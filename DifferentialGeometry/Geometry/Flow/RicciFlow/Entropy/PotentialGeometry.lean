@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Potential
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -14,7 +15,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
 
 universe u uE uH

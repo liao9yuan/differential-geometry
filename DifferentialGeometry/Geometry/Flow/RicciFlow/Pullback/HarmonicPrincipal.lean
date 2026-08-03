@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwi
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import DifferentialGeometry.Geometry.Connection.Laplacian.Musical
 import DifferentialGeometry.Geometry.Exponential.LocalAddition
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # The zero-section principal part of the harmonic-map gauge
@@ -50,6 +51,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.DistanceBarrier
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -24,6 +25,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Filter Set Tensor0SBundle
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Riemannian
 open scoped Manifold ContDiff Topology Bundle
 

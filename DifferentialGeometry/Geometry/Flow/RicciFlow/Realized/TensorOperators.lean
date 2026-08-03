@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
+import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
 
@@ -12,6 +13,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section

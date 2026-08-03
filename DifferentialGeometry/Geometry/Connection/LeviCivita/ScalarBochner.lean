@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.ScalarBochner
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Hessian
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -18,6 +19,7 @@ namespace DifferentialGeometry.Integral.Connection
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

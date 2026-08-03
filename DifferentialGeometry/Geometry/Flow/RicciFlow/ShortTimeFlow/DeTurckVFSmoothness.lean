@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
+open DifferentialGeometry.Geometry.Operator
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -22,6 +23,7 @@ open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
@@ -1304,7 +1306,7 @@ theorem deturck_vf_joint_smoothness
     (h_gDT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun q : ℝ × M =>
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
+          DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) x₀ i j
             (extChartAt I x₀ q.2))
         (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -1392,20 +1394,20 @@ theorem deturck_vf_continuous_up_to_zero
     (h_gram0 : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun q : ℝ × E =>
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j q.2)
+          DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α i j q.2)
         (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target))
     (h_partial : ∀ (α : M) (l i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun q : ℝ × E =>
           Integral.DivergenceTheorem.partialDeriv (E := E) l
-            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j) q.2)
+            (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α i j) q.2)
         (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target))
     (h_partial2 : ∀ (α : M) (m l i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun q : ℝ × E =>
           Integral.DivergenceTheorem.partialDeriv (E := E) m
             (Integral.DivergenceTheorem.partialDeriv (E := E) l
-              (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)) q.2)
+              (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α i j)) q.2)
         (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target))
     (h_frame : ∀ (α : M) (p : Fin (Module.finrank ℝ E)),
       ContinuousOn
@@ -1486,7 +1488,7 @@ theorem deturck_solution_joint_smooth
     (h_smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun q : ℝ × M =>
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
+          DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) x₀ i j
             (extChartAt I x₀ q.2))
         (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

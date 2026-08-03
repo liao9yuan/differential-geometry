@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -176,7 +177,7 @@ theorem cubicQ_sub_nonneg_of_section9_point
       S.scalar t x = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 :=
     scalar_eq_diag (I := I) hScalarTrace hdiag0
   have hscalarMetric :
-      DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
+      DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I)
           (S.base.metric t) (S.base.ricciAt t x) =
         DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
     simpa [SolutionOn.scalar_eq_metricTrace, SolutionOn.ricciAt] using hscalar

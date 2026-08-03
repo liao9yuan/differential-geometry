@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LinearExtensionTangen
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleNabla
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -17,6 +18,7 @@ namespace Connection
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

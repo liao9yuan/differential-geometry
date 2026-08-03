@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ConnectionTrace
+open DifferentialGeometry.Geometry.Operator
 
 
 set_option autoImplicit false
@@ -10,6 +11,7 @@ noncomputable section
 open Filter MeasureTheory
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
 open scoped Manifold ContDiff
@@ -106,22 +108,22 @@ theorem formula510_of_connTraceField
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) g hpotential x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) g hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) g hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) g hq x)
     (hqeq :
       ∀ x : M,
@@ -195,22 +197,22 @@ theorem formula510_of_trace
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) g hpotential x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) g hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) g hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) g hq x)
     (hqeq :
       ∀ x : M,
@@ -359,22 +361,22 @@ theorem formula510_of_components
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) g hpotential x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) g hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) g hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) g hq x)
     (hqeq :
       ∀ x : M,
@@ -610,22 +612,22 @@ theorem formula510_producer
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) (G.metric s0) hpotential x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           (G.metric s0).inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) (G.metric s0) hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) (G.metric s0) hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) (G.metric s0) hq x)
     (hqeq :
       ∀ x : M,

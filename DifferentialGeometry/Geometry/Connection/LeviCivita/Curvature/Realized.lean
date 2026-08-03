@@ -1,10 +1,13 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
+import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 open Bundle Tensor0SBundle

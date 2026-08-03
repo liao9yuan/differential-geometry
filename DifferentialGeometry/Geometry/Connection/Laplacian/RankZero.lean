@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Tensor.RSTensor.Field
+import DifferentialGeometry.Geometry.Operator.Operators
+import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 
 
@@ -19,6 +21,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold CovariantDerivative Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
 namespace Integral
 namespace Connection

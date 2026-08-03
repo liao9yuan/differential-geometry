@@ -27,8 +27,9 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
+open DifferentialGeometry.Integral.Connection
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
@@ -1067,4 +1068,4 @@ theorem lapTrace_nablaSec
       (I := I) g y)
     f duSec hessF X hfields hdu (hHess y) (hgrad y)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator

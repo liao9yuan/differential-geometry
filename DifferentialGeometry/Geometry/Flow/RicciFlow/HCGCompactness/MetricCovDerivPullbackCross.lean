@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullback
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarGradient
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -20,6 +21,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff BigOperators
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Connection.CovariantDerivative
 open Tensor0SBundle
 

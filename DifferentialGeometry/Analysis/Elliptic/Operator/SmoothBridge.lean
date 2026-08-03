@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Operator.DirichletForm
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Elliptic.Operator.Variational
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -21,6 +22,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicH1Lp
 
 private local instance : MeasurableSpace E := borel E

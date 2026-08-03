@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
-import DifferentialGeometry.Geometry.Operator.Operators
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Equiv
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
@@ -17,10 +16,11 @@ noncomputable section
 
 open Bundle Manifold Set MeasureTheory
 open scoped Manifold Topology ContDiff Matrix
+open DifferentialGeometry.Integral.DivergenceTheorem
 
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
@@ -962,6 +962,6 @@ lemma hasCompactSupport_grad_g [I.Boundaryless] [T2Space M]
   show x ∈ tsupport f
   exact support_gradFun_subset (I := I) g f hx
 
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry

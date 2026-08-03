@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Trace04
 import DifferentialGeometry.Tensor.RSTensor.NormSqProduct
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -16,6 +17,7 @@ namespace Tensor0SBundle
 
 open Bundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

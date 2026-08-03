@@ -1,6 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
+import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
 
@@ -24,6 +26,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section

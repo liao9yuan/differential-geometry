@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Geometry.Operator.Gradient
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -23,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalLimit
@@ -49,7 +51,7 @@ theorem gradFun_smul_smooth_eq_pointwise
   classical
   have hρ_md := hφ.mdifferentiable (by simp) x
   have hu_md := hv.mdifferentiable (by simp) x
-  apply DifferentialGeometry.Integral.DivergenceTheorem.metricFlatLinear_injective
+  apply DifferentialGeometry.Geometry.Operator.metricFlatLinear_injective
     (I := I) g x
   ext w
   change g.inner x

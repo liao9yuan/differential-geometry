@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Lichnerowicz
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.LpClass
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -20,6 +21,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Connection
 
 private local instance : MeasurableSpace E := borel E

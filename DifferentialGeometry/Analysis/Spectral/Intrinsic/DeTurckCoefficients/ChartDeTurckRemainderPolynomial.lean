@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieM
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
+open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
@@ -18,6 +19,7 @@ namespace DeTurckCoefficients
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
 section NormedSpaceModel

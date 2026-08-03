@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturba
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -29,6 +30,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
@@ -660,10 +662,10 @@ private lemma corrField_raisedKoszulVec_realizedFam_chartα
   set cvx : TangentSpace I x →ₗ[ℝ] ℝ := (g₁.inner x W).toLinearMap with hcvx
   have hraisedeq : raisedKoszulVec (I := I) g₀ g₁ x
         (chartBasisVecFiber (I := I) α j x) (chartBasisVecFiber (I := I) α k x) =
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₀ x cvx := by
+      DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₀ x cvx := by
     rw [raisedKoszulVec_apply, inverseMetricSharpFib_apply]
     refine congrArg
-      (fun t => DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₀ x t) ?_
+      (fun t => DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₀ x t) ?_
     ext w
     rw [cotangentToDualLinear_apply,
       DifferentialGeometry.Analysis.Sobolev.TensorHilbert.cotangentToDual_g0FlatCLM]

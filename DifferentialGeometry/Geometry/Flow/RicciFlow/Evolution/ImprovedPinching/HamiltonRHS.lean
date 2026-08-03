@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Quotient
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -98,17 +99,17 @@ theorem pinchEvol_setup
     (hgradTf : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (tfRicNormSq scalar ricciNormSq (t : Real)) y) x)
     (hgradScalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (scalar (t : Real)) y) x)
     (hgradScalarPow : forall
       (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => scalar (t : Real) w ^ (-(2 - epsilon))) z) y) :
     PinchEvolOn (I := I) (D := D) G
       scalar ricciNormSq nablaRicNormSq gradScalarNormSq Q epsilon := by
@@ -154,7 +155,7 @@ def ricciGradCoupleSq
     normSq0S (I := I) (g t) x 3
       (ricciGradCoupleAt (I := I)
         (scalar t x) (Ric t x) (nablaRic t x)
-        (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x))
+        (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x))
 
 
 
@@ -191,18 +192,18 @@ theorem ricciGradCoupleSq_exp_inner
             (Bundle.continuousMultilinearMap.product_fun
               (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
               (s := 1) (q := 2)
-              (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+              (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
               (Ric t x)) +
         gradScalarNormSq t x * ricciNormSq t x := by
   have hgradOne :
       inner0S (I := I) (G.metric t) x 1
-          (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
-          (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x) =
+          (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
+          (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x) =
         gradScalarNormSq t x := by
     calc
       inner0S (I := I) (G.metric t) x 1
-          (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
-          (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+          (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
+          (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
           = (G.metric t).inner x
               (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x)
               (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x) := by
@@ -214,7 +215,7 @@ theorem ricciGradCoupleSq_exp_inner
   rw [normSq0S_smul_sub_product_one_two (I := I)
     (G.metric t) x basis gInv hinv
     (scalar t x) (nablaRic t x)
-    (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+    (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
     (Ric t x)]
   rw [← hnabla, ← hric, hgradOne]
 
@@ -246,7 +247,7 @@ theorem ricciMixed_eq_gradNorm
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
         (M := M) 2 (G.connection t) RicSec nablaRicSec)
     (hdu :
-      DifferentialGeometry.Integral.Connection.DuFieldRealizes (I := I)
+      DifferentialGeometry.Geometry.Operator.DuFieldRealizes (I := I)
         (fun y : M => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (G.metric t) y
           (RicSec y))
         duRicNorm) :
@@ -254,7 +255,7 @@ theorem ricciMixed_eq_gradNorm
           (Bundle.continuousMultilinearMap.product_fun
             (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
-            (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+            (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
             (RicSec x)) =
       (G.metric t).inner x
         (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t
@@ -271,22 +272,22 @@ theorem ricciMixed_eq_gradNorm
           (Bundle.continuousMultilinearMap.product_fun
             (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
-            (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+            (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
             (RicSec x)) =
         inner0S (I := I) (G.metric t) x 2
           ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 2 x
               (nablaRicSec x))
             (cotangentSharp_gen (I := I) (G.metric t) x
-              (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t)
+              (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t)
                 x)))
           (RicSec x) := by
     exact inner0S_three_product_right (I := I) (G.metric t) x
       basis gInv hinv (nablaRicSec x)
-      (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+      (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
         (RicSec x)
   have hsharp :
       cotangentSharp_gen (I := I) (G.metric t) x
-          (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x) =
+          (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x) =
             W := by
     simpa [W, DifferentialGeometry.Integral.Connection.gradientAt] using
       DifferentialGeometry.Integral.Connection.cotangentSharp_differential1FormFun_eq_gradientFun
@@ -309,19 +310,19 @@ theorem ricciMixed_eq_gradNorm
           (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t normFun x) W := by
     rw [hdu x]
     change
-      DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) normFun x
+      DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) normFun x
           (fun _ : Fin 1 => W) =
         (G.metric t).inner x
           (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t normFun x) W
     simpa [DifferentialGeometry.Integral.Connection.gradientAt] using
-      DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_inner_gradientFun
+      DifferentialGeometry.Geometry.Operator.differential1FormFun_apply_eq_inner_gradientFun
         (I := I) (G.metric t) normFun x W
   calc
     2 * inner0S (I := I) (G.metric t) x 3 (nablaRicSec x)
           (Bundle.continuousMultilinearMap.product_fun
             (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
-            (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+            (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
             (RicSec x))
         = 2 * inner0S (I := I) (G.metric t) x 2
             ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 2 x
@@ -369,7 +370,7 @@ theorem ricciMixed_eq_tfGrad
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
         (M := M) 2 (G.connection t) RicSec nablaRicSec)
     (hdu :
-      DifferentialGeometry.Integral.Connection.DuFieldRealizes (I := I)
+      DifferentialGeometry.Geometry.Operator.DuFieldRealizes (I := I)
         (fun y : M => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (G.metric t) y
           (RicSec y))
         duRicNorm)
@@ -390,7 +391,7 @@ theorem ricciMixed_eq_tfGrad
           (Bundle.continuousMultilinearMap.product_fun
             (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
-            (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+            (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
             (RicSec x)) =
       scalar t x *
         ((G.metric t).inner x
@@ -422,11 +423,11 @@ theorem ricciMixed_eq_tfGrad
       DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t sqFun x =
         (2 * R x) • DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t R x := by
     unfold DifferentialGeometry.Integral.Connection.gradientAt
-    exact DifferentialGeometry.Integral.Connection.gradientFun_mul_self (I := I) (G.metric t)
+    exact DifferentialGeometry.Geometry.Operator.gradientFun_mul_self (I := I) (G.metric t)
       hscalarDiff
   have hgradSqFun :
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) sqFun x =
-        (2 * R x) • DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) R
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) sqFun x =
+        (2 * R x) • DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) R
           x := by
     simpa [DifferentialGeometry.Integral.Connection.gradientAt] using hgradSq
   have hgradTf :
@@ -437,17 +438,17 @@ theorem ricciMixed_eq_tfGrad
             DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t R x := by
     rw [htfFun]
     unfold DifferentialGeometry.Integral.Connection.gradientAt
-    rw [DifferentialGeometry.Integral.Connection.gradientFun_sub (I := I) (G.metric t) hnormDiff
+    rw [DifferentialGeometry.Geometry.Operator.gradientFun_sub (I := I) (G.metric t) hnormDiff
       hthirdDiff]
-    rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul (I := I) (G.metric t)
+    rw [DifferentialGeometry.Geometry.Operator.gradientFun_const_smul (I := I) (G.metric t)
       (1 / 3 : Real) hsqDiff]
     change
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) normFun x -
-          (1 / 3 : Real) • DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) normFun x -
+          (1 / 3 : Real) • DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             (G.metric t) sqFun x =
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) normFun x -
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) normFun x -
           (((2 : Real) / 3) * R x) •
-            DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) R x
+            DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) R x
     rw [hgradSqFun]
     simp [smul_smul, R]
     ring_nf
@@ -465,14 +466,14 @@ theorem ricciMixed_eq_tfGrad
           (Bundle.continuousMultilinearMap.product_fun
             (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
             (s := 1) (q := 2)
-            (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+            (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
             (RicSec x))
         = scalar t x *
             (2 * inner0S (I := I) (G.metric t) x 3 (nablaRicSec x)
               (Bundle.continuousMultilinearMap.product_fun
                 (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
                 (s := 1) (q := 2)
-                (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t)
+                (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t)
                   x)
                 (RicSec x))) := by ring
     _ = scalar t x *
@@ -523,7 +524,7 @@ theorem ricciGradCoupleSq_exp_mixed
             (Bundle.continuousMultilinearMap.product_fun
               (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
               (s := 1) (q := 2)
-              (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (scalar t) x)
+              (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
               (Ric t x)) =
         scalar t x *
           ((G.metric t).inner x
@@ -627,7 +628,7 @@ theorem pinchDrift_exp
   let R : M -> Real := scalar t
   let Rpow : M -> Real := fun y => R y ^ (-(2 - epsilon))
   have hRpowDiff : MDifferentiableAt I 𝓘(Real, Real) Rpow x := by
-    exact DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow
+    exact DifferentialGeometry.Geometry.Operator.mdifferentiableAt_rpow
       (I := I) (-(2 - epsilon)) hscalarDiff hscalar
   have hmul :
       DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (fun y : M => phi y * Rpow y)
@@ -684,12 +685,12 @@ theorem pinchDrift_exp
   rw [hgradScalarSq]
   rw [hnegpow, hnegpow1]
   rw [hpow3, hpow4]
-  simp only [div_eq_mul_inv, Integral.Connection.gradientAt_eq, Integral.Connection.gradientFun_eq,
-    Integral.Connection.metricSharp_eq, neg_sub, mul_inv_rev, map_add, map_smul, smul_eq_mul,
+  simp only [div_eq_mul_inv, Integral.Connection.gradientAt_eq, DifferentialGeometry.Geometry.Operator.gradientFun_eq,
+    DifferentialGeometry.Geometry.Operator.metricSharp_def, neg_sub, mul_inv_rev, map_add, map_smul, smul_eq_mul,
     phi, R]
   unfold DifferentialGeometry.Integral.Connection.gradientAt
-    DifferentialGeometry.Integral.Connection.gradientFun
-    DifferentialGeometry.Integral.Connection.metricSharp at hinnerSymm
+    DifferentialGeometry.Geometry.Operator.gradientFun
+    DifferentialGeometry.Geometry.Operator.metricSharp at hinnerSymm
   rw [hinnerSymm]
   field_simp [hscalar.ne']
   rw [hpow3]
@@ -961,7 +962,7 @@ theorem pinchEvol_book_of_mixed
             (Bundle.continuousMultilinearMap.product_fun
               (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I) (x := x)
               (s := 1) (q := 2)
-              (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I)
+              (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I)
                 (scalar (t : Real)) x)
               (Ric (t : Real) x)) =
         scalar (t : Real) x *
@@ -1069,7 +1070,7 @@ theorem pinchEvol_sec
         (M := M) 2 (G.connection (t : Real))
         (RicSec (t : Real)) (nablaRicSec (t : Real)))
     (hdu : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D),
-      DifferentialGeometry.Integral.Connection.DuFieldRealizes (I := I)
+      DifferentialGeometry.Geometry.Operator.DuFieldRealizes (I := I)
         (fun y : M =>
           DifferentialGeometry.Integral.Connection.normSq02 (I := I) (G.metric (t : Real)) y
             (RicSec (t : Real) y))

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Basic
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -190,7 +191,7 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
     (scalarHess : Real -> (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (htrace : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
-      DifferentialGeometry.Integral.Connection.ScalarLaplacianRealizesTraceAtInBasis (I := I)
+      DifferentialGeometry.Geometry.Operator.ScalarLaplacianRealizesTraceAtInBasis (I := I)
         (G.connection t) (G.metric t)
         (hframe.toBasisAt (hcover x))
         (gInv t x) (scalarTraceInFrame (I := I) S gInv frame t)
@@ -208,16 +209,16 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
   intro t ht x
   let basis := hframe.toBasisAt (hcover x)
   have hmetric :
-      DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis (gInv t x)
+      DifferentialGeometry.Geometry.Operator.metricTrace0S2InBasis (I := I) basis (gInv t x)
           (scalarHess t x) Fin.elim0 =
         scalarLaplacianTraceInFrame (M := M) gInv roughLapRic t x := by
-    unfold DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis
+    unfold DifferentialGeometry.Geometry.Operator.metricTrace0S2InBasis
       scalarLaplacianTraceInFrame
     refine Finset.sum_congr rfl fun i _hi => ?_
     refine Finset.sum_congr rfl fun j _hj => ?_
     congr 1
     have hinput :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (basis i) (basis j)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (basis i) (basis j)
           Fin.elim0 =
           DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x) := by
       have hbi : basis i = frame i x := by
@@ -227,16 +228,16 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
       rw [hbi, hbj]
       funext q
       fin_cases q
-      · simp [DifferentialGeometry.Integral.Connection.metricTraceInput,
+      · simp [DifferentialGeometry.Geometry.Operator.metricTraceInput,
         DifferentialGeometry.Integral.Connection.vec2,
         DifferentialGeometry.Integral.Connection.vec2]
       · rfl
     rw [hinput, hcomp t ht x i j]
   have htrace_tx := htrace t ht x
-  unfold DifferentialGeometry.Integral.Connection.ScalarLaplacianRealizesTraceAtInBasis at htrace_tx
+  unfold DifferentialGeometry.Geometry.Operator.ScalarLaplacianRealizesTraceAtInBasis at htrace_tx
   calc
     scalarLaplacianTraceInFrame (M := M) gInv roughLapRic t x =
-        DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis (gInv t x)
+        DifferentialGeometry.Geometry.Operator.metricTrace0S2InBasis (I := I) basis (gInv t x)
           (scalarHess t x) Fin.elim0 := hmetric.symm
     _ = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
           (scalarTraceInFrame (I := I) S gInv frame t) x := by
@@ -292,7 +293,7 @@ theorem scalarTraceInFrame_eq_metricTracePair
     (hinv : InvMetricLocal (I := I) S gInv frame u)
     (t : Real) {x : M} (hx : x ∈ u) :
     scalarTraceInFrame (I := I) S gInv frame t x =
-      DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (S.family.metric t)
+      DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (S.family.metric t)
         (S.ricci t x) := by
   classical
   let basis := hframe.toBasisAt hx
@@ -302,7 +303,7 @@ theorem scalarTraceInFrame_eq_metricTracePair
         basis (fun i j : Idx => gInv t x i j) :=
     scalar_metricInverseInBasis_of_solution_frame
       (I := I) S gInv frame hframe hinv t hx
-  rw [DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis
+  rw [DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_eq_sum_basis
     (I := I) (S.family.metric t) basis (fun i j : Idx => gInv t x i j) hinvAt]
   simp [scalarTraceInFrame, ricciCompInFrame, basis, IsLocalFrameOn.toBasisAt_coe]
 
@@ -471,7 +472,7 @@ theorem of_metric_inverse_frame
       (I := I) S gInv frame hframe hinv t hx,
     ricciNormSqInFrame_eq_normSq0S
       (I := I) S gInv frame hframe hinv t hx]
-  exact DifferentialGeometry.Integral.Connection.metricTracePair0SAt_sq_div_rank_le_normSq0S
+  exact DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_sq_div_rank_le_normSq0S
     (I := I) (S.family.metric t) basis (fun i j : Idx => gInv t x i j)
     hinvAt (S.ricci t x)
 

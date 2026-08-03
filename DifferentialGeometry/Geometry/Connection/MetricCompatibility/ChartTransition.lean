@@ -16,6 +16,7 @@ open scoped Manifold Topology ContDiff
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 namespace DifferentialGeometry
 namespace Geometry

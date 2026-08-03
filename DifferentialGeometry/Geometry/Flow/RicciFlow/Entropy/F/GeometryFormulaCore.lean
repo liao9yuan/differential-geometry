@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Formula510Core
+open DifferentialGeometry.Geometry.Operator
 
 
 set_option autoImplicit false
@@ -733,22 +734,22 @@ theorem formula510_of_connTrace
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) g hpotential x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) g hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+            ((DifferentialGeometry.Geometry.Operator.grad_g
               (I := I) g hpotential :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+          DifferentialGeometry.Geometry.Operator.Δ_g
             (I := I) g hq x)
     (hqeq :
       ∀ x : M,
@@ -771,13 +772,13 @@ theorem formula510_of_connTrace
         ∫ x,
           expWeightedMeasureVariationFactor potentialVariation
             metricVariationTrace x *
-            (DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+            (DifferentialGeometry.Geometry.Operator.Δ_g
                 (I := I) g hpotential x -
               g.inner x
-                ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+                ((DifferentialGeometry.Geometry.Operator.grad_g
                   (I := I) g hpotential :
                   Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-                ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+                ((DifferentialGeometry.Geometry.Operator.grad_g
                   (I := I) g hpotential :
                   Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
         ∂(expNegPotentialWeightedMeasure
@@ -800,13 +801,13 @@ theorem formula510_of_connTrace
         ∫ x,
           expWeightedMeasureVariationFactor potentialVariation
             metricVariationTrace x *
-            (DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+            (DifferentialGeometry.Geometry.Operator.Δ_g
                 (I := I) g hpotential x -
               g.inner x
-                ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+                ((DifferentialGeometry.Geometry.Operator.grad_g
                   (I := I) g hpotential :
                   Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-                ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+                ((DifferentialGeometry.Geometry.Operator.grad_g
                   (I := I) g hpotential :
                   Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
         ∂(expNegPotentialWeightedMeasure

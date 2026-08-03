@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import Mathlib.Geometry.Manifold.Riemannian.Basic
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -25,6 +26,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter Set
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators Bundle Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

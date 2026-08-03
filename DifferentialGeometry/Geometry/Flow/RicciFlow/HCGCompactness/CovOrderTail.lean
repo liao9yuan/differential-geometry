@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivContinuity
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -21,6 +22,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow
 
 section ZeroOrder

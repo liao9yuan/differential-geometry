@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.StarSum2
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 

@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Green
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Topology.Algebra.Support
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -25,6 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 

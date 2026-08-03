@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Candidate
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.DualNorm
 import Mathlib.Analysis.Normed.Operator.Extend
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -21,6 +22,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
@@ -75,7 +77,7 @@ lemma ricciPairingSmooth_pt_add
       gradFun (I := I) g v.toFun b + gradFun (I := I) g w.toFun b := by
     have hfun : (v + w).toFun = v.toFun + w.toFun := rfl
     rw [hfun]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.gradFun_add (I := I) g
+    exact DifferentialGeometry.Geometry.Operator.gradFun_add (I := I) g
       (v.smooth.mdifferentiable (by simp) b)
       (w.smooth.mdifferentiable (by simp) b)
   rw [hgrad_add, ContinuousLinearMap.map_add]

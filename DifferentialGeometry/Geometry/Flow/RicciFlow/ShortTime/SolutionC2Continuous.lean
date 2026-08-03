@@ -10,6 +10,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.ChartOverlapUniqueness
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -30,6 +31,7 @@ open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
@@ -64,7 +66,7 @@ theorem deturck_solution_c2_continuous_icc0
       ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
         ContinuousOn
           (fun s : ℝ => iteratedFDeriv ℝ k
-            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT s) α i j)
             (extChartAt I α y))
           (Set.Icc 0 T)) :
     (∀ (x : M) (v w : TangentSpace I x),

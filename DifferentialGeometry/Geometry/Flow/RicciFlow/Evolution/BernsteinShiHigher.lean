@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShi
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -72,15 +73,15 @@ theorem gradientFun_sum
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
     (hf : ∀ i ∈ s, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
-    DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+    DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
         (fun z : M => ∑ i ∈ s, c i * f i z) x =
       ∑ i ∈ s, c i •
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) x := by
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) x := by
   classical
   induction s using Finset.induction_on with
   | empty =>
       simp only [Finset.sum_empty]
-      exact DifferentialGeometry.Integral.Connection.gradientFun_const
+      exact DifferentialGeometry.Geometry.Operator.gradientFun_const
         (I := I) (G.metric t) 0 x
   | insert a s has ih =>
       have hfa : MDifferentiableAt I 𝓘(Real, Real) (f a) x := hf a (by simp)
@@ -92,12 +93,12 @@ theorem gradientFun_sum
             (fun z : M => c a * f a z + ∑ i ∈ s, c i * f i z) from by
         funext z
         rw [Finset.sum_insert has]]
-      rw [DifferentialGeometry.Integral.Connection.gradientFun_add
+      rw [DifferentialGeometry.Geometry.Operator.gradientFun_add
         (I := I) (G.metric t) (by simpa [smul_eq_mul] using hfa.const_smul (c a)) htail_diff]
       rw [show (fun z : M => c a * f a z) = (c a • f a) from by
         funext z
         simp [smul_eq_mul]]
-      rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul
+      rw [DifferentialGeometry.Geometry.Operator.gradientFun_const_smul
         (I := I) (G.metric t) (c a) hfa]
       rw [ih (fun i hi => hf i (by simp [hi]))]
       rw [Finset.sum_insert has]
@@ -112,29 +113,29 @@ theorem mdiffAt_gradientFun_finset_sum_smul
     (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
     (hf : ∀ i ∈ s, ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (f i) y)
     (hgradf : ∀ i ∈ s, MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) y) x) :
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) y) x) :
     MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
         (fun z : M => ∑ i ∈ s, c i * f i z) y) x := by
   classical
   have hgrad_eq :
       (fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
             (fun z : M => ∑ i ∈ s, c i * f i z) y) =
         (fun y : M => ∑ i ∈ s,
           (c i • fun w : M =>
-            DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) w)
+            DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) w)
               y) := by
     funext y
     exact gradientFun_sum (I := I) s G t f c y (fun i hi => hf i hi y)
   -- Differentiability of that sum of scaled sections.
   have hsection_eq :
       (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
             (fun z : M => ∑ i ∈ s, c i * f i z) y) =
         (T% fun y : M => ∑ i ∈ s,
           (c i • fun w : M =>
-            DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) w)
+            DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) w)
               y) := by
     funext y
     have hy := congrFun hgrad_eq y
@@ -150,19 +151,19 @@ theorem mdiffAt_gradientFun_finset_sum_smul
       rfl
   | insert a s has ih =>
       have hgradfa : MDiffAt (T% fun w : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f a) w) x :=
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f a) w) x :=
         hgradf a (by simp)
       have htail := ih (fun i hi => hgradf i (by simp [hi]))
       have hsplit :
           (fun y : M => ∑ i ∈ insert a s,
             (c i • fun w : M =>
-              DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) w) y)
+              DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) w) y)
                 =
           ((c a • fun w : M =>
-              DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f a) w) +
+              DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f a) w) +
             fun y : M => ∑ i ∈ s,
               (c i • fun w : M =>
-                DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) w)
+                DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) w)
                   y) := by
         funext y
         simp only [Pi.add_apply]
@@ -170,13 +171,13 @@ theorem mdiffAt_gradientFun_finset_sum_smul
       have hgoal_eq :
           (T% fun y : M => ∑ i ∈ insert a s,
             (c i • fun w : M =>
-              DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) w) y)
+              DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) w) y)
                 =
           (T% ((c a • fun w : M =>
-              DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f a) w) +
+              DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f a) w) +
             fun y : M => ∑ i ∈ s,
               (c i • fun w : M =>
-                DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) w)
+                DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) w)
                   y)) := by
         funext y
         exact congrArg (fun z => (⟨y, z⟩ : TotalSpace E (TangentSpace I))) (congrFun hsplit y)
@@ -190,7 +191,7 @@ theorem laplacianAt_linear_combo_finset
     (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
     (hf : ∀ i ∈ s, ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (f i) y)
     (hgradf : ∀ i ∈ s, MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) y) x) :
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) y) x) :
     DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
         (fun z : M => ∑ i ∈ s, c i * f i z) x =
       ∑ i ∈ s, c i * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (f i) x := by
@@ -199,27 +200,27 @@ theorem laplacianAt_linear_combo_finset
   | empty =>
       simp only [Finset.sum_empty]
       rw [DifferentialGeometry.Integral.Connection.laplacianAt_eq]
-      unfold DifferentialGeometry.Integral.Connection.laplacian
-      rw [show DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+      unfold DifferentialGeometry.Geometry.Operator.laplacian
+      rw [show DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
             (fun _z : M => (0 : Real)) = (0 : (x : M) -> TangentSpace I x) by
-        funext y; exact DifferentialGeometry.Integral.Connection.gradientFun_const (I := I)
+        funext y; exact DifferentialGeometry.Geometry.Operator.gradientFun_const (I := I)
           (G.metric t) 0 y]
       simp
   | insert a s has ih =>
       have hfa : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (f a) y := hf a (by simp)
       have hgradfa : MDiffAt (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f a) y) x :=
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f a) y) x :=
         hgradf a (by simp)
       have hft : ∀ i ∈ s, ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (f i) y :=
         fun i hi => hf i (by simp [hi])
       have hgradft : ∀ i ∈ s, MDiffAt (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) y) x :=
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) y) x :=
         fun i hi => hgradf i (by simp [hi])
       have htail_diff : ∀ y : M,
           MDifferentiableAt I 𝓘(Real, Real) (fun z : M => ∑ i ∈ s, c i * f i z) y :=
         fun y => mdifferentiableAt_finset_sum_smul (I := I) s f c y (fun i hi => hft i hi y)
       have htail_grad : MDiffAt (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
             (fun z : M => ∑ i ∈ s, c i * f i z) y) x :=
         mdiffAt_gradientFun_finset_sum_smul (I := I) s G t f c x hft hgradft
       have hsplit :
@@ -242,7 +243,7 @@ theorem heatOperator_linear_combo_finset
     (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
     (hf : ∀ i ∈ s, ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (f i) y)
     (hgradf : ∀ i ∈ s, MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (f i) y) x) :
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (f i) y) x) :
     DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (fun z : M => ∑ i ∈ s, c i * f i z) x =
       ∑ i ∈ s, c i * DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
@@ -583,7 +584,7 @@ structure BernsteinTower
 
   hw_grad : ∀ k : ℕ, ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
     MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (w k t) y) x
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (w k t) y) x
 
 namespace BernsteinTower
 
@@ -1248,7 +1249,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
           (fun i _ => B.hw_space i s hsmem hspos y)
       have hGgrad : ∀ s : Real, s ∈ Set.Icc 0 B.T -> 0 < s -> ∀ y : M,
           MDiffAt (T% fun z : M =>
-            DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric s)
+            DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric s)
               (Gfun (I := I) B m s) z) y := by
         intro s hsmem hspos y
         have heq : (Gfun (I := I) B m s) =

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.Basic
+import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Operator
 
 
 

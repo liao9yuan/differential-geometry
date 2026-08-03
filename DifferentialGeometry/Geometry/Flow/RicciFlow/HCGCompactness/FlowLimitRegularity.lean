@@ -9,6 +9,7 @@ import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
 import DifferentialGeometry.Analysis.Calculus.TimeSliceSwap
 import DifferentialGeometry.Analysis.Calculus.TimeSliceBootstrap
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -44,6 +45,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology BigOperators
 open Bundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn)

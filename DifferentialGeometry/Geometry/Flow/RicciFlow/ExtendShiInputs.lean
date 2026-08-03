@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProd
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGramUniformContinuity
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -25,6 +26,7 @@ open Bundle Set Filter
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -269,12 +271,12 @@ private theorem chartJet0_le_of_equiv
     (hgRef : ∀ (a : Fin (Module.finrank ℝ E)) (b : M), b ∈ Q →
       chartGramMatrix gRef α₀ b a a ≤ M0)
     (i j : Fin (Module.finrank ℝ E)) {x : M} (hx : x ∈ Q) :
-    |Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j (extChartAt I α₀ x)| ≤ C * M0 := by
+    |DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) g α₀ i j (extChartAt I α₀ x)| ≤ C * M0 := by
   have hxsrc : x ∈ (extChartAt I α₀).source := by
     rw [extChartAt_source]; exact goodSet_subset_chartSource α₀ (hQ hx)
-  have hred : Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j (extChartAt I α₀ x)
+  have hred : DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) g α₀ i j (extChartAt I α₀ x)
       = chartGramMatrix g α₀ x i j := by
-    rw [Integral.DivergenceTheorem.chartGramOnE_def, (extChartAt I α₀).left_inv hxsrc]
+    rw [DifferentialGeometry.Geometry.Operator.chartGramOnE_def, (extChartAt I α₀).left_inv hxsrc]
   rw [hred]
   exact chartGramEntry_le_of_equiv gRef g hC0 hM0 α₀ hequiv hgRef i j hx
 

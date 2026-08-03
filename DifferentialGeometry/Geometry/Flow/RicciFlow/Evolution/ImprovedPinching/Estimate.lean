@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.W
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.EigenBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -239,7 +240,7 @@ theorem pinchCoupleSol_nonneg
       (ricciGradCoupleAt (I := I)
         (S.scalar t x) (S.ricci t x)
         (ricciNablaSec (I := I) S t x)
-        (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (S.scalar t) x))
+        (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (S.scalar t) x))
 
 
 
@@ -709,7 +710,7 @@ theorem pinchQuotient_space_pos
   have hpow :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => S.scalar (t : Real) y ^ p) x :=
-    DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow (I := I) p hscalarDiff
+    DifferentialGeometry.Geometry.Operator.mdifferentiableAt_rpow (I := I) p hscalarDiff
       (hscalar t x)
   have hprod :
       MDifferentiableAt I 𝓘(Real, Real)
@@ -736,7 +737,7 @@ theorem pinchQuotient_grad_pos
       0 < S.scalar (t : Real) x) :
     ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
           (pinchQuotient (I := I) S epsilon (t : Real)) y) x := by
   intro t x
@@ -748,39 +749,39 @@ theorem pinchQuotient_grad_pos
   have hhDiff : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) h y := by
     intro y
     have ht : (t : Real) ∈ D.carrier := D.regular_subset t.2
-    exact DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow (I := I) (-(2 - epsilon))
+    exact DifferentialGeometry.Geometry.Operator.mdifferentiableAt_rpow (I := I) (-(2 - epsilon))
       (hS.scalarRegular.scalar_space (t : Real) ht y) (hscalar t y)
   have hgradf : MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) f y) x := by
     simpa [f] using tfGrad_sol (I := I) S hS.isSolution t x
   have hgradh : MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) h y) x := by
     simpa [h] using scalarPowGrad_sol (I := I) S hS.isSolution epsilon hscalar t x
   have hterm1 : MDiffAt (T% (f • fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) h y)) x :=
     (hfDiff x).smul_section hgradh
   have hterm2 : MDiffAt (T% (h • fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) f y)) x :=
     (hhDiff x).smul_section hgradf
   have hsum : MDiffAt (T% fun y : M =>
-      f y • DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      f y • DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) h y +
-      h y • DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      h y • DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) f y) x :=
     by simpa using mdifferentiableAt_add_section hterm1 hterm2
   have hgrad_eq :
       (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
           (pinchQuotient (I := I) S epsilon (t : Real)) y) =
       (T% fun y : M =>
-        f y • DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        f y • DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real)) h y +
-        h y • DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        h y • DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real)) f y) := by
     have hfun_eq :
         pinchQuotient (I := I) S epsilon (t : Real) =
@@ -790,7 +791,7 @@ theorem pinchQuotient_grad_pos
     funext y
     rw [hfun_eq]
     simpa [f, h] using
-      DifferentialGeometry.Integral.Connection.gradientFun_mul (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun_mul (I := I)
         ((flowG (I := I) S).metric (t : Real))
         (hfDiff y) (hhDiff y)
   rw [hgrad_eq]
@@ -884,7 +885,7 @@ theorem pinchQuot_slab_bound
     simpa [τ] using mdifferentiableAt_const.sub hP
   have hw_grad : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) ((flowG (I := I) S).metric t)
           (fun z : M => C - pinchQuotient (I := I) S epsilon t z) y) x := by
     intro t ht htpos x
     have htreg : t ∈ D.regular := by
@@ -902,38 +903,38 @@ theorem pinchQuot_slab_bound
           (fun τ y => hscalar (τ : Real) (D.regular_subset τ.2) y) τ y
     have hgrad_plain :
         (fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric t)
             (fun z : M => C - pinchQuotient (I := I) S epsilon t z) y) =
         (fun y : M =>
-          - DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          - DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric t)
             (pinchQuotient (I := I) S epsilon t) y) := by
       funext y
       calc
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) ((flowG (I := I) S).metric t)
             (fun z : M => C - pinchQuotient (I := I) S epsilon t z) y =
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric t)
               (fun _ : M => C) y -
-            DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
               ((flowG (I := I) S).metric t)
               (pinchQuotient (I := I) S epsilon t) y := by
-            exact DifferentialGeometry.Integral.Connection.gradientFun_sub (I := I)
+            exact DifferentialGeometry.Geometry.Operator.gradientFun_sub (I := I)
               ((flowG (I := I) S).metric t)
               mdifferentiableAt_const (hPdiff y)
-        _ = - DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        _ = - DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric t)
               (pinchQuotient (I := I) S epsilon t) y := by
-            rw [DifferentialGeometry.Integral.Connection.gradientFun_const]
+            rw [DifferentialGeometry.Geometry.Operator.gradientFun_const]
             simp
     have hgrad_eq :
         (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric t)
             (fun z : M => C - pinchQuotient (I := I) S epsilon t z) y) =
         (T% fun y : M =>
-          - DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          - DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric t)
             (pinchQuotient (I := I) S epsilon t) y) := by
       funext y
@@ -977,7 +978,7 @@ theorem pinchQuot_slab_bound
         pinchQuotient_space_pos (I := I) S hS epsilon
           (fun τ y => hscalar (τ : Real) (D.regular_subset τ.2) y) τ y
     have hu_grad : MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) ((flowG (I := I) S).metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) ((flowG (I := I) S).metric t)
           (pinchQuotient (I := I) S epsilon t) y) x := by
       simpa [τ] using
         pinchQuotient_grad_pos (I := I) S hS epsilon

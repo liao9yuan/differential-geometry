@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -26,6 +27,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff BigOperators
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Connection.CovariantDerivative
 open Tensor0SBundle
 

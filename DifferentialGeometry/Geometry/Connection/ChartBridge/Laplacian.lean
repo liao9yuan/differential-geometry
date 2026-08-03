@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 import Mathlib.Topology.Algebra.Module.FiniteDimensionBilinear
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -22,6 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
 

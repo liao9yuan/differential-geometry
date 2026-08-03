@@ -1,4 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTrace02
+import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
 
@@ -8,6 +10,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section

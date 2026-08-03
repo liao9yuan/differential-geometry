@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -500,11 +501,11 @@ theorem ricci_heat_mc
     (hinv : forall t x,
       Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M) (S.base.metric t) x
         (basis x) (gInv t x))
-    (hfields : forall x, DifferentialGeometry.Integral.Connection.SmoothBasisFieldsAt (I := I)
+    (hfields : forall x, DifferentialGeometry.Geometry.Operator.SmoothBasisFieldsAt (I := I)
       (basis x) (X x))
     (hlapTrace : forall t x,
       ricciNormLap t x =
-        DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) (basis x) (gInv t x)
+        DifferentialGeometry.Geometry.Operator.metricTrace0S2InBasis (I := I) (basis x) (gInv t x)
           (normSecond t x) Fin.elim0)
     (hA : forall t,
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
@@ -513,16 +514,16 @@ theorem ricci_heat_mc
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
         (M := M) 3 (S.base.connection t) (nablaA t) (nabla2A t))
     (hdu : forall t,
-      DifferentialGeometry.Integral.Connection.DuFieldRealizes (I := I)
+      DifferentialGeometry.Geometry.Operator.DuFieldRealizes (I := I)
         (fun y : M => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y
           (A t y))
         (du t))
     (hHess : forall t x,
-      DifferentialGeometry.Integral.Connection.HessianRealizesNablaDuAt (I := I)
+      DifferentialGeometry.Geometry.Operator.HessianRealizesNablaDuAt (I := I)
         (S.base.connection t) (du t)
         (normSecond t) x)
     (hrough : forall t x,
-      DifferentialGeometry.Integral.Connection.RoughLap0SRealizesMetricTraceInBasis (I := I)
+      DifferentialGeometry.Geometry.Operator.RoughLap0SRealizesMetricTraceInBasis (I := I)
         (basis x) (gInv t x) (s := 2) (roughA t x) (nabla2A t x))
     (hAComp : forall t x i j,
       A t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =

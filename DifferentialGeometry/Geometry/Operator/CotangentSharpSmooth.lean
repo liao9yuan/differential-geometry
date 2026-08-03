@@ -50,12 +50,13 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Integral.DivergenceTheorem
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
@@ -166,6 +167,6 @@ theorem cotangentSharp_gen_mdiffAt [I.Boundaryless]
   (cotangentSharp_gen_contMDiff_total (I := I) g hβ).contMDiffAt.mdifferentiableAt
     (by simp)
 
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry

@@ -6,6 +6,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -33,6 +34,7 @@ noncomputable section
 
 open Bundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Bundle Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

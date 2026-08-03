@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Topology.Algebra.Support
+import DifferentialGeometry.Geometry.Operator.Gradient
 
 
 noncomputable section
@@ -12,6 +13,7 @@ noncomputable section
 open Bundle Manifold Set MeasureTheory
 open scoped Manifold Topology ContDiff Matrix
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem

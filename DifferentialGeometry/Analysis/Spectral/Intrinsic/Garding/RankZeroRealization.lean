@@ -10,6 +10,7 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tenso
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Tensor.RSTensor.RankZero
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -32,6 +33,7 @@ namespace RicciFlow
 namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
@@ -100,7 +102,7 @@ theorem rawLap_cc_scalar
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
         (rawTensorConnLapSmooth (I := I) g 0 0 S).toSection x =
-      DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g
+      DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g
         (TensorRSField.scalar0_smooth
           (n := (∞ : WithTop ℕ∞)) S.toSection) x := by
   let f := TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection
@@ -131,7 +133,7 @@ theorem rawLap_cc_scalar
       ((Tensor0SNabla.tensor0Iso I M x).symm
         (laplacian (I := I) (LeviCivita (I := I) g) g f x)) = _
   rw [ContinuousLinearEquiv.apply_symm_apply,
-    DifferentialGeometry.Integral.Connection.laplacian_levi_eq
+    DifferentialGeometry.Geometry.Operator.laplacian_levi_eq
       (I := I) g hf x]
 
 omit [BoundarylessManifold I M] in

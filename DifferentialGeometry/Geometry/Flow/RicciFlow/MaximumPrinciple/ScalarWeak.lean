@@ -5,6 +5,7 @@ import Mathlib.Topology.Algebra.MetricSpace.Lipschitz
 import Mathlib.Topology.MetricSpace.Lipschitz
 import Mathlib.Topology.Order.Compact
 import Mathlib.Tactic
+import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
 
@@ -19,6 +20,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section

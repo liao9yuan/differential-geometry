@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Scaling
 import DifferentialGeometry.Geometry.Operator.Scaling
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Scaling
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -309,9 +310,9 @@ private theorem metricTracePair0SAt_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     {x : M} (B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) 2 x) :
-    DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
+    DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I)
       (scaleMetric (I := I) c hc g) B =
-      c⁻¹ * DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g B := by
+      c⁻¹ * DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) g B := by
   classical
   let basis : Module.Basis (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
     Real
@@ -330,9 +331,9 @@ private theorem metricTracePair0SAt_scaleMetric
       MetricInverseInBasis_gen (I := I) (scaleMetric (I := I) c hc g) x basis
         (fun i j => c⁻¹ * gInv i j) :=
     metricInvBasis_scale (I := I) c hc g basis gInv hinv
-  rw [DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis (I := I)
+  rw [DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_eq_sum_basis (I := I)
       (scaleMetric (I := I) c hc g) basis (fun i j => c⁻¹ * gInv i j) hinvScale,
-    DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis (I := I) g basis gInv
+    DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_eq_sum_basis (I := I) g basis gInv
       hinv]
   simp only [Finset.mul_sum]
   apply Finset.sum_congr rfl
@@ -382,11 +383,11 @@ private theorem paraRicciNormGrad_eq
     (hS : IsSolutionOn (I := I) S)
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier)
     {s : Real} (hs : s ∈ (paraInterval D τ R hR hτ).carrier) (x : M) :
-    DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+    DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((paraSolution (I := I) S τ R hR hτ).family.metric s)
         (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) s) x =
       (R⁻¹ * R⁻¹ * R⁻¹) •
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           (S.family.metric (paraTime τ R s))
           (ricciNorm (I := I) S (paraTime τ R s)) x := by
   have hdiff :
@@ -394,10 +395,10 @@ private theorem paraRicciNormGrad_eq
         (ricciNorm (I := I) S (paraTime τ R s)) x :=
     hS.ricciNormSpace (paraTime τ R s) hs x
   calc
-    DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+    DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((paraSolution (I := I) S τ R hR hτ).family.metric s)
         (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) s) x =
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           (scaleMetric (I := I) R hR (S.family.metric (paraTime τ R s)))
           ((R⁻¹ * R⁻¹) • ricciNorm (I := I) S (paraTime τ R s)) x := by
           have hfun :
@@ -411,20 +412,20 @@ private theorem paraRicciNormGrad_eq
           rw [hfun]
           simp [SolutionOn.family, paraSolution, paraFamily]
     _ =
-        R⁻¹ • DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        R⁻¹ • DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           (S.family.metric (paraTime τ R s))
           ((R⁻¹ * R⁻¹) • ricciNorm (I := I) S (paraTime τ R s)) x := by
-          rw [DifferentialGeometry.Integral.Connection.gradientFun_scale]
+          rw [DifferentialGeometry.Geometry.Operator.gradientFun_scale]
     _ =
         R⁻¹ • ((R⁻¹ * R⁻¹) •
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             (S.family.metric (paraTime τ R s))
             (ricciNorm (I := I) S (paraTime τ R s)) x) := by
-          rw [DifferentialGeometry.Integral.Connection.gradientFun_const_smul (I := I)
+          rw [DifferentialGeometry.Geometry.Operator.gradientFun_const_smul (I := I)
             (S.family.metric (paraTime τ R s)) (a := R⁻¹ * R⁻¹) hdiff]
     _ =
         (R⁻¹ * R⁻¹ * R⁻¹) •
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             (S.family.metric (paraTime τ R s))
             (ricciNorm (I := I) S (paraTime τ R s)) x := by
           simp [smul_smul, mul_comm]
@@ -737,47 +738,47 @@ theorem paraSol
     intro t ht x
     have hOld :
         MDiffAt (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             (S.family.metric (paraTime τ R t))
             (ricciNorm (I := I) S (paraTime τ R t)) y) x :=
       hS.ricciNormGrad (paraTime τ R t) ht x
     have hscaled :
         MDiffAt (T% fun y : M =>
           (R⁻¹ * R⁻¹ * R⁻¹) •
-            DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
               (S.family.metric (paraTime τ R t))
               (ricciNorm (I := I) S (paraTime τ R t)) y) x := by
       simpa [Pi.smul_apply] using
         (mdifferentiableAt_const (I := I) (c := R⁻¹ * R⁻¹ * R⁻¹)).smul_section hOld
     have hpt : ∀ y : M,
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((paraSolution (I := I) S τ R hR hτ).family.metric t)
           (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) t) y =
           (R⁻¹ * R⁻¹ * R⁻¹) •
-            DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
               (S.family.metric (paraTime τ R t))
               (ricciNorm (I := I) S (paraTime τ R t)) y := by
       intro y
       exact paraRicciNormGrad_eq (I := I) S hS τ R hR hτ ht y
     have htotal :
         (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((paraSolution (I := I) S τ R hR hτ).family.metric t)
             (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) t) y) =
           (T% fun y : M =>
             (R⁻¹ * R⁻¹ * R⁻¹) •
-              DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+              DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
                 (S.family.metric (paraTime τ R t))
                 (ricciNorm (I := I) S (paraTime τ R t)) y) := by
       funext y
       change
           TotalSpace.mk' E y
-            (DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+            (DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
               ((paraSolution (I := I) S τ R hR hτ).family.metric t)
               (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) t) y) =
             TotalSpace.mk' E y
               ((R⁻¹ * R⁻¹ * R⁻¹) •
-                DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+                DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
                   (S.family.metric (paraTime τ R t))
                   (ricciNorm (I := I) S (paraTime τ R t)) y)
       rw [hpt y]

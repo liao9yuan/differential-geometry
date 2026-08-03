@@ -1,6 +1,7 @@
 import DifferentialGeometry.Integration.DivergenceTheorem.Gradient
 import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -40,6 +41,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 
 

@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
 import Mathlib.Analysis.Calculus.ContDiff.Comp
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -32,6 +33,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -562,7 +564,7 @@ theorem chartGramOnE_set
     (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun p : ℝ × E =>
-        Integral.DivergenceTheorem.chartGramOnE (I := I) (g p.1) α i j p.2)
+        DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g p.1) α i j p.2)
       (J ×ˢ interior ((extChartAt I α).target)) := by
   classical
   have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm (extChartAt I α).target :=
@@ -593,7 +595,7 @@ theorem chartGramOnE_set
     hσ1.prodMk hσ2
   have hcomp : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ) ∞
       (fun p : ℝ × E =>
-        Integral.DivergenceTheorem.chartGramOnE (I := I) (g p.1) α i j p.2)
+        DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g p.1) α i j p.2)
           (J ×ˢ interior ((extChartAt I α).target)) := by
     refine ((hsmooth α i j).comp hσ (fun p hp => ⟨hp.1, hsubset (interior_subset hp.2)⟩)).congr ?_
     intro p _
@@ -617,7 +619,7 @@ theorem chartGramOnE_jointContDiffOn
     (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun p : ℝ × E =>
-        Integral.DivergenceTheorem.chartGramOnE (I := I) (g p.1) α i j p.2)
+        DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g p.1) α i j p.2)
       (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) :=
   chartGramOnE_set (I := I) g (Set.Ioo a b) α hsmooth i j
 
@@ -642,11 +644,11 @@ theorem chartGram_jet_set
     ContinuousOn
       (fun q : ℝ × M =>
         iteratedFDeriv ℝ k
-          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g q.1) α i j)
+          (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g q.1) α i j)
           (extChartAt I α q.2)) Sp := by
   have hF := chartGramOnE_set (I := I) g J α hsmooth i j
   have hcore := (spatialJet_set
-    (G := fun t y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g t) α i j y)
+    (G := fun t y => DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g t) α i j y)
     hJ isOpen_interior hF k hk).continuousOn
   have hΨcont : ContinuousOn (fun q : ℝ × M => (q.1, extChartAt I α q.2)) Sp :=
     continuous_fst.continuousOn.prodMk
@@ -680,7 +682,7 @@ theorem chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
     ContinuousOn
       (fun q : ℝ × M =>
         iteratedFDeriv ℝ k
-          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g q.1) α i j)
+          (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g q.1) α i j)
           (extChartAt I α q.2)) Sp := by
   have hF := chartGramOnE_jointContDiffOn (I := I) g a b α hsmooth i j
   have hUopen : IsOpen (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) :=

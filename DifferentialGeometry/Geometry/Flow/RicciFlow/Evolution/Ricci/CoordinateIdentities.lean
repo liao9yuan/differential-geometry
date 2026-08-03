@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRegularity
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -208,7 +209,7 @@ theorem canBianchiAt
     let nablaRicT :=
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 (S.family.connection t) (S.ricci t) x
-    let dScalar := DifferentialGeometry.Integral.Connection.differential1FormFun (I := I)
+    let dScalar := DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I)
       (S.scalar t) x
     ∃ nablaRm04 :
         Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x,
@@ -268,7 +269,7 @@ theorem coordBianchiTr
   let nablaRicT :=
     totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       2 (S.family.connection (t : Real)) (S.ricci (t : Real)) x
-  let dScalar := DifferentialGeometry.Integral.Connection.differential1FormFun (I := I)
+  let dScalar := DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I)
     (S.scalar (t : Real)) x
   obtain ⟨nablaRm04, hsecond, hRmSymm, hRicTrace, hScalar⟩ :=
     canBianchiAt (I := I) S x₀ (t : Real) hx

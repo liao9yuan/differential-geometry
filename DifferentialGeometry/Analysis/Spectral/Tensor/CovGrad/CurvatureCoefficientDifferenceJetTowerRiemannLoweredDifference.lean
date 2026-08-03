@@ -20,6 +20,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGr
 import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import Mathlib.Analysis.MeanInequalities
 import Mathlib.Data.Fin.Tuple.NatAntidiagonal
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -40,6 +41,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
   ccTensorModel ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply
   ccTensorBilinSymm_symm)
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
@@ -186,8 +188,6 @@ private lemma ricEndoRaisedFib_eq_mixed_add_gInvDiffRaised
     rw [ricMixedSharpEndoFib_apply]
     exact inner_metricSharp (I := I) g₀ x (ricciTensor (I := I) g₁ x v).toLinearMap w
   rw [hβ, ricEndoRaisedFib_apply]
-  exact (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_eq_connectionMetricSharp
-    (I := I) g₁ x (ricciTensor (I := I) g₁ x v).toLinearMap).symm
 
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in

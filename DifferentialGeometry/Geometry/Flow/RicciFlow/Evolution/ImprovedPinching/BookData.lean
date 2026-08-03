@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.TfHeatAssembly
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -70,7 +71,7 @@ noncomputable def ricciNormDuSec
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1 :=
-  DifferentialGeometry.Integral.Connection.duSec (I := I)
+  DifferentialGeometry.Geometry.Operator.duSec (I := I)
     (fun y : M =>
       DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y (S.ricci t y))
     (by
@@ -177,7 +178,7 @@ theorem pinchEvol_solSec
         (S.ricci (t : Real))).first
   · intro t
     simpa [ricciNormDuSec, flowG] using
-      DifferentialGeometry.Integral.Connection.duSec_realizes (I := I)
+      DifferentialGeometry.Geometry.Operator.duSec_realizes (I := I)
         (fun y : M =>
           DifferentialGeometry.Integral.Connection.normSq02 (I := I)
             ((flowG (I := I) S).metric (t : Real)) y
@@ -665,9 +666,9 @@ theorem tfNonneg_sol
       S.scalar t x = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
     calc
       S.scalar t x =
-          DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (S.family.metric t)
+          DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (S.family.metric t)
             (S.ricciAt t x) := SolutionOn.scalar_eq_metricTrace (I := I) S t x
-      _ = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (S.base.metric t)
+      _ = DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (S.base.metric t)
             (S.ricciAt t x) := by rfl
       _ = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
             exact scalar_eq_diag (I := I) hscalarTrace hdiag
@@ -733,7 +734,7 @@ theorem tfGrad_sol
     (hS : IsSolutionOn (I := I) S) :
     forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
           (tfRicNormSq S.scalar (ricciNorm (I := I) S) (t : Real)) y) x := by
   intro t x
@@ -743,46 +744,46 @@ theorem tfGrad_sol
   let h : M -> Real := fun y : M => S.scalar (t : Real) y ^ 2 / 3
   have hgrad_eq :
       (fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
           (tfRicNormSq S.scalar (ricciNorm (I := I) S) (t : Real)) y) =
         fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric (t : Real)) f y -
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric (t : Real)) h y := by
     funext y
     simpa [f, h, flowG, tfRicNormSq, tracefreeRicciNormSqOf,
       tracefreeRicciNormSqAtOf] using
-      DifferentialGeometry.Integral.Connection.gradientFun_sub (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun_sub (I := I)
         ((flowG (I := I) S).metric (t : Real))
         (hSmooth.ricciRegular.ricci_norm_space (t : Real) ht y)
         (hSmooth.scalarRegular.scalar_sq_div_space (t : Real) ht y)
   have hnormGrad : MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) f y) x := by
     simpa [f, flowG, SolutionOn.family] using
       hSmooth.ricciRegular.ricci_norm_grad (t : Real) ht x
   have hthirdGrad : MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) h y) x := by
     simpa [h, flowG, SolutionOn.family] using
       hSmooth.scalarRegular.scalar_sq_div_grad (t : Real) ht x
   have hcombined : MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) f y -
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) h y) x := by
     exact mdifferentiableAt_sub_section hnormGrad hthirdGrad
   have hsection_eq :
       (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
           (tfRicNormSq S.scalar (ricciNorm (I := I) S) (t : Real)) y) =
         (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric (t : Real)) f y -
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric (t : Real)) h y) := by
     funext y
     simpa using congrFun hgrad_eq y
@@ -806,7 +807,7 @@ theorem scalarPowGrad_sol
       0 < S.scalar (t : Real) x) :
     forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
           (fun w : M => S.scalar (t : Real) w ^ (-(2 - epsilon))) z) y := by
   intro t y
@@ -819,41 +820,41 @@ theorem scalarPowGrad_sol
     have hp :
         MDifferentiableAt I 𝓘(Real, Real)
           (fun z : M => f z ^ (p - 1)) y :=
-      DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow (I := I) (p - 1)
+      DifferentialGeometry.Geometry.Operator.mdifferentiableAt_rpow (I := I) (p - 1)
         (hSmooth.scalarRegular.scalar_space (t : Real) ht y)
         (hscalar t y)
     simpa [coeff] using mdifferentiableAt_const.mul hp
   have hgrad_eq :
       (fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
           (fun w : M => S.scalar (t : Real) w ^ (-(2 - epsilon))) z) =
         coeff • fun z : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric (t : Real)) f z := by
     funext z
     simpa [p, f, coeff] using
-      DifferentialGeometry.Integral.Connection.gradientFun_rpow (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun_rpow (I := I)
         ((flowG (I := I) S).metric (t : Real))
         (p := p)
         (hSmooth.scalarRegular.scalar_space (t : Real) ht z)
         (hscalar t z)
   have hscalarGrad : MDiffAt (T% fun z : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) f z) y := by
     simpa [f, flowG, SolutionOn.family] using
       hSmooth.scalarRegular.scalar_grad (t : Real) ht y
   have hsmul : MDiffAt (T% (coeff • fun z : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
         ((flowG (I := I) S).metric (t : Real)) f z)) y := by
     exact hcoeff.smul_section hscalarGrad
   have hsection_eq :
       (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
           (fun w : M => S.scalar (t : Real) w ^ (-(2 - epsilon))) z) =
         (T% (coeff • fun z : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric (t : Real)) f z)) := by
     funext z
     simpa using congrFun hgrad_eq z
@@ -928,7 +929,7 @@ theorem pinchEvol_sol
   have hgradScalar :
       forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
         MDiffAt (T% fun y : M =>
-          DifferentialGeometry.Integral.Connection.gradientFun (I := I)
+          DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric (t : Real))
             (S.scalar (t : Real)) y) x := by
     intro t x

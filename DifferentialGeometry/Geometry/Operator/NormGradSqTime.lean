@@ -16,8 +16,9 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
+open DifferentialGeometry.Integral.Connection
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators Topology
@@ -263,4 +264,4 @@ theorem normGradSq_time {x : M} {t : Real}
   exact hbase.congr_of_eventuallyEq
     (Filter.Eventually.of_forall fun r => (hnorm (g r) (f r)).symm)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator

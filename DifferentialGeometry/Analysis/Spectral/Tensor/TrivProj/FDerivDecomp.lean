@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.ChristoffelDecomp
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -17,6 +18,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

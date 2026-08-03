@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.RoughLapNablaK
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.FrozenSlotAllK
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannReactionBound
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -141,6 +142,7 @@ theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
     tensor0SSpace_continuousLinearEquiv_apply] using h_eval
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
+open DifferentialGeometry.Geometry.Operator
 def nablaKRmFrozenSlotSharpSection
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))

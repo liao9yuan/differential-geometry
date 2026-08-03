@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+import DifferentialGeometry.Geometry.Operator.Gradient
 
 
 noncomputable section
@@ -11,6 +12,7 @@ noncomputable section
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff Matrix
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem

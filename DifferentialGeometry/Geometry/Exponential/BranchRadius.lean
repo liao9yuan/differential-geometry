@@ -18,6 +18,7 @@ noncomputable section
 open Bundle Manifold Set Filter
 open scoped ContDiff Manifold Topology
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 
 namespace DifferentialGeometry
 namespace Geometry

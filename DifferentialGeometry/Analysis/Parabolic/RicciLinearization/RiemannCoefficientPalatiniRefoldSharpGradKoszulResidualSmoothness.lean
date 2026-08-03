@@ -19,6 +19,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLinearizedRefoldIdentity
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldMonomialRefoldL2JetWindow
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldRicciFoldWeightKernel
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -36,6 +37,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
@@ -122,7 +124,7 @@ private lemma bdInner_sharpKoszul_left (g₀ g₁ : SmoothRiemannianMetric I M)
     g₁.inner x (sharpRaisedKoszulVec (I := I) g₀ g₁ S x a b) z =
       linearizedKoszulCovec (I := I) g₀ S x a b z := by
   rw [sharpRaisedKoszulVec]
-  exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp (I := I) g₁ x
+  exact DifferentialGeometry.Geometry.Operator.inner_metricSharp (I := I) g₁ x
     (linearizedKoszulCovec (I := I) g₀ S x a b) z
 
 omit [BoundarylessManifold I M] in
@@ -132,7 +134,7 @@ private lemma bdInner_sharpKoszul_right (g₀ g₁ : SmoothRiemannianMetric I M)
     g₁.inner x z (sharpRaisedKoszulVec (I := I) g₀ g₁ S x a b) =
       linearizedKoszulCovec (I := I) g₀ S x a b z := by
   rw [sharpRaisedKoszulVec]
-  exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp_right (I := I) g₁ x
+  exact DifferentialGeometry.Geometry.Operator.inner_metricSharp_right (I := I) g₁ x
     (linearizedKoszulCovec (I := I) g₀ S x a b) z
 
 set_option backward.isDefEq.respectTransparency false in

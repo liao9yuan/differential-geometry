@@ -9,6 +9,7 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointChartCurvatureSmoothness
 import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointTensorFieldSmoothness
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -25,6 +26,7 @@ namespace RicciLinearization
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -689,7 +691,7 @@ theorem metricSharp_jointContMDiffOn
         ((chartAt H α).source ×ˢ S)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        (DifferentialGeometry.Geometry.Operator.metricSharp
           (I := I) (gfam p.2) p.1 (cv p.2 p.1)))
       (Set.univ ×ˢ S) := by
   intro p hp
@@ -700,7 +702,7 @@ theorem metricSharp_jointContMDiffOn
       TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
           (metricSharpChartLocal (I := I) (gfam q.2) p.1 (cv q.2) q.1) =
         TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
-          (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+          (DifferentialGeometry.Geometry.Operator.metricSharp
             (I := I) (gfam q.2) q.1 (cv q.2 q.1)) := by
     rintro q ⟨hqx, _⟩
     have hqbase : q.1 ∈ (trivializationAt E (TangentSpace I) p.1).baseSet := by
@@ -767,7 +769,7 @@ theorem inverseMetricSharpField_realizedFam_jointContMDiffOn [BoundarylessManifo
     (S := realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hinv hcv
   refine hjoint.congr (fun p hp => ?_)
   change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+      (DifferentialGeometry.Geometry.Operator.metricSharp
         (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (cv p.2 p.1)) =
     TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (inverseMetricSharpFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1))
@@ -1399,27 +1401,11 @@ theorem ricEndoRaisedFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (S := realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hinv hcv
   refine hjoint.congr (fun p hp => ?_)
   change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+      (DifferentialGeometry.Geometry.Operator.metricSharp
         (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (cv p.2 p.1)) =
     TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1))
   rw [ricEndoRaisedFib_apply, hcvdef]
-  refine congrArg (TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1) ?_
-  apply DifferentialGeometry.Integral.DivergenceTheorem.metricFlatLinear_injective
-    (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
-  ext w
-  change (realizedFam (I := I) g₀ T T' hδ hδ' p.2).inner p.1
-      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
-        (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
-          ((ricciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
-            (Y p.1)).toLinearMap)) w =
-    (realizedFam (I := I) g₀ T T' hδ hδ' p.2).inner p.1
-      (DifferentialGeometry.Integral.Connection.metricSharp
-        (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
-          ((ricciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
-            (Y p.1)).toLinearMap)) w
-  rw [DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp,
-    DifferentialGeometry.Integral.Connection.inner_metricSharp]
 
 set_option backward.isDefEq.respectTransparency false in
 
@@ -1753,7 +1739,7 @@ theorem invSharp_of_family
     D.regular_isOpen hinv hcv
   refine hjoint.congr (fun p _ => ?_)
   change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-      (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+      (DifferentialGeometry.Geometry.Operator.metricSharp
         (I := I) (G.metric p.2) p.1 (cv p.2 p.1)) =
     TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (inverseMetricSharpFib (I := I) (G.metric p.2) p.1 (Y p.1))

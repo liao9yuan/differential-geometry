@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebra
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -25,6 +26,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -355,7 +357,7 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
         scalarLapTraceAt (I := I) g (hessianSec (I := I) cov hcov (S.scalar (t : Real)) hf x₀) := by
     have hreal := scalarLap_smooth (I := I) cov hcov g hmc (S.scalar (t : Real)) hf
       (x := x₀)
-    have := DifferentialGeometry.Integral.Connection.ScalarLaplacianRealizesTraceAt.eq_trace
+    have := DifferentialGeometry.Geometry.Operator.ScalarLaplacianRealizesTraceAt.eq_trace
       (I := I) cov g (S.scalar (t : Real))
       (hessianSec (I := I) cov hcov (S.scalar (t : Real)) hf x₀) hreal
     simpa [DifferentialGeometry.Integral.Connection.laplacianAt, flowG, hcov_def, hg_def]

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 import Mathlib.Analysis.Normed.Group.Uniform
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -152,7 +153,7 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
             (scalar t y - scalarLowerBarrier n c0 t)) x)
     (hw_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M =>
             Real.exp (-(K : Real) * t) *
               (scalar t z - scalarLowerBarrier n c0 t)) y) x)
@@ -165,7 +166,7 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
         (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y)
     (hdiff_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x)
     (hparabolic : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
       scalarLowerReaction n (scalar t x) t <=
@@ -274,7 +275,7 @@ structure ScalarLowerBoundWMPRegularity
           (scalar t y - scalarLowerBarrier n c0 t)) x
   weighted_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
     ∀ x : M, MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
         (fun z : M =>
           Real.exp (-(K : Real) * t) *
             (scalar t z - scalarLowerBarrier n c0 t)) y) x
@@ -287,7 +288,7 @@ structure ScalarLowerBoundWMPRegularity
       (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y
   diff_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
     ∀ x : M, MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
         (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x
 
 
@@ -598,7 +599,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
             (scalar t y - scalarLowerBarrier n c0 t)) x)
     (hw_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M =>
             Real.exp (-(K : Real) * t) *
               (scalar t z - scalarLowerBarrier n c0 t)) y) x)
@@ -611,7 +612,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
         (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y)
     (hdiff_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x)
     (hevol : ScalarEvolutionEquationOn (D := D) scalar scalarLap ricciNormSq)
     (hlap : ScalarLaplacianRealizesHeatOperatorOn (I := I) G T scalar scalarLap)
@@ -743,7 +744,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
             (scalar t y - scalarLowerBarrier n c0 t)) x)
     (hw_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M =>
             Real.exp (-(K : Real) * t) *
               (scalar t z - scalarLowerBarrier n c0 t)) y) x)
@@ -756,7 +757,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
         (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y)
     (hdiff_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x)
     (hevol : ScalarEvolutionEquationOn (D := D) scalar scalarLap ricciNormSq)
     (hlap : ScalarLaplacianRealizesHeatOperatorOn (I := I) G T scalar scalarLap)
@@ -816,7 +817,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
               scalarLowerBarrier n c0 t)) x)
     (hw_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M =>
             Real.exp (-(K : Real) * t) *
               (scalarTraceInFrame (I := I) S gInv frame t z -
@@ -835,7 +836,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
             scalarLowerBarrier n c0 t) y)
     (hdiff_grad : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M =>
             scalarTraceInFrame (I := I) S gInv frame t z -
               scalarLowerBarrier n c0 t) y) x)

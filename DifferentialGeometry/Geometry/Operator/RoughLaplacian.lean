@@ -19,10 +19,11 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
+open DifferentialGeometry.Integral.Connection
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
@@ -1318,4 +1319,4 @@ theorem rough_lap_one_form_realizes_metric_trace
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator

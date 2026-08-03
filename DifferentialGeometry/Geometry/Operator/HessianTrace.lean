@@ -8,12 +8,13 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDeriva
 
 noncomputable section
 
+open DifferentialGeometry.Integral.DivergenceTheorem
 open Bundle Manifold Set MeasureTheory
 open scoped Manifold Topology ContDiff Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -1632,6 +1633,6 @@ theorem chartHessTrace_eq_laplacian_pointwise_of_boundaryless
       (I := I) g x hx_target j
   exact chartHessTrace_eq_laplacian_pointwise (I := I) g hf x hcc
 
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry

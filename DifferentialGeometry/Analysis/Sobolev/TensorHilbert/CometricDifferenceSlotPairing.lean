@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.CometricDifferen
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
 import DifferentialGeometry.Geometry.Operator.Gradient
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -15,6 +16,7 @@ namespace DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -83,12 +85,12 @@ theorem multilinear_firstSlot_pairing_le
     · simp
     · simp
   set w : TangentSpace I x :=
-    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+    DifferentialGeometry.Geometry.Operator.metricSharp
       (I := I) g₀ x φ.toLinearMap with hw_def
   have hw_inner : ∀ u : TangentSpace I x, g₀.inner x w u = φ u := by
     intro u
     rw [hw_def]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp
+    exact DifferentialGeometry.Geometry.Operator.inner_metricSharp
       (I := I) g₀ x φ.toLinearMap u
   have hcomp_eq : ∀ a : Fin (Module.finrank ℝ E),
       Wm (Fin.cons (e a) (fun k => e (J' k))) = g₀.inner x w (e a) := by
@@ -397,12 +399,12 @@ private theorem multi_slotAt_le
     rw [hφ_def, ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply,
       ContinuousMultilinearMap.toContinuousLinearMap_apply]
   set w : TangentSpace I x :=
-    DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+    DifferentialGeometry.Geometry.Operator.metricSharp
       (I := I) g₀ x φ.toLinearMap with hw_def
   have hw_inner : ∀ u : TangentSpace I x, g₀.inner x w u = φ u := by
     intro u
     rw [hw_def]
-    exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp
+    exact DifferentialGeometry.Geometry.Operator.inner_metricSharp
       (I := I) g₀ x φ.toLinearMap u
   have hcomp : ∀ a : Fin (Module.finrank ℝ E),
       Wm (Function.update z j (e a)) = g₀.inner x w (e a) := by

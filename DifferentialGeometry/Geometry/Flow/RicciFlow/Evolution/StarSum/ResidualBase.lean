@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.HamiltonBaseProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.ResidualCost
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 

@@ -4,12 +4,13 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvarian
 
 noncomputable section
 
+open DifferentialGeometry.Integral.DivergenceTheorem
 open Bundle Manifold Set MeasureTheory
 open scoped Manifold Topology ContDiff Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
@@ -227,6 +228,6 @@ theorem voss_weyl_laplacian_formula_pointwise
     Δ_g (I := I) g hf x = chartVossWeylLaplacian (I := I) g α f x :=
   laplacian_eq_chartVossWeyl_of_sigmaCompact (I := I) g α hf hx
 
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry

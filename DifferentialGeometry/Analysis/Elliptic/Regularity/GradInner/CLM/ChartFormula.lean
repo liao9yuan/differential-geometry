@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartDa
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import DifferentialGeometry.Geometry.Operator.Gradient
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -24,6 +25,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl

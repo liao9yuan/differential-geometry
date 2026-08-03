@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLineari
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivCommutation
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDifferenceKoszul
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -19,6 +20,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
@@ -226,10 +228,10 @@ theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv
       ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)), hbil]
   rw [hcorrY, hcorrZ]
   have hg₁ : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b : M => g₁.inner b (Y b) (Z b)) x :=
-    (DifferentialGeometry.Integral.DivergenceTheorem.contMDiff_g_inner_of_smooth_sections
+    (DifferentialGeometry.Geometry.Operator.contMDiff_g_inner_of_smooth_sections
       (I := I) (M := M) g₁ Y Z x).mdifferentiableAt (by simp)
   have hg₁' : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b : M => g₁'.inner b (Y b) (Z b)) x :=
-    (DifferentialGeometry.Integral.DivergenceTheorem.contMDiff_g_inner_of_smooth_sections
+    (DifferentialGeometry.Geometry.Operator.contMDiff_g_inner_of_smooth_sections
       (I := I) (M := M) g₁' Y Z x).mdifferentiableAt (by simp)
   have hsplit : directionalDeriv (I := I)
         (fun b : M => g₁.inner b (Y b) (Z b) - g₁'.inner b (Y b) (Z b)) x (X x) =

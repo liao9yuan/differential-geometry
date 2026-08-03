@@ -16,6 +16,7 @@ noncomputable section
 open Bundle Manifold Set Metric Module
 open DifferentialGeometry.Integral
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open scoped Manifold Topology ContDiff RealInnerProductSpace
 
@@ -108,7 +109,7 @@ private noncomputable def coordGrad (w : E) :
     Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n),
       (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯ := by
   exact
-    ⟨fun x => DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+    ⟨fun x => DifferentialGeometry.Geometry.Operator.gradFun
         (I := 𝓡 n) (roundMetric (E := E) (n := n))
       (innerCoordFun (E := E) (n := n) w) x,
       DifferentialGeometry.Integral.Connection.gradFun_contMDiff_total_section
@@ -148,7 +149,7 @@ private theorem dIncl_coordGrad
     rw [← dInclEquiv_coe (n := n) x]
     exact congrArg Subtype.val ((dInclEquiv (n := n) x).apply_symm_apply u)
   have hgrad :
-      z = DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+      z = DifferentialGeometry.Geometry.Operator.gradFun
         (I := 𝓡 n) (roundMetric (E := E) (n := n))
         (innerCoordFun (E := E) (n := n) w) x := by
     apply DifferentialGeometry.Integral.Connection.gradFun_unique
@@ -162,7 +163,7 @@ private theorem dIncl_coordGrad
     exact ((ℝ ∙ (x : E))ᗮ).inner_orthogonalProjection_eq_of_mem_right
       (dInclEquiv (n := n) x a) w
   change dIncl (n := n) x
-      (DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+      (DifferentialGeometry.Geometry.Operator.gradFun
         (I := 𝓡 n) (roundMetric (E := E) (n := n))
         (innerCoordFun (E := E) (n := n) w) x) = _
   rw [← hgrad, hz]

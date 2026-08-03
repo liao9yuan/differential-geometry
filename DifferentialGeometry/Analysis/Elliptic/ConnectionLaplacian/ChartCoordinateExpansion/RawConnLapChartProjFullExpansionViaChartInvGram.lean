@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartProjAsWeightedSecondCovDerivMinusΓTrace
+open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
@@ -14,6 +15,7 @@ open DifferentialGeometry.Tensor
 open Tensor0SBundle
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 

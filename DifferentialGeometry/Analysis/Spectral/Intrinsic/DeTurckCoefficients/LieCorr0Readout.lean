@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RealizedGramDerivChartEvaluation
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieCoeffAppCcValue
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDeTurckRemainderOrderSplit
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -24,6 +25,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -57,7 +59,8 @@ open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
   chartPushedRaw_tensorChartComponentRaw_contDiffOn)
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
   (chartDeTurckCorrPrincipalSymbolExprRaw chartDeTurckCorrHessBlockRaw)
-open DifferentialGeometry.Integral.DivergenceTheorem (partialDeriv chartGramOnE chartInvGramOnE)
+open DifferentialGeometry.Integral.DivergenceTheorem (partialDeriv)
+open DifferentialGeometry.Geometry.Operator (chartGramOnE chartInvGramOnE)
 open DifferentialGeometry.Integral.Measure (chartGramMatrix)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
@@ -282,7 +285,7 @@ private lemma lieCorr0_euclid_christoffel_bridge (g : SmoothRiemannianMetric I M
     extChartAt_target_subset_interior_of_boundaryless
       (I := I) x (mem_extChartAt_target x)
   have hdiff : DifferentiableAt ℝ (chartChristoffel (I := I) g x a b r) (extChartAt I x x) :=
-    ((DifferentialGeometry.Integral.DivergenceTheorem.chartChristoffel_contDiffOn_interior
+    ((DifferentialGeometry.Geometry.Operator.chartChristoffel_contDiffOn_interior
       (I := I) g x a b r).contDiffAt
       (isOpen_interior.mem_nhds hy_int)).differentiableAt (by simp)
   rw [euclidPartial_def, DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv]

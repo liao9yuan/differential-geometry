@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Bianchi
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -284,14 +285,14 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     have h := hRicciId t x (frame k x) (frame i x)
       (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))
     have hinput₁ :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (frame k x) (frame i x)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame k x) (frame i x)
             (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) =
           DifferentialGeometry.Integral.Connection.vec4 (frame k x) (frame i x) (frame j x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     have hinput₂ :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (frame i x) (frame k x)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame i x) (frame k x)
             (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) =
           DifferentialGeometry.Integral.Connection.vec4 (frame i x) (frame k x) (frame j x)
             (frame l x) := by
@@ -313,14 +314,14 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     have h := hRicciId t x (frame k x) (frame j x)
       (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))
     have hinput₁ :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (frame k x) (frame j x)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame k x) (frame j x)
             (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) =
           DifferentialGeometry.Integral.Connection.vec4 (frame k x) (frame j x) (frame i x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     have hinput₂ :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (frame j x) (frame k x)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame j x) (frame k x)
             (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) =
           DifferentialGeometry.Integral.Connection.vec4 (frame j x) (frame k x) (frame i x)
             (frame l x) := by
@@ -571,14 +572,14 @@ theorem ricciSecCommLocId
     have h := hRicciId t x (frame k x) (frame i x)
       (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))
     have hinput₁ :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (frame k x) (frame i x)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame k x) (frame i x)
             (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) =
           DifferentialGeometry.Integral.Connection.vec4 (frame k x) (frame i x) (frame j x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     have hinput₂ :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (frame i x) (frame k x)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame i x) (frame k x)
             (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) =
           DifferentialGeometry.Integral.Connection.vec4 (frame i x) (frame k x) (frame j x)
             (frame l x) := by
@@ -600,14 +601,14 @@ theorem ricciSecCommLocId
     have h := hRicciId t x (frame k x) (frame j x)
       (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))
     have hinput₁ :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (frame k x) (frame j x)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame k x) (frame j x)
             (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) =
           DifferentialGeometry.Integral.Connection.vec4 (frame k x) (frame j x) (frame i x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     have hinput₂ :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (frame j x) (frame k x)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame j x) (frame k x)
             (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) =
           DifferentialGeometry.Integral.Connection.vec4 (frame j x) (frame k x) (frame i x)
             (frame l x) := by

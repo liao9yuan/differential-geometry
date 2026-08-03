@@ -17,10 +17,11 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
+open DifferentialGeometry.Integral.Connection
 open Bundle
 open scoped Manifold ContDiff
 
@@ -570,4 +571,4 @@ theorem laplacianNonnegativeAtSpatialMin_of_metricCompatible
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator

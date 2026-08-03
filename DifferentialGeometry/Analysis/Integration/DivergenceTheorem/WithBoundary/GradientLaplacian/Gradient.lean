@@ -7,6 +7,7 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+import DifferentialGeometry.Geometry.Operator.Operators
 
 
 noncomputable section
@@ -14,6 +15,7 @@ noncomputable section
 open Bundle Manifold Set MeasureTheory
 open scoped Manifold Topology ContDiff Matrix
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
@@ -26,7 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-export DifferentialGeometry.Integral.DivergenceTheorem
+export DifferentialGeometry.Geometry.Operator
   (metricFlatLinear metricFlatLinear_apply metricFlatLinear_injective
     metricFlatMap metricFlatMap_apply metricFlatMap_apply_symm
     metricSharp metricSharp_def

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -18,6 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 theorem gradient_eq_gradFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :

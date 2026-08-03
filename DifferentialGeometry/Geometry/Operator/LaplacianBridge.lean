@@ -12,10 +12,11 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Integral.Connection
 open Bundle Manifold Set
 open scoped Manifold ContDiff BigOperators
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SBundle
@@ -118,6 +119,6 @@ theorem laplacianAt_eq_delta
   rw [hconn]
   exact laplacian_levi_eq (I := I) (G.metric t) hf x
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator
 
 end

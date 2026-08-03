@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
+import DifferentialGeometry.Geometry.Operator.NormGradSq
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -14,6 +16,7 @@ namespace Connection
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 section NablaRicci
 
@@ -387,7 +390,7 @@ theorem nablaRicci_eq_frame_trace_nablaCurvSec
     rw [riemannOp_apply_smooth cov (hBsm i) hV hW]
   have hginner_sm : ∀ i, ContMDiff I 𝓘(ℝ) ∞ (fun b => g.inner b (S i b) (B i b)) := by
     intro i
-    exact DivergenceTheorem.contMDiff_g_inner_of_smooth_sections (I := I) g
+    exact DifferentialGeometry.Geometry.Operator.contMDiff_g_inner_of_smooth_sections (I := I) g
       ⟨fun b => S i b, hSsm i⟩ ⟨fun b => B i b, hBsm i⟩
   have hmd : ∀ i, MDifferentiableAt I 𝓘(ℝ) (fun b => g.inner b (S i b) (B i b)) x :=
     fun i => ((hginner_sm i) x).mdifferentiableAt (by simp)
@@ -698,11 +701,11 @@ theorem nablaCurvSec_metric_skew45
   have hWat : MDiffAt (T% W) x := (hW x).mdifferentiableAt (by simp)
   have hmd1 : MDifferentiableAt I 𝓘(ℝ)
       (fun b => g.inner b (riemannSec cov Y Z W b) (U b)) x :=
-    ((DivergenceTheorem.contMDiff_g_inner_of_smooth_sections (I := I) g
+    ((DifferentialGeometry.Geometry.Operator.contMDiff_g_inner_of_smooth_sections (I := I) g
       ⟨_, hRW_sm⟩ ⟨fun b => U b, hU⟩) x).mdifferentiableAt (by simp)
   have hmd2 : MDifferentiableAt I 𝓘(ℝ)
       (fun b => g.inner b (riemannSec cov Y Z U b) (W b)) x :=
-    ((DivergenceTheorem.contMDiff_g_inner_of_smooth_sections (I := I) g
+    ((DifferentialGeometry.Geometry.Operator.contMDiff_g_inner_of_smooth_sections (I := I) g
       ⟨_, hRU_sm⟩ ⟨fun b => W b, hW⟩) x).mdifferentiableAt (by simp)
   have hmf0 : extDerivFun (I := I) (fun b => g.inner b (riemannSec cov Y Z W b) (U b)) x (X x)
       + extDerivFun (I := I) (fun b => g.inner b (riemannSec cov Y Z U b) (W b)) x (X x) = 0 := by
@@ -804,11 +807,11 @@ theorem nablaCurvSec_inner_pair_symm
     rw [h1, h2, riemannOp_inner_pair_symm (I := I) g b (Y b) (Z b) (W b) (U b), sub_self]
   have hmd1 : MDifferentiableAt I 𝓘(ℝ)
       (fun b => g.inner b (riemannSec cov Y Z W b) (U b)) x :=
-    ((DivergenceTheorem.contMDiff_g_inner_of_smooth_sections (I := I) g
+    ((DifferentialGeometry.Geometry.Operator.contMDiff_g_inner_of_smooth_sections (I := I) g
       ⟨_, hRYZW_sm⟩ ⟨fun b => U b, hU⟩) x).mdifferentiableAt (by simp)
   have hmd2 : MDifferentiableAt I 𝓘(ℝ)
       (fun b => g.inner b (riemannSec cov W U Y b) (Z b)) x :=
-    ((DivergenceTheorem.contMDiff_g_inner_of_smooth_sections (I := I) g
+    ((DifferentialGeometry.Geometry.Operator.contMDiff_g_inner_of_smooth_sections (I := I) g
       ⟨_, hRWUY_sm⟩ ⟨fun b => Z b, hZ⟩) x).mdifferentiableAt (by simp)
   have hmf0 : extDerivFun (I := I) (fun b => g.inner b (riemannSec cov Y Z W b) (U b)) x (X x)
       - extDerivFun (I := I) (fun b => g.inner b (riemannSec cov W U Y b) (Z b)) x (X x) = 0 := by

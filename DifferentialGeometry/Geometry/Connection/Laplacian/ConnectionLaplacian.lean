@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Operator.HessianTrace
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -20,6 +21,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 def connLaplacian_function [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}

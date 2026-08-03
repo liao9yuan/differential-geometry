@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricCoord
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -8,6 +9,7 @@ namespace DifferentialGeometry.Integral.Connection
 
 open Bundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
 open scoped Manifold ContDiff Topology

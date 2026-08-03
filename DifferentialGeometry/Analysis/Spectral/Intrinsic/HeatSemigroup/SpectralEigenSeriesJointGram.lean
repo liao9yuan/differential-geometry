@@ -19,6 +19,7 @@ import DifferentialGeometry.Analysis.Calculus.SpectralEigenSeriesJointGramProjec
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramSobolevWeightSummability
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramRawComponentJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramEigenChartIncrementMajorant
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -34,6 +35,7 @@ namespace IntrinsicSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
@@ -1282,9 +1284,9 @@ lemma chartGramOnE_realize_eq_add_half_rawCompOnE
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g S) δ)
     (α : M) (a b : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
-    Integral.DivergenceTheorem.chartGramOnE (I := I)
+    DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I)
         (tensorSectionRealizeMetric (I := I) g S hδ_lt hδ) α a b y =
-      Integral.DivergenceTheorem.chartGramOnE (I := I) g α a b y +
+      DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) g α a b y +
         (1 / 2 : ℝ) * (tensorChartComponentOnModel (I := I) (M := M) g S α ![a, b] y +
           tensorChartComponentOnModel (I := I) (M := M) g S α ![b, a] y) := by
   classical
@@ -1292,7 +1294,7 @@ lemma chartGramOnE_realize_eq_add_half_rawCompOnE
   have hp_src : (extChartAt I α).symm y ∈ (chartAt H α).source := by
     have := (extChartAt I α).map_target hy_t
     rwa [extChartAt_source] at this
-  rw [Integral.DivergenceTheorem.chartGramOnE_def, Integral.DivergenceTheorem.chartGramOnE_def,
+  rw [DifferentialGeometry.Geometry.Operator.chartGramOnE_def, DifferentialGeometry.Geometry.Operator.chartGramOnE_def,
     chartGramMatrix_apply, chartGramMatrix_apply, tensorSectionRealizeMetric_inner]
   have hhalf := ccTensorBilinSymm_eq_half_rawComponent (I := I) (M := M) g S α a b hp_src
   rw [hhalf]

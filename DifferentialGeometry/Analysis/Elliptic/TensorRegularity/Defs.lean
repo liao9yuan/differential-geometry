@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -14,6 +15,7 @@ namespace TensorRegularity
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Tensor

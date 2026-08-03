@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Connect
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Moving
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Smoothness
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -25,6 +26,7 @@ namespace DifferentialGeometry.Integral.Connection
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 

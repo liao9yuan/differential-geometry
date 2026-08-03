@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeOperator
 import Mathlib.Topology.MetricSpace.Contracting
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # A small moving-mass perturbation of tensor maximal regularity

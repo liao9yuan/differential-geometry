@@ -16,6 +16,7 @@ noncomputable section
 open Set Function Filter Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.HCGCompactness
 
 namespace DifferentialGeometry
@@ -536,7 +537,7 @@ theorem isSolutionOn_pullback
       intro y
       simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
         SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
-    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I)
+    exact DifferentialGeometry.Geometry.Operator.gradientFun_mdiffAt (I := I)
       ((solutionOn_pullback (I := I) S Φ).family.metric t) hsmooth x
 
 

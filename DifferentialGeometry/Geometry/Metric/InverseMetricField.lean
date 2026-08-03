@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Metric.ChartGram
+open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
@@ -15,6 +16,7 @@ namespace DifferentialGeometry
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open Tensor0SBundle
 open TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
 

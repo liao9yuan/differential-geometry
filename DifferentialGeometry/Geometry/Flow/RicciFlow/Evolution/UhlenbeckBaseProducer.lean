@@ -14,6 +14,7 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.UhlReaction3
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -395,7 +396,7 @@ theorem scalar_eq_trace_ortho
         + S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2)
           (basis 2)) := by
   classical
-  have h : DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
+  have h : DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I)
         (S.base.metric t) (S.ricciAt t x) =
       ∑ i : Fin 3, ∑ j : Fin 3,
         DifferentialGeometry.Integral.Connection.delta3 i j *
@@ -403,7 +404,7 @@ theorem scalar_eq_trace_ortho
             (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) :=
     scalarTrace_delta (I := I) (S.base.metric t) (S.ricciAt t x) horth
   rw [show S.scalar t x =
-        DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
+        DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I)
           (S.base.metric t) (S.ricciAt t x) from
       SolutionOn.scalar_eq_metricTrace (I := I) S t x, h]
   simp [DifferentialGeometry.Integral.Connection.delta3, Fin.sum_univ_three]
@@ -535,7 +536,7 @@ theorem ricDot_of_solution
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)))
     (i j : Fin 3) :
     HasDerivWithinAt (fun s : Real => R s i j)
-      (DifferentialGeometry.Integral.Connection.metricTraceFirstTwo0SAt
+      (DifferentialGeometry.Geometry.Operator.metricTraceFirstTwo0SAt
           (I := I) (S.base.metric (t : Real))
           (ricciNabla2WMP (I := I) S (t : Real) x)
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) -
@@ -877,7 +878,7 @@ theorem knScalRealizes
               (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2)
               (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
                 (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
-                (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                (DifferentialGeometry.Geometry.Operator.duSec (I := I)
                   (S.scalar t) (scalarSmoothOfSol (I := I) S t))
                 (metricTensorField (I := I) (S.family.metric t)))
               (metricTensorField (I := I) (S.family.metric t)))
@@ -897,11 +898,11 @@ theorem knScalRealizes
       (nabla_smul_metric (I := I) (M := M) (S.family.connection t)
         (S.family.metric t) (metricCompatSol (I := I) S t)
         (S.scalar t) (scalarSmoothOfSol (I := I) S t)
-        (DifferentialGeometry.Integral.Connection.duSec (I := I)
+        (DifferentialGeometry.Geometry.Operator.duSec (I := I)
           (S.scalar t) (scalarSmoothOfSol (I := I) S t))
         (fun x v => by
-          rw [DifferentialGeometry.Integral.Connection.duSec_apply]
-          exact DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun
+          rw [DifferentialGeometry.Geometry.Operator.duSec_apply]
+          exact DifferentialGeometry.Geometry.Operator.differential1FormFun_apply_eq_extDerivFun
             (I := I) (S.scalar t) x v))
       (zero_realizes_metric (I := I) (S.family.connection t)
         (S.family.metric t) (metricCompatSol (I := I) S t)))
@@ -1013,11 +1014,11 @@ theorem duNablaRealizes
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       1 (S.family.connection t)
-      (DifferentialGeometry.Integral.Connection.duSec (I := I)
+      (DifferentialGeometry.Geometry.Operator.duSec (I := I)
         (S.scalar t) (scalarSmoothOfSol (I := I) S t))
       (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         1 (S.family.connection t)
-        (DifferentialGeometry.Integral.Connection.duSec (I := I)
+        (DifferentialGeometry.Geometry.Operator.duSec (I := I)
           (S.scalar t) (scalarSmoothOfSol (I := I) S t))
         (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
           1 (S.family.connection t) (connSmoothSol (I := I) S t) _)) :=
@@ -1061,7 +1062,7 @@ private noncomputable def knScalD
           (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2)
           (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
             (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
-            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+            (DifferentialGeometry.Geometry.Operator.duSec (I := I)
               (S.scalar t) (scalarSmoothOfSol (I := I) S t))
             (metricTensorField (I := I) (S.family.metric t)))
           (metricTensorField (I := I) (S.family.metric t)))
@@ -1188,7 +1189,7 @@ private theorem knScal2Realizes
                         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1 + 1) (q := 2)
                         (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
                           1 (S.family.connection t)
-                          (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                          (DifferentialGeometry.Geometry.Operator.duSec (I := I)
                             (S.scalar t) (scalarSmoothOfSol (I := I) S t))
                           (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
                             1 (S.family.connection t) (connSmoothSol (I := I) S t) _))
@@ -1197,7 +1198,7 @@ private theorem knScal2Realizes
                       (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 1 2)
                       (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
                         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2 + 1)
-                        (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                        (DifferentialGeometry.Geometry.Operator.duSec (I := I)
                           (S.scalar t) (scalarSmoothOfSol (I := I) S t))
                         0))
                   (metricTensorField (I := I) (S.family.metric t)))
@@ -1207,7 +1208,7 @@ private theorem knScal2Realizes
                   (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
                   (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
                     (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
-                    (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                    (DifferentialGeometry.Geometry.Operator.duSec (I := I)
                       (S.scalar t) (scalarSmoothOfSol (I := I) S t))
                     (metricTensorField (I := I) (S.family.metric t)))
                   0))
@@ -1220,7 +1221,7 @@ private theorem knScal2Realizes
                   (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
                   (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
                     (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
-                    (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                    (DifferentialGeometry.Geometry.Operator.duSec (I := I)
                       (S.scalar t) (scalarSmoothOfSol (I := I) S t))
                     (metricTensorField (I := I) (S.family.metric t)))
                   0)
@@ -1240,7 +1241,7 @@ private theorem knScal2Realizes
         (nabla0S_product_realizes (I := I) (S.family.connection t)
           _ (metricTensorField (I := I) (S.family.metric t)) _ 0
           (nabla0S_product_realizes (I := I) (S.family.connection t)
-            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+            (DifferentialGeometry.Geometry.Operator.duSec (I := I)
               (S.scalar t) (scalarSmoothOfSol (I := I) S t))
             (metricTensorField (I := I) (S.family.metric t)) _ 0
             (duNablaRealizes (I := I) S t)
@@ -1255,12 +1256,12 @@ private theorem knScal2Realizes
           (nabla_smul_metric (I := I) (M := M) (S.family.connection t)
             (S.family.metric t) (metricCompatSol (I := I) S t)
             (S.scalar t) (scalarSmoothOfSol (I := I) S t)
-            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+            (DifferentialGeometry.Geometry.Operator.duSec (I := I)
               (S.scalar t) (scalarSmoothOfSol (I := I) S t))
             (fun x v => by
-              rw [DifferentialGeometry.Integral.Connection.duSec_apply]
+              rw [DifferentialGeometry.Geometry.Operator.duSec_apply]
               exact
-                DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun
+                DifferentialGeometry.Geometry.Operator.differential1FormFun_apply_eq_extDerivFun
                 (I := I) (S.scalar t) x v))
           (zero_realizes_nabla (I := I) (2 + 1) (S.family.connection t)))))
 
@@ -1443,6 +1444,7 @@ private theorem rm04Nab2Kn_eq
 
 
 
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Connection in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -1628,7 +1630,7 @@ private noncomputable def knScalLapT
         (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
           (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
             1 (S.family.connection t)
-            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+            (DifferentialGeometry.Geometry.Operator.duSec (I := I)
               (S.scalar t) (scalarSmoothOfSol (I := I) S t))
             (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
               1 (S.family.connection t) (connSmoothSol (I := I) S t) _)))

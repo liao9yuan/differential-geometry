@@ -31,6 +31,7 @@ open scoped Manifold Topology ContDiff Matrix
 open DifferentialGeometry.Analysis DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 
 namespace DifferentialGeometry
 namespace Integral

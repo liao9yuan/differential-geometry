@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Metric.DistanceTent
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.LipschitzApprox
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Smooth cutoff energy
@@ -24,6 +25,7 @@ namespace Perelman
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
 

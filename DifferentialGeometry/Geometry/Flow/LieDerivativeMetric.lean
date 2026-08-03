@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.VectorField
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -12,6 +13,7 @@ namespace PDE
 namespace DeTurck
 
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 

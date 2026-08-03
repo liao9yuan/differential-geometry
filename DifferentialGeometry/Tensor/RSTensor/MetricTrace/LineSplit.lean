@@ -10,6 +10,7 @@ of a covariant two-tensor into one distinguished line and its perpendicular
 complement.  The tensor need not be symmetric.
 -/
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section

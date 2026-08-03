@@ -9,6 +9,7 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import DifferentialGeometry.Geometry.Operator.Gradient
 
 
 noncomputable section
@@ -16,6 +17,7 @@ noncomputable section
 open Bundle Manifold Set MeasureTheory Function
 open scoped Manifold Topology ContDiff Matrix ENNReal BigOperators
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem

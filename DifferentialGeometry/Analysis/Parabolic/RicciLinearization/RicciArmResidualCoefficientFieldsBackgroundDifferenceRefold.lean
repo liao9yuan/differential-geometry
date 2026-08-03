@@ -14,6 +14,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsConnDiffCommutator
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsSharpGradientKoszul
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsRicciFold
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -31,6 +32,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
@@ -974,7 +976,7 @@ private lemma foldPsi_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
   apply inner_ext_vec (I := I) (M := M) g₁ x
   intro z
   rw [sharpRaisedKoszulVec,
-    DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp (I := I) g₁ x _ z,
+    DifferentialGeometry.Geometry.Operator.inner_metricSharp (I := I) g₁ x _ z,
     linearizedKoszulCovec_apply,
     connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x u ζ z, hsymmS]
 

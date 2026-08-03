@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -17,6 +18,7 @@ noncomputable section
 open MeasureTheory
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
 
 

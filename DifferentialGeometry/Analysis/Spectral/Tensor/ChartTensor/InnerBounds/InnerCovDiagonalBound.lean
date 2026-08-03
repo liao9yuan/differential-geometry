@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -18,6 +19,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -252,7 +254,7 @@ theorem exists_sum_tensorInner_cov_chartBasis_diagonal_le_const_mul_covDerivInne
     rw [htip_def]
     unfold chartTensorCovDerivPointwiseInner
     rw [hA_def, hcov_def]
-    unfold DifferentialGeometry.Integral.DivergenceTheorem.chartInvGramMatrix
+    unfold DifferentialGeometry.Geometry.Operator.chartInvGramMatrix
     rfl
   rw [hdiag_eq, ← hcov_quad_eq, hquad_eq]
   exact hsum_bound

@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -193,6 +194,7 @@ theorem LeviCivita_chartBasisVec_neighborhood_formula
   rw [ContinuousLinearMap.map_zero, sub_zero]
 
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
     [BoundarylessManifold I M] in

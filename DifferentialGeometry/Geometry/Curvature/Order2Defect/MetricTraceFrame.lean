@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CurvatureDefect
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Bound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpDualFrameParseval
+import DifferentialGeometry.Geometry.Operator.Gradient
 
 
 noncomputable section
@@ -13,6 +14,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
 namespace Integral
 namespace Connection
@@ -321,7 +323,7 @@ private lemma sum_coBchangeChartα_eq_invGram
     ∑ i : Fin (Module.finrank ℝ E),
       coBchangeChartα (I := I) α B i k *
         coBchangeChartα (I := I) α B i l =
-      DifferentialGeometry.Integral.DivergenceTheorem.chartInvGramMatrix (I := I) g α b k l := by
+      DifferentialGeometry.Geometry.Operator.chartInvGramMatrix (I := I) g α b k l := by
   classical
   set A : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
     coBchangeChartα (I := I) α B with hA_def
@@ -334,11 +336,11 @@ private lemma sum_coBchangeChartα_eq_invGram
   rw [Matrix.mul_assoc] at hA_left_inv
   have hAtA_eq_Ginv : A.transpose * A = G⁻¹ := (Matrix.inv_eq_right_inv hA_left_inv).symm
   have hGinv_eq : G⁻¹ =
-      DifferentialGeometry.Integral.DivergenceTheorem.chartInvGramMatrix (I := I) g α b := by
-    have hmul : DifferentialGeometry.Integral.DivergenceTheorem.chartInvGramMatrix
+      DifferentialGeometry.Geometry.Operator.chartInvGramMatrix (I := I) g α b := by
+    have hmul : DifferentialGeometry.Geometry.Operator.chartInvGramMatrix
         (I := I) g α b * G = 1 := by
       rw [hG_def]
-      exact DifferentialGeometry.Integral.DivergenceTheorem.chartInvGramMatrix_mul_chartGramMatrix
+      exact DifferentialGeometry.Geometry.Operator.chartInvGramMatrix_mul_chartGramMatrix
         (I := I) g α hb
     exact (Matrix.inv_eq_left_inv hmul).symm
   have heval : (A.transpose * A) k l = G⁻¹ k l := by rw [hAtA_eq_Ginv]
@@ -359,7 +361,7 @@ theorem orthonormal_basis_bilin_trace_chartα {A : Type*} [AddCommGroup A] [Modu
       g.inner b (B i) (B j) = if i = j then (1 : ℝ) else 0) :
     ∑ i : Fin (Module.finrank ℝ E), Hb (B i) (B i) =
       ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
-        DifferentialGeometry.Integral.DivergenceTheorem.chartInvGramMatrix (I := I) g α b k l •
+        DifferentialGeometry.Geometry.Operator.chartInvGramMatrix (I := I) g α b k l •
           Hb (chartBasisVecFiber (I := I) α k b)
             (chartBasisVecFiber (I := I) α l b) := by
   classical

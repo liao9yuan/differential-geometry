@@ -10,6 +10,7 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.PinchingAlgebra
 import DifferentialGeometry.Tensor.RSTensor.Metric
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -1324,7 +1325,7 @@ theorem scalarTrace_delta {x : M}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
     (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis) :
     DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I)
-      (DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g Ric)
+      (DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) g Ric)
       Ric DifferentialGeometry.Integral.Connection.delta3 basis := by
   classical
   have hinv :
@@ -1332,7 +1333,7 @@ theorem scalarTrace_delta {x : M}
         DifferentialGeometry.Integral.Connection.delta3 :=
     DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
   unfold DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt
-  rw [DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis
+  rw [DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_eq_sum_basis
     (I := I) g basis DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
 
 

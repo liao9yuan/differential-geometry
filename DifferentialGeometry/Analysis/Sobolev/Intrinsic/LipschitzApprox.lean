@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 import DifferentialGeometry.Analysis.Calculus.CompactCutoff
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Chart control of gradient differences
@@ -30,6 +31,7 @@ namespace IntrinsicLp
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Chart.ChartTower
 

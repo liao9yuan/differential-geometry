@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -237,22 +238,22 @@ theorem palpha_over_qbeta_formula
     (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
     (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
     (hgradPhiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => phi (t : Real) w ^ alpha) z) y)
     (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :
     PAlphaOverQBetaFormulaOn (I := I) (D := D) G
       phi psi phiHeat psiHeat alpha beta :=

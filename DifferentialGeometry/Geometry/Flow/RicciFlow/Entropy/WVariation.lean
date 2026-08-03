@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.FlowVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PotentialGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WeightedHessian
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -23,6 +24,7 @@ noncomputable section
 
 open Bundle Filter MeasureTheory Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

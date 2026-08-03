@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Family
 import Mathlib.Analysis.Calculus.MeanValue
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -21,6 +22,7 @@ noncomputable section
 open MeasureTheory
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow.Evolution.Volume
 open scoped Manifold ContDiff
 

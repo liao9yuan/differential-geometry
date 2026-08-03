@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
 
@@ -11,6 +12,7 @@ bound into a scalar-curvature upper bound.
 
 noncomputable section
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 open Tensor0SBundle

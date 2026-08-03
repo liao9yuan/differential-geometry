@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -18,6 +19,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 
 def codifferentialOfVectorField [I.Boundaryless] [T2Space M]
@@ -82,11 +84,11 @@ theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :
     formLaplacianScalar (I := I) g hf y =
-      -DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g hf y := by
+      -DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g hf y := by
   change codifferentialOfVectorField (I := I) g (grad_g (I := I) g hf) y =
-    -DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g hf y
+    -DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g hf y
   rw [codifferentialOfVectorField_def (I := I) g (grad_g (I := I) g hf) y]
-  rw [DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def (I := I) g hf y]
+  rw [DifferentialGeometry.Geometry.Operator.Δ_g_def (I := I) g hf y]
 
 omit [InnerProductSpace ℝ E] in
 theorem formLaplacianScalar_contMDiff [I.Boundaryless] [T2Space M]
@@ -110,8 +112,8 @@ omit [InnerProductSpace ℝ E] in
         (0 : TangentSpace I x)
     apply gradFun_eq_zero_of_mfderiv_eq_zero
     exact mfderiv_const
-  change -DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g h0 y = 0
-  rw [DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def (I := I) g h0 y]
+  change -DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g h0 y = 0
+  rw [DifferentialGeometry.Geometry.Operator.Δ_g_def (I := I) g h0 y]
   rw [hgrad_zero]
   rw [divergence_g_zero (I := I) g y]
   exact neg_zero
@@ -140,12 +142,12 @@ theorem formLaplacianScalar_add [I.Boundaryless] [T2Space M]
       gradFun (I := I) g f x + gradFun (I := I) g h x
     exact gradFun_add (I := I) g
       (hf.mdifferentiable (by simp) x) (hh.mdifferentiable (by simp) x)
-  change -DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g hfh y =
-    -DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g hf y +
-      -DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g hh y
-  rw [DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def (I := I) g hfh y]
-  rw [DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def (I := I) g hf y]
-  rw [DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def (I := I) g hh y]
+  change -DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g hfh y =
+    -DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g hf y +
+      -DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g hh y
+  rw [DifferentialGeometry.Geometry.Operator.Δ_g_def (I := I) g hfh y]
+  rw [DifferentialGeometry.Geometry.Operator.Δ_g_def (I := I) g hf y]
+  rw [DifferentialGeometry.Geometry.Operator.Δ_g_def (I := I) g hh y]
   rw [hgrad_sum]
   rw [divergence_g_add (I := I) g
         (grad_g (I := I) g hf) (grad_g (I := I) g hh) y]

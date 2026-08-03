@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.VariationalIdentity
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -19,6 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianVariational
 open DifferentialGeometry.Analysis.Laplacian.HessianPairingChart
@@ -347,7 +349,7 @@ theorem bochner_polarised_pointwise
     rw [Δ_g_smul_eq (I := I) (M := M) g h_const_smul_smooth h_gphi_gv_smooth x]
     have h_grad_const_zero :
         gradFun (I := I) g (fun _ : M => (4 : ℝ)) x = (0 : TangentSpace I x) :=
-      DifferentialGeometry.Integral.DivergenceTheorem.gradFun_const
+      DifferentialGeometry.Geometry.Operator.gradFun_const
         (I := I) g (4 : ℝ) x
     rw [h_grad_const_zero]
     rw [show g.inner x (0 : TangentSpace I x) = (0 : TangentSpace I x →L[ℝ] ℝ) from

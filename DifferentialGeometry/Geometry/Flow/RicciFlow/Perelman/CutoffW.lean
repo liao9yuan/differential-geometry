@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CutoffEnergy
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
 import DifferentialGeometry.Analysis.Integration.LpNorm
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Normalized Perelman cutoffs
@@ -23,6 +24,7 @@ namespace Perelman
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Integration
 open DifferentialGeometry.Analysis.Laplacian

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossLimits
 import DifferentialGeometry.Geometry.Operator.Gradient
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -24,6 +25,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
@@ -73,22 +75,22 @@ private lemma gradFun_eq_gramInv_sum
       (∑ i : Fin (Module.finrank ℝ E),
         Ginv i j * extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i)) •
         (chartModelBasis E) j with hrhs
-  refine (DifferentialGeometry.Integral.Connection.metricFlatLinear_injective
+  refine (DifferentialGeometry.Geometry.Operator.metricFlatLinear_injective
     (I := I) g x ?_).symm
   refine (chartModelBasis E).ext ?_
   intro k
-  have hgrad_k : DifferentialGeometry.Integral.Connection.metricFlatLinear (I := I) g x
+  have hgrad_k : DifferentialGeometry.Geometry.Operator.metricFlatLinear (I := I) g x
       (gradFun (I := I) g (ζ : M → ℝ) x) ((chartModelBasis E) k) =
         extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) k) := by
-    rw [DifferentialGeometry.Integral.Connection.metricFlatLinear_apply, extDerivFun_apply_scalar]
+    rw [DifferentialGeometry.Geometry.Operator.metricFlatLinear_apply, extDerivFun_apply_scalar]
     exact inner_gradFun (I := I) g (ζ : M → ℝ) x ((chartModelBasis E) k)
-  have hrhs_k : DifferentialGeometry.Integral.Connection.metricFlatLinear (I := I) g x rhs
+  have hrhs_k : DifferentialGeometry.Geometry.Operator.metricFlatLinear (I := I) g x rhs
     ((chartModelBasis E) k) =
       ∑ j : Fin (Module.finrank ℝ E),
         (∑ i : Fin (Module.finrank ℝ E),
           Ginv i j * extDerivFun (I := I) (ζ : M → ℝ) x ((chartModelBasis E) i)) *
           gramMatrixAt (I := I) (M := M) g x j k := by
-    rw [DifferentialGeometry.Integral.Connection.metricFlatLinear_apply, hrhs]
+    rw [DifferentialGeometry.Geometry.Operator.metricFlatLinear_apply, hrhs]
     rw [map_sum, ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul, gramMatrixAt_apply]
@@ -102,7 +104,7 @@ private lemma gradFun_eq_gramInv_sum
     rw [Matrix.mul_apply] at hentry
     rw [hGinv]
     exact hentry
-  calc DifferentialGeometry.Integral.Connection.metricFlatLinear (I := I) g x rhs
+  calc DifferentialGeometry.Geometry.Operator.metricFlatLinear (I := I) g x rhs
          ((chartModelBasis E) k)
       = ∑ j : Fin (Module.finrank ℝ E),
           (∑ i : Fin (Module.finrank ℝ E),
@@ -137,7 +139,7 @@ private lemma gradFun_eq_gramInv_sum
           rw [Matrix.one_apply_ne hik, mul_zero]
         · intro hk
           exact absurd (Finset.mem_univ k) hk
-    _ = DifferentialGeometry.Integral.Connection.metricFlatLinear (I := I) g x
+    _ = DifferentialGeometry.Geometry.Operator.metricFlatLinear (I := I) g x
           (gradFun (I := I) g (ζ : M → ℝ) x) ((chartModelBasis E) k) :=
         hgrad_k.symm
 

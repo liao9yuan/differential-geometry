@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.TfHeatCore
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -198,19 +199,19 @@ theorem quotHeat_at
     (hpsiPos : forall y : M, 0 < psi (t : Real) y)
     (hgradPhi :
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
     (hgradPsi :
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
     (hgradPhiPow :
       forall y : M, MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => phi (t : Real) w ^ alpha) z) y)
     (hgradPsiPow :
       forall y : M, MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :
     HasDerivWithinAt
       (fun s : Real => quotField (M := M) phi psi alpha beta s x)
@@ -224,11 +225,11 @@ theorem quotHeat_at
   let B : M -> Real := fun y => psi tt y ^ (-beta)
   have hA_diff : forall y : M, MDifferentiableAt I 𝓘(Real, Real) A y := by
     intro y
-    exact DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow
+    exact DifferentialGeometry.Geometry.Operator.mdifferentiableAt_rpow
       (I := I) alpha (hphiDiff y) (hphiPos y)
   have hB_diff : forall y : M, MDifferentiableAt I 𝓘(Real, Real) B y := by
     intro y
-    exact DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow
+    exact DifferentialGeometry.Geometry.Operator.mdifferentiableAt_rpow
       (I := I) (-beta) (hpsiDiff y) (hpsiPos y)
   have hA_lap :=
     DifferentialGeometry.Integral.Connection.laplacianAt_rpow (I := I) G tt
@@ -302,22 +303,22 @@ theorem quotHeat
     (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
     (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
     (hgradPhiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => phi (t : Real) w ^ alpha) z) y)
     (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :
     QuotientEvolutionOn (I := I) (D := D) G
       phi psi phiHeat psiHeat alpha beta := by
@@ -375,22 +376,22 @@ theorem quotHeat_one
     (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
     (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
     (hgradPhiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => phi (t : Real) w ^ (1 : Real)) z) y)
     (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :
     QuotientEvolutionOn (I := I) (D := D) G
       phi psi phiHeat psiHeat (1 : Real) beta := by
@@ -449,17 +450,17 @@ theorem quotHeat1_of_nonneg
     (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
     (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
     (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :
     QuotientEvolutionOn (I := I) (D := D) G
       phi psi phiHeat psiHeat (1 : Real) beta := by
@@ -468,7 +469,7 @@ theorem quotHeat1_of_nonneg
   let B : M -> Real := fun y => psi tt y ^ (-beta)
   have hB_diff : forall y : M, MDifferentiableAt I 𝓘(Real, Real) B y := by
     intro y
-    exact DifferentialGeometry.Integral.Connection.mdifferentiableAt_rpow
+    exact DifferentialGeometry.Geometry.Operator.mdifferentiableAt_rpow
       (I := I) (-beta) (hpsiDiff t y) (hpsiPos t y)
   have hB_lap :=
     DifferentialGeometry.Integral.Connection.laplacianAt_rpow (I := I) G tt
@@ -550,22 +551,22 @@ theorem quotHeat_book
     (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
     (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
     (hgradPhiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => phi (t : Real) w ^ alpha) z) y)
     (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :
     QuotientEvolutionOn (I := I) (D := D) G
       phi psi phiHeat psiHeat alpha beta :=
@@ -621,17 +622,17 @@ theorem quotHeat1_book
     (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
     (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
     (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :
     QuotientEvolutionOn (I := I) (D := D) G
       phi psi phiHeat psiHeat (1 : Real) beta :=
@@ -684,22 +685,22 @@ theorem quotHeatDiv
     (hgradPhi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (phi (t : Real)) y) x)
     (hgradPsi : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
       x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (psi (t : Real)) y) x)
     (hgradPhiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => phi (t : Real) w ^ alpha) z) y)
     (hgradPsiPow : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D) y,
       MDiffAt (T% fun z : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric (t : Real))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric (t : Real))
           (fun w : M => psi (t : Real) w ^ (-beta)) z) y) :
     QuotEvolDivOn (I := I) (D := D) G
       phi psi phiHeat psiHeat alpha beta := by

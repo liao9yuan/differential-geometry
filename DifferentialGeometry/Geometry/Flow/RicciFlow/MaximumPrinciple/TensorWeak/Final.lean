@@ -1,9 +1,11 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Certification
+import DifferentialGeometry.Geometry.Operator.Operators
 
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section

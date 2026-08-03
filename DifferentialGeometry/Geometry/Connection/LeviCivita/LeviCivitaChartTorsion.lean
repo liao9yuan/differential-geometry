@@ -1,6 +1,7 @@
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
+open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
@@ -19,6 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma christoffelCorrection_symm_cancel

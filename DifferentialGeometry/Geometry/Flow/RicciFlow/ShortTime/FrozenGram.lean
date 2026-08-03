@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSPD
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoefficients
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Frozen inverse-Gram coordinate equivalences
@@ -19,6 +20,7 @@ open scoped ContDiff Manifold Topology BigOperators RealInnerProductSpace
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 variable

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SolutionTo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerNormRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -12,6 +13,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.HCGCompactness
 open scoped Manifold ContDiff BigOperators
 

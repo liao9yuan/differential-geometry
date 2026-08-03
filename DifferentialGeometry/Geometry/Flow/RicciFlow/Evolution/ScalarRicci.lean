@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -109,7 +110,7 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
     (scalarHess : Real -> (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (htrace : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
-      DifferentialGeometry.Integral.Connection.ScalarLaplacianRealizesTraceAtInBasis (I := I)
+      DifferentialGeometry.Geometry.Operator.ScalarLaplacianRealizesTraceAtInBasis (I := I)
         (G.connection t) (G.metric t)
         (hframe.toBasisAt (hcover x))
         (gInv t x) (scalarTraceInFrame (I := I) S gInv frame t)
@@ -129,17 +130,17 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
   intro t ht x
   let basis := hframe.toBasisAt (hcover x)
   have hmetric :
-      DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis (gInv t x)
+      DifferentialGeometry.Geometry.Operator.metricTrace0S2InBasis (I := I) basis (gInv t x)
           (scalarHess t x) Fin.elim0 =
         ∑ i : Idx, ∑ j : Idx,
           gInv t x i j *
             scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric t x i j := by
-    unfold DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis
+    unfold DifferentialGeometry.Geometry.Operator.metricTrace0S2InBasis
     refine Finset.sum_congr rfl fun i _hi => ?_
     refine Finset.sum_congr rfl fun j _hj => ?_
     congr 1
     have hinput :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (basis i) (basis j)
+        DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (basis i) (basis j)
           Fin.elim0 =
           DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x) := by
       have hbi : basis i = frame i x := by
@@ -149,13 +150,13 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
       rw [hbi, hbj]
       funext q
       fin_cases q
-      · simp [DifferentialGeometry.Integral.Connection.metricTraceInput,
+      · simp [DifferentialGeometry.Geometry.Operator.metricTraceInput,
         DifferentialGeometry.Integral.Connection.vec2,
         DifferentialGeometry.Integral.Connection.vec2]
       · rfl
     rw [hinput, hcomp t ht x i j]
   have htrace_tx := htrace t ht x
-  unfold DifferentialGeometry.Integral.Connection.ScalarLaplacianRealizesTraceAtInBasis at htrace_tx
+  unfold DifferentialGeometry.Geometry.Operator.ScalarLaplacianRealizesTraceAtInBasis at htrace_tx
   calc
     scalarLaplacianTraceInFrame (M := M) gInv
         (roughLapRicInFrame (M := M) gInv nabla2Ric) t x =
@@ -164,7 +165,7 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
             scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric t x i j :=
           (scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
             (M := M) gInv nabla2Ric t x).symm
-    _ = DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis (gInv t x)
+    _ = DifferentialGeometry.Geometry.Operator.metricTrace0S2InBasis (I := I) basis (gInv t x)
           (scalarHess t x) Fin.elim0 := hmetric.symm
     _ = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
           (scalarTraceInFrame (I := I) S gInv frame t) x := by

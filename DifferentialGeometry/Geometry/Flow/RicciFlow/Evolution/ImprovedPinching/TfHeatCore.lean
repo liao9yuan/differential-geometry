@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Definitions
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -39,16 +40,16 @@ theorem sqLap_at
     (hf_all : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hf_x : MDifferentiableAt I 𝓘(Real, Real) f x)
     (hgrad : MDiffAt (T% fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f y) x)
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) f y) x)
     (hfg : MDiffAt (T% (f • fun y : M =>
-      DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f y)) x) :
+      DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) f y)) x) :
     DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (fun y : M => f y ^ 2) x =
       2 * f x * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t f x +
         2 * (G.metric t).inner x
           (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t f x)
           (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t f x) := by
   have hhalf :=
-    DifferentialGeometry.Integral.Connection.half_laplacian_mul_self
+    DifferentialGeometry.Geometry.Operator.half_laplacian_mul_self
       (I := I) (G.connection t) (G.metric t) (f := f) (x := x)
       hf_all hf_x hgrad hfg
   unfold DifferentialGeometry.Integral.Connection.laplacianAt
@@ -59,13 +60,13 @@ theorem sqLap_at
     ring
   rw [hpow]
   have hmain :
-      DifferentialGeometry.Integral.Connection.laplacian (I := I) (G.connection t) (G.metric t)
+      DifferentialGeometry.Geometry.Operator.laplacian (I := I) (G.connection t) (G.metric t)
           (fun y : M => f y * f y) x =
-        2 * (f x * DifferentialGeometry.Integral.Connection.laplacian (I := I) (G.connection t)
+        2 * (f x * DifferentialGeometry.Geometry.Operator.laplacian (I := I) (G.connection t)
           (G.metric t) f x +
           (G.metric t).inner x
-            (DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f x)
-            (DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) f x)) := by
+            (DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) f x)
+            (DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) f x)) := by
     linarith
   rw [hmain]
   ring
@@ -89,10 +90,10 @@ theorem sqLap_realizes
       MDifferentiableAt I 𝓘(Real, Real) (scalar t) y)
     (hgrad : forall t x,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (scalar t) y) x)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (scalar t) y) x)
     (hfg : forall t x,
       MDiffAt (T% ((scalar t) • fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (scalar t) y))
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (scalar t) y))
           x) :
     ScalarLaplacianRealizesHeatOperatorOn
       (I := I) G T

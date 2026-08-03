@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.OpensRestrict
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -22,6 +23,7 @@ open Bundle Manifold Set TopologicalSpace
 open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]

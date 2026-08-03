@@ -19,6 +19,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable

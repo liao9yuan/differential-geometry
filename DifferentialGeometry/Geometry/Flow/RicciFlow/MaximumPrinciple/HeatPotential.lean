@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -19,6 +20,7 @@ noncomputable section
 
 open Bundle Set Filter
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology
 
 universe u uE uH

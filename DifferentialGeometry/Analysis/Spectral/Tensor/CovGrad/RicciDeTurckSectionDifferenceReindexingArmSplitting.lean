@@ -10,6 +10,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatu
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceKoszulSecondCovGrad
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferencePrincipalEndomorphismTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceSymmetrizedReindexedCoeff
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -27,6 +28,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
@@ -1212,7 +1214,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
 lemma inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     inverseMetricSharpFib (I := I) g₁ x (lowerFlatCLM (I := I) g₁' x v) =
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+      DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ x
         (g₁'.inner x v).toLinearMap := by
   rw [inverseMetricSharpFib_apply, lowerFlatCLM_apply]
   rw [show cotangentToDualLinear (I := I)
@@ -1248,22 +1250,22 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
 lemma combinedLowerRaisedEndo0_eq_metricSharp_flatDiff
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     combinedLowerRaisedEndo0 (I := I) g₁ g₁' x v =
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+      DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ x
         ((g₁'.inner x v).toLinearMap - (g₁.inner x v).toLinearMap) := by
   rw [combinedLowerRaisedEndo0_apply, inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp]
-  have hv : DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+  have hv : DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ x
         (g₁.inner x v).toLinearMap = v := by
     rw [← inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp (I := I) g₁ g₁ x v]
     exact inverseMetricSharpFib_lowerFlatCLM (I := I) g₁ x v
-  have hsharp_sub : DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+  have hsharp_sub : DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ x
         ((g₁'.inner x v).toLinearMap - (g₁.inner x v).toLinearMap) =
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+      DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ x
           (g₁'.inner x v).toLinearMap
-        - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+        - DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ x
           (g₁.inner x v).toLinearMap := by
-    rw [DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_sub]
+    rw [DifferentialGeometry.Geometry.Operator.metricSharp_def,
+      DifferentialGeometry.Geometry.Operator.metricSharp_def,
+      DifferentialGeometry.Geometry.Operator.metricSharp_def, map_sub]
   rw [hsharp_sub, hv]
 
 
@@ -1326,9 +1328,9 @@ theorem combinedLowerRaisedEndo0_contMDiff (g₁ g₁' : SmoothRiemannianMetric 
   have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E
         (E := fun z : M => TangentSpace I z) b
-        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ b
+        (DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ b
           ((g₁'.inner b (Y b)).toLinearMap - (g₁.inner b (Y b)).toLinearMap))) := by
-    apply DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_contMDiff_total (I := I) g₁
+    apply DifferentialGeometry.Geometry.Operator.metricSharp_contMDiff_total (I := I) g₁
     intro γ j
     exact metricFlatDiff_chartComponent_contMDiffOn_local (I := I) g₁ g₁' Y γ j
   refine hsharpY.congr (fun x => ?_)

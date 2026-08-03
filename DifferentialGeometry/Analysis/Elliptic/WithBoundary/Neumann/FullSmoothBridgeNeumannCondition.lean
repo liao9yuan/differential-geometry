@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.WithBoundary.Neumann.FullH1Compl
 import DifferentialGeometry.Analysis.Elliptic.WithBoundary.Neumann.FullSmoothBridgeInteriorSupport
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.GreenFull
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.SurfaceIntegralIdentification
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -23,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 
 private local instance : MeasurableSpace (EuclideanSpace ℝ (Fin n)) :=

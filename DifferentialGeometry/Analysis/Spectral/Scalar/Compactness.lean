@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Topology.Sequences
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -25,6 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Equivalence
@@ -275,9 +277,9 @@ theorem H1ComplToLp_isCompactOperator (g : SmoothRiemannianMetric I M) :
     have h := hC₀_bound (s n).smooth
     have h_eq : (fun x : M => Real.sqrt
             (g.inner x
-              (DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+              (DifferentialGeometry.Geometry.Operator.gradFun
                 (I := I) g (s n).toFun x)
-              (DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+              (DifferentialGeometry.Geometry.Operator.gradFun
                 (I := I) g (s n).toFun x))) =
           (fun x : M => Real.sqrt
             (g.inner x ((grad_g (I := I) g (s n).smooth :

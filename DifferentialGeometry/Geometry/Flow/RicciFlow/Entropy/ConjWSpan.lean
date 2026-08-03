@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinOn
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WVariation
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -18,6 +19,7 @@ noncomputable section
 open Bundle Filter MeasureTheory Set Tensor0SBundle
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

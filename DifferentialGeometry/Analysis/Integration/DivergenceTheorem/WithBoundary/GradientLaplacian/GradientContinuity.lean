@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.Instances.Real
 import Mathlib.Topology.ContinuousOn
+import DifferentialGeometry.Geometry.Operator.Gradient
 
 
 noncomputable section
@@ -12,6 +13,7 @@ noncomputable section
 open Bundle Manifold Set MeasureTheory Filter
 open scoped Manifold Topology ContDiff Matrix BigOperators ENNReal
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem

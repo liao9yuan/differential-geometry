@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -232,6 +233,7 @@ section Intrinsic
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 
 
 

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatu
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomTensorRSRiemannian
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -17,6 +18,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
@@ -78,7 +80,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
 lemma inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (g₀ g' : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     inverseMetricSharpFib (I := I) g' x (g0FlatCLM (I := I) g₀ x v) =
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+      DifferentialGeometry.Geometry.Operator.metricSharp
         (I := I) g' x (g₀.inner x v).toLinearMap := by
   rw [inverseMetricSharpFib_apply, g0FlatCLM_apply]
   rw [show cotangentToDualLinear (I := I) (dualToCotangent (I := I) (g₀.inner x v).toLinearMap)
@@ -360,22 +362,22 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
 lemma gInvDiffRaisedEndo_eq_metricSharp_flatDiff (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     metricComparisonDiffEndo (I := I) g₀ g₁ x v =
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+      DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ x
         ((g₀.inner x v).toLinearMap - (g₁.inner x v).toLinearMap) := by
   rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM_eq_metricSharp]
-  have hv : DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+  have hv : DifferentialGeometry.Geometry.Operator.metricSharp
       (I := I) g₁ x (g₁.inner x v).toLinearMap = v := by
     rw [← inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (I := I) g₁ g₁ x v]
     exact inverseMetricSharpFib_g0FlatCLM (I := I) g₁ x v
-  have hsharp_sub : DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+  have hsharp_sub : DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ x
         ((g₀.inner x v).toLinearMap - (g₁.inner x v).toLinearMap)
-      = DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+      = DifferentialGeometry.Geometry.Operator.metricSharp
           (I := I) g₁ x (g₀.inner x v).toLinearMap
-        - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        - DifferentialGeometry.Geometry.Operator.metricSharp
           (I := I) g₁ x (g₁.inner x v).toLinearMap := by
-    rw [DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
-      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_sub]
+    rw [DifferentialGeometry.Geometry.Operator.metricSharp_def,
+      DifferentialGeometry.Geometry.Operator.metricSharp_def,
+      DifferentialGeometry.Geometry.Operator.metricSharp_def, map_sub]
   rw [hsharp_sub, hv]
 
 omit [CompactSpace M] in
@@ -411,7 +413,7 @@ theorem gInvDiffRaisedEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
   have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E
         (E := fun z : M => TangentSpace I z) b
-        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ b
+        (DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g₁ b
           ((g₀.inner b (Y b)).toLinearMap - (g₁.inner b (Y b)).toLinearMap))) := by
     apply metricSharp_contMDiff_total (I := I) g₁
     intro γ j
@@ -896,7 +898,7 @@ theorem gInvSlotEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
   have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E
         (E := fun z : M => TangentSpace I z) b
-        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp
+        (DifferentialGeometry.Geometry.Operator.metricSharp
           (I := I) g₁ b (g₀.inner b (Y b)).toLinearMap)) := by
     apply metricSharp_contMDiff_total (I := I) g₁
     intro γ j

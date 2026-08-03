@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Geodesic.Equation
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -21,6 +22,7 @@ namespace Connection
 open Bundle Manifold
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open scoped Manifold ContDiff
 

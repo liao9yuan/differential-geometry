@@ -10,6 +10,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -255,6 +256,7 @@ theorem commute_ds_dt_fixed_chart
 
 section FixedChartCurvatureHelpers
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 def chartCoordCLM (i : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
   (chartModelBasis E).coord i |>.toContinuousLinearMap

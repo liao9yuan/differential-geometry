@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerTensor
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -15,6 +16,7 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 open Bundle Tensor0SBundle

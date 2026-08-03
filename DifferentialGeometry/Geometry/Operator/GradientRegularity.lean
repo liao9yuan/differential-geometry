@@ -15,8 +15,9 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
+open DifferentialGeometry.Integral.Connection
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open scoped BigOperators Manifold ContDiff Topology
@@ -225,4 +226,4 @@ theorem mdiffAt_const_mul_sub_const_smul_gradientFun
     exact gradientFun_mdiffAt (I := I) g hu y
   simpa [u] using scalar_mul_grad_mdiffAt (I := I) g hudiff hugrad
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator

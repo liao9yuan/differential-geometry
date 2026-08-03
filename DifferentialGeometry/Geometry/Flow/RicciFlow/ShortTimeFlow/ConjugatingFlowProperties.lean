@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
 import DifferentialGeometry.Bundle.PartialMfderiv
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+open DifferentialGeometry.Geometry.Operator
 
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -19,6 +20,7 @@ open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 
 variable
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -391,10 +393,10 @@ theorem evalForm_joint
     unfold evalFormTwoVar
     rw [hexpand]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
-    have hgramEq : DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE
+    have hgramEq : DifferentialGeometry.Geometry.Operator.chartGramOnE
           (I := I) (g_DT p.1) α i j (extChartAt I α ((Φ_fam p.2 : M → M) x))
         = Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) α ((Φ_fam p.2 : M → M) x) i j := by
-      unfold DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE
+      unfold DifferentialGeometry.Geometry.Operator.chartGramOnE
       rw [(extChartAt I α).left_inv hsr]
     rw [hgramEq]
   have hevalAt : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) (5 : ℕ)
@@ -731,13 +733,13 @@ theorem conjugating_flow_t0_continuity_data
     (hg_joint : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun q : ℝ × M =>
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
+          DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α i j
             (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ (chartAt H α).source))
     (hC2 : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
       ContinuousOn
         (fun q : ℝ × M => iteratedFDeriv ℝ k
-          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+          (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α i j)
           (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α))
     (hΦ_orbit : ∀ y : M,
@@ -1259,11 +1261,11 @@ theorem conjugating_flow_pullback_jointGram_data
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2))
       rw [hexpand]
       refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
-      have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT r.1) α p q
+      have hgramEq : DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT r.1) α p q
             (extChartAt I α ((Φ_fam r.1 : M → M) r.2))
           = Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p
             q := by
-        unfold Integral.DivergenceTheorem.chartGramOnE
+        unfold DifferentialGeometry.Geometry.Operator.chartGramOnE
         rw [(extChartAt I α).left_inv hsr]
       rw [hgramEq]
     · obtain ⟨hbE0, hsr0⟩ : (Φ_fam t₀ : M → M) b₀ ∈ e.baseSet ∧
@@ -1274,10 +1276,10 @@ theorem conjugating_flow_pullback_jointGram_data
         (mfderiv I I (Φ_fam t₀ : M → M) b₀ (Integral.Measure.chartBasisVecFiber (I := I) x₀ j b₀))
       rw [hexpand]
       refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
-      have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t₀) α p q
+      have hgramEq : DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t₀) α p q
             (extChartAt I α ((Φ_fam t₀ : M → M) b₀))
           = Integral.Measure.chartGramMatrix (I := I) (g_DT t₀) α ((Φ_fam t₀ : M → M) b₀) p q := by
-        unfold Integral.DivergenceTheorem.chartGramOnE
+        unfold DifferentialGeometry.Geometry.Operator.chartGramOnE
         rw [(extChartAt I α).left_inv hsr0]
       rw [hgramEq]
   · intro x₀ i j p₀ hp₀
@@ -1350,11 +1352,11 @@ theorem conjugating_flow_pullback_jointGram_data
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2))
       rw [hexpand]
       refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
-      have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT r.1) α p q
+      have hgramEq : DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT r.1) α p q
             (extChartAt I α ((Φ_fam r.1 : M → M) r.2))
           = Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p
             q := by
-        unfold Integral.DivergenceTheorem.chartGramOnE
+        unfold DifferentialGeometry.Geometry.Operator.chartGramOnE
         rw [(extChartAt I α).left_inv hsr]
       rw [hgramEq]
     · obtain ⟨hbE0, hsr0⟩ : (Φ_fam t₀ : M → M) b₀ ∈ e.baseSet ∧
@@ -1365,10 +1367,10 @@ theorem conjugating_flow_pullback_jointGram_data
         (mfderiv I I (Φ_fam t₀ : M → M) b₀ (Integral.Measure.chartBasisVecFiber (I := I) x₀ j b₀))
       rw [hexpand]
       refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
-      have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t₀) α p q
+      have hgramEq : DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t₀) α p q
             (extChartAt I α ((Φ_fam t₀ : M → M) b₀))
           = Integral.Measure.chartGramMatrix (I := I) (g_DT t₀) α ((Φ_fam t₀ : M → M) b₀) p q := by
-        unfold Integral.DivergenceTheorem.chartGramOnE
+        unfold DifferentialGeometry.Geometry.Operator.chartGramOnE
         rw [(extChartAt I α).left_inv hsr0]
       rw [hgramEq]
 
@@ -1461,10 +1463,10 @@ theorem conjugating_flow_pullback_jointGram_onesided
       (mfderiv I I (Φ_fam r.1 : M → M) r.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2))
     rw [hexpand]
     refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
-    have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT r.1) α p q
+    have hgramEq : DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT r.1) α p q
           (extChartAt I α ((Φ_fam r.1 : M → M) r.2))
         = Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q := by
-      unfold Integral.DivergenceTheorem.chartGramOnE
+      unfold DifferentialGeometry.Geometry.Operator.chartGramOnE
       rw [(extChartAt I α).left_inv hsr]
     rw [hgramEq]
   · obtain ⟨hbE0, hsr0⟩ : (Φ_fam t₀ : M → M) b₀ ∈ e.baseSet ∧
@@ -1475,10 +1477,10 @@ theorem conjugating_flow_pullback_jointGram_onesided
       (mfderiv I I (Φ_fam t₀ : M → M) b₀ (Integral.Measure.chartBasisVecFiber (I := I) x₀ j b₀))
     rw [hexpand]
     refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
-    have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t₀) α p q
+    have hgramEq : DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t₀) α p q
           (extChartAt I α ((Φ_fam t₀ : M → M) b₀))
         = Integral.Measure.chartGramMatrix (I := I) (g_DT t₀) α ((Φ_fam t₀ : M → M) b₀) p q := by
-      unfold Integral.DivergenceTheorem.chartGramOnE
+      unfold DifferentialGeometry.Geometry.Operator.chartGramOnE
       rw [(extChartAt I α).left_inv hsr0]
     rw [hgramEq]
 

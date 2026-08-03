@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -37,7 +38,7 @@ structure TFLapReg
   ricci_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (ricciNorm (I := I) S t) y) x
   scalar_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ y : M,
@@ -45,7 +46,7 @@ structure TFLapReg
   scalar_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (S.scalar t) y) x
   scalar_sq_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ y : M,
@@ -54,7 +55,7 @@ structure TFLapReg
   scalar_sq_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (fun z : M => S.scalar t z ^ 2) y) x
   scalar_sq_div_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ y : M,
@@ -63,7 +64,7 @@ structure TFLapReg
   scalar_sq_div_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (fun z : M => S.scalar t z ^ 2 / 3) y) x
 
 

@@ -13,6 +13,9 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Model
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Christoffel
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+import DifferentialGeometry.Geometry.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
 
@@ -26,6 +29,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 open Bundle Tensor0SBundle
@@ -93,7 +97,7 @@ noncomputable def metricRicciAt (g : SmoothRiemannianMetric I M) (x : M) :
 
 noncomputable def metricScalarAt (g : SmoothRiemannianMetric I M) (x : M) :
     Real :=
-  DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g
+  DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) g
     (metricRicciAt (I := I) (M := M) g x)
 
 
@@ -113,7 +117,7 @@ theorem metricRicciAt_eq_trace (g : SmoothRiemannianMetric I M) (x : M) :
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricScalarAt_def (g : SmoothRiemannianMetric I M) (x : M) :
     metricScalarAt (I := I) g x
-      = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g
+      = DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) g
           (metricRicciAt (I := I) (M := M) g x) := rfl
 
 
@@ -258,7 +262,7 @@ theorem metricScalar_const_of_dScalar_zero
     [I.Boundaryless] [ConnectedSpace M]
     (g : SmoothRiemannianMetric I M)
     (hzero : ∀ x : M, ∀ X : TangentSpace I x,
-      DifferentialGeometry.Integral.Connection.differential1FormFun (I := I)
+      DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I)
           (fun y : M => metricScalarAt (I := I) (M := M) g y)
           x (fun _ : Fin 1 => X) = 0) :
     ∃ R0 : Real, ∀ x : M,
@@ -271,7 +275,7 @@ theorem metricScalar_const_of_dScalar_zero
     intro x
     ext X
     have hx := hzero x X
-    rw [DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun] at hx
+    rw [DifferentialGeometry.Geometry.Operator.differential1FormFun_apply_eq_extDerivFun] at hx
     rw [DifferentialGeometry.extDerivFun_real_eq_mfderiv] at hx
     simpa [scalar] using hx
   have hloc : IsLocallyConstant scalar :=
@@ -305,7 +309,7 @@ theorem nablaRic_ein3
     let scalar := fun y : M => metricScalarAt (I := I) (M := M) g y
     let nablaRic := totalNabla0SFun (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) 2 cov Ric x
-    let dScalar := DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) scalar x
+    let dScalar := DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar x
     ∀ A B C : TangentSpace I x,
       nablaRic (DifferentialGeometry.Integral.Connection.vec3 (I := I) A B C) =
         (1 / 3 : Real) * dScalar (fun _ : Fin 1 => A) * g.inner x B C := by
@@ -324,7 +328,7 @@ theorem nablaRic_ein3
     (I := I) (M := M) (s := 1)
   let dScalarSec : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I)
       (M := M) (n := (∞ : WithTop ℕ∞)) 1 :=
-    DifferentialGeometry.Integral.Connection.duSec (I := I) scalar hscalar
+    DifferentialGeometry.Geometry.Operator.duSec (I := I) scalar hscalar
   let df3 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I)
       (M := M) (n := (∞ : WithTop ℕ∞)) 1 :=
     tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
@@ -349,11 +353,11 @@ theorem nablaRic_ein3
     calc
       df3 y (fun _ : Fin 1 => v)
           = (1 / 3 : Real) *
-              DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) scalar y
+              DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar y
                 (fun _ : Fin 1 => v) := by
             simp [df3, dScalarSec]
       _ = (1 / 3 : Real) * extDerivFun (I := I) scalar y v := by
-            rw [DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun]
+            rw [DifferentialGeometry.Geometry.Operator.differential1FormFun_apply_eq_extDerivFun]
        _ = extDerivFun (I := I) f3 y v := by
              simpa [f3, Pi.smul_apply, smul_eq_mul] using hv.symm
   have hRicEq : Ric = smulSec := by
@@ -431,12 +435,12 @@ theorem nablaRic_ein3
           (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
           df3 metricSec) x (Fin.cons (X x) slots) =
         (1 / 3 : Real) *
-          DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) scalar x
+          DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar x
             (fun _ : Fin 1 => A) * g.inner x B C := by
     change (Bundle.continuousMultilinearMap.product_fun
         (df3 x) (metricSec x)) (Fin.cons (X x) slots) =
       (1 / 3 : Real) *
-        DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) scalar x
+        DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar x
           (fun _ : Fin 1 => A) * g.inner x B C
     rw [Bundle.continuousMultilinearMap.product_fun_apply]
     have hleft :
@@ -468,7 +472,7 @@ theorem nablaRic_ein3
           rw [← hslots3X, ← htot]
     _ =
       (1 / 3 : Real) *
-        DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) scalar x
+        DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar x
           (fun _ : Fin 1 => A) * g.inner x B C := hprodEval
 
 
@@ -486,7 +490,7 @@ theorem dScalar_zero_ein3_at
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) =
         (metricScalarAt (I := I) (M := M) g y / 3) * g.inner y v w) :
     let scalar := fun y : M => metricScalarAt (I := I) (M := M) g y
-    let dScalar := DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) scalar x
+    let dScalar := DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar x
     ∀ X : TangentSpace I x, dScalar (fun _ : Fin 1 => X) = 0 := by
   classical
   dsimp
@@ -499,11 +503,11 @@ theorem dScalar_zero_ein3_at
     DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
       hcov
   let scalar : M -> Real :=
-    fun y => DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g (Ric y)
+    fun y => DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) g (Ric y)
   let nablaRic :=
     totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       2 cov Ric x
-  let dScalar := DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) scalar x
+  let dScalar := DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar x
   obtain ⟨nablaRm04, hsecond, hRmSymm, hRicTrace, hScalar⟩ :=
     DifferentialGeometry.Integral.Connection.metricBianchiAt (I := I) (M := M) g basis gInv hinv
   have hInv : ∀ i j : Fin 3, gInv i j = gInv j i :=
@@ -771,14 +775,14 @@ theorem metricRicci_velocity_eq_sum_inner_curv_frame
     (hSucc : forall i : Fin m, basis i.succ = E i) :
     metricRicci (I := I) (M := M) g x (vec2 (I := I) T T) =
       ∑ i, g.inner x
-        (DifferentialGeometry.Integral.Connection.metricSharp (I := I) g x
+        (DifferentialGeometry.Geometry.Operator.metricSharp (I := I) g x
           (metricRm04LastDualAt (I := I) (M := M) g x (E i) T T))
         (E i) := by
   rw [metricRicci_velocity_eq_sum_rm04_frame
     (I := I) (M := M) g basis hON h0 hSucc]
   refine Finset.sum_congr rfl ?_
   intro i _
-  rw [DifferentialGeometry.Integral.Connection.inner_metricSharp]
+  rw [DifferentialGeometry.Geometry.Operator.inner_metricSharp]
   rfl
 
 end DifferentialGeometry.Integral.Connection

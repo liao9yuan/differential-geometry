@@ -11,6 +11,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Analysis.Calculus.MeanValue
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -30,6 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
@@ -714,7 +716,7 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
         rw [extChartAt_source_eq_chartAt_source (I := I)]
         rw [TangentBundle.trivializationAt_baseSet] at hs
         exact hs
-      rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hinv]
+      rw [DifferentialGeometry.Geometry.Operator.chartGramOnE_def, hinv]
     have hu_hasDerivAt : HasDerivAt (chartCurve (I := I) α γ)
         (deriv (chartCurve (I := I) α γ) t₀) t₀ := by
       have hcd : ContDiffAt ℝ (N : ℕ∞) (chartCurve (I := I) α γ) t₀ := by

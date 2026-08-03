@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.AtZero
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.FrechetDerivative
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -23,6 +24,7 @@ open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Analysis.ODE.Flow
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 section ChartPhaseVFLinearization
 

@@ -20,6 +20,7 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Metric.Sphere.QuotientDescent
 import DifferentialGeometry.Geometry.Metric.Sphere.PositiveSpaceForm
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -1198,18 +1199,18 @@ theorem ham3_scalar0_cont74
     funext y
     have hmetric :
         Tensor0SBundle.metricTensorField (I := I) (P.S.family.metric 0) y =
-          DifferentialGeometry.Integral.Connection.metricTensor0S (I := I) (P.S.family.metric 0)
+          DifferentialGeometry.Geometry.Operator.metricTensor0S (I := I) (P.S.family.metric 0)
             y := by
       ext v
       rw [Tensor0SBundle.metricTensorField_apply,
-        DifferentialGeometry.Integral.Connection.metricTensor0S_apply]
+        DifferentialGeometry.Geometry.Operator.metricTensor0S_apply]
     change
       Tensor0SBundle.inner0S (I := I) (P.S.family.metric 0) y 2
           (Tensor0SBundle.metricTensorField (I := I) (P.S.family.metric 0) y)
           (P.S.ricci 0 y) =
         DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar (I := I) (ham3Solution (I := I) P) 0 y
     rw [DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_eq_metricTrace,
-      DifferentialGeometry.Integral.Connection.metricTracePair0SAt, hmetric]
+      DifferentialGeometry.Geometry.Operator.metricTracePair0SAt, hmetric]
     simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricci,
       DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt,
       DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricci_apply]
@@ -1442,7 +1443,7 @@ theorem ham3_ricBound74
       Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
         (I := I) (P.S.family.metric t) x
   have h :=
-    DifferentialGeometry.Integral.Connection.metricTracePair0SAt_sq_div_rank_le_normSq0S
+    DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_sq_div_rank_le_normSq0S
       (I := I) (g := P.S.family.metric t) (basis := basis)
       (gInv := gInv) hinv (P.S.ricciAt t x)
   have hcard :
@@ -3095,11 +3096,11 @@ theorem limitEinstein_of_tf0
       L.S.scalar t0 x = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
     calc
       L.S.scalar t0 x =
-          DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (M := L.N)
+          DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (M := L.N)
             (L.S.family.metric t0) (L.S.ricciAt t0 x) :=
             DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_eq_metricTrace (I := I) (M := L.N)
               L.S t0 x
-      _ = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (M := L.N) g
+      _ = DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (M := L.N) g
         Ric := by
             rfl
       _ = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
@@ -3226,7 +3227,7 @@ theorem limit_round_base
       DifferentialGeometry.PDE.RicciFlow.metricScalarAt] using h
   have hdScalar :
       ∀ x : L.N, ∀ X : TangentSpace I x,
-        DifferentialGeometry.Integral.Connection.differential1FormFun (I := I)
+        DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I)
             (fun y : L.N =>
               DifferentialGeometry.Integral.Connection.metricScalarAt (I := I) (M := L.N) g y)
             x (fun _ : Fin 1 => X) = 0 := by

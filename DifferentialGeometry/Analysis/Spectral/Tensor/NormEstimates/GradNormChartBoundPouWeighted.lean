@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.GradNormChartBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -16,6 +17,7 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open Tensor0SBundle

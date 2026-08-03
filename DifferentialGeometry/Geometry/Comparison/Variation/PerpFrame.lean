@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransp
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransportSmooth
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -419,7 +420,7 @@ theorem perp_to_velocity_preserved_of_parallel
         rw [extChartAt_source_eq_chartAt_source (I := I)]
         rw [TangentBundle.trivializationAt_baseSet] at hs
         exact hs
-      rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hinv]
+      rw [DifferentialGeometry.Geometry.Operator.chartGramOnE_def, hinv]
     have hu_hasDerivAt :
         HasDerivAt (chartCurve (I := I) α γ)
           (deriv (chartCurve (I := I) α γ) t₀) t₀ := by
@@ -865,7 +866,7 @@ theorem perp_to_velocity_preserved_on
         rw [extChartAt_source_eq_chartAt_source (I := I)]
         rw [TangentBundle.trivializationAt_baseSet] at hs
         exact hs
-      rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hinv]
+      rw [DifferentialGeometry.Geometry.Operator.chartGramOnE_def, hinv]
     have hu_hasDerivAt :
         HasDerivAt (chartCurve (I := I) α γ)
           (deriv (chartCurve (I := I) α γ) t₀) t₀ := by

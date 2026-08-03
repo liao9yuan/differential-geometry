@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -16,6 +17,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter Set
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology Bundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

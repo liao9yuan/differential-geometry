@@ -21,6 +21,7 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
+import DifferentialGeometry.Geometry.Operator.Operators
 
 set_option autoImplicit false
 
@@ -39,6 +40,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Integral.Connection
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable

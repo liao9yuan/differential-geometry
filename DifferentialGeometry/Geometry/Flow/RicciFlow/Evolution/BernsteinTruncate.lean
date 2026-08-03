@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiSolution
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -56,7 +57,7 @@ theorem estimate_of_heat
       MDifferentiableAt I (modelWithCornersSelf Real Real) (w k t) y)
     (hw_grad : forall k : Nat, forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (w k t) y) x)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) (w k t) y) x)
     (m : Nat) (c : Real) (hc : 0 <= c)
     (hlevelC : forall k : Nat, k <= m -> levelC k <= c)
     {t : Real} (htmem : t ∈ Set.Icc 0 T) (htpos : 0 < t) (x : M) :
@@ -200,7 +201,7 @@ theorem estimate_of_heat
           rw [DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift,
             DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt,
             DifferentialGeometry.Integral.Connection.laplacianAt_eq]
-          exact DifferentialGeometry.Integral.Connection.laplacian_const
+          exact DifferentialGeometry.Geometry.Operator.laplacian_const
             (I := I) (G.connection s) (G.metric s) 0 y
       hw_cont := by
         intro k
@@ -246,7 +247,7 @@ theorem estimate_of_heat
             (E := (TangentSpace I : M -> Type _)) (x := y)).congr_of_eventuallyEq ?_
           filter_upwards with z
           exact congrArg (fun v => (⟨z, v⟩ : TotalSpace E (TangentSpace I)))
-            (DifferentialGeometry.Integral.Connection.gradientFun_const (I := I) (G.metric s) 0 z) }
+            (DifferentialGeometry.Geometry.Operator.gradientFun_const (I := I) (G.metric s) 0 z) }
   have hkey : B.w m t x <= (towerConst B.c B.α m) ^ 2 * B.K ^ 2 / t ^ m :=
     B.estimate_div m htmem htpos x
   simp only [B] at hkey

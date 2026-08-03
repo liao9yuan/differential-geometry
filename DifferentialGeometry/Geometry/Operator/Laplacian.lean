@@ -5,12 +5,13 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 
 noncomputable section
 
+open DifferentialGeometry.Integral.DivergenceTheorem
 open Bundle Manifold Set MeasureTheory
 open scoped Manifold Topology ContDiff Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
@@ -121,6 +122,6 @@ theorem Δ_g_add [I.Boundaryless] [T2Space M]
   rw [Δ_g_def, hsection_eq]
   exact divergence_g_zero (I := I) g x
 
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry

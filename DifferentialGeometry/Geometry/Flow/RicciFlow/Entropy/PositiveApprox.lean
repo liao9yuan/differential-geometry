@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Integration.EntropyMix
 import DifferentialGeometry.Analysis.Integration.L2.Basic
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import Mathlib.Analysis.SpecificLimits.Basic
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -19,7 +20,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 noncomputable section
 
 open MeasureTheory Filter
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Integration
 open DifferentialGeometry.Analysis.Laplacian

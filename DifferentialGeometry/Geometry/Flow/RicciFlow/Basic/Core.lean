@@ -15,6 +15,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricCoord
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Model
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Christoffel
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -284,7 +285,7 @@ omit [SigmaCompactSpace M] [T2Space M] in
     (G : SolutionFamily (I := I) (M := M))
     (t : Real) (x : M) :
     G.scalar t x =
-      DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (G.metric t)
+      DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (G.metric t)
         (G.ricciAt t x) := by
   simp [scalar, metricScalarAt, DifferentialGeometry.Integral.Connection.metricScalarAt, ricciAt,
     metricRicciAt]
@@ -406,7 +407,7 @@ omit [SigmaCompactSpace M] [T2Space M] in
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
     S.scalar t x =
-      DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) (S.family.metric t)
+      DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (S.family.metric t)
         (S.ricciAt t x) := by
   simp [scalar, SolutionFamily.scalar_apply]
 
@@ -578,7 +579,7 @@ structure IsSolutionOn
   ricciNormGrad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (ricciNorm (I := I) S t) y) x
 
 namespace IsSolutionOn
@@ -657,12 +658,12 @@ structure CanonicalScalarRegularOn
   scalar_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (S.scalar t) y) x
   scalar_mul_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% ((S.scalar t) • fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (S.scalar t) y)) x
   scalar_sq_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
@@ -671,7 +672,7 @@ structure CanonicalScalarRegularOn
   scalar_sq_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (fun z : M => S.scalar t z ^ 2) y) x
   scalar_sq_div_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
@@ -680,17 +681,17 @@ structure CanonicalScalarRegularOn
   scalar_sq_div_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (fun z : M => S.scalar t z ^ 2 / 3) y) x
   scalar_grad_sub_const :
     ∀ t : Real, t ∈ D.carrier -> ∀ c : Real, ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (fun z : M => S.scalar t z - c) y) x
   scalar_grad_const_mul_sub_const :
     ∀ t : Real, t ∈ D.carrier -> ∀ a c : Real, ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (fun z : M => a * (S.scalar t z - c)) y) x
 
 namespace CanonicalScalarRegularOn
@@ -730,7 +731,7 @@ structure CanonicalRicciRegularOn
   ricci_norm_grad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
-        DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
+        DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (S.family.metric t)
           (ricciNorm (I := I) S t) y) x
 
 namespace CanonicalRicciRegularOn

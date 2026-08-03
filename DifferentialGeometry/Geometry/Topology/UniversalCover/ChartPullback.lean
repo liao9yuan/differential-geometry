@@ -34,8 +34,9 @@ open scoped Topology ContDiff Manifold
 open DifferentialGeometry.Integral.Measure
   (SmoothRiemannianMetric chartBasisVecFiber chartModelBasis chartGramMatrix)
 open DifferentialGeometry.Integral.DivergenceTheorem
-  (chartInvGramMatrix chartGramOnE chartChristoffel partialDeriv
-   chartRiemannTensor chartRicciTensor)
+  (partialDeriv chartRiemannTensor chartRicciTensor)
+open DifferentialGeometry.Geometry.Operator
+  (chartInvGramMatrix chartGramOnE chartChristoffel)
 
 noncomputable section
 
@@ -211,11 +212,11 @@ theorem chartChristoffel_lifted
   have hy_eq : extChartAt I α' x' = extChartAt I (proj α') (proj x') :=
     extChartAt_proj_eq (I := I) (M := M) α' x'
   rw [show extChartAt I (proj (X := M) α') (proj (X := M) x') = y₀ from hy_eq.symm]
-  rw [DifferentialGeometry.Integral.DivergenceTheorem.chartChristoffel_def
+  rw [DifferentialGeometry.Geometry.Operator.chartChristoffel_def
         (I := I)
         (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
         (liftedMetric (I := I) g) α' i j k y₀,
-      DifferentialGeometry.Integral.DivergenceTheorem.chartChristoffel_def
+      DifferentialGeometry.Geometry.Operator.chartChristoffel_def
         (I := I) (M := M) g (proj α') i j k y₀]
   congr 1
   refine Finset.sum_congr rfl ?_

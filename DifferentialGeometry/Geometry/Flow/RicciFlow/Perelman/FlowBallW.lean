@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CurvatureBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PositiveApprox
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CollapseScale
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -21,6 +22,7 @@ open Bundle Tensor0SBundle MeasureTheory Set Function
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.PDE.RicciFlow.Entropy
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
 universe u uE uH
@@ -100,17 +102,17 @@ theorem flowball_wform
         ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
           I M (S.base.metric time))) = 1 ∧
       Integrable (fun x => (S.base.metric time).inner x
-        (DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+        (DifferentialGeometry.Geometry.Operator.gradFun
           (I := I) (S.base.metric time) v x)
-        (DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+        (DifferentialGeometry.Geometry.Operator.gradFun
           (I := I) (S.base.metric time) v x))
         (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
           I M (S.base.metric time)) ∧
       (∫ x, 4 * B.radius ^ 2 *
             (S.base.metric time).inner x
-              (DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+              (DifferentialGeometry.Geometry.Operator.gradFun
                 (I := I) (S.base.metric time) v x)
-              (DifferentialGeometry.Integral.DivergenceTheorem.gradFun
+              (DifferentialGeometry.Geometry.Operator.gradFun
                 (I := I) (S.base.metric time) v x) +
           B.radius ^ 2 *
             DifferentialGeometry.Integral.Connection.metricScalarAt

@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Coordinates.Christoffel
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Inverse
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.MFDeriv.Tangent
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -54,6 +55,7 @@ namespace DifferentialGeometry.Integral.Connection
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
 
