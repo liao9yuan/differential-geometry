@@ -118,6 +118,63 @@ def spdLaplacianSchauderConst
   contDiffHolderLinearEquivConst L alpha
     (laplacianSchauderConst alpha K' B (linPullBcf L u))
 
+def spdLaplacianSchauderDefectConst
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (alpha K B : NNReal) : NNReal :=
+  let L := spdSqrtEquiv A hA
+  let K' := K * ‖(L : Euc n →L[Real] Euc n)‖₊ ^ (alpha : Real)
+  contDiffHolderLinearEquivConst L alpha
+    (heatDuhConstSchauderConst (V := Euc n) alpha K' B 1)
+
+omit [Nonempty n] [NormedSpace Real F] [CompleteSpace F] in
+theorem spdLaplacianSchauderConst_add_source
+    {alpha : NNReal} (halpha1 : alpha < 1)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (K₁ K₂ B₁ B₂ : NNReal)
+    (u : BoundedContinuousFunction (Euc n) F) :
+    spdLaplacianSchauderConst A hA alpha
+        (K₁ + K₂) (B₁ + B₂) u =
+      spdLaplacianSchauderConst A hA alpha K₁ B₁ u +
+        spdLaplacianSchauderDefectConst A hA alpha K₂ B₂ := by
+  let L := spdSqrtEquiv A hA
+  let q := ‖(L : Euc n →L[Real] Euc n)‖₊ ^ (alpha : Real)
+  have hK : (K₁ + K₂) * q = K₁ * q + K₂ * q := by ring
+  rw [spdLaplacianSchauderConst, spdLaplacianSchauderConst,
+    spdLaplacianSchauderDefectConst]
+  change contDiffHolderLinearEquivConst L alpha
+      (laplacianSchauderConst alpha ((K₁ + K₂) * q)
+        (B₁ + B₂) (linPullBcf L u)) =
+    contDiffHolderLinearEquivConst L alpha
+        (laplacianSchauderConst alpha (K₁ * q) B₁ (linPullBcf L u)) +
+      contDiffHolderLinearEquivConst L alpha
+        (heatDuhConstSchauderConst (V := Euc n) alpha (K₂ * q) B₂ 1)
+  rw [hK]
+  unfold laplacianSchauderConst
+  rw [heatDuhConstSchauderConst_add halpha1
+    (K₁ * q) (K₂ * q) B₁ B₂ (by norm_num)]
+  unfold contDiffHolderLinearEquivConst
+  ring
+
+omit [Nonempty n] [CompleteSpace F] in
+theorem spdLaplacianSchauderDefectConst_nnreal_mul
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (alpha c K B : NNReal) :
+    spdLaplacianSchauderDefectConst A hA alpha (c * K) (c * B) =
+      c * spdLaplacianSchauderDefectConst A hA alpha K B := by
+  let L := spdSqrtEquiv A hA
+  let q := ‖(L : Euc n →L[Real] Euc n)‖₊ ^ (alpha : Real)
+  rw [spdLaplacianSchauderDefectConst,
+    spdLaplacianSchauderDefectConst]
+  change contDiffHolderLinearEquivConst L alpha
+      (heatDuhConstSchauderConst (V := Euc n) alpha
+        ((c * K) * q) (c * B) 1) =
+    c * contDiffHolderLinearEquivConst L alpha
+      (heatDuhConstSchauderConst (V := Euc n) alpha (K * q) B 1)
+  rw [show (c * K) * q = c * (K * q) by ring,
+    heatDuhConstSchauderConst_nnreal_mul]
+  unfold contDiffHolderLinearEquivConst
+  ring
+
 theorem spd_laplacian_schauder_estimate
     {alpha K B : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
