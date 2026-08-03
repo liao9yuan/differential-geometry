@@ -274,6 +274,29 @@ theorem parabolicHolder_time_dist_le
   rw [← Real.rpow_mul (abs_nonneg _) (1 / 2 : Real) (alpha : Real)] at hraw
   simpa only [div_eq_mul_inv, one_mul, mul_comm] using hraw
 
+theorem holderWith_slice_of_parabolicCylinder
+    {V F : Type*} [PseudoMetricSpace V] [PseudoMetricSpace F]
+    {alpha C : NNReal} {J : Set Real} {f : Real → V → F}
+    (h : HolderWith C alpha
+      ((parabolicCylinder J Set.univ).restrict
+        (fun p => f p.time p.space)))
+    {t : Real} (ht : t ∈ J) :
+    HolderWith C alpha (f t) := by
+  intro x y
+  let px : parabolicCylinder J (Set.univ : Set V) :=
+    ⟨parabolicPoint t x, ht, Set.mem_univ x⟩
+  let py : parabolicCylinder J (Set.univ : Set V) :=
+    ⟨parabolicPoint t y, ht, Set.mem_univ y⟩
+  have hxy := h.edist_le px py
+  change edist (f t x) (f t y) ≤
+    (C : ENNReal) * edist px py ^ (alpha : Real) at hxy
+  change edist (f t x) (f t y) ≤
+    (C : ENNReal) * edist x y ^ (alpha : Real)
+  rw [edist_dist, edist_dist] at hxy ⊢
+  simpa [px, py, Subtype.dist_eq, dist_parabolicPoint,
+    Real.zero_rpow (by norm_num : (1 / 2 : Real) ≠ 0),
+    max_eq_right dist_nonneg] using hxy
+
 section Parabolic
 
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
