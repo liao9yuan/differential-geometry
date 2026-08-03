@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Schauder.CutoffValue
+import DifferentialGeometry.Analysis.Schauder.CutoffJet
 import DifferentialGeometry.Analysis.Schauder.VariableCutoff
 
 noncomputable section
@@ -132,6 +133,81 @@ theorem variable_coefficient_interior_schauder_estimate_of_cutoffJet2_control
   rw [eContDiffHolderGaugeOn_congr_of_eqOn_open hU hsU heq 2 alpha]
   exact (eContDiffHolderGaugeOn_mono (Set.subset_univ s)
     2 alpha (w : Euc n → F)).trans hglobal
+
+theorem variable_coefficient_interior_schauder_estimate_of_cutoff
+    {s U : Set (Euc n)} (hU : IsOpen U) (hsU : s ⊆ U)
+    {alpha Kchi Kf Kdchi Kdu Kd2chi Ku Kd2u
+      Mchi Mdchi Mdu Md2chi Mu Md2u : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (a : n → n → BoundedContinuousFunction (Euc n) Real) (x0 : Euc n)
+    (hA : Matrix.PosDef (fun i j ↦ a i j x0))
+    (chi : BoundedContinuousFunction (Euc n) Real)
+    (dchi : BoundedContinuousFunction (Euc n) (Euc n →L[Real] Real))
+    (d2chi : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] Real))
+    (f u : BoundedContinuousFunction (Euc n) F)
+    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (hchiOne : ∀ x ∈ U, chi x = 1)
+    (hchi : ∀ x, HasFDerivAt (chi : Euc n → Real) (dchi x) x)
+    (hdchi : ∀ x,
+      HasFDerivAt (dchi : Euc n → Euc n →L[Real] Real) (d2chi x) x)
+    (hu : ∀ x, HasFDerivAt (u : Euc n → F) (du x) x)
+    (hdu : ∀ x,
+      HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x)
+    (hsource : ∀ x, chi x ≠ 0 → variableMatrixLap a d2u x = f x)
+    (A Ka omega : n → n → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha (a i j : Euc n → Real))
+    (homega : ∀ i j x, ‖a i j x0 - a i j x‖ ≤ omega i j)
+    (haNorm : ∀ i j x, ‖a i j x‖ ≤ A i j)
+    (hchiHolder : HolderWith Kchi alpha (chi : Euc n → Real))
+    (hfHolder : HolderWith Kf alpha (f : Euc n → F))
+    (hdchiHolder : HolderWith Kdchi alpha
+      (dchi : Euc n → Euc n →L[Real] Real))
+    (hduHolder : HolderWith Kdu alpha
+      (du : Euc n → Euc n →L[Real] F))
+    (hd2chiHolder : HolderWith Kd2chi alpha
+      (d2chi : Euc n → Euc n →L[Real] Euc n →L[Real] Real))
+    (huHolder : HolderWith Ku alpha (u : Euc n → F))
+    (hd2uHolder : HolderWith Kd2u alpha
+      (d2u : Euc n → Euc n →L[Real] Euc n →L[Real] F))
+    (hchiNorm : ∀ x, ‖chi x‖ ≤ Mchi)
+    (hdchiNorm : ∀ x, ‖dchi x‖ ≤ Mdchi)
+    (hduNorm : ∀ x, ‖du x‖ ≤ Mdu)
+    (hd2chiNorm : ∀ x, ‖d2chi x‖ ≤ Md2chi)
+    (huNorm : ∀ x, ‖u x‖ ≤ Mu)
+    (hd2uNorm : ∀ x, ‖d2u x‖ ≤ Md2u)
+    (hsmall : spdLaplacianSchauderDefectConst
+      (fun i j ↦ a i j x0) hA alpha
+        (∑ i, ∑ j, (omega i j + Ka i j))
+        (∑ i, ∑ j, omega i j) < 1) :
+    eContDiffHolderGaugeOn 2 alpha s (u : Euc n → F) ≤
+      ((spdLaplacianSchauderConst (fun i j ↦ a i j x0) hA alpha
+        (variableCutoffSourceHolderConst A Ka
+          Kchi Kf Kdchi Kdu Kd2chi Ku Mdchi Mdu Md2chi Mu chi f)
+        (variableCutoffSourceSupConst A Mdchi Mdu Md2chi Mu chi f)
+        (cutoffValue chi u)) /
+        (1 - spdLaplacianSchauderDefectConst
+          (fun i j ↦ a i j x0) hA alpha
+            (∑ i, ∑ j, (omega i j + Ka i j))
+            (∑ i, ∑ j, omega i j)) : NNReal) := by
+  apply variable_coefficient_interior_schauder_estimate_of_cutoffJet2_control
+    (Kd2w := cutoffJet2HolderConst
+      Kchi Kdchi Kd2chi Ku Kdu Kd2u
+      Mchi Mdchi Md2chi Mu Mdu Md2u)
+    (Md2w := cutoffJet2SupConst Mchi Mdchi Md2chi Mu Mdu Md2u)
+    hU hsU halpha0 halpha1 a x0 hA chi dchi d2chi f u du d2u
+    hchiOne hchi hdchi hu hdu hsource A Ka omega ha homega haNorm
+    hchiHolder hfHolder hdchiHolder hduHolder hd2chiHolder huHolder
+    hdchiNorm hduNorm hd2chiNorm huNorm
+  · exact fun x ↦ norm_cutoffJet2_le chi dchi d2chi u du d2u
+      Mchi Mdchi Md2chi Mu Mdu Md2u hchiNorm hdchiNorm hd2chiNorm
+      huNorm hduNorm hd2uNorm x
+  · exact cutoffJet2_holderWith chi dchi d2chi u du d2u
+      hchiHolder hdchiHolder hd2chiHolder huHolder hduHolder hd2uHolder
+      hchiNorm hdchiNorm hd2chiNorm huNorm hduNorm hd2uNorm
+  · exact hsmall
 
 end DifferentialGeometry.Analysis.Schauder
 
