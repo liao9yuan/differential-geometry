@@ -253,6 +253,19 @@ theorem cutoffJet2_holderWith
     exact cutoffJet2_apply chi dchi d2chi u du d2u x]
   simpa only [cutoffJet2HolderConst, two_mul, add_assoc] using hall
 
+theorem cutoffJet2_eq_zero_of_cutoff_eq_zero
+    (chi : BoundedContinuousFunction V Real)
+    (dchi : BoundedContinuousFunction V (V →L[Real] Real))
+    (d2chi : BoundedContinuousFunction V (V →L[Real] V →L[Real] Real))
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (x : V) (hchi : chi x = 0) (hdchi : dchi x = 0)
+    (hd2chi : d2chi x = 0) :
+    cutoffJet2 chi dchi d2chi u du d2u x = 0 := by
+  rw [cutoffJet2_apply, hchi, hdchi, hd2chi]
+  simp
+
 end DifferentialGeometry.Analysis.Schauder
 
 end

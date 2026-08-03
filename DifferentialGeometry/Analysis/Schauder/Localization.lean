@@ -86,6 +86,35 @@ theorem eContDiffHolderGaugeOn_congr_of_eqOn_open
     Filter.mem_of_superset (hU.mem_nhds (hsU hx)) hfg
   exact (Filter.EventuallyEq.iteratedFDeriv Real heq j).eq_of_nhds
 
+def holderBallOscillationConst (R : Real) (alpha K : NNReal) : NNReal :=
+  K * (Real.toNNReal R) ^ (alpha : Real)
+
+omit [NormedSpace Real F] [NormedAddCommGroup V] [NormedSpace Real V] in
+theorem norm_sub_le_holderBallOscillationConst_of_mem_ball
+    {center x : X} {R : Real} (hR : 0 < R)
+    {alpha K : NNReal} {f : X → F}
+    (hf : HolderWith K alpha ((Metric.ball center R).restrict f))
+    (hx : x ∈ Metric.ball center R) :
+    ‖f center - f x‖ ≤ holderBallOscillationConst R alpha K := by
+  have hcenter : center ∈ Metric.ball center R := by
+    simpa only [Metric.mem_ball, dist_self] using hR
+  have hraw := hf.dist_le
+    (⟨center, hcenter⟩ : Metric.ball center R)
+    (⟨x, hx⟩ : Metric.ball center R)
+  have hdist : dist center x ≤ R := by
+    simpa only [dist_comm] using (Metric.mem_ball.mp hx).le
+  have hrpow : dist center x ^ (alpha : Real) ≤ R ^ (alpha : Real) :=
+    Real.rpow_le_rpow (dist_nonneg) hdist alpha.coe_nonneg
+  calc
+    ‖f center - f x‖ = dist (f center) (f x) := (dist_eq_norm _ _).symm
+    _ ≤ (K : Real) * dist center x ^ (alpha : Real) := by
+      simpa only [Set.restrict_apply, Subtype.dist_eq] using hraw
+    _ ≤ (K : Real) * R ^ (alpha : Real) :=
+      mul_le_mul_of_nonneg_left hrpow K.coe_nonneg
+    _ = holderBallOscillationConst R alpha K := by
+      simp only [holderBallOscillationConst, NNReal.coe_mul, NNReal.coe_rpow,
+        Real.coe_toNNReal R hR.le]
+
 theorem holderWith_smul_of_norm_le
     {alpha C D M N : NNReal} {f : X → Real} {g : X → F}
     (hf : HolderWith C alpha f) (hg : HolderWith D alpha g)

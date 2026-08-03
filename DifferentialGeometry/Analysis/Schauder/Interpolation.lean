@@ -1,10 +1,11 @@
 import DifferentialGeometry.Analysis.Schauder.Holder
 import Mathlib.Analysis.Calculus.MeanValue
+import Mathlib.Topology.ContinuousMap.Bounded.Normed
 
 noncomputable section
 
 open Set
-open scoped NNReal
+open scoped BoundedContinuousFunction NNReal
 
 namespace DifferentialGeometry.Analysis.Schauder
 
@@ -120,5 +121,103 @@ theorem norm_iteratedFDeriv_succ_le_at_scale
     (hf.differentiable_iteratedFDeriv (mod_cast Nat.lt_succ_self k))
     hderivHolder hfnorm hepsilon x
   rwa [norm_fderiv_iteratedFDeriv] at hbound
+
+def hessianInterpolationFunctionConst (epsilon M : NNReal) : NNReal :=
+  32 * M / epsilon ^ 2
+
+def hessianInterpolationConst
+    (epsilon alpha M K : NNReal) : NNReal :=
+  hessianInterpolationFunctionConst epsilon M +
+    2 * K * epsilon ^ (alpha : Real)
+
+theorem norm_hessian_le_hessianInterpolationConst
+    (u : BoundedContinuousFunction E F)
+    (du : BoundedContinuousFunction E (E →L[Real] F))
+    (d2u : BoundedContinuousFunction E (E →L[Real] E →L[Real] F))
+    (hu : ∀ x, HasFDerivAt (u : E → F) (du x) x)
+    (hdu : ∀ x, HasFDerivAt (du : E → E →L[Real] F) (d2u x) x)
+    {epsilon alpha K : NNReal} (hepsilon : 0 < epsilon)
+    (hd2uHolder : HolderWith K alpha
+      (d2u : E → E →L[Real] E →L[Real] F)) :
+    ‖d2u‖ ≤ hessianInterpolationConst epsilon alpha ‖u‖₊ K := by
+  have huDifferentiable : Differentiable Real (u : E → F) :=
+    fun x ↦ (hu x).differentiableAt
+  have hduDifferentiable : Differentiable Real
+      (du : E → E →L[Real] F) :=
+    fun x ↦ (hdu x).differentiableAt
+  have hfderivU : fderiv Real (u : E → F) =
+      (du : E → E →L[Real] F) := by
+    funext x
+    exact (hu x).fderiv
+  have hfderivDu : fderiv Real (du : E → E →L[Real] F) =
+      (d2u : E → E →L[Real] E →L[Real] F) := by
+    funext x
+    exact (hdu x).fderiv
+  have hduLipschitz : LipschitzWith ‖d2u‖₊
+      (du : E → E →L[Real] F) := by
+    apply lipschitzWith_of_nnnorm_fderiv_le (f := (du : E → E →L[Real] F))
+      (fun x ↦ (hdu x).differentiableAt)
+    intro x
+    rw [hfderivDu]
+    exact_mod_cast d2u.norm_coe_le_norm x
+  have hduHolderOne : HolderWith ‖d2u‖₊ 1
+      (fderiv Real (u : E → F)) := by
+    rw [hfderivU]
+    exact hduLipschitz.holderWith
+  let G : NNReal := 8 * ‖u‖₊ / epsilon + ‖d2u‖₊ * epsilon / 4
+  have hduNorm : ∀ x, ‖du x‖ ≤ G := by
+    intro x
+    have hraw := norm_fderiv_le_at_scale (M := ‖u‖₊)
+      huDifferentiable hduHolderOne
+      (fun z ↦ by simpa using u.norm_coe_le_norm z)
+      (show 0 < (epsilon : Real) / 4 by positivity) x
+    rw [hfderivU] at hraw
+    calc
+      ‖du x‖ ≤ 2 * (‖u‖₊ : Real) / ((epsilon : Real) / 4) +
+          (‖d2u‖₊ : Real) * ((epsilon : Real) / 4) ^ (1 : Real) := hraw
+      _ = G := by
+        simp only [G, NNReal.coe_add, NNReal.coe_div, NNReal.coe_mul,
+          NNReal.coe_ofNat, Real.rpow_one]
+        field_simp [ne_of_gt hepsilon]
+        ring
+  have hrawPoint : ∀ x, ‖d2u x‖ ≤
+      2 * (G : Real) / epsilon + K * (epsilon : Real) ^ (alpha : Real) := by
+    intro x
+    have hraw := norm_fderiv_le_at_scale (M := G) hduDifferentiable
+      (by rw [hfderivDu]; exact hd2uHolder) hduNorm
+      (show 0 < (epsilon : Real) by exact_mod_cast hepsilon) x
+    rwa [hfderivDu] at hraw
+  have hrawNorm : ‖d2u‖ ≤
+      2 * (G : Real) / epsilon + K * (epsilon : Real) ^ (alpha : Real) := by
+    rw [BoundedContinuousFunction.norm_le]
+    · exact hrawPoint
+    · positivity
+  have hrewrite :
+      2 * (G : Real) / epsilon + K * (epsilon : Real) ^ (alpha : Real) =
+        16 * (‖u‖₊ : Real) / (epsilon : Real) ^ 2 +
+          ‖d2u‖ / 2 + K * (epsilon : Real) ^ (alpha : Real) := by
+    simp only [G, NNReal.coe_add, NNReal.coe_div, NNReal.coe_mul,
+      NNReal.coe_ofNat, coe_nnnorm]
+    field_simp [ne_of_gt hepsilon]
+    ring
+  rw [hrewrite] at hrawNorm
+  let A : Real := 16 * (‖u‖₊ : Real) / (epsilon : Real) ^ 2
+  let B : Real := (K : Real) * (epsilon : Real) ^ (alpha : Real)
+  have hrawNorm' : ‖d2u‖ ≤ A + ‖d2u‖ / 2 + B := by
+    simpa only [A, B] using hrawNorm
+  have habsorb : ‖d2u‖ ≤ 2 * (A + B) := by
+    linarith
+  have htarget : ‖d2u‖ ≤
+      32 * (‖u‖₊ : Real) / (epsilon : Real) ^ 2 +
+        2 * K * (epsilon : Real) ^ (alpha : Real) := by
+    calc
+      ‖d2u‖ ≤ 2 * (A + B) := habsorb
+      _ = 32 * (‖u‖₊ : Real) / (epsilon : Real) ^ 2 +
+          2 * K * (epsilon : Real) ^ (alpha : Real) := by
+        simp only [A, B]
+        ring
+  simpa only [hessianInterpolationConst, hessianInterpolationFunctionConst,
+    NNReal.coe_add, NNReal.coe_div,
+    NNReal.coe_mul, NNReal.coe_pow, NNReal.coe_ofNat, NNReal.coe_rpow] using htarget
 
 end DifferentialGeometry.Analysis.Schauder

@@ -178,14 +178,14 @@ theorem norm_ballCutoffArgumentFDeriv2_le
   ring_nf
   exact le_refl ((R ^ 2 - r ^ 2)⁻¹ * ‖v‖ * (2 : ℝ))
 
-theorem two_le_ballCutoffArgument_of_not_le
+theorem two_le_ballCutoffArgument_of_le_dist
     {center : E} {r R : ℝ} (hr : 0 ≤ r) (hrR : r < R) {x : E}
-    (hx : ¬dist x center ≤ R) :
+    (hx : R ≤ dist x center) :
     2 ≤ ballCutoffArgument center r R x := by
   have hden : 0 < R ^ 2 - r ^ 2 := by nlinarith
   have hR : 0 ≤ R := hr.trans hrR.le
   have hdist : R ≤ ‖x - center‖ := by
-    simpa [dist_eq_norm] using (not_le.mp hx).le
+    simpa [dist_eq_norm] using hx
   have hsq : R ^ 2 ≤ ‖x - center‖ ^ 2 :=
     (sq_le_sq₀ hR (norm_nonneg _)).2 hdist
   have hquot : 1 ≤
@@ -194,6 +194,43 @@ theorem two_le_ballCutoffArgument_of_not_le
     linarith
   simp only [ballCutoffArgument]
   linarith
+
+theorem two_le_ballCutoffArgument_of_not_le
+    {center : E} {r R : ℝ} (hr : 0 ≤ r) (hrR : r < R) {x : E}
+    (hx : ¬dist x center ≤ R) :
+    2 ≤ ballCutoffArgument center r R x :=
+  two_le_ballCutoffArgument_of_le_dist hr hrR (not_le.mp hx).le
+
+theorem ballCutoffFDeriv_eq_zero_of_le_dist
+    [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
+    (hr : 0 ≤ r) (hrR : r < R) {x : E} (hx : R ≤ dist x center) :
+    ballCutoffFDeriv center r R x = 0 := by
+  rw [ballCutoffFDeriv,
+    CutoffProfile.deriv_zero_of_ge
+      (two_le_ballCutoffArgument_of_le_dist hr hrR hx), zero_smul]
+
+theorem ballCutoffFDeriv2_eq_zero_of_le_dist
+    [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
+    (hr : 0 ≤ r) (hrR : r < R) {x : E} (hx : R ≤ dist x center) :
+    ballCutoffFDeriv2 center r R x = 0 := by
+  have harg := two_le_ballCutoffArgument_of_le_dist hr hrR hx
+  ext v w
+  simp [ballCutoffFDeriv2, CutoffProfile.deriv_zero_of_ge harg,
+    CutoffProfile.deriv2_zero_of_ge harg]
+
+theorem ballCutoffFDeriv_eq_zero_of_not_mem_ball
+    [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
+    (hr : 0 ≤ r) (hrR : r < R) {x : E} (hx : x ∉ Metric.ball center R) :
+    ballCutoffFDeriv center r R x = 0 :=
+  ballCutoffFDeriv_eq_zero_of_le_dist hr hrR
+    (by simpa [Metric.mem_ball, dist_comm] using hx)
+
+theorem ballCutoffFDeriv2_eq_zero_of_not_mem_ball
+    [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
+    (hr : 0 ≤ r) (hrR : r < R) {x : E} (hx : x ∉ Metric.ball center R) :
+    ballCutoffFDeriv2 center r R x = 0 :=
+  ballCutoffFDeriv2_eq_zero_of_le_dist hr hrR
+    (by simpa [Metric.mem_ball, dist_comm] using hx)
 
 theorem norm_ballCutoffFDeriv_le
     [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
