@@ -489,6 +489,23 @@ def parabolicC2HolderLinearEquivConst
   C + R * C + R ^ 2 * C + C +
     R ^ 2 * (C * R ^ (alpha : Real)) + C * R ^ (alpha : Real)
 
+theorem parabolicC2HolderLinearEquivConst_add
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (L : V ≃L[Real] V) (alpha C₁ C₂ : NNReal) :
+    parabolicC2HolderLinearEquivConst L alpha (C₁ + C₂) =
+      parabolicC2HolderLinearEquivConst L alpha C₁ +
+        parabolicC2HolderLinearEquivConst L alpha C₂ := by
+  unfold parabolicC2HolderLinearEquivConst
+  ring
+
+theorem parabolicC2HolderLinearEquivConst_nnreal_mul
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (L : V ≃L[Real] V) (alpha c C : NNReal) :
+    parabolicC2HolderLinearEquivConst L alpha (c * C) =
+      c * parabolicC2HolderLinearEquivConst L alpha C := by
+  unfold parabolicC2HolderLinearEquivConst
+  ring
+
 theorem eParabolicC2HolderGaugeOn_linearEquiv_le
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]

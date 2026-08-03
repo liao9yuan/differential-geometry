@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialSPD
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatSemigroupSchauder
+import DifferentialGeometry.Analysis.Schauder.Absorption
 import DifferentialGeometry.Analysis.Schauder.BilinearHolder
 
 noncomputable section
@@ -50,6 +51,50 @@ def parabolicMatrixLapFreezeDefect
     (p0 : ParabolicPoint (Euc n)) (u : Real → Euc n → F) :
     ParabolicPoint (Euc n) → F :=
   fun p ↦ ∑ i, ∑ j, (a i j p0 - a i j p) • parabolicHessianComponent u i j p
+
+def parabolicMatrixFreezeHolderConst
+    (Ka omega : n → n → NNReal) : NNReal :=
+  ∑ i, ∑ j, (omega i j + Ka i j)
+
+def parabolicMatrixFreezeSupConst (omega : n → n → NNReal) : NNReal :=
+  ∑ i, ∑ j, omega i j
+
+def spdParabolicSchauderDefectConst
+    (A : Matrix n n Real) (hA : A.PosDef) (alpha : NNReal)
+    (Ka omega : n → n → NNReal) (T : Real) : NNReal :=
+  spdHeatPotentialSchauderConst A hA alpha
+    (parabolicMatrixFreezeHolderConst Ka omega)
+    (parabolicMatrixFreezeSupConst omega) T
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicMatrixFreezeHolderConst_mul
+    (Ka omega : n → n → NNReal) (X : NNReal) :
+    (∑ i, ∑ j, (omega i j * X + X * Ka i j)) =
+      X * parabolicMatrixFreezeHolderConst Ka omega := by
+  classical
+  unfold parabolicMatrixFreezeHolderConst
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro i _hi
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j _hj
+  ring
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicMatrixFreezeSupConst_mul
+    (omega : n → n → NNReal) (X : NNReal) :
+    (∑ i, ∑ j, omega i j * X) =
+      X * parabolicMatrixFreezeSupConst omega := by
+  classical
+  unfold parabolicMatrixFreezeSupConst
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro i _hi
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j _hj
+  ring
 
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
@@ -399,6 +444,133 @@ theorem spdHeatDuh_parabolic_schauder_solution
         A hA f hbound hsource
   · exact spdHeatDuh_schauder_estimate_euclidean
       halpha0 halpha1 hT hTS A hA f hbound hsource
+
+theorem parabolic_variable_coefficient_schauder_estimate_of_frozen_representation
+    {alpha Kf Bf X : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S T : Real} (hT : 0 ≤ T) (hTS : T < S)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (u : Real → Euc n → F)
+    (g : Real → BoundedContinuousFunction (Euc n) F)
+    (hrep : u = fun t x ↦
+      spdHeatDuh (fun i j ↦ a i j p0) hA t g x)
+    (hgfrozen : Set.EqOn (fun p ↦ g p.time p.space)
+      (parabolicFrozenMatrixOperator (fun i j ↦ a i j p0) u)
+      (parabolicCylinder (Icc (0 : Real) S) Set.univ))
+    (hsourceBound : eSupNormOn
+      (parabolicCylinder (Icc (0 : Real) S) Set.univ)
+      (parabolicVariableMatrixOperator a u) ≤ Bf)
+    (hsourceHolder : HolderWith Kf alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (parabolicVariableMatrixOperator a u)))
+    (Ka omega : n → n → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict (a i j)))
+    (homega : ∀ i j p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖a i j p0 - a i j p‖ ≤ omega i j)
+    (hu : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Icc (0 : Real) S) Set.univ) u ≤ X) :
+    eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≤
+      spdHeatPotentialSchauderConst (fun i j ↦ a i j p0) hA alpha
+        (Kf + X * parabolicMatrixFreezeHolderConst Ka omega)
+        (Bf + X * parabolicMatrixFreezeSupConst omega) T := by
+  let Q : Set (ParabolicPoint (Euc n)) :=
+    parabolicCylinder (Icc (0 : Real) S) Set.univ
+  let A : Matrix n n Real := fun i j ↦ a i j p0
+  let Kdefect := X * parabolicMatrixFreezeHolderConst Ka omega
+  let Bdefect := X * parabolicMatrixFreezeSupConst omega
+  have hfrozen := parabolicFrozenMatrixOperator_source_estimate
+    a p0 u Ka omega hsourceBound hsourceHolder ha homega hu
+  rw [parabolicMatrixFreezeHolderConst_mul,
+    parabolicMatrixFreezeSupConst_mul] at hfrozen
+  have hboundG : ∀ r ∈ Icc (0 : Real) S, ‖g r‖ ≤ Bf + Bdefect := by
+    intro r hr
+    rw [BoundedContinuousFunction.norm_le (by positivity)]
+    intro x
+    let p : ParabolicPoint (Euc n) := parabolicPoint r x
+    have hp : p ∈ Q := ⟨hr, Set.mem_univ x⟩
+    have heq := hgfrozen hp
+    calc
+      ‖g r x‖ = ‖parabolicFrozenMatrixOperator A u p‖ := by
+        exact congrArg norm heq
+      _ ≤ Bf + Bdefect := by
+        change ‖parabolicFrozenMatrixOperator A u p‖ ≤
+          ((Bf + Bdefect : NNReal) : Real)
+        rw [← ENNReal.ofReal_le_coe]
+        exact (norm_le_eSupNormOn Q
+          (parabolicFrozenMatrixOperator A u) p hp).trans (by
+            simpa only [ENNReal.coe_add] using hfrozen.1)
+  have hholderG : HolderWith (Kf + Kdefect) alpha
+      (Q.restrict (fun p ↦ g p.time p.space)) := by
+    have heq : Q.restrict (fun p ↦ g p.time p.space) =
+        Q.restrict (parabolicFrozenMatrixOperator A u) := by
+      funext p
+      exact hgfrozen p.2
+    rw [heq]
+    exact hfrozen.2
+  calc
+    eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u =
+        eParabolicC2HolderGaugeOn alpha
+          (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
+          (fun t x ↦ spdHeatDuh A hA t g x) := by rw [hrep]
+    _ ≤ spdHeatPotentialSchauderConst A hA alpha
+        (Kf + Kdefect) (Bf + Bdefect) T :=
+      spdHeatDuh_schauder_estimate_euclidean
+        halpha0 halpha1 hT hTS A hA g hboundG hholderG
+
+omit [Nonempty n] [CompleteSpace F] in
+theorem parabolic_schauder_estimate_of_small_freeze_defect
+    {alpha Kf Bf X : NNReal} (halpha1 : alpha < 1)
+    {T : Real} (hT : 0 ≤ T)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (Ka omega : n → n → NNReal)
+    (u : Real → Euc n → F)
+    (hraw : eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≤
+      spdHeatPotentialSchauderConst A hA alpha
+        (Kf + X * parabolicMatrixFreezeHolderConst Ka omega)
+        (Bf + X * parabolicMatrixFreezeSupConst omega) T)
+    (hX : (X : ENNReal) ≤ eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u)
+    (hsmall : spdParabolicSchauderDefectConst
+      A hA alpha Ka omega T < 1) :
+    eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≤
+      (spdHeatPotentialSchauderConst A hA alpha Kf Bf T /
+        (1 - spdParabolicSchauderDefectConst
+          A hA alpha Ka omega T) : NNReal) := by
+  let Kosc := parabolicMatrixFreezeHolderConst Ka omega
+  let Bosc := parabolicMatrixFreezeSupConst omega
+  let delta := spdParabolicSchauderDefectConst A hA alpha Ka omega T
+  let C := spdHeatPotentialSchauderConst A hA alpha Kf Bf T
+  rw [spdHeatPotentialSchauderConst_add halpha1 A hA
+      Kf (X * Kosc) Bf (X * Bosc) hT,
+    spdHeatPotentialSchauderConst_nnreal_mul
+      A hA alpha X Kosc Bosc T] at hraw
+  have hraw' : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≤
+        (C : ENNReal) + (delta : ENNReal) * X := by
+    simpa only [C, delta, Kosc, Bosc, spdParabolicSchauderDefectConst,
+      ENNReal.coe_add, ENNReal.coe_mul, mul_comm] using hraw
+  have hself : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≤
+        (C : ENNReal) + (delta : ENNReal) *
+          eParabolicC2HolderGaugeOn alpha
+            (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u :=
+    hraw'.trans (by gcongr)
+  have hfinite : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≠ ⊤ :=
+    ne_of_lt (hraw'.trans_lt (ENNReal.add_lt_top.mpr
+      ⟨ENNReal.coe_lt_top,
+        ENNReal.mul_lt_top ENNReal.coe_lt_top ENNReal.coe_lt_top⟩))
+  have habsorb := ennreal_le_coe_div_one_sub_of_le_add_mul
+    hfinite (show delta < 1 by simpa only [delta] using hsmall) hself
+  simpa only [C, delta] using habsorb
 
 end FrozenSolution
 

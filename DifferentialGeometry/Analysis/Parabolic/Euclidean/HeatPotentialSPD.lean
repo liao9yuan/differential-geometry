@@ -59,6 +59,53 @@ def spdHeatPotentialSchauderConst
       (spdSourceHolderConst A hA alpha K) T)
 
 omit [Nonempty n] [NormedSpace Real F] [CompleteSpace F] in
+theorem spdSourceHolderConst_add
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (alpha K₁ K₂ : NNReal) :
+    spdSourceHolderConst A hA alpha (K₁ + K₂) =
+      spdSourceHolderConst A hA alpha K₁ +
+        spdSourceHolderConst A hA alpha K₂ := by
+  unfold spdSourceHolderConst
+  ring
+
+omit [Nonempty n] [NormedSpace Real F] [CompleteSpace F] in
+theorem spdSourceHolderConst_nnreal_mul
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (alpha c K : NNReal) :
+    spdSourceHolderConst A hA alpha (c * K) =
+      c * spdSourceHolderConst A hA alpha K := by
+  unfold spdSourceHolderConst
+  ring
+
+omit [Nonempty n] [NormedSpace Real F] [CompleteSpace F] in
+theorem spdHeatPotentialSchauderConst_add
+    {alpha : NNReal} (halpha1 : alpha < 1)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (K₁ K₂ B₁ B₂ : NNReal) {T : Real} (hT : 0 ≤ T) :
+    spdHeatPotentialSchauderConst A hA alpha (K₁ + K₂) (B₁ + B₂) T =
+      spdHeatPotentialSchauderConst A hA alpha K₁ B₁ T +
+        spdHeatPotentialSchauderConst A hA alpha K₂ B₂ T := by
+  unfold spdHeatPotentialSchauderConst
+  rw [spdSourceHolderConst_add,
+    heatPotentialSchauderConst_add halpha1
+      (spdSourceHolderConst A hA alpha K₁)
+      (spdSourceHolderConst A hA alpha K₂) B₁ B₂
+      (spdSourceHolderConst A hA alpha K₁)
+      (spdSourceHolderConst A hA alpha K₂) hT,
+    parabolicC2HolderLinearEquivConst_add]
+
+omit [Nonempty n] [NormedSpace Real F] [CompleteSpace F] in
+theorem spdHeatPotentialSchauderConst_nnreal_mul
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (alpha c K B : NNReal) (T : Real) :
+    spdHeatPotentialSchauderConst A hA alpha (c * K) (c * B) T =
+      c * spdHeatPotentialSchauderConst A hA alpha K B T := by
+  unfold spdHeatPotentialSchauderConst
+  rw [spdSourceHolderConst_nnreal_mul,
+    heatPotentialSchauderConst_nnreal_mul,
+    parabolicC2HolderLinearEquivConst_nnreal_mul]
+
+omit [Nonempty n] [NormedSpace Real F] [CompleteSpace F] in
 theorem spdHeatSource_norm (A : Matrix n n Real) (hA : A.PosDef)
     (f : Real → BoundedContinuousFunction (Euc n) F) (t : Real) :
     ‖spdHeatSource A hA f t‖ = ‖f t‖ := by
