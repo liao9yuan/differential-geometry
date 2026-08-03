@@ -67,6 +67,16 @@ def parabolicPreimage {V : Type*} [SMul Real V]
     (r : NNReal) (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
   parabolicDilation r ⁻¹' Q
 
+def parabolicRescale {V F : Type*} [SMul Real V]
+    (r : NNReal) (u : Real → V → F) : Real → V → F :=
+  fun t x ↦ u ((r : Real) ^ 2 * t) ((r : Real) • x)
+
+@[simp]
+theorem parabolicRescale_apply {V F : Type*} [SMul Real V]
+    (r : NNReal) (u : Real → V → F) (t : Real) (x : V) :
+    parabolicRescale r u t x =
+      u ((r : Real) ^ 2 * t) ((r : Real) • x) := rfl
+
 theorem parabolicDilation_mapsTo_preimage {V : Type*} [SMul Real V]
     (r : NNReal) (Q : Set (ParabolicPoint V)) :
     MapsTo (parabolicDilation r) (parabolicPreimage r Q) Q :=
@@ -105,6 +115,121 @@ theorem parabolicHolder_dilation
       rw [ENNReal.ofReal_mul r.coe_nonneg, ENNReal.ofReal_coe_nnreal,
         ENNReal.mul_rpow_of_nonneg _ _ alpha.coe_nonneg]
       ring
+
+theorem parabolicSpatialJet_rescale
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (u : Real → V → F) (j : Nat)
+    (p : ParabolicPoint V)
+    (hspace : ContDiff Real j (u ((r : Real) ^ 2 * p.time))) :
+    parabolicSpatialJet j (parabolicRescale r u) p =
+      (r : Real) ^ j •
+        parabolicSpatialJet j u (parabolicDilation r p) := by
+  unfold parabolicSpatialJet parabolicRescale
+  have h := iteratedFDeriv_comp_const_smul (r : Real) hspace
+  exact congrFun h p.space
+
+theorem parabolicTimeDerivative_rescale
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (u : Real → V → F) (p : ParabolicPoint V) :
+    parabolicTimeDerivative (parabolicRescale r u) p =
+      (r : Real) ^ 2 •
+        parabolicTimeDerivative u (parabolicDilation r p) := by
+  unfold parabolicTimeDerivative parabolicRescale
+  have h := fderiv_comp_smul
+    (f := fun t ↦ u t ((r : Real) • p.space))
+    (x := p.time) ((r : Real) ^ 2)
+  simpa only [ContinuousLinearMap.smul_apply, smul_eq_mul, mul_one] using
+    congrArg (fun L : Real →L[Real] F ↦ L 1) h
+
+def parabolicC2HolderRescaleConst
+    (r alpha C : NNReal) : NNReal :=
+  (∑ j ∈ Finset.range 3, r ^ j * C) + r ^ 2 * C +
+    C * r ^ (alpha : Real) * r ^ 2 +
+      C * r ^ (alpha : Real) * r ^ 2
+
+theorem eParabolicC2HolderGaugeOn_rescale_le
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r alpha C : NNReal) (Q : Set (ParabolicPoint V))
+    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (h : eParabolicC2HolderGaugeOn alpha Q u ≤ C) :
+    eParabolicC2HolderGaugeOn alpha (parabolicPreimage r Q)
+      (parabolicRescale r u) ≤
+        parabolicC2HolderRescaleConst r alpha C := by
+  let Cspatial : Nat → NNReal := fun j ↦ r ^ j * C
+  have hspatial : ∀ j < 3, ∀ p ∈ parabolicPreimage r Q,
+      ‖parabolicSpatialJet j (parabolicRescale r u) p‖ ≤ Cspatial j := by
+    intro j hj p hp
+    rw [parabolicSpatialJet_rescale r u j p
+      ((hspace _).of_le (by
+        exact_mod_cast Nat.le_of_lt_succ hj))]
+    calc
+      ‖(r : Real) ^ j • parabolicSpatialJet j u (parabolicDilation r p)‖ =
+          (r : Real) ^ j *
+            ‖parabolicSpatialJet j u (parabolicDilation r p)‖ := by
+        rw [norm_smul, Real.norm_of_nonneg (pow_nonneg r.coe_nonneg j)]
+      _ ≤ (r : Real) ^ j * C :=
+        mul_le_mul_of_nonneg_left
+          (parabolicSpatialJet_norm_le h (by omega) hp)
+          (pow_nonneg r.coe_nonneg j)
+      _ = (Cspatial j : Real) := by
+        simp only [Cspatial, NNReal.coe_mul, NNReal.coe_pow]
+  have htime : ∀ p ∈ parabolicPreimage r Q,
+      ‖parabolicTimeDerivative (parabolicRescale r u) p‖ ≤
+        ((r ^ 2 * C : NNReal) : Real) := by
+    intro p hp
+    rw [parabolicTimeDerivative_rescale r u p]
+    calc
+      ‖(r : Real) ^ 2 • parabolicTimeDerivative u (parabolicDilation r p)‖ =
+          (r : Real) ^ 2 *
+            ‖parabolicTimeDerivative u (parabolicDilation r p)‖ := by
+        rw [norm_smul, Real.norm_of_nonneg (sq_nonneg (r : Real))]
+      _ ≤ (r : Real) ^ 2 * C :=
+        mul_le_mul_of_nonneg_left
+          (parabolicTimeDerivative_norm_le h hp) (sq_nonneg (r : Real))
+      _ = (r ^ 2 * C : NNReal) := by
+        simp only [NNReal.coe_mul, NNReal.coe_pow]
+  have hspatialHolder : HolderWith
+      (C * r ^ (alpha : Real) * r ^ 2) alpha
+      ((parabolicPreimage r Q).restrict
+        (parabolicSpatialJet 2 (parabolicRescale r u))) := by
+    have hadapt := parabolicHolder_dilation r
+      (parabolicSpatialJet_holderWith_restrict h)
+    have hscaled := hadapt.smul ((r : Real) ^ 2)
+    have hrnorm : ‖(r : Real) ^ 2‖₊ = r ^ 2 := by
+      ext
+      simp only [coe_nnnorm, Real.norm_of_nonneg (sq_nonneg (r : Real)),
+        NNReal.coe_pow]
+    convert hscaled using 1
+    · rw [hrnorm]
+    · funext p
+      simp only [Pi.smul_apply, Function.comp_apply, Set.restrict_apply]
+      exact (parabolicSpatialJet_rescale r u 2 p.1
+        ((hspace _).of_le le_rfl))
+  have htimeHolder : HolderWith
+      (C * r ^ (alpha : Real) * r ^ 2) alpha
+      ((parabolicPreimage r Q).restrict
+        (parabolicTimeDerivative (parabolicRescale r u))) := by
+    have hadapt := parabolicHolder_dilation r
+      (parabolicTimeDerivative_holderWith_restrict h)
+    have hscaled := hadapt.smul ((r : Real) ^ 2)
+    have hrnorm : ‖(r : Real) ^ 2‖₊ = r ^ 2 := by
+      ext
+      simp only [coe_nnnorm, Real.norm_of_nonneg (sq_nonneg (r : Real)),
+        NNReal.coe_pow]
+    convert hscaled using 1
+    · rw [hrnorm]
+    · funext p
+      simp only [Pi.smul_apply, Function.comp_apply, Set.restrict_apply]
+      exact parabolicTimeDerivative_rescale r u p.1
+  have hresult := eParabolicC2HolderGaugeOn_le Cspatial (r ^ 2 * C)
+    (C * r ^ (alpha : Real) * r ^ 2)
+    (C * r ^ (alpha : Real) * r ^ 2)
+    hspatial htime hspatialHolder htimeHolder
+  unfold parabolicC2HolderRescaleConst
+  simpa only [Cspatial] using hresult
 
 def parabolicLinearMap {V : Type*} [NormedAddCommGroup V]
     [NormedSpace Real V] (L : V →L[Real] V)
