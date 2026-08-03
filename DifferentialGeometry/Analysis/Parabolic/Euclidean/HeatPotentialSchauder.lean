@@ -767,6 +767,70 @@ theorem heatD2Conv_time_add_sub_norm_le_of_holder
     _ = d * ‖v‖ * ‖w‖ * (K : Real) * holderSecondTimeHeatScale alpha t *
         heatC2DtHolder (V := V) alpha := by ring
 
+theorem heatD2Duh_time_add_sub_eq {alpha K : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {tau d : Real} (htau : 0 < tau) (hd : 0 ≤ d)
+    (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) (tau + d), HolderWith K alpha (f s))
+    (v w x : V)
+    (hmeasplus : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) (tau + d))))
+    (hmeasnow : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (tau - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) tau))) :
+    heatD2Duh (tau + d) v w f x - heatD2Duh tau v w f x =
+      (∫ s : Real in 0..tau,
+        heatD2Conv ((tau - s) + d) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x) +
+      ∫ s : Real in tau..tau + d,
+        heatD2Conv (tau + d - s) v w (f s) x := by
+  have htplus : 0 < tau + d := htau.trans_le (le_add_of_nonneg_right hd)
+  have hplus := heatD2Duh_int_of_holder halpha0 halpha1 htplus f hf v w x hmeasplus
+  have hfnow : ∀ s ∈ Icc (0 : Real) tau, HolderWith K alpha (f s) := by
+    intro s hs
+    exact hf s ⟨hs.1, hs.2.trans (le_add_of_nonneg_right hd)⟩
+  have hnow := heatD2Duh_int_of_holder halpha0 halpha1 htau f hfnow v w x hmeasnow
+  have hplusOld : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      volume 0 tau := by
+    apply hplus.mono_set
+    rw [uIcc_of_le htau.le, uIcc_of_le htplus.le]
+    exact Icc_subset_Icc le_rfl (le_add_of_nonneg_right hd)
+  have hplusNew : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      volume tau (tau + d) := by
+    apply hplus.mono_set
+    rw [uIcc_of_le (le_add_of_nonneg_right hd), uIcc_of_le htplus.le]
+    exact Icc_subset_Icc htau.le le_rfl
+  have hadd := intervalIntegral.integral_add_adjacent_intervals hplusOld hplusNew
+  have holdsub := intervalIntegral.integral_sub hplusOld hnow
+  unfold heatD2Duh
+  calc
+    (∫ s : Real in 0..tau + d, heatD2Conv (tau + d - s) v w (f s) x) -
+        ∫ s : Real in 0..tau, heatD2Conv (tau - s) v w (f s) x =
+      ((∫ s : Real in 0..tau, heatD2Conv (tau + d - s) v w (f s) x) +
+        ∫ s : Real in tau..tau + d,
+          heatD2Conv (tau + d - s) v w (f s) x) -
+        ∫ s : Real in 0..tau, heatD2Conv (tau - s) v w (f s) x := by
+      rw [hadd]
+    _ = (∫ s : Real in 0..tau,
+        heatD2Conv (tau + d - s) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x) +
+        ∫ s : Real in tau..tau + d,
+          heatD2Conv (tau + d - s) v w (f s) x := by
+      rw [holdsub]
+      abel
+    _ = (∫ s : Real in 0..tau,
+        heatD2Conv ((tau - s) + d) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x) +
+        ∫ s : Real in tau..tau + d,
+          heatD2Conv (tau + d - s) v w (f s) x := by
+      congr 2
+      funext s
+      congr 3
+      ring
+
 end Convolution
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
