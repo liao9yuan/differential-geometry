@@ -94,6 +94,201 @@ theorem timeCutoffDerivBcf_parabolic_holderWith
   exact (div_le_iff₀ (by norm_num : (0 : NNReal) < 2)).2
     (by simpa using halpha1.trans (show (1 : NNReal) ≤ 2 by norm_num))
 
+def intervalCutoffCenter (t₀ t₁ : Real) : Real :=
+  (t₀ + t₁) / 2
+
+def intervalCutoffInnerRadius (t₀ t₁ : Real) : Real :=
+  (t₁ - t₀) / 2
+
+def intervalCutoffGap (a t₀ t₁ b : Real) : Real :=
+  min (t₀ - a) (b - t₁)
+
+def intervalCutoffOuterRadius (a t₀ t₁ b : Real) : Real :=
+  intervalCutoffInnerRadius t₀ t₁ + intervalCutoffGap a t₀ t₁ b / 2
+
+theorem intervalCutoffInnerRadius_nonneg
+    {t₀ t₁ : Real} (ht : t₀ ≤ t₁) :
+    0 ≤ intervalCutoffInnerRadius t₀ t₁ := by
+  unfold intervalCutoffInnerRadius
+  linarith
+
+theorem intervalCutoffGap_pos
+    {a t₀ t₁ b : Real} (ha : a < t₀) (hb : t₁ < b) :
+    0 < intervalCutoffGap a t₀ t₁ b := by
+  unfold intervalCutoffGap
+  exact lt_min (sub_pos.mpr ha) (sub_pos.mpr hb)
+
+theorem intervalCutoffInnerRadius_lt_outerRadius
+    {a t₀ t₁ b : Real} (ha : a < t₀) (hb : t₁ < b) :
+    intervalCutoffInnerRadius t₀ t₁ <
+      intervalCutoffOuterRadius a t₀ t₁ b := by
+  unfold intervalCutoffOuterRadius
+  linarith [intervalCutoffGap_pos ha hb]
+
+theorem Icc_subset_intervalCutoff_closedBall
+    (t₀ t₁ : Real) :
+    Icc t₀ t₁ ⊆ Metric.closedBall
+      (intervalCutoffCenter t₀ t₁)
+      (intervalCutoffInnerRadius t₀ t₁) := by
+  simpa only [intervalCutoffCenter, intervalCutoffInnerRadius] using
+    Set.Subset.rfl (s := Icc t₀ t₁) |>.trans_eq
+      (Real.Icc_eq_closedBall t₀ t₁)
+
+theorem intervalCutoff_closedBall_subset_Ioo
+    {a t₀ t₁ b : Real} (ha : a < t₀) (hb : t₁ < b) :
+    Metric.closedBall (intervalCutoffCenter t₀ t₁)
+        (intervalCutoffOuterRadius a t₀ t₁ b) ⊆ Ioo a b := by
+  intro t ht
+  rw [Real.closedBall_eq_Icc] at ht
+  have hgapLeft : intervalCutoffGap a t₀ t₁ b ≤ t₀ - a :=
+    min_le_left _ _
+  have hgapRight : intervalCutoffGap a t₀ t₁ b ≤ b - t₁ :=
+    min_le_right _ _
+  have hgapPos := intervalCutoffGap_pos ha hb
+  unfold intervalCutoffCenter intervalCutoffOuterRadius
+    intervalCutoffInnerRadius at ht
+  rcases ht with ⟨htLeft, htRight⟩
+  constructor <;> linarith
+
+def intervalCutoffBcf
+    (a t₀ t₁ b : Real) (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b) :
+    BoundedContinuousFunction Real Real :=
+  timeCutoffBcf (intervalCutoffCenter t₀ t₁)
+    (intervalCutoffInnerRadius_nonneg ht)
+    (intervalCutoffInnerRadius_lt_outerRadius ha hb)
+
+def intervalCutoffDerivBcf
+    (a t₀ t₁ b : Real) (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b) :
+    BoundedContinuousFunction Real Real :=
+  timeCutoffDerivBcf (intervalCutoffCenter t₀ t₁)
+    (intervalCutoffInnerRadius_nonneg ht)
+    (intervalCutoffInnerRadius_lt_outerRadius ha hb)
+
+def intervalCutoffHolderConst (a t₀ t₁ b : Real) : NNReal :=
+  ballCutoffHolderConst (intervalCutoffInnerRadius t₀ t₁)
+    (intervalCutoffOuterRadius a t₀ t₁ b)
+
+def intervalCutoffDerivHolderConst (a t₀ t₁ b : Real) : NNReal :=
+  timeCutoffDerivHolderConst (intervalCutoffInnerRadius t₀ t₁)
+    (intervalCutoffOuterRadius a t₀ t₁ b)
+
+def intervalCutoffDerivSupConst (a t₀ t₁ b : Real) : NNReal :=
+  Real.toNNReal (ballCutoffFDerivBound
+    (intervalCutoffInnerRadius t₀ t₁)
+    (intervalCutoffOuterRadius a t₀ t₁ b))
+
+theorem intervalCutoffBcf_eq_one
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    {t : Real} (htmem : t ∈ Icc t₀ t₁) :
+    intervalCutoffBcf a t₀ t₁ b ha ht hb t = 1 := by
+  apply ballCutoff_eq_one_of_mem_closedBall
+    (intervalCutoffInnerRadius_nonneg ht)
+    (intervalCutoffInnerRadius_lt_outerRadius ha hb)
+  exact Icc_subset_intervalCutoff_closedBall t₀ t₁ htmem
+
+theorem intervalCutoffBcf_mem_Icc
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (t : Real) :
+    intervalCutoffBcf a t₀ t₁ b ha ht hb t ∈ Icc (0 : Real) 1 :=
+  ballCutoff_mem_Icc _ _ _ _
+
+theorem norm_intervalCutoffBcf_le_one
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (t : Real) :
+    ‖intervalCutoffBcf a t₀ t₁ b ha ht hb t‖ ≤ 1 := by
+  rw [Real.norm_eq_abs, abs_of_nonneg (intervalCutoffBcf_mem_Icc ha ht hb t).1]
+  exact (intervalCutoffBcf_mem_Icc ha ht hb t).2
+
+theorem norm_intervalCutoffDerivBcf_le
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (t : Real) :
+    ‖intervalCutoffDerivBcf a t₀ t₁ b ha ht hb t‖ ≤
+      intervalCutoffDerivSupConst a t₀ t₁ b := by
+  let r := intervalCutoffInnerRadius t₀ t₁
+  let R := intervalCutoffOuterRadius a t₀ t₁ b
+  have hr : 0 ≤ r := intervalCutoffInnerRadius_nonneg ht
+  have hrR : r < R := intervalCutoffInnerRadius_lt_outerRadius ha hb
+  have hbound : 0 ≤ ballCutoffFDerivBound r R :=
+    ballCutoffFDerivBound_nonneg hr hrR
+  calc
+    ‖intervalCutoffDerivBcf a t₀ t₁ b ha ht hb t‖ =
+        ‖ballCutoffFDeriv (intervalCutoffCenter t₀ t₁) r R t 1‖ := rfl
+    _ ≤ ‖ballCutoffFDeriv (intervalCutoffCenter t₀ t₁) r R t‖ := by
+      simpa only [norm_one, mul_one] using
+        (ballCutoffFDeriv (intervalCutoffCenter t₀ t₁) r R t).le_opNorm 1
+    _ ≤ ballCutoffFDerivBound r R := norm_ballCutoffFDeriv_le hr hrR t
+    _ = intervalCutoffDerivSupConst a t₀ t₁ b := by
+      rw [intervalCutoffDerivSupConst, Real.coe_toNNReal _ hbound]
+
+theorem intervalCutoffBcf_tsupport_subset
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b) :
+    tsupport (intervalCutoffBcf a t₀ t₁ b ha ht hb : Real → Real) ⊆
+      Ioo a b := by
+  exact (ballCutoff_tsupport_subset_closedBall
+    (intervalCutoffInnerRadius_nonneg ht)
+    (intervalCutoffInnerRadius_lt_outerRadius ha hb)).trans
+      (intervalCutoff_closedBall_subset_Ioo ha hb)
+
+theorem intervalCutoffBcf_eq_zero_of_not_mem
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    {t : Real} (htmem : t ∉ Ioo a b) :
+    intervalCutoffBcf a t₀ t₁ b ha ht hb t = 0 := by
+  by_contra hne
+  exact htmem (intervalCutoffBcf_tsupport_subset ha ht hb
+    (subset_tsupport _ hne))
+
+theorem intervalCutoffBcf_hasDerivAt
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (t : Real) :
+    HasDerivAt (intervalCutoffBcf a t₀ t₁ b ha ht hb : Real → Real)
+      (intervalCutoffDerivBcf a t₀ t₁ b ha ht hb t) t := by
+  exact timeCutoffBcf_hasDerivAt
+    (intervalCutoffCenter t₀ t₁)
+    (intervalCutoffInnerRadius_nonneg ht)
+    (intervalCutoffInnerRadius_lt_outerRadius ha hb) t
+
+theorem intervalCutoffBcf_holderWith
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    {beta : NNReal} (hbeta1 : beta ≤ 1) :
+    HolderWith (intervalCutoffHolderConst a t₀ t₁ b) beta
+      (intervalCutoffBcf a t₀ t₁ b ha ht hb : Real → Real) := by
+  exact timeCutoffBcf_holderWith (intervalCutoffCenter t₀ t₁)
+    (intervalCutoffInnerRadius_nonneg ht)
+    (intervalCutoffInnerRadius_lt_outerRadius ha hb) hbeta1
+
+theorem intervalCutoffDerivBcf_holderWith
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    {beta : NNReal} (hbeta1 : beta ≤ 1) :
+    HolderWith (intervalCutoffDerivHolderConst a t₀ t₁ b) beta
+      (intervalCutoffDerivBcf a t₀ t₁ b ha ht hb : Real → Real) := by
+  exact timeCutoffDerivBcf_holderWith (intervalCutoffCenter t₀ t₁)
+    (intervalCutoffInnerRadius_nonneg ht)
+    (intervalCutoffInnerRadius_lt_outerRadius ha hb) hbeta1
+
+theorem intervalCutoffBcf_parabolic_holderWith
+    {V : Type*} [PseudoMetricSpace V]
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    {alpha : NNReal} (halpha1 : alpha ≤ 1) :
+    HolderWith (intervalCutoffHolderConst a t₀ t₁ b) alpha
+      (fun p : ParabolicPoint V ↦
+        intervalCutoffBcf a t₀ t₁ b ha ht hb p.time) := by
+  apply holderWith_parabolic_const_space
+  apply intervalCutoffBcf_holderWith ha ht hb
+  exact (div_le_iff₀ (by norm_num : (0 : NNReal) < 2)).2
+    (by simpa using halpha1.trans (show (1 : NNReal) ≤ 2 by norm_num))
+
+theorem intervalCutoffDerivBcf_parabolic_holderWith
+    {V : Type*} [PseudoMetricSpace V]
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    {alpha : NNReal} (halpha1 : alpha ≤ 1) :
+    HolderWith (intervalCutoffDerivHolderConst a t₀ t₁ b) alpha
+      (fun p : ParabolicPoint V ↦
+        intervalCutoffDerivBcf a t₀ t₁ b ha ht hb p.time) := by
+  apply holderWith_parabolic_const_space
+  apply intervalCutoffDerivBcf_holderWith ha ht hb
+  exact (div_le_iff₀ (by norm_num : (0 : NNReal) < 2)).2
+    (by simpa using halpha1.trans (show (1 : NNReal) ≤ 2 by norm_num))
+
 section Separable
 
 variable {V F : Type*} [TopologicalSpace V]
