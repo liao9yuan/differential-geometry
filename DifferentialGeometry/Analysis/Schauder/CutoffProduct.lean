@@ -48,12 +48,26 @@ def cutoffValue
     BoundedContinuousFunction V F :=
   chi • u
 
+def cutoffTimeJet
+    (chi dchi : Real → BoundedContinuousFunction V Real)
+    (u du : Real → BoundedContinuousFunction V F) (t : Real) :
+    BoundedContinuousFunction V F :=
+  cutoffValue (chi t) (du t) + cutoffValue (dchi t) (u t)
+
 omit [NormedSpace Real V] in
 @[simp]
 theorem cutoffValue_apply
     (chi : BoundedContinuousFunction V Real)
     (u : BoundedContinuousFunction V F) (x : V) :
     cutoffValue chi u x = chi x • u x := rfl
+
+omit [NormedSpace Real V] in
+@[simp]
+theorem cutoffTimeJet_apply
+    (chi dchi : Real → BoundedContinuousFunction V Real)
+    (u du : Real → BoundedContinuousFunction V F) (t : Real) (x : V) :
+    cutoffTimeJet chi dchi u du t x =
+      chi t x • du t x + dchi t x • u t x := rfl
 
 def cutoffJet1
     (chi : BoundedContinuousFunction V Real)
@@ -118,6 +132,17 @@ theorem cutoffValue_hasFDerivAt
       (cutoffJet1 chi dchi u du x) x := by
   simpa only [cutoffValue_apply, cutoffJet1_apply] using
     (hchi x).smul (hu x)
+
+omit [NormedSpace Real V] in
+theorem cutoffValue_hasDerivAt
+    (chi dchi : Real → BoundedContinuousFunction V Real)
+    (u du : Real → BoundedContinuousFunction V F)
+    (t : Real)
+    (hchi : HasDerivAt chi (dchi t) t)
+    (hu : HasDerivAt u (du t) t) :
+    HasDerivAt (fun s ↦ cutoffValue (chi s) (u s))
+      (cutoffTimeJet chi dchi u du t) t := by
+  simpa only [cutoffValue, cutoffTimeJet] using hchi.smul hu
 
 theorem cutoffJet1_hasFDerivAt
     (chi : BoundedContinuousFunction V Real)

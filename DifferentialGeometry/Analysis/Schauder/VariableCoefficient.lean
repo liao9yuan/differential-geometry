@@ -45,6 +45,24 @@ def variableMatrixLap
     BoundedContinuousFunction (Euc n) F :=
   ∑ i, ∑ j, a i j • hessianComponentBcf d2u i j
 
+def matrixLapBcf
+    (A : Matrix n n Real)
+    (d2u : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F)) :
+    BoundedContinuousFunction (Euc n) F :=
+  ∑ i, ∑ j, (A i j) • hessianComponentBcf d2u i j
+
+omit [DecidableEq n] [Nonempty n] in
+@[simp]
+theorem matrixLapBcf_apply
+    (A : Matrix n n Real)
+    (d2u : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F)) (x : Euc n) :
+    matrixLapBcf A d2u x = matrixLap A (d2u x) := by
+  simp only [matrixLapBcf, matrixLap,
+    BoundedContinuousFunction.sum_apply,
+    BoundedContinuousFunction.smul_apply, hessianComponentBcf_apply]
+
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
 theorem variableMatrixLap_apply
