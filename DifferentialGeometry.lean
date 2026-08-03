@@ -831,6 +831,7 @@ import DifferentialGeometry.Analysis.Schauder.LowerOrder
 import DifferentialGeometry.Analysis.Schauder.Scaling
 import DifferentialGeometry.Analysis.Schauder.VariableCoefficient
 import DifferentialGeometry.Analysis.Schauder.VariableCutoff
+import DifferentialGeometry.Analysis.Schauder.VariableInterior
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherOrder
