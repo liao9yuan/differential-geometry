@@ -1449,6 +1449,94 @@ def d2DuhJetHolderConst (alpha K : NNReal) : NNReal :=
       ((stdOrthonormalBasis Real V) (β 0))
       ((stdOrthonormalBasis Real V) (β 1)) K)
 
+def d2DuhJetNormConst (alpha K : NNReal) (T : Real) : NNReal :=
+  ∑ β : Fin 2 → Fin (Module.finrank Real V),
+    Real.toNNReal (d2DuhHolderConst alpha
+      ((stdOrthonormalBasis Real V) (β 0))
+      ((stdOrthonormalBasis Real V) (β 1)) K *
+        ((2 / (alpha : Real)) * T ^ ((alpha : Real) / 2)))
+
+omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
+  [CompleteSpace F] in
+private theorem d2DuhJetNormConst_term_nonneg
+    {alpha : NNReal} (halpha0 : 0 < alpha) (K : NNReal) {T : Real} (hT : 0 ≤ T)
+    (β : Fin 2 → Fin (Module.finrank Real V)) :
+    0 ≤ d2DuhHolderConst alpha
+      ((stdOrthonormalBasis Real V) (β 0))
+      ((stdOrthonormalBasis Real V) (β 1)) K *
+        ((2 / (alpha : Real)) * T ^ ((alpha : Real) / 2)) := by
+  have halphaReal : 0 < (alpha : Real) := by exact_mod_cast halpha0
+  have hconst : 0 ≤ d2DuhHolderConst alpha
+      ((stdOrthonormalBasis Real V) (β 0))
+      ((stdOrthonormalBasis Real V) (β 1)) K := by
+    unfold d2DuhHolderConst
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _)) K.coe_nonneg)
+      (heatC2Holder_nonneg (V := V) alpha)
+  exact mul_nonneg hconst
+    (mul_nonneg (div_nonneg (by norm_num) halphaReal.le)
+      (Real.rpow_nonneg hT _))
+
+theorem parabolicSpatialJet_two_norm_le_of_heatD2Duh
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {T : Real} (hT : 0 ≤ T) (u f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hrealize : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ∀ m : Fin 2 → V,
+        parabolicSpatialJet 2 u p m =
+          heatD2Duh p.time (m 0) (m 1) f p.space)
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ β : Fin 2 → Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r)
+          ((stdOrthonormalBasis Real V) (β 0))
+          ((stdOrthonormalBasis Real V) (β 1)) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t)))
+    (p : ParabolicPoint V)
+    (hp : p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ) :
+    ‖parabolicSpatialJet 2 u p‖ ≤ d2DuhJetNormConst (V := V) alpha K T := by
+  have hbasis := continuousMultilinearMap_norm_le_sum_stdOrthonormalBasis
+    (parabolicSpatialJet 2 u p)
+  calc
+    ‖parabolicSpatialJet 2 u p‖ ≤
+        ∑ β : Fin 2 → Fin (Module.finrank Real V),
+          ‖parabolicSpatialJet 2 u p
+            (fun i ↦ (stdOrthonormalBasis Real V) (β i))‖ := hbasis
+    _ ≤ ∑ β : Fin 2 → Fin (Module.finrank Real V),
+        d2DuhHolderConst alpha
+          ((stdOrthonormalBasis Real V) (β 0))
+          ((stdOrthonormalBasis Real V) (β 1)) K *
+            ((2 / (alpha : Real)) * T ^ ((alpha : Real) / 2)) := by
+      gcongr with β
+      rw [hrealize p hp]
+      have hslice : ∀ r ∈ Icc (0 : Real) p.time, HolderWith K alpha (f r) := by
+        intro r hr
+        exact hf r ⟨hr.1, hr.2.trans hp.1.2⟩
+      have hraw := heatD2Duh_norm_of_holder halpha0 halpha1 hp.1.1 f hslice
+        ((stdOrthonormalBasis Real V) (β 0))
+        ((stdOrthonormalBasis Real V) (β 1)) p.space
+        (hmeas p.time hp.1 p.space β)
+      refine hraw.trans ?_
+      have hcoef : 0 ≤ d2DuhHolderConst alpha
+          ((stdOrthonormalBasis Real V) (β 0))
+          ((stdOrthonormalBasis Real V) (β 1)) K := by
+        unfold d2DuhHolderConst
+        exact mul_nonneg
+          (mul_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _)) K.coe_nonneg)
+          (heatC2Holder_nonneg (V := V) alpha)
+      have hfactor : 0 ≤ 2 / (alpha : Real) := by
+        exact div_nonneg (by norm_num) (by exact_mod_cast halpha0.le)
+      exact mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left
+          (Real.rpow_le_rpow hp.1.1.le hp.1.2 (by positivity)) hfactor) hcoef
+    _ = d2DuhJetNormConst (V := V) alpha K T := by
+      unfold d2DuhJetNormConst
+      push_cast
+      apply Finset.sum_congr rfl
+      intro β _
+      exact (Real.coe_toNNReal _
+        (d2DuhJetNormConst_term_nonneg (V := V) halpha0 K hT β)).symm
+
 theorem parabolicSpatialJet_two_holderWith_restrict_of_heatD2Duh
     {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
     {T : Real} (u f : Real → V → F)
@@ -1492,6 +1580,34 @@ def lapDuhParabolicHolderConst (alpha K : NNReal) : Real :=
     d2DuhParabolicHolderConst alpha ((stdOrthonormalBasis Real V) i)
       ((stdOrthonormalBasis Real V) i) K
 
+def lapDuhNormConst (alpha K : NNReal) (T : Real) : NNReal :=
+  ∑ i : Fin (Module.finrank Real V),
+    Real.toNNReal (d2DuhHolderConst alpha
+      ((stdOrthonormalBasis Real V) i)
+      ((stdOrthonormalBasis Real V) i) K *
+        ((2 / (alpha : Real)) * T ^ ((alpha : Real) / 2)))
+
+omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
+  [CompleteSpace F] in
+private theorem lapDuhNormConst_term_nonneg
+    {alpha : NNReal} (halpha0 : 0 < alpha) (K : NNReal) {T : Real} (hT : 0 ≤ T)
+    (i : Fin (Module.finrank Real V)) :
+    0 ≤ d2DuhHolderConst alpha
+      ((stdOrthonormalBasis Real V) i)
+      ((stdOrthonormalBasis Real V) i) K *
+        ((2 / (alpha : Real)) * T ^ ((alpha : Real) / 2)) := by
+  have halphaReal : 0 < (alpha : Real) := by exact_mod_cast halpha0
+  have hconst : 0 ≤ d2DuhHolderConst alpha
+      ((stdOrthonormalBasis Real V) i)
+      ((stdOrthonormalBasis Real V) i) K := by
+    unfold d2DuhHolderConst
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _)) K.coe_nonneg)
+      (heatC2Holder_nonneg (V := V) alpha)
+  exact mul_nonneg hconst
+    (mul_nonneg (div_nonneg (by norm_num) halphaReal.le)
+      (Real.rpow_nonneg hT _))
+
 omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
   [CompleteSpace F] in
 theorem lapDuhParabolicHolderConst_nonneg {alpha : NNReal}
@@ -1500,6 +1616,60 @@ theorem lapDuhParabolicHolderConst_nonneg {alpha : NNReal}
   unfold lapDuhParabolicHolderConst
   exact Finset.sum_nonneg fun i _ ↦
     d2DuhParabolicHolderConst_nonneg halpha _ _ K
+
+theorem heatLapDuh_norm_le_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {T : Real} (hT : 0 ≤ T) (f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ i : Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r)
+          ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t)))
+    {t : Real} (ht : t ∈ Ioc (0 : Real) T) (x : V) :
+    ‖heatLapDuh t f x‖ ≤ lapDuhNormConst (V := V) alpha K T := by
+  unfold heatLapDuh
+  calc
+    ‖∑ i : Fin (Module.finrank Real V),
+        heatD2Duh t ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) f x‖ ≤
+      ∑ i : Fin (Module.finrank Real V),
+        ‖heatD2Duh t ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) f x‖ := norm_sum_le _ _
+    _ ≤ ∑ i : Fin (Module.finrank Real V),
+        d2DuhHolderConst alpha
+          ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) K *
+            ((2 / (alpha : Real)) * T ^ ((alpha : Real) / 2)) := by
+      gcongr with i
+      have hslice : ∀ r ∈ Icc (0 : Real) t, HolderWith K alpha (f r) := by
+        intro r hr
+        exact hf r ⟨hr.1, hr.2.trans ht.2⟩
+      have hraw := heatD2Duh_norm_of_holder halpha0 halpha1 ht.1 f hslice
+        ((stdOrthonormalBasis Real V) i) ((stdOrthonormalBasis Real V) i) x
+        (hmeas t ht x i)
+      refine hraw.trans ?_
+      have hcoef : 0 ≤ d2DuhHolderConst alpha
+          ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) K := by
+        unfold d2DuhHolderConst
+        exact mul_nonneg
+          (mul_nonneg (mul_nonneg (norm_nonneg _) (norm_nonneg _)) K.coe_nonneg)
+          (heatC2Holder_nonneg (V := V) alpha)
+      have hfactor : 0 ≤ 2 / (alpha : Real) := by
+        exact div_nonneg (by norm_num) (by exact_mod_cast halpha0.le)
+      exact mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left
+          (Real.rpow_le_rpow ht.1.le ht.2 (by positivity)) hfactor) hcoef
+    _ = lapDuhNormConst (V := V) alpha K T := by
+      unfold lapDuhNormConst
+      push_cast
+      apply Finset.sum_congr rfl
+      intro i _
+      exact (Real.coe_toNNReal _
+        (lapDuhNormConst_term_nonneg (V := V) halpha0 K hT i)).symm
 
 theorem heatLapDuh_parabolic_norm_sub_le_of_holder
     {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
@@ -1620,6 +1790,35 @@ theorem heatDuhTimeCandidateField_holderWith_restrict_of_holder
   simpa only [heatDuhTimeCandidateField, heatDuhTimeCandidate,
     heatLapDuhField, Set.restrict_apply, Pi.add_apply] using hsource.add hlap
 
+theorem parabolicTimeDerivative_norm_le_of_heatDuhTimeCandidate
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {T : Real} (hT : 0 ≤ T) (u f : Real → V → F)
+    (hbound : ∀ r ∈ Icc (0 : Real) T, ∀ x : V, ‖f r x‖ ≤ B)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hrealize : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      HasDerivAt (fun t : Real ↦ u t p.space)
+        (heatDuhTimeCandidateField f p) p.time)
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ i : Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r)
+          ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t)))
+    (p : ParabolicPoint V)
+    (hp : p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ) :
+    ‖parabolicTimeDerivative u p‖ ≤
+      B + lapDuhNormConst (V := V) alpha K T := by
+  have heq : parabolicTimeDerivative u p = heatDuhTimeCandidateField f p := by
+    unfold parabolicTimeDerivative
+    rw [(hrealize p hp).hasFDerivAt.fderiv]
+    simp
+  rw [heq]
+  unfold heatDuhTimeCandidateField heatDuhTimeCandidate
+  exact (norm_add_le _ _).trans
+    (add_le_add (hbound p.time ⟨hp.1.1.le, hp.1.2⟩ p.space)
+      (heatLapDuh_norm_le_of_holder halpha0 halpha1 hT f hf hmeas hp.1 p.space))
+
 theorem parabolicTimeDerivative_holderWith_restrict_of_heatDuhTimeCandidate
     {alpha K C : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
     {T : Real} (u f : Real → V → F)
@@ -1698,6 +1897,73 @@ theorem eParabolicC2HolderGaugeOn_le_of_heat_potential_jets
   · exact parabolicTimeDerivative_holderWith_restrict_of_heatDuhTimeCandidate
       halpha0 halpha1 u f hf hsource htimeRealize (fun t ht x i => by
         simpa using hmeas t ht x (fun _ => i))
+
+def heatPotentialC2HolderGaugeConst
+    (alpha K B Csource C0 C1 : NNReal) (T : Real) : ENNReal :=
+  C0 + C1 + d2DuhJetNormConst (V := V) alpha K T +
+    (B + lapDuhNormConst (V := V) alpha K T) +
+    d2DuhJetHolderConst (V := V) alpha K +
+    (Csource + Real.toNNReal
+      (lapDuhParabolicHolderConst (V := V) alpha K))
+
+theorem eParabolicC2HolderGaugeOn_le_of_heat_potential_lower_jets
+    {alpha K B Csource C0 C1 : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (hT : 0 ≤ T) (u f : Real → V → F)
+    (hzero : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ‖parabolicSpatialJet 0 u p‖ ≤ C0)
+    (hone : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ‖parabolicSpatialJet 1 u p‖ ≤ C1)
+    (hbound : ∀ r ∈ Icc (0 : Real) T, ∀ x : V, ‖f r x‖ ≤ B)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hsource : HolderWith Csource alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (fun p ↦ f p.time p.space)))
+    (hspaceRealize : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ∀ m : Fin 2 → V,
+        parabolicSpatialJet 2 u p m =
+          heatD2Duh p.time (m 0) (m 1) f p.space)
+    (htimeRealize : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      HasDerivAt (fun t : Real ↦ u t p.space)
+        (heatDuhTimeCandidateField f p) p.time)
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ β : Fin 2 → Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r)
+          ((stdOrthonormalBasis Real V) (β 0))
+          ((stdOrthonormalBasis Real V) (β 1)) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≤
+      heatPotentialC2HolderGaugeConst (V := V)
+        alpha K B Csource C0 C1 T := by
+  let Cspatial : Nat → NNReal := fun j =>
+    match j with
+    | 0 => C0
+    | 1 => C1
+    | _ => d2DuhJetNormConst (V := V) alpha K T
+  have hspatial : ∀ j < 3,
+      ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+        ‖parabolicSpatialJet j u p‖ ≤ Cspatial j := by
+    intro j hj p hp
+    interval_cases j
+    · exact hzero p hp
+    · exact hone p hp
+    · exact parabolicSpatialJet_two_norm_le_of_heatD2Duh
+        halpha0 halpha1.le hT u f hf hspaceRealize hmeas p hp
+  have htime : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ‖parabolicTimeDerivative u p‖ ≤
+        B + lapDuhNormConst (V := V) alpha K T :=
+    fun p hp => parabolicTimeDerivative_norm_le_of_heatDuhTimeCandidate
+      halpha0 halpha1.le hT u f hbound hf htimeRealize
+        (fun t ht x i => by simpa using hmeas t ht x (fun _ => i)) p hp
+  have hraw := eParabolicC2HolderGaugeOn_le_of_heat_potential_jets
+    halpha0 halpha1 u f Cspatial
+    (B + lapDuhNormConst (V := V) alpha K T)
+    hspatial htime hf hsource hspaceRealize htimeRealize hmeas
+  unfold heatPotentialC2HolderGaugeConst
+  convert hraw using 1
+  norm_num [Cspatial, Finset.sum_range_succ]
 
 end Convolution
 
