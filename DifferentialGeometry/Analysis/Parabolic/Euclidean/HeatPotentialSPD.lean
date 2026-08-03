@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Schauder.Scaling
 
 noncomputable section
 
-open Matrix Real Set
+open Matrix MeasureTheory Real Set
 open scoped Interval NNReal RealInnerProductSpace Topology
 
 namespace DifferentialGeometry.Analysis.Parabolic.Euclidean
@@ -29,6 +29,20 @@ def spdSourceHolderConst (A : Matrix n n Real) (hA : A.PosDef)
 def spdHeatDuh (A : Matrix n n Real) (hA : A.PosDef) (t : Real)
     (f : Real → BoundedContinuousFunction (Euc n) F) (x : Euc n) : F :=
   heatDuh t (spdHeatSource A hA f) ((spdSqrtEquiv A hA).symm x)
+
+def spdHeatDuhGradient (A : Matrix n n Real) (hA : A.PosDef) (t : Real)
+    (f : Real → BoundedContinuousFunction (Euc n) F) (x : Euc n) :
+    Euc n →L[Real] F :=
+  (heatDuhGradientMap t (spdHeatSource A hA f)
+    ((spdSqrtEquiv A hA).symm x)).comp
+      ((spdSqrtEquiv A hA).symm : Euc n →L[Real] Euc n)
+
+def spdHeatDuhHessian (A : Matrix n n Real) (hA : A.PosDef) (t : Real)
+    (f : Real → BoundedContinuousFunction (Euc n) F) (x : Euc n) :
+    Euc n →L[Real] Euc n →L[Real] F :=
+  pushHess (F := F) (spdSqrtEquiv A hA).symm
+    (heatDuhHessian t (spdHeatSource A hA f)
+      ((spdSqrtEquiv A hA).symm x))
 
 def eSpdParabolicC2HolderGaugeOn
     (A : Matrix n n Real) (hA : A.PosDef) (alpha : NNReal)
@@ -86,6 +100,143 @@ theorem spdHeatDuh_schauder_estimate
       (spdHeatSource_parabolic_holder A hA f hsource)
   unfold eSpdParabolicC2HolderGaugeOn spdHeatDuh
   simpa only [ContinuousLinearEquiv.symm_apply_apply] using h
+
+theorem spdHeatDuh_matrixLap
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {S t : Real} (ht : t ∈ Ioc (0 : Real) S)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (f : Real → BoundedContinuousFunction (Euc n) F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun p => f p.time p.space)))
+    (x : Euc n) :
+    matrixLap A (spdHeatDuhHessian A hA t f x) =
+      heatLapDuh t (fun s y => spdHeatSource A hA f s y)
+        ((spdSqrtEquiv A hA).symm x) := by
+  let L := spdSqrtEquiv A hA
+  let fp := spdHeatSource A hA f
+  let H := heatDuhHessian t fp (L.symm x)
+  have hbound' : ∀ s ∈ Icc (0 : Real) t, ‖fp s‖ ≤ B := by
+    intro s hs
+    change ‖spdHeatSource A hA f s‖ ≤ B
+    rw [spdHeatSource_norm]
+    exact hbound s ⟨hs.1, hs.2.trans ht.2⟩
+  have hsource' := spdHeatSource_parabolic_holder A hA f hsource
+  have hf : ∀ s ∈ Icc (0 : Real) t,
+      HolderWith (spdSourceHolderConst A hA alpha K) alpha (fp s) := by
+    intro s hs
+    exact holderWith_slice_of_parabolicCylinder
+      (f := fun r y => fp r y) hsource'
+      ⟨hs.1, hs.2.trans ht.2⟩
+  have hm1 : ∀ z : Euc n, AEStronglyMeasurable
+      (fun s : Real => heatSupGradient (t - s) (fp s) z)
+      (volume.restrict (uIoc (0 : Real) t)) := fun z =>
+    heatSupGradient_timeSource_aestronglyMeasurable_of_parabolic_holder
+      halpha0 ht fp hsource' z
+  have hm2 : ∀ z : Euc n, AEStronglyMeasurable
+      (fun s : Real => heatSupHessian (t - s) (fp s) z)
+      (volume.restrict (uIoc (0 : Real) t)) := fun z =>
+    heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
+      halpha0 ht fp hsource' z
+  change matrixLap A (pushHess L.symm H) = _
+  calc
+    matrixLap A (pushHess L.symm H) = factorLap L (pushHess L.symm H) :=
+      (spd_factorLap A hA _).symm
+    _ = lapEval H := factorLap_pull L H
+    _ = ∑ i : Fin (Module.finrank Real (Euc n)),
+        H ((stdOrthonormalBasis Real (Euc n)) i)
+          ((stdOrthonormalBasis Real (Euc n)) i) :=
+      lapEval_basis (stdOrthonormalBasis Real (Euc n)) H
+    _ = ∑ i : Fin (Module.finrank Real (Euc n)),
+        heatD2Duh t ((stdOrthonormalBasis Real (Euc n)) i)
+          ((stdOrthonormalBasis Real (Euc n)) i)
+          (fun s y => fp s y) (L.symm x) := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      exact heatDuhHessian_apply halpha0 halpha1 ht.1 fp hbound' hf hm1 hm2
+        (L.symm x) _ _
+    _ = heatLapDuh t (fun s y => fp s y) (L.symm x) := rfl
+
+theorem spdHeatDuh_pde
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S t : Real} (ht : t ∈ Ioo (0 : Real) S)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (f : Real → BoundedContinuousFunction (Euc n) F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun p => f p.time p.space)))
+    (x : Euc n) :
+    HasFDerivAt (spdHeatDuh A hA t f)
+        (spdHeatDuhGradient A hA t f x) x ∧
+      HasFDerivAt (spdHeatDuhGradient A hA t f)
+        (spdHeatDuhHessian A hA t f x) x ∧
+      HasDerivAt (fun q : Real => spdHeatDuh A hA q f x)
+        (matrixLap A (spdHeatDuhHessian A hA t f x) + f t x) t := by
+  let L := spdSqrtEquiv A hA
+  let fp := spdHeatSource A hA f
+  have ht' : t ∈ Ioc (0 : Real) S := ⟨ht.1, ht.2.le⟩
+  have hbound' : ∀ s ∈ Icc (0 : Real) t, ‖fp s‖ ≤ B := by
+    intro s hs
+    change ‖spdHeatSource A hA f s‖ ≤ B
+    rw [spdHeatSource_norm]
+    exact hbound s ⟨hs.1, hs.2.trans ht.2.le⟩
+  have hsource' := spdHeatSource_parabolic_holder A hA f hsource
+  have hf : ∀ s ∈ Icc (0 : Real) S,
+      HolderWith (spdSourceHolderConst A hA alpha K) alpha (fp s) := by
+    intro s hs
+    exact holderWith_slice_of_parabolicCylinder
+      (f := fun r y => fp r y) hsource' hs
+  have hf' : ∀ s ∈ Icc (0 : Real) t,
+      HolderWith (spdSourceHolderConst A hA alpha K) alpha (fp s) := by
+    intro s hs
+    exact hf s ⟨hs.1, hs.2.trans ht.2.le⟩
+  have hm0 : ∀ z : Euc n, AEStronglyMeasurable
+      (fun s : Real => heatSup (t - s) (fp s) z)
+      (volume.restrict (uIoc (0 : Real) t)) := fun z =>
+    heatSup_timeSource_aestronglyMeasurable_of_parabolic_holder
+      halpha0 ht' fp hsource' z
+  have hm1 : ∀ z : Euc n, AEStronglyMeasurable
+      (fun s : Real => heatSupGradient (t - s) (fp s) z)
+      (volume.restrict (uIoc (0 : Real) t)) := fun z =>
+    heatSupGradient_timeSource_aestronglyMeasurable_of_parabolic_holder
+      halpha0 ht' fp hsource' z
+  have hm2 : ∀ z : Euc n, AEStronglyMeasurable
+      (fun s : Real => heatSupHessian (t - s) (fp s) z)
+      (volume.restrict (uIoc (0 : Real) t)) := fun z =>
+    heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
+      halpha0 ht' fp hsource' z
+  have hv := (heatDuh_hasFDerivAt ht.1 fp hbound' hm0 hm1 (L.symm x)).comp
+    x L.symm.hasFDerivAt
+  have hg0 := heatDuhGradientMap_hasFDerivAt halpha0 halpha1.le ht.1 fp
+    hbound' hf' hm1 hm2 (L.symm x)
+  have hg1 := hg0.comp x L.symm.hasFDerivAt
+  have hg := (precompJet (F := F) L.symm).hasFDerivAt.comp x hg1
+  have hsourceOpen : HolderWith (spdSourceHolderConst A hA alpha K) alpha
+      ((parabolicCylinder (Ioc (0 : Real) S) Set.univ).restrict
+        (fun p => fp p.time p.space)) := by
+    rw [HolderWith.restrict_iff] at hsource' ⊢
+    exact hsource'.mono fun p hp => ⟨⟨hp.1.1.le, hp.1.2⟩, hp.2⟩
+  have hm2all : ∀ q ∈ Ioc (0 : Real) S, ∀ z : Euc n,
+      AEStronglyMeasurable
+        (fun s : Real => heatSupHessian (q - s) (fp s) z)
+        (volume.restrict (uIoc (0 : Real) q)) := fun q hq z =>
+    heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
+      halpha0 hq fp (spdHeatSource_parabolic_holder A hA f hsource) z
+  have htime := heatDuh_time halpha0 halpha1 ht fp hf hsourceOpen hm2all (L.symm x)
+  have hlap := spdHeatDuh_matrixLap halpha0 halpha1.le ht' A hA f
+    hbound hsource x
+  refine ⟨?_, ?_, ?_⟩
+  · simpa only [spdHeatDuh, spdHeatDuhGradient, L, Function.comp_apply,
+      ContinuousLinearMap.comp_apply] using hv
+  · simpa only [spdHeatDuhGradient, spdHeatDuhHessian, L,
+      Function.comp_apply, ContinuousLinearMap.comp_apply] using hg
+  · rw [hlap]
+    simpa only [spdHeatDuh, fp, spdHeatSource, linPullBcf_apply,
+      heatDuhTimeCandidateField, heatDuhTimeCandidate, parabolicPoint_time,
+      parabolicPoint_space, L, ContinuousLinearEquiv.apply_symm_apply,
+      add_comm] using htime
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
