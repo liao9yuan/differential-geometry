@@ -45,6 +45,20 @@ def eSupNormOn (s : Set X) (f : X → F) : ENNReal :=
   ⨆ x : s, ENNReal.ofReal ‖f x‖
 
 omit [MetricSpace X] in
+theorem eSupNormOn_add_le (s : Set X) (f g : X → F) :
+    eSupNormOn s (f + g) ≤ eSupNormOn s f + eSupNormOn s g := by
+  apply iSup_le
+  intro x
+  calc
+    ENNReal.ofReal ‖f x + g x‖ ≤ ENNReal.ofReal (‖f x‖ + ‖g x‖) :=
+      ENNReal.ofReal_le_ofReal (norm_add_le (f x) (g x))
+    _ = ENNReal.ofReal ‖f x‖ + ENNReal.ofReal ‖g x‖ := by
+      rw [ENNReal.ofReal_add (norm_nonneg _) (norm_nonneg _)]
+    _ ≤ eSupNormOn s f + eSupNormOn s g := by
+      exact add_le_add (le_iSup (fun y : s ↦ ENNReal.ofReal ‖f y‖) x)
+        (le_iSup (fun y : s ↦ ENNReal.ofReal ‖g y‖) x)
+
+omit [MetricSpace X] in
 theorem eSupNormOn_sub_le (s : Set X) (f g : X → F) :
     eSupNormOn s (f - g) ≤ eSupNormOn s f + eSupNormOn s g := by
   apply iSup_le
@@ -304,6 +318,14 @@ section Spatial
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
   [NormedSpace Real F]
 
+omit [NormedSpace Real V] [NormedSpace Real F] in
+theorem eHolderSeminormOn_add_le
+    (alpha : NNReal) (s : Set X) (f g : X → F) :
+    eHolderSeminormOn alpha s (f + g) ≤
+      eHolderSeminormOn alpha s f + eHolderSeminormOn alpha s g := by
+  unfold eHolderSeminormOn
+  exact eHolderNorm_add_le
+
 omit [NormedSpace Real V] in
 theorem eHolderSeminormOn_sub_le
     (alpha : NNReal) (s : Set X) (f g : X → F) :
@@ -327,6 +349,42 @@ def eContDiffHolderGaugeOn (k : Nat) (alpha : NNReal)
     (s : Set V) (f : V → F) : ENNReal :=
   (∑ j ∈ Finset.range (k + 1), eSupNormOn s (iteratedFDeriv Real j f)) +
     eHolderSeminormOn alpha s (iteratedFDeriv Real k f)
+
+theorem eContDiffHolderGaugeOn_add_le
+    (k : Nat) (alpha : NNReal) (s : Set V) (f g : V → F)
+    (hf : ContDiff Real k f) (hg : ContDiff Real k g) :
+    eContDiffHolderGaugeOn k alpha s (f + g) ≤
+      eContDiffHolderGaugeOn k alpha s f +
+        eContDiffHolderGaugeOn k alpha s g := by
+  have hjet : ∀ j ≤ k,
+      iteratedFDeriv Real j (f + g) =
+        iteratedFDeriv Real j f + iteratedFDeriv Real j g := by
+    intro j hj
+    apply iteratedFDeriv_add
+    · exact hf.of_le (by exact_mod_cast hj)
+    · exact hg.of_le (by exact_mod_cast hj)
+  unfold eContDiffHolderGaugeOn
+  calc
+    (∑ j ∈ Finset.range (k + 1),
+        eSupNormOn s (iteratedFDeriv Real j (f + g))) +
+        eHolderSeminormOn alpha s (iteratedFDeriv Real k (f + g)) ≤
+      (∑ j ∈ Finset.range (k + 1),
+        (eSupNormOn s (iteratedFDeriv Real j f) +
+          eSupNormOn s (iteratedFDeriv Real j g))) +
+        (eHolderSeminormOn alpha s (iteratedFDeriv Real k f) +
+          eHolderSeminormOn alpha s (iteratedFDeriv Real k g)) := by
+      gcongr with j hj
+      · rw [hjet j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))]
+        exact eSupNormOn_add_le s _ _
+      · rw [hjet k le_rfl]
+        exact eHolderSeminormOn_add_le alpha s _ _
+    _ = ((∑ j ∈ Finset.range (k + 1),
+          eSupNormOn s (iteratedFDeriv Real j f)) +
+          eHolderSeminormOn alpha s (iteratedFDeriv Real k f)) +
+        ((∑ j ∈ Finset.range (k + 1),
+          eSupNormOn s (iteratedFDeriv Real j g)) +
+          eHolderSeminormOn alpha s (iteratedFDeriv Real k g)) := by
+      simp only [Finset.sum_add_distrib, add_assoc, add_left_comm]
 
 theorem eContDiffHolderGaugeOn_sub_le
     (k : Nat) (alpha : NNReal) (s : Set V) (f g : V → F)
@@ -450,6 +508,12 @@ theorem parabolicPoint_time {V : Type*} (t : Real) (x : V) :
 theorem parabolicPoint_space {V : Type*} (t : Real) (x : V) :
     (parabolicPoint t x).space = x := rfl
 
+@[simp]
+theorem parabolicPoint_time_space {V : Type*} (p : ParabolicPoint V) :
+    parabolicPoint p.time p.space = p := by
+  rcases p with ⟨⟨t⟩, x⟩
+  rfl
+
 theorem dist_parabolicPoint {V : Type*} [PseudoMetricSpace V]
     (t s : Real) (x y : V) :
     dist (parabolicPoint t x) (parabolicPoint s y) =
@@ -548,6 +612,80 @@ def eParabolicC2HolderGaugeOn (alpha : NNReal)
     eSupNormOn Q (parabolicTimeDerivative u) +
     eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
     eHolderSeminormOn alpha Q (parabolicTimeDerivative u)
+
+theorem eParabolicC2HolderGaugeOn_add_le
+    (alpha : NNReal) (Q : Set (ParabolicPoint V))
+    (u v : Real → V → F)
+    (hu_space : ∀ t : Real, ContDiff Real 2 (u t))
+    (hv_space : ∀ t : Real, ContDiff Real 2 (v t))
+    (hu_time : ∀ x : V, Differentiable Real (fun t ↦ u t x))
+    (hv_time : ∀ x : V, Differentiable Real (fun t ↦ v t x)) :
+    eParabolicC2HolderGaugeOn alpha Q (fun t x ↦ u t x + v t x) ≤
+      eParabolicC2HolderGaugeOn alpha Q u +
+        eParabolicC2HolderGaugeOn alpha Q v := by
+  have hspatial : ∀ j ≤ 2,
+      parabolicSpatialJet j (fun t x ↦ u t x + v t x) =
+        parabolicSpatialJet j u + parabolicSpatialJet j v := by
+    intro j hj
+    funext p
+    unfold parabolicSpatialJet
+    change iteratedFDeriv Real j (u p.time + v p.time) p.space = _
+    rw [iteratedFDeriv_add
+      ((hu_space p.time).of_le (by exact_mod_cast hj))
+      ((hv_space p.time).of_le (by exact_mod_cast hj))]
+    rfl
+  have htime :
+      parabolicTimeDerivative (fun t x ↦ u t x + v t x) =
+        parabolicTimeDerivative u + parabolicTimeDerivative v := by
+    funext p
+    unfold parabolicTimeDerivative
+    change (fderiv Real
+        ((fun t ↦ u t p.space) + fun t ↦ v t p.space) p.time) 1 =
+      (fderiv Real (fun t ↦ u t p.space) p.time) 1 +
+        (fderiv Real (fun t ↦ v t p.space) p.time) 1
+    rw [fderiv_add (hu_time p.space p.time) (hv_time p.space p.time)]
+    exact ContinuousLinearMap.add_apply _ _ _
+  unfold eParabolicC2HolderGaugeOn
+  calc
+    (∑ j ∈ Finset.range 3,
+        eSupNormOn Q
+          (parabolicSpatialJet j (fun t x ↦ u t x + v t x))) +
+        eSupNormOn Q
+          (parabolicTimeDerivative (fun t x ↦ u t x + v t x)) +
+        eHolderSeminormOn alpha Q
+          (parabolicSpatialJet 2 (fun t x ↦ u t x + v t x)) +
+        eHolderSeminormOn alpha Q
+          (parabolicTimeDerivative (fun t x ↦ u t x + v t x)) ≤
+      (∑ j ∈ Finset.range 3,
+        (eSupNormOn Q (parabolicSpatialJet j u) +
+          eSupNormOn Q (parabolicSpatialJet j v))) +
+        (eSupNormOn Q (parabolicTimeDerivative u) +
+          eSupNormOn Q (parabolicTimeDerivative v)) +
+        (eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
+          eHolderSeminormOn alpha Q (parabolicSpatialJet 2 v)) +
+        (eHolderSeminormOn alpha Q (parabolicTimeDerivative u) +
+          eHolderSeminormOn alpha Q (parabolicTimeDerivative v)) := by
+      gcongr with j hj
+      · rw [hspatial j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))]
+        exact eSupNormOn_add_le Q _ _
+      · rw [htime]
+        exact eSupNormOn_add_le Q _ _
+      · rw [hspatial 2 le_rfl]
+        exact eHolderSeminormOn_add_le alpha Q _ _
+      · rw [htime]
+        exact eHolderSeminormOn_add_le alpha Q _ _
+    _ = ((∑ j ∈ Finset.range 3,
+          eSupNormOn Q (parabolicSpatialJet j u)) +
+          eSupNormOn Q (parabolicTimeDerivative u) +
+          eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
+          eHolderSeminormOn alpha Q (parabolicTimeDerivative u)) +
+        ((∑ j ∈ Finset.range 3,
+          eSupNormOn Q (parabolicSpatialJet j v)) +
+          eSupNormOn Q (parabolicTimeDerivative v) +
+          eHolderSeminormOn alpha Q (parabolicSpatialJet 2 v) +
+          eHolderSeminormOn alpha Q (parabolicTimeDerivative v)) := by
+      rw [Finset.sum_add_distrib]
+      abel
 
 theorem eParabolicC2HolderGaugeOn_sub_le
     (alpha : NNReal) (Q : Set (ParabolicPoint V))

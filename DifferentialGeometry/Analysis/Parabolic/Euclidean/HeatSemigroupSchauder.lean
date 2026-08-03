@@ -1,3 +1,4 @@
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamel
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialSchauder
 
 noncomputable section
@@ -468,6 +469,258 @@ theorem heatSup_schauder_estimate
       Set.univ).holderWith
   simpa only [heatSupSchauderConst, ENNReal.coe_add,
     ENNReal.coe_finset_sum] using h
+
+omit [CompleteSpace F] in
+theorem heatScaled_integrable (t : Real)
+    (u : BoundedContinuousFunction V F) (x : V) :
+    Integrable (fun z : V ↦
+      baseHeat z • u (x - heatScale t • z)) := by
+  refine ((baseHeat_int (V := V)).norm.mul_const ‖u‖).mono' ?_ ?_
+  · apply Continuous.aestronglyMeasurable
+    unfold baseHeat heatScale
+    fun_prop
+  · filter_upwards with z
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (baseHeat_nonneg z)]
+    simpa only [mul_comm] using
+      mul_le_mul_of_nonneg_left (u.norm_coe_le_norm _)
+        (baseHeat_nonneg z)
+
+omit [CompleteSpace F] in
+theorem heatScaled_space_sub_norm_le_of_holder
+    {alpha K : NNReal} (t : Real)
+    (u : BoundedContinuousFunction V F) (hu : HolderWith K alpha u)
+    (x y : V) :
+    ‖heatScaled t u x - heatScaled t u y‖ ≤
+      (K : Real) * dist x y ^ (alpha : Real) := by
+  have heq : heatScaled t u x - heatScaled t u y =
+      ∫ z : V, baseHeat z •
+        (u (x - heatScale t • z) - u (y - heatScale t • z)) := by
+    unfold heatScaled
+    rw [← integral_sub (heatScaled_integrable t u x)
+      (heatScaled_integrable t u y)]
+    apply integral_congr_ae
+    filter_upwards with z
+    rw [smul_sub]
+  rw [heq]
+  have hmajor : Integrable
+      (fun z : V ↦ ((K : Real) * dist x y ^ (alpha : Real)) * baseHeat z) :=
+    (baseHeat_int (V := V)).const_mul
+      ((K : Real) * dist x y ^ (alpha : Real))
+  calc
+    ‖∫ z : V, baseHeat z •
+        (u (x - heatScale t • z) - u (y - heatScale t • z))‖ ≤
+        ∫ z : V,
+          ((K : Real) * dist x y ^ (alpha : Real)) * baseHeat z := by
+      apply norm_integral_le_of_norm_le hmajor
+      filter_upwards with z
+      rw [norm_smul, Real.norm_eq_abs,
+        abs_of_nonneg (baseHeat_nonneg z)]
+      have hdist : dist (x - heatScale t • z)
+          (y - heatScale t • z) = dist x y := by
+        rw [dist_eq_norm, dist_eq_norm]
+        congr 1
+        abel
+      calc
+        baseHeat z *
+            ‖u (x - heatScale t • z) - u (y - heatScale t • z)‖ ≤
+            baseHeat z *
+              ((K : Real) * dist x y ^ (alpha : Real)) := by
+          rw [← dist_eq_norm, ← hdist]
+          exact mul_le_mul_of_nonneg_left
+            (hu.dist_le _ _) (baseHeat_nonneg z)
+        _ = ((K : Real) * dist x y ^ (alpha : Real)) * baseHeat z := by
+          ring
+    _ = (K : Real) * dist x y ^ (alpha : Real) := by
+      rw [integral_const_mul, integral_baseHeat, mul_one]
+
+omit [CompleteSpace F] in
+theorem heatScaled_time_sub_norm_le_of_holder
+    {alpha K : NNReal} (halpha : alpha ≤ 1)
+    (u : BoundedContinuousFunction V F) (hu : HolderWith K alpha u)
+    (t s : Real) (x : V) :
+    ‖heatScaled t u x - heatScaled s u x‖ ≤
+      (K : Real) * |heatScale t - heatScale s| ^ (alpha : Real) *
+        heatC0Holder (V := V) alpha := by
+  have heq : heatScaled t u x - heatScaled s u x =
+      ∫ z : V, baseHeat z •
+        (u (x - heatScale t • z) - u (x - heatScale s • z)) := by
+    unfold heatScaled
+    rw [← integral_sub (heatScaled_integrable t u x)
+      (heatScaled_integrable s u x)]
+    apply integral_congr_ae
+    filter_upwards with z
+    rw [smul_sub]
+  rw [heq]
+  let A : Real := (K : Real) *
+    |heatScale t - heatScale s| ^ (alpha : Real)
+  have hA : 0 ≤ A := mul_nonneg K.coe_nonneg
+    (Real.rpow_nonneg (abs_nonneg _) _)
+  have hmajor : Integrable
+      (fun z : V ↦ A * baseHeatHolder alpha z) :=
+    (baseHeatHolder_int (V := V) halpha).const_mul A
+  calc
+    ‖∫ z : V, baseHeat z •
+        (u (x - heatScale t • z) - u (x - heatScale s • z))‖ ≤
+        ∫ z : V, A * baseHeatHolder alpha z := by
+      apply norm_integral_le_of_norm_le hmajor
+      filter_upwards with z
+      rw [norm_smul, Real.norm_eq_abs,
+        abs_of_nonneg (baseHeat_nonneg z)]
+      have hdist : dist (x - heatScale t • z)
+          (x - heatScale s • z) =
+          |heatScale t - heatScale s| * ‖z‖ := by
+        rw [dist_eq_norm]
+        have heq' :
+            (x - heatScale t • z) - (x - heatScale s • z) =
+              (heatScale s - heatScale t) • z := by
+          module
+        rw [heq', norm_smul, Real.norm_eq_abs, abs_sub_comm]
+      calc
+        baseHeat z *
+            ‖u (x - heatScale t • z) - u (x - heatScale s • z)‖ ≤
+            baseHeat z * ((K : Real) *
+              (|heatScale t - heatScale s| * ‖z‖) ^
+                (alpha : Real)) := by
+          rw [← dist_eq_norm, ← hdist]
+          exact mul_le_mul_of_nonneg_left
+            (hu.dist_le _ _) (baseHeat_nonneg z)
+        _ = A * baseHeatHolder alpha z := by
+          rw [Real.mul_rpow (abs_nonneg _) (norm_nonneg _)]
+          unfold A baseHeatHolder
+          ring
+    _ = A * heatC0Holder (V := V) alpha := by
+      rw [integral_const_mul]
+      rfl
+    _ = (K : Real) * |heatScale t - heatScale s| ^ (alpha : Real) *
+        heatC0Holder (V := V) alpha := by rfl
+
+theorem abs_heatScale_sub_heatScale_le
+    {t s : Real} (ht : 0 ≤ t) (hs : 0 ≤ s) :
+    |heatScale t - heatScale s| ≤ Real.sqrt |t - s| := by
+  wlog hst : s ≤ t generalizing t s
+  · rw [abs_sub_comm (heatScale t), abs_sub_comm t]
+    exact this hs ht (le_of_not_ge hst)
+  have hsqrt : Real.sqrt s ≤ Real.sqrt t := Real.sqrt_le_sqrt hst
+  have hleft : 0 ≤ Real.sqrt t - Real.sqrt s := sub_nonneg.mpr hsqrt
+  have hright : 0 ≤ Real.sqrt (t - s) := Real.sqrt_nonneg _
+  have hmul : (Real.sqrt s) ^ 2 ≤ Real.sqrt s * Real.sqrt t := by
+    rw [pow_two]
+    exact mul_le_mul_of_nonneg_left hsqrt (Real.sqrt_nonneg s)
+  have hsquare : (Real.sqrt t - Real.sqrt s) ^ 2 ≤
+      (Real.sqrt (t - s)) ^ 2 := by
+    calc
+      (Real.sqrt t - Real.sqrt s) ^ 2 =
+          (Real.sqrt t) ^ 2 + (Real.sqrt s) ^ 2 -
+            2 * (Real.sqrt s * Real.sqrt t) := by ring
+      _ =
+          t + s - 2 * (Real.sqrt s * Real.sqrt t) := by
+        rw [Real.sq_sqrt ht, Real.sq_sqrt hs]
+      _ ≤ t - s := by
+        rw [Real.sq_sqrt hs] at hmul
+        nlinarith
+      _ = (Real.sqrt (t - s)) ^ 2 := by
+        rw [Real.sq_sqrt (sub_nonneg.mpr hst)]
+  unfold heatScale
+  rw [abs_of_nonneg (sub_nonneg.mpr hsqrt),
+    abs_of_nonneg (sub_nonneg.mpr hst)]
+  exact (sq_le_sq₀ hleft hright).mp hsquare
+
+def heatScaledParabolicHolderConst
+    (alpha K : NNReal) : NNReal :=
+  K * (1 + Real.toNNReal (heatC0Holder (V := V) alpha))
+
+omit [CompleteSpace F] in
+theorem heatScaled_parabolic_sub_norm_le_of_holder
+    {alpha K : NNReal} (halpha : alpha ≤ 1)
+    (u : BoundedContinuousFunction V F) (hu : HolderWith K alpha u)
+    {t s : Real} (ht : 0 ≤ t) (hs : 0 ≤ s) (x y : V) :
+    ‖heatScaled t u x - heatScaled s u y‖ ≤
+      (heatScaledParabolicHolderConst (V := V) alpha K : Real) *
+        dist (parabolicPoint t x) (parabolicPoint s y) ^ (alpha : Real) := by
+  let D : Real := dist (parabolicPoint t x) (parabolicPoint s y)
+  have hspace : dist x y ≤ D := by
+    unfold D
+    rw [dist_parabolicPoint]
+    exact le_max_right _ _
+  have htime : |heatScale t - heatScale s| ≤ D := by
+    refine (abs_heatScale_sub_heatScale_le ht hs).trans ?_
+    unfold D
+    rw [dist_parabolicPoint, Real.sqrt_eq_rpow]
+    exact le_max_left _ _
+  have hspacePow : dist x y ^ (alpha : Real) ≤ D ^ (alpha : Real) :=
+    Real.rpow_le_rpow dist_nonneg hspace alpha.coe_nonneg
+  have htimePow : |heatScale t - heatScale s| ^ (alpha : Real) ≤
+      D ^ (alpha : Real) :=
+    Real.rpow_le_rpow (abs_nonneg _) htime alpha.coe_nonneg
+  have hC0 : 0 ≤ heatC0Holder (V := V) alpha :=
+    heatC0Holder_nonneg alpha
+  calc
+    ‖heatScaled t u x - heatScaled s u y‖ ≤
+        ‖heatScaled t u x - heatScaled t u y‖ +
+          ‖heatScaled t u y - heatScaled s u y‖ := by
+      have hsplit : heatScaled t u x - heatScaled s u y =
+          (heatScaled t u x - heatScaled t u y) +
+            (heatScaled t u y - heatScaled s u y) := by abel
+      rw [hsplit]
+      exact norm_add_le _ _
+    _ ≤ (K : Real) * dist x y ^ (alpha : Real) +
+        (K : Real) * |heatScale t - heatScale s| ^ (alpha : Real) *
+          heatC0Holder (V := V) alpha :=
+      add_le_add
+        (heatScaled_space_sub_norm_le_of_holder t u hu x y)
+        (heatScaled_time_sub_norm_le_of_holder halpha u hu t s y)
+    _ ≤ (K : Real) * D ^ (alpha : Real) +
+        (K : Real) * D ^ (alpha : Real) *
+          heatC0Holder (V := V) alpha := by
+      gcongr
+    _ = (heatScaledParabolicHolderConst (V := V) alpha K : Real) *
+        D ^ (alpha : Real) := by
+      unfold heatScaledParabolicHolderConst
+      push_cast
+      rw [Real.coe_toNNReal _ hC0]
+      ring
+
+omit [CompleteSpace F] in
+theorem heatScaled_parabolic_holder
+    {alpha K : NNReal} (halpha : alpha ≤ 1)
+    (u : BoundedContinuousFunction V F) (hu : HolderWith K alpha u) :
+    HolderWith (heatScaledParabolicHolderConst (V := V) alpha K) alpha
+      ((parabolicCylinder (Ici (0 : Real)) Set.univ).restrict
+        (fun p ↦ heatScaled p.time u p.space)) := by
+  intro p q
+  rw [edist_dist, edist_dist]
+  have hreal := heatScaled_parabolic_sub_norm_le_of_holder halpha u hu
+    p.2.1 q.2.1 p.1.space q.1.space
+  rw [← dist_eq_norm] at hreal
+  refine (ENNReal.ofReal_le_ofReal hreal).trans_eq ?_
+  rw [ENNReal.ofReal_mul (by positivity :
+      0 ≤ (heatScaledParabolicHolderConst (V := V) alpha K : Real)),
+    ENNReal.ofReal_coe_nnreal,
+    ENNReal.ofReal_rpow_of_nonneg dist_nonneg alpha.coe_nonneg,
+    Subtype.dist_eq, parabolicPoint_time_space,
+    parabolicPoint_time_space]
+
+omit [CompleteSpace F] in
+theorem heatSup_parabolic_holder
+    {alpha K : NNReal} (halpha : alpha ≤ 1)
+    (u : BoundedContinuousFunction V F) (hu : HolderWith K alpha u) :
+    HolderWith (heatScaledParabolicHolderConst (V := V) alpha K) alpha
+      ((parabolicCylinder (Ioi (0 : Real)) Set.univ).restrict
+        (fun p ↦ heatSup p.time u p.space)) := by
+  have hscaled := heatScaled_parabolic_holder (V := V) halpha u hu
+  rw [HolderWith.restrict_iff] at hscaled ⊢
+  intro p hp q hq
+  have hp_pos : 0 < p.time := by simpa only [mem_Ioi] using hp.1
+  have hq_pos : 0 < q.time := by simpa only [mem_Ioi] using hq.1
+  have hp0 : p.time ∈ Ici (0 : Real) := by
+    simpa only [mem_Ici] using hp_pos.le
+  have hq0 : q.time ∈ Ici (0 : Real) := by
+    simpa only [mem_Ici] using hq_pos.le
+  have h := hscaled p ⟨hp0, hp.2⟩ q ⟨hq0, hq.2⟩
+  change edist (heatSup p.time u p.space) (heatSup q.time u q.space) ≤ _
+  rw [heatSup_scaled hp_pos u p.space,
+    heatSup_scaled hq_pos u q.space]
+  exact h
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
