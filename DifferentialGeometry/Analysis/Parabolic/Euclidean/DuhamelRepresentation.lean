@@ -7,6 +7,8 @@ open scoped NNReal RealInnerProductSpace Topology
 
 namespace DifferentialGeometry.Analysis.Parabolic.Euclidean
 
+open DifferentialGeometry.Analysis.Schauder
+
 variable {V F : Type*}
   [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
@@ -169,6 +171,31 @@ theorem heatScaled_sub_time_hasDerivAt
     abel
   · exact Eventually.of_forall fun _ ↦ rfl
 
+omit [CompleteSpace F] in
+theorem heatScaled_timeSource_intervalIntegrable_of_parabolic_holder
+    {alpha K B : NNReal} (halpha0 : 0 < alpha)
+    {t : Real} (ht : 0 < t)
+    (f : Real → BoundedContinuousFunction V F)
+    (hbound : ∀ s ∈ Icc (0 : Real) t, ‖f s‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) t) Set.univ).restrict
+        (fun p ↦ f p.time p.space)))
+    (x : V) :
+    IntervalIntegrable
+      (fun s ↦ heatScaled (t - s) (f s) x) volume 0 t := by
+  have hsup : IntervalIntegrable
+      (fun s ↦ heatSup (t - s) (f s) x) volume 0 t :=
+    heatDuh_int ht f hbound x
+      (heatSup_timeSource_aestronglyMeasurable_of_parabolic_holder
+        halpha0 ⟨ht, le_rfl⟩ f hsource x)
+  apply hsup.congr_ae
+  have hne : ∀ᵐ s ∂(volume : Measure Real), s ≠ t := by
+    simp [ae_iff, measure_singleton]
+  filter_upwards [ae_restrict_mem measurableSet_uIoc,
+    ae_restrict_of_ae (s := uIoc (0 : Real) t) hne] with s hs hst
+  rw [uIoc_of_le ht.le] at hs
+  exact heatSup_scaled (sub_pos.mpr (lt_of_le_of_ne hs.2 hst)) (f s) x
+
 theorem heatDuh_eq_of_zero_initial
     {t : Real} (ht : 0 < t)
     (u dtU : Real → BoundedContinuousFunction V F)
@@ -229,6 +256,31 @@ theorem heatDuh_eq_of_zero_initial
     exact heatSup_scaled (sub_pos.mpr (lt_of_le_of_ne hs.2 hst))
       (source s) x]
   simpa only [source, sub_zero] using hftc
+
+theorem heatDuh_eq_of_zero_initial_of_parabolic_holder
+    {alpha K B : NNReal} (halpha0 : 0 < alpha)
+    {t : Real} (ht : 0 < t)
+    (u dtU : Real → BoundedContinuousFunction V F)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : Real →
+      BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (huTime : ∀ s ∈ Ioo (0 : Real) t, HasDerivAt u (dtU s) s)
+    (hu : ∀ s ∈ Ioo (0 : Real) t, ∀ x,
+      HasFDerivAt (u s : V → F) (du s x) x)
+    (hdu : ∀ s ∈ Ioo (0 : Real) t, ∀ x,
+      HasFDerivAt (du s : V → V →L[Real] F) (d2u s x) x)
+    (huCont : Continuous u) (hu0 : u 0 = 0)
+    (hbound : ∀ s ∈ Icc (0 : Real) t,
+      ‖dtU s - coreLap (d2u s)‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) t) Set.univ).restrict
+        (fun p ↦ (dtU p.time - coreLap (d2u p.time)) p.space)))
+    (x : V) :
+    heatDuh t (fun s ↦ dtU s - coreLap (d2u s)) x = u t x := by
+  apply heatDuh_eq_of_zero_initial ht u dtU du d2u huTime hu hdu
+    huCont hu0 x
+  exact heatScaled_timeSource_intervalIntegrable_of_parabolic_holder
+    halpha0 ht (fun s ↦ dtU s - coreLap (d2u s)) hbound hsource x
 
 def linPullBcfCLM (L : V ≃L[Real] V) :
     BoundedContinuousFunction V F →L[Real]
@@ -354,6 +406,38 @@ theorem spdHeatDuh_eq_of_zero_initial
   rw [hsource] at hiso
   simpa only [spdHeatDuh, L, up, linPullBcf_apply,
     ContinuousLinearEquiv.apply_symm_apply] using hiso
+
+theorem spdHeatDuh_eq_of_zero_initial_of_parabolic_holder
+    {alpha K B : NNReal} (halpha0 : 0 < alpha)
+    {t : Real} (ht : 0 < t)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (u dtU f : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real →
+      BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ Ioo (0 : Real) t, HasDerivAt u (dtU s) s)
+    (hu : ∀ s ∈ Ioo (0 : Real) t, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ Ioo (0 : Real) t, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (hf : ∀ s x, f s x = dtU s x - matrixLap A (d2u s x))
+    (huCont : Continuous u) (hu0 : u 0 = 0)
+    (hbound : ∀ s ∈ Icc (0 : Real) t, ‖f s‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) t) Set.univ).restrict
+        (fun p ↦ f p.time p.space)))
+    (x : Euc n) :
+    spdHeatDuh A hA t f x = u t x := by
+  apply spdHeatDuh_eq_of_zero_initial ht A hA u dtU f du d2u
+    huTime hu hdu hf huCont hu0 x
+  apply heatScaled_timeSource_intervalIntegrable_of_parabolic_holder
+    (K := spdSourceHolderConst A hA alpha K) halpha0 ht
+      (spdHeatSource A hA f)
+  · intro s hs
+    rw [spdHeatSource_norm]
+    exact hbound s hs
+  · exact spdHeatSource_parabolic_holder A hA f hsource
 
 end SPD
 
