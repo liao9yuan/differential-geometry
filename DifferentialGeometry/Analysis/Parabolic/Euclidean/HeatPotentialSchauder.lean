@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSchauderTime
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialRealization
 import DifferentialGeometry.Analysis.Schauder.Holder
 import Mathlib.MeasureTheory.Integral.Prod
 
@@ -1964,6 +1965,59 @@ theorem eParabolicC2HolderGaugeOn_le_of_heat_potential_lower_jets
   unfold heatPotentialC2HolderGaugeConst
   convert hraw using 1
   norm_num [Cspatial, Finset.sum_range_succ]
+
+theorem eParabolicC2HolderGaugeOn_heatDuh_le_of_lower_jets
+    {alpha K B Csource C0 C1 : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (hT : 0 ≤ T)
+    (f : Real → BoundedContinuousFunction V F)
+    (hzero : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ‖parabolicSpatialJet 0 (fun t x => heatDuh t f x) p‖ ≤ C0)
+    (hone : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ‖parabolicSpatialJet 1 (fun t x => heatDuh t f x) p‖ ≤ C1)
+    (hbound : ∀ r ∈ Icc (0 : Real) T, ‖f r‖ ≤ B)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hsource : HolderWith Csource alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (fun p => f p.time p.space)))
+    (htimeRealize : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      HasDerivAt (fun t : Real => heatDuh t f p.space)
+        (heatDuhTimeCandidateField (fun r x => f r x) p) p.time)
+    (hmeas0 : ∀ t ∈ Ioc (0 : Real) T, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real => heatSup (t - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) t)))
+    (hmeas1 : ∀ t ∈ Ioc (0 : Real) T, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real => heatSupGradient (t - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) t)))
+    (hmeas2 : ∀ t ∈ Ioc (0 : Real) T, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real => heatSupHessian (t - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
+      (fun t x => heatDuh t f x) ≤
+      heatPotentialC2HolderGaugeConst (V := V)
+        alpha K B Csource C0 C1 T := by
+  apply eParabolicC2HolderGaugeOn_le_of_heat_potential_lower_jets
+    halpha0 halpha1 hT (fun t x => heatDuh t f x) (fun r x => f r x)
+      hzero hone
+  · intro r hr x
+    exact (f r).norm_coe_le_norm x |>.trans (hbound r hr)
+  · exact hf
+  · exact hsource
+  · intro p hp m
+    exact heatDuh_parabolicSpatialJet_two halpha0 halpha1.le hp.1.1 f
+      (fun s hs => hbound s ⟨hs.1, hs.2.trans hp.1.2⟩)
+      (fun s hs => hf s ⟨hs.1, hs.2.trans hp.1.2⟩)
+      (hmeas0 p.time hp.1) (hmeas1 p.time hp.1)
+      (hmeas2 p.time hp.1) p.space m
+  · exact htimeRealize
+  · intro t ht x β
+    exact heatD2Conv_time_aestronglyMeasurable ht.1 f
+      (hmeas2 t ht) ((stdOrthonormalBasis Real V) (β 0))
+      ((stdOrthonormalBasis Real V) (β 1)) x
 
 end Convolution
 

@@ -400,6 +400,77 @@ theorem heatD1Duh_hasFDerivAt
       (heatD2DuhMapMajor_intble (V := V) halpha0 ht K v) hdiff
   simpa only [G, DG, heatD1Duh, heatD2DuhMap] using h
 
+omit [CompleteSpace F] in
+private theorem heatD1Sup_time_aestronglyMeasurable
+    {t : Real} (ht : 0 < t)
+    (f : Real → BoundedContinuousFunction V F)
+    (hmeas : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real => heatSupGradient (t - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (v z : V) :
+    AEStronglyMeasurable
+      (fun s : Real => heatD1Sup (t - s) v (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)) := by
+  have hcomp := ((ContinuousLinearMap.apply Real F) v).continuous
+    |>.comp_aestronglyMeasurable (hmeas z)
+  apply hcomp.congr
+  have hne : ∀ᵐ s ∂(volume : Measure Real), s ≠ t := by
+    simp [ae_iff, measure_singleton]
+  filter_upwards [ae_restrict_mem measurableSet_uIoc,
+    ae_restrict_of_ae (s := uIoc (0 : Real) t) hne] with s hs hst
+  rw [uIoc_of_le ht.le] at hs
+  exact heatSupGradient_apply
+    (sub_pos.mpr (lt_of_le_of_ne hs.2 hst)) (f s) z v
+
+omit [CompleteSpace F] in
+private theorem heatD2ConvMap_time_aestronglyMeasurable
+    {t : Real} (ht : 0 < t)
+    (f : Real → BoundedContinuousFunction V F)
+    (hmeas : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real => heatSupHessian (t - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (v z : V) :
+    AEStronglyMeasurable
+      (fun s : Real => heatD2ConvMap (t - s) v (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)) := by
+  let L : (V →L[Real] (V →L[Real] F)) →L[Real] (V →L[Real] F) :=
+    ContinuousLinearMap.compL Real V (V →L[Real] F) F
+      ((ContinuousLinearMap.apply Real F) v)
+  have hcomp := L.continuous.comp_aestronglyMeasurable (hmeas z)
+  apply hcomp.congr
+  have hne : ∀ᵐ s ∂(volume : Measure Real), s ≠ t := by
+    simp [ae_iff, measure_singleton]
+  filter_upwards [ae_restrict_mem measurableSet_uIoc,
+    ae_restrict_of_ae (s := uIoc (0 : Real) t) hne] with s hs hst
+  rw [uIoc_of_le ht.le] at hs
+  unfold L
+  rw [ContinuousLinearMap.compL_apply]
+  exact heatSupHessian_eval_eq_heatD2ConvMap
+    (sub_pos.mpr (lt_of_le_of_ne hs.2 hst)) (f s) z v
+
+omit [CompleteSpace F] in
+theorem heatD2Conv_time_aestronglyMeasurable
+    {t : Real} (ht : 0 < t)
+    (f : Real → BoundedContinuousFunction V F)
+    (hmeas : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real => heatSupHessian (t - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (v w z : V) :
+    AEStronglyMeasurable
+      (fun s : Real => heatD2Conv (t - s) v w (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)) := by
+  have hcomp := ((ContinuousLinearMap.apply Real F) w).continuous
+    |>.comp_aestronglyMeasurable
+      (heatD2ConvMap_time_aestronglyMeasurable ht f hmeas v z)
+  apply hcomp.congr
+  have hne : ∀ᵐ s ∂(volume : Measure Real), s ≠ t := by
+    simp [ae_iff, measure_singleton]
+  filter_upwards [ae_restrict_mem measurableSet_uIoc,
+    ae_restrict_of_ae (s := uIoc (0 : Real) t) hne] with s hs hst
+  rw [uIoc_of_le ht.le] at hs
+  exact heatD2ConvMap_apply
+    (sub_pos.mpr (lt_of_le_of_ne hs.2 hst)) v (f s) z w
+
 theorem heatDuhHessian_apply
     {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {t : Real} (ht : 0 < t)
@@ -411,12 +482,6 @@ theorem heatDuhHessian_apply
       (volume.restrict (uIoc (0 : Real) t)))
     (hmeas2 : ∀ z : V, AEStronglyMeasurable
       (fun s : Real => heatSupHessian (t - s) (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
-    (hmeasD1 : ∀ v z : V, AEStronglyMeasurable
-      (fun s : Real => heatD1Sup (t - s) v (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
-    (hmeasD2 : ∀ v z : V, AEStronglyMeasurable
-      (fun s : Real => heatD2ConvMap (t - s) v (f s) z)
       (volume.restrict (uIoc (0 : Real) t)))
     (x w v : V) :
     heatDuhHessian t f x w v =
@@ -435,11 +500,13 @@ theorem heatDuhHessian_apply
     rw [← hfun]
     simpa only [Function.comp_apply] using heval
   have hraw := heatD1Duh_hasFDerivAt halpha0 halpha1 ht f hbound hf v
-    (hmeasD1 v) (hmeasD2 v) x
+    (heatD1Sup_time_aestronglyMeasurable ht f hmeas1 v)
+    (heatD2ConvMap_time_aestronglyMeasurable ht f hmeas2 v) x
   have hmaps := heval'.unique hraw
   have happly := congrArg (fun A : V →L[Real] F => A w) hmaps
   simpa only [L, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
-    heatD2DuhMap_apply halpha0 halpha1 ht f hf v x (hmeasD2 v x)] using happly
+    heatD2DuhMap_apply halpha0 halpha1 ht f hf v x
+      (heatD2ConvMap_time_aestronglyMeasurable ht f hmeas2 v x)] using happly
 
 theorem heatDuh_iteratedFDeriv_two_apply
     {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
@@ -456,12 +523,6 @@ theorem heatDuh_iteratedFDeriv_two_apply
     (hmeas2 : ∀ z : V, AEStronglyMeasurable
       (fun s : Real => heatSupHessian (t - s) (f s) z)
       (volume.restrict (uIoc (0 : Real) t)))
-    (hmeasD1 : ∀ v z : V, AEStronglyMeasurable
-      (fun s : Real => heatD1Sup (t - s) v (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
-    (hmeasD2 : ∀ v z : V, AEStronglyMeasurable
-      (fun s : Real => heatD2ConvMap (t - s) v (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
     (x : V) (m : Fin 2 → V) :
     iteratedFDeriv Real 2 (heatDuh t f) x m =
       heatD2Duh t (m 1) (m 0) (fun s => f s) x := by
@@ -473,7 +534,7 @@ theorem heatDuh_iteratedFDeriv_two_apply
     (heatDuhGradientMap_hasFDerivAt halpha0 halpha1 ht f hbound hf
       hmeas1 hmeas2 x).fderiv]
   exact heatDuhHessian_apply halpha0 halpha1 ht f hbound hf hmeas1 hmeas2
-    hmeasD1 hmeasD2 x (m 0) (m 1)
+    x (m 0) (m 1)
 
 theorem heatDuh_parabolicSpatialJet_two
     {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
@@ -490,12 +551,6 @@ theorem heatDuh_parabolicSpatialJet_two
     (hmeas2 : ∀ z : V, AEStronglyMeasurable
       (fun s : Real => heatSupHessian (t - s) (f s) z)
       (volume.restrict (uIoc (0 : Real) t)))
-    (hmeasD1 : ∀ v z : V, AEStronglyMeasurable
-      (fun s : Real => heatD1Sup (t - s) v (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
-    (hmeasD2 : ∀ v z : V, AEStronglyMeasurable
-      (fun s : Real => heatD2ConvMap (t - s) v (f s) z)
-      (volume.restrict (uIoc (0 : Real) t)))
     (x : V) (m : Fin 2 → V) :
     parabolicSpatialJet 2 (fun r : Real => heatDuh r f)
         (parabolicPoint t x) m =
@@ -503,7 +558,7 @@ theorem heatDuh_parabolicSpatialJet_two
   unfold parabolicSpatialJet
   simp only [parabolicPoint_time, parabolicPoint_space]
   rw [heatDuh_iteratedFDeriv_two_apply halpha0 halpha1 ht f hbound hf
-    hmeas0 hmeas1 hmeas2 hmeasD1 hmeasD2]
+    hmeas0 hmeas1 hmeas2]
   exact heatD2Duh_comm t (m 1) (m 0) (fun s => f s) x
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
