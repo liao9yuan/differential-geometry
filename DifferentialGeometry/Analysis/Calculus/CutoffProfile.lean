@@ -219,6 +219,36 @@ theorem deriv2_zero_of_ge {s : Real} (hs : 2 ≤ s) :
   rw [deriv_zero_of_ge hs]
   exact deriv_nonpos y
 
+theorem deriv3_zero_of_le {s : Real} (hs : s ≤ 1) :
+    deriv (deriv (deriv value)) s = 0 := by
+  have hle3 : (3 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
+    have h : ((3 : ℕ∞) : WithTop ℕ∞) ≤
+        (∞ : WithTop ℕ∞) := by
+      exact_mod_cast (le_top : (3 : ℕ∞) ≤ ⊤)
+    exact h
+  have hdiff : DifferentiableAt ℝ (deriv (deriv value)) s :=
+    (((contDiff.of_le hle3).deriv' (n := 2)).deriv' (n := 1)).differentiable
+      (by simp) s
+  exact (uniqueDiffOn_Iic 1 s hs).eq_deriv _
+    hdiff.hasDerivAt.hasDerivWithinAt
+    ((hasDerivWithinAt_const (x := s) (s := Iic 1) (c := (0 : ℝ))).congr_of_mem
+      (fun y hy ↦ deriv2_zero_of_le hy) hs)
+
+theorem deriv3_zero_of_ge {s : Real} (hs : 2 ≤ s) :
+    deriv (deriv (deriv value)) s = 0 := by
+  have hle3 : (3 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
+    have h : ((3 : ℕ∞) : WithTop ℕ∞) ≤
+        (∞ : WithTop ℕ∞) := by
+      exact_mod_cast (le_top : (3 : ℕ∞) ≤ ⊤)
+    exact h
+  have hdiff : DifferentiableAt ℝ (deriv (deriv value)) s :=
+    (((contDiff.of_le hle3).deriv' (n := 2)).deriv' (n := 1)).differentiable
+      (by simp) s
+  exact (uniqueDiffOn_Ici 2 s hs).eq_deriv _
+    hdiff.hasDerivAt.hasDerivWithinAt
+    ((hasDerivWithinAt_const (x := s) (s := Ici 2) (c := (0 : ℝ))).congr_of_mem
+      (fun y hy ↦ deriv2_zero_of_ge hy) hs)
+
 /-- The squared first derivative is bounded by a constant times the profile. -/
 theorem exists_deriv_sq :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ s : ℝ, (deriv value s) ^ 2 ≤ C * value s := by
@@ -323,5 +353,42 @@ theorem abs_deriv_le_derivBound (s : ℝ) :
 theorem abs_deriv2_le_derivBound (s : ℝ) :
     |deriv (deriv value) s| ≤ derivBound :=
   (Classical.choose_spec exists_deriv_bounds).2.2 s
+
+theorem exists_deriv3_bound :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ s : ℝ, |deriv (deriv (deriv value)) s| ≤ C := by
+  have hle3 : (3 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
+    have h : ((3 : ℕ∞) : WithTop ℕ∞) ≤
+        (∞ : WithTop ℕ∞) := by
+      exact_mod_cast (le_top : (3 : ℕ∞) ≤ ⊤)
+    exact h
+  have hvalue3 : ContDiff ℝ 3 value := contDiff.of_le hle3
+  have hderiv3 : Continuous (deriv (deriv (deriv value))) :=
+    ((hvalue3.deriv' (n := 2)).deriv' (n := 1)).continuous_deriv_one
+  obtain ⟨sMax, -, hsMax⟩ :=
+    (isCompact_Icc (a := (1 : ℝ)) (b := 2)).exists_isMaxOn
+      (Set.nonempty_Icc.2 (by norm_num)) hderiv3.norm.continuousOn
+  refine ⟨|deriv (deriv (deriv value)) sMax|, abs_nonneg _, ?_⟩
+  intro s
+  by_cases hs1 : s < (1 : ℝ)
+  · rw [deriv3_zero_of_le hs1.le, abs_zero]
+    exact abs_nonneg _
+  · by_cases hs2 : (2 : ℝ) < s
+    · rw [deriv3_zero_of_ge hs2.le, abs_zero]
+      exact abs_nonneg _
+    · push Not at hs1 hs2
+      simpa [Real.norm_eq_abs] using
+        (Filter.eventually_principal.mp hsMax s
+          (Set.mem_Icc.2 ⟨hs1, hs2⟩))
+
+noncomputable def deriv3Bound : ℝ :=
+  Classical.choose exists_deriv3_bound
+
+theorem deriv3Bound_nonneg : 0 ≤ deriv3Bound :=
+  (Classical.choose_spec exists_deriv3_bound).1
+
+theorem abs_deriv3_le_deriv3Bound (s : ℝ) :
+    |deriv (deriv (deriv value)) s| ≤ deriv3Bound :=
+  (Classical.choose_spec exists_deriv3_bound).2 s
 
 end DifferentialGeometry.Analysis.CutoffProfile
