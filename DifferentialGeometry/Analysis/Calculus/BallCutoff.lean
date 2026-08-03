@@ -24,15 +24,28 @@ def ballCutoffArgumentFDeriv [InnerProductSpace ℝ E]
 
 def ballCutoffArgumentFDeriv2 [InnerProductSpace ℝ E]
     (r R : ℝ) : E →L[ℝ] E →L[ℝ] ℝ :=
-  (R ^ 2 - r ^ 2)⁻¹ • ((2 : ℕ) • innerSL ℝ)
+  (R ^ 2 - r ^ 2)⁻¹ •
+    ((2 : ℕ) • (innerSL ℝ (E := E) : E →L[ℝ] E →L[ℝ] ℝ))
 
 def ballCutoffFDeriv [InnerProductSpace ℝ E]
     (center : E) (r R : ℝ) (x : E) : E →L[ℝ] ℝ :=
   deriv CutoffProfile.value (ballCutoffArgument center r R x) •
     ballCutoffArgumentFDeriv center r R x
 
+def ballCutoffFDeriv2 [InnerProductSpace ℝ E]
+    (center : E) (r R : ℝ) (x : E) : E →L[ℝ] E →L[ℝ] ℝ :=
+  deriv CutoffProfile.value (ballCutoffArgument center r R x) •
+      ballCutoffArgumentFDeriv2 r R +
+    (deriv (deriv CutoffProfile.value) (ballCutoffArgument center r R x) •
+        ballCutoffArgumentFDeriv center r R x).smulRight
+      (ballCutoffArgumentFDeriv center r R x)
+
 def ballCutoffFDerivBound (r R : ℝ) : ℝ :=
   CutoffProfile.derivBound * (2 * R / (R ^ 2 - r ^ 2))
+
+def ballCutoffFDeriv2Bound (r R : ℝ) : ℝ :=
+  CutoffProfile.derivBound *
+    (2 / (R ^ 2 - r ^ 2) + (2 * R / (R ^ 2 - r ^ 2)) ^ 2)
 
 theorem hasFDerivAt_ballCutoffArgument [InnerProductSpace ℝ E]
     (center : E) (r R : ℝ) (x : E) :
@@ -48,7 +61,8 @@ theorem hasFDerivAt_ballCutoffArgumentFDeriv [InnerProductSpace ℝ E]
     HasFDerivAt (ballCutoffArgumentFDeriv center r R)
       (ballCutoffArgumentFDeriv2 r R) x := by
   simpa [ballCutoffArgumentFDeriv, ballCutoffArgumentFDeriv2] using
-    (((R ^ 2 - r ^ 2)⁻¹ • ((2 : ℕ) • (innerSL ℝ (E := E)))).hasFDerivAt.comp x
+    (((R ^ 2 - r ^ 2)⁻¹ •
+      ((2 : ℕ) • (innerSL ℝ (E := E) : E →L[ℝ] E →L[ℝ] ℝ))).hasFDerivAt.comp x
       ((hasFDerivAt_id x).sub_const center))
 
 theorem hasFDerivAt_ballCutoff [InnerProductSpace ℝ E]
@@ -64,12 +78,44 @@ theorem hasFDerivAt_ballCutoff [InnerProductSpace ℝ E]
     hprofile.comp_hasFDerivAt x
       (hasFDerivAt_ballCutoffArgument center r R x)
 
+theorem hasFDerivAt_ballCutoffFDeriv [InnerProductSpace ℝ E]
+    (center : E) (r R : ℝ) (x : E) :
+    HasFDerivAt (ballCutoffFDeriv center r R)
+      (ballCutoffFDeriv2 center r R x) x := by
+  have hle2 : (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by
+    have h : ((2 : ℕ∞) : WithTop ℕ∞) ≤
+        (∞ : WithTop ℕ∞) := by
+      exact_mod_cast (le_top : (2 : ℕ∞) ≤ ⊤)
+    exact h
+  have hprofile2 : HasDerivAt (deriv CutoffProfile.value)
+      (deriv (deriv CutoffProfile.value) (ballCutoffArgument center r R x))
+      (ballCutoffArgument center r R x) :=
+    ((CutoffProfile.contDiff.of_le hle2).deriv' (n := 1)).differentiable
+      (by simp) (ballCutoffArgument center r R x) |>.hasDerivAt
+  have hcoefficient : HasFDerivAt
+      (fun y ↦ deriv CutoffProfile.value (ballCutoffArgument center r R y))
+      (deriv (deriv CutoffProfile.value) (ballCutoffArgument center r R x) •
+        ballCutoffArgumentFDeriv center r R x) x := by
+    simpa only [Function.comp_def] using
+      hprofile2.comp_hasFDerivAt x
+        (hasFDerivAt_ballCutoffArgument center r R x)
+  simpa only [ballCutoffFDeriv, ballCutoffFDeriv2] using
+    hcoefficient.smul
+      (hasFDerivAt_ballCutoffArgumentFDeriv center r R x)
+
 theorem ballCutoffFDerivBound_nonneg
     {r R : ℝ} (hr : 0 ≤ r) (hrR : r < R) :
     0 ≤ ballCutoffFDerivBound r R := by
   have hden : 0 < R ^ 2 - r ^ 2 := by nlinarith
   exact mul_nonneg CutoffProfile.derivBound_nonneg
     (div_nonneg (mul_nonneg (by norm_num) (hr.trans hrR.le)) hden.le)
+
+theorem ballCutoffFDeriv2Bound_nonneg
+    {r R : ℝ} (hr : 0 ≤ r) (hrR : r < R) :
+    0 ≤ ballCutoffFDeriv2Bound r R := by
+  have hden : 0 < R ^ 2 - r ^ 2 := by nlinarith
+  exact mul_nonneg CutoffProfile.derivBound_nonneg
+    (add_nonneg (div_nonneg (by norm_num) hden.le) (sq_nonneg _))
 
 theorem norm_ballCutoffArgumentFDeriv_le
     [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
@@ -85,6 +131,23 @@ theorem norm_ballCutoffArgumentFDeriv_le
     abs_of_pos hden]
   rw [div_eq_mul_inv]
   nlinarith [inv_pos.mpr hden, norm_nonneg (x - center)]
+
+theorem norm_ballCutoffArgumentFDeriv2_le
+    [InnerProductSpace ℝ E] {r R : ℝ}
+    (hr : 0 ≤ r) (hrR : r < R) :
+    ‖ballCutoffArgumentFDeriv2 (E := E) r R‖ ≤
+      2 / (R ^ 2 - r ^ 2) := by
+  have hden : 0 < R ^ 2 - r ^ 2 := by nlinarith
+  refine ContinuousLinearMap.opNorm_le_bound _
+    (div_nonneg (by norm_num) hden.le) ?_
+  intro v
+  change ‖(R ^ 2 - r ^ 2)⁻¹ • ((2 : ℕ) • innerSL ℝ v)‖ ≤
+    2 / (R ^ 2 - r ^ 2) * ‖v‖
+  rw [norm_smul, RCLike.norm_nsmul ℝ, innerSL_apply_norm,
+    nsmul_eq_mul, Real.norm_eq_abs, abs_inv, abs_of_pos hden,
+    div_eq_mul_inv]
+  ring_nf
+  exact le_refl ((R ^ 2 - r ^ 2)⁻¹ * ‖v‖ * (2 : ℝ))
 
 theorem norm_ballCutoffFDeriv_le
     [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
@@ -112,6 +175,94 @@ theorem norm_ballCutoffFDeriv_le
     rw [ballCutoffFDeriv, CutoffProfile.deriv_zero_of_ge harg, zero_smul,
       norm_zero]
     exact ballCutoffFDerivBound_nonneg hr hrR
+
+theorem norm_ballCutoffFDeriv2_le
+    [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
+    (hr : 0 ≤ r) (hrR : r < R) (x : E) :
+    ‖ballCutoffFDeriv2 center r R x‖ ≤ ballCutoffFDeriv2Bound r R := by
+  by_cases hx : dist x center ≤ R
+  · let d1 := ballCutoffArgumentFDeriv center r R x
+    let d2 := ballCutoffArgumentFDeriv2 (E := E) r R
+    let s1 := 2 * R / (R ^ 2 - r ^ 2)
+    let s2 := 2 / (R ^ 2 - r ^ 2)
+    have hd1 : ‖d1‖ ≤ s1 := norm_ballCutoffArgumentFDeriv_le hr hrR hx
+    have hd2 : ‖d2‖ ≤ s2 := norm_ballCutoffArgumentFDeriv2_le hr hrR
+    have hs1 : 0 ≤ s1 := by
+      have hden : 0 < R ^ 2 - r ^ 2 := by nlinarith
+      exact div_nonneg (mul_nonneg (by norm_num) (hr.trans hrR.le)) hden.le
+    refine ContinuousLinearMap.opNorm_le_bound _
+      (ballCutoffFDeriv2Bound_nonneg hr hrR) ?_
+    intro v
+    let a := ballCutoffArgument center r R x
+    have hd1v : |d1 v| ≤ s1 * ‖v‖ := by
+      rw [← Real.norm_eq_abs]
+      exact (d1.le_opNorm v).trans
+        (mul_le_mul_of_nonneg_right hd1 (norm_nonneg v))
+    have hd2v : ‖d2 v‖ ≤ s2 * ‖v‖ :=
+      (d2.le_opNorm v).trans
+        (mul_le_mul_of_nonneg_right hd2 (norm_nonneg v))
+    have hterm1 : ‖deriv CutoffProfile.value a • d2 v‖ ≤
+        (CutoffProfile.derivBound * s2) * ‖v‖ := by
+      rw [norm_smul, Real.norm_eq_abs]
+      calc
+        |deriv CutoffProfile.value a| * ‖d2 v‖ ≤
+            CutoffProfile.derivBound * (s2 * ‖v‖) :=
+          mul_le_mul (CutoffProfile.abs_deriv_le_derivBound a) hd2v
+            (norm_nonneg _) CutoffProfile.derivBound_nonneg
+        _ = (CutoffProfile.derivBound * s2) * ‖v‖ := by ring
+    have hcoefficient :
+        |deriv (deriv CutoffProfile.value) a| * |d1 v| ≤
+          CutoffProfile.derivBound * (s1 * ‖v‖) :=
+      mul_le_mul (CutoffProfile.abs_deriv2_le_derivBound a) hd1v
+        (abs_nonneg _) CutoffProfile.derivBound_nonneg
+    have hterm2 : ‖(deriv (deriv CutoffProfile.value) a * d1 v) • d1‖ ≤
+        (CutoffProfile.derivBound * s1 ^ 2) * ‖v‖ := by
+      rw [norm_smul, Real.norm_eq_abs, abs_mul]
+      calc
+        (|deriv (deriv CutoffProfile.value) a| * |d1 v|) * ‖d1‖ ≤
+            (CutoffProfile.derivBound * (s1 * ‖v‖)) * s1 :=
+          mul_le_mul hcoefficient hd1 (norm_nonneg _)
+            (mul_nonneg CutoffProfile.derivBound_nonneg
+              (mul_nonneg hs1 (norm_nonneg v)))
+        _ = (CutoffProfile.derivBound * s1 ^ 2) * ‖v‖ := by ring
+    change ‖deriv CutoffProfile.value a • d2 v +
+      (deriv (deriv CutoffProfile.value) a * d1 v) • d1‖ ≤
+        ballCutoffFDeriv2Bound r R * ‖v‖
+    calc
+      ‖deriv CutoffProfile.value a • d2 v +
+          (deriv (deriv CutoffProfile.value) a * d1 v) • d1‖ ≤
+          ‖deriv CutoffProfile.value a • d2 v‖ +
+            ‖(deriv (deriv CutoffProfile.value) a * d1 v) • d1‖ :=
+        norm_add_le _ _
+      _ ≤ (CutoffProfile.derivBound * s2) * ‖v‖ +
+          (CutoffProfile.derivBound * s1 ^ 2) * ‖v‖ :=
+        add_le_add hterm1 hterm2
+      _ = ballCutoffFDeriv2Bound r R * ‖v‖ := by
+        simp only [ballCutoffFDeriv2Bound, s1, s2]
+        ring
+  · have harg : 2 ≤ ballCutoffArgument center r R x := by
+      have hden : 0 < R ^ 2 - r ^ 2 := by nlinarith
+      have hR : 0 ≤ R := hr.trans hrR.le
+      have hdist : R ≤ ‖x - center‖ := by
+        simpa [dist_eq_norm] using (not_le.mp hx).le
+      have hsq : R ^ 2 ≤ ‖x - center‖ ^ 2 :=
+        (sq_le_sq₀ hR (norm_nonneg _)).2 hdist
+      have hquot : 1 ≤
+          (‖x - center‖ ^ 2 - r ^ 2) / (R ^ 2 - r ^ 2) := by
+        rw [le_div_iff₀ hden]
+        linarith
+      simp only [ballCutoffArgument]
+      linarith
+    have hz : ballCutoffFDeriv2 center r R x = 0 := by
+      ext v w
+      simp [ballCutoffFDeriv2, CutoffProfile.deriv_zero_of_ge harg,
+        CutoffProfile.deriv2_zero_of_ge harg, zero_smul,
+        ContinuousLinearMap.zero_smulRight]
+    rw [hz]
+    have hzero : ‖(0 : E →L[ℝ] E →L[ℝ] ℝ)‖ = 0 :=
+      ContinuousLinearMap.opNorm_zero
+    rw [hzero]
+    exact ballCutoffFDeriv2Bound_nonneg hr hrR
 
 theorem ballCutoff_contDiff [InnerProductSpace ℝ E]
     (center : E) (r R : ℝ) :
