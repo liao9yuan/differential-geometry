@@ -387,7 +387,8 @@ private theorem endo_joint
   simpa only [deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
     add_sub_cancel_left] using hsub
 
-private theorem lieRefold0_joint
+/-- The lower DeTurck refold coefficient is jointly smooth along the realized metric segment. -/
+theorem lieRefold_joint
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
     (hdelta : gFibreOpBound (I := I) (M := M) g
@@ -420,7 +421,7 @@ theorem rhsRefold0_joint
     g T hdelta hdeltaZ
   have hRefold := ricciRefold0_joint (I := I) (M := M)
     g T hdelta hdeltaZ
-  have hLie := lieRefold0_joint (I := I) (M := M)
+  have hLie := lieRefold_joint (I := I) (M := M)
     g g_bg T hdelta hdeltaZ
   have hEndo := endo_joint (I := I) (M := M)
     g g_bg T hdelta hdeltaZ

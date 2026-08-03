@@ -414,6 +414,48 @@ private theorem connDiffSection_realizedFam_jointContMDiffOn
   rw [appCcRS_toSection, raisedKoszul_toSection, sharpFlatEndoCc_toSection]
   rfl
 
+/-- The connection-contraction insertion operator varies jointly smoothly along a realized
+metric segment. -/
+theorem connIns_joint
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 4 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 4 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 4 I z) p.1
+        (show Tensor0SBundle.TensorRSSpace 3 4 I p.1 from
+          connContrCLM (I := I) 2 1 p.1
+            ((connDiffSection (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g₀).toSection p.1)))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 3 ℝ E)
+    (V₁ := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z)
+    (F₂ := Tensor0SBundle.Tensor0SModel 4 ℝ E)
+    (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z)
+    (φ := fun p : M × ℝ =>
+      (show Tensor0SBundle.TensorRSSpace 3 4 I p.1 from
+        connContrCLM (I := I) 2 1 p.1
+          ((connDiffSection (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g₀).toSection p.1)))
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+  intro D
+  have hD : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) p.1 (D p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+    D.contMDiff.comp_contMDiffOn contMDiffOn_fst
+  have h := connContrField_jointContMDiffOn (I := I) 2 1
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (fun p => (connDiffSection (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g₀).toSection p.1)
+    (connDiffSection_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ')
+    (fun p => D p.1) hD
+  refine h.congr (fun p _ => ?_)
+  exact congrArg (fun z => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
+    (E := fun x : M => Tensor0SBundle.Tensor0SSpace 4 I x) p.1 z) rfl
+
 private theorem covGradConnDiff_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -572,7 +614,9 @@ private theorem order0CLM_realizedFam_jointContMDiffOn
 
 set_option backward.isDefEq.respectTransparency false in
 
-private theorem fourTrace_realizedFam_jointContMDiffOn
+/-- The Ricci four-slot contraction carries jointly smooth covariant fields along a realized
+metric segment to jointly smooth two-tensors. -/
+theorem fourTrace_joint
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -634,7 +678,7 @@ theorem linearizedRicciConnDiffOrder1Fib_realizedFam_jointContMDiffOn
     Y.contMDiff.comp_contMDiffOn contMDiffOn_fst
   have hE1 := order1CLM_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
     (fun p => Y p.1) hYj
-  have hCK := fourTrace_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
+  have hCK := fourTrace_joint (I := I) g₀ T T' hδ hδ'
     (fun p => linearizedRicciConnDiffOrder1CLM (I := I) p.1
       ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g₀).toSection p.1)
       (Y p.1))
@@ -672,7 +716,7 @@ theorem linearizedRicciConnDiffOrder0Fib_realizedFam_jointContMDiffOn
     Y.contMDiff.comp_contMDiffOn contMDiffOn_fst
   have hE0 := order0CLM_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
     (fun p => Y p.1) hYj
-  have hCK := fourTrace_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
+  have hCK := fourTrace_joint (I := I) g₀ T T' hδ hδ'
     (fun p => linearizedRicciConnDiffOrder0CLM (I := I) p.1
       ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g₀).toSection p.1)
       ((covGrad (I := I) (M := M) g₀ 1 2

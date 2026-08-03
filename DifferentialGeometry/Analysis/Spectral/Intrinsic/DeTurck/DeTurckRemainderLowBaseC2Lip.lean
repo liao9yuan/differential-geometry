@@ -2072,6 +2072,80 @@ private theorem curvMono_h2_lip
           mul_le_mul_of_nonneg_left (add_le_add hs₁ hs₂) (by norm_num)
         _ = (2 * (K₁ + K₂) * (A * N + D)) ^ 2 := by ring
 
+set_option maxHeartbeats 1800000 in
+/-- A fixed-background curvature-refold monomial is bounded on intrinsic
+`H²` coefficient differences. -/
+theorem curv_pair_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S R : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4))
+        (D : ℝ), 0 ≤ D →
+        lowJetSq (I := I) (M := M) g 2 (S - R) ≤ D ^ 2 →
+        lowJetSq (I := I) (M := M) g 2
+            (curvatureRefoldMonomialCoeffField
+                (I := I) (M := M) g g
+                (ccTensorUnitValueSection (I := I) (M := M) g S)
+                (ccTensorUnitValueSection_contMDiff
+                  (I := I) (M := M) g S) σ -
+              curvatureRefoldMonomialCoeffField
+                (I := I) (M := M) g g
+                (ccTensorUnitValueSection (I := I) (M := M) g R)
+                (ccTensorUnitValueSection_contMDiff
+                  (I := I) (M := M) g R) σ) ≤
+          (C * D) ^ 2 := by
+  obtain ⟨ρ, C, hρ, hC, hlip⟩ :=
+    curvMono_h2_lip (I := I) (M := M) hDim g
+  refine ⟨C, hC, ?_⟩
+  intro S R σ D hD hSR
+  change c2JetSq (I := I) (M := M) g (S - R) ≤ D ^ 2 at hSR
+  change c2JetSq (I := I) (M := M) g
+      (curvatureRefoldMonomialCoeffField
+          (I := I) (M := M) g g
+          (ccTensorUnitValueSection (I := I) (M := M) g S)
+          (ccTensorUnitValueSection_contMDiff
+            (I := I) (M := M) g S) σ -
+        curvatureRefoldMonomialCoeffField
+          (I := I) (M := M) g g
+          (ccTensorUnitValueSection (I := I) (M := M) g R)
+          (ccTensorUnitValueSection_contMDiff
+            (I := I) (M := M) g R) σ) ≤ (C * D) ^ 2
+  let A : ℝ := Real.sqrt (c2JetSq (I := I) (M := M) g S)
+  have hA : 0 ≤ A := Real.sqrt_nonneg _
+  have hS : c2JetSq (I := I) (M := M) g S ≤ A ^ 2 := by
+    exact (Real.sq_sqrt
+      (jet3_nonneg_c2 (I := I) (M := M) g S)).symm.le
+  have hzero_app : ∀ (y : M) (v w : TangentSpace I y),
+      ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2) y v w = 0 := by
+    intro y v w
+    have hz : (0 : SmoothCcTensor g 0 2) =
+        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) :=
+      (zero_smul ℝ _).symm
+    rw [hz, ccTensorBilinSymm_smul]
+    ring
+  have hzero_tie : ∀ (y : M) (v w : TangentSpace I y),
+      g.inner y v w =
+        g.inner y v w + ccTensorBilinSymm (I := I) g
+          (0 : SmoothCcTensor g 0 2) y v w := by
+    intro y v w
+    rw [hzero_app, add_zero]
+  have hcc0 :
+      ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+          (0 : SmoothCcTensor g 0 2) = 0 := by
+    rw [show (0 : SmoothCcTensor g 0 2) =
+      (0 : ℝ) • (0 : SmoothCcTensor g 0 2) by simp,
+      ccTensorToHs_smul, zero_smul]
+  have hzero_norm :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (0 : SmoothCcTensor g 0 2)‖ ≤ ρ := by
+    rw [hcc0, norm_zero]
+    exact le_of_lt hρ
+  have hraw := hlip
+    (0 : SmoothCcTensor g 0 2) (0 : SmoothCcTensor g 0 2) g g
+    hzero_tie hzero_tie hzero_norm hzero_norm S R σ A D hA hD hS hSR
+  simpa only [sub_self, hcc0, norm_zero, mul_zero, zero_add] using hraw
+
 set_option maxHeartbeats 2400000 in
 private theorem lieRefold_pair_lip
     (hDim : Module.finrank ℝ E = 3)

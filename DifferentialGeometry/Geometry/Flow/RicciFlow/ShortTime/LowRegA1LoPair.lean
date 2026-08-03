@@ -5,7 +5,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLiftAffine
 # The radial low first-order action supplies the ShortTime core pair
 
 This module is the radius-aligned adapter from the intrinsic radial pair
-estimate to the `LowA1CorePair` input of the low-regularity affine bridge.
+estimate to the `LowA1CorePair` predicate, together with the ball-local
+uniform bound it yields for the completed low first-order coefficient.
+
+These are the producers for `lowBaseN`-shaped statements, whose first-order
+arm is `lowA1Lo`.  The `hfLo` bridge itself no longer runs through them: since
+`lowreg_N_affine` moved to the refolded first-order action, its first-order
+coefficient is the `FLo` supplied by `refold_time`.
 -/
 
 noncomputable section
@@ -149,52 +155,6 @@ theorem lowA1Lo_ball
   · refine hbound.trans ?_
     simpa only [C] using
       add_le_add (mul_le_mul_of_nonneg_left hv hK₀) (le_refl ‖F 0‖)
-
-/-- At every sufficiently small radial cutoff, the low-regularity Nemytskii
-nonlinearity is the frozen low-base affine action without an external
-first-order pair hypothesis. -/
-theorem lowreg_N_radial
-    (hDim : Module.finrank ℝ E = 3)
-    (g₀ : SmoothRiemannianMetric I M) :
-    ∃ ρ₀ : ℝ, 0 < ρ₀ ∧
-      ∀ {R ρ δ : ℝ} (hR : 0 < R) (hρ : 0 < ρ) (_ : ρ ≤ ρ₀)
-        (_ : R ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
-        (hδ : δ < 1)
-        (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀
-              (((1 : ℕ) : ℝ) + 1) S‖ ≤ R →
-            gFibreOpBound (I := I) (M := M) g₀
-              (ccTensorBilinSymm (I := I) g₀ S) δ)
-        (hreal' : ∀ S : SmoothCcTensor g₀ 0 2,
-          ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) S‖ ≤ ρ →
-            gFibreOpBound (I := I) (M := M) g₀
-              (ccTensorBilinSymm (I := I) g₀ S) δ)
-        (_ : Continuous
-          (lowRegN (I := I) (M := M) g₀ g₀ hR hδ hreal))
-        (_ : Continuous
-          (coreN (I := I) (M := M) g₀ g₀ hδ hreal))
-        (_ : Continuous
-          (lowA2Lo (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'))
-        (_ : ∀ S : SmoothCcTensor g₀ 0 2,
-          lowA2Lo (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
-              (ccToHsLin (I := I) (M := M) g₀ 2 (2 : ℝ) S) =
-            (lowCoreData (I := I) (M := M) g₀
-              hρ.le hδ0 hδ_le hreal' S).a2Lo (I := I) (M := M))
-        (w : lowerState (I := I) (M := M) g₀ 1 R),
-        tensorHsCongr (I := I) (M := M) g₀ 0 2
-            (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)
-            (lowRegN (I := I) (M := M) g₀ g₀ hR hδ hreal w) =
-          lowBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
-            (tensorHsCongr (I := I) (M := M) g₀ 0 2
-              (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num) w.1) := by
-  obtain ⟨ρ₀, hρ₀, hpair⟩ :=
-    lowA1Core_pair (I := I) (M := M) hDim g₀
-  refine ⟨ρ₀, hρ₀, ?_⟩
-  intro R ρ δ hR hρ hρ_le hRρ hδ0 hδ_le hδ hreal hreal'
-    hNcont hcore hA2cont hA2core w
-  exact lowreg_N_affine (I := I) (M := M) hDim g₀
-    hR hρ hRρ hδ0 hδ_le hδ hreal hreal' hNcont hcore hA2cont
-    hA2core (hpair hρ hρ_le hδ0 hδ_le hreal') w
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

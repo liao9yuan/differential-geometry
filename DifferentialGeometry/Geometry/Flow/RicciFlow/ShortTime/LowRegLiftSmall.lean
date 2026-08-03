@@ -258,6 +258,105 @@ theorem lift_small_two_bd {T c M : ℝ} {ZHi ZLo : Type*}
   lift_smallness hA1Hi hA1Lo hC2Hi hC2Lo hc0 hc1 hM hT hTle
     (norm_toLp_le_bd hA1Hi hM hHi) (norm_toLp_le_bd hA1Lo hM hLo)
 
+/-! ### The affine first-order size
+
+The refolded first-order families do not come with a pointwise operator bound
+that a producer can supply: maximal regularity controls the low trajectory only
+in `L²_t H³`, so the honest certificate is the affine time-`L²` bound of
+`memLp_clm_affine`,
+
+```
+‖A1‖_{L²(0,T)} ≤ A + √T · Z,   A = L · ‖duhH3‖ ≲ L · ‖f‖.
+```
+
+Only the second summand is small in `T`; the first is a genuine radius-side
+smallness, exactly like the second-order term `C₂`.  So the horizon absorbs `Z`
+alone and `A` is capped by the separate `T`-free margin `6 A < 1 - c`. -/
+
+/-- The closed horizon for a first-order family whose time-`L²` size is only
+*affine* in `√T` (`‖A1‖ ≤ A + √T · Z`).  Only the `√T`-carrying constant `Z`
+enters; the `√T`-free part `A` is capped by the margin of `lift_aff_arith`.
+
+The budget split is `c·T ≤ (1-c)/4` from the first cap and
+`3·√T·Z ≤ (1-c)/4` from the second, leaving `(1-c)/2` for `3A`. -/
+def lowregLiftHorizon' (c Z : ℝ) : ℝ :=
+  min 1 (min ((1 - c) / (4 * (c + 1))) ((1 - c) ^ 2 / (144 * (Z + 1) ^ 2)))
+
+theorem lowregLiftHorizon'_le_one {c Z : ℝ} : lowregLiftHorizon' c Z ≤ 1 :=
+  min_le_left _ _
+
+/-- The affine horizon is positive under the same sign conditions as
+`lowregLiftHorizon`: a genuine second-order contraction (`c < 1`) and a
+nonnegative zeroth-order size. -/
+theorem lowregLiftHorizon'_pos {c Z : ℝ} (hc0 : 0 ≤ c) (hc1 : c < 1)
+    (hZ : 0 ≤ Z) : 0 < lowregLiftHorizon' c Z := by
+  have h1c : (0 : ℝ) < 1 - c := by linarith
+  have hc : (0 : ℝ) < c + 1 := by linarith
+  have hZ1 : (0 : ℝ) < Z + 1 := by linarith
+  exact lt_min one_pos (lt_min (by positivity) (by positivity))
+
+/-- **The lift smallness from an affine first-order size, as pure arithmetic.**
+On the horizon `lowregLiftHorizon' c Z`, a second-order bound `C ≤ c` and a
+first-order time-`L²` size `V ≤ A + √T · Z` whose `√T`-free part obeys the
+margin `6 A < 1 - c` satisfy the contraction condition of `nonautL2_lift`.
+
+The total is at most `c + (1-c)/4 + 3A + (1-c)/4 < c + (1-c) = 1`. -/
+theorem lift_aff_arith {c A Z T C V : ℝ}
+    (hc0 : 0 ≤ c) (hc1 : c < 1) (hZ : 0 ≤ Z)
+    (hA : 6 * A < 1 - c)
+    (hT : 0 < T) (hTle : T ≤ lowregLiftHorizon' c Z)
+    (hCc : C ≤ c) (hV0 : 0 ≤ V) (hV : V ≤ A + Real.sqrt T * Z) :
+    C * (1 + T) + 2 * Real.sqrt (1 + T) * V < 1 := by
+  have h1c : (0 : ℝ) < 1 - c := by linarith
+  have hZ1 : (0 : ℝ) < Z + 1 := by linarith
+  have hT1 : T ≤ 1 := hTle.trans lowregLiftHorizon'_le_one
+  have hs0 : (0 : ℝ) ≤ Real.sqrt T := Real.sqrt_nonneg _
+  -- The second-order term spends a quarter of the budget `1 - c`.
+  have hTa : T ≤ (1 - c) / (4 * (c + 1)) :=
+    hTle.trans (le_trans (min_le_right _ _) (min_le_left _ _))
+  have hcT : c * T ≤ (1 - c) / 4 := by
+    have hden : (0 : ℝ) < 4 * (c + 1) := by linarith
+    rw [le_div_iff₀ hden] at hTa
+    nlinarith
+  -- On a horizon `≤ 1` the parabolic weight is bounded by `3/2`.
+  have hq : Real.sqrt (1 + T) ≤ 3 / 2 := by
+    have h := Real.sqrt_le_sqrt (show 1 + T ≤ (3 / 2 : ℝ) ^ 2 by nlinarith)
+    rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 3 / 2)] at h
+  -- The zeroth-order cap in the form `√T ≤ (1 - c) / (12 (Z + 1))`.
+  have hTb : T ≤ (1 - c) ^ 2 / (144 * (Z + 1) ^ 2) :=
+    hTle.trans (le_trans (min_le_right _ _) (min_le_right _ _))
+  have hsq : ((1 - c) / (12 * (Z + 1))) ^ 2 =
+      (1 - c) ^ 2 / (144 * (Z + 1) ^ 2) := by
+    rw [div_pow, mul_pow]
+    norm_num
+  have hs : Real.sqrt T ≤ (1 - c) / (12 * (Z + 1)) := by
+    have h := Real.sqrt_le_sqrt (hTb.trans_eq hsq.symm)
+    rwa [Real.sqrt_sq (by positivity)] at h
+  have hs' : Real.sqrt T * (12 * (Z + 1)) ≤ 1 - c := by
+    rw [← le_div_iff₀ (by linarith : (0 : ℝ) < 12 * (Z + 1))]
+    exact hs
+  have hzT : 3 * (Real.sqrt T * Z) ≤ (1 - c) / 4 := by nlinarith
+  have hfirst : Real.sqrt (1 + T) * V ≤ 3 / 2 * V :=
+    mul_le_mul_of_nonneg_right hq hV0
+  have hCT : C * T ≤ c * T := mul_le_mul_of_nonneg_right hCc hT.le
+  rw [show C * (1 + T) = C + C * T from by ring]
+  linarith
+
+/-- **One contraction condition from the affine time-`L²` certificate**, in the
+exact shape consumed by `lowreg_lift_two` / `nonautL2_lift`.  This is the
+`memLp_clm_affine` companion of `lift_small_toLp`: the producer supplies the
+affine bound `‖A1‖_{L²} ≤ A + √T · Z` instead of a pointwise operator bound,
+and the caller supplies the `T`-free margin `6 A < 1 - c`. -/
+theorem lift_small_aff {T c A Z : ℝ} {Y : Type*} [NormedAddCommGroup Y]
+    {A1 : ℝ → Y} (hA1 : MemLp A1 2 (timeMeasure T))
+    {C2 : ℝ≥0} (hC2 : (C2 : ℝ) ≤ c)
+    (hc0 : 0 ≤ c) (hc1 : c < 1) (hZ : 0 ≤ Z)
+    (hA : 6 * A < 1 - c)
+    (hT : 0 < T) (hTle : T ≤ lowregLiftHorizon' c Z)
+    (hnorm : ‖hA1.toLp A1‖ ≤ A + Real.sqrt T * Z) :
+    (C2 : ℝ) * (1 + T) + 2 * Real.sqrt (1 + T) * ‖hA1.toLp A1‖ < 1 :=
+  lift_aff_arith hc0 hc1 hZ hA hT hTle hC2 (norm_nonneg _) hnorm
+
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end

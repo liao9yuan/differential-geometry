@@ -750,3 +750,478 @@ Honest accounting: `ricci_flow_unif_existence` remains 0% because its endpoint
 proof still contains a placeholder.  Dedicated machinery is approximately
 70% complete; the whole HCG compactness project remains in the low single
 digits.
+
+## Planner update No. 88 (2026-07-31) - ARBITRARY-BACKGROUND LOW AFFINE CLOSED
+
+`ShortTime/LowRegBgAffine.lean` now assembles the completed low forcing with an
+independent fixed DeTurck background `gB`.  It exports the zero forcing
+`lowBaseForceBg`, the completed affine forcing `lowBaseNBg`, continuity, and
+the exact dense-extension identity `lowreg_N_bg_affine`.  The proof uses
+`lowCoreBg_split`, `lowA2LoBg`, and `lowA1LoBg` on the smooth core and then
+passes to the completed H2 target by density.  Focused and targeted
+verification are GREEN, and the module is placeholder-free.
+
+This corrects the remaining-frontier sentence in No. 87.  A general completed
+H3 state does not admit an exact smooth representative, so `force_hi_smooth`
+cannot be closed by producing such a representative from the actual packet.
+It remains a valid conditional smooth-core theorem, not the endpoint producer.
+
+The next genuine high-side frontier is a D4-free H2 pair estimate for the
+C0/high-A1 coefficient, local on H3 balls.  Use it to construct the continuous
+H3-to-H2 high A1 extension and its time-integrable forcing packet.  The low A1
+pair and arbitrary-background low affine identity are closed and must not be
+reopened.
+
+Honest accounting: `ricci_flow_unif_existence` itself remains 0% because its
+endpoint proof still contains a placeholder.  Dedicated machinery is
+approximately 72% complete; the whole HCG compactness project remains in the
+low single digits.
+
+## Planner update No. 89 (2026-08-01) - HONEST HIGH A1 TIME PACKET CLOSED
+
+The false global-Lipschitz high-A1 route is now fully superseded.  The
+dimension-three smooth-core estimate was completed in
+`DeTurckRemainderLowBaseH2Pair.lean`; `ShortTime/LowRegBgA1Pair.lean` transfers
+it to the same-background high action, and `ShortTime/LowRegBgTime.lean`
+constructs the ball-local completed high and low maps with their adjacent-scale
+commuting square.  `ShortTime/LowRegBgA1Time.lean` then freezes the canonical
+radial passenger along a measurable bounded H3 trajectory and supplies the
+high `H3 → H2` and low `H2 → H1` measurable, time-L2, uniformly bounded
+families.  Focused and targeted verification of each completed module are
+GREEN and the route is placeholder-free.
+
+No smooth representative of a general completed state is chosen, and no
+global affine estimate is asserted.  The time bounds are correctly local on
+the H3 state ball.  The old `liftA1Two_data` input `hlin` and the old
+`lowRegA2Total = principal + extra` family are not endpoint routes: the new
+`LowBaseActionData.C2` is already the complete small second-order deviation
+after subtraction of the fixed rough Laplacian, so adding the separate
+principal arm would double count it.
+
+The active brick is `ShortTime/LowRegBgA2Time.lean`.  At `g_bg = g`, it must
+transfer the smooth-core `c2_h2_small` estimate through the completed
+`lowA2HiBg`/`lowA2LoBg` maps, freeze the same H2 radial scalar on the H4 and H3
+passengers, and return measurable uniformly small compatible A2 families.
+After that packet is GREEN, combine it with the completed A1 packet and the
+existing low affine identity at `lowreg_realize_two`; do not revive the old
+all-order or separate-principal wrappers.
+
+Honest accounting: `ricci_flow_unif_existence` remains unstated/proved at this
+lane endpoint (0%; its single placeholder remains in
+`Evolution/ExtendViaUniqueness.lean`).  Its dedicated low-regularity machinery
+is approximately 76% complete; the whole HCG compactness project remains in
+the low single digits.
+
+## Planner update No. 90 (2026-08-01) - ACTUAL L2-H3 C1 TIME ARM CLOSED
+
+No. 89 records a valid bounded-trajectory packet, but it is not the packet
+supplied by the actual low-regularity solution: that state is in time `L2 H3`,
+not `L∞ H3`.  The complete-A1 bound in `LowRegBgA1Time.lean` therefore remains
+a conditional consumer and must not be used to close the endpoint.
+
+`ShortTime/LowRegBgC1Time.lean` now isolates the path-integrated `C1` arm, whose
+fixed-H2-ball coefficient estimate is genuinely affine in the independent H3
+size.  It constructs continuous completed maps on both adjacent scales,
+identifies them with one smooth-core action, proves their commuting square,
+and radializes the common passenger along every actual `L2_t H3` state.  The
+public `c1_bg_time` packet returns time-L2 operator certificates with affine
+Minkowski bound `L * ||u|| + sqrt T * Z`.  It introduces no H3/H4 smallness and
+no essentially bounded H3 trajectory.
+
+The complete A2 time packet in `LowRegBgA2Time.lean` is already GREEN, so it is
+not the active brick stated in No. 89.  The remaining first-order endpoint wall
+is C0: path-integrate the same-background C0 pair together with the completed
+arbitrary-background `lie0_bg_pair_h1` correction, then construct its
+radius-free time-integrable completed action.  Do not return to the obsolete
+global-affine full-A1 or separate-principal A2 routes.
+
+Focused verification, the named module refresh, and direct axiom inspection
+of `c1_bg_aff` and `c1_bg_time` are GREEN; the source is placeholder-free.
+
+Honest accounting: `ricci_flow_unif_existence` itself remains 0% because the
+endpoint proof is still absent.  Its dedicated low-regularity machinery is
+approximately 83% complete after the C1 time packet; the whole HCG compactness
+project remains in the low single digits.
+
+## Planner update No. 91 (2026-08-02) - C0CORE SPLIT CHAIN GREEN; C0PAIR CAPSTONE RESTORED
+
+Compile-stabilization pass, no new mathematics.  All fourteen chunks of the
+C0Core split (`Alg → Joint → Zero → One → {PairBase→PairCurv→PairDA→PairRic |
+PairEst | Amix} → CoeffPair → Integrate → Assemble → Core`) are focused +
+exact GREEN with current `.olean`s; the public `LowRegBgC0Core` endpoint
+(`c0CoreData`, `c0Core_self`, `c0CorePair`, `c0Coeff_aff`, `refold_low_split`)
+is preserved and the monolith OOM is resolved.  `LowRegBgC0Time` is GREEN
+after narrow import repair (`DenseExtension`, `NonautonomousL2Cross`); the
+split had dropped the monolith's `LowRegBgC1Time` import, and the closure gap
+was refilled narrowly at each consumer (`Assemble` ← `LowRegBaseForce`,
+`Core` ← `DeTurckRemainderLowBaseTime`) rather than re-importing C1Time.
+
+Separately, the `LowRegBgC0Pair` overwrite accident is now FULLY healed: the
+earlier 33-patch replay had restored only the intermediate `dlaBg_pair_h1`
+snapshot; the remaining 43 patches from the true authoring session
+(`rollout-2026-07-29T06-05-04`) were replayed with context-validated diffs,
+restoring `dlbIns_pair_h1`, `amixBg_pair_h1`, and the capstone
+`lie0_bg_pair_h1` (3401 lines, zero sorry, build 121 s; new SHA in
+`LowRegBgC0Pair.md`).  `LowRegBgA1Pair` compiles again on top of it (27 s),
+and the C1Time closure is current.
+
+`LowRegBgA1Refold.refold_time` (new, first elaboration) initially hit
+heartbeat-immune `whnf`/`isDefEq` deterministic timeouts — the signature of
+instance-tower unification divergence, here `MemLp.add` instantiated at the
+CLM space over the reducible `metricH3/H2/H1 = tensorHs` abbrevs.  Fixed
+structurally (route the time-`L²` membership through `memLp_clm_affine`
+exactly as `c0_time` does, so `MemLp.add` only ever sees `ℝ`); GREEN in ~27 s
+at the default term budget, statement unchanged (details in
+`LowRegBgA1Refold.md`).  `LowRegLiftAffine` then exposed one defeq-transparency
+regression (`LowA1CorePair`, a Prop wrapper passed where `extend_pair_apply`
+wants the literal ∀∃ form, no longer unfolds as a `def` at application
+positions) — fixed by declaring it `abbrev`, faithful to its docstring;
+focused 22 s + build 24 s GREEN.  The full mandated chain
+`Amix → CoeffPair → Integrate → Assemble → Core → C0Time → A1Refold →
+LiftAffine` is exact GREEN with current `.olean`s.
+
+The HfLo migration to the refolded `FLo` route also LANDED in this pass:
+`LowRegLiftHfLo.lean` now consumes a supplied `FLo` at the equation level
+(mirroring `lowreg_N_affine`'s hypothesis block) and invokes `refold_time`
+once at the packet level in `lowreg_hfLo_data`, which re-exports the obtained
+`FLo` existentially; `refoldAffA1` replaces `lowAffA1` (same slot type, so
+the `lowreg_lift_two` fixed-point shape at `LowRegLiftTwo.lean:169/:206` is
+unchanged), and `lowA1Lo` no longer appears in the file.  In
+`LowRegA1LoPair.lean` the stale `lowreg_N_radial` was REMOVED as unrepairable
+on the new route (its core formula would need `refoldCore.C1 = lowCoreData.C1`,
+which is false: `refoldCore.C1 = c0CoreData.C1 + lowCoreDataBg.C1`);
+`lowA1Core_pair`/`lowA1Lo_ball` are kept as the honest producers for
+`lowBaseN`-shaped statements.  Both modules focused + targeted-build GREEN
+(HfLo 24 s, A1LoPair 17 s), zero grep hits remain for the removed
+declarations, details in `LowRegLiftHfLo.md`.  This removes the module's
+dependence on the D₄-free `a1Lo` pair estimate but proves no new mathematics.
+
+Honest accounting: `ricci_flow_unif_existence` remains 0%.  Dedicated
+machinery unchanged at approximately 83% (this pass moved compile health and
+restored lost verified content, not the endpoint); the whole HCG compactness
+project remains in the low single digits.
+
+## Planner update No. 92 (2026-08-02) - HI-SIDE REFOLD PACKET EXPORTED; A2-COMPAT ROUTE RULED
+
+Wiring brick toward the `(aLo, aHi) = (1, 2)` instantiation of
+`lowreg_realize_two` (plan: `LowRegApplyTwo.md`).  `LowRegLiftHfLo.lean`
+(746 → 1053 lines, GREEN, no set_option) now re-exports from its single
+`refold_time` invocation everything it previously discarded: explicit
+`Z L ≥ 0`; `FHi` with continuity, smooth-core formula
+(`c0CoreData.a1Hi + oneCore.a1Hi`), and pointwise affine bound; the Hi
+family `refoldAffA1Hi` (congr baked in, slot type
+`tensorHs g 0 2 ((2:ℝ)+1) →L tensorHs g 0 2 (2:ℝ)`) with `MemLp`, toLp
+bounds `≤ L*‖duhH3 f‖ + √T*Z` on BOTH scales, an a.e. uniform Hi bound
+`≤ Z + L*B3`, and the verbatim `hA1compat` square
+`∀ᵐ t, incl ∘ AHi t = ALo t ∘ incl`.  `lowreg_hfLo` unchanged; MemLp
+certificates re-derived via `memLp_clm_affine` rather than transported
+(instance-tower discipline); square proved pointwise, never as an
+operator-family equality.
+
+RULING (recorded in `LowRegApplyTwo.md` Risk 1): `lowAffA2` and
+`lowRegA2TotalLo` are genuinely different families (missing principal
+summand, extra radial factor, a.e.-only state identification), so the
+existing total-A2 square cannot serve as `hA2compat` — realize_two's `A2Lo`
+slot is forced to the term of the proved `hfLo` equation.  The A2 arm gets
+the same treatment as A1: build `lowAffA2Hi` from `lowA2Hi` with the radial
+factor at the high scale and prove its own square.  `liftA2Two` is NOT the
+A2Hi of this instantiation.
+
+Honest accounting: `ricci_flow_unif_existence` remains 0% (unstated).
+Machinery ~83%; this entry is packet plumbing on the Lane-B/C junction.
+
+## Planner update No. 93 (2026-08-02) - APPLY_TWO LANDED: (1,2) REALIZATION ASSEMBLED
+
+ACCOUNT CORRECTION first: `ricci_flow_unif_existence` is STATED — black box
+(N) at `Evolution/ExtendViaUniqueness.lean:80`, the file's single `sorry`
+(line 98) is its placeholder.  Earlier entries' "unstated" is wrong from here
+on; say "(N) stated, proof 0%".  Its header also fixes the discharge shape:
+a-posteriori endpoint bootstrap of the ONE low-regularity solution on its
+fixed horizon (never per-order horizon-shrinking re-runs).
+
+Brick (two stages, both GREEN, ledger `LowRegApplyTwo.md`):
+
+2a `LowRegLiftHfLo.lean` (1264 lines): A2 arm now mirrors the A1 arm —
+`lowAffA2Hi` (from `lowA2Hi`, radial factor at the high scale, congr baked
+in), `lowAffA2Hi_le/_data`, and the compat square `lowAffA2_compat`.  The
+completed `∀ v` a2 Hi/Lo square was FOUND, not rebuilt: `radialA2_lip`
+(`DeTurck/DeTurckRemainderLowBaseTimeA2.lean:370`, last conjunct), re-exported
+with continuity and `C·ρ` bounds on BOTH scales by `lowA2_small`
+(`TensorMaximalRegularity/LowRegOperatorTime.lean:667`).  Also:
+`Continuous FLo` + `FLo` core formula + `FLo` affine bound + `(C2:ℝ) = B2`
+now exported by `lowreg_hfLo_data`; `stateField` promoted to public.
+
+2b NEW `LowRegApplyTwo.lean` (255 lines): `lowreg_apply_two` — the
+`(aLo, aHi) = (1, 2)` instantiation of `lowreg_realize_two` with the refold
+families, smallness closed via `lift_small_le` + `lift_smallness`.
+STATABILITY RULING: the horizon condition cannot be an outer hypothesis —
+the first-order constant `K = max (Z + L·B3) B1` exists only after
+`refold_time` runs at the given `T, f`; conclusion shape is
+`∃ K ≥ 0, ∀ {c}, 0 ≤ c → c < 1 → B2 ≤ c → B2Hi ≤ c →
+T ≤ lowregLiftHorizon c K → ∃ …, realize_two package`.  Honest-input audit:
+the three new `lowA2Hi` hypotheses are jointly satisfiable by `lowA2_small`
+alone (same lever, shrink `ρ` against its `C`, also gives `B2, B2Hi ≤ c`).
+
+Still owed by this lane (next brick): wire `lowreg_partial_sol` into
+`hball`/`hforce`/`hball3`, thread `lowA2_small` at a chosen `ρ` with
+`C·ρ < 1`, and the consumer `T`-choice against the reported `K`.  Unchanged
+mathematical frontier elsewhere: field-level Palatini difference identity;
+class-uniform `Ksup` at `j = 1`.
+
+Honest accounting: (N) stated, proof 0%.  Dedicated machinery ~81%
+(sub-estimates across passes range 78–83; the spread is estimate noise, not
+regression).  Whole HCG compactness project: low single digits.
+
+## Planner update No. 94 (2026-08-02) - SOLVE_TWO LANDED; B3 IS THE ONE OPEN INPUT, ROUTE RULED
+
+`LowRegApplyTwo.lean` (547 lines, GREEN, axiom-clean): `lowreg_solve_two`
+(line 412) takes ONLY `hDim, g` and PRODUCES the coefficient radius `ρ`, the
+fibre threshold `δ` with `hreal'`, a horizon `T₀ > 0`, `B2`, and for every
+`0 < T ≤ min T₀ 1` the solver's own trajectory `f` with the full
+`lowreg_apply_two` package (`IsRealizedTwo`, line 273).  Caller supplies
+only: `T`, the contraction level `c` (`B2 ≤ c < 1`,
+`T ≤ lowregLiftHorizon c K` against the packet's `K`), and `B3` with the
+a.e. `H³` trajectory bound.  Producer→slot map and probed Lean facts in
+`LowRegApplyTwo.md` (notably: `((1:ℕ):ℝ)` is NOT defeq `(1:ℝ)`; the
+completed-`a2Lo` identification must be done at `C2` and lifted — direct
+`rfl` is a kernel timeout).
+
+FINDING 1: `lowreg_partial_sol` itself is UNUSABLE for this wiring — it
+picks its state radius with no cap, while the lift forces `R ≤ ρ` at
+`lowA2_small`'s radius.  The six-number pair `lowreg_bounds_exist` +
+`lowreg_partial_sol_of_bounds` (`UnifClassBounds.lean`) at realization
+radius `P := min ρ ρN` gives the nested cascade `ρ₀ → Pr → ρN → ρL → ρ → P`
+with `R = lowregStateRad … P ≤ ρ`.
+
+FINDING 2 (the one open analytic input): the `B3` slot is `L^∞_t H³` on the
+trajectory, and structurally has NO producer here — maximal regularity gives
+`L²_t H³` with norm ≲ ‖f‖ ≤ R/4, not shrinking in `T`; `L^∞_t H³` is half a
+derivative above the trace space.
+
+ROUTE RULING (planner, 2026-08-02, for the next brick): do NOT chase
+`O(√T)` decay of `‖duhH3‖` (T-dependent fixed-point family, genuinely
+nontrivial).  The contraction does not need the `M·√T` SHAPE, only
+smallness: `‖toLp A1‖ ≤ L·‖duhH3‖ + √T·Z` and `‖duhH3‖_{L²ₜH³} ≤ c₀·‖f‖ ≤
+c₀·R/4` (the CORE maximal-regularity estimate — locate its spelling), with
+`R` shrinkable through the Finding-1 cascade.  So: drop/optionalize the
+pointwise `hball3/B3` inputs (the a.e. uniform Hi bound they feed is not
+consumed by `nonautL2Map`, which needs only `MemLp`), thread the maxReg
+norm bound, and repackage the contraction arithmetic as joint smallness in
+`(ρ, R, T)` beside `lowregLiftHorizon`.  If the maxReg `L²ₜ`-norm lemma for
+`maxRegDuhamelSolField`/`duhH3` is genuinely absent, THAT is the recorded
+frontier (name it), not the `L^∞` bound.
+
+Honest accounting: (N) stated, proof 0%.  Machinery ~83% — the Lane-B/C
+junction is now SOLVED (not hypothesis-parameterized) modulo the single `B3`
+input.  Whole HCG compactness project: low single digits.
+
+## Executor report on No. 94 (2026-08-02) - B3 DISSOLVED, ROUTE RULING LANDED
+
+The ruling is implemented and GREEN; ledger in `LowRegApplyTwo.md`, brick 4.
+
+The CORE maximal-regularity estimate was NOT missing.  It is
+`norm_maxRegDuhamelSolField_zero_le`
+(`Analysis/Spectral/Intrinsic/DeTurck/DeTurckQuasilinearExistence.lean:217`),
+`‖maxRegDuhamelSolField a hT hT1 0 F‖ ≤ (1 + T)·‖F‖`, i.e. the zero-initial
+Duhamel map is bounded `L²ₜHᵃ → L²ₜHᵃ⁺²` with a `T`-benign constant.  Its
+`duhH3` spelling is the new `norm_duhH3_le` (`LowRegLiftHfLo.lean:153`), via the
+new `norm_congrLp` (`:136`).  No new analysis was required.
+
+`B3`/`hball3` are gone from `lowreg_hfLo_data`, `lowreg_apply_two`,
+`IsRealizedTwo` and `lowreg_solve_two`.  `lowreg_solve_two`'s hypotheses are
+again only `hDim` and `g`, and the caller's obligations are now two inequalities
+between reals the packet reports: the `T`-free margin `6A < 1 - c` and
+`T ≤ lowregLiftHorizon' c Z`, with `A = 2L‖f‖` and `Z` the zeroth-order size.
+New arithmetic in `LowRegLiftSmall.lean`: `lowregLiftHorizon'` (`:282`),
+`lift_aff_arith` (`:304`), `lift_small_aff` (`:350`).
+
+NEW SMALLEST FRONTIER for this lane (an ordering issue, not analysis): the
+margin `6A < 1 - c` is discharged by capping the realization radius `P`, since
+`A ≤ L·R/2` and `R ≤ P`, but `L` is bound *inside* `lowreg_hfLo_data` because
+`refold_time` (`LowRegBgA1Refold.lean:324`) quantifies `∃ Z L` AFTER its state
+argument `u : timeL2 H³ T`.  Hoist `Z, L` above that binder — they are the
+affine-growth constants of `FHi`/`FLo`, built from `ρ, δ, hreal` only — and
+`lowreg_solve_two` can then take a target `η > 0`, cap `P ≤ η/L`, and report
+`A ≤ η`.
+
+Honest accounting: (N) stated, proof 0%.  Machinery ~84%.  Whole HCG
+compactness project: low single digits.
+
+## Executor report on No. 94 (later, 2026-08-02) - ORDERING OBSTRUCTION DISSOLVED; SOLVE_TWO IS UNCONDITIONAL
+
+The frontier the previous report left ("hoist `Z, L` above the `u` binder") is
+done, and it cost no mathematics: the u-free halves already existed.
+`c0_ext_pair` (`LowRegBgC0Time`, private) was *verbatim* the C0 packet, and
+`c1_ext_pair` (`LowRegBgC1Time`, private) *verbatim* the C1 packet.  Neither
+`F`-construction ever mentioned the trajectory.  Full ledger in
+`LowRegApplyTwo.md`, brick 5.
+
+New public spine, one per lane, each REPLACING the old `*_time` (no wrappers
+kept - every consumer chain here is single-consumer):
+
+- `c0_pack` (`LowRegBgC0Time:322`), `c1_bg_pack` (`LowRegBgC1Time:763`),
+  `refold_aff` (`LowRegBgA1Refold:331`): `∃ ρ₀ > 0, ∀ ρ δ …, ∃ Z L FHi FLo,
+  Continuous + smooth-core formulas + `‖F x‖ ≤ Z + L‖x‖` + the u-free
+  Sobolev square`.  No `T`, no `u`.
+- `lowreg_hfLo_data` (`LowRegLiftHfLo:1117`) and `lowreg_apply_two`
+  (`LowRegApplyTwo:171`) now TAKE that packet instead of producing it.
+- `IsRealizedTwo` (`:84`) is the bare package: it lost the `∃ A Z ∀ c …` prefix
+  and the `B2 B2Hi` parameters, and moved above `lowreg_apply_two`, which now
+  states its conclusion by name instead of repeating 55 lines of existential.
+
+`lowreg_solve_two` (`:383`) is now UNCONDITIONAL in the sense that matters:
+
+```
+∃ ρ δ hρ hδ0 hδ_le hreal' B2, 0 ≤ B2 ∧
+  ∀ {c}, B2 ≤ c → c < 1 →
+    ∃ T₀, 0 < T₀ ∧ ∀ {T} (hT : 0 < T), T ≤ T₀ → ∀ (hT1 : T ≤ 1),
+      ∃ f, IsRealizedTwo g hρ hδ0 hδ_le hreal' hT hT1 f
+```
+
+The caller picks only `c` and `T`.  Both former obligations are discharged
+inside: the horizon one by folding `lowregLiftHorizon' c Z` into `T₀`, the
+margin `6·(2L‖f‖) < 1 - c` by capping the realization radius
+`P := min (min ρ ρN) ((1-c)/(6(L+1)))` - possible exactly because `c` and `L`
+are now both in scope before `P` is chosen.  Then `‖f‖ ≤ P/4` via
+`norm_congrLp` + `lowregStateRad_le_P` + the `‖gforce‖ ≤ R/4` conjunct of
+`lowreg_partial_sol_of_bounds`, and the rest is `linarith`.  Note the quantifier
+order `ρ, B2 → c → T₀ → T → f`: `T₀` really does depend on `c`, because the
+radius does.
+
+Also deleted as dead: `refoldAffA1_data`, `refoldAffA1Hi_data` (the two
+`L^∞_t H³` WARNING wrappers from brick 4), the ~105 lines of per-`u` time
+plumbing inside the old `refold_time`, and the ~275 lines of the same inside
+`c0_time`/`c1_bg_time` - all of it was already being discarded by its single
+consumer, which rebuilt the `MemLp` witnesses itself from the affine bounds.
+The five files went 3953 -> 3507 lines with no proof obligation added, and the
+`set_option synthInstance.maxHeartbeats 1000000` that `refold_time` needed is
+gone (the blow-up was the `timeL2`/`MemLp` statement layer, not the actions).
+
+Verification: focused check + targeted `lake build` GREEN for all five modules
+in dependency order; the six touched endpoints report exactly
+`[propext, Classical.choice, Quot.sound]`.
+
+Honest accounting: (N) stated, proof 0%.  Machinery ~84% (unchanged - this pass
+removed a wiring obstruction and 450 lines of dead code, it did not add
+mathematics).  Whole HCG compactness project: low single digits.
+
+## Planner update No. 95 (2026-08-02) - RUNG (1,2) CLOSED END-TO-END
+
+Milestone marker for the four-brick sequence No. 92-94 + the two executor
+passes: `lowreg_solve_two` (`LowRegApplyTwo.lean:383`) now derives, from
+`hDim, g` ALONE, the packet `ρ, δ, hreal', B2` such that for every
+contraction level `c` with `B2 ≤ c < 1` there is `T₀ > 0` under which every
+horizon `0 < T ≤ T₀, T ≤ 1` carries the solver's own trajectory `f` with the
+full realized package `IsRealizedTwo` (CrossScaleField, zero trace, clean
+equation, both fixed points, forcing inclusions, carrier/representative
+pins).  Caller freedom = exactly `(c, T)`.  Axiom-clean; the five touched
+modules are focused + build GREEN with zero heartbeat options; acceptance
+included a mojibake sweep of the encoding-repaired `LowRegBgC0Time.lean`.
+
+Candidate next fronts, in rough leverage order (planner, not yet
+dispatched):
+1. Lane C C3 residue - supply the smooth representative to
+   `LowRegForceHi.force_hi_smooth` from the solution packet (makes
+   `fHi =ᵐ N2 ∘ state` honest at `aHi = 2`).
+2. The a-posteriori fixed-horizon bootstrap: iterate the closed rung to all
+   orders on the ONE horizon, per the (N) discharge ruling in
+   `Evolution/ExtendViaUniqueness.lean`'s header.
+3. The class-uniformity layer for τ₀ (the actual (N) content); open
+   mathematical walls unchanged: field-level Palatini difference identity,
+   class-uniform `Ksup` at `j = 1`, E7, Lane F.
+
+Honest accounting: (N) stated (`Evolution/ExtendViaUniqueness.lean:80`,
+sorry at :98), proof 0%.  Dedicated machinery ~84%.  Whole HCG compactness
+project: low single digits.
+
+## Planner ruling No. 96 (2026-08-02) - C3 ROUTE CORRECTED: FROZEN-SPLIT N2, NOT THE SMOOTH FAMILY
+
+Recon before dispatching front 1 of No. 95 found that `force_hi_smooth`'s
+`F`/`hpin` inputs (a SMOOTH-CORE family realizing the trajectory field a.e.)
+have NO producer in the solution packet — `lowreg_partial_sol` exports only
+the abstract Duhamel field, and smooth-core membership of the actual
+trajectory is a-posteriori regularity, i.e. front 2's content.  No. 95
+mis-ranked front 1 as a wiring brick on that route.
+
+CORRECT ROUTE (already recorded in `LowRegRealizeTwo.md`, "alternative
+producer", now actionable): take `N2` to be the frozen split
+`N2 u := N(0) + (A2 u + A1 u) u`, whose right side is `H²`-valued at the
+`H⁴` regularity the LIFTED solution has; prove `incl ∘ N2 = lowRegN` on the
+ball by the equalizer-closed density argument — both sides are now
+CONTINUOUS (this is what tonight's packets unlocked: `Continuous FHi` from
+`refold_aff`, `Continuous lowA2Hi` from `lowA2_small`, `Continuous lowRegN`
+from the packet), and they agree on the smooth core by `lowCore_split`
+(`DeTurckRemainderLowBaseTime.lean:1723`) + the smooth-core formulas +
+`staticForce` at order 2 (`LowRegLiftNTerm`, arbitrary real order).  Then
+the ALREADY-PROVED `lowreg_force_id` (`LowRegRealizeTwo.lean`) upgrades
+`fHi =ᵐ N2 ∘ state` for the realized trajectory.  `force_hi_smooth` stays
+as the smooth-family variant for the smooth era; no representative is
+needed now.
+
+## Executor report on No. 96 (2026-08-02) - C3 CLOSED AT `aHi = 2`; N2 IS PURE ALGEBRA
+
+GREEN.  The frozen-split `N2` exists, lifts `lowRegN` along the scale
+inclusion, and the realized `(1,2)` package now *carries* the high Nemytskii
+identity.
+
+**Route correction inside the ruling.**  No. 96 expected an equalizer-closed
+density argument for `incl ∘ N2 = lowRegN`.  That work is already banked one
+layer down, in `lowreg_N_affine` (`LowRegLiftAffine.lean:318`), which proves
+`congr(lowRegN w) = refoldBaseN (congr w.1)` on the whole `H3` ball.  So the
+new object only has to be a **lift of `refoldBaseN`**, and that is pure algebra
+of the two commuting squares this lane already exports.  No density, no
+smooth-core re-entry, no new estimate.
+
+**Domain ruling.**  `lowreg_force_id`'s `N2` slot is `lowerState g 1 R -> H^σ`,
+i.e. `H3`-domained, and the `H4` passenger of `lowA2Hi` genuinely cannot live
+there.  It does not have to: `CrossScaleField.hiL2` at `a = 2` is `H^{a+2} =
+H4`-valued, so the lifted solution's own field is `H4`.  `liftHiN` is therefore
+defined on `H4`, and the pin `incl_{3<=4}(hi t) = state t` is derivable from
+the package.  `lowreg_force_id` itself is used only through its unconditional
+half `lowreg_force_lo`.
+
+**Decls added** (`ShortTime/LowRegForceHi.lean`, +1 import `LowRegLiftAffine`):
+
+- `liftHiN` (:132) - `staticForce g g 2 + lowA2Hi (incl42 v) (radialCLM_{H4} ρ
+  (incl42 v) v) + FHi (incl43 v) (lowRadialH3 ρ (incl43 v))`, `H4 -> H2`.
+- `hiN_incl` (:166) - `incl_{1<=2} (liftHiN v) = refoldBaseN (incl_{3<=4} v)`.
+- `hiN_lowreg` (:299) - `congr_{1N=1}(lowRegN w) = incl_{1<=2}(liftHiN v)`
+  whenever `incl_{3<=4} v = congr_{1N+2=3} w.1`.  This is the `N2` slot.
+- `force_hi_id` (:373) - `fHi =ᵐ fun t => liftHiN (hi t)` from `lowreg_force_lo`
+  plus the pin, by injectivity of the inclusion.
+
+**Core identities -> summand map** (what makes `hiN_incl` true):
+
+| `liftHiN` summand | discharged by | `refoldBaseN` summand |
+| --- | --- | --- |
+| `staticForce g g 2` | `staticForce_incl`, `lowBaseForce_eq_static` | `lowBaseForce g` |
+| `lowA2Hi (incl42 v) (radialCLM_{H4} …)` | `lowA2_small`'s square, `radialCLM_incl`, `radialCLM_h3`, `tensorHsInclusion_trans_apply` | `lowA2Lo (incl32 u) (lowRadialH3 ρ u)` |
+| `FHi (incl43 v) (lowRadialH3 ρ …)` | `refold_aff`'s square, `lowRadialH3_incl` | `FLo u (lowRadialHs ρ (incl32 u))` |
+
+`lowCore_split` / `refold_split` / `a2Lo_core` / `refoldLo_core` /
+`lowRadial_eq_self` are what make `lowreg_N_affine` true, and they are consumed
+there; this brick does not re-enter them, and `liftHiN` mirrors `refoldBaseN`
+summand for summand so the algebraic shape stays `N(S) - N(0) = a2 S + a1 S`.
+
+**Endpoint wiring.**  `IsRealizedTwo` (`LowRegApplyTwo.lean:90`) gained one
+conjunct, `fHi =ᵐ fun t => liftHiN g … FHi (congr_{2+2=4} (u.hiL2 t))`, proved
+inside `lowreg_apply_two` from `u.link`, the two `repr` pins, `aeSetLift_coe_ae`
+and `hiN_lowreg`.  A standalone corollary was rejected: the package
+existentially binds `FHi`, `fHi`, `u`, so a corollary could not name them
+without duplicating the whole existential.  `IsRealizedTwo` has no other
+consumer, and `lowreg_solve_two` transmits the conjunct unchanged - so for the
+trajectory it produces, the high forcing **is** the genuine Ricci--DeTurck
+nonlinearity along the lifted `H4` field.
+
+**Not touched.**  `force_hi_smooth` stays as the smooth-era variant; its `F` /
+`hpin` inputs still have no producer, as No. 96 diagnosed.
+
+**Verification.**  Focused checks GREEN for both edited files; targeted builds
+`+…LowRegForceHi` and `+…LowRegApplyTwo` GREEN, no warnings from either, no
+`sorry`, no heartbeat option.
+
+**Honest accounting.**  `(N)` (`Evolution/ExtendViaUniqueness.lean:80`, sorry at
+:98) still 0%.  Lane C is now complete for the `(1,2)` rung, C3 included.
+Dedicated machinery ~85%.  Whole HCG compactness project: low single digits.
+The next front is unchanged from No. 95's list: the a-posteriori fixed-horizon
+bootstrap to all orders, then the class-uniformity layer for `τ₀`.

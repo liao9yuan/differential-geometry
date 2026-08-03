@@ -181,3 +181,32 @@ whole HCG compactness project remains in the low single-digit percentage range.
 The next low-regularity brick is the D₄-free `a1Lo` pair estimate, which should
 simultaneously discharge the `hfLo` bridge, the `lowA1` restatement, and the
 M-witness consumer.
+
+## Local H3 coefficient pair (2026-07-31)
+
+The fixed-order continuity lane is now separated from the historical
+H4-affine compatibility estimate.  The new public theorem `c0_pair_h3` proves
+the radial zero-coefficient pair bound
+
+`J2(C0(T)-C0(U)) <= (B R (1+A^2) (D3+D2+N))^2`
+
+on a common small spectral H2 ball.  It assumes only state H3 bounds and
+H2/H3 difference bounds; there is no state H4 or difference D4 input.
+
+The proof specializes each already-verified factorwise telescope at the actual
+H3 radius before estimating.  The private chain is
+`ricciAA_h3_pair` / `ricciDA_h3_pair` / `good_h3_pair`, then
+`lieCov_h3_pair`, `vb_h3_pair`, `amixHalf_h3_pair` / `amix_h3_pair`, and
+`riem_h3_pair`, followed by `selfLow_h3_pair` and `path_jetL2_le`.
+This closes the missing C0 half of the local H3-to-H2 coefficient continuity
+argument.  It does not by itself prove the separate affine-in-H3 time-growth
+bound needed for the final Nemytskii/MemLp consumer.
+
+Persistent LSP elaboration is green for the complete theorem chain.  A fresh,
+standalone focused module verification also passes.  With the persistent LSP
+server stopped, the cold check used roughly 6.3 GB of private committed memory;
+the earlier 11--12 GB figure was therefore persistent-worker accumulation, not
+the cold cost of this source alone.  The named module refresh also passes, so
+the public `c0_pair_h3` export is current for downstream consumers.  The next
+consumer brick is to combine `c0_pair_h3` with the existing D4-free C1 H2 pair
+and extend the same smooth-core first-order action continuously from H3 to H2.

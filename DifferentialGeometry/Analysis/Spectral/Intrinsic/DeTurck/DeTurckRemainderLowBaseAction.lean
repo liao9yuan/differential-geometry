@@ -3394,6 +3394,43 @@ noncomputable def connLowOp
         (fullRaisedEndoField (I := I) (M := M) g gm))
       (koszulOp (I := I) (M := M) g))
 
+/-- The lowered connection difference is the first-order action of the
+transparent Koszul coefficient. -/
+theorem connLow_app
+    (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    (hT : ∀ (x : M) (u v : TangentSpace I x),
+      ccTensorBilin (I := I) g T x u v =
+        ccTensorBilin (I := I) g T x v u)
+    (htie : ∀ (x : M) (u v : TangentSpace I x),
+      gm.inner x u v =
+        g.inner x u v + ccTensorBilinSymm (I := I) g T x u v) :
+    appCcRS (I := I) (M := M) g 0 3 3
+        (connLowOp (I := I) (M := M) g gm)
+        (covGrad (I := I) (M := M) g 0 2 T) =
+      connDiffLoweredCc (I := I) g gm :=
+  connLowOp_app (I := I) (M := M) g gm T hT htie
+
+/-- The transparent Koszul coefficient is jointly smooth along the realized
+metric segment. -/
+theorem connLow_joint
+    (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 3 3 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 3 3 ℝ E)
+        (E := fun x : M => TensorRSSpace 3 3 I x) p.1
+        ((connLowOp (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hδ hδZ p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ
+        realizedSmallSet (δ := δ) (δ' := δ)) := by
+  exact IntrinsicSpectral.connLow_joint
+    (I := I) (M := M) g T hδ hδZ
+
 /-- Transparent top derivative coefficient in the Ricci connection arm. -/
 noncomputable def dagTopOp
     (g gm : SmoothRiemannianMetric I M) : SmoothCcTensor g 4 4 :=
@@ -3452,6 +3489,27 @@ noncomputable def daTrans
   daTransMono (I := I) (M := M) g gm W daPermA -
     daTransMono (I := I) (M := M) g gm W daPermB
 
+private theorem daMono_swap
+    (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
+    (σ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g 0 2) :
+    appCc (I := I) (M := M) g 2 2
+        (daMono (I := I) (M := M) g gm G σ) W =
+      appCc (I := I) (M := M) g 4 2
+        (daTransMono (I := I) (M := M) g gm W σ) G := by
+  rw [daMono, ← appCc_assoc]
+  exact mono_trans (I := I) (M := M) g G σ
+    (daWeight (I := I) (M := M) g gm W)
+
+private theorem daContr_swap
+    (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
+    (W : SmoothCcTensor g 0 2) :
+    appCc (I := I) (M := M) g 2 2
+        (daContr (I := I) (M := M) g gm G) W =
+      appCc (I := I) (M := M) g 4 2
+        (daTrans (I := I) (M := M) g gm W) G := by
+  rw [daContr, daTrans, appCc_sub_left, appCc_sub_left,
+    daMono_swap, daMono_swap]
+
 /-- Transparent Ricci top coefficient used by the pairwise C2 telescope. -/
 noncomputable def ricciTop
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
@@ -3468,6 +3526,83 @@ noncomputable def ricciDALow
     (appCcRS (I := I) (M := M) g 0 3 4
       (dagLowOp (I := I) (M := M) g gm)
       (covGrad (I := I) (M := M) g 0 2 T))
+
+/-- First-order passenger coefficient obtained by exchanging the lower
+Palatini derivative factor with the tensor on which the Ricci coefficient
+acts. -/
+noncomputable def ricciDAOne
+    (g gm : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
+    SmoothCcTensor g 3 2 :=
+  appCcRS (I := I) (M := M) g 3 4 2
+    (daTrans (I := I) (M := M) g gm W)
+    (dagLowOp (I := I) (M := M) g gm)
+
+/-- The lower Ricci Palatini self-action is exactly a first-order passenger
+action. -/
+theorem ricciDA_one
+    (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2) :
+    appCc (I := I) (M := M) g 2 2
+        (ricciDALow (I := I) (M := M) g gm P) W =
+      appCc (I := I) (M := M) g 3 2
+        (ricciDAOne (I := I) (M := M) g gm W)
+        (covGrad (I := I) (M := M) g 0 2 P) := by
+  rw [ricciDALow, daContr_swap]
+  simp only [ricciDAOne, appCcRS_zero_eq_appCc]
+  rw [appCc_assoc]
+
+private theorem dagLow_joint
+    (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ) :
+    JointRS (I := I) g 3 4
+      (realizedSmallSet (δ := δ) (δ' := δ))
+      (fun t => dagLowOp (I := I) (M := M) g
+        (realizedFam (I := I) g T 0 hδ hδZ t)) := by
+  have hc := connLow_joint (I := I) (M := M) g T hδ hδZ
+  have hd := covGrad_step_jointContMDiffOn (I := I) (M := M)
+    g 3 3
+    (fun t => connLowOp (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hδ hδZ t))
+    (realizedSmallSet (δ := δ) (δ' := δ)) hc
+  have hd' : JointRS (I := I) g 3 4
+      (realizedSmallSet (δ := δ) (δ' := δ))
+      (fun t => covGrad (I := I) (M := M) g 3 3
+        (connLowOp (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hδ hδZ t))) := by
+    simpa only [Nat.reduceAdd] using hd
+  have hp := joint_const (I := I) (M := M)
+    (S := realizedSmallSet (δ := δ) (δ' := δ)) g
+    (permCoeff (I := I) (M := M) g daPermA)
+  have hout := joint_app (I := I) (M := M) g _ _ hp hd'
+  simpa only [dagLowOp] using hout
+
+/-- The transferred lower Palatini coefficient is jointly smooth along the
+realized metric segment. -/
+theorem ricciDAOne_joint
+    (g : SmoothRiemannianMetric I M) (T W : SmoothCcTensor g 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g 3
+      (fun t => ricciDAOne (I := I) (M := M) g
+        (realizedFam (I := I) g T 0 hδ hδZ t) W)
+      (δ := δ) (δ' := δ) := by
+  have hA : JointRS (I := I) g 4 2
+      (realizedSmallSet (δ := δ) (δ' := δ))
+      (fun t => daTrans (I := I) (M := M) g
+        (realizedFam (I := I) g T 0 hδ hδZ t) W) := by
+    simpa only [linearizedRicciThreeArmHjoint] using
+      daTrans_joint (I := I) (M := M) g T W hδ hδZ
+  have hB := dagLow_joint (I := I) (M := M) g T hδ hδZ
+  have hout := joint_app (I := I) (M := M) g _ _ hA hB
+  simpa only [linearizedRicciThreeArmHjoint, ricciDAOne] using hout
 
 /-- Transparent first-order Ricci coefficient after the Palatini head has
 been transferred to the second-order action. -/
@@ -9213,6 +9348,145 @@ private theorem lcvPair_h2_low
           (pureTrace (I := I) (M := M) g g₁ 4))
         (mul_nonneg hCa (mul_nonneg hK2 (by positivity)))
     _ = B R := by rfl
+
+set_option maxHeartbeats 2400000 in
+set_option linter.unusedVariables false in
+/-- The transferred lower Palatini coefficient has a radius-free fixed-order
+`H2` bound, with only the `H3` size of the metric perturbation entering its
+first-order coefficient envelope. -/
+theorem ricciDAOne_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ B : ℝ → ℝ, (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M)
+        (P W : SmoothCcTensor g 0 2)
+        (hP : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g P x u v =
+            ccTensorBilin (I := I) g P x v u)
+        (htie : ∀ (x : M) (u v : TangentSpace I x),
+          g₁.inner x u v =
+            g.inner x u v + ccTensorBilinSymm (I := I) g P x u v)
+        {δ : ℝ} (hδ_le : δ ≤ 1 / 3) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g P) δ)
+        (R A : ℝ), 0 ≤ R → 0 ≤ A →
+        lowJetSq (I := I) (M := M) g 2 P ≤ R ^ 2 →
+        lowJetSq (I := I) (M := M) g 3 P ≤ A ^ 2 →
+        lowJetSq (I := I) (M := M) g 2 W ≤ R ^ 2 →
+      lowJetSq (I := I) (M := M) g 2
+          (LowBaseInternal.ricciDAOne (I := I) (M := M) g g₁ W) ≤
+        (B R * (1 + A)) ^ 2 := by
+  obtain ⟨Kf, hKf, hfull⟩ :=
+    full_slot_h2_low (I := I) (M := M) g 1
+      (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
+  obtain ⟨Cw, hCw, happW⟩ :=
+    app_h2_mul (I := I) (M := M) hDim g 0 2 2
+  obtain ⟨Cm, hCm, hmono⟩ :=
+    curvMono_h2 (I := I) (M := M) hDim g
+  let Kpair : ℝ := lowJetSq (I := I) (M := M) g 2
+    (lieCovPair (I := I) (M := M) g g)
+  obtain ⟨Kd, hKd, hdag⟩ :=
+    dagLow_h2_rf (I := I) (M := M) hDim g
+      (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
+  obtain ⟨Co, hCo, happO⟩ :=
+    app_h2_mul (I := I) (M := M) hDim g 3 4 2
+  let Zw : ℝ → ℝ := fun R => Cw * (Kf * (1 + R ^ 2)) * R ^ 2
+  let Zt : ℝ → ℝ := fun R => 4 * Cm * Kpair * Zw R
+  let L : ℝ → ℝ := fun R => Co * Zt R * Kd
+  let B : ℝ → ℝ := fun R => Real.sqrt (L R)
+  have hZw : ∀ R : ℝ, 0 ≤ R → 0 ≤ Zw R := by
+    intro R hR
+    exact mul_nonneg
+      (mul_nonneg hCw (mul_nonneg hKf (add_nonneg (by norm_num) (sq_nonneg R))))
+      (sq_nonneg R)
+  have hKpair : 0 ≤ Kpair :=
+    jet_nonneg (I := I) (M := M) (m := 2) g _
+  have hZt : ∀ R : ℝ, 0 ≤ R → 0 ≤ Zt R := by
+    intro R hR
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (by norm_num) hCm) hKpair)
+      (hZw R hR)
+  have hL : ∀ R : ℝ, 0 ≤ R → 0 ≤ L R := by
+    intro R hR
+    exact mul_nonneg (mul_nonneg hCo (hZt R hR)) hKd
+  refine ⟨B, fun R hR => Real.sqrt_nonneg _, ?_⟩
+  intro g₁ P W hP htie δ hδ_le hδ0 hδ R A hR hA hP2 hP3 hW2
+  have hFull : lowJetSq (I := I) (M := M) g 2
+      (slotInsertEndoCc (I := I) (M := M) g 1
+        (fullRaisedEndoField (I := I) (M := M) g g₁)) ≤
+      Kf * (1 + R ^ 2) := by
+    refine (hfull g₁ P hP htie hδ_le hδ0 hδ).trans ?_
+    exact mul_le_mul_of_nonneg_left (add_le_add le_rfl hP2) hKf
+  have hWeight : lowJetSq (I := I) (M := M) g 2
+      (LowBaseInternal.daWeight (I := I) (M := M) g g₁ W) ≤ Zw R := by
+    rw [LowBaseInternal.daWeight]
+    refine (happW _ _).trans ?_
+    calc
+      Cw * lowJetSq (I := I) (M := M) g 2
+          (slotInsertEndoCc (I := I) (M := M) g 1
+            (fullRaisedEndoField (I := I) (M := M) g g₁)) *
+          lowJetSq (I := I) (M := M) g 2 W ≤
+        Cw * (Kf * (1 + R ^ 2)) * R ^ 2 :=
+          mul_le_mul (mul_le_mul_of_nonneg_left hFull hCw) hW2
+            (jet_nonneg (I := I) (M := M) (m := 2) g W)
+            (mul_nonneg hCw (mul_nonneg hKf
+              (add_nonneg (by norm_num) (sq_nonneg R))))
+      _ = Zw R := rfl
+  have hMono (σ : Equiv.Perm (Fin 4)) :
+      lowJetSq (I := I) (M := M) g 2
+          (LowBaseInternal.daTransMono (I := I) (M := M) g g₁ W σ) ≤
+        Cm * Kpair * Zw R := by
+    rw [LowBaseInternal.daTransMono]
+    calc
+      _ ≤ Cm * lowJetSq (I := I) (M := M) g 2
+            (lieCovPair (I := I) (M := M) g g) *
+          lowJetSq (I := I) (M := M) g 2
+            (LowBaseInternal.daWeight (I := I) (M := M) g g₁ W) := by
+              exact hmono g
+                (LowBaseInternal.daWeight (I := I) (M := M) g g₁ W) σ
+      _ ≤ Cm * Kpair * Zw R :=
+        mul_le_mul le_rfl hWeight
+          (jet_nonneg (I := I) (M := M) (m := 2) g _)
+          (mul_nonneg hCm hKpair)
+  have hTrans : lowJetSq (I := I) (M := M) g 2
+      (LowBaseInternal.daTrans (I := I) (M := M) g g₁ W) ≤ Zt R := by
+    rw [LowBaseInternal.daTrans]
+    refine (jet_sub (I := I) (M := M) g 2 _ _).trans ?_
+    calc
+      2 * (lowJetSq (I := I) (M := M) g 2
+            (LowBaseInternal.daTransMono (I := I) (M := M)
+              g g₁ W LowBaseInternal.daPermA) +
+          lowJetSq (I := I) (M := M) g 2
+            (LowBaseInternal.daTransMono (I := I) (M := M)
+              g g₁ W LowBaseInternal.daPermB)) ≤
+        2 * (Cm * Kpair * Zw R + Cm * Kpair * Zw R) :=
+          mul_le_mul_of_nonneg_left
+            (add_le_add (hMono LowBaseInternal.daPermA)
+              (hMono LowBaseInternal.daPermB)) (by norm_num)
+      _ = Zt R := by simp only [Zt]; ring
+  have hDag : lowJetSq (I := I) (M := M) g 2
+      (LowBaseInternal.dagLowOp (I := I) (M := M) g g₁) ≤
+      Kd * (1 + A ^ 2) := by
+    refine (hdag g₁ P hP htie hδ_le hδ0 hδ).trans ?_
+    exact mul_le_mul_of_nonneg_left (add_le_add le_rfl hP3) hKd
+  rw [LowBaseInternal.ricciDAOne]
+  refine (happO _ _).trans ?_
+  calc
+    Co * lowJetSq (I := I) (M := M) g 2
+          (LowBaseInternal.daTrans (I := I) (M := M) g g₁ W) *
+        lowJetSq (I := I) (M := M) g 2
+          (LowBaseInternal.dagLowOp (I := I) (M := M) g g₁) ≤
+      Co * Zt R * (Kd * (1 + A ^ 2)) :=
+        mul_le_mul (mul_le_mul_of_nonneg_left hTrans hCo) hDag
+          (jet_nonneg (I := I) (M := M) (m := 2) g _)
+          (mul_nonneg hCo (hZt R hR))
+    _ = L R * (1 + A ^ 2) := by simp only [L]; ring
+    _ ≤ L R * (1 + A) ^ 2 := by
+      apply mul_le_mul_of_nonneg_left _ (hL R hR)
+      nlinarith
+    _ = (B R * (1 + A)) ^ 2 := by
+      rw [mul_pow, show B R ^ 2 = L R by
+        simpa only [B] using Real.sq_sqrt (hL R hR)]
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in

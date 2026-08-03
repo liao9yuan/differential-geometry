@@ -188,3 +188,27 @@ first-order Lipschitz estimate are what still block application.
   exponents, but the lane is **not** finished: the three items listed above
   (completed `a1` square, low principal `a2` family + square, horizon smallness)
   are new, precisely-located gaps.
+
+## 2026-08-02 update — the `N2` residual of C3 is CLOSED (supersedes "C3 ~55%")
+
+The single residual isolated above — an `H^σ`-valued Nemytskii map `N2` with
+`tensorHsInclusion ∘ N2 = lowRegN` — now exists: `liftHiN` /
+`hiN_lowreg` in `ShortTime/LowRegForceHi.lean`.
+
+Two corrections to the analysis recorded above:
+
+* The `H3 → H2` shape really is too strong (the `H4` passenger of `lowA2Hi` is
+  real), but that never had to be overcome.  `CrossScaleField.hiL2` at `a = 2`
+  is `H^{a+2} = H4`-valued, so **the lifted solution's own field is `H4`** and
+  `N2` is defined there.  `lowreg_force_id`'s `H3`-domained `N2` slot is
+  bypassed; only its unconditional half `lowreg_force_lo` is used.
+* No new dense extension or tame estimate was needed.  `lowreg_N_affine`
+  already extends the smooth-core split to the whole `H3` ball, so `liftHiN`
+  only has to be a **lift of `refoldBaseN`**, which follows summand for summand
+  from the two banked commuting squares (`lowA2_small`, `refold_aff`) plus
+  `staticForce_incl`, `radialCLM_incl`, `radialCLM_h3`, `lowRadialH3_incl`.
+
+`IsRealizedTwo` now carries the resulting a.e. identity as a conjunct, so
+`lowreg_solve_two` reports it for the trajectory it produces.  Call the C3
+theorem **complete** for the `(1,2)` rung; Lane C owes lane D nothing further
+at this rung.  Details: `LowRegForceHi.md`, `LowRegApplyTwo.md`.

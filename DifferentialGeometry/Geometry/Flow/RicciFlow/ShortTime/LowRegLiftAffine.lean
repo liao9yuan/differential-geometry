@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLiftNTerm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegSmoothBridge
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgA1Refold
 import DifferentialGeometry.Analysis.DenseExtension
 
 /-!
@@ -15,22 +16,21 @@ bridge between the two.
 The whole bridge reduces to one **state-level** identity,
 
 ```
-lowRegN g₀ g₀ … w  =  lowBaseN g₀ … w        (for every `w` in the `H3` ball)
+lowRegN g₀ g₀ … w  =  refoldBaseN g₀ … FLo w
+                                                (for every `w` in the `H3` ball)
 ```
 
 `lowreg_N_affine`, proved by a closed equalizer plus density of the smooth
 core: on the smooth core both sides are the spectral embedding of the genuine
-smooth Ricci--DeTurck remainder (`lowRegN_on_smooth`, then `lowCore_split`,
-`a2Lo_core`, `a1Lo_core_any`, `lowRadial_eq_self`), and the equalizer is closed
+smooth Ricci--DeTurck remainder (`lowRegN_on_smooth`, then `refold_split`,
+`a2Lo_core`, `refoldLo_core`, `lowRadial_eq_self`), and the equalizer is closed
 because both sides are continuous.
 
 Closedness needs continuity of the two completed coefficient maps.  The `A2`
 half is banked (`lowA2_small` / `radialA2_lip`) and enters as the two
-hypotheses `hA2cont`, `hA2core`.  The `A1` half is **not** banked: it is the
-`D₄`-free ball-local `a1Lo` pair estimate that the low-base pair lane still
-owes, and it enters as the single explicit hypothesis `hA1pair` -- see
-`lowA1Lo_core` and `lowA1Lo_cont`, which are its only two consumers.  Nothing
-is routed through `lowA1_lip`, whose `hHiPair` input is false.
+hypotheses `hA2cont`, `hA2core`.  The `A1` half is the refolded continuous map
+`FLo`; its smooth-core formula is supplied by `refold_time`.  Thus the active
+state identity no longer consumes the false raw `hA1pair` route.
 
 **Background restriction.**  `lowBaseN`, `lowBaseForce` and `lowCoreData` are
 all single-metric (`lowBaseData g g`), and `liftForceLo_lowBase` is stated only
@@ -142,7 +142,7 @@ coefficient on the smooth core.  This is the single open analytic input of the
 `hfLo` bridge (the `a1Lo` half of the low-base pair lane's follow-up); it is
 kept as a named abbreviation so that its two consumers below make the
 dependency visible. -/
-def LowA1CorePair (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+abbrev LowA1CorePair (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
         gFibreOpBound (I := I) (M := M) g
@@ -205,6 +205,31 @@ end A1
 
 /-! ## Continuity of the frozen low-base forcing -/
 
+/-- The same-background low-base forcing with the refolded first-order
+coefficient.  The second-order completion is unchanged; `FLo` is the complete
+first-order action supplied by `refold_time`. -/
+noncomputable def refoldBaseN
+    (g : SmoothRiemannianMetric I M)
+    {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+    (hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ)
+    (FLo : tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →
+      (tensorHs (I := I) (M := M) g 0 2 (2 : ℝ) →L[ℝ]
+        tensorHs (I := I) (M := M) g 0 2 (1 : ℝ)))
+    (u : tensorHs (I := I) (M := M) g 0 2 (3 : ℝ)) :
+    tensorHs (I := I) (M := M) g 0 2 (1 : ℝ) :=
+  lowBaseForce (I := I) (M := M) g +
+    lowA2Lo (I := I) (M := M) g hρ hδ0 hδ_le hreal
+      (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+        (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u)
+      (lowRadialH3 (I := I) (M := M) g ρ u) +
+    FLo u
+      (lowRadialHs (I := I) (M := M) g ρ
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+          (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u))
+
 /-- The autonomous low-base forcing on the `H3` state space is continuous as
 soon as its two completed coefficient maps are.  Canonical home once both
 continuity inputs are unconditional: `DeTurckRemainderLowBaseFixedPoint`. -/
@@ -240,16 +265,56 @@ theorem lowBaseN_cont
         ((lowRadialHs_cont (I := I) (M := M) g hρ.le).comp hincl))
   exact (continuous_const.add h2).add h1
 
+/-- The refolded low-base forcing is continuous when its unchanged
+second-order completion and its complete first-order coefficient are
+continuous. -/
+theorem refoldBaseN_cont
+    (g : SmoothRiemannianMetric I M) {ρ δ : ℝ} (hρ : 0 < ρ)
+    (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+    (hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ)
+    (FLo : tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →
+      (tensorHs (I := I) (M := M) g 0 2 (2 : ℝ) →L[ℝ]
+        tensorHs (I := I) (M := M) g 0 2 (1 : ℝ)))
+    (hA2 : Continuous (lowA2Lo (I := I) (M := M)
+      g hρ.le hδ0 hδ_le hreal))
+    (hFLo : Continuous FLo) :
+    Continuous (refoldBaseN (I := I) (M := M)
+      g hρ.le hδ0 hδ_le hreal FLo) := by
+  have hincl : Continuous fun u : tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) =>
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+        (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u :=
+    (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+      (show (2 : ℝ) ≤ (3 : ℝ) by norm_num)).continuous
+  have h2 : Continuous fun u : tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) =>
+      lowA2Lo (I := I) (M := M) g hρ.le hδ0 hδ_le hreal
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+          (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u)
+        (lowRadialH3 (I := I) (M := M) g ρ u) :=
+    isBoundedBilinearMap_apply.continuous.comp
+      ((hA2.comp hincl).prodMk (lowRadialH3_cont (I := I) (M := M) g hρ))
+  have h1 : Continuous fun u : tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) =>
+      FLo u
+        (lowRadialHs (I := I) (M := M) g ρ
+          (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+            (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u)) :=
+    isBoundedBilinearMap_apply.continuous.comp
+      (hFLo.prodMk ((lowRadialHs_cont (I := I) (M := M) g hρ.le).comp hincl))
+  exact (continuous_const.add h2).add h1
+
 /-! ## The state-level identity -/
 
-/-- **The low-regularity Nemytskii nonlinearity is the frozen low-base affine
+/-- **The low-regularity Nemytskii nonlinearity is the refolded low-base affine
 action.**  For every state `w` of the `H3` ball, the genuine dense-extension
 nonlinearity `lowRegN` agrees, after the exponent transport
-`((1 : ℕ) : ℝ) = (1 : ℝ)`, with `lowBaseN` evaluated at the same state.
+`((1 : ℕ) : ℝ) = (1 : ℝ)`, with `refoldBaseN` evaluated at the same state.
 
 `hNcont` and `hcore` are exported verbatim by `lowreg_partial_sol`; `hA2cont`
-and `hA2core` by `lowA2_small` / `radialA2_lip`.  The only open input is
-`hA1pair`, the `D₄`-free ball-local `a1Lo` pair estimate. -/
+and `hA2core` by `lowA2_small` / `radialA2_lip`.  The refolded first-order
+coefficient and its smooth-core formula are the state-level outputs of
+`refold_time`. -/
 theorem lowreg_N_affine
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {R ρ δ : ℝ}
@@ -270,14 +335,23 @@ theorem lowreg_N_affine
     (hA2core : ∀ S : SmoothCcTensor g₀ 0 2,
       lowA2Lo (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
           (ccToHsLin (I := I) (M := M) g₀ 2 (2 : ℝ) S) =
-        (lowCoreData (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S).a2Lo
+        (refoldCore (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S).a2Lo
           (I := I) (M := M))
-    (hA1pair : LowA1CorePair (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal')
+    (FLo : tensorHs (I := I) (M := M) g₀ 0 2 (3 : ℝ) →
+      (tensorHs (I := I) (M := M) g₀ 0 2 (2 : ℝ) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 (1 : ℝ)))
+    (hFLo : Continuous FLo)
+    (hFcore : ∀ S : SmoothCcTensor g₀ 0 2,
+      FLo (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S) =
+        (c0CoreData (I := I) (M := M)
+            g₀ hρ.le hδ0 hδ_le hreal' S).a1Lo (I := I) (M := M) +
+          (oneCore (I := I) (M := M)
+            g₀ hρ.le hδ0 hδ_le hreal' S).a1Lo (I := I) (M := M))
     (w : lowerState (I := I) (M := M) g₀ 1 R) :
     tensorHsCongr (I := I) (M := M) g₀ 0 2
         (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)
         (lowRegN (I := I) (M := M) g₀ g₀ hR hδ hreal w) =
-      lowBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
+      refoldBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' FLo
         (tensorHsCongr (I := I) (M := M) g₀ 0 2
           (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num) w.1) := by
   classical
@@ -295,11 +369,11 @@ theorem lowreg_N_affine
     (tensorHsCongr (I := I) (M := M) g₀ 0 2
       (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)).continuous.comp hNcont
   have hΨcont : Continuous fun v : lowerState (I := I) (M := M) g₀ 1 R =>
-      lowBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
+      refoldBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' FLo
         (tensorHsCongr (I := I) (M := M) g₀ 0 2
           (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num) v.1) :=
-    (lowBaseN_cont (I := I) (M := M) g₀ hρ hδ0 hδ_le hreal' hA2cont
-        (lowA1Lo_cont (I := I) (M := M) hA1pair)).comp
+    (refoldBaseN_cont (I := I) (M := M) g₀ hρ hδ0 hδ_le hreal'
+        FLo hA2cont hFLo).comp
       ((tensorHsCongr (I := I) (M := M) g₀ 0 2
         (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num)).continuous.comp
           continuous_subtype_val)
@@ -307,7 +381,7 @@ theorem lowreg_N_affine
       tensorHsCongr (I := I) (M := M) g₀ 0 2
           (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)
           (lowRegN (I := I) (M := M) g₀ g₀ hR hδ hreal v) =
-        lowBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
+        refoldBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' FLo
           (tensorHsCongr (I := I) (M := M) g₀ 0 2
             (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num) v.1)} :=
     isClosed_eq hΦcont hΨcont
@@ -316,7 +390,7 @@ theorem lowreg_N_affine
         tensorHsCongr (I := I) (M := M) g₀ 0 2
             (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)
             (lowRegN (I := I) (M := M) g₀ g₀ hR hδ hreal v) =
-          lowBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
+          refoldBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' FLo
             (tensorHsCongr (I := I) (M := M) g₀ 0 2
               (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num) v.1)} := by
     intro v hv
@@ -347,8 +421,8 @@ theorem lowreg_N_affine
       lowRadial_eq_self (I := I) (M := M) g₀ S hsymm2
     have hveq : v = ⟨smoothCcToTensorHs (I := I) (M := M) g₀
         (((1 : ℕ) : ℝ) + 2) S, hball⟩ := Subtype.ext hS.symm
-    -- abbreviations for the low-base coefficient bundle and the radial state
-    set A := lowCoreData (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S with hA
+    -- abbreviations for the refolded coefficient bundle and the radial state
+    set F := refoldCore (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S with hF
     set S' := lowRadial (I := I) (M := M) g₀ ρ S with hS'
     -- left-hand side on the smooth core
     have hLHS : tensorHsCongr (I := I) (M := M) g₀ 0 2
@@ -375,34 +449,38 @@ theorem lowreg_N_affine
               (hreal' _ (lowRadial_norm (I := I) (M := M) g₀ hρ.le S)) -
             deTurckSmoothRemainder (I := I) g₀ g₀
               (0 : SmoothCcTensor g₀ 0 2) hδ (hreal' _ hzeroNorm) =
-          A.a2 (I := I) (M := M) S' + A.a1 (I := I) (M := M) S' :=
-      lowCore_split (I := I) (M := M) hDim g₀ hρ.le hδ0 hδ_le hreal' S
-    -- the five smooth-core read-offs of the frozen operator
+          F.a2 (I := I) (M := M) S' + F.a1 (I := I) (M := M) S' :=
+      refold_split (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S
+    -- the smooth-core read-offs of the refolded operator
     have e1 : tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show (2 : ℝ) ≤ (3 : ℝ) by norm_num)
           (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S) =
         ccToHsLin (I := I) (M := M) g₀ 2 (2 : ℝ) S := by
       rw [ccToHsLin_apply, ccToHsLin_apply]
       exact tensorHsInclusion_ccToHs (I := I) (M := M) g₀ _ S
-    have e6 : A.a2Lo (I := I) (M := M)
+    have e6 : F.a2Lo (I := I) (M := M)
           (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S') =
         ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
-          (A.a2 (I := I) (M := M) S') := by
+          (F.a2 (I := I) (M := M) S') := by
       rw [ccToHsLin_apply]
-      exact a2Lo_core (I := I) (M := M) hDim g₀ A S'
-    have e7 : A.a1Lo (I := I) (M := M)
+      exact a2Lo_core (I := I) (M := M) hDim g₀ F S'
+    have e7 : FLo (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S)
           (ccToHsLin (I := I) (M := M) g₀ 2 (2 : ℝ) S') =
         ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
-          (A.a1 (I := I) (M := M) S') := by
-      rw [ccToHsLin_apply]
-      exact a1Lo_core_any (I := I) (M := M) hDim g₀ A S'
-    have hRHS : lowBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
+          (F.a1 (I := I) (M := M) S') := by
+      rw [hFcore S, ccToHsLin_apply]
+      simpa only [F] using
+        (refoldLo_core (I := I) (M := M) hDim g₀
+          hρ.le hδ0 hδ_le hreal' S S')
+    have hRHS : refoldBaseN (I := I) (M := M)
+          g₀ hρ.le hδ0 hδ_le hreal' FLo
           (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S) =
         ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
           (deTurckSmoothRemainder (I := I) g₀ g₀
             (symmS (I := I) (M := M) g₀ S) hδ
             (hreal _ (symm_h2_of_state (I := I) (M := M) g₀ S hball))) := by
-      rw [show lowBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
+      rw [show refoldBaseN (I := I) (M := M)
+            g₀ hρ.le hδ0 hδ_le hreal' FLo
             (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S) =
           lowBaseForce (I := I) (M := M) g₀ +
             lowA2Lo (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
@@ -411,8 +489,7 @@ theorem lowreg_N_affine
                 (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S))
               (lowRadialH3 (I := I) (M := M) g₀ ρ
                 (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S)) +
-            lowA1Lo (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
-              (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S)
+            FLo (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S)
               (lowRadialHs (I := I) (M := M) g₀ ρ
                 (tensorHsInclusion (I := I) (M := M) (g := g₀)
                   (r := 0) (s := 2)
@@ -421,8 +498,8 @@ theorem lowreg_N_affine
         e1,
         lowRadialH3_core (I := I) (M := M) g₀ hρ S,
         lowRadialHs_core (I := I) (M := M) g₀ hρ.le S,
-        hA2core S, lowA1Lo_core (I := I) (M := M) hA1pair S,
-        ← hA, ← hS', e6, e7, lowBaseForce_core (I := I) (M := M) g₀,
+        hA2core S, ← hF, ← hS', e6, e7,
+        lowBaseForce_core (I := I) (M := M) g₀,
         ← ccTensorToHs_add, ← ccTensorToHs_add]
       refine congrArg (ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)) ?_
       have hz0 := deTurckRem_zero (I := I) (M := M) g₀ g₀
@@ -444,7 +521,7 @@ theorem lowreg_N_affine
         tensorHsCongr (I := I) (M := M) g₀ 0 2
             (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)
             (lowRegN (I := I) (M := M) g₀ g₀ hR hδ hreal v) =
-          lowBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal'
+          refoldBaseN (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' FLo
             (tensorHsCongr (I := I) (M := M) g₀ 0 2
               (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num) v.1)} :=
     hclosed.closure_subset_iff.mpr hsub
