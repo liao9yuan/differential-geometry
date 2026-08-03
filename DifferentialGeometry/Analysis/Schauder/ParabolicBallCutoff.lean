@@ -134,6 +134,17 @@ theorem parabolicBallCutoff_eq_zero_of_time_not_mem
     intervalCutoffBcf_eq_zero_of_not_mem ha ht hb htmem, zero_smul]
   rfl
 
+theorem parabolicBallCutoffTimeDerivative_eq_zero_of_time_not_mem
+    (a t₀ t₁ b : Real) (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    {t : Real} (htmem : t ∉ Ioo a b) :
+    parabolicBallCutoffTimeDerivative
+      a t₀ t₁ b ha ht hb center hr hrR t = 0 := by
+  ext x
+  rw [parabolicBallCutoffTimeDerivative_apply,
+    intervalCutoffDerivBcf_eq_zero_of_not_mem ha ht hb htmem, zero_smul]
+  rfl
+
 def parabolicBallCutoffSpatialFDerivSupConst (r R : Real) : NNReal :=
   Real.toNNReal (ballCutoffFDerivBound r R)
 

@@ -237,6 +237,23 @@ theorem intervalCutoffBcf_eq_zero_of_not_mem
   exact htmem (intervalCutoffBcf_tsupport_subset ha ht hb
     (subset_tsupport _ hne))
 
+theorem intervalCutoffDerivBcf_eq_zero_of_not_mem
+    {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    {t : Real} (htmem : t ∉ Ioo a b) :
+    intervalCutoffDerivBcf a t₀ t₁ b ha ht hb t = 0 := by
+  have hout : t ∉ Metric.ball (intervalCutoffCenter t₀ t₁)
+      (intervalCutoffOuterRadius a t₀ t₁ b) := by
+    intro hball
+    exact htmem (intervalCutoff_closedBall_subset_Ioo ha hb
+      (Metric.ball_subset_closedBall hball))
+  change ballCutoffFDeriv (intervalCutoffCenter t₀ t₁)
+      (intervalCutoffInnerRadius t₀ t₁)
+      (intervalCutoffOuterRadius a t₀ t₁ b) t 1 = 0
+  rw [ballCutoffFDeriv_eq_zero_of_not_mem_ball
+    (intervalCutoffInnerRadius_nonneg ht)
+    (intervalCutoffInnerRadius_lt_outerRadius ha hb) hout]
+  rfl
+
 theorem intervalCutoffBcf_hasDerivAt
     {a t₀ t₁ b : Real} (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
     (t : Real) :

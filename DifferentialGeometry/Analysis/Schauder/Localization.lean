@@ -56,8 +56,10 @@ theorem eParabolicC2HolderGaugeOn_mono
 omit [NormedSpace Real V] [NormedSpace Real F] in
 theorem holderWith_parabolicCylinder_Icc_of_time_support
     {a b S T : Real} (ha : 0 < a) (haT : a ≤ T) (hbT : b < T)
+    (hTS : T ≤ S)
     {alpha K : NNReal} (f : ParabolicPoint V → F)
-    (hsupport : ∀ p, p.time ∉ Set.Ioo a b → f p = 0)
+    (hsupport : ∀ p, p.time ∈ Set.Icc (0 : Real) S →
+      p.time ∉ Set.Ioo a b → f p = 0)
     (hlocal : HolderWith K alpha
       ((parabolicCylinder (Set.Ioc (0 : Real) T) Set.univ).restrict f)) :
     HolderWith K alpha
@@ -91,6 +93,10 @@ theorem holderWith_parabolicCylinder_Icc_of_time_support
     · exact le_rfl
   have hprojectValue : ∀ p : Q, f (project p).1 = f p.1 := by
     intro p
+    have hprojectMem : (project p).1.time ∈ Set.Icc (0 : Real) S := by
+      exact ⟨le_trans (le_of_lt ha)
+          (Set.projIcc a T haT p.1.time).2.1,
+        (Set.projIcc a T haT p.1.time).2.2.trans hTS⟩
     by_cases hp : p.1.time ∈ Set.Icc a T
     · have hproj := Set.projIcc_of_mem haT hp
       change f (parabolicPoint
@@ -103,8 +109,8 @@ theorem holderWith_parabolicCylinder_Icc_of_time_support
         have hprojectTime : (project p).1.time = a := by
           change ((Set.projIcc a T haT p.1.time : Set.Icc a T) : Real) = a
           exact congrArg Subtype.val hproj
-        rw [hsupport p.1 (fun hmem ↦ (not_lt_of_ge hpa.le) hmem.1),
-          hsupport (project p).1 (fun hmem ↦
+        rw [hsupport p.1 p.2.1 (fun hmem ↦ (not_lt_of_ge hpa.le) hmem.1),
+          hsupport (project p).1 hprojectMem (fun hmem ↦
             (lt_irrefl a) (hprojectTime ▸ hmem.1))]
       · have hpT : T < p.1.time := by
           by_contra hnot
@@ -113,9 +119,9 @@ theorem holderWith_parabolicCylinder_Icc_of_time_support
         have hprojectTime : (project p).1.time = T := by
           change ((Set.projIcc a T haT p.1.time : Set.Icc a T) : Real) = T
           exact congrArg Subtype.val hproj
-        rw [hsupport p.1 (fun hmem ↦
+        rw [hsupport p.1 p.2.1 (fun hmem ↦
             (not_lt_of_ge (hbT.le.trans hpT.le)) hmem.2),
-          hsupport (project p).1 (fun hmem ↦
+          hsupport (project p).1 hprojectMem (fun hmem ↦
             (not_lt_of_ge hbT.le) (hprojectTime ▸ hmem.2))]
   have hcomp := hlocal.comp hproject.holderWith
   have hfun :
@@ -129,8 +135,10 @@ theorem holderWith_parabolicCylinder_Icc_of_time_support
 omit [NormedAddCommGroup V] [NormedSpace Real V] [NormedSpace Real F] in
 theorem eSupNormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
     {a b S T : Real} (ha : 0 < a) (haT : a ≤ T) (hbT : b < T)
+    (hTS : T ≤ S)
     (f : ParabolicPoint V → F)
-    (hsupport : ∀ p, p.time ∉ Set.Ioo a b → f p = 0) :
+    (hsupport : ∀ p, p.time ∈ Set.Icc (0 : Real) S →
+      p.time ∉ Set.Ioo a b → f p = 0) :
     eSupNormOn (parabolicCylinder (Set.Icc (0 : Real) S) Set.univ) f ≤
       eSupNormOn (parabolicCylinder (Set.Ioc (0 : Real) T) Set.univ) f := by
   let Q := parabolicCylinder (Set.Icc (0 : Real) S) (Set.univ : Set V)
@@ -142,6 +150,10 @@ theorem eSupNormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
         (Set.projIcc a T haT p.1.time).2.2⟩, Set.mem_univ p.1.space⟩⟩
   have hprojectValue : ∀ p : Q, f (project p).1 = f p.1 := by
     intro p
+    have hprojectMem : (project p).1.time ∈ Set.Icc (0 : Real) S := by
+      exact ⟨le_trans (le_of_lt ha)
+          (Set.projIcc a T haT p.1.time).2.1,
+        (Set.projIcc a T haT p.1.time).2.2.trans hTS⟩
     by_cases hp : p.1.time ∈ Set.Icc a T
     · have hproj := Set.projIcc_of_mem haT hp
       change f (parabolicPoint
@@ -154,8 +166,8 @@ theorem eSupNormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
         have hprojectTime : (project p).1.time = a := by
           change ((Set.projIcc a T haT p.1.time : Set.Icc a T) : Real) = a
           exact congrArg Subtype.val hproj
-        rw [hsupport p.1 (fun hmem ↦ (not_lt_of_ge hpa.le) hmem.1),
-          hsupport (project p).1 (fun hmem ↦
+        rw [hsupport p.1 p.2.1 (fun hmem ↦ (not_lt_of_ge hpa.le) hmem.1),
+          hsupport (project p).1 hprojectMem (fun hmem ↦
             (lt_irrefl a) (hprojectTime ▸ hmem.1))]
       · have hpT : T < p.1.time := by
           by_contra hnot
@@ -164,9 +176,9 @@ theorem eSupNormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
         have hprojectTime : (project p).1.time = T := by
           change ((Set.projIcc a T haT p.1.time : Set.Icc a T) : Real) = T
           exact congrArg Subtype.val hproj
-        rw [hsupport p.1 (fun hmem ↦
+        rw [hsupport p.1 p.2.1 (fun hmem ↦
             (not_lt_of_ge (hbT.le.trans hpT.le)) hmem.2),
-          hsupport (project p).1 (fun hmem ↦
+          hsupport (project p).1 hprojectMem (fun hmem ↦
             (not_lt_of_ge hbT.le) (hprojectTime ▸ hmem.2))]
   rw [eSupNormOn_le]
   intro p hp
@@ -176,8 +188,10 @@ theorem eSupNormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
 omit [NormedSpace Real V] [NormedSpace Real F] in
 theorem eHolderSeminormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
     {a b S T : Real} (ha : 0 < a) (haT : a ≤ T) (hbT : b < T)
+    (hTS : T ≤ S)
     (alpha : NNReal) (f : ParabolicPoint V → F)
-    (hsupport : ∀ p, p.time ∉ Set.Ioo a b → f p = 0) :
+    (hsupport : ∀ p, p.time ∈ Set.Icc (0 : Real) S →
+      p.time ∉ Set.Ioo a b → f p = 0) :
     eHolderSeminormOn alpha
         (parabolicCylinder (Set.Icc (0 : Real) S) Set.univ) f ≤
       eHolderSeminormOn alpha
@@ -189,15 +203,18 @@ theorem eHolderSeminormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
   intro hC
   exact HolderWith.eHolderNorm_le
     (holderWith_parabolicCylinder_Icc_of_time_support
-      ha haT hbT f hsupport hC)
+      ha haT hbT hTS f hsupport hC)
 
 theorem eParabolicC2HolderGaugeOn_Icc_le_Ioc_of_time_support
     {a b S T : Real} (ha : 0 < a) (haT : a ≤ T) (hbT : b < T)
+    (hTS : T ≤ S)
     (alpha : NNReal) (u : Real → V → F)
     (hspatialSupport : ∀ j < 3, ∀ p,
-      p.time ∉ Set.Ioo a b → parabolicSpatialJet j u p = 0)
+      p.time ∈ Set.Icc (0 : Real) S →
+        p.time ∉ Set.Ioo a b → parabolicSpatialJet j u p = 0)
     (htimeSupport : ∀ p,
-      p.time ∉ Set.Ioo a b → parabolicTimeDerivative u p = 0) :
+      p.time ∈ Set.Icc (0 : Real) S →
+        p.time ∉ Set.Ioo a b → parabolicTimeDerivative u p = 0) :
     eParabolicC2HolderGaugeOn alpha
         (parabolicCylinder (Set.Icc (0 : Real) S) Set.univ) u ≤
       eParabolicC2HolderGaugeOn alpha
@@ -205,13 +222,13 @@ theorem eParabolicC2HolderGaugeOn_Icc_le_Ioc_of_time_support
   unfold eParabolicC2HolderGaugeOn
   gcongr with j hj
   · exact eSupNormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
-      ha haT hbT _ (hspatialSupport j (Finset.mem_range.mp hj))
+      ha haT hbT hTS _ (hspatialSupport j (Finset.mem_range.mp hj))
   · exact eSupNormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
-      ha haT hbT _ htimeSupport
+      ha haT hbT hTS _ htimeSupport
   · exact eHolderSeminormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
-      ha haT hbT alpha _ (hspatialSupport 2 (by norm_num))
+      ha haT hbT hTS alpha _ (hspatialSupport 2 (by norm_num))
   · exact eHolderSeminormOn_parabolicCylinder_Icc_le_Ioc_of_time_support
-      ha haT hbT alpha _ htimeSupport
+      ha haT hbT hTS alpha _ htimeSupport
 
 theorem eContDiffHolderGaugeOn_congr {s : Set V} {f g : V → F}
     {k : Nat} (hfg : ∀ j ≤ k,
