@@ -28,6 +28,20 @@ def chartInvGramOnE (g : SmoothRiemannianMetric I M) (α : M)
     chartInvGramOnE (I := I) g α i j y =
       chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) i j := rfl
 
+lemma chartInvGramOnE_posDef
+    (g : SmoothRiemannianMetric I M) (α : M) {y : E}
+    (hy : y ∈ (extChartAt I α).target) :
+    (Matrix.of fun i j : Fin (Module.finrank ℝ E) =>
+      chartInvGramOnE (I := I) g α i j y).PosDef := by
+  have hsource : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
+    (extChartAt I α).map_target hy
+  have hbase : (extChartAt I α).symm y ∈
+      (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
+    rwa [trivializationAt_baseSet_eq_chartAt_source]
+  have hpos := chartGramMatrix_posDef (I := I) g α hbase
+  simpa only [chartInvGramOnE_def, chartInvGramMatrix] using hpos.inv
+
 def gradChartCoeffOnE (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y =>

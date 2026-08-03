@@ -50,6 +50,28 @@ theorem eHolderSeminormOn_comp_le_of_lipschitzWith
 def parabolicMap (phi : X → Y) : ParabolicPoint X → ParabolicPoint Y :=
   fun p ↦ parabolicPoint p.time (phi p.space)
 
+def parabolicToProduct (p : ParabolicPoint X) : Real × X :=
+  (p.time, p.space)
+
+def parabolicTimeSlabLipschitzConst (a b : Real) : NNReal :=
+  ⟨max 1 (Real.sqrt (b - a)), by positivity⟩
+
+omit [MetricSpace X] [MetricSpace Y] in
+@[simp]
+theorem parabolicToProduct_apply (t : Real) (x : X) :
+    parabolicToProduct (parabolicPoint t x) = (t, x) := by
+  rfl
+
+theorem one_le_parabolicTimeSlabLipschitzConst (a b : Real) :
+    1 ≤ parabolicTimeSlabLipschitzConst a b := by
+  change (1 : Real) ≤ max 1 (Real.sqrt (b - a))
+  exact le_max_left _ _
+
+theorem sqrt_sub_le_parabolicTimeSlabLipschitzConst (a b : Real) :
+    Real.sqrt (b - a) ≤ parabolicTimeSlabLipschitzConst a b := by
+  change Real.sqrt (b - a) ≤ max 1 (Real.sqrt (b - a))
+  exact le_max_right _ _
+
 omit [MetricSpace X] [MetricSpace Y] in
 @[simp]
 theorem parabolicMap_apply (phi : X → Y) (t : Real) (x : X) :
@@ -99,6 +121,48 @@ theorem lipschitzWith_parabolicMap
             (le_max_left _ _))
   · exact (hphi.dist_le_mul p.space q.space).trans
       (mul_le_mul_of_nonneg_left (le_max_right _ _) L.coe_nonneg)
+
+theorem lipschitzOnWith_parabolicToProduct_Icc
+    (a b : Real) (Omega : Set X) :
+    LipschitzOnWith (parabolicTimeSlabLipschitzConst a b)
+      parabolicToProduct (parabolicCylinder (Set.Icc a b) Omega) := by
+  apply LipschitzOnWith.of_dist_le_mul
+  intro p hp q hq
+  change dist (p.time, p.space) (q.time, q.space) ≤
+    (parabolicTimeSlabLipschitzConst a b : Real) * dist p q
+  rw [Prod.dist_eq, Real.dist_eq, ← parabolicPoint_time_space p,
+    ← parabolicPoint_time_space q, dist_parabolicPoint]
+  let z := Real.sqrt |p.time - q.time|
+  have htime : |p.time - q.time| ≤ b - a := by
+    rw [abs_sub_le_iff]
+    exact ⟨by linarith [hp.1.1, hp.1.2, hq.1.1, hq.1.2],
+      by linarith [hp.1.1, hp.1.2, hq.1.1, hq.1.2]⟩
+  have hz_nonneg : 0 ≤ z := Real.sqrt_nonneg _
+  have hz_le : z ≤ parabolicTimeSlabLipschitzConst a b := by
+    exact (Real.sqrt_le_sqrt htime).trans
+      (sqrt_sub_le_parabolicTimeSlabLipschitzConst a b)
+  have hz_sq : z ^ 2 = |p.time - q.time| := by
+    exact Real.sq_sqrt (abs_nonneg _)
+  have hz_rpow : z = |p.time - q.time| ^ (1 / 2 : Real) := by
+    exact Real.sqrt_eq_rpow _
+  rw [← hz_rpow]
+  apply max_le
+  · calc
+      |p.time - q.time| = z * z := by rw [← pow_two, hz_sq]
+      _ ≤ (parabolicTimeSlabLipschitzConst a b : Real) * z :=
+        mul_le_mul_of_nonneg_right hz_le hz_nonneg
+      _ ≤ (parabolicTimeSlabLipschitzConst a b : Real) *
+          max z (dist p.space q.space) :=
+        mul_le_mul_of_nonneg_left (le_max_left _ _)
+          (parabolicTimeSlabLipschitzConst a b).coe_nonneg
+  · calc
+      dist p.space q.space ≤ max z (dist p.space q.space) := le_max_right _ _
+      _ = 1 * max z (dist p.space q.space) := by rw [one_mul]
+      _ ≤ (parabolicTimeSlabLipschitzConst a b : Real) *
+          max z (dist p.space q.space) :=
+        mul_le_mul_of_nonneg_right
+          (by exact_mod_cast one_le_parabolicTimeSlabLipschitzConst a b)
+          (hz_nonneg.trans (le_max_left _ _))
 
 theorem holderWith_restrict_comp_parabolicMap
     {Q : Set (ParabolicPoint X)} {R : Set (ParabolicPoint Y)}

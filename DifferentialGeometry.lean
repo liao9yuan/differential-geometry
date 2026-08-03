@@ -829,6 +829,7 @@ import DifferentialGeometry.Analysis.Schauder.BallCutoff
 import DifferentialGeometry.Analysis.Schauder.BallCutoffHessian
 import DifferentialGeometry.Analysis.Schauder.BallInterior
 import DifferentialGeometry.Analysis.Schauder.BilinearHolder
+import DifferentialGeometry.Analysis.Schauder.CompactRegularity
 import DifferentialGeometry.Analysis.Schauder.Composition
 import DifferentialGeometry.Analysis.Schauder.ConstantCoefficientElliptic
 import DifferentialGeometry.Analysis.Schauder.CutoffJet
@@ -836,6 +837,7 @@ import DifferentialGeometry.Analysis.Schauder.CutoffLaplacian
 import DifferentialGeometry.Analysis.Schauder.CutoffExistence
 import DifferentialGeometry.Analysis.Schauder.CutoffProduct
 import DifferentialGeometry.Analysis.Schauder.CutoffValue
+import DifferentialGeometry.Analysis.Schauder.EvolvingMetric
 import DifferentialGeometry.Analysis.Schauder.Holder
 import DifferentialGeometry.Analysis.Schauder.Interior
 import DifferentialGeometry.Analysis.Schauder.Interpolation
