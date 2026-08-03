@@ -5,7 +5,7 @@ import Mathlib.MeasureTheory.Integral.Prod
 noncomputable section
 
 open MeasureTheory Real Set Filter
-open scoped NNReal RealInnerProductSpace
+open scoped NNReal RealInnerProductSpace BigOperators
 
 namespace DifferentialGeometry.Analysis.Parabolic.Euclidean
 
@@ -1442,6 +1442,144 @@ theorem heatD2DuhField_holderWith_restrict_of_holder
         (heatD2DuhField v w f)) :=
   (heatD2DuhField_holderOnWith_of_holder
     halpha0 halpha1 f hf v w hmeas).holderWith
+
+def heatLapDuh (t : Real) (f : Real → V → F) (x : V) : F :=
+  ∑ i : Fin (Module.finrank Real V),
+    heatD2Duh t ((stdOrthonormalBasis Real V) i)
+      ((stdOrthonormalBasis Real V) i) f x
+
+def lapDuhParabolicHolderConst (alpha K : NNReal) : Real :=
+  ∑ i : Fin (Module.finrank Real V),
+    d2DuhParabolicHolderConst alpha ((stdOrthonormalBasis Real V) i)
+      ((stdOrthonormalBasis Real V) i) K
+
+omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
+  [CompleteSpace F] in
+theorem lapDuhParabolicHolderConst_nonneg {alpha : NNReal}
+    (halpha : alpha ≤ 1) (K : NNReal) :
+    0 ≤ lapDuhParabolicHolderConst (V := V) alpha K := by
+  unfold lapDuhParabolicHolderConst
+  exact Finset.sum_nonneg fun i _ ↦
+    d2DuhParabolicHolderConst_nonneg halpha _ _ K
+
+theorem heatLapDuh_parabolic_norm_sub_le_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {s t : Real} (hs : 0 < s) (ht : 0 < t)
+    (f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) (max s t), HolderWith K alpha (f r))
+    (x y : V)
+    (hmeas : ∀ q ∈ ({s, t} : Set Real), ∀ z ∈ ({x, y} : Set V),
+      ∀ i : Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (q - r) ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) (f r) z)
+        (volume.restrict (uIoc (0 : Real) q))) :
+    ‖heatLapDuh t f x - heatLapDuh s f y‖ ≤
+      lapDuhParabolicHolderConst (V := V) alpha K *
+        (max (|t - s| ^ (1 / 2 : Real)) ‖x - y‖) ^ (alpha : Real) := by
+  let D : Real := max (|t - s| ^ (1 / 2 : Real)) ‖x - y‖
+  unfold heatLapDuh
+  rw [← Finset.sum_sub_distrib]
+  calc
+    ‖∑ i : Fin (Module.finrank Real V),
+        (heatD2Duh t ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) f x -
+        heatD2Duh s ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) f y)‖ ≤
+      ∑ i : Fin (Module.finrank Real V),
+        ‖heatD2Duh t ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) f x -
+        heatD2Duh s ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) f y‖ := norm_sum_le _ _
+    _ ≤ ∑ i : Fin (Module.finrank Real V),
+        d2DuhParabolicHolderConst alpha ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) K * D ^ (alpha : Real) := by
+      gcongr with i
+      exact heatD2Duh_parabolic_norm_sub_le_of_holder
+        halpha0 halpha1 hs ht f hf _ _ x y
+        (hmeas t (by simp) x (by simp) i)
+        (hmeas t (by simp) y (by simp) i)
+        (hmeas s (by simp) y (by simp) i)
+    _ = lapDuhParabolicHolderConst (V := V) alpha K *
+        D ^ (alpha : Real) := by
+      unfold lapDuhParabolicHolderConst
+      exact (Finset.sum_mul Finset.univ
+        (fun i : Fin (Module.finrank Real V) ↦
+          d2DuhParabolicHolderConst alpha ((stdOrthonormalBasis Real V) i)
+            ((stdOrthonormalBasis Real V) i) K)
+        (D ^ (alpha : Real))).symm
+
+def heatLapDuhField (f : Real → V → F) : ParabolicPoint V → F :=
+  fun p ↦ heatLapDuh p.time f p.space
+
+theorem heatLapDuhField_holderOnWith_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ i : Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r) ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    HolderOnWith (Real.toNNReal (lapDuhParabolicHolderConst (V := V) alpha K))
+      alpha (heatLapDuhField f)
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ) := by
+  intro p hp q hq
+  have hf' : ∀ r ∈ Icc (0 : Real) (max q.time p.time),
+      HolderWith K alpha (f r) := by
+    intro r hr
+    exact hf r ⟨hr.1, hr.2.trans (max_le hq.1.2 hp.1.2)⟩
+  have hreal := heatLapDuh_parabolic_norm_sub_le_of_holder
+    halpha0 halpha1 hq.1.1 hp.1.1 f hf' p.space q.space
+    (fun z hz a ha i ↦ hmeas z (by
+      rcases hz with rfl | rfl
+      · exact hq.1
+      · exact hp.1) a i)
+  have hp_repr : parabolicPoint p.time p.space = p := by
+    rcases p with ⟨⟨pt⟩, px⟩
+    rfl
+  have hq_repr : parabolicPoint q.time q.space = q := by
+    rcases q with ⟨⟨qt⟩, qx⟩
+    rfl
+  have hdist : dist p q =
+      max (|p.time - q.time| ^ (1 / 2 : Real)) ‖p.space - q.space‖ := by
+    rw [← hp_repr, ← hq_repr, dist_parabolicPoint, dist_eq_norm]
+    simp only [parabolicPoint_time, parabolicPoint_space]
+  change edist (heatLapDuh p.time f p.space) (heatLapDuh q.time f q.space) ≤ _
+  rw [edist_dist, edist_dist, hdist, ENNReal.ofNNReal_toNNReal,
+    ENNReal.ofReal_rpow_of_nonneg (by positivity) alpha.coe_nonneg,
+    ← ENNReal.ofReal_mul
+      (lapDuhParabolicHolderConst_nonneg (V := V) halpha1.le K)]
+  simpa only [dist_eq_norm] using ENNReal.ofReal_le_ofReal hreal
+
+def heatDuhTimeCandidate (t : Real) (f : Real → V → F) (x : V) : F :=
+  f t x + heatLapDuh t f x
+
+def heatDuhTimeCandidateField (f : Real → V → F) : ParabolicPoint V → F :=
+  fun p ↦ heatDuhTimeCandidate p.time f p.space
+
+theorem heatDuhTimeCandidateField_holderWith_restrict_of_holder
+    {alpha K C : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hsource : HolderWith C alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (fun p ↦ f p.time p.space)))
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ i : Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r) ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    HolderWith (C + Real.toNNReal
+      (lapDuhParabolicHolderConst (V := V) alpha K)) alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (heatDuhTimeCandidateField f)) := by
+  have hlap :=
+    (heatLapDuhField_holderOnWith_of_holder halpha0 halpha1 f hf hmeas).holderWith
+  simpa only [heatDuhTimeCandidateField, heatDuhTimeCandidate,
+    heatLapDuhField, Set.restrict_apply, Pi.add_apply] using hsource.add hlap
 
 end Convolution
 
