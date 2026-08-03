@@ -93,6 +93,191 @@ theorem scalar_hopf_boundary_point_of_defining_function_on_compact_annulus
       hu_super hp hp_outer hgrad_boundary gamma ha hgamma0 hgamma
       hgamma_mdiff hgamma_velocity hu_zero
 
+private theorem gradientFun_exp_mul
+    [I.Boundaryless]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (g : SmoothRiemannianMetric I M) (L T : Real)
+    (u : M → Real) (p : M)
+    (hu : MDifferentiableAt I (modelWithCornersSelf Real Real) u p) :
+    gradientFun (I := I) g (fun x => Real.exp (-L * T) * u x) p =
+      Real.exp (-L * T) • gradientFun (I := I) g u p := by
+  simpa only [Pi.smul_apply, smul_eq_mul] using
+    gradientFun_const_smul (I := I) g (Real.exp (-L * T)) hu
+
+omit [FiniteDimensional Real E] [IsManifold I ∞ M] in
+private theorem exp_mul_mdiffAt
+    [I.Boundaryless]
+    (L t : Real) (u : M → Real) (x : M)
+    (hu : MDifferentiableAt I (modelWithCornersSelf Real Real) u x) :
+    MDifferentiableAt I (modelWithCornersSelf Real Real)
+      (fun y => Real.exp (-L * t) * u y) x := by
+  exact (mdifferentiableAt_const (c := Real.exp (-L * t))).mul hu
+
+private theorem exp_neg_mul_differentiableWithinAt
+    (L T t : Real) :
+    DifferentiableWithinAt Real (fun s => Real.exp (-L * s))
+      (Set.Icc 0 T) t :=
+  (((differentiableAt_const (-L)).mul differentiableAt_id).exp
+    (x := t)).differentiableWithinAt
+
+private theorem exp_neg_abs_mul_mul_le
+    (L T eta t a : Real) (ht : t ∈ Set.Icc 0 T)
+    (heta : 0 ≤ eta) (ha : eta ≤ a) :
+    Real.exp (-|L| * T) * eta ≤ Real.exp (-L * t) * a := by
+  have hLt : L * t ≤ |L| * T := by
+    calc
+      L * t ≤ |L| * t := mul_le_mul_of_nonneg_right (le_abs_self L) ht.1
+      _ ≤ |L| * T := mul_le_mul_of_nonneg_left ht.2 (abs_nonneg L)
+  have hscale : Real.exp (-|L| * T) ≤ Real.exp (-L * t) := by
+    apply Real.exp_le_exp.mpr
+    linarith
+  calc
+    Real.exp (-|L| * T) * eta ≤ Real.exp (-L * t) * eta :=
+      mul_le_mul_of_nonneg_right hscale heta
+    _ ≤ Real.exp (-L * t) * a :=
+      mul_le_mul_of_nonneg_left ha (Real.exp_pos _).le
+
+private theorem gradientFun_exp_mul_mdiffAt
+    [I.Boundaryless]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (g : SmoothRiemannianMetric I M) (L t : Real)
+    (u : M → Real) (x : M)
+    (hu : ∀ y : M,
+      MDifferentiableAt I (modelWithCornersSelf Real Real) u y)
+    (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g u y) x) :
+    MDiffAt (T% fun y : M => gradientFun (I := I) g
+      (fun z => Real.exp (-L * t) * u z) y) x := by
+  have heq :
+      (T% fun y : M => gradientFun (I := I) g
+        (fun z => Real.exp (-L * t) * u z) y) =
+        (T% fun y : M => Real.exp (-L * t) •
+          gradientFun (I := I) g u y) := by
+    funext y
+    apply congrArg (fun q =>
+      (⟨y, q⟩ : TotalSpace E (TangentSpace I : M → Type _)))
+    exact gradientFun_exp_mul (I := I) g L t u y (hu y)
+  rw [heq]
+  exact (mdifferentiableAt_const (I := I) (c := Real.exp (-L * t))).smul_section
+    hgrad
+
+theorem scalar_hopf_boundary_point_with_potential_on_compact_annulus
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    (X : Real → (x : M) → TangentSpace I x)
+    (V : Real → M → Real) (L : Real)
+    (rho : M → Real)
+    (hrho : ContMDiff I (modelWithCornersSelf Real Real) ∞ rho)
+    {r R eta m B kappa alpha : Real}
+    (hr : 0 ≤ r) (hrR : r < R) (heta : 0 < eta)
+    (hK : IsCompact {x | r ≤ rho x ∧ rho x ≤ R})
+    (hkappa : 0 < kappa) (hinit : R ≤ r + kappa * T ^ 2)
+    (halpha : 0 < alpha) (hdom : 2 * kappa * T + B ≤ alpha * m)
+    (hgrad_lower : ∀ t ∈ Set.Icc 0 T, 0 < t →
+      ∀ x ∈ interior {x | r ≤ rho x ∧ rho x ≤ R},
+        m ≤ (G.metric t).inner x
+          (gradientFun (I := I) (G.metric t) rho x)
+          (gradientFun (I := I) (G.metric t) rho x))
+    (hheat_upper : ∀ t ∈ Set.Icc 0 T, 0 < t →
+      ∀ x ∈ interior {x | r ≤ rho x ∧ rho x ≤ R},
+        heatOperatorWithDrift (I := I) G t (X t) rho x ≤ B)
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (Set.Icc 0 T ×ˢ {x | r ≤ rho x ∧ rho x ≤ R}))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ {x | r ≤ rho x ∧ rho x ≤ R}, 0 ≤ u t x)
+    (hu_inner : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ frontier {x | r ≤ rho x ∧ rho x ≤ R},
+        rho x = r → eta ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I (modelWithCornersSelf Real Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t →
+      ∀ x ∈ interior {x | r ≤ rho x ∧ rho x ≤ R},
+        0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x - V t x * u t x)
+    (hV_lower : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ interior {x | r ≤ rho x ∧ rho x ≤ R}, L ≤ V t x)
+    {p : M}
+    (hp : p ∈ frontier {x | r ≤ rho x ∧ rho x ≤ R})
+    (hp_outer : rho p = R)
+    (hgrad_boundary : 0 < (G.metric T).inner p
+      (gradientFun (I := I) (G.metric T) rho p)
+      (gradientFun (I := I) (G.metric T) rho p))
+    (hu_zero : u T p = 0) :
+    (G.metric T).inner p
+      (gradientFun (I := I) (G.metric T) (u T) p)
+      (levelSetOutwardNormal (I := I) (G.metric T) rho p) < 0 := by
+  let z : Real → M → Real := fun t x => Real.exp (-L * t) * u t x
+  let eta' : Real := Real.exp (-|L| * T) * eta
+  have heta' : 0 < eta' := mul_pos (Real.exp_pos _) heta
+  have hz_cont : ContinuousOn (fun p : Real × M => z p.1 p.2)
+      (Set.Icc 0 T ×ˢ {x | r ≤ rho x ∧ rho x ≤ R}) := by
+    have hscale : Continuous (fun p : Real × M => Real.exp (-L * p.1)) := by
+      fun_prop
+    simpa only [z] using hscale.continuousOn.mul hu_cont
+  have hz_nonneg : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ {x | r ≤ rho x ∧ rho x ≤ R}, 0 ≤ z t x := by
+    intro t ht x hx
+    exact mul_nonneg (Real.exp_pos _).le (hu_nonneg t ht x hx)
+  have hz_inner : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ frontier {x | r ≤ rho x ∧ rho x ≤ R},
+        rho x = r → eta' ≤ z t x := by
+    intro t ht x hx hrho_x
+    exact exp_neg_abs_mul_mul_le L T eta t (u t x) ht heta.le
+      (hu_inner t ht x hx hrho_x)
+  have hz_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => z s x) (Set.Icc 0 T) t := by
+    intro t ht htpos x
+    exact (exp_neg_mul_differentiableWithinAt L T t).mul
+      (hu_time t ht htpos x)
+  have hz_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I (modelWithCornersSelf Real Real) (z t) x := by
+    intro t ht htpos x
+    simpa only [z] using exp_mul_mdiffAt (I := I) L t (u t) x
+      (hu_mdiff t ht htpos x)
+  have hz_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (z t) y) x := by
+    intro t ht htpos x
+    simpa only [z] using gradientFun_exp_mul_mdiffAt (I := I) (G.metric t)
+      L t (u t) x (hu_mdiff t ht htpos) (hu_grad t ht htpos x)
+  have hz_super : ∀ t ∈ Set.Icc 0 T, 0 < t →
+      ∀ x ∈ interior {x | r ≤ rho x ∧ rho x ≤ R},
+        0 ≤ parabolicOperatorWithDrift (I := I) G T X z t x := by
+    intro t ht htpos x hx
+    simpa only [z] using parabolic_exp_rescale_nonneg_of_potential (I := I)
+      G T hT L X V u t ht (hu_mdiff t ht htpos) x
+      (hu_grad t ht htpos x) (hu_time t ht htpos x)
+      (hu_nonneg t ht x (interior_subset hx)) (hV_lower t ht x hx)
+      (hu_super t ht htpos x hx)
+  have hz_zero : z T p = 0 := by
+    simp [z, hu_zero]
+  have hhopf :=
+    scalar_hopf_boundary_point_of_defining_function_on_compact_annulus
+      (I := I) G hT X rho hrho hr hrR heta' hK hkappa hinit halpha hdom
+      hgrad_lower hheat_upper z hz_cont hz_nonneg hz_inner hz_time
+      hz_mdiff hz_grad hz_super hp hp_outer hgrad_boundary hz_zero
+  have hgradient :
+      gradientFun (I := I) (G.metric T) (z T) p =
+        Real.exp (-L * T) •
+          gradientFun (I := I) (G.metric T) (u T) p := by
+    simpa only [z] using gradientFun_exp_mul (I := I) (G.metric T) L T
+      (u T) p (hu_mdiff T ⟨hT.le, le_rfl⟩ hT p)
+  rw [hgradient, map_smul] at hhopf
+  change Real.exp (-L * T) *
+    (G.metric T).inner p
+      (gradientFun (I := I) (G.metric T) (u T) p)
+      (levelSetOutwardNormal (I := I) (G.metric T) rho p) < 0 at hhopf
+  rcases mul_neg_iff.mp hhopf with h | h
+  · exact h.2
+  · exact (not_lt_of_ge (Real.exp_pos _).le h.1).elim
+
 theorem scalar_hopf_boundary_point_of_subsolution_on_compact_annulus
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]

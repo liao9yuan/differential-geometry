@@ -698,6 +698,36 @@ theorem parabolic_exp_rescale_identity
   rw [htime, hheat]
   ring
 
+theorem parabolic_exp_rescale_nonneg_of_potential
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (hT : 0 < T) (L : Real)
+    (X : Real -> (x : M) -> TangentSpace I x)
+    (V v : Real -> M -> Real)
+    (t : Real) (ht : t ∈ Set.Icc 0 T)
+    (hv_space : forall y : M, MDifferentiableAt I 𝓘(Real, Real) (v t) y)
+    (x : M)
+    (hv_grad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (v t) y) x)
+    (hv : DifferentiableWithinAt Real (fun s : Real => v s x) (Set.Icc 0 T) t)
+    (hv_nonneg : 0 <= v t x) (hV : L <= V t x)
+    (hsuper : 0 <=
+      parabolicOperatorWithDrift (I := I) G T X v t x - V t x * v t x) :
+    0 <= parabolicOperatorWithDrift (I := I) G T X
+      (fun s y => Real.exp (-L * s) * v s y) t x := by
+  have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
+    (uniqueDiffOn_Icc hT).uniqueDiffWithinAt ht
+  have hscale : DifferentiableWithinAt Real
+      (fun s : Real => Real.exp (-L * s)) (Set.Icc 0 T) t :=
+    (((differentiableAt_const (-L)).mul differentiableAt_id).exp
+      (x := t)).differentiableWithinAt
+  rw [parabolic_exp_rescale_identity (I := I) G T L X v t ht huniq
+    hv_space x hv_grad hv hscale]
+  apply mul_nonneg (Real.exp_pos _).le
+  have hreaction : 0 <= (V t x - L) * v t x :=
+    mul_nonneg (sub_nonneg.mpr hV) hv_nonneg
+  linarith
+
 
 structure ParabolicUpperSupportAt
     (G : RealizedMetricFamily (I := I) (M := M) Real)

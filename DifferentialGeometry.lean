@@ -690,6 +690,7 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Synthesis
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Comparison
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotential
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotentialHopf
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotentialStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Hopf
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.LocalStrong
