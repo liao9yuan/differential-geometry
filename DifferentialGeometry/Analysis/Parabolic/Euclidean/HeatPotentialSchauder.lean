@@ -1966,7 +1966,7 @@ theorem eParabolicC2HolderGaugeOn_le_of_heat_potential_lower_jets
   convert hraw using 1
   norm_num [Cspatial, Finset.sum_range_succ]
 
-theorem eParabolicC2HolderGaugeOn_heatDuh_le_of_lower_jets
+theorem eParabolicC2HolderGaugeOn_heatDuh_le_of_lower_jets_of_time_realization
     {alpha K B Csource C0 C1 : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
     {T : Real} (hT : 0 ≤ T)

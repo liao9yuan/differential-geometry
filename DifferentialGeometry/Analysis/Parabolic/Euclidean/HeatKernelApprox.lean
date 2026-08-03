@@ -12,8 +12,8 @@ gives the explicit rate `t^(1/4)`.
 
 noncomputable section
 
-open MeasureTheory Real
-open scoped RealInnerProductSpace NNReal
+open Filter MeasureTheory Real
+open scoped Interval RealInnerProductSpace NNReal Topology
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -379,6 +379,32 @@ theorem heatSup_id_norm_of_holder {alpha K : NNReal}
       rw [integral_const_mul, integral_heatHolder alpha ht]
     _ = (K : Real) * (heatScale t) ^ (alpha : Real) *
         heatC0Holder (V := V) alpha := by ring
+
+theorem heatSup_zero_of_holder {alpha K : NNReal} (halpha0 : 0 < alpha)
+    (halpha1 : alpha ≤ 1) (u : BoundedContinuousFunction V F)
+    (hu : HolderWith K alpha u) (x : V) :
+    Tendsto (fun t : Real => heatSup t u x) (𝓝[>] (0 : Real)) (𝓝 (u x)) := by
+  rw [tendsto_iff_norm_sub_tendsto_zero]
+  have hscale : Tendsto heatScale (𝓝[>] (0 : Real)) (𝓝 0) := by
+    have hfull : Tendsto (fun t : Real => Real.sqrt t) (𝓝 0) (𝓝 0) := by
+      simpa only [Real.sqrt_zero] using Real.continuous_sqrt.tendsto (0 : Real)
+    simpa only [heatScale] using hfull.mono_left nhdsWithin_le_nhds
+  have halphaReal : 0 < (alpha : Real) := by exact_mod_cast halpha0
+  have hrpow : Tendsto (fun t : Real => (heatScale t) ^ (alpha : Real))
+      (𝓝[>] (0 : Real)) (𝓝 0) := by
+    have hcont := Real.continuousAt_rpow_const 0 (alpha : Real)
+      (Or.inr halphaReal.le)
+    simpa [Function.comp_apply, Real.zero_rpow halphaReal.ne'] using
+      hcont.tendsto.comp hscale
+  have hupper : Tendsto
+      (fun t : Real => (K : Real) * (heatScale t) ^ (alpha : Real) *
+        heatC0Holder (V := V) alpha)
+      (𝓝[>] (0 : Real)) (𝓝 0) := by
+    simpa only [mul_zero, zero_mul] using
+      (hrpow.const_mul (K : Real)).mul_const (heatC0Holder (V := V) alpha)
+  refine squeeze_zero' (Filter.Eventually.of_forall fun t => norm_nonneg _) ?_ hupper
+  filter_upwards [self_mem_nhdsWithin] with t ht
+  exact heatSup_id_norm_of_holder halpha1 ht hu x
 
 end ApproxIdentity
 

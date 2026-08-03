@@ -621,6 +621,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSup
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialRealization
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialRegularity
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialSchauder
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialTimeRealization
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatResolvent
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HmfFixedCore
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HmfQuadFixed
