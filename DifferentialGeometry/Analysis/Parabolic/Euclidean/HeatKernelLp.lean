@@ -336,6 +336,12 @@ def baseD2Map (v x : V) : V →L[ℝ] ℝ :=
   ((4 : ℝ)⁻¹ * ⟪x, v⟫ * baseHeat x) • innerSL ℝ x -
     ((2 : ℝ)⁻¹ * baseHeat x) • innerSL ℝ v
 
+def baseD2CurriedMap (x : V) : V →L[ℝ] (V →L[ℝ] ℝ) :=
+  (innerSL ℝ x).smulRight
+      (((4 : ℝ)⁻¹ * baseHeat x) • innerSL ℝ x) -
+    ((2 : ℝ)⁻¹ * baseHeat x) •
+      (innerSL ℝ (E := V)).toContinuousLinearMap
+
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 @[simp] theorem baseD1Map_apply (x v : V) :
     baseD1Map x v = baseD1 v x := by
@@ -346,6 +352,17 @@ omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 @[simp] theorem baseD2Map_apply (v x w : V) :
     baseD2Map v x w = baseD2 v w x := by
   simp [baseD2Map, baseD2]
+  ring
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+@[simp] theorem baseD2CurriedMap_apply (x w v : V) :
+    baseD2CurriedMap x w v = baseD2 v w x := by
+  simp only [baseD2CurriedMap, baseD2, ContinuousLinearMap.sub_apply,
+    ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    innerSL_apply_apply, smul_eq_mul]
+  have hinner :
+      ((innerSL ℝ (E := V)).toContinuousLinearMap w) v = ⟪w, v⟫ := rfl
+  rw [hinner, real_inner_comm w v]
   ring
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
@@ -377,6 +394,28 @@ theorem baseD1_hasFDeriv (v x : V) :
       ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
       innerSL_apply_apply, smul_eq_mul]
     ring
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem baseD1Map_hasFDeriv (x : V) :
+    HasFDerivAt (baseD1Map (V := V)) (baseD2CurriedMap x) x := by
+  have hc := (baseHeat_hasFDeriv (V := V) x).const_mul (-(2 : ℝ)⁻¹)
+  have hi : HasFDerivAt
+      (fun y : V => (innerSL ℝ (E := V)).toContinuousLinearMap y)
+      (innerSL ℝ (E := V)).toContinuousLinearMap x :=
+    (innerSL ℝ (E := V)).toContinuousLinearMap.hasFDerivAt
+  have h := hc.smul hi
+  convert h using 1
+  ext w v
+  simp only [baseD2CurriedMap, ContinuousLinearMap.sub_apply,
+    ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.smulRight_apply, innerSL_apply_apply, smul_eq_mul]
+  have hinner :
+      ((innerSL ℝ (E := V)).toContinuousLinearMap w) v = ⟪w, v⟫ := rfl
+  have hinnerX :
+      ((innerSL ℝ (E := V)).toContinuousLinearMap x) v = ⟪x, v⟫ := rfl
+  rw [hinner, hinnerX, baseD1Map_apply]
+  unfold baseD1
+  ring
 
 /-- Radial `L^1` majorant for the first derivative kernel. -/
 def baseD1Maj (x : V) : ℝ :=
@@ -606,6 +645,11 @@ def heatD2Map (t : ℝ) (v x : V) : V →L[ℝ] ℝ :=
       (heatScale t)⁻¹) •
     baseD2Map v ((heatScale t)⁻¹ • x)
 
+def heatD2CurriedMap (t : ℝ) (x : V) : V →L[ℝ] (V →L[ℝ] ℝ) :=
+  (((heatScale t) ^ Module.finrank ℝ V)⁻¹ * (heatScale t)⁻¹ *
+      (heatScale t)⁻¹) •
+    baseD2CurriedMap ((heatScale t)⁻¹ • x)
+
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 @[simp] theorem heatD1Map_apply (t : ℝ) (x v : V) :
     heatD1Map t x v = heatD1 t v x := by
@@ -615,6 +659,13 @@ omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 @[simp] theorem heatD2Map_apply (t : ℝ) (v x w : V) :
     heatD2Map t v x w = heatD2 t v w x := by
   simp [heatD2Map, heatD2]
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+@[simp] theorem heatD2CurriedMap_apply (t : ℝ) (x w v : V) :
+    heatD2CurriedMap t x w v = heatD2 t v w x := by
+  simp only [heatD2CurriedMap, ContinuousLinearMap.smul_apply, smul_eq_mul,
+    baseD2CurriedMap_apply]
+  rfl
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 /-- At positive time, `heatD1` is exactly the Frechet derivative of the heat
@@ -644,6 +695,24 @@ theorem heatD1_hasFDeriv {t : ℝ} (_ht : 0 < t) (v x : V) :
   convert h using 1
   ext w
   simp [heatD2Map, S, baseD2Map]
+  ring
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem heatD1Map_hasFDeriv (t : ℝ) (x : V) :
+    HasFDerivAt (heatD1Map (V := V) t) (heatD2CurriedMap t x) x := by
+  let S : V →L[ℝ] V := (heatScale t)⁻¹ • ContinuousLinearMap.id ℝ V
+  have hS : HasFDerivAt (fun y : V => (heatScale t)⁻¹ • y) S x := by
+    simpa [S] using S.hasFDerivAt
+  have hb : HasFDerivAt (baseD1Map (V := V))
+      (baseD2CurriedMap ((heatScale t)⁻¹ • x)) ((heatScale t)⁻¹ • x) :=
+    baseD1Map_hasFDeriv _
+  have h := (hb.comp x hS).const_smul
+    (((heatScale t) ^ Module.finrank ℝ V)⁻¹ * (heatScale t)⁻¹)
+  convert h using 1
+  ext w v
+  simp only [heatD2CurriedMap, S, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply, map_smul,
+    smul_eq_mul]
   ring
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
@@ -702,6 +771,18 @@ theorem heatD2Map_norm_le {t : Real} (ht : 0 < t) (v x : V) :
     (mul_nonneg (norm_nonneg v) (heatD2Maj_nonneg ht x))
   intro w
   rw [heatD2Map_apply]
+  exact (heatD2_bound ht v w x).trans_eq (by ring)
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem heatD2CurriedMap_norm_le {t : Real} (ht : 0 < t) (x : V) :
+    ‖heatD2CurriedMap t x‖ ≤ heatD2Maj t x := by
+  apply ContinuousLinearMap.opNorm_le_bound (heatD2CurriedMap t x)
+    (heatD2Maj_nonneg ht x)
+  intro w
+  apply ContinuousLinearMap.opNorm_le_bound (heatD2CurriedMap t x w)
+    (mul_nonneg (heatD2Maj_nonneg ht x) (norm_nonneg w))
+  intro v
+  rw [heatD2CurriedMap_apply]
   exact (heatD2_bound ht v w x).trans_eq (by ring)
 
 /-- Integrability of the first heat derivative kernel. -/
