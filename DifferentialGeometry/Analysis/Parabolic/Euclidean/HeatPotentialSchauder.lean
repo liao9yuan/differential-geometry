@@ -1656,6 +1656,49 @@ theorem parabolicTimeDerivative_holderWith_restrict_of_heatDuhTimeCandidate
   rw [heq]
   exact hcand
 
+theorem eParabolicC2HolderGaugeOn_le_of_heat_potential_jets
+    {alpha K Csource : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (u f : Real → V → F)
+    (Cspatial : Nat → NNReal) (Ctime : NNReal)
+    (hspatial : ∀ j < 3,
+      ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+        ‖parabolicSpatialJet j u p‖ ≤ Cspatial j)
+    (htime : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ‖parabolicTimeDerivative u p‖ ≤ Ctime)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hsource : HolderWith Csource alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (fun p ↦ f p.time p.space)))
+    (hspaceRealize : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ∀ m : Fin 2 → V,
+        parabolicSpatialJet 2 u p m =
+          heatD2Duh p.time (m 0) (m 1) f p.space)
+    (htimeRealize : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      HasDerivAt (fun t : Real ↦ u t p.space)
+        (heatDuhTimeCandidateField f p) p.time)
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ β : Fin 2 → Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r)
+          ((stdOrthonormalBasis Real V) (β 0))
+          ((stdOrthonormalBasis Real V) (β 1)) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≤
+      (∑ j ∈ Finset.range 3, (Cspatial j : ENNReal)) + Ctime +
+        d2DuhJetHolderConst (V := V) alpha K +
+          (Csource + Real.toNNReal
+            (lapDuhParabolicHolderConst (V := V) alpha K)) := by
+  apply eParabolicC2HolderGaugeOn_le Cspatial Ctime
+    (d2DuhJetHolderConst (V := V) alpha K)
+    (Csource + Real.toNNReal
+      (lapDuhParabolicHolderConst (V := V) alpha K)) hspatial htime
+  · exact parabolicSpatialJet_two_holderWith_restrict_of_heatD2Duh
+      halpha0 halpha1 u f hf hspaceRealize hmeas
+  · exact parabolicTimeDerivative_holderWith_restrict_of_heatDuhTimeCandidate
+      halpha0 halpha1 u f hf hsource htimeRealize (fun t ht x i => by
+        simpa using hmeas t ht x (fun _ => i))
+
 end Convolution
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean

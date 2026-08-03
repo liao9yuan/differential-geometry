@@ -300,6 +300,41 @@ def IsParabolicC2HolderOn (alpha : NNReal)
     MemHolder alpha (Q.restrict (parabolicSpatialJet 2 u)) ∧
     MemHolder alpha (Q.restrict (parabolicTimeDerivative u))
 
+theorem eParabolicC2HolderGaugeOn_le
+    {alpha : NNReal} {Q : Set (ParabolicPoint V)} {u : Real → V → F}
+    (Cspatial : Nat → NNReal) (Ctime CspatialHolder CtimeHolder : NNReal)
+    (hspatial : ∀ j < 3, ∀ p ∈ Q,
+      ‖parabolicSpatialJet j u p‖ ≤ Cspatial j)
+    (htime : ∀ p ∈ Q, ‖parabolicTimeDerivative u p‖ ≤ Ctime)
+    (hspatialHolder : HolderWith CspatialHolder alpha
+      (Q.restrict (parabolicSpatialJet 2 u)))
+    (htimeHolder : HolderWith CtimeHolder alpha
+      (Q.restrict (parabolicTimeDerivative u))) :
+    eParabolicC2HolderGaugeOn alpha Q u ≤
+      (∑ j ∈ Finset.range 3, (Cspatial j : ENNReal)) + Ctime +
+        CspatialHolder + CtimeHolder := by
+  have hsupSpatial : ∀ j < 3,
+      eSupNormOn Q (parabolicSpatialJet j u) ≤ Cspatial j := by
+    intro j hj
+    rw [eSupNormOn_le]
+    intro p hp
+    rw [ENNReal.ofReal_le_coe]
+    exact hspatial j hj p hp
+  have hsupTime : eSupNormOn Q (parabolicTimeDerivative u) ≤ Ctime := by
+    rw [eSupNormOn_le]
+    intro p hp
+    rw [ENNReal.ofReal_le_coe]
+    exact htime p hp
+  have hholderSpatial :
+      eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) ≤ CspatialHolder :=
+    hspatialHolder.eHolderNorm_le
+  have hholderTime :
+      eHolderSeminormOn alpha Q (parabolicTimeDerivative u) ≤ CtimeHolder :=
+    htimeHolder.eHolderNorm_le
+  unfold eParabolicC2HolderGaugeOn
+  gcongr with j hj
+  exact hsupSpatial j (Finset.mem_range.mp hj)
+
 theorem parabolicSpatialJet_le
     (alpha : NNReal) (Q : Set (ParabolicPoint V)) (u : Real → V → F)
     {j : Nat} (hj : j < 3) (p : ParabolicPoint V) (hp : p ∈ Q) :
