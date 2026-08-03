@@ -822,6 +822,7 @@ import DifferentialGeometry.Analysis.Schauder.ConstantCoefficientElliptic
 import DifferentialGeometry.Analysis.Schauder.CutoffLaplacian
 import DifferentialGeometry.Analysis.Schauder.CutoffExistence
 import DifferentialGeometry.Analysis.Schauder.CutoffProduct
+import DifferentialGeometry.Analysis.Schauder.CutoffValue
 import DifferentialGeometry.Analysis.Schauder.Holder
 import DifferentialGeometry.Analysis.Schauder.Interior
 import DifferentialGeometry.Analysis.Schauder.Interpolation
