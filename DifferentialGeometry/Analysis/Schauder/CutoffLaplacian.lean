@@ -160,6 +160,141 @@ theorem norm_cutoffLaplacian_le
           (by norm_num : (0 : Real) ≤ 2)
       · exact norm_smul_le (coreLap d2chi) u
 
+private theorem norm_apply_stdOrthonormalBasis_le_one
+    {G : Type*} [NormedAddCommGroup G] [NormedSpace Real G]
+    (i : Fin (Module.finrank Real V)) :
+    ‖ContinuousLinearMap.apply Real G ((stdOrthonormalBasis Real V) i)‖ ≤ 1 := by
+  refine ContinuousLinearMap.opNorm_le_bound
+    (ContinuousLinearMap.apply Real G ((stdOrthonormalBasis Real V) i))
+    zero_le_one ?_
+  intro A
+  change ‖A ((stdOrthonormalBasis Real V) i)‖ ≤ 1 * ‖A‖
+  simpa only [(stdOrthonormalBasis Real V).orthonormal.norm_eq_one i, mul_one, one_mul] using
+    A.le_opNorm ((stdOrthonormalBasis Real V) i)
+
+theorem cutoffGradientPair_holderWith
+    {alpha Kdchi Kdu : NNReal}
+    (dchi : BoundedContinuousFunction V (V →L[Real] Real))
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (hdchi : HolderWith Kdchi alpha (dchi : V → V →L[Real] Real))
+    (hdu : HolderWith Kdu alpha (du : V → V →L[Real] F)) :
+    HolderWith
+      ((Module.finrank Real V : NNReal) *
+        (‖dchi‖₊ * Kdu + ‖du‖₊ * Kdchi)) alpha
+      (cutoffGradientPair dchi du : V → F) := by
+  let e := stdOrthonormalBasis Real V
+  let K := ‖dchi‖₊ * Kdu + ‖du‖₊ * Kdchi
+  have hcomponent : ∀ i : Fin (Module.finrank Real V),
+      HolderWith K alpha
+        (fun x ↦ dchi x (e i) • du x (e i)) := by
+    intro i
+    have hdchi_i : HolderWith Kdchi alpha (fun x ↦ dchi x (e i)) :=
+      holderWith_comp_continuousLinearMap_of_norm_le_one
+        (ContinuousLinearMap.apply Real Real (e i))
+        (norm_apply_stdOrthonormalBasis_le_one (V := V) (G := Real) i) hdchi
+    have hdu_i : HolderWith Kdu alpha (fun x ↦ du x (e i)) :=
+      holderWith_comp_continuousLinearMap_of_norm_le_one
+        (ContinuousLinearMap.apply Real F (e i))
+        (norm_apply_stdOrthonormalBasis_le_one (V := V) (G := F) i) hdu
+    apply holderWith_smul_of_norm_le hdchi_i hdu_i
+    · intro x
+      calc
+        ‖dchi x (e i)‖ ≤ ‖dchi x‖ * ‖e i‖ := (dchi x).le_opNorm _
+        _ ≤ ‖dchi‖ := by
+          rw [show ‖e i‖ = 1 from
+            (stdOrthonormalBasis Real V).orthonormal.norm_eq_one i, mul_one]
+          exact dchi.norm_coe_le_norm x
+        _ = (‖dchi‖₊ : Real) := rfl
+    · intro x
+      calc
+        ‖du x (e i)‖ ≤ ‖du x‖ * ‖e i‖ := (du x).le_opNorm _
+        _ ≤ ‖du‖ := by
+          rw [show ‖e i‖ = 1 from
+            (stdOrthonormalBasis Real V).orthonormal.norm_eq_one i, mul_one]
+          exact du.norm_coe_le_norm x
+        _ = (‖du‖₊ : Real) := rfl
+  have hsum := holderWith_finset_sum
+    (Finset.univ : Finset (Fin (Module.finrank Real V)))
+    (K := fun _ ↦ K) (f := fun i x ↦ dchi x (e i) • du x (e i))
+    (fun i _ ↦ hcomponent i)
+  rw [show (cutoffGradientPair dchi du : V → F) =
+      fun x ↦ ∑ i : Fin (Module.finrank Real V), dchi x (e i) • du x (e i) from
+    funext fun x ↦ cutoffGradientPair_apply dchi du x]
+  simpa only [K, e, Finset.sum_const, Finset.card_fin, nsmul_eq_mul] using hsum
+
+def cutoffLaplacianSupConst
+    (chi : BoundedContinuousFunction V Real)
+    (dchi : BoundedContinuousFunction V (V →L[Real] Real))
+    (d2chi : BoundedContinuousFunction V (V →L[Real] V →L[Real] Real))
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F)) : NNReal :=
+  ‖chi‖₊ * ‖coreLap d2u‖₊ +
+    2 * ((Module.finrank Real V : NNReal) * ‖dchi‖₊ * ‖du‖₊) +
+    ‖coreLap d2chi‖₊ * ‖u‖₊
+
+theorem nnnorm_cutoffLaplacian_le
+    (chi : BoundedContinuousFunction V Real)
+    (dchi : BoundedContinuousFunction V (V →L[Real] Real))
+    (d2chi : BoundedContinuousFunction V (V →L[Real] V →L[Real] Real))
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F)) :
+    ‖cutoffLaplacian chi dchi d2chi u du d2u‖₊ ≤
+      cutoffLaplacianSupConst chi dchi d2chi u du d2u := by
+  rw [← NNReal.coe_le_coe]
+  simpa only [cutoffLaplacianSupConst, NNReal.coe_add, NNReal.coe_mul,
+    NNReal.coe_ofNat, coe_nnnorm] using
+      norm_cutoffLaplacian_le chi dchi d2chi u du d2u
+
+def cutoffLaplacianHolderConst
+    (Kchi Kdchi Klapchi Ku Kdu Kf : NNReal)
+    (chi : BoundedContinuousFunction V Real)
+    (dchi : BoundedContinuousFunction V (V →L[Real] Real))
+    (d2chi : BoundedContinuousFunction V (V →L[Real] V →L[Real] Real))
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F)) : NNReal :=
+  ‖chi‖₊ * Kf + ‖coreLap d2u‖₊ * Kchi +
+    2 * ((Module.finrank Real V : NNReal) *
+      (‖dchi‖₊ * Kdu + ‖du‖₊ * Kdchi)) +
+    ‖coreLap d2chi‖₊ * Ku + ‖u‖₊ * Klapchi
+
+theorem cutoffLaplacian_holderWith
+    {alpha Kchi Kdchi Klapchi Ku Kdu Kf : NNReal}
+    (chi : BoundedContinuousFunction V Real)
+    (dchi : BoundedContinuousFunction V (V →L[Real] Real))
+    (d2chi : BoundedContinuousFunction V (V →L[Real] V →L[Real] Real))
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hchi : HolderWith Kchi alpha (chi : V → Real))
+    (hdchi : HolderWith Kdchi alpha (dchi : V → V →L[Real] Real))
+    (hlapchi : HolderWith Klapchi alpha (coreLap d2chi : V → Real))
+    (hu : HolderWith Ku alpha (u : V → F))
+    (hdu : HolderWith Kdu alpha (du : V → V →L[Real] F))
+    (hf : HolderWith Kf alpha (coreLap d2u : V → F)) :
+    HolderWith
+      (cutoffLaplacianHolderConst Kchi Kdchi Klapchi Ku Kdu Kf
+        chi dchi d2chi u du d2u) alpha
+      (cutoffLaplacian chi dchi d2chi u du d2u : V → F) := by
+  have hfirst := holderWith_smul_of_norm_le
+    (M := ‖chi‖₊) (N := ‖coreLap d2u‖₊) hchi hf
+    (fun x ↦ by simpa using chi.norm_coe_le_norm x)
+    (fun x ↦ by simpa using (coreLap d2u).norm_coe_le_norm x)
+  have hcross := cutoffGradientPair_holderWith dchi du hdchi hdu
+  have hthird := holderWith_smul_of_norm_le
+    (M := ‖coreLap d2chi‖₊) (N := ‖u‖₊) hlapchi hu
+    (fun x ↦ by simpa using (coreLap d2chi).norm_coe_le_norm x)
+    (fun x ↦ by simpa using u.norm_coe_le_norm x)
+  rw [show (cutoffLaplacian chi dchi d2chi u du d2u : V → F) =
+      fun x ↦ chi x • coreLap d2u x +
+        2 • cutoffGradientPair dchi du x + coreLap d2chi x • u x from
+    funext fun x ↦ cutoffLaplacian_apply chi dchi d2chi u du d2u x]
+  have hall := (hfirst.add (hcross.add hcross)).add hthird
+  simpa only [cutoffLaplacianHolderConst, Pi.add_apply, two_nsmul,
+    add_assoc, two_mul] using hall
+
 end DifferentialGeometry.Analysis.Schauder
 
 end

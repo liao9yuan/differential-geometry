@@ -818,6 +818,7 @@ import DifferentialGeometry.Analysis.Schauder.ConstantCoefficientElliptic
 import DifferentialGeometry.Analysis.Schauder.CutoffLaplacian
 import DifferentialGeometry.Analysis.Schauder.CutoffProduct
 import DifferentialGeometry.Analysis.Schauder.Holder
+import DifferentialGeometry.Analysis.Schauder.Interior
 import DifferentialGeometry.Analysis.Schauder.Interpolation
 import DifferentialGeometry.Analysis.Schauder.Localization
 import DifferentialGeometry.Analysis.Schauder.Scaling

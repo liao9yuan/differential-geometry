@@ -129,6 +129,37 @@ theorem holderWith_smul_of_norm_le
         ENNReal.ofReal (dist x y) ^ (alpha : Real) := by
       rw [ENNReal.ofReal_rpow_of_nonneg (dist_nonneg) alpha.coe_nonneg]
 
+theorem holderWith_comp_continuousLinearMap_of_norm_le_one
+    {A B : Type*}
+    [NormedAddCommGroup A] [NormedSpace Real A]
+    [NormedAddCommGroup B] [NormedSpace Real B]
+    {alpha K : NNReal} {f : X → A}
+    (L : A →L[Real] B) (hL : ‖L‖ ≤ 1)
+    (hf : HolderWith K alpha f) :
+    HolderWith K alpha (fun x ↦ L (f x)) := by
+  have hraw := L.lipschitz.holderWith.comp hf
+  have hraw' : HolderWith (‖L‖₊ * K) alpha (fun x ↦ L (f x)) := by
+    simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul, Function.comp_apply] using hraw
+  have hnorm : ‖L‖₊ * K ≤ K := by
+    apply mul_le_of_le_one_left (zero_le K)
+    exact_mod_cast hL
+  exact hraw'.mono hnorm
+
+omit [NormedSpace Real F] in
+theorem holderWith_finset_sum
+    {I : Type*} {alpha : NNReal} {K : I → NNReal} {f : I → X → F}
+    (s : Finset I) (h : ∀ i ∈ s, HolderWith (K i) alpha (f i)) :
+    HolderWith (∑ i ∈ s, K i) alpha (fun x ↦ ∑ i ∈ s, f i x) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+      simpa only [Finset.sum_empty] using
+        (HolderWith.zero : HolderWith 0 alpha (0 : X → F))
+  | @insert i s hi ih =>
+      have hi' := h i (Finset.mem_insert_self i s)
+      have hs' := ih fun j hj ↦ h j (Finset.mem_insert_of_mem hj)
+      simpa only [Finset.sum_insert hi, Pi.add_apply] using hi'.add hs'
+
 theorem eHolderSeminormOn_smul_le
     {s : Set X} {alpha C D M N : NNReal}
     {f : X → Real} {g : X → F}
