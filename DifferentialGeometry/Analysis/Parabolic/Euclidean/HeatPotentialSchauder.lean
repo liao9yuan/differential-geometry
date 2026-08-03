@@ -369,6 +369,325 @@ theorem heatD2Conv_space_sub_norm_le_of_holder
     _ = ‖h‖ * ‖v‖ * ‖w‖ * (K : Real) * holderThirdHeatScale alpha t *
         heatC3Holder (V := V) alpha := by rfl
 
+theorem heatD2Conv_space_sub_norm_le_recent_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t : Real} (ht : 0 < t) {f : V → F} (hf : HolderWith K alpha f)
+    (h v w x : V) :
+    ‖heatD2Conv t v w f (x - h) - heatD2Conv t v w f x‖ ≤
+      2 * (‖v‖ * ‖w‖ * (K : Real) * holderHeatScale alpha t *
+        heatC2Holder (V := V) alpha) := by
+  calc
+    ‖heatD2Conv t v w f (x - h) - heatD2Conv t v w f x‖ ≤
+        ‖heatD2Conv t v w f (x - h)‖ +
+          ‖heatD2Conv t v w f x‖ := norm_sub_le _ _
+    _ ≤ (‖v‖ * ‖w‖ * (K : Real) * holderHeatScale alpha t *
+          heatC2Holder (V := V) alpha) +
+        (‖v‖ * ‖w‖ * (K : Real) * holderHeatScale alpha t *
+          heatC2Holder (V := V) alpha) := by
+      exact add_le_add
+        (by
+          rw [heatD2Conv_eq_cancel_of_holder halpha0 halpha1 ht hf]
+          exact heatD2Cancel_norm_of_holder halpha1 ht hf v w (x - h))
+        (by
+          rw [heatD2Conv_eq_cancel_of_holder halpha0 halpha1 ht hf]
+          exact heatD2Cancel_norm_of_holder halpha1 ht hf v w x)
+    _ = 2 * (‖v‖ * ‖w‖ * (K : Real) * holderHeatScale alpha t *
+        heatC2Holder (V := V) alpha) := by ring
+
+omit [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
+private theorem holderHeatScale_intervalIntegrable {alpha : NNReal}
+    (halpha0 : 0 < alpha) (a b : Real) :
+    IntervalIntegrable (holderHeatScale alpha) volume a b := by
+  unfold holderHeatScale
+  apply intervalIntegral.intervalIntegrable_rpow'
+  have ha : 0 < (alpha : Real) := by exact_mod_cast halpha0
+  linarith
+
+omit [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
+private theorem holderThirdHeatScale_intervalIntegrable_of_pos
+    {alpha : NNReal} {a b : Real} (ha : 0 < a) (hab : a ≤ b) :
+    IntervalIntegrable (holderThirdHeatScale alpha) volume a b := by
+  unfold holderThirdHeatScale
+  apply ContinuousOn.intervalIntegrable
+  intro y hy
+  apply (Real.continuousAt_rpow_const y ((alpha : Real) / 2 - 3 / 2)
+    (Or.inl ?_)).continuousWithinAt
+  rw [uIcc_of_le hab] at hy
+  exact (ha.trans_le hy.1).ne'
+
+def d2DuhSpaceHolderConst (alpha : NNReal) (v w : V) (K : NNReal) : Real :=
+  ‖v‖ * ‖w‖ * (K : Real) *
+    ((4 / (alpha : Real)) * heatC2Holder (V := V) alpha +
+      (2 / (1 - (alpha : Real))) * heatC3Holder (V := V) alpha)
+
+omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
+  [CompleteSpace F] in
+theorem d2DuhSpaceHolderConst_nonneg {alpha : NNReal} (halpha : alpha ≤ 1)
+    (v w : V) (K : NNReal) :
+    0 ≤ d2DuhSpaceHolderConst alpha v w K := by
+  have halpha_real : (alpha : Real) ≤ 1 := by exact_mod_cast halpha
+  unfold d2DuhSpaceHolderConst
+  exact mul_nonneg
+    (mul_nonneg (mul_nonneg (norm_nonneg v) (norm_nonneg w)) K.coe_nonneg)
+    (add_nonneg
+      (mul_nonneg (div_nonneg (by norm_num) alpha.coe_nonneg)
+        (heatC2Holder_nonneg (V := V) alpha))
+      (mul_nonneg (div_nonneg (by norm_num) (sub_nonneg.mpr halpha_real))
+        (heatC3Holder_nonneg (V := V) alpha)))
+
+theorem heatD2Duh_space_sub_eq_integral {alpha K : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t : Real} (ht : 0 < t) (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) t, HolderWith K alpha (f s))
+    (h v w x : V)
+    (hmeas0 : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (t - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (hmeas1 : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (t - s) v w (f s) (x - h))
+      (volume.restrict (uIoc (0 : Real) t))) :
+    heatD2Duh t v w f (x - h) - heatD2Duh t v w f x =
+      ∫ s : Real in 0..t,
+        heatD2Conv (t - s) v w (f s) (x - h) -
+          heatD2Conv (t - s) v w (f s) x := by
+  have h0 := heatD2Duh_int_of_holder halpha0 halpha1 ht f hf v w x hmeas0
+  have h1 :=
+    heatD2Duh_int_of_holder halpha0 halpha1 ht f hf v w (x - h) hmeas1
+  unfold heatD2Duh
+  exact (intervalIntegral.integral_sub h1 h0).symm
+
+theorem heatD2Duh_space_sub_norm_le_of_holder {alpha K : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {t : Real} (ht : 0 < t) (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) t, HolderWith K alpha (f s))
+    (h v w x : V)
+    (hmeas0 : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (t - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (hmeas1 : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (t - s) v w (f s) (x - h))
+      (volume.restrict (uIoc (0 : Real) t))) :
+    ‖heatD2Duh t v w f (x - h) - heatD2Duh t v w f x‖ ≤
+      d2DuhSpaceHolderConst alpha v w K * ‖h‖ ^ (alpha : Real) := by
+  have halpha_le : alpha ≤ 1 := halpha1.le
+  have h0 := heatD2Duh_int_of_holder halpha0 halpha_le ht f hf v w x hmeas0
+  have h1 :=
+    heatD2Duh_int_of_holder halpha0 halpha_le ht f hf v w (x - h) hmeas1
+  let q : Real → F := fun s ↦
+    heatD2Conv (t - s) v w (f s) (x - h) -
+      heatD2Conv (t - s) v w (f s) x
+  have hq : IntervalIntegrable q volume 0 t := h1.sub h0
+  rw [heatD2Duh_space_sub_eq_integral halpha0 halpha_le ht f hf h v w x
+    hmeas0 hmeas1]
+  change ‖∫ s : Real in 0..t, q s‖ ≤ _
+  by_cases hh0 : ‖h‖ = 0
+  · have hh : h = 0 := norm_eq_zero.mp hh0
+    subst h
+    have halpha_ne : (alpha : Real) ≠ 0 := by exact_mod_cast halpha0.ne'
+    have hpow0 : (0 : Real) ^ (alpha : Real) = 0 :=
+      Real.zero_rpow halpha_ne
+    simp [q, hpow0]
+  have hr : 0 < ‖h‖ := lt_of_le_of_ne (norm_nonneg h) (Ne.symm hh0)
+  let A2 : Real := 2 * (‖v‖ * ‖w‖ * (K : Real) *
+    heatC2Holder (V := V) alpha)
+  let A3 : Real := ‖v‖ * ‖w‖ * (K : Real) *
+    heatC3Holder (V := V) alpha
+  have hA2 : 0 ≤ A2 := by
+    unfold A2
+    exact mul_nonneg (by norm_num) <|
+      mul_nonneg
+        (mul_nonneg (mul_nonneg (norm_nonneg v) (norm_nonneg w)) K.coe_nonneg)
+        (heatC2Holder_nonneg (V := V) alpha)
+  have hA3 : 0 ≤ A3 := by
+    unfold A3
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (norm_nonneg v) (norm_nonneg w)) K.coe_nonneg)
+      (heatC3Holder_nonneg (V := V) alpha)
+  by_cases hsplit : ‖h‖ ^ 2 ≤ t
+  · let c : Real := t - ‖h‖ ^ 2
+    have hc0 : 0 ≤ c := sub_nonneg.mpr hsplit
+    have hct : c ≤ t := sub_le_self t (sq_nonneg ‖h‖)
+    have hqe : IntervalIntegrable q volume 0 c := by
+      apply hq.mono_set
+      rw [uIcc_of_le hc0, uIcc_of_le ht.le]
+      exact Icc_subset_Icc le_rfl hct
+    have hqr : IntervalIntegrable q volume c t := by
+      apply hq.mono_set
+      rw [uIcc_of_le hct, uIcc_of_le ht.le]
+      exact Icc_subset_Icc hc0 le_rfl
+    have hscale2 : IntervalIntegrable
+        (fun s : Real ↦ holderHeatScale alpha (t - s)) volume c t := by
+      have hs :=
+        (holderHeatScale_intervalIntegrable halpha0 0 (‖h‖ ^ 2)).comp_sub_left t
+      simpa only [c, sub_zero, sub_sub_cancel] using hs.symm
+    have hscale3 : IntervalIntegrable
+        (fun s : Real ↦ holderThirdHeatScale alpha (t - s)) volume 0 c := by
+      have hs :=
+        (holderThirdHeatScale_intervalIntegrable_of_pos
+          (sq_pos_of_pos hr) hsplit).comp_sub_left t
+      simpa only [c, sub_self, sub_sub_cancel] using hs.symm
+    have hearly :
+        ‖∫ s : Real in 0..c, q s‖ ≤
+          ∫ s : Real in 0..c,
+            (‖h‖ * A3) * holderThirdHeatScale alpha (t - s) := by
+      calc
+        ‖∫ s : Real in 0..c, q s‖ ≤
+            ∫ s : Real in 0..c, ‖q s‖ :=
+          intervalIntegral.norm_integral_le_integral_norm hc0
+        _ ≤ ∫ s : Real in 0..c,
+            (‖h‖ * A3) * holderThirdHeatScale alpha (t - s) := by
+          apply intervalIntegral.integral_mono_on_of_le_Ioo hc0 hqe.norm
+            (hscale3.const_mul (‖h‖ * A3))
+          intro s hs
+          have hst : 0 < t - s := sub_pos.mpr (hs.2.trans_le hct)
+          have hfs : HolderWith K alpha (f s) :=
+            hf s ⟨hs.1.le, (hs.2.trans_le hct).le⟩
+          change ‖heatD2Conv (t - s) v w (f s) (x - h) -
+              heatD2Conv (t - s) v w (f s) x‖ ≤ _
+          refine (heatD2Conv_space_sub_norm_le_of_holder
+            halpha0 halpha_le hst hfs h v w x).trans_eq ?_
+          unfold A3
+          ring
+    have hrecent :
+        ‖∫ s : Real in c..t, q s‖ ≤
+          ∫ s : Real in c..t, A2 * holderHeatScale alpha (t - s) := by
+      calc
+        ‖∫ s : Real in c..t, q s‖ ≤
+            ∫ s : Real in c..t, ‖q s‖ :=
+          intervalIntegral.norm_integral_le_integral_norm hct
+        _ ≤ ∫ s : Real in c..t, A2 * holderHeatScale alpha (t - s) := by
+          apply intervalIntegral.integral_mono_on_of_le_Ioo hct hqr.norm
+            (hscale2.const_mul A2)
+          intro s hs
+          have hst : 0 < t - s := sub_pos.mpr hs.2
+          have hfs : HolderWith K alpha (f s) :=
+            hf s ⟨hc0.trans_lt hs.1 |>.le, hs.2.le⟩
+          change ‖heatD2Conv (t - s) v w (f s) (x - h) -
+              heatD2Conv (t - s) v w (f s) x‖ ≤ _
+          refine (heatD2Conv_space_sub_norm_le_recent_of_holder
+            halpha0 halpha_le hst hfs h v w x).trans_eq ?_
+          unfold A2
+          ring
+    have hearly_scale :
+        (∫ s : Real in 0..c,
+          (‖h‖ * A3) * holderThirdHeatScale alpha (t - s)) ≤
+        A3 * ((2 / (1 - (alpha : Real))) * ‖h‖ ^ (alpha : Real)) := by
+      rw [intervalIntegral.integral_const_mul,
+        intervalIntegral.integral_comp_sub_left]
+      simp only [c, sub_zero, sub_sub_cancel]
+      have hm := mul_holderThirdHeatScale_integral_le halpha1 hr hsplit
+      calc
+        (‖h‖ * A3) *
+            ∫ y : Real in ‖h‖ ^ 2..t, holderThirdHeatScale alpha y =
+            A3 * (‖h‖ *
+              ∫ y : Real in ‖h‖ ^ 2..t, holderThirdHeatScale alpha y) := by ring
+        _ ≤ A3 * ((2 / (1 - (alpha : Real))) *
+            ‖h‖ ^ (alpha : Real)) := mul_le_mul_of_nonneg_left hm hA3
+    have hrecent_scale :
+        (∫ s : Real in c..t, A2 * holderHeatScale alpha (t - s)) =
+        A2 * ((2 / (alpha : Real)) * ‖h‖ ^ (alpha : Real)) := by
+      rw [intervalIntegral.integral_const_mul,
+        intervalIntegral.integral_comp_sub_left]
+      simp only [c, sub_self, sub_sub_cancel]
+      rw [holderHeatScale_integral_sq halpha0 hr.le]
+    have hadd := intervalIntegral.integral_add_adjacent_intervals hqe hqr
+    calc
+      ‖∫ s : Real in 0..t, q s‖ =
+          ‖(∫ s : Real in 0..c, q s) + ∫ s : Real in c..t, q s‖ := by
+        rw [hadd]
+      _ ≤ ‖∫ s : Real in 0..c, q s‖ +
+          ‖∫ s : Real in c..t, q s‖ := norm_add_le _ _
+      _ ≤ (∫ s : Real in 0..c,
+            (‖h‖ * A3) * holderThirdHeatScale alpha (t - s)) +
+          ∫ s : Real in c..t, A2 * holderHeatScale alpha (t - s) :=
+        add_le_add hearly hrecent
+      _ ≤ A3 * ((2 / (1 - (alpha : Real))) * ‖h‖ ^ (alpha : Real)) +
+          A2 * ((2 / (alpha : Real)) * ‖h‖ ^ (alpha : Real)) := by
+        rw [hrecent_scale]
+        gcongr
+      _ = d2DuhSpaceHolderConst alpha v w K * ‖h‖ ^ (alpha : Real) := by
+        unfold A2 A3 d2DuhSpaceHolderConst
+        ring
+  · have htr : t ≤ ‖h‖ ^ 2 := le_of_lt (lt_of_not_ge hsplit)
+    have hscale : IntervalIntegrable
+        (fun s : Real ↦ holderHeatScale alpha (t - s)) volume 0 t :=
+      holderHeatScale_intble halpha0 ht
+    have hfull :
+        ‖∫ s : Real in 0..t, q s‖ ≤
+          ∫ s : Real in 0..t, A2 * holderHeatScale alpha (t - s) := by
+      calc
+        ‖∫ s : Real in 0..t, q s‖ ≤
+            ∫ s : Real in 0..t, ‖q s‖ :=
+          intervalIntegral.norm_integral_le_integral_norm ht.le
+        _ ≤ ∫ s : Real in 0..t, A2 * holderHeatScale alpha (t - s) := by
+          apply intervalIntegral.integral_mono_on_of_le_Ioo ht.le hq.norm
+            (hscale.const_mul A2)
+          intro s hs
+          have hst : 0 < t - s := sub_pos.mpr hs.2
+          have hfs : HolderWith K alpha (f s) := hf s ⟨hs.1.le, hs.2.le⟩
+          change ‖heatD2Conv (t - s) v w (f s) (x - h) -
+              heatD2Conv (t - s) v w (f s) x‖ ≤ _
+          refine (heatD2Conv_space_sub_norm_le_recent_of_holder
+            halpha0 halpha_le hst hfs h v w x).trans_eq ?_
+          unfold A2
+          ring
+    have hpow : t ^ ((alpha : Real) / 2) ≤ ‖h‖ ^ (alpha : Real) := by
+      have hmono := Real.rpow_le_rpow ht.le htr
+        (by positivity : 0 ≤ (alpha : Real) / 2)
+      calc
+        t ^ ((alpha : Real) / 2) ≤ (‖h‖ ^ 2) ^ ((alpha : Real) / 2) := hmono
+        _ = ‖h‖ ^ (alpha : Real) := by
+          rw [← Real.rpow_natCast]
+          rw [← Real.rpow_mul hr.le]
+          congr 1
+          ring
+    calc
+      ‖∫ s : Real in 0..t, q s‖ ≤
+          ∫ s : Real in 0..t, A2 * holderHeatScale alpha (t - s) := hfull
+      _ = A2 * ((2 / (alpha : Real)) * t ^ ((alpha : Real) / 2)) := by
+        rw [intervalIntegral.integral_const_mul,
+          timeHolderHeatScale_int halpha0 ht]
+      _ ≤ A2 * ((2 / (alpha : Real)) * ‖h‖ ^ (alpha : Real)) := by
+        gcongr
+      _ ≤ d2DuhSpaceHolderConst alpha v w K * ‖h‖ ^ (alpha : Real) := by
+        unfold A2 d2DuhSpaceHolderConst
+        have hlate : 0 ≤ (2 / (1 - (alpha : Real))) *
+            heatC3Holder (V := V) alpha := by
+          exact mul_nonneg
+            (div_nonneg (by norm_num)
+              (sub_nonneg.mpr (by exact_mod_cast halpha1.le)))
+            (heatC3Holder_nonneg (V := V) alpha)
+        calc
+          2 * (‖v‖ * ‖w‖ * (K : Real) * heatC2Holder alpha) *
+              (2 / (alpha : Real) * ‖h‖ ^ (alpha : Real)) =
+              (‖v‖ * ‖w‖ * (K : Real)) *
+                ((4 / (alpha : Real)) * heatC2Holder alpha) *
+                  ‖h‖ ^ (alpha : Real) := by ring
+          _ ≤ (‖v‖ * ‖w‖ * (K : Real)) *
+                ((4 / (alpha : Real)) * heatC2Holder alpha +
+                  (2 / (1 - (alpha : Real))) * heatC3Holder alpha) *
+                ‖h‖ ^ (alpha : Real) := by
+            gcongr
+            exact le_add_of_nonneg_right hlate
+
+theorem heatD2Duh_norm_sub_le_of_holder {alpha K : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {t : Real} (ht : 0 < t) (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) t, HolderWith K alpha (f s))
+    (v w x y : V)
+    (hmeasx : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (t - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (hmeasy : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (t - s) v w (f s) y)
+      (volume.restrict (uIoc (0 : Real) t))) :
+    ‖heatD2Duh t v w f y - heatD2Duh t v w f x‖ ≤
+      d2DuhSpaceHolderConst alpha v w K * ‖y - x‖ ^ (alpha : Real) := by
+  have h := heatD2Duh_space_sub_norm_le_of_holder
+    halpha0 halpha1 ht f hf (x - y) v w x hmeasx (by
+      simpa only [sub_sub_cancel] using hmeasy)
+  simpa only [sub_sub_cancel, norm_sub_rev] using h
+
 end Convolution
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
