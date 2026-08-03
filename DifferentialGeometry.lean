@@ -692,6 +692,7 @@ import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Comparison
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotential
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotentialStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.LocalStrong
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.MetricFamilyStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ScalarStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Strong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Weak
