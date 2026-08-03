@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Schauder.Holder
+import Mathlib.Analysis.Calculus.MeanValue
 
 noncomputable section
 
@@ -159,6 +160,25 @@ theorem holderWith_finset_sum
       have hi' := h i (Finset.mem_insert_self i s)
       have hs' := ih fun j hj ↦ h j (Finset.mem_insert_of_mem hj)
       simpa only [Finset.sum_insert hi, Pi.add_apply] using hi'.add hs'
+
+theorem holderWith_of_hasFDerivAt_of_norm_le
+    {A : Type*} [NormedAddCommGroup A] [NormedSpace Real A]
+    {f : V → A} {df : V → V →L[Real] A}
+    {alpha M N : NNReal}
+    (halpha0 : 0 ≤ alpha) (halpha1 : alpha ≤ 1)
+    (hf : ∀ x, HasFDerivAt f (df x) x)
+    (hfnorm : ∀ x, ‖f x‖ ≤ M)
+    (hdfnorm : ∀ x, ‖df x‖ ≤ N) :
+    HolderWith (max (2 * M) N) alpha f := by
+  have hlip : LipschitzWith N f := by
+    apply lipschitzWith_of_nnnorm_fderiv_le (𝕜 := Real)
+    · exact fun x ↦ (hf x).differentiableAt
+    · intro x
+      rw [(hf x).fderiv]
+      exact_mod_cast hdfnorm x
+  have hzero : HolderWith (2 * M) 0 f :=
+    holderWith_zero_of_norm_le hfnorm
+  exact hzero.of_le_of_le hlip.holderWith halpha0 halpha1
 
 theorem eHolderSeminormOn_smul_le
     {s : Set X} {alpha C D M N : NNReal}
