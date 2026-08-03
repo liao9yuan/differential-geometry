@@ -818,7 +818,9 @@ import DifferentialGeometry.Analysis.ProjectedContractionFixedPoint
 import DifferentialGeometry.Analysis.Schauder.Absorption
 import DifferentialGeometry.Analysis.Schauder.BallCutoff
 import DifferentialGeometry.Analysis.Schauder.BallInterior
+import DifferentialGeometry.Analysis.Schauder.BilinearHolder
 import DifferentialGeometry.Analysis.Schauder.ConstantCoefficientElliptic
+import DifferentialGeometry.Analysis.Schauder.CutoffJet
 import DifferentialGeometry.Analysis.Schauder.CutoffLaplacian
 import DifferentialGeometry.Analysis.Schauder.CutoffExistence
 import DifferentialGeometry.Analysis.Schauder.CutoffProduct
