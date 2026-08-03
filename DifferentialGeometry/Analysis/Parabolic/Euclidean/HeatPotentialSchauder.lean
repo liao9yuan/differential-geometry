@@ -404,6 +404,25 @@ private theorem holderHeatScale_intervalIntegrable {alpha : NNReal}
   linarith
 
 omit [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
+private theorem holderHeatScale_terminal_interval_int {alpha : NNReal}
+    (halpha0 : 0 < alpha) {a b : Real} (hab : a < b) :
+    ∫ s : Real in a..b, holderHeatScale alpha (b - s) =
+      (2 / (alpha : Real)) * (b - a) ^ ((alpha : Real) / 2) := by
+  rw [intervalIntegral.integral_comp_sub_left]
+  have h := timeHolderHeatScale_int halpha0 (sub_pos.mpr hab)
+  rw [intervalIntegral.integral_comp_sub_left] at h
+  simpa only [sub_self, sub_zero] using h
+
+omit [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
+private theorem holderHeatScale_add_le {alpha : NNReal}
+    (halpha1 : alpha ≤ 1) {u d : Real} (hu : 0 < u) (hd : 0 ≤ d) :
+    holderHeatScale alpha (u + d) ≤ holderHeatScale alpha u := by
+  unfold holderHeatScale
+  apply Real.rpow_le_rpow_of_nonpos hu (le_add_of_nonneg_right hd)
+  have halpha_real : (alpha : Real) ≤ 1 := by exact_mod_cast halpha1
+  linarith
+
+omit [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
 private theorem holderThirdHeatScale_intervalIntegrable_of_pos
     {alpha : NNReal} {a b : Real} (ha : 0 < a) (hab : a ≤ b) :
     IntervalIntegrable (holderThirdHeatScale alpha) volume a b := by
@@ -767,6 +786,29 @@ theorem heatD2Conv_time_add_sub_norm_le_of_holder
     _ = d * ‖v‖ * ‖w‖ * (K : Real) * holderSecondTimeHeatScale alpha t *
         heatC2DtHolder (V := V) alpha := by ring
 
+def d2DuhTimeHolderConst (alpha : NNReal) (v w : V) (K : NNReal) : Real :=
+  ‖v‖ * ‖w‖ * (K : Real) *
+    ((6 / (alpha : Real)) * heatC2Holder (V := V) alpha +
+      (2 / (2 - (alpha : Real))) * heatC2DtHolder (V := V) alpha)
+
+omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
+  [CompleteSpace F] in
+theorem d2DuhTimeHolderConst_nonneg {alpha : NNReal} (halpha : alpha ≤ 1)
+    (v w : V) (K : NNReal) :
+    0 ≤ d2DuhTimeHolderConst alpha v w K := by
+  have halpha_real : (alpha : Real) ≤ 1 := by exact_mod_cast halpha
+  have hfirst : 0 ≤ (6 / (alpha : Real)) * heatC2Holder (V := V) alpha :=
+    mul_nonneg (div_nonneg (by norm_num) alpha.coe_nonneg)
+      (heatC2Holder_nonneg (V := V) alpha)
+  have hsecond : 0 ≤ (2 / (2 - (alpha : Real))) *
+      heatC2DtHolder (V := V) alpha :=
+    mul_nonneg (div_nonneg (by norm_num) (by linarith))
+      (heatC2DtHolder_nonneg (V := V) alpha)
+  unfold d2DuhTimeHolderConst
+  exact mul_nonneg
+    (mul_nonneg (mul_nonneg (norm_nonneg v) (norm_nonneg w)) K.coe_nonneg)
+    (add_nonneg hfirst hsecond)
+
 theorem heatD2Duh_time_add_sub_eq {alpha K : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {tau d : Real} (htau : 0 < tau) (hd : 0 ≤ d)
@@ -830,6 +872,408 @@ theorem heatD2Duh_time_add_sub_eq {alpha K : NNReal}
       funext s
       congr 3
       ring
+
+private theorem heatD2Duh_time_add_sub_norm_le_large
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {tau d : Real} (htau : 0 < tau) (htd : tau ≤ d)
+    (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) (tau + d), HolderWith K alpha (f s))
+    (v w x : V)
+    (hmeasplus : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) (tau + d))))
+    (hmeasnow : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (tau - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) tau))) :
+    ‖heatD2Duh (tau + d) v w f x - heatD2Duh tau v w f x‖ ≤
+      d2DuhTimeHolderConst alpha v w K * d ^ ((alpha : Real) / 2) := by
+  have hd : 0 < d := htau.trans_le htd
+  have htplus : 0 < tau + d := htau.trans (lt_add_of_pos_right tau hd)
+  have hfnow : ∀ s ∈ Icc (0 : Real) tau, HolderWith K alpha (f s) := by
+    intro s hs
+    exact hf s ⟨hs.1, hs.2.trans (le_add_of_nonneg_right hd.le)⟩
+  have hplus := heatD2Duh_norm_of_holder
+    halpha0 halpha1 htplus f hf v w x hmeasplus
+  have hnow := heatD2Duh_norm_of_holder
+    halpha0 halpha1 htau f hfnow v w x hmeasnow
+  let p : Real := (alpha : Real) / 2
+  have hp0 : 0 ≤ p := by
+    dsimp [p]
+    positivity
+  have hp1 : p ≤ 1 := by
+    have halpha_real : (alpha : Real) ≤ 1 := by exact_mod_cast halpha1
+    dsimp [p]
+    linarith
+  have htauPow : tau ^ p ≤ d ^ p :=
+    Real.rpow_le_rpow htau.le htd hp0
+  have htplusPow : (tau + d) ^ p ≤ 2 * d ^ p := by
+    calc
+      (tau + d) ^ p ≤ (2 * d) ^ p := by
+        apply Real.rpow_le_rpow htplus.le
+        · linarith
+        · exact hp0
+      _ = 2 ^ p * d ^ p := Real.mul_rpow (by norm_num) hd.le
+      _ ≤ 2 * d ^ p := by
+        gcongr
+        simpa only [Real.rpow_one] using
+          Real.rpow_le_rpow_of_exponent_le (by norm_num : (1 : Real) ≤ 2) hp1
+  have hduh : 0 ≤ d2DuhHolderConst alpha v w K := by
+    unfold d2DuhHolderConst
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (norm_nonneg v) (norm_nonneg w)) K.coe_nonneg)
+      (heatC2Holder_nonneg (V := V) alpha)
+  calc
+    ‖heatD2Duh (tau + d) v w f x - heatD2Duh tau v w f x‖ ≤
+        ‖heatD2Duh (tau + d) v w f x‖ + ‖heatD2Duh tau v w f x‖ :=
+      norm_sub_le _ _
+    _ ≤ d2DuhHolderConst alpha v w K *
+          ((2 / (alpha : Real)) * (tau + d) ^ p) +
+        d2DuhHolderConst alpha v w K *
+          ((2 / (alpha : Real)) * tau ^ p) := add_le_add hplus hnow
+    _ ≤ d2DuhHolderConst alpha v w K *
+          ((2 / (alpha : Real)) * (2 * d ^ p)) +
+        d2DuhHolderConst alpha v w K *
+          ((2 / (alpha : Real)) * d ^ p) := by
+      exact add_le_add
+        (mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left htplusPow (by positivity)) hduh)
+        (mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left htauPow (by positivity)) hduh)
+    _ ≤ d2DuhTimeHolderConst alpha v w K * d ^ p := by
+      unfold d2DuhHolderConst d2DuhTimeHolderConst
+      have hlate : 0 ≤ (2 / (2 - (alpha : Real))) *
+          heatC2DtHolder (V := V) alpha := by
+        have halpha_real : (alpha : Real) ≤ 1 := by exact_mod_cast halpha1
+        exact mul_nonneg (div_nonneg (by norm_num) (by linarith))
+          (heatC2DtHolder_nonneg (V := V) alpha)
+      have hbase : 0 ≤ ‖v‖ * ‖w‖ * (K : Real) := by positivity
+      have hpow : 0 ≤ d ^ p := Real.rpow_nonneg hd.le p
+      calc
+        (‖v‖ * ‖w‖ * (K : Real) * heatC2Holder alpha) *
+              (2 / (alpha : Real) * (2 * d ^ p)) +
+            (‖v‖ * ‖w‖ * (K : Real) * heatC2Holder alpha) *
+              (2 / (alpha : Real) * d ^ p) =
+            (‖v‖ * ‖w‖ * (K : Real)) *
+              ((6 / (alpha : Real)) * heatC2Holder alpha) * d ^ p := by ring
+        _ ≤ (‖v‖ * ‖w‖ * (K : Real)) *
+              ((6 / (alpha : Real)) * heatC2Holder alpha +
+                (2 / (2 - (alpha : Real))) * heatC2DtHolder alpha) *
+              d ^ p := by
+          exact mul_le_mul_of_nonneg_right
+            (mul_le_mul_of_nonneg_left (le_add_of_nonneg_right hlate) hbase) hpow
+
+private theorem heatD2Duh_time_add_new_norm_le
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {tau d : Real} (htau : 0 ≤ tau) (hd : 0 < d) (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) (tau + d), HolderWith K alpha (f s))
+    (v w x : V)
+    (hnew : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      volume tau (tau + d)) :
+    ‖∫ s : Real in tau..tau + d,
+        heatD2Conv (tau + d - s) v w (f s) x‖ ≤
+      d2DuhHolderConst alpha v w K *
+        ((2 / (alpha : Real)) * d ^ ((alpha : Real) / 2)) := by
+  have hscale : IntervalIntegrable
+      (fun s : Real ↦ holderHeatScale alpha (tau + d - s))
+      volume tau (tau + d) := by
+    have hs :=
+      (holderHeatScale_intervalIntegrable halpha0 0 d).comp_sub_left (tau + d)
+    simpa only [sub_zero, add_sub_cancel_right] using hs.symm
+  calc
+    ‖∫ s : Real in tau..tau + d,
+        heatD2Conv (tau + d - s) v w (f s) x‖ ≤
+      ∫ s : Real in tau..tau + d,
+        ‖heatD2Conv (tau + d - s) v w (f s) x‖ :=
+      intervalIntegral.norm_integral_le_integral_norm
+        (le_add_of_nonneg_right hd.le)
+    _ ≤ ∫ s : Real in tau..tau + d,
+        d2DuhHolderConst alpha v w K *
+          holderHeatScale alpha (tau + d - s) := by
+      apply intervalIntegral.integral_mono_on_of_le_Ioo
+        (le_add_of_nonneg_right hd.le) hnew.norm
+        (hscale.const_mul (d2DuhHolderConst alpha v w K))
+      intro s hs
+      have htime : 0 < tau + d - s := sub_pos.mpr hs.2
+      rw [heatD2Conv_eq_cancel_of_holder halpha0 halpha1 htime
+        (hf s ⟨htau.trans hs.1.le, hs.2.le⟩) v w x]
+      refine (heatD2Cancel_norm_of_holder halpha1 htime
+        (hf s ⟨htau.trans hs.1.le, hs.2.le⟩) v w x).trans_eq ?_
+      unfold d2DuhHolderConst
+      ring
+    _ = d2DuhHolderConst alpha v w K *
+        ((2 / (alpha : Real)) * d ^ ((alpha : Real) / 2)) := by
+      rw [intervalIntegral.integral_const_mul,
+        holderHeatScale_terminal_interval_int halpha0
+          (lt_add_of_pos_right tau hd), add_sub_cancel_left]
+
+private theorem heatD2Duh_time_add_late_norm_le
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {tau d : Real} (hd : 0 < d) (hdt : d < tau)
+    (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) (tau + d), HolderWith K alpha (f s))
+    (v w x : V)
+    (hq : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv ((tau - s) + d) v w (f s) x -
+        heatD2Conv (tau - s) v w (f s) x)
+      volume 0 (tau - d)) :
+    ‖∫ s : Real in 0..tau - d,
+        heatD2Conv ((tau - s) + d) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x‖ ≤
+      (‖v‖ * ‖w‖ * (K : Real) * heatC2DtHolder (V := V) alpha) *
+        ((2 / (2 - (alpha : Real))) * d ^ ((alpha : Real) / 2)) := by
+  let B : Real := ‖v‖ * ‖w‖ * (K : Real) * heatC2DtHolder (V := V) alpha
+  have hB : 0 ≤ B := by
+    unfold B
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (norm_nonneg v) (norm_nonneg w)) K.coe_nonneg)
+      (heatC2DtHolder_nonneg (V := V) alpha)
+  have hscale0 := holderSecondTimeHeatScale_intervalIntegrable
+    (alpha := alpha) hd hdt.le
+  have hscale : IntervalIntegrable
+      (fun s : Real ↦ holderSecondTimeHeatScale alpha (tau - s))
+      volume 0 (tau - d) := by
+    have hs := hscale0.comp_sub_left tau
+    simpa only [sub_self] using hs.symm
+  have halpha2 : alpha < 2 := halpha1.trans_lt (by norm_num)
+  calc
+    ‖∫ s : Real in 0..tau - d,
+        heatD2Conv ((tau - s) + d) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x‖ ≤
+      ∫ s : Real in 0..tau - d,
+        ‖heatD2Conv ((tau - s) + d) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x‖ :=
+      intervalIntegral.norm_integral_le_integral_norm (sub_nonneg.mpr hdt.le)
+    _ ≤ ∫ s : Real in 0..tau - d,
+        (d * B) * holderSecondTimeHeatScale alpha (tau - s) := by
+      apply intervalIntegral.integral_mono_on_of_le_Ioo
+        (sub_nonneg.mpr hdt.le) hq.norm (hscale.const_mul (d * B))
+      intro s hs
+      have htime : 0 < tau - s := by linarith [hs.2]
+      have hfs : HolderWith K alpha (f s) :=
+        hf s ⟨hs.1.le, by linarith [hs.2]⟩
+      refine (heatD2Conv_time_add_sub_norm_le_of_holder
+        halpha0 halpha1 htime hd.le hfs v w x).trans_eq ?_
+      unfold B
+      ring_nf
+    _ = B * (d *
+        ∫ u : Real in d..tau, holderSecondTimeHeatScale alpha u) := by
+      rw [intervalIntegral.integral_const_mul,
+        intervalIntegral.integral_comp_sub_left]
+      simp only [sub_sub_cancel]
+      ring_nf
+    _ ≤ B * ((2 / (2 - (alpha : Real))) *
+        d ^ ((alpha : Real) / 2)) := by
+      exact mul_le_mul_of_nonneg_left
+        (mul_holderSecondTimeHeatScale_integral_le halpha2 hd hdt.le) hB
+    _ = (‖v‖ * ‖w‖ * (K : Real) * heatC2DtHolder alpha) *
+        ((2 / (2 - (alpha : Real))) * d ^ ((alpha : Real) / 2)) := by
+      rfl
+
+private theorem heatD2Duh_time_add_near_norm_le
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {tau d : Real} (hd : 0 < d) (hdt : d < tau)
+    (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) (tau + d), HolderWith K alpha (f s))
+    (v w x : V)
+    (hq : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv ((tau - s) + d) v w (f s) x -
+        heatD2Conv (tau - s) v w (f s) x)
+      volume (tau - d) tau) :
+    ‖∫ s : Real in tau - d..tau,
+        heatD2Conv ((tau - s) + d) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x‖ ≤
+      d2DuhHolderConst alpha v w K *
+        ((4 / (alpha : Real)) * d ^ ((alpha : Real) / 2)) := by
+  have hscale : IntervalIntegrable
+      (fun s : Real ↦ holderHeatScale alpha (tau - s))
+      volume (tau - d) tau := by
+    have hs :=
+      (holderHeatScale_intervalIntegrable halpha0 0 d).comp_sub_left tau
+    simpa only [sub_zero] using hs.symm
+  have hC : 0 ≤ d2DuhHolderConst alpha v w K := by
+    unfold d2DuhHolderConst
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg (norm_nonneg v) (norm_nonneg w)) K.coe_nonneg)
+      (heatC2Holder_nonneg (V := V) alpha)
+  calc
+    ‖∫ s : Real in tau - d..tau,
+        heatD2Conv ((tau - s) + d) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x‖ ≤
+      ∫ s : Real in tau - d..tau,
+        ‖heatD2Conv ((tau - s) + d) v w (f s) x -
+          heatD2Conv (tau - s) v w (f s) x‖ :=
+      intervalIntegral.norm_integral_le_integral_norm (sub_le_self tau hd.le)
+    _ ≤ ∫ s : Real in tau - d..tau,
+        (2 * d2DuhHolderConst alpha v w K) *
+          holderHeatScale alpha (tau - s) := by
+      apply intervalIntegral.integral_mono_on_of_le_Ioo
+        (sub_le_self tau hd.le) hq.norm
+        (hscale.const_mul (2 * d2DuhHolderConst alpha v w K))
+      intro s hs
+      have htime : 0 < tau - s := sub_pos.mpr hs.2
+      have htimeplus : 0 < (tau - s) + d :=
+        htime.trans_le (le_add_of_nonneg_right hd.le)
+      have hfs : HolderWith K alpha (f s) :=
+        hf s ⟨by linarith [hs.1, hdt], by linarith [hs.2]⟩
+      have hplus : ‖heatD2Conv ((tau - s) + d) v w (f s) x‖ ≤
+          d2DuhHolderConst alpha v w K *
+            holderHeatScale alpha ((tau - s) + d) := by
+        rw [heatD2Conv_eq_cancel_of_holder
+          halpha0 halpha1 htimeplus hfs v w x]
+        refine (heatD2Cancel_norm_of_holder halpha1 htimeplus hfs v w x).trans_eq ?_
+        unfold d2DuhHolderConst
+        ring
+      have hnow : ‖heatD2Conv (tau - s) v w (f s) x‖ ≤
+          d2DuhHolderConst alpha v w K * holderHeatScale alpha (tau - s) := by
+        rw [heatD2Conv_eq_cancel_of_holder halpha0 halpha1 htime hfs v w x]
+        refine (heatD2Cancel_norm_of_holder halpha1 htime hfs v w x).trans_eq ?_
+        unfold d2DuhHolderConst
+        ring
+      have hscaleAdd := holderHeatScale_add_le halpha1 htime hd.le
+      calc
+        ‖heatD2Conv ((tau - s) + d) v w (f s) x -
+            heatD2Conv (tau - s) v w (f s) x‖ ≤
+          ‖heatD2Conv ((tau - s) + d) v w (f s) x‖ +
+            ‖heatD2Conv (tau - s) v w (f s) x‖ := norm_sub_le _ _
+        _ ≤ d2DuhHolderConst alpha v w K *
+              holderHeatScale alpha ((tau - s) + d) +
+            d2DuhHolderConst alpha v w K *
+              holderHeatScale alpha (tau - s) := add_le_add hplus hnow
+        _ ≤ d2DuhHolderConst alpha v w K * holderHeatScale alpha (tau - s) +
+            d2DuhHolderConst alpha v w K * holderHeatScale alpha (tau - s) := by
+          gcongr
+        _ = (2 * d2DuhHolderConst alpha v w K) *
+            holderHeatScale alpha (tau - s) := by ring
+    _ = d2DuhHolderConst alpha v w K *
+        ((4 / (alpha : Real)) * d ^ ((alpha : Real) / 2)) := by
+      rw [intervalIntegral.integral_const_mul,
+        holderHeatScale_terminal_interval_int halpha0 (sub_lt_self tau hd),
+        sub_sub_cancel]
+      ring
+
+private theorem heatD2Duh_time_add_sub_norm_le_small
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {tau d : Real} (htau : 0 < tau) (hd : 0 < d) (hdt : d < tau)
+    (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) (tau + d), HolderWith K alpha (f s))
+    (v w x : V)
+    (hmeasplus : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) (tau + d))))
+    (hmeasnow : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (tau - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) tau))) :
+    ‖heatD2Duh (tau + d) v w f x - heatD2Duh tau v w f x‖ ≤
+      d2DuhTimeHolderConst alpha v w K * d ^ ((alpha : Real) / 2) := by
+  have htplus : 0 < tau + d := htau.trans (lt_add_of_pos_right tau hd)
+  have hplus := heatD2Duh_int_of_holder
+    halpha0 halpha1 htplus f hf v w x hmeasplus
+  have hfnow : ∀ s ∈ Icc (0 : Real) tau, HolderWith K alpha (f s) := by
+    intro s hs
+    exact hf s ⟨hs.1, hs.2.trans (le_add_of_nonneg_right hd.le)⟩
+  have hnow := heatD2Duh_int_of_holder
+    halpha0 halpha1 htau f hfnow v w x hmeasnow
+  have hplusOld : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      volume 0 tau := by
+    apply hplus.mono_set
+    rw [uIcc_of_le htau.le, uIcc_of_le htplus.le]
+    exact Icc_subset_Icc le_rfl (le_add_of_nonneg_right hd.le)
+  have hnew : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      volume tau (tau + d) := by
+    apply hplus.mono_set
+    rw [uIcc_of_le (le_add_of_nonneg_right hd.le), uIcc_of_le htplus.le]
+    exact Icc_subset_Icc htau.le le_rfl
+  have hq : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv ((tau - s) + d) v w (f s) x -
+        heatD2Conv (tau - s) v w (f s) x)
+      volume 0 tau := by
+    have hraw := hplusOld.sub hnow
+    refine hraw.congr ?_
+    intro s _
+    ring_nf
+  have hlate : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv ((tau - s) + d) v w (f s) x -
+        heatD2Conv (tau - s) v w (f s) x)
+      volume 0 (tau - d) := by
+    apply hq.mono_set
+    rw [uIcc_of_le (sub_nonneg.mpr hdt.le), uIcc_of_le htau.le]
+    exact Icc_subset_Icc le_rfl (sub_le_self tau hd.le)
+  have hnear : IntervalIntegrable
+      (fun s : Real ↦ heatD2Conv ((tau - s) + d) v w (f s) x -
+        heatD2Conv (tau - s) v w (f s) x)
+      volume (tau - d) tau := by
+    apply hq.mono_set
+    rw [uIcc_of_le (sub_le_self tau hd.le), uIcc_of_le htau.le]
+    exact Icc_subset_Icc (sub_nonneg.mpr hdt.le) le_rfl
+  have hsplit := intervalIntegral.integral_add_adjacent_intervals hlate hnear
+  have hlateBound := heatD2Duh_time_add_late_norm_le
+    halpha0 halpha1 hd hdt f hf v w x hlate
+  have hnearBound := heatD2Duh_time_add_near_norm_le
+    halpha0 halpha1 hd hdt f hf v w x hnear
+  have hnewBound := heatD2Duh_time_add_new_norm_le
+    halpha0 halpha1 htau.le hd f hf v w x hnew
+  rw [heatD2Duh_time_add_sub_eq halpha0 halpha1 htau hd.le
+    f hf v w x hmeasplus hmeasnow, ← hsplit]
+  calc
+    ‖((∫ s : Real in 0..tau - d,
+          heatD2Conv (tau - s + d) v w (f s) x -
+            heatD2Conv (tau - s) v w (f s) x) +
+        ∫ s : Real in tau - d..tau,
+          heatD2Conv (tau - s + d) v w (f s) x -
+            heatD2Conv (tau - s) v w (f s) x) +
+      ∫ s : Real in tau..tau + d,
+        heatD2Conv (tau + d - s) v w (f s) x‖ ≤
+      ‖∫ s : Real in 0..tau - d,
+          heatD2Conv (tau - s + d) v w (f s) x -
+            heatD2Conv (tau - s) v w (f s) x‖ +
+        ‖∫ s : Real in tau - d..tau,
+          heatD2Conv (tau - s + d) v w (f s) x -
+            heatD2Conv (tau - s) v w (f s) x‖ +
+        ‖∫ s : Real in tau..tau + d,
+          heatD2Conv (tau + d - s) v w (f s) x‖ := by
+      exact (norm_add_le _ _).trans
+        (add_le_add (norm_add_le _ _) le_rfl)
+    _ ≤ (‖v‖ * ‖w‖ * (K : Real) * heatC2DtHolder alpha) *
+          ((2 / (2 - (alpha : Real))) * d ^ ((alpha : Real) / 2)) +
+        d2DuhHolderConst alpha v w K *
+          ((4 / (alpha : Real)) * d ^ ((alpha : Real) / 2)) +
+        d2DuhHolderConst alpha v w K *
+          ((2 / (alpha : Real)) * d ^ ((alpha : Real) / 2)) :=
+      add_le_add (add_le_add hlateBound hnearBound) hnewBound
+    _ = d2DuhTimeHolderConst alpha v w K * d ^ ((alpha : Real) / 2) := by
+      unfold d2DuhHolderConst d2DuhTimeHolderConst
+      ring
+
+theorem heatD2Duh_time_add_sub_norm_le_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {tau d : Real} (htau : 0 < tau) (hd : 0 ≤ d)
+    (f : Real → V → F)
+    (hf : ∀ s ∈ Icc (0 : Real) (tau + d), HolderWith K alpha (f s))
+    (v w x : V)
+    (hmeasplus : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (tau + d - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) (tau + d))))
+    (hmeasnow : AEStronglyMeasurable
+      (fun s : Real ↦ heatD2Conv (tau - s) v w (f s) x)
+      (volume.restrict (uIoc (0 : Real) tau))) :
+    ‖heatD2Duh (tau + d) v w f x - heatD2Duh tau v w f x‖ ≤
+      d2DuhTimeHolderConst alpha v w K * d ^ ((alpha : Real) / 2) := by
+  by_cases hd0 : d = 0
+  · subst d
+    simp only [add_zero, sub_self, norm_zero]
+    rw [Real.zero_rpow]
+    · simp
+    · positivity
+  have hdpos : 0 < d := lt_of_le_of_ne hd (Ne.symm hd0)
+  by_cases htd : tau ≤ d
+  · exact heatD2Duh_time_add_sub_norm_le_large
+      halpha0 halpha1 htau htd f hf v w x hmeasplus hmeasnow
+  · exact heatD2Duh_time_add_sub_norm_le_small
+      halpha0 halpha1 htau hdpos (lt_of_not_ge htd)
+      f hf v w x hmeasplus hmeasnow
 
 end Convolution
 

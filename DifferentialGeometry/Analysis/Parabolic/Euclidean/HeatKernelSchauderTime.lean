@@ -210,6 +210,17 @@ theorem integral_holderD2Dt {alpha : NNReal} (halpha : alpha ≤ 1)
       rw [holderSecondTimeHeatScale_eq alpha ht]
       ring
 
+theorem holderSecondTimeHeatScale_intervalIntegrable {alpha : NNReal}
+    {a b : Real} (ha : 0 < a) (hab : a ≤ b) :
+    IntervalIntegrable (holderSecondTimeHeatScale alpha) volume a b := by
+  unfold holderSecondTimeHeatScale
+  apply ContinuousOn.intervalIntegrable
+  intro t ht
+  apply (Real.continuousAt_rpow_const t ((alpha : Real) / 2 - 2)
+    (Or.inl ?_)).continuousWithinAt
+  rw [uIcc_of_le hab] at ht
+  exact (ha.trans_le ht.1).ne'
+
 theorem holderSecondTimeHeatScale_integral_le {alpha : NNReal}
     (halpha : alpha < 2) {d T : Real} (hd : 0 < d) (hT : d ≤ T) :
     ∫ t : Real in d..T, holderSecondTimeHeatScale alpha t ≤
