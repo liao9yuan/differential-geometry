@@ -439,6 +439,48 @@ theorem spdHeatDuh_eq_of_zero_initial_of_parabolic_holder
     exact hbound s hs
   · exact spdHeatSource_parabolic_holder A hA f hsource
 
+theorem spdHeatDuh_eqOn_of_zero_initial_of_parabolic_holder
+    {alpha K B : NNReal} (halpha0 : 0 < alpha)
+    {S : Real}
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (u dtU f : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real →
+      BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ Ioo (0 : Real) S, HasDerivAt u (dtU s) s)
+    (hu : ∀ s ∈ Ioo (0 : Real) S, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ Ioo (0 : Real) S, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (hf : ∀ s x, f s x = dtU s x - matrixLap A (d2u s x))
+    (huCont : Continuous u) (hu0 : u 0 = 0)
+    (hbound : ∀ s ∈ Icc (0 : Real) S, ‖f s‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun p ↦ f p.time p.space))) :
+    Set.EqOn
+      (fun p ↦ spdHeatDuh A hA p.time f p.space)
+      (fun p ↦ u p.time p.space)
+      (parabolicCylinder (Ioo (0 : Real) S) Set.univ) := by
+  intro p hp
+  apply spdHeatDuh_eq_of_zero_initial_of_parabolic_holder
+    halpha0 hp.1.1 A hA u dtU f du d2u
+  · intro s hs
+    exact huTime s ⟨hs.1, hs.2.trans hp.1.2⟩
+  · intro s hs
+    exact hu s ⟨hs.1, hs.2.trans hp.1.2⟩
+  · intro s hs
+    exact hdu s ⟨hs.1, hs.2.trans hp.1.2⟩
+  · exact hf
+  · exact huCont
+  · exact hu0
+  · intro s hs
+    exact hbound s ⟨hs.1, hs.2.trans hp.1.2.le⟩
+  · rw [HolderWith.restrict_iff] at hsource ⊢
+    exact hsource.mono fun q hq ↦
+      ⟨⟨hq.1.1, hq.1.2.trans hp.1.2.le⟩, hq.2⟩
+
 end SPD
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean

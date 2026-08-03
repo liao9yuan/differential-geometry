@@ -99,6 +99,38 @@ theorem eParabolicC2HolderGaugeOn_congr
   unfold eParabolicC2HolderGaugeOn
   rw [hsum, hsupTime, hholderSpatial, hholderTime]
 
+theorem eParabolicC2HolderGaugeOn_congr_of_eqOn_open
+    {Q U : Set (ParabolicPoint V)} (hU : IsOpen U) (hQU : Q ⊆ U)
+    {u v : Real → V → F}
+    (huv : Set.EqOn (fun p ↦ u p.time p.space)
+      (fun p ↦ v p.time p.space) U)
+    (alpha : NNReal) :
+    eParabolicC2HolderGaugeOn alpha Q u =
+      eParabolicC2HolderGaugeOn alpha Q v := by
+  apply eParabolicC2HolderGaugeOn_congr
+  · intro j _hj p hp
+    have hmap : ContinuousAt
+        (fun x ↦ parabolicPoint p.time x) p.space := by
+      unfold parabolicPoint
+      exact (continuous_const.prodMk continuous_id).continuousAt
+    have heq : u p.time =ᶠ[nhds p.space] v p.time := by
+      filter_upwards [hmap (hU.mem_nhds (hQU hp))] with x hx
+      exact huv hx
+    unfold parabolicSpatialJet
+    exact (Filter.EventuallyEq.iteratedFDeriv Real heq j).eq_of_nhds
+  · intro p hp
+    have hmap : ContinuousAt
+        (fun t ↦ parabolicPoint t p.space) p.time := by
+      unfold parabolicPoint
+      exact (Metric.Snowflaking.continuous_toSnowflaking.prodMk
+        continuous_const).continuousAt
+    have heq : (fun t ↦ u t p.space) =ᶠ[nhds p.time]
+        fun t ↦ v t p.space := by
+      filter_upwards [hmap (hU.mem_nhds (hQU hp))] with t ht
+      exact huv ht
+    unfold parabolicTimeDerivative
+    rw [heq.fderiv_eq]
+
 theorem eContDiffHolderGaugeOn_congr_of_eqOn_open
     {s U : Set V} (hU : IsOpen U) (hsU : s ⊆ U)
     {f g : V → F} (hfg : Set.EqOn f g U)

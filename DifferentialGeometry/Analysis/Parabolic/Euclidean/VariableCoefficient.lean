@@ -541,7 +541,7 @@ theorem spdHeatDuh_parabolic_schauder_solution
   · exact spdHeatDuh_schauder_estimate_euclidean
       halpha0 halpha1 hT hTS A hA f hbound hsource
 
-theorem parabolic_variable_coefficient_schauder_estimate_of_frozen_representation
+theorem parabolic_variable_coefficient_schauder_estimate_of_frozen_representation_on
     {alpha Kf Bf X : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
     {S T : Real} (hT : 0 ≤ T) (hTS : T < S)
@@ -550,8 +550,10 @@ theorem parabolic_variable_coefficient_schauder_estimate_of_frozen_representatio
     (hA : Matrix.PosDef (fun i j ↦ a i j p0))
     (u : Real → Euc n → F)
     (g : Real → BoundedContinuousFunction (Euc n) F)
-    (hrep : u = fun t x ↦
-      spdHeatDuh (fun i j ↦ a i j p0) hA t g x)
+    (hrep : Set.EqOn (fun p ↦ u p.time p.space)
+      (fun p ↦ spdHeatDuh (fun i j ↦ a i j p0) hA
+        p.time g p.space)
+      (parabolicCylinder (Ioo (0 : Real) S) Set.univ))
     (hgfrozen : Set.EqOn (fun p ↦ g p.time p.space)
       (parabolicFrozenMatrixOperator (fun i j ↦ a i j p0) u)
       (parabolicCylinder (Icc (0 : Real) S) Set.univ))
@@ -613,11 +615,60 @@ theorem parabolic_variable_coefficient_schauder_estimate_of_frozen_representatio
         (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u =
         eParabolicC2HolderGaugeOn alpha
           (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
-          (fun t x ↦ spdHeatDuh A hA t g x) := by rw [hrep]
+          (fun t x ↦ spdHeatDuh A hA t g x) := by
+      apply eParabolicC2HolderGaugeOn_congr_of_eqOn_open
+        (isOpen_parabolicCylinder isOpen_Ioo isOpen_univ)
+      · intro p hp
+        exact ⟨⟨hp.1.1, hp.1.2.trans_lt hTS⟩, hp.2⟩
+      · simpa only [A] using hrep
     _ ≤ spdHeatPotentialSchauderConst A hA alpha
         (Kf + Kdefect) (Bf + Bdefect) T :=
       spdHeatDuh_schauder_estimate_euclidean
         halpha0 halpha1 hT hTS A hA g hboundG hholderG
+
+theorem parabolic_variable_coefficient_schauder_estimate_of_frozen_representation
+    {alpha Kf Bf X : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S T : Real} (hT : 0 ≤ T) (hTS : T < S)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (u : Real → Euc n → F)
+    (g : Real → BoundedContinuousFunction (Euc n) F)
+    (hrep : u = fun t x ↦
+      spdHeatDuh (fun i j ↦ a i j p0) hA t g x)
+    (hgfrozen : Set.EqOn (fun p ↦ g p.time p.space)
+      (parabolicFrozenMatrixOperator (fun i j ↦ a i j p0) u)
+      (parabolicCylinder (Icc (0 : Real) S) Set.univ))
+    (hsourceBound : eSupNormOn
+      (parabolicCylinder (Icc (0 : Real) S) Set.univ)
+      (parabolicVariableMatrixOperator a u) ≤ Bf)
+    (hsourceHolder : HolderWith Kf alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (parabolicVariableMatrixOperator a u)))
+    (Ka omega : n → n → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict (a i j)))
+    (homega : ∀ i j p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖a i j p0 - a i j p‖ ≤ omega i j)
+    (hu : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Icc (0 : Real) S) Set.univ) u ≤ X) :
+    eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioc (0 : Real) T) Set.univ) u ≤
+      spdHeatPotentialSchauderConst (fun i j ↦ a i j p0) hA alpha
+        (Kf + X * parabolicMatrixFreezeHolderConst Ka omega)
+        (Bf + X * parabolicMatrixFreezeSupConst omega) T := by
+  apply parabolic_variable_coefficient_schauder_estimate_of_frozen_representation_on
+    halpha0 halpha1 hT hTS a p0 hA u g
+  · intro p _hp
+    exact congrFun (congrFun hrep p.time) p.space
+  · exact hgfrozen
+  · exact hsourceBound
+  · exact hsourceHolder
+  · exact ha
+  · exact homega
+  · exact hu
 
 omit [Nonempty n] [CompleteSpace F] in
 theorem parabolic_schauder_estimate_of_small_freeze_defect

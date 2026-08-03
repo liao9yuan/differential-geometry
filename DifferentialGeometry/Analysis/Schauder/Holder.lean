@@ -554,6 +554,14 @@ theorem parabolicPoint_time_space {V : Type*} (p : ParabolicPoint V) :
   rcases p with ⟨⟨t⟩, x⟩
   rfl
 
+theorem continuous_parabolicPoint_time {V : Type*} [TopologicalSpace V] :
+    Continuous (fun p : ParabolicPoint V ↦ p.time) :=
+  Metric.Snowflaking.continuous_ofSnowflaking.comp continuous_fst
+
+theorem continuous_parabolicPoint_space {V : Type*} [TopologicalSpace V] :
+    Continuous (fun p : ParabolicPoint V ↦ p.space) :=
+  continuous_snd
+
 theorem dist_parabolicPoint {V : Type*} [PseudoMetricSpace V]
     (t s : Real) (x y : V) :
     dist (parabolicPoint t x) (parabolicPoint s y) =
@@ -563,6 +571,13 @@ theorem dist_parabolicPoint {V : Type*} [PseudoMetricSpace V]
 def parabolicCylinder {V : Type*} (J : Set Real) (Omega : Set V) :
     Set (ParabolicPoint V) :=
   {p | p.time ∈ J ∧ p.space ∈ Omega}
+
+theorem isOpen_parabolicCylinder
+    {V : Type*} [TopologicalSpace V] {J : Set Real} {Omega : Set V}
+    (hJ : IsOpen J) (hOmega : IsOpen Omega) :
+    IsOpen (parabolicCylinder J Omega) := by
+  exact (hJ.preimage continuous_parabolicPoint_time).inter
+    (hOmega.preimage continuous_parabolicPoint_space)
 
 theorem parabolicHolder_space_dist_le
     {V F : Type*} [PseudoMetricSpace V] [MetricSpace F]
