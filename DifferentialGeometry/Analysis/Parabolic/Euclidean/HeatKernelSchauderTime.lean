@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSchauderHigher
+import Mathlib.MeasureTheory.Integral.Prod
 
 noncomputable section
 
@@ -270,5 +271,181 @@ theorem mul_holderSecondTimeHeatScale_integral_le {alpha : NNReal}
     _ = (2 / (2 - (alpha : Real))) * d ^ ((alpha : Real) / 2) := by
       congr 1
       ring_nf
+
+omit [MeasurableSpace V] [BorelSpace V] in
+theorem heatD2_time_add_sub_eq_integral_heatD2Dt
+    {t d : Real} (ht : 0 < t) (hd : 0 ≤ d) (v w x : V) :
+    heatD2 (t + d) v w x - heatD2 t v w x =
+      ∫ r : Real in t..t + d, heatD2Dt r v w x := by
+  have hpos : ∀ r ∈ uIcc t (t + d), 0 < r := by
+    intro r hr
+    rw [uIcc_of_le (le_add_of_nonneg_right hd)] at hr
+    exact ht.trans_le hr.1
+  have hderiv : IntervalIntegrable
+      (fun r : Real ↦ heatD2Dt r v w x) volume t (t + d) := by
+    apply ContinuousOn.intervalIntegrable
+    intro r hr
+    have hrpos := hpos r hr
+    have hrne : r ≠ 0 := hrpos.ne'
+    have hsne : heatScale r ≠ 0 := (heatScale_pos hrpos).ne'
+    have hpne : heatScale r ^ Module.finrank Real V ≠ 0 := pow_ne_zero _ hsne
+    have hr2ne : r ^ 2 ≠ 0 := pow_ne_zero _ hrne
+    unfold heatD2Dt baseD2Dt baseD2 baseD3 baseHeat baseHeatMass heatScale
+    fun_prop (disch := assumption)
+  exact intervalIntegral.integral_eq_sub_of_hasDerivAt
+    (fun r hr ↦ heatD2_time (hpos r hr) v w x) hderiv |>.symm
+
+omit [MeasurableSpace V] [BorelSpace V] in
+private theorem heatD2_time_add_diff_holder_point {alpha : NNReal}
+    {t d : Real} (ht : 0 < t) (hd : 0 ≤ d) (v w x : V) :
+    ‖heatD2 (t + d) v w x - heatD2 t v w x‖ *
+        ‖x‖ ^ (alpha : Real) ≤
+      ∫ r : Real in t..t + d,
+        ‖heatD2Dt r v w x‖ * ‖x‖ ^ (alpha : Real) := by
+  rw [heatD2_time_add_sub_eq_integral_heatD2Dt ht hd]
+  calc
+    ‖∫ r : Real in t..t + d, heatD2Dt r v w x‖ *
+        ‖x‖ ^ (alpha : Real) ≤
+      (∫ r : Real in t..t + d, ‖heatD2Dt r v w x‖) *
+        ‖x‖ ^ (alpha : Real) := by
+      gcongr
+      exact intervalIntegral.norm_integral_le_integral_norm
+        (le_add_of_nonneg_right hd)
+    _ = ∫ r : Real in t..t + d,
+        ‖heatD2Dt r v w x‖ * ‖x‖ ^ (alpha : Real) := by
+      rw [intervalIntegral.integral_mul_const]
+
+theorem heatD2_time_add_diff_holder {alpha : NNReal} (halpha : alpha ≤ 1)
+    {t d : Real} (ht : 0 < t) (hd : 0 ≤ d) (v w : V) :
+    (∫ x : V, ‖heatD2 (t + d) v w x - heatD2 t v w x‖ *
+      ‖x‖ ^ (alpha : Real)) ≤
+      d * ‖v‖ * ‖w‖ * holderSecondTimeHeatScale alpha t *
+        heatC2DtHolder (V := V) alpha := by
+  let μ : Measure Real := volume.restrict (Ioc t (t + d))
+  let G : Real × V → Real := fun z ↦
+    ‖heatD2Dt z.1 v w z.2‖ * ‖z.2‖ ^ (alpha : Real)
+  let C : Real := ‖v‖ * ‖w‖ * holderSecondTimeHeatScale alpha t *
+    heatC2DtHolder (V := V) alpha
+  have htd : t ≤ t + d := le_add_of_nonneg_right hd
+  have hq : (alpha : Real) / 2 - 2 ≤ 0 := by
+    have ha : (alpha : Real) ≤ 1 := by exact_mod_cast halpha
+    linarith
+  have hslice_pos : ∀ r ∈ Icc t (t + d), 0 < r := by
+    intro r hr
+    exact ht.trans_le hr.1
+  have hslice_int : ∀ r ∈ Icc t (t + d),
+      Integrable (fun x : V ↦ G (r, x)) := by
+    intro r hr
+    have hrpos := hslice_pos r hr
+    have hmajor : Integrable
+        (fun x : V ↦ (‖v‖ * ‖w‖) * heatD2DtHolder alpha r x) :=
+      (heatD2DtHolder_int (V := V) halpha hrpos).const_mul _
+    refine hmajor.mono' ?_ ?_
+    · apply Continuous.aestronglyMeasurable
+      have hpow : Continuous (fun x : V ↦ ‖x‖ ^ (alpha : Real)) :=
+        continuous_norm.rpow_const (fun _ ↦ Or.inr alpha.coe_nonneg)
+      have hd2dt : Continuous (fun x : V ↦ heatD2Dt r v w x) := by
+        unfold heatD2Dt baseD2Dt baseD2 baseD3 baseHeat baseHeatMass heatScale
+        fun_prop
+      exact hd2dt.norm.mul hpow
+    filter_upwards with x
+    rw [Real.norm_eq_abs, abs_of_nonneg
+      (mul_nonneg (norm_nonneg _) (Real.rpow_nonneg (norm_nonneg x) _))]
+    exact heatD2Dt_holder_bound alpha hrpos v w x
+  have hslice_le : ∀ r ∈ Icc t (t + d),
+      (∫ x : V, G (r, x)) ≤ C := by
+    intro r hr
+    have hrpos := hslice_pos r hr
+    have hscale : holderSecondTimeHeatScale alpha r ≤
+        holderSecondTimeHeatScale alpha t := by
+      unfold holderSecondTimeHeatScale
+      exact Real.rpow_le_rpow_of_nonpos ht hr.1 hq
+    calc
+      (∫ x : V, G (r, x)) ≤
+          ‖v‖ * ‖w‖ * holderSecondTimeHeatScale alpha r *
+            heatC2DtHolder (V := V) alpha :=
+        integral_holderD2Dt halpha hrpos v w
+      _ ≤ ‖v‖ * ‖w‖ * holderSecondTimeHeatScale alpha t *
+            heatC2DtHolder (V := V) alpha := by
+        gcongr
+        exact heatC2DtHolder_nonneg alpha
+      _ = C := by rfl
+  have hGmeas : AEStronglyMeasurable G (μ.prod (volume : Measure V)) := by
+    apply Measurable.aestronglyMeasurable
+    unfold G heatD2Dt baseD2Dt baseD2 baseD3 baseHeat baseHeatMass heatScale
+    fun_prop
+  have houter : Integrable (fun r : Real ↦ ∫ x : V, ‖G (r, x)‖) μ := by
+    have hconst : IntegrableOn (fun _ : Real ↦ C) (Ioc t (t + d)) :=
+      integrableOn_const measure_Ioc_lt_top.ne
+    refine hconst.mono' hGmeas.norm.integral_prod_right' ?_
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with r hr
+    have hr' : r ∈ Icc t (t + d) := ⟨hr.1.le, hr.2⟩
+    have hnonneg : 0 ≤ ∫ x : V, ‖G (r, x)‖ :=
+      integral_nonneg (fun _ ↦ norm_nonneg _)
+    rw [Real.norm_eq_abs, abs_of_nonneg hnonneg]
+    have heq : (∫ x : V, ‖G (r, x)‖) = ∫ x : V, G (r, x) := by
+      apply integral_congr_ae
+      filter_upwards with x
+      change |‖heatD2Dt r v w x‖ * ‖x‖ ^ (alpha : Real)| = _
+      rw [abs_of_nonneg]
+      exact mul_nonneg (norm_nonneg _)
+        (Real.rpow_nonneg (norm_nonneg x) _)
+    rw [heq]
+    exact hslice_le r hr'
+  have hGint : Integrable G (μ.prod (volume : Measure V)) := by
+    exact (integrable_prod_iff hGmeas).2 ⟨by
+      filter_upwards [ae_restrict_mem measurableSet_Ioc] with r hr
+      exact hslice_int r ⟨hr.1.le, hr.2⟩, houter⟩
+  have hleft : Integrable (fun x : V ↦
+      ‖heatD2 (t + d) v w x - heatD2 t v w x‖ *
+        ‖x‖ ^ (alpha : Real)) := by
+    have htargetmeas : AEStronglyMeasurable (fun x : V ↦
+        ‖heatD2 (t + d) v w x - heatD2 t v w x‖ *
+          ‖x‖ ^ (alpha : Real)) := by
+      have hpow : Continuous (fun x : V ↦ ‖x‖ ^ (alpha : Real)) :=
+        continuous_norm.rpow_const (fun _ ↦ Or.inr alpha.coe_nonneg)
+      have hplus : Continuous (fun x : V ↦ heatD2 (t + d) v w x) := by
+        unfold heatD2 baseD2 baseHeat baseHeatMass heatScale
+        fun_prop
+      have hnow : Continuous (fun x : V ↦ heatD2 t v w x) := by
+        unfold heatD2 baseD2 baseHeat baseHeatMass heatScale
+        fun_prop
+      exact (hplus.sub hnow).norm.mul hpow |>.aestronglyMeasurable
+    have hright := hGint.integral_prod_right
+    refine hright.mono' htargetmeas ?_
+    filter_upwards with x
+    rw [Real.norm_eq_abs, abs_of_nonneg
+      (mul_nonneg (norm_nonneg _) (Real.rpow_nonneg (norm_nonneg x) _))]
+    change _ ≤ ∫ r : Real in Ioc t (t + d), G (r, x)
+    rw [← intervalIntegral.integral_of_le htd]
+    simpa only [G] using
+      heatD2_time_add_diff_holder_point (alpha := alpha) ht hd v w x
+  have hright := hGint.integral_prod_right
+  calc
+    (∫ x : V, ‖heatD2 (t + d) v w x - heatD2 t v w x‖ *
+        ‖x‖ ^ (alpha : Real)) ≤
+        ∫ x : V, ∫ r : Real, G (r, x) ∂μ := by
+      exact integral_mono hleft hright (fun x ↦ by
+        change _ ≤ ∫ r : Real in Ioc t (t + d), G (r, x)
+        rw [← intervalIntegral.integral_of_le htd]
+        simpa only [G] using
+          heatD2_time_add_diff_holder_point (alpha := alpha) ht hd v w x)
+    _ = ∫ r : Real, (∫ x : V, G (r, x)) ∂μ := by
+      exact (integral_integral_swap (f := fun r x ↦ G (r, x)) hGint).symm
+    _ ≤ ∫ _r : Real, C ∂μ := by
+      apply integral_mono_ae hGint.integral_prod_left
+        (by simpa only [μ] using
+          (integrableOn_const measure_Ioc_lt_top.ne :
+            IntegrableOn (fun _ : Real ↦ C) (Ioc t (t + d))))
+      filter_upwards [ae_restrict_mem measurableSet_Ioc] with r hr
+      exact hslice_le r ⟨hr.1.le, hr.2⟩
+    _ = d * C := by
+      rw [MeasureTheory.integral_const]
+      simp only [μ, measureReal_restrict_apply_univ,
+        Real.volume_real_Ioc_of_le htd, add_sub_cancel_left, smul_eq_mul]
+    _ = d * ‖v‖ * ‖w‖ * holderSecondTimeHeatScale alpha t *
+        heatC2DtHolder (V := V) alpha := by
+      unfold C
+      ring
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
