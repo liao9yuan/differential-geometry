@@ -30,12 +30,12 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-private theorem heat_pot_nonneg_on_strict_subinterval
+private theorem heat_pot_supersolution_nonneg_on_strict_subinterval
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
-    (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
+    (hsol : IsHeatPotSupersolutionOn (RealTimeInterval.closed 0 T hT) G V u)
     (C : Real)
     (hV : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, V t x <= C)
     (hinit : forall x : M, 0 <= u 0 x)
@@ -66,7 +66,7 @@ private theorem heat_pot_nonneg_on_strict_subinterval
       exact ⟨htpos, lt_of_le_of_lt ht.2 hT'lt⟩
     have hscale : DifferentiableAt Real (fun s : Real => Real.exp (-C * s)) t := by
       fun_prop
-    exact (hscale.mul (hsol.equation t htreg x).differentiableAt).differentiableWithinAt
+    exact (hscale.mul (hsol.timeDiff t htreg x)).differentiableWithinAt
   have hJ_mdiff : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t ->
       forall x : M, MDifferentiableAt I 𝓘(Real, Real) (J t) x := by
     intro t ht _htpos x
@@ -107,31 +107,31 @@ private theorem heat_pot_nonneg_on_strict_subinterval
       gradientFun_mdiffAt (I := I) (G.metric t) husmooth x
     have hu_time : DifferentiableWithinAt Real
         (fun s : Real => u s x) (Set.Icc 0 T') t :=
-      (hsol.equation t htreg x).differentiableAt.differentiableWithinAt
+      (hsol.timeDiff t htreg x).differentiableWithinAt
     have hscale : DifferentiableWithinAt Real
         (fun s : Real => Real.exp (-C * s)) (Set.Icc 0 T') t := by
       fun_prop
     have hreaction :
-        parabolicOperatorWithDrift (I := I) G T' X u t x = V t x * u t x := by
+        V t x * u t x ≤
+          parabolicOperatorWithDrift (I := I) G T' X u t x := by
       have hderiv :
           derivWithin (fun s : Real => u s x) (Set.Icc 0 T') t =
-            laplacianAt (I := I) G t (u t) x + V t x * u t x :=
-        (hsol.equation t htreg x).hasDerivWithinAt.derivWithin huniq
+            deriv (fun s : Real => u s x) t :=
+        (hsol.timeDiff t htreg x).derivWithin huniq
       rw [parabolicOperatorWithDrift_eq, hderiv]
       rw [show X t = (fun y : M => (0 : TangentSpace I y)) from rfl]
       rw [heatOperatorWithDrift_zero_drift, heatOperator_eq_laplacianAt]
-      ring
+      linarith [hsol.equation_ge t htreg x]
     rw [show J = (fun s y => Real.exp (-C * s) * u s y) from rfl]
     rw [parabolic_exp_rescale_identity (I := I) G T' C X u t ht huniq
       hu_space x hu_grad hu_time hscale]
-    rw [hreaction]
     have hu_neg : u t x < 0 :=
       lt_of_mul_lt_mul_left (by simpa [J] using hJneg) (Real.exp_pos (-C * t)).le
     apply mul_nonneg (Real.exp_pos (-C * t)).le
-    calc
-      V t x * u t x - C * u t x = (V t x - C) * u t x := by ring
-      _ >= 0 := mul_nonneg_of_nonpos_of_nonpos
+    have hVu : 0 ≤ (V t x - C) * u t x :=
+      mul_nonneg_of_nonpos_of_nonpos
         (sub_nonpos.mpr (hV t ⟨ht.1, ht.2.trans hT'lt.le⟩ x)) hu_neg.le
+    linarith
   have hJ_nonneg : forall t : Real, t ∈ Set.Icc 0 T' ->
       forall x : M, 0 <= J t x :=
     strict_barrier_posReg (I := I) G T' hT' X J hJ_cont hJ0
@@ -141,12 +141,12 @@ private theorem heat_pot_nonneg_on_strict_subinterval
     simpa only [J] using hJ_nonneg t ht x
   exact (mul_nonneg_iff_of_pos_left (Real.exp_pos (-C * t))).mp hprod
 
-theorem heat_pot_nonneg
+theorem heat_pot_supersolution_nonneg
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
-    (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
+    (hsol : IsHeatPotSupersolutionOn (RealTimeInterval.closed 0 T hT) G V u)
     (C : Real)
     (hV : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, V t x <= C)
     (hinit : forall x : M, 0 <= u 0 x) :
@@ -158,7 +158,8 @@ theorem heat_pot_nonneg
   have hTpos : 0 < T := lt_of_le_of_ne hT (Ne.symm hTzero)
   have hshort : forall T' : Real, 0 <= T' -> T' < T ->
       forall t : Real, t ∈ Set.Icc 0 T' -> forall x : M, 0 <= u t x :=
-    heat_pot_nonneg_on_strict_subinterval (I := I) G hT V u hsol C hV hinit
+    heat_pot_supersolution_nonneg_on_strict_subinterval
+      (I := I) G hT V u hsol C hV hinit
   have hIco : forall t : Real, t ∈ Set.Ico 0 T -> forall x : M, 0 <= u t x := by
     intro t ht x
     let T' : Real := (t + T) / 2
@@ -210,6 +211,19 @@ theorem heat_pot_nonneg
     have h_neBot : (𝓝[<] T).NeBot := nhdsLT_neBot_of_exists_lt ⟨0, hTpos⟩
     exact neg_nonpos.mp (le_of_tendsto h_tend_neg h_evt_nonpos)
   · exact hIco t ⟨ht.1, htT⟩ x
+
+theorem heat_pot_nonneg
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
+    (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
+    (C : Real)
+    (hV : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, V t x <= C)
+    (hinit : forall x : M, 0 <= u 0 x) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= u t x := by
+  exact heat_pot_supersolution_nonneg (I := I) G hT V u
+    hsol.toSupersolution C hV hinit
 
 omit [CompleteSpace E] in
 private theorem heat_pot_exp_rescale_barrier_operator_nonneg
