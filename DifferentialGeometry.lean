@@ -594,6 +594,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.ClassicalSchauder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.CutoffClassicalSchauder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.CutoffEstimate
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.CutoffGauge
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.DuhamelRepresentation
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FourierL2Bridge
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamel
