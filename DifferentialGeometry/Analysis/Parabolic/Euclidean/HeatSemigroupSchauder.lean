@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamel
-import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialSchauder
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialEstimate
+import DifferentialGeometry.Analysis.Schauder.Localization
 
 noncomputable section
 
@@ -889,6 +890,67 @@ theorem heatSup_parabolic_schauder_estimate_nnnorm
   · exact le_rfl
   · exact le_rfl
   · exact hK2
+
+def heatSolution
+    (u0 : BoundedContinuousFunction V F)
+    (f : Real → BoundedContinuousFunction V F) : Real → V → F :=
+  fun t x ↦ heatSup t u0 x + heatDuh t f x
+
+def heatSolutionSchauderConst
+    (alpha B0 B1 B2 K2 Kf Bf : NNReal) (T : Real) : NNReal :=
+  heatSupParabolicSchauderConst (V := V) alpha B0 B1 B2 K2 +
+    heatPotentialSchauderConst (V := V) alpha Kf Bf Kf T
+
+theorem heatSolution_parabolic_schauder_estimate
+    {alpha B0 B1 B2 K2 Kf Bf : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S T : Real} (hT : 0 ≤ T) (hTS : T < S)
+    (u0 : BoundedContinuousFunction V F)
+    (du0 : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u0 : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu0 : ∀ x : V, HasFDerivAt (u0 : V → F) (du0 x) x)
+    (hdu0 : ∀ x : V,
+      HasFDerivAt (du0 : V → V →L[Real] F) (d2u0 x) x)
+    (hB0 : ‖u0‖ ≤ B0) (hB1 : ‖du0‖ ≤ B1) (hB2 : ‖d2u0‖ ≤ B2)
+    (hK2 : HolderWith K2 alpha d2u0)
+    (f : Real → BoundedContinuousFunction V F)
+    (hBf : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ Bf)
+    (hKf : HolderWith Kf alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun p ↦ f p.time p.space))) :
+    eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
+      (heatSolution u0 f) ≤
+        heatSolutionSchauderConst (V := V)
+          alpha B0 B1 B2 K2 Kf Bf T := by
+  let Q : Set (ParabolicPoint V) :=
+    parabolicCylinder (Ioc (0 : Real) T) Set.univ
+  let uh : Real → V → F := fun t x ↦ heatSup t u0 x
+  let uf : Real → V → F := fun t x ↦ heatDuh t f x
+  have hQ : Q ⊆ parabolicCylinder (Ioi (0 : Real)) Set.univ := by
+    intro p hp
+    exact ⟨hp.1.1, hp.2⟩
+  have huhGauge : eParabolicC2HolderGaugeOn alpha Q uh ≤
+      heatSupParabolicSchauderConst (V := V) alpha B0 B1 B2 K2 := by
+    exact (eParabolicC2HolderGaugeOn_mono hQ alpha uh).trans
+      (heatSup_parabolic_schauder_estimate halpha1.le
+        u0 du0 d2u0 hu0 hdu0 hB0 hB1 hB2 hK2)
+  have hufGauge : eParabolicC2HolderGaugeOn alpha Q uf ≤
+      heatPotentialSchauderConst (V := V) alpha Kf Bf Kf T :=
+    heatDuh_schauder_estimate_of_parabolic_holder
+      halpha0 halpha1 hT hTS f hBf hKf
+  have huh : IsParabolicC2On Q uh := by
+    constructor
+    · intro p hp
+      exact (heatSup_contDiff_two hp.1.1 u0).contDiffAt
+    · intro p hp
+      exact (heatSup_time hp.1.1 u0 du0 d2u0 hu0 hdu0 p.space).differentiableAt
+  have huf : IsParabolicC2On Q uf :=
+    (heatDuh_isParabolicC2HolderOn
+      halpha0 halpha1 hT hTS f hBf hKf).1
+  have hadd := eParabolicC2HolderGaugeOn_add_le alpha Q uh uf huh huf
+  unfold heatSolutionSchauderConst
+  exact hadd.trans (add_le_add huhGauge hufGauge)
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 

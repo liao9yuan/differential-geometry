@@ -53,25 +53,6 @@ theorem eParabolicC2HolderGaugeOn_mono
   · exact eHolderSeminormOn_mono hQR alpha _
   · exact eHolderSeminormOn_mono hQR alpha _
 
-omit [MetricSpace X] [NormedSpace Real F]
-    [NormedAddCommGroup V] [NormedSpace Real V] in
-theorem eSupNormOn_congr {s : Set X} {f g : X → F}
-    (hfg : Set.EqOn f g s) :
-    eSupNormOn s f = eSupNormOn s g := by
-  unfold eSupNormOn
-  congr 1
-  funext x
-  rw [hfg x.2]
-
-omit [NormedSpace Real F] [NormedAddCommGroup V] [NormedSpace Real V] in
-theorem eHolderSeminormOn_congr {s : Set X} {f g : X → F}
-    (hfg : Set.EqOn f g s) (alpha : NNReal) :
-    eHolderSeminormOn alpha s f = eHolderSeminormOn alpha s g := by
-  unfold eHolderSeminormOn
-  congr 1
-  funext x
-  exact hfg x.2
-
 theorem eContDiffHolderGaugeOn_congr {s : Set V} {f g : V → F}
     {k : Nat} (hfg : ∀ j ≤ k,
       Set.EqOn (iteratedFDeriv Real j f) (iteratedFDeriv Real j g) s)

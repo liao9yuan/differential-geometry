@@ -593,6 +593,99 @@ theorem heatDuh_schauder_estimate_of_parabolic_holder
       heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
         halpha0 ht f hsource z)
 
+theorem heatDuh_isParabolicC2HolderOn
+    {alpha K B : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S T : Real} (hT : 0 ≤ T) (hTS : T < S)
+    (f : Real → BoundedContinuousFunction V F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun p ↦ f p.time p.space))) :
+    IsParabolicC2HolderOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
+      (fun t x ↦ heatDuh t f x) := by
+  let Q : Set (ParabolicPoint V) :=
+    parabolicCylinder (Ioc (0 : Real) T) Set.univ
+  let w : Real → V → F := fun t x ↦ heatDuh t f x
+  let C : NNReal := heatPotentialSchauderConst (V := V) alpha K B K T
+  have hf : ∀ r ∈ Icc (0 : Real) S, HolderWith K alpha (f r) :=
+    fun r hr ↦ holderWith_slice_of_parabolicCylinder
+      (f := fun s x ↦ f s x) hsource hr
+  have hsource' : HolderWith K alpha
+      ((parabolicCylinder (Ioc (0 : Real) S) Set.univ).restrict
+        (fun p ↦ f p.time p.space)) := by
+    rw [HolderWith.restrict_iff] at hsource ⊢
+    exact hsource.mono fun p hp ↦ ⟨⟨hp.1.1.le, hp.1.2⟩, hp.2⟩
+  have hmeas0 : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real ↦ heatSup (t - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) t)) :=
+    fun t ht z ↦
+      heatSup_timeSource_aestronglyMeasurable_of_parabolic_holder
+        halpha0 ht f hsource z
+  have hmeas1 : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real ↦ heatSupGradient (t - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) t)) :=
+    fun t ht z ↦
+      heatSupGradient_timeSource_aestronglyMeasurable_of_parabolic_holder
+        halpha0 ht f hsource z
+  have hmeas2 : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real ↦ heatSupHessian (t - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) t)) :=
+    fun t ht z ↦
+      heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
+        halpha0 ht f hsource z
+  have hgauge : eParabolicC2HolderGaugeOn alpha Q w ≤ C :=
+    heatDuh_schauder_estimate_of_parabolic_holder
+      halpha0 halpha1 hT hTS f hbound hsource
+  refine ⟨⟨?_, ?_⟩,
+    (parabolicSpatialJet_holderWith_restrict hgauge).memHolder,
+    (parabolicTimeDerivative_holderWith_restrict hgauge).memHolder⟩
+  · intro p hp
+    have htS : p.time ∈ Ioc (0 : Real) S :=
+      ⟨hp.1.1, hp.1.2.trans hTS.le⟩
+    have hbound' : ∀ s ∈ Icc (0 : Real) p.time, ‖f s‖ ≤ B := by
+      intro s hs
+      exact hbound s ⟨hs.1, hs.2.trans htS.2⟩
+    have hf' : ∀ s ∈ Icc (0 : Real) p.time,
+        HolderWith K alpha (f s) := by
+      intro s hs
+      exact hf s ⟨hs.1, hs.2.trans htS.2⟩
+    have hslice := holderWith_slice_of_parabolicCylinder
+      (f := fun t x ↦ parabolicSpatialJet 2 w (parabolicPoint t x))
+      (parabolicSpatialJet_holderWith_restrict hgauge) hp.1
+    have hhessHolder : HolderWith C alpha (heatDuhHessian p.time f) := by
+      have hcomp := (hessianCurryEquiv V F).lipschitz.holderWith.comp hslice
+      have hcomp' : HolderWith C alpha
+          (hessianCurryEquiv V F ∘
+            fun x ↦ parabolicSpatialJet 2 w (parabolicPoint p.time x)) := by
+        simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul] using hcomp
+      convert hcomp' using 1
+      funext x
+      exact (heatDuh_hessianCurryEquiv_iteratedFDeriv_two
+        halpha0 halpha1.le hp.1.1 f hbound' hf'
+        (hmeas0 p.time htS) (hmeas1 p.time htS)
+        (hmeas2 p.time htS) x).symm
+    have hhess : Continuous (heatDuhHessian p.time f) :=
+      hhessHolder.continuous halpha0
+    have hgrad : ContDiff Real 1 (heatDuhGradientMap p.time f) :=
+      contDiff_one_iff_hasFDerivAt.mpr
+        ⟨heatDuhHessian p.time f, hhess, fun x ↦
+          heatDuhGradientMap_hasFDerivAt halpha0 halpha1.le hp.1.1
+            f hbound' hf' (hmeas1 p.time htS) (hmeas2 p.time htS) x⟩
+    exact ((contDiff_succ_iff_hasFDerivAt (n := 1)).mpr
+      ⟨heatDuhGradientMap p.time f, hgrad, fun x ↦
+        heatDuh_hasFDerivAt hp.1.1 f hbound'
+          (hmeas0 p.time htS) (hmeas1 p.time htS) x⟩).contDiffAt
+  · intro p hp
+    have htS : p.time ∈ Ioo (0 : Real) S :=
+      ⟨hp.1.1, hp.1.2.trans_lt hTS⟩
+    exact (heatDuh_time halpha0 halpha1 htS f hf hsource'
+      hmeas2 p.space).differentiableAt
+
 theorem heatDuh_const_schauder_estimate
     {alpha K B : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)

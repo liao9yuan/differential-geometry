@@ -45,6 +45,15 @@ def eSupNormOn (s : Set X) (f : X → F) : ENNReal :=
   ⨆ x : s, ENNReal.ofReal ‖f x‖
 
 omit [MetricSpace X] in
+theorem eSupNormOn_congr {s : Set X} {f g : X → F}
+    (hfg : Set.EqOn f g s) :
+    eSupNormOn s f = eSupNormOn s g := by
+  unfold eSupNormOn
+  congr 1
+  funext x
+  rw [hfg x.2]
+
+omit [MetricSpace X] in
 theorem eSupNormOn_add_le (s : Set X) (f g : X → F) :
     eSupNormOn s (f + g) ≤ eSupNormOn s f + eSupNormOn s g := by
   apply iSup_le
@@ -84,6 +93,14 @@ theorem eSupNormOn_le {s : Set X} {f : X → F} {C : ENNReal} :
 
 def eHolderSeminormOn (alpha : NNReal) (s : Set X) (f : X → F) : ENNReal :=
   eHolderNorm alpha (s.restrict f)
+
+theorem eHolderSeminormOn_congr {s : Set X} {f g : X → F}
+    (hfg : Set.EqOn f g s) (alpha : NNReal) :
+    eHolderSeminormOn alpha s f = eHolderSeminormOn alpha s g := by
+  unfold eHolderSeminormOn
+  congr 1
+  funext x
+  exact hfg x.2
 
 theorem holderWith_restrict_of_eHolderSeminormOn_le
     {alpha C : NNReal} {s : Set X} {f : X → F}
@@ -613,6 +630,11 @@ def parabolicSpatialJet (j : Nat) (u : Real → V → F) :
 def parabolicTimeDerivative (u : Real → V → F) : ParabolicPoint V → F :=
   fun p => fderiv Real (fun t => u t p.space) p.time 1
 
+def IsParabolicC2On
+    (Q : Set (ParabolicPoint V)) (u : Real → V → F) : Prop :=
+  (∀ p ∈ Q, ContDiffAt Real 2 (u p.time) p.space) ∧
+    ∀ p ∈ Q, DifferentiableAt Real (fun t ↦ u t p.space) p.time
+
 def eParabolicC2HolderGaugeOn (alpha : NNReal)
     (Q : Set (ParabolicPoint V)) (u : Real → V → F) : ENNReal :=
   (∑ j ∈ Finset.range 3, eSupNormOn Q (parabolicSpatialJet j u)) +
@@ -623,34 +645,30 @@ def eParabolicC2HolderGaugeOn (alpha : NNReal)
 theorem eParabolicC2HolderGaugeOn_add_le
     (alpha : NNReal) (Q : Set (ParabolicPoint V))
     (u v : Real → V → F)
-    (hu_space : ∀ t : Real, ContDiff Real 2 (u t))
-    (hv_space : ∀ t : Real, ContDiff Real 2 (v t))
-    (hu_time : ∀ x : V, Differentiable Real (fun t ↦ u t x))
-    (hv_time : ∀ x : V, Differentiable Real (fun t ↦ v t x)) :
+    (hu : IsParabolicC2On Q u) (hv : IsParabolicC2On Q v) :
     eParabolicC2HolderGaugeOn alpha Q (fun t x ↦ u t x + v t x) ≤
       eParabolicC2HolderGaugeOn alpha Q u +
         eParabolicC2HolderGaugeOn alpha Q v := by
-  have hspatial : ∀ j ≤ 2,
-      parabolicSpatialJet j (fun t x ↦ u t x + v t x) =
-        parabolicSpatialJet j u + parabolicSpatialJet j v := by
-    intro j hj
-    funext p
+  have hspatial : ∀ j ≤ 2, Set.EqOn
+      (parabolicSpatialJet j (fun t x ↦ u t x + v t x))
+      (parabolicSpatialJet j u + parabolicSpatialJet j v) Q := by
+    intro j hj p hp
     unfold parabolicSpatialJet
     change iteratedFDeriv Real j (u p.time + v p.time) p.space = _
-    rw [iteratedFDeriv_add
-      ((hu_space p.time).of_le (by exact_mod_cast hj))
-      ((hv_space p.time).of_le (by exact_mod_cast hj))]
+    rw [iteratedFDeriv_add_apply
+      ((hu.1 p hp).of_le (by exact_mod_cast hj))
+      ((hv.1 p hp).of_le (by exact_mod_cast hj))]
     rfl
-  have htime :
-      parabolicTimeDerivative (fun t x ↦ u t x + v t x) =
-        parabolicTimeDerivative u + parabolicTimeDerivative v := by
-    funext p
+  have htime : Set.EqOn
+      (parabolicTimeDerivative (fun t x ↦ u t x + v t x))
+      (parabolicTimeDerivative u + parabolicTimeDerivative v) Q := by
+    intro p hp
     unfold parabolicTimeDerivative
     change (fderiv Real
         ((fun t ↦ u t p.space) + fun t ↦ v t p.space) p.time) 1 =
       (fderiv Real (fun t ↦ u t p.space) p.time) 1 +
         (fderiv Real (fun t ↦ v t p.space) p.time) 1
-    rw [fderiv_add (hu_time p.space p.time) (hv_time p.space p.time)]
+    rw [fderiv_add (hu.2 p hp) (hv.2 p hp)]
     exact ContinuousLinearMap.add_apply _ _ _
   unfold eParabolicC2HolderGaugeOn
   calc
@@ -673,14 +691,15 @@ theorem eParabolicC2HolderGaugeOn_add_le
         (eHolderSeminormOn alpha Q (parabolicTimeDerivative u) +
           eHolderSeminormOn alpha Q (parabolicTimeDerivative v)) := by
       gcongr with j hj
-      · rw [hspatial j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))]
-        exact eSupNormOn_add_le Q _ _
-      · rw [htime]
-        exact eSupNormOn_add_le Q _ _
-      · rw [hspatial 2 le_rfl]
-        exact eHolderSeminormOn_add_le alpha Q _ _
-      · rw [htime]
-        exact eHolderSeminormOn_add_le alpha Q _ _
+      · exact (eSupNormOn_congr
+          (hspatial j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)))).le.trans
+            (eSupNormOn_add_le Q _ _)
+      · exact (eSupNormOn_congr htime).le.trans
+          (eSupNormOn_add_le Q _ _)
+      · exact (eHolderSeminormOn_congr (hspatial 2 le_rfl) alpha).le.trans
+          (eHolderSeminormOn_add_le alpha Q _ _)
+      · exact (eHolderSeminormOn_congr htime alpha).le.trans
+          (eHolderSeminormOn_add_le alpha Q _ _)
     _ = ((∑ j ∈ Finset.range 3,
           eSupNormOn Q (parabolicSpatialJet j u)) +
           eSupNormOn Q (parabolicTimeDerivative u) +
@@ -697,34 +716,30 @@ theorem eParabolicC2HolderGaugeOn_add_le
 theorem eParabolicC2HolderGaugeOn_sub_le
     (alpha : NNReal) (Q : Set (ParabolicPoint V))
     (u v : Real → V → F)
-    (hu_space : ∀ t : Real, ContDiff Real 2 (u t))
-    (hv_space : ∀ t : Real, ContDiff Real 2 (v t))
-    (hu_time : ∀ x : V, Differentiable Real (fun t => u t x))
-    (hv_time : ∀ x : V, Differentiable Real (fun t => v t x)) :
+    (hu : IsParabolicC2On Q u) (hv : IsParabolicC2On Q v) :
     eParabolicC2HolderGaugeOn alpha Q (fun t x => u t x - v t x) ≤
       eParabolicC2HolderGaugeOn alpha Q u +
         eParabolicC2HolderGaugeOn alpha Q v := by
-  have hspatial : ∀ j ≤ 2,
-      parabolicSpatialJet j (fun t x => u t x - v t x) =
-        parabolicSpatialJet j u - parabolicSpatialJet j v := by
-    intro j hj
-    funext p
+  have hspatial : ∀ j ≤ 2, Set.EqOn
+      (parabolicSpatialJet j (fun t x => u t x - v t x))
+      (parabolicSpatialJet j u - parabolicSpatialJet j v) Q := by
+    intro j hj p hp
     unfold parabolicSpatialJet
     change iteratedFDeriv Real j (u p.time - v p.time) p.space = _
-    rw [iteratedFDeriv_sub
-      ((hu_space p.time).of_le (by exact_mod_cast hj))
-      ((hv_space p.time).of_le (by exact_mod_cast hj))]
+    rw [iteratedFDeriv_sub_apply
+      ((hu.1 p hp).of_le (by exact_mod_cast hj))
+      ((hv.1 p hp).of_le (by exact_mod_cast hj))]
     rfl
-  have htime :
-      parabolicTimeDerivative (fun t x => u t x - v t x) =
-        parabolicTimeDerivative u - parabolicTimeDerivative v := by
-    funext p
+  have htime : Set.EqOn
+      (parabolicTimeDerivative (fun t x => u t x - v t x))
+      (parabolicTimeDerivative u - parabolicTimeDerivative v) Q := by
+    intro p hp
     unfold parabolicTimeDerivative
     change (fderiv Real
         ((fun t => u t p.space) - fun t => v t p.space) p.time) 1 =
       (fderiv Real (fun t => u t p.space) p.time) 1 -
         (fderiv Real (fun t => v t p.space) p.time) 1
-    rw [fderiv_sub (hu_time p.space p.time) (hv_time p.space p.time)]
+    rw [fderiv_sub (hu.2 p hp) (hv.2 p hp)]
     exact ContinuousLinearMap.sub_apply _ _ _
   unfold eParabolicC2HolderGaugeOn
   calc
@@ -747,14 +762,15 @@ theorem eParabolicC2HolderGaugeOn_sub_le
         (eHolderSeminormOn alpha Q (parabolicTimeDerivative u) +
           eHolderSeminormOn alpha Q (parabolicTimeDerivative v)) := by
       gcongr with j hj
-      · rw [hspatial j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))]
-        exact eSupNormOn_sub_le Q _ _
-      · rw [htime]
-        exact eSupNormOn_sub_le Q _ _
-      · rw [hspatial 2 le_rfl]
-        exact eHolderSeminormOn_sub_le alpha Q _ _
-      · rw [htime]
-        exact eHolderSeminormOn_sub_le alpha Q _ _
+      · exact (eSupNormOn_congr
+          (hspatial j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)))).le.trans
+            (eSupNormOn_sub_le Q _ _)
+      · exact (eSupNormOn_congr htime).le.trans
+          (eSupNormOn_sub_le Q _ _)
+      · exact (eHolderSeminormOn_congr (hspatial 2 le_rfl) alpha).le.trans
+          (eHolderSeminormOn_sub_le alpha Q _ _)
+      · exact (eHolderSeminormOn_congr htime alpha).le.trans
+          (eHolderSeminormOn_sub_le alpha Q _ _)
     _ = ((∑ j ∈ Finset.range 3,
           eSupNormOn Q (parabolicSpatialJet j u)) +
           eSupNormOn Q (parabolicTimeDerivative u) +
@@ -770,8 +786,7 @@ theorem eParabolicC2HolderGaugeOn_sub_le
 
 def IsParabolicC2HolderOn (alpha : NNReal)
     (Q : Set (ParabolicPoint V)) (u : Real → V → F) : Prop :=
-  (∀ p ∈ Q, ContDiffAt Real 2 (u p.time) p.space) ∧
-    (∀ p ∈ Q, DifferentiableAt Real (fun t => u t p.space) p.time) ∧
+  IsParabolicC2On Q u ∧
     MemHolder alpha (Q.restrict (parabolicSpatialJet 2 u)) ∧
     MemHolder alpha (Q.restrict (parabolicTimeDerivative u))
 

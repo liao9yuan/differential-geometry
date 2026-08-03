@@ -536,6 +536,36 @@ theorem heatDuh_iteratedFDeriv_two_apply
   exact heatDuhHessian_apply halpha0 halpha1 ht f hbound hf hmeas1 hmeas2
     x (m 0) (m 1)
 
+theorem heatDuh_hessianCurryEquiv_iteratedFDeriv_two
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {t : Real} (ht : 0 < t)
+    (f : Real → BoundedContinuousFunction V F)
+    (hbound : ∀ s ∈ Icc (0 : Real) t, ‖f s‖ ≤ B)
+    (hf : ∀ s ∈ Icc (0 : Real) t, HolderWith K alpha (f s))
+    (hmeas0 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSup (t - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (hmeas1 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSupGradient (t - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (hmeas2 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSupHessian (t - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) t)))
+    (x : V) :
+    hessianCurryEquiv V F (iteratedFDeriv Real 2 (heatDuh t f) x) =
+      heatDuhHessian t f x := by
+  have hgrad : fderiv Real (heatDuh t f) = heatDuhGradientMap t f := by
+    funext z
+    exact (heatDuh_hasFDerivAt ht f hbound hmeas0 hmeas1 z).fderiv
+  ext v w
+  simp only [hessianCurryEquiv, LinearIsometryEquiv.trans_apply,
+    continuousMultilinearCurryFin1_apply,
+    continuousMultilinearCurryRightEquiv_apply', iteratedFDeriv_two_apply]
+  rw [hgrad,
+    (heatDuhGradientMap_hasFDerivAt halpha0 halpha1 ht f hbound hf
+      hmeas1 hmeas2 x).fderiv]
+  rfl
+
 theorem heatDuh_parabolicSpatialJet_two
     {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
     {t : Real} (ht : 0 < t)
