@@ -15,10 +15,20 @@ variable {V F : Type*}
   [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
 
 def heatPotentialSchauderConst
-    (alpha K B Csource : NNReal) (T : Real) : ENNReal :=
-  heatPotentialC2HolderGaugeConst (V := V) alpha K B Csource
+    (alpha K B Csource : NNReal) (T : Real) : NNReal :=
+  (heatPotentialC2HolderGaugeConst (V := V) alpha K B Csource
     (Real.toNNReal (T * (B : Real)))
-    (Real.toNNReal (2 * (B : Real) * heatC1 V * Real.sqrt T)) T
+    (Real.toNNReal (2 * (B : Real) * heatC1 V * Real.sqrt T)) T).toNNReal
+
+omit [Nontrivial V] in
+theorem coe_heatPotentialSchauderConst
+    (alpha K B Csource : NNReal) (T : Real) :
+    (heatPotentialSchauderConst (V := V) alpha K B Csource T : ENNReal) =
+      heatPotentialC2HolderGaugeConst (V := V) alpha K B Csource
+        (Real.toNNReal (T * (B : Real)))
+        (Real.toNNReal (2 * (B : Real) * heatC1 V * Real.sqrt T)) T := by
+  apply ENNReal.coe_toNNReal
+  simp [heatPotentialC2HolderGaugeConst]
 
 omit [CompleteSpace F] in
 theorem heatDuhGradientMap_norm_le
@@ -103,6 +113,7 @@ theorem heatDuh_schauder_estimate
       (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
       (fun t x => heatDuh t f x) ≤
       heatPotentialSchauderConst (V := V) alpha K B Csource T := by
+  rw [coe_heatPotentialSchauderConst]
   apply eParabolicC2HolderGaugeOn_heatDuh_le_of_lower_jets
     halpha0 halpha1 hT hTS f
   · intro p hp
