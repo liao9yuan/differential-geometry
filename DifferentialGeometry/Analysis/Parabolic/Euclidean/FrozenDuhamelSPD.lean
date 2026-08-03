@@ -73,6 +73,11 @@ theorem precompJet_apply (L : V ≃L[ℝ] V) (D : V →L[ℝ] F) (v : V) :
     precompJet L D v = D (L v) := by
   simp [precompJet, ContinuousLinearMap.compL_apply]
 
+theorem norm_precompJet_le (L : V ≃L[ℝ] V) (D : V →L[ℝ] F) :
+    ‖precompJet L D‖ ≤ ‖(L : V →L[ℝ] V)‖ * ‖D‖ := by
+  rw [mul_comm]
+  exact D.opNorm_comp_le (L : V →L[ℝ] V)
+
 /-- Apply `L` in both slots of a bounded bilinear map. -/
 def pushHess (L : V ≃L[ℝ] V) :
     (V →L[ℝ] V →L[ℝ] F) →L[ℝ] V →L[ℝ] V →L[ℝ] F :=
@@ -86,6 +91,40 @@ theorem pushHess_apply (L : V ≃L[ℝ] V)
     (B : V →L[ℝ] V →L[ℝ] F) (v w : V) :
     pushHess L B v w = B (L v) (L w) := by
   simp [pushHess, precompJet, ContinuousLinearMap.compL_apply]
+
+theorem norm_pushHess_le (L : V ≃L[ℝ] V)
+    (B : V →L[ℝ] V →L[ℝ] F) :
+    ‖pushHess L B‖ ≤ ‖(L : V →L[ℝ] V)‖ ^ 2 * ‖B‖ := by
+  apply ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg (sq_nonneg _) (norm_nonneg B))
+  intro v
+  apply ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg (mul_nonneg (sq_nonneg _) (norm_nonneg B)) (norm_nonneg v))
+  intro w
+  rw [pushHess_apply]
+  calc
+    ‖B (L v) (L w)‖ ≤ ‖B (L v)‖ * ‖L w‖ :=
+      (B (L v)).le_opNorm (L w)
+    _ ≤ (‖B‖ * ‖L v‖) *
+        (‖(L : V →L[ℝ] V)‖ * ‖w‖) := by
+      gcongr
+      · exact B.le_opNorm (L v)
+      · exact (L : V →L[ℝ] V).le_opNorm w
+    _ ≤ (‖B‖ * (‖(L : V →L[ℝ] V)‖ * ‖v‖)) *
+        (‖(L : V →L[ℝ] V)‖ * ‖w‖) := by
+      gcongr
+      exact (L : V →L[ℝ] V).le_opNorm v
+    _ = (‖(L : V →L[ℝ] V)‖ ^ 2 * ‖B‖ * ‖v‖) * ‖w‖ := by
+      ring
+
+theorem lipschitzWith_pushHess (L : V ≃L[ℝ] V) :
+    LipschitzWith (‖(L : V →L[ℝ] V)‖₊ ^ 2)
+      (pushHess (F := F) L) := by
+  apply LipschitzWith.of_dist_le_mul
+  intro B C
+  rw [dist_eq_norm, ← map_sub]
+  simpa only [NNReal.coe_pow, coe_nnnorm, dist_eq_norm] using
+    norm_pushHess_le L (B - C)
 
 /-- The first derivative jet of a pullback. -/
 def pullJet1 (L : V ≃L[ℝ] V)

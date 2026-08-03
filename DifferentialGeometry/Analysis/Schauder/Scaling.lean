@@ -189,4 +189,189 @@ theorem parabolicHolder_linearMap
   have hcomp := hf.comp hg.holderWith
   simpa only [g, Function.comp_apply, Set.restrict_apply, mul_one] using hcomp
 
+theorem parabolicSpatialJet_linearEquiv
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (L : V ≃L[Real] V) (u : Real → V → F) (j : Nat)
+    (p : ParabolicPoint V) :
+    parabolicSpatialJet j (fun t x => u t (L x)) p =
+      (parabolicSpatialJet j u
+        (parabolicLinearMap (L : V →L[Real] V) p)).compContinuousLinearMap
+          (fun _ => (L : V →L[Real] V)) := by
+  unfold parabolicSpatialJet
+  simp only [parabolicLinearMap_time, parabolicLinearMap_space]
+  have h := L.iteratedFDerivWithin_comp_right (u p.time)
+    uniqueDiffOn_univ (mem_univ (L p.space)) j
+  simpa only [preimage_univ, iteratedFDerivWithin_univ,
+    Function.comp_apply] using h
+
+theorem parabolicTimeDerivative_linearEquiv
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (L : V ≃L[Real] V) (u : Real → V → F) (p : ParabolicPoint V) :
+    parabolicTimeDerivative (fun t x => u t (L x)) p =
+      parabolicTimeDerivative u
+        (parabolicLinearMap (L : V →L[Real] V) p) := by
+  rfl
+
+theorem lipschitzWith_compContinuousLinearMapL
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (j : Nat) (L : V →L[Real] V) :
+    LipschitzWith (∏ _ : Fin j, ‖L‖₊)
+      (ContinuousMultilinearMap.compContinuousLinearMapL
+        (F := F) (fun _ : Fin j => L)) := by
+  apply LipschitzWith.of_dist_le_mul
+  intro B C
+  rw [dist_eq_norm, ← map_sub]
+  simpa only [dist_eq_norm, NNReal.coe_prod, coe_nnnorm, mul_comm,
+    ContinuousMultilinearMap.compContinuousLinearMapL_apply] using
+    ContinuousMultilinearMap.norm_compContinuousLinearMap_le
+      (B - C) (fun _ : Fin j => L)
+
+def parabolicC2HolderLinearEquivConst
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (L : V ≃L[Real] V) (alpha C : NNReal) : NNReal :=
+  let R := max 1 ‖(L.symm : V →L[Real] V)‖₊
+  C + R * C + R ^ 2 * C + C +
+    R ^ 2 * (C * R ^ (alpha : Real)) + C * R ^ (alpha : Real)
+
+theorem eParabolicC2HolderGaugeOn_linearEquiv_le
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (L : V ≃L[Real] V) (alpha C : NNReal) (J : Set Real)
+    (u : Real → V → F)
+    (h : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J Set.univ) (fun t x => u t (L x)) ≤ C) :
+    eParabolicC2HolderGaugeOn alpha (parabolicCylinder J Set.univ) u ≤
+      parabolicC2HolderLinearEquivConst L alpha C := by
+  let Q : Set (ParabolicPoint V) := parabolicCylinder J Set.univ
+  let v : Real → V → F := fun t x => u t (L x)
+  let R : NNReal := max 1 ‖(L.symm : V →L[Real] V)‖₊
+  let Cspatial : Nat → NNReal := fun j =>
+    match j with
+    | 0 => C
+    | 1 => R * C
+    | _ => R ^ 2 * C
+  have h' : eParabolicC2HolderGaugeOn alpha Q v ≤ C := h
+  have hR : ‖(L.symm : V →L[Real] V)‖₊ ≤ R := by
+    exact le_max_right _ _
+  have hspatial : ∀ j < 3, ∀ p ∈ Q,
+      ‖parabolicSpatialJet j u p‖ ≤ Cspatial j := by
+    intro j hj p hp
+    let q := parabolicLinearMap (L.symm : V →L[Real] V) p
+    have hq : q ∈ Q := by
+      simpa only [q, Q, parabolicCylinder, parabolicLinearMap_time,
+        parabolicLinearMap_space, mem_setOf_eq, mem_univ, and_true] using hp
+    have heq : parabolicSpatialJet j u p =
+        (parabolicSpatialJet j v q).compContinuousLinearMap
+          (fun _ => (L.symm : V →L[Real] V)) := by
+      have hlin := parabolicSpatialJet_linearEquiv L.symm v j p
+      simpa only [v, q, ContinuousLinearEquiv.apply_symm_apply] using hlin
+    rw [heq]
+    have hnorm := ContinuousMultilinearMap.norm_compContinuousLinearMap_le
+      (parabolicSpatialJet j v q)
+      (fun _ : Fin j => (L.symm : V →L[Real] V))
+    have hadapt := parabolicSpatialJet_norm_le h' (Nat.le_of_lt_succ hj) hq
+    interval_cases j
+    · calc
+        ‖(parabolicSpatialJet 0 v q).compContinuousLinearMap
+            (fun _ => (L.symm : V →L[Real] V))‖ ≤
+            ‖parabolicSpatialJet 0 v q‖ * 1 := by
+          simpa only [Finset.prod_fin_eq_prod_range,
+            Finset.prod_range_zero] using hnorm
+        _ = ‖parabolicSpatialJet 0 v q‖ := mul_one _
+        _ ≤ (Cspatial 0 : Real) := by
+          simpa only [Cspatial] using hadapt
+    · calc
+        ‖(parabolicSpatialJet 1 v q).compContinuousLinearMap
+            (fun _ => (L.symm : V →L[Real] V))‖ ≤
+            ‖parabolicSpatialJet 1 v q‖ *
+              ‖(L.symm : V →L[Real] V)‖ := by
+          simpa only [Fin.prod_univ_one] using hnorm
+        _ ≤ C * (R : Real) := by
+          exact mul_le_mul hadapt (by exact_mod_cast hR)
+            (norm_nonneg _) C.coe_nonneg
+        _ = (Cspatial 1 : Real) := by
+          simp only [Cspatial, NNReal.coe_mul]
+          ring
+    · calc
+        ‖(parabolicSpatialJet 2 v q).compContinuousLinearMap
+            (fun _ => (L.symm : V →L[Real] V))‖ ≤
+            ‖parabolicSpatialJet 2 v q‖ *
+              (‖(L.symm : V →L[Real] V)‖ *
+                ‖(L.symm : V →L[Real] V)‖) := by
+          simpa only [Fin.prod_univ_two] using hnorm
+        _ ≤ C * ((R : Real) * R) := by
+          apply mul_le_mul hadapt
+          · exact mul_le_mul (by exact_mod_cast hR) (by exact_mod_cast hR)
+              (norm_nonneg _) R.coe_nonneg
+          · positivity
+          · exact C.coe_nonneg
+        _ = (Cspatial 2 : Real) := by
+          simp only [Cspatial, NNReal.coe_mul, NNReal.coe_pow]
+          ring
+  have htime : ∀ p ∈ Q, ‖parabolicTimeDerivative u p‖ ≤ C := by
+    intro p hp
+    let q := parabolicLinearMap (L.symm : V →L[Real] V) p
+    have hq : q ∈ Q := by
+      simpa only [q, Q, parabolicCylinder, parabolicLinearMap_time,
+        parabolicLinearMap_space, mem_setOf_eq, mem_univ, and_true] using hp
+    have heq := parabolicTimeDerivative_linearEquiv L.symm v p
+    have heq' : parabolicTimeDerivative u p =
+        parabolicTimeDerivative v q := by
+      simpa only [v, q, ContinuousLinearEquiv.apply_symm_apply] using heq
+    rw [heq']
+    exact parabolicTimeDerivative_norm_le h' hq
+  have hspatialHolder : HolderWith
+      (R ^ 2 * (C * R ^ (alpha : Real))) alpha
+      (Q.restrict (parabolicSpatialJet 2 u)) := by
+    have hadapt := parabolicSpatialJet_holderWith_restrict h'
+    have hdomain : HolderWith (C * R ^ (alpha : Real)) alpha
+        (Q.restrict (parabolicSpatialJet 2 v ∘
+          parabolicLinearMap (L.symm : V →L[Real] V))) := by
+      have hraw := parabolicHolder_linearMap
+        (L.symm : V →L[Real] V) hadapt
+      simpa only [R, Q, parabolicLinearPreimage_cylinder_univ] using hraw
+    let P := ContinuousMultilinearMap.compContinuousLinearMapL
+      (F := F) (fun _ : Fin 2 => (L.symm : V →L[Real] V))
+    have hP0 := lipschitzWith_compContinuousLinearMapL
+      (F := F) 2 (L.symm : V →L[Real] V)
+    have hprod : (∏ _ : Fin 2, ‖(L.symm : V →L[Real] V)‖₊) ≤ R ^ 2 := by
+      simpa only [Fin.prod_univ_two, pow_two] using
+        mul_le_mul hR hR (zero_le _) (zero_le _)
+    have hP : LipschitzWith (R ^ 2) P := hP0.weaken hprod
+    have hcomp := hP.holderWith.comp hdomain
+    have hcomp' : HolderWith
+        (R ^ 2 * (C * R ^ (alpha : Real))) alpha
+        (P ∘ Q.restrict (parabolicSpatialJet 2 v ∘
+          parabolicLinearMap (L.symm : V →L[Real] V))) := by
+      simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul] using hcomp
+    convert hcomp' using 1
+    funext p
+    have hlin := parabolicSpatialJet_linearEquiv L.symm v 2 p.1
+    simpa only [P, v, Function.comp_apply, Set.restrict_apply,
+      ContinuousLinearEquiv.apply_symm_apply] using hlin
+  have htimeHolder : HolderWith (C * R ^ (alpha : Real)) alpha
+      (Q.restrict (parabolicTimeDerivative u)) := by
+    have hadapt := parabolicTimeDerivative_holderWith_restrict h'
+    have hraw := parabolicHolder_linearMap
+      (L.symm : V →L[Real] V) hadapt
+    have hraw' : HolderWith (C * R ^ (alpha : Real)) alpha
+        (Q.restrict (parabolicTimeDerivative v ∘
+          parabolicLinearMap (L.symm : V →L[Real] V))) := by
+      simpa only [R, Q, parabolicLinearPreimage_cylinder_univ] using hraw
+    convert hraw' using 1
+    funext p
+    have hlin := parabolicTimeDerivative_linearEquiv L.symm v p.1
+    simpa only [v, Function.comp_apply, Set.restrict_apply,
+      ContinuousLinearEquiv.apply_symm_apply] using hlin
+  have hresult := eParabolicC2HolderGaugeOn_le Cspatial C
+    (R ^ 2 * (C * R ^ (alpha : Real)))
+    (C * R ^ (alpha : Real)) hspatial htime hspatialHolder htimeHolder
+  unfold parabolicC2HolderLinearEquivConst
+  simpa only [Q, R, Cspatial, Finset.sum_range_succ, Finset.sum_range_zero,
+    zero_add, NNReal.coe_add, NNReal.coe_mul, NNReal.coe_pow,
+    NNReal.coe_rpow] using hresult
+
 end DifferentialGeometry.Analysis.Schauder

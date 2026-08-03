@@ -50,6 +50,14 @@ def eSpdParabolicC2HolderGaugeOn
   eParabolicC2HolderGaugeOn alpha Q
     (fun t y => u t (spdSqrtEquiv A hA y))
 
+def spdHeatPotentialSchauderConst
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (alpha K B : NNReal) (T : Real) : NNReal :=
+  parabolicC2HolderLinearEquivConst (spdSqrtEquiv A hA) alpha
+    (heatPotentialSchauderConst (V := Euc n) alpha
+      (spdSourceHolderConst A hA alpha K) B
+      (spdSourceHolderConst A hA alpha K) T)
+
 omit [Nonempty n] [NormedSpace Real F] [CompleteSpace F] in
 theorem spdHeatSource_norm (A : Matrix n n Real) (hA : A.PosDef)
     (f : Real → BoundedContinuousFunction (Euc n) F) (t : Real) :
@@ -100,6 +108,29 @@ theorem spdHeatDuh_schauder_estimate
       (spdHeatSource_parabolic_holder A hA f hsource)
   unfold eSpdParabolicC2HolderGaugeOn spdHeatDuh
   simpa only [ContinuousLinearEquiv.symm_apply_apply] using h
+
+theorem spdHeatDuh_schauder_estimate_euclidean
+    {alpha K B : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S T : Real} (hT : 0 ≤ T) (hTS : T < S)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (f : Real → BoundedContinuousFunction (Euc n) F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun p => f p.time p.space))) :
+    eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
+      (fun t x => spdHeatDuh A hA t f x) ≤
+      spdHeatPotentialSchauderConst A hA alpha K B T := by
+  apply eParabolicC2HolderGaugeOn_linearEquiv_le
+    (spdSqrtEquiv A hA) alpha
+    (heatPotentialSchauderConst (V := Euc n) alpha
+      (spdSourceHolderConst A hA alpha K) B
+      (spdSourceHolderConst A hA alpha K) T)
+    (Ioc (0 : Real) T) (fun t x => spdHeatDuh A hA t f x)
+  exact spdHeatDuh_schauder_estimate halpha0 halpha1 hT hTS
+    A hA f hbound hsource
 
 theorem spdHeatDuh_matrixLap
     {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
