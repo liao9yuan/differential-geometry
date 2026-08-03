@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelApprox
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelCancel
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelHigher
 import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.Analysis.Convolution
@@ -461,6 +462,165 @@ theorem heatSup_iteratedFDeriv_two_apply {t : Real} (ht : 0 < t)
     funext z
     exact (heatSup_hasFDerivAt ht u z).fderiv
   rw [hgrad, (heatSupGradient_hasFDerivAt ht u x).fderiv]
+
+omit [CompleteSpace F] in
+theorem heatSupGradient_apply {t : Real} (ht : 0 < t)
+    (u : BoundedContinuousFunction V F) (x v : V) :
+    heatSupGradient t u x v = heatD1Sup t v u x := by
+  have hInt : Integrable
+      (fun y : V => (heatD1Map t (x - y)).smulRight (u y)) := by
+    refine (((heatD1Maj_int (V := V) ht).comp_sub_left x).const_mul ‖u‖).mono'
+      ?_ ?_
+    · apply Continuous.aestronglyMeasurable
+      unfold heatD1Map baseD1Map baseHeat baseHeatMass heatScale
+      fun_prop
+    filter_upwards with y
+    rw [ContinuousLinearMap.norm_smulRight_apply]
+    calc
+      ‖heatD1Map t (x - y)‖ * ‖u y‖ ≤
+          heatD1Maj t (x - y) * ‖u‖ :=
+        mul_le_mul (heatD1Map_norm_le ht (x - y))
+          (u.norm_coe_le_norm y) (norm_nonneg _) (heatD1Maj_nonneg ht _)
+      _ = ‖u‖ * heatD1Maj t (x - y) := by ring
+  unfold heatSupGradient heatD1Sup supKernel
+  rw [ContinuousLinearMap.integral_apply hInt v]
+  simp only [ContinuousLinearMap.smulRight_apply, heatD1Map_apply]
+  change (∫ y : V, heatD1 t v (x - y) • u y) =
+    ∫ y : V, heatD1 t v y • u (x - y)
+  rw [← MeasureTheory.convolution_lsmul_swap]
+  rfl
+
+def heatD2ConvMap (t : Real) (v : V)
+    (u : BoundedContinuousFunction V F) (x : V) : V →L[Real] F :=
+  ∫ y : V, (heatD2Map t v (x - y)).smulRight (u y)
+
+omit [CompleteSpace F] in
+@[simp] theorem heatD2ConvMap_apply {t : Real} (ht : 0 < t) (v : V)
+    (u : BoundedContinuousFunction V F) (x w : V) :
+    heatD2ConvMap t v u x w = heatD2Conv t v w u x := by
+  have hInt : Integrable
+      (fun y : V => (heatD2Map t v (x - y)).smulRight (u y)) := by
+    refine ((((heatD2Maj_int (V := V) ht).comp_sub_left x).const_mul ‖v‖).const_mul
+      ‖u‖).mono' ?_ ?_
+    · apply Continuous.aestronglyMeasurable
+      unfold heatD2Map baseD2Map baseHeat baseHeatMass heatScale
+      fun_prop
+    filter_upwards with y
+    rw [ContinuousLinearMap.norm_smulRight_apply]
+    calc
+      ‖heatD2Map t v (x - y)‖ * ‖u y‖ ≤
+          (‖v‖ * heatD2Maj t (x - y)) * ‖u‖ :=
+        mul_le_mul (heatD2Map_norm_le ht v (x - y))
+          (u.norm_coe_le_norm y) (norm_nonneg _)
+          (mul_nonneg (norm_nonneg v) (heatD2Maj_nonneg ht _))
+      _ = ‖u‖ * (‖v‖ * heatD2Maj t (x - y)) := by ring
+  unfold heatD2ConvMap heatD2Conv
+  rw [ContinuousLinearMap.integral_apply hInt w]
+  simp only [ContinuousLinearMap.smulRight_apply, heatD2Map_apply]
+  change (∫ y : V, heatD2 t v w (x - y) • u y) =
+    ∫ y : V, heatD2 t v w y • u (x - y)
+  rw [← MeasureTheory.convolution_lsmul_swap]
+  rfl
+
+omit [CompleteSpace F] in
+theorem heatD1Sup_hasFDerivAt {t : Real} (ht : 0 < t) (v : V)
+    (u : BoundedContinuousFunction V F) (x : V) :
+    HasFDerivAt (heatD1Sup t v u) (heatD2ConvMap t v u x) x := by
+  let G : V → V → F := fun z y => heatD1 t v (z - y) • u y
+  let DG : V → V → V →L[Real] F := fun z y =>
+    (heatD2Map t v (z - y)).smulRight (u y)
+  let bound : V → Real := fun y =>
+    ‖v‖ * ‖u‖ * heatD2LocalMajor (V := V) t x y
+  have hs : Metric.ball x (heatScale t) ∈ 𝓝 x :=
+    Metric.ball_mem_nhds x (heatScale_pos ht)
+  have hGmeas : ∀ᶠ z in 𝓝 x,
+      AEStronglyMeasurable (G z) (volume : Measure V) := by
+    apply Filter.Eventually.of_forall
+    intro z
+    apply Continuous.aestronglyMeasurable
+    unfold G heatD1 baseD1 baseHeat baseHeatMass heatScale
+    fun_prop
+  have hGint : Integrable (G x) := by
+    refine (((heatD1_int (V := V) ht v).norm.comp_sub_left x).mul_const ‖u‖).mono'
+      ?_ ?_
+    · apply Continuous.aestronglyMeasurable
+      unfold G heatD1 baseD1 baseHeat baseHeatMass heatScale
+      fun_prop
+    filter_upwards with y
+    rw [norm_smul]
+    exact mul_le_mul_of_nonneg_left (u.norm_coe_le_norm y)
+      (norm_nonneg (heatD1 t v (x - y)))
+  have hDGmeas : AEStronglyMeasurable (DG x) (volume : Measure V) := by
+    apply Continuous.aestronglyMeasurable
+    unfold DG heatD2Map baseD2Map baseHeat baseHeatMass heatScale
+    fun_prop
+  have hbound : ∀ᵐ y ∂(volume : Measure V), ∀ z ∈ Metric.ball x (heatScale t),
+      ‖DG z y‖ ≤ bound y := by
+    apply Filter.Eventually.of_forall
+    intro y z hz
+    calc
+      ‖DG z y‖ = ‖heatD2Map t v (z - y)‖ * ‖u y‖ := by
+        unfold DG
+        rw [ContinuousLinearMap.norm_smulRight_apply]
+      _ ≤ (‖v‖ * heatD2Maj t (z - y)) * ‖u‖ :=
+        mul_le_mul (heatD2Map_norm_le ht v (z - y))
+          (u.norm_coe_le_norm y) (norm_nonneg _)
+          (mul_nonneg (norm_nonneg v) (heatD2Maj_nonneg ht _))
+      _ = ‖v‖ * ‖u‖ * heatD2Maj t (z - y) := by ring
+      _ ≤ ‖v‖ * ‖u‖ * heatD2LocalMajor (V := V) t x y :=
+        mul_le_mul_of_nonneg_left (heatD2Maj_le_localMajor ht x y hz)
+          (mul_nonneg (norm_nonneg v) (norm_nonneg u))
+      _ = bound y := rfl
+  have hboundInt : Integrable bound :=
+    (heatD2LocalMajor_int (V := V) ht x).const_mul (‖v‖ * ‖u‖)
+  have hdiff : ∀ᵐ y ∂(volume : Measure V), ∀ z ∈ Metric.ball x (heatScale t),
+      HasFDerivAt (G · y) (DG z y) z := by
+    apply Filter.Eventually.of_forall
+    intro y z hz
+    have hsub : HasFDerivAt (fun q : V => q - y)
+        (ContinuousLinearMap.id Real V) z :=
+      (hasFDerivAt_id z).sub_const y
+    unfold G DG
+    simpa using ((heatD1_hasFDeriv ht v (z - y)).comp z hsub).smul_const (u y)
+  have h := hasFDerivAt_integral_of_dominated_of_fderiv_le
+    (F := G) (F' := DG) (bound := bound) hs hGmeas hGint hDGmeas
+      hbound hboundInt hdiff
+  have hfun : (fun z : V => ∫ y : V, G z y) = heatD1Sup t v u := by
+    funext z
+    unfold G heatD1Sup supKernel
+    rw [← MeasureTheory.convolution_lsmul_swap]
+    rfl
+  rw [hfun] at h
+  simpa only [DG, heatD2ConvMap] using h
+
+omit [CompleteSpace F] in
+theorem heatSupHessian_apply {t : Real} (ht : 0 < t)
+    (u : BoundedContinuousFunction V F) (x w v : V) :
+    heatSupHessian t u x w v = heatD2Conv t v w u x := by
+  let L : (V →L[Real] F) →L[Real] F :=
+    (ContinuousLinearMap.apply Real F) v
+  have heval := L.hasFDerivAt.comp x (heatSupGradient_hasFDerivAt ht u x)
+  have hfun : (fun z : V => L (heatSupGradient t u z)) = heatD1Sup t v u := by
+    funext z
+    exact heatSupGradient_apply ht u z v
+  have heval' : HasFDerivAt (heatD1Sup t v u)
+      (L.comp (heatSupHessian t u x)) x := by
+    rw [← hfun]
+    simpa only [Function.comp_apply] using heval
+  have hraw := heatD1Sup_hasFDerivAt ht v u x
+  have hmaps := heval'.unique hraw
+  have happly := congrArg (fun A : V →L[Real] F => A w) hmaps
+  simpa only [L, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
+    heatD2ConvMap_apply ht] using happly
+
+omit [CompleteSpace F] in
+theorem heatSupHessian_eval_eq_heatD2ConvMap {t : Real} (ht : 0 < t)
+    (u : BoundedContinuousFunction V F) (x v : V) :
+    ((ContinuousLinearMap.apply Real F) v).comp (heatSupHessian t u x) =
+      heatD2ConvMap t v u x := by
+  ext w
+  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
+    heatSupHessian_apply ht, heatD2ConvMap_apply ht]
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 

@@ -264,6 +264,14 @@ def heatD2Cancel (t : ℝ) (v w : V) (f : V → F) (x : V) : F :=
 def heatD2Conv (t : ℝ) (v w : V) (f : V → F) (x : V) : F :=
   ∫ y : V, heatD2 t v w y • f (x - y)
 
+omit [Nontrivial V] [CompleteSpace F] in
+theorem heatD2Conv_comm (t : ℝ) (v w : V) (f : V → F) (x : V) :
+    heatD2Conv t v w f x = heatD2Conv t w v f x := by
+  unfold heatD2Conv
+  apply integral_congr_ae
+  filter_upwards with y
+  rw [heatD2_comm]
+
 omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V]
   [BorelSpace V] [Nontrivial V] [NormedSpace ℝ F] [CompleteSpace F] in
 private theorem holder_half_bound {K : ℝ≥0} {f : V → F}

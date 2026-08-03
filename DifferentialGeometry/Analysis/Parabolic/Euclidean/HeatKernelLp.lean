@@ -327,6 +327,13 @@ def baseD2 (v w x : V) : ℝ :=
   ((4 : ℝ)⁻¹ * ⟪x, v⟫ * ⟪x, w⟫ -
       (2 : ℝ)⁻¹ * ⟪v, w⟫) * baseHeat x
 
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem baseD2_comm (v w x : V) :
+    baseD2 v w x = baseD2 w v x := by
+  unfold baseD2
+  rw [real_inner_comm v w]
+  ring
+
 /-- Frechet derivative of `baseHeat`, as a continuous linear functional. -/
 def baseD1Map (x : V) : V →L[ℝ] ℝ :=
   (-(2 : ℝ)⁻¹ * baseHeat x) • innerSL ℝ x
@@ -633,6 +640,12 @@ def heatD1 (t : ℝ) (v x : V) : ℝ :=
 def heatD2 (t : ℝ) (v w x : V) : ℝ :=
   ((heatScale t) ^ Module.finrank ℝ V)⁻¹ * (heatScale t)⁻¹ * (heatScale t)⁻¹ *
     baseD2 v w ((heatScale t)⁻¹ • x)
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
+theorem heatD2_comm (t : ℝ) (v w x : V) :
+    heatD2 t v w x = heatD2 t w v x := by
+  unfold heatD2
+  rw [baseD2_comm]
 
 /-- Frechet derivative map of the positive-time heat kernel. -/
 def heatD1Map (t : ℝ) (x : V) : V →L[ℝ] ℝ :=

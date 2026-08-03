@@ -120,6 +120,14 @@ cancellation is inserted by `heatD2Conv_eq_cancel` in the estimates below. -/
 def heatD2Duh (t : ℝ) (v w : V) (f : ℝ → V → F) (x : V) : F :=
   ∫ s : ℝ in 0..t, heatD2Conv (t - s) v w (f s) x
 
+omit [Nontrivial V] [CompleteSpace F] in
+theorem heatD2Duh_comm (t : ℝ) (v w : V) (f : ℝ → V → F) (x : V) :
+    heatD2Duh t v w f x = heatD2Duh t w v f x := by
+  unfold heatD2Duh
+  apply intervalIntegral.integral_congr
+  intro s _
+  exact heatD2Conv_comm (t - s) v w (f s) x
+
 /-- A strongly measurable time path with one uniform spatial
 `1/2`-Holder constant has an interval-integrable cancelled `D^2` Duhamel
 integrand. -/
