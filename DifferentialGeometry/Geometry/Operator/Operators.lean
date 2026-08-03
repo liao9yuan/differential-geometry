@@ -240,6 +240,18 @@ theorem gradientFun_const_smul
   let e := (metricFlatEquiv (I := I) g x).symm
   exact e.map_smul a (mfderiv I 𝓘(Real, Real) f x).toLinearMap
 
+theorem gradientFun_neg
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M}
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
+    gradientFun (I := I) g (-f) x =
+      -gradientFun (I := I) g f x := by
+  rw [show -f = (-1 : Real) • f by
+    ext y
+    simp]
+  rw [gradientFun_const_smul (I := I) g (-1) hf]
+  simp
+
 
 theorem gradientFun_add
     (g : SmoothRiemannianMetric I M)

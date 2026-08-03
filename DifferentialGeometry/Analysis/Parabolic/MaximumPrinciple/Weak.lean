@@ -185,6 +185,27 @@ theorem parabolic_smul
   rw [hheat']
   ring
 
+theorem parabolic_neg
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
+    (u : Real -> M -> Real) (t : Real) (x : M)
+    (hu_time : DifferentiableWithinAt Real
+      (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hu_space : forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hu_grad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (u t) y) x) :
+    parabolicOperatorWithDrift (I := I) G T X
+        (fun s y => -u s y) t x =
+      -parabolicOperatorWithDrift (I := I) G T X u t x := by
+  have hfun : (fun s y => -u s y) =
+      (fun s y => (-1 : Real) * u s y) := by
+    funext s y
+    ring
+  rw [hfun, parabolic_smul (I := I) G T X (-1) u t x
+    hu_time hu_space hu_grad]
+  ring
+
 theorem parabolic_sub
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
