@@ -12,6 +12,25 @@ namespace DifferentialGeometry.Analysis.Schauder
 
 variable {X F : Type*} [MetricSpace X] [NormedAddCommGroup F]
 
+theorem holderWith_zero_of_norm_le
+    {Y G : Type*} [PseudoMetricSpace Y] [NormedAddCommGroup G]
+    {B : NNReal} {f : Y → G} (h : ∀ x, ‖f x‖ ≤ B) :
+    HolderWith (2 * B) 0 f := by
+  intro x y
+  rw [edist_dist, edist_dist]
+  have hdist : dist (f x) (f y) ≤ 2 * (B : Real) := by
+    rw [dist_eq_norm]
+    exact (norm_sub_le (f x) (f y)).trans
+      ((add_le_add (h x) (h y)).trans_eq (by ring))
+  calc
+    ENNReal.ofReal (dist (f x) (f y)) ≤ ENNReal.ofReal (2 * (B : Real)) :=
+      ENNReal.ofReal_le_ofReal hdist
+    _ = ((2 * B : NNReal) : ENNReal) *
+        ENNReal.ofReal (dist x y) ^ (0 : Real) := by
+      rw [ENNReal.rpow_zero, mul_one, ENNReal.coe_mul, ENNReal.coe_ofNat,
+        ENNReal.ofReal_mul (by positivity : (0 : Real) ≤ 2),
+        ENNReal.ofReal_ofNat, ENNReal.ofReal_coe_nnreal]
+
 def eSupNormOn (s : Set X) (f : X → F) : ENNReal :=
   ⨆ x : s, ENNReal.ofReal ‖f x‖
 
@@ -172,6 +191,28 @@ def IsContDiffHolderOn (k : Nat) (alpha : NNReal)
   (∀ x ∈ s, ContDiffAt Real k f x) ∧
     MemHolder alpha (s.restrict (iteratedFDeriv Real k f))
 
+theorem eContDiffHolderGaugeOn_le
+    {k : Nat} {alpha : NNReal} {s : Set V} {f : V → F}
+    (Cspatial : Nat → NNReal) (Cholder : NNReal)
+    (hspatial : ∀ j ≤ k, ∀ x ∈ s,
+      ‖iteratedFDeriv Real j f x‖ ≤ Cspatial j)
+    (hholder : HolderWith Cholder alpha
+      (s.restrict (iteratedFDeriv Real k f))) :
+    eContDiffHolderGaugeOn k alpha s f ≤
+      (∑ j ∈ Finset.range (k + 1), (Cspatial j : ENNReal)) + Cholder := by
+  have hsup : ∀ j ≤ k,
+      eSupNormOn s (iteratedFDeriv Real j f) ≤ Cspatial j := by
+    intro j hj
+    rw [eSupNormOn_le]
+    intro x hx
+    rw [ENNReal.ofReal_le_coe]
+    exact hspatial j hj x hx
+  have hholder' : eHolderSeminormOn alpha s (iteratedFDeriv Real k f) ≤
+      Cholder := hholder.eHolderNorm_le
+  unfold eContDiffHolderGaugeOn
+  gcongr with j hj
+  exact hsup j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))
+
 theorem spatialJet_le_eContDiffHolderGaugeOn
     (k : Nat) (alpha : NNReal) (s : Set V) (f : V → F)
     {j : Nat} (hj : j ≤ k) (x : V) (hx : x ∈ s) :
@@ -296,6 +337,20 @@ theorem holderWith_slice_of_parabolicCylinder
   simpa [px, py, Subtype.dist_eq, dist_parabolicPoint,
     Real.zero_rpow (by norm_num : (1 / 2 : Real) ≠ 0),
     max_eq_right dist_nonneg] using hxy
+
+theorem holderWith_parabolic_const_time
+    {V F : Type*} [PseudoMetricSpace V] [PseudoMetricSpace F]
+    {alpha K : NNReal} (f : V → F) (hf : HolderWith K alpha f)
+    (J : Set Real) :
+    HolderWith K alpha
+      ((parabolicCylinder J Set.univ).restrict (fun p => f p.space)) := by
+  have hsnd : LipschitzWith 1 (fun p : ParabolicPoint V => p.space) :=
+    LipschitzWith.prod_snd
+  have hfull := hf.comp hsnd.holderWith
+  have hfull' : HolderWith K alpha
+      (fun p : ParabolicPoint V => f p.space) := by
+    simpa only [NNReal.one_rpow, mul_one, Function.comp_apply, one_mul] using hfull
+  exact (hfull'.holderOnWith (parabolicCylinder J Set.univ)).holderWith
 
 section Parabolic
 
@@ -427,6 +482,25 @@ theorem parabolicTimeDerivative_holderWith_restrict {alpha C : NNReal}
     HolderWith C alpha (Q.restrict (parabolicTimeDerivative u)) :=
   holderWith_restrict_of_eHolderSeminormOn_le
     ((parabolicTimeHolderSeminorm_le alpha Q u).trans h)
+
+theorem eContDiffHolderGaugeOn_slice_le
+    {alpha C : NNReal} {J : Set Real} {u : Real → V → F}
+    {t : Real} (ht : t ∈ J)
+    (h : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J Set.univ) u ≤ C) :
+    eContDiffHolderGaugeOn 2 alpha Set.univ (u t) ≤
+      (∑ _j ∈ Finset.range 3, (C : ENNReal)) + C := by
+  apply eContDiffHolderGaugeOn_le (fun _ => C) C
+  · intro j hj x hx
+    have hp : parabolicPoint t x ∈ parabolicCylinder J (Set.univ : Set V) :=
+      ⟨ht, Set.mem_univ x⟩
+    exact parabolicSpatialJet_norm_le h hj hp
+  · have hpar := parabolicSpatialJet_holderWith_restrict h
+    have hslice := holderWith_slice_of_parabolicCylinder
+      (f := fun q x => parabolicSpatialJet 2 u (parabolicPoint q x)) hpar ht
+    have hslice' := (hslice.holderOnWith (Set.univ : Set V)).holderWith
+    simpa only [parabolicSpatialJet, parabolicPoint_time,
+      parabolicPoint_space] using hslice'
 
 end Parabolic
 

@@ -20,6 +20,10 @@ def heatPotentialSchauderConst
     (Real.toNNReal (T * (B : Real)))
     (Real.toNNReal (2 * (B : Real) * heatC1 V * Real.sqrt T)) T).toNNReal
 
+def heatDuhConstSchauderConst
+    (alpha K B : NNReal) (T : Real) : NNReal :=
+  4 * heatPotentialSchauderConst (V := V) alpha K B K T
+
 omit [Nontrivial V] in
 theorem coe_heatPotentialSchauderConst
     (alpha K B Csource : NNReal) (T : Real) :
@@ -184,6 +188,27 @@ theorem heatDuh_schauder_estimate_of_parabolic_holder
     (fun t ht z =>
       heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
         halpha0 ht f hsource z)
+
+theorem heatDuh_const_schauder_estimate
+    {alpha K B : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S T : Real} (hT : 0 < T) (hTS : T < S)
+    (f : BoundedContinuousFunction V F)
+    (hbound : ‖f‖ ≤ B) (hholder : HolderWith K alpha f) :
+    eContDiffHolderGaugeOn 2 alpha Set.univ
+      (heatDuh T (fun _ => f)) ≤
+      heatDuhConstSchauderConst (V := V) alpha K B T := by
+  have hpar := heatDuh_schauder_estimate_of_parabolic_holder
+    halpha0 halpha1 hT.le hTS (fun _ => f)
+    (fun _ _ => hbound)
+    (holderWith_parabolic_const_time f hholder (Icc (0 : Real) S))
+  have hslice := eContDiffHolderGaugeOn_slice_le
+    (t := T) (J := Ioc (0 : Real) T) ⟨hT, le_rfl⟩ hpar
+  unfold heatDuhConstSchauderConst
+  convert hslice using 1
+  simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
+    ENNReal.coe_mul, ENNReal.coe_ofNat]
+  ring
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
