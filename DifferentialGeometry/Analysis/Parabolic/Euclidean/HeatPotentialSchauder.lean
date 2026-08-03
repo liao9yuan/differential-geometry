@@ -1275,6 +1275,42 @@ theorem heatD2Duh_time_add_sub_norm_le_of_holder
       halpha0 halpha1 htau hdpos (lt_of_not_ge htd)
       f hf v w x hmeasplus hmeasnow
 
+theorem heatD2Duh_time_norm_sub_le_of_holder
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    {s t : Real} (hs : 0 < s) (ht : 0 < t)
+    (f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) (max s t), HolderWith K alpha (f r))
+    (v w x : V)
+    (hmeass : AEStronglyMeasurable
+      (fun r : Real ↦ heatD2Conv (s - r) v w (f r) x)
+      (volume.restrict (uIoc (0 : Real) s)))
+    (hmeast : AEStronglyMeasurable
+      (fun r : Real ↦ heatD2Conv (t - r) v w (f r) x)
+      (volume.restrict (uIoc (0 : Real) t))) :
+    ‖heatD2Duh t v w f x - heatD2Duh s v w f x‖ ≤
+      d2DuhTimeHolderConst alpha v w K *
+        |t - s| ^ ((alpha : Real) / 2) := by
+  rcases le_total s t with hst | hts
+  · have heq : s + (t - s) = t := by ring
+    have hf' : ∀ r ∈ Icc (0 : Real) (s + (t - s)),
+        HolderWith K alpha (f r) := by
+      rw [heq]
+      simpa only [max_eq_right hst] using hf
+    have h := heatD2Duh_time_add_sub_norm_le_of_holder
+      halpha0 halpha1 hs (sub_nonneg.mpr hst) f hf' v w x (by
+        simpa only [heq] using hmeast) hmeass
+    simpa only [heq, abs_of_nonneg (sub_nonneg.mpr hst)] using h
+  · have heq : t + (s - t) = s := by ring
+    have hf' : ∀ r ∈ Icc (0 : Real) (t + (s - t)),
+        HolderWith K alpha (f r) := by
+      rw [heq]
+      simpa only [max_eq_left hts] using hf
+    have h := heatD2Duh_time_add_sub_norm_le_of_holder
+      halpha0 halpha1 ht (sub_nonneg.mpr hts) f hf' v w x (by
+        simpa only [heq] using hmeass) hmeast
+    simpa only [heq, norm_sub_rev,
+      abs_of_nonpos (sub_nonpos.mpr hts), neg_sub] using h
+
 end Convolution
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
