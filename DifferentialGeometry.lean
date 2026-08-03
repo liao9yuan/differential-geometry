@@ -829,6 +829,7 @@ import DifferentialGeometry.Analysis.Schauder.Interpolation
 import DifferentialGeometry.Analysis.Schauder.Localization
 import DifferentialGeometry.Analysis.Schauder.LowerOrder
 import DifferentialGeometry.Analysis.Schauder.Scaling
+import DifferentialGeometry.Analysis.Schauder.VariableBallInterior
 import DifferentialGeometry.Analysis.Schauder.VariableCoefficient
 import DifferentialGeometry.Analysis.Schauder.VariableCutoff
 import DifferentialGeometry.Analysis.Schauder.VariableInterior

@@ -1,0 +1,154 @@
+import DifferentialGeometry.Analysis.Schauder.BallCutoff
+import DifferentialGeometry.Analysis.Schauder.VariableInterior
+
+noncomputable section
+
+open Real Set
+open scoped BoundedContinuousFunction NNReal RealInnerProductSpace
+
+namespace DifferentialGeometry.Analysis.Schauder
+
+private abbrev Euc (n : Type*) := EuclideanSpace Real n
+
+variable {n F : Type*} [Fintype n] [DecidableEq n] [Nonempty n]
+  [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+
+def variableBallCutoffSourceSupConst
+    (center : Euc n) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (a : n → n → BoundedContinuousFunction (Euc n) Real)
+    (f u : BoundedContinuousFunction (Euc n) F)
+    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F)) : NNReal :=
+  variableCutoffSourceSupConst (fun i j ↦ ‖a i j‖₊)
+    ‖ballCutoffFDerivBcf center hr hrR‖₊ ‖du‖₊
+    (Real.toNNReal (ballCutoffFDeriv2Bound r R)) ‖u‖₊
+    (ballCutoffBcf center hr hrR) f
+
+def variableBallCutoffSourceHolderConst
+    (center : Euc n) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (a : n → n → BoundedContinuousFunction (Euc n) Real)
+    (Ka : n → n → NNReal) (Kf Kdu Kd2chi Ku : NNReal)
+    (f u : BoundedContinuousFunction (Euc n) F)
+    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F)) : NNReal :=
+  variableCutoffSourceHolderConst (fun i j ↦ ‖a i j‖₊) Ka
+    (ballCutoffHolderConst r R) Kf
+    (ballCutoffFDerivHolderConst r R) Kdu Kd2chi Ku
+    ‖ballCutoffFDerivBcf center hr hrR‖₊ ‖du‖₊
+    (Real.toNNReal (ballCutoffFDeriv2Bound r R)) ‖u‖₊
+    (ballCutoffBcf center hr hrR) f
+
+def variableBallInteriorSchauderConst
+    (center : Euc n) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (a : n → n → BoundedContinuousFunction (Euc n) Real) (x0 : Euc n)
+    (hA : Matrix.PosDef (fun i j ↦ a i j x0))
+    (alpha : NNReal) (Ka omega : n → n → NNReal)
+    (Kf Kdu Kd2chi Ku : NNReal)
+    (f u : BoundedContinuousFunction (Euc n) F)
+    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F)) : NNReal :=
+  (spdLaplacianSchauderConst (fun i j ↦ a i j x0) hA alpha
+      (variableBallCutoffSourceHolderConst center hr hrR
+        a Ka Kf Kdu Kd2chi Ku f u du)
+      (variableBallCutoffSourceSupConst center hr hrR a f u du)
+      (cutoffValue (ballCutoffBcf center hr hrR) u)) /
+    (1 - spdLaplacianSchauderDefectConst
+      (fun i j ↦ a i j x0) hA alpha
+        (∑ i, ∑ j, (omega i j + Ka i j))
+        (∑ i, ∑ j, omega i j))
+
+theorem variable_coefficient_ball_interior_schauder_estimate_of_cutoffJet2_control
+    {center : Euc n} {rho r R : Real}
+    (hrho : 0 ≤ rho) (hrhor : rho < r) (hrR : r < R)
+    {alpha Kf Kdu Kd2chi Ku Kd2w Md2w : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (a : n → n → BoundedContinuousFunction (Euc n) Real) (x0 : Euc n)
+    (hA : Matrix.PosDef (fun i j ↦ a i j x0))
+    (f u : BoundedContinuousFunction (Euc n) F)
+    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (hu : ∀ x, HasFDerivAt (u : Euc n → F) (du x) x)
+    (hdu : ∀ x,
+      HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x)
+    (hsource : ∀ x ∈ Metric.ball center R,
+      variableMatrixLap a d2u x = f x)
+    (Ka omega : n → n → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha (a i j : Euc n → Real))
+    (homega : ∀ i j x, ‖a i j x0 - a i j x‖ ≤ omega i j)
+    (hfHolder : HolderWith Kf alpha (f : Euc n → F))
+    (hduHolder : HolderWith Kdu alpha
+      (du : Euc n → Euc n →L[Real] F))
+    (hd2chiHolder : HolderWith Kd2chi alpha
+      (ballCutoffFDeriv2Bcf center (hrho.trans hrhor.le) hrR :
+        Euc n → Euc n →L[Real] Euc n →L[Real] Real))
+    (huHolder : HolderWith Ku alpha (u : Euc n → F))
+    (hd2wNorm : ∀ x,
+      ‖cutoffJet2
+        (ballCutoffBcf center (hrho.trans hrhor.le) hrR)
+        (ballCutoffFDerivBcf center (hrho.trans hrhor.le) hrR)
+        (ballCutoffFDeriv2Bcf center (hrho.trans hrhor.le) hrR)
+        u du d2u x‖ ≤ Md2w)
+    (hd2wHolder : HolderWith Kd2w alpha
+      (cutoffJet2
+        (ballCutoffBcf center (hrho.trans hrhor.le) hrR)
+        (ballCutoffFDerivBcf center (hrho.trans hrhor.le) hrR)
+        (ballCutoffFDeriv2Bcf center (hrho.trans hrhor.le) hrR)
+        u du d2u : Euc n → Euc n →L[Real] Euc n →L[Real] F))
+    (hsmall : spdLaplacianSchauderDefectConst
+      (fun i j ↦ a i j x0) hA alpha
+        (∑ i, ∑ j, (omega i j + Ka i j))
+        (∑ i, ∑ j, omega i j) < 1) :
+    eContDiffHolderGaugeOn 2 alpha (Metric.closedBall center rho)
+        (u : Euc n → F) ≤
+      variableBallInteriorSchauderConst center (hrho.trans hrhor.le) hrR
+        a x0 hA alpha Ka omega Kf Kdu Kd2chi Ku f u du := by
+  let hr : 0 ≤ r := hrho.trans hrhor.le
+  let chi := ballCutoffBcf center hr hrR
+  let dchi := ballCutoffFDerivBcf center hr hrR
+  let d2chi := ballCutoffFDeriv2Bcf center hr hrR
+  have hsU : Metric.closedBall center rho ⊆ Metric.ball center r := by
+    intro x hx
+    exact Metric.mem_ball.mpr ((Metric.mem_closedBall.mp hx).trans_lt hrhor)
+  have hchiOne : ∀ x ∈ Metric.ball center r, chi x = 1 := by
+    intro x hx
+    exact ballCutoff_eq_one_of_mem_closedBall hr hrR
+      (Metric.ball_subset_closedBall hx)
+  have hchi : ∀ x, HasFDerivAt (chi : Euc n → Real) (dchi x) x :=
+    hasFDerivAt_ballCutoff center r R
+  have hdchi : ∀ x,
+      HasFDerivAt (dchi : Euc n → Euc n →L[Real] Real) (d2chi x) x :=
+    hasFDerivAt_ballCutoffFDeriv center r R
+  have hsource' : ∀ x, chi x ≠ 0 → variableMatrixLap a d2u x = f x := by
+    intro x hx
+    apply hsource x
+    by_contra hxball
+    exact hx (ballCutoff_eq_zero_of_not_mem_ball hr hrR hxball)
+  apply variable_coefficient_interior_schauder_estimate_of_cutoffJet2_control
+    (s := Metric.closedBall center rho) (U := Metric.ball center r)
+    (Kchi := ballCutoffHolderConst r R)
+    (Kdchi := ballCutoffFDerivHolderConst r R)
+    (Mdchi := ‖dchi‖₊) (Mdu := ‖du‖₊)
+    (Md2chi := Real.toNNReal (ballCutoffFDeriv2Bound r R)) (Mu := ‖u‖₊)
+    Metric.isOpen_ball hsU halpha0 halpha1 a x0 hA chi dchi d2chi
+    f u du d2u hchiOne hchi hdchi hu hdu hsource'
+    (fun i j ↦ ‖a i j‖₊) Ka omega ha homega
+  · exact fun i j x ↦ by simpa using (a i j).norm_coe_le_norm x
+  · exact ballCutoff_holderWith hr hrR halpha0.le halpha1.le
+  · exact hfHolder
+  · exact ballCutoffFDeriv_holderWith hr hrR halpha0.le halpha1.le
+  · exact hduHolder
+  · exact hd2chiHolder
+  · exact huHolder
+  · exact fun x ↦ by simpa using dchi.norm_coe_le_norm x
+  · exact fun x ↦ by simpa using du.norm_coe_le_norm x
+  · intro x
+    change ‖ballCutoffFDeriv2 center r R x‖ ≤
+      (Real.toNNReal (ballCutoffFDeriv2Bound r R) : Real)
+    rw [Real.coe_toNNReal _ (ballCutoffFDeriv2Bound_nonneg hr hrR)]
+    exact norm_ballCutoffFDeriv2_le hr hrR x
+  · exact fun x ↦ by simpa using u.norm_coe_le_norm x
+  · exact hd2wNorm
+  · exact hd2wHolder
+  · exact hsmall
+
+end DifferentialGeometry.Analysis.Schauder
+
+end
