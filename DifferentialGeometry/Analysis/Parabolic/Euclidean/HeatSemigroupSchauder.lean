@@ -16,6 +16,20 @@ variable {V F : Type*}
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
   [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
 
+def parabolicLaplacian (u : Real → V → F) : ParabolicPoint V → F :=
+  fun p ↦ lapEval (hessianCurryEquiv V F (parabolicSpatialJet 2 u p))
+
+omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
+  [CompleteSpace F] in
+theorem parabolicLaplacian_add
+    (u v : Real → V → F) (p : ParabolicPoint V)
+    (hu : ContDiffAt Real 2 (u p.time) p.space)
+    (hv : ContDiffAt Real 2 (v p.time) p.space) :
+    parabolicLaplacian (fun t x ↦ u t x + v t x) p =
+      parabolicLaplacian u p + parabolicLaplacian v p := by
+  unfold parabolicLaplacian
+  rw [parabolicSpatialJet_add 2 u v p hu hv, map_add, map_add]
+
 omit [CompleteSpace F] in
 theorem heatD3Conv_int_of_bounded {t : Real} (ht : 0 < t)
     (h v w : V) (u : BoundedContinuousFunction V F) (x : V) :
@@ -760,6 +774,25 @@ theorem heatSup_hessianCurryEquiv_iteratedFDeriv_two
   rw [hfd, heatSup_fderiv_eq ht du d2u hdu x]
   rfl
 
+theorem heatSup_parabolicLaplacian_eq
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu : ∀ x : V, HasFDerivAt (u : V → F) (du x) x)
+    (hdu : ∀ x : V,
+      HasFDerivAt (du : V → V →L[Real] F) (d2u x) x)
+    (p : ParabolicPoint V) (ht : 0 < p.time) :
+    parabolicLaplacian (fun t x ↦ heatSup t u x) p =
+      heatSup p.time (coreLap d2u) p.space := by
+  unfold parabolicLaplacian parabolicSpatialJet
+  rw [heatSup_hessianCurryEquiv_iteratedFDeriv_two ht u du d2u hu hdu]
+  unfold heatSup supKernel
+  rw [← (lapEval (V := V) (F := F)).integral_comp_comm
+    (supKernel_int (heatKernel_int ht) d2u p.space)]
+  apply integral_congr_ae
+  filter_upwards with y
+  simp only [map_smul, coreLap, BoundedContinuousFunction.coe_mk]
+
 omit [CompleteSpace F] in
 theorem heatSup_parabolicTimeDerivative_eq
     (u : BoundedContinuousFunction V F)
@@ -774,6 +807,106 @@ theorem heatSup_parabolicTimeDerivative_eq
   unfold parabolicTimeDerivative
   rw [(heatSup_time ht u du d2u hu hdu p.space).hasFDerivAt.fderiv]
   simp
+
+theorem heatSup_parabolicTimeDerivative_eq_laplacian
+    (u : BoundedContinuousFunction V F)
+    (du : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu : ∀ x : V, HasFDerivAt (u : V → F) (du x) x)
+    (hdu : ∀ x : V,
+      HasFDerivAt (du : V → V →L[Real] F) (d2u x) x)
+    (p : ParabolicPoint V) (ht : 0 < p.time) :
+    parabolicTimeDerivative (fun t x ↦ heatSup t u x) p =
+      parabolicLaplacian (fun t x ↦ heatSup t u x) p := by
+  rw [heatSup_parabolicTimeDerivative_eq u du d2u hu hdu p ht,
+    heatSup_parabolicLaplacian_eq u du d2u hu hdu p ht]
+
+theorem heatDuh_parabolicLaplacian_eq_heatLapDuh
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
+    (p : ParabolicPoint V) (ht : 0 < p.time)
+    (f : Real → BoundedContinuousFunction V F)
+    (hbound : ∀ s ∈ Icc (0 : Real) p.time, ‖f s‖ ≤ B)
+    (hf : ∀ s ∈ Icc (0 : Real) p.time, HolderWith K alpha (f s))
+    (hmeas0 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSup (p.time - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) p.time)))
+    (hmeas1 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSupGradient (p.time - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) p.time)))
+    (hmeas2 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSupHessian (p.time - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) p.time))) :
+    parabolicLaplacian (fun t x ↦ heatDuh t f x) p =
+      heatLapDuh p.time (fun s ↦ f s) p.space := by
+  unfold parabolicLaplacian parabolicSpatialJet
+  rw [heatDuh_hessianCurryEquiv_iteratedFDeriv_two
+    halpha0 halpha1 ht f hbound hf hmeas0 hmeas1 hmeas2]
+  rw [lapEval_apply]
+  unfold heatLapDuh
+  apply Finset.sum_congr rfl
+  intro i _hi
+  exact heatDuhHessian_apply halpha0 halpha1 ht f hbound hf hmeas1 hmeas2
+    p.space ((stdOrthonormalBasis Real V) i)
+      ((stdOrthonormalBasis Real V) i)
+
+theorem heatDuh_parabolicTimeDerivative_eq_source_add_laplacian
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S : Real} (p : ParabolicPoint V) (hp : p.time ∈ Ioo (0 : Real) S)
+    (f : Real → BoundedContinuousFunction V F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun q ↦ f q.time q.space))) :
+    parabolicTimeDerivative (fun t x ↦ heatDuh t f x) p =
+      f p.time p.space + parabolicLaplacian (fun t x ↦ heatDuh t f x) p := by
+  have htIoc : p.time ∈ Ioc (0 : Real) S := ⟨hp.1, hp.2.le⟩
+  have hf : ∀ r ∈ Icc (0 : Real) S, HolderWith K alpha (f r) :=
+    fun r hr ↦ holderWith_slice_of_parabolicCylinder
+      (f := fun s x ↦ f s x) hsource hr
+  have hsource' : HolderWith K alpha
+      ((parabolicCylinder (Ioc (0 : Real) S) Set.univ).restrict
+        (fun q ↦ f q.time q.space)) := by
+    rw [HolderWith.restrict_iff] at hsource ⊢
+    exact hsource.mono fun q hq ↦ ⟨⟨hq.1.1.le, hq.1.2⟩, hq.2⟩
+  have hbound' : ∀ r ∈ Icc (0 : Real) p.time, ‖f r‖ ≤ B := by
+    intro r hr
+    exact hbound r ⟨hr.1, hr.2.trans hp.2.le⟩
+  have hf' : ∀ r ∈ Icc (0 : Real) p.time,
+      HolderWith K alpha (f r) := by
+    intro r hr
+    exact hf r ⟨hr.1, hr.2.trans hp.2.le⟩
+  have hmeas0 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSup (p.time - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) p.time)) :=
+    fun z ↦ heatSup_timeSource_aestronglyMeasurable_of_parabolic_holder
+      halpha0 htIoc f hsource z
+  have hmeas1 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSupGradient (p.time - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) p.time)) :=
+    fun z ↦ heatSupGradient_timeSource_aestronglyMeasurable_of_parabolic_holder
+      halpha0 htIoc f hsource z
+  have hmeas2All : ∀ q ∈ Ioc (0 : Real) S, ∀ z : V,
+      AEStronglyMeasurable
+        (fun s : Real ↦ heatSupHessian (q - s) (f s) z)
+        (volume.restrict (uIoc (0 : Real) q)) :=
+    fun q hq z ↦
+      heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
+        halpha0 hq f hsource z
+  have hmeas2 : ∀ z : V, AEStronglyMeasurable
+      (fun s : Real ↦ heatSupHessian (p.time - s) (f s) z)
+      (volume.restrict (uIoc (0 : Real) p.time)) :=
+    hmeas2All p.time htIoc
+  have htime := heatDuh_time halpha0 halpha1 hp f hf hsource'
+    hmeas2All p.space
+  have htimeEq : parabolicTimeDerivative (fun t x ↦ heatDuh t f x) p =
+      f p.time p.space + heatLapDuh p.time (fun s ↦ f s) p.space := by
+    unfold parabolicTimeDerivative
+    rw [htime.hasFDerivAt.fderiv]
+    simp only [heatDuhTimeCandidateField, heatDuhTimeCandidate,
+      parabolicPoint_time, parabolicPoint_space,
+      ContinuousLinearMap.toSpanSingleton_apply, one_smul]
+  rw [htimeEq, heatDuh_parabolicLaplacian_eq_heatLapDuh
+    halpha0 halpha1.le p hp.1 f hbound' hf' hmeas0 hmeas1 hmeas2]
 
 def heatSupParabolicSchauderConst
     (alpha B0 B1 B2 K2 : NNReal) : NNReal :=
@@ -895,6 +1028,68 @@ def heatSolution
     (u0 : BoundedContinuousFunction V F)
     (f : Real → BoundedContinuousFunction V F) : Real → V → F :=
   fun t x ↦ heatSup t u0 x + heatDuh t f x
+
+theorem heatSolution_parabolicTimeDerivative_eq_source_add_laplacian
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S : Real} (p : ParabolicPoint V) (hp : p.time ∈ Ioo (0 : Real) S)
+    (u0 : BoundedContinuousFunction V F)
+    (du0 : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u0 : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu0 : ∀ x : V, HasFDerivAt (u0 : V → F) (du0 x) x)
+    (hdu0 : ∀ x : V,
+      HasFDerivAt (du0 : V → V →L[Real] F) (d2u0 x) x)
+    (f : Real → BoundedContinuousFunction V F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun q ↦ f q.time q.space))) :
+    parabolicTimeDerivative (heatSolution u0 f) p =
+      f p.time p.space + parabolicLaplacian (heatSolution u0 f) p := by
+  let uh : Real → V → F := fun t x ↦ heatSup t u0 x
+  let uf : Real → V → F := fun t x ↦ heatDuh t f x
+  have hpQ : p ∈ parabolicCylinder (Ioc (0 : Real) p.time) Set.univ :=
+    ⟨⟨hp.1, le_rfl⟩, Set.mem_univ p.space⟩
+  have huhSpatial : ContDiffAt Real 2 (uh p.time) p.space :=
+    (heatSup_contDiff_two hp.1 u0).contDiffAt
+  have huhTime : DifferentiableAt Real (fun t ↦ uh t p.space) p.time :=
+    (heatSup_time hp.1 u0 du0 d2u0 hu0 hdu0 p.space).differentiableAt
+  have huf := (heatDuh_isParabolicC2HolderOn
+    halpha0 halpha1 hp.1.le hp.2 f hbound hsource).1
+  have hufSpatial : ContDiffAt Real 2 (uf p.time) p.space :=
+    huf.1 p hpQ
+  have hufTime : DifferentiableAt Real (fun t ↦ uf t p.space) p.time :=
+    huf.2 p hpQ
+  change parabolicTimeDerivative (fun t x ↦ uh t x + uf t x) p =
+    f p.time p.space +
+      parabolicLaplacian (fun t x ↦ uh t x + uf t x) p
+  rw [parabolicTimeDerivative_add uh uf p huhTime hufTime,
+    parabolicLaplacian_add uh uf p huhSpatial hufSpatial,
+    heatSup_parabolicTimeDerivative_eq_laplacian
+      u0 du0 d2u0 hu0 hdu0 p hp.1,
+    heatDuh_parabolicTimeDerivative_eq_source_add_laplacian
+      halpha0 halpha1 p hp f hbound hsource]
+  abel
+
+theorem heatSolution_parabolicTimeDerivative_sub_laplacian
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S : Real} (p : ParabolicPoint V) (hp : p.time ∈ Ioo (0 : Real) S)
+    (u0 : BoundedContinuousFunction V F)
+    (du0 : BoundedContinuousFunction V (V →L[Real] F))
+    (d2u0 : BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu0 : ∀ x : V, HasFDerivAt (u0 : V → F) (du0 x) x)
+    (hdu0 : ∀ x : V,
+      HasFDerivAt (du0 : V → V →L[Real] F) (d2u0 x) x)
+    (f : Real → BoundedContinuousFunction V F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun q ↦ f q.time q.space))) :
+    parabolicTimeDerivative (heatSolution u0 f) p -
+        parabolicLaplacian (heatSolution u0 f) p =
+      f p.time p.space := by
+  rw [heatSolution_parabolicTimeDerivative_eq_source_add_laplacian
+    halpha0 halpha1 p hp u0 du0 d2u0 hu0 hdu0 f hbound hsource]
+  abel
 
 def heatSolutionSchauderConst
     (alpha B0 B1 B2 K2 Kf Bf : NNReal) (T : Real) : NNReal :=

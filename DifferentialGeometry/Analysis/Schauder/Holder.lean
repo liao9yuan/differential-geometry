@@ -635,6 +635,29 @@ def IsParabolicC2On
   (∀ p ∈ Q, ContDiffAt Real 2 (u p.time) p.space) ∧
     ∀ p ∈ Q, DifferentiableAt Real (fun t ↦ u t p.space) p.time
 
+theorem parabolicSpatialJet_add
+    (j : Nat) (u v : Real → V → F) (p : ParabolicPoint V)
+    (hu : ContDiffAt Real j (u p.time) p.space)
+    (hv : ContDiffAt Real j (v p.time) p.space) :
+    parabolicSpatialJet j (fun t x ↦ u t x + v t x) p =
+      parabolicSpatialJet j u p + parabolicSpatialJet j v p := by
+  unfold parabolicSpatialJet
+  change iteratedFDeriv Real j (u p.time + v p.time) p.space = _
+  rw [iteratedFDeriv_add_apply hu hv]
+
+omit [NormedAddCommGroup V] [NormedSpace Real V] in
+theorem parabolicTimeDerivative_add
+    (u v : Real → V → F) (p : ParabolicPoint V)
+    (hu : DifferentiableAt Real (fun t ↦ u t p.space) p.time)
+    (hv : DifferentiableAt Real (fun t ↦ v t p.space) p.time) :
+    parabolicTimeDerivative (fun t x ↦ u t x + v t x) p =
+      parabolicTimeDerivative u p + parabolicTimeDerivative v p := by
+  unfold parabolicTimeDerivative
+  change (fderiv Real
+      ((fun t ↦ u t p.space) + fun t ↦ v t p.space) p.time) 1 = _
+  rw [fderiv_add hu hv]
+  exact ContinuousLinearMap.add_apply _ _ _
+
 def eParabolicC2HolderGaugeOn (alpha : NNReal)
     (Q : Set (ParabolicPoint V)) (u : Real → V → F) : ENNReal :=
   (∑ j ∈ Finset.range 3, eSupNormOn Q (parabolicSpatialJet j u)) +
