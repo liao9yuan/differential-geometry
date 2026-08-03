@@ -11,6 +11,14 @@ def parabolicDilation {V : Type*} [SMul Real V]
     (r : NNReal) (p : ParabolicPoint V) : ParabolicPoint V :=
   parabolicPoint ((r : Real) ^ 2 * p.time) ((r : Real) • p.space)
 
+def parabolicTranslation {V : Type*} [Add V]
+    (p0 p : ParabolicPoint V) : ParabolicPoint V :=
+  parabolicPoint (p0.time + p.time) (p0.space + p.space)
+
+def parabolicDilationAt {V : Type*} [Add V] [SMul Real V]
+    (r : NNReal) (p0 p : ParabolicPoint V) : ParabolicPoint V :=
+  parabolicTranslation p0 (parabolicDilation r p)
+
 @[simp]
 theorem parabolicDilation_time {V : Type*} [SMul Real V]
     (r : NNReal) (p : ParabolicPoint V) :
@@ -20,6 +28,28 @@ theorem parabolicDilation_time {V : Type*} [SMul Real V]
 theorem parabolicDilation_space {V : Type*} [SMul Real V]
     (r : NNReal) (p : ParabolicPoint V) :
     (parabolicDilation r p).space = (r : Real) • p.space := rfl
+
+@[simp]
+theorem parabolicTranslation_time {V : Type*} [Add V]
+    (p0 p : ParabolicPoint V) :
+    (parabolicTranslation p0 p).time = p0.time + p.time := rfl
+
+@[simp]
+theorem parabolicTranslation_space {V : Type*} [Add V]
+    (p0 p : ParabolicPoint V) :
+    (parabolicTranslation p0 p).space = p0.space + p.space := rfl
+
+@[simp]
+theorem parabolicDilationAt_time {V : Type*} [Add V] [SMul Real V]
+    (r : NNReal) (p0 p : ParabolicPoint V) :
+    (parabolicDilationAt r p0 p).time =
+      p0.time + (r : Real) ^ 2 * p.time := rfl
+
+@[simp]
+theorem parabolicDilationAt_space {V : Type*} [Add V] [SMul Real V]
+    (r : NNReal) (p0 p : ParabolicPoint V) :
+    (parabolicDilationAt r p0 p).space =
+      p0.space + (r : Real) • p.space := rfl
 
 @[simp]
 theorem parabolicDilation_zero {V : Type*} [NormedAddCommGroup V]
@@ -63,9 +93,41 @@ theorem dist_parabolicDilation {V : Type*} [NormedAddCommGroup V]
   rw [htime, Real.norm_eq_abs, abs_of_nonneg r.coe_nonneg,
     ← mul_max_of_nonneg _ _ r.coe_nonneg]
 
+theorem dist_parabolicTranslation {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] (p0 p q : ParabolicPoint V) :
+    dist (parabolicTranslation p0 p) (parabolicTranslation p0 q) =
+      dist p q := by
+  rcases p0 with ⟨⟨t0⟩, x0⟩
+  rcases p with ⟨⟨t⟩, x⟩
+  rcases q with ⟨⟨s⟩, y⟩
+  simp only [parabolicTranslation, dist_parabolicPoint]
+  rw [add_sub_add_left_eq_sub, dist_add_left]
+  rfl
+
+theorem dist_parabolicDilationAt {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] (r : NNReal) (p0 p q : ParabolicPoint V) :
+    dist (parabolicDilationAt r p0 p) (parabolicDilationAt r p0 q) =
+      (r : Real) * dist p q := by
+  change dist (parabolicTranslation p0 (parabolicDilation r p))
+    (parabolicTranslation p0 (parabolicDilation r q)) = _
+  rw [dist_parabolicTranslation,
+    dist_parabolicDilation]
+
+@[simp]
+theorem parabolicDilationAt_origin {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] (r : NNReal) (p0 : ParabolicPoint V) :
+    parabolicDilationAt r p0 (parabolicPoint 0 0) = p0 := by
+  rw [← parabolicPoint_time_space p0]
+  simp [parabolicDilationAt, parabolicTranslation, parabolicDilation]
+
 def parabolicPreimage {V : Type*} [SMul Real V]
     (r : NNReal) (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
   parabolicDilation r ⁻¹' Q
+
+def parabolicPreimageAt {V : Type*} [Add V] [SMul Real V]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
+  parabolicDilationAt r p0 ⁻¹' Q
 
 def parabolicRescale {V F : Type*} [SMul Real V]
     (r : NNReal) (u : Real → V → F) : Real → V → F :=
@@ -80,6 +142,12 @@ theorem parabolicRescale_apply {V F : Type*} [SMul Real V]
 theorem parabolicDilation_mapsTo_preimage {V : Type*} [SMul Real V]
     (r : NNReal) (Q : Set (ParabolicPoint V)) :
     MapsTo (parabolicDilation r) (parabolicPreimage r Q) Q :=
+  fun _ hp => hp
+
+theorem parabolicDilationAt_mapsTo_preimage
+    {V : Type*} [Add V] [SMul Real V]
+    (r : NNReal) (p0 : ParabolicPoint V) (Q : Set (ParabolicPoint V)) :
+    MapsTo (parabolicDilationAt r p0) (parabolicPreimageAt r p0 Q) Q :=
   fun _ hp => hp
 
 theorem parabolicHolder_dilation
@@ -115,6 +183,107 @@ theorem parabolicHolder_dilation
       rw [ENNReal.ofReal_mul r.coe_nonneg, ENNReal.ofReal_coe_nnreal,
         ENNReal.mul_rpow_of_nonneg _ _ alpha.coe_nonneg]
       ring
+
+theorem parabolicHolder_dilationAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [MetricSpace F] {alpha C : NNReal} {Q : Set (ParabolicPoint V)}
+    {f : ParabolicPoint V → F} (r : NNReal) (p0 : ParabolicPoint V)
+    (hf : HolderWith C alpha (Q.restrict f)) :
+    HolderWith (C * r ^ (alpha : Real)) alpha
+      ((parabolicPreimageAt r p0 Q).restrict
+        (f ∘ parabolicDilationAt r p0)) := by
+  intro p q
+  change edist (f (parabolicDilationAt r p0 p.1))
+      (f (parabolicDilationAt r p0 q.1)) ≤ _
+  have hpQ : parabolicDilationAt r p0 p.1 ∈ Q := p.2
+  have hqQ : parabolicDilationAt r p0 q.1 ∈ Q := q.2
+  have hdist := hf.edist_le
+    (x := ⟨parabolicDilationAt r p0 p.1, hpQ⟩)
+    (y := ⟨parabolicDilationAt r p0 q.1, hqQ⟩)
+  change edist (f (parabolicDilationAt r p0 p.1))
+      (f (parabolicDilationAt r p0 q.1)) ≤
+    (C : ENNReal) * edist (parabolicDilationAt r p0 p.1)
+      (parabolicDilationAt r p0 q.1) ^ (alpha : Real) at hdist
+  rw [edist_dist, edist_dist, dist_parabolicDilationAt r] at hdist
+  rw [edist_dist, edist_dist]
+  change ENNReal.ofReal (dist (f (parabolicDilationAt r p0 p.1))
+      (f (parabolicDilationAt r p0 q.1))) ≤
+    (C * r ^ (alpha : Real) : NNReal) *
+      ENNReal.ofReal (dist p.1 q.1) ^ (alpha : Real)
+  simp only [ENNReal.coe_mul, ENNReal.coe_rpow_of_nonneg _ alpha.coe_nonneg]
+  calc
+    ENNReal.ofReal (dist (f (parabolicDilationAt r p0 p.1))
+      (f (parabolicDilationAt r p0 q.1))) ≤
+        C * ENNReal.ofReal ((r : Real) * dist p.1 q.1) ^
+          (alpha : Real) := hdist
+    _ = (C * (r : ENNReal) ^ (alpha : Real)) *
+        ENNReal.ofReal (dist p.1 q.1) ^ (alpha : Real) := by
+      rw [ENNReal.ofReal_mul r.coe_nonneg, ENNReal.ofReal_coe_nnreal,
+        ENNReal.mul_rpow_of_nonneg _ _ alpha.coe_nonneg]
+      ring
+
+theorem parabolicDilationAt_mapsTo_ball
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (R : Real) (p0 : ParabolicPoint V) :
+    MapsTo (parabolicDilationAt r p0)
+      (Metric.ball (parabolicPoint 0 0) R)
+      (Metric.ball p0 ((r : Real) * R)) := by
+  intro p hp
+  rw [Metric.mem_ball]
+  have hcenter := parabolicDilationAt_origin r p0
+  calc
+    dist (parabolicDilationAt r p0 p) p0 =
+        dist (parabolicDilationAt r p0 p)
+          (parabolicDilationAt r p0 (parabolicPoint 0 0)) := by
+      rw [hcenter]
+    _ = (r : Real) * dist p (parabolicPoint 0 0) :=
+      dist_parabolicDilationAt r p0 p (parabolicPoint 0 0)
+    _ < (r : Real) * R :=
+      mul_lt_mul_of_pos_left (Metric.mem_ball.mp hp) hr
+
+theorem parabolicDilationAt_mapsTo_unitBall
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V) :
+    MapsTo (parabolicDilationAt r p0)
+      (Metric.ball (parabolicPoint 0 0) 1) (Metric.ball p0 r) := by
+  intro p hp
+  rw [Metric.mem_ball]
+  have hcenter := parabolicDilationAt_origin r p0
+  calc
+    dist (parabolicDilationAt r p0 p) p0 =
+        dist (parabolicDilationAt r p0 p)
+          (parabolicDilationAt r p0 (parabolicPoint 0 0)) := by
+      rw [hcenter]
+    _ = (r : Real) * dist p (parabolicPoint 0 0) :=
+      dist_parabolicDilationAt r p0 p (parabolicPoint 0 0)
+    _ < (r : Real) * 1 :=
+      mul_lt_mul_of_pos_left (Metric.mem_ball.mp hp) hr
+    _ = (r : Real) := by ring
+
+theorem parabolicHolder_dilationAt_ball
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [MetricSpace F] {alpha C : NNReal} (r : NNReal) (hr : 0 < r)
+    (R : Real) (p0 : ParabolicPoint V) {f : ParabolicPoint V → F}
+    (hf : HolderWith C alpha
+      ((Metric.ball p0 ((r : Real) * R)).restrict f)) :
+    HolderWith (C * r ^ (alpha : Real)) alpha
+      ((Metric.ball (parabolicPoint 0 0) R).restrict
+        (f ∘ parabolicDilationAt r p0)) := by
+  have hadapt := parabolicHolder_dilationAt r p0 hf
+  exact ((HolderWith.restrict_iff.mp hadapt).mono
+    (parabolicDilationAt_mapsTo_ball r hr R p0)).holderWith
+
+theorem parabolicHolder_dilationAt_unitBall
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [MetricSpace F] {alpha C : NNReal} (r : NNReal) (hr : 0 < r)
+    (p0 : ParabolicPoint V) {f : ParabolicPoint V → F}
+    (hf : HolderWith C alpha ((Metric.ball p0 r).restrict f)) :
+    HolderWith (C * r ^ (alpha : Real)) alpha
+      ((Metric.ball (parabolicPoint 0 0) 1).restrict
+        (f ∘ parabolicDilationAt r p0)) := by
+  have hadapt := parabolicHolder_dilationAt r p0 hf
+  exact ((HolderWith.restrict_iff.mp hadapt).mono
+    (parabolicDilationAt_mapsTo_unitBall r hr p0)).holderWith
 
 theorem parabolicSpatialJet_rescale
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]

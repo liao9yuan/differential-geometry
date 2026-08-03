@@ -66,6 +66,63 @@ def spdParabolicSchauderDefectConst
     (parabolicMatrixFreezeHolderConst Ka omega)
     (parabolicMatrixFreezeSupConst omega) T
 
+def parabolicMatrixCoefficientRescale
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real) :
+    n → n → ParabolicPoint (Euc n) → Real :=
+  fun i j p ↦ a i j (parabolicDilationAt r p0 p)
+
+omit [DecidableEq n] [Nonempty n] in
+@[simp]
+theorem parabolicMatrixCoefficientRescale_apply
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (i j : n) (p : ParabolicPoint (Euc n)) :
+    parabolicMatrixCoefficientRescale r p0 a i j p =
+      a i j (parabolicDilationAt r p0 p) := rfl
+
+omit [DecidableEq n] [Nonempty n] in
+@[simp]
+theorem parabolicMatrixCoefficientRescale_origin
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real) (i j : n) :
+    parabolicMatrixCoefficientRescale r p0 a i j
+        (parabolicPoint 0 0) = a i j p0 := by
+  simp [parabolicMatrixCoefficientRescale]
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicMatrixCoefficientRescale_holderWith_unitBall
+    {alpha : NNReal} (r : NNReal) (hr : 0 < r)
+    (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (Ka : n → n → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((Metric.ball p0 r).restrict (a i j))) :
+    ∀ i j, HolderWith (Ka i j * r ^ (alpha : Real)) alpha
+      ((Metric.ball (parabolicPoint 0 0) 1).restrict
+        (parabolicMatrixCoefficientRescale r p0 a i j)) := by
+  intro i j
+  simpa only [Function.comp_def, parabolicMatrixCoefficientRescale] using
+    parabolicHolder_dilationAt_unitBall r hr p0 (ha i j)
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicMatrixCoefficientRescale_norm_sub_le_of_mem_unitBall
+    {alpha : NNReal} (r : NNReal) (hr : 0 < r)
+    (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (Ka : n → n → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((Metric.ball p0 r).restrict (a i j)))
+    (i j : n) (p : ParabolicPoint (Euc n))
+    (hp : p ∈ Metric.ball (parabolicPoint 0 0) 1) :
+    ‖a i j p0 - parabolicMatrixCoefficientRescale r p0 a i j p‖ ≤
+      Ka i j * r ^ (alpha : Real) := by
+  have h := norm_sub_le_holderBallOscillationConst_of_mem_ball
+    (show (0 : Real) < 1 by norm_num)
+    (parabolicMatrixCoefficientRescale_holderWith_unitBall
+      r hr p0 a Ka ha i j) hp
+  simpa [holderBallOscillationConst] using h
+
 omit [DecidableEq n] [Nonempty n] in
 theorem parabolicMatrixFreezeHolderConst_mul
     (Ka omega : n → n → NNReal) (X : NNReal) :
@@ -95,6 +152,45 @@ theorem parabolicMatrixFreezeSupConst_mul
   apply Finset.sum_congr rfl
   intro j _hj
   ring
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicMatrixFreezeHolderConst_rescale
+    (Ka : n → n → NNReal) (c : NNReal) :
+    parabolicMatrixFreezeHolderConst
+        (fun i j ↦ Ka i j * c) (fun i j ↦ Ka i j * c) =
+      c * parabolicMatrixFreezeHolderConst Ka Ka := by
+  simpa only [parabolicMatrixFreezeHolderConst, mul_comm] using
+    parabolicMatrixFreezeHolderConst_mul Ka Ka c
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicMatrixFreezeSupConst_rescale
+    (Ka : n → n → NNReal) (c : NNReal) :
+    parabolicMatrixFreezeSupConst (fun i j ↦ Ka i j * c) =
+      c * parabolicMatrixFreezeSupConst Ka := by
+  simpa only [mul_comm] using parabolicMatrixFreezeSupConst_mul Ka c
+
+omit [Nonempty n] [NormedSpace Real F] in
+theorem spdParabolicSchauderDefectConst_rescale
+    (A : Matrix n n Real) (hA : A.PosDef) (alpha : NNReal)
+    (Ka : n → n → NNReal) (c : NNReal) (T : Real) :
+    spdParabolicSchauderDefectConst A hA alpha
+        (fun i j ↦ Ka i j * c) (fun i j ↦ Ka i j * c) T =
+      c * spdParabolicSchauderDefectConst A hA alpha Ka Ka T := by
+  unfold spdParabolicSchauderDefectConst
+  rw [parabolicMatrixFreezeHolderConst_rescale,
+    parabolicMatrixFreezeSupConst_rescale,
+    spdHeatPotentialSchauderConst_nnreal_mul]
+
+omit [Nonempty n] [NormedSpace Real F] in
+theorem spdParabolicSchauderDefectConst_rescale_lt_one
+    (A : Matrix n n Real) (hA : A.PosDef) (alpha : NNReal)
+    (Ka : n → n → NNReal) (c : NNReal) (T : Real)
+    (hsmall : c * spdParabolicSchauderDefectConst
+      A hA alpha Ka Ka T < 1) :
+    spdParabolicSchauderDefectConst A hA alpha
+        (fun i j ↦ Ka i j * c) (fun i j ↦ Ka i j * c) T < 1 := by
+  rw [spdParabolicSchauderDefectConst_rescale]
+  exact hsmall
 
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
