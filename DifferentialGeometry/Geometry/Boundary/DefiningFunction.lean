@@ -9,6 +9,37 @@ open scoped Manifold ContDiff
 
 namespace DifferentialGeometry.Integral.Connection
 
+theorem frontier_levelSet_annulus_subset
+    {X : Type*} [TopologicalSpace X]
+    {rho : X → Real} (hrho : Continuous rho) {r R : Real} :
+    frontier {x | r ≤ rho x ∧ rho x ≤ R} ⊆
+      {x | rho x = r ∨ rho x = R} := by
+  intro x hx
+  let K : Set X := {y | r ≤ rho y ∧ rho y ≤ R}
+  have hKclosed : IsClosed K :=
+    (isClosed_le continuous_const hrho).inter
+      (isClosed_le hrho continuous_const)
+  have hxK : x ∈ K := by
+    have hxcl : x ∈ closure K := frontier_subset_closure hx
+    rwa [hKclosed.closure_eq] at hxcl
+  by_contra hboundary
+  change ¬ (rho x = r ∨ rho x = R) at hboundary
+  rw [not_or] at hboundary
+  have hrx : r < rho x :=
+    lt_of_le_of_ne hxK.1 (Ne.symm hboundary.1)
+  have hxR : rho x < R :=
+    lt_of_le_of_ne hxK.2 hboundary.2
+  let U : Set X := {y | r < rho y} ∩ {y | rho y < R}
+  have hUopen : IsOpen U :=
+    (isOpen_lt continuous_const hrho).inter
+      (isOpen_lt hrho continuous_const)
+  have hUK : U ⊆ K := by
+    intro y hy
+    exact ⟨hy.1.le, hy.2.le⟩
+  have hxU : x ∈ U := ⟨hrx, hxR⟩
+  have hxint : x ∈ interior K := interior_maximal hUK hUopen hxU
+  exact (mem_frontier_iff_notMem_interior hxK).mp hx hxint
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
