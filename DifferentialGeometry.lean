@@ -826,6 +826,7 @@ import DifferentialGeometry.Analysis.Schauder.Interior
 import DifferentialGeometry.Analysis.Schauder.Interpolation
 import DifferentialGeometry.Analysis.Schauder.Localization
 import DifferentialGeometry.Analysis.Schauder.Scaling
+import DifferentialGeometry.Analysis.Schauder.VariableCoefficient
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherOrder
