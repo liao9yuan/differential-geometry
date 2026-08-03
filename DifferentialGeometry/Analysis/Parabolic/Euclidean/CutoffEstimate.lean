@@ -752,6 +752,114 @@ theorem parabolicNondivergenceCutoffCommutator_holderWith_restrict
       parabolicDriftCutoffCommutator b dchi u p.1)
   simpa only [sub_eq_add_neg] using hsum
 
+def parabolicCutoffSourceSupConst
+    (Mchi Bsource Bcomm : NNReal) : NNReal :=
+  Mchi * Bsource + Bcomm
+
+def parabolicCutoffSourceHolderConst
+    (Kchi Ksource Kcomm Mchi Bsource : NNReal) : NNReal :=
+  Mchi * Ksource + Bsource * Kchi + Kcomm
+
+omit [Fintype n] [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicCutoffSource_le
+    {Q : Set (ParabolicPoint (Euc n))}
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource Bcomm : NNReal)
+    (hchiNorm : ∀ p, p ∈ Q → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → ‖source p‖ ≤ Bsource)
+    (hcommNorm : ∀ p, p ∈ Q → ‖comm p‖ ≤ Bcomm)
+    (p : ParabolicPoint (Euc n)) (hp : p ∈ Q) :
+    ‖chi p • source p + comm p‖ ≤
+      parabolicCutoffSourceSupConst Mchi Bsource Bcomm := by
+  rw [parabolicCutoffSourceSupConst, NNReal.coe_add, NNReal.coe_mul]
+  exact (norm_add_le _ _).trans (add_le_add
+    ((norm_smul _ _).trans_le (mul_le_mul
+      (hchiNorm p hp) (hsourceNorm p hp) (norm_nonneg _) Mchi.coe_nonneg))
+    (hcommNorm p hp))
+
+omit [Fintype n] [DecidableEq n] [Nonempty n] in
+theorem eSupNormOn_parabolicCutoffSource_le
+    {Q : Set (ParabolicPoint (Euc n))}
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource Bcomm : NNReal)
+    (hchiNorm : ∀ p, p ∈ Q → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → ‖source p‖ ≤ Bsource)
+    (hcommNorm : ∀ p, p ∈ Q → ‖comm p‖ ≤ Bcomm) :
+    eSupNormOn Q (fun p ↦ chi p • source p + comm p) ≤
+      parabolicCutoffSourceSupConst Mchi Bsource Bcomm := by
+  rw [eSupNormOn_le]
+  intro p hp
+  rw [ENNReal.ofReal_le_coe]
+  exact norm_parabolicCutoffSource_le chi source comm
+    Mchi Bsource Bcomm hchiNorm hsourceNorm hcommNorm p hp
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicCutoffSource_holderWith_restrict
+    {Q : Set (ParabolicPoint (Euc n))}
+    {alpha Kchi Ksource Kcomm : NNReal}
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource : NNReal)
+    (hchi : HolderWith Kchi alpha (Q.restrict chi))
+    (hsource : HolderWith Ksource alpha (Q.restrict source))
+    (hcomm : HolderWith Kcomm alpha (Q.restrict comm))
+    (hchiNorm : ∀ p, p ∈ Q → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → ‖source p‖ ≤ Bsource) :
+    HolderWith
+      (parabolicCutoffSourceHolderConst Kchi Ksource Kcomm Mchi Bsource)
+      alpha (Q.restrict (fun p ↦ chi p • source p + comm p)) := by
+  have hproduct : HolderWith (Mchi * Ksource + Bsource * Kchi) alpha
+      (fun p : Q ↦ chi p.1 • source p.1) :=
+    holderWith_smul_of_norm_le hchi hsource
+      (fun p ↦ hchiNorm p.1 p.2) (fun p ↦ hsourceNorm p.1 p.2)
+  have hsum := hproduct.add hcomm
+  unfold parabolicCutoffSourceHolderConst
+  simpa only [Set.restrict_apply] using hsum
+
+omit [Fintype n] [DecidableEq n] [Nonempty n] in
+theorem eSupNormOn_parabolicCutoffSource_eqOn_le
+    {Q : Set (ParabolicPoint (Euc n))}
+    (g : ParabolicPoint (Euc n) → F)
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource Bcomm : NNReal)
+    (hg : Set.EqOn g (fun p ↦ chi p • source p + comm p) Q)
+    (hchiNorm : ∀ p, p ∈ Q → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → ‖source p‖ ≤ Bsource)
+    (hcommNorm : ∀ p, p ∈ Q → ‖comm p‖ ≤ Bcomm) :
+    eSupNormOn Q g ≤
+      parabolicCutoffSourceSupConst Mchi Bsource Bcomm := by
+  rw [eSupNormOn_congr hg]
+  exact eSupNormOn_parabolicCutoffSource_le chi source comm
+    Mchi Bsource Bcomm hchiNorm hsourceNorm hcommNorm
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicCutoffSource_eqOn_holderWith_restrict
+    {Q : Set (ParabolicPoint (Euc n))}
+    {alpha Kchi Ksource Kcomm : NNReal}
+    (g : ParabolicPoint (Euc n) → F)
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource : NNReal)
+    (hg : Set.EqOn g (fun p ↦ chi p • source p + comm p) Q)
+    (hchi : HolderWith Kchi alpha (Q.restrict chi))
+    (hsource : HolderWith Ksource alpha (Q.restrict source))
+    (hcomm : HolderWith Kcomm alpha (Q.restrict comm))
+    (hchiNorm : ∀ p, p ∈ Q → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → ‖source p‖ ≤ Bsource) :
+    HolderWith
+      (parabolicCutoffSourceHolderConst Kchi Ksource Kcomm Mchi Bsource)
+      alpha (Q.restrict g) := by
+  have heq : Q.restrict g =
+      Q.restrict (fun p ↦ chi p • source p + comm p) := by
+    funext p
+    exact hg p.2
+  rw [heq]
+  exact parabolicCutoffSource_holderWith_restrict chi source comm
+    Mchi Bsource hchi hsource hcomm hchiNorm hsourceNorm
+
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 end
