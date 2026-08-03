@@ -27,6 +27,35 @@ def ballCutoffArgumentFDeriv2 [InnerProductSpace ℝ E]
   (R ^ 2 - r ^ 2)⁻¹ •
     ((2 : ℕ) • (innerSL ℝ (E := E) : E →L[ℝ] E →L[ℝ] ℝ))
 
+@[simp]
+theorem ballCutoffArgumentFDeriv_apply [InnerProductSpace ℝ E]
+    (center : E) (r R : ℝ) (x v : E) :
+    ballCutoffArgumentFDeriv center r R x v =
+      (R ^ 2 - r ^ 2)⁻¹ * (2 * inner ℝ (x - center) v) := by
+  simp only [ballCutoffArgumentFDeriv, two_nsmul,
+    ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+    coe_innerSL_apply, inner_sub_left, smul_eq_mul]
+  ring
+
+@[simp]
+theorem ballCutoffArgumentFDeriv2_apply [InnerProductSpace ℝ E]
+    (r R : ℝ) (v w : E) :
+    ballCutoffArgumentFDeriv2 (E := E) r R v w =
+      (R ^ 2 - r ^ 2)⁻¹ * (2 * inner ℝ v w) := by
+  unfold ballCutoffArgumentFDeriv2
+  change ((((R ^ 2 - r ^ 2)⁻¹ •
+    ((2 : ℕ) • (innerSL ℝ (E := E) : E →L[ℝ] E →L[ℝ] ℝ))) v) w) = _
+  rw [ContinuousLinearMap.smul_apply]
+  have hn :
+      (((2 : ℕ) • (innerSL ℝ (E := E) : E →L[ℝ] E →L[ℝ] ℝ)) v) =
+        (2 : ℕ) • innerSL ℝ v := rfl
+  rw [hn, ContinuousLinearMap.smul_apply]
+  have hn' : (((2 : ℕ) • innerSL ℝ v) w) =
+      (2 : ℕ) • inner ℝ v w := rfl
+  rw [hn', nsmul_eq_mul]
+  simp only [smul_eq_mul]
+  ring
+
 def ballCutoffFDeriv [InnerProductSpace ℝ E]
     (center : E) (r R : ℝ) (x : E) : E →L[ℝ] ℝ :=
   deriv CutoffProfile.value (ballCutoffArgument center r R x) •
@@ -148,6 +177,23 @@ theorem norm_ballCutoffArgumentFDeriv2_le
     div_eq_mul_inv]
   ring_nf
   exact le_refl ((R ^ 2 - r ^ 2)⁻¹ * ‖v‖ * (2 : ℝ))
+
+theorem two_le_ballCutoffArgument_of_not_le
+    {center : E} {r R : ℝ} (hr : 0 ≤ r) (hrR : r < R) {x : E}
+    (hx : ¬dist x center ≤ R) :
+    2 ≤ ballCutoffArgument center r R x := by
+  have hden : 0 < R ^ 2 - r ^ 2 := by nlinarith
+  have hR : 0 ≤ R := hr.trans hrR.le
+  have hdist : R ≤ ‖x - center‖ := by
+    simpa [dist_eq_norm] using (not_le.mp hx).le
+  have hsq : R ^ 2 ≤ ‖x - center‖ ^ 2 :=
+    (sq_le_sq₀ hR (norm_nonneg _)).2 hdist
+  have hquot : 1 ≤
+      (‖x - center‖ ^ 2 - r ^ 2) / (R ^ 2 - r ^ 2) := by
+    rw [le_div_iff₀ hden]
+    linarith
+  simp only [ballCutoffArgument]
+  linarith
 
 theorem norm_ballCutoffFDeriv_le
     [InnerProductSpace ℝ E] {center : E} {r R : ℝ}
