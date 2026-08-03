@@ -510,6 +510,22 @@ def hessianCurryEquiv
   (continuousMultilinearCurryRightEquiv' Real 1 V F).trans
     (continuousMultilinearCurryFin1 Real V (V →L[Real] F))
 
+theorem hessianCurryEquiv_iteratedFDeriv_two
+    (u : V → F) (du : V → V →L[Real] F)
+    (d2u : V → V →L[Real] V →L[Real] F)
+    (hu : ∀ x, HasFDerivAt u (du x) x)
+    (hdu : ∀ x, HasFDerivAt du (d2u x) x) (x : V) :
+    hessianCurryEquiv V F (iteratedFDeriv Real 2 u x) = d2u x := by
+  have hfd : fderiv Real u = du := by
+    funext y
+    exact (hu y).fderiv
+  ext v w
+  simp only [hessianCurryEquiv, LinearIsometryEquiv.trans_apply,
+    continuousMultilinearCurryFin1_apply,
+    continuousMultilinearCurryRightEquiv_apply', iteratedFDeriv_two_apply]
+  rw [hfd, (hdu x).fderiv]
+  rfl
+
 end Spatial
 
 abbrev ParabolicPoint (V : Type*) :=

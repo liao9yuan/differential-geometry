@@ -329,6 +329,79 @@ theorem parabolicFrozenMatrixOperator_source_estimate
       (parabolicMatrixLapFreezeDefect_holderWith_restrict
         a p0 u Ka omega ha homega hu)
 
+section FrozenSolution
+
+variable [CompleteSpace F]
+
+theorem spdHeatDuh_parabolicFrozenMatrixOperator_eq
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S : Real} (p : ParabolicPoint (Euc n)) (hp : p.time ∈ Ioo (0 : Real) S)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (f : Real → BoundedContinuousFunction (Euc n) F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun q ↦ f q.time q.space))) :
+    parabolicFrozenMatrixOperator A
+        (fun t x ↦ spdHeatDuh A hA t f x) p =
+      f p.time p.space := by
+  let w : Euc n → F := spdHeatDuh A hA p.time f
+  let dw : Euc n → Euc n →L[Real] F :=
+    spdHeatDuhGradient A hA p.time f
+  let d2w : Euc n → Euc n →L[Real] Euc n →L[Real] F :=
+    spdHeatDuhHessian A hA p.time f
+  have hpde : ∀ x : Euc n,
+      HasFDerivAt w (dw x) x ∧
+        HasFDerivAt dw (d2w x) x ∧
+        HasDerivAt (fun t : Real ↦ spdHeatDuh A hA t f x)
+          (matrixLap A (d2w x) + f p.time x) p.time := by
+    intro x
+    exact spdHeatDuh_pde halpha0 halpha1 hp A hA f hbound hsource x
+  have hhess :
+      hessianCurryEquiv (Euc n) F
+          (parabolicSpatialJet 2
+            (fun t x ↦ spdHeatDuh A hA t f x) p) =
+        d2w p.space := by
+    unfold parabolicSpatialJet
+    exact hessianCurryEquiv_iteratedFDeriv_two w dw d2w
+      (fun x ↦ (hpde x).1) (fun x ↦ (hpde x).2.1) p.space
+  have htime :
+      parabolicTimeDerivative (fun t x ↦ spdHeatDuh A hA t f x) p =
+        matrixLap A (d2w p.space) + f p.time p.space := by
+    unfold parabolicTimeDerivative
+    rw [(hpde p.space).2.2.hasFDerivAt.fderiv]
+    simp only [ContinuousLinearMap.toSpanSingleton_apply, one_smul]
+  unfold parabolicFrozenMatrixOperator parabolicFrozenMatrixLap
+  rw [htime, hhess]
+  abel
+
+theorem spdHeatDuh_parabolic_schauder_solution
+    {alpha K B : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {S T : Real} (hT : 0 ≤ T) (hTS : T < S)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (f : Real → BoundedContinuousFunction (Euc n) F)
+    (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
+    (hsource : HolderWith K alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
+        (fun p ↦ f p.time p.space))) :
+    (∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+        parabolicFrozenMatrixOperator A
+            (fun t x ↦ spdHeatDuh A hA t f x) p =
+          f p.time p.space) ∧
+      eParabolicC2HolderGaugeOn alpha
+          (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
+          (fun t x ↦ spdHeatDuh A hA t f x) ≤
+        spdHeatPotentialSchauderConst A hA alpha K B T := by
+  constructor
+  · intro p hp
+    exact spdHeatDuh_parabolicFrozenMatrixOperator_eq
+      halpha0 halpha1 p ⟨hp.1.1, hp.1.2.trans_lt hTS⟩
+        A hA f hbound hsource
+  · exact spdHeatDuh_schauder_estimate_euclidean
+      halpha0 halpha1 hT hTS A hA f hbound hsource
+
+end FrozenSolution
+
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 end

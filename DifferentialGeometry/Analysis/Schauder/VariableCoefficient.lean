@@ -438,29 +438,6 @@ section Estimates
 
 variable [CompleteSpace F]
 
-omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
-private theorem hessianCurryEquiv_iteratedFDeriv_two
-    (u : BoundedContinuousFunction (Euc n) F)
-    (du : BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
-    (d2u : BoundedContinuousFunction (Euc n)
-      (Euc n →L[Real] Euc n →L[Real] F))
-    (hu : ∀ x, HasFDerivAt (u : Euc n → F) (du x) x)
-    (hdu : ∀ x,
-      HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x)
-    (x : Euc n) :
-    hessianCurryEquiv (Euc n) F
-        (iteratedFDeriv Real 2 (u : Euc n → F) x) = d2u x := by
-  have hfd : fderiv Real (u : Euc n → F) =
-      (du : Euc n → Euc n →L[Real] F) := by
-    funext y
-    exact (hu y).fderiv
-  ext v w
-  simp only [hessianCurryEquiv, LinearIsometryEquiv.trans_apply,
-    continuousMultilinearCurryFin1_apply,
-    continuousMultilinearCurryRightEquiv_apply', iteratedFDeriv_two_apply]
-  rw [hfd, (hdu x).fderiv]
-  rfl
-
 theorem frozen_matrix_laplacian_schauder_estimate
     {alpha K B : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
