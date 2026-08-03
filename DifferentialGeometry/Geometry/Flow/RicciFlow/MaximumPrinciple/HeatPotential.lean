@@ -1,1 +1,1 @@
-import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotential
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotentialStrong

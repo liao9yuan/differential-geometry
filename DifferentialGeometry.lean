@@ -682,7 +682,9 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Synthesis
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotential
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotentialStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.LocalStrong
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ScalarStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Strong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Weak
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
@@ -2654,6 +2656,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullbackFlat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.LieDerivativePairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.HeatPotential
+import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarStrong
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.BarrierCore
