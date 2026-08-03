@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.MetricSpace.HolderNorm
 import Mathlib.Topology.MetricSpace.Snowflaking
 
@@ -41,6 +42,120 @@ theorem holderWith_restrict_of_eHolderSeminormOn_le
   have hnn : nnHolderNorm alpha g ≤ C :=
     ENNReal.coe_le_coe.mp (coe_nnHolderNorm_le_eHolderNorm.trans he)
   simpa only [g] using hbase.mono hnn
+
+private theorem orthonormal_repr_abs_le_norm
+    {V : Type*} [NormedAddCommGroup V] [InnerProductSpace Real V]
+    {ι : Type*} [Fintype ι] (b : OrthonormalBasis ι Real V) (v : V) (i : ι) :
+    |b.repr v i| ≤ ‖v‖ := by
+  classical
+  have hsq : (b.repr v i) ^ 2 ≤ ‖b.repr v‖ ^ 2 := by
+    rw [EuclideanSpace.real_norm_sq_eq]
+    exact Finset.single_le_sum (f := fun j : ι => (b.repr v j) ^ 2)
+      (fun j _ => sq_nonneg _) (Finset.mem_univ i)
+  rw [show |b.repr v i| = Real.sqrt ((b.repr v i) ^ 2) from
+      (Real.sqrt_sq_eq_abs _).symm,
+    show ‖v‖ = Real.sqrt (‖b.repr v‖ ^ 2) from by
+      rw [Real.sqrt_sq (norm_nonneg _), b.repr.norm_map]]
+  exact Real.sqrt_le_sqrt hsq
+
+theorem continuousMultilinearMap_norm_le_sum_stdOrthonormalBasis
+    {V G : Type*} [NormedAddCommGroup V] [InnerProductSpace Real V]
+    [FiniteDimensional Real V] [NormedAddCommGroup G] [NormedSpace Real G]
+    {j : Nat} (A : ContinuousMultilinearMap Real (fun _ : Fin j => V) G) :
+    ‖A‖ ≤ ∑ β : Fin j → Fin (Module.finrank Real V),
+      ‖A (fun i => (stdOrthonormalBasis Real V) (β i))‖ := by
+  classical
+  let b := stdOrthonormalBasis Real V
+  let C : Real := ∑ β : Fin j → Fin (Module.finrank Real V),
+    ‖A (fun i => b (β i))‖
+  have hC : 0 ≤ C := Finset.sum_nonneg fun _ _ => norm_nonneg _
+  refine ContinuousMultilinearMap.opNorm_le_bound hC ?_
+  intro m
+  have hexpand : ∀ i : Fin j, m i =
+      ∑ a : Fin (Module.finrank Real V), b.repr (m i) a • b a := by
+    intro i
+    exact (b.sum_repr (m i)).symm
+  have hA : A m = ∑ β : Fin j → Fin (Module.finrank Real V),
+      (∏ i : Fin j, b.repr (m i) (β i)) • A (fun i => b (β i)) := by
+    have hstep : A m = A (fun i : Fin j =>
+        ∑ a : Fin (Module.finrank Real V), b.repr (m i) a • b a) := by
+      congr
+      funext i
+      exact hexpand i
+    rw [hstep]
+    change A.toMultilinearMap _ = _
+    rw [A.toMultilinearMap.map_sum
+      (fun (i : Fin j) (a : Fin (Module.finrank Real V)) =>
+        b.repr (m i) a • b a)]
+    apply Finset.sum_congr rfl
+    intro β _
+    rw [A.toMultilinearMap.map_smul_univ]
+    rfl
+  rw [hA]
+  calc
+    ‖∑ β : Fin j → Fin (Module.finrank Real V),
+        (∏ i : Fin j, b.repr (m i) (β i)) • A (fun i => b (β i))‖
+        ≤ ∑ β : Fin j → Fin (Module.finrank Real V),
+          ‖(∏ i : Fin j, b.repr (m i) (β i)) • A (fun i => b (β i))‖ :=
+      norm_sum_le _ _
+    _ = ∑ β : Fin j → Fin (Module.finrank Real V),
+          |∏ i : Fin j, b.repr (m i) (β i)| * ‖A (fun i => b (β i))‖ := by
+      apply Finset.sum_congr rfl
+      intro β _
+      rw [norm_smul, Real.norm_eq_abs]
+    _ ≤ ∑ β : Fin j → Fin (Module.finrank Real V),
+          (∏ i : Fin j, ‖m i‖) * ‖A (fun i => b (β i))‖ := by
+      gcongr with β
+      rw [Finset.abs_prod]
+      exact Finset.prod_le_prod (fun i _ => abs_nonneg _)
+        (fun i _ => orthonormal_repr_abs_le_norm b (m i) (β i))
+    _ = C * ∏ i : Fin j, ‖m i‖ := by
+      unfold C
+      rw [Finset.sum_mul]
+      apply Finset.sum_congr rfl
+      intro β _
+      ring
+
+theorem holderWith_continuousMultilinearMap_of_stdOrthonormalBasis
+    {X V G : Type*} [PseudoMetricSpace X]
+    [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
+    [NormedAddCommGroup G] [NormedSpace Real G]
+    {j : Nat} {alpha : NNReal}
+    (A : X → ContinuousMultilinearMap Real (fun _ : Fin j => V) G)
+    (C : (Fin j → Fin (Module.finrank Real V)) → NNReal)
+    (h : ∀ β, HolderWith (C β) alpha
+      (fun x => A x (fun i => (stdOrthonormalBasis Real V) (β i)))) :
+    HolderWith (∑ β, C β) alpha A := by
+  intro x y
+  have hreal : dist (A x) (A y) ≤
+      (∑ β, C β : NNReal) * dist x y ^ (alpha : Real) := by
+    rw [dist_eq_norm]
+    calc
+      ‖A x - A y‖ ≤ ∑ β : Fin j → Fin (Module.finrank Real V),
+          ‖(A x - A y) (fun i => (stdOrthonormalBasis Real V) (β i))‖ :=
+        continuousMultilinearMap_norm_le_sum_stdOrthonormalBasis (A x - A y)
+      _ ≤ ∑ β : Fin j → Fin (Module.finrank Real V),
+          (C β : Real) * dist x y ^ (alpha : Real) := by
+        gcongr with β
+        simpa only [ContinuousMultilinearMap.sub_apply, dist_eq_norm] using
+          (h β).dist_le x y
+      _ = (∑ β, C β : NNReal) * dist x y ^ (alpha : Real) := by
+        push_cast
+        rw [Finset.sum_mul]
+  rw [edist_dist, edist_dist]
+  calc
+    ENNReal.ofReal (dist (A x) (A y)) ≤
+        ENNReal.ofReal (((∑ β, C β : NNReal) : Real) *
+          dist x y ^ (alpha : Real)) := ENNReal.ofReal_le_ofReal hreal
+    _ = ((∑ β, C β : NNReal) : ENNReal) *
+        ENNReal.ofReal (dist x y ^ (alpha : Real)) := by
+      rw [ENNReal.ofReal_mul (by positivity :
+        (0 : Real) ≤ (∑ β, C β : NNReal))]
+      congr 1
+      exact ENNReal.ofReal_coe_nnreal
+    _ = ((∑ β, C β : NNReal) : ENNReal) *
+        ENNReal.ofReal (dist x y) ^ (alpha : Real) := by
+      rw [ENNReal.ofReal_rpow_of_nonneg (dist_nonneg) alpha.coe_nonneg]
 
 section Spatial
 

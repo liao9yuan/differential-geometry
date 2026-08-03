@@ -1443,6 +1443,45 @@ theorem heatD2DuhField_holderWith_restrict_of_holder
   (heatD2DuhField_holderOnWith_of_holder
     halpha0 halpha1 f hf v w hmeas).holderWith
 
+def d2DuhJetHolderConst (alpha K : NNReal) : NNReal :=
+  ∑ β : Fin 2 → Fin (Module.finrank Real V),
+    Real.toNNReal (d2DuhParabolicHolderConst alpha
+      ((stdOrthonormalBasis Real V) (β 0))
+      ((stdOrthonormalBasis Real V) (β 1)) K)
+
+theorem parabolicSpatialJet_two_holderWith_restrict_of_heatD2Duh
+    {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (u f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hu : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      ∀ m : Fin 2 → V,
+        parabolicSpatialJet 2 u p m =
+          heatD2Duh p.time (m 0) (m 1) f p.space)
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ β : Fin 2 → Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r)
+          ((stdOrthonormalBasis Real V) (β 0))
+          ((stdOrthonormalBasis Real V) (β 1)) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    HolderWith (d2DuhJetHolderConst (V := V) alpha K) alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (parabolicSpatialJet 2 u)) := by
+  apply holderWith_continuousMultilinearMap_of_stdOrthonormalBasis
+    (C := fun β : Fin 2 → Fin (Module.finrank Real V) ↦
+      Real.toNNReal (d2DuhParabolicHolderConst alpha
+        ((stdOrthonormalBasis Real V) (β 0))
+        ((stdOrthonormalBasis Real V) (β 1)) K))
+  intro β
+  have hdir := heatD2DuhField_holderWith_restrict_of_holder
+    halpha0 halpha1 f hf
+    ((stdOrthonormalBasis Real V) (β 0))
+    ((stdOrthonormalBasis Real V) (β 1))
+    (fun t ht x ↦ hmeas t ht x β)
+  convert hdir using 1
+  funext p
+  exact hu p.1 p.2 (fun i ↦ (stdOrthonormalBasis Real V) (β i))
+
 def heatLapDuh (t : Real) (f : Real → V → F) (x : V) : F :=
   ∑ i : Fin (Module.finrank Real V),
     heatD2Duh t ((stdOrthonormalBasis Real V) i)
