@@ -1581,6 +1581,42 @@ theorem heatDuhTimeCandidateField_holderWith_restrict_of_holder
   simpa only [heatDuhTimeCandidateField, heatDuhTimeCandidate,
     heatLapDuhField, Set.restrict_apply, Pi.add_apply] using hsource.add hlap
 
+theorem parabolicTimeDerivative_holderWith_restrict_of_heatDuhTimeCandidate
+    {alpha K C : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {T : Real} (u f : Real → V → F)
+    (hf : ∀ r ∈ Icc (0 : Real) T, HolderWith K alpha (f r))
+    (hsource : HolderWith C alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (fun p ↦ f p.time p.space)))
+    (hu : ∀ p ∈ parabolicCylinder (Ioc (0 : Real) T) Set.univ,
+      HasDerivAt (fun t : Real ↦ u t p.space)
+        (heatDuhTimeCandidateField f p) p.time)
+    (hmeas : ∀ t ∈ Ioc (0 : Real) T, ∀ x : V,
+      ∀ i : Fin (Module.finrank Real V),
+      AEStronglyMeasurable
+        (fun r : Real ↦ heatD2Conv (t - r) ((stdOrthonormalBasis Real V) i)
+          ((stdOrthonormalBasis Real V) i) (f r) x)
+        (volume.restrict (uIoc (0 : Real) t))) :
+    HolderWith (C + Real.toNNReal
+      (lapDuhParabolicHolderConst (V := V) alpha K)) alpha
+      ((parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+        (parabolicTimeDerivative u)) := by
+  have hcand := heatDuhTimeCandidateField_holderWith_restrict_of_holder
+    halpha0 halpha1 f hf hsource hmeas
+  have heq :
+      (parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+          (parabolicTimeDerivative u) =
+        (parabolicCylinder (Ioc (0 : Real) T) Set.univ).restrict
+          (heatDuhTimeCandidateField f) := by
+    funext p
+    unfold parabolicTimeDerivative
+    change (fderiv Real (fun t : Real ↦ u t p.1.space) p.1.time) 1 =
+      heatDuhTimeCandidateField f p.1
+    rw [(hu p p.2).hasFDerivAt.fderiv]
+    simp
+  rw [heq]
+  exact hcand
+
 end Convolution
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
