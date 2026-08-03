@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialTimeRealization
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialMeasurability
 
 noncomputable section
 
@@ -149,19 +149,7 @@ theorem heatDuh_schauder_estimate_of_parabolic_holder
     (hbound : ∀ r ∈ Icc (0 : Real) S, ‖f r‖ ≤ B)
     (hsource : HolderWith K alpha
       ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict
-        (fun p => f p.time p.space)))
-    (hmeas0 : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
-      AEStronglyMeasurable
-        (fun s : Real => heatSup (t - s) (f s) z)
-        (volume.restrict (uIoc (0 : Real) t)))
-    (hmeas1 : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
-      AEStronglyMeasurable
-        (fun s : Real => heatSupGradient (t - s) (f s) z)
-        (volume.restrict (uIoc (0 : Real) t)))
-    (hmeas2 : ∀ t ∈ Ioc (0 : Real) S, ∀ z : V,
-      AEStronglyMeasurable
-        (fun s : Real => heatSupHessian (t - s) (f s) z)
-        (volume.restrict (uIoc (0 : Real) t))) :
+        (fun p => f p.time p.space))) :
     eParabolicC2HolderGaugeOn alpha
       (parabolicCylinder (Ioc (0 : Real) T) Set.univ)
       (fun t x => heatDuh t f x) ≤
@@ -175,7 +163,16 @@ theorem heatDuh_schauder_estimate_of_parabolic_holder
     rw [HolderWith.restrict_iff] at hsource ⊢
     exact hsource.mono fun p hp => ⟨⟨hp.1.1.le, hp.1.2⟩, hp.2⟩
   exact heatDuh_schauder_estimate halpha0 halpha1 hT hTS f hbound hf
-    hsource' hmeas0 hmeas1 hmeas2
+    hsource'
+    (fun t ht z =>
+      heatSup_timeSource_aestronglyMeasurable_of_parabolic_holder
+        halpha0 ht f hsource z)
+    (fun t ht z =>
+      heatSupGradient_timeSource_aestronglyMeasurable_of_parabolic_holder
+        halpha0 ht f hsource z)
+    (fun t ht z =>
+      heatSupHessian_timeSource_aestronglyMeasurable_of_parabolic_holder
+        halpha0 ht f hsource z)
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
