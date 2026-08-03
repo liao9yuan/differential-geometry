@@ -106,4 +106,87 @@ theorem parabolicHolder_dilation
         ENNReal.mul_rpow_of_nonneg _ _ alpha.coe_nonneg]
       ring
 
+def parabolicLinearMap {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] (L : V →L[Real] V)
+    (p : ParabolicPoint V) : ParabolicPoint V :=
+  parabolicPoint p.time (L p.space)
+
+@[simp]
+theorem parabolicLinearMap_time {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] (L : V →L[Real] V) (p : ParabolicPoint V) :
+    (parabolicLinearMap L p).time = p.time := rfl
+
+@[simp]
+theorem parabolicLinearMap_space {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] (L : V →L[Real] V) (p : ParabolicPoint V) :
+    (parabolicLinearMap L p).space = L p.space := rfl
+
+theorem dist_parabolicLinearMap_le {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] (L : V →L[Real] V) (p q : ParabolicPoint V) :
+    dist (parabolicLinearMap L p) (parabolicLinearMap L q) ≤
+      max 1 ‖L‖ * dist p q := by
+  rcases p with ⟨⟨t⟩, x⟩
+  rcases q with ⟨⟨s⟩, y⟩
+  change dist (parabolicPoint t (L x)) (parabolicPoint s (L y)) ≤
+    max 1 ‖L‖ * dist (parabolicPoint t x) (parabolicPoint s y)
+  rw [dist_parabolicPoint, dist_parabolicPoint]
+  let D : Real := max (|t - s| ^ (1 / 2 : Real)) (dist x y)
+  have hD0 : 0 ≤ D :=
+    (Real.rpow_nonneg (abs_nonneg _) _).trans (le_max_left _ _)
+  have htime : |t - s| ^ (1 / 2 : Real) ≤ max 1 ‖L‖ * D := by
+    calc
+      |t - s| ^ (1 / 2 : Real) ≤ D := le_max_left _ _
+      _ = 1 * D := by rw [one_mul]
+      _ ≤ max 1 ‖L‖ * D :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) hD0
+  have hspace : dist (L x) (L y) ≤ max 1 ‖L‖ * D := by
+    calc
+      dist (L x) (L y) = ‖L (x - y)‖ := by
+        rw [dist_eq_norm, map_sub]
+      _ ≤ ‖L‖ * ‖x - y‖ := L.le_opNorm (x - y)
+      _ = ‖L‖ * dist x y := by rw [dist_eq_norm]
+      _ ≤ max 1 ‖L‖ * D :=
+        mul_le_mul (le_max_right _ _) (le_max_right _ _)
+          (dist_nonneg) (by positivity)
+  exact max_le htime hspace
+
+theorem lipschitzWith_parabolicLinearMap
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (L : V →L[Real] V) :
+    LipschitzWith (max 1 ‖L‖₊) (parabolicLinearMap L) := by
+  apply LipschitzWith.of_dist_le_mul
+  intro p q
+  simpa only [NNReal.coe_max, NNReal.coe_one, coe_nnnorm] using
+    dist_parabolicLinearMap_le L p q
+
+def parabolicLinearPreimage {V : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] (L : V →L[Real] V)
+    (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
+  parabolicLinearMap L ⁻¹' Q
+
+@[simp]
+theorem parabolicLinearPreimage_cylinder_univ
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (L : V →L[Real] V) (J : Set Real) :
+    parabolicLinearPreimage L (parabolicCylinder J Set.univ) =
+      parabolicCylinder J Set.univ := by
+  ext p
+  simp [parabolicLinearPreimage, parabolicCylinder]
+
+theorem parabolicHolder_linearMap
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [MetricSpace F] {alpha C : NNReal} {Q : Set (ParabolicPoint V)}
+    {f : ParabolicPoint V → F} (L : V →L[Real] V)
+    (hf : HolderWith C alpha (Q.restrict f)) :
+    HolderWith (C * (max 1 ‖L‖₊) ^ (alpha : Real)) alpha
+      ((parabolicLinearPreimage L Q).restrict
+        (f ∘ parabolicLinearMap L)) := by
+  let g : parabolicLinearPreimage L Q → Q := fun p =>
+    ⟨parabolicLinearMap L p.1, p.2⟩
+  have hg : LipschitzWith (max 1 ‖L‖₊) g :=
+    ((lipschitzWith_parabolicLinearMap L).restrict
+      (parabolicLinearPreimage L Q)).subtype_mk fun p => p.2
+  have hcomp := hf.comp hg.holderWith
+  simpa only [g, Function.comp_apply, Set.restrict_apply, mul_one] using hcomp
+
 end DifferentialGeometry.Analysis.Schauder

@@ -48,6 +48,19 @@ theorem linPullBcf_apply (L : V ≃L[ℝ] V)
     (u : BoundedContinuousFunction V F) (x : V) :
     linPullBcf L u x = u (L x) := rfl
 
+omit [NormedSpace ℝ F] in
+theorem norm_linPullBcf (L : V ≃L[ℝ] V)
+    (u : BoundedContinuousFunction V F) :
+    ‖linPullBcf L u‖ = ‖u‖ := by
+  apply le_antisymm
+  · rw [BoundedContinuousFunction.norm_le (norm_nonneg u)]
+    intro x
+    exact u.norm_coe_le_norm (L x)
+  · rw [BoundedContinuousFunction.norm_le (norm_nonneg (linPullBcf L u))]
+    intro x
+    simpa only [linPullBcf_apply, ContinuousLinearEquiv.apply_symm_apply] using
+      (linPullBcf L u).norm_coe_le_norm (L.symm x)
+
 /-- Precompose a continuous linear map by `L`, bundled as a continuous
 linear operation on the operator space. -/
 def precompJet (L : V ≃L[ℝ] V) :
