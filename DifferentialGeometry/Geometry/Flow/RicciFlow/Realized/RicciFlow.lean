@@ -130,9 +130,9 @@ structure IsRealizedRicciFlowSolutionOn
     {D : RealTimeInterval}
     (S : RealizedRicciFlowCandidateOn (I := I) (M := M) D) : Prop where
   smoothMetric : MetricFamilySmoothOn (I := I) (M := M) D S.family
-  smoothConnection : DifferentialGeometry.Integral.Connection.ConnectionFamilySmoothOn (I := I)
+  smoothConnection : DifferentialGeometry.Geometry.Connection.ConnectionFamilySmoothOn (I := I)
     (M := M) S.family
-  leviCivita : DifferentialGeometry.Integral.Connection.IsLeviCivitaFamilyOn (I := I) S.family
+  leviCivita : DifferentialGeometry.Geometry.Connection.IsLeviCivitaFamilyOn (I := I) S.family
   equation : MetricVariationEquationOn (I := I) S.family S.ricci
 
 

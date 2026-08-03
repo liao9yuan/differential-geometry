@@ -15,6 +15,7 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Rot
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

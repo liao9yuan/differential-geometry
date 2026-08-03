@@ -14,6 +14,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjugateHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.HeatPotential
 import DifferentialGeometry.Geometry.Operator.NormGradSqTime
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

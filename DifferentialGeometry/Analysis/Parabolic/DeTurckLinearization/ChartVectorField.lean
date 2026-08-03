@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSymbol
 import DifferentialGeometry.Geometry.Operator.HessianTrace
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

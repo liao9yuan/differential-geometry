@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RiemannNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

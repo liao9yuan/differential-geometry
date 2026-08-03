@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullback
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import Mathlib.Topology.Order.IsLUB
+open DifferentialGeometry.Geometry.Connection
 
 
 

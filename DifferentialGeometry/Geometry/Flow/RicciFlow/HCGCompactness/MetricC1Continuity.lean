@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvBridge
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Uniqueness
 import Mathlib.Topology.Instances.Matrix
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

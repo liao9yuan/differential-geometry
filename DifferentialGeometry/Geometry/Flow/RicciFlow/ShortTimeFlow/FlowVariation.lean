@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -746,7 +746,7 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_restrict_ball_eq_restri
         eLpNorm_indicator_eq_eLpNorm_restrict hIntΩ_meas
 
 private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {u : M → ℝ} (h_int : AllChartsInteriorSupport (n := n) (M := M) u)
     (α : M) (q : ℝ≥0∞) :
     eLpNorm (chartSmoothExt (n := n) (M := M) α
@@ -1123,7 +1123,7 @@ private lemma wkpNorm_chartSmoothExt_interior_eq_wkpNorm_chartPushed_interior
 
 omit [CompactSpace M] in
 private lemma wkpNormHalfSpace_chartPushed_target_le_wkpNormChart
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {q : ℝ≥0∞} (α : M) (u : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
         (d := n) 1 q
@@ -1137,7 +1137,7 @@ private lemma wkpNormHalfSpace_chartPushed_target_le_wkpNormChart
   exact ENNReal.le_tsum α
 
 private lemma eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {u : M → ℝ} (hu : ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u)
     (h_int : AllChartsInteriorSupport (n := n) (M := M) u) (α : M) :
     eLpNorm (fun z : EuN => ‖fderiv ℝ (chartSmoothExt (n := n) (M := M) α
@@ -1164,7 +1164,7 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
     (n := n) (M := M) g α u
 
 private lemma per_chart_smooth_sup_bound
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {u : M → ℝ}, ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u →
@@ -1356,19 +1356,19 @@ private lemma norm_pou_mul_le_norm_chartSmoothExt_at_some_point
     exact hCmod
 
 private noncomputable def perChartMorreyConst
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) (α : M) : ℝ :=
   Classical.choose (per_chart_smooth_sup_bound (n := n) (M := M) g hp α)
 
 private lemma perChartMorreyConst_nn
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) (α : M) :
     0 ≤ perChartMorreyConst (n := n) (M := M) g hp α :=
   (Classical.choose_spec
     (per_chart_smooth_sup_bound (n := n) (M := M) g hp α)).1
 
 private lemma perChartMorreyConst_bound
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) (α : M)
     {u : M → ℝ} (hu : ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u)
     (h_int : AllChartsInteriorSupport (n := n) (M := M) u) (y : EuN) :
@@ -1381,7 +1381,7 @@ private lemma perChartMorreyConst_bound
     (per_chart_smooth_sup_bound (n := n) (M := M) g hp α)).2 hu h_int y
 
 theorem smooth_manifold_morrey_sup_bound_uniform_withBoundary
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {u : M → ℝ}, ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u →
@@ -1419,7 +1419,7 @@ theorem smooth_manifold_morrey_sup_bound_uniform_withBoundary
   exact perChartMorreyConst_bound (n := n) (M := M) g hp α hu h_int y
 
 private lemma chartSmoothExt_holder_uniform_half_ball
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     (α : M) {p : ℝ} (hp : (n : ℝ) < p) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {u : M → ℝ}, ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u →
@@ -1564,7 +1564,7 @@ private lemma extChartAt_mem_half_ball_of_mem_tsupport_pou
   exact chartCarrier_subset_half_ball (n := n) (M := M) α h_in
 
 private lemma pou_mul_holder_chart_uniform_tsupport
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     (α : M) {p : ℝ} (hp : (n : ℝ) < p) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {u : M → ℝ}, ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u →
@@ -1620,7 +1620,7 @@ private lemma pou_mul_holder_chart_uniform_tsupport
   exact h_pair
 
 theorem smooth_manifold_morrey_holder_modulus_per_chart_withBoundary
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) (α : M) :
     ∃ K : Set M, IsCompact K ∧ K ⊆ (chartAt (EuclideanHalfSpace n) α).source ∧
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1679,7 +1679,7 @@ theorem norm_sub_le_sum_pou_diff_withBoundary
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem smooth_manifold_morrey_sup_bound_uniform_withBoundary_unconditional
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I_hs M)
     {p : ℝ} (hp : (n : ℝ) < p) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {u : M → ℝ}, ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ u →

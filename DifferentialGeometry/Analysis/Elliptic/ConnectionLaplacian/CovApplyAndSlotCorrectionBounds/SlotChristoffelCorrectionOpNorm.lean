@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

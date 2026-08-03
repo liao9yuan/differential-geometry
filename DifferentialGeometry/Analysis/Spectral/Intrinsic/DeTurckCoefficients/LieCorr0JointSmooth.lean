@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Core
+open DifferentialGeometry.Geometry.Connection
 
 
 

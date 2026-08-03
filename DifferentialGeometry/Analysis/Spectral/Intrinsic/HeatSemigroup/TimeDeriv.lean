@@ -5,6 +5,7 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.Normed.Group.Tannery
 import Mathlib.Analysis.Calculus.Deriv.Slope
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

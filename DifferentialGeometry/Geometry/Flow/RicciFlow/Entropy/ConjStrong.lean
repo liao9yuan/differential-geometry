@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffMea
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.Nonautonomous
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionFieldLink
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

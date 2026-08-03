@@ -8,7 +8,8 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set IsManifold Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 section ModelFiber
 
@@ -222,6 +223,6 @@ theorem homTensorRSCovariantDerivative_apply_of_mdifferentiableAt (r a c : ℕ)
 
 end CovDeriv
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection
 
 end

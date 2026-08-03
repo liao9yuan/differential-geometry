@@ -10,6 +10,7 @@ noncollapsing theorem when the flow interval is `[0, ω)`.  It still starts at a
 strictly positive time.  The remaining initial-time producer is separate.
 -/
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section

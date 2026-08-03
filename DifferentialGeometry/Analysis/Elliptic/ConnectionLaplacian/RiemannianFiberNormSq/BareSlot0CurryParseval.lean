@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

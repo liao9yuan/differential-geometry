@@ -14,6 +14,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SmoothCoor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralMassUniformSup
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularity
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -18,6 +18,7 @@ import DifferentialGeometry.Geometry.Curvature.Metric
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 
 open Bundle Manifold Set Tensor0SBundle

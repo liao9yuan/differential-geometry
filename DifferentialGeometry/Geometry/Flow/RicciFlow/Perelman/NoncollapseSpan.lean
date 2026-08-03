@@ -12,6 +12,7 @@ starts at a strictly positive regular time; extending it uniformly to the
 initial time is a separate geometric frontier.
 -/
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section

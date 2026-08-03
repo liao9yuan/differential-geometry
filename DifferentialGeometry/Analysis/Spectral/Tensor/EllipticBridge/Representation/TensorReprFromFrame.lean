@@ -9,6 +9,7 @@ import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.Topology.UniformSpace.Completion
 import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.Normed.Operator.Extend
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

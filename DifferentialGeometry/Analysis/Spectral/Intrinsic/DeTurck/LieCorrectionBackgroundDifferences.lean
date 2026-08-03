@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionTensorTransferBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Background differences of the zeroth-order DeTurck correction

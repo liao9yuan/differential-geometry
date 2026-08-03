@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.OffDiagonalCurvatureCore
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetricCompatible
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Metric.Sphere.RoundProjConnLC
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import Mathlib.Analysis.InnerProductSpace.LinearMap
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Great circles on the round sphere
@@ -112,7 +113,7 @@ private noncomputable def coordGrad (w : E) :
     ⟨fun x => DifferentialGeometry.Geometry.Operator.gradFun
         (I := 𝓡 n) (roundMetric (E := E) (n := n))
       (innerCoordFun (E := E) (n := n) w) x,
-      DifferentialGeometry.Integral.Connection.gradFun_contMDiff_total_section
+      DifferentialGeometry.Geometry.Connection.gradFun_contMDiff_total_section
         (I := 𝓡 n) (roundMetric (E := E) (n := n))
         (innerCoordFun (E := E) (n := n) w).contMDiff⟩
 
@@ -152,7 +153,7 @@ private theorem dIncl_coordGrad
       z = DifferentialGeometry.Geometry.Operator.gradFun
         (I := 𝓡 n) (roundMetric (E := E) (n := n))
         (innerCoordFun (E := E) (n := n) w) x := by
-    apply DifferentialGeometry.Integral.Connection.gradFun_unique
+    apply DifferentialGeometry.Geometry.Connection.gradFun_unique
     intro a
     rw [roundMetric_inner, hz, mfderiv_innerCoordFun]
     have ha :

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartInvariance
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

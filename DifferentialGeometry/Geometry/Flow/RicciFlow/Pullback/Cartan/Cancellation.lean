@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

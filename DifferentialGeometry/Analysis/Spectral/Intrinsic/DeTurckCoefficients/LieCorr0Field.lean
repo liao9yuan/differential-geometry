@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Core
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -153,8 +154,8 @@ private lemma lieArm_inner_chartBasis_center (g : SmoothRiemannianMetric I M) (x
         ((chartModelBasis E) q : TangentSpace I x) =
       DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x p q := by
   rw [DifferentialGeometry.Integral.Measure.chartGramMatrix_apply,
-    DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p,
-    DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x q]
+    DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x p,
+    DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x q]
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -171,15 +172,15 @@ private lemma lieArm_connDiff_chartBasis_center (gA gB : SmoothRiemannianMetric 
           ((chartModelBasis E) p : TangentSpace I x) := by
   rw [show ((chartModelBasis E) j : TangentSpace I x) =
       DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x j x from
-    (DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x j).symm]
+    (DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x j).symm]
   rw [show ((chartModelBasis E) k : TangentSpace I x) =
       DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x k x from
-    (DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x k).symm]
+    (DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x k).symm]
   rw [PDE.DeTurck.connDiff_chartBasis_pair_eq_sum (I := I) gA gB x
-    (DifferentialGeometry.Integral.Connection.self_mem_chartLeviCivitaGoodSet (I := I) (α := x))
+    (DifferentialGeometry.Geometry.Connection.self_mem_chartLeviCivitaGoodSet (I := I) (α := x))
     j k]
   refine Finset.sum_congr rfl (fun p _ => ?_)
-  rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p]
+  rw [DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x p]
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm_chartGramMatrix_symm (g : SmoothRiemannianMetric I M) (x : M)
@@ -336,7 +337,7 @@ private lemma lieCorr0NEndo_chartBasis (x : M) (i : Fin (Module.finrank ℝ E)) 
               (extChartAt I x x)) •
         ((chartModelBasis E) p : TangentSpace I x) from
     Finset.sum_congr rfl (fun p _ => by
-      rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p])]
+      rw [DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x p])]
   rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [lieCorr0NScalar, sub_smul, sub_smul]
@@ -1110,8 +1111,8 @@ private lemma lieCorr0_riemLowered_basis_value (x : M) (i j ml kl : Fin (Module.
       ((chartModelBasis E) kl : TangentSpace I x) from by
     rw [lieCorr0RiemLoweredFib_toModel]
     rfl]
-  rw [Integral.Connection.riemannOp_eq_chartRiemannCLM_apply (I := I) g₀ x]
-  rw [Integral.Connection.chartRiemannCLM_basis_apply (I := I) g₀ x ml i j]
+  rw [DifferentialGeometry.Geometry.Connection.riemannOp_eq_chartRiemannCLM_apply (I := I) g₀ x]
+  rw [DifferentialGeometry.Geometry.Connection.chartRiemannCLM_basis_apply (I := I) g₀ x ml i j]
   rw [map_sum (g₀.inner x), ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun ρ _ => ?_)
   rw [map_smul (g₀.inner x), ContinuousLinearMap.smul_apply, smul_eq_mul,
@@ -1360,7 +1361,7 @@ private lemma lieCorr0_dLa_inner_basis (g₁ g_bg : SmoothRiemannianMetric I M) 
       lieCorr0CovASc (I := I) (M := M) g₁ g_bg x a m k p •
         ((chartModelBasis E) p : TangentSpace I x) from
     Finset.sum_congr rfl (fun p _ => by
-      rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p]
+      rw [DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x p]
       rfl)]
   rw [map_sum (g₁.inner x), ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun p _ => ?_)
@@ -1387,7 +1388,7 @@ private lemma lieCorr0_covW_basis (g₁ g_bg : SmoothRiemannianMetric I M) (x : 
           ((chartModelBasis E) p : TangentSpace I x) := by
   rw [deTurckLieCovDerivW_chartBasis_eq (I := I) g₁ g_bg x a]
   refine Finset.sum_congr rfl (fun p _ => ?_)
-  rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p]
+  rw [DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x p]
   rfl
 omit [BoundarylessManifold I M] in
 private lemma lieCorr0_icg0_readout (hδ_lt : δ < 1)

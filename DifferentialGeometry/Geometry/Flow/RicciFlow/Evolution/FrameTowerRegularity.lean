@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CoordinateTowerRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridgeAllK
+open DifferentialGeometry.Geometry.Connection
 
 
 

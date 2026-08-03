@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotentialT
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinLimit
 import Mathlib.Analysis.Normed.Operator.BanachSteinhaus
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
+open DifferentialGeometry.Geometry.Connection
 
 
 

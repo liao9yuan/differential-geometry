@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochnerFie
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.Slot0SliceFiberNormDomination
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -9,6 +9,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 import Mathlib.Topology.Compactness.Compact
+open DifferentialGeometry.Geometry.Connection
 
 
 

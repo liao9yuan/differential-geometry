@@ -18,6 +18,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Compactness.Compact
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -160,7 +161,7 @@ theorem speedSq_hasDerivAt
     have hxsrc : f s t ∈ (extChartAt I α).source := by rw [extChartAt_source]; exact hsrc
     have hsq : speedSq (I := I) g f s t = g.inner (f s t) (Vsec s) (Vsec s) := rfl
     rw [hsq]
-    rw [DifferentialGeometry.Integral.Connection.g_inner_eq_chart_sum
+    rw [DifferentialGeometry.Geometry.Connection.g_inner_eq_chart_sum
       (I := I) g α hbase_set hxsrc (Vsec s) (Vsec s)]
     have hVcoord :
         (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (f s t) (Vsec s)

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.VariationalFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

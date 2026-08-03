@@ -164,7 +164,7 @@ private lemma sum_eLpNorm_norm_iteratedFDeriv_chartSmoothExt_le_wkpNorm
 
 omit [CompactSpace M] in
 private lemma wkpNorm_chartPushed_target_le_wkpNormChart_k
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (k : ℕ) (α : M) (u : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
@@ -198,7 +198,7 @@ private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target_k
 
 omit [CompactSpace M] in
 private lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart_k
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (k : ℕ) (α : M) (u : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
@@ -266,7 +266,7 @@ private lemma memWkp_chartPushed_of_contMDiff
     (d := Module.finrank ℝ E) hp_one hΩ_open h_ae).mp hExt
 
 theorem memWkpChart_of_contMDiff_k
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (k : ℕ)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     MemWkpChart (I := I) (M := M) g k p u := by
@@ -274,7 +274,7 @@ theorem memWkpChart_of_contMDiff_k
   exact memWkp_chartPushed_of_contMDiff (I := I) (M := M) α hu hp_one k
 
 private lemma wkpNormChart_lt_top_of_contMDiff_k
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (k : ℕ)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     wkpNormChart (I := I) (M := M) g k p u < (⊤ : ℝ≥0∞) :=
@@ -325,7 +325,7 @@ private lemma chartSmoothExt_morrey_iteratedFDeriv_sup_uniform
     exact Finset.sum_nonneg (fun j _ => ENNReal.toReal_nonneg)
 
 private lemma per_chart_smooth_iteratedFDeriv_sup_bound
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ)
     [NeZero (Module.finrank ℝ E)] (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -441,14 +441,14 @@ private lemma per_chart_smooth_iteratedFDeriv_sup_bound
   exact le_trans h_bound_chain h_final
 
 private noncomputable def perChartMorreyIteratedConst
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ)
     [NeZero (Module.finrank ℝ E)] (α : M) : ℝ :=
   Classical.choose (per_chart_smooth_iteratedFDeriv_sup_bound
     (I := I) (M := M) g hp m α)
 
 private lemma perChartMorreyIteratedConst_nn
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ)
     [NeZero (Module.finrank ℝ E)] (α : M) :
     0 ≤ perChartMorreyIteratedConst (I := I) (M := M) g hp m α :=
@@ -457,7 +457,7 @@ private lemma perChartMorreyIteratedConst_nn
       (I := I) (M := M) g hp m α)).1
 
 private lemma perChartMorreyIteratedConst_bound
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ)
     [NeZero (Module.finrank ℝ E)] (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) (y : EuclN) :
@@ -476,7 +476,7 @@ theorem smooth_manifold_morrey_iteratedFDeriv_bound_uniform_perChart
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {v : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ v →
@@ -493,7 +493,7 @@ theorem smooth_manifold_morrey_iteratedFDeriv_bound_uniform
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ) :
     ∀ α : M, ∃ C : ℝ, 0 ≤ C ∧
       ∀ {v : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ v →

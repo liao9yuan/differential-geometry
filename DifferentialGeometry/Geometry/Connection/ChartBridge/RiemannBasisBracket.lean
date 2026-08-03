@@ -13,8 +13,10 @@ noncomputable section
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -631,5 +633,5 @@ theorem chartRiemannBasisIdentity_LeviCivita [I.Boundaryless]
     (c := fun l' => chartRiemannTensor (I := I) g x i j k l' (extChartAt I x x)) l
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

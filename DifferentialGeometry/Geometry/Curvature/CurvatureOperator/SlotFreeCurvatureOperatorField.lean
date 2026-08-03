@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCa
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

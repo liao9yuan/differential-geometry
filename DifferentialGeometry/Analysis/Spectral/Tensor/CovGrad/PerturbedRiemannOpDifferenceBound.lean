@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQuadraticBound
 import DifferentialGeometry.Geometry.Metric.MetricBounds
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

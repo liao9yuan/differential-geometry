@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldPDE
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FlowLimitBuild
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FlowLimitUpgrade
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompactnessSubseq
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false

@@ -11,6 +11,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

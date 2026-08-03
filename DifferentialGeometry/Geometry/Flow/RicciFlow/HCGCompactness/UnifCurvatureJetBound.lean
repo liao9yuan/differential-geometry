@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Metric.ConvexCombination
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Uniform curvature-jet bound (item-6 brick 2a)

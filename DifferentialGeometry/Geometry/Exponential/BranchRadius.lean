@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicGauss
 import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # The metric-jet ↔ iterated-covariant-gradient norm bridge (`normBridge`)

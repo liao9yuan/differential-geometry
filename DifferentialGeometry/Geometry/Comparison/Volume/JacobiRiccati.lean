@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.LengthBound
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiShape
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Riccati trace comparison for Jacobi families

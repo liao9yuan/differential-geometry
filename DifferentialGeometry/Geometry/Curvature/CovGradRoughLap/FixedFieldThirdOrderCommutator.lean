@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Slot0CurryCovariantLeibniz
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

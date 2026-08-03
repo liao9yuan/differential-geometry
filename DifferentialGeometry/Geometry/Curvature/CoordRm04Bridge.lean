@@ -16,6 +16,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 
 open Bundle Manifold Set

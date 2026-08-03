@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionMixedFeedBounds
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

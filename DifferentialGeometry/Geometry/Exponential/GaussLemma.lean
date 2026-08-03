@@ -15,6 +15,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
+open DifferentialGeometry.Geometry.Connection
 
 
 

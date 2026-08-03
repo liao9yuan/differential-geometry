@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.SecondOrderBootstrap
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Chart regularity of geodesics

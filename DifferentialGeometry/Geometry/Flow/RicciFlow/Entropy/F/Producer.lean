@@ -4,6 +4,7 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
@@ -313,7 +314,7 @@ theorem formula510_of_components
         (fun y : M => fun a b : CoordinateIdx (𝕜 := Real) E =>
           inverseMetricFlatModelInChart_component (I := I) g x a b
             (extChartAt I x y))
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x)
         x d i j = 0)
@@ -323,7 +324,7 @@ theorem formula510_of_components
             (coordinateFrameAt (I := I) x d x) +
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a k *
               componentRS (I := I)
@@ -333,7 +334,7 @@ theorem formula510_of_components
                 (fun q : Fin 2 => if q = 0 then i else j)) -
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d i a *
               componentRS (I := I)
@@ -343,7 +344,7 @@ theorem formula510_of_components
                 (fun q : Fin 2 => if q = 0 then a else j)) -
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d j a *
               componentRS (I := I)
@@ -352,10 +353,10 @@ theorem formula510_of_components
                 (A x) (fun _ : Fin 1 => k)
                 (fun q : Fin 2 => if q = 0 then i else a)))
     (hGamma : ∀ x : M, ∀ d a k : CoordinateIdx (𝕜 := Real) E,
-      christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+      christoffelSymbolInFrame (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a k =
-      christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+      christoffelSymbolInFrame (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x a d k)
     (hlap :
@@ -391,7 +392,7 @@ theorem formula510_of_components
         connTraceRawDiv (I := I) g A x =
           gammaRawDivergenceTrace (I := I) g nablaChristoffelVariation x :=
     connTraceRaw_of_components (I := I)
-      (cov := DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) g rfl A
+      (cov := DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) g rfl A
       nablaChristoffelVariation hzero hNabla hGamma
   have hweighted :
       ∀ x : M,
@@ -562,7 +563,7 @@ theorem formula510_producer
         (fun y : M => fun a b : CoordinateIdx (𝕜 := Real) E =>
           inverseMetricFlatModelInChart_component (I := I) (G.metric s0) x a b
             (extChartAt I x y))
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x)
         x d i j = 0)
@@ -572,7 +573,7 @@ theorem formula510_producer
             (coordinateFrameAt (I := I) x d x) +
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a k *
               componentRS (I := I)
@@ -582,7 +583,7 @@ theorem formula510_producer
                 (fun q : Fin 2 => if q = 0 then i else j)) -
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d i a *
               componentRS (I := I)
@@ -592,7 +593,7 @@ theorem formula510_producer
                 (fun q : Fin 2 => if q = 0 then a else j)) -
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d j a *
               componentRS (I := I)
@@ -602,11 +603,11 @@ theorem formula510_producer
                 (fun q : Fin 2 => if q = 0 then i else a)))
     (hGamma : ∀ x : M, ∀ d a k : CoordinateIdx (𝕜 := Real) E,
       christoffelSymbolInFrame
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a k =
       christoffelSymbolInFrame
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x a d k)
     (hlap :

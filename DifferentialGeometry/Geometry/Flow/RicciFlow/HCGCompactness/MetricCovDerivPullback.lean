@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -555,7 +556,7 @@ theorem ricciSection_eq_ricciTensor
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
         (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
         (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
           (I := I) (M := M) g) x (vec2 (I := I) v w)
       = ricciTensor (I := I) g x v w := by

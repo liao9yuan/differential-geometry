@@ -390,8 +390,8 @@ def ConnDiffFieldRealizes
     D x =
       Tensor0SBundle.connectionDifferenceTensorAt
         (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h) x
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h) x
 
 
 
@@ -419,7 +419,7 @@ def ConnDiffDerivRealizes
     ConnDiffFieldRealizes (I := I) g h D ∧
       Tensor0SBundle.HigherCovDerivRSRealizes
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h) D k Dk
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h) D k Dk
 
 
 

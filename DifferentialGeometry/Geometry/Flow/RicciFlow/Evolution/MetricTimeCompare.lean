@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 import DifferentialGeometry.Geometry.Metric.Completeness
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

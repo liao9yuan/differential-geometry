@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConver
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0SLinear
 import DifferentialGeometry.Geometry.Metric.SmoothVectorFieldExtGlobal
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -230,7 +231,7 @@ noncomputable def covStep
     change IsManifold I ∞ M
     infer_instance
   let cov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   let hcov :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
@@ -253,7 +254,7 @@ omit [SigmaCompactSpace M] in
     covStep (I := I) gRef s A x
       = Tensor0SBundle.totalNabla0SFun (𝕜 := Real) (E := E) (H := H)
           (I := I) (M := M) s
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
           A x :=
   rfl
 

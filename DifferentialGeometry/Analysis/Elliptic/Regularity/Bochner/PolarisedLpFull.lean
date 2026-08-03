@@ -191,7 +191,7 @@ theorem gradInnerSmoothBundle_sub_oneSubLap_apply
         gradFun (I := I) g v.oneSubLapClassical.toFun b =
       gradFun (I := I) g
         (fun y : M => v.toFun y - v.oneSubLapClassical.toFun y) b := by
-    rw [DifferentialGeometry.Integral.Connection.gradFun_sub
+    rw [DifferentialGeometry.Geometry.Connection.gradFun_sub
       (I := I) g hv_diff hvl_diff]
   rw [h_grad_sub]
   have h_fun_eq : (fun y : M => v.toFun y - v.oneSubLapClassical.toFun y) =

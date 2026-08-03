@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDe
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

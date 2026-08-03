@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.RicciFlow
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

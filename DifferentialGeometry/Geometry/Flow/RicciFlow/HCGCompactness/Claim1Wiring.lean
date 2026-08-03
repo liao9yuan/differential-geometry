@@ -4,6 +4,7 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.KoszulDifference
 import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
 import Mathlib.LinearAlgebra.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -389,13 +390,13 @@ theorem koszulComp_at
         (n := (⊤ : ℕ∞)) y (frame (idx 2) y)).choose,
       (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
         (n := (⊤ : ℕ∞)) y (frame (idx 2) y)).choose_spec⟩
-  have hmcK : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
+  have hmcK : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen
       (I := I) (leviCivitaConnectionOfMetric (I := I) gK) gK :=
     leviCivitaConnectionOfMetric_isMetricCompatible (I := I) gK
-  have htfK : DifferentialGeometry.Integral.Connection.IsTorsionFreeAt (I := I)
+  have htfK : DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt (I := I)
       (leviCivitaConnectionOfMetric (I := I) gK) y :=
     leviCivitaConnectionOfMetric_isTorsionFree (I := I) gK y
-  have htfR : DifferentialGeometry.Integral.Connection.IsTorsionFreeAt (I := I)
+  have htfR : DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt (I := I)
       (leviCivitaConnectionOfMetric (I := I) gRef) y :=
     leviCivitaConnectionOfMetric_isTorsionFree (I := I) gRef y
   have hkos := Tensor0SBundle.koszul_difference (I := I)

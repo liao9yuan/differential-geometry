@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SolutionTo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerNormRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

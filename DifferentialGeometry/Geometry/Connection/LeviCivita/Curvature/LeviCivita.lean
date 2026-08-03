@@ -36,10 +36,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Topology Manifold ContDiff
 
@@ -901,7 +901,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       simpa [Zc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x Z hp
     have hWp : MDiffAt (T% Wc) p := by
       simpa [Wc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x W hp
-    have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have hmetric := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := p) Yc Zc Wc hYp hZp hWp
     simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace, f, YZc, YWc]
       using hmetric
@@ -917,7 +917,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       simpa [Zc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x Z hp
     have hWp : MDiffAt (T% Wc) p := by
       simpa [Wc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x W hp
-    have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have hmetric := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := p) Xc Zc Wc hXp hZp hWp
     simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace, f, XZc, XWc]
       using hmetric
@@ -936,14 +936,14 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
           g.inner x (YZc x) ((cov Wc x) (Xc x))) +
         (g.inner x ((cov Zc x) (Xc x)) (YWc x) +
           g.inner x (Zc x) ((cov YWc x) (Xc x))) := by
-    have h1 := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have h1 := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Xc YZc Wc hX hYZ hW
     have h1' :
         directionalDerivAlong (I := I) Xc (fun p : M => g.inner p (YZc p) (Wc p)) x =
           g.inner x ((cov YZc x) (Xc x)) (Wc x) +
             g.inner x (YZc x) ((cov Wc x) (Xc x)) := by
       simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace] using h1
-    have h2 := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have h2 := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Xc Zc YWc hX hZ hYW
     have h2' :
         directionalDerivAlong (I := I) Xc (fun p : M => g.inner p (Zc p) (YWc p)) x =
@@ -970,14 +970,14 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
           g.inner x (XZc x) ((cov Wc x) (Yc x))) +
         (g.inner x ((cov Zc x) (Yc x)) (XWc x) +
           g.inner x (Zc x) ((cov XWc x) (Yc x))) := by
-    have h1 := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have h1 := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Yc XZc Wc hY hXZ hW
     have h1' :
         directionalDerivAlong (I := I) Yc (fun p : M => g.inner p (XZc p) (Wc p)) x =
           g.inner x ((cov XZc x) (Yc x)) (Wc x) +
             g.inner x (XZc x) ((cov Wc x) (Yc x)) := by
       simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace] using h1
-    have h2 := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have h2 := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Yc Zc XWc hY hZ hXW
     have h2' :
         directionalDerivAlong (I := I) Yc (fun p : M => g.inner p (Zc p) (XWc p)) x =
@@ -1001,7 +1001,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       directionalDerivAlong (I := I) Bc f x =
         g.inner x ((cov Zc x) (Bc x)) (Wc x) +
           g.inner x (Zc x) ((cov Wc x) (Bc x)) := by
-    have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have hmetric := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Bc Zc Wc hB hZ hW
     simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace, f] using hmetric
   have hcomm :=
@@ -1702,4 +1702,4 @@ theorem tensor0S_ricciIdentity_of_leviCivita
   simpa [IsTorsionFreeAt] using htf x
 
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

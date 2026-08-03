@@ -18,8 +18,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.L2
@@ -138,7 +139,7 @@ lemma inner_toRS0_scalar
     ContinuousLinearEquiv.apply_symm_apply]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

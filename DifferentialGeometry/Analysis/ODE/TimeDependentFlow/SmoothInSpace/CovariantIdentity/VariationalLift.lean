@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.EuclideanVariationalODE
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.VariationalFlow
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

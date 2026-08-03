@@ -111,7 +111,7 @@ theorem connTraceUTrace
         (coordinateFrameAt_basis (I := I) x (coordinateFrameAt_mem (I := I) x))
         (A x) (fun _ : Fin 1 => d) (fun q : Fin 2 => if q = 0 then i else j)
   have hcancel :=
-    DifferentialGeometry.Integral.Connection.gInvTraceCancel
+    DifferentialGeometry.Geometry.Connection.gInvTraceCancel
       (I := I)
       (gInv := fun y : M => fun a b : CoordinateIdx (𝕜 := Real) E =>
         inverseMetricFlatModelInChart_component (I := I) g x a b
@@ -388,7 +388,7 @@ private theorem connTraceRawDiv_eq_productSum
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
     (x : M)
-    (hcov : cov = DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+    (hcov : cov = DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
     (hGamma : ∀ d a k : CoordinateIdx (𝕜 := Real) E,
       christoffelSymbolInFrame cov
         (coordinateFrameAt (I := I) x)
@@ -417,7 +417,7 @@ private theorem connTraceRawDiv_eq_productSum
   classical
   set Z := DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A with hZ
   have hbridge :=
-    DifferentialGeometry.Integral.Connection.divergence_g_eq_coordinateFrame_covariant_divergence
+    DifferentialGeometry.Geometry.Connection.divergence_g_eq_coordinateFrame_covariant_divergence
       (I := I) g Z x
   have hrawdef :
       connTraceRawDiv (I := I) g A x =
@@ -470,7 +470,7 @@ private theorem connTraceRawDiv_eq_productSum
     calc
       (∑ p : CoordinateIdx (𝕜 := Real) E,
         ∑ l : CoordinateIdx (𝕜 := Real) E,
-          christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          christoffelSymbolInFrame (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x p l p *
             (coordinateFrameAt_isLocalFrame_one (I := I) x).coeff l x (Z.toFun x))
@@ -478,7 +478,7 @@ private theorem connTraceRawDiv_eq_productSum
         ∑ l : CoordinateIdx (𝕜 := Real) E,
           (∑ p : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x p l p) *
             (∑ i : CoordinateIdx (𝕜 := Real) E,
@@ -496,13 +496,13 @@ private theorem connTraceRawDiv_eq_productSum
               gInvFun (I := I) g x i j x * compFun (I := I) A x p i j x) *
             (∑ a : CoordinateIdx (𝕜 := Real) E,
               christoffelSymbolInFrame
-                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+                (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
                 (coordinateFrameAt (I := I) x)
                 (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a a) := by
           exact symmetric_trace_sum_mul
             (fun p a k =>
               christoffelSymbolInFrame
-                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+                (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
                 (coordinateFrameAt (I := I) x)
                 (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a k)
             (fun p =>
@@ -520,7 +520,7 @@ omit [SigmaCompactSpace M] in
 theorem connTraceRaw_eq_gamma
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)
-    (hcov : cov = DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+    (hcov : cov = DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
     (nablaChristoffelVariation :
@@ -664,7 +664,7 @@ omit [SigmaCompactSpace M] in
 theorem connTraceRaw_of_components
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     (g : SmoothRiemannianMetric I M)
-    (hcov : cov = DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+    (hcov : cov = DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
     (nablaChristoffelVariation :

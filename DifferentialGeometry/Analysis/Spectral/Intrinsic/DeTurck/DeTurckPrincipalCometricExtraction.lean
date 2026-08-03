@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldDiffer
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.KoszulSectionParallelRaise
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -325,7 +326,7 @@ lemma deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo
     deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁ =
       DifferentialGeometry.Integral.Connection.ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2
         (cometricDoubleTraceField (I := I) g₀ 2)
-        (DifferentialGeometry.Integral.Connection.endoSlotZeroCcTensor (I := I) (M := M) g₀ 3
+        (DifferentialGeometry.Geometry.Connection.endoSlotZeroCcTensor (I := I) (M := M) g₀ 3
           (gInvDiffRaisedEndoField (I := I) g₀ g₁)) := by
   classical
   apply SmoothCcTensor.ext
@@ -340,7 +341,7 @@ lemma deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo
     ContinuousLinearMap.comp_apply, cometricDoubleTraceField_toSection,
     cometricDoubleTraceFib_toModel, modelDoubleTrace_apply]
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  rw [DifferentialGeometry.Integral.Connection.slotInsertEndoCc_toSection,
+  rw [DifferentialGeometry.Geometry.Connection.slotInsertEndoCc_toSection,
     slotInsertEndoFib_apply_eval, Fin.cons_zero, Fin.update_cons_zero]
   rfl
 
@@ -851,7 +852,7 @@ private lemma slotInsertEndoCc_succ_eq_reindex_slotExtend_local
             (slotExtend (I := I) (M := M) g₀ (s + 1) (s + 1)
               (endoSlotZeroCcTensor (I := I) (M := M) g₀ s Λ)))
           (Equiv.swap (0 : Fin (s + 1 + 1)) 1)).toSection x) D) m
-  rw [DifferentialGeometry.Integral.Connection.slotInsertEndoCc_toSection,
+  rw [DifferentialGeometry.Geometry.Connection.slotInsertEndoCc_toSection,
     slotInsertEndoFib_apply_eval]
   rw [reindexCoeffGen_toSection, reindexCoeffFibGen_apply, rsDomDomCongrSection_toSection,
     toModel_rsDomDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply, slotExtend_toSection]
@@ -863,7 +864,7 @@ private lemma slotInsertEndoCc_succ_eq_reindex_slotExtend_local
     · simp only [Fin.cons_zero, Equiv.swap_apply_left]
     · simp only [Fin.cons_succ]]
   rw [slotExtendFib_apply_eval]
-  rw [DifferentialGeometry.Integral.Connection.slotInsertEndoCc_toSection,
+  rw [DifferentialGeometry.Geometry.Connection.slotInsertEndoCc_toSection,
     slotInsertEndoFib_apply_eval, TensorMultilinear.tensor0S_curry_apply_eval,
     Tensor0SSpace.toModel_ofModel, ContinuousMultilinearMap.domDomCongr_apply]
   have hswap_succ0 : (Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ (0 : Fin (s + 1))) = 0 := by

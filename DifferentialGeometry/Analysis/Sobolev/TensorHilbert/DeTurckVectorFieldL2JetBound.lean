@@ -6,6 +6,7 @@ import Mathlib.Analysis.MeanInequalities
 import DifferentialGeometry.Geometry.Flow.DeTurckVectorFieldL2JetBoundEndomorphismCometricRaise
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBoundDiagonalProductGridIntegralBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBoundRaisedKoszulJetNorm
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

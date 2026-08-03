@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Slot0CurryCovariantLeibniz
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

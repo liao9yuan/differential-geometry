@@ -13,6 +13,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.FlowRea
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairedResidual
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

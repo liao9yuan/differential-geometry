@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulParalle
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceArmRfnsBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCometricRaise
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

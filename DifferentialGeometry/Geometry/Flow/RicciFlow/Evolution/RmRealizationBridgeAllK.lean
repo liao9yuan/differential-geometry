@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -363,9 +364,9 @@ theorem nablaKRm04_ricciIdentityAt
     connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
   have htor : (S.family.connection (t : Real)).torsion x = 0 := by
     have htf :=
-      DifferentialGeometry.Integral.Connection.torsionFree_of_isLeviCivita
+      DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
         (I := I) (lcAt_regular (I := I) S hS t)
-    simpa [DifferentialGeometry.Integral.Connection.IsTorsionFreeAt] using htf x
+    simpa [DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt] using htf x
   exact DifferentialGeometry.Integral.Connection.tensor0S_ricciIdentity_of_torsionFree
     (I := I) (S.family.connection (t : Real)) hcov (S.base.rm13 (t : Real))
     (nablaKRm04Field (I := I) S (t : Real) k)

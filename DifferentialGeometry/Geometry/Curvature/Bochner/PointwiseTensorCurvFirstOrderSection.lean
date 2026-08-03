@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorCurvFirstOrderFiber
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

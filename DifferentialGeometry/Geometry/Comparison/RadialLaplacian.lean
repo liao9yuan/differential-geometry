@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.JacobiShape
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.LineSplit
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

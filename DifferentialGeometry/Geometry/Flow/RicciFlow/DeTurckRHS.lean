@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
@@ -23,10 +24,10 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 noncomputable def smoothRiemannianMetricToInfty
     (g : SmoothRiemannianMetric I M) :
-    Integral.Measure.SmoothRiemannianMetric I M := g
+    SmoothRiemannianMetric I M := g
 
 private noncomputable def lieDerivMetricClmAux
-    (g : Integral.Measure.SmoothRiemannianMetric I M)
+    (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     TangentSpace I x →ₗ[ℝ] (TangentSpace I x →L[ℝ] ℝ) :=
   haveI : T2Space (TangentSpace I x) := inferInstanceAs (T2Space E)
@@ -50,7 +51,7 @@ private noncomputable def lieDerivMetricClmAux
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] private lemma lieDerivMetricClmAux_apply
-    (g : Integral.Measure.SmoothRiemannianMetric I M)
+    (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (v w : TangentSpace I x) :
     lieDerivMetricClmAux (I := I) g W x v w =

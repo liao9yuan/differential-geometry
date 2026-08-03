@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartProjAsWeightedSecondCovDerivMinusΓTrace
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 noncomputable section

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackCovariantNaturality
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -116,7 +117,7 @@ theorem iterCov_metric_zero (g : SmoothRiemannianMetric I M) (a : Nat) :
         Tensor0SBundle.totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H)
           (I := I) (M := M) 2 _ X (Tensor0SBundle.metricTensorField (I := I) g) x _,
         Tensor0SBundle.nabla_metric_zero (I := I) _ g
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
             (I := I) g) X x]
       simp
   | succ a ih =>

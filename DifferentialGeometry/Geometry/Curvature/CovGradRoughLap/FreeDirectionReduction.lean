@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.AbstractRoughLaplacianNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

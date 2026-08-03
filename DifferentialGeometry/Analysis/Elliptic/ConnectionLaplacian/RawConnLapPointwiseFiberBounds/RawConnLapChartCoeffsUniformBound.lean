@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartComponentSecondCovDerivFormula
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

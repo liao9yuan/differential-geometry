@@ -11,11 +11,11 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
 open CovariantDerivative
-open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -59,4 +59,4 @@ theorem connection_smooth_at_of_connectionFamilySmoothOn
 
 end Smoothness
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

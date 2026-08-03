@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

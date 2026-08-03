@@ -7,6 +7,7 @@ import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]

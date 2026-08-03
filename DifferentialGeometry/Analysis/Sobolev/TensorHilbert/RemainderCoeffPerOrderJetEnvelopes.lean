@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderHigherOrderTame
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import Mathlib.Analysis.MeanInequalities
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

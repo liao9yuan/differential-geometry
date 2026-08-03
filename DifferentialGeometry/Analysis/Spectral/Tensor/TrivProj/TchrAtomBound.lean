@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.CovNormBound
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryReconstruction
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TraceDiscrepancyDecomposition
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

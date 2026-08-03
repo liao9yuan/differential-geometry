@@ -16,8 +16,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -922,7 +923,7 @@ theorem abstractHessian_symm
       extDerivFun (I := I) f x (VectorField.mlieBracket I V W x) =
         extDerivFun (I := I) (fun b => extDerivFun (I := I) f b (W b)) x (V x) -
           extDerivFun (I := I) (fun b => extDerivFun (I := I) f b (V b)) x (W x) :=
-    extDerivFun_apply_mlieBracket hV hW hf hx_int
+    DifferentialGeometry.Geometry.Connection.extDerivFun_apply_mlieBracket hV hW hf hx_int
   have htor : (LeviCivita (I := I) g).torsion = 0 :=
     LeviCivita_torsion_eq_zero (I := I) g
   have hbr :
@@ -942,5 +943,5 @@ theorem abstractHessian_symm
   linarith [hfound, hcov_diff]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

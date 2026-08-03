@@ -13,8 +13,9 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
 open Tensor0SBundle
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -155,5 +156,5 @@ theorem TensorSectionMDiffAt_partialEval
     hCurried_at hY_at
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

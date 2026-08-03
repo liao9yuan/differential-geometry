@@ -6,6 +6,7 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

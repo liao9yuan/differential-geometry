@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalCoeffH2
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzPhiMetTotalCurvatureFold
+open DifferentialGeometry.Geometry.Connection
 
 
 

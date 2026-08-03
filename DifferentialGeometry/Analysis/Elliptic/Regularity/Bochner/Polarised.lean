@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.VariationalIdentity
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -101,7 +102,7 @@ lemma gradFun_sub
     have : (fun y : M => -h y) = (-1 : ℝ) • h := by funext y; simp [Pi.smul_apply]
     rw [this]
     exact hh.const_smul (-1 : ℝ)
-  rw [DifferentialGeometry.Integral.Connection.gradFun_add (I := I) g hf h_neg_diff]
+  rw [DifferentialGeometry.Geometry.Connection.gradFun_add (I := I) g hf h_neg_diff]
   rw [gradFun_neg (I := I) g hh]
   abel
 
@@ -158,7 +159,7 @@ lemma normGradSqFun_polar
     φ.contMDiff.mdifferentiable (by simp) x
   have hv_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) (v : M → ℝ) x :=
     v.contMDiff.mdifferentiable (by simp) x
-  rw [DifferentialGeometry.Integral.Connection.gradFun_add (I := I) g hφ_diff hv_diff]
+  rw [DifferentialGeometry.Geometry.Connection.gradFun_add (I := I) g hφ_diff hv_diff]
   rw [gradFun_sub (I := I) g hφ_diff hv_diff]
   exact g_inner_polar (I := I) (M := M) g x
     (gradFun (I := I) g (φ : M → ℝ) x)
@@ -182,7 +183,7 @@ lemma ricciTensor_grad_polar
     φ.contMDiff.mdifferentiable (by simp) x
   have hv_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) (v : M → ℝ) x :=
     v.contMDiff.mdifferentiable (by simp) x
-  rw [DifferentialGeometry.Integral.Connection.gradFun_add (I := I) g hφ_diff hv_diff]
+  rw [DifferentialGeometry.Geometry.Connection.gradFun_add (I := I) g hφ_diff hv_diff]
   rw [gradFun_sub (I := I) g hφ_diff hv_diff]
   exact ricciTensor_polar (I := I) (M := M) g x
     (gradFun (I := I) g (φ : M → ℝ) x)
@@ -211,7 +212,7 @@ lemma g_inner_grad_lap_polar
     φ.contMDiff.mdifferentiable (by simp) x
   have hv_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) (v : M → ℝ) x :=
     v.contMDiff.mdifferentiable (by simp) x
-  rw [DifferentialGeometry.Integral.Connection.gradFun_add (I := I) g hφ_diff hv_diff]
+  rw [DifferentialGeometry.Geometry.Connection.gradFun_add (I := I) g hφ_diff hv_diff]
   rw [gradFun_sub (I := I) g hφ_diff hv_diff]
   set Δφ : M → ℝ := Δ_g (I := I) g φ.contMDiff with hΔφ_def
   set Δv : M → ℝ := Δ_g (I := I) g v.contMDiff with hΔv_def
@@ -240,7 +241,7 @@ lemma g_inner_grad_lap_polar
     hΔφ_smooth.mdifferentiable (by simp) x
   have hΔv_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) Δv x :=
     hΔv_smooth.mdifferentiable (by simp) x
-  rw [DifferentialGeometry.Integral.Connection.gradFun_add (I := I) g hΔφ_diff hΔv_diff]
+  rw [DifferentialGeometry.Geometry.Connection.gradFun_add (I := I) g hΔφ_diff hΔv_diff]
   rw [gradFun_sub (I := I) g hΔφ_diff hΔv_diff]
   set u : TangentSpace I x := gradFun (I := I) g (φ : M → ℝ) x with hu_def
   set w : TangentSpace I x := gradFun (I := I) g (v : M → ℝ) x with hw_def

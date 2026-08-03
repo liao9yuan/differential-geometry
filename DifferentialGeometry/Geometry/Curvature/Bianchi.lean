@@ -44,9 +44,9 @@ private theorem mdifferentiableAt_tangentConstAt_of_mem
     (x₀ : M) (v : TangentSpace I x₀) {p : M}
     (hp : p ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     MDiffAt
-      (T% (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ v :
+      (T% (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ v :
         (q : M) -> TangentSpace I q)) p := by
-  unfold DifferentialGeometry.Integral.Connection.tangentConstAt
+  unfold DifferentialGeometry.Geometry.Connection.tangentConstAt
   exact TensorLieDeriv.mdifferentiableAt_tangentConstInChart_of_mem
     (𝕜 := Real) (I := I) (x₀ := x₀) (p := p) v hp
 
@@ -54,7 +54,7 @@ omit [FiniteDimensional ℝ E] in
 private theorem contMDiffAt_tangentConstAt_self_minTwo
     (x₀ : M) (v : TangentSpace I x₀) :
     ContMDiffAt I (I.prod 𝓘(Real, E)) (2 : ℕ∞)
-      (T% (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ v :
+      (T% (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ v :
         (p : M) -> TangentSpace I p)) x₀ := by
   let e := trivializationAt E (TangentSpace I) x₀
   have hx : x₀ ∈ e.baseSet :=
@@ -68,9 +68,9 @@ private theorem contMDiffAt_tangentConstAt_self_minTwo
     exact (inferInstance : IsManifold I 3 M)
   have h_on :
       ContMDiffOn I (I.prod 𝓘(Real, E)) (2 : ℕ∞)
-        (T% (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ v :
+        (T% (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ v :
           (p : M) -> TangentSpace I p)) e.baseSet := by
-    simpa [e, DifferentialGeometry.Integral.Connection.tangentConstAt] using
+    simpa [e, DifferentialGeometry.Geometry.Connection.tangentConstAt] using
       (TensorLieDeriv.tangentConstInChart_contMDiffOn_baseSet
         (𝕜 := Real) (I := I) (M := M)
         (n := (2 : ℕ∞)) x₀ v)
@@ -80,14 +80,14 @@ private theorem contMDiffAt_tangentConstAt_mlieBracket_self_one
     (x₀ : M) (v w : TangentSpace I x₀) :
     ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : ℕ∞)
       (T% (VectorField.mlieBracket I
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ v)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ w))) x₀ := by
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ v)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ w))) x₀ := by
   have hv : ContMDiffAt I (I.prod 𝓘(Real, E)) (2 : ℕ∞)
-      (T% (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ v :
+      (T% (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ v :
         (p : M) -> TangentSpace I p)) x₀ :=
     contMDiffAt_tangentConstAt_self_minTwo (I := I) x₀ v
   have hw : ContMDiffAt I (I.prod 𝓘(Real, E)) (2 : ℕ∞)
-      (T% (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ w :
+      (T% (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ w :
         (p : M) -> TangentSpace I p)) x₀ :=
     contMDiffAt_tangentConstAt_self_minTwo (I := I) x₀ w
   haveI : IsManifold I (minSmoothness Real 2) M := by
@@ -105,8 +105,8 @@ private theorem contMDiffAt_tangentConstAt_mlieBracket_self_one
 private theorem mdifferentiableAt_tangentConstAt_mlieBracket_self
     (x₀ : M) (v w : TangentSpace I x₀) :
     MDiffAt (T% (VectorField.mlieBracket I
-      (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ v)
-      (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x₀ w))) x₀ :=
+      (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ v)
+      (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x₀ w))) x₀ :=
   (contMDiffAt_tangentConstAt_mlieBracket_self_one (I := I) x₀ v w).mdifferentiableAt
     (by norm_num : ((1 : ℕ∞) : WithTop ℕ∞) ≠ 0)
 
@@ -114,35 +114,35 @@ private theorem tangentConst_torsion_derivative_eq_add
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (1 : WithTop ℕ∞))
-    (htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I) cov)
+    (htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I) cov)
     (x : M) (A B C : TangentSpace I x) :
     (cov (fun p : M =>
-        (cov (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x B) p)
-          (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x A p)) x)
-      (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x C x) =
+        (cov (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x B) p)
+          (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x A p)) x)
+      (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x C x) =
       (cov (fun p : M =>
-          (cov (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x A) p)
-            (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x B p)) x)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x C x) +
+          (cov (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x A) p)
+            (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x B p)) x)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x C x) +
         (cov (VectorField.mlieBracket I
-            (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x A)
-            (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x B)) x)
-          (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x C x) := by
-  let Ac : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+            (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x A)
+            (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x B)) x)
+          (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x C x) := by
+  let Ac : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x A
-  let Bc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+  let Bc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x B
-  let Cc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+  let Cc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x C
   let ABc : (p : M) -> TangentSpace I p := fun p => (cov Bc p) (Ac p)
   let BAc : (p : M) -> TangentSpace I p := fun p => (cov Ac p) (Bc p)
   let BrAB : (p : M) -> TangentSpace I p := VectorField.mlieBracket I Ac Bc
   have hAB : MDiffAt (T% ABc) x := by
-    simpa [ABc, Ac, Bc, DifferentialGeometry.Integral.Connection.tangentConstAt] using
+    simpa [ABc, Ac, Bc, DifferentialGeometry.Geometry.Connection.tangentConstAt] using
       CovariantDerivative.tangentConst_cov_mdiffAt
         (𝕜 := Real) (I := I) cov hcov (x := x) (v := A) (w := B)
   have hBA : MDiffAt (T% BAc) x := by
-    simpa [BAc, Ac, Bc, DifferentialGeometry.Integral.Connection.tangentConstAt] using
+    simpa [BAc, Ac, Bc, DifferentialGeometry.Geometry.Connection.tangentConstAt] using
       CovariantDerivative.tangentConst_cov_mdiffAt
         (𝕜 := Real) (I := I) cov hcov (x := x) (v := B) (w := A)
   have hBr : MDiffAt (T% BrAB) x := by
@@ -183,26 +183,26 @@ private theorem tangentConst_torsion_derivative_eq_add
 
 private theorem tangentConst_torsion_bracket_eq_add
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I) cov)
+    (htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I) cov)
     (x : M) (A B C : TangentSpace I x) :
     (cov (VectorField.mlieBracket I
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x A)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x B)) x)
-      (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x C x) =
-      (cov (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x C) x)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x A)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x B)) x)
+      (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x C x) =
+      (cov (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x C) x)
         ((VectorField.mlieBracket I
-          (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x A)
-          (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x B)) x) +
+          (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x A)
+          (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x B)) x) +
         VectorField.mlieBracket I
-          (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x C)
+          (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x C)
           (VectorField.mlieBracket I
-            (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x A)
-            (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x B)) x := by
-  let Ac : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+            (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x A)
+            (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x B)) x := by
+  let Ac : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x A
-  let Bc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+  let Bc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x B
-  let Cc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+  let Cc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x C
   let BrAB : (p : M) -> TangentSpace I p := VectorField.mlieBracket I Ac Bc
   have hC : MDiffAt (T% Cc) x := by
@@ -226,11 +226,11 @@ private theorem tangentConst_torsion_bracket_eq_add
 
 private theorem tangentConst_mlieBracket_jacobi_cyclic
     (x : M) (X Y Z : TangentSpace I x) :
-    let Xc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+    let Xc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
       (I := I) x X
-    let Yc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+    let Yc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
       (I := I) x Y
-    let Zc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+    let Zc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
       (I := I) x Z
     let BrYZ : (p : M) -> TangentSpace I p := VectorField.mlieBracket I Yc Zc
     let BrZX : (p : M) -> TangentSpace I p := VectorField.mlieBracket I Zc Xc
@@ -238,11 +238,11 @@ private theorem tangentConst_mlieBracket_jacobi_cyclic
     VectorField.mlieBracket I Xc BrYZ x +
       VectorField.mlieBracket I Yc BrZX x +
         VectorField.mlieBracket I Zc BrXY x = 0 := by
-  let Xc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+  let Xc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x X
-  let Yc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+  let Yc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x Y
-  let Zc : (p : M) -> TangentSpace I p := DifferentialGeometry.Integral.Connection.tangentConstAt
+  let Zc : (p : M) -> TangentSpace I p := DifferentialGeometry.Geometry.Connection.tangentConstAt
     (I := I) x Z
   let BrYZ : (p : M) -> TangentSpace I p := VectorField.mlieBracket I Yc Zc
   let BrZX : (p : M) -> TangentSpace I p := VectorField.mlieBracket I Zc Xc
@@ -397,20 +397,20 @@ theorem connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFre
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (1 : WithTop ℕ∞))
-    (htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I) cov)
+    (htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I) cov)
     (x : M) (X Y Z : TangentSpace I x) :
     connectionRiemannCurvatureField (I := I) cov
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x X)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x Y)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x Z) x +
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x X)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x Y)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x Z) x +
       connectionRiemannCurvatureField (I := I) cov
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x Y)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x Z)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x X) x +
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x Y)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x Z)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x X) x +
       connectionRiemannCurvatureField (I := I) cov
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x Z)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x X)
-        (DifferentialGeometry.Integral.Connection.tangentConstAt (I := I) x Y) x = 0 := by
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x Z)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x X)
+        (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x Y) x = 0 := by
   unfold DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
   rw [tangentConst_torsion_derivative_eq_add (I := I) cov hcov htf x Y Z X]
   rw [tangentConst_torsion_derivative_eq_add (I := I) cov hcov htf x Z X Y]
@@ -486,7 +486,7 @@ private theorem curvBracket_mid
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I) cov)
+    (htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I) cov)
     (X Y Z W :
       ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x : M) :
@@ -595,7 +595,7 @@ private theorem curvTorsionCancel
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I) cov)
+    (htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I) cov)
     (X Y Z W :
       ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x : M) :
@@ -832,7 +832,7 @@ theorem curvSecondBianchi
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I) cov)
+    (htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I) cov)
     (X Y Z W :
       ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x : M) :

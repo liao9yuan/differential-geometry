@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.GradNormChartBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.LpDecomp
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

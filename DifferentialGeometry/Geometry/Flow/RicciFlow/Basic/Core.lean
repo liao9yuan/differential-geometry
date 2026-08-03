@@ -172,7 +172,7 @@ omit [SigmaCompactSpace M] in
 abbrev metricCurvData
     (g : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Integral.Connection.CurvatureSectionProducerData (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g :=
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g :=
   DifferentialGeometry.Integral.Connection.metricCurvData (I := I) (M := M) g
 
 
@@ -188,7 +188,7 @@ omit [SigmaCompactSpace M] in
 theorem metricCurvData_exists
     (g : SmoothRiemannianMetric I M) :
     Nonempty (DifferentialGeometry.Integral.Connection.CurvatureSectionProducerData (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g) :=
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g) :=
   ⟨metricCurvData (I := I) (M := M) g⟩
 
 
@@ -220,7 +220,7 @@ omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompac
 noncomputable def connection
     (G : SolutionFamily (I := I) (M := M)) :
     Real -> CovariantDerivative I E (TangentSpace I : M -> Type _) :=
-  fun t => DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+  fun t => DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
              (G.metric t)
 
 
@@ -295,7 +295,7 @@ def MetricCompatibleOn
     (G : SolutionFamily (I := I) (M := M))
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) : Prop :=
   forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D,
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (G.connection (t : Real)) (G.metric (t : Real))
 
 end SolutionFamily
@@ -340,7 +340,7 @@ theorem metricCompatible {D : DifferentialGeometry.Integral.Connection.RealTimeI
     (S : SolutionOn (I := I) (M := M) D) :
     S.base.MetricCompatibleOn D := by
   intro t
-  exact DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+  exact DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
     (I := I) (S.base.metric (t : Real))
 
 
@@ -505,7 +505,7 @@ def flowG
   metricCompatible := by
     intro t
     simpa [SolutionFamily.connection] using
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
         (I := I) (S.base.metric t))
 
 
@@ -546,7 +546,7 @@ structure IsSolutionOn
     (S : SolutionOn (I := I) (M := M) D) : Prop where
   smoothMetric : DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn (I := I) (M := M) D
     S.family
-  smoothConnection : DifferentialGeometry.Integral.Connection.ConnectionFamilySmoothOn (I := I)
+  smoothConnection : DifferentialGeometry.Geometry.Connection.ConnectionFamilySmoothOn (I := I)
     (M := M) S.family
   equation : MetricVariationEquationOn (I := I) S
 
@@ -590,12 +590,12 @@ theorem leviCivita
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (_hS : IsSolutionOn (I := I) S) :
-    DifferentialGeometry.Integral.Connection.IsLeviCivitaFamilyOn (I := I) S.family := by
+    DifferentialGeometry.Geometry.Connection.IsLeviCivitaFamilyOn (I := I) S.family := by
   constructor
   · intro t
     exact S.metricCompatible t
   · intro t
-    exact DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree
+    exact DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
       (I := I) (S.base.metric (t : Real))
 
 end IsSolutionOn

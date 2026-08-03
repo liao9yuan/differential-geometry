@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalDiag
 import DifferentialGeometry.Geometry.Comparison.CenterOfMass
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradMain
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

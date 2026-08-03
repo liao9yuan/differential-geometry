@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRegularity
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -232,7 +233,7 @@ theorem canBianchiAt
     simpa [basis, hframe, gInvAt, coordInv,
       IsLocalFrameOn.toBasisAt_coe] using h
   have hmetric :=
-    DifferentialGeometry.Integral.Connection.metricBianchiAt (I := I) (M := M)
+    DifferentialGeometry.Geometry.Connection.metricBianchiAt (I := I) (M := M)
       (g := S.family.metric t) basis gInvAt hinv
   simpa [SolutionOn.family, SolutionOn.ricci, SolutionOn.scalar,
     SolutionFamily.connection, SolutionFamily.rm04, SolutionFamily.ricci,
@@ -398,7 +399,7 @@ theorem canHessAt
   have hcan := coordNab2Can (I := I) S t x₀
     derivs.nablaA derivs.nabla2A derivs.second hnabla
   have hmetric :=
-    DifferentialGeometry.Integral.Connection.canScalHess (I := I) (M := M)
+    DifferentialGeometry.Geometry.Connection.canScalHess (I := I) (M := M)
       (g := S.family.metric t) basis gInvAt hinv i j
   have hmetric' :
       (∑ k : CoordinateIdx (𝕜 := Real) E,
@@ -609,9 +610,9 @@ theorem coordCommAt
           ?_ rfl rfl h20 ?_
       · exact rm13OfSol (I := I) S (t : Real) (D.regular_subset t.2)
       · have htf :=
-          DifferentialGeometry.Integral.Connection.torsionFree_of_isLeviCivita
+          DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
             (I := I) (lcAt_regular (I := I) S hS t)
-        simpa [DifferentialGeometry.Integral.Connection.IsTorsionFreeAt] using htf x
+        simpa [DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt] using htf x
     have hRicTrace13 :
         ∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
           DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I)

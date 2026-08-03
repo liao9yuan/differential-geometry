@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipal
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DLaCoefficientFieldTopSeparated
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Boundary Ricci--DeTurck difference energy

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
+open DifferentialGeometry.Geometry.Connection
 
 
 

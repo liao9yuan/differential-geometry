@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Metric.PointwiseInner.SlotPermutation
 import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

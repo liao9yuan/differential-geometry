@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNormRestrict
 import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

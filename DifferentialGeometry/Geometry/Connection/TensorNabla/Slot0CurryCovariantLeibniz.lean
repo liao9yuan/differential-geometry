@@ -11,8 +11,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -301,7 +302,7 @@ theorem tensor0S_curry_covApply_slot0_leibniz
   rfl
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

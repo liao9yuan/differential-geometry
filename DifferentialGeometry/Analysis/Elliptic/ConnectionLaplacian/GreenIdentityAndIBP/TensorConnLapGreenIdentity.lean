@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovGradL2InnerDirichletBridge
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

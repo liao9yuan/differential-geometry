@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.RSTensor.Defs
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

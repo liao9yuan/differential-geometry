@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBou
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

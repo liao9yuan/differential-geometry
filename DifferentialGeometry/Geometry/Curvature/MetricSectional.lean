@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.AlgebraicForm
 import DifferentialGeometry.Geometry.Curvature.CoordRm04Bridge
 import DifferentialGeometry.Geometry.Curvature.Scaling
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

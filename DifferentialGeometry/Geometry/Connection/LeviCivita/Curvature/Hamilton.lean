@@ -5,7 +5,8 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
 open scoped Topology Manifold ContDiff BigOperators
@@ -992,4 +993,4 @@ theorem hamiltonRm04Id
   simp [hamiltonRmReact, Rcomp, A, B, C, D]
   linear_combination hRaw
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

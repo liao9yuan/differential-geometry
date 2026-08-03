@@ -11,8 +11,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle NormedSpace
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -254,5 +255,5 @@ theorem covApply_linearExtensionTangent_basepoint_eq
 end Reduction
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

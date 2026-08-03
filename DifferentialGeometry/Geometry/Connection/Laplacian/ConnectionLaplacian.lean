@@ -8,8 +8,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -363,5 +364,5 @@ lemma extDerivFun_inner_self_eq_globally [I.Boundaryless]
   exact extDerivFun_inner_self (I := I) g hV b (X b)
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

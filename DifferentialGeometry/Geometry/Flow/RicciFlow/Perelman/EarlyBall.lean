@@ -12,6 +12,7 @@ already in `NoncollapseOpen`; the compact-uniform volume producer is imported
 from `FamilySmallBall`.
 -/
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section

@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6Isometry
 
 set_option autoImplicit false
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 namespace HCGCompactness
 

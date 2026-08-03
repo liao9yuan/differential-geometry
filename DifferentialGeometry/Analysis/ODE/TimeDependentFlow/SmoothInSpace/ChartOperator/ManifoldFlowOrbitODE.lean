@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ManifoldFlowOrbitReduction
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

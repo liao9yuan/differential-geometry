@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmCoordinateRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerRegularity
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

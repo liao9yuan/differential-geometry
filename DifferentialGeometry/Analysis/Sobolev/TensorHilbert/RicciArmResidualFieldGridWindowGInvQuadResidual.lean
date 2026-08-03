@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputS
 import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnectionDifferenceBridge
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

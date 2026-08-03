@@ -9,8 +9,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -1241,7 +1242,7 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs
     (I := I) (M := M) g r s S x v u w hw_at]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

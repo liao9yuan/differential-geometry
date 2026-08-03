@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvat
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

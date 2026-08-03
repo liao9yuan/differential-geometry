@@ -7,6 +7,7 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.InnerProductSpace.Basic
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

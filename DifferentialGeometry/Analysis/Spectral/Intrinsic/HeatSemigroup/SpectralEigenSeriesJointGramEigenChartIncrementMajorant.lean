@@ -17,6 +17,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representati
 import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
 import DifferentialGeometry.Analysis.Calculus.SpectralEigenSeriesJointGramProjectionJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramRawComponentJetBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

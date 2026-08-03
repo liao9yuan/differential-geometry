@@ -9,8 +9,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle NormedSpace
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -605,5 +606,5 @@ theorem riemannOp_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     ((chartModelBasis E) j) ((chartModelBasis E) k) ((chartModelBasis E) i)
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

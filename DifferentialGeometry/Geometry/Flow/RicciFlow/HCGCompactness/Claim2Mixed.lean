@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AkMFold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

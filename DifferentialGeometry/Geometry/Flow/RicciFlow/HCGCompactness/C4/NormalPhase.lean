@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.PhaseFlowExistence
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricGeodesicSpray
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricExtend
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -41,7 +42,7 @@ noncomputable def normalAccel
   letI : SigmaCompactSpace Y.M := Y.sigmaCompact
   letI : T2Space Y.M := Y.t2
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact -((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+  exact -((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
     (normalTotal (I := I) Y x) (fun _ : E ↦ z.2) z.1) z.2)
 
 
@@ -49,11 +50,11 @@ noncomputable def normalAccel
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     normalAccel (I := I) Y x (0 : E × E) = 0 := by
   unfold normalAccel
-  change -((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+  change -((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
     (normalTotal (I := I) Y x) (fun _ : E ↦ (0 : E)) (0 : E)) (0 : E)) = 0
-  rw [Integral.Connection.leviCivitaConnectionOfMetric_apply]
+  rw [DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_apply]
   have hz :
-      Integral.Connection.leviCivitaConnectionCandidateAt (I := 𝓘(Real, E))
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionCandidateAt (I := 𝓘(Real, E))
         (normalTotal (I := I) Y x) (fun _ : E ↦ (0 : E)) (0 : E) (0 : E) = 0 :=
     ContinuousLinearMap.map_zero _
   rw [hz, neg_zero]

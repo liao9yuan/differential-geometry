@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCc
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

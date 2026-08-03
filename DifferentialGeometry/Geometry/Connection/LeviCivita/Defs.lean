@@ -14,8 +14,9 @@ noncomputable section
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -318,5 +319,5 @@ theorem LeviCivita_unique (g : SmoothRiemannianMetric I M)
     hσ v
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

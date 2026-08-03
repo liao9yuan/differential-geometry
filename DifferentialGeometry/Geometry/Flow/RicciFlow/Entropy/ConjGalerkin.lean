@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffMea
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarLapDiffCore
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 import Mathlib.Analysis.InnerProductSpace.PiL2
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNo
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

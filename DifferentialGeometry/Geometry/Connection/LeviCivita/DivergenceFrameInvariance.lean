@@ -50,7 +50,8 @@ set_option maxSynthPendingDepth 3
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
@@ -516,4 +517,4 @@ theorem divergence_g_eq_coordinateFrame_covariant_divergence
         · intro k _ hki; rw [if_neg (fun h => hki h.symm), mul_zero]
         · intro hi; exact absurd (Finset.mem_univ i) hi
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

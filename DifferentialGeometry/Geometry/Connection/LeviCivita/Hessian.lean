@@ -22,10 +22,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
@@ -317,4 +317,4 @@ theorem oneFormLastTwoSymmAt_of_leviCivita_du
   rw [hleft, hright]
   simpa [vec2] using hs
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

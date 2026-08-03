@@ -18,8 +18,9 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open Bundle
@@ -75,7 +76,7 @@ private theorem tangentConst_model (z v : E) :
 
 
 theorem const_flat_eq_koszul
-    (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
+    (g : SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real)
     (hB : ∀ y : E, g.inner y = B y) {z : E}
     (hBdiff : DifferentiableAt Real B z) (v w : E) :
@@ -123,7 +124,7 @@ theorem const_flat_eq_koszul
 
 
 theorem const_flat_eq_nhds
-    (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
+    (g : SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real) {z : E}
     (hB : (fun y : E ↦ g.inner y) =ᶠ[nhds z] B)
     (hBdiff : DifferentiableAt Real B z) (v w : E) :
@@ -191,7 +192,7 @@ theorem const_flat_eq_nhds
 
 
 theorem const_cov_eq_koszul
-    (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
+    (g : SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real)
     (hB : ∀ y : E, g.inner y = B y) {z : E}
     (hBdiff : DifferentiableAt Real B z)
@@ -213,7 +214,7 @@ theorem const_cov_eq_koszul
 
 
 theorem const_cov_eq_nhds
-    (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
+    (g : SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real) {z : E}
     (hB : (fun y : E ↦ g.inner y) =ᶠ[nhds z] B)
     (hBdiff : DifferentiableAt Real B z)
@@ -237,7 +238,7 @@ theorem const_cov_eq_nhds
 
 theorem cov_eq_fderiv_add
     [NeZero (Module.finrank Real E)]
-    (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
+    (g : SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real) {z : E}
     (hB : (fun y : E ↦ g.inner y) =ᶠ[nhds z] B)
     (hBdiff : DifferentiableAt Real B z)
@@ -277,5 +278,5 @@ theorem cov_eq_fderiv_add
   exact congrArg (fun w ↦ fderiv Real V z v + w) hcorr
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

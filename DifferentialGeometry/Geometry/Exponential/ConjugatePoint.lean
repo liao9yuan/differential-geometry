@@ -143,7 +143,7 @@ private theorem jacobi_comp_affine
     covDerivAlong (I := I) g δ
         (fun s => covDerivAlong (I := I) g δ L s) t +
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
           (δ t))
         (L t) (curveVelocity (I := I) δ t)
         (curveVelocity (I := I) δ t) = 0

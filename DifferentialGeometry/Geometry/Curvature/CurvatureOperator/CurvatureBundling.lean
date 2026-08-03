@@ -4,6 +4,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.Topology.Algebra.Module.FiniteDimension
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTrans
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomConv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCPairGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCTransitionRefine
+open DifferentialGeometry.Geometry.Connection
 
 
 

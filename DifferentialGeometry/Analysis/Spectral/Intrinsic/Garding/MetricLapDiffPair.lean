@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.CrossMetricEnergy
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

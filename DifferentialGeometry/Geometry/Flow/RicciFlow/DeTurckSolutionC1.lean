@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLift
+open DifferentialGeometry.Geometry.Connection
 
 
 

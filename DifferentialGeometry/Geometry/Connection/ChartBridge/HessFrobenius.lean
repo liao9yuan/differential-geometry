@@ -9,8 +9,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -295,5 +296,5 @@ theorem hessSec_normSq [I.Boundaryless]
     hessSec_chart_comp (I := I) g hf x hx k l]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

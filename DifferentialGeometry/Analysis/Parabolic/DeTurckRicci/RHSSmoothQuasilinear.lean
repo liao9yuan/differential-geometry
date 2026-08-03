@@ -12,6 +12,7 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

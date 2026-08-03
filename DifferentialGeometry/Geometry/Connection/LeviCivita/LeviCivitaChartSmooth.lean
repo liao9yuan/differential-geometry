@@ -11,7 +11,7 @@ open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -407,5 +407,5 @@ theorem chartLeviCivita_contMDiffCovariantDerivativeOn
       rw [htriv, hcov]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

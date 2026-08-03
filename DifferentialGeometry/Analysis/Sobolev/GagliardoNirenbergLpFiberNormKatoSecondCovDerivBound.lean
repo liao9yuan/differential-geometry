@@ -11,6 +11,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormDiscreteLogConvex
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormHolderIntegrability
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GagliardoNirenbergLpFiberNormCovGradFrameSum
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
@@ -49,8 +50,8 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     ∑ i : Fin (Module.finrank ℝ E),
         riemannianFiberNormSq (I := I) (M := M) g r m x
           (Integral.Connection.tensorSecondCovDeriv (I := I) g r m
-            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
-            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) ≤
       riemannianFiberNormSq (I := I) (M := M) g r (m + 1 + 1) x
         ((covGrad (I := I) (M := M) g r (m + 1)
@@ -58,19 +59,19 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
   set e : Fin n → TangentSpace I x :=
-    fun a => Integral.Connection.smoothOrthoFrame (I := I) g x a x with he_def
+    fun a => DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x with he_def
   have horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := by
     intro a b
     rw [he_def]
-    exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+    exact DifferentialGeometry.Geometry.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
   set T2 : Tensor0SBundle.TensorRSSpace r (m + 1 + 1) I x :=
     (covGrad (I := I) (M := M) g r (m + 1)
       (covGrad (I := I) (M := M) g r m w)).toSection x with hT2_def
   have hcomp : ∀ (i : Fin n) (K : Fin r → Fin n) (J : Fin m → Fin n),
       Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r m
           (Integral.Connection.tensorSecondCovDeriv (I := I) g r m
-            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
-            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) n e K J =
         Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
           (Fin.cons i (Fin.cons i J)) := by
@@ -89,13 +90,13 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
         · simp
         · intro l; simp
     have hbridge := secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) (M := M) g r m w
-      (Integral.Connection.smoothOrthoFrame_smooth (I := I) g x i)
-      (Integral.Connection.smoothOrthoFrame_smooth (I := I) g x i) x ωK
+      (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame_smooth (I := I) g x i)
+      (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame_smooth (I := I) g x i) x ωK
       (fun k : Fin m => e (J k))
     change ((show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace m I x from
           Integral.Connection.tensorSecondCovDeriv (I := I) g r m
-            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
-            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) ωK) (fun k : Fin m => e (J k)) =
       ((show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (m + 1 + 1) I x
           from T2) ωK)
@@ -115,8 +116,8 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
   have hdiag_term : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g r m x
           (Integral.Connection.tensorSecondCovDeriv (I := I) g r m
-            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
-            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) =
         ∑ K : Fin r → Fin n, ∑ J : Fin m → Fin n,
           (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
@@ -188,8 +189,8 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
   have hcw_nn : 0 ≤ cw := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
   set D : Fin n → Tensor0SBundle.TensorRSSpace r m I x :=
     fun i => Integral.Connection.tensorSecondCovDeriv (I := I) g r m
-      (Integral.Connection.smoothOrthoFrame (I := I) g x i)
-      (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+      (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
+      (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
       (fun y : M => w.toSection y) x with hD_def
   have htrace : (rawTensorConnLapSmooth (I := I) g r m w).toFun x =
       Tensor0SBundle.TensorRSSpace.toModel (∑ i : Fin n, D i) := by
@@ -317,13 +318,13 @@ private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
         (fun y : M => Integral.L2.tensorInnerPointwise (I := I) (M := M) g r p y
           (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y))
           (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y))) x v from rfl]
-  rw [Integral.Connection.tensorInnerPointwise_hasMFDerivAt_metricCompatible
+  rw [DifferentialGeometry.Geometry.Connection.tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (I := I) (M := M) g r p Q.toSection Q.toSection x v]
   have hbridge : Integral.L2.covariantTensorInnerPointwise (I := I) (M := M) (r + p) g x
         (Tensor0SBundle.Tensor0SSpace.toModel
-          (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g r p Q.toSection x v))
+          (DifferentialGeometry.Geometry.Connection.loweredCovDerivAt (I := I) (M := M) g r p Q.toSection x v))
         (Tensor0SBundle.Tensor0SSpace.toModel
-          (Integral.Connection.liftedTensorSection (I := I) (M := M) g r p Q.toSection x)) =
+          (DifferentialGeometry.Geometry.Connection.liftedTensorSection (I := I) (M := M) g r p Q.toSection x)) =
       Integral.L2.tensorInnerPointwise (I := I) (M := M) g r p x
         (Tensor0SBundle.TensorRSSpace.toModel
           (tensorCovDerivAt (I := I) (M := M) g r p Q x v))
@@ -341,22 +342,22 @@ private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
           (Tensor0SBundle.TensorRSSpace.toModel
             (tensorCovDerivAt (I := I) (M := M) g r p Q x v)) =
         Tensor0SBundle.Tensor0SSpace.toModel
-          (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g r p Q.toSection x v) from by
+          (DifferentialGeometry.Geometry.Connection.loweredCovDerivAt (I := I) (M := M) g r p Q.toSection x v) from by
       rw [tensorCovDerivAt_def (I := I) (M := M) g r p Q x v]
-      exact (Integral.Connection.loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs
+      exact (DifferentialGeometry.Geometry.Connection.loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs
         (I := I) (M := M) g r p Q.toSection x v).symm]
     rw [show Integral.L2.lowerAllUpperIndices (I := I) (M := M) g r p x
           (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x)) =
         Tensor0SBundle.Tensor0SSpace.toModel
-          (Integral.Connection.liftedTensorSection (I := I) (M := M) g r p Q.toSection x) from
-      (Integral.Connection.toModel_liftedTensorSection
+          (DifferentialGeometry.Geometry.Connection.liftedTensorSection (I := I) (M := M) g r p Q.toSection x) from
+      (DifferentialGeometry.Geometry.Connection.toModel_liftedTensorSection
         (I := I) (M := M) g r p Q.toSection x).symm]
   rw [hbridge]
   rw [Integral.L2.tensorInnerPointwise_0s_symm (I := I) (M := M) g x (r + p)
       (Tensor0SBundle.Tensor0SSpace.toModel
-        (Integral.Connection.liftedTensorSection (I := I) (M := M) g r p Q.toSection x))
+        (DifferentialGeometry.Geometry.Connection.liftedTensorSection (I := I) (M := M) g r p Q.toSection x))
       (Tensor0SBundle.Tensor0SSpace.toModel
-        (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g r p Q.toSection x v))]
+        (DifferentialGeometry.Geometry.Connection.loweredCovDerivAt (I := I) (M := M) g r p Q.toSection x v))]
   rw [hbridge]
   ring
 
@@ -366,18 +367,18 @@ theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs
     ∑ a : Fin (Module.finrank ℝ E),
         (extDerivFun (I := I)
           (fun y : M => riemannianFiberNormSq (I := I) (M := M) g r p y (Q.toSection y)) x
-          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
+          (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
       4 * riemannianFiberNormSq (I := I) (M := M) g r p x (Q.toSection x) *
         riemannianFiberNormSq (I := I) (M := M) g r (p + 1) x
           ((covGrad (I := I) (M := M) g r p Q).toSection x) := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
   set e : Fin n → TangentSpace I x :=
-    fun a => Integral.Connection.smoothOrthoFrame (I := I) g x a x with he_def
+    fun a => DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x with he_def
   have horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := by
     intro a b
     rw [he_def]
-    exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+    exact DifferentialGeometry.Geometry.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
   set rQ : ℝ := riemannianFiberNormSq (I := I) (M := M) g r p x (Q.toSection x) with hrQ_def
   have hrQ_nn : 0 ≤ rQ := riemannianFiberNormSq_nonneg (I := I) (M := M) g r p x (Q.toSection x)
   set V : Fin n → Tensor0SBundle.TensorRSSpace r p I x :=
@@ -440,16 +441,16 @@ theorem prependCovGradSlot_fiberNormSq_frame_sum_rs
         ((prependCovGradSlot (I := I) (M := M) g r t ζ S).toSection x) =
       (∑ a : Fin (Module.finrank ℝ E),
           (extDerivFun (I := I) (ζ : M → ℝ) x
-            (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
         riemannianFiberNormSq (I := I) (M := M) g r t x (S.toSection x) := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
   set e : Fin n → TangentSpace I x :=
-    fun a => Integral.Connection.smoothOrthoFrame (I := I) g x a x with he_def
+    fun a => DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x with he_def
   have horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := by
     intro a b
     rw [he_def]
-    exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+    exact DifferentialGeometry.Geometry.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
   rw [prependCovGradSlot_toSection_apply (I := I) (M := M) g r t ζ S x]
   rw [riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs (I := I) (M := M) g r t x
     ((extDerivFun (I := I) (ζ : M → ℝ) x).smulRight (S.toSection x)) e hn_def horth]

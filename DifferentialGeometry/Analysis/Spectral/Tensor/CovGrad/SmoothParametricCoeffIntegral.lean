@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.Analysis.Calculus.ContDiff.Comp
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -41,6 +41,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Field
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0JointSmooth
 import DifferentialGeometry.Tensor.Multilinear.CurriedProducts
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -1528,8 +1529,8 @@ private lemma lieArm_inner_chartBasis_center (g : SmoothRiemannianMetric I M) (x
         ((chartModelBasis E) q : TangentSpace I x) =
       DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x p q := by
   rw [DifferentialGeometry.Integral.Measure.chartGramMatrix_apply,
-    DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p,
-    DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x q]
+    DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x p,
+    DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x q]
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1547,15 +1548,15 @@ private lemma lieArm_connDiff_chartBasis_center
           ((chartModelBasis E) p : TangentSpace I x) := by
   rw [show ((chartModelBasis E) j : TangentSpace I x) =
       DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x j x from
-    (DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x j).symm]
+    (DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x j).symm]
   rw [show ((chartModelBasis E) k : TangentSpace I x) =
       DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x k x from
-    (DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x k).symm]
+    (DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x k).symm]
   rw [PDE.DeTurck.connDiff_chartBasis_pair_eq_sum (I := I) gA gB x
-    (DifferentialGeometry.Integral.Connection.self_mem_chartLeviCivitaGoodSet (I := I) (α := x))
+    (DifferentialGeometry.Geometry.Connection.self_mem_chartLeviCivitaGoodSet (I := I) (α := x))
     j k]
   refine Finset.sum_congr rfl (fun p _ => ?_)
-  rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p]
+  rw [DifferentialGeometry.Geometry.Connection.chartBasisVecFiber_self (I := I) x p]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm_bilin_expand_fst (F : E →L[ℝ] E →L[ℝ] ℝ)

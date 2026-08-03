@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower.GenuineOperator
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

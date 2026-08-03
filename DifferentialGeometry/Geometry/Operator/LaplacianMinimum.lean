@@ -485,7 +485,7 @@ private theorem cov_gradient_inner_self_nonneg_at_spatial_min
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -501,7 +501,7 @@ private theorem cov_gradient_inner_self_nonneg_at_spatial_min
     simpa [V] using mdifferentiableAt_tangentConstAt_self (I := I) x v
   have hcritical : G x = 0 := by
     simpa [G] using gradientFun_eq_zero_at_spatial_min (I := I) g hmin hf
-  have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply
+  have hmetric := DifferentialGeometry.Geometry.Connection.metric_compatible_apply
     (I := I) hmc V G V hV hgrad hV
   have hfun :
       (fun y : M => g.inner y (G y) (V y)) =
@@ -540,7 +540,7 @@ theorem laplacian_nonneg_at_spatial_min_of_metricCompatible
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -563,7 +563,7 @@ theorem laplacianNonnegativeAtSpatialMin_of_metricCompatible
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g) :
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g) :
     LaplacianNonnegativeAtSpatialMin (I := I) cov g := by
   intro f x hmin hf hf_near hgrad
   exact laplacian_nonneg_at_spatial_min_of_metricCompatible

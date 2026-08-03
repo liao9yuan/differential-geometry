@@ -10,8 +10,9 @@ set_option backward.isDefEq.respectTransparency false
 open scoped Manifold ContDiff Topology
 open Bundle Set Tensor0SBundle
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable
@@ -239,7 +240,7 @@ theorem tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv
     hb_src hb_tgt_int hscalarFn_at v).symm
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

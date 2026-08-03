@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedR
 import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Connection.ChartBridge.DiffRiemannBasisIdentityOffCentre
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformRiemannOperatorNormBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -536,7 +537,7 @@ private lemma pouTsupport_subset_goodSet (α : M) :
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have heq : chartLeviCivitaGoodSet (I := I) α = (chartAt H α).source := by
-    rw [DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
+    rw [DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
           (I := I) α]
     exact extChartAt_source_eq_chartAt_source (I := I) α
   rw [heq]

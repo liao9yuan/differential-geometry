@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGrad
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradVar
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

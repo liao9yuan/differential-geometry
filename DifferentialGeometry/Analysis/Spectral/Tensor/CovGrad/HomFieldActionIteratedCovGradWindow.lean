@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCalculus
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

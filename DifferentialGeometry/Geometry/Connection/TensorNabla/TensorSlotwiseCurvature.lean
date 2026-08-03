@@ -10,8 +10,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -357,7 +358,7 @@ theorem riemannSec_tensor0SCov_apply_eval
             (Function.update u k (baseSlotCurv (I := I) g X W x (u k))))]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

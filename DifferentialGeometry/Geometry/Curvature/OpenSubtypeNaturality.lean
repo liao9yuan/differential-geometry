@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

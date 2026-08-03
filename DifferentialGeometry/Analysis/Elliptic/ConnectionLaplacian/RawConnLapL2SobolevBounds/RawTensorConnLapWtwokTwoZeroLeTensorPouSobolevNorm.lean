@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIntrinsicL2LePouSobolevNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

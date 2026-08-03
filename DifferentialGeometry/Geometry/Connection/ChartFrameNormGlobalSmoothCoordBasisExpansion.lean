@@ -9,8 +9,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Tensor
@@ -268,5 +269,5 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_orthonormality
   exact heval
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

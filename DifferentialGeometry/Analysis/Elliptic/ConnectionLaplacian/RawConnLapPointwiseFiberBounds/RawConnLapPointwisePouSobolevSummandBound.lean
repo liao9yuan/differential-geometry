@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawConnLapRiemannianFiberNormSqLeChartDataT0Uniform
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.IteratedFDerivChartPushedRawBridge
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

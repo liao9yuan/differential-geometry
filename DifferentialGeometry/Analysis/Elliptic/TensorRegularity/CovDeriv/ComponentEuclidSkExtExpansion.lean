@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SkExtChartComponentEqCovDerivEuclid
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.ChartProjectionSecondCovDerivViaSkExt
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentSecondFormula
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

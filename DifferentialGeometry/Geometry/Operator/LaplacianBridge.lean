@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
 import DifferentialGeometry.Geometry.Operator.Laplacian
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotUnif
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartJUniformBoundLocallyConstant
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

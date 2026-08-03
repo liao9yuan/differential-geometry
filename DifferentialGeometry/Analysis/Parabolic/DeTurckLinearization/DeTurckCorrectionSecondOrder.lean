@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LinearizedVectorField
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawTensorConnLapChartFrameTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

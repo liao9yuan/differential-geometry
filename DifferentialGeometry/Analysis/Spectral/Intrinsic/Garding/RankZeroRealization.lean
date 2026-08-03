@@ -10,6 +10,7 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tenso
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Tensor.RSTensor.RankZero
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

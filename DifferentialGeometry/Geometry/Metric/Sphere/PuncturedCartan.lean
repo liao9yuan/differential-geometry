@@ -223,7 +223,7 @@ theorem punctCartan_sq
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := J) g) x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     {x : sphere (0 : A) 1} (hx : x ≠ -p)
@@ -374,7 +374,7 @@ theorem punctCartan_inner
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := J) g) x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     {x : sphere (0 : A) 1} (hx : x ≠ -p)
@@ -407,7 +407,7 @@ theorem punctCartan_local
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := J) g) x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y) :
     IsLocalDiffeomorphOn (𝓡 n) J ∞

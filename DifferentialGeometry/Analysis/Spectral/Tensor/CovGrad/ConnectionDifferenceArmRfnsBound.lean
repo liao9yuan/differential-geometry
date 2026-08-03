@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceFibreBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -8,6 +8,7 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Topology.FiberBundle.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -267,7 +268,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem LeviCivita_riemannSec_torsionFree_form
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, TangentSpace I b} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) :
     riemannSec (LeviCivita (I := I) g) X Y Z x =
@@ -420,7 +421,7 @@ lemma riemannSec_smul_third
   have hfound :
       extDerivFun f x (VectorField.mlieBracket I X Y x) =
         extDerivFun Yf x (X x) - extDerivFun Xf x (Y x) :=
-    extDerivFun_apply_mlieBracket hX hY hf hx_int
+    DifferentialGeometry.Geometry.Connection.extDerivFun_apply_mlieBracket hX hY hf hx_int
   rw [hfound]
   simp only [hXf_def, hYf_def]
   simp only [covApply_apply]

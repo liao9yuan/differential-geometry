@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

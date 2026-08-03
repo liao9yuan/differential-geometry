@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderRe
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensor.NablaTensorFormula
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.ChristoffelCkBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradChartIdentity
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -879,11 +879,11 @@ theorem tfHeat_lc
       Module.finrank Real (TangentSpace I x) = 3)
     (hRm13 : ∀ t,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (Rm13 t))
     (hRm04 : ∀ t,
       DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I) (S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (Rm04 t))
     (hRic13 : ∀ t x,
       S.ricciAt t x =
@@ -916,7 +916,7 @@ theorem tfHeat_lc
           (Rm13 t x) (Rm04 t x) :=
       DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
         (I := I) (g := S.base.metric t)
-        (cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t))
         (Rm13 := Rm13 t) (Rm04 := Rm04 t)
         (hRm13 t) (hRm04 t) x
@@ -928,13 +928,13 @@ theorem tfHeat_lc
         (S.ricciAt t x) (Rm13 t x) (Rm04 t x) (hRic13 t x) hLowerAt
     exact ricciSym_rm04 (I := I) (heatBasis t x) DifferentialGeometry.Integral.Connection.delta3
       (S.ricciAt t x) (Rm04 t x) hTrace
-      (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04PairSymmAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := Rm04 t) (hRm04 := hRm04 t))
-      (DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04OutputSkewAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := Rm04 t) (hRm04 := hRm04 t))
-      (DifferentialGeometry.Integral.Connection.rm04InputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04InputSkewAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := Rm04 t) (hRm04 := hRm04 t))
       delta3_symm
@@ -949,7 +949,7 @@ theorem tfHeat_lc
   · intro t x
     exact DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
       (I := I) (g := S.base.metric t)
-      (cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+      (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
         (S.base.metric t))
       (Rm13 := Rm13 t) (Rm04 := Rm04 t)
       (hRm13 t) (hRm04 t) x
@@ -1134,22 +1134,22 @@ theorem tfHeat_ricci
   have hcov : ∀ t,
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (1 : WithTop ℕ∞) := by
     intro t
     exact
-      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) (S.base.metric t)
   have hRm13 : ∀ t,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm13 t) := by
     intro t
     simpa [SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm13
   have hRm04 : ∀ t,
       DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I) (S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm04 t) := by
     intro t
     simpa [SolutionFamily.rm04, metricCov] using
@@ -1169,7 +1169,7 @@ theorem tfHeat_ricci
           (S.base.rm13 t x) (S.base.rm04 t x) :=
       DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
         (I := I) (g := S.base.metric t)
-        (cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t))
         (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
         (hRm13 t) (hRm04 t) x
@@ -1182,13 +1182,13 @@ theorem tfHeat_ricci
         (hRic13 t x) hLowerAt
     exact ricciSym_rm04 (I := I) (heatBasis t x) DifferentialGeometry.Integral.Connection.delta3
       (S.ricciAt t x) (S.base.rm04 t x) hTrace
-      (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04PairSymmAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := S.base.rm04 t) (hRm04 := hRm04 t))
-      (DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04OutputSkewAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := S.base.rm04 t) (hRm04 := hRm04 t))
-      (DifferentialGeometry.Integral.Connection.rm04InputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04InputSkewAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := S.base.rm04 t) (hRm04 := hRm04 t))
       delta3_symm
@@ -1206,7 +1206,7 @@ theorem tfHeat_ricci
           (S.base.rm13 t x) (S.base.rm04 t x) :=
       DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
         (I := I) (g := S.base.metric t)
-        (cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t))
         (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
         (hRm13 t) (hRm04 t) x
@@ -1329,22 +1329,22 @@ theorem tfHeat_mc
   have hcov : ∀ t,
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (1 : WithTop ℕ∞) := by
     intro t
     exact
-      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) (S.base.metric t)
   have hRm13 : ∀ t,
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm13 t) := by
     intro t
     simpa [SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm13
   have hRm04 : ∀ t,
       DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I) (S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm04 t) := by
     intro t
     simpa [SolutionFamily.rm04, metricCov] using
@@ -1364,7 +1364,7 @@ theorem tfHeat_mc
           (S.base.rm13 t x) (S.base.rm04 t x) :=
       DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
         (I := I) (g := S.base.metric t)
-        (cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t))
         (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
         (hRm13 t) (hRm04 t) x
@@ -1377,13 +1377,13 @@ theorem tfHeat_mc
         (hRic13 t x) hLowerAt
     exact ricciSym_rm04 (I := I) (heatBasis t x) DifferentialGeometry.Integral.Connection.delta3
       (S.ricciAt t x) (S.base.rm04 t x) hTrace
-      (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04PairSymmAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := S.base.rm04 t) (hRm04 := hRm04 t))
-      (DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04OutputSkewAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := S.base.rm04 t) (hRm04 := hRm04 t))
-      (DifferentialGeometry.Integral.Connection.rm04InputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04InputSkewAt_of_leviCivita_realizes
         (I := I) (g := S.base.metric t)
         (Rm04 := S.base.rm04 t) (hRm04 := hRm04 t))
       delta3_symm

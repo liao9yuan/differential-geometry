@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionItera
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Bound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedAppCcLeibniz
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

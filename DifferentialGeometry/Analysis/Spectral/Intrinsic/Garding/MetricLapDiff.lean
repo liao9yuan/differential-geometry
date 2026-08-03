@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarHessBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

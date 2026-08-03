@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnectionDifferenceBridge
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindowGInvQuadResidual
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

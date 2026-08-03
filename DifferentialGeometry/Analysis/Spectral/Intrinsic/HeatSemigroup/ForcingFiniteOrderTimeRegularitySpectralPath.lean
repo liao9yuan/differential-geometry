@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
 import DifferentialGeometry.Analysis.Calculus.ContDiffExtendInterval
 import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegularityParametricIntegral
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

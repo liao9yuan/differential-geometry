@@ -4,7 +4,8 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
@@ -238,7 +239,7 @@ private theorem christoffelCoordAt_symm_of_lc
     (x0 : M) (i j k : CoordinateIdx (𝕜 := Real) E) :
     DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x0 i j k =
       DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x0 j i k := by
-  have htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I) cov := hLC.2
+  have htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I) cov := hLC.2
   have hzero :
       (coordinateFrameAt_isLocalFrame_one (I := I) x0).coeff k x0
           (cov.torsion x0
@@ -247,7 +248,7 @@ private theorem christoffelCoordAt_symm_of_lc
     rw [htf x0]
     simp
   have hskew :=
-    DifferentialGeometry.Integral.Connection.coordinate_torsion_coeff_eq_christoffel_skew
+    DifferentialGeometry.Geometry.Connection.coordinate_torsion_coeff_eq_christoffel_skew
     (I := I) cov x0 i j k
   rw [hzero] at hskew
   simpa [DifferentialGeometry.Integral.Connection.christoffelCoordAt] using sub_eq_zero.mp
@@ -992,4 +993,4 @@ theorem gammaTraceDeriv
 
 end RicciCoordVariation
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTame
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

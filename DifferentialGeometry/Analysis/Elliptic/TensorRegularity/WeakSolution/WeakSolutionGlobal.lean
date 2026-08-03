@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartWeakIdentity
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.SourcePairing
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartIntegrationByParts
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

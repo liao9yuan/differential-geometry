@@ -14,6 +14,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.Parabolic
 
 noncomputable section

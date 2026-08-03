@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LinearExtensionTangent
 import DifferentialGeometry.Geometry.Connection.LeviCivita.CorrectionContraction
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -16,11 +17,11 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 open Bundle Filter Manifold Set
 open scoped Topology Manifold ContDiff
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 

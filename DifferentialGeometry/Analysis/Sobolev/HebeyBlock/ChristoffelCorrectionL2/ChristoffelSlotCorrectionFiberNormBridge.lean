@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Algebra.Order.Chebyshev
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

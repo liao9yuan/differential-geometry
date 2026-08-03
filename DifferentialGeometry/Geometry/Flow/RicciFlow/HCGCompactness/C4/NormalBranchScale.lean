@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalDiagAt
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalDiagBranch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseSmallness
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

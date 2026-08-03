@@ -14,6 +14,7 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.UhlReaction3
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -102,7 +103,7 @@ theorem realizedRmBase_eq_curvCoeff_lower
   have hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (S.family.connection t) (1 : WithTop ℕ∞) := by
     simpa [SolutionFamily.connection, metricCov] using
-      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) (S.base.metric t)
   rw [realizedRmBase_apply, hvec,
     solution_rm04LowersRm13At S t x₀
@@ -773,10 +774,10 @@ omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCompatSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (S.family.connection t) (S.family.metric t) := by
   simpa [SolutionFamily.connection, SolutionOn.family_metric] using
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t)
 
 

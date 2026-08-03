@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpenScalar
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldEndgame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

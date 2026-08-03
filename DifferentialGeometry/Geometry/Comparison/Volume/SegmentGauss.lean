@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiGram
 import DifferentialGeometry.Geometry.Exponential.EndpointShape
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

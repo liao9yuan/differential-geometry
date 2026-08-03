@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Exponential.BranchRadius
 import DifferentialGeometry.Geometry.Exponential.CartanNorm
 import DifferentialGeometry.Geometry.Exponential.DiagInvFixed
 import DifferentialGeometry.Geometry.Metric.Polarization
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -124,12 +125,12 @@ theorem cartanMap_sq
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I') g') x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)
     {x : M} (hx : (p, x) ∈ B.dom) (Y : TangentSpace I x) :
@@ -239,12 +240,12 @@ theorem cartanMap_inner
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I') g') x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)
     {x : M} (hx : (p, x) ∈ B.dom)
@@ -418,12 +419,12 @@ theorem cartanPD_inner
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I') g') x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)
     {x : M} (hx : x ∈ (cartanPD B B' i).source)

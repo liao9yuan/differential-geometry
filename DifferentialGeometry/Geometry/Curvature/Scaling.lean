@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Scaling
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

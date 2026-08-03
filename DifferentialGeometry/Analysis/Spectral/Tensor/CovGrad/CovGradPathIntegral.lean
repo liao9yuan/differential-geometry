@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -93,11 +94,11 @@ private theorem chartRepr_pathIntegralCoeffField_eq
         (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
       ((Set.univ : Set M) ×ˢ S))
     (α b : M) :
-    DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s α
+    DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s α
         (fun y : M => (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection
           y) b =
       ∫ t in (0 : ℝ)..1,
-        DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s α
+        DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s α
           (fun y : M => (Φ t).toSection y) b := by
   set L : TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E :=
     ((trivializationAt (TensorRSModel r s ℝ E)
@@ -107,7 +108,7 @@ private theorem chartRepr_pathIntegralCoeffField_eq
   have hIIm : IntervalIntegrable
       (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection b)) volume 0 1 :=
     toModel_section_intervalIntegrable (I := I) g₀ r s Φ S hSI hjoint b
-  rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply]
+  rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply]
   have hLHS : (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
         ((pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection b) =
@@ -116,7 +117,7 @@ private theorem chartRepr_pathIntegralCoeffField_eq
     congr 1
   rw [hLHS, ← ContinuousLinearMap.intervalIntegral_comp_comm L hIIm]
   refine intervalIntegral.integral_congr (fun t _ => ?_)
-  rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply, hL,
+  rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply, hL,
     ContinuousLinearMap.comp_apply]
   congr 1
 
@@ -132,7 +133,7 @@ private theorem chartRepr_comp_symm_jointContDiffOn
         ((F p.2).toSection p.1))
       ((Set.univ : Set M) ×ˢ S)) :
     ContDiffOn ℝ ∞
-      (fun q : ℝ × E => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      (fun q : ℝ × E => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s α (fun z : M => (F q.1).toSection z) ((extChartAt I α).symm q.2))
       (S ×ˢ (extChartAt I α).target) := by
   intro q hq
@@ -153,13 +154,13 @@ private theorem fderiv_chartRepr_jointContinuousOn
       ((Set.univ : Set M) ×ˢ S)) :
     ContinuousOn
       (fun q : ℝ × E => fderiv ℝ (fun y : E =>
-          DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+          DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
             (I := I) r s α (fun z : M => (F q.1).toSection z) ((extChartAt I α).symm y)) q.2)
       (S ×ˢ U) := by
   intro q hq
   obtain ⟨hqS, hqU⟩ := hq
   set G : ℝ × E → E → TensorRSModel r s ℝ E :=
-    fun p y => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+    fun p y => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
       (I := I) r s α (fun z : M => (F p.1).toSection z) ((extChartAt I α).symm y) with hG
   have huncurry : ContDiffWithinAt ℝ ∞
       (Function.uncurry (fun (p : ℝ × E) (y : E) => G p y))
@@ -197,18 +198,18 @@ private theorem hasFDerivAt_chartRepr_pathIntegral
       ((Set.univ : Set M) ×ˢ S))
     (α : M) {y₀ : E} (hy₀ : y₀ ∈ interior ((extChartAt I α).target : Set E)) :
     HasFDerivAt
-      (fun y : E => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      (fun y : E => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s α
         (fun z : M =>
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection z)
         ((extChartAt I α).symm y))
       (∫ t in (0 : ℝ)..1, fderiv ℝ (fun y : E =>
-          DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+          DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
             (I := I) r s α (fun z : M => (Φ t).toSection z) ((extChartAt I α).symm y)) y₀)
       y₀ := by
   classical
   set Gfn : ℝ → E → TensorRSModel r s ℝ E :=
-    fun t y => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+    fun t y => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
       (I := I) r s α (fun z : M => (Φ t).toSection z) ((extChartAt I α).symm y) with hGfn
   set F : E → ℝ → TensorRSModel r s ℝ E := fun y t => Gfn t y with hF
   set F' : E → ℝ → E →L[ℝ] TensorRSModel r s ℝ E :=
@@ -331,7 +332,7 @@ private theorem hasFDerivAt_chartRepr_pathIntegral
     (F := F) (F' := F') (bound := fun _ => C) (a := 0) (b := 1) (μ := μ) (x₀ := y₀)
     (s := Metric.ball y₀ ε2) hsmem hF_meas hF_int hF'_meas h_bound hbound_int h_diff
   have hLHSeq : (fun y : E => ∫ t in (0:ℝ)..1, F y t ∂μ) =
-      (fun y : E => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      (fun y : E => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s α
         (fun z : M =>
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection z)
@@ -354,21 +355,21 @@ private theorem fderiv_chartRepr_pathIntegral_apply_data
         (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
       ((Set.univ : Set M) ×ˢ S))
     (α : M) {y₀ : E} (hy₀ : y₀ ∈ interior ((extChartAt I α).target : Set E)) (dir : E) :
-    (fderiv ℝ (fun y : E => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+    (fderiv ℝ (fun y : E => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s α
         (fun z : M =>
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection z)
         ((extChartAt I α).symm y)) y₀ dir =
       ∫ t in (0 : ℝ)..1, fderiv ℝ (fun y : E =>
-        DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+        DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
           (I := I) r s α (fun z : M => (Φ t).toSection z) ((extChartAt I α).symm y)) y₀ dir) ∧
     IntervalIntegrable (fun t : ℝ => fderiv ℝ (fun y : E =>
-      DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s α (fun z : M => (Φ t).toSection z) ((extChartAt I α).symm y)) y₀ dir)
       volume 0 1 := by
   have hhas := hasFDerivAt_chartRepr_pathIntegral (I := I) g₀ r s Φ S hS hSI hjoint α hy₀
   have hcont : ContinuousOn (fun t : ℝ => fderiv ℝ (fun y : E =>
-      DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s α (fun z : M => (Φ t).toSection z) ((extChartAt I α).symm y)) y₀)
       (Set.uIcc (0 : ℝ) 1) := by
     have hjc := fderiv_chartRepr_jointContinuousOn (I := I) g₀ r s Φ S hS α
@@ -377,7 +378,7 @@ private theorem fderiv_chartRepr_pathIntegral_apply_data
         (S ×ˢ interior ((extChartAt I α).target : Set E)) := fun t ht => ⟨hSI ht, hy₀⟩
     exact hjc.comp ((continuous_id.prodMk continuous_const).continuousOn) hmaps
   have hII : IntervalIntegrable (fun t : ℝ => fderiv ℝ (fun y : E =>
-      DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s α (fun z : M => (Φ t).toSection z) ((extChartAt I α).symm y)) y₀)
       volume 0 1 := hcont.intervalIntegrable
   constructor
@@ -395,7 +396,7 @@ private theorem chartE_repr_slice_continuousOn
       ((Set.univ : Set M) ×ˢ S))
     (α x : M) (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S) :
     ContinuousOn
-      (fun t : ℝ => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      (fun t : ℝ => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s α (fun z : M => (Φ t).toSection z) x) (Set.uIcc (0:ℝ) 1) := by
   set L : TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E :=
     ((trivializationAt (TensorRSModel r s ℝ E)
@@ -407,10 +408,10 @@ private theorem chartE_repr_slice_continuousOn
     (jointContMDiff_toModel_continuous_slice (I := I) g₀ r s Φ S hjoint x).mono hSI
   refine ContinuousOn.congr (L.continuous.comp_continuousOn hm) ?_
   intro t _
-  change DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+  change DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
       (I := I) r s α (fun z : M => (Φ t).toSection z) x = L
         (TensorRSSpace.toModel ((Φ t).toSection x))
-  rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply, hL,
+  rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply, hL,
     ContinuousLinearMap.comp_apply]
   congr 1
 
@@ -430,14 +431,14 @@ private theorem intervalIntegrable_slotInput
       (fun t : ℝ =>
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             x
             (fun z : M => (Φ t).toSection z) B.toFun x k)) volume 0 1 := by
   have hcont : ContinuousOn
       (fun t : ℝ =>
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             x
             (fun z : M => (Φ t).toSection z) B.toFun x k)) (Set.uIcc (0:ℝ) 1) := by
     have hbase := chartE_repr_slice_continuousOn (I := I) g₀ r s Φ S hjoint x x hSI
@@ -447,15 +448,15 @@ private theorem intervalIntegrable_slotInput
     intro t _
     change (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             x
             (fun z : M => (Φ t).toSection z) B.toFun x k) =
         DifferentialGeometry.Integral.Connection.inputSlotChartKernel (I := I) g₀ r s x B.toFun k x
-          (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+          (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
             (I := I) r s x (fun z : M => (Φ t).toSection z) x)
     rw [chartTensorRSInputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
       (fun z : M => (Φ t).toSection z) B.toFun hx_src k,
-      DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply]
+      DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply]
   exact hcont.intervalIntegrable
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
@@ -474,14 +475,14 @@ private theorem intervalIntegrable_slotOutput
       (fun t : ℝ =>
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ x
             (fun z : M => (Φ t).toSection z) B.toFun x l)) volume 0 1 := by
   have hcont : ContinuousOn
       (fun t : ℝ =>
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ x
             (fun z : M => (Φ t).toSection z) B.toFun x l)) (Set.uIcc (0:ℝ) 1) := by
     have hbase := chartE_repr_slice_continuousOn (I := I) g₀ r s Φ S hjoint x x hSI
@@ -491,15 +492,15 @@ private theorem intervalIntegrable_slotOutput
     intro t _
     change (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ x
             (fun z : M => (Φ t).toSection z) B.toFun x l) =
         DifferentialGeometry.Integral.Connection.outputSlotChartKernel (I := I) g₀ r s x B.toFun l x
-          (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+          (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
             (I := I) r s x (fun z : M => (Φ t).toSection z) x)
     rw [chartTensorRSOutputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
       (fun z : M => (Φ t).toSection z) B.toFun hx_src l,
-      DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply]
+      DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply]
   exact hcont.intervalIntegrable
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M]
@@ -515,25 +516,25 @@ private theorem inputSlotCorrection_pathIntegral_comm
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (k : Fin r) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-      (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀ x
+      (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀ x
         (fun z : M => (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection
           z)
         B.toFun x k) =
       ∫ t in (0 : ℝ)..1,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             x
             (fun z : M => (Φ t).toSection z) B.toFun x k) := by
   have hx_src : x ∈ (chartAt H x).source := mem_chart_source H x
   have hIIΦ : IntervalIntegrable
-      (fun t : ℝ => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      (fun t : ℝ => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s x (fun z : M => (Φ t).toSection z) x) volume 0 1 :=
     (chartE_repr_slice_continuousOn (I := I) g₀ r s Φ S hjoint x x hSI).intervalIntegrable
   rw [chartTensorRSInputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
     (fun z : M => (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection z)
     B.toFun hx_src k,
-    ← DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply (I := I) r s x
+    ← DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply (I := I) r s x
       (fun z : M => (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection z)
         x,
     chartRepr_pathIntegralCoeffField_eq (I := I) g₀ r s Φ S hS hSI hjoint x x]
@@ -543,7 +544,7 @@ private theorem inputSlotCorrection_pathIntegral_comm
   refine intervalIntegral.integral_congr (fun t _ => ?_)
   rw [chartTensorRSInputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
     (fun z : M => (Φ t).toSection z) B.toFun hx_src k,
-    DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply]
+    DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply]
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M]
   [SigmaCompactSpace M] in
@@ -558,25 +559,25 @@ private theorem outputSlotCorrection_pathIntegral_comm
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (l : Fin s) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-      (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s g₀ x
+      (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s g₀ x
         (fun z : M => (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection
           z)
         B.toFun x l) =
       ∫ t in (0 : ℝ)..1,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') x).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ x
             (fun z : M => (Φ t).toSection z) B.toFun x l) := by
   have hx_src : x ∈ (chartAt H x).source := mem_chart_source H x
   have hIIΦ : IntervalIntegrable
-      (fun t : ℝ => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      (fun t : ℝ => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) r s x (fun z : M => (Φ t).toSection z) x) volume 0 1 :=
     (chartE_repr_slice_continuousOn (I := I) g₀ r s Φ S hjoint x x hSI).intervalIntegrable
   rw [chartTensorRSOutputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
     (fun z : M => (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection z)
     B.toFun hx_src l,
-    ← DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply (I := I) r s x
+    ← DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply (I := I) r s x
       (fun z : M => (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection z)
         x,
     chartRepr_pathIntegralCoeffField_eq (I := I) g₀ r s Φ S hS hSI hjoint x x]
@@ -586,7 +587,7 @@ private theorem outputSlotCorrection_pathIntegral_comm
   refine intervalIntegral.integral_congr (fun t _ => ?_)
   rw [chartTensorRSOutputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
     (fun z : M => (Φ t).toSection z) B.toFun hx_src l,
-    DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply]
+    DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply]
 
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -599,22 +600,22 @@ private theorem covApply_chartE_pathIntegral_comm
         (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
       ((Set.univ : Set M) ×ˢ S))
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
-    DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s x
+    DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s x
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
           B.toFun
           (fun z : M =>
             (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection z)) x =
       ∫ t in (0 : ℝ)..1,
-        DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s x
+        DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s x
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
             B.toFun (fun z : M => (Φ t).toSection z)) x := by
   classical
   set α : M := x with hα
   set φ := extChartAt I α with hφ
   have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) α :=
-    DifferentialGeometry.Integral.Connection.self_mem_chartLeviCivitaGoodSet (I := I) α
+    DifferentialGeometry.Geometry.Connection.self_mem_chartLeviCivitaGoodSet (I := I) α
   have hx_src : x ∈ (chartAt H α).source :=
-    DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_mem_chartAt_source
+    DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_mem_chartAt_source
       (I := I) hx_good
   have hx_tgt : φ x ∈ φ.target := φ.map_source (by rw [hφ, extChartAt_source]; exact hx_src)
   have hx_round : φ.symm (φ x) = x := φ.left_inv (by rw [hφ, extChartAt_source]; exact hx_src)
@@ -626,34 +627,34 @@ private theorem covApply_chartE_pathIntegral_comm
   have hform_W := chart_pulled_covApply_explicit_formula_target_smoothCc (I := I) (M := M)
     g₀ r s α W B hx_tgt (by rw [hx_round]; exact hx_good)
   have hform_Φ : ∀ t : ℝ,
-      (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s α
+      (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s α
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
             B.toFun (fun z : M => (Φ t).toSection z)) ∘ φ.symm) (φ x) =
         fderiv ℝ
-          (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s α
+          (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s α
             (fun z : M => (Φ t).toSection z) ∘ φ.symm) (φ x)
-          (DifferentialGeometry.Integral.Connection.trivToE (I := I) α (φ.symm (φ x))
+          (DifferentialGeometry.Geometry.Connection.trivToE (I := I) α (φ.symm (φ x))
             (B.toFun (φ.symm (φ x))))
         + ∑ k : Fin r,
             (trivializationAt (TensorRSModel r s ℝ E)
                 (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ (φ.symm (φ x))
-              (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r
+              (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r
                 s g₀ α
                 (fun z : M => (Φ t).toSection z) B.toFun (φ.symm (φ x)) k)
         - ∑ l : Fin s,
             (trivializationAt (TensorRSModel r s ℝ E)
                 (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ (φ.symm (φ x))
-              (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r
+              (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r
                 s g₀ α
                 (fun z : M => (Φ t).toSection z) B.toFun (φ.symm (φ x)) l) := fun t =>
     chart_pulled_covApply_explicit_formula_target_smoothCc (I := I) (M := M)
       g₀ r s α (Φ t) B hx_tgt (by rw [hx_round]; exact hx_good)
-  set dir : E := DifferentialGeometry.Integral.Connection.trivToE (I := I) α x (B.toFun x) with hdir
+  set dir : E := DifferentialGeometry.Geometry.Connection.trivToE (I := I) α x (B.toFun x) with hdir
   set Wchart : E → TensorRSModel r s ℝ E :=
-    fun y => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s α
+    fun y => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s α
       (fun z : M => W.toSection z) (φ.symm y) with hWchart
   set Φchart : ℝ → E → TensorRSModel r s ℝ E :=
-    fun t y => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s α
+    fun t y => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s α
       (fun z : M => (Φ t).toSection z) (φ.symm y) with hΦchart
   have hfderiv_data :=
     fderiv_chartRepr_pathIntegral_apply_data (I := I) g₀ r s Φ S hS hSI hjoint α hx_int dir
@@ -670,12 +671,12 @@ private theorem covApply_chartE_pathIntegral_comm
   have hinput_comm : ∀ k : Fin r,
       (trivializationAt (TensorRSModel r s ℝ E)
           (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-        (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀ α
+        (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀ α
           (fun z : M => W.toSection z) B.toFun x k) =
       ∫ t in (0 : ℝ)..1,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             α
             (fun z : M => (Φ t).toSection z) B.toFun x k) := by
     intro k
@@ -684,32 +685,32 @@ private theorem covApply_chartE_pathIntegral_comm
   have houtput_comm : ∀ l : Fin s,
       (trivializationAt (TensorRSModel r s ℝ E)
           (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-        (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s g₀
+        (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s g₀
           α
           (fun z : M => W.toSection z) B.toFun x l) =
       ∫ t in (0 : ℝ)..1,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ α
             (fun z : M => (Φ t).toSection z) B.toFun x l) := by
     intro l
     rw [hW, hα]
     exact outputSlotCorrection_pathIntegral_comm (I := I) g₀ r s Φ S hS hSI hjoint B x l
-  have hLHS_eq : DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s x
+  have hLHS_eq : DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s x
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
           B.toFun (fun z : M => W.toSection z)) x =
       fderiv ℝ Wchart (φ x) dir
         + (∑ k : Fin r,
             (trivializationAt (TensorRSModel r s ℝ E)
                 (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-              (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r
+              (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r
                 s g₀ α
                 (fun z : M => W.toSection z) B.toFun x k))
         - (∑ l : Fin s,
             (trivializationAt (TensorRSModel r s ℝ E)
                 (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-              (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r
+              (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r
                 s g₀ α
                 (fun z : M => W.toSection z) B.toFun x l)) := by
     have h := hform_W
@@ -719,20 +720,20 @@ private theorem covApply_chartE_pathIntegral_comm
     rw [hWchart, hdir]
     exact h
   have hRHS_eq : ∀ t : ℝ,
-      DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s x
+      DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s x
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
           B.toFun (fun z : M => (Φ t).toSection z)) x =
       fderiv ℝ (Φchart t) (φ x) dir
         + (∑ k : Fin r,
             (trivializationAt (TensorRSModel r s ℝ E)
                 (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-              (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r
+              (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r
                 s g₀ α
                 (fun z : M => (Φ t).toSection z) B.toFun x k))
         - (∑ l : Fin s,
             (trivializationAt (TensorRSModel r s ℝ E)
                 (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-              (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r
+              (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r
                 s g₀ α
                 (fun z : M => (Φ t).toSection z) B.toFun x l)) := by
     intro t
@@ -745,13 +746,13 @@ private theorem covApply_chartE_pathIntegral_comm
   have hsum_input : (∑ k : Fin r,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             α
             (fun z : M => W.toSection z) B.toFun x k)) =
       ∫ t in (0 : ℝ)..1, ∑ k : Fin r,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             α
             (fun z : M => (Φ t).toSection z) B.toFun x k) := by
     refine finset_sum_eq_intervalIntegral_sum_local _ _ hinput_comm ?_
@@ -759,13 +760,13 @@ private theorem covApply_chartE_pathIntegral_comm
   have hsum_output : (∑ l : Fin s,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ α
             (fun z : M => W.toSection z) B.toFun x l)) =
       ∫ t in (0 : ℝ)..1, ∑ l : Fin s,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ α
             (fun z : M => (Φ t).toSection z) B.toFun x l) := by
     refine finset_sum_eq_intervalIntegral_sum_local _ _ houtput_comm ?_
@@ -779,7 +780,7 @@ private theorem covApply_chartE_pathIntegral_comm
       (fun t : ℝ => ∑ k : Fin r,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             α
             (fun z : M => (Φ t).toSection z) B.toFun x k)) volume 0 1 := by
     refine intervalIntegrable_finset_sum_local _ ?_
@@ -788,7 +789,7 @@ private theorem covApply_chartE_pathIntegral_comm
       (fun t : ℝ => ∑ l : Fin s,
         (trivializationAt (TensorRSModel r s ℝ E)
             (fun y' : M => TensorRSSpace r s I y') α).continuousLinearMapAt ℝ x
-          (DifferentialGeometry.Integral.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
+          (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ α
             (fun z : M => (Φ t).toSection z) B.toFun x l)) volume 0 1 := by
     refine intervalIntegrable_finset_sum_local _ ?_
@@ -874,21 +875,21 @@ private theorem tensorCovDerivAt_pathIntegralCoeffField_eq
       TensorRSSpace.toModel
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
           B.toFun (fun z : M => Y.toSection z) x) =
-      K (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s x
+      K (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s x
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
             B.toFun (fun z : M => Y.toSection z)) x) := by
     intro Y
     rw [hK, ContinuousLinearMap.comp_apply,
-      DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
+      DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply,
       Bundle.Trivialization.symmL_continuousLinearMapAt e hxbase]
     rfl
   have hII_chartΦ : IntervalIntegrable
-      (fun t : ℝ => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r
+      (fun t : ℝ => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r
         s x
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
           B.toFun (fun z : M => (Φ t).toSection z)) x) volume 0 1 := by
     have hcont : ContinuousOn
-        (fun t : ℝ => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I)
+        (fun t : ℝ => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I)
           r s x
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
             B.toFun (fun z : M => (Φ t).toSection z)) x) (Set.uIcc (0:ℝ) 1) := by
@@ -900,18 +901,18 @@ private theorem tensorCovDerivAt_pathIntegralCoeffField_eq
         with hLc
       refine ContinuousOn.congr (Lc.continuous.comp_continuousOn hfibre_model) ?_
       intro t _
-      change DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s x
+      change DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s x
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
             B.toFun (fun z : M => (Φ t).toSection z)) x =
           Lc (TensorRSSpace.toModel
             (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
                 B.toFun (fun z : M => (Φ t).toSection z) x))
-      rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply, hLc,
+      rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply, hLc,
         ContinuousLinearMap.comp_apply]
       congr 1
     exact hcont.intervalIntegrable
   have hgoalL : TensorRSSpace.toModel (tensorCovDerivAt (I := I) (M := M) g₀ r s W x v) =
-      K (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s x
+      K (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s x
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
             B.toFun (fun z : M => W.toSection z)) x) := by
     rw [← hKbridge W]
@@ -920,7 +921,7 @@ private theorem tensorCovDerivAt_pathIntegralCoeffField_eq
     rw [hBx]
   have hgoalΦ : ∀ t : ℝ,
       TensorRSSpace.toModel (tensorCovDerivAt (I := I) (M := M) g₀ r s (Φ t) x v) =
-      K (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) r s x
+      K (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) r s x
           (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g₀))
             B.toFun (fun z : M => (Φ t).toSection z)) x) := by
     intro t

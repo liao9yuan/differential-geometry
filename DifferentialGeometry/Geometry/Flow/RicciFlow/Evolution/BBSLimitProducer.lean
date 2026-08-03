@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BBSAllMBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.EndpointMetricLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.EndpointRicciLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ExtendShiInputs
+open DifferentialGeometry.Geometry.Connection
 
 
 

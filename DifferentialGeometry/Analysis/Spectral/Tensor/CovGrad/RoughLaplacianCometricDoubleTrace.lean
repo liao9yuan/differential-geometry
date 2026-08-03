@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

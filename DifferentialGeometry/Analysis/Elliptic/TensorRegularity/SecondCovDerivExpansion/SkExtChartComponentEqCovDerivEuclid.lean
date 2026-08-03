@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentSecondFormula
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

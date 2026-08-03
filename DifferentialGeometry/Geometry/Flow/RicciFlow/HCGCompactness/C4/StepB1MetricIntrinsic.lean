@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullbackCross
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNormFlat
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -91,7 +92,7 @@ private theorem metric_norm_le_comp
       |iterCovComp (I := 𝓘(Real, E)) (M := V)
           (fun i _ ↦ e i)
           (fun y ↦ Tensor.Coordinates.christoffelSymbolInFrame
-            (Integral.Connection.leviCivitaConnectionOfMetric
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
               (I := 𝓘(Real, E)) g)
             (fun i (_ : V) ↦ e i)
             (constBasis_isLocalFrame_open V e) y)
@@ -141,7 +142,7 @@ private theorem metric_norm_le_comp
   have ht' :
       iterCovComp (I := 𝓘(Real, E)) frame
           (fun y ↦ Tensor.Coordinates.christoffelSymbolInFrame
-            (Integral.Connection.leviCivitaConnectionOfMetric
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
               (I := 𝓘(Real, E)) g) frame hframe y)
           (frameComp0S (I := 𝓘(Real, E))
             (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
@@ -159,7 +160,7 @@ private theorem metric_norm_le_comp
         a z (fun q ↦ e (slots q))| =
         |iterCovComp (I := 𝓘(Real, E)) frame
           (fun y ↦ Tensor.Coordinates.christoffelSymbolInFrame
-            (Integral.Connection.leviCivitaConnectionOfMetric
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
               (I := 𝓘(Real, E)) g) frame hframe y)
           (frameComp0S (I := 𝓘(Real, E))
             (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
@@ -283,7 +284,7 @@ private theorem normal_christoffel
       (z : V) (hco : IsCoercive (normalCoordMetric (I := I) Y x (z : E)))
       (i j m : Fin (Module.finrank Real E)),
       Tensor.Coordinates.christoffelSymbolInFrame
-          (Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
             ((normalTotal (I := I) Y x).restrictOpen (I := 𝓘(Real, E)) V))
           (fun q (y : V) => (show TangentSpace 𝓘(Real, E) y from e q))
           (constBasis_isLocalFrame_open V e) z i j m =
@@ -318,14 +319,14 @@ private theorem normal_christoffel
     (constTangentSection (E := E) (e j)) z (e i)
   rw [hfield] at hres
   have hres' :
-      ((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+      ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
           ((normalTotal (I := I) Y x).restrictOpen (I := 𝓘(Real, E)) V)
           (frame j) z) (e i)) =
-        ((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+        ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
           (normalTotal (I := I) Y x) (fun _ : E => e j) (z : E)) (e i)) := by
     simpa only [Integral.Connection.metricCov, frame, constTangentSection] using hres
   have hcov :
-      ((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+      ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
           ((normalTotal (I := I) Y x).restrictOpen (I := 𝓘(Real, E)) V)
           (frame j) z) (frame i z)) =
         MetricKoszul.koszulVec hco
@@ -555,7 +556,7 @@ private theorem local_norm_le
       frame Set.univ := constBasis_isLocalFrame_open V e
   have hchrEq :
       (fun w ↦ Tensor.Coordinates.christoffelSymbolInFrame
-        (Integral.Connection.leviCivitaConnectionOfMetric
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
           (I := 𝓘(Real, E)) gv) frame hframe w) =
         fun (w : V) ↦ Gamma (w : E) := by
     funext w i j m
@@ -588,7 +589,7 @@ private theorem local_norm_le
     |iterCovComp (I := 𝓘(Real, E)) (M := V)
         (fun i _ ↦ e i)
         (fun w ↦ Tensor.Coordinates.christoffelSymbolInFrame
-          (Integral.Connection.leviCivitaConnectionOfMetric
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
             (I := 𝓘(Real, E)) gv)
           (fun i (_ : V) ↦ e i)
           (constBasis_isLocalFrame_open V e) w)

@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicExpContinuity
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.UnitInterval
+open DifferentialGeometry.Geometry.Connection
 
 
 

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ConnectionDifferenceCurvature
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

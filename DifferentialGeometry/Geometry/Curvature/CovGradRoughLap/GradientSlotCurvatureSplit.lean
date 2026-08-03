@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

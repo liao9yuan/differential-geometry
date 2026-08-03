@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 namespace PDE
 

@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCha
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieTopReanchor
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

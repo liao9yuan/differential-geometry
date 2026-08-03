@@ -9,6 +9,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenc
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceDeriv
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
 import DifferentialGeometry.Analysis.Calculus.PiDeriv
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

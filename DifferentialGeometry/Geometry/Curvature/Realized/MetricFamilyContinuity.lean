@@ -23,6 +23,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Integral.Connection
 
 open Bundle Tensor0SBundle

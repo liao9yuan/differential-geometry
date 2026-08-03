@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.RawTensorConnLapNormSqChartPulledReprBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.IteratedFDerivTensorReprChartCompBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecompReal
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

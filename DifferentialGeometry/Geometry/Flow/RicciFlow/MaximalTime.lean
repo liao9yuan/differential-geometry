@@ -10,6 +10,7 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import Mathlib.Analysis.Calculus.FDeriv.Extend
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

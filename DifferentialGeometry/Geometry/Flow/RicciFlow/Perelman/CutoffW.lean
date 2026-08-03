@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CutoffEnergy
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
 import DifferentialGeometry.Analysis.Integration.LpNorm
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 /-!

@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Bound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpDualFrameParseval
 import DifferentialGeometry.Geometry.Operator.Gradient
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

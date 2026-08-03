@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
+open DifferentialGeometry.Geometry.Connection
 
 
 
@@ -458,13 +459,13 @@ theorem radialJacobi_ode_of_curv
     (hcurv : ∀ t ∈ Ico (0 : ℝ) b,
       g.inner (radialCurve (I := I) g p x t)
         ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (radialCurve (I := I) g p x t))
           (radialJacobiField (I := I) g p x w t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t))
         ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (radialCurve (I := I) g p x t))
           (radialJacobiField (I := I) g p x w t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
@@ -503,13 +504,13 @@ theorem ode_Ico_of_Ioo_zero
     (hcurv : ∀ t ∈ Ioo (0 : ℝ) b,
       g.inner (radialCurve (I := I) g p x t)
         ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (radialCurve (I := I) g p x t))
           (radialJacobiField (I := I) g p x w t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t))
         ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (radialCurve (I := I) g p x t))
           (radialJacobiField (I := I) g p x w t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
@@ -560,13 +561,13 @@ theorem ode_Ico_of_Ioo_d2
     (hcurv : ∀ t ∈ Ioo (0 : ℝ) b,
       g.inner (radialCurve (I := I) g p x t)
         ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (radialCurve (I := I) g p x t))
           (radialJacobiField (I := I) g p x w t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t))
         ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (radialCurve (I := I) g p x t))
           (radialJacobiField (I := I) g p x w t)
           (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
@@ -625,7 +626,7 @@ theorem d2_zero_of_jac0
         (radialJacobiField (I := I) g p x w) s) 0 with hD_def
   set C : TangentSpace I (radialCurve (I := I) g p x 0) :=
     ((DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
           (radialCurve (I := I) g p x 0))
         (0 : TangentSpace I (radialCurve (I := I) g p x 0))
         (curveVelocity (I := I) (radialCurve (I := I) g p x) 0)
@@ -648,13 +649,13 @@ theorem exists_ode_Ico
       (∀ t ∈ Ioo (0 : ℝ) b,
         g.inner (radialCurve (I := I) g p x t)
           ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (radialCurve (I := I) g p x t))
             (radialJacobiField (I := I) g p x w t)
             (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
             (curveVelocity (I := I) (radialCurve (I := I) g p x) t))
           ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (radialCurve (I := I) g p x t))
             (radialJacobiField (I := I) g p x w t)
             (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
@@ -727,7 +728,7 @@ private def radialCurvTerm
     (g : SmoothRiemannianMetric I M) (p : M) (x w : E) (t : Real) :
     TangentSpace I (radialCurve (I := I) g p x t) :=
   (DifferentialGeometry.Integral.Connection.riemannOp
-    (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+    (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
       (radialCurve (I := I) g p x t))
     (radialJacobiField (I := I) g p x w t)
     (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
@@ -782,7 +783,7 @@ private theorem radialCurvTermFlat_apply_eq_metricRm04StdAt
     DifferentialGeometry.metricRm04At_eq_riemannCurvature04At,
     DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At_apply_const,
     DifferentialGeometry.riemannCurvatureAux_tangentConst_eq_riemannOp
-      (cov := DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+      (cov := DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
       (hcov := hcov)]
   unfold radialCurvTermFlat radialCurvTerm
   rw [Tensor0SBundle.dualToCotangent_apply_gen,

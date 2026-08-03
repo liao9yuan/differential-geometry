@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

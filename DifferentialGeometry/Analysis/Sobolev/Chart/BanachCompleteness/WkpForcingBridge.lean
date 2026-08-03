@@ -33,7 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I (⊤ : WithTop ℕ∞) M]
 abbrev WkpTimeL2
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (k : ℕ) (p : ℝ≥0∞) (hp : 1 ≤ p) (T : ℝ) : Type _ :=
   MeasureTheory.Lp
     (WkpChartQuot (I := I) (M := M) g k p hp)
@@ -45,7 +45,7 @@ to make its time-`L²` forcing carrier complete. -/
 theorem wkpTime_complete
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤)
     (T : ℝ) :
     CompleteSpace (WkpTimeL2 (I := I) (M := M) g k p hp_one T) := by
@@ -58,7 +58,7 @@ fixed point.  The `CompleteSpace` input is supplied locally by
 theorem wkpTime_fixed
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤)
     (T : ℝ) {K : NNReal}
     {Phi : WkpTimeL2 (I := I) (M := M) g k p hp_one T →

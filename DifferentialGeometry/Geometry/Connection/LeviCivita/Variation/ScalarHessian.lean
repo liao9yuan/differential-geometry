@@ -4,7 +4,8 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
@@ -857,4 +858,4 @@ theorem lcTraceShifted
 
 end RicciCoordVariation
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

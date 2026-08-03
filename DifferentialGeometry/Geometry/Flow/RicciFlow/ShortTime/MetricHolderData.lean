@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MetricWkpData
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Topology.MetricSpace.HolderNorm
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Uniform low-order Holder data for metric families

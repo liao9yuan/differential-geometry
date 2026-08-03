@@ -15,6 +15,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberToModelOpNorm
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.MeasureTheory.Integral.IntegrableOn
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

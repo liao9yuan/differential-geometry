@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -45,7 +46,7 @@ private lemma pouTsupport_subset_goodSet (α : M) :
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have heq : chartLeviCivitaGoodSet (I := I) α = (chartAt H α).source := by
-    rw [DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
+    rw [DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
           (I := I) α]
     exact extChartAt_source_eq_chartAt_source (I := I) α
   rw [heq]

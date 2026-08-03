@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvU
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

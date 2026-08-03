@@ -70,7 +70,7 @@ theorem metricInner_mdiffAt
       (E₂ := fun x : M => TangentSpace I x →L[Real] Real)
       (b := fun b : M => b)
       (ϕ := fun b => g.inner b) (v := fun b => Y b) hg hY
-  exact ((DifferentialGeometry.Integral.Connection.cotangentCov_pairing_contMDiff hgY hZ)
+  exact ((DifferentialGeometry.Geometry.Connection.cotangentCov_pairing_contMDiff hgY hZ)
     x).mdifferentiableAt (by simp)
 
 

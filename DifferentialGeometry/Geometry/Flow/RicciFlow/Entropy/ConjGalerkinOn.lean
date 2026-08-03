@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautExac
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinClassical
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotentialSpan
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 /-!

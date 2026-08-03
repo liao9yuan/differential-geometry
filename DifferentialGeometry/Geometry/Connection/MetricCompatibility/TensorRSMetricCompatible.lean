@@ -9,8 +9,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -178,7 +179,7 @@ theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible'
     (liftedTensorSection_mdiffAt (I := I) (M := M) g r s S x)
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

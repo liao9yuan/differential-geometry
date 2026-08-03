@@ -7,8 +7,9 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -301,6 +302,6 @@ lemma cotangent_slot_apply (x : M)
 
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 end

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionRestrictOpen
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

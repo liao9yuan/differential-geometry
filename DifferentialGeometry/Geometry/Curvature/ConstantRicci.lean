@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.MetricSectional
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Ricci curvature of a constant-curvature metric

@@ -9,8 +9,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -89,7 +90,7 @@ lemma covGrad_covDeriv_at_unit_eq
   rw [map_zero, sub_zero]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

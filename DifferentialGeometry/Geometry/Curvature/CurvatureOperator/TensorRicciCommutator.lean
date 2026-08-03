@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

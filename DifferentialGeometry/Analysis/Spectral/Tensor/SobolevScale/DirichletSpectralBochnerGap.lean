@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

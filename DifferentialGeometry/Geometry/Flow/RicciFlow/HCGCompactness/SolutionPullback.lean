@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiPullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
+open DifferentialGeometry.Geometry.Connection
 
 
 

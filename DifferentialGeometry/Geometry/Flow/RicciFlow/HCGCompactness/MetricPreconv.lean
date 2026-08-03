@@ -15,6 +15,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ChartRicciJetIdentity
 import DifferentialGeometry.Analysis.Calculus.PiDeriv
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

@@ -6,8 +6,9 @@ noncomputable section
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -402,7 +403,7 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     homTensorRSDirCovDeriv]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

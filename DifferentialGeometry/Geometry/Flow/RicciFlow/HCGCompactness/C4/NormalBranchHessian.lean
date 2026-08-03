@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBran
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchScale
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricLocal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoothness
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

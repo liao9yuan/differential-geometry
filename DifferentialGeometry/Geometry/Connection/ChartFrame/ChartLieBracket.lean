@@ -8,7 +8,7 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
@@ -513,5 +513,5 @@ theorem extDerivFun_apply_mlieBracket
   exact hftilde_lieBracket
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

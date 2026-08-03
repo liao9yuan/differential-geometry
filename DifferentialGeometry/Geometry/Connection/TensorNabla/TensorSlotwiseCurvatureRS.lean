@@ -8,8 +8,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -66,7 +67,7 @@ theorem riemannSec_tensorCov_apply_eval
   rfl
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

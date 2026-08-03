@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -56,7 +56,7 @@ theorem coordInvMdiffOn
     MDifferentiableAt I 𝓘(Real, Real)
       (fun y : M => coordInv (I := I) S x₀ t y a b) x := by
   simpa [coordInv] using
-    DifferentialGeometry.Integral.Connection.coordGInvMdiff (I := I) (S.family.metric t) x₀ hx a b
+    DifferentialGeometry.Geometry.Connection.coordGInvMdiff (I := I) (S.family.metric t) x₀ hx a b
 
 
 
@@ -1040,10 +1040,10 @@ theorem coordGammaForm
     christoffelSymbolInFrame
         (S.family.connection s) (coordinateFrameAt (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀) x i j k =
-      DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS
+      DifferentialGeometry.Geometry.Connection.leviCivitaChristoffelModelRHS
         (I := I) (S.family.metric s) x₀ i j k (extChartAt I x₀ x) := by
   simpa [SolutionOn.family, SolutionFamily.connection] using
-    (DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
+    (DifferentialGeometry.Geometry.Connection.leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
       (I := I) (g := S.family.metric s) x₀ hx i j k).symm
 
 
@@ -1066,11 +1066,11 @@ theorem coordGammaMdiff
       ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
         (fun y : M =>
           e.localFrame_coeff I b k y
-            ((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
+            ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
                 (I := I) (S.family.metric s) (e.localFrame b j) y)
               (e.localFrame b i y))) x := by
     simpa [e, b] using
-      DifferentialGeometry.Integral.Connection.lc_christoffel_contMDiffAt
+      DifferentialGeometry.Geometry.Connection.lc_christoffel_contMDiffAt
         (I := I) (e := coordinateTrivializationAt (I := I) x₀)
         (b := Module.finBasis Real E) (g := S.family.metric s)
         (x := x) hx i j k
@@ -1083,7 +1083,7 @@ theorem coordGammaMdiff
         =ᶠ[nhds x]
       fun y : M =>
         e.localFrame_coeff I b k y
-          ((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
+          ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
               (I := I) (S.family.metric s) (e.localFrame b j) y)
             (e.localFrame b i y)) := by
     filter_upwards [(coordinateFrameSet_open (I := I) x₀).mem_nhds hx] with y hy
@@ -1104,7 +1104,7 @@ theorem coordGammaMdiff
       SolutionOn.family, SolutionFamily.connection, e, b]
     let V : (z : M) -> TangentSpace I z :=
       fun z =>
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
             (I := I) (S.family.metric s) (e.localFrame b j) z)
           (e.localFrame b i z)
     change
@@ -1190,7 +1190,7 @@ private theorem coordDgSmAt
     ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         fderivWithin Real
-          (DifferentialGeometry.Integral.Connection.metricFlatModelInChart_component
+          (DifferentialGeometry.Geometry.Connection.metricFlatModelInChart_component
             (I := I) (S.family.metric p.1) x₀ i j)
           (Set.range I) (extChartAt I x₀ p.2)
           ((Module.finBasis Real E) a))
@@ -1218,7 +1218,7 @@ private theorem coordDgSmAt
   have heq :
       (fun p : Real × M =>
         fderivWithin Real
-          (DifferentialGeometry.Integral.Connection.metricFlatModelInChart_component
+          (DifferentialGeometry.Geometry.Connection.metricFlatModelInChart_component
             (I := I) (S.family.metric p.1) x₀ i j)
           (Set.range I) (extChartAt I x₀ p.2)
           ((Module.finBasis Real E) a))
@@ -1230,10 +1230,10 @@ private theorem coordDgSmAt
       (coordinateFrameSet_open (I := I) x₀).preimage continuous_snd
     filter_upwards [hopen.mem_nhds hx] with p hp
     have hflat :=
-      DifferentialGeometry.Integral.Connection.metricFlatModelInChart_component_deriv_of_mem
+      DifferentialGeometry.Geometry.Connection.metricFlatModelInChart_component_deriv_of_mem
         (I := I) (g := S.family.metric p.1) x₀ hp a i j
     simpa [F, X, frame, metricCompInFrame,
-      DifferentialGeometry.Integral.Connection.directionalDeriv] using hflat
+      DifferentialGeometry.Geometry.Connection.directionalDeriv] using hflat
   exact hD.congr_of_eventuallyEq heq
 
 
@@ -1248,11 +1248,11 @@ private theorem gammaRhsSm
     (i j k : CoordinateIdx (𝕜 := Real) E) :
     ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
-        DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS
+        DifferentialGeometry.Geometry.Connection.leviCivitaChristoffelModelRHS
           (I := I) (S.family.metric p.1) x₀ i j k (extChartAt I x₀ p.2))
       ((t : Real), x) := by
   classical
-  unfold DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS
+  unfold DifferentialGeometry.Geometry.Connection.leviCivitaChristoffelModelRHS
   refine contMDiffAt_const.mul ?_
   refine ContMDiffAt.sum fun l _ => ?_
   have hInv :
@@ -1265,7 +1265,7 @@ private theorem gammaRhsSm
         (fun p : Real × M =>
           (Module.finBasis Real E).coord k
             ((ContinuousLinearMap.inverse
-                (DifferentialGeometry.Integral.Connection.metricFlatModelInChart
+                (DifferentialGeometry.Geometry.Connection.metricFlatModelInChart
                   (I := I) (S.family.metric p.1) x₀
                   (extChartAt I x₀ p.2)))
               (LinearMap.toContinuousLinearMap
@@ -1304,7 +1304,7 @@ theorem coordGammaSmoothInf
           (coordinateFrameAt_isLocalFrame_one (I := I) x₀) p.2 i j k)
         =ᶠ[nhds ((t : Real), x)]
       fun p : Real × M =>
-        DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS
+        DifferentialGeometry.Geometry.Connection.leviCivitaChristoffelModelRHS
           (I := I) (S.family.metric p.1) x₀ i j k (extChartAt I x₀ p.2) := by
     have hopen :
         IsOpen {p : Real × M | p.2 ∈ coordinateFrameSet (I := I) x₀} :=

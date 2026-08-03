@@ -77,10 +77,10 @@ omit [SigmaCompactSpace M] [T2Space M] in
 private theorem isMetricCompatibleSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (S.family.connection t) (S.family.metric t) := by
   simpa [SolutionFamily.connection, SolutionOn.family_metric] using
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t)
 
 
@@ -337,7 +337,7 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     connSmoothInf (I := I) S (t : Real)
   have hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov (1 : WithTop ℕ∞) :=
     connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
-  have hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g :=
+  have hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g :=
     isMetricCompatibleSol (I := I) S (t : Real)
   have hinv :
       Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M) g x₀ basis gInv := by

@@ -47,7 +47,7 @@ structure RealizedMetricFamily (Time : Type*) where
   metric : Time -> SmoothRiemannianMetric I M
   connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : Time,
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (connection t)
       (metric t)
 
 
@@ -58,7 +58,7 @@ structure RealizedMetricFamilyOn (D : RealTimeInterval) where
   metric : Real -> SmoothRiemannianMetric I M
   connection : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : RealTimeInterval.FlowTime D,
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (connection (t : Real)) (metric (t : Real))
 
 namespace RealizedMetricFamily
@@ -67,7 +67,7 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t)
+      DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (connection t)
         (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
@@ -78,7 +78,7 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t)
+      DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (connection t)
         (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
@@ -90,7 +90,7 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (connection t)
+      DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (connection t)
         (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
@@ -154,7 +154,7 @@ theorem metricCompatibleAt
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.FlowTime D) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t)
       (G.metricAt t) := by
   exact G.metricCompatible t
 
@@ -163,7 +163,7 @@ theorem metricCompatibleAt_regular
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.RegularTime D) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (G.connection (t : Real)) (G.metric (t : Real)) := by
   exact G.metricCompatible (RealTimeInterval.regularToFlow t)
 
@@ -176,7 +176,7 @@ def IsMetricCompatibleFamilyOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
   forall t : RealTimeInterval.FlowTime D,
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t)
       (G.metricAt t)
 
 
@@ -199,7 +199,7 @@ theorem metric_compatible_family_apply
         (fun y : M => (G.metricAt t).inner y (Y y) (Z y)) x (X x) =
       (G.metricAt t).inner x ((G.connectionAt t) Y x (X x)) (Z x) +
         (G.metricAt t).inner x (Y x) ((G.connectionAt t) Z x (X x)) :=
-  DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) (hmc t) X Y Z hX hY hZ
+  DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) (hmc t) X Y Z hX hY hZ
 
 end FamilyCompatibility
 

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.TfHeatAssembly
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -230,19 +231,19 @@ theorem ricciSym_can
   have hcov :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (1 : WithTop ℕ∞) :=
-    Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric t)
   have hRm13 :
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm13 t) := by
     simpa [SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm13
   have hRm04 :
       DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I) (S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm04 t) := by
     simpa [SolutionFamily.rm04, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
@@ -257,7 +258,7 @@ theorem ricciSym_can
         (S.base.rm13 t x) (S.base.rm04 t x) :=
     DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
       (I := I) (g := S.base.metric t)
-      (cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+      (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
         (S.base.metric t))
       (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
       hRm13 hRm04 x
@@ -270,13 +271,13 @@ theorem ricciSym_can
       hRic13 hLowerAt hInvSym
   exact ricciSym_rm04 (I := I) basis gInv
     (S.ricciAt t x) (S.base.rm04 t x) hTrace
-    (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
+    (DifferentialGeometry.Geometry.Connection.rm04PairSymmAt_of_leviCivita_realizes
       (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04))
-    (DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
+    (DifferentialGeometry.Geometry.Connection.rm04OutputSkewAt_of_leviCivita_realizes
       (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04))
-    (DifferentialGeometry.Integral.Connection.rm04InputSkewAt_of_leviCivita_realizes
+    (DifferentialGeometry.Geometry.Connection.rm04InputSkewAt_of_leviCivita_realizes
       (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04))
     hInvSym
@@ -299,19 +300,19 @@ theorem traceData_can
   have hcov :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (1 : WithTop ℕ∞) :=
-    Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric t)
   have hRm13 :
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm13 t) := by
     simpa [SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm13
   have hRm04 :
       DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I) (S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm04 t) := by
     simpa [SolutionFamily.rm04, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
@@ -326,7 +327,7 @@ theorem traceData_can
         (S.base.rm13 t x) (S.base.rm04 t x) :=
     DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
       (I := I) (g := S.base.metric t)
-      (cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+      (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
         (S.base.metric t))
       (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
       hRm13 hRm04 x

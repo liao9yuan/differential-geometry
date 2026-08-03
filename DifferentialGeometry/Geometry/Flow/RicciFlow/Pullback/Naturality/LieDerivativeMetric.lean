@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

@@ -494,17 +494,17 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
     (g : SmoothRiemannianMetric I M)
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
     {x : M} (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) :
     AlgebraicCurvatureSymmetries3 (standardRmCompAt (I := I) basis (Rm04 x)) := by
   refine ⟨?_, ?_, ?_⟩
   · intro i j k l
     simpa [standardRmCompAt_apply] using
-      (DifferentialGeometry.Integral.Connection.rm04InputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04InputSkewAt_of_leviCivita_realizes
         (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l))
   · intro i j k l
     have h :=
-      DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
+      DifferentialGeometry.Geometry.Connection.rm04OutputSkewAt_of_leviCivita_realizes
         (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)
     have h' :
         (Rm04 x) (vec4 (basis i) (basis j) (basis l) (basis k)) =
@@ -513,7 +513,7 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
     simpa [standardRmCompAt_apply] using h'
   · intro i j k l
     simpa [standardRmCompAt_apply] using
-      (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04PairSymmAt_of_leviCivita_realizes
         (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)).symm
 
 
@@ -524,7 +524,7 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
     (g : SmoothRiemannianMetric I M)
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
     {x : M} (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) :
     forall i j k l : Fin 3,
       rm04CompAt (I := I) basis (Rm04 x) i j l k =

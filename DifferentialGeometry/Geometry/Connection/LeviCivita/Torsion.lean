@@ -13,10 +13,10 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
@@ -423,4 +423,4 @@ theorem leviCivitaConnectionOfMetric_isLeviCivita
     (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
     (leviCivitaConnectionOfMetric_isTorsionFree (I := I) g)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Lemma45Engine
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

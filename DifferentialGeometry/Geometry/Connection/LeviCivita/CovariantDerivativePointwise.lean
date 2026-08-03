@@ -4,16 +4,17 @@ import DifferentialGeometry.Geometry.Connection.MLieBracket
 import DifferentialGeometry.Geometry.Connection.LeviCivita.PullbackConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
 open VectorField
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

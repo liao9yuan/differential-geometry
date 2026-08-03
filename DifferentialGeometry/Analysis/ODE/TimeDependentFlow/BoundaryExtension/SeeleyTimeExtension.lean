@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOp
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Set Function Bundle

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -545,7 +546,7 @@ theorem ricci_heat_mc
       metricCompatible := by
         intro t
         simpa [SolutionFamily.connection] using
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
             (I := I) (S.base.metric t)) }
   exact
     ricciNormHeatEquationOn_of_solution_canonical_laplacian

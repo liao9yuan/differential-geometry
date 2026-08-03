@@ -13,6 +13,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldFamilyJointSmoothness
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

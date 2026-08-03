@@ -4,10 +4,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
 open scoped Manifold ContDiff Topology
@@ -113,4 +113,4 @@ theorem metric_coordinateFrame_component_directional_contMDiffAt
       g.inner q (coordinateFrameAt (I := I) x₀ i q)
         (coordinateFrameAt (I := I) x₀ j q))
     (X := coordinateFrameAt (I := I) x₀ a) hf ha
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRe
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ChartRicciJetIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

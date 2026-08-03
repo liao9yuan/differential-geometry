@@ -25,6 +25,7 @@ import Mathlib.Topology.MetricSpace.Lipschitz
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Set Function Bundle Metric

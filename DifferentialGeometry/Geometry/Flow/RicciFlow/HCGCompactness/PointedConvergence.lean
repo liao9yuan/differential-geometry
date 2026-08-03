@@ -59,12 +59,12 @@ noncomputable def metricCovDerivStep
     change IsManifold I ∞ M
     infer_instance
   let cov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   let hcov :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
     simpa [cov] using
-      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) gRef
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
@@ -112,7 +112,7 @@ theorem metricCovDeriv_one_apply_section
     metricCovDeriv (I := I) h gRef 1 x (Fin.cons (X x) slots) =
       Tensor0SBundle.nabla0SFun (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) 2
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
         X (metricCovDeriv (I := I) h gRef 0) x slots := by
   haveI : IsManifold I 1 M :=
     IsManifold.of_le (I := I) (M := M) (n := ∞)
@@ -124,7 +124,7 @@ theorem metricCovDeriv_one_apply_section
     change IsManifold I ∞ M
     infer_instance
   let cov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   let A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2 :=
     metricCovDeriv (I := I) h gRef 0
@@ -132,7 +132,7 @@ theorem metricCovDeriv_one_apply_section
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
     simpa [cov] using
-      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) gRef
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
@@ -165,11 +165,11 @@ theorem metricCovDeriv_one_eval_smooth_slots
         ∑ a : Fin 2,
           h.inner x
             ((Function.update (fun b : Fin 2 => V b x) a
-              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+              (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                 gRef)
                   (fun p : M => V a p) x) (X x))) 0)
             ((Function.update (fun b : Fin 2 => V b x) a
-              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+              (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                 gRef)
                   (fun p : M => V a p) x) (X x))) 1) := by
   classical
@@ -183,7 +183,7 @@ theorem metricCovDeriv_one_eval_smooth_slots
     change IsManifold I ∞ M
     infer_instance
   let cov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   have hzero :
       metricCovDeriv (I := I) h gRef 0 =
         Tensor0SBundle.metricTensorField (I := I) h := by
@@ -230,11 +230,11 @@ theorem metricCovDeriv_one_eval_localFrame
       extDerivFun (I := I)
           (fun y : M => h.inner y (frame a y) (frame b y)) x (frame d x) -
         (h.inner x
-            (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 (frame a) x) (frame d x))
             (frame b x) +
           h.inner x (frame a x)
-            (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 (frame b) x) (frame d x))) := by
   classical
   haveI : IsManifold I 1 M :=
@@ -249,7 +249,7 @@ theorem metricCovDeriv_one_eval_localFrame
   obtain ⟨sec, hsec⟩ :=
     hframe.exists_contMDiffSection_eqOn_nhd hu hx
   let cov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   let X :
       ContMDiffSection I E (∞ : WithTop ℕ∞)
         (TangentSpace I : M -> Type _) := sec d
@@ -296,29 +296,29 @@ theorem metricCovDeriv_one_eval_localFrame
         (by simpa [V] using hsec_ev b)
     rw [hconn, hXx]
   have hcov_a' :
-      (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+      (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
           (fun y : M => sec a y) x) (X x)) =
-        (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+        (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
           (frame a) x) (frame d x)) := by
     simpa [cov, V] using hcov_a
   have hcov_b' :
-      (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+      (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
           (fun y : M => sec b y) x) (X x)) =
-        (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+        (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
           (frame b) x) (frame d x)) := by
     simpa [cov, V] using hcov_b
   have hcov_a_candidate :
-      ((DifferentialGeometry.Integral.Connection.leviCivitaConnectionCandidateAt (I := I) gRef
+      ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionCandidateAt (I := I) gRef
           (fun y : M => sec a y) x) (X x)) =
-        ((DifferentialGeometry.Integral.Connection.leviCivitaConnectionCandidateAt (I := I) gRef
+        ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionCandidateAt (I := I) gRef
           (frame a) x) (frame d x)) := by
-    simpa [DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric] using hcov_a'
+    simpa [DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric] using hcov_a'
   have hcov_b_candidate :
-      ((DifferentialGeometry.Integral.Connection.leviCivitaConnectionCandidateAt (I := I) gRef
+      ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionCandidateAt (I := I) gRef
           (fun y : M => sec b y) x) (X x)) =
-        ((DifferentialGeometry.Integral.Connection.leviCivitaConnectionCandidateAt (I := I) gRef
+        ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionCandidateAt (I := I) gRef
           (frame b) x) (frame d x)) := by
-    simpa [DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric] using hcov_b'
+    simpa [DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric] using hcov_b'
   have hmain :=
     metricCovDeriv_one_eval_smooth_slots (I := I) h gRef X V x
   have hderiv :
@@ -347,11 +347,11 @@ theorem metricCovDeriv_one_eval_localFrame
       extDerivFun (I := I)
           (fun y : M => h.inner y (frame a y) (frame b y)) x (frame d x) -
         (h.inner x
-            (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 (frame a) x) (frame d x))
             (frame b x) +
           h.inner x (frame a x)
-            (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 (frame b) x) (frame d x))) := by
           rw [hmain, hderiv, Fin.sum_univ_two]
           simp [V, hsec_x a, hsec_x b, hcov_a_candidate, hcov_b_candidate]
@@ -372,11 +372,11 @@ theorem metricCovDeriv_one_component_localFrame
       extDerivFun (I := I)
           (fun y : M => h.inner y (frame a y) (frame b y)) x (frame d x) -
         (h.inner x
-            (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 (frame a) x) (frame d x))
             (frame b x) +
           h.inner x (frame a x)
-            (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 (frame b) x) (frame d x))) := by
   classical
   rw [Tensor0SBundle.component0S_apply]

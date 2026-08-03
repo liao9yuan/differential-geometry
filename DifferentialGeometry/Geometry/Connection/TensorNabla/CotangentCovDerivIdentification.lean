@@ -11,8 +11,9 @@ noncomputable section
 open Bundle Manifold Set Filter FiberBundle Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -154,5 +155,5 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
   exact (tensorCovDerivAt_unitEval (I := I) (M := M) g σ x v).symm
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

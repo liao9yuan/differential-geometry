@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnect
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePairCore
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RankReducingOperatorFieldGreenIBP
 import DifferentialGeometry.Geometry.Metric.InnerExpansion
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Ricci connection-difference pairing at a closed edge

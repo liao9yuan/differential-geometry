@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.DeTurckLieArm2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLoweredTrilinear
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.DeTurckLieArm1CoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieRealizedFamilyJointSmooth
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

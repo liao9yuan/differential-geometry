@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAveragePOU
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCPairTail
+open DifferentialGeometry.Geometry.Connection
 
 
 

@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Spectr
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.RankZero
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
+open DifferentialGeometry.Geometry.Connection
 
 
 

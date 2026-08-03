@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

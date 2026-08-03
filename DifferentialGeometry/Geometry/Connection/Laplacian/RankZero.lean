@@ -22,8 +22,9 @@ open Bundle Manifold CovariantDerivative Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -477,7 +478,7 @@ theorem rawLap_scalar
           (I := I) (LeviCivita (I := I) g) g f (Hess x) hreal).symm
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

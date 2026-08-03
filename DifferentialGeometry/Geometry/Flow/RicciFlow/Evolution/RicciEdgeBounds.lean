@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ChartRicciJetIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

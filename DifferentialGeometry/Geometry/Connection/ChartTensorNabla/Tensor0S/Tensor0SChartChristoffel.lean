@@ -12,7 +12,7 @@ open Bundle CovariantDerivative
 open Tensor0SBundle
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -230,7 +230,7 @@ example
   tensor0SCovariantDerivative_chart_decomp_apply (I := I) cov s α T b v
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

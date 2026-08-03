@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartFderivBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -143,7 +144,7 @@ private lemma pouTsupport_subset_goodSet' (α : M) :
       chartLeviCivitaGoodSet (I := I) α := by
   intro b hb
   have h_eq :=
-    DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
+    DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
     (I := I) α
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb

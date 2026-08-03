@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Lemma45Covariant
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Lemma45Intrinsic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

@@ -12,7 +12,7 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1023,5 +1023,5 @@ theorem chartLeviCivita_isMetricCompatibleOn
   linear_combination hmatch
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

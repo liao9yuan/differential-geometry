@@ -15,6 +15,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.NablaTensorCurv
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformDiffCurvatureNormBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

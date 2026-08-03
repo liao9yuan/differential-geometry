@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ConnDiffCovGradBr
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficientsFibreOperators
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

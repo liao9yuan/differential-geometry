@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -31,8 +31,9 @@ noncomputable section
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open Tensor0SBundle
@@ -489,7 +490,7 @@ theorem connDiff_koszul_deriv
   linarith [hmaster, hk1, hk2, hk3]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

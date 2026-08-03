@@ -21,6 +21,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

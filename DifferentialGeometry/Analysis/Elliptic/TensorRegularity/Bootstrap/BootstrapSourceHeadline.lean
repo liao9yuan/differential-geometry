@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapSource
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Analysis.Matrix.Order
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Covariant-sum cross-metric equivalence (item-6 statement S0) — fiber-level layer

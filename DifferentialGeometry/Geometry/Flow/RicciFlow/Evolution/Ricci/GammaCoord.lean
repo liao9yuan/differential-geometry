@@ -63,7 +63,7 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
       (S.family.connection (t : Real)) x₀ i j k =
       DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
         (S.family.connection (t : Real)) x₀ j i k := by
-  have htf : DifferentialGeometry.Integral.Connection.IsTorsionFree (I := I)
+  have htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I)
       (S.family.connection (t : Real)) := by
     simpa [DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt] using
       hS.leviCivita.2 (DifferentialGeometry.Integral.Connection.RealTimeInterval.regularToFlow t)
@@ -75,7 +75,7 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
     rw [htf x₀]
     simp
   have hskew :=
-    DifferentialGeometry.Integral.Connection.coordinate_torsion_coeff_eq_christoffel_skew
+    DifferentialGeometry.Geometry.Connection.coordinate_torsion_coeff_eq_christoffel_skew
     (I := I) (S.family.connection (t : Real)) x₀ i j k
   rw [hzero] at hskew
   exact sub_eq_zero.mp hskew.symm
@@ -655,7 +655,7 @@ theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
     coordinateFrameAt_mem (I := I) x₀
   have hu : IsOpen (coordinateFrameSet (I := I) x₀) :=
     coordinateFrameSet_open (I := I) x₀
-  have hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+  have hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (S.family.connection (t : Real)) (S.family.metric (t : Real)) :=
     DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.metricCompatibleAt_regular
       (I := I) S.family t
@@ -935,7 +935,7 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             (t : Real) x₀ d k l = 0 := by
     intro t d k l
-    have hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+    have hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
         (S.family.connection (t : Real)) (S.family.metric (t : Real)) :=
       DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.metricCompatibleAt_regular
         (I := I) S.family t

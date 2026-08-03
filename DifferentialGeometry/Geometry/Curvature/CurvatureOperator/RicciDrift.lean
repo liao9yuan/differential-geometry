@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SBochnerProduct
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

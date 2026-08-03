@@ -9,6 +9,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFin
 import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegularityParametricIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularitySpectralPath
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularityEigenPairingBound
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -1175,7 +1176,7 @@ private lemma reconFO_raw_eq_chartRHS
         (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδS) g_bg α (Jdx 0) (Jdx 1)
         (extChartAt I α x) := by
   have hgood : x ∈ chartLeviCivitaGoodSet (I := I) α := by
-    rw [DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
+    rw [DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
       (I := I) α, extChartAt_source (I := I)]
     exact hx
   have hcongr := tensorChartComponentRaw_congr_toSection
@@ -1417,7 +1418,7 @@ private theorem anisoOn_pushed_oneMinusConnLapIter_reconFOPath
           chartLeviCivitaGoodSet (I := I) α := by
         constructor
         · exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hbU))
-        · rw [DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
+        · rw [DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source
             (I := I) α]
           exact (extChartAt I α).map_target hbT
       set Qm : SmoothCcTensor g₀ 0 2 :=

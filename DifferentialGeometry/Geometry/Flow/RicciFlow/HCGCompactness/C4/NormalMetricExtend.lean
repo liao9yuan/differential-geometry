@@ -522,7 +522,7 @@ theorem normal_cov_eq
     ∀ (z : E), z ∈ Metric.ball (0 : E)
       (expMapC2Radius (I := I) Y.metric x / 4) →
     ∀ (hco : IsCoercive (normalCoordMetric (I := I) Y x z)) (v w : E),
-    (Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+    (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
         (normalTotal (I := I) Y x) (fun _ : E ↦ w) z) v =
       MetricKoszul.koszulVec hco
         (fderiv Real (normalCoordMetric (I := I) Y x) z) v w := by
@@ -541,7 +541,7 @@ theorem normal_cov_eq
   have hdiff : DifferentiableAt Real (normalCoordMetric (I := I) Y x) z := by
     exact ((normalCoordMetric_contDiffOn_expBall (I := I) Y x).contDiffAt
       (Metric.isOpen_ball.mem_nhds (hsub hz))).differentiableAt (by simp)
-  exact Integral.Connection.const_cov_eq_nhds
+  exact DifferentialGeometry.Geometry.Connection.const_cov_eq_nhds
     (normalTotal (I := I) Y x) (normalCoordMetric (I := I) Y x)
     hB hdiff hco v w
 
@@ -564,7 +564,7 @@ theorem normal_cov_eq_fderiv
         (𝓘(Real, E).prod 𝓘(Real, E))
         (fun y : E ↦ (⟨y, V y⟩ : TangentBundle 𝓘(Real, E) E)) z)
       (v : E),
-    (Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+    (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
         (normalTotal (I := I) Y x) V z) v =
       fderiv Real V z v +
         MetricKoszul.koszulVec hco
@@ -584,7 +584,7 @@ theorem normal_cov_eq_fderiv
   have hdiff : DifferentiableAt Real (normalCoordMetric (I := I) Y x) z := by
     exact ((normalCoordMetric_contDiffOn_expBall (I := I) Y x).contDiffAt
       (Metric.isOpen_ball.mem_nhds (hsub hz))).differentiableAt (by simp)
-  exact Integral.Connection.cov_eq_fderiv_add
+  exact DifferentialGeometry.Geometry.Connection.cov_eq_fderiv_add
     (normalTotal (I := I) Y x) (normalCoordMetric (I := I) Y x)
     hB hdiff hco V _hV v
 

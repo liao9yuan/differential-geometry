@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldMain
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowDataPullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiPullback
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false

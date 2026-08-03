@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.IteratedFDerivTensorReprChartCompBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

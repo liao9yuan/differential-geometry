@@ -19,10 +19,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open scoped BigOperators Manifold ContDiff
 
@@ -86,7 +86,7 @@ theorem scalHessFrameSymm
     scalHessFrame (I := I) (M := M) g F hx gInv i j =
       scalHessFrame (I := I) (M := M) g F hx gInv j i := by
   simpa [scalHessFrame] using
-    DifferentialGeometry.Integral.Connection.canScalHess (I := I) (M := M) (g := g)
+    DifferentialGeometry.Geometry.Connection.canScalHess (I := I) (M := M) (g := g)
       (basis := F.basisAt hx) gInv hinv i j
 
 
@@ -141,4 +141,4 @@ theorem frameScalHess_symm
       (frameInvMetric (I := I) (M := M) g F hx)
       (frameInvMetric_real (I := I) (M := M) g F hx) i j
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

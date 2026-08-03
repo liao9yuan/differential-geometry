@@ -10,6 +10,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 open DifferentialGeometry.Geometry.Operator
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

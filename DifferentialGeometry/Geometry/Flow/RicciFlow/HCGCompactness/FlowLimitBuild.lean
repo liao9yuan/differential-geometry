@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

@@ -5,8 +5,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -527,7 +528,7 @@ def tensor03CovFun
     tensor03CovFun cov T x = tensor03CovAt cov T x := rfl
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

@@ -23,6 +23,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDroppi
 open DifferentialGeometry.Geometry.Operator
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

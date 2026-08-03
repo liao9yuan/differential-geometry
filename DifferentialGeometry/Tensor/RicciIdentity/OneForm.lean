@@ -5,6 +5,7 @@ import DifferentialGeometry.Tensor.Auxiliary.SlotAlgebra
 import DifferentialGeometry.Tensor.RSTensor.CurvatureAction
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

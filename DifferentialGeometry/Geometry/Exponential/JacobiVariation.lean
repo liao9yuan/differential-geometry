@@ -116,9 +116,9 @@ omit [SigmaCompactSpace M] in
 private lemma riemannOp_congr_point (g : SmoothRiemannianMetric I M)
     {x y : M} (h : x = y) (A B C : E) :
     ((DifferentialGeometry.Integral.Connection.riemannOp
-      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) x) A B C : E)
+      (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x) A B C : E)
     = ((DifferentialGeometry.Integral.Connection.riemannOp
-      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) y) A B C : E) := by
+      (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) y) A B C : E) := by
   subst h
   rfl
 
@@ -245,7 +245,7 @@ theorem intrinsic_jacobi
         (fun v : ℝ => covDerivAlong (I := I) g (fun v' : ℝ => F 0 v')
           (fun v' : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F u v') 0 (1 : ℝ)) v) t₀
       + (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (F 0 t₀))
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (F 0 t₀))
           (mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F u t₀) 0 (1 : ℝ))
           (mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F 0 u) t₀ (1 : ℝ))
           (mfderiv 𝓘(ℝ, ℝ) I (fun u : ℝ => F 0 u) t₀ (1 : ℝ)) = 0
@@ -779,12 +779,12 @@ theorem radial_jacobi_of_lt (g : SmoothRiemannianMetric I M) (p : M)
     rfl
   change covDerivAlong (I := I) g γ (fun v : ℝ => covDerivAlong (I := I) g γ J v) t₀
       + (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t₀))
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t₀))
           (J t₀) (curveVelocity (I := I) γ t₀) (curveVelocity (I := I) γ t₀) = 0
   have hfinal : (covDerivAlong (I := I) g γ
       (fun v : ℝ => covDerivAlong (I := I) g γ J v) t₀ : E)
       = - ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t₀))
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t₀))
           (J t₀) (curveVelocity (I := I) γ t₀) (curveVelocity (I := I) γ t₀) : E) := by
     rw [← houter_eq, hcomm]
     rw [hS_eq, hT_eq]
@@ -1444,12 +1444,12 @@ theorem jacobi_zero_of_lt
     rfl
   change covDerivAlong (I := I) g γ (fun v : ℝ => covDerivAlong (I := I) g γ J v) 0
       + (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ 0))
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ 0))
           (J 0) (curveVelocity (I := I) γ 0) (curveVelocity (I := I) γ 0) = 0
   have hfinal : (covDerivAlong (I := I) g γ
       (fun v : ℝ => covDerivAlong (I := I) g γ J v) 0 : E)
       = - ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ 0))
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ 0))
           (J 0) (curveVelocity (I := I) γ 0) (curveVelocity (I := I) γ 0) : E) := by
     rw [← houter_eq, hcomm]
     rw [hS_eq, hT_eq]

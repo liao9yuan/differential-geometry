@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 import DifferentialGeometry.Analysis.Calculus.CompactCutoff
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 /-!
@@ -194,7 +195,7 @@ private lemma grad_eq_pou
       (by simp) |>.mul (hu.sub hv)
   change gradFun (I := I) g w x = S.sum (fun α => gradFun (I := I) g (f α) x)
   rw [hw]
-  exact DifferentialGeometry.Integral.Connection.gradFun_finset (I := I) g S f hf
+  exact DifferentialGeometry.Geometry.Connection.gradFun_finset (I := I) g S f hf
 
 omit [FiniteDimensional ℝ E] in
 private lemma gNorm_sum_le

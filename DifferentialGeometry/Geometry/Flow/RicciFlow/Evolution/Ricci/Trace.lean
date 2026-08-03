@@ -212,7 +212,7 @@ theorem connSmoothOfSol
         (S.family.connection s) (1 : WithTop ℕ∞) := by
   intro s _hs
   simpa [SolutionFamily.connection, metricCov] using
-    Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric s)
 
 
@@ -275,7 +275,7 @@ theorem lcAt_regular
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) :
-    DifferentialGeometry.Integral.Connection.IsLeviCivita (I := I)
+    DifferentialGeometry.Geometry.Connection.IsLeviCivita (I := I)
       (S.family.connection (t : Real)) (S.family.metric (t : Real)) := by
   constructor
   · simpa [DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt,
@@ -324,10 +324,10 @@ theorem rm04OutputSkew_regular
     forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
       DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x) := by
   intro t x
-  exact DifferentialGeometry.Integral.Connection.rm04OutputSkew_ofMC
+  exact DifferentialGeometry.Geometry.Connection.rm04OutputSkew_ofMC
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
     (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
-    (DifferentialGeometry.Integral.Connection.metricCompatible_of_isLeviCivita
+    (DifferentialGeometry.Geometry.Connection.metricCompatible_of_isLeviCivita
       (I := I) (lcAt_regular (I := I) S hS t))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
@@ -351,10 +351,10 @@ theorem rm04FirstBianchi_regular
     forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
       DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 (t : Real) x) := by
   intro t x
-  exact DifferentialGeometry.Integral.Connection.firstBianchi_ofTF
+  exact DifferentialGeometry.Geometry.Connection.firstBianchi_ofTF
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
     (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
-    (DifferentialGeometry.Integral.Connection.torsionFree_of_isLeviCivita
+    (DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
       (I := I) (lcAt_regular (I := I) S hS t))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
@@ -380,7 +380,7 @@ theorem rm04PairSymm_regular
         Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 W X Y Z) =
           Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 Y Z W X) := by
   intro t x
-  exact DifferentialGeometry.Integral.Connection.rm04PairSymm_ofLC
+  exact DifferentialGeometry.Geometry.Connection.rm04PairSymm_ofLC
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
     (connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2))
     (lcAt_regular (I := I) S hS t) (Rm04 (t : Real))
@@ -406,7 +406,7 @@ theorem rm04InputSkew_regular_first_two
         Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 Y X Z W) =
           -Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 X Y Z W) := by
   intro t x
-  exact DifferentialGeometry.Integral.Connection.rm04InputSkew_ofRealizes
+  exact DifferentialGeometry.Geometry.Connection.rm04InputSkew_ofRealizes
     (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)

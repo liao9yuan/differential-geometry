@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 import Mathlib.Analysis.Normed.Group.Uniform
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

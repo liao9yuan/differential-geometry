@@ -29,6 +29,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section
@@ -845,7 +846,7 @@ noncomputable def freeze02Field
 theorem tensor02_inner_extDerivFun_eq_inner_nabla
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2)
     (nablaA nablaB :
@@ -900,7 +901,7 @@ private theorem inner02_mdiff
 private theorem inner02_nablaFun
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -950,7 +951,7 @@ theorem du_norm02
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2)
     (nablaA :
@@ -1033,7 +1034,7 @@ theorem freeze02_deriv
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2)
     (nablaA :
@@ -1321,7 +1322,7 @@ theorem hess_norm02
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
     (hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M) g x basis gInv)
@@ -1576,7 +1577,7 @@ theorem second_norm02_mc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
     (hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) (M := M) g x basis gInv)

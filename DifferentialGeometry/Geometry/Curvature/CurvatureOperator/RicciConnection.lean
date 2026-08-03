@@ -4,6 +4,7 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
+open DifferentialGeometry.Geometry.Connection
 
 
 
@@ -480,7 +481,7 @@ theorem riemannSec_metric_skew
       extDerivFun (I := I)
         (fun b : M => extDerivFun (I := I) (fun b' => g.inner b' (Z b') (W b')) b (X b))
         x (Y x) :=
-    extDerivFun_apply_mlieBracket hX_at hY_at hf_2 hx_int
+    DifferentialGeometry.Geometry.Connection.extDerivFun_apply_mlieBracket hX_at hY_at hf_2 hx_int
   have hbr_mdiff : MDiffAt (T% (VectorField.mlieBracket I X Y)) x := by
     haveI : IsManifold I 2 M := by
       have h_le : (2 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by norm_cast

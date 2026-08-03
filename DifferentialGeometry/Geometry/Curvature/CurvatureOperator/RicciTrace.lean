@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import Mathlib.LinearAlgebra.Trace
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

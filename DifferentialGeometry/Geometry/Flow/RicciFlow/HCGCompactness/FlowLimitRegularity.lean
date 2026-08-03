@@ -9,6 +9,7 @@ import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
 import DifferentialGeometry.Analysis.Calculus.TimeSliceSwap
 import DifferentialGeometry.Analysis.Calculus.TimeSliceBootstrap
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

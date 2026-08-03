@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.OneForm
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.TwoTensor
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Transform
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

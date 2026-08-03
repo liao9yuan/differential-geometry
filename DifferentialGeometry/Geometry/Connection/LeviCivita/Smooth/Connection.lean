@@ -4,12 +4,12 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
 open scoped Manifold ContDiff Topology
@@ -150,4 +150,4 @@ theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
   exact
     (leviCivitaConnectionOfMetric_homSection_contMDiffAt_one
       (I := I) e b g hxBase hσdiff hσAt).contMDiffWithinAt
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

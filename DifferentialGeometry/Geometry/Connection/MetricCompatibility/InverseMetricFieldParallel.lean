@@ -12,8 +12,9 @@ open Bundle Manifold Set Filter FiberBundle
 open scoped Manifold Topology ContDiff BigOperators
 open Tensor0SBundle
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -186,5 +187,5 @@ theorem covGrad_inverseMetricSharpFib_cross
   abel
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Operators
 import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

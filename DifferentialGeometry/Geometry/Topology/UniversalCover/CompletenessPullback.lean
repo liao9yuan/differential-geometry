@@ -14,6 +14,7 @@ import Mathlib.Topology.EMetricSpace.Lipschitz
 import Mathlib.LinearAlgebra.Trace
 import Mathlib.Logic.Equiv.Basic
 import Mathlib.Data.Finite.Defs
+open DifferentialGeometry.Geometry.Connection
 
 
 

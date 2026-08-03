@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ChartDictionary
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

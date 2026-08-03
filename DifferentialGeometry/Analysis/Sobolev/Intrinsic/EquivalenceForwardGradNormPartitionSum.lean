@@ -41,7 +41,7 @@ open DifferentialGeometry.Analysis.Sobolev.Intrinsic
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
 
 private lemma gradFun_eq_zero_off_tsupport_smooth
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {f : M → ℝ} (_hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) {x : M}
     (hx : x ∉ tsupport f) :
     DifferentialGeometry.Geometry.Operator.gradFun (I := I) g f x =
@@ -60,7 +60,7 @@ private lemma gradFun_eq_zero_off_tsupport_smooth
   exact mfderiv_const
 
 noncomputable def gNormGrad
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (u : M → ℝ) (x : M) : ℝ :=
   Real.sqrt
     (g.inner x
@@ -70,13 +70,13 @@ noncomputable def gNormGrad
         (I := I) g u x))
 
 lemma gNormGrad_nonneg
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (u : M → ℝ) (x : M) :
     0 ≤ gNormGrad (I := I) (M := M) g u x :=
   Real.sqrt_nonneg _
 
 lemma gNormGrad_eq_zero_of_notMem_tsupport
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) {x : M}
     (hx : x ∉ tsupport f) :
     gNormGrad (I := I) (M := M) g f x = 0 := by
@@ -107,7 +107,7 @@ private lemma mdifferentiableAt_finset_sum
     exact (hh_β x).add (ihB hh_rest)
 
 private lemma gradFun_finset_sum
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {ι : Type*} (S : Finset ι) (h : ι → M → ℝ)
     (hh : ∀ α ∈ S, ∀ x : M, MDifferentiableAt I 𝓘(ℝ, ℝ) (h α) x) (x : M) :
     DifferentialGeometry.Geometry.Operator.gradFun (I := I) g
@@ -139,7 +139,7 @@ private lemma gradFun_finset_sum
 
 private lemma gradFun_eq_sum_gradFun_pou_mul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) (x : M) :
     DifferentialGeometry.Geometry.Operator.gradFun (I := I) g u x =
       ∑ α ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M),
@@ -182,7 +182,7 @@ private lemma gradFun_eq_sum_gradFun_pou_mul
 
 lemma gNormGrad_le_finset_sum_pou_mul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) (x : M) :
     gNormGrad (I := I) (M := M) g u x ≤
       ∑ α ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M),

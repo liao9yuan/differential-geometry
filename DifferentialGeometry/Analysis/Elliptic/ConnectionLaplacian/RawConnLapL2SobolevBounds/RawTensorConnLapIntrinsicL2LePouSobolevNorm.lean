@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

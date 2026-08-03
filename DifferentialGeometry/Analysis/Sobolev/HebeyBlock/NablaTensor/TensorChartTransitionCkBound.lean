@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransit
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle

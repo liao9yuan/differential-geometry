@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompCo
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false

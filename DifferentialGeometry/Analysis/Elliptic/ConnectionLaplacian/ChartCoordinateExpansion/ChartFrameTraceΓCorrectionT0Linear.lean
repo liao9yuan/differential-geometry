@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoo
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SkExtChartComponentEqCovDerivEuclid
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentFormula
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

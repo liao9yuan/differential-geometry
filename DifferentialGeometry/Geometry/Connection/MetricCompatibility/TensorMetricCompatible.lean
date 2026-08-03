@@ -13,8 +13,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -1055,7 +1056,7 @@ theorem tensorInnerPointwise_0s_mfderiv_metricCompatible
   exact tensorMetricCompatDiff_apply (I := I) (M := M) g s W T x v
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

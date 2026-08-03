@@ -5,6 +5,7 @@ import Mathlib.Tactic.Ring
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section
@@ -52,7 +53,7 @@ theorem barrierDerivs
     (nabla2S : TensorNabla2SecFamily (I := I) (M := M))
     (epsilon delta t0 : Real)
     (hmc : ∀ t : Real,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (cov t) (G t))
+      DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (cov t) (G t))
     (hS : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S) :
     TensorSpatialDerivs (I := I) (M := M) cov
       (tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0)

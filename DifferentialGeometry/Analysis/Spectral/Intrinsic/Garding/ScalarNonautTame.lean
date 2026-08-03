@@ -10,6 +10,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTowe
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SlotTransportPairing
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ConnDiffCovGradBridge
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
+open DifferentialGeometry.Geometry.Connection
 
 
 

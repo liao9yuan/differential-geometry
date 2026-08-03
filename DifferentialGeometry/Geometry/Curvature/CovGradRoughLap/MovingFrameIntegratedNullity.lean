@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.MovingFrameBracketDi
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapLoweredIBP
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

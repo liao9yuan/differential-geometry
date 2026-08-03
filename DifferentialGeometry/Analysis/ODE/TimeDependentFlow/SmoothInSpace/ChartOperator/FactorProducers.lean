@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.VariationalLift
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import Mathlib.Analysis.Calculus.FDeriv.Mul
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

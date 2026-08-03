@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.NablaReact
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFrameInvariant
 import DifferentialGeometry.Tensor.RSTensor.ProductNablaLeibniz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.UhlenbeckBaseProducer
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -75,10 +76,10 @@ omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem stMetricCompat
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (S.family.connection t) (S.family.metric t) := by
   simpa [SolutionFamily.connection, SolutionOn.family_metric] using
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t)
 
 set_option backward.isDefEq.respectTransparency false in
@@ -432,7 +433,7 @@ theorem stNablaMtIter
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     {s : ℕ} (τ : ℕ) :
     ∀ (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) (s + 2 * τ))

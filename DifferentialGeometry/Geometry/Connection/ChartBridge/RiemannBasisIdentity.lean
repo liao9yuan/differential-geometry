@@ -12,8 +12,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle Filter
 open scoped Manifold Topology ContDiff BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -510,7 +511,7 @@ theorem riemannOp_eq_chartRiemannCLM_apply [I.Boundaryless]
     (chartRiemannBasisIdentity_holds (I := I) g x) v w u
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

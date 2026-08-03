@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorr
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoothness.ChartInvGramMatrixPullback
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

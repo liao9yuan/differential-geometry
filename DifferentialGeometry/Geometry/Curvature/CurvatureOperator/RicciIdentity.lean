@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -111,7 +112,7 @@ theorem ricci_identity_oneForm
         (fun b : M => extDerivFun (I := I) (fun b' : M => θ b' (W b')) b (Y b)) x (X x) -
       extDerivFun (I := I)
         (fun b : M => extDerivFun (I := I) (fun b' : M => θ b' (W b')) b (X b)) x (Y x) :=
-    extDerivFun_apply_mlieBracket hX_at hY_at hf_2 hx_int
+    DifferentialGeometry.Geometry.Connection.extDerivFun_apply_mlieBracket hX_at hY_at hf_2 hx_int
   rw [hpair_Y_glob, hpair_X_glob] at hfound
   have hpair_br : extDerivFun (I := I) (fun b : M => θ b (W b)) x
         (VectorField.mlieBracket I X Y x) =

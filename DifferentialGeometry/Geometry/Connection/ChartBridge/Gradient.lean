@@ -8,8 +8,9 @@ noncomputable section
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -231,5 +232,5 @@ theorem gradFun_contMDiff_total_section [I.Boundaryless]
   gradFun_contMDiff_total (I := I) g hf
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

@@ -87,7 +87,7 @@ theorem parInner_d2
       (fun s : ℝ => g.inner (γ s) (Fi s) (covDerivAlong (I := I) g γ Y s))
       (- g.inner (γ t) (Fi t)
         ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (Y t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)))
       t := by
@@ -115,13 +115,13 @@ theorem parInner_curv_expand
     (i : ι) :
     g.inner (γ t) (F i t)
       ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
           (γ t))
         (Y t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t))
     = ∑ j, g.inner (γ t) (F j t) (Y t) *
         g.inner (γ t) (F i t)
           ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (γ t))
             (F j t) (curveVelocity (I := I) γ t)
             (curveVelocity (I := I) γ t)) := by
@@ -173,7 +173,7 @@ theorem jacobi_unique
     (hCbound : ∀ t ∈ Icc (0 : ℝ) b, ∀ i j,
       |g.inner (γ t) (F i t)
         ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (F j t) (curveVelocity (I := I) γ t)
           (curveVelocity (I := I) γ t))| ≤ C)
@@ -192,12 +192,12 @@ theorem jacobi_unique
     (w := fun t i =>
       (- g.inner (γ t) (F i t)
           ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (γ t))
             (Y₁ t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)))
         - (- g.inner (γ t) (F i t)
             ((DifferentialGeometry.Integral.Connection.riemannOp
-                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+                (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
                 (γ t))
               (Y₂ t) (curveVelocity (I := I) γ t)
               (curveVelocity (I := I) γ t))))
@@ -236,13 +236,13 @@ theorem jacobi_unique
       have hw :
           (- g.inner (γ t) (F i t)
               ((DifferentialGeometry.Integral.Connection.riemannOp
-                  (DifferentialGeometry.Integral.Connection.LeviCivita
+                  (DifferentialGeometry.Geometry.Connection.LeviCivita
                     (I := I) g) (γ t))
                 (Y₁ t) (curveVelocity (I := I) γ t)
                 (curveVelocity (I := I) γ t)))
             - (- g.inner (γ t) (F i t)
                 ((DifferentialGeometry.Integral.Connection.riemannOp
-                    (DifferentialGeometry.Integral.Connection.LeviCivita
+                    (DifferentialGeometry.Geometry.Connection.LeviCivita
                       (I := I) g) (γ t))
                   (Y₂ t) (curveVelocity (I := I) γ t)
                   (curveVelocity (I := I) γ t)))
@@ -250,7 +250,7 @@ theorem jacobi_unique
                 - g.inner (γ t) (F j t) (Y₁ t))
               * g.inner (γ t) (F i t)
                 ((DifferentialGeometry.Integral.Connection.riemannOp
-                    (DifferentialGeometry.Integral.Connection.LeviCivita
+                    (DifferentialGeometry.Geometry.Connection.LeviCivita
                       (I := I) g) (γ t))
                   (F j t) (curveVelocity (I := I) γ t)
                   (curveVelocity (I := I) γ t)) := by
@@ -263,7 +263,7 @@ theorem jacobi_unique
                 - g.inner (γ t) (F j t) (Y₁ t))
               * g.inner (γ t) (F i t)
                 ((DifferentialGeometry.Integral.Connection.riemannOp
-                    (DifferentialGeometry.Integral.Connection.LeviCivita
+                    (DifferentialGeometry.Geometry.Connection.LeviCivita
                       (I := I) g) (γ t))
                   (F j t) (curveVelocity (I := I) γ t)
                   (curveVelocity (I := I) γ t))|
@@ -271,7 +271,7 @@ theorem jacobi_unique
                 - g.inner (γ t) (F j t) (Y₁ t))
               * g.inner (γ t) (F i t)
                 ((DifferentialGeometry.Integral.Connection.riemannOp
-                    (DifferentialGeometry.Integral.Connection.LeviCivita
+                    (DifferentialGeometry.Geometry.Connection.LeviCivita
                       (I := I) g) (γ t))
                   (F j t) (curveVelocity (I := I) γ t)
                   (curveVelocity (I := I) γ t))| :=

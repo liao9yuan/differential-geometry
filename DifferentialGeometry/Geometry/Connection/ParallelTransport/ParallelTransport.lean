@@ -19,6 +19,7 @@ noncomputable section
 open Set Function Filter Manifold Bundle
 open scoped Topology Manifold ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
 namespace Geometry
 namespace Riemannian

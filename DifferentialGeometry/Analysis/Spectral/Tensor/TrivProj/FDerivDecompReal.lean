@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

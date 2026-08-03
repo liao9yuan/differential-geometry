@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalMapContDiffOnK
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTop
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

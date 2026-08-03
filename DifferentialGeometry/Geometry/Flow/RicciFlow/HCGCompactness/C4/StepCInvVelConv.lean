@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalInvV
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchConv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageFill
 import DifferentialGeometry.Analysis.Calculus.MovingImplicit
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

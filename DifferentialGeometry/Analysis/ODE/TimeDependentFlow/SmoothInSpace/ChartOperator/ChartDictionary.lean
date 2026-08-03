@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.Covariant
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

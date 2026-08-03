@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionIteratedCovGradWindow
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorCurvFirstOrderSection
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

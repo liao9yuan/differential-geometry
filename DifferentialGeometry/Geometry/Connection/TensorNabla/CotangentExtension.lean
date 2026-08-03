@@ -15,8 +15,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -685,5 +686,5 @@ instance cotangentCov_isContMDiff
         exact hglobal.contMDiffOn }
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

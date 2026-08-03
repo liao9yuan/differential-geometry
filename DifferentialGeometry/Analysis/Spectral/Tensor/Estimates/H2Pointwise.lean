@@ -12,6 +12,7 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInne
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open scoped ContDiff Manifold Topology BigOperators

@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.LieDerivativePairing
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
+open DifferentialGeometry.Geometry.Connection
 
 
 

@@ -14,6 +14,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.QuasiMeasureP
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
+open DifferentialGeometry.Geometry.Connection
 
 
 

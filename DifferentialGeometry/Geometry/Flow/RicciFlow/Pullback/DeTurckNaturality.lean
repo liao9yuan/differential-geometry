@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
+open DifferentialGeometry.Geometry.Connection
 noncomputable section
 
 open Bundle Manifold

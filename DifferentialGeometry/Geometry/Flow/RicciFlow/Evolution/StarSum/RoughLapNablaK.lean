@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridgeAllK
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -70,7 +71,7 @@ theorem nabla_roughLap0S_nablaKRm
     simpa [SolutionFamily.connection, metricCov] using
       leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
         (I := I) (M := M) (S.base.metric t)
-  have hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+  have hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (S.family.connection t) (S.base.metric t) := by
     simpa [SolutionFamily.connection, metricCov] using
       leviCivitaConnectionOfMetric_isMetricCompatible (I := I) (S.base.metric t)

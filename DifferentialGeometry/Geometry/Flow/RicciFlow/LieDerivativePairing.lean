@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

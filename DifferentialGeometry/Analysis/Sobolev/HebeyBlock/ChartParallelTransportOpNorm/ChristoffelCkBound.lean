@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 open DifferentialGeometry.Geometry.Operator
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle

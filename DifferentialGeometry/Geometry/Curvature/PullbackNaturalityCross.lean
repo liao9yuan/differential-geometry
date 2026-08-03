@@ -145,10 +145,10 @@ theorem directionalDeriv_pullbackCross
     (g : SmoothRiemannianMetric J N) (Phi : M ≃ₘ⟮I, J⟯ N)
     (A P Q : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _)) (x : M) :
-    DifferentialGeometry.Integral.Connection.directionalDerivAlong (I := I) (fun p : M => A p)
+    DifferentialGeometry.Geometry.Connection.directionalDerivAlong (I := I) (fun p : M => A p)
         (fun y : M =>
           (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi).inner y (P y) (Q y)) x =
-      DifferentialGeometry.Integral.Connection.directionalDerivAlong (I := J)
+      DifferentialGeometry.Geometry.Connection.directionalDerivAlong (I := J)
         (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi A q)
         (fun q : N =>
           g.inner q (pushFwdSectionCross (I := I) (J := J) Phi P q)
@@ -164,7 +164,7 @@ theorem directionalDeriv_pullbackCross
     rw [Diffeomorph.pullbackMetricCross_inner]
     simp only [pushFwdSectionCross_apply_at_image]
   rw [hfun]
-  unfold DifferentialGeometry.Integral.Connection.directionalDerivAlong
+  unfold DifferentialGeometry.Geometry.Connection.directionalDerivAlong
   dsimp only
   rw [pushFwdSectionCross_apply_at_image]
   rw [extDerivFun_real_eq_mfderiv, extDerivFun_real_eq_mfderiv]
@@ -245,14 +245,14 @@ private theorem koszulScalar_pullback_pushFwdCross
     (g : SmoothRiemannianMetric J N) (Phi : M ≃ₘ⟮I, J⟯ N)
     (A B C : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _)) (x : M) :
-    DifferentialGeometry.Integral.Connection.koszulScalar (I := I)
+    DifferentialGeometry.Geometry.Connection.koszulScalar (I := I)
         (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
         (fun p : M => A p) (fun p : M => B p) (fun p : M => C p) x =
-      DifferentialGeometry.Integral.Connection.koszulScalar (I := J) g
+      DifferentialGeometry.Geometry.Connection.koszulScalar (I := J) g
         (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi A q)
         (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi B q)
         (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi C q) (Phi x) := by
-  unfold DifferentialGeometry.Integral.Connection.koszulScalar
+  unfold DifferentialGeometry.Geometry.Connection.koszulScalar
   dsimp only
   rw [directionalDeriv_pullbackCross (I := I) (J := J) g Phi A B C x,
     directionalDeriv_pullbackCross (I := I) (J := J) g Phi B C A x,
@@ -303,12 +303,12 @@ theorem metricCov_pullbackCross
             (metricCov (I := I) (M := M) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
               (fun p : M => Y p) x v)) u
         = (1 / 2 : ℝ) *
-            DifferentialGeometry.Integral.Connection.koszulScalar (I := I)
+            DifferentialGeometry.Geometry.Connection.koszulScalar (I := I)
               (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
               (fun p : M => Xv p) (fun p : M => Y p) (fun p : M => Zw p) x := by
     rw [← hdw, ← Diffeomorph.pullbackMetricCross_inner, ← hXv, ← hZw]
     exact
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
       (I := I) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
       (fun p : M => Xv p) (fun p : M => Y p) (fun p : M => Zw p) x
       (Xv.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
@@ -320,13 +320,13 @@ theorem metricCov_pullbackCross
             (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Y q) (Phi x)
             (mfderiv I J (Phi : M -> N) x v)) u
         = (1 / 2 : ℝ) *
-            DifferentialGeometry.Integral.Connection.koszulScalar (I := J) g
+            DifferentialGeometry.Geometry.Connection.koszulScalar (I := J) g
               (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Xv q)
               (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Y q)
               (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Zw q) (Phi x) := by
     rw [← hu, ← hv]
     exact
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_inner_eq_koszulScalar
       (I := J) g
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Xv q)
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Y q)

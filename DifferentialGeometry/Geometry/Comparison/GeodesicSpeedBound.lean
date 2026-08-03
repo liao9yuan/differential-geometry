@@ -17,6 +17,7 @@ import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

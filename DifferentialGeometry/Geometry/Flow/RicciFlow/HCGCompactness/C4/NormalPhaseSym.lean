@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.Flow.GlobalSliceSmoothness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseRealization
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

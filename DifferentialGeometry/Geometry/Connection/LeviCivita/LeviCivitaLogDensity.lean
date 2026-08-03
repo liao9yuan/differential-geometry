@@ -25,7 +25,8 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
@@ -216,4 +217,4 @@ theorem lcTrace_logDensity
         chartChristoffel (I := I) g x p a a (extChartAt I x x) := by
           exact (lcTrace_halfTrace (I := I) g x p).symm
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

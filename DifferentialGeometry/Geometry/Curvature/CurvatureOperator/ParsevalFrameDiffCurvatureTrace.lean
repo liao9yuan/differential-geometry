@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
 import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

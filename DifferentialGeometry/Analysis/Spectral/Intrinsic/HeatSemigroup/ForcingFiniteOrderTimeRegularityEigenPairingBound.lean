@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
 import DifferentialGeometry.Analysis.Calculus.ContDiffExtendInterval
 import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegularityParametricIntegral
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -769,7 +770,7 @@ private theorem smoothCcTensorPath_timeJet_selfPairing_continuousOn
   have hCR : ∀ α : M, ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)
       ((kk : ℕ) : WithTop ℕ∞)
       (fun p : M × ℝ =>
-        DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
+        DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
           (fun z : M => (Sfam p.2).toSection z) p.1)
       ((chartAt H α).source ×ˢ Set.Icc (0 : ℝ) T) := by
     intro α p hp
@@ -799,17 +800,17 @@ private theorem smoothCcTensorPath_timeJet_selfPairing_continuousOn
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α) hsource).mp hFwithin).2
     refine hrepr.congr_of_eventuallyEq ?_ ?_
     · filter_upwards [self_mem_nhdsWithin] with q hq
-      rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
+      rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply,
         Bundle.Trivialization.continuousLinearMapAt_apply,
         Bundle.Trivialization.coe_linearMapAt_of_mem _ (hbaseRS α q.1 hq.1)]
-    · rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
+    · rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply,
         Bundle.Trivialization.continuousLinearMapAt_apply,
         Bundle.Trivialization.coe_linearMapAt_of_mem _ hpbase]
   have hChartCommute : ∀ (α : M) (x : M), x ∈ (chartAt H α).source → ∀ t ∈ Set.Icc (0 : ℝ) T,
-      DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
+      DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
           (fun z : M => Tensor0SBundle.TensorRSSpace.ofModel (jetD z t)) x =
         iteratedDerivWithin j
-          (fun s => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+          (fun s => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
             (I := I) 0 2 α (fun z : M => (Sfam s).toSection z) x)
           (Set.Icc (0 : ℝ) T) t := by
     intro α x hx t ht
@@ -821,11 +822,11 @@ private theorem smoothCcTensorPath_timeJet_selfPairing_continuousOn
           : Tensor0SBundle.TensorRSModel 0 2 ℝ E →L[ℝ] Tensor0SBundle.TensorRSSpace 0 2 I x)
       with hΦ
     have hΦeq : ∀ s : ℝ, Φ ((Sfam s).toFun x) =
-        DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+        DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
           (I := I) 0 2 α (fun z : M => (Sfam s).toSection z) x := by
       intro s
       rw [hΦ, ContinuousLinearMap.comp_apply,
-        DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply]
+        DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply]
       have hsymm : ((Tensor0SBundle.tensorRSSpace_continuousLinearEquiv (I := I) 0 2 x).symm
           : Tensor0SBundle.TensorRSModel 0 2 ℝ E →L[ℝ] Tensor0SBundle.TensorRSSpace 0 2 I x)
           ((Sfam s).toFun x) = (Sfam s).toSection x := by
@@ -835,10 +836,10 @@ private theorem smoothCcTensorPath_timeJet_selfPairing_continuousOn
         exact (Tensor0SBundle.tensorRSSpace_continuousLinearEquiv
           (I := I) 0 2 x).symm_apply_apply _
       rw [hsymm]
-    have hΦLHS : DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+    have hΦLHS : DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
           (I := I) 0 2 α (fun z : M => Tensor0SBundle.TensorRSSpace.ofModel (jetD z t)) x =
         Φ (jetD x t) := by
-      rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply, hΦ,
+      rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply, hΦ,
         ContinuousLinearMap.comp_apply]
       rfl
     have hcomm := clm_comm_iteratedDerivWithin_finiteOrder Φ
@@ -851,20 +852,20 @@ private theorem smoothCcTensorPath_timeJet_selfPairing_continuousOn
   have hChartJet : ∀ α : M, ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ((0 : ℕ) : WithTop ℕ∞)
       (fun p : M × ℝ =>
-        DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
+        DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
           (fun z : M => Tensor0SBundle.TensorRSSpace.ofModel (jetD z p.2)) p.1)
       ((chartAt H α).source ×ˢ Set.Icc (0 : ℝ) T) := by
     intro α
     have hCRj : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)
         ((0 + j : ℕ) : WithTop ℕ∞)
         (fun p : M × ℝ =>
-          DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
+          DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
             (fun z : M => (Sfam p.2).toSection z) p.1)
         ((chartAt H α).source ×ˢ Set.Icc (0 : ℝ) T) :=
       (hCR α).of_le (by exact_mod_cast (by omega : 0 + j ≤ kk))
     have hvecjet := vec_iteratedPartialSnd_set_contMDiffOn_Icc_finiteOrder
       (V := Tensor0SBundle.TensorRSModel 0 2 ℝ E) (U := (chartAt H α).source) hT
-      (fun x s => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
+      (fun x s => DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
         (I := I) 0 2 α (fun z : M => (Sfam s).toSection z) x) j 0 hCRj
     refine hvecjet.congr ?_
     intro p hp
@@ -907,10 +908,10 @@ private theorem smoothCcTensorPath_timeJet_selfPairing_continuousOn
         ((chartAt H α).source ×ˢ Set.Icc (0 : ℝ) T) p₀ := by
       refine ((hChartJet α) p₀ ⟨hx₀src, hs₀'⟩).congr_of_eventuallyEq ?_ ?_
       · filter_upwards [self_mem_nhdsWithin] with p hp
-        rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
+        rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply,
           Bundle.Trivialization.continuousLinearMapAt_apply,
           Bundle.Trivialization.coe_linearMapAt_of_mem _ (hbaseRS α p.1 hp.1)]
-      · rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
+      · rw [DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply,
           Bundle.Trivialization.continuousLinearMapAt_apply,
           Bundle.Trivialization.coe_linearMapAt_of_mem _ hbaseSet]
     exact ((Bundle.Trivialization.contMDiffWithinAt_iff

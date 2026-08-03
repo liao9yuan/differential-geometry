@@ -10,6 +10,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -1161,7 +1162,7 @@ theorem chartCovDerivAlong_commutator_eq_riemannOp_on_variation
         chartCovDerivAlong (I := I) g (f s t) (fun u : ℝ => f u v)
           (fun u : ℝ => Y u v) s) t
     = (DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita
+        (DifferentialGeometry.Geometry.Connection.LeviCivita
           (I := I) g) (f s t))
         (fderiv ℝ (fun u : ℝ => extChartAt I (f s t) (f u t)) s (1 : ℝ))
         (fderiv ℝ (fun v : ℝ => extChartAt I (f s t) (f s v)) t (1 : ℝ))
@@ -1169,9 +1170,9 @@ theorem chartCovDerivAlong_commutator_eq_riemannOp_on_variation
   have hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f s t) (f p.1 p.2)) (s, t) :=
     chartPulled_contDiffAt (I := I) f hf s t
   rw [Aux7.commutator_eq_chartRiemannCLM (I := I) g f Y s t hF hY,
-    ← DifferentialGeometry.Integral.Connection.riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
+    ← DifferentialGeometry.Geometry.Connection.riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
       (I := I) g (f s t)
-      (DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity_LeviCivita
+      (DifferentialGeometry.Geometry.Connection.chartRiemannBasisIdentity_LeviCivita
         (I := I) g (f s t))]
 
 end Variation

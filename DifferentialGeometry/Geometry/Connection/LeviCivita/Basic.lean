@@ -13,10 +13,10 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -111,4 +111,4 @@ theorem isLeviCivitaFamilyOn_of_calculus
 
 end Family
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

@@ -15,10 +15,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
@@ -584,4 +584,4 @@ theorem lc_bochner_rm04
     normSecond hfields hHessLocal hdu hnablaLocal hnabla2 hlapTrace hsecond hrough
     hdlap hsymm hthird hRm04Skew
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

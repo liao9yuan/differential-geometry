@@ -49,7 +49,7 @@ lemma chartAtlasPOU_finset_sum_eq_one
 
 theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M)
     {F : M → ℝ≥0∞} (hF : Measurable F)
     (hF_supp : ∀ x, x ∉ (chartAt H α).source → F x = 0) :

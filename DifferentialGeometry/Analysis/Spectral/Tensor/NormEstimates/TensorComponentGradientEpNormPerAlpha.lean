@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.TensorChartTwistUniformBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.GradNormChartBound
 import DifferentialGeometry.Geometry.Metric.MetricBounds
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 noncomputable section

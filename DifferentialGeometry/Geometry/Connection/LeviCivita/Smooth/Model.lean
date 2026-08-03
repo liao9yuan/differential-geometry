@@ -5,10 +5,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
@@ -458,4 +458,4 @@ noncomputable def metricFlatModelInChart_component
     (i j : CoordinateIdx (𝕜 := Real) E) (y : E) : Real :=
   metricFlatModelInChart (I := I) g x₀ y
     ((Module.finBasis Real E) i) ((Module.finBasis Real E) j)
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

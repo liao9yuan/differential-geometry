@@ -10,8 +10,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1208,5 +1209,5 @@ theorem heart_of_bochner_smoothOrthoFrame [I.Boundaryless]
     (fun i => smoothOrthoFrame_smooth (I := I) g x i) hInner
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

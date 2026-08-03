@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrameCurvatureCore
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.FrozenFrameTrace
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSCovariantDerivativeCongrLocally
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

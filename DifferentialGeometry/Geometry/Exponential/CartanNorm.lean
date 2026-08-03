@@ -76,12 +76,12 @@ theorem expDiff_sq_xfer
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
       (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I') g') x)
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y) :
     g'.inner
@@ -277,7 +277,7 @@ theorem expDiff_sq_xfer
   have hcoef : ∀ t ∈ Icc (0 : ℝ) 1, ∀ a b,
       g.inner (γ t) (frame a t)
           ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (γ t))
             (frame b t) (V t) (V t))
         = a0 a b := by
@@ -288,7 +288,7 @@ theorem expDiff_sq_xfer
   have hcoef' : ∀ t ∈ Icc (0 : ℝ) 1, ∀ a b,
       g'.inner (γ' t) (frame' a t)
           ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I') g')
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g')
               (γ' t))
             (frame' b t) (V' t) (V' t))
         = a0 a b := by
@@ -302,7 +302,7 @@ theorem expDiff_sq_xfer
   have hCbound : ∀ t ∈ Icc (0 : ℝ) 1, ∀ a b,
       |g.inner (γ t) (frame a t)
         ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (frame b t) (V t) (V t))| ≤ C := by
     intro t ht a b

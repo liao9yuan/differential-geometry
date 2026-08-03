@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.NormGradSq
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

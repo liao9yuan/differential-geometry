@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Topology.FiberBundleT2
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

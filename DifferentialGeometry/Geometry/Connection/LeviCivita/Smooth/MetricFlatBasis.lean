@@ -9,12 +9,12 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
 open scoped Manifold ContDiff Topology
@@ -620,4 +620,4 @@ theorem lc_christoffel_contMDiffAt {ι : Type*} [Finite ι]
     exact lc_christoffel_eq_koszul_sum (I := I) e b g hy i j k
   exact hRhs.congr_of_eventuallyEq heq
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

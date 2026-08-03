@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

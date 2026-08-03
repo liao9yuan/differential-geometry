@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Algebraic pullback identities for inverse diffeomorphisms

@@ -410,7 +410,7 @@ theorem nabla_metricPow_zero
     [IsManifold I 2 M] [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g) :
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g) :
     ∀ r : ℕ,
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (2 * r) cov (metricPow (I := I) g r)
@@ -459,7 +459,7 @@ theorem nabla0SFun_metricPow_contraction_eval {s r : ℕ}
     [IsManifold I 2 M] [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
     (nablaA : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

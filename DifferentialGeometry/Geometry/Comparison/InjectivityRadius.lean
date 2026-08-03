@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
 import Mathlib.Data.ENNReal.Real
+open DifferentialGeometry.Geometry.Connection
 
 
 /-!

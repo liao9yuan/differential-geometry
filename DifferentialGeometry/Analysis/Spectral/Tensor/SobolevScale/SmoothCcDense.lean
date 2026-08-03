@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorTensorHsToWtwokTwo
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
+open DifferentialGeometry.Geometry.Connection
 
 
 

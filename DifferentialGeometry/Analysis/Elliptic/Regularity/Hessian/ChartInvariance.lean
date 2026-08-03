@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

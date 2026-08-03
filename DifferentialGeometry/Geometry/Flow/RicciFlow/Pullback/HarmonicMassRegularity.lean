@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicStateMass
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 import Mathlib.Analysis.Calculus.MeanValue
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Regularity of the finite state-dependent HMF mass

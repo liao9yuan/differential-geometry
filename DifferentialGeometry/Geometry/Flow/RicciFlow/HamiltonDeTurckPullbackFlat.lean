@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairing
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

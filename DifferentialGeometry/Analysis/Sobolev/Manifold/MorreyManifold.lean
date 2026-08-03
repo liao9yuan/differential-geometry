@@ -737,7 +737,7 @@ private lemma eLpNorm_chartSmoothExt_target_eq_eLpNorm_chartPushed_target
   eLpNorm_congr_ae (chartSmoothExt_ae_eq_chartPushed (I := I) (M := M) α u)
 
 private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) (u : M → ℝ) (q : ℝ≥0∞) :
     eLpNorm (chartSmoothExt (I := I) (M := M) α
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -1065,7 +1065,7 @@ private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target
 
 omit [CompactSpace M] in
 private lemma wkpNorm_chartPushed_target_le_wkpNormChart
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (α : M) (u : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 q
@@ -1080,7 +1080,7 @@ private lemma wkpNorm_chartPushed_target_le_wkpNormChart
 
 private lemma eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) {q : ℝ≥0∞} (hq_one : 1 ≤ q) {u : M → ℝ}
     (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     eLpNorm (fun z : EuclN => ‖fderiv ℝ (chartSmoothExt (I := I) (M := M) α
@@ -1100,7 +1100,7 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
   exact wkpNorm_chartPushed_target_le_wkpNormChart (I := I) (M := M) g α u
 
 private lemma per_chart_smooth_sup_bound
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p)
     [NeZero (Module.finrank ℝ E)] (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1237,13 +1237,13 @@ private lemma norm_pou_mul_le_norm_chartSmoothExt_at_some_point
     exact hCmod
 
 private noncomputable def perChartMorreyConst
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p)
     [NeZero (Module.finrank ℝ E)] (α : M) : ℝ :=
   Classical.choose (per_chart_smooth_sup_bound (I := I) (M := M) g hp α)
 
 private lemma perChartMorreyConst_nn
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p)
     [NeZero (Module.finrank ℝ E)] (α : M) :
     0 ≤ perChartMorreyConst (I := I) (M := M) g hp α :=
@@ -1251,7 +1251,7 @@ private lemma perChartMorreyConst_nn
     (per_chart_smooth_sup_bound (I := I) (M := M) g hp α)).1
 
 private lemma perChartMorreyConst_bound
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p)
     [NeZero (Module.finrank ℝ E)] (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) (y : EuclN) :
@@ -1269,7 +1269,7 @@ theorem smooth_manifold_morrey_sup_bound_uniform
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {u : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ u →
@@ -1310,7 +1310,7 @@ theorem smooth_manifold_morrey_sup_bound_uniform
   exact perChartMorreyConst_bound (I := I) (M := M) g hp α hu y
 
 private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞)) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {u : M → ℝ}, Measurable u →
@@ -1415,7 +1415,7 @@ theorem morrey_C0_embedding_of_compact
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p)
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u) :
@@ -1733,7 +1733,7 @@ theorem morrey_C0_embedding_of_compact
   exact le_of_tendsto_of_tendsto' h_norm_tendsto h_rhs_tendsto h_v_bound
 
 private lemma chartSmoothExt_holder_uniform_half_ball
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p)
     [NeZero (Module.finrank ℝ E)] :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1828,7 +1828,7 @@ private lemma toEuclidean_extChartAt_mem_half_ball_of_mem_tsupport_pou
   exact chartCarrier_subset_half_ball (I := I) (M := M) α h_toEuc_in
 
 private lemma pou_mul_holder_chart_uniform_tsupport
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p)
     [NeZero (Module.finrank ℝ E)] :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1890,7 +1890,7 @@ theorem smooth_manifold_morrey_holder_modulus_per_chart
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (α : M) :
     ∃ K : Set M, IsCompact K ∧ K ⊆ (chartAt H α).source ∧
     ∃ C : ℝ, 0 ≤ C ∧

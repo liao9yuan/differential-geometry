@@ -10,6 +10,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.QuasilinearAbstrac
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 open DifferentialGeometry.Geometry.Operator
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

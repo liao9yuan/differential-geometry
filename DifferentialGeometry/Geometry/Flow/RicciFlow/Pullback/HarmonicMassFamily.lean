@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicMassRegularity
 import DifferentialGeometry.Analysis.ODE.StateCoerciveMass
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # One-radius finite harmonic-map mass families

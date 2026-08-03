@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.Co
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import Mathlib.MeasureTheory.Function.LpSeminorm.SMul
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

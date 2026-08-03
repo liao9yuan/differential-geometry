@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -804,7 +805,7 @@ structure PinchWMPData
         (cov t) (∞ : WithTop ℕ∞)
   hmc :
     forall t : Real,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) (cov t) (G t)
+      DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (cov t) (G t)
   spatial : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S
 
 namespace PinchWMPData

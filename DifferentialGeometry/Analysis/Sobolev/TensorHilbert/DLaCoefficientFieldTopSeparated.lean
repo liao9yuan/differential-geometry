@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Top-separated pointwise bounds for the DLa coefficient field

@@ -125,7 +125,7 @@ theorem MemW1pIntrinsicLp_of_MemWkpChart_smooth
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (p : ℝ≥0∞)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (p : ℝ≥0∞)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     DifferentialGeometry.Analysis.Sobolev.IntrinsicLp.MemW1pIntrinsicLp
       (I := I) (M := M) g p u := by
@@ -143,7 +143,7 @@ theorem w1pNormIntrinsicLp_lt_top_of_MemWkpChart_smooth
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (p : ℝ≥0∞)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (p : ℝ≥0∞)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     DifferentialGeometry.Analysis.Sobolev.IntrinsicLp.w1pNormIntrinsicLp
       (I := I) (M := M) g p u < ⊤ := by
@@ -167,7 +167,7 @@ theorem MemW1pIntrinsicLp_of_MemWkpChart
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (hu_meas : Measurable u)
@@ -185,7 +185,7 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (_hp_top : p ≠ ⊤)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (_hu_meas : Measurable u)
@@ -240,7 +240,7 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :
     ∀ {u : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ u →
       Measurable u →
@@ -257,7 +257,7 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart
 
 lemma continuous_g_norm_gradFun
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     Continuous (fun x : M => Real.sqrt
         (g.inner x
@@ -285,7 +285,7 @@ lemma continuous_g_norm_gradFun
 
 private lemma exists_bound_g_norm_gradFun
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x : M,
       Real.sqrt
@@ -309,7 +309,7 @@ private lemma exists_bound_g_norm_gradFun
 
 private lemma eLpNorm_g_norm_gradFun_chart_local_lt_top_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     eLpNorm (Set.indicator (chartAt H α).source
@@ -370,7 +370,7 @@ theorem eLpNorm_g_norm_gradFun_chart_local_le_const_mul_wkpNormChart_smooth
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (_hp_top : p ≠ ⊤) (α : M)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (h_chart_pos : wkpNormChart (I := I) (M := M) g 1 p u ≠ 0) :

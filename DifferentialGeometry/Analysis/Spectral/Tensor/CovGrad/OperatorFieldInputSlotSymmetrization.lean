@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

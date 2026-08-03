@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotInsertSelfAdjoint
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePairCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeLowerPairing
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Closed-edge Ricci--DeTurck refold pairing

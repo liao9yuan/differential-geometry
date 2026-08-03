@@ -401,7 +401,7 @@ lemma pullbackToM_eq_zero_off_chart_source
 
 omit [CompactSpace M] in
 lemma memW1p_chartPushedRaw_pou_mul_of_memWkpChart
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞}
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) g 1 p u)
@@ -432,7 +432,7 @@ lemma memW1p_chartPushedRaw_pou_mul_of_memWkpChart
     (d := Module.finrank ℝ E) (p := p) hopen h_ae).mp h_chart_pushed_w1p
 
 lemma memW1p_chartPushedRaw_pou_mul_chartNbhd
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞}
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) g 1 p u)
@@ -462,7 +462,7 @@ lemma memW1p_chartPushedRaw_pou_mul_chartNbhd
 
 lemma memW01p_chartPushedRaw_pou_mul_chartNbhd
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u)
@@ -481,7 +481,7 @@ lemma memW01p_chartPushedRaw_pou_mul_chartNbhd
 
 omit [CompactSpace M] [I.Boundaryless] in
 lemma eLpNorm_chartPushedRaw_pou_mul_eq_chartPushed
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞}
     (u : M → ℝ) (α : M) :
     eLpNorm (chartPushedRaw (I := I) (M := M) α
@@ -516,7 +516,7 @@ lemma eLpNorm_chartPushedRaw_pou_mul_chartNbhd_le
 
 lemma rellich_witness_weakGrad_isWeakPartial
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u)
@@ -534,7 +534,7 @@ lemma rellich_witness_weakGrad_isWeakPartial
 
 lemma rellich_witness_weakGrad_memLp
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u)
@@ -549,7 +549,7 @@ lemma rellich_witness_weakGrad_memLp
 
 lemma rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u)
@@ -666,7 +666,7 @@ lemma rellich_witness_weakGrad_ae_eq_chosenWeakPartial'
 
 omit [CompactSpace M] in
 lemma eLpNorm_chartPushed_le_wkpNormChart
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞}
     (u : M → ℝ) (α : M) :
     eLpNorm (chartPushed (I := I) (M := M)
@@ -709,7 +709,7 @@ lemma eLpNorm_chartPushed_le_wkpNormChart
 
 lemma eLpNorm_rellich_witness_weakGrad_le_wkpNormChart
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : M → ℝ}
     (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u)
@@ -812,7 +812,7 @@ lemma eLpNorm_rellich_witness_weakGrad_le_wkpNormChart
 
 private lemma exists_chart_rellich_subseq_aux
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : ℕ → M → ℝ}
     (hu_mem : ∀ n, MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) (u n))
@@ -1034,7 +1034,7 @@ lemma chartPushedRaw_pullbackToM_chartCompact_indicator
 
 private lemma exists_diagonal_chart_extraction
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : ℕ → M → ℝ}
     (hu_mem : ∀ n, MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) (u n))
@@ -1341,7 +1341,7 @@ private lemma tsupport_chartPushedRaw_pou_mul_sub_subset_chartCompact
 
 private lemma memLp_pou_mul_riemannianMeasure
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u)
@@ -1410,7 +1410,7 @@ private lemma memLp_pou_mul_riemannianMeasure
 
 private lemma memLp_riemannianMeasure_of_memWkpChart
     [NeZero (Module.finrank ℝ E)]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu : MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u) :

@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothEmbedInj
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsMetricPerturbation
+open DifferentialGeometry.Geometry.Connection
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter MeasureTheory Tensor0SBundle

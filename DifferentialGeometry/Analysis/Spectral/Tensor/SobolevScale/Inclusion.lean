@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

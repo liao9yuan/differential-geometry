@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
+open DifferentialGeometry.Geometry.Connection
 
 
 

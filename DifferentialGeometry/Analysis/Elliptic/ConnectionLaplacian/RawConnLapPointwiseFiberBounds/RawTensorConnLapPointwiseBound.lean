@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacianChart
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.ChartTensorRSCovariantDerivativeOpNorm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.RawTensorConnLap2ndApplicationOpNorm
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

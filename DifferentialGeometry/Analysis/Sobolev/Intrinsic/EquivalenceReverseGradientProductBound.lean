@@ -33,7 +33,7 @@ local notation "EuclN_E" =>
 
 omit [FiniteDimensional ℝ E] in
 lemma g_inner_cauchy_schwarz_sq
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     (g.inner x v w)^2 ≤ g.inner x v v * g.inner x w w := by
   have h_inner_self_nn : ∀ z : TangentSpace I x, 0 ≤ g.inner x z z := by
@@ -120,7 +120,7 @@ lemma g_inner_cauchy_schwarz_sq
 
 omit [FiniteDimensional ℝ E] in
 lemma abs_g_inner_le_sqrt_mul_sqrt
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     |g.inner x v w| ≤ Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
   have h_inner_self_nn : ∀ z : TangentSpace I x, 0 ≤ g.inner x z z := by
@@ -146,7 +146,7 @@ lemma abs_g_inner_le_sqrt_mul_sqrt
   exact h_sqrt_le
 
 lemma gradFun_mul_pointwise
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {ρ u : M → ℝ} {x : M}
     (hρ : MDifferentiableAt I 𝓘(ℝ, ℝ) ρ x)
     (hu : MDifferentiableAt I 𝓘(ℝ, ℝ) u x) :
@@ -223,7 +223,7 @@ lemma gradFun_mul_pointwise
 
 lemma continuous_sqrt_g_inner_gradFun_self
     [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     Continuous (fun x : M => Real.sqrt
       (g.inner x
@@ -279,7 +279,7 @@ lemma abs_chartAtlasPOU_le_one
 
 lemma sqrt_g_inner_gradFun_pou_mul_le
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ x : M,
       Real.sqrt

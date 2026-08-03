@@ -44,7 +44,7 @@ def curveCurvGram (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   Matrix.of fun i j =>
     g.inner (γ t)
       ((DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
         (V i t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t))
       (V j t)
 

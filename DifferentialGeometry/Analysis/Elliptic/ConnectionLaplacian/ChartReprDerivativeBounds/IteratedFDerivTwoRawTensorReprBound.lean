@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawTensorConnLapPointwiseBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartReprNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

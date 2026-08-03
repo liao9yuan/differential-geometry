@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulTameEnvelope
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

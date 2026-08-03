@@ -149,7 +149,7 @@ theorem nabla2Trace02
       (∞ : WithTop ℕ∞))
     (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -583,7 +583,7 @@ theorem nablaTrace04
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

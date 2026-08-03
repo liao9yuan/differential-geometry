@@ -622,7 +622,7 @@ structure MetricAllTimesFirstOrderInput
     forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
       forall x : M, x ∈ K ->
         Real.sqrt
-          (DifferentialGeometry.Integral.Connection.componentL2Sq3
+          (DifferentialGeometry.Geometry.Connection.componentL2Sq3
             (fun a b c : Idx => nablaRic i s x a b c)) <= R
   initialOneC : Real
   initial_one_bound :

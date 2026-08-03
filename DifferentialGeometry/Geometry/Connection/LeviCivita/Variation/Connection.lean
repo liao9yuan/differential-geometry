@@ -22,7 +22,8 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
@@ -194,7 +195,7 @@ def metricDotFrame
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (x : M) (a b : Idx) : Real :=
-  DifferentialGeometry.Integral.Connection.metricVariationComponent (I := I) metricVariation x
+  DifferentialGeometry.Geometry.Connection.metricVariationComponent (I := I) metricVariation x
     (frame a x) (frame b x)
 
 
@@ -202,7 +203,7 @@ def metricDotFrame
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] in
 theorem metricVar_path
     {g : SmoothRiemannianMetric I M} {potential : M -> Real}
-    (path : DifferentialGeometry.Integral.Connection.MetricPotentialVariationPath (I := I) g
+    (path : DifferentialGeometry.Geometry.Connection.MetricPotentialVariationPath (I := I) g
       potential)
     (metricVariation :
       Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -211,7 +212,7 @@ theorem metricVar_path
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (hpath :
-      DifferentialGeometry.Integral.Connection.IsMetricPotentialVariationPath (I := I) path
+      DifferentialGeometry.Geometry.Connection.IsMetricPotentialVariationPath (I := I) path
         metricVariation
         potentialVariation) :
     metricVarOn (I := I) path.G frame path.base u
@@ -571,10 +572,10 @@ private theorem connDiffVec_symm
   have hfj : MDiffAt (T% (frame j)) x :=
     localFrame_mdiffAt (I := I) frame hframe hu hx j
   have hvar_torsion :=
-    DifferentialGeometry.Integral.Connection.torsion_free_apply
+    DifferentialGeometry.Geometry.Connection.torsion_free_apply
       (I := I) (hLC var).2 (hX := hfi) (hY := hfj)
   have hbase_torsion :=
-    DifferentialGeometry.Integral.Connection.torsion_free_apply
+    DifferentialGeometry.Geometry.Connection.torsion_free_apply
       (I := I) (hLC base).2 (hX := hfi) (hY := hfj)
   have hdiff :
       (G.connection var (frame j) x) (frame i x) -
@@ -636,7 +637,7 @@ theorem metricCovAtBase_eq_connDiff
   have hfb : MDiffAt (T% (frame b)) x :=
     localFrame_mdiffAt (I := I) frame hframe hu hx b
   have hmc :=
-    DifferentialGeometry.Integral.Connection.metric_compatible_apply
+    DifferentialGeometry.Geometry.Connection.metric_compatible_apply
       (I := I) (hLC var).1 (frame d) (frame a) (frame b) hfd hfa hfb
   unfold metricCovAtBase connDiffLow connDiffVec
   have hmc' :
@@ -1993,4 +1994,4 @@ theorem gammaTraceVar_of_lcGammaVar [DecidableEq Idx]
 
 
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

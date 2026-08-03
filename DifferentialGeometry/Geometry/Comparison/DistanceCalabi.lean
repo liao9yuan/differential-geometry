@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Exponential.ExpInvBranch
 import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

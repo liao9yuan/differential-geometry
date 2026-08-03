@@ -16,6 +16,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.MeasureTheory.Integral.IntegrableOn
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientL2AtomsCovariantChartSource
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

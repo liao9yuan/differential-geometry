@@ -9,7 +9,7 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -89,5 +89,5 @@ theorem chartLeviCivita_torsion_free_on (g : SmoothRiemannianMetric I M) (α : M
     hx_src hx_base hx_int hX hY).symm
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

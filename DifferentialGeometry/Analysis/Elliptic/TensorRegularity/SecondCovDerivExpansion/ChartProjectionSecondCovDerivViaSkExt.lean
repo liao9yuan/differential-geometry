@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSCovariantDerivativeCongrLocally
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SkExtChartComponentEqCovDerivEuclid
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

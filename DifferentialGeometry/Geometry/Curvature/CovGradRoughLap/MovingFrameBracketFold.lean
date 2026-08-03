@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemain
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameFoldPieces
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Connection.Realization.Embedding
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 import DifferentialGeometry.Geometry.Curvature.Metric
 import Mathlib.Analysis.InnerProductSpace.Calculus
+open DifferentialGeometry.Geometry.Connection
 
 
 
@@ -179,7 +180,7 @@ theorem projConn_torsion :
 
 omit [FiniteDimensional ℝ E] in
 theorem projConn_metricCompat :
-    Integral.Connection.IsMetricCompatible (projConnCD (E := E) (n := n))
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible (projConnCD (E := E) (n := n))
       (roundMetric (E := E) (n := n)) := by
   intro Y Z x hY hZ _ v
   have hYd := dInclField_mdifferentiableAt (n := n) hY
@@ -228,20 +229,20 @@ theorem projConn_eq_metricCov
     EuclideanSpace.instIsManifoldSphere.of_le le_top
   have htor₂ : (Integral.Connection.metricCov (roundMetric (E := E) (n := n))).torsion = 0 :=
     funext fun y =>
-      Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
         (roundMetric (E := E) (n := n)) y
-  have hMC₂ : Integral.Connection.IsMetricCompatible
+  have hMC₂ : DifferentialGeometry.Geometry.Connection.IsMetricCompatible
       (Integral.Connection.metricCov (roundMetric (E := E) (n := n)))
       (roundMetric (E := E) (n := n)) := by
     intro W₁ W₂ y hW₁ hW₂ _ vv
     obtain ⟨W, hWy⟩ : ∃ σ : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n),
         (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯, σ y = vv :=
       ContMDiffSection.exists_eq_at y vv
-    have hgen := Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+    have hgen := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (roundMetric (E := E) (n := n)) y W W₁ W₂ W.mdifferentiableAt hW₁ hW₂
     rw [hWy] at hgen
     exact hgen
-  exact Integral.Connection.koszul_levi_civita_unique_of_torsionFree_metricCompatible
+  exact DifferentialGeometry.Geometry.Connection.koszul_levi_civita_unique_of_torsionFree_metricCompatible
     (projConnCD (E := E) (n := n)) (Integral.Connection.metricCov (roundMetric (E := E) (n := n)))
     projConn_torsion htor₂ projConn_metricCompat hMC₂ hY v
 

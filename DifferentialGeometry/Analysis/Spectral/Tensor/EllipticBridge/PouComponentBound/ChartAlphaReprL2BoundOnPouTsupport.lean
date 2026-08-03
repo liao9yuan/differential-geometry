@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapL2WtwokTwoBound
 import DifferentialGeometry.Tensor.Auxiliary.DetOpNormBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

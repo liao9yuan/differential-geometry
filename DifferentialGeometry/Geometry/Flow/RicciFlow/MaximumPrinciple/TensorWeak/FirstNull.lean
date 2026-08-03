@@ -7,6 +7,7 @@ set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
 open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section

@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Intrinsically Lipschitz functions in chart Sobolev spaces
@@ -71,7 +72,7 @@ Lipschitz for an explicit Riemannian distance is globally Lipschitz in the
 Euclidean chart model. -/
 theorem chart_pou_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) {u : M → ℝ} {L B : ℝ≥0}
     (hu : ∀ x y, edist (u x) (u y) ≤ L *
       DifferentialGeometry.riemannianEDistOf (I := I) g x y)
@@ -263,7 +264,7 @@ theorem chart_pou_lip
 
 private lemma pou_ae_diff
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) {u : M → ℝ} {L B : ℝ≥0}
     (hu : ∀ x y, edist (u x) (u y) ≤ L *
       DifferentialGeometry.riemannianEDistOf (I := I) g x y)
@@ -282,7 +283,7 @@ private lemma pou_ae_diff
 
 private lemma pou_ae_mdiff
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) {u : M → ℝ} {L B : ℝ≥0}
     (hu : ∀ x y, edist (u x) (u y) ≤ L *
       DifferentialGeometry.riemannianEDistOf (I := I) g x y)
@@ -302,7 +303,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 is manifold-differentiable almost everywhere for the Riemannian volume. -/
 theorem ae_mdiff_of_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {u : M → ℝ} {L B : ℝ≥0}
     (hu : ∀ x y, edist (u x) (u y) ≤ L *
       DifferentialGeometry.riemannianEDistOf (I := I) g x y)
@@ -351,7 +352,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 smooth Riemannian metric belongs to every first-order chart Sobolev space. -/
 theorem mem_chart_one_of_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp : 1 ≤ p) {u : M → ℝ} {L B : ℝ≥0}
     (hu : ∀ x y, edist (u x) (u y) ≤ L *
       DifferentialGeometry.riemannianEDistOf (I := I) g x y)

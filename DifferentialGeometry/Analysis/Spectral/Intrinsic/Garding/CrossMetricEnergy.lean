@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarHessBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

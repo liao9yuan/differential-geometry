@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ChartDictionary
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -11,6 +11,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.Inn
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.ChartLeviCivitaParallelCLM
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Geometry.Metric.MetricBounds
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

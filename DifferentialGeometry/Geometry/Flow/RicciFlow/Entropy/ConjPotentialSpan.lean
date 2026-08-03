@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Compact-interval conjugate potential

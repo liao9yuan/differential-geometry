@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FreeDirectionReduction
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

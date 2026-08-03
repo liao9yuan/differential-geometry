@@ -37,7 +37,7 @@ theorem normalPhaseVF_eq
         (normalTotal (I := I) Y x) a z =
       PhaseFlow.phaseField (normalAccel (I := I) Y x) z := by
   unfold Geodesic.chartPhaseVF PhaseFlow.phaseField normalAccel
-  rw [Integral.Connection.const_cov_eq_contr
+  rw [DifferentialGeometry.Geometry.Connection.const_cov_eq_contr
     (g := normalTotal (I := I) Y x) (a := a)
     (z := z.1) (v := z.2) (w := z.2)]
   rfl

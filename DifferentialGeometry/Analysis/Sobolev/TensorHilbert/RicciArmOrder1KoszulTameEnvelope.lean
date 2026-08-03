@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrde
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.LocalFrameInverse
+open DifferentialGeometry.Geometry.Connection
 
 
 

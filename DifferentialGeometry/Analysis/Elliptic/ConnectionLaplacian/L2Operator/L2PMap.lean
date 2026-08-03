@@ -8,6 +8,7 @@ import Mathlib.Topology.Algebra.Module.LinearPMap
 import Mathlib.LinearAlgebra.LinearPMap
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 import Mathlib.Algebra.Module.Projective
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -31,8 +31,9 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 
 
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open Bundle Manifold Set
@@ -54,7 +55,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem leviCivitaConnectionOfMetric_apply_eq_leviCivita
-    (g : Measure.SmoothRiemannianMetric I M)
+    (g : SmoothRiemannianMetric I M)
     {σ : Π x : M, TangentSpace I x} {x : M} (hσ : MDiffAt (T% σ) x)
     (v : TangentSpace I x) :
     (leviCivitaConnectionOfMetric (I := I) g).toFun σ x v
@@ -73,5 +74,5 @@ theorem leviCivitaConnectionOfMetric_apply_eq_leviCivita
     exact h
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

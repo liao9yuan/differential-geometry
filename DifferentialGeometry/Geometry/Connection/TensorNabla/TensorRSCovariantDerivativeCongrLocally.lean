@@ -8,8 +8,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle CovariantDerivative Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -46,7 +47,7 @@ theorem tensorRSCovariantDerivative_congr_of_eventuallyEq
     hσ hσ' Filter.univ_mem hagree
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannT2Boun
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmFrozenSlotField
 import DifferentialGeometry.Geometry.Operator.CotangentSharpSmooth
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -42,7 +43,7 @@ omit [SigmaCompactSpace M] [T2Space M] in
 theorem solution_isMetricCompatible
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (S.family.connection t) (S.base.metric t) := by
   simpa [SolutionFamily.connection, metricCov] using
     leviCivitaConnectionOfMetric_isMetricCompatible (I := I) (S.base.metric t)

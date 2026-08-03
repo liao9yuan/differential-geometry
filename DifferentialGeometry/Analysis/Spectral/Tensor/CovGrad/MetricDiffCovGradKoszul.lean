@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLineari
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivCommutation
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDifferenceKoszul
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

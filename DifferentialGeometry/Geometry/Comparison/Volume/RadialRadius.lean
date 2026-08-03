@@ -150,13 +150,13 @@ theorem rm04Data_jacobi
     have hcurv : ∀ t ∈ Ioo (0 : ℝ) b,
         g.inner (radialCurve (I := I) g p x t)
             ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
                 (radialCurve (I := I) g p x t))
               (radialJacobiField (I := I) g p x w t)
               (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
               (curveVelocity (I := I) (radialCurve (I := I) g p x) t))
             ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
                 (radialCurve (I := I) g p x t))
               (radialJacobiField (I := I) g p x w t)
               (curveVelocity (I := I) (radialCurve (I := I) g p x) t)

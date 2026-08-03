@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 noncomputable section

@@ -242,10 +242,10 @@ private theorem connectionDiffVectorInFrame_symm
   have hfj : MDiffAt (T% (frame j)) x :=
     localFrame_mdiffAt (I := I) frame hframe hu hx j
   have hvar_torsion :=
-    DifferentialGeometry.Integral.Connection.torsion_free_apply
+    DifferentialGeometry.Geometry.Connection.torsion_free_apply
       (I := I) (hS.leviCivita.2 ⟨var, hvar⟩) (hX := hfi) (hY := hfj)
   have hbase_torsion :=
-    DifferentialGeometry.Integral.Connection.torsion_free_apply
+    DifferentialGeometry.Geometry.Connection.torsion_free_apply
       (I := I) (hS.leviCivita.2 ⟨base, hbase⟩) (hX := hfi) (hY := hfj)
   have hdiff :
       (S.family.connection var (frame j) x) (frame i x) -
@@ -311,7 +311,7 @@ theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
   have hfb : MDiffAt (T% (frame b)) x :=
     localFrame_mdiffAt (I := I) frame hframe hu hx b
   have hmc :=
-    DifferentialGeometry.Integral.Connection.metric_compatible_apply
+    DifferentialGeometry.Geometry.Connection.metric_compatible_apply
       (I := I) (hS.leviCivita.1 ⟨var, hvar⟩)
       (frame d) (frame a) (frame b) hfd hfa hfb
   unfold metricCovDerivCompInFrameAtBase connectionDiffLoweredInFrame

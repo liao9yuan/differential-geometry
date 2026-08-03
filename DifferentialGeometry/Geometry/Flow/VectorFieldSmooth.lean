@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.MetricTrace
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

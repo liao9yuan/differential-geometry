@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1Producers
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBLocalMetrics
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtoms
+open DifferentialGeometry.Geometry.Connection
 
 
 

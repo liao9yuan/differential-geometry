@@ -16,6 +16,7 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -46,7 +47,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 noncomputable def metricCov (g : SmoothRiemannianMetric I M) :
     CovariantDerivative I E (TangentSpace I : M -> Type _) :=
-  DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g
+  DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g
 
 
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -223,7 +224,7 @@ omit [SigmaCompactSpace M] in
 noncomputable def metricCurvData
     (g : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Integral.Connection.CurvatureSectionProducerData (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g where
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g where
   rm13 := metricRm13 (I := I) (M := M) g
   rm04 := metricRm04 (I := I) (M := M) g
   ricci := metricRicci (I := I) (M := M) g
@@ -397,7 +398,7 @@ theorem nablaRic_ein3
     C
   have hreal :=
     nabla_smul_metric (I := I) (M := M) cov g
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
         (I := I) g)
       f3 hf3 df3 hdf3
   have happly :=
@@ -509,7 +510,7 @@ theorem dScalar_zero_ein3_at
       2 cov Ric x
   let dScalar := DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar x
   obtain ⟨nablaRm04, hsecond, hRmSymm, hRicTrace, hScalar⟩ :=
-    DifferentialGeometry.Integral.Connection.metricBianchiAt (I := I) (M := M) g basis gInv hinv
+    DifferentialGeometry.Geometry.Connection.metricBianchiAt (I := I) (M := M) g basis gInv hinv
   have hInv : ∀ i j : Fin 3, gInv i j = gInv j i :=
     invMetric_symm (I := I) (M := M) g x basis gInv hinv
   have hEinNabla : ∀ A B C : TangentSpace I x,
@@ -576,7 +577,7 @@ theorem metricRicciSymm
   have hcov1 :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
         (1 : WithTop ℕ∞) :=
     leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) g
@@ -587,14 +588,14 @@ theorem metricRicciSymm
           metricRm04At (I := I) (M := M) g x
             (DifferentialGeometry.Integral.Connection.vec4 (I := I) Z W X Y) := by
     simpa using
-      (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04PairSymmAt_of_leviCivita_realizes
         (I := I) g (metricRm04 (I := I) (M := M) g) K.h_rm04
         (x := x))
   have hOutput :
       DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I)
         (metricRm04At (I := I) (M := M) g x) := by
     simpa using
-      (DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04OutputSkewAt_of_leviCivita_realizes
         (I := I) g (metricRm04 (I := I) (M := M) g) K.h_rm04
         (x := x))
   have hInput :
@@ -604,7 +605,7 @@ theorem metricRicciSymm
           -metricRm04At (I := I) (M := M) g x
             (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W) := by
     simpa using
-      (DifferentialGeometry.Integral.Connection.rm04InputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04InputSkewAt_of_leviCivita_realizes
         (I := I) g (metricRm04 (I := I) (M := M) g) K.h_rm04
         (x := x))
   exact
@@ -734,7 +735,7 @@ theorem metricRicci_velocity_eq_sum_rm04_frame
           -metricRm04At (I := I) (M := M) g x
             (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W) := by
     simpa using
-      (DifferentialGeometry.Integral.Connection.rm04InputSkewAt_of_leviCivita_realizes
+      (DifferentialGeometry.Geometry.Connection.rm04InputSkewAt_of_leviCivita_realizes
         (I := I) g (metricRm04 (I := I) (M := M) g) K.h_rm04
         (x := x))
   have hzero :

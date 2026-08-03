@@ -19,6 +19,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorCompone
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientL2AtomsMeasurability
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientL2AtomsCovariantRiemannian
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientL2AtomsChristoffelSlotNormBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

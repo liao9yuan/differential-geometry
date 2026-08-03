@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.DistanceBarrier
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

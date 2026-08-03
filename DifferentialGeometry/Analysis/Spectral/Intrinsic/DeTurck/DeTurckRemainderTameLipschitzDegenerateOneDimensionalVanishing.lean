@@ -212,15 +212,15 @@ private lemma dim1_riemannOp_first_two_eq_zero (h1 : Module.finrank ℝ E = 1)
     (g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x)
     (hw : w ≠ 0) :
     DifferentialGeometry.Integral.Connection.riemannOp
-      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁) x v w u = 0 := by
+      (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g₁) x v w u = 0 := by
   obtain ⟨c, hc⟩ := exists_smul_eq_of_finrank_eq_one (K := ℝ) (V := TangentSpace I x)
     (show Module.finrank ℝ (TangentSpace I x) = 1 from h1) hw v
   have hself : DifferentialGeometry.Integral.Connection.riemannOp
-      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁) x w w u = 0 := by
+      (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g₁) x w w u = 0 := by
     have hsw := DifferentialGeometry.Integral.Connection.riemannOp_swap
-      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁) x w w u
+      (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g₁) x w w u
     have h2 : (2 : ℝ) • (DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁) x w w u) = 0 := by
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g₁) x w w u) = 0 := by
       rw [two_smul]
       nth_rewrite 1 [hsw]
       abel
@@ -228,7 +228,7 @@ private lemma dim1_riemannOp_first_two_eq_zero (h1 : Module.finrank ℝ E = 1)
     exact (smul_eq_zero.mp h2).resolve_left h2ne
   rw [← hc]
   rw [(DifferentialGeometry.Integral.Connection.riemannOp
-    (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁) x).map_smul c w]
+    (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g₁) x).map_smul c w]
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
   rw [hself, smul_zero]
 
@@ -237,9 +237,9 @@ omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     [SigmaCompactSpace M] in
 private lemma dim1_smoothOrthoFrame_ne_zero (g₁ : SmoothRiemannianMetric I M) (x : M)
     (a : Fin (Module.finrank ℝ E)) :
-    DifferentialGeometry.Integral.Connection.smoothOrthoFrame (I := I) g₁ x a x ≠ 0 := by
+    DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g₁ x a x ≠ 0 := by
   intro h0
-  have horth := DifferentialGeometry.Integral.Connection.smoothOrthoFrame_orthonormal_at_center
+  have horth := DifferentialGeometry.Geometry.Connection.smoothOrthoFrame_orthonormal_at_center
     (I := I) g₁ x a a
   rw [if_pos rfl] at horth
   rw [h0] at horth
@@ -269,12 +269,12 @@ lemma dim1_ricciArmOrder0RiemannCoeff_eq_zero (h1 : Module.finrank ℝ E = 1)
     rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannBiContrFibFixedFrame_toModel]
     have hz : ∀ a b : Fin (Module.finrank ℝ E),
         (g₁.inner x) (DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₁) x (v 0)
-            (DifferentialGeometry.Integral.Connection.smoothOrthoFrame (I := I) g₁ x a x)
-            (DifferentialGeometry.Integral.Connection.smoothOrthoFrame (I := I) g₁ x b x))
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g₁) x (v 0)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g₁ x a x)
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g₁ x b x))
           (v 1) *
-          D.toModel ![DifferentialGeometry.Integral.Connection.smoothOrthoFrame (I := I) g₁ x a x,
-            DifferentialGeometry.Integral.Connection.smoothOrthoFrame (I := I) g₁ x b x] = 0 := by
+          D.toModel ![DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g₁ x a x,
+            DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g₁ x b x] = 0 := by
       intro a b
       rw [dim1_riemannOp_first_two_eq_zero (I := I) h1 g₁ x (v 0) _ _
         (dim1_smoothOrthoFrame_ne_zero (I := I) g₁ x a)]

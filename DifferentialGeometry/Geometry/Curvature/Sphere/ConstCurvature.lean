@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Metric.Sphere.RoundShape
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Curvature.MetricSectional
+open DifferentialGeometry.Geometry.Connection
 
 
 

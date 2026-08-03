@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import Mathlib.Topology.Instances.Matrix
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

@@ -21,6 +21,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuo
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1Modulus
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

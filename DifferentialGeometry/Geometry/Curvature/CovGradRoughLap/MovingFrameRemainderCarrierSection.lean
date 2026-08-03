@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

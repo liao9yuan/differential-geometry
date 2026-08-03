@@ -15,8 +15,9 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open Bundle Manifold
@@ -137,5 +138,5 @@ theorem const_cov_eq_contr
   rfl
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

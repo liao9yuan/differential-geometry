@@ -14,6 +14,7 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.IntrinsicComponent
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -221,7 +222,7 @@ private lemma chartFrameNormGlobalSmooth_fderiv_repr_bound
     contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)
   have hK_sub_good : K_set ⊆ chartLeviCivitaGoodSet (I := I) α := by
     have h_eq :=
-      DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source (I := I)
+      DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet_eq_extChartAt_source (I := I)
       α
     intro y hy
     rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]

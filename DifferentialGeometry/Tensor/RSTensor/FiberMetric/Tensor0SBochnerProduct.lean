@@ -50,6 +50,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace Tensor0SBundle
 
 noncomputable section

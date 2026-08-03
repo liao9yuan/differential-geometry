@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJo
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutionFiberNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLoweredTrilinear
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

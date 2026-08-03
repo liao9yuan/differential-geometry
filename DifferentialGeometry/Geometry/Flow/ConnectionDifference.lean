@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

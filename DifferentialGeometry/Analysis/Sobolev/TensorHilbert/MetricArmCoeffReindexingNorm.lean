@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffPassZero
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -9,8 +9,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -167,7 +168,7 @@ theorem covApply_covRS_chartBasis_globalSmoothExtension
   rw [hinner]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

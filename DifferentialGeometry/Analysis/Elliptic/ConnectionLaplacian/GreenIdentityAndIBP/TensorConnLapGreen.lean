@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

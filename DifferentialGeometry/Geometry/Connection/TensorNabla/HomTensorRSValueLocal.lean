@@ -5,8 +5,9 @@ noncomputable section
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -197,7 +198,7 @@ theorem exists_value_local_appFullSec (g : SmoothRiemannianMetric I M) (r a c : 
   rw [appFullSec_toSection]
   exact (valueLocalLinearHomFib_apply (I := I) (M := M) g r a c F hadd hsmul hloc W x).symm
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

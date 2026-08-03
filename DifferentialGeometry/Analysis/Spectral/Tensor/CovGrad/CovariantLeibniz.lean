@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

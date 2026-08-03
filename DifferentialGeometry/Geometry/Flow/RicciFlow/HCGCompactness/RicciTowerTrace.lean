@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NormBound
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

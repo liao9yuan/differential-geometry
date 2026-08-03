@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.ConcreteFlow
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseOr
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseOrderZero
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqLeRawComponents
 import Mathlib.Algebra.Order.Chebyshev
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

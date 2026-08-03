@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldMain
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvDiag
 import DifferentialGeometry.Geometry.Curvature.Realized.TimeInterval
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

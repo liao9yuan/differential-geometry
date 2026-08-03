@@ -145,8 +145,8 @@ theorem mc_scaleMetric
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
     {c : Real} (hc : 0 < c)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g) :
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov
       (scaleMetric (I := I) c hc g) := by
   intro x X Y Z hX hY hZ
   let f : M -> Real := fun y : M => g.inner y (Y y) (Z y)
@@ -183,8 +183,8 @@ theorem lc_scaleMetric
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {g : SmoothRiemannianMetric I M}
     {c : Real} (hc : 0 < c)
-    (hLC : DifferentialGeometry.Integral.Connection.IsLeviCivita (I := I) cov g) :
-    DifferentialGeometry.Integral.Connection.IsLeviCivita (I := I) cov
+    (hLC : DifferentialGeometry.Geometry.Connection.IsLeviCivita (I := I) cov g) :
+    DifferentialGeometry.Geometry.Connection.IsLeviCivita (I := I) cov
       (scaleMetric (I := I) c hc g) :=
   ⟨mc_scaleMetric (I := I) hc hLC.1, hLC.2⟩
 

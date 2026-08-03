@@ -13,6 +13,7 @@ slab lifespan.  The induction accepts arbitrary smooth positive unit densities,
 so it applies both to cutoff data and to every evolved intermediate slice.
 -/
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section

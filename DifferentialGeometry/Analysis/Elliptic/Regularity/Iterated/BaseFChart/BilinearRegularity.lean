@@ -716,7 +716,7 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
           rw [hCfinal_def]
 
 theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) (m : ℕ) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm

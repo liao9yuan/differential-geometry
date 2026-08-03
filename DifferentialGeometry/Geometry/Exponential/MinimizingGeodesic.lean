@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Topology.Order.Compact
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Hopf–Rinow minimising-geodesic existence via the ray/sphere argument

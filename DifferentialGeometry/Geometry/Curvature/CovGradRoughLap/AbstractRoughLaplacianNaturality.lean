@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CommutatorIdentity
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

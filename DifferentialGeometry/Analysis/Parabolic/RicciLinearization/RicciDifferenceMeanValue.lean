@@ -9,6 +9,7 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointChartCurvatureSmoothness
 import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointTensorFieldSmoothness
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -1158,9 +1159,9 @@ theorem cometricDoubleTraceFib_realizedFam_jointContMDiffOn [BoundarylessManifol
   have hunit : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 0 ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 0 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 0 I z) q.1
-        (Integral.Connection.unitZeroSec (I := I) (M := M) q.1))
+        (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M) q.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-    ((Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst)
+    ((DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst)
   have htraceUnit := ContMDiffOn.clm_bundle_apply (b := Prod.fst) htrace hunit
   refine htraceUnit.congr (fun q hq => ?_)
   congr 1
@@ -1831,9 +1832,9 @@ theorem comTrace_of_family (p : ℕ)
       (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 0 ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 0 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 0 I z) q.1
-        (Integral.Connection.unitZeroSec (I := I) (M := M) q.1))
+        (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M) q.1))
       ((Set.univ : Set M) ×ˢ D.regular) :=
-    (Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn
+    (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn
       contMDiffOn_fst
   have htraceUnit := ContMDiffOn.clm_bundle_apply (b := Prod.fst) htrace hunit
   refine htraceUnit.congr (fun q _ => ?_)

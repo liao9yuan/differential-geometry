@@ -20,6 +20,7 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Metric.Sphere.QuotientDescent
 import DifferentialGeometry.Geometry.Metric.Sphere.PositiveSpaceForm
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -132,14 +133,14 @@ def ham3RealFamilyCore
     classical
     exact
       if _ht : t ∈ D.carrier then S.family.connection t
-      else DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g0
+      else DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g0
   metricCompatible := by
     intro t
     classical
     by_cases ht : t ∈ D.carrier
     · simpa [ht] using S.family.metricCompatible ⟨t, ht⟩
     · simpa [ht] using
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
           (I := I) g0)
 
 

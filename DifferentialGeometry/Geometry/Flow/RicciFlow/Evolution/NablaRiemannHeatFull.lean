@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFrameInvariant
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SBochnerProduct
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

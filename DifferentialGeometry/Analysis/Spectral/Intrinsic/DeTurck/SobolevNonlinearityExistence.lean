@@ -16,6 +16,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivarian
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistenceSpectralCovGradNormEquiv
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistenceRemainderDiffBallUniform
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistenceSymmetrizationNormBounds
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

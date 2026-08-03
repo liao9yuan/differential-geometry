@@ -10,7 +10,7 @@ open scoped Manifold Topology ContDiff
 open Tensor0SBundle
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -464,5 +464,5 @@ lemma chartTensor0SCovariantDerivative_succ_smul (s : ℕ)
   exact hsub
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

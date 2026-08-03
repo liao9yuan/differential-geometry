@@ -329,9 +329,9 @@ private theorem connContrField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
   have hunit : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 0 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 0 I z) p.1
-        (Integral.Connection.unitZeroSec (I := I) (M := M) p.1))
+        (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M) p.1))
       ((Set.univ : Set M) ×ˢ S) :=
-    (Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst
+    (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst
   have hEval := ContMDiffOn.clm_bundle_apply (b := Prod.fst) hTr hunit
   refine hEval.congr (fun p _ => ?_)
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (m + 1 + k) ℝ E)

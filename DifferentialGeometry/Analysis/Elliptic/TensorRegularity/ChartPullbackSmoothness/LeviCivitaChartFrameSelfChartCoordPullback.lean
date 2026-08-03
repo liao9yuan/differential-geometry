@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoothness.ChartFrameCoordMatrixPullback
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.CovApplyFrameToCoordExpansion
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

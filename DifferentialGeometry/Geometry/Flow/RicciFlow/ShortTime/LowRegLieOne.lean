@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoeffJets
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffL2JetBound
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Low-regularity order-one DeTurck Lie coefficient

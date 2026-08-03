@@ -20,6 +20,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricPathResolvent
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2WeitzenbockRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseTensorCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

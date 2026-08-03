@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimis
 import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
+open DifferentialGeometry.Geometry.Connection
 
 
 

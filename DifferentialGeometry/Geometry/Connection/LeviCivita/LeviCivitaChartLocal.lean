@@ -12,7 +12,7 @@ open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -513,5 +513,5 @@ theorem chartLeviCivita_isCovariantDerivativeOn (g : SmoothRiemannianMetric I M)
   leibniz hσ hf hx := chartLeviCivita_leibniz (I := I) g α hσ hf hx
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

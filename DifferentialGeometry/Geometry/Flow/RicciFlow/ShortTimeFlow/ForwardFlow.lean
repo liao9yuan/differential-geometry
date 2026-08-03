@@ -14,6 +14,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.Ful
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

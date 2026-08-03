@@ -40,7 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 noncomputable def chartErr
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
+    {g : DifferentialGeometry.SmoothRiemannianMetric I M}
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     {hp : 1 ≤ p}
     {f : ℕ → WkpChart (I := I) (M := M) g k p hp}
@@ -59,7 +59,7 @@ noncomputable def chartErr
 lemma chartErr_mem
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
+    {g : DifferentialGeometry.SmoothRiemannianMetric I M}
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     {hp : 1 ≤ p}
     {f : ℕ → WkpChart (I := I) (M := M) g k p hp}
@@ -84,7 +84,7 @@ POU kernel. -/
 lemma chartErr_ae_zero
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
+    {g : DifferentialGeometry.SmoothRiemannianMetric I M}
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     {hp : 1 ≤ p}
     {f : ℕ → WkpChart (I := I) (M := M) g k p hp}
@@ -160,7 +160,7 @@ lemma pullback_sub (β : M) (v w : EuclN → ℝ) :
 lemma limitFun_decomp
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
+    {g : DifferentialGeometry.SmoothRiemannianMetric I M}
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     {hp : 1 ≤ p}
     {f : ℕ → WkpChart (I := I) (M := M) g k p hp}
@@ -205,7 +205,7 @@ assembly of its chosen Euclidean chart limits. -/
 theorem limitFun_tendsto
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     {hp : 1 ≤ p}
     {f : ℕ → WkpChart (I := I) (M := M) g k p hp}
@@ -363,7 +363,7 @@ global typeclass instance. -/
 theorem wkpChart_complete
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞)) :
     CompleteSpace (WkpChart (I := I) (M := M) g k p hp_one) := by
   apply Metric.complete_of_cauchySeq_tendsto
@@ -405,7 +405,7 @@ theorem value rather than installed globally. -/
 theorem wkpQuot_complete
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞)) :
     CompleteSpace (WkpChartQuot (I := I) (M := M) g k p hp_one) :=
   SeparationQuotient.completeSpace_iff.mpr

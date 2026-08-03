@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCovariantJetTower
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

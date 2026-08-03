@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomDiagonal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCPairTail
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSourceCover
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

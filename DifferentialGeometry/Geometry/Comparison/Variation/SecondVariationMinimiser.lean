@@ -6,6 +6,7 @@ import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
 import Mathlib.Analysis.Calculus.DerivativeTest
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
+open DifferentialGeometry.Geometry.Connection
 
 
 

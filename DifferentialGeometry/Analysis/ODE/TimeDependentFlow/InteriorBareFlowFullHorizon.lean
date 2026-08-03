@@ -10,6 +10,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.See
 open Set Function Filter Bundle
 open scoped Topology Manifold ContDiff NNReal
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]

@@ -14,6 +14,7 @@ This file assembles the intrinsic cutoff and curvature trace bounds at the
 distinguished time of a genuine `FlowMetricBall`.
 -/
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section

@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedAppCcLeibni
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionIteratedCovGradWindow
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SlotExtendCovariantParallelism
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RankRReadingDominationUniformSup
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

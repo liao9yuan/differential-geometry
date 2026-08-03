@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.CoordFrameStep
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

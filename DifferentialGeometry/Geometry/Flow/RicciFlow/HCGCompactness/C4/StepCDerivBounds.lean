@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Calculus.RingInverseDeriv
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Analysis.Calculus.FDeriv.Mul
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatu
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PerturbedInnerUpperBound
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -9,6 +9,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyPair
 import DifferentialGeometry.Tensor.RSTensor.Metric
+open DifferentialGeometry.Geometry.Connection
 
 
 

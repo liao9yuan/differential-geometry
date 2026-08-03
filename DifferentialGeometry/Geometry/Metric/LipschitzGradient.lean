@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemma
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Topology.FiberBundleT2
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

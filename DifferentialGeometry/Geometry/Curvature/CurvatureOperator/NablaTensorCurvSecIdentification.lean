@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivSecondOrderCommutation
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -42,7 +42,7 @@ abbrev volumeTraceFrame :
 
 
 abbrev volumeTraceInvMetricComponents
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) :
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) :
     M → Fin (Module.finrank Real E) → Fin (Module.finrank Real E) → Real :=
   fun x i j => ((chartGramMatrix (I := I) g x x)⁻¹) i j
 
@@ -104,7 +104,7 @@ theorem traceTimeDerivMetricAt_eq_trace_metric_derivative
 
 
 private theorem chartGramMatrix_inv_symm
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (x : M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank Real E)) :
     ((chartGramMatrix (I := I) g x x)⁻¹) j i =
       ((chartGramMatrix (I := I) g x x)⁻¹) i j := by
@@ -117,7 +117,7 @@ private theorem chartGramMatrix_inv_symm
 
 
 theorem scalar_trace_eq_volume_trace_components
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (Ric : DifferentialGeometry.Integral.Connection.RawTwoTensorField (I := I) (M := M))
     (scalar : M → Real)
     (hScalar : DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceInFrame (I := I)

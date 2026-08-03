@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInne
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 /-!

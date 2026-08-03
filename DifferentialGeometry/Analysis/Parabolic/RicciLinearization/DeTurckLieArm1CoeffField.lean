@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianc
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutionFiberNormBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.DeTurckLieArm2TraceCoeff
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLoweredTrilinear
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

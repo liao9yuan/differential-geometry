@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationByParts
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

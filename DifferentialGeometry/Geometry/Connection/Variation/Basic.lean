@@ -19,7 +19,8 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
@@ -83,7 +84,7 @@ structure IsMetricPotentialVariationPath
     (potentialVariation : M -> Real) : Prop where
   leviCivita :
     ∀ s : Real,
-      DifferentialGeometry.Integral.Connection.IsLeviCivita (I := I) (path.G.connection s)
+      DifferentialGeometry.Geometry.Connection.IsLeviCivita (I := I) (path.G.connection s)
         (path.G.metric s)
   metric_deriv :
     ∀ x : M, ∀ X Y : TangentSpace I x,
@@ -96,4 +97,4 @@ structure IsMetricPotentialVariationPath
       HasDerivAt (fun s : Real => path.potentialPath s x)
         (potentialVariation x) path.base
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

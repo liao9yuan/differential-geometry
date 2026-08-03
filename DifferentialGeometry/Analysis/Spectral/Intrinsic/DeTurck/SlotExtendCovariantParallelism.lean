@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
@@ -72,12 +73,12 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
     (hU_smooth x).mdifferentiableAt (by norm_num)
   have hw_at : TensorSectionMDiffAt (I := I) (r + 1) (fun y : M => w y) x :=
     (w.contMDiff x).mdifferentiableAt (by norm_num)
-  have hCL_U := Integral.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz (I := I)
+  have hCL_U := DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz (I := I)
     (M := M) g₀ s
     (fun y : M => (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace (s + 1) I y from SEΦ.toSection
       y) (w y))
     (x := x) hU_at Y v
-  have hCL_w := Integral.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz (I := I)
+  have hCL_w := DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz (I := I)
     (M := M) g₀ r
     (fun y : M => w y) (x := x) hw_at Y v
   have hHL_Φ := TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r s

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

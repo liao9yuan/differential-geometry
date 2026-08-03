@@ -8,6 +8,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciContinuityInMetricTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAllPt
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

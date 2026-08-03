@@ -13,8 +13,9 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
 open Tensor0SBundle
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -519,7 +520,7 @@ theorem chartTensor0SCovariantDerivative_eq_abstract_succ
     (I := I) (M := M) g α s T.toFun X.toFun hb hT_at hX_at
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

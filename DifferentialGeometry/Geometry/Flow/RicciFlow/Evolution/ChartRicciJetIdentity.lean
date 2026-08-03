@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.JetPartialDeriv
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.JetGlueParam
 import DifferentialGeometry.Analysis.Calculus.TimeJetEvolution
+open DifferentialGeometry.Geometry.Connection
 
 
 

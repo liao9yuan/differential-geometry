@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartL
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

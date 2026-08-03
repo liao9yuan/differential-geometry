@@ -241,7 +241,7 @@ theorem ricciMixed_eq_gradNorm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
     (hinv : MetricInverseInBasis_gen (I := I) (G.metric t) x basis gInv)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen
       (I := I) (G.connection t) (G.metric t))
     (hRicNabla :
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
@@ -364,7 +364,7 @@ theorem ricciMixed_eq_tfGrad
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
     (hinv : MetricInverseInBasis_gen (I := I) (G.metric t) x basis gInv)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen
       (I := I) (G.connection t) (G.metric t))
     (hRicNabla :
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
@@ -1062,7 +1062,7 @@ theorem pinchEvol_sec
         normSq0S (I := I) (G.metric (t : Real)) x 2
           (RicSec (t : Real) x))
     (hmc : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D),
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
+      DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen
         (I := I) (G.connection (t : Real)) (G.metric (t : Real)))
     (hRicNabla : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
       D),

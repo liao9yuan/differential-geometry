@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Scaling
 import DifferentialGeometry.Geometry.Operator.Scaling
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Scaling
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -216,7 +217,7 @@ omit [SigmaCompactSpace M] [T2Space M] in
       fun s => S.base.connection (paraTime τ R s) := by
   funext s
   simp [paraSolution, paraFamily, SolutionFamily.connection,
-    DifferentialGeometry.Integral.Connection.lcConn_scaleMetric]
+    DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric]
 
 omit [SigmaCompactSpace M] in
 @[simp] theorem paraSolution_ricci
@@ -229,7 +230,7 @@ omit [SigmaCompactSpace M] in
   simp [paraSolution, paraFamily, SolutionFamily.ricci, metricRicci,
     DifferentialGeometry.Integral.Connection.metricRicci,
       DifferentialGeometry.Integral.Connection.metricCov,
-      DifferentialGeometry.Integral.Connection.lcConn_scaleMetric]
+      DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric]
 
 omit [SigmaCompactSpace M] in
 private theorem metricRm04_scaleMetric
@@ -245,7 +246,7 @@ private theorem metricRm04_scaleMetric
   rw [hv]
   simp [DifferentialGeometry.Integral.Connection.metricRm04,
     DifferentialGeometry.Integral.Connection.metricCov, scaleMetric_inner,
-    DifferentialGeometry.Integral.Connection.lcConn_scaleMetric, smul_eq_mul]
+    DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric, smul_eq_mul]
 
 omit [SigmaCompactSpace M] in
 @[simp] theorem paraSolution_rm04
@@ -353,7 +354,7 @@ omit [SigmaCompactSpace M] [T2Space M] in
   simp [SolutionOn.scalar, SolutionFamily.scalar_apply, paraSolution, paraFamily,
     SolutionFamily.ricciAt, metricRicciAt, DifferentialGeometry.Integral.Connection.metricRicciAt,
     DifferentialGeometry.Integral.Connection.metricCov,
-      DifferentialGeometry.Integral.Connection.lcConn_scaleMetric,
+      DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric,
     metricTracePair0SAt_scaleMetric]
 
 omit [SigmaCompactSpace M] in
@@ -434,9 +435,9 @@ omit [SigmaCompactSpace M] [T2Space M] in
 private theorem lcConnectionSmooth
     (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivative
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) ∞ := by
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) ∞ := by
   exact
-    ⟨Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    ⟨DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) g (u := Set.univ) isOpen_univ⟩
 
 
@@ -552,7 +553,7 @@ theorem connectionFamilySmooth_para
     (S : SolutionOn (I := I) (M := M) D)
     (_hS : IsSolutionOn (I := I) S)
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
-    DifferentialGeometry.Integral.Connection.ConnectionFamilySmoothOn (I := I) (M := M)
+    DifferentialGeometry.Geometry.Connection.ConnectionFamilySmoothOn (I := I) (M := M)
       (paraSolution (I := I) S τ R hR hτ).family := by
   intro t
   simpa [SolutionOn.family, paraSolution, paraFamily, SolutionFamily.connection,
@@ -567,7 +568,7 @@ theorem leviCivita_para
     (S : SolutionOn (I := I) (M := M) D)
     (_hS : IsSolutionOn (I := I) S)
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
-    DifferentialGeometry.Integral.Connection.IsLeviCivitaFamilyOn (I := I)
+    DifferentialGeometry.Geometry.Connection.IsLeviCivitaFamilyOn (I := I)
       (paraSolution (I := I) S τ R hR hτ).family := by
   constructor
   · intro t
@@ -575,7 +576,7 @@ theorem leviCivita_para
   · intro t
     simpa [SolutionOn.family, paraSolution, paraFamily, SolutionFamily.connection,
       DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt]
-      using DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree
+      using DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
         (I := I) ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
 
 
@@ -609,7 +610,7 @@ theorem metricVariation_para
     SolutionOn.family, paraSolution, paraFamily, RicciAtFamily.toTensorField,
     SolutionFamily.ricciAt, metricRicciAt, DifferentialGeometry.Integral.Connection.metricRicciAt,
     DifferentialGeometry.Integral.Connection.metricCov, scaleMetric_inner,
-      DifferentialGeometry.Integral.Connection.lcConn_scaleMetric,
+      DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric,
     tOld]
     using
       (hscaled.congr_deriv (by
@@ -805,7 +806,7 @@ theorem paraBack_para_connection
     (paraBackFamily (I := I) (paraFamily (I := I) G τ R hR)
       τ R hR).connection t = G.connection t := by
   simp [paraBackFamily, paraFamily, SolutionFamily.connection,
-    DifferentialGeometry.Integral.Connection.lcConn_scaleMetric, paraTime_back (τ := τ) (R := R)
+    DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric, paraTime_back (τ := τ) (R := R)
       (t := t)
       (ne_of_gt hR)]
 
@@ -818,7 +819,7 @@ theorem paraBack_para_ricci
   simp [paraBackFamily, paraFamily, SolutionFamily.ricci, metricRicci,
     DifferentialGeometry.Integral.Connection.metricRicci,
       DifferentialGeometry.Integral.Connection.metricCov,
-      DifferentialGeometry.Integral.Connection.lcConn_scaleMetric,
+      DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric,
     paraTime_back (τ := τ) (R := R) (t := t) (ne_of_gt hR)]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I 1 M] [SigmaCompactSpace M]
@@ -841,7 +842,7 @@ theorem para_paraBack_connection
     (paraFamily (I := I) (paraBackFamily (I := I) G τ R hR)
       τ R hR).connection s = G.connection s := by
   simp [paraFamily, paraBackFamily, SolutionFamily.connection,
-    DifferentialGeometry.Integral.Connection.lcConn_scaleMetric, paraBack_time (τ := τ) (R := R)
+    DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric, paraBack_time (τ := τ) (R := R)
       (s := s)
       (ne_of_gt hR)]
 
@@ -854,7 +855,7 @@ theorem para_paraBack_ricci
   simp [paraFamily, paraBackFamily, SolutionFamily.ricci, metricRicci,
     DifferentialGeometry.Integral.Connection.metricRicci,
       DifferentialGeometry.Integral.Connection.metricCov,
-      DifferentialGeometry.Integral.Connection.lcConn_scaleMetric,
+      DifferentialGeometry.Geometry.Connection.lcConn_scaleMetric,
     paraBack_time (τ := τ) (R := R) (s := s) (ne_of_gt hR)]
 
 

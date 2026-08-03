@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePul
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -12,6 +12,7 @@ open DifferentialGeometry.Geometry.Operator
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 open scoped ContDiff Manifold Topology BigOperators

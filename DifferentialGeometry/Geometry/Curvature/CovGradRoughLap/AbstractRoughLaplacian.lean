@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

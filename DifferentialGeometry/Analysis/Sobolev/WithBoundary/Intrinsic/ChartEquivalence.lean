@@ -296,7 +296,7 @@ theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (p : ℝ≥0∞)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (hu_int : tsupport u ⊆ I.interior M) :
@@ -320,7 +320,7 @@ theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth_interior
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (p : ℝ≥0∞)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (hu_int : tsupport u ⊆ I.interior M) :
@@ -645,7 +645,7 @@ theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (p : ℝ≥0∞)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.MemW1pIntrinsicLp_withBoundary
@@ -667,7 +667,7 @@ theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (p : ℝ≥0∞)
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.MemW1pIntrinsicLp_withBoundary
@@ -681,7 +681,7 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (p : ℝ≥0∞)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
@@ -708,7 +708,7 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff_interior
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (p : ℝ≥0∞)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (hu_int : tsupport u ⊆ I.interior M) :

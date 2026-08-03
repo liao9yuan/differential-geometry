@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePartnerBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRicciPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceFibreBound
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Closed-edge bounds for the derivative Ricci arm

@@ -18,6 +18,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section

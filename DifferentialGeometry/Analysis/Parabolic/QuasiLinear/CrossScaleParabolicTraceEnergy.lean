@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTrace
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

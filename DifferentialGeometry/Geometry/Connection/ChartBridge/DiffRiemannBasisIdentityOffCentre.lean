@@ -9,8 +9,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle Filter
 open scoped Manifold Topology ContDiff BigOperators
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
@@ -580,7 +581,7 @@ theorem nablaCurvSec_chartBasisVec_alpha_frame_expand
   rfl
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

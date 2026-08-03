@@ -6,6 +6,7 @@ import Mathlib.Analysis.Convex.Integral
 import Mathlib.Analysis.Convex.Mul
 import Mathlib.Analysis.Seminorm
 import Mathlib.MeasureTheory.Integral.Prod
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 noncomputable section

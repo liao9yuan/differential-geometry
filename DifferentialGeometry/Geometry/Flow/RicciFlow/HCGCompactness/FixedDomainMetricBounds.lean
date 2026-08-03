@@ -375,17 +375,17 @@ theorem gammaL2_le_of_christoffel
     (hRic :
       forall s : Real, s ∈ Set.uIcc a b ->
         Real.sqrt
-          (DifferentialGeometry.Integral.Connection.componentL2Sq3
+          (DifferentialGeometry.Geometry.Connection.componentL2Sq3
             (fun i j k : Idx => nablaRic s x i j k)) <= R) :
     Real.sqrt
-        (DifferentialGeometry.Integral.Connection.componentL2Sq3
+        (DifferentialGeometry.Geometry.Connection.componentL2Sq3
           (fun i j k : Idx =>
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
                 (S.family.connection b) frame hframe x i j k -
               baseGamma i j k)) <=
       3 * R * |b - a| +
         Real.sqrt
-          (DifferentialGeometry.Integral.Connection.componentL2Sq3
+          (DifferentialGeometry.Geometry.Connection.componentL2Sq3
             (fun i j k : Idx =>
               DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
                   (S.family.connection a) frame hframe x i j k -
@@ -429,10 +429,10 @@ theorem metricCov1_coord
           Fin 3 -> Idx) =
       DifferentialGeometry.Tensor.Coordinates.metricCovDerivForMetricCompInFrame
         (I := I) g
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
         frame (localFrameOneOfInf (I := I) frame hframe) x d a b := by
   classical
-  let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h
+  let cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h
   let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
     localFrameOneOfInf (I := I) frame hframe
   rw [metricCovDeriv_one_component_localFrame
@@ -481,7 +481,7 @@ theorem metricCovDeriv_two_eval_smooth_slots
         ∑ a : Fin 3,
           metricCovDeriv (I := I) h gRef 1 x
             (Function.update (fun b : Fin 3 => V b x) a
-              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+              (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                 gRef)
                   (fun p : M => V a p) x) (X x))) := by
   classical
@@ -495,7 +495,7 @@ theorem metricCovDeriv_two_eval_smooth_slots
     change IsManifold I ∞ M
     infer_instance
   let cov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   let A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 3 :=
     metricCovDeriv (I := I) h gRef 1
@@ -503,7 +503,7 @@ theorem metricCovDeriv_two_eval_smooth_slots
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
     simpa [cov] using
-      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) gRef
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
@@ -553,7 +553,7 @@ theorem metricCovDeriv_three_eval_smooth_slots
         ∑ a : Fin 4,
           metricCovDeriv (I := I) h gRef 2 x
             (Function.update (fun b : Fin 4 => V b x) a
-              (((DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+              (((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                 gRef)
                   (fun p : M => V a p) x) (X x))) := by
   classical
@@ -567,7 +567,7 @@ theorem metricCovDeriv_three_eval_smooth_slots
     change IsManifold I ∞ M
     infer_instance
   let cov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   let A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 4 :=
     metricCovDeriv (I := I) h gRef 2
@@ -575,7 +575,7 @@ theorem metricCovDeriv_three_eval_smooth_slots
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M) cov (∞ : WithTop ℕ∞) := by
     simpa [cov] using
-      Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) gRef
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
@@ -618,10 +618,10 @@ theorem metricCov2_coord
         (Fin.cons d (DifferentialGeometry.Tensor.Coordinates.slots3 a b c) : Fin 4 -> Idx) =
       DifferentialGeometry.Tensor.Coordinates.metricCovDeriv2ForMetricCompInFrame
         (I := I) g
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
         frame (localFrameOneOfInf (I := I) frame hframe) x d a b c := by
   classical
-  let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h
+  let cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h
   let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
     localFrameOneOfInf (I := I) frame hframe
   obtain ⟨sec, hsec⟩ :=
@@ -1081,10 +1081,10 @@ theorem metricCov3_coord
         (Fin.cons m (DifferentialGeometry.Tensor.Coordinates.slots4 d a b c) : Fin 5 -> Idx) =
       DifferentialGeometry.Tensor.Coordinates.metricCovDeriv3ForMetricCompInFrame
         (I := I) g
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
         frame (localFrameOneOfInf (I := I) frame hframe) x m d a b c := by
   classical
-  let cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h
+  let cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h
   let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
     localFrameOneOfInf (I := I) frame hframe
   let slot : Fin 4 -> Idx := DifferentialGeometry.Tensor.Coordinates.slots4 d a b c
@@ -1341,9 +1341,9 @@ noncomputable def lcMetricFamily
     DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real where
   metric := g
   connection := fun t : Real =>
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) (g t)
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) (g t)
   metricCompatible := fun t : Real =>
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (g t)
 
 
@@ -1363,12 +1363,12 @@ theorem metricCovDeriv_one_component_eq_metricCovAtBase
         (metricCovDeriv (I := I) (g var) (g base) 1 x)
         (Fin.cons d (fun q : Fin 2 => if q = 0 then a else b) :
           Fin 3 -> Idx) =
-      DifferentialGeometry.Integral.Connection.metricCovAtBase (I := I)
+      DifferentialGeometry.Geometry.Connection.metricCovAtBase (I := I)
         (lcMetricFamily (I := I) (M := M) g) frame base var x d a b := by
   classical
   rw [metricCovDeriv_one_component_localFrame (I := I)
     (h := g var) (gRef := g base) frame hframe hu hx d a b]
-  unfold DifferentialGeometry.Integral.Connection.metricCovAtBase lcMetricFamily
+  unfold DifferentialGeometry.Geometry.Connection.metricCovAtBase lcMetricFamily
   ring
 
 
@@ -1380,17 +1380,17 @@ theorem componentL2Sq3_metricCovDeriv_one_eq_metricCovAtBase
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
     (base var : Real) :
-    DifferentialGeometry.Integral.Connection.componentL2Sq3
+    DifferentialGeometry.Geometry.Connection.componentL2Sq3
         (fun d a b : Idx =>
           Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hx)
             (metricCovDeriv (I := I) (g var) (g base) 1 x)
             (Fin.cons d (fun q : Fin 2 => if q = 0 then a else b) :
               Fin 3 -> Idx)) =
-      DifferentialGeometry.Integral.Connection.componentL2Sq3
+      DifferentialGeometry.Geometry.Connection.componentL2Sq3
         (fun d a b : Idx =>
-          DifferentialGeometry.Integral.Connection.metricCovAtBase (I := I)
+          DifferentialGeometry.Geometry.Connection.metricCovAtBase (I := I)
             (lcMetricFamily (I := I) (M := M) g) frame base var x d a b) := by
-  unfold DifferentialGeometry.Integral.Connection.componentL2Sq3
+  unfold DifferentialGeometry.Geometry.Connection.componentL2Sq3
   apply Finset.sum_congr rfl
   intro p _
   exact congrArg (fun r : Real => r ^ 2)
@@ -1451,12 +1451,12 @@ theorem metricGammaEquiv
         (by decide : (1 : WithTop ℕ∞) ≤ ∞) }
   have hLC :
       ∀ s : Real,
-        DifferentialGeometry.Integral.Connection.IsLeviCivita
+        DifferentialGeometry.Geometry.Connection.IsLeviCivita
           (I := I) ((lcMetricFamily (I := I) (M := M) g).connection s)
           ((lcMetricFamily (I := I) (M := M) g).metric s) := by
     intro s
     simpa [lcMetricFamily] using
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isLeviCivita
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isLeviCivita
         (I := I) (g s)
   have hinvBasis :
       Tensor0SBundle.MetricInverseInBasis
@@ -1474,16 +1474,16 @@ theorem metricGammaEquiv
       Tensor0SBundle.normSq0S
           (I := I) (g var) x 3
           (metricCovDeriv (I := I) (g var) (g base) 1 x) =
-        DifferentialGeometry.Integral.Connection.componentL2Sq3
+        DifferentialGeometry.Geometry.Connection.componentL2Sq3
           (fun d a b : Idx =>
-            DifferentialGeometry.Integral.Connection.metricCovAtBase (I := I)
+            DifferentialGeometry.Geometry.Connection.metricCovAtBase (I := I)
               (lcMetricFamily (I := I) (M := M) g) frame base var x d a b) := by
     exact
-      DifferentialGeometry.Integral.Connection.normSq0S_three_eq_componentL2Sq3_of_components
+      DifferentialGeometry.Geometry.Connection.normSq0S_three_eq_componentL2Sq3_of_components
         (I := I) (g := g var) x (hframe.toBasisAt hx) hinvBasis
         (metricCovDeriv (I := I) (g var) (g base) 1 x)
         (fun d a b : Idx =>
-          DifferentialGeometry.Integral.Connection.metricCovAtBase (I := I)
+          DifferentialGeometry.Geometry.Connection.metricCovAtBase (I := I)
             (lcMetricFamily (I := I) (M := M) g) frame base var x d a b)
         (by
           intro d a b
@@ -1496,7 +1496,7 @@ theorem metricGammaEquiv
             (I := I)
             ((lcMetricFamily (I := I) (M := M) g).connection var)
             ((lcMetricFamily (I := I) (M := M) g).connection base) x) =
-        DifferentialGeometry.Integral.Connection.componentL2Sq3
+        DifferentialGeometry.Geometry.Connection.componentL2Sq3
           (fun a b e : Idx =>
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
                 ((lcMetricFamily (I := I) (M := M) g).connection var)
@@ -1505,11 +1505,11 @@ theorem metricGammaEquiv
                 ((lcMetricFamily (I := I) (M := M) g).connection base)
                 frame hframe1 x a b e) := by
     exact
-      DifferentialGeometry.Integral.Connection.normSqRS_connDiff_eq_componentL2Sq3
+      DifferentialGeometry.Geometry.Connection.normSqRS_connDiff_eq_componentL2Sq3
         (I := I) (G := lcMetricFamily (I := I) (M := M) g) gInv
         frame hframe1 hu hx base var hinv hinv_id
   have hcomp :=
-    DifferentialGeometry.Integral.Connection.covGamma_l2_equiv
+    DifferentialGeometry.Geometry.Connection.covGamma_l2_equiv
       (I := I) (G := lcMetricFamily (I := I) (M := M) g) hLC
       gInv frame hframe1 hu hx base var hinv hinv_id hmetric_id
   constructor
@@ -1905,8 +1905,8 @@ theorem covOne_le_diff
               (I := I) (g := h) (x := x) 1 2
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                   gRef) x))) := by
   let pair : Real -> SmoothRiemannianMetric I M :=
     fun s => if s = (0 : Real) then gRef else h
@@ -1952,8 +1952,8 @@ theorem diff_le_covOne
           (I := I) (g := h) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
               x)) <=
       (3 / 2 : Real) *
         (Real.sqrt (C ^ 3) *
@@ -1997,15 +1997,15 @@ theorem diffNormSq_eq_l2
         (I := I) (g := h) (x := x) 1 2
         (Tensor0SBundle.connectionDifferenceTensorAt
           (I := I)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x) =
-      DifferentialGeometry.Integral.Connection.componentL2Sq3
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x) =
+      DifferentialGeometry.Geometry.Connection.componentL2Sq3
         (fun a b e : Idx =>
           DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
               frame hframe x a b e -
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
               frame hframe x a b e) := by
   let pair : Real -> SmoothRiemannianMetric I M :=
     fun s => if s = (0 : Real) then gRef else h
@@ -2015,7 +2015,7 @@ theorem diffNormSq_eq_l2
         gInv frame := by
     simpa [pair, lcMetricFamily] using hinv
   have hmain :=
-    DifferentialGeometry.Integral.Connection.normSqRS_connDiff_eq_componentL2Sq3
+    DifferentialGeometry.Geometry.Connection.normSqRS_connDiff_eq_componentL2Sq3
       (I := I) (G := lcMetricFamily (I := I) (M := M) pair)
       gInv frame hframe hu hx
       (base := 0) (var := 1) hinv' hinv_id
@@ -2035,7 +2035,7 @@ theorem normSqRS12_eq_l2
     (A : Tensor0SBundle.TensorRSSpace (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) 1 2 x) :
     Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) 1 2 A =
-      DifferentialGeometry.Integral.Connection.componentL2Sq3
+      DifferentialGeometry.Geometry.Connection.componentL2Sq3
         (fun a b e : Idx =>
           Tensor0SBundle.componentRS (I := I) basis A
             (fun _ : Fin 1 => e)
@@ -2043,7 +2043,7 @@ theorem normSqRS12_eq_l2
   classical
   rw [Tensor0SBundle.normSqRS_one_two_identity_eq_sum
     (I := I) h x basis hinv A]
-  rw [DifferentialGeometry.Integral.Connection.componentL2Sq3_eq_sum_upper_first]
+  rw [DifferentialGeometry.Geometry.Connection.componentL2Sq3_eq_sum_upper_first]
   simp only [Tensor0SBundle.componentRS_apply_gen, Tensor0SBundle.componentRS_apply]
 
 
@@ -2088,7 +2088,7 @@ theorem coord_eq_inner_id
     (a : Idx) (V : TangentSpace I x) :
     basis.coord a V = h.inner x (basis a) V := by
   have hcoord :=
-    DifferentialGeometry.Integral.Connection.coordinate_basis_coord_eq_sum_inv_metric_inner
+    DifferentialGeometry.Geometry.Connection.coordinate_basis_coord_eq_sum_inv_metric_inner
       (I := I) h basis (Tensor0SBundle.identityInvMetric (Idx := Idx))
       hinv a V
   simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric]
@@ -2116,20 +2116,20 @@ theorem covOneCompDiff
       Tensor0SBundle.componentRS (I := I) basis
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
           (fun _ : Fin 1 => b)
           (fun q : Fin 2 => if q = 0 then a else c) +
         Tensor0SBundle.componentRS (I := I) basis
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
           (fun _ : Fin 1 => c)
           (fun q : Fin 2 => if q = 0 then a else b) := by
   classical
-  let covH := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h
-  let covG := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+  let covH := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h
+  let covG := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   let alpha := Tensor0SBundle.metricTensorField (I := I) h
   let X : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) :=
@@ -2199,7 +2199,7 @@ theorem covOneCompDiff
             (I := I) (M := M) 2 covH X alpha x = 0 := by
       simpa [covH, alpha] using
         Tensor0SBundle.nabla_metric_zero (I := I) covH h
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
             (I := I) h) X x
     let slots : Fin 2 -> TangentSpace I x :=
       fun q : Fin 2 => if q = 0 then Y x else Z x
@@ -2280,15 +2280,15 @@ theorem covOneCompDiff
       Tensor0SBundle.componentRS (I := I) basis
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
           (fun _ : Fin 1 => b)
           (fun q : Fin 2 => if q = 0 then a else c) +
         Tensor0SBundle.componentRS (I := I) basis
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
           (fun _ : Fin 1 => c)
           (fun q : Fin 2 => if q = 0 then a else b) := by
         rw [hterm1, hterm2]
@@ -2304,16 +2304,16 @@ theorem connDiffBasisSymm
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (a b : Idx) :
     ((CovariantDerivative.difference
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
         (basis b)) (basis a) =
       ((CovariantDerivative.difference
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
         (basis a)) (basis b) := by
   classical
-  let covH := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h
-  let covG := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef
+  let covH := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h
+  let covG := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef
   let X : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) :=
     (ContMDiffSection.exists_eq_at
@@ -2361,13 +2361,13 @@ theorem connDiffBasisSymm
     exact congrArg (fun L : TangentSpace I x →L[Real] TangentSpace I x =>
       L (Y x)) hdiff
   have htorH :=
-    DifferentialGeometry.Integral.Connection.torsion_free_apply (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree
+    DifferentialGeometry.Geometry.Connection.torsion_free_apply (I := I)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
         (I := I) h)
       (X := fun p : M => X p) (Y := fun p : M => Y p) hXd hYd
   have htorG :=
-    DifferentialGeometry.Integral.Connection.torsion_free_apply (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree
+    DifferentialGeometry.Geometry.Connection.torsion_free_apply (I := I)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
         (I := I) gRef)
       (X := fun p : M => X p) (Y := fun p : M => Y p) hXd hYd
   have hsub :
@@ -2383,8 +2383,8 @@ theorem connDiffBasisSymm
     exact sub_swap_of_sub_eq_sub htor
   calc
     ((CovariantDerivative.difference
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
         (basis b)) (basis a)
         = ((CovariantDerivative.difference covH covG x) (Y x)) (X x) := by
           simp [covH, covG, hX, hY]
@@ -2394,8 +2394,8 @@ theorem connDiffBasisSymm
           ((covG (fun p : M => X p) x) (Y x)) := hsub
     _ = ((CovariantDerivative.difference covH covG x) (X x)) (Y x) := hdX.symm
     _ = ((CovariantDerivative.difference
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
         (basis a)) (basis b) := by
           simp [covH, covG, hX, hY]
 
@@ -2409,15 +2409,15 @@ theorem connDiffCompSymm
     Tensor0SBundle.componentRS (I := I) basis
         (Tensor0SBundle.connectionDifferenceTensorAt
           (I := I)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
         (fun _ : Fin 1 => e)
         (fun q : Fin 2 => if q = 0 then a else b) =
       Tensor0SBundle.componentRS (I := I) basis
         (Tensor0SBundle.connectionDifferenceTensorAt
           (I := I)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
         (fun _ : Fin 1 => e)
         (fun q : Fin 2 => if q = 0 then b else a) := by
   rw [componentRS_eq_gen, Tensor0SBundle.componentRS_connectionDifferenceTensorAt]
@@ -2448,16 +2448,16 @@ theorem covOne_le_diff_basis
           Tensor0SBundle.componentRS (I := I) basis
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                   gRef) x)
               (fun _ : Fin 1 => b)
               (fun q : Fin 2 => if q = 0 then a else c) +
             Tensor0SBundle.componentRS (I := I) basis
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                   gRef) x)
               (fun _ : Fin 1 => c)
               (fun q : Fin 2 => if q = 0 then a else b)) :
@@ -2469,8 +2469,8 @@ theorem covOne_le_diff_basis
           (Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) 1 2
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 x)) := by
   classical
   let A0 :=
@@ -2478,8 +2478,8 @@ theorem covOne_le_diff_basis
   let D0 :=
     Tensor0SBundle.connectionDifferenceTensorAt
       (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x
   let A : Idx -> Idx -> Idx -> Real :=
     fun a b c =>
       Tensor0SBundle.component0S (I := I) basis A0
@@ -2491,18 +2491,18 @@ theorem covOne_le_diff_basis
         (fun q : Fin 2 => if q = 0 then a else b)
   have hA :
       Tensor0SBundle.normSq0S (I := I) h x 3 A0 =
-        DifferentialGeometry.Integral.Connection.componentL2Sq3 A := by
+        DifferentialGeometry.Geometry.Connection.componentL2Sq3 A := by
     exact
-      DifferentialGeometry.Integral.Connection.normSq0S_three_eq_componentL2Sq3_of_components
+      DifferentialGeometry.Geometry.Connection.normSq0S_three_eq_componentL2Sq3_of_components
         (I := I) h x basis hinv A0 A (by intro d a b; rfl)
   have hD :
       Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) 1 2 D0 =
-        DifferentialGeometry.Integral.Connection.componentL2Sq3 D := by
+        DifferentialGeometry.Geometry.Connection.componentL2Sq3 D := by
     exact normSqRS12_eq_l2 (I := I) h basis hinv D0
   have hmain :
-      Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 A) <=
-        2 * Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 D) := by
-    exact DifferentialGeometry.Integral.Connection.metricCov_l2_le (Idx := Idx) A D (by
+      Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 A) <=
+        2 * Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 D) := by
+    exact DifferentialGeometry.Geometry.Connection.metricCov_l2_le (Idx := Idx) A D (by
       intro a b c
       simpa [A, D, add_comm, add_left_comm, add_assoc] using hcombo a b c)
   rw [hA, hD]
@@ -2526,8 +2526,8 @@ theorem covOne_le_diff_basis_lc
           (Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) 1 2
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 x)) := by
   exact covOne_le_diff_basis (I := I) h gRef basis hinv
     (fun a b c => covOneCompDiff (I := I) h gRef basis hinv a b c)
@@ -2552,8 +2552,8 @@ theorem diff_le_covOne_basis
           Tensor0SBundle.componentRS (I := I) basis
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 x)
             (fun _ : Fin 1 => e)
             (fun q : Fin 2 => if q = 0 then a else b) =
@@ -2570,8 +2570,8 @@ theorem diff_le_covOne_basis
         (Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
               x)) <=
       (3 / 2 : Real) *
         Real.sqrt
@@ -2583,8 +2583,8 @@ theorem diff_le_covOne_basis
   let D0 :=
     Tensor0SBundle.connectionDifferenceTensorAt
       (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x
   let A : Idx -> Idx -> Idx -> Real :=
     fun a b c =>
       Tensor0SBundle.component0S (I := I) basis A0
@@ -2596,18 +2596,18 @@ theorem diff_le_covOne_basis
         (fun q : Fin 2 => if q = 0 then a else b)
   have hA :
       Tensor0SBundle.normSq0S (I := I) h x 3 A0 =
-        DifferentialGeometry.Integral.Connection.componentL2Sq3 A := by
+        DifferentialGeometry.Geometry.Connection.componentL2Sq3 A := by
     exact
-      DifferentialGeometry.Integral.Connection.normSq0S_three_eq_componentL2Sq3_of_components
+      DifferentialGeometry.Geometry.Connection.normSq0S_three_eq_componentL2Sq3_of_components
         (I := I) h x basis hinv A0 A (by intro d a b; rfl)
   have hD :
       Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) 1 2 D0 =
-        DifferentialGeometry.Integral.Connection.componentL2Sq3 D := by
+        DifferentialGeometry.Geometry.Connection.componentL2Sq3 D := by
     exact normSqRS12_eq_l2 (I := I) h basis hinv D0
   have hmain :
-      Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 D) <=
-        (3 / 2 : Real) * Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 A) := by
-    exact DifferentialGeometry.Integral.Connection.gammaSub_l2_le (Idx := Idx) A D (by
+      Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 D) <=
+        (3 / 2 : Real) * Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 A) := by
+    exact DifferentialGeometry.Geometry.Connection.gammaSub_l2_le (Idx := Idx) A D (by
       intro a b e
       simpa [A, D, add_comm, add_left_comm, add_assoc] using hcombo a b e)
   rw [hA, hD]
@@ -2629,8 +2629,8 @@ theorem connDiffCompEq
         Tensor0SBundle.componentRS (I := I) basis
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
           (fun _ : Fin 1 => e)
           (fun q : Fin 2 => if q = 0 then a else b) =
       Tensor0SBundle.component0S (I := I) basis
@@ -2647,8 +2647,8 @@ theorem connDiffCompEq
   let D0 :=
     Tensor0SBundle.connectionDifferenceTensorAt
       (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x
   let A : Idx -> Idx -> Idx -> Real := fun i j k =>
     Tensor0SBundle.component0S (I := I) basis A0
       (Fin.cons i (fun q : Fin 2 => if q = 0 then j else k))
@@ -2698,8 +2698,8 @@ theorem diff_le_covOne_basis_lc
         (Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
               x)) <=
       (3 / 2 : Real) *
         Real.sqrt
@@ -2730,16 +2730,16 @@ theorem covOne_le_diff_basis_ref
           Tensor0SBundle.componentRS (I := I) basis
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                   gRef) x)
               (fun _ : Fin 1 => b)
               (fun q : Fin 2 => if q = 0 then a else c) +
             Tensor0SBundle.componentRS (I := I) basis
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                   gRef) x)
               (fun _ : Fin 1 => c)
               (fun q : Fin 2 => if q = 0 then a else b)) :
@@ -2751,8 +2751,8 @@ theorem covOne_le_diff_basis_ref
               (I := I) (g := h) (x := x) 1 2
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                   gRef) x))) := by
   let A0 :=
     metricCovDeriv (I := I) h gRef 1 x
@@ -2789,8 +2789,8 @@ theorem covOne_le_diff_basis_ref_lc
               (I := I) (g := h) (x := x) 1 2
               (Tensor0SBundle.connectionDifferenceTensorAt
                 (I := I)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+                (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
                   gRef) x))) := by
   exact covOne_le_diff_basis_ref (I := I) h gRef hxK C hEq basis hinv
     (fun a b c => covOneCompDiff (I := I) h gRef basis hinv a b c)
@@ -2814,8 +2814,8 @@ theorem diff_le_covOne_basis_ref
           Tensor0SBundle.componentRS (I := I) basis
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 x)
             (fun _ : Fin 1 => e)
             (fun q : Fin 2 => if q = 0 then a else b) =
@@ -2833,8 +2833,8 @@ theorem diff_le_covOne_basis_ref
           (I := I) (g := h) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
               x)) <=
       (3 / 2 : Real) *
         (Real.sqrt (C ^ 3) *
@@ -2872,8 +2872,8 @@ theorem diff_le_covOne_basis_ref_lc
           (I := I) (g := h) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
               x)) <=
       (3 / 2 : Real) *
         (Real.sqrt (C ^ 3) *
@@ -2936,7 +2936,7 @@ theorem covOne_le_christoffel
     (hRic :
       ∀ s : Real, s ∈ Set.uIcc a b ->
         Real.sqrt
-          (DifferentialGeometry.Integral.Connection.componentL2Sq3
+          (DifferentialGeometry.Geometry.Connection.componentL2Sq3
             (fun i j k : Idx => nablaRic s x i j k)) <= R)
     (hEq_b :
       MetricUniformEquivalentOn (I := I) K gRef (S.family.metric b) Cb)
@@ -2959,7 +2959,7 @@ theorem covOne_le_christoffel
   let baseGamma : Idx -> Idx -> Idx -> Real :=
     fun i j k =>
       DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
         frame hframe1 x i j k
   have hgamma :=
     gammaL2_le_of_christoffel
@@ -2975,11 +2975,11 @@ theorem covOne_le_christoffel
           (I := I) (g := S.family.metric b) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
               (I := I) (S.family.metric b))
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
               =
-        DifferentialGeometry.Integral.Connection.componentL2Sq3
+        DifferentialGeometry.Geometry.Connection.componentL2Sq3
           (fun i j k : Idx =>
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
                 (S.family.connection b) frame hframe1 x i j k -
@@ -2996,11 +2996,11 @@ theorem covOne_le_christoffel
           (I := I) (g := S.family.metric a) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt
             (I := I)
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
               (I := I) (S.family.metric a))
-            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
+            (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef) x)
               =
-        DifferentialGeometry.Integral.Connection.componentL2Sq3
+        DifferentialGeometry.Geometry.Connection.componentL2Sq3
           (fun i j k : Idx =>
             DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
                 (S.family.connection a) frame hframe1 x i j k -
@@ -3028,7 +3028,7 @@ theorem covOne_le_christoffel
       hxK (C := Ca) hEq_a (hframe.toBasisAt hx) hinvBasis_a
   have hinit_component :
       Real.sqrt
-          (DifferentialGeometry.Integral.Connection.componentL2Sq3
+          (DifferentialGeometry.Geometry.Connection.componentL2Sq3
             (fun i j k : Idx =>
               DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
                   (S.family.connection a) frame hframe1 x i j k -
@@ -3044,9 +3044,9 @@ theorem covOne_le_christoffel
             (I := I) (g := S.family.metric b) (x := x) 1 2
             (Tensor0SBundle.connectionDifferenceTensorAt
               (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
                 (I := I) (S.family.metric b))
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 x)) <=
         3 * R * |b - a| +
           (3 / 2 : Real) *
@@ -3094,7 +3094,7 @@ theorem covOne_le_init
     (hRic :
       ∀ s : Real, s ∈ Set.uIcc a b ->
         Real.sqrt
-          (DifferentialGeometry.Integral.Connection.componentL2Sq3
+          (DifferentialGeometry.Geometry.Connection.componentL2Sq3
             (fun i j k : Idx => nablaRic s x i j k)) <= R)
     (hEq_b :
       MetricUniformEquivalentOn (I := I) K gRef (S.family.metric b) Cb)

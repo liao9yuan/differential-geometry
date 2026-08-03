@@ -13,6 +13,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.F
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

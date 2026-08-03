@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.DeTurckNaturality
 import DifferentialGeometry.Geometry.Metric.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Harmonic-map tension for diffeomorphisms

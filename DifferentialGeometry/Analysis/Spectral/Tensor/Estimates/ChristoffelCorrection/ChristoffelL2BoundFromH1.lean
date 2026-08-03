@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

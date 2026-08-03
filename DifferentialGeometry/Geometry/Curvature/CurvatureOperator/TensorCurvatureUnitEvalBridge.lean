@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvat
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformRiemannOperatorNormBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

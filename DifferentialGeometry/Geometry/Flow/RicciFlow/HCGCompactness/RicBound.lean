@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundClaim
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivArityBridge
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -128,8 +129,8 @@ noncomputable def ricCovTower
   iterCov (I := I) gRef 2
     (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
       (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g)) s
 
 /-- **The moving-metric Shi bound** (MSM135 Lemma 3.11 hypothesis (3.5)): on the

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Tensor.RSTensor.Derivation.GradientBundleEquiv
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

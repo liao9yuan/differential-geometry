@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 import DifferentialGeometry.Geometry.Metric.BumpExtend
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowSolutions
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

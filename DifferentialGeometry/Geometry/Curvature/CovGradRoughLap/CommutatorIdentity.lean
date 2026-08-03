@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.AbstractRoughLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tensor0SRSCovariantDerivativeAgreement
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

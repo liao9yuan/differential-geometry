@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.IntrinsicComponent
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

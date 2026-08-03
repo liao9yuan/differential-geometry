@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
 import DifferentialGeometry.Geometry.Exponential.ConjugatePoint
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

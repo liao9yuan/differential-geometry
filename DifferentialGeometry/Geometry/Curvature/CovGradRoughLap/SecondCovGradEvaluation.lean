@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseTensorCu
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

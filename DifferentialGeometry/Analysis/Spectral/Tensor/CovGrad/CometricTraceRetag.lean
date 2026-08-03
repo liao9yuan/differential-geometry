@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
+open DifferentialGeometry.Geometry.Connection
 
 
 

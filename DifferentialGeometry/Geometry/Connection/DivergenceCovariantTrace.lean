@@ -11,8 +11,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 open DifferentialGeometry.Tensor
@@ -647,7 +648,7 @@ theorem voss_weyl_divergence_eq_leviCivita_frameTrace
   rw [chartChristoffel_symm (I := I) g α k i i]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

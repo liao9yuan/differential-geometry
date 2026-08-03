@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.RankZeroRealizat
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInner
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

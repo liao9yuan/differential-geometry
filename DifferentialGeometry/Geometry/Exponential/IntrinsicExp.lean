@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
+open DifferentialGeometry.Geometry.Connection
 
 
 

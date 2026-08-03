@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.UhlenbeckBaseProducer
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

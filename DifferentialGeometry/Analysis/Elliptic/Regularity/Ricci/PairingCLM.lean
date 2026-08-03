@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Candidate
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.DualNorm
 import Mathlib.Analysis.Normed.Operator.Extend
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

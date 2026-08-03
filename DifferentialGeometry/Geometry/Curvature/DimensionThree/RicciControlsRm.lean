@@ -7,6 +7,7 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Tactic
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

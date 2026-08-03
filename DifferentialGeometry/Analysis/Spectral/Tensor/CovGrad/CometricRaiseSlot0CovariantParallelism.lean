@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCometricRaise
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetricFieldParallel
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentCovDerivIdentification
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

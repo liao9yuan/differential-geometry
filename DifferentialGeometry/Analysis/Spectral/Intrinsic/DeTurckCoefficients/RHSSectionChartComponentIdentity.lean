@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieM
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

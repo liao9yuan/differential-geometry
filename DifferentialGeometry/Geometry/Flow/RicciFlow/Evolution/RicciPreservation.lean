@@ -9,6 +9,7 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
 import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -210,7 +211,7 @@ structure MetricRicciData
     (Ric : TwoTensorFamily (I := I) (M := M)) where
   K : CurvatureSectionProducerData
     (I := I) (M := M)
-    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) (G 0)) (G 0)
+    (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) (G 0)) (G 0)
   ricci_eq :
     ∀ x v w, Ric 0 x v w = K.ricci x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w)
 
@@ -888,10 +889,10 @@ theorem ricciMetricComp
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
-    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
+    DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen
       (I := I) (S.base.connection t) (S.base.metric t) := by
   simpa [SolutionFamily.connection] using
-    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+    (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t))
 
 
@@ -1660,19 +1661,19 @@ private theorem traceData_metricTrace
   have hcov :
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (I := I) (E := E) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (1 : WithTop ℕ∞) :=
     leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric t)
   have hRm13 :
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm13 t) := by
     simpa [SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm13
   have hRm04 :
       DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I) (S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm04 t) := by
     simpa [SolutionFamily.rm04, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
@@ -1687,7 +1688,7 @@ private theorem traceData_metricTrace
         (S.base.rm13 t x) (S.base.rm04 t x) :=
     DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
       (I := I) (g := S.base.metric t)
-      (cov := DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+      (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
         (S.base.metric t))
       (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
       hRm13 hRm04 x
@@ -1971,10 +1972,10 @@ noncomputable def pinchMetricDerivs
       (metricTensorField (I := I) (S.base.metric t)) := by
   simpa [SolutionFamily.connection] using
     metricDerivsZero (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
         (S.base.metric t))
       (S.base.metric t)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
         (I := I) (S.base.metric t))
 
 @[simp]

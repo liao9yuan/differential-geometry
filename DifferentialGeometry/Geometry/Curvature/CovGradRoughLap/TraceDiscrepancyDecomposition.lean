@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.Slot0FrameTraceMatching
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

@@ -8,6 +8,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

@@ -11,6 +11,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormDiscreteLogConvex
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormHolderIntegrability
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormKatoSecondCovDerivBound
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
@@ -101,7 +102,7 @@ private theorem covDerivCrossLeft_weight_bound_rs
     exact Real.sqrt_le_sqrt hsq
   have hrP_eq : rP = (∑ a : Fin n,
         (extDerivFun (I := I) (ζ : M → ℝ) x
-          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
+          (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
         riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) :=
     prependCovGradSlot_fiberNormSq_frame_sum_rs (I := I) (M := M) g r m ζ w x
   have hbfun_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) bfun x := by
@@ -148,23 +149,23 @@ private theorem covDerivCrossLeft_weight_bound_rs
     have hexp : k - 1 - 1 = k - 2 := by omega
     rw [show (bfun x) = b from rfl, hkcast, hexp]
   have hkato : ∑ a : Fin n,
-      (extDerivFun (I := I) bfun x (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
+      (extDerivFun (I := I) bfun x (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
         4 * b * c :=
     kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs (I := I) (M := M) g r (m + 1) Q x
   have hdζsum : (∑ a : Fin n,
       (extDerivFun (I := I) (ζ : M → ℝ) x
-        (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) ≤
+        (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) ≤
         ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) := by
     have hrw : (∑ a : Fin n,
         (extDerivFun (I := I) (ζ : M → ℝ) x
-          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) =
+          (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) =
         ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 *
           ∑ a : Fin n,
             (extDerivFun (I := I) bfun x
-              (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 := by
+              (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 := by
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl (fun a _ => ?_)
-      rw [hchain (Integral.Connection.smoothOrthoFrame (I := I) g x a x)]
+      rw [hchain (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)]
       ring
     rw [hrw]
     have hcoeff_nn : (0 : ℝ) ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 := by positivity
@@ -176,14 +177,14 @@ private theorem covDerivCrossLeft_weight_bound_rs
       riemannianFiberNormSq_nonneg (I := I) (M := M) g r m x (w.toSection x)
     have hsum_nn : (0 : ℝ) ≤ ∑ a : Fin n,
         (extDerivFun (I := I) (ζ : M → ℝ) x
-          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 :=
+          (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 :=
       Finset.sum_nonneg (fun a _ => sq_nonneg _)
     have hbound_nn : (0 : ℝ) ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) := by
       exact mul_nonneg (mul_nonneg (sq_nonneg _) (sq_nonneg _))
         (mul_nonneg (mul_nonneg (by norm_num) hb_nn) hc_nn)
     calc (∑ a : Fin n,
             (extDerivFun (I := I) (ζ : M → ℝ) x
-              (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
+              (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
             riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x)
         ≤ (((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c)) *
             riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) :=
@@ -677,7 +678,7 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
       exact Real.sqrt_le_sqrt hsq
     have hrP_eq : rP = (∑ a : Fin n,
           (extDerivFun (I := I) (ζ : M → ℝ) x
-            (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) * av :=
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) * av :=
       prependCovGradSlot_fiberNormSq_frame_sum_rs (I := I) (M := M) g r m ζ w x
     have hbfun_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) bfun x := by
       have hb_eq_scalar : bfun = Integral.Connection.tensorInnerScalar (I := I) (M := M) g r (m + 1)
@@ -717,23 +718,23 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
         ring
       rw [hext, hζeq, hCLM, one_mul, hbv_def]
     have hkato : ∑ a : Fin n,
-        (extDerivFun (I := I) bfun x (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
+        (extDerivFun (I := I) bfun x (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
           4 * bv * cv :=
       kato_mfderiv_riemannianFiberNormSq_frame_sum_le_rs (I := I) (M := M) g r (m + 1) Q x
     have hdζsum : (∑ a : Fin n,
         (extDerivFun (I := I) (ζ : M → ℝ) x
-          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) ≤
+          (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) ≤
           pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv) := by
       have hrw : (∑ a : Fin n,
           (extDerivFun (I := I) (ζ : M → ℝ) x
-            (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) =
+            (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) =
           (pm1 * (bv + ε) ^ (pm1 - 1)) ^ 2 *
             ∑ a : Fin n,
               (extDerivFun (I := I) bfun x
-                (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 := by
+                (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 := by
         rw [Finset.mul_sum]
         refine Finset.sum_congr rfl (fun a _ => ?_)
-        rw [hchain (Integral.Connection.smoothOrthoFrame (I := I) g x a x), mul_pow]
+        rw [hchain (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x), mul_pow]
       rw [hrw, mul_pow]
       exact mul_le_mul_of_nonneg_left hkato
         (mul_nonneg (sq_nonneg pm1) (sq_nonneg ((bv + ε) ^ (pm1 - 1))))
@@ -741,7 +742,7 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
       rw [hrP_eq]
       calc (∑ a : Fin n,
               (extDerivFun (I := I) (ζ : M → ℝ) x
-                (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) * av
+                (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) * av
           ≤ (pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv)) * av :=
             mul_le_mul_of_nonneg_right hdζsum hav_nn
         _ = pm1 ^ 2 * ((bv + ε) ^ (pm1 - 1)) ^ 2 * (4 * bv * cv) * av := by ring

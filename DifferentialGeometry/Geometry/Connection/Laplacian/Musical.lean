@@ -27,8 +27,9 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -357,7 +358,7 @@ theorem sharp_connLap
     sharp_second_eq (I := I) g w (smoothOrthoFrame_smooth (I := I) g x i) x
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

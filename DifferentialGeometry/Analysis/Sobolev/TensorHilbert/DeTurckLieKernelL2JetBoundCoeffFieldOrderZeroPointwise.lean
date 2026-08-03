@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBoundCoeffFieldOrderZeroCore
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

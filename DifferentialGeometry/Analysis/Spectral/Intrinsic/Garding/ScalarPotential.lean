@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricScalarSmul
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
+open DifferentialGeometry.Geometry.Connection
 
 
 

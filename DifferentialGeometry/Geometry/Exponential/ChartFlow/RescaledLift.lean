@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.PreconnectedPropagati
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowData
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.MaximalRescaling
+open DifferentialGeometry.Geometry.Connection
 
 
 

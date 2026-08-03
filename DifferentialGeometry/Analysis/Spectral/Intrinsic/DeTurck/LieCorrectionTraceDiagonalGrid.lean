@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RecoveryEndomorphismJetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTowerAppCcRSProductGridRankLeftBound
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Pointwise diagonal-grid bounds for moving trace operators

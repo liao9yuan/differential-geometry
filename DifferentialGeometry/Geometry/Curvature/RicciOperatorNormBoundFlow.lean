@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

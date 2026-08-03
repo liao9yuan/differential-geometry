@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaMatrix
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 

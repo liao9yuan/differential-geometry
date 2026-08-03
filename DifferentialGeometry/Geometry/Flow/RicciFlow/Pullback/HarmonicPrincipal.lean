@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwi
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import DifferentialGeometry.Geometry.Connection.Laplacian.Musical
 import DifferentialGeometry.Geometry.Exponential.LocalAddition
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 /-!

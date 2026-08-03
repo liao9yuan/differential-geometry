@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuin
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Algebra.Order.Chebyshev
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 

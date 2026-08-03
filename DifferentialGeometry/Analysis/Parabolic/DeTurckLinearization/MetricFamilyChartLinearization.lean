@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -1297,7 +1298,7 @@ lemma chartFComponentOnE_deTurckRicciRHS_eq
   have hyz : extChartAt I α z = y := (extChartAt I α).right_inv hy_t
   have hz_pre : z ∈ (extChartAt I α) ⁻¹' interior ((extChartAt I α).target : Set E) := by
     simp only [Set.mem_preimage, hyz]; exact hy
-  have hz_good : z ∈ DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet (I := I) α :=
+  have hz_good : z ∈ DifferentialGeometry.Geometry.Connection.chartLeviCivitaGoodSet (I := I) α :=
     ⟨⟨hz_src, hz_base⟩, hz_pre⟩
   rw [DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE]
   simp only [chartPushforwardFrameVec_eq_chartBasisVecFiber]

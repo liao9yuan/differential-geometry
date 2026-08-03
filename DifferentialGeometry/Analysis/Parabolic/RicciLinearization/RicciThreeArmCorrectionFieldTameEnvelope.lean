@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1Ta
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder0KernelJetGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputSlotSymmetrization
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

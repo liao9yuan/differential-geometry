@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestrict
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricCovDerivProducer
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

@@ -28,12 +28,12 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 open scoped Bundle Manifold ContDiff
 
@@ -1187,4 +1187,4 @@ theorem leviCivitaConnectionOfMetric_isMetricCompatible
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

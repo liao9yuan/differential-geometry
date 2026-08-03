@@ -8,7 +8,7 @@ open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -58,5 +58,5 @@ theorem christoffelCorrection_basepoint_symm
   exact hsym
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

@@ -20,6 +20,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovDivergenceRoughLaplacianCommutation
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotSwapPairingCalculus
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
+open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
@@ -653,7 +654,7 @@ private lemma armResidual_arm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M
         (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (DifferentialGeometry.Integral.Connection.ccOperatorFieldComp (I := I) (M := M) g₀ 4 4 2
             (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-            (DifferentialGeometry.Integral.Connection.endoSlotZeroCcTensor (I := I) (M := M) g₀ 3
+            (DifferentialGeometry.Geometry.Connection.endoSlotZeroCcTensor (I := I) (M := M) g₀ 3
               (gInvDiffRaisedEndoField (I := I) g₀ g₁)))
           (iteratedCovGrad (I := I) g₀ 0 2 2 u₀)).toSection b) D) m =
     Tensor0SSpace.toModel

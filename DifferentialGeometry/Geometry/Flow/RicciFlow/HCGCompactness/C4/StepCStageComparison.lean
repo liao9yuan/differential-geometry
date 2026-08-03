@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCHatRe
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSupportCapstone
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricExtend
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 

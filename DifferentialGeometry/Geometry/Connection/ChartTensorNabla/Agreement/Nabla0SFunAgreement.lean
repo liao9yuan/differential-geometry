@@ -49,8 +49,9 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
 open Tensor0SBundle
 
+open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -366,7 +367,7 @@ theorem nabla0SFun_eq_tensor0SCovariantDerivative
       α.contMDiff (fun a => (V a).contMDiff) X.contMDiff x]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.W
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.EigenBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

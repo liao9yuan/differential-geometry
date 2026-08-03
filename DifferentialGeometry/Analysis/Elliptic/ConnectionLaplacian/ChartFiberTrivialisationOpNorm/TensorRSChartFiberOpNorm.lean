@@ -4,6 +4,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

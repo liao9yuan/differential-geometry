@@ -67,7 +67,7 @@ theorem e0Field_cost_any {Idx : Type*} [Fintype Idx]
 eight generators of `e0Field`. -/
 def rmBaseReact {Idx : Type*} [Fintype Idx]
     (R : (Fin 4 -> Idx) -> Real) (m : Fin 4 -> Idx) : Real :=
-  DifferentialGeometry.Integral.Connection.hamiltonRmReact R m
+  DifferentialGeometry.Geometry.Connection.hamiltonRmReact R m
 
 set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless]

@@ -14,7 +14,7 @@ noncomputable section
 open Bundle Manifold
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -54,4 +54,4 @@ theorem chartInvGram_inverse
       chartGramMatrix_mul_chartInvGramMatrix (I := I) g alpha hx,
       Matrix.one_apply]
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

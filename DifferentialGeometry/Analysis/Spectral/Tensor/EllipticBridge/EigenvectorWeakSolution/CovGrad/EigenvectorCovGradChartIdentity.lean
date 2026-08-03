@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.EigenvectorChartTestDecoupling
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegratedNullity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
