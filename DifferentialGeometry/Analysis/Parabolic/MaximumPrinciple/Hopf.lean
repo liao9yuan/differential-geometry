@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Strong
 import DifferentialGeometry.Geometry.Boundary.DefiningFunctionCurve
+import DifferentialGeometry.Geometry.Operator.MetricFamilyRegularity
 
 set_option autoImplicit false
 
@@ -92,6 +93,197 @@ theorem scalar_hopf_boundary_point_of_defining_function_on_compact_annulus
       hheat_upper u hu_cont hu_nonneg hu_inner hu_time hu_mdiff hu_grad
       hu_super hp hp_outer hgrad_boundary gamma ha hgamma0 hgamma
       hgamma_mdiff hgamma_velocity hu_zero
+
+theorem scalar_hopf_boundary_point_of_defining_function_on_compact_annulus_of_continuousOn
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    (X : Real → (x : M) → TangentSpace I x)
+    (rho : M → Real)
+    (hrho : ContMDiff I (modelWithCornersSelf Real Real) ∞ rho)
+    {r R eta : Real}
+    (hr : 0 ≤ r) (hrR : r < R) (heta : 0 < eta)
+    (hK : IsCompact {x | r ≤ rho x ∧ rho x ≤ R})
+    (hgrad_ne : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ {x | r ≤ rho x ∧ rho x ≤ R},
+        gradientFun (I := I) (G.metric t) rho x ≠ 0)
+    (hgrad_cont : ContinuousOn (fun p : Real × M =>
+      (G.metric p.1).inner p.2
+        (gradientFun (I := I) (G.metric p.1) rho p.2)
+        (gradientFun (I := I) (G.metric p.1) rho p.2))
+      (Set.Icc 0 T ×ˢ {x | r ≤ rho x ∧ rho x ≤ R}))
+    (hheat_cont : ContinuousOn (fun p : Real × M =>
+      heatOperatorWithDrift (I := I) G p.1 (X p.1) rho p.2)
+      (Set.Icc 0 T ×ˢ {x | r ≤ rho x ∧ rho x ≤ R}))
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (Set.Icc 0 T ×ˢ {x | r ≤ rho x ∧ rho x ≤ R}))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ {x | r ≤ rho x ∧ rho x ≤ R}, 0 ≤ u t x)
+    (hu_inner : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ frontier {x | r ≤ rho x ∧ rho x ≤ R},
+        rho x = r → eta ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I (modelWithCornersSelf Real Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t →
+      ∀ x ∈ interior {x | r ≤ rho x ∧ rho x ≤ R},
+        0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x)
+    {p : M}
+    (hp : p ∈ frontier {x | r ≤ rho x ∧ rho x ≤ R})
+    (hp_outer : rho p = R)
+    (hu_zero : u T p = 0) :
+    (G.metric T).inner p
+      (gradientFun (I := I) (G.metric T) (u T) p)
+      (levelSetOutwardNormal (I := I) (G.metric T) rho p) < 0 := by
+  let K : Set M := {x | r ≤ rho x ∧ rho x ≤ R}
+  let S : Set (Real × M) := Set.Icc 0 T ×ˢ K
+  let q : Real × M → Real := fun z =>
+    (G.metric z.1).inner z.2
+      (gradientFun (I := I) (G.metric z.1) rho z.2)
+      (gradientFun (I := I) (G.metric z.1) rho z.2)
+  let ell : Real × M → Real := fun z =>
+    |heatOperatorWithDrift (I := I) G z.1 (X z.1) rho z.2|
+  have hpK : p ∈ K := by
+    have hpcl : p ∈ closure K := frontier_subset_closure hp
+    rw [hK.isClosed.closure_eq] at hpcl
+    exact hpcl
+  have hSne : S.Nonempty :=
+    ⟨(0, p), ⟨⟨le_rfl, hT.le⟩, hpK⟩⟩
+  have hScompact : IsCompact S := isCompact_Icc.prod hK
+  have hq_cont : ContinuousOn q S := by
+    simpa only [S, K, q] using hgrad_cont
+  have hell_cont : ContinuousOn ell S := by
+    simpa only [S, K, ell] using hheat_cont.abs
+  obtain ⟨pm, hpm, hpmin⟩ := hScompact.exists_isMinOn hSne hq_cont
+  obtain ⟨pB, _hpB, hpBmax⟩ := hScompact.exists_isMaxOn hSne hell_cont
+  let m : Real := q pm
+  let B : Real := ell pB
+  have hm : 0 < m := by
+    exact (G.metric pm.1).pos pm.2 _
+      (hgrad_ne pm.1 hpm.1 pm.2 hpm.2)
+  have hB : 0 ≤ B := by
+    exact abs_nonneg _
+  have hgrad_lower : ∀ t ∈ Set.Icc 0 T, 0 < t →
+      ∀ x ∈ interior K,
+        m ≤ (G.metric t).inner x
+          (gradientFun (I := I) (G.metric t) rho x)
+          (gradientFun (I := I) (G.metric t) rho x) := by
+    intro t ht _htpos x hx
+    change q pm ≤ q (t, x)
+    exact hpmin (show (t, x) ∈ S from ⟨ht, interior_subset hx⟩)
+  have hheat_upper : ∀ t ∈ Set.Icc 0 T, 0 < t →
+      ∀ x ∈ interior K,
+        heatOperatorWithDrift (I := I) G t (X t) rho x ≤ B := by
+    intro t ht _htpos x hx
+    have habs : ell (t, x) ≤ ell pB :=
+      hpBmax (show (t, x) ∈ S from ⟨ht, interior_subset hx⟩)
+    change |heatOperatorWithDrift (I := I) G t (X t) rho x| ≤ B at habs
+    exact (le_abs_self _).trans habs
+  let kappa : Real := (R - r) / T ^ 2 + 1
+  have hT_sq : 0 < T ^ 2 := sq_pos_of_pos hT
+  have hgap : 0 < R - r := sub_pos.mpr hrR
+  have hkappa : 0 < kappa := by
+    dsimp only [kappa]
+    linarith [div_pos hgap hT_sq]
+  have hinit : R ≤ r + kappa * T ^ 2 := by
+    have hratio : (R - r) / T ^ 2 < kappa := by
+      dsimp only [kappa]
+      linarith
+    have hmul := (div_lt_iff₀ hT_sq).mp hratio
+    linarith
+  let alpha : Real := (2 * kappa * T + B) / m + 1
+  have hnum : 0 ≤ 2 * kappa * T + B := by positivity
+  have halpha : 0 < alpha := by
+    dsimp only [alpha]
+    linarith [div_nonneg hnum hm.le]
+  have hdom : 2 * kappa * T + B ≤ alpha * m := by
+    apply le_of_lt ((div_lt_iff₀ hm).mp ?_)
+    dsimp only [alpha]
+    linarith
+  have hgrad_boundary : 0 < (G.metric T).inner p
+      (gradientFun (I := I) (G.metric T) rho p)
+      (gradientFun (I := I) (G.metric T) rho p) := by
+    exact (G.metric T).pos p _
+      (hgrad_ne T ⟨hT.le, le_rfl⟩ p hpK)
+  exact scalar_hopf_boundary_point_of_defining_function_on_compact_annulus
+    (I := I) G hT X rho hrho hr hrR heta hK hkappa hinit halpha hdom
+      (by simpa only [K] using hgrad_lower)
+      (by simpa only [K] using hheat_upper) u hu_cont hu_nonneg hu_inner
+      hu_time hu_mdiff hu_grad hu_super hp hp_outer hgrad_boundary hu_zero
+
+theorem scalar_hopf_boundary_point_of_defining_function_on_compact_annulus_of_metricFamilySmoothOn
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 < T)
+    {D : RealTimeInterval}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hslab : Set.Icc 0 T ⊆ D.regular)
+    (hconn : ∀ t ∈ Set.Icc 0 T,
+      G.connection t = LeviCivita (I := I) (G.metric t))
+    (X : Real → (x : M) → TangentSpace I x)
+    (rho : M → Real)
+    (hrho : ContMDiff I (modelWithCornersSelf Real Real) ∞ rho)
+    (hdrift : ContinuousOn (fun p : Real × M =>
+      driftTerm (I := I) G p.1 (X p.1) rho p.2)
+      (Set.Icc 0 T ×ˢ (Set.univ : Set M)))
+    {r R eta : Real}
+    (hr : 0 ≤ r) (hrR : r < R) (heta : 0 < eta)
+    (hK : IsCompact {x | r ≤ rho x ∧ rho x ≤ R})
+    (hgrad_ne : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ {x | r ≤ rho x ∧ rho x ≤ R},
+        gradientFun (I := I) (G.metric t) rho x ≠ 0)
+    (u : Real → M → Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (Set.Icc 0 T ×ˢ {x | r ≤ rho x ∧ rho x ≤ R}))
+    (hu_nonneg : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ {x | r ≤ rho x ∧ rho x ≤ R}, 0 ≤ u t x)
+    (hu_inner : ∀ t ∈ Set.Icc 0 T,
+      ∀ x ∈ frontier {x | r ≤ rho x ∧ rho x ≤ R},
+        rho x = r → eta ≤ u t x)
+    (hu_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      DifferentiableWithinAt Real (fun s => u s x) (Set.Icc 0 T) t)
+    (hu_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDifferentiableAt I (modelWithCornersSelf Real Real) (u t) x)
+    (hu_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (u t) y) x)
+    (hu_super : ∀ t ∈ Set.Icc 0 T, 0 < t →
+      ∀ x ∈ interior {x | r ≤ rho x ∧ rho x ≤ R},
+        0 ≤ parabolicOperatorWithDrift (I := I) G T X u t x)
+    {p : M}
+    (hp : p ∈ frontier {x | r ≤ rho x ∧ rho x ≤ R})
+    (hp_outer : rho p = R)
+    (hu_zero : u T p = 0) :
+    (G.metric T).inner p
+      (gradientFun (I := I) (G.metric T) (u T) p)
+      (levelSetOutwardNormal (I := I) (G.metric T) rho p) < 0 := by
+  apply
+    scalar_hopf_boundary_point_of_defining_function_on_compact_annulus_of_continuousOn
+      (I := I) G hT X rho hrho hr hrR heta hK hgrad_ne
+  · exact (G.gradient_norm_sq_continuousOn hG hslab hrho).mono
+      (fun p hp => ⟨hp.1, Set.mem_univ p.2⟩)
+  · exact (G.heatOperatorWithDrift_continuousOn hG hslab
+      (uniqueDiffOn_Icc hT) hconn X hrho hdrift).mono
+      (fun p hp => ⟨hp.1, Set.mem_univ p.2⟩)
+  · exact hu_cont
+  · exact hu_nonneg
+  · exact hu_inner
+  · exact hu_time
+  · exact hu_mdiff
+  · exact hu_grad
+  · exact hu_super
+  · exact hp
+  · exact hp_outer
+  · exact hu_zero
 
 private theorem gradientFun_exp_mul
     [I.Boundaryless]
