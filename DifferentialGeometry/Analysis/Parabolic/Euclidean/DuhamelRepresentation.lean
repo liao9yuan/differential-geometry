@@ -230,6 +230,133 @@ theorem heatDuh_eq_of_zero_initial
       (source s) x]
   simpa only [source, sub_zero] using hftc
 
+def linPullBcfCLM (L : V ≃L[Real] V) :
+    BoundedContinuousFunction V F →L[Real]
+      BoundedContinuousFunction V F :=
+  LinearMap.mkContinuous
+    { toFun := linPullBcf L
+      map_add' := by
+        intro u v
+        ext x
+        rfl
+      map_smul' := by
+        intro c u
+        ext x
+        rfl }
+    1
+    (fun u ↦ by
+      change ‖linPullBcf L u‖ ≤ 1 * ‖u‖
+      rw [norm_linPullBcf, one_mul])
+
+omit [FiniteDimensional Real V] [MeasurableSpace V] [BorelSpace V]
+  [Nontrivial V] [CompleteSpace F] in
+@[simp]
+theorem linPullBcfCLM_apply
+    (L : V ≃L[Real] V) (u : BoundedContinuousFunction V F) :
+    linPullBcfCLM L u = linPullBcf L u := rfl
+
+private abbrev Euc (n : Type*) := EuclideanSpace Real n
+
+section SPD
+
+variable {n : Type*} [Fintype n] [DecidableEq n] [Nonempty n]
+
+omit [CompleteSpace F] [Nonempty n] in
+theorem coreLap_pullJet2_spd
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (d2u : BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (x : Euc n) :
+    coreLap (pullJet2 (spdSqrtEquiv A hA) d2u) x =
+      matrixLap A (d2u (spdSqrtEquiv A hA x)) := by
+  let L := spdSqrtEquiv A hA
+  change lapEval (pullJet2 L d2u x) = matrixLap A (d2u (L x))
+  calc
+    lapEval (pullJet2 L d2u x) =
+        ∑ i : n, pullJet2 L d2u x
+          (EuclideanSpace.basisFun n Real i)
+          (EuclideanSpace.basisFun n Real i) :=
+      lapEval_basis (EuclideanSpace.basisFun n Real) _
+    _ = factorLap L (d2u (L x)) := by
+      simp only [factorLap, pullJet2_apply]
+    _ = matrixLap A (d2u (L x)) := spd_factorLap A hA _
+
+theorem spdHeatDuh_eq_of_zero_initial
+    {t : Real} (ht : 0 < t)
+    (A : Matrix n n Real) (hA : A.PosDef)
+    (u dtU f : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real →
+      BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ Ioo (0 : Real) t, HasDerivAt u (dtU s) s)
+    (hu : ∀ s ∈ Ioo (0 : Real) t, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ Ioo (0 : Real) t, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (hf : ∀ s x, f s x = dtU s x - matrixLap A (d2u s x))
+    (huCont : Continuous u) (hu0 : u 0 = 0)
+    (x : Euc n)
+    (hint : IntervalIntegrable
+      (fun s ↦ heatScaled (t - s) (spdHeatSource A hA f s)
+        ((spdSqrtEquiv A hA).symm x)) volume 0 t) :
+    spdHeatDuh A hA t f x = u t x := by
+  let L := spdSqrtEquiv A hA
+  let up : Real → BoundedContinuousFunction (Euc n) F :=
+    fun s ↦ linPullBcf L (u s)
+  let dtp : Real → BoundedContinuousFunction (Euc n) F :=
+    fun s ↦ linPullBcf L (dtU s)
+  let dup : Real →
+      BoundedContinuousFunction (Euc n) (Euc n →L[Real] F) :=
+    fun s ↦ pullJet1 L (du s)
+  let d2p : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F) :=
+    fun s ↦ pullJet2 L (d2u s)
+  have hupTime : ∀ s ∈ Ioo (0 : Real) t,
+      HasDerivAt up (dtp s) s := by
+    intro s hs
+    simpa only [up, dtp, linPullBcfCLM_apply] using
+      (linPullBcfCLM L).hasFDerivAt.comp_hasDerivAt s (huTime s hs)
+  have hup : ∀ s ∈ Ioo (0 : Real) t, ∀ z,
+      HasFDerivAt (up s : Euc n → F) (dup s z) z := by
+    intro s hs z
+    exact linPull_fderiv L (u s) (du s) (hu s hs) z
+  have hdup : ∀ s ∈ Ioo (0 : Real) t, ∀ z,
+      HasFDerivAt (dup s : Euc n → Euc n →L[Real] F)
+        (d2p s z) z := by
+    intro s hs z
+    exact pullJet1_fderiv L (du s) (d2u s) (hdu s hs) z
+  have hupCont : Continuous up :=
+    (linPullBcfCLM L).continuous.comp huCont
+  have hup0 : up 0 = 0 := by
+    rw [show up 0 = linPullBcfCLM L (u 0) by rfl, hu0, map_zero]
+  have hsource : (fun s ↦ dtp s - coreLap (d2p s)) =
+      spdHeatSource A hA f := by
+    funext s
+    ext z
+    change dtU s (L z) - coreLap (pullJet2 L (d2u s)) z = f s (L z)
+    rw [coreLap_pullJet2_spd A hA (d2u s) z, hf]
+  have hint' : IntervalIntegrable
+      (fun s ↦ heatScaled (t - s) (dtp s - coreLap (d2p s))
+        (L.symm x)) volume 0 t := by
+    have hintegrand :
+        (fun s ↦ heatScaled (t - s) (dtp s - coreLap (d2p s))
+          (L.symm x)) =
+        fun s ↦ heatScaled (t - s) (spdHeatSource A hA f s)
+          (L.symm x) := by
+      funext s
+      rw [congrFun hsource s]
+    rw [hintegrand]
+    exact hint
+  have hiso := heatDuh_eq_of_zero_initial ht up dtp dup d2p
+    hupTime hup hdup hupCont hup0 (L.symm x)
+      hint'
+  rw [hsource] at hiso
+  simpa only [spdHeatDuh, L, up, linPullBcf_apply,
+    ContinuousLinearEquiv.apply_symm_apply] using hiso
+
+end SPD
+
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 end
