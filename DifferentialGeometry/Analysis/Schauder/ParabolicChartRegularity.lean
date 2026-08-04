@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Schauder.EvolvingMetric
+import DifferentialGeometry.Analysis.Schauder.ParabolicBallExtension
 
 noncomputable section
 
@@ -161,6 +162,98 @@ theorem exists_uniform_parabolic_chart_nondivergence_operator_coefficient_schaud
   · intro r
     exact (hpotential r).2.mono
       (Finset.single_le_sum (fun s _ ↦ zero_le (Kcr s)) (Finset.mem_univ r))
+
+theorem exists_parabolic_chart_nondivergence_operator_coefficient_schauder_bounds_on_closedBall
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {a b : Real} (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    (chartCenter : M) (center : EuclM E) (R : Real)
+    (hchart : ((toEuclidean (E := E)).symm : EuclM E → E) ''
+      Metric.closedBall center R ⊆ interior (extChartAt I chartCenter).target)
+    (V : Real → M → Real)
+    (hV : ContDiffOn Real 1
+      (fun p : Real × E ↦ V p.1 ((extChartAt I chartCenter).symm p.2))
+      (Set.Icc a b ×ˢ
+        (((toEuclidean (E := E)).symm : EuclM E → E) ''
+          Metric.closedBall center R)))
+    {alpha : NNReal} (halpha : alpha ≤ 1) :
+    ∃ Apr Ka : Fin (Module.finrank Real E) →
+          Fin (Module.finrank Real E) → NNReal,
+      ∃ Bb Kb : Fin (Module.finrank Real E) → NNReal,
+      ∃ Bc Kc : NNReal,
+      (∀ i j p, p ∈ parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall center R) →
+        ‖parabolicChartPrincipalCoefficient (I := I) G.metric
+          chartCenter i j p‖ ≤ Apr i j) ∧
+      (∀ i j, HolderWith (Ka i j) alpha
+        ((parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall center R)).restrict
+            (parabolicChartPrincipalCoefficient (I := I) G.metric
+              chartCenter i j))) ∧
+      (∀ p, p ∈ parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall center R) →
+        (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+          parabolicChartPrincipalCoefficient (I := I) G.metric
+            chartCenter i j p).PosDef) ∧
+      (∀ k p, p ∈ parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall center R) →
+        ‖parabolicChartDriftCoefficient (I := I) G.metric
+          chartCenter k p‖ ≤ Bb k) ∧
+      (∀ k, HolderWith (Kb k) alpha
+        ((parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall center R)).restrict
+            (parabolicChartDriftCoefficient (I := I) G.metric
+              chartCenter k))) ∧
+      (∀ p, p ∈ parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall center R) →
+        ‖parabolicChartPotentialCoefficient (I := I) V
+          chartCenter p‖ ≤ Bc) ∧
+      HolderWith Kc alpha
+        ((parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall center R)).restrict
+            (parabolicChartPotentialCoefficient (I := I) V chartCenter)) := by
+  let e := (toEuclidean (E := E)).symm
+  let K := e '' Metric.closedBall center R
+  have hK : IsCompact K := (isCompact_closedBall center R).image e.continuous
+  have hKconv : Convex Real K :=
+    (convex_closedBall center R).linear_image e.toLinearEquiv.toLinearMap
+  have hpreimage : parabolicLinearPreimage
+      (e : EuclM E →L[Real] E)
+      (parabolicCylinder (Set.Icc a b) K) =
+        parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) := by
+    ext p
+    constructor
+    · intro hp
+      rcases hp.2 with ⟨x, hx, hxp⟩
+      have hxp' : e x = e p.space := hxp
+      exact ⟨hp.1, e.injective hxp' ▸ hx⟩
+    · intro hp
+      exact ⟨hp.1, ⟨p.space, hp.2, rfl⟩⟩
+  obtain ⟨Apr, Ka, hAnorm, ha, hpos⟩ :=
+    exists_parabolicChartPrincipalCoefficient_schauder_bounds
+      hG a b habreg chartCenter hK hKconv (by simpa only [K, e] using hchart)
+        halpha
+  obtain ⟨Bb, Kb, hbnorm, hb⟩ :=
+    exists_parabolicChartDriftCoefficient_schauder_bounds
+      hG hab habreg chartCenter hK hKconv (by simpa only [K, e] using hchart)
+        halpha
+  obtain ⟨Bc, Kc, hcnorm, hc⟩ :=
+    DifferentialGeometry.Analysis.Schauder.exists_parabolicChartPotentialCoefficient_schauder_bounds
+      V a b chartCenter hK hKconv (by simpa only [K, e] using hV) halpha
+  refine ⟨Apr, Ka, Bb, Kb, Bc, Kc, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · simpa only [e, hpreimage] using hAnorm
+  · intro i j
+    rw [← hpreimage]
+    simpa only [e] using ha i j
+  · simpa only [e, hpreimage] using hpos
+  · simpa only [e, hpreimage] using hbnorm
+  · intro k
+    rw [← hpreimage]
+    simpa only [e] using hb k
+  · simpa only [e, hpreimage] using hcnorm
+  · rw [← hpreimage]
+    simpa only [e] using hc
 
 end DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn
 

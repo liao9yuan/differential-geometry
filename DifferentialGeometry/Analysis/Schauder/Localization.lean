@@ -504,6 +504,76 @@ theorem norm_smul_le_of_eq_zero_outside
   · rw [hchiZero x hxQ hxU, zero_smul, norm_zero]
     positivity
 
+def cutoffExtension (chi : X → Real) (f0 : F) (f : X → F) : X → F :=
+  fun x ↦ f0 + chi x • (f x - f0)
+
+omit [MetricSpace X] in
+@[simp]
+theorem cutoffExtension_apply
+    (chi : X → Real) (f0 : F) (f : X → F) (x : X) :
+    cutoffExtension chi f0 f x = f0 + chi x • (f x - f0) :=
+  rfl
+
+omit [MetricSpace X] in
+theorem cutoffExtension_eq_of_eq_one
+    (chi : X → Real) (f0 : F) (f : X → F) {x : X}
+    (hx : chi x = 1) : cutoffExtension chi f0 f x = f x := by
+  rw [cutoffExtension_apply, hx, one_smul, add_sub_cancel]
+
+omit [MetricSpace X] in
+theorem cutoffExtension_eq_of_eq_zero
+    (chi : X → Real) (f0 : F) (f : X → F) {x : X}
+    (hx : chi x = 0) : cutoffExtension chi f0 f x = f0 := by
+  rw [cutoffExtension_apply, hx, zero_smul, add_zero]
+
+theorem cutoffExtension_holderWith
+    {Q U : Set X} {alpha Kchi Kf Mchi Mf : NNReal}
+    (chi : X → Real) (f0 : F) (f : X → F)
+    (hchi : HolderWith Kchi alpha (Q.restrict chi))
+    (hf : HolderWith Kf alpha ((Q ∩ U).restrict f))
+    (hchiNorm : ∀ x, x ∈ Q → x ∈ U → ‖chi x‖ ≤ Mchi)
+    (hfNorm : ∀ x, x ∈ Q → x ∈ U → ‖f x‖ ≤ Mf)
+    (hchiZero : ∀ x, x ∈ Q → x ∉ U → chi x = 0) :
+    HolderWith (Mchi * Kf + (Mf + ‖f0‖₊) * Kchi) alpha
+      (Q.restrict (cutoffExtension chi f0 f)) := by
+  have hdiff : HolderWith Kf alpha
+      ((Q ∩ U).restrict (fun x ↦ f x - f0)) := by
+    intro x y
+    simpa only [Set.restrict_apply, edist_dist, dist_eq_norm,
+      sub_sub_sub_cancel_right] using hf x y
+  have hdiffNorm : ∀ x, x ∈ Q → x ∈ U →
+      ‖f x - f0‖ ≤ Mf + ‖f0‖₊ := by
+    intro x hxQ hxU
+    exact (norm_sub_le _ _).trans (add_le_add (hfNorm x hxQ hxU) le_rfl)
+  have hproduct := holderWith_smul_of_eq_zero_outside
+    (Mu := Mf + ‖f0‖₊)
+    chi (fun x ↦ f x - f0) hchi hdiff hchiNorm hdiffNorm hchiZero
+  intro x y
+  simpa only [cutoffExtension, Set.restrict_apply, edist_dist,
+    dist_eq_norm, add_sub_add_left_eq_sub] using hproduct x y
+
+omit [MetricSpace X] in
+theorem norm_cutoffExtension_le
+    {Q U : Set X} {Mchi Mf : NNReal}
+    (chi : X → Real) (f0 : F) (f : X → F)
+    (hchiNorm : ∀ x, x ∈ Q → x ∈ U → ‖chi x‖ ≤ Mchi)
+    (hfNorm : ∀ x, x ∈ Q → x ∈ U → ‖f x‖ ≤ Mf)
+    (hchiZero : ∀ x, x ∈ Q → x ∉ U → chi x = 0) :
+    ∀ x, x ∈ Q →
+      ‖cutoffExtension chi f0 f x‖ ≤
+        ‖f0‖₊ + Mchi * (Mf + ‖f0‖₊) := by
+  have hdiffNorm : ∀ x, x ∈ Q → x ∈ U →
+      ‖f x - f0‖ ≤ Mf + ‖f0‖₊ := by
+    intro x hxQ hxU
+    exact (norm_sub_le _ _).trans (add_le_add (hfNorm x hxQ hxU) le_rfl)
+  have hproduct := norm_smul_le_of_eq_zero_outside
+    (Mu := Mf + ‖f0‖₊)
+    chi (fun x ↦ f x - f0) hchiNorm hdiffNorm hchiZero
+  intro x hxQ
+  rw [cutoffExtension_apply]
+  exact (norm_add_le _ _).trans
+    (add_le_add le_rfl (by simpa using hproduct x hxQ))
+
 theorem holderWith_comp_continuousLinearMap_of_norm_le_one
     {A B : Type*}
     [NormedAddCommGroup A] [NormedSpace Real A]

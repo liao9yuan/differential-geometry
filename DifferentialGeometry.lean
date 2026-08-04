@@ -848,6 +848,7 @@ import DifferentialGeometry.Analysis.Schauder.Interpolation
 import DifferentialGeometry.Analysis.Schauder.Localization
 import DifferentialGeometry.Analysis.Schauder.LowerOrder
 import DifferentialGeometry.Analysis.Schauder.ParabolicBallCutoff
+import DifferentialGeometry.Analysis.Schauder.ParabolicBallExtension
 import DifferentialGeometry.Analysis.Schauder.ParabolicChart
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartOperator
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartRegularity
