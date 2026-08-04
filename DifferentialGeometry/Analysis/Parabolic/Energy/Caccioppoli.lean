@@ -46,6 +46,11 @@ omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (t : ℝ) (x : M) :
     (smoothScalarSlice (I := I) g u hu t).toFun x = u t x := rfl
 
+def localizedIntegral {g : SmoothRiemannianMetric I M}
+    (cutoff u : SmoothScalar g) : ℝ :=
+  ∫ x, cutoff.toFun x ^ 2 * u.toFun x
+    ∂(riemannianVolumeMeasure (I := I) (M := M) g)
+
 def localizedL2Mass {g : SmoothRiemannianMetric I M}
     (cutoff u : SmoothScalar g) : ℝ :=
   ∫ x, cutoff.toFun x ^ 2 * u.toFun x ^ 2
@@ -163,6 +168,34 @@ theorem cutoffGradientError_le_localizedL2Mass
   change u.toFun x ^ 2 * gradNormSq x ≤
     K * (outer.toFun x ^ 2 * u.toFun x ^ 2)
   nlinarith
+
+omit [I.Boundaryless] in
+theorem contDiff_localizedIntegral
+    {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2)) :
+    ContDiff ℝ ∞
+      (fun t => localizedIntegral (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hcutoff_joint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => cutoff.toFun p.1) :=
+    cutoff.smooth.comp contMDiff_fst
+  have hu_swap : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => u p.2 p.1) :=
+    hu.comp (contMDiff_snd.prodMk contMDiff_fst)
+  have hintegrand : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => cutoff.toFun p.1 ^ 2 * u p.2 p.1) :=
+    (hcutoff_joint.pow 2).mul hu_swap
+  simpa only [localizedIntegral, smoothScalarSlice, μ] using
+    contDiff_integral_of_jointContMDiff μ
+      (fun x t => cutoff.toFun x ^ 2 * u t x) hintegrand
 
 omit [I.Boundaryless] in
 theorem contDiff_localizedL2Mass
@@ -385,6 +418,48 @@ theorem timeCutoff_caccioppoli_rhs_le
         (smoothScalarSlice (I := I) g u hu s) hgrad
   · exact hderiv_le
   · exact houterMass_le
+
+omit [I.Boundaryless] in
+theorem hasDerivAt_localizedIntegral
+    {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (t : ℝ) :
+    HasDerivAt
+      (fun s => localizedIntegral (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu s))
+      (∫ x, cutoff.toFun x ^ 2 * deriv (fun s => u s x) t
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hcutoff_joint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => cutoff.toFun p.1) :=
+    cutoff.smooth.comp contMDiff_fst
+  have hu_swap : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => u p.2 p.1) :=
+    hu.comp (contMDiff_snd.prodMk contMDiff_fst)
+  have hintegrand : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => cutoff.toFun p.1 ^ 2 * u p.2 p.1) :=
+    (hcutoff_joint.pow 2).mul hu_swap
+  have hraw := hasDerivAt_integral_of_jointContMDiff μ
+    (fun x s => cutoff.toFun x ^ 2 * u s x) hintegrand t
+  have hderiv : ∀ x : M,
+      deriv (fun s => cutoff.toFun x ^ 2 * u s x) t =
+        cutoff.toFun x ^ 2 * deriv (fun s => u s x) t := by
+    intro x
+    have hfiber : ContDiff ℝ ∞ (fun s : ℝ => u s x) :=
+      contMDiff_iff_contDiff.mp (hu.comp (contMDiff_id.prodMk contMDiff_const))
+    have hu_at : HasDerivAt (fun s : ℝ => u s x) (deriv (fun s : ℝ => u s x) t) t :=
+      (hfiber.differentiable (by norm_num)).differentiableAt.hasDerivAt
+    have hproduct := ((hasDerivAt_const t (cutoff.toFun x ^ 2)).mul hu_at).deriv
+    simpa only [Pi.mul_apply, zero_mul, zero_add] using hproduct
+  convert hraw using 1
+  simpa only [μ] using (integral_congr_ae (ae_of_all μ hderiv)).symm
 
 omit [I.Boundaryless] in
 theorem hasDerivAt_localizedL2Mass
