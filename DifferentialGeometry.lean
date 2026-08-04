@@ -1696,7 +1696,7 @@ import DifferentialGeometry.Bundle.PartialMfderiv
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
-import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmoothness
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueClmSectionJointSmoothness
 import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Bundle.SectionRealized
 import DifferentialGeometry.Bundle.SmoothScalarGerm
@@ -2799,7 +2799,7 @@ import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Metric.CompactMetricLowerBound
 import DifferentialGeometry.Geometry.Metric.Completeness
 import DifferentialGeometry.Geometry.Metric.ConvexCombination
-import DifferentialGeometry.Geometry.Metric.Defs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 import DifferentialGeometry.Geometry.Metric.DistanceTent
 import DifferentialGeometry.Geometry.Metric.FiberExpansion

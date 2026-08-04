@@ -9,7 +9,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckVFTimeFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.GlobalFlowOnClosed
-import DifferentialGeometry.Geometry.Metric.Defs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciTensor
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciContinuityInMetricTime
-import DifferentialGeometry.Geometry.Metric.Defs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.CutoffExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.FlowVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
