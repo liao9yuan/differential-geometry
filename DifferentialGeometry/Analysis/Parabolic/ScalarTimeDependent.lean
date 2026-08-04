@@ -108,6 +108,18 @@ structure IsHeatPotSupersolutionOn
       laplacianAt (I := I) G t (u t) x + V t x * u t x ≤
         deriv (fun s : Real => u s x) t
 
+abbrev IsHeatSubsolutionOn
+    (D : RealTimeInterval)
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (u : Real → M → Real) : Prop :=
+  IsHeatPotSubsolutionOn D G (fun _ _ ↦ 0) u
+
+abbrev IsHeatSupersolutionOn
+    (D : RealTimeInterval)
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (u : Real → M → Real) : Prop :=
+  IsHeatPotSupersolutionOn D G (fun _ _ ↦ 0) u
+
 namespace IsHeatPotOn
 
 

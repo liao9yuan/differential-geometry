@@ -72,6 +72,18 @@ theorem heat_comparison
     hu.toSubsolution hv.toSupersolution 0
     (by simp) hinit
 
+theorem heat_subsolution_comparison
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T) (u v : Real → M → Real)
+    (hu : IsHeatSubsolutionOn (RealTimeInterval.closed 0 T hT) G u)
+    (hv : IsHeatSupersolutionOn (RealTimeInterval.closed 0 T hT) G v)
+    (hinit : ∀ x : M, u 0 x ≤ v 0 x) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M, u t x ≤ v t x := by
+  exact heat_pot_comparison (I := I) G hT (fun _ _ ↦ 0) u v hu hv 0
+    (by simp) hinit
+
 theorem heat_eq_of_initial_eq
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
