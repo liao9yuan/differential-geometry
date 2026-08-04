@@ -233,6 +233,22 @@ def parabolicPreimageAt {V : Type*} [Add V] [SMul Real V]
     (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
   parabolicDilationAt r p0 ⁻¹' Q
 
+theorem parabolicPreimageAt_inverse_ball
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V) (R : Real) :
+    parabolicPreimageAt r⁻¹
+        (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
+        (Metric.ball (parabolicPoint 0 0) R) =
+      Metric.ball p0 ((r : Real) * R) := by
+  ext p
+  change dist (parabolicDilationAt r⁻¹
+      (parabolicInverseDilationAt r p0 (parabolicPoint 0 0)) p)
+      (parabolicPoint 0 0) < R ↔ dist p p0 < (r : Real) * R
+  rw [parabolicDilationAt_inverse_eq_inverseDilationAt r hr p0 p,
+    ← parabolicInverseDilationAt_center r p0,
+    dist_parabolicInverseDilationAt r hr p0]
+  rw [inv_mul_lt_iff₀ (NNReal.coe_pos.mpr hr)]
+
 theorem parabolicPreimageAt_inverse_unitBall
     {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V) :
@@ -240,15 +256,7 @@ theorem parabolicPreimageAt_inverse_unitBall
         (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
         (Metric.ball (parabolicPoint 0 0) 1) =
       Metric.ball p0 r := by
-  ext p
-  change dist (parabolicDilationAt r⁻¹
-      (parabolicInverseDilationAt r p0 (parabolicPoint 0 0)) p)
-      (parabolicPoint 0 0) < 1 ↔ dist p p0 < (r : Real)
-  rw [parabolicDilationAt_inverse_eq_inverseDilationAt r hr p0 p,
-    ← parabolicInverseDilationAt_center r p0,
-    dist_parabolicInverseDilationAt r hr p0]
-  rw [inv_mul_lt_iff₀ (NNReal.coe_pos.mpr hr)]
-  simp
+  simpa using parabolicPreimageAt_inverse_ball r hr p0 1
 
 def parabolicRescale {V F : Type*} [SMul Real V]
     (r : NNReal) (u : Real → V → F) : Real → V → F :=
@@ -750,6 +758,27 @@ theorem eParabolicC2HolderGaugeOn_rescaleAt_le
   unfold parabolicC2HolderRescaleConst
   simpa only [Cspatial] using hresult
 
+theorem eParabolicC2HolderGaugeOn_scaledBall_le_of_rescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r alpha C : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V)
+    (R : Real) (u : Real → V → F)
+    (hspace : ∀ t, ContDiff Real 2 (u t))
+    (h : eParabolicC2HolderGaugeOn alpha
+      (Metric.ball (parabolicPoint 0 0) R)
+      (parabolicRescaleAt r p0 u) ≤ C) :
+    eParabolicC2HolderGaugeOn alpha (Metric.ball p0 ((r : Real) * R)) u ≤
+      parabolicC2HolderRescaleConst r⁻¹ alpha C := by
+  have hscaled : ∀ t, ContDiff Real 2 (parabolicRescaleAt r p0 u t) :=
+    contDiff_parabolicRescaleAt_space r p0 u hspace
+  have hresult := eParabolicC2HolderGaugeOn_rescaleAt_le r⁻¹ alpha C
+    (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
+    (Metric.ball (parabolicPoint 0 0) R)
+    (parabolicRescaleAt r p0 u) hscaled h
+  rw [parabolicPreimageAt_inverse_ball r hr p0 R,
+    parabolicRescaleAt_inverse_rescaleAt r hr p0 u] at hresult
+  exact hresult
+
 theorem eParabolicC2HolderGaugeOn_ball_le_of_rescaleAt
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]
@@ -760,15 +789,8 @@ theorem eParabolicC2HolderGaugeOn_ball_le_of_rescaleAt
       (parabolicRescaleAt r p0 u) ≤ C) :
     eParabolicC2HolderGaugeOn alpha (Metric.ball p0 r) u ≤
       parabolicC2HolderRescaleConst r⁻¹ alpha C := by
-  have hscaled : ∀ t, ContDiff Real 2 (parabolicRescaleAt r p0 u t) :=
-    contDiff_parabolicRescaleAt_space r p0 u hspace
-  have hresult := eParabolicC2HolderGaugeOn_rescaleAt_le r⁻¹ alpha C
-    (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
-    (Metric.ball (parabolicPoint 0 0) 1)
-    (parabolicRescaleAt r p0 u) hscaled h
-  rw [parabolicPreimageAt_inverse_unitBall r hr p0,
-    parabolicRescaleAt_inverse_rescaleAt r hr p0 u] at hresult
-  exact hresult
+  simpa using eParabolicC2HolderGaugeOn_scaledBall_le_of_rescaleAt
+    r alpha C hr p0 1 u hspace h
 
 def parabolicLinearMap {V W : Type*} [NormedAddCommGroup V]
     [NormedSpace Real V] [NormedAddCommGroup W] [NormedSpace Real W]

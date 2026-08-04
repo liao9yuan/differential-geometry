@@ -152,7 +152,7 @@ theorem exists_finite_buffered_parabolicNondivergence_schauder_cover
         (Matrix.of fun i j ↦ principal i j p).PosDef)
     (alpha : NNReal) (halpha : 0 < alpha)
     (Ka : n → n → NNReal) (Kb Bb : n → NNReal) (Kc Bc : NNReal)
-    (T : Real)
+    (T : Real) (theta : NNReal) (htheta : 0 < theta)
     (ha : ∀ i j, HolderWith (Ka i j) alpha
       ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
         (principal i j)))
@@ -196,12 +196,14 @@ theorem exists_finite_buffered_parabolicNondivergence_schauder_cover
           (Matrix.of fun i j ↦ principal i j p.1) (hpos p.1 p.2) alpha
           (fun i j ↦ Ka i j * rho ^ (alpha : Real))
           (fun i j ↦ Ka i j * rho ^ (alpha : Real)) T < 1},
-      ∃ s : Finset ↥(parabolicCylinder (Set.Icc t₀ t₁)
+        ∃ s : Finset ↥(parabolicCylinder (Set.Icc t₀ t₁)
           (Metric.closedBall center r)),
         ∃ delta : NNReal, 0 < delta ∧
-          (∀ p ∈ s, (delta : Real) ≤ ((localScale p).1 : Real) / 2) ∧
+          (∀ p ∈ s, (delta : Real) ≤
+            (theta : Real) * ((localScale p).1 : Real)) ∧
           parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r) ⊆
-            ⋃ p ∈ s, Metric.ball p.1 (((localScale p).1 : Real) / 2) := by
+            ⋃ p ∈ s, Metric.ball p.1
+              ((theta : Real) * ((localScale p).1 : Real)) := by
   obtain ⟨localScale, _⟩ :=
     exists_finite_parabolicNondivergence_schauder_cover
       principal drift potential hat₀ ht₁b hrR center hpos alpha halpha
@@ -209,31 +211,10 @@ theorem exists_finite_buffered_parabolicNondivergence_schauder_cover
   let Q := parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r)
   have hcompact : IsCompact Q :=
     isCompact_parabolicCylinder_Icc t₀ t₁ (isCompact_closedBall center r)
-  obtain ⟨s, hs⟩ := exists_finite_ball_cover_of_isCompact hcompact
-    (fun p : Q ↦ ((localScale p).1 : Real) / 2)
-    (fun p ↦ half_pos (by exact_mod_cast (localScale p).2.1))
-  let deltaReal : Real := if h : s.Nonempty then
-      s.inf' h (fun p ↦ ((localScale p).1 : Real) / 2) else 1
-  have hdeltaReal : 0 < deltaReal := by
-    rw [show deltaReal = if h : s.Nonempty then
-        s.inf' h (fun p ↦ ((localScale p).1 : Real) / 2) else 1 by rfl]
-    split
-    · next h =>
-        rw [Finset.lt_inf'_iff]
-        exact fun p _ ↦ half_pos (by exact_mod_cast (localScale p).2.1)
-    · exact one_pos
-  let delta : NNReal := ⟨deltaReal, hdeltaReal.le⟩
-  have hdelta : 0 < delta := by exact_mod_cast hdeltaReal
-  have hdeltaLe : ∀ p ∈ s,
-      (delta : Real) ≤ ((localScale p).1 : Real) / 2 := by
-    intro p hp
-    dsimp only [delta]
-    change deltaReal ≤ ((localScale p).1 : Real) / 2
-    rw [show deltaReal = if h : s.Nonempty then
-        s.inf' h (fun q ↦ ((localScale q).1 : Real) / 2) else 1 by rfl]
-    split
-    · next h => exact Finset.inf'_le _ hp
-    · next h => exact (h ⟨p, hp⟩).elim
+  obtain ⟨s, delta, hdelta, hdeltaLe, hs⟩ :=
+    exists_finite_buffered_ball_cover_of_isCompact hcompact
+      (fun p : Q ↦ ((localScale p).1 : Real))
+      (fun p ↦ by exact_mod_cast (localScale p).2.1) theta htheta
   exact ⟨localScale, s, delta, hdelta, hdeltaLe, hs⟩
 
 end DifferentialGeometry.Analysis.Parabolic.Euclidean

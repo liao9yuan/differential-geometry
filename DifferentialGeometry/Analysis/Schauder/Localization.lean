@@ -53,6 +53,41 @@ theorem eParabolicC2HolderGaugeOn_mono
   · exact eHolderSeminormOn_mono hQR alpha _
   · exact eHolderSeminormOn_mono hQR alpha _
 
+theorem ball_parabolicPoint_eq_parabolicCylinder
+    {Y : Type*} [PseudoMetricSpace Y]
+    (t0 R : Real) (hR : 0 ≤ R) (x0 : Y) :
+    Metric.ball (parabolicPoint t0 x0) R =
+      parabolicCylinder (Set.Ioo (t0 - R ^ 2) (t0 + R ^ 2))
+        (Metric.ball x0 R) := by
+  ext p
+  rw [Metric.mem_ball]
+  change dist p (parabolicPoint t0 x0) < R ↔
+    (t0 - R ^ 2 < p.time ∧ p.time < t0 + R ^ 2) ∧
+      dist p.space x0 < R
+  rw [← parabolicPoint_time_space p, dist_parabolicPoint]
+  simp only [parabolicPoint_time, parabolicPoint_space]
+  constructor
+  · intro hp
+    have hmax := max_lt_iff.mp hp
+    have htimeRoot : Real.sqrt |p.time - t0| < R := by
+      simpa only [Real.sqrt_eq_rpow] using hmax.1
+    have htimeSq :=
+      (sq_lt_sq₀ (Real.sqrt_nonneg |p.time - t0|) hR).mpr htimeRoot
+    rw [Real.sq_sqrt (abs_nonneg _)] at htimeSq
+    have htime := abs_lt.mp htimeSq
+    exact ⟨⟨by linarith, by linarith⟩, hmax.2⟩
+  · rintro ⟨htime, hspace⟩
+    have htimeAbs : |p.time - t0| < R ^ 2 := by
+      rw [abs_lt]
+      constructor <;> linarith
+    have htimeSq : (Real.sqrt |p.time - t0|) ^ 2 < R ^ 2 := by
+      rw [Real.sq_sqrt (abs_nonneg _)]
+      exact htimeAbs
+    have htimeRoot :=
+      (sq_lt_sq₀ (Real.sqrt_nonneg |p.time - t0|) hR).mp htimeSq
+    apply max_lt_iff.mpr
+    exact ⟨by simpa only [Real.sqrt_eq_rpow] using htimeRoot, hspace⟩
+
 def parabolicInteriorRadius
     (a t₀ t₁ b r R : Real) : Real :=
   min (Real.sqrt (t₀ - a))
@@ -145,6 +180,41 @@ theorem exists_finite_ball_cover_of_isCompact
   obtain ⟨s, hs⟩ := hK.elim_finite_subcover U
     (fun _ ↦ Metric.isOpen_ball) hcover
   exact ⟨s, hs⟩
+
+theorem exists_finite_buffered_ball_cover_of_isCompact
+    {K : Set X} (hK : IsCompact K) (radius : K → Real)
+    (hradius : ∀ x, 0 < radius x) (theta : NNReal) (htheta : 0 < theta) :
+    ∃ s : Finset K, ∃ delta : NNReal, 0 < delta ∧
+      (∀ x ∈ s, (delta : Real) ≤ (theta : Real) * radius x) ∧
+      K ⊆ ⋃ x ∈ s, Metric.ball x.1 ((theta : Real) * radius x) := by
+  have hscaledRadius : ∀ x, 0 < (theta : Real) * radius x := by
+    intro x
+    exact mul_pos (NNReal.coe_pos.mpr htheta) (hradius x)
+  obtain ⟨s, hs⟩ := exists_finite_ball_cover_of_isCompact hK
+    (fun x ↦ (theta : Real) * radius x) hscaledRadius
+  let deltaReal : Real := if h : s.Nonempty then
+      s.inf' h (fun x ↦ (theta : Real) * radius x) else 1
+  have hdeltaReal : 0 < deltaReal := by
+    rw [show deltaReal = if h : s.Nonempty then
+        s.inf' h (fun x ↦ (theta : Real) * radius x) else 1 by rfl]
+    split
+    · next h =>
+        rw [Finset.lt_inf'_iff]
+        exact fun x _ ↦ hscaledRadius x
+    · exact one_pos
+  let delta : NNReal := ⟨deltaReal, hdeltaReal.le⟩
+  have hdelta : 0 < delta := by exact_mod_cast hdeltaReal
+  have hdeltaLe : ∀ x ∈ s,
+      (delta : Real) ≤ (theta : Real) * radius x := by
+    intro x hx
+    dsimp only [delta]
+    change deltaReal ≤ (theta : Real) * radius x
+    rw [show deltaReal = if h : s.Nonempty then
+        s.inf' h (fun y ↦ (theta : Real) * radius y) else 1 by rfl]
+    split
+    · next h => exact Finset.inf'_le _ hx
+    · next h => exact (h ⟨x, hx⟩).elim
+  exact ⟨s, delta, hdelta, hdeltaLe, hs⟩
 
 omit [NormedSpace Real V] [NormedSpace Real F] in
 theorem holderWith_parabolicCylinder_Icc_of_time_support
@@ -657,6 +727,37 @@ theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover_sum
     exact_mod_cast Finset.single_le_sum
       (fun j _ ↦ zero_le (localBound j)) i.2
 
+theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_scaledBall_rescaleAt
+    {ι : Type*} {Q : Set (ParabolicPoint V)} {alpha delta : NNReal}
+    (hdelta : 0 < delta) (s : Finset ι)
+    (center : ι → ParabolicPoint V) (scale : ι → NNReal)
+    (innerRadius : ι → Real)
+    (hscale : ∀ i ∈ s, 0 < scale i)
+    (hbuffer : ∀ i ∈ s,
+      (delta : Real) ≤ ((scale i : Real) * innerRadius i) / 2)
+    (hcover : Q ⊆ ⋃ i ∈ s,
+      Metric.ball (center i) (((scale i : Real) * innerRadius i) / 2))
+    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (localBound : ι → NNReal)
+    (hlocal : ∀ i ∈ s,
+      eParabolicC2HolderGaugeOn alpha
+        (Metric.ball (parabolicPoint 0 0) (innerRadius i))
+        (parabolicRescaleAt (scale i) (center i) u) ≤ localBound i) :
+    eParabolicC2HolderGaugeOn alpha Q u ≤
+      bufferedParabolicC2HolderGaugeConst alpha
+        (∑ i ∈ s,
+          parabolicC2HolderRescaleConst (scale i)⁻¹ alpha (localBound i))
+        delta := by
+  apply eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover_sum
+    hdelta s center (fun i ↦ (scale i : Real) * innerRadius i)
+      hbuffer hcover u
+    (fun i ↦ parabolicC2HolderRescaleConst
+      (scale i)⁻¹ alpha (localBound i))
+  intro i hi
+  exact eParabolicC2HolderGaugeOn_scaledBall_le_of_rescaleAt
+    (scale i) alpha (localBound i) (hscale i hi) (center i) (innerRadius i)
+      u hspace (hlocal i hi)
+
 theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_rescaleAt
     {ι : Type*} {Q : Set (ParabolicPoint V)} {alpha delta : NNReal}
     (hdelta : 0 < delta) (s : Finset ι)
@@ -676,14 +777,16 @@ theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_rescaleAt
         (∑ i ∈ s,
           parabolicC2HolderRescaleConst (radius i)⁻¹ alpha (localBound i))
         delta := by
-  apply eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover_sum
-    hdelta s center (fun i ↦ (radius i : Real)) hbuffer hcover u
-    (fun i ↦ parabolicC2HolderRescaleConst
-      (radius i)⁻¹ alpha (localBound i))
-  intro i hi
-  exact eParabolicC2HolderGaugeOn_ball_le_of_rescaleAt
-    (radius i) alpha (localBound i) (hradius i hi) (center i) u hspace
-      (hlocal i hi)
+  have hbuffer' : ∀ i ∈ s,
+      (delta : Real) ≤ ((radius i : Real) * 1) / 2 := by
+    simpa only [mul_one] using hbuffer
+  have hcover' : Q ⊆ ⋃ i ∈ s,
+      Metric.ball (center i) (((radius i : Real) * 1) / 2) := by
+    simpa only [mul_one] using hcover
+  simpa only [mul_one] using
+    eParabolicC2HolderGaugeOn_le_of_finite_buffered_scaledBall_rescaleAt
+      hdelta s center radius (fun _ ↦ 1) hradius hbuffer' hcover'
+        u hspace localBound hlocal
 
 omit [NormedSpace Real F] [NormedAddCommGroup V] [NormedSpace Real V] in
 theorem norm_sub_le_holderBallOscillationConst_of_mem_ball
