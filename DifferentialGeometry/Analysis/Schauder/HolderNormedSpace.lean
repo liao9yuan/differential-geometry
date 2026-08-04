@@ -7,6 +7,197 @@ open scoped BigOperators NNReal
 
 namespace DifferentialGeometry.Analysis.Schauder
 
+section BoundedHolder
+
+variable {X F : Type*} [MetricSpace X]
+  [NormedAddCommGroup F] [NormedSpace Real F]
+
+def BoundedHolderSpace (alpha : NNReal) : Type _ :=
+  ↑(boundedHolderSubmodule (X := X) (F := F) alpha)
+
+instance (alpha : NNReal) :
+    AddCommGroup (BoundedHolderSpace (X := X) (F := F) alpha) :=
+  inferInstanceAs (AddCommGroup
+    ↑(boundedHolderSubmodule (X := X) (F := F) alpha))
+
+instance (alpha : NNReal) :
+    Module Real (BoundedHolderSpace (X := X) (F := F) alpha) :=
+  inferInstanceAs (Module Real
+    ↑(boundedHolderSubmodule (X := X) (F := F) alpha))
+
+def boundedHolderSpaceFun {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) : X → F :=
+  f.1
+
+instance {alpha : NNReal} :
+    CoeFun (BoundedHolderSpace (X := X) (F := F) alpha)
+      (fun _ ↦ X → F) where
+  coe := boundedHolderSpaceFun
+
+@[simp]
+theorem boundedHolderSpaceFun_apply {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
+    boundedHolderSpaceFun f x = f x :=
+  rfl
+
+@[simp]
+theorem boundedHolderSpace_zero_apply {alpha : NNReal} (x : X) :
+    (0 : BoundedHolderSpace (X := X) (F := F) alpha) x = 0 :=
+  rfl
+
+@[simp]
+theorem boundedHolderSpace_add_apply {alpha : NNReal}
+    (f g : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
+    (f + g) x = f x + g x :=
+  rfl
+
+@[simp]
+theorem boundedHolderSpace_neg_apply {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
+    (-f) x = -f x :=
+  rfl
+
+@[simp]
+theorem boundedHolderSpace_sub_apply {alpha : NNReal}
+    (f g : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
+    (f - g) x = f x - g x :=
+  rfl
+
+@[simp]
+theorem boundedHolderSpace_sum_apply {ι : Type*} {alpha : NNReal}
+    (s : Finset ι)
+    (f : ι → BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
+    (∑ i ∈ s, f i) x = ∑ i ∈ s, f i x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | @insert i s hi ih => simp [hi, ih]
+
+theorem boundedHolderSpace_isBoundedHolder {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) :
+    IsBoundedHolder alpha f :=
+  f.2
+
+@[ext]
+theorem boundedHolderSpace_ext {alpha : NNReal}
+    {f g : BoundedHolderSpace (X := X) (F := F) alpha}
+    (h : ∀ x, f x = g x) : f = g := by
+  apply Subtype.ext
+  funext x
+  exact h x
+
+instance (alpha : NNReal) :
+    Norm (BoundedHolderSpace (X := X) (F := F) alpha) where
+  norm f := (eHolderGauge alpha f).toReal
+
+def boundedHolderSpaceNormedSpaceCore (alpha : NNReal) :
+    NormedSpace.Core Real
+      (BoundedHolderSpace (X := X) (F := F) alpha) where
+  norm_nonneg _ := ENNReal.toReal_nonneg
+  norm_smul c f := by
+    change (eHolderGauge alpha (c • boundedHolderSpaceFun f)).toReal =
+      ‖c‖ * (eHolderGauge alpha (boundedHolderSpaceFun f)).toReal
+    rw [eHolderGauge_smul, ENNReal.toReal_mul]
+    rfl
+  norm_triangle f g := by
+    change (eHolderGauge alpha
+      (boundedHolderSpaceFun f + boundedHolderSpaceFun g)).toReal ≤
+        (eHolderGauge alpha (boundedHolderSpaceFun f)).toReal +
+          (eHolderGauge alpha (boundedHolderSpaceFun g)).toReal
+    have hle := eHolderGauge_add_le alpha
+      (boundedHolderSpaceFun f) (boundedHolderSpaceFun g)
+    have hfinite : eHolderGauge alpha (boundedHolderSpaceFun f) +
+        eHolderGauge alpha (boundedHolderSpaceFun g) ≠ ⊤ :=
+      ENNReal.add_ne_top.mpr ⟨f.2, g.2⟩
+    have hreal := ENNReal.toReal_mono hfinite hle
+    exact hreal.trans_eq (ENNReal.toReal_add f.2 g.2)
+  norm_eq_zero_iff f := by
+    constructor
+    · intro hnorm
+      have hgauge : eHolderGauge alpha (boundedHolderSpaceFun f) = 0 :=
+        (ENNReal.toReal_eq_zero_iff _).mp hnorm |>.resolve_right f.2
+      apply Subtype.ext
+      funext x
+      apply norm_eq_zero.mp
+      have hx := norm_le_eSupNormOn Set.univ
+        (boundedHolderSpaceFun f) x (Set.mem_univ x)
+      have hsup : eSupNormOn Set.univ (boundedHolderSpaceFun f) ≤
+          eHolderGauge alpha (boundedHolderSpaceFun f) := by
+        unfold eHolderGauge
+        exact le_add_right le_rfl
+      have hzero : ENNReal.ofReal ‖boundedHolderSpaceFun f x‖ = 0 := by
+        exact nonpos_iff_eq_zero.mp (by simpa only [hgauge] using hx.trans hsup)
+      exact le_antisymm (ENNReal.ofReal_eq_zero.mp hzero) (norm_nonneg _)
+    · intro hf
+      rw [hf]
+      change (eHolderGauge alpha (0 : X → F)).toReal = 0
+      simp
+
+instance (alpha : NNReal) :
+    NormedAddCommGroup
+      (BoundedHolderSpace (X := X) (F := F) alpha) :=
+  NormedAddCommGroup.ofCore
+    (boundedHolderSpaceNormedSpaceCore (X := X) (F := F) alpha)
+
+instance (alpha : NNReal) :
+    NormedSpace Real
+      (BoundedHolderSpace (X := X) (F := F) alpha) :=
+  NormedSpace.ofCore
+    (boundedHolderSpaceNormedSpaceCore (X := X) (F := F) alpha)
+
+theorem norm_boundedHolderSpace_eq {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) :
+    ‖f‖ = (eHolderGauge alpha (boundedHolderSpaceFun f)).toReal :=
+  rfl
+
+theorem eHolderGauge_eq_ofReal_norm {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) :
+    eHolderGauge alpha (boundedHolderSpaceFun f) = ENNReal.ofReal ‖f‖ := by
+  rw [norm_boundedHolderSpace_eq]
+  exact (ENNReal.ofReal_toReal f.2).symm
+
+theorem norm_boundedHolderSpace_apply_le {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
+    ‖f x‖ ≤ ‖f‖ := by
+  have hx := norm_le_eSupNormOn Set.univ
+    (boundedHolderSpaceFun f) x (Set.mem_univ x)
+  have hsup : eSupNormOn Set.univ (boundedHolderSpaceFun f) ≤
+      eHolderGauge alpha (boundedHolderSpaceFun f) := by
+    unfold eHolderGauge
+    exact le_add_right le_rfl
+  have hreal := ENNReal.toReal_mono f.2 (hx.trans hsup)
+  simpa only [ofReal_norm_eq_enorm, enorm_eq_nnnorm,
+    ENNReal.coe_toReal, norm_boundedHolderSpace_eq] using hreal
+
+theorem boundedHolderSpace_holderWith {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) :
+    HolderWith ‖f‖₊ alpha (boundedHolderSpaceFun f) := by
+  have hle : (nnHolderNorm alpha (boundedHolderSpaceFun f) : ENNReal) ≤
+      (‖f‖₊ : ENNReal) := by
+    calc
+      (nnHolderNorm alpha (boundedHolderSpaceFun f) : ENNReal) ≤
+          eHolderNorm alpha (boundedHolderSpaceFun f) :=
+        coe_nnHolderNorm_le_eHolderNorm
+      _ ≤ eHolderGauge alpha (boundedHolderSpaceFun f) := by
+        unfold eHolderGauge
+        exact le_add_left le_rfl
+      _ = (‖f‖₊ : ENNReal) := by
+        rw [eHolderGauge_eq_ofReal_norm]
+        simp only [ofReal_norm_eq_enorm, enorm_eq_nnnorm]
+  exact f.2.memHolder.holderWith.mono (ENNReal.coe_le_coe.mp hle)
+
+end BoundedHolder
+
+section ParabolicHolder
+
+variable {V F : Type*} [MetricSpace V]
+  [NormedAddCommGroup F] [NormedSpace Real F]
+
+abbrev ParabolicHolderSpace (alpha : NNReal) : Type _ :=
+  BoundedHolderSpace (X := ParabolicPoint V) (F := F) alpha
+
+end ParabolicHolder
+
 section Elliptic
 
 variable {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]

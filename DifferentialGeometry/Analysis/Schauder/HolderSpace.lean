@@ -30,6 +30,90 @@ theorem eHolderSeminormOn_smul
 
 end GaugeAlgebra
 
+section BoundedHolder
+
+variable {X F : Type*} [MetricSpace X] [NormedAddCommGroup F]
+
+def eHolderGauge (alpha : NNReal) (f : X → F) : ENNReal :=
+  eSupNormOn Set.univ f + eHolderNorm alpha f
+
+theorem eHolderGauge_add_le (alpha : NNReal) (f g : X → F) :
+    eHolderGauge alpha (f + g) ≤
+      eHolderGauge alpha f + eHolderGauge alpha g := by
+  unfold eHolderGauge
+  exact (add_le_add (eSupNormOn_add_le Set.univ f g)
+    eHolderNorm_add_le).trans_eq (by
+      simp only [add_assoc, add_left_comm])
+
+theorem eHolderGauge_smul [NormedSpace Real F]
+    (alpha : NNReal) (f : X → F) (c : Real) :
+    eHolderGauge alpha (c • f) =
+      (‖c‖₊ : ENNReal) * eHolderGauge alpha f := by
+  unfold eHolderGauge
+  rw [eSupNormOn_smul, eHolderNorm_smul, mul_add]
+
+@[simp]
+theorem eHolderGauge_zero (alpha : NNReal) :
+    eHolderGauge alpha (0 : X → F) = 0 := by
+  simp [eHolderGauge, eSupNormOn]
+
+def IsBoundedHolder (alpha : NNReal) (f : X → F) : Prop :=
+  eHolderGauge alpha f ≠ ⊤
+
+namespace IsBoundedHolder
+
+theorem memHolder {alpha : NNReal} {f : X → F}
+    (hf : IsBoundedHolder alpha f) :
+    MemHolder alpha f := by
+  rw [← eHolderNorm_lt_top]
+  exact lt_of_le_of_lt (le_add_left le_rfl)
+    (lt_top_iff_ne_top.mpr hf)
+
+theorem zero (alpha : NNReal) :
+    IsBoundedHolder alpha (0 : X → F) := by
+  simp [IsBoundedHolder]
+
+theorem add {alpha : NNReal} {f g : X → F}
+    (hf : IsBoundedHolder alpha f) (hg : IsBoundedHolder alpha g) :
+    IsBoundedHolder alpha (f + g) := by
+  exact ne_top_of_le_ne_top (ENNReal.add_ne_top.mpr ⟨hf, hg⟩)
+    (eHolderGauge_add_le alpha f g)
+
+variable [NormedSpace Real F]
+
+theorem smul {alpha : NNReal} {f : X → F}
+    (hf : IsBoundedHolder alpha f) (c : Real) :
+    IsBoundedHolder alpha (c • f) := by
+  rw [IsBoundedHolder, eHolderGauge_smul]
+  exact ENNReal.mul_ne_top ENNReal.coe_ne_top hf
+
+theorem neg {alpha : NNReal} {f : X → F}
+    (hf : IsBoundedHolder alpha f) :
+    IsBoundedHolder alpha (-f) := by
+  simpa only [neg_one_smul] using hf.smul (-1)
+
+theorem sub {alpha : NNReal} {f g : X → F}
+    (hf : IsBoundedHolder alpha f) (hg : IsBoundedHolder alpha g) :
+    IsBoundedHolder alpha (f - g) := by
+  simpa only [sub_eq_add_neg] using hf.add hg.neg
+
+end IsBoundedHolder
+
+variable [NormedSpace Real F]
+
+def boundedHolderSubmodule (alpha : NNReal) : Submodule Real (X → F) where
+  carrier := {f | IsBoundedHolder alpha f}
+  zero_mem' := IsBoundedHolder.zero alpha
+  add_mem' := IsBoundedHolder.add
+  smul_mem' := fun c _ hf ↦ hf.smul c
+
+@[simp]
+theorem mem_boundedHolderSubmodule {alpha : NNReal} {f : X → F} :
+    f ∈ boundedHolderSubmodule alpha ↔ IsBoundedHolder alpha f :=
+  Iff.rfl
+
+end BoundedHolder
+
 section Elliptic
 
 variable {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]

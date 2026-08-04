@@ -46,6 +46,120 @@ theorem holderWith_tsum {alpha : NNReal} {C : Nat → NNReal}
 
 end Holder
 
+section BoundedHolder
+
+variable {X F : Type*} [MetricSpace X]
+  [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+
+private theorem exists_boundedHolderSpace_pointwise_tsum
+    {alpha : NNReal}
+    (f : Nat → BoundedHolderSpace (X := X) (F := F) alpha)
+    (hf : Summable fun n ↦ ‖f n‖) :
+    ∃ g : BoundedHolderSpace (X := X) (F := F) alpha,
+      (∀ x, g x = ∑' n, f n x) ∧
+      ‖g‖ ≤ (((2 : NNReal) * ∑' n, ‖f n‖₊ : NNReal) : Real) := by
+  let g : X → F := fun x ↦ ∑' n, f n x
+  have hfNN : Summable fun n ↦ ‖f n‖₊ := by
+    rw [← NNReal.summable_coe]
+    simpa only [coe_nnnorm] using hf
+  let S : NNReal := ∑' n, ‖f n‖₊
+  have hpointNorm : ∀ x, Summable fun n ↦ ‖f n x‖ := by
+    intro x
+    exact Summable.of_nonneg_of_le (fun _ ↦ norm_nonneg _)
+      (fun n ↦ norm_boundedHolderSpace_apply_le (f n) x) hf
+  have hpoint : ∀ x, Summable fun n ↦ f n x := by
+    intro x
+    exact Summable.of_norm (hpointNorm x)
+  have hholder : HolderWith S alpha g := by
+    exact holderWith_tsum hfNN
+      (fun n ↦ boundedHolderSpace_holderWith (f n)) hpoint
+  have hsup : eSupNormOn Set.univ g ≤ S := by
+    rw [eSupNormOn_le]
+    intro x _hx
+    have hx : ‖g x‖ ≤ (S : Real) := by
+      calc
+        ‖g x‖ ≤ ∑' n, ‖f n x‖ :=
+          norm_tsum_le_tsum_norm (hpointNorm x)
+        _ ≤ ∑' n, ‖f n‖ :=
+          (hpointNorm x).tsum_le_tsum
+            (fun n ↦ norm_boundedHolderSpace_apply_le (f n) x) hf
+        _ = S := by
+          dsimp only [S]
+          rw [NNReal.coe_tsum]
+          simp only [coe_nnnorm]
+    simpa only [ENNReal.ofReal_coe_nnreal] using
+      ENNReal.ofReal_le_ofReal hx
+  have hgauge : eHolderGauge alpha g ≤ ((2 : NNReal) * S : NNReal) := by
+    unfold eHolderGauge
+    calc
+      eSupNormOn Set.univ g + eHolderNorm alpha g ≤
+          (S : ENNReal) + S := add_le_add hsup hholder.eHolderNorm_le
+      _ = ((2 : NNReal) * S : NNReal) := by
+        push_cast
+        ring
+  have hfinite : IsBoundedHolder alpha g :=
+    ne_top_of_le_ne_top ENNReal.coe_ne_top hgauge
+  let G : BoundedHolderSpace (X := X) (F := F) alpha := ⟨g, hfinite⟩
+  refine ⟨G, fun x ↦ rfl, ?_⟩
+  rw [norm_boundedHolderSpace_eq]
+  have hreal := ENNReal.toReal_mono
+    (show ((((2 : NNReal) * S : NNReal) : ENNReal) ≠ ⊤) from
+      ENNReal.coe_ne_top) hgauge
+  simpa only [ENNReal.toReal_ofNat, ENNReal.toReal_mul,
+    G, g, S] using hreal
+
+instance (alpha : NNReal) :
+    CompleteSpace (BoundedHolderSpace (X := X) (F := F) alpha) := by
+  apply NormedAddCommGroup.completeSpace_of_summable_imp_tendsto
+  intro f hf
+  obtain ⟨g, hg, _hgnorm⟩ :=
+    exists_boundedHolderSpace_pointwise_tsum f hf
+  refine ⟨g, tendsto_iff_norm_sub_tendsto_zero.mpr ?_⟩
+  have hfPoint : ∀ x, Summable fun n ↦ f n x := by
+    intro x
+    exact Summable.of_norm_bounded hf fun n ↦
+      norm_boundedHolderSpace_apply_le (f n) x
+  have htailBound : ∀ N,
+      ‖(∑ n ∈ Finset.range N, f n) - g‖ ≤
+        (((2 : NNReal) * ∑' m, ‖f (m + N)‖₊ : NNReal) : Real) := by
+    intro N
+    have htailSummable : Summable fun m ↦ ‖f (m + N)‖ :=
+      (summable_nat_add_iff N).mpr hf
+    obtain ⟨tail, htail, htailNorm⟩ :=
+      exists_boundedHolderSpace_pointwise_tsum
+        (fun m ↦ f (m + N)) htailSummable
+    have hdiff : (∑ n ∈ Finset.range N, f n) - g = -tail := by
+      apply boundedHolderSpace_ext
+      intro x
+      rw [boundedHolderSpace_sub_apply, boundedHolderSpace_neg_apply,
+        boundedHolderSpace_sum_apply]
+      rw [hg x, htail x]
+      have hsum := (hfPoint x).sum_add_tsum_nat_add N
+      rw [← hsum]
+      abel
+    rw [hdiff, norm_neg]
+    exact htailNorm
+  have htailZero : Filter.Tendsto
+      (fun N ↦ (((2 : NNReal) *
+        ∑' m, ‖f (m + N)‖₊ : NNReal) : Real))
+      Filter.atTop (nhds 0) := by
+    have hNN :=
+      (NNReal.tendsto_sum_nat_add (fun n ↦ ‖f n‖₊)).const_mul
+        (2 : NNReal)
+    have hNN' : Filter.Tendsto
+        (fun N ↦ (2 : NNReal) * ∑' m, ‖f (m + N)‖₊)
+        Filter.atTop (nhds 0) := by
+      simpa only [mul_zero] using hNN
+    have hR : Filter.Tendsto
+        (fun N ↦ (((2 : NNReal) *
+          ∑' m, ‖f (m + N)‖₊ : NNReal) : Real))
+        Filter.atTop (nhds (((0 : NNReal) : Real))) :=
+      NNReal.tendsto_coe.mpr hNN'
+    simpa only [NNReal.coe_zero] using hR
+  exact squeeze_zero (fun _ ↦ norm_nonneg _) htailBound htailZero
+
+end BoundedHolder
+
 section Elliptic
 
 variable {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
