@@ -89,6 +89,22 @@ theorem le_of_ae_le_of_continuous
   have hx := congrFun hmax x
   exact (le_max_left (f x) C).trans_eq hx
 
+theorem le_on_open_of_ae_le
+    [μ.IsOpenPosMeasure]
+    {U : Set X} {f : X → ℝ} {C : ℝ}
+    (hU : IsOpen U)
+    (hf : ContinuousOn f U)
+    (hbound : ∀ᵐ x ∂μ.restrict U, f x ≤ C) :
+    ∀ x ∈ U, f x ≤ C := by
+  have hmax_ae : (fun x => max (f x) C) =ᵐ[μ.restrict U] fun _ => C := by
+    filter_upwards [hbound] with x hx
+    exact max_eq_right hx
+  have hmax : Set.EqOn (fun x => max (f x) C) (fun _ => C) U :=
+    MeasureTheory.Measure.eqOn_open_of_ae_eq hmax_ae hU
+      (fun x hx => (hf x hx).max continuousWithinAt_const) continuousOn_const
+  intro x hx
+  exact (le_max_left (f x) C).trans_eq (hmax hx)
+
 theorem le_of_integral_rpow_le
     [IsFiniteMeasure μ] [μ.IsOpenPosMeasure]
     {f : X → ℝ} {p : ℕ → ℝ} {C : ℝ}
@@ -101,6 +117,21 @@ theorem le_of_integral_rpow_le
     (hbound : ∀ k, (∫ x, f x ^ p k ∂μ) ≤ C ^ p k) :
     ∀ x, f x ≤ C := by
   exact le_of_ae_le_of_continuous hf
+    (ae_le_of_integral_rpow_le hC hp_pos hp hf_nonneg hf_integrable hbound)
+
+theorem le_on_open_of_integral_rpow_le
+    {U : Set X} [IsFiniteMeasure (μ.restrict U)] [μ.IsOpenPosMeasure]
+    {f : X → ℝ} {p : ℕ → ℝ} {C : ℝ}
+    (hU : IsOpen U)
+    (hC : 0 ≤ C)
+    (hp_pos : ∀ k, 0 < p k)
+    (hp : Tendsto p atTop atTop)
+    (hf : ContinuousOn f U)
+    (hf_nonneg : ∀ x, 0 ≤ f x)
+    (hf_integrable : ∀ k, Integrable (fun x => f x ^ p k) (μ.restrict U))
+    (hbound : ∀ k, (∫ x, f x ^ p k ∂μ.restrict U) ≤ C ^ p k) :
+    ∀ x ∈ U, f x ≤ C := by
+  exact le_on_open_of_ae_le hU hf
     (ae_le_of_integral_rpow_le hC hp_pos hp hf_nonneg hf_integrable hbound)
 
 end DifferentialGeometry.Analysis.Integration
