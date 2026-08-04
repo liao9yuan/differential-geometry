@@ -635,7 +635,11 @@ theorem exists_parabolicNondivergence_schauder_estimate_of_local_scaledBall_esti
       p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
         ‖potential p‖ ≤ Bc)
     (innerRadius : NNReal) (hinnerRadius : 0 < innerRadius)
-    (u : Real → Euc n → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (hinnerRadiusOne : innerRadius ≤ 1)
+    (u : Real → Euc n → F)
+    (hspace : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ContDiff Real 2 (u p.time))
     (localBound : ↥(parabolicCylinder (Set.Icc t₀ t₁)
       (Metric.closedBall center r)) → NNReal → NNReal)
     (hlocal : ∀ p : ↥(parabolicCylinder (Set.Icc t₀ t₁)
@@ -693,11 +697,26 @@ theorem exists_parabolicNondivergence_schauder_estimate_of_local_scaledBall_esti
     simpa only [theta, NNReal.coe_div, NNReal.coe_ofNat,
       show (innerRadius : Real) / 2 * ((localScale p).1 : Real) =
         ((localScale p).1 : Real) * (innerRadius : Real) / 2 by ring] using hqp
+  have hlocalSpace : ∀ p ∈ s, ∀ q ∈ Metric.ball p.1
+      (((localScale p).1 : Real) * (innerRadius : Real)),
+      ContDiff Real 2 (u q.time) := by
+    intro p _ q hq
+    apply hspace q
+    apply ball_parabolicInteriorRadius_subset_parabolicCylinder
+      hat₀ ht₁b hrR p.2
+    apply Metric.ball_subset_ball _ hq
+    calc
+      ((localScale p).1 : Real) * (innerRadius : Real) ≤
+          ((localScale p).1 : Real) := by
+        exact mul_le_of_le_one_right (localScale p).1.coe_nonneg
+          (by exact_mod_cast hinnerRadiusOne)
+      _ ≤ parabolicInteriorRadius a t₀ t₁ b r R :=
+        (localScale p).2.2.2.1
   have hglobal :=
     eParabolicC2HolderGaugeOn_le_of_finite_buffered_scaledBall_rescaleAt
       hdelta s (fun p ↦ p.1) (fun p ↦ (localScale p).1)
         (fun _ ↦ (innerRadius : Real))
-        (fun p _ ↦ (localScale p).2.1) hbuffer hcover' u hspace
+        (fun p _ ↦ (localScale p).2.1) hbuffer hcover' u hlocalSpace
         (fun p ↦ localBound p (localScale p).1)
         (fun p _ ↦ hlocal p (localScale p).1 (localScale p).2)
   exact ⟨localScale, s, delta, hdelta, hbuffer, hcover', hglobal⟩

@@ -88,6 +88,27 @@ theorem ball_parabolicPoint_eq_parabolicCylinder
     apply max_lt_iff.mpr
     exact ⟨by simpa only [Real.sqrt_eq_rpow] using htimeRoot, hspace⟩
 
+omit [NormedSpace Real V] in
+theorem parabolicRescaleTimeInterval_subset_of_ball_subset
+    {J : Set Real} {Omega : Set V} {p : ParabolicPoint V}
+    (r : NNReal) (hr : 0 < r) (R : Real) (hR1 : R < 1)
+    (hball : Metric.ball p r ⊆ parabolicCylinder J Omega) :
+    parabolicRescaleTimeInterval r p R ⊆ J := by
+  intro t ht
+  have hrReal : 0 < (r : Real) := NNReal.coe_pos.mpr hr
+  have hpoint : parabolicPoint t p.space ∈ Metric.ball p r := by
+    rw [← parabolicPoint_time_space p,
+      ball_parabolicPoint_eq_parabolicCylinder p.time r r.coe_nonneg p.space]
+    refine ⟨?_, Metric.mem_ball_self hrReal⟩
+    change p.time - (r : Real) ^ 2 < t ∧
+      t < p.time + (r : Real) ^ 2
+    rw [parabolicRescaleTimeInterval] at ht
+    have hscaleLt : (r : Real) ^ 2 * R < (r : Real) ^ 2 :=
+      by simpa only [mul_one] using
+        mul_lt_mul_of_pos_left hR1 (pow_pos hrReal 2)
+    constructor <;> linarith [ht.1, ht.2]
+  exact (hball hpoint).1
+
 theorem eParabolicC2HolderGaugeOn_ball_le_of_timeTranslate
     (tau R : Real) (hR : 0 ≤ R) (x0 : V) (alpha C : NNReal)
     (u : Real → V → F)
@@ -824,7 +845,9 @@ theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_scaledBall_rescaleAt
       (delta : Real) ≤ ((scale i : Real) * innerRadius i) / 2)
     (hcover : Q ⊆ ⋃ i ∈ s,
       Metric.ball (center i) (((scale i : Real) * innerRadius i) / 2))
-    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (u : Real → V → F)
+    (hspace : ∀ i ∈ s, ∀ p ∈ Metric.ball (center i)
+      ((scale i : Real) * innerRadius i), ContDiff Real 2 (u p.time))
     (localBound : ι → NNReal)
     (hlocal : ∀ i ∈ s,
       eParabolicC2HolderGaugeOn alpha
@@ -843,7 +866,7 @@ theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_scaledBall_rescaleAt
   intro i hi
   exact eParabolicC2HolderGaugeOn_scaledBall_le_of_rescaleAt
     (scale i) alpha (localBound i) (hscale i hi) (center i) (innerRadius i)
-      u (fun q _ ↦ hspace q.time) (hlocal i hi)
+      u (hspace i hi) (hlocal i hi)
 
 theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_rescaleAt
     {ι : Type*} {Q : Set (ParabolicPoint V)} {alpha delta : NNReal}
@@ -873,7 +896,7 @@ theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_rescaleAt
   simpa only [mul_one] using
     eParabolicC2HolderGaugeOn_le_of_finite_buffered_scaledBall_rescaleAt
       hdelta s center radius (fun _ ↦ 1) hradius hbuffer' hcover'
-        u hspace localBound hlocal
+        u (fun _ _ p _ ↦ hspace p.time) localBound hlocal
 
 omit [NormedSpace Real F] [NormedAddCommGroup V] [NormedSpace Real V] in
 theorem norm_sub_le_holderBallOscillationConst_of_mem_ball

@@ -340,6 +340,327 @@ theorem parabolic_nondivergence_rescaled_interior_schauder_estimate
   rw [← hvShift]
   convert hlocal using 1
 
+theorem parabolic_nondivergence_rescaled_interior_schauder_estimate_of_subset
+    {alpha Ksource Kc Ku KdtimeU Kdu Kd2u Bsource Bc
+      Mu MdtimeU Mdu Md2u : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (potential : ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : (Matrix.of fun i j ↦ principal i j p0).PosDef)
+    (Ka : n → n → NNReal) (Kb Bb : n → NNReal)
+    (maxRadius : Real) (rho : NNReal)
+    (hscale : IsParabolicNondivergenceSchauderScale
+      principal drift potential p0 hA alpha Ka Kb Bb Kc Bc
+        maxRadius (5 / 8) rho)
+    (J : Set Real) (Qsource : Set (ParabolicPoint (Euc n)))
+    (hball : Metric.ball p0 rho ⊆ Qsource)
+    (htime : parabolicRescaleTimeInterval rho p0 (3 / 8) ⊆ J)
+    (u dtimeU : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real → BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ J, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ J, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ J, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (huCont : Continuous u)
+    (hsourceHolder : HolderWith Ksource alpha
+      (Qsource.restrict (parabolicNondivergenceOperator
+        principal drift potential (fun t x ↦ u t x))))
+    (hsourceNorm : ∀ p, p ∈ Qsource →
+      ‖parabolicNondivergenceOperator principal drift potential
+        (fun t x ↦ u t x) p‖ ≤ Bsource)
+    (huHolder : HolderWith Ku alpha
+      ((parabolicCylinder J Set.univ).restrict
+        (fun p ↦ u p.time p.space)))
+    (hdtimeUHolder : HolderWith KdtimeU alpha
+      ((parabolicCylinder J Set.univ).restrict
+        (fun p ↦ dtimeU p.time p.space)))
+    (hduHolder : HolderWith Kdu alpha
+      ((parabolicCylinder J Set.univ).restrict
+        (fun p ↦ du p.time p.space)))
+    (hd2uHolder : HolderWith Kd2u alpha
+      ((parabolicCylinder J Set.univ).restrict
+        (fun p ↦ d2u p.time p.space)))
+    (huNorm : ∀ p, p ∈ parabolicCylinder J Set.univ →
+      ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeUNorm : ∀ p, p ∈ parabolicCylinder J Set.univ →
+      ‖dtimeU p.time p.space‖ ≤ MdtimeU)
+    (hduNorm : ∀ p, p ∈ parabolicCylinder J Set.univ →
+      ‖du p.time p.space‖ ≤ Mdu)
+    (hd2uNorm : ∀ p, p ∈ parabolicCylinder J Set.univ →
+      ‖d2u p.time p.space‖ ≤ Md2u) :
+    eParabolicC2HolderGaugeOn alpha
+        (Metric.ball (parabolicPoint 0 0) (1 / 4))
+        (fun t x ↦ BoundedContinuousFunction.parabolicRescaleAt
+          rho p0 u t x) ≤
+      parabolicNondivergenceRescaledInteriorSchauderConst
+        principal p0 hA alpha rho Ka Kb Bb Kc Bc
+        Ksource Ku Kdu Bsource Mu Mdu := by
+  let Qlocal := parabolicCylinder
+    (parabolicRescaleTimeInterval rho p0 (3 / 8))
+      (Set.univ : Set (Euc n))
+  have hcylinder : Qlocal ⊆ parabolicCylinder J Set.univ := by
+    intro p hp
+    exact ⟨htime hp.1, Set.mem_univ _⟩
+  have hsourceHolderLocal : HolderWith Ksource alpha
+      ((Metric.ball p0 rho).restrict
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x))) :=
+    ((HolderWith.restrict_iff.mp hsourceHolder).mono hball).holderWith
+  have huHolderLocal : HolderWith Ku alpha
+      (Qlocal.restrict (fun p ↦ u p.time p.space)) :=
+    ((HolderWith.restrict_iff.mp huHolder).mono hcylinder).holderWith
+  have hdtimeUHolderLocal : HolderWith KdtimeU alpha
+      (Qlocal.restrict (fun p ↦ dtimeU p.time p.space)) :=
+    ((HolderWith.restrict_iff.mp hdtimeUHolder).mono hcylinder).holderWith
+  have hduHolderLocal : HolderWith Kdu alpha
+      (Qlocal.restrict (fun p ↦ du p.time p.space)) :=
+    ((HolderWith.restrict_iff.mp hduHolder).mono hcylinder).holderWith
+  have hd2uHolderLocal : HolderWith Kd2u alpha
+      (Qlocal.restrict (fun p ↦ d2u p.time p.space)) :=
+    ((HolderWith.restrict_iff.mp hd2uHolder).mono hcylinder).holderWith
+  exact parabolic_nondivergence_rescaled_interior_schauder_estimate
+    (alpha := alpha) (Ksource := Ksource) (Kc := Kc) (Ku := Ku)
+    (KdtimeU := KdtimeU) (Kdu := Kdu) (Kd2u := Kd2u)
+    (Bsource := Bsource) (Bc := Bc) (Mu := Mu)
+    (MdtimeU := MdtimeU) (Mdu := Mdu) (Md2u := Md2u)
+    halpha0 halpha1 principal drift potential p0 hA Ka Kb Bb
+      maxRadius rho hscale u dtimeU du d2u
+      (fun s hs ↦ huTime s (htime hs))
+      (fun s hs ↦ hu s (htime hs))
+      (fun s hs ↦ hdu s (htime hs)) huCont
+      hsourceHolderLocal (fun p hp ↦ hsourceNorm p (hball hp))
+      huHolderLocal hdtimeUHolderLocal hduHolderLocal hd2uHolderLocal
+      (fun p hp ↦ huNorm p (hcylinder hp))
+      (fun p hp ↦ hdtimeUNorm p (hcylinder hp))
+      (fun p hp ↦ hduNorm p (hcylinder hp))
+      (fun p hp ↦ hd2uNorm p (hcylinder hp))
+
+theorem parabolic_nondivergence_rescaled_interior_schauder_estimates_on_parabolic_cylinder
+    {alpha Ksource Kc Ku KdtimeU Kdu Kd2u Bsource Bc
+      Mu MdtimeU Mdu Md2u : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (potential : ParabolicPoint (Euc n) → Real)
+    {a t₀ t₁ b r R : Real}
+    (hat₀ : a < t₀) (ht₁b : t₁ < b) (hrR : r < R)
+    (center : Euc n)
+    (hpos : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r) →
+        (Matrix.of fun i j ↦ principal i j p).PosDef)
+    (Ka : n → n → NNReal) (Kb Bb : n → NNReal)
+    (u dtimeU : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real → BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ Set.Icc a b, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (huCont : Continuous u)
+    (hsourceHolder : HolderWith Ksource alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x))))
+    (hsourceNorm : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x) p‖ ≤ Bsource)
+    (huHolder : HolderWith Ku alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ u p.time p.space)))
+    (hdtimeUHolder : HolderWith KdtimeU alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ dtimeU p.time p.space)))
+    (hduHolder : HolderWith Kdu alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ du p.time p.space)))
+    (hd2uHolder : HolderWith Kd2u alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ d2u p.time p.space)))
+    (huNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeUNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖dtimeU p.time p.space‖ ≤ MdtimeU)
+    (hduNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖du p.time p.space‖ ≤ Mdu)
+    (hd2uNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖d2u p.time p.space‖ ≤ Md2u) :
+    (∀ p, p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+      ContDiff Real 2 (u p.time)) ∧
+    ∀ p : ↥(parabolicCylinder (Set.Icc t₀ t₁)
+        (Metric.closedBall center r)), ∀ rho : NNReal,
+      IsParabolicNondivergenceSchauderScale principal drift potential p.1
+        (hpos p.1 p.2) alpha Ka Kb Bb Kc Bc
+          (parabolicInteriorRadius a t₀ t₁ b r R) (5 / 8) rho →
+      eParabolicC2HolderGaugeOn alpha
+          (Metric.ball (parabolicPoint 0 0) (1 / 4 : Real))
+          (parabolicRescaleAt rho p.1 (fun t x ↦ u t x)) ≤
+        parabolicNondivergenceRescaledInteriorSchauderConst
+          principal p.1 (hpos p.1 p.2) alpha rho Ka Kb Bb Kc Bc
+          Ksource Ku Kdu Bsource Mu Mdu := by
+  constructor
+  · intro p hp
+    exact contDiff_two_of_hasFDerivAt (u p.time) (du p.time) (d2u p.time)
+      (hu p.time hp.1) (hdu p.time hp.1)
+  · intro p rho hscale
+    let Qouter := parabolicCylinder (Set.Icc a b)
+      (Metric.closedBall center R)
+    have hball : Metric.ball p.1 rho ⊆ Qouter := by
+      intro q hq
+      apply ball_parabolicInteriorRadius_subset_parabolicCylinder
+        hat₀ ht₁b hrR p.2
+      exact Metric.ball_subset_ball hscale.2.2.1 hq
+    have htime : parabolicRescaleTimeInterval rho p.1 (3 / 8) ⊆
+        Set.Icc a b :=
+      parabolicRescaleTimeInterval_subset_of_ball_subset
+        rho hscale.1 (3 / 8) (by norm_num) hball
+    change eParabolicC2HolderGaugeOn alpha
+        (Metric.ball (parabolicPoint 0 0) (1 / 4 : Real))
+        (fun t x ↦ BoundedContinuousFunction.parabolicRescaleAt
+          rho p.1 u t x) ≤
+      parabolicNondivergenceRescaledInteriorSchauderConst
+        principal p.1 (hpos p.1 p.2) alpha rho Ka Kb Bb Kc Bc
+        Ksource Ku Kdu Bsource Mu Mdu
+    exact parabolic_nondivergence_rescaled_interior_schauder_estimate_of_subset
+      (alpha := alpha) (Ksource := Ksource) (Kc := Kc) (Ku := Ku)
+      (KdtimeU := KdtimeU) (Kdu := Kdu) (Kd2u := Kd2u)
+      (Bsource := Bsource) (Bc := Bc) (Mu := Mu)
+      (MdtimeU := MdtimeU) (Mdu := Mdu) (Md2u := Md2u)
+      (halpha0 := halpha0) (halpha1 := halpha1)
+      (principal := principal) (drift := drift) (potential := potential)
+      (p0 := p.1) (hA := hpos p.1 p.2) (Ka := Ka) (Kb := Kb) (Bb := Bb)
+      (maxRadius := parabolicInteriorRadius a t₀ t₁ b r R)
+      (rho := rho) (hscale := hscale) (J := Set.Icc a b)
+      (Qsource := Qouter) (hball := hball) (htime := htime)
+      (u := u) (dtimeU := dtimeU) (du := du) (d2u := d2u)
+      (huTime := huTime) (hu := hu) (hdu := hdu) (huCont := huCont)
+      (hsourceHolder := hsourceHolder) (hsourceNorm := hsourceNorm)
+      (huHolder := huHolder) (hdtimeUHolder := hdtimeUHolder)
+      (hduHolder := hduHolder) (hd2uHolder := hd2uHolder)
+      (huNorm := huNorm) (hdtimeUNorm := hdtimeUNorm)
+      (hduNorm := hduNorm) (hd2uNorm := hd2uNorm)
+
+theorem exists_parabolic_nondivergence_schauder_estimate
+    {alpha Ksource Kc Ku KdtimeU Kdu Kd2u Bsource Bc
+      Mu MdtimeU Mdu Md2u : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (potential : ParabolicPoint (Euc n) → Real)
+    {a t₀ t₁ b r R : Real}
+    (hat₀ : a < t₀) (ht₁b : t₁ < b) (hrR : r < R)
+    (center : Euc n)
+    (hpos : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r) →
+        (Matrix.of fun i j ↦ principal i j p).PosDef)
+    (Ka : n → n → NNReal) (Kb Bb : n → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (principal i j)))
+    (hb : ∀ i, HolderWith (Kb i) alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (drift i)))
+    (hc : HolderWith Kc alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        potential))
+    (hbNorm : ∀ i p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖drift i p‖ ≤ Bb i)
+    (hcNorm : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖potential p‖ ≤ Bc)
+    (u dtimeU : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real → BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ Set.Icc a b, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (huCont : Continuous u)
+    (hsourceHolder : HolderWith Ksource alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x))))
+    (hsourceNorm : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x) p‖ ≤ Bsource)
+    (huHolder : HolderWith Ku alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ u p.time p.space)))
+    (hdtimeUHolder : HolderWith KdtimeU alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ dtimeU p.time p.space)))
+    (hduHolder : HolderWith Kdu alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ du p.time p.space)))
+    (hd2uHolder : HolderWith Kd2u alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ d2u p.time p.space)))
+    (huNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeUNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖dtimeU p.time p.space‖ ≤ MdtimeU)
+    (hduNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖du p.time p.space‖ ≤ Mdu)
+    (hd2uNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖d2u p.time p.space‖ ≤ Md2u) :
+    ∃ localScale : ∀ p : ↥(parabolicCylinder (Set.Icc t₀ t₁)
+        (Metric.closedBall center r)),
+      {rho : NNReal //
+        IsParabolicNondivergenceSchauderScale principal drift potential p.1
+          (hpos p.1 p.2) alpha Ka Kb Bb Kc Bc
+          (parabolicInteriorRadius a t₀ t₁ b r R) (5 / 8) rho},
+      ∃ s : Finset ↥(parabolicCylinder (Set.Icc t₀ t₁)
+          (Metric.closedBall center r)),
+        ∃ delta : NNReal, 0 < delta ∧
+          (∀ p ∈ s, (delta : Real) ≤
+            (((localScale p).1 : Real) * (1 / 4 : Real)) / 2) ∧
+          parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r) ⊆
+            ⋃ p ∈ s, Metric.ball p.1
+              ((((localScale p).1 : Real) * (1 / 4 : Real)) / 2) ∧
+          eParabolicC2HolderGaugeOn alpha
+              (parabolicCylinder (Set.Icc t₀ t₁)
+                (Metric.closedBall center r)) (fun t x ↦ u t x) ≤
+            bufferedParabolicC2HolderGaugeConst alpha
+              (∑ p ∈ s, parabolicC2HolderRescaleConst
+                (localScale p).1⁻¹ alpha
+                (parabolicNondivergenceRescaledInteriorSchauderConst
+                  principal p.1 (hpos p.1 p.2) alpha (localScale p).1
+                  Ka Kb Bb Kc Bc Ksource Ku Kdu Bsource Mu Mdu))
+              delta := by
+  let Qouter := parabolicCylinder (Set.Icc a b)
+    (Metric.closedBall center R)
+  let localBound : ↥(parabolicCylinder (Set.Icc t₀ t₁)
+      (Metric.closedBall center r)) → NNReal → NNReal := fun p rho ↦
+    parabolicNondivergenceRescaledInteriorSchauderConst
+      principal p.1 (hpos p.1 p.2) alpha rho Ka Kb Bb Kc Bc
+        Ksource Ku Kdu Bsource Mu Mdu
+  obtain ⟨hspace, hlocal⟩ :=
+    parabolic_nondivergence_rescaled_interior_schauder_estimates_on_parabolic_cylinder
+      (alpha := alpha) (Ksource := Ksource) (Kc := Kc) (Ku := Ku)
+      (KdtimeU := KdtimeU) (Kdu := Kdu) (Kd2u := Kd2u)
+      (Bsource := Bsource) (Bc := Bc) (Mu := Mu)
+      (MdtimeU := MdtimeU) (Mdu := Mdu) (Md2u := Md2u)
+      halpha0 halpha1 principal drift potential hat₀ ht₁b hrR center hpos
+      Ka Kb Bb u dtimeU du d2u huTime hu hdu huCont hsourceHolder
+      hsourceNorm huHolder hdtimeUHolder hduHolder hd2uHolder huNorm
+      hdtimeUNorm hduNorm hd2uNorm
+  exact exists_parabolicNondivergence_schauder_estimate_of_local_scaledBall_estimates
+    principal drift potential hat₀ ht₁b hrR center hpos alpha halpha0
+      Ka Kb Bb Kc Bc (5 / 8) ha hb hc hbNorm hcNorm (1 / 4) (by norm_num)
+      (by exact (div_le_one (by norm_num : (0 : NNReal) < 4)).2 (by norm_num))
+      (fun t x ↦ u t x) hspace localBound hlocal
+
 end DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 end
