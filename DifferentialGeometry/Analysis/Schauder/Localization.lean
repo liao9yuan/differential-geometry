@@ -526,84 +526,6 @@ theorem holderWith_restrict_of_finite_buffered_ball_cover
     exact hlocal x.1 x.2
   · exact hbound
 
-theorem eSupNormOn_parabolicSpatialJet_le_eParabolicC2HolderGaugeOn
-    {Q : Set (ParabolicPoint V)} (u : Real → V → F) {j : Nat}
-    (hj : j < 3) (alpha : NNReal) :
-    eSupNormOn Q (parabolicSpatialJet j u) ≤
-      eParabolicC2HolderGaugeOn alpha Q u := by
-  unfold eParabolicC2HolderGaugeOn
-  calc
-    eSupNormOn Q (parabolicSpatialJet j u) ≤
-        ∑ k ∈ Finset.range 3, eSupNormOn Q (parabolicSpatialJet k u) :=
-      Finset.single_le_sum
-        (f := fun k ↦ eSupNormOn Q (parabolicSpatialJet k u))
-        (fun k _ ↦ zero_le _)
-        (Finset.mem_range.mpr hj)
-    _ ≤ (∑ k ∈ Finset.range 3,
-          eSupNormOn Q (parabolicSpatialJet k u)) +
-        eSupNormOn Q (parabolicTimeDerivative u) :=
-      le_add_of_nonneg_right (zero_le _)
-    _ ≤ (∑ k ∈ Finset.range 3,
-          eSupNormOn Q (parabolicSpatialJet k u)) +
-        eSupNormOn Q (parabolicTimeDerivative u) +
-        eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) :=
-      le_add_of_nonneg_right (zero_le _)
-    _ ≤ (∑ k ∈ Finset.range 3,
-          eSupNormOn Q (parabolicSpatialJet k u)) +
-        eSupNormOn Q (parabolicTimeDerivative u) +
-        eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
-        eHolderSeminormOn alpha Q (parabolicTimeDerivative u) :=
-      le_add_of_nonneg_right (zero_le _)
-
-theorem eSupNormOn_parabolicTimeDerivative_le_eParabolicC2HolderGaugeOn
-    {Q : Set (ParabolicPoint V)} (u : Real → V → F) (alpha : NNReal) :
-    eSupNormOn Q (parabolicTimeDerivative u) ≤
-      eParabolicC2HolderGaugeOn alpha Q u := by
-  unfold eParabolicC2HolderGaugeOn
-  calc
-    eSupNormOn Q (parabolicTimeDerivative u) ≤
-        (∑ k ∈ Finset.range 3,
-          eSupNormOn Q (parabolicSpatialJet k u)) +
-          eSupNormOn Q (parabolicTimeDerivative u) :=
-      le_add_of_nonneg_left (zero_le _)
-    _ ≤ (∑ k ∈ Finset.range 3,
-          eSupNormOn Q (parabolicSpatialJet k u)) +
-        eSupNormOn Q (parabolicTimeDerivative u) +
-        eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) :=
-      le_add_of_nonneg_right (zero_le _)
-    _ ≤ (∑ k ∈ Finset.range 3,
-          eSupNormOn Q (parabolicSpatialJet k u)) +
-        eSupNormOn Q (parabolicTimeDerivative u) +
-        eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
-        eHolderSeminormOn alpha Q (parabolicTimeDerivative u) :=
-      le_add_of_nonneg_right (zero_le _)
-
-theorem eHolderSeminormOn_parabolicSpatialJet_two_le_eParabolicC2HolderGaugeOn
-    {Q : Set (ParabolicPoint V)} (u : Real → V → F) (alpha : NNReal) :
-    eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) ≤
-      eParabolicC2HolderGaugeOn alpha Q u := by
-  unfold eParabolicC2HolderGaugeOn
-  calc
-    eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) ≤
-        (∑ k ∈ Finset.range 3,
-          eSupNormOn Q (parabolicSpatialJet k u)) +
-          eSupNormOn Q (parabolicTimeDerivative u) +
-          eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) :=
-      le_add_of_nonneg_left (zero_le _)
-    _ ≤ (∑ k ∈ Finset.range 3,
-          eSupNormOn Q (parabolicSpatialJet k u)) +
-        eSupNormOn Q (parabolicTimeDerivative u) +
-        eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
-        eHolderSeminormOn alpha Q (parabolicTimeDerivative u) :=
-      le_add_of_nonneg_right (zero_le _)
-
-theorem eHolderSeminormOn_parabolicTimeDerivative_le_eParabolicC2HolderGaugeOn
-    {Q : Set (ParabolicPoint V)} (u : Real → V → F) (alpha : NNReal) :
-    eHolderSeminormOn alpha Q (parabolicTimeDerivative u) ≤
-      eParabolicC2HolderGaugeOn alpha Q u := by
-  unfold eParabolicC2HolderGaugeOn
-  exact le_add_of_nonneg_left (zero_le _)
-
 def bufferedParabolicC2HolderGaugeConst
     (alpha C delta : NNReal) : NNReal :=
   4 * C + 2 * bufferedBallHolderConst alpha C C delta
@@ -630,33 +552,21 @@ theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover
       ‖parabolicSpatialJet j u q‖ ≤ C := by
     intro j hj q hq
     rcases Set.mem_iUnion₂.mp (hcover hq) with ⟨p, hp, hqp⟩
-    rw [← ENNReal.ofReal_le_coe]
-    exact (norm_le_eSupNormOn (Metric.ball p (radius p))
-      (parabolicSpatialJet j u) q (hhalfFull p hp hqp)).trans
-        ((eSupNormOn_parabolicSpatialJet_le_eParabolicC2HolderGaugeOn
-          u hj alpha).trans (hlocal p hp))
+    exact parabolicSpatialJet_norm_le (hlocal p hp)
+      (Nat.le_of_lt_succ hj) (hhalfFull p hp hqp)
   have htimeNorm : ∀ q ∈ Q, ‖parabolicTimeDerivative u q‖ ≤ C := by
     intro q hq
     rcases Set.mem_iUnion₂.mp (hcover hq) with ⟨p, hp, hqp⟩
-    rw [← ENNReal.ofReal_le_coe]
-    exact (norm_le_eSupNormOn (Metric.ball p (radius p))
-      (parabolicTimeDerivative u) q (hhalfFull p hp hqp)).trans
-        ((eSupNormOn_parabolicTimeDerivative_le_eParabolicC2HolderGaugeOn
-          u alpha).trans (hlocal p hp))
+    exact parabolicTimeDerivative_norm_le (hlocal p hp)
+      (hhalfFull p hp hqp)
   have hspatialHolderLocal : ∀ p ∈ s, HolderWith C alpha
       ((Metric.ball p (radius p)).restrict (parabolicSpatialJet 2 u)) := by
     intro p hp
-    apply holderWith_restrict_of_eHolderSeminormOn_le
-    exact
-      (eHolderSeminormOn_parabolicSpatialJet_two_le_eParabolicC2HolderGaugeOn
-        u alpha).trans (hlocal p hp)
+    exact parabolicSpatialJet_holderWith_restrict (hlocal p hp)
   have htimeHolderLocal : ∀ p ∈ s, HolderWith C alpha
       ((Metric.ball p (radius p)).restrict (parabolicTimeDerivative u)) := by
     intro p hp
-    apply holderWith_restrict_of_eHolderSeminormOn_le
-    exact
-      (eHolderSeminormOn_parabolicTimeDerivative_le_eParabolicC2HolderGaugeOn
-        u alpha).trans (hlocal p hp)
+    exact parabolicTimeDerivative_holderWith_restrict (hlocal p hp)
   have hspatialHolder := holderWith_restrict_of_finite_buffered_ball_cover
     hdelta s radius hbuffer hcover hspatialHolderLocal (hspatialNorm 2 (by norm_num))
   have htimeHolder := holderWith_restrict_of_finite_buffered_ball_cover
