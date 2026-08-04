@@ -2754,6 +2754,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.HeatPotential
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarStrong
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
+import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorStrong
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.BarrierCore
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Basic

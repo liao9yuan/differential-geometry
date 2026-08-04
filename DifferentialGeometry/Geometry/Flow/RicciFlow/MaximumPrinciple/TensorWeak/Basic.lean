@@ -99,6 +99,11 @@ def TwoTensorFamilyNonnegativeOn (S : TwoTensorFamily (I := I) (M := M))
   ∀ t, t ∈ U -> ∀ x, TwoTensorNonnegativeAt (I := I) (M := M) (S t) x
 
 
+def TwoTensorFamilyPositiveDefiniteOn (S : TwoTensorFamily (I := I) (M := M))
+    (U : Set Real) : Prop :=
+  ∀ t, t ∈ U -> ∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M) (S t) x
+
+
 def TwoTensorFamilyNonnegativeAtTime (S : TwoTensorFamily (I := I) (M := M))
     (t : Real) : Prop :=
   ∀ x, TwoTensorNonnegativeAt (I := I) (M := M) (S t) x
