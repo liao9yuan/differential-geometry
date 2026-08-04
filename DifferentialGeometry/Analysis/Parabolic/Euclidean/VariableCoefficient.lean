@@ -367,6 +367,102 @@ theorem parabolicFrozenMatrixLap_apply
   rfl
 
 omit [DecidableEq n] [Nonempty n] in
+theorem parabolicHessianComponent_rescaleAt
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (u : Real → Euc n → F) (i j : n) (p : ParabolicPoint (Euc n))
+    (hspace : ContDiff Real 2
+      (u (p0.time + (r : Real) ^ 2 * p.time))) :
+    parabolicHessianComponent (parabolicRescaleAt r p0 u) i j p =
+      (r : Real) ^ 2 •
+        parabolicHessianComponent u i j (parabolicDilationAt r p0 p) := by
+  unfold parabolicHessianComponent
+  rw [parabolicSpatialJet_rescaleAt r p0 u 2 p hspace]
+  simp
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicVariableMatrixLap_rescaleAt
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (p : ParabolicPoint (Euc n))
+    (hspace : ContDiff Real 2
+      (u (p0.time + (r : Real) ^ 2 * p.time))) :
+    parabolicVariableMatrixLap
+        (parabolicMatrixCoefficientRescale r p0 a)
+        (parabolicRescaleAt r p0 u) p =
+      (r : Real) ^ 2 •
+        parabolicVariableMatrixLap a u (parabolicDilationAt r p0 p) := by
+  simp only [parabolicVariableMatrixLap_apply,
+    parabolicMatrixCoefficientRescale_apply,
+    parabolicHessianComponent_rescaleAt r p0 u _ _ p hspace]
+  simp only [smul_smul, Finset.smul_sum]
+  congr 1
+  funext i
+  congr 1
+  funext j
+  rw [mul_comm]
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicVariableMatrixOperator_rescaleAt
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (p : ParabolicPoint (Euc n))
+    (hspace : ContDiff Real 2
+      (u (p0.time + (r : Real) ^ 2 * p.time))) :
+    parabolicVariableMatrixOperator
+        (parabolicMatrixCoefficientRescale r p0 a)
+        (parabolicRescaleAt r p0 u) p =
+      parabolicSourceRescaleAt r p0
+        (parabolicVariableMatrixOperator a u) p := by
+  unfold parabolicVariableMatrixOperator
+  rw [parabolicTimeDerivative_rescaleAt,
+    parabolicVariableMatrixLap_rescaleAt r p0 a u p hspace, ← smul_sub]
+  rfl
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicVariableMatrixOperator_rescaleAt_holderWith_unitBall
+    {alpha K : NNReal} (r : NNReal) (hr : 0 < r)
+    (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (hoperator : HolderWith K alpha
+      ((Metric.ball p0 r).restrict (parabolicVariableMatrixOperator a u))) :
+    HolderWith (K * r ^ (alpha : Real) * r ^ 2) alpha
+      ((Metric.ball (parabolicPoint 0 0) 1).restrict
+        (parabolicVariableMatrixOperator
+          (parabolicMatrixCoefficientRescale r p0 a)
+          (parabolicRescaleAt r p0 u))) := by
+  have heq :
+      (Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicVariableMatrixOperator
+            (parabolicMatrixCoefficientRescale r p0 a)
+            (parabolicRescaleAt r p0 u)) =
+        (Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicSourceRescaleAt r p0
+            (parabolicVariableMatrixOperator a u)) := by
+    funext p
+    exact parabolicVariableMatrixOperator_rescaleAt
+      r p0 a u p.1 (hspace _)
+  rw [heq]
+  exact parabolicSourceRescaleAt_holderWith_unitBall r hr p0 _ hoperator
+
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicVariableMatrixOperator_rescaleAt_le_of_mem_unitBall
+    (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (B : NNReal)
+    (hoperator : ∀ p, p ∈ Metric.ball p0 r →
+      ‖parabolicVariableMatrixOperator a u p‖ ≤ B)
+    (p : ParabolicPoint (Euc n))
+    (hp : p ∈ Metric.ball (parabolicPoint 0 0) 1) :
+    ‖parabolicVariableMatrixOperator
+        (parabolicMatrixCoefficientRescale r p0 a)
+        (parabolicRescaleAt r p0 u) p‖ ≤ r ^ 2 * B := by
+  rw [parabolicVariableMatrixOperator_rescaleAt r p0 a u p (hspace _)]
+  exact norm_parabolicSourceRescaleAt_le_of_mem_unitBall
+    r hr p0 _ B hoperator p hp
+
+omit [DecidableEq n] [Nonempty n] in
 theorem parabolicFrozenMatrixLap_eq_variable_add_defect
     (a : n → n → ParabolicPoint (Euc n) → Real)
     (p0 : ParabolicPoint (Euc n)) (u : Real → Euc n → F)
