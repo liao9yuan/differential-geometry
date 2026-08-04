@@ -878,6 +878,7 @@ import DifferentialGeometry.Analysis.Schauder.ParabolicChartExtension
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartOperator
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartRegularity
 import DifferentialGeometry.Analysis.Schauder.ParabolicCutoff
+import DifferentialGeometry.Analysis.Schauder.ParabolicJetLimit
 import DifferentialGeometry.Analysis.Schauder.Scaling
 import DifferentialGeometry.Analysis.Schauder.VariableBallInterior
 import DifferentialGeometry.Analysis.Schauder.VariableCoefficient

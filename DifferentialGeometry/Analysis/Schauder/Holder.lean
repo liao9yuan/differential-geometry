@@ -55,6 +55,24 @@ theorem holderWith_sub
     simpa only [Pi.neg_apply, edist_neg_neg] using hg x y
   simpa only [Pi.add_apply, Pi.sub_apply, sub_eq_add_neg] using hf.add hneg
 
+theorem holderOnWith_of_tendsto
+    {ι : Type*} {l : Filter ι} [Filter.NeBot l]
+    {C alpha : NNReal} {f : ι → X → F} {g : X → F} {s : Set X}
+    (hf : ∀ᶠ i in l, HolderOnWith C alpha (f i) s)
+    (hfg : ∀ x ∈ s, Filter.Tendsto (fun i ↦ f i x) l (nhds (g x))) :
+    HolderOnWith C alpha g s := by
+  intro x hx y hy
+  exact le_of_tendsto ((hfg x hx).edist (hfg y hy))
+    (hf.mono fun i hi ↦ hi x hx y hy)
+
+theorem TendstoLocallyUniformlyOn.holderOnWith
+    {ι : Type*} {l : Filter ι} [Filter.NeBot l]
+    {C alpha : NNReal} {f : ι → X → F} {g : X → F} {s : Set X}
+    (hfg : TendstoLocallyUniformlyOn f g l s)
+    (hf : ∀ᶠ i in l, HolderOnWith C alpha (f i) s) :
+    HolderOnWith C alpha g s :=
+  holderOnWith_of_tendsto hf fun _ hx ↦ hfg.tendsto_at hx
+
 def eSupNormOn (s : Set X) (f : X → F) : ENNReal :=
   ⨆ x : s, ENNReal.ofReal ‖f x‖
 
