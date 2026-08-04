@@ -871,6 +871,7 @@ import DifferentialGeometry.Analysis.Schauder.CutoffValue
 import DifferentialGeometry.Analysis.Schauder.EvolvingMetric
 import DifferentialGeometry.Analysis.Schauder.Holder
 import DifferentialGeometry.Analysis.Schauder.HolderCompactness
+import DifferentialGeometry.Analysis.Schauder.HolderCompleteSpace
 import DifferentialGeometry.Analysis.Schauder.HolderNormedSpace
 import DifferentialGeometry.Analysis.Schauder.HolderSpace
 import DifferentialGeometry.Analysis.Schauder.Interior

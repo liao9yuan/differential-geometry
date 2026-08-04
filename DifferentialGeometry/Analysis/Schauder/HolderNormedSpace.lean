@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Schauder.HolderSpace
 noncomputable section
 
 open Set
-open scoped NNReal
+open scoped BigOperators NNReal
 
 namespace DifferentialGeometry.Analysis.Schauder
 
@@ -42,6 +42,39 @@ theorem contDiffHolderSpaceFun_apply {k : Nat} {alpha : NNReal}
     (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
     contDiffHolderSpaceFun f x = f x :=
   rfl
+
+@[simp]
+theorem contDiffHolderSpace_zero_apply {k : Nat} {alpha : NNReal} (x : V) :
+    (0 : ContDiffHolderSpace (V := V) (F := F) k alpha) x = 0 :=
+  rfl
+
+@[simp]
+theorem contDiffHolderSpace_add_apply {k : Nat} {alpha : NNReal}
+    (f g : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    (f + g) x = f x + g x :=
+  rfl
+
+@[simp]
+theorem contDiffHolderSpace_neg_apply {k : Nat} {alpha : NNReal}
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    (-f) x = -f x :=
+  rfl
+
+@[simp]
+theorem contDiffHolderSpace_sub_apply {k : Nat} {alpha : NNReal}
+    (f g : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    (f - g) x = f x - g x :=
+  rfl
+
+@[simp]
+theorem contDiffHolderSpace_sum_apply {ι : Type*} {k : Nat} {alpha : NNReal}
+    (s : Finset ι)
+    (f : ι → ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    (∑ i ∈ s, f i) x = ∑ i ∈ s, f i x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | @insert i s hi ih => simp [hi, ih]
 
 theorem contDiffHolderSpace_isBoundedContDiffHolderOn
     {k : Nat} {alpha : NNReal}
