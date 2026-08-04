@@ -65,6 +65,26 @@ def cutoffGradientError {g : SmoothRiemannianMetric I M}
         (gradFun (I := I) g cutoff.toFun x)
     ∂(riemannianVolumeMeasure (I := I) (M := M) g)
 
+omit [I.Boundaryless] [CompactSpace M] in
+theorem localizedL2Mass_nonneg {g : SmoothRiemannianMetric I M}
+    (cutoff u : SmoothScalar g) :
+    0 ≤ localizedL2Mass (I := I) (M := M) cutoff u := by
+  exact integral_nonneg (fun x => mul_nonneg (sq_nonneg _) (sq_nonneg _))
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem localizedDirichletEnergy_nonneg {g : SmoothRiemannianMetric I M}
+    (cutoff u : SmoothScalar g) :
+    0 ≤ localizedDirichletEnergy (I := I) (M := M) cutoff u := by
+  exact integral_nonneg (fun x => mul_nonneg (sq_nonneg _)
+    (metric_inner_self_nonneg (I := I) (M := M) g x _))
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem cutoffGradientError_nonneg {g : SmoothRiemannianMetric I M}
+    (cutoff u : SmoothScalar g) :
+    0 ≤ cutoffGradientError (I := I) (M := M) cutoff u := by
+  exact integral_nonneg (fun x => mul_nonneg (sq_nonneg _)
+    (metric_inner_self_nonneg (I := I) (M := M) g x _))
+
 omit [I.Boundaryless] in
 theorem contDiff_localizedL2Mass
     {g : SmoothRiemannianMetric I M}
