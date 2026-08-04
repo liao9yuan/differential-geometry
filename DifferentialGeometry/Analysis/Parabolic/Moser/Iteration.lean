@@ -1,4 +1,6 @@
 import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration.Recurrence
+import Mathlib.Analysis.SpecialFunctions.Exp
+import Mathlib.Analysis.SpecificLimits.Normed
 
 
 noncomputable section
@@ -17,6 +19,9 @@ def parabolicMoserDecay : ℝ :=
 
 def parabolicMoserExponent (p₀ : ℝ) (k : ℕ) : ℝ :=
   p₀ * parabolicMoserGain n ^ k
+
+def moserIterationCost (theta a b : ℝ) (k : ℕ) : ℝ :=
+  (a + b * k) * theta ^ k
 
 theorem one_lt_parabolicMoserGain :
     1 < parabolicMoserGain n := by
@@ -80,6 +85,115 @@ theorem inv_parabolicMoserExponent {p₀ : ℝ} (hp₀ : 0 < p₀) (k : ℕ) :
   have hgain : parabolicMoserGain n ≠ 0 := (parabolicMoserGain_pos n).ne'
   rw [inv_pow]
   field_simp [hp₀.ne', pow_ne_zero k hgain]
+
+omit [NeZero n] in
+theorem moserIterationCost_nonneg
+    {theta a b : ℝ} (htheta : 0 ≤ theta) (ha : 0 ≤ a) (hb : 0 ≤ b) (k : ℕ) :
+    0 ≤ moserIterationCost theta a b k := by
+  exact mul_nonneg (add_nonneg ha (mul_nonneg hb (Nat.cast_nonneg k)))
+    (pow_nonneg htheta k)
+
+omit [NeZero n] in
+theorem summable_moserIterationCost
+    {theta a b : ℝ} (htheta : 0 ≤ theta) (htheta_one : theta < 1) :
+    Summable (moserIterationCost theta a b) := by
+  have htheta_norm : ‖theta‖ < 1 := by
+    simpa only [Real.norm_eq_abs, abs_of_nonneg htheta] using htheta_one
+  have hgeom : Summable (fun k : ℕ => theta ^ k) :=
+    summable_geometric_of_lt_one htheta htheta_one
+  have hlinear : Summable (fun k : ℕ => (k : ℝ) * theta ^ k) := by
+    have h := summable_pow_mul_geometric_of_norm_lt_one (R := ℝ) 1 htheta_norm
+    simpa only [pow_one, Real.norm_eq_abs,
+      abs_of_nonneg (mul_nonneg (Nat.cast_nonneg _) (pow_nonneg htheta _))] using h
+  refine ((hgeom.mul_left a).add (hlinear.mul_left b)).congr ?_
+  intro k
+  simp only [moserIterationCost]
+  ring
+
+omit [NeZero n] in
+theorem additive_iteration_le_initial_add_tsum
+    {X cost : ℕ → ℝ}
+    (hcost : Summable cost) (hcost_nonneg : ∀ k, 0 ≤ cost k)
+    (hstep : ∀ k, X (k + 1) ≤ X k + cost k) (k : ℕ) :
+    X k ≤ X 0 + ∑' j, cost j := by
+  have hfinite : ∀ m : ℕ, X m ≤ X 0 + ∑ j ∈ Finset.range m, cost j := by
+    intro m
+    induction m with
+    | zero => simp
+    | succ m hm =>
+        calc
+          X (m + 1) ≤ X m + cost m := hstep m
+          _ ≤ (X 0 + ∑ j ∈ Finset.range m, cost j) + cost m := by linarith
+          _ = X 0 + ∑ j ∈ Finset.range (m + 1), cost j := by
+            rw [Finset.sum_range_succ]
+            ring
+  refine (hfinite k).trans ?_
+  gcongr
+  exact hcost.sum_le_tsum (Finset.range k) (fun j _ => hcost_nonneg j)
+
+omit [NeZero n] in
+theorem multiplicative_iteration_bound
+    {X cost : ℕ → ℝ}
+    (hX_zero : 0 ≤ X 0)
+    (hcost : Summable cost) (hcost_nonneg : ∀ k, 0 ≤ cost k)
+    (hstep : ∀ k, X (k + 1) ≤ Real.exp (cost k) * X k) (k : ℕ) :
+    X k ≤ Real.exp (∑' j, cost j) * X 0 := by
+  have hfinite : ∀ m : ℕ,
+      X m ≤ Real.exp (∑ j ∈ Finset.range m, cost j) * X 0 := by
+    intro m
+    induction m with
+    | zero =>
+        simp only [Finset.range_zero, Finset.sum_empty, Real.exp_zero, one_mul]
+        exact le_rfl
+    | succ m hm =>
+        calc
+          X (m + 1) ≤ Real.exp (cost m) * X m := hstep m
+          _ ≤ Real.exp (cost m) *
+              (Real.exp (∑ j ∈ Finset.range m, cost j) * X 0) := by
+            gcongr
+          _ = Real.exp (∑ j ∈ Finset.range (m + 1), cost j) * X 0 := by
+            rw [Finset.sum_range_succ, Real.exp_add]
+            ring
+  refine (hfinite k).trans ?_
+  gcongr
+  exact hcost.sum_le_tsum (Finset.range k) (fun j _ => hcost_nonneg j)
+
+omit [NeZero n] in
+theorem bddAbove_range_of_multiplicative_iteration
+    {X cost : ℕ → ℝ}
+    (hX_zero : 0 ≤ X 0)
+    (hcost : Summable cost) (hcost_nonneg : ∀ k, 0 ≤ cost k)
+    (hstep : ∀ k, X (k + 1) ≤ Real.exp (cost k) * X k) :
+    BddAbove (Set.range X) := by
+  refine ⟨Real.exp (∑' j, cost j) * X 0, ?_⟩
+  rintro _ ⟨k, rfl⟩
+  exact multiplicative_iteration_bound hX_zero hcost hcost_nonneg hstep k
+
+omit [NeZero n] in
+theorem moser_iteration_bound
+    {X : ℕ → ℝ} {theta a b : ℝ}
+    (hX_zero : 0 ≤ X 0)
+    (htheta : 0 ≤ theta) (htheta_one : theta < 1)
+    (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (hstep : ∀ k, X (k + 1) ≤
+      Real.exp (moserIterationCost theta a b k) * X k) (k : ℕ) :
+    X k ≤ Real.exp (∑' j, moserIterationCost theta a b j) * X 0 := by
+  exact multiplicative_iteration_bound hX_zero
+    (summable_moserIterationCost htheta htheta_one)
+    (moserIterationCost_nonneg htheta ha hb) hstep k
+
+omit [NeZero n] in
+theorem moser_iteration_bddAbove
+    {X : ℕ → ℝ} {theta a b : ℝ}
+    (hX_zero : 0 ≤ X 0)
+    (htheta : 0 ≤ theta) (htheta_one : theta < 1)
+    (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (hstep : ∀ k, X (k + 1) ≤
+      Real.exp (moserIterationCost theta a b k) * X k) :
+    BddAbove (Set.range X) := by
+  exact bddAbove_range_of_multiplicative_iteration hX_zero
+    (summable_moserIterationCost htheta htheta_one)
+    (moserIterationCost_nonneg htheta ha hb) hstep
 
 omit [NeZero n] in
 theorem superlinear_recurrence_tendsto_zero
