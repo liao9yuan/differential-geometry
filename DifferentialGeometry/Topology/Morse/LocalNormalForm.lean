@@ -8,6 +8,8 @@ import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+import Mathlib.Analysis.SpecialFunctions.Sqrt
+import Mathlib.Data.Sign.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.Real
 import Mathlib.LinearAlgebra.QuadraticForm.Signature
 
@@ -200,6 +202,47 @@ theorem morse_complete_square
         hsym x (morseCons (0 : ℝ) (morseTail x)) morseE0
       rw [hcross]
       ring
+
+noncomputable def morseCompletionMap
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x : MorseModel (n + 1)) : MorseModel (n + 1) :=
+  morseCons (Real.sqrt |morsePivot a x| * morseComplete a x) (morseTail x)
+
+theorem morseHead_completionMap
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x : MorseModel (n + 1)) :
+    morseHead (morseCompletionMap a x) = Real.sqrt |morsePivot a x| * morseComplete a x := by
+  simp [morseCompletionMap, morseHead, morseCons]
+
+theorem morseTail_completionMap
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x : MorseModel (n + 1)) :
+    morseTail (morseCompletionMap a x) = morseTail x := by
+  funext i
+  simp [morseCompletionMap, morseTail, morseCons]
+
+theorem morse_sqrt_square (p c : ℝ) :
+    (Real.sqrt |p| * c) ^ 2 = |p| * c ^ 2 := by
+  calc
+    (Real.sqrt |p| * c) ^ 2 = (Real.sqrt |p|) ^ 2 * c ^ 2 := by ring
+    _ = |p| * c ^ 2 := by simp
+
+theorem morse_sign_sqrt_square (p c : ℝ) :
+    SignType.sign p * (Real.sqrt |p| * c) ^ 2 = p * c ^ 2 := by
+  rw [morse_sqrt_square, ← mul_assoc, sign_mul_abs p]
+
+theorem morse_complete_square_sqrt
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (hsym : ∀ x y z, a x y z = a x z y) (x : MorseModel (n + 1))
+    (hpiv : morsePivot a x ≠ 0) :
+    a x x x =
+      SignType.sign (morsePivot a x) * (morseHead (morseCompletionMap a x)) ^ 2 +
+        a x (morseCons (0 : ℝ) (morseTail x)) (morseCons (0 : ℝ) (morseTail x)) -
+          a x (morseCons (0 : ℝ) (morseTail x)) morseE0 *
+            a x morseE0 (morseCons (0 : ℝ) (morseTail x)) / morsePivot a x := by
+  rw [morse_complete_square a hsym x hpiv]
+  rw [morseHead_completionMap]
+  rw [morse_sign_sqrt_square]
 
 end Completion
 
