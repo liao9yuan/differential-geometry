@@ -546,6 +546,19 @@ def hessianCurryEquiv
   (continuousMultilinearCurryRightEquiv' Real 1 V F).trans
     (continuousMultilinearCurryFin1 Real V (V →L[Real] F))
 
+theorem hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv
+    (u : V → F) (x : V) :
+    hessianCurryEquiv V F (iteratedFDeriv Real 2 u x) =
+      fderiv Real (fderiv Real u) x := by
+  apply ContinuousLinearMap.ext
+  intro v
+  apply ContinuousLinearMap.ext
+  intro w
+  rw [hessianCurryEquiv, LinearIsometryEquiv.trans_apply,
+    continuousMultilinearCurryFin1_apply,
+    continuousMultilinearCurryRightEquiv_apply', iteratedFDeriv_two_apply]
+  simp
+
 theorem hessianCurryEquiv_iteratedFDeriv_two
     (u : V → F) (du : V → V →L[Real] F)
     (d2u : V → V →L[Real] V →L[Real] F)
@@ -555,12 +568,8 @@ theorem hessianCurryEquiv_iteratedFDeriv_two
   have hfd : fderiv Real u = du := by
     funext y
     exact (hu y).fderiv
-  ext v w
-  simp only [hessianCurryEquiv, LinearIsometryEquiv.trans_apply,
-    continuousMultilinearCurryFin1_apply,
-    continuousMultilinearCurryRightEquiv_apply', iteratedFDeriv_two_apply]
-  rw [hfd, (hdu x).fderiv]
-  rfl
+  rw [hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv, hfd,
+    (hdu x).fderiv]
 
 end Spatial
 

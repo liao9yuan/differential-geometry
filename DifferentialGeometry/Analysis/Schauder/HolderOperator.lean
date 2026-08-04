@@ -288,6 +288,46 @@ theorem norm_contDiffHolderSpaceJet_le
   exact LinearMap.mkContinuous_norm_le _ zero_le_one
     (fun f ↦ by simpa using norm_contDiffHolderSpaceJetLinearMap_le hj f)
 
+def contDiffHolderSpaceFDeriv
+    (k : Nat) (alpha : NNReal) (hk : 1 ≤ k) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →L[Real]
+      BoundedContinuousFunction V (V →L[Real] F) :=
+  (((continuousMultilinearCurryFin1 Real V F).toContinuousLinearEquiv.toContinuousLinearMap
+    ).compLeftContinuousBounded V).comp
+    (contDiffHolderSpaceJet k alpha 1 hk)
+
+@[simp]
+theorem contDiffHolderSpaceFDeriv_apply
+    (k : Nat) (alpha : NNReal) (hk : 1 ≤ k)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    contDiffHolderSpaceFDeriv k alpha hk f x =
+      fderiv Real (contDiffHolderSpaceFun f) x := by
+  apply ContinuousLinearMap.ext
+  intro v
+  change continuousMultilinearCurryFin1 Real V F
+      (iteratedFDeriv Real 1 (contDiffHolderSpaceFun f) x) v = _
+  simp only [continuousMultilinearCurryFin1_apply,
+    iteratedFDeriv_one_apply, Fin.snoc_zero]
+
+def contDiffHolderSpaceHessian
+    (k : Nat) (alpha : NNReal) (hk : 2 ≤ k) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →L[Real]
+      BoundedContinuousFunction V (V →L[Real] V →L[Real] F) :=
+  (((hessianCurryEquiv V F).toContinuousLinearEquiv.toContinuousLinearMap
+    ).compLeftContinuousBounded V).comp
+    (contDiffHolderSpaceJet k alpha 2 hk)
+
+@[simp]
+theorem contDiffHolderSpaceHessian_apply
+    (k : Nat) (alpha : NNReal) (hk : 2 ≤ k)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    contDiffHolderSpaceHessian k alpha hk f x =
+      fderiv Real (fderiv Real (contDiffHolderSpaceFun f)) x := by
+  simp only [contDiffHolderSpaceHessian, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.compLeftContinuousBounded_apply,
+    contDiffHolderSpaceJet_apply]
+  exact hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv _ _
+
 end EllipticBoundedContinuousFunction
 
 section RestrictUniv
