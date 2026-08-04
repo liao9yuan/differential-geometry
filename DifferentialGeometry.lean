@@ -698,6 +698,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammTailScale
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammValue
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.LowerOrder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.NeumannRightInverse
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.NondivergenceLocalization
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.QuantCover
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.QuasilinearFlux
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.RetractionParametrix

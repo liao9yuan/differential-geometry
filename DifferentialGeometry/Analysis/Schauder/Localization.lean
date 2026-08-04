@@ -133,6 +133,19 @@ theorem ball_parabolicInteriorRadius_subset_parabolicCylinder
       _ ≤ R := by linarith
   exact ⟨⟨hqa, hqb⟩, Metric.mem_closedBall.mpr hqcenter⟩
 
+theorem exists_finite_ball_cover_of_isCompact
+    {K : Set X} (hK : IsCompact K) (radius : K → Real)
+    (hradius : ∀ x, 0 < radius x) :
+    ∃ s : Finset K, K ⊆ ⋃ x ∈ s, Metric.ball x.1 (radius x) := by
+  let U : K → Set X := fun x ↦ Metric.ball x.1 (radius x)
+  have hcover : K ⊆ ⋃ x, U x := by
+    intro x hx
+    exact Set.mem_iUnion.mpr
+      ⟨⟨x, hx⟩, Metric.mem_ball_self (hradius ⟨x, hx⟩)⟩
+  obtain ⟨s, hs⟩ := hK.elim_finite_subcover U
+    (fun _ ↦ Metric.isOpen_ball) hcover
+  exact ⟨s, hs⟩
+
 omit [NormedSpace Real V] [NormedSpace Real F] in
 theorem holderWith_parabolicCylinder_Icc_of_time_support
     {a b S T : Real} (ha : 0 < a) (haT : a ≤ T) (hbT : b < T)
