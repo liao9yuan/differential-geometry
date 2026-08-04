@@ -41,8 +41,8 @@ theorem ricci_flow_short_time_existence
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-      [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+      [IsManifold I ∞ M] [CompactSpace M]
+      [I.Boundaryless] [T2Space M]
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, 0 < T ∧ ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
       g_fam 0 = g₀ ∧
@@ -162,8 +162,8 @@ theorem short_time_joint
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-      [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+      [IsManifold I ∞ M] [CompactSpace M]
+      [I.Boundaryless] [T2Space M]
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, 0 < T ∧ ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
       g_fam 0 = g₀ ∧
