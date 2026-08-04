@@ -1,4 +1,5 @@
 import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration.Recurrence
+import DifferentialGeometry.Analysis.Integration.LpLimit
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecificLimits.Normed
 
@@ -194,6 +195,68 @@ theorem moser_iteration_bddAbove
   exact bddAbove_range_of_multiplicative_iteration hX_zero
     (summable_moserIterationCost htheta htheta_one)
     (moserIterationCost_nonneg htheta ha hb) hstep
+
+theorem local_boundedness_of_moser_iteration
+    {Y : Type*} [MeasurableSpace Y] [TopologicalSpace Y]
+    {μ : MeasureTheory.Measure Y}
+    [MeasureTheory.IsFiniteMeasure μ] [μ.IsOpenPosMeasure]
+    {f : Y → ℝ} {X : ℕ → ℝ} {p₀ theta a b : ℝ}
+    (hp₀ : 0 < p₀)
+    (hf : Continuous f)
+    (hf_nonneg : ∀ y, 0 ≤ f y)
+    (hf_integrable : ∀ k,
+      MeasureTheory.Integrable
+        (fun y => f y ^ parabolicMoserExponent n p₀ k) μ)
+    (hX_zero : 0 ≤ X 0)
+    (htheta : 0 ≤ theta) (htheta_one : theta < 1)
+    (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (hintegral : ∀ k,
+      (∫ y, f y ^ parabolicMoserExponent n p₀ k ∂μ) ^
+          (1 / parabolicMoserExponent n p₀ k) ≤ X k)
+    (hstep : ∀ k, X (k + 1) ≤
+      Real.exp (moserIterationCost theta a b k) * X k) :
+    ∀ y, f y ≤
+      Real.exp (∑' k, moserIterationCost theta a b k) * X 0 := by
+  let C := Real.exp (∑' k, moserIterationCost theta a b k) * X 0
+  have hC : 0 ≤ C := mul_nonneg (Real.exp_pos _).le hX_zero
+  have hroot_le : ∀ k,
+      (∫ y, f y ^ parabolicMoserExponent n p₀ k ∂μ) ^
+          (1 / parabolicMoserExponent n p₀ k) ≤ C := by
+    intro k
+    exact (hintegral k).trans
+      (moser_iteration_bound hX_zero htheta htheta_one ha hb hstep k)
+  have hbound : ∀ k,
+      (∫ y, f y ^ parabolicMoserExponent n p₀ k ∂μ) ≤
+        C ^ parabolicMoserExponent n p₀ k := by
+    intro k
+    let p := parabolicMoserExponent n p₀ k
+    let integral := ∫ y, f y ^ p ∂μ
+    have hp : 0 < p := by
+      dsimp [p, parabolicMoserExponent]
+      exact mul_pos hp₀ (pow_pos (by
+        dsimp [parabolicMoserGain]
+        have hn : 0 < (n : ℝ) := by
+          exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne n)
+        positivity) k)
+    have hintegral_nonneg : 0 ≤ integral := by
+      dsimp [integral]
+      exact MeasureTheory.integral_nonneg fun y => Real.rpow_nonneg (hf_nonneg y) _
+    have hroot : integral ^ (1 / p) ≤ C := by
+      simpa only [integral, p] using hroot_le k
+    calc
+      integral = integral ^ (1 : ℝ) := (Real.rpow_one integral).symm
+      _ = integral ^ ((1 / p) * p) := by
+        congr 2
+        field_simp [hp.ne']
+      _ = (integral ^ (1 / p)) ^ p := by
+        rw [Real.rpow_mul hintegral_nonneg]
+      _ ≤ C ^ p := Real.rpow_le_rpow
+        (Real.rpow_nonneg hintegral_nonneg _) hroot hp.le
+  exact DifferentialGeometry.Analysis.Integration.le_of_integral_rpow_le
+    hC
+    (parabolicMoserExponent_pos n hp₀)
+    (parabolicMoserExponent_tendsto_atTop n hp₀)
+    hf hf_nonneg hf_integrable hbound
 
 omit [NeZero n] in
 theorem superlinear_recurrence_tendsto_zero
