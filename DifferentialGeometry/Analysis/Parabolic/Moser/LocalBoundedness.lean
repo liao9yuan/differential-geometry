@@ -771,6 +771,36 @@ theorem local_boundedness_of_subsolution
   intro t ht x hx
   exact hpoint (t, x) ⟨ht, hx⟩
 
+theorem reciprocal_local_boundedness_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
+      (u t x)⁻¹ ≤
+        moserLocalBound (I := I) (M := M) g hdim rho
+          (fun s y => (u s y)⁻¹) p₀ a τ t₁ := by
+  let v : ℝ → M → ℝ := fun t x => (u t x)⁻¹
+  have hv : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => v z.1 z.2) := by
+    simpa only [v, Real.rpow_neg_one] using
+      contMDiff_rpow_of_pos hu hpos (-1 : ℝ)
+  have hvpos : ∀ t x, 0 < v t x := fun t x => inv_pos.mpr (hpos t x)
+  apply local_boundedness_of_subsolution
+    (I := I) (M := M) g hdim rho v hv hvpos hp₀ haτ hτt₁
+  intro t ht x
+  have h := rpow_subsolution_of_supersolution
+    (I := I) (M := M) g u (fun _ _ => 0) hu hpos
+    (q := -1) (by norm_num) (t := t) (x := x) (by simpa using hpde t ht x)
+  simpa only [v, Real.rpow_neg_one, rpowSource, mul_zero, add_zero] using h
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
