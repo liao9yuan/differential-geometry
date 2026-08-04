@@ -80,6 +80,13 @@ theorem moserTimeLevel_strictMono {a τ : ℝ} (haτ : a < τ) :
     StrictMono (moserTimeLevel a τ) := by
   exact strictMono_nat_of_lt_succ (moserTimeLevel_lt_succ haτ)
 
+theorem moserTimeLevel_le {a τ : ℝ} (haτ : a < τ) (k : ℕ) :
+    a ≤ moserTimeLevel a τ k := by
+  calc
+    a = moserTimeLevel a τ 0 := (moserTimeLevel_zero a τ).symm
+    _ ≤ moserTimeLevel a τ k :=
+      (moserTimeLevel_strictMono haτ).monotone (Nat.zero_le k)
+
 theorem moserTimeLevel_lt {a τ : ℝ} (haτ : a < τ) (k : ℕ) :
     moserTimeLevel a τ k < τ := by
   rw [moserTimeLevel]
@@ -335,6 +342,29 @@ theorem exists_spatialMoserCutoff_gradient_bound
       rw [div_eq_mul_inv, moserCutoffWidth_succ_inv_sq]
       dsimp only [K]
       ring
+
+def spatialMoserCutoffGradientConstant
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g) : ℝ :=
+  Classical.choose (exists_spatialMoserCutoff_gradient_bound (I := I) g rho)
+
+omit [SigmaCompactSpace M] in
+theorem spatialMoserCutoffGradientConstant_nonneg
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g) :
+    0 ≤ spatialMoserCutoffGradientConstant (I := I) g rho :=
+  (Classical.choose_spec
+    (exists_spatialMoserCutoff_gradient_bound (I := I) g rho)).1
+
+omit [SigmaCompactSpace M] in
+theorem spatialMoserCutoff_gradient_le
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    (k : ℕ) (x : M) :
+    g.inner x
+        (gradFun (I := I) g (spatialMoserCutoff rho (k + 1)).toFun x)
+        (gradFun (I := I) g (spatialMoserCutoff rho (k + 1)).toFun x) ≤
+      spatialMoserCutoffGradientConstant (I := I) g rho * 4 ^ k *
+        (spatialMoserCutoff rho k).toFun x ^ 2 :=
+  (Classical.choose_spec
+    (exists_spatialMoserCutoff_gradient_bound (I := I) g rho)).2 k x
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
