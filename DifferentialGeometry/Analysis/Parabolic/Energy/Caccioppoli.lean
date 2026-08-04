@@ -85,6 +85,42 @@ theorem cutoffGradientError_nonneg {g : SmoothRiemannianMetric I M}
   exact integral_nonneg (fun x => mul_nonneg (sq_nonneg _)
     (metric_inner_self_nonneg (I := I) (M := M) g x _))
 
+omit [I.Boundaryless] in
+theorem localizedL2Mass_le_of_sq_le
+    {g : SmoothRiemannianMetric I M}
+    (cutoff outer u : SmoothScalar g)
+    (hcutoff : ∀ x : M, cutoff.toFun x ^ 2 ≤ outer.toFun x ^ 2) :
+    localizedL2Mass (I := I) (M := M) cutoff u ≤
+      localizedL2Mass (I := I) (M := M) outer u := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hcutoff_int : Integrable
+      (fun x : M => cutoff.toFun x ^ 2 * u.toFun x ^ 2) μ :=
+    ((cutoff.smooth.continuous.pow 2).mul (u.smooth.continuous.pow 2))
+      |>.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have houter_int : Integrable
+      (fun x : M => outer.toFun x ^ 2 * u.toFun x ^ 2) μ :=
+    ((outer.smooth.continuous.pow 2).mul (u.smooth.continuous.pow 2))
+      |>.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  exact integral_mono hcutoff_int houter_int fun x =>
+    mul_le_mul_of_nonneg_right (hcutoff x) (sq_nonneg (u.toFun x))
+
+omit [I.Boundaryless] in
+theorem localizedL2Mass_le_of_nonneg_of_le
+    {g : SmoothRiemannianMetric I M}
+    (cutoff outer u : SmoothScalar g)
+    (hcutoff_nonneg : ∀ x : M, 0 ≤ cutoff.toFun x)
+    (hcutoff : ∀ x : M, cutoff.toFun x ≤ outer.toFun x) :
+    localizedL2Mass (I := I) (M := M) cutoff u ≤
+      localizedL2Mass (I := I) (M := M) outer u := by
+  apply localizedL2Mass_le_of_sq_le (I := I) (M := M) cutoff outer u
+  intro x
+  exact (sq_le_sq₀ (hcutoff_nonneg x)
+    ((hcutoff_nonneg x).trans (hcutoff x))).2 (hcutoff x)
+
 theorem cutoffGradientError_le_localizedL2Mass
     {g : SmoothRiemannianMetric I M}
     (cutoff outer u : SmoothScalar g) {K : ℝ}
