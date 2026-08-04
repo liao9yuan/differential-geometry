@@ -27,6 +27,11 @@ theorem moserCutoffWidth_pos (k : ℕ) :
     0 < moserCutoffWidth k := by
   exact pow_pos (by norm_num) _
 
+theorem moserCutoffLevel_lt_one (k : ℕ) :
+    moserCutoffLevel k < 1 := by
+  rw [moserCutoffLevel]
+  exact sub_lt_self 1 (pow_pos (by norm_num) k)
+
 theorem moserCutoffLevel_succ_sub (k : ℕ) :
     moserCutoffLevel (k + 1) - moserCutoffLevel k = moserCutoffWidth k := by
   simp only [moserCutoffLevel, moserCutoffWidth, pow_succ]
