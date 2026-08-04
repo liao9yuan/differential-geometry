@@ -414,6 +414,24 @@ theorem tensorHsBasisVec_span_dense {g : SmoothRiemannianMetric I M}
   refine Submodule.sum_mem _ (fun i _ => ?_)
   exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
 
+def tensorHsHilbertBasis {g : SmoothRiemannianMetric I M} {r s : ℕ} (σ : ℝ) :
+    HilbertBasis (TensorEigenIdx (I := I) (M := M) g r s) ℝ
+      (tensorHs (I := I) (M := M) g r s σ) :=
+  HilbertBasis.ofRepr
+    (tensorHs.rescaleEquivL2 (I := I) (M := M)
+      (g := g) (r := r) (s := s) (σ := σ))
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+@[simp] theorem tensorHsHilbertBasis_repr_apply_apply
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} (σ : ℝ)
+    (T : tensorHs (I := I) (M := M) g r s σ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    ((tensorHsHilbertBasis (I := I) (M := M)
+        (g := g) (r := r) (s := s) σ).repr T : _ → ℝ) i =
+      Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * T.coeff i :=
+  rfl
+
 example {g : SmoothRiemannianMetric I M} {r s : ℕ} {τ σ : ℝ}
     (hτσ : τ ≤ σ) :
     tensorHs (I := I) (M := M) g r s σ →L[ℝ]

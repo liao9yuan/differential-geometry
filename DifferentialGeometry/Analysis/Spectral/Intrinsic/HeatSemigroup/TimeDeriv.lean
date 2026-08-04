@@ -145,6 +145,30 @@ lemma abstractSpectralSemigroupDeriv_def (b : HilbertBasis ι ℝ X) (lam : ι �
     abstractSpectralSemigroupDeriv b lam t v =
       ∑' i : ι, heatDerivCoeff lam t i • ⟪b i, v⟫_ℝ • b i := rfl
 
+theorem abstractSpectralSemigroupDeriv_repr_apply (b : HilbertBasis ι ℝ X)
+    {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) {t : ℝ} (ht : 0 < t)
+    (v : X) (i : ι) :
+    (b.repr (abstractSpectralSemigroupDeriv b lam t v) : ι → ℝ) i =
+      heatDerivCoeff lam t i * (b.repr v : ι → ℝ) i := by
+  classical
+  rw [b.repr_apply_apply, b.repr_apply_apply,
+    abstractSpectralSemigroupDeriv_def]
+  have hsum := summable_heatDerivTerm b hlam ht v
+  change (innerSL (𝕜 := ℝ) (E := X) (b i))
+      (∑' j : ι, heatDerivCoeff lam t j • ⟪b j, v⟫_ℝ • b j) = _
+  rw [(innerSL (𝕜 := ℝ) (E := X) (b i)).map_tsum hsum]
+  have horth := (orthonormal_iff_ite (𝕜 := ℝ) (v := b)).mp b.orthonormal
+  simp_rw [innerSL_apply_apply, inner_smul_right, horth]
+  have heq : (fun j : ι =>
+      heatDerivCoeff lam t j * (⟪b j, v⟫_ℝ * if i = j then 1 else 0)) =
+      (fun j => if j = i then heatDerivCoeff lam t j * ⟪b j, v⟫_ℝ else 0) := by
+    funext j
+    by_cases hji : j = i
+    · subst j
+      simp
+    · simp [hji, Ne.symm hji]
+  rw [heq, tsum_ite_eq]
+
 private def slopeMinusDerivCoeff (lam : ι → ℝ) (t s : ℝ) (i : ι) : ℝ :=
   (s - t)⁻¹ * (heatCoeff lam s i - heatCoeff lam t i) - heatDerivCoeff lam t i
 
