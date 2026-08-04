@@ -228,6 +228,44 @@ theorem parabolicC2HolderSpaceFun_apply {alpha : NNReal}
     parabolicC2HolderSpaceFun u t x = u t x :=
   rfl
 
+@[simp]
+theorem parabolicC2HolderSpace_zero_apply {alpha : NNReal}
+    (t : Real) (x : V) :
+    (0 : ParabolicC2HolderSpace (V := V) (F := F) alpha) t x = 0 :=
+  rfl
+
+@[simp]
+theorem parabolicC2HolderSpace_add_apply {alpha : NNReal}
+    (u v : ParabolicC2HolderSpace (V := V) (F := F) alpha)
+    (t : Real) (x : V) :
+    (u + v) t x = u t x + v t x :=
+  rfl
+
+@[simp]
+theorem parabolicC2HolderSpace_neg_apply {alpha : NNReal}
+    (u : ParabolicC2HolderSpace (V := V) (F := F) alpha)
+    (t : Real) (x : V) :
+    (-u) t x = -u t x :=
+  rfl
+
+@[simp]
+theorem parabolicC2HolderSpace_sub_apply {alpha : NNReal}
+    (u v : ParabolicC2HolderSpace (V := V) (F := F) alpha)
+    (t : Real) (x : V) :
+    (u - v) t x = u t x - v t x :=
+  rfl
+
+@[simp]
+theorem parabolicC2HolderSpace_sum_apply
+    {ι : Type*} {alpha : NNReal} (s : Finset ι)
+    (u : ι → ParabolicC2HolderSpace (V := V) (F := F) alpha)
+    (t : Real) (x : V) :
+    (∑ i ∈ s, u i) t x = ∑ i ∈ s, u i t x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | @insert i s hi ih => simp [hi, ih]
+
 theorem parabolicC2HolderSpace_isBoundedParabolicC2HolderOn
     {alpha : NNReal}
     (u : ParabolicC2HolderSpace (V := V) (F := F) alpha) :
