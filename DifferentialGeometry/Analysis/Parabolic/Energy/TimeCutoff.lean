@@ -105,6 +105,90 @@ theorem exists_timeCutoffDeriv_bound :
     le_trans (le_abs_self _) (hbound _)
   exact div_le_div_of_nonneg_right hderiv (sub_pos.mpr hab).le
 
+theorem timeCutoff_mass_error_intervalIntegral_le
+    {mass error outerMass : ℝ → ℝ}
+    {a t₀ t t₁ D K L : ℝ}
+    (hat₀ : a < t₀) (ht₀t : t₀ ≤ t) (htt₁ : t ≤ t₁)
+    (hD : 0 ≤ D) (hK : 0 ≤ K)
+    (hmass : ContinuousOn mass (Icc a t₁))
+    (herror : ContinuousOn error (Icc a t₁))
+    (houterMass : ContinuousOn outerMass (Icc a t₁))
+    (hmass_nonneg : ∀ s ∈ Icc a t₁, 0 ≤ mass s)
+    (herror_nonneg : ∀ s ∈ Icc a t₁, 0 ≤ error s)
+    (houterMass_nonneg : ∀ s ∈ Icc a t₁, 0 ≤ outerMass s)
+    (hmass_le : ∀ s ∈ Icc a t₁, mass s ≤ outerMass s)
+    (herror_le : ∀ s ∈ Icc a t₁, error s ≤ K * outerMass s)
+    (hderiv_le : ∀ s ∈ Icc a t₁, timeCutoffDeriv a t₀ s ≤ D)
+    (houterMass_le : (∫ s in a..t₁, outerMass s) ≤ L) :
+    (∫ s in a..t,
+      timeCutoffDeriv a t₀ s * mass s +
+        timeCutoff a t₀ s * (4 * error s)) ≤
+      (D + 4 * K) * L := by
+  have hat : a ≤ t := hat₀.le.trans ht₀t
+  have hat₁ : a ≤ t₁ := hat.trans htt₁
+  let lhs : ℝ → ℝ := fun s =>
+    timeCutoffDeriv a t₀ s * mass s + timeCutoff a t₀ s * (4 * error s)
+  let rhs : ℝ → ℝ := fun s => (D + 4 * K) * outerMass s
+  have hlhs_cont : ContinuousOn lhs (Icc a t) := by
+    have hsubset : Icc a t ⊆ Icc a t₁ := fun s hs => ⟨hs.1, hs.2.trans htt₁⟩
+    exact ((contDiff_timeCutoffDeriv a t₀).continuous.continuousOn.mul
+      (hmass.mono hsubset)).add
+        ((contDiff_timeCutoff a t₀).continuous.continuousOn.mul
+          (continuousOn_const.mul (herror.mono hsubset)))
+  have hrhs_cont : ContinuousOn rhs (Icc a t) := by
+    exact continuousOn_const.mul
+      (houterMass.mono (fun s hs => ⟨hs.1, hs.2.trans htt₁⟩))
+  have hlhs_int : IntervalIntegrable lhs volume a t := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hat] using hlhs_cont
+  have hrhs_int : IntervalIntegrable rhs volume a t := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hat] using hrhs_cont
+  have hpoint : ∀ s ∈ Icc a t, lhs s ≤ rhs s := by
+    intro s hs
+    have hs' : s ∈ Icc a t₁ := ⟨hs.1, hs.2.trans htt₁⟩
+    have htime := timeCutoff_mem_Icc a t₀ s
+    have htime_term :
+        timeCutoffDeriv a t₀ s * mass s ≤ D * outerMass s := by
+      calc
+        timeCutoffDeriv a t₀ s * mass s ≤ D * mass s :=
+          mul_le_mul_of_nonneg_right (hderiv_le s hs') (hmass_nonneg s hs')
+        _ ≤ D * outerMass s := mul_le_mul_of_nonneg_left (hmass_le s hs') hD
+    have herror_term :
+        timeCutoff a t₀ s * (4 * error s) ≤ 4 * K * outerMass s := by
+      calc
+        timeCutoff a t₀ s * (4 * error s) ≤ 1 * (4 * error s) :=
+          mul_le_mul_of_nonneg_right htime.2
+            (mul_nonneg (by norm_num) (herror_nonneg s hs'))
+        _ = 4 * error s := one_mul _
+        _ ≤ 4 * (K * outerMass s) :=
+          mul_le_mul_of_nonneg_left (herror_le s hs') (by norm_num)
+        _ = 4 * K * outerMass s := by ring
+    dsimp only [lhs, rhs]
+    linarith
+  have hmono : (∫ s in a..t, lhs s) ≤ ∫ s in a..t, rhs s :=
+    intervalIntegral.integral_mono_on hat hlhs_int hrhs_int hpoint
+  have houter_int : IntervalIntegrable outerMass volume a t₁ := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hat₁] using houterMass
+  have houter_mono : (∫ s in a..t, outerMass s) ≤ ∫ s in a..t₁, outerMass s := by
+    exact intervalIntegral.integral_mono_interval le_rfl hat htt₁
+      (by
+        filter_upwards [ae_restrict_mem measurableSet_Ioc] with s hs
+        exact houterMass_nonneg s ⟨hs.1.le, hs.2⟩)
+      houter_int
+  have hcoefficient : 0 ≤ D + 4 * K := add_nonneg hD (mul_nonneg (by norm_num) hK)
+  calc
+    (∫ s in a..t, timeCutoffDeriv a t₀ s * mass s +
+        timeCutoff a t₀ s * (4 * error s)) = ∫ s in a..t, lhs s := rfl
+    _ ≤ ∫ s in a..t, rhs s := hmono
+    _ = (D + 4 * K) * ∫ s in a..t, outerMass s := by
+      simp only [rhs, intervalIntegral.integral_const_mul]
+    _ ≤ (D + 4 * K) * ∫ s in a..t₁, outerMass s :=
+      mul_le_mul_of_nonneg_left houter_mono hcoefficient
+    _ ≤ (D + 4 * K) * L :=
+      mul_le_mul_of_nonneg_left houterMass_le hcoefficient
+
 theorem weight_mul_sub_eq_intervalIntegral
     {weight dweight energy denergy : ℝ → ℝ} {a b : ℝ}
     (hab : a ≤ b)

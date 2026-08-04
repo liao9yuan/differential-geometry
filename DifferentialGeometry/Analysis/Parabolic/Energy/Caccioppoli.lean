@@ -277,6 +277,59 @@ theorem intervalIntegral_cutoffGradientError_le_localizedL2Mass
   rw [intervalIntegral.integral_const_mul] at hmono
   simpa only [error, outerMass] using hmono
 
+theorem timeCutoff_caccioppoli_rhs_le
+    {g : SmoothRiemannianMetric I M}
+    (cutoff outer : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a t₀ t t₁ D K L : ℝ}
+    (hat₀ : a < t₀) (ht₀t : t₀ ≤ t) (htt₁ : t ≤ t₁)
+    (hD : 0 ≤ D) (hK : 0 ≤ K)
+    (hcutoff : ∀ x : M, cutoff.toFun x ^ 2 ≤ outer.toFun x ^ 2)
+    (hgrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x) ≤
+        K * outer.toFun x ^ 2)
+    (hderiv_le : ∀ s ∈ Icc a t₁, timeCutoffDeriv a t₀ s ≤ D)
+    (houterMass_le :
+      (∫ s in a..t₁,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g u hu s)) ≤ L) :
+    (∫ s in a..t,
+      timeCutoffDeriv a t₀ s *
+          localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu s) +
+        timeCutoff a t₀ s *
+          (4 * cutoffGradientError (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu s))) ≤
+      (D + 4 * K) * L := by
+  apply timeCutoff_mass_error_intervalIntegral_le
+    hat₀ ht₀t htt₁ hD hK
+  · exact (contDiff_localizedL2Mass (I := I) (M := M) cutoff u hu).continuous.continuousOn
+  · exact (contDiff_cutoffGradientError
+      (I := I) (M := M) cutoff u hu).continuous.continuousOn
+  · exact (contDiff_localizedL2Mass (I := I) (M := M) outer u hu).continuous.continuousOn
+  · intro s _
+    exact localizedL2Mass_nonneg (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu s)
+  · intro s _
+    exact cutoffGradientError_nonneg (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu s)
+  · intro s _
+    exact localizedL2Mass_nonneg (I := I) (M := M) outer
+      (smoothScalarSlice (I := I) g u hu s)
+  · intro s _
+    exact localizedL2Mass_le_of_sq_le (I := I) (M := M) cutoff outer
+      (smoothScalarSlice (I := I) g u hu s) hcutoff
+  · intro s _
+    exact cutoffGradientError_le_localizedL2Mass
+      (I := I) (M := M) cutoff outer
+        (smoothScalarSlice (I := I) g u hu s) hgrad
+  · exact hderiv_le
+  · exact houterMass_le
+
 omit [I.Boundaryless] in
 theorem hasDerivAt_localizedL2Mass
     {g : SmoothRiemannianMetric I M}

@@ -5,7 +5,7 @@ import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 
 noncomputable section
 
-open Bundle Manifold Set
+open Bundle Manifold MeasureTheory Set
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.Analysis.Parabolic.Moser
@@ -256,6 +256,102 @@ theorem rpow_moser_step
   · exact henergy.2
   · exact hgrad
   · simpa only [huq] using houterMass_le
+
+theorem rpow_moser_step_homogeneous
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff outer : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq : 1 ≤ q)
+    {a t₀ t₁ D K L : ℝ}
+    (hat₀ : a < t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (hD : 0 ≤ D) (hK : 0 ≤ K) (hL : 0 ≤ L)
+    (hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
+          (contMDiff_rpow_of_pos hu hpos q) t)) (Icc a t₁))
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    (hcutoff : ∀ x : M, cutoff.toFun x ^ 2 ≤ outer.toFun x ^ 2)
+    (hgrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x) ≤
+        K * outer.toFun x ^ 2)
+    (hderiv_le : ∀ s ∈ Icc a t₁, timeCutoffDeriv a t₀ s ≤ D)
+    (houterMass_le :
+      (∫ t in a..t₁,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
+            (contMDiff_rpow_of_pos hu hpos q) t)) ≤ L) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∫ t in t₀..t₁, ∫ x,
+          |cutoff.toFun x * u t x ^ q| ^
+            (2 + 4 / (Module.finrank ℝ E : ℝ))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+        C * (((t₁ - t₀ + 1) * ((D + 4 * K) * L) + K * L) ^
+          (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
+  let huq := contMDiff_rpow_of_pos hu hpos q
+  let zeroSource : ℝ → M → ℝ := fun _ _ => 0
+  have hzeroSource : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => zeroSource p.1 p.2) := contMDiff_const
+  have hrhs_le : ∀ t ∈ Icc t₀ t₁,
+      (∫ s in a..t,
+        timeCutoffDeriv a t₀ s * localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun r x => u r x ^ q) huq s) +
+          timeCutoff a t₀ s *
+            (4 * cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g (fun r x => u r x ^ q) huq s) +
+              ∫ x, 2 * cutoff.toFun x ^ 2 * u s x ^ q *
+                  rpowSource q u zeroSource s x
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g))) ≤
+        (D + 4 * K) * L := by
+    intro t ht
+    have h := timeCutoff_caccioppoli_rhs_le
+      (I := I) (M := M) cutoff outer (fun s x => u s x ^ q) huq
+      hat₀ ht.1 ht.2 hD hK hcutoff hgrad hderiv_le
+      (by simpa only [huq] using houterMass_le)
+    simpa only [zeroSource, rpowSource, mul_zero, integral_zero, add_zero, huq] using h
+  have houterMass_inner_le :
+      (∫ t in t₀..t₁,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t)) ≤ L := by
+    let mass : ℝ → ℝ := fun t =>
+      localizedL2Mass (I := I) (M := M) outer
+        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t)
+    have hmass_cont : ContinuousOn mass (Icc a t₁) := by
+      simpa only [mass] using
+        (contDiff_localizedL2Mass (I := I) (M := M) outer
+          (fun s x => u s x ^ q) huq).continuous.continuousOn
+    have hmass_int : IntervalIntegrable mass volume a t₁ := by
+      apply ContinuousOn.intervalIntegrable
+      simpa [uIcc_of_le (hat₀.le.trans ht₀t₁)] using hmass_cont
+    have hmono : (∫ t in t₀..t₁, mass t) ≤ ∫ t in a..t₁, mass t := by
+      exact intervalIntegral.integral_mono_interval hat₀.le ht₀t₁ le_rfl
+        (by
+          filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht
+          exact localizedL2Mass_nonneg (I := I) (M := M) outer
+            (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t))
+        hmass_int
+    exact hmono.trans (by simpa only [mass, huq] using houterMass_le)
+  apply rpow_moser_step (I := I) (M := M) g hdim cutoff outer u zeroSource
+    hu hzeroSource hpos hq hat₀.le ht₀t₁
+    (mul_nonneg (add_nonneg hD (mul_nonneg (by norm_num) hK)) hL) hK
+    (contDiff_timeCutoffDeriv a t₀).continuous.continuousOn
+    (fun t _ => hasDerivAt_timeCutoff a t₀ t)
+    (fun t _ => (timeCutoff_mem_Icc a t₀ t).1)
+    (timeCutoff_eq_zero a hat₀)
+    (fun t ht => timeCutoff_eq_one_of_le hat₀ ht.1)
+    (by simpa only [huq] using hdirichlet)
+  · intro t ht x
+    simpa only [zeroSource, add_zero] using hpde t ht x
+  · simpa only [huq, zeroSource] using hrhs_le
+  · exact hgrad
+  · simpa only [huq] using houterMass_inner_le
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
