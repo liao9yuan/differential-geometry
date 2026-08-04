@@ -118,6 +118,25 @@ theorem tensorHeatSemigroupHsExt_coeff
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+theorem tensorHsInclusion_tensorHeatSemigroupHsExt
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {τ σ t : ℝ}
+    (hτσ : τ ≤ σ) (ht : 0 ≤ t)
+    (T : tensorHs (I := I) (M := M) g r s σ) :
+    tensorHsInclusion (I := I) (M := M)
+        (g := g) (r := r) (s := s) hτσ
+        (tensorHeatSemigroupHsExt (I := I) (M := M) g r s σ t T) =
+      tensorHeatSemigroupHsExt (I := I) (M := M) g r s τ t
+        (tensorHsInclusion (I := I) (M := M)
+          (g := g) (r := r) (s := s) hτσ T) := by
+  apply tensorHs.ext
+  funext i
+  rw [tensorHsInclusion_coeff_apply,
+    tensorHeatSemigroupHsExt_coeff (I := I) (M := M) ht,
+    tensorHeatSemigroupHsExt_coeff (I := I) (M := M) ht,
+    tensorHsInclusion_coeff_apply]
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_eq_abstractSpectralSemigroup
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ t : ℝ} (ht : 0 ≤ t) :
     tensorHeatSemigroupHsExt (I := I) (M := M) g r s σ t =
