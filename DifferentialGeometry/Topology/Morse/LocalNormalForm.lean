@@ -105,6 +105,104 @@ theorem morseTaylorBilin_zero (g : E → ℝ) :
       _ = 1 / 2 := by norm_num
   rw [intervalIntegral.integral_smul_const (fun t : ℝ => 1 - t) (fderiv ℝ (fderiv ℝ g) 0), hInt]
 
+section Completion
+
+variable {n : ℕ}
+
+abbrev MorseModel (n : ℕ) : Type :=
+  Fin n → ℝ
+
+def morseTail (x : MorseModel (n + 1)) : MorseModel n :=
+  fun i => x i.succ
+
+def morseHead (x : MorseModel (n + 1)) : ℝ :=
+  x 0
+
+def morseCons (h : ℝ) (t : MorseModel n) : MorseModel (n + 1) :=
+  Fin.cons h t
+
+def morseE0 : MorseModel (n + 1) :=
+  Fin.cons (1 : ℝ) 0
+
+def morseZeroTail : MorseModel (n + 1) :=
+  Fin.cons (0 : ℝ) 0
+
+theorem morseCons_head (h : ℝ) (t : MorseModel n) :
+    morseHead (morseCons h t) = h := by
+  simp [morseHead, morseCons]
+
+theorem morseCons_tail (h : ℝ) (t : MorseModel n) :
+    morseTail (morseCons h t) = t := by
+  funext i
+  simp [morseTail, morseCons]
+
+theorem morse_cons_decompose (x : MorseModel (n + 1)) :
+    x = morseCons (morseHead x) (morseTail x) := by
+  funext i
+  cases i using Fin.cases with
+  | zero => simp [morseHead, morseCons]
+  | succ j => simp [morseTail, morseCons]
+
+theorem morse_cons_smul' (h : ℝ) (t : MorseModel n) :
+    morseCons h t = h • morseE0 + morseCons (0 : ℝ) t := by
+  funext i
+  cases i using Fin.cases with
+  | zero => simp [morseE0, morseCons]
+  | succ j => simp [morseE0, morseCons]
+
+noncomputable def morsePivot (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x : MorseModel (n + 1)) : ℝ :=
+  a x morseE0 morseE0
+
+noncomputable def morseComplete (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x : MorseModel (n + 1)) : ℝ :=
+  morseHead x + a x morseE0 (morseCons (0 : ℝ) (morseTail x)) / morsePivot a x
+
+theorem morse_bilinear_expand
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x : MorseModel (n + 1)) (h : ℝ) (t : MorseModel n) :
+    a x (h • morseE0 + morseCons (0 : ℝ) t) (h • morseE0 + morseCons (0 : ℝ) t) =
+      h ^ 2 * a x morseE0 morseE0 +
+        h * a x morseE0 (morseCons (0 : ℝ) t) +
+        h * a x (morseCons (0 : ℝ) t) morseE0 +
+        a x (morseCons (0 : ℝ) t) (morseCons (0 : ℝ) t) := by
+  simp [map_add, map_smul]
+  ring
+
+theorem morse_complete_square
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (hsym : ∀ x y z, a x y z = a x z y) (x : MorseModel (n + 1))
+    (hpiv : morsePivot a x ≠ 0) :
+    a x x x =
+      morsePivot a x * (morseComplete a x) ^ 2 +
+        a x (morseCons (0 : ℝ) (morseTail x)) (morseCons (0 : ℝ) (morseTail x)) -
+          a x (morseCons (0 : ℝ) (morseTail x)) morseE0 *
+            a x morseE0 (morseCons (0 : ℝ) (morseTail x)) / morsePivot a x := by
+  calc
+    a x x x = a x (morseCons (morseHead x) (morseTail x)) (morseCons (morseHead x) (morseTail x)) := by
+      exact congrArg (fun y => a x y y) (morse_cons_decompose x)
+    _ = (morseHead x) ^ 2 * a x morseE0 morseE0 +
+          morseHead x * a x morseE0 (morseCons (0 : ℝ) (morseTail x)) +
+          morseHead x * a x (morseCons (0 : ℝ) (morseTail x)) morseE0 +
+          a x (morseCons (0 : ℝ) (morseTail x)) (morseCons (0 : ℝ) (morseTail x)) := by
+      rw [morse_cons_smul' (morseHead x) (morseTail x)]
+      rw [morse_bilinear_expand]
+    _ = morsePivot a x * (morseComplete a x) ^ 2 +
+          a x (morseCons (0 : ℝ) (morseTail x)) (morseCons (0 : ℝ) (morseTail x)) -
+            a x (morseCons (0 : ℝ) (morseTail x)) morseE0 *
+              a x morseE0 (morseCons (0 : ℝ) (morseTail x)) / morsePivot a x := by
+      dsimp [morsePivot, morseComplete, morseHead]
+      have hpiv' : a x morseE0 morseE0 ≠ 0 := by
+        simpa [morsePivot] using hpiv
+      field_simp [hpiv']
+      have hcross : a x (morseCons (0 : ℝ) (morseTail x)) morseE0 =
+          a x morseE0 (morseCons (0 : ℝ) (morseTail x)) :=
+        hsym x (morseCons (0 : ℝ) (morseTail x)) morseE0
+      rw [hcross]
+      ring
+
+end Completion
+
 omit [FiniteDimensional ℝ E] in
 private theorem hasFDerivAt_third_morse (g : E → ℝ) (hg : ContDiff ℝ 3 g) (x : E) (t : ℝ) :
     HasFDerivAt (fun x : E => fderiv ℝ (fderiv ℝ g) (t • x))
