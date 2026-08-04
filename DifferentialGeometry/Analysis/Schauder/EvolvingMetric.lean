@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Schauder.CompactRegularity
+import DifferentialGeometry.Analysis.Schauder.ParabolicChartOperator
 import DifferentialGeometry.Geometry.Operator.MetricFamilyRegularity
 
 noncomputable section
@@ -20,6 +21,10 @@ variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
   {I : ModelWithCorners Real E H}
   {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ((⊤ : ℕ∞) : WithTop ℕ∞) M]
+
+private abbrev EuclN (E : Type uE) [NormedAddCommGroup E]
+    [NormedSpace Real E] [FiniteDimensional Real E] :=
+  EuclideanSpace Real (Fin (Module.finrank Real E))
 
 theorem exists_chartInvGramOnE_parabolic_schauder_bounds
     {D : RealTimeInterval}
@@ -118,6 +123,209 @@ theorem exists_chartChristoffelOnE_parabolic_schauder_bounds
   simpa only [f, Function.comp_apply, parabolicToProduct] using
     exists_norm_bound_and_holderWith_restrict_parabolicCylinder_Icc_of_contDiffOn
       a b hK hKconv hf halpha
+
+theorem exists_parabolicChartPrincipalCoefficient_schauder_bounds
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (a b : Real) (habreg : Set.Icc a b ⊆ D.regular)
+    (chartCenter : M) {K : Set E} (hK : IsCompact K)
+    (hKconv : Convex Real K)
+    (hKchart : K ⊆ interior (extChartAt I chartCenter).target)
+    {alpha : NNReal} (halpha : alpha ≤ 1) :
+    ∃ A Ka : Fin (Module.finrank Real E) →
+        Fin (Module.finrank Real E) → NNReal,
+      (∀ i j p, p ∈ parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) K) →
+        ‖parabolicChartPrincipalCoefficient (I := I) G.metric
+          chartCenter i j p‖ ≤ A i j) ∧
+      (∀ i j, HolderWith (Ka i j) alpha
+        ((parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) K)).restrict
+            (parabolicChartPrincipalCoefficient (I := I) G.metric
+              chartCenter i j))) ∧
+      ∀ p, p ∈ parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) K) →
+        (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+          parabolicChartPrincipalCoefficient (I := I) G.metric
+            chartCenter i j p).PosDef := by
+  obtain ⟨A, Ka, hnorm, hholder, hpos⟩ :=
+    exists_chartInvGramOnE_parabolic_schauder_coefficient_bounds
+      hG a b habreg chartCenter hK hKconv hKchart halpha
+  let L := ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+  let Ka' : Fin (Module.finrank Real E) →
+      Fin (Module.finrank Real E) → NNReal :=
+    fun i j ↦ Ka i j * (max 1 ‖L‖₊) ^ (alpha : Real)
+  refine ⟨A, Ka', ?_, ?_, ?_⟩
+  · intro i j p hp
+    have h := hnorm i j (parabolicLinearMap L p) hp
+    simpa [L, parabolicChartPrincipalCoefficient, euclideanChartPoint,
+      chartInvGramOnE_def] using h
+  · intro i j
+    have h := parabolicHolder_linearMap L (hholder i j)
+    simpa [L, Ka', parabolicChartPrincipalCoefficient, euclideanChartPoint,
+      chartInvGramOnE_def, Function.comp_def] using h
+  · intro p hp
+    have h := hpos (parabolicLinearMap L p) hp
+    simpa [L, parabolicChartPrincipalCoefficient, euclideanChartPoint,
+      chartInvGramOnE_def] using h
+
+theorem exists_parabolicChartChristoffelCoefficient_schauder_bounds
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {a b : Real} (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    (chartCenter : M) {K : Set E} (hK : IsCompact K)
+    (hKconv : Convex Real K)
+    (hKchart : K ⊆ interior (extChartAt I chartCenter).target)
+    {alpha : NNReal} (halpha : alpha ≤ 1) :
+    ∃ B KGamma : Fin (Module.finrank Real E) →
+        Fin (Module.finrank Real E) → Fin (Module.finrank Real E) → NNReal,
+      (∀ i j k p, p ∈ parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) K) →
+        ‖parabolicChartChristoffelCoefficient (I := I) G.metric
+          chartCenter i j k p‖ ≤ B i j k) ∧
+      ∀ i j k, HolderWith (KGamma i j k) alpha
+        ((parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) K)).restrict
+            (parabolicChartChristoffelCoefficient (I := I) G.metric
+              chartCenter i j k)) := by
+  have hentry : ∀ i j k : Fin (Module.finrank Real E),
+      ∃ C₀ Cα : NNReal,
+        (∀ p ∈ parabolicCylinder (Set.Icc a b) K,
+          ‖chartChristoffel (I := I) (G.metric p.time)
+            chartCenter i j k p.space‖ ≤ C₀) ∧
+        HolderWith Cα alpha
+          ((parabolicCylinder (Set.Icc a b) K).restrict
+            (fun p => chartChristoffel (I := I) (G.metric p.time)
+              chartCenter i j k p.space)) := by
+    intro i j k
+    exact exists_chartChristoffelOnE_parabolic_schauder_bounds
+      hG hab habreg chartCenter hK hKconv hKchart i j k halpha
+  choose B KGamma hbounds using hentry
+  let L := ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+  let KGamma' : Fin (Module.finrank Real E) →
+      Fin (Module.finrank Real E) → Fin (Module.finrank Real E) → NNReal :=
+    fun i j k ↦ KGamma i j k * (max 1 ‖L‖₊) ^ (alpha : Real)
+  refine ⟨B, KGamma', ?_, ?_⟩
+  · intro i j k p hp
+    have h := (hbounds i j k).1 (parabolicLinearMap L p) hp
+    simpa only [L, parabolicChartChristoffelCoefficient,
+      parabolicLinearMap_time, parabolicLinearMap_space] using h
+  · intro i j k
+    have h := parabolicHolder_linearMap L (hbounds i j k).2
+    simpa only [L, KGamma', parabolicChartChristoffelCoefficient,
+      Function.comp_apply, parabolicLinearMap_time,
+      parabolicLinearMap_space] using h
+
+theorem exists_parabolicChartDriftCoefficient_schauder_bounds
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {a b : Real} (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    (chartCenter : M) {K : Set E} (hK : IsCompact K)
+    (hKconv : Convex Real K)
+    (hKchart : K ⊆ interior (extChartAt I chartCenter).target)
+    {alpha : NNReal} (halpha : alpha ≤ 1) :
+    ∃ Bb Kb : Fin (Module.finrank Real E) → NNReal,
+      (∀ k p, p ∈ parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) K) →
+        ‖parabolicChartDriftCoefficient (I := I) G.metric
+          chartCenter k p‖ ≤ Bb k) ∧
+      ∀ k, HolderWith (Kb k) alpha
+        ((parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) K)).restrict
+            (parabolicChartDriftCoefficient (I := I) G.metric
+              chartCenter k)) := by
+  obtain ⟨A, Ka, hAnorm, ha, _hpos⟩ :=
+    exists_parabolicChartPrincipalCoefficient_schauder_bounds
+      hG a b habreg chartCenter hK hKconv hKchart halpha
+  obtain ⟨BGamma, KGamma, hGammaNorm, hGamma⟩ :=
+    exists_parabolicChartChristoffelCoefficient_schauder_bounds
+      hG hab habreg chartCenter hK hKconv hKchart halpha
+  let Q := parabolicLinearPreimage
+    ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+    (parabolicCylinder (Set.Icc a b) K)
+  let Bb : Fin (Module.finrank Real E) → NNReal := fun k ↦
+    ∑ i, ∑ j, A i j * BGamma i j k
+  let Kb : Fin (Module.finrank Real E) → NNReal := fun k ↦
+    ∑ i, ∑ j, (A i j * KGamma i j k + BGamma i j k * Ka i j)
+  refine ⟨Bb, Kb, ?_, ?_⟩
+  · intro k p hp
+    rw [parabolicChartDriftCoefficient_apply, norm_neg]
+    calc
+      ‖∑ i, ∑ j,
+          parabolicChartPrincipalCoefficient (I := I) G.metric
+              chartCenter i j p *
+            parabolicChartChristoffelCoefficient (I := I) G.metric
+              chartCenter i j k p‖ ≤
+          ∑ i, ‖∑ j,
+            parabolicChartPrincipalCoefficient (I := I) G.metric
+                chartCenter i j p *
+              parabolicChartChristoffelCoefficient (I := I) G.metric
+                chartCenter i j k p‖ :=
+        norm_sum_le _ _
+      _ ≤ ∑ i, ∑ j, ‖parabolicChartPrincipalCoefficient (I := I) G.metric
+              chartCenter i j p *
+            parabolicChartChristoffelCoefficient (I := I) G.metric
+              chartCenter i j k p‖ := by
+        apply Finset.sum_le_sum
+        intro i _
+        exact norm_sum_le _ _
+      _ ≤ ∑ i, ∑ j, (A i j : Real) * BGamma i j k := by
+        apply Finset.sum_le_sum
+        intro i _
+        apply Finset.sum_le_sum
+        intro j _
+        rw [norm_mul]
+        exact mul_le_mul (hAnorm i j p hp) (hGammaNorm i j k p hp)
+          (norm_nonneg _) (by positivity)
+      _ = (Bb k : Real) := by
+        simp only [Bb, NNReal.coe_sum, NNReal.coe_mul]
+  · intro k
+    have hproduct : ∀ i j,
+        HolderWith (A i j * KGamma i j k + BGamma i j k * Ka i j) alpha
+          (fun p : Q ↦
+            parabolicChartPrincipalCoefficient (I := I) G.metric
+                chartCenter i j p.1 *
+              parabolicChartChristoffelCoefficient (I := I) G.metric
+                chartCenter i j k p.1) := by
+      intro i j
+      have h := holderWith_smul_of_norm_le (ha i j) (hGamma i j k)
+        (fun p : Q ↦ hAnorm i j p.1 p.2)
+        (fun p : Q ↦ hGammaNorm i j k p.1 p.2)
+      simpa only [Pi.smul_apply, smul_eq_mul, Set.restrict_apply] using h
+    have hj : ∀ i, HolderWith
+        (∑ j, (A i j * KGamma i j k + BGamma i j k * Ka i j)) alpha
+          (fun p : Q ↦ ∑ j,
+            parabolicChartPrincipalCoefficient (I := I) G.metric
+                chartCenter i j p.1 *
+              parabolicChartChristoffelCoefficient (I := I) G.metric
+                chartCenter i j k p.1) := by
+      intro i
+      exact holderWith_finset_sum (Finset.univ)
+        (fun j _ ↦ hproduct i j)
+    have hi := holderWith_finset_sum (Finset.univ)
+      (fun i _ ↦ hj i)
+    have hneg : HolderWith
+        (∑ i, ∑ j, (A i j * KGamma i j k + BGamma i j k * Ka i j)) alpha
+          (-(fun p : Q ↦ ∑ i, ∑ j,
+            parabolicChartPrincipalCoefficient (I := I) G.metric
+                chartCenter i j p.1 *
+              parabolicChartChristoffelCoefficient (I := I) G.metric
+                chartCenter i j k p.1)) := by
+      intro p q
+      simpa only [Pi.neg_apply, edist_neg_neg] using hi p q
+    simpa only [Q, Kb, parabolicChartDriftCoefficient,
+      Set.restrict_apply, Pi.neg_apply] using hneg
+
 
 end DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn
 

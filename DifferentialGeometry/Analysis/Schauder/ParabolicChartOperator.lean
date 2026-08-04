@@ -137,14 +137,20 @@ def parabolicChartPrincipalCoefficient
   fun p ↦ chartInvGramMatrix (I := I) (g p.time) alpha
     (euclideanChartPoint (I := I) alpha p) i j
 
+def parabolicChartChristoffelCoefficient
+    (g : Real → SmoothRiemannianMetric I M) (alpha : M)
+    (i j k : Fin (Module.finrank Real E)) :
+    ParabolicPoint (EuclN E) → Real :=
+  fun p ↦ chartChristoffel (I := I) (g p.time) alpha i j k
+    ((toEuclidean (E := E)).symm p.space)
+
 def parabolicChartDriftCoefficient
     (g : Real → SmoothRiemannianMetric I M) (alpha : M)
     (k : Fin (Module.finrank Real E)) :
     ParabolicPoint (EuclN E) → Real :=
   fun p ↦ -∑ i, ∑ j,
     parabolicChartPrincipalCoefficient (I := I) g alpha i j p *
-      chartChristoffel (I := I) (g p.time) alpha i j k
-        ((toEuclidean (E := E)).symm p.space)
+      parabolicChartChristoffelCoefficient (I := I) g alpha i j k p
 
 def parabolicChartPotentialCoefficient
     (V : Real → M → Real) (alpha : M) :
@@ -171,14 +177,23 @@ theorem parabolicChartPrincipalCoefficient_apply
 
 omit [NeZero (Module.finrank Real E)] in
 @[simp]
+theorem parabolicChartChristoffelCoefficient_apply
+    (g : Real → SmoothRiemannianMetric I M) (alpha : M)
+    (i j k : Fin (Module.finrank Real E)) (p : ParabolicPoint (EuclN E)) :
+    parabolicChartChristoffelCoefficient (I := I) g alpha i j k p =
+      chartChristoffel (I := I) (g p.time) alpha i j k
+        ((toEuclidean (E := E)).symm p.space) :=
+  rfl
+
+omit [NeZero (Module.finrank Real E)] in
+@[simp]
 theorem parabolicChartDriftCoefficient_apply
     (g : Real → SmoothRiemannianMetric I M) (alpha : M)
     (k : Fin (Module.finrank Real E)) (p : ParabolicPoint (EuclN E)) :
     parabolicChartDriftCoefficient (I := I) g alpha k p =
       -∑ i, ∑ j,
         parabolicChartPrincipalCoefficient (I := I) g alpha i j p *
-          chartChristoffel (I := I) (g p.time) alpha i j k
-            ((toEuclidean (E := E)).symm p.space) :=
+          parabolicChartChristoffelCoefficient (I := I) g alpha i j k p :=
   rfl
 
 omit [NeZero (Module.finrank Real E)] [IsManifold I ∞ M] in
@@ -236,8 +251,7 @@ theorem parabolicDriftTerm_euclideanChartRepresentation
         (parabolicEuclideanChartRepresentation I alpha u) p =
       -∑ i, ∑ j,
         parabolicChartPrincipalCoefficient (I := I) g alpha i j p *
-          (∑ k, chartChristoffel (I := I) (g p.time) alpha i j k
-              ((toEuclidean (E := E)).symm p.space) *
+          (∑ k, parabolicChartChristoffelCoefficient (I := I) g alpha i j k p *
             partialDeriv (E := E) k (scalarOnE (I := I) alpha (u p.time))
               ((toEuclidean (E := E)).symm p.space)) := by
   classical
@@ -300,7 +314,7 @@ theorem parabolicVariableMatrixLap_add_driftTerm_eq_laplacian_in_euclideanChart
       (euclideanChartPoint_mem_source (I := I) alpha p hp)]
   simp_rw [chartHessianTensor_def, chartIteratedPartialDeriv_def,
     extChartAt_euclideanChartPoint (I := I) alpha p hp]
-  unfold parabolicChartPrincipalCoefficient
+  unfold parabolicChartPrincipalCoefficient parabolicChartChristoffelCoefficient
   simp_rw [mul_sub, Finset.sum_sub_distrib]
   ring
 
