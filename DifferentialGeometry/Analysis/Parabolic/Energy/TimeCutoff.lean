@@ -1,12 +1,109 @@
 import Mathlib.Analysis.InnerProductSpace.Calculus
 import Mathlib.Analysis.Calculus.Deriv.Mul
+import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 noncomputable section
 
-open MeasureTheory Set
+open Filter MeasureTheory Set
+open scoped ContDiff Topology
 
 namespace DifferentialGeometry.Analysis.Parabolic.Energy
+
+def timeCutoff (a b t : ℝ) : ℝ :=
+  Real.smoothTransition ((t - a) / (b - a))
+
+def timeCutoffDeriv (a b t : ℝ) : ℝ :=
+  deriv Real.smoothTransition ((t - a) / (b - a)) / (b - a)
+
+theorem contDiff_timeCutoff (a b : ℝ) :
+    ContDiff ℝ ∞ (timeCutoff a b) := by
+  have haffine : ContDiff ℝ ∞ (fun t : ℝ => (t - a) / (b - a)) :=
+    (contDiff_id.sub contDiff_const).div_const _
+  exact (Real.smoothTransition.contDiff (n := (⊤ : ℕ∞))).comp haffine
+
+theorem contDiff_timeCutoffDeriv (a b : ℝ) :
+    ContDiff ℝ ∞ (timeCutoffDeriv a b) := by
+  have hsmooth : ContDiff ℝ ∞ (deriv Real.smoothTransition) := by
+    exact (contDiff_infty_iff_deriv.mp
+      (Real.smoothTransition.contDiff (n := (⊤ : ℕ∞)))).2
+  have haffine : ContDiff ℝ ∞ (fun t : ℝ => (t - a) / (b - a)) :=
+    (contDiff_id.sub contDiff_const).div_const _
+  simpa only [timeCutoffDeriv, Function.comp_apply] using
+    (hsmooth.comp haffine).div_const (b - a)
+
+theorem hasDerivAt_timeCutoff (a b t : ℝ) :
+    HasDerivAt (timeCutoff a b) (timeCutoffDeriv a b t) t := by
+  have hinner : HasDerivAt (fun s : ℝ => (s - a) / (b - a))
+      (1 / (b - a)) t := by
+    simpa using ((hasDerivAt_id t).sub_const a).div_const (b - a)
+  have houter : HasDerivAt Real.smoothTransition
+      (deriv Real.smoothTransition ((t - a) / (b - a)))
+      ((t - a) / (b - a)) :=
+    ((Real.smoothTransition.contDiff (n := (1 : ℕ∞))).differentiable
+      (by norm_num) _).hasDerivAt
+  simpa only [timeCutoff, timeCutoffDeriv, div_eq_mul_inv, one_mul] using
+    houter.comp t hinner
+
+theorem timeCutoff_mem_Icc (a b t : ℝ) :
+    timeCutoff a b t ∈ Icc (0 : ℝ) 1 :=
+  ⟨Real.smoothTransition.nonneg _, Real.smoothTransition.le_one _⟩
+
+theorem timeCutoff_eq_zero_of_le {a b t : ℝ} (hab : a < b) (ht : t ≤ a) :
+    timeCutoff a b t = 0 := by
+  apply Real.smoothTransition.zero_of_nonpos
+  exact div_nonpos_of_nonpos_of_nonneg (sub_nonpos.mpr ht) (sub_nonneg.mpr hab.le)
+
+theorem timeCutoff_eq_zero (a : ℝ) {b : ℝ} (hab : a < b) :
+    timeCutoff a b a = 0 :=
+  timeCutoff_eq_zero_of_le hab le_rfl
+
+theorem timeCutoff_eq_one_of_le {a b t : ℝ} (hab : a < b) (ht : b ≤ t) :
+    timeCutoff a b t = 1 := by
+  apply Real.smoothTransition.one_of_one_le
+  rw [one_le_div (sub_pos.mpr hab)]
+  linarith
+
+theorem timeCutoffDeriv_nonneg {a b : ℝ} (hab : a < b) (t : ℝ) :
+    0 ≤ timeCutoffDeriv a b t := by
+  exact div_nonneg Real.smoothTransition.monotone.deriv_nonneg (sub_pos.mpr hab).le
+
+private theorem exists_smoothTransition_deriv_bound :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ s : ℝ, |deriv Real.smoothTransition s| ≤ C := by
+  have hsmooth : ContDiff ℝ 1 Real.smoothTransition := by
+    simpa using (Real.smoothTransition.contDiff (n := (1 : ℕ∞)))
+  have hcont : Continuous (deriv Real.smoothTransition) :=
+    hsmooth.continuous_deriv_one
+  obtain ⟨sMax, -, hsMax⟩ :=
+    (isCompact_Icc (a := (0 : ℝ)) (b := 1)).exists_isMaxOn
+      (Set.nonempty_Icc.2 (by norm_num)) hcont.norm.continuousOn
+  refine ⟨|deriv Real.smoothTransition sMax|, abs_nonneg _, ?_⟩
+  intro s
+  by_cases hs0 : s < 0
+  · have hloc : Real.smoothTransition =ᶠ[nhds s] fun _ => (0 : ℝ) := by
+      filter_upwards [Iio_mem_nhds hs0] with y hy
+      exact Real.smoothTransition.zero_of_nonpos hy.le
+    rw [hloc.deriv_eq, deriv_const, abs_zero]
+    exact abs_nonneg _
+  · by_cases hs1 : 1 < s
+    · have hloc : Real.smoothTransition =ᶠ[nhds s] fun _ => (1 : ℝ) := by
+        filter_upwards [Ioi_mem_nhds hs1] with y hy
+        exact Real.smoothTransition.one_of_one_le hy.le
+      rw [hloc.deriv_eq, deriv_const, abs_zero]
+      exact abs_nonneg _
+    · push Not at hs0 hs1
+      simpa [Real.norm_eq_abs] using
+        (Filter.eventually_principal.mp hsMax s (Set.mem_Icc.2 ⟨hs0, hs1⟩))
+
+theorem exists_timeCutoffDeriv_bound :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {a b : ℝ}, a < b → ∀ t : ℝ,
+      timeCutoffDeriv a b t ≤ C / (b - a) := by
+  obtain ⟨C, hC, hbound⟩ := exists_smoothTransition_deriv_bound
+  refine ⟨C, hC, ?_⟩
+  intro a b hab t
+  have hderiv : deriv Real.smoothTransition ((t - a) / (b - a)) ≤ C :=
+    le_trans (le_abs_self _) (hbound _)
+  exact div_le_div_of_nonneg_right hderiv (sub_pos.mpr hab).le
 
 theorem weight_mul_sub_eq_intervalIntegral
     {weight dweight energy denergy : ℝ → ℝ} {a b : ℝ}
