@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Analysis.Calculus.DerivativeTest
 
 set_option autoImplicit false
@@ -165,9 +166,9 @@ private theorem fderiv_fderiv_apply_self_nonneg_of_isLocalMin_model
 
 omit [FiniteDimensional ℝ E] in
 private theorem writtenInExtChartAt_differentiableAt_of_mdifferentiableAt
-    [I.Boundaryless]
     {f : M -> Real} {x p : M} {z : E}
     (hp : p ∈ (chartAt H x).source)
+    (hp_interior : I.IsInteriorPoint p)
     (hz : z ∈ (extChartAt I x).target)
     (hpz : p = (extChartAt I x).symm z)
     (h : MDifferentiableAt I 𝓘(Real, Real) f p) :
@@ -182,20 +183,26 @@ private theorem writtenInExtChartAt_differentiableAt_of_mdifferentiableAt
       DifferentiableWithinAt Real (writtenInExtChartAt I 𝓘(Real, Real) x f)
         (Set.range I) (extChartAt I x p) := by
     simpa [writtenInExtChartAt] using hmd_within.differentiableWithinAt
-  have hrange : Set.range I ∈ nhds z := by
-    rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
-    exact Filter.univ_mem
   have hpoint : extChartAt I x p = z := by
     rw [hpz]
     exact (extChartAt I x).right_inv hz
+  have hp_chart_interior :
+      extChartAt I x p ∈ interior (extChartAt I x).target :=
+    (I.isInteriorPoint_iff_of_mem_atlas (n := (∞ : WithTop ℕ∞)) (by simp)
+      (chart_mem_atlas H x) hp).mp hp_interior
+  have hrange : Set.range I ∈ nhds z := by
+    apply mem_interior_iff_mem_nhds.mp
+    rw [← hpoint]
+    exact interior_mono (extChartAt_target_subset_range (I := I) x)
+      hp_chart_interior
   rw [hpoint] at hdiff_within
   exact hdiff_within.differentiableAt hrange
 
 omit [FiniteDimensional ℝ E] in
 private theorem extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt
-    [I.Boundaryless]
     {f : M -> Real} {x p : M}
     (hp : p ∈ (chartAt H x).source)
+    (hp_interior : I.IsInteriorPoint p)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f p)
     (v : TangentSpace I x) :
     extDerivFun (I := I) f p (tangentConstAt (I := I) x v p) =
@@ -207,9 +214,14 @@ private theorem extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt
     simpa [z] using (extChartAt I x).map_source hsource
   have hsymm : (extChartAt I x).symm z = p := by
     simpa [z] using (extChartAt I x).left_inv hsource
+  have hp_chart_interior :
+      extChartAt I x p ∈ interior (extChartAt I x).target :=
+    (I.isInteriorPoint_iff_of_mem_atlas (n := (∞ : WithTop ℕ∞)) (by simp)
+      (chart_mem_atlas H x) hp).mp hp_interior
   have hrange : Set.range I ∈ nhds z := by
-    rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
-    exact Filter.univ_mem
+    apply mem_interior_iff_mem_nhds.mp
+    exact interior_mono (extChartAt_target_subset_range (I := I) x)
+      hp_chart_interior
   have hsymm_mdiff :
       MDifferentiableWithinAt 𝓘(Real, E) I (extChartAt I x).symm
         (Set.range I) z := by
@@ -264,10 +276,10 @@ private theorem extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt
 
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
-theorem mfderiv_eq_zero_at_spatial_min
-    [I.Boundaryless]
+theorem mfderiv_eq_zero_at_spatial_min_of_isInteriorPoint
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
+    (hx : I.IsInteriorPoint x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
     mfderiv I 𝓘(Real, Real) f x = 0 := by
   have hmin_chart :
@@ -283,8 +295,7 @@ theorem mfderiv_eq_zero_at_spatial_min
         ((extChartAt I x) x) = 0 :=
     hmin_chart.fderiv_eq_zero
   have hrange : Set.range I ∈ nhds ((extChartAt I x) x) := by
-    rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
-    exact Filter.univ_mem
+    exact range_mem_nhds_isInteriorPoint hx
   calc
     mfderiv I 𝓘(Real, Real) f x =
         fderivWithin Real (writtenInExtChartAt I 𝓘(Real, Real) x f)
@@ -295,6 +306,27 @@ theorem mfderiv_eq_zero_at_spatial_min
       exact fderivWithin_of_mem_nhds hrange
     _ = 0 := by
       simpa [writtenInExtChartAt] using hderiv_chart
+
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
+theorem mfderiv_eq_zero_at_spatial_min
+    [I.Boundaryless]
+    {f : M -> Real} {x : M}
+    (hmin : IsLocalMin f x)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
+    mfderiv I 𝓘(Real, Real) f x = 0 :=
+  mfderiv_eq_zero_at_spatial_min_of_isInteriorPoint
+    (I := I) hmin BoundarylessManifold.isInteriorPoint hf
+
+
+theorem gradientFun_eq_zero_at_spatial_min_of_isInteriorPoint
+    (g : SmoothRiemannianMetric I M) {f : M -> Real} {x : M}
+    (hmin : IsLocalMin f x)
+    (hx : I.IsInteriorPoint x)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
+    gradientFun (I := I) g f x = 0 := by
+  exact gradientFun_eq_zero_of_mfderiv_eq_zero (I := I) g f
+    (mfderiv_eq_zero_at_spatial_min_of_isInteriorPoint (I := I) hmin hx hf)
 
 
 theorem gradientFun_eq_zero_at_spatial_min
@@ -364,10 +396,10 @@ theorem laplacian_eq_laplacian_of_gradient_eq_zero
 
 
 private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
+    (hx : I.IsInteriorPoint x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
     (hf_near : ∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y)
     (_hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x)
@@ -388,7 +420,7 @@ private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
   have hF : DifferentiableAt Real F z₀ := by
     exact writtenInExtChartAt_differentiableAt_of_mdifferentiableAt
       (I := I) (x := x) (p := x) (z := z₀)
-      (mem_chart_source H x) (by simp [z₀])
+      (mem_chart_source H x) hx (by simp [z₀])
       (by simp [z₀]) hf
   have hsymm_tend :
       Filter.Tendsto (fun z : E => (extChartAt I x).symm z) (nhds z₀) (nhds x) := by
@@ -405,13 +437,21 @@ private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
         ∀ᶠ z in nhds z₀, (extChartAt I x).symm z ∈ (chartAt H x).source :=
       hsymm_tend ((chartAt H x).open_source.mem_nhds (mem_chart_source H x))
     have htarget_z :
-        ∀ᶠ z in nhds z₀, z ∈ (extChartAt I x).target :=
-      extChartAt_target_mem_nhds' (I := I)
-        (by simp [z₀])
+        ∀ᶠ z in nhds z₀, z ∈ interior (extChartAt I x).target := by
+      exact isOpen_interior.mem_nhds ((I.isInteriorPoint_iff).mp hx)
     filter_upwards [hmd_z, hsource_z, htarget_z] with z hmd hsource htarget
+    have hright := (extChartAt I x).right_inv (interior_subset htarget)
+    have hp_interior :
+        I.IsInteriorPoint ((extChartAt I x).symm z) := by
+      apply (I.isInteriorPoint_iff_of_mem_atlas
+        (n := (∞ : WithTop ℕ∞)) (by simp)
+        (chart_mem_atlas H x) hsource).mpr
+      change extChartAt I x ((extChartAt I x).symm z) ∈
+        interior (extChartAt I x).target
+      rwa [hright]
     exact writtenInExtChartAt_differentiableAt_of_mdifferentiableAt
       (I := I) (x := x) (p := (extChartAt I x).symm z) (z := z)
-      hsource htarget rfl hmd
+      hsource hp_interior (interior_subset htarget) rfl hmd
   have hmodel :=
     fderiv_fderiv_apply_self_nonneg_of_isLocalMin_model
       (F := F) (y := z₀) hmin_chart hF hF_near_model v
@@ -430,16 +470,23 @@ private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
         ∀ᶠ z in nhds z₀, (extChartAt I x).symm z ∈ (chartAt H x).source :=
       hsymm_tend ((chartAt H x).open_source.mem_nhds (mem_chart_source H x))
     have htarget_z :
-        ∀ᶠ z in nhds z₀, z ∈ (extChartAt I x).target :=
-      extChartAt_target_mem_nhds' (I := I)
-        (by simp [z₀])
+        ∀ᶠ z in nhds z₀, z ∈ interior (extChartAt I x).target := by
+      exact isOpen_interior.mem_nhds ((I.isInteriorPoint_iff).mp hx)
     filter_upwards [hmd_z, hsource_z, htarget_z] with z hmd hsource htarget
+    have hright : extChartAt I x ((extChartAt I x).symm z) = z :=
+      (extChartAt I x).right_inv (interior_subset htarget)
+    have hp_interior :
+        I.IsInteriorPoint ((extChartAt I x).symm z) := by
+      apply (I.isInteriorPoint_iff_of_mem_atlas
+        (n := (∞ : WithTop ℕ∞)) (by simp)
+        (chart_mem_atlas H x) hsource).mpr
+      change extChartAt I x ((extChartAt I x).symm z) ∈
+        interior (extChartAt I x).target
+      rwa [hright]
     have h :=
       extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt
         (I := I) (x := x) (p := (extChartAt I x).symm z)
-        hsource hmd v
-    have hright : extChartAt I x ((extChartAt I x).symm z) = z :=
-      (extChartAt I x).right_inv htarget
+        hsource hp_interior hmd v
     change
       mfderiv I 𝓘(Real, Real) f ((extChartAt I x).symm z)
           (tangentConstAt (I := I) x v ((extChartAt I x).symm z)) =
@@ -451,8 +498,7 @@ private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
   change 0 <= extDerivFun (I := I) u x v
   by_cases hu : MDifferentiableAt I 𝓘(Real, Real) u x
   · have hrange : Set.range I ∈ nhds z₀ := by
-      rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
-      exact Filter.univ_mem
+      simpa [z₀] using range_mem_nhds_isInteriorPoint hx
     have houter :
         extDerivFun (I := I) u x v =
           fderiv Real (writtenInExtChartAt I 𝓘(Real, Real) x u) z₀ v := by
@@ -479,7 +525,6 @@ private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
 
 
 private theorem cov_gradient_inner_self_nonneg_at_spatial_min
-    [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -487,6 +532,7 @@ private theorem cov_gradient_inner_self_nonneg_at_spatial_min
     (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
+    (hx : I.IsInteriorPoint x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
     (hf_near : ∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x)
@@ -499,7 +545,8 @@ private theorem cov_gradient_inner_self_nonneg_at_spatial_min
   have hV : MDiffAt (T% V) x := by
     simpa [V] using mdifferentiableAt_tangentConstAt_self (I := I) x v
   have hcritical : G x = 0 := by
-    simpa [G] using gradientFun_eq_zero_at_spatial_min (I := I) g hmin hf
+    simpa [G] using
+      gradientFun_eq_zero_at_spatial_min_of_isInteriorPoint (I := I) g hmin hx hf
   have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply
     (I := I) hmc V G V hV hgrad hV
   have hfun :
@@ -529,8 +576,32 @@ private theorem cov_gradient_inner_self_nonneg_at_spatial_min
     rw [hzero, add_zero] at hmetric
     simpa [G, V] using hmetric
   rw [← hmetric']
-  exact fderiv_fderiv_self_nonneg_of_isLocalMin (I := I) g hmin hf hf_near hgrad v
+  exact fderiv_fderiv_self_nonneg_of_isLocalMin
+    (I := I) g hmin hx hf hf_near hgrad v
 
+
+
+theorem laplacian_nonneg_at_spatial_min_of_metricCompatible_of_isInteriorPoint
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    {f : M -> Real} {x : M}
+    (hmin : IsLocalMin f x)
+    (hx : I.IsInteriorPoint x)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hf_near : ∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x) :
+  0 <= laplacian (I := I) cov g f x := by
+  unfold laplacian divergence
+  exact Tensor0SBundle.linearMap_trace_nonneg_of_metric_inner_apply_self_nonneg
+    (I := I) g x
+    ((cov (fun y : M => gradientFun (I := I) g f y) x).toLinearMap)
+    (fun v => by
+      simpa using
+        cov_gradient_inner_self_nonneg_at_spatial_min
+          (I := I) cov g hmc hmin hx hf hf_near hgrad v)
 
 
 theorem laplacian_nonneg_at_spatial_min_of_metricCompatible
@@ -545,15 +616,9 @@ theorem laplacian_nonneg_at_spatial_min_of_metricCompatible
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
     (hf_near : ∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x) :
-  0 <= laplacian (I := I) cov g f x := by
-  unfold laplacian divergence
-  exact Tensor0SBundle.linearMap_trace_nonneg_of_metric_inner_apply_self_nonneg
-    (I := I) g x
-    ((cov (fun y : M => gradientFun (I := I) g f y) x).toLinearMap)
-    (fun v => by
-      simpa using
-        cov_gradient_inner_self_nonneg_at_spatial_min
-          (I := I) cov g hmc hmin hf hf_near hgrad v)
+  0 <= laplacian (I := I) cov g f x :=
+  laplacian_nonneg_at_spatial_min_of_metricCompatible_of_isInteriorPoint
+    (I := I) cov g hmc hmin BoundarylessManifold.isInteriorPoint hf hf_near hgrad
 
 
 theorem laplacianNonnegativeAtSpatialMin_of_metricCompatible

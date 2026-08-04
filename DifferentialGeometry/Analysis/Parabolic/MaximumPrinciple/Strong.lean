@@ -340,14 +340,14 @@ private theorem strong_derivWithin_add_eps_mul_time
     ring
   rw [derivWithin_fun_add hw hlinear, hderiv_linear]
 
-theorem strict_barrier_on_compact_set
-    [I.Boundaryless]
+theorem strict_barrier_on_compact_set_of_isInteriorPoint
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 ≤ T)
     (X : Real → (x : M) → TangentSpace I x)
     {K : Set M} (hK : IsCompact K) (hKne : K.Nonempty)
+    (hKinterior : interior K ⊆ I.interior M)
     (w : Real → M → Real)
     (hw_cont : ContinuousOn (fun p : Real × M => w p.1 p.2)
       (Set.Icc 0 T ×ˢ K))
@@ -439,8 +439,9 @@ theorem strict_barrier_on_compact_set
       linarith
     have hheat_nonneg : 0 ≤
         heatOperatorWithDrift (I := I) G t0 (X t0) (w t0) x0 :=
-      heatOperatorWithDrift_at_spatial_min_nonneg (I := I) G t0 (X t0)
-        hspatial_min (hw_mdiff t0 ht0 ht0pos x0 hx0int)
+      heatOperatorWithDrift_at_spatial_min_nonneg_of_isInteriorPoint
+        (I := I) G t0 (X t0) hspatial_min (hKinterior hx0int)
+        (hw_mdiff t0 ht0 ht0pos x0 hx0int)
         (by
           filter_upwards [isOpen_interior.mem_nhds hx0int] with y hy
           exact hw_mdiff t0 ht0 ht0pos y hy)
@@ -465,6 +466,35 @@ theorem strict_barrier_on_compact_set
       field_simp [htzero]
     rw [hepsilon_mul] at hnonneg
     linarith
+
+theorem strict_barrier_on_compact_set
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (hT : 0 ≤ T)
+    (X : Real → (x : M) → TangentSpace I x)
+    {K : Set M} (hK : IsCompact K) (hKne : K.Nonempty)
+    (w : Real → M → Real)
+    (hw_cont : ContinuousOn (fun p : Real × M => w p.1 p.2)
+      (Set.Icc 0 T ×ˢ K))
+    (hw0 : ∀ x ∈ K, 0 ≤ w 0 x)
+    (hw_boundary : ∀ t ∈ Set.Icc 0 T, ∀ x ∈ frontier K, 0 ≤ w t x)
+    (hw_time : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      DifferentiableWithinAt Real (fun s => w s x) (Set.Icc 0 T) t)
+    (hw_mdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      MDifferentiableAt I 𝓘(Real, Real) (w t) x)
+    (hw_grad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (w t) y) x)
+    (hnegative : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      w t x < 0 →
+        0 ≤ parabolicOperatorWithDrift (I := I) G T X w t x) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x ∈ K, 0 ≤ w t x :=
+  strict_barrier_on_compact_set_of_isInteriorPoint
+    (I := I) G T hT X hK hKne
+      (fun _ _ => BoundarylessManifold.isInteriorPoint)
+      w hw_cont hw0 hw_boundary hw_time hw_mdiff hw_grad hnegative
 
 private theorem deriv_nonneg_at_right_endpoint
     {f : Real → Real} {a d : Real} (ha : 0 < a)
@@ -491,6 +521,69 @@ private theorem deriv_nonneg_at_right_endpoint
         (a - 0) (1 : Real))
   rw [hlin, hderivWithin] at hnonneg
   exact nonneg_of_mul_nonneg_left (by simpa [mul_comm] using hnonneg) ha
+
+theorem scalar_hopf_boundary_point_of_barrier_of_isInteriorPoint
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (hT : 0 ≤ T)
+    (X : Real → (x : M) → TangentSpace I x)
+    {K : Set M} (hK : IsCompact K) (hKne : K.Nonempty)
+    (hKinterior : interior K ⊆ I.interior M)
+    (u v : Real → M → Real)
+    (hcont : ContinuousOn (fun p : Real × M => u p.1 p.2 - v p.1 p.2)
+      (Set.Icc 0 T ×ˢ K))
+    (hinit : ∀ x ∈ K, 0 ≤ u 0 x - v 0 x)
+    (hboundary : ∀ t ∈ Set.Icc 0 T, ∀ x ∈ frontier K,
+      0 ≤ u t x - v t x)
+    (htime : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      DifferentiableWithinAt Real (fun s => u s x - v s x) (Set.Icc 0 T) t)
+    (hmdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      MDifferentiableAt I 𝓘(Real, Real) (fun y => u t y - v t y) x)
+    (hgrad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      MDiffAt (T% fun y : M => gradientFun (I := I) (G.metric t)
+        (fun z => u t z - v t z) y) x)
+    (hoperator : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      u t x - v t x < 0 → 0 ≤
+        parabolicOperatorWithDrift (I := I) G T X
+          (fun s y => u s y - v s y) t x)
+    {p : M} (hp : p ∈ frontier K)
+    (gamma : Real → M) {a du dv : Real} (ha : 0 < a)
+    (hgamma0 : gamma 0 = p)
+    (hgamma : Set.MapsTo gamma (Set.Icc 0 a) K)
+    (heq : u T p = v T p)
+    (hu_deriv : HasDerivAt (fun s => u T (gamma s)) du 0)
+    (hv_deriv : HasDerivAt (fun s => v T (gamma s)) dv 0)
+    (hdv : 0 < dv) :
+    0 < du := by
+  let w : Real → M → Real := fun t x => u t x - v t x
+  have hw_nonneg := strict_barrier_on_compact_set_of_isInteriorPoint (I := I)
+    G T hT X hK hKne hKinterior w hcont hinit hboundary
+      htime hmdiff hgrad hoperator
+  have hpK : p ∈ K := by
+    have hpcl : p ∈ closure K := frontier_subset_closure hp
+    simpa [hK.isClosed.closure_eq] using hpcl
+  let f : Real → Real := fun s => u T (gamma s) - v T (gamma s)
+  have hf0 : f 0 = 0 := by
+    dsimp [f]
+    rw [hgamma0, heq, sub_self]
+  have hf_nonneg : ∀ s ∈ Set.Icc 0 a, 0 ≤ f s := by
+    intro s hs
+    by_cases hs0 : s = 0
+    · subst s
+      dsimp [f]
+      rw [hgamma0]
+      exact hw_nonneg T ⟨hT, le_rfl⟩ p hpK
+    · exact hw_nonneg T ⟨hT, le_rfl⟩ (gamma s) (hgamma hs)
+  have hfmin : IsMinOn f (Set.Icc 0 a) 0 := by
+    intro s hs
+    rw [hf0]
+    exact hf_nonneg s hs
+  have hfderiv : HasDerivAt f (du - dv) 0 := by
+    exact hu_deriv.sub hv_deriv
+  have hdiff : 0 ≤ du - dv :=
+    deriv_nonneg_at_right_endpoint ha hfmin hfderiv
+  linarith
 
 theorem scalar_hopf_boundary_point_of_barrier
     [I.Boundaryless]
@@ -525,34 +618,12 @@ theorem scalar_hopf_boundary_point_of_barrier
     (hu_deriv : HasDerivAt (fun s => u T (gamma s)) du 0)
     (hv_deriv : HasDerivAt (fun s => v T (gamma s)) dv 0)
     (hdv : 0 < dv) :
-    0 < du := by
-  let w : Real → M → Real := fun t x => u t x - v t x
-  have hw_nonneg := strict_barrier_on_compact_set (I := I)
-    G T hT X hK hKne w hcont hinit hboundary htime hmdiff hgrad hoperator
-  have hpK : p ∈ K := by
-    have hpcl : p ∈ closure K := frontier_subset_closure hp
-    simpa [hK.isClosed.closure_eq] using hpcl
-  let f : Real → Real := fun s => u T (gamma s) - v T (gamma s)
-  have hf0 : f 0 = 0 := by
-    dsimp [f]
-    rw [hgamma0, heq, sub_self]
-  have hf_nonneg : ∀ s ∈ Set.Icc 0 a, 0 ≤ f s := by
-    intro s hs
-    by_cases hs0 : s = 0
-    · subst s
-      dsimp [f]
-      rw [hgamma0]
-      exact hw_nonneg T ⟨hT, le_rfl⟩ p hpK
-    · exact hw_nonneg T ⟨hT, le_rfl⟩ (gamma s) (hgamma hs)
-  have hfmin : IsMinOn f (Set.Icc 0 a) 0 := by
-    intro s hs
-    rw [hf0]
-    exact hf_nonneg s hs
-  have hfderiv : HasDerivAt f (du - dv) 0 := by
-    exact hu_deriv.sub hv_deriv
-  have hdiff : 0 ≤ du - dv :=
-    deriv_nonneg_at_right_endpoint ha hfmin hfderiv
-  linarith
+    0 < du :=
+  scalar_hopf_boundary_point_of_barrier_of_isInteriorPoint
+    (I := I) G T hT X hK hKne
+      (fun _ _ => BoundarylessManifold.isInteriorPoint)
+      u v hcont hinit hboundary htime hmdiff hgrad hoperator hp
+      gamma ha hgamma0 hgamma heq hu_deriv hv_deriv hdv
 
 omit [FiniteDimensional Real E] [IsManifold I ∞ M] in
 private theorem hasDerivAt_comp_mfderiv
