@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Strong
+import DifferentialGeometry.Geometry.Boundary.InwardCurve
 import DifferentialGeometry.Geometry.Boundary.NormalDerivative
 
 set_option autoImplicit false
@@ -263,20 +264,17 @@ theorem scalar_hopf_boundary_point_of_barrier_with_boundary
         parabolicOperatorWithDrift (I := I) G T X
           (fun s y => u s y - v s y) t x)
     {p : BoundaryManifold I M}
-    (gamma : Real → M) {a dv : Real} (ha : 0 < a)
-    (hgamma0 : gamma 0 = (p : M))
     (heq : u T (p : M) = v T (p : M))
     (hu_mdiff : MDifferentiableAt I 𝓘(Real, Real) (u T) (p : M))
-    (hgamma_mdiff : MDifferentiableWithinAt 𝓘(Real, Real) I
-      gamma (Set.Ici 0) 0)
-    (hgamma_velocity : mfderivWithin 𝓘(Real, Real) I
-      gamma (Set.Ici 0) 0 1 =
-      inwardCoord (M := M) p)
-    (hv_deriv : HasDerivWithinAt (fun s => v T (gamma s)) dv (Set.Ici 0) 0)
-    (hdv : 0 < dv)
+    (hv_mdiff : MDifferentiableAt I 𝓘(Real, Real) (v T) (p : M))
+    (hv_inward : 0 < (G.metric T).inner (p : M)
+      (gradientFun (I := I) (G.metric T) (v T) (p : M))
+      (inwardCoord (M := M) p))
     (hmin : IsLocalMin
       (fun q : BoundaryManifold I M => u T (q : M)) p) :
     outwardNormalDerivative (M := M) (G.metric T) (u T) p < 0 := by
+  obtain ⟨gamma, hgamma0, hgamma_mdiff, hgamma_velocity, a, ha, _⟩ :=
+    exists_inward_curve (I := I) (M := M) p
   have hu_deriv : HasDerivWithinAt (fun s => u T (gamma s))
       ((G.metric T).inner (p : M)
         (gradientFun (I := I) (G.metric T) (u T) (p : M))
@@ -291,7 +289,26 @@ theorem scalar_hopf_boundary_point_of_barrier_with_boundary
         (inwardCoord (M := M) p) =
       mfderiv I 𝓘(Real, Real) (u T) (p : M)
         (mfderivWithin 𝓘(Real, Real) I gamma (Set.Ici 0) 0 1)
-    rw [hgamma_velocity, inner_gradientFun]
+    rw [inner_gradientFun]
+    exact congrArg (mfderiv I 𝓘(Real, Real) (u T) (p : M))
+      hgamma_velocity.symm
+  have hv_deriv : HasDerivWithinAt (fun s => v T (gamma s))
+      ((G.metric T).inner (p : M)
+        (gradientFun (I := I) (G.metric T) (v T) (p : M))
+        (inwardCoord (M := M) p)) (Set.Ici 0) 0 := by
+    have hcurve := boundaryHopf_hasDerivWithinAt_comp_mfderivWithin
+      (I := I) (v T) gamma (Set.Ici 0) 0
+      (by simpa [hgamma0] using hv_mdiff) hgamma_mdiff
+    rw [hgamma0] at hcurve
+    convert hcurve using 1
+    change (G.metric T).inner (p : M)
+        (gradientFun (I := I) (G.metric T) (v T) (p : M))
+        (inwardCoord (M := M) p) =
+      mfderiv I 𝓘(Real, Real) (v T) (p : M)
+        (mfderivWithin 𝓘(Real, Real) I gamma (Set.Ici 0) 0 1)
+    rw [inner_gradientFun]
+    exact congrArg (mfderiv I 𝓘(Real, Real) (v T) (p : M))
+      hgamma_velocity.symm
   let w : Real → M → Real := fun t x => u t x - v t x
   have hw_nonneg := strict_barrier_on_compact_manifold_with_boundary
     (I := I) G T X w hcont hinit hboundary htime hmdiff hgrad hoperator
@@ -309,13 +326,16 @@ theorem scalar_hopf_boundary_point_of_barrier_with_boundary
   have hfderiv : HasDerivWithinAt f
       ((G.metric T).inner (p : M)
         (gradientFun (I := I) (G.metric T) (u T) (p : M))
-        (inwardCoord (M := M) p) - dv) (Set.Ici 0) 0 :=
+        (inwardCoord (M := M) p) -
+      (G.metric T).inner (p : M)
+        (gradientFun (I := I) (G.metric T) (v T) (p : M))
+        (inwardCoord (M := M) p)) (Set.Ici 0) 0 :=
     hu_deriv.sub hv_deriv
   have hdiff := boundaryHopf_deriv_nonneg_at_right_endpoint ha hfmin hfderiv
   have hinward : 0 < (G.metric T).inner (p : M)
       (gradientFun (I := I) (G.metric T) (u T) (p : M))
       (inwardCoord (M := M) p) := by
-    linarith
+    linarith [hv_inward]
   exact
     outwardNormalDerivative_neg_of_inner_gradient_inwardCoord_pos_at_local_min
       (M := M) (G.metric T) hmin hu_mdiff hinward
