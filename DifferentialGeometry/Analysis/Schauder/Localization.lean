@@ -393,6 +393,117 @@ theorem holderWith_smul_of_norm_le
         ENNReal.ofReal (dist x y) ^ (alpha : Real) := by
       rw [ENNReal.ofReal_rpow_of_nonneg (dist_nonneg) alpha.coe_nonneg]
 
+theorem holderWith_smul_of_eq_zero_outside
+    {Q U : Set X} {alpha Kchi Ku Mchi Mu : NNReal}
+    (chi : X → Real) (u : X → F)
+    (hchi : HolderWith Kchi alpha (Q.restrict chi))
+    (hu : HolderWith Ku alpha ((Q ∩ U).restrict u))
+    (hchiNorm : ∀ x, x ∈ Q → x ∈ U → ‖chi x‖ ≤ Mchi)
+    (huNorm : ∀ x, x ∈ Q → x ∈ U → ‖u x‖ ≤ Mu)
+    (hchiZero : ∀ x, x ∈ Q → x ∉ U → chi x = 0) :
+    HolderWith (Mchi * Ku + Mu * Kchi) alpha
+      (Q.restrict (fun x ↦ chi x • u x)) := by
+  intro x y
+  rw [edist_dist, edist_dist]
+  have hreal : dist (chi x.1 • u x.1) (chi y.1 • u y.1) ≤
+      ((Mchi * Ku + Mu * Kchi : NNReal) : Real) *
+        dist x y ^ (alpha : Real) := by
+    by_cases hxU : x.1 ∈ U
+    · by_cases hyU : y.1 ∈ U
+      · rw [dist_eq_norm]
+        calc
+          ‖chi x.1 • u x.1 - chi y.1 • u y.1‖ =
+              ‖chi x.1 • (u x.1 - u y.1) +
+                (chi x.1 - chi y.1) • u y.1‖ := by
+            congr 1
+            module
+          _ ≤ ‖chi x.1 • (u x.1 - u y.1)‖ +
+              ‖(chi x.1 - chi y.1) • u y.1‖ := norm_add_le _ _
+          _ ≤ (Mchi : Real) * ((Ku : Real) * dist x y ^ (alpha : Real)) +
+              ((Kchi : Real) * dist x y ^ (alpha : Real)) * (Mu : Real) := by
+            rw [norm_smul, norm_smul]
+            gcongr
+            · simpa only [Real.norm_eq_abs] using hchiNorm x.1 x.2 hxU
+            · simpa only [dist_eq_norm, Subtype.dist_eq] using
+                hu.dist_le
+                  (⟨x.1, ⟨x.2, hxU⟩⟩ : (Q ∩ U : Set X))
+                  (⟨y.1, ⟨y.2, hyU⟩⟩ : (Q ∩ U : Set X))
+            · simpa only [Real.dist_eq, Subtype.dist_eq] using hchi.dist_le x y
+            · exact huNorm y.1 y.2 hyU
+          _ = ((Mchi * Ku + Mu * Kchi : NNReal) : Real) *
+              dist x y ^ (alpha : Real) := by
+            push_cast
+            ring
+      · rw [hchiZero y.1 y.2 hyU, zero_smul, dist_zero_right, norm_smul]
+        calc
+          ‖chi x.1‖ * ‖u x.1‖ ≤
+              ((Kchi : Real) * dist x y ^ (alpha : Real)) * (Mu : Real) := by
+            gcongr
+            · have hc := hchi.dist_le x y
+              simpa only [Set.restrict_apply, Real.dist_eq,
+                hchiZero y.1 y.2 hyU, sub_zero, Real.norm_eq_abs,
+                Subtype.dist_eq] using hc
+            · exact huNorm x.1 x.2 hxU
+          _ ≤ ((Mchi * Ku + Mu * Kchi : NNReal) : Real) *
+              dist x y ^ (alpha : Real) := by
+            push_cast
+            rw [show (Kchi : Real) * dist x y ^ (alpha : Real) * Mu =
+              (Mu * Kchi) * dist x y ^ (alpha : Real) by ring, add_mul]
+            exact le_add_of_nonneg_left
+              (mul_nonneg (mul_nonneg Mchi.coe_nonneg Ku.coe_nonneg)
+                (Real.rpow_nonneg (dist_nonneg : 0 ≤ dist x y) _))
+    · rw [hchiZero x.1 x.2 hxU, zero_smul]
+      by_cases hyU : y.1 ∈ U
+      · rw [dist_zero_left, norm_smul]
+        calc
+          ‖chi y.1‖ * ‖u y.1‖ ≤
+              ((Kchi : Real) * dist x y ^ (alpha : Real)) * (Mu : Real) := by
+            gcongr
+            · have hc := hchi.dist_le x y
+              simpa only [Set.restrict_apply, Real.dist_eq,
+                hchiZero x.1 x.2 hxU, zero_sub, norm_neg,
+                Real.norm_eq_abs, abs_neg, Subtype.dist_eq] using hc
+            · exact huNorm y.1 y.2 hyU
+          _ ≤ ((Mchi * Ku + Mu * Kchi : NNReal) : Real) *
+              dist x y ^ (alpha : Real) := by
+            push_cast
+            rw [show (Kchi : Real) * dist x y ^ (alpha : Real) * Mu =
+              (Mu * Kchi) * dist x y ^ (alpha : Real) by ring, add_mul]
+            exact le_add_of_nonneg_left
+              (mul_nonneg (mul_nonneg Mchi.coe_nonneg Ku.coe_nonneg)
+                (Real.rpow_nonneg (dist_nonneg : 0 ≤ dist x y) _))
+      · rw [hchiZero y.1 y.2 hyU, zero_smul, dist_self]
+        positivity
+  calc
+    ENNReal.ofReal (dist (chi x.1 • u x.1) (chi y.1 • u y.1)) ≤
+        ENNReal.ofReal (((Mchi * Ku + Mu * Kchi : NNReal) : Real) *
+          dist x y ^ (alpha : Real)) := ENNReal.ofReal_le_ofReal hreal
+    _ = ((Mchi * Ku + Mu * Kchi : NNReal) : ENNReal) *
+        ENNReal.ofReal (dist x y ^ (alpha : Real)) := by
+      rw [ENNReal.ofReal_mul (by positivity :
+        (0 : Real) ≤ ((Mchi * Ku + Mu * Kchi : NNReal) : Real))]
+      congr 1
+      exact ENNReal.ofReal_coe_nnreal
+    _ = ((Mchi * Ku + Mu * Kchi : NNReal) : ENNReal) *
+        ENNReal.ofReal (dist x y) ^ (alpha : Real) := by
+      rw [ENNReal.ofReal_rpow_of_nonneg (dist_nonneg) alpha.coe_nonneg]
+
+omit [MetricSpace X] in
+theorem norm_smul_le_of_eq_zero_outside
+    {Q U : Set X} {Mchi Mu : NNReal}
+    (chi : X → Real) (u : X → F)
+    (hchiNorm : ∀ x, x ∈ Q → x ∈ U → ‖chi x‖ ≤ Mchi)
+    (huNorm : ∀ x, x ∈ Q → x ∈ U → ‖u x‖ ≤ Mu)
+    (hchiZero : ∀ x, x ∈ Q → x ∉ U → chi x = 0) :
+    ∀ x, x ∈ Q → ‖chi x • u x‖ ≤ Mchi * Mu := by
+  intro x hxQ
+  by_cases hxU : x ∈ U
+  · rw [norm_smul]
+    exact mul_le_mul (hchiNorm x hxQ hxU) (huNorm x hxQ hxU)
+      (norm_nonneg _) Mchi.coe_nonneg
+  · rw [hchiZero x hxQ hxU, zero_smul, norm_zero]
+    positivity
+
 theorem holderWith_comp_continuousLinearMap_of_norm_le_one
     {A B : Type*}
     [NormedAddCommGroup A] [NormedSpace Real A]

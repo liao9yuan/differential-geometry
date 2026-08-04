@@ -589,6 +589,7 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamily
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLocalSource
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLowerOrder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorSchauder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.ClassicalSchauder
@@ -596,6 +597,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.CutoffClassicalSchauder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.CutoffEstimate
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.CutoffGauge
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.CutoffLocalSource
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.DuhamelRepresentation
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FourierL2Bridge
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamel

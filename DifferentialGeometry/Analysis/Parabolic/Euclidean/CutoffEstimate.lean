@@ -818,6 +818,96 @@ theorem parabolicCutoffSource_holderWith_restrict
   unfold parabolicCutoffSourceHolderConst
   simpa only [Set.restrict_apply] using hsum
 
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicCutoffSource_holderWith_restrict_of_eq_zero_outside
+    {Q U : Set (ParabolicPoint (Euc n))}
+    {alpha Kchi Ksource Kcomm : NNReal}
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource : NNReal)
+    (hchi : HolderWith Kchi alpha (Q.restrict chi))
+    (hsource : HolderWith Ksource alpha ((Q ∩ U).restrict source))
+    (hcomm : HolderWith Kcomm alpha (Q.restrict comm))
+    (hchiNorm : ∀ p, p ∈ Q → p ∈ U → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → p ∈ U → ‖source p‖ ≤ Bsource)
+    (hchiZero : ∀ p, p ∈ Q → p ∉ U → chi p = 0) :
+    HolderWith
+      (parabolicCutoffSourceHolderConst Kchi Ksource Kcomm Mchi Bsource)
+      alpha (Q.restrict (fun p ↦ chi p • source p + comm p)) := by
+  have hproduct := holderWith_smul_of_eq_zero_outside
+    chi source hchi hsource hchiNorm hsourceNorm hchiZero
+  have hsum := hproduct.add hcomm
+  unfold parabolicCutoffSourceHolderConst
+  simpa only [Set.restrict_apply] using hsum
+
+omit [Fintype n] [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicCutoffSource_le_of_eq_zero_outside
+    {Q U : Set (ParabolicPoint (Euc n))}
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource Bcomm : NNReal)
+    (hchiNorm : ∀ p, p ∈ Q → p ∈ U → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → p ∈ U → ‖source p‖ ≤ Bsource)
+    (hcommNorm : ∀ p, p ∈ Q → ‖comm p‖ ≤ Bcomm)
+    (hchiZero : ∀ p, p ∈ Q → p ∉ U → chi p = 0) :
+    ∀ p, p ∈ Q →
+      ‖chi p • source p + comm p‖ ≤
+        parabolicCutoffSourceSupConst Mchi Bsource Bcomm := by
+  have hproduct := norm_smul_le_of_eq_zero_outside
+    chi source hchiNorm hsourceNorm hchiZero
+  intro p hp
+  rw [parabolicCutoffSourceSupConst, NNReal.coe_add, NNReal.coe_mul]
+  exact (norm_add_le _ _).trans
+    (add_le_add (hproduct p hp) (hcommNorm p hp))
+
+omit [Fintype n] [DecidableEq n] [Nonempty n] in
+theorem eSupNormOn_parabolicCutoffSource_eqOn_le_of_eq_zero_outside
+    {Q U : Set (ParabolicPoint (Euc n))}
+    (g : ParabolicPoint (Euc n) → F)
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource Bcomm : NNReal)
+    (hg : Set.EqOn g (fun p ↦ chi p • source p + comm p) Q)
+    (hchiNorm : ∀ p, p ∈ Q → p ∈ U → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → p ∈ U → ‖source p‖ ≤ Bsource)
+    (hcommNorm : ∀ p, p ∈ Q → ‖comm p‖ ≤ Bcomm)
+    (hchiZero : ∀ p, p ∈ Q → p ∉ U → chi p = 0) :
+    eSupNormOn Q g ≤
+      parabolicCutoffSourceSupConst Mchi Bsource Bcomm := by
+  rw [eSupNormOn_congr hg, eSupNormOn_le]
+  intro p hp
+  rw [ENNReal.ofReal_le_coe]
+  exact norm_parabolicCutoffSource_le_of_eq_zero_outside
+    chi source comm Mchi Bsource Bcomm hchiNorm hsourceNorm
+      hcommNorm hchiZero p hp
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicCutoffSource_eqOn_holderWith_restrict_of_eq_zero_outside
+    {Q U : Set (ParabolicPoint (Euc n))}
+    {alpha Kchi Ksource Kcomm : NNReal}
+    (g : ParabolicPoint (Euc n) → F)
+    (chi : ParabolicPoint (Euc n) → Real)
+    (source comm : ParabolicPoint (Euc n) → F)
+    (Mchi Bsource : NNReal)
+    (hg : Set.EqOn g (fun p ↦ chi p • source p + comm p) Q)
+    (hchi : HolderWith Kchi alpha (Q.restrict chi))
+    (hsource : HolderWith Ksource alpha ((Q ∩ U).restrict source))
+    (hcomm : HolderWith Kcomm alpha (Q.restrict comm))
+    (hchiNorm : ∀ p, p ∈ Q → p ∈ U → ‖chi p‖ ≤ Mchi)
+    (hsourceNorm : ∀ p, p ∈ Q → p ∈ U → ‖source p‖ ≤ Bsource)
+    (hchiZero : ∀ p, p ∈ Q → p ∉ U → chi p = 0) :
+    HolderWith
+      (parabolicCutoffSourceHolderConst Kchi Ksource Kcomm Mchi Bsource)
+      alpha (Q.restrict g) := by
+  have heq : Q.restrict g =
+      Q.restrict (fun p ↦ chi p • source p + comm p) := by
+    funext p
+    exact hg p.2
+  rw [heq]
+  exact parabolicCutoffSource_holderWith_restrict_of_eq_zero_outside
+    chi source comm Mchi Bsource hchi hsource hcomm hchiNorm
+      hsourceNorm hchiZero
+
 omit [Fintype n] [DecidableEq n] [Nonempty n] in
 theorem eSupNormOn_parabolicCutoffSource_eqOn_le
     {Q : Set (ParabolicPoint (Euc n))}
