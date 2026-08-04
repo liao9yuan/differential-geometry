@@ -169,6 +169,90 @@ theorem caccioppoli_rpow_of_subsolution
   · intro t ht x
     exact rpow_subsolution (I := I) (M := M) g u source hu hpos hq (hpde t ht x)
 
+theorem rpow_moser_step_le
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff outer : SmoothScalar g)
+    (u source : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq : 1 ≤ q)
+    {weight dweight : ℝ → ℝ} {a t₀ t₁ A K L : ℝ}
+    (hat₀ : a ≤ t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (hA : 0 ≤ A) (hK : 0 ≤ K)
+    (hdweight : ContinuousOn dweight (Icc a t₁))
+    (hweight : ∀ t ∈ Icc a t₁, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a t₁, 0 ≤ weight t)
+    (hweight_a : weight a = 0)
+    (hweight_inner : ∀ t ∈ Icc t₀ t₁, weight t = 1)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x)
+    (hrhs_le : ∀ t ∈ Icc t₀ t₁,
+      (∫ s in a..t,
+        dweight s * localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun r x => u r x ^ q)
+              (contMDiff_rpow_of_pos hu hpos q) s) +
+          weight s *
+            (4 * cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g (fun r x => u r x ^ q)
+                  (contMDiff_rpow_of_pos hu hpos q) s) +
+              ∫ x, 2 * cutoff.toFun x ^ 2 * u s x ^ q *
+                  rpowSource q u source s x
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g))) ≤ A)
+    (hgrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x) ≤
+        K * outer.toFun x ^ 2)
+    (houterMass_le :
+      (∫ t in t₀..t₁,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
+            (contMDiff_rpow_of_pos hu hpos q) t)) ≤ L) :
+    (∫ t in t₀..t₁, ∫ x,
+        |cutoff.toFun x * u t x ^ q| ^
+          (2 + 4 / (Module.finrank ℝ E : ℝ))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+      localizedSobolevConstant (I := I) (M := M) g hdim *
+        (((t₁ - t₀ + 1) * A + K * L) ^
+          (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
+  let huq := contMDiff_rpow_of_pos hu hpos q
+  let sourceq := rpowSource q u source
+  have hsourceq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => sourceq p.1 p.2) := by
+    simpa only [sourceq] using contMDiff_rpowSource_of_pos hu hsource hpos q
+  have hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t))
+      (Icc a t₁) :=
+    (contDiff_localizedDirichletEnergy (I := I) (M := M) cutoff
+      (fun s x => u s x ^ q) huq).continuous.continuousOn
+  have hpdeq : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x ^ q) t ≤
+        Δ_g (I := I) g
+            (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t).smooth x +
+          sourceq t x := by
+    intro t ht x
+    simpa only [huq, sourceq] using
+      rpow_subsolution (I := I) (M := M) g u source hu hpos hq (hpde t ht x)
+  have henergy := caccioppoli_inner_energy_of_subsolution
+    (I := I) (M := M) cutoff (fun t x => u t x ^ q) sourceq huq hsourceq
+    hat₀ ht₀t₁ hdweight hweight hweight_nonneg hweight_a hweight_inner
+    (fun t _ x => (Real.rpow_pos_of_pos (hpos t x) q).le)
+    hpdeq
+    (by simpa only [huq, sourceq] using hrhs_le)
+  apply localized_parabolic_sobolev_of_nested_cutoffs_le
+    (I := I) (M := M) g hdim cutoff outer (fun t x => u t x ^ q) huq
+    ht₀t₁ hA hK henergy.1
+  · exact hdirichlet.mono (fun t ht => ⟨hat₀.trans ht.1, ht.2⟩)
+  · exact henergy.2
+  · exact hgrad
+  · simpa only [huq] using houterMass_le
+
 theorem rpow_moser_step
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
@@ -220,40 +304,13 @@ theorem rpow_moser_step
           ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
         C * (((t₁ - t₀ + 1) * A + K * L) ^
           (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
-  let huq := contMDiff_rpow_of_pos hu hpos q
-  let sourceq := rpowSource q u source
-  have hsourceq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => sourceq p.1 p.2) := by
-    simpa only [sourceq] using contMDiff_rpowSource_of_pos hu hsource hpos q
-  have hdirichlet : ContinuousOn
-      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
-        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t))
-      (Icc a t₁) :=
-    (contDiff_localizedDirichletEnergy (I := I) (M := M) cutoff
-      (fun s x => u s x ^ q) huq).continuous.continuousOn
-  have hpdeq : ∀ t ∈ Icc a t₁, ∀ x : M,
-      deriv (fun s => u s x ^ q) t ≤
-        Δ_g (I := I) g
-            (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t).smooth x +
-          sourceq t x := by
-    intro t ht x
-    simpa only [huq, sourceq] using
-      rpow_subsolution (I := I) (M := M) g u source hu hpos hq (hpde t ht x)
-  have henergy := caccioppoli_inner_energy_of_subsolution
-    (I := I) (M := M) cutoff (fun t x => u t x ^ q) sourceq huq hsourceq
-    hat₀ ht₀t₁ hdweight hweight hweight_nonneg hweight_a hweight_inner
-    (fun t _ x => (Real.rpow_pos_of_pos (hpos t x) q).le)
-    hpdeq
-    (by simpa only [huq, sourceq] using hrhs_le)
-  apply localized_parabolic_sobolev_of_nested_cutoffs
-    (I := I) (M := M) g hdim cutoff outer (fun t x => u t x ^ q) huq
-    ht₀t₁ hA hK henergy.1
-  · exact hdirichlet.mono (fun t ht => ⟨hat₀.trans ht.1, ht.2⟩)
-  · exact henergy.2
-  · exact hgrad
-  · simpa only [huq] using houterMass_le
+  refine ⟨localizedSobolevConstant (I := I) (M := M) g hdim,
+    localizedSobolevConstant_nonneg (I := I) (M := M) g hdim, ?_⟩
+  exact rpow_moser_step_le (I := I) (M := M) g hdim cutoff outer u source hu hsource
+    hpos hq hat₀ ht₀t₁ hA hK hdweight hweight hweight_nonneg hweight_a
+    hweight_inner hpde hrhs_le hgrad houterMass_le
 
-theorem rpow_moser_step_homogeneous
+theorem rpow_moser_step_homogeneous_le
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
     (cutoff outer : SmoothScalar g)
@@ -280,12 +337,12 @@ theorem rpow_moser_step_homogeneous
         localizedL2Mass (I := I) (M := M) outer
           (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
             (contMDiff_rpow_of_pos hu hpos q) t)) ≤ L) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      (∫ t in t₀..t₁, ∫ x,
-          |cutoff.toFun x * u t x ^ q| ^
-            (2 + 4 / (Module.finrank ℝ E : ℝ))
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
-        C * (((t₁ - t₀ + 1) * ((D + 4 * K) * L) + K * L) ^
+    (∫ t in t₀..t₁, ∫ x,
+        |cutoff.toFun x * u t x ^ q| ^
+          (2 + 4 / (Module.finrank ℝ E : ℝ))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+      localizedSobolevConstant (I := I) (M := M) g hdim *
+        (((t₁ - t₀ + 1) * ((D + 4 * K) * L) + K * L) ^
           (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
   let huq := contMDiff_rpow_of_pos hu hpos q
   let zeroSource : ℝ → M → ℝ := fun _ _ => 0
@@ -330,7 +387,7 @@ theorem rpow_moser_step_homogeneous
             (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t))
         hmass_int
     exact hmono.trans (by simpa only [mass, huq] using houterMass_le)
-  apply rpow_moser_step (I := I) (M := M) g hdim cutoff outer u zeroSource
+  apply rpow_moser_step_le (I := I) (M := M) g hdim cutoff outer u zeroSource
     hu hzeroSource hpos hq hat₀.le ht₀t₁
     (mul_nonneg (add_nonneg hD (mul_nonneg (by norm_num) hK)) hL) hK
     (contDiff_timeCutoffDeriv a t₀).continuous.continuousOn
@@ -343,6 +400,46 @@ theorem rpow_moser_step_homogeneous
   · simpa only [huq, zeroSource] using hrhs_le
   · exact hgrad
   · simpa only [huq] using houterMass_inner_le
+
+theorem rpow_moser_step_homogeneous
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff outer : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq : 1 ≤ q)
+    {a t₀ t₁ D K L : ℝ}
+    (hat₀ : a < t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (hD : 0 ≤ D) (hK : 0 ≤ K) (hL : 0 ≤ L)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    (hcutoff : ∀ x : M, cutoff.toFun x ^ 2 ≤ outer.toFun x ^ 2)
+    (hgrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x) ≤
+        K * outer.toFun x ^ 2)
+    (hderiv_le : ∀ s ∈ Icc a t₁, timeCutoffDeriv a t₀ s ≤ D)
+    (houterMass_le :
+      (∫ t in a..t₁,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
+            (contMDiff_rpow_of_pos hu hpos q) t)) ≤ L) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∫ t in t₀..t₁, ∫ x,
+          |cutoff.toFun x * u t x ^ q| ^
+            (2 + 4 / (Module.finrank ℝ E : ℝ))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+        C * (((t₁ - t₀ + 1) * ((D + 4 * K) * L) + K * L) ^
+          (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
+  refine ⟨localizedSobolevConstant (I := I) (M := M) g hdim,
+    localizedSobolevConstant_nonneg (I := I) (M := M) g hdim, ?_⟩
+  exact rpow_moser_step_homogeneous_le
+    (I := I) (M := M) g hdim cutoff outer u hu hpos hq hat₀ ht₀t₁ hD hK hL
+      hpde hcutoff hgrad hderiv_le houterMass_le
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
