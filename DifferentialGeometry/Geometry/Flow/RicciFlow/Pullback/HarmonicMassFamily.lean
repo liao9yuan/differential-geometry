@@ -1,7 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicMassRegularity
 import DifferentialGeometry.Analysis.ODE.StateCoerciveMass
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 

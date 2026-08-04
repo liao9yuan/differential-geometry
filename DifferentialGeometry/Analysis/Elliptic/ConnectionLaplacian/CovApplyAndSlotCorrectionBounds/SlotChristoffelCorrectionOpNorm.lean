@@ -13,8 +13,8 @@ open scoped Manifold Topology ContDiff BigOperators
 open Tensor0SBundle
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 
@@ -310,8 +310,8 @@ theorem chartTensorRSOutputSlotCorrection_opNorm_le (r s : ℕ)
   rw [h_rearrange] at hChain2
   exact hChain2
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

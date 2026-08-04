@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 noncomputable section
 
@@ -10,8 +10,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
@@ -156,6 +156,6 @@ theorem exists_riemannianFiberNormSq_slot0Curry_le
   exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x e K₀
     hreprS hreprSucc T a
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry

@@ -4,8 +4,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMO
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotUniformBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotChartSourceContMDiff
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -18,8 +18,8 @@ open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -1132,8 +1132,8 @@ theorem outputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
   have h := hC_mem ⟨b, hb_K, rfl⟩
   exact le_trans h (le_max_left _ _)
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

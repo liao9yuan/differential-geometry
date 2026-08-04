@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.TensorConnLaplacianL2Bound
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -16,8 +16,8 @@ open MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators ENNReal NNReal
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
@@ -888,8 +888,8 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNormPou
     rw [← mul_assoc, h_NC_eq]
   exact le_trans h_int_le' (le_trans h_combined (le_of_eq h_final_eq))
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

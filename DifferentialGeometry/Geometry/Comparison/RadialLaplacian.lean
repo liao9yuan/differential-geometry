@@ -7,8 +7,8 @@ import DifferentialGeometry.Geometry.Comparison.Variation.JacobiShape
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.LineSplit
+open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator

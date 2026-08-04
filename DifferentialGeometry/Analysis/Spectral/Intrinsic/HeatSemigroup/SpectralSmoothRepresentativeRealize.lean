@@ -3,8 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLim
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenComboGardingReduction
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
@@ -54,7 +54,7 @@ theorem eigenSpan_pouHs_le_spectral (k : ℕ) :
           (C * (k + 1)) *
             ‖finiteEigenComboHs (I := I) (M := M) g F c ((2 * k : ℕ) : ℝ)‖ := by
   obtain ⟨C, hC_nn, hC⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter
+    DifferentialGeometry.Analysis.Elliptic.exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter
       (I := I) (M := M) g 2 k
   refine ⟨C, hC_nn, fun F c => ?_⟩
   exact eigenSpan_pouHs_le_spectral_of_elliptic (I := I) (M := M) g F c k hC_nn

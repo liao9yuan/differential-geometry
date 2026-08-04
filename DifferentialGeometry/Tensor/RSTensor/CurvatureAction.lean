@@ -16,7 +16,7 @@ set_option autoImplicit false
 noncomputable section
 
 open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Tensor.RSTensor
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -256,4 +256,4 @@ theorem curvatureAction0SAt_eq_neg_sum_connectionRiemannCurvature
       (I := I) (cov := cov) (Rm13 := Rm13)
       alpha Xsec Ysec Vsec hRm13
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Tensor.RSTensor

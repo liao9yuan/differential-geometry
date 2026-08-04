@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.OpenWindowEqu
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SourceCovLip
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpenAssembly
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

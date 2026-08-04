@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegratedNullity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -15,7 +15,7 @@ open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
 namespace Integral
-namespace Connection
+namespace DivergenceTheorem
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -208,7 +208,7 @@ theorem integral_frameSummed_bracketCovDeriv_combined_eq_zero
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 :=
   integral_frameSummed_covDeriv_combined_eq_zero (I := I) (M := M) g r s V W Z
 
-end Connection
+end DivergenceTheorem
 end Integral
 end DifferentialGeometry
 

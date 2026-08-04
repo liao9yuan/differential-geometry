@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.FineInvGram
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.RetractionParametrix
 import DifferentialGeometry.Geometry.Operator.VossWeyl
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator

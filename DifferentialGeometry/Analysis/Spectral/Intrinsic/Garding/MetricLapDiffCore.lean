@@ -3,8 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapLinear
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Retag
 import Mathlib.Analysis.Normed.Operator.Extend
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator

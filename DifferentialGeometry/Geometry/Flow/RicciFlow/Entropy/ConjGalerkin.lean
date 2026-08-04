@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffMea
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarLapDiffCore
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 import Mathlib.Analysis.InnerProductSpace.PiL2
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.W
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.EigenBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -197,13 +198,13 @@ theorem cubicQ_sub_nonneg_of_section9
     (hepsilon : epsilon <= 2 * delta ^ 2)
     (ht : t ∈ Set.Icc 0 T)
     (hric :
-      DifferentialGeometry.Integral.Connection.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+      DifferentialGeometry.PDE.RicciFlow.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         (Set.Icc 0 T))
     (hpinch :
       PinchPres (I := I) (M := M)
         (fun t : Real => S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         S.scalar T delta) :
     0 <=
       cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S) t x
@@ -291,13 +292,13 @@ theorem pinchBookRHS_le_drift_sol
     (hepsilon : epsilon <= 2 * delta ^ 2)
     (ht : t ∈ Set.Icc 0 T)
     (hric :
-      DifferentialGeometry.Integral.Connection.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+      DifferentialGeometry.PDE.RicciFlow.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         (Set.Icc 0 T))
     (hpinch :
       PinchPres (I := I) (M := M)
         (fun t : Real => S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         S.scalar T delta) :
     pinchBookRHS (I := I) (flowG (I := I) S)
         S.scalar (ricciNorm (I := I) S) (scalGradSq (I := I) S)
@@ -338,16 +339,16 @@ theorem pinchQuotient_parabolic_nonpos
     (heps0 : 0 < epsilon) (heps1 : epsilon < 1)
     (hepsilon : epsilon <= 2 * delta ^ 2)
     (hric :
-      DifferentialGeometry.Integral.Connection.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+      DifferentialGeometry.PDE.RicciFlow.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         (Set.Icc 0 T))
     (hpinch :
       PinchPres (I := I) (M := M)
         (fun t : Real => S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         S.scalar T delta) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I)
+      DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I)
         (flowG (I := I) S) T
         (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
         (pinchQuotient (I := I) S epsilon) t x <= 0 := by
@@ -398,7 +399,7 @@ theorem pinchQuotient_parabolic_nonpos
     pinchBookRHS_le_drift_sol (I := I) (M := M) S hdim
       (hscalar t (hIcc_subset ht) x) hdelta0 heps0 heps1 hepsilon
       ht hric hpinch
-  unfold DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift
+  unfold DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift
   rw [hderiv, hheat]
   linarith
 
@@ -610,7 +611,7 @@ private theorem ricciNorm_slabCont
     (hD : D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     (hTω : T < omega) :
     ContinuousOn (fun p : Real × M => ricciNorm (I := I) S p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
   classical
   refine continuousOn_of_locally_continuousOn ?_
   intro p hp
@@ -625,7 +626,7 @@ private theorem ricciNorm_slabCont
     intro q hq
     rcases hq with ⟨hslab, _hu_time, hu_space⟩
     have hslab' : q.1 ∈ Set.Icc 0 T ∧ q.2 ∈ (Set.univ : Set M) := by
-      simpa [DifferentialGeometry.Integral.Connection.spacetimeSlab] using hslab
+      simpa [DifferentialGeometry.PDE.RicciFlow.spacetimeSlab] using hslab
     constructor
     · rw [hD]
       exact ⟨hslab'.1.1, lt_of_le_of_lt hslab'.1.2 hTω⟩
@@ -647,25 +648,25 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
     (hscalar : ∀ t : Real, t ∈ D.carrier -> ∀ x : M, 0 < S.scalar t x)
     (hricciNorm_cont :
       ContinuousOn (fun p : Real × M => ricciNorm (I := I) S p.1 p.2)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) :
+        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T)) :
     ContinuousOn
       (fun p : Real × M => C - pinchQuotient (I := I) S epsilon p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
   have hscalar_cont : ContinuousOn (fun p : Real × M => S.scalar p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
-    simpa [DifferentialGeometry.Integral.Connection.spacetimeSlab] using
+      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
+    simpa [DifferentialGeometry.PDE.RicciFlow.spacetimeSlab] using
       (SolutionOn.scalar_continuousOn (I := I) (M := M) S
         hS.isSolution hS.scalarSTCont T
         (by
           intro t ht
           rw [hD]
           exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩))
-  have hscalar_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Integral.Connection.spacetimeSlab
+  have hscalar_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.PDE.RicciFlow.spacetimeSlab
     (M := M) T ->
       S.scalar p.1 p.2 ≠ 0 ∨ 0 ≤ -(2 - epsilon) := by
     intro p hp
     have hp' : p.1 ∈ Set.Icc 0 T ∧ p.2 ∈ (Set.univ : Set M) := by
-      simpa [DifferentialGeometry.Integral.Connection.spacetimeSlab] using hp
+      simpa [DifferentialGeometry.PDE.RicciFlow.spacetimeSlab] using hp
     have hpD : p.1 ∈ D.carrier := by
       rw [hD]
       exact ⟨hp'.1.1, lt_of_le_of_lt hp'.1.2 hTω⟩
@@ -673,17 +674,17 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
   have htf_cont : ContinuousOn
       (fun p : Real × M =>
         tfRicNormSq S.scalar (ricciNorm (I := I) S) p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
     simpa [tfRicNormSq, tracefreeRicciNormSqOf,
       tracefreeRicciNormSqAtOf, div_eq_mul_inv] using
       hricciNorm_cont.sub ((hscalar_cont.pow 2).mul continuousOn_const)
   have hpow_cont : ContinuousOn
       (fun p : Real × M => S.scalar p.1 p.2 ^ (-(2 - epsilon)))
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) :=
+      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) :=
     hscalar_cont.rpow_const hscalar_ne
   have hquot_cont : ContinuousOn
       (fun p : Real × M => pinchQuotient (I := I) S epsilon p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
     simpa [pinchQuotient, quotField] using htf_cont.mul hpow_cont
   exact continuousOn_const.sub hquot_cont
 
@@ -826,24 +827,24 @@ theorem pinchQuot_slab_bound
     (heps0 : 0 < epsilon) (heps1 : epsilon < 1)
     (hepsilon : epsilon <= 2 * delta ^ 2)
     (hric :
-      DifferentialGeometry.Integral.Connection.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+      DifferentialGeometry.PDE.RicciFlow.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         (Set.Icc 0 T))
     (hpinch :
       PinchPres (I := I) (M := M)
         (fun t : Real => S.base.metric t)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         S.scalar T delta)
     (hinit : ∀ x : M, pinchQuotient (I := I) S epsilon 0 x <= C)
     (hw_cont : ContinuousOn
       (fun p : Real × M => C - pinchQuotient (I := I) S epsilon p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) :
+      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T)) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       pinchQuotient (I := I) S epsilon t x <= C := by
   classical
   have hsub :
       ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I)
+        DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I)
           (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (pinchQuotient (I := I) S epsilon) t x <= 0 :=
@@ -946,11 +947,11 @@ theorem pinchQuot_slab_bound
     simpa [τ] using mdifferentiableAt_neg_section hPgrad
   have hoperator_neg : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       ∀ x : M,
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I)
+        DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I)
           (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (fun s y => C - pinchQuotient (I := I) S epsilon s y) t x =
-        - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I)
+        - DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I)
           (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (pinchQuotient (I := I) S epsilon) t x := by
@@ -986,12 +987,12 @@ theorem pinchQuot_slab_bound
       simpa [τ] using
         pinchQuotient_grad_pos (I := I) S hS epsilon
           (fun τ y => hscalar (τ : Real) (D.regular_subset τ.2) y) τ x
-    exact DifferentialGeometry.Integral.Connection.parabolic_const_sub (I := I) (flowG (I := I) S) T
+    exact DifferentialGeometry.PDE.RicciFlow.parabolic_const_sub (I := I) (flowG (I := I) S) T
       (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
       (pinchQuotient (I := I) S epsilon) C t x
       ((uniqueDiffOn_Icc hTpos).uniqueDiffWithinAt ht)
       hu_time hu_space hu_grad
-  exact DifferentialGeometry.Integral.Connection.scalar_sub_const_posReg (I := I)
+  exact DifferentialGeometry.PDE.RicciFlow.scalar_sub_const_posReg (I := I)
     (flowG (I := I) S) T hT
     (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
     (pinchQuotient (I := I) S epsilon) C
@@ -1070,13 +1071,13 @@ theorem pinchEstimate_sol
           ∀ T : Real, 0 ≤ T -> T < omega ->
             PinchPres (I := I) (M := M)
               (fun t : Real => S.base.metric t)
-              (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+              (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M)
                 S.ricci)
               S.scalar T delta)
     (hric :
       ∀ T : Real, 0 ≤ T -> T < omega ->
-        DifferentialGeometry.Integral.Connection.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+        DifferentialGeometry.PDE.RicciFlow.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+          (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
           (Set.Icc 0 T)) :
     ∃ epsilon C : Real,
       0 < epsilon ∧ epsilon < 1 ∧ 0 ≤ C ∧
@@ -1119,12 +1120,12 @@ theorem pinchEstimate_sol
     have hpinchT := hpinchAll t ht0 htω
     have hricciNorm_cont : ContinuousOn
         (fun p : Real × M => ricciNorm (I := I) S p.1 p.2)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) t) :=
+        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) t) :=
       ricciNorm_slabCont (I := I) (M := M) S hS h0ω hD htω
     have hw_cont : ContinuousOn
         (fun p : Real × M =>
           C - pinchQuotient (I := I) S epsilon p.1 p.2)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) t) :=
+        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) t) :=
       pinchQuotient_slab_continuous_of_ricciNorm (I := I) (M := M)
         S hS h0ω hD htω hscalar hricciNorm_cont
     have hbound :=
@@ -1163,13 +1164,13 @@ theorem pinchEstimate_display_sol
           ∀ T : Real, 0 ≤ T -> T < omega ->
             PinchPres (I := I) (M := M)
               (fun t : Real => S.base.metric t)
-              (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M)
+              (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M)
                 S.ricci)
               S.scalar T delta)
     (hric :
       ∀ T : Real, 0 ≤ T -> T < omega ->
-        DifferentialGeometry.Integral.Connection.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+        DifferentialGeometry.PDE.RicciFlow.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+          (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
           (Set.Icc 0 T)) :
     ∃ tracefreeRicciNormSq scalar weight : Real -> M -> Real, ∃ C : Real,
       PinchEstimateOn (M := M) tracefreeRicciNormSq scalar weight C Set.univ := by

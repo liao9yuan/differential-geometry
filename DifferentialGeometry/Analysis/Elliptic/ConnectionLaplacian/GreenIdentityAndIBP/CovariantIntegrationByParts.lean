@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetr
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationByParts
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -14,8 +13,8 @@ open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -275,8 +274,8 @@ theorem integral_tensorInner_covDeriv_integrationByParts
   rw [hsplitABC, hsplitAB] at hcombined'
   linarith [hcombined']
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

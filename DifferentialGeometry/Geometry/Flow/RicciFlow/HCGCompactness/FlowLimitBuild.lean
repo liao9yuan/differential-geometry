@@ -3,8 +3,9 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -112,8 +113,7 @@ theorem isSolutionOn_of_reg
         ((-2 : Real) * ricciTensor (I := I) (g (t : Real)) x X Y)
         D.carrier (t : Real) :=
       (hpde (t : Real) t.2 x X Y).hasDerivWithinAt
-    simpa [SolutionFamily.ricciAt, metricRicciAt,
-      metricRicciAt_apply_eq_ricciTensor] using h
+    simpa [SolutionFamily.ricciAt, metricRicciAt_apply_eq_ricciTensor] using h
   · exact hscalarCont.congr (fun q _ => rfl)
   · intro K t htK hKsub x
     exact (hscalarTime t (hKsub htK) x).mono hKsub

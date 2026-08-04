@@ -13,8 +13,8 @@ open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
@@ -96,8 +96,8 @@ private lemma trivToE_B_value_bound_on_pouTsupport
   have h1 := hCu_mem ⟨b, hb, rfl⟩
   exact le_trans h1 (le_max_left _ _)
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

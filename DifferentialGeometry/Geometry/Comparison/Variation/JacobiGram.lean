@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiField
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 /-!

@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.RicciFlow
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -17,7 +18,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
@@ -355,7 +356,7 @@ theorem metricGainControl_of_metricVariationOn
     (A : (t : Real) -> (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     {T : Real}
-    (hEq : MetricVariationEquationOn (I := I) G Ric)
+    (hEq : MetricVariationEquationOnRaw (I := I) G Ric)
     (hlocal :
       ∀ t0 : Real,
         t0 ∈ Set.Icc 0 T ->
@@ -433,7 +434,7 @@ theorem metricGainControl_of_metricVariationOn_closedOpen
     (Ric : RicciTensorField (I := I) (M := M) Real)
     (A : (t : Real) -> (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
-    (hEq : MetricVariationEquationOn (I := I) G Ric)
+    (hEq : MetricVariationEquationOnRaw (I := I) G Ric)
     (hSmooth : MetricFamilySmoothOn (I := I) (M := M)
       (RealTimeInterval.closedOpen 0 omega h0ω) G)
     (hA :
@@ -498,4 +499,4 @@ theorem metricGainControl_of_metricVariationOn_closedOpen
           lt_of_le_of_lt (le_trans hs.2 hdeltaRawT) hTω⟩)
   · exact hAcont t0 deltaRaw
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

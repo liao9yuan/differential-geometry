@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Metric.FiberExpansion
 import DifferentialGeometry.Analysis.ODE.SecondOrderLinearExistence
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 

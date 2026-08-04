@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Elliptic
 
 
 noncomputable section
@@ -10,8 +10,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
@@ -156,6 +156,6 @@ theorem riemannianFiberNormSq_succ_eq_sum_slot0Curry
   refine Finset.sum_congr rfl (fun J' _ => ?_)
   rw [fiberNormSqComponent_slot0Curry (I := I) (M := M) g x s e K₀ T a J']
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry

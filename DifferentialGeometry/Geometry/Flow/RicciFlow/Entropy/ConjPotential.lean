@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotential
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Uniform
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.JointRegularity
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

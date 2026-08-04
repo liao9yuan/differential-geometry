@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Bianchi
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
@@ -39,17 +40,17 @@ private theorem curvatureAction0SAt_vec2_eq
     {x : M}
     (Ric : DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x)
     (X Y U V : TangentSpace I x) :
-    DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) Rm13 Ric X Y
+    DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) Rm13 Ric X Y
         (DifferentialGeometry.Geometry.Curvature.vec2 U V) =
       - (Rm13 x
-            (DifferentialGeometry.Integral.Connection.oneFormAtSlot0S (I := I) Ric
+            (DifferentialGeometry.Tensor.RSTensor.oneFormAtSlot0S (I := I) Ric
               (DifferentialGeometry.Geometry.Curvature.vec2 U V) 0)
             (DifferentialGeometry.Geometry.Curvature.vec3 X Y U) +
           Rm13 x
-            (DifferentialGeometry.Integral.Connection.oneFormAtSlot0S (I := I) Ric
+            (DifferentialGeometry.Tensor.RSTensor.oneFormAtSlot0S (I := I) Ric
               (DifferentialGeometry.Geometry.Curvature.vec2 U V) 1)
             (DifferentialGeometry.Geometry.Curvature.vec3 X Y V)) := by
-  rw [DifferentialGeometry.Integral.Connection.curvatureAction0SAt]
+  rw [DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt]
   simp [Fin.sum_univ_two, DifferentialGeometry.Geometry.Curvature.vec2,
     DifferentialGeometry.Geometry.Curvature.vec2]
 
@@ -88,7 +89,7 @@ private theorem contractedCurvatureAction_left_eq
     (hbasis : forall a : Idx, basis a = frame a x) :
     (∑ k : Idx, ∑ l : Idx,
         gInv t x k l *
-          DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 t)
+          DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 t)
             (S.ricci t x) (frame k x) (frame i x)
             (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) =
       rmRicciContractionCompInFrame (I := I) S
@@ -148,7 +149,7 @@ private theorem contractedCurvatureAction_right_eq
     (hbasis : forall a : Idx, basis a = frame a x) :
     (∑ k : Idx, ∑ l : Idx,
         gInv t x k l *
-          DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 t)
+          DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 t)
             (S.ricci t x) (frame k x) (frame j x)
             (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) =
       rmRicciContractionCompInFrame (I := I) S
@@ -173,7 +174,7 @@ private theorem contractedCurvatureAction_right_eq
   calc
     (∑ k : Idx, ∑ l : Idx,
         gInv t x k l *
-          DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 t)
+          DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 t)
             (S.ricci t x) (frame k x) (frame j x)
             (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)))
         =
@@ -226,7 +227,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
       (I := I) frame nabla2RicTensor nabla2Ric)
     (hRicciId : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
+      DifferentialGeometry.Tensor.RSTensor.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
     (hRicTrace13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D,
@@ -280,7 +281,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
       forall k l : Idx,
         nabla2Ric (t : Real) x k i j l -
             nabla2Ric (t : Real) x i k j l =
-          DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+          DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
             (S.ricci (t : Real) x)
             (frame k x) (frame i x)
             (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x)) := by
@@ -309,7 +310,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
       forall k l : Idx,
         nabla2Ric (t : Real) x k j i l -
             nabla2Ric (t : Real) x j k i l =
-          DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+          DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
             (S.ricci (t : Real) x)
             (frame k x) (frame j x)
             (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)) := by
@@ -341,7 +342,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
           (t : Real) x i j +
         (∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
-            DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame i x)
               (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := by
@@ -353,7 +354,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
         ∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
             (nabla2Ric (t : Real) x i k j l +
-              DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I)
+              DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I)
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame i x)
@@ -369,7 +370,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
             gInv (t : Real) x k l * nabla2Ric (t : Real) x i k j l) +
           (∑ k : Idx, ∑ l : Idx,
             gInv (t : Real) x k l *
-              DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I)
+              DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I)
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame i x)
@@ -382,7 +383,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
           gInv (t : Real) x k l * nabla2Ric (t : Real) x j k i l) +
         (∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
-            DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame j x)
               (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) := by
@@ -394,7 +395,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
         ∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
             (nabla2Ric (t : Real) x j k i l +
-              DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I)
+              DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I)
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame j x)
@@ -410,7 +411,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
             gInv (t : Real) x k l * nabla2Ric (t : Real) x j k i l) +
           (∑ k : Idx, ∑ l : Idx,
             gInv (t : Real) x k l *
-              DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I)
+              DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I)
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame j x)
@@ -453,7 +454,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
           (t : Real) x i j +
         (∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
-            DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame i x)
               (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := hleftCurv
@@ -474,7 +475,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
           (t : Real) x i j +
         (∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
-            DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame j x)
               (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) :=
@@ -512,7 +513,7 @@ theorem ricciSecCommLocId
       (I := I) frame u nabla2RicTensor nabla2Ric)
     (hRicciId : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
+      DifferentialGeometry.Tensor.RSTensor.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
     (hRicTrace13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D,
@@ -567,7 +568,7 @@ theorem ricciSecCommLocId
       forall k l : Idx,
         nabla2Ric (t : Real) x k i j l -
             nabla2Ric (t : Real) x i k j l =
-          DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+          DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
             (S.ricci (t : Real) x)
             (frame k x) (frame i x)
             (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x)) := by
@@ -596,7 +597,7 @@ theorem ricciSecCommLocId
       forall k l : Idx,
         nabla2Ric (t : Real) x k j i l -
             nabla2Ric (t : Real) x j k i l =
-          DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+          DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
             (S.ricci (t : Real) x)
             (frame k x) (frame j x)
             (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)) := by
@@ -628,7 +629,7 @@ theorem ricciSecCommLocId
           (t : Real) x i j +
         (∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
-            DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame i x)
               (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := by
@@ -640,7 +641,7 @@ theorem ricciSecCommLocId
         ∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
             (nabla2Ric (t : Real) x i k j l +
-              DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I)
+              DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I)
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame i x)
@@ -656,7 +657,7 @@ theorem ricciSecCommLocId
             gInv (t : Real) x k l * nabla2Ric (t : Real) x i k j l) +
           (∑ k : Idx, ∑ l : Idx,
             gInv (t : Real) x k l *
-              DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I)
+              DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I)
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame i x)
@@ -669,7 +670,7 @@ theorem ricciSecCommLocId
           gInv (t : Real) x k l * nabla2Ric (t : Real) x j k i l) +
         (∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
-            DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame j x)
               (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) := by
@@ -681,7 +682,7 @@ theorem ricciSecCommLocId
         ∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
             (nabla2Ric (t : Real) x j k i l +
-              DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I)
+              DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I)
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame j x)
@@ -697,7 +698,7 @@ theorem ricciSecCommLocId
             gInv (t : Real) x k l * nabla2Ric (t : Real) x j k i l) +
           (∑ k : Idx, ∑ l : Idx,
             gInv (t : Real) x k l *
-              DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I)
+              DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I)
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame j x)
@@ -740,7 +741,7 @@ theorem ricciSecCommLocId
           (t : Real) x i j +
         (∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
-            DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame i x)
               (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := hleftCurv
@@ -761,7 +762,7 @@ theorem ricciSecCommLocId
           (t : Real) x i j +
         (∑ k : Idx, ∑ l : Idx,
           gInv (t : Real) x k l *
-            DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame j x)
               (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) :=
@@ -970,7 +971,7 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
       (I := I) frame nabla2RicTensor nabla2Ric)
     (hRicciId : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
+      DifferentialGeometry.Tensor.RSTensor.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
     (hRicTrace13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D,
@@ -1032,7 +1033,7 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
       (I := I) frame nabla2RicTensor nabla2Ric)
     (hRicciId : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
+      DifferentialGeometry.Tensor.RSTensor.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
     (hRicTrace13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D,

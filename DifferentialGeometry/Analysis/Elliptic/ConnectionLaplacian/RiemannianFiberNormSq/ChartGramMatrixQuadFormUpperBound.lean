@@ -11,8 +11,8 @@ open Bundle Set IsManifold ContinuousLinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -178,8 +178,8 @@ theorem exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport
         ring
     _ = C * ∑ k : Fin N, ξ k ^ 2 := by rw [hC_def]
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

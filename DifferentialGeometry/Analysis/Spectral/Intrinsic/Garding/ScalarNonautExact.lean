@@ -2,8 +2,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffSpa
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautCompat
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautHs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTime
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 /-!

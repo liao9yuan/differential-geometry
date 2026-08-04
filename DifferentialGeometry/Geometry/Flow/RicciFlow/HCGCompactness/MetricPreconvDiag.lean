@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConv
 import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false

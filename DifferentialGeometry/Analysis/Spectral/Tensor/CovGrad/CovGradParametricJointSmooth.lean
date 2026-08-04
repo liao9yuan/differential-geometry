@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricChartRepr
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -140,7 +140,7 @@ private theorem covApply_chartRepr_euclid_jointContDiffWithinAt
     intro k
     obtain ⟨Ker, hKer, hK_at⟩ :
         ∃ Ker : E → (TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E),
-          (Ker = fun y : E => DifferentialGeometry.Integral.Connection.inputSlotChartKernel
+          (Ker = fun y : E => DifferentialGeometry.Analysis.Elliptic.inputSlotChartKernel
             (I := I) g₀ r s α B.toFun k (φ.symm y)) ∧
           ContDiffAt ℝ ∞ Ker (φ b) :=
       ⟨_, rfl, inputSlotChartKernel_contDiffAt_chart_pulled (I := I) (M := M) g₀ r s α B k hb_good⟩
@@ -185,7 +185,7 @@ private theorem covApply_chartRepr_euclid_jointContDiffWithinAt
     intro l
     obtain ⟨Ker, hKer, hK_at⟩ :
         ∃ Ker : E → (TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E),
-          (Ker = fun y : E => DifferentialGeometry.Integral.Connection.outputSlotChartKernel
+          (Ker = fun y : E => DifferentialGeometry.Analysis.Elliptic.outputSlotChartKernel
             (I := I) g₀ r s α B.toFun l (φ.symm y)) ∧
           ContDiffAt ℝ ∞ Ker (φ b) :=
       ⟨_, rfl, outputSlotChartKernel_contDiffAt_chart_pulled (I := I) (M := M) g₀ r s α B l hb_good⟩

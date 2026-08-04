@@ -1,7 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.TensorBackedReaction
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
@@ -943,8 +944,8 @@ theorem rm04Mid02At_apply
         (vec2 (I := I) K L) =
       Rm04 (vec4 (I := I) X K Y L) := by
   unfold rm04Mid02At
-  rw [DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons]
-  rw [DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons]
+  rw [DifferentialGeometry.Tensor.RSTensor.metricTrace_tensor0S_curry_apply_cons]
+  rw [DifferentialGeometry.Tensor.RSTensor.metricTrace_tensor0S_curry_apply_cons]
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   congr 1
   funext i
@@ -1258,7 +1259,7 @@ theorem ricciQuadAt_comp_orthonormal
           (fun _ : Fin 1 => basis j) by
     funext q
     fin_cases q <;> rfl]
-  rw [← DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons
+  rw [← DifferentialGeometry.Tensor.RSTensor.metricTrace_tensor0S_curry_apply_cons
     (I := I) (M := M) (s := 1) Ric
       (∑ k : Fin 3,
         basis.repr (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric (basis i)) k
@@ -1275,7 +1276,7 @@ theorem ricciQuadAt_comp_orthonormal
       ricciSq3
         (fun a b : Fin 3 => Ric (vec2 (I := I) (basis a) (basis b))) i j
   rw [map_sum]
-  simp [DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons,
+  simp [DifferentialGeometry.Tensor.RSTensor.metricTrace_tensor0S_curry_apply_cons,
     finCons1_eq_vec2, Tensor0SBundle.Tensor0SSpace.sum_apply,
     Tensor0SBundle.Tensor0SSpace.smul_apply, smul_eq_mul]
   simp [ricciEnd_repr_orthonormal (I := I) (M := M) basis horth Ric,

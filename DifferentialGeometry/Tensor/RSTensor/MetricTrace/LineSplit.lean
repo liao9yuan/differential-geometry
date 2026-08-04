@@ -13,7 +13,7 @@ complement.  The tensor need not be symmetric.
 -/
 
 open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Tensor.RSTensor
 
 noncomputable section
 
@@ -164,4 +164,4 @@ theorem trace_eq_line_add
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Tensor.RSTensor

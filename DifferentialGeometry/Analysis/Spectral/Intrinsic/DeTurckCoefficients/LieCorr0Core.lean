@@ -2,8 +2,8 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Readout
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.RzMaster
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -513,7 +513,7 @@ theorem lieCorr0RiemLoweredFib_section_contMDiff
       (fun x : M => g₀.inner x
         (DifferentialGeometry.Geometry.Curvature.riemannOp (LeviCivita (I := I) g₀) x
           ((Y (σ 0)) x) ((Y (σ 1)) x) ((Y (σ 2)) x)) ((Y (σ 3)) x)) :=
-    Integral.Connection.mixedKernelScalar_global (I := I) g₀ g₀
+    DifferentialGeometry.Analysis.Spectral.mixedKernelScalar_global (I := I) g₀ g₀
       (Y (σ 0)).contMDiff (Y (σ 3)).contMDiff (Y (σ 1)).contMDiff (Y (σ 2)).contMDiff
   refine hscalar.contMDiffAt.congr_of_eventuallyEq ?_
   have h_base₁ : ∀ᶠ x in nhds x₀, x ∈ e₁.baseSet := e₁.open_baseSet.mem_nhds he₁

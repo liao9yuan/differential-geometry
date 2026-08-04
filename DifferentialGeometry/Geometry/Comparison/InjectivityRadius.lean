@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
 import Mathlib.Data.ENNReal.Real
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 

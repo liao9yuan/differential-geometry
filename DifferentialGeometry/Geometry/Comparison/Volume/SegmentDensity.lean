@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Exponential.EndpointShape
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicOffZero
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 
 /-!

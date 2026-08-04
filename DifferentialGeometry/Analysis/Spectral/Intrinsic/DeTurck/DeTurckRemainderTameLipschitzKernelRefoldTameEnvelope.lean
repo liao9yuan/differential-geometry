@@ -1,7 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzKernelRefoldTopSeparatedBounds
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -435,7 +437,7 @@ private theorem
         (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
           ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x))
         (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-      DifferentialGeometry.Integral.Connection.integrable_riemannianFiberNormSq_toSection
+      DifferentialGeometry.Analysis.Elliptic.integrable_riemannianFiberNormSq_toSection
         (I := I) (M := M) g₀ 0 (2 + (i + 2)) (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P)
     have hF_int : MeasureTheory.Integrable
         (fun x => ε ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x

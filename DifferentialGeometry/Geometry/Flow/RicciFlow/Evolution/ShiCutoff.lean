@@ -3,8 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.DistanceBarrier
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator

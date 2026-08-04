@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower.GenuineOperator
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
@@ -157,7 +158,7 @@ theorem exists_GcurvSection_iteratedCovGrad_grid_bound (g : SmoothRiemannianMetr
     exact mul_nonneg (by positivity) (gridWindowSum_nonneg hkappa_nn 0 (s + 1) k)
   rw [hcsq]
   have hgrid :=
-    DifferentialGeometry.Integral.Connection.DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le_at
+    DifferentialGeometry.Analysis.Spectral.DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le_at
     (g := g)
     (op := fun p r W => pureRGenuineDiffOp (I := I) (M := M) g p r W)
     (fun p r W => covGrad_pureRGenuineDiffOp_eq (I := I) (M := M) g p r W)

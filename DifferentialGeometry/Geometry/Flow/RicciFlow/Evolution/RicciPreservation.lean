@@ -9,8 +9,10 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
 import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -1412,7 +1414,7 @@ private theorem ricciQuadAt_comp_basis
           (fun _ : Fin 1 => basis j) by
     funext q
     fin_cases q <;> rfl]
-  rw [← DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons
+  rw [← DifferentialGeometry.Tensor.RSTensor.metricTrace_tensor0S_curry_apply_cons
     (I := I) (M := M) (s := 1) Ric
       (∑ k : Idx,
         basis.repr (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric (basis i)) k
@@ -1428,7 +1430,7 @@ private theorem ricciQuadAt_comp_basis
         (fun _ : Fin 1 => basis j) =
       DifferentialGeometry.Geometry.Curvature.ricciQuadraticAt (I := I) basis gInv Ric i j
   rw [map_sum]
-  simp [DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons,
+  simp [DifferentialGeometry.Tensor.RSTensor.metricTrace_tensor0S_curry_apply_cons,
     finCons1_eq_vec2,
     ricciEnd_repr_basis (I := I) (M := M) basis gInv hinv Ric,
     DifferentialGeometry.Geometry.Curvature.ricciQuadraticAt,

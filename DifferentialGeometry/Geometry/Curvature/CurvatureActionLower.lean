@@ -1,6 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.CurvatureAction
 import DifferentialGeometry.Geometry.Curvature.Contractions
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
 
 

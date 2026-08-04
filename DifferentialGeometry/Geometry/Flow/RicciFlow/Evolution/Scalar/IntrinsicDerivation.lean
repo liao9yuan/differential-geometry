@@ -3,8 +3,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebra
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
@@ -207,7 +208,7 @@ theorem coordNab2Ric_eq_nabla2RicField
             (DifferentialGeometry.Geometry.Curvature.vec3 (I := I)
               (frame a x₀) (frame i x₀) (frame j x₀)) := by
       rw [hDsec]
-      rw [DifferentialGeometry.Integral.Connection.metricTrace_finCons_vec3_eq_vec4]
+      rw [DifferentialGeometry.Tensor.RSTensor.metricTrace_finCons_vec3_eq_vec4]
     rw [nabla2RicField, ← hnablaA_def, hcons]
     exact totalNabla0SFun_apply_section
       (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

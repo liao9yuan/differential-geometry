@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMoser
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Sobolev
 
 /-!
 # Summed data-weighted jet-L2 bounds for the linearized Ricci arm base coefficients
@@ -33,7 +33,7 @@ noncomputable section
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Analysis.Sobolev
 
 open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
@@ -243,4 +243,4 @@ theorem linearizedRicciArm1BaseCoeff_realizedFam_jetL2_summed_topSeparated
       ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)
     (fun j => add_nonneg (sq_nonneg _) (sq_nonneg _)) hper
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Analysis.Sobolev

@@ -16,7 +16,7 @@ set_option autoImplicit false
 
 
 open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
@@ -372,4 +372,4 @@ theorem tensorHeatWithDrift2QuadAt_zero
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

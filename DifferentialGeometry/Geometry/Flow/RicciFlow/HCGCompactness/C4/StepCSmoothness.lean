@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.DiagInvReadout
 import Mathlib.Analysis.Calculus.Implicit
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 

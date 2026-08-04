@@ -3,8 +3,12 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ParametricPairin
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarGalerkinPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 

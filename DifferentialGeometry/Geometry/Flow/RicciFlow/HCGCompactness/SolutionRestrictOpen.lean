@@ -3,8 +3,19 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNo
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -518,7 +529,7 @@ theorem ricciNormSpace_restrictOpen
       (ricciNorm (I := I) (solutionOn_restrictOpen (I := I) S U) t) x := by
   have hsmooth : ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
       (ricciNorm (I := I) (solutionOn_restrictOpen (I := I) S U) t) := by
-    refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := U)
+    refine (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := U)
       ((solutionOn_restrictOpen (I := I) S U).family.metric t)
       (metricRicci (I := I) (M := U)
         ((solutionOn_restrictOpen (I := I) S U).family.metric t))).congr ?_
@@ -566,7 +577,7 @@ theorem isSolutionOn_restrictOpen
     intro t _ht x
     have hsmooth : ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
         (ricciNorm (I := I) (solutionOn_restrictOpen (I := I) S U) t) := by
-      refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := U)
+      refine (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := U)
         ((solutionOn_restrictOpen (I := I) S U).family.metric t)
         (metricRicci (I := I) (M := U)
           ((solutionOn_restrictOpen (I := I) S U).family.metric t))).congr ?_

@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionTotalDecomposition
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -180,7 +182,7 @@ lemma lc0b_normSq_icg_slotExtendIter_le (g₀ : SmoothRiemannianMetric I M)
 lemma lc0b_NEndoIns_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     endoSlotZeroCcTensor (I := I) (M := M) g₀ 0 (lc0NEndoSec (I := I) (M := M) g₀ g₁ g_bg) =
       lc0CdVField (I := I) (M := M) g₀ g₁ g₀ - lc0CdVField (I := I) (M := M) g₀ g₁ g_bg
-        - DifferentialGeometry.Integral.Connection.deTurckLieWEndoInsert
+        - DifferentialGeometry.PDE.RicciFlow.deTurckLieWEndoInsert
             (I := I) (M := M) g₀ g₁ g₀ := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -193,20 +195,20 @@ lemma lc0b_NEndoIns_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   beta_reduce
   have hRHS : ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
       ((lc0CdVField (I := I) (M := M) g₀ g₁ g₀ - lc0CdVField (I := I) (M := M) g₀ g₁ g_bg
-        - DifferentialGeometry.Integral.Connection.deTurckLieWEndoInsert
+        - DifferentialGeometry.PDE.RicciFlow.deTurckLieWEndoInsert
             (I := I) (M := M) g₀ g₁ g₀).toSection x)) om) =
       ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
         (lc0CdVField (I := I) (M := M) g₀ g₁ g₀).toSection x) om) -
       ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
         (lc0CdVField (I := I) (M := M) g₀ g₁ g_bg).toSection x) om) -
       ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
-        (DifferentialGeometry.Integral.Connection.deTurckLieWEndoInsert
+        (DifferentialGeometry.PDE.RicciFlow.deTurckLieWEndoInsert
           (I := I) (M := M) g₀ g₁ g₀).toSection x) om) := rfl
   rw [hRHS]
   rw [lc0b_cdV_fiber (I := I) (M := M) g₀ g₁ g₀ x om,
     lc0b_cdV_fiber (I := I) (M := M) g₀ g₁ g_bg x om]
   have hWfib : ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
-      (DifferentialGeometry.Integral.Connection.deTurckLieWEndoInsert
+      (DifferentialGeometry.PDE.RicciFlow.deTurckLieWEndoInsert
         (I := I) (M := M) g₀ g₁ g₀).toSection x) om) =
       slotInsertEndoFib (I := I) (M := M) 1 0 x (deTurckLieWEndo (I := I) g₁ g₀ x) om := rfl
   rw [hWfib]

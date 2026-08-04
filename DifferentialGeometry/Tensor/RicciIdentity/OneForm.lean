@@ -5,8 +5,9 @@ import DifferentialGeometry.Tensor.Auxiliary.SlotAlgebra
 import DifferentialGeometry.Tensor.RSTensor.CurvatureAction
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -24,7 +25,7 @@ set_option autoImplicit false
 noncomputable section
 
 open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Tensor.RicciIdentity
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
@@ -642,4 +643,4 @@ theorem tensor0S_ricciIdentity_one
     tensor0S_ricciIdentity_one_of_oneForm (I := I) Rm13 alpha nabla2Alpha⟩
 
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Tensor.RicciIdentity

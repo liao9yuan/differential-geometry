@@ -2,8 +2,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppH
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricTimeDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -24,8 +25,8 @@ open Bundle Manifold Set Filter MeasureTheory Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Spectral
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
@@ -1240,8 +1241,8 @@ theorem appHs_path_cd
       intro hk
       norm_num at hk
 
-end Connection
-end Integral
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
@@ -116,24 +117,24 @@ theorem pinchEigen3Unordered_of_pinchTensor_nonneg
     (hdiag : DifferentialGeometry.Geometry.Curvature.RicciDiagAt
       (I := I) (S.ricciAt t x) (S.scalar t x) l1 l2 l3 basis)
     (hric :
-      DifferentialGeometry.Integral.Connection.TwoTensorNonnegativeAt (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci t)
+      DifferentialGeometry.PDE.RicciFlow.TwoTensorNonnegativeAt (I := I) (M := M)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci t)
           x)
     (hpinch :
-      DifferentialGeometry.Integral.Connection.TwoTensorNonnegativeAt (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.TwoTensorNonnegativeAt (I := I) (M := M)
         (pinchTensor (I := I) (M := M)
           (fun t : Real => S.base.metric t)
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+          (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
           S.scalar delta t) x)
     (hdelta0 : 0 <= delta) :
     DifferentialGeometry.Geometry.Curvature.PinchEigen3Unordered l1 l2 l3 delta := by
   refine pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
     (I := I) (M := M) horth hdiag ?_ ?_ hdelta0
   · intro v
-    simpa [DifferentialGeometry.Integral.Connection.twoTensorSecToFamily, SolutionOn.ricciAt] using
+    simpa [DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily, SolutionOn.ricciAt] using
       hric v
   · intro v
-    simpa [pinchTensor, DifferentialGeometry.Integral.Connection.twoTensorSecToFamily,
+    simpa [pinchTensor, DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily,
       SolutionOn.ricciAt]
       using hpinch v
 
@@ -150,16 +151,16 @@ theorem cubicQ_sub_nonneg_of_section9_point
     (hdelta0 : 0 <= delta)
     (hepsilon : epsilon <= 2 * delta ^ 2)
     (hric :
-      DifferentialGeometry.Integral.Connection.TwoTensorNonnegativeAt
+      DifferentialGeometry.PDE.RicciFlow.TwoTensorNonnegativeAt
         (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci t)
+        (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci t)
           x)
     (hpinch :
-      DifferentialGeometry.Integral.Connection.TwoTensorNonnegativeAt
+      DifferentialGeometry.PDE.RicciFlow.TwoTensorNonnegativeAt
         (I := I) (M := M)
         (pinchTensor (I := I) (M := M)
           (fun t : Real => S.base.metric t)
-          (DifferentialGeometry.Integral.Connection.twoTensorSecToFamily (I := I) (M := M) S.ricci)
+          (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
           S.scalar delta t) x) :
     0 <=
       cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S) t x

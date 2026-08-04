@@ -14,7 +14,7 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff
@@ -110,7 +110,7 @@ variable [IsManifold I 1 M]
 
 
 
-def MetricVariationEquationOn
+def MetricVariationEquationOnRaw
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (Ric : RicciTensorField (I := I) (M := M) Real) : Prop :=
@@ -136,7 +136,7 @@ structure IsRealizedRicciFlowSolutionOn
   smoothConnection : DifferentialGeometry.Geometry.Connection.ConnectionFamilySmoothOn (I := I)
     (M := M) S.family
   leviCivita : DifferentialGeometry.Geometry.Connection.IsLeviCivitaFamilyOn (I := I) S.family
-  equation : MetricVariationEquationOn (I := I) S.family S.ricci
+  equation : MetricVariationEquationOnRaw (I := I) S.family S.ricci
 
 
 
@@ -146,7 +146,7 @@ theorem metric_derivWithin_eq_neg_two_ricci_of_metricVariationEquationOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (Ric : RicciTensorField (I := I) (M := M) Real)
-    (hEq : MetricVariationEquationOn (I := I) G Ric)
+    (hEq : MetricVariationEquationOnRaw (I := I) G Ric)
     (t : RealTimeInterval.RegularTime D) (x : M) (X Y : TangentSpace I x) :
     HasDerivWithinAt
       (fun s : Real => (G.metric s).inner x X Y)
@@ -172,4 +172,4 @@ theorem metric_derivWithin_eq_neg_two_ricci_of_isRealizedRicciFlowSolutionOn
 
 end Interval
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

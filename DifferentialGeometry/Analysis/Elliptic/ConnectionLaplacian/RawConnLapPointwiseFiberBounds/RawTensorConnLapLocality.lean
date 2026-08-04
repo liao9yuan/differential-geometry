@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -12,8 +11,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
@@ -107,8 +106,8 @@ theorem rawTensorConnLap_tsupport_subset [CompleteSpace E]
     (rawTensorConnLap (I := I) g r s T x) = 0
   rw [h_zero, TensorRSSpace.toModel_zero]
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

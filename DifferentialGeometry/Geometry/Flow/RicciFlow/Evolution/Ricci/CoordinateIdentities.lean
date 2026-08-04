@@ -1,6 +1,13 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRegularity
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -582,7 +589,7 @@ theorem coordCommAt
         DifferentialGeometry.Geometry.Curvature.rm04Comp] using hcan.symm
     have hRicciId :
         ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
-          DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I)
+          DifferentialGeometry.Tensor.RSTensor.Tensor0SRicciIdentityAt (I := I)
             (S.base.rm13 (t : Real))
             (S.ricci (t : Real) x) (nabla2Tensor (t : Real) x) := by
       intro t x
@@ -591,13 +598,13 @@ theorem coordCommAt
             (S.family.connection (t : Real)) (1 : WithTop ℕ∞) :=
         connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
       have hfirst :
-          DifferentialGeometry.Integral.Connection.Nabla0SSectionRealizes (I := I) 2
+          DifferentialGeometry.Tensor.RicciIdentity.Nabla0SSectionRealizes (I := I) 2
             (S.family.connection (t : Real)) (S.ricci (t : Real))
             (derivs (t : Real)).nablaA := by
         intro y X slots
         exact (derivs (t : Real)).first X y slots
       have h20 :
-          DifferentialGeometry.Integral.Connection.Nabla20SRealizesAt (I := I) 2
+          DifferentialGeometry.Tensor.RicciIdentity.Nabla20SRealizesAt (I := I) 2
             (S.family.connection (t : Real)) (S.ricci (t : Real))
             (derivs (t : Real)).nablaA x (nabla2Tensor (t : Real) x) := by
         constructor
@@ -605,7 +612,7 @@ theorem coordCommAt
         · intro X slots
           exact (derivs (t : Real)).second X x slots
       refine
-        DifferentialGeometry.Integral.Connection.tensor0S_ricciIdentity_of_torsionFree
+        DifferentialGeometry.Tensor.RicciIdentity.tensor0S_ricciIdentity_of_torsionFree
           (I := I) (S.family.connection (t : Real)) hcov (S.base.rm13 (t : Real))
           (S.ricci (t : Real)) (derivs (t : Real)).nablaA
           (S.ricci (t : Real) x) ((derivs (t : Real)).nablaA x)

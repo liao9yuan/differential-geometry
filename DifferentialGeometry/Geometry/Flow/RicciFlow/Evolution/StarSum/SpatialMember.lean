@@ -1,7 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.StarRouting
 import DifferentialGeometry.Geometry.Curvature.CurvatureActionLower
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 

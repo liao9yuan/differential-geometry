@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.GeometryFormulaCore
+open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 
@@ -46,7 +46,7 @@ theorem connTraceAction_coord
     (potential : M -> Real)
     (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀) :
     DifferentialGeometry.Integral.DivergenceTheorem.tangentSectionAction
-        (I := I) (DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A)
+        (I := I) (DifferentialGeometry.Tensor.RSTensor.connTraceField (I := I) g A)
         potential x =
       ∑ p : CoordinateIdx (𝕜 := Real) E,
         (∑ i : CoordinateIdx (𝕜 := Real) E,
@@ -60,7 +60,7 @@ theorem connTraceAction_coord
             (coordinateFrameAt (I := I) x₀ p x) := by
   classical
   let X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
-    DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A
+    DifferentialGeometry.Tensor.RSTensor.connTraceField (I := I) g A
   let frame := coordinateFrameAt (I := I) x₀
   let hframe := coordinateFrameAt_isLocalFrame (I := I) x₀
   have hX :
@@ -75,7 +75,7 @@ theorem connTraceAction_coord
   intro p _
   rw [map_smul]
   have hcoeff :=
-    DifferentialGeometry.Integral.Connection.connTraceField_coord (I := I) g A x₀ hx p
+    DifferentialGeometry.Tensor.RSTensor.connTraceField_coord (I := I) g A x₀ hx p
   rw [hcoeff]
   exact smul_eq_mul ..
 
@@ -86,7 +86,7 @@ def connTraceRawDiv
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2) : M -> Real :=
   fun x =>
     DifferentialGeometry.Integral.DivergenceTheorem.divergence_g
-      (I := I) g (DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A) x
+      (I := I) g (DifferentialGeometry.Tensor.RSTensor.connTraceField (I := I) g A) x
 
 
 
@@ -544,7 +544,7 @@ theorem connTraceAction_eq
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
     (potential : M -> Real) (x : M) :
     DifferentialGeometry.Integral.DivergenceTheorem.tangentSectionAction
-        (I := I) (DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A)
+        (I := I) (DifferentialGeometry.Tensor.RSTensor.connTraceField (I := I) g A)
         potential x =
       connTraceAction (I := I) g A potential x := by
   simpa [connTraceAction] using

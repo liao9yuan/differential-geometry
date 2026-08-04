@@ -15,8 +15,10 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldFamilyJointSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLieCovDerivFamily
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldEndoArmGridWindow
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -1862,7 +1864,7 @@ omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpa
 lemma bdConnDiff_self_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₀ g₀ x u v = 0 := by
-  have h := Integral.Connection.connDiff_cocycle (I := I) (M := M) g₀ g₀ g₀ x u v
+  have h := DifferentialGeometry.Analysis.Sobolev.connDiff_cocycle (I := I) (M := M) g₀ g₀ g₀ x u v
   have h2 : PDE.DeTurck.connDiff (I := I) g₀ g₀ x u v +
       PDE.DeTurck.connDiff (I := I) g₀ g₀ x u v =
       PDE.DeTurck.connDiff (I := I) g₀ g₀ x u v := h
@@ -1897,13 +1899,13 @@ private lemma dLaCovKernel_diff_eq_dLaCovKernel_connDiff_expansion
         PDE.DeTurck.connDiff (I := I) g₁ g₀ x u v -
           PDE.DeTurck.connDiff (I := I) g_bg g₀ x u v := by
     intro u v
-    have h := Integral.Connection.connDiff_cocycle (I := I) (M := M) g₁ g_bg g₀ x u v
+    have h := DifferentialGeometry.Analysis.Sobolev.connDiff_cocycle (I := I) (M := M) g₁ g_bg g₀ x u v
     exact eq_sub_of_add_eq h
-  have hS1 := Integral.Connection.dLaCovKernel_backgroundSplit (I := I) (M := M)
+  have hS1 := DifferentialGeometry.Analysis.Sobolev.dLaCovKernel_backgroundSplit (I := I) (M := M)
     g₀ g₁ g_bg x v0 p q
-  have hS2 := Integral.Connection.dLaCovKernel_backgroundSplit (I := I) (M := M)
+  have hS2 := DifferentialGeometry.Analysis.Sobolev.dLaCovKernel_backgroundSplit (I := I) (M := M)
     g₀ g₁ g₀ x v0 p q
-  have hS3 := Integral.Connection.dLaCovKernel_backgroundSplit (I := I) (M := M)
+  have hS3 := DifferentialGeometry.Analysis.Sobolev.dLaCovKernel_backgroundSplit (I := I) (M := M)
     g₀ g_bg g₀ x v0 p q
   rw [hS1, hS2, hS3]
   have hT1 : PDE.DeTurck.connDiff (I := I) g₁ g₀ x

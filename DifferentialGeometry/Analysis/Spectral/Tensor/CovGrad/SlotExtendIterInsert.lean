@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -20,8 +20,8 @@ open Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff InnerProductSpace
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Spectral
 
 open DifferentialGeometry.Integral.L2
 
@@ -100,6 +100,6 @@ theorem app_slotExt_apply (g : SmoothRiemannianMetric I M) (s w : ℕ)
   rw [appCcRS_toSection, ContinuousLinearMap.comp_apply]
   exact slotExtIter_apply (I := I) (M := M) g s w Λ x (W.toSection x d)
 
-end Connection
-end Integral
+end Spectral
+end Analysis
 end DifferentialGeometry

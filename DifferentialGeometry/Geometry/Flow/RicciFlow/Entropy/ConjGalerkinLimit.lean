@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.GalerkinCompactness
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinEnergy
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

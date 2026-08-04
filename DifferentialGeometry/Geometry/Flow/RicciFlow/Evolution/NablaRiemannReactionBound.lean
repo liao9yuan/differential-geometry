@@ -3,8 +3,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannT2Boun
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmFrozenSlotField
 import DifferentialGeometry.Geometry.Operator.CotangentSharpSmooth
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator

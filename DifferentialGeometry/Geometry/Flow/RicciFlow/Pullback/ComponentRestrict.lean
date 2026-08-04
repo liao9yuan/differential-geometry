@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.LocalAddition
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionRestrictOpen
 import DifferentialGeometry.Geometry.Geodesic.OpenSubtype
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

@@ -1,12 +1,13 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Limit
 import DifferentialGeometry.Geometry.Operator.LaplacianMinimum
+open DifferentialGeometry.PDE.RicciFlow
 
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
 open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
@@ -433,4 +434,4 @@ theorem certSlab_of_sectionReg
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

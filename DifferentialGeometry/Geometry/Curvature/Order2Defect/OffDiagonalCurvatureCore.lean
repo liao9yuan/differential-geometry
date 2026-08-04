@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection

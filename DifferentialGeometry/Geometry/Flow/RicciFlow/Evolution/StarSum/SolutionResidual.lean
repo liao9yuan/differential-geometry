@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TowerHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.ResidualBase
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerSwapRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.UhlenbeckBaseProducer
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

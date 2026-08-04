@@ -2,8 +2,10 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautExac
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinClassical
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotentialSpan
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -1169,7 +1171,7 @@ theorem galPde_on
     simp only [W, SmoothCcTensor.toSection_add, TensorRSField.scalar0_add,
       Pi.add_apply, rawLap_cc_scalar (I := I) (M := M) q U x,
       scalarLapDiff_eq (I := I) (M := M) q h U x,
-      DifferentialGeometry.Integral.Connection.scalar0_smul_cc
+      DifferentialGeometry.Analysis.Sobolev.scalar0_smul_cc
         (I := I) (M := M) q zeta U x, f]
     ring
   have hlap :

@@ -2,8 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RoughLaplacianSecondCovGradL2Bound
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
@@ -739,7 +739,7 @@ private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
             (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s' + 1)
               (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 s'
                 S)).toFun :=
-  Integral.Connection.exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen (I := I) (M := M) g
+  DifferentialGeometry.Analysis.Elliptic.exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen (I := I) (M := M) g
 
 private theorem l2jet_logConvex_iteratedCovGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -789,11 +789,11 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
     (u : Integral.L2.SmoothCcTensor g 0 s) (Λ₀ : ℝ) (hΛ₀ : 0 ≤ Λ₀)
     (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ≤ Λ₀ ^ 2) :
     Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun ≤
-      Λ₀ * Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal := by
+      Λ₀ * Real.sqrt ((DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal := by
   classical
-  have hfin : MeasureTheory.IsFiniteMeasure (Integral.Measure.riemannianVolumeMeasure I M g) :=
-    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  set μ := Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  have hfin : MeasureTheory.IsFiniteMeasure (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) :=
+    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  set μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g with hμ
   set V : ℝ := (μ Set.univ).toReal with hV
   have hVnn : 0 ≤ V := ENNReal.toReal_nonneg
   have hsq := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g s u
@@ -829,7 +829,7 @@ private theorem l2Interp_pow_iteratedCovGrad
                   (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s k u).toFun) ^ j := by
   classical
   obtain ⟨K, hK1, hlc⟩ := l2jet_logConvex_iteratedCovGrad (I := I) (M := M) g s
-  set V : ℝ := Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
+  set V : ℝ := Real.sqrt ((DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
   have hVnn : 0 ≤ V := Real.sqrt_nonneg _
   have hmax1 : (1 : ℝ) ≤ max 1 V := le_max_left _ _
   have hmaxV : V ≤ max 1 V := le_max_right _ _

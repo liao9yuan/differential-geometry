@@ -1,7 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
@@ -65,7 +66,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle Filter
 open DifferentialGeometry.Tensor.Coordinates
@@ -403,7 +404,7 @@ private theorem allBut04FreezeNabla
         4 cov A x (Fin.cons (X x)
           (Function.update (fun i : Fin 4 => Y i x) q U)) := hAtot.symm
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow
 
 
 

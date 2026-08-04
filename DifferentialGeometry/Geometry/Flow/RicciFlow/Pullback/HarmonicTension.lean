@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 /-!

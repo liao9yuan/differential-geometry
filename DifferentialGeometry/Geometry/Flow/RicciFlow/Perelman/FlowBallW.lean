@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CurvatureBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PositiveApprox
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CollapseScale
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator

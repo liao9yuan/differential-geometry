@@ -15,6 +15,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricCoord
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Model
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Christoffel
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
@@ -70,7 +71,7 @@ namespace RicciAtFamily
 
 
 def toTensorField (Ric : RicciAtFamily (I := I) (M := M)) :
-    DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real :=
+    DifferentialGeometry.PDE.RicciFlow.RicciTensorField (I := I) (M := M) Real :=
   fun t x X Y => Ric t x (DifferentialGeometry.Geometry.Curvature.vec2 X Y)
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
@@ -88,7 +89,7 @@ namespace RicciSectionFamily
 
 
 def toTensorField (Ric : RicciSectionFamily (I := I) (M := M)) :
-    DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real :=
+    DifferentialGeometry.PDE.RicciFlow.RicciTensorField (I := I) (M := M) Real :=
   fun t x X Y => Ric t x (DifferentialGeometry.Geometry.Curvature.vec2 X Y)
 
 omit [IsManifold I 1 M] in
@@ -104,94 +105,6 @@ end RicciSectionFamily
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
-abbrev metricCov (g : SmoothRiemannianMetric I M) :
-    CovariantDerivative I E (TangentSpace I : M -> Type _) :=
-  DifferentialGeometry.Geometry.Curvature.metricCov (I := I) (M := M) g
-
-
-omit [SigmaCompactSpace M] [T2Space M] in
-theorem metricCov_smooth (g : SmoothRiemannianMetric I M) :
-    CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (I := I) (E := E) (M := M) (metricCov (I := I) (M := M) g) ∞ :=
-  DifferentialGeometry.Geometry.Curvature.metricCov_smooth (I := I) (M := M) g
-
-
-abbrev metricRm13At (g : SmoothRiemannianMetric I M) (x : M) :
-    DifferentialGeometry.Geometry.Curvature.Tensor13At (I := I) (M := M) x :=
-  DifferentialGeometry.Geometry.Curvature.metricRm13At (I := I) (M := M) g x
-
-
-abbrev metricRm04At (g : SmoothRiemannianMetric I M) (x : M) :
-    DifferentialGeometry.Geometry.Curvature.Tensor04At (I := I) (M := M) x :=
-  DifferentialGeometry.Geometry.Curvature.metricRm04At (I := I) (M := M) g x
-
-
-abbrev metricRicciAt (g : SmoothRiemannianMetric I M) (x : M) :
-    DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x :=
-  DifferentialGeometry.Geometry.Curvature.metricRicciAt (I := I) (M := M) g x
-
-
-abbrev metricScalarAt (g : SmoothRiemannianMetric I M) (x : M) : Real :=
-  DifferentialGeometry.Geometry.Curvature.metricScalarAt (I := I) (M := M) g x
-
-
-abbrev metricRm04 (g : SmoothRiemannianMetric I M) :
-    DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M) :=
-  DifferentialGeometry.Geometry.Curvature.metricRm04 (I := I) (M := M) g
-
-
-abbrev metricRm13 (g : SmoothRiemannianMetric I M) :
-    DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M) :=
-  DifferentialGeometry.Geometry.Curvature.metricRm13 (I := I) (M := M) g
-
-
-abbrev metricRicci (g : SmoothRiemannianMetric I M) :
-    DifferentialGeometry.Geometry.Curvature.Tensor02Section (I := I) (M := M) :=
-  DifferentialGeometry.Geometry.Curvature.metricRicci (I := I) (M := M) g
-
-omit [SigmaCompactSpace M] in
-@[simp] theorem metricRm04_apply
-    (g : SmoothRiemannianMetric I M) (x : M) :
-    metricRm04 (I := I) (M := M) g x =
-      metricRm04At (I := I) (M := M) g x :=
-  DifferentialGeometry.Geometry.Curvature.metricRm04_apply (I := I) (M := M) g x
-
-omit [SigmaCompactSpace M] in
-@[simp] theorem metricRm13_apply
-    (g : SmoothRiemannianMetric I M) (x : M) :
-    metricRm13 (I := I) (M := M) g x =
-      metricRm13At (I := I) (M := M) g x :=
-  DifferentialGeometry.Geometry.Curvature.metricRm13_apply (I := I) (M := M) g x
-
-omit [SigmaCompactSpace M] in
-@[simp] theorem metricRicci_apply
-    (g : SmoothRiemannianMetric I M) (x : M) :
-    metricRicci (I := I) (M := M) g x =
-      metricRicciAt (I := I) (M := M) g x :=
-  DifferentialGeometry.Geometry.Curvature.metricRicci_apply (I := I) (M := M) g x
-
-
-abbrev metricCurvData
-    (g : SmoothRiemannianMetric I M) :
-    DifferentialGeometry.Geometry.Curvature.CurvatureSectionProducerData (I := I)
-      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g :=
-  DifferentialGeometry.Geometry.Curvature.metricCurvData (I := I) (M := M) g
-
-
-omit [SigmaCompactSpace M] in
-theorem metricScalar_smooth
-    (g : SmoothRiemannianMetric I M) :
-    ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
-      (fun x : M => metricScalarAt (I := I) (M := M) g x) :=
-  DifferentialGeometry.Geometry.Curvature.metricScalar_smooth (I := I) (M := M) g
-
-
-omit [SigmaCompactSpace M] in
-theorem metricCurvData_exists
-    (g : SmoothRiemannianMetric I M) :
-    Nonempty (DifferentialGeometry.Geometry.Curvature.CurvatureSectionProducerData (I := I)
-      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g) :=
-  ⟨metricCurvData (I := I) (M := M) g⟩
 
 
 
@@ -457,7 +370,7 @@ omit [SigmaCompactSpace M] [T2Space M] in
 
 def toRealizedCandidate {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
-    DifferentialGeometry.Integral.Connection.RealizedRicciFlowCandidateOn (I := I) (M := M) D where
+    DifferentialGeometry.PDE.RicciFlow.RealizedRicciFlowCandidateOn (I := I) (M := M) D where
   family := S.family
   ricci := RicciAtFamily.toTensorField (I := I) S.ricciAt
 
@@ -475,7 +388,7 @@ end SolutionOn
 def MetricVariationEquationOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop :=
-  DifferentialGeometry.Integral.Connection.MetricVariationEquationOn (I := I) S.family
+  DifferentialGeometry.PDE.RicciFlow.MetricVariationEquationOnRaw (I := I) S.family
     (RicciAtFamily.toTensorField (I := I) S.ricciAt)
 
 
@@ -958,7 +871,7 @@ theorem isRealizedRicciFlowSolutionOn_of_isSolutionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSolutionOn (I := I) S) :
-    DifferentialGeometry.Integral.Connection.IsRealizedRicciFlowSolutionOn (I := I)
+    DifferentialGeometry.PDE.RicciFlow.IsRealizedRicciFlowSolutionOn (I := I)
       S.toRealizedCandidate := by
   exact
     { smoothMetric := hS.smoothMetric

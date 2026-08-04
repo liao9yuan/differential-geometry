@@ -1,4 +1,21 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Compactness
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -6,7 +23,7 @@ open DifferentialGeometry.Geometry.Curvature
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
@@ -507,11 +524,11 @@ theorem ofTotal
     (G := G) (S := S) (X := X) (N := N) (T := T)
     hsym hbar
     (fun delta t0 hdelta hsub =>
-      DifferentialGeometry.Integral.Connection.metricFamQuadCont (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.metricFamQuadCont (I := I) (M := M)
         G (Set.Icc t0 (t0 + delta))
         (hMetric delta t0 hdelta hsub))
     (fun delta t0 hdelta hsub =>
-      DifferentialGeometry.Integral.Connection.tensorQuadCont (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.tensorQuadCont (I := I) (M := M)
         S (Set.Icc t0 (t0 + delta))
         (hTensor delta t0 hdelta hsub))
     hFixed
@@ -751,11 +768,11 @@ theorem ofTotal
     (G := G) (S := S) (X := X) (N := N) (T := T)
     hsym hbar
     (fun delta t0 hdelta hsub =>
-      DifferentialGeometry.Integral.Connection.metricFamQuadCont (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.metricFamQuadCont (I := I) (M := M)
         G (Set.Icc t0 (t0 + delta))
         (hMetric delta t0 hdelta hsub))
     (fun delta t0 hdelta hsub =>
-      DifferentialGeometry.Integral.Connection.tensorQuadCont (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.tensorQuadCont (I := I) (M := M)
         S (Set.Icc t0 (t0 + delta))
         (hTensor delta t0 hdelta hsub))
     hFixed hSigns
@@ -858,4 +875,4 @@ end TensorWMPSectionReg
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

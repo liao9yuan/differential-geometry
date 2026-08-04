@@ -14,7 +14,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Analysis.Elliptic
 
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Integral.Measure
@@ -274,6 +274,6 @@ theorem tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
     _ ≤ (C_max + 1) * ‖v‖ :=
       mul_le_mul_of_nonneg_right (le_add_of_nonneg_right zero_le_one) h_v_nn
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Analysis.Elliptic
 
 end

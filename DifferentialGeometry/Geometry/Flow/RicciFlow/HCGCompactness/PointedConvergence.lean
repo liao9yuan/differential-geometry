@@ -6,9 +6,9 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla
 import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 

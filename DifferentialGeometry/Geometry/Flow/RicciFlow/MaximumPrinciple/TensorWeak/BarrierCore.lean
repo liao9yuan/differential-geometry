@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Basic
 import Mathlib.Tactic.Ring
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -8,7 +9,7 @@ set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
@@ -811,4 +812,4 @@ theorem strictParabolic_of_est
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

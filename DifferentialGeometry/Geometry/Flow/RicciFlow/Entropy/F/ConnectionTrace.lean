@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ChartTrace
+open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 
@@ -363,7 +363,7 @@ private theorem connTraceCoeff_one_center
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
     (x : M) (p : CoordinateIdx (𝕜 := Real) E) :
     (coordinateFrameAt_isLocalFrame_one (I := I) x).coeff p x
-        ((DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A).toFun x) =
+        ((DifferentialGeometry.Tensor.RSTensor.connTraceField (I := I) g A).toFun x) =
       ∑ i : CoordinateIdx (𝕜 := Real) E,
         ∑ j : CoordinateIdx (𝕜 := Real) E,
           gInvFun (I := I) g x i j x * compFun (I := I) A x p i j x := by
@@ -418,7 +418,7 @@ private theorem connTraceRawDiv_eq_productSum
                 (coordinateFrameAt (I := I) x)
                 (coordinateFrameAt_isLocalFrame_one (I := I) x) x p a a)) := by
   classical
-  set Z := DifferentialGeometry.Integral.Connection.connTraceField (I := I) g A with hZ
+  set Z := DifferentialGeometry.Tensor.RSTensor.connTraceField (I := I) g A with hZ
   have hbridge :=
     DifferentialGeometry.Geometry.Connection.divergence_g_eq_coordinateFrame_covariant_divergence
       (I := I) g Z x

@@ -1,8 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjWSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WLower
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 

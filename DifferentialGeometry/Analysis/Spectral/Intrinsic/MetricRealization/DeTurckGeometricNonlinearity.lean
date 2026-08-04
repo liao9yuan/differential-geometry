@@ -4,8 +4,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -558,7 +558,7 @@ private theorem smoothCcCovApplyChartRepr_euclid_jointContDiffWithinAt
     obtain ⟨Ker, hKer, hK_at⟩ :
         ∃ Ker : E → (Tensor0SBundle.TensorRSModel 0 2 ℝ E →L[ℝ]
             Tensor0SBundle.TensorRSModel 0 2 ℝ E),
-          (Ker = fun y : E => DifferentialGeometry.Integral.Connection.outputSlotChartKernel
+          (Ker = fun y : E => DifferentialGeometry.Analysis.Elliptic.outputSlotChartKernel
             (I := I) g₀ 0 2 α B.toFun l (φ.symm y)) ∧
           ContDiffAt ℝ ∞ Ker (φ b) :=
       ⟨_, rfl, outputSlotChartKernel_contDiffAt_chart_pulled (I := I) (M := M) g₀ 0 2 α B l hb_good⟩

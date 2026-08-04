@@ -16,8 +16,9 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturba
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 
@@ -93,7 +94,7 @@ private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (
         g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0) := by
   classical
   obtain ⟨n, e0, hn, horth0, _hpars, _hrepr⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_orthonormal_frame_riemannianFiberNormSq
+    DifferentialGeometry.Analysis.Elliptic.exists_orthonormal_frame_riemannianFiberNormSq
       (I := I) (M := M) g 0 0 x
   have hnE : n = Module.finrank ℝ E := by rw [hn]; rfl
   subst hnE

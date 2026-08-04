@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import Mathlib.Algebra.Order.Chebyshev
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

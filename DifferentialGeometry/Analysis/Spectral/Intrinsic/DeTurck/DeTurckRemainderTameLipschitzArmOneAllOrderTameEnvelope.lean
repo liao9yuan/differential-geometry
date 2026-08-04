@@ -46,8 +46,10 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmDiffL2TameBallUniform
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzPhiMetTotalCurvatureFold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzDegenerateOneDimensionalVanishing
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 
@@ -131,7 +133,7 @@ private theorem lieArm1Piece_connDiff_realizedFam_allOrder_tameEnvelope
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (i : ℕ), ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (DifferentialGeometry.Integral.Connection.deTurckLieTraceCoeffPiece (I := I) (M := M)
+              (DifferentialGeometry.Analysis.Sobolev.deTurckLieTraceCoeffPiece (I := I) (M := M)
                 g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
                 (DifferentialGeometry.Geometry.Curvature.connDiffSection (I := I)
@@ -386,10 +388,10 @@ private theorem lieArm1Piece_connDiffBg_realizedFam_allOrder_tameEnvelope
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (i : ℕ), ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (DifferentialGeometry.Integral.Connection.deTurckLieTraceCoeffPiece (I := I) (M := M)
+              (DifferentialGeometry.Analysis.Sobolev.deTurckLieTraceCoeffPiece (I := I) (M := M)
                 g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
-                (DifferentialGeometry.Integral.Connection.lieArm1ConnDiffBgCc (I := I) (M := M)
+                (DifferentialGeometry.Analysis.Sobolev.lieArm1ConnDiffBgCc (I := I) (M := M)
                   g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))‖ ^ 2 ≤
             P i * (1 + ∑ j ∈ Finset.range (i + 2),
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
@@ -695,10 +697,10 @@ private theorem lieArm1Piece_psiB_realizedFam_allOrder_tameEnvelope
         ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
         ∀ (i : ℕ), ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (DifferentialGeometry.Integral.Connection.deTurckLieTraceCoeffPiece (I := I) (M := M)
+              (DifferentialGeometry.Analysis.Sobolev.deTurckLieTraceCoeffPiece (I := I) (M := M)
                 g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
-                (DifferentialGeometry.Integral.Connection.lieArm1PsiB (I := I) (M := M)
+                (DifferentialGeometry.Analysis.Sobolev.lieArm1PsiB (I := I) (M := M)
                   g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))‖ ^ 2 ≤
             P i * (1 + ∑ j ∈ Finset.range (i + 2),
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +

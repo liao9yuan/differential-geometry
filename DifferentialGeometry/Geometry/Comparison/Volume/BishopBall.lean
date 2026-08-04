@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopPolarFramed
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 /-!
 # Local Bishop comparison for center-metric normal balls

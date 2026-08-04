@@ -1,9 +1,12 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCc
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -11,7 +14,7 @@ noncomputable section
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Analysis.Parabolic
 
 open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
@@ -558,6 +561,6 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic_allOrders
       (iteratedCovGrad (I := I) g₀ 0 2 (i + 1) P)]
   · exact hleaf g₁ P hδ_le hδ htie hPball i
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Analysis.Parabolic
 
 end

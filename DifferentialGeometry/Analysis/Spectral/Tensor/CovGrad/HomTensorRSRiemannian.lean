@@ -4,9 +4,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSC
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section
@@ -16,7 +17,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set IsManifold Tensor0SBundle ContinuousLinearMap Filter
 open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -351,4 +352,4 @@ theorem exists_uniform_riemannianFiberNormSq_homTensorRS_section_clm_le
 
 end Payoff
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Analysis.Spectral

@@ -11,8 +11,8 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormDiscreteLogConvex
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormHolderIntegrability
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GagliardoNirenbergLpFiberNormCovGradFrameSum
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -71,12 +71,12 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     (covGrad (I := I) (M := M) g r (m + 1)
       (covGrad (I := I) (M := M) g r m w)).toSection x with hT2_def
   have hcomp : ∀ (i : Fin n) (K : Fin r → Fin n) (J : Fin m → Fin n),
-      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r m
+      DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r m
           (DifferentialGeometry.Geometry.Curvature.tensorSecondCovDeriv (I := I) g r m
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) n e K J =
-        Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+        DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
           (Fin.cons i (Fin.cons i J)) := by
     intro i K J
     set ωK : Tensor0SBundle.Tensor0SSpace r I x :=
@@ -123,7 +123,7 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) =
         ∑ K : Fin r → Fin n, ∑ J : Fin m → Fin n,
-          (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+          (DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
             (Fin.cons i (Fin.cons i J))) ^ 2 := by
     intro i
     rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g
@@ -137,28 +137,28 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
   rw [Finset.sum_congr rfl (fun i _ => hdiag_term i)]
   have hfull : ∀ K : Fin r → Fin n,
       (∑ J : Fin (m + 1 + 1) → Fin n,
-          (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+          (DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
             J) ^ 2) =
         ∑ a : Fin n, ∑ b : Fin n, ∑ J : Fin m → Fin n,
-          (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+          (DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
             (Fin.cons a (Fin.cons b J))) ^ 2 := by
     intro K
     rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (m + 1 + 1) => Fin n))
           (fun pr : Fin n × (Fin (m + 1) → Fin n) =>
-            (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+            (DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
               (Fin.cons pr.1 pr.2)) ^ 2)
           (fun J'' : Fin (m + 1 + 1) → Fin n =>
-            (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+            (DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
               J'') ^ 2)
           (fun pr => by simp [Fin.consEquiv])]
     rw [Fintype.sum_prod_type]
     refine Finset.sum_congr rfl (fun a _ => ?_)
     rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (m + 1) => Fin n))
           (fun pr : Fin n × (Fin m → Fin n) =>
-            (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+            (DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
               (Fin.cons a (Fin.cons pr.1 pr.2))) ^ 2)
           (fun J' : Fin (m + 1) → Fin n =>
-            (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+            (DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
               (Fin.cons a J')) ^ 2)
           (fun pr => by simp [Fin.consEquiv])]
     rw [Fintype.sum_prod_type]
@@ -168,7 +168,7 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
   refine Finset.sum_le_sum (fun i _ => ?_)
   exact Finset.single_le_sum (f := fun b : Fin n =>
       ∑ J : Fin m → Fin n,
-        (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
+        (DifferentialGeometry.Analysis.Elliptic.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
           (Fin.cons i (Fin.cons b J))) ^ 2)
     (fun b _ => Finset.sum_nonneg (fun J _ => sq_nonneg _)) (Finset.mem_univ i)
 
@@ -200,7 +200,7 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
     have h1 : (rawTensorConnLapSmooth (I := I) g r m w).toFun x =
         Tensor0SBundle.TensorRSSpace.toModel
           ((rawTensorConnLapSmooth (I := I) g r m w).toSection x) := rfl
-    rw [h1, Integral.Connection.rawTensorConnLapSmooth_toSection_apply (I := I) (M := M) g r m w x,
+    rw [h1, DifferentialGeometry.Analysis.Elliptic.rawTensorConnLapSmooth_toSection_apply (I := I) (M := M) g r m w x,
       DifferentialGeometry.Geometry.Curvature.rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g r m
         (fun y : M => w.toSection y) x]
   have hsum_aux : ∀ (s' : Finset (Fin n)),

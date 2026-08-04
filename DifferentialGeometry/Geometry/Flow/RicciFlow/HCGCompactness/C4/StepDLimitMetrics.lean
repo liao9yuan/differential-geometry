@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAll
 import DifferentialGeometry.Geometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

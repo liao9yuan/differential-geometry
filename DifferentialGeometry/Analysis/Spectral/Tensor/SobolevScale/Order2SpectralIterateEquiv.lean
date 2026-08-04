@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2Equivalence
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
 
@@ -113,7 +113,7 @@ theorem exists_tensorPouSobolevHsNorm_le_order2IterateNspec
         (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal ≤
           C₂ * order2ConnLapIterateL2Sum (I := I) (M := M) g T := by
   obtain ⟨C₂, hC₂_nn, hC₂⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter
+    DifferentialGeometry.Analysis.Elliptic.exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter
       (I := I) (M := M) g 2 2
   exact ⟨C₂, hC₂_nn, fun T => hC₂ T⟩
 

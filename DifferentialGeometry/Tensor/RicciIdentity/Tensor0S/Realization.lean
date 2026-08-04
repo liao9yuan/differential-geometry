@@ -1,8 +1,9 @@
 import DifferentialGeometry.Tensor.RicciIdentity.OneForm
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 
@@ -16,7 +17,7 @@ set_option autoImplicit false
 noncomputable section
 
 open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Tensor.RicciIdentity
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.SlotAlgebra
@@ -350,4 +351,4 @@ lemma first_slot_torsionCorrection_eq
   abel
 
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Tensor.RicciIdentity

@@ -16,8 +16,8 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 open DifferentialGeometry.Geometry.Connection
 
@@ -255,7 +255,7 @@ theorem metricScalar_smooth
     ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
       (fun x : M => metricScalarAt (I := I) (M := M) g x) := by
   simpa [metricScalarAt] using
-    DifferentialGeometry.Integral.Connection.trace02_smooth (I := I) (M := M) g
+    DifferentialGeometry.Tensor.RSTensor.trace02_smooth (I := I) (M := M) g
       (metricRicci (I := I) (M := M) g)
 
 

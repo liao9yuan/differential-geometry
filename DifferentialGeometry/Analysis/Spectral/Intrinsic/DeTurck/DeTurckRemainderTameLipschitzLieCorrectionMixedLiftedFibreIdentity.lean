@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionMixedInnerFibreIdentity
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Spectral
 
 
 noncomputable section

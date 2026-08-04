@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -446,7 +446,7 @@ private theorem intervalIntegrable_slotInput
             (fun z : M => (Φ t).toSection z) B.toFun x k)) (Set.uIcc (0:ℝ) 1) := by
     have hbase := chartE_repr_slice_continuousOn (I := I) g₀ r s Φ S hjoint x x hSI
     refine ContinuousOn.congr
-      (((DifferentialGeometry.Integral.Connection.inputSlotChartKernel
+      (((DifferentialGeometry.Analysis.Elliptic.inputSlotChartKernel
         (I := I) g₀ r s x B.toFun k x).continuous).comp_continuousOn hbase) ?_
     intro t _
     change (trivializationAt (TensorRSModel r s ℝ E)
@@ -454,7 +454,7 @@ private theorem intervalIntegrable_slotInput
           (DifferentialGeometry.Geometry.Connection.chartTensorRSInputSlotCorrection (I := I) r s g₀
             x
             (fun z : M => (Φ t).toSection z) B.toFun x k) =
-        DifferentialGeometry.Integral.Connection.inputSlotChartKernel (I := I) g₀ r s x B.toFun k x
+        DifferentialGeometry.Analysis.Elliptic.inputSlotChartKernel (I := I) g₀ r s x B.toFun k x
           (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
             (I := I) r s x (fun z : M => (Φ t).toSection z) x)
     rw [chartTensorRSInputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
@@ -490,7 +490,7 @@ private theorem intervalIntegrable_slotOutput
             (fun z : M => (Φ t).toSection z) B.toFun x l)) (Set.uIcc (0:ℝ) 1) := by
     have hbase := chartE_repr_slice_continuousOn (I := I) g₀ r s Φ S hjoint x x hSI
     refine ContinuousOn.congr
-      (((DifferentialGeometry.Integral.Connection.outputSlotChartKernel
+      (((DifferentialGeometry.Analysis.Elliptic.outputSlotChartKernel
         (I := I) g₀ r s x B.toFun l x).continuous).comp_continuousOn hbase) ?_
     intro t _
     change (trivializationAt (TensorRSModel r s ℝ E)
@@ -498,7 +498,7 @@ private theorem intervalIntegrable_slotOutput
           (DifferentialGeometry.Geometry.Connection.chartTensorRSOutputSlotCorrection (I := I) r s
             g₀ x
             (fun z : M => (Φ t).toSection z) B.toFun x l) =
-        DifferentialGeometry.Integral.Connection.outputSlotChartKernel (I := I) g₀ r s x B.toFun l x
+        DifferentialGeometry.Analysis.Elliptic.outputSlotChartKernel (I := I) g₀ r s x B.toFun l x
           (DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr
             (I := I) r s x (fun z : M => (Φ t).toSection z) x)
     rw [chartTensorRSOutputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
@@ -542,7 +542,7 @@ private theorem inputSlotCorrection_pathIntegral_comm
         x,
     chartRepr_pathIntegralCoeffField_eq (I := I) g₀ r s Φ S hS hSI hjoint x x]
   rw [← ContinuousLinearMap.intervalIntegral_comp_comm
-    (DifferentialGeometry.Integral.Connection.inputSlotChartKernel (I := I) g₀ r s x B.toFun k x)
+    (DifferentialGeometry.Analysis.Elliptic.inputSlotChartKernel (I := I) g₀ r s x B.toFun k x)
       hIIΦ]
   refine intervalIntegral.integral_congr (fun t _ => ?_)
   rw [chartTensorRSInputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x
@@ -585,7 +585,7 @@ private theorem outputSlotCorrection_pathIntegral_comm
         x,
     chartRepr_pathIntegralCoeffField_eq (I := I) g₀ r s Φ S hS hSI hjoint x x]
   rw [← ContinuousLinearMap.intervalIntegral_comp_comm
-    (DifferentialGeometry.Integral.Connection.outputSlotChartKernel (I := I) g₀ r s x B.toFun l x)
+    (DifferentialGeometry.Analysis.Elliptic.outputSlotChartKernel (I := I) g₀ r s x B.toFun l x)
       hIIΦ]
   refine intervalIntegral.integral_congr (fun t _ => ?_)
   rw [chartTensorRSOutputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ r s x

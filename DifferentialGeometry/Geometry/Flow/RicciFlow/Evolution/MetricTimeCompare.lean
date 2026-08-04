@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 import DifferentialGeometry.Geometry.Metric.Completeness
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -126,15 +127,13 @@ theorem metricPDE_Icc
       let τ : RealTimeInterval.RegularTime D :=
         ⟨s, hreg ⟨hs.1, hs.2.le⟩⟩
       have hraw := metricDerivAt (I := I) S hS τ x v w
-      simpa [SolutionFamily.ricciAt, metricRicciAt,
-        metricRicciAt_apply_eq_ricciTensor] using hraw.hasDerivWithinAt
+      simpa [SolutionFamily.ricciAt, metricRicciAt_apply_eq_ricciTensor, DifferentialGeometry.ricciCurvatureAt_leviCivita_apply_eq_ricciTensor] using hraw.hasDerivWithinAt
     exact (deriv_Ici_start hab _ _ (hmetricCont x v w) hecont hint).mono
       (fun _ hs ↦ hs.1)
   · let τ : RealTimeInterval.RegularTime D :=
       ⟨t, hreg ⟨hat, ht.2⟩⟩
     have hraw := metricDerivAt (I := I) S hS τ x v w
-    simpa [SolutionFamily.ricciAt, metricRicciAt,
-      metricRicciAt_apply_eq_ricciTensor] using hraw.hasDerivWithinAt
+    simpa [SolutionFamily.ricciAt, metricRicciAt_apply_eq_ricciTensor] using hraw.hasDerivWithinAt
 
 /-- A bound on the logarithmic ratio of two positive numbers gives
 multiplicative exponential bounds. -/

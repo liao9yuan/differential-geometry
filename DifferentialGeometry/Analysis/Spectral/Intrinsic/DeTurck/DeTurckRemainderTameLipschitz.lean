@@ -44,8 +44,10 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzPhiMetTotalCurvatureFold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmOneAllOrderTameEnvelope
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzKernelRefoldTameEnvelope
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -1716,7 +1718,7 @@ private theorem exists_lieDerivativeCorrectionPlusEndoArm_order0_data
   have hEndoEq : ∀ u : ℝ,
       deTurckLieEndoArmField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ u) g₀ =
-      DifferentialGeometry.Integral.Connection.deTurckLieDLbCoeffField (I := I) (M := M)
+      DifferentialGeometry.Analysis.Sobolev.deTurckLieDLbCoeffField (I := I) (M := M)
         g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ u) g₀ := by
     intro u
     apply SmoothCcTensor.ext

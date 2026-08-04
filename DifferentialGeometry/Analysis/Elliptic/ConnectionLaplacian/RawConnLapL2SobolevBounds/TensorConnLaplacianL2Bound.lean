@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawTensorConnLapPerChartL2Bound
 import DifferentialGeometry.Analysis.Integration.Measure.ManifoldL2NormChartTargetBound
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -13,8 +13,8 @@ open MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators ENNReal NNReal
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
@@ -138,8 +138,8 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
           (fun z : M => T₀ z) b)
       hΔT_meas
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

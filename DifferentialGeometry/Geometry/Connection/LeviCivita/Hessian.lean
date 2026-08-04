@@ -7,8 +7,8 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Connect
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Moving
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Smoothness
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
+open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 

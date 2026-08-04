@@ -5,8 +5,17 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
 import Mathlib.Analysis.Calculus.ContDiff.Comp
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
@@ -779,7 +788,7 @@ theorem metricVariationEquationOn_of_pde
       ((-2 : ℝ) * DifferentialGeometry.Geometry.Curvature.ricciTensor (I := I) (g (t : ℝ)) x X Y)
       (Set.Ico a b) (t : ℝ) :=
     (hpde (t : ℝ) htmem x X Y).mono Set.Ico_subset_Ici_self
-  simpa [SolutionFamily.ricciAt, metricRicciAt, metricRicciAt_apply_eq_ricciTensor] using h
+  simpa [SolutionFamily.ricciAt, metricRicciAt_apply_eq_ricciTensor, DifferentialGeometry.ricciCurvatureAt_leviCivita_apply_eq_ricciTensor] using h
 
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1213,7 +1222,7 @@ theorem solutionOn_of_joint [I.Boundaryless]
       (fun t _ x => ?_)
     simp only [SolutionFamily.rm04, metricRm04_apply]
   · intro t ht x
-    have h := (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+    have h := (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := M)
       (g (t : ℝ)) (metricRicci (I := I) (M := M) (g (t : ℝ)))).mdifferentiableAt
       (by simp) (x := x)
     refine h.congr_of_eventuallyEq ?_
@@ -1225,7 +1234,7 @@ theorem solutionOn_of_joint [I.Boundaryless]
         (ricciNorm (I := I)
           ({ base := { metric := g } } : SolutionOn (I := I) (M := M)
             (RealTimeInterval.closedOpen a b hab)) (t : ℝ)) := by
-      refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+      refine (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := M)
         (g (t : ℝ)) (metricRicci (I := I) (M := M) (g (t : ℝ)))).congr ?_
       intro y
       simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
@@ -1366,7 +1375,7 @@ theorem isSolutionOn_of_extendData
       hglued (fun t _ x => ?_)
     simp only [SolutionFamily.rm04, metricRm04_apply]
   · intro t ht x
-    have h := (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+    have h := (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := M)
       (g_ext (t : ℝ)) (metricRicci (I := I) (M := M) (g_ext (t : ℝ)))).mdifferentiableAt
       (by simp) (x := x)
     refine h.congr_of_eventuallyEq ?_
@@ -1378,7 +1387,7 @@ theorem isSolutionOn_of_extendData
         (ricciNorm (I := I)
           ({ base := { metric := g_ext } } : SolutionOn (I := I) (M := M)
             (RealTimeInterval.closedOpen α b hαb)) (t : ℝ)) := by
-      refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+      refine (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := M)
         (g_ext (t : ℝ)) (metricRicci (I := I) (M := M) (g_ext (t : ℝ)))).congr ?_
       intro y
       simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,

@@ -16,8 +16,10 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLieCovDerivFamily
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldEndoArmGridWindow
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldCovDerivArmPairTrace
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -435,14 +437,14 @@ private theorem lrKernel_inner (g₀ : SmoothRiemannianMetric I M)
   · subst hs0
     rw [lrRealizedFam_zero (I := I) (M := M) g₀ T hδ hδZ]
     have hker0 : connDiffCovDerivOp (I := I) g₀ g₀ x v0 p q = 0 := by
-      rw [Integral.Connection.dLaCovKernel_backgroundSplit (I := I) (M := M) g₀ g₀ g₀ x v0 p q]
+      rw [DifferentialGeometry.Analysis.Sobolev.dLaCovKernel_backgroundSplit (I := I) (M := M) g₀ g₀ g₀ x v0 p q]
       simp only [bdConnDiff_self_apply (I := I) (M := M) g₀ x, sub_self, add_zero]
     rw [hker0]
     simp only [bdConnDiff_self_apply (I := I) (M := M) g₀ x, map_zero,
       ContinuousLinearMap.zero_apply, zero_mul, sub_self]
   · have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
       Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
-    rw [Integral.Connection.dLaCovKernel_backgroundSplit (I := I) (M := M) g₀
+    rw [DifferentialGeometry.Analysis.Sobolev.dLaCovKernel_backgroundSplit (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀ x v0 p q]
     rw [lrCovDerivConnDiff_self_zero (I := I) (M := M) g₀ x v0 p q, sub_zero]
     set gs := realizedFam (I := I) g₀ T 0 hδ hδZ s with hgs_def

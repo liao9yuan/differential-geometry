@@ -3,8 +3,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjCriticalSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinOn
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotentialSpan
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 /-!

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Components.Lowering
+open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 
 set_option autoImplicit false

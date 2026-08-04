@@ -5,8 +5,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBou
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
@@ -142,14 +142,14 @@ private theorem metric_pde_start
       let tau : RealTimeInterval.RegularTime D :=
         ⟨s, hreg ⟨hs.1, hs.2.le⟩⟩
       have hraw := metricDerivAt (I := I) S hS tau x v w
-      simpa [SolutionFamily.ricciAt, PDE.RicciFlow.metricRicciAt,
+      simpa [SolutionFamily.ricciAt,
         metricRicciAt_apply_eq_ricciTensor] using hraw.hasDerivWithinAt
     exact (deriv_Ici_start halphaPsi _ _ (hmetricCont x v w) hecont hint).mono
       (fun _ hs ↦ hs.1)
   · let tau : RealTimeInterval.RegularTime D :=
       ⟨t, hreg ⟨halphaT, ht.2⟩⟩
     have hraw := metricDerivAt (I := I) S hS tau x v w
-    simpa [SolutionFamily.ricciAt, PDE.RicciFlow.metricRicciAt,
+    simpa [SolutionFamily.ricciAt,
       metricRicciAt_apply_eq_ricciTensor] using hraw.hasDerivWithinAt
 
 private theorem exp_bounds_log

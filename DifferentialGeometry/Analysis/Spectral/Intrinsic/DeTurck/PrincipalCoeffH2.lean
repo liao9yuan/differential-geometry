@@ -2,8 +2,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 
@@ -134,7 +136,7 @@ private theorem h2_grid_two
     intro n hn e he
     have hn2 : n ≤ 2 := by have := Finset.mem_range.mp hn; omega
     have hsum : ∑ m, e m = 2 := Finset.Nat.mem_antidiagonalTuple.mp he
-    have hres := DifferentialGeometry.Integral.Connection.grid_prod_int_le
+    have hres := DifferentialGeometry.Analysis.Spectral.grid_prod_int_le
       (I := I) (M := M) g T hR 2 (by omega) hLam hLam_sup (le_refl R)
       hCgn hGNP n hn2 e hsum
     refine ⟨hres.1, hres.2.trans ?_⟩

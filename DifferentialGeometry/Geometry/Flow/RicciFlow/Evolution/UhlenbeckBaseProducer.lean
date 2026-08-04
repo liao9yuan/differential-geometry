@@ -14,8 +14,9 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.UhlReaction3
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -1449,7 +1450,6 @@ private theorem rm04Nab2Kn_eq
 
 
 open DifferentialGeometry.Geometry.Operator
-open DifferentialGeometry.Integral.Connection in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceRicWit
@@ -1513,7 +1513,6 @@ private theorem traceRicWit
   simp only [leibnizLeftEquiv]
   rw [metricTraceFirstTwoField_product]
 
-open DifferentialGeometry.Integral.Connection in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem traceScalWit
@@ -1596,7 +1595,6 @@ private theorem traceScalWit
   simp only [leibnizLeftEquiv]
   rw [metricTraceFirstTwoField_product, metricTraceFirstTwoField_product]
 
-open DifferentialGeometry.Integral.Connection in
 private noncomputable def knRicLapT
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1618,7 +1616,6 @@ private noncomputable def knRicLapT
             (2 + 1) (S.family.connection t) (connSmoothSol (I := I) S t) _)))
       (metricTensorField (I := I) (S.family.metric t)))
 
-open DifferentialGeometry.Integral.Connection in
 private noncomputable def knScalLapT
     [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1653,7 +1650,6 @@ private noncomputable def lapRm04Kn
     + ((1 / 2 : Real) • knScalLapT (I := I) S t knE1
         + (-(1 / 2) : Real) • knScalLapT (I := I) S t knE2)
 
-open DifferentialGeometry.Integral.Connection in
 omit [IsManifold I 1 M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem lapRm04Kn_apply
@@ -1781,7 +1777,6 @@ private theorem lapRm04Kn_apply
   simp [vec2, vec4]
   ring
 
-open DifferentialGeometry.Integral.Connection in
 omit [IsManifold I 1 M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem traceRm04Kn

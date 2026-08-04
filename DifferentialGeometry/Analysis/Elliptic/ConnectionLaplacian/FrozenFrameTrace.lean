@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -13,8 +13,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -108,8 +108,8 @@ theorem frozenFrameTrace_eq_gWeighted_of_mem_nbhd
       (smoothOrthoFrame (I := I) g x j y))]
   rw [if_pos (Finset.mem_univ i)]
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

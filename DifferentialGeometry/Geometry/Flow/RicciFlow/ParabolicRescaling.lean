@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Scaling
 import DifferentialGeometry.Geometry.Operator.Scaling
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Scaling
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -608,7 +609,7 @@ theorem metricVariation_para
   have hcomp := hOld.comp (x := (t : Real)) htime hmaps
   have hscaled := hcomp.const_mul R
   simpa [MetricVariationEquationOn,
-    DifferentialGeometry.Integral.Connection.MetricVariationEquationOn,
+    DifferentialGeometry.PDE.RicciFlow.MetricVariationEquationOn,
     SolutionOn.family, paraSolution, paraFamily, RicciAtFamily.toTensorField,
     SolutionFamily.ricciAt, metricRicciAt, DifferentialGeometry.Geometry.Curvature.metricRicciAt,
     DifferentialGeometry.Geometry.Curvature.metricCov, scaleMetric_inner,

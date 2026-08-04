@@ -14,8 +14,8 @@ open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Analysis
+namespace Elliptic
 
 open DifferentialGeometry.Tensor
 open Tensor0SBundle
@@ -100,8 +100,8 @@ private lemma sum_VFI2_eq_finSum
   rw [Fin.sum_univ_three]
   simp only [Fin.val_zero, Fin.val_one, Fin.val_two]
 
-end Connection
-end Integral
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

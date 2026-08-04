@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedAppCcLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Spectral
 
 noncomputable section
 

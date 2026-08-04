@@ -7,7 +7,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 

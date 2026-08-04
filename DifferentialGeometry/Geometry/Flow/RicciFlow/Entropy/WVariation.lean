@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.FlowVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PotentialGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WeightedHessian
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator

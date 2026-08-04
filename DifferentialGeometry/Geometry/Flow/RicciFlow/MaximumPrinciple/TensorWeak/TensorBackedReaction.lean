@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.BarrierCore
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -15,7 +16,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
@@ -312,4 +313,4 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
   · constructor <;> simp [Tensor02ReactionAt.toRawSymm, hA]
 
 end
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

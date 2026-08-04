@@ -1,8 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiPullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -534,7 +535,7 @@ theorem isSolutionOn_pullback
     intro t _ht x
     have hsmooth : ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
         (ricciNorm (I := I) (solutionOn_pullback (I := I) S Φ) t) := by
-      refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+      refine (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := M)
         ((solutionOn_pullback (I := I) S Φ).family.metric t)
         (metricRicci (I := I) (M := M)
           ((solutionOn_pullback (I := I) S Φ).family.metric t))).congr ?_

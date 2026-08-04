@@ -2,9 +2,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.MeanInequalities
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section
@@ -65,7 +65,7 @@ theorem holder_integral_prod_rpow_le_prod_integral_rpow
 
 end ScalarHolder
 
-namespace Connection
+namespace L2
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -266,7 +266,7 @@ theorem holder_integral_prod_riemannianFiberNormSq_natWeight_le_of_sup_bound
   refine congrArg _ (Finset.prod_congr rfl fun m hm => ?_)
   rw [one_div_div]
 
-end Connection
+end L2
 end Integral
 end DifferentialGeometry
 

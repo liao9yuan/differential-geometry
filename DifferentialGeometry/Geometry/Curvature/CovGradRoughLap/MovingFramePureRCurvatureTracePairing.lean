@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower.DifferentiatedCurvature
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 
 

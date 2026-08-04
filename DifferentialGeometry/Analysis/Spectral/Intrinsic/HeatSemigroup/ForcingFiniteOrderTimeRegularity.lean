@@ -9,8 +9,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFin
 import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegularityParametricIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularitySpectralPath
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularityEigenPairingBound
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -2440,7 +2440,7 @@ private theorem deTurckRemainder_pathCoeff_finiteOrder_timeContDiff_withinMass
   set rawRaw : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
     fun i s => tensorL2Coeff (I := I) (M := M) hc
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-        (DifferentialGeometry.Integral.Connection.rawTensorConnLapSmooth
+        (DifferentialGeometry.Analysis.Elliptic.rawTensorConnLapSmooth
           (I := I) g₀ 0 2 (F s))) i with hrawRaw_def
   set cpath : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
     fun i s => tensorL2Coeff (I := I) (M := M) hc
@@ -2451,7 +2451,7 @@ private theorem deTurckRemainder_pathCoeff_finiteOrder_timeContDiff_withinMass
     have hrem :
         deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s)
           = deTurckRHSReconSectionFiniteOrder (I := I) g₀ g_bg (F s) hδ_lt (hδ s)
-            - DifferentialGeometry.Integral.Connection.rawTensorConnLapSmooth
+            - DifferentialGeometry.Analysis.Elliptic.rawTensorConnLapSmooth
                 (I := I) g₀ 0 2 (F s) := rfl
     simp only [hcpath_def, hreconRaw_def, hrawRaw_def]
     rw [hrem, SmoothCcTensor.toL2_sub]

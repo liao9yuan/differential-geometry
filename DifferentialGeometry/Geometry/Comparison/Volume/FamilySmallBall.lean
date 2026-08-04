@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.FamilyParamControl
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
