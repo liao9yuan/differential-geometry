@@ -112,4 +112,323 @@ theorem norm_boundedHolderSpaceMap_le
 
 end Map
 
+section RestrictUniv
+
+variable {X F : Type*} [MetricSpace X]
+  [NormedAddCommGroup F]
+
+theorem eHolderNorm_le_eHolderSeminormOn_univ
+    {alpha : NNReal} {f : X → F}
+    (hf : MemHolder alpha (Set.univ.restrict f)) :
+    eHolderNorm alpha f ≤ eHolderSeminormOn alpha Set.univ f := by
+  have hglobal : HolderWith
+      (nnHolderNorm alpha (Set.univ.restrict f)) alpha f := by
+    intro x y
+    exact hf.holderWith ⟨x, Set.mem_univ x⟩ ⟨y, Set.mem_univ y⟩
+  exact hglobal.eHolderNorm_le.trans coe_nnHolderNorm_le_eHolderNorm
+
+end RestrictUniv
+
+section EllipticJet
+
+variable {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+  [NormedAddCommGroup F] [NormedSpace Real F]
+
+theorem eHolderGauge_iteratedFDeriv_le
+    {k : Nat} {alpha : NNReal}
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
+    eHolderGauge alpha
+        (iteratedFDeriv Real k (contDiffHolderSpaceFun f)) ≤
+      eContDiffHolderGaugeOn k alpha Set.univ
+        (contDiffHolderSpaceFun f) := by
+  have hsup : eSupNormOn Set.univ
+      (iteratedFDeriv Real k (contDiffHolderSpaceFun f)) ≤
+      ∑ j ∈ Finset.range (k + 1),
+        eSupNormOn Set.univ
+          (iteratedFDeriv Real j (contDiffHolderSpaceFun f)) :=
+    Finset.single_le_sum
+      (fun j _ ↦ zero_le (eSupNormOn Set.univ
+        (iteratedFDeriv Real j (contDiffHolderSpaceFun f))))
+      (Finset.mem_range.mpr (Nat.lt_succ_self k))
+  have hholder : eHolderNorm alpha
+      (iteratedFDeriv Real k (contDiffHolderSpaceFun f)) ≤
+      eHolderSeminormOn alpha Set.univ
+        (iteratedFDeriv Real k (contDiffHolderSpaceFun f)) :=
+    eHolderNorm_le_eHolderSeminormOn_univ f.2.1.2
+  unfold eHolderGauge eContDiffHolderGaugeOn
+  exact add_le_add hsup hholder
+
+private def contDiffHolderSpaceTopJetLinearMap
+    (k : Nat) (alpha : NNReal) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →ₗ[Real]
+      BoundedHolderSpace (X := V) (F := V [×k]→L[Real] F) alpha where
+  toFun f := ⟨iteratedFDeriv Real k (contDiffHolderSpaceFun f),
+    ne_top_of_le_ne_top f.2.2 (eHolderGauge_iteratedFDeriv_le f)⟩
+  map_add' f g := by
+    apply boundedHolderSpace_ext
+    intro x
+    exact iteratedFDeriv_add_apply
+      (f.2.1.1 x (Set.mem_univ x))
+      (g.2.1.1 x (Set.mem_univ x))
+  map_smul' c f := by
+    apply boundedHolderSpace_ext
+    intro x
+    exact iteratedFDeriv_const_smul_apply
+      (f.2.1.1 x (Set.mem_univ x))
+
+private theorem norm_contDiffHolderSpaceTopJetLinearMap_le
+    {k : Nat} {alpha : NNReal}
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
+    ‖contDiffHolderSpaceTopJetLinearMap k alpha f‖ ≤ ‖f‖ := by
+  rw [norm_boundedHolderSpace_eq, norm_contDiffHolderSpace_eq]
+  exact ENNReal.toReal_mono f.2.2 (eHolderGauge_iteratedFDeriv_le f)
+
+def contDiffHolderSpaceTopJet (k : Nat) (alpha : NNReal) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →L[Real]
+      BoundedHolderSpace (X := V) (F := V [×k]→L[Real] F) alpha :=
+  LinearMap.mkContinuous (contDiffHolderSpaceTopJetLinearMap k alpha) 1
+    (fun f ↦ by simpa using norm_contDiffHolderSpaceTopJetLinearMap_le f)
+
+@[simp]
+theorem contDiffHolderSpaceTopJet_apply
+    (k : Nat) (alpha : NNReal)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    contDiffHolderSpaceTopJet k alpha f x =
+      iteratedFDeriv Real k (contDiffHolderSpaceFun f) x :=
+  rfl
+
+theorem norm_contDiffHolderSpaceTopJet_le (k : Nat) (alpha : NNReal) :
+    ‖contDiffHolderSpaceTopJet (V := V) (F := F) k alpha‖ ≤ 1 := by
+  exact LinearMap.mkContinuous_norm_le _ zero_le_one
+    (fun f ↦ by simpa using norm_contDiffHolderSpaceTopJetLinearMap_le f)
+
+end EllipticJet
+
+section ParabolicJet
+
+variable {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+  [NormedAddCommGroup F] [NormedSpace Real F]
+
+theorem eHolderGauge_parabolicSpatialHessian_le
+    {alpha : NNReal}
+    (u : ParabolicC2HolderSpace (V := V) (F := F) alpha) :
+    eHolderGauge alpha
+        (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) ≤
+      eParabolicC2HolderGaugeOn alpha Set.univ
+        (parabolicC2HolderSpaceFun u) := by
+  have hsup : eSupNormOn Set.univ
+      (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) ≤
+      ∑ j ∈ Finset.range 3,
+        eSupNormOn Set.univ
+          (parabolicSpatialJet j (parabolicC2HolderSpaceFun u)) :=
+    Finset.single_le_sum
+      (fun j _ ↦ zero_le (eSupNormOn Set.univ
+        (parabolicSpatialJet j (parabolicC2HolderSpaceFun u))))
+      (Finset.mem_range.mpr (by omega))
+  have hholder : eHolderNorm alpha
+      (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) ≤
+      eHolderSeminormOn alpha Set.univ
+        (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) :=
+    eHolderNorm_le_eHolderSeminormOn_univ u.2.1.2.1
+  unfold eHolderGauge
+  calc
+    eSupNormOn Set.univ
+          (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) +
+        eHolderNorm alpha
+          (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) ≤
+      eSupNormOn Set.univ
+          (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) +
+        eHolderSeminormOn alpha Set.univ
+          (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) :=
+      add_le_add le_rfl hholder
+    _ ≤ (∑ j ∈ Finset.range 3,
+          eSupNormOn Set.univ
+            (parabolicSpatialJet j (parabolicC2HolderSpaceFun u))) +
+        eHolderSeminormOn alpha Set.univ
+          (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) :=
+      add_le_add hsup le_rfl
+    _ ≤ eParabolicC2HolderGaugeOn alpha Set.univ
+        (parabolicC2HolderSpaceFun u) := by
+      unfold eParabolicC2HolderGaugeOn
+      calc
+        (∑ j ∈ Finset.range 3,
+              eSupNormOn Set.univ
+                (parabolicSpatialJet j (parabolicC2HolderSpaceFun u))) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) ≤
+          ((∑ j ∈ Finset.range 3,
+              eSupNormOn Set.univ
+                (parabolicSpatialJet j (parabolicC2HolderSpaceFun u))) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u))) +
+            (eSupNormOn Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u))) :=
+          le_add_right le_rfl
+        _ = (∑ j ∈ Finset.range 3,
+              eSupNormOn Set.univ
+                (parabolicSpatialJet j (parabolicC2HolderSpaceFun u))) +
+            eSupNormOn Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) := by
+          abel
+
+theorem eHolderGauge_parabolicTimeDerivative_le
+    {alpha : NNReal}
+    (u : ParabolicC2HolderSpace (V := V) (F := F) alpha) :
+    eHolderGauge alpha
+        (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) ≤
+      eParabolicC2HolderGaugeOn alpha Set.univ
+        (parabolicC2HolderSpaceFun u) := by
+  have hholder : eHolderNorm alpha
+      (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) ≤
+      eHolderSeminormOn alpha Set.univ
+        (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) :=
+    eHolderNorm_le_eHolderSeminormOn_univ u.2.1.2.2
+  unfold eHolderGauge
+  calc
+    eSupNormOn Set.univ
+          (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) +
+        eHolderNorm alpha
+          (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) ≤
+      eSupNormOn Set.univ
+          (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) +
+        eHolderSeminormOn alpha Set.univ
+          (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) :=
+      add_le_add le_rfl hholder
+    _ ≤ eParabolicC2HolderGaugeOn alpha Set.univ
+        (parabolicC2HolderSpaceFun u) := by
+      unfold eParabolicC2HolderGaugeOn
+      calc
+        eSupNormOn Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) ≤
+          ((∑ j ∈ Finset.range 3,
+              eSupNormOn Set.univ
+                (parabolicSpatialJet j (parabolicC2HolderSpaceFun u))) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u))) +
+            (eSupNormOn Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u))) :=
+          le_add_left le_rfl
+        _ = (∑ j ∈ Finset.range 3,
+              eSupNormOn Set.univ
+                (parabolicSpatialJet j (parabolicC2HolderSpaceFun u))) +
+            eSupNormOn Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u)) +
+            eHolderSeminormOn alpha Set.univ
+              (parabolicTimeDerivative (parabolicC2HolderSpaceFun u)) := by
+          abel
+
+private def parabolicC2HolderSpaceSpatialHessianLinearMap
+    (alpha : NNReal) :
+    ParabolicC2HolderSpace (V := V) (F := F) alpha →ₗ[Real]
+      ParabolicHolderSpace (V := V) (F := V [×2]→L[Real] F) alpha where
+  toFun u := ⟨parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u),
+    ne_top_of_le_ne_top u.2.2
+      (eHolderGauge_parabolicSpatialHessian_le u)⟩
+  map_add' u v := by
+    apply boundedHolderSpace_ext
+    intro p
+    exact parabolicSpatialJet_add 2 _ _ p
+      (u.2.1.1.1 p (Set.mem_univ p))
+      (v.2.1.1.1 p (Set.mem_univ p))
+  map_smul' c u := by
+    apply boundedHolderSpace_ext
+    intro p
+    exact parabolicSpatialJet_const_smul 2 _ p c
+      (u.2.1.1.1 p (Set.mem_univ p))
+
+private theorem norm_parabolicC2HolderSpaceSpatialHessianLinearMap_le
+    {alpha : NNReal}
+    (u : ParabolicC2HolderSpace (V := V) (F := F) alpha) :
+    ‖parabolicC2HolderSpaceSpatialHessianLinearMap alpha u‖ ≤ ‖u‖ := by
+  rw [norm_boundedHolderSpace_eq, norm_parabolicC2HolderSpace_eq]
+  exact ENNReal.toReal_mono u.2.2
+    (eHolderGauge_parabolicSpatialHessian_le u)
+
+def parabolicC2HolderSpaceSpatialHessian (alpha : NNReal) :
+    ParabolicC2HolderSpace (V := V) (F := F) alpha →L[Real]
+      ParabolicHolderSpace (V := V) (F := V [×2]→L[Real] F) alpha :=
+  LinearMap.mkContinuous
+    (parabolicC2HolderSpaceSpatialHessianLinearMap alpha) 1
+    (fun u ↦ by simpa using
+      norm_parabolicC2HolderSpaceSpatialHessianLinearMap_le u)
+
+@[simp]
+theorem parabolicC2HolderSpaceSpatialHessian_apply
+    (alpha : NNReal)
+    (u : ParabolicC2HolderSpace (V := V) (F := F) alpha)
+    (p : ParabolicPoint V) :
+    parabolicC2HolderSpaceSpatialHessian alpha u p =
+      parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u) p :=
+  rfl
+
+theorem norm_parabolicC2HolderSpaceSpatialHessian_le (alpha : NNReal) :
+    ‖parabolicC2HolderSpaceSpatialHessian (V := V) (F := F) alpha‖ ≤ 1 := by
+  exact LinearMap.mkContinuous_norm_le _ zero_le_one
+    (fun u ↦ by simpa using
+      norm_parabolicC2HolderSpaceSpatialHessianLinearMap_le u)
+
+private def parabolicC2HolderSpaceTimeDerivativeLinearMap
+    (alpha : NNReal) :
+    ParabolicC2HolderSpace (V := V) (F := F) alpha →ₗ[Real]
+      ParabolicHolderSpace (V := V) (F := F) alpha where
+  toFun u := ⟨parabolicTimeDerivative (parabolicC2HolderSpaceFun u),
+    ne_top_of_le_ne_top u.2.2
+      (eHolderGauge_parabolicTimeDerivative_le u)⟩
+  map_add' u v := by
+    apply boundedHolderSpace_ext
+    intro p
+    exact parabolicTimeDerivative_add _ _ p
+      (u.2.1.1.2 p (Set.mem_univ p))
+      (v.2.1.1.2 p (Set.mem_univ p))
+  map_smul' c u := by
+    apply boundedHolderSpace_ext
+    intro p
+    exact parabolicTimeDerivative_const_smul _ p c
+      (u.2.1.1.2 p (Set.mem_univ p))
+
+private theorem norm_parabolicC2HolderSpaceTimeDerivativeLinearMap_le
+    {alpha : NNReal}
+    (u : ParabolicC2HolderSpace (V := V) (F := F) alpha) :
+    ‖parabolicC2HolderSpaceTimeDerivativeLinearMap alpha u‖ ≤ ‖u‖ := by
+  rw [norm_boundedHolderSpace_eq, norm_parabolicC2HolderSpace_eq]
+  exact ENNReal.toReal_mono u.2.2
+    (eHolderGauge_parabolicTimeDerivative_le u)
+
+def parabolicC2HolderSpaceTimeDerivative (alpha : NNReal) :
+    ParabolicC2HolderSpace (V := V) (F := F) alpha →L[Real]
+      ParabolicHolderSpace (V := V) (F := F) alpha :=
+  LinearMap.mkContinuous
+    (parabolicC2HolderSpaceTimeDerivativeLinearMap alpha) 1
+    (fun u ↦ by simpa using
+      norm_parabolicC2HolderSpaceTimeDerivativeLinearMap_le u)
+
+@[simp]
+theorem parabolicC2HolderSpaceTimeDerivative_apply
+    (alpha : NNReal)
+    (u : ParabolicC2HolderSpace (V := V) (F := F) alpha)
+    (p : ParabolicPoint V) :
+    parabolicC2HolderSpaceTimeDerivative alpha u p =
+      parabolicTimeDerivative (parabolicC2HolderSpaceFun u) p :=
+  rfl
+
+theorem norm_parabolicC2HolderSpaceTimeDerivative_le (alpha : NNReal) :
+    ‖parabolicC2HolderSpaceTimeDerivative (V := V) (F := F) alpha‖ ≤ 1 := by
+  exact LinearMap.mkContinuous_norm_le _ zero_le_one
+    (fun u ↦ by simpa using
+      norm_parabolicC2HolderSpaceTimeDerivativeLinearMap_le u)
+
+end ParabolicJet
+
 end DifferentialGeometry.Analysis.Schauder
