@@ -383,6 +383,90 @@ theorem log_energy_differential_of_supersolution
   simpa only [localizedDirichletEnergy, cutoffDirichletEnergy, μ, w, hlog,
     smoothScalarSlice_toFun] using hresult
 
+theorem log_energy_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {a b : ℝ} (hab : a ≤ b)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    (1 / 2 : ℝ) * ∫ t in a..b,
+        localizedDirichletEnergy (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x))
+            (contMDiff_log_of_pos hu hpos) t) ≤
+      localizedIntegral (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x))
+            (contMDiff_log_of_pos hu hpos) b) -
+        localizedIntegral (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x))
+            (contMDiff_log_of_pos hu hpos) a) +
+        2 * (b - a) * cutoffDirichletEnergy (I := I) (M := M) cutoff := by
+  let hlog := contMDiff_log_of_pos hu hpos
+  let mass : ℝ → ℝ := fun t =>
+    localizedIntegral (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x)) hlog t)
+  let energy : ℝ → ℝ := fun t => -mass t
+  let denergy : ℝ → ℝ := fun t => -deriv mass t
+  let dissipation : ℝ → ℝ := fun t =>
+    (1 / 2 : ℝ) * localizedDirichletEnergy (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x)) hlog t)
+  let source : ℝ → ℝ := fun _ =>
+    2 * cutoffDirichletEnergy (I := I) (M := M) cutoff
+  have hmass_smooth : ContDiff ℝ ∞ mass := by
+    simpa only [mass] using contDiff_localizedIntegral
+      (I := I) (M := M) cutoff (fun s x => Real.log (u s x)) hlog
+  have hdenergy_cont : ContinuousOn denergy (Icc a b) := by
+    exact (hmass_smooth.continuous_deriv (by simp)).neg.continuousOn
+  have henergy_deriv : ∀ t ∈ Icc a b,
+      HasDerivAt energy (denergy t) t := by
+    intro t _
+    exact ((hmass_smooth.differentiable (by simp) t).hasDerivAt.neg)
+  have hdissipation_cont : ContinuousOn dissipation (Icc a b) := by
+    have hcont := contDiff_localizedDirichletEnergy
+      (I := I) (M := M) cutoff (fun s x => Real.log (u s x)) hlog
+    exact (continuous_const.mul hcont.continuous).continuousOn
+  have hpointwise : ∀ t ∈ Icc a b,
+      0 * energy t + 1 * denergy t + dissipation t ≤ source t := by
+    intro t ht
+    have hdiff := log_energy_differential_of_supersolution
+      (I := I) (M := M) g cutoff u hu hpos t (hpde t ht)
+    change (1 / 2 : ℝ) * localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x)) hlog t) ≤
+      deriv mass t + 2 * cutoffDirichletEnergy (I := I) (M := M) cutoff at hdiff
+    dsimp only [energy, denergy, dissipation, source]
+    linarith
+  have hresult := weight_mul_energy_inequality
+    (weight := fun _ => 1) (dweight := fun _ => 0)
+    (energy := energy) (denergy := denergy)
+    (dissipation := dissipation) (source := source) hab
+    continuousOn_const (fun t _ => hasDerivAt_const t 1)
+    hdenergy_cont henergy_deriv hdissipation_cont continuousOn_const hpointwise
+  have hscaled :
+      (∫ t in a..b, dissipation t) =
+        (1 / 2 : ℝ) * ∫ t in a..b,
+          localizedDirichletEnergy (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x)) hlog t) := by
+    simp only [dissipation, intervalIntegral.integral_const_mul]
+  have hsource :
+      (∫ t in a..b, source t) =
+        2 * (b - a) * cutoffDirichletEnergy (I := I) (M := M) cutoff := by
+    simp only [source, intervalIntegral.integral_const, smul_eq_mul]
+    ring
+  rw [hscaled, hsource] at hresult
+  dsimp only [energy] at hresult
+  have hfinal :
+      (1 / 2 : ℝ) * ∫ t in a..b,
+          localizedDirichletEnergy (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x)) hlog t) ≤
+        mass b - mass a +
+          2 * (b - a) * cutoffDirichletEnergy (I := I) (M := M) cutoff := by
+    linarith
+  simpa only [hlog, mass] using hfinal
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
