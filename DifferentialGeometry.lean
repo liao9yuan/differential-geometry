@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
 import DifferentialGeometry.Analysis.Calculus.ApproximatesLinearOn
+import DifferentialGeometry.Analysis.Calculus.ArzelaAscoli
 import DifferentialGeometry.Analysis.Calculus.BallCutoff
 import DifferentialGeometry.Analysis.Calculus.BallRetraction
 import DifferentialGeometry.Analysis.Calculus.BumpClamp
