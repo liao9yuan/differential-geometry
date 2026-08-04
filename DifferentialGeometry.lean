@@ -3138,6 +3138,7 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0SLinear
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0STimeDeriv
 import DifferentialGeometry.Tensor.RSTensor.NormSqProduct
 import DifferentialGeometry.Tensor.RSTensor.ProductNablaLeibniz
+import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Nullspace
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.RSLoweringNorm

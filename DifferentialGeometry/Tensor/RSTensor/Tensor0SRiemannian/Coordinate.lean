@@ -327,8 +327,9 @@ theorem homCLM_inner_eq_basis
         gInv i j * D.inner (A (basis i)) (B (basis j)) := by
   exact hom_inner_eq_basis (I := I) g x basis gInv hinv D A.toLinearMap B.toLinearMap
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem tensor0S_curry_one_apply
+    [IsManifold I 1 M]
     {x : M} (A : Tensor0SSpace 2 I x)
     (X Y : TangentSpace I x) :
     (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x A X)
