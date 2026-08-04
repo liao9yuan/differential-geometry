@@ -93,6 +93,20 @@ theorem parabolicTimeCenteredDilationAt_eq_dilationAt
   · rfl
 
 @[simp]
+theorem parabolicTimeCenteredDilationAt_center
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V) :
+    parabolicTimeCenteredDilationAt tau r p0
+        (parabolicPoint tau 0) = p0 := by
+  rw [← parabolicPoint_time_space p0]
+  apply Prod.ext
+  · apply Metric.Snowflaking.ext
+    change p0.time + (r : Real) ^ 2 * (tau - tau) = p0.time
+    ring
+  · change p0.space + (r : Real) • (0 : V) = p0.space
+    simp
+
+@[simp]
 theorem parabolicInverseDilationAt_time
     {V : Type*} [AddGroup V] [SMul Real V]
     (r : NNReal) (p0 p : ParabolicPoint V) :
@@ -292,6 +306,11 @@ def parabolicPreimageAt {V : Type*} [Add V] [SMul Real V]
     (r : NNReal) (p0 : ParabolicPoint V)
     (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
   parabolicDilationAt r p0 ⁻¹' Q
+
+def parabolicRescaleTimeInterval {V : Type*}
+    (r : NNReal) (p0 : ParabolicPoint V) (R : Real) : Set Real :=
+  Set.Icc (p0.time - (r : Real) ^ 2 * R)
+    (p0.time + (r : Real) ^ 2 * R)
 
 theorem parabolicPreimageAt_inverse_preimageAt
     {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
@@ -1241,6 +1260,40 @@ theorem parabolicDilationAt_mapsTo_ball
       dist_parabolicDilationAt r p0 p (parabolicPoint 0 0)
     _ < (r : Real) * R :=
       mul_lt_mul_of_pos_left (Metric.mem_ball.mp hp) hr
+
+theorem parabolicTimeCenteredDilationAt_mapsTo_ball
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (tau : Real) (r : NNReal) (hr : 0 < r)
+    (R : Real) (p0 : ParabolicPoint V) :
+    MapsTo (parabolicTimeCenteredDilationAt tau r p0)
+      (Metric.ball (parabolicPoint tau 0) R)
+      (Metric.ball p0 ((r : Real) * R)) := by
+  intro p hp
+  rw [Metric.mem_ball]
+  calc
+    dist (parabolicTimeCenteredDilationAt tau r p0 p) p0 =
+        dist (parabolicTimeCenteredDilationAt tau r p0 p)
+          (parabolicTimeCenteredDilationAt tau r p0
+            (parabolicPoint tau 0)) := by
+      rw [parabolicTimeCenteredDilationAt_center]
+    _ = (r : Real) * dist p (parabolicPoint tau 0) :=
+      dist_parabolicTimeCenteredDilationAt
+        tau r p0 p (parabolicPoint tau 0)
+    _ < (r : Real) * R :=
+      mul_lt_mul_of_pos_left (Metric.mem_ball.mp hp) hr
+
+theorem parabolicTimeCenteredDilationAt_mapsTo_rescaleTimeCylinder
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (R : Real) (r : NNReal) (p0 : ParabolicPoint V) :
+    MapsTo (parabolicTimeCenteredDilationAt R r p0)
+      (parabolicCylinder (Set.Icc 0 (2 * R)) Set.univ)
+      (parabolicCylinder (parabolicRescaleTimeInterval r p0 R) Set.univ) := by
+  intro p hp
+  refine ⟨?_, Set.mem_univ _⟩
+  rw [parabolicRescaleTimeInterval]
+  simp only [parabolicTimeCenteredDilationAt_time]
+  have hr2 : 0 ≤ (r : Real) ^ 2 := sq_nonneg _
+  constructor <;> nlinarith [hp.1.1, hp.1.2]
 
 theorem parabolicDilationAt_mapsTo_unitBall
     {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]

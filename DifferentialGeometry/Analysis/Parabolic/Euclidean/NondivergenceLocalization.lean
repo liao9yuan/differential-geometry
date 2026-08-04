@@ -113,6 +113,23 @@ theorem parabolicPotentialCoefficientRescaleExtension_eq_of_mem_closedBall
     tau _ hp
 
 omit [DecidableEq n] in
+theorem parabolicMatrixCoefficientRescaleExtension_posDef
+    (tau R : Real) (rho : NNReal) (p0 : ParabolicPoint (Euc n))
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (hA : (Matrix.of fun i j ↦ principal i j p0).PosDef) :
+    (Matrix.of fun i j ↦ parabolicMatrixCoefficientRescaleExtension
+      tau R rho p0 principal i j (parabolicPoint tau 0)).PosDef := by
+  have hcenter : ∀ i j,
+      parabolicMatrixCoefficientRescaleExtension
+          tau R rho p0 principal i j (parabolicPoint tau 0) =
+        principal i j p0 := by
+    intro i j
+    simp [parabolicMatrixCoefficientRescaleExtension,
+      parabolicTimeCenteredBallRetractionExtension,
+      parabolicTimeCenteredBallRetraction, ballRetraction]
+  simpa only [hcenter] using hA
+
+omit [DecidableEq n] in
 theorem parabolicNondivergenceOperator_timeCenteredRescaleExtension
     {F : Type*} [Nonempty n]
     [NormedAddCommGroup F] [NormedSpace Real F]
