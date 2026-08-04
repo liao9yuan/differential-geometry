@@ -19,6 +19,11 @@ def parabolicDilationAt {V : Type*} [Add V] [SMul Real V]
     (r : NNReal) (p0 p : ParabolicPoint V) : ParabolicPoint V :=
   parabolicTranslation p0 (parabolicDilation r p)
 
+def parabolicInverseDilationAt {V : Type*} [AddGroup V] [SMul Real V]
+    (r : NNReal) (p0 p : ParabolicPoint V) : ParabolicPoint V :=
+  parabolicPoint ((p.time - p0.time) / (r : Real) ^ 2)
+    ((r : Real)⁻¹ • (p.space - p0.space))
+
 @[simp]
 theorem parabolicDilation_time {V : Type*} [SMul Real V]
     (r : NNReal) (p : ParabolicPoint V) :
@@ -50,6 +55,20 @@ theorem parabolicDilationAt_space {V : Type*} [Add V] [SMul Real V]
     (r : NNReal) (p0 p : ParabolicPoint V) :
     (parabolicDilationAt r p0 p).space =
       p0.space + (r : Real) • p.space := rfl
+
+@[simp]
+theorem parabolicInverseDilationAt_time
+    {V : Type*} [AddGroup V] [SMul Real V]
+    (r : NNReal) (p0 p : ParabolicPoint V) :
+    (parabolicInverseDilationAt r p0 p).time =
+      (p.time - p0.time) / (r : Real) ^ 2 := rfl
+
+@[simp]
+theorem parabolicInverseDilationAt_space
+    {V : Type*} [AddGroup V] [SMul Real V]
+    (r : NNReal) (p0 p : ParabolicPoint V) :
+    (parabolicInverseDilationAt r p0 p).space =
+      (r : Real)⁻¹ • (p.space - p0.space) := rfl
 
 @[simp]
 theorem parabolicDilation_zero {V : Type*} [NormedAddCommGroup V]
@@ -120,6 +139,91 @@ theorem parabolicDilationAt_origin {V : Type*} [NormedAddCommGroup V]
   rw [← parabolicPoint_time_space p0]
   simp [parabolicDilationAt, parabolicTranslation, parabolicDilation]
 
+@[simp]
+theorem parabolicDilationAt_inverseDilationAt
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (p0 p : ParabolicPoint V) :
+    parabolicDilationAt r p0 (parabolicInverseDilationAt r p0 p) = p := by
+  rcases p0 with ⟨⟨t0⟩, x0⟩
+  rcases p with ⟨⟨t⟩, x⟩
+  apply Prod.ext
+  · apply Metric.Snowflaking.ext
+    change t0 + (r : Real) ^ 2 * ((t - t0) / (r : Real) ^ 2) = t
+    field_simp
+    ring
+  · change x0 + (r : Real) • ((r : Real)⁻¹ • (x - x0)) = x
+    rw [smul_smul]
+    simp [hr.ne']
+
+@[simp]
+theorem parabolicInverseDilationAt_dilationAt
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (p0 p : ParabolicPoint V) :
+    parabolicInverseDilationAt r p0 (parabolicDilationAt r p0 p) = p := by
+  rcases p0 with ⟨⟨t0⟩, x0⟩
+  rcases p with ⟨⟨t⟩, x⟩
+  apply Prod.ext
+  · apply Metric.Snowflaking.ext
+    change (t0 + (r : Real) ^ 2 * t - t0) / (r : Real) ^ 2 = t
+    field_simp
+    ring
+  · change (r : Real)⁻¹ • (x0 + (r : Real) • x - x0) = x
+    simp [hr.ne']
+
+theorem dist_parabolicInverseDilationAt
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (p0 p q : ParabolicPoint V) :
+    dist (parabolicInverseDilationAt r p0 p)
+        (parabolicInverseDilationAt r p0 q) =
+      (r : Real)⁻¹ * dist p q := by
+  have h := dist_parabolicDilationAt r p0
+    (parabolicInverseDilationAt r p0 p)
+    (parabolicInverseDilationAt r p0 q)
+  simp only [parabolicDilationAt_inverseDilationAt r hr p0] at h
+  calc
+    dist (parabolicInverseDilationAt r p0 p)
+        (parabolicInverseDilationAt r p0 q) =
+        (r : Real)⁻¹ * ((r : Real) *
+          dist (parabolicInverseDilationAt r p0 p)
+            (parabolicInverseDilationAt r p0 q)) := by
+          field_simp
+    _ = (r : Real)⁻¹ * dist p q := by rw [h]
+
+@[simp]
+theorem parabolicInverseDilationAt_center
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (p0 : ParabolicPoint V) :
+    parabolicInverseDilationAt r p0 p0 = parabolicPoint 0 0 := by
+  rcases p0 with ⟨⟨t0⟩, x0⟩
+  apply Prod.ext
+  · apply Metric.Snowflaking.ext
+    change (t0 - t0) / (r : Real) ^ 2 = 0
+    simp
+  · change (r : Real)⁻¹ • (x0 - x0) = 0
+    simp
+
+theorem parabolicDilationAt_inverse_eq_inverseDilationAt
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (p0 p : ParabolicPoint V) :
+    parabolicDilationAt r⁻¹
+        (parabolicInverseDilationAt r p0 (parabolicPoint 0 0)) p =
+      parabolicInverseDilationAt r p0 p := by
+  rcases p0 with ⟨⟨t0⟩, x0⟩
+  rcases p with ⟨⟨t⟩, x⟩
+  apply Prod.ext
+  · apply Metric.Snowflaking.ext
+    change (0 - t0) / (r : Real) ^ 2 +
+      ((r⁻¹ : NNReal) : Real) ^ 2 * t =
+        (t - t0) / (r : Real) ^ 2
+    simp only [NNReal.coe_inv]
+    field_simp
+    ring
+  · change (r : Real)⁻¹ • (0 - x0) +
+      ((r⁻¹ : NNReal) : Real) • x =
+        (r : Real)⁻¹ • (x - x0)
+    simp only [NNReal.coe_inv, zero_sub, smul_neg, smul_sub]
+    abel
+
 def parabolicPreimage {V : Type*} [SMul Real V]
     (r : NNReal) (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
   parabolicDilation r ⁻¹' Q
@@ -128,6 +232,23 @@ def parabolicPreimageAt {V : Type*} [Add V] [SMul Real V]
     (r : NNReal) (p0 : ParabolicPoint V)
     (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
   parabolicDilationAt r p0 ⁻¹' Q
+
+theorem parabolicPreimageAt_inverse_unitBall
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V) :
+    parabolicPreimageAt r⁻¹
+        (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
+        (Metric.ball (parabolicPoint 0 0) 1) =
+      Metric.ball p0 r := by
+  ext p
+  change dist (parabolicDilationAt r⁻¹
+      (parabolicInverseDilationAt r p0 (parabolicPoint 0 0)) p)
+      (parabolicPoint 0 0) < 1 ↔ dist p p0 < (r : Real)
+  rw [parabolicDilationAt_inverse_eq_inverseDilationAt r hr p0 p,
+    ← parabolicInverseDilationAt_center r p0,
+    dist_parabolicInverseDilationAt r hr p0]
+  rw [inv_mul_lt_iff₀ (NNReal.coe_pos.mpr hr)]
+  simp
 
 def parabolicRescale {V F : Type*} [SMul Real V]
     (r : NNReal) (u : Real → V → F) : Real → V → F :=
@@ -158,6 +279,42 @@ theorem parabolicRescaleAt_apply {V F : Type*} [Add V] [SMul Real V]
     parabolicRescaleAt r p0 u t x =
       u (p0.time + (r : Real) ^ 2 * t)
         (p0.space + (r : Real) • x) := rfl
+
+theorem contDiff_parabolicRescaleAt_space
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {n : WithTop ℕ∞} (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → V → F) (hspace : ∀ t, ContDiff Real n (u t))
+    (t : Real) :
+    ContDiff Real n (parabolicRescaleAt r p0 u t) := by
+  have haffine : ContDiff Real n
+      (fun x : V ↦ p0.space + (r : Real) • x) := by
+    simpa only [id_eq] using
+      (contDiff_const.add (contDiff_id.const_smul (r : Real)))
+  simpa only [parabolicRescaleAt_apply, Function.comp_apply] using
+    (hspace (p0.time + (r : Real) ^ 2 * t)).comp haffine
+
+@[simp]
+theorem parabolicRescaleAt_inverse_rescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V)
+    (u : Real → V → F) :
+    parabolicRescaleAt r⁻¹
+        (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
+        (parabolicRescaleAt r p0 u) = u := by
+  funext t x
+  change u
+      (parabolicDilationAt r p0
+        (parabolicDilationAt r⁻¹
+          (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
+          (parabolicPoint t x))).time
+      (parabolicDilationAt r p0
+        (parabolicDilationAt r⁻¹
+          (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
+          (parabolicPoint t x))).space = u t x
+  rw [parabolicDilationAt_inverse_eq_inverseDilationAt r hr,
+    parabolicDilationAt_inverseDilationAt r hr]
+  rfl
 
 @[simp]
 theorem parabolicSourceRescaleAt_apply
@@ -592,6 +749,26 @@ theorem eParabolicC2HolderGaugeOn_rescaleAt_le
     hspatial htime hspatialHolder htimeHolder
   unfold parabolicC2HolderRescaleConst
   simpa only [Cspatial] using hresult
+
+theorem eParabolicC2HolderGaugeOn_ball_le_of_rescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r alpha C : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V)
+    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (h : eParabolicC2HolderGaugeOn alpha
+      (Metric.ball (parabolicPoint 0 0) 1)
+      (parabolicRescaleAt r p0 u) ≤ C) :
+    eParabolicC2HolderGaugeOn alpha (Metric.ball p0 r) u ≤
+      parabolicC2HolderRescaleConst r⁻¹ alpha C := by
+  have hscaled : ∀ t, ContDiff Real 2 (parabolicRescaleAt r p0 u t) :=
+    contDiff_parabolicRescaleAt_space r p0 u hspace
+  have hresult := eParabolicC2HolderGaugeOn_rescaleAt_le r⁻¹ alpha C
+    (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
+    (Metric.ball (parabolicPoint 0 0) 1)
+    (parabolicRescaleAt r p0 u) hscaled h
+  rw [parabolicPreimageAt_inverse_unitBall r hr p0,
+    parabolicRescaleAt_inverse_rescaleAt r hr p0 u] at hresult
+  exact hresult
 
 def parabolicLinearMap {V W : Type*} [NormedAddCommGroup V]
     [NormedSpace Real V] [NormedAddCommGroup W] [NormedSpace Real W]
