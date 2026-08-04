@@ -53,6 +53,86 @@ theorem eParabolicC2HolderGaugeOn_mono
   · exact eHolderSeminormOn_mono hQR alpha _
   · exact eHolderSeminormOn_mono hQR alpha _
 
+def parabolicInteriorRadius
+    (a t₀ t₁ b r R : Real) : Real :=
+  min (Real.sqrt (t₀ - a))
+    (min (Real.sqrt (b - t₁)) (R - r)) / 2
+
+theorem parabolicInteriorRadius_pos
+    {a t₀ t₁ b r R : Real}
+    (hat₀ : a < t₀) (ht₁b : t₁ < b) (hrR : r < R) :
+    0 < parabolicInteriorRadius a t₀ t₁ b r R := by
+  unfold parabolicInteriorRadius
+  apply div_pos
+  · exact lt_min (Real.sqrt_pos.2 (sub_pos.2 hat₀))
+      (lt_min (Real.sqrt_pos.2 (sub_pos.2 ht₁b)) (sub_pos.2 hrR))
+  · norm_num
+
+theorem ball_parabolicInteriorRadius_subset_parabolicCylinder
+    {a t₀ t₁ b r R : Real}
+    (hat₀ : a < t₀) (ht₁b : t₁ < b)
+    (hrR : r < R) {center : X} {p : ParabolicPoint X}
+    (hp : p ∈ parabolicCylinder (Set.Icc t₀ t₁)
+      (Metric.closedBall center r)) :
+    Metric.ball p (parabolicInteriorRadius a t₀ t₁ b r R) ⊆
+      parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) := by
+  let delta := parabolicInteriorRadius a t₀ t₁ b r R
+  have hdelta : 0 < delta := parabolicInteriorRadius_pos hat₀ ht₁b hrR
+  have hdleft : delta ≤ Real.sqrt (t₀ - a) / 2 := by
+    dsimp only [delta, parabolicInteriorRadius]
+    exact div_le_div_of_nonneg_right (min_le_left _ _) (by norm_num)
+  have hdright : delta ≤ Real.sqrt (b - t₁) / 2 := by
+    dsimp only [delta, parabolicInteriorRadius]
+    exact div_le_div_of_nonneg_right
+      ((min_le_right _ _).trans (min_le_left _ _)) (by norm_num)
+  have hdspace : delta ≤ (R - r) / 2 := by
+    dsimp only [delta, parabolicInteriorRadius]
+    exact div_le_div_of_nonneg_right
+      ((min_le_right _ _).trans (min_le_right _ _)) (by norm_num)
+  have hdleftSq : delta ^ 2 ≤ t₀ - a := by
+    have hsqrtSq : (Real.sqrt (t₀ - a)) ^ 2 = t₀ - a :=
+      Real.sq_sqrt (sub_nonneg.2 hat₀.le)
+    nlinarith [sq_nonneg (Real.sqrt (t₀ - a) / 2 - delta)]
+  have hdrightSq : delta ^ 2 ≤ b - t₁ := by
+    have hsqrtSq : (Real.sqrt (b - t₁)) ^ 2 = b - t₁ :=
+      Real.sq_sqrt (sub_nonneg.2 ht₁b.le)
+    nlinarith [sq_nonneg (Real.sqrt (b - t₁) / 2 - delta)]
+  intro q hq
+  have hqdist : dist q p < delta := by
+    simpa only [delta] using Metric.mem_ball.mp hq
+  have hqdistMax :
+      max (|q.time - p.time| ^ (1 / 2 : Real))
+          (dist q.space p.space) < delta := by
+    calc
+      max (|q.time - p.time| ^ (1 / 2 : Real))
+          (dist q.space p.space) = dist q p := by
+        rw [← parabolicPoint_time_space q, ← parabolicPoint_time_space p,
+          dist_parabolicPoint]
+        rfl
+      _ < delta := hqdist
+  have htimeSqrt : Real.sqrt |q.time - p.time| < delta := by
+    rw [Real.sqrt_eq_rpow]
+    exact (le_max_left _ _).trans_lt hqdistMax
+  have htimeAbs : |q.time - p.time| < delta ^ 2 := by
+    have hsqrtSq : (Real.sqrt |q.time - p.time|) ^ 2 =
+        |q.time - p.time| := Real.sq_sqrt (abs_nonneg _)
+    nlinarith [Real.sqrt_nonneg |q.time - p.time|]
+  have htimeBounds := abs_lt.mp htimeAbs
+  have hqa : a ≤ q.time := by
+    linarith [hp.1.1]
+  have hqb : q.time ≤ b := by
+    linarith [hp.1.2]
+  have hspaceDist : dist q.space p.space < delta :=
+    (le_max_right _ _).trans_lt hqdistMax
+  have hqcenter : dist q.space center ≤ R := by
+    calc
+      dist q.space center ≤ dist q.space p.space + dist p.space center :=
+        dist_triangle _ _ _
+      _ ≤ delta + r := add_le_add hspaceDist.le
+        (Metric.mem_closedBall.mp hp.2)
+      _ ≤ R := by linarith
+  exact ⟨⟨hqa, hqb⟩, Metric.mem_closedBall.mpr hqcenter⟩
+
 omit [NormedSpace Real V] [NormedSpace Real F] in
 theorem holderWith_parabolicCylinder_Icc_of_time_support
     {a b S T : Real} (ha : 0 < a) (haT : a ≤ T) (hbT : b < T)

@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatPotentialSPD
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatSemigroupSchauder
 import DifferentialGeometry.Analysis.Schauder.Absorption
 import DifferentialGeometry.Analysis.Schauder.BilinearHolder
+import DifferentialGeometry.Analysis.Schauder.Localization
 
 noncomputable section
 
@@ -300,6 +301,52 @@ theorem exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith
   · intro i j p hp
     exact parabolicMatrixCoefficientRescale_norm_sub_le_of_mem_unitBall
       r hr p0 a Ka har i j p hp
+
+omit [Nonempty n] [NormedSpace Real F] in
+theorem exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith_on_parabolicCylinder
+    (coeff : n → n → ParabolicPoint (Euc n) → Real)
+    {a t₀ t₁ b r R : Real}
+    (hat₀ : a < t₀) (ht₁b : t₁ < b) (hrR : r < R)
+    {center : Euc n} {p0 : ParabolicPoint (Euc n)}
+    (hp0 : p0 ∈ parabolicCylinder (Set.Icc t₀ t₁)
+      (Metric.closedBall center r))
+    (hA : (Matrix.of fun i j ↦ coeff i j p0).PosDef)
+    (alpha : NNReal) (halpha : 0 < alpha) (Ka : n → n → NNReal)
+    (T : Real)
+    (hcoeff : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (coeff i j))) :
+    ∃ rho : NNReal, 0 < rho ∧
+      (rho : Real) ≤ parabolicInteriorRadius a t₀ t₁ b r R ∧
+      (∀ i j, HolderWith (Ka i j * rho ^ (alpha : Real)) alpha
+        ((Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicMatrixCoefficientRescale rho p0 coeff i j))) ∧
+      (∀ i j p, p ∈ Metric.ball (parabolicPoint 0 0) 1 →
+        ‖coeff i j p0 - parabolicMatrixCoefficientRescale rho p0 coeff i j p‖ ≤
+          Ka i j * rho ^ (alpha : Real)) ∧
+      spdParabolicSchauderDefectConst
+        (Matrix.of fun i j ↦ coeff i j p0) hA alpha
+        (fun i j ↦ Ka i j * rho ^ (alpha : Real))
+        (fun i j ↦ Ka i j * rho ^ (alpha : Real)) T < 1 := by
+  let delta := parabolicInteriorRadius a t₀ t₁ b r R
+  have hdelta : 0 < delta := parabolicInteriorRadius_pos hat₀ ht₁b hrR
+  let radius : NNReal := ⟨delta, hdelta.le⟩
+  have hradius : 0 < radius := by
+    exact_mod_cast hdelta
+  have hball : Metric.ball p0 (radius : Real) ⊆
+      parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) := by
+    simpa only [radius, delta, NNReal.coe_mk] using
+      ball_parabolicInteriorRadius_subset_parabolicCylinder
+        hat₀ ht₁b hrR hp0
+  have hlocal : ∀ i j, HolderWith (Ka i j) alpha
+      ((Metric.ball p0 radius).restrict (coeff i j)) := by
+    intro i j
+    exact ((HolderWith.restrict_iff.mp (hcoeff i j)).mono hball).holderWith
+  obtain ⟨rho, hrho, hrhoRadius, hholder, hoscillation, hsmall⟩ :=
+    exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith
+      coeff p0 hA alpha halpha Ka T radius hradius hlocal
+  refine ⟨rho, hrho, ?_, hholder, hoscillation, hsmall⟩
+  exact_mod_cast hrhoRadius
 
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
