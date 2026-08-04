@@ -79,6 +79,19 @@ theorem parabolicTimeCenteredDilationAt_space
       p0.space + (r : Real) • p.space :=
   rfl
 
+theorem parabolicTimeCenteredDilationAt_eq_dilationAt
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (tau : Real) (r : NNReal) (p0 p : ParabolicPoint V) :
+    parabolicTimeCenteredDilationAt tau r p0 p =
+      parabolicDilationAt r
+        (parabolicPoint (p0.time - (r : Real) ^ 2 * tau) p0.space) p := by
+  apply Prod.ext
+  · apply Metric.Snowflaking.ext
+    change p0.time + (r : Real) ^ 2 * (p.time - tau) =
+      p0.time - (r : Real) ^ 2 * tau + (r : Real) ^ 2 * p.time
+    ring
+  · rfl
+
 @[simp]
 theorem parabolicInverseDilationAt_time
     {V : Type*} [AddGroup V] [SMul Real V]
@@ -488,6 +501,24 @@ theorem coe_parabolicRescaleAt
   rfl
 
 @[simp]
+theorem coe_parabolicTimeCenteredRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) :
+    (fun t x ↦ parabolicTimeCenteredRescaleAt tau r p0 u t x) =
+      DifferentialGeometry.Analysis.Schauder.parabolicRescaleAt r
+        (parabolicPoint (p0.time - (r : Real) ^ 2 * tau) p0.space)
+        (fun t x ↦ u t x) := by
+  funext t x
+  change u (p0.time + (r : Real) ^ 2 * (t - tau))
+      (p0.space + (r : Real) • x) =
+    u (p0.time - (r : Real) ^ 2 * tau + (r : Real) ^ 2 * t)
+      (p0.space + (r : Real) • x)
+  congr 1
+  ring_nf
+
+@[simp]
 theorem parabolicTimeDerivativeRescaleAt_apply
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]
@@ -892,6 +923,19 @@ theorem parabolicTimeCenteredSourceRescaleAt_apply
       (r : Real) ^ 2 •
         f (parabolicTimeCenteredDilationAt tau r p0 p) :=
   rfl
+
+theorem parabolicTimeCenteredSourceRescaleAt_eq_parabolicSourceRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (f : ParabolicPoint V → F) :
+    parabolicTimeCenteredSourceRescaleAt tau r p0 f =
+      parabolicSourceRescaleAt r
+        (parabolicPoint (p0.time - (r : Real) ^ 2 * tau) p0.space) f := by
+  funext p
+  rw [parabolicTimeCenteredSourceRescaleAt_apply,
+    parabolicSourceRescaleAt_apply,
+    parabolicTimeCenteredDilationAt_eq_dilationAt]
 
 theorem parabolicDilation_mapsTo_preimage {V : Type*} [SMul Real V]
     (r : NNReal) (Q : Set (ParabolicPoint V)) :

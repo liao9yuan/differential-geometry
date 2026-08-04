@@ -112,6 +112,199 @@ theorem parabolicPotentialCoefficientRescaleExtension_eq_of_mem_closedBall
   exact parabolicTimeCenteredBallRetractionExtension_eq_of_mem_closedBall
     tau _ hp
 
+omit [DecidableEq n] in
+theorem parabolicNondivergenceOperator_timeCenteredRescaleExtension
+    {F : Type*} [Nonempty n]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) {R : Real} (rho : NNReal)
+    (p0 : ParabolicPoint (Euc n))
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (potential : ParabolicPoint (Euc n) → Real)
+    (u : Real → BoundedContinuousFunction (Euc n) F)
+    (p : ParabolicPoint (Euc n))
+    (hp : p.space ∈ Metric.closedBall (0 : Euc n) R)
+    (hspace : ContDiff Real 2
+      (u (p0.time + (rho : Real) ^ 2 * (p.time - tau)) :
+        Euc n → F)) :
+    parabolicNondivergenceOperator
+        (parabolicMatrixCoefficientRescaleExtension
+          tau R rho p0 principal)
+        (parabolicDriftCoefficientRescaleExtension
+          tau R rho p0 drift)
+        (parabolicPotentialCoefficientRescaleExtension
+          tau R rho p0 potential)
+        (fun t x ↦ BoundedContinuousFunction.parabolicTimeCenteredRescaleAt
+          tau rho p0 u t x) p =
+      parabolicTimeCenteredSourceRescaleAt tau rho p0
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x)) p := by
+  classical
+  let pshift : ParabolicPoint (Euc n) :=
+    parabolicPoint (p0.time - (rho : Real) ^ 2 * tau) p0.space
+  have hprincipal : ∀ i j,
+      parabolicMatrixCoefficientRescaleExtension
+          tau R rho p0 principal i j p =
+        parabolicMatrixCoefficientRescale rho pshift principal i j p := by
+    intro i j
+    rw [parabolicMatrixCoefficientRescaleExtension_eq_of_mem_closedBall
+      tau rho p0 principal i j hp]
+    change principal i j
+        (parabolicTimeCenteredDilationAt tau rho p0 p) =
+      principal i j (parabolicDilationAt rho pshift p)
+    rw [parabolicTimeCenteredDilationAt_eq_dilationAt]
+  have hdrift : ∀ i,
+      parabolicDriftCoefficientRescaleExtension
+          tau R rho p0 drift i p =
+        parabolicDriftCoefficientRescale rho pshift drift i p := by
+    intro i
+    rw [parabolicDriftCoefficientRescaleExtension_eq_of_mem_closedBall
+      tau rho p0 drift i hp]
+    change (rho : Real) *
+        drift i (parabolicTimeCenteredDilationAt tau rho p0 p) =
+      (rho : Real) * drift i (parabolicDilationAt rho pshift p)
+    rw [parabolicTimeCenteredDilationAt_eq_dilationAt]
+  have hpotential :
+      parabolicPotentialCoefficientRescaleExtension
+          tau R rho p0 potential p =
+        parabolicPotentialCoefficientRescale rho pshift potential p := by
+    rw [parabolicPotentialCoefficientRescaleExtension_eq_of_mem_closedBall
+      tau rho p0 potential hp]
+    change (rho : Real) ^ 2 *
+        potential (parabolicTimeCenteredDilationAt tau rho p0 p) =
+      (rho : Real) ^ 2 * potential (parabolicDilationAt rho pshift p)
+    rw [parabolicTimeCenteredDilationAt_eq_dilationAt]
+  have hu : (fun t x ↦
+      BoundedContinuousFunction.parabolicTimeCenteredRescaleAt
+        tau rho p0 u t x) =
+      parabolicRescaleAt rho pshift (fun t x ↦ u t x) := by
+    simpa only [pshift] using
+      BoundedContinuousFunction.coe_parabolicTimeCenteredRescaleAt
+        tau rho p0 u
+  have hspace' : ContDiff Real 2
+      (u (pshift.time + (rho : Real) ^ 2 * p.time) : Euc n → F) := by
+    dsimp only [pshift, parabolicPoint_time]
+    convert hspace using 1
+    ring_nf
+  calc
+    parabolicNondivergenceOperator
+        (parabolicMatrixCoefficientRescaleExtension
+          tau R rho p0 principal)
+        (parabolicDriftCoefficientRescaleExtension
+          tau R rho p0 drift)
+        (parabolicPotentialCoefficientRescaleExtension
+          tau R rho p0 potential)
+        (fun t x ↦ BoundedContinuousFunction.parabolicTimeCenteredRescaleAt
+          tau rho p0 u t x) p =
+      parabolicNondivergenceOperator
+        (parabolicMatrixCoefficientRescale rho pshift principal)
+        (parabolicDriftCoefficientRescale rho pshift drift)
+        (parabolicPotentialCoefficientRescale rho pshift potential)
+        (parabolicRescaleAt rho pshift (fun t x ↦ u t x)) p := by
+          rw [hu]
+          unfold parabolicNondivergenceOperator
+            parabolicVariableMatrixOperator parabolicVariableMatrixLap
+            parabolicLowerOrderTerm parabolicDriftTerm
+            parabolicPotentialTerm matrixLap
+          simp only [Pi.sub_apply, Pi.add_apply]
+          simp_rw [hprincipal, hdrift, hpotential]
+    _ = parabolicSourceRescaleAt rho pshift
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x)) p :=
+      parabolicNondivergenceOperator_rescaleAt rho pshift
+        principal drift potential (fun t x ↦ u t x) p hspace'
+    _ = parabolicTimeCenteredSourceRescaleAt tau rho p0
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x)) p := by
+      rw [parabolicTimeCenteredSourceRescaleAt_eq_parabolicSourceRescaleAt]
+
+omit [DecidableEq n] in
+theorem parabolicNondivergenceOperator_timeCenteredRescaleExtension_holderWith
+    {F : Type*} [Nonempty n]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {alpha K : NNReal} {P Q : Set (ParabolicPoint (Euc n))}
+    (tau : Real) {R : Real} (rho : NNReal)
+    (p0 : ParabolicPoint (Euc n))
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (potential : ParabolicPoint (Euc n) → Real)
+    (u : Real → BoundedContinuousFunction (Euc n) F)
+    (hspaceBall : ∀ p, p ∈ Q →
+      p.space ∈ Metric.closedBall (0 : Euc n) R)
+    (hspace : ∀ p, p ∈ Q → ContDiff Real 2
+      (u (p0.time + (rho : Real) ^ 2 * (p.time - tau)) :
+        Euc n → F))
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau rho p0) Q P)
+    (hoperator : HolderWith K alpha
+      (P.restrict (parabolicNondivergenceOperator principal drift potential
+        (fun t x ↦ u t x)))) :
+    HolderWith (K * rho ^ (alpha : Real) * rho ^ 2) alpha
+      (Q.restrict (parabolicNondivergenceOperator
+        (parabolicMatrixCoefficientRescaleExtension
+          tau R rho p0 principal)
+        (parabolicDriftCoefficientRescaleExtension
+          tau R rho p0 drift)
+        (parabolicPotentialCoefficientRescaleExtension
+          tau R rho p0 potential)
+        (fun t x ↦ BoundedContinuousFunction.parabolicTimeCenteredRescaleAt
+          tau rho p0 u t x))) := by
+  have heq : Q.restrict (parabolicNondivergenceOperator
+      (parabolicMatrixCoefficientRescaleExtension
+        tau R rho p0 principal)
+      (parabolicDriftCoefficientRescaleExtension
+        tau R rho p0 drift)
+      (parabolicPotentialCoefficientRescaleExtension
+        tau R rho p0 potential)
+      (fun t x ↦ BoundedContinuousFunction.parabolicTimeCenteredRescaleAt
+        tau rho p0 u t x)) =
+      Q.restrict (parabolicTimeCenteredSourceRescaleAt tau rho p0
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x))) := by
+    funext p
+    exact parabolicNondivergenceOperator_timeCenteredRescaleExtension
+      tau rho p0 principal drift potential u p.1
+        (hspaceBall p.1 p.2) (hspace p.1 p.2)
+  rw [heq]
+  exact parabolicTimeCenteredSourceRescaleAt_holderWith
+    tau rho p0 _ hmap hoperator
+
+omit [DecidableEq n] in
+theorem norm_parabolicNondivergenceOperator_timeCenteredRescaleExtension_le
+    {F : Type*} [Nonempty n]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {P Q : Set (ParabolicPoint (Euc n))}
+    (tau : Real) {R : Real} (rho : NNReal)
+    (p0 : ParabolicPoint (Euc n))
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (potential : ParabolicPoint (Euc n) → Real)
+    (u : Real → BoundedContinuousFunction (Euc n) F) (B : NNReal)
+    (hspaceBall : ∀ p, p ∈ Q →
+      p.space ∈ Metric.closedBall (0 : Euc n) R)
+    (hspace : ∀ p, p ∈ Q → ContDiff Real 2
+      (u (p0.time + (rho : Real) ^ 2 * (p.time - tau)) :
+        Euc n → F))
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau rho p0) Q P)
+    (hoperator : ∀ p, p ∈ P →
+      ‖parabolicNondivergenceOperator principal drift potential
+        (fun t x ↦ u t x) p‖ ≤ B) :
+    ∀ p, p ∈ Q →
+      ‖parabolicNondivergenceOperator
+        (parabolicMatrixCoefficientRescaleExtension
+          tau R rho p0 principal)
+        (parabolicDriftCoefficientRescaleExtension
+          tau R rho p0 drift)
+        (parabolicPotentialCoefficientRescaleExtension
+          tau R rho p0 potential)
+        (fun t x ↦ BoundedContinuousFunction.parabolicTimeCenteredRescaleAt
+          tau rho p0 u t x) p‖ ≤ rho ^ 2 * B := by
+  intro p hp
+  rw [parabolicNondivergenceOperator_timeCenteredRescaleExtension
+    tau rho p0 principal drift potential u p
+      (hspaceBall p hp) (hspace p hp)]
+  exact norm_parabolicTimeCenteredSourceRescaleAt_le
+    tau rho p0 _ B hmap hoperator p hp
+
 def IsParabolicNondivergenceSchauderScale
     (principal : n → n → ParabolicPoint (Euc n) → Real)
     (drift : n → ParabolicPoint (Euc n) → Real)
