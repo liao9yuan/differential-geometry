@@ -35,6 +35,15 @@ theorem uniformEquicontinuousOn_of_holderOnWith
   exact uniformEquicontinuous_of_holderWith
     (s.restrict ∘ f) hr (fun i => (hf i).holderWith)
 
+theorem holderOnWith_prodMk
+    [PseudoMetricSpace X] [PseudoEMetricSpace Y] [PseudoEMetricSpace F]
+    {s : Set X} {f : X → Y} {g : X → F} {C D r : NNReal}
+    (hf : HolderOnWith C r f s) (hg : HolderOnWith D r g s) :
+    HolderOnWith (max C D) r (fun x => (f x, g x)) s := by
+  intro x hx y hy
+  rw [Prod.edist_eq, ENNReal.coe_max, max_mul]
+  exact max_le_max (hf x hx y hy) (hg x hx y hy)
+
 theorem equicontinuous_of_locally_holderOnWith
     [PseudoMetricSpace X] [LocallyCompactSpace X] [PseudoMetricSpace Y]
     {ι : Type*} (f : ι → X → Y) {r : NNReal} (hr : 0 < r)
