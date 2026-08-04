@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffCovariantDerivative
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

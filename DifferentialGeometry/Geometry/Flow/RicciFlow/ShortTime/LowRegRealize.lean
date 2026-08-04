@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Three-dimensional low-regularity metric realization

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialJacobiScaling
+open DifferentialGeometry.Geometry.Curvature
 
 
 /-!
@@ -52,7 +53,7 @@ def Rm04DataAt
     (∀ t (_ht : t ∈ Ioo (0 : ℝ) b),
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
         (radialCurve (I := I) g p x t) 4
-        (DifferentialGeometry.Integral.Connection.metricRm04At
+        (DifferentialGeometry.Geometry.Curvature.metricRm04At
           (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
     (∀ t ∈ Icc (0 : ℝ) b,
       DifferentiableAt ℝ
@@ -144,18 +145,18 @@ theorem rm04Data_jacobi
       simpa [show Module.finrank ℝ
           (TangentSpace I (radialCurve (I := I) g p x t)) =
             Module.finrank ℝ E from rfl] using
-        (DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+        (DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis
           (I := I) g (radialCurve (I := I) g p x t))
     choose basis hON using hbasis
     have hcurv : ∀ t ∈ Ioo (0 : ℝ) b,
         g.inner (radialCurve (I := I) g p x t)
-            ((DifferentialGeometry.Integral.Connection.riemannOp
+            ((DifferentialGeometry.Geometry.Curvature.riemannOp
               (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
                 (radialCurve (I := I) g p x t))
               (radialJacobiField (I := I) g p x w t)
               (curveVelocity (I := I) (radialCurve (I := I) g p x) t)
               (curveVelocity (I := I) (radialCurve (I := I) g p x) t))
-            ((DifferentialGeometry.Integral.Connection.riemannOp
+            ((DifferentialGeometry.Geometry.Curvature.riemannOp
               (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
                 (radialCurve (I := I) g p x t))
               (radialJacobiField (I := I) g p x w t)
@@ -172,7 +173,7 @@ theorem rm04Data_jacobi
         Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : ℝ))
       set A : ℝ := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
         (radialCurve (I := I) g p x t) 4
-        (DifferentialGeometry.Integral.Connection.metricRm04At
+        (DifferentialGeometry.Geometry.Curvature.metricRm04At
           (I := I) (M := M) g (radialCurve (I := I) g p x t)))
       have hCnn : 0 ≤ C := Real.sqrt_nonneg _
       have hVsq : 0 ≤ Vb ^ 2 := sq_nonneg Vb
@@ -210,7 +211,7 @@ theorem rm04_one_le
     (hRm : ∀ t (_ht : t ∈ Ioo (0 : ℝ) b),
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
         (radialCurve (I := I) g p x t) 4
-        (DifferentialGeometry.Integral.Connection.metricRm04At
+        (DifferentialGeometry.Geometry.Curvature.metricRm04At
           (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R)
     (hγ : ∀ t ∈ Icc (0 : ℝ) b,
       ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)
@@ -277,7 +278,7 @@ theorem rm04_one_ge
     (hRm : ∀ t (_ht : t ∈ Ioo (0 : ℝ) b),
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
         (radialCurve (I := I) g p x t) 4
-        (DifferentialGeometry.Integral.Connection.metricRm04At
+        (DifferentialGeometry.Geometry.Curvature.metricRm04At
           (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R)
     (hγ : ∀ t ∈ Icc (0 : ℝ) b,
       ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t)

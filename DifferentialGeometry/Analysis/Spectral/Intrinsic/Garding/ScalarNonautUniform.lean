@@ -3,6 +3,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ParametricPairin
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarGalerkinPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -22,7 +25,7 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert

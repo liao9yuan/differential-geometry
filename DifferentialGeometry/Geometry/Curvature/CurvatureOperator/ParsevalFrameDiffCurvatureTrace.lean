@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
 import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -11,8 +13,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle Tensor0SNabla
@@ -1054,8 +1056,8 @@ theorem parsevalFrame_eq_orthoFrame_diag_nablaTensor0SCurv
   simp only [ContMDiffSection.coeFn_mk]
   exact hconv
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

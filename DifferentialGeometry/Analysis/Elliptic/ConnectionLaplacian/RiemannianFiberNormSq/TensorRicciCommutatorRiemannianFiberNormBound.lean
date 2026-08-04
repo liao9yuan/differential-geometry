@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqLe
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

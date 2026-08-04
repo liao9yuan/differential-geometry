@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 noncomputable section
 

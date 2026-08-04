@@ -1,6 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricDifferenceSlotPairing
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -14,7 +17,7 @@ namespace DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Laplacian
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

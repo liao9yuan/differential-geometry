@@ -6,6 +6,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothEmbedInj
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsMetricPerturbation
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
@@ -20,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 

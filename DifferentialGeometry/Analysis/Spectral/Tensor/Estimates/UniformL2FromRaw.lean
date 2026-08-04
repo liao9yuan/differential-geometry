@@ -1,6 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqLeRawComponents
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -20,7 +23,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

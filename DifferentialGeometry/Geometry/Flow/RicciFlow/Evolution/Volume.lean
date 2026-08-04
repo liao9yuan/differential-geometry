@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
 import DifferentialGeometry.Geometry.Curvature.Realized.Curvature
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -49,26 +51,26 @@ abbrev volumeTraceInvMetricComponents
 
 
 abbrev scalarCurvatureFromRicciInVolumeFrame
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real) :
     Real → M → Real :=
   fun t =>
-    DifferentialGeometry.Integral.Connection.scalarCurvatureFromRicciTraceInFrame (I := I) (Ric t)
+    DifferentialGeometry.Geometry.Curvature.scalarCurvatureFromRicciTraceInFrame (I := I) (Ric t)
       (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t))
       (volumeTraceFrame (I := I) (M := M))
 
 
 
 theorem scalarCurvatureFromRicciInVolumeFrame_realizes
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
       (t : Real) :
-    DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceInFrame (I := I)
+    DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceInFrame (I := I)
       (scalarCurvatureFromRicciInVolumeFrame (I := I) (M := M) G Ric t)
       (Ric t)
       (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t))
       (volumeTraceFrame (I := I) (M := M)) :=
-  DifferentialGeometry.Integral.Connection.scalarCurvatureFromRicciTraceInFrame_realizes
+  DifferentialGeometry.Geometry.Curvature.scalarCurvatureFromRicciTraceInFrame_realizes
     (I := I) (M := M) (Ric t)
     (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t))
     (volumeTraceFrame (I := I) (M := M))
@@ -80,14 +82,14 @@ theorem scalarCurvatureFromRicciInVolumeFrame_realizes
 
 theorem traceTimeDerivMetricAt_eq_trace_metric_derivative
     (td : TimeDerivativeData Real A Real)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     {t : Real} {x : M}
     (hdt : ∀ F : Real → Real, td.dt_apply F t = deriv F t) :
     traceTimeDerivMetricAt (I := I) G t x =
       Matrix.trace
         ((chartGramMatrix (I := I) (G.metric t) x x)⁻¹ *
           Matrix.of fun i j =>
-            DifferentialGeometry.Integral.Connection.metricTimeDerivative td G t x
+            DifferentialGeometry.Geometry.Curvature.metricTimeDerivative td G t x
               (chartBasisVecFiber (I := I) x i x)
               (chartBasisVecFiber (I := I) x j x)) := by
   rw [traceTimeDerivMetricAt_eq, traceTimeDerivMetric_eq]
@@ -98,7 +100,7 @@ theorem traceTimeDerivMetricAt_eq_trace_metric_derivative
       (G.metric s).inner x
         (chartBasisVecFiber (I := I) x i x)
         (chartBasisVecFiber (I := I) x j x))
-  simpa [metricFamilyForMeasure, DifferentialGeometry.Integral.Connection.metricTimeDerivative,
+  simpa [metricFamilyForMeasure, DifferentialGeometry.Geometry.Curvature.metricTimeDerivative,
     chartGramMatrix_apply]
     using h.symm
 
@@ -118,9 +120,9 @@ private theorem chartGramMatrix_inv_symm
 
 theorem scalar_trace_eq_volume_trace_components
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
-    (Ric : DifferentialGeometry.Integral.Connection.RawTwoTensorField (I := I) (M := M))
+    (Ric : DifferentialGeometry.Geometry.Curvature.RawTwoTensorField (I := I) (M := M))
     (scalar : M → Real)
-    (hScalar : DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceInFrame (I := I)
+    (hScalar : DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceInFrame (I := I)
       scalar Ric
       (volumeTraceInvMetricComponents (I := I) (M := M) g)
       (volumeTraceFrame (I := I) (M := M))) (x : M) :
@@ -132,7 +134,7 @@ theorem scalar_trace_eq_volume_trace_components
               (chartBasisVecFiber (I := I) x i x)
               (chartBasisVecFiber (I := I) x j x) := by
   simpa [volumeTraceInvMetricComponents, volumeTraceFrame] using
-    DifferentialGeometry.Integral.Connection.scalar_eq_trace (I := I) scalar Ric
+    DifferentialGeometry.Geometry.Curvature.scalar_eq_trace (I := I) scalar Ric
       (volumeTraceInvMetricComponents (I := I) (M := M) g)
       (volumeTraceFrame (I := I) (M := M)) hScalar x
 
@@ -143,7 +145,7 @@ theorem scalar_trace_eq_volume_trace_components
 
 theorem traceTimeDerivMetricAt_eq_neg_two_scalar
     (td : TimeDerivativeData Real A Real)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
     (scalar : Real → M → Real)
     (hdt : ∀ (F : Real → Real) (t : Real), td.dt_apply F t = deriv F t)
@@ -163,7 +165,7 @@ theorem traceTimeDerivMetricAt_eq_neg_two_scalar
     chartGramMatrix (I := I) (G.metric t) x x
   let dG : Matrix (Fin (Module.finrank Real E)) (Fin (Module.finrank Real E)) Real :=
     Matrix.of fun i j =>
-      DifferentialGeometry.Integral.Connection.metricTimeDerivative td G t x
+      DifferentialGeometry.Geometry.Curvature.metricTimeDerivative td G t x
         (chartBasisVecFiber (I := I) x i x)
         (chartBasisVecFiber (I := I) x j x)
   have htrace :
@@ -237,13 +239,13 @@ theorem traceTimeDerivMetricAt_eq_neg_two_scalar
 
 theorem traceTimeDerivMetricAt_eq_neg_two_scalar_of_scalarTrace
     (td : TimeDerivativeData Real A Real)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
     (scalar : Real → M → Real)
     (hdt : ∀ (F : Real → Real) (t : Real), td.dt_apply F t = deriv F t)
     (hEq : DifferentialGeometry.Integral.Connection.MetricVariationEquation (I := I) td G Ric)
     {t : Real}
-    (hScalar : DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceInFrame (I := I)
+    (hScalar : DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceInFrame (I := I)
       (scalar t) (Ric t)
       (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t))
       (volumeTraceFrame (I := I) (M := M)))
@@ -258,12 +260,12 @@ theorem traceTimeDerivMetricAt_eq_neg_two_scalar_of_scalarTrace
 
 
 theorem traceTimeDerivMetricAt_eq_neg_two_scalar_of_metricDeriv
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
     (scalar : Real → M → Real)
     {t : Real}
     (hEq : DifferentialGeometry.Integral.Connection.MetricVariationEquationDerivAt (I := I) G Ric t)
-    (hScalar : DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceInFrame (I := I)
+    (hScalar : DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceInFrame (I := I)
       (scalar t) (Ric t)
       (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t))
       (volumeTraceFrame (I := I) (M := M)))
@@ -350,7 +352,7 @@ theorem traceTimeDerivMetricAt_eq_neg_two_scalar_of_metricDeriv
 
 theorem volume_variation_ricciFlow_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar : Real → M → Real)
     {f : Real → M → Real} {t₀ : Real}
     (hg : MetricFamilyRegularAt (I := I)
@@ -385,13 +387,13 @@ theorem volume_variation_ricciFlow_at
 theorem volume_variation_ricciFlow_at_of_metricVariationEquation
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (td : TimeDerivativeData Real A Real)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
     (scalar : Real → M → Real)
     {f : Real → M → Real} {t₀ : Real}
     (hdt : ∀ (F : Real → Real) (t : Real), td.dt_apply F t = deriv F t)
     (hEq : DifferentialGeometry.Integral.Connection.MetricVariationEquation (I := I) td G Ric)
-    (hScalar : DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceInFrame (I := I)
+    (hScalar : DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceInFrame (I := I)
       (scalar t₀) (Ric t₀)
       (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t₀))
       (volumeTraceFrame (I := I) (M := M)))
@@ -412,13 +414,13 @@ theorem volume_variation_ricciFlow_at_of_metricVariationEquation
 
 theorem volume_variation_ricciFlow_at_of_metricDeriv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
     (scalar : Real → M → Real)
     {f : Real → M → Real} {t₀ : Real}
     (hEq : DifferentialGeometry.Integral.Connection.MetricVariationEquationDerivAt (I := I) G Ric
       t₀)
-    (hScalar : DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceInFrame (I := I)
+    (hScalar : DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceInFrame (I := I)
       (scalar t₀) (Ric t₀)
       (volumeTraceInvMetricComponents (I := I) (M := M) (G.metric t₀))
       (volumeTraceFrame (I := I) (M := M)))
@@ -439,7 +441,7 @@ theorem volume_variation_ricciFlow_at_of_metricDeriv
 
 theorem volume_variation_ricciFlow_at_of_metricDeriv_canonicalScalar
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
     {f : Real → M → Real} {t₀ : Real}
     (hEq : DifferentialGeometry.Integral.Connection.MetricVariationEquationDerivAt (I := I) G Ric
@@ -464,7 +466,7 @@ theorem volume_variation_ricciFlow_at_of_metricDeriv_canonicalScalar
 
 theorem total_volume_variation_ricciFlow_at_of_metricDeriv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (Ric : DifferentialGeometry.Integral.Connection.RicciTensorField (I := I) (M := M) Real)
     {t₀ : Real}
     (hEq : DifferentialGeometry.Integral.Connection.MetricVariationEquationDerivAt (I := I) G Ric

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Weitzenbock
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 
 noncomputable section
 
@@ -10,8 +13,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -60,8 +63,8 @@ theorem riemannOp_covGrad_fiberNormSq_le_gen
   refine ⟨Cx, hCx_nonneg, fun v w => ?_⟩
   exact hbound v w ((covGrad (I := I) (M := M) g 0 s S).toSection x)
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

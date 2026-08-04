@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGrad
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradVar
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -27,7 +28,7 @@ namespace Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

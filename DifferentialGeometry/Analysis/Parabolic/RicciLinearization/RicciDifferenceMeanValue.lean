@@ -9,6 +9,8 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointChartCurvatureSmoothness
 import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointTensorFieldSmoothness
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -26,7 +28,7 @@ namespace DeTurck
 namespace RicciLinearization
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

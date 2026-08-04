@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemain
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameFoldPieces
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -11,8 +14,8 @@ open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -65,8 +68,8 @@ theorem frameSummed_bracketIntegral_empty_eq_zero
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
   simp only [Finset.univ_eq_empty, Finset.sum_empty]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

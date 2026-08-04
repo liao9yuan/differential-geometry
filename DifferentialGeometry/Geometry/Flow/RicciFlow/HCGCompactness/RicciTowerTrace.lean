@@ -4,6 +4,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NormBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -21,7 +24,7 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.HCGCompactness
 open scoped Manifold ContDiff BigOperators
 

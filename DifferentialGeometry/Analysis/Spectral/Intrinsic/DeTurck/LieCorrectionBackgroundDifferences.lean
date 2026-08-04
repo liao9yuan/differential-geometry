@@ -1,5 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionTensorTransferBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -22,7 +25,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open LieCorr0Core
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable

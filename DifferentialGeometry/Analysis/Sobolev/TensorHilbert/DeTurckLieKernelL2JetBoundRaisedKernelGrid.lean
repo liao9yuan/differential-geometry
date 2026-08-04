@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBoundLoweredRepresentation
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

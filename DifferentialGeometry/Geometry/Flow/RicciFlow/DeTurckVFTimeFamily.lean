@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -14,7 +16,7 @@ open scoped Manifold ContDiff
 open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem

@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -11,8 +13,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -600,6 +602,6 @@ theorem localConnLap_vector_eq_bochnerFormula_of_inner_form [I.Boundaryless]
         g.inner x (ricciSharp (I := I) g x (gradFun (I := I) g f x)) w from
     by rw [map_add, ContinuousLinearMap.add_apply]]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

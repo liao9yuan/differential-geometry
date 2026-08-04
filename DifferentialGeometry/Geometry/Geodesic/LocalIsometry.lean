@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Geodesic.OpenSubtype
 import DifferentialGeometry.Geometry.Geodesic.PullbackCross
 import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

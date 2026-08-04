@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.FiberNormRiema
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberFromModelOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
+open DifferentialGeometry.Integral.Connection
 
 noncomputable section
 
@@ -17,7 +18,7 @@ namespace HebeyBlock
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 

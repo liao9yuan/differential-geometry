@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -15,7 +18,7 @@ namespace IntrinsicSpectral
 namespace DeTurck
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow

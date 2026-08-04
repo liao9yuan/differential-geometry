@@ -4,6 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMO
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotUniformBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotChartSourceContMDiff
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

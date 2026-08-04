@@ -17,7 +17,7 @@ namespace Analysis
 namespace Laplacian
 namespace TensorRegularity
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

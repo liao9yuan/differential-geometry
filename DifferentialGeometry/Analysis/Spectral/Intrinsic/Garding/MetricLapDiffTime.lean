@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricC1Continuity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -23,7 +25,7 @@ namespace RicciFlow
 namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
 section LapDiffOperator

@@ -6,6 +6,8 @@ import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -530,11 +532,11 @@ theorem gammaL2_le_initial_add_on_subset
 
 theorem gammaL2_le_initial_add_regular
     (Gamma dGamma nablaRic : Real -> Idx -> Idx -> Idx -> Real)
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval} {a b R : Real}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval} {a b R : Real}
     (hsub : Set.uIcc a b ⊆ D.carrier)
     (hregular : forall s : Real, s ∈ Set.uIcc a b -> s ∈ D.regular)
     (hderiv :
-      forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
+      forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
         forall p : Idx × Idx × Idx,
           HasDerivWithinAt
             (fun r : Real => Gamma r p.1 p.2.1 p.2.2)

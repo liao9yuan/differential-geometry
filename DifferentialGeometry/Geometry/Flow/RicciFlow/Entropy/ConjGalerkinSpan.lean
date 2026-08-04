@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjCriticalSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinOn
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotentialSpan
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Compact-span scalar Galerkin compactness
@@ -20,7 +23,7 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

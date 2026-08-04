@@ -8,6 +8,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegula
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRealizedSolutionFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.QuasilinearAbstractShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 open DifferentialGeometry.Geometry.Connection
@@ -21,7 +24,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2

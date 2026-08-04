@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedRicciEndomorphism
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -9,7 +12,7 @@ noncomputable section
 open Bundle Manifold Set FiberBundle Filter
 open scoped Manifold Topology ContDiff BigOperators
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

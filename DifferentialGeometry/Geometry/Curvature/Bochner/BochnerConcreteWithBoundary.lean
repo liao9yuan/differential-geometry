@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Laplacian
 import DifferentialGeometry.Geometry.Boundary.ModelBoundary
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
+open DifferentialGeometry.Geometry.Curvature
+
 
 
 
@@ -88,8 +90,8 @@ open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 namespace WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -177,6 +179,6 @@ theorem bochner_pointwise_concrete_metric_withBoundary_eqOn
     (I := I) g hf hf_int h_pointwise hx
 
 end WithBoundary
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

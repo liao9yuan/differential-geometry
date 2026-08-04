@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrde
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
+open DifferentialGeometry.Integral.Connection
 
 noncomputable section
 

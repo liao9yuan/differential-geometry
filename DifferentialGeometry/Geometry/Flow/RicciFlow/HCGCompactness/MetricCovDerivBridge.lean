@@ -8,6 +8,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -54,7 +57,7 @@ open scoped Manifold Topology ContDiff BigOperators
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.HCGCompactness
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 
 namespace DifferentialGeometry

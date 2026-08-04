@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullbackCross
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNormFlat
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -67,17 +69,17 @@ private theorem constBasis_isLocalFrame_open
   · intro i
     have hsmooth : ContMDiff 𝓘(Real, E)
         (𝓘(Real, E).prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
-        (T% (fun y : U => (Integral.Connection.restrictOpenTangentSection
+        (T% (fun y : U => (DifferentialGeometry.Geometry.Curvature.restrictOpenTangentSection
           (I := 𝓘(Real, E)) U (constTangentSection (E := E) (e i))) y)) :=
-      (Integral.Connection.restrictOpenTangentSection
+      (DifferentialGeometry.Geometry.Curvature.restrictOpenTangentSection
         (I := 𝓘(Real, E)) U (constTangentSection (E := E) (e i))).contMDiff.of_le
           (by simp : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
     have hsec : ContMDiffOn 𝓘(Real, E)
         (𝓘(Real, E).prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
-        (T% (fun y : U => (Integral.Connection.restrictOpenTangentSection
+        (T% (fun y : U => (DifferentialGeometry.Geometry.Curvature.restrictOpenTangentSection
           (I := 𝓘(Real, E)) U (constTangentSection (E := E) (e i))) y))
         Set.univ := hsmooth.contMDiffOn
-    simpa only [Integral.Connection.restrictOpenTangentSection_apply,
+    simpa only [DifferentialGeometry.Geometry.Curvature.restrictOpenTangentSection_apply,
       constTangentSection] using hsec
 
 omit [NeZero (Module.finrank Real E)] in
@@ -119,13 +121,13 @@ private theorem metric_norm_le_comp
   let hframe : IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
       frame Set.univ := constBasis_isLocalFrame_open V e
   obtain ⟨b, hbON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis
       (I := 𝓘(Real, E)) g z
   have hbinv : Tensor0SBundle.MetricInverseInBasis_gen
       (I := 𝓘(Real, E)) g z b
       (Tensor0SBundle.identityInvMetric
         (Idx := Fin (Module.finrank Real (TangentSpace 𝓘(Real, E) z)))) := by
-    have h := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+    have h := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := 𝓘(Real, E)) g b hbON
     simpa [Tensor0SBundle.identityInvMetric,
       Tensor0SBundle.diagonalInvMetric] using h
@@ -305,16 +307,16 @@ private theorem normal_christoffel
       (y : V) → TangentSpace 𝓘(Real, E) y := fun q _ => e q
   let hframe : IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
       frame Set.univ := constBasis_isLocalFrame_open V e
-  have hfield : Integral.Connection.restrictOpenTangentField
+  have hfield : DifferentialGeometry.Geometry.Curvature.restrictOpenTangentField
       (I := 𝓘(Real, E)) V
       (fun y : E => (constTangentSection (E := E) (e j)) y) =
         fun y : V => (show TangentSpace 𝓘(Real, E) y from e j) := by
     funext y
     simpa only [constTangentSection] using
-      (Integral.Connection.restrictOpenTangentField_apply
+      (DifferentialGeometry.Geometry.Curvature.restrictOpenTangentField_apply
         (I := 𝓘(Real, E)) V
         (fun y : E => (constTangentSection (E := E) (e j)) y) y)
-  have hres := Integral.Connection.metricCov_restrictOpen_globalSection
+  have hres := DifferentialGeometry.Geometry.Curvature.metricCov_restrictOpen_globalSection
     (I := 𝓘(Real, E)) (normalTotal (I := I) Y x) V
     (constTangentSection (E := E) (e j)) z (e i)
   rw [hfield] at hres
@@ -324,7 +326,7 @@ private theorem normal_christoffel
           (frame j) z) (e i)) =
         ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
           (normalTotal (I := I) Y x) (fun _ : E => e j) (z : E)) (e i)) := by
-    simpa only [Integral.Connection.metricCov, frame, constTangentSection] using hres
+    simpa only [DifferentialGeometry.Geometry.Curvature.metricCov, frame, constTangentSection] using hres
   have hcov :
       ((DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
           ((normalTotal (I := I) Y x).restrictOpen (I := 𝓘(Real, E)) V)

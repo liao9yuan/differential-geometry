@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Calculus.IteratedFDerivSeminormCalculus
 import DifferentialGeometry.Analysis.Calculus.PartialDerivIteratedFDerivOrderBridge
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartRicciStructuralDifference
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

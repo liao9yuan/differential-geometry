@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopJacobi
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialGram
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Radial input for Bishop comparison

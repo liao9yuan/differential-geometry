@@ -9,6 +9,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLim
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.TimeL2EigenProjection
 import DifferentialGeometry.Analysis.ProjectedContractionFixedPoint
 import Mathlib.Analysis.ODE.Gronwall
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

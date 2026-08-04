@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarHessBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -23,7 +25,7 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2

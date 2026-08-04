@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.LaplacianMinimum
 import DifferentialGeometry.Geometry.Operator.Operators
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false

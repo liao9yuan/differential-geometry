@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedRiemannian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringSeq
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

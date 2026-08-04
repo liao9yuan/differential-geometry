@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RiemannNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -64,7 +66,7 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem parabolicOperatorWithDrift_affine_sub
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (F : Real -> M -> Real) (a b t : Real) (x : M)
     (huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t)
@@ -141,24 +143,24 @@ theorem parabolicOperatorWithDrift_affine_sub
     intro y
     exact (hF_space y).sub mdifferentiableAt_const
   have hheat_sub :
-      DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t)
+      DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t (X t)
           (fun y : M => F t y - (a + b * t)) x =
-        DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t) (F t) x :=
-    DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_sub_const (I := I) G t (X t)
+        DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t (X t) (F t) x :=
+    DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift_sub_const (I := I) G t (X t)
       (a + b * t) hF_space x
   have hheat_scale :
-      DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t)
+      DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t (X t)
           ((-1 : Real) • fun y : M => F t y - (a + b * t)) x =
         (-1 : Real) *
-          DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t)
+          DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t (X t)
             (fun y : M => F t y - (a + b * t)) x :=
-    DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_const_smul (I := I) G t (X t)
+    DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift_const_smul (I := I) G t (X t)
       (-1)
       (f := fun y : M => F t y - (a + b * t)) hsub_space hsub_grad
   have hheat :
-      DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t)
+      DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t (X t)
           (fun y : M => (a + b * t) - F t y) x =
-        - DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t (X t) (F t)
+        - DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t (X t) (F t)
           x := by
     have hfun :
         (fun y : M => (a + b * t) - F t y) =
@@ -175,7 +177,7 @@ theorem parabolicOperatorWithDrift_affine_sub
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem laplacianAt_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (t : Real) (f g : M -> Real) (c1 c2 : Real) (x : M)
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hg : forall y : M, MDifferentiableAt I 𝓘(Real, Real) g y)
@@ -183,10 +185,10 @@ theorem laplacianAt_linear_combo
       DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) f y) x)
     (hgradg : MDiffAt (T% fun y : M =>
       DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) g y) x) :
-    DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
+    DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t
         (fun z : M => c1 * f z + c2 * g z) x =
-      c1 * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t f x +
-        c2 * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t g x := by
+      c1 * DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t f x +
+        c2 * DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t g x := by
   have hgrad_eq :
       DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
           (fun z : M => c1 * f z + c2 * g z) =
@@ -223,9 +225,9 @@ theorem laplacianAt_linear_combo
               DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) g y)
                 y := by
           rfl
-  rw [DifferentialGeometry.Integral.Connection.laplacianAt_eq,
-    DifferentialGeometry.Integral.Connection.laplacianAt_eq,
-    DifferentialGeometry.Integral.Connection.laplacianAt_eq]
+  rw [DifferentialGeometry.Geometry.Curvature.laplacianAt_eq,
+    DifferentialGeometry.Geometry.Curvature.laplacianAt_eq,
+    DifferentialGeometry.Geometry.Curvature.laplacianAt_eq]
   unfold DifferentialGeometry.Geometry.Operator.laplacian
   rw [hgrad_eq]
   rw [DifferentialGeometry.Geometry.Operator.divergence_add (I := I) (G.connection t)
@@ -240,7 +242,7 @@ theorem laplacianAt_linear_combo
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem heatOperator_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (t : Real) (f g : M -> Real) (c1 c2 : Real) (x : M)
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hg : forall y : M, MDifferentiableAt I 𝓘(Real, Real) g y)
@@ -248,18 +250,18 @@ theorem heatOperator_linear_combo
       DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) f y) x)
     (hgradg : MDiffAt (T% fun y : M =>
       DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) g y) x) :
-    DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+    DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (fun z : M => c1 * f z + c2 * g z) x =
-      c1 * DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+      c1 * DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
           (fun _y : M => (0 : TangentSpace I _y)) f x +
-        c2 * DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+        c2 * DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
           (fun _y : M => (0 : TangentSpace I _y)) g x := by
-  rw [DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift,
-    DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift,
-    DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift]
-  rw [DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt,
-    DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt,
-    DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt]
+  rw [DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift_zero_drift,
+    DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift_zero_drift,
+    DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift_zero_drift]
+  rw [DifferentialGeometry.Geometry.Curvature.heatOperator_eq_laplacianAt,
+    DifferentialGeometry.Geometry.Curvature.heatOperator_eq_laplacianAt,
+    DifferentialGeometry.Geometry.Curvature.heatOperator_eq_laplacianAt]
   exact laplacianAt_linear_combo (I := I) G t f g c1 c2 x hf hg hgradf hgradg
 
 
@@ -276,7 +278,7 @@ theorem heatOperator_linear_combo
 theorem scalar_subsolution_affine_bound
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (F : Real -> M -> Real) (a b : Real)
@@ -399,9 +401,9 @@ theorem scalar_subsolution_affine_bound
 
 
 def NablaRm04NormHeatBoundOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (nablaRmNormSq nablaRmNormLap rmNormSq : Real -> M -> Real) (cReact : Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     ∃ d : Real,
       HasDerivWithinAt
         (fun s : Real => nablaRmNormSq s x)
@@ -433,8 +435,8 @@ def bernsteinConstant (cReact alpha : Real) : Real :=
 theorem bernstein_first_derivative_estimate
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 < T)
     (u v uLap vLap reaction : Real -> M -> Real)
     (cReact K alpha : Real)
@@ -450,10 +452,10 @@ theorem bernstein_first_derivative_estimate
     (hreaction : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       |reaction t x| <= 16 * (v t x) ^ ((3 : Real) / 2))
     (huLap : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-      DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+      DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (u t) x = uLap t x)
     (hvLap : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-      DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+      DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (v t) x = vLap t x)
     (hu_space : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ y : M,
       MDifferentiableAt I 𝓘(Real, Real) (u t) y)
@@ -514,7 +516,7 @@ theorem bernstein_first_derivative_estimate
       DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x <=
         b := by
     intro t ht htpos x
-    let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D :=
+    let τ : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D :=
       ⟨t, hregular t ht htpos⟩
     obtain ⟨du, hdu_deriv, hdu_le⟩ := hu_heat τ x
     have hdv_deriv :
@@ -551,16 +553,16 @@ theorem bernstein_first_derivative_estimate
           (u t x + t * du) + β * (vLap t x + (-2 * u t x + reaction t x)) :=
       hFtime.derivWithin huniq
     have hheatF :
-        DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+        DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
             (fun _y : M => (0 : TangentSpace I _y)) (F t) x =
           t * uLap t x + β * vLap t x := by
       have hcombo :
-          DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+          DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
               (fun _y : M => (0 : TangentSpace I _y))
               (fun z : M => t * u t z + β * v t z) x =
-            t * DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+            t * DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
                 (fun _y : M => (0 : TangentSpace I _y)) (u t) x +
-              β * DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+              β * DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
                 (fun _y : M => (0 : TangentSpace I _y)) (v t) x :=
         heatOperator_linear_combo (I := I) G t (u t) (v t) t β x
           (hu_space t ht htpos) (hv_space t ht htpos)

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -9,7 +12,7 @@ noncomputable section
 open Bundle Manifold Set FiberBundle Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

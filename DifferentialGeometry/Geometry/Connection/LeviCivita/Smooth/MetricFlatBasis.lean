@@ -4,12 +4,14 @@ import DifferentialGeometry.Bundle.LocalFrameRegularity
 import DifferentialGeometry.Tensor.RSTensor.Basis
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Smooth
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable

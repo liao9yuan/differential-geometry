@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Bundle.SmoothScalarGerm
 import Mathlib.Analysis.Calculus.FDeriv.Congr
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -10,7 +12,7 @@ noncomputable section
 open Bundle Manifold Set FiberBundle
 open scoped Manifold Topology ContDiff
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundClaim
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivArityBridge
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -58,7 +60,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -127,7 +129,7 @@ noncomputable def ricCovTower
     Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (2 + s) :=
   iterCov (I := I) gRef 2
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+    (DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection
       (I := I) (M := M)
       (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
       (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally

@@ -10,6 +10,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPa
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegSolutionJointlySmooth
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.PointwiseDeriv
+open DifferentialGeometry.Geometry.Curvature
 
 
 namespace DifferentialGeometry.PDE.RicciFlow

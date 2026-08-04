@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.LieDerivativePairing
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -103,7 +105,7 @@ namespace RicciFlow
 namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients

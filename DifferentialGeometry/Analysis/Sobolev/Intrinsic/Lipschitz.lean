@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.Lipschitz
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Lp
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
 import DifferentialGeometry.Geometry.Metric.LipschitzGradient
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 /-!

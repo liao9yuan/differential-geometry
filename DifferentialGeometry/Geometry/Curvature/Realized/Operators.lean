@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Operator.LaplacianMinimum
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
@@ -14,7 +16,7 @@ set_option autoImplicit false
 
 
 open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -517,4 +519,4 @@ theorem heatOperatorWithDrift_at_spatial_min_nonneg
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

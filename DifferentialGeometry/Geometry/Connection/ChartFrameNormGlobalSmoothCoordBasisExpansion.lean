@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Geometry.Operator.Gradient
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
@@ -9,7 +11,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

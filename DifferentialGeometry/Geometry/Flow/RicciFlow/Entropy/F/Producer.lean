@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ConnectionTrace
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -11,7 +14,7 @@ noncomputable section
 
 open Filter MeasureTheory
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open Tensor0SBundle
@@ -419,7 +422,7 @@ theorem formula510_of_components
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_producer
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
       (I := I) (M := M) Real)
     {s0 : Real}
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)

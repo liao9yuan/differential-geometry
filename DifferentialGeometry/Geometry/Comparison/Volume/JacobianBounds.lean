@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialJacobiScaling
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.AbsoluteValue
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -692,7 +694,7 @@ theorem exists_dens_le_rm04_at
       (∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source →
       ‖x‖ < expMapC2Radius (I := I) g p →
@@ -748,7 +750,7 @@ theorem exists_dens_le_rm04
       (∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source →
       ‖x‖ < expMapC2Radius (I := I) g p →
@@ -900,7 +902,7 @@ theorem exists_dens_ge_rm04_at
       (∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source →
       ‖x‖ < expMapC2Radius (I := I) g p →
@@ -960,7 +962,7 @@ theorem exists_dens_ge_rm04
       (∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source →
       ‖x‖ < expMapC2Radius (I := I) g p →
@@ -1016,7 +1018,7 @@ theorem exists_dens_two_rm04_at
       (∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source →
       ‖x‖ < expMapC2Radius (I := I) g p →
@@ -1103,7 +1105,7 @@ theorem exists_dens_pair_rm04_at
       (∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source →
       ‖x‖ < expMapC2Radius (I := I) g p →
@@ -1189,7 +1191,7 @@ theorem exists_dens_two_rm04
       (∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source →
       ‖x‖ < expMapC2Radius (I := I) g p →

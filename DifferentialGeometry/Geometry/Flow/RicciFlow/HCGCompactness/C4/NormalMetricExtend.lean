@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInput
 import DifferentialGeometry.Geometry.Metric.BumpExtend
 import DifferentialGeometry.Geometry.Metric.MetricExistence
 import DifferentialGeometry.Geometry.Metric.PullbackCross
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

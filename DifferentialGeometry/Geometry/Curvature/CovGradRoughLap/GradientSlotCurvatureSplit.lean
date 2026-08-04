@@ -6,6 +6,9 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -17,8 +20,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -474,8 +477,8 @@ theorem gradSlotCurv_pairing_covGrad_eq_zero
   rw [← hsymm] at hskew
   linarith [hskew]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

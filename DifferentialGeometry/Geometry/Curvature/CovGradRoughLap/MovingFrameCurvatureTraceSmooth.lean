@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochnerFie
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.GenuineCurvatureField
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryReconstruction
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -13,8 +15,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -856,8 +858,8 @@ theorem GcurvSection_toSection_eventuallyEq_fixedFramePureRSection
     fixedFramePureRSection_toSection]
   exact genuineCurvPureRFib_eq_fixedFrame_smoothOrthoFrame_on_nbhd (I := I) (M := M) g s S x₀ hy
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

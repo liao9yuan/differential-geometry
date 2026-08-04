@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.DeTurckNaturality
 import DifferentialGeometry.Geometry.Metric.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -30,7 +33,7 @@ open scoped Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 

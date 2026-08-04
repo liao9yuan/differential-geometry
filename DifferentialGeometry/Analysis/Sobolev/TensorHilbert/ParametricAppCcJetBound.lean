@@ -1,5 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 

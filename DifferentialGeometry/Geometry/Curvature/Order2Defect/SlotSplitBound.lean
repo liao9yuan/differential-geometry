@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TraceDiscrepancyDecomposition
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 
 
 noncomputable section
@@ -10,8 +13,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -152,8 +155,8 @@ theorem covGradRoughLapCurv_hpt_of_slot0_budget
     _ = (Module.finrank ℝ E : ℝ) * D₀ ^ 2 * secondCovGradEnergyBudget (I := I) (M := M) g T₀ x := by
         rw [hn_E]; ring
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebra
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -19,7 +21,7 @@ open scoped Manifold ContDiff BigOperators Topology
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Tensor.Coordinates
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

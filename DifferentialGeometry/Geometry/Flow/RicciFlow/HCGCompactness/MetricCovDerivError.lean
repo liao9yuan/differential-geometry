@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackField
 import DifferentialGeometry.Geometry.Metric.TensorInner.CoerciveBilinInverse
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -54,13 +56,13 @@ theorem t02Norm_metricDiff
       metricDerivNorm (I := I) a G g g x := by
   classical
   obtain ⟨basis, hON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis
       (I := I) g x
   have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) g x basis
       (Tensor0SBundle.identityInvMetric
         (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
     have h :=
-      DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
         (I := I) g basis hON
     simpa [Tensor0SBundle.identityInvMetric,
       Tensor0SBundle.diagonalInvMetric] using h

@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 
 
 noncomputable section
@@ -8,8 +11,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -248,8 +251,8 @@ theorem exists_rfns_iteratedCovGrad_singleSum_le (Φ : RankRaisingDiffBilinOp g 
 
 end RankRaisingDiffBilinOp
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

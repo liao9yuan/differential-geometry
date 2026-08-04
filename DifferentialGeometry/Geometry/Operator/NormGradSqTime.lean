@@ -2,6 +2,8 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -18,7 +20,7 @@ noncomputable section
 
 namespace DifferentialGeometry.Geometry.Operator
 
-open DifferentialGeometry.Integral.Connection
+
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators Topology

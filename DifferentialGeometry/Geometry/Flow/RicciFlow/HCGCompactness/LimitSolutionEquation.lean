@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAll
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -37,7 +39,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
-open DifferentialGeometry.Integral.Connection
+
 open Tensor0SBundle
 open Filter Topology Asymptotics
 open DifferentialGeometry.PDE.RicciFlow

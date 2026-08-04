@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -13,7 +15,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

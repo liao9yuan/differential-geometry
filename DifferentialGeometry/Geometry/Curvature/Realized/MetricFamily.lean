@@ -13,6 +13,7 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -27,7 +28,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
@@ -654,4 +655,4 @@ omit [FiniteDimensional ℝ E] in
 
 end IntervalSmoothness
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

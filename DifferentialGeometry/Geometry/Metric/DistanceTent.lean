@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Topology.MetricSpace.ThickenedIndicator
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

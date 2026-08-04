@@ -3,6 +3,9 @@ import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -292,7 +295,7 @@ private theorem tailFreezeNablaGen {s : ℕ}
         have hV2x :
             (fun a : Fin 2 => V2 a x) = vec2 (I := I) U V := by
           funext a
-          fin_cases a <;> simp [V2, hUsec, hVsec, DifferentialGeometry.Integral.Connection.vec2]
+          fin_cases a <;> simp [V2, hUsec, hVsec, DifferentialGeometry.Geometry.Curvature.vec2]
         have hVfullx :
             (fun a : Fin (s + 2) => Vfull a x) =
               metricTraceInput (I := I) U V (fun b : Fin s => Y b x) := by

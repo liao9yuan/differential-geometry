@@ -1,10 +1,11 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Model
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle

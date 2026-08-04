@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpBoundK
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Exact tensor compatibility for chartwise `W^{2,p}` limits

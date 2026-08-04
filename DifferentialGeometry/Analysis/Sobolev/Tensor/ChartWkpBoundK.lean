@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Quantitative tensor-chart transport in `W^{k,p}`

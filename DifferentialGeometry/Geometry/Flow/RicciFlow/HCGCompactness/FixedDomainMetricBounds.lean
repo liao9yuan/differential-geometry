@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeomet
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Christoffel
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivFrame
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -355,9 +358,9 @@ theorem metricCovBoundsWindow_of_orderBounds
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem gammaL2_le_of_christoffel
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -1338,7 +1341,7 @@ theorem metricCov3_coord
 
 noncomputable def lcMetricFamily
     (g : Real -> SmoothRiemannianMetric I M) :
-    DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real where
+    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real where
   metric := g
   connection := fun t : Real =>
     DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) (g t)
@@ -1407,13 +1410,13 @@ omit [SigmaCompactSpace M] in
 theorem metricGammaEquiv
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
     (base var : Real)
     (hinv :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (g var) gInv frame)
     (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0)
     (hmetric_id : ∀ i j : Idx,
@@ -1788,14 +1791,14 @@ omit [SigmaCompactSpace M] in
 theorem covOne_le_connDiff
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u) (hxK : x ∈ K)
     (base var C : Real)
     (hEq : MetricUniformEquivalentOn (I := I) K (g base) (g var) C)
     (hinv :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (g var) gInv frame)
     (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0)
     (hmetric_id : ∀ i j : Idx,
@@ -1838,14 +1841,14 @@ omit [SigmaCompactSpace M] in
 theorem connDiff_le_covOne
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     (g : Real -> SmoothRiemannianMetric I M)
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u) (hxK : x ∈ K)
     (base var C : Real)
     (hEq : MetricUniformEquivalentOn (I := I) K (g base) (g var) C)
     (hinv :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (g var) gInv frame)
     (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0)
     (hmetric_id : ∀ i j : Idx,
@@ -1884,14 +1887,14 @@ omit [SigmaCompactSpace M] in
 theorem covOne_le_diff
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     (h gRef : SmoothRiemannianMetric I M)
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u) (hxK : x ∈ K)
     (C : Real)
     (hEq : MetricUniformEquivalentOn (I := I) K gRef h C)
     (hinv :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) h gInv frame)
     (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0)
     (hmetric_id : ∀ i j : Idx,
@@ -1914,7 +1917,7 @@ theorem covOne_le_diff
       MetricUniformEquivalentOn (I := I) K (pair 0) (pair 1) C := by
     simpa [pair] using hEq
   have hinv' :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (pair 1) gInv frame := by
     simpa [pair] using hinv
   have hmetric_id' : ∀ i j : Idx,
@@ -1934,14 +1937,14 @@ omit [SigmaCompactSpace M] in
 theorem diff_le_covOne
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
     (h gRef : SmoothRiemannianMetric I M)
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u) (hxK : x ∈ K)
     (C : Real)
     (hEq : MetricUniformEquivalentOn (I := I) K gRef h C)
     (hinv :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) h gInv frame)
     (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0)
     (hmetric_id : ∀ i j : Idx,
@@ -1964,7 +1967,7 @@ theorem diff_le_covOne
       MetricUniformEquivalentOn (I := I) K (pair 0) (pair 1) C := by
     simpa [pair] using hEq
   have hinv' :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (pair 1) gInv frame := by
     simpa [pair] using hinv
   have hmetric_id' : ∀ i j : Idx,
@@ -1985,12 +1988,12 @@ omit [T2Space M] [SigmaCompactSpace M] in
 theorem diffNormSq_eq_l2
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (h gRef : SmoothRiemannianMetric I M)
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
     (hinv :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) h gInv frame)
     (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0) :
     Tensor0SBundle.normSqRS
@@ -2010,7 +2013,7 @@ theorem diffNormSq_eq_l2
   let pair : Real -> SmoothRiemannianMetric I M :=
     fun s => if s = (0 : Real) then gRef else h
   have hinv' :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) ((lcMetricFamily (I := I) (M := M) pair).metric 1)
         gInv frame := by
     simpa [pair, lcMetricFamily] using hinv
@@ -2887,12 +2890,12 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace 
 theorem metricInvBasisId
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (h : SmoothRiemannianMetric I M)
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     {x : M} (hx : x ∈ u)
     (hinv :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) h gInv frame)
     (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0) :
     Tensor0SBundle.MetricInverseInBasis
@@ -2915,10 +2918,10 @@ theorem metricInvBasisId
 omit [SigmaCompactSpace M] in
 theorem covOne_le_christoffel
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (gRef : SmoothRiemannianMetric I M)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u) (hxK : x ∈ K)
@@ -2941,12 +2944,12 @@ theorem covOne_le_christoffel
     (hEq_b :
       MetricUniformEquivalentOn (I := I) K gRef (S.family.metric b) Cb)
     (hinv_b :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (S.family.metric b) (gInv b) frame)
     (hEq_a :
       MetricUniformEquivalentOn (I := I) K gRef (S.family.metric a) Ca)
     (hinv_a :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (S.family.metric a) (gInv a) frame) :
     metricCovDerivNorm (I := I) 1 (S.family.metric b) gRef x <=
       Real.sqrt (Cb ^ 3) *
@@ -3073,10 +3076,10 @@ theorem covOne_le_christoffel
 omit [SigmaCompactSpace M] in
 theorem covOne_le_init
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (gRef : SmoothRiemannianMetric I M)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
     (hu : IsOpen u) {x : M} (hx : x ∈ u) (hxK : x ∈ K)
@@ -3099,12 +3102,12 @@ theorem covOne_le_init
     (hEq_b :
       MetricUniformEquivalentOn (I := I) K gRef (S.family.metric b) Cb)
     (hinv_b :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (S.family.metric b) (gInv b) frame)
     (hEq_a :
       MetricUniformEquivalentOn (I := I) K gRef (S.family.metric a) Ca)
     (hinv_a :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (S.family.metric a) (gInv a) frame)
     (hinit :
       metricCovDerivNorm (I := I) 1 (S.family.metric a) gRef x <= C1) :

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -33,7 +35,7 @@ omit [BoundarylessManifold I M] in
 /-- On any prescribed compact reflected regular-time interval, the
 conjugate-heat potential operator is continuous and has one finite norm bound. -/
 theorem conjA1_on
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     {h : Real}
@@ -67,7 +69,7 @@ omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
 /-- On a compact regular-time slab, the conjugate-heat scalar coefficient has
 one pointwise bound uniform in time and space. -/
 theorem conjCoeff_span
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     {a b : Real} (hab : Set.Icc a b ⊆ D.regular) :

@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.InjectivityRadius
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 
@@ -33,7 +36,7 @@ namespace PointedFlowData
 
 
 def baseFlowBall
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D)
     (hzero : 0 ∈ D.carrier) (r : Real) (hr : 0 < r) :
     letI : TopologicalSpace F.M := F.topology

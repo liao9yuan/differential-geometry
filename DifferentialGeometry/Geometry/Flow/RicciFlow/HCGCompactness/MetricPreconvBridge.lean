@@ -47,7 +47,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
 open Bundle Tensor0SBundle TensorLieDeriv
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]

@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopIntrinsic
 import DifferentialGeometry.Geometry.Comparison.Variation.MinimizingNoConj
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 

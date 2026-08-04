@@ -12,6 +12,8 @@ import DifferentialGeometry.Geometry.Metric.MetricBallMonotone
 import DifferentialGeometry.Geometry.Metric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Topology.Order.IntermediateValue
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false
@@ -169,13 +171,13 @@ theorem twoTensorSecToFamily_bilin
     have hleft :
         Function.update m (0 : Fin 2) (X + Y) = vec2 (I := I) (X + Y) Z := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hX : Function.update m (0 : Fin 2) X = vec2 (I := I) X Z := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hY : Function.update m (0 : Fin 2) Y = vec2 (I := I) Y Z := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     simpa [twoTensorSecToFamily, hleft, hX, hY] using hmap
   · intro c X Z
     classical
@@ -184,10 +186,10 @@ theorem twoTensorSecToFamily_bilin
     have hleft :
         Function.update m (0 : Fin 2) (c • X) = vec2 (I := I) (c • X) Z := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hX : Function.update m (0 : Fin 2) X = vec2 (I := I) X Z := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     simpa [twoTensorSecToFamily, hleft, hX, smul_eq_mul] using hmap
   · intro X Y Z
     classical
@@ -196,13 +198,13 @@ theorem twoTensorSecToFamily_bilin
     have hleft :
         Function.update m (1 : Fin 2) (Y + Z) = vec2 (I := I) X (Y + Z) := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hY : Function.update m (1 : Fin 2) Y = vec2 (I := I) X Y := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hZ : Function.update m (1 : Fin 2) Z = vec2 (I := I) X Z := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     simpa [twoTensorSecToFamily, hleft, hY, hZ] using hmap
   · intro c X Z
     classical
@@ -211,10 +213,10 @@ theorem twoTensorSecToFamily_bilin
     have hleft :
         Function.update m (1 : Fin 2) (c • Z) = vec2 (I := I) X (c • Z) := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hZ : Function.update m (1 : Fin 2) Z = vec2 (I := I) X Z := by
       funext i
-      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     simpa [twoTensorSecToFamily, hleft, hZ, smul_eq_mul] using hmap
 
 
@@ -254,9 +256,9 @@ theorem tensorBarrierSec_apply
         epsilon * (delta + t - t0) * (G t).inner x v w
   rw [Tensor0SBundle.metricTensorField_apply]
   have h0 : vec2 (I := I) v w 0 = v := by
-    simp [DifferentialGeometry.Integral.Connection.vec2]
+    simp [DifferentialGeometry.Geometry.Curvature.vec2]
   have h1 : vec2 (I := I) v w 1 = w := by
-    simp [DifferentialGeometry.Integral.Connection.vec2]
+    simp [DifferentialGeometry.Geometry.Curvature.vec2]
   rw [h0, h1]
 
 omit [IsManifold I ∞ M] [IsManifold I 2 M] in
@@ -329,7 +331,7 @@ omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifo
 theorem vec2_self_eq_const {x : M} (v : TangentSpace I x) :
     vec2 (I := I) v v = fun _ : Fin 2 => v := by
   funext i
-  fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+  fin_cases i <;> simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
 
 
 omit [IsManifold I 2 M] in

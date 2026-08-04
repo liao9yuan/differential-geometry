@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Curvature.QuadraticFormBound
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricContinuity
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -21,9 +22,9 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -381,4 +382,4 @@ theorem exists_ricci_bound
   rw [metricRicciAt_apply_eq_ricciTensor (I := I) g x v v] at hall
   exact hall
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

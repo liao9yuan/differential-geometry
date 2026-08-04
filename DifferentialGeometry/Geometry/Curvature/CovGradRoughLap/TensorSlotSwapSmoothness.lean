@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TensorSlotSwap
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCalculus
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -11,8 +13,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -345,6 +347,6 @@ lemma swapTwoSec_apply (r t : ℕ) (x : M) :
     (show TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r (t + 2) I x from
       swapTwoSec (I := I) (M := M) (E := E) r t x) = swapTwoFib (I := I) (M := M) r t x := rfl
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

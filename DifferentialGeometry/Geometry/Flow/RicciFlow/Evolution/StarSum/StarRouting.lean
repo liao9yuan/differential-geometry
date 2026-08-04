@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.StarSum2
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -27,7 +30,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
-open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
+open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
 
@@ -38,7 +41,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 

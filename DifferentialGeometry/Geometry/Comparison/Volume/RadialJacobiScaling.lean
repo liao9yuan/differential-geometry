@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialJacobiBounds
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -1279,7 +1281,7 @@ theorem exists_fin_le_rm04_at
       (∀ t (_ht : t ∈ Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       (∀ t ∈ Icc (0 : ℝ) b,
         ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t) →
@@ -1336,7 +1338,7 @@ theorem exists_fin_le_rm04
       (∀ t (_ht : t ∈ Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) →
       ∀ {ι : Type*}, [Fintype ι] → [DecidableEq ι] → [Nonempty ι] →
@@ -1388,7 +1390,7 @@ theorem exists_dir_ge_rm04_at
       (∀ t (_ht : t ∈ Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       (∀ t ∈ Icc (0 : ℝ) b,
         ContMDiffAt 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) t) →
@@ -1473,7 +1475,7 @@ theorem exists_dir_ge_rm04
       (∀ t (_ht : t ∈ Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p x t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p x t))) ≤ R) →
       ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p x) →
       ∀ {ι : Type*}, [Fintype ι] → [DecidableEq ι] → [Nonempty ι] →

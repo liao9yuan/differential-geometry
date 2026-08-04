@@ -14,6 +14,8 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.Weak
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapSource
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.RotatedTestSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -36,7 +38,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open TensorRSNabla
 open DifferentialGeometry.Analysis.Sobolev.Chart

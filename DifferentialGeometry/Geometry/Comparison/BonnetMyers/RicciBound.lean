@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -16,14 +18,14 @@ noncomputable section
 open Bundle Manifold
 open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 
 namespace DifferentialGeometry
 namespace Geometry
 namespace Riemannian
 namespace BonnetMyers
 
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]

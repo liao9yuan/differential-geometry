@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrameCurvatureCore
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.FrozenFrameTrace
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSCovariantDerivativeCongrLocally
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -12,8 +15,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -331,8 +334,8 @@ theorem covGradRoughLapCurv_toSection_eq_frame_sum
   rw [covGrad_rawConnLap_toSection_eq_frame_sum (I := I) (M := M) g T₀ x]
   rw [← Finset.sum_sub_distrib]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

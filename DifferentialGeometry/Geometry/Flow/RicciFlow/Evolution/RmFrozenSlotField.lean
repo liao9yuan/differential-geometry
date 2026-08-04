@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -408,7 +411,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -424,7 +427,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 def rmFrozenSlotField
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
@@ -435,7 +438,7 @@ def rmFrozenSlotField
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 @[simp] theorem rmFrozenSlotField_apply
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -447,7 +450,7 @@ omit [SigmaCompactSpace M] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem rmFrozenSlotField_apply_vec
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -460,7 +463,7 @@ theorem rmFrozenSlotField_apply_vec
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem rmFrozen_connSmoothInf
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (S.family.connection t) (∞ : WithTop ℕ∞) := by
@@ -470,7 +473,7 @@ private theorem rmFrozen_connSmoothInf
 
 
 def nablaRmFrozenSlotField
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
@@ -488,7 +491,7 @@ def nablaRmFrozenSlotField
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRmFrozenSlotField_realizes
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
@@ -517,10 +520,10 @@ theorem nablaRmFrozenSlotField_realizes
 
 omit [SigmaCompactSpace M] in
 theorem nablaRmFrozenSlot_eval
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (q : Fin 4)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))

@@ -7,6 +7,7 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Tactic
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -21,9 +22,9 @@ open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Tensor0SBundle
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
@@ -681,7 +682,7 @@ theorem coordInner0S_four_delta3_eq_stdRmNormSq3
   rw [sum_delta3_slots4_contract]
   rw [sum_fin_four_fun]
   unfold stdRmNormSq3 standardRmCompAt rm04CompAt component0S
-    tensor0SComponent DifferentialGeometry.Integral.Connection.slots4
+    tensor0SComponent DifferentialGeometry.Geometry.Curvature.slots4
   simp [Fin.sum_univ_three]
 
 
@@ -924,4 +925,4 @@ theorem normSqLeOfFirstData
   exact traceDataOfFirst (I := I) horth (hcurv basis horth)
     (hRic basis horth) (hScalar basis horth)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

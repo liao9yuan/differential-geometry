@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpQuot
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevQuot
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # A theorem-valued Banach structure on tensor chart Sobolev classes

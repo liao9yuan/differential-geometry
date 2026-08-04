@@ -7,6 +7,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAll
 import DifferentialGeometry.Geometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -650,7 +652,7 @@ theorem speed_ge_of_c0 {j : ℕ}
     (1 - ε) * g.inner x v v ≤ P x (fun _ => v) := by
   classical
   obtain ⟨basis, hON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) g x
   have hCS := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I)
     g x 2 basis (fun i k => hON i k)
     (P x - Tensor0SBundle.metricTensorField (I := I) g x)
@@ -1035,20 +1037,20 @@ theorem diffNorm_change_le
             metricDerivNorm (I := I) k A B gBase x) := by
   classical
   obtain ⟨bBase, hBaseON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) gBase x
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) gBase x
   have hBaseInv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gBase x bBase
       (Tensor0SBundle.identityInvMetric
         (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
-    have h := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+    have h := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := I) gBase bBase hBaseON
     intro i j
     simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h i j
   obtain ⟨bInf, hInfON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) gInf x
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) gInf x
   have hInfInv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gInf x bInf
       (Tensor0SBundle.identityInvMetric
         (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
-    have h := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+    have h := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := I) gInf bInf hInfON
     intro i j
     simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h i j
@@ -1058,11 +1060,11 @@ theorem diffNorm_change_le
           (Tensor0SBundle.metricTensorField (I := I) gInf) j y)) ≤ eps := by
     intro y hy j hj1 hjp
     obtain ⟨b, hON⟩ :=
-      DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) gBase y
+      DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) gBase y
     have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gBase y b
         (Tensor0SBundle.identityInvMetric
           (Idx := Fin (Module.finrank Real (TangentSpace I y)))) := by
-      have h := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      have h := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
         (I := I) gBase b hON
       intro i k
       simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h i k

@@ -10,6 +10,8 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -704,7 +706,7 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open Aux5
 open scoped Manifold ContDiff Topology
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
@@ -991,7 +993,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open Aux4 Aux6
 open scoped Manifold ContDiff Topology
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
@@ -1161,7 +1163,7 @@ theorem chartCovDerivAlong_commutator_eq_riemannOp_on_variation
       - chartCovDerivAlong (I := I) g (f s t) (fun v : ℝ => f s v) (fun v : ℝ =>
         chartCovDerivAlong (I := I) g (f s t) (fun u : ℝ => f u v)
           (fun u : ℝ => Y u v) s) t
-    = (DifferentialGeometry.Integral.Connection.riemannOp
+    = (DifferentialGeometry.Geometry.Curvature.riemannOp
         (DifferentialGeometry.Geometry.Connection.LeviCivita
           (I := I) g) (f s t))
         (fderiv ℝ (fun u : ℝ => extChartAt I (f s t) (f u t)) s (1 : ℝ))

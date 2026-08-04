@@ -10,6 +10,9 @@ import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorDirichletCurrentGreenIdentityRS
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormDiscreteLogConvex
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormHolderIntegrability
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral
 
 
 noncomputable section
@@ -22,7 +25,7 @@ namespace DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable

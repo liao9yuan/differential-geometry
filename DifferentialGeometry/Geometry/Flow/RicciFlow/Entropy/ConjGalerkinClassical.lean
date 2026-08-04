@@ -14,6 +14,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjugateHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.HeatPotential
 import DifferentialGeometry.Geometry.Operator.NormGradSqTime
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -37,7 +40,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.Evolution.Volume
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
@@ -57,7 +60,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
 private theorem rev_gram_smooth
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSolutionOn (I := I) S) (T : Real) {U : Set Real}
     (hU : Set.MapsTo (fun r : Real => T - r) U D.regular)
@@ -103,7 +106,7 @@ private theorem rev_gram_smooth
 omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
 private theorem rev_trace_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSolutionOn (I := I) S) (T s : Real)
     (hs : T - s ∈ D.regular) (x : M) :
@@ -167,7 +170,7 @@ private theorem rev_trace_eq
 omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
 /-- A genuine reversed heat potential preserves its moving Riemannian mass at interior times. -/
 theorem heatpot_mass_deriv
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     {tau : Real} (htau : 0 ≤ tau) {u : Real → M → Real}
@@ -247,7 +250,7 @@ theorem heatpot_mass_deriv
 omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
 /-- On a shorter interval, a genuine reversed heat potential has constant moving mass. -/
 theorem heatpot_mass_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     {tau : Real} (htau : 0 < tau) {u : Real → M → Real}
@@ -339,7 +342,7 @@ omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
 /-- On a prescribed reflected regular interval, a genuine heat potential has
 constant moving mass on the entire closed interval. -/
 theorem heatpot_mass_on
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     {tau : Real} (htau : 0 < tau) {u : Real → M → Real}
@@ -405,7 +408,7 @@ theorem heatpot_mass_on
 /-- Every Sobolev realization of the Galerkin limit has the original limiting
 coefficient on the compact Galerkin interval. -/
 @[simp] theorem galLimExt_coeff
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -427,7 +430,7 @@ coefficient on the compact Galerkin interval. -/
 /-- At reverse time zero, every Sobolev realization of the Galerkin limit is
 the prescribed smooth initial tensor in that same Sobolev scale. -/
 @[simp] theorem galLimExt_zero
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -503,7 +506,7 @@ private theorem covGrad0_apply
 time jets of the scalar Galerkin coefficients admit a single summable spectral
 majorant at every natural Sobolev order. -/
 theorem galLim_jet_mass
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -630,7 +633,7 @@ theorem galLim_jet_mass
 
 
 theorem galLim_mass0
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -683,7 +686,7 @@ theorem galLim_mass0
 /-- Every Galerkin limit slice has one smooth representative realizing all
 natural Sobolev orders and its scalar spectral series. -/
 theorem galLim_slice_cc
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -788,7 +791,7 @@ theorem galLim_slice_cc
 
 
 theorem galLim_initial
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -826,7 +829,7 @@ theorem galLim_initial
 /-- At reverse time zero, every fixed directional derivative of the scalar
 Galerkin limit converges to the corresponding derivative of the initial data. -/
 theorem galLim_d_zero
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -940,7 +943,7 @@ theorem galLim_d_zero
 /-- In a genuine chart frame, the spatial derivatives of the scalar Galerkin
 limit are jointly continuous at the reverse-time endpoint. -/
 theorem galLim_d_joint
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1116,7 +1119,7 @@ theorem galLim_d_joint
 /-- The moving squared gradient of the scalar Galerkin limit is jointly
 continuous at the reverse-time endpoint. -/
 theorem galLim_grad_zero
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau sigma : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1280,7 +1283,7 @@ theorem galLim_grad_zero
 /-- The scalar eigen-series of the Galerkin limit is jointly continuous on
 the full compact Galerkin interval, including both endpoints. -/
 theorem galLim_joint_cont
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1326,7 +1329,7 @@ theorem galLim_joint_cont
 
 
 theorem galLim_joint_smooth
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1382,7 +1385,7 @@ theorem galLim_joint_smooth
 
 
 theorem galLim_joint_top
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1431,7 +1434,7 @@ theorem galLim_joint_top
 /-- On a shorter nontrivial Galerkin interval, the moving squared gradient of
 the scalar limit is jointly continuous through reverse time zero. -/
 theorem galLim_grad_cont
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1526,7 +1529,7 @@ theorem galLim_grad_cont
 /-- Every positive-time slice of the jointly smooth Galerkin scalar series is
 a smooth scalar function on the manifold. -/
 theorem galLim_slice_pos
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1559,7 +1562,7 @@ theorem galLim_slice_pos
 
 
 theorem galLim_pde
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1849,7 +1852,7 @@ theorem galLim_pde
 
 
 theorem heatpot_of_gallim
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {tau : Real}
     {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
@@ -1936,7 +1939,7 @@ theorem heatpot_of_gallim
 
 
 theorem heatpot_exists
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     (u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0) :
@@ -1965,7 +1968,7 @@ theorem heatpot_exists
 
 
 theorem conj_heat_exists
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     (u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0) :
@@ -1997,7 +2000,7 @@ theorem conj_heat_exists
 
 
 theorem gallim_nonneg
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     (u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0)
@@ -2058,7 +2061,7 @@ theorem gallim_nonneg
 
 
 theorem gallim_pos
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
     (u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0)
@@ -2117,7 +2120,7 @@ theorem gallim_pos
 
 
 theorem gallim_unit_pos
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
     IsEmpty M ∨

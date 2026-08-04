@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Comparison.Volume.Packing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

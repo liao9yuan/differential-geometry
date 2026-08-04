@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SmoothStrongPair
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Interior Ricci--DeTurck uniqueness from chart-Gram regularity
@@ -19,7 +21,7 @@ open scoped Manifold Topology ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

@@ -3,6 +3,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.RankZeroRealizat
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInner
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -27,7 +30,7 @@ namespace PDE
 namespace RicciFlow
 namespace IntrinsicSpectral
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2

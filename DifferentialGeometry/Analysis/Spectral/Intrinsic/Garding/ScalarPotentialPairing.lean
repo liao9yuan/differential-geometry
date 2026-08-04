@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ParametricPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FiniteSpectralPairing
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -19,7 +21,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

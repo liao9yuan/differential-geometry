@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Curvature.Components.LocalFrame
 import DifferentialGeometry.Geometry.Curvature.Components.Christoffel
 import DifferentialGeometry.Geometry.Curvature.Components.RicciIdentity
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -33,7 +34,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 
 open Bundle Tensor0SBundle
@@ -61,7 +62,7 @@ theorem rm04LowersRm13At_convention
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13At (I := I) (M := M) x)
     (Rm04 : Tensor04At (I := I) (M := M) x)
-    (h : DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) g x Rm13 Rm04)
+    (h : DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I) g x Rm13 Rm04)
     (X Y Z W : TangentSpace I x) :
   Rm04 (vec4 X Y Z W) =
       Rm13 (dualToCotangent_gen (I := I) ((tangentFlatLinear_gen (I := I) g x) W))
@@ -86,15 +87,15 @@ theorem ricciFromRm13At_rm04_first_trace_convention
     (hinv : MetricInverseInBasis_gen (I := I) g x basis gInv)
     (Rm13 : Tensor13At (I := I) (M := M) x)
     (Rm04 : Tensor04At (I := I) (M := M) x)
-    (hLower : DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) g x Rm13 Rm04)
+    (hLower : DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I) g x Rm13 Rm04)
     (_hInvSym : forall a b : Idx, gInv a b = gInv b a)
     (i j : Idx) :
-    DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis
+    DifferentialGeometry.Geometry.Curvature.ricciCompAt (I := I) basis
         (ricciFromRm13At (I := I) (M := M) Rm13) i j =
       ∑ k : Idx, ∑ l : Idx,
-        gInv k l * DifferentialGeometry.Integral.Connection.rm04CompAt (I := I) basis Rm04 k i j
+        gInv k l * DifferentialGeometry.Geometry.Curvature.rm04CompAt (I := I) basis Rm04 k i j
           l := by
-  have h := DifferentialGeometry.Integral.Connection.ricciFromRm13_comp_eq_rm04_trace
+  have h := DifferentialGeometry.Geometry.Curvature.ricciFromRm13_comp_eq_rm04_trace
     (I := I) g basis gInv hinv Rm13 Rm04 hLower i j
   simpa using h
 
@@ -128,7 +129,7 @@ theorem rm04StdRealizesConnection_convention
     (Rm04 : Tensor04Section (I := I) (M := M))
     (h : Rm04RealizesConnection (I := I) g cov Rm04)
     (X Y Z W : SmoothTangentSection (I := I) (M := M)) (x : M) :
-    DifferentialGeometry.Integral.Connection.tensor04StdAt (I := I) (M := M) (Rm04 x)
+    DifferentialGeometry.Geometry.Curvature.tensor04StdAt (I := I) (M := M) (Rm04 x)
         (X x) (Y x) (Z x) (W x) =
       g.inner x (W x) ((connectionRiemannCurvatureField (I := I) cov X Y Z) x) :=
   h X Y Z W x
@@ -137,7 +138,7 @@ end Realized
 
 namespace DimensionThree
 
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -161,4 +162,4 @@ theorem standardRmCompAt_slot_convention
 
 end DimensionThree
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

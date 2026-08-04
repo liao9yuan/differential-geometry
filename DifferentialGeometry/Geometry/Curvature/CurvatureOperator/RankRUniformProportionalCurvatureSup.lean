@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvature
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -13,8 +15,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle Tensor0SNabla TensorRSNabla
@@ -187,8 +189,8 @@ theorem riemannOp_tensorCovRS_apply_eval
     rw [hXx, hWx, hYx]
   rw [hLHS, hkey, hCov, hContra, hτx]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

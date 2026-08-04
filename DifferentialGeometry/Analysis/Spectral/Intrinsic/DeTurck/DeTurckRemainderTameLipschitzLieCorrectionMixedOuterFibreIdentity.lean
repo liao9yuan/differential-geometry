@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionMixedLiftedFibreIdentity
+open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section
@@ -11,7 +12,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open LieCorr0Core
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

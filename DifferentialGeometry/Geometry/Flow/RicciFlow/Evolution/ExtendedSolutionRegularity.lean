@@ -5,6 +5,9 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
 import Mathlib.Analysis.Calculus.ContDiff.Comp
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -33,7 +36,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral
 open DifferentialGeometry.Integral.Measure
@@ -764,7 +767,7 @@ theorem metricVariationEquationOn_of_pde
     (g : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (hpde : ∀ t ∈ Set.Ico a b, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : ℝ => (g s).inner x v w)
-        ((-2 : ℝ) * DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (g t) x v w)
+        ((-2 : ℝ) * DifferentialGeometry.Geometry.Curvature.ricciTensor (I := I) (g t) x v w)
         (Set.Ici a) t) :
     MetricVariationEquationOn (I := I)
       ({ base := { metric := g } } :
@@ -773,7 +776,7 @@ theorem metricVariationEquationOn_of_pde
   have ht : (t : ℝ) ∈ Set.Ioo a b := t.2
   have htmem : (t : ℝ) ∈ Set.Ico a b := Set.Ioo_subset_Ico_self ht
   have h : HasDerivWithinAt (fun s : ℝ => (g s).inner x X Y)
-      ((-2 : ℝ) * DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (g (t : ℝ)) x X Y)
+      ((-2 : ℝ) * DifferentialGeometry.Geometry.Curvature.ricciTensor (I := I) (g (t : ℝ)) x X Y)
       (Set.Ico a b) (t : ℝ) :=
     (hpde (t : ℝ) htmem x X Y).mono Set.Ico_subset_Ici_self
   simpa [SolutionFamily.ricciAt, metricRicciAt, metricRicciAt_apply_eq_ricciTensor] using h
@@ -793,12 +796,12 @@ theorem metricFamilySmoothOn_of_chartGram
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (Set.Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
-    DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn (I := I) (M := M)
+    DifferentialGeometry.Geometry.Curvature.MetricFamilySmoothOn (I := I) (M := M)
       (RealTimeInterval.closedOpen a b hab)
       ({ base := { metric := g } } :
         SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen a b hab)).family := by
   have hcontTensor :
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+      DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
         (Set.Ico a b) (fun t x => Tensor0SBundle.metricTensorField (I := I) (g t) x) := by
     apply metricTensorCont_of_chartGram (K := Set.Ico a b) g
     intro x₀ i j
@@ -844,16 +847,16 @@ theorem metricFamilySmoothOn_of_chartGram
     have hbase :
         ContinuousOn
           (fun s : ℝ => Tensor0SBundle.metricTensorField (I := I) (g s) x
-            (DifferentialGeometry.Integral.Connection.vec2 X Y))
+            (DifferentialGeometry.Geometry.Curvature.vec2 X Y))
           (Set.Ico a b) := by
       rw [continuousOn_iff_continuous_restrict]
       exact hcontTensor.eval_continuous (P := {s : ℝ // s ∈ Set.Ico a b})
         (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
         (fun p => p.2) continuous_const
-        (v := fun i _ => DifferentialGeometry.Integral.Connection.vec2 X Y i)
+        (v := fun i _ => DifferentialGeometry.Geometry.Curvature.vec2 X Y i)
         (fun _ => continuous_const)
     refine hbase.congr (fun s _ => ?_)
-    simp [Tensor0SBundle.metricTensorField_apply, DifferentialGeometry.Integral.Connection.vec2]
+    simp [Tensor0SBundle.metricTensorField_apply, DifferentialGeometry.Geometry.Curvature.vec2]
   · exact hcontTensor
   · intro Idx _ frame u hframe i j
     exact metricFrameComp_jointContMDiffOn_of_chartGram (I := I) g a b hsmooth frame hframe i j
@@ -871,7 +874,7 @@ theorem ricciCont_of_joint [I.Boundaryless]
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+    DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
       J (fun t x => metricRicciAt (I := I) (g t) x) := by
   apply tensor0SFamilyContinuousOnSet_of_chartBasisComp _
     (fun x₀ => chartLeviCivitaGoodSet (I := I) x₀)
@@ -900,7 +903,7 @@ theorem ricciCont_of_joint [I.Boundaryless]
   refine hcomp.congr ?_
   intro q _
   have hvec : (fun k : Fin 2 => Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) q.2)
-      = DifferentialGeometry.Integral.Connection.vec2
+      = DifferentialGeometry.Geometry.Curvature.vec2
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 0) q.2)
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 1) q.2) := by
     funext k; fin_cases k <;> rfl
@@ -921,7 +924,7 @@ theorem ricciCont_interior_of_chartGram [I.Boundaryless]
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+    DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
       (Set.Ioo a b) (fun t x => metricRicciAt (I := I) (g t) x) :=
   ricciCont_of_joint (I := I) g (Set.Ioo a b) isOpen_Ioo.uniqueDiffOn hsmooth
 
@@ -935,14 +938,14 @@ theorem rm04_coord_eq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (idx : Fin 4 → Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) x₀) :
-    DifferentialGeometry.Integral.Connection.metricRm04At (I := I) g x
+    DifferentialGeometry.Geometry.Curvature.metricRm04At (I := I) g x
         (fun k : Fin 4 => Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) x)
       = ∑ l : Fin (Module.finrank ℝ E),
           chartRiemannTensor (I := I) g x₀ (idx 2) (idx 0) (idx 1) l (extChartAt I x₀ x) *
             Integral.Measure.chartGramMatrix (I := I) g x₀ x (idx 3) l := by
   have hcov := leviCivita_contMDiffCovariantDerivativeLocally (I := I) g
   have hvec : (fun k : Fin 4 => Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) x)
-      = DifferentialGeometry.Integral.Connection.vec4
+      = DifferentialGeometry.Geometry.Curvature.vec4
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 0) x)
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 1) x)
           (Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx 2) x)
@@ -968,9 +971,9 @@ theorem rm04Cont_of_joint [I.Boundaryless]
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
+    DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
       J
-      (fun t x => DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (g t) x) := by
+      (fun t x => DifferentialGeometry.Geometry.Curvature.metricRm04At (I := I) (g t) x) := by
   apply tensor0SFamilyContinuousOnSet_of_chartBasisComp _
     (fun x₀ => chartLeviCivitaGoodSet (I := I) x₀)
     (fun x₀ => (chartLeviCivitaGoodSet_isOpen (I := I) x₀).mem_nhds
@@ -1021,9 +1024,9 @@ theorem rm04Cont_interior_of_chartGram [I.Boundaryless]
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
+    DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
       (Set.Ioo a b)
-      (fun t x => DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (g t) x) :=
+      (fun t x => DifferentialGeometry.Geometry.Curvature.metricRm04At (I := I) (g t) x) :=
   rm04Cont_of_joint (I := I) g (Set.Ioo a b) isOpen_Ioo.uniqueDiffOn hsmooth
 
 omit [CompactSpace M] in
@@ -1131,7 +1134,7 @@ theorem scalarTime_of_joint [I.Boundaryless]
         chartInvGramOnE (I := I) (g s') x i j (extChartAt I x x) *
           chartRicciTensor (I := I) (g s') x i j (extChartAt I x x) := by
     intro s'
-    change DifferentialGeometry.Integral.Connection.metricScalarAt (I := I) (g s') x = _
+    change DifferentialGeometry.Geometry.Curvature.metricScalarAt (I := I) (g s') x = _
     rw [metricScalar_chartTrace_eq (I := I) (g s') x hgood]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
     rw [ricciTensor_chartBasisVec_alpha_eq (I := I) (g s') x i j hgood]
@@ -1164,7 +1167,7 @@ theorem solutionOn_of_joint [I.Boundaryless]
         (Set.Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hpde : ∀ t ∈ Set.Ico a b, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : ℝ => (g s).inner x v w)
-        ((-2 : ℝ) * DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (g t) x v w)
+        ((-2 : ℝ) * DifferentialGeometry.Geometry.Curvature.ricciTensor (I := I) (g t) x v w)
         (Set.Ici a) t) :
     IsSolutionOn (I := I)
       ({ base := { metric := g } } :
@@ -1193,7 +1196,7 @@ theorem solutionOn_of_joint [I.Boundaryless]
       ricciNormGrad := ?_ }
   · intro t
     simpa [SolutionOn.family, SolutionFamily.connection,
-      DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt]
+      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt]
       using leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) (g (t : ℝ))
   · exact (scalarCont_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint).congr
       (fun _ _ => rfl)
@@ -1201,11 +1204,11 @@ theorem solutionOn_of_joint [I.Boundaryless]
     simpa [SolutionOn.scalar, SolutionFamily.scalar] using
       (scalarTime_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint t
         (hK ht) x).mono hK
-  · refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
+  · refine DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.congr
       (ricciCont_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint)
       (fun t _ x => ?_)
     simp only [SolutionOn.ricci, SolutionFamily.ricci_apply, SolutionFamily.ricciAt]
-  · refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
+  · refine DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.congr
       (rm04Cont_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint)
       (fun t _ x => ?_)
     simp only [SolutionFamily.rm04, metricRm04_apply]
@@ -1258,7 +1261,7 @@ theorem isSolutionOn_of_extendData
         (Set.Ico α b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (hpde : ∀ t ∈ Set.Ico α b, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : ℝ => (g_ext s).inner x v w)
-        ((-2 : ℝ) * DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (g_ext t) x v w)
+        ((-2 : ℝ) * DifferentialGeometry.Geometry.Curvature.ricciTensor (I := I) (g_ext t) x v w)
         (Set.Ici α) t) :
     IsSolutionOn (I := I)
       ({ base := { metric := g_ext } } :
@@ -1276,7 +1279,7 @@ theorem isSolutionOn_of_extendData
   · exact metricFamilySmoothOn_of_chartGram (I := I) g_ext hαb hsmooth hcont
   · intro t
     simpa [SolutionOn.family, SolutionFamily.connection,
-      DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt]
+      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt]
       using leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) (g_ext (t : ℝ))
   · exact metricVariationEquationOn_of_pde (I := I) g_ext hαb hpde
   · have hinterior : ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g_ext q.1) q.2)
@@ -1326,40 +1329,40 @@ theorem isSolutionOn_of_extendData
           ⟨hα, (hKsub htK).2⟩ x
     exact hmain.mono hKsub
   · have hinterior :
-        DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+        DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
           (Set.Ioo α b) (fun t x => metricRicciAt (I := I) (g_ext t) x) :=
       ricciCont_interior_of_chartGram (I := I) g_ext α b hsmooth
     have hhalf :
-        DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+        DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
           (Set.Ico α omega) (fun t x => metricRicciAt (I := I) (g_ext t) x) := by
-      refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
+      refine DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.congr
         hS.ricciCont (fun t ht x => ?_)
       have h : g_ext t = S.base.metric t := hagree t ht.2
       simp only [SolutionOn.ricci, SolutionFamily.ricci_apply, SolutionFamily.ricciAt, h]
     have hglued :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.of_union_closedOpen
+      DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.of_union_closedOpen
         (I := I) (M := M) (a := α) (c := omega) (b := b) hαω hhalf hinterior
-    refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
+    refine DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.congr
       hglued (fun t _ x => ?_)
     simp only [SolutionOn.ricci, SolutionFamily.ricci_apply, SolutionFamily.ricciAt]
   · have hinterior :
-        DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
+        DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
           (Set.Ioo α b)
-          (fun t x => DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (g_ext t) x) :=
+          (fun t x => DifferentialGeometry.Geometry.Curvature.metricRm04At (I := I) (g_ext t) x) :=
       rm04Cont_interior_of_chartGram (I := I) g_ext α b hsmooth
     have hhalf :
-        DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
+        DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
           (Set.Ico α omega)
-          (fun t x => DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (g_ext t)
+          (fun t x => DifferentialGeometry.Geometry.Curvature.metricRm04At (I := I) (g_ext t)
             x) := by
-      refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
+      refine DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.congr
         hS.rm04Cont (fun t ht x => ?_)
       have h : g_ext t = S.base.metric t := hagree t ht.2
       simp only [SolutionFamily.rm04, metricRm04_apply, h]
     have hglued :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.of_union_closedOpen
+      DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.of_union_closedOpen
         (I := I) (M := M) (a := α) (c := omega) (b := b) hαω hhalf hinterior
-    refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
+    refine DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.congr
       hglued (fun t _ x => ?_)
     simp only [SolutionFamily.rm04, metricRm04_apply]
   · intro t ht x

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Metric.PullbackCross
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
@@ -22,7 +24,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open scoped Manifold ContDiff
 open Tensor0SBundle
@@ -173,7 +175,7 @@ theorem directionalDeriv_pullbackCross
         (fun q : N =>
           g.inner q (pushFwdSectionCross (I := I) (J := J) Phi P q)
             (pushFwdSectionCross (I := I) (J := J) Phi Q q)) (Phi x) :=
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt (I := J)
+    (DifferentialGeometry.Geometry.Curvature.CovariantDerivative.metric_inner_contMDiffAt (I := J)
       (M := N) g
       (pushFwdSectionCross (I := I) (J := J) Phi P).contMDiff.contMDiffAt
       (pushFwdSectionCross (I := I) (J := J) Phi Q).contMDiff.contMDiffAt
@@ -351,12 +353,12 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwdCross
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _)) (x : M) :
     mfderiv I J (Phi : M -> N) x
-        (DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+        (DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
           (I := I)
           (metricCov (I := I) (M := M) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi))
           (fun p : M => X p) (fun p : M => Y p) (fun p : M => Z p) x)
       =
-      DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+      DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
         (I := J) (metricCov (I := J) (M := N) g)
         (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi X q)
         (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Y q)
@@ -369,12 +371,12 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwdCross
   let ZYh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (Y p),
       fun p
-        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+        => DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) Y Z p⟩
   let ZXh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (X p),
       fun p
-        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+        => DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) X Z p⟩
   have hZY :
       (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi ZYh q) =
@@ -472,7 +474,7 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwdCross
           rw [minSmoothness_of_isRCLikeNormedField]
           exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
     simpa [pushFwdSectionCross, pushFwdFieldCross] using hbr'
-  simp only [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+  simp only [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   change
     mfderiv I J (Phi : M -> N) x
       ((covh (fun p : M => ZYh p) x) (X x) -
@@ -531,7 +533,7 @@ theorem metricRm04Std_pullbackCross
   rw [metricRm04StdAt_apply, metricRm04StdAt_apply]
   unfold metricRm04At
   have hleft :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At_apply_smooth
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At_apply_smooth
       (I := I)
       (g := Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
       (cov := metricCov (I := I) (M := M)
@@ -540,7 +542,7 @@ theorem metricRm04Std_pullbackCross
         (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi))
       Xs Ys Zs Ws x
   have hright :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At_apply_smooth
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At_apply_smooth
       (I := J)
       (g := g)
       (cov := metricCov (I := J) (M := N) g)
@@ -549,19 +551,19 @@ theorem metricRm04Std_pullbackCross
       (pushFwdSectionCross (I := I) (J := J) Phi Ys)
       (pushFwdSectionCross (I := I) (J := J) Phi Zs)
       (pushFwdSectionCross (I := I) (J := J) Phi Ws) (Phi x)
-  rw [show DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
+  rw [show DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At
         (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
         (metricCov (I := I) (M := M) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi))
         (metricCov_smooth (I := I) (M := M)
           (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi))
         x (vec4 X Y Z W) =
       (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi).inner x W
-        (DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+        (DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
           (I := I)
           (metricCov (I := I) (M := M) (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi))
           (fun p : M => Xs p) (fun p : M => Ys p) (fun p : M => Zs p) x) by
         simpa [hXs, hYs, hZs, hWs] using hleft]
-  rw [show DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
+  rw [show DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At
         g (metricCov (I := J) (M := N) g)
         (metricCov_smooth (I := J) (M := N) g)
         (Phi x)
@@ -570,7 +572,7 @@ theorem metricRm04Std_pullbackCross
           (mfderiv I J (Phi : M -> N) x Z)
           (mfderiv I J (Phi : M -> N) x W)) =
       g.inner (Phi x) (mfderiv I J (Phi : M -> N) x W)
-        (DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+        (DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
           (I := J) (metricCov (I := J) (M := N) g)
           (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Xs q)
           (fun q : N => pushFwdSectionCross (I := I) (J := J) Phi Ys q)
@@ -580,4 +582,4 @@ theorem metricRm04Std_pullbackCross
   rw [connectionRiemannCurvatureField_pullback_pushFwdCross
     (I := I) (J := J) g Phi Xs Ys Zs x]
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

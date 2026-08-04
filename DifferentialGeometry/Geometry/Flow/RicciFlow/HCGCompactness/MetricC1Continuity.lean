@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvBridge
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Uniqueness
 import Mathlib.Topology.Instances.Matrix
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -25,7 +27,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Coordinates
 open scoped Manifold ContDiff Topology BigOperators
 

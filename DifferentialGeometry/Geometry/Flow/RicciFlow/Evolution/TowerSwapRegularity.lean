@@ -2,6 +2,8 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.TailChristoffel
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.FrameTowerRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHeatEq
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -16,7 +18,7 @@ open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
 

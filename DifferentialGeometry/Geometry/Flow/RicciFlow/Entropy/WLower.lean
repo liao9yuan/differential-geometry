@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.LogSobolev
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -20,7 +22,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 noncomputable section
 
 open MeasureTheory Set
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem

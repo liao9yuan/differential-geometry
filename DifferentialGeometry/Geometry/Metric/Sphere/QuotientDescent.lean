@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Coordinates.PartialDiffeomorphOpens
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityLocal
 import DifferentialGeometry.Geometry.Curvature.Sphere.ConstCurvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -33,7 +35,7 @@ noncomputable section
 
 open Bundle Manifold Set Metric Module
 open scoped Manifold Topology ContDiff RealInnerProductSpace
-open DifferentialGeometry.Integral.Connection
+
 
 namespace DifferentialGeometry
 namespace Geometry

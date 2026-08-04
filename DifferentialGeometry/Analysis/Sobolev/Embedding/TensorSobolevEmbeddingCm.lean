@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.FiberNormRiema
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2BoundByComponents
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 namespace DifferentialGeometry.PDE.RicciFlow

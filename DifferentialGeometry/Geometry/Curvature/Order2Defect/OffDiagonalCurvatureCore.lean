@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -9,8 +12,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -124,9 +127,9 @@ theorem riemannOp_gradTensor_offDiag_frame_fiberNormSq_le
   rw [hii, hjj] at h
   simpa using h
 
-end Connection
+end Curvature
 
-end Integral
+end Geometry
 
 end DifferentialGeometry
 

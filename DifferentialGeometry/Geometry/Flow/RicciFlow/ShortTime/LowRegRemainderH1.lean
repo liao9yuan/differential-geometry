@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegForcingH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegPathLower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegPathSplit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmOpNorm
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 /-!
@@ -20,7 +23,7 @@ open scoped Manifold Topology ContDiff BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

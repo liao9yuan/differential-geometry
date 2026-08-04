@@ -8,6 +8,7 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import DifferentialGeometry.Bundle.Equiv
 import DifferentialGeometry.Bundle.Frame
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -15,7 +16,7 @@ noncomputable section
 open Bundle Manifold Set FiberBundle
 open scoped Manifold Topology ContDiff
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

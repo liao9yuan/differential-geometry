@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullback
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -20,8 +22,8 @@ noncomputable section
 
 open Set Function Filter Bundle Manifold
 open scoped Manifold Topology ContDiff ENNReal
-open DifferentialGeometry.Integral.Connection
-open DifferentialGeometry.Integral.Connection.CovariantDerivative
+
+open DifferentialGeometry.Geometry.Curvature.CovariantDerivative
 
 namespace DifferentialGeometry
 namespace HCGCompactness

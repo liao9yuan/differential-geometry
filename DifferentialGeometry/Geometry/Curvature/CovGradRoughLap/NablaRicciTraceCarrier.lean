@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedRicciEndomorphism
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -12,8 +15,8 @@ open scoped Manifold Topology ContDiff BigOperators
 open Tensor0SBundle Tensor0SNabla
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -591,8 +594,8 @@ theorem tensorCovDerivAt_ricTraceSection_eq_nablaRicTrace_add
   exact congrArg (fun (T : Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x) => T)
     (tensorCovDerivAt_ricSlotOpField_eq_nablaRicSlotOpFib (I := I) (M := M) g s X x)
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

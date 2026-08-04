@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Bound
+open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section

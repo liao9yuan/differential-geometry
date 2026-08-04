@@ -7,6 +7,9 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.DeTurckLieArm2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLoweredTrilinear
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.DeTurckLieArm1CoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieRealizedFamilyJointSmooth
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -24,7 +27,7 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization

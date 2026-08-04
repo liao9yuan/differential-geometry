@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.EigenBasis
 import Mathlib.Analysis.SpecialFunctions.Exp
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -12,7 +14,7 @@ namespace RicciFlow
 
 open Bundle
 open scoped Manifold ContDiff
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 

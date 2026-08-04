@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -6,12 +6,14 @@ import DifferentialGeometry.Tensor.RicciIdentity.MixedComponents
 import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.Basic
 import DifferentialGeometry.Tensor.RSTensor.Components
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -183,7 +185,7 @@ theorem contract_trace13_component_basis
   · rfl
   · rfl
   · change vec2 (basis i) (basis j) 1 = basis j
-    simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+    simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
 
 
 
@@ -249,5 +251,5 @@ theorem ricciFromRm13At_apply_basis_trace
   · rfl
   · rfl
   · change vec2 Y Z 1 = Z
-    simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
-end DifferentialGeometry.Integral.Connection
+    simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
+end DifferentialGeometry.Geometry.Curvature

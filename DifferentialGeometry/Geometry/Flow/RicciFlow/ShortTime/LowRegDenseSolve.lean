@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoreTame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRealize
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.TameForcingFixedPoint
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Dense low-regularity Ricci--DeTurck solver

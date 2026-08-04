@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffBilinGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

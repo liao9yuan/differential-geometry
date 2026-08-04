@@ -6,6 +6,9 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulT
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciDeTurckArm0CurvatureDifferenceJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureArm1KoszulTopSeparation
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section

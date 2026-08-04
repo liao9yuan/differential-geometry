@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection
@@ -7,7 +9,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Set Function Bundle
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Slot0CurryCovariantLeibniz
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -12,8 +15,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -847,8 +850,8 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
   simp only [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply] at h
   exact h
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Covariant
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -41,16 +43,16 @@ variable {u : Set M}
 omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
     [DecidableEq Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (gInvDt : Real -> M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
     (hdt : InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt)
     (hinv : InvMetricLocal (I := I) S gInv frame u)
-    (hunique : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
+    (hunique : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)) :
     InverseMetricEvolutionEquationInFrame (I := I) S gInv frame u := by
   intro t x hx i j
@@ -91,10 +93,10 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
 omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     [DecidableEq Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (gInvDt : Real -> M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
@@ -111,7 +113,7 @@ theorem inverseMetricEvolution_of_metricFrameTimeRegularity
 
 
 theorem coordInvLocal
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M) :
     InvMetricLocal (I := I) S (coordInv (I := I) S x0)
@@ -132,7 +134,7 @@ theorem coordInvLocal
 
 
 theorem coordInvEvol
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (x0 : M) :
@@ -143,7 +145,7 @@ theorem coordInvEvol
   classical
   intro t x hx i j
   let frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0
-  let gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+  let gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M
     (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E) :=
     coordInv (I := I) S x0
   let G : Real -> ((DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E -> Real) →L[Real]
@@ -280,17 +282,17 @@ theorem coordInvEvol
 omit [SigmaCompactSpace M] in
 theorem evol_inverse_metric_inFrame
     [DecidableEq Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (gInvDt : Real -> M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
     (hreg :
       MetricFrameTimeRegularityInFrameOnLocal
         (I := I) S gInv gInvDt frame u)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x : M) (hx : x ∈ u) (i j : Idx) :
     HasDerivWithinAt
       (fun s : Real => gInv s x i j)

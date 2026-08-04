@@ -19,6 +19,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.FlatInteri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 open DifferentialGeometry.Geometry.Connection
@@ -31,7 +33,7 @@ open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 
 theorem ricci_flow_short_time_existence
@@ -52,7 +54,7 @@ theorem ricci_flow_short_time_existence
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
         HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
           ((-2 : ℝ) *
-            DifferentialGeometry.Integral.Connection.ricciTensor
+            DifferentialGeometry.Geometry.Curvature.ricciTensor
               (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
   obtain ⟨T_DT, g_DT, hDT, hJ⟩ :=
     DifferentialGeometry.PDE.RicciFlow.deTurckRicci_solution_with_jointReg
@@ -71,7 +73,7 @@ theorem ricci_flow_short_time_existence
         (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
           HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
             ((-2 : ℝ) *
-              DifferentialGeometry.Integral.Connection.ricciTensor
+              DifferentialGeometry.Geometry.Curvature.ricciTensor
                 (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
     have hDT_deriv' : ∀ t ∈ Set.Ico (0 : ℝ) T_DT, ∀ x : M, ∀ v w : TangentSpace I x,
         HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
@@ -173,7 +175,7 @@ theorem short_time_joint
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
         HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
           ((-2 : ℝ) *
-            DifferentialGeometry.Integral.Connection.ricciTensor
+            DifferentialGeometry.Geometry.Curvature.ricciTensor
               (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
   obtain ⟨T_DT, g_DT, hDT, hJ⟩ :=
     DifferentialGeometry.PDE.RicciFlow.deTurckRicci_solution_with_jointReg
@@ -192,7 +194,7 @@ theorem short_time_joint
         (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
           HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
             ((-2 : ℝ) *
-              DifferentialGeometry.Integral.Connection.ricciTensor
+              DifferentialGeometry.Geometry.Curvature.ricciTensor
                 (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
     have hDT_deriv' : ∀ t ∈ Set.Ico (0 : ℝ) T_DT, ∀ x : M, ∀ v w : TangentSpace I x,
         HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)

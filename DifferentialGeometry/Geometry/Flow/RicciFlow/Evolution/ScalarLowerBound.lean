@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 import Mathlib.Analysis.Normed.Group.Uniform
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -135,7 +137,7 @@ theorem exists_scalarLowerReaction_lipschitzOn_valueSet
 theorem scalar_curvature_lower_bound_of_parabolic_inequality
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (hT : 0 < T)
     (hn : n ≠ 0)
     (X : Real -> (x : M) -> TangentSpace I x)
@@ -262,7 +264,7 @@ theorem exists_initialScalarMinimum_of_continuous
 
 
 structure ScalarLowerBoundWMPRegularity
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (scalar : Real -> M -> Real) (K : NNReal) : Prop where
   weighted_cont : ContinuousOn
     (fun p : Real × M =>
@@ -302,10 +304,10 @@ structure ScalarLowerBoundWMPRegularity
 
 
 theorem scalarRegOfSmooth
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (K : NNReal)
     (hsubset : ∀ t : Real, t ∈ Set.Icc 0 T -> t ∈ D.carrier)
     (hmetric : ∀ t : Real, t ∈ Set.Icc 0 T ->
@@ -405,7 +407,7 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n : Real) (hT : 0 < T)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (hscalar : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
@@ -458,8 +460,8 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n : Real) (hT : 0 < T)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (hslab : Set.Icc 0 T ⊆ D.carrier)
@@ -473,7 +475,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
         DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x := by
   intro t ht htpos x
-  let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D :=
+  let τ : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D :=
     ⟨t, hregular t ht htpos⟩
   have hwithin :
       HasDerivWithinAt
@@ -511,7 +513,7 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n : Real) (hT : 0 < T)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (hscalar : ScalarEvolutionAllTimesOn (M := M) T scalar scalarLap ricciNormSq)
@@ -535,12 +537,12 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] [Nonempty Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n : Real) (hT : 0 < T)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
@@ -579,8 +581,8 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
 theorem scalar_curvature_lower_bound_of_scalarEvolution
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (hT : 0 < T)
     (hn : n ≠ 0)
     (scalar scalarLap ricciNormSq : Real -> M -> Real) (K : NNReal)
@@ -644,8 +646,8 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
 theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (hT : 0 < T)
     (hn : n ≠ 0)
     (scalar scalarLap ricciNormSq : Real -> M -> Real) (K : NNReal)
@@ -680,7 +682,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (hT : 0 < T) (hTω : T < omega)
     (hn : n ≠ 0)
     (scalar scalarLap ricciNormSq : Real -> M -> Real) (K : NNReal)
@@ -688,7 +690,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
       0 < 1 - (2 / n) * c0 * t)
     (hreg : ScalarLowerBoundWMPRegularity (I := I) G T n c0 scalar K)
     (hevol : ScalarEvolutionEquationOn
-      (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+      (D := DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
       scalar scalarLap ricciNormSq)
     (hlap : ScalarLaplacianRealizesHeatOperatorOn (I := I) G T scalar scalarLap)
     (hricci : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
@@ -702,20 +704,20 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
       scalarLowerBarrier n c0 t <= scalar t x := by
   have hslab :
       Set.Icc 0 T ⊆
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+        (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega
           h0ω).carrier := by
     intro t ht
     change t ∈ Set.Ico 0 omega
     exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
   have hregular :
       ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
-        t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+        t ∈ (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega
           h0ω).regular := by
     intro t ht htpos
     change t ∈ Set.Ioo 0 omega
     exact ⟨htpos, lt_of_le_of_lt ht.2 hTω⟩
   exact scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
-    (I := I) (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (I := I) (D := DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     G T n c0 hT hn scalar scalarLap ricciNormSq K
     hslab hregular hden hreg hevol hlap hricci hinit hF_lip
 
@@ -724,8 +726,8 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
 theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (hT : 0 < T)
     (hn : n ≠ 0)
     (scalar scalarLap ricciNormSq : Real -> M -> Real) (K : NNReal)
@@ -786,13 +788,13 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] [Nonempty Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (hT : 0 < T)
     (hn_ne : n ≠ 0)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
@@ -885,11 +887,11 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
     {omega : Real} (h0ω : 0 < omega)
     {u : Set M}
     (S : SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω))
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+      (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω))
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (hT : 0 < T) (hTω : T < omega)
     (hn_ne : n ≠ 0)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
@@ -902,7 +904,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
     (hreg : ScalarLowerBoundWMPRegularity (I := I) G T n c0
       (scalarTraceInFrame (I := I) S gInv frame) K)
     (hevol : ScalarEvolutionEquationOn
-      (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+      (D := DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
       (scalarTraceInFrame (I := I) S gInv frame)
       (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
       (ricciNormSqInFrame (I := I) S gInv frame))
@@ -921,14 +923,14 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
         scalarTraceInFrame (I := I) S gInv frame t x := by
   have hslab :
       Set.Icc 0 T ⊆
-        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+        (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega
           h0ω).carrier := by
     intro t ht
     change t ∈ Set.Ico 0 omega
     exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
   have hregular :
       ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
-        t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+        t ∈ (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega
           h0ω).regular := by
     intro t ht htpos
     change t ∈ Set.Ioo 0 omega
@@ -943,7 +945,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
     intro t _ht x
     exact hcs t x
   exact scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
-    (I := I) (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (I := I) (D := DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     G T n c0 hT hn_ne
     (scalarTraceInFrame (I := I) S gInv frame)
     (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)

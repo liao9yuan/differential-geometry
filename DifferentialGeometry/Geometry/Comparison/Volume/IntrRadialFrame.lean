@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Exponential.IntrinsicSmooth
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 /-!
@@ -86,7 +88,7 @@ lemma exists_intrFrame
     (intrinsicGeodesic_contMDiff (I := I) g hEnorm p v).of_le
       (by exact_mod_cast le_top)
   obtain ⟨basis, hON0⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis
       (I := I) g (intrinsicGeodesic (I := I) g hEnorm p v 0)
   obtain ⟨F, _hF0, hFdiff, hFpar, hFON⟩ :=
     exists_parallel_frame (I := I) g (intrinsicGeodesic (I := I) g hEnorm p v)

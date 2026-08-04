@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.CorrectedBareVelocity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.UniformBijective
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 

@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.ResidualLedger
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHeatEq
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -29,7 +32,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
+open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
 
@@ -41,7 +44,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -94,16 +97,16 @@ theorem nablaRicReal_frame
     · simpa [V] using hframeAt b
   have hslots : ∀ y,
       (fun q : Fin 2 => V q y) =
-        DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a y) (frame b y) := by
+        DifferentialGeometry.Geometry.Curvature.vec2 (I := I) (frame a y) (frame b y) := by
     intro y
     funext q
-    fin_cases q <;> simp [V, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases q <;> simp [V, DifferentialGeometry.Geometry.Curvature.vec2]
   have heval :=
     TotalNabla0SRealizes.eval_C1_slots (I := I) (s := 2)
       (h := (derivs.first)) X V x hV_at
   have hcons :
       Fin.cons (X x) (fun q : Fin 2 => V q x) =
-        DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+        DifferentialGeometry.Geometry.Curvature.vec3 (I := I) (frame d x) (frame a x)
           (frame b x) := by
     rw [hX, hslots x]
     funext q
@@ -112,7 +115,7 @@ theorem nablaRicReal_frame
   rw [hX] at heval
   have hleft :
       derivs.nablaA x
-          (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame d x) (frame a x)
+          (DifferentialGeometry.Geometry.Curvature.vec3 (I := I) (frame d x) (frame a x)
             (frame b x)) =
         nablaRicComp (I := I) S frame t x d a b := by
     simp [nablaRicComp, derivs, CanonicalSpatialDerivs0S.of_smooth_connection]
@@ -127,17 +130,17 @@ theorem nablaRicReal_frame
           (Function.update (fun q : Fin 2 => V q x) (0 : Fin 2)
             ((S.family.connection t) (V 0) x (frame d x))) =
         S.ricciAt t x
-          (DifferentialGeometry.Integral.Connection.vec2
+          (DifferentialGeometry.Geometry.Curvature.vec2
             ((S.family.connection t) (frame a) x (frame d x))
             (frame b x)) := by
     have harg :
         Function.update (fun q : Fin 2 => V q x) (0 : Fin 2)
             ((S.family.connection t) (V 0) x (frame d x)) =
-          DifferentialGeometry.Integral.Connection.vec2
+          DifferentialGeometry.Geometry.Curvature.vec2
             ((S.family.connection t) (frame a) x (frame d x))
             (frame b x) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Geometry.Curvature.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   have hterm1 :
@@ -145,17 +148,17 @@ theorem nablaRicReal_frame
           (Function.update (fun q : Fin 2 => V q x) (1 : Fin 2)
             ((S.family.connection t) (V 1) x (frame d x))) =
         S.ricciAt t x
-          (DifferentialGeometry.Integral.Connection.vec2
+          (DifferentialGeometry.Geometry.Curvature.vec2
             (frame a x)
             ((S.family.connection t) (frame b) x (frame d x))) := by
     have harg :
         Function.update (fun q : Fin 2 => V q x) (1 : Fin 2)
             ((S.family.connection t) (V 1) x (frame d x)) =
-          DifferentialGeometry.Integral.Connection.vec2
+          DifferentialGeometry.Geometry.Curvature.vec2
             (frame a x)
             ((S.family.connection t) (frame b) x (frame d x)) := by
       funext q
-      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [Function.update, V, DifferentialGeometry.Geometry.Curvature.vec2]
     rw [harg]
     simp [SolutionOn.ricciAt_eq]
   rw [hleft, hfun] at heval

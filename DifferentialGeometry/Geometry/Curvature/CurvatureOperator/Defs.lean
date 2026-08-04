@@ -8,6 +8,8 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Topology.FiberBundle.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -17,8 +19,8 @@ open Bundle Manifold Set FiberBundle NormedSpace
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 section General
 
@@ -732,6 +734,6 @@ theorem riemannOpFun_def (cov : CovariantDerivative I F V) (x : M)
 
 end RiemannOp
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

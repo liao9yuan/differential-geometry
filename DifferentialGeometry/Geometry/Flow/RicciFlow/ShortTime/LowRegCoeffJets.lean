@@ -13,6 +13,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LieCorrectionOpe
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LieCorrectionTraceDiagonalGrid
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistenceSymmetrizationNormBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSThreeArmCancel
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 /-!
 # Low-regularity jets of concrete Ricci--DeTurck coefficients
@@ -33,7 +36,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization

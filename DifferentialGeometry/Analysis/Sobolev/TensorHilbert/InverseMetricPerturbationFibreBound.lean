@@ -13,7 +13,7 @@ open DifferentialGeometry
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-open DifferentialGeometry.Integral.Connection
+
 
 variable
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CovOrderTail
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProducer
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -19,7 +21,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Set Filter
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.HCGCompactness
 open Tensor0SBundle
 

@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Core
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -20,7 +23,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -1104,7 +1107,7 @@ private lemma lieCorr0_riemLowered_basis_value (x : M) (i j ml kl : Fin (Module.
   rw [show Tensor0SSpace.toModel (lieCorr0RiemLoweredFib (I := I) g₀ x)
       ![(chartModelBasis E) i, (chartModelBasis E) j, (chartModelBasis E) ml,
         (chartModelBasis E) kl] =
-    g₀.inner x (Integral.Connection.riemannOp (LeviCivita (I := I) g₀) x
+    g₀.inner x (DifferentialGeometry.Geometry.Curvature.riemannOp (LeviCivita (I := I) g₀) x
       ((chartModelBasis E) i : TangentSpace I x)
       ((chartModelBasis E) j : TangentSpace I x)
       ((chartModelBasis E) ml : TangentSpace I x))

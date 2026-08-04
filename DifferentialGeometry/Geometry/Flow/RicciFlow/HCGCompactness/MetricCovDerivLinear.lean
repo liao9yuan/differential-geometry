@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConver
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0SLinear
 import DifferentialGeometry.Geometry.Metric.SmoothVectorFieldExtGlobal
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -36,7 +39,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]

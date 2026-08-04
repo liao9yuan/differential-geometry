@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConvTower
 import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -121,7 +124,7 @@ section Realization
 
 open scoped Manifold ContDiff Topology
 open Bundle Tensor0SBundle TensorLieDeriv
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

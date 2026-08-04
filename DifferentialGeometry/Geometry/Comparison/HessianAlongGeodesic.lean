@@ -24,7 +24,7 @@ namespace DifferentialGeometry
 namespace Geometry
 namespace Riemannian
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong

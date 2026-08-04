@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -8,7 +9,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

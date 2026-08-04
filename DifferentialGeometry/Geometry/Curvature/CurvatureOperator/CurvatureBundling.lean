@@ -4,6 +4,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.Topology.Algebra.Module.FiniteDimension
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -13,8 +15,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 section RiemannOpBundling
 
@@ -850,6 +852,6 @@ lemma riemannOp_swap
 
 end RiemannOpBundling
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

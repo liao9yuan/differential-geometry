@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Coordinates.Christoffel
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Inverse
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.MFDeriv.Tangent
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -50,7 +52,7 @@ set_option maxSynthPendingDepth 3
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators Matrix
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 open DifferentialGeometry

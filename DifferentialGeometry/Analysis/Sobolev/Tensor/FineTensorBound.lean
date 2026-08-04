@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.FineTensorRepack
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Quantitative Sobolev reassembly of one fine tensor block

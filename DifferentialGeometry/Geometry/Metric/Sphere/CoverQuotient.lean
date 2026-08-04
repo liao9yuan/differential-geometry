@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Metric.Sphere.QuotientDescent
 import DifferentialGeometry.Geometry.Topology.UniversalCover.DeckIsometry
 import DifferentialGeometry.Geometry.Topology.UniversalCover.FibreEquiv
 import DifferentialGeometry.Geometry.Topology.UniversalCover.LocalDiffeomorph
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Round quotient data from a universal-cover isometry

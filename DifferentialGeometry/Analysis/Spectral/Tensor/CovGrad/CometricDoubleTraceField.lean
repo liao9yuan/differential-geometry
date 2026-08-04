@@ -7,6 +7,8 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParal
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetricFieldParallel
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -495,7 +497,7 @@ theorem ricciCometricDoubleTraceFib_contMDiff (g₀ : SmoothRiemannianMetric I M
     (cometricRaiseSlot0Fib (I := I) g₀ (2 + a) x (Y' x))]
   congr 1
 
-open DifferentialGeometry.Integral.Connection
+
 
 noncomputable def cometricDoubleTraceFib (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M) :
     Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace p I x :=

@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BBSAllMBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.EndpointMetricLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.EndpointRicciLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ExtendShiInputs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -60,7 +62,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open DifferentialGeometry.Integral.Connection
+
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
 

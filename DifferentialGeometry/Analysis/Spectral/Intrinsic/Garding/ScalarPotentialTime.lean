@@ -1,5 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotential
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHsTime
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -20,7 +23,7 @@ namespace IntrinsicSpectral
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

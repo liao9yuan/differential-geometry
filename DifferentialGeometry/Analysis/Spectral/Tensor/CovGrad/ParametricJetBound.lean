@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -15,7 +18,7 @@ set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow
 open Tensor0SBundle TensorRSNabla

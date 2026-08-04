@@ -11,6 +11,8 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -19,7 +21,7 @@ open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry
 open DifferentialGeometry.PDE
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck

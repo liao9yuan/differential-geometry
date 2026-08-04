@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimis
 import DifferentialGeometry.Geometry.Comparison.Variation.VariationFieldSmooth
 import DifferentialGeometry.Geometry.Exponential.ConjugatePoint
 import DifferentialGeometry.Geometry.Exponential.IntrinsicSmooth
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

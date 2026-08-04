@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -55,7 +57,7 @@ private theorem sum_swap_four
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) :
     (∑ i : Idx, ∑ j : Idx,
@@ -97,12 +99,12 @@ theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
 omit [SigmaCompactSpace M] [T2Space M] in
 @[deprecated "use a local or pointwise scalar trace statement instead" (since := "2026-05-22")]
 theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
@@ -117,7 +119,7 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
         (scalarHess t x))
     (hcomp : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
       forall i j : Idx,
-        scalarHess t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x)
+        scalarHess t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) (frame i x)
           (frame j x)) =
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric t x i j) :
     ScalarLaplacianRealizesHeatOperatorOn (I := I) G T
@@ -142,7 +144,7 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
     have hinput :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (basis i) (basis j)
           Fin.elim0 =
-          DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x) := by
+          DifferentialGeometry.Geometry.Curvature.vec2 (I := I) (frame i x) (frame j x) := by
       have hbi : basis i = frame i x := by
         simp [basis, IsLocalFrameOn.toBasisAt_coe]
       have hbj : basis j = frame j x := by
@@ -151,8 +153,8 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
       funext q
       fin_cases q
       · simp [DifferentialGeometry.Geometry.Operator.metricTraceInput,
-        DifferentialGeometry.Integral.Connection.vec2,
-        DifferentialGeometry.Integral.Connection.vec2]
+        DifferentialGeometry.Geometry.Curvature.vec2,
+        DifferentialGeometry.Geometry.Curvature.vec2]
       · rfl
     rw [hinput, hcomp t ht x i j]
   have htrace_tx := htrace t ht x
@@ -167,9 +169,9 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
             (M := M) gInv nabla2Ric t x).symm
     _ = DifferentialGeometry.Geometry.Operator.metricTrace0S2InBasis (I := I) basis (gInv t x)
           (scalarHess t x) Fin.elim0 := hmetric.symm
-    _ = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
+    _ = DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t
           (scalarTraceInFrame (I := I) S gInv frame t) x := by
-        unfold DifferentialGeometry.Integral.Connection.laplacianAt
+        unfold DifferentialGeometry.Geometry.Curvature.laplacianAt
         exact htrace_tx.symm
 
 end DifferentialGeometry.PDE.RicciFlow

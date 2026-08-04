@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -14,7 +16,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open scoped Manifold ContDiff Topology
 
@@ -212,7 +214,7 @@ theorem directionalDeriv_restrictOpen_inner
   have hf :
       MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => g.inner y (Y y) (Z y)) (x : M) :=
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt
+    (DifferentialGeometry.Geometry.Curvature.CovariantDerivative.metric_inner_contMDiffAt
       (I := I) (M := M) g
       Y.contMDiff.contMDiffAt Z.contMDiff.contMDiffAt
       (by simp)).mdifferentiableAt (by simp)
@@ -327,4 +329,4 @@ theorem metricCov_restrictOpen_globalSection
     _ = (metricCov (I := I) (M := M) g (fun y : M => Y y) (x : M)) v := by
       rw [hXx]
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

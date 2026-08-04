@@ -1,5 +1,7 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

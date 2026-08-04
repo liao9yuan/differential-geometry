@@ -14,6 +14,9 @@ import DifferentialGeometry.Tensor.RicciIdentity.MixedComponents
 import DifferentialGeometry.Bundle.LocalFrameRegularity
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -29,7 +32,7 @@ noncomputable section
 
 namespace DifferentialGeometry.Geometry.Operator
 
-open DifferentialGeometry.Integral.Connection
+
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
@@ -865,7 +868,7 @@ theorem scalarLaplacianRealizesTraceAt_of_nablaDu
         vec2 (I := I) (basis i) (basis j) := by
     funext q
     fin_cases q
-    · simp [metricTraceInput, vec2, DifferentialGeometry.Integral.Connection.vec2]
+    · simp [metricTraceInput, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
     · rfl
   rw [hinput]
   rw [hessian_component_eq_inner_cov_gradient

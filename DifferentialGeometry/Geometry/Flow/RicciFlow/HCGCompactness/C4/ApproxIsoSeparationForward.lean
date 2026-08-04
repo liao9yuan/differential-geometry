@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PartialDataComposition
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -283,8 +285,8 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
       (Tensor0SBundle.metricTensorField (I := I) g) (r' + 1)
     rw [hδ₀def, hsub, iterCov_metric_zero, sub_zero]
     obtain ⟨basis, hON⟩ :=
-      DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
-    have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) g x
+    have hinv := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := I) g basis hON
     rw [← t02Norm_eq_iterCov (I := I) D₁.forward.pullback g (r' + 1) basis hinv]
     calc tensor02CovDerivNormWith (I := I) (r' + 1) D₁.forward.pullback g g x
@@ -295,8 +297,8 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
         (iterCov (I := I) G₁ 2 (Tensor0SBundle.metricTensorField (I := I) g) j x)) ≤ q := by
     intro hNV x hxV j hj1 hjp
     obtain ⟨basis, hON⟩ :=
-      DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) G₁ x
-    have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) G₁ x
+    have hinv := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := I) G₁ basis hON
     rw [← t02Norm_eq_iterCov (I := I)
       (Tensor0SBundle.metricTensorField (I := I) g) G₁ j basis hinv]
@@ -310,8 +312,8 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
         (iterCov (I := I) G₁ 2 δ₁ k x)) ≤ e1 := by
     intro hNV x hxV k hkp
     obtain ⟨basis, hON⟩ :=
-      DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) G₁ x
-    have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) G₁ x
+    have hinv := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := I) G₁ basis hON
     rw [← t02Norm_eq_iterCov (I := I) δ₁ G₁ k basis hinv]
     rw [hδ₁tow hNV k x hxV]
@@ -400,8 +402,8 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
       simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
       rw [Tensor0SBundle.Tensor0SSpace.sub_apply, hgermzI slots, sub_zero]
     obtain ⟨basis, hON⟩ :=
-      DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
-    have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) g x
+    have hinv := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := I) g basis hON
     rw [t02Norm_eq_iterCov (I := I) P'' g (a' + 1) basis hinv, hdecI]
     exact hCp x hxV (a' + 1) (by omega) hap
@@ -421,8 +423,8 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
     unfold metricTensorErrorNorm
     rw [hval]
     obtain ⟨basis, hON⟩ :=
-      DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
-    have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) g x
+    have hinv := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := I) g basis hON
     have htri := sqrt_normSq0S_add_le (I := I) g (δ₀ x) (δ₁ x) basis hinv
     have ht0 : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2 (δ₀ x)) ≤ c0 := by

@@ -20,6 +20,9 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDroppingCentredFrameInvGramExpansion
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDroppingComponentL2NormHsZeroBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -29,7 +32,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Tensor
@@ -2089,7 +2092,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-open DifferentialGeometry.Integral.Connection Bundle Tensor0SBundle
+open Bundle Tensor0SBundle
 
 set_option backward.isDefEq.respectTransparency false
 

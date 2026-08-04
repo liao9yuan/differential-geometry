@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Chart
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SNabla
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Agreement of the chart/model `nabla0SFun` with the abstract bundled `(0, s)` covariant derivative
@@ -49,7 +51,7 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
 open Tensor0SBundle
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

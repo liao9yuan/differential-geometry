@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNormTransfer
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -11,7 +14,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace L2
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (pathIntegralCoeffField
   pathIntegralCoeffField_toSection pathIntegralFib pathIntegralFib_toModel)
 

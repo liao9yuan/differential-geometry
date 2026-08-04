@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmFrozenSlotField
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -22,7 +25,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle Filter DifferentialGeometry.Integral.Connection
+open Bundle Tensor0SBundle Filter
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 

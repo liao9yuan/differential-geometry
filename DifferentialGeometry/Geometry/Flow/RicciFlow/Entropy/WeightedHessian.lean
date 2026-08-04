@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Geometry
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -22,7 +25,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 noncomputable section
 
 open Filter MeasureTheory Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure

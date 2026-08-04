@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CurvatureBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PositiveApprox
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CollapseScale
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -22,7 +24,7 @@ noncomputable section
 open Bundle Tensor0SBundle MeasureTheory Set Function
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.PDE.RicciFlow.Entropy
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
@@ -35,7 +37,7 @@ variable {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [IsManifold I 1 M]
   [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
@@ -96,7 +98,7 @@ estimate at its distinguished time, with the scalar term controlled directly
 by the invariant Riemann norm hypothesis. -/
 theorem flowball_wform
     {S : SolutionOn (I := I) (M := M) D}
-    {time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D}
+    {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}
     (B : FlowMetricBall S time) (hB : B.IsRmControlled) (C : ℝ) :
     ∃ v : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ v ∧ support v ⊆ B.set ∧
       (∫ x, v x ^ 2
@@ -116,7 +118,7 @@ theorem flowball_wform
               (DifferentialGeometry.Geometry.Operator.gradFun
                 (I := I) (S.base.metric time) v x) +
           B.radius ^ 2 *
-            DifferentialGeometry.Integral.Connection.metricScalarAt
+            DifferentialGeometry.Geometry.Curvature.metricScalarAt
               (I := I) (M := M) (S.base.metric time) x * v x ^ 2 -
           v x ^ 2 * Real.log (v x ^ 2) + C * v x ^ 2
         ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
@@ -138,11 +140,11 @@ theorem flowball_wform
     · linarith [sq_nonneg B.radius]
     · exact le_rfl
   let R : M → ℝ := fun x =>
-    DifferentialGeometry.Integral.Connection.metricScalarAt
+    DifferentialGeometry.Geometry.Curvature.metricScalarAt
       (I := I) (M := M) (S.base.metric time) x
   have hRcont : Continuous R := by
     simpa only [R] using
-      (DifferentialGeometry.Integral.Connection.metricScalar_smooth
+      (DifferentialGeometry.Geometry.Curvature.metricScalar_smooth
         (I := I) (M := M) (S.base.metric time)).continuous
   have hR : ∀ x, x ∈ B.set →
       R x ≤ (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt (1 / B.radius ^ 4) := by
@@ -165,7 +167,7 @@ amplitude whose actual Perelman W-functional is bounded by the cutoff estimate,
 up to an arbitrarily small error. -/
 theorem flowball_w_upper
     {S : SolutionOn (I := I) (M := M) D}
-    {time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D}
+    {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}
     (B : FlowMetricBall S time) (hB : B.IsRmControlled)
     {δ : ℝ} (hδ : 0 < δ) :
     ∃ w : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ w ∧ (∀ x : M, 0 < w x) ∧
@@ -176,7 +178,7 @@ theorem flowball_w_upper
           (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
             I M (S.base.metric time))
           (Module.finrank ℝ E) (B.radius ^ 2)
-          (fun x => DifferentialGeometry.Integral.Connection.metricScalarAt
+          (fun x => DifferentialGeometry.Geometry.Curvature.metricScalarAt
             (I := I) (M := M) (S.base.metric time) x)
           (fun x => (S.base.metric time).inner x
             (gradientFun (I := I) (S.base.metric time)
@@ -206,7 +208,7 @@ theorem flowball_w_upper
   let n : ℕ := Module.finrank ℝ E
   let tau : ℝ := B.radius ^ 2
   let R : M → ℝ := fun x =>
-    DifferentialGeometry.Integral.Connection.metricScalarAt
+    DifferentialGeometry.Geometry.Curvature.metricScalarAt
       (I := I) (M := M) g x
   let C₀ : ℝ := Real.log (perelmanDensityPrefactor n tau) - (n : ℝ)
   have htau : 0 < tau := by
@@ -214,7 +216,7 @@ theorem flowball_w_upper
     exact sq_pos_of_pos B.radius_pos
   have hRcont : Continuous R := by
     simpa only [R] using
-      (DifferentialGeometry.Integral.Connection.metricScalar_smooth
+      (DifferentialGeometry.Geometry.Curvature.metricScalar_smooth
         (I := I) (M := M) g).continuous
   obtain ⟨v, hv, _hvsupp, hvmass, hvgradi, hvupper⟩ :=
     flowball_wform (I := I) (M := M) B hB C₀
@@ -283,7 +285,7 @@ theorem exists_sel_w_bound
     [CompleteSpace E] [T2Space (TangentBundle I M)] [T3Space M]
     [ConnectedSpace M]
     {S : SolutionOn (I := I) (M := M) D}
-    {time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D}
+    {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}
     (B : FlowMetricBall S time) (hB : B.IsRmControlled)
     {δ : ℝ} (hδ : 0 < δ) :
     ∃ (B' : FlowMetricBall S time) (w : M → ℝ),
@@ -298,7 +300,7 @@ theorem exists_sel_w_bound
           (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
             I M (S.base.metric time))
           (Module.finrank ℝ E) (B'.radius ^ 2)
-          (fun x => DifferentialGeometry.Integral.Connection.metricScalarAt
+          (fun x => DifferentialGeometry.Geometry.Curvature.metricScalarAt
             (I := I) (M := M) (S.base.metric time) x)
           (fun x => (S.base.metric time).inner x
             (gradientFun (I := I) (S.base.metric time)
@@ -352,7 +354,7 @@ theorem exists_sel_w_bound
     wFunctional
           (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
             I M (S.base.metric time)) n (B'.radius ^ 2)
-          (fun x => DifferentialGeometry.Integral.Connection.metricScalarAt
+          (fun x => DifferentialGeometry.Geometry.Curvature.metricScalarAt
             (I := I) (M := M) (S.base.metric time) x)
           (fun x => (S.base.metric time).inner x
             (gradientFun (I := I) (S.base.metric time)

@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautHs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffH0
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarLapDiffCore
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -19,7 +21,7 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 

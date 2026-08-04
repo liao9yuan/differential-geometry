@@ -5,6 +5,9 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.BareSlot0CurryParseval
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -17,8 +20,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -982,8 +985,8 @@ theorem tensorInnerPointwise_slotSubst_sum
       map_add' := fun a b => tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x a b _ }
   exact map_sum φ _ Finset.univ
 
-end Connection
+end Curvature
 
-end Integral
+end Geometry
 
 end DifferentialGeometry

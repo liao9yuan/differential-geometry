@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.TraceAlgebra
 import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false

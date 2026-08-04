@@ -4,6 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricScalarSmul
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -29,7 +32,7 @@ namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 

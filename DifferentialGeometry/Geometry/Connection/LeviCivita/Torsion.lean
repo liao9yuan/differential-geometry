@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
 import DifferentialGeometry.Geometry.Coordinates.Christoffel
 import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -13,7 +15,7 @@ set_option autoImplicit false
 
 
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle

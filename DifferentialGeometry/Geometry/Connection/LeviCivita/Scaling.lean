@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
 import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -13,7 +14,7 @@ set_option autoImplicit false
 
 
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 noncomputable section

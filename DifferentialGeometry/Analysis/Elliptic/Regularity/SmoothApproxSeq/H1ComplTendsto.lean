@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.MemW1pRe
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.H2
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

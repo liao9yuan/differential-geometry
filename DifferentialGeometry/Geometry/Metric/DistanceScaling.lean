@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.Scaling
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

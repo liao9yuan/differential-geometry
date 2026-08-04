@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDomain
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopBall
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

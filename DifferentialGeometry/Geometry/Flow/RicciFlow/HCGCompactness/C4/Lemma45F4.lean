@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Lemma45Covariant
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Lemma45Intrinsic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -31,7 +33,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
-open Bundle DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Bundle Tensor0SBundle
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Tensor.Coordinates
 

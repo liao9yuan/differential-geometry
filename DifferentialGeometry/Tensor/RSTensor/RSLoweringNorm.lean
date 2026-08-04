@@ -1,6 +1,9 @@
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false

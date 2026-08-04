@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldAssembly
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAllPt
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -38,7 +40,7 @@ noncomputable section
 
 open Set Function Filter Bundle Manifold TopologicalSpace
 open scoped Manifold Topology ContDiff BigOperators
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 
 namespace DifferentialGeometry

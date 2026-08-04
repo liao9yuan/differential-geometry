@@ -11,7 +11,7 @@ import Mathlib.Tactic.Positivity
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 variable {R : Type*}
 
@@ -537,4 +537,4 @@ theorem q_sub_nonneg {l1 l2 l3 delta epsilon : Real}
 
 end PinchEigen3Unordered
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

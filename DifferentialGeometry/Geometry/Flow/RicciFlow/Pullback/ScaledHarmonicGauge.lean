@@ -2,6 +2,8 @@ import DifferentialGeometry.Bundle.VectorField
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.DeTurckNaturality
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicTension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.InverseFamily
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Density-scaled harmonic-map gauges
@@ -20,7 +22,7 @@ open scoped Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 

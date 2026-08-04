@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicStateMass
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 import Mathlib.Analysis.Calculus.MeanValue
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 /-!

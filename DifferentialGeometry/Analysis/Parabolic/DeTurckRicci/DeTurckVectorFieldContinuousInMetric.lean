@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -142,7 +144,7 @@ private theorem jacobi_comp_affine
   change
     covDerivAlong (I := I) g δ
         (fun s => covDerivAlong (I := I) g δ L s) t +
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
           (δ t))
         (L t) (curveVelocity (I := I) δ t)

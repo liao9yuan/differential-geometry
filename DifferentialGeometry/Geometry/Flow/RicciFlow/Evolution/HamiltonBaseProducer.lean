@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04Variation
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Hamilton
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -19,7 +21,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
@@ -115,7 +117,7 @@ private def varTensor
 
 /-- The canonical first covariant derivative of the solution Ricci tensor. -/
 private def solNablaRic
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 3 :=
@@ -126,7 +128,7 @@ private def solNablaRic
 
 /-- The canonical second covariant derivative of the solution Ricci tensor. -/
 private def solNabla2Ric
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
     Tensor04At (I := I) (M := M) x :=
   totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -134,7 +136,7 @@ private def solNabla2Ric
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem coordNab2_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) (t : Real)
     (d a i j : CoordinateIdx (𝕜 := Real) E) :
     coordNab2Ric (I := I) S x₀ t x₀ d a i j =
@@ -314,7 +316,7 @@ private theorem hessVar_apply {x : M}
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem gammaLower_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (x₀ : M) (t : Real)
     (d i j z : CoordinateIdx (𝕜 := Real) E) :
@@ -340,13 +342,13 @@ private theorem gammaLower_eq
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem rawCoord_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (x₀ : M) (t : Real) (ht : t ∈ D.carrier)
     (m : Fin 4 → CoordinateIdx (𝕜 := Real) E) :
     (∑ p : CoordinateIdx (𝕜 := Real) E,
-        DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+        DifferentialGeometry.Geometry.Curvature.christoffelCurvCoeffAt
             (I := I) (S.family.connection t) x₀ (m 0) (m 1) (m 2) p *
           ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
             t x₀ (m 3) p) =
@@ -362,7 +364,7 @@ private theorem rawCoord_eq
     (S.base.ricciAt t x₀) Dv
   have hcov := connSmoothOfSol (I := I) S hS t ht
   have hcoord :=
-    DifferentialGeometry.Integral.Connection.rm13_eval_eq_christoffelCurvCoord
+    DifferentialGeometry.Geometry.Curvature.rm13_eval_eq_christoffelCurvCoord
       (I := I) (S.family.connection t) hcov (S.base.rm13 t) x₀ β
       (rm13OfSol (I := I) S t ht) (connCurvOfSol (I := I) S hS x₀ t ht)
       (m 0) (m 1) (m 2)
@@ -383,7 +385,7 @@ private theorem rawCoord_eq
     (solution_rm04LowersRm13At (I := I) S t x₀) β A B C
   calc
     _ = ∑ p : CoordinateIdx (𝕜 := Real) E,
-        DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+        DifferentialGeometry.Geometry.Curvature.christoffelCurvCoeffAt
             (I := I) (S.family.connection t) x₀ (m 0) (m 1) (m 2) p *
           β (fun _ : Fin 1 ↦ coordinateFrameAt (I := I) x₀ p x₀) := by
       refine Finset.sum_congr rfl fun p _ ↦ ?_
@@ -404,7 +406,7 @@ private theorem rawCoord_eq
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem rm04Var_eq_tensor
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (x₀ : M) (t : Real) (ht : t ∈ D.carrier)
@@ -426,7 +428,7 @@ private theorem rm04Var_eq_tensor
   let G := fun p : CoordinateIdx (𝕜 := Real) E ↦
     metricCompInFrame (I := I) S frame t x₀ (m 3) p
   let R := fun p : CoordinateIdx (𝕜 := Real) E ↦
-    DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+    DifferentialGeometry.Geometry.Curvature.christoffelCurvCoeffAt
       (I := I) (S.family.connection t) x₀ (m 0) (m 1) (m 2) p
   let Rc := fun p : CoordinateIdx (𝕜 := Real) E ↦
     ricciCompInFrame (I := I) S frame t x₀ (m 3) p
@@ -496,7 +498,7 @@ private theorem rm04Var_eq_tensor
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem varTensor_eq_ham
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M)
@@ -546,10 +548,10 @@ private theorem varTensor_eq_ham
     SolutionFamily.connection, SolutionFamily.rm04, SolutionFamily.ricci,
     SolutionFamily.ricciAt, metricRm04, metricRicci, metricTrace0S2InBasis,
     htraceInput, hvec, identityInvMetric, diagonalInvMetric, metricCov,
-    DifferentialGeometry.Integral.Connection.metricRm04,
-    DifferentialGeometry.Integral.Connection.metricRicci,
-    DifferentialGeometry.Integral.Connection.metricRicciAt,
-    DifferentialGeometry.Integral.Connection.metricCov] using hstatic
+    DifferentialGeometry.Geometry.Curvature.metricRm04,
+    DifferentialGeometry.Geometry.Curvature.metricRicci,
+    DifferentialGeometry.Geometry.Curvature.metricRicciAt,
+    DifferentialGeometry.Geometry.Curvature.metricCov] using hstatic
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless]
@@ -558,10 +560,10 @@ omit [NeZero (Module.finrank ℝ E)]
 time derivative on any four fixed tangent vectors.  The coefficients are the
 time-independent coordinates of those vectors in the centered chart basis. -/
 theorem rm04Deriv_of_coord
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (x₀ : M)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (V : (Fin 4 → CoordinateIdx (𝕜 := Real) E) → Real)
     (hD : ∀ m, HasDerivWithinAt
       (fun s : Real ↦ S.base.rm04 s x₀
@@ -598,11 +600,11 @@ theorem rm04Deriv_of_coord
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem rm04Var_of_solution
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (x₀ : M)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (v : Fin 4 → TangentSpace I x₀) :
     HasDerivWithinAt
       (fun s : Real ↦ S.base.rm04 s x₀ v)
@@ -664,7 +666,7 @@ private theorem rm04Var_of_solution
     have hbase : ∀ s, s ∈ D.carrier →
         realizedRmBase (I := I) S x₀ s x₀ m =
           ∑ p : CoordinateIdx (𝕜 := Real) E,
-            DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+            DifferentialGeometry.Geometry.Curvature.christoffelCurvCoeffAt
                 (I := I) (S.family.connection s) x₀ (m 0) (m 1) (m 2) p *
               metricCompInFrame (I := I) S frame s x₀ (m 3) p := by
       intro s hs
@@ -683,7 +685,7 @@ private theorem rm04Var_of_solution
                   (t : Real) x₀ (m 1) p (m 0) (m 2)) *
                 metricCompInFrame (I := I) S frame
                   (t : Real) x₀ (m 3) p +
-              DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+              DifferentialGeometry.Geometry.Curvature.christoffelCurvCoeffAt
                   (I := I) (S.family.connection (t : Real))
                   x₀ (m 0) (m 1) (m 2) p *
                 ((-2 : Real) * ricciCompInFrame
@@ -692,7 +694,7 @@ private theorem rm04Var_of_solution
       have hterm : ∀ p ∈ (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)),
           HasDerivWithinAt
             (fun s : Real ↦
-              DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+              DifferentialGeometry.Geometry.Curvature.christoffelCurvCoeffAt
                   (I := I) (S.family.connection s) x₀ (m 0) (m 1) (m 2) p *
                 metricCompInFrame (I := I) S frame s x₀ (m 3) p)
             ((christoffelVariationCovDerivCoordAt
@@ -703,7 +705,7 @@ private theorem rm04Var_of_solution
                   (t : Real) x₀ (m 1) p (m 0) (m 2)) *
                 metricCompInFrame (I := I) S frame
                   (t : Real) x₀ (m 3) p +
-              DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+              DifferentialGeometry.Geometry.Curvature.christoffelCurvCoeffAt
                   (I := I) (S.family.connection (t : Real))
                   x₀ (m 0) (m 1) (m 2) p *
                 ((-2 : Real) * ricciCompInFrame
@@ -730,7 +732,7 @@ private theorem rm04Var_of_solution
                   (t : Real) x₀ (m 1) p (m 0) (m 2)) *
                 metricCompInFrame (I := I) S frame
                   (t : Real) x₀ (m 3) p +
-              DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt
+              DifferentialGeometry.Geometry.Curvature.christoffelCurvCoeffAt
                   (I := I) (S.family.connection (t : Real))
                   x₀ (m 0) (m 1) (m 2) p *
                 ((-2 : Real) * ricciCompInFrame
@@ -761,10 +763,10 @@ omit [NeZero (Module.finrank ℝ E)] in
 /-- The arbitrary-dimensional Hamilton evolution of lowered Riemann in a
 fixed orthonormal basis, produced directly from a Ricci-flow solution. -/
 theorem rm04Base_of_solution_any
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))

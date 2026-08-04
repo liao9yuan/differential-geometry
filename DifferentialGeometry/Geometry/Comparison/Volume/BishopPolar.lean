@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Integration.Measure.PolarEvaluation
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopRadial
 import DifferentialGeometry.Geometry.Comparison.Volume.NormalChartMeasure
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Flow.ConnectionDifference
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -12,7 +13,7 @@ open Bundle Manifold Set Filter FiberBundle
 open scoped Manifold Topology ContDiff BigOperators
 open Tensor0SBundle
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

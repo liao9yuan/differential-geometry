@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Calculus.MovingInverse
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1MetricLocal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageInjectivity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false

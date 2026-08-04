@@ -1,6 +1,9 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffUniformBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCc
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 
 
@@ -16,7 +19,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open scoped ContDiff Manifold Topology BigOperators
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 

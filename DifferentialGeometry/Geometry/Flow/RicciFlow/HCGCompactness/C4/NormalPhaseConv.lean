@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Calculus.MapConvergenceDeriv
 import DifferentialGeometry.Geometry.Exponential.NormalConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseEndpoint
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false

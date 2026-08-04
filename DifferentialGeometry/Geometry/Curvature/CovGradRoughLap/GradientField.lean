@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -10,8 +12,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -553,8 +555,8 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
     rw [tensorCovDerivAt_def (I := I) (M := M) g 0 s S x ((LeviCivita (I := I) g).toFun Y x (X x))]
   rw [houter, hchr]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

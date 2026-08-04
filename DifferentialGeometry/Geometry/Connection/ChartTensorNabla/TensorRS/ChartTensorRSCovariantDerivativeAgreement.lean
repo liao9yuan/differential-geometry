@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SLeviCivitaParallelExtend
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.ChartTensor0SCovariantDerivativeAgreementSucc
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -12,7 +13,7 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
 open Tensor0SBundle
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

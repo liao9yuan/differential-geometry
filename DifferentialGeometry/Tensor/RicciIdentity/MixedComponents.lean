@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.Specia
 import DifferentialGeometry.Tensor.Auxiliary.DerivationAlgebra
 import DifferentialGeometry.Tensor.RSTensor.Components
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
+open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 

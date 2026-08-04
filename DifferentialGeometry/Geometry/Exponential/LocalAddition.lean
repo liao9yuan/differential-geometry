@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
 import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Topology.FiberBundleT2
 import Mathlib.Topology.Connected.LocallyConnected
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 /-!

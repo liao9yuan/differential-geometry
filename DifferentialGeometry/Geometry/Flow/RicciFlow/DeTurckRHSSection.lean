@@ -16,7 +16,7 @@ namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.DeTurck

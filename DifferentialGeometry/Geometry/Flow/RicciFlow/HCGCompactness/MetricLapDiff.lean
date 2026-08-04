@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -25,7 +27,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open scoped Manifold ContDiff Topology BigOperators

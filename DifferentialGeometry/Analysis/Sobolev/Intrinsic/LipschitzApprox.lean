@@ -8,6 +8,8 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 import DifferentialGeometry.Analysis.Calculus.CompactCutoff
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

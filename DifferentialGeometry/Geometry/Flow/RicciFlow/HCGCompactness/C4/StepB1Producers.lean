@@ -9,6 +9,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenc
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceDeriv
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
 import DifferentialGeometry.Analysis.Calculus.PiDeriv
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -1381,7 +1383,7 @@ theorem exists_gON_bd (g : SmoothRiemannianMetric I M') (x : M')
       (∀ i j, g.inner x (basis i) (basis j) = if i = j then (1 : ℝ) else 0) ∧
       ∀ i, ‖(basis i : TangentSpace I x)‖ ≤ (Real.sqrt cLow)⁻¹ := by
   obtain ⟨basis, hON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) g x
   refine ⟨basis, hON, fun i => ?_⟩
   have h1 : cLow * ‖(basis i : TangentSpace I x)‖ ^ 2 ≤ 1 := by
     have := hcoer (basis i)

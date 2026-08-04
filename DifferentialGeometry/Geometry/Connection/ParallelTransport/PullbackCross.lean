@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LinearExtensionTangent
 import DifferentialGeometry.Geometry.Connection.LeviCivita.CorrectionContraction
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -17,7 +19,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 open Bundle Filter Manifold Set
@@ -486,7 +488,7 @@ theorem covAlong_mapCrossAt
       covDerivAlong (I := J) g (fun s => Phi (gamma s))
         (fun s => mfderiv I J (Phi : M → N) (gamma s) (Y (gamma s))) t := by
   let delta : ℝ → N := fun s => Phi (gamma s)
-  let Ypush := DifferentialGeometry.Integral.Connection.pushFwdSectionCross
+  let Ypush := DifferentialGeometry.Geometry.Curvature.pushFwdSectionCross
     (I := I) (J := J) Phi Y
   let v : TangentSpace I (gamma t) :=
     (mfderiv 𝓘(ℝ, ℝ) I gamma t : ℝ →L[ℝ] TangentSpace I (gamma t)) (1 : ℝ)
@@ -508,7 +510,7 @@ theorem covAlong_mapCrossAt
     simpa [delta, v, Function.comp_def] using
       (mfderiv_comp_apply (I := 𝓘(ℝ, ℝ)) (I' := I) (I'' := J)
         (g := (Phi : M → N)) (f := gamma) (x := t) hPhi hgammaAt (1 : ℝ))
-  have hcov := DifferentialGeometry.Integral.Connection.metricCov_pullbackCross
+  have hcov := DifferentialGeometry.Geometry.Curvature.metricCov_pullbackCross
     (I := I) (J := J) g Phi Y (gamma t) v
   calc
     mfderiv I J (Phi : M → N) (gamma t)
@@ -521,7 +523,7 @@ theorem covAlong_mapCrossAt
           (fun x : M => Y x) (gamma t) v) := by rw [hleft]
     _ = (LeviCivita (I := J) g) (fun x : N => Ypush x) (Phi (gamma t))
         (mfderiv I J (Phi : M → N) (gamma t) v) := by
-      simpa [LeviCivita, DifferentialGeometry.Integral.Connection.metricCov,
+      simpa [LeviCivita, DifferentialGeometry.Geometry.Curvature.metricCov,
         Ypush] using hcov
     _ = (LeviCivita (I := J) g) (fun x : N => Ypush x) (delta t)
         ((mfderiv 𝓘(ℝ, ℝ) J delta t : ℝ →L[ℝ] TangentSpace J (delta t)) (1 : ℝ)) := by

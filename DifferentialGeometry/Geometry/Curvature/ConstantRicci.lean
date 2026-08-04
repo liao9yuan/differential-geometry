@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.MetricSectional
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -15,7 +17,7 @@ noncomputable section
 open Bundle
 open scoped Manifold ContDiff
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
@@ -114,6 +116,6 @@ theorem ricciBound_of_sec
   intro x v
   rw [ricci_of_sec (I := I) g c hsec x v v]
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature
 
 end

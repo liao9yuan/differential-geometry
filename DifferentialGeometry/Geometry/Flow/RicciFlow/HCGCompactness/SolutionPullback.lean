@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiPullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -16,7 +19,7 @@ noncomputable section
 
 open Set Function Filter Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.HCGCompactness
 

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCalculus
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 

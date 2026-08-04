@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBoundFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -20,7 +22,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]

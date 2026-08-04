@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.AbstractRoughLaplacianNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -12,8 +15,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -211,8 +214,8 @@ lemma covDeriv_unit_eval_eq_two
         x v :=
   tensorRSCovariantDerivative_zeroS_unit_eval (I := I) (M := M) g 2 σ x v
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

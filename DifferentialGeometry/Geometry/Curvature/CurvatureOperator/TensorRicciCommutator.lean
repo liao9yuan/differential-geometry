@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -11,8 +13,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
@@ -196,6 +198,6 @@ theorem rawTensorConnLap_eq_frame_trace_secondCovDeriv
 
 end TensorBundle
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

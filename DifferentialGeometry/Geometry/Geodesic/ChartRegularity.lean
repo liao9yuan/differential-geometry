@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.ODE.SecondOrderBootstrap
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!

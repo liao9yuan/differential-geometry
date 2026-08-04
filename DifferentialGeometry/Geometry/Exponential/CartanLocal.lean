@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Exponential.BranchRadius
 import DifferentialGeometry.Geometry.Exponential.CartanNorm
 import DifferentialGeometry.Geometry.Exponential.DiagInvFixed
 import DifferentialGeometry.Geometry.Metric.Polarization
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -124,12 +127,12 @@ theorem cartanMap_sq
     (p' : M') (i : E ≃L[ℝ] E)
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)
@@ -239,12 +242,12 @@ theorem cartanMap_inner
     (p' : M') (i : E ≃L[ℝ] E)
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)
@@ -418,12 +421,12 @@ theorem cartanPD_inner
     (i : E ≃L[ℝ] E)
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)

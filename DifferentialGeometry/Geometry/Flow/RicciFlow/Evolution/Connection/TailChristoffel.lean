@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricCovDerivProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.TailFrameRegularity
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -21,7 +23,7 @@ attribute [local instance] Fintype.ofFinite
 
 open Bundle Filter Set
 open scoped Manifold ContDiff Topology
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]

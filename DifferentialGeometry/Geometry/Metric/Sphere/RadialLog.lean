@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Metric.Sphere.PolarBij
 import DifferentialGeometry.Geometry.Metric.Sphere.RoundIntrinsic
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
 import DifferentialGeometry.Geometry.Exponential.DiagInvFixed
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Radial logarithms on the round sphere

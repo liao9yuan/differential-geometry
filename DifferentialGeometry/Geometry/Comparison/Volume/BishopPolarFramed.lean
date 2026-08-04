@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopPolar
 import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!

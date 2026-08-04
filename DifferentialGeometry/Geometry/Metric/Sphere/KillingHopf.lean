@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Metric.Sphere.PuncturedCartan
 import DifferentialGeometry.Geometry.Metric.Sphere.PuncturedOverlap
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricFiberData
 import DifferentialGeometry.Geometry.Topology.CoveringSimple
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -122,7 +124,7 @@ theorem punctCartan_match
     (hEnorm : ∀ (x : N) (w : TangentSpace J x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
@@ -291,7 +293,7 @@ theorem sphere_diffeo_one
     (hEnorm : ∀ (x : N) (w : TangentSpace J x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)

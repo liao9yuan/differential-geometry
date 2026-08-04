@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransp
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransportSmooth
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

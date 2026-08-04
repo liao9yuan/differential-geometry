@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannCommutator
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -68,7 +71,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -92,9 +95,9 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 theorem solution_rm04LowersRm13At
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
-    DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+    DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I)
       (S.base.metric t) x (S.base.rm13 t x) (S.base.rm04 t x) := by
   have h :=
     rm04LowersRm13At_of_realizes
@@ -128,7 +131,7 @@ theorem rm13_apply_eq_rm04_raise
     (g : SmoothRiemannianMetric I M) {x : M}
     (Rm13 : Tensor13At (I := I) (M := M) x)
     (Rm04 : Tensor04At (I := I) (M := M) x)
-    (hLower : DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) g x Rm13 Rm04)
+    (hLower : DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I) g x Rm13 Rm04)
     (β : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
     (X Y Z : TangentSpace I x) :
     Rm13 β (vec3 (I := I) X Y Z) =
@@ -169,7 +172,7 @@ theorem curvatureAction0SAt_eq_rm04_raise
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M} {s : ℕ}
     (Rm04 : Tensor04At (I := I) (M := M) x)
-    (hLower : DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) g x (Rm13 x) Rm04)
+    (hLower : DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I) g x (Rm13 x) Rm04)
     (alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (X Y : TangentSpace I x) (slots : Fin s → TangentSpace I x) :
     curvatureAction0SAt (I := I) Rm13 alpha X Y slots =
@@ -210,7 +213,7 @@ theorem curvatureAction0SAt_eq_rm04_raise
 
 omit [I.Boundaryless] in
 theorem nablaLapComm_secondTerm_eq_rm04_raise
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M)
     (a b c : CoordinateIdx (𝕜 := Real) E) (m : Fin 4 → CoordinateIdx (𝕜 := Real) E) :
     curvatureAction0SAt (I := I) (S.base.rm13 t)

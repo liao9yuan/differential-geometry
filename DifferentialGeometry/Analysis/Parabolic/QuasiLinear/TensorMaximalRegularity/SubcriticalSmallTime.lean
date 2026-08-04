@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.ForcingFixedPoint
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

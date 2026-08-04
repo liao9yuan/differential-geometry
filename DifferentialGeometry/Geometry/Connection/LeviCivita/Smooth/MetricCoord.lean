@@ -4,7 +4,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle

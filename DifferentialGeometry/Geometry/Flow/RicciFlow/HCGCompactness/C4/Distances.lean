@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsom
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Data.Real.Sqrt
 import Mathlib.Topology.MetricSpace.Lipschitz
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -298,7 +300,7 @@ theorem image_ball_local
 
 universe u uE uH
 
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Tensor0SBundle
 
 section Speed
 
@@ -318,7 +320,7 @@ theorem speed_le_of_c0
     P x (fun _ => v) ≤ (1 + ε) * g.inner x v v := by
   classical
   obtain ⟨basis, hON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) g x
   have hCS := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I)
     g x 2 basis (fun i j => hON i j)
     (P x - Tensor0SBundle.metricTensorField (I := I) g x)

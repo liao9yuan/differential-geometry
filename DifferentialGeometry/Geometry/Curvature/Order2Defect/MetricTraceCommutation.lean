@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -10,8 +12,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -117,9 +119,9 @@ theorem metricTrace2_secondCovDeriv_add
   exact tensorSecondCovDeriv_add (I := I) g r s hT hT'
     (smoothOrthoFrame_smooth (I := I) g x i)
 
-end Connection
+end Curvature
 
-end Integral
+end Geometry
 
 end DifferentialGeometry
 

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -10,8 +12,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -141,8 +143,8 @@ theorem abstract_succ_covDeriv_unfold_at
     exact (tensor0S_curry (I := I) (M := M) 2 x).apply_symm_apply _
   rw [hsucc]
   exact hHom
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

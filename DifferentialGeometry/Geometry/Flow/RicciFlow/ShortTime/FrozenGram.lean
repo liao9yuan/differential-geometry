@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSPD
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoefficients
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 /-!

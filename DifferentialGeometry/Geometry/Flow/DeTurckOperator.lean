@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
@@ -10,7 +12,7 @@ namespace DifferentialGeometry
 namespace PDE
 namespace DeTurck
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem

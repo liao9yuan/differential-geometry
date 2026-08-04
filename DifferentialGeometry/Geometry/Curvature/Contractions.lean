@@ -6,6 +6,9 @@ import DifferentialGeometry.Geometry.Curvature.Components.LocalFrame
 import DifferentialGeometry.Geometry.Curvature.Components.Christoffel
 import DifferentialGeometry.Geometry.Curvature.Components.RicciIdentity
 import DifferentialGeometry.Geometry.Curvature.Bianchi
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+
 
 set_option autoImplicit false
 
@@ -20,7 +23,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -747,7 +750,7 @@ theorem contracted_curvatureAction0SAt_vec2_eq
                   Function.update (vec2 (basis b) (basis l)) 0 (basis q) =
                     vec2 (basis q) (basis l) := by
                 funext r
-                fin_cases r <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+                fin_cases r <;> simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
               simp [oneFormAtSlot0S_apply, hupdate]
             rw [hcoeff, (hLower (basis k) (basis a) (basis b) (basis p)).symm]
   have hslot1 : forall k l : Idx,
@@ -789,7 +792,7 @@ theorem contracted_curvatureAction0SAt_vec2_eq
                   Function.update (vec2 (basis b) (basis l)) 1 (basis q) =
                     vec2 (basis b) (basis q) := by
                 funext r
-                fin_cases r <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+                fin_cases r <;> simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
               simp [oneFormAtSlot0S_apply, hupdate]
             rw [hcoeff, (hLower (basis k) (basis a) (basis l) (basis p)).symm]
   have hslot0_contracted :
@@ -825,7 +828,7 @@ theorem contracted_curvatureAction0SAt_vec2_eq
           Rm13 x (oneFormAtSlot0S (I := I) A (vec2 (basis b) (basis l)) 0)
             (vec3 (basis k) (basis a) (basis b))) := by
           simp [curvatureAction0SAt, Fin.sum_univ_two, vec2,
-            DifferentialGeometry.Integral.Connection.vec2, mul_add, sub_eq_add_neg,
+            DifferentialGeometry.Geometry.Curvature.vec2, mul_add, sub_eq_add_neg,
             Finset.sum_add_distrib, Finset.sum_neg_distrib]
     _ =
       rm04RicciContractionAt (I := I) basis Rm04 gInv A a b +
@@ -853,4 +856,4 @@ theorem curvature_ricci_rhs_symm
   rw [rm04RicciContractionAt_symm (I := I) basis Rm04 gInv A hPair hA hInv a b,
     ricciQuadraticAt_symm (I := I) basis gInv A hA hInv a b]
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

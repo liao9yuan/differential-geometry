@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.InverseGramPerturbation
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

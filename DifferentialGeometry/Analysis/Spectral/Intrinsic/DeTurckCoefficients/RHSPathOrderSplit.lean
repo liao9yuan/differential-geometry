@@ -3,6 +3,9 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCha
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieTopReanchor
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -28,7 +31,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficien
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

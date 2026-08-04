@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLift
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 

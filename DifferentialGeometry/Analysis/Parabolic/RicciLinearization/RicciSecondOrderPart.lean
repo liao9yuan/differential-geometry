@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChristoffelLinearization
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

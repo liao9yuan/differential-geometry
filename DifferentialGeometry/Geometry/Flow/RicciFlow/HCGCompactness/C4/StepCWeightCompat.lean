@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1Producers
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCNormalBump
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCWeights
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

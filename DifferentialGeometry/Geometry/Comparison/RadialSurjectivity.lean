@@ -9,6 +9,7 @@ import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Analysis.Convex.Star
 import Mathlib.Analysis.Convex.PathConnected
+open DifferentialGeometry.Geometry.Curvature
 
 
 

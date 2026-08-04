@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.RoughLapNablaK
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.FrozenSlotAllK
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannReactionBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -32,7 +35,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
+open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
 
@@ -52,7 +55,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 def nablaKRmFrozenSlotField
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
@@ -63,7 +66,7 @@ def nablaKRmFrozenSlotField
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlotField_apply_vec
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -74,7 +77,7 @@ theorem nablaKRmFrozenSlotField_apply_vec
 
 
 def nablaKRmNablaFrozenSlotField
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
@@ -89,7 +92,7 @@ def nablaKRmNablaFrozenSlotField
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRmNablaFrozenSlotField_realizes
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
@@ -109,7 +112,7 @@ set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -144,7 +147,7 @@ theorem nablaKRmFrozenSlot_chartBasis_contMDiffOn
 open DifferentialGeometry.Integral.DivergenceTheorem in
 open DifferentialGeometry.Geometry.Operator
 def nablaKRmFrozenSlotSharpSection
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
@@ -161,7 +164,7 @@ omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
 @[simp] theorem nablaKRmFrozenSlotSharpSection_apply
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -176,7 +179,7 @@ omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlotSharp_mdiffAt
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
@@ -195,10 +198,10 @@ theorem nablaKRmFrozenSlotSharp_mdiffAt
 
 omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlot_eval
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (q : Fin (4 + k))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Y : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -239,7 +242,7 @@ theorem nablaKRmFrozenSlot_eval
 
 
 def nablaKRmRaiseSlotSections
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (q : Fin (4 + k))
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -252,9 +255,9 @@ omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRmRaise_summand_covDeriv
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x₀ : M) (k : ℕ) (q : Fin (4 + k))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -407,10 +410,10 @@ omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaK_antisym_eq_covDeriv_curvatureAction
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (x₀ : M)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -544,10 +547,10 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
 omit [Module.Finite ℝ E] in
 theorem nablaK_antisym_eq_rm04_raise_leibniz
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (x₀ : M)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -658,10 +661,10 @@ variable {n : ℕ}
 omit [Module.Finite ℝ E] in
 theorem abs_nablaK_antisym_covConst_le
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (x₀ : M)
     (basis : Module.Basis (Fin n) Real (TangentSpace I x₀))
     (horth : ∀ i j : Fin n,
@@ -861,10 +864,10 @@ theorem abs_nablaK_antisym_covConst_le
 omit [Module.Finite ℝ E] in
 theorem abs_nablaK_antisym_basis_le
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (x₀ : M)
     (basis : Module.Basis (Fin n) Real (TangentSpace I x₀))
     (horth : ∀ i j : Fin n,
@@ -912,10 +915,10 @@ theorem abs_nablaK_antisym_basis_le
 omit [Module.Finite ℝ E] in
 theorem abs_spatialBracket_nablaKRm_ortho_le
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (x₀ : M)
     (basis : Module.Basis (Fin n) Real (TangentSpace I x₀))
     (horth : ∀ i j : Fin n,
@@ -986,10 +989,10 @@ theorem abs_spatialBracket_nablaKRm_ortho_le
 omit [Module.Finite ℝ E] in
 theorem abs_spatialComm_nablaKRm_ortho_le
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (x₀ : M)
     (basis : Module.Basis (Fin n) Real (TangentSpace I x₀))
     (horth : ∀ i j : Fin n,

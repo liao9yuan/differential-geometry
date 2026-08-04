@@ -1,6 +1,9 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovDivergenceRoughLaplacianCommutation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePartnerBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MovingEdgeEnergy
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Ricci--DeTurck rate bound at the closed initial edge
@@ -29,7 +32,7 @@ namespace RicciFlow
 namespace IntrinsicSpectral
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

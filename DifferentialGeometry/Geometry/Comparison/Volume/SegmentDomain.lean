@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

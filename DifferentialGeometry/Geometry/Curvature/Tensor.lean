@@ -72,6 +72,7 @@ import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.Trace
 import DifferentialGeometry.Tensor.RSTensor.Field
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -95,7 +96,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -295,4 +296,4 @@ theorem rm04_comp_eq_eval
       Rm04 x (vec4 (frame i x) (frame j x) (frame k x) (frame l x)) :=
   rfl
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

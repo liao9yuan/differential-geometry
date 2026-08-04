@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolev.TensorChartComponentSobolevIntrinsic
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

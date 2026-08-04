@@ -8,6 +8,9 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameBracke
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorCurvFirstOrderBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldContractionBound
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

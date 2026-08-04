@@ -6,6 +6,9 @@ import Mathlib.Analysis.Convex.Integral
 import Mathlib.Analysis.Convex.Mul
 import Mathlib.Analysis.Seminorm
 import Mathlib.MeasureTheory.Integral.Prod
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -20,7 +23,7 @@ namespace DifferentialGeometry
 namespace Integral
 namespace L2
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (pathIntegralCoeffField
   pathIntegralCoeffField_toSection pathIntegralFib pathIntegralFib_toModel)
 

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjWSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WLower
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -19,7 +22,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 noncomputable section
 
 open Bundle Filter MeasureTheory Set Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

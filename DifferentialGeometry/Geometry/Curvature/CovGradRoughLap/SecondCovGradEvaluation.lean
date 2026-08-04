@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseTensorCu
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -13,8 +16,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -281,6 +284,6 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
 
 end Bridge
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

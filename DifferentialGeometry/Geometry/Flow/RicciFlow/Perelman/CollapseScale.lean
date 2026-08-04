@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
 import DifferentialGeometry.Analysis.Calculus.DyadicScale
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -17,7 +19,7 @@ noncomputable section
 
 open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff ENNReal
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 
 universe u uE uH

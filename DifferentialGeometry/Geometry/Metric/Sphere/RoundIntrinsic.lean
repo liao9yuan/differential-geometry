@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.Sphere.GreatCircle
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # The intrinsic exponential map of the round sphere

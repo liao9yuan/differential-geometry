@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -10,8 +12,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
@@ -329,6 +331,6 @@ theorem riemannSec_eq_riemannOp_tensorCov
 
 end TensorBundle
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

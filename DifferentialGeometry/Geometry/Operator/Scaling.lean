@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -13,7 +14,6 @@ namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
 open Bundle
 open scoped Manifold ContDiff
 

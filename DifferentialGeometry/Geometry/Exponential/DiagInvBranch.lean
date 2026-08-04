@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Exponential.ExpInvBranch
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

@@ -7,6 +7,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompCo
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -41,7 +43,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Tensor0SBundle
 open DifferentialGeometry.PDE.RicciFlow (iterCov_realizes)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

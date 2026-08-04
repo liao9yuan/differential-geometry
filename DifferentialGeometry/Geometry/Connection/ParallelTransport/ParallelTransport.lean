@@ -11,6 +11,8 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Analysis.Calculus.MeanValue
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -19,7 +21,7 @@ noncomputable section
 open Set Function Filter Manifold Bundle
 open scoped Topology Manifold ContDiff
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Riemannian

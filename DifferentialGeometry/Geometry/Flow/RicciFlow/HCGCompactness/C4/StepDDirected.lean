@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1ApproxIso
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackField
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Distances
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -36,7 +39,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators ENNReal
 open Bundle Manifold
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Tensor0SBundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]

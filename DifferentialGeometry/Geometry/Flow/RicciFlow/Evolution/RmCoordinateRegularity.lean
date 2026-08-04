@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRe
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ChartRicciJetIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -21,7 +23,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
 open DifferentialGeometry.Analysis
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure

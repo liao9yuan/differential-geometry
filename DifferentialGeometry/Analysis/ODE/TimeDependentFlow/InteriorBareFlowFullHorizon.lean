@@ -5,6 +5,9 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbitUniqueness
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ForwardIntegralCurveUniqueness
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.SeeleyTimeExtension
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 open Set Function Filter Bundle

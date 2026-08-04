@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

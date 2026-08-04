@@ -8,6 +8,9 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Analysis.Matrix.Order
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -280,7 +283,7 @@ Hoist candidate: `covStep_zero'`, `iterCov_one_eq` → `MetricCovDerivLinear.lea
 here pending planner hoist. -/
 section DiffStepNorm
 
-open DifferentialGeometry.Integral.Connection
+
 
 
 -- The connection-difference tower `covStep`/`iterCov`/`diffStep`/`telescAccum` re-enters the

@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingConst
 import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

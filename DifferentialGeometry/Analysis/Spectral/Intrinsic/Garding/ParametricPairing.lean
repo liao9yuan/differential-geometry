@@ -1,6 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.BalancedPairing
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricAppCcJetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricScalarSmulJet
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -23,7 +26,7 @@ namespace RicciFlow
 namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

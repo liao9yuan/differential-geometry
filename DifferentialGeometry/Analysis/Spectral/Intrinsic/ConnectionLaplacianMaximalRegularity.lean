@@ -8,6 +8,8 @@ import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

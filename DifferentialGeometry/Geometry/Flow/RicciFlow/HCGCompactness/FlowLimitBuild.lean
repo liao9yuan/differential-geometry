@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -36,7 +39,7 @@ namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 
 universe u uE uH
@@ -143,7 +146,7 @@ end PDE
 
 namespace HCGCompactness
 
-open DifferentialGeometry.Integral.Connection
+
 
 universe u uE uH
 
@@ -163,7 +166,7 @@ variable {I : ModelWithCorners Real E H}
 
 
 def flowOfMetric
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (g :
       letI : TopologicalSpace P.M := P.topology
@@ -213,7 +216,7 @@ def flowOfMetric
 
 
 theorem flowOfMetric_metric
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (g :
       letI : TopologicalSpace P.M := P.topology
@@ -259,7 +262,7 @@ theorem flowOfMetric_metric
 
 
 theorem flowOfMetric_atTime
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (g :
       letI : TopologicalSpace P.M := P.topology

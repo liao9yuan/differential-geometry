@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNo
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -29,7 +32,7 @@ noncomputable section
 
 open Set Function Filter Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn MetricVariationEquationOn
   ricciNorm SolutionFamily RicciAtFamily)
@@ -202,7 +205,7 @@ theorem metricRm04_restrictOpen_eval
 
 
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 def solutionOn_restrictOpen

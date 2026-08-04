@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MultiNormHeat
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -108,12 +110,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 omit [TopologicalSpace M] in
 theorem nablaRm04NormHeatBoundSharp_scalar
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (u uLap nabla2 reaction v : Real -> M -> Real) (cReact : Real)
     (h_heat : NablaRm04NormHeatEquationOn (D := D) u uLap nabla2 reaction)
-    (hreact_bound : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hreact_bound : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M), reaction (t : Real) x ≤ cReact * Real.sqrt (v (t : Real) x) * u (t : Real) x) :
-    ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
       ∃ d : Real,
         HasDerivWithinAt (fun s : Real => u s x) d D.carrier (t : Real) ∧
         d ≤ uLap (t : Real) x +
@@ -142,13 +144,13 @@ theorem nablaRm04NormHeatBoundSharp_scalar
 
 omit [TopologicalSpace M] in
 theorem nablaRm04NormHeatBoundOn_scalar
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (u uLap nabla2 reaction v : Real -> M -> Real) (cReact : Real)
     (h_heat : NablaRm04NormHeatEquationOn (D := D) u uLap nabla2 reaction)
-    (hnabla2_nonneg : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+    (hnabla2_nonneg : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D)
       (x : M), 0 ≤ nabla2 (t : Real) x)
-    (hreact_bound : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hreact_bound : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M), reaction (t : Real) x ≤ cReact * Real.sqrt (v (t : Real) x) * u (t : Real) x) :
     NablaRm04NormHeatBoundOn (D := D) u uLap v cReact := by
   intro t x
@@ -208,7 +210,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem nablaRm04NormHeatEquationOn_of_multiBochner
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (level levelDt levelLap : Real -> M -> (Fin 5 → Idx) → Real)
     (nextLevel : Real -> M -> (Fin (5 + 1) → Idx) → Real)
     (normSq normLap nextNormSq : Real -> M -> Real)
@@ -242,7 +244,7 @@ theorem nablaRm04NormHeatEquationOn_of_multiBochner
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem nablaRm04NormHeatBoundOn_of_multiBochner_residual
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (level levelDt levelLap : Real -> M -> (Fin 5 → Idx) → Real)
     (nextLevel : Real -> M -> (Fin (5 + 1) → Idx) → Real)
     (star : Real -> M -> (Fin 5 → Idx) → Real)
@@ -251,12 +253,12 @@ theorem nablaRm04NormHeatBoundOn_of_multiBochner_residual
     (h_normSq : MultiNormSqDef (M := M) level normSq)
     (h_lap : MultiNormLaplacianSplit (M := M) level levelLap nextLevel
       normLap nextNormSq)
-    (hres : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (hres : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M)
       (m : Fin 5 → Idx),
       levelDt (t : Real) x m - levelLap (t : Real) x m = star (t : Real) x m)
-    (hnext_nonneg : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hnext_nonneg : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M), 0 ≤ nextNormSq (t : Real) x)
-    (hstar_bound : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hstar_bound : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       2 * compPairMulti (star (t : Real) x) (level (t : Real) x) ≤
         cReact * Real.sqrt (v (t : Real) x) * normSq (t : Real) x) :

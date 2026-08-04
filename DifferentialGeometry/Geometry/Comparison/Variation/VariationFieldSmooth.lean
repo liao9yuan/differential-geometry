@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

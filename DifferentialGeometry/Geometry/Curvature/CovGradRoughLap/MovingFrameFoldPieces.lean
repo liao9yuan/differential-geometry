@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemain
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDivergenceForm
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivSecondOrderCommutation
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -12,8 +14,8 @@ open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -117,8 +119,8 @@ noncomputable def christoffelResidualPairingFib
           (covGrad (I := I) (M := M) g 0 s S).toSection x)
           (unitZeroSec (I := I) (M := M) x)) (smoothOrthoFrame (I := I) g x i x)))
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

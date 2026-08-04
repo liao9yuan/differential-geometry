@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -19,7 +21,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
@@ -51,7 +53,7 @@ def scalHessFrame
     leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection (I := I) (M := M) cov
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection (I := I) (M := M) cov
       hcov
   let nablaRic :=
     totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

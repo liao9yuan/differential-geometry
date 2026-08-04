@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.MFDeriv.Tangent
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # From-`0` uniqueness of the bare manifold flow under the weak `t = 0` datum

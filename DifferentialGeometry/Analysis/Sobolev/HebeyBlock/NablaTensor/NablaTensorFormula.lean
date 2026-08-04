@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
@@ -10,7 +12,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 open Bundle DifferentialGeometry
 open MeasureTheory
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Tensor0SBundle
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

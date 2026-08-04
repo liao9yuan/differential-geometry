@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.FineTensorProject
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpBoundK
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Sobolev reassembly from fine tensor blocks

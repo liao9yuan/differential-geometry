@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

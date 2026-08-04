@@ -3,6 +3,8 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.DerivativeTest
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -21,7 +23,7 @@ namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 open Bundle
 open scoped Manifold ContDiff
 

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageDiagonal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageInjectivity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

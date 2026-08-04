@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 import DifferentialGeometry.Geometry.Metric.Completeness
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -19,7 +21,7 @@ universe u uE uH
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff Bundle Topology
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]

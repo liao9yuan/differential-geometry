@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvat
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -13,8 +15,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle Tensor0SNabla
@@ -57,8 +59,8 @@ theorem smoothOrthoFrame_riemannOp_trace_eq_ricci
     (fun i => smoothOrthoFrame (I := I) g x i x)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j)).symm
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

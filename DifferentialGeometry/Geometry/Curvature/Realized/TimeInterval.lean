@@ -19,7 +19,7 @@ open scoped Topology
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -589,4 +589,4 @@ def univ (t₀ : Real) : RealTimeInterval where
 
 end RealTimeInterval
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

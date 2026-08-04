@@ -22,6 +22,9 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
@@ -41,7 +44,7 @@ set_option autoImplicit false
 noncomputable section
 
 open DifferentialGeometry.Geometry.Operator
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
@@ -1120,8 +1123,8 @@ theorem hessian_components_of_nabla_du
   have hvec : vec2 (X0 x) Y = fun a : Fin 2 => basis (slots a) := by
     funext a
     fin_cases a
-    · simp [X0, Y, vec2, DifferentialGeometry.Integral.Connection.vec2, hfields (slots 0)]
-    · simp [Y, vec2, DifferentialGeometry.Integral.Connection.vec2]
+    · simp [X0, Y, vec2, DifferentialGeometry.Geometry.Curvature.vec2, hfields (slots 0)]
+    · simp [Y, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   have hn := hnabla X0 Y
   have hh := hHess X0 Y
   change nablaDu x (fun a : Fin 2 => basis (slots a)) =
@@ -2025,4 +2028,4 @@ theorem fundamental_bochner_of_lc_terms_of_rm04_skew
     (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13 Rm04
     hRm13 hRm04 hRm04Skew
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

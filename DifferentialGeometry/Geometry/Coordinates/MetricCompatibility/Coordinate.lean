@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Covariant
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -16,7 +18,7 @@ namespace DifferentialGeometry.Tensor.Coordinates
 noncomputable section
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
+
 open Tensor0SBundle
 open scoped Manifold ContDiff BigOperators Topology
 

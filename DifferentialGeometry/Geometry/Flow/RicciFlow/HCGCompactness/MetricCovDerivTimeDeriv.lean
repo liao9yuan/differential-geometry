@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -50,7 +52,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
 open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradMetricBridge
+open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section

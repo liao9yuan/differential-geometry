@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.Operators
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -19,7 +21,7 @@ namespace DifferentialGeometry.Analysis.Parabolic
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 open Set
 open scoped Manifold ContDiff
 

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTower
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -135,8 +137,8 @@ theorem towerLevelConst_mono {k m : ℕ} (hkm : k <= m) :
 
 omit [DecidableEq Idx] in
 theorem bernsteinShi_solution_estimate
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     {level : (k : ℕ) → Real → M → (Fin (4 + k) → Idx) → Real}
     {star : (k : ℕ) → Real → M → ℕ → (Fin (4 + k) → Idx) → Real}
     {w wLap : ℕ → Real → M → Real}
@@ -149,7 +151,7 @@ theorem bernsteinShi_solution_estimate
     (hw0_bound : ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M, w 0 t x <= K ^ 2)
     (hTK : T <= α / K)
     (hLap : ∀ k : ℕ, ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-      DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+      DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (w k t) x = wLap k t x)
     (hw_cont : ∀ k : ℕ, ContinuousOn (fun p : Real × M => w k p.1 p.2)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
@@ -277,9 +279,9 @@ theorem bernsteinShi_solution_estimate
         · have hfun : (w' k s) = (fun _z : M => (0 : Real)) := by
             funext z; rw [hw'_val_gt k hk]
           rw [hwLap'_val_gt k hk, hfun]
-          rw [DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift,
-            DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt,
-            DifferentialGeometry.Integral.Connection.laplacianAt_eq]
+          rw [DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift_zero_drift,
+            DifferentialGeometry.Geometry.Curvature.heatOperator_eq_laplacianAt,
+            DifferentialGeometry.Geometry.Curvature.laplacianAt_eq]
           exact DifferentialGeometry.Geometry.Operator.laplacian_const
             (I := I) (G.connection s) (G.metric s) 0 y
       hw_cont := by

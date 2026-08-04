@@ -4,6 +4,9 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuin
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Algebra.Order.Chebyshev
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -14,8 +17,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
@@ -378,6 +381,6 @@ theorem riemannianFiberNormSq_slotSub_le
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

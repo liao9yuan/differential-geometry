@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

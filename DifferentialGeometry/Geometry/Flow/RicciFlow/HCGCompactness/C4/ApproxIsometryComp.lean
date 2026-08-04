@@ -6,6 +6,7 @@ import DifferentialGeometry.Bundle.ClmSectionSmooth
 import DifferentialGeometry.Geometry.Metric.MetricExistence
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false

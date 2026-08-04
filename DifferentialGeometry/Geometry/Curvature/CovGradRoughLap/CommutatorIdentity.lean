@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.AbstractRoughLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tensor0SRSCovariantDerivativeAgreement
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -11,8 +13,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -220,8 +222,8 @@ lemma curry_abstract_covDeriv_unitGrad_unfold'
   · exact (hX x).mdifferentiableAt (by simp)
   · exact (hY x).mdifferentiableAt (by simp)
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

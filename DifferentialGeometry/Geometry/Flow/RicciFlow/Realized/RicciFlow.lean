@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Connection.Smoothness
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 

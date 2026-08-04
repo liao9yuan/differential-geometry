@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDensity
 import DifferentialGeometry.Analysis.Integration.Measure.JacobianImageLe
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

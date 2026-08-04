@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import Mathlib.Topology.MetricSpace.Contracting
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

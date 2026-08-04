@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.VariationalLift
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import Mathlib.Analysis.Calculus.FDeriv.Mul
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -11,7 +12,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Set Function Bundle Filter
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.ODE.Flow
 
 section FactorProducers

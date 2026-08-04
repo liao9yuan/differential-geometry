@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedRiemannian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -36,7 +38,7 @@ variable {I : ModelWithCorners Real E H}
 
 structure PointedFlowData
     (I : ModelWithCorners Real E H)
-      (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) where
+      (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval) where
   M : Type u
   [topology : TopologicalSpace M]
   [charted : ChartedSpace H M]
@@ -65,7 +67,7 @@ structure PointedFlowData
 namespace PointedFlowData
 
 variable {I : ModelWithCorners Real E H}
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -108,7 +110,7 @@ end PointedFlowData
 
 
 structure PointedFlowSeq (I : ModelWithCorners Real E H) where
-  D : DifferentialGeometry.Integral.Connection.RealTimeInterval
+  D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval
   term : Nat -> PointedFlowData.{u, uE, uH} (I := I) D
 
 namespace PointedFlowSeq

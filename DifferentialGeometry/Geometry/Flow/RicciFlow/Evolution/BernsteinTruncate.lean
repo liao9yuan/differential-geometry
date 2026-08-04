@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiSolution
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -34,8 +36,8 @@ namespace BernsteinTower
 
 
 theorem estimate_of_heat
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
       (I := I) (M := M) Real)
     {w wLap : Nat -> Real -> M -> Real}
     (levelC : Nat -> Real)
@@ -49,7 +51,7 @@ theorem estimate_of_heat
     (hTK : T <= aScale / K)
     (hheat : forall k : Nat, TowerHeatBoundOn (D := D) w wLap (levelC k) k)
     (hLap : forall k : Nat, forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
-      DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
+      DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (w k t) x = wLap k t x)
     (hw_cont : forall k : Nat, ContinuousOn (fun p : Real × M => w k p.1 p.2)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
@@ -198,9 +200,9 @@ theorem estimate_of_heat
             funext z
             rw [hw'_val_gt k hk]
           rw [hwLap'_val_gt k hk, hfun]
-          rw [DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift,
-            DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt,
-            DifferentialGeometry.Integral.Connection.laplacianAt_eq]
+          rw [DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift_zero_drift,
+            DifferentialGeometry.Geometry.Curvature.heatOperator_eq_laplacianAt,
+            DifferentialGeometry.Geometry.Curvature.laplacianAt_eq]
           exact DifferentialGeometry.Geometry.Operator.laplacian_const
             (I := I) (G.connection s) (G.metric s) 0 y
       hw_cont := by

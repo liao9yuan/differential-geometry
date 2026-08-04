@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannReactionBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatSolution
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -76,7 +78,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -180,9 +182,9 @@ omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem rm04NormSqInFrame_orthoBasis_eq_normSq0S
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x₀ : M)
     (frame : Fin n → (x : M) → TangentSpace I x)
     (basis : Module.Basis (Fin n) Real (TangentSpace I x₀))
@@ -204,7 +206,7 @@ theorem rm04NormSqInFrame_orthoBasis_eq_normSq0S
   refine Finset.sum_congr rfl fun j _ => ?_
   refine Finset.sum_congr rfl fun k _ => ?_
   refine Finset.sum_congr rfl fun l _ => ?_
-  simp only [DifferentialGeometry.Integral.Connection.rm04Comp]
+  simp only [DifferentialGeometry.Geometry.Curvature.rm04Comp]
   rw [hframe i, hframe j, hframe k, hframe l]
 
 
@@ -216,9 +218,9 @@ omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRm04NormSqInFrame_orthoBasis_eq_normSq0S
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x₀ : M)
     (frame : Fin n → (x : M) → TangentSpace I x)
     (basis : Module.Basis (Fin n) Real (TangentSpace I x₀))
@@ -285,10 +287,10 @@ end ProducerNorms
 omit [Module.Finite ℝ E] in
 theorem abs_spatialCommNablaRm_intrinsic_le
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x₀ : M) :
     ∃ (n : ℕ) (frame : Fin n → (x : M) → TangentSpace I x),
       (∀ i j : Fin n,
@@ -343,7 +345,7 @@ theorem abs_spatialCommNablaRm_intrinsic_le
       refine Finset.sum_congr rfl fun j _ => ?_
       refine Finset.sum_congr rfl fun k _ => ?_
       refine Finset.sum_congr rfl fun l _ => ?_
-      simp only [DifferentialGeometry.Integral.Connection.rm04Comp]
+      simp only [DifferentialGeometry.Geometry.Curvature.rm04Comp]
       rw [hframe' i, hframe' j, hframe' k, hframe' l]
     have hNab :
         compNormSqMulti (fun idx : Fin 5 → Fin n' =>

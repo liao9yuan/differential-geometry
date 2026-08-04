@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocalNemytskii
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.DenseLowerState
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasilinearExistence
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # A forcing fixed point for a lower-Sobolev state set

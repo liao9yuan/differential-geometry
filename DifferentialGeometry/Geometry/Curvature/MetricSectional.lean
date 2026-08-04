@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.AlgebraicForm
 import DifferentialGeometry.Geometry.Curvature.CoordRm04Bridge
 import DifferentialGeometry.Geometry.Curvature.Scaling
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -14,7 +16,7 @@ Riemann tensor of a smooth metric.
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
@@ -245,4 +247,4 @@ theorem metricRm_scale_one
     (metricRm_of_sec (I := I) (M := M)
       (scaleMetric (I := I) c hc g) x 1 hdiag)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentSobolevBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentSobolevPointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -347,7 +349,7 @@ section PointwiseGradientBound
 variable [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
 
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Connection
+
 open Tensor0SBundle
 
 omit [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in

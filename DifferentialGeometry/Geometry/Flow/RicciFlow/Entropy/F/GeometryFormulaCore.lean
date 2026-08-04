@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Formula510Core
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -43,7 +45,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 theorem firstVariationIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     {scalarCurvaturePath gradPotentialNormSqPath potentialPath :
       Real -> M -> Real}
     {s0 : Real}
@@ -129,7 +131,7 @@ theorem firstVariationIntegral_eq_pre510
 
 theorem closedIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     {s0 : Real}
     {scalarCurvature lapPotential gradPotentialNormSq potential
       potentialVariation metricVariationTrace metricVariationRicciHess
@@ -199,7 +201,7 @@ theorem closedIntegral_eq_pre510
 
 theorem firstVar_pre510_closed
     [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     {scalarCurvaturePath gradPotentialNormSqPath potentialPath :
       Real -> M -> Real}
     {s0 : Real}
@@ -327,7 +329,7 @@ theorem bracketClosed_eventually
 
 theorem closedCompare
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     {scalarCurvaturePath lapPotentialPath gradPotentialNormSqPath
       potentialPath : Real -> M -> Real}
     {s0 : Real}
@@ -460,7 +462,7 @@ theorem closedCompare
 
 theorem firstVar_pre510_weighted
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     {scalarCurvaturePath lapPotentialPath gradPotentialNormSqPath
       potentialPath : Real -> M -> Real}
     {s0 : Real}
@@ -556,7 +558,7 @@ theorem firstVar_pre510_weighted
 
 theorem firstVar_pre510_ibp
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     {scalarCurvaturePath lapPotentialPath gradPotentialNormSqPath
       potentialPath : Real -> M -> Real}
     {s0 : Real}

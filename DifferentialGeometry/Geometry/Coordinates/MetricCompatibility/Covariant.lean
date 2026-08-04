@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Inverse
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -16,7 +18,6 @@ namespace DifferentialGeometry.Tensor.Coordinates
 noncomputable section
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open Tensor0SBundle
 open scoped Manifold ContDiff BigOperators Topology
 
@@ -51,7 +52,7 @@ theorem gInvForMetric_symm [DecidableEq Idx]
     (hinv : InverseMetricComponentsForMetricInFrameOn (I := I) g gInv frame) :
     forall x i j, gInv x i j = gInv x j i := by
   intro x i j
-  exact DifferentialGeometry.Integral.Connection.invComp_symm
+  exact DifferentialGeometry.Geometry.Curvature.invComp_symm
     (I := I) (g := g) (gInv := gInv) frame
     (by
       intro y a b

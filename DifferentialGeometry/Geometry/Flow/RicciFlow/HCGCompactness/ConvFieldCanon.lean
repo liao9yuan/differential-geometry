@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.OpenWindowEqu
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SourceCovLip
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpenAssembly
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -28,7 +30,7 @@ namespace HCGCompactness
 
 open Set
 open scoped Manifold ContDiff Topology
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E]

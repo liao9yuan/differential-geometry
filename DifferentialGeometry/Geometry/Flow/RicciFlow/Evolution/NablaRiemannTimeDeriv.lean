@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -237,13 +239,13 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem iteratedRmComp_one_hasDerivWithinAt
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M)
     (rm04Dt : Real → M → (Fin 4 → CoordinateIdx (𝕜 := Real) E) → Real)
     (chrDt : Real → M →
       CoordinateIdx (𝕜 := Real) E → CoordinateIdx (𝕜 := Real) E →
       CoordinateIdx (𝕜 := Real) E → Real)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x : M)
     (n : Fin 5 → CoordinateIdx (𝕜 := Real) E)
     (hrm : ∀ m : Fin 4 → CoordinateIdx (𝕜 := Real) E,

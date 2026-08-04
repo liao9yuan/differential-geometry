@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Operator.NormGradSq
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -12,8 +14,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -1037,6 +1039,6 @@ theorem contracted_second_bianchi
 
 end ContractedBianchi
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
 import DifferentialGeometry.Analysis.Integration.Measure.Scaling
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 
@@ -33,13 +36,13 @@ variable [T2Space M] [SigmaCompactSpace M]
 
 
 def paraFlowTime
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
     (s : (paraInterval D tau R hR htau).FlowTime) : D.FlowTime :=
   ⟨paraTime tau R (s : Real), s.2⟩
 
 @[simp] theorem paraFlowTime_coe
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (tau R : Real) (hR : 0 < R) (htau : tau ∈ D.carrier)
     (s : (paraInterval D tau R hR htau).FlowTime) :
     (paraFlowTime tau R hR htau s : Real) = paraTime tau R (s : Real) := by
@@ -47,7 +50,7 @@ def paraFlowTime
 
 namespace Perelman
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 def paraBall

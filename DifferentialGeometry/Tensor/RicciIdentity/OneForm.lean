@@ -5,6 +5,9 @@ import DifferentialGeometry.Tensor.Auxiliary.SlotAlgebra
 import DifferentialGeometry.Tensor.RSTensor.CurvatureAction
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -154,7 +157,7 @@ theorem nabla2OneFormRealizesAt_of_totalNabla
     have hslots :
         Fin.cons (X y) (fun _ : Fin 1 => Y) = vec2 (I := I) (X y) Y := by
       funext i
-      fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases i <;> simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
     rw [hslots] at h
     exact h
   · intro X Y Z
@@ -163,11 +166,11 @@ theorem nabla2OneFormRealizesAt_of_totalNabla
         Fin.cons (X x) (vec2 (I := I) Y Z) = vec3 (I := I) (X x) Y Z := by
       funext i
       fin_cases i
-      · simp [Fin.cons_zero, vec3, DifferentialGeometry.Integral.Connection.vec3]
+      · simp [Fin.cons_zero, vec3, DifferentialGeometry.Geometry.Curvature.vec3]
       · change (vec2 (I := I) Y Z) 0 = Y
-        simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+        simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
       · change (vec2 (I := I) Y Z) 1 = Z
-        simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+        simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
     rw [hslots] at h
     exact h
 
@@ -275,7 +278,7 @@ omit [FiniteDimensional ℝ E] in
     A (vec3 Y X Z)
   congr 1
   funext q
-  fin_cases q <;> simp [Equiv.swap_apply_def, vec3, DifferentialGeometry.Integral.Connection.vec3]
+  fin_cases q <;> simp [Equiv.swap_apply_def, vec3, DifferentialGeometry.Geometry.Curvature.vec3]
 
 
 
@@ -330,13 +333,13 @@ theorem one_form_third_comm_of_coord_ijk
         (fun a => basis (slots a)) =
           vec3 (basis (slots 0)) (basis (slots 1)) (basis (slots 2)) := by
       funext q
-      fin_cases q <;> simp [vec3, DifferentialGeometry.Integral.Connection.vec3]
+      fin_cases q <;> simp [vec3, DifferentialGeometry.Geometry.Curvature.vec3]
     have hswap :
         (fun a => basis (slots ((Equiv.swap (0 : Fin 3) 1) a))) =
           vec3 (basis (slots 1)) (basis (slots 0)) (basis (slots 2)) := by
       funext q
       fin_cases q <;> simp [Equiv.swap_apply_def, vec3,
-        DifferentialGeometry.Integral.Connection.vec3]
+        DifferentialGeometry.Geometry.Curvature.vec3]
     simpa [hslots, hswap] using h
 
 
@@ -487,7 +490,7 @@ theorem metricTraceInput_one_eq_vec3 {x : M}
     metricTraceInput (I := I) X Y (fun _ : Fin 1 => Z) = vec3 X Y Z := by
   funext q
   fin_cases q
-  · simp [metricTraceInput, vec3, DifferentialGeometry.Integral.Connection.vec3]
+  · simp [metricTraceInput, vec3, DifferentialGeometry.Geometry.Curvature.vec3]
   · change
       Fin.cases X (fun i : Fin 2 => Fin.cases Y (fun _ : Fin 1 => Z) i)
           (Fin.succ 0) = Y

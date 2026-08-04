@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCCente
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
 import DifferentialGeometry.Geometry.Exponential.DiagInvReadout
 import Mathlib.Analysis.Calculus.Implicit
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 

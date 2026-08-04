@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentPolar
 import DifferentialGeometry.Geometry.Comparison.Volume.Packing
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

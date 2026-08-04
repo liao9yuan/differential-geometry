@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackCovariantNaturality
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -198,7 +200,7 @@ theorem inner_le_of_c0
   classical
   intro x hx v
   obtain ⟨basis, hON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) g x
   have hCS := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I)
     g x 2 basis (fun i j => hON i j)
     ((Tensor0SBundle.metricTensorField (I := I) Gm) x

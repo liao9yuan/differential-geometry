@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -115,12 +117,12 @@ private lemma convexCombForm_coeff_contMDiffOn (g₁ g₂ : SmoothRiemannianMetr
   have hg1 :
       ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (fun y : M => g₁.inner y (frameVec (I := I) x₀ i y) (frameVec (I := I) x₀ j y)) x :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.metric_inner_contMDiffAt
       (I := I) g₁ hfri hfrj le_rfl
   have hg2 :
       ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (fun y : M => g₂.inner y (frameVec (I := I) x₀ i y) (frameVec (I := I) x₀ j y)) x :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.metric_inner_contMDiffAt
       (I := I) g₂ hfri hfrj le_rfl
   have hχx : ContMDiffAt I 𝓘(ℝ, ℝ) ∞ χ x := hχ x
   have hχ1x : ContMDiffAt I 𝓘(ℝ, ℝ) ∞ (fun y : M => 1 - χ y) x :=

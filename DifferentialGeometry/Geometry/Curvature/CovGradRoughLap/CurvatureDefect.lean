@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FreeDirectionReduction
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -10,8 +13,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -307,8 +310,8 @@ theorem frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv_gen
       rw [covGrad_rawConnLap_curry_eq_swap_add_residual_gen (I := I) (M := M) g s T₀ x w]
       rw [add_sub_cancel_right]]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

@@ -18,6 +18,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentFormula
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Tensor.RSTensor.Defs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -27,7 +30,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Tensor
@@ -62,7 +65,7 @@ section CentredFrameCoordExpansion
 
 set_option backward.isDefEq.respectTransparency false
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 private noncomputable def centredOrthoFrameCoordMatrix
@@ -891,7 +894,7 @@ section B4Bridge
 
 set_option backward.isDefEq.respectTransparency false
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 omit [CompactSpace M] [I.Boundaryless] in

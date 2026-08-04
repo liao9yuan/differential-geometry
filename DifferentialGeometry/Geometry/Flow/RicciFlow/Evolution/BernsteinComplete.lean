@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoffData
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import Mathlib.Geometry.Manifold.Riemannian.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -26,7 +29,7 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter Set
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators Bundle Topology
 

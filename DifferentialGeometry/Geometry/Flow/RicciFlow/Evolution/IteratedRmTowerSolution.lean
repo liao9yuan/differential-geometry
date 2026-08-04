@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.ResidualCo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SolutionResidual
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TowerProducer
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -22,7 +24,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
+open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

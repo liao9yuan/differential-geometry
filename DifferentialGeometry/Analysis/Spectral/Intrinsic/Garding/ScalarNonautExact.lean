@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffSpa
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautCompat
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautHs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTime
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Exact-interval scalar nonautonomous Sobolev operators
@@ -20,7 +23,7 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 

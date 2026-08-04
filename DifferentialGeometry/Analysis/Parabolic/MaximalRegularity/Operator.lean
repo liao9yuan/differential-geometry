@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Synthesis
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

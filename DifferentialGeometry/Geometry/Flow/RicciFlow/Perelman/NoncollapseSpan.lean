@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.FlowBallW
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -20,7 +23,7 @@ noncomputable section
 open Bundle MeasureTheory Set Tensor0SBundle
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.Entropy
 

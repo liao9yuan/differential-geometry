@@ -1,5 +1,8 @@
 import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Realization
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

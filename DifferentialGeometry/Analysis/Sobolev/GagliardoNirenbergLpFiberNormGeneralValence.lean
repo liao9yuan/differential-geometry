@@ -14,6 +14,9 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GagliardoNirenber
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormKatoSecondCovDerivBound
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormWeightedCovIBP
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormSecondOrderInterp
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -26,7 +29,7 @@ namespace DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable

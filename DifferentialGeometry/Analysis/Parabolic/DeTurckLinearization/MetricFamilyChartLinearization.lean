@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

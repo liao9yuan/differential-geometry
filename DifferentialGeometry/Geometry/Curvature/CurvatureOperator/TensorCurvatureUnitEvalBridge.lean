@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvat
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformRiemannOperatorNormBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -14,8 +17,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open Tensor0SBundle Tensor0SNabla TensorRSNabla
 
@@ -539,8 +542,8 @@ theorem
   exact riemannianFiberNormSq_riemannOp_tensorCov_dualTensorFrameS_le (I := I) (M := M) g t x
     e i j J Kbase hKbase (fun a b c => hKb x a b c) horth
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

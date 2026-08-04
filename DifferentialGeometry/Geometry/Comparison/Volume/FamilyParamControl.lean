@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Coordinates.TangentPartialDiffeomorph
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Geometry.Topology.FiberBundleT2
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -22,7 +24,7 @@ open scoped Manifold ContDiff Topology
 
 namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential

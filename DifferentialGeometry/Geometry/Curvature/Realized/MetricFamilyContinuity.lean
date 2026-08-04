@@ -3,6 +3,7 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.TensorRSModelEvalBasis
 import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -24,7 +25,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry
@@ -467,4 +468,4 @@ theorem restrictOpen
 
 end Tensor0SFamilyContinuousOnSet
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

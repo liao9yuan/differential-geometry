@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSourceBuffer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageReturn
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

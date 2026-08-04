@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CutoffEnergy
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
 import DifferentialGeometry.Analysis.Integration.LpNorm
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -24,7 +26,7 @@ namespace RicciFlow
 namespace Perelman
 
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Integration

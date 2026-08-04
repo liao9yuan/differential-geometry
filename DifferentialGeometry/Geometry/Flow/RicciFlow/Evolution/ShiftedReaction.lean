@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.TensorBackedReaction
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -18,7 +21,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open Bundle
 open Tensor0SBundle
@@ -52,7 +55,7 @@ def pinchReact
     (Rm : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (Ric : Fin 3 -> Fin 3 -> Real) (i j : Fin 3) : Real :=
   ricciPresReact Rm Ric i j -
-    2 * delta * (ricciNorm3 Ric * DifferentialGeometry.Integral.Connection.delta3 i j -
+    2 * delta * (ricciNorm3 Ric * DifferentialGeometry.Geometry.Curvature.delta3 i j -
       ricciScal3 Ric * Ric i j)
 
 
@@ -60,15 +63,15 @@ def pinchReact
 def stdRmOfRic3
     (Ric : Fin 3 -> Fin 3 -> Real)
     (i j k l : Fin 3) : Real :=
-  DifferentialGeometry.Integral.Connection.delta3 i k * Ric j l
-    - DifferentialGeometry.Integral.Connection.delta3 i l * Ric j k
-    - DifferentialGeometry.Integral.Connection.delta3 j k * Ric i l
-    + DifferentialGeometry.Integral.Connection.delta3 j l * Ric i k
+  DifferentialGeometry.Geometry.Curvature.delta3 i k * Ric j l
+    - DifferentialGeometry.Geometry.Curvature.delta3 i l * Ric j k
+    - DifferentialGeometry.Geometry.Curvature.delta3 j k * Ric i l
+    + DifferentialGeometry.Geometry.Curvature.delta3 j l * Ric i k
     - (1 / 2 : Real) * ricciScal3 Ric *
-        (DifferentialGeometry.Integral.Connection.delta3 i k *
-            DifferentialGeometry.Integral.Connection.delta3 j l -
-          DifferentialGeometry.Integral.Connection.delta3 i l *
-            DifferentialGeometry.Integral.Connection.delta3 j k)
+        (DifferentialGeometry.Geometry.Curvature.delta3 i k *
+            DifferentialGeometry.Geometry.Curvature.delta3 j l -
+          DifferentialGeometry.Geometry.Curvature.delta3 i l *
+            DifferentialGeometry.Geometry.Curvature.delta3 j k)
 
 
 
@@ -78,58 +81,58 @@ theorem pinchReact_add_g00
     pinchReact delta
         (stdRmOfRic3
           (fun p q : Fin 3 =>
-            Ric p q + a * DifferentialGeometry.Integral.Connection.delta3 p q))
+            Ric p q + a * DifferentialGeometry.Geometry.Curvature.delta3 p q))
         (fun p q : Fin 3 =>
-          Ric p q + a * DifferentialGeometry.Integral.Connection.delta3 p q) 0 0 -
+          Ric p q + a * DifferentialGeometry.Geometry.Curvature.delta3 p q) 0 0 -
       pinchReact delta (stdRmOfRic3 Ric) Ric 0 0 =
         a * (2 * delta - 1) *
           (3 * Ric 0 0 - ricciScal3 Ric) := by
   unfold pinchReact ricciPresReact ricciSq3 ricciNorm3 stdRmOfRic3
-    DifferentialGeometry.Integral.Connection.delta3
+    DifferentialGeometry.Geometry.Curvature.delta3
   simp [Fin.sum_univ_three, ricciScal3]
   ring_nf
 
 
 theorem ricciReactNull
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
-    ricciPresReact (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
-      (DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3) 0 0 =
+    ricciPresReact (DifferentialGeometry.Geometry.Curvature.stdRmDiag3 l1 l2 l3)
+      (DifferentialGeometry.Geometry.Curvature.ricciDiag3 l1 l2 l3) 0 0 =
       (l2 - l3) ^ 2 := by
   subst l1
-  unfold ricciPresReact ricciSq3 DifferentialGeometry.Integral.Connection.stdRmDiag3
-    DifferentialGeometry.Integral.Connection.ricciDiag3
-      DifferentialGeometry.Integral.Connection.ricciEigenScalar3
-    DifferentialGeometry.Integral.Connection.delta3
+  unfold ricciPresReact ricciSq3 DifferentialGeometry.Geometry.Curvature.stdRmDiag3
+    DifferentialGeometry.Geometry.Curvature.ricciDiag3
+      DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3
+    DifferentialGeometry.Geometry.Curvature.delta3
   simp [Fin.sum_univ_three]
   ring
 
 
 theorem ricciReact_ge
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
-    0 <= ricciPresReact (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
-      (DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3) 0 0 := by
+    0 <= ricciPresReact (DifferentialGeometry.Geometry.Curvature.stdRmDiag3 l1 l2 l3)
+      (DifferentialGeometry.Geometry.Curvature.ricciDiag3 l1 l2 l3) 0 0 := by
   rw [ricciReactNull l1 l2 l3 hnull]
   positivity
 
 
 theorem pinchReactNull
     (delta l1 l2 l3 : Real)
-    (hnull : l1 = delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3) :
-    pinchReact delta (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
-      (DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3) 0 0 =
+    (hnull : l1 = delta * DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3) :
+    pinchReact delta (DifferentialGeometry.Geometry.Curvature.stdRmDiag3 l1 l2 l3)
+      (DifferentialGeometry.Geometry.Curvature.ricciDiag3 l1 l2 l3) 0 0 =
       delta ^ 2 * (1 - 3 * delta) *
-          DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ^ 2 +
+          DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3 ^ 2 +
         (1 - delta) * (l2 - l3) ^ 2 := by
   let lhs :=
-    pinchReact delta (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
-      (DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3) 0 0
+    pinchReact delta (DifferentialGeometry.Geometry.Curvature.stdRmDiag3 l1 l2 l3)
+      (DifferentialGeometry.Geometry.Curvature.ricciDiag3 l1 l2 l3) 0 0
   let rhs :=
     delta ^ 2 * (1 - 3 * delta) *
-        DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ^ 2 +
+        DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3 ^ 2 +
       (1 - delta) * (l2 - l3) ^ 2
   change lhs = rhs
   have hrel : delta * (l1 + l2 + l3) - l1 = 0 := by
-    unfold DifferentialGeometry.Integral.Connection.ricciEigenScalar3 at hnull
+    unfold DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 at hnull
     nlinarith
   have hfactor :
       lhs - rhs =
@@ -138,10 +141,10 @@ theorem pinchReactNull
             2 * delta * l1 - delta * l2 - delta * l3 + 2 * l1 - l2 - l3) := by
     dsimp [lhs, rhs]
     unfold pinchReact ricciPresReact ricciSq3 ricciNorm3 ricciScal3
-      DifferentialGeometry.Integral.Connection.stdRmDiag3
-        DifferentialGeometry.Integral.Connection.ricciDiag3
-      DifferentialGeometry.Integral.Connection.ricciEigenScalar3
-        DifferentialGeometry.Integral.Connection.delta3
+      DifferentialGeometry.Geometry.Curvature.stdRmDiag3
+        DifferentialGeometry.Geometry.Curvature.ricciDiag3
+      DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3
+        DifferentialGeometry.Geometry.Curvature.delta3
     simp [Fin.sum_univ_three]
     ring
   have hzero : lhs - rhs = 0 := by
@@ -153,15 +156,15 @@ theorem pinchReactNull
 theorem pinchReact_ge
     (delta l1 l2 l3 : Real)
     (_hdelta0 : 0 <= delta) (hdelta13 : delta <= (1 : Real) / 3)
-    (hnull : l1 = delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3) :
-    0 <= pinchReact delta (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
-      (DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3) 0 0 := by
+    (hnull : l1 = delta * DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3) :
+    0 <= pinchReact delta (DifferentialGeometry.Geometry.Curvature.stdRmDiag3 l1 l2 l3)
+      (DifferentialGeometry.Geometry.Curvature.ricciDiag3 l1 l2 l3) 0 0 := by
   rw [pinchReactNull delta l1 l2 l3 hnull]
   have h1 : 0 <= delta ^ 2 * (1 - 3 * delta) *
-      DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ^ 2 := by
+      DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3 ^ 2 := by
     have hdelta_sq : 0 <= delta ^ 2 := sq_nonneg delta
     have hcoeff : 0 <= 1 - 3 * delta := by nlinarith
-    have hscalar_sq : 0 <= DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ^
+    have hscalar_sq : 0 <= DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3 ^
       2 :=
       sq_nonneg _
     positivity
@@ -185,14 +188,14 @@ def shiftRic3 (delta a b : Real) : Real := b + delta * shiftScal3 delta a b
 
 theorem shiftScal3_eq
     (delta a b : Real) (hdelta13 : delta < (1 : Real) / 3) :
-    DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+    DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3
       (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b) =
       shiftScal3 delta a b := by
   have hden : 1 - 3 * delta ≠ 0 := by
     nlinarith
   have hden' : 1 - delta * 3 ≠ 0 := by
     nlinarith
-  unfold DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+  unfold DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3
     shiftRic1 shiftRic2 shiftRic3 shiftScal3
   field_simp [hden, hden']
   ring
@@ -201,7 +204,7 @@ theorem shiftScal3_eq
 theorem shiftNull3
     (delta a b : Real) (hdelta13 : delta < (1 : Real) / 3) :
     shiftRic1 delta a b =
-      delta * DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+      delta * DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3
         (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b) := by
   rw [shiftScal3_eq delta a b hdelta13]
   rfl
@@ -211,9 +214,9 @@ theorem pinchShiftNull_ge
     (delta a b : Real)
     (hdelta0 : 0 <= delta) (hdelta13 : delta < (1 : Real) / 3) :
     0 <= pinchReact delta
-      (DifferentialGeometry.Integral.Connection.stdRmDiag3
+      (DifferentialGeometry.Geometry.Curvature.stdRmDiag3
         (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
-      (DifferentialGeometry.Integral.Connection.ricciDiag3
+      (DifferentialGeometry.Geometry.Curvature.ricciDiag3
         (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
       0 0 := by
   exact pinchReact_ge delta
@@ -224,9 +227,9 @@ theorem pinchShiftNull_ge
 
 def shiftReact3 (delta a b : Real) : Real :=
   pinchReact delta
-    (DifferentialGeometry.Integral.Connection.stdRmDiag3
+    (DifferentialGeometry.Geometry.Curvature.stdRmDiag3
       (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
-    (DifferentialGeometry.Integral.Connection.ricciDiag3
+    (DifferentialGeometry.Geometry.Curvature.ricciDiag3
       (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
     0 0
 
@@ -251,7 +254,7 @@ def shiftBlockS3 (a b c : Real) (i j : Fin 3) : Real :=
 
 def shiftRicBlock3 (delta a b c : Real) (i j : Fin 3) : Real :=
   shiftBlockS3 a b c i j +
-    delta * shiftScal3 delta a b * DifferentialGeometry.Integral.Connection.delta3 i j
+    delta * shiftScal3 delta a b * DifferentialGeometry.Geometry.Curvature.delta3 i j
 
 
 
@@ -274,7 +277,7 @@ theorem shiftReactBlock3_eq
     ring
   unfold shiftReactBlock3 pinchReact ricciPresReact ricciSq3 ricciNorm3
     stdRmOfRic3 shiftRicBlock3 shiftBlockS3 shiftScal3
-    DifferentialGeometry.Integral.Connection.delta3
+    DifferentialGeometry.Geometry.Curvature.delta3
   simp [Fin.sum_univ_three, ricciScal3]
   field_simp [hden, hden', hden2]
   ring_nf
@@ -326,7 +329,7 @@ structure ShiftBlockAt
     (A : RawTwoTensorField (I := I) (M := M)) (x : M)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
     (a b c : Real) : Prop where
-  orthonormal : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis
+  orthonormal : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis
   components :
     ∀ i j : Fin 3,
       A x (basis i) (basis j) = shiftBlockS3 a b c i j
@@ -358,7 +361,7 @@ theorem shiftBlockOfNull
     {A : RawTwoTensorField (I := I) (M := M)} {x : M}
     {v : TangentSpace I x} {r : Real}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (hsym : TwoTensorSymmetricAt (I := I) (M := M) A x)
     (hbilin : TwoTensorBilinearAt (I := I) (M := M) A x)
     (hpsd : TwoTensorNonnegativeAt (I := I) (M := M) A x)
@@ -397,7 +400,7 @@ structure NullOrthonormalBasis3At
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) : Type _ where
   basis : Module.Basis (Fin 3) Real (TangentSpace I x)
-  orthonormal : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis
+  orthonormal : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis
   scale : ∃ r : Real, r ≠ 0 ∧ v = r • basis 0
 
 
@@ -450,17 +453,17 @@ theorem exists_nullOrthonormalBasis3At
       hcard horth
   let basis : Module.Basis (Fin 3) Real (TangentSpace I x) := ob.toBasis
   have horth_basis :
-      DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis := by
+      DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis := by
     intro i j
     have hinner :
         Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
       MetricFiberData.toCore_inner D (ob i) (ob j)
-    change g.inner x (basis i) (basis j) = DifferentialGeometry.Integral.Connection.delta3 i j
+    change g.inner x (basis i) (basis j) = DifferentialGeometry.Geometry.Curvature.delta3 i j
     rw [← TangentMetricData_gen.inner_eq_gen (tangentMetricData_gen (I := I) g x)
       (basis i) (basis j)]
-    change D.inner (ob i) (ob j) = DifferentialGeometry.Integral.Connection.delta3 i j
+    change D.inner (ob i) (ob j) = DifferentialGeometry.Geometry.Curvature.delta3 i j
     rw [← hinner]
-    simpa [DifferentialGeometry.Integral.Connection.delta3] using ob.inner_eq_ite i j
+    simpa [DifferentialGeometry.Geometry.Curvature.delta3] using ob.inner_eq_ite i j
   have hscale : v = ‖v‖ • basis 0 := by
     have hb0 : ob 0 = e0 := by
       have h0s : (0 : Fin 3) ∈ s := by
@@ -495,20 +498,20 @@ omit [IsManifold I 2 M] in
 theorem metricTrace_metric3
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis) :
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis) :
     metricTracePair0SAt (I := I) g
         (metricTensorField (I := I) g x) = 3 := by
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis horth
   have horth' :
       ∀ i j : Fin 3, g.inner x (basis i) (basis j) =
-        DifferentialGeometry.Integral.Connection.delta3 i j := horth
+        DifferentialGeometry.Geometry.Curvature.delta3 i j := horth
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
-    DifferentialGeometry.Integral.Connection.delta3 hinv]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3,
+    DifferentialGeometry.Geometry.Curvature.delta3 hinv]
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3,
     metricTensorField_apply,
-    horth', vec2, DifferentialGeometry.Integral.Connection.vec2]
+    horth', vec2, DifferentialGeometry.Geometry.Curvature.vec2]
 
 
 
@@ -516,27 +519,27 @@ omit [IsManifold I 2 M] in
 theorem shiftScalar_add_g
     {δ c : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (A : Tensor02At (I := I) (M := M) x) :
     shiftScalar3At (I := I) (M := M) δ g
         (A + c • metricTensorField (I := I) g x) =
       shiftScalar3At (I := I) (M := M) δ g A +
         (3 * c) / (1 - 3 * δ) := by
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis horth
   have horth' :
       ∀ i j : Fin 3, g.inner x (basis i) (basis j) =
-        DifferentialGeometry.Integral.Connection.delta3 i j := horth
+        DifferentialGeometry.Geometry.Curvature.delta3 i j := horth
   rw [shiftScalar3At, shiftScalar3At]
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
-    DifferentialGeometry.Integral.Connection.delta3 hinv
+    DifferentialGeometry.Geometry.Curvature.delta3 hinv
       (A + c • metricTensorField (I := I) g x)]
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
-    DifferentialGeometry.Integral.Connection.delta3 hinv A]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3,
+    DifferentialGeometry.Geometry.Curvature.delta3 hinv A]
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3,
     metricTensorField_apply,
-    horth', vec2, DifferentialGeometry.Integral.Connection.vec2,
+    horth', vec2, DifferentialGeometry.Geometry.Curvature.vec2,
     Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     smul_eq_mul]
   ring
@@ -547,7 +550,7 @@ omit [IsManifold I 2 M] in
 theorem shiftRic_add_g
     {δ c : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (hδ : δ < (1 : Real) / 3)
     (A : Tensor02At (I := I) (M := M) x) :
     shiftRic3At (I := I) (M := M) δ g
@@ -568,7 +571,7 @@ omit [IsManifold I 2 M] in
 theorem shiftScalar3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (hδ : δ < (1 : Real) / 3)
     (Ric : Tensor02At (I := I) (M := M) x) :
     shiftScalar3At (I := I) (M := M) δ g
@@ -577,8 +580,8 @@ theorem shiftScalar3At_pinch
       metricTracePair0SAt (I := I) g Ric := by
   let R : Real := metricTracePair0SAt (I := I) g Ric
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis horth
   have hR :
       R =
         Ric (vec2 (I := I) (basis 0) (basis 0)) +
@@ -586,21 +589,21 @@ theorem shiftScalar3At_pinch
             Ric (vec2 (I := I) (basis 2) (basis 2)) := by
     dsimp [R]
     rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
-      DifferentialGeometry.Integral.Connection.delta3 hinv]
-    norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3]
+      DifferentialGeometry.Geometry.Curvature.delta3 hinv]
+    norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3]
   have hden : 1 - 3 * δ ≠ 0 := by
     nlinarith
   have horth' :
       ∀ i j : Fin 3, g.inner x (basis i) (basis j) =
-        DifferentialGeometry.Integral.Connection.delta3 i j := horth
+        DifferentialGeometry.Geometry.Curvature.delta3 i j := horth
   rw [shiftScalar3At]
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
-    DifferentialGeometry.Integral.Connection.delta3 hinv]
+    DifferentialGeometry.Geometry.Curvature.delta3 hinv]
   rw [show metricTracePair0SAt (I := I) g Ric = R by rfl]
   rw [hR]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3,
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3,
     metricTensorField_apply,
-    horth', vec2, DifferentialGeometry.Integral.Connection.vec2,
+    horth', vec2, DifferentialGeometry.Geometry.Curvature.vec2,
     Tensor0SBundle.Tensor0SSpace.sub_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     smul_eq_mul]
   field_simp [hden]
@@ -611,7 +614,7 @@ omit [IsManifold I 2 M] in
 theorem shiftRic3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (hδ : δ < (1 : Real) / 3)
     (Ric : Tensor02At (I := I) (M := M) x) :
     shiftRic3At (I := I) (M := M) δ g
@@ -637,13 +640,13 @@ theorem shiftScalar3At_of_shiftBlock
     (hblock : ShiftBlockAt (I := I) (M := M) g Araw x basis a b c) :
     shiftScalar3At (I := I) (M := M) δ g A = shiftScal3 δ a b := by
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis
       hblock.orthonormal
   rw [shiftScalar3At, shiftScal3,
     metricTracePair0SAt_eq_sum_basis (I := I) g basis
-      DifferentialGeometry.Integral.Connection.delta3 hinv A]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3]
+      DifferentialGeometry.Geometry.Curvature.delta3 hinv A]
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3]
   rw [hreal (basis 0) (basis 0), hreal (basis 1) (basis 1),
     hreal (basis 2) (basis 2), hblock.components 0 0,
     hblock.components 1 1, hblock.components 2 2]
@@ -669,9 +672,9 @@ theorem shiftRic3At_comp_of_shiftBlock
   have hmetric :
       metricTensorField (I := I) g x
           (vec2 (I := I) (basis i) (basis j)) =
-        DifferentialGeometry.Integral.Connection.delta3 i j := by
+        DifferentialGeometry.Geometry.Curvature.delta3 i j := by
     simp [metricTensorField_apply, hblock.orthonormal i j,
-      vec2, DifferentialGeometry.Integral.Connection.vec2]
+      vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   simp [Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     hreal (basis i) (basis j), hblock.components i j, hmetric, smul_eq_mul]
 
@@ -784,8 +787,8 @@ theorem tensor04Pair_perm0213_vec4
       A (vec2 (I := I) W Y) * B (vec2 (I := I) X Z) := by
   rw [tensor04Pair_apply]
   congr <;> funext q <;> fin_cases q <;>
-    simp [perm0213, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
-      DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
+    simp [perm0213, vec2, vec4, DifferentialGeometry.Geometry.Curvature.vec2,
+      DifferentialGeometry.Geometry.Curvature.vec4, Function.comp_def]
 
 omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
@@ -796,8 +799,8 @@ theorem tensor04Pair_perm0312_vec4
       A (vec2 (I := I) W Z) * B (vec2 (I := I) X Y) := by
   rw [tensor04Pair_apply]
   congr <;> funext q <;> fin_cases q <;>
-    simp [perm0312, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
-      DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
+    simp [perm0312, vec2, vec4, DifferentialGeometry.Geometry.Curvature.vec2,
+      DifferentialGeometry.Geometry.Curvature.vec4, Function.comp_def]
 
 omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
@@ -808,8 +811,8 @@ theorem tensor04Pair_perm1203_vec4
       A (vec2 (I := I) X Y) * B (vec2 (I := I) W Z) := by
   rw [tensor04Pair_apply]
   congr <;> funext q <;> fin_cases q <;>
-    simp [perm1203, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
-      DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
+    simp [perm1203, vec2, vec4, DifferentialGeometry.Geometry.Curvature.vec2,
+      DifferentialGeometry.Geometry.Curvature.vec4, Function.comp_def]
 
 omit [FiniteDimensional ℝ E] [IsManifold I 2 M] in
 @[simp]
@@ -820,8 +823,8 @@ theorem tensor04Pair_perm1302_vec4
       A (vec2 (I := I) X Z) * B (vec2 (I := I) W Y) := by
   rw [tensor04Pair_apply]
   congr <;> funext q <;> fin_cases q <;>
-    simp [perm1302, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
-      DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
+    simp [perm1302, vec2, vec4, DifferentialGeometry.Geometry.Curvature.vec2,
+      DifferentialGeometry.Geometry.Curvature.vec4, Function.comp_def]
 
 
 
@@ -846,7 +849,7 @@ omit [IsManifold I 2 M] in
 theorem rm04OfRic3At_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (Ric : Tensor02At (I := I) (M := M) x)
     (i j k l : Fin 3) :
     rm04OfRic3At (I := I) (M := M) g Ric
@@ -854,20 +857,20 @@ theorem rm04OfRic3At_comp_orthonormal
       stdRmOfRic3 (fun a b : Fin 3 => Ric (vec2 (I := I) (basis a) (basis b)))
         i j k l := by
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis horth
   have htrace :
       metricTracePair0SAt (I := I) g Ric =
         ricciScal3
           (fun a b : Fin 3 => Ric (vec2 (I := I) (basis a) (basis b))) := by
     rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
-      DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
-    norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, ricciScal3]
+      DifferentialGeometry.Geometry.Curvature.delta3 hinv Ric]
+    norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3, ricciScal3]
   have horth' :
       ∀ a b : Fin 3, g.inner x (basis a) (basis b) =
-        DifferentialGeometry.Integral.Connection.delta3 a b := horth
+        DifferentialGeometry.Geometry.Curvature.delta3 a b := horth
   simp [rm04OfRic3At, stdRmOfRic3, htrace, metricTensorField_apply, horth',
-    vec2, DifferentialGeometry.Integral.Connection.vec2,
+    vec2, DifferentialGeometry.Geometry.Curvature.vec2,
     Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.sub_apply,
     Tensor0SBundle.Tensor0SSpace.smul_apply, smul_eq_mul]
 
@@ -879,7 +882,7 @@ def ricciEndCLMAt
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
     TangentSpace I x →L[Real] TangentSpace I x :=
-  ⟨DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric,
+  ⟨DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric,
     LinearMap.continuous_of_finiteDimensional _⟩
 
 omit [IsManifold I 1 M] [IsManifold I 2 M] in
@@ -889,7 +892,7 @@ theorem ricciEndCLMAt_apply
     (Ric : Tensor02At (I := I) (M := M) x)
     (X : TangentSpace I x) :
     ricciEndCLMAt (I := I) (M := M) g Ric X =
-      DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric X := by
+      DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric X := by
   rfl
 
 
@@ -914,12 +917,12 @@ theorem ricciQuadAt_apply
     ricciQuadAt (I := I) (M := M) g Ric
         (vec2 (I := I) X Y) =
       Ric (vec2 (I := I)
-        (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric X) Y) := by
+        (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric X) Y) := by
   unfold ricciQuadAt
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   congr 1
   funext i
-  fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+  fin_cases i <;> simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
 
 
 
@@ -1167,7 +1170,7 @@ omit [IsManifold I 2 M] in
 theorem shiftNAt_pinch
     {δ t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (hδ : δ < (1 : Real) / 3)
     (Ric : Tensor02At (I := I) (M := M) x) :
     shiftNAt (I := I) (M := M) δ t g x
@@ -1205,25 +1208,25 @@ omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem ricciEnd_repr_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (Ric : Tensor02At (I := I) (M := M) x)
     (i k : Fin 3) :
-    basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k =
+    basis.repr (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric (basis i)) k =
       Ric (vec2 (I := I) (basis i) (basis k)) := by
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
-  rw [basis_repr_eq_sum_inv_inner (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis horth
+  rw [basis_repr_eq_sum_inv_inner (I := I) g x basis DifferentialGeometry.Geometry.Curvature.delta3
     hinv]
   fin_cases k <;>
-    simp [DifferentialGeometry.Integral.Connection.delta3,
-      DifferentialGeometry.Integral.Connection.ricciEnd_inner]
+    simp [DifferentialGeometry.Geometry.Curvature.delta3,
+      DifferentialGeometry.Geometry.Curvature.ricciEnd_inner]
 
 omit [IsManifold I 2 M] in
 theorem ricciQuadAt_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (Ric : Tensor02At (I := I) (M := M) x)
     (i j : Fin 3) :
     ricciQuadAt (I := I) (M := M) g Ric
@@ -1232,24 +1235,24 @@ theorem ricciQuadAt_comp_orthonormal
         Ric (vec2 (I := I) (basis a) (basis b))) i j := by
   rw [ricciQuadAt_apply]
   have hEnd :
-      DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i) =
+      DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric (basis i) =
         ∑ k : Fin 3,
-          basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i))
+          basis.repr (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric (basis i))
             k •
             basis k := by
     exact (basis.sum_repr
-      (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i))).symm
+      (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric (basis i))).symm
   rw [hEnd]
   rw [show
       vec2 (I := I)
           (∑ k : Fin 3,
-            basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric
+            basis.repr (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric
               (basis i)) k •
               basis k)
           (basis j) =
         Fin.cons
           (∑ k : Fin 3,
-            basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric
+            basis.repr (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric
               (basis i)) k •
               basis k)
           (fun _ : Fin 1 => basis j) by
@@ -1258,14 +1261,14 @@ theorem ricciQuadAt_comp_orthonormal
   rw [← DifferentialGeometry.Integral.Connection.metricTrace_tensor0S_curry_apply_cons
     (I := I) (M := M) (s := 1) Ric
       (∑ k : Fin 3,
-        basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i)) k
+        basis.repr (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric (basis i)) k
           •
           basis k)
       (fun _ : Fin 1 => basis j)]
   change
     ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x Ric)
         (∑ k : Fin 3,
-          basis.repr (DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric (basis i))
+          basis.repr (DifferentialGeometry.Geometry.Curvature.ricciEndAt (I := I) g Ric (basis i))
             k •
             basis k))
         (fun _ : Fin 1 => basis j) =
@@ -1282,40 +1285,40 @@ omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem ricciNorm3_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (Ric : Tensor02At (I := I) (M := M) x) :
     inner0S (I := I) g x 2 Ric Ric =
       ricciNorm3 (fun a b : Fin 3 =>
         Ric (vec2 (I := I) (basis a) (basis b))) := by
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
-  rw [inner0S_two_eq_coord (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 hinv]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, ricciNorm3,
-    vec2, DifferentialGeometry.Integral.Connection.vec2]
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis horth
+  rw [inner0S_two_eq_coord (I := I) g x basis DifferentialGeometry.Geometry.Curvature.delta3 hinv]
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3, ricciNorm3,
+    vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   simp [fin2_const_eq_vec2, fin2_if_eq_vec2]
 
 omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem metricTrace_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (Ric : Tensor02At (I := I) (M := M) x) :
     metricTracePair0SAt (I := I) g Ric =
       ricciScal3 (fun a b : Fin 3 =>
         Ric (vec2 (I := I) (basis a) (basis b))) := by
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis horth
   rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
-    DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, ricciScal3]
+    DifferentialGeometry.Geometry.Curvature.delta3 hinv Ric]
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3, ricciScal3]
 
 omit [IsManifold I 2 M] in
 theorem rm04Contr_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (Rm04 : Tensor04At (I := I) (M := M) x)
     (Ric : Tensor02At (I := I) (M := M) x)
     (i j : Fin 3) :
@@ -1325,13 +1328,13 @@ theorem rm04Contr_comp_orthonormal
         Rm04 (vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
           Ric (vec2 (I := I) (basis k) (basis l)) := by
   have hinv : MetricInverseInBasis_gen (I := I) g x basis
-    DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) g basis horth
+    DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) g basis horth
   rw [rm04RicciContrAt_apply]
-  rw [inner0S_two_eq_coord (I := I) g x basis DifferentialGeometry.Integral.Connection.delta3 hinv]
-  norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3, rm04Mid02At_apply,
-    vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
-      DifferentialGeometry.Integral.Connection.vec4]
+  rw [inner0S_two_eq_coord (I := I) g x basis DifferentialGeometry.Geometry.Curvature.delta3 hinv]
+  norm_num [Fin.sum_univ_three, DifferentialGeometry.Geometry.Curvature.delta3, rm04Mid02At_apply,
+    vec2, vec4, DifferentialGeometry.Geometry.Curvature.vec2,
+      DifferentialGeometry.Geometry.Curvature.vec4]
   simp [fin2_const_eq_vec2, fin2_if_eq_vec2, rm04Mid02At_apply]
   ring_nf
 
@@ -1339,7 +1342,7 @@ omit [IsManifold I 2 M] in
 theorem ricciReaction3At_comp_orthonormal
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (Ric : Tensor02At (I := I) (M := M) x)
     (i j : Fin 3) :
     ricciReaction3At (I := I) (M := M) g Ric
@@ -1369,7 +1372,7 @@ omit [IsManifold I 2 M] in
 theorem shiftNAt_comp_orthonormal
     {delta t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (A : Tensor02At (I := I) (M := M) x)
     (i j : Fin 3) :
     shiftNAt (I := I) (M := M) delta t g x A
@@ -1385,9 +1388,9 @@ theorem shiftNAt_comp_orthonormal
   have hmetric :
       metricTensorField (I := I) g x
           (vec2 (I := I) (basis i) (basis j)) =
-        DifferentialGeometry.Integral.Connection.delta3 i j := by
+        DifferentialGeometry.Geometry.Curvature.delta3 i j := by
     simp [metricTensorField_apply, horth i j,
-      vec2, DifferentialGeometry.Integral.Connection.vec2]
+      vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   simp [shiftNAt, pinchReact,
     ricciReaction3At_comp_orthonormal (I := I) (M := M) basis horth,
     ricciNorm3_comp_orthonormal (I := I) (M := M) basis horth,
@@ -1401,7 +1404,7 @@ omit [IsManifold I 2 M] in
 theorem shiftNAt_add_g_comp
     {delta c t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt (I := I) g x basis)
     (hdelta : delta < (1 : Real) / 3)
     (A : Tensor02At (I := I) (M := M) x) :
     shiftNAt (I := I) (M := M) delta t g x
@@ -1423,18 +1426,18 @@ theorem shiftNAt_add_g_comp
       shiftRic3At (I := I) (M := M) delta g
           (A + c • metricTensorField (I := I) g x)
           (vec2 (I := I) (basis p) (basis q)) =
-        Ric p q + a * DifferentialGeometry.Integral.Connection.delta3 p q := by
+        Ric p q + a * DifferentialGeometry.Geometry.Curvature.delta3 p q := by
     intro p q
     rw [shiftRic_add_g (I := I) (M := M) basis horth hdelta A]
     simp [Ric, a, metricTensorField_apply, horth p q,
-      vec2, DifferentialGeometry.Integral.Connection.vec2, smul_eq_mul]
+      vec2, DifferentialGeometry.Geometry.Curvature.vec2, smul_eq_mul]
   have hRmAdd : ∀ p q r s : Fin 3,
       rm04OfRic3At (I := I) (M := M) g
           (shiftRic3At (I := I) (M := M) delta g
             (A + c • metricTensorField (I := I) g x))
           (vec4 (I := I) (basis p) (basis q) (basis r) (basis s)) =
         stdRmOfRic3
-          (fun u v : Fin 3 => Ric u v + a * DifferentialGeometry.Integral.Connection.delta3 u v)
+          (fun u v : Fin 3 => Ric u v + a * DifferentialGeometry.Geometry.Curvature.delta3 u v)
           p q r s := by
     intro p q r s
     rw [rm04OfRic3At_comp_orthonormal (I := I) (M := M) basis horth]
@@ -1530,8 +1533,8 @@ theorem shiftNAt_add_g_quad
     have hmetric00 :
         metricTensorField (I := I) g x
             (vec2 (I := I) (nb.basis 0) (nb.basis 0)) = 1 := by
-      simpa [metricTensorField_apply, vec2, DifferentialGeometry.Integral.Connection.vec2,
-        DifferentialGeometry.Integral.Connection.delta3] using nb.orthonormal 0 0
+      simpa [metricTensorField_apply, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
+        DifferentialGeometry.Geometry.Curvature.delta3] using nb.orthonormal 0 0
     have hC0 :
         C (vec2 (I := I) (nb.basis 0) (nb.basis 0)) =
           3 *
@@ -1728,7 +1731,7 @@ theorem tensor02FromBasis_apply
     tensor02FromBasis (I := I) (M := M) basis C
         (vec2 (I := I) (basis i) (basis j)) =
       C i j := by
-  simpa [component0S_apply, slots2, vec2, DifferentialGeometry.Integral.Connection.vec2] using
+  simpa [component0S_apply, slots2, vec2, DifferentialGeometry.Geometry.Curvature.vec2] using
     tensor02FromBasis_component (I := I) (M := M) basis C i j
 
 
@@ -1746,12 +1749,12 @@ theorem tensor02_smul2
       Function.update m0 (0 : Fin 2) (r • X) =
         vec2 (I := I) (r • X) Y := by
     funext i
-    fin_cases i <;> simp [m0, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m0, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   have h0right :
       Function.update m0 (0 : Fin 2) X =
         vec2 (I := I) X Y := by
     funext i
-    fin_cases i <;> simp [m0, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m0, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   have h0eq :
       T (vec2 (I := I) (r • X) Y) =
         r * T (vec2 (I := I) X Y) := by
@@ -1762,12 +1765,12 @@ theorem tensor02_smul2
       Function.update m1 (1 : Fin 2) (r • Y) =
         vec2 (I := I) (r • X) (r • Y) := by
     funext i
-    fin_cases i <;> simp [m1, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m1, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   have h1right :
       Function.update m1 (1 : Fin 2) Y =
         vec2 (I := I) (r • X) Y := by
     funext i
-    fin_cases i <;> simp [m1, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m1, vec2, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   have h1eq :
       T (vec2 (I := I) (r • X) (r • Y)) =
         r * T (vec2 (I := I) (r • X) Y) := by

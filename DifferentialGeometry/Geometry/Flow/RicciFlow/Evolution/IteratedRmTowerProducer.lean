@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHeatEq
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFrameInvariant
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -87,7 +89,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
@@ -418,7 +420,7 @@ omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04Reaction_orthoBasis_eq_compContract
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
     (basis : (x : M) → Module.Basis Idx Real (TangentSpace I x))
     (gInv : Real → M → Idx → Idx → Real)
@@ -483,7 +485,7 @@ omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKReactionAt_eq
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) (t : Real) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv ric : Idx → Idx → Real)

@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInner
+open DifferentialGeometry.Integral.Connection
 
 
 
@@ -18,7 +19,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open scoped ContDiff Manifold Topology BigOperators
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization

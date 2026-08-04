@@ -13,7 +13,7 @@ open Bundle Set
 open scoped Manifold Topology ContDiff
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 

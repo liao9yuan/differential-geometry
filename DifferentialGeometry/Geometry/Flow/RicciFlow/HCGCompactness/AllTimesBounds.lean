@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -63,7 +65,7 @@ def TwoTensorQuadBoundOnWindow
     forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
       forall x : M, x ∈ K ->
         forall v : TangentSpace I x,
-          |T i t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)| <=
+          |T i t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)| <=
             A * (gSeq i t).inner x v v
 
 
@@ -89,7 +91,7 @@ structure MetricLogDerivativeInput
         forall t : Real, t ∈ Set.Icc β ψ ->
           HasDerivAt
             (fun s : Real => (gSeq i s).inner x v v)
-            ((-2 : Real) * T i t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
+            ((-2 : Real) * T i t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v))
             t
   log_integrable :
     forall i : Nat, forall x : M, x ∈ K ->
@@ -97,7 +99,7 @@ structure MetricLogDerivativeInput
         forall t : Real, t ∈ Set.Icc β ψ ->
           IntervalIntegrable
             (fun s : Real =>
-              ((-2 : Real) * T i s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)) /
+              ((-2 : Real) * T i s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)) /
                 (gSeq i s).inner x v v)
             MeasureTheory.volume t0 t
 
@@ -162,7 +164,7 @@ theorem metricUniformEquivalentOnWindow_of_logDerivativeInput
     Set.uIcc_subset_Icc ht0 ht
   let f : Real -> Real := fun s => (gSeq i s).inner x v v
   let f' : Real -> Real :=
-    fun s => (-2 : Real) * T i s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
+    fun s => (-2 : Real) * T i s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)
   have hf_pos : forall s : Real, s ∈ Set.uIcc t0 t -> 0 < f s := by
     intro s _hs
     exact (gSeq i s).pos x v hv
@@ -178,11 +180,11 @@ theorem metricUniformEquivalentOnWindow_of_logDerivativeInput
     have hquad := hlog.quad_bound.2 i s hswin x hx v
     have hden_pos : 0 < f s := hf_pos s hs
     have hnum :
-        |(-2 : Real) * T i s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)| <=
+        |(-2 : Real) * T i s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)| <=
           2 * (A * f s) := by
       calc
-        |(-2 : Real) * T i s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)|
-            = 2 * |T i s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)| := by
+        |(-2 : Real) * T i s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)|
+            = 2 * |T i s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)| := by
               rw [abs_mul]
               norm_num
         _ <= 2 * (A * f s) :=
@@ -581,7 +583,7 @@ def metricFirstOrderConstant
 structure MetricAllTimesFirstOrderInput
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (K u : Set M) (β ψ t0 : Real)
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (SSeq : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (gRef : SmoothRiemannianMetric I M)
     (T :
@@ -601,7 +603,7 @@ structure MetricAllTimesFirstOrderInput
   K_subset_u : K ⊆ u
   subset_carrier : Set.Icc β ψ ⊆ D.carrier
   regular_on_window : forall s : Real, s ∈ Set.Icc β ψ -> s ∈ D.regular
-  gInv : Nat -> Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx
+  gInv : Nat -> Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx
   nablaRic : Nat -> Real -> M -> Idx -> Idx -> Idx -> Real
   hinv_id :
     forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
@@ -609,7 +611,7 @@ structure MetricAllTimesFirstOrderInput
         forall e l : Idx, gInv i s x e l = if e = l then 1 else 0
   hinv_frame :
     forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) ((SSeq i).family.metric s) (gInv i s) frame
   hevol :
     forall i : Nat,
@@ -643,7 +645,7 @@ structure MetricAllTimesFirstOrderInput
 
 
 structure MetricAllTimesFirstOrderConclusion
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (K : Set M) (β ψ : Real)
     (SSeq : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (gRef : SmoothRiemannianMetric I M) where
@@ -661,7 +663,7 @@ structure MetricAllTimesFirstOrderConclusion
 omit [SigmaCompactSpace M] in
 theorem metricCovOrderOneWindow_of_christoffel
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    {K u : Set M} {β ψ t0 : Real} {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {K u : Set M} {β ψ t0 : Real} {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {SSeq : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D}
     {gRef : SmoothRiemannianMetric I M}
     {T :
@@ -755,7 +757,7 @@ theorem metricCovOrderOneWindow_of_christoffel
 
 def metricAllTimes_firstOrder
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    {K u : Set M} {β ψ t0 : Real} {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {K u : Set M} {β ψ t0 : Real} {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {SSeq : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D}
     {gRef : SmoothRiemannianMetric I M}
     {T :

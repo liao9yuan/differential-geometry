@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpCompat
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Completeness of the genuine tensor chart `W^{k,p}` carrier

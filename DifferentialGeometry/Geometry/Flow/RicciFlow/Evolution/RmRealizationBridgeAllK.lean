@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -69,7 +72,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Field
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -143,7 +146,7 @@ end Field
 
 section Bridge
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -311,7 +314,7 @@ end Bridge
 
 section RicciIdentity
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -353,7 +356,7 @@ omit [SigmaCompactSpace M] in
 theorem nablaKRm04_ricciIdentityAt
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (x : M) :
     DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I)
       (S.base.rm13 (t : Real)) (nablaKRm04Field (I := I) S (t : Real) k x)

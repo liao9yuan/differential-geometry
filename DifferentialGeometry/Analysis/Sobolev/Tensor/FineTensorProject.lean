@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpCompat
 import DifferentialGeometry.Analysis.Sobolev.Tensor.FineTensorWkp
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.FineChartCover
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Finite-chart projection through genuine tensor sections

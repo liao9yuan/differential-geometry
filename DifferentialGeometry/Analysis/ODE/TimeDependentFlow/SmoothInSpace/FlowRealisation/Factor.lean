@@ -11,7 +11,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Set Function Bundle Filter
 open scoped Manifold Topology ContDiff NNReal
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.ODE.Flow
 open DifferentialGeometry.PDE.DeTurck

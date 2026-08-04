@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Produce
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BlackBox
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -83,7 +85,7 @@ theorem metricInner_mdiffAt
 omit [NeZero (Module.finrank ℝ E)] [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem metricFrameComp_fixedBaseSwap_of_solution
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -122,7 +124,7 @@ theorem metricFrameComp_fixedBaseSwap_of_solution
 omit [NeZero (Module.finrank ℝ E)] [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem metricCovDerivDeriv_of_solution
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -173,7 +175,7 @@ theorem metricCovDerivDeriv_of_solution
 
 
 def connectionVariationBlackBox_of_solution
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -203,10 +205,10 @@ omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem christoffelEvolution_of_solution
     [DecidableEq Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (gInvDt : Real -> M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)

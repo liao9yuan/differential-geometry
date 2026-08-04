@@ -3,6 +3,9 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotInsertSelfAdjoint
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePairCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeLowerPairing
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -38,7 +41,7 @@ namespace RicciFlow
 namespace IntrinsicSpectral
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert

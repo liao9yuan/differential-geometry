@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -18,9 +19,9 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -35,7 +36,7 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M]
 
 omit [I.Boundaryless] in
 theorem ricciAt_unitQuad_le_of_sol
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     {t : Real} (ht : t ∈ D.carrier) (x : M) (u : TangentSpace I x)
     (hu : (S.base.metric t).inner x u u = 1) :
@@ -73,7 +74,7 @@ theorem ricciAt_unitQuad_le_of_sol
 
 omit [I.Boundaryless] in
 theorem twoTensorQuadBound_of_solutions
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (K : Set M) (β ψ C : Real)
     (hwin : Set.Icc β ψ ⊆ D.carrier)
@@ -97,4 +98,4 @@ theorem twoTensorQuadBound_of_solutions
         exact mul_le_mul_of_nonneg_left
           (Real.sqrt_le_sqrt (hcurv i t ht x hx)) (by positivity)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

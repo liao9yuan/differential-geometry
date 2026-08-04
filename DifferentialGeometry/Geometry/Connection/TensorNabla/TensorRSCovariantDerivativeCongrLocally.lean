@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -8,7 +9,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle CovariantDerivative Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -38,7 +40,7 @@ open Bundle Set Filter
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry
 open DifferentialGeometry.PDE
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.HCGCompactness
 
 

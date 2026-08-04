@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Heat.Semigroup.Duhamel
 import DifferentialGeometry.Analysis.Heat.Semigroup.Generator
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpQuot
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Fixed-point closedness in the explicit tensor Sobolev quotient

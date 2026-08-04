@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.SecondCovGradEvaluation
+open DifferentialGeometry.Geometry.Curvature
+
 
 
 noncomputable section
@@ -9,8 +11,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -281,6 +283,6 @@ lemma swapTwoFib_eval (r t : ℕ) (x : M) (T : TensorRSSpace r (t + 2) I x)
   rw [tangentBilinFlip_apply]
   exact twoSlotPeel_eval (I := I) (M := M) r t x T b a D m
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

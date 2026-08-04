@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautExac
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinClassical
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotentialSpan
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -25,7 +28,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2

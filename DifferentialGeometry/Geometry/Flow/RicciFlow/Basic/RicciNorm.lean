@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -29,9 +31,9 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 
 def ScalarEvolutionEquationOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (scalar scalarLap ricciNormSq : Real -> M -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     HasDerivWithinAt
       (fun s : Real => scalar s x)
       (scalarLap (t : Real) x + 2 * ricciNormSq (t : Real) x)
@@ -45,9 +47,9 @@ def ScalarEvolutionEquationOn
 
 
 def RicciNormTimeDerivativeComponentsOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (ricciNormSq roughLapInner reaction : Real -> M -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     HasDerivWithinAt
       (fun s : Real => ricciNormSq s x)
       (2 * roughLapInner (t : Real) x + 4 * reaction (t : Real) x)
@@ -62,10 +64,10 @@ variable {Idx : Type*} [Fintype Idx]
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (roughLapInner reaction : Real -> M -> Real)
@@ -86,10 +88,10 @@ theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
@@ -124,7 +126,7 @@ def RicciNormLaplacianComponentsOn
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormLaplacianComponentsOn_of_bochner
     (ricciNormLap roughLapInner nablaRicNormSq : Real -> M -> Real)
-    (h_lap : DifferentialGeometry.Integral.Connection.RicciNormLaplacianComponentsInFrame
+    (h_lap : DifferentialGeometry.Geometry.Curvature.RicciNormLaplacianComponentsInFrame
       (M := M) (Time := Real) ricciNormLap roughLapInner nablaRicNormSq) :
     RicciNormLaplacianComponentsOn ricciNormLap roughLapInner nablaRicNormSq :=
   h_lap
@@ -133,15 +135,15 @@ theorem ricciNormLaplacianComponentsOn_of_bochner
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {Idx : Type*} [Fintype Idx]
     (S : SolutionOn (I := I) (M := M) D)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (ricciNormLap : Real -> M -> Real)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
-    (h_lap : DifferentialGeometry.Integral.Connection.RicciNormScalarLaplacianExpansionInFrame
+    (h_lap : DifferentialGeometry.Geometry.Curvature.RicciNormScalarLaplacianExpansionInFrame
       (I := I) (M := M) (Time := Real) ricciNormLap roughLapRic
       (ricciTwoTensorField (I := I) S) gInv frame nablaRic) :
     RicciNormLaplacianComponentsOn
@@ -149,7 +151,7 @@ theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
       (roughLapRicciInnerInFrame (I := I) S roughLapRic gInv frame)
       (nablaRicciNormSqInFrame (M := M) nablaRic gInv) := by
   have hrealized :=
-    Integral.Connection.ricciNormLaplacianComponentsInFrame_of_normSq_laplacian_expansion
+    DifferentialGeometry.Geometry.Curvature.ricciNormLaplacianComponentsInFrame_of_normSq_laplacian_expansion
       (I := I) (M := M) (Time := Real) ricciNormLap roughLapRic
       (ricciTwoTensorField (I := I) S) gInv frame nablaRic h_lap
   intro t x
@@ -158,11 +160,11 @@ theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
 
 
 noncomputable def coordInv
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M) :
-    Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+    Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M
       (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :=
   fun t x i j =>
     DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
@@ -172,7 +174,7 @@ noncomputable def coordInv
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordInvReal
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M) (t : Real) :
@@ -188,7 +190,7 @@ theorem coordInvReal
 
 
 noncomputable def coordRoughRic
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M)
@@ -208,7 +210,7 @@ noncomputable def coordRoughRic
 
 
 noncomputable def coordNab2Ric
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (x0 : M) :
@@ -256,9 +258,9 @@ noncomputable def coordNab2Ric
 
 
 def RicciNormHeatEquationOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (ricciNormSq ricciNormLap nablaRicNormSq reaction : Real -> M -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     HasDerivWithinAt
       (fun s : Real => ricciNormSq s x)
       (ricciNormLap (t : Real) x +
@@ -270,7 +272,7 @@ def RicciNormHeatEquationOn
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_components
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (ricciNormSq ricciNormLap roughLapInner nablaRicNormSq reaction : Real -> M -> Real)
     (h_dt : RicciNormTimeDerivativeComponentsOn
       (D := D) ricciNormSq roughLapInner reaction)
@@ -296,22 +298,22 @@ theorem ricciNormHeatEquationOn_of_components
 
 
 structure IsSmoothSolutionOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
   isSolution : IsSolutionOn (I := I) S
   scalarSTCont : ScalarSTContOn (I := I) (M := M) S
   scalarRegular : CanonicalScalarRegularOn (I := I) (M := M) S
   ricciRegular : CanonicalRicciRegularOn (I := I) (M := M) S
   scalarEvolution : ∀
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real),
-      (∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real),
+      (∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
         G.metric (t : Real) = S.family.metric (t : Real)) ->
-      (∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
+      (∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
         G.connection (t : Real) = S.family.connection (t : Real)) ->
-      ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+      ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
         HasDerivWithinAt
           (fun s : Real => S.scalar s x)
-          (DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real)
+          (DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G (t : Real)
               (S.scalar (t : Real)) x +
             2 * normSq0S (I := I) (S.family.metric (t : Real)) x 2
               (S.ricci (t : Real) x))
@@ -324,7 +326,7 @@ structure IsSmoothSolutionOn
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
   ricciEvol :
-    ∀ x0 : M, ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    ∀ x0 : M, ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E),
       HasDerivWithinAt
         (fun s : Real =>
@@ -362,7 +364,7 @@ namespace IsSmoothSolutionOn
 
 
 theorem toIsSolutionOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
     IsSolutionOn (I := I) S :=
@@ -371,7 +373,7 @@ theorem toIsSolutionOn
 
 
 theorem scalarCont
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
     ScalarSTContOn (I := I) (M := M) S :=
@@ -380,7 +382,7 @@ theorem scalarCont
 
 
 theorem scalarReg
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
     CanonicalScalarRegularOn (I := I) (M := M) S :=
@@ -397,10 +399,10 @@ variable {Idx : Type*} [Fintype Idx]
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_solution
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (ricciNormLap nablaRicNormSq : Real -> M -> Real)
@@ -435,10 +437,10 @@ theorem ricciNormHeatEquationOn_of_solution
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (ricciNormLap : Real -> M -> Real)
@@ -449,7 +451,7 @@ theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
     (hRicSym : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
-    (h_lap : DifferentialGeometry.Integral.Connection.RicciNormScalarLaplacianExpansionInFrame
+    (h_lap : DifferentialGeometry.Geometry.Curvature.RicciNormScalarLaplacianExpansionInFrame
       (I := I) (M := M) (Time := Real) ricciNormLap roughLapRic
       (ricciTwoTensorField (I := I) S) gInv frame nablaRic) :
     RicciNormHeatEquationOn
@@ -469,11 +471,11 @@ theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
 
 omit [SigmaCompactSpace M] in
 theorem ricci_heat_mc
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (ricciNormLap : Real -> M -> Real)
@@ -483,7 +485,7 @@ theorem ricci_heat_mc
       (TangentSpace I : M -> Type _))
     (A : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
-    (roughA : Real -> (x : M) -> DifferentialGeometry.Integral.Connection.Tensor02At (I := I) x)
+    (roughA : Real -> (x : M) -> DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) x)
     (nablaA : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 3)
     (nabla2A : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -516,7 +518,7 @@ theorem ricci_heat_mc
         (M := M) 3 (S.base.connection t) (nablaA t) (nabla2A t))
     (hdu : forall t,
       DifferentialGeometry.Geometry.Operator.DuFieldRealizes (I := I)
-        (fun y : M => DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y
+        (fun y : M => DifferentialGeometry.Geometry.Curvature.normSq02 (I := I) (S.base.metric t) y
           (A t y))
         (du t))
     (hHess : forall t x,
@@ -527,20 +529,20 @@ theorem ricci_heat_mc
       DifferentialGeometry.Geometry.Operator.RoughLap0SRealizesMetricTraceInBasis (I := I)
         (basis x) (gInv t x) (s := 2) (roughA t x) (nabla2A t x))
     (hAComp : forall t x i j,
-      A t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
+      A t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) (frame i x) (frame j x)) =
         ricciTwoTensorField (I := I) S t x (frame i x) (frame j x))
     (hroughComp : forall t x i j,
-      roughA t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
+      roughA t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) (frame i x) (frame j x)) =
         roughLapRic t x i j)
     (hnablaComp : forall t x a i j,
-      nablaA t x (DifferentialGeometry.Integral.Connection.vec3 (I := I) (frame a x) (frame i x)
+      nablaA t x (DifferentialGeometry.Geometry.Curvature.vec3 (I := I) (frame a x) (frame i x)
         (frame j x)) =
         nablaRic t x a i j) :
     RicciNormHeatEquationOn
       (D := D) (ricciNormSqInFrame (I := I) S gInv frame)
       ricciNormLap (nablaRicciNormSqInFrame (M := M) nablaRic gInv)
       (ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame) := by
-  let G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real :=
+  let G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real :=
     { metric := S.base.metric
       connection := S.base.connection
       metricCompatible := by
@@ -552,7 +554,7 @@ theorem ricci_heat_mc
     ricciNormHeatEquationOn_of_solution_canonical_laplacian
       (I := I) S Rm04 gInv frame roughLapRic ricciNormLap nablaRic
       h_inv h_ricci hInvSym hRicSym
-      (DifferentialGeometry.Integral.Connection.ricci_lap_mc (I := I) (Time := Real) G
+      (DifferentialGeometry.Geometry.Curvature.ricci_lap_mc (I := I) (Time := Real) G
         ricciNormLap roughLapRic (ricciTwoTensorField (I := I) S)
         gInv frame nablaRic basis X A roughA nablaA nabla2A du normSecond
         hframe hinv hfields hlapTrace hA h2 hdu hHess hrough

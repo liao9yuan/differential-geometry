@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -11,8 +13,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -91,8 +93,8 @@ theorem covGradBundleEquiv_tensorCov_unit_curry_eq_abstractCovDeriv
     (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) (fun y : M => σ y) x) v]
   exact tensorRSCovariantDerivative_zeroS_unit_eval (I := I) (M := M) g 2 σ x v
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

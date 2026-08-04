@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ConnectionDifferenceCurvature
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -7,8 +9,8 @@ open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open VectorField
 open DifferentialGeometry.Integral.Measure
@@ -81,6 +83,6 @@ theorem ricciTensor_sub_telescope (g₀ g₁ g₂ : SmoothRiemannianMetric I M) 
 
 end Ricci
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

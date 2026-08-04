@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Bianchi
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -32,23 +35,23 @@ variable {u : Set M}
 
 omit [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem curvatureAction0SAt_vec2_eq
-    (Rm13 : DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
+    (Rm13 : DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M))
     {x : M}
-    (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
+    (Ric : DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x)
     (X Y U V : TangentSpace I x) :
     DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) Rm13 Ric X Y
-        (DifferentialGeometry.Integral.Connection.vec2 U V) =
+        (DifferentialGeometry.Geometry.Curvature.vec2 U V) =
       - (Rm13 x
             (DifferentialGeometry.Integral.Connection.oneFormAtSlot0S (I := I) Ric
-              (DifferentialGeometry.Integral.Connection.vec2 U V) 0)
-            (DifferentialGeometry.Integral.Connection.vec3 X Y U) +
+              (DifferentialGeometry.Geometry.Curvature.vec2 U V) 0)
+            (DifferentialGeometry.Geometry.Curvature.vec3 X Y U) +
           Rm13 x
             (DifferentialGeometry.Integral.Connection.oneFormAtSlot0S (I := I) Ric
-              (DifferentialGeometry.Integral.Connection.vec2 U V) 1)
-            (DifferentialGeometry.Integral.Connection.vec3 X Y V)) := by
+              (DifferentialGeometry.Geometry.Curvature.vec2 U V) 1)
+            (DifferentialGeometry.Geometry.Curvature.vec3 X Y V)) := by
   rw [DifferentialGeometry.Integral.Connection.curvatureAction0SAt]
-  simp [Fin.sum_univ_two, DifferentialGeometry.Integral.Connection.vec2,
-    DifferentialGeometry.Integral.Connection.vec2]
+  simp [Fin.sum_univ_two, DifferentialGeometry.Geometry.Curvature.vec2,
+    DifferentialGeometry.Geometry.Curvature.vec2]
 
 
 
@@ -56,11 +59,11 @@ private theorem curvatureAction0SAt_vec2_eq
 
 omit [SigmaCompactSpace M] in
 private theorem contractedCurvatureAction_left_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm13 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -69,15 +72,15 @@ private theorem contractedCurvatureAction_left_eq
       Tensor0SBundle.MetricInverseInBasis_gen
         (I := I) (M := M) g x basis gInvAt)
     (t : Real) (i j : Idx)
-    (hLower : DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) g x (Rm13 t x)
+    (hLower : DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I) g x (Rm13 t x)
       (Rm04 t x))
-    (hTraceAt : DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+    (hTraceAt : DifferentialGeometry.Geometry.Curvature.RicciRealizesRm04FirstTraceAt (I := I)
       (S.ricci t x) (Rm04 t x) gInvAt basis)
     (hPair : forall W X Y Z : TangentSpace I x,
-      Rm04 t x (DifferentialGeometry.Integral.Connection.vec4 W X Y Z) =
-        Rm04 t x (DifferentialGeometry.Integral.Connection.vec4 Y Z W X))
-    (hOutput : DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 t x))
-    (hFirst : DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 t x))
+      Rm04 t x (DifferentialGeometry.Geometry.Curvature.vec4 W X Y Z) =
+        Rm04 t x (DifferentialGeometry.Geometry.Curvature.vec4 Y Z W X))
+    (hOutput : DifferentialGeometry.Geometry.Curvature.Rm04OutputSkewAt (I := I) (Rm04 t x))
+    (hFirst : DifferentialGeometry.Geometry.Curvature.FirstBianchiAt (I := I) (Rm04 t x))
     (hRic : forall i j : Idx,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
@@ -87,40 +90,40 @@ private theorem contractedCurvatureAction_left_eq
         gInv t x k l *
           DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 t)
             (S.ricci t x) (frame k x) (frame i x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) =
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) =
       rmRicciContractionCompInFrame (I := I) S
         Rm04 gInv frame t x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
   have hRicAt :
       forall a b : Idx,
-        (S.ricci t x) (DifferentialGeometry.Integral.Connection.vec2 (basis a) (basis b)) =
-          (S.ricci t x) (DifferentialGeometry.Integral.Connection.vec2 (basis b) (basis a)) := by
+        (S.ricci t x) (DifferentialGeometry.Geometry.Curvature.vec2 (basis a) (basis b)) =
+          (S.ricci t x) (DifferentialGeometry.Geometry.Curvature.vec2 (basis b) (basis a)) := by
     intro a b
     simpa [hbasis] using hRic a b
   have hInvAt : forall a b : Idx, gInvAt a b = gInvAt b a := by
     exact Tensor0SBundle.invMetric_symm (I := I) (M := M) g x basis gInvAt hinvAt
   have hmain :=
-    DifferentialGeometry.Integral.Connection.contracted_curvatureAction0SAt_vec2_eq
+    DifferentialGeometry.Geometry.Curvature.contracted_curvatureAction0SAt_vec2_eq
       (I := I) g basis gInvAt hinvAt (Rm13 t) (Rm04 t x) (S.ricci t x)
       hLower hTraceAt hPair hOutput hFirst hRicAt hInvAt i j
-  simpa [DifferentialGeometry.Integral.Connection.rm04RicciContractionAt,
-    DifferentialGeometry.Integral.Connection.raised02CompAt,
-    DifferentialGeometry.Integral.Connection.ricciQuadraticAt,
-      DifferentialGeometry.Integral.Connection.oneUp02CompAt,
+  simpa [DifferentialGeometry.Geometry.Curvature.rm04RicciContractionAt,
+    DifferentialGeometry.Geometry.Curvature.raised02CompAt,
+    DifferentialGeometry.Geometry.Curvature.ricciQuadraticAt,
+      DifferentialGeometry.Geometry.Curvature.oneUp02CompAt,
     rmRicciContractionCompInFrame, raisedRicciCompInFrame, ricciOneUpCompInFrame,
-    ricciQuadraticCompInFrame, DifferentialGeometry.Integral.Connection.rm04Comp,
-      DifferentialGeometry.Integral.Connection.rm04Comp,
+    ricciQuadraticCompInFrame, DifferentialGeometry.Geometry.Curvature.rm04Comp,
+      DifferentialGeometry.Geometry.Curvature.rm04Comp,
     hgInvAt, hbasis] using hmain
 
 
 
 omit [SigmaCompactSpace M] in
 private theorem contractedCurvatureAction_right_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm13 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -129,15 +132,15 @@ private theorem contractedCurvatureAction_right_eq
       Tensor0SBundle.MetricInverseInBasis_gen
         (I := I) (M := M) g x basis gInvAt)
     (t : Real) (i j : Idx)
-    (hLower : DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) g x (Rm13 t x)
+    (hLower : DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I) g x (Rm13 t x)
       (Rm04 t x))
-    (hTraceAt : DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+    (hTraceAt : DifferentialGeometry.Geometry.Curvature.RicciRealizesRm04FirstTraceAt (I := I)
       (S.ricci t x) (Rm04 t x) gInvAt basis)
     (hPair : forall W X Y Z : TangentSpace I x,
-      Rm04 t x (DifferentialGeometry.Integral.Connection.vec4 W X Y Z) =
-        Rm04 t x (DifferentialGeometry.Integral.Connection.vec4 Y Z W X))
-    (hOutput : DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 t x))
-    (hFirst : DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 t x))
+      Rm04 t x (DifferentialGeometry.Geometry.Curvature.vec4 W X Y Z) =
+        Rm04 t x (DifferentialGeometry.Geometry.Curvature.vec4 Y Z W X))
+    (hOutput : DifferentialGeometry.Geometry.Curvature.Rm04OutputSkewAt (I := I) (Rm04 t x))
+    (hFirst : DifferentialGeometry.Geometry.Curvature.FirstBianchiAt (I := I) (Rm04 t x))
     (hRic : forall i j : Idx,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
@@ -147,24 +150,24 @@ private theorem contractedCurvatureAction_right_eq
         gInv t x k l *
           DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 t)
             (S.ricci t x) (frame k x) (frame j x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) =
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) =
       rmRicciContractionCompInFrame (I := I) S
         Rm04 gInv frame t x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
   have hRicAt :
       forall a b : Idx,
-        (S.ricci t x) (DifferentialGeometry.Integral.Connection.vec2 (basis a) (basis b)) =
-          (S.ricci t x) (DifferentialGeometry.Integral.Connection.vec2 (basis b) (basis a)) := by
+        (S.ricci t x) (DifferentialGeometry.Geometry.Curvature.vec2 (basis a) (basis b)) =
+          (S.ricci t x) (DifferentialGeometry.Geometry.Curvature.vec2 (basis b) (basis a)) := by
     intro a b
     simpa [hbasis] using hRic a b
   have hInvAt : forall a b : Idx, gInvAt a b = gInvAt b a := by
     exact Tensor0SBundle.invMetric_symm (I := I) (M := M) g x basis gInvAt hinvAt
   have hmain :=
-    DifferentialGeometry.Integral.Connection.contracted_curvatureAction0SAt_vec2_eq
+    DifferentialGeometry.Geometry.Curvature.contracted_curvatureAction0SAt_vec2_eq
       (I := I) g basis gInvAt hinvAt (Rm13 t) (Rm04 t x) (S.ricci t x)
       hLower hTraceAt hPair hOutput hFirst hRicAt hInvAt j i
   have hsym :=
-    DifferentialGeometry.Integral.Connection.curvature_ricci_rhs_symm
+    DifferentialGeometry.Geometry.Curvature.curvature_ricci_rhs_symm
       (I := I) basis (Rm04 t x) gInvAt (S.ricci t x)
       hPair hRicAt hInvAt j i
   calc
@@ -172,31 +175,31 @@ private theorem contractedCurvatureAction_right_eq
         gInv t x k l *
           DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 t)
             (S.ricci t x) (frame k x) (frame j x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)))
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)))
         =
-          DifferentialGeometry.Integral.Connection.rm04RicciContractionAt (I := I) basis (Rm04 t x)
+          DifferentialGeometry.Geometry.Curvature.rm04RicciContractionAt (I := I) basis (Rm04 t x)
             gInvAt
               (S.ricci t x) j i +
-            DifferentialGeometry.Integral.Connection.ricciQuadraticAt (I := I) basis gInvAt
+            DifferentialGeometry.Geometry.Curvature.ricciQuadraticAt (I := I) basis gInvAt
               (S.ricci t x) j i := by
           simpa [hgInvAt, hbasis] using hmain
     _ =
-          DifferentialGeometry.Integral.Connection.rm04RicciContractionAt (I := I) basis (Rm04 t x)
+          DifferentialGeometry.Geometry.Curvature.rm04RicciContractionAt (I := I) basis (Rm04 t x)
             gInvAt
               (S.ricci t x) i j +
-            DifferentialGeometry.Integral.Connection.ricciQuadraticAt (I := I) basis gInvAt
+            DifferentialGeometry.Geometry.Curvature.ricciQuadraticAt (I := I) basis gInvAt
               (S.ricci t x) i j := hsym
     _ =
       rmRicciContractionCompInFrame (I := I) S
         Rm04 gInv frame t x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
-          simp [DifferentialGeometry.Integral.Connection.rm04RicciContractionAt,
-            DifferentialGeometry.Integral.Connection.raised02CompAt,
-            DifferentialGeometry.Integral.Connection.ricciQuadraticAt,
-              DifferentialGeometry.Integral.Connection.oneUp02CompAt,
+          simp [DifferentialGeometry.Geometry.Curvature.rm04RicciContractionAt,
+            DifferentialGeometry.Geometry.Curvature.raised02CompAt,
+            DifferentialGeometry.Geometry.Curvature.ricciQuadraticAt,
+              DifferentialGeometry.Geometry.Curvature.oneUp02CompAt,
             rmRicciContractionCompInFrame, raisedRicciCompInFrame, ricciOneUpCompInFrame,
-            ricciQuadraticCompInFrame, DifferentialGeometry.Integral.Connection.rm04Comp,
-              DifferentialGeometry.Integral.Connection.rm04Comp,
+            ricciQuadraticCompInFrame, DifferentialGeometry.Geometry.Curvature.rm04Comp,
+              DifferentialGeometry.Geometry.Curvature.rm04Comp,
             hgInvAt, hbasis]
 
 
@@ -206,45 +209,45 @@ private theorem contractedCurvatureAction_right_eq
 omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise commutator producer instead" (since := "2026-05-22")]
 theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm13 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
     (hinv : InvMetricLocal (I := I) S gInv frame u)
-    (nabla2RicTensor : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I)
+    (nabla2RicTensor : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I)
       (M := M))
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hNabla2 : Nabla2RicciTensorComponentsInFrameOn
       (I := I) frame nabla2RicTensor nabla2Ric)
-    (hRicciId : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hRicciId : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
-    (hRicTrace13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+    (hRicTrace13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D,
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm13Trace (I := I)
         (S.ricci (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hLower : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+      DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I)
         (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    (hPair : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hPair : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       forall W X Y Z : TangentSpace I x,
-        Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 W X Y Z) =
-          Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 Y Z W X))
-    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+        Rm04 (t : Real) x (DifferentialGeometry.Geometry.Curvature.vec4 W X Y Z) =
+          Rm04 (t : Real) x (DifferentialGeometry.Geometry.Curvature.vec4 Y Z W X))
+    (hOutput : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      DifferentialGeometry.Geometry.Curvature.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
+    (hFirst : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
+      DifferentialGeometry.Geometry.Curvature.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (hRic : RicciSymmetricInFrameOnRegular (I := I) S frame)
     :
     RicciSecondDerivativeCommutatorsInFrame
@@ -265,13 +268,13 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
       (I := I) S Rm13 Rm04 gInv frame hframe hcover hinv hRicTrace13 hLower
   have hTraceFrame := hTraceReg t
   have hTraceAt :
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (fun a b : Idx => gInv (t : Real) x a b)
         (hframe.toBasisAt (hcover x)) := by
     intro a b
     have h := hTraceFrame x a b
-    simpa [DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04FirstTraceInFrame,
+    simpa [DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm04FirstTraceInFrame,
       IsLocalFrameOn.toBasisAt_coe] using h
   have hIdComp :
       forall k l : Idx,
@@ -280,28 +283,28 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
           DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
             (S.ricci (t : Real) x)
             (frame k x) (frame i x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) := by
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x)) := by
     intro k l
     have h := hRicciId t x (frame k x) (frame i x)
-      (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))
+      (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))
     have hinput₁ :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame k x) (frame i x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) =
-          DifferentialGeometry.Integral.Connection.vec4 (frame k x) (frame i x) (frame j x)
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x)) =
+          DifferentialGeometry.Geometry.Curvature.vec4 (frame k x) (frame i x) (frame j x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     have hinput₂ :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame i x) (frame k x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) =
-          DifferentialGeometry.Integral.Connection.vec4 (frame i x) (frame k x) (frame j x)
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x)) =
+          DifferentialGeometry.Geometry.Curvature.vec4 (frame i x) (frame k x) (frame j x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     rw [hinput₁, hinput₂] at h
     rw [hNabla2 (t : Real) x k i j l, hNabla2 (t : Real) x i k j l]
-    simpa [DifferentialGeometry.Integral.Connection.rm04Comp,
-      DifferentialGeometry.Integral.Connection.rm04Comp] using h
+    simpa [DifferentialGeometry.Geometry.Curvature.rm04Comp,
+      DifferentialGeometry.Geometry.Curvature.rm04Comp] using h
   have hIdCompRight :
       forall k l : Idx,
         nabla2Ric (t : Real) x k j i l -
@@ -309,28 +312,28 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
           DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
             (S.ricci (t : Real) x)
             (frame k x) (frame j x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) := by
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)) := by
     intro k l
     have h := hRicciId t x (frame k x) (frame j x)
-      (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))
+      (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))
     have hinput₁ :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame k x) (frame j x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) =
-          DifferentialGeometry.Integral.Connection.vec4 (frame k x) (frame j x) (frame i x)
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)) =
+          DifferentialGeometry.Geometry.Curvature.vec4 (frame k x) (frame j x) (frame i x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     have hinput₂ :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame j x) (frame k x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) =
-          DifferentialGeometry.Integral.Connection.vec4 (frame j x) (frame k x) (frame i x)
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)) =
+          DifferentialGeometry.Geometry.Curvature.vec4 (frame j x) (frame k x) (frame i x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     rw [hinput₁, hinput₂] at h
     rw [hNabla2 (t : Real) x k j i l, hNabla2 (t : Real) x j k i l]
-    simpa [DifferentialGeometry.Integral.Connection.rm04Comp,
-      DifferentialGeometry.Integral.Connection.rm04Comp] using h
+    simpa [DifferentialGeometry.Geometry.Curvature.rm04Comp,
+      DifferentialGeometry.Geometry.Curvature.rm04Comp] using h
   have hleftCurv :
       contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j =
@@ -341,7 +344,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
             DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame i x)
-              (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) := by
+              (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := by
     unfold contractedNabla2RicLeftInFrame contractedNabla2RicTraceAInFrame
     calc
       (∑ k : Idx, ∑ l : Idx,
@@ -354,7 +357,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame i x)
-                (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) := by
+                (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := by
             refine Finset.sum_congr rfl fun k _ => ?_
             refine Finset.sum_congr rfl fun l _ => ?_
             have h := hIdComp k l
@@ -370,7 +373,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame i x)
-                (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) := by
+                (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := by
             simp [mul_add, Finset.sum_add_distrib]
   have hrightCurvNatural :
       contractedNabla2RicRightInFrame (M := M) gInv nabla2Ric
@@ -382,7 +385,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
             DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame j x)
-              (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) := by
+              (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) := by
     unfold contractedNabla2RicRightInFrame
     calc
       (∑ k : Idx, ∑ l : Idx,
@@ -395,7 +398,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame j x)
-                (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) := by
+                (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) := by
             refine Finset.sum_congr rfl fun k _ => ?_
             refine Finset.sum_congr rfl fun l _ => ?_
             have h := hIdCompRight k l
@@ -411,7 +414,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame j x)
-                (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) := by
+                (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) := by
             simp [mul_add, Finset.sum_add_distrib]
   have hgInvAt :
       forall a b : Idx,
@@ -453,7 +456,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
             DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame i x)
-              (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) := hleftCurv
+              (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := hleftCurv
       _ =
         contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j +
@@ -474,7 +477,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
             DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame j x)
-              (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) :=
+              (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) :=
                 hrightCurvNatural
       _ =
         contractedNabla2RicTraceRightNaturalInFrame (M := M) gInv nabla2Ric
@@ -493,45 +496,45 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
 
 omit [SigmaCompactSpace M] in
 theorem ricciSecCommLocId
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm13 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hinv : InvMetricLocal (I := I) S gInv frame u)
-    (nabla2RicTensor : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I)
+    (nabla2RicTensor : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I)
       (M := M))
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hNabla2 : Nab2RicLoc
       (I := I) frame u nabla2RicTensor nabla2Ric)
-    (hRicciId : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hRicciId : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
-    (hRicTrace13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+    (hRicTrace13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D,
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm13Trace (I := I)
         (S.ricci (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hLower : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+      DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I)
         (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    (hPair : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hPair : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       forall W X Y Z : TangentSpace I x,
-        Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 W X Y Z) =
-          Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 Y Z W X))
-    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+        Rm04 (t : Real) x (DifferentialGeometry.Geometry.Curvature.vec4 W X Y Z) =
+          Rm04 (t : Real) x (DifferentialGeometry.Geometry.Curvature.vec4 Y Z W X))
+    (hOutput : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      DifferentialGeometry.Geometry.Curvature.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
+    (hFirst : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
-    (hRic : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      DifferentialGeometry.Geometry.Curvature.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
+    (hRic : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       x ∈ u -> forall i j : Idx,
         ricciCompInFrame (I := I) S frame (t : Real) x i j =
@@ -547,12 +550,12 @@ theorem ricciSecCommLocId
     metricInverseInBasis_of_local
       (I := I) S gInv frame hframe hinv (t : Real) hx
   have hTraceAt :
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (fun a b : Idx => gInv (t : Real) x a b)
         (hframe.toBasisAt hx) := by
     exact
-      DifferentialGeometry.Integral.Connection.ricciFirstTraceAt_of_rm13_section
+      DifferentialGeometry.Geometry.Curvature.ricciFirstTraceAt_of_rm13_section
         (I := I) (S.family.metric (t : Real)) (hframe.toBasisAt hx)
         (fun a b : Idx => gInv (t : Real) x a b) hinvAt
         (S.ricci (t : Real)) (Rm13 (t : Real)) (Rm04 (t : Real))
@@ -567,28 +570,28 @@ theorem ricciSecCommLocId
           DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
             (S.ricci (t : Real) x)
             (frame k x) (frame i x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) := by
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x)) := by
     intro k l
     have h := hRicciId t x (frame k x) (frame i x)
-      (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))
+      (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))
     have hinput₁ :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame k x) (frame i x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) =
-          DifferentialGeometry.Integral.Connection.vec4 (frame k x) (frame i x) (frame j x)
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x)) =
+          DifferentialGeometry.Geometry.Curvature.vec4 (frame k x) (frame i x) (frame j x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     have hinput₂ :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame i x) (frame k x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x)) =
-          DifferentialGeometry.Integral.Connection.vec4 (frame i x) (frame k x) (frame j x)
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x)) =
+          DifferentialGeometry.Geometry.Curvature.vec4 (frame i x) (frame k x) (frame j x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     rw [hinput₁, hinput₂] at h
     rw [hNabla2 (t : Real) x hx k i j l, hNabla2 (t : Real) x hx i k j l]
-    simpa [DifferentialGeometry.Integral.Connection.rm04Comp,
-      DifferentialGeometry.Integral.Connection.rm04Comp] using h
+    simpa [DifferentialGeometry.Geometry.Curvature.rm04Comp,
+      DifferentialGeometry.Geometry.Curvature.rm04Comp] using h
   have hIdCompRight :
       forall k l : Idx,
         nabla2Ric (t : Real) x k j i l -
@@ -596,28 +599,28 @@ theorem ricciSecCommLocId
           DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
             (S.ricci (t : Real) x)
             (frame k x) (frame j x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) := by
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)) := by
     intro k l
     have h := hRicciId t x (frame k x) (frame j x)
-      (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))
+      (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))
     have hinput₁ :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame k x) (frame j x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) =
-          DifferentialGeometry.Integral.Connection.vec4 (frame k x) (frame j x) (frame i x)
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)) =
+          DifferentialGeometry.Geometry.Curvature.vec4 (frame k x) (frame j x) (frame i x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     have hinput₂ :
         DifferentialGeometry.Geometry.Operator.metricTraceInput (I := I) (frame j x) (frame k x)
-            (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x)) =
-          DifferentialGeometry.Integral.Connection.vec4 (frame j x) (frame k x) (frame i x)
+            (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x)) =
+          DifferentialGeometry.Geometry.Curvature.vec4 (frame j x) (frame k x) (frame i x)
             (frame l x) := by
       funext q
       fin_cases q <;> rfl
     rw [hinput₁, hinput₂] at h
     rw [hNabla2 (t : Real) x hx k j i l, hNabla2 (t : Real) x hx j k i l]
-    simpa [DifferentialGeometry.Integral.Connection.rm04Comp,
-      DifferentialGeometry.Integral.Connection.rm04Comp] using h
+    simpa [DifferentialGeometry.Geometry.Curvature.rm04Comp,
+      DifferentialGeometry.Geometry.Curvature.rm04Comp] using h
   have hleftCurv :
       contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j =
@@ -628,7 +631,7 @@ theorem ricciSecCommLocId
             DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame i x)
-              (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) := by
+              (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := by
     unfold contractedNabla2RicLeftInFrame contractedNabla2RicTraceAInFrame
     calc
       (∑ k : Idx, ∑ l : Idx,
@@ -641,7 +644,7 @@ theorem ricciSecCommLocId
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame i x)
-                (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) := by
+                (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := by
             refine Finset.sum_congr rfl fun k _ => ?_
             refine Finset.sum_congr rfl fun l _ => ?_
             have h := hIdComp k l
@@ -657,7 +660,7 @@ theorem ricciSecCommLocId
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame i x)
-                (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) := by
+                (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := by
             simp [mul_add, Finset.sum_add_distrib]
   have hrightCurvNatural :
       contractedNabla2RicRightInFrame (M := M) gInv nabla2Ric
@@ -669,7 +672,7 @@ theorem ricciSecCommLocId
             DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame j x)
-              (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) := by
+              (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) := by
     unfold contractedNabla2RicRightInFrame
     calc
       (∑ k : Idx, ∑ l : Idx,
@@ -682,7 +685,7 @@ theorem ricciSecCommLocId
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame j x)
-                (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) := by
+                (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) := by
             refine Finset.sum_congr rfl fun k _ => ?_
             refine Finset.sum_congr rfl fun l _ => ?_
             have h := hIdCompRight k l
@@ -698,7 +701,7 @@ theorem ricciSecCommLocId
                 (Rm13 (t : Real))
                 (S.ricci (t : Real) x)
                 (frame k x) (frame j x)
-                (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) := by
+                (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) := by
             simp [mul_add, Finset.sum_add_distrib]
   have hgInvAt :
       forall a b : Idx,
@@ -740,7 +743,7 @@ theorem ricciSecCommLocId
             DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame i x)
-              (DifferentialGeometry.Integral.Connection.vec2 (frame j x) (frame l x))) := hleftCurv
+              (DifferentialGeometry.Geometry.Curvature.vec2 (frame j x) (frame l x))) := hleftCurv
       _ =
         contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j +
@@ -761,7 +764,7 @@ theorem ricciSecCommLocId
             DifferentialGeometry.Integral.Connection.curvatureAction0SAt (I := I) (Rm13 (t : Real))
               (S.ricci (t : Real) x)
               (frame k x) (frame j x)
-              (DifferentialGeometry.Integral.Connection.vec2 (frame i x) (frame l x))) :=
+              (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame l x))) :=
                 hrightCurvNatural
       _ =
         contractedNabla2RicTraceRightNaturalInFrame (M := M) gInv nabla2Ric
@@ -778,13 +781,13 @@ theorem ricciSecCommLocId
 
 
 def RicciContractedCommutatorsInFrame
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+  forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M)
     (i j : Idx),
     contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric (t : Real) x i j =
         (1 / 2 : Real) *
@@ -808,14 +811,14 @@ def RicciContractedCommutatorsInFrame
 
 
 def RicciContractedCommutatorsInFrameOnLocal
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
-  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M), x ∈
+  forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M), x ∈
     u ->
     forall i j : Idx,
       contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric (t : Real) x i j =
@@ -841,11 +844,11 @@ def RicciContractedCommutatorsInFrameOnLocal
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem RicciContractedCommutatorsInFrame.toLocal
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hcomm : RicciContractedCommutatorsInFrame
@@ -857,12 +860,12 @@ theorem RicciContractedCommutatorsInFrame.toLocal
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem ricci_trace_terms_eq_of_differentiatedBianchi
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hbianchi : DifferentiatedContractedBianchiInFrame
       (D := D) (M := M) gInv nabla2Ric)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M)
       (i j : Idx) :
     contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
         (t : Real) x i j =
@@ -876,13 +879,13 @@ theorem ricci_trace_terms_eq_of_differentiatedBianchi
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem traceTermsEqLoc
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (u : Set M)
     (hbianchi : DifferentiatedContractedBianchiInFrameOnLocal
       (D := D) (M := M) gInv nabla2Ric u)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M)
       (hx : x ∈ u)
     (i j : Idx) :
     contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
@@ -898,10 +901,10 @@ theorem traceTermsEqLoc
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciCommLoc
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -924,10 +927,10 @@ theorem ricciCommLoc
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutators
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hbianchi : DifferentiatedContractedBianchiInFrame
@@ -946,17 +949,17 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutato
 omit [SigmaCompactSpace M] in
 @[deprecated "use the local contracted-commutator route instead" (since := "2026-05-22")]
 theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_ricciIdentity
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm13 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
     (hinv : InvMetricLocal (I := I) S gInv frame u)
-    (nabla2RicTensor : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I)
+    (nabla2RicTensor : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I)
       (M := M))
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hbianchi : DifferentiatedContractedBianchiInFrame
@@ -965,30 +968,30 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
       (D := D) (M := M) gInv nabla2Ric)
     (hNabla2 : Nabla2RicciTensorComponentsInFrameOn
       (I := I) frame nabla2RicTensor nabla2Ric)
-    (hRicciId : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hRicciId : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
-    (hRicTrace13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+    (hRicTrace13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D,
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm13Trace (I := I)
         (S.ricci (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hLower : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+      DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I)
         (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    (hPair : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hPair : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       forall W X Y Z : TangentSpace I x,
-        Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 W X Y Z) =
-          Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 Y Z W X))
-    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+        Rm04 (t : Real) x (DifferentialGeometry.Geometry.Curvature.vec4 W X Y Z) =
+          Rm04 (t : Real) x (DifferentialGeometry.Geometry.Curvature.vec4 Y Z W X))
+    (hOutput : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hFirst : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      DifferentialGeometry.Geometry.Curvature.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
+    (hFirst : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
+      DifferentialGeometry.Geometry.Curvature.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (hRic : RicciSymmetricInFrameOnRegular (I := I) S frame)
     :
     RicciContractedCommutatorsInFrame
@@ -1007,18 +1010,18 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
 @[deprecated "use the local contracted-commutator route instead" (since := "2026-05-22")]
 theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
     [IsManifold I (∞ + 1) M]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm13 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
     (hinv : InvMetricLocal (I := I) S gInv frame u)
-    (nabla2RicTensor : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I)
+    (nabla2RicTensor : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I)
       (M := M))
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hbianchi : DifferentiatedContractedBianchiInFrame
@@ -1027,20 +1030,20 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
       (D := D) (M := M) gInv nabla2Ric)
     (hNabla2 : Nabla2RicciTensorComponentsInFrameOn
       (I := I) frame nabla2RicTensor nabla2Ric)
-    (hRicciId : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hRicciId : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
-    (hRicTrace13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+    (hRicTrace13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D,
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm13Trace (I := I)
         (S.ricci (t : Real)) (Rm13 (t : Real)))
-    (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
+    (hRm13 : forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
+      DifferentialGeometry.Geometry.Curvature.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hLower : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
+      DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I)
         (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x)) :
     RicciContractedCommutatorsInFrame
@@ -1053,9 +1056,9 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
     rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hInput :=
     rm04InputSkew_regular (I := I) S Rm13 Rm04 hRm13 hLower
-  have hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+  have hTrace : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x : M),
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
         (hframe.toBasisAt (hcover x)) := by
@@ -1066,7 +1069,7 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
         (I := I) S Rm13 Rm04 gInv frame hframe hcover hinv hRicTrace13 hLower
     intro t x i j
     have h := hTraceReg t x i j
-    simpa [DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04FirstTraceInFrame,
+    simpa [DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm04FirstTraceInFrame,
       IsLocalFrameOn.toBasisAt_coe] using h
   have hRic : RicciSymmetricInFrameOnRegular (I := I) S frame :=
     ricciSymm_regular (I := I) S Rm04 gInv frame hframe
@@ -1080,7 +1083,7 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) :
     ricciVariationExpandedRHSInFrame (M := M) gInv nabla2Ric t x i j =
@@ -1174,10 +1177,10 @@ private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hcomm : RicciContractedCommutatorsInFrame
@@ -1197,7 +1200,7 @@ theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
 
 
 def contractedBianchiInFrame
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (gradScalar : Real -> M -> Idx -> Real) : Prop :=
   forall t x i,
@@ -1223,10 +1226,10 @@ def ricciVariationGaugeTerms_cancel
 
 
 def ricciCurvatureTerms_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (curvatureTerms : Real -> M -> Idx -> Idx -> Real) : Prop :=
   forall t x i j,
@@ -1240,10 +1243,10 @@ def ricciCurvatureTerms_eq
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrame_of_variation_expanded
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (h_var : RicciVariationFormulaInFrameOn (I := I) S frame
@@ -1263,10 +1266,10 @@ theorem ricciEvolutionEquationInFrame_of_variation_expanded
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrameOnLocal_of_variation_expanded
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -1288,10 +1291,10 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_expanded
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolution_of_variation_commutators
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (h_var : RicciVariationFormulaInFrameOn (I := I) S frame
@@ -1310,10 +1313,10 @@ theorem ricciEvolution_of_variation_commutators
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -1334,10 +1337,10 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolLocal
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)

@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower.GenuineOperator
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -9,8 +12,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -168,8 +171,8 @@ theorem exists_GcurvSection_iteratedCovGrad_grid_bound (g : SmoothRiemannianMetr
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact riemannianFiberNormSq_toSection_iteratedCovGrad_covGrad_comm (I := I) (M := M) g s q S x
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

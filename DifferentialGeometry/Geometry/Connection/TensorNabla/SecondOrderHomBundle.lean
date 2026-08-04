@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -8,7 +10,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set IsManifold Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 section ModelFiber

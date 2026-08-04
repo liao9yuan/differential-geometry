@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDe
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetricCompatible
 import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwise
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -11,7 +12,7 @@ noncomputable section
 open Bundle Manifold Set Filter FiberBundle Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

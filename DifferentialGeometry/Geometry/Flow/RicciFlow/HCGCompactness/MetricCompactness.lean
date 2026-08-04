@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergence
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

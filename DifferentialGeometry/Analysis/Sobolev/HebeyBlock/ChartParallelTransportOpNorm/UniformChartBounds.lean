@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.ChartFrameNorm
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock

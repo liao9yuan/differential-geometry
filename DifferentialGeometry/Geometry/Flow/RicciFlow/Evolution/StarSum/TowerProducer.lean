@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TowerHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiSolution
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFrameInvariant
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -22,7 +24,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
-open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
+open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
 
@@ -174,7 +176,7 @@ omit [SigmaCompactSpace M] in
 theorem nablaKReactionAt_le
     [Module.Finite ℝ E]
     {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -230,7 +232,7 @@ omit [SigmaCompactSpace M] in
 theorem nablaKReaction_le
     [Module.Finite ℝ E]
     {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (basis : (x : M) → Module.Basis Idx Real (TangentSpace I x))
     (gInv : Real → M → Idx → Idx → Real)
@@ -273,12 +275,12 @@ theorem nablaKReaction_le
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem towerHeatBoundOn_of_heatReact
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {w wLap : ℕ → Real → M → Real}
     {c : Real} {k : ℕ}
     {nablaKRmNormLap reaction : Real → M → Real}
     (hHeatEq : NablaRm04NormHeatEquationOn (D := D) (w k) nablaKRmNormLap (w (k + 1)) reaction)
-    (hReact : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hReact : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
         (x : M),
       |reaction (t : Real) x| ≤ towerReactionSum (M := M) w c k (t : Real) x)
     (hLap : ∀ (t : Real) (x : M), nablaKRmNormLap t x = wLap k t x) :

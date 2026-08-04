@@ -1,10 +1,12 @@
 import DifferentialGeometry.Geometry.Curvature.Components.Basic
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -152,4 +154,4 @@ theorem rm13MetricSkewAt_of_realizes_outputSkew
   rm13MetricSkewAt_of_rm04_outputSkew (I := I) g (Rm13 x) (Rm04 x)
     (rm04LowersRm13At_of_realizes (I := I) g cov Rm13 Rm04 hRm13 hRm04 x)
     hSkew
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

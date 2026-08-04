@@ -31,7 +31,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 
 
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Connection.Realization.Embedding
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 import DifferentialGeometry.Geometry.Curvature.Metric
 import Mathlib.Analysis.InnerProductSpace.Calculus
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -224,15 +226,15 @@ theorem projConn_eq_metricCov
       (fun y => (TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y (Y y))) x)
     (v : TangentSpace (𝓡 n) x) :
     projConn (n := n) Y x v
-      = Integral.Connection.metricCov (roundMetric (E := E) (n := n)) Y x v := by
+      = DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n)) Y x v := by
   haveI : IsManifold (𝓡 n) ∞ (sphere (0 : E) 1) :=
     EuclideanSpace.instIsManifoldSphere.of_le le_top
-  have htor₂ : (Integral.Connection.metricCov (roundMetric (E := E) (n := n))).torsion = 0 :=
+  have htor₂ : (DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n))).torsion = 0 :=
     funext fun y =>
       DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
         (roundMetric (E := E) (n := n)) y
   have hMC₂ : DifferentialGeometry.Geometry.Connection.IsMetricCompatible
-      (Integral.Connection.metricCov (roundMetric (E := E) (n := n)))
+      (DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n)))
       (roundMetric (E := E) (n := n)) := by
     intro W₁ W₂ y hW₁ hW₂ _ vv
     obtain ⟨W, hWy⟩ : ∃ σ : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n),
@@ -243,7 +245,7 @@ theorem projConn_eq_metricCov
     rw [hWy] at hgen
     exact hgen
   exact DifferentialGeometry.Geometry.Connection.koszul_levi_civita_unique_of_torsionFree_metricCompatible
-    (projConnCD (E := E) (n := n)) (Integral.Connection.metricCov (roundMetric (E := E) (n := n)))
+    (projConnCD (E := E) (n := n)) (DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n)))
     projConn_torsion htor₂ projConn_metricCompat hMC₂ hY v
 
 end Geometry

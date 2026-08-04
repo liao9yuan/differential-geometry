@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiGram
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Radial Gram data for volume comparison

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.IntrinsicRatio
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautSpan
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotentialPairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Compact-span scalar critical estimate
@@ -20,7 +22,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

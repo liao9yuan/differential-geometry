@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Curvature.Metric
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -23,7 +25,7 @@ namespace DifferentialGeometry
 
 open Bundle Manifold Set Tensor0SBundle
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open CovariantDerivative
 

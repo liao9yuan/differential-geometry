@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.ODE.PhaseFlowExistence
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricGeodesicSpray
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricExtend
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false

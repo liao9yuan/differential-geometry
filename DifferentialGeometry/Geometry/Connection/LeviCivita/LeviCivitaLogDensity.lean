@@ -25,7 +25,7 @@ set_option autoImplicit false
 
 
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle

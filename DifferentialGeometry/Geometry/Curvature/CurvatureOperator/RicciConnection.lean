@@ -4,6 +4,8 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -14,8 +16,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -1340,6 +1342,6 @@ theorem riemannOp_diag_symm
 
 end PairSymmetry
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

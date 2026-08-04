@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRemainderH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRhsOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegDenseN
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Tame low-regularity Ricci--DeTurck core estimate
@@ -23,7 +26,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization

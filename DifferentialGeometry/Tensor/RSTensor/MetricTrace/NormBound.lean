@@ -1,5 +1,7 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Trace04
 import DifferentialGeometry.Tensor.RSTensor.NormSqProduct
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -16,7 +18,7 @@ noncomputable section
 namespace Tensor0SBundle
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 

@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Metric.Pullback
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
@@ -14,7 +16,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open scoped Manifold ContDiff
 open Tensor0SBundle
@@ -162,7 +164,7 @@ theorem directionalDeriv_pullback
         (fun q : N =>
           g.inner q (pushFwdSection (I := I) Phi P q)
             (pushFwdSection (I := I) Phi Q q)) (Phi x) :=
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt (I := I)
+    (DifferentialGeometry.Geometry.Curvature.CovariantDerivative.metric_inner_contMDiffAt (I := I)
       (M := N) g
       (pushFwdSection (I := I) Phi P).contMDiff.contMDiffAt
       (pushFwdSection (I := I) Phi Q).contMDiff.contMDiffAt
@@ -342,12 +344,12 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwd
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _)) (x : M) :
     mfderiv I I (Phi : M -> N) x
-        (DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+        (DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
           (I := I)
           (metricCov (I := I) (M := M) (Diffeomorph.pullbackMetric (I := I) g Phi))
           (fun p : M => X p) (fun p : M => Y p) (fun p : M => Z p) x)
       =
-      DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+      DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
         (I := I) (metricCov (I := I) (M := N) g)
         (fun q : N => pushFwdSection (I := I) Phi X q)
         (fun q : N => pushFwdSection (I := I) Phi Y q)
@@ -360,12 +362,12 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwd
   let ZYh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (Y p),
       fun p
-        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+        => DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) Y Z p⟩
   let ZXh : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (covh (fun q : M => Z q) p) (X p),
       fun p
-        => DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+        => DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) covh (metricCov_smooth (I := I) (M := M) h) X Z p⟩
   have hZY :
       (fun q : N => pushFwdSection (I := I) Phi ZYh q) =
@@ -463,7 +465,7 @@ private theorem connectionRiemannCurvatureField_pullback_pushFwd
           rw [minSmoothness_of_isRCLikeNormedField]
           exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
     simpa [pushFwdSection, pushFwdField] using hbr'
-  simp only [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+  simp only [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   change
     mfderiv I I (Phi : M -> N) x
       ((covh (fun p : M => ZYh p) x) (X x) -
@@ -522,7 +524,7 @@ theorem metricRm04Std_pullback
   rw [metricRm04StdAt_apply, metricRm04StdAt_apply]
   unfold metricRm04At
   have hleft :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At_apply_smooth
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At_apply_smooth
       (I := I)
       (g := Diffeomorph.pullbackMetric (I := I) g Phi)
       (cov := metricCov (I := I) (M := M)
@@ -531,7 +533,7 @@ theorem metricRm04Std_pullback
         (Diffeomorph.pullbackMetric (I := I) g Phi))
       Xs Ys Zs Ws x
   have hright :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At_apply_smooth
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At_apply_smooth
       (I := I)
       (g := g)
       (cov := metricCov (I := I) (M := N) g)
@@ -540,19 +542,19 @@ theorem metricRm04Std_pullback
       (pushFwdSection (I := I) Phi Ys)
       (pushFwdSection (I := I) Phi Zs)
       (pushFwdSection (I := I) Phi Ws) (Phi x)
-  rw [show DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
+  rw [show DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At
         (Diffeomorph.pullbackMetric (I := I) g Phi)
         (metricCov (I := I) (M := M) (Diffeomorph.pullbackMetric (I := I) g Phi))
         (metricCov_smooth (I := I) (M := M)
           (Diffeomorph.pullbackMetric (I := I) g Phi))
         x (vec4 X Y Z W) =
       (Diffeomorph.pullbackMetric (I := I) g Phi).inner x W
-        (DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+        (DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
           (I := I)
           (metricCov (I := I) (M := M) (Diffeomorph.pullbackMetric (I := I) g Phi))
           (fun p : M => Xs p) (fun p : M => Ys p) (fun p : M => Zs p) x) by
         simpa [hXs, hYs, hZs, hWs] using hleft]
-  rw [show DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
+  rw [show DifferentialGeometry.Geometry.Curvature.CovariantDerivative.riemannCurvature04At
         g (metricCov (I := I) (M := N) g)
         (metricCov_smooth (I := I) (M := N) g)
         (Phi x)
@@ -561,7 +563,7 @@ theorem metricRm04Std_pullback
           (mfderiv I I (Phi : M -> N) x Z)
           (mfderiv I I (Phi : M -> N) x W)) =
       g.inner (Phi x) (mfderiv I I (Phi : M -> N) x W)
-        (DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+        (DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
           (I := I) (metricCov (I := I) (M := N) g)
           (fun q : N => pushFwdSection (I := I) Phi Xs q)
           (fun q : N => pushFwdSection (I := I) Phi Ys q)
@@ -571,4 +573,4 @@ theorem metricRm04Std_pullback
   rw [connectionRiemannCurvatureField_pullback_pushFwd
     (I := I) g Phi Xs Ys Zs x]
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Scaling
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -13,7 +15,7 @@ multiplies the lowered Riemann tensor by the same constant.
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
@@ -56,4 +58,4 @@ theorem metricRmStd_scale
     (metricRm_scale (I := I) c hc g x)
   simpa [metricRm04_apply, metricRm04StdAt_apply, smul_eq_mul] using h
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

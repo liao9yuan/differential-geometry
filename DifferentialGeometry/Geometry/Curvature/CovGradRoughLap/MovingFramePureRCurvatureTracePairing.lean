@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower.DifferentiatedCurvature
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 
 noncomputable section
 
@@ -8,8 +11,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -47,8 +50,8 @@ theorem exists_GcurvSection_eq_appCc_curvatureOpField
   rw [← pureRGenuineDiffOp0_eq_GcurvSection (I := I) (M := M) g s S]
   exact hΦ₀ (s + 1) (covGrad (I := I) (M := M) g 0 s S)
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

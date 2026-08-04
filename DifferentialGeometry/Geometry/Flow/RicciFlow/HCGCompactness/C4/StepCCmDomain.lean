@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAveraging
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoothness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchMin
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -28,7 +30,7 @@ open Set Bundle Manifold
 open scoped Topology Manifold ContDiff
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -761,7 +763,7 @@ open Set Bundle Manifold
 open scoped Topology Manifold ContDiff
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
-open DifferentialGeometry.Integral.Connection
+
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace

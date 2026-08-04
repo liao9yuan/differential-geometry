@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import Mathlib.LinearAlgebra.Trace
+open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection
@@ -12,7 +13,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open VectorField
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

@@ -8,6 +8,8 @@ import Mathlib.Topology.Algebra.Module.LinearPMap
 import Mathlib.LinearAlgebra.LinearPMap
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 import Mathlib.Algebra.Module.Projective
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -26,7 +28,7 @@ namespace ConnectionLaplacian
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

@@ -6,7 +6,7 @@ noncomputable section
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

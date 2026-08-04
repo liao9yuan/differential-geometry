@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpenScalar
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldEndgame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -20,7 +22,7 @@ noncomputable section
 
 open Set Function Filter Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 
 namespace DifferentialGeometry

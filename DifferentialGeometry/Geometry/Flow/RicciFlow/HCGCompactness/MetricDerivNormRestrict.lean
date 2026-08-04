@@ -4,6 +4,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -22,7 +25,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
@@ -119,7 +122,7 @@ theorem metricCovDeriv_restrictOpen_apply
               (by simp)
           rw [hscalar]
           simpa [XU] using
-            DifferentialGeometry.Integral.Connection.extDerivFun_restrictOpen
+            DifferentialGeometry.Geometry.Curvature.extDerivFun_restrictOpen
               (I := I) U
               (fun y : M => metricCovDeriv (I := I) h gRef a y
                 (fun q : Fin (a + 2) => V q y)) x (X (x : M)) hf
@@ -341,7 +344,7 @@ end DifferentialGeometry
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

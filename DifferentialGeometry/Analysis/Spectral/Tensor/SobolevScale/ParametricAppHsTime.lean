@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppH
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricTimeDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

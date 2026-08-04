@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Metric.Sphere.CoverQuotient
 import DifferentialGeometry.Geometry.Metric.Sphere.PositiveCover
 import DifferentialGeometry.Geometry.Topology.SemilocallySimplyConnected
 import DifferentialGeometry.Geometry.Topology.StandardModel
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -44,7 +46,7 @@ noncomputable def constPosQuotient
     (hbdry : I.Boundaryless) (hdim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (c : ℝ) (hc : 0 < c)
     (hsec : ∀ x : M, ∀ X Y : TangentSpace I x,
-      DifferentialGeometry.Integral.Connection.metricRm04StdAt
+      DifferentialGeometry.Geometry.Curvature.metricRm04StdAt
           (I := I) (M := M) g x X Y Y X =
         c * (g.inner x X X * g.inner x Y Y -
           g.inner x X Y * g.inner x X Y)) :
@@ -82,12 +84,12 @@ noncomputable def constPosQuotient
       (I := 𝓡 3) (J := I) g S.equiv.symm
   have hsecQ :
       ∀ x : S.Q, ∀ X Y : TangentSpace (𝓡 3) x,
-        DifferentialGeometry.Integral.Connection.metricRm04StdAt
+        DifferentialGeometry.Geometry.Curvature.metricRm04StdAt
             (I := 𝓡 3) (M := S.Q) gQ x X Y Y X =
           c * (gQ.inner x X X * gQ.inner x Y Y -
             gQ.inner x X Y * gQ.inner x X Y) := by
     intro x X Y
-    rw [DifferentialGeometry.Integral.Connection.metricRm04Std_pullbackCross
+    rw [DifferentialGeometry.Geometry.Curvature.metricRm04Std_pullbackCross
           g S.equiv.symm x X Y Y X,
       hsec,
       ← Diffeomorph.pullbackMetricCross_inner g S.equiv.symm x X X,

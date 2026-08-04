@@ -46,6 +46,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmDiffL2TameBallUniform
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzPhiMetTotalCurvatureFold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzDegenerateOneDimensionalVanishing
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -59,7 +62,7 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
   (chartRiemannTensor extChartAt_target_subset_interior_of_boundaryless)
@@ -131,7 +134,7 @@ private theorem lieArm1Piece_connDiff_realizedFam_allOrder_tameEnvelope
               (DifferentialGeometry.Integral.Connection.deTurckLieTraceCoeffPiece (I := I) (M := M)
                 g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) σ' ρ
-                (DifferentialGeometry.Integral.Connection.connDiffSection (I := I)
+                (DifferentialGeometry.Geometry.Curvature.connDiffSection (I := I)
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀))‖ ^ 2 ≤
             P i * (1 + ∑ j ∈ Finset.range (i + 2),
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +

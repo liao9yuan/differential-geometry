@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinFo
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 import Mathlib.Topology.Algebra.InfiniteSum.Real
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

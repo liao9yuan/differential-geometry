@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffMea
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarLapDiffCore
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 import Mathlib.Analysis.InnerProductSpace.PiL2
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -27,7 +29,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

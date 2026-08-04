@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -12,7 +14,7 @@ noncomputable section
 open Bundle Manifold Set FiberBundle Filter
 open scoped Manifold Topology ContDiff BigOperators
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

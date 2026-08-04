@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAvera
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCPartition
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBApproxIso
 import DifferentialGeometry.Geometry.Exponential.GaussLemma
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false

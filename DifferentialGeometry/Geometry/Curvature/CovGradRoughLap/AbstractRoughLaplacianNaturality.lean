@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CommutatorIdentity
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -9,8 +11,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -154,8 +156,8 @@ lemma curry_abstract_covDeriv_covApply_unitGrad_unfold_inner
   rw [curry_abstract_covDeriv_covApply_unitGrad_unfold (I := I) (M := M) g T₀ hX hVfield hY]
   rw [curriedSection_covApply_unitGradField_eq (I := I) (M := M) g T₀ hX hY]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

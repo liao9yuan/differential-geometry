@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSPathOrderSplit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Field
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieOneReanchor
+open DifferentialGeometry.Integral.Connection
 
 
 
@@ -22,7 +23,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficien
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization

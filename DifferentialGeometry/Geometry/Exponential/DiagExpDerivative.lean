@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Analysis.ODE.PhaseFlowPerturbation
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

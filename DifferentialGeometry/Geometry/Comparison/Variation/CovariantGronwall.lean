@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Metric.InnerExpansion
 import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Analysis.InnerProductSpace.PiL2
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

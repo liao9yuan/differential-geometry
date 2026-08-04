@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -56,7 +58,7 @@ theorem exists_pair_rrm1_ge
           Rm * (C * R) ^ 2 ≤ κ →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -114,7 +116,7 @@ theorem exists_pair_rrm1
           Rm * (C * R) ^ 2 ≤ κ →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -191,7 +193,7 @@ theorem exists_vol_pair_coeff
       (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -266,7 +268,7 @@ theorem exists_vol_pair_regionRm
         radialCurve (I := I) g p w t ∈ U) →
       (∀ q ∈ U,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -332,7 +334,7 @@ theorem exists_vol_pair_globalRm
       s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -396,7 +398,7 @@ theorem exists_vol_pair_globalRm1
       s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -462,7 +464,7 @@ theorem exists_vol_pair_rm1_ge
           Rm * ρ ^ 2 ≤ κ →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -521,7 +523,7 @@ theorem exists_vol_pair_rm1_auto
           Rm * ρ ^ 2 ≤ κ →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -605,7 +607,7 @@ theorem exists_vol_two_rm04
       (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
       (∀ w ∈ Metric.ball (0 : E) R,
         ContMDiff 𝓘(ℝ, ℝ) I 1 (radialCurve (I := I) g p w)) →
@@ -754,7 +756,7 @@ theorem exists_vol_scalar
       (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -817,7 +819,7 @@ theorem exists_vol_launch
       (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -882,7 +884,7 @@ theorem exists_vol_coeff
       (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -957,7 +959,7 @@ theorem exists_vol_regionRm
         radialCurve (I := I) g p w t ∈ U) →
       (∀ q ∈ U,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -1023,7 +1025,7 @@ theorem exists_vol_globalRm
       s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -1087,7 +1089,7 @@ theorem exists_vol_globalRm1
       s / Real.sqrt (gpCoerciveConst (I := I) g p) < R →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -1156,7 +1158,7 @@ theorem exists_vol_rm1_ge
           Rm * ρ ^ 2 ≤ κ →
       (∀ q : M,
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g q 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g q)) ≤ Rm) →
       (∀ k : Fin (Module.finrank ℝ E),
         Real.sqrt (g.inner p ((chartModelBasis E) k) ((chartModelBasis E) k)) ≤ A) →
@@ -1218,7 +1220,7 @@ theorem exists_vol_frame
       (∀ w ∈ Metric.ball (0 : E) R, ∀ t (_ht : t ∈ Set.Ioo (0 : Real) b),
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g
           (radialCurve (I := I) g p w t) 4
-          (DifferentialGeometry.Integral.Connection.metricRm04At
+          (DifferentialGeometry.Geometry.Curvature.metricRm04At
             (I := I) (M := M) g (radialCurve (I := I) g p w t))) ≤ Rm) →
       (∀ a : ℝ, 0 < a →
         (∀ k : Fin (Module.finrank ℝ E), ‖a • (chartModelBasis E) k‖ < ρ) →

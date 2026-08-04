@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Definitions
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -35,7 +37,7 @@ omit [Module.Finite ℝ E] in
 theorem sqLap_at
     [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (t : Real) {f : M -> Real} {x : M}
     (hf_all : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hf_x : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -43,17 +45,17 @@ theorem sqLap_at
       DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) f y) x)
     (hfg : MDiffAt (T% (f • fun y : M =>
       DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t) f y)) x) :
-    DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (fun y : M => f y ^ 2) x =
-      2 * f x * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t f x +
+    DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t (fun y : M => f y ^ 2) x =
+      2 * f x * DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t f x +
         2 * (G.metric t).inner x
-          (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t f x)
-          (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t f x) := by
+          (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t f x)
+          (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t f x) := by
   have hhalf :=
     DifferentialGeometry.Geometry.Operator.half_laplacian_mul_self
       (I := I) (G.connection t) (G.metric t) (f := f) (x := x)
       hf_all hf_x hgrad hfg
-  unfold DifferentialGeometry.Integral.Connection.laplacianAt
-    DifferentialGeometry.Integral.Connection.gradientAt
+  unfold DifferentialGeometry.Geometry.Curvature.laplacianAt
+    DifferentialGeometry.Geometry.Curvature.gradientAt
   have hpow :
       (fun y : M => f y ^ 2) = fun y : M => f y * f y := by
     funext y
@@ -77,15 +79,15 @@ omit [Module.Finite ℝ E] in
 theorem sqLap_realizes
     [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (scalar scalarLap gradScalarNormSq : Real -> M -> Real)
     (hscalarLap : ScalarLaplacianRealizesHeatOperatorOn
       (I := I) G T scalar scalarLap)
     (hgradNorm : forall t x,
       gradScalarNormSq t x =
         (G.metric t).inner x
-          (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x)
-          (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x))
+          (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (scalar t) x)
+          (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (scalar t) x))
     (hdf : forall t y,
       MDifferentiableAt I 𝓘(Real, Real) (scalar t) y)
     (hgrad : forall t x,
@@ -101,24 +103,24 @@ theorem sqLap_realizes
       (scalarSqLap scalar scalarLap gradScalarNormSq) := by
   intro t ht x
   have hlap :
-      scalarLap t x = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (scalar t)
+      scalarLap t x = DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t (scalar t)
         x := by
-    simpa [DifferentialGeometry.Integral.Connection.heatOperator] using hscalarLap t ht x
+    simpa [DifferentialGeometry.Geometry.Curvature.heatOperator] using hscalarLap t ht x
   have hsq :=
     sqLap_at (I := I) G t (f := scalar t) (x := x)
       (hdf t) (hdf t x) (hgrad t x) (hfg t x)
   calc
     scalarSqLap scalar scalarLap gradScalarNormSq t x =
-        2 * scalar t x * DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
+        2 * scalar t x * DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t
           (scalar t) x +
           2 * (G.metric t).inner x
-            (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x)
-            (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x) := by
+            (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (scalar t) x)
+            (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (scalar t) x) := by
           simp [scalarSqLap, hlap, hgradNorm t x]
-    _ = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
+    _ = DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t
           (fun y : M => scalar t y ^ 2) x := by
           rw [hsq]
-    _ = DifferentialGeometry.Integral.Connection.heatOperator (I := I) G t
+    _ = DifferentialGeometry.Geometry.Curvature.heatOperator (I := I) G t
           (fun y : M => scalar t y ^ 2) x := rfl
 
 
@@ -130,10 +132,10 @@ def tfLap
 
 
 def scalarSqHeatOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (scalar scalarSqLap gradScalarNormSq ricciNormSq : Real -> M -> Real) :
     Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     HasDerivWithinAt
       (fun s : Real => scalar s x ^ 2)
       (scalarSqLap (t : Real) x +
@@ -146,7 +148,7 @@ def scalarSqHeatOn
 
 omit [TopologicalSpace M] in
 theorem sqHeat_of_scalar
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (scalar scalarLap gradScalarNormSq ricciNormSq : Real -> M -> Real)
     (hscalar : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap ricciNormSq) :
@@ -164,10 +166,10 @@ theorem sqHeat_of_scalar
 
 
 def tfRicHeatOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (tfNormSq tfLap nablaRicNormSq gradScalarNormSq
       scalar ricciNormSq Q : Real -> M -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     scalar (t : Real) x ≠ 0 ->
     HasDerivWithinAt
       (fun s : Real => tfNormSq s x)
@@ -183,14 +185,14 @@ def tfRicHeatOn
 
 omit [TopologicalSpace M] in
 theorem tfRicHeat_alg
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (scalar ricciNormSq ricciNormLap scalarSqLap tfLap
       nablaRicNormSq gradScalarNormSq Q reaction : Real -> M -> Real)
     (hRic : RicciNormHeatEquationOn
       (D := D) ricciNormSq ricciNormLap nablaRicNormSq reaction)
     (hSq : scalarSqHeatOn
       (D := D) scalar scalarSqLap gradScalarNormSq ricciNormSq)
-    (hLap : ∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D, ∀ x,
+    (hLap : ∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D, ∀ x,
       tfLap (t : Real) x = ricciNormLap (t : Real) x -
         scalarSqLap (t : Real) x / 3)
     (hRel : tfRicReactRel
@@ -250,7 +252,7 @@ theorem tfRicHeat_alg
 
 omit [TopologicalSpace M] in
 theorem tfHeat_base
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (scalar scalarLap ricciNormSq ricciNormLap
       nablaRicNormSq gradScalarNormSq Q reaction : Real -> M -> Real)
     (hscalar : ScalarEvolutionEquationOn

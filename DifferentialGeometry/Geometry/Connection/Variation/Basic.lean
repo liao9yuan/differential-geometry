@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Tensor.RSTensor.Components
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -19,7 +21,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
@@ -46,7 +47,7 @@ def metricVariationComponent
 
 structure MetricPotentialVariationPath
     (g : SmoothRiemannianMetric I M) (potential : M -> Real) where
-  G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real
+  G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real
   potentialPath : Real -> M -> Real
   base : Real
   metricBase : G.metric base = g

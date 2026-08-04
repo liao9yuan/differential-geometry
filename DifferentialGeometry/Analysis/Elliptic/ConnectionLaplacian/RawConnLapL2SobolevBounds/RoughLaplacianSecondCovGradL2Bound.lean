@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryReconstruction
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -321,7 +324,7 @@ private theorem secondCovDeriv_unit_frame_fiberNormSq_le
       (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
       (fun y : M => S.toSection y) x) (fun m => ?_)
   exact
-    (Integral.Connection.tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
+    (DifferentialGeometry.Geometry.Curvature.tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
     (I := I) (M := M) g s S (X := smoothOrthoFrame (I := I) g x i)
     (Y := smoothOrthoFrame (I := I) g x i)
     (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x i) x m).symm

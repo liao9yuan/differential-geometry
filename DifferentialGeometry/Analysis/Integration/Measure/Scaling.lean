@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

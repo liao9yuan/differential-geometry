@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.Slot0FrameTraceMatching
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -9,8 +12,8 @@ open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -159,8 +162,8 @@ theorem covGradRoughLapCurv_curry_eq_discrepancy_add_curv_sub_residual_gen
   rw [hswap]
   abel
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

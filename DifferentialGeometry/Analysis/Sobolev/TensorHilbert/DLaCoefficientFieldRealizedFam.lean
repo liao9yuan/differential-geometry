@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DLaCoefficientFieldTopSeparated
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 /-!
 # Top-separated realized-family jet bounds for the DLa coefficient field

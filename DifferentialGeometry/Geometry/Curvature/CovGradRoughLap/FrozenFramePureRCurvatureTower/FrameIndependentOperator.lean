@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower.FrozenOperator
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -9,8 +12,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -351,8 +354,8 @@ private theorem pureRGenuineDiffOp_isOrderZeroCurvFactor (g : SmoothRiemannianMe
           pureRGenuineEndoFib (I := I) (M := M) g m W₂ x from rfl,
           pureRGenuineEndoFib_local (I := I) (M := M) g m W₁ W₂ x hx]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

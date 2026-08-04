@@ -7,6 +7,8 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -23,7 +25,7 @@ namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
@@ -231,7 +233,7 @@ theorem exists_freezeFirstTwo0S {x : M} {s : ℕ}
     Traw (metricTraceInput (I := I) X Y tail)
   change L (vec2 (I := I) X Y) =
     Traw (metricTraceInput (I := I) X Y tail)
-  simp [L, DifferentialGeometry.Integral.Connection.vec2]
+  simp [L, DifferentialGeometry.Geometry.Curvature.vec2]
 
 
 def freezeFirstTwo0S {x : M} {s : ℕ}
@@ -288,12 +290,12 @@ theorem exists_freezeLastTwo0S3 {x : M}
   congr 1
   funext a
   fin_cases a
-  · norm_num [DifferentialGeometry.Integral.Connection.vec2,
-    DifferentialGeometry.Integral.Connection.vec3]
-  · norm_num [DifferentialGeometry.Integral.Connection.vec2,
-    DifferentialGeometry.Integral.Connection.vec3]
+  · norm_num [DifferentialGeometry.Geometry.Curvature.vec2,
+    DifferentialGeometry.Geometry.Curvature.vec3]
+  · norm_num [DifferentialGeometry.Geometry.Curvature.vec2,
+    DifferentialGeometry.Geometry.Curvature.vec3]
   · change (vec2 (I := I) X Z) 1 = Z
-    norm_num [DifferentialGeometry.Integral.Connection.vec2]
+    norm_num [DifferentialGeometry.Geometry.Curvature.vec2]
 
 
 def freezeLastTwo0S3 {x : M}
@@ -527,7 +529,7 @@ theorem normSq0S_metricTensor0S_eq_card
           intro i _
           apply Finset.sum_congr rfl
           intro j _
-          simp [metricTensor0S_apply, vec2, DifferentialGeometry.Integral.Connection.vec2,
+          simp [metricTensor0S_apply, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
             g.symm x (basis i) (basis j)]
     _ = ∑ i : Idx, (if i = i then (1 : Real) else 0) := by
           apply Finset.sum_congr rfl

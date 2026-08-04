@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.PhaseEndpointInverse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseSmallness
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 

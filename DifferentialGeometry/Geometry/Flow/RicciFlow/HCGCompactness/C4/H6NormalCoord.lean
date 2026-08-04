@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -126,7 +128,7 @@ def FramedRm04Bound
     Real.sqrt (Tensor0SBundle.normSq0S (I := I) Y.metric
       (radialCurve (I := I) Y.metric x
         (normalFrame (I := I) Y.metric x z) t) 4
-      (DifferentialGeometry.Integral.Connection.metricRm04At
+      (DifferentialGeometry.Geometry.Curvature.metricRm04At
         (I := I) (M := Y.M) Y.metric
         (radialCurve (I := I) Y.metric x
           (normalFrame (I := I) Y.metric x z) t))) ≤ R
@@ -320,7 +322,7 @@ theorem framed_rm04_bounds
   have hRmRaw : ∀ t ∈ Set.Ioo (0 : Real) 1,
       Real.sqrt (Tensor0SBundle.normSq0S (I := I) Y.metric
         (radialCurve (I := I) Y.metric x xRaw t) 4
-        (DifferentialGeometry.Integral.Connection.metricRm04At
+        (DifferentialGeometry.Geometry.Curvature.metricRm04At
           (I := I) (M := Y.M) Y.metric
           (radialCurve (I := I) Y.metric x xRaw t))) ≤ R := by
     simpa only [FramedRm04Bound, xRaw] using hRm

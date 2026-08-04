@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Geometry
+open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false

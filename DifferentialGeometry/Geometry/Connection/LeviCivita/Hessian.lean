@@ -7,6 +7,9 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Connect
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Moving
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Smoothness
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -22,7 +25,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle

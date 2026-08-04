@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Calculus.MovingInverse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalDiagBranch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalLimitPhase
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false

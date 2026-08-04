@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 
 
 noncomputable section
@@ -8,8 +11,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
@@ -148,6 +151,6 @@ theorem tensorRS_section_eq_sum_slot0Curry_uncurry
   exact tensorRS_section_uncurry_cons_eval_slot0Curry (I := I) (M := M) g s x e
     (fun k => k.elim0) hv_expand T w m
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

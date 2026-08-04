@@ -31,12 +31,15 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle Tensor0SBundle
@@ -244,7 +247,7 @@ private theorem nabla0SFun_two_eval_smooth_slots
   let V : Fin 2 -> (p : M) -> TangentSpace I p := fun a p => Vsec a p
   have hslots : (fun a : Fin 2 => V a x) = vec2 (Y x) (Z x) := by
     funext a
-    fin_cases a <;> simp [V, Vsec, vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases a <;> simp [V, Vsec, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   have hpair : MDifferentiableAt I 𝓘(Real, Real)
       (fun p : M => A p (fun a : Fin 2 => V a p)) x := by
     have hEval := TensorMultilinear.contMDiff_tensor0SField_apply
@@ -288,13 +291,13 @@ private theorem nabla0SFun_two_eval_smooth_slots
             ((cov (V 0) x) (X x)) =
           vec2 ((cov (fun p : M => Y p) x) (X x)) (Z x) := by
       funext q
-      fin_cases q <;> simp [V, Vsec, vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [V, Vsec, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
     have h1 :
         Function.update (fun b : Fin 2 => V b x) 1
             ((cov (V 1) x) (X x)) =
           vec2 (Y x) ((cov (fun p : M => Z p) x) (X x)) := by
       funext q
-      fin_cases q <;> simp [V, Vsec, vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [V, Vsec, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
     rw [Fin.sum_univ_two]
     rw [h0, h1]
   have hscalar :
@@ -303,7 +306,7 @@ private theorem nabla0SFun_two_eval_smooth_slots
     funext p
     congr 1
     funext a
-    fin_cases a <;> simp [V, Vsec, vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases a <;> simp [V, Vsec, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   calc
     (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       2 cov X A x) (vec2 (Y x) (Z x))
@@ -729,7 +732,7 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangen
   have hYval : tangentConstAt (I := I) x Y x = Ys x := by
     simpa [Yc] using hYx
   simp only [connectionRiemannCurvatureField,
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 
@@ -1055,7 +1058,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
   change g.inner x W ((connectionRiemannCurvatureField (I := I) cov Xc Yc Zc) x) =
       -g.inner x Z ((connectionRiemannCurvatureField (I := I) cov Xc Yc Wc) x)
   simpa [connectionRiemannCurvatureField,
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, YZc, YWc, XZc, XWc,
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField, YZc, YWc, XZc, XWc,
       Bc,
     hXc_self, hYc_self] using hgoal
 
@@ -1091,7 +1094,7 @@ theorem rm04InputSkewAt_of_leviCivita_realizes
   have hleft := hRm04 Ysec Xsec Zsec Wsec x
   have hright := hRm04 Xsec Ysec Zsec Wsec x
   have hswap :=
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) (leviCivitaConnectionOfMetric (I := I) g)
       Xsec Ysec Zsec x
   have hinner :
@@ -1141,7 +1144,7 @@ theorem rm04InputSkew_ofRealizes
   have hleft := hRm04 Ysec Xsec Zsec Wsec x
   have hright := hRm04 Xsec Ysec Zsec Wsec x
   have hswap :=
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) cov Xsec Ysec Zsec x
   have hinner :
       g.inner x (Wsec x)

@@ -4,6 +4,9 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInne
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -38,7 +41,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

@@ -13,6 +13,9 @@ import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.Operators
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -30,7 +33,7 @@ set_option backward.isDefEq.respectTransparency false
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -1181,9 +1184,9 @@ theorem freeze02_deriv
             vec3 (I := I) (Y x) ((cov (fun y : M => Z y) x) (X x)) (v 1) := by
         funext a
         fin_cases a
-        · simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
-        · simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
-        · simpa [Function.update, DifferentialGeometry.Integral.Connection.vec3] using hW
+        · simp [Function.update, DifferentialGeometry.Geometry.Curvature.vec3]
+        · simp [Function.update, DifferentialGeometry.Geometry.Curvature.vec3]
+        · simpa [Function.update, DifferentialGeometry.Geometry.Curvature.vec3] using hW
       have hWupd :
           Function.update
               (Fin.cons (Y x) (fun a : Fin 2 => (if a = 0 then Z else W) x)) 2
@@ -1191,9 +1194,9 @@ theorem freeze02_deriv
             vec3 (I := I) (Y x) (v 0) ((cov (fun y : M => W y) x) (X x)) := by
         funext a
         fin_cases a
-        · simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
-        · simpa [Function.update, DifferentialGeometry.Integral.Connection.vec3] using hZ
-        · simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
+        · simp [Function.update, DifferentialGeometry.Geometry.Curvature.vec3]
+        · simpa [Function.update, DifferentialGeometry.Geometry.Curvature.vec3] using hZ
+        · simp [Function.update, DifferentialGeometry.Geometry.Curvature.vec3]
       simp only [hZupd, hWupd] at h
       simpa [CZ, CW] using h
     have htot :
@@ -1208,19 +1211,19 @@ theorem freeze02_deriv
               ((cov (fun p : M => Y p) x) (X x)) =
             vec3 (I := I) ((cov (fun y : M => Y y) x) (X x)) (v 0) (v 1) := by
         funext a
-        fin_cases a <;> simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
+        fin_cases a <;> simp [Function.update, DifferentialGeometry.Geometry.Curvature.vec3]
       have hZupd3 :
           Function.update (vec3 (I := I) (Y x) (v 0) (v 1)) 1
               ((cov (fun p : M => Z p) x) (X x)) =
             vec3 (I := I) (Y x) ((cov (fun y : M => Z y) x) (X x)) (v 1) := by
         funext a
-        fin_cases a <;> simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
+        fin_cases a <;> simp [Function.update, DifferentialGeometry.Geometry.Curvature.vec3]
       have hWupd3 :
           Function.update (vec3 (I := I) (Y x) (v 0) (v 1)) 2
               ((cov (fun p : M => W p) x) (X x)) =
             vec3 (I := I) (Y x) (v 0) ((cov (fun y : M => W y) x) (X x)) := by
         funext a
-        fin_cases a <;> simp [Function.update, DifferentialGeometry.Integral.Connection.vec3]
+        fin_cases a <;> simp [Function.update, DifferentialGeometry.Geometry.Curvature.vec3]
       simp only [Nat.reduceAdd, Fin.isValue, ContinuousLinearMap.coe_comp',
         ContinuousLinearEquiv.coe_coe, Function.comp_apply, directionalDeriv_eq,
         Fin.sum_univ_succ, Fin.cons_zero, Fin.cons_succ, Fin.succ_zero_eq_one,
@@ -1231,9 +1234,9 @@ theorem freeze02_deriv
           (nabla2A x) (vec4 (I := I) (X x) (Y x) (v 0) (v 1)) =
             D - (CY + (CZ + CW)) := by
         simpa [D, CY, CZ, CW, V2, V3, hZ, hW,
-          DifferentialGeometry.Integral.Connection.vec2,
-            DifferentialGeometry.Integral.Connection.vec3,
-          DifferentialGeometry.Integral.Connection.vec4, Fin.sum_univ_succ, Fin.sum_univ_two,
+          DifferentialGeometry.Geometry.Curvature.vec2,
+            DifferentialGeometry.Geometry.Curvature.vec3,
+          DifferentialGeometry.Geometry.Curvature.vec4, Fin.sum_univ_succ, Fin.sum_univ_two,
           Function.update, Fin.cons_zero, Fin.cons_succ]
           using h
       calc
@@ -1485,7 +1488,7 @@ theorem Tensor02NormSecondProductInBasis.of_hessian_product
                 vec2 (I := I) (basis i) (basis j) := by
             funext a
             fin_cases a
-            · simp [metricTraceInput, vec2, DifferentialGeometry.Integral.Connection.vec2]
+            · simp [metricTraceInput, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
             · rfl
           rw [hinput]
     _ =
@@ -1910,4 +1913,4 @@ end RicciNorm
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

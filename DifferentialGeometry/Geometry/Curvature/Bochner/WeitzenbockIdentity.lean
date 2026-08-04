@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -13,8 +15,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -1475,6 +1477,6 @@ theorem laplacian_inner_self [I.Boundaryless]
   exact h
 
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

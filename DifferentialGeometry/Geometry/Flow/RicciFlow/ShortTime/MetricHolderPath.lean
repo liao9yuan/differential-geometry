@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HolderPath
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MetricHolderData
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Finite-chart Holder paths for metric differences

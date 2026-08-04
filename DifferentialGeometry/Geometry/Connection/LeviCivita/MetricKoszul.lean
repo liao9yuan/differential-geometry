@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.CorrectionContraction
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricKoszul
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -18,7 +19,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

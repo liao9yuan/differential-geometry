@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Metric.Sphere.RoundProjConnLC
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import Mathlib.Analysis.InnerProductSpace.LinearMap
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -16,7 +18,7 @@ noncomputable section
 
 open Bundle Manifold Set Metric Module
 open DifferentialGeometry.Integral
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open scoped Manifold Topology ContDiff RealInnerProductSpace
@@ -329,12 +331,12 @@ theorem greatCircle_geodesic
         (fun y => TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y (Y y)) (γ t) :=
     Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
   have hcov :
-      (Integral.Connection.metricCov (roundMetric (E := E) (n := n)))
+      (DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n)))
           (fun y => Y y) (γ t)
           ((mfderiv 𝓘(ℝ, ℝ) (𝓡 n) γ t) (1 : ℝ)) = 0 := by
     apply mfderiv_coe_sphere_injective
     change dIncl (n := n) (γ t)
-        ((Integral.Connection.metricCov (roundMetric (E := E) (n := n)))
+        ((DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n)))
           (fun y => Y y) (γ t)
           ((mfderiv 𝓘(ℝ, ℝ) (𝓡 n) γ t) (1 : ℝ))) =
       dIncl (n := n) (γ t) 0

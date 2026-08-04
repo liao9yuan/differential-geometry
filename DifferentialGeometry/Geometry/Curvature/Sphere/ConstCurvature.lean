@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Metric.Sphere.RoundShape
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Curvature.MetricSectional
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -26,8 +27,8 @@ noncomputable section
 
 open Bundle Manifold Set Metric Module
 open scoped Manifold Topology ContDiff RealInnerProductSpace
-open DifferentialGeometry.Integral.Connection
-open DifferentialGeometry.Integral.Connection.CovariantDerivative
+
+open DifferentialGeometry.Geometry.Curvature.CovariantDerivative
 
 namespace DifferentialGeometry
 namespace Geometry

@@ -7,6 +7,7 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -22,10 +23,10 @@ noncomputable section
 
 set_option autoImplicit false
 
-open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
+open Bundle Tensor0SBundle
 open scoped BigOperators Manifold ContDiff Topology
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 variable {E : Type _} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [CompleteSpace E]
@@ -300,7 +301,7 @@ theorem curvField_contMDiffAt
       ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
         (T% (fun p : M => (cov (fun q : M => Z q) p) (B p))) x :=
     cov_smooth_apply_contMDiffAt (I := I) cov hcov B Z x
-  simpa [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, YZ, XZ, B] using
+  simpa [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField, YZ, XZ, B] using
     (h1.sub_section h2).sub_section h3
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
@@ -474,7 +475,7 @@ theorem connectionRiemannCurvatureField_congr_of_eventuallyEq
       (cov_smooth_apply_mdiffAt (I := I) cov hcov X Z x)
       (cov_smooth_apply_mdiffAt (I := I) cov hcov X' Z' x)
       (by simp) hinnerX
-  simp [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, hcovZY, hcovZX,
+  simp [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField, hcovZY, hcovZX,
     hZ_at, hXx, hYx, hbr]
 
 omit [FiniteDimensional ℝ E] in
@@ -501,7 +502,7 @@ theorem connectionRiemannCurvatureField_tensorial_left
           f • (fun p : M => (cov (fun q : M => Z q) p) (σ p)) := by
       funext p
       simp [map_smul]
-    simp only [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+    simp only [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
     rw [hmid]
     rw [cov.isCovariantDerivativeOnUniv.leibniz hZσ hf]
     rw [VectorField.mlieBracket_smul_left (I := I) hf hσ]
@@ -523,7 +524,7 @@ theorem connectionRiemannCurvatureField_tensorial_left
             (fun p : M => (cov (fun q : M => Z q) p) (σ' p)) := by
       funext p
       simp [map_add]
-    simp only [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+    simp only [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
     rw [hmid]
     rw [cov.isCovariantDerivativeOnUniv.add hZσ hZσ']
     rw [VectorField.mlieBracket_add_left (I := I) hσ hσ']
@@ -546,10 +547,10 @@ theorem connectionRiemannCurvatureField_tensorial_middle
     have hleft :=
       (connectionRiemannCurvatureField_tensorial_left
         (I := I) cov hcov X Z x).smul (f := f) (σ := σ) hf hσ
-    rw [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    rw [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) (cov := cov) (X := f • σ) (Y := fun p : M => X p)
       (Z := fun p : M => Z p) (x := x)]
-    rw [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    rw [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) (cov := cov) (X := σ) (Y := fun p : M => X p)
       (Z := fun p : M => Z p) (x := x)]
     rw [hleft]
@@ -558,13 +559,13 @@ theorem connectionRiemannCurvatureField_tensorial_middle
     have hleft :=
       (connectionRiemannCurvatureField_tensorial_left
         (I := I) cov hcov X Z x).add (σ := σ) (σ' := σ') hσ hσ'
-    rw [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    rw [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) (cov := cov) (X := σ + σ') (Y := fun p : M => X p)
       (Z := fun p : M => Z p) (x := x)]
-    rw [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    rw [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) (cov := cov) (X := σ) (Y := fun p : M => X p)
       (Z := fun p : M => Z p) (x := x)]
-    rw [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    rw [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) (cov := cov) (X := σ') (Y := fun p : M => X p)
       (Z := fun p : M => Z p) (x := x)]
     rw [hleft]
@@ -708,7 +709,7 @@ private theorem connectionRiemannCurvatureField_smul_right_smooth
     simpa [vderiv, Xf, Yf] using
       (DifferentialGeometry.vderiv_mlieBracket
         (I := I) (fun p : M => X p) (fun p : M => Y p) f x hX2 hY2 hf2)
-  simp only [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+  simp only [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   rw [hinnerY, hinnerX]
   rw [cov.isCovariantDerivativeOnUniv.add
     ((hfmd.smul_section hYZmd)) (hYfmd.smul_section hZmd)]
@@ -788,7 +789,7 @@ private theorem connectionRiemannCurvatureField_add_right_smooth
           (Z'.contMDiff.contMDiffAt.mdifferentiableAt (by simp)))
     simpa [XZ, XZ', Pi.add_apply] using
       congrArg (fun L : TangentSpace I p →L[Real] TangentSpace I p => L (X p)) hleib
-  simp only [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+  simp only [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   rw [hinnerY, hinnerX]
   rw [cov.isCovariantDerivativeOnUniv.add hYZmd hYZ'md]
   rw [cov.isCovariantDerivativeOnUniv.add hXZmd hXZ'md]
@@ -994,4 +995,4 @@ theorem connectionRiemannCurvatureField_congr_point
 
 end CovariantDerivative
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

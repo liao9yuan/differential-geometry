@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Readout
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.RzMaster
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -22,7 +25,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
@@ -190,7 +193,7 @@ noncomputable def lieCorr0RiemQuadlin
       (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
       (ContinuousLinearMap.compL ℝ (TangentSpace I x) (TangentSpace I x)
         (TangentSpace I x →L[ℝ] ℝ) (g₀.inner x))).comp
-    (Integral.Connection.riemannOp (LeviCivita (I := I) g₀) x)
+    (DifferentialGeometry.Geometry.Curvature.riemannOp (LeviCivita (I := I) g₀) x)
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -199,7 +202,7 @@ theorem lieCorr0RiemQuadlin_apply
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 u w : TangentSpace I x) :
     lieCorr0RiemQuadlin (I := I) g₀ x v0 v1 u w =
-      g₀.inner x (Integral.Connection.riemannOp (LeviCivita (I := I) g₀) x v0 v1 u) w :=
+      g₀.inner x (DifferentialGeometry.Geometry.Curvature.riemannOp (LeviCivita (I := I) g₀) x v0 v1 u) w :=
   rfl
 
 noncomputable def lieCorr0Quadlin4ToModel
@@ -233,7 +236,7 @@ omit [SigmaCompactSpace M] in
 theorem lieCorr0RiemLoweredFib_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M) (v : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel (lieCorr0RiemLoweredFib (I := I) g₀ x) v =
-      g₀.inner x (Integral.Connection.riemannOp (LeviCivita (I := I) g₀) x
+      g₀.inner x (DifferentialGeometry.Geometry.Curvature.riemannOp (LeviCivita (I := I) g₀) x
         (v 0) (v 1) (v 2)) (v 3) := by
   rw [lieCorr0RiemLoweredFib, Tensor0SSpace.toModel_ofModel]
   exact lieCorr0Quadlin4ToModel_apply (TangentSpace I x) (lieCorr0RiemQuadlin (I := I) g₀ x) v
@@ -508,7 +511,7 @@ theorem lieCorr0RiemLoweredFib_section_contMDiff
   obtain ⟨Y, hY⟩ := hframe.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
   have hscalar : ContMDiff I 𝓘(ℝ) ∞
       (fun x : M => g₀.inner x
-        (Integral.Connection.riemannOp (LeviCivita (I := I) g₀) x
+        (DifferentialGeometry.Geometry.Curvature.riemannOp (LeviCivita (I := I) g₀) x
           ((Y (σ 0)) x) ((Y (σ 1)) x) ((Y (σ 2)) x)) ((Y (σ 3)) x)) :=
     Integral.Connection.mixedKernelScalar_global (I := I) g₀ g₀
       (Y (σ 0)).contMDiff (Y (σ 3)).contMDiff (Y (σ 1)).contMDiff (Y (σ 2)).contMDiff

@@ -21,6 +21,9 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcChartCurvatureJointSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcArmCoeffJetEnvelopeBallUniform
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcCorrectionFieldConstruction
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -36,7 +39,7 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization

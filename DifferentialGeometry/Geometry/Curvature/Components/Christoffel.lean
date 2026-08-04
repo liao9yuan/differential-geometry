@@ -1,10 +1,12 @@
 import DifferentialGeometry.Geometry.Curvature.Components.LocalFrame
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -463,7 +465,7 @@ theorem connection_curvature_coord_of_christoffel
     (connectionRiemannCurvatureField (I := I) cov (frame i) (frame k) (frame j)) x₀
         = (cov Vkj x₀) (frame i x₀) - (cov Vij x₀) (frame k x₀) := by
           simp [connectionRiemannCurvatureField,
-            DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, Vkj, Vij,
+            DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField, Vkj, Vij,
               frame, hbracket]
     _ = ∑ m : CoordinateIdx (𝕜 := Real) E,
           christoffelCurvCoeffAt (I := I) cov x₀ i k j m • frame m x₀ := by
@@ -608,7 +610,7 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_coordFrame
   have hYval : coordinateFrameAt (I := I) x₀ k x₀ = Ys x₀ := by
     simpa [Yc] using hYx
   simp only [connectionRiemannCurvatureField,
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 
@@ -740,7 +742,7 @@ theorem rm13_coord_expand
               (fun q : Fin 3 => basis (r q)) =
                 vec3 (basis (r 0)) (basis (r 1)) (basis (r 2)) := by
             funext q
-            fin_cases q <;> simp [DifferentialGeometry.Integral.Connection.vec3]
+            fin_cases q <;> simp [DifferentialGeometry.Geometry.Curvature.vec3]
           have hbasisEval :
               Rm13 x₀ alpha (fun q : Fin 3 => basis (r q)) =
                 ∑ m : CoordinateIdx (𝕜 := Real) E,
@@ -827,4 +829,4 @@ theorem ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
   exact hsum
 
 end CoordinateChristoffelCurvature
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

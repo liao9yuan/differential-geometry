@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.TfHeatAssembly
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -26,32 +28,32 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
 
 def scalGradSq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     Real -> M -> Real :=
   fun t x =>
     (S.family.metric t).inner x
-      (DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t
+      (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) (flowG (I := I) S) t
         (S.scalar t) x)
-      (DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t
+      (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) (flowG (I := I) S) t
         (S.scalar t) x)
 
 
 def tfLapBook
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     Real -> M -> Real :=
   fun t x =>
-    DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+    DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
       (fun y : M => tfRicNormSq S.scalar (ricciNorm (I := I) S) t y) x
 
 
 
 
 noncomputable def ricciNablaSec
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -67,21 +69,21 @@ noncomputable def ricciNablaSec
 
 
 noncomputable def ricciNormDuSec
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1 :=
   DifferentialGeometry.Geometry.Operator.duSec (I := I)
     (fun y : M =>
-      DifferentialGeometry.Integral.Connection.normSq02 (I := I) (S.base.metric t) y (S.ricci t y))
+      DifferentialGeometry.Geometry.Curvature.normSq02 (I := I) (S.base.metric t) y (S.ricci t y))
     (by
-      exact DifferentialGeometry.Integral.Connection.norm02_smooth (I := I) (M := M)
+      exact DifferentialGeometry.Geometry.Curvature.norm02_smooth (I := I) (M := M)
         (S.base.metric t) (S.ricci t))
 
 
 def pinchCoupleSol
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     Real -> M -> Real :=
@@ -100,7 +102,7 @@ def pinchCoupleSol
 omit [Module.Finite ℝ E] in
 theorem pinchEvol_solSec
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (S : SolutionOn (I := I) (M := M) D)
@@ -110,17 +112,17 @@ theorem pinchEvol_solSec
       (scalGradSq (I := I) S)
       (cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S))
       epsilon)
-    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hscalar : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       x,
       0 < S.scalar (t : Real) x)
-    (htfDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (htfDiff : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       x,
       MDifferentiableAt I 𝓘(Real, Real)
         (tfRicNormSq S.scalar (ricciNorm (I := I) S) (t : Real)) x)
-    (hscalarDiff : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+    (hscalarDiff : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D) x,
       MDifferentiableAt I 𝓘(Real, Real) (S.scalar (t : Real)) x) :
-    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
       HasDerivWithinAt
         (fun s : Real =>
           quotField (M := M)
@@ -140,11 +142,11 @@ theorem pinchEvol_solSec
   classical
   let Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E
   let basis :
-      forall (_t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+      forall (_t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
         Module.Basis Idx Real (TangentSpace I x) :=
     fun _t x => DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
   let gInv :
-      forall (_t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+      forall (_t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
         (_x : M),
         Idx -> Idx -> Real :=
     fun t x i j => coordInv (I := I) S x (t : Real) x i j
@@ -181,25 +183,25 @@ theorem pinchEvol_solSec
     simpa [ricciNormDuSec, flowG] using
       DifferentialGeometry.Geometry.Operator.duSec_realizes (I := I)
         (fun y : M =>
-          DifferentialGeometry.Integral.Connection.normSq02 (I := I)
+          DifferentialGeometry.Geometry.Curvature.normSq02 (I := I)
             ((flowG (I := I) S).metric (t : Real)) y
             (S.ricci (t : Real) y))
         (by
           simpa [flowG] using
-            DifferentialGeometry.Integral.Connection.norm02_smooth (I := I) (M := M)
+            DifferentialGeometry.Geometry.Curvature.norm02_smooth (I := I) (M := M)
               (S.base.metric (t : Real)) (S.ricci (t : Real)))
   · intro t y
-    simp [ricciNorm, DifferentialGeometry.Integral.Connection.normSq02,
-      DifferentialGeometry.Integral.Connection.inner02, flowG]
+    simp [ricciNorm, DifferentialGeometry.Geometry.Curvature.normSq02,
+      DifferentialGeometry.Geometry.Curvature.inner02, flowG]
   · intro t x
     have hf :
         ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
           (fun y : M =>
-            DifferentialGeometry.Integral.Connection.normSq02 (I := I)
+            DifferentialGeometry.Geometry.Curvature.normSq02 (I := I)
               ((flowG (I := I) S).metric (t : Real)) y
               (S.ricci (t : Real) y)) := by
       simpa [flowG] using
-        DifferentialGeometry.Integral.Connection.norm02_smooth (I := I) (M := M)
+        DifferentialGeometry.Geometry.Curvature.norm02_smooth (I := I) (M := M)
           (S.base.metric (t : Real)) (S.ricci (t : Real))
     exact hf.contMDiffAt.mdifferentiableAt (by simp)
 
@@ -207,11 +209,11 @@ theorem pinchEvol_solSec
 omit [Module.Finite ℝ E] in
 theorem ricciSym_can
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
-    DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricciAt t x) := by
+    DifferentialGeometry.Geometry.Curvature.RicciSymAt (I := I) (S.ricciAt t x) := by
   classical
   let basis : Module.Basis (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
       Real (TangentSpace I x) :=
@@ -236,37 +238,37 @@ theorem ricciSym_can
     DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric t)
   have hRm13 :
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
+      DifferentialGeometry.Geometry.Curvature.Rm13RealizesConnection (I := I)
         (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm13 t) := by
     simpa [SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm13
   have hRm04 :
-      DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I) (S.base.metric t)
+      DifferentialGeometry.Geometry.Curvature.Rm04RealizesConnection (I := I) (S.base.metric t)
         (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm04 t) := by
     simpa [SolutionFamily.rm04, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
   have hRic13 :
       S.ricciAt t x =
-        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M)
+        DifferentialGeometry.Geometry.Curvature.ricciFromRm13At (I := I) (M := M)
           (S.base.rm13 t x) := by
     simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionFamily.rm13]
       using (metricCurvData (I := I) (M := M) (S.base.metric t)).h_ricci13 x
   have hLowerAt :
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) (S.base.metric t) x
+      DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I) (S.base.metric t) x
         (S.base.rm13 t x) (S.base.rm04 t x) :=
-    DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
+    DifferentialGeometry.Geometry.Curvature.rm04LowersRm13At_of_realizes
       (I := I) (g := S.base.metric t)
       (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
         (S.base.metric t))
       (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
       hRm13 hRm04 x
   have hTrace :
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricciAt t x)
         (S.base.rm04 t x) gInv basis :=
-    DifferentialGeometry.Integral.Connection.ricciFirstTraceAt_of_rm13 (I := I) (S.base.metric t)
+    DifferentialGeometry.Geometry.Curvature.ricciFirstTraceAt_of_rm13 (I := I) (S.base.metric t)
       basis gInv hinv (S.ricciAt t x) (S.base.rm13 t x) (S.base.rm04 t x)
       hRic13 hLowerAt hInvSym
   exact ricciSym_rm04 (I := I) basis gInv
@@ -287,14 +289,14 @@ theorem ricciSym_can
 omit [Module.Finite ℝ E] in
 theorem traceData_can
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     {t : Real} {x : M}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
-    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt
+    (horth : DifferentialGeometry.Geometry.Curvature.OrthonormalBasisAt
       (I := I) (S.base.metric t) x basis) :
-    DifferentialGeometry.Integral.Connection.RiemannFromRicci3DTraceDataAt
+    DifferentialGeometry.Geometry.Curvature.RiemannFromRicci3DTraceDataAt
       (I := I) (S.base.metric t) (-(S.ricciAt t x))
       (-(S.scalar t x)) (S.base.rm04 t x) basis := by
   have hcov :
@@ -305,53 +307,53 @@ theorem traceData_can
     DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric t)
   have hRm13 :
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
+      DifferentialGeometry.Geometry.Curvature.Rm13RealizesConnection (I := I)
         (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm13 t) := by
     simpa [SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm13
   have hRm04 :
-      DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I) (S.base.metric t)
+      DifferentialGeometry.Geometry.Curvature.Rm04RealizesConnection (I := I) (S.base.metric t)
         (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
           (S.base.metric t)) (S.base.rm04 t) := by
     simpa [SolutionFamily.rm04, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
   have hRic13 :
       S.ricciAt t x =
-        DifferentialGeometry.Integral.Connection.ricciFromRm13At (I := I) (M := M)
+        DifferentialGeometry.Geometry.Curvature.ricciFromRm13At (I := I) (M := M)
           (S.base.rm13 t x) := by
     simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionFamily.rm13]
       using (metricCurvData (I := I) (M := M) (S.base.metric t)).h_ricci13 x
   have hLowerAt :
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I) (S.base.metric t) x
+      DifferentialGeometry.Geometry.Curvature.Rm04LowersRm13At (I := I) (S.base.metric t) x
         (S.base.rm13 t x) (S.base.rm04 t x) :=
-    DifferentialGeometry.Integral.Connection.rm04LowersRm13At_of_realizes
+    DifferentialGeometry.Geometry.Curvature.rm04LowersRm13At_of_realizes
       (I := I) (g := S.base.metric t)
       (cov := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I)
         (S.base.metric t))
       (Rm13 := S.base.rm13 t) (Rm04 := S.base.rm04 t)
       hRm13 hRm04 x
   have hcurv :
-      DifferentialGeometry.Integral.Connection.AlgebraicCurvatureSymmetries3
-        (DifferentialGeometry.Integral.Connection.standardRmCompAt (I := I) basis
+      DifferentialGeometry.Geometry.Curvature.AlgebraicCurvatureSymmetries3
+        (DifferentialGeometry.Geometry.Curvature.standardRmCompAt (I := I) basis
           (S.base.rm04 t x)) :=
-    Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
+    DifferentialGeometry.Geometry.Curvature.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
       (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04) basis
   have hRicFirst :
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
+      DifferentialGeometry.Geometry.Curvature.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricciAt t x)
-        (S.base.rm04 t x) DifferentialGeometry.Integral.Connection.delta3 basis :=
+        (S.base.rm04 t x) DifferentialGeometry.Geometry.Curvature.delta3 basis :=
     firstTrace_delta (I := I) (S.base.metric t) horth
       (S.ricciAt t x) (S.base.rm13 t x) (S.base.rm04 t x)
       hRic13 hLowerAt
   have hScalarTrace :
-      DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I) (S.scalar t x)
-        (S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis := by
+      DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceAt (I := I) (S.scalar t x)
+        (S.ricciAt t x) DifferentialGeometry.Geometry.Curvature.delta3 basis := by
     have htr := scalarTrace_delta (I := I) (S.base.metric t)
       (S.ricciAt t x) horth
     simpa [SolutionOn.scalar_eq_metricTrace] using htr
-  exact DifferentialGeometry.Integral.Connection.traceDataOfFirst (I := I) (M := M) horth
+  exact DifferentialGeometry.Geometry.Curvature.traceDataOfFirst (I := I) (M := M) horth
     hcurv hRicFirst hScalarTrace
 
 
@@ -360,7 +362,7 @@ theorem traceData_can
 omit [Module.Finite ℝ E] in
 theorem tfReactSmooth
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -373,34 +375,34 @@ theorem tfReactSmooth
       (ricciReact (I := I) S) := by
   classical
   intro t x hR
-  rcases DifferentialGeometry.Integral.Connection.ricciEigen3 (I := I) (S.base.metric t)
+  rcases DifferentialGeometry.Geometry.Curvature.ricciEigen3 (I := I) (S.base.metric t)
       (S.ricciAt t x) (hdim t x) (ricciSym_can (I := I) S t x) with
     ⟨basis, l1, l2, l3, horth, hdiag0⟩
   have hScalarTrace :
-      DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt (I := I) (S.scalar t x)
-        (S.ricciAt t x) DifferentialGeometry.Integral.Connection.delta3 basis := by
+      DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceAt (I := I) (S.scalar t x)
+        (S.ricciAt t x) DifferentialGeometry.Geometry.Curvature.delta3 basis := by
     have htr := scalarTrace_delta (I := I) (S.base.metric t)
       (S.ricciAt t x) horth
     simpa [SolutionOn.scalar_eq_metricTrace] using htr
   have hscalar :
       S.scalar t x =
-        DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 :=
+        DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3 :=
     scalar_eq_diag (I := I) hScalarTrace hdiag0
   have hdiag :
-      DifferentialGeometry.Integral.Connection.RicciDiagAt (I := I) (S.ricciAt t x)
+      DifferentialGeometry.Geometry.Curvature.RicciDiagAt (I := I) (S.ricciAt t x)
         (S.scalar t x) l1 l2 l3 basis := by
     exact ⟨hscalar, hdiag0.2⟩
   have hcube :
       ricciCube (I := I) S t x =
-        DifferentialGeometry.Integral.Connection.ricciEigenTraceCube3 l1 l2 l3 :=
+        DifferentialGeometry.Geometry.Curvature.ricciEigenTraceCube3 l1 l2 l3 :=
     ricciCubeInv_diag (I := I) (S.base.metric t) horth hdiag0
   have hrel := tfRel_trace (I := I) (g := S.base.metric t)
     (Ric := S.ricciAt t x) (Rm04 := S.base.rm04 t x)
     (basis := basis) (traceData_can (I := I) S horth) hdiag hcube hR
   have hinv :
       MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis
-        DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (S.base.metric t) basis
+        DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) (S.base.metric t) basis
       horth
   have hnorm :
       ricciNormAt (I := I) (S.base.ricciAt t x) basis =
@@ -422,7 +424,7 @@ theorem tfReactSmooth
 omit [Module.Finite ℝ E] in
 theorem ricciDataSmooth
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -432,11 +434,11 @@ theorem ricciDataSmooth
     RicciNormHeatEquationOn
       (D := D) (ricciNorm (I := I) S) (ricciNormLap (I := I) S)
       (ricciGradSq (I := I) S) (ricciReact (I := I) S) ∧
-    (∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
       tfLapBook (I := I) S (t : Real) x =
         tfLap S.scalar
           (fun t x =>
-            DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+            DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
               (S.scalar t) x)
       (scalGradSq (I := I) S) (ricciNormLap (I := I) S) (t : Real) x) := by
   refine ⟨ricciHeatSmooth (I := I) S _hS, ?_⟩
@@ -450,18 +452,18 @@ theorem ricciDataSmooth
 omit [Module.Finite ℝ E] in
 theorem tfLapBook_eq
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     (hdim : ∀ (_t : Real) (x : M),
       Module.finrank Real (TangentSpace I x) = 3) :
-    ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
       tfLapBook (I := I) S (t : Real) x =
         tfLap S.scalar
           (fun t x =>
-            DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+            DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
               (S.scalar t) x)
           (scalGradSq (I := I) S) (ricciNormLap (I := I) S) (t : Real) x :=
   (ricciDataSmooth (I := I) S hS hdim).2
@@ -475,7 +477,7 @@ theorem tfLapBook_eq
 omit [Module.Finite ℝ E] in
 theorem tfDataSmooth
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -486,11 +488,11 @@ theorem tfDataSmooth
       RicciNormHeatEquationOn
         (D := D) (ricciNorm (I := I) S) (ricciNormLap (I := I) S)
         (ricciGradSq (I := I) S) reaction ∧
-      (∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+      (∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
         tfLapBook (I := I) S (t : Real) x =
           tfLap S.scalar
             (fun t x =>
-              DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+              DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
                 (S.scalar t) x)
             (scalGradSq (I := I) S) (ricciNormLap (I := I) S) (t : Real) x) ∧
       tfRicReactRel
@@ -508,7 +510,7 @@ theorem tfDataSmooth
 omit [Module.Finite ℝ E] in
 theorem tfBookData
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -519,11 +521,11 @@ theorem tfBookData
       RicciNormHeatEquationOn
         (D := D) (ricciNorm (I := I) S) ricciNormLap
         (ricciGradSq (I := I) S) reaction ∧
-      (∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+      (∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
         tfLapBook (I := I) S (t : Real) x =
           tfLap S.scalar
             (fun t x =>
-              DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+              DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
                 (S.scalar t) x)
             (scalGradSq (I := I) S) ricciNormLap (t : Real) x) ∧
       tfRicReactRel
@@ -544,7 +546,7 @@ theorem tfBookData
 omit [Module.Finite ℝ E] in
 theorem tfHeat_book
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -560,15 +562,15 @@ theorem tfHeat_book
       S.scalar
       (ricciNorm (I := I) S)
       (cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S)) := by
-  let G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real :=
+  let G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real :=
     flowG (I := I) S
   let scalarLap : Real -> M -> Real :=
-    fun t x => DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t (S.scalar t) x
-  have hmetric : ∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
+    fun t x => DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t (S.scalar t) x
+  have hmetric : ∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
       G.metric (t : Real) = S.family.metric (t : Real) := by
     intro t
     rfl
-  have hconnection : ∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
+  have hconnection : ∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
       G.connection (t : Real) = S.family.connection (t : Real) := by
     intro t
     rfl
@@ -582,7 +584,7 @@ theorem tfHeat_book
         RicciNormHeatEquationOn
           (D := D) (ricciNorm (I := I) S) ricciNormLap
           (ricciGradSq (I := I) S) reaction ∧
-        (∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+        (∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
           tfLapBook (I := I) S (t : Real) x =
             tfLap S.scalar scalarLap (scalGradSq (I := I) S) ricciNormLap
               (t : Real) x) ∧
@@ -624,7 +626,7 @@ theorem tfHeat_book
 omit [Module.Finite ℝ E] in
 theorem tfHeat_sol
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -648,7 +650,7 @@ theorem tfHeat_sol
 omit [Module.Finite ℝ E] in
 theorem tfNonneg_sol
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -658,25 +660,25 @@ theorem tfNonneg_sol
       0 <= tfRicNormSq S.scalar (ricciNorm (I := I) S) t x := by
   classical
   intro t x
-  rcases DifferentialGeometry.Integral.Connection.ricciEigen3 (I := I) (S.base.metric t)
+  rcases DifferentialGeometry.Geometry.Curvature.ricciEigen3 (I := I) (S.base.metric t)
       (S.ricciAt t x) (hdim t x) (ricciSym_can (I := I) S t x) with
     ⟨basis, l1, l2, l3, horth, hdiag⟩
   have hscalarTrace :=
     scalarTrace_delta (I := I) (S.base.metric t) (S.ricciAt t x) horth
   have hscalar :
-      S.scalar t x = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
+      S.scalar t x = DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3 := by
     calc
       S.scalar t x =
           DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (S.family.metric t)
             (S.ricciAt t x) := SolutionOn.scalar_eq_metricTrace (I := I) S t x
       _ = DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) (S.base.metric t)
             (S.ricciAt t x) := by rfl
-      _ = DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 := by
+      _ = DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3 := by
             exact scalar_eq_diag (I := I) hscalarTrace hdiag
   have hinv :
       MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis
-        DifferentialGeometry.Integral.Connection.delta3 :=
-    DifferentialGeometry.Integral.Connection.orthonormal_invBasis3 (I := I) (S.base.metric t)
+        DifferentialGeometry.Geometry.Curvature.delta3 :=
+    DifferentialGeometry.Geometry.Curvature.orthonormal_invBasis3 (I := I) (S.base.metric t)
       basis horth
   have hnorm :
       ricciNorm (I := I) S t x =
@@ -691,28 +693,28 @@ theorem tfNonneg_sol
               (S.ricciAt t x) basis hinv).symm
   have htf :
       tfRicNormSq S.scalar (ricciNorm (I := I) S) t x =
-        DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3 l1 l2 l3 := by
+        DifferentialGeometry.Geometry.Curvature.tracefreeRicciEigenNormSq3 l1 l2 l3 := by
     rw [tfRicNormSq, tracefreeRicciNormSqOf, tracefreeRicciNormSqAtOf,
       hscalar, hnorm, ricciNormAt_diag (I := I) hdiag]
-    unfold DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3
-      DifferentialGeometry.Integral.Connection.ricciEigenPairwiseGapSq3
-      DifferentialGeometry.Integral.Connection.ricciEigenNormSq3
-        DifferentialGeometry.Integral.Connection.ricciEigenScalar3
+    unfold DifferentialGeometry.Geometry.Curvature.tracefreeRicciEigenNormSq3
+      DifferentialGeometry.Geometry.Curvature.ricciEigenPairwiseGapSq3
+      DifferentialGeometry.Geometry.Curvature.ricciEigenNormSq3
+        DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3
     ring
   rw [htf]
-  exact DifferentialGeometry.Integral.Connection.tracefreeRicciEigenNormSq3_nonneg l1 l2 l3
+  exact DifferentialGeometry.Geometry.Curvature.tracefreeRicciEigenNormSq3_nonneg l1 l2 l3
 
 
 omit [Module.Finite ℝ E] in
 theorem tfDiff_sol
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :
-    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
       MDifferentiableAt I 𝓘(Real, Real)
         (tfRicNormSq S.scalar (ricciNorm (I := I) S) (t : Real)) x := by
   intro t x
@@ -727,13 +729,13 @@ theorem tfDiff_sol
 omit [Module.Finite ℝ E] in
 theorem tfGrad_sol
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :
-    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
       MDiffAt (T% fun y : M =>
         DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
@@ -796,17 +798,17 @@ theorem tfGrad_sol
 omit [Module.Finite ℝ E] in
 theorem scalarPowGrad_sol
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (epsilon : Real)
-    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hscalar : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       x,
       0 < S.scalar (t : Real) x) :
-    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
+    forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) y,
       MDiffAt (T% fun z : M =>
         DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
@@ -871,7 +873,7 @@ theorem scalarPowGrad_sol
 omit [Module.Finite ℝ E] in
 theorem pinchEvol_sol
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -881,10 +883,10 @@ theorem pinchEvol_sol
     (hdim : forall (_t : Real) (x : M),
       Module.finrank Real (TangentSpace I x) = 3)
     (epsilon : Real)
-    (hscalar : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hscalar : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       x,
       0 < S.scalar (t : Real) x) :
-    forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
       HasDerivWithinAt
         (fun s : Real =>
           quotField (M := M)
@@ -904,7 +906,7 @@ theorem pinchEvol_sol
   classical
   let scalarLap : Real -> M -> Real :=
     fun t x =>
-      DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+      DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
         (S.scalar t) x
   have hscalarHeat :
       ScalarEvolutionEquationOn (D := D) S.scalar scalarLap
@@ -916,19 +918,19 @@ theorem pinchEvol_sol
   have hSmooth := smoothOfSol (I := I) S hS
   have htfDiff := tfDiff_sol (I := I) S hS
   have hscalarDiff :
-      forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+      forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
         MDifferentiableAt I 𝓘(Real, Real) (S.scalar (t : Real)) x := by
     intro t x
     exact hSmooth.scalarRegular.scalar_space (t : Real)
       (D.regular_subset t.2) x
   have htfNonneg :
-      forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) y,
+      forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) y,
         0 <= tfRicNormSq S.scalar (ricciNorm (I := I) S) (t : Real) y := by
     intro t y
     exact tfNonneg_sol (I := I) S hdim (t : Real) y
   have hgradTf := tfGrad_sol (I := I) S hS
   have hgradScalar :
-      forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+      forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
         MDiffAt (T% fun y : M =>
           DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
             ((flowG (I := I) S).metric (t : Real))

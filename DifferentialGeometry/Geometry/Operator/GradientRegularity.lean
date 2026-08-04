@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Covariant
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 import DifferentialGeometry.Bundle.LocalFrameRegularity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -17,7 +19,7 @@ noncomputable section
 
 namespace DifferentialGeometry.Geometry.Operator
 
-open DifferentialGeometry.Integral.Connection
+
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open scoped BigOperators Manifold ContDiff Topology

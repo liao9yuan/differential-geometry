@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTransition
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.FramedNormalMetric
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Normal-coordinate transition overlap

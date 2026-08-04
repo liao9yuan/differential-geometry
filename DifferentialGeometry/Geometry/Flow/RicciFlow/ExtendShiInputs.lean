@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProd
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGramUniformContinuity
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -26,7 +28,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Set Filter
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.HCGCompactness

@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.W
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.EigenBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -46,7 +48,7 @@ def PinchEstimateOn
 
 
 def pinchQuotient
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) (epsilon : Real) :
     Real -> M -> Real :=
@@ -56,24 +58,24 @@ def pinchQuotient
 
 
 def pinchDriftVector
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar : Real -> M -> Real) (epsilon : Real) :
     Real -> (x : M) -> TangentSpace I x :=
   fun t x =>
     (2 * (1 - epsilon) / scalar t x) •
-      DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x
+      DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (scalar t) x
 
 
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchDriftTerm_eq_inner_drift
     [Module.Finite ℝ E]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq : Real -> M -> Real)
     (epsilon t : Real) (x : M) :
     pinchDriftTerm (I := I) G scalar ricciNormSq epsilon t x =
       (G.metric t).inner x
         (pinchDriftVector (I := I) G scalar epsilon t x)
-        (DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t
+        (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t
           (quotField (M := M) (tfRicNormSq scalar ricciNormSq)
             scalar (1 : Real) (2 - epsilon) t) x) := by
   simp [pinchDriftTerm, pinchDriftVector]
@@ -185,7 +187,7 @@ theorem pinchReactTerm_nonpos
 omit [Module.Finite ℝ E] in
 theorem cubicQ_sub_nonneg_of_section9
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     {T delta epsilon t : Real} {x : M}
@@ -215,13 +217,13 @@ theorem cubicQ_sub_nonneg_of_section9
 omit [Module.Finite ℝ E] in
 theorem scalGradSq_nonneg
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
     0 <= scalGradSq (I := I) S t x := by
   let v :=
-    DifferentialGeometry.Integral.Connection.gradientAt (I := I) (flowG (I := I) S) t (S.scalar t) x
+    DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) (flowG (I := I) S) t (S.scalar t) x
   change 0 <= (S.family.metric t).inner x v v
   by_cases hv : v = 0
   · simp [hv]
@@ -231,7 +233,7 @@ theorem scalGradSq_nonneg
 omit [Module.Finite ℝ E] in
 theorem pinchCoupleSol_nonneg
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
@@ -248,7 +250,7 @@ theorem pinchCoupleSol_nonneg
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchBookRHS_le_drift
     [Module.Finite ℝ E]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq coupleSq Q : Real -> M -> Real)
     (epsilon t : Real) (x : M)
     (hR : 0 < scalar t x) (heps0 : 0 < epsilon) (heps1 : epsilon < 1)
@@ -277,7 +279,7 @@ theorem pinchBookRHS_le_drift
 omit [Module.Finite ℝ E] in
 theorem pinchBookRHS_le_drift_sol
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -320,7 +322,7 @@ theorem pinchBookRHS_le_drift_sol
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_parabolic_nonpos
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -328,7 +330,7 @@ theorem pinchQuotient_parabolic_nonpos
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     {omega T delta epsilon : Real} (h0ω : 0 < omega)
-    (hD : D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (hD : D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     (_hT : 0 <= T) (hTω : T < omega)
     (hdim : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3)
     (hscalar : ∀ t : Real, t ∈ D.carrier -> ∀ x : M, 0 < S.scalar t x)
@@ -354,7 +356,7 @@ theorem pinchQuotient_parabolic_nonpos
   have htreg : t ∈ D.regular := by
     rw [hD]
     exact ⟨htpos, lt_of_le_of_lt ht.2 hTω⟩
-  let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
+  let τ : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
   have hIcc_subset : Set.Icc 0 T ⊆ D.carrier := by
     intro s hs
     rw [hD]
@@ -379,7 +381,7 @@ theorem pinchQuotient_parabolic_nonpos
           epsilon t x := by
     simpa [pinchQuotient, τ] using hderivIcc.derivWithin huniq
   have hheat :
-      DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) (flowG (I := I) S) t
+      DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) (flowG (I := I) S) t
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon t)
           (pinchQuotient (I := I) S epsilon t) x =
         quotLap (I := I) (flowG (I := I) S)
@@ -387,8 +389,8 @@ theorem pinchQuotient_parabolic_nonpos
           S.scalar (1 : Real) (2 - epsilon) t x +
         pinchDriftTerm (I := I) (flowG (I := I) S)
           S.scalar (ricciNorm (I := I) S) epsilon t x := by
-    unfold DifferentialGeometry.Integral.Connection.heatOperatorWithDrift
-      DifferentialGeometry.Integral.Connection.driftTerm
+    unfold DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift
+      DifferentialGeometry.Geometry.Curvature.driftTerm
       pinchQuotient quotLap
     rw [← pinchDriftTerm_eq_inner_drift (I := I) (M := M)
       (flowG (I := I) S) S.scalar (ricciNorm (I := I) S) epsilon t x]
@@ -404,7 +406,7 @@ theorem pinchQuotient_parabolic_nonpos
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_initial_continuous
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (S : SolutionOn (I := I) (M := M) D)
@@ -450,7 +452,7 @@ theorem compact_nonneg_upper_bound
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_initial_bound
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (S : SolutionOn (I := I) (M := M) D)
@@ -476,7 +478,7 @@ private theorem continuousOn_of_restrict
 omit [Module.Finite ℝ E] in
 private theorem ricciComp_coordCont
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
@@ -513,7 +515,7 @@ private theorem ricciComp_coordCont
         (continuous_snd.comp continuous_subtype_val) (fun q => q.2.2)
     have hA := hS.ricciRegular.ricciTensorFamilyContinuousOnSet
     have heval :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+      DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.eval_continuous
       (I := I) (M := M) (s := 2) (K := K)
       (A := fun t x => S.ricci t x) hA
       (P := P)
@@ -529,7 +531,7 @@ private theorem ricciComp_coordCont
         fin_cases a
         · simpa using hframe_i
         · simpa using hframe_j)
-    simpa [ricciCompInFrame, frame, DifferentialGeometry.Integral.Connection.vec2] using heval
+    simpa [ricciCompInFrame, frame, DifferentialGeometry.Geometry.Curvature.vec2] using heval
   simpa [K, u, P, frame] using
     continuousOn_of_restrict
       (s := D.carrier ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
@@ -541,7 +543,7 @@ private theorem ricciComp_coordCont
 omit [Module.Finite ℝ E] in
 private theorem ricciNorm_coordCont
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
@@ -600,12 +602,12 @@ private theorem ricciNorm_coordCont
 omit [Module.Finite ℝ E] in
 private theorem ricciNorm_slabCont
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     {omega T : Real} (h0ω : 0 < omega)
-    (hD : D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (hD : D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     (hTω : T < omega) :
     ContinuousOn (fun p : Real × M => ricciNorm (I := I) S p.1 p.2)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
@@ -634,13 +636,13 @@ private theorem ricciNorm_slabCont
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_slab_continuous_of_ricciNorm
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     {omega T epsilon C : Real} (h0ω : 0 < omega)
-    (hD : D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (hD : D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     (hTω : T < omega)
     (hscalar : ∀ t : Real, t ∈ D.carrier -> ∀ x : M, 0 < S.scalar t x)
     (hricciNorm_cont :
@@ -689,16 +691,16 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_space_pos
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     (epsilon : Real)
-    (hscalar : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hscalar : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
       0 < S.scalar (t : Real) x) :
-    ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
       MDifferentiableAt I 𝓘(Real, Real)
         (pinchQuotient (I := I) S epsilon (t : Real)) x := by
   intro t x
@@ -726,7 +728,7 @@ theorem pinchQuotient_space_pos
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_grad_pos
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -734,9 +736,9 @@ theorem pinchQuotient_grad_pos
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     (epsilon : Real)
-    (hscalar : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    (hscalar : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
       0 < S.scalar (t : Real) x) :
-    ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) x,
+    ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) x,
       MDiffAt (T% fun y : M =>
         DifferentialGeometry.Geometry.Operator.gradientFun (I := I)
           ((flowG (I := I) S).metric (t : Real))
@@ -808,7 +810,7 @@ theorem pinchQuotient_grad_pos
 omit [Module.Finite ℝ E] in
 theorem pinchQuot_slab_bound
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -816,7 +818,7 @@ theorem pinchQuot_slab_bound
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     {omega T delta epsilon C : Real} (h0ω : 0 < omega)
-    (hD : D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (hD : D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     (hT : 0 <= T) (hTω : T < omega)
     (hdim : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3)
     (hscalar : ∀ t : Real, t ∈ D.carrier -> ∀ x : M, 0 < S.scalar t x)
@@ -860,7 +862,7 @@ theorem pinchQuot_slab_bound
     have htreg : t ∈ D.regular := by
       rw [hD]
       exact ⟨htpos, lt_of_le_of_lt ht.2 hTω⟩
-    let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
+    let τ : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
     have hderivD :=
       pinchEvol_book (I := I) (M := M) S hS.isSolution
         (fun _ x => hdim x) heps0 heps1
@@ -879,7 +881,7 @@ theorem pinchQuot_slab_bound
     have htreg : t ∈ D.regular := by
       rw [hD]
       exact ⟨htpos, lt_of_le_of_lt ht.2 hTω⟩
-    let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
+    let τ : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
     have hP :=
       pinchQuotient_space_pos (I := I) S hS epsilon
         (fun τ y => hscalar (τ : Real) (D.regular_subset τ.2) y) τ x
@@ -892,7 +894,7 @@ theorem pinchQuot_slab_bound
     have htreg : t ∈ D.regular := by
       rw [hD]
       exact ⟨htpos, lt_of_le_of_lt ht.2 hTω⟩
-    let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
+    let τ : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
     have hPgrad :=
       pinchQuotient_grad_pos (I := I) S hS epsilon
         (fun τ y => hscalar (τ : Real) (D.regular_subset τ.2) y) τ x
@@ -961,7 +963,7 @@ theorem pinchQuot_slab_bound
     have htreg : t ∈ D.regular := by
       rw [hD]
       exact ⟨htpos, lt_of_le_of_lt ht.2 hTω⟩
-    let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
+    let τ : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D := ⟨t, htreg⟩
     have hderivD :=
       pinchEvol_book (I := I) (M := M) S hS.isSolution
         (fun _ x => hdim x) heps0 heps1
@@ -997,7 +999,7 @@ theorem pinchQuot_slab_bound
 
 
 def carrierZeroExt
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (f : Real -> M -> Real) :
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval) (f : Real -> M -> Real) :
     Real -> M -> Real := by
   classical
   exact fun t x => if t ∈ D.carrier then f t x else 0
@@ -1005,14 +1007,14 @@ def carrierZeroExt
 
 
 def carrierScalarExt
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (scalar : Real -> M -> Real) :
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval) (scalar : Real -> M -> Real) :
     Real -> M -> Real := by
   classical
   exact fun t x => if t ∈ D.carrier then scalar t x else 1
 
 
 def carrierWeightExt
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (scalar : Real -> M -> Real)
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval) (scalar : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real := by
   classical
   exact fun t x =>
@@ -1022,7 +1024,7 @@ def carrierWeightExt
 
 omit [TopologicalSpace M] in
 theorem pinchEstimate_ext
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {tracefreeRicciNormSq scalar : Real -> M -> Real}
     {epsilon C : Real}
     (h : PinchEstimateOn (M := M) tracefreeRicciNormSq scalar
@@ -1047,7 +1049,7 @@ theorem pinchEstimate_ext
 omit [Module.Finite ℝ E] in
 theorem pinchEstimate_sol
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -1059,7 +1061,7 @@ theorem pinchEstimate_sol
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     {omega : Real} (h0ω : 0 < omega)
-    (hD : D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (hD : D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     (hdim : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3)
     (hscalar : ∀ t : Real, t ∈ D.carrier -> ∀ x : M, 0 < S.scalar t x)
     (hpinch :
@@ -1107,7 +1109,7 @@ theorem pinchEstimate_sol
     (scalar := S.scalar) (epsilon := epsilon) (C := C)
     (U := D.carrier) hscalar
   intro t htD x
-  have htD' : t ∈ (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega
+  have htD' : t ∈ (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega
     h0ω).carrier := by
     simpa [hD] using htD
   have ht0 : 0 <= t := htD'.1
@@ -1140,7 +1142,7 @@ theorem pinchEstimate_sol
 omit [Module.Finite ℝ E] in
 theorem pinchEstimate_display_sol
     [Module.Finite ℝ E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     [I.Boundaryless]
     [IsManifold I 2 M] [IsManifold I 3 M]
@@ -1152,7 +1154,7 @@ theorem pinchEstimate_display_sol
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     {omega : Real} (h0ω : 0 < omega)
-    (hD : D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (hD : D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     (hdim : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3)
     (hscalar : ∀ t : Real, t ∈ D.carrier -> ∀ x : M, 0 < S.scalar t x)
     (hpinch :

@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcLpProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1L6
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Mixed H1-H2 product estimate for operator fields
@@ -19,7 +22,7 @@ open MeasureTheory
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable

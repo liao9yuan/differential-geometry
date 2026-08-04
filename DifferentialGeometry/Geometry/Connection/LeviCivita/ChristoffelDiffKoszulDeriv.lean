@@ -4,6 +4,8 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Toward the differentiated Christoffel-difference Koszul identity (B2 P2.a)
@@ -31,7 +33,7 @@ noncomputable section
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff BigOperators
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

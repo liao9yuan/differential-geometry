@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Comparison.Volume.BishopBall
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
 import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Local Bishop comparison for intrinsic metric balls

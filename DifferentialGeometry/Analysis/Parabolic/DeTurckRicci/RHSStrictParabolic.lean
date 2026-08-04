@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrd
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamilyChartLinearization
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -35,7 +37,7 @@ theorem deTurckRicciRHS_isPointwiseSymm
       deTurckRicciRHS (I := I) g_bg g x w v := by
   simp only [deTurckRicciRHS, ContinuousLinearMap.add_apply,
     ContinuousLinearMap.smul_apply, smul_eq_mul, lieDerivMetricClm_apply]
-  rw [DifferentialGeometry.Integral.Connection.ricciTensor_symm (I := I)
+  rw [DifferentialGeometry.Geometry.Curvature.ricciTensor_symm (I := I)
         (smoothRiemannianMetricToInfty (I := I) g) x v w,
     DeTurck.lieDerivMetric_isPointwiseSymm (I := I)
       (smoothRiemannianMetricToInfty (I := I) g)

@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsio
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -14,7 +15,7 @@ noncomputable section
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

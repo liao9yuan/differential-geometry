@@ -8,6 +8,8 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -26,7 +28,6 @@ namespace DifferentialGeometry.Tensor.Coordinates
 noncomputable section
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Operator
 open Tensor0SBundle
 open scoped Manifold ContDiff BigOperators Topology

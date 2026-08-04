@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -8,8 +10,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -432,6 +434,6 @@ theorem bochner_pointwise_half_grad_normSq_of_boundaryless
   rw [bochner_pointwise_concrete_metric_unconditional (I := I) g hf x]
   ring
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

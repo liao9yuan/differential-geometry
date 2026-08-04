@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
 import DifferentialGeometry.Geometry.Operator.Laplacian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -13,7 +15,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-open DifferentialGeometry.Integral.Connection
+
 open Bundle Manifold Set
 open scoped Manifold ContDiff BigOperators
 

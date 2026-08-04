@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Manifold
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.Flow.Defs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -12,7 +14,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Set Function Bundle Filter
 open scoped Manifold Topology ContDiff NNReal
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.ODE.Flow
 
 section LocalChartDischarge

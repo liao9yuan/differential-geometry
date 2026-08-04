@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.LengthBound
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiShape
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 /-!
@@ -20,7 +22,7 @@ namespace Geometry
 namespace Riemannian
 namespace Volume
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 

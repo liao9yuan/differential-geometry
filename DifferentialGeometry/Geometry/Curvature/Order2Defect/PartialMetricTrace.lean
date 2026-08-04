@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.OffDiagonalCurvatureCore
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetricCompatible
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -10,8 +12,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -148,8 +150,8 @@ theorem cometric_diagonal_skew
   rw [hsymm] at hcore
   linarith
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

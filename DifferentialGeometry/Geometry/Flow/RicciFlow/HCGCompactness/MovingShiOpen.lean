@@ -5,6 +5,11 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBou
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -29,7 +34,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open Bundle Set Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow
 open scoped Manifold ContDiff BigOperators Bundle

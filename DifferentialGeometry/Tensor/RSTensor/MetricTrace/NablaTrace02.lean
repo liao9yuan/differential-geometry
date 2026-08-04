@@ -1,6 +1,9 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Trace04
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -416,7 +419,7 @@ noncomputable def freezeMiddle04Field
   rw [freezeMiddle04Slots_vec4]
   congr 1
   funext q
-  fin_cases q <;> simp [trace04Perm, DifferentialGeometry.Integral.Connection.vec4]
+  fin_cases q <;> simp [trace04Perm, DifferentialGeometry.Geometry.Curvature.vec4]
 
 @[simp] theorem freezeMiddle04Field_apply
     [CompleteSpace E]

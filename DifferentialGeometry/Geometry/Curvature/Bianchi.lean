@@ -14,6 +14,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Smooth
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Endomorphism
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
@@ -28,7 +30,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Topology Manifold ContDiff BigOperators
@@ -411,7 +413,7 @@ theorem connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFre
         (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x Z)
         (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x X)
         (DifferentialGeometry.Geometry.Connection.tangentConstAt (I := I) x Y) x = 0 := by
-  unfold DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField
+  unfold DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField
   rw [tangentConst_torsion_derivative_eq_add (I := I) cov hcov htf x Y Z X]
   rw [tangentConst_torsion_derivative_eq_add (I := I) cov hcov htf x Z X Y]
   rw [tangentConst_torsion_derivative_eq_add (I := I) cov hcov htf x X Y Z]
@@ -518,11 +520,11 @@ private theorem curvBracket_mid
     Z.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
   have hDYZ : MDiffAt (T% DYZ) x := by
     simpa [DYZ] using
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_mdiffAt
+      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_mdiffAt
         (I := I) cov hcov Y Z x
   have hDZY : MDiffAt (T% DZY) x := by
     simpa [DZY] using
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_mdiffAt
+      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_mdiffAt
         (I := I) cov hcov Z Y x
   have hneg : MDiffAt (T% negDZY) x := by
     simpa [negDZY] using
@@ -638,17 +640,17 @@ private theorem curvTorsionCancel
   rw [curvBracket_mid (I := I) cov hcov htf X Y Z W x]
   rw [curvBracket_mid (I := I) cov hcov htf Y Z X W x]
   rw [curvBracket_mid (I := I) cov hcov htf Z X Y W x]
-  rw [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+  rw [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
     (I := I) (cov := cov)
     (X := fun p : M => Z p)
     (Y := fun p : M => (cov (fun q : M => Y q) p) (X p))
     (Z := fun p : M => W p) (x := x)]
-  rw [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+  rw [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
     (I := I) (cov := cov)
     (X := fun p : M => X p)
     (Y := fun p : M => (cov (fun q : M => Z q) p) (Y p))
     (Z := fun p : M => W p) (x := x)]
-  rw [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+  rw [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
     (I := I) (cov := cov)
     (X := fun p : M => Y p)
     (Y := fun p : M => (cov (fun q : M => X q) p) (Z p))
@@ -680,13 +682,13 @@ private theorem covCurvExpand
     ⟨fun p : M => (cov (fun q : M => W q) p) (Z p), by
       intro p
       exact
-        DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+        DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) cov hcov Z W p⟩
   let YW : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => (cov (fun q : M => W q) p) (Y p), by
       intro p
       exact
-        DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+        DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_contMDiffAt
         (I := I) cov hcov Y W p⟩
   let BrYZ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     ⟨fun p : M => VectorField.mlieBracket I (fun q : M => Y q) (fun q : M => Z q) p, by
@@ -711,15 +713,15 @@ private theorem covCurvExpand
   let negC : (p : M) -> TangentSpace I p := -C
   have hA : MDiffAt (T% A) x := by
     simpa [A, ZW] using
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_mdiffAt
+      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_mdiffAt
         (I := I) cov hcov Y ZW x
   have hB : MDiffAt (T% B) x := by
     simpa [B, YW] using
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_mdiffAt
+      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_mdiffAt
         (I := I) cov hcov Z YW x
   have hC : MDiffAt (T% C) x := by
     simpa [C, BrYZ] using
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.cov_smooth_apply_mdiffAt
+      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.cov_smooth_apply_mdiffAt
         (I := I) cov hcov BrYZ W x
   have hnegB : MDiffAt (T% negB) x := by
     simpa [negB] using mdifferentiableAt_neg_section hB
@@ -732,8 +734,8 @@ private theorem covCurvExpand
         (T% (fun p : M =>
           connectionRiemannCurvatureField (I := I) cov
             (fun q : M => Y q) (fun q : M => Z q) (fun q : M => W q) p)) x := by
-    simpa [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField,
-      DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, A, B, C, ZW, YW,
+    simpa [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField,
+      DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField, A, B, C, ZW, YW,
         BrYZ] using
       mdifferentiableAt_sub_section (mdifferentiableAt_sub_section hA hB) hC
   have heq :
@@ -743,8 +745,8 @@ private theorem covCurvExpand
         =ᶠ[𝓝 x] ((A + negB) + negC) := by
     refine Filter.Eventually.of_forall ?_
     intro p
-    simp [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField,
-      DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, A, B, C, negB, negC,
+    simp [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField,
+      DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField, A, B, C, negB, negC,
       ZW, YW, BrYZ, Pi.add_apply, sub_eq_add_neg, add_assoc]
   have hcongr :
       cov (fun p : M =>
@@ -817,8 +819,8 @@ private theorem curvJacobiAt
   rw [covCurvExpand (I := I) cov hcov Y Z X W x]
   rw [covCurvExpand (I := I) cov hcov Z X Y W x]
   have hJacCovNeg := congrArg Neg.neg hJacCov
-  simp only [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField,
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+  simp only [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField,
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   abel_nf at hJacCovNeg ⊢
   exact hJacCovNeg
 
@@ -1711,4 +1713,4 @@ theorem contrOfSecond_sec
   exact contracted_bianchi_of_second (I := I) (basis x) (gInv x)
     (nablaRm04 x) (nablaRic x) (dScalar x) (hcontract x) (hsecond x)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

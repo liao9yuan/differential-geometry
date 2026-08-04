@@ -3,6 +3,9 @@ import DifferentialGeometry.Geometry.Comparison.Variation.JacobiGram
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 import DifferentialGeometry.Geometry.Exponential.EndpointShape
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicOffZero
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 
 /-!

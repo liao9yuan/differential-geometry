@@ -6,6 +6,9 @@ import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SBochnerProduct
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -23,7 +26,7 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -381,6 +384,6 @@ theorem ricDriftAct [I.Boundaryless]
     tensor0S_curry_one_apply, smul_eq_mul]
   rfl
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature
 
 end

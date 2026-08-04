@@ -4,6 +4,8 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.KoszulDifference
 import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
 import Mathlib.LinearAlgebra.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -33,7 +35,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open DifferentialGeometry.HCGCompactness
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

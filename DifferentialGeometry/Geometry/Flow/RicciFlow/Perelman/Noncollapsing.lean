@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Analysis.Integration.Measure.RealizedMetricForMeasure
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 set_option autoImplicit false
 
@@ -31,7 +34,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 variable [T2Space M] [SigmaCompactSpace M]
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -39,7 +42,7 @@ variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
 
 
 structure FlowMetricBall (S : SolutionOn (I := I) (M := M) D)
-    (time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D) where
+    (time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D) where
   center : M
   radius : Real
   radius_pos : 0 < radius
@@ -47,7 +50,7 @@ structure FlowMetricBall (S : SolutionOn (I := I) (M := M) D)
 namespace FlowMetricBall
 
 variable {S : SolutionOn (I := I) (M := M) D}
-variable {time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D}
+variable {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}
 
 
 
@@ -98,7 +101,7 @@ end FlowMetricBall
 
 def KappaNoncollapsedBelowScale
     (S : SolutionOn (I := I) (M := M) D) (kappa rho : Real) : Prop :=
-  0 < rho ∧ ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D)
+  0 < rho ∧ ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D)
     (B : FlowMetricBall S t), B.radius ≤ rho →
     B.IsRmControlled → B.IsKappaNoncollapsed kappa
 

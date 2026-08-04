@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import Mathlib.Topology.Instances.Matrix
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -33,7 +35,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open DifferentialGeometry.HCGCompactness
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -713,7 +715,7 @@ theorem ricCompField_mdiffOn
     (k : Fin 2 → Idx) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun y => frameComp0S (I := I)
-        (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+        (DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection
           (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
           (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) (M := M) g))
         (fun a y' => e₀.localFrame basisE a y') y k) e₀.baseSet := by
@@ -721,11 +723,11 @@ theorem ricCompField_mdiffOn
   have hT : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun b : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
         (E := fun x : M => Tensor0SSpace 2 I x) b
-        ((DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+        ((DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection
           (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
           (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) (M := M) g))
           b)) y :=
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+    (DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection
       (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
       (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g)).contMDiff.contMDiffAt
@@ -736,7 +738,7 @@ theorem ricCompField_mdiffOn
     fun i => (frame_e_mdiffOn e₀ basisE (k i)).contMDiffAt (e₀.open_baseSet.mem_nhds hy)
   have h := TensorMultilinear.contMDiffAt_section_apply_gen
     (T := fun b : M =>
-      (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+      (DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection
         (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
         (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
           (I := I) (M := M) g)) b) hT

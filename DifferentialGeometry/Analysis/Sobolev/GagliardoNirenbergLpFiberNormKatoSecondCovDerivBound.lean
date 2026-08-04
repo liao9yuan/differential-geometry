@@ -11,6 +11,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormDiscreteLogConvex
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormHolderIntegrability
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GagliardoNirenbergLpFiberNormCovGradFrameSum
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -23,7 +26,7 @@ namespace DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
@@ -49,7 +52,7 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     (w : Integral.L2.SmoothCcTensor g r m) (x : M) :
     ∑ i : Fin (Module.finrank ℝ E),
         riemannianFiberNormSq (I := I) (M := M) g r m x
-          (Integral.Connection.tensorSecondCovDeriv (I := I) g r m
+          (DifferentialGeometry.Geometry.Curvature.tensorSecondCovDeriv (I := I) g r m
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) ≤
@@ -69,7 +72,7 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
       (covGrad (I := I) (M := M) g r m w)).toSection x with hT2_def
   have hcomp : ∀ (i : Fin n) (K : Fin r → Fin n) (J : Fin m → Fin n),
       Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r m
-          (Integral.Connection.tensorSecondCovDeriv (I := I) g r m
+          (DifferentialGeometry.Geometry.Curvature.tensorSecondCovDeriv (I := I) g r m
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) n e K J =
@@ -94,7 +97,7 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
       (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame_smooth (I := I) g x i) x ωK
       (fun k : Fin m => e (J k))
     change ((show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace m I x from
-          Integral.Connection.tensorSecondCovDeriv (I := I) g r m
+          DifferentialGeometry.Geometry.Curvature.tensorSecondCovDeriv (I := I) g r m
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) ωK) (fun k : Fin m => e (J k)) =
@@ -115,7 +118,7 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     exact hbridge.symm
   have hdiag_term : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g r m x
-          (Integral.Connection.tensorSecondCovDeriv (I := I) g r m
+          (DifferentialGeometry.Geometry.Curvature.tensorSecondCovDeriv (I := I) g r m
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
             (fun y : M => w.toSection y) x) =
@@ -188,7 +191,7 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
   have haw_nn : 0 ≤ aw := riemannianFiberNormSq_nonneg (I := I) (M := M) g r m x _
   have hcw_nn : 0 ≤ cw := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
   set D : Fin n → Tensor0SBundle.TensorRSSpace r m I x :=
-    fun i => Integral.Connection.tensorSecondCovDeriv (I := I) g r m
+    fun i => DifferentialGeometry.Geometry.Curvature.tensorSecondCovDeriv (I := I) g r m
       (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
       (DifferentialGeometry.Geometry.Connection.smoothOrthoFrame (I := I) g x i)
       (fun y : M => w.toSection y) x with hD_def
@@ -198,7 +201,7 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
         Tensor0SBundle.TensorRSSpace.toModel
           ((rawTensorConnLapSmooth (I := I) g r m w).toSection x) := rfl
     rw [h1, Integral.Connection.rawTensorConnLapSmooth_toSection_apply (I := I) (M := M) g r m w x,
-      Integral.Connection.rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g r m
+      DifferentialGeometry.Geometry.Curvature.rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g r m
         (fun y : M => w.toSection y) x]
   have hsum_aux : ∀ (s' : Finset (Fin n)),
       Integral.L2.tensorInnerPointwise (I := I) (M := M) g r m x

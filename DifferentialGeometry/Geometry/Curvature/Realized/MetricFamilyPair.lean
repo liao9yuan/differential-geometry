@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Bundle.LocalFrameRegularity
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -16,7 +17,7 @@ noncomputable section
 
 universe u uE uH
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle
 open scoped Manifold ContDiff Topology BigOperators
@@ -107,6 +108,6 @@ theorem pairSmoothAt
     ring
 
 end MetricFamilySmoothOn
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature
 
 end

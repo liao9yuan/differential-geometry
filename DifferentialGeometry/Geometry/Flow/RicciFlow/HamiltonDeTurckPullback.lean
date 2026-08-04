@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.V
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ManifoldIntegralFlow
 import Mathlib.Analysis.Calculus.Deriv.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -17,7 +19,7 @@ namespace RicciFlow
 open Bundle Set
 open scoped Manifold Topology ContDiff
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.PDE.RicciFlow.ODE

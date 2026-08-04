@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Metric.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.PullbackConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 

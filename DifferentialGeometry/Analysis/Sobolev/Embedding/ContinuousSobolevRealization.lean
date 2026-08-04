@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDr
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SmoothCcDense
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.Normed.Module.Completion
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingSpectralLift
 import DifferentialGeometry.Analysis.Elliptic.LichnerowiczSpectral
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

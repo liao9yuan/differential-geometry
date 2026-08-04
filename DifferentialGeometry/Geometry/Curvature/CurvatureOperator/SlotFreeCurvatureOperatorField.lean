@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCa
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -13,8 +16,8 @@ open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 open DifferentialGeometry.Integral.L2
 open TensorMultilinear
@@ -742,8 +745,8 @@ theorem exists_slotFreeCurvOpField_baseSlot_eval (g : SmoothRiemannianMetric I M
     rfl
   rw [hval, slotFreeCurvOpFib_apply_eval (I := I) (M := M) g s x _ u w m]
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry
 
 end

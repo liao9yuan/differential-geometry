@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -11,7 +13,6 @@ set_option autoImplicit false
 
 
 
-open DifferentialGeometry.Integral.Connection
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle

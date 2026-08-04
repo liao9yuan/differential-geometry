@@ -4,6 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSC
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section

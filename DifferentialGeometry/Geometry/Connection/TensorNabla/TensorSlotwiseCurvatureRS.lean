@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -8,7 +10,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

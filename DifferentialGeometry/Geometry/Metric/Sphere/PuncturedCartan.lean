@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Exponential.CartanNorm
 import DifferentialGeometry.Geometry.Metric.Polarization
 import DifferentialGeometry.Geometry.Metric.Sphere.RadialLog
 import Mathlib.Analysis.Normed.Module.Connected
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -222,7 +224,7 @@ theorem punctCartan_sq
       g.inner p' (i a) (i b) =
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
@@ -373,7 +375,7 @@ theorem punctCartan_inner
       g.inner p' (i a) (i b) =
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
@@ -406,7 +408,7 @@ theorem punctCartan_local
       g.inner p' (i a) (i b) =
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y) :

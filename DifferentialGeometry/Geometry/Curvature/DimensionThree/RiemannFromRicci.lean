@@ -9,6 +9,7 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciIdentity
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -26,9 +27,9 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -152,7 +153,7 @@ private theorem vec2_update_zero {x : M}
     Function.update (vec2 (I := I) X Y) (0 : Fin 2) X' =
       vec2 (I := I) X' Y := by
   funext a
-  fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, Function.update]
+  fin_cases a <;> simp [DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem vec2_update_one {x : M}
@@ -160,7 +161,7 @@ private theorem vec2_update_one {x : M}
     Function.update (vec2 (I := I) X Y) (1 : Fin 2) Y' =
       vec2 (I := I) X Y' := by
   funext a
-  fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, Function.update]
+  fin_cases a <;> simp [DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
 
 
 omit [FiniteDimensional ℝ E] in
@@ -233,7 +234,7 @@ theorem ricciSym_of_basis
             basis ((fun a : Fin 2 => if a = 0 then j else i) a)) =
         vec2 (I := I) (cx j • basis j) (cy i • basis i) := by
     funext a
-    fin_cases a <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases a <;> simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   have hright :
       (fun a : Fin 2 =>
         (if a = 0
@@ -242,7 +243,7 @@ theorem ricciSym_of_basis
             basis ((fun a : Fin 2 => if a = 0 then i else j) a)) =
         vec2 (I := I) (cy i • basis i) (cx j • basis j) := by
     funext a
-    fin_cases a <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases a <;> simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   rw [hleft, hright]
   have hL :
       Ric (vec2 (I := I) (cx j • basis j) (cy i • basis i)) =
@@ -258,12 +259,12 @@ theorem ricciSym_of_basis
       Ric (vec2 (I := I) (cx j • basis j) (cy i • basis i))
           = (cx j) *
               Ric (vec2 (I := I) (basis j) (cy i • basis i)) := by
-              simpa only [vec2, DifferentialGeometry.Integral.Connection.vec2, vec2_update_zero,
+              simpa only [vec2, DifferentialGeometry.Geometry.Curvature.vec2, vec2_update_zero,
                 smul_eq_mul] using h0
       _ = (cx j) * ((cy i) *
               Ric (vec2 (I := I) (basis j) (basis i))) := by
               congr 1
-              simpa only [vec2, DifferentialGeometry.Integral.Connection.vec2, vec2_update_one,
+              simpa only [vec2, DifferentialGeometry.Geometry.Curvature.vec2, vec2_update_one,
                 smul_eq_mul] using h1
       _ = (cx j) * (cy i) *
               Ric (vec2 (I := I) (basis j) (basis i)) := by ring
@@ -281,12 +282,12 @@ theorem ricciSym_of_basis
       Ric (vec2 (I := I) (cy i • basis i) (cx j • basis j))
           = (cy i) *
               Ric (vec2 (I := I) (basis i) (cx j • basis j)) := by
-              simpa only [vec2, DifferentialGeometry.Integral.Connection.vec2, vec2_update_zero,
+              simpa only [vec2, DifferentialGeometry.Geometry.Curvature.vec2, vec2_update_zero,
                 smul_eq_mul] using h0
       _ = (cy i) * ((cx j) *
               Ric (vec2 (I := I) (basis i) (basis j))) := by
               congr 1
-              simpa only [vec2, DifferentialGeometry.Integral.Connection.vec2, vec2_update_one,
+              simpa only [vec2, DifferentialGeometry.Geometry.Curvature.vec2, vec2_update_one,
                 smul_eq_mul] using h1
       _ = (cy i) * (cx j) *
               Ric (vec2 (I := I) (basis i) (basis j)) := by ring
@@ -312,13 +313,13 @@ def ricciCovAt
     have hleft :
         Function.update m (1 : Fin 2) (Y + Z) = vec2 X (Y + Z) := by
       funext i
-      fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hY : Function.update m (1 : Fin 2) Y = vec2 X Y := by
       funext i
-      fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hZ : Function.update m (1 : Fin 2) Z = vec2 X Z := by
       funext i
-      fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     simpa [hleft, hY, hZ] using hmap
   map_smul' := by
     intro c Y
@@ -328,10 +329,10 @@ def ricciCovAt
     have hleft :
         Function.update m (1 : Fin 2) (c • Y) = vec2 X (c • Y) := by
       funext i
-      fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     have hY : Function.update m (1 : Fin 2) Y = vec2 X Y := by
       funext i
-      fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+      fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
     simpa [hleft, hY] using hmap
 
 omit [FiniteDimensional ℝ E] in
@@ -347,13 +348,13 @@ private theorem ricciCovAt_add
   have hleft :
       Function.update m (0 : Fin 2) (X + Y) = vec2 (X + Y) Z := by
     funext i
-    fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   have hX : Function.update m (0 : Fin 2) X = vec2 X Z := by
     funext i
-    fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   have hY : Function.update m (0 : Fin 2) Y = vec2 Y Z := by
     funext i
-    fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   simpa [ricciCovAt, hleft, hX, hY] using hmap
 
 omit [FiniteDimensional ℝ E] in
@@ -369,10 +370,10 @@ private theorem ricciCovAt_smul
   have hleft :
       Function.update m (0 : Fin 2) (c • X) = vec2 (c • X) Z := by
     funext i
-    fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   have hX : Function.update m (0 : Fin 2) X = vec2 X Z := by
     funext i
-    fin_cases i <;> simp [m, DifferentialGeometry.Integral.Connection.vec2, Function.update]
+    fin_cases i <;> simp [m, DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
   simpa [ricciCovAt, hleft, hX] using hmap
 
 
@@ -761,7 +762,7 @@ theorem rm04_einstein3_at
   rw [sum_fin_four_fun]
   rw [hXX, hYY, hXY]
   simp_rw [hcompSlots]
-  simp [slots4, DifferentialGeometry.Integral.Connection.vec4, delta3, Fin.sum_univ_three,
+  simp [slots4, DifferentialGeometry.Geometry.Curvature.vec4, delta3, Fin.sum_univ_three,
     Fin.prod_univ_four]
   ring
 
@@ -823,7 +824,7 @@ theorem rm04Std_ein3_at
       ricciCompAt (I := I) basis Ric i j =
         (scalar / 3) * delta3 i j)
     (X Y : TangentSpace I x) :
-    DifferentialGeometry.Integral.Connection.tensor04StdAt (I := I) (M := M) Rm04 X Y Y X =
+    DifferentialGeometry.Geometry.Curvature.tensor04StdAt (I := I) (M := M) Rm04 X Y Y X =
       (scalar / 6) *
         (g.inner x X X * g.inner x Y Y -
           g.inner x X Y * g.inner x X Y) :=
@@ -894,12 +895,12 @@ theorem rm04_kn_gform
     intro P Q
     rw [tensor0S_apply_eq_sum (I := I) basis Ric (vec2 (I := I) P Q), sum_fin_two_fun]
     refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun c _ => ?_
-    simp [ricciCompAt, slots2, DifferentialGeometry.Integral.Connection.vec2,
+    simp [ricciCompAt, slots2, DifferentialGeometry.Geometry.Curvature.vec2,
       Fin.prod_univ_two, Module.Basis.coord_apply, mul_comm, mul_assoc]
   rw [tensor0S_apply_eq_sum (I := I) basis Rm04 (vec4 (I := I) X Y Z W), sum_fin_four_fun]
   simp_rw [hcomp, hg, hric]
-  simp [DifferentialGeometry.Integral.Connection.vec4, slots4, Fin.prod_univ_four,
+  simp [DifferentialGeometry.Geometry.Curvature.vec4, slots4, Fin.prod_univ_four,
     Module.Basis.coord_apply, delta3, Fin.sum_univ_three]
   ring
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

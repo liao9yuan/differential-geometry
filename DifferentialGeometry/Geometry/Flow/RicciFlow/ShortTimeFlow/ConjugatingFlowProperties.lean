@@ -6,6 +6,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
 import DifferentialGeometry.Bundle.PartialMfderiv
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -20,7 +23,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 
 variable
@@ -755,7 +758,7 @@ theorem conjugating_flow_t0_continuity_data
           (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)).inner x v w) (Set.Ico 0 T) ∧
       ContinuousWithinAt
         (fun s : ℝ => (-2 : ℝ) *
-          DifferentialGeometry.Integral.Connection.ricciTensor (I := I)
+          DifferentialGeometry.Geometry.Curvature.ricciTensor (I := I)
             (Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s)) x v w) (Set.Ioi 0) 0 := by
   refine ⟨gfam_inner_continuous_on (I := I) g_DT T hT Φ_fam x v w hg_joint hΦ_orbit hΦ_total, ?_⟩
   have hric : ContinuousOn

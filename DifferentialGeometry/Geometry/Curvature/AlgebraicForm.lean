@@ -14,7 +14,7 @@ manifolds and curvature realizations.
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 variable {V : Type*} [AddCommGroup V] [Module Real V]
 
@@ -153,4 +153,4 @@ theorem ext (hB : IsAlgCurvForm B) (hB' : IsAlgCurvForm B')
 
 end IsAlgCurvForm
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

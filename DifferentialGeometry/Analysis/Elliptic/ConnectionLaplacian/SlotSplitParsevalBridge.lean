@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
+open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section

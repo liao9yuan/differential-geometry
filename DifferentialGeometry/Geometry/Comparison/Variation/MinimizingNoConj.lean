@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Comparison.HalfSqDistGrad
 import DifferentialGeometry.Geometry.Comparison.Variation.MinimalGeodesicNoConjugate
 import DifferentialGeometry.Geometry.Exponential.ConjugatePoint
 import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Chart `W^{k,p}` carriers for genuine mixed-tensor sections

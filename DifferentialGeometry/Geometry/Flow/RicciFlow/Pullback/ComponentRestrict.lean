@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Exponential.LocalAddition
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionRestrictOpen
 import DifferentialGeometry.Geometry.Geodesic.OpenSubtype
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -37,7 +39,7 @@ open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.HCGCompactness
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 
 namespace DifferentialGeometry.PDE.RicciFlow

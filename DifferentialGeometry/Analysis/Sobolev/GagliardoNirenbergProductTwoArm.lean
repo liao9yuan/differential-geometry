@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
 
 
 noncomputable section
@@ -10,7 +13,7 @@ namespace DifferentialGeometry.Analysis.Sobolev.Tensor
 
 open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 

@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBound
 import DifferentialGeometry.Geometry.Curvature.QuadraticFormBound
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Metric.CompactMetricLowerBound
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -38,14 +40,14 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
 omit [SigmaCompactSpace M] in
 theorem ricciFlow_metric_hasDerivAt
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S)
     {t : Real} (ht : t ∈ D.regular) (x : M) (v : TangentSpace I x) :
     HasDerivAt
       (fun s : Real => (S.family.metric s).inner x v v)
       ((-2 : Real) *
-        S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
+        S.ricciAt t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v))
       t := by
   have hwithin := hS.equation ⟨t, ht⟩ x v v
   exact hwithin.hasDerivAt (D.regular_mem_nhds ht)
@@ -67,10 +69,10 @@ theorem twoTensorQuadBound_of_unit_bound
     (hunit :
       forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ K ->
         forall u : TangentSpace I x, (gSeq i t).inner x u u = 1 ->
-          |T i t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) u u)| <= A) :
+          |T i t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) u u)| <= A) :
     TwoTensorQuadBoundOnWindow (I := I) K β ψ gSeq T A :=
   ⟨hA, fun i t ht x hx v =>
-    DifferentialGeometry.Integral.Connection.tensor02_quadForm_abs_le_of_unit_bound
+    DifferentialGeometry.Geometry.Curvature.tensor02_quadForm_abs_le_of_unit_bound
       (gSeq i t) (T i t x) (fun u hu => hunit i t ht x hx u hu) v⟩
 
 
@@ -122,33 +124,33 @@ theorem metricQuadFormDiff_le_metricDerivNorm
     change IsManifold I ∞ M; infer_instance
   have heval :
       metricDiffCovDerivAt (I := I) 0 gk gInf gRef x
-          (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
+          (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)
         = gk.inner x v v - gInf.inner x v v := by
     change (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = _
+        (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v) = _
     have hk : metricCovDeriv (I := I) gk gRef 0 x
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v := by
+        (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v) = gk.inner x v v := by
       change Tensor0SBundle.metricTensorField (I := I) gk x
-          (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v
+          (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v) = gk.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
-      simp [DifferentialGeometry.Integral.Connection.vec2]
+      simp [DifferentialGeometry.Geometry.Curvature.vec2]
     have hI : metricCovDeriv (I := I) gInf gRef 0 x
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v := by
+        (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v) = gInf.inner x v v := by
       change Tensor0SBundle.metricTensorField (I := I) gInf x
-          (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v
+          (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v) = gInf.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
-      simp [DifferentialGeometry.Integral.Connection.vec2]
+      simp [DifferentialGeometry.Geometry.Curvature.vec2]
     calc
       (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
-          (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) =
+          (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v) =
           metricCovDeriv (I := I) gk gRef 0 x
-              (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) -
+              (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v) -
             metricCovDeriv (I := I) gInf gRef 0 x
-              (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) :=
+              (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v) :=
         Tensor0SBundle.Tensor0SSpace.sub_apply 2 x _ _ _
       _ = gk.inner x v v - gInf.inner x v v := by rw [hk, hI]
   have hbound :=
-    DifferentialGeometry.Integral.Connection.tensor02_quadForm_abs_le_normSq0S
+    DifferentialGeometry.Geometry.Curvature.tensor02_quadForm_abs_le_normSq0S
       (I := I) gRef (metricDiffCovDerivAt (I := I) 0 gk gInf gRef x) v
   rw [heval] at hbound
   rw [metricDerivNorm]
@@ -175,33 +177,33 @@ omit [SigmaCompactSpace M] in
 theorem metricDiffCovDerivAt_zero_apply
     (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     metricDiffCovDerivAt (I := I) 0 gk gInf gRef x
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b)
+        (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b)
       = gk.inner x a b - gInf.inner x a b := by
   haveI : IsManifold I 1 M :=
     IsManifold.of_le (I := I) (M := M) (n := ∞) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
     change IsManifold I ∞ M; infer_instance
   change (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
-      (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = _
+      (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b) = _
   have hk : metricCovDeriv (I := I) gk gRef 0 x
-      (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b := by
+      (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b) = gk.inner x a b := by
     change Tensor0SBundle.metricTensorField (I := I) gk x
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b
+        (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b) = gk.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
-    simp [DifferentialGeometry.Integral.Connection.vec2]
+    simp [DifferentialGeometry.Geometry.Curvature.vec2]
   have hI : metricCovDeriv (I := I) gInf gRef 0 x
-      (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b := by
+      (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b) = gInf.inner x a b := by
     change Tensor0SBundle.metricTensorField (I := I) gInf x
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b
+        (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b) = gInf.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
-    simp [DifferentialGeometry.Integral.Connection.vec2]
+    simp [DifferentialGeometry.Geometry.Curvature.vec2]
   calc
     (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) =
+        (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b) =
         metricCovDeriv (I := I) gk gRef 0 x
-            (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) -
+            (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b) -
           metricCovDeriv (I := I) gInf gRef 0 x
-            (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) :=
+            (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) a b) :=
       Tensor0SBundle.Tensor0SSpace.sub_apply 2 x _ _ _
     _ = gk.inner x a b - gInf.inner x a b := by rw [hk, hI]
 
@@ -215,17 +217,17 @@ theorem metricDiff_abs_le
       metricDerivNorm (I := I) 0 gk gInf gRef x *
         Real.sqrt (gRef.inner x v v) * Real.sqrt (gRef.inner x w w) := by
   obtain ⟨basis, hON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis
       (I := I) gRef x
   have hbound := Tensor0SBundle.abs_apply_le_sqrt_normSq0S
     (I := I) (g := gRef) (x := x) (s := 2) basis hON
     (metricDiffCovDerivAt (I := I) 0 gk gInf gRef x)
-    (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w)
+    (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v w)
   rw [metricDiffCovDerivAt_zero_apply (I := I) gk gInf gRef x v w] at hbound
   rw [metricDerivNorm]
   refine hbound.trans_eq ?_
   rw [Fin.prod_univ_two]
-  simp [DifferentialGeometry.Integral.Connection.vec2, mul_assoc]
+  simp [DifferentialGeometry.Geometry.Curvature.vec2, mul_assoc]
 
 
 
@@ -286,11 +288,11 @@ theorem metricDerivNorm_le_of_equiv
   classical
   set nE : ℕ := Module.finrank Real (TangentSpace I y) with hnE
   obtain ⟨basis, hON⟩ :=
-    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) gInf y
+    DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I) gInf y
   have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gInf y basis
       (Tensor0SBundle.identityInvMetric
         (Idx := Fin (Module.finrank Real (TangentSpace I y)))) := by
-    have h := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+    have h := DifferentialGeometry.Geometry.Curvature.metricInverseInBasis_of_orthonormal
       (I := I) gInf basis hON
     intro i j
     simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h i j
@@ -324,7 +326,7 @@ theorem metricDerivNorm_le_of_equiv
             - gInf.inner y (basis (slots 0)) (basis (slots 1)) := by
         rw [Tensor0SBundle.component0S_apply]
         rw [show (fun a => basis (slots a))
-            = DifferentialGeometry.Integral.Connection.vec2 (I := I)
+            = DifferentialGeometry.Geometry.Curvature.vec2 (I := I)
                 (basis (slots 0)) (basis (slots 1)) from by
           funext a; fin_cases a <;> rfl]
         exact metricDiffCovDerivAt_zero_apply gk gInf gInf y _ _
@@ -494,14 +496,14 @@ theorem exists_uniform_equiv_of_metricCPConv [CompactSpace M]
 
 omit [SigmaCompactSpace M] in
 theorem log_integrable_of_sol
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S)
     (x : M) (v : TangentSpace I x) (hv : v ≠ 0) (t0 t : Real)
     (hsub : Set.uIcc t0 t ⊆ D.carrier) :
     IntervalIntegrable
       (fun s : Real =>
-        ((-2 : Real) * S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)) /
+        ((-2 : Real) * S.ricciAt s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)) /
           (S.family.metric s).inner x v v)
       MeasureTheory.volume t0 t := by
   haveI : IsManifold I 1 M :=
@@ -511,26 +513,26 @@ theorem log_integrable_of_sol
   apply ContinuousOn.intervalIntegrable
   have hnum : ContinuousOn
       (fun s : Real =>
-        (-2 : Real) * S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
+        (-2 : Real) * S.ricciAt s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v))
       (Set.uIcc t0 t) := by
     rw [continuousOn_iff_continuous_restrict]
     have hev :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
+      DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.eval_continuous
       (hA := hS.ricciCont) (P := {s : Real // s ∈ Set.uIcc t0 t})
       (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
       (fun p => hsub p.2) continuous_const (v := fun _ _ => v) (fun _ => continuous_const)
     refine continuous_const.mul ?_
     refine hev.congr ?_
     intro p
-    rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Integral.Connection.vec2 (I := I) v v
+    rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v
       from by
       funext i; fin_cases i <;> rfl]
     simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt]
   have hden : ContinuousOn (fun s : Real => (S.family.metric s).inner x v v) (Set.uIcc t0 t) := by
     rw [continuousOn_iff_continuous_restrict]
     have hev :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.eval_continuous
-      (hA := DifferentialGeometry.Integral.Connection.metricTensor_cont_of_metricFamilySmoothOn
+      DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.eval_continuous
+      (hA := DifferentialGeometry.Geometry.Curvature.metricTensor_cont_of_metricFamilySmoothOn
         S.family hS.smoothMetric)
       (P := {s : Real // s ∈ Set.uIcc t0 t})
       (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
@@ -554,7 +556,7 @@ variable [SigmaCompactSpace M]
 omit [SigmaCompactSpace M] in
 theorem metricLogDerivativeInput_of_solutions
     [SigmaCompactSpace M]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))
     (K : Set M) (β ψ t0 A : Real)
@@ -563,7 +565,7 @@ theorem metricLogDerivativeInput_of_solutions
     (hquad :
       forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ K ->
         forall v : TangentSpace I x,
-          |(S i).ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)| <=
+          |(S i).ricciAt t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)| <=
             A * ((S i).family.metric t).inner x v v)
     (hint :
       forall i : Nat, forall x : M, x ∈ K -> forall v : TangentSpace I x, v ≠ 0 ->
@@ -571,7 +573,7 @@ theorem metricLogDerivativeInput_of_solutions
           IntervalIntegrable
             (fun s : Real =>
               ((-2 : Real) *
-                (S i).ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)) /
+                (S i).ricciAt s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)) /
                 ((S i).family.metric s).inner x v v)
             MeasureTheory.volume t0 t) :
     MetricLogDerivativeInput (I := I) K β ψ t0
@@ -588,7 +590,7 @@ theorem metricLogDerivativeInput_of_solutions
 omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_solutions
     [SigmaCompactSpace M]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))
     (K : Set M) (β ψ t0 C A : Real)
@@ -603,7 +605,7 @@ theorem metricUniformEquivalentOnWindow_of_solutions
     (hquad :
       forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ K ->
         forall v : TangentSpace I x,
-          |(S i).ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)| <=
+          |(S i).ricciAt t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)| <=
             A * ((S i).family.metric t).inner x v v)
     (hint :
       forall i : Nat, forall x : M, x ∈ K -> forall v : TangentSpace I x, v ≠ 0 ->
@@ -611,7 +613,7 @@ theorem metricUniformEquivalentOnWindow_of_solutions
           IntervalIntegrable
             (fun s : Real =>
               ((-2 : Real) *
-                (S i).ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)) /
+                (S i).ricciAt s x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)) /
                 ((S i).family.metric s).inner x v v)
             MeasureTheory.volume t0 t) :
     MetricUniformEquivalentOnWindow (I := I) K β ψ gRef
@@ -630,7 +632,7 @@ theorem metricUniformEquivalentOnWindow_of_solutions
 omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_solutions'
     [SigmaCompactSpace M]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))
     (K : Set M) (β ψ t0 C A : Real)
@@ -645,7 +647,7 @@ theorem metricUniformEquivalentOnWindow_of_solutions'
     (hquad :
       forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ K ->
         forall v : TangentSpace I x,
-          |(S i).ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)| <=
+          |(S i).ricciAt t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)| <=
             A * ((S i).family.metric t).inner x v v) :
     MetricUniformEquivalentOnWindow (I := I) K β ψ gRef
       (fun i s => (S i).family.metric s)

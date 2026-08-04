@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.MildSolutio
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection

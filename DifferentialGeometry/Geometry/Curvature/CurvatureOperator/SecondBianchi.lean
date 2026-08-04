@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
+open DifferentialGeometry.Geometry.Curvature
+
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -7,8 +9,8 @@ open Bundle Manifold Set FiberBundle NormedSpace Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Geometry
+namespace Curvature
 
 section CovToFunArith
 
@@ -409,6 +411,6 @@ theorem second_bianchi_levi_civita_metric
 
 end LeviCivitaSecondBianchi
 
-end Connection
-end Integral
+end Curvature
+end Geometry
 end DifferentialGeometry

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentSobolevBoundPerSection
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichOnM
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

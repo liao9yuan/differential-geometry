@@ -1,10 +1,12 @@
 import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -163,4 +165,4 @@ theorem scalar_eq_trace_ricci_frame
     (gInv x) (scalarTraceAt_of_frame (I := I) scalar Ric gInv frame hframe hScalar hx)
 
 end LocalFrame
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

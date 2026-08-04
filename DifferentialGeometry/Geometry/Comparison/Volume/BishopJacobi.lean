@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Comparison.Volume.HyperbolicModel
 import DifferentialGeometry.Geometry.Comparison.Volume.JacobiRiccati
 import DifferentialGeometry.Geometry.Comparison.Volume.JacobianBounds
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Bishop comparison for Jacobi families

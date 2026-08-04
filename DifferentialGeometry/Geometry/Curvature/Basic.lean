@@ -16,7 +16,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
@@ -164,4 +164,4 @@ theorem scalarFromRicciTraceInFrame_apply
 
 end MetricTrace
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

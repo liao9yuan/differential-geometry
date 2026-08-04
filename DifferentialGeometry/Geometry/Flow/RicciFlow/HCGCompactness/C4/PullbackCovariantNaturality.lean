@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PartialDiffeomorphOpens
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -190,7 +192,7 @@ theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     (ContinuousMultilinearMap.ext hres2).symm
   unfold tensor02CovDerivNormWith
   rw [tensor02_eq_covDOF, tensor02_eq_covDOF]
-  obtain ⟨basis, hONb⟩ := DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I)
+  obtain ⟨basis, hONb⟩ := DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis (I := I)
     (Diffeomorph.pullbackMetric (I := I) (g'.restrictOpen (I := I) W) F) xV
   have hnorm1 : Tensor0SBundle.normSq0S (I := I) G x (a + 2)
         (covDerivOfField (I := I) G δM a x)

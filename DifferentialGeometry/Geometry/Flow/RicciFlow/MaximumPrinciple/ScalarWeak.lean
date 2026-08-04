@@ -6,6 +6,8 @@ import Mathlib.Topology.MetricSpace.Lipschitz
 import Mathlib.Topology.Order.Compact
 import Mathlib.Tactic
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

@@ -1,11 +1,12 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor03Differentiability
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
 open Bundle Manifold Set FiberBundle
 open scoped Manifold Topology ContDiff
 
-open DifferentialGeometry.Integral.Connection
+
 namespace DifferentialGeometry
 namespace Geometry
 namespace Connection

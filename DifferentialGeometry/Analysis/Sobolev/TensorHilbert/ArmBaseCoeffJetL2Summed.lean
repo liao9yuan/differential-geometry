@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMoser
+open DifferentialGeometry.Integral.Connection
 
 /-!
 # Summed data-weighted jet-L2 bounds for the linearized Ricci arm base coefficients

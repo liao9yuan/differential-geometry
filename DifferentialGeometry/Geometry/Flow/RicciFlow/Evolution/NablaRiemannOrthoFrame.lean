@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannCommutator
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 import Mathlib.Analysis.InnerProductSpace.PiL2
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
@@ -89,7 +92,7 @@ attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
@@ -141,7 +144,7 @@ def nabla3FrameTupleF
 
 
 def nablaLapCommReactionTermF
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M)
     (frame : Idx → (x : M) → TangentSpace I x)
     (a b c : Idx) (m : Fin 4 → Idx) :
@@ -162,10 +165,10 @@ omit [Fintype Idx] [DecidableEq Idx] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaLapCommF_pointwise
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x₀ : M)
     (frame : Idx → (x : M) → TangentSpace I x)
     (a b c : Idx) (m : Fin 4 → Idx) :
@@ -187,7 +190,7 @@ theorem nablaLapCommF_pointwise
 
 
 def roughLapNablaRmCompF
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M)
     (frame : Idx → (x : M) → TangentSpace I x)
     (gInv : Idx → Idx → Real)
@@ -202,7 +205,7 @@ def roughLapNablaRmCompF
 
 
 def nablaRoughLapRmCompF
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M)
     (frame : Idx → (x : M) → TangentSpace I x)
     (gInv : Idx → Idx → Real)
@@ -220,10 +223,10 @@ omit [DecidableEq Idx] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaLapCommF_trace
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x₀ : M)
     (frame : Idx → (x : M) → TangentSpace I x)
     (gInv : Idx → Idx → Real)
@@ -251,10 +254,10 @@ theorem nablaLapCommF_trace
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaLapCommF_orthonormalTrace
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x₀ : M)
     (frame : Idx → (x : M) → TangentSpace I x)
     (gInv : Idx → Idx → Real)
@@ -303,7 +306,7 @@ section OrthonormalFrame
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem exists_orthoFrameAt
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M) :
     ∃ (n : ℕ) (frame : Fin n → (x : M) → TangentSpace I x),
       (∀ i j : Fin n,
@@ -352,7 +355,7 @@ section Adapter
 
 
 def deltaInvMetric {Idx : Type*} [DecidableEq Idx] :
-    Real → DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx :=
+    Real → DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx :=
   fun _ _ i j => if i = j then 1 else 0
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
@@ -396,10 +399,10 @@ theorem deltaInvMetric_orthonormal {Idx : Type*} [Finite Idx] [DecidableEq Idx]
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaLapComm_orthoFrame
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x₀ : M) :
     ∃ (n : ℕ) (frame : Fin n → (x : M) → TangentSpace I x),
       (∀ i j : Fin n,

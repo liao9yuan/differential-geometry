@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpLimit
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.TensorChartTransition
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Algebraic chart transport for raw tensor Sobolev sections

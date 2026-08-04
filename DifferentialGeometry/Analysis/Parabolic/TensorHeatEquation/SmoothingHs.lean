@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPowe
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupLaw
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

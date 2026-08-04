@@ -27,7 +27,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open Bundle ContinuousLinearMap Tensor0SBundle
 open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow
 
