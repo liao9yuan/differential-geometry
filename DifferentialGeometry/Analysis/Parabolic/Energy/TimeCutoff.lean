@@ -8,6 +8,74 @@ open MeasureTheory Set
 
 namespace DifferentialGeometry.Analysis.Parabolic.Energy
 
+theorem weight_mul_sub_eq_intervalIntegral
+    {weight dweight energy denergy : ℝ → ℝ} {a b : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hdenergy : ContinuousOn denergy (Icc a b))
+    (henergy : ∀ t ∈ Icc a b, HasDerivAt energy (denergy t) t) :
+    weight b * energy b - weight a * energy a =
+      ∫ t in a..b, dweight t * energy t + weight t * denergy t := by
+  have hweight_cont : ContinuousOn weight (Icc a b) :=
+    fun t ht => (hweight t ht).continuousAt.continuousWithinAt
+  have henergy_cont : ContinuousOn energy (Icc a b) :=
+    fun t ht => (henergy t ht).continuousAt.continuousWithinAt
+  have hintegrand : ContinuousOn
+      (fun t => dweight t * energy t + weight t * denergy t) (Icc a b) :=
+    (hdweight.mul henergy_cont).add (hweight_cont.mul hdenergy)
+  have hintegrand_int : IntervalIntegrable
+      (fun t => dweight t * energy t + weight t * denergy t) volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hintegrand
+  symm
+  exact intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le
+    (f := fun t => weight t * energy t)
+    (f' := fun t => dweight t * energy t + weight t * denergy t)
+    hab (hweight_cont.mul henergy_cont)
+    (fun t ht => (hweight t ⟨le_of_lt ht.1, le_of_lt ht.2⟩).mul
+      (henergy t ⟨le_of_lt ht.1, le_of_lt ht.2⟩)) hintegrand_int
+
+theorem weight_mul_energy_inequality
+    {weight dweight energy denergy dissipation source : ℝ → ℝ} {a b : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hdenergy : ContinuousOn denergy (Icc a b))
+    (henergyDeriv : ∀ t ∈ Icc a b, HasDerivAt energy (denergy t) t)
+    (hdissipation : ContinuousOn dissipation (Icc a b))
+    (hsource : ContinuousOn source (Icc a b))
+    (henergy : ∀ t ∈ Icc a b,
+      dweight t * energy t + weight t * denergy t + dissipation t ≤ source t) :
+    weight b * energy b - weight a * energy a +
+        ∫ t in a..b, dissipation t ≤ ∫ t in a..b, source t := by
+  have hidentity := weight_mul_sub_eq_intervalIntegral
+    hab hdweight hweight hdenergy henergyDeriv
+  have hweight_cont : ContinuousOn weight (Icc a b) :=
+    fun t ht => (hweight t ht).continuousAt.continuousWithinAt
+  have henergy_cont : ContinuousOn energy (Icc a b) :=
+    fun t ht => (henergyDeriv t ht).continuousAt.continuousWithinAt
+  have hderivative : ContinuousOn
+      (fun t => dweight t * energy t + weight t * denergy t) (Icc a b) :=
+    (hdweight.mul henergy_cont).add (hweight_cont.mul hdenergy)
+  have hleft_int : IntervalIntegrable
+      (fun t => dweight t * energy t + weight t * denergy t) volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hderivative
+  have hdiss_int : IntervalIntegrable dissipation volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hdissipation
+  have hsource_int : IntervalIntegrable source volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hsource
+  have hmono :
+      (∫ t in a..b,
+        (dweight t * energy t + weight t * denergy t) + dissipation t) ≤
+          ∫ t in a..b, source t :=
+    intervalIntegral.integral_mono_on hab (hleft_int.add hdiss_int) hsource_int henergy
+  rw [intervalIntegral.integral_add hleft_int hdiss_int, ← hidentity] at hmono
+  exact hmono
+
 theorem norm_sq_sub_eq_intervalIntegral_inner_deriv
     {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
     {u du : ℝ → X} {a b : ℝ}
