@@ -319,6 +319,137 @@ theorem morseReducedFamily_sym (a : MorseModel (n + 1) → LinearMap.BilinForm �
   rw [hsym (morseCons (0 : ℝ) x') morseE0 (morseCons (0 : ℝ) w)]
   ring
 
+theorem morseHead_add (v w : MorseModel (n + 1)) :
+    morseHead (v + w) = morseHead v + morseHead w := by
+  simp [morseHead]
+
+theorem morseTail_add (v w : MorseModel (n + 1)) :
+    morseTail (v + w) = morseTail v + morseTail w := by
+  funext i
+  rfl
+
+theorem morseHead_smul (c : ℝ) (v : MorseModel (n + 1)) :
+    morseHead (c • v) = c * morseHead v := by
+  simp [morseHead]
+
+theorem morseTail_smul (c : ℝ) (v : MorseModel (n + 1)) :
+    morseTail (c • v) = c • morseTail v := by
+  funext i
+  rfl
+
+noncomputable def morseCompletionDerivMap
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (d' : MorseModel (n + 1) →L[ℝ] ℝ) (v : MorseModel (n + 1)) : MorseModel (n + 1) :=
+  morseCons (Real.sqrt |morsePivot a 0| * (morseHead v + d' v / morsePivot a 0)) (morseTail v)
+
+noncomputable def morseCompletionDeriv
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (d' : MorseModel (n + 1) →L[ℝ] ℝ) : MorseModel (n + 1) →ₗ[ℝ] MorseModel (n + 1) :=
+  { toFun := morseCompletionDerivMap a d'
+    map_add' := by
+      intro v w
+      dsimp [morseCompletionDerivMap]
+      rw [morseHead_add, morseTail_add, map_add]
+      have hhead :
+          Real.sqrt |morsePivot a 0| * (morseHead v + morseHead w + (d' v + d' w) / morsePivot a 0) =
+            Real.sqrt |morsePivot a 0| * (morseHead v + d' v / morsePivot a 0) +
+              Real.sqrt |morsePivot a 0| * (morseHead w + d' w / morsePivot a 0) := by
+        rw [add_div]
+        ring
+      rw [hhead]
+      rw [morseCons_add]
+    map_smul' := by
+      intro c v
+      dsimp [morseCompletionDerivMap]
+      rw [morseHead_smul, morseTail_smul, map_smul]
+      have hhead : Real.sqrt |morsePivot a 0| * (c * morseHead v + (c • d' v) / morsePivot a 0) =
+          c * (Real.sqrt |morsePivot a 0| * (morseHead v + d' v / morsePivot a 0)) := by
+        rw [smul_eq_mul]
+        ring
+      rw [hhead]
+      funext i
+      cases i using Fin.cases with
+      | zero => simp [morseCons]
+      | succ j => simp [morseCons]
+      }
+
+theorem morseHead_completionDeriv (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (d' : MorseModel (n + 1) →L[ℝ] ℝ) (v : MorseModel (n + 1)) :
+    morseHead (morseCompletionDeriv a d' v) =
+      Real.sqrt |morsePivot a 0| * (morseHead v + d' v / morsePivot a 0) := by
+  simp [morseCompletionDeriv, morseCompletionDerivMap, morseHead, morseCons]
+
+theorem morseTail_completionDeriv (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (d' : MorseModel (n + 1) →L[ℝ] ℝ) (v : MorseModel (n + 1)) :
+    morseTail (morseCompletionDeriv a d' v) = morseTail v := by
+  funext i
+  simp [morseCompletionDeriv, morseCompletionDerivMap, morseTail, morseCons]
+
+theorem d'apply_tail (d' : MorseModel (n + 1) →L[ℝ] ℝ) (hd₀ : d' morseE0 = 0)
+    (v : MorseModel (n + 1)) :
+    d' v = d' (morseCons (0 : ℝ) (morseTail v)) := by
+  conv_lhs =>
+    rw [morse_cons_decompose v, morse_cons_smul']
+  rw [map_add, map_smul, hd₀, smul_eq_mul, mul_zero, zero_add]
+
+theorem morseCompletionDeriv_injective (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (d' : MorseModel (n + 1) →L[ℝ] ℝ) (hpiv : morsePivot a 0 ≠ 0) (hd₀ : d' morseE0 = 0) :
+    Function.Injective (morseCompletionDeriv a d') := by
+  intro v w h
+  have hhead : Real.sqrt |morsePivot a 0| * (morseHead v + d' v / morsePivot a 0) =
+      Real.sqrt |morsePivot a 0| * (morseHead w + d' w / morsePivot a 0) := by
+    have := congrArg morseHead h
+    rw [morseHead_completionDeriv, morseHead_completionDeriv] at this
+    exact this
+  have htail : morseTail v = morseTail w := by
+    have := congrArg morseTail h
+    simpa [morseCompletionDeriv, morseCompletionDerivMap, morseTail] using this
+  have hsq : Real.sqrt |morsePivot a 0| ≠ 0 := by
+    exact (Real.sqrt_pos.2 (abs_pos.mpr hpiv)).ne'
+  have hmain : morseHead v + d' v / morsePivot a 0 = morseHead w + d' w / morsePivot a 0 := by
+    exact (mul_left_cancel₀ hsq hhead)
+  have hdv : d' v = d' (morseCons (0 : ℝ) (morseTail v)) := d'apply_tail d' hd₀ v
+  have hdw : d' w = d' (morseCons (0 : ℝ) (morseTail w)) := d'apply_tail d' hd₀ w
+  have hd'eq : d' v = d' w := by
+    rw [hdv, hdw, htail]
+  have hh : morseHead v = morseHead w := by
+    rw [hd'eq] at hmain
+    linarith
+  rw [morse_cons_decompose v, morse_cons_decompose w]
+  rw [hh, htail]
+
+theorem morseCompletionDeriv_surjective (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (d' : MorseModel (n + 1) →L[ℝ] ℝ) (hpiv : morsePivot a 0 ≠ 0) (hd₀ : d' morseE0 = 0) :
+    Function.Surjective (morseCompletionDeriv a d') := by
+  intro y
+  let s : ℝ := Real.sqrt |morsePivot a 0|
+  have hsq : s ≠ 0 := by
+    exact (Real.sqrt_pos.2 (abs_pos.mpr hpiv)).ne'
+  let v : MorseModel (n + 1) :=
+    morseCons (morseHead y / s - d' (morseCons (0 : ℝ) (morseTail y)) / morsePivot a 0) (morseTail y)
+  refine ⟨v, ?_⟩
+  have hd' : d' v = d' (morseCons (0 : ℝ) (morseTail y)) := by
+    have hsplit : v =
+        (morseHead y / s - d' (morseCons (0 : ℝ) (morseTail y)) / morsePivot a 0) • morseE0 +
+          morseCons (0 : ℝ) (morseTail y) := by
+      rw [← morse_cons_smul' (morseHead y / s - d' (morseCons (0 : ℝ) (morseTail y)) / morsePivot a 0)
+        (morseTail y)]
+    rw [hsplit]
+    simp [map_add, map_smul, hd₀, smul_eq_mul]
+  have hmv : morseHead v =
+      morseHead y / s - d' (morseCons (0 : ℝ) (morseTail y)) / morsePivot a 0 := by
+    simp [v, morseHead, morseCons]
+  funext i
+  cases i using Fin.cases with
+  | zero =>
+      change morseHead (morseCompletionDeriv a d' v) = y (0 : Fin (n + 1))
+      rw [morseHead_completionDeriv, hd', hmv]
+      field_simp [hsq, hpiv]
+      simp [s, morseHead]
+      ring_nf
+  | succ j =>
+      simp [morseCompletionDeriv, morseCompletionDerivMap, v, morseCons, morseTail]
+
 end Completion
 
 omit [FiniteDimensional ℝ E] in
