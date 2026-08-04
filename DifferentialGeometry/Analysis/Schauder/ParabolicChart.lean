@@ -150,6 +150,40 @@ theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_iff
         alpha I (center i) (Q i) u ≤ C := by
   exact iSup_le_iff
 
+theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_iSup
+    [FiniteDimensional Real E]
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) (C : A → ENNReal)
+    (h : ∀ i, eParabolicC2HolderGaugeInEuclideanChartOn
+      alpha I (center i) (Q i) u ≤ C i) :
+    eParabolicC2HolderGaugeInEuclideanChartsOn alpha I center Q u ≤
+      ⨆ i, C i := by
+  apply iSup_mono
+  exact h
+
+theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_sum_of_finite
+    [FiniteDimensional Real E]
+    {A : Type*} [Fintype A]
+    (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) (C : A → NNReal)
+    (h : ∀ i, eParabolicC2HolderGaugeInEuclideanChartOn
+      alpha I (center i) (Q i) u ≤ C i) :
+    eParabolicC2HolderGaugeInEuclideanChartsOn alpha I center Q u ≤
+      ∑ i, C i := by
+  classical
+  unfold eParabolicC2HolderGaugeInEuclideanChartsOn
+  apply iSup_le
+  intro i
+  exact (h i).trans
+    (ENNReal.coe_le_coe.mpr
+      (Finset.single_le_sum (fun j _ ↦ zero_le (C j)) (Finset.mem_univ i)))
+
 end DifferentialGeometry.Analysis.Schauder
 
 end
