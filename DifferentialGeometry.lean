@@ -873,6 +873,7 @@ import DifferentialGeometry.Analysis.Schauder.Holder
 import DifferentialGeometry.Analysis.Schauder.HolderCompactness
 import DifferentialGeometry.Analysis.Schauder.HolderCompleteSpace
 import DifferentialGeometry.Analysis.Schauder.HolderNormedSpace
+import DifferentialGeometry.Analysis.Schauder.HolderOperator
 import DifferentialGeometry.Analysis.Schauder.HolderSpace
 import DifferentialGeometry.Analysis.Schauder.Interior
 import DifferentialGeometry.Analysis.Schauder.Interpolation
