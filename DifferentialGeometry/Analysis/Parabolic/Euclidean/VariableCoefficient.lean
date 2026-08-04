@@ -192,6 +192,39 @@ theorem spdParabolicSchauderDefectConst_rescale_lt_one
   rw [spdParabolicSchauderDefectConst_rescale]
   exact hsmall
 
+omit [Nonempty n] [NormedSpace Real F] in
+theorem exists_pos_rescale_spdParabolicSchauderDefectConst_lt_one
+    (A : Matrix n n Real) (hA : A.PosDef) (alpha : NNReal)
+    (Ka : n → n → NNReal) (T : Real) :
+    ∃ c : NNReal, 0 < c ∧ c ≤ 1 ∧
+      spdParabolicSchauderDefectConst A hA alpha
+        (fun i j ↦ Ka i j * c) (fun i j ↦ Ka i j * c) T < 1 := by
+  let C := spdParabolicSchauderDefectConst A hA alpha Ka Ka T
+  let c : NNReal := 1 / (2 * (C + 1))
+  have hcpos : 0 < c := by
+    dsimp only [c]
+    positivity
+  have hcle : c ≤ 1 := by
+    dsimp only [c]
+    rw [div_le_one (by positivity)]
+    calc
+      1 ≤ C + 1 := by simp
+      _ = 1 * (C + 1) := by simp
+      _ ≤ 2 * (C + 1) := mul_le_mul_left (by norm_num) _
+  have hsmall : c * C < 1 := by
+    calc
+      c * C = C / (2 * (C + 1)) := by
+        dsimp only [c]
+        field_simp
+      _ < 1 := (div_lt_one (by positivity)).2 <| lt_of_lt_of_le
+        (lt_add_one C) <| by
+          calc
+            C + 1 = 1 * (C + 1) := by simp
+            _ ≤ 2 * (C + 1) := mul_le_mul_left (by norm_num) _
+  refine ⟨c, hcpos, hcle, ?_⟩
+  exact spdParabolicSchauderDefectConst_rescale_lt_one
+    A hA alpha Ka c T hsmall
+
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
 theorem parabolicVariableMatrixLap_apply
