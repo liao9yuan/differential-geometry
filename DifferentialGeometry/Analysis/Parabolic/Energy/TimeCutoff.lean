@@ -105,6 +105,18 @@ theorem exists_timeCutoffDeriv_bound :
     le_trans (le_abs_self _) (hbound _)
   exact div_le_div_of_nonneg_right hderiv (sub_pos.mpr hab).le
 
+def timeCutoffDerivConstant : ℝ :=
+  Classical.choose exists_timeCutoffDeriv_bound
+
+theorem timeCutoffDerivConstant_nonneg :
+    0 ≤ timeCutoffDerivConstant :=
+  (Classical.choose_spec exists_timeCutoffDeriv_bound).1
+
+theorem timeCutoffDeriv_le
+    {a b : ℝ} (hab : a < b) (t : ℝ) :
+    timeCutoffDeriv a b t ≤ timeCutoffDerivConstant / (b - a) :=
+  (Classical.choose_spec exists_timeCutoffDeriv_bound).2 hab t
+
 theorem timeCutoff_mass_error_intervalIntegral_le
     {mass error outerMass : ℝ → ℝ}
     {a t₀ t t₁ D K L : ℝ}

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Calculus.CutoffProfile
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothScalar.PreH1
+import DifferentialGeometry.Analysis.Parabolic.Energy.TimeCutoff
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 
 set_option autoImplicit false
@@ -44,6 +45,72 @@ theorem moserCutoffLevel_strictMono : StrictMono moserCutoffLevel := by
   intro k
   rw [← sub_pos, moserCutoffLevel_succ_sub]
   exact moserCutoffWidth_pos k
+
+def moserTimeLevel (a τ : ℝ) (k : ℕ) : ℝ :=
+  τ - (τ - a) * (2 : ℝ)⁻¹ ^ k
+
+def moserTimeWidth (a τ : ℝ) (k : ℕ) : ℝ :=
+  (τ - a) * (2 : ℝ)⁻¹ ^ (k + 1)
+
+@[simp]
+theorem moserTimeLevel_zero (a τ : ℝ) :
+    moserTimeLevel a τ 0 = a := by
+  simp [moserTimeLevel]
+
+theorem moserTimeLevel_succ_sub (a τ : ℝ) (k : ℕ) :
+    moserTimeLevel a τ (k + 1) - moserTimeLevel a τ k =
+      moserTimeWidth a τ k := by
+  simp only [moserTimeLevel, moserTimeWidth, pow_succ]
+  ring
+
+theorem moserTimeWidth_pos {a τ : ℝ} (haτ : a < τ) (k : ℕ) :
+    0 < moserTimeWidth a τ k := by
+  exact mul_pos (sub_pos.mpr haτ) (pow_pos (by norm_num) _)
+
+theorem moserTimeWidth_inv (a τ : ℝ) (k : ℕ) :
+    (moserTimeWidth a τ k)⁻¹ = (2 : ℝ) ^ (k + 1) / (τ - a) := by
+  simp only [moserTimeWidth, mul_inv_rev, ← inv_pow, inv_inv, div_eq_mul_inv]
+
+theorem moserTimeLevel_lt_succ {a τ : ℝ} (haτ : a < τ) (k : ℕ) :
+    moserTimeLevel a τ k < moserTimeLevel a τ (k + 1) := by
+  rw [← sub_pos, moserTimeLevel_succ_sub]
+  exact moserTimeWidth_pos haτ k
+
+theorem moserTimeLevel_strictMono {a τ : ℝ} (haτ : a < τ) :
+    StrictMono (moserTimeLevel a τ) := by
+  exact strictMono_nat_of_lt_succ (moserTimeLevel_lt_succ haτ)
+
+theorem moserTimeLevel_lt {a τ : ℝ} (haτ : a < τ) (k : ℕ) :
+    moserTimeLevel a τ k < τ := by
+  rw [moserTimeLevel]
+  exact sub_lt_self τ (mul_pos (sub_pos.mpr haτ) (pow_pos (by norm_num) _))
+
+theorem timeCutoffDeriv_moserTimeLevel_le
+    {a τ : ℝ} (haτ : a < τ) (k : ℕ) (t : ℝ) :
+    DifferentialGeometry.Analysis.Parabolic.Energy.timeCutoffDeriv
+        (moserTimeLevel a τ k) (moserTimeLevel a τ (k + 1)) t ≤
+      DifferentialGeometry.Analysis.Parabolic.Energy.timeCutoffDerivConstant /
+        moserTimeWidth a τ k := by
+  have h := DifferentialGeometry.Analysis.Parabolic.Energy.timeCutoffDeriv_le
+    (moserTimeLevel_lt_succ haτ k) t
+  rwa [moserTimeLevel_succ_sub] at h
+
+theorem timeCutoffDeriv_moserTimeLevel_le_mul_pow
+    {a τ : ℝ} (haτ : a < τ) (k : ℕ) (t : ℝ) :
+    DifferentialGeometry.Analysis.Parabolic.Energy.timeCutoffDeriv
+        (moserTimeLevel a τ k) (moserTimeLevel a τ (k + 1)) t ≤
+      (2 * DifferentialGeometry.Analysis.Parabolic.Energy.timeCutoffDerivConstant /
+          (τ - a)) * 2 ^ k := by
+  calc
+    _ ≤ DifferentialGeometry.Analysis.Parabolic.Energy.timeCutoffDerivConstant /
+        moserTimeWidth a τ k := timeCutoffDeriv_moserTimeLevel_le haτ k t
+    _ = DifferentialGeometry.Analysis.Parabolic.Energy.timeCutoffDerivConstant *
+        ((2 : ℝ) ^ (k + 1) / (τ - a)) := by
+      rw [div_eq_mul_inv, moserTimeWidth_inv]
+    _ = (2 * DifferentialGeometry.Analysis.Parabolic.Energy.timeCutoffDerivConstant /
+          (τ - a)) * 2 ^ k := by
+      rw [pow_succ]
+      ring
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -112,6 +179,23 @@ theorem spatialMoserCutoff_succ_sq_le
       spatialMoserCutoff_eq_one_of_level_le (le_of_not_ge hx)
     rw [hone, one_pow]
     have hmem := spatialMoserCutoff_mem_Icc rho (k + 1) x
+    simpa using (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
+
+omit [Module.Finite ℝ E] in
+theorem spatialMoserCutoff_add_two_sq_le_rpow
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g) (k : ℕ) (x : M)
+    (p : ℝ) :
+    (spatialMoserCutoff rho (k + 2)).toFun x ^ 2 ≤
+      (spatialMoserCutoff rho (k + 1)).toFun x ^ p := by
+  by_cases hx : rho.toFun x ≤ moserCutoffLevel (k + 2)
+  · rw [spatialMoserCutoff_eq_zero_of_le_level hx]
+    norm_num
+    exact Real.rpow_nonneg (spatialMoserCutoff_mem_Icc rho (k + 1) x).1 p
+  · have hone : (spatialMoserCutoff rho (k + 1)).toFun x = 1 := by
+      apply spatialMoserCutoff_eq_one_of_level_le
+      simpa only [Nat.add_assoc] using le_of_not_ge hx
+    rw [hone, Real.one_rpow]
+    have hmem := spatialMoserCutoff_mem_Icc rho (k + 2) x
     simpa using (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
 
 theorem gradientFun_spatialMoserCutoff
