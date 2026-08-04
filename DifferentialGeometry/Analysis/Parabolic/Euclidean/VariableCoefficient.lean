@@ -225,6 +225,82 @@ theorem exists_pos_rescale_spdParabolicSchauderDefectConst_lt_one
   exact spdParabolicSchauderDefectConst_rescale_lt_one
     A hA alpha Ka c T hsmall
 
+omit [Nonempty n] [NormedSpace Real F] in
+theorem exists_pos_le_rescale_spdParabolicSchauderDefectConst_lt_one
+    (A : Matrix n n Real) (hA : A.PosDef) (alpha : NNReal)
+    (halpha : 0 < alpha) (Ka : n → n → NNReal) (T : Real)
+    (R : NNReal) (hR : 0 < R) :
+    ∃ r : NNReal, 0 < r ∧ r ≤ R ∧
+      spdParabolicSchauderDefectConst A hA alpha
+        (fun i j ↦ Ka i j * r ^ (alpha : Real))
+        (fun i j ↦ Ka i j * r ^ (alpha : Real)) T < 1 := by
+  obtain ⟨c, hcpos, _, hsmall⟩ :=
+    exists_pos_rescale_spdParabolicSchauderDefectConst_lt_one
+      A hA alpha Ka T
+  let d : NNReal := min c (R ^ (alpha : Real))
+  let r : NNReal := d ^ ((alpha : Real)⁻¹)
+  have hdpos : 0 < d := by
+    dsimp only [d]
+    exact lt_min hcpos (NNReal.rpow_pos hR)
+  have hrpos : 0 < r := NNReal.rpow_pos hdpos
+  have halphaReal : (0 : Real) < alpha := by exact_mod_cast halpha
+  have halphaNe : (alpha : Real) ≠ 0 := halphaReal.ne'
+  have hrpow : r ^ (alpha : Real) = d := by
+    dsimp only [r]
+    rw [← NNReal.rpow_mul, inv_mul_cancel₀ halphaNe, NNReal.rpow_one]
+  have hrle : r ≤ R := by
+    dsimp only [r]
+    calc
+      d ^ ((alpha : Real)⁻¹) ≤
+          (R ^ (alpha : Real)) ^ ((alpha : Real)⁻¹) :=
+        NNReal.rpow_le_rpow (min_le_right _ _) (inv_nonneg.mpr halphaReal.le)
+      _ = R := by
+        rw [← NNReal.rpow_mul, mul_inv_cancel₀ halphaNe, NNReal.rpow_one]
+  refine ⟨r, hrpos, hrle, ?_⟩
+  rw [hrpow]
+  apply spdParabolicSchauderDefectConst_rescale_lt_one
+  have hcsmall : c * spdParabolicSchauderDefectConst A hA alpha Ka Ka T < 1 := by
+    rw [← spdParabolicSchauderDefectConst_rescale]
+    exact hsmall
+  exact lt_of_le_of_lt (mul_le_mul_left (min_le_left _ _) _) hcsmall
+
+omit [Nonempty n] [NormedSpace Real F] in
+theorem exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : (Matrix.of fun i j ↦ a i j p0).PosDef)
+    (alpha : NNReal) (halpha : 0 < alpha) (Ka : n → n → NNReal)
+    (T : Real) (R : NNReal) (hR : 0 < R)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((Metric.ball p0 R).restrict (a i j))) :
+    ∃ r : NNReal, 0 < r ∧ r ≤ R ∧
+      (∀ i j, HolderWith (Ka i j * r ^ (alpha : Real)) alpha
+        ((Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicMatrixCoefficientRescale r p0 a i j))) ∧
+      (∀ i j p, p ∈ Metric.ball (parabolicPoint 0 0) 1 →
+        ‖a i j p0 - parabolicMatrixCoefficientRescale r p0 a i j p‖ ≤
+          Ka i j * r ^ (alpha : Real)) ∧
+      spdParabolicSchauderDefectConst
+        (Matrix.of fun i j ↦ a i j p0) hA alpha
+        (fun i j ↦ Ka i j * r ^ (alpha : Real))
+        (fun i j ↦ Ka i j * r ^ (alpha : Real)) T < 1 := by
+  obtain ⟨r, hr, hrR, hsmall⟩ :=
+    exists_pos_le_rescale_spdParabolicSchauderDefectConst_lt_one
+      (Matrix.of fun i j ↦ a i j p0) hA alpha halpha Ka T R hR
+  have har : ∀ i j, HolderWith (Ka i j) alpha
+      ((Metric.ball p0 r).restrict (a i j)) := by
+    intro i j
+    apply HolderOnWith.holderWith
+    exact (HolderWith.restrict_iff.mp (ha i j)).mono
+      (Metric.ball_subset_ball (by exact_mod_cast hrR))
+  refine ⟨r, hr, hrR, ?_, ?_, hsmall⟩
+  · intro i j
+    exact parabolicMatrixCoefficientRescale_holderWith_unitBall
+      r hr p0 a Ka har i j
+  · intro i j p hp
+    exact parabolicMatrixCoefficientRescale_norm_sub_le_of_mem_unitBall
+      r hr p0 a Ka har i j p hp
+
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
 theorem parabolicVariableMatrixLap_apply
