@@ -10,6 +10,7 @@ import DifferentialGeometry.Analysis.Calculus.ContDiffOnTsum
 import DifferentialGeometry.Analysis.Calculus.Cutoff
 import DifferentialGeometry.Analysis.Calculus.CutoffProfile
 import DifferentialGeometry.Analysis.Calculus.DyadicScale
+import DifferentialGeometry.Analysis.Calculus.HilbertBasisDerivative
 import DifferentialGeometry.Analysis.Calculus.IteratedCompBound
 import DifferentialGeometry.Analysis.Calculus.IteratedFDerivProductDifferenceBound
 import DifferentialGeometry.Analysis.Calculus.IteratedFDerivSeminormCalculus

@@ -519,6 +519,65 @@ theorem laplacianOp_inner_eigenbasis
     laplacianOp_laplacianEigenfunction, real_inner_smul_left] at h
   exact h
 
+theorem exists_laplacianDomain_lift_iff_inner_eigenbasis
+    (g : SmoothRiemannianMetric I M)
+    (u w : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
+    (∃ u_h : laplacianDomain (I := I) (M := M) g,
+      H1ComplToLp (I := I) (M := M) g (u_h : H1Compl g) = u ∧
+        laplacianOp (I := I) (M := M) g u_h = w) ↔
+      ∀ i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
+        Fin (Module.finrank ℝ
+          (resolventEigenspace (I := I) (M := M) g μ.val)),
+        ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i, w⟫_ℝ =
+          -(laplacianEigenvalueOf i.1.val) *
+            ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i, u⟫_ℝ := by
+  constructor
+  · rintro ⟨u_h, hu_h, hw⟩ i
+    rw [← hu_h, ← hw]
+    exact laplacianOp_inner_eigenbasis (I := I) (M := M) g u_h i
+  · intro hcoeff
+    let z := u - w
+    let u_h : laplacianDomain (I := I) (M := M) g :=
+      ⟨resolvent (I := I) (M := M) g z,
+        (laplacianDomain_mem_iff (I := I) (M := M) g).mpr ⟨z, rfl⟩⟩
+    have hu_h : H1ComplToLp (I := I) (M := M) g (u_h : H1Compl g) = u := by
+      set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
+      apply b.repr.injective
+      ext i
+      rw [b.repr_apply_apply, b.repr_apply_apply]
+      change ⟪b i, H1ComplToLp (I := I) (M := M) g
+        (resolvent (I := I) (M := M) g z)⟫_ℝ = ⟪b i, u⟫_ℝ
+      rw [← resolventL2_apply]
+      have hself := resolventL2_isSelfAdjoint (I := I) (M := M) g
+      have hsym : (resolventL2 (I := I) (M := M) g).IsSymmetric :=
+        (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric).mp hself
+      have hswap : ⟪b i, resolventL2 (I := I) (M := M) g z⟫_ℝ =
+          ⟪resolventL2 (I := I) (M := M) g (b i), z⟫_ℝ :=
+        (hsym.apply_clm (b i) z).symm
+      rw [hswap]
+      change ⟪resolventL2 (I := I) (M := M) g
+        (resolventEigenbasisSigma (I := I) (M := M) g i), z⟫_ℝ = ⟪b i, u⟫_ℝ
+      rw [resolventL2_apply_resolventEigenbasisSigma,
+        real_inner_smul_left]
+      change i.1.val * ⟪b i, u - w⟫_ℝ = ⟪b i, u⟫_ℝ
+      rw [inner_sub_right, hcoeff]
+      have hmul : i.1.val * (1 + laplacianEigenvalueOf i.1.val) = 1 := by
+        unfold laplacianEigenvalueOf
+        field_simp [i.1.val_ne_zero]
+        ring
+      calc
+        i.1.val * (⟪b i, u⟫_ℝ -
+            (-(laplacianEigenvalueOf i.1.val) * ⟪b i, u⟫_ℝ)) =
+            (i.1.val * (1 + laplacianEigenvalueOf i.1.val)) * ⟪b i, u⟫_ℝ := by ring
+        _ = ⟪b i, u⟫_ℝ := by rw [hmul, one_mul]
+    refine ⟨u_h, hu_h, ?_⟩
+    change laplacianOp (I := I) (M := M) g
+      ⟨resolvent (I := I) (M := M) g z,
+        (laplacianDomain_mem_iff (I := I) (M := M) g).mpr ⟨z, rfl⟩⟩ = w
+    rw [laplacianOp_resolvent, hu_h]
+    change u - (u - w) = w
+    abel
+
 example (g : SmoothRiemannianMetric I M) :
     HilbertBasis
       (Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,

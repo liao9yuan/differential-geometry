@@ -590,6 +590,24 @@ theorem heatPower_isSelfAdjoint (g : SmoothRiemannianMetric I M) (k : ℕ)
     exact h_inner_hsum'.tsum_eq.symm
   rw [h_lhs, h_rhs]
 
+theorem heatPower_inner_eigenbasis
+    (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
+    (i : EigenIdx (I := I) (M := M) g)
+    (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
+    ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i,
+      heatPower (I := I) (M := M) g k t u⟫_ℝ =
+      ((EigenIdx.lambda (I := I) (M := M) i) ^ k *
+        Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) *
+        ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i, u⟫_ℝ := by
+  have hself := heatPower_isSelfAdjoint (I := I) (M := M) g k ht
+  have hsym : (heatPower (I := I) (M := M) g k t).IsSymmetric :=
+    (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric).mp hself
+  have hswap := (hsym.apply_clm
+    (resolventHilbertEigenbasisSigma (I := I) (M := M) g i) u).symm
+  rw [heatPower_apply_basis_pos (I := I) (M := M) g k ht i,
+    real_inner_smul_left] at hswap
+  exact hswap
+
 theorem heatPower_comp_heatSemigroup
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     {s : ℝ} (hs : 0 ≤ s) :
