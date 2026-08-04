@@ -486,7 +486,107 @@ theorem caccioppoli_differential
   rw [hlap_scale]
   linarith
 
-theorem caccioppoli
+theorem caccioppoli_differential_of_subsolution
+    {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g)
+    (u source : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    (t : ℝ)
+    (hu_nonneg : ∀ x : M, 0 ≤ u t x)
+    (hpde : ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x) :
+    deriv
+        (fun s => localizedL2Mass (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu s)) t +
+        localizedDirichletEnergy (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu t) ≤
+      4 * cutoffGradientError (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu t) +
+        ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * source t x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  let ut := smoothScalarSlice (I := I) g u hu t
+  let ft := smoothScalarSlice (I := I) g source hsource t
+  letI : IsFiniteMeasure μ := by
+    dsimp [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hu_swap : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => u p.2 p.1) :=
+    hu.comp (contMDiff_snd.prodMk contMDiff_fst)
+  have htime_joint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => deriv (fun s => u s p.1) p.2) := by
+    simpa using DifferentialGeometry.contMDiff_partial_deriv_snd I
+      (⟨fun p : M × ℝ => u p.2 p.1, hu_swap⟩ :
+        C^∞⟮I.prod 𝓘(ℝ, ℝ), M × ℝ; ℝ⟯)
+  have htime_cont : Continuous (fun x : M => deriv (fun s => u s x) t) :=
+    htime_joint.continuous.comp (continuous_id.prodMk continuous_const)
+  have hlap_cont : Continuous (fun x : M =>
+      Δ_g (I := I) g ut.smooth x) :=
+    (Δ_g_contMDiff (I := I) g ut.smooth).continuous
+  have hcoeff_cont : Continuous (fun x : M => 2 * cutoff.toFun x ^ 2 * u t x) :=
+    (continuous_const.mul (cutoff.smooth.continuous.pow 2)).mul ut.smooth.continuous
+  have hsource_cont : Continuous (fun x : M => source t x) := ft.smooth.continuous
+  have htime_int : Integrable (fun x : M =>
+      2 * cutoff.toFun x ^ 2 * u t x * deriv (fun s => u s x) t) μ :=
+    (hcoeff_cont.mul htime_cont).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have hlap_int : Integrable (fun x : M =>
+      2 * cutoff.toFun x ^ 2 * u t x * Δ_g (I := I) g ut.smooth x) μ :=
+    (hcoeff_cont.mul hlap_cont).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have hsource_int : Integrable (fun x : M =>
+      2 * cutoff.toFun x ^ 2 * u t x * source t x) μ :=
+    (hcoeff_cont.mul hsource_cont).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have htime_le :
+      ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * deriv (fun s => u s x) t ∂μ ≤
+        (∫ x, 2 * cutoff.toFun x ^ 2 * u t x *
+          Δ_g (I := I) g ut.smooth x ∂μ) +
+        ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * source t x ∂μ := by
+    rw [← integral_add hlap_int hsource_int]
+    apply integral_mono htime_int (hlap_int.add hsource_int)
+    intro x
+    have hcoeff : 0 ≤ 2 * cutoff.toFun x ^ 2 * u t x :=
+      mul_nonneg (mul_nonneg (by norm_num) (sq_nonneg _)) (hu_nonneg x)
+    change 2 * cutoff.toFun x ^ 2 * u t x * deriv (fun s => u s x) t ≤
+      2 * cutoff.toFun x ^ 2 * u t x * Δ_g (I := I) g ut.smooth x +
+        2 * cutoff.toFun x ^ 2 * u t x * source t x
+    calc
+      _ ≤ (2 * cutoff.toFun x ^ 2 * u t x) *
+          (Δ_g (I := I) g ut.smooth x + source t x) :=
+        mul_le_mul_of_nonneg_left (hpde x) hcoeff
+      _ = _ := by ring
+  have hmass := hasDerivAt_localizedL2Mass
+    (I := I) (M := M) cutoff u hu t
+  have hspatial := caccioppoli_spatial
+    (I := I) (M := M) cutoff ut
+  have hlap_scale :
+      ∫ x, 2 * cutoff.toFun x ^ 2 * u t x *
+          Δ_g (I := I) g ut.smooth x ∂μ =
+        2 * ∫ x, cutoff.toFun x ^ 2 * ut.toFun x *
+          Δ_g (I := I) g ut.smooth x ∂μ := by
+    rw [← integral_const_mul]
+    apply integral_congr_ae
+    refine ae_of_all μ (fun x => ?_)
+    change 2 * cutoff.toFun x ^ 2 * u t x * Δ_g (I := I) g ut.smooth x =
+      2 * (cutoff.toFun x ^ 2 * u t x * Δ_g (I := I) g ut.smooth x)
+    ring
+  change deriv
+        (fun s => localizedL2Mass (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu s)) t +
+      localizedDirichletEnergy (I := I) (M := M) cutoff ut ≤
+    4 * cutoffGradientError (I := I) (M := M) cutoff ut +
+      ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * source t x ∂μ
+  rw [hmass.deriv]
+  rw [hlap_scale] at htime_le
+  linarith
+
+private theorem caccioppoli_of_differential
     {g : SmoothRiemannianMetric I M}
     (cutoff : SmoothScalar g)
     (u source : ℝ → M → ℝ)
@@ -502,9 +602,16 @@ theorem caccioppoli
     (hdirichlet : ContinuousOn
       (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
         (smoothScalarSlice (I := I) g u hu t)) (Icc a b))
-    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      deriv (fun s => u s x) t =
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x) :
+    (hdifferential : ∀ t ∈ Icc a b,
+      deriv
+          (fun s => localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu s)) t +
+          localizedDirichletEnergy (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) ≤
+        4 * cutoffGradientError (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) +
+          ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * source t x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) :
     weight b * localizedL2Mass (I := I) (M := M) cutoff
           (smoothScalarSlice (I := I) g u hu b) -
         weight a * localizedL2Mass (I := I) (M := M) cutoff
@@ -602,8 +709,7 @@ theorem caccioppoli
       dweight t * mass t + weight t * deriv mass t + weight t * dirichlet t ≤
         dweight t * mass t + weight t * (4 * error t + forcing t) := by
     intro t ht
-    have hdiff := caccioppoli_differential
-      (I := I) (M := M) cutoff u source hu hsource t (hpde t ht)
+    have hdiff := hdifferential t ht
     have hmul := mul_le_mul_of_nonneg_left hdiff (hweight_nonneg t ht)
     change weight t * (deriv mass t + dirichlet t) ≤
       weight t * (4 * error t + forcing t) at hmul
@@ -611,6 +717,89 @@ theorem caccioppoli
   have hresult := weight_mul_energy_inequality
     hab hdweight hweight hdmass_cont hmass_deriv hdissipation hrhs hpointwise
   simpa only [mass, dirichlet, error, forcing, μ] using hresult
+
+theorem caccioppoli
+    {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g)
+    (u source : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    {weight dweight : ℝ → ℝ} {a b : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
+    (hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) (Icc a b))
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      deriv (fun s => u s x) t =
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x) :
+    weight b * localizedL2Mass (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu b) -
+        weight a * localizedL2Mass (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu a) +
+        ∫ t in a..b, weight t *
+          localizedDirichletEnergy (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) ≤
+      ∫ t in a..b,
+        dweight t * localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) +
+          weight t *
+            (4 * cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t) +
+              ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * source t x
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  apply caccioppoli_of_differential
+    (I := I) (M := M) cutoff u source hu hsource hab hdweight hweight
+      hweight_nonneg hdirichlet
+  intro t ht
+  exact caccioppoli_differential
+    (I := I) (M := M) cutoff u source hu hsource t (hpde t ht)
+
+theorem caccioppoli_of_subsolution
+    {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g)
+    (u source : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    {weight dweight : ℝ → ℝ} {a b : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
+    (hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) (Icc a b))
+    (hu_nonneg : ∀ t ∈ Icc a b, ∀ x : M, 0 ≤ u t x)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x) :
+    weight b * localizedL2Mass (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu b) -
+        weight a * localizedL2Mass (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu a) +
+        ∫ t in a..b, weight t *
+          localizedDirichletEnergy (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) ≤
+      ∫ t in a..b,
+        dweight t * localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) +
+          weight t *
+            (4 * cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t) +
+              ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * source t x
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  apply caccioppoli_of_differential
+    (I := I) (M := M) cutoff u source hu hsource hab hdweight hweight
+      hweight_nonneg hdirichlet
+  intro t ht
+  exact caccioppoli_differential_of_subsolution
+    (I := I) (M := M) cutoff u source hu hsource t (hu_nonneg t ht) (hpde t ht)
 
 end DifferentialGeometry.Analysis.Parabolic.Energy
 
