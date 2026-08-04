@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Schauder.Holder
+import Mathlib.Analysis.Calculus.Deriv.Mul
+import Mathlib.Topology.ContinuousMap.Bounded.Normed
 
 noncomputable section
 
@@ -297,6 +299,297 @@ def parabolicRescaleAt {V F : Type*} [Add V] [SMul Real V]
     Real → V → F :=
   fun t x ↦ u (p0.time + (r : Real) ^ 2 * t)
     (p0.space + (r : Real) • x)
+
+private def boundedContinuousFunctionCompContinuousCLM
+    {X Y F : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (g : C(Y, X)) :
+    BoundedContinuousFunction X F →L[Real]
+      BoundedContinuousFunction Y F :=
+  LinearMap.mkContinuous
+    { toFun := fun f : BoundedContinuousFunction X F ↦
+        BoundedContinuousFunction.compContinuous f g
+      map_add' := by
+        intro f h
+        apply BoundedContinuousFunction.ext
+        intro y
+        rfl
+      map_smul' := by
+        intro c f
+        apply BoundedContinuousFunction.ext
+        intro y
+        rfl }
+    1
+    (fun f ↦ by
+      rw [one_mul]
+      exact (BoundedContinuousFunction.norm_le (norm_nonneg f)).2
+        (fun y ↦ f.norm_coe_le_norm (g y)))
+
+private def parabolicSpatialAffineContinuousMap
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (r : NNReal) (p0 : ParabolicPoint V) : C(V, V) :=
+  ⟨fun x ↦ p0.space + (r : Real) • x,
+    continuous_const.add (continuous_id.const_smul (r : Real))⟩
+
+private def boundedContinuousFunctionConstSMul
+    {X F : Type*} [TopologicalSpace X]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (c : Real) (f : BoundedContinuousFunction X F) :
+    BoundedContinuousFunction X F :=
+  f.comp (fun y ↦ c • y)
+    ((c • ContinuousLinearMap.id Real F).lipschitz)
+
+@[simp]
+private theorem boundedContinuousFunctionConstSMul_apply
+    {X F : Type*} [TopologicalSpace X]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (c : Real) (f : BoundedContinuousFunction X F) (x : X) :
+    boundedContinuousFunctionConstSMul c f x = c • f x :=
+  rfl
+
+namespace BoundedContinuousFunction
+
+def parabolicRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) :
+    Real → BoundedContinuousFunction V F :=
+  fun t ↦ (u (p0.time + (r : Real) ^ 2 * t)).compContinuous
+    (parabolicSpatialAffineContinuousMap r p0)
+
+def parabolicTimeDerivativeRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (dtimeU : Real → BoundedContinuousFunction V F) :
+    Real → BoundedContinuousFunction V F :=
+  fun t ↦ boundedContinuousFunctionConstSMul ((r : Real) ^ 2)
+    (parabolicRescaleAt r p0 dtimeU t)
+
+def parabolicSpatialDerivativeRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F)) :
+    Real → BoundedContinuousFunction V (V →L[Real] F) :=
+  fun t ↦ boundedContinuousFunctionConstSMul (r : Real)
+    (parabolicRescaleAt r p0 du t)
+
+def parabolicSpatialSecondDerivativeRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F)) :
+    Real → BoundedContinuousFunction V (V →L[Real] V →L[Real] F) :=
+  fun t ↦ boundedContinuousFunctionConstSMul ((r : Real) ^ 2)
+    (parabolicRescaleAt (V := V) (F := V →L[Real] V →L[Real] F)
+      r p0 d2u t)
+
+@[simp]
+theorem parabolicRescaleAt_apply
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) (t : Real) (x : V) :
+    parabolicRescaleAt r p0 u t x =
+      u (p0.time + (r : Real) ^ 2 * t)
+        (p0.space + (r : Real) • x) :=
+  rfl
+
+@[simp]
+theorem coe_parabolicRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) :
+    (fun t x ↦ parabolicRescaleAt r p0 u t x) =
+      DifferentialGeometry.Analysis.Schauder.parabolicRescaleAt
+        r p0 (fun t x ↦ u t x) :=
+  rfl
+
+@[simp]
+theorem parabolicTimeDerivativeRescaleAt_apply
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (dtimeU : Real → BoundedContinuousFunction V F) (t : Real) (x : V) :
+    parabolicTimeDerivativeRescaleAt r p0 dtimeU t x =
+      (r : Real) ^ 2 • dtimeU
+        (p0.time + (r : Real) ^ 2 * t)
+        (p0.space + (r : Real) • x) :=
+  rfl
+
+@[simp]
+theorem parabolicSpatialDerivativeRescaleAt_apply
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (t : Real) (x : V) :
+    parabolicSpatialDerivativeRescaleAt r p0 du t x =
+      (r : Real) • du (p0.time + (r : Real) ^ 2 * t)
+        (p0.space + (r : Real) • x) :=
+  rfl
+
+@[simp]
+theorem parabolicSpatialSecondDerivativeRescaleAt_apply
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F)) (t : Real) (x : V) :
+    parabolicSpatialSecondDerivativeRescaleAt r p0 d2u t x =
+      (r : Real) ^ 2 • d2u (p0.time + (r : Real) ^ 2 * t)
+        (p0.space + (r : Real) • x) :=
+  rfl
+
+theorem hasDerivAt_parabolicRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (u dtimeU : Real → BoundedContinuousFunction V F) (t : Real)
+    (hu : HasDerivAt u
+      (dtimeU (p0.time + (r : Real) ^ 2 * t))
+      (p0.time + (r : Real) ^ 2 * t)) :
+    HasDerivAt (parabolicRescaleAt r p0 u)
+      (parabolicTimeDerivativeRescaleAt r p0 dtimeU t) t := by
+  have htime : HasDerivAt
+      (fun s : Real ↦ p0.time + (r : Real) ^ 2 * s)
+      ((r : Real) ^ 2) t := by
+    have h :=
+      (hasDerivAt_const_mul (x := t) ((r : Real) ^ 2)).add_const p0.time
+    apply h.congr_of_eventuallyEq
+    filter_upwards with s
+    ring_nf
+  have hcomp : HasDerivAt
+      (fun s : Real ↦ u (p0.time + (r : Real) ^ 2 * s))
+      ((r : Real) ^ 2 • dtimeU
+        (p0.time + (r : Real) ^ 2 * t)) t := by
+    simpa only [Function.comp_apply, ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.toSpanSingleton_apply, one_smul] using
+      (hu.hasFDerivAt.comp t htime.hasFDerivAt).hasDerivAt
+  let L : BoundedContinuousFunction V F →L[Real]
+      BoundedContinuousFunction V F :=
+    boundedContinuousFunctionCompContinuousCLM
+      (parabolicSpatialAffineContinuousMap r p0)
+  have hresult := L.hasFDerivAt.comp_hasDerivAt t hcomp
+  change HasDerivAt
+    (fun s : Real ↦ L (u (p0.time + (r : Real) ^ 2 * s)))
+    (boundedContinuousFunctionConstSMul ((r : Real) ^ 2)
+      (L (dtimeU (p0.time + (r : Real) ^ 2 * t)))) t
+  exact hresult
+
+theorem continuous_parabolicRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) (hu : Continuous u) :
+    Continuous (parabolicRescaleAt r p0 u) := by
+  let L : BoundedContinuousFunction V F →L[Real]
+      BoundedContinuousFunction V F :=
+    boundedContinuousFunctionCompContinuousCLM
+      (parabolicSpatialAffineContinuousMap r p0)
+  have htime : Continuous
+      (fun t : Real ↦ p0.time + (r : Real) ^ 2 * t) :=
+    continuous_const.add (continuous_const.mul continuous_id)
+  change Continuous
+    (fun t : Real ↦ L (u (p0.time + (r : Real) ^ 2 * t)))
+  exact L.continuous.comp (hu.comp htime)
+
+theorem hasFDerivAt_parabolicRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (t : Real) (x : V)
+    (hu : HasFDerivAt
+      (u (p0.time + (r : Real) ^ 2 * t) : V → F)
+      (du (p0.time + (r : Real) ^ 2 * t)
+        (p0.space + (r : Real) • x))
+      (p0.space + (r : Real) • x)) :
+    HasFDerivAt (parabolicRescaleAt r p0 u t : V → F)
+      (parabolicSpatialDerivativeRescaleAt r p0 du t x) x := by
+  have haffine : HasFDerivAt
+      (fun y : V ↦ p0.space + (r : Real) • y)
+      ((r : Real) • ContinuousLinearMap.id Real V) x := by
+    have hconst : HasFDerivAt (fun _ : V ↦ p0.space)
+        (0 : V →L[Real] V) x := hasFDerivAt_const (x := x) p0.space
+    have hlinear : HasFDerivAt (fun y : V ↦ (r : Real) • y)
+        ((r : Real) • ContinuousLinearMap.id Real V) x :=
+      (hasFDerivAt_id x).const_smul (r : Real)
+    simpa only [Pi.add_apply, zero_add] using hconst.add hlinear
+  have hresult := hu.comp x haffine
+  convert hresult using 1
+  ext z
+  simp
+
+theorem hasFDerivAt_parabolicSpatialDerivativeRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F))
+    (t : Real) (x : V)
+    (hdu : HasFDerivAt
+      (du (p0.time + (r : Real) ^ 2 * t) : V → V →L[Real] F)
+      (d2u (p0.time + (r : Real) ^ 2 * t)
+        (p0.space + (r : Real) • x))
+      (p0.space + (r : Real) • x)) :
+    HasFDerivAt
+      (parabolicSpatialDerivativeRescaleAt r p0 du t :
+        V → V →L[Real] F)
+      (parabolicSpatialSecondDerivativeRescaleAt r p0 d2u t x) x := by
+  have haffine : HasFDerivAt
+      (fun y : V ↦ p0.space + (r : Real) • y)
+      ((r : Real) • ContinuousLinearMap.id Real V) x := by
+    have hconst : HasFDerivAt (fun _ : V ↦ p0.space)
+        (0 : V →L[Real] V) x := hasFDerivAt_const (x := x) p0.space
+    have hlinear : HasFDerivAt (fun y : V ↦ (r : Real) • y)
+        ((r : Real) • ContinuousLinearMap.id Real V) x :=
+      (hasFDerivAt_id x).const_smul (r : Real)
+    simpa only [Pi.add_apply, zero_add] using hconst.add hlinear
+  have hcomp := hdu.comp x haffine
+  have hscaled := hcomp.const_smul (r : Real)
+  convert hscaled using 1
+  ext z w
+  simp only [parabolicSpatialSecondDerivativeRescaleAt,
+    boundedContinuousFunctionConstSMul_apply,
+    parabolicRescaleAt_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.smul_apply, ContinuousLinearMap.id_apply, map_smul]
+  rw [pow_two, mul_smul]
+
+theorem contDiff_two_parabolicRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F))
+    (t : Real)
+    (hu : ∀ x, HasFDerivAt
+      (u (p0.time + (r : Real) ^ 2 * t) : V → F)
+      (du (p0.time + (r : Real) ^ 2 * t) x) x)
+    (hdu : ∀ x, HasFDerivAt
+      (du (p0.time + (r : Real) ^ 2 * t) : V → V →L[Real] F)
+      (d2u (p0.time + (r : Real) ^ 2 * t) x) x) :
+    ContDiff Real 2 (parabolicRescaleAt r p0 u t : V → F) := by
+  apply contDiff_two_of_hasFDerivAt
+    (parabolicRescaleAt r p0 u t)
+    (parabolicSpatialDerivativeRescaleAt r p0 du t)
+    (parabolicSpatialSecondDerivativeRescaleAt r p0 d2u t)
+  · intro x
+    exact hasFDerivAt_parabolicRescaleAt r p0 u du t x
+      (hu (p0.space + (r : Real) • x))
+  · intro x
+    exact hasFDerivAt_parabolicSpatialDerivativeRescaleAt
+      r p0 du d2u t x (hdu (p0.space + (r : Real) • x))
+
+end BoundedContinuousFunction
 
 def parabolicSourceRescaleAt
     {V F : Type*} [Add V] [SMul Real V] [SMul Real F]
