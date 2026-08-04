@@ -174,6 +174,122 @@ theorem norm_boundedHolderSpaceToBoundedContinuousFunction_le
 
 end BoundedContinuousFunction
 
+section EllipticBoundedContinuousFunction
+
+variable {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+  [NormedAddCommGroup F] [NormedSpace Real F]
+
+private def contDiffHolderSpaceToBoundedContinuousFunctionLinearMap
+    (k : Nat) (alpha : NNReal) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →ₗ[Real]
+      BoundedContinuousFunction V F where
+  toFun f := BoundedContinuousFunction.ofNormedAddCommGroup
+    (contDiffHolderSpaceFun f)
+    (by
+      have hf : ContDiff Real k (contDiffHolderSpaceFun f) := by
+        rw [contDiff_iff_contDiffAt]
+        intro x
+        exact f.2.1.1 x (Set.mem_univ x)
+      exact hf.continuous)
+    ‖f‖ (norm_contDiffHolderSpace_apply_le f)
+  map_add' f g := by
+    apply BoundedContinuousFunction.ext
+    intro x
+    rfl
+  map_smul' c f := by
+    apply BoundedContinuousFunction.ext
+    intro x
+    rfl
+
+private theorem norm_contDiffHolderSpaceToBoundedContinuousFunctionLinearMap_le
+    {k : Nat} {alpha : NNReal}
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
+    ‖contDiffHolderSpaceToBoundedContinuousFunctionLinearMap k alpha f‖ ≤
+      ‖f‖ := by
+  exact BoundedContinuousFunction.norm_ofNormedAddCommGroup_le _
+    (norm_nonneg f) (norm_contDiffHolderSpace_apply_le f)
+
+def contDiffHolderSpaceToBoundedContinuousFunction
+    (k : Nat) (alpha : NNReal) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →L[Real]
+      BoundedContinuousFunction V F :=
+  LinearMap.mkContinuous
+    (contDiffHolderSpaceToBoundedContinuousFunctionLinearMap k alpha) 1
+    (fun f ↦ by simpa using
+      norm_contDiffHolderSpaceToBoundedContinuousFunctionLinearMap_le f)
+
+@[simp]
+theorem contDiffHolderSpaceToBoundedContinuousFunction_apply
+    (k : Nat) (alpha : NNReal)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    contDiffHolderSpaceToBoundedContinuousFunction k alpha f x = f x :=
+  rfl
+
+theorem norm_contDiffHolderSpaceToBoundedContinuousFunction_le
+    (k : Nat) (alpha : NNReal) :
+    ‖contDiffHolderSpaceToBoundedContinuousFunction
+      (V := V) (F := F) k alpha‖ ≤ 1 := by
+  exact LinearMap.mkContinuous_norm_le _ zero_le_one
+    (fun f ↦ by simpa using
+      norm_contDiffHolderSpaceToBoundedContinuousFunctionLinearMap_le f)
+
+private def contDiffHolderSpaceJetLinearMap
+    (k : Nat) (alpha : NNReal) (j : Nat) (hj : j ≤ k) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →ₗ[Real]
+      BoundedContinuousFunction V (V [×j]→L[Real] F) where
+  toFun f := BoundedContinuousFunction.ofNormedAddCommGroup
+    (iteratedFDeriv Real j (contDiffHolderSpaceFun f))
+    (by
+      have hf : ContDiff Real k (contDiffHolderSpaceFun f) := by
+        rw [contDiff_iff_contDiffAt]
+        intro x
+        exact f.2.1.1 x (Set.mem_univ x)
+      exact hf.continuous_iteratedFDeriv (by exact_mod_cast hj))
+    ‖f‖ (contDiffHolderSpace_iteratedFDeriv_norm_le f hj)
+  map_add' f g := by
+    apply BoundedContinuousFunction.ext
+    intro x
+    exact iteratedFDeriv_add_apply
+      ((f.2.1.1 x (Set.mem_univ x)).of_le (by exact_mod_cast hj))
+      ((g.2.1.1 x (Set.mem_univ x)).of_le (by exact_mod_cast hj))
+  map_smul' c f := by
+    apply BoundedContinuousFunction.ext
+    intro x
+    exact iteratedFDeriv_const_smul_apply
+      ((f.2.1.1 x (Set.mem_univ x)).of_le (by exact_mod_cast hj))
+
+private theorem norm_contDiffHolderSpaceJetLinearMap_le
+    {k : Nat} {alpha : NNReal} {j : Nat} (hj : j ≤ k)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
+    ‖contDiffHolderSpaceJetLinearMap k alpha j hj f‖ ≤ ‖f‖ := by
+  exact BoundedContinuousFunction.norm_ofNormedAddCommGroup_le _
+    (norm_nonneg f) (contDiffHolderSpace_iteratedFDeriv_norm_le f hj)
+
+def contDiffHolderSpaceJet
+    (k : Nat) (alpha : NNReal) (j : Nat) (hj : j ≤ k) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →L[Real]
+      BoundedContinuousFunction V (V [×j]→L[Real] F) :=
+  LinearMap.mkContinuous
+    (contDiffHolderSpaceJetLinearMap k alpha j hj) 1
+    (fun f ↦ by simpa using
+      norm_contDiffHolderSpaceJetLinearMap_le hj f)
+
+@[simp]
+theorem contDiffHolderSpaceJet_apply
+    (k : Nat) (alpha : NNReal) (j : Nat) (hj : j ≤ k)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    contDiffHolderSpaceJet k alpha j hj f x =
+      iteratedFDeriv Real j (contDiffHolderSpaceFun f) x :=
+  rfl
+
+theorem norm_contDiffHolderSpaceJet_le
+    (k : Nat) (alpha : NNReal) (j : Nat) (hj : j ≤ k) :
+    ‖contDiffHolderSpaceJet (V := V) (F := F) k alpha j hj‖ ≤ 1 := by
+  exact LinearMap.mkContinuous_norm_le _ zero_le_one
+    (fun f ↦ by simpa using norm_contDiffHolderSpaceJetLinearMap_le hj f)
+
+end EllipticBoundedContinuousFunction
+
 section RestrictUniv
 
 variable {X F : Type*} [MetricSpace X]
