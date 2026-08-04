@@ -155,6 +155,86 @@ theorem sobolev_lpNorm
       toReal_eLpNorm hu.continuous.aestronglyMeasurable,
       toReal_eLpNorm hgrad_cont.aestronglyMeasurable] using hreal
 
+theorem sobolev_two_lpNorm
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    [FiniteDimensional Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank Real E : Real)) :
+    ∃ C : Real, 0 ≤ C ∧
+      ∀ {u : M -> Real}, ContMDiff I 𝓘(Real, Real) ∞ u ->
+        lpNorm u
+            (ENNReal.ofReal
+              ((Module.finrank Real E : Real) * 2 /
+                ((Module.finrank Real E : Real) - 2)))
+            (riemannianVolumeMeasure I M g) ≤
+          C *
+            (lpNorm u 2 (riemannianVolumeMeasure I M g) +
+              lpNorm (fun x : M => Real.sqrt
+                  (g.inner x
+                    (gradFun (I := I) g u x)
+                    (gradFun (I := I) g u x)))
+                2 (riemannianVolumeMeasure I M g)) := by
+  letI : NeZero (Module.finrank Real E) := ⟨by
+    intro hzero
+    simp only [hzero, Nat.cast_zero] at hdim
+    linarith⟩
+  simpa only [ENNReal.ofReal_ofNat] using
+    sobolev_lpNorm (I := I) (M := M) g (p := (2 : Real)) (by norm_num) hdim
+
+theorem sq_sobolev_two_lpNorm
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    [FiniteDimensional Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank Real E : Real)) :
+    ∃ C : Real, 0 ≤ C ∧
+      ∀ {u : M -> Real}, ContMDiff I 𝓘(Real, Real) ∞ u ->
+        lpNorm u
+              (ENNReal.ofReal
+                ((Module.finrank Real E : Real) * 2 /
+                  ((Module.finrank Real E : Real) - 2)))
+              (riemannianVolumeMeasure I M g) ^ 2 ≤
+          2 * C ^ 2 *
+            (lpNorm u 2 (riemannianVolumeMeasure I M g) ^ 2 +
+              lpNorm (fun x : M => Real.sqrt
+                  (g.inner x
+                    (gradFun (I := I) g u x)
+                    (gradFun (I := I) g u x)))
+                2 (riemannianVolumeMeasure I M g) ^ 2) := by
+  obtain ⟨C, hC, hSob⟩ := sobolev_two_lpNorm (I := I) (M := M) g hdim
+  refine ⟨C, hC, ?_⟩
+  intro u hu
+  let A := lpNorm u
+    (ENNReal.ofReal
+      ((Module.finrank Real E : Real) * 2 /
+        ((Module.finrank Real E : Real) - 2)))
+    (riemannianVolumeMeasure I M g)
+  let B := lpNorm u 2 (riemannianVolumeMeasure I M g)
+  let D := lpNorm (fun x : M => Real.sqrt
+      (g.inner x
+        (gradFun (I := I) g u x)
+        (gradFun (I := I) g u x)))
+    2 (riemannianVolumeMeasure I M g)
+  have hA : 0 ≤ A := lpNorm_nonneg
+  have hB : 0 ≤ B := lpNorm_nonneg
+  have hD : 0 ≤ D := lpNorm_nonneg
+  have hmain : A ≤ C * (B + D) := hSob hu
+  have hsquare : A ^ 2 ≤ (C * (B + D)) ^ 2 := by
+    nlinarith
+  have hadd : (B + D) ^ 2 ≤ 2 * (B ^ 2 + D ^ 2) := by
+    nlinarith [sq_nonneg (B - D)]
+  dsimp only [A, B, D] at hsquare ⊢
+  calc
+    _ ≤ (C * (B + D)) ^ 2 := hsquare
+    _ = C ^ 2 * (B + D) ^ 2 := by ring
+    _ ≤ C ^ 2 * (2 * (B ^ 2 + D ^ 2)) := by gcongr
+    _ = 2 * C ^ 2 * (B ^ 2 + D ^ 2) := by ring
+
 end
 
 end DifferentialGeometry.Analysis.Sobolev
