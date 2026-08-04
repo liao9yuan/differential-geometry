@@ -459,13 +459,14 @@ private theorem abstractSpectralDuhamelHolderDeriv_eq_holderIccExtension
 
 theorem abstractSpectralDuhamelHolderDeriv_repr_apply_of_holderOn
     (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
-    (u₀ : X) {F : ℝ → X} {T : ℝ} (hT : 0 ≤ T) {K α : NNReal}
+    (u₀ : X) {F : ℝ → X} {T : ℝ} {K α : NNReal}
     (hα : 0 < α) (hF : HolderOnWith K α F (Set.Icc 0 T))
     {t : ℝ} (ht : t ∈ Set.Ioo 0 T) (i : ι) :
     (b.repr (abstractSpectralDuhamelHolderDeriv b hlam u₀ F t) : ι → ℝ) i =
       -(lam i) *
           (b.repr (abstractSpectralDuhamel b hlam u₀ F t) : ι → ℝ) i +
         (b.repr (F t) : ι → ℝ) i := by
+  have hT : 0 ≤ T := (ht.1.trans ht.2).le
   let Fext : ℝ → X := holderIccExtension F T hT
   have hFext : HolderWith K α Fext :=
     holderIccExtension_holderWith hT hF
@@ -482,11 +483,12 @@ theorem abstractSpectralDuhamelHolderDeriv_repr_apply_of_holderOn
 
 theorem abstractSpectralDuhamel_hasDerivAt_of_holderOn
     (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
-    (u₀ : X) {F : ℝ → X} {T : ℝ} (hT : 0 ≤ T) {K α : NNReal}
+    (u₀ : X) {F : ℝ → X} {T : ℝ} {K α : NNReal}
     (hα : 0 < α) (hF : HolderOnWith K α F (Set.Icc 0 T))
     {t : ℝ} (ht : t ∈ Set.Ioo 0 T) :
     HasDerivAt (abstractSpectralDuhamel b hlam u₀ F)
       (abstractSpectralDuhamelHolderDeriv b hlam u₀ F t) t := by
+  have hT : 0 ≤ T := (ht.1.trans ht.2).le
   let Fext : ℝ → X := holderIccExtension F T hT
   have hFext : HolderWith K α Fext :=
     holderIccExtension_holderWith hT hF
