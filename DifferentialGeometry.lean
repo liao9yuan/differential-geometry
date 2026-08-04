@@ -707,6 +707,7 @@ import DifferentialGeometry.Analysis.Parabolic.Harnack.PathIntegration
 import DifferentialGeometry.Analysis.Parabolic.Moser.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Moser.Iteration
 import DifferentialGeometry.Analysis.Parabolic.Moser.LocalBoundedness
+import DifferentialGeometry.Analysis.Parabolic.Moser.LogEnergy
 import DifferentialGeometry.Analysis.Parabolic.Moser.Power
 import DifferentialGeometry.Analysis.Parabolic.Moser.Sobolev
 import DifferentialGeometry.Analysis.Parabolic.LionsMagenes
