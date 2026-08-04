@@ -7,10 +7,73 @@ open scoped NNReal
 
 namespace DifferentialGeometry.Analysis.Schauder
 
+section GaugeAlgebra
+
+variable {X F : Type*} [MetricSpace X] [NormedAddCommGroup F]
+  [NormedSpace Real F]
+
+omit [MetricSpace X] in
+theorem eSupNormOn_smul (s : Set X) (f : X → F) (c : Real) :
+    eSupNormOn s (c • f) = (‖c‖₊ : ENNReal) * eSupNormOn s f := by
+  unfold eSupNormOn
+  simp_rw [Pi.smul_apply, norm_smul, ENNReal.ofReal_mul (norm_nonneg c),
+    ofReal_norm_eq_enorm, enorm_eq_nnnorm]
+  rw [ENNReal.mul_iSup]
+
+theorem eHolderSeminormOn_smul
+    (alpha : NNReal) (s : Set X) (f : X → F) (c : Real) :
+    eHolderSeminormOn alpha s (c • f) =
+      (‖c‖₊ : ENNReal) * eHolderSeminormOn alpha s f := by
+  unfold eHolderSeminormOn
+  change eHolderNorm alpha (c • s.restrict f) = _
+  exact eHolderNorm_smul c
+
+end GaugeAlgebra
+
 section Elliptic
 
 variable {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
   [NormedAddCommGroup F] [NormedSpace Real F]
+
+theorem eContDiffHolderGaugeOn_smul
+    (k : Nat) (alpha : NNReal) (s : Set V) (f : V → F) (c : Real)
+    (hf : ∀ x ∈ s, ContDiffAt Real k f x) :
+    eContDiffHolderGaugeOn k alpha s (c • f) =
+      (‖c‖₊ : ENNReal) * eContDiffHolderGaugeOn k alpha s f := by
+  have hjet : ∀ j ≤ k, Set.EqOn
+      (iteratedFDeriv Real j (c • f))
+      (c • iteratedFDeriv Real j f) s := by
+    intro j hj x hx
+    exact iteratedFDeriv_const_smul_apply
+      ((hf x hx).of_le (by exact_mod_cast hj))
+  unfold eContDiffHolderGaugeOn
+  calc
+    (∑ j ∈ Finset.range (k + 1),
+        eSupNormOn s (iteratedFDeriv Real j (c • f))) +
+        eHolderSeminormOn alpha s (iteratedFDeriv Real k (c • f)) =
+      (∑ j ∈ Finset.range (k + 1),
+        eSupNormOn s (c • iteratedFDeriv Real j f)) +
+        eHolderSeminormOn alpha s (c • iteratedFDeriv Real k f) := by
+      congr 1
+      · apply Finset.sum_congr rfl
+        intro j hj
+        exact eSupNormOn_congr
+          (hjet j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)))
+      · exact eHolderSeminormOn_congr (hjet k le_rfl) alpha
+    _ = (‖c‖₊ : ENNReal) *
+        ((∑ j ∈ Finset.range (k + 1),
+          eSupNormOn s (iteratedFDeriv Real j f)) +
+          eHolderSeminormOn alpha s (iteratedFDeriv Real k f)) := by
+      simp_rw [eSupNormOn_smul, eHolderSeminormOn_smul]
+      rw [← Finset.mul_sum, ← mul_add]
+
+@[simp]
+theorem eContDiffHolderGaugeOn_zero
+    (k : Nat) (alpha : NNReal) (s : Set V) :
+    eContDiffHolderGaugeOn k alpha s (0 : V → F) = 0 := by
+  have h := eContDiffHolderGaugeOn_smul k alpha s (0 : V → F) 0
+    (fun _ _ ↦ contDiffAt_const)
+  simpa using h
 
 namespace IsContDiffHolderOn
 
@@ -84,6 +147,59 @@ theorem mem_contDiffHolderOnSubmodule {k : Nat} {alpha : NNReal}
       IsContDiffHolderOn k alpha s f :=
   Iff.rfl
 
+def IsBoundedContDiffHolderOn (k : Nat) (alpha : NNReal)
+    (s : Set V) (f : V → F) : Prop :=
+  IsContDiffHolderOn k alpha s f ∧
+    eContDiffHolderGaugeOn k alpha s f ≠ ⊤
+
+namespace IsBoundedContDiffHolderOn
+
+theorem zero (k : Nat) (alpha : NNReal) (s : Set V) :
+    IsBoundedContDiffHolderOn k alpha s (0 : V → F) := by
+  exact ⟨IsContDiffHolderOn.zero k alpha s, by simp⟩
+
+theorem add {k : Nat} {alpha : NNReal} {s : Set V} {f g : V → F}
+    (hf : IsBoundedContDiffHolderOn k alpha s f)
+    (hg : IsBoundedContDiffHolderOn k alpha s g) :
+    IsBoundedContDiffHolderOn k alpha s (f + g) := by
+  refine ⟨hf.1.add hg.1, ?_⟩
+  exact ne_top_of_le_ne_top (ENNReal.add_ne_top.mpr ⟨hf.2, hg.2⟩)
+    (eContDiffHolderGaugeOn_add_le k alpha s f g hf.1.1 hg.1.1)
+
+theorem smul {k : Nat} {alpha : NNReal} {s : Set V} {f : V → F}
+    (hf : IsBoundedContDiffHolderOn k alpha s f) (c : Real) :
+    IsBoundedContDiffHolderOn k alpha s (c • f) := by
+  refine ⟨hf.1.smul c, ?_⟩
+  rw [eContDiffHolderGaugeOn_smul k alpha s f c hf.1.1]
+  exact ENNReal.mul_ne_top ENNReal.coe_ne_top hf.2
+
+theorem neg {k : Nat} {alpha : NNReal} {s : Set V} {f : V → F}
+    (hf : IsBoundedContDiffHolderOn k alpha s f) :
+    IsBoundedContDiffHolderOn k alpha s (-f) := by
+  simpa only [neg_one_smul] using hf.smul (-1)
+
+theorem sub {k : Nat} {alpha : NNReal} {s : Set V} {f g : V → F}
+    (hf : IsBoundedContDiffHolderOn k alpha s f)
+    (hg : IsBoundedContDiffHolderOn k alpha s g) :
+    IsBoundedContDiffHolderOn k alpha s (f - g) := by
+  simpa only [sub_eq_add_neg] using hf.add hg.neg
+
+end IsBoundedContDiffHolderOn
+
+def boundedContDiffHolderOnSubmodule
+    (k : Nat) (alpha : NNReal) (s : Set V) : Submodule Real (V → F) where
+  carrier := {f | IsBoundedContDiffHolderOn k alpha s f}
+  zero_mem' := IsBoundedContDiffHolderOn.zero k alpha s
+  add_mem' := IsBoundedContDiffHolderOn.add
+  smul_mem' := fun c _ hf ↦ hf.smul c
+
+@[simp]
+theorem mem_boundedContDiffHolderOnSubmodule
+    {k : Nat} {alpha : NNReal} {s : Set V} {f : V → F} :
+    f ∈ boundedContDiffHolderOnSubmodule k alpha s ↔
+      IsBoundedContDiffHolderOn k alpha s f :=
+  Iff.rfl
+
 end Elliptic
 
 section Parabolic
@@ -108,6 +224,80 @@ theorem parabolicTimeDerivative_const_smul
   change (fderiv Real (c • fun t ↦ u t p.space) p.time) 1 = _
   rw [fderiv_const_smul hu c]
   exact ContinuousLinearMap.smul_apply _ _ _
+
+theorem eParabolicC2HolderGaugeOn_smul
+    (alpha : NNReal) (Q : Set (ParabolicPoint V))
+    (u : Real → V → F) (c : Real) (hu : IsParabolicC2On Q u) :
+    eParabolicC2HolderGaugeOn alpha Q (c • u) =
+      (‖c‖₊ : ENNReal) * eParabolicC2HolderGaugeOn alpha Q u := by
+  have hspatial : ∀ j ≤ 2, Set.EqOn
+      (parabolicSpatialJet j (c • u))
+      (c • parabolicSpatialJet j u) Q := by
+    intro j hj p hp
+    exact parabolicSpatialJet_const_smul j u p c
+      ((hu.1 p hp).of_le (by exact_mod_cast hj))
+  have htime : Set.EqOn
+      (parabolicTimeDerivative (c • u))
+      (c • parabolicTimeDerivative u) Q := by
+    intro p hp
+    exact parabolicTimeDerivative_const_smul u p c (hu.2 p hp)
+  have hsum :
+      (∑ j ∈ Finset.range 3,
+        eSupNormOn Q (parabolicSpatialJet j (c • u))) =
+      ∑ j ∈ Finset.range 3,
+        eSupNormOn Q (c • parabolicSpatialJet j u) := by
+    apply Finset.sum_congr rfl
+    intro j hj
+    exact eSupNormOn_congr
+      (hspatial j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)))
+  have hsupTime :
+      eSupNormOn Q (parabolicTimeDerivative (c • u)) =
+        eSupNormOn Q (c • parabolicTimeDerivative u) :=
+    eSupNormOn_congr htime
+  have hholderSpatial :
+      eHolderSeminormOn alpha Q (parabolicSpatialJet 2 (c • u)) =
+        eHolderSeminormOn alpha Q (c • parabolicSpatialJet 2 u) :=
+    eHolderSeminormOn_congr (hspatial 2 le_rfl) alpha
+  have hholderTime :
+      eHolderSeminormOn alpha Q (parabolicTimeDerivative (c • u)) =
+        eHolderSeminormOn alpha Q (c • parabolicTimeDerivative u) :=
+    eHolderSeminormOn_congr htime alpha
+  unfold eParabolicC2HolderGaugeOn
+  calc
+    (∑ j ∈ Finset.range 3,
+        eSupNormOn Q (parabolicSpatialJet j (c • u))) +
+        eSupNormOn Q (parabolicTimeDerivative (c • u)) +
+        eHolderSeminormOn alpha Q (parabolicSpatialJet 2 (c • u)) +
+        eHolderSeminormOn alpha Q (parabolicTimeDerivative (c • u)) =
+      (∑ j ∈ Finset.range 3,
+        eSupNormOn Q (c • parabolicSpatialJet j u)) +
+        eSupNormOn Q (c • parabolicTimeDerivative u) +
+        eHolderSeminormOn alpha Q (c • parabolicSpatialJet 2 u) +
+        eHolderSeminormOn alpha Q (c • parabolicTimeDerivative u) := by
+      rw [hsum, hsupTime, hholderSpatial, hholderTime]
+    _ = (‖c‖₊ : ENNReal) *
+        ((∑ j ∈ Finset.range 3,
+          eSupNormOn Q (parabolicSpatialJet j u)) +
+          eSupNormOn Q (parabolicTimeDerivative u) +
+          eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
+          eHolderSeminormOn alpha Q (parabolicTimeDerivative u)) := by
+      simp_rw [eSupNormOn_smul, eHolderSeminormOn_smul]
+      rw [← Finset.mul_sum]
+      ring
+
+@[simp]
+theorem eParabolicC2HolderGaugeOn_zero
+    (alpha : NNReal) (Q : Set (ParabolicPoint V)) :
+    eParabolicC2HolderGaugeOn alpha Q (0 : Real → V → F) = 0 := by
+  have hreg : IsParabolicC2On Q (0 : Real → V → F) := by
+    constructor
+    · intro p _
+      exact contDiffAt_const
+    · intro p _
+      exact differentiableAt_const _
+  have h := eParabolicC2HolderGaugeOn_smul alpha Q
+    (0 : Real → V → F) 0 hreg
+  simpa using h
 
 namespace IsParabolicC2On
 
@@ -243,6 +433,64 @@ theorem mem_parabolicC2HolderOnSubmodule {alpha : NNReal}
     {Q : Set (ParabolicPoint V)} {u : Real → V → F} :
     u ∈ parabolicC2HolderOnSubmodule alpha Q ↔
       IsParabolicC2HolderOn alpha Q u :=
+  Iff.rfl
+
+def IsBoundedParabolicC2HolderOn (alpha : NNReal)
+    (Q : Set (ParabolicPoint V)) (u : Real → V → F) : Prop :=
+  IsParabolicC2HolderOn alpha Q u ∧
+    eParabolicC2HolderGaugeOn alpha Q u ≠ ⊤
+
+namespace IsBoundedParabolicC2HolderOn
+
+theorem zero (alpha : NNReal) (Q : Set (ParabolicPoint V)) :
+    IsBoundedParabolicC2HolderOn alpha Q (0 : Real → V → F) := by
+  exact ⟨IsParabolicC2HolderOn.zero alpha Q, by simp⟩
+
+theorem add {alpha : NNReal} {Q : Set (ParabolicPoint V)}
+    {u v : Real → V → F}
+    (hu : IsBoundedParabolicC2HolderOn alpha Q u)
+    (hv : IsBoundedParabolicC2HolderOn alpha Q v) :
+    IsBoundedParabolicC2HolderOn alpha Q (u + v) := by
+  refine ⟨hu.1.add hv.1, ?_⟩
+  exact ne_top_of_le_ne_top (ENNReal.add_ne_top.mpr ⟨hu.2, hv.2⟩)
+    (eParabolicC2HolderGaugeOn_add_le alpha Q u v hu.1.1 hv.1.1)
+
+theorem smul {alpha : NNReal} {Q : Set (ParabolicPoint V)}
+    {u : Real → V → F}
+    (hu : IsBoundedParabolicC2HolderOn alpha Q u) (c : Real) :
+    IsBoundedParabolicC2HolderOn alpha Q (c • u) := by
+  refine ⟨hu.1.smul c, ?_⟩
+  rw [eParabolicC2HolderGaugeOn_smul alpha Q u c hu.1.1]
+  exact ENNReal.mul_ne_top ENNReal.coe_ne_top hu.2
+
+theorem neg {alpha : NNReal} {Q : Set (ParabolicPoint V)}
+    {u : Real → V → F}
+    (hu : IsBoundedParabolicC2HolderOn alpha Q u) :
+    IsBoundedParabolicC2HolderOn alpha Q (-u) := by
+  simpa only [neg_one_smul] using hu.smul (-1)
+
+theorem sub {alpha : NNReal} {Q : Set (ParabolicPoint V)}
+    {u v : Real → V → F}
+    (hu : IsBoundedParabolicC2HolderOn alpha Q u)
+    (hv : IsBoundedParabolicC2HolderOn alpha Q v) :
+    IsBoundedParabolicC2HolderOn alpha Q (u - v) := by
+  simpa only [sub_eq_add_neg] using hu.add hv.neg
+
+end IsBoundedParabolicC2HolderOn
+
+def boundedParabolicC2HolderOnSubmodule (alpha : NNReal)
+    (Q : Set (ParabolicPoint V)) : Submodule Real (Real → V → F) where
+  carrier := {u | IsBoundedParabolicC2HolderOn alpha Q u}
+  zero_mem' := IsBoundedParabolicC2HolderOn.zero alpha Q
+  add_mem' := IsBoundedParabolicC2HolderOn.add
+  smul_mem' := fun c _ hu ↦ hu.smul c
+
+@[simp]
+theorem mem_boundedParabolicC2HolderOnSubmodule
+    {alpha : NNReal} {Q : Set (ParabolicPoint V)}
+    {u : Real → V → F} :
+    u ∈ boundedParabolicC2HolderOnSubmodule alpha Q ↔
+      IsBoundedParabolicC2HolderOn alpha Q u :=
   Iff.rfl
 
 end Parabolic

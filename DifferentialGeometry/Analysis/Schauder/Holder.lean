@@ -401,17 +401,18 @@ def eContDiffHolderGaugeOn (k : Nat) (alpha : NNReal)
 
 theorem eContDiffHolderGaugeOn_add_le
     (k : Nat) (alpha : NNReal) (s : Set V) (f g : V → F)
-    (hf : ContDiff Real k f) (hg : ContDiff Real k g) :
+    (hf : ∀ x ∈ s, ContDiffAt Real k f x)
+    (hg : ∀ x ∈ s, ContDiffAt Real k g x) :
     eContDiffHolderGaugeOn k alpha s (f + g) ≤
       eContDiffHolderGaugeOn k alpha s f +
         eContDiffHolderGaugeOn k alpha s g := by
-  have hjet : ∀ j ≤ k,
-      iteratedFDeriv Real j (f + g) =
-        iteratedFDeriv Real j f + iteratedFDeriv Real j g := by
-    intro j hj
-    apply iteratedFDeriv_add
-    · exact hf.of_le (by exact_mod_cast hj)
-    · exact hg.of_le (by exact_mod_cast hj)
+  have hjet : ∀ j ≤ k, Set.EqOn
+      (iteratedFDeriv Real j (f + g))
+      (iteratedFDeriv Real j f + iteratedFDeriv Real j g) s := by
+    intro j hj x hx
+    exact iteratedFDeriv_add_apply
+      ((hf x hx).of_le (by exact_mod_cast hj))
+      ((hg x hx).of_le (by exact_mod_cast hj))
   unfold eContDiffHolderGaugeOn
   calc
     (∑ j ∈ Finset.range (k + 1),
@@ -423,10 +424,11 @@ theorem eContDiffHolderGaugeOn_add_le
         (eHolderSeminormOn alpha s (iteratedFDeriv Real k f) +
           eHolderSeminormOn alpha s (iteratedFDeriv Real k g)) := by
       gcongr with j hj
-      · rw [hjet j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))]
-        exact eSupNormOn_add_le s _ _
-      · rw [hjet k le_rfl]
-        exact eHolderSeminormOn_add_le alpha s _ _
+      · exact (eSupNormOn_congr
+          (hjet j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)))).le.trans
+            (eSupNormOn_add_le s _ _)
+      · exact (eHolderSeminormOn_congr (hjet k le_rfl) alpha).le.trans
+          (eHolderSeminormOn_add_le alpha s _ _)
     _ = ((∑ j ∈ Finset.range (k + 1),
           eSupNormOn s (iteratedFDeriv Real j f)) +
           eHolderSeminormOn alpha s (iteratedFDeriv Real k f)) +
@@ -437,17 +439,18 @@ theorem eContDiffHolderGaugeOn_add_le
 
 theorem eContDiffHolderGaugeOn_sub_le
     (k : Nat) (alpha : NNReal) (s : Set V) (f g : V → F)
-    (hf : ContDiff Real k f) (hg : ContDiff Real k g) :
+    (hf : ∀ x ∈ s, ContDiffAt Real k f x)
+    (hg : ∀ x ∈ s, ContDiffAt Real k g x) :
     eContDiffHolderGaugeOn k alpha s (f - g) ≤
       eContDiffHolderGaugeOn k alpha s f +
         eContDiffHolderGaugeOn k alpha s g := by
-  have hjet : ∀ j ≤ k,
-      iteratedFDeriv Real j (f - g) =
-        iteratedFDeriv Real j f - iteratedFDeriv Real j g := by
-    intro j hj
-    apply iteratedFDeriv_sub
-    · exact hf.of_le (by exact_mod_cast hj)
-    · exact hg.of_le (by exact_mod_cast hj)
+  have hjet : ∀ j ≤ k, Set.EqOn
+      (iteratedFDeriv Real j (f - g))
+      (iteratedFDeriv Real j f - iteratedFDeriv Real j g) s := by
+    intro j hj x hx
+    exact iteratedFDeriv_sub_apply
+      ((hf x hx).of_le (by exact_mod_cast hj))
+      ((hg x hx).of_le (by exact_mod_cast hj))
   unfold eContDiffHolderGaugeOn
   calc
     (∑ j ∈ Finset.range (k + 1),
@@ -459,10 +462,11 @@ theorem eContDiffHolderGaugeOn_sub_le
         (eHolderSeminormOn alpha s (iteratedFDeriv Real k f) +
           eHolderSeminormOn alpha s (iteratedFDeriv Real k g)) := by
       gcongr with j hj
-      · rw [hjet j (Nat.le_of_lt_succ (Finset.mem_range.mp hj))]
-        exact eSupNormOn_sub_le s _ _
-      · rw [hjet k le_rfl]
-        exact eHolderSeminormOn_sub_le alpha s _ _
+      · exact (eSupNormOn_congr
+          (hjet j (Nat.le_of_lt_succ (Finset.mem_range.mp hj)))).le.trans
+            (eSupNormOn_sub_le s _ _)
+      · exact (eHolderSeminormOn_congr (hjet k le_rfl) alpha).le.trans
+          (eHolderSeminormOn_sub_le alpha s _ _)
     _ = ((∑ j ∈ Finset.range (k + 1),
           eSupNormOn s (iteratedFDeriv Real j f)) +
           eHolderSeminormOn alpha s (iteratedFDeriv Real k f)) +

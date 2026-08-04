@@ -69,7 +69,8 @@ theorem laplacian_schauder_estimate
     exact hheatC2.sub huC2
   rw [hrep]
   refine (eContDiffHolderGaugeOn_sub_le 2 alpha Set.univ _ _
-    hheatC2 hduhC2).trans ?_
+    (fun _ _ ↦ hheatC2.contDiffAt)
+    (fun _ _ ↦ hduhC2.contDiffAt)).trans ?_
   have hheat := heatSup_schauder_estimate halpha1.le one_pos u
   have hduh := heatDuh_const_schauder_estimate
     halpha0 halpha1 (T := 1) (S := 2) one_pos (by norm_num)
