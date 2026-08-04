@@ -1,8 +1,10 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothScalar.PreH1
 import DifferentialGeometry.Analysis.Integration.L2.ParametricFiberInnerSmooth
 import DifferentialGeometry.Analysis.Parabolic.Energy.TimeCutoff
+import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Geometry.Operator.NormGradSq
+import DifferentialGeometry.Geometry.Operator.NormGradSqTime
 
 
 noncomputable section
@@ -189,6 +191,60 @@ theorem contDiff_localizedL2Mass
   simpa only [localizedL2Mass, smoothScalarSlice, μ] using
     contDiff_integral_of_jointContMDiff μ
       (fun x t => cutoff.toFun x ^ 2 * u t x ^ 2) hintegrand
+
+omit [I.Boundaryless] in
+theorem contDiff_localizedDirichletEnergy
+    {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2)) :
+    ContDiff ℝ ∞
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
+    { metric := fun _ => g
+      connection := fun _ => LeviCivita (I := I) g
+      metricCompatible := fun _ => by
+        simpa [LeviCivita] using
+          (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g) }
+  have hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (G.metric p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    intro x₀ i j
+    have hspace := chartGramMatrix_entry_contMDiffOn (I := I) g x₀ i j
+    simpa only [G] using hspace.comp contMDiffOn_snd
+      (fun p hp => hp.2)
+  have hgrad_joint : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        g.inner p.2
+          (gradientFun (I := I) g (u p.1) p.2)
+          (gradientFun (I := I) g (u p.1) p.2)) := by
+    have h := gradSq_joint (I := I) G isOpen_univ hgram u hu.contMDiffOn
+    simpa only [G, Set.univ_prod_univ, contMDiffOn_univ] using h
+  have hcutoff_joint : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => cutoff.toFun p.2) :=
+    cutoff.smooth.comp contMDiff_snd
+  have hintegrand : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => cutoff.toFun p.1 ^ 2 *
+        g.inner p.1
+          (gradientFun (I := I) g (u p.2) p.1)
+          (gradientFun (I := I) g (u p.2) p.1)) := by
+    exact ((hcutoff_joint.pow 2).mul hgrad_joint).comp
+      (contMDiff_snd.prodMk contMDiff_fst)
+  simpa only [localizedDirichletEnergy, smoothScalarSlice, μ] using
+    contDiff_integral_of_jointContMDiff μ
+      (fun x t => cutoff.toFun x ^ 2 *
+        g.inner x
+          (gradientFun (I := I) g (u t) x)
+          (gradientFun (I := I) g (u t) x)) hintegrand
 
 theorem contDiff_cutoffGradientError
     {g : SmoothRiemannianMetric I M}
@@ -905,9 +961,6 @@ theorem caccioppoli
     (hdweight : ContinuousOn dweight (Icc a b))
     (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
     (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
-    (hdirichlet : ContinuousOn
-      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
-        (smoothScalarSlice (I := I) g u hu t)) (Icc a b))
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
       deriv (fun s => u s x) t =
         Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x) :
@@ -926,6 +979,10 @@ theorem caccioppoli
                 (smoothScalarSlice (I := I) g u hu t) +
               ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * source t x
                 ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  have hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) (Icc a b) :=
+    (contDiff_localizedDirichletEnergy (I := I) (M := M) cutoff u hu).continuous.continuousOn
   apply caccioppoli_of_differential
     (I := I) (M := M) cutoff u source hu hsource hab hdweight hweight
       hweight_nonneg hdirichlet
@@ -946,9 +1003,6 @@ theorem caccioppoli_of_subsolution
     (hdweight : ContinuousOn dweight (Icc a b))
     (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
     (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
-    (hdirichlet : ContinuousOn
-      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
-        (smoothScalarSlice (I := I) g u hu t)) (Icc a b))
     (hu_nonneg : ∀ t ∈ Icc a b, ∀ x : M, 0 ≤ u t x)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
       deriv (fun s => u s x) t ≤
@@ -968,6 +1022,10 @@ theorem caccioppoli_of_subsolution
                 (smoothScalarSlice (I := I) g u hu t) +
               ∫ x, 2 * cutoff.toFun x ^ 2 * u t x * source t x
                 ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  have hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) (Icc a b) :=
+    (contDiff_localizedDirichletEnergy (I := I) (M := M) cutoff u hu).continuous.continuousOn
   apply caccioppoli_of_differential
     (I := I) (M := M) cutoff u source hu hsource hab hdweight hweight
       hweight_nonneg hdirichlet
@@ -990,9 +1048,6 @@ theorem caccioppoli_inner_energy_of_subsolution
     (hweight_nonneg : ∀ t ∈ Icc a t₁, 0 ≤ weight t)
     (hweight_a : weight a = 0)
     (hweight_inner : ∀ t ∈ Icc t₀ t₁, weight t = 1)
-    (hdirichlet : ContinuousOn
-      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
-        (smoothScalarSlice (I := I) g u hu t)) (Icc a t₁))
     (hu_nonneg : ∀ t ∈ Icc a t₁, ∀ x : M, 0 ≤ u t x)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
@@ -1018,6 +1073,10 @@ theorem caccioppoli_inner_energy_of_subsolution
   let dissipation : ℝ → ℝ := fun t =>
     localizedDirichletEnergy (I := I) (M := M) cutoff
       (smoothScalarSlice (I := I) g u hu t)
+  have hdirichlet : ContinuousOn dissipation (Icc a t₁) := by
+    simpa only [dissipation] using
+      (contDiff_localizedDirichletEnergy
+        (I := I) (M := M) cutoff u hu).continuous.continuousOn
   let rhs : ℝ → ℝ := fun t =>
     dweight t * mass t +
       weight t *
@@ -1050,7 +1109,6 @@ theorem caccioppoli_inner_energy_of_subsolution
       (hdweight.mono hsubset)
       (fun s hs => hweight s (hsubset hs))
       (fun s hs => hweight_nonneg s (hsubset hs))
-      (hdirichlet.mono hsubset)
       (fun s hs => hu_nonneg s (hsubset hs))
       (fun s hs => hpde s (hsubset hs))
     simpa only [mass, dissipation, rhs] using henergy

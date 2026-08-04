@@ -135,10 +135,6 @@ theorem caccioppoli_rpow_of_subsolution
     (hdweight : ContinuousOn dweight (Icc a b))
     (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
     (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
-    (hdirichlet : ContinuousOn
-      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
-        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
-          (contMDiff_rpow_of_pos hu hpos q) t)) (Icc a b))
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
       deriv (fun s => u s x) t ≤
         Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x) :
@@ -168,7 +164,6 @@ theorem caccioppoli_rpow_of_subsolution
   apply caccioppoli_of_subsolution
     (I := I) (M := M) cutoff (fun t x => u t x ^ q)
       (rpowSource q u source) huq hsourceq hab hdweight hweight hweight_nonneg
-  · simpa only [huq] using hdirichlet
   · intro t _ x
     exact (Real.rpow_pos_of_pos (hpos t x) q).le
   · intro t ht x
@@ -193,10 +188,6 @@ theorem rpow_moser_step
     (hweight_nonneg : ∀ t ∈ Icc a t₁, 0 ≤ weight t)
     (hweight_a : weight a = 0)
     (hweight_inner : ∀ t ∈ Icc t₀ t₁, weight t = 1)
-    (hdirichlet : ContinuousOn
-      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
-        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
-          (contMDiff_rpow_of_pos hu hpos q) t)) (Icc a t₁))
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
         Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x)
@@ -234,6 +225,12 @@ theorem rpow_moser_step
   have hsourceq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => sourceq p.1 p.2) := by
     simpa only [sourceq] using contMDiff_rpowSource_of_pos hu hsource hpos q
+  have hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t))
+      (Icc a t₁) :=
+    (contDiff_localizedDirichletEnergy (I := I) (M := M) cutoff
+      (fun s x => u s x ^ q) huq).continuous.continuousOn
   have hpdeq : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x ^ q) t ≤
         Δ_g (I := I) g
@@ -245,7 +242,6 @@ theorem rpow_moser_step
   have henergy := caccioppoli_inner_energy_of_subsolution
     (I := I) (M := M) cutoff (fun t x => u t x ^ q) sourceq huq hsourceq
     hat₀ ht₀t₁ hdweight hweight hweight_nonneg hweight_a hweight_inner
-    (by simpa only [huq] using hdirichlet)
     (fun t _ x => (Real.rpow_pos_of_pos (hpos t x) q).le)
     hpdeq
     (by simpa only [huq, sourceq] using hrhs_le)
@@ -269,10 +265,6 @@ theorem rpow_moser_step_homogeneous
     {a t₀ t₁ D K L : ℝ}
     (hat₀ : a < t₀) (ht₀t₁ : t₀ ≤ t₁)
     (hD : 0 ≤ D) (hK : 0 ≤ K) (hL : 0 ≤ L)
-    (hdirichlet : ContinuousOn
-      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
-        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
-          (contMDiff_rpow_of_pos hu hpos q) t)) (Icc a t₁))
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
         Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
@@ -346,7 +338,6 @@ theorem rpow_moser_step_homogeneous
     (fun t _ => (timeCutoff_mem_Icc a t₀ t).1)
     (timeCutoff_eq_zero a hat₀)
     (fun t ht => timeCutoff_eq_one_of_le hat₀ ht.1)
-    (by simpa only [huq] using hdirichlet)
   · intro t ht x
     simpa only [zeroSource, add_zero] using hpde t ht x
   · simpa only [huq, zeroSource] using hrhs_le
