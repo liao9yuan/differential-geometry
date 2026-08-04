@@ -327,6 +327,114 @@ theorem exists_parabolicChartDriftCoefficient_schauder_bounds
       Set.restrict_apply, Pi.neg_apply] using hneg
 
 
+theorem exists_uniform_parabolic_chart_operator_coefficient_schauder_bounds_of_finite
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {a b : Real} (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    {Achart : Type*} [Finite Achart]
+    (chartCenter : Achart → M) (K : Achart → Set E)
+    (hK : ∀ r, IsCompact (K r))
+    (hKconv : ∀ r, Convex Real (K r))
+    (hKchart : ∀ r, K r ⊆ interior (extChartAt I (chartCenter r)).target)
+    {alpha : NNReal} (halpha : alpha ≤ 1) :
+    ∃ Apr Ka : Fin (Module.finrank Real E) →
+          Fin (Module.finrank Real E) → NNReal,
+      ∃ Bb Kb : Fin (Module.finrank Real E) → NNReal,
+      (∀ r i j p, p ∈ parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) (K r)) →
+        ‖parabolicChartPrincipalCoefficient (I := I) G.metric
+          (chartCenter r) i j p‖ ≤ Apr i j) ∧
+      (∀ r i j, HolderWith (Ka i j) alpha
+        ((parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) (K r))).restrict
+            (parabolicChartPrincipalCoefficient (I := I) G.metric
+              (chartCenter r) i j))) ∧
+      (∀ r p, p ∈ parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) (K r)) →
+        (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+          parabolicChartPrincipalCoefficient (I := I) G.metric
+            (chartCenter r) i j p).PosDef) ∧
+      (∀ r k p, p ∈ parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) (K r)) →
+        ‖parabolicChartDriftCoefficient (I := I) G.metric
+          (chartCenter r) k p‖ ≤ Bb k) ∧
+      ∀ r k, HolderWith (Kb k) alpha
+        ((parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) (K r))).restrict
+            (parabolicChartDriftCoefficient (I := I) G.metric
+              (chartCenter r) k)) := by
+  classical
+  letI := Fintype.ofFinite Achart
+  have hpkg : ∀ r : Achart,
+      ∃ Ar Kar : Fin (Module.finrank Real E) →
+            Fin (Module.finrank Real E) → NNReal,
+        ∃ Bbr Kbr : Fin (Module.finrank Real E) → NNReal,
+        (∀ i j p, p ∈ parabolicLinearPreimage
+            ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+            (parabolicCylinder (Set.Icc a b) (K r)) →
+          ‖parabolicChartPrincipalCoefficient (I := I) G.metric
+            (chartCenter r) i j p‖ ≤ Ar i j) ∧
+        (∀ i j, HolderWith (Kar i j) alpha
+          ((parabolicLinearPreimage
+            ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+            (parabolicCylinder (Set.Icc a b) (K r))).restrict
+              (parabolicChartPrincipalCoefficient (I := I) G.metric
+                (chartCenter r) i j))) ∧
+        (∀ p, p ∈ parabolicLinearPreimage
+            ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+            (parabolicCylinder (Set.Icc a b) (K r)) →
+          (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+            parabolicChartPrincipalCoefficient (I := I) G.metric
+              (chartCenter r) i j p).PosDef) ∧
+        (∀ k p, p ∈ parabolicLinearPreimage
+            ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+            (parabolicCylinder (Set.Icc a b) (K r)) →
+          ‖parabolicChartDriftCoefficient (I := I) G.metric
+            (chartCenter r) k p‖ ≤ Bbr k) ∧
+        ∀ k, HolderWith (Kbr k) alpha
+          ((parabolicLinearPreimage
+            ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+            (parabolicCylinder (Set.Icc a b) (K r))).restrict
+              (parabolicChartDriftCoefficient (I := I) G.metric
+                (chartCenter r) k)) := by
+    intro r
+    obtain ⟨Ar, Kar, hAnorm, ha, hpos⟩ :=
+      exists_parabolicChartPrincipalCoefficient_schauder_bounds
+        hG a b habreg (chartCenter r) (hK r) (hKconv r) (hKchart r) halpha
+    obtain ⟨Bbr, Kbr, hbnorm, hb⟩ :=
+      exists_parabolicChartDriftCoefficient_schauder_bounds
+        hG hab habreg (chartCenter r) (hK r) (hKconv r) (hKchart r) halpha
+    exact ⟨Ar, Kar, Bbr, Kbr, hAnorm, ha, hpos, hbnorm, hb⟩
+  choose Ar Kar Bbr Kbr hpkg using hpkg
+  let Apr : Fin (Module.finrank Real E) →
+      Fin (Module.finrank Real E) → NNReal := fun i j ↦ ∑ r, Ar r i j
+  let Ka : Fin (Module.finrank Real E) →
+      Fin (Module.finrank Real E) → NNReal := fun i j ↦ ∑ r, Kar r i j
+  let Bb : Fin (Module.finrank Real E) → NNReal := fun k ↦ ∑ r, Bbr r k
+  let Kb : Fin (Module.finrank Real E) → NNReal := fun k ↦ ∑ r, Kbr r k
+  refine ⟨Apr, Ka, Bb, Kb, ?_, ?_, ?_, ?_, ?_⟩
+  · intro r i j p hp
+    exact (hpkg r).1 i j p hp |>.trans
+      (Finset.single_le_sum (fun s _ ↦ zero_le (Ar s i j)) (Finset.mem_univ r))
+  · intro r i j
+    exact (hpkg r).2.1 i j |>.mono
+      (Finset.single_le_sum (fun s _ ↦ zero_le (Kar s i j)) (Finset.mem_univ r))
+  · intro r p hp
+    exact (hpkg r).2.2.1 p hp
+  · intro r k p hp
+    exact (hpkg r).2.2.2.1 k p hp |>.trans
+      (Finset.single_le_sum (fun s _ ↦ zero_le (Bbr s k)) (Finset.mem_univ r))
+  · intro r k
+    exact (hpkg r).2.2.2.2 k |>.mono
+      (Finset.single_le_sum (fun s _ ↦ zero_le (Kbr s k)) (Finset.mem_univ r))
+
+
 end DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn
 
 end
