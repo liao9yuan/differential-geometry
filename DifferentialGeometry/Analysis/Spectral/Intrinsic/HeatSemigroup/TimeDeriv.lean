@@ -169,6 +169,56 @@ theorem abstractSpectralSemigroupDeriv_repr_apply (b : HilbertBasis ι ℝ X)
     · simp [hji, Ne.symm hji]
   rw [heq, tsum_ite_eq]
 
+theorem abstractSpectralSemigroupDeriv_add (b : HilbertBasis ι ℝ X)
+    {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) {t s : ℝ}
+    (ht : 0 < t) (hs : 0 ≤ s) (v : X) :
+    abstractSpectralSemigroupDeriv b lam (t + s) v =
+      abstractSpectralSemigroup b hlam s
+        (abstractSpectralSemigroupDeriv b lam t v) := by
+  apply b.repr.injective
+  ext i
+  rw [abstractSpectralSemigroupDeriv_repr_apply b hlam (add_pos_of_pos_of_nonneg ht hs),
+    abstractSpectralSemigroup_repr_apply b hlam hs,
+    abstractSpectralSemigroupDeriv_repr_apply b hlam ht]
+  simp only [heatDerivCoeff_def, heatCoeff_def]
+  rw [show -(lam i) * (t + s) = -(lam i) * t + -(lam i) * s by ring,
+    Real.exp_add]
+  ring
+
+theorem abstractSpectralSemigroupDeriv_continuousOn (b : HilbertBasis ι ℝ X)
+    {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i) (v : X) :
+    ContinuousOn (fun t : ℝ => abstractSpectralSemigroupDeriv b lam t v)
+      (Set.Ioi 0) := by
+  intro t ht
+  have ht' : 0 < t := ht
+  set a : ℝ := t / 2 with ha_def
+  have ha : 0 < a := by rw [ha_def]; linarith
+  have hat : a < t := by rw [ha_def]; linarith
+  have hta : 0 < t - a := sub_pos.mpr hat
+  set w : X := abstractSpectralSemigroupDeriv b lam a v with hw_def
+  have hsemigroup : ContinuousAt
+      (fun q : ℝ => abstractSpectralSemigroup b hlam q w) (t - a) :=
+    (abstractSpectralSemigroup_continuousOn b hlam w).continuousAt
+      (Ici_mem_nhds hta)
+  have hcomp : ContinuousAt
+      (fun q : ℝ => abstractSpectralSemigroup b hlam (q - a) w) t := by
+    have hsub : ContinuousAt (fun q : ℝ => q - a) t :=
+      continuousAt_id.sub continuousAt_const
+    exact hsemigroup.comp_of_eq hsub rfl
+  have heq : (fun q : ℝ => abstractSpectralSemigroupDeriv b lam q v) =ᶠ[𝓝 t]
+      (fun q : ℝ => abstractSpectralSemigroup b hlam (q - a) w) := by
+    filter_upwards [Ioi_mem_nhds hat] with q hq
+    calc
+      abstractSpectralSemigroupDeriv b lam q v =
+          abstractSpectralSemigroupDeriv b lam (a + (q - a)) v := by
+            congr 2
+            ring
+      _ = abstractSpectralSemigroup b hlam (q - a)
+          (abstractSpectralSemigroupDeriv b lam a v) :=
+        abstractSpectralSemigroupDeriv_add b hlam ha (sub_nonneg.mpr hq.le) v
+      _ = abstractSpectralSemigroup b hlam (q - a) w := by rw [hw_def]
+  exact (hcomp.congr_of_eventuallyEq heq).continuousWithinAt
+
 private def slopeMinusDerivCoeff (lam : ι → ℝ) (t s : ℝ) (i : ι) : ℝ :=
   (s - t)⁻¹ * (heatCoeff lam s i - heatCoeff lam t i) - heatDerivCoeff lam t i
 
