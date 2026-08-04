@@ -171,6 +171,14 @@ theorem dist_parabolicTimeCenteredDilationAt
   congr 1
   ring_nf
 
+theorem lipschitzWith_parabolicTimeCenteredDilationAt
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V) :
+    LipschitzWith r (parabolicTimeCenteredDilationAt tau r p0) := by
+  apply LipschitzWith.of_dist_le_mul
+  intro p q
+  exact (dist_parabolicTimeCenteredDilationAt tau r p0 p q).le
+
 @[simp]
 theorem parabolicDilationAt_origin {V : Type*} [NormedAddCommGroup V]
     [NormedSpace Real V] (r : NNReal) (p0 : ParabolicPoint V) :
@@ -809,6 +817,13 @@ def parabolicSourceRescaleAt
     ParabolicPoint V → F :=
   fun p ↦ (r : Real) ^ 2 • f (parabolicDilationAt r p0 p)
 
+def parabolicTimeCenteredSourceRescaleAt
+    {V F : Type*} [Add V] [SMul Real V] [SMul Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (f : ParabolicPoint V → F) : ParabolicPoint V → F :=
+  fun p ↦ (r : Real) ^ 2 •
+    f (parabolicTimeCenteredDilationAt tau r p0 p)
+
 @[simp]
 theorem parabolicRescale_apply {V F : Type*} [SMul Real V]
     (r : NNReal) (u : Real → V → F) (t : Real) (x : V) :
@@ -867,6 +882,16 @@ theorem parabolicSourceRescaleAt_apply
     (p : ParabolicPoint V) :
     parabolicSourceRescaleAt r p0 f p =
       (r : Real) ^ 2 • f (parabolicDilationAt r p0 p) := rfl
+
+@[simp]
+theorem parabolicTimeCenteredSourceRescaleAt_apply
+    {V F : Type*} [Add V] [SMul Real V] [SMul Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (f : ParabolicPoint V → F) (p : ParabolicPoint V) :
+    parabolicTimeCenteredSourceRescaleAt tau r p0 f p =
+      (r : Real) ^ 2 •
+        f (parabolicTimeCenteredDilationAt tau r p0 p) :=
+  rfl
 
 theorem parabolicDilation_mapsTo_preimage {V : Type*} [SMul Real V]
     (r : NNReal) (Q : Set (ParabolicPoint V)) :
@@ -951,6 +976,209 @@ theorem parabolicHolder_dilationAt
         ENNReal.mul_rpow_of_nonneg _ _ alpha.coe_nonneg]
       ring
 
+theorem parabolicHolder_timeCenteredDilationAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [MetricSpace F] {alpha K : NNReal} {P Q : Set (ParabolicPoint V)}
+    {f : ParabolicPoint V → F} (tau : Real) (r : NNReal)
+    (p0 : ParabolicPoint V)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hf : HolderWith K alpha (P.restrict f)) :
+    HolderWith (K * r ^ (alpha : Real)) alpha
+      (Q.restrict (f ∘ parabolicTimeCenteredDilationAt tau r p0)) := by
+  let g : Q → P := fun p ↦
+    ⟨parabolicTimeCenteredDilationAt tau r p0 p.1, hmap p.2⟩
+  have hg : LipschitzWith r g :=
+    ((lipschitzWith_parabolicTimeCenteredDilationAt tau r p0).restrict Q)
+      |>.subtype_mk fun p ↦ hmap p.2
+  have hcomp := hf.comp hg.holderWith
+  simpa only [g, Function.comp_apply, Set.restrict_apply, mul_one] using hcomp
+
+namespace BoundedContinuousFunction
+
+theorem parabolicTimeCenteredRescaleAt_holderWith
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {alpha K : NNReal} {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hu : HolderWith K alpha
+      (P.restrict (fun p ↦ u p.time p.space))) :
+    HolderWith (K * r ^ (alpha : Real)) alpha
+      (Q.restrict (fun p ↦
+        parabolicTimeCenteredRescaleAt tau r p0 u p.time p.space)) := by
+  simpa only [Function.comp_apply, Set.restrict_apply,
+    parabolicTimeCenteredRescaleAt_apply,
+    parabolicTimeCenteredDilationAt_time,
+    parabolicTimeCenteredDilationAt_space] using
+      parabolicHolder_timeCenteredDilationAt tau r p0 hmap hu
+
+theorem parabolicTimeCenteredTimeDerivativeRescaleAt_holderWith
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {alpha K : NNReal} {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (dtimeU : Real → BoundedContinuousFunction V F)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hu : HolderWith K alpha
+      (P.restrict (fun p ↦ dtimeU p.time p.space))) :
+    HolderWith (K * r ^ (alpha : Real) * r ^ 2) alpha
+      (Q.restrict (fun p ↦
+        parabolicTimeCenteredTimeDerivativeRescaleAt
+          tau r p0 dtimeU p.time p.space)) := by
+  have hpull := parabolicHolder_timeCenteredDilationAt
+    tau r p0 hmap hu
+  have hscaled := hpull.smul ((r : Real) ^ 2)
+  have hrnorm : ‖(r : Real) ^ 2‖₊ = r ^ 2 := by
+    ext
+    simp only [coe_nnnorm, Real.norm_of_nonneg (sq_nonneg (r : Real)),
+      NNReal.coe_pow]
+  rw [hrnorm] at hscaled
+  simpa only [Function.comp_apply, Set.restrict_apply, Pi.smul_apply,
+    parabolicTimeCenteredTimeDerivativeRescaleAt_apply,
+    parabolicTimeCenteredDilationAt_time,
+    parabolicTimeCenteredDilationAt_space] using hscaled
+
+theorem parabolicTimeCenteredSpatialDerivativeRescaleAt_holderWith
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {alpha K : NNReal} {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hu : HolderWith K alpha
+      (P.restrict (fun p ↦ du p.time p.space))) :
+    HolderWith (K * r ^ (alpha : Real) * r) alpha
+      (Q.restrict (fun p ↦
+        parabolicTimeCenteredSpatialDerivativeRescaleAt
+          tau r p0 du p.time p.space)) := by
+  have hpull := parabolicHolder_timeCenteredDilationAt
+    tau r p0 hmap hu
+  have hscaled := hpull.smul (r : Real)
+  have hrnorm : ‖(r : Real)‖₊ = r := by
+    ext
+    simp only [coe_nnnorm, Real.norm_of_nonneg r.coe_nonneg]
+  rw [hrnorm] at hscaled
+  simpa only [Function.comp_apply, Set.restrict_apply, Pi.smul_apply,
+    parabolicTimeCenteredSpatialDerivativeRescaleAt_apply,
+    parabolicTimeCenteredDilationAt_time,
+    parabolicTimeCenteredDilationAt_space] using hscaled
+
+theorem parabolicTimeCenteredSpatialSecondDerivativeRescaleAt_holderWith
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {alpha K : NNReal} {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F))
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hu : HolderWith K alpha
+      (P.restrict (fun p ↦ d2u p.time p.space))) :
+    HolderWith (K * r ^ (alpha : Real) * r ^ 2) alpha
+      (Q.restrict (fun p ↦
+        parabolicTimeCenteredSpatialSecondDerivativeRescaleAt
+          tau r p0 d2u p.time p.space)) := by
+  have hpull := parabolicHolder_timeCenteredDilationAt
+    tau r p0 hmap hu
+  have hscaled := hpull.smul ((r : Real) ^ 2)
+  have hrnorm : ‖(r : Real) ^ 2‖₊ = r ^ 2 := by
+    ext
+    simp only [coe_nnnorm, Real.norm_of_nonneg (sq_nonneg (r : Real)),
+      NNReal.coe_pow]
+  rw [hrnorm] at hscaled
+  simpa only [Function.comp_apply, Set.restrict_apply, Pi.smul_apply,
+    parabolicTimeCenteredSpatialSecondDerivativeRescaleAt_apply,
+    parabolicTimeCenteredDilationAt_time,
+    parabolicTimeCenteredDilationAt_space] using hscaled
+
+theorem norm_parabolicTimeCenteredRescaleAt_le
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) (M : NNReal)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hu : ∀ p, p ∈ P → ‖u p.time p.space‖ ≤ M) :
+    ∀ p, p ∈ Q →
+      ‖parabolicTimeCenteredRescaleAt tau r p0 u p.time p.space‖ ≤ M := by
+  intro p hp
+  simpa only [parabolicTimeCenteredRescaleAt_apply,
+    parabolicTimeCenteredDilationAt_time,
+    parabolicTimeCenteredDilationAt_space] using hu _ (hmap hp)
+
+theorem norm_parabolicTimeCenteredTimeDerivativeRescaleAt_le
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (dtimeU : Real → BoundedContinuousFunction V F) (M : NNReal)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hu : ∀ p, p ∈ P → ‖dtimeU p.time p.space‖ ≤ M) :
+    ∀ p, p ∈ Q →
+      ‖parabolicTimeCenteredTimeDerivativeRescaleAt
+        tau r p0 dtimeU p.time p.space‖ ≤ r ^ 2 * M := by
+  intro p hp
+  rw [parabolicTimeCenteredTimeDerivativeRescaleAt_apply, norm_smul,
+    Real.norm_of_nonneg (sq_nonneg (r : Real))]
+  calc
+    (r : Real) ^ 2 *
+        ‖dtimeU (parabolicTimeCenteredDilationAt tau r p0 p).time
+          (parabolicTimeCenteredDilationAt tau r p0 p).space‖ ≤
+        (r : Real) ^ 2 * M :=
+      mul_le_mul_of_nonneg_left (hu _ (hmap hp)) (sq_nonneg (r : Real))
+    _ = (r ^ 2 * M : NNReal) := by
+      simp only [NNReal.coe_mul, NNReal.coe_pow]
+
+theorem norm_parabolicTimeCenteredSpatialDerivativeRescaleAt_le
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (M : NNReal)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hu : ∀ p, p ∈ P → ‖du p.time p.space‖ ≤ M) :
+    ∀ p, p ∈ Q →
+      ‖parabolicTimeCenteredSpatialDerivativeRescaleAt
+        tau r p0 du p.time p.space‖ ≤ r * M := by
+  intro p hp
+  rw [parabolicTimeCenteredSpatialDerivativeRescaleAt_apply, norm_smul,
+    Real.norm_of_nonneg r.coe_nonneg]
+  calc
+    (r : Real) *
+        ‖du (parabolicTimeCenteredDilationAt tau r p0 p).time
+          (parabolicTimeCenteredDilationAt tau r p0 p).space‖ ≤
+        (r : Real) * M :=
+      mul_le_mul_of_nonneg_left (hu _ (hmap hp)) r.coe_nonneg
+    _ = (r * M : NNReal) := by
+      simp only [NNReal.coe_mul]
+
+theorem norm_parabolicTimeCenteredSpatialSecondDerivativeRescaleAt_le
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F)) (M : NNReal)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hu : ∀ p, p ∈ P → ‖d2u p.time p.space‖ ≤ M) :
+    ∀ p, p ∈ Q →
+      ‖parabolicTimeCenteredSpatialSecondDerivativeRescaleAt
+        tau r p0 d2u p.time p.space‖ ≤ r ^ 2 * M := by
+  intro p hp
+  rw [parabolicTimeCenteredSpatialSecondDerivativeRescaleAt_apply,
+    norm_smul, Real.norm_of_nonneg (sq_nonneg (r : Real))]
+  calc
+    (r : Real) ^ 2 *
+        ‖d2u (parabolicTimeCenteredDilationAt tau r p0 p).time
+          (parabolicTimeCenteredDilationAt tau r p0 p).space‖ ≤
+        (r : Real) ^ 2 * M :=
+      mul_le_mul_of_nonneg_left (hu _ (hmap hp)) (sq_nonneg (r : Real))
+    _ = (r ^ 2 * M : NNReal) := by
+      simp only [NNReal.coe_mul, NNReal.coe_pow]
+
+end BoundedContinuousFunction
+
 theorem parabolicDilationAt_mapsTo_ball
     {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     (r : NNReal) (hr : 0 < r) (R : Real) (p0 : ParabolicPoint V) :
@@ -1013,6 +1241,49 @@ theorem parabolicHolder_dilationAt_unitBall
   have hadapt := parabolicHolder_dilationAt r p0 hf
   exact ((HolderWith.restrict_iff.mp hadapt).mono
     (parabolicDilationAt_mapsTo_unitBall r hr p0)).holderWith
+
+theorem parabolicTimeCenteredSourceRescaleAt_holderWith
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {alpha K : NNReal} {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (f : ParabolicPoint V → F)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hf : HolderWith K alpha (P.restrict f)) :
+    HolderWith (K * r ^ (alpha : Real) * r ^ 2) alpha
+      (Q.restrict (parabolicTimeCenteredSourceRescaleAt tau r p0 f)) := by
+  have hpull := parabolicHolder_timeCenteredDilationAt
+    tau r p0 hmap hf
+  have hscaled := hpull.smul ((r : Real) ^ 2)
+  have hrnorm : ‖(r : Real) ^ 2‖₊ = r ^ 2 := by
+    ext
+    simp only [coe_nnnorm, Real.norm_of_nonneg (sq_nonneg (r : Real)),
+      NNReal.coe_pow]
+  rw [hrnorm] at hscaled
+  simpa only [parabolicTimeCenteredSourceRescaleAt,
+    Function.comp_apply, Set.restrict_apply, Pi.smul_apply] using hscaled
+
+theorem norm_parabolicTimeCenteredSourceRescaleAt_le
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    {P Q : Set (ParabolicPoint V)}
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (f : ParabolicPoint V → F) (B : NNReal)
+    (hmap : MapsTo (parabolicTimeCenteredDilationAt tau r p0) Q P)
+    (hf : ∀ p, p ∈ P → ‖f p‖ ≤ B) :
+    ∀ p, p ∈ Q →
+      ‖parabolicTimeCenteredSourceRescaleAt tau r p0 f p‖ ≤
+        r ^ 2 * B := by
+  intro p hp
+  rw [parabolicTimeCenteredSourceRescaleAt_apply, norm_smul,
+    Real.norm_of_nonneg (sq_nonneg (r : Real))]
+  calc
+    (r : Real) ^ 2 *
+        ‖f (parabolicTimeCenteredDilationAt tau r p0 p)‖ ≤
+        (r : Real) ^ 2 * B :=
+      mul_le_mul_of_nonneg_left (hf _ (hmap hp)) (sq_nonneg (r : Real))
+    _ = (r ^ 2 * B : NNReal) := by
+      simp only [NNReal.coe_mul, NNReal.coe_pow]
 
 theorem parabolicSourceRescaleAt_holderWith_unitBall
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
