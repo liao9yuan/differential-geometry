@@ -2916,6 +2916,7 @@ import DifferentialGeometry.Topology.Attachment.Basic
 import DifferentialGeometry.Topology.Attachment.Defs
 import DifferentialGeometry.Topology.Attachment.Union
 import DifferentialGeometry.Topology.Morse.Defs
+import DifferentialGeometry.Topology.Morse.LocalNormalForm
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Alternating.Bundle
 import DifferentialGeometry.Tensor.Alternating.Comp
