@@ -400,23 +400,26 @@ theorem eParabolicC2HolderGaugeOn_rescale_le
   unfold parabolicC2HolderRescaleConst
   simpa only [Cspatial] using hresult
 
-def parabolicLinearMap {V : Type*} [NormedAddCommGroup V]
-    [NormedSpace Real V] (L : V →L[Real] V)
-    (p : ParabolicPoint V) : ParabolicPoint V :=
+def parabolicLinearMap {V W : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] [NormedAddCommGroup W] [NormedSpace Real W]
+    (L : V →L[Real] W) (p : ParabolicPoint V) : ParabolicPoint W :=
   parabolicPoint p.time (L p.space)
 
 @[simp]
-theorem parabolicLinearMap_time {V : Type*} [NormedAddCommGroup V]
-    [NormedSpace Real V] (L : V →L[Real] V) (p : ParabolicPoint V) :
+theorem parabolicLinearMap_time {V W : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] [NormedAddCommGroup W] [NormedSpace Real W]
+    (L : V →L[Real] W) (p : ParabolicPoint V) :
     (parabolicLinearMap L p).time = p.time := rfl
 
 @[simp]
-theorem parabolicLinearMap_space {V : Type*} [NormedAddCommGroup V]
-    [NormedSpace Real V] (L : V →L[Real] V) (p : ParabolicPoint V) :
+theorem parabolicLinearMap_space {V W : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] [NormedAddCommGroup W] [NormedSpace Real W]
+    (L : V →L[Real] W) (p : ParabolicPoint V) :
     (parabolicLinearMap L p).space = L p.space := rfl
 
-theorem dist_parabolicLinearMap_le {V : Type*} [NormedAddCommGroup V]
-    [NormedSpace Real V] (L : V →L[Real] V) (p q : ParabolicPoint V) :
+theorem dist_parabolicLinearMap_le {V W : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] [NormedAddCommGroup W] [NormedSpace Real W]
+    (L : V →L[Real] W) (p q : ParabolicPoint V) :
     dist (parabolicLinearMap L p) (parabolicLinearMap L q) ≤
       max 1 ‖L‖ * dist p q := by
   rcases p with ⟨⟨t⟩, x⟩
@@ -445,32 +448,35 @@ theorem dist_parabolicLinearMap_le {V : Type*} [NormedAddCommGroup V]
   exact max_le htime hspace
 
 theorem lipschitzWith_parabolicLinearMap
-    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    (L : V →L[Real] V) :
+    {V W : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup W] [NormedSpace Real W]
+    (L : V →L[Real] W) :
     LipschitzWith (max 1 ‖L‖₊) (parabolicLinearMap L) := by
   apply LipschitzWith.of_dist_le_mul
   intro p q
   simpa only [NNReal.coe_max, NNReal.coe_one, coe_nnnorm] using
     dist_parabolicLinearMap_le L p q
 
-def parabolicLinearPreimage {V : Type*} [NormedAddCommGroup V]
-    [NormedSpace Real V] (L : V →L[Real] V)
-    (Q : Set (ParabolicPoint V)) : Set (ParabolicPoint V) :=
+def parabolicLinearPreimage {V W : Type*} [NormedAddCommGroup V]
+    [NormedSpace Real V] [NormedAddCommGroup W] [NormedSpace Real W]
+    (L : V →L[Real] W) (Q : Set (ParabolicPoint W)) : Set (ParabolicPoint V) :=
   parabolicLinearMap L ⁻¹' Q
 
 @[simp]
 theorem parabolicLinearPreimage_cylinder_univ
-    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    (L : V →L[Real] V) (J : Set Real) :
+    {V W : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup W] [NormedSpace Real W]
+    (L : V →L[Real] W) (J : Set Real) :
     parabolicLinearPreimage L (parabolicCylinder J Set.univ) =
       parabolicCylinder J Set.univ := by
   ext p
   simp [parabolicLinearPreimage, parabolicCylinder]
 
 theorem parabolicHolder_linearMap
-    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    {V W F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup W] [NormedSpace Real W]
     [MetricSpace F] {alpha C : NNReal} {Q : Set (ParabolicPoint V)}
-    {f : ParabolicPoint V → F} (L : V →L[Real] V)
+    {f : ParabolicPoint V → F} (L : W →L[Real] V)
     (hf : HolderWith C alpha (Q.restrict f)) :
     HolderWith (C * (max 1 ‖L‖₊) ^ (alpha : Real)) alpha
       ((parabolicLinearPreimage L Q).restrict
@@ -484,14 +490,15 @@ theorem parabolicHolder_linearMap
   simpa only [g, Function.comp_apply, Set.restrict_apply, mul_one] using hcomp
 
 theorem parabolicSpatialJet_linearEquiv
-    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    {V W F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup W] [NormedSpace Real W]
     [NormedAddCommGroup F] [NormedSpace Real F]
-    (L : V ≃L[Real] V) (u : Real → V → F) (j : Nat)
-    (p : ParabolicPoint V) :
+    (L : W ≃L[Real] V) (u : Real → V → F) (j : Nat)
+    (p : ParabolicPoint W) :
     parabolicSpatialJet j (fun t x => u t (L x)) p =
       (parabolicSpatialJet j u
-        (parabolicLinearMap (L : V →L[Real] V) p)).compContinuousLinearMap
-          (fun _ => (L : V →L[Real] V)) := by
+        (parabolicLinearMap (L : W →L[Real] V) p)).compContinuousLinearMap
+          (fun _ => (L : W →L[Real] V)) := by
   unfold parabolicSpatialJet
   simp only [parabolicLinearMap_time, parabolicLinearMap_space]
   have h := L.iteratedFDerivWithin_comp_right (u p.time)
@@ -500,12 +507,13 @@ theorem parabolicSpatialJet_linearEquiv
     Function.comp_apply] using h
 
 theorem parabolicTimeDerivative_linearEquiv
-    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    {V W F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup W] [NormedSpace Real W]
     [NormedAddCommGroup F] [NormedSpace Real F]
-    (L : V ≃L[Real] V) (u : Real → V → F) (p : ParabolicPoint V) :
+    (L : W ≃L[Real] V) (u : Real → V → F) (p : ParabolicPoint W) :
     parabolicTimeDerivative (fun t x => u t (L x)) p =
       parabolicTimeDerivative u
-        (parabolicLinearMap (L : V →L[Real] V) p) := by
+        (parabolicLinearMap (L : W →L[Real] V) p) := by
   rfl
 
 theorem lipschitzWith_compContinuousLinearMapL
