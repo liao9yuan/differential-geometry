@@ -591,6 +591,7 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamily
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
+import DifferentialGeometry.Analysis.Parabolic.Energy.Caccioppoli
 import DifferentialGeometry.Analysis.Parabolic.Energy.TimeCutoff
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLocalSource
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLowerOrder
