@@ -502,6 +502,23 @@ theorem laplacianOp_laplacianEigenfunction
   rw [h_subtype_eq]
   exact h
 
+theorem laplacianOp_inner_eigenbasis
+    (g : SmoothRiemannianMetric I M)
+    (u_h : laplacianDomain (I := I) (M := M) g)
+    (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
+      Fin (Module.finrank ℝ
+        (resolventEigenspace (I := I) (M := M) g μ.val))) :
+    ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i,
+      laplacianOp (I := I) (M := M) g u_h⟫_ℝ =
+      -(laplacianEigenvalueOf i.1.val) *
+        ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i,
+          H1ComplToLp (I := I) (M := M) g (u_h : H1Compl g)⟫_ℝ := by
+  have h := laplacianOp_symmetric (I := I) (M := M) g
+    (laplacianEigenfunction (I := I) (M := M) g i) u_h
+  rw [H1ComplToLp_laplacianEigenfunction,
+    laplacianOp_laplacianEigenfunction, real_inner_smul_left] at h
+  exact h
+
 example (g : SmoothRiemannianMetric I M) :
     HilbertBasis
       (Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
