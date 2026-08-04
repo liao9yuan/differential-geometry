@@ -114,6 +114,74 @@ theorem intervalIntegral_le_const_mul_sup_rpow
   have hint := intervalIntegral.integral_mono_on hab hlhs_int hright_int hmono
   simpa only [intervalIntegral.integral_const_mul] using hint
 
+theorem inner_mass_and_dissipation_le
+    {weight mass dissipation source : ℝ → ℝ}
+    {a t₀ t₁ A : ℝ}
+    (hat₀ : a ≤ t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (hweight : ContinuousOn weight (Icc a t₁))
+    (hdissipation : ContinuousOn dissipation (Icc a t₁))
+    (hweight_nonneg : ∀ t ∈ Icc a t₁, 0 ≤ weight t)
+    (hdissipation_nonneg : ∀ t ∈ Icc a t₁, 0 ≤ dissipation t)
+    (hweight_a : weight a = 0)
+    (hweight_inner : ∀ t ∈ Icc t₀ t₁, weight t = 1)
+    (hmass_nonneg : ∀ t ∈ Icc t₀ t₁, 0 ≤ mass t)
+    (hsource_le : ∀ t ∈ Icc t₀ t₁, ∫ s in a..t, source s ≤ A)
+    (hweighted : ∀ t ∈ Icc t₀ t₁,
+      weight t * mass t - weight a * mass a +
+          ∫ s in a..t, weight s * dissipation s ≤
+        ∫ s in a..t, source s) :
+    (∀ t ∈ Icc t₀ t₁, mass t ≤ A) ∧
+      (∫ t in t₀..t₁, dissipation t) ≤ A := by
+  have hat₁ : a ≤ t₁ := hat₀.trans ht₀t₁
+  have hweighted_cont : ContinuousOn
+      (fun t => weight t * dissipation t) (Icc a t₁) :=
+    hweight.mul hdissipation
+  have hmass_le : ∀ t ∈ Icc t₀ t₁, mass t ≤ A := by
+    intro t ht
+    have hat : a ≤ t := hat₀.trans ht.1
+    have hinterval_nonneg : 0 ≤ ∫ s in a..t, weight s * dissipation s :=
+      intervalIntegral.integral_nonneg hat (fun s hs =>
+        mul_nonneg
+          (hweight_nonneg s ⟨hs.1, hs.2.trans ht.2⟩)
+          (hdissipation_nonneg s ⟨hs.1, hs.2.trans ht.2⟩))
+    have h := (hweighted t ht).trans (hsource_le t ht)
+    rw [hweight_inner t ht, hweight_a] at h
+    simpa only [one_mul, zero_mul, zero_add] using h.trans' (by linarith)
+  refine ⟨hmass_le, ?_⟩
+  have hleft_cont : ContinuousOn
+      (fun t => weight t * dissipation t) (Icc a t₀) :=
+    hweighted_cont.mono (fun t ht => ⟨ht.1, ht.2.trans ht₀t₁⟩)
+  have hinner_cont : ContinuousOn
+      (fun t => weight t * dissipation t) (Icc t₀ t₁) :=
+    hweighted_cont.mono (fun t ht => ⟨hat₀.trans ht.1, ht.2⟩)
+  have hleft_int : IntervalIntegrable
+      (fun t => weight t * dissipation t) volume a t₀ := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hat₀] using hleft_cont
+  have hinner_int : IntervalIntegrable
+      (fun t => weight t * dissipation t) volume t₀ t₁ := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le ht₀t₁] using hinner_cont
+  have hleft_nonneg : 0 ≤ ∫ t in a..t₀, weight t * dissipation t :=
+    intervalIntegral.integral_nonneg hat₀ (fun t ht =>
+      mul_nonneg
+        (hweight_nonneg t ⟨ht.1, ht.2.trans ht₀t₁⟩)
+        (hdissipation_nonneg t ⟨ht.1, ht.2.trans ht₀t₁⟩))
+  have hinner_eq :
+      (∫ t in t₀..t₁, weight t * dissipation t) =
+        ∫ t in t₀..t₁, dissipation t := by
+    apply intervalIntegral.integral_congr
+    intro t ht
+    change weight t * dissipation t = dissipation t
+    rw [hweight_inner t (by simpa [uIcc_of_le ht₀t₁] using ht), one_mul]
+  have htotal := (hweighted t₁ ⟨ht₀t₁, le_rfl⟩).trans
+    (hsource_le t₁ ⟨ht₀t₁, le_rfl⟩)
+  rw [hweight_inner t₁ ⟨ht₀t₁, le_rfl⟩, hweight_a] at htotal
+  simp only [one_mul, zero_mul, sub_zero] at htotal
+  rw [← intervalIntegral.integral_add_adjacent_intervals hleft_int hinner_int,
+    hinner_eq] at htotal
+  linarith [hmass_nonneg t₁ ⟨ht₀t₁, le_rfl⟩]
+
 theorem norm_sq_sub_eq_intervalIntegral_inner_deriv
     {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
     {u du : ℝ → X} {a b : ℝ}
