@@ -1,7 +1,9 @@
 import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralDuhamel
+import DifferentialGeometry.Analysis.Calculus.HilbertBasisDerivative
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.TimeDeriv
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
 import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
+import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.Topology.MetricSpace.HolderNorm
 
 noncomputable section
@@ -25,6 +27,48 @@ def abstractSpectralDuhamelHolderCorrection
     if s < t then
       abstractSpectralSemigroupDeriv b lam (t - s) (F s - F t)
     else 0
+
+private def abstractSpectralDuhamelHolderKernel
+    (b : HilbertBasis ι ℝ X) (lam : ι → ℝ) (F : ℝ → X)
+    (t τ : ℝ) : X :=
+  if 0 < τ then
+    abstractSpectralSemigroupDeriv b lam τ (F (t - τ) - F t)
+  else 0
+
+omit [CompleteSpace X] in
+private theorem abstractSpectralDuhamelHolderCorrection_eq_kernel_integral
+    (b : HilbertBasis ι ℝ X) (lam : ι → ℝ) (F : ℝ → X) (t : ℝ) :
+    abstractSpectralDuhamelHolderCorrection b lam F t =
+      ∫ τ in (0 : ℝ)..t,
+        abstractSpectralDuhamelHolderKernel b lam F t τ := by
+  rw [abstractSpectralDuhamelHolderCorrection]
+  calc
+    (∫ s in (0 : ℝ)..t,
+        if s < t then
+          abstractSpectralSemigroupDeriv b lam (t - s) (F s - F t)
+        else 0) =
+        ∫ s in (0 : ℝ)..t,
+          abstractSpectralDuhamelHolderKernel b lam F t (t - s) := by
+      apply intervalIntegral.integral_congr
+      intro s _
+      change (if s < t then
+          abstractSpectralSemigroupDeriv b lam (t - s) (F s - F t)
+        else 0) =
+        abstractSpectralDuhamelHolderKernel b lam F t (t - s)
+      by_cases hs : s < t
+      · rw [if_pos hs]
+        simp only [abstractSpectralDuhamelHolderKernel, if_pos (sub_pos.mpr hs)]
+        congr 2
+        ring_nf
+      · rw [if_neg hs]
+        simp only [abstractSpectralDuhamelHolderKernel,
+          if_neg (not_lt.mpr (sub_nonpos.mpr (le_of_not_gt hs)))]
+    _ = ∫ τ in t - t..t - 0,
+        abstractSpectralDuhamelHolderKernel b lam F t τ :=
+      intervalIntegral.integral_comp_sub_left
+        (fun τ : ℝ => abstractSpectralDuhamelHolderKernel b lam F t τ) t
+    _ = ∫ τ in (0 : ℝ)..t,
+        abstractSpectralDuhamelHolderKernel b lam F t τ := by ring_nf
 
 theorem abstractSpectralDuhamelHolderCorrection_intervalIntegrable
     (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
@@ -99,6 +143,113 @@ theorem abstractSpectralDuhamelHolderCorrection_intervalIntegrable
     simp only [lt_self_iff_false, ↓reduceIte, norm_zero]
     exact mul_nonneg (div_nonneg K.coe_nonneg (Real.exp_pos 1).le)
       (Real.rpow_nonneg (sub_nonneg.mpr le_rfl) _)
+
+theorem abstractSpectralDuhamelHolderCorrection_continuousOn
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    {F : ℝ → X} {K α : NNReal} (hα : 0 < α) (hF : HolderWith K α F) :
+    ContinuousOn
+      (fun t : ℝ => abstractSpectralDuhamelHolderCorrection b lam F t)
+      (Set.Ioi 0) := by
+  have hFcont : Continuous F := hF.continuous hα
+  intro t ht
+  have ht_pos : 0 < t := by simpa using ht
+  let G : ℝ → ℝ → X := fun q τ =>
+    abstractSpectralDuhamelHolderKernel b lam F q τ
+  let bound : ℝ → ℝ := fun τ =>
+    if 0 < τ then
+      ((K : ℝ) / Real.exp 1) * τ ^ ((α : ℝ) - 1)
+    else 0
+  have hGmeas : ∀ q : ℝ,
+      AEStronglyMeasurable (G q)
+        (volume.restrict (Set.uIoc (-1 : ℝ) (2 * t))) := by
+    intro q
+    let Graw : ℝ → X := fun τ =>
+      abstractSpectralSemigroupDeriv b lam τ (F (q - τ) - F q)
+    have hinner : Continuous (fun τ : ℝ => (τ, F (q - τ) - F q)) :=
+      continuous_id.prodMk
+        ((hFcont.comp (continuous_const.sub continuous_id)).sub continuous_const)
+    have hGraw : ContinuousOn Graw (Set.Ioi 0) := by
+      simpa only [Graw, Function.comp_apply] using
+        (abstractSpectralSemigroupDeriv_continuousOn_uncurry b hlam).comp
+          hinner.continuousOn
+          (fun τ hτ => ⟨hτ, Set.mem_univ _⟩)
+    have hp : AEStronglyMeasurable
+        ((Set.Ioi 0).piecewise Graw (0 : ℝ → X)) volume :=
+      AEStronglyMeasurable.piecewise measurableSet_Ioi
+        (hGraw.aestronglyMeasurable measurableSet_Ioi)
+        aestronglyMeasurable_zero
+    have hglobal : AEStronglyMeasurable (G q) volume := by
+      simpa only [G, abstractSpectralDuhamelHolderKernel, Set.piecewise,
+        Set.mem_Ioi, Pi.zero_apply] using hp
+    exact hglobal.mono_measure Measure.restrict_le_self
+  have hGbound : ∀ᶠ q in 𝓝 t,
+      ∀ᵐ τ ∂volume.restrict (Set.uIoc (-1 : ℝ) (2 * t)),
+        ‖G q τ‖ ≤ bound τ := by
+    filter_upwards with q
+    exact ae_of_all _ fun τ => by
+      by_cases hτ : 0 < τ
+      · have hholder := hF.dist_le (q - τ) q
+        have hdist : dist (q - τ) q = τ := by
+          rw [Real.dist_eq]
+          have heq : q - τ - q = -τ := by ring
+          rw [heq, abs_neg, abs_of_pos hτ]
+        rw [dist_eq_norm, hdist] at hholder
+        simp only [G, abstractSpectralDuhamelHolderKernel, if_pos hτ, bound]
+        calc
+          ‖abstractSpectralSemigroupDeriv b lam τ (F (q - τ) - F q)‖ ≤
+              (1 / (Real.exp 1 * τ)) * ‖F (q - τ) - F q‖ :=
+            norm_abstractSpectralSemigroupDeriv_le b hlam hτ _
+          _ ≤ (1 / (Real.exp 1 * τ)) * ((K : ℝ) * τ ^ (α : ℝ)) :=
+            mul_le_mul_of_nonneg_left hholder (by positivity)
+          _ = ((K : ℝ) / Real.exp 1) * τ ^ ((α : ℝ) - 1) := by
+            rw [Real.rpow_sub_one hτ.ne']
+            field_simp [hτ.ne', (Real.exp_pos 1).ne']
+      · simp only [G, abstractSpectralDuhamelHolderKernel, if_neg hτ,
+          norm_zero, bound]
+        exact le_rfl
+  have hbound : IntervalIntegrable bound volume (-1 : ℝ) (2 * t) := by
+    have hpow : IntervalIntegrable
+      (fun τ : ℝ => ((K : ℝ) / Real.exp 1) *
+          τ ^ ((α : ℝ) - 1)) volume 0 (2 * t) :=
+      (intervalIntegral.intervalIntegrable_rpow' (by
+        have hαR : 0 < (α : ℝ) := NNReal.coe_pos.mpr hα
+        linarith : -1 < (α : ℝ) - 1)).const_mul ((K : ℝ) / Real.exp 1)
+    have hneg : IntervalIntegrable bound volume (-1 : ℝ) 0 := by
+      refine (intervalIntegrable_const : IntervalIntegrable
+        (fun _ : ℝ => (0 : ℝ)) volume (-1 : ℝ) 0).congr ?_
+      intro τ hτ
+      rw [Set.uIoc_of_le (by norm_num)] at hτ
+      simp only [bound, if_neg (not_lt.mpr hτ.2)]
+    have hpos : IntervalIntegrable bound volume 0 (2 * t) := by
+      refine hpow.congr ?_
+      intro τ hτ
+      rw [Set.uIoc_of_le (by linarith)] at hτ
+      simp only [bound, if_pos hτ.1]
+    exact hneg.trans hpos
+  have hGcont : ∀ᵐ τ ∂volume.restrict (Set.uIoc (-1 : ℝ) (2 * t)),
+      ContinuousAt (fun q : ℝ => G q τ) t := by
+    exact ae_of_all _ fun τ => by
+      by_cases hτ : 0 < τ
+      · have harg : Continuous (fun q : ℝ => F (q - τ) - F q) :=
+          (hFcont.comp (continuous_id.sub continuous_const)).sub hFcont
+        simpa only [G, abstractSpectralDuhamelHolderKernel, if_pos hτ] using
+          ((abstractSpectralSemigroupDerivCLM b hlam τ hτ).continuous.comp
+            harg).continuousAt
+      · simpa only [G, abstractSpectralDuhamelHolderKernel, if_neg hτ] using
+          (continuousAt_const : ContinuousAt (fun _ : ℝ => (0 : X)) t)
+  have hparam := intervalIntegral.continuousAt_parametric_primitive_of_dominated
+    (X := ℝ) (E := X) (F := G) (bound := bound) (a := (-1 : ℝ))
+    (b := 2 * t) (a₀ := 0) (b₀ := t) (x₀ := t) hGmeas hGbound hbound hGcont
+    (by constructor <;> linarith)
+    (by constructor <;> linarith)
+    (by simp)
+  have hdiag : ContinuousAt (fun q : ℝ => ∫ τ in (0 : ℝ)..q, G q τ) t :=
+    hparam.comp_of_eq (continuousAt_id.prodMk continuousAt_id) rfl
+  rw [show (fun q : ℝ => abstractSpectralDuhamelHolderCorrection b lam F q) =
+      (fun q : ℝ => ∫ τ in (0 : ℝ)..q, G q τ) by
+    funext q
+    exact abstractSpectralDuhamelHolderCorrection_eq_kernel_integral b lam F q]
+  exact hdiag.continuousWithinAt
 
 theorem abstractSpectralDuhamelHolderCorrection_repr_apply
     (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
@@ -187,6 +338,58 @@ theorem abstractSpectralDuhamelHolderDeriv_repr_apply
       intervalIntegral.integral_mul_const, hkernel']
   rw [hsplit]
   ring
+
+theorem abstractSpectralDuhamelHolderDeriv_continuousOn
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) {F : ℝ → X} {K α : NNReal} (hα : 0 < α)
+    (hF : HolderWith K α F) :
+    ContinuousOn
+      (abstractSpectralDuhamelHolderDeriv b hlam u₀ F)
+      (Set.Ioi 0) := by
+  have hFcont : Continuous F := hF.continuous hα
+  have hsemigroup : ContinuousOn
+      (fun t : ℝ => abstractSpectralSemigroup b hlam t (F t))
+      (Set.Ioi 0) := by
+    exact ((abstractSpectralBoundedC0Semigroup b hlam).continuousOn_uncurry).comp
+      (continuousOn_id.prodMk hFcont.continuousOn)
+      (fun t ht => by
+        change (t, F t) ∈ Set.Ici 0 ×ˢ Set.univ
+        exact ⟨Set.mem_Ici.mpr (Set.mem_Ioi.mp ht).le, Set.mem_univ _⟩)
+  exact ((abstractSpectralSemigroupDeriv_continuousOn b hlam u₀).add
+    hsemigroup).add
+      (abstractSpectralDuhamelHolderCorrection_continuousOn b hlam hα hF)
+
+theorem abstractSpectralDuhamel_hasDerivAt_of_holder
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) {F : ℝ → X} {K α : NNReal} (hα : 0 < α)
+    (hF : HolderWith K α F) {t : ℝ} (ht : 0 < t) :
+    HasDerivAt (abstractSpectralDuhamel b hlam u₀ F)
+      (abstractSpectralDuhamelHolderDeriv b hlam u₀ F t) t := by
+  have hFcont : Continuous F := hF.continuous hα
+  let v : ℝ → X := fun q =>
+    abstractSpectralDuhamelHolderDeriv b hlam u₀ F q
+  have hv : ContinuousOn v (Set.Ioi 0) :=
+    abstractSpectralDuhamelHolderDeriv_continuousOn b hlam u₀ hα hF
+  change HasDerivAt (abstractSpectralDuhamel b hlam u₀ F) (v t) t
+  refine hasDerivAt_of_inner_hilbertBasis b isOpen_Ioi hv ?_ ht
+  intro q hq i
+  have hmodal := abstractSpectralDuhamel_hasDerivAt_repr_apply
+    b hlam u₀ hFcont hq i
+  have hcandidate := abstractSpectralDuhamelHolderDeriv_repr_apply
+    b hlam u₀ hα hF hq i
+  have hcandidate' :
+      ⟪b i, v q⟫_ℝ =
+        -(lam i) *
+            (b.repr (abstractSpectralDuhamel b hlam u₀ F q) : ι → ℝ) i +
+          (b.repr (F q) : ι → ℝ) i := by
+    simpa only [v, b.repr_apply_apply] using hcandidate
+  have hmodal' : HasDerivAt
+      (fun s : ℝ => ⟪b i, abstractSpectralDuhamel b hlam u₀ F s⟫_ℝ)
+      (-(lam i) *
+          (b.repr (abstractSpectralDuhamel b hlam u₀ F q) : ι → ℝ) i +
+        (b.repr (F q) : ι → ℝ) i) q := by
+    simpa only [b.repr_apply_apply] using hmodal
+  exact hcandidate' ▸ hmodal'
 
 end Parabolic
 end Analysis

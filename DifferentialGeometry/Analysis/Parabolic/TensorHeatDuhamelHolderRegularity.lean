@@ -158,6 +158,80 @@ theorem tensorHeatMildSolutionHsHolderDeriv_eq_tensorScaleLaplacian_add
   rw [tensorScaleLaplacian_coeff,
     tensorHeatMildSolutionHsLiftOfHolder_coeff]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+private theorem tensorHeatMildSolutionHs_hasDerivAt_holder_candidate
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
+    (T₀ : tensorHs (I := I) (M := M) g r s σ)
+    {F : ℝ → tensorHs (I := I) (M := M) g r s σ}
+    {K α : NNReal} (hα : 0 < α) (hF : HolderWith K α F)
+    {t : ℝ} (ht : 0 < t) :
+    HasDerivAt
+      (tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F)
+      (tensorHeatMildSolutionHsHolderDeriv (I := I) (M := M)
+        g r s σ T₀ F t) t := by
+  let b := tensorHsHilbertBasis (I := I) (M := M)
+    (g := g) (r := r) (s := s) σ
+  have habstract := abstractSpectralDuhamel_hasDerivAt_of_holder b
+    (fun i => tensor_lambda_nonneg (I := I) (M := M) i) T₀ hα hF ht
+  have heq :
+      tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F =ᶠ[𝓝 t]
+        abstractSpectralDuhamel b
+          (fun i => tensor_lambda_nonneg (I := I) (M := M) i) T₀ F := by
+    filter_upwards [Ioi_mem_nhds ht] with q hq
+    exact tensorHeatMildSolutionHs_eq_abstractSpectralDuhamel
+      (I := I) (M := M) g r s σ T₀ F hq.le
+  simpa only [b, tensorHeatMildSolutionHsHolderDeriv] using
+    habstract.congr_of_eventuallyEq heq
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensorHeatMildSolutionHs_hasDerivAt_of_holder
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
+    (T₀ : tensorHs (I := I) (M := M) g r s σ)
+    {F : ℝ → tensorHs (I := I) (M := M) g r s σ}
+    {K α : NNReal} (hα : 0 < α) (hF : HolderWith K α F)
+    {t : ℝ} (ht : 0 < t) :
+    HasDerivAt
+      (tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F)
+      (tensorScaleLaplacian (I := I) (M := M) σ
+          (tensorHeatMildSolutionHsLiftOfHolder (I := I) (M := M)
+            g r s σ T₀ F hα hF t ht) + F t) t := by
+  have hcandidate := tensorHeatMildSolutionHs_hasDerivAt_holder_candidate
+    (I := I) (M := M) g r s σ T₀ hα hF ht
+  apply hcandidate.congr_deriv
+  exact tensorHeatMildSolutionHsHolderDeriv_eq_tensorScaleLaplacian_add
+    (I := I) (M := M) g r s σ T₀ hα hF ht
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_holder
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
+    (T₀ : tensorHs (I := I) (M := M) g r s σ)
+    {F : ℝ → tensorHs (I := I) (M := M) g r s σ}
+    {K α : NNReal} (hα : 0 < α) (hF : HolderWith K α F)
+    {t : ℝ} (ht : 0 < t) :
+    deriv (tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F) t =
+      tensorScaleLaplacian (I := I) (M := M) σ
+          (tensorHeatMildSolutionHsLiftOfHolder (I := I) (M := M)
+            g r s σ T₀ F hα hF t ht) + F t :=
+  (tensorHeatMildSolutionHs_hasDerivAt_of_holder
+    (I := I) (M := M) g r s σ T₀ hα hF ht).deriv
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensorHeatMildSolutionHs_differentiableOn_of_holder
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
+    (T₀ : tensorHs (I := I) (M := M) g r s σ)
+    {F : ℝ → tensorHs (I := I) (M := M) g r s σ}
+    {K α : NNReal} (hα : 0 < α) (hF : HolderWith K α F) :
+    DifferentiableOn ℝ
+      (tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F)
+      (Set.Ioi 0) := by
+  intro t ht
+  exact (tensorHeatMildSolutionHs_hasDerivAt_of_holder
+    (I := I) (M := M) g r s σ T₀ hα hF ht).differentiableAt.differentiableWithinAt
+
 end TensorHeatEquation
 
 end Parabolic
