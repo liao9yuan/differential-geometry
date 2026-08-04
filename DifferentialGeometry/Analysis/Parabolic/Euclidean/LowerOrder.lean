@@ -42,6 +42,100 @@ def parabolicNondivergenceOperator
     (u : Real → Euc n → F) : ParabolicPoint (Euc n) → F :=
   parabolicVariableMatrixOperator a u - parabolicLowerOrderTerm b c u
 
+def parabolicDriftCoefficientRescale
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (b : n → ParabolicPoint (Euc n) → Real) :
+    n → ParabolicPoint (Euc n) → Real :=
+  fun i p ↦ (r : Real) * b i (parabolicDilationAt r p0 p)
+
+def parabolicPotentialCoefficientRescale
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (c : ParabolicPoint (Euc n) → Real) :
+    ParabolicPoint (Euc n) → Real :=
+  fun p ↦ (r : Real) ^ 2 * c (parabolicDilationAt r p0 p)
+
+omit [DecidableEq n] [Nonempty n] in
+@[simp]
+theorem parabolicDriftCoefficientRescale_apply
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (i : n) (p : ParabolicPoint (Euc n)) :
+    parabolicDriftCoefficientRescale r p0 b i p =
+      (r : Real) * b i (parabolicDilationAt r p0 p) := rfl
+
+omit [DecidableEq n] [Nonempty n] in
+@[simp]
+theorem parabolicPotentialCoefficientRescale_apply
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (c : ParabolicPoint (Euc n) → Real) (p : ParabolicPoint (Euc n)) :
+    parabolicPotentialCoefficientRescale r p0 c p =
+      (r : Real) ^ 2 * c (parabolicDilationAt r p0 p) := rfl
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicDriftCoefficientRescale_holderWith_unitBall
+    {alpha : NNReal} (r : NNReal) (hr : 0 < r)
+    (p0 : ParabolicPoint (Euc n))
+    (b : n → ParabolicPoint (Euc n) → Real) (Kb : n → NNReal)
+    (hb : ∀ i, HolderWith (Kb i) alpha
+      ((Metric.ball p0 r).restrict (b i))) :
+    ∀ i, HolderWith (Kb i * r ^ (alpha : Real) * r) alpha
+      ((Metric.ball (parabolicPoint 0 0) 1).restrict
+        (parabolicDriftCoefficientRescale r p0 b i)) := by
+  intro i
+  have hadapt := parabolicHolder_dilationAt_unitBall r hr p0 (hb i)
+  have hscaled := hadapt.smul (r : Real)
+  have hrnorm : ‖(r : Real)‖₊ = r := by
+    ext
+    simp only [coe_nnnorm, Real.norm_of_nonneg r.coe_nonneg]
+  rw [hrnorm] at hscaled
+  simpa only [parabolicDriftCoefficientRescale, Function.comp_apply,
+    Set.restrict_apply, Pi.smul_apply, smul_eq_mul] using hscaled
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicPotentialCoefficientRescale_holderWith_unitBall
+    {alpha Kc : NNReal} (r : NNReal) (hr : 0 < r)
+    (p0 : ParabolicPoint (Euc n))
+    (c : ParabolicPoint (Euc n) → Real)
+    (hc : HolderWith Kc alpha ((Metric.ball p0 r).restrict c)) :
+    HolderWith (Kc * r ^ (alpha : Real) * r ^ 2) alpha
+      ((Metric.ball (parabolicPoint 0 0) 1).restrict
+        (parabolicPotentialCoefficientRescale r p0 c)) := by
+  have hadapt := parabolicHolder_dilationAt_unitBall r hr p0 hc
+  have hscaled := hadapt.smul ((r : Real) ^ 2)
+  have hrnorm : ‖(r : Real) ^ 2‖₊ = r ^ 2 := by
+    ext
+    simp only [coe_nnnorm, Real.norm_of_nonneg (sq_nonneg (r : Real)),
+      NNReal.coe_pow]
+  rw [hrnorm] at hscaled
+  simpa only [parabolicPotentialCoefficientRescale, Function.comp_apply,
+    Set.restrict_apply, Pi.smul_apply, smul_eq_mul] using hscaled
+
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicDriftCoefficientRescale_le_of_mem_unitBall
+    (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint (Euc n))
+    (b : n → ParabolicPoint (Euc n) → Real) (Bb : n → NNReal)
+    (hb : ∀ i p, p ∈ Metric.ball p0 r → ‖b i p‖ ≤ Bb i)
+    (i : n) (p : ParabolicPoint (Euc n))
+    (hp : p ∈ Metric.ball (parabolicPoint 0 0) 1) :
+    ‖parabolicDriftCoefficientRescale r p0 b i p‖ ≤ r * Bb i := by
+  have hmap := parabolicDilationAt_mapsTo_unitBall r hr p0 hp
+  rw [parabolicDriftCoefficientRescale_apply, norm_mul,
+    Real.norm_of_nonneg r.coe_nonneg]
+  exact mul_le_mul_of_nonneg_left (hb i _ hmap) r.coe_nonneg
+
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicPotentialCoefficientRescale_le_of_mem_unitBall
+    (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint (Euc n))
+    (c : ParabolicPoint (Euc n) → Real) (Bc : NNReal)
+    (hc : ∀ p, p ∈ Metric.ball p0 r → ‖c p‖ ≤ Bc)
+    (p : ParabolicPoint (Euc n))
+    (hp : p ∈ Metric.ball (parabolicPoint 0 0) 1) :
+    ‖parabolicPotentialCoefficientRescale r p0 c p‖ ≤ r ^ 2 * Bc := by
+  have hmap := parabolicDilationAt_mapsTo_unitBall r hr p0 hp
+  rw [parabolicPotentialCoefficientRescale_apply, norm_mul,
+    Real.norm_of_nonneg (sq_nonneg (r : Real))]
+  exact mul_le_mul_of_nonneg_left (hc _ hmap) (sq_nonneg (r : Real))
+
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
 theorem parabolicGradientComponent_apply
@@ -68,6 +162,151 @@ theorem parabolicLowerOrderTerm_apply
       (∑ i, b i p • parabolicGradientComponent u i p) +
         c p • u p.time p.space := by
   rfl
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicGradientComponent_rescaleAt
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (u : Real → Euc n → F) (i : n) (p : ParabolicPoint (Euc n))
+    (hspace : ContDiff Real 1
+      (u (p0.time + (r : Real) ^ 2 * p.time))) :
+    parabolicGradientComponent (parabolicRescaleAt r p0 u) i p =
+      (r : Real) •
+        parabolicGradientComponent u i (parabolicDilationAt r p0 p) := by
+  unfold parabolicGradientComponent
+  rw [parabolicSpatialJet_rescaleAt r p0 u 1 p hspace]
+  simp
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicDriftTerm_rescaleAt
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (p : ParabolicPoint (Euc n))
+    (hspace : ContDiff Real 1
+      (u (p0.time + (r : Real) ^ 2 * p.time))) :
+    parabolicDriftTerm (parabolicDriftCoefficientRescale r p0 b)
+        (parabolicRescaleAt r p0 u) p =
+      (r : Real) ^ 2 •
+        parabolicDriftTerm b u (parabolicDilationAt r p0 p) := by
+  simp only [parabolicDriftTerm, parabolicDriftCoefficientRescale,
+    parabolicGradientComponent_rescaleAt r p0 u _ p hspace,
+    smul_smul, Finset.smul_sum]
+  congr 1
+  funext i
+  congr 1
+  ring
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicPotentialTerm_rescaleAt
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (c : ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (p : ParabolicPoint (Euc n)) :
+    parabolicPotentialTerm (parabolicPotentialCoefficientRescale r p0 c)
+        (parabolicRescaleAt r p0 u) p =
+      (r : Real) ^ 2 •
+        parabolicPotentialTerm c u (parabolicDilationAt r p0 p) := by
+  unfold parabolicPotentialTerm parabolicPotentialCoefficientRescale
+    parabolicRescaleAt
+  simp only [parabolicDilationAt_time, parabolicDilationAt_space]
+  rw [SemigroupAction.mul_smul]
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicLowerOrderTerm_rescaleAt
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (p : ParabolicPoint (Euc n))
+    (hspace : ContDiff Real 1
+      (u (p0.time + (r : Real) ^ 2 * p.time))) :
+    parabolicLowerOrderTerm
+        (parabolicDriftCoefficientRescale r p0 b)
+        (parabolicPotentialCoefficientRescale r p0 c)
+        (parabolicRescaleAt r p0 u) p =
+      (r : Real) ^ 2 •
+        parabolicLowerOrderTerm b c u (parabolicDilationAt r p0 p) := by
+  unfold parabolicLowerOrderTerm
+  rw [Pi.add_apply, parabolicDriftTerm_rescaleAt r p0 b u p hspace,
+    parabolicPotentialTerm_rescaleAt]
+  rw [Pi.add_apply, ← smul_add]
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicNondivergenceOperator_rescaleAt
+    (r : NNReal) (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (p : ParabolicPoint (Euc n))
+    (hspace : ContDiff Real 2
+      (u (p0.time + (r : Real) ^ 2 * p.time))) :
+    parabolicNondivergenceOperator
+        (parabolicMatrixCoefficientRescale r p0 a)
+        (parabolicDriftCoefficientRescale r p0 b)
+        (parabolicPotentialCoefficientRescale r p0 c)
+        (parabolicRescaleAt r p0 u) p =
+      parabolicSourceRescaleAt r p0
+        (parabolicNondivergenceOperator a b c u) p := by
+  unfold parabolicNondivergenceOperator parabolicSourceRescaleAt
+  rw [Pi.sub_apply,
+    parabolicVariableMatrixOperator_rescaleAt r p0 a u p hspace,
+    parabolicLowerOrderTerm_rescaleAt r p0 b c u p
+      (hspace.of_le (by norm_num)),
+    parabolicSourceRescaleAt_apply, ← smul_sub]
+  rw [Pi.sub_apply]
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicNondivergenceOperator_rescaleAt_holderWith_unitBall
+    {alpha K : NNReal} (r : NNReal) (hr : 0 < r)
+    (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (hoperator : HolderWith K alpha
+      ((Metric.ball p0 r).restrict
+        (parabolicNondivergenceOperator a b c u))) :
+    HolderWith (K * r ^ (alpha : Real) * r ^ 2) alpha
+      ((Metric.ball (parabolicPoint 0 0) 1).restrict
+        (parabolicNondivergenceOperator
+          (parabolicMatrixCoefficientRescale r p0 a)
+          (parabolicDriftCoefficientRescale r p0 b)
+          (parabolicPotentialCoefficientRescale r p0 c)
+          (parabolicRescaleAt r p0 u))) := by
+  have heq :
+      (Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicNondivergenceOperator
+            (parabolicMatrixCoefficientRescale r p0 a)
+            (parabolicDriftCoefficientRescale r p0 b)
+            (parabolicPotentialCoefficientRescale r p0 c)
+            (parabolicRescaleAt r p0 u)) =
+        (Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicSourceRescaleAt r p0
+            (parabolicNondivergenceOperator a b c u)) := by
+    funext p
+    exact parabolicNondivergenceOperator_rescaleAt
+      r p0 a b c u p.1 (hspace _)
+  rw [heq]
+  exact parabolicSourceRescaleAt_holderWith_unitBall r hr p0 _ hoperator
+
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicNondivergenceOperator_rescaleAt_le_of_mem_unitBall
+    (r : NNReal) (hr : 0 < r) (p0 : ParabolicPoint (Euc n))
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (B : NNReal)
+    (hoperator : ∀ p, p ∈ Metric.ball p0 r →
+      ‖parabolicNondivergenceOperator a b c u p‖ ≤ B)
+    (p : ParabolicPoint (Euc n))
+    (hp : p ∈ Metric.ball (parabolicPoint 0 0) 1) :
+    ‖parabolicNondivergenceOperator
+        (parabolicMatrixCoefficientRescale r p0 a)
+        (parabolicDriftCoefficientRescale r p0 b)
+        (parabolicPotentialCoefficientRescale r p0 c)
+        (parabolicRescaleAt r p0 u) p‖ ≤ r ^ 2 * B := by
+  rw [parabolicNondivergenceOperator_rescaleAt
+    r p0 a b c u p (hspace _)]
+  exact norm_parabolicSourceRescaleAt_le_of_mem_unitBall
+    r hr p0 _ B hoperator p hp
 
 omit [DecidableEq n] [Nonempty n] in
 theorem parabolicVariableMatrixOperator_eq_nondivergenceOperator_add_lowerOrderTerm
