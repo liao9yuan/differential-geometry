@@ -82,6 +82,54 @@ theorem parabolicVariableMatrixOperator_eq_nondivergenceOperator_add_lowerOrderT
   abel
 
 omit [DecidableEq n] [Nonempty n] in
+theorem parabolicNondivergenceOperator_congr_of_eqOn_open
+    {U : Set (ParabolicPoint (Euc n))} (hU : IsOpen U)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u v : Real → Euc n → F) {p : ParabolicPoint (Euc n)} (hp : p ∈ U)
+    (huv : Set.EqOn (fun q ↦ u q.time q.space)
+      (fun q ↦ v q.time q.space) U) :
+    parabolicNondivergenceOperator a b c u p =
+      parabolicNondivergenceOperator a b c v p := by
+  classical
+  have hspaceMap : ContinuousAt
+      (fun x ↦ parabolicPoint p.time x) p.space := by
+    unfold parabolicPoint
+    exact (continuous_const.prodMk continuous_id).continuousAt
+  have hspace : u p.time =ᶠ[nhds p.space] v p.time := by
+    filter_upwards [hspaceMap (hU.mem_nhds hp)] with x hx
+    exact huv hx
+  have htimeMap : ContinuousAt
+      (fun t ↦ parabolicPoint t p.space) p.time := by
+    unfold parabolicPoint
+    exact (Metric.Snowflaking.continuous_toSnowflaking.prodMk
+      continuous_const).continuousAt
+  have htime : (fun t ↦ u t p.space) =ᶠ[nhds p.time]
+      fun t ↦ v t p.space := by
+    filter_upwards [htimeMap (hU.mem_nhds hp)] with t ht
+    exact huv ht
+  have hjetOne : parabolicSpatialJet 1 u p =
+      parabolicSpatialJet 1 v p := by
+    unfold parabolicSpatialJet
+    exact (Filter.EventuallyEq.iteratedFDeriv Real hspace 1).eq_of_nhds
+  have hjetTwo : parabolicSpatialJet 2 u p =
+      parabolicSpatialJet 2 v p := by
+    unfold parabolicSpatialJet
+    exact (Filter.EventuallyEq.iteratedFDeriv Real hspace 2).eq_of_nhds
+  have htimeDeriv : parabolicTimeDerivative u p =
+      parabolicTimeDerivative v p := by
+    unfold parabolicTimeDerivative
+    exact congrArg (fun L : Real →L[Real] F ↦ L 1) htime.fderiv_eq
+  have hvalue : u p.time p.space = v p.time p.space := huv hp
+  unfold parabolicNondivergenceOperator parabolicVariableMatrixOperator
+    parabolicVariableMatrixLap parabolicLowerOrderTerm parabolicDriftTerm
+    parabolicGradientComponent parabolicPotentialTerm
+  simp only [Pi.sub_apply, Pi.add_apply]
+  rw [htimeDeriv, hjetTwo]
+  simp_rw [hjetOne, hvalue]
+
+omit [DecidableEq n] [Nonempty n] in
 theorem parabolicGradientComponent_norm_le
     (u : Real → Euc n → F) (i : n) (p : ParabolicPoint (Euc n)) :
     ‖parabolicGradientComponent u i p‖ ≤ ‖parabolicSpatialJet 1 u p‖ := by

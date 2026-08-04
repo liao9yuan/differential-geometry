@@ -55,30 +55,23 @@ def parabolicChartPotentialCoefficientExtension
     (parabolicChartPotentialCoefficient (I := I) V chartCenter p0)
     (parabolicChartPotentialCoefficient (I := I) V chartCenter)
 
-theorem parabolicNondivergenceOperator_coefficientExtension_eq_intrinsic_in_euclideanChart
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+theorem parabolicNondivergenceOperator_coefficientExtension_eq
     (center : EuclN E) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
     (g : Real → SmoothRiemannianMetric I M) (V : Real → M → Real)
     (chartCenter : M) (p0 : ParabolicPoint (EuclN E))
-    (u : Real → M → Real) (p : ParabolicPoint (EuclN E))
-    (hu : ContMDiff I 𝓘(Real, Real) ∞ (u p.time))
-    (hpSpace : p.space ∈ Metric.closedBall center r)
-    (hpChart : (toEuclidean (E := E)).symm p.space ∈
-      (extChartAt I chartCenter).target) :
+    (u : Real → EuclN E → Real) (p : ParabolicPoint (EuclN E))
+    (hpSpace : p.space ∈ Metric.closedBall center r) :
     parabolicNondivergenceOperator
         (parabolicChartPrincipalCoefficientExtension (I := I)
           center r R g chartCenter p0)
         (parabolicChartDriftCoefficientExtension (I := I)
           center r R g chartCenter p0)
         (parabolicChartPotentialCoefficientExtension (I := I)
-          center r R V chartCenter p0)
-        (parabolicEuclideanChartRepresentation I chartCenter u) p =
-      fderiv Real (fun t ↦
-          u t (euclideanChartPoint (I := I) chartCenter p)) p.time 1 -
-        laplacian (I := I) (LeviCivita (I := I) (g p.time)) (g p.time)
-          (u p.time) (euclideanChartPoint (I := I) chartCenter p) -
-        V p.time (euclideanChartPoint (I := I) chartCenter p) *
-          u p.time (euclideanChartPoint (I := I) chartCenter p) := by
+          center r R V chartCenter p0) u p =
+      parabolicNondivergenceOperator
+        (parabolicChartPrincipalCoefficient (I := I) g chartCenter)
+        (parabolicChartDriftCoefficient (I := I) g chartCenter)
+        (parabolicChartPotentialCoefficient (I := I) V chartCenter) u p := by
   have ha : ∀ i j,
       parabolicChartPrincipalCoefficientExtension (I := I)
           center r R g chartCenter p0 i j p =
@@ -105,25 +98,40 @@ theorem parabolicNondivergenceOperator_coefficientExtension_eq_intrinsic_in_eucl
         g chartCenter i j p := by
     funext i j
     exact ha i j
-  rw [show parabolicNondivergenceOperator
-      (parabolicChartPrincipalCoefficientExtension (I := I)
-        center r R g chartCenter p0)
-      (parabolicChartDriftCoefficientExtension (I := I)
-        center r R g chartCenter p0)
-      (parabolicChartPotentialCoefficientExtension (I := I)
-        center r R V chartCenter p0)
-      (parabolicEuclideanChartRepresentation I chartCenter u) p =
-        parabolicNondivergenceOperator
-          (parabolicChartPrincipalCoefficient (I := I) g chartCenter)
-          (parabolicChartDriftCoefficient (I := I) g chartCenter)
-          (parabolicChartPotentialCoefficient (I := I) V chartCenter)
-          (parabolicEuclideanChartRepresentation I chartCenter u) p by
-    unfold parabolicNondivergenceOperator parabolicVariableMatrixOperator
-      parabolicVariableMatrixLap parabolicLowerOrderTerm
-      parabolicDriftTerm parabolicPotentialTerm
-    simp only [Pi.sub_apply, Pi.add_apply]
-    rw [haAt]
-    simp_rw [hb, hc]]
+  unfold parabolicNondivergenceOperator parabolicVariableMatrixOperator
+    parabolicVariableMatrixLap parabolicLowerOrderTerm
+    parabolicDriftTerm parabolicPotentialTerm
+  simp only [Pi.sub_apply, Pi.add_apply]
+  rw [haAt]
+  simp_rw [hb, hc]
+
+theorem parabolicNondivergenceOperator_coefficientExtension_eq_intrinsic_in_euclideanChart
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+    (center : EuclN E) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (g : Real → SmoothRiemannianMetric I M) (V : Real → M → Real)
+    (chartCenter : M) (p0 : ParabolicPoint (EuclN E))
+    (u : Real → M → Real) (p : ParabolicPoint (EuclN E))
+    (hu : ContMDiff I 𝓘(Real, Real) ∞ (u p.time))
+    (hpSpace : p.space ∈ Metric.closedBall center r)
+    (hpChart : (toEuclidean (E := E)).symm p.space ∈
+      (extChartAt I chartCenter).target) :
+    parabolicNondivergenceOperator
+        (parabolicChartPrincipalCoefficientExtension (I := I)
+          center r R g chartCenter p0)
+        (parabolicChartDriftCoefficientExtension (I := I)
+          center r R g chartCenter p0)
+        (parabolicChartPotentialCoefficientExtension (I := I)
+          center r R V chartCenter p0)
+        (parabolicEuclideanChartRepresentation I chartCenter u) p =
+      fderiv Real (fun t ↦
+          u t (euclideanChartPoint (I := I) chartCenter p)) p.time 1 -
+        laplacian (I := I) (LeviCivita (I := I) (g p.time)) (g p.time)
+          (u p.time) (euclideanChartPoint (I := I) chartCenter p) -
+        V p.time (euclideanChartPoint (I := I) chartCenter p) *
+          u p.time (euclideanChartPoint (I := I) chartCenter p) := by
+  rw [parabolicNondivergenceOperator_coefficientExtension_eq
+    (I := I) center hr hrR g V chartCenter p0
+      (parabolicEuclideanChartRepresentation I chartCenter u) p hpSpace]
   exact parabolicNondivergenceOperator_eq_intrinsic_in_euclideanChart
     (I := I) g V chartCenter u p hu hpChart
 
