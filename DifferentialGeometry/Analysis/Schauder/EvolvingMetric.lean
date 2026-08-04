@@ -1,11 +1,12 @@
+import DifferentialGeometry.Analysis.Schauder.CompactEllipticity
 import DifferentialGeometry.Analysis.Schauder.CompactRegularity
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartOperator
 import DifferentialGeometry.Geometry.Operator.MetricFamilyRegularity
 
 noncomputable section
 
-open Set
-open scoped ENNReal NNReal
+open Matrix Set
+open scoped ENNReal NNReal RealInnerProductSpace
 
 namespace DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn
 
@@ -433,6 +434,69 @@ theorem exists_uniform_parabolic_chart_operator_coefficient_schauder_bounds_of_f
   · intro r k
     exact (hpkg r).2.2.2.2 k |>.mono
       (Finset.single_le_sum (fun s _ ↦ zero_le (Kbr s k)) (Finset.mem_univ r))
+
+theorem exists_uniform_parabolic_chart_principal_coefficient_quadratic_lower_bound_of_finite
+    [NeZero (Module.finrank Real E)]
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {a b : Real} (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    {Achart : Type*} [Finite Achart]
+    (chartCenter : Achart → M) (K : Achart → Set E)
+    (hK : ∀ r, IsCompact (K r))
+    (hKconv : ∀ r, Convex Real (K r))
+    (hKchart : ∀ r, K r ⊆ interior (extChartAt I (chartCenter r)).target) :
+    ∃ c : Real, 0 < c ∧ ∀ r p,
+      p ∈ parabolicLinearPreimage
+          ((toEuclidean (E := E)).symm : EuclN E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) (K r)) →
+        ∀ v : EuclN E,
+          c * ‖v‖ ^ 2 ≤ star v ⬝ᵥ
+            (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+              parabolicChartPrincipalCoefficient (I := I) G.metric
+                (chartCenter r) i j p) *ᵥ v := by
+  classical
+  obtain ⟨_, _, _, _, _, ha, hpos, _, _⟩ :=
+    exists_uniform_parabolic_chart_operator_coefficient_schauder_bounds_of_finite
+      hG hab habreg chartCenter K hK hKconv hKchart
+        (alpha := (1 : NNReal)) (by norm_num)
+  let e := (toEuclidean (E := E)).symm
+  let Q : Achart → Set (ParabolicPoint (EuclN E)) := fun r ↦
+    parabolicLinearPreimage (e : EuclN E →L[Real] E)
+      (parabolicCylinder (Set.Icc a b) (K r))
+  have hQeq : ∀ r,
+      Q r = parabolicCylinder (Set.Icc a b) (toEuclidean '' K r) := by
+    intro r
+    ext p
+    constructor
+    · intro hp
+      exact ⟨hp.1, ⟨e p.space, hp.2, by simp [e]⟩⟩
+    · intro hp
+      rcases hp.2 with ⟨y, hy, hyp⟩
+      have hey : e p.space = y := by
+        rw [← hyp]
+        simp [e]
+      refine ⟨hp.1, ?_⟩
+      change e p.space ∈ K r
+      rw [hey]
+      exact hy
+  have hQcompact : ∀ r, IsCompact (Q r) := by
+    intro r
+    rw [hQeq r]
+    exact isCompact_parabolicCylinder_Icc a b
+      ((hK r).image (toEuclidean (E := E)).continuous)
+  let A : Achart → ParabolicPoint (EuclN E) →
+      Matrix (Fin (Module.finrank Real E)) (Fin (Module.finrank Real E)) Real :=
+    fun r p ↦ Matrix.of fun i j ↦
+      parabolicChartPrincipalCoefficient (I := I) G.metric (chartCenter r) i j p
+  have hAcont : ∀ r i j, ContinuousOn (fun p ↦ A r p i j) (Q r) := by
+    intro r i j
+    exact (HolderWith.restrict_iff.mp (ha r i j)).continuousOn zero_lt_one
+  have hApos : ∀ r p, p ∈ Q r → (A r p).PosDef := by
+    intro r p hp
+    exact hpos r p hp
+  simpa only [Q, A] using
+    exists_uniform_matrix_quadratic_lower_bound_of_finite Q hQcompact A hAcont hApos
 
 theorem exists_finite_buffered_chart_cover_with_uniform_parabolic_operator_coefficient_schauder_bounds
     [I.Boundaryless] [CompactSpace M]
