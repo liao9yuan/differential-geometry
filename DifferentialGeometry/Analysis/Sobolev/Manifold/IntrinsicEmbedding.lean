@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
+import DifferentialGeometry.Analysis.Integration.L2.Basic
+import DifferentialGeometry.Geometry.Metric.MetricBounds
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
 
 set_option autoImplicit false
@@ -234,6 +236,65 @@ theorem sq_sobolev_two_lpNorm
     _ = C ^ 2 * (B + D) ^ 2 := by ring
     _ ≤ C ^ 2 * (2 * (B ^ 2 + D ^ 2)) := by gcongr
     _ = 2 * C ^ 2 * (B ^ 2 + D ^ 2) := by ring
+
+theorem sobolev_two_integral
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    [FiniteDimensional Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank Real E : Real)) :
+    ∃ C : Real, 0 ≤ C ∧
+      ∀ {u : M -> Real}, ContMDiff I 𝓘(Real, Real) ∞ u ->
+        lpNorm u
+              (ENNReal.ofReal
+                ((Module.finrank Real E : Real) * 2 /
+                  ((Module.finrank Real E : Real) - 2)))
+              (riemannianVolumeMeasure I M g) ^ 2 ≤
+          2 * C ^ 2 *
+            ((∫ x, u x ^ 2 ∂(riemannianVolumeMeasure I M g)) +
+              ∫ x, g.inner x
+                  (gradFun (I := I) g u x)
+                  (gradFun (I := I) g u x)
+                ∂(riemannianVolumeMeasure I M g)) := by
+  classical
+  letI : MeasurableSpace M := borel M
+  letI : BorelSpace M := ⟨rfl⟩
+  obtain ⟨C, hC, hSob⟩ := sq_sobolev_two_lpNorm (I := I) (M := M) g hdim
+  refine ⟨C, hC, ?_⟩
+  intro u hu
+  let μ := riemannianVolumeMeasure I M g
+  let gradNorm : M -> Real := fun x => Real.sqrt
+    (g.inner x
+      (gradFun (I := I) g u x)
+      (gradFun (I := I) g u x))
+  have hu_l2 : lpNorm u 2 μ ^ 2 = ∫ x, u x ^ 2 ∂μ :=
+    DifferentialGeometry.Integral.L2.lpNorm_two_sq_eq_integral_sq
+      hu.continuous.aestronglyMeasurable
+  have hgrad_cont : Continuous gradNorm := by
+    have hinner := TangentBundle.continuous_g_inner_of_smooth_sections
+      (I := I) (M := M) g
+      (grad_g (I := I) g hu) (grad_g (I := I) g hu)
+    exact Real.continuous_sqrt.comp (by
+      simpa only [gradNorm, grad_g_apply] using hinner)
+  have hgrad_l2 : lpNorm gradNorm 2 μ ^ 2 =
+      ∫ x, g.inner x
+          (gradFun (I := I) g u x)
+          (gradFun (I := I) g u x) ∂μ := by
+    rw [DifferentialGeometry.Integral.L2.lpNorm_two_sq_eq_integral_sq
+      hgrad_cont.aestronglyMeasurable]
+    refine integral_congr_ae (ae_of_all μ fun x => ?_)
+    dsimp only [gradNorm]
+    rw [Real.sq_sqrt]
+    exact DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg
+      (I := I) (M := M) g x _
+  have hmain := hSob hu
+  change lpNorm u
+        (ENNReal.ofReal
+          ((Module.finrank Real E : Real) * 2 /
+            ((Module.finrank Real E : Real) - 2))) μ ^ 2 ≤ _
+  simpa only [μ, gradNorm, hu_l2, hgrad_l2] using hmain
 
 end
 
