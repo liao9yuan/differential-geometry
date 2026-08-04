@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatDuhamelMildSolution
 import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralDuhamelTimeRegularity
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GraphNorm
 
 noncomputable section
 
@@ -112,44 +113,20 @@ def tensorHeatMildSolutionHsLiftOfHasDerivAt
     (F F' : ℝ → tensorHs (I := I) (M := M) g r s σ)
     (hF : ∀ q, HasDerivAt F (F' q) q) (hF' : Continuous F')
     (t : ℝ) (ht : 0 < t) :
-    tensorHs (I := I) (M := M) g r s (σ + 2) where
-  coeff := (tensorHeatMildSolutionHs (I := I) (M := M)
-    g r s σ T₀ F t).coeff
-  weighted_summable := by
-    let U := tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F t
-    let D := tensorHeatMildSolutionHsDeriv (I := I) (M := M)
-      g r s σ T₀ F F' t
-    let Z := U - D + F t
-    have hZcoeff : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        Z.coeff i =
-          (1 + TensorEigenIdx.lambda (I := I) (M := M) i) * U.coeff i := by
-      intro i
-      simp only [Z, sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff]
-      rw [tensorHeatMildSolutionHsDeriv_coeff
-        (I := I) (M := M) g r s σ T₀ hF hF' ht]
-      ring
-    have hmass :
-        (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
-          tensorSobolevWeight (I := I) (M := M) i (σ + 2) *
-            (U.coeff i) ^ 2) =
-        (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
-          (Z.coeff i) ^ 2) := by
-      funext i
-      have hbase_pos : 0 < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
-        have := tensor_lambda_nonneg (I := I) (M := M) i
-        linarith
-      have hweight : tensorSobolevWeight (I := I) (M := M) i σ *
-          (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ 2 =
-          tensorSobolevWeight (I := I) (M := M) i (σ + 2) := by
-        unfold tensorSobolevWeight
-        rw [← Real.rpow_natCast
-              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) 2,
-          ← Real.rpow_add hbase_pos]
-        norm_num
-      rw [hZcoeff i, mul_pow, ← hweight]
-      ring
-    rw [hmass]
-    exact Z.weighted_summable
+    tensorHs (I := I) (M := M) g r s (σ + 2) := by
+  let U := tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F t
+  let D := tensorHeatMildSolutionHsDeriv (I := I) (M := M)
+    g r s σ T₀ F F' t
+  let Z := U - D + F t
+  have hZcoeff : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Z.coeff i =
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) i) * U.coeff i := by
+    intro i
+    simp only [Z, sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff]
+    rw [tensorHeatMildSolutionHsDeriv_coeff
+      (I := I) (M := M) g r s σ T₀ hF hF' ht]
+    ring
+  exact tensorHsAddTwoOfOneAddLambdaMul (I := I) (M := M) σ U Z hZcoeff
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
