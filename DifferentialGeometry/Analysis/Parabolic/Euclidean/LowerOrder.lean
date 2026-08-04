@@ -136,6 +136,92 @@ theorem norm_parabolicPotentialCoefficientRescale_le_of_mem_unitBall
     Real.norm_of_nonneg (sq_nonneg (r : Real))]
   exact mul_le_mul_of_nonneg_left (hc _ hmap) (sq_nonneg (r : Real))
 
+omit [Nonempty n] [NormedSpace Real F] in
+theorem exists_parabolicNondivergenceCoefficientRescale_schauder_bounds_of_holderWith_on_parabolicCylinder
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (potential : ParabolicPoint (Euc n) → Real)
+    {a t₀ t₁ b r R : Real}
+    (hat₀ : a < t₀) (ht₁b : t₁ < b) (hrR : r < R)
+    {center : Euc n} {p0 : ParabolicPoint (Euc n)}
+    (hp0 : p0 ∈ parabolicCylinder (Set.Icc t₀ t₁)
+      (Metric.closedBall center r))
+    (hA : (Matrix.of fun i j ↦ principal i j p0).PosDef)
+    (alpha : NNReal) (halpha : 0 < alpha)
+    (Ka : n → n → NNReal) (Kb Bb : n → NNReal) (Kc Bc : NNReal)
+    (T : Real)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (principal i j)))
+    (hb : ∀ i, HolderWith (Kb i) alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (drift i)))
+    (hc : HolderWith Kc alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        potential))
+    (hbNorm : ∀ i p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖drift i p‖ ≤ Bb i)
+    (hcNorm : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖potential p‖ ≤ Bc) :
+    ∃ rho : NNReal, 0 < rho ∧ rho ≤ 1 ∧
+      (rho : Real) ≤ parabolicInteriorRadius a t₀ t₁ b r R ∧
+      (∀ i j, HolderWith (Ka i j * rho ^ (alpha : Real)) alpha
+        ((Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicMatrixCoefficientRescale rho p0 principal i j))) ∧
+      (∀ i j p, p ∈ Metric.ball (parabolicPoint 0 0) 1 →
+        ‖principal i j p0 -
+            parabolicMatrixCoefficientRescale rho p0 principal i j p‖ ≤
+          Ka i j * rho ^ (alpha : Real)) ∧
+      (∀ i, HolderWith (Kb i * rho ^ (alpha : Real) * rho) alpha
+        ((Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicDriftCoefficientRescale rho p0 drift i))) ∧
+      (∀ i p, p ∈ Metric.ball (parabolicPoint 0 0) 1 →
+        ‖parabolicDriftCoefficientRescale rho p0 drift i p‖ ≤
+          rho * Bb i) ∧
+      HolderWith (Kc * rho ^ (alpha : Real) * rho ^ 2) alpha
+        ((Metric.ball (parabolicPoint 0 0) 1).restrict
+          (parabolicPotentialCoefficientRescale rho p0 potential)) ∧
+      (∀ p, p ∈ Metric.ball (parabolicPoint 0 0) 1 →
+        ‖parabolicPotentialCoefficientRescale rho p0 potential p‖ ≤
+          rho ^ 2 * Bc) ∧
+      spdParabolicSchauderDefectConst
+        (Matrix.of fun i j ↦ principal i j p0) hA alpha
+        (fun i j ↦ Ka i j * rho ^ (alpha : Real))
+        (fun i j ↦ Ka i j * rho ^ (alpha : Real)) T < 1 := by
+  obtain ⟨rho, hrho, hrhoOne, hrhoInterior, haRescaled,
+      hoscillation, hsmall⟩ :=
+    exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith_on_parabolicCylinder
+      principal hat₀ ht₁b hrR hp0 hA alpha halpha Ka T ha
+  have hball : Metric.ball p0 (rho : Real) ⊆
+      parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) :=
+    (Metric.ball_subset_ball hrhoInterior).trans
+      (ball_parabolicInteriorRadius_subset_parabolicCylinder
+        hat₀ ht₁b hrR hp0)
+  have hbLocal : ∀ i, HolderWith (Kb i) alpha
+      ((Metric.ball p0 rho).restrict (drift i)) := by
+    intro i
+    exact ((HolderWith.restrict_iff.mp (hb i)).mono hball).holderWith
+  have hcLocal : HolderWith Kc alpha
+      ((Metric.ball p0 rho).restrict potential) :=
+    ((HolderWith.restrict_iff.mp hc).mono hball).holderWith
+  have hbNormLocal : ∀ i p, p ∈ Metric.ball p0 rho →
+      ‖drift i p‖ ≤ Bb i := fun i p hp ↦ hbNorm i p (hball hp)
+  have hcNormLocal : ∀ p, p ∈ Metric.ball p0 rho →
+      ‖potential p‖ ≤ Bc := fun p hp ↦ hcNorm p (hball hp)
+  refine ⟨rho, hrho, hrhoOne, hrhoInterior, haRescaled, hoscillation,
+    parabolicDriftCoefficientRescale_holderWith_unitBall
+      rho hrho p0 drift Kb hbLocal,
+    ?_, parabolicPotentialCoefficientRescale_holderWith_unitBall
+      rho hrho p0 potential hcLocal, ?_, hsmall⟩
+  · intro i p hp
+    exact norm_parabolicDriftCoefficientRescale_le_of_mem_unitBall
+      rho hrho p0 drift Bb hbNormLocal i p hp
+  · intro p hp
+    exact norm_parabolicPotentialCoefficientRescale_le_of_mem_unitBall
+      rho hrho p0 potential Bc hcNormLocal p hp
+
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
 theorem parabolicGradientComponent_apply

@@ -316,7 +316,7 @@ theorem exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith_o
     (hcoeff : ∀ i j, HolderWith (Ka i j) alpha
       ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
         (coeff i j))) :
-    ∃ rho : NNReal, 0 < rho ∧
+    ∃ rho : NNReal, 0 < rho ∧ rho ≤ 1 ∧
       (rho : Real) ≤ parabolicInteriorRadius a t₀ t₁ b r R ∧
       (∀ i j, HolderWith (Ka i j * rho ^ (alpha : Real)) alpha
         ((Metric.ball (parabolicPoint 0 0) 1).restrict
@@ -330,14 +330,15 @@ theorem exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith_o
         (fun i j ↦ Ka i j * rho ^ (alpha : Real)) T < 1 := by
   let delta := parabolicInteriorRadius a t₀ t₁ b r R
   have hdelta : 0 < delta := parabolicInteriorRadius_pos hat₀ ht₁b hrR
-  let radius : NNReal := ⟨delta, hdelta.le⟩
+  let radius : NNReal := ⟨min delta 1, le_min hdelta.le zero_le_one⟩
   have hradius : 0 < radius := by
-    exact_mod_cast hdelta
+    exact_mod_cast lt_min hdelta zero_lt_one
   have hball : Metric.ball p0 (radius : Real) ⊆
       parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) := by
-    simpa only [radius, delta, NNReal.coe_mk] using
-      ball_parabolicInteriorRadius_subset_parabolicCylinder
-        hat₀ ht₁b hrR hp0
+    apply (Metric.ball_subset_ball ?_).trans
+      (ball_parabolicInteriorRadius_subset_parabolicCylinder
+        hat₀ ht₁b hrR hp0)
+    simpa only [radius, delta, NNReal.coe_mk] using min_le_left delta 1
   have hlocal : ∀ i j, HolderWith (Ka i j) alpha
       ((Metric.ball p0 radius).restrict (coeff i j)) := by
     intro i j
@@ -345,8 +346,15 @@ theorem exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith_o
   obtain ⟨rho, hrho, hrhoRadius, hholder, hoscillation, hsmall⟩ :=
     exists_parabolicMatrixCoefficientRescale_schauder_bounds_of_holderWith
       coeff p0 hA alpha halpha Ka T radius hradius hlocal
-  refine ⟨rho, hrho, ?_, hholder, hoscillation, hsmall⟩
-  exact_mod_cast hrhoRadius
+  refine ⟨rho, hrho, ?_, ?_, hholder, hoscillation, hsmall⟩
+  · calc
+      rho ≤ radius := hrhoRadius
+      _ ≤ 1 := by
+        exact_mod_cast (min_le_right delta 1)
+  · calc
+      (rho : Real) ≤ radius := by exact_mod_cast hrhoRadius
+      _ ≤ delta := by
+        simpa only [radius, NNReal.coe_mk] using min_le_left delta 1
 
 omit [DecidableEq n] [Nonempty n] in
 @[simp]
