@@ -441,6 +441,7 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Retag
 import DifferentialGeometry.Analysis.Integration.L2.Tensor0SInnerSectionSmooth
+import DifferentialGeometry.Analysis.Integration.LpLimit
 import DifferentialGeometry.Analysis.Integration.LpNorm
 import DifferentialGeometry.Analysis.Integration.Measure.BorelManifold.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.BorelManifold.Derived
