@@ -391,6 +391,120 @@ theorem abstractSpectralDuhamel_hasDerivAt_of_holder
     simpa only [b.repr_apply_apply] using hmodal
   exact hcandidate' ▸ hmodal'
 
+private def holderIccExtension
+    (F : ℝ → X) (T : ℝ) (hT : 0 ≤ T) (t : ℝ) : X :=
+  F (Set.projIcc 0 T hT t)
+
+omit [InnerProductSpace ℝ X] [CompleteSpace X] in
+private theorem holderIccExtension_holderWith
+    {F : ℝ → X} {T : ℝ} (hT : 0 ≤ T) {K α : NNReal}
+    (hF : HolderOnWith K α F (Set.Icc 0 T)) :
+    HolderWith K α (holderIccExtension F T hT) := by
+  have hrestricted : HolderWith K α (Set.restrict (Set.Icc 0 T) F) :=
+    hF.holderWith
+  have hcomp := hrestricted.comp (LipschitzWith.projIcc hT).holderWith
+  simpa [holderIccExtension] using hcomp
+
+omit [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X] in
+private theorem holderIccExtension_apply
+    (F : ℝ → X) {T : ℝ} (hT : 0 ≤ T) {t : ℝ}
+    (ht : t ∈ Set.Icc 0 T) :
+    holderIccExtension F T hT t = F t := by
+  simp only [holderIccExtension]
+  rw [Set.projIcc_of_mem hT ht]
+
+private theorem abstractSpectralDuhamel_eq_holderIccExtension
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) (F : ℝ → X) {T : ℝ} (hT : 0 ≤ T) {t : ℝ}
+    (ht : t ∈ Set.Icc 0 T) :
+    abstractSpectralDuhamel b hlam u₀ F t =
+      abstractSpectralDuhamel b hlam u₀ (holderIccExtension F T hT) t := by
+  unfold abstractSpectralDuhamel duhamel
+  congr 1
+  apply intervalIntegral.integral_congr
+  intro s hs
+  rw [Set.uIcc_of_le ht.1] at hs
+  exact congrArg
+    (fun v : X => abstractSpectralBoundedC0Semigroup b hlam (t - s) v)
+    (holderIccExtension_apply F hT ⟨hs.1, hs.2.trans ht.2⟩).symm
+
+omit [CompleteSpace X] in
+private theorem abstractSpectralDuhamelHolderCorrection_eq_holderIccExtension
+    (b : HilbertBasis ι ℝ X) (lam : ι → ℝ) (F : ℝ → X)
+    {T : ℝ} (hT : 0 ≤ T) {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
+    abstractSpectralDuhamelHolderCorrection b lam F t =
+      abstractSpectralDuhamelHolderCorrection b lam
+        (holderIccExtension F T hT) t := by
+  unfold abstractSpectralDuhamelHolderCorrection
+  apply intervalIntegral.integral_congr
+  intro s hs
+  rw [Set.uIcc_of_le ht.1] at hs
+  by_cases hst : s < t
+  · simp only [if_pos hst]
+    rw [holderIccExtension_apply F hT ⟨hs.1, hs.2.trans ht.2⟩,
+      holderIccExtension_apply F hT ht]
+  · simp only [if_neg hst]
+
+private theorem abstractSpectralDuhamelHolderDeriv_eq_holderIccExtension
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) (F : ℝ → X) {T : ℝ} (hT : 0 ≤ T) {t : ℝ}
+    (ht : t ∈ Set.Icc 0 T) :
+    abstractSpectralDuhamelHolderDeriv b hlam u₀ F t =
+      abstractSpectralDuhamelHolderDeriv b hlam u₀
+        (holderIccExtension F T hT) t := by
+  unfold abstractSpectralDuhamelHolderDeriv
+  rw [holderIccExtension_apply F hT ht,
+    abstractSpectralDuhamelHolderCorrection_eq_holderIccExtension
+      b lam F hT ht]
+
+theorem abstractSpectralDuhamelHolderDeriv_repr_apply_of_holderOn
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) {F : ℝ → X} {T : ℝ} (hT : 0 ≤ T) {K α : NNReal}
+    (hα : 0 < α) (hF : HolderOnWith K α F (Set.Icc 0 T))
+    {t : ℝ} (ht : t ∈ Set.Ioo 0 T) (i : ι) :
+    (b.repr (abstractSpectralDuhamelHolderDeriv b hlam u₀ F t) : ι → ℝ) i =
+      -(lam i) *
+          (b.repr (abstractSpectralDuhamel b hlam u₀ F t) : ι → ℝ) i +
+        (b.repr (F t) : ι → ℝ) i := by
+  let Fext : ℝ → X := holderIccExtension F T hT
+  have hFext : HolderWith K α Fext :=
+    holderIccExtension_holderWith hT hF
+  have hrepr := abstractSpectralDuhamelHolderDeriv_repr_apply
+    b hlam u₀ hα hFext ht.1 i
+  have hFt : Fext t = F t := by
+    simpa only [Fext] using
+      holderIccExtension_apply F hT ⟨ht.1.le, ht.2.le⟩
+  rw [← abstractSpectralDuhamelHolderDeriv_eq_holderIccExtension
+      b hlam u₀ F hT ⟨ht.1.le, ht.2.le⟩,
+    ← abstractSpectralDuhamel_eq_holderIccExtension
+      b hlam u₀ F hT ⟨ht.1.le, ht.2.le⟩, hFt] at hrepr
+  exact hrepr
+
+theorem abstractSpectralDuhamel_hasDerivAt_of_holderOn
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) {F : ℝ → X} {T : ℝ} (hT : 0 ≤ T) {K α : NNReal}
+    (hα : 0 < α) (hF : HolderOnWith K α F (Set.Icc 0 T))
+    {t : ℝ} (ht : t ∈ Set.Ioo 0 T) :
+    HasDerivAt (abstractSpectralDuhamel b hlam u₀ F)
+      (abstractSpectralDuhamelHolderDeriv b hlam u₀ F t) t := by
+  let Fext : ℝ → X := holderIccExtension F T hT
+  have hFext : HolderWith K α Fext :=
+    holderIccExtension_holderWith hT hF
+  have hext := abstractSpectralDuhamel_hasDerivAt_of_holder
+    b hlam u₀ hα hFext ht.1
+  have hfunctions :
+      abstractSpectralDuhamel b hlam u₀ F =ᶠ[nhds t]
+        abstractSpectralDuhamel b hlam u₀ Fext := by
+    filter_upwards [Ioo_mem_nhds ht.1 ht.2] with q hq
+    exact abstractSpectralDuhamel_eq_holderIccExtension
+      b hlam u₀ F hT ⟨hq.1.le, hq.2.le⟩
+  have hderiv :
+      abstractSpectralDuhamelHolderDeriv b hlam u₀ F t =
+        abstractSpectralDuhamelHolderDeriv b hlam u₀ Fext t :=
+    abstractSpectralDuhamelHolderDeriv_eq_holderIccExtension
+      b hlam u₀ F hT ⟨ht.1.le, ht.2.le⟩
+  exact (hext.congr_of_eventuallyEq hfunctions).congr_deriv hderiv.symm
+
 end Parabolic
 end Analysis
 end DifferentialGeometry
