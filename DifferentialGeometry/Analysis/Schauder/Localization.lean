@@ -88,6 +88,25 @@ theorem ball_parabolicPoint_eq_parabolicCylinder
     apply max_lt_iff.mpr
     exact ⟨by simpa only [Real.sqrt_eq_rpow] using htimeRoot, hspace⟩
 
+theorem eParabolicC2HolderGaugeOn_ball_le_of_timeTranslate
+    (tau R : Real) (hR : 0 ≤ R) (alpha C : NNReal)
+    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (h : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder
+        (Set.Ioo (-R ^ 2 - tau) (R ^ 2 - tau)) (Metric.ball 0 R))
+      (parabolicRescaleAt 1 (parabolicPoint tau 0) u) ≤ C) :
+    eParabolicC2HolderGaugeOn alpha
+        (Metric.ball (parabolicPoint 0 0) R) u ≤
+      parabolicC2HolderRescaleConst 1 alpha C := by
+  rw [ball_parabolicPoint_eq_parabolicCylinder 0 R hR 0]
+  have hresult :=
+    eParabolicC2HolderGaugeOn_parabolicCylinder_Ioo_le_of_timeTranslate
+      tau (-R ^ 2 - tau) (R ^ 2 - tau) (Metric.ball 0 R)
+        alpha C u hspace h
+  rw [show -R ^ 2 - tau + tau = -R ^ 2 by ring,
+    show R ^ 2 - tau + tau = R ^ 2 by ring] at hresult
+  simpa only [zero_sub, zero_add] using hresult
+
 def parabolicInteriorRadius
     (a t₀ t₁ b r R : Real) : Real :=
   min (Real.sqrt (t₀ - a))
