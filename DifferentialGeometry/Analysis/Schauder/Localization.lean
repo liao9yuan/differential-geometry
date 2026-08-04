@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Schauder.Holder
+import DifferentialGeometry.Analysis.Schauder.Scaling
 import Mathlib.Analysis.Calculus.MeanValue
 
 noncomputable section
@@ -530,47 +530,51 @@ def bufferedParabolicC2HolderGaugeConst
     (alpha C delta : NNReal) : NNReal :=
   4 * C + 2 * bufferedBallHolderConst alpha C C delta
 
-theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover
-    {Q : Set (ParabolicPoint V)} {alpha C delta : NNReal}
-    (hdelta : 0 < delta) (s : Finset (ParabolicPoint V))
-    (radius : ParabolicPoint V → Real)
-    (hbuffer : ∀ p ∈ s, (delta : Real) ≤ radius p / 2)
-    (hcover : Q ⊆ ⋃ p ∈ s, Metric.ball p (radius p / 2))
+theorem eParabolicC2HolderGaugeOn_le_of_buffered_ball_cover
+    {ι : Type*} {Q : Set (ParabolicPoint V)} {alpha C delta : NNReal}
+    (hdelta : 0 < delta) (center : ι → ParabolicPoint V)
+    (radius : ι → Real)
+    (hbuffer : ∀ i, (delta : Real) ≤ radius i / 2)
+    (hcover : ∀ q ∈ Q, ∃ i, q ∈ Metric.ball (center i) (radius i / 2))
     (u : Real → V → F)
-    (hlocal : ∀ p ∈ s,
-      eParabolicC2HolderGaugeOn alpha (Metric.ball p (radius p)) u ≤ C) :
+    (hlocal : ∀ i,
+      eParabolicC2HolderGaugeOn alpha
+        (Metric.ball (center i) (radius i)) u ≤ C) :
     eParabolicC2HolderGaugeOn alpha Q u ≤
       bufferedParabolicC2HolderGaugeConst alpha C delta := by
-  have hhalfFull : ∀ p ∈ s,
-      Metric.ball p (radius p / 2) ⊆ Metric.ball p (radius p) := by
-    intro p hp q hq
+  have hhalfFull : ∀ i,
+      Metric.ball (center i) (radius i / 2) ⊆
+        Metric.ball (center i) (radius i) := by
+    intro i q hq
     rw [Metric.mem_ball] at hq ⊢
-    have hrhalf_pos : 0 < radius p / 2 :=
-      lt_of_lt_of_le (by exact_mod_cast hdelta) (hbuffer p hp)
+    have hrhalf_pos : 0 < radius i / 2 :=
+      lt_of_lt_of_le (by exact_mod_cast hdelta) (hbuffer i)
     exact hq.trans (half_lt_self (by linarith))
   have hspatialNorm : ∀ j < 3, ∀ q ∈ Q,
       ‖parabolicSpatialJet j u q‖ ≤ C := by
     intro j hj q hq
-    rcases Set.mem_iUnion₂.mp (hcover hq) with ⟨p, hp, hqp⟩
-    exact parabolicSpatialJet_norm_le (hlocal p hp)
-      (Nat.le_of_lt_succ hj) (hhalfFull p hp hqp)
+    obtain ⟨i, hqi⟩ := hcover q hq
+    exact parabolicSpatialJet_norm_le (hlocal i)
+      (Nat.le_of_lt_succ hj) (hhalfFull i hqi)
   have htimeNorm : ∀ q ∈ Q, ‖parabolicTimeDerivative u q‖ ≤ C := by
     intro q hq
-    rcases Set.mem_iUnion₂.mp (hcover hq) with ⟨p, hp, hqp⟩
-    exact parabolicTimeDerivative_norm_le (hlocal p hp)
-      (hhalfFull p hp hqp)
-  have hspatialHolderLocal : ∀ p ∈ s, HolderWith C alpha
-      ((Metric.ball p (radius p)).restrict (parabolicSpatialJet 2 u)) := by
-    intro p hp
-    exact parabolicSpatialJet_holderWith_restrict (hlocal p hp)
-  have htimeHolderLocal : ∀ p ∈ s, HolderWith C alpha
-      ((Metric.ball p (radius p)).restrict (parabolicTimeDerivative u)) := by
-    intro p hp
-    exact parabolicTimeDerivative_holderWith_restrict (hlocal p hp)
-  have hspatialHolder := holderWith_restrict_of_finite_buffered_ball_cover
-    hdelta s radius hbuffer hcover hspatialHolderLocal (hspatialNorm 2 (by norm_num))
-  have htimeHolder := holderWith_restrict_of_finite_buffered_ball_cover
-    hdelta s radius hbuffer hcover htimeHolderLocal htimeNorm
+    obtain ⟨i, hqi⟩ := hcover q hq
+    exact parabolicTimeDerivative_norm_le (hlocal i) (hhalfFull i hqi)
+  have hspatialHolderLocal : ∀ i, HolderWith C alpha
+      ((Metric.ball (center i) (radius i)).restrict
+        (parabolicSpatialJet 2 u)) := by
+    intro i
+    exact parabolicSpatialJet_holderWith_restrict (hlocal i)
+  have htimeHolderLocal : ∀ i, HolderWith C alpha
+      ((Metric.ball (center i) (radius i)).restrict
+        (parabolicTimeDerivative u)) := by
+    intro i
+    exact parabolicTimeDerivative_holderWith_restrict (hlocal i)
+  have hspatialHolder := holderWith_restrict_of_buffered_ball_cover
+    hdelta center radius hbuffer hcover hspatialHolderLocal
+      (hspatialNorm 2 (by norm_num))
+  have htimeHolder := holderWith_restrict_of_buffered_ball_cover
+    hdelta center radius hbuffer hcover htimeHolderLocal htimeNorm
   have hspatialSup : ∀ j < 3,
       eSupNormOn Q (parabolicSpatialJet j u) ≤ C := by
     intro j hj
@@ -606,6 +610,80 @@ theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover
         nsmul_eq_mul, Nat.cast_ofNat, ENNReal.coe_add, ENNReal.coe_mul,
         ENNReal.coe_ofNat]
       ring
+
+theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover
+    {Q : Set (ParabolicPoint V)} {alpha C delta : NNReal}
+    (hdelta : 0 < delta) (s : Finset (ParabolicPoint V))
+    (radius : ParabolicPoint V → Real)
+    (hbuffer : ∀ p ∈ s, (delta : Real) ≤ radius p / 2)
+    (hcover : Q ⊆ ⋃ p ∈ s, Metric.ball p (radius p / 2))
+    (u : Real → V → F)
+    (hlocal : ∀ p ∈ s,
+      eParabolicC2HolderGaugeOn alpha (Metric.ball p (radius p)) u ≤ C) :
+    eParabolicC2HolderGaugeOn alpha Q u ≤
+      bufferedParabolicC2HolderGaugeConst alpha C delta := by
+  apply eParabolicC2HolderGaugeOn_le_of_buffered_ball_cover hdelta
+    (fun p : ↥s ↦ p.1) (fun p : ↥s ↦ radius p.1)
+  · intro p
+    exact hbuffer p.1 p.2
+  · intro q hq
+    rcases Set.mem_iUnion₂.mp (hcover hq) with ⟨p, hp, hqp⟩
+    exact ⟨⟨p, hp⟩, hqp⟩
+  · intro p
+    exact hlocal p.1 p.2
+
+theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover_sum
+    {ι : Type*} {Q : Set (ParabolicPoint V)} {alpha delta : NNReal}
+    (hdelta : 0 < delta) (s : Finset ι)
+    (center : ι → ParabolicPoint V) (radius : ι → Real)
+    (hbuffer : ∀ i ∈ s, (delta : Real) ≤ radius i / 2)
+    (hcover : Q ⊆ ⋃ i ∈ s, Metric.ball (center i) (radius i / 2))
+    (u : Real → V → F) (localBound : ι → NNReal)
+    (hlocal : ∀ i ∈ s,
+      eParabolicC2HolderGaugeOn alpha
+        (Metric.ball (center i) (radius i)) u ≤ localBound i) :
+    eParabolicC2HolderGaugeOn alpha Q u ≤
+      bufferedParabolicC2HolderGaugeConst alpha
+        (∑ i ∈ s, localBound i) delta := by
+  apply eParabolicC2HolderGaugeOn_le_of_buffered_ball_cover hdelta
+    (fun i : ↥s ↦ center i.1) (fun i : ↥s ↦ radius i.1)
+  · intro i
+    exact hbuffer i.1 i.2
+  · intro q hq
+    rcases Set.mem_iUnion₂.mp (hcover hq) with ⟨i, hi, hqi⟩
+    exact ⟨⟨i, hi⟩, hqi⟩
+  · intro i
+    apply (hlocal i.1 i.2).trans
+    exact_mod_cast Finset.single_le_sum
+      (fun j _ ↦ zero_le (localBound j)) i.2
+
+theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_rescaleAt
+    {ι : Type*} {Q : Set (ParabolicPoint V)} {alpha delta : NNReal}
+    (hdelta : 0 < delta) (s : Finset ι)
+    (center : ι → ParabolicPoint V) (radius : ι → NNReal)
+    (hradius : ∀ i ∈ s, 0 < radius i)
+    (hbuffer : ∀ i ∈ s, (delta : Real) ≤ (radius i : Real) / 2)
+    (hcover : Q ⊆ ⋃ i ∈ s,
+      Metric.ball (center i) ((radius i : Real) / 2))
+    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (localBound : ι → NNReal)
+    (hlocal : ∀ i ∈ s,
+      eParabolicC2HolderGaugeOn alpha
+        (Metric.ball (parabolicPoint 0 0) 1)
+        (parabolicRescaleAt (radius i) (center i) u) ≤ localBound i) :
+    eParabolicC2HolderGaugeOn alpha Q u ≤
+      bufferedParabolicC2HolderGaugeConst alpha
+        (∑ i ∈ s,
+          parabolicC2HolderRescaleConst (radius i)⁻¹ alpha (localBound i))
+        delta := by
+  apply eParabolicC2HolderGaugeOn_le_of_finite_buffered_ball_cover_sum
+    hdelta s center (fun i ↦ (radius i : Real)) hbuffer hcover u
+    (fun i ↦ parabolicC2HolderRescaleConst
+      (radius i)⁻¹ alpha (localBound i))
+  intro i hi
+  exact eParabolicC2HolderGaugeOn_ball_le_of_rescaleAt
+    (radius i) alpha (localBound i) (hradius i hi) (center i) u hspace
+      (hlocal i hi)
 
 omit [NormedSpace Real F] [NormedAddCommGroup V] [NormedSpace Real V] in
 theorem norm_sub_le_holderBallOscillationConst_of_mem_ball
