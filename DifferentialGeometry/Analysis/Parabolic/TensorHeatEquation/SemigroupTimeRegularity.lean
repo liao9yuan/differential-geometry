@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Semigroup
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingHs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.TimeDeriv
 
@@ -22,6 +23,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
+open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 private local instance : MeasurableSpace E := borel E
@@ -229,6 +231,26 @@ theorem tensorHeatSemigroupHsExt_differentiableOn
   intro t ht
   exact (hasDerivAt_tensorHeatSemigroupHsExt_eq_tensorScaleLaplacian
     (I := I) (M := M) g r s ht T).differentiableAt.differentiableWithinAt
+
+def tensorHsBoundedC0Semigroup
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) :
+    BoundedC0Semigroup (tensorHs (I := I) (M := M) g r s σ) where
+  toFun := tensorHeatSemigroupHsExt (I := I) (M := M) g r s σ
+  apply_zero := tensorHeatSemigroupHsExt_zero (I := I) (M := M) g r s σ
+  apply_add := fun _ _ ht hu =>
+    tensorHeatSemigroupHsExt_add (I := I) (M := M) ht hu
+  opNorm_le_one := fun _ ht =>
+    tensorHeatSemigroupHsExt_opNorm_le_one (I := I) (M := M) ht
+  continuousOn_apply := fun T =>
+    tensorHeatSemigroupHsExt_continuousOn (I := I) (M := M) g r s σ T
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+@[simp] theorem tensorHsBoundedC0Semigroup_apply
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ t : ℝ) :
+    tensorHsBoundedC0Semigroup (I := I) (M := M) g r s σ t =
+      tensorHeatSemigroupHsExt (I := I) (M := M) g r s σ t :=
+  rfl
 
 end TensorHeatEquation
 end Parabolic
