@@ -846,6 +846,7 @@ import DifferentialGeometry.Analysis.Schauder.Localization
 import DifferentialGeometry.Analysis.Schauder.LowerOrder
 import DifferentialGeometry.Analysis.Schauder.ParabolicBallCutoff
 import DifferentialGeometry.Analysis.Schauder.ParabolicChart
+import DifferentialGeometry.Analysis.Schauder.ParabolicChartOperator
 import DifferentialGeometry.Analysis.Schauder.ParabolicCutoff
 import DifferentialGeometry.Analysis.Schauder.Scaling
 import DifferentialGeometry.Analysis.Schauder.VariableBallInterior
