@@ -76,6 +76,44 @@ theorem weight_mul_energy_inequality
   rw [intervalIntegral.integral_add hleft_int hdiss_int, ← hidentity] at hmono
   exact hmono
 
+theorem intervalIntegral_le_const_mul_sup_rpow
+    {lhs mass energy : ℝ → ℝ} {C S theta a b : ℝ}
+    (hab : a ≤ b)
+    (hlhs : ContinuousOn lhs (Icc a b))
+    (henergy : ContinuousOn energy (Icc a b))
+    (hC : 0 ≤ C) (htheta : 0 ≤ theta)
+    (hmass_nonneg : ∀ t ∈ Icc a b, 0 ≤ mass t)
+    (hmass_le : ∀ t ∈ Icc a b, mass t ≤ S)
+    (henergy_nonneg : ∀ t ∈ Icc a b, 0 ≤ energy t)
+    (hpoint : ∀ t ∈ Icc a b,
+      lhs t ≤ C * mass t ^ theta * energy t) :
+    ∫ t in a..b, lhs t ≤
+      C * S ^ theta * ∫ t in a..b, energy t := by
+  have hlhs_int : IntervalIntegrable lhs volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hlhs
+  have hright_cont : ContinuousOn
+      (fun t => (C * S ^ theta) * energy t) (Icc a b) :=
+    continuousOn_const.mul henergy
+  have hright_int : IntervalIntegrable
+      (fun t => (C * S ^ theta) * energy t) volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hright_cont
+  have hmono : ∀ t ∈ Icc a b,
+      lhs t ≤ (C * S ^ theta) * energy t := by
+    intro t ht
+    refine (hpoint t ht).trans ?_
+    have hrpow : mass t ^ theta ≤ S ^ theta :=
+      Real.rpow_le_rpow (hmass_nonneg t ht) (hmass_le t ht) htheta
+    calc
+      C * mass t ^ theta * energy t ≤
+          C * S ^ theta * energy t :=
+        mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left hrpow hC) (henergy_nonneg t ht)
+      _ = (C * S ^ theta) * energy t := rfl
+  have hint := intervalIntegral.integral_mono_on hab hlhs_int hright_int hmono
+  simpa only [intervalIntegral.integral_const_mul] using hint
+
 theorem norm_sq_sub_eq_intervalIntegral_inner_deriv
     {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
     {u du : ℝ → X} {a b : ℝ}

@@ -113,6 +113,49 @@ theorem contDiff_localizedL2Mass
     contDiff_integral_of_jointContMDiff μ
       (fun x t => cutoff.toFun x ^ 2 * u t x ^ 2) hintegrand
 
+theorem contDiff_cutoffGradientError
+    {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2)) :
+    ContDiff ℝ ∞
+      (fun t => cutoffGradientError (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hcutoff_grad_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M =>
+      g.inner x
+        (gradFun (I := I) g cutoff.toFun x)
+        (gradFun (I := I) g cutoff.toFun x)) := by
+    have h := contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
+      (grad_g (I := I) g cutoff.smooth) (grad_g (I := I) g cutoff.smooth)
+    simpa only [grad_g_apply] using h
+  have hcutoff_grad_joint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ =>
+        g.inner p.1
+          (gradFun (I := I) g cutoff.toFun p.1)
+          (gradFun (I := I) g cutoff.toFun p.1)) :=
+    hcutoff_grad_smooth.comp contMDiff_fst
+  have hu_swap : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => u p.2 p.1) :=
+    hu.comp (contMDiff_snd.prodMk contMDiff_fst)
+  have hintegrand : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => u p.2 p.1 ^ 2 *
+        g.inner p.1
+          (gradFun (I := I) g cutoff.toFun p.1)
+          (gradFun (I := I) g cutoff.toFun p.1)) :=
+    (hu_swap.pow 2).mul hcutoff_grad_joint
+  simpa only [cutoffGradientError, smoothScalarSlice, μ] using
+    contDiff_integral_of_jointContMDiff μ
+      (fun x t => u t x ^ 2 *
+        g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x)) hintegrand
+
 omit [I.Boundaryless] in
 theorem hasDerivAt_localizedL2Mass
     {g : SmoothRiemannianMetric I M}

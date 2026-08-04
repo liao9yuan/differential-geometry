@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.Energy.Caccioppoli
+import DifferentialGeometry.Analysis.Parabolic.Energy.TimeCutoff
 import DifferentialGeometry.Analysis.Integration.Holder.Weighted
+import DifferentialGeometry.Analysis.Integration.Measure.CompactParametricIntegral
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IntrinsicEmbedding
 
 
@@ -282,6 +284,101 @@ theorem localized_parabolic_sobolev
         (localizedL2Mass (I := I) (M := M) cutoff u +
           localizedDirichletEnergy (I := I) (M := M) cutoff u +
           cutoffGradientError (I := I) (M := M) cutoff u) := by ring
+
+theorem localized_parabolic_sobolev_time
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b S : ℝ} (hab : a ≤ b)
+    (hmass_le : ∀ t ∈ Icc a b,
+      localizedL2Mass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t) ≤ S)
+    (hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) (Icc a b)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∫ t in a..b, ∫ x,
+          |cutoff.toFun x * u t x| ^
+            (2 + 4 / (Module.finrank ℝ E : ℝ))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+        C * S ^ (2 / (Module.finrank ℝ E : ℝ)) *
+          ∫ t in a..b,
+            localizedL2Mass (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t) +
+              localizedDirichletEnergy (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t) +
+              cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t) := by
+  obtain ⟨C, hC, hSob⟩ := localized_parabolic_sobolev (I := I) (M := M) g hdim
+  refine ⟨C, hC, ?_⟩
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  let lhs : ℝ → ℝ := fun t =>
+    ∫ x, |cutoff.toFun x * u t x| ^
+      (2 + 4 / (Module.finrank ℝ E : ℝ)) ∂μ
+  let mass : ℝ → ℝ := fun t =>
+    localizedL2Mass (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu t)
+  let dirichlet : ℝ → ℝ := fun t =>
+    localizedDirichletEnergy (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu t)
+  let error : ℝ → ℝ := fun t =>
+    cutoffGradientError (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu t)
+  let energy : ℝ → ℝ := fun t => mass t + dirichlet t + error t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hdpos : 0 < (Module.finrank ℝ E : ℝ) := by linarith
+  have hcritical : 0 ≤ 2 + 4 / (Module.finrank ℝ E : ℝ) := by positivity
+  have hbase_cont : Continuous (fun p : ℝ × M =>
+      |cutoff.toFun p.2 * u p.1 p.2|) :=
+    ((cutoff.smooth.continuous.comp continuous_snd).mul hu.continuous).abs
+  have hintegrand_cont : Continuous (fun p : ℝ × M =>
+      |cutoff.toFun p.2 * u p.1 p.2| ^
+        (2 + 4 / (Module.finrank ℝ E : ℝ))) :=
+    hbase_cont.rpow_const (fun _ => Or.inr hcritical)
+  have hlhs_cont : ContinuousOn lhs (Icc a b) := by
+    have h := DifferentialGeometry.Integral.Measure.integral_contOn_cpt
+      (K := Icc a b) μ (fun t x => |cutoff.toFun x * u t x| ^
+        (2 + 4 / (Module.finrank ℝ E : ℝ))) isCompact_Icc
+      hintegrand_cont.continuousOn
+    simpa only [lhs] using h
+  have hmass_cont : ContinuousOn mass (Icc a b) := by
+    simpa only [mass] using
+      (contDiff_localizedL2Mass (I := I) (M := M) cutoff u hu).continuous.continuousOn
+  have herror_cont : ContinuousOn error (Icc a b) := by
+    simpa only [error] using
+      (contDiff_cutoffGradientError (I := I) (M := M) cutoff u hu).continuous.continuousOn
+  have henergy_cont : ContinuousOn energy (Icc a b) := by
+    simpa only [energy] using (hmass_cont.add hdirichlet).add herror_cont
+  have hmass_nonneg : ∀ t ∈ Icc a b, 0 ≤ mass t := by
+    intro t _
+    exact localizedL2Mass_nonneg (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu t)
+  have henergy_nonneg : ∀ t ∈ Icc a b, 0 ≤ energy t := by
+    intro t _
+    exact add_nonneg
+      (add_nonneg
+        (localizedL2Mass_nonneg (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu t))
+        (localizedDirichletEnergy_nonneg (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu t)))
+      (cutoffGradientError_nonneg (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t))
+  have hpoint : ∀ t ∈ Icc a b,
+      lhs t ≤ C * mass t ^ (2 / (Module.finrank ℝ E : ℝ)) * energy t := by
+    intro t _
+    have h := hSob cutoff (smoothScalarSlice (I := I) g u hu t)
+    simpa only [lhs, mass, dirichlet, error, energy, smoothScalarSlice_toFun, μ] using h
+  have htime := intervalIntegral_le_const_mul_sup_rpow
+    hab hlhs_cont henergy_cont hC
+    (div_nonneg (by norm_num) hdpos.le) hmass_nonneg
+    (by simpa only [mass] using hmass_le) henergy_nonneg hpoint
+  simpa only [lhs, mass, dirichlet, error, energy, μ] using htime
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
