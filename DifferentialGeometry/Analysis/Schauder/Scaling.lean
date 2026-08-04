@@ -21,6 +21,11 @@ def parabolicDilationAt {V : Type*} [Add V] [SMul Real V]
     (r : NNReal) (p0 p : ParabolicPoint V) : ParabolicPoint V :=
   parabolicTranslation p0 (parabolicDilation r p)
 
+def parabolicTimeCenteredDilationAt {V : Type*} [Add V] [SMul Real V]
+    (tau : Real) (r : NNReal) (p0 p : ParabolicPoint V) :
+    ParabolicPoint V :=
+  parabolicDilationAt r p0 (parabolicPoint (p.time - tau) p.space)
+
 def parabolicInverseDilationAt {V : Type*} [AddGroup V] [SMul Real V]
     (r : NNReal) (p0 p : ParabolicPoint V) : ParabolicPoint V :=
   parabolicPoint ((p.time - p0.time) / (r : Real) ^ 2)
@@ -57,6 +62,22 @@ theorem parabolicDilationAt_space {V : Type*} [Add V] [SMul Real V]
     (r : NNReal) (p0 p : ParabolicPoint V) :
     (parabolicDilationAt r p0 p).space =
       p0.space + (r : Real) • p.space := rfl
+
+@[simp]
+theorem parabolicTimeCenteredDilationAt_time
+    {V : Type*} [Add V] [SMul Real V]
+    (tau : Real) (r : NNReal) (p0 p : ParabolicPoint V) :
+    (parabolicTimeCenteredDilationAt tau r p0 p).time =
+      p0.time + (r : Real) ^ 2 * (p.time - tau) :=
+  rfl
+
+@[simp]
+theorem parabolicTimeCenteredDilationAt_space
+    {V : Type*} [Add V] [SMul Real V]
+    (tau : Real) (r : NNReal) (p0 p : ParabolicPoint V) :
+    (parabolicTimeCenteredDilationAt tau r p0 p).space =
+      p0.space + (r : Real) • p.space :=
+  rfl
 
 @[simp]
 theorem parabolicInverseDilationAt_time
@@ -133,6 +154,22 @@ theorem dist_parabolicDilationAt {V : Type*} [NormedAddCommGroup V]
     (parabolicTranslation p0 (parabolicDilation r q)) = _
   rw [dist_parabolicTranslation,
     dist_parabolicDilation]
+
+theorem dist_parabolicTimeCenteredDilationAt
+    {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    (tau : Real) (r : NNReal) (p0 p q : ParabolicPoint V) :
+    dist (parabolicTimeCenteredDilationAt tau r p0 p)
+        (parabolicTimeCenteredDilationAt tau r p0 q) =
+      (r : Real) * dist p q := by
+  rcases p with ⟨⟨t⟩, x⟩
+  rcases q with ⟨⟨s⟩, y⟩
+  rw [parabolicTimeCenteredDilationAt, parabolicTimeCenteredDilationAt,
+    dist_parabolicDilationAt]
+  change (r : Real) *
+      max (|(t - tau) - (s - tau)| ^ (1 / 2 : Real)) (dist x y) =
+    (r : Real) * max (|t - s| ^ (1 / 2 : Real)) (dist x y)
+  congr 1
+  ring_nf
 
 @[simp]
 theorem parabolicDilationAt_origin {V : Type*} [NormedAddCommGroup V]
@@ -387,6 +424,39 @@ def parabolicSpatialSecondDerivativeRescaleAt
     (parabolicRescaleAt (V := V) (F := V →L[Real] V →L[Real] F)
       r p0 d2u t)
 
+def parabolicTimeCenteredRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) :
+    Real → BoundedContinuousFunction V F :=
+  fun t ↦ parabolicRescaleAt r p0 u (t - tau)
+
+def parabolicTimeCenteredTimeDerivativeRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (dtimeU : Real → BoundedContinuousFunction V F) :
+    Real → BoundedContinuousFunction V F :=
+  fun t ↦ parabolicTimeDerivativeRescaleAt r p0 dtimeU (t - tau)
+
+def parabolicTimeCenteredSpatialDerivativeRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F)) :
+    Real → BoundedContinuousFunction V (V →L[Real] F) :=
+  fun t ↦ parabolicSpatialDerivativeRescaleAt r p0 du (t - tau)
+
+def parabolicTimeCenteredSpatialSecondDerivativeRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F)) :
+    Real → BoundedContinuousFunction V (V →L[Real] V →L[Real] F) :=
+  fun t ↦ parabolicSpatialSecondDerivativeRescaleAt r p0 d2u (t - tau)
+
 @[simp]
 theorem parabolicRescaleAt_apply
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
@@ -443,6 +513,59 @@ theorem parabolicSpatialSecondDerivativeRescaleAt_apply
     parabolicSpatialSecondDerivativeRescaleAt r p0 d2u t x =
       (r : Real) ^ 2 • d2u (p0.time + (r : Real) ^ 2 * t)
         (p0.space + (r : Real) • x) :=
+  rfl
+
+@[simp]
+theorem parabolicTimeCenteredRescaleAt_apply
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) (t : Real) (x : V) :
+    parabolicTimeCenteredRescaleAt tau r p0 u t x =
+      u (p0.time + (r : Real) ^ 2 * (t - tau))
+        (p0.space + (r : Real) • x) :=
+  rfl
+
+@[simp]
+theorem parabolicTimeCenteredTimeDerivativeRescaleAt_apply
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (dtimeU : Real → BoundedContinuousFunction V F)
+    (t : Real) (x : V) :
+    parabolicTimeCenteredTimeDerivativeRescaleAt
+        tau r p0 dtimeU t x =
+      (r : Real) ^ 2 •
+        dtimeU (p0.time + (r : Real) ^ 2 * (t - tau))
+          (p0.space + (r : Real) • x) :=
+  rfl
+
+@[simp]
+theorem parabolicTimeCenteredSpatialDerivativeRescaleAt_apply
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (t : Real) (x : V) :
+    parabolicTimeCenteredSpatialDerivativeRescaleAt tau r p0 du t x =
+      (r : Real) •
+        du (p0.time + (r : Real) ^ 2 * (t - tau))
+          (p0.space + (r : Real) • x) :=
+  rfl
+
+@[simp]
+theorem parabolicTimeCenteredSpatialSecondDerivativeRescaleAt_apply
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F))
+    (t : Real) (x : V) :
+    parabolicTimeCenteredSpatialSecondDerivativeRescaleAt
+        tau r p0 d2u t x =
+      (r : Real) ^ 2 •
+        d2u (p0.time + (r : Real) ^ 2 * (t - tau))
+          (p0.space + (r : Real) • x) :=
   rfl
 
 theorem hasDerivAt_parabolicRescaleAt
@@ -588,6 +711,95 @@ theorem contDiff_two_parabolicRescaleAt
   · intro x
     exact hasFDerivAt_parabolicSpatialDerivativeRescaleAt
       r p0 du d2u t x (hdu (p0.space + (r : Real) • x))
+
+theorem hasDerivAt_parabolicTimeCenteredRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u dtimeU : Real → BoundedContinuousFunction V F) (t : Real)
+    (hu : HasDerivAt u
+      (dtimeU (p0.time + (r : Real) ^ 2 * (t - tau)))
+      (p0.time + (r : Real) ^ 2 * (t - tau))) :
+    HasDerivAt (parabolicTimeCenteredRescaleAt tau r p0 u)
+      (parabolicTimeCenteredTimeDerivativeRescaleAt
+        tau r p0 dtimeU t) t := by
+  have hrescaled := hasDerivAt_parabolicRescaleAt
+    r p0 u dtimeU (t - tau) hu
+  have hshift : HasDerivAt (fun s : Real ↦ s - tau) 1 t :=
+    (hasDerivAt_id t).sub_const tau
+  have hcomp := hrescaled.hasFDerivAt.comp_hasDerivAt t hshift
+  simpa only [parabolicTimeCenteredRescaleAt,
+    parabolicTimeCenteredTimeDerivativeRescaleAt,
+    Function.comp_apply, ContinuousLinearMap.toSpanSingleton_apply,
+    one_smul] using hcomp
+
+theorem continuous_parabolicTimeCenteredRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F) (hu : Continuous u) :
+    Continuous (parabolicTimeCenteredRescaleAt tau r p0 u) := by
+  exact (continuous_parabolicRescaleAt r p0 u hu).comp
+    (continuous_id.sub continuous_const)
+
+theorem hasFDerivAt_parabolicTimeCenteredRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (t : Real) (x : V)
+    (hu : HasFDerivAt
+      (u (p0.time + (r : Real) ^ 2 * (t - tau)) : V → F)
+      (du (p0.time + (r : Real) ^ 2 * (t - tau))
+        (p0.space + (r : Real) • x))
+      (p0.space + (r : Real) • x)) :
+    HasFDerivAt (parabolicTimeCenteredRescaleAt tau r p0 u t : V → F)
+      (parabolicTimeCenteredSpatialDerivativeRescaleAt
+        tau r p0 du t x) x := by
+  exact hasFDerivAt_parabolicRescaleAt r p0 u du (t - tau) x hu
+
+theorem hasFDerivAt_parabolicTimeCenteredSpatialDerivativeRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F))
+    (t : Real) (x : V)
+    (hdu : HasFDerivAt
+      (du (p0.time + (r : Real) ^ 2 * (t - tau)) :
+        V → V →L[Real] F)
+      (d2u (p0.time + (r : Real) ^ 2 * (t - tau))
+        (p0.space + (r : Real) • x))
+      (p0.space + (r : Real) • x)) :
+    HasFDerivAt
+      (parabolicTimeCenteredSpatialDerivativeRescaleAt
+        tau r p0 du t : V → V →L[Real] F)
+      (parabolicTimeCenteredSpatialSecondDerivativeRescaleAt
+        tau r p0 d2u t x) x := by
+  exact hasFDerivAt_parabolicSpatialDerivativeRescaleAt
+    r p0 du d2u (t - tau) x hdu
+
+theorem contDiff_two_parabolicTimeCenteredRescaleAt
+    {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup F] [NormedSpace Real F]
+    (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
+    (u : Real → BoundedContinuousFunction V F)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction V
+      (V →L[Real] V →L[Real] F))
+    (t : Real)
+    (hu : ∀ x, HasFDerivAt
+      (u (p0.time + (r : Real) ^ 2 * (t - tau)) : V → F)
+      (du (p0.time + (r : Real) ^ 2 * (t - tau)) x) x)
+    (hdu : ∀ x, HasFDerivAt
+      (du (p0.time + (r : Real) ^ 2 * (t - tau)) :
+        V → V →L[Real] F)
+      (d2u (p0.time + (r : Real) ^ 2 * (t - tau)) x) x) :
+    ContDiff Real 2
+      (parabolicTimeCenteredRescaleAt tau r p0 u t : V → F) := by
+  exact contDiff_two_parabolicRescaleAt r p0 u du d2u (t - tau) hu hdu
 
 end BoundedContinuousFunction
 
