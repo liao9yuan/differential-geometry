@@ -20,21 +20,23 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
 
 omit [FiniteDimensional Real E] [IsManifold I ∞ M] hI in
-private theorem boundaryHopf_hasDerivAt_comp_mfderiv
-    (f : M → Real) (gamma : Real → M) (t : Real)
+private theorem boundaryHopf_hasDerivWithinAt_comp_mfderivWithin
+    (f : M → Real) (gamma : Real → M) (s : Set Real) (t : Real)
     (hf : MDifferentiableAt I (modelWithCornersSelf Real Real) f (gamma t))
-    (hgamma : MDifferentiableAt (modelWithCornersSelf Real Real) I gamma t) :
-    HasDerivAt (fun s => f (gamma s))
+    (hgamma : MDifferentiableWithinAt
+      (modelWithCornersSelf Real Real) I gamma s t) :
+    HasDerivWithinAt (fun r => f (gamma r))
       (NormedSpace.fromTangentSpace (f (gamma t))
         (mfderiv I (modelWithCornersSelf Real Real) f (gamma t)
-          (mfderiv (modelWithCornersSelf Real Real) I gamma t 1))) t := by
-  rw [hasDerivAt_iff_hasFDerivAt]
-  have hcomp := hf.hasMFDerivAt.comp t hgamma.hasMFDerivAt
-  have hcomp' := hcomp.hasFDerivAt
+          (mfderivWithin (modelWithCornersSelf Real Real) I gamma s t 1))) s t := by
+  rw [hasDerivWithinAt_iff_hasFDerivWithinAt]
+  have hcomp := hf.hasMFDerivAt.comp_hasMFDerivWithinAt t
+    hgamma.hasMFDerivWithinAt
+  have hcomp' := hcomp.hasFDerivWithinAt
   convert hcomp' using 1
   change ContinuousLinearMap.toSpanSingleton Real
       (((mfderiv I (modelWithCornersSelf Real Real) f (gamma t)).comp
-        (mfderiv (modelWithCornersSelf Real Real) I gamma t)) 1) = _
+        (mfderivWithin (modelWithCornersSelf Real Real) I gamma s t)) 1) = _
   exact ContinuousLinearMap.toSpanSingleton_apply_map_one
     (R₁ := Real) (M₂ := Real) _
 
@@ -211,51 +213,76 @@ theorem strict_barrier_on_compact_manifold_with_boundary
     rw [hepsilon_mul] at hnonneg
     linarith
 
+private theorem boundaryHopf_deriv_nonneg_at_right_endpoint
+    {f : Real → Real} {a d : Real} (ha : 0 < a)
+    (hmin : IsMinOn f (Set.Icc 0 a) 0)
+    (hderiv : HasDerivWithinAt f d (Set.Ici 0) 0) :
+    0 ≤ d := by
+  have hdir : a - 0 ∈ posTangentConeAt (Set.Icc 0 a) 0 := by
+    have hseg : segment Real 0 a ⊆ Set.Icc 0 a := by
+      rw [segment_eq_Icc ha.le]
+    exact sub_mem_posTangentConeAt_of_segment_subset hseg
+  have hnonneg : 0 ≤
+      (fderivWithin Real f (Set.Icc 0 a) 0 : Real →L[Real] Real) (a - 0) :=
+    hmin.localize.fderivWithin_nonneg hdir
+  have huniq : UniqueDiffWithinAt Real (Set.Icc 0 a) 0 :=
+    (uniqueDiffOn_Icc ha).uniqueDiffWithinAt (left_mem_Icc.mpr ha.le)
+  have hderivWithin : derivWithin f (Set.Icc 0 a) 0 = d := by
+    exact (hderiv.mono fun _ hx => hx.1).derivWithin huniq
+  have hlin :
+      (fderivWithin Real f (Set.Icc 0 a) 0 : Real →L[Real] Real) (a - 0) =
+        (a - 0) * derivWithin f (Set.Icc 0 a) 0 := by
+    rw [← fderivWithin_derivWithin (f := f) (s := Set.Icc 0 a) (x := 0)]
+    simpa [smul_eq_mul] using
+      ((fderivWithin Real f (Set.Icc 0 a) 0 : Real →L[Real] Real).map_smul
+        (a - 0) (1 : Real))
+  rw [hlin, hderivWithin] at hnonneg
+  exact nonneg_of_mul_nonneg_left (by simpa [mul_comm] using hnonneg) ha
+
 theorem scalar_hopf_boundary_point_of_barrier_with_boundary
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [CompleteSpace E] [CompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 ≤ T)
     (X : Real → (x : M) → TangentSpace I x)
-    {K : Set M} (hK : IsCompact K) (hKne : K.Nonempty)
-    (hKinterior : interior K ⊆ I.interior M)
     (u v : Real → M → Real)
     (hcont : ContinuousOn (fun q : Real × M => u q.1 q.2 - v q.1 q.2)
-      (Set.Icc 0 T ×ˢ K))
-    (hinit : ∀ x ∈ K, 0 ≤ u 0 x - v 0 x)
-    (hboundary : ∀ t ∈ Set.Icc 0 T, ∀ x ∈ frontier K,
-      0 ≤ u t x - v t x)
-    (htime : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+      (Set.Icc 0 T ×ˢ Set.univ))
+    (hinit : ∀ x : M, 0 ≤ u 0 x - v 0 x)
+    (hboundary : ∀ t ∈ Set.Icc 0 T, ∀ q : BoundaryManifold I M,
+      0 ≤ u t (q : M) - v t (q : M))
+    (htime : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ I.interior M,
       DifferentiableWithinAt Real (fun s => u s x - v s x) (Set.Icc 0 T) t)
-    (hmdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+    (hmdiff : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ I.interior M,
       MDifferentiableAt I 𝓘(Real, Real) (fun y => u t y - v t y) x)
-    (hgrad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+    (hgrad : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ I.interior M,
       MDiffAt (T% fun y : M => gradientFun (I := I) (G.metric t)
         (fun z => u t z - v t z) y) x)
-    (hoperator : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ interior K,
+    (hoperator : ∀ t ∈ Set.Icc 0 T, 0 < t → ∀ x ∈ I.interior M,
       u t x - v t x < 0 → 0 ≤
         parabolicOperatorWithDrift (I := I) G T X
           (fun s y => u s y - v s y) t x)
-    {p : BoundaryManifold I M} (hp : (p : M) ∈ frontier K)
+    {p : BoundaryManifold I M}
     (gamma : Real → M) {a dv : Real} (ha : 0 < a)
     (hgamma0 : gamma 0 = (p : M))
-    (hgamma : Set.MapsTo gamma (Set.Icc 0 a) K)
     (heq : u T (p : M) = v T (p : M))
     (hu_mdiff : MDifferentiableAt I 𝓘(Real, Real) (u T) (p : M))
-    (hgamma_mdiff : MDifferentiableAt 𝓘(Real, Real) I gamma 0)
-    (hgamma_velocity : mfderiv 𝓘(Real, Real) I gamma 0 1 =
+    (hgamma_mdiff : MDifferentiableWithinAt 𝓘(Real, Real) I
+      gamma (Set.Ici 0) 0)
+    (hgamma_velocity : mfderivWithin 𝓘(Real, Real) I
+      gamma (Set.Ici 0) 0 1 =
       inwardCoord (M := M) p)
-    (hv_deriv : HasDerivAt (fun s => v T (gamma s)) dv 0)
+    (hv_deriv : HasDerivWithinAt (fun s => v T (gamma s)) dv (Set.Ici 0) 0)
     (hdv : 0 < dv)
     (hmin : IsLocalMin
       (fun q : BoundaryManifold I M => u T (q : M)) p) :
     outwardNormalDerivative (M := M) (G.metric T) (u T) p < 0 := by
-  have hu_deriv : HasDerivAt (fun s => u T (gamma s))
+  have hu_deriv : HasDerivWithinAt (fun s => u T (gamma s))
       ((G.metric T).inner (p : M)
         (gradientFun (I := I) (G.metric T) (u T) (p : M))
-        (inwardCoord (M := M) p)) 0 := by
-    have hcurve := boundaryHopf_hasDerivAt_comp_mfderiv
-      (I := I) (u T) gamma 0
+        (inwardCoord (M := M) p)) (Set.Ici 0) 0 := by
+    have hcurve := boundaryHopf_hasDerivWithinAt_comp_mfderivWithin
+      (I := I) (u T) gamma (Set.Ici 0) 0
       (by simpa [hgamma0] using hu_mdiff) hgamma_mdiff
     rw [hgamma0] at hcurve
     convert hcurve using 1
@@ -263,12 +290,32 @@ theorem scalar_hopf_boundary_point_of_barrier_with_boundary
         (gradientFun (I := I) (G.metric T) (u T) (p : M))
         (inwardCoord (M := M) p) =
       mfderiv I 𝓘(Real, Real) (u T) (p : M)
-        (mfderiv 𝓘(Real, Real) I gamma 0 1)
+        (mfderivWithin 𝓘(Real, Real) I gamma (Set.Ici 0) 0 1)
     rw [hgamma_velocity, inner_gradientFun]
-  have hinward := scalar_hopf_boundary_point_of_barrier_of_isInteriorPoint
-    (I := I) G T hT X hK hKne hKinterior u v hcont hinit hboundary
-      htime hmdiff hgrad hoperator hp gamma ha hgamma0 hgamma heq
-      hu_deriv hv_deriv hdv
+  let w : Real → M → Real := fun t x => u t x - v t x
+  have hw_nonneg := strict_barrier_on_compact_manifold_with_boundary
+    (I := I) G T X w hcont hinit hboundary htime hmdiff hgrad hoperator
+  let f : Real → Real := fun s => u T (gamma s) - v T (gamma s)
+  have hf0 : f 0 = 0 := by
+    dsimp [f]
+    rw [hgamma0, heq, sub_self]
+  have hf_nonneg : ∀ s ∈ Set.Icc 0 a, 0 ≤ f s := by
+    intro s hs
+    exact hw_nonneg T ⟨hT, le_rfl⟩ (gamma s)
+  have hfmin : IsMinOn f (Set.Icc 0 a) 0 := by
+    intro s hs
+    rw [hf0]
+    exact hf_nonneg s hs
+  have hfderiv : HasDerivWithinAt f
+      ((G.metric T).inner (p : M)
+        (gradientFun (I := I) (G.metric T) (u T) (p : M))
+        (inwardCoord (M := M) p) - dv) (Set.Ici 0) 0 :=
+    hu_deriv.sub hv_deriv
+  have hdiff := boundaryHopf_deriv_nonneg_at_right_endpoint ha hfmin hfderiv
+  have hinward : 0 < (G.metric T).inner (p : M)
+      (gradientFun (I := I) (G.metric T) (u T) (p : M))
+      (inwardCoord (M := M) p) := by
+    linarith
   exact
     outwardNormalDerivative_neg_of_inner_gradient_inwardCoord_pos_at_local_min
       (M := M) (G.metric T) hmin hu_mdiff hinward
