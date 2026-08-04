@@ -30,41 +30,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-omit [NeZero (Module.finrank ℝ E)] in
-theorem H1ComplToLp_inj_on_laplacianDomain
-    (g : SmoothRiemannianMetric I M)
-    {u v : laplacianDomain (I := I) (M := M) g}
-    (h_eq : H1ComplToLp (I := I) (M := M) g (u : H1Compl g) =
-            H1ComplToLp (I := I) (M := M) g (v : H1Compl g)) :
-    (u : H1Compl g) = (v : H1Compl g) := by
-  set wu : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
-    laplacianDomain.preimage (I := I) (M := M) g u with hwu_def
-  set wv : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
-    laplacianDomain.preimage (I := I) (M := M) g v with hwv_def
-  have h_u_res : (u : H1Compl g) =
-      resolvent (I := I) (M := M) g wu :=
-    (resolvent_laplacianDomain_preimage_eq (I := I) (M := M) g u).symm
-  have h_v_res : (v : H1Compl g) =
-      resolvent (I := I) (M := M) g wv :=
-    (resolvent_laplacianDomain_preimage_eq (I := I) (M := M) g v).symm
-  have hLHS : resolventL2 (I := I) (M := M) g wu =
-      H1ComplToLp (I := I) (M := M) g
-        (resolvent (I := I) (M := M) g wu) :=
-    resolventL2_apply (I := I) (M := M) g _
-  have hRHS : resolventL2 (I := I) (M := M) g wv =
-      H1ComplToLp (I := I) (M := M) g
-        (resolvent (I := I) (M := M) g wv) :=
-    resolventL2_apply (I := I) (M := M) g _
-  have h_eq_L2 :
-      resolventL2 (I := I) (M := M) g wu =
-      resolventL2 (I := I) (M := M) g wv := by
-    rw [hLHS, hRHS, ← h_u_res, ← h_v_res]
-    exact h_eq
-  have h_pre_eq : wu = wv := by
-    have h_inj := resolventL2_injective (I := I) (M := M) g
-    exact h_inj h_eq_L2
-  rw [h_u_res, h_v_res, h_pre_eq]
-
 private def spectralBasisFun
     (g : SmoothRiemannianMetric I M)
     (i : Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
@@ -163,7 +128,7 @@ theorem laplacianEigenfunction_smooth_representative
           H1Compl (I := I) (M := M) g) = b_i
     rw [H1ComplToLp_laplacianEigenfunction]
   have h_subtype_eq : (f_lap : H1Compl g) = (ef_lap : H1Compl g) :=
-    H1ComplToLp_inj_on_laplacianDomain (I := I) (M := M) g
+    H1ComplToLp_injective_on_laplacianDomain (I := I) (M := M) g
       (h_H1ComplToLp_f_lap.trans h_H1ComplToLp_ef_lap.symm)
   have h_lap_eq : f_lap = ef_lap := Subtype.ext h_subtype_eq
   have h_op_smooth :

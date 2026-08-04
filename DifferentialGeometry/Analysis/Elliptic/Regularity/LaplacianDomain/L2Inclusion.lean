@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.Defs
 import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.MeasureTheory.Function.LpSpace.Indicator
+import Mathlib.MeasureTheory.Measure.OpenPos
 import Mathlib.Analysis.Normed.Operator.Extend
 
 
@@ -122,6 +123,29 @@ noncomputable def smoothToLp (g : SmoothRiemannianMetric I M) :
     (f : SmoothScalar g) :
     smoothToLp (I := I) (M := M) g f =
       f.memLp_two.toLp f.toFun := rfl
+
+theorem smoothToLp_injective (g : SmoothRiemannianMetric I M) :
+    Function.Injective (smoothToLp (I := I) (M := M) g) := by
+  intro f h hfh
+  apply SmoothScalar.ext
+  funext x
+  have hf_ae : (smoothToLp (I := I) (M := M) g f : M → ℝ) =ᵐ[
+      riemannianVolumeMeasure (I := I) (M := M) g] f.toFun :=
+    MemLp.coeFn_toLp f.memLp_two
+  have hh_ae : (smoothToLp (I := I) (M := M) g h : M → ℝ) =ᵐ[
+      riemannianVolumeMeasure (I := I) (M := M) g] h.toFun :=
+    MemLp.coeFn_toLp h.memLp_two
+  have hlp_ae : (smoothToLp (I := I) (M := M) g f : M → ℝ) =ᵐ[
+      riemannianVolumeMeasure (I := I) (M := M) g]
+      (smoothToLp (I := I) (M := M) g h : M → ℝ) := by
+    rw [hfh]
+  have hfun_ae : f.toFun =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g] h.toFun :=
+    hf_ae.symm.trans (hlp_ae.trans hh_ae)
+  letI : (riemannianVolumeMeasure (I := I) (M := M) g).IsOpenPosMeasure :=
+    riemannianVolumeMeasure_isOpenPosMeasure (I := I) (M := M) g
+  exact congrFun ((Continuous.ae_eq_iff_eq
+    (riemannianVolumeMeasure (I := I) (M := M) g)
+    f.smooth.continuous h.smooth.continuous).mp hfun_ae) x
 
 private lemma denseRange_toComplL_smoothScalar (g : SmoothRiemannianMetric I M) :
     DenseRange (UniformSpace.Completion.toComplL : SmoothScalar g →L[ℝ] H1Compl g) := by

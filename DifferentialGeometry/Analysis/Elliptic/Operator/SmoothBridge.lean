@@ -35,11 +35,29 @@ noncomputable def SmoothScalar.oneSubLapClassical {g : SmoothRiemannianMetric I 
   toFun := u.toFun - Δ_g (I := I) g u.smooth
   smooth := u.smooth.sub (Δ_g_contMDiff (I := I) g u.smooth)
 
+noncomputable def SmoothScalar.laplacian {g : SmoothRiemannianMetric I M}
+    (u : SmoothScalar g) : SmoothScalar g where
+  toFun := Δ_g (I := I) g u.smooth
+  smooth := Δ_g_contMDiff (I := I) g u.smooth
+
 omit [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.oneSubLapClassical_toFun
     {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
     (u.oneSubLapClassical).toFun =
       u.toFun - Δ_g (I := I) g u.smooth := rfl
+
+omit [SigmaCompactSpace M] [CompactSpace M] in
+@[simp] lemma SmoothScalar.laplacian_toFun
+    {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
+    u.laplacian.toFun = Δ_g (I := I) g u.smooth := rfl
+
+omit [SigmaCompactSpace M] [CompactSpace M] in
+@[simp] lemma SmoothScalar.sub_oneSubLapClassical
+    {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
+    u - u.oneSubLapClassical = u.laplacian := by
+  apply SmoothScalar.ext
+  funext x
+  simp [SmoothScalar.oneSubLapClassical_toFun]
 
 theorem smoothScalarH1Inner_eq_integral_oneSubLap_mul
     {g : SmoothRiemannianMetric I M}

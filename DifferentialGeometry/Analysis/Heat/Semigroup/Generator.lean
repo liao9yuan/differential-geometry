@@ -1,5 +1,4 @@
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingSpectralLift
-import DifferentialGeometry.Analysis.Elliptic.LichnerowiczSpectral
 
 noncomputable section
 
@@ -137,7 +136,7 @@ lemma heatSemigroupSpectralLift_one_eq_explicit_zero
         (heatSemigroupExplicitLift (I := I) (M := M) g 0 t u_0) := by
     rw [H1ComplToLp_heatSemigroupSpectralLift (I := I) (M := M) g ht u_0 1]
     rw [H1ComplToLp_heatSemigroupExplicitLift (I := I) (M := M) g 0 ht u_0]
-  exact H1ComplToLp_inj_on_laplacianDomain (I := I) (M := M) g
+  exact H1ComplToLp_injective_on_laplacianDomain (I := I) (M := M) g
     (u := ⟨_, h_can_mem⟩) (v := ⟨_, h_exp_mem⟩) h_proj_eq
 
 theorem laplacianOp_heatSemigroupSpectralLift_one_eq_neg_heatPower_one
