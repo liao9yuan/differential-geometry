@@ -157,6 +157,16 @@ def parabolicChartPotentialCoefficient
     ParabolicPoint (EuclN E) → Real :=
   fun p ↦ V p.time (euclideanChartPoint (I := I) alpha p)
 
+def parabolicNondivergenceOperatorInEuclideanChart
+    (g : Real → SmoothRiemannianMetric I M) (V : Real → M → Real)
+    (alpha : M) (u : Real → M → Real) :
+    ParabolicPoint (EuclN E) → Real :=
+  parabolicNondivergenceOperator
+    (parabolicChartPrincipalCoefficient (I := I) g alpha)
+    (parabolicChartDriftCoefficient (I := I) g alpha)
+    (parabolicChartPotentialCoefficient (I := I) V alpha)
+    (parabolicEuclideanChartRepresentation I alpha u)
+
 omit [NeZero (Module.finrank Real E)] [IsManifold I ∞ M] in
 @[simp]
 theorem euclideanChartPoint_apply
@@ -202,6 +212,20 @@ theorem parabolicChartPotentialCoefficient_apply
     (V : Real → M → Real) (alpha : M) (p : ParabolicPoint (EuclN E)) :
     parabolicChartPotentialCoefficient (I := I) V alpha p =
       V p.time (euclideanChartPoint (I := I) alpha p) :=
+  rfl
+
+omit [NeZero (Module.finrank Real E)] in
+@[simp]
+theorem parabolicNondivergenceOperatorInEuclideanChart_apply
+    (g : Real → SmoothRiemannianMetric I M) (V : Real → M → Real)
+    (alpha : M) (u : Real → M → Real) (p : ParabolicPoint (EuclN E)) :
+    parabolicNondivergenceOperatorInEuclideanChart (I := I)
+        g V alpha u p =
+      parabolicNondivergenceOperator
+        (parabolicChartPrincipalCoefficient (I := I) g alpha)
+        (parabolicChartDriftCoefficient (I := I) g alpha)
+        (parabolicChartPotentialCoefficient (I := I) V alpha)
+        (parabolicEuclideanChartRepresentation I alpha u) p :=
   rfl
 
 omit [NeZero (Module.finrank Real E)] [IsManifold I ∞ M] in
@@ -356,6 +380,25 @@ theorem parabolicNondivergenceOperator_eq_intrinsic_in_euclideanChart
     parabolicVariableMatrixLap_add_driftTerm_eq_laplacian_in_euclideanChart
       (I := I) g alpha u p hu hp,
     parabolicPotentialTerm_euclideanChartRepresentation (I := I) V alpha u p]
+
+omit [NeZero (Module.finrank Real E)] in
+theorem parabolicNondivergenceOperatorInEuclideanChart_eq_intrinsic
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+    (g : Real → SmoothRiemannianMetric I M) (V : Real → M → Real)
+    (alpha : M) (u : Real → M → Real) (p : ParabolicPoint (EuclN E))
+    (hu : ContMDiff I 𝓘(Real, Real) ∞ (u p.time))
+    (hp : (toEuclidean (E := E)).symm p.space ∈
+      (extChartAt I alpha).target) :
+    parabolicNondivergenceOperatorInEuclideanChart (I := I)
+        g V alpha u p =
+      fderiv Real (fun t ↦ u t (euclideanChartPoint (I := I) alpha p))
+          p.time 1 -
+        laplacian (I := I) (LeviCivita (I := I) (g p.time)) (g p.time)
+          (u p.time) (euclideanChartPoint (I := I) alpha p) -
+        V p.time (euclideanChartPoint (I := I) alpha p) *
+          u p.time (euclideanChartPoint (I := I) alpha p) := by
+  exact parabolicNondivergenceOperator_eq_intrinsic_in_euclideanChart
+    (I := I) g V alpha u p hu hp
 
 omit [NeZero (Module.finrank Real E)] in
 theorem parabolicNondivergenceOperator_euclideanChartRepresentation_eq_laplacianAt
