@@ -2,6 +2,7 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.MetricSpace.HolderNorm
 import Mathlib.Topology.MetricSpace.Snowflaking
+import Mathlib.Topology.ContinuousMap.Bounded.Basic
 
 noncomputable section
 
@@ -11,6 +12,19 @@ open scoped ENNReal NNReal BigOperators Topology
 namespace DifferentialGeometry.Analysis.Schauder
 
 variable {X F : Type*} [MetricSpace X] [NormedAddCommGroup F]
+
+theorem contDiff_two_of_hasFDerivAt
+    {V G : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    [NormedAddCommGroup G] [NormedSpace Real G]
+    (u : BoundedContinuousFunction V G)
+    (du : BoundedContinuousFunction V (V →L[Real] G))
+    (d2u : BoundedContinuousFunction V (V →L[Real] V →L[Real] G))
+    (hu : ∀ x, HasFDerivAt (u : V → G) (du x) x)
+    (hdu : ∀ x, HasFDerivAt (du : V → V →L[Real] G) (d2u x) x) :
+    ContDiff Real 2 (u : V → G) := by
+  have hduC1 : ContDiff Real 1 (du : V → V →L[Real] G) :=
+    contDiff_one_iff_hasFDerivAt.mpr ⟨d2u, d2u.continuous, hdu⟩
+  exact (contDiff_succ_iff_hasFDerivAt (n := 1)).mpr ⟨du, hduC1, hu⟩
 
 theorem holderWith_zero_of_norm_le
     {Y G : Type*} [PseudoMetricSpace Y] [NormedAddCommGroup G]

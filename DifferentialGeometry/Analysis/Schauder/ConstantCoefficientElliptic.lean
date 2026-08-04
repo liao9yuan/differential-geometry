@@ -56,10 +56,8 @@ theorem laplacian_schauder_estimate
     have hprim := heatSup_primitive (t := 1) one_pos u du d2u hu hdu huhalf x
     rw [hprim]
     abel
-  have hduC1 : ContDiff Real 1 (du : V → V →L[Real] F) :=
-    contDiff_one_iff_hasFDerivAt.mpr ⟨d2u, d2u.continuous, hdu⟩
   have huC2 : ContDiff Real 2 (u : V → F) :=
-    (contDiff_succ_iff_hasFDerivAt (n := 1)).mpr ⟨du, hduC1, hu⟩
+    contDiff_two_of_hasFDerivAt u du d2u hu hdu
   have hheatC2 : ContDiff Real 2 (fun x : V ↦ heatSup 1 u x) :=
     heatSup_contDiff_two one_pos u
   have hduhEq : heatDuh 1 (fun _ ↦ coreLap d2u) =

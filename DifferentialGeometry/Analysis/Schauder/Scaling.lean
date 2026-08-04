@@ -322,15 +322,16 @@ theorem contDiff_parabolicRescaleAt_space
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]
     {n : WithTop ℕ∞} (r : NNReal) (p0 : ParabolicPoint V)
-    (u : Real → V → F) (hspace : ∀ t, ContDiff Real n (u t))
-    (t : Real) :
+    (u : Real → V → F) (t : Real)
+    (hspace : ContDiff Real n
+      (u (p0.time + (r : Real) ^ 2 * t))) :
     ContDiff Real n (parabolicRescaleAt r p0 u t) := by
   have haffine : ContDiff Real n
       (fun x : V ↦ p0.space + (r : Real) • x) := by
     simpa only [id_eq] using
       (contDiff_const.add (contDiff_id.const_smul (r : Real)))
   simpa only [parabolicRescaleAt_apply, Function.comp_apply] using
-    (hspace (p0.time + (r : Real) ^ 2 * t)).comp haffine
+    hspace.comp haffine
 
 @[simp]
 theorem parabolicRescaleAt_inverse_rescaleAt
@@ -625,7 +626,8 @@ theorem eParabolicC2HolderGaugeOn_rescale_le
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]
     (r alpha C : NNReal) (Q : Set (ParabolicPoint V))
-    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (u : Real → V → F)
+    (hspace : ∀ p ∈ Q, ContDiff Real 2 (u p.time))
     (h : eParabolicC2HolderGaugeOn alpha Q u ≤ C) :
     eParabolicC2HolderGaugeOn alpha (parabolicPreimage r Q)
       (parabolicRescale r u) ≤
@@ -635,7 +637,7 @@ theorem eParabolicC2HolderGaugeOn_rescale_le
       ‖parabolicSpatialJet j (parabolicRescale r u) p‖ ≤ Cspatial j := by
     intro j hj p hp
     rw [parabolicSpatialJet_rescale r u j p
-      ((hspace _).of_le (by
+      ((hspace (parabolicDilation r p) hp).of_le (by
         exact_mod_cast Nat.le_of_lt_succ hj))]
     calc
       ‖(r : Real) ^ j • parabolicSpatialJet j u (parabolicDilation r p)‖ =
@@ -679,7 +681,7 @@ theorem eParabolicC2HolderGaugeOn_rescale_le
     · funext p
       simp only [Pi.smul_apply, Function.comp_apply, Set.restrict_apply]
       exact (parabolicSpatialJet_rescale r u 2 p.1
-        ((hspace _).of_le le_rfl))
+        ((hspace (parabolicDilation r p.1) p.2).of_le le_rfl))
   have htimeHolder : HolderWith
       (C * r ^ (alpha : Real) * r ^ 2) alpha
       ((parabolicPreimage r Q).restrict
@@ -708,7 +710,8 @@ theorem eParabolicC2HolderGaugeOn_rescaleAt_le
     [NormedAddCommGroup F] [NormedSpace Real F]
     (r alpha C : NNReal) (p0 : ParabolicPoint V)
     (Q : Set (ParabolicPoint V))
-    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (u : Real → V → F)
+    (hspace : ∀ p ∈ Q, ContDiff Real 2 (u p.time))
     (h : eParabolicC2HolderGaugeOn alpha Q u ≤ C) :
     eParabolicC2HolderGaugeOn alpha (parabolicPreimageAt r p0 Q)
       (parabolicRescaleAt r p0 u) ≤
@@ -719,7 +722,8 @@ theorem eParabolicC2HolderGaugeOn_rescaleAt_le
         Cspatial j := by
     intro j hj p hp
     rw [parabolicSpatialJet_rescaleAt r p0 u j p
-      ((hspace _).of_le (by exact_mod_cast Nat.le_of_lt_succ hj))]
+      ((hspace (parabolicDilationAt r p0 p) hp).of_le
+        (by exact_mod_cast Nat.le_of_lt_succ hj))]
     calc
       ‖(r : Real) ^ j • parabolicSpatialJet j u
           (parabolicDilationAt r p0 p)‖ =
@@ -764,7 +768,7 @@ theorem eParabolicC2HolderGaugeOn_rescaleAt_le
     · funext p
       simp only [Pi.smul_apply, Function.comp_apply, Set.restrict_apply]
       exact parabolicSpatialJet_rescaleAt r p0 u 2 p.1
-        ((hspace _).of_le le_rfl)
+        ((hspace (parabolicDilationAt r p0 p.1) p.2).of_le le_rfl)
   have htimeHolder : HolderWith
       (C * r ^ (alpha : Real) * r ^ 2) alpha
       ((parabolicPreimageAt r p0 Q).restrict
@@ -793,13 +797,16 @@ theorem eParabolicC2HolderGaugeOn_le_of_rescaleAt
     [NormedAddCommGroup F] [NormedSpace Real F]
     (r alpha C : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V)
     (Q : Set (ParabolicPoint V)) (u : Real → V → F)
-    (hspace : ∀ t, ContDiff Real 2 (u t))
+    (hspace : ∀ p ∈ Q, ContDiff Real 2 (u p.time))
     (h : eParabolicC2HolderGaugeOn alpha (parabolicPreimageAt r p0 Q)
       (parabolicRescaleAt r p0 u) ≤ C) :
     eParabolicC2HolderGaugeOn alpha Q u ≤
       parabolicC2HolderRescaleConst r⁻¹ alpha C := by
-  have hscaled : ∀ t, ContDiff Real 2 (parabolicRescaleAt r p0 u t) :=
-    contDiff_parabolicRescaleAt_space r p0 u hspace
+  have hscaled : ∀ p ∈ parabolicPreimageAt r p0 Q,
+      ContDiff Real 2 (parabolicRescaleAt r p0 u p.time) := by
+    intro p hp
+    exact contDiff_parabolicRescaleAt_space r p0 u p.time
+      (hspace (parabolicDilationAt r p0 p) hp)
   have hresult := eParabolicC2HolderGaugeOn_rescaleAt_le r⁻¹ alpha C
     (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
     (parabolicPreimageAt r p0 Q) (parabolicRescaleAt r p0 u) hscaled h
@@ -811,7 +818,9 @@ theorem eParabolicC2HolderGaugeOn_parabolicCylinder_Ioo_le_of_timeTranslate
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]
     (tau a b : Real) (Omega : Set V) (alpha C : NNReal)
-    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (u : Real → V → F)
+    (hspace : ∀ p ∈ parabolicCylinder (Set.Ioo (a + tau) (b + tau)) Omega,
+      ContDiff Real 2 (u p.time))
     (h : eParabolicC2HolderGaugeOn alpha
       (parabolicCylinder (Set.Ioo a b) Omega)
       (parabolicRescaleAt 1 (parabolicPoint tau 0) u) ≤ C) :
@@ -834,14 +843,19 @@ theorem eParabolicC2HolderGaugeOn_scaledBall_le_of_rescaleAt
     [NormedAddCommGroup F] [NormedSpace Real F]
     (r alpha C : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V)
     (R : Real) (u : Real → V → F)
-    (hspace : ∀ t, ContDiff Real 2 (u t))
+    (hspace : ∀ p ∈ Metric.ball p0 ((r : Real) * R),
+      ContDiff Real 2 (u p.time))
     (h : eParabolicC2HolderGaugeOn alpha
       (Metric.ball (parabolicPoint 0 0) R)
       (parabolicRescaleAt r p0 u) ≤ C) :
     eParabolicC2HolderGaugeOn alpha (Metric.ball p0 ((r : Real) * R)) u ≤
       parabolicC2HolderRescaleConst r⁻¹ alpha C := by
-  have hscaled : ∀ t, ContDiff Real 2 (parabolicRescaleAt r p0 u t) :=
-    contDiff_parabolicRescaleAt_space r p0 u hspace
+  have hscaled : ∀ p ∈ Metric.ball (parabolicPoint (V := V) 0 0) R,
+      ContDiff Real 2 (parabolicRescaleAt r p0 u p.time) := by
+    intro p hp
+    exact contDiff_parabolicRescaleAt_space r p0 u p.time
+      (hspace (parabolicDilationAt r p0 p)
+        (parabolicDilationAt_mapsTo_ball r hr R p0 hp))
   have hresult := eParabolicC2HolderGaugeOn_rescaleAt_le r⁻¹ alpha C
     (parabolicInverseDilationAt r p0 (parabolicPoint 0 0))
     (Metric.ball (parabolicPoint 0 0) R)
@@ -854,14 +868,18 @@ theorem eParabolicC2HolderGaugeOn_ball_le_of_rescaleAt
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]
     (r alpha C : NNReal) (hr : 0 < r) (p0 : ParabolicPoint V)
-    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (u : Real → V → F)
+    (hspace : ∀ p ∈ Metric.ball p0 r, ContDiff Real 2 (u p.time))
     (h : eParabolicC2HolderGaugeOn alpha
       (Metric.ball (parabolicPoint 0 0) 1)
       (parabolicRescaleAt r p0 u) ≤ C) :
     eParabolicC2HolderGaugeOn alpha (Metric.ball p0 r) u ≤
       parabolicC2HolderRescaleConst r⁻¹ alpha C := by
+  have hspace' : ∀ p ∈ Metric.ball p0 ((r : Real) * 1),
+      ContDiff Real 2 (u p.time) := by
+    simpa only [mul_one] using hspace
   simpa using eParabolicC2HolderGaugeOn_scaledBall_le_of_rescaleAt
-    r alpha C hr p0 1 u hspace h
+    r alpha C hr p0 1 u hspace' h
 
 def parabolicLinearMap {V W : Type*} [NormedAddCommGroup V]
     [NormedSpace Real V] [NormedAddCommGroup W] [NormedSpace Real W]

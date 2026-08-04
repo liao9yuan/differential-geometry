@@ -89,23 +89,91 @@ theorem ball_parabolicPoint_eq_parabolicCylinder
     exact ⟨by simpa only [Real.sqrt_eq_rpow] using htimeRoot, hspace⟩
 
 theorem eParabolicC2HolderGaugeOn_ball_le_of_timeTranslate
-    (tau R : Real) (hR : 0 ≤ R) (alpha C : NNReal)
-    (u : Real → V → F) (hspace : ∀ t, ContDiff Real 2 (u t))
+    (tau R : Real) (hR : 0 ≤ R) (x0 : V) (alpha C : NNReal)
+    (u : Real → V → F)
+    (hspace : ∀ p ∈ Metric.ball (parabolicPoint 0 x0) R,
+      ContDiff Real 2 (u p.time))
     (h : eParabolicC2HolderGaugeOn alpha
-      (parabolicCylinder
-        (Set.Ioo (-R ^ 2 - tau) (R ^ 2 - tau)) (Metric.ball 0 R))
+      (parabolicCylinder (Set.Ioo (-R ^ 2 - tau) (R ^ 2 - tau))
+        (Metric.ball x0 R))
       (parabolicRescaleAt 1 (parabolicPoint tau 0) u) ≤ C) :
     eParabolicC2HolderGaugeOn alpha
-        (Metric.ball (parabolicPoint 0 0) R) u ≤
+        (Metric.ball (parabolicPoint 0 x0) R) u ≤
       parabolicC2HolderRescaleConst 1 alpha C := by
-  rw [ball_parabolicPoint_eq_parabolicCylinder 0 R hR 0]
+  have hspace' : ∀ p ∈ parabolicCylinder
+      (Set.Ioo (-R ^ 2 - tau + tau) (R ^ 2 - tau + tau))
+      (Metric.ball x0 R), ContDiff Real 2 (u p.time) := by
+    intro p hp
+    apply hspace p
+    rw [ball_parabolicPoint_eq_parabolicCylinder 0 R hR x0]
+    simpa only [zero_sub, zero_add,
+      show -R ^ 2 - tau + tau = -R ^ 2 by ring,
+      show R ^ 2 - tau + tau = R ^ 2 by ring] using hp
+  rw [ball_parabolicPoint_eq_parabolicCylinder 0 R hR x0]
   have hresult :=
     eParabolicC2HolderGaugeOn_parabolicCylinder_Ioo_le_of_timeTranslate
-      tau (-R ^ 2 - tau) (R ^ 2 - tau) (Metric.ball 0 R)
-        alpha C u hspace h
+      tau (-R ^ 2 - tau) (R ^ 2 - tau) (Metric.ball x0 R)
+        alpha C u hspace' h
   rw [show -R ^ 2 - tau + tau = -R ^ 2 by ring,
     show R ^ 2 - tau + tau = R ^ 2 by ring] at hresult
   simpa only [zero_sub, zero_add] using hresult
+
+theorem eParabolicC2HolderGaugeOn_centered_ball_le_of_parabolicCylinder
+    {t₀ t₁ r : Real} (hr : 0 ≤ r) (htime : t₁ - t₀ = 2 * r ^ 2)
+    (center : V) (alpha C : NNReal)
+    (u : Real → BoundedContinuousFunction V F)
+    (du : Real → BoundedContinuousFunction V (V →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction V (V →L[Real] V →L[Real] F))
+    (hu : ∀ s ∈ Set.Ioo t₀ t₁, ∀ x,
+      HasFDerivAt (u s : V → F) (du s x) x)
+    (hdu : ∀ s ∈ Set.Ioo t₀ t₁, ∀ x,
+      HasFDerivAt (du s : V → V →L[Real] F) (d2u s x) x)
+    (h : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Set.Ioo t₀ t₁) (Metric.ball center r))
+      (fun t x ↦ u t x) ≤ C) :
+    eParabolicC2HolderGaugeOn alpha
+        (Metric.ball (parabolicPoint 0 center) r)
+        (fun t x ↦ u ((t₀ + t₁) / 2 + t) x) ≤
+      parabolicC2HolderRescaleConst 1 alpha C := by
+  let midpoint : Real := (t₀ + t₁) / 2
+  let v : Real → V → F := fun t x ↦ u (midpoint + t) x
+  let tau : Real := -midpoint
+  have hspace : ∀ p ∈ Metric.ball (parabolicPoint 0 center) r,
+      ContDiff Real 2 (v p.time) := by
+    intro p hp
+    have hpCylinder : p ∈ parabolicCylinder
+        (Set.Ioo (-r ^ 2) (r ^ 2)) (Metric.ball center r) := by
+      rw [ball_parabolicPoint_eq_parabolicCylinder 0 r hr center] at hp
+      simpa only [zero_sub, zero_add] using hp
+    have hs : midpoint + p.time ∈ Set.Ioo t₀ t₁ := by
+      dsimp only [midpoint]
+      constructor <;> nlinarith [htime, hpCylinder.1.1, hpCylinder.1.2]
+    exact contDiff_two_of_hasFDerivAt (u (midpoint + p.time))
+      (du (midpoint + p.time)) (d2u (midpoint + p.time))
+      (hu (midpoint + p.time) hs) (hdu (midpoint + p.time) hs)
+  have htranslate : parabolicRescaleAt 1 (parabolicPoint tau 0) v =
+      fun t x ↦ u t x := by
+    funext t x
+    change u (midpoint + (tau + 1 ^ 2 * t)) (0 + (1 : Real) • x) = u t x
+    rw [one_pow, one_mul, one_smul, zero_add]
+    congr 2
+    dsimp only [tau]
+    ring
+  have hleft : -r ^ 2 - tau = t₀ := by
+    dsimp only [tau, midpoint]
+    nlinarith [htime]
+  have hright : r ^ 2 - tau = t₁ := by
+    dsimp only [tau, midpoint]
+    nlinarith [htime]
+  have hsource : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Set.Ioo (-r ^ 2 - tau) (r ^ 2 - tau))
+        (Metric.ball center r))
+      (parabolicRescaleAt 1 (parabolicPoint tau 0) v) ≤ C := by
+    rw [hleft, hright, htranslate]
+    exact h
+  have hresult := eParabolicC2HolderGaugeOn_ball_le_of_timeTranslate
+    tau r hr center alpha C v hspace hsource
+  simpa only [v, midpoint] using hresult
 
 def parabolicInteriorRadius
     (a t₀ t₁ b r R : Real) : Real :=
@@ -775,7 +843,7 @@ theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_scaledBall_rescaleAt
   intro i hi
   exact eParabolicC2HolderGaugeOn_scaledBall_le_of_rescaleAt
     (scale i) alpha (localBound i) (hscale i hi) (center i) (innerRadius i)
-      u hspace (hlocal i hi)
+      u (fun q _ ↦ hspace q.time) (hlocal i hi)
 
 theorem eParabolicC2HolderGaugeOn_le_of_finite_buffered_rescaleAt
     {ι : Type*} {Q : Set (ParabolicPoint V)} {alpha delta : NNReal}
