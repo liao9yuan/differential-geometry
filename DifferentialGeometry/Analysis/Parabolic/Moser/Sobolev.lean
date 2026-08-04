@@ -431,6 +431,165 @@ theorem localized_parabolic_sobolev_of_energy_bound
       rw [Real.rpow_add_of_nonneg hA (by norm_num) htheta, Real.rpow_one]
       ring
 
+theorem localized_parabolic_sobolev_of_mass_and_dirichlet_bound
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b A : ℝ} (hab : a ≤ b) (hA : 0 ≤ A)
+    (hmass_le : ∀ t ∈ Icc a b,
+      localizedL2Mass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t) ≤ A)
+    (hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) (Icc a b))
+    (hdirichlet_le :
+      (∫ t in a..b,
+        localizedDirichletEnergy (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu t)) ≤ A) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∫ t in a..b, ∫ x,
+          |cutoff.toFun x * u t x| ^
+            (2 + 4 / (Module.finrank ℝ E : ℝ))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+        C *
+          (((b - a + 1) * A +
+            ∫ t in a..b,
+              cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t)) ^
+            (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
+  let mass : ℝ → ℝ := fun t =>
+    localizedL2Mass (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu t)
+  let dirichlet : ℝ → ℝ := fun t =>
+    localizedDirichletEnergy (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu t)
+  let error : ℝ → ℝ := fun t =>
+    cutoffGradientError (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu t)
+  let B : ℝ := (b - a + 1) * A + ∫ t in a..b, error t
+  have hmass_cont : ContinuousOn mass (Icc a b) := by
+    simpa only [mass] using
+      (contDiff_localizedL2Mass (I := I) (M := M) cutoff u hu).continuous.continuousOn
+  have herror_cont : ContinuousOn error (Icc a b) := by
+    simpa only [error] using
+      (contDiff_cutoffGradientError (I := I) (M := M) cutoff u hu).continuous.continuousOn
+  have hmass_int : IntervalIntegrable mass volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hmass_cont
+  have hdirichlet_int : IntervalIntegrable dirichlet volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab, dirichlet] using hdirichlet
+  have herror_int : IntervalIntegrable error volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using herror_cont
+  have hmass_integral : (∫ t in a..b, mass t) ≤ (b - a) * A := by
+    calc
+      (∫ t in a..b, mass t) ≤ ∫ _ in a..b, A :=
+        intervalIntegral.integral_mono_on hab hmass_int intervalIntegrable_const
+          (by simpa only [mass] using hmass_le)
+      _ = (b - a) * A := by simp
+  have herror_nonneg : 0 ≤ ∫ t in a..b, error t :=
+    intervalIntegral.integral_nonneg hab (fun t _ => by
+      exact cutoffGradientError_nonneg (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t))
+  have hAleB : A ≤ B := by
+    dsimp only [B]
+    nlinarith
+  have hB : 0 ≤ B := hA.trans hAleB
+  have henergy_le :
+      (∫ t in a..b, mass t + dirichlet t + error t) ≤ B := by
+    calc
+      (∫ t in a..b, mass t + dirichlet t + error t) =
+          (∫ t in a..b, mass t) + (∫ t in a..b, dirichlet t) +
+            ∫ t in a..b, error t := by
+        rw [intervalIntegral.integral_add (hmass_int.add hdirichlet_int) herror_int,
+          intervalIntegral.integral_add hmass_int hdirichlet_int]
+      _ ≤ B := by
+        dsimp only [B]
+        have hdir : (∫ t in a..b, dirichlet t) ≤ A := by
+          simpa only [dirichlet] using hdirichlet_le
+        linarith
+  have hresult := localized_parabolic_sobolev_of_energy_bound
+    (I := I) (M := M) g hdim cutoff u hu hab hB
+    (fun t ht => (hmass_le t ht).trans hAleB)
+    hdirichlet
+    (by simpa only [mass, dirichlet, error] using henergy_le)
+  simpa only [B, error] using hresult
+
+theorem localized_parabolic_sobolev_of_nested_cutoffs
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff outer : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b A K L : ℝ} (hab : a ≤ b)
+    (hA : 0 ≤ A) (hK : 0 ≤ K)
+    (hmass_le : ∀ t ∈ Icc a b,
+      localizedL2Mass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t) ≤ A)
+    (hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) (Icc a b))
+    (hdirichlet_le :
+      (∫ t in a..b,
+        localizedDirichletEnergy (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu t)) ≤ A)
+    (hgrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x) ≤
+        K * outer.toFun x ^ 2)
+    (houterMass_le :
+      (∫ t in a..b,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g u hu t)) ≤ L) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∫ t in a..b, ∫ x,
+          |cutoff.toFun x * u t x| ^
+            (2 + 4 / (Module.finrank ℝ E : ℝ))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+        C * (((b - a + 1) * A + K * L) ^
+          (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
+  obtain ⟨C, hC, hbase⟩ := localized_parabolic_sobolev_of_mass_and_dirichlet_bound
+    (I := I) (M := M) g hdim cutoff u hu hab hA hmass_le hdirichlet hdirichlet_le
+  refine ⟨C, hC, hbase.trans ?_⟩
+  have herror_le := intervalIntegral_cutoffGradientError_le_localizedL2Mass
+    (I := I) (M := M) cutoff outer u hu hab hgrad
+  have hKmass :
+      K * (∫ t in a..b,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g u hu t)) ≤ K * L :=
+    mul_le_mul_of_nonneg_left houterMass_le hK
+  have herror_nonneg :
+      0 ≤ ∫ t in a..b,
+        cutoffGradientError (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g u hu t) :=
+    intervalIntegral.integral_nonneg hab (fun t _ =>
+      cutoffGradientError_nonneg (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t))
+  have hduration : 0 ≤ b - a + 1 := by linarith
+  have hleft_nonneg :
+      0 ≤ (b - a + 1) * A +
+        ∫ t in a..b,
+          cutoffGradientError (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) :=
+    add_nonneg (mul_nonneg hduration hA) herror_nonneg
+  have hbase_le :
+      (b - a + 1) * A +
+          ∫ t in a..b,
+            cutoffGradientError (I := I) (M := M) cutoff
+              (smoothScalarSlice (I := I) g u hu t) ≤
+        (b - a + 1) * A + K * L := by
+    linarith
+  have hdpos : 0 < (Module.finrank ℝ E : ℝ) := by linarith
+  have hexponent : 0 ≤ 1 + 2 / (Module.finrank ℝ E : ℝ) := by positivity
+  exact mul_le_mul_of_nonneg_left
+    (Real.rpow_le_rpow hleft_nonneg hbase_le hexponent) hC
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end

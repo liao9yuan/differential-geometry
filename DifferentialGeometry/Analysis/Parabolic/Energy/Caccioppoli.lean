@@ -85,6 +85,47 @@ theorem cutoffGradientError_nonneg {g : SmoothRiemannianMetric I M}
   exact integral_nonneg (fun x => mul_nonneg (sq_nonneg _)
     (metric_inner_self_nonneg (I := I) (M := M) g x _))
 
+theorem cutoffGradientError_le_localizedL2Mass
+    {g : SmoothRiemannianMetric I M}
+    (cutoff outer u : SmoothScalar g) {K : ℝ}
+    (hgrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x) ≤
+        K * outer.toFun x ^ 2) :
+    cutoffGradientError (I := I) (M := M) cutoff u ≤
+      K * localizedL2Mass (I := I) (M := M) outer u := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  let gradNormSq : M → ℝ := fun x =>
+    g.inner x
+      (gradFun (I := I) g cutoff.toFun x)
+      (gradFun (I := I) g cutoff.toFun x)
+  have hgrad_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ gradNormSq := by
+    have h := contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
+      (grad_g (I := I) g cutoff.smooth) (grad_g (I := I) g cutoff.smooth)
+    simpa only [gradNormSq, grad_g_apply] using h
+  have hleft_int : Integrable (fun x : M => u.toFun x ^ 2 * gradNormSq x) μ :=
+    ((u.smooth.continuous.pow 2).mul hgrad_smooth.continuous)
+      |>.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hright_int : Integrable
+      (fun x : M => K * (outer.toFun x ^ 2 * u.toFun x ^ 2)) μ :=
+    (continuous_const.mul ((outer.smooth.continuous.pow 2).mul
+      (u.smooth.continuous.pow 2))).integrable_of_hasCompactSupport
+        (HasCompactSupport.of_compactSpace _)
+  change (∫ x, u.toFun x ^ 2 * gradNormSq x ∂μ) ≤
+    K * ∫ x, outer.toFun x ^ 2 * u.toFun x ^ 2 ∂μ
+  rw [← integral_const_mul]
+  apply integral_mono hleft_int hright_int
+  intro x
+  have hmul := mul_le_mul_of_nonneg_left (hgrad x) (sq_nonneg (u.toFun x))
+  change u.toFun x ^ 2 * gradNormSq x ≤
+    K * (outer.toFun x ^ 2 * u.toFun x ^ 2)
+  nlinarith
+
 omit [I.Boundaryless] in
 theorem contDiff_localizedL2Mass
     {g : SmoothRiemannianMetric I M}
@@ -155,6 +196,50 @@ theorem contDiff_cutoffGradientError
         g.inner x
           (gradFun (I := I) g cutoff.toFun x)
           (gradFun (I := I) g cutoff.toFun x)) hintegrand
+
+theorem intervalIntegral_cutoffGradientError_le_localizedL2Mass
+    {g : SmoothRiemannianMetric I M}
+    (cutoff outer : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {K a b : ℝ} (hab : a ≤ b)
+    (hgrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x) ≤
+        K * outer.toFun x ^ 2) :
+    (∫ t in a..b,
+      cutoffGradientError (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) ≤
+      K * ∫ t in a..b,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g u hu t) := by
+  let error : ℝ → ℝ := fun t =>
+    cutoffGradientError (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g u hu t)
+  let outerMass : ℝ → ℝ := fun t =>
+    localizedL2Mass (I := I) (M := M) outer
+      (smoothScalarSlice (I := I) g u hu t)
+  have herror_cont : ContinuousOn error (Icc a b) := by
+    simpa only [error] using
+      (contDiff_cutoffGradientError (I := I) (M := M) cutoff u hu).continuous.continuousOn
+  have hmass_cont : ContinuousOn outerMass (Icc a b) := by
+    simpa only [outerMass] using
+      (contDiff_localizedL2Mass (I := I) (M := M) outer u hu).continuous.continuousOn
+  have herror_int : IntervalIntegrable error volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using herror_cont
+  have hmass_int : IntervalIntegrable outerMass volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hmass_cont
+  have hmono : (∫ t in a..b, error t) ≤ ∫ t in a..b, K * outerMass t :=
+    intervalIntegral.integral_mono_on hab herror_int (hmass_int.const_mul K)
+      (fun t _ => cutoffGradientError_le_localizedL2Mass
+        (I := I) (M := M) cutoff outer
+          (smoothScalarSlice (I := I) g u hu t) hgrad)
+  rw [intervalIntegral.integral_const_mul] at hmono
+  simpa only [error, outerMass] using hmono
 
 omit [I.Boundaryless] in
 theorem hasDerivAt_localizedL2Mass

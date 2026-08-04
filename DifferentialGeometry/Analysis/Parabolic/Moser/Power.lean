@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Energy.Caccioppoli
+import DifferentialGeometry.Analysis.Parabolic.Moser.Sobolev
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 
 
@@ -172,6 +173,89 @@ theorem caccioppoli_rpow_of_subsolution
     exact (Real.rpow_pos_of_pos (hpos t x) q).le
   · intro t ht x
     exact rpow_subsolution (I := I) (M := M) g u source hu hpos hq (hpde t ht x)
+
+theorem rpow_moser_step
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff outer : SmoothScalar g)
+    (u source : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq : 1 ≤ q)
+    {weight dweight : ℝ → ℝ} {a t₀ t₁ A K L : ℝ}
+    (hat₀ : a ≤ t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (hA : 0 ≤ A) (hK : 0 ≤ K)
+    (hdweight : ContinuousOn dweight (Icc a t₁))
+    (hweight : ∀ t ∈ Icc a t₁, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a t₁, 0 ≤ weight t)
+    (hweight_a : weight a = 0)
+    (hweight_inner : ∀ t ∈ Icc t₀ t₁, weight t = 1)
+    (hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
+          (contMDiff_rpow_of_pos hu hpos q) t)) (Icc a t₁))
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x)
+    (hrhs_le : ∀ t ∈ Icc t₀ t₁,
+      (∫ s in a..t,
+        dweight s * localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun r x => u r x ^ q)
+              (contMDiff_rpow_of_pos hu hpos q) s) +
+          weight s *
+            (4 * cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g (fun r x => u r x ^ q)
+                  (contMDiff_rpow_of_pos hu hpos q) s) +
+              ∫ x, 2 * cutoff.toFun x ^ 2 * u s x ^ q *
+                  rpowSource q u source s x
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g))) ≤ A)
+    (hgrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g cutoff.toFun x)
+          (gradFun (I := I) g cutoff.toFun x) ≤
+        K * outer.toFun x ^ 2)
+    (houterMass_le :
+      (∫ t in t₀..t₁,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
+            (contMDiff_rpow_of_pos hu hpos q) t)) ≤ L) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∫ t in t₀..t₁, ∫ x,
+          |cutoff.toFun x * u t x ^ q| ^
+            (2 + 4 / (Module.finrank ℝ E : ℝ))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+        C * (((t₁ - t₀ + 1) * A + K * L) ^
+          (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
+  let huq := contMDiff_rpow_of_pos hu hpos q
+  let sourceq := rpowSource q u source
+  have hsourceq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => sourceq p.1 p.2) := by
+    simpa only [sourceq] using contMDiff_rpowSource_of_pos hu hsource hpos q
+  have hpdeq : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x ^ q) t ≤
+        Δ_g (I := I) g
+            (smoothScalarSlice (I := I) g (fun s x => u s x ^ q) huq t).smooth x +
+          sourceq t x := by
+    intro t ht x
+    simpa only [huq, sourceq] using
+      rpow_subsolution (I := I) (M := M) g u source hu hpos hq (hpde t ht x)
+  have henergy := caccioppoli_inner_energy_of_subsolution
+    (I := I) (M := M) cutoff (fun t x => u t x ^ q) sourceq huq hsourceq
+    hat₀ ht₀t₁ hdweight hweight hweight_nonneg hweight_a hweight_inner
+    (by simpa only [huq] using hdirichlet)
+    (fun t _ x => (Real.rpow_pos_of_pos (hpos t x) q).le)
+    hpdeq
+    (by simpa only [huq, sourceq] using hrhs_le)
+  apply localized_parabolic_sobolev_of_nested_cutoffs
+    (I := I) (M := M) g hdim cutoff outer (fun t x => u t x ^ q) huq
+    ht₀t₁ hA hK henergy.1
+  · exact hdirichlet.mono (fun t ht => ⟨hat₀.trans ht.1, ht.2⟩)
+  · exact henergy.2
+  · exact hgrad
+  · simpa only [huq] using houterMass_le
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
