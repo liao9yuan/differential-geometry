@@ -152,6 +152,27 @@ theorem morse_cons_smul' (h : ℝ) (t : MorseModel n) :
   | zero => simp [morseE0, morseCons]
   | succ j => simp [morseE0, morseCons]
 
+theorem morseCons_add (h₁ h₂ : ℝ) (t₁ t₂ : MorseModel n) :
+    morseCons (h₁ + h₂) (t₁ + t₂) = morseCons h₁ t₁ + morseCons h₂ t₂ := by
+  funext i
+  cases i using Fin.cases with
+  | zero => simp [morseCons]
+  | succ j => simp [morseCons]
+
+@[simp] theorem morseCons_zero_add (t₁ t₂ : MorseModel n) :
+    morseCons (0 : ℝ) (t₁ + t₂) = morseCons (0 : ℝ) t₁ + morseCons (0 : ℝ) t₂ := by
+  funext i
+  cases i using Fin.cases with
+  | zero => simp [morseCons]
+  | succ j => simp [morseCons]
+
+@[simp] theorem morseCons_zero_smul (c : ℝ) (t : MorseModel n) :
+    morseCons (0 : ℝ) (c • t) = c • morseCons (0 : ℝ) t := by
+  funext i
+  cases i using Fin.cases with
+  | zero => simp [morseCons]
+  | succ j => simp [morseCons]
+
 noncomputable def morsePivot (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
     (x : MorseModel (n + 1)) : ℝ :=
   a x morseE0 morseE0
@@ -243,6 +264,60 @@ theorem morse_complete_square_sqrt
   rw [morse_complete_square a hsym x hpiv]
   rw [morseHead_completionMap]
   rw [morse_sign_sqrt_square]
+
+noncomputable def morseReducedInner
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x' v : MorseModel n) : MorseModel n →ₗ[ℝ] ℝ :=
+  { toFun := fun w =>
+      a (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w) -
+        a (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) morseE0 *
+          a (morseCons (0 : ℝ) x') morseE0 (morseCons (0 : ℝ) w) /
+            morsePivot a (morseCons (0 : ℝ) x')
+    map_add' := by
+      intro w₁ w₂
+      simp [map_add]
+      ring
+    map_smul' := by
+      intro c w
+      simp [map_smul]
+      ring }
+
+noncomputable def morseReducedFamily
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x' : MorseModel n) : LinearMap.BilinForm ℝ (MorseModel n) :=
+  { toFun := fun v => morseReducedInner a x' v
+    map_add' := by
+      intro v₁ v₂
+      apply LinearMap.ext
+      intro w
+      rw [LinearMap.add_apply]
+      simp [morseReducedInner, morseCons_zero_add, map_add]
+      ring
+    map_smul' := by
+      intro c v
+      apply LinearMap.ext
+      intro w
+      simp [morseReducedInner, morseCons_zero_smul, map_smul]
+      ring }
+
+theorem morseReducedFamily_apply
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (x' v w : MorseModel n) :
+    morseReducedFamily a x' v w =
+      a (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w) -
+        a (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) morseE0 *
+          a (morseCons (0 : ℝ) x') morseE0 (morseCons (0 : ℝ) w) /
+            morsePivot a (morseCons (0 : ℝ) x') := by
+  rfl
+
+theorem morseReducedFamily_sym (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (hsym : ∀ x y z, a x y z = a x z y) (x' v w : MorseModel n) :
+    morseReducedFamily a x' v w = morseReducedFamily a x' w v := by
+  rw [morseReducedFamily_apply, morseReducedFamily_apply]
+  rw [hsym (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w)]
+  rw [hsym (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) morseE0]
+  rw [hsym (morseCons (0 : ℝ) x') morseE0 (morseCons (0 : ℝ) w)]
+  ring
 
 end Completion
 
