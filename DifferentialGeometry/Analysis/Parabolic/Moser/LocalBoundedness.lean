@@ -33,6 +33,12 @@ def moserLocalizedMass
       u t x ^ parabolicMoserExponent n p₀ k
       ∂(riemannianVolumeMeasure (I := I) (M := M) g)
 
+def moserNormalizedMass
+    (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ) (p₀ a τ t₁ : ℝ) (k : ℕ) : ℝ :=
+  moserLocalizedMass (I := I) (M := M) n rho u p₀ a τ t₁ k ^
+    (1 / parabolicMoserExponent n p₀ k)
+
 def moserTimeDerivativeCost (a τ : ℝ) (k : ℕ) : ℝ :=
   (2 * timeCutoffDerivConstant / (τ - a)) * 2 ^ k
 
@@ -411,6 +417,167 @@ theorem moserStepCoefficient_le
     _ ≤ (t₁ - a + 1) * ((D + 4 * K) * 16 ^ k) + K * 16 ^ k := by
       gcongr
     _ = ((t₁ - a + 1) * (D + 4 * K) + K) * 16 ^ k := by ring
+
+theorem moserLocalizedMass_succ_le_majorant
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    (k : ℕ) :
+    moserLocalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+        rho u p₀ a τ t₁ (k + 1) ≤
+      max 1 (localizedSobolevConstant (I := I) (M := M) g hdim) *
+        ((max 1 (moserStepConstant (I := I) rho a τ t₁) * 16 ^ k) *
+          moserLocalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+            rho u p₀ a τ t₁ k) ^ parabolicMoserGain (Module.finrank ℝ E) := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let C := localizedSobolevConstant (I := I) (M := M) g hdim
+  let A := moserStepConstant (I := I) rho a τ t₁
+  let coefficient := moserStepCoefficient (I := I) rho a τ t₁ k
+  let L := moserLocalizedMass (I := I) (M := M) n rho u p₀ a τ t₁ k
+  let gain := parabolicMoserGain n
+  have hC : 0 ≤ C := localizedSobolevConstant_nonneg (I := I) (M := M) g hdim
+  have hA : 0 ≤ A := moserStepConstant_nonneg rho haτ hτt₁
+  have hcoefficient : 0 ≤ coefficient := moserStepCoefficient_nonneg rho haτ hτt₁ k
+  have hL : 0 ≤ L := moserLocalizedMass_nonneg n rho u haτ hτt₁
+    (fun t x => (hpos t x).le) k
+  have hgain : 0 ≤ gain := (parabolicMoserGain_pos n).le
+  have hcoefficient_le : coefficient ≤ A * 16 ^ k :=
+    moserStepCoefficient_le rho haτ hτt₁ k
+  have hA_le : A * 16 ^ k * L ≤ max 1 A * 16 ^ k * L := by
+    gcongr
+    exact le_max_right 1 A
+  have hfirst := moserLocalizedMass_succ_le_of_subsolution
+    (I := I) (M := M) g hdim rho u hu hpos hp₀ haτ hτt₁ hpde k
+  calc
+    _ ≤ C * (coefficient * L) ^ gain := by
+      simpa only [n, C, coefficient, L, gain] using hfirst
+    _ ≤ C * (A * 16 ^ k * L) ^ gain := by
+      gcongr
+    _ ≤ max 1 C * (A * 16 ^ k * L) ^ gain := by
+      gcongr
+      exact le_max_right 1 C
+    _ ≤ max 1 C * ((max 1 A * 16 ^ k) * L) ^ gain := by
+      have hleft_nonneg : 0 ≤ A * 16 ^ k * L := by positivity
+      have hrpow := Real.rpow_le_rpow hleft_nonneg hA_le hgain
+      exact mul_le_mul_of_nonneg_left hrpow
+        ((by norm_num : (0 : ℝ) ≤ 1).trans (le_max_left 1 C))
+    _ = _ := by
+      simp only [n, C, A, L, gain]
+
+theorem moserNormalizedMass_succ_le_of_subsolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    (k : ℕ) :
+    moserNormalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+        rho u p₀ a τ t₁ (k + 1) ≤
+      Real.exp
+          (moserIterationCost (parabolicMoserDecay (Module.finrank ℝ E))
+            ((parabolicMoserDecay (Module.finrank ℝ E) *
+                Real.log (max 1
+                  (localizedSobolevConstant (I := I) (M := M) g hdim)) +
+                Real.log (max 1 (moserStepConstant (I := I) rho a τ t₁))) / p₀)
+            (Real.log 16 / p₀) k) *
+        moserNormalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+          rho u p₀ a τ t₁ k := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let C := max 1 (localizedSobolevConstant (I := I) (M := M) g hdim)
+  let A := max 1 (moserStepConstant (I := I) rho a τ t₁)
+  let L := moserLocalizedMass (I := I) (M := M) n rho u p₀ a τ t₁ k
+  let L' := moserLocalizedMass (I := I) (M := M) n rho u p₀ a τ t₁ (k + 1)
+  have hp₀pos : 0 < p₀ := lt_of_lt_of_le (by norm_num) hp₀
+  have hC : 1 ≤ C := le_max_left 1 _
+  have hA : 1 ≤ A := le_max_left 1 _
+  have hL : 0 ≤ L := moserLocalizedMass_nonneg n rho u haτ hτt₁
+    (fun t x => (hpos t x).le) k
+  have hL' : 0 ≤ L' := moserLocalizedMass_nonneg n rho u haτ hτt₁
+    (fun t x => (hpos t x).le) (k + 1)
+  have hstep := moserLocalizedMass_succ_le_majorant
+    (I := I) (M := M) g hdim rho u hu hpos hp₀ haτ hτt₁ hpde k
+  have hnormalized := normalized_moser_step (n := n) hp₀pos hC hA hL hL' k
+    (by simpa only [C, A, L, L', n] using hstep)
+  simpa only [moserNormalizedMass, n, C, A, L, L'] using hnormalized
+
+theorem moserNormalizedMass_le_of_subsolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    (k : ℕ) :
+    moserNormalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+        rho u p₀ a τ t₁ k ≤
+      Real.exp
+          (∑' j, moserIterationCost (parabolicMoserDecay (Module.finrank ℝ E))
+            ((parabolicMoserDecay (Module.finrank ℝ E) *
+                Real.log (max 1
+                  (localizedSobolevConstant (I := I) (M := M) g hdim)) +
+                Real.log (max 1 (moserStepConstant (I := I) rho a τ t₁))) / p₀)
+            (Real.log 16 / p₀) j) *
+        moserNormalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+          rho u p₀ a τ t₁ 0 := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let theta := parabolicMoserDecay n
+  let C := max 1 (localizedSobolevConstant (I := I) (M := M) g hdim)
+  let A := max 1 (moserStepConstant (I := I) rho a τ t₁)
+  let initialCost := (theta * Real.log C + Real.log A) / p₀
+  let linearCost := Real.log 16 / p₀
+  let X : ℕ → ℝ := fun j =>
+    moserNormalizedMass (I := I) (M := M) n rho u p₀ a τ t₁ j
+  have hp₀pos : 0 < p₀ := lt_of_lt_of_le (by norm_num) hp₀
+  have htheta : 0 ≤ theta := (parabolicMoserDecay_pos n).le
+  have htheta_one : theta < 1 := parabolicMoserDecay_lt_one n
+  have hC : 1 ≤ C := le_max_left 1 _
+  have hA : 1 ≤ A := le_max_left 1 _
+  have hlogC : 0 ≤ Real.log C := Real.log_nonneg hC
+  have hlogA : 0 ≤ Real.log A := Real.log_nonneg hA
+  have hinitialCost : 0 ≤ initialCost := by
+    exact div_nonneg (add_nonneg (mul_nonneg htheta hlogC) hlogA) hp₀pos.le
+  have hlinearCost : 0 ≤ linearCost := by
+    exact div_nonneg (Real.log_nonneg (by norm_num)) hp₀pos.le
+  have hXzero : 0 ≤ X 0 := Real.rpow_nonneg
+    (moserLocalizedMass_nonneg n rho u haτ hτt₁
+      (fun t x => (hpos t x).le) 0) _
+  have hstep : ∀ j, X (j + 1) ≤
+      Real.exp (moserIterationCost theta initialCost linearCost j) * X j := by
+    intro j
+    simpa only [X, theta, initialCost, linearCost, C, A, n] using
+      moserNormalizedMass_succ_le_of_subsolution
+        (I := I) (M := M) g hdim rho u hu hpos hp₀ haτ hτt₁ hpde j
+  have hbound := moser_iteration_bound hXzero htheta htheta_one
+    hinitialCost hlinearCost hstep k
+  simpa only [X, theta, initialCost, linearCost, C, A, n] using hbound
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 

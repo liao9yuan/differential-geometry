@@ -196,6 +196,86 @@ theorem moser_iteration_bddAbove
     (summable_moserIterationCost htheta htheta_one)
     (moserIterationCost_nonneg htheta ha hb) hstep
 
+theorem normalized_moser_step
+    {p₀ C A L L' : ℝ}
+    (hp₀ : 0 < p₀) (hC : 1 ≤ C) (hA : 1 ≤ A)
+    (hL : 0 ≤ L) (hL' : 0 ≤ L') (k : ℕ)
+    (hstep : L' ≤ C * ((A * 16 ^ k) * L) ^ parabolicMoserGain n) :
+    L' ^ (1 / parabolicMoserExponent n p₀ (k + 1)) ≤
+      Real.exp
+          (moserIterationCost (parabolicMoserDecay n)
+            ((parabolicMoserDecay n * Real.log C + Real.log A) / p₀)
+            (Real.log 16 / p₀) k) *
+        L ^ (1 / parabolicMoserExponent n p₀ k) := by
+  have hp : 0 < parabolicMoserExponent n p₀ k :=
+    parabolicMoserExponent_pos n hp₀ k
+  have hp' : 0 < parabolicMoserExponent n p₀ (k + 1) :=
+    parabolicMoserExponent_pos n hp₀ (k + 1)
+  have hgain : 0 < parabolicMoserGain n := parabolicMoserGain_pos n
+  have hCpos : 0 < C := zero_lt_one.trans_le hC
+  have hApos : 0 < A := zero_lt_one.trans_le hA
+  by_cases hLzero : L = 0
+  · have hL'le : L' ≤ 0 := by
+      simpa only [hLzero, mul_zero, Real.zero_rpow hgain.ne', mul_zero] using hstep
+    have hL'zero : L' = 0 := le_antisymm hL'le hL'
+    rw [hL'zero, hLzero, Real.zero_rpow (one_div_ne_zero hp'.ne'),
+      Real.zero_rpow (one_div_ne_zero hp.ne'), mul_zero]
+  · have hLpos : 0 < L := lt_of_le_of_ne hL (Ne.symm hLzero)
+    have hfactor_pos : 0 < A * 16 ^ k :=
+      mul_pos hApos (pow_pos (by norm_num) k)
+    have hbase_pos : 0 < (A * 16 ^ k) * L := mul_pos hfactor_pos hLpos
+    have htotal_nonneg : 0 ≤ C * ((A * 16 ^ k) * L) ^ parabolicMoserGain n :=
+      mul_nonneg hCpos.le (Real.rpow_nonneg hbase_pos.le _)
+    have hroot := Real.rpow_le_rpow hL' hstep (by positivity :
+      0 ≤ 1 / parabolicMoserExponent n p₀ (k + 1))
+    have hexponent :
+        parabolicMoserGain n *
+            (1 / parabolicMoserExponent n p₀ (k + 1)) =
+          1 / parabolicMoserExponent n p₀ k := by
+      rw [parabolicMoserExponent_succ]
+      field_simp [hgain.ne', hp.ne']
+    have hprefactor :
+        C ^ (1 / parabolicMoserExponent n p₀ (k + 1)) *
+              A ^ (1 / parabolicMoserExponent n p₀ k) *
+              (16 ^ k : ℝ) ^ (1 / parabolicMoserExponent n p₀ k) =
+          Real.exp
+            (moserIterationCost (parabolicMoserDecay n)
+              ((parabolicMoserDecay n * Real.log C + Real.log A) / p₀)
+              (Real.log 16 / p₀) k) := by
+      rw [Real.rpow_def_of_pos hCpos, Real.rpow_def_of_pos hApos,
+        Real.rpow_def_of_pos (pow_pos (by norm_num) k), ← Real.exp_add,
+        ← Real.exp_add]
+      congr 1
+      rw [inv_parabolicMoserExponent n hp₀ k,
+        inv_parabolicMoserExponent n hp₀ (k + 1), pow_succ, Real.log_pow]
+      simp only [moserIterationCost]
+      ring
+    calc
+      L' ^ (1 / parabolicMoserExponent n p₀ (k + 1)) ≤
+          (C * ((A * 16 ^ k) * L) ^ parabolicMoserGain n) ^
+            (1 / parabolicMoserExponent n p₀ (k + 1)) := hroot
+      _ = C ^ (1 / parabolicMoserExponent n p₀ (k + 1)) *
+          (((A * 16 ^ k) * L) ^ parabolicMoserGain n) ^
+            (1 / parabolicMoserExponent n p₀ (k + 1)) := by
+        rw [Real.mul_rpow hCpos.le (Real.rpow_nonneg hbase_pos.le _)]
+      _ = C ^ (1 / parabolicMoserExponent n p₀ (k + 1)) *
+          ((A * 16 ^ k) * L) ^
+            (1 / parabolicMoserExponent n p₀ k) := by
+        rw [← Real.rpow_mul hbase_pos.le, hexponent]
+      _ = C ^ (1 / parabolicMoserExponent n p₀ (k + 1)) *
+            A ^ (1 / parabolicMoserExponent n p₀ k) *
+            (16 ^ k : ℝ) ^ (1 / parabolicMoserExponent n p₀ k) *
+            L ^ (1 / parabolicMoserExponent n p₀ k) := by
+        rw [Real.mul_rpow hfactor_pos.le hLpos.le,
+          Real.mul_rpow hApos.le (pow_nonneg (by norm_num) k)]
+        ring
+      _ = Real.exp
+            (moserIterationCost (parabolicMoserDecay n)
+              ((parabolicMoserDecay n * Real.log C + Real.log A) / p₀)
+              (Real.log 16 / p₀) k) *
+          L ^ (1 / parabolicMoserExponent n p₀ k) := by
+        rw [hprefactor]
+
 theorem local_boundedness_on_open_of_moser_iteration
     {Y : Type*} [MeasurableSpace Y] [TopologicalSpace Y]
     {μ : MeasureTheory.Measure Y} {U : Set Y}
