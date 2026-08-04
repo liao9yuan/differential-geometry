@@ -2912,6 +2912,9 @@ import DifferentialGeometry.Integration.Volume.ChartDensity
 import DifferentialGeometry.Integration.Volume.Family.Base
 import DifferentialGeometry.Integration.Volume.Family.Variation
 import DifferentialGeometry.Integration.Volume.Invariance
+import DifferentialGeometry.Topology.Attachment.Basic
+import DifferentialGeometry.Topology.Attachment.Defs
+import DifferentialGeometry.Topology.Attachment.Union
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Alternating.Bundle
 import DifferentialGeometry.Tensor.Alternating.Comp
