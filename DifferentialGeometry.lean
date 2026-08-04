@@ -702,6 +702,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.RetractionParametrix
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.RoughCarleson
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.VariableCoefficient
 import DifferentialGeometry.Analysis.Parabolic.Harnack.PathIntegration
+import DifferentialGeometry.Analysis.Parabolic.Moser.Iteration
 import DifferentialGeometry.Analysis.Parabolic.LionsMagenes
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
