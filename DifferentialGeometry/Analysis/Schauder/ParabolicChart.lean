@@ -46,6 +46,60 @@ theorem parabolicEuclideanChartRepresentation_apply
       u t ((extChartAt I x₀).symm ((toEuclidean (E := E)).symm y)) := by
   rfl
 
+theorem exists_finite_buffered_euclidean_chart_cover
+    [FiniteDimensional Real E] [I.Boundaryless] [CompactSpace M] :
+    ∃ s : Finset M, ∃ r R Rext : M → Real,
+      (∀ x ∈ s, 0 < r x ∧ r x < R x ∧ R x < Rext x) ∧
+      (∀ x ∈ s,
+        (toEuclidean (E := E)).symm ''
+            Metric.closedBall (toEuclidean (extChartAt I x x)) (Rext x) ⊆
+          (extChartAt I x).target) ∧
+      ∀ y : M, ∃ x ∈ s,
+        y ∈ (extChartAt I x).source ∧
+          toEuclidean (extChartAt I x y) ∈
+            Metric.ball (toEuclidean (extChartAt I x x)) (r x) := by
+  classical
+  have hlocal : ∀ x : M, ∃ ε : Real, 0 < ε ∧
+      Euclidean.ball (extChartAt I x x) ε ⊆ (extChartAt I x).target := by
+    intro x
+    exact Euclidean.nhds_basis_ball.mem_iff.mp
+      ((isOpen_extChartAt_target x).mem_nhds (mem_extChartAt_target x))
+  choose ε hε hball using hlocal
+  let r : M → Real := fun x ↦ ε x / 4
+  let R : M → Real := fun x ↦ ε x / 2
+  let Rext : M → Real := fun x ↦ 3 * ε x / 4
+  let U : M → Set M := fun x ↦
+    (extChartAt I x).source ∩
+      (extChartAt I x) ⁻¹' Euclidean.ball (extChartAt I x x) (r x)
+  have hUopen : ∀ x : M, IsOpen (U x) := by
+    intro x
+    exact (continuousOn_extChartAt x).isOpen_inter_preimage
+      (isOpen_extChartAt_source x) Euclidean.isOpen_ball
+  have hUself : ∀ x : M, x ∈ U x := by
+    intro x
+    refine ⟨mem_extChartAt_source x, ?_⟩
+    change extChartAt I x x ∈ Euclidean.ball (extChartAt I x x) (r x)
+    apply Euclidean.mem_ball_self
+    exact div_pos (hε x) (by norm_num)
+  have hcover : (Set.univ : Set M) ⊆ ⋃ x : M, U x := by
+    intro x _
+    exact Set.mem_iUnion.mpr ⟨x, hUself x⟩
+  obtain ⟨s, hs⟩ := isCompact_univ.elim_finite_subcover U hUopen hcover
+  refine ⟨s, r, R, Rext, ?_, ?_, ?_⟩
+  · intro x hx
+    dsimp only [r, R, Rext]
+    constructor
+    · exact div_pos (hε x) (by norm_num)
+    constructor <;> nlinarith [hε x]
+  · intro x hx
+    rw [← Euclidean.closedBall_eq_image]
+    exact fun y hy ↦ hball x (by
+      dsimp [Euclidean.closedBall, Euclidean.ball, Rext] at hy ⊢
+      linarith [hε x])
+  · intro y
+    rcases Set.mem_iUnion₂.mp (hs (Set.mem_univ y)) with ⟨x, hxs, hyU⟩
+    exact ⟨x, hxs, hyU.1, hyU.2⟩
+
 def eParabolicC2HolderGaugeInExtChartOn
     (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
     (Q : Set (ParabolicPoint E)) (u : Real → M → F) : ENNReal :=
