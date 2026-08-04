@@ -201,7 +201,7 @@ lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
   rw [hev.fderiv_eq]
 
 theorem voss_weyl_laplacian_formula_of_closed
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source) :

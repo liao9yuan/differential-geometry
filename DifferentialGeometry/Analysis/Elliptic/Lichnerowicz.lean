@@ -43,7 +43,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem integral_Δ_g_eq_zero
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ, ℝ) ∞ φ) :
     ∫ x, Δ_g (I := I) g hφ x ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
@@ -51,7 +51,7 @@ private theorem integral_Δ_g_eq_zero
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ∫ x, g.inner x ((grad_g (I := I) g hf :
@@ -66,7 +66,7 @@ private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem lichnerowicz_inequality
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (hn_ge_two : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (hK : 0 < K)
