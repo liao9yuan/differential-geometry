@@ -863,6 +863,7 @@ import DifferentialGeometry.Analysis.Schauder.CompactEllipticity
 import DifferentialGeometry.Analysis.Schauder.CompactRegularity
 import DifferentialGeometry.Analysis.Schauder.Composition
 import DifferentialGeometry.Analysis.Schauder.ConstantCoefficientElliptic
+import DifferentialGeometry.Analysis.Schauder.ConstantCoefficientOperator
 import DifferentialGeometry.Analysis.Schauder.CutoffJet
 import DifferentialGeometry.Analysis.Schauder.CutoffLaplacian
 import DifferentialGeometry.Analysis.Schauder.CutoffExistence
