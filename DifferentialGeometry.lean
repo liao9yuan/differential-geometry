@@ -1861,6 +1861,7 @@ import DifferentialGeometry.Geometry.Boundary.DefiningFunction
 import DifferentialGeometry.Geometry.Boundary.DefiningFunctionCurve
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Geometry.Boundary.InducedMetric
+import DifferentialGeometry.Geometry.Boundary.InwardCurve
 import DifferentialGeometry.Geometry.Boundary.ModelBoundary
 import DifferentialGeometry.Geometry.Boundary.NormalDerivative
 import DifferentialGeometry.Geometry.Boundary.Orientation
