@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.LowerOrder
 import DifferentialGeometry.Analysis.Schauder.CompactRegularity
+import DifferentialGeometry.Analysis.Schauder.ParabolicBallRetraction
 
 noncomputable section
 
@@ -13,6 +14,103 @@ open DifferentialGeometry.Analysis.Schauder
 private abbrev Euc (n : Type*) := EuclideanSpace Real n
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
+
+def parabolicMatrixCoefficientRescaleExtension
+    (tau R : Real) (rho : NNReal) (p0 : ParabolicPoint (Euc n))
+    (principal : n → n → ParabolicPoint (Euc n) → Real) :
+    n → n → ParabolicPoint (Euc n) → Real :=
+  fun i j ↦ parabolicTimeCenteredBallRetractionExtension tau R
+    (parabolicMatrixCoefficientRescale rho p0 principal i j)
+
+def parabolicDriftCoefficientRescaleExtension
+    (tau R : Real) (rho : NNReal) (p0 : ParabolicPoint (Euc n))
+    (drift : n → ParabolicPoint (Euc n) → Real) :
+    n → ParabolicPoint (Euc n) → Real :=
+  fun i ↦ parabolicTimeCenteredBallRetractionExtension tau R
+    (parabolicDriftCoefficientRescale rho p0 drift i)
+
+def parabolicPotentialCoefficientRescaleExtension
+    (tau R : Real) (rho : NNReal) (p0 : ParabolicPoint (Euc n))
+    (potential : ParabolicPoint (Euc n) → Real) :
+    ParabolicPoint (Euc n) → Real :=
+  parabolicTimeCenteredBallRetractionExtension tau R
+    (parabolicPotentialCoefficientRescale rho p0 potential)
+
+omit [DecidableEq n] in
+@[simp]
+theorem parabolicMatrixCoefficientRescaleExtension_apply
+    (tau R : Real) (rho : NNReal) (p0 : ParabolicPoint (Euc n))
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (i j : n) (p : ParabolicPoint (Euc n)) :
+    parabolicMatrixCoefficientRescaleExtension
+        tau R rho p0 principal i j p =
+      parabolicMatrixCoefficientRescale rho p0 principal i j
+        (parabolicTimeCenteredBallRetraction tau R p) :=
+  rfl
+
+omit [DecidableEq n] in
+@[simp]
+theorem parabolicDriftCoefficientRescaleExtension_apply
+    (tau R : Real) (rho : NNReal) (p0 : ParabolicPoint (Euc n))
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (i : n) (p : ParabolicPoint (Euc n)) :
+    parabolicDriftCoefficientRescaleExtension tau R rho p0 drift i p =
+      parabolicDriftCoefficientRescale rho p0 drift i
+        (parabolicTimeCenteredBallRetraction tau R p) :=
+  rfl
+
+omit [DecidableEq n] in
+@[simp]
+theorem parabolicPotentialCoefficientRescaleExtension_apply
+    (tau R : Real) (rho : NNReal) (p0 : ParabolicPoint (Euc n))
+    (potential : ParabolicPoint (Euc n) → Real)
+    (p : ParabolicPoint (Euc n)) :
+    parabolicPotentialCoefficientRescaleExtension
+        tau R rho p0 potential p =
+      parabolicPotentialCoefficientRescale rho p0 potential
+        (parabolicTimeCenteredBallRetraction tau R p) :=
+  rfl
+
+omit [DecidableEq n] in
+theorem parabolicMatrixCoefficientRescaleExtension_eq_of_mem_closedBall
+    (tau : Real) {R : Real} (rho : NNReal)
+    (p0 : ParabolicPoint (Euc n))
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (i j : n) {p : ParabolicPoint (Euc n)}
+    (hp : p.space ∈ Metric.closedBall (0 : Euc n) R) :
+    parabolicMatrixCoefficientRescaleExtension
+        tau R rho p0 principal i j p =
+      parabolicMatrixCoefficientRescale rho p0 principal i j
+        (parabolicPoint (p.time - tau) p.space) := by
+  exact parabolicTimeCenteredBallRetractionExtension_eq_of_mem_closedBall
+    tau _ hp
+
+omit [DecidableEq n] in
+theorem parabolicDriftCoefficientRescaleExtension_eq_of_mem_closedBall
+    (tau : Real) {R : Real} (rho : NNReal)
+    (p0 : ParabolicPoint (Euc n))
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (i : n) {p : ParabolicPoint (Euc n)}
+    (hp : p.space ∈ Metric.closedBall (0 : Euc n) R) :
+    parabolicDriftCoefficientRescaleExtension tau R rho p0 drift i p =
+      parabolicDriftCoefficientRescale rho p0 drift i
+        (parabolicPoint (p.time - tau) p.space) := by
+  exact parabolicTimeCenteredBallRetractionExtension_eq_of_mem_closedBall
+    tau _ hp
+
+omit [DecidableEq n] in
+theorem parabolicPotentialCoefficientRescaleExtension_eq_of_mem_closedBall
+    (tau : Real) {R : Real} (rho : NNReal)
+    (p0 : ParabolicPoint (Euc n))
+    (potential : ParabolicPoint (Euc n) → Real)
+    {p : ParabolicPoint (Euc n)}
+    (hp : p.space ∈ Metric.closedBall (0 : Euc n) R) :
+    parabolicPotentialCoefficientRescaleExtension
+        tau R rho p0 potential p =
+      parabolicPotentialCoefficientRescale rho p0 potential
+        (parabolicPoint (p.time - tau) p.space) := by
+  exact parabolicTimeCenteredBallRetractionExtension_eq_of_mem_closedBall
+    tau _ hp
 
 def IsParabolicNondivergenceSchauderScale
     (principal : n → n → ParabolicPoint (Euc n) → Real)
@@ -45,6 +143,141 @@ def IsParabolicNondivergenceSchauderScale
     (Matrix.of fun i j ↦ principal i j p) hA alpha
     (fun i j ↦ Ka i j * rho ^ (alpha : Real))
     (fun i j ↦ Ka i j * rho ^ (alpha : Real)) T < 1
+
+theorem exists_parabolicNondivergenceCoefficientRescaleExtension_schauder_bounds
+    (principal : n → n → ParabolicPoint (Euc n) → Real)
+    (drift : n → ParabolicPoint (Euc n) → Real)
+    (potential : ParabolicPoint (Euc n) → Real)
+    (p : ParabolicPoint (Euc n))
+    (hA : (Matrix.of fun i j ↦ principal i j p).PosDef)
+    (alpha : NNReal) (Ka : n → n → NNReal)
+    (Kb Bb : n → NNReal) (Kc Bc : NNReal)
+    (maxRadius T : Real) (rho : NNReal)
+    (hscale : IsParabolicNondivergenceSchauderScale
+      principal drift potential p hA alpha Ka Kb Bb Kc Bc
+        maxRadius T rho)
+    (tau : Real) {J : Set Real} {R : Real}
+    (hR : 0 ≤ R) (hRone : R < 1)
+    (htime : ∀ t ∈ J, |t - tau| ^ (1 / 2 : Real) < 1) :
+    ∃ hAext : (Matrix.of fun i j ↦
+        parabolicMatrixCoefficientRescaleExtension
+          tau R rho p principal i j (parabolicPoint tau 0)).PosDef,
+      (∀ i j, HolderWith (Ka i j * rho ^ (alpha : Real)) alpha
+        ((parabolicCylinder J Set.univ).restrict
+          (parabolicMatrixCoefficientRescaleExtension
+            tau R rho p principal i j))) ∧
+      (∀ i j q, q ∈ parabolicCylinder J Set.univ →
+        ‖parabolicMatrixCoefficientRescaleExtension
+              tau R rho p principal i j (parabolicPoint tau 0) -
+            parabolicMatrixCoefficientRescaleExtension
+              tau R rho p principal i j q‖ ≤
+          Ka i j * rho ^ (alpha : Real)) ∧
+      (∀ i j q, q ∈ parabolicCylinder J Set.univ →
+        ‖parabolicMatrixCoefficientRescaleExtension
+            tau R rho p principal i j q‖ ≤
+          ‖principal i j p‖₊ + Ka i j * rho ^ (alpha : Real)) ∧
+      (∀ i, HolderWith (Kb i * rho ^ (alpha : Real) * rho) alpha
+        ((parabolicCylinder J Set.univ).restrict
+          (parabolicDriftCoefficientRescaleExtension
+            tau R rho p drift i))) ∧
+      (∀ i q, q ∈ parabolicCylinder J Set.univ →
+        ‖parabolicDriftCoefficientRescaleExtension
+            tau R rho p drift i q‖ ≤ rho * Bb i) ∧
+      HolderWith (Kc * rho ^ (alpha : Real) * rho ^ 2) alpha
+        ((parabolicCylinder J Set.univ).restrict
+          (parabolicPotentialCoefficientRescaleExtension
+            tau R rho p potential)) ∧
+      (∀ q, q ∈ parabolicCylinder J Set.univ →
+        ‖parabolicPotentialCoefficientRescaleExtension
+            tau R rho p potential q‖ ≤ rho ^ 2 * Bc) ∧
+      spdParabolicSchauderDefectConst
+        (Matrix.of fun i j ↦
+          parabolicMatrixCoefficientRescaleExtension
+            tau R rho p principal i j (parabolicPoint tau 0))
+        hAext alpha
+        (fun i j ↦ Ka i j * rho ^ (alpha : Real))
+        (fun i j ↦ Ka i j * rho ^ (alpha : Real)) T < 1 := by
+  rcases hscale with ⟨hrho, hrhoOne, hrhoMax, ha, homega,
+    hb, hbNorm, hc, hcNorm, hsmall⟩
+  have hcenter : ∀ i j,
+      parabolicMatrixCoefficientRescaleExtension
+          tau R rho p principal i j (parabolicPoint tau 0) =
+        principal i j p := by
+    intro i j
+    simp [parabolicMatrixCoefficientRescaleExtension,
+      parabolicTimeCenteredBallRetractionExtension,
+      parabolicTimeCenteredBallRetraction, ballRetraction]
+  have hAext : (Matrix.of fun i j ↦
+      parabolicMatrixCoefficientRescaleExtension
+        tau R rho p principal i j (parabolicPoint tau 0)).PosDef := by
+    simpa only [hcenter] using hA
+  refine ⟨hAext, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro i j
+    simpa only [parabolicMatrixCoefficientRescaleExtension] using
+      parabolicTimeCenteredBallRetractionExtension_holderWith
+        tau hR hRone htime
+        (parabolicMatrixCoefficientRescale rho p principal i j) (ha i j)
+  · intro i j q hq
+    rw [hcenter]
+    exact norm_sub_parabolicTimeCenteredBallRetractionExtension_le
+      (omega := Ka i j * rho ^ (alpha : Real))
+      tau hR hRone htime (principal i j p)
+      (parabolicMatrixCoefficientRescale rho p principal i j)
+      (homega i j) q hq
+  · intro i j q hq
+    have hoscillation :=
+      norm_sub_parabolicTimeCenteredBallRetractionExtension_le
+        (omega := Ka i j * rho ^ (alpha : Real))
+        tau hR hRone htime (principal i j p)
+        (parabolicMatrixCoefficientRescale rho p principal i j)
+        (homega i j) q hq
+    have hoscillation' :
+        ‖principal i j p -
+          parabolicMatrixCoefficientRescaleExtension
+            tau R rho p principal i j q‖ ≤
+          Ka i j * rho ^ (alpha : Real) := by
+      simpa only [parabolicMatrixCoefficientRescaleExtension] using
+        hoscillation
+    calc
+      ‖parabolicMatrixCoefficientRescaleExtension
+          tau R rho p principal i j q‖ ≤
+          ‖principal i j p‖ +
+            ‖principal i j p -
+              parabolicMatrixCoefficientRescaleExtension
+                tau R rho p principal i j q‖ :=
+        norm_le_norm_add_norm_sub _ _
+      _ ≤ ‖principal i j p‖ +
+          (Ka i j * rho ^ (alpha : Real) : NNReal) :=
+        by
+          simpa only [NNReal.coe_mul, NNReal.coe_rpow] using
+            add_le_add (le_refl ‖principal i j p‖) hoscillation'
+      _ = (‖principal i j p‖₊ +
+          Ka i j * rho ^ (alpha : Real) : NNReal) := by
+        simp only [NNReal.coe_add, coe_nnnorm]
+  · intro i
+    simpa only [parabolicDriftCoefficientRescaleExtension] using
+      parabolicTimeCenteredBallRetractionExtension_holderWith
+        tau hR hRone htime
+        (parabolicDriftCoefficientRescale rho p drift i) (hb i)
+  · intro i q hq
+    exact norm_parabolicTimeCenteredBallRetractionExtension_le
+      (B := rho * Bb i) tau hR hRone htime
+      (parabolicDriftCoefficientRescale rho p drift i) (hbNorm i) q hq
+  · simpa only [parabolicPotentialCoefficientRescaleExtension] using
+      parabolicTimeCenteredBallRetractionExtension_holderWith
+        tau hR hRone htime
+        (parabolicPotentialCoefficientRescale rho p potential) hc
+  · intro q hq
+    have hcNorm' : ∀ z,
+        z ∈ Metric.ball (parabolicPoint 0 0) 1 →
+          ‖parabolicPotentialCoefficientRescale rho p potential z‖ ≤
+            (rho ^ 2 * Bc : NNReal) := by
+      intro z hz
+      simpa only [NNReal.coe_mul, NNReal.coe_pow] using hcNorm z hz
+    exact norm_parabolicTimeCenteredBallRetractionExtension_le
+      (B := rho ^ 2 * Bc) tau hR hRone htime
+      (parabolicPotentialCoefficientRescale rho p potential) hcNorm' q hq
+  · simpa only [hcenter] using hsmall
 
 theorem exists_finite_parabolicNondivergence_schauder_cover
     (principal : n → n → ParabolicPoint (Euc n) → Real)
