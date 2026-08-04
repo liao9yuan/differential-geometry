@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Energy.Caccioppoli
+import DifferentialGeometry.Analysis.Integration.Holder.Weighted
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IntrinsicEmbedding
 
 
@@ -183,6 +184,101 @@ theorem localized_sobolev
       gcongr
       linarith
     _ = 4 * C ^ 2 *
+        (localizedL2Mass (I := I) (M := M) cutoff u +
+          localizedDirichletEnergy (I := I) (M := M) cutoff u +
+          cutoffGradientError (I := I) (M := M) cutoff u) := by ring
+
+omit [I.Boundaryless] in
+theorem critical_slice_interpolation
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (u : SmoothScalar g) :
+    ∫ x, |u.toFun x| ^
+          (2 + 4 / (Module.finrank ℝ E : ℝ))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
+      (∫ x, u.toFun x ^ 2
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ^
+          (2 / (Module.finrank ℝ E : ℝ)) *
+        lpNorm u.toFun
+            (ENNReal.ofReal
+              (2 * (Module.finrank ℝ E : ℝ) /
+                ((Module.finrank ℝ E : ℝ) - 2)))
+            (riemannianVolumeMeasure (I := I) (M := M) g) ^ 2 := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hdpos : 0 < (Module.finrank ℝ E : ℝ) := by linarith
+  have hd2pos : 0 < (Module.finrank ℝ E : ℝ) - 2 := by linarith
+  have hcritical : 0 ≤
+      2 * (Module.finrank ℝ E : ℝ) /
+        ((Module.finrank ℝ E : ℝ) - 2) :=
+    (div_pos (mul_pos (by norm_num) hdpos) hd2pos).le
+  have h2_cont : Continuous (fun x : M => u.toFun x ^ 2) :=
+    u.smooth.continuous.pow 2
+  have hq_cont : Continuous (fun x : M =>
+      |u.toFun x| ^
+        (2 * (Module.finrank ℝ E : ℝ) /
+          ((Module.finrank ℝ E : ℝ) - 2))) :=
+    u.smooth.continuous.abs.rpow_const (fun _ => Or.inr hcritical)
+  exact DifferentialGeometry.Integral.critical_sobolev_interpolation hdim
+    u.smooth.continuous.aestronglyMeasurable
+    (h2_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _))
+    (hq_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _))
+
+theorem localized_parabolic_sobolev
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ cutoff u : SmoothScalar g,
+        ∫ x, |cutoff.toFun x * u.toFun x| ^
+              (2 + 4 / (Module.finrank ℝ E : ℝ))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
+          C * localizedL2Mass (I := I) (M := M) cutoff u ^
+              (2 / (Module.finrank ℝ E : ℝ)) *
+            (localizedL2Mass (I := I) (M := M) cutoff u +
+              localizedDirichletEnergy (I := I) (M := M) cutoff u +
+              cutoffGradientError (I := I) (M := M) cutoff u) := by
+  obtain ⟨C, hC, hSob⟩ := localized_sobolev (I := I) (M := M) g hdim
+  refine ⟨C, hC, ?_⟩
+  intro cutoff u
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  let v : SmoothScalar g :=
+    ⟨fun x => cutoff.toFun x * u.toFun x, cutoff.smooth.mul u.smooth⟩
+  have hinterp := critical_slice_interpolation (I := I) (M := M) g hdim v
+  change (∫ x, |cutoff.toFun x * u.toFun x| ^
+        (2 + 4 / (Module.finrank ℝ E : ℝ)) ∂μ) ≤ _ at hinterp
+  have hmass :
+      (∫ x, v.toFun x ^ 2 ∂μ) =
+        localizedL2Mass (I := I) (M := M) cutoff u := by
+    apply integral_congr_ae
+    filter_upwards with x
+    dsimp only [v]
+    ring
+  rw [hmass] at hinterp
+  have hlocal := hSob cutoff u
+  have hmass_rpow_nonneg :
+      0 ≤ localizedL2Mass (I := I) (M := M) cutoff u ^
+        (2 / (Module.finrank ℝ E : ℝ)) :=
+    Real.rpow_nonneg
+      (localizedL2Mass_nonneg (I := I) (M := M) cutoff u) _
+  calc
+    _ ≤ localizedL2Mass (I := I) (M := M) cutoff u ^
+          (2 / (Module.finrank ℝ E : ℝ)) *
+        lpNorm (fun x => cutoff.toFun x * u.toFun x)
+            (ENNReal.ofReal
+              ((Module.finrank ℝ E : ℝ) * 2 /
+                ((Module.finrank ℝ E : ℝ) - 2))) μ ^ 2 := by
+      simpa only [v, μ, mul_comm] using hinterp
+    _ ≤ localizedL2Mass (I := I) (M := M) cutoff u ^
+          (2 / (Module.finrank ℝ E : ℝ)) *
+        (C * (localizedL2Mass (I := I) (M := M) cutoff u +
+          localizedDirichletEnergy (I := I) (M := M) cutoff u +
+          cutoffGradientError (I := I) (M := M) cutoff u)) := by
+      exact mul_le_mul_of_nonneg_left hlocal hmass_rpow_nonneg
+    _ = C * localizedL2Mass (I := I) (M := M) cutoff u ^
+          (2 / (Module.finrank ℝ E : ℝ)) *
         (localizedL2Mass (I := I) (M := M) cutoff u +
           localizedDirichletEnergy (I := I) (M := M) cutoff u +
           cutoffGradientError (I := I) (M := M) cutoff u) := by ring
