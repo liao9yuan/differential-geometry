@@ -380,6 +380,57 @@ theorem localized_parabolic_sobolev_time
     (by simpa only [mass] using hmass_le) henergy_nonneg hpoint
   simpa only [lhs, mass, dirichlet, error, energy, μ] using htime
 
+theorem localized_parabolic_sobolev_of_energy_bound
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b A : ℝ} (hab : a ≤ b) (hA : 0 ≤ A)
+    (hmass_le : ∀ t ∈ Icc a b,
+      localizedL2Mass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t) ≤ A)
+    (hdirichlet : ContinuousOn
+      (fun t => localizedDirichletEnergy (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g u hu t)) (Icc a b))
+    (henergy_le :
+      (∫ t in a..b,
+        localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) +
+          localizedDirichletEnergy (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t) +
+          cutoffGradientError (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g u hu t)) ≤ A) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∫ t in a..b, ∫ x,
+          |cutoff.toFun x * u t x| ^
+            (2 + 4 / (Module.finrank ℝ E : ℝ))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+        C * A ^ (1 + 2 / (Module.finrank ℝ E : ℝ)) := by
+  obtain ⟨C, hC, htime⟩ := localized_parabolic_sobolev_time
+    (I := I) (M := M) g hdim cutoff u hu hab hmass_le hdirichlet
+  refine ⟨C, hC, htime.trans ?_⟩
+  have hdpos : 0 < (Module.finrank ℝ E : ℝ) := by linarith
+  have htheta : 0 ≤ 2 / (Module.finrank ℝ E : ℝ) :=
+    div_nonneg (by norm_num) hdpos.le
+  have hfactor : 0 ≤ C * A ^ (2 / (Module.finrank ℝ E : ℝ)) :=
+    mul_nonneg hC (Real.rpow_nonneg hA _)
+  calc
+    C * A ^ (2 / (Module.finrank ℝ E : ℝ)) *
+          (∫ t in a..b,
+            localizedL2Mass (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t) +
+              localizedDirichletEnergy (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t) +
+              cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g u hu t)) ≤
+        C * A ^ (2 / (Module.finrank ℝ E : ℝ)) * A :=
+      mul_le_mul_of_nonneg_left henergy_le hfactor
+    _ = C * A ^ (1 + 2 / (Module.finrank ℝ E : ℝ)) := by
+      rw [Real.rpow_add_of_nonneg hA (by norm_num) htheta, Real.rpow_one]
+      ring
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
