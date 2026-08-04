@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Schauder.HolderNormedSpace
+import Mathlib.Topology.ContinuousMap.Bounded.Normed
 
 noncomputable section
 
@@ -111,6 +112,67 @@ theorem norm_boundedHolderSpaceMap_le
     (norm_boundedHolderSpaceMapLinearMap_le L)
 
 end Map
+
+section BoundedContinuousFunction
+
+variable {X F : Type*} [MetricSpace X]
+  [NormedAddCommGroup F] [NormedSpace Real F]
+
+private def boundedHolderSpaceToBoundedContinuousFunctionLinearMap
+    (alpha : NNReal) (halpha : 0 < alpha) :
+    BoundedHolderSpace (X := X) (F := F) alpha →ₗ[Real]
+      BoundedContinuousFunction X F where
+  toFun f :=
+    ⟨⟨boundedHolderSpaceFun f,
+        (boundedHolderSpace_holderWith f).continuous halpha⟩,
+      ⟨2 * ‖f‖, fun x y ↦ by
+        rw [dist_eq_norm]
+        exact (norm_sub_le (f x) (f y)).trans
+          ((add_le_add (norm_boundedHolderSpace_apply_le f x)
+            (norm_boundedHolderSpace_apply_le f y)).trans_eq (by ring))⟩⟩
+  map_add' f g := by
+    apply BoundedContinuousFunction.ext
+    intro x
+    rfl
+  map_smul' c f := by
+    apply BoundedContinuousFunction.ext
+    intro x
+    rfl
+
+private theorem norm_boundedHolderSpaceToBoundedContinuousFunctionLinearMap_le
+    {alpha : NNReal} (halpha : 0 < alpha)
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) :
+    ‖boundedHolderSpaceToBoundedContinuousFunctionLinearMap alpha halpha f‖ ≤
+      ‖f‖ := by
+  rw [BoundedContinuousFunction.norm_le (norm_nonneg f)]
+  intro x
+  exact norm_boundedHolderSpace_apply_le f x
+
+def boundedHolderSpaceToBoundedContinuousFunction
+    (alpha : NNReal) (halpha : 0 < alpha) :
+    BoundedHolderSpace (X := X) (F := F) alpha →L[Real]
+      BoundedContinuousFunction X F :=
+  LinearMap.mkContinuous
+    (boundedHolderSpaceToBoundedContinuousFunctionLinearMap alpha halpha) 1
+    (fun f ↦ by simpa using
+      norm_boundedHolderSpaceToBoundedContinuousFunctionLinearMap_le halpha f)
+
+@[simp]
+theorem boundedHolderSpaceToBoundedContinuousFunction_apply
+    (alpha : NNReal) (halpha : 0 < alpha)
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
+    boundedHolderSpaceToBoundedContinuousFunction alpha halpha f x = f x :=
+  rfl
+
+theorem norm_boundedHolderSpaceToBoundedContinuousFunction_le
+    (alpha : NNReal) (halpha : 0 < alpha) :
+    ‖boundedHolderSpaceToBoundedContinuousFunction
+      (X := X) (F := F) alpha halpha‖ ≤ 1 := by
+  exact LinearMap.mkContinuous_norm_le _ zero_le_one
+    (fun f ↦ by simpa using
+      norm_boundedHolderSpaceToBoundedContinuousFunctionLinearMap_le halpha f)
+
+end BoundedContinuousFunction
 
 section RestrictUniv
 
