@@ -64,6 +64,34 @@ theorem geometric_hole_filling
     ge_of_tendsto htendsto (Filter.Eventually.of_forall hbound)
   simpa only [div_eq_mul_inv] using hlimit
 
+theorem nnreal_affine_geometric_hole_filling
+    {X data factor : ℕ → NNReal} {theta A B : NNReal}
+    (hX_bdd : BddAbove (Set.range X)) (hB : 1 ≤ B)
+    (hthetaB : theta * B < 1)
+    (hfactor : ∀ k, factor k ≤ theta)
+    (hdata : ∀ k, data k ≤ A * B ^ k)
+    (hstep : ∀ k, X k ≤ data k + factor k * X (k + 1)) :
+    X 0 ≤ A / (1 - theta * B) := by
+  obtain ⟨K, hK⟩ := hX_bdd
+  have hXreal : BddAbove (Set.range (fun k ↦ (X k : Real))) := by
+    refine ⟨K, ?_⟩
+    intro x hx
+    obtain ⟨k, rfl⟩ := hx
+    exact_mod_cast hK (Set.mem_range_self k)
+  have hreal := geometric_hole_filling hXreal theta.coe_nonneg
+    (by exact_mod_cast hB) A.coe_nonneg (by exact_mod_cast hthetaB) (fun k ↦ ?_)
+  · apply NNReal.coe_le_coe.mp
+    simpa only [NNReal.coe_div, NNReal.coe_sub hthetaB.le,
+      NNReal.coe_one, NNReal.coe_mul] using hreal
+  · calc
+      (X k : Real) ≤ data k + factor k * X (k + 1) := by
+        exact_mod_cast hstep k
+      _ ≤ theta * X (k + 1) + A * B ^ k := by
+        rw [add_comm]
+        gcongr
+        · exact_mod_cast hfactor k
+        · exact_mod_cast hdata k
+
 theorem summable_hole_filling
     {X cost : ℕ → ℝ} {theta : ℝ}
     (hX_bdd : BddAbove (Set.range X))
