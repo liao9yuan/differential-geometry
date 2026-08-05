@@ -112,6 +112,61 @@ theorem weak_harnack_of_localized_rpow_crossover
     (weak_harnack_of_crossover (hpos t x) hA hD hB hC hp
       hcrossover' hreciprocal')
 
+theorem harnack_of_localized_crossover
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a τ t₁ C : ℝ} (hp : 2 ≤ p) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hC : 0 ≤ C)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t =
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    (hcrossover :
+      moserLocalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+          rho u p a τ t₁ 0 *
+        moserLocalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+          rho (fun s y => (u s y)⁻¹) p a τ t₁ 0 ≤ C) :
+    let B := moserLocalBoundFactor (I := I) (M := M)
+      g hdim rho p a τ t₁
+    ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
+      ∀ q ∈ Ioo τ t₁, ∀ y : M, 1 < rho.toFun y →
+        u t x ≤ B ^ 2 * C ^ (1 / p) * u q y := by
+  let Dplus := moserLocalizedMass (I := I) (M := M)
+    (Module.finrank ℝ E) rho u p a τ t₁ 0
+  let Dminus := moserLocalizedMass (I := I) (M := M)
+    (Module.finrank ℝ E) rho (fun s y => (u s y)⁻¹) p a τ t₁ 0
+  let B := moserLocalBoundFactor (I := I) (M := M)
+    g hdim rho p a τ t₁
+  change ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
+    ∀ q ∈ Ioo τ t₁, ∀ y : M, 1 < rho.toFun y →
+      u t x ≤ B ^ 2 * C ^ (1 / p) * u q y
+  have hDplus : 0 ≤ Dplus :=
+    moserLocalizedMass_nonneg (I := I) (M := M) (Module.finrank ℝ E)
+      rho u haτ hτt₁ (fun t x => (hpos t x).le) 0
+  have hB : 0 ≤ B := (Real.exp_pos _).le
+  intro t ht x hx q hq y hy
+  have hlocal : u t x ≤ B * Dplus ^ (1 / p) := by
+    simpa only [moserLocalBound, moserNormalizedMass,
+      parabolicMoserExponent_zero, Dplus, B] using
+      local_boundedness_of_subsolution
+        (I := I) (M := M) g hdim rho u hu hpos hp haτ hτt₁
+          (fun s hs z => (hpde s hs z).le) t ht x hx
+  have hweak : Dplus ^ (1 / p) ≤ C ^ (1 / p) * B * u q y := by
+    simpa only [Dplus, Dminus, B] using
+      weak_harnack_of_localized_crossover
+        (I := I) (M := M) g hdim rho u hu hpos hp haτ hτt₁
+          hDplus hC (fun s hs z => (hpde s hs z).ge)
+          (by simpa only [Dplus, Dminus] using hcrossover) q hq y hy
+  calc
+    u t x ≤ B * Dplus ^ (1 / p) := hlocal
+    _ ≤ B * (C ^ (1 / p) * B * u q y) :=
+      mul_le_mul_of_nonneg_left hweak hB
+    _ = B ^ 2 * C ^ (1 / p) * u q y := by ring
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
