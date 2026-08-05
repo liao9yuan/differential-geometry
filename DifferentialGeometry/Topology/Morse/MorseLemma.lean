@@ -814,6 +814,162 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
     rw [hdecomp, ht', ht'']
   exact hsq
 
+-- The reduced family at 0 is nondegenerate when the full Hessian is and the pivot is nonzero.
+theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
+    (hsym : ∀ x y z, a x y z = a x z y)
+    (hpiv : morsePivot (clmBilin a) 0 ≠ 0)
+    (hsep : (QuadraticMap.associated (R := ℝ) (clmBilin a 0).toQuadraticMap).SeparatingLeft) :
+    (QuadraticMap.associated (R := ℝ) (morseReducedFamily (clmBilin a) 0).toQuadraticMap).SeparatingLeft := by
+  unfold LinearMap.SeparatingLeft
+  intro u hu
+  have hu' : ∀ v : MorseModel n, morseReducedFamily (clmBilin a) 0 u v = 0 := by
+    intro v
+    -- hu : (associated (morseReducedFamily ...).toQuadraticMap) u v = 0
+    -- and associated B.toQuadraticMap = B for symmetric B
+    have hmain : (QuadraticMap.associated (R := ℝ) ((morseReducedFamily (clmBilin a) 0).toQuadraticMap)) u v =
+        morseReducedFamily (clmBilin a) 0 u v := by
+      rw [QuadraticMap.associated_apply]
+      -- Q(z) = B z z; expand Q(u+v) - Q u - Q v
+      have hq : (morseReducedFamily (clmBilin a) 0) (u + v) (u + v) -
+          (morseReducedFamily (clmBilin a) 0) u u -
+          (morseReducedFamily (clmBilin a) 0) v v =
+          2 * (morseReducedFamily (clmBilin a) 0) u v := by
+        have hsym' : ∀ x y, (morseReducedFamily (clmBilin a) 0) x y =
+            (morseReducedFamily (clmBilin a) 0) y x :=
+          morseReducedFamily_sym (clmBilin a) (by
+            intro x y z
+            simpa [clmBilin] using hsym x y z) 0
+        simp [map_add, hsym']
+        ring_nf
+      have hinv : (⅟(2 : ℝ) : ℝ) * (2 * (morseReducedFamily (clmBilin a) 0) u v) =
+          morseReducedFamily (clmBilin a) 0 u v := by
+        norm_num
+        ring
+      simpa [hq, hinv, smul_eq_mul] using (show (⅟(2 : ℝ) : ℝ) *
+        ((morseReducedFamily (clmBilin a) 0) (u + v) (u + v) -
+          (morseReducedFamily (clmBilin a) 0) u u -
+          (morseReducedFamily (clmBilin a) 0) v v) =
+        morseReducedFamily (clmBilin a) 0 u v by
+          rw [hq]
+          exact hinv)
+    have hu'' : (QuadraticMap.associated (R := ℝ) ((morseReducedFamily (clmBilin a) 0).toQuadraticMap)) u v = 0 :=
+      hu v
+    rwa [hmain] at hu''
+  -- the Schur-complement witness: w = cons 0 u − (cross_u / p) • e0
+  let cross_u : ℝ := (clmBilin a 0) morseE0 (morseCons (0 : ℝ) u)
+  let w : MorseModel (n + 1) := morseCons (0 : ℝ) u - (cross_u / (clmBilin a 0 morseE0 morseE0)) • morseE0
+  have hpiv' : (clmBilin a 0 morseE0 morseE0) ≠ 0 := by
+    simpa [morsePivot] using hpiv
+  -- (clmBilin a 0) w z = 0 for all z
+  have hfull : ∀ z : MorseModel (n + 1), (clmBilin a 0) w z = 0 := by
+    intro z
+    have hz : z = morseHead z • morseE0 + morseCons (0 : ℝ) (morseTail z) := by
+      calc
+        z = morseCons (morseHead z) (morseTail z) := morse_cons_decompose z
+        _ = morseHead z • morseE0 + morseCons (0 : ℝ) (morseTail z) :=
+          morse_cons_smul' (morseHead z) (morseTail z)
+    -- (clmBilin a 0) w vanishes on e0 and on tails
+    have hwe0 : (clmBilin a 0) w morseE0 = 0 := by
+      dsimp [w, cross_u]
+      have h1 : (clmBilin a 0) (morseCons (0 : ℝ) u - (cross_u / (clmBilin a 0 morseE0 morseE0)) • morseE0) =
+          (clmBilin a 0) (morseCons (0 : ℝ) u) -
+            (cross_u / (clmBilin a 0 morseE0 morseE0)) • (clmBilin a 0) morseE0 := by
+        rw [map_sub, map_smul]
+      rw [h1]
+      change (clmBilin a 0) (morseCons (0 : ℝ) u) morseE0 -
+        (cross_u / (clmBilin a 0 morseE0 morseE0)) •
+          (clmBilin a 0) morseE0 morseE0 = 0
+      have hcu' : (clmBilin a 0) (morseCons (0 : ℝ) u) morseE0 = cross_u := by
+        dsimp [cross_u]
+        exact hsym 0 (morseCons (0 : ℝ) u) morseE0
+      rw [hcu']
+      simp [smul_eq_mul]
+      field_simp [hpiv']
+      ring
+    have hwt : ∀ v : MorseModel n, (clmBilin a 0) w (morseCons (0 : ℝ) v) = 0 := by
+      intro v
+      dsimp [w, cross_u]
+      have h1 : (clmBilin a 0) (morseCons (0 : ℝ) u - (cross_u / (clmBilin a 0 morseE0 morseE0)) • morseE0) =
+          (clmBilin a 0) (morseCons (0 : ℝ) u) -
+            (cross_u / (clmBilin a 0 morseE0 morseE0)) • (clmBilin a 0) morseE0 := by
+        rw [map_sub, map_smul]
+      change (clmBilin a 0) (morseCons (0 : ℝ) u - (cross_u / (clmBilin a 0 morseE0 morseE0)) • morseE0)
+          (morseCons (0 : ℝ) v) = 0
+      rw [h1]
+      change (clmBilin a 0) (morseCons (0 : ℝ) u) (morseCons (0 : ℝ) v) -
+        (cross_u / (clmBilin a 0 morseE0 morseE0)) •
+          (clmBilin a 0) morseE0 (morseCons (0 : ℝ) v) = 0
+      -- Rfam0(u, v) = 0 gives the tail identity
+      have hru := hu' v
+      have hfam : (clmBilin a 0) (morseCons (0 : ℝ) u) (morseCons (0 : ℝ) v) =
+          (clmBilin a 0) morseE0 (morseCons (0 : ℝ) u) *
+            (clmBilin a 0) morseE0 (morseCons (0 : ℝ) v) /
+              (clmBilin a 0 morseE0 morseE0) := by
+        have hru' : morseReducedFamily (clmBilin a) 0 u v = 0 := hru
+        rw [morseReducedFamily_apply] at hru'
+        have hsym0 : (clmBilin a 0) (morseCons (0 : ℝ) u) morseE0 =
+            (clmBilin a 0) morseE0 (morseCons (0 : ℝ) u) :=
+          hsym 0 (morseCons (0 : ℝ) u) morseE0
+        rw [hsym0] at hru'
+        have hpiv2 : morsePivot (clmBilin a) 0 = (clmBilin a 0 morseE0 morseE0) := rfl
+        rw [hpiv2] at hru'
+        linear_combination hru'
+      rw [hfam]
+      have hcu' : (clmBilin a 0) (morseCons (0 : ℝ) u) morseE0 = (clmBilin a 0) morseE0 (morseCons (0 : ℝ) u) :=
+        hsym 0 (morseCons (0 : ℝ) u) morseE0
+      simp [smul_eq_mul]
+      field_simp [hpiv']
+      ring
+    -- combine: z = head • e0 + cons 0 (tail z)
+    rw [hz]
+    rw [map_add, map_smul]
+    rw [hwe0, hwt]
+    simp
+  have hzero : w = 0 := by
+    apply hsep
+    intro z
+    -- hsep uses the associated bilinear map; for symmetric clmBilin a 0 the
+    -- associated form agrees up to a scalar with clmBilin a 0.
+    have hz : (QuadraticMap.associated (R := ℝ) ((clmBilin a 0).toQuadraticMap)) w z =
+        (clmBilin a 0) w z := by
+      rw [QuadraticMap.associated_apply]
+      have hsym0 : ∀ x y, (clmBilin a 0) x y = (clmBilin a 0) y x := by
+        intro x y
+        simpa [clmBilin] using hsym 0 x y
+      simp [map_add, hsym0]
+      ring_nf
+    rw [hz]
+    exact hfull z
+  -- w = 0 forces u = 0 (tails of w and of cons 0 u agree)
+  have htailw : morseTail w = morseTail (morseCons (0 : ℝ) u) := by
+    change morseTail (morseCons (0 : ℝ) u - (cross_u / (clmBilin a 0 morseE0 morseE0)) • morseE0) =
+      morseTail (morseCons (0 : ℝ) u)
+    have hlin : ∀ x y : MorseModel (n + 1), morseTail (x - y) = morseTail x - morseTail y := by
+      intro x y
+      calc
+        morseTail (x - y) = morseTail (x + (-1 : ℝ) • y) := by
+          rw [sub_eq_add_neg]
+          rw [← neg_one_smul ℝ y]
+        _ = morseTail x + morseTail ((-1 : ℝ) • y) := morseTail_add x ((-1 : ℝ) • y)
+        _ = morseTail x + (-1 : ℝ) • morseTail y := by
+          rw [morseTail_smul (-1 : ℝ) y]
+        _ = morseTail x - morseTail y := by
+          simp [sub_eq_add_neg]
+    rw [hlin]
+    rw [morseTail_smul]
+    have htailE0 : morseTail morseE0 = (0 : MorseModel n) := by
+      funext i
+      simp [morseTail, morseE0]
+    rw [htailE0]
+    simp [morseCons_tail]
+  have htail0 : morseTail w = u := by
+    rw [htailw]
+    exact morseCons_tail (0 : ℝ) u
+  have hu0 : u = 0 := by
+    rw [← htail0]
+    exact congrArg morseTail hzero
+  exact hu0
+
 end Completion
 
 end DifferentialGeometry.Topology.Morse
