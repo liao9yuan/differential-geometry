@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLocalSource
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.NondivergenceSchauder
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartExtension
 
 noncomputable section
@@ -229,6 +229,297 @@ theorem parabolic_nondivergence_interior_schauder_estimate_in_euclideanChart_of_
   rw [← hgauge]
   simpa only [Qinner, aext, bext, cext] using hestimate
 
+theorem exists_parabolic_nondivergence_schauder_estimate_in_euclideanChart
+    {alpha Ksource Kc Ku KdtimeU Kdu Kd2u Bsource Bc
+      Mu MdtimeU Mdu Md2u : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (g : Real → SmoothRiemannianMetric I M) (V : Real → M → Real)
+    (chartCenter : M) (intrinsicU : Real → M → Real)
+    {a t₀ t₁ b r R Rext : Real}
+    (hat₀ : a < t₀) (ht₁b : t₁ < b) (hrR : r < R) (hRRext : R < Rext)
+    (center : EuclN E)
+    (hpos : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r) →
+        (Matrix.of fun i j : Fin (Module.finrank Real E) ↦
+          parabolicChartPrincipalCoefficient (I := I) g chartCenter i j p).PosDef)
+    (Ka : Fin (Module.finrank Real E) →
+      Fin (Module.finrank Real E) → NNReal)
+    (Kb Bb : Fin (Module.finrank Real E) → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (parabolicChartPrincipalCoefficient (I := I) g chartCenter i j)))
+    (hb : ∀ i, HolderWith (Kb i) alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (parabolicChartDriftCoefficient (I := I) g chartCenter i)))
+    (hc : HolderWith Kc alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (parabolicChartPotentialCoefficient (I := I) V chartCenter)))
+    (hbNorm : ∀ i p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖parabolicChartDriftCoefficient (I := I) g chartCenter i p‖ ≤ Bb i)
+    (hcNorm : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖parabolicChartPotentialCoefficient (I := I) V chartCenter p‖ ≤ Bc)
+    (u dtimeU : Real → BoundedContinuousFunction (EuclN E) Real)
+    (du : Real →
+      BoundedContinuousFunction (EuclN E) (EuclN E →L[Real] Real))
+    (d2u : Real → BoundedContinuousFunction (EuclN E)
+      (EuclN E →L[Real] EuclN E →L[Real] Real))
+    (huTime : ∀ s ∈ Set.Icc a b, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (u s : EuclN E → Real) (du s x) x)
+    (hdu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (du s : EuclN E → EuclN E →L[Real] Real)
+        (d2u s x) x)
+    (huCont : Continuous u)
+    (hrealize : Set.EqOn (fun p ↦ u p.time p.space)
+      (fun p ↦ parabolicEuclideanChartRepresentation
+        I chartCenter intrinsicU p.time p.space)
+      (parabolicCylinder Set.univ (Metric.ball center Rext)))
+    (hsourceHolder : HolderWith Ksource alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (parabolicNondivergenceOperatorInEuclideanChart (I := I)
+          g V chartCenter intrinsicU)))
+    (hsourceNorm : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖parabolicNondivergenceOperatorInEuclideanChart (I := I)
+          g V chartCenter intrinsicU p‖ ≤ Bsource)
+    (huHolder : HolderWith Ku alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ u p.time p.space)))
+    (hdtimeUHolder : HolderWith KdtimeU alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ dtimeU p.time p.space)))
+    (hduHolder : HolderWith Kdu alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ du p.time p.space)))
+    (hd2uHolder : HolderWith Kd2u alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ d2u p.time p.space)))
+    (huNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeUNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖dtimeU p.time p.space‖ ≤ MdtimeU)
+    (hduNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖du p.time p.space‖ ≤ Mdu)
+    (hd2uNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖d2u p.time p.space‖ ≤ Md2u) :
+    ∃ localScale : ∀ p : ↥(parabolicCylinder (Set.Icc t₀ t₁)
+        (Metric.closedBall center r)),
+      {rho : NNReal //
+        IsParabolicNondivergenceSchauderScale
+          (parabolicChartPrincipalCoefficient (I := I) g chartCenter)
+          (parabolicChartDriftCoefficient (I := I) g chartCenter)
+          (parabolicChartPotentialCoefficient (I := I) V chartCenter)
+          p.1 (hpos p.1 p.2) alpha Ka Kb Bb Kc Bc
+          (parabolicInteriorRadius a t₀ t₁ b r R) (5 / 8) rho},
+      ∃ s : Finset ↥(parabolicCylinder (Set.Icc t₀ t₁)
+          (Metric.closedBall center r)),
+        ∃ delta : NNReal, 0 < delta ∧
+          (∀ p ∈ s, (delta : Real) ≤
+            (((localScale p).1 : Real) * (1 / 4 : Real)) / 2) ∧
+          parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r) ⊆
+            ⋃ p ∈ s, Metric.ball p.1
+              ((((localScale p).1 : Real) * (1 / 4 : Real)) / 2) ∧
+          eParabolicC2HolderGaugeInEuclideanChartOn alpha I chartCenter
+              (parabolicCylinder (Set.Icc t₀ t₁)
+                (Metric.closedBall center r)) intrinsicU ≤
+            bufferedParabolicC2HolderGaugeConst alpha
+              (∑ p ∈ s, parabolicC2HolderRescaleConst
+                (localScale p).1⁻¹ alpha
+                (parabolicNondivergenceRescaledInteriorSchauderConst
+                  (parabolicChartPrincipalCoefficient (I := I) g chartCenter)
+                  p.1 (hpos p.1 p.2) alpha (localScale p).1 Ka Kb Bb Kc Bc
+                  Ksource Ku Kdu Bsource Mu Mdu)) delta := by
+  let principal := parabolicChartPrincipalCoefficient (I := I) g chartCenter
+  let drift := parabolicChartDriftCoefficient (I := I) g chartCenter
+  let potential := parabolicChartPotentialCoefficient (I := I) V chartCenter
+  let chartU := parabolicEuclideanChartRepresentation I chartCenter intrinsicU
+  let Qouter := parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)
+  let Qinner := parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r)
+  let Urealize := parabolicCylinder Set.univ (Metric.ball center Rext)
+  have hUrealize : IsOpen Urealize :=
+    isOpen_parabolicCylinder isOpen_univ Metric.isOpen_ball
+  have hQouterU : Qouter ⊆ Urealize := by
+    intro p hp
+    exact ⟨Set.mem_univ p.time, Metric.closedBall_subset_ball hRRext hp.2⟩
+  have hQinnerU : Qinner ⊆ Urealize := by
+    intro p hp
+    exact ⟨Set.mem_univ p.time,
+      Metric.closedBall_subset_ball (hrR.trans hRRext) hp.2⟩
+  have hsourceEq : Set.EqOn
+      (parabolicNondivergenceOperator principal drift potential
+        (fun t x ↦ u t x))
+      (parabolicNondivergenceOperatorInEuclideanChart (I := I)
+        g V chartCenter intrinsicU) Qouter := by
+    intro p hp
+    exact parabolicNondivergenceOperator_congr_of_eqOn_open
+      hUrealize principal drift potential (fun t x ↦ u t x) chartU
+        (hQouterU hp) (by simpa only [Urealize, chartU] using hrealize)
+  have hsourceHolder' : HolderWith Ksource alpha
+      (Qouter.restrict
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x))) := by
+    have hfun : Qouter.restrict
+        (parabolicNondivergenceOperator principal drift potential
+          (fun t x ↦ u t x)) =
+        Qouter.restrict
+          (parabolicNondivergenceOperatorInEuclideanChart (I := I)
+            g V chartCenter intrinsicU) := by
+      funext p
+      exact hsourceEq p.2
+    rw [hfun]
+    simpa only [Qouter] using hsourceHolder
+  have hsourceNorm' : ∀ p, p ∈ Qouter →
+      ‖parabolicNondivergenceOperator principal drift potential
+        (fun t x ↦ u t x) p‖ ≤ Bsource := by
+    intro p hp
+    rw [hsourceEq hp]
+    exact hsourceNorm p (by simpa only [Qouter] using hp)
+  obtain ⟨localScale, s, delta, hdelta, hdeltaScale, hcover, hestimate⟩ :=
+    exists_parabolic_nondivergence_schauder_estimate
+      (alpha := alpha) (Ksource := Ksource) (Kc := Kc) (Ku := Ku)
+      (KdtimeU := KdtimeU) (Kdu := Kdu) (Kd2u := Kd2u)
+      (Bsource := Bsource) (Bc := Bc) (Mu := Mu)
+      (MdtimeU := MdtimeU) (Mdu := Mdu) (Md2u := Md2u)
+      halpha0 halpha1 principal drift potential hat₀ ht₁b hrR center hpos
+      Ka Kb Bb (by simpa only [principal] using ha)
+      (by simpa only [drift] using hb) (by simpa only [potential] using hc)
+      (by simpa only [drift] using hbNorm)
+      (by simpa only [potential] using hcNorm)
+      u dtimeU du d2u huTime hu hdu huCont
+      (by simpa only [Qouter] using hsourceHolder')
+      (by simpa only [Qouter] using hsourceNorm') huHolder hdtimeUHolder
+      hduHolder hd2uHolder huNorm hdtimeUNorm hduNorm hd2uNorm
+  refine ⟨localScale, s, delta, hdelta, hdeltaScale, hcover, ?_⟩
+  have hgauge : eParabolicC2HolderGaugeOn alpha Qinner
+      (fun t x ↦ u t x) = eParabolicC2HolderGaugeOn alpha Qinner chartU :=
+    eParabolicC2HolderGaugeOn_congr_of_eqOn_open
+      hUrealize hQinnerU (by simpa only [Urealize, chartU] using hrealize) alpha
+  unfold eParabolicC2HolderGaugeInEuclideanChartOn
+  rw [← hgauge]
+  simpa only [Qinner, principal, drift, potential] using hestimate
+
 end DifferentialGeometry.Analysis.Schauder
+
+namespace DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn
+
+open DifferentialGeometry.Analysis.Schauder
+open DifferentialGeometry.Analysis.Parabolic.Euclidean
+
+universe v vE vH
+
+variable {E : Type vE} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
+  {H : Type vH} [TopologicalSpace H]
+  {I : ModelWithCorners Real E H}
+  {M : Type v} [TopologicalSpace M] [ChartedSpace H M]
+  [IsManifold I ((⊤ : ℕ∞) : WithTop ℕ∞) M]
+
+private abbrev EuclM (E : Type vE) [NormedAddCommGroup E]
+    [NormedSpace Real E] [FiniteDimensional Real E] :=
+  EuclideanSpace Real (Fin (Module.finrank Real E))
+
+theorem exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {alpha Ksource Ku KdtimeU Kdu Kd2u Bsource
+      Mu MdtimeU Mdu Md2u : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {a t₀ t₁ b r R Rext : Real}
+    (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    (hat₀ : a < t₀) (ht₁b : t₁ < b) (hrR : r < R) (hRRext : R < Rext)
+    (chartCenter : M) (center : EuclM E)
+    (hchart : ((toEuclidean (E := E)).symm : EuclM E → E) ''
+      Metric.closedBall center R ⊆ interior (extChartAt I chartCenter).target)
+    (V : Real → M → Real)
+    (hV : ContDiffOn Real 1
+      (fun p : Real × E ↦ V p.1 ((extChartAt I chartCenter).symm p.2))
+      (Set.Icc a b ×ˢ
+        (((toEuclidean (E := E)).symm : EuclM E → E) ''
+          Metric.closedBall center R)))
+    (intrinsicU : Real → M → Real)
+    (u dtimeU : Real → BoundedContinuousFunction (EuclM E) Real)
+    (du : Real →
+      BoundedContinuousFunction (EuclM E) (EuclM E →L[Real] Real))
+    (d2u : Real → BoundedContinuousFunction (EuclM E)
+      (EuclM E →L[Real] EuclM E →L[Real] Real))
+    (huTime : ∀ s ∈ Set.Icc a b, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (u s : EuclM E → Real) (du s x) x)
+    (hdu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (du s : EuclM E → EuclM E →L[Real] Real)
+        (d2u s x) x)
+    (huCont : Continuous u)
+    (hrealize : Set.EqOn (fun p ↦ u p.time p.space)
+      (fun p ↦ parabolicEuclideanChartRepresentation
+        I chartCenter intrinsicU p.time p.space)
+      (parabolicCylinder Set.univ (Metric.ball center Rext)))
+    (hsourceHolder : HolderWith Ksource alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (parabolicNondivergenceOperatorInEuclideanChart (I := I)
+          G.metric V chartCenter intrinsicU)))
+    (hsourceNorm : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖parabolicNondivergenceOperatorInEuclideanChart (I := I)
+          G.metric V chartCenter intrinsicU p‖ ≤ Bsource)
+    (huHolder : HolderWith Ku alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ u p.time p.space)))
+    (hdtimeUHolder : HolderWith KdtimeU alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ dtimeU p.time p.space)))
+    (hduHolder : HolderWith Kdu alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ du p.time p.space)))
+    (hd2uHolder : HolderWith Kd2u alpha
+      ((parabolicCylinder (Set.Icc a b) Set.univ).restrict
+        (fun p ↦ d2u p.time p.space)))
+    (huNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeUNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖dtimeU p.time p.space‖ ≤ MdtimeU)
+    (hduNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖du p.time p.space‖ ≤ Mdu)
+    (hd2uNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖d2u p.time p.space‖ ≤ Md2u) :
+    ∃ C : NNReal,
+      eParabolicC2HolderGaugeInEuclideanChartOn alpha I chartCenter
+        (parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r))
+        intrinsicU ≤ C := by
+  obtain ⟨_Apr, Ka, Bb, Kb, Bc, Kc, _hAnorm, ha, hpos,
+      hbNorm, hb, hcNorm, hc⟩ :=
+    exists_parabolic_chart_nondivergence_operator_coefficient_schauder_bounds_on_closedBall
+      hG hab habreg chartCenter center R hchart V hV halpha1.le
+  have hposInner : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r) →
+        (Matrix.of fun i j : Fin (Module.finrank Real E) ↦
+          parabolicChartPrincipalCoefficient (I := I)
+            G.metric chartCenter i j p).PosDef := by
+    intro p hp
+    apply hpos p
+    exact ⟨⟨hat₀.le.trans hp.1.1, hp.1.2.trans ht₁b.le⟩,
+      Metric.closedBall_subset_closedBall hrR.le hp.2⟩
+  obtain ⟨localScale, s, delta, _hdelta, _hdeltaScale, _hcover, hestimate⟩ :=
+    exists_parabolic_nondivergence_schauder_estimate_in_euclideanChart
+      (alpha := alpha) (Ksource := Ksource) (Kc := Kc) (Ku := Ku)
+      (KdtimeU := KdtimeU) (Kdu := Kdu) (Kd2u := Kd2u)
+      (Bsource := Bsource) (Bc := Bc) (Mu := Mu)
+      (MdtimeU := MdtimeU) (Mdu := Mdu) (Md2u := Md2u)
+      halpha0 halpha1 G.metric V chartCenter intrinsicU hat₀ ht₁b hrR hRRext
+      center hposInner Ka Kb Bb ha hb hc hbNorm hcNorm
+      u dtimeU du d2u huTime hu hdu huCont hrealize hsourceHolder hsourceNorm
+      huHolder hdtimeUHolder hduHolder hd2uHolder
+      huNorm hdtimeUNorm hduNorm hd2uNorm
+  exact ⟨bufferedParabolicC2HolderGaugeConst alpha
+    (∑ p ∈ s, parabolicC2HolderRescaleConst
+      (localScale p).1⁻¹ alpha
+      (parabolicNondivergenceRescaledInteriorSchauderConst
+        (parabolicChartPrincipalCoefficient (I := I) G.metric chartCenter)
+        p.1 (hposInner p.1 p.2) alpha (localScale p).1 Ka Kb Bb Kc Bc
+        Ksource Ku Kdu Bsource Mu Mdu)) delta, hestimate⟩
+
+end DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn
 
 end
