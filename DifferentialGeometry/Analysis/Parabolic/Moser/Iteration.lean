@@ -160,6 +160,51 @@ theorem inv_parabolicMoserExponent {p₀ : ℝ} (hp₀ : 0 < p₀) (k : ℕ) :
   rw [inv_pow]
   field_simp [hp₀.ne', pow_ne_zero k hgain]
 
+theorem inv_le_exponent_gap_div_one_sub
+    {p₀ q : ℝ} {m : ℕ} (hp₀ : 0 < p₀) (hm : 0 < m)
+    (htarget : parabolicMoserExponent n p₀ m = q) :
+    1 / p₀ ≤ (1 / p₀ - 1 / q) / (1 - parabolicMoserDecay n) := by
+  let theta := parabolicMoserDecay n
+  have htheta : 0 ≤ theta := (parabolicMoserDecay_pos n).le
+  have htheta_one : theta ≤ 1 := (parabolicMoserDecay_lt_one n).le
+  have hdenom : 0 < 1 - theta := sub_pos.mpr (parabolicMoserDecay_lt_one n)
+  have hpow : theta ^ m ≤ theta :=
+    pow_le_of_le_one htheta htheta_one (Nat.ne_of_gt hm)
+  have hinv : 1 / q = theta ^ m / p₀ := by
+    rw [← htarget]
+    simpa only [theta] using inv_parabolicMoserExponent n hp₀ m
+  apply (le_div_iff₀ hdenom).2
+  rw [hinv]
+  have hinv_p₀ : 0 ≤ 1 / p₀ := (div_pos one_pos hp₀).le
+  calc
+    1 / p₀ * (1 - theta) ≤ 1 / p₀ * (1 - theta ^ m) :=
+      mul_le_mul_of_nonneg_left (sub_le_sub_left hpow 1) hinv_p₀
+    _ = 1 / p₀ - theta ^ m / p₀ := by ring
+
+theorem exp_div_le_rpow_exponent_gap
+    {D p₀ q : ℝ} {m : ℕ} (hD : 0 ≤ D) (hp₀ : 0 < p₀) (hm : 0 < m)
+    (htarget : parabolicMoserExponent n p₀ m = q) :
+    Real.exp (D / p₀) ≤
+      Real.exp (D / (1 - parabolicMoserDecay n)) ^ (1 / p₀ - 1 / q) := by
+  let theta := parabolicMoserDecay n
+  have hgap := inv_le_exponent_gap_div_one_sub n hp₀ hm htarget
+  have hexponent : D / p₀ ≤
+      (1 / p₀ - 1 / q) * (D / (1 - theta)) := by
+    have hmul := mul_le_mul_of_nonneg_left hgap hD
+    dsimp only [theta] at hmul ⊢
+    calc
+      D / p₀ = D * (1 / p₀) := by ring
+      _ ≤ D * ((1 / p₀ - 1 / q) / (1 - parabolicMoserDecay n)) := hmul
+      _ = (1 / p₀ - 1 / q) *
+          (D / (1 - parabolicMoserDecay n)) := by ring
+  rw [Real.rpow_def_of_pos (Real.exp_pos _), Real.log_exp]
+  apply Real.exp_le_exp.mpr
+  calc
+    D / p₀ ≤ (1 / p₀ - 1 / q) *
+        (D / (1 - parabolicMoserDecay n)) := by
+      simpa only [theta] using hexponent
+    _ = D / (1 - parabolicMoserDecay n) * (1 / p₀ - 1 / q) := mul_comm _ _
+
 omit [NeZero n] in
 theorem moserIterationCost_nonneg
     {theta a b : ℝ} (htheta : 0 ≤ theta) (ha : 0 ≤ a) (hb : 0 ≤ b) (k : ℕ) :
