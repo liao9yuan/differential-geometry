@@ -461,6 +461,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.FiniteParametricIntegra
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula
 import DifferentialGeometry.Analysis.Integration.Measure.JacobianImageLe
+import DifferentialGeometry.Analysis.Integration.Measure.LevelSetDecay
 import DifferentialGeometry.Analysis.Integration.Measure.ManifoldL2NormChartTargetBound
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.ParamEvaluation
