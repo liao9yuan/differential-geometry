@@ -169,6 +169,45 @@ theorem holderWith_bilinear_of_restrict_of_support
         ENNReal.ofReal (dist x y) ^ (alpha : Real) := by
       rw [ENNReal.ofReal_rpow_of_nonneg (dist_nonneg) alpha.coe_nonneg]
 
+theorem holderWith_bilinear_of_eq_zero_outside
+    {Q U : Set X} {alpha Kf Kg Mf Mg : NNReal}
+    (L : A →L[Real] B →L[Real] C)
+    (hL : ∀ a b, ‖L a b‖ ≤ ‖a‖ * ‖b‖)
+    (f : X → A) (g : X → B)
+    (hf : HolderWith Kf alpha (Q.restrict f))
+    (hg : HolderWith Kg alpha ((Q ∩ U).restrict g))
+    (hfNorm : ∀ x, x ∈ Q → x ∈ U → ‖f x‖ ≤ Mf)
+    (hgNorm : ∀ x, x ∈ Q → x ∈ U → ‖g x‖ ≤ Mg)
+    (hfZero : ∀ x, x ∈ Q → x ∉ U → f x = 0) :
+    HolderWith (Mf * Kg + Mg * Kf) alpha
+      (Q.restrict (fun x ↦ L (f x) (g x))) := by
+  let s : Set Q := {x | x.1 ∈ U}
+  have hg' : HolderWith Kg alpha
+      (s.restrict (fun x : Q ↦ g x.1)) := by
+    intro x y
+    simpa only [s, Set.mem_setOf_eq, Set.restrict_apply, Subtype.dist_eq] using
+      hg (⟨x.1.1, ⟨x.1.2, x.2⟩⟩ : (Q ∩ U : Set X))
+        (⟨y.1.1, ⟨y.1.2, y.2⟩⟩ : (Q ∩ U : Set X))
+  have hf' : HolderWith Kf alpha (fun x : Q ↦ f x.1) := by
+    simpa only [Set.restrict_apply] using hf
+  have hgNorm' : ∀ x ∈ s, ‖g x.1‖ ≤ Mg := by
+    intro x hx
+    exact hgNorm x.1 x.2 hx
+  have hfNorm' : ∀ x : Q, ‖f x.1‖ ≤ Mf := by
+    intro x
+    by_cases hx : x.1 ∈ U
+    · exact hfNorm x.1 x.2 hx
+    · rw [hfZero x.1 x.2 hx, norm_zero]
+      exact zero_le Mf
+  have hfSupport' : ∀ x : Q, x ∉ s → f x.1 = 0 := by
+    intro x hx
+    exact hfZero x.1 x.2 (by simpa only [s, Set.mem_setOf_eq] using hx)
+  have hresult := holderWith_bilinear_of_restrict_of_support
+    L.flip (fun b a ↦ by
+      simpa only [ContinuousLinearMap.flip_apply, mul_comm] using hL a b)
+    hg' hf' hgNorm' hfNorm' hfSupport'
+  simpa only [Set.restrict_apply, ContinuousLinearMap.flip_apply, add_comm] using hresult
+
 theorem holderWith_smul_of_restrict_of_support
     {s : Set X} {alpha Kf Kg Mf Mg : NNReal}
     {f : X → Real} {g : X → C}
