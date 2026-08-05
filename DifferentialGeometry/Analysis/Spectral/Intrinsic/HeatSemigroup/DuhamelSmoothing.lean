@@ -308,6 +308,29 @@ theorem duhamel_into_all_tensorHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
     hu_coeff i]
   rfl
 
+theorem exists_smooth_tensor_representative_of_duhamel_smoothing
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {t : ℝ} (ht : 0 ≤ t)
+    (h_gate : SpectralSmoothRealizesAsSmooth (I := I) (M := M) g r s)
+    (φ : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
+    (hφ : ∀ i, Continuous (φ i))
+    (hsmooth : ∀ c : ℝ, 0 ≤ c →
+      Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        tensorSobolevWeight (I := I) (M := M) i c *
+          ∫ q in (0 : ℝ)..t, (φ i q) ^ 2)) :
+    ∃ T : SmoothCcTensor g r s,
+      ∀ i, tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+          (T : TensorL2 r s g) i =
+        perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (φ i) t := by
+  obtain ⟨u, hu_coeff, hu_all⟩ :=
+    duhamel_into_all_tensorHs (I := I) (M := M) ht
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+      φ hφ hsmooth
+  obtain ⟨T, hT⟩ := h_gate u hu_all
+  refine ⟨T, fun i => ?_⟩
+  rw [hT]
+  exact hu_coeff i
+
 end Assembly
 
 end IntrinsicSpectral

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DuhamelSmoothing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenComboGardingReduction
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
@@ -27,6 +28,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
+open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 
@@ -382,6 +384,25 @@ theorem spectralSmoothRealizesAsSmooth_holds :
       (fun n => spectralPartialSum (I := I) (M := M) g u n) hcauchy
       (spectralPartialSum_toL2_tendsto (I := I) (M := M) g u)
   exact ⟨T, hT⟩
+
+theorem exists_smooth_covariant_two_tensor_representative_of_duhamel_smoothing
+    {t : ℝ} (ht : 0 ≤ t)
+    (φ : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
+    (hφ : ∀ i, Continuous (φ i))
+    (hsmooth : ∀ c : ℝ, 0 ≤ c →
+      Summable (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 =>
+        tensorSobolevWeight (I := I) (M := M) i c *
+          ∫ q in (0 : ℝ)..t, (φ i q) ^ 2)) :
+    ∃ T : SmoothCcTensor g 0 2,
+      ∀ i, tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+          (T : TensorL2 0 2 g) i =
+        perModeConv (TensorHeatEquation.TensorEigenIdx.lambda (I := I) (M := M) i)
+          (φ i) t :=
+  exists_smooth_tensor_representative_of_duhamel_smoothing
+    (I := I) (M := M) ht
+    (spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) (g := g))
+    φ hφ hsmooth
 
 end IntrinsicSpectral
 end RicciFlow
