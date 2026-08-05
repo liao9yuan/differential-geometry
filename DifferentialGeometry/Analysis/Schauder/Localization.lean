@@ -522,6 +522,35 @@ theorem eParabolicC2HolderGaugeWithLowerJetsOn_congr
     eHolderSeminormOn_congr hvalue alpha,
     eHolderSeminormOn_congr (hspatial 1 (by norm_num)) alpha]
 
+theorem isParabolicC2On_congr_of_eqOn_open
+    {Q U : Set (ParabolicPoint V)} (hU : IsOpen U) (hQU : Q ⊆ U)
+    {u v : Real → V → F}
+    (huv : Set.EqOn (fun p ↦ u p.time p.space)
+      (fun p ↦ v p.time p.space) U)
+    (hu : IsParabolicC2On Q u) :
+    IsParabolicC2On Q v := by
+  constructor
+  · intro p hp
+    have hmap : ContinuousAt
+        (fun x ↦ parabolicPoint p.time x) p.space := by
+      unfold parabolicPoint
+      exact (continuous_const.prodMk continuous_id).continuousAt
+    have heq : u p.time =ᶠ[nhds p.space] v p.time := by
+      filter_upwards [hmap (hU.mem_nhds (hQU hp))] with x hx
+      exact huv hx
+    exact (hu.1 p hp).congr_of_eventuallyEq heq.symm
+  · intro p hp
+    have hmap : ContinuousAt
+        (fun t ↦ parabolicPoint t p.space) p.time := by
+      unfold parabolicPoint
+      exact (Metric.Snowflaking.continuous_toSnowflaking.prodMk
+        continuous_const).continuousAt
+    have heq : (fun t ↦ u t p.space) =ᶠ[nhds p.time]
+        fun t ↦ v t p.space := by
+      filter_upwards [hmap (hU.mem_nhds (hQU hp))] with t ht
+      exact huv ht
+    exact heq.differentiableAt_iff.mp (hu.2 p hp)
+
 theorem eParabolicC2HolderGaugeOn_congr_of_eqOn_open
     {Q U : Set (ParabolicPoint V)} (hU : IsOpen U) (hQU : Q ⊆ U)
     {u v : Real → V → F}

@@ -526,6 +526,43 @@ def IsBoundedParabolicC2HolderOn (alpha : NNReal)
 
 namespace IsBoundedParabolicC2HolderOn
 
+theorem of_isParabolicC2On_of_gauge_ne_top
+    {alpha : NNReal} {Q : Set (ParabolicPoint V)}
+    {u : Real → V → F}
+    (hu : IsParabolicC2On Q u)
+    (hfinite : eParabolicC2HolderGaugeOn alpha Q u ≠ ⊤) :
+    IsBoundedParabolicC2HolderOn alpha Q u := by
+  have hspatialFinite : eHolderSeminormOn alpha Q
+      (parabolicSpatialJet 2 u) ≠ ⊤ :=
+    ne_top_of_le_ne_top hfinite
+      (parabolicSpatialHolderSeminorm_le alpha Q u)
+  have htimeFinite : eHolderSeminormOn alpha Q
+      (parabolicTimeDerivative u) ≠ ⊤ :=
+    ne_top_of_le_ne_top hfinite
+      (parabolicTimeHolderSeminorm_le alpha Q u)
+  have hspatial : MemHolder alpha
+      (Q.restrict (parabolicSpatialJet 2 u)) := by
+    rw [← eHolderNorm_lt_top]
+    exact lt_top_iff_ne_top.mpr hspatialFinite
+  have htime : MemHolder alpha
+      (Q.restrict (parabolicTimeDerivative u)) := by
+    rw [← eHolderNorm_lt_top]
+    exact lt_top_iff_ne_top.mpr htimeFinite
+  exact ⟨⟨hu, hspatial, htime⟩, hfinite⟩
+
+theorem mono
+    {alpha : NNReal} {Q R : Set (ParabolicPoint V)} (hQR : Q ⊆ R)
+    {u : Real → V → F}
+    (hu : IsBoundedParabolicC2HolderOn alpha R u) :
+    IsBoundedParabolicC2HolderOn alpha Q u := by
+  have huQ : IsParabolicC2On Q u :=
+    ⟨fun p hp ↦ hu.1.1.1 p (hQR hp),
+      fun p hp ↦ hu.1.1.2 p (hQR hp)⟩
+  have hfinite : eParabolicC2HolderGaugeOn alpha Q u ≠ ⊤ :=
+    ne_top_of_le_ne_top hu.2
+      (eParabolicC2HolderGaugeOn_mono hQR alpha u)
+  exact of_isParabolicC2On_of_gauge_ne_top huQ hfinite
+
 theorem zero (alpha : NNReal) (Q : Set (ParabolicPoint V)) :
     IsBoundedParabolicC2HolderOn alpha Q (0 : Real → V → F) := by
   exact ⟨IsParabolicC2HolderOn.zero alpha Q, by simp⟩
