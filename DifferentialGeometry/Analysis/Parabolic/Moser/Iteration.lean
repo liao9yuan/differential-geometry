@@ -69,6 +69,24 @@ theorem parabolicMoserExponent_succ (p₀ : ℝ) (k : ℕ) :
   rw [parabolicMoserExponent, pow_succ, parabolicMoserExponent]
   ring
 
+omit [NeZero n] in
+theorem parabolicMoserExponent_half_mul_critical
+    (p₀ : ℝ) (k : ℕ) :
+    (parabolicMoserExponent n p₀ k / 2) * (2 + 4 / (n : ℝ)) =
+      parabolicMoserExponent n p₀ (k + 1) := by
+  rw [parabolicMoserExponent_succ, parabolicMoserGain]
+  ring
+
+omit [NeZero n] in
+theorem abs_mul_rpow_half_critical
+    {a b p₀ : ℝ} (ha : 0 ≤ a) (hb : 0 < b) (k : ℕ) :
+    |a * b ^ (parabolicMoserExponent n p₀ k / 2)| ^ (2 + 4 / (n : ℝ)) =
+      a ^ (2 + 4 / (n : ℝ)) * b ^ parabolicMoserExponent n p₀ (k + 1) := by
+  have hbrpow : 0 ≤ b ^ (parabolicMoserExponent n p₀ k / 2) :=
+    Real.rpow_nonneg hb.le _
+  rw [abs_of_nonneg (mul_nonneg ha hbrpow), Real.mul_rpow ha hbrpow,
+    ← Real.rpow_mul hb.le, parabolicMoserExponent_half_mul_critical]
+
 theorem parabolicMoserExponent_pos {p₀ : ℝ} (hp₀ : 0 < p₀) (k : ℕ) :
     0 < parabolicMoserExponent n p₀ k := by
   rw [parabolicMoserExponent]
@@ -78,6 +96,36 @@ theorem parabolicMoserExponent_tendsto_atTop {p₀ : ℝ} (hp₀ : 0 < p₀) :
     Tendsto (parabolicMoserExponent n p₀) atTop atTop := by
   simpa only [parabolicMoserExponent, mul_comm] using
     (tendsto_pow_atTop_atTop_of_one_lt (one_lt_parabolicMoserGain n)).atTop_mul_const hp₀
+
+theorem exists_parabolic_moser_iteration_depth
+    {p q : ℝ} (hp : 0 < p) (hpq : p < q) :
+    ∃ m : ℕ,
+      let p₀ := q * parabolicMoserDecay n ^ m
+      p₀ < p ∧ p ≤ parabolicMoserGain n * p₀ := by
+  let rho := parabolicMoserDecay n
+  have hrho_pos : 0 < rho := parabolicMoserDecay_pos n
+  have hrho_one : rho < 1 := parabolicMoserDecay_lt_one n
+  have hpq_ratio_pos : 0 < p / q := div_pos hp (hp.trans hpq)
+  have hpq_ratio_le : p / q ≤ 1 := (div_le_one (hp.trans hpq)).2 hpq.le
+  obtain ⟨m, hm_lt, hm_le⟩ :=
+    exists_nat_pow_near_of_lt_one hpq_ratio_pos hpq_ratio_le hrho_pos hrho_one
+  refine ⟨m + 1, ?_⟩
+  dsimp only
+  constructor
+  · have hmul := mul_lt_mul_of_pos_left hm_lt (hp.trans hpq)
+    simpa [rho, div_eq_mul_inv, (hp.trans hpq).ne', mul_assoc, mul_left_comm, mul_comm]
+      using hmul
+  · have hmul := mul_le_mul_of_nonneg_left hm_le (hp.trans hpq).le
+    have hp_le : p ≤ q * rho ^ m := by
+      simpa [rho, div_eq_mul_inv, (hp.trans hpq).ne', mul_assoc, mul_left_comm, mul_comm]
+        using hmul
+    calc
+      p ≤ q * rho ^ m := hp_le
+      _ = parabolicMoserGain n *
+          (q * parabolicMoserDecay n ^ (m + 1)) := by
+        change q * parabolicMoserDecay n ^ m = _
+        rw [pow_succ, parabolicMoserDecay_eq_inv_gain]
+        field_simp [(parabolicMoserGain_pos n).ne']
 
 theorem inv_parabolicMoserExponent {p₀ : ℝ} (hp₀ : 0 < p₀) (k : ℕ) :
     1 / parabolicMoserExponent n p₀ k =

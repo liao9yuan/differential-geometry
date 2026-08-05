@@ -721,6 +721,7 @@ import DifferentialGeometry.Analysis.Parabolic.Harnack.PathIntegration
 import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiusti
 import DifferentialGeometry.Analysis.Parabolic.Moser.Crossover
 import DifferentialGeometry.Analysis.Parabolic.Moser.Cutoff
+import DifferentialGeometry.Analysis.Parabolic.Moser.ForwardIteration
 import DifferentialGeometry.Analysis.Parabolic.Moser.Iteration
 import DifferentialGeometry.Analysis.Parabolic.Moser.LocalBoundedness
 import DifferentialGeometry.Analysis.Parabolic.Moser.LogEnergy

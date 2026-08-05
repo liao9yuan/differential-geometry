@@ -81,22 +81,6 @@ def moserLocalBound
     moserNormalizedMass (I := I) (M := M) (Module.finrank ℝ E)
       rho u p₀ a τ t₁ 0
 
-theorem parabolicMoserExponent_half_mul_critical
-    (n : ℕ) [NeZero n] (p₀ : ℝ) (k : ℕ) :
-    (parabolicMoserExponent n p₀ k / 2) * (2 + 4 / (n : ℝ)) =
-      parabolicMoserExponent n p₀ (k + 1) := by
-  rw [parabolicMoserExponent_succ, parabolicMoserGain]
-  ring
-
-theorem abs_mul_rpow_half_critical
-    (n : ℕ) [NeZero n] {a b p₀ : ℝ} (ha : 0 ≤ a) (hb : 0 < b) (k : ℕ) :
-    |a * b ^ (parabolicMoserExponent n p₀ k / 2)| ^ (2 + 4 / (n : ℝ)) =
-      a ^ (2 + 4 / (n : ℝ)) * b ^ parabolicMoserExponent n p₀ (k + 1) := by
-  have hbrpow : 0 ≤ b ^ (parabolicMoserExponent n p₀ k / 2) :=
-    Real.rpow_nonneg hb.le _
-  rw [abs_of_nonneg (mul_nonneg ha hbrpow), Real.mul_rpow ha hbrpow,
-    ← Real.rpow_mul hb.le, parabolicMoserExponent_half_mul_critical]
-
 omit [I.Boundaryless] [CompactSpace M] in
 theorem moserLocalizedMass_nonneg
     (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)

@@ -57,6 +57,12 @@ def moserTimeLevel (a τ : ℝ) (k : ℕ) : ℝ :=
 def moserTimeWidth (a τ : ℝ) (k : ℕ) : ℝ :=
   (τ - a) * (2 : ℝ)⁻¹ ^ (k + 1)
 
+def moserUpperTimeLevel (τ b : ℝ) (k : ℕ) : ℝ :=
+  τ + (b - τ) * (2 : ℝ)⁻¹ ^ k
+
+def moserUpperTimeWidth (τ b : ℝ) (k : ℕ) : ℝ :=
+  (b - τ) * (2 : ℝ)⁻¹ ^ (k + 1)
+
 @[simp]
 theorem moserTimeLevel_zero (a τ : ℝ) :
     moserTimeLevel a τ 0 = a := by
@@ -75,6 +81,46 @@ theorem moserTimeWidth_pos {a τ : ℝ} (haτ : a < τ) (k : ℕ) :
 theorem moserTimeWidth_inv (a τ : ℝ) (k : ℕ) :
     (moserTimeWidth a τ k)⁻¹ = (2 : ℝ) ^ (k + 1) / (τ - a) := by
   simp only [moserTimeWidth, mul_inv_rev, ← inv_pow, inv_inv, div_eq_mul_inv]
+
+@[simp]
+theorem moserUpperTimeLevel_zero (τ b : ℝ) :
+    moserUpperTimeLevel τ b 0 = b := by
+  simp [moserUpperTimeLevel]
+
+theorem moserUpperTimeLevel_sub_succ (τ b : ℝ) (k : ℕ) :
+    moserUpperTimeLevel τ b k - moserUpperTimeLevel τ b (k + 1) =
+      moserUpperTimeWidth τ b k := by
+  simp only [moserUpperTimeLevel, moserUpperTimeWidth, pow_succ]
+  ring
+
+theorem moserUpperTimeWidth_pos {τ b : ℝ} (hτb : τ < b) (k : ℕ) :
+    0 < moserUpperTimeWidth τ b k := by
+  exact mul_pos (sub_pos.mpr hτb) (pow_pos (by norm_num) _)
+
+theorem moserUpperTimeWidth_inv (τ b : ℝ) (k : ℕ) :
+    (moserUpperTimeWidth τ b k)⁻¹ = (2 : ℝ) ^ (k + 1) / (b - τ) := by
+  simp only [moserUpperTimeWidth, mul_inv_rev, ← inv_pow, inv_inv, div_eq_mul_inv]
+
+theorem moserUpperTimeLevel_succ_lt {τ b : ℝ} (hτb : τ < b) (k : ℕ) :
+    moserUpperTimeLevel τ b (k + 1) < moserUpperTimeLevel τ b k := by
+  rw [← sub_pos, moserUpperTimeLevel_sub_succ]
+  exact moserUpperTimeWidth_pos hτb k
+
+theorem moserUpperTimeLevel_strictAnti {τ b : ℝ} (hτb : τ < b) :
+    StrictAnti (moserUpperTimeLevel τ b) := by
+  exact strictAnti_nat_of_succ_lt (moserUpperTimeLevel_succ_lt hτb)
+
+theorem moserUpperTimeLevel_le {τ b : ℝ} (hτb : τ < b) (k : ℕ) :
+    moserUpperTimeLevel τ b k ≤ b := by
+  calc
+    moserUpperTimeLevel τ b k ≤ moserUpperTimeLevel τ b 0 :=
+      (moserUpperTimeLevel_strictAnti hτb).antitone (Nat.zero_le k)
+    _ = b := moserUpperTimeLevel_zero τ b
+
+theorem moserUpperTimeLevel_lt {τ b : ℝ} (hτb : τ < b) (k : ℕ) :
+    τ < moserUpperTimeLevel τ b k := by
+  rw [moserUpperTimeLevel]
+  exact lt_add_of_pos_right τ (mul_pos (sub_pos.mpr hτb) (pow_pos (by norm_num) _))
 
 theorem moserTimeLevel_lt_succ {a τ : ℝ} (haτ : a < τ) (k : ℕ) :
     moserTimeLevel a τ k < moserTimeLevel a τ (k + 1) := by
