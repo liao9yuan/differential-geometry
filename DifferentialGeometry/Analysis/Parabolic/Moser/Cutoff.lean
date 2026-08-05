@@ -23,6 +23,9 @@ def moserCutoffLevel (k : ℕ) : ℝ :=
 def moserCutoffWidth (k : ℕ) : ℝ :=
   (2 : ℝ)⁻¹ ^ (k + 1)
 
+def moserCutoffLevelBetween (lower upper : ℝ) (k : ℕ) : ℝ :=
+  lower + (upper - lower) * moserCutoffLevel k
+
 theorem moserCutoffWidth_pos (k : ℕ) :
     0 < moserCutoffWidth k := by
   exact pow_pos (by norm_num) _
@@ -37,6 +40,36 @@ theorem moserCutoffLevel_succ_sub (k : ℕ) :
   simp only [moserCutoffLevel, moserCutoffWidth, pow_succ]
   ring
 
+@[simp]
+theorem moserCutoffLevelBetween_zero (lower upper : ℝ) :
+    moserCutoffLevelBetween lower upper 0 = lower := by
+  simp [moserCutoffLevelBetween, moserCutoffLevel]
+
+theorem moserCutoffLevelBetween_succ_sub
+    (lower upper : ℝ) (k : ℕ) :
+    moserCutoffLevelBetween lower upper (k + 1) -
+        moserCutoffLevelBetween lower upper k =
+      (upper - lower) * moserCutoffWidth k := by
+  rw [moserCutoffLevelBetween, moserCutoffLevelBetween]
+  rw [← moserCutoffLevel_succ_sub]
+  ring
+
+theorem moserCutoffLevelBetween_strictMono
+    {lower upper : ℝ} (hlowerUpper : lower < upper) :
+    StrictMono (moserCutoffLevelBetween lower upper) := by
+  apply strictMono_nat_of_lt_succ
+  intro k
+  rw [← sub_pos, moserCutoffLevelBetween_succ_sub]
+  exact mul_pos (sub_pos.mpr hlowerUpper) (moserCutoffWidth_pos k)
+
+theorem moserCutoffLevelBetween_lt
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    moserCutoffLevelBetween lower upper k < upper := by
+  rw [moserCutoffLevelBetween]
+  have hgap : 0 < upper - lower := sub_pos.mpr hlowerUpper
+  have hlevel := moserCutoffLevel_lt_one k
+  nlinarith
+
 theorem moserCutoffWidth_succ_inv_sq (k : ℕ) :
     (moserCutoffWidth (k + 1) ^ 2)⁻¹ = (16 : ℝ) * 4 ^ k := by
   simp only [moserCutoffWidth, pow_succ, inv_pow]
@@ -44,6 +77,16 @@ theorem moserCutoffWidth_succ_inv_sq (k : ℕ) :
   norm_num [pow_mul]
   rw [pow_two, ← mul_pow]
   norm_num
+
+theorem moserCutoffLevelBetween_succ_inv_sq
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    ((moserCutoffLevelBetween lower upper (k + 2) -
+        moserCutoffLevelBetween lower upper (k + 1)) ^ 2)⁻¹ =
+      (16 / (upper - lower) ^ 2) * 4 ^ k := by
+  rw [show k + 2 = (k + 1) + 1 by omega,
+    moserCutoffLevelBetween_succ_sub, mul_pow, mul_inv_rev,
+    moserCutoffWidth_succ_inv_sq]
+  field_simp [(sub_pos.mpr hlowerUpper).ne']
 
 theorem moserCutoffLevel_strictMono : StrictMono moserCutoffLevel := by
   apply strictMono_nat_of_lt_succ
