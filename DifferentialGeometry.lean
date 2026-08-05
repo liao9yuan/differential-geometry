@@ -388,6 +388,7 @@ import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothRepresentative
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingFromChartBridges
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingOfClosed
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingSpectralLift
+import DifferentialGeometry.Analysis.HoleFilling
 import DifferentialGeometry.Analysis.InnerProductSpace.IsometryTransitive
 import DifferentialGeometry.Analysis.InnerProductSpace.ProperConeIsometry
 import DifferentialGeometry.Analysis.InnerProductSpace.ProperConeFace
