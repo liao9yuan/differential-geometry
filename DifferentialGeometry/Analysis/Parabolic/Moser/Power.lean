@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.Energy.Caccioppoli
+import DifferentialGeometry.Analysis.Parabolic.Energy.Supersolution
 import DifferentialGeometry.Analysis.Parabolic.Moser.Sobolev
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 
@@ -291,6 +291,277 @@ theorem rpow_supersolution_of_supersolution
   linarith
 
 variable [SigmaCompactSpace M] [CompactSpace M]
+
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+private theorem positive_rpow_cross_term_le
+    (g : SmoothRiemannianMetric I M)
+    (cutoff u : SmoothScalar g) {q : ℝ} (hq_pos : 0 < q) (hq_one : q < 1)
+    (x : M) (hpos : 0 < u.toFun x) :
+    2 * cutoff.toFun x *
+        g.inner x
+          (gradientFun (I := I) g cutoff.toFun x)
+          (gradientFun (I := I) g (fun y => u.toFun y ^ q) x) ≤
+      (1 / 2 : ℝ) * cutoff.toFun x ^ 2 *
+          ((q * (1 - q) * u.toFun x ^ (q - 2)) *
+            g.inner x
+              (gradientFun (I := I) g u.toFun x)
+              (gradientFun (I := I) g u.toFun x)) +
+        (2 * q / (1 - q)) * u.toFun x ^ q *
+          g.inner x
+            (gradientFun (I := I) g cutoff.toFun x)
+            (gradientFun (I := I) g cutoff.toFun x) := by
+  rw [gradientFun_rpow (I := I) g q (u.smooth.mdifferentiable (by simp) x) hpos]
+  simp only [map_smul, smul_eq_mul]
+  let a := cutoff.toFun x
+  let z := u.toFun x
+  let U := gradientFun (I := I) g u.toFun x
+  let V := gradientFun (I := I) g cutoff.toFun x
+  have hnonneg := metric_inner_self_nonneg (I := I) (M := M) g x
+    (((1 - q) * a) • U - (2 * z) • V)
+  have hfactor : 0 ≤ q / 2 * z ^ (q - 2) := by
+    exact mul_nonneg (div_nonneg hq_pos.le (by norm_num))
+      (Real.rpow_nonneg hpos.le _)
+  have hscaled := mul_nonneg hfactor hnonneg
+  have hz1 : z ^ (q - 2) * z = z ^ (q - 1) := by
+    rw [← Real.rpow_add_one hpos.ne' (q - 2)]
+    congr 1
+    ring
+  have hz2 : z ^ (q - 2) * z ^ 2 = z ^ q := by
+    rw [← Real.rpow_two, ← Real.rpow_add hpos (q - 2) 2]
+    congr 1
+    ring
+  have hz1q : q * z ^ (q - 2) * z = q * z ^ (q - 1) := by
+    calc
+      q * z ^ (q - 2) * z = q * (z ^ (q - 2) * z) := by ring
+      _ = q * z ^ (q - 1) := by rw [hz1]
+  have hz1q2 : q ^ 2 * z ^ (q - 2) * z = q ^ 2 * z ^ (q - 1) := by
+    calc
+      q ^ 2 * z ^ (q - 2) * z = q ^ 2 * (z ^ (q - 2) * z) := by ring
+      _ = q ^ 2 * z ^ (q - 1) := by rw [hz1]
+  have hz2q : q * z ^ (q - 2) * z ^ 2 = q * z ^ q := by
+    calc
+      q * z ^ (q - 2) * z ^ 2 = q * (z ^ (q - 2) * z ^ 2) := by ring
+      _ = q * z ^ q := by rw [hz2]
+  simp only [map_sub, ContinuousLinearMap.sub_apply, map_smul,
+    ContinuousLinearMap.smul_apply, smul_eq_mul] at hscaled
+  rw [g.symm x V U] at hscaled
+  have hcore :
+      (1 - q) * (2 * a * (q * z ^ (q - 1) * g.inner x U V)) ≤
+        (1 - q) * ((1 / 2 : ℝ) * a ^ 2 *
+          ((q * (1 - q) * z ^ (q - 2)) * g.inner x U U)) +
+          2 * q * z ^ q * g.inner x V V := by
+    ring_nf at hz1q hz1q2 hz2q hscaled ⊢
+    rw [hz1q, hz1q2, hz2q] at hscaled
+    nlinarith
+  have hdenom : 0 < 1 - q := sub_pos.mpr hq_one
+  have hdiv :
+      2 * a * (q * z ^ (q - 1) * g.inner x U V) -
+          (1 / 2 : ℝ) * a ^ 2 *
+            ((q * (1 - q) * z ^ (q - 2)) * g.inner x U U) ≤
+        (2 * q * z ^ q * g.inner x V V) / (1 - q) := by
+    apply (le_div_iff₀ hdenom).2
+    nlinarith
+  rw [g.symm x V U]
+  change 2 * a * (q * z ^ (q - 1) * g.inner x U V) ≤
+    (1 / 2 : ℝ) * a ^ 2 *
+        ((q * (1 - q) * z ^ (q - 2)) * g.inner x U U) +
+      (2 * q / (1 - q)) * z ^ q * g.inner x V V
+  have herr :
+      (2 * q * z ^ q * g.inner x V V) / (1 - q) =
+        (2 * q / (1 - q)) * z ^ q * g.inner x V V := by
+    field_simp
+  rw [← herr]
+  linarith
+
+theorem localized_energy_positive_rpow_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq_pos : 0 < q) (hq_one : q < 1)
+    (t : ℝ)
+    (hpde : ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    (1 / 2 : ℝ) *
+        ∫ x, cutoff.toFun x ^ 2 *
+          ((q * (1 - q) * u t x ^ (q - 2)) *
+            g.inner x
+              (gradientFun (I := I) g
+                (smoothScalarSlice (I := I) g u hu t).toFun x)
+              (gradientFun (I := I) g
+                (smoothScalarSlice (I := I) g u hu t).toFun x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
+      deriv
+          (fun s => localizedIntegral (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun r x => u r x ^ q)
+              (contMDiff_rpow_of_pos hu hpos q) s)) t +
+        ∫ x, (2 * q / (1 - q)) * u t x ^ q *
+            g.inner x
+              (gradientFun (I := I) g cutoff.toFun x)
+              (gradientFun (I := I) g cutoff.toFun x)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  let huq := contMDiff_rpow_of_pos hu hpos q
+  let uq : ℝ → M → ℝ := fun s x => u s x ^ q
+  let dissipation : ℝ → M → ℝ := fun s x =>
+    (q * (1 - q) * u s x ^ (q - 2)) *
+      g.inner x
+        (gradientFun (I := I) g (u s) x)
+        (gradientFun (I := I) g (u s) x)
+  let error : ℝ → M → ℝ := fun s x =>
+    (2 * q / (1 - q)) * u s x ^ q *
+      g.inner x
+        (gradientFun (I := I) g cutoff.toFun x)
+        (gradientFun (I := I) g cutoff.toFun x)
+  let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
+    { metric := fun _ => g
+      connection := fun _ => LeviCivita (I := I) g
+      metricCompatible := fun _ => by
+        simpa [LeviCivita] using
+          (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g) }
+  have hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (G.metric p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    intro x₀ i j
+    have hspace := chartGramMatrix_entry_contMDiffOn (I := I) g x₀ i j
+    simpa only [G] using hspace.comp contMDiffOn_snd (fun p hp => hp.2)
+  have hgrad_joint : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        g.inner p.2
+          (gradientFun (I := I) g (u p.1) p.2)
+          (gradientFun (I := I) g (u p.1) p.2)) := by
+    have h := gradSq_joint (I := I) G isOpen_univ hgram u hu.contMDiffOn
+    simpa only [G, Set.univ_prod_univ, contMDiffOn_univ] using h
+  have hcutoff_grad : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M =>
+      g.inner x
+        (gradientFun (I := I) g cutoff.toFun x)
+        (gradientFun (I := I) g cutoff.toFun x)) := by
+    have h := contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
+      (grad_g (I := I) g cutoff.smooth) (grad_g (I := I) g cutoff.smooth)
+    simpa only [grad_g_apply] using h
+  have hdissipation : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => dissipation p.1 p.2) := by
+    exact ((contMDiff_const.mul (contMDiff_rpow_of_pos hu hpos (q - 2))).mul
+      hgrad_joint)
+  have herror : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => error p.1 p.2) := by
+    exact ((contMDiff_const.mul (contMDiff_rpow_of_pos hu hpos q)).mul
+      (hcutoff_grad.comp contMDiff_snd))
+  have hmain := localized_energy_differential_of_supersolution
+    (I := I) (M := M) g cutoff uq dissipation error huq hdissipation herror t
+    (fun x => by
+      simpa only [uq, dissipation, rpowSource, smoothScalarSlice_toFun,
+        mul_zero, zero_mul, add_zero] using
+        rpow_supersolution_with_gradient_term
+          (I := I) (M := M) g u (fun _ _ => 0) hu hpos hq_pos.le
+            (t := t) (x := x) (by simpa only [add_zero] using hpde x))
+    (fun x => by
+      simpa only [uq, dissipation, error, smoothScalarSlice_toFun] using
+        positive_rpow_cross_term_le (I := I) (M := M) g cutoff
+          (smoothScalarSlice (I := I) g u hu t) hq_pos hq_one x (hpos t x))
+  simpa only [uq, dissipation, error, huq, smoothScalarSlice_toFun] using hmain
+
+theorem caccioppoli_positive_rpow_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq_pos : 0 < q) (hq_one : q < 1)
+    (t : ℝ)
+    (hpde : ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    (2 * (1 - q) / q) *
+        localizedDirichletEnergy (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+            (contMDiff_rpow_of_pos hu hpos (q / 2)) t) ≤
+      deriv
+          (fun s => localizedIntegral (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun r x => u r x ^ q)
+              (contMDiff_rpow_of_pos hu hpos q) s)) t +
+        (2 * q / (1 - q)) *
+          cutoffGradientError (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+              (contMDiff_rpow_of_pos hu hpos (q / 2)) t) := by
+  let huHalf := contMDiff_rpow_of_pos hu hpos (q / 2)
+  let wt := smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2)) huHalf t
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  have hraw := localized_energy_positive_rpow_of_supersolution
+    (I := I) (M := M) g cutoff u hu hpos hq_pos hq_one t hpde
+  have hleft :
+      (2 * (1 - q) / q) *
+          localizedDirichletEnergy (I := I) (M := M) cutoff wt =
+        (1 / 2 : ℝ) *
+          ∫ x, cutoff.toFun x ^ 2 *
+            ((q * (1 - q) * u t x ^ (q - 2)) *
+              g.inner x
+                (gradientFun (I := I) g (u t) x)
+                (gradientFun (I := I) g (u t) x)) ∂μ := by
+    rw [localizedDirichletEnergy, ← integral_const_mul, ← integral_const_mul]
+    apply integral_congr_ae
+    filter_upwards [] with x
+    simp only [← gradient_eq_gradFun]
+    have hgrad := gradientFun_rpow (I := I) g (q / 2)
+      ((smoothScalarSlice (I := I) g u hu t).smooth.mdifferentiable (by simp) x)
+      (hpos t x)
+    have hgrad' :
+        gradientFun (I := I) g wt.toFun x =
+          (q / 2 * u t x ^ (q / 2 - 1)) •
+            gradientFun (I := I) g (u t) x := by
+      simpa only [wt, smoothScalarSlice_toFun] using hgrad
+    have hrpow :
+        u t x ^ (q / 2 - 1) * u t x ^ (q / 2 - 1) = u t x ^ (q - 2) := by
+      rw [← Real.rpow_add (hpos t x) (q / 2 - 1) (q / 2 - 1)]
+      congr 1
+      ring
+    rw [hgrad']
+    simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+    calc
+      2 * (1 - q) / q *
+            (cutoff.toFun x ^ 2 *
+              (q / 2 * u t x ^ (q / 2 - 1) *
+                (q / 2 * u t x ^ (q / 2 - 1) *
+                  g.inner x
+                    (gradientFun (I := I) g (u t) x)
+                    (gradientFun (I := I) g (u t) x)))) =
+          2 * (1 - q) / q * cutoff.toFun x ^ 2 *
+            ((q / 2) ^ 2 *
+              (u t x ^ (q / 2 - 1) * u t x ^ (q / 2 - 1)) *
+              g.inner x
+                (gradientFun (I := I) g (u t) x)
+                (gradientFun (I := I) g (u t) x)) := by ring
+      _ = (1 / 2 : ℝ) *
+          (cutoff.toFun x ^ 2 *
+            (q * (1 - q) * u t x ^ (q - 2) *
+              g.inner x
+                (gradientFun (I := I) g (u t) x)
+                (gradientFun (I := I) g (u t) x))) := by
+        rw [hrpow]
+        field_simp [hq_pos.ne']
+  have herror :
+      ∫ x, (2 * q / (1 - q)) * u t x ^ q *
+          g.inner x
+            (gradientFun (I := I) g cutoff.toFun x)
+            (gradientFun (I := I) g cutoff.toFun x) ∂μ =
+        (2 * q / (1 - q)) *
+          cutoffGradientError (I := I) (M := M) cutoff wt := by
+    rw [cutoffGradientError, ← integral_const_mul]
+    apply integral_congr_ae
+    filter_upwards [] with x
+    have hrpow : (u t x ^ (q / 2)) ^ 2 = u t x ^ q := by
+      rw [← Real.rpow_two, ← Real.rpow_mul (hpos t x).le]
+      congr 1
+      ring
+    simp only [wt, smoothScalarSlice_toFun, hrpow, ← gradient_eq_gradFun]
+    ring
+  rw [hleft, ← herror]
+  simpa only [μ, smoothScalarSlice_toFun] using hraw
 
 theorem caccioppoli_rpow_of_subsolution
     (g : SmoothRiemannianMetric I M)

@@ -602,6 +602,7 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldCo
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
 import DifferentialGeometry.Analysis.Parabolic.Energy.Caccioppoli
+import DifferentialGeometry.Analysis.Parabolic.Energy.Supersolution
 import DifferentialGeometry.Analysis.Parabolic.Energy.TimeCutoff
 import DifferentialGeometry.Analysis.Parabolic.ExponentialRescaling
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLocalSource
