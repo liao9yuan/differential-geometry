@@ -74,6 +74,33 @@ def moserLocalBoundFactor
           Real.log (max 1 (moserStepConstant (I := I) rho a τ t₁))) / p₀)
       (Real.log 16 / p₀) j)
 
+theorem one_le_moserLocalBoundFactor
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g) {p₀ : ℝ} (hp₀ : 0 < p₀) (a τ t₁ : ℝ) :
+    1 ≤ moserLocalBoundFactor (I := I) (M := M)
+      g hdim rho p₀ a τ t₁ := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  have hSobolev :
+      1 ≤ max 1 (localizedSobolevConstant (I := I) (M := M) g hdim) :=
+    le_max_left _ _
+  have hStep : 1 ≤ max 1 (moserStepConstant (I := I) rho a τ t₁) :=
+    le_max_left _ _
+  unfold moserLocalBoundFactor
+  rw [Real.one_le_exp_iff]
+  apply tsum_nonneg
+  intro k
+  exact moserIterationCost_nonneg (parabolicMoserDecay_pos n).le
+    (div_nonneg
+      (add_nonneg
+        (mul_nonneg (parabolicMoserDecay_pos n).le
+          (Real.log_nonneg hSobolev))
+        (Real.log_nonneg hStep)) hp₀.le)
+    (div_nonneg (Real.log_nonneg (by norm_num)) hp₀.le) k
+
 def moserLocalBound
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
