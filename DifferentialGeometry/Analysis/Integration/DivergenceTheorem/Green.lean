@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationBy
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
-import DifferentialGeometry.Integration.DivergenceTheorem.Gradient
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Gradient
 
 
 noncomputable section

@@ -1,11 +1,11 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
-import DifferentialGeometry.Integration.Volume.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.MeasureTheory.Measure.WithDensity
 import Mathlib.MeasureTheory.Integral.Lebesgue.Basic
-import DifferentialGeometry.Integration.Volume.Invariance
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import Mathlib.MeasureTheory.Measure.Typeclasses.Finite
 import Mathlib.MeasureTheory.Measure.Typeclasses.SFinite
 import Mathlib.MeasureTheory.Measure.OpenPos

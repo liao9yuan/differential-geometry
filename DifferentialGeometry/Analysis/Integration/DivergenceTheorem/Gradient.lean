@@ -1,6 +1,5 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.LocalFormula
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
-import DifferentialGeometry.Integration.DivergenceTheorem.LocalFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartCoeffPullback
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
@@ -11,13 +10,11 @@ import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.LineDeriv.Basic
-import DifferentialGeometry.Integration.Volume.ChartDensity
-import DifferentialGeometry.Integration.Volume.Family.Base
-import DifferentialGeometry.Integration.Volume.Family.Variation
-import Mathlib.Analysis.Calculus.FDeriv.Basic
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs
+import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
 import Mathlib.Analysis.Calculus.FDeriv.Equiv
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
-import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.LinearAlgebra.Dual.Lemmas
