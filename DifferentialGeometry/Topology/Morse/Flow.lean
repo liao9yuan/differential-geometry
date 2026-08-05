@@ -46,7 +46,7 @@ theorem curveAt_integralCurve (v : (x : M) → TangentSpace I x)
   (Classical.choose_spec (hcomplete x)).2
 
 noncomputable def unitSpeedFlow_of_vectorField [T2Space M] (I : ModelWithCorners ℝ E H)
-    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (a b : ℝ) (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
@@ -267,6 +267,19 @@ theorem UnitSpeedFlow.image_sublevels (Φ : UnitSpeedFlow f a b) (hab : a ≤ b)
         _ = Φ.flow ((a - b) + (b - a)) y := h.symm
         _ = Φ.flow 0 y := by rw [hz]
         _ = y := Φ.flow_zero y
+
+theorem sublevel_transport_of_unitSpeedVectorField [T2Space M] (I : ModelWithCorners ℝ E H)
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (a b : ℝ) (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (hab : a ≤ b) :
+    (fun x : M => (unitSpeedFlow_of_vectorField I a b f hf v hv hdf hcomplete).flow (a - b) x) ''
+        sublevel f a = sublevel f b :=
+  UnitSpeedFlow.image_sublevels (a := a) (b := b)
+    (unitSpeedFlow_of_vectorField I a b f hf v hv hdf hcomplete) hab
 
 theorem GradientLikeFlow.toDiffeomorph_image_sublevels (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
     Φ.toDiffeomorph (a - b) '' sublevel f a = sublevel f b := by
