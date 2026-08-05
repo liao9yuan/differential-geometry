@@ -85,6 +85,81 @@ theorem holder_integral_mul_rpow_le
     (by simp [Theta, Fin.sum_univ_two])
   simpa [F, Theta, Fin.prod_univ_two] using h
 
+theorem integral_rpow_le_interpolation
+    {f : α → ℝ} {p q theta : ℝ}
+    (hp : 0 < p) (hq : 0 < q)
+    (hfp : Integrable (fun x => f x ^ p) μ)
+    (hfq : Integrable (fun x => f x ^ q) μ)
+    (hf_nonneg : 0 ≤ᵐ[μ] f)
+    (htheta : 0 ≤ theta) (htheta_one : theta ≤ 1) :
+    (∫ x, f x ^ (theta * p + (1 - theta) * q) ∂μ) ≤
+      (∫ x, f x ^ p ∂μ) ^ theta *
+        (∫ x, f x ^ q ∂μ) ^ (1 - theta) := by
+  have h := holder_integral_mul_rpow_le hfp hfq
+    (hf_nonneg.mono fun x hx => Real.rpow_nonneg hx p)
+    (hf_nonneg.mono fun x hx => Real.rpow_nonneg hx q)
+    htheta htheta_one
+  have hpoint : ∀ᵐ x ∂μ,
+      (f x ^ p) ^ theta * (f x ^ q) ^ (1 - theta) =
+        f x ^ (theta * p + (1 - theta) * q) := by
+    filter_upwards [hf_nonneg] with x hx
+    by_cases hzero : f x = 0
+    · have hexponent : 0 < theta * p + (1 - theta) * q := by
+        nlinarith [mul_nonneg htheta hp.le,
+          mul_nonneg (sub_nonneg.mpr htheta_one) hq.le]
+      by_cases htheta_zero : theta = 0
+      · simp [hzero, htheta_zero, Real.zero_rpow hp.ne', Real.zero_rpow hq.ne']
+      by_cases htheta_one_eq : theta = 1
+      · simp [hzero, htheta_one_eq, Real.zero_rpow hp.ne', Real.zero_rpow hq.ne']
+      have htheta_pos : 0 < theta := lt_of_le_of_ne htheta (Ne.symm htheta_zero)
+      have hone_sub_pos : 0 < 1 - theta := sub_pos.mpr
+        (lt_of_le_of_ne htheta_one htheta_one_eq)
+      simp [hzero, Real.zero_rpow hp.ne', Real.zero_rpow hq.ne',
+        Real.zero_rpow hexponent.ne', Real.zero_rpow htheta_pos.ne',
+        Real.zero_rpow hone_sub_pos.ne']
+    · have hpos : 0 < f x := lt_of_le_of_ne hx (Ne.symm hzero)
+      rw [← Real.rpow_mul hpos.le, ← Real.rpow_mul hpos.le,
+        ← Real.rpow_add hpos]
+      congr 1
+      ring
+  rw [integral_congr_ae hpoint] at h
+  exact h
+
+theorem integral_rpow_root_le_interpolation
+    {f : α → ℝ} {p q r theta : ℝ}
+    (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
+    (htheta : 0 ≤ theta) (htheta_one : theta ≤ 1)
+    (hq_eq : q = theta * p + (1 - theta) * r)
+    (hfp : Integrable (fun x => f x ^ p) μ)
+    (hfr : Integrable (fun x => f x ^ r) μ)
+    (hf_nonneg : 0 ≤ᵐ[μ] f) :
+    (∫ x, f x ^ q ∂μ) ^ (1 / q) ≤
+      ((∫ x, f x ^ p ∂μ) ^ (1 / p)) ^ (theta * p / q) *
+        ((∫ x, f x ^ r ∂μ) ^ (1 / r)) ^ ((1 - theta) * r / q) := by
+  have hmoment := integral_rpow_le_interpolation hp hr hfp hfr hf_nonneg
+    htheta htheta_one
+  rw [← hq_eq] at hmoment
+  have hpint : 0 ≤ ∫ x, f x ^ p ∂μ :=
+    integral_nonneg_of_ae (hf_nonneg.mono fun x hx => Real.rpow_nonneg hx p)
+  have hqint : 0 ≤ ∫ x, f x ^ q ∂μ :=
+    integral_nonneg_of_ae (hf_nonneg.mono fun x hx => Real.rpow_nonneg hx q)
+  have hrint : 0 ≤ ∫ x, f x ^ r ∂μ :=
+    integral_nonneg_of_ae (hf_nonneg.mono fun x hx => Real.rpow_nonneg hx r)
+  have hroot := Real.rpow_le_rpow hqint hmoment (div_nonneg zero_le_one hq.le)
+  calc
+    (∫ x, f x ^ q ∂μ) ^ (1 / q) ≤
+        ((∫ x, f x ^ p ∂μ) ^ theta *
+          (∫ x, f x ^ r ∂μ) ^ (1 - theta)) ^ (1 / q) := hroot
+    _ = ((∫ x, f x ^ p ∂μ) ^ (1 / p)) ^ (theta * p / q) *
+        ((∫ x, f x ^ r ∂μ) ^ (1 / r)) ^ ((1 - theta) * r / q) := by
+      rw [Real.mul_rpow (Real.rpow_nonneg hpint theta)
+        (Real.rpow_nonneg hrint (1 - theta))]
+      rw [← Real.rpow_mul hpint, ← Real.rpow_mul hrint]
+      rw [← Real.rpow_mul hpint, ← Real.rpow_mul hrint]
+      congr 1
+      · field_simp [hp.ne', hq.ne']
+      · field_simp [hq.ne', hr.ne']
+
 theorem integrable_rpow_of_integrable_rpow
     [IsFiniteMeasure μ] {f : α → ℝ} {p q : ℝ}
     (hp : 0 ≤ p) (hpq : p ≤ q)

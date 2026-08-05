@@ -211,6 +211,29 @@ theorem localizedSpacetimeRpowNorm_mono
       (integrable_localizedSpacetimeRpow_of_continuous_pos
         (I := I) (M := M) cutoff u hu hpos q a b) hmass
 
+theorem localizedSpacetimeRpowNorm_le_interpolation
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : Continuous (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p q r theta a b : ℝ}
+    (hp : 0 < p) (hq : 0 < q) (hr : 0 < r)
+    (htheta : 0 ≤ theta) (htheta_one : theta ≤ 1)
+    (hq_eq : q = theta * p + (1 - theta) * r) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u q a b ≤
+      localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ^
+          (theta * p / q) *
+        localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u r a b ^
+          ((1 - theta) * r / q) := by
+  unfold localizedSpacetimeRpowNorm localizedSpacetimeRpowMoment
+  exact DifferentialGeometry.Integral.integral_rpow_root_le_interpolation
+    hp hq hr htheta htheta_one hq_eq
+      (integrable_localizedSpacetimeRpow_of_continuous_pos
+        (I := I) (M := M) cutoff u hu hpos p a b)
+      (integrable_localizedSpacetimeRpow_of_continuous_pos
+        (I := I) (M := M) cutoff u hu hpos r a b)
+      (ae_of_all _ fun z => (hpos z.1 z.2).le)
+
 omit [CompactSpace M] in
 theorem integral_cutoffWeightedMeasure
     {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g) (f : M → ℝ) :
