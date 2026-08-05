@@ -1179,7 +1179,8 @@ theorem variable_coefficient_schauder_norm_estimate_of_small_oscillation
       alpha halpha0 (a i j)
   let u0 := contDiffHolderSpaceToBoundedContinuousFunction 2 alpha u
   let du := contDiffHolderSpaceFDeriv 2 alpha (by omega) u
-  let d2u := contDiffHolderSpaceHessian 2 alpha (by omega) u
+  let d2 := contDiffHolderSpaceHessianHolder alpha u
+  let d2u := boundedHolderSpaceToBoundedContinuousFunction alpha halpha0 d2
   let f := contDiffHolderSpaceVariableMatrixLaplacian alpha a u
   let f0 := boundedHolderSpaceToBoundedContinuousFunction alpha halpha0 f
   let Ka : n → n → NNReal :=
@@ -1194,16 +1195,23 @@ theorem variable_coefficient_schauder_norm_estimate_of_small_oscillation
   have hdu : ∀ x : Euc n,
       HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x := by
     intro x
-    simpa only [du, d2u] using
+    have hd2eq : d2u x =
+        contDiffHolderSpaceHessian 2 alpha (by omega) u x := by
+      simp only [d2u, d2,
+        boundedHolderSpaceToBoundedContinuousFunction_apply,
+        contDiffHolderSpaceHessianHolder_apply,
+        contDiffHolderSpaceHessian_apply]
+    rw [hd2eq]
+    simpa only [du] using
       contDiffHolderSpaceFDeriv_hasFDerivAt 2 alpha (by omega) u x
   have hsource : variableMatrixLap a0 d2u = f0 := by
     apply BoundedContinuousFunction.ext
     intro x
-    simp only [variableMatrixLap_apply, a0,
+    simp only [variableMatrixLap_apply, a0, d2u, d2,
       boundedHolderSpaceToBoundedContinuousFunction_apply, f0, f,
+      contDiffHolderSpaceHessianHolder_apply,
       contDiffHolderSpaceVariableMatrixLaplacian_apply]
-    rw [contDiffHolderSpaceHessian_apply,
-      hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv]
+    rw [← hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv]
   have hfBound : ‖variableMatrixLap a0 d2u‖ ≤ ‖f‖₊ := by
     rw [hsource, BoundedContinuousFunction.norm_le (by positivity)]
     intro x
@@ -1223,37 +1231,14 @@ theorem variable_coefficient_schauder_norm_estimate_of_small_oscillation
     intro i j x
     simp only [a0, boundedHolderSpaceToBoundedContinuousFunction_apply]
     exact norm_sub_le_boundedHolderSpaceOscillationAt (a i j) x0 x
-  have hd2unorm : ∀ x, ‖d2u x‖ ≤ ‖u‖₊ := by
+  have hd2unorm : ∀ x, ‖d2u x‖ ≤ ‖d2‖₊ := by
     intro x
-    simp only [d2u, contDiffHolderSpaceHessian_apply]
-    rw [← hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv,
-      LinearIsometryEquiv.norm_map]
-    simpa using contDiffHolderSpace_iteratedFDeriv_norm_le
-      u (j := 2) (by omega) x
-  let top := contDiffHolderSpaceTopJet 2 alpha u
-  have htopnorm : ‖top‖₊ ≤ ‖u‖₊ := by
-    exact_mod_cast (calc
-      ‖top‖ ≤ ‖contDiffHolderSpaceTopJet
-          (V := Euc n) (F := F) 2 alpha‖ * ‖u‖ :=
-        (contDiffHolderSpaceTopJet
-          (V := Euc n) (F := F) 2 alpha).le_opNorm u
-      _ ≤ 1 * ‖u‖ := by
-        gcongr
-        exact norm_contDiffHolderSpaceTopJet_le
-          (V := Euc n) (F := F) 2 alpha
-      _ = ‖u‖ := one_mul _)
-  have htop : HolderWith ‖u‖₊ alpha
-      (iteratedFDeriv Real 2 (contDiffHolderSpaceFun u)) := by
-    simpa only [top, contDiffHolderSpaceTopJet_apply] using
-      (boundedHolderSpace_holderWith top).mono htopnorm
-  have hd2uHolder : HolderWith ‖u‖₊ alpha
+    simp only [d2u, boundedHolderSpaceToBoundedContinuousFunction_apply]
+    simpa using norm_boundedHolderSpace_apply_le d2 x
+  have hd2uHolder : HolderWith ‖d2‖₊ alpha
       (d2u : Euc n → Euc n →L[Real] Euc n →L[Real] F) := by
-    have hcomp :=
-      (hessianCurryEquiv (Euc n) F).lipschitz.holderWith.comp htop
-    simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul,
-      Function.comp_apply, d2u,
-      contDiffHolderSpaceHessian_apply,
-      hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv] using hcomp
+    simpa only [d2u, boundedHolderSpaceToBoundedContinuousFunction_apply]
+      using boundedHolderSpace_holderWith d2
   have hsmall' : spdLaplacianSchauderDefectConst
       (fun i j ↦ a0 i j x0) hA alpha
         (∑ i, ∑ j, (omega i j + Ka i j))

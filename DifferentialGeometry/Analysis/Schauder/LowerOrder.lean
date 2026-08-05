@@ -111,6 +111,81 @@ theorem nondivergenceOperator_apply
   simp only [nondivergenceOperator, BoundedContinuousFunction.add_apply,
     variableMatrixLap_apply, lowerOrderTerm_apply]
 
+def gradientComponentEval (i : n) :
+    (Euc n →L[Real] F) →L[Real] F :=
+  ContinuousLinearMap.apply Real F (EuclideanSpace.basisFun n Real i)
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+@[simp]
+theorem gradientComponentEval_apply (i : n) (A : Euc n →L[Real] F) :
+    gradientComponentEval i A = A (EuclideanSpace.basisFun n Real i) :=
+  rfl
+
+def contDiffHolderSpaceLowerOrderTerm
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (b : n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (c : BoundedHolderSpace (X := Euc n) (F := Real) alpha) :
+    ContDiffHolderSpace (V := Euc n) (F := F) 2 alpha →L[Real]
+      BoundedHolderSpace (X := Euc n) (F := F) alpha :=
+  (∑ i,
+    (boundedHolderSpaceSmu alpha (b i)).comp
+      ((boundedHolderSpaceMap alpha
+        (gradientComponentEval (F := F) i)).comp
+        (contDiffHolderSpaceFDerivHolder 2 alpha (by omega) halpha))) +
+    (boundedHolderSpaceSmu alpha c).comp
+      (contDiffHolderSpaceValueHolder 2 alpha (by omega) halpha)
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+@[simp]
+theorem contDiffHolderSpaceLowerOrderTerm_apply
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (b : n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (c : BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (u : ContDiffHolderSpace (V := Euc n) (F := F) 2 alpha)
+    (x : Euc n) :
+    contDiffHolderSpaceLowerOrderTerm alpha halpha b c u x =
+      (∑ i, b i x •
+        fderiv Real (contDiffHolderSpaceFun u) x
+          (EuclideanSpace.basisFun n Real i)) + c x • u x := by
+  simp only [contDiffHolderSpaceLowerOrderTerm,
+    ContinuousLinearMap.add_apply, boundedHolderSpace_add_apply,
+    ContinuousLinearMap.sum_apply, boundedHolderSpace_sum_apply,
+    ContinuousLinearMap.comp_apply, boundedHolderSpaceSmu_apply,
+    boundedHolderSpaceMap_apply, gradientComponentEval_apply,
+    contDiffHolderSpaceFDerivHolder_apply,
+    contDiffHolderSpaceValueHolder_apply]
+
+def contDiffHolderSpaceNondivergenceOperator
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (a : n → n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (b : n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (c : BoundedHolderSpace (X := Euc n) (F := Real) alpha) :
+    ContDiffHolderSpace (V := Euc n) (F := F) 2 alpha →L[Real]
+      BoundedHolderSpace (X := Euc n) (F := F) alpha :=
+  contDiffHolderSpaceVariableMatrixLaplacian alpha a +
+    contDiffHolderSpaceLowerOrderTerm alpha halpha b c
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+@[simp]
+theorem contDiffHolderSpaceNondivergenceOperator_apply
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (a : n → n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (b : n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (c : BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (u : ContDiffHolderSpace (V := Euc n) (F := F) 2 alpha)
+    (x : Euc n) :
+    contDiffHolderSpaceNondivergenceOperator alpha halpha a b c u x =
+      matrixLap (fun i j ↦ a i j x)
+          (hessianCurryEquiv (Euc n) F
+            (iteratedFDeriv Real 2 (contDiffHolderSpaceFun u) x)) +
+        ((∑ i, b i x •
+          fderiv Real (contDiffHolderSpaceFun u) x
+            (EuclideanSpace.basisFun n Real i)) + c x • u x) := by
+  simp only [contDiffHolderSpaceNondivergenceOperator,
+    ContinuousLinearMap.add_apply, boundedHolderSpace_add_apply,
+    contDiffHolderSpaceVariableMatrixLaplacian_apply,
+    contDiffHolderSpaceLowerOrderTerm_apply]
+
 omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
 theorem variableMatrixLap_eq_nondivergenceOperator_sub_lowerOrderTerm
     (a : n → n → BoundedContinuousFunction (Euc n) Real)
@@ -358,6 +433,142 @@ theorem nondivergence_schauder_estimate_of_small_oscillation
     (lowerOrderTerm_holderWith b c u du Kb Bb Mdu Bc Mu
       hb hc hduHolder huHolder hbNorm hcNorm hduNorm huNorm)
     Ka omega ha homega hd2unorm hd2uHolder hsmall
+
+def nondivergenceSchauderNormConst
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (a : n → n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (x0 : Euc n) (hA : Matrix.PosDef (fun i j ↦ a i j x0))
+    (b : n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (c : BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (u : ContDiffHolderSpace (V := Euc n) (F := F) 2 alpha) : NNReal :=
+  let Lu := contDiffHolderSpaceNondivergenceOperator
+    alpha halpha a b c u
+  let lo := contDiffHolderSpaceLowerOrderTerm alpha halpha b c u
+  (spdLaplacianSchauderConst (fun i j ↦ a i j x0) hA alpha
+    (‖Lu‖₊ + ‖lo‖₊) (‖Lu‖₊ + ‖lo‖₊)
+    (contDiffHolderSpaceToBoundedContinuousFunction 2 alpha u)) /
+    (1 - variableCoefficientSchauderDefectConst alpha a x0 hA)
+
+theorem nondivergence_schauder_norm_estimate_of_small_oscillation
+    {alpha : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (a : n → n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (x0 : Euc n) (hA : Matrix.PosDef (fun i j ↦ a i j x0))
+    (b : n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (c : BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (u : ContDiffHolderSpace (V := Euc n) (F := F) 2 alpha)
+    (hsmall : variableCoefficientSchauderDefectConst alpha a x0 hA < 1) :
+    ‖u‖ ≤ nondivergenceSchauderNormConst
+      alpha halpha1.le a x0 hA b c u := by
+  let a0 : n → n → BoundedContinuousFunction (Euc n) Real :=
+    fun i j ↦ boundedHolderSpaceToBoundedContinuousFunction
+      alpha halpha0 (a i j)
+  let b0 : n → BoundedContinuousFunction (Euc n) Real :=
+    fun i ↦ boundedHolderSpaceToBoundedContinuousFunction
+      alpha halpha0 (b i)
+  let c0 := boundedHolderSpaceToBoundedContinuousFunction alpha halpha0 c
+  let u0 := contDiffHolderSpaceToBoundedContinuousFunction 2 alpha u
+  let du := contDiffHolderSpaceFDeriv 2 alpha (by omega) u
+  let d2 := contDiffHolderSpaceHessianHolder alpha u
+  let d2u := boundedHolderSpaceToBoundedContinuousFunction alpha halpha0 d2
+  let Lu := contDiffHolderSpaceNondivergenceOperator
+    alpha halpha1.le a b c u
+  let L0 := boundedHolderSpaceToBoundedContinuousFunction alpha halpha0 Lu
+  let lo := contDiffHolderSpaceLowerOrderTerm alpha halpha1.le b c u
+  let lo0 := boundedHolderSpaceToBoundedContinuousFunction alpha halpha0 lo
+  let Ka : n → n → NNReal :=
+    fun i j ↦ boundedHolderSpaceHolderConst (a i j)
+  let omega : n → n → NNReal :=
+    fun i j ↦ boundedHolderSpaceOscillationAt (a i j) x0
+  have hu : ∀ x : Euc n, HasFDerivAt (u0 : Euc n → F) (du x) x := by
+    intro x
+    simpa only [u0, du,
+      contDiffHolderSpaceToBoundedContinuousFunction_apply] using
+      contDiffHolderSpace_hasFDerivAt 2 alpha (by omega) u x
+  have hdu : ∀ x : Euc n,
+      HasFDerivAt (du : Euc n → Euc n →L[Real] F) (d2u x) x := by
+    intro x
+    have hd2eq : d2u x =
+        contDiffHolderSpaceHessian 2 alpha (by omega) u x := by
+      simp only [d2u, d2,
+        boundedHolderSpaceToBoundedContinuousFunction_apply,
+        contDiffHolderSpaceHessianHolder_apply,
+        contDiffHolderSpaceHessian_apply]
+    rw [hd2eq]
+    simpa only [du] using
+      contDiffHolderSpaceFDeriv_hasFDerivAt 2 alpha (by omega) u x
+  have hLsource : nondivergenceOperator a0 b0 c0 u0 du d2u = L0 := by
+    apply BoundedContinuousFunction.ext
+    intro x
+    simp only [nondivergenceOperator_apply, a0, b0, c0, u0, du,
+      d2u, d2, L0, Lu,
+      boundedHolderSpaceToBoundedContinuousFunction_apply,
+      contDiffHolderSpaceToBoundedContinuousFunction_apply,
+      contDiffHolderSpaceFDeriv_apply,
+      contDiffHolderSpaceHessianHolder_apply,
+      contDiffHolderSpaceNondivergenceOperator_apply]
+    rw [← hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv]
+  have hlosource : lowerOrderTerm b0 c0 u0 du = lo0 := by
+    apply BoundedContinuousFunction.ext
+    intro x
+    simp only [lowerOrderTerm_apply, b0, c0, u0, du, lo0, lo,
+      boundedHolderSpaceToBoundedContinuousFunction_apply,
+      contDiffHolderSpaceToBoundedContinuousFunction_apply,
+      contDiffHolderSpaceFDeriv_apply,
+      contDiffHolderSpaceLowerOrderTerm_apply]
+  have hLBound : ‖nondivergenceOperator a0 b0 c0 u0 du d2u‖ ≤ ‖Lu‖₊ := by
+    rw [hLsource, BoundedContinuousFunction.norm_le (by positivity)]
+    intro x
+    change ‖Lu x‖ ≤ (‖Lu‖₊ : Real)
+    simpa using norm_boundedHolderSpace_apply_le Lu x
+  have hLHolder : HolderWith ‖Lu‖₊ alpha
+      (nondivergenceOperator a0 b0 c0 u0 du d2u) := by
+    rw [hLsource]
+    simpa only [boundedHolderSpaceToBoundedContinuousFunction_apply]
+      using boundedHolderSpace_holderWith Lu
+  have hloBound : ‖lowerOrderTerm b0 c0 u0 du‖ ≤ ‖lo‖₊ := by
+    rw [hlosource, BoundedContinuousFunction.norm_le (by positivity)]
+    intro x
+    change ‖lo x‖ ≤ (‖lo‖₊ : Real)
+    simpa using norm_boundedHolderSpace_apply_le lo x
+  have hloHolder : HolderWith ‖lo‖₊ alpha
+      (lowerOrderTerm b0 c0 u0 du) := by
+    rw [hlosource]
+    simpa only [boundedHolderSpaceToBoundedContinuousFunction_apply]
+      using boundedHolderSpace_holderWith lo
+  have ha : ∀ i j, HolderWith (Ka i j) alpha
+      (a0 i j : Euc n → Real) := by
+    intro i j
+    simpa only [Ka, a0,
+      boundedHolderSpaceToBoundedContinuousFunction_apply] using
+      boundedHolderSpace_holderWith_holderConst (a i j)
+  have homega : ∀ i j x, ‖a0 i j x0 - a0 i j x‖ ≤ omega i j := by
+    intro i j x
+    simp only [a0, boundedHolderSpaceToBoundedContinuousFunction_apply]
+    exact norm_sub_le_boundedHolderSpaceOscillationAt (a i j) x0 x
+  have hd2unorm : ∀ x, ‖d2u x‖ ≤ ‖d2‖₊ := by
+    intro x
+    simp only [d2u, boundedHolderSpaceToBoundedContinuousFunction_apply]
+    simpa using norm_boundedHolderSpace_apply_le d2 x
+  have hd2uHolder : HolderWith ‖d2‖₊ alpha
+      (d2u : Euc n → Euc n →L[Real] Euc n →L[Real] F) := by
+    simpa only [d2u, boundedHolderSpaceToBoundedContinuousFunction_apply]
+      using boundedHolderSpace_holderWith d2
+  have hsmall' : spdLaplacianSchauderDefectConst
+      (fun i j ↦ a0 i j x0) hA alpha
+        (∑ i, ∑ j, (omega i j + Ka i j))
+        (∑ i, ∑ j, omega i j) < 1 := by
+    simpa only [a0, boundedHolderSpaceToBoundedContinuousFunction_apply,
+      omega, Ka, variableCoefficientSchauderDefectConst] using hsmall
+  have hgauge := variable_coefficient_schauder_estimate_of_lower_order_source
+    halpha0 halpha1 a0 x0 hA b0 c0 u0 du d2u hu hdu
+      hLBound hLHolder hloBound hloHolder Ka omega ha homega
+      hd2unorm hd2uHolder hsmall'
+  rw [norm_contDiffHolderSpace_eq]
+  have hreal := ENNReal.toReal_mono ENNReal.coe_ne_top hgauge
+  simpa only [u0, Lu, lo, a0,
+    boundedHolderSpaceToBoundedContinuousFunction_apply,
+    nondivergenceSchauderNormConst,
+    variableCoefficientSchauderDefectConst, omega, Ka] using hreal
 
 end DifferentialGeometry.Analysis.Schauder
 

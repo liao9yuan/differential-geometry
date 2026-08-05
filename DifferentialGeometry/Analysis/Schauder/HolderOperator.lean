@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Schauder.HolderNormedSpace
+import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Topology.ContinuousMap.Bounded.Normed
 
 noncomputable section
@@ -360,6 +361,210 @@ theorem contDiffHolderSpaceFDeriv_hasFDerivAt
   rw [heq, contDiffHolderSpaceHessian_apply]
   exact (hfd.differentiable (by norm_num) x).hasFDerivAt
 
+private theorem eHolderGauge_contDiffHolderSpaceFun_le
+    {k : Nat} {alpha : NNReal} (hk : 1 ≤ k) (halpha : alpha ≤ 1)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
+    eHolderGauge alpha (contDiffHolderSpaceFun f) ≤
+      ((3 * ‖f‖₊ : NNReal) : ENNReal) := by
+  have hsup : eSupNormOn Set.univ (contDiffHolderSpaceFun f) ≤
+      (‖f‖₊ : ENNReal) := by
+    rw [eSupNormOn_le]
+    intro x _hx
+    rw [ENNReal.ofReal_le_coe]
+    simpa using norm_contDiffHolderSpace_apply_le f x
+  have hlip : LipschitzWith ‖f‖₊ (contDiffHolderSpaceFun f) := by
+    apply lipschitzWith_of_nnnorm_fderiv_le (𝕜 := Real)
+    · exact fun x ↦ (contDiffHolderSpace_hasFDerivAt
+        k alpha hk f x).differentiableAt
+    · intro x
+      have hreal : ‖fderiv Real (contDiffHolderSpaceFun f) x‖ ≤ ‖f‖ := by
+        rw [← norm_iteratedFDeriv_one]
+        exact contDiffHolderSpace_iteratedFDeriv_norm_le f hk x
+      exact_mod_cast hreal
+  have hzero : HolderWith (2 * ‖f‖₊) 0
+      (contDiffHolderSpaceFun f) :=
+    holderWith_zero_of_norm_le (norm_contDiffHolderSpace_apply_le f)
+  have hnorm : ‖f‖₊ ≤ 2 * ‖f‖₊ := by
+    rw [show 2 * ‖f‖₊ = ‖f‖₊ + ‖f‖₊ by ring]
+    exact le_add_right le_rfl
+  have hholder : HolderWith (2 * ‖f‖₊) alpha
+      (contDiffHolderSpaceFun f) := by
+    simpa only [max_eq_left hnorm] using
+      hzero.of_le_of_le hlip.holderWith (by positivity) halpha
+  unfold eHolderGauge
+  calc
+    eSupNormOn Set.univ (contDiffHolderSpaceFun f) +
+        eHolderNorm alpha (contDiffHolderSpaceFun f) ≤
+      (‖f‖₊ : ENNReal) + (2 * ‖f‖₊ : NNReal) :=
+      add_le_add hsup hholder.eHolderNorm_le
+    _ = ((3 * ‖f‖₊ : NNReal) : ENNReal) := by
+      push_cast
+      ring
+
+private def contDiffHolderSpaceValueHolderLinearMap
+    (k : Nat) (alpha : NNReal) (hk : 1 ≤ k) (halpha : alpha ≤ 1) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →ₗ[Real]
+      BoundedHolderSpace (X := V) (F := F) alpha where
+  toFun f := ⟨contDiffHolderSpaceFun f,
+    ne_top_of_le_ne_top ENNReal.coe_ne_top
+      (eHolderGauge_contDiffHolderSpaceFun_le hk halpha f)⟩
+  map_add' f g := by
+    apply boundedHolderSpace_ext
+    intro x
+    rfl
+  map_smul' c f := by
+    apply boundedHolderSpace_ext
+    intro x
+    rfl
+
+private theorem norm_contDiffHolderSpaceValueHolderLinearMap_le
+    {k : Nat} {alpha : NNReal} (hk : 1 ≤ k) (halpha : alpha ≤ 1)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
+    ‖contDiffHolderSpaceValueHolderLinearMap k alpha hk halpha f‖ ≤
+      3 * ‖f‖ := by
+  rw [norm_boundedHolderSpace_eq]
+  have hreal := ENNReal.toReal_mono ENNReal.coe_ne_top
+    (eHolderGauge_contDiffHolderSpaceFun_le hk halpha f)
+  simpa only [ENNReal.toReal_ofNat, ENNReal.toReal_mul,
+    ENNReal.coe_toReal, norm_contDiffHolderSpace_eq] using hreal
+
+def contDiffHolderSpaceValueHolder
+    (k : Nat) (alpha : NNReal) (hk : 1 ≤ k) (halpha : alpha ≤ 1) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →L[Real]
+      BoundedHolderSpace (X := V) (F := F) alpha :=
+  LinearMap.mkContinuous
+    (contDiffHolderSpaceValueHolderLinearMap k alpha hk halpha) 3
+    (norm_contDiffHolderSpaceValueHolderLinearMap_le hk halpha)
+
+@[simp]
+theorem contDiffHolderSpaceValueHolder_apply
+    (k : Nat) (alpha : NNReal) (hk : 1 ≤ k) (halpha : alpha ≤ 1)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    contDiffHolderSpaceValueHolder k alpha hk halpha f x = f x :=
+  rfl
+
+theorem norm_contDiffHolderSpaceValueHolder_le
+    (k : Nat) (alpha : NNReal) (hk : 1 ≤ k) (halpha : alpha ≤ 1) :
+    ‖contDiffHolderSpaceValueHolder
+      (V := V) (F := F) k alpha hk halpha‖ ≤ 3 :=
+  LinearMap.mkContinuous_norm_le _ (by norm_num)
+    (norm_contDiffHolderSpaceValueHolderLinearMap_le hk halpha)
+
+private theorem eHolderGauge_contDiffHolderSpaceFDeriv_le
+    {k : Nat} {alpha : NNReal} (hk : 2 ≤ k) (halpha : alpha ≤ 1)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
+    eHolderGauge alpha
+        (contDiffHolderSpaceFDeriv k alpha
+          ((by omega : 1 ≤ 2).trans hk) f : V → V →L[Real] F) ≤
+      ((3 * ‖f‖₊ : NNReal) : ENNReal) := by
+  let df := contDiffHolderSpaceFDeriv k alpha
+    ((by omega : 1 ≤ 2).trans hk) f
+  let d2f := contDiffHolderSpaceHessian k alpha hk f
+  have hdfnorm : ∀ x, ‖df x‖ ≤ ‖f‖ := by
+    intro x
+    simp only [df, contDiffHolderSpaceFDeriv_apply]
+    rw [← norm_iteratedFDeriv_one]
+    exact contDiffHolderSpace_iteratedFDeriv_norm_le f
+      ((by omega : 1 ≤ 2).trans hk) x
+  have hsup : eSupNormOn Set.univ (df : V → V →L[Real] F) ≤
+      (‖f‖₊ : ENNReal) := by
+    rw [eSupNormOn_le]
+    intro x _hx
+    rw [ENNReal.ofReal_le_coe]
+    simpa using hdfnorm x
+  have hd2fnorm : ∀ x, ‖d2f x‖ ≤ ‖f‖ := by
+    intro x
+    simp only [d2f, contDiffHolderSpaceHessian_apply]
+    rw [← hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv,
+      LinearIsometryEquiv.norm_map]
+    exact contDiffHolderSpace_iteratedFDeriv_norm_le f hk x
+  have hlip : LipschitzWith ‖f‖₊ (df : V → V →L[Real] F) := by
+    apply lipschitzWith_of_nnnorm_fderiv_le (𝕜 := Real)
+    · exact fun x ↦ (contDiffHolderSpaceFDeriv_hasFDerivAt
+        k alpha hk f x).differentiableAt
+    · intro x
+      rw [(contDiffHolderSpaceFDeriv_hasFDerivAt
+        k alpha hk f x).fderiv]
+      exact_mod_cast hd2fnorm x
+  have hzero : HolderWith (2 * ‖f‖₊) 0
+      (df : V → V →L[Real] F) :=
+    holderWith_zero_of_norm_le (fun x ↦ by simpa using hdfnorm x)
+  have hnorm : ‖f‖₊ ≤ 2 * ‖f‖₊ := by
+    rw [show 2 * ‖f‖₊ = ‖f‖₊ + ‖f‖₊ by ring]
+    exact le_add_right le_rfl
+  have hholder : HolderWith (2 * ‖f‖₊) alpha
+      (df : V → V →L[Real] F) := by
+    simpa only [max_eq_left hnorm] using
+      hzero.of_le_of_le hlip.holderWith (by positivity) halpha
+  unfold eHolderGauge
+  calc
+    eSupNormOn Set.univ (df : V → V →L[Real] F) +
+        eHolderNorm alpha (df : V → V →L[Real] F) ≤
+      (‖f‖₊ : ENNReal) + (2 * ‖f‖₊ : NNReal) :=
+      add_le_add hsup hholder.eHolderNorm_le
+    _ = ((3 * ‖f‖₊ : NNReal) : ENNReal) := by
+      push_cast
+      ring
+
+private def contDiffHolderSpaceFDerivHolderLinearMap
+    (k : Nat) (alpha : NNReal) (hk : 2 ≤ k) (halpha : alpha ≤ 1) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →ₗ[Real]
+      BoundedHolderSpace (X := V) (F := V →L[Real] F) alpha where
+  toFun f :=
+    ⟨(contDiffHolderSpaceFDeriv k alpha
+      ((by omega : 1 ≤ 2).trans hk) f : V → V →L[Real] F),
+      ne_top_of_le_ne_top ENNReal.coe_ne_top
+        (eHolderGauge_contDiffHolderSpaceFDeriv_le hk halpha f)⟩
+  map_add' f g := by
+    apply boundedHolderSpace_ext
+    intro x
+    change contDiffHolderSpaceFDeriv k alpha
+      ((by omega : 1 ≤ 2).trans hk) (f + g) x = _
+    rw [map_add]
+    rfl
+  map_smul' c f := by
+    apply boundedHolderSpace_ext
+    intro x
+    change contDiffHolderSpaceFDeriv k alpha
+      ((by omega : 1 ≤ 2).trans hk) (c • f) x = _
+    rw [map_smul]
+    rfl
+
+private theorem norm_contDiffHolderSpaceFDerivHolderLinearMap_le
+    {k : Nat} {alpha : NNReal} (hk : 2 ≤ k) (halpha : alpha ≤ 1)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
+    ‖contDiffHolderSpaceFDerivHolderLinearMap k alpha hk halpha f‖ ≤
+      3 * ‖f‖ := by
+  rw [norm_boundedHolderSpace_eq]
+  have hreal := ENNReal.toReal_mono ENNReal.coe_ne_top
+    (eHolderGauge_contDiffHolderSpaceFDeriv_le hk halpha f)
+  simpa only [ENNReal.toReal_ofNat, ENNReal.toReal_mul,
+    ENNReal.coe_toReal, norm_contDiffHolderSpace_eq] using hreal
+
+def contDiffHolderSpaceFDerivHolder
+    (k : Nat) (alpha : NNReal) (hk : 2 ≤ k) (halpha : alpha ≤ 1) :
+    ContDiffHolderSpace (V := V) (F := F) k alpha →L[Real]
+      BoundedHolderSpace (X := V) (F := V →L[Real] F) alpha :=
+  LinearMap.mkContinuous
+    (contDiffHolderSpaceFDerivHolderLinearMap k alpha hk halpha) 3
+    (norm_contDiffHolderSpaceFDerivHolderLinearMap_le hk halpha)
+
+@[simp]
+theorem contDiffHolderSpaceFDerivHolder_apply
+    (k : Nat) (alpha : NNReal) (hk : 2 ≤ k) (halpha : alpha ≤ 1)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    contDiffHolderSpaceFDerivHolder k alpha hk halpha f x =
+      fderiv Real (contDiffHolderSpaceFun f) x :=
+  contDiffHolderSpaceFDeriv_apply k alpha
+    ((by omega : 1 ≤ 2).trans hk) f x
+
+theorem norm_contDiffHolderSpaceFDerivHolder_le
+    (k : Nat) (alpha : NNReal) (hk : 2 ≤ k) (halpha : alpha ≤ 1) :
+    ‖contDiffHolderSpaceFDerivHolder
+      (V := V) (F := F) k alpha hk halpha‖ ≤ 3 :=
+  LinearMap.mkContinuous_norm_le _ (by norm_num)
+    (norm_contDiffHolderSpaceFDerivHolderLinearMap_le hk halpha)
+
 end EllipticBoundedContinuousFunction
 
 section RestrictUniv
@@ -451,6 +656,24 @@ theorem norm_contDiffHolderSpaceTopJet_le (k : Nat) (alpha : NNReal) :
     ‖contDiffHolderSpaceTopJet (V := V) (F := F) k alpha‖ ≤ 1 := by
   exact LinearMap.mkContinuous_norm_le _ zero_le_one
     (fun f ↦ by simpa using norm_contDiffHolderSpaceTopJetLinearMap_le f)
+
+def contDiffHolderSpaceHessianHolder (alpha : NNReal) :
+    ContDiffHolderSpace (V := V) (F := F) 2 alpha →L[Real]
+      BoundedHolderSpace (X := V) (F := V →L[Real] V →L[Real] F) alpha :=
+  (boundedHolderSpaceMap alpha
+    (hessianCurryEquiv V F).toContinuousLinearEquiv.toContinuousLinearMap).comp
+    (contDiffHolderSpaceTopJet 2 alpha)
+
+@[simp]
+theorem contDiffHolderSpaceHessianHolder_apply
+    (alpha : NNReal)
+    (f : ContDiffHolderSpace (V := V) (F := F) 2 alpha) (x : V) :
+    contDiffHolderSpaceHessianHolder alpha f x =
+      fderiv Real (fderiv Real (contDiffHolderSpaceFun f)) x := by
+  simp only [contDiffHolderSpaceHessianHolder,
+    ContinuousLinearMap.comp_apply, boundedHolderSpaceMap_apply,
+    contDiffHolderSpaceTopJet_apply]
+  exact hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv _ _
 
 end EllipticJet
 
