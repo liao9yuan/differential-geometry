@@ -728,6 +728,82 @@ theorem isLocalHomeomorphAt_morseCompletionMap
   · rw [ContDiffAt.toOpenPartialHomeomorph_coe]
   · exact ContDiffAt.mem_toOpenPartialHomeomorph_source _ _ _
 
+noncomputable def morsePartial (f : MorseModel (n + 1) → ℝ) : MorseModel (n + 1) → ℝ :=
+  fun x => fderiv ℝ f x morseE0
+
+noncomputable def morsePartialMap (f : MorseModel (n + 1) → ℝ) : MorseModel (n + 1) → MorseModel (n + 1) :=
+  fun x => morseCons (morsePartial f x) (morseTail x)
+
+noncomputable def morsePartialDeriv (p' : MorseModel (n + 1) →L[ℝ] ℝ) :
+    MorseModel (n + 1) →ₗ[ℝ] MorseModel (n + 1) :=
+  { toFun := fun v => morseCons (p' v) (morseTail v)
+    map_add' := by
+      intro v w
+      rw [morseTail_add, map_add, morseCons_add]
+    map_smul' := by
+      intro c v
+      rw [morseTail_smul, map_smul, smul_eq_mul]
+      rw [morseCons_smul]
+      rfl }
+
+theorem morsePartialDeriv_injective (p' : MorseModel (n + 1) →L[ℝ] ℝ)
+    (h₀ : p' morseE0 ≠ 0) : Function.Injective (morsePartialDeriv p') := by
+  intro v w h
+  have hhead : p' v = p' w := by
+    have := congrArg morseHead h
+    simpa [morsePartialDeriv, morseHead, morseCons] using this
+  have htail : morseTail v = morseTail w := by
+    have := congrArg morseTail h
+    simpa [morsePartialDeriv, morseTail, morseCons] using this
+  have hlin : ∀ u : MorseModel (n + 1),
+      p' u = morseHead u * p' morseE0 + p' (morseCons (0 : ℝ) (morseTail u)) := by
+    intro u
+    conv_lhs =>
+      rw [morse_cons_decompose u, morse_cons_smul' (morseHead u) (morseTail u)]
+    simp [map_add, map_smul, smul_eq_mul]
+  have hmul : morseHead v * p' morseE0 = morseHead w * p' morseE0 := by
+    rw [hlin v, hlin w] at hhead
+    rw [htail] at hhead
+    linarith
+  have : morseHead v = morseHead w := mul_right_cancel₀ h₀ hmul
+  rw [morse_cons_decompose v, morse_cons_decompose w]
+  rw [this, htail]
+
+theorem morsePartialDeriv_surjective (p' : MorseModel (n + 1) →L[ℝ] ℝ)
+    (h₀ : p' morseE0 ≠ 0) : Function.Surjective (morsePartialDeriv p') := by
+  intro y
+  let v : MorseModel (n + 1) :=
+    morseCons ((morseHead y - p' (morseCons (0 : ℝ) (morseTail y))) / p' morseE0) (morseTail y)
+  refine ⟨v, ?_⟩
+  have hlin : p' v = morseHead v * p' morseE0 + p' (morseCons (0 : ℝ) (morseTail v)) := by
+    conv_lhs =>
+      rw [morse_cons_decompose v, morse_cons_smul' (morseHead v) (morseTail v)]
+    simp [map_add, map_smul, smul_eq_mul]
+  have hmv : morseHead v = (morseHead y - p' (morseCons (0 : ℝ) (morseTail y))) / p' morseE0 := by
+    simp [v, morseHead, morseCons]
+  ext i
+  cases i using Fin.cases with
+  | zero =>
+      have hzero : (morsePartialDeriv p' v) (0 : Fin (n + 1)) = p' v := by
+        dsimp [morsePartialDeriv, morseCons]
+        rfl
+      rw [hzero]
+      rw [hlin, hmv]
+      have htv : morseTail v = morseTail y := by
+        funext j
+        simp [v, morseTail, morseCons, Fin.cons_succ]
+      rw [htv]
+      field_simp [h₀]
+      simp [morseHead]
+  | succ j =>
+      simp [v, morseCons, morseTail, morsePartialDeriv, Fin.cons_succ]
+
+noncomputable def morsePartialDerivCLE (p' : MorseModel (n + 1) →L[ℝ] ℝ)
+    (h₀ : p' morseE0 ≠ 0) : MorseModel (n + 1) ≃L[ℝ] MorseModel (n + 1) :=
+  (LinearEquiv.ofBijective (morsePartialDeriv p')
+    (show Function.Bijective (morsePartialDeriv p') from
+      ⟨morsePartialDeriv_injective p' h₀, morsePartialDeriv_surjective p' h₀⟩)).toContinuousLinearEquiv
+
 end Completion
 
 omit [FiniteDimensional ℝ E] in
