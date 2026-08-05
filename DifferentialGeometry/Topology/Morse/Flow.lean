@@ -243,6 +243,58 @@ theorem linearModelNoCriticalValues (a b : ℝ) (hab : a ≤ b) :
       sublevel (fun y : MorseModel 1 => y 0) b :=
   noCriticalValues (linearModelFlow a b hab) hab
 
+noncomputable def fin1Homeo : MorseModel 1 ≃ₜ ℝ where
+  toFun := fun y => y 0
+  invFun := fun r => (fun _ : Fin 1 => r)
+  left_inv := by
+    intro y
+    funext i
+    fin_cases i; rfl
+  right_inv := by
+    intro r
+    rfl
+  continuous_toFun := continuous_apply (0 : Fin 1)
+  continuous_invFun := by
+    fun_prop
+
+theorem linearModel_strip_compact (a b : ℝ) :
+    IsCompact (sublevelStrip (fun y : MorseModel 1 => y 0) a b) := by
+  -- the strip is the preimage of Icc a b under the homeomorphism y ↦ y 0
+  have hIcc : IsCompact (Set.Icc a b) := isCompact_Icc
+  have himg : IsCompact (fin1Homeo.symm '' (Set.Icc a b)) :=
+    hIcc.image fin1Homeo.symm.continuous
+  have hset : sublevelStrip (fun y : MorseModel 1 => y 0) a b = fin1Homeo.symm '' (Set.Icc a b) := by
+    ext y
+    constructor
+    · intro hy
+      refine ⟨y 0, by simpa [sublevelStrip] using hy, ?_⟩
+      funext i
+      fin_cases i; rfl
+    · rintro ⟨r, hr, hry⟩
+      change a ≤ y 0 ∧ y 0 ≤ b
+      have hy0 : y 0 = r := by
+        have h := congrFun hry 0
+        simpa [fin1Homeo] using h.symm
+      rw [hy0]
+      exact hr
+  rwa [hset]
+
+theorem linearModel_no_critical (a b : ℝ) :
+    ∀ y : MorseModel 1, y ∈ sublevelStrip (fun y : MorseModel 1 => y 0) a b →
+      fderiv ℝ (fun y : MorseModel 1 => y 0) y ≠ 0 := by
+  intro y hy
+  -- fderiv of the projection at y is the projection itself (a nonzero continuous linear map)
+  have hfd : fderiv ℝ (fun y : MorseModel 1 => y 0) y = ContinuousLinearMap.proj (0 : Fin 1) := by
+    -- the projection is linear, so its fderiv is itself
+    have hlin : IsBoundedLinearMap ℝ (fun y : MorseModel 1 => y 0) :=
+      (ContinuousLinearMap.proj (0 : Fin 1) : MorseModel 1 →L[ℝ] ℝ).isBoundedLinearMap
+    exact hlin.fderiv
+  intro hz
+  have hproj_ne : (ContinuousLinearMap.proj (0 : Fin 1) : MorseModel 1 →L[ℝ] ℝ) ≠ 0 := by
+    intro h
+    simpa using (congrArg (fun L : MorseModel 1 →L[ℝ] ℝ => L (fun _ => (1 : ℝ))) h)
+  exact hproj_ne (by simpa [hfd] using hz)
+
 end
 
 end DifferentialGeometry.Topology.Morse
