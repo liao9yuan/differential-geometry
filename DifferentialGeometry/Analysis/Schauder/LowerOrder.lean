@@ -1,3 +1,4 @@
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.LowerOrder
 import DifferentialGeometry.Analysis.Schauder.VariableCoefficient
 
 noncomputable section
@@ -185,6 +186,149 @@ theorem contDiffHolderSpaceNondivergenceOperator_apply
     ContinuousLinearMap.add_apply, boundedHolderSpace_add_apply,
     contDiffHolderSpaceVariableMatrixLaplacian_apply,
     contDiffHolderSpaceLowerOrderTerm_apply]
+
+def parabolicC2HolderSpaceLowerOrderTerm
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (b : n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (c : ParabolicHolderSpace (V := Euc n) (F := Real) alpha) :
+    ParabolicC2HolderSpace (V := Euc n) (F := F) alpha →L[Real]
+      ParabolicHolderSpace (V := Euc n) (F := F) alpha :=
+  (∑ i,
+    (boundedHolderSpaceSmu alpha (b i)).comp
+      ((boundedHolderSpaceMap alpha
+        (gradientComponentEval (F := F) i)).comp
+        (parabolicC2HolderSpaceSpatialGradient alpha halpha))) +
+    (boundedHolderSpaceSmu alpha c).comp
+      (parabolicC2HolderSpaceValue alpha halpha)
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+@[simp]
+theorem parabolicC2HolderSpaceLowerOrderTerm_apply
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (b : n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (c : ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (u : ParabolicC2HolderSpace (V := Euc n) (F := F) alpha)
+    (p : ParabolicPoint (Euc n)) :
+    parabolicC2HolderSpaceLowerOrderTerm alpha halpha b c u p =
+      parabolicLowerOrderTerm
+        (fun i q ↦ b i q) (fun q ↦ c q)
+        (parabolicC2HolderSpaceFun u) p := by
+  simp only [parabolicC2HolderSpaceLowerOrderTerm,
+    ContinuousLinearMap.add_apply, boundedHolderSpace_add_apply,
+    ContinuousLinearMap.sum_apply, boundedHolderSpace_sum_apply,
+    ContinuousLinearMap.comp_apply, boundedHolderSpaceSmu_apply,
+    boundedHolderSpaceMap_apply, gradientComponentEval_apply,
+    parabolicC2HolderSpaceSpatialGradient_apply,
+    parabolicC2HolderSpaceValue_apply, parabolicLowerOrderTerm,
+    parabolicDriftTerm, parabolicPotentialTerm, Pi.add_apply,
+    parabolicGradientComponent]
+  have hgradient :
+      fderiv Real (parabolicC2HolderSpaceFun u p.time) p.space =
+        continuousMultilinearCurryFin1 Real (Euc n) F
+          (parabolicSpatialJet 1 (parabolicC2HolderSpaceFun u) p) := by
+    apply ContinuousLinearMap.ext
+    intro v
+    rw [← parabolicPoint_time_space p]
+    simp only [parabolicSpatialJet, parabolicPoint_time,
+      parabolicPoint_space, continuousMultilinearCurryFin1_apply,
+      iteratedFDeriv_one_apply, Fin.snoc_zero]
+  rw [hgradient]
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+theorem norm_parabolicC2HolderSpaceLowerOrderTerm_le
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (b : n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (c : ParabolicHolderSpace (V := Euc n) (F := Real) alpha) :
+    ‖parabolicC2HolderSpaceLowerOrderTerm
+      (F := F) alpha halpha b c‖ ≤
+      18 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by
+  classical
+  have hsmu : ∀ a : ParabolicHolderSpace (V := Euc n) (F := Real) alpha,
+      ‖boundedHolderSpaceSmu (F := F) alpha a‖ ≤ 3 * ‖a‖ := by
+    intro a
+    calc
+      ‖boundedHolderSpaceSmu (F := F) alpha a‖ ≤
+          ‖boundedHolderSpaceSmu (X := ParabolicPoint (Euc n))
+            (F := F) alpha‖ * ‖a‖ :=
+        (boundedHolderSpaceSmu (X := ParabolicPoint (Euc n))
+          (F := F) alpha).le_opNorm a
+      _ ≤ 3 * ‖a‖ := mul_le_mul_of_nonneg_right
+        (norm_boundedHolderSpaceSmu_le
+          (X := ParabolicPoint (Euc n)) (F := F) alpha) (norm_nonneg _)
+  have hdrift : ∀ i,
+      ‖(boundedHolderSpaceSmu alpha (b i)).comp
+        ((boundedHolderSpaceMap alpha
+          (gradientComponentEval (F := F) i)).comp
+          (parabolicC2HolderSpaceSpatialGradient alpha halpha))‖ ≤
+        18 * ‖b i‖ := by
+    intro i
+    calc
+      ‖(boundedHolderSpaceSmu alpha (b i)).comp
+          ((boundedHolderSpaceMap alpha
+            (gradientComponentEval (F := F) i)).comp
+            (parabolicC2HolderSpaceSpatialGradient alpha halpha))‖ ≤
+        ‖boundedHolderSpaceSmu alpha (b i)‖ *
+          ‖(boundedHolderSpaceMap alpha
+            (gradientComponentEval (F := F) i)).comp
+            (parabolicC2HolderSpaceSpatialGradient alpha halpha)‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (3 * ‖b i‖) * (1 * 6) := mul_le_mul (hsmu (b i))
+        ((ContinuousLinearMap.opNorm_comp_le _ _).trans
+          (mul_le_mul
+            ((norm_boundedHolderSpaceMap_le alpha
+              (gradientComponentEval (F := F) i)).trans
+                (norm_apply_euclideanBasis_le_one (G := F) i))
+            (norm_parabolicC2HolderSpaceSpatialGradient_le
+              (V := Euc n) (F := F) alpha halpha)
+            (norm_nonneg _) zero_le_one))
+        (norm_nonneg _)
+        (mul_nonneg (by norm_num) (norm_nonneg (b i)))
+      _ = 18 * ‖b i‖ := by ring
+  have hpotential :
+      ‖(boundedHolderSpaceSmu (F := F) alpha c).comp
+        (parabolicC2HolderSpaceValue
+          (V := Euc n) (F := F) alpha halpha)‖ ≤ 9 * ‖c‖ := by
+    calc
+      ‖(boundedHolderSpaceSmu (F := F) alpha c).comp
+          (parabolicC2HolderSpaceValue
+            (V := Euc n) (F := F) alpha halpha)‖ ≤
+        ‖boundedHolderSpaceSmu (F := F) alpha c‖ *
+          ‖parabolicC2HolderSpaceValue
+            (V := Euc n) (F := F) alpha halpha‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (3 * ‖c‖) * 3 := mul_le_mul (hsmu c)
+        (norm_parabolicC2HolderSpaceValue_le
+          (V := Euc n) (F := F) alpha halpha)
+        (norm_nonneg _)
+        (mul_nonneg (by norm_num) (norm_nonneg c))
+      _ = 9 * ‖c‖ := by ring
+  unfold parabolicC2HolderSpaceLowerOrderTerm
+  calc
+    ‖(∑ i,
+          (boundedHolderSpaceSmu alpha (b i)).comp
+            ((boundedHolderSpaceMap alpha
+              (gradientComponentEval (F := F) i)).comp
+              (parabolicC2HolderSpaceSpatialGradient alpha halpha))) +
+        (boundedHolderSpaceSmu (F := F) alpha c).comp
+          (parabolicC2HolderSpaceValue
+            (V := Euc n) (F := F) alpha halpha)‖ ≤
+      ‖∑ i,
+          (boundedHolderSpaceSmu alpha (b i)).comp
+            ((boundedHolderSpaceMap alpha
+              (gradientComponentEval (F := F) i)).comp
+              (parabolicC2HolderSpaceSpatialGradient alpha halpha))‖ +
+        ‖(boundedHolderSpaceSmu (F := F) alpha c).comp
+          (parabolicC2HolderSpaceValue
+            (V := Euc n) (F := F) alpha halpha)‖ := norm_add_le _ _
+    _ ≤ (∑ i, 18 * ‖b i‖) + 9 * ‖c‖ := add_le_add
+      ((norm_sum_le Finset.univ fun i ↦
+        (boundedHolderSpaceSmu alpha (b i)).comp
+          ((boundedHolderSpaceMap alpha
+            (gradientComponentEval (F := F) i)).comp
+            (parabolicC2HolderSpaceSpatialGradient alpha halpha))).trans
+        (Finset.sum_le_sum fun i _hi ↦ hdrift i)) hpotential
+    _ = 18 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by
+      rw [Finset.mul_sum]
 
 omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
 theorem variableMatrixLap_eq_nondivergenceOperator_sub_lowerOrderTerm
