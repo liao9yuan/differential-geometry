@@ -1,6 +1,7 @@
-import DifferentialGeometry.Analysis.InnerProductSpace.ProperConeIsometry
+import DifferentialGeometry.Analysis.InnerProductSpace.ProperConeFace
 
 open Set
+open DifferentialGeometry.Analysis.InnerProductSpace
 
 namespace DifferentialGeometry.Geometry.Connection
 
@@ -122,5 +123,23 @@ theorem IsParallelProperConeFamily.innerDual
     ProperCone.innerDual (C y : Set (V y))
   rw [← DifferentialGeometry.Analysis.InnerProductSpace.ProperCone.innerDual_map_linearIsometryEquiv]
   rw [h x y]
+
+theorem IsParallelProperConeFamily.innerDualZeroFace_map_transport
+    {P : LinearIsometricTransport V} {C : ProperConeFamily V}
+    (h : IsParallelProperConeFamily V P C) (x y : X) (v : V x) :
+    (ProperCone.innerDualZeroFace (C x) v).map
+        (P.transport x y).toContinuousLinearEquiv.toContinuousLinearMap =
+      ProperCone.innerDualZeroFace (C y) (P.transport x y v) := by
+  rw [ProperCone.innerDualZeroFace_map_linearIsometryEquiv, h x y]
+
+theorem IsParallelProperConeFamily.transport_mem_innerDualZeroFace_iff
+    {P : LinearIsometricTransport V} {C : ProperConeFamily V}
+    (h : IsParallelProperConeFamily V P C) (x y : X) (v w : V x) :
+    P.transport x y w ∈
+        ProperCone.innerDualZeroFace (C y) (P.transport x y v) ↔
+      w ∈ ProperCone.innerDualZeroFace (C x) v := by
+  rw [← h.innerDualZeroFace_map_transport V x y v]
+  rw [ProperCone.mem_map_continuousLinearEquiv_iff]
+  simp
 
 end DifferentialGeometry.Geometry.Connection
