@@ -509,6 +509,43 @@ theorem laplacianNonnegativeAtSpatialMinFamily_of_realizedMetricFamily
     (G.connection t) (G.metric t) (G.metricCompatible t)
 
 
+theorem laplacianAt_nonpos_at_spatial_max
+    [I.Boundaryless]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) {f : M -> Real} {x : M}
+    (hmax : IsLocalMax f x)
+    (hf : ContMDiff I 𝓘(Real, Real) ∞ f) :
+    laplacianAt (I := I) G t f x <= 0 := by
+  have hmdiff : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y :=
+    fun y => hf.mdifferentiable (by simp) y
+  have hgrad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) f y) x :=
+    gradientFun_mdiffAt (I := I) (G.metric t) hf x
+  have hneggrad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (-f) y) x := by
+    have heq :
+        (T% fun y : M => gradientFun (I := I) (G.metric t) (-f) y) =
+          (T% fun y : M => -gradientFun (I := I) (G.metric t) f y) := by
+      funext y
+      apply congrArg (fun q =>
+        (⟨y, q⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+      exact gradientFun_neg (I := I) (G.metric t) (hmdiff y)
+    rw [heq]
+    exact mdifferentiableAt_neg_section hgrad
+  have hneg : 0 <= laplacianAt (I := I) G t (-f) x :=
+    laplacian_nonneg_at_spatial_min_of_metricCompatible
+      (I := I) (G.connection t) (G.metric t) (G.metricCompatible t)
+      hmax.neg (hmdiff x).neg (Filter.Eventually.of_forall (fun y => (hmdiff y).neg)) hneggrad
+  have hlin := laplacianAt_smul (I := I) G t (-1 : Real) hmdiff hgrad
+  have hfun : (-f) = (-1 : Real) • f := by
+    funext y
+    simp
+  rw [hfun, hlin] at hneg
+  linarith
+
+
 theorem heatOperatorWithDrift_at_spatial_min_nonneg_of_isInteriorPoint
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
