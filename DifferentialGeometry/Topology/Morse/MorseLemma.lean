@@ -1549,6 +1549,7 @@ theorem morseSection_smooth {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     (h₀ : fderiv ℝ (morsePartial f) 0 morseE0 ≠ 0) :
     ∃ φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)),
       (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f ∧ 0 ∈ φ.source ∧
+      ContDiffAt ℝ (⊤ : ℕ∞) (morseSection φ) (0 : MorseModel n) ∧
       ContDiffAt ℝ 2 (morseSection φ) (0 : MorseModel n) ∧
       DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n) := by
   let φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)) :=
@@ -1615,6 +1616,15 @@ theorem morseSection_smooth {n : ℕ} (f : MorseModel (n + 1) → ℝ)
       simpa [hz] using hφsymm1
     exact ContDiffAt.comp (x := 0) (g := φ.symm)
       (f := fun x' : MorseModel n => morseCons (0 : ℝ) x') (hg := hg') (hf := hcons1)
+  have hσinf : ContDiffAt ℝ (⊤ : ℕ∞) (morseSection φ) (0 : MorseModel n) := by
+    change ContDiffAt ℝ (⊤ : ℕ∞) (fun x' : MorseModel n => φ.symm (morseCons (0 : ℝ) x')) (0 : MorseModel n)
+    have hg' : ContDiffAt ℝ (⊤ : ℕ∞) (φ.symm) (morseCons (0 : ℝ) (0 : MorseModel n)) := by
+      have hz : morseCons (0 : ℝ) (0 : MorseModel n) = (0 : MorseModel (n + 1)) := by
+        funext i
+        cases i using Fin.cases <;> simp [morseCons]
+      simpa [hz] using hφsymm0
+    exact ContDiffAt.comp (x := 0) (g := φ.symm)
+      (f := fun x' : MorseModel n => morseCons (0 : ℝ) x') (hg := hg') (hf := hcons0)
   have hσ2 : ContDiffAt ℝ 2 (morseSection φ) (0 : MorseModel n) := by
     change ContDiffAt ℝ 2 (fun x' : MorseModel n => φ.symm (morseCons (0 : ℝ) x')) (0 : MorseModel n)
     have hg' : ContDiffAt ℝ 2 (φ.symm) (morseCons (0 : ℝ) (0 : MorseModel n)) := by
@@ -1626,7 +1636,7 @@ theorem morseSection_smooth {n : ℕ} (f : MorseModel (n + 1) → ℝ)
       (f := fun x' : MorseModel n => morseCons (0 : ℝ) x') (hg := hg') (hf := hcons2)
   have hσdiff : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n) :=
     (hσ1.differentiableAt (by decide : (1 : WithTop ℕ∞) ≠ 0))
-  refine ⟨φ, ?_, ?_, hσ2, hσdiff⟩
+  refine ⟨φ, ?_, ?_, hσinf, hσ2, hσdiff⟩
   · rw [ContDiffAt.toOpenPartialHomeomorph_coe]
   · exact ContDiffAt.mem_toOpenPartialHomeomorph_source _ _ _
 
