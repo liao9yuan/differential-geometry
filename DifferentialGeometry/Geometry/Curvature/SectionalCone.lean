@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Convex.Tensor04SectionalNonnegativeCone
+import DifferentialGeometry.Geometry.Curvature.AlgebraicSectionalCone
+import DifferentialGeometry.Geometry.Curvature.AlgebraicTensorMetric
 import DifferentialGeometry.Geometry.Curvature.Metric
 
 set_option autoImplicit false
@@ -43,6 +45,15 @@ theorem metricRm04_mem_tensor04SectionalNonnegativeCone_iff
     (∀ x : M, metricRm04 (I := I) (M := M) g x ∈
       tensor04SectionalNonnegativeCone (I := I) (M := M)) ↔
       ∀ x : M, ∀ v w : TangentSpace I x,
+        0 ≤ metricRm04StdAt (I := I) (M := M) g x v w w v := by
+  simp
+
+omit [SigmaCompactSpace M] in
+theorem metricAlgebraicCurvatureTensorAt_mem_algebraicSectionalNonnegativeCone_iff
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    metricAlgebraicCurvatureTensorAt (I := I) (M := M) g x ∈
+        algebraicSectionalNonnegativeCone (I := I) (M := M) ↔
+      ∀ v w : TangentSpace I x,
         0 ≤ metricRm04StdAt (I := I) (M := M) g x v w w v := by
   simp
 
