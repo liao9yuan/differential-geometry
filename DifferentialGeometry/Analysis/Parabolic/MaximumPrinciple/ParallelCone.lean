@@ -157,6 +157,39 @@ theorem parallelProperCone_heat_reaction_mem_of_tangent
   simpa using hfixed t ht x
 
 omit [CompleteSpace E] in
+theorem parallelProperCone_heat_reaction_mem_of_mapsTo
+    [∀ x, CompleteSpace (F x)]
+    [I.Boundaryless] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T)
+    (P : LinearIsometricTransport F)
+    (C : ProperConeFamily F)
+    (hC : IsParallelProperConeFamily F P C)
+    (x₀ : M)
+    (reaction : Real → (x : M) → F x → F x)
+    (u : Real → ∀ x, F x)
+    (hsol : IsInnerProductHeatReactionOn
+      (RealTimeInterval.closed 0 T hT) G
+        (transportedReactionFamily F P x₀ reaction)
+        (transportedSectionFamily F P x₀ u))
+    (L : NNReal)
+    (hL : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
+      LipschitzWith L (reaction t x))
+    (hreaction : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
+      MapsTo (reaction t x) (C x) (C x))
+    (hinit : ∀ x : M, u 0 x ∈ C x) :
+    ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C x := by
+  apply parallelProperCone_heat_reaction_mem_of_tangent
+    (I := I) F G hT P C hC x₀ reaction u hsol L hL
+  · intro t ht x p hp
+    have htan := sub_mem_posTangentConeAt_of_segment_subset
+      ((C x).convex.segment_subset hp ((C x).add_mem hp (hreaction t ht x hp)))
+    simpa using htan
+  · exact hinit
+
+omit [CompleteSpace E] in
 theorem parallelProperCone_heat_reaction_mem_of_dualZeroFace_nonneg
     [∀ x, CompleteSpace (F x)]
     [I.Boundaryless] [CompactSpace M]
