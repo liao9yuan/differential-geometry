@@ -1173,6 +1173,188 @@ theorem parabolic_nondivergence_ball_interior_schauder_estimate_of_local_source_
       huHolder hdtimeUHolder hduHolder hd2uHolder huNorm hdtimeUNorm
       hduNorm hd2uNorm hsmall
 
+theorem parabolic_nondivergence_ball_interior_schauder_estimate_of_interpolation_of_local_source_estimates_of_small_freeze_defect
+    {alpha Ksource Kc Bsource Bc C M : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (epsilon : NNReal) (hepsilon : 0 < epsilon)
+    {aTime t₀ t₁ bTime S T : Real}
+    (haTime : 0 < aTime) (hat₀ : aTime < t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (ht₁b : t₁ < bTime) (hbT : bTime < T) (hTS : T < S)
+    (center : Euc n) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u dtimeU : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real →
+      BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ Icc (0 : Real) S, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ Icc (0 : Real) S, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ Icc (0 : Real) S, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (huCont : Continuous u)
+    (huC2 : IsParabolicC2On
+      (parabolicCylinder (Icc (0 : Real) S) Set.univ)
+      (fun t x ↦ u t x))
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Icc (0 : Real) S) Set.univ)
+      (fun t x ↦ u t x) ≤ C)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖u p.time p.space‖ ≤ M)
+    (hsourceHolder : HolderWith Ksource alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        (parabolicNondivergenceOperator a b c (fun t x ↦ u t x))))
+    (hsourceNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖parabolicNondivergenceOperator a b c (fun t x ↦ u t x) p‖ ≤
+          Bsource)
+    (Kb Bb : n → NNReal) (A Ka omega : n → n → NNReal)
+    (hb : ∀ i, HolderWith (Kb i) alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        (b i)))
+    (hc : HolderWith Kc alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        c))
+    (hbNorm : ∀ i p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖b i p‖ ≤ Bb i)
+    (hcNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖c p‖ ≤ Bc)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict (a i j)))
+    (homega : ∀ i j p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖a i j p0 - a i j p‖ ≤ omega i j)
+    (haNorm : ∀ i j p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖a i j p‖ ≤ A i j)
+    (hsmall : spdParabolicSchauderDefectConst
+      (fun i j ↦ a i j p0) hA alpha Ka omega T < 1) :
+    eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioo t₀ t₁) (Metric.ball center r))
+        (fun t x ↦ u t x) ≤
+      parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        (Ksource + parabolicLowerOrderInterpolationHolderConst
+          Kb Bb Kc Bc epsilon alpha C M)
+        (parabolicSpatialGradientInterpolationConst epsilon alpha C M)
+        (parabolicValueInterpolationConst epsilon alpha C M)
+        (Bsource + parabolicLowerOrderInterpolationSupConst
+          Bb Bc epsilon C M)
+        (2 * M / epsilon + C * epsilon) M A Ka omega T := by
+  let Q := parabolicCylinder (Icc (0 : Real) S) (Set.univ : Set (Euc n))
+  let e1 := continuousMultilinearCurryFin1 Real (Euc n) F
+  let e2 := hessianCurryEquiv (Euc n) F
+  have hduEq : ∀ p ∈ Q,
+      e1 (parabolicSpatialJet 1 (fun t x ↦ u t x) p) =
+        du p.time p.space := by
+    intro p hp
+    ext v
+    simp only [e1, parabolicSpatialJet,
+      continuousMultilinearCurryFin1_apply, iteratedFDeriv_one_apply]
+    rw [(hu p.time hp.1 p.space).fderiv]
+    rfl
+  have hd2uEq : ∀ p ∈ Q,
+      e2 (parabolicSpatialJet 2 (fun t x ↦ u t x) p) =
+        d2u p.time p.space := by
+    intro p hp
+    simpa only [e2, parabolicPoint_time_space] using
+      hessianCurryEquiv_parabolicSpatialJet_two_of_hasFDerivAt
+        (fun t x ↦ u t x) (fun q ↦ du q.time q.space)
+        (fun q ↦ d2u q.time q.space) p.time
+        (hu p.time hp.1) (hdu p.time hp.1) p.space
+  have hdtimeUEq : ∀ p ∈ Q,
+      parabolicTimeDerivative (fun t x ↦ u t x) p =
+        dtimeU p.time p.space := by
+    intro p hp
+    have hpoint : HasDerivAt (fun t ↦ u t p.space)
+        (dtimeU p.time p.space) p.time := by
+      simpa only [BoundedContinuousFunction.evalCLM_apply] using
+        (BoundedContinuousFunction.evalCLM Real p.space).hasFDerivAt
+          |>.comp_hasDerivAt p.time (huTime p.time hp.1)
+    unfold parabolicTimeDerivative
+    rw [hpoint.hasFDerivAt.fderiv]
+    simp only [ContinuousLinearMap.toSpanSingleton_apply, one_smul]
+  have huHolder : HolderWith
+      (parabolicValueInterpolationConst epsilon alpha C M) alpha
+      (Q.restrict (fun p ↦ u p.time p.space)) := by
+    simpa only [Q] using
+      parabolicValue_holderWith_restrict_of_interpolation
+        (convex_Icc (0 : Real) S) convex_univ epsilon hepsilon
+        halpha1.le huC2 hgauge huNorm
+  have hjetHolder : HolderWith
+      (parabolicSpatialGradientInterpolationConst epsilon alpha C M) alpha
+      (Q.restrict (parabolicSpatialJet 1 (fun t x ↦ u t x))) := by
+    simpa only [Q] using
+      parabolicSpatialJet_one_holderWith_restrict_of_interpolation
+        (convex_Icc (0 : Real) S) epsilon hepsilon halpha1.le
+        huC2 hgauge huNorm
+  have hduHolder : HolderWith
+      (parabolicSpatialGradientInterpolationConst epsilon alpha C M) alpha
+      (Q.restrict (fun p ↦ du p.time p.space)) := by
+    have hcomp := e1.lipschitz.holderWith.comp hjetHolder
+    have hfun : e1 ∘ Q.restrict
+        (parabolicSpatialJet 1 (fun t x ↦ u t x)) =
+          Q.restrict (fun p ↦ du p.time p.space) := by
+      funext p
+      exact hduEq p.1 p.2
+    rw [hfun] at hcomp
+    simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul] using hcomp
+  have hdtimeUHolder : HolderWith C alpha
+      (Q.restrict (fun p ↦ dtimeU p.time p.space)) := by
+    have hbase := parabolicTimeDerivative_holderWith_restrict hgauge
+    have hfun : Q.restrict
+        (parabolicTimeDerivative (fun t x ↦ u t x)) =
+          Q.restrict (fun p ↦ dtimeU p.time p.space) := by
+      funext p
+      exact hdtimeUEq p.1 p.2
+    rwa [hfun] at hbase
+  have hd2uHolder : HolderWith C alpha
+      (Q.restrict (fun p ↦ d2u p.time p.space)) := by
+    have hbase := parabolicSpatialJet_holderWith_restrict hgauge
+    have hcomp := e2.lipschitz.holderWith.comp hbase
+    have hfun : e2 ∘ Q.restrict
+        (parabolicSpatialJet 2 (fun t x ↦ u t x)) =
+          Q.restrict (fun p ↦ d2u p.time p.space) := by
+      funext p
+      exact hd2uEq p.1 p.2
+    rw [hfun] at hcomp
+    simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul] using hcomp
+  have hdtimeUNorm : ∀ p, p ∈ Q → ‖dtimeU p.time p.space‖ ≤ C := by
+    intro p hp
+    rw [← hdtimeUEq p hp]
+    exact parabolicTimeDerivative_norm_le hgauge hp
+  have hduNorm : ∀ p, p ∈ Q →
+      ‖du p.time p.space‖ ≤ 2 * M / epsilon + C * epsilon := by
+    intro p hp
+    rw [← hduEq p hp, LinearIsometryEquiv.norm_map]
+    exact norm_parabolicSpatialJet_one_le_of_interpolation
+      epsilon hepsilon huC2 hgauge huNorm p hp
+  have hd2uNorm : ∀ p, p ∈ Q → ‖d2u p.time p.space‖ ≤ C := by
+    intro p hp
+    rw [← hd2uEq p hp, LinearIsometryEquiv.norm_map]
+    exact parabolicSpatialJet_norm_le hgauge (j := 2) (by omega) hp
+  simpa only [Q, parabolicLowerOrderInterpolationHolderConst,
+    parabolicLowerOrderInterpolationSupConst] using
+    (parabolic_nondivergence_ball_interior_schauder_estimate_of_local_source_estimates_of_small_freeze_defect
+      (alpha := alpha) (Ksource := Ksource) (Kc := Kc)
+      (Ku := parabolicValueInterpolationConst epsilon alpha C M)
+      (KdtimeU := C)
+      (Kdu := parabolicSpatialGradientInterpolationConst epsilon alpha C M)
+      (Kd2u := C) (Bsource := Bsource) (Bc := Bc) (Mu := M)
+      (MdtimeU := C) (Mdu := 2 * M / epsilon + C * epsilon)
+      (Md2u := C) halpha0 halpha1 haTime hat₀ ht₀t₁ ht₁b hbT hTS
+      center hr hrR a p0 hA b c u dtimeU du d2u huTime hu hdu huCont
+      hsourceHolder hsourceNorm Kb Bb A Ka omega hb hc hbNorm hcNorm
+      ha homega haNorm huHolder hdtimeUHolder hduHolder hd2uHolder
+      huNorm hdtimeUNorm hduNorm hd2uNorm hsmall)
+
 theorem parabolic_nondivergence_centered_ball_schauder_estimate_of_local_source_estimates_of_small_freeze_defect
     {alpha Ksource Kc Ku KdtimeU Kdu Kd2u Bsource Bc
       Mu MdtimeU Mdu Md2u : NNReal}

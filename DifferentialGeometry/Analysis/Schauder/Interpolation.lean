@@ -781,6 +781,19 @@ def bufferedParabolicSpatialGradientConst
     (C delta : NNReal) : NNReal :=
   5 * C + 2 * C / delta
 
+def parabolicSpatialGradientInterpolationConst
+    (epsilon alpha C M : NNReal) : NNReal :=
+  5 * C * epsilon ^ ((1 : NNReal) - alpha : Real) +
+    2 * (2 * M / epsilon + C * epsilon) /
+      epsilon ^ (alpha : Real)
+
+def bufferedParabolicSpatialGradientInterpolationConst
+    (epsilon delta alpha C M : NNReal) : NNReal :=
+  bufferedParabolicSpatialGradientConst C delta *
+      epsilon ^ ((1 : NNReal) - alpha : Real) +
+    2 * (2 * M / epsilon + C * epsilon) /
+      epsilon ^ (alpha : Real)
+
 def bufferedParabolicC2HolderGaugeWithLowerJetsConst
     (C delta : NNReal) : NNReal :=
   8 * C + 2 * C / delta
@@ -796,6 +809,40 @@ theorem bufferedParabolicC2HolderGaugeWithLowerJetsConst_eq_factor_mul
   unfold bufferedParabolicC2HolderGaugeWithLowerJetsConst
   unfold bufferedParabolicC2HolderGaugeWithLowerJetsFactor
   field_simp
+
+theorem norm_parabolicSpatialJet_one_le_of_interpolation
+    {J : Set Real} (epsilon : NNReal) (hepsilon : 0 < epsilon)
+    {alpha C M : NNReal} {u : Real → V → F}
+    (hu : IsParabolicC2On (parabolicCylinder J Set.univ) u)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J Set.univ) u ≤ C)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder J Set.univ → ‖u p.time p.space‖ ≤ M)
+    (p : ParabolicPoint V) (hp : p ∈ parabolicCylinder J Set.univ) :
+    ‖parabolicSpatialJet 1 u p‖ ≤ 2 * M / epsilon + C * epsilon := by
+  have hut : ContDiff Real 2 (u p.time) := by
+    rw [contDiff_iff_contDiffAt]
+    intro x
+    exact hu.1 (parabolicPoint p.time x) ⟨hp.1, Set.mem_univ x⟩
+  have hspace : LipschitzWith C (fderiv Real (u p.time)) := by
+    apply lipschitzWith_of_nnnorm_fderiv_le
+      ((((contDiff_succ_iff_fderiv (n := 1)).mp hut).2.2).differentiable
+        (by norm_num))
+    intro x
+    change ‖fderiv Real (fderiv Real (u p.time)) x‖ ≤ (C : Real)
+    rw [← hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv,
+      LinearIsometryEquiv.norm_map]
+    exact parabolicSpatialJet_norm_le hgauge (j := 2) (by omega)
+      (p := parabolicPoint p.time x) ⟨hp.1, Set.mem_univ x⟩
+  have hderiv := norm_fderiv_le_at_scale
+    (M := M) (C := C) (alpha := 1)
+    (hut.differentiable (by norm_num)) hspace.holderWith
+    (fun x ↦ huNorm (parabolicPoint p.time x) ⟨hp.1, Set.mem_univ x⟩)
+    (show 0 < (epsilon : Real) by exact_mod_cast hepsilon) p.space
+  simpa only [parabolicSpatialJet, parabolicPoint_time_space,
+    norm_iteratedFDeriv_one, NNReal.coe_add, NNReal.coe_div,
+    NNReal.coe_mul, NNReal.coe_ofNat, NNReal.coe_one,
+    Real.rpow_one] using hderiv
 
 theorem norm_parabolicSpatialJet_one_le_of_buffered_ball
     {J : Set Real} (center : V) {r R : Real} (epsilon : NNReal)
@@ -1167,14 +1214,7 @@ theorem lipschitzOnWith_parabolicSpatialJet_one_of_buffered_ball
           push_cast
           ring
 
-def parabolicSpatialGradientInterpolationConst
-    (epsilon delta alpha C M : NNReal) : NNReal :=
-  bufferedParabolicSpatialGradientConst C delta *
-      epsilon ^ ((1 : NNReal) - alpha : Real) +
-    2 * (2 * M / epsilon + C * epsilon) /
-      epsilon ^ (alpha : Real)
-
-theorem parabolicSpatialJet_one_holderWith_restrict_of_interpolation
+theorem parabolicSpatialJet_one_holderWith_restrict_of_buffered_ball_interpolation
     {J : Set Real} (hJ : Convex Real J)
     (center : V) {r R : Real} (epsilon delta : NNReal)
     (hepsilon : 0 < epsilon) (hepsilonDelta : epsilon < delta)
@@ -1189,7 +1229,7 @@ theorem parabolicSpatialJet_one_holderWith_restrict_of_interpolation
       p ∈ parabolicCylinder J (Metric.ball center R) →
         ‖u p.time p.space‖ ≤ M) :
     HolderWith
-      (parabolicSpatialGradientInterpolationConst
+      (bufferedParabolicSpatialGradientInterpolationConst
         epsilon delta alpha C M) alpha
       ((parabolicCylinder J (Metric.closedBall center r)).restrict
         (parabolicSpatialJet 1 u)) := by
@@ -1206,7 +1246,7 @@ theorem parabolicSpatialJet_one_holderWith_restrict_of_interpolation
       center epsilon hepsilon hepsilonBuffer hu hgauge huNorm p hp
   have hlip := lipschitzOnWith_parabolicSpatialJet_one_of_buffered_ball
     hJ center delta hdelta hbuffer hu hgauge
-  simpa only [parabolicSpatialGradientInterpolationConst] using
+  simpa only [bufferedParabolicSpatialGradientInterpolationConst] using
     holderWith_restrict_of_norm_le_of_lipschitzOnWith
       (s := parabolicCylinder J (Metric.closedBall center r))
       (f := parabolicSpatialJet 1 u)
@@ -1589,6 +1629,34 @@ theorem lipschitzOnWith_parabolicSpatialJet_one_of_parabolicC2HolderGaugeOn
                 (dist p.space q.space) := by
           push_cast
           ring
+
+theorem parabolicSpatialJet_one_holderWith_restrict_of_interpolation
+    {J : Set Real} (hJ : Convex Real J) (epsilon : NNReal)
+    (hepsilon : 0 < epsilon)
+    {alpha C M : NNReal} (halpha : alpha ≤ 1)
+    {u : Real → V → F}
+    (hu : IsParabolicC2On (parabolicCylinder J Set.univ) u)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J Set.univ) u ≤ C)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder J Set.univ → ‖u p.time p.space‖ ≤ M) :
+    HolderWith
+      (parabolicSpatialGradientInterpolationConst epsilon alpha C M) alpha
+      ((parabolicCylinder J Set.univ).restrict
+        (parabolicSpatialJet 1 u)) := by
+  have hnorm : ∀ p ∈ parabolicCylinder J (Set.univ : Set V),
+      ‖parabolicSpatialJet 1 u p‖ ≤ 2 * M / epsilon + C * epsilon := by
+    intro p hp
+    exact norm_parabolicSpatialJet_one_le_of_interpolation
+      epsilon hepsilon hu hgauge huNorm p hp
+  simpa only [parabolicSpatialGradientInterpolationConst] using
+    holderWith_restrict_of_norm_le_of_lipschitzOnWith
+      (s := parabolicCylinder J (Set.univ : Set V))
+      (f := parabolicSpatialJet 1 u)
+      (M := 2 * M / epsilon + C * epsilon) (L := 5 * C)
+      (alpha := alpha) (epsilon := epsilon) hepsilon halpha hnorm
+      (lipschitzOnWith_parabolicSpatialJet_one_of_parabolicC2HolderGaugeOn
+        hJ hu hgauge)
 
 theorem parabolicSpatialJet_one_holderWith_restrict
     {J : Set Real} (hJ : Convex Real J)
