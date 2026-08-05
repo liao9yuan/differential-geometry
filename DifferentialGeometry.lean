@@ -46,6 +46,7 @@ import DifferentialGeometry.Analysis.Calculus.TimeSliceBootstrap
 import DifferentialGeometry.Analysis.Calculus.TimeSliceSwap
 import DifferentialGeometry.Analysis.Convex.ProperConeFace
 import DifferentialGeometry.Analysis.Convex.Tensor02PositiveSemidefiniteCone
+import DifferentialGeometry.Analysis.Convex.Tensor04SectionalNonnegativeCone
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.ChartFrameTraceΓCorrectionT0Linear
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.CovApplyFrameToCoordExpansion
@@ -2293,6 +2294,7 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFi
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.MetricSectional
+import DifferentialGeometry.Geometry.Curvature.SectionalCone
 import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrameComponentBound
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrameCurvatureCore
@@ -3182,6 +3184,7 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0STimeDeriv
 import DifferentialGeometry.Tensor.RSTensor.NormSqProduct
 import DifferentialGeometry.Tensor.RSTensor.ProductNablaLeibniz
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.ContinuousEvaluation
+import DifferentialGeometry.Tensor.RSTensor.Pullback
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Nullspace
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
