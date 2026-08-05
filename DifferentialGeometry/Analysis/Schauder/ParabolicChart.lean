@@ -101,6 +101,31 @@ theorem exists_finite_buffered_euclidean_chart_cover
     rcases Set.mem_iUnion₂.mp (hs (Set.mem_univ y)) with ⟨x, hxs, hyU⟩
     exact ⟨x, hxs, hyU.1, hyU.2⟩
 
+def IsParabolicC2InEuclideanChartsOn
+    [FiniteDimensional Real E]
+    {A : Type*} (I : ModelWithCorners Real E H) (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) : Prop :=
+  ∀ i, IsParabolicC2On (Q i)
+    (parabolicEuclideanChartRepresentation I (center i) u)
+
+namespace IsParabolicC2InEuclideanChartsOn
+
+theorem mono
+    [FiniteDimensional Real E]
+    {A : Type*} {center : A → M}
+    {Q R : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E))))}
+    (hQR : ∀ i, Q i ⊆ R i) {u : Real → M → F}
+    (hu : IsParabolicC2InEuclideanChartsOn I center R u) :
+    IsParabolicC2InEuclideanChartsOn I center Q u := by
+  intro i
+  exact ⟨fun p hp => (hu i).1 p (hQR i hp),
+    fun p hp => (hu i).2 p (hQR i hp)⟩
+
+end IsParabolicC2InEuclideanChartsOn
+
 def eParabolicC2HolderGaugeInExtChartOn
     (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
     (Q : Set (ParabolicPoint E)) (u : Real → M → F) : ENNReal :=

@@ -26,6 +26,19 @@ def IsBoundedParabolicC2HolderInEuclideanChartsOn
 
 namespace IsBoundedParabolicC2HolderInEuclideanChartsOn
 
+theorem isParabolicC2InEuclideanChartsOn
+    [FiniteDimensional Real E]
+    {A : Type*} {alpha : NNReal}
+    {center : A → M}
+    {Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E))))}
+    {u : Real → M → F}
+    (hu : IsBoundedParabolicC2HolderInEuclideanChartsOn
+      alpha I center Q u) :
+    IsParabolicC2InEuclideanChartsOn I center Q u := by
+  intro i
+  exact (hu i).1.1
+
 theorem gauge_ne_top
     [FiniteDimensional Real E]
     {A : Type*} [Finite A] {alpha : NNReal}
