@@ -98,28 +98,6 @@ theorem abs_mul_rpow_half_critical
     ← Real.rpow_mul hb.le, parabolicMoserExponent_half_mul_critical]
 
 omit [I.Boundaryless] [CompactSpace M] in
-theorem localizedL2Mass_rpow_half
-    (g : SmoothRiemannianMetric I M) (cutoff : SmoothScalar g)
-    (u : ℝ → M → ℝ)
-    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun z : ℝ × M => u z.1 z.2))
-    (hpos : ∀ t x, 0 < u t x) (p t : ℝ) :
-    localizedL2Mass (I := I) (M := M) cutoff
-        (smoothScalarSlice (I := I) g (fun s x => u s x ^ (p / 2))
-          (contMDiff_rpow_of_pos hu hpos (p / 2)) t) =
-      ∫ x, cutoff.toFun x ^ 2 * u t x ^ p
-        ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  apply integral_congr_ae
-  filter_upwards with x
-  change cutoff.toFun x ^ 2 * (u t x ^ (p / 2)) ^ 2 =
-    cutoff.toFun x ^ 2 * u t x ^ p
-  congr 1
-  rw [← Real.rpow_natCast (u t x ^ (p / 2)) 2,
-    ← Real.rpow_mul (hpos t x).le]
-  congr 1
-  ring
-
-omit [I.Boundaryless] [CompactSpace M] in
 theorem moserLocalizedMass_nonneg
     (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
     (u : ℝ → M → ℝ) {p₀ a τ t₁ : ℝ}

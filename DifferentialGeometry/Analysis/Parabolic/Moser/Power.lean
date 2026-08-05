@@ -292,6 +292,28 @@ theorem rpow_supersolution_of_supersolution
 
 variable [SigmaCompactSpace M] [CompactSpace M]
 
+omit [I.Boundaryless] [CompactSpace M] in
+theorem localizedL2Mass_rpow_half
+    (g : SmoothRiemannianMetric I M) (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x) (p t : ℝ) :
+    localizedL2Mass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => u s x ^ (p / 2))
+          (contMDiff_rpow_of_pos hu hpos (p / 2)) t) =
+      ∫ x, cutoff.toFun x ^ 2 * u t x ^ p
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  apply integral_congr_ae
+  filter_upwards with x
+  change cutoff.toFun x ^ 2 * (u t x ^ (p / 2)) ^ 2 =
+    cutoff.toFun x ^ 2 * u t x ^ p
+  congr 1
+  rw [← Real.rpow_natCast (u t x ^ (p / 2)) 2,
+    ← Real.rpow_mul (hpos t x).le]
+  congr 1
+  ring
+
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private theorem positive_rpow_cross_term_le
     (g : SmoothRiemannianMetric I M)
@@ -562,6 +584,229 @@ theorem caccioppoli_positive_rpow_of_supersolution
     ring
   rw [hleft, ← herror]
   simpa only [μ, smoothScalarSlice_toFun] using hraw
+
+theorem weighted_caccioppoli_positive_rpow_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq_pos : 0 < q) (hq_one : q < 1)
+    {weight dweight : ℝ → ℝ} {a b : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    weight a * localizedL2Mass (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+            (contMDiff_rpow_of_pos hu hpos (q / 2)) a) -
+        weight b * localizedL2Mass (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+            (contMDiff_rpow_of_pos hu hpos (q / 2)) b) +
+        ∫ t in a..b, weight t *
+          ((2 * (1 - q) / q) *
+            localizedDirichletEnergy (I := I) (M := M) cutoff
+              (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+                (contMDiff_rpow_of_pos hu hpos (q / 2)) t)) ≤
+      ∫ t in a..b,
+        (-dweight t) * localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+              (contMDiff_rpow_of_pos hu hpos (q / 2)) t) +
+          weight t *
+            ((2 * q / (1 - q)) *
+              cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+                  (contMDiff_rpow_of_pos hu hpos (q / 2)) t)) := by
+  let huHalf := contMDiff_rpow_of_pos hu hpos (q / 2)
+  let w : ℝ → M → ℝ := fun t x => u t x ^ (q / 2)
+  let mass : ℝ → ℝ := fun t =>
+    localizedL2Mass (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g w huHalf t)
+  let dirichlet : ℝ → ℝ := fun t =>
+    localizedDirichletEnergy (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g w huHalf t)
+  let error : ℝ → ℝ := fun t =>
+    cutoffGradientError (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g w huHalf t)
+  let c := 2 * (1 - q) / q
+  let e := 2 * q / (1 - q)
+  let negMass : ℝ → ℝ := fun t => -mass t
+  have hmass_smooth : ContDiff ℝ ∞ mass := by
+    simpa only [mass] using
+      contDiff_localizedL2Mass (I := I) (M := M) cutoff w huHalf
+  have hnegMass_smooth : ContDiff ℝ ∞ negMass := by
+    exact hmass_smooth.neg
+  have hdnegMass_cont : ContinuousOn (deriv negMass) (Icc a b) :=
+    (hnegMass_smooth.continuous_deriv (by simp)).continuousOn
+  have hnegMass_deriv : ∀ t ∈ Icc a b, HasDerivAt negMass (deriv negMass t) t := by
+    intro t _
+    exact (hnegMass_smooth.differentiable (by simp) t).hasDerivAt
+  have hweight_cont : ContinuousOn weight (Icc a b) :=
+    fun t ht => (hweight t ht).continuousAt.continuousWithinAt
+  have hdirichlet_cont : ContinuousOn dirichlet (Icc a b) := by
+    simpa only [dirichlet] using
+      (contDiff_localizedDirichletEnergy (I := I) (M := M) cutoff w huHalf)
+        |>.continuous.continuousOn
+  have herror_cont : ContinuousOn error (Icc a b) := by
+    simpa only [error] using
+      (contDiff_cutoffGradientError (I := I) (M := M) cutoff w huHalf)
+        |>.continuous.continuousOn
+  have hdissipation : ContinuousOn (fun t => weight t * (c * dirichlet t))
+      (Icc a b) :=
+    hweight_cont.mul (continuousOn_const.mul hdirichlet_cont)
+  have hrhs : ContinuousOn
+      (fun t => dweight t * negMass t + weight t * (e * error t)) (Icc a b) :=
+    (hdweight.mul hnegMass_smooth.continuous.continuousOn).add
+      (hweight_cont.mul (continuousOn_const.mul herror_cont))
+  have hmass_eq : mass = fun t =>
+      localizedIntegral (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => u s x ^ q)
+          (contMDiff_rpow_of_pos hu hpos q) t) := by
+    funext t
+    simpa only [mass, w, huHalf, localizedIntegral] using
+      localizedL2Mass_rpow_half (I := I) (M := M) g cutoff u hu hpos q t
+  have hpointwise : ∀ t ∈ Icc a b,
+      dweight t * negMass t + weight t * deriv negMass t +
+          weight t * (c * dirichlet t) ≤
+        dweight t * negMass t + weight t * (e * error t) := by
+    intro t ht
+    have hdiff := caccioppoli_positive_rpow_of_supersolution
+      (I := I) (M := M) g cutoff u hu hpos hq_pos hq_one t (hpde t ht)
+    have hderiv_eq := congrArg (fun f : ℝ → ℝ => deriv f t) hmass_eq
+    change deriv mass t =
+      deriv
+        (fun s => localizedIntegral (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g (fun r x => u r x ^ q)
+            (contMDiff_rpow_of_pos hu hpos q) s)) t at hderiv_eq
+    change c * dirichlet t ≤
+      deriv
+          (fun s => localizedIntegral (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun r x => u r x ^ q)
+              (contMDiff_rpow_of_pos hu hpos q) s)) t + e * error t at hdiff
+    have hdiff' : c * dirichlet t ≤ deriv mass t + e * error t := by
+      rw [hderiv_eq]
+      exact hdiff
+    have hneg_deriv : deriv negMass t = -deriv mass t := by
+      have h := ((hmass_smooth.differentiable (by simp) t).hasDerivAt.neg).deriv
+      simpa only [negMass] using h
+    have hbase : deriv negMass t + c * dirichlet t ≤ e * error t := by
+      rw [hneg_deriv]
+      linarith
+    have hmul := mul_le_mul_of_nonneg_left hbase (hweight_nonneg t ht)
+    ring_nf at hmul ⊢
+    linarith
+  have hresult := weight_mul_energy_inequality
+    hab hdweight hweight hdnegMass_cont hnegMass_deriv hdissipation hrhs hpointwise
+  simp only [negMass, mass, dirichlet, error, c, e, w,
+    mul_neg, sub_neg_eq_add] at hresult
+  convert hresult using 1
+  · ring
+  · apply intervalIntegral.integral_congr
+    intro t _
+    ring
+
+theorem backward_caccioppoli_inner_energy_positive_rpow_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq_pos : 0 < q) (hq_one : q < 1)
+    {weight dweight : ℝ → ℝ} {a t₁ b A : ℝ}
+    (hat₁ : a ≤ t₁) (ht₁b : t₁ ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
+    (hweight_b : weight b = 0)
+    (hweight_inner : ∀ t ∈ Icc a t₁, weight t = 1)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (hrhs_le : ∀ t ∈ Icc a t₁,
+      (∫ s in t..b,
+        (-dweight s) * localizedL2Mass (I := I) (M := M) cutoff
+            (smoothScalarSlice (I := I) g (fun r x => u r x ^ (q / 2))
+              (contMDiff_rpow_of_pos hu hpos (q / 2)) s) +
+          weight s *
+            ((2 * q / (1 - q)) *
+              cutoffGradientError (I := I) (M := M) cutoff
+                (smoothScalarSlice (I := I) g (fun r x => u r x ^ (q / 2))
+                  (contMDiff_rpow_of_pos hu hpos (q / 2)) s))) ≤ A) :
+    (∀ t ∈ Icc a t₁,
+      localizedL2Mass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+          (contMDiff_rpow_of_pos hu hpos (q / 2)) t) ≤ A) ∧
+      (∫ t in a..t₁,
+        localizedDirichletEnergy (I := I) (M := M) cutoff
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+            (contMDiff_rpow_of_pos hu hpos (q / 2)) t)) ≤
+        (q / (2 * (1 - q))) * A := by
+  let huHalf := contMDiff_rpow_of_pos hu hpos (q / 2)
+  let w : ℝ → M → ℝ := fun t x => u t x ^ (q / 2)
+  let mass : ℝ → ℝ := fun t =>
+    localizedL2Mass (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g w huHalf t)
+  let dirichlet : ℝ → ℝ := fun t =>
+    localizedDirichletEnergy (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g w huHalf t)
+  let c := 2 * (1 - q) / q
+  let e := 2 * q / (1 - q)
+  let dissipation : ℝ → ℝ := fun t => c * dirichlet t
+  let source : ℝ → ℝ := fun t =>
+    (-dweight t) * mass t + weight t *
+      (e * cutoffGradientError (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g w huHalf t))
+  have hweight_cont : ContinuousOn weight (Icc a b) :=
+    fun t ht => (hweight t ht).continuousAt.continuousWithinAt
+  have hdirichlet_cont : ContinuousOn dirichlet (Icc a b) := by
+    simpa only [dirichlet] using
+      (contDiff_localizedDirichletEnergy (I := I) (M := M) cutoff w huHalf)
+        |>.continuous.continuousOn
+  have hdissipation_cont : ContinuousOn dissipation (Icc a b) :=
+    continuousOn_const.mul hdirichlet_cont
+  have hc_pos : 0 < c := by
+    dsimp only [c]
+    exact div_pos (mul_pos (by norm_num) (sub_pos.mpr hq_one)) hq_pos
+  have hbase := backward_inner_mass_and_dissipation_le
+    (weight := weight) (mass := mass) (dissipation := dissipation) (source := source)
+    hat₁ ht₁b hweight_cont hdissipation_cont hweight_nonneg
+    (fun t _ => mul_nonneg hc_pos.le
+      (localizedDirichletEnergy_nonneg (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g w huHalf t)))
+    hweight_b hweight_inner
+    (fun t _ => localizedL2Mass_nonneg (I := I) (M := M) cutoff
+      (smoothScalarSlice (I := I) g w huHalf t))
+    (by simpa only [source, mass, e, w, huHalf] using hrhs_le)
+    (fun t ht => by
+      have htb : t ≤ b := ht.2.trans ht₁b
+      have hsubset : Icc t b ⊆ Icc a b := fun s hs => ⟨ht.1.trans hs.1, hs.2⟩
+      have henergy := weighted_caccioppoli_positive_rpow_of_supersolution
+        (I := I) (M := M) g cutoff u hu hpos hq_pos hq_one htb
+        (hdweight.mono hsubset)
+        (fun s hs => hweight s (hsubset hs))
+        (fun s hs => hweight_nonneg s (hsubset hs))
+        (fun s hs => hpde s (hsubset hs))
+      simpa only [mass, dissipation, source, c, e, w, huHalf] using henergy)
+  refine ⟨by simpa only [mass, w, huHalf] using hbase.1, ?_⟩
+  have hscaled : c * (∫ t in a..t₁, dirichlet t) ≤ A := by
+    rw [← intervalIntegral.integral_const_mul]
+    simpa only [dissipation] using hbase.2
+  let k := q / (2 * (1 - q))
+  have hk_nonneg : 0 ≤ k := by
+    dsimp only [k]
+    exact div_nonneg hq_pos.le
+      (mul_nonneg (by norm_num) (sub_nonneg.mpr hq_one.le))
+  have hkc : k * c = 1 := by
+    dsimp only [k, c]
+    field_simp [hq_pos.ne', sub_ne_zero.mpr (ne_of_gt hq_one)]
+  have hmul := mul_le_mul_of_nonneg_left hscaled hk_nonneg
+  rw [← mul_assoc, hkc, one_mul] at hmul
+  simpa only [dirichlet, k, w, huHalf] using hmul
 
 theorem caccioppoli_rpow_of_subsolution
     (g : SmoothRiemannianMetric I M)
