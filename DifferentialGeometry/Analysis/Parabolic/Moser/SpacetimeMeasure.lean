@@ -44,12 +44,50 @@ def localizedSpacetimeMeasure {g : SmoothRiemannianMetric I M}
   (volume.restrict (Ioc a b)).prod
     (cutoffWeightedMeasure (I := I) (M := M) cutoff)
 
+def localizedSpacetimeRpowMoment {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g) (u : ℝ → M → ℝ)
+    (p a b : ℝ) : ℝ :=
+  ∫ z, u z.1 z.2 ^ p
+    ∂localizedSpacetimeMeasure (I := I) (M := M) cutoff a b
+
+def localizedSpacetimeRpowNorm {g : SmoothRiemannianMetric I M}
+    (cutoff : SmoothScalar g) (u : ℝ → M → ℝ)
+    (p a b : ℝ) : ℝ :=
+  localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b ^ (1 / p)
+
 instance localizedSpacetimeMeasure_isFiniteMeasure
     {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g) (a b : ℝ) :
     IsFiniteMeasure
       (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b) := by
   unfold localizedSpacetimeMeasure
   infer_instance
+
+omit [CompactSpace M] in
+theorem localizedSpacetimeRpowMoment_nonneg
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ) (hu : ∀ t x, 0 ≤ u t x)
+    (p a b : ℝ) :
+    0 ≤ localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b := by
+  exact integral_nonneg fun z => Real.rpow_nonneg (hu z.1 z.2) p
+
+omit [CompactSpace M] in
+theorem localizedSpacetimeRpowNorm_nonneg
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ) (hu : ∀ t x, 0 ≤ u t x)
+    (p a b : ℝ) :
+    0 ≤ localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b :=
+  Real.rpow_nonneg
+    (localizedSpacetimeRpowMoment_nonneg (I := I) (M := M)
+      cutoff u hu p a b) _
+
+omit [CompactSpace M] in
+theorem localizedSpacetimeRpowNorm_pos
+    {g : SmoothRiemannianMetric I M} {cutoff : SmoothScalar g}
+    {u : ℝ → M → ℝ} {p a b : ℝ}
+    (hmoment : 0 <
+      localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b) :
+    0 < localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b :=
+  Real.rpow_pos_of_pos hmoment _
 
 omit [CompactSpace M] in
 theorem integral_cutoffWeightedMeasure
@@ -91,6 +129,17 @@ theorem integral_localizedSpacetimeMeasure
   rw [localizedSpacetimeMeasure, integral_prod f hf]
   simp_rw [integral_cutoffWeightedMeasure (I := I) (M := M)]
   exact (intervalIntegral.integral_of_le hab).symm
+
+theorem localizedSpacetimeRpowMoment_eq_intervalIntegral
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ) {p a b : ℝ} (hab : a ≤ b)
+    (hu : Integrable (fun z : ℝ × M => u z.1 z.2 ^ p)
+      (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b)) :
+    localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b =
+      ∫ t in a..b, ∫ x, cutoff.toFun x ^ 2 * u t x ^ p
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  exact integral_localizedSpacetimeMeasure (I := I) (M := M)
+    cutoff hab (fun z : ℝ × M => u z.1 z.2 ^ p) hu
 
 theorem localizedSpacetimeMeasure_real_superlevel
     {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
