@@ -463,6 +463,87 @@ theorem nestedForwardMoserNorm_le_of_supersolution
   simpa only [X, factor, n] using
     (finite_multiplicative_iteration m hfactor hstep)
 
+theorem nestedForwardMoserNorm_le_rpowNorm_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ p a B : ℝ} (level upperTime : ℕ → ℝ) (m : ℕ)
+    (hp₀ : 0 < p₀) (hp₀p : p₀ ≤ p)
+    (hlevel : StrictMono level) (htime : StrictAnti upperTime)
+    (haTime : a ≤ upperTime m) (hB : 0 ≤ B)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hpde : ∀ t ∈ Icc a (upperTime 0), ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (hexponents : ∀ k < m,
+      parabolicMoserExponent (Module.finrank ℝ E) p₀ k < 1)
+    (hmass :
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (spatialCutoffBetween rho (level 0) (level 1)) a (upperTime 0)).real
+          Set.univ ≤ 1) :
+    nestedForwardMoserNorm (I := I) (M := M) (Module.finrank ℝ E)
+        rho u p₀ a level upperTime m ≤
+      (∏ k ∈ Finset.range m,
+        nestedForwardMoserStepFactor (I := I) (M := M)
+          (Module.finrank ℝ E) g hdim B p₀ a level upperTime k) *
+        localizedSpacetimeRpowNorm (I := I) (M := M)
+          (spatialCutoffBetween rho (level 0) (level 1)) u
+            p a (upperTime 0) := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let factor : ℕ → ℝ := fun k =>
+    nestedForwardMoserStepFactor (I := I) (M := M)
+      n g hdim B p₀ a level upperTime k
+  let P := ∏ k ∈ Finset.range m, factor k
+  have hiteration := nestedForwardMoserNorm_le_of_supersolution
+    (I := I) (M := M) g hdim rho u hu hpos level upperTime m hp₀
+      hlevel htime haTime hB hrho hpde hexponents
+  have hfactor : ∀ k < m, 0 ≤ factor k := by
+    intro k hk
+    have hk1m : k + 1 ≤ m := Nat.succ_le_iff.mpr hk
+    exact nestedForwardMoserStepFactor_nonneg (I := I) (M := M)
+      n g hdim level upperTime k hp₀
+        (by simpa only [n] using hexponents k hk)
+        (haTime.trans (htime.antitone hk1m))
+        (htime (Nat.lt_succ_self k)) hB
+  have hP : 0 ≤ P := by
+    apply Finset.prod_nonneg
+    intro k hk
+    exact hfactor k (Finset.mem_range.mp hk)
+  have hmono := localizedSpacetimeRpowNorm_mono
+    (I := I) (M := M)
+      (spatialCutoffBetween rho (level 0) (level 1)) u
+      hu.continuous hpos hp₀ hp₀p hmass
+      (a := a) (b := upperTime 0)
+  have hzero :
+      nestedForwardMoserNorm (I := I) (M := M) n
+          rho u p₀ a level upperTime 0 ≤
+        localizedSpacetimeRpowNorm (I := I) (M := M)
+          (spatialCutoffBetween rho (level 0) (level 1)) u
+            p a (upperTime 0) := by
+    simpa only [nestedForwardMoserNorm, nestedForwardMoserMoment,
+      parabolicMoserExponent_zero, zero_mul, zero_add] using hmono
+  calc
+    nestedForwardMoserNorm (I := I) (M := M) n
+          rho u p₀ a level upperTime m ≤
+        P * nestedForwardMoserNorm (I := I) (M := M) n
+          rho u p₀ a level upperTime 0 := by
+      simpa only [P, factor, n] using hiteration
+    _ ≤ P * localizedSpacetimeRpowNorm (I := I) (M := M)
+          (spatialCutoffBetween rho (level 0) (level 1)) u
+            p a (upperTime 0) :=
+      mul_le_mul_of_nonneg_left hzero hP
+    _ = _ := by rfl
+
 omit [I.Boundaryless] [CompactSpace M] in
 theorem forwardMoserLocalizedMass_nonneg
     (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
