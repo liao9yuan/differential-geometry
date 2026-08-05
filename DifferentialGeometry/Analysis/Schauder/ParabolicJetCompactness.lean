@@ -172,6 +172,70 @@ theorem exists_parabolic_jet_subseq_of_locally_holderOnWith
   exact ⟨phi, u, dtimeU, du, d2u, hphi, hu, hdtimeU, hdu, hd2u,
     hlimit, hlimit.isParabolicC2On hQ hd2uContinuous⟩
 
+theorem exists_parabolic_jet_subseq_with_locally_holderOnWith
+    {Q : Set (ParabolicPoint E)} (hQ : IsOpen Q)
+    (uApprox dtimeUApprox : Nat → ParabolicPoint E → F)
+    (duApprox : Nat → ParabolicPoint E → E →L[Real] F)
+    (d2uApprox : Nat → ParabolicPoint E → E →L[Real] E →L[Real] F)
+    {r : NNReal} (hr : 0 < r)
+    (huHolder : ∀ K : Set Q, IsCompact K →
+      ∃ C : NNReal, ∀ n,
+        HolderOnWith C r (fun p : Q => uApprox n p) K)
+    (hdtimeUHolder : ∀ K : Set Q, IsCompact K →
+      ∃ C : NNReal, ∀ n,
+        HolderOnWith C r (fun p : Q => dtimeUApprox n p) K)
+    (hduHolder : ∀ K : Set Q, IsCompact K →
+      ∃ C : NNReal, ∀ n,
+        HolderOnWith C r (fun p : Q => duApprox n p) K)
+    (hd2uHolder : ∀ K : Set Q, IsCompact K →
+      ∃ C : NNReal, ∀ n,
+        HolderOnWith C r (fun p : Q => d2uApprox n p) K)
+    (huBound : ∀ p : Q, ∃ M : Real, ∀ n, ‖uApprox n p‖ ≤ M)
+    (hdtimeUBound : ∀ p : Q, ∃ M : Real, ∀ n, ‖dtimeUApprox n p‖ ≤ M)
+    (hduBound : ∀ p : Q, ∃ M : Real, ∀ n, ‖duApprox n p‖ ≤ M)
+    (hd2uBound : ∀ p : Q, ∃ M : Real, ∀ n, ‖d2uApprox n p‖ ≤ M)
+    (hrealize : ∀ n, ParabolicJetRealizesOn Q
+      (uApprox n) (dtimeUApprox n) (duApprox n) (d2uApprox n)) :
+    ∃ (phi : Nat → Nat)
+        (u dtimeU : ParabolicPoint E → F)
+        (du : ParabolicPoint E → E →L[Real] F)
+        (d2u : ParabolicPoint E → E →L[Real] E →L[Real] F),
+      StrictMono phi ∧
+        TendstoLocallyUniformlyOn (fun n => uApprox (phi n)) u atTop Q ∧
+        TendstoLocallyUniformlyOn (fun n => dtimeUApprox (phi n)) dtimeU atTop Q ∧
+        TendstoLocallyUniformlyOn (fun n => duApprox (phi n)) du atTop Q ∧
+        TendstoLocallyUniformlyOn (fun n => d2uApprox (phi n)) d2u atTop Q ∧
+        ParabolicJetRealizesOn Q u dtimeU du d2u ∧
+        IsParabolicC2On Q (fun t x => u (parabolicPoint t x)) ∧
+        ∀ K : Set Q, IsCompact K →
+          ∃ Cu Ct Cd Cd2 : NNReal,
+            HolderOnWith Cu r (fun p : Q => u p) K ∧
+            HolderOnWith Ct r (fun p : Q => dtimeU p) K ∧
+            HolderOnWith Cd r (fun p : Q => du p) K ∧
+            HolderOnWith Cd2 r (fun p : Q => d2u p) K := by
+  rcases exists_parabolic_jet_subseq_of_locally_holderOnWith hQ
+      uApprox dtimeUApprox duApprox d2uApprox hr
+      huHolder hdtimeUHolder hduHolder hd2uHolder
+      huBound hdtimeUBound hduBound hd2uBound hrealize with
+    ⟨phi, u, dtimeU, du, d2u, hphi, hu, hdtimeU, hdu, hd2u,
+      hlimit, hclassical⟩
+  refine ⟨phi, u, dtimeU, du, d2u, hphi, hu, hdtimeU, hdu, hd2u,
+    hlimit, hclassical, ?_⟩
+  intro K hK
+  rcases huHolder K hK with ⟨Cu, hCu⟩
+  rcases hdtimeUHolder K hK with ⟨Ct, hCt⟩
+  rcases hduHolder K hK with ⟨Cd, hCd⟩
+  rcases hd2uHolder K hK with ⟨Cd2, hCd2⟩
+  exact ⟨Cu, Ct, Cd, Cd2,
+    holderOnWith_of_tendsto (Eventually.of_forall fun n => hCu (phi n))
+      (fun p _ => hu.tendsto_at p.2),
+    holderOnWith_of_tendsto (Eventually.of_forall fun n => hCt (phi n))
+      (fun p _ => hdtimeU.tendsto_at p.2),
+    holderOnWith_of_tendsto (Eventually.of_forall fun n => hCd (phi n))
+      (fun p _ => hdu.tendsto_at p.2),
+    holderOnWith_of_tendsto (Eventually.of_forall fun n => hCd2 (phi n))
+      (fun p _ => hd2u.tendsto_at p.2)⟩
+
 end DifferentialGeometry.Analysis.Schauder
 
 end
