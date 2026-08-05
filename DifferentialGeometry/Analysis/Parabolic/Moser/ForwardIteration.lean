@@ -231,6 +231,24 @@ theorem canonicalForwardMoserLogCost_nonneg
     (mul_nonneg (Real.log_nonneg (by norm_num))
       (div_nonneg htheta (sq_nonneg _)))
 
+theorem canonicalForwardMoserIterationCost_nonneg
+    (n : ℕ) [NeZero n] (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    {p₀ : ℝ} (hp₀ : 0 < p₀) (q a τ b B lower upper : ℝ) (k : ℕ) :
+    0 ≤ canonicalForwardMoserIterationCost (I := I) (M := M)
+      n g hdim p₀ q a τ b B lower upper k := by
+  have hC : 1 ≤ max 1 (localizedSobolevConstant (I := I) (M := M) g hdim) :=
+    le_max_left _ _
+  have hA : 1 ≤ canonicalForwardMoserStepEnvelope q a τ b B lower upper :=
+    le_max_left _ _
+  unfold canonicalForwardMoserIterationCost
+  exact moserIterationCost_nonneg (parabolicMoserDecay_pos n).le
+    (div_nonneg
+      (add_nonneg
+        (mul_nonneg (parabolicMoserDecay_pos n).le (Real.log_nonneg hC))
+        (Real.log_nonneg hA)) hp₀.le)
+    (div_nonneg (Real.log_nonneg (by norm_num)) hp₀.le) k
+
 theorem one_le_canonicalForwardMoserReverseCost
     (n : ℕ) [NeZero n] (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
@@ -707,6 +725,64 @@ theorem nestedForwardMoserNorm_succ_le_exp_of_supersolution
   simpa only [nestedForwardMoserNorm, L, L', C, A, level, upperTime,
     canonicalForwardMoserIterationCost, n] using hnormalized
 
+theorem nestedForwardMoserNorm_le_exp_finset_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ qbar a τ b B lower upper : ℝ} (m : ℕ)
+    (hp₀ : 0 < p₀) (hqbar_one : qbar < 1)
+    (haτ : a ≤ τ) (hτb : τ < b)
+    (hB : 0 ≤ B) (hlowerUpper : lower < upper)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (hexponents : ∀ k < m,
+      parabolicMoserExponent (Module.finrank ℝ E) p₀ k ≤ qbar) :
+    nestedForwardMoserNorm (I := I) (M := M) (Module.finrank ℝ E)
+        rho u p₀ a (moserCutoffLevelBetween lower upper)
+          (moserUpperTimeLevel τ b) m ≤
+      Real.exp
+          (∑ k ∈ Finset.range m,
+            canonicalForwardMoserIterationCost (I := I) (M := M)
+              (Module.finrank ℝ E) g hdim p₀ qbar a τ b B lower upper k) *
+        nestedForwardMoserNorm (I := I) (M := M) (Module.finrank ℝ E)
+          rho u p₀ a (moserCutoffLevelBetween lower upper)
+            (moserUpperTimeLevel τ b) 0 := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let level := moserCutoffLevelBetween lower upper
+  let upperTime := moserUpperTimeLevel τ b
+  let X : ℕ → ℝ := fun k =>
+    nestedForwardMoserNorm (I := I) (M := M)
+      n rho u p₀ a level upperTime k
+  let cost : ℕ → ℝ := fun k =>
+    canonicalForwardMoserIterationCost (I := I) (M := M)
+      n g hdim p₀ qbar a τ b B lower upper k
+  have hstep : ∀ k < m, X (k + 1) ≤ Real.exp (cost k) * X k := by
+    intro k hk
+    simpa only [X, cost, level, upperTime, n] using
+      (nestedForwardMoserNorm_succ_le_exp_of_supersolution
+        (I := I) (M := M) g hdim rho u hu hpos k hp₀
+          (by simpa only [n] using hexponents k hk) hqbar_one
+          haτ hτb hB hlowerUpper hrho hpde)
+  have hfinite := finite_multiplicative_iteration m
+    (fun _ _ => (Real.exp_pos _).le) hstep
+  calc
+    X m ≤ (∏ k ∈ Finset.range m, Real.exp (cost k)) * X 0 := hfinite
+    _ = Real.exp (∑ k ∈ Finset.range m, cost k) * X 0 := by
+      rw [Real.exp_sum]
+    _ = _ := by rfl
+
 theorem nestedForwardMoserNorm_le_exp_of_supersolution
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
@@ -960,6 +1036,521 @@ theorem nestedForwardMoserStepFactor_nonneg
     (Real.rpow_nonneg
       (localizedSobolevConstant_nonneg (I := I) (M := M) g hdim) _)
     (Real.rpow_nonneg hcoefficient _)
+
+theorem nestedForwardMoserStepFactor_le_exp_canonicalForwardMoserIterationCost
+    (n : ℕ) [NeZero n] (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    {p₀ qbar a τ b B lower upper : ℝ} (k : ℕ)
+    (hp₀ : 0 < p₀)
+    (hexponent_le : parabolicMoserExponent n p₀ k ≤ qbar)
+    (hqbar_one : qbar < 1)
+    (haτ : a ≤ τ) (hτb : τ < b)
+    (hB : 0 ≤ B) (hlowerUpper : lower < upper) :
+    nestedForwardMoserStepFactor (I := I) (M := M)
+        n g hdim B p₀ a (moserCutoffLevelBetween lower upper)
+          (moserUpperTimeLevel τ b) k ≤
+      Real.exp
+        (canonicalForwardMoserIterationCost (I := I) (M := M)
+          n g hdim p₀ qbar a τ b B lower upper k) := by
+  let level := moserCutoffLevelBetween lower upper
+  let upperTime := moserUpperTimeLevel τ b
+  let q := parabolicMoserExponent n p₀ k
+  let K := nestedForwardMoserGradientCost B level k
+  let coefficient := forwardMoserStepCoefficient q a
+    (upperTime (k + 1)) (upperTime k) K
+  let C := max 1 (localizedSobolevConstant (I := I) (M := M) g hdim)
+  let A := canonicalForwardMoserStepEnvelope qbar a τ b B lower upper
+  let L' := C * (A * 16 ^ k) ^ parabolicMoserGain n
+  have hq : 0 < q := parabolicMoserExponent_pos n hp₀ k
+  have hq_one : q < 1 := hexponent_le.trans_lt hqbar_one
+  have hC : 1 ≤ C := le_max_left _ _
+  have hA : 1 ≤ A := le_max_left _ _
+  have haTime : a ≤ upperTime (k + 1) :=
+    haτ.trans (moserUpperTimeLevel_lt hτb (k + 1)).le
+  have htime : upperTime (k + 1) < upperTime k :=
+    moserUpperTimeLevel_succ_lt hτb k
+  have hK : 0 ≤ K := by
+    dsimp only [K, nestedForwardMoserGradientCost]
+    exact div_nonneg (mul_nonneg (sq_nonneg _) hB) (sq_nonneg _)
+  have hcoefficient : 0 ≤ coefficient :=
+    forwardMoserStepCoefficient_nonneg hq hq_one haTime htime hK
+  have hcoefficient_bound : coefficient ≤ A * 16 ^ k := by
+    simpa only [coefficient, K, A, level, upperTime, q] using
+      (forwardMoserStepCoefficient_canonical_le_mul_pow k hq.le
+        hexponent_le hqbar_one haτ hτb hB hlowerUpper)
+  have hsobolev_bound :
+      localizedSobolevConstant (I := I) (M := M) g hdim ≤ C :=
+    le_max_right _ _
+  have hfactor_bound :
+      nestedForwardMoserStepFactor (I := I) (M := M)
+          n g hdim B p₀ a level upperTime k ≤
+        C ^ (1 / parabolicMoserExponent n p₀ (k + 1)) *
+          (A * 16 ^ k) ^ (1 / q) := by
+    unfold nestedForwardMoserStepFactor
+    exact mul_le_mul
+      (Real.rpow_le_rpow
+        (localizedSobolevConstant_nonneg (I := I) (M := M) g hdim)
+        hsobolev_bound
+        (div_nonneg zero_le_one (parabolicMoserExponent_pos n hp₀ (k + 1)).le))
+      (Real.rpow_le_rpow hcoefficient hcoefficient_bound
+        (div_nonneg zero_le_one hq.le))
+      (Real.rpow_nonneg hcoefficient _)
+      (Real.rpow_nonneg (zero_le_one.trans hC) _)
+  have hL' : 0 ≤ L' := by
+    exact mul_nonneg (zero_le_one.trans hC)
+      (Real.rpow_nonneg
+        (mul_nonneg (zero_le_one.trans hA) (pow_nonneg (by norm_num) k)) _)
+  have hnormalized := normalized_moser_step n hp₀ hC hA zero_le_one hL' k
+    (by dsimp only [L']; rw [mul_one])
+  have hrewrite :
+      C ^ (1 / parabolicMoserExponent n p₀ (k + 1)) *
+          (A * 16 ^ k) ^ (1 / q) =
+        L' ^ (1 / parabolicMoserExponent n p₀ (k + 1)) := by
+    have hAbase : 0 ≤ A * 16 ^ k :=
+      mul_nonneg (zero_le_one.trans hA) (pow_nonneg (by norm_num) k)
+    dsimp only [L']
+    rw [Real.mul_rpow (zero_le_one.trans hC) (Real.rpow_nonneg hAbase _)]
+    rw [← Real.rpow_mul hAbase]
+    congr 1
+    dsimp only [q]
+    rw [parabolicMoserExponent_succ]
+    field_simp [(parabolicMoserGain_pos n).ne', hq.ne']
+  calc
+    nestedForwardMoserStepFactor (I := I) (M := M)
+          n g hdim B p₀ a level upperTime k ≤
+        C ^ (1 / parabolicMoserExponent n p₀ (k + 1)) *
+          (A * 16 ^ k) ^ (1 / q) := hfactor_bound
+    _ = L' ^ (1 / parabolicMoserExponent n p₀ (k + 1)) := hrewrite
+    _ ≤ Real.exp
+        (canonicalForwardMoserIterationCost (I := I) (M := M)
+          n g hdim p₀ qbar a τ b B lower upper k) := by
+      simpa only [L', C, A, q, level, upperTime,
+        canonicalForwardMoserIterationCost, mul_one, Real.one_rpow] using hnormalized
+
+theorem nestedForwardMoserNorm_interpolation_step_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ q theta a B : ℝ} (level upperTime : ℕ → ℝ) (k : ℕ)
+    (hp₀ : 0 < p₀) (hq : 0 < q)
+    (htheta : 0 ≤ theta) (htheta_one : theta ≤ 1)
+    (hq_eq : q =
+      theta * parabolicMoserExponent (Module.finrank ℝ E) p₀ k +
+        (1 - theta) *
+          parabolicMoserExponent (Module.finrank ℝ E) p₀ (k + 1))
+    (hexponent_one :
+      parabolicMoserExponent (Module.finrank ℝ E) p₀ k < 1)
+    (hlevel : StrictMono level) (htime : StrictAnti upperTime)
+    (haTime : a ≤ upperTime (k + 1)) (hB : 0 ≤ B)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hpde : ∀ t ∈ Icc a (upperTime k), ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+        (spatialCutoffBetween rho (level (2 * (k + 1)))
+          (level (2 * (k + 1) + 1))) u q a (upperTime (k + 1)) ≤
+      nestedForwardMoserStepFactor (I := I) (M := M)
+          (Module.finrank ℝ E) g hdim B p₀ a level upperTime k ^
+            ((1 - theta) *
+              parabolicMoserExponent (Module.finrank ℝ E) p₀ (k + 1) / q) *
+        nestedForwardMoserNorm (I := I) (M := M) (Module.finrank ℝ E)
+          rho u p₀ a level upperTime k := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let p := parabolicMoserExponent n p₀ k
+  let r := parabolicMoserExponent n p₀ (k + 1)
+  let inner := spatialCutoffBetween rho (level (2 * (k + 1)))
+    (level (2 * (k + 1) + 1))
+  let outer := spatialCutoffBetween rho (level (2 * k)) (level (2 * k + 1))
+  let factor := nestedForwardMoserStepFactor (I := I) (M := M)
+    n g hdim B p₀ a level upperTime k
+  let innerNorm : ℝ → ℝ := fun s =>
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+      inner u s a (upperTime (k + 1))
+  let outerNorm := localizedSpacetimeRpowNorm (I := I) (M := M)
+    outer u p a (upperTime k)
+  let alpha := theta * p / q
+  let beta := (1 - theta) * r / q
+  have hp : 0 < p := parabolicMoserExponent_pos n hp₀ k
+  have hr : 0 < r := parabolicMoserExponent_pos n hp₀ (k + 1)
+  have halpha : 0 ≤ alpha :=
+    div_nonneg (mul_nonneg htheta hp.le) hq.le
+  have hbeta : 0 ≤ beta :=
+    div_nonneg (mul_nonneg (sub_nonneg.mpr htheta_one) hr.le) hq.le
+  have halpha_beta : alpha + beta = 1 := by
+    dsimp only [alpha, beta]
+    rw [← add_div]
+    rw [← hq_eq]
+    exact div_self hq.ne'
+  have hinnerOuterCutoff : ∀ x,
+      inner.toFun x ^ 2 ≤ outer.toFun x ^ 2 := by
+    intro x
+    have hfirst := spatialCutoffBetween_sq_le rho
+      (hlevel (Nat.lt_succ_self (2 * k + 1)))
+      (hlevel (Nat.lt_succ_self (2 * k + 2))) x
+    have hsecond := spatialCutoffBetween_sq_le rho
+      (hlevel (Nat.lt_succ_self (2 * k)))
+      (hlevel (Nat.lt_succ_self (2 * k + 1))) x
+    simpa only [inner, outer, Nat.mul_add, Nat.mul_one, Nat.add_assoc] using
+      hfirst.trans hsecond
+  have hinnerOuter : innerNorm p ≤ outerNorm := by
+    exact localizedSpacetimeRpowNorm_mono_measure
+      (I := I) (M := M) u hu.continuous hpos hp le_rfl
+        (htime.antitone (Nat.le_succ k)) hinnerOuterCutoff
+  have hgain : innerNorm r ≤ factor * outerNorm := by
+    simpa only [innerNorm, outerNorm, factor, inner, outer, p, r, n,
+      nestedForwardMoserNorm, nestedForwardMoserMoment] using
+      (nestedForwardMoserNorm_succ_le_of_supersolution
+        (I := I) (M := M) g hdim rho u hu hpos level upperTime k hp₀
+          (by simpa only [n] using hexponent_one) haTime
+          (htime (Nat.lt_succ_self k))
+          (hlevel (Nat.lt_succ_self (2 * k)))
+          (hlevel (Nat.lt_succ_self (2 * k + 1)))
+          (hlevel (Nat.lt_succ_self (2 * k + 2))) hB hrho hpde)
+  have hinterpolation : innerNorm q ≤
+      innerNorm p ^ alpha * innerNorm r ^ beta := by
+    simpa only [innerNorm, alpha, beta, p, r, inner] using
+      (localizedSpacetimeRpowNorm_le_interpolation
+        (I := I) (M := M) inner u hu.continuous hpos hp hq hr
+          htheta htheta_one (by simpa only [p, r, n] using hq_eq))
+  have hfactor : 0 ≤ factor := by
+    simpa only [factor, n] using
+      (nestedForwardMoserStepFactor_nonneg
+        (I := I) (M := M) n g hdim level upperTime k hp₀
+          (by simpa only [n] using hexponent_one) haTime
+          (htime (Nat.lt_succ_self k)) hB)
+  have hinnerP : 0 ≤ innerNorm p :=
+    localizedSpacetimeRpowNorm_nonneg (I := I) (M := M)
+      inner u (fun t x => (hpos t x).le) p a (upperTime (k + 1))
+  have hinnerR : 0 ≤ innerNorm r :=
+    localizedSpacetimeRpowNorm_nonneg (I := I) (M := M)
+      inner u (fun t x => (hpos t x).le) r a (upperTime (k + 1))
+  have houter : 0 ≤ outerNorm :=
+    localizedSpacetimeRpowNorm_nonneg (I := I) (M := M)
+      outer u (fun t x => (hpos t x).le) p a (upperTime k)
+  calc
+    innerNorm q ≤ innerNorm p ^ alpha * innerNorm r ^ beta := hinterpolation
+    _ ≤ outerNorm ^ alpha * (factor * outerNorm) ^ beta := by
+      exact mul_le_mul
+        (Real.rpow_le_rpow hinnerP hinnerOuter halpha)
+        (Real.rpow_le_rpow hinnerR hgain hbeta)
+        (Real.rpow_nonneg hinnerR beta)
+        (Real.rpow_nonneg houter alpha)
+    _ = factor ^ beta * outerNorm := by
+      rw [Real.mul_rpow hfactor houter]
+      calc
+        outerNorm ^ alpha * (factor ^ beta * outerNorm ^ beta) =
+            factor ^ beta * (outerNorm ^ alpha * outerNorm ^ beta) := by ring
+        _ = factor ^ beta * outerNorm ^ (alpha + beta) := by
+          rw [Real.rpow_add_of_nonneg houter halpha hbeta]
+        _ = factor ^ beta * outerNorm := by rw [halpha_beta, Real.rpow_one]
+    _ = _ := by rfl
+
+theorem nestedForwardMoserNorm_interpolation_step_le_exp_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ q theta qbar a τ b B lower upper : ℝ} (k : ℕ)
+    (hp₀ : 0 < p₀) (hq : 0 < q)
+    (htheta : 0 ≤ theta) (htheta_one : theta ≤ 1)
+    (hq_eq : q =
+      theta * parabolicMoserExponent (Module.finrank ℝ E) p₀ k +
+        (1 - theta) *
+          parabolicMoserExponent (Module.finrank ℝ E) p₀ (k + 1))
+    (hexponent_le :
+      parabolicMoserExponent (Module.finrank ℝ E) p₀ k ≤ qbar)
+    (hqbar_one : qbar < 1)
+    (haτ : a ≤ τ) (hτb : τ < b)
+    (hB : 0 ≤ B) (hlowerUpper : lower < upper)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+        (spatialCutoffBetween rho
+          (moserCutoffLevelBetween lower upper (2 * (k + 1)))
+          (moserCutoffLevelBetween lower upper (2 * (k + 1) + 1)))
+        u q a (moserUpperTimeLevel τ b (k + 1)) ≤
+      Real.exp
+          (((1 - theta) *
+              parabolicMoserExponent (Module.finrank ℝ E) p₀ (k + 1) / q) *
+            canonicalForwardMoserIterationCost (I := I) (M := M)
+              (Module.finrank ℝ E) g hdim p₀ qbar a τ b B lower upper k) *
+        nestedForwardMoserNorm (I := I) (M := M) (Module.finrank ℝ E)
+          rho u p₀ a (moserCutoffLevelBetween lower upper)
+            (moserUpperTimeLevel τ b) k := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let level := moserCutoffLevelBetween lower upper
+  let upperTime := moserUpperTimeLevel τ b
+  let p := parabolicMoserExponent n p₀ k
+  let r := parabolicMoserExponent n p₀ (k + 1)
+  let beta := (1 - theta) * r / q
+  let factor := nestedForwardMoserStepFactor (I := I) (M := M)
+    n g hdim B p₀ a level upperTime k
+  let cost := canonicalForwardMoserIterationCost (I := I) (M := M)
+    n g hdim p₀ qbar a τ b B lower upper k
+  let X := nestedForwardMoserNorm (I := I) (M := M) n
+    rho u p₀ a level upperTime k
+  have hp : 0 < p := parabolicMoserExponent_pos n hp₀ k
+  have hr : 0 < r := parabolicMoserExponent_pos n hp₀ (k + 1)
+  have hbeta : 0 ≤ beta :=
+    div_nonneg (mul_nonneg (sub_nonneg.mpr htheta_one) hr.le) hq.le
+  have hraw :
+      localizedSpacetimeRpowNorm (I := I) (M := M)
+          (spatialCutoffBetween rho (level (2 * (k + 1)))
+            (level (2 * (k + 1) + 1))) u q a (upperTime (k + 1)) ≤
+        factor ^ beta * X := by
+    simpa only [level, upperTime, p, r, beta, factor, X, n] using
+      (nestedForwardMoserNorm_interpolation_step_of_supersolution
+        (I := I) (M := M) g hdim rho u hu hpos level upperTime k hp₀ hq
+          htheta htheta_one (by simpa only [n] using hq_eq)
+          (hexponent_le.trans_lt hqbar_one)
+          (moserCutoffLevelBetween_strictMono hlowerUpper)
+          (moserUpperTimeLevel_strictAnti hτb)
+          (haτ.trans (moserUpperTimeLevel_lt hτb (k + 1)).le) hB hrho
+          (fun t ht x => hpde t
+            ⟨ht.1, ht.2.trans (moserUpperTimeLevel_le hτb k)⟩ x))
+  have hfactor : 0 ≤ factor := by
+    simpa only [factor, level, upperTime, n] using
+      (nestedForwardMoserStepFactor_nonneg
+        (I := I) (M := M) n g hdim level upperTime k hp₀
+          (hexponent_le.trans_lt hqbar_one)
+          (haτ.trans (moserUpperTimeLevel_lt hτb (k + 1)).le)
+          (moserUpperTimeLevel_succ_lt hτb k) hB)
+  have hfactorBound : factor ≤ Real.exp cost := by
+    simpa only [factor, cost, level, upperTime, n] using
+      (nestedForwardMoserStepFactor_le_exp_canonicalForwardMoserIterationCost
+        (I := I) (M := M) n g hdim k hp₀ hexponent_le hqbar_one
+          haτ hτb hB hlowerUpper)
+  have hX : 0 ≤ X := by
+    exact localizedSpacetimeRpowNorm_nonneg (I := I) (M := M)
+      (spatialCutoffBetween rho (level (2 * k)) (level (2 * k + 1)))
+      u (fun t x => (hpos t x).le) p a (upperTime k)
+  have hpower : factor ^ beta ≤ Real.exp (beta * cost) := by
+    calc
+      factor ^ beta ≤ (Real.exp cost) ^ beta :=
+        Real.rpow_le_rpow hfactor hfactorBound hbeta
+      _ = Real.exp (beta * cost) := by
+        rw [Real.rpow_def_of_pos (Real.exp_pos _), Real.log_exp]
+        congr 1
+        ring
+  calc
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+          (spatialCutoffBetween rho (level (2 * (k + 1)))
+            (level (2 * (k + 1) + 1))) u q a (upperTime (k + 1)) ≤
+        factor ^ beta * X := hraw
+    _ ≤ Real.exp (beta * cost) * X := mul_le_mul_of_nonneg_right hpower hX
+    _ = _ := by rfl
+
+theorem nestedForwardMoserNorm_interpolation_le_reverseCost_rpow_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ q theta a τ b B lower upper : ℝ} (k : ℕ)
+    (hp₀ : 0 < p₀) (hq : 0 < q) (hq_one : q < 1)
+    (htheta : 0 ≤ theta) (htheta_one : theta ≤ 1)
+    (hq_eq : q =
+      theta * parabolicMoserExponent (Module.finrank ℝ E) p₀ k +
+        (1 - theta) *
+          parabolicMoserExponent (Module.finrank ℝ E) p₀ (k + 1))
+    (haτ : a ≤ τ) (hτb : τ < b)
+    (hB : 0 ≤ B) (hlowerUpper : lower < upper)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+        (spatialCutoffBetween rho
+          (moserCutoffLevelBetween lower upper (2 * (k + 1)))
+          (moserCutoffLevelBetween lower upper (2 * (k + 1) + 1)))
+        u q a (moserUpperTimeLevel τ b (k + 1)) ≤
+      canonicalForwardMoserReverseCost (I := I) (M := M)
+          (Module.finrank ℝ E) g hdim q a τ b B lower upper ^
+            (1 / p₀ - 1 / q) *
+        nestedForwardMoserNorm (I := I) (M := M) (Module.finrank ℝ E)
+          rho u p₀ a (moserCutoffLevelBetween lower upper)
+            (moserUpperTimeLevel τ b) 0 := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let level := moserCutoffLevelBetween lower upper
+  let upperTime := moserUpperTimeLevel τ b
+  let p := parabolicMoserExponent n p₀ k
+  let r := parabolicMoserExponent n p₀ (k + 1)
+  let alpha := theta * p / q
+  let beta := (1 - theta) * r / q
+  let cost : ℕ → ℝ := fun j =>
+    canonicalForwardMoserIterationCost (I := I) (M := M)
+      n g hdim p₀ q a τ b B lower upper j
+  let D := canonicalForwardMoserLogCost (I := I) (M := M)
+    n g hdim q a τ b B lower upper
+  let R := canonicalForwardMoserReverseCost (I := I) (M := M)
+    n g hdim q a τ b B lower upper
+  let X : ℕ → ℝ := fun j =>
+    nestedForwardMoserNorm (I := I) (M := M)
+      n rho u p₀ a level upperTime j
+  have hp : 0 < p := parabolicMoserExponent_pos n hp₀ k
+  have hr : 0 < r := parabolicMoserExponent_pos n hp₀ (k + 1)
+  have hpr : p < r := parabolicMoserExponent_strictMono n hp₀
+    (Nat.lt_succ_self k)
+  have halpha : 0 ≤ alpha :=
+    div_nonneg (mul_nonneg htheta hp.le) hq.le
+  have hbeta : 0 ≤ beta :=
+    div_nonneg (mul_nonneg (sub_nonneg.mpr htheta_one) hr.le) hq.le
+  have halpha_beta : alpha + beta = 1 := by
+    dsimp only [alpha, beta]
+    rw [← add_div, ← hq_eq]
+    exact div_self hq.ne'
+  have hbeta_one : beta ≤ 1 := by linarith
+  have hpq : p ≤ q := by
+    rw [hq_eq]
+    nlinarith [mul_nonneg htheta hp.le,
+      mul_nonneg (sub_nonneg.mpr htheta_one) hr.le]
+  have hexponents : ∀ j < k, parabolicMoserExponent n p₀ j ≤ q := by
+    intro j hj
+    exact (parabolicMoserExponent_strictMono n hp₀ hj).le.trans hpq
+  have hstep :=
+    nestedForwardMoserNorm_interpolation_step_le_exp_of_supersolution
+      (I := I) (M := M) g hdim rho u hu hpos k hp₀ hq htheta htheta_one
+        (by simpa only [n] using hq_eq) hpq hq_one haτ hτb hB
+        hlowerUpper hrho hpde
+  have hprior := nestedForwardMoserNorm_le_exp_finset_of_supersolution
+    (I := I) (M := M) g hdim rho u hu hpos k hp₀ hq_one
+      haτ hτb hB hlowerUpper hrho hpde
+      (by simpa only [n] using hexponents)
+  have hcost_nonneg : ∀ j, 0 ≤ cost j := by
+    intro j
+    simpa only [cost] using
+      (canonicalForwardMoserIterationCost_nonneg
+        (I := I) (M := M) n g hdim hp₀ q a τ b B lower upper j)
+  have hcost_summable : Summable cost := by
+    unfold cost canonicalForwardMoserIterationCost
+    exact summable_moserIterationCost (parabolicMoserDecay_pos n).le
+      (parabolicMoserDecay_lt_one n)
+  have hpartial :
+      (∑ j ∈ Finset.range k, cost j) + beta * cost k ≤ ∑' j, cost j := by
+    calc
+      (∑ j ∈ Finset.range k, cost j) + beta * cost k ≤
+          (∑ j ∈ Finset.range k, cost j) + cost k := by
+        gcongr
+        exact mul_le_of_le_one_left (hcost_nonneg k) hbeta_one
+      _ = ∑ j ∈ Finset.range (k + 1), cost j := by
+        rw [Finset.sum_range_succ]
+      _ ≤ ∑' j, cost j :=
+        hcost_summable.sum_le_tsum (Finset.range (k + 1))
+          (fun j _ => hcost_nonneg j)
+  have htsum : (∑' j, cost j) = D / p₀ := by
+    simpa only [cost, D] using
+      (tsum_canonicalForwardMoserIterationCost
+        (I := I) (M := M) n g hdim hp₀ q a τ b B lower upper)
+  have hpartialD :
+      (∑ j ∈ Finset.range k, cost j) + beta * cost k ≤ D / p₀ := by
+    rw [← htsum]
+    exact hpartial
+  have hlogbound :
+      (∑ j ∈ Finset.range k, cost j) + beta * cost k ≤
+        D / (1 - parabolicMoserDecay n) * (1 / p₀ - 1 / q) := by
+    by_cases hk : k = 0
+    · subst k
+      have hinvr : 1 / r = parabolicMoserDecay n / p₀ := by
+        simpa only [r, pow_one] using inv_parabolicMoserExponent n hp₀ 1
+      have hq_eq_zero : q = theta * p₀ + (1 - theta) * r := by
+        simpa only [n, r, parabolicMoserExponent_zero, zero_add] using hq_eq
+      have hgap : 1 / p₀ - 1 / q = beta * (1 / p₀ - 1 / r) := by
+        dsimp only [beta]
+        field_simp [hp₀.ne', hq.ne', hr.ne']
+        rw [hq_eq_zero]
+        ring
+      have hcost_zero : cost 0 ≤ D / p₀ := by
+        have hsingle := hcost_summable.sum_le_tsum ({0} : Finset ℕ)
+          (fun j _ => hcost_nonneg j)
+        simpa only [Finset.sum_singleton, htsum] using hsingle
+      simp only [Finset.range_zero, Finset.sum_empty, zero_add]
+      calc
+        beta * cost 0 ≤ beta * (D / p₀) :=
+          mul_le_mul_of_nonneg_left hcost_zero hbeta
+        _ = D / (1 - parabolicMoserDecay n) * (1 / p₀ - 1 / q) := by
+          rw [hgap, hinvr]
+          field_simp [hp₀.ne',
+            (sub_pos.mpr (parabolicMoserDecay_lt_one n)).ne']
+    · have hkpos : 0 < k := Nat.pos_of_ne_zero hk
+      have hprefactor := exp_div_le_rpow_exponent_gap n
+        (canonicalForwardMoserLogCost_nonneg n g hdim q a τ b B lower upper)
+        hp₀ hkpos (by rfl : parabolicMoserExponent n p₀ k = p)
+      have hprefactor_log :
+          D / p₀ ≤ D / (1 - parabolicMoserDecay n) * (1 / p₀ - 1 / p) := by
+        change Real.exp (D / p₀) ≤
+          Real.exp (D / (1 - parabolicMoserDecay n)) ^
+            (1 / p₀ - 1 / p) at hprefactor
+        rw [Real.rpow_def_of_pos (Real.exp_pos _), Real.log_exp] at hprefactor
+        exact Real.exp_le_exp.mp hprefactor
+      have hinv : 1 / q ≤ 1 / p := one_div_le_one_div_of_le hp hpq
+      have hDdiv : 0 ≤ D / (1 - parabolicMoserDecay n) :=
+        div_nonneg
+          (canonicalForwardMoserLogCost_nonneg n g hdim q a τ b B lower upper)
+          (sub_nonneg.mpr (parabolicMoserDecay_lt_one n).le)
+      calc
+        (∑ j ∈ Finset.range k, cost j) + beta * cost k ≤ D / p₀ := hpartialD
+        _ ≤ D / (1 - parabolicMoserDecay n) * (1 / p₀ - 1 / p) :=
+          hprefactor_log
+        _ ≤ D / (1 - parabolicMoserDecay n) * (1 / p₀ - 1 / q) := by
+          exact mul_le_mul_of_nonneg_left (sub_le_sub_left hinv (1 / p₀)) hDdiv
+  have hprefactor :
+      Real.exp ((∑ j ∈ Finset.range k, cost j) + beta * cost k) ≤
+        R ^ (1 / p₀ - 1 / q) := by
+    unfold R canonicalForwardMoserReverseCost
+    rw [Real.rpow_def_of_pos (Real.exp_pos _), Real.log_exp]
+    exact Real.exp_le_exp.mpr hlogbound
+  have hXzero : 0 ≤ X 0 := by
+    simpa only [X, nestedForwardMoserNorm, nestedForwardMoserMoment,
+      parabolicMoserExponent_zero] using
+      (localizedSpacetimeRpowNorm_nonneg (I := I) (M := M)
+        (spatialCutoffBetween rho (level 0) (level 1)) u
+        (fun t x => (hpos t x).le) p₀ a (upperTime 0))
+  calc
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+          (spatialCutoffBetween rho (level (2 * (k + 1)))
+            (level (2 * (k + 1) + 1))) u q a (upperTime (k + 1)) ≤
+        Real.exp (beta * cost k) * X k := by
+      simpa only [level, upperTime, beta, cost, p, r, n] using hstep
+    _ ≤ Real.exp (beta * cost k) *
+        (Real.exp (∑ j ∈ Finset.range k, cost j) * X 0) := by
+      exact mul_le_mul_of_nonneg_left
+        (by simpa only [X, level, upperTime, cost, n] using hprior)
+        (Real.exp_pos _).le
+    _ = Real.exp ((∑ j ∈ Finset.range k, cost j) + beta * cost k) * X 0 := by
+      rw [Real.exp_add]
+      ring
+    _ ≤ R ^ (1 / p₀ - 1 / q) * X 0 :=
+      mul_le_mul_of_nonneg_right hprefactor hXzero
+    _ = _ := by rfl
 
 theorem nestedForwardMoserNorm_le_of_supersolution
     (g : SmoothRiemannianMetric I M)
