@@ -12,6 +12,110 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 variable {α : Type*} [MeasurableSpace α]
 
+def bombieriGiustiExponent (p₀ c₀ β : ℝ) : ℝ :=
+  (p₀⁻¹ + β / (2 * Real.log (β / (2 * c₀))))⁻¹
+
+theorem bombieriGiustiExponent_pos
+    {p₀ c₀ β : ℝ} (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hβ : 2 * c₀ < β) :
+    0 < bombieriGiustiExponent p₀ c₀ β := by
+  have hβ_pos : 0 < β := (mul_pos (by norm_num) hc₀).trans hβ
+  have hratio : 1 < β / (2 * c₀) := (one_lt_div (mul_pos (by norm_num) hc₀)).2 hβ
+  have hlog : 0 < Real.log (β / (2 * c₀)) := Real.log_pos hratio
+  exact inv_pos.mpr (add_pos (inv_pos.mpr hp₀)
+    (div_pos hβ_pos (mul_pos (by norm_num) hlog)))
+
+theorem bombieriGiustiExponent_lt
+    {p₀ c₀ β : ℝ} (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hβ : 2 * c₀ < β) :
+    bombieriGiustiExponent p₀ c₀ β < p₀ := by
+  have hβ_pos : 0 < β := (mul_pos (by norm_num) hc₀).trans hβ
+  have hratio : 1 < β / (2 * c₀) := (one_lt_div (mul_pos (by norm_num) hc₀)).2 hβ
+  have hlog : 0 < Real.log (β / (2 * c₀)) := Real.log_pos hratio
+  have hterm : 0 < β / (2 * Real.log (β / (2 * c₀))) :=
+    div_pos hβ_pos (mul_pos (by norm_num) hlog)
+  have hdenom : 0 < p₀⁻¹ + β / (2 * Real.log (β / (2 * c₀))) :=
+    add_pos (inv_pos.mpr hp₀) hterm
+  have hinv := (inv_lt_inv₀ hdenom (inv_pos.mpr hp₀)).2
+    (lt_add_of_pos_right p₀⁻¹ hterm)
+  simpa only [bombieriGiustiExponent, inv_inv] using hinv
+
+theorem bombieriGiustiExponent_inv_sub
+    (p₀ c₀ β : ℝ) :
+    1 / bombieriGiustiExponent p₀ c₀ β - 1 / p₀ =
+      β / (2 * Real.log (β / (2 * c₀))) := by
+  simp only [bombieriGiustiExponent, one_div, inv_inv]
+  ring
+
+theorem lt_bombieriGiustiExponent_inv_sub
+    {p₀ c₀ β : ℝ} (hc₀ : 0 < c₀) (hβ : 2 * c₀ < β) :
+    c₀ < 1 / bombieriGiustiExponent p₀ c₀ β - 1 / p₀ := by
+  rw [bombieriGiustiExponent_inv_sub]
+  let x := β / (2 * c₀)
+  have hx : 1 < x := (one_lt_div (mul_pos (by norm_num) hc₀)).2 hβ
+  have hx_pos : 0 < x := zero_lt_one.trans hx
+  have hlog_pos : 0 < Real.log x := Real.log_pos hx
+  have hlog_lt : Real.log x < x :=
+    (Real.log_lt_sub_one_of_pos hx_pos hx.ne').trans (sub_lt_self x one_pos)
+  have hmul : c₀ * (2 * Real.log x) < β := by
+    calc
+      c₀ * (2 * Real.log x) < c₀ * (2 * x) := by
+        exact mul_lt_mul_of_pos_left (mul_lt_mul_of_pos_left hlog_lt (by norm_num)) hc₀
+      _ = β := by
+        dsimp only [x]
+        field_simp [hc₀.ne']
+  exact (lt_div_iff₀ (mul_pos (by norm_num) hlog_pos)).2 (by
+    simpa only [x] using hmul)
+
+theorem bombieriGiustiExponent_lt_one
+    {p₀ c₀ β : ℝ} (hp₀ : 0 < p₀) (hc₀ : 1 ≤ c₀) (hβ : 2 * c₀ < β) :
+    bombieriGiustiExponent p₀ c₀ β < 1 := by
+  have hc₀_pos : 0 < c₀ := zero_lt_one.trans_le hc₀
+  have hp := bombieriGiustiExponent_pos hp₀ hc₀_pos hβ
+  have hgap := lt_bombieriGiustiExponent_inv_sub (p₀ := p₀) hc₀_pos hβ
+  have hinv : 1 < 1 / bombieriGiustiExponent p₀ c₀ β := by
+    have hp₀_inv : 0 < 1 / p₀ := div_pos one_pos hp₀
+    linarith
+  have h := one_div_lt_one_div_of_lt one_pos hinv
+  simpa only [one_div_one, one_div_div, div_one] using h
+
+theorem bombieriGiustiExponent_lt_mul
+    {p₀ c₀ β η : ℝ}
+    (hp₀ : 0 < p₀) (hη : 0 < η) (hc₀ : 0 < c₀)
+    (hc₀η : 1 / (η * p₀) ≤ c₀) (hβ : 2 * c₀ < β) :
+    bombieriGiustiExponent p₀ c₀ β < η * p₀ := by
+  have hηp₀ : 0 < η * p₀ := mul_pos hη hp₀
+  have hp := bombieriGiustiExponent_pos hp₀ hc₀ hβ
+  have hgap := lt_bombieriGiustiExponent_inv_sub (p₀ := p₀) hc₀ hβ
+  have hinv : 1 / (η * p₀) < 1 / bombieriGiustiExponent p₀ c₀ β := by
+    have hp₀_inv : 0 < 1 / p₀ := div_pos one_pos hp₀
+    linarith
+  exact (inv_lt_inv₀ hηp₀ hp).mp (by
+    simpa only [one_div] using hinv)
+
+theorem bombieriGiusti_tail_power
+    {p₀ c₀ β : ℝ} (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hβ : 2 * c₀ < β) :
+    let p := bombieriGiustiExponent p₀ c₀ β
+    (2 * c₀ / β) ^ (1 - p / p₀) = Real.exp (-p * β / 2) := by
+  let p := bombieriGiustiExponent p₀ c₀ β
+  have hp : 0 < p := bombieriGiustiExponent_pos hp₀ hc₀ hβ
+  have hβ_pos : 0 < β := (mul_pos (by norm_num) hc₀).trans hβ
+  have hbase : 0 < 2 * c₀ / β := div_pos (mul_pos (by norm_num) hc₀) hβ_pos
+  have hbase_inv : 2 * c₀ / β = (β / (2 * c₀))⁻¹ := by
+    field_simp [hc₀.ne', hβ_pos.ne']
+  have hlog : Real.log (2 * c₀ / β) = -Real.log (β / (2 * c₀)) := by
+    rw [hbase_inv, Real.log_inv]
+  have hexponent : 1 - p / p₀ =
+      p * (1 / p - 1 / p₀) := by
+    field_simp [hp.ne', hp₀.ne']
+  change (2 * c₀ / β) ^ (1 - p / p₀) = Real.exp (-p * β / 2)
+  rw [Real.rpow_def_of_pos hbase, hlog, hexponent]
+  congr 1
+  rw [show 1 / p - 1 / p₀ =
+      β / (2 * Real.log (β / (2 * c₀))) by
+    simpa only [p] using bombieriGiustiExponent_inv_sub p₀ c₀ β]
+  have hlog_pos : 0 < Real.log (β / (2 * c₀)) := by
+    exact Real.log_pos ((one_lt_div (mul_pos (by norm_num) hc₀)).2 hβ)
+  field_simp [hlog_pos.ne']
+
 theorem integral_rpow_le_of_log_superlevel
     (μ : Measure α) [IsFiniteMeasure μ] (f : α → ℝ)
     {p q level tail : ℝ}
@@ -99,6 +203,96 @@ theorem integral_neg_rpow_le_of_log_sublevel
     hp hq hpq hf.inv (fun x => inv_pos.mpr (hf_pos x)) hinv_q
     (by simpa only [Real.log_inv] using htail)
   simpa only [Real.inv_rpow (hf_pos _).le, ← Real.rpow_neg (hf_pos _).le] using h
+
+theorem integral_rpow_le_two_exp_half_of_log_superlevel_tail
+    (μ : Measure α) [IsFiniteMeasure μ] (f : α → ℝ)
+    {p₀ c₀ β : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hβ : 2 * c₀ < β)
+    (hf : Measurable f) (hf_pos : ∀ x, 0 < f x)
+    (hf₀ : Integrable (fun x => f x ^ p₀) μ)
+    (hintegral_pos : 0 < ∫ x, f x ^ p₀ ∂μ)
+    (hmass : μ.real Set.univ ≤ 1)
+    (hβ_eq : β = Real.log ((∫ x, f x ^ p₀ ∂μ) ^ (1 / p₀)))
+    (htail : μ.real {x | β / 2 < Real.log (f x)} ≤ 2 * c₀ / β) :
+    let p := bombieriGiustiExponent p₀ c₀ β
+    (∫ x, f x ^ p ∂μ) ≤ 2 * Real.exp (p * β / 2) := by
+  let p := bombieriGiustiExponent p₀ c₀ β
+  let J := ∫ x, f x ^ p₀ ∂μ
+  have hp : 0 < p := bombieriGiustiExponent_pos hp₀ hc₀ hβ
+  have hp_le : p ≤ p₀ := (bombieriGiustiExponent_lt hp₀ hc₀ hβ).le
+  have hJpos : 0 < J := by simpa only [J] using hintegral_pos
+  have hβ_eq' : β = Real.log (J ^ (1 / p₀)) := by simpa only [J] using hβ_eq
+  have hbound := integral_rpow_le_of_log_superlevel μ f hp.le hp₀ hp_le
+    hf hf_pos hf₀ htail
+  have hJpower : J ^ (p / p₀) = Real.exp (p * β) := by
+    calc
+      J ^ (p / p₀) = J ^ ((1 / p₀) * p) := by
+        congr 1
+        ring
+      _ = (J ^ (1 / p₀)) ^ p := Real.rpow_mul hJpos.le _ _
+      _ = Real.exp (p * Real.log (J ^ (1 / p₀))) := by
+        rw [Real.rpow_def_of_pos (Real.rpow_pos_of_pos hJpos _)]
+        congr 1
+        ring
+      _ = Real.exp (p * β) := by rw [hβ_eq']
+  have htailpower : (2 * c₀ / β) ^ (1 - p / p₀) =
+      Real.exp (-p * β / 2) := by
+    simpa only [p] using bombieriGiusti_tail_power hp₀ hc₀ hβ
+  have hhigh : J ^ (p / p₀) * (2 * c₀ / β) ^ (1 - p / p₀) =
+      Real.exp (p * β / 2) := by
+    rw [hJpower, htailpower, ← Real.exp_add]
+    congr 1
+    ring
+  have hlow : Real.exp (p * (β / 2)) * μ.real Set.univ ≤
+      Real.exp (p * β / 2) := by
+    calc
+      Real.exp (p * (β / 2)) * μ.real Set.univ ≤
+          Real.exp (p * (β / 2)) * 1 :=
+        mul_le_mul_of_nonneg_left hmass (Real.exp_pos _).le
+      _ = Real.exp (p * β / 2) := by ring_nf
+  change (∫ x, f x ^ p ∂μ) ≤ 2 * Real.exp (p * β / 2)
+  calc
+    (∫ x, f x ^ p ∂μ) ≤
+        Real.exp (p * (β / 2)) * μ.real Set.univ +
+          J ^ (p / p₀) * (2 * c₀ / β) ^ (1 - p / p₀) := by
+      simpa only [J] using hbound
+    _ ≤ Real.exp (p * β / 2) + Real.exp (p * β / 2) := by
+      exact add_le_add hlow hhigh.le
+    _ = 2 * Real.exp (p * β / 2) := by ring
+
+theorem integral_rpow_root_le_of_log_superlevel_tail
+    (μ : Measure α) [IsFiniteMeasure μ] (f : α → ℝ)
+    {p₀ c₀ β : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hβ : 2 * c₀ < β)
+    (hf : Measurable f) (hf_pos : ∀ x, 0 < f x)
+    (hf₀ : Integrable (fun x => f x ^ p₀) μ)
+    (hintegral_pos : 0 < ∫ x, f x ^ p₀ ∂μ)
+    (hmass : μ.real Set.univ ≤ 1)
+    (hβ_eq : β = Real.log ((∫ x, f x ^ p₀ ∂μ) ^ (1 / p₀)))
+    (htail : μ.real {x | β / 2 < Real.log (f x)} ≤ 2 * c₀ / β) :
+    let p := bombieriGiustiExponent p₀ c₀ β
+    (∫ x, f x ^ p ∂μ) ^ (1 / p) ≤
+      2 ^ (1 / p) * Real.exp (β / 2) := by
+  let p := bombieriGiustiExponent p₀ c₀ β
+  have hp : 0 < p := bombieriGiustiExponent_pos hp₀ hc₀ hβ
+  have hbound := integral_rpow_le_two_exp_half_of_log_superlevel_tail
+    μ f hp₀ hc₀ hβ hf hf_pos hf₀ hintegral_pos hmass hβ_eq htail
+  have hintegral_nonneg : 0 ≤ ∫ x, f x ^ p ∂μ :=
+    integral_nonneg fun x => Real.rpow_nonneg (hf_pos x).le p
+  have hroot := Real.rpow_le_rpow hintegral_nonneg hbound
+    (div_nonneg zero_le_one hp.le)
+  change (∫ x, f x ^ p ∂μ) ^ (1 / p) ≤
+    2 ^ (1 / p) * Real.exp (β / 2)
+  calc
+    (∫ x, f x ^ p ∂μ) ^ (1 / p) ≤
+        (2 * Real.exp (p * β / 2)) ^ (1 / p) := hroot
+    _ = 2 ^ (1 / p) * Real.exp (p * β / 2) ^ (1 / p) := by
+      rw [Real.mul_rpow (by norm_num) (Real.exp_pos _).le]
+    _ = 2 ^ (1 / p) * Real.exp (β / 2) := by
+      congr 1
+      rw [Real.rpow_def_of_pos (Real.exp_pos _), Real.log_exp]
+      congr 1
+      field_simp [hp.ne']
 
 open Bundle Manifold
 open scoped ContDiff Manifold Topology
