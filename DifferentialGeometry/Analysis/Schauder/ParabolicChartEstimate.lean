@@ -917,6 +917,74 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoo
       (fun i ↦ parabolicCylinder (Set.Icc t₀ t₁)
         (Metric.closedBall (center i) (r i))) intrinsicU Cresult hCresult
 
+theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoothOn_of_uniform_interpolation_of_finite
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {Achart : Type*} [Finite Achart]
+    {alpha : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {a t₀ t₁ b : Real}
+    (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    (hat₀ : a < t₀) (ht₁b : t₁ < b)
+    (epsilon : NNReal) (hepsilon : 0 < epsilon)
+    (chartCenter : Achart → M) (center : Achart → EuclM E)
+    (r R Rext : Achart → Real)
+    (hrR : ∀ i, r i < R i) (hRRext : ∀ i, R i < Rext i)
+    (hchart : ∀ i,
+      ((toEuclidean (E := E)).symm : EuclM E → E) ''
+          Metric.closedBall (center i) (R i) ⊆
+        interior (extChartAt I (chartCenter i)).target)
+    (V : Real → M → Real)
+    (hV : ∀ i, ContDiffOn Real 1
+      (fun p : Real × E ↦ V p.1 ((extChartAt I (chartCenter i)).symm p.2))
+      (Set.Icc a b ×ˢ
+        (((toEuclidean (E := E)).symm : EuclM E → E) ''
+          Metric.closedBall (center i) (R i))))
+    (intrinsicU : Real → M → Real)
+    (u dtimeU : Achart → Real → BoundedContinuousFunction (EuclM E) Real)
+    (du : Achart → Real →
+      BoundedContinuousFunction (EuclM E) (EuclM E →L[Real] Real))
+    (d2u : Achart → Real → BoundedContinuousFunction (EuclM E)
+      (EuclM E →L[Real] EuclM E →L[Real] Real))
+    (huTime : ∀ i s, s ∈ Set.Icc a b → HasDerivAt (u i) (dtimeU i s) s)
+    (hu : ∀ i s, s ∈ Set.Icc a b → ∀ x,
+      HasFDerivAt (u i s : EuclM E → Real) (du i s x) x)
+    (hdu : ∀ i s, s ∈ Set.Icc a b → ∀ x,
+      HasFDerivAt (du i s : EuclM E → EuclM E →L[Real] Real)
+        (d2u i s x) x)
+    (huCont : ∀ i, Continuous (u i))
+    (hrealize : ∀ i, Set.EqOn (fun p ↦ u i p.time p.space)
+      (fun p ↦ parabolicEuclideanChartRepresentation
+        I (chartCenter i) intrinsicU p.time p.space)
+      (parabolicCylinder Set.univ (Metric.ball (center i) (Rext i))))
+    {Ksource Bsource C M0 : NNReal}
+    (hsourceHolder : ∀ i, HolderWith Ksource alpha
+      ((parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall (center i) (R i))).restrict
+        (parabolicNondivergenceOperatorInEuclideanChart (I := I)
+          G.metric V (chartCenter i) intrinsicU)))
+    (hsourceNorm : ∀ i p,
+      p ∈ parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall (center i) (R i)) →
+        ‖parabolicNondivergenceOperatorInEuclideanChart (I := I)
+          G.metric V (chartCenter i) intrinsicU p‖ ≤ Bsource)
+    (hgauge : ∀ i, eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Set.Icc a b) Set.univ)
+      (fun t x ↦ u i t x) ≤ C)
+    (huNorm : ∀ i p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖u i p.time p.space‖ ≤ M0) :
+    ∃ Cresult : NNReal,
+      eParabolicC2HolderGaugeInEuclideanChartsOn alpha I chartCenter
+        (fun i ↦ parabolicCylinder (Set.Icc t₀ t₁)
+          (Metric.closedBall (center i) (r i))) intrinsicU ≤ Cresult := by
+  exact
+    exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoothOn_of_interpolation_of_finite
+      hG halpha0 halpha1 hab habreg hat₀ ht₁b (fun _ ↦ epsilon)
+      (fun _ ↦ hepsilon) chartCenter center r R Rext hrR hRRext hchart V hV
+      intrinsicU u dtimeU du d2u huTime hu hdu huCont hrealize
+      (fun _ ↦ Ksource) (fun _ ↦ Bsource) (fun _ ↦ C) (fun _ ↦ M0)
+      hsourceHolder hsourceNorm hgauge huNorm
+
 theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_of_metricFamilySmoothOn_of_finite
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
