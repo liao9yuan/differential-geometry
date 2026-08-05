@@ -769,6 +769,72 @@ theorem bufferedParabolicC2HolderGaugeWithLowerJetsConst_eq_factor_mul
   unfold bufferedParabolicC2HolderGaugeWithLowerJetsFactor
   field_simp
 
+theorem norm_parabolicSpatialJet_one_le_of_buffered_ball
+    {J : Set Real} (center : V) {r R : Real} (epsilon : NNReal)
+    (hepsilon : 0 < epsilon) (hbuffer : r + epsilon < R)
+    {alpha C M : NNReal} {u : Real → V → F}
+    (hu : IsParabolicC2On
+      (parabolicCylinder J (Metric.ball center R)) u)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J (Metric.ball center R)) u ≤ C)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.ball center R) →
+        ‖u p.time p.space‖ ≤ M)
+    (p : ParabolicPoint V)
+    (hp : p ∈ parabolicCylinder J (Metric.closedBall center r)) :
+    ‖parabolicSpatialJet 1 u p‖ ≤ 2 * M / epsilon + C * epsilon := by
+  have hinner : Metric.closedBall center r ⊆ Metric.ball center R := by
+    intro x hx
+    rw [Metric.mem_ball]
+    calc
+      dist x center ≤ r := Metric.mem_closedBall.mp hx
+      _ < r + (epsilon : Real) :=
+        lt_add_of_pos_right r (by exact_mod_cast hepsilon)
+      _ < R := hbuffer
+  have hspace : LipschitzOnWith C (fderiv Real (u p.time))
+      (Metric.ball center R) := by
+    apply (convex_ball center R).lipschitzOnWith_of_nnnorm_fderiv_le
+      (𝕜 := Real)
+    · intro x hx
+      have hcd : ContDiffAt Real 2 (u p.time) x :=
+        hu.1 (parabolicPoint p.time x) ⟨hp.1, hx⟩
+      exact (hcd.fderiv_right (m := 1) (by norm_num)).differentiableAt_one
+    · intro x hx
+      rw [← NNReal.coe_le_coe]
+      simp only [coe_nnnorm]
+      rw [← hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv,
+        LinearIsometryEquiv.norm_map]
+      exact parabolicSpatialJet_norm_le hgauge
+        (j := 2) (by omega) (p := parabolicPoint p.time x) ⟨hp.1, hx⟩
+  have hderiv := norm_fderiv_le_at_scale_on
+    (s := Metric.ball center R) (M := M) (C := C) (alpha := 1)
+    (epsilon := (epsilon : Real)) (convex_ball center R)
+    (fun x hx ↦
+      (hu.1 (parabolicPoint p.time x) ⟨hp.1, hx⟩).differentiableAt
+        (by norm_num)) hspace.holderOnWith
+    (fun x hx ↦ huNorm (parabolicPoint p.time x) ⟨hp.1, hx⟩)
+    (by exact_mod_cast hepsilon) (hinner hp.2) (by
+      intro v hv
+      rw [Metric.mem_ball]
+      calc
+        dist (p.space + (epsilon : Real) • v) center ≤
+            dist (p.space + (epsilon : Real) • v) p.space +
+              dist p.space center := dist_triangle _ _ _
+        _ = (epsilon : Real) + dist p.space center := by
+          congr 1
+          rw [dist_eq_norm]
+          simp only [add_sub_cancel_left, norm_smul,
+            Real.norm_of_nonneg epsilon.coe_nonneg, hv, mul_one]
+        _ ≤ (epsilon : Real) + r := by
+          gcongr
+          exact Metric.mem_closedBall.mp hp.2
+        _ = r + (epsilon : Real) := by ring
+        _ < R := hbuffer)
+  simpa only [parabolicSpatialJet, parabolicPoint_time_space,
+    norm_iteratedFDeriv_one, NNReal.coe_add, NNReal.coe_div,
+    NNReal.coe_mul, NNReal.coe_ofNat, NNReal.coe_one,
+    Real.rpow_one] using hderiv
+
 theorem norm_parabolicSpatialJet_one_time_sub_le_of_mem_buffered_ball
     {J : Set Real} (hJ : Convex Real J)
     (center : V) {r R : Real} (delta : NNReal)
@@ -1072,6 +1138,54 @@ theorem lipschitzOnWith_parabolicSpatialJet_one_of_buffered_ball
                 (dist p.space q.space) := by
           push_cast
           ring
+
+def parabolicSpatialGradientInterpolationConst
+    (epsilon delta alpha C M : NNReal) : NNReal :=
+  bufferedParabolicSpatialGradientConst C delta *
+      epsilon ^ ((1 : NNReal) - alpha : Real) +
+    2 * (2 * M / epsilon + C * epsilon) /
+      epsilon ^ (alpha : Real)
+
+theorem parabolicSpatialJet_one_holderWith_restrict_of_interpolation
+    {J : Set Real} (hJ : Convex Real J)
+    (center : V) {r R : Real} (epsilon delta : NNReal)
+    (hepsilon : 0 < epsilon) (hepsilonDelta : epsilon < delta)
+    (hbuffer : r + delta ≤ R)
+    {alpha C M : NNReal} (halpha : alpha ≤ 1)
+    {u : Real → V → F}
+    (hu : IsParabolicC2On
+      (parabolicCylinder J (Metric.ball center R)) u)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J (Metric.ball center R)) u ≤ C)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.ball center R) →
+        ‖u p.time p.space‖ ≤ M) :
+    HolderWith
+      (parabolicSpatialGradientInterpolationConst
+        epsilon delta alpha C M) alpha
+      ((parabolicCylinder J (Metric.closedBall center r)).restrict
+        (parabolicSpatialJet 1 u)) := by
+  have hdelta : 0 < delta := hepsilon.trans hepsilonDelta
+  have hepsilonBuffer : r + (epsilon : Real) < R := by
+    calc
+      r + (epsilon : Real) < r + (delta : Real) := by
+        gcongr
+      _ ≤ R := hbuffer
+  have hnorm : ∀ p ∈ parabolicCylinder J (Metric.closedBall center r),
+      ‖parabolicSpatialJet 1 u p‖ ≤ 2 * M / epsilon + C * epsilon := by
+    intro p hp
+    exact norm_parabolicSpatialJet_one_le_of_buffered_ball
+      center epsilon hepsilon hepsilonBuffer hu hgauge huNorm p hp
+  have hlip := lipschitzOnWith_parabolicSpatialJet_one_of_buffered_ball
+    hJ center delta hdelta hbuffer hu hgauge
+  simpa only [parabolicSpatialGradientInterpolationConst] using
+    holderWith_restrict_of_norm_le_of_lipschitzOnWith
+      (s := parabolicCylinder J (Metric.closedBall center r))
+      (f := parabolicSpatialJet 1 u)
+      (M := 2 * M / epsilon + C * epsilon)
+      (L := bufferedParabolicSpatialGradientConst C delta)
+      (alpha := alpha) (epsilon := epsilon)
+      hepsilon halpha hnorm hlip
 
 theorem parabolicSpatialJet_one_holderWith_restrict_of_buffered_ball
     {J : Set Real} (hJ : Convex Real J)

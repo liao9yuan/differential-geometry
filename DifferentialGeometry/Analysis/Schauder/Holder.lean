@@ -45,6 +45,85 @@ theorem holderWith_zero_of_norm_le
         ENNReal.ofReal_mul (by positivity : (0 : Real) ≤ 2),
         ENNReal.ofReal_ofNat, ENNReal.ofReal_coe_nnreal]
 
+theorem holderWith_restrict_of_norm_le_of_lipschitzOnWith
+    {Y G : Type*} [MetricSpace Y] [NormedAddCommGroup G]
+    {s : Set Y} {f : Y → G} {M L alpha epsilon : NNReal}
+    (hepsilon : 0 < epsilon) (halpha : alpha ≤ 1)
+    (hfnorm : ∀ x ∈ s, ‖f x‖ ≤ M)
+    (hlip : LipschitzOnWith L f s) :
+    HolderWith
+      (L * epsilon ^ ((1 : NNReal) - alpha : Real) +
+        2 * M / epsilon ^ (alpha : Real)) alpha
+      (s.restrict f) := by
+  rw [HolderWith.restrict_iff]
+  intro x hx y hy
+  rw [edist_nndist, edist_nndist,
+    ← ENNReal.coe_rpow_of_nonneg _ alpha.coe_nonneg,
+    ← ENNReal.coe_mul, ENNReal.coe_le_coe]
+  rw [← NNReal.coe_le_coe]
+  simp only [coe_nndist, NNReal.coe_mul, NNReal.coe_add, NNReal.coe_div,
+    NNReal.coe_rpow, NNReal.coe_ofNat]
+  by_cases hxy : x = y
+  · subst y
+    simp only [dist_self]
+    positivity
+  have hdist : 0 < dist x y := dist_pos.mpr hxy
+  by_cases hsmall : dist x y ≤ epsilon
+  · have hlip' := hlip.dist_le_mul x hx y hy
+    calc
+      dist (f x) (f y) ≤ (L : Real) * dist x y := hlip'
+      _ ≤ ((L * epsilon ^ ((1 : NNReal) - alpha : Real) : NNReal) : Real) *
+          dist x y ^ (alpha : Real) := by
+        rw [NNReal.coe_mul, NNReal.coe_rpow]
+        have halphaReal : (alpha : Real) ≤ 1 := by exact_mod_cast halpha
+        have hsum : ((1 : NNReal) - alpha : Real) + (alpha : Real) = 1 := by
+          norm_num
+        calc
+          (L : Real) * dist x y = (L : Real) *
+              (dist x y ^ ((1 : NNReal) - alpha : Real) *
+                dist x y ^ (alpha : Real)) := by
+            rw [← Real.rpow_add hdist, hsum, Real.rpow_one]
+          _ ≤ (L : Real) *
+              ((epsilon : Real) ^ ((1 : NNReal) - alpha : Real) *
+                dist x y ^ (alpha : Real)) := by
+            gcongr
+            exact sub_nonneg.mpr halphaReal
+          _ = (L : Real) * (epsilon : Real) ^
+              ((1 : NNReal) - alpha : Real) *
+                dist x y ^ (alpha : Real) := by ring
+      _ ≤ (((L * epsilon ^ ((1 : NNReal) - alpha : Real) +
+          2 * M / epsilon ^ (alpha : Real) : NNReal) : Real) *
+          dist x y ^ (alpha : Real)) := by
+        gcongr
+        exact_mod_cast (le_add_right le_rfl :
+          L * epsilon ^ ((1 : NNReal) - alpha : Real) ≤
+            L * epsilon ^ ((1 : NNReal) - alpha : Real) +
+              2 * M / epsilon ^ (alpha : Real))
+  · have hfar : (epsilon : Real) < dist x y := lt_of_not_ge hsmall
+    have hfunction : dist (f x) (f y) ≤ 2 * M := by
+      rw [dist_eq_norm]
+      calc
+        ‖f x - f y‖ ≤ ‖f x‖ + ‖f y‖ := norm_sub_le _ _
+        _ ≤ M + M := add_le_add (hfnorm x hx) (hfnorm y hy)
+        _ = 2 * M := by ring
+    calc
+      dist (f x) (f y) ≤ (2 * M : NNReal) := hfunction
+      _ ≤ ((2 * M / epsilon ^ (alpha : Real) : NNReal) : Real) *
+          dist x y ^ (alpha : Real) := by
+        rw [NNReal.coe_div, NNReal.coe_mul, NNReal.coe_ofNat,
+          NNReal.coe_rpow]
+        have hepspow : 0 < (epsilon : Real) ^ (alpha : Real) := by positivity
+        rw [div_mul_eq_mul_div, le_div_iff₀ hepspow]
+        gcongr
+      _ ≤ (((L * epsilon ^ ((1 : NNReal) - alpha : Real) +
+          2 * M / epsilon ^ (alpha : Real) : NNReal) : Real) *
+          dist x y ^ (alpha : Real)) := by
+        gcongr
+        exact_mod_cast (le_add_left le_rfl :
+          2 * M / epsilon ^ (alpha : Real) ≤
+            L * epsilon ^ ((1 : NNReal) - alpha : Real) +
+              2 * M / epsilon ^ (alpha : Real))
+
 theorem holderWith_sub
     {Y G : Type*} [PseudoMetricSpace Y] [NormedAddCommGroup G]
     {alpha C D : NNReal} {f g : Y → G}
