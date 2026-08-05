@@ -21,6 +21,15 @@ theorem norm_c1PullbackGradient_le
     ‖c1PullbackGradient Dphi Du‖ ≤ ‖Du‖ * ‖Dphi‖ :=
   ContinuousLinearMap.opNorm_comp_le _ _
 
+theorem continuousMultilinearCurryFin1_iteratedFDeriv_one_eq_fderiv
+    (f : V → F) (x : V) :
+    continuousMultilinearCurryFin1 Real V F
+        (iteratedFDeriv Real 1 f x) =
+      fderiv Real f x := by
+  ext v
+  rw [continuousMultilinearCurryFin1_apply, iteratedFDeriv_one_apply]
+  rfl
+
 theorem norm_c1PullbackGradient_sub_le
     (Dphi Dphi' : V →L[Real] W) (Du Du' : W →L[Real] F) :
     ‖c1PullbackGradient Dphi Du - c1PullbackGradient Dphi' Du'‖ ≤

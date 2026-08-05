@@ -889,6 +889,7 @@ import DifferentialGeometry.Analysis.Schauder.ParabolicChartEstimate
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartExtension
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartOperator
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartRegularity
+import DifferentialGeometry.Analysis.Schauder.ParabolicComposition
 import DifferentialGeometry.Analysis.Schauder.ParabolicCutoff
 import DifferentialGeometry.Analysis.Schauder.ParabolicJetCompactness
 import DifferentialGeometry.Analysis.Schauder.ParabolicJetLimit
