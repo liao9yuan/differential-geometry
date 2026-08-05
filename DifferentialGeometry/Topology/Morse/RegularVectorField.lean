@@ -25,35 +25,44 @@ theorem fderiv_ne_zero_iff_exists_coord (g : MorseModel n → ℝ) (y : MorseMod
   rw [hv]
   simp [hz]
 
+private theorem chartRep_contDiffOn (I : ModelWithCorners ℝ (MorseModel n) H)
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f) (x₀ : M) :
+    ContDiffOn ℝ (⊤ : WithTop ℕ∞) (fun y : MorseModel n => f ((extChartAt I x₀).symm y))
+      (extChartAt I x₀).target := by
+  have hc : ContMDiffOn I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f Set.univ := by
+    intro x hx
+    exact hf x
+  have hcsub : ContMDiffOn I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f (chartAt H x₀).source :=
+    hc.mono (by intro x hx; trivial)
+  have hc' : ContMDiffOn 𝓘(ℝ, MorseModel n) 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞)
+      (f ∘ (extChartAt I x₀).symm) (extChartAt I x₀ '' (chartAt H x₀).source) :=
+    (contMDiffOn_iff_source_of_mem_maximalAtlas (I := I) (I' := 𝓘(ℝ, ℝ))
+    (n := (⊤ : WithTop ℕ∞)) (e := chartAt H x₀) (IsManifold.chart_mem_maximalAtlas x₀)
+    (s := (chartAt H x₀).source) (hs := by intro x hx; exact hx)).1 hcsub
+  have hcd : ContDiffOn ℝ (⊤ : WithTop ℕ∞) (f ∘ (extChartAt I x₀).symm)
+      (extChartAt I x₀ '' (chartAt H x₀).source) :=
+    (contMDiffOn_iff_contDiffOn).1 hc'
+  have hrange : extChartAt I x₀ '' (chartAt H x₀).source = (extChartAt I x₀).target := by
+    exact (OpenPartialHomeomorph.extend_target_eq_image_source (f := chartAt H x₀) (I := I)).symm
+  rw [show (fun y : MorseModel n => f ((extChartAt I x₀).symm y)) = f ∘ (extChartAt I x₀).symm by rfl]
+  rwa [← hrange]
+
 set_option backward.isDefEq.respectTransparency false in
 theorem localUnitSpeedVectorField_at_noncritical (I : ModelWithCorners ℝ (MorseModel n) H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
     {x₀ : M} (hcrit : ¬ IsCriticalPointAt I f x₀) :
-    ∃ (i : Fin n) (W : (x : M) → TangentSpace I x),
-      (∀ x ∈ (extChartAt I x₀).source,
-        (fderiv ℝ (fun y : MorseModel n => f ((extChartAt I x₀).symm y)) (extChartAt I x₀ x))
-            (Pi.single i (1 : ℝ)) ≠ 0 →
-        (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (W x)) = -1) := by
+    ∃ (i : Fin n),
+      (fderiv ℝ (fun y : MorseModel n => f ((extChartAt I x₀).symm y)) (extChartAt I x₀ x₀))
+          (Pi.single i (1 : ℝ)) ≠ 0 ∧
+      ∃ W : (x : M) → TangentSpace I x,
+        (∀ x ∈ (extChartAt I x₀).source,
+          (fderiv ℝ (fun y : MorseModel n => f ((extChartAt I x₀).symm y)) (extChartAt I x₀ x))
+              (Pi.single i (1 : ℝ)) ≠ 0 →
+          (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (W x)) = -1) := by
   have hgOn : ContDiffOn ℝ (⊤ : WithTop ℕ∞) (fun y : MorseModel n => f ((extChartAt I x₀).symm y))
-      (extChartAt I x₀).target := by
-    have hc : ContMDiffOn I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f Set.univ := by
-      intro x hx
-      exact hf x
-    have hcsub : ContMDiffOn I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f (chartAt H x₀).source :=
-      hc.mono (by intro x hx; trivial)
-    have hc' : ContMDiffOn 𝓘(ℝ, MorseModel n) 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞)
-        (f ∘ (extChartAt I x₀).symm) (extChartAt I x₀ '' (chartAt H x₀).source) :=
-      (contMDiffOn_iff_source_of_mem_maximalAtlas (I := I) (I' := 𝓘(ℝ, ℝ))
-      (n := (⊤ : WithTop ℕ∞)) (e := chartAt H x₀) (IsManifold.chart_mem_maximalAtlas x₀)
-      (s := (chartAt H x₀).source) (hs := by intro x hx; exact hx)).1 hcsub
-    have hcd : ContDiffOn ℝ (⊤ : WithTop ℕ∞) (f ∘ (extChartAt I x₀).symm)
-        (extChartAt I x₀ '' (chartAt H x₀).source) :=
-      (contMDiffOn_iff_contDiffOn).1 hc'
-    have hrange : extChartAt I x₀ '' (chartAt H x₀).source = (extChartAt I x₀).target := by
-      exact (OpenPartialHomeomorph.extend_target_eq_image_source (f := chartAt H x₀) (I := I)).symm
-    rw [show (fun y : MorseModel n => f ((extChartAt I x₀).symm y)) = f ∘ (extChartAt I x₀).symm by rfl]
-    rwa [← hrange]
+      (extChartAt I x₀).target := chartRep_contDiffOn I f hf x₀
   have hmemx₀ : extChartAt I x₀ x₀ ∈ (extChartAt I x₀).target :=
     (extChartAt I x₀).map_source (mem_extChartAt_source x₀)
   have hcritChart : fderiv ℝ (fun y : MorseModel n => f ((extChartAt I x₀).symm y))
@@ -68,7 +77,8 @@ theorem localUnitSpeedVectorField_at_noncritical (I : ModelWithCorners ℝ (Mors
   let a : M → ℝ := fun x => (fderiv ℝ g (e x)) (Pi.single i (1 : ℝ))
   let W : (x : M) → TangentSpace I x := fun x =>
     (mfderivWithin 𝓘(ℝ, MorseModel n) I e.symm (range I) (e x)) (-(a x)⁻¹ • (Pi.single i (1 : ℝ) : MorseModel n))
-  refine ⟨i, W, ?_⟩
+  refine ⟨i, ?_, W, ?_⟩
+  · simpa [g, e] using hi
   intro x hx hane
   have hane_g : (fderiv ℝ g (e x)) (Pi.single i (1 : ℝ)) ≠ 0 := by
     simpa [g, e] using hane
@@ -127,6 +137,51 @@ theorem localUnitSpeedVectorField_at_noncritical (I : ModelWithCorners ℝ (Mors
     rfl
   rw [hts]
   exact hmain
+
+theorem exists_open_unitSpeedVectorField_at_noncritical (I : ModelWithCorners ℝ (MorseModel n) H)
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    {x₀ : M} (hcrit : ¬ IsCriticalPointAt I f x₀) :
+    ∃ (U : Set M), x₀ ∈ U ∧ IsOpen U ∧
+      ∃ W : (x : M) → TangentSpace I x,
+        ∀ x ∈ U, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (W x)) = -1 := by
+  rcases localUnitSpeedVectorField_at_noncritical I f hf hcrit with ⟨i, hi₀, W, hW⟩
+  let p : M → ℝ := fun x => (fderiv ℝ (fun y : MorseModel n => f ((extChartAt I x₀).symm y))
+    (extChartAt I x₀ x)) (Pi.single i (1 : ℝ))
+  have hgOn : ContDiffOn ℝ (⊤ : WithTop ℕ∞) (fun y : MorseModel n => f ((extChartAt I x₀).symm y))
+      (extChartAt I x₀).target := chartRep_contDiffOn I f hf x₀
+  have hcont : ContinuousOn p (extChartAt I x₀).source := by
+    have hfd : ContDiffOn ℝ 1 (fderiv ℝ (fun y : MorseModel n => f ((extChartAt I x₀).symm y)))
+        (extChartAt I x₀).target :=
+      hgOn.fderiv_of_isOpen (isOpen_extChartAt_target x₀) (by norm_num : (1 : WithTop ℕ∞) + 1 ≤ ⊤)
+    have hcontfd : ContinuousOn (fderiv ℝ (fun y : MorseModel n => f ((extChartAt I x₀).symm y)))
+        (extChartAt I x₀).target := hfd.continuousOn
+    have hconte : ContinuousOn (extChartAt I x₀) (extChartAt I x₀).source := by
+      simpa [extChartAt_source (I := I) (x := x₀)] using
+        (contMDiffOn_extChartAt (I := I) (n := (⊤ : WithTop ℕ∞)) (x := x₀)).continuousOn
+    have hcomp' : ContinuousOn (fun x : M =>
+        (fderiv ℝ (fun y : MorseModel n => f ((extChartAt I x₀).symm y))) (extChartAt I x₀ x))
+        (extChartAt I x₀).source :=
+      hcontfd.comp hconte (by intro x hx; exact (extChartAt I x₀).map_source hx)
+    have happly : Continuous (fun L : (MorseModel n →L[ℝ] ℝ) => L (Pi.single i (1 : ℝ))) :=
+      (ContinuousLinearMap.apply ℝ ℝ (Pi.single i (1 : ℝ)) : (MorseModel n →L[ℝ] ℝ) →L[ℝ] ℝ).cont
+    simpa [p, Function.comp_def] using (happly.comp_continuousOn hcomp')
+  have hmem : x₀ ∈ (extChartAt I x₀).source := mem_extChartAt_source x₀
+  have hne₀ : p x₀ ≠ 0 := by
+    simpa [p] using hi₀
+  have hV : {x : M | p x ≠ 0} ∈ nhds x₀ := by
+    have hcontAt : ContinuousAt p x₀ :=
+      (hcont x₀ hmem).continuousAt ((isOpen_extChartAt_source x₀).mem_nhds hmem)
+    exact hcontAt.preimage_mem_nhds (isOpen_ne.mem_nhds hne₀)
+  rcases mem_nhds_iff.mp hV with ⟨V, hVsub, hVopen, hVx₀⟩
+  let U : Set M := V ∩ (extChartAt I x₀).source
+  refine ⟨U, ?_, ?_, W, ?_⟩
+  · exact ⟨hVx₀, hmem⟩
+  · exact hVopen.inter (isOpen_extChartAt_source x₀)
+  · intro x hx
+    have hxV : x ∈ V := hx.1
+    have hpx : p x ≠ 0 := hVsub hxV
+    exact hW x hx.2 (by simpa [p] using hpx)
 
 end
 
