@@ -603,6 +603,7 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
 import DifferentialGeometry.Analysis.Parabolic.Energy.Caccioppoli
 import DifferentialGeometry.Analysis.Parabolic.Energy.TimeCutoff
+import DifferentialGeometry.Analysis.Parabolic.ExponentialRescaling
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLocalSource
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLowerOrder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorSchauder

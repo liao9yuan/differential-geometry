@@ -1,3 +1,4 @@
+import DifferentialGeometry.Analysis.Parabolic.ExponentialRescaling
 import DifferentialGeometry.Analysis.Parabolic.Moser.Oscillation
 import Mathlib.MeasureTheory.Integral.Prod
 
@@ -9,6 +10,7 @@ open scoped ContDiff Manifold Topology
 namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Analysis.Parabolic.Energy
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -278,6 +280,112 @@ def logCenterDrift
     (cutoff : SmoothScalar g) : ℝ :=
   2 * cutoffDirichletEnergy (I := I) (M := M) cutoff /
     cutoffMass (I := I) (M := M) cutoff
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem logCenterDrift_nonneg
+    (g : SmoothRiemannianMetric I M) (cutoff : SmoothScalar g) :
+    0 ≤ logCenterDrift (I := I) (M := M) g cutoff := by
+  exact div_nonneg
+    (mul_nonneg (by norm_num)
+      (cutoffDirichletEnergy_nonneg (I := I) (M := M) cutoff))
+    (cutoff_mass_nonneg (I := I) (M := M) cutoff)
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem localizedSuperlevelMass_log_exponentialTimeRescale
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : SmoothScalar g)
+    (rate center : ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (t level : ℝ) :
+    localizedSuperlevelMass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g
+          (fun s x => Real.log (exponentialTimeRescale rate center u s x))
+          (contMDiff_log_of_pos
+            (contMDiff_exponentialTimeRescale rate center u hu)
+            (exponentialTimeRescale_pos rate center u hpos)) t) level =
+      localizedSuperlevelMass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x))
+          (contMDiff_log_of_pos hu hpos) t)
+        (center - rate * t + level) := by
+  unfold localizedSuperlevelMass
+  simp only [smoothScalarSlice_toFun]
+  have hset :
+      {x : M | level < Real.log (exponentialTimeRescale rate center u t x)} =
+        {x : M | center - rate * t + level < Real.log (u t x)} := by
+    ext x
+    change level < Real.log (exponentialTimeRescale rate center u t x) ↔
+      center - rate * t + level < Real.log (u t x)
+    simp only [exponentialTimeRescale]
+    rw [Real.log_mul (Real.exp_ne_zero _) (hpos t x).ne', Real.log_exp]
+    constructor <;> intro h <;> change _ < _ at h ⊢ <;> linarith
+  rw [hset]
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem localizedSublevelMass_log_exponentialTimeRescale
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : SmoothScalar g)
+    (rate center : ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (t level : ℝ) :
+    localizedSublevelMass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g
+          (fun s x => Real.log (exponentialTimeRescale rate center u s x))
+          (contMDiff_log_of_pos
+            (contMDiff_exponentialTimeRescale rate center u hu)
+            (exponentialTimeRescale_pos rate center u hpos)) t) level =
+      localizedSublevelMass (I := I) (M := M) cutoff
+        (smoothScalarSlice (I := I) g (fun s x => Real.log (u s x))
+          (contMDiff_log_of_pos hu hpos) t)
+        (center - rate * t + level) := by
+  unfold localizedSublevelMass
+  simp only [smoothScalarSlice_toFun]
+  have hset :
+      {x : M | Real.log (exponentialTimeRescale rate center u t x) < level} =
+        {x : M | Real.log (u t x) < center - rate * t + level} := by
+    ext x
+    change Real.log (exponentialTimeRescale rate center u t x) < level ↔
+      Real.log (u t x) < center - rate * t + level
+    simp only [exponentialTimeRescale]
+    rw [Real.log_mul (Real.exp_ne_zero _) (hpos t x).ne', Real.log_exp]
+    constructor <;> intro h <;> change _ < _ at h ⊢ <;> linarith
+  rw [hset]
+
+omit [CompactSpace M] in
+theorem centered_exponential_time_rescale_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (averagingCutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (τ : ℝ) {t : ℝ} {x : M}
+    (hpde :
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    Δ_g (I := I) g
+        (smoothScalarSlice (I := I) g
+          (exponentialTimeRescale
+            (logCenterDrift (I := I) (M := M) g averagingCutoff)
+            (shiftedLogCenter (I := I) (M := M) g averagingCutoff u hu hpos τ) u)
+          (contMDiff_exponentialTimeRescale
+            (logCenterDrift (I := I) (M := M) g averagingCutoff)
+            (shiftedLogCenter (I := I) (M := M) g averagingCutoff u hu hpos τ) u hu)
+          t).smooth x ≤
+      deriv (fun s =>
+        exponentialTimeRescale
+          (logCenterDrift (I := I) (M := M) g averagingCutoff)
+          (shiftedLogCenter (I := I) (M := M) g averagingCutoff u hu hpos τ) u s x) t := by
+  exact exponential_time_rescale_supersolution (I := I) (M := M) g
+    (logCenterDrift (I := I) (M := M) g averagingCutoff)
+    (shiftedLogCenter (I := I) (M := M) g averagingCutoff u hu hpos τ)
+    (logCenterDrift_nonneg (I := I) (M := M) g averagingCutoff)
+    u hu hpos hpde
 
 omit [I.Boundaryless] [CompactSpace M] in
 theorem shifted_log_center_eq
@@ -897,6 +1005,122 @@ theorem integrated_late_log_sublevel_tail_of_supersolution
   simpa only [tailMass, level, center, hlog] using
     integral_tail_le_of_center_gap_sq_from_left center tailMass energy hcenter_smooth
       hτb hr hC hmass.le hcenter_mono htail_int htail henergy
+
+theorem integrated_early_centered_log_superlevel_tail_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : SmoothScalar g)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      deviationCutoff averagingCutoff C)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {a τ r : ℝ}
+    (haτ : a ≤ τ) (hr : 0 < r)
+    (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
+    (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun q => u q x) t) :
+    (∫ s in a..τ,
+        localizedSuperlevelMass (I := I) (M := M) deviationCutoff
+          (smoothScalarSlice (I := I) g
+            (fun q x => Real.log
+              (exponentialTimeRescale
+                (logCenterDrift (I := I) (M := M) g averagingCutoff)
+                (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+                  u hu hpos τ) u q x))
+            (contMDiff_log_of_pos
+              (contMDiff_exponentialTimeRescale
+                (logCenterDrift (I := I) (M := M) g averagingCutoff)
+                (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+                  u hu hpos τ) u hu)
+              (exponentialTimeRescale_pos
+                (logCenterDrift (I := I) (M := M) g averagingCutoff)
+                (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+                  u hu hpos τ) u hpos)) s) r) ≤
+      2 * C * cutoffMass (I := I) (M := M) averagingCutoff / r := by
+  let rate := logCenterDrift (I := I) (M := M) g averagingCutoff
+  let center := shiftedLogCenter (I := I) (M := M) g averagingCutoff u hu hpos τ
+  have hpointwise : ∀ s,
+      localizedSuperlevelMass (I := I) (M := M) deviationCutoff
+          (smoothScalarSlice (I := I) g
+            (fun q x => Real.log (exponentialTimeRescale rate center u q x))
+            (contMDiff_log_of_pos
+              (contMDiff_exponentialTimeRescale rate center u hu)
+              (exponentialTimeRescale_pos rate center u hpos)) s) r =
+        localizedSuperlevelMass (I := I) (M := M) deviationCutoff
+          (smoothScalarSlice (I := I) g (fun q x => Real.log (u q x))
+            (contMDiff_log_of_pos hu hpos) s)
+          (center - s * rate + r) := by
+    intro s
+    simpa only [mul_comm] using
+      localizedSuperlevelMass_log_exponentialTimeRescale
+        (I := I) (M := M) g deviationCutoff rate center u hu hpos s r
+  simp_rw [show logCenterDrift (I := I) (M := M) g averagingCutoff = rate from rfl,
+    show shiftedLogCenter (I := I) (M := M) g averagingCutoff u hu hpos τ = center from rfl,
+    hpointwise]
+  exact integrated_early_log_superlevel_tail_of_supersolution
+    (I := I) (M := M) g deviationCutoff averagingCutoff C hC hP
+      u hu hpos haτ hr hmass hpde
+
+theorem integrated_late_centered_log_sublevel_tail_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : SmoothScalar g)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      deviationCutoff averagingCutoff C)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {τ b r : ℝ}
+    (hτb : τ ≤ b) (hr : 0 < r)
+    (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
+    (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun q => u q x) t) :
+    (∫ s in τ..b,
+        localizedSublevelMass (I := I) (M := M) deviationCutoff
+          (smoothScalarSlice (I := I) g
+            (fun q x => Real.log
+              (exponentialTimeRescale
+                (logCenterDrift (I := I) (M := M) g averagingCutoff)
+                (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+                  u hu hpos τ) u q x))
+            (contMDiff_log_of_pos
+              (contMDiff_exponentialTimeRescale
+                (logCenterDrift (I := I) (M := M) g averagingCutoff)
+                (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+                  u hu hpos τ) u hu)
+              (exponentialTimeRescale_pos
+                (logCenterDrift (I := I) (M := M) g averagingCutoff)
+                (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+                  u hu hpos τ) u hpos)) s) (-r)) ≤
+      2 * C * cutoffMass (I := I) (M := M) averagingCutoff / r := by
+  let rate := logCenterDrift (I := I) (M := M) g averagingCutoff
+  let center := shiftedLogCenter (I := I) (M := M) g averagingCutoff u hu hpos τ
+  have hpointwise : ∀ s,
+      localizedSublevelMass (I := I) (M := M) deviationCutoff
+          (smoothScalarSlice (I := I) g
+            (fun q x => Real.log (exponentialTimeRescale rate center u q x))
+            (contMDiff_log_of_pos
+              (contMDiff_exponentialTimeRescale rate center u hu)
+              (exponentialTimeRescale_pos rate center u hpos)) s) (-r) =
+        localizedSublevelMass (I := I) (M := M) deviationCutoff
+          (smoothScalarSlice (I := I) g (fun q x => Real.log (u q x))
+            (contMDiff_log_of_pos hu hpos) s)
+          (center - s * rate - r) := by
+    intro s
+    simpa only [mul_comm, add_neg] using
+      localizedSublevelMass_log_exponentialTimeRescale
+        (I := I) (M := M) g deviationCutoff rate center u hu hpos s (-r)
+  simp_rw [show logCenterDrift (I := I) (M := M) g averagingCutoff = rate from rfl,
+    show shiftedLogCenter (I := I) (M := M) g averagingCutoff u hu hpos τ = center from rfl,
+    hpointwise]
+  exact integrated_late_log_sublevel_tail_of_supersolution
+    (I := I) (M := M) g deviationCutoff averagingCutoff C hC hP
+      u hu hpos hτb hr hmass hpde
 
 theorem early_log_superlevel_tail_of_supersolution
     (g : SmoothRiemannianMetric I M)
