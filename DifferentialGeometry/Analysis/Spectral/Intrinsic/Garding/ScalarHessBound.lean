@@ -60,8 +60,7 @@ private theorem rawLap_repr_delta
         (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection x =
       Tensor0SSpace.toRS0
         ((Tensor0SNabla.tensor0Iso I M x).symm
-          (Δ_g (I := I) g
-            (reprScalar0_smooth (I := I) (M := M) v hv) x)) := by
+          (Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x)) := by
   rw [rawLap_repr_scalar (I := I) (M := M) g v hv x]
   rw [laplacian_levi_eq (I := I) g
     (reprScalar0_smooth (I := I) (M := M) v hv) x]
@@ -72,8 +71,7 @@ theorem lap_energy_eq
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
     (hv : (Function.support v.coeff).Finite) :
-    ∫ x, (Δ_g (I := I) g
-        (reprScalar0_smooth (I := I) (M := M) v hv) x) ^ 2
+    ∫ x, (Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x) ^ 2
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ‖rawTensorConnLapSmooth (I := I) g 0 0
         (tensorHsSmoothRepr (I := I) (M := M) v hv)‖ ^ 2 := by
@@ -92,8 +90,7 @@ theorem lap_energy_eq
       (fun y : M => S.toSection y) x =
         Tensor0SSpace.toRS0
           ((Tensor0SNabla.tensor0Iso I M x).symm
-            (Δ_g (I := I) g
-              (reprScalar0_smooth (I := I) (M := M) v hv) x)) by
+            (Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x)) by
       simpa only [S] using rawLap_repr_delta (I := I) (M := M) g v hv x]
   rw [inner_toRS0_scalar (I := I) (M := M) g x]
   ring
@@ -108,8 +105,7 @@ private theorem repr_lap_inner
         (rawTensorConnLapSmooth (I := I) g 0 0
           (tensorHsSmoothRepr (I := I) (M := M) v hv)).toFun
         (tensorHsSmoothRepr (I := I) (M := M) v hv).toFun =
-      ∫ x, (Δ_g (I := I) g
-          (reprScalar0_smooth (I := I) (M := M) v hv) x) *
+      ∫ x, (Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x) *
         reprScalar0 (I := I) (M := M) v hv x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   unfold tensorL2Inner
@@ -129,10 +125,8 @@ private theorem repr_lap_inner
   rw [inner_toRS0_zero (I := I) (M := M) g x]
   have hlap : tensor0SSpace_evalScalar x
       ((Tensor0SNabla.tensor0Iso I M x).symm
-        (Δ_g (I := I) g
-          (reprScalar0_smooth (I := I) (M := M) v hv) x)) =
-      Δ_g (I := I) g
-        (reprScalar0_smooth (I := I) (M := M) v hv) x := by
+        (Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x)) =
+      Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x := by
     change Tensor0SNabla.tensor0Iso I M x
       ((Tensor0SNabla.tensor0Iso I M x).symm _) = _
     rw [ContinuousLinearEquiv.apply_symm_apply]
@@ -171,8 +165,7 @@ theorem grad_energy_eq
           (reprScalar0 (I := I) (M := M) v hv) x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         -∫ x, reprScalar0 (I := I) (M := M) v hv x *
-          Δ_g (I := I) g
-            (reprScalar0_smooth (I := I) (M := M) v hv) x
+          Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
     simpa only [normGradSqFun_def, grad_g_apply] using
       (green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
@@ -194,11 +187,9 @@ theorem grad_energy_eq
         (reprScalar0 (I := I) (M := M) v hv) x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         -∫ x, reprScalar0 (I := I) (M := M) v hv x *
-          Δ_g (I := I) g
-            (reprScalar0_smooth (I := I) (M := M) v hv) x
+          Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := hscalar
-    _ = -∫ x, (Δ_g (I := I) g
-            (reprScalar0_smooth (I := I) (M := M) v hv) x) *
+    _ = -∫ x, (Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x) *
           reprScalar0 (I := I) (M := M) v hv x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
       congr 1
@@ -214,8 +205,7 @@ theorem lap_energy_le
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
     (hv : (Function.support v.coeff).Finite) :
-    ∫ x, (Δ_g (I := I) g
-        (reprScalar0_smooth (I := I) (M := M) v hv) x) ^ 2
+    ∫ x, (Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x) ^ 2
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤ ‖v‖ ^ 2 := by
   rw [lap_energy_eq (I := I) (M := M) g v hv]
   have hL := rawLap_repr_norm (I := I) (M := M) g v hv
@@ -290,8 +280,7 @@ theorem hess_energy_le
     ∫ x, chartHessFrobeniusSq (I := I) g
         (reprScalar0 (I := I) (M := M) v hv) x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
-        (∫ x, (Δ_g (I := I) g
-            (reprScalar0_smooth (I := I) (M := M) v hv) x) ^ 2
+        (∫ x, (Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x) ^ 2
             ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
           C * ∫ x, normGradSqFun (I := I) g
             (reprScalar0 (I := I) (M := M) v hv) x

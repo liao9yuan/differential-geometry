@@ -106,9 +106,8 @@ theorem rawLap_cc_scalar
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
         (rawTensorConnLapSmooth (I := I) g 0 0 S).toSection x =
-      DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g
-        (TensorRSField.scalar0_smooth
-          (n := (∞ : WithTop ℕ∞)) S.toSection) x := by
+      DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g ⟨_, (TensorRSField.scalar0_smooth
+          (n := (∞ : WithTop ℕ∞)) S.toSection)⟩ x := by
   let f := TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection
   let hf := TensorRSField.scalar0_smooth
     (n := (∞ : WithTop ℕ∞)) S.toSection

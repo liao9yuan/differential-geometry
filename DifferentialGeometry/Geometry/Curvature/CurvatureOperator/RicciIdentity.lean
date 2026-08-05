@@ -587,18 +587,18 @@ theorem localConnLap_vector_eq_bochnerFormula_of_inner_form [I.Boundaryless]
     (hInner : ∀ w : TangentSpace I x,
       g.inner x (localConnLap_vector (LeviCivita (I := I) g) B
                   (fun b => gradFun (I := I) g f b) x) w =
-        g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x) w +
+        g.inner x (gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x) w +
           g.inner x (ricciSharp (I := I) g x (gradFun (I := I) g f x)) w) :
     localConnLap_vector (LeviCivita (I := I) g) B
         (fun b => gradFun (I := I) g f b) x =
-      gradFun (I := I) g (Δ_g (I := I) g hf) x +
+      gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x +
         ricciSharp (I := I) g x (gradFun (I := I) g f x) := by
   rw [vector_eq_iff_inner_eq (I := I) g x]
   intro w
   rw [hInner w]
-  rw [show g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x +
+  rw [show g.inner x (gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x +
         ricciSharp (I := I) g x (gradFun (I := I) g f x)) w =
-      g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x) w +
+      g.inner x (gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x) w +
         g.inner x (ricciSharp (I := I) g x (gradFun (I := I) g f x)) w from
     by rw [map_add, ContinuousLinearMap.add_apply]]
 

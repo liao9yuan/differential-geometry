@@ -235,9 +235,11 @@ theorem lapDiffA20_test
             ((v.1 : tensorHs (I := I) (M := M)
                 (G.metric (T : Real)) 0 0 2),
               ∫ x, (Δ_g (I := I) (G.metric ((T : Real) - s))
-                      (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
+                      ⟨reprScalar0 (I := I) (M := M) v.1 v.2,
+                        reprScalar0_smooth (I := I) (M := M) v.1 v.2⟩ x -
                     Δ_g (I := I) (G.metric (T : Real))
-                      (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x) *
+                      ⟨reprScalar0 (I := I) (M := M) v.1 v.2,
+                        reprScalar0_smooth (I := I) (M := M) v.1 v.2⟩ x) *
                   reprScalar0 (I := I) (M := M) w.1 w.2 x
                 ∂(riemannianVolumeMeasure (I := I) (M := M)
                   (G.metric (T : Real))))) := by
@@ -263,9 +265,11 @@ theorem lapDiffA20_test
           ((v.1 : tensorHs (I := I) (M := M)
               (G.metric (T : Real)) 0 0 2),
             ∫ x, (Δ_g (I := I) (G.metric ((T : Real) - s))
-                    (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
+                    ⟨reprScalar0 (I := I) (M := M) v.1 v.2,
+                      reprScalar0_smooth (I := I) (M := M) v.1 v.2⟩ x -
                   Δ_g (I := I) (G.metric (T : Real))
-                    (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x) *
+                    ⟨reprScalar0 (I := I) (M := M) v.1 v.2,
+                      reprScalar0_smooth (I := I) (M := M) v.1 v.2⟩ x) *
                 reprScalar0 (I := I) (M := M) w.1 w.2 x
               ∂(riemannianVolumeMeasure (I := I) (M := M)
                 (G.metric (T : Real)))))

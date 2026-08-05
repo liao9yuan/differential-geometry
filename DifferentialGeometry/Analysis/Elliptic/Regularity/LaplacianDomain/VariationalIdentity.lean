@@ -134,14 +134,14 @@ private noncomputable def gradInnerSmoothScalar
     (gradFun (I := I) g v.toFun x)
   smooth := by
     have h := contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
-      (grad_g (I := I) g ρα.contMDiff) (grad_g (I := I) g v.smooth)
+      (grad_g (I := I) g ρα) (grad_g (I := I) g ⟨v.toFun, v.smooth⟩)
     refine h.congr (fun x => ?_)
-    change g.inner x ((grad_g (I := I) g ρα.contMDiff :
+    change g.inner x ((grad_g (I := I) g ρα :
         Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-        ((grad_g (I := I) g v.smooth :
+        ((grad_g (I := I) g ⟨v.toFun, v.smooth⟩ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g v.toFun x)
-    rw [grad_g_apply, grad_g_apply]
+    simp [grad_g_apply]
 
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in

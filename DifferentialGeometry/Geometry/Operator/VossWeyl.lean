@@ -79,7 +79,7 @@ lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
     {x : M} (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (hx_int : extChartAt I α x ∈ interior (extChartAt I α).target)
     (i : Fin (Module.finrank ℝ E)) :
-    chartCoeff (I := I) α (grad_g (I := I) g hf) i x =
+    chartCoeff (I := I) α (grad_g (I := I) g ⟨_, hf⟩) i x =
       gradChartCoeff (I := I) g α f i x := by
   classical
   set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
@@ -125,11 +125,11 @@ lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
       simp [Ne.symm hki]
     · intro hi
       exact absurd (Finset.mem_univ i) hi
-  have hgrad_g_x : ((grad_g (I := I) g hf :
+  have hgrad_g_x : ((grad_g (I := I) g ⟨_, hf⟩ :
         Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) = gradFun (I := I) g f x :=
-    grad_g_apply (I := I) g hf x
+    grad_g_apply (I := I) g ⟨_, hf⟩ x
   unfold chartCoeff
-  rw [show ((grad_g (I := I) g hf :
+  rw [show ((grad_g (I := I) g ⟨_, hf⟩ :
         Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) = gradFun (I := I) g f x
       from hgrad_g_x]
   rw [show (T ⟨x, gradFun (I := I) g f x⟩).2 = L (gradFun (I := I) g f x)
@@ -142,7 +142,7 @@ private lemma chartCoeffOnE_grad_g_eq_gradChartCoeffOnE [I.Boundaryless]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (i : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ (extChartAt I α).target) :
-    chartCoeffOnE (I := I) α (grad_g (I := I) g hf) i y =
+    chartCoeffOnE (I := I) α (grad_g (I := I) g ⟨_, hf⟩) i y =
       gradChartCoeffOnE (I := I) g α f i y := by
   classical
   set z : M := (extChartAt I α).symm y with hz_def
@@ -174,7 +174,7 @@ lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source) :
-    localDivergence (I := I) g α (grad_g (I := I) g hf) x =
+    localDivergence (I := I) g α (grad_g (I := I) g ⟨_, hf⟩) x =
       chartVossWeylLaplacian (I := I) g α f x := by
   classical
   rw [localDivergence_def, chartVossWeylLaplacian_def]
@@ -191,7 +191,7 @@ lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
   have htarget_nhd : (extChartAt I α).target ∈ 𝓝 y₀ :=
     htarget_open.mem_nhds hy₀_target
   have hev : (fun y : E =>
-        chartCoeffOnE (I := I) α (grad_g (I := I) g hf) i y *
+        chartCoeffOnE (I := I) α (grad_g (I := I) g ⟨_, hf⟩) i y *
           chartDensityOnE (I := I) g α y) =ᶠ[𝓝 y₀]
       chartVossWeylIntegrand (I := I) g α f i := by
     filter_upwards [htarget_nhd] with y hy
@@ -205,9 +205,9 @@ theorem voss_weyl_laplacian_formula_of_closed
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source) :
-    Δ_g (I := I) g hf x = chartVossWeylLaplacian (I := I) g α f x := by
+    Δ_g (I := I) g ⟨_, hf⟩ x = chartVossWeylLaplacian (I := I) g α f x := by
   rw [Δ_g_def]
-  rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g hf) hx]
+  rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g ⟨_, hf⟩) hx]
   exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
 
 theorem laplacian_eq_chartVossWeyl_of_sigmaCompact
@@ -215,9 +215,9 @@ theorem laplacian_eq_chartVossWeyl_of_sigmaCompact
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source) :
-    Δ_g (I := I) g hf x = chartVossWeylLaplacian (I := I) g α f x := by
+    Δ_g (I := I) g ⟨_, hf⟩ x = chartVossWeylLaplacian (I := I) g α f x := by
   rw [Δ_g_def]
-  rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g hf) hx]
+  rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g ⟨_, hf⟩) hx]
   exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
 
 theorem voss_weyl_laplacian_formula_pointwise
@@ -225,7 +225,7 @@ theorem voss_weyl_laplacian_formula_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source) :
-    Δ_g (I := I) g hf x = chartVossWeylLaplacian (I := I) g α f x :=
+    Δ_g (I := I) g ⟨_, hf⟩ x = chartVossWeylLaplacian (I := I) g α f x :=
   laplacian_eq_chartVossWeyl_of_sigmaCompact (I := I) g α hf hx
 
 end Operator

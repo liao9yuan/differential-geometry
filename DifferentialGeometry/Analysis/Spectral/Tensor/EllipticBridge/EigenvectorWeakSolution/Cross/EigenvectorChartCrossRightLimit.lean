@@ -316,7 +316,7 @@ noncomputable def covDerivAlongGrad
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) :
     SmoothCcTensor g r s :=
   covDerivAlong (I := I) (M := M) g r s S
-    (grad_g (I := I) g ζ.contMDiff)
+    (grad_g (I := I) g ζ)
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlongGrad_toSection_apply

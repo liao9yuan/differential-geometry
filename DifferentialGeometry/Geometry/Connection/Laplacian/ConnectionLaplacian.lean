@@ -29,13 +29,13 @@ open DifferentialGeometry.Geometry.Operator
 def connLaplacian_function [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) : M → ℝ :=
-  Δ_g (I := I) g hf
+  Δ_g (I := I) g ⟨_, hf⟩
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp] lemma connLaplacian_function_def [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
-    connLaplacian_function (I := I) g hf x = Δ_g (I := I) g hf x := rfl
+    connLaplacian_function (I := I) g hf x = Δ_g (I := I) g ⟨_, hf⟩ x := rfl
 
 def connLaplacian_vector
     (g : SmoothRiemannianMetric I M)
@@ -81,11 +81,11 @@ omit [SigmaCompactSpace M] [T2Space M] in
               (smoothOrthoFrame (I := I) g x i) x
               (smoothOrthoFrame (I := I) g x i x))) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem connLaplacian_function_eq_laplaceBeltrami [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
-    connLaplacian_function (I := I) g hf = Δ_g (I := I) g hf := rfl
+    connLaplacian_function (I := I) g hf = Δ_g (I := I) g ⟨_, hf⟩ := rfl
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -102,7 +102,7 @@ theorem connLaplacian_function_contMDiff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (connLaplacian_function (I := I) g hf) :=
-  Δ_g_contMDiff (I := I) g hf
+  Δ_g_contMDiff (I := I) g ⟨_, hf⟩
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem connLaplacian_function_add [I.Boundaryless]
@@ -114,7 +114,7 @@ theorem connLaplacian_function_add [I.Boundaryless]
         connLaplacian_function (I := I) g hh x := by
   rw [connLaplacian_function_def, connLaplacian_function_def,
       connLaplacian_function_def]
-  exact Δ_g_add (I := I) g hf hh x
+  exact Δ_g_add (I := I) g ⟨_, hf⟩ ⟨_, hh⟩ x
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp] theorem connLaplacian_function_const [I.Boundaryless]
@@ -157,11 +157,11 @@ theorem connLaplacian_grad_eq_grad_laplacian_plus_ricciSharp_of_inner
     (hInner : ∀ w : TangentSpace I x,
       g.inner x (connLaplacian_vector (I := I) g
                   (fun b => gradFun (I := I) g f b) x) w =
-        g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x) w +
+        g.inner x (gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x) w +
           g.inner x (ricciSharp (I := I) g x (gradFun (I := I) g f x)) w) :
     connLaplacian_vector (I := I) g
         (fun b => gradFun (I := I) g f b) x =
-      gradFun (I := I) g (Δ_g (I := I) g hf) x +
+      gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x +
         ricciSharp (I := I) g x (gradFun (I := I) g f x) := by
   unfold connLaplacian_vector
   exact heart_of_bochner_smoothOrthoFrame (I := I) g hf x hInner
@@ -174,11 +174,11 @@ theorem connLaplacian_grad_eq_grad_laplacian_plus_ricciSharp_of_inner_form
     (hInner : ∀ w : TangentSpace I x,
       g.inner x (connLaplacian_vector (I := I) g
                   (fun b => gradFun (I := I) g f b) x) w =
-        g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x) w +
+        g.inner x (gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x) w +
           g.inner x (ricciSharp (I := I) g x (gradFun (I := I) g f x)) w) :
     connLaplacian_vector (I := I) g
         (fun b => gradFun (I := I) g f b) x =
-      gradFun (I := I) g (Δ_g (I := I) g hf) x +
+      gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x +
         ricciSharp (I := I) g x (gradFun (I := I) g f x) :=
   connLaplacian_grad_eq_grad_laplacian_plus_ricciSharp_of_inner
     (I := I) g hf x hInner
@@ -189,19 +189,19 @@ theorem connLaplacian_grad_iff_inner_form [I.Boundaryless]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     connLaplacian_vector (I := I) g
         (fun b => gradFun (I := I) g f b) x =
-      gradFun (I := I) g (Δ_g (I := I) g hf) x +
+      gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x +
         ricciSharp (I := I) g x (gradFun (I := I) g f x) ↔
       ∀ w : TangentSpace I x,
         g.inner x (connLaplacian_vector (I := I) g
                     (fun b => gradFun (I := I) g f b) x) w =
-          g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x) w +
+          g.inner x (gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x) w +
             g.inner x (ricciSharp (I := I) g x (gradFun (I := I) g f x)) w := by
   classical
   refine ⟨fun h w => ?_, fun h => ?_⟩
   · rw [h]
-    rw [show g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x +
+    rw [show g.inner x (gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x +
           ricciSharp (I := I) g x (gradFun (I := I) g f x)) w =
-        g.inner x (gradFun (I := I) g (Δ_g (I := I) g hf) x) w +
+        g.inner x (gradFun (I := I) g (Δ_g (I := I) g ⟨_, hf⟩) x) w +
           g.inner x (ricciSharp (I := I) g x (gradFun (I := I) g f x)) w from
       by rw [map_add, ContinuousLinearMap.add_apply]]
   · exact connLaplacian_grad_eq_grad_laplacian_plus_ricciSharp_of_inner
@@ -315,7 +315,7 @@ lemma frobeniusSq_grad_vector_nonneg
   · exact le_of_lt (g.pos x v hv)
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-omit [SigmaCompactSpace M] in
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem connLaplacian_inner_self_of_trace [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {V : Π b : M, TangentSpace I b}
@@ -323,7 +323,7 @@ theorem connLaplacian_inner_self_of_trace [I.Boundaryless]
     (hgVV : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => g.inner b (V b) (V b)))
     (x : M)
     (hLeibniz :
-      Δ_g (I := I) g hgVV x =
+      Δ_g (I := I) g ⟨_, hgVV⟩ x =
         2 * g.inner x (connLaplacian_vector (I := I) g V x) (V x) +
           2 * frobeniusSq_grad_vector (I := I) g V x) :
     connLaplacian_function (I := I) g hgVV x =

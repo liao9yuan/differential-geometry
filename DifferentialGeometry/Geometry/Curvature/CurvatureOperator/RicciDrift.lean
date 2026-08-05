@@ -53,7 +53,7 @@ noncomputable def ricGradForm [I.Boundaryless]
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1 :=
   partialEval0SField (I := I) (metricRicci (I := I) (M := M) g)
-    (grad_g (I := I) g hf)
+    (grad_g (I := I) g ⟨_, hf⟩)
 
 omit [SigmaCompactSpace M] in
 @[simp] theorem ricGradForm_apply [I.Boundaryless]
@@ -61,7 +61,7 @@ omit [SigmaCompactSpace M] in
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
     ricGradForm (I := I) g hf x =
       tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x
-        (metricRicciAt (I := I) (M := M) g x) (grad_g (I := I) g hf x) := by
+        (metricRicciAt (I := I) (M := M) g x) (grad_g (I := I) g ⟨_, hf⟩ x) := by
   simp [ricGradForm]
 
 
@@ -94,10 +94,10 @@ noncomputable def ricDriftVec [I.Boundaryless]
   ContMDiffSection.mk
     (fun x : M => ricGradVec (I := I) g hf x -
       ((1 / 2 : Real) * metricScalarAt (I := I) (M := M) g x) •
-        grad_g (I := I) g hf x)
+        grad_g (I := I) g ⟨_, hf⟩ x)
     ((ricGradVec (I := I) g hf).contMDiff.sub_section
       ((contMDiff_const.mul (metricScalar_smooth (I := I) (M := M) g)).smul_section
-        (grad_g (I := I) g hf).contMDiff))
+        (grad_g (I := I) g ⟨_, hf⟩).contMDiff))
 
 omit [SigmaCompactSpace M] in
 @[simp] theorem ricDriftVec_apply [I.Boundaryless]
@@ -105,7 +105,7 @@ omit [SigmaCompactSpace M] in
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
     ricDriftVec (I := I) g hf x = ricGradVec (I := I) g hf x -
       ((1 / 2 : Real) * metricScalarAt (I := I) (M := M) g x) •
-        grad_g (I := I) g hf x :=
+        grad_g (I := I) g ⟨_, hf⟩ x :=
   rfl
 
 private theorem div_ricGrad [I.Boundaryless]
@@ -116,7 +116,7 @@ private theorem div_ricGrad [I.Boundaryless]
       (1 / 2 : Real) *
           extDerivFun (I := I)
             (fun y : M => metricScalarAt (I := I) (M := M) g y) x
-            (grad_g (I := I) g hf x) +
+            (grad_g (I := I) g ⟨_, hf⟩ x) +
         inner02 (I := I) g x (metricRicciAt (I := I) (M := M) g x)
           (hessianSec (I := I) (metricCov (I := I) (M := M) g)
             (metricCov_smooth (I := I) (M := M) g) f hf x) := by
@@ -124,7 +124,7 @@ private theorem div_ricGrad [I.Boundaryless]
   let cov := LeviCivita (I := I) g
   let hcov := metricCov_smooth (I := I) (M := M) g
   let Ric := metricRicci (I := I) (M := M) g
-  let G := grad_g (I := I) g hf
+  let G := grad_g (I := I) g ⟨_, hf⟩
   let beta := ricGradForm (I := I) g hf
   let hRicReg := totalNabla0S_reg (I := I) 2 cov hcov Ric
   let nRic := totalNabla0S (I := I) 2 cov Ric hRicReg
@@ -303,9 +303,9 @@ theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
           (hessianSec (I := I) (metricCov (I := I) (M := M) g)
             (metricCov_smooth (I := I) (M := M) g) f hf x) -
         (1 / 2 : Real) * metricScalarAt (I := I) (M := M) g x *
-          Δ_g (I := I) g hf x := by
+          Δ_g (I := I) g ⟨_, hf⟩ x := by
   let cov := metricCov (I := I) (M := M) g
-  let G := grad_g (I := I) g hf
+  let G := grad_g (I := I) g ⟨_, hf⟩
   let RG := ricGradVec (I := I) g hf
   let a : M -> Real := fun y =>
     (1 / 2 : Real) * metricScalarAt (I := I) (M := M) g y
@@ -336,7 +336,7 @@ theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
       (divergence_smul (I := I) (X := fun y : M => G y) (x := x) cov inferInstance haMD
         (G.contMDiff.contMDiffAt.mdifferentiableAt (by simp)))
   have hLap :
-      divergence (I := I) cov (fun y : M => G y) x = Δ_g (I := I) g hf x := by
+      divergence (I := I) cov (fun y : M => G y) x = Δ_g (I := I) g ⟨_, hf⟩ x := by
     simpa only [cov, G, laplacian_eq, grad_g_apply] using
       (laplacian_levi_eq (I := I) g hf x)
   have hda :
@@ -372,11 +372,18 @@ theorem ricDriftAct [I.Boundaryless]
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
     tangentSectionAction (I := I) (ricDriftVec (I := I) g hf) f x =
       metricRicciAt (I := I) (M := M) g x
-          (vec2 (I := I) (grad_g (I := I) g hf x)
-            (grad_g (I := I) g hf x)) -
+          (vec2 (I := I) (grad_g (I := I) g ⟨_, hf⟩ x)
+            (grad_g (I := I) g ⟨_, hf⟩ x)) -
         (1 / 2 : Real) * metricScalarAt (I := I) (M := M) g x *
-          g.inner x (grad_g (I := I) g hf x) (grad_g (I := I) g hf x) := by
-  rw [tangentSectionAction_eq_inner_grad_g (I := I) g hf
+          g.inner x (grad_g (I := I) g ⟨_, hf⟩ x) (grad_g (I := I) g ⟨_, hf⟩ x) := by
+  let fb : C^∞⟮I, M; ℝ⟯ := ⟨f, hf⟩
+  change tangentSectionAction (I := I) (ricDriftVec (I := I) g hf) (⇑fb) x =
+    metricRicciAt (I := I) (M := M) g x
+        (vec2 (I := I) (grad_g (I := I) g fb x)
+          (grad_g (I := I) g fb x)) -
+      (1 / 2 : Real) * metricScalarAt (I := I) (M := M) g x *
+        g.inner x (grad_g (I := I) g fb x) (grad_g (I := I) g fb x)
+  rw [tangentSectionAction_eq_inner_grad_g (I := I) g fb
     (ricDriftVec (I := I) g hf) x]
   simp only [ricDriftVec_apply, map_sub, map_smul,
     ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,

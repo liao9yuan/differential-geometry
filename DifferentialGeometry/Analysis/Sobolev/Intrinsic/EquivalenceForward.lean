@@ -1476,7 +1476,7 @@ private lemma gNormGrad_le_gNormG_aeEq_smooth_of_HasWeakRiemannianGradLp
     DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I) (M := M) g
   set σ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
-    DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hu_smooth with hσ_def
+    DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hu_smooth⟩ with hσ_def
   have hgradFun_weak :
       DifferentialGeometry.Analysis.Sobolev.IntrinsicLp.HasWeakRiemannianGradLp
         (I := I) (M := M) g u
@@ -1508,7 +1508,7 @@ private lemma gNormGrad_le_gNormG_aeEq_smooth_of_HasWeakRiemannianGradLp
   have hσ_eq :
       (σ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
         DifferentialGeometry.Geometry.Operator.gradFun (I := I) g u x :=
-    DifferentialGeometry.Geometry.Operator.grad_g_apply (I := I) g hu_smooth x
+    DifferentialGeometry.Geometry.Operator.grad_g_apply (I := I) g ⟨_, hu_smooth⟩ x
   rw [hσ_eq] at hx
   set v : TangentSpace I x := G x with hv_def
   set w : TangentSpace I x :=

@@ -27,7 +27,7 @@ def boundaryLaplacian
     {f : BoundaryManifold I M → ℝ}
     (hf : ContMDiff hI.boundaryI 𝓘(ℝ, ℝ) ∞ f) :
     BoundaryManifold I M → ℝ :=
-  Δ_g (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) hf
+  Δ_g (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) ⟨_, hf⟩
 
 omit [InnerProductSpace ℝ E] in
 omit [FiniteDimensional ℝ E] in
@@ -38,7 +38,7 @@ omit [FiniteDimensional ℝ E] in
     (hf : ContMDiff hI.boundaryI 𝓘(ℝ, ℝ) ∞ f)
     (x : BoundaryManifold I M) :
     boundaryLaplacian (I := I) (M := M) g hf x =
-      Δ_g (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) hf x := rfl
+      Δ_g (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) ⟨_, hf⟩ x := rfl
 
 omit [InnerProductSpace ℝ E] in
 omit [FiniteDimensional ℝ E] in
@@ -49,7 +49,7 @@ theorem boundaryLaplacian_contMDiff
     (hf : ContMDiff hI.boundaryI 𝓘(ℝ, ℝ) ∞ f) :
     ContMDiff hI.boundaryI 𝓘(ℝ, ℝ) ∞
       (boundaryLaplacian (I := I) (M := M) g hf) :=
-  Δ_g_contMDiff (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) hf
+  Δ_g_contMDiff (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) ⟨_, hf⟩
 
 omit [InnerProductSpace ℝ E] in
 omit [FiniteDimensional ℝ E] in
@@ -63,7 +63,7 @@ theorem boundaryLaplacian_add
     boundaryLaplacian (I := I) (M := M) g (hf.add hh) x =
       boundaryLaplacian (I := I) (M := M) g hf x +
         boundaryLaplacian (I := I) (M := M) g hh x :=
-  Δ_g_add (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) hf hh x
+  Δ_g_add (I := hI.boundaryI) (inducedMetric (I := I) (M := M) g) ⟨_, hf⟩ ⟨_, hh⟩ x
 
 omit [InnerProductSpace ℝ E] in
 omit [FiniteDimensional ℝ E] in

@@ -276,7 +276,7 @@ theorem conj_heat_mass_deriv
       (-2 : Real) * scalar t x)
     (hconj : ∀ x : M,
       deriv (fun s : Real => u s x) t =
-        -Δ_g (I := I) (G.metric t) huSmooth x + scalar t x * u t x) :
+        -Δ_g (I := I) (G.metric t) ⟨_, huSmooth⟩ x + scalar t x * u t x) :
     HasDerivAt
       (fun s : Real =>
         ∫ x, u s x ∂(volumeMeasureFamily (I := I) (M := M) G s))
@@ -289,7 +289,7 @@ theorem conj_heat_mass_deriv
       (f := fun _ : M => (1 : Real)) (h := u t)
       contMDiff_const huSmooth t
   have hlap :
-      ∫ x, Δ_g (I := I) (G.metric t) huSmooth x
+      ∫ x, Δ_g (I := I) (G.metric t) ⟨_, huSmooth⟩ x
         ∂(volumeMeasureFamily (I := I) (M := M) G t) = 0 := by
     simpa only [one_mul, Δ_g_const, mul_zero, sub_zero] using hgreen
   have hmass :
@@ -298,7 +298,7 @@ theorem conj_heat_mass_deriv
     calc
       (∫ x, (deriv (fun s : Real => u s x) t - scalar t x * u t x)
           ∂(volumeMeasureFamily (I := I) (M := M) G t)) =
-          ∫ x, -Δ_g (I := I) (G.metric t) huSmooth x
+          ∫ x, -Δ_g (I := I) (G.metric t) ⟨_, huSmooth⟩ x
             ∂(volumeMeasureFamily (I := I) (M := M) G t) := by
         apply integral_congr_ae
         filter_upwards with x
@@ -323,7 +323,7 @@ theorem conj_heat_mass_eq
       traceTimeDerivMetricAt (I := I) G t x = (-2 : Real) * scalar t x)
     (hconj : ∀ (t : Real) (ht : t ∈ Set.Icc a b) (x : M),
       deriv (fun s : Real => u s x) t =
-        -Δ_g (I := I) (G.metric t) (huSmooth t ht) x +
+        -Δ_g (I := I) (G.metric t) ⟨u t, huSmooth t ht⟩ x +
           scalar t x * u t x) :
     (∫ x, u b x ∂(volumeMeasureFamily (I := I) (M := M) G b)) =
       ∫ x, u a x ∂(volumeMeasureFamily (I := I) (M := M) G a) := by
@@ -363,7 +363,7 @@ theorem conj_heat_mass_one
       traceTimeDerivMetricAt (I := I) G t x = (-2 : Real) * scalar t x)
     (hconj : ∀ (t : Real) (ht : t ∈ Set.Icc a b) (x : M),
       deriv (fun s : Real => u s x) t =
-        -Δ_g (I := I) (G.metric t) (huSmooth t ht) x +
+        -Δ_g (I := I) (G.metric t) ⟨u t, huSmooth t ht⟩ x +
           scalar t x * u t x)
     (hmass : (∫ x, u b x ∂(volumeMeasureFamily (I := I) (M := M) G b)) = 1) :
     ∀ t ∈ Set.Icc a b,

@@ -231,18 +231,25 @@ lemma continuous_sqrt_g_inner_gradFun_self
         (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g f x))) := by
   have hcont := TangentBundle.continuous_g_inner_of_smooth_sections
     (I := I) (M := M) g
-    (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hf)
-    (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hf)
+    (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hf⟩)
+    (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hf⟩)
   have hcoe : (fun x : M => g.inner x
-        ((DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hf :
+        ((DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hf⟩ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-          ((DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hf :
+          ((DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hf⟩ :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) =
       (fun x : M => g.inner x
         (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g f x)
         (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g f x)) := by
     funext x
-    rw [DifferentialGeometry.Geometry.Operator.grad_g_apply (I := I) g hf x]
+    rw [DifferentialGeometry.Geometry.Operator.grad_g_apply (I := I) g ⟨_, hf⟩ x]
+    change g.inner x
+        (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g f x)
+        (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g f x) =
+      g.inner x
+        (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g f x)
+        (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g f x)
+    rfl
   rw [hcoe] at hcont
   exact Real.continuous_sqrt.comp hcont
 

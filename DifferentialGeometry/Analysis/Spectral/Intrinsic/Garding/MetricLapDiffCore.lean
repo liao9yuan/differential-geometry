@@ -83,10 +83,8 @@ theorem lapDiffSec_apply
     (lapDiffSec (I := I) (M := M) g h v).toSection x =
       Tensor0SSpace.toRS0
         ((Tensor0SNabla.tensor0Iso I M x).symm
-          (Δ_g (I := I) h
-              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
-            Δ_g (I := I) g
-              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x)) := by
+          (Δ_g (I := I) h ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x -
+            Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x)) := by
   simp only [lapDiffSec, LinearMap.sub_apply, LinearMap.comp_apply,
     finiteReprLin_apply, rawConnLapLin_apply,
     SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
@@ -122,10 +120,8 @@ theorem lapDiffCore_pair
     inner Real (lapDiffCore (I := I) (M := M) q h v)
         (SmoothCcTensor.toL2
           (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2)) =
-      ∫ x, (Δ_g (I := I) h
-              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
-            Δ_g (I := I) q
-              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x) *
+      ∫ x, (Δ_g (I := I) h ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x -
+            Δ_g (I := I) q ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x) *
           reprScalar0 (I := I) (M := M) w.1 w.2 x
         ∂(riemannianVolumeMeasure (I := I) (M := M) q) := by
   change inner Real
@@ -149,14 +145,10 @@ theorem lapDiffCore_pair
   have hlap :
       tensor0SSpace_evalScalar x
         ((Tensor0SNabla.tensor0Iso I M x).symm
-          (Δ_g (I := I) h
-              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
-            Δ_g (I := I) q
-              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x)) =
-        Δ_g (I := I) h
-            (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
-          Δ_g (I := I) q
-            (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x := by
+          (Δ_g (I := I) h ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x -
+            Δ_g (I := I) q ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x)) =
+        Δ_g (I := I) h ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x -
+          Δ_g (I := I) q ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x := by
     change Tensor0SNabla.tensor0Iso I M x
       ((Tensor0SNabla.tensor0Iso I M x).symm _) = _
     rw [ContinuousLinearEquiv.apply_symm_apply]
@@ -182,10 +174,8 @@ theorem lapDiffCore_sq
     (g h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) g) :
     ‖lapDiffCore (I := I) (M := M) g h v‖ ^ 2 =
-      ∫ x, (Δ_g (I := I) h
-              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
-            Δ_g (I := I) g
-              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x) ^ 2
+      ∫ x, (Δ_g (I := I) h ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x -
+            Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v.1 v.2)⟩ x) ^ 2
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   change ‖SmoothCcTensor.toL2
       (lapDiffSec (I := I) (M := M) g h v)‖ ^ 2 = _

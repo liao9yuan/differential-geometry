@@ -333,12 +333,10 @@ theorem scalarLapDiff_eq
     (q h : SmoothRiemannianMetric I M) (U : SmoothCcTensor q 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
         (scalarLapDiffCc (I := I) q h U).toSection x =
-      Δ_g (I := I) h
-          (TensorRSField.scalar0_smooth
-            (n := (∞ : WithTop ℕ∞)) U.toSection) x -
-        Δ_g (I := I) q
-          (TensorRSField.scalar0_smooth
-            (n := (∞ : WithTop ℕ∞)) U.toSection) x := by
+      Δ_g (I := I) h ⟨_, (TensorRSField.scalar0_smooth
+            (n := (∞ : WithTop ℕ∞)) U.toSection)⟩ x -
+        Δ_g (I := I) q ⟨_, (TensorRSField.scalar0_smooth
+            (n := (∞ : WithTop ℕ∞)) U.toSection)⟩ x := by
   let f := TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) U.toSection
   let hf := TensorRSField.scalar0_smooth
     (n := (∞ : WithTop ℕ∞)) U.toSection

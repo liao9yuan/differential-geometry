@@ -262,7 +262,7 @@ structure CinftyLimitData
 
 
 
-
+omit [SigmaCompactSpace M] in
 theorem restart_short_time (gomega : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, 0 < T ∧ ∃ r : ℝ → SmoothRiemannianMetric I M,
       r 0 = gomega ∧
@@ -647,7 +647,7 @@ structure CinftyGlueData
 
 
 
-
+omit [SigmaCompactSpace M] in
 theorem ricci_flow_extends_construction
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαomega : α < omega)
     (hleft : ∀ t ∈ Set.Ico α omega, ∀ x : M, ∀ v w : TangentSpace I x,

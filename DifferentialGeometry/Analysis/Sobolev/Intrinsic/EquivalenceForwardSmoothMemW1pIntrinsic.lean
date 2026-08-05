@@ -87,16 +87,19 @@ lemma memLp_g_norm_gradFun_smooth
   have hG_cont : Continuous (fun x : M => Real.sqrt
       (g.inner x (gradFun (I := I) g u x) (gradFun (I := I) g u x))) := by
     have hcont := TangentBundle.continuous_g_inner_of_smooth_sections
-      (I := I) (M := M) g (grad_g (I := I) g hu) (grad_g (I := I) g hu)
+      (I := I) (M := M) g (grad_g (I := I) g ⟨_, hu⟩) (grad_g (I := I) g ⟨_, hu⟩)
     have hcoe : (fun x : M =>
-        g.inner x ((grad_g (I := I) g hu :
+        g.inner x ((grad_g (I := I) g ⟨_, hu⟩ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-            ((grad_g (I := I) g hu :
+            ((grad_g (I := I) g ⟨_, hu⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) =
         (fun x : M => g.inner x (gradFun (I := I) g u x)
           (gradFun (I := I) g u x)) := by
       funext x
-      rw [grad_g_apply (I := I) g hu x]
+      rw [grad_g_apply (I := I) g ⟨_, hu⟩ x]
+      change g.inner x (gradFun (I := I) g u x) (gradFun (I := I) g u x) =
+        g.inner x (gradFun (I := I) g u x) (gradFun (I := I) g u x)
+      rfl
     rw [hcoe] at hcont
     exact Real.continuous_sqrt.comp hcont
   exact continuous_memLp_of_compactSpace g p hG_cont
@@ -107,16 +110,16 @@ lemma hasWeakRiemannianGradLp_gradFun
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     HasWeakRiemannianGradLp (I := I) (M := M) g u (gradFun (I := I) g u) := by
   have h_smooth_gw : Intrinsic.HasWeakRiemannianGrad (I := I) (M := M) g u
-      (grad_g (I := I) g hu) :=
+      (grad_g (I := I) g ⟨_, hu⟩) :=
     Intrinsic.hasWeakRiemannianGrad_grad_g_of_contMDiff
       (I := I) (M := M) g hu
   have h_lp := IntrinsicLp.hasWeakRiemannianGradLp_of_smooth (I := I) (M := M)
     h_smooth_gw
-  have h_eq : (fun x : M => ((grad_g (I := I) g hu :
+  have h_eq : (fun x : M => ((grad_g (I := I) g ⟨_, hu⟩ :
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x : E)) =
       (fun x : M => (gradFun (I := I) g u x : E)) := by
     funext x
-    exact grad_g_apply (I := I) g hu x
+    exact grad_g_apply (I := I) g ⟨_, hu⟩ x
   rw [h_eq] at h_lp
   exact h_lp
 
@@ -268,18 +271,25 @@ lemma continuous_g_norm_gradFun
   have hcont :=
     TangentBundle.continuous_g_inner_of_smooth_sections
       (I := I) (M := M) g
-      (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hu)
-      (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hu)
+      (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hu⟩)
+      (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hu⟩)
   have hcoe : (fun x : M => g.inner x
-        ((DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hu :
+        ((DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hu⟩ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-          ((DifferentialGeometry.Geometry.Operator.grad_g (I := I) g hu :
+          ((DifferentialGeometry.Geometry.Operator.grad_g (I := I) g ⟨_, hu⟩ :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) =
       (fun x : M => g.inner x
         (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g u x)
         (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g u x)) := by
     funext x
-    rw [DifferentialGeometry.Geometry.Operator.grad_g_apply (I := I) g hu x]
+    rw [DifferentialGeometry.Geometry.Operator.grad_g_apply (I := I) g ⟨_, hu⟩ x]
+    change g.inner x
+        (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g u x)
+        (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g u x) =
+      g.inner x
+        (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g u x)
+        (DifferentialGeometry.Geometry.Operator.gradFun (I := I) g u x)
+    rfl
   rw [hcoe] at hcont
   exact Real.continuous_sqrt.comp hcont
 

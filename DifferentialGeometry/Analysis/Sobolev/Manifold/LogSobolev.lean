@@ -94,7 +94,7 @@ theorem logSobolev_closed
   have hgrad_cont : Continuous gradNorm := by
     have hinner := TangentBundle.continuous_g_inner_of_smooth_sections
       (I := I) (M := M) g
-      (grad_g (I := I) g hv) (grad_g (I := I) g hv)
+      (grad_g (I := I) g ⟨_, hv⟩) (grad_g (I := I) g ⟨_, hv⟩)
     exact Real.continuous_sqrt.comp (by
       simpa only [gradNorm, grad_g_apply] using hinner)
   have hv_mem2 : MemLp v (2 : ENNReal) μ := by

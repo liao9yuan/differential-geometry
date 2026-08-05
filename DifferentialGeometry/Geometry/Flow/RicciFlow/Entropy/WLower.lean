@@ -101,7 +101,7 @@ theorem w_fixed_lower
   have henergy_cont : Continuous energy := by
     have hinner := TangentBundle.continuous_g_inner_of_smooth_sections
       (I := I) (M := M) g
-      (grad_g (I := I) g hv) (grad_g (I := I) g hv)
+      (grad_g (I := I) g ⟨_, hv⟩) (grad_g (I := I) g ⟨_, hv⟩)
     simpa only [energy, grad_g_apply] using hinner
   have hv2cont : Continuous (fun x => v x ^ 2) := hv.continuous.pow 2
   have hR2cont : Continuous (fun x => R x * v x ^ 2) := hRcont.mul hv2cont

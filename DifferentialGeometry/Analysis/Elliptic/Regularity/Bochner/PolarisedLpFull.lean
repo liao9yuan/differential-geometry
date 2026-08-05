@@ -155,7 +155,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 omit [CompactSpace M] [SigmaCompactSpace M] in
 theorem v_sub_oneSubLap_eq_lap
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) (x : M) :
-    v.toFun x - v.oneSubLapClassical.toFun x = Δ_g (I := I) g v.smooth x := by
+    v.toFun x - v.oneSubLapClassical.toFun x = Δ_g (I := I) g ⟨v.toFun, v.smooth⟩ x := by
   rw [SmoothScalar.oneSubLapClassical_toFun, Pi.sub_apply]
   ring
 
@@ -168,15 +168,15 @@ theorem gradInnerSmoothBundle_sub_oneSubLap_apply
         (gradInnerSmoothBundle (I := I) (M := M) g φ
           v.oneSubLapClassical).toFun b =
       g.inner b (gradFun (I := I) g (φ : M → ℝ) b)
-        (gradFun (I := I) g (Δ_g (I := I) g v.smooth) b) := by
+        (gradFun (I := I) g (Δ_g (I := I) g ⟨v.toFun, v.smooth⟩) b) := by
   classical
   rw [gradInnerSmoothBundle_apply, gradInnerSmoothBundle_apply]
   have hv_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) v.toFun b :=
     v.smooth.mdifferentiable (by simp) b
   have hvl_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) v.oneSubLapClassical.toFun b :=
     v.oneSubLapClassical.smooth.mdifferentiable (by simp) b
-  have hΔv_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) (Δ_g (I := I) g v.smooth) b :=
-    (Δ_g_contMDiff (I := I) g v.smooth).mdifferentiable (by simp) b
+  have hΔv_diff : MDifferentiableAt I 𝓘(ℝ, ℝ) (Δ_g (I := I) g ⟨v.toFun, v.smooth⟩) b :=
+    (Δ_g_contMDiff (I := I) g ⟨v.toFun, v.smooth⟩).mdifferentiable (by simp) b
   have h_inner_sub : g.inner b
         (gradFun (I := I) g (φ : M → ℝ) b)
         (gradFun (I := I) g v.toFun b) -
@@ -197,21 +197,22 @@ theorem gradInnerSmoothBundle_sub_oneSubLap_apply
       (I := I) g hv_diff hvl_diff]
   rw [h_grad_sub]
   have h_fun_eq : (fun y : M => v.toFun y - v.oneSubLapClassical.toFun y) =
-      (fun y : M => Δ_g (I := I) g v.smooth y) := by
+      (fun y : M => Δ_g (I := I) g ⟨v.toFun, v.smooth⟩ y) := by
     funext y
     exact v_sub_oneSubLap_eq_lap (I := I) (M := M) g v y
   rw [h_fun_eq]
 
 noncomputable def smoothLaplacianAsScalar
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) : SmoothScalar g where
-  toFun := Δ_g (I := I) g φ.contMDiff
-  smooth := Δ_g_contMDiff (I := I) g φ.contMDiff
+  toFun := Δ_g (I := I) g φ
+  smooth := Δ_g_contMDiff (I := I) g φ
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 @[simp] lemma smoothLaplacianAsScalar_toFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     (smoothLaplacianAsScalar (I := I) (M := M) g φ).toFun =
-      Δ_g (I := I) g φ.contMDiff := rfl
+      Δ_g (I := I) g φ := rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 lemma smoothLaplacianBundle_toFun_eq_smoothLaplacianAsScalar
@@ -229,10 +230,10 @@ theorem oneSubLapClassical_gradInner_apply
         (gradFun (I := I) g v.toFun x)
       - g.inner x
           (gradFun (I := I) g v.toFun x)
-          (gradFun (I := I) g (Δ_g (I := I) g φ.contMDiff) x)
+          (gradFun (I := I) g (Δ_g (I := I) g φ) x)
       - g.inner x
           (gradFun (I := I) g (φ : M → ℝ) x)
-          (gradFun (I := I) g (Δ_g (I := I) g v.smooth) x)
+          (gradFun (I := I) g (Δ_g (I := I) g ⟨v.toFun, v.smooth⟩) x)
       - 2 * hessPairingChart (I := I) g φ
           ⟨v.toFun, v.smooth⟩ x
       - 2 * ricciTensor (I := I) g x
@@ -431,9 +432,9 @@ theorem gradInnerLaplacianCandidateUnconditional_smoothCase_of_hessHypothesis
         (gradFun (I := I) g v.toFun b) =
       g.inner b
         (gradFun (I := I) g v.toFun b)
-        (gradFun (I := I) g (Δ_g (I := I) g φ.contMDiff) b) := by
+        (gradFun (I := I) g (Δ_g (I := I) g φ) b) := by
     rw [show ((smoothLaplacianBundle (I := I) (M := M) g φ) : M → ℝ) =
-        Δ_g (I := I) g φ.contMDiff from rfl]
+        Δ_g (I := I) g φ from rfl]
     exact g.symm b _ _
   rw [h_phi_sym]
   have h_diff_eq : g.inner b
@@ -444,7 +445,7 @@ theorem gradInnerLaplacianCandidateUnconditional_smoothCase_of_hessHypothesis
         (gradFun (I := I) g v.oneSubLapClassical.toFun b) =
       g.inner b
         (gradFun (I := I) g (φ : M → ℝ) b)
-        (gradFun (I := I) g (Δ_g (I := I) g v.smooth) b) := by
+        (gradFun (I := I) g (Δ_g (I := I) g ⟨v.toFun, v.smooth⟩) b) := by
     have h := gradInnerSmoothBundle_sub_oneSubLap_apply (I := I) (M := M) g φ v b
     rw [gradInnerSmoothBundle_apply, gradInnerSmoothBundle_apply] at h
     exact h

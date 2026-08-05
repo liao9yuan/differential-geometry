@@ -33,14 +33,14 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 noncomputable def laplacianOfChartPOU (g : SmoothRiemannianMetric I M) (α : M) :
     C^∞⟮I, M; ℝ⟯ :=
-  ⟨Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff,
-    Δ_g_contMDiff (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff⟩
+  ⟨Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯),
+    Δ_g_contMDiff (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)⟩
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] lemma laplacianOfChartPOU_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x =
-      Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff x := rfl
+      Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x := rfl
 
 noncomputable def leibnizCompensatedSource (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :

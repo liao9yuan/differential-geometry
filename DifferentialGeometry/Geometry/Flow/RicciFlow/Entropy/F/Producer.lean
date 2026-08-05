@@ -113,22 +113,22 @@ theorem formula510_of_connTraceField
       ∀ x : M,
         lapPotential x =
           DifferentialGeometry.Geometry.Operator.Δ_g
-            (I := I) g hpotential x)
+            (I := I) g ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
             ((DifferentialGeometry.Geometry.Operator.grad_g
-              (I := I) g hpotential :
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
             ((DifferentialGeometry.Geometry.Operator.grad_g
-              (I := I) g hpotential :
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
           DifferentialGeometry.Geometry.Operator.Δ_g
-            (I := I) g hq x)
+            (I := I) g ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :
@@ -202,22 +202,22 @@ theorem formula510_of_trace
       ∀ x : M,
         lapPotential x =
           DifferentialGeometry.Geometry.Operator.Δ_g
-            (I := I) g hpotential x)
+            (I := I) g ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
             ((DifferentialGeometry.Geometry.Operator.grad_g
-              (I := I) g hpotential :
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
             ((DifferentialGeometry.Geometry.Operator.grad_g
-              (I := I) g hpotential :
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
           DifferentialGeometry.Geometry.Operator.Δ_g
-            (I := I) g hq x)
+            (I := I) g ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :
@@ -366,22 +366,22 @@ theorem formula510_of_components
       ∀ x : M,
         lapPotential x =
           DifferentialGeometry.Geometry.Operator.Δ_g
-            (I := I) g hpotential x)
+            (I := I) g ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
             ((DifferentialGeometry.Geometry.Operator.grad_g
-              (I := I) g hpotential :
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
             ((DifferentialGeometry.Geometry.Operator.grad_g
-              (I := I) g hpotential :
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
           DifferentialGeometry.Geometry.Operator.Δ_g
-            (I := I) g hq x)
+            (I := I) g ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :
@@ -617,22 +617,22 @@ theorem formula510_producer
       ∀ x : M,
         lapPotential x =
           DifferentialGeometry.Geometry.Operator.Δ_g
-            (I := I) (G.metric s0) hpotential x)
+            (I := I) (G.metric s0) ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           (G.metric s0).inner x
             ((DifferentialGeometry.Geometry.Operator.grad_g
-              (I := I) (G.metric s0) hpotential :
+              (I := I) (G.metric s0) ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
             ((DifferentialGeometry.Geometry.Operator.grad_g
-              (I := I) (G.metric s0) hpotential :
+              (I := I) (G.metric s0) ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
           DifferentialGeometry.Geometry.Operator.Δ_g
-            (I := I) (G.metric s0) hq x)
+            (I := I) (G.metric s0) ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :

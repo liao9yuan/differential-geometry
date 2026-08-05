@@ -58,10 +58,8 @@ theorem lapDiff_energy_le
         (Module.finrank Real E : Real) *
             DifferentialGeometry.HCGCompactness.metricDerivNormSupOn
               (I := I) Set.univ 1 h g g <= (1 / 2 : Real) ->
-        ∫ x, (Δ_g (I := I) h
-              (reprScalar0_smooth (I := I) (M := M) v hv) x -
-            Δ_g (I := I) g
-              (reprScalar0_smooth (I := I) (M := M) v hv) x) ^ 2
+        ∫ x, (Δ_g (I := I) h ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x -
+            Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x) ^ 2
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) <=
           C *
             (DifferentialGeometry.HCGCompactness.metricDerivNormSupOn
@@ -88,7 +86,7 @@ theorem lapDiff_energy_le
     Tensor0SBundle.normSq0S (I := I) g x 1
       (duSec (I := I) f hf x)
   let lhs : M -> Real := fun x =>
-    (Δ_g (I := I) h hf x - Δ_g (I := I) g hf x) ^ 2
+    (Δ_g (I := I) h ⟨_, hf⟩ x - Δ_g (I := I) g ⟨_, hf⟩ x) ^ 2
   let rhs : M -> Real := fun x => A * HessNorm x + B * duNorm x
   have hHessEq : HessNorm = chartHessFrobeniusSq (I := I) g f := by
     funext x
@@ -106,8 +104,8 @@ theorem lapDiff_energy_le
     rw [hduEq]
     exact normGradSqFun_continuous (I := I) g hf
   have hlhsCont : Continuous lhs := by
-    exact (((Δ_g_contMDiff (I := I) h hf).continuous.sub
-      (Δ_g_contMDiff (I := I) g hf).continuous).pow 2)
+    exact (((Δ_g_contMDiff (I := I) h ⟨_, hf⟩).continuous.sub
+      (Δ_g_contMDiff (I := I) g ⟨_, hf⟩).continuous).pow 2)
   have hrhsCont : Continuous rhs := by
     exact (continuous_const.mul hHessCont).add
       (continuous_const.mul hduCont)
@@ -152,10 +150,8 @@ theorem lapDiff_energy_le
   have hA : 0 <= A := by dsimp only [A, n]; positivity
   have hB : 0 <= B := by dsimp only [B, n]; positivity
   calc
-    ∫ x, (Δ_g (I := I) h
-          (reprScalar0_smooth (I := I) (M := M) v hv) x -
-        Δ_g (I := I) g
-          (reprScalar0_smooth (I := I) (M := M) v hv) x) ^ 2
+    ∫ x, (Δ_g (I := I) h ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x -
+        Δ_g (I := I) g ⟨_, (reprScalar0_smooth (I := I) (M := M) v hv)⟩ x) ^ 2
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         ∫ x, lhs x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
       rfl
