@@ -511,6 +511,7 @@ import DifferentialGeometry.Analysis.ODE.IndexFormNegative
 import DifferentialGeometry.Analysis.ODE.IndexFormNegativeSmooth
 import DifferentialGeometry.Analysis.ODE.IndexFormUniqueness
 import DifferentialGeometry.Analysis.ODE.IntegralGronwall
+import DifferentialGeometry.Analysis.ODE.InvariantSet
 import DifferentialGeometry.Analysis.ODE.PhaseEndpointInverse
 import DifferentialGeometry.Analysis.ODE.PhaseFlowExistence
 import DifferentialGeometry.Analysis.ODE.PhaseFlowPerturbation
