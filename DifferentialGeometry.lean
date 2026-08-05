@@ -759,6 +759,7 @@ import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Hopf
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.LocalStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.MetricFamilyStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ParallelCone
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ParallelDualConeStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ParallelConeStrong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ProperCone
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ScalarStrong
