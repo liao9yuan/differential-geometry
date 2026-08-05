@@ -579,6 +579,126 @@ theorem parabolic_variable_coefficient_ball_interior_schauder_estimate_of_local_
       hcommHolder hsourceNorm hcommNorm Ka omega ha homega
       hcutoffFinite hsmall)
 
+theorem parabolic_variable_coefficient_ball_interior_schauder_estimate_of_local_source_and_solution_estimates_of_small_freeze_defect
+    {alpha Ksource Ku KdtimeU Kdu Kd2u Bsource Mu MdtimeU Mdu Md2u : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    {aTime t₀ t₁ bTime S T : Real}
+    (haTime : 0 < aTime) (hat₀ : aTime < t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (ht₁b : t₁ < bTime) (hbT : bTime < T) (hTS : T < S)
+    (center : Euc n) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (u dtimeU : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real →
+      BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ Icc (0 : Real) S, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ Icc (0 : Real) S, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ Icc (0 : Real) S, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (huCont : Continuous u)
+    (hsourceHolder : HolderWith Ksource alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        (parabolicVariableMatrixOperator a (fun t x ↦ u t x))))
+    (hsourceNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖parabolicVariableMatrixOperator a (fun t x ↦ u t x) p‖ ≤ Bsource)
+    (A Ka omega : n → n → NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict (a i j)))
+    (homega : ∀ i j p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖a i j p0 - a i j p‖ ≤ omega i j)
+    (haNorm : ∀ i j p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖a i j p‖ ≤ A i j)
+    (huHolder : HolderWith Ku alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        (fun p ↦ u p.time p.space)))
+    (hdtimeUHolder : HolderWith KdtimeU alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        (fun p ↦ dtimeU p.time p.space)))
+    (hduHolder : HolderWith Kdu alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        (fun p ↦ du p.time p.space)))
+    (hd2uHolder : HolderWith Kd2u alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        (fun p ↦ d2u p.time p.space)))
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeUNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖dtimeU p.time p.space‖ ≤ MdtimeU)
+    (hduNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖du p.time p.space‖ ≤ Mdu)
+    (hd2uNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖d2u p.time p.space‖ ≤ Md2u)
+    (hsmall : spdParabolicSchauderDefectConst
+      (fun i j ↦ a i j p0) hA alpha Ka omega T < 1) :
+    eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioo t₀ t₁) (Metric.ball center r))
+        (fun t x ↦ u t x) ≤
+      parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        Ksource Kdu Ku Bsource Mdu Mu A Ka omega T := by
+  let Q := parabolicCylinder (Icc (0 : Real) S) (Set.univ : Set (Euc n))
+  let dtimeChi : ParabolicPoint (Euc n) → Real := fun q ↦
+    parabolicBallCutoffTimeDerivative
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  let dchi : ParabolicPoint (Euc n) → Euc n →L[Real] Real := fun q ↦
+    parabolicBallCutoffSpatialFDeriv
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  let d2chi : ParabolicPoint (Euc n) →
+      Euc n →L[Real] Euc n →L[Real] Real := fun q ↦
+    parabolicBallCutoffSpatialFDeriv2
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  let Kcomm := parabolicBallCutoffOperatorCommutatorHolderConst
+    aTime t₀ t₁ bTime center hr hrR A Ka Kdu Ku Mdu Mu
+  let Bcomm := parabolicBallCutoffOperatorCommutatorSupConst
+    aTime t₀ t₁ bTime r R A Mdu Mu
+  have hcommHolder : HolderWith Kcomm alpha
+      (Q.restrict
+        (parabolicCutoffOperatorCommutator a dtimeChi dchi d2chi
+          (fun t x ↦ u t x) (fun p ↦ du p.time p.space))) := by
+    exact parabolicBallCutoffOperatorCommutator_holderWith_restrict_of_local_solution
+      halpha1.le aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+      a (fun t x ↦ u t x) (fun p ↦ du p.time p.space)
+      A Ka Mdu Mu ha hduHolder huHolder haNorm hduNorm huNorm
+  have hcommNorm : ∀ p, p ∈ Q →
+      ‖parabolicCutoffOperatorCommutator a dtimeChi dchi d2chi
+        (fun t x ↦ u t x) (fun q ↦ du q.time q.space) p‖ ≤ Bcomm := by
+    intro p hp
+    exact norm_parabolicBallCutoffOperatorCommutator_le_of_local_solution
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+      a (fun t x ↦ u t x) (fun q ↦ du q.time q.space)
+      A Mdu Mu haNorm hduNorm huNorm p hp
+  have hcutoffBound : eParabolicC2HolderGaugeOn alpha Q
+      (fun t x ↦ parabolicBallCutoff
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR t x • u t x) ≤
+      parabolicBallCutoffC2HolderGaugeConst
+        aTime t₀ t₁ bTime center hr hrR
+        Ku KdtimeU Kdu Kd2u Mu MdtimeU Mdu Md2u := by
+    exact eParabolicC2HolderGaugeOn_parabolicBallCutoff_le_of_local_solution
+      halpha1.le aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+      u dtimeU du d2u huTime hu hdu huHolder hdtimeUHolder
+      hduHolder hd2uHolder huNorm hdtimeUNorm hduNorm hd2uNorm
+  have hcutoffFinite : eParabolicC2HolderGaugeOn alpha Q
+      (fun t x ↦ parabolicBallCutoff
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR t x • u t x) ≠ ⊤ := by
+    exact ne_of_lt (hcutoffBound.trans_lt ENNReal.coe_lt_top)
+  simpa only [Q, dtimeChi, dchi, d2chi, Kcomm, Bcomm,
+      parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst] using
+    (parabolic_variable_coefficient_ball_interior_schauder_estimate_of_local_cutoff_source_estimates_of_small_freeze_defect
+      halpha0 halpha1 haTime hat₀ ht₀t₁ ht₁b hbT hTS center hr hrR
+      a p0 hA u dtimeU du d2u huTime hu hdu huCont hsourceHolder
+      hcommHolder hsourceNorm hcommNorm Ka omega ha homega hcutoffFinite hsmall)
+
 theorem parabolic_variable_coefficient_ball_interior_schauder_estimate_of_local_source_and_solution_estimates
     {alpha Ksource Kdu Ku Bsource Mdu Mu X : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
