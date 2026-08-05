@@ -136,6 +136,23 @@ theorem localizedSpacetimeRpowMoment_mono
     (integrable_localizedSpacetimeRpow_of_continuous_pos
       (I := I) (M := M) outer u hu hpos p c d)
 
+theorem localizedSpacetimeRpowNorm_mono_measure
+    {g : SmoothRiemannianMetric I M} {cutoff outer : SmoothScalar g}
+    (u : ℝ → M → ℝ)
+    (hu : Continuous (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a b c d : ℝ} (hp : 0 < p) (hca : c ≤ a) (hbd : b ≤ d)
+    (hcutoff : ∀ x, cutoff.toFun x ^ 2 ≤ outer.toFun x ^ 2) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ≤
+      localizedSpacetimeRpowNorm (I := I) (M := M) outer u p c d := by
+  unfold localizedSpacetimeRpowNorm
+  exact Real.rpow_le_rpow
+    (localizedSpacetimeRpowMoment_nonneg (I := I) (M := M)
+      cutoff u (fun t x => (hpos t x).le) p a b)
+    (localizedSpacetimeRpowMoment_mono (I := I) (M := M)
+      u hu hpos hca hbd hcutoff)
+    (div_pos one_pos hp).le
+
 omit [CompactSpace M] in
 theorem localizedSpacetimeRpowNorm_nonneg
     {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
