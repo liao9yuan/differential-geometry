@@ -186,6 +186,110 @@ theorem rpow_subsolution_of_supersolution
   have hmul := mul_le_mul_of_nonpos_left hpde hcoeff
   nlinarith
 
+theorem rpow_supersolution_with_gradient_term
+    (g : SmoothRiemannianMetric I M)
+    (u source : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq_nonneg : 0 ≤ q)
+    {t : ℝ} {x : M}
+    (hpde :
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x ≤
+        deriv (fun s => u s x) t) :
+    Δ_g (I := I) g
+          (smoothScalarSlice (I := I) g (fun t x => u t x ^ q)
+            (contMDiff_rpow_of_pos hu hpos q) t).smooth x +
+        rpowSource q u source t x +
+        (q * (1 - q) * u t x ^ (q - 2)) *
+          g.inner x
+            (gradientFun (I := I) g
+              (smoothScalarSlice (I := I) g u hu t).toFun x)
+            (gradientFun (I := I) g
+              (smoothScalarSlice (I := I) g u hu t).toFun x) ≤
+      deriv (fun s => u s x ^ q) t := by
+  let ut := smoothScalarSlice (I := I) g u hu t
+  let huq := contMDiff_rpow_of_pos hu hpos q
+  let uqt := smoothScalarSlice (I := I) g (fun s y => u s y ^ q) huq t
+  have htime : ContDiff ℝ ∞ (fun s => u s x) :=
+    contMDiff_iff_contDiff.mp (hu.comp (contMDiff_id.prodMk contMDiff_const))
+  have htime_deriv :
+      deriv (fun s => u s x ^ q) t =
+        q * u t x ^ (q - 1) * deriv (fun s => u s x) t := by
+    have h := ((htime.differentiable (by norm_num) t).hasDerivAt.rpow_const (p := q)
+      (Or.inl (hpos t x).ne')).deriv
+    rw [h]
+    ring
+  have hgrad : MDiffAt
+      (T% fun y : M => gradientFun (I := I) g ut.toFun y) x :=
+    (grad_g (I := I) g ut.smooth).mdifferentiable x
+  have hlap_raw := laplacian_rpow (I := I)
+    (LeviCivita (I := I) g) g q
+    (fun y => ut.smooth.mdifferentiable (by simp) y)
+    (fun y => hpos t y) hgrad
+  have hlap :
+      Δ_g (I := I) g uqt.smooth x =
+        (q * u t x ^ (q - 1)) * Δ_g (I := I) g ut.smooth x +
+          (q * (q - 1) * u t x ^ (q - 2)) *
+            g.inner x
+              (gradientFun (I := I) g ut.toFun x)
+              (gradientFun (I := I) g ut.toFun x) := by
+    rw [← laplacian_levi_eq (I := I) g uqt.smooth x,
+      ← laplacian_levi_eq (I := I) g ut.smooth x]
+    simpa only [ut, uqt, smoothScalarSlice_toFun] using hlap_raw
+  have hcoeff : 0 ≤ q * u t x ^ (q - 1) :=
+    mul_nonneg hq_nonneg (Real.rpow_nonneg (hpos t x).le _)
+  have hmul := mul_le_mul_of_nonneg_left hpde hcoeff
+  rw [htime_deriv, hlap]
+  change
+    q * u t x ^ (q - 1) * Δ_g (I := I) g ut.smooth x +
+          (q * (q - 1) * u t x ^ (q - 2)) *
+            g.inner x
+              (gradientFun (I := I) g ut.toFun x)
+              (gradientFun (I := I) g ut.toFun x) +
+        q * u t x ^ (q - 1) * source t x +
+        (q * (1 - q) * u t x ^ (q - 2)) *
+          g.inner x
+            (gradientFun (I := I) g ut.toFun x)
+            (gradientFun (I := I) g ut.toFun x) ≤
+      q * u t x ^ (q - 1) * deriv (fun s => u s x) t
+  have hcancel :
+      q * (q - 1) * u t x ^ (q - 2) +
+          q * (1 - q) * u t x ^ (q - 2) = 0 := by
+    ring
+  nlinarith
+
+theorem rpow_supersolution_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (u source : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq_nonneg : 0 ≤ q) (hq_one : q ≤ 1)
+    {t : ℝ} {x : M}
+    (hpde :
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x + source t x ≤
+        deriv (fun s => u s x) t) :
+    Δ_g (I := I) g
+          (smoothScalarSlice (I := I) g (fun t x => u t x ^ q)
+            (contMDiff_rpow_of_pos hu hpos q) t).smooth x +
+        rpowSource q u source t x ≤
+      deriv (fun s => u s x ^ q) t := by
+  have hmain := rpow_supersolution_with_gradient_term
+    (I := I) (M := M) g u source hu hpos hq_nonneg hpde
+  have hgradient :
+      0 ≤ (q * (1 - q) * u t x ^ (q - 2)) *
+        g.inner x
+          (gradientFun (I := I) g
+            (smoothScalarSlice (I := I) g u hu t).toFun x)
+          (gradientFun (I := I) g
+            (smoothScalarSlice (I := I) g u hu t).toFun x) := by
+    exact mul_nonneg
+      (mul_nonneg (mul_nonneg hq_nonneg (sub_nonneg.mpr hq_one))
+        (Real.rpow_nonneg (hpos t x).le _))
+      (metric_inner_self_nonneg (I := I) (M := M) g x _)
+  linarith
+
 variable [SigmaCompactSpace M] [CompactSpace M]
 
 theorem caccioppoli_rpow_of_subsolution
