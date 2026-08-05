@@ -173,6 +173,52 @@ def nestedForwardMoserGradientCost
   CutoffProfile.derivBound ^ 2 * B /
     (level (2 * k + 2) - level (2 * k + 1)) ^ 2
 
+def canonicalForwardMoserGradientCost
+    (B lower upper : ℝ) : ℝ :=
+  CutoffProfile.derivBound ^ 2 * B * (16 / (upper - lower) ^ 2)
+
+def canonicalForwardMoserStepEnvelope
+    (q a τ b B lower upper : ℝ) : ℝ :=
+  max 1 (forwardMoserStepCoefficientEnvelope q a b (2 / (b - τ))
+    (canonicalForwardMoserGradientCost B lower upper))
+
+theorem nestedForwardMoserGradientCost_canonical
+    {B lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    nestedForwardMoserGradientCost B
+        (moserCutoffLevelBetween lower upper) k =
+      canonicalForwardMoserGradientCost B lower upper * 16 ^ k := by
+  unfold nestedForwardMoserGradientCost canonicalForwardMoserGradientCost
+  rw [div_eq_mul_inv,
+    moserCutoffLevelBetween_even_succ_inv_sq hlowerUpper]
+  ring
+
+theorem forwardMoserStepCoefficient_canonical_le_mul_pow
+    {q qbar a τ b B lower upper : ℝ} (k : ℕ)
+    (hq : 0 ≤ q) (hqqbar : q ≤ qbar) (hqbar_one : qbar < 1)
+    (haτ : a ≤ τ) (hτb : τ < b) (hB : 0 ≤ B)
+    (hlowerUpper : lower < upper) :
+    forwardMoserStepCoefficient q a
+        (moserUpperTimeLevel τ b (k + 1)) (moserUpperTimeLevel τ b k)
+        (nestedForwardMoserGradientCost B
+          (moserCutoffLevelBetween lower upper) k) ≤
+      canonicalForwardMoserStepEnvelope qbar a τ b B lower upper * 16 ^ k := by
+  have hK : 0 ≤ nestedForwardMoserGradientCost B
+      (moserCutoffLevelBetween lower upper) k := by
+    exact div_nonneg (mul_nonneg (sq_nonneg _) hB) (sq_nonneg _)
+  have henvelope := forwardMoserStepCoefficient_le_envelope_mul_pow k
+    hq hqqbar hqbar_one
+    (haτ.trans (moserUpperTimeLevel_lt hτb (k + 1)).le)
+    (moserUpperTimeLevel_le hτb (k + 1))
+    (moserUpperTimeLevel_succ_lt hτb k) hK
+    (moserUpperTimeLevel_sub_succ_inv_le_mul_pow hτb k)
+    (le_of_eq (nestedForwardMoserGradientCost_canonical hlowerUpper k))
+  calc
+    _ ≤ forwardMoserStepCoefficientEnvelope qbar a b (2 / (b - τ))
+          (canonicalForwardMoserGradientCost B lower upper) * 16 ^ k := henvelope
+    _ ≤ canonicalForwardMoserStepEnvelope qbar a τ b B lower upper * 16 ^ k := by
+      exact mul_le_mul_of_nonneg_right (le_max_right _ _)
+        (pow_nonneg (by norm_num) k)
+
 def nestedForwardMoserStepFactor
     (n : ℕ) (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
