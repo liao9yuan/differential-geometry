@@ -731,6 +731,7 @@ import DifferentialGeometry.Analysis.Parabolic.Harnack.PathIntegration
 import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiusti
 import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiustiCylinder
 import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiustiForward
+import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiustiReciprocal
 import DifferentialGeometry.Analysis.Parabolic.Moser.Crossover
 import DifferentialGeometry.Analysis.Parabolic.Moser.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Moser.ForwardIteration
