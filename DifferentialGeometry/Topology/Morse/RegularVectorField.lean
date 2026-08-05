@@ -49,6 +49,23 @@ private theorem chartRep_contDiffOn (I : ModelWithCorners ℝ (MorseModel n) H)
   rwa [← hrange]
 
 set_option backward.isDefEq.respectTransparency false in
+theorem tangentTrivializationAt_apply (I : ModelWithCorners ℝ (MorseModel n) H)
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (x₀ x : M)
+    (hx : x ∈ (extChartAt I x₀).source) (v : TangentSpace I x) :
+    (trivializationAt (MorseModel n) (TangentSpace I) x₀ ⟨x, v⟩).2 =
+      (mfderiv I 𝓘(ℝ, MorseModel n) (extChartAt I x₀) x) v := by
+  rw [TangentBundle.trivializationAt_apply]
+  rw [mfderiv]
+  have hmd : MDifferentiableAt I 𝓘(ℝ, MorseModel n) (extChartAt I x₀) x := by
+    have hxsrc : x ∈ (chartAt H x₀).source := by
+      rwa [extChartAt_source (I := I) (x := x₀)] at hx
+    exact (contMDiffAt_extChartAt' (I := I) (n := (⊤ : WithTop ℕ∞)) (x := x₀) hxsrc).mdifferentiableAt (by norm_num)
+  rw [if_pos hmd]
+  change fderivWithin ℝ (extChartAt I x₀ ∘ (extChartAt I x).symm) (range I) (extChartAt I x x) v =
+      fderivWithin ℝ (extChartAt I x₀ ∘ (extChartAt I x).symm) (range I) (extChartAt I x x) v
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
 theorem localUnitSpeedVectorField_at_noncritical (I : ModelWithCorners ℝ (MorseModel n) H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
