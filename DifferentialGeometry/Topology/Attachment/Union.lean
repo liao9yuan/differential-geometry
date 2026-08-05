@@ -6,7 +6,7 @@ import Mathlib.Topology.Separation.Hausdorff
 
 namespace DifferentialGeometry.Topology
 
-universe u v
+universe u v w u'
 
 open Filter Function Set
 
@@ -336,6 +336,74 @@ noncomputable def cellAdjunctionHomeomorphUnionImage {n : ℕ} {X₀ : Set Y}
         ⟨⟨(⟨d, hlt⟩ : CellInterior n), rfl⟩, congrArg c (by ext; rfl)⟩⟩ hd
   have hEq : ‖(d : EuclideanSpace ℝ (Fin n))‖ = 1 := le_antisymm d.2 (le_of_not_gt hnot)
   exact ⟨⟨d, hEq⟩, by ext; rfl⟩
+
+noncomputable def adjunctionHomeoOfLowerEquiv {A : Type v} {B : Type w} [TopologicalSpace B]
+    {X : Type u} [TopologicalSpace X] {X' : Type u'} [TopologicalSpace X']
+    (i : A → B) (φ : A → X) (h : X ≃ₜ X') :
+    AdjunctionSpace i (h ∘ φ) ≃ₜ AdjunctionSpace i φ := by
+  let F : AdjunctionSpace i (h ∘ φ) → AdjunctionSpace i φ :=
+    Quot.lift (fun z : B ⊕ X' => Quot.mk (adjunctionRel i φ) (Sum.map id h.symm z)) (by
+      intro a b hab
+      rcases hab with ⟨x, hx | hx⟩
+      · rcases hx with ⟨ha, hb⟩
+        subst a
+        subst b
+        exact Quot.sound ⟨x, Or.inl ⟨rfl, by simp⟩⟩
+      · rcases hx with ⟨hb, ha⟩
+        subst a
+        subst b
+        exact Quot.sound ⟨x, Or.inr ⟨rfl, by simp⟩⟩)
+  let G : AdjunctionSpace i φ → AdjunctionSpace i (h ∘ φ) :=
+    Quot.lift (fun z : B ⊕ X => Quot.mk (adjunctionRel i (h ∘ φ)) (Sum.map id h z)) (by
+      intro a b hab
+      rcases hab with ⟨x, hx | hx⟩
+      · rcases hx with ⟨ha, hb⟩
+        subst a
+        subst b
+        exact Quot.sound ⟨x, Or.inl ⟨rfl, by simp⟩⟩
+      · rcases hx with ⟨hb, ha⟩
+        subst a
+        subst b
+        exact Quot.sound ⟨x, Or.inr ⟨rfl, by simp⟩⟩)
+  exact
+    { toFun := F
+      invFun := G
+      left_inv := by
+        refine Quot.ind ?_
+        intro z
+        simp [F, G]
+      right_inv := by
+        refine Quot.ind ?_
+        intro z
+        simp [F, G]
+      continuous_toFun := by
+        dsimp [F]
+        exact continuous_quot_lift (by
+          intro a b hab
+          rcases hab with ⟨x, hx | hx⟩
+          · rcases hx with ⟨ha, hb⟩
+            subst a
+            subst b
+            exact Quot.sound ⟨x, Or.inl ⟨rfl, by simp⟩⟩
+          · rcases hx with ⟨hb, ha⟩
+            subst a
+            subst b
+            exact Quot.sound ⟨x, Or.inr ⟨rfl, by simp⟩⟩)
+          ((continuous_adjunctionMk i φ).comp (Continuous.sumMap continuous_id h.symm.continuous))
+      continuous_invFun := by
+        dsimp [G]
+        exact continuous_quot_lift (by
+          intro a b hab
+          rcases hab with ⟨x, hx | hx⟩
+          · rcases hx with ⟨ha, hb⟩
+            subst a
+            subst b
+            exact Quot.sound ⟨x, Or.inl ⟨rfl, by simp⟩⟩
+          · rcases hx with ⟨hb, ha⟩
+            subst a
+            subst b
+            exact Quot.sound ⟨x, Or.inr ⟨rfl, by simp⟩⟩)
+          ((continuous_adjunctionMk i (h ∘ φ)).comp (Continuous.sumMap continuous_id h.continuous)) }
 
 end UnionRealization
 

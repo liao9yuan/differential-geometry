@@ -744,7 +744,7 @@ noncomputable def cellAttachmentModel {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (h
 abbrev morseNorm (n : ℕ) (y : MorseModel n) : ℝ :=
   ‖(WithLp.toLp 2 y : EuclideanSpace ℝ (Fin n))‖
 
-private theorem sum_split_fin {n k : ℕ} (hk : k ≤ n) (f : Fin n → ℝ) :
+theorem sum_split_fin {n k : ℕ} (hk : k ≤ n) (f : Fin n → ℝ) :
     (∑ i : Fin n, f i) =
       (∑ i : Fin k, f (negIdx hk i)) + (∑ j : Fin (n - k), f (posIdx hk j)) := by
   let e : Sum (Fin k) (Fin (n - k)) ≃ Fin n :=
