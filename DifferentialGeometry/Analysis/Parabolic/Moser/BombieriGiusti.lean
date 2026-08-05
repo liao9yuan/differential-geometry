@@ -354,6 +354,79 @@ theorem bombieriGiusti_log_error
   rw [hgap, hinv]
   ring
 
+def bombieriGiustiThreshold (p₀ c₀ reverseCost : ℝ) : ℝ :=
+  max
+    (2 * c₀ * Real.exp
+      (4 * (Real.log reverseCost + Real.log 2)))
+    (8 * Real.log 2 / p₀)
+
+theorem two_mul_le_bombieriGiustiThreshold
+    {p₀ c₀ reverseCost : ℝ}
+    (hc₀ : 0 ≤ c₀) (hreverseCost : 1 ≤ reverseCost) :
+    2 * c₀ ≤ bombieriGiustiThreshold p₀ c₀ reverseCost := by
+  have hlog : 0 ≤ Real.log reverseCost + Real.log 2 :=
+    add_nonneg (Real.log_nonneg hreverseCost) (Real.log_nonneg (by norm_num))
+  calc
+    2 * c₀ = 2 * c₀ * 1 := by ring
+    _ ≤ 2 * c₀ * Real.exp
+        (4 * (Real.log reverseCost + Real.log 2)) := by
+      exact mul_le_mul_of_nonneg_left
+        ((Real.one_le_exp_iff).2 (mul_nonneg (by norm_num) hlog))
+        (mul_nonneg (by norm_num) hc₀)
+    _ ≤ bombieriGiustiThreshold p₀ c₀ reverseCost := le_max_left _ _
+
+theorem bombieriGiusti_log_error_le_of_threshold_lt
+    {p₀ c₀ β reverseCost : ℝ}
+    (hc₀ : 0 < c₀) (hreverseCost : 1 ≤ reverseCost)
+    (hβ : bombieriGiustiThreshold p₀ c₀ reverseCost < β) :
+    let p := bombieriGiustiExponent p₀ c₀ β
+    (1 / p - 1 / p₀) * Real.log reverseCost +
+        (1 / p) * Real.log 2 ≤ β / 4 := by
+  let L := Real.log reverseCost + Real.log 2
+  have hlogReverse : 0 ≤ Real.log reverseCost := Real.log_nonneg hreverseCost
+  have hlogTwo : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hL : 0 < L := by
+    dsimp only [L]
+    linarith
+  have hfirst :
+      2 * c₀ * Real.exp (4 * L) < β :=
+    (le_max_left
+      (2 * c₀ * Real.exp (4 * L)) (8 * Real.log 2 / p₀)).trans_lt hβ
+  have hβ_pos : 0 < β :=
+    (mul_pos (mul_pos (by norm_num) hc₀) (Real.exp_pos _)).trans hfirst
+  have hratio : Real.exp (4 * L) < β / (2 * c₀) := by
+    apply (lt_div_iff₀ (mul_pos (by norm_num) hc₀)).2
+    simpa only [mul_assoc, mul_left_comm, mul_comm] using hfirst
+  have hlogRatio : 4 * L < Real.log (β / (2 * c₀)) := by
+    have h := Real.log_lt_log (Real.exp_pos _) hratio
+    simpa only [Real.log_exp] using h
+  have hlogRatio_pos : 0 < Real.log (β / (2 * c₀)) :=
+    (mul_pos (by norm_num) hL).trans hlogRatio
+  have hfraction :
+      L / (2 * Real.log (β / (2 * c₀))) ≤ 1 / 8 := by
+    apply (div_le_iff₀ (mul_pos (by norm_num) hlogRatio_pos)).2
+    nlinarith
+  have hmain :
+      β / (2 * Real.log (β / (2 * c₀))) * L ≤ β / 8 := by
+    calc
+      β / (2 * Real.log (β / (2 * c₀))) * L =
+          β * (L / (2 * Real.log (β / (2 * c₀)))) := by ring
+      _ ≤ β * (1 / 8) := mul_le_mul_of_nonneg_left hfraction hβ_pos.le
+      _ = β / 8 := by ring
+  have hsecond : 8 * Real.log 2 / p₀ < β :=
+    (le_max_right
+      (2 * c₀ * Real.exp (4 * L)) (8 * Real.log 2 / p₀)).trans_lt hβ
+  have hsecond' : 8 * (Real.log 2 / p₀) < β := by
+    calc
+      8 * (Real.log 2 / p₀) = 8 * Real.log 2 / p₀ := by ring
+      _ < β := hsecond
+  have htail : Real.log 2 / p₀ ≤ β / 8 := by
+    linarith
+  dsimp only
+  rw [bombieriGiusti_log_error]
+  dsimp only [L] at hmain
+  linarith
+
 theorem bombieriGiusti_hole_filling_step
     {p₀ c₀ βInner βOuter threshold reverseCost : ℝ}
     (hp₀ : 0 < p₀) (hc₀ : 0 < c₀)
@@ -412,6 +485,40 @@ theorem bombieriGiusti_summable_hole_filling
   intro k
   exact bombieriGiusti_hole_filling_step hp₀ hc₀ (hthreshold k) (hmono k)
     (hreverseCost k) (hreverse k) (herror k)
+
+theorem bombieriGiusti_hole_filling
+    {p₀ c₀ reverseCost : ℝ} {β : ℕ → ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hreverseCost : 1 ≤ reverseCost)
+    (hβ_bdd : BddAbove (Set.range β))
+    (hmono : ∀ k, β k ≤ β (k + 1))
+    (hreverse : ∀ k,
+      bombieriGiustiThreshold p₀ c₀ reverseCost < β (k + 1) →
+        let p := bombieriGiustiExponent p₀ c₀ (β (k + 1))
+        Real.exp (β k) ≤
+          reverseCost ^ (1 / p - 1 / p₀) *
+            (2 ^ (1 / p) * Real.exp (β (k + 1) / 2))) :
+    β 0 ≤ bombieriGiustiThreshold p₀ c₀ reverseCost := by
+  let threshold := bombieriGiustiThreshold p₀ c₀ reverseCost
+  have hgeometric : Summable (fun k : ℕ => (3 / 4 : ℝ) ^ k) :=
+    summable_geometric_of_lt_one (by norm_num) (by norm_num)
+  have hsummable : Summable
+      (fun k : ℕ => (3 / 4 : ℝ) ^ k * (threshold / 4)) :=
+    Summable.mul_right (threshold / 4) hgeometric
+  have hbound := bombieriGiusti_summable_hole_filling hp₀ hc₀ hβ_bdd
+    (threshold := fun _ => threshold) (reverseCost := fun _ => reverseCost)
+    (fun _ => two_mul_le_bombieriGiustiThreshold hc₀.le hreverseCost)
+    hmono (fun _ => zero_lt_one.trans_le hreverseCost)
+    (fun k hk => hreverse k hk)
+    (fun _ hk => bombieriGiusti_log_error_le_of_threshold_lt hc₀ hreverseCost hk)
+    hsummable
+  calc
+    β 0 ≤ ∑' k : ℕ, (3 / 4 : ℝ) ^ k * (threshold / 4) := hbound
+    _ = (∑' k : ℕ, (3 / 4 : ℝ) ^ k) * (threshold / 4) :=
+      hgeometric.tsum_mul_right (threshold / 4)
+    _ = threshold := by
+      rw [tsum_geometric_of_lt_one (by norm_num) (by norm_num)]
+      ring
+    _ = bombieriGiustiThreshold p₀ c₀ reverseCost := rfl
 
 open Bundle Manifold
 open scoped ContDiff Manifold Topology
