@@ -272,6 +272,175 @@ theorem eParabolicC2HolderGaugeOn_parabolicBallCutoff_le
   · exact hd2uNorm
 
 omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+theorem eParabolicC2HolderGaugeOn_parabolicBallCutoff_le_of_local_solution
+    {J : Set Real} {alpha Ku KdtimeU Kdu Kd2u Mu MdtimeU Mdu Md2u : NNReal}
+    (halpha1 : alpha ≤ 1)
+    (aTime t₀ t₁ bTime : Real) (hat₀ : aTime < t₀)
+    (ht₀t₁ : t₀ ≤ t₁) (ht₁b : t₁ < bTime)
+    (center : Euc n) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (u dtimeU : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real → BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ J, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ J, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ J, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (huHolder : HolderWith Ku alpha
+      ((parabolicCylinder J (Metric.ball center R)).restrict
+        (fun p ↦ u p.time p.space)))
+    (hdtimeUHolder : HolderWith KdtimeU alpha
+      ((parabolicCylinder J (Metric.ball center R)).restrict
+        (fun p ↦ dtimeU p.time p.space)))
+    (hduHolder : HolderWith Kdu alpha
+      ((parabolicCylinder J (Metric.ball center R)).restrict
+        (fun p ↦ du p.time p.space)))
+    (hd2uHolder : HolderWith Kd2u alpha
+      ((parabolicCylinder J (Metric.ball center R)).restrict
+        (fun p ↦ d2u p.time p.space)))
+    (huNorm : ∀ p, p ∈ parabolicCylinder J (Metric.ball center R) →
+      ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeUNorm : ∀ p, p ∈ parabolicCylinder J (Metric.ball center R) →
+      ‖dtimeU p.time p.space‖ ≤ MdtimeU)
+    (hduNorm : ∀ p, p ∈ parabolicCylinder J (Metric.ball center R) →
+      ‖du p.time p.space‖ ≤ Mdu)
+    (hd2uNorm : ∀ p, p ∈ parabolicCylinder J (Metric.ball center R) →
+      ‖d2u p.time p.space‖ ≤ Md2u) :
+    eParabolicC2HolderGaugeOn alpha (parabolicCylinder J Set.univ)
+      (fun t x ↦ parabolicBallCutoff
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR t x •
+          u t x) ≤
+      parabolicBallCutoffC2HolderGaugeConst
+        aTime t₀ t₁ bTime center hr hrR
+        Ku KdtimeU Kdu Kd2u Mu MdtimeU Mdu Md2u := by
+  let Q := parabolicCylinder J (Set.univ : Set (Euc n))
+  let U := parabolicCylinder J (Metric.ball center R)
+  let chi : ParabolicPoint (Euc n) → Real := fun p ↦
+    parabolicBallCutoff
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+        p.time p.space
+  let dtimeChi : ParabolicPoint (Euc n) → Real := fun p ↦
+    parabolicBallCutoffTimeDerivative
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+        p.time p.space
+  let dchi : ParabolicPoint (Euc n) → Euc n →L[Real] Real := fun p ↦
+    parabolicBallCutoffSpatialFDeriv
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+        p.time p.space
+  let d2chi : ParabolicPoint (Euc n) →
+      Euc n →L[Real] Euc n →L[Real] Real := fun p ↦
+    parabolicBallCutoffSpatialFDeriv2
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+        p.time p.space
+  let dtimeUPoint : ParabolicPoint (Euc n) → F := fun p ↦
+    dtimeU p.time p.space
+  let duPoint : ParabolicPoint (Euc n) → Euc n →L[Real] F := fun p ↦
+    du p.time p.space
+  let d2uPoint : ParabolicPoint (Euc n) →
+      Euc n →L[Real] Euc n →L[Real] F := fun p ↦ d2u p.time p.space
+  have hUQ : U ⊆ Q := fun p hp ↦ ⟨hp.1, Set.mem_univ p.space⟩
+  have hQU : Q ∩ U = U := Set.inter_eq_right.mpr hUQ
+  have hchiSpatial : ∀ p ∈ Q, ∀ x,
+      HasFDerivAt (fun y ↦ chi (parabolicPoint p.time y))
+        (dchi (parabolicPoint p.time x)) x := by
+    intro p _hp x
+    exact parabolicBallCutoff_hasFDerivAt
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time x
+  have hdchiSpatial : ∀ p ∈ Q, ∀ x,
+      HasFDerivAt (fun y ↦ dchi (parabolicPoint p.time y))
+        (d2chi (parabolicPoint p.time x)) x := by
+    intro p _hp x
+    exact parabolicBallCutoffSpatialFDeriv_hasFDerivAt
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time x
+  have huSpatial : ∀ p ∈ Q, ∀ x,
+      HasFDerivAt (u p.time) (duPoint (parabolicPoint p.time x)) x := by
+    intro p hp x
+    exact hu p.time hp.1 x
+  have hduSpatial : ∀ p ∈ Q, ∀ x,
+      HasFDerivAt (fun y ↦ duPoint (parabolicPoint p.time y))
+        (d2uPoint (parabolicPoint p.time x)) x := by
+    intro p hp x
+    exact hdu p.time hp.1 x
+  have hchiTime : ∀ p ∈ Q,
+      HasDerivAt (fun t ↦ chi (parabolicPoint t p.space))
+        (dtimeChi p) p.time := by
+    intro p _hp
+    simpa only [chi, dtimeChi, parabolicPoint_time,
+      parabolicPoint_space, parabolicPoint_time_space,
+      BoundedContinuousFunction.evalCLM_apply] using
+      (BoundedContinuousFunction.evalCLM Real p.space).hasFDerivAt
+        |>.comp_hasDerivAt p.time
+          (parabolicBallCutoff_hasDerivAt
+            aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time)
+  have huTimePoint : ∀ p ∈ Q,
+      HasDerivAt (fun t ↦ u t p.space) (dtimeUPoint p) p.time := by
+    intro p hp
+    simpa only [dtimeUPoint, BoundedContinuousFunction.evalCLM_apply] using
+      (BoundedContinuousFunction.evalCLM Real p.space).hasFDerivAt
+        |>.comp_hasDerivAt p.time (huTime p.time hp.1)
+  have hchiHolder := parabolicBallCutoff_holderWith_restrict
+    aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR halpha1 J
+  have hdtimeChiHolder := parabolicBallCutoffTimeDerivative_holderWith_restrict
+    aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR halpha1 J
+  have hdchiHolder := parabolicBallCutoffSpatialFDeriv_holderWith_restrict
+    aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR halpha1 J
+  have hd2chiHolder := parabolicBallCutoffSpatialFDeriv2_holderWith_restrict
+    aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR halpha1 J
+  apply eParabolicC2HolderGaugeOn_parabolicCutoffValue_le_of_eq_zero_outside
+    (U := U) chi dtimeChi dchi d2chi (fun t x ↦ u t x)
+      dtimeUPoint duPoint d2uPoint hchiSpatial hdchiSpatial
+      huSpatial hduSpatial hchiTime huTimePoint
+  · exact hchiHolder
+  · exact hdtimeChiHolder
+  · exact hdchiHolder
+  · exact hd2chiHolder
+  · rw [hQU]
+    simpa only [U] using huHolder
+  · rw [hQU]
+    simpa only [U, dtimeUPoint] using hdtimeUHolder
+  · rw [hQU]
+    simpa only [U, duPoint] using hduHolder
+  · rw [hQU]
+    simpa only [U, d2uPoint] using hd2uHolder
+  · intro p _hp _hpU
+    exact norm_parabolicBallCutoff_le_one
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time p.space
+  · intro p _hp _hpU
+    exact norm_parabolicBallCutoffTimeDerivative_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time p.space
+  · intro p _hp _hpU
+    exact norm_parabolicBallCutoffSpatialFDeriv_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time p.space
+  · intro p _hp _hpU
+    exact norm_parabolicBallCutoffSpatialFDeriv2_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time p.space
+  · intro p _hp hpU
+    exact huNorm p (by simpa only [U] using hpU)
+  · intro p _hp hpU
+    exact hdtimeUNorm p (by simpa only [U] using hpU)
+  · intro p _hp hpU
+    exact hduNorm p (by simpa only [U] using hpU)
+  · intro p _hp hpU
+    exact hd2uNorm p (by simpa only [U] using hpU)
+  · intro p hp hpU
+    exact parabolicBallCutoff_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time
+        (fun hspace ↦ hpU ⟨hp.1, hspace⟩)
+  · intro p hp hpU
+    exact parabolicBallCutoffTimeDerivative_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time
+        (fun hspace ↦ hpU ⟨hp.1, hspace⟩)
+  · intro p hp hpU
+    exact parabolicBallCutoffSpatialFDeriv_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time
+        (fun hspace ↦ hpU ⟨hp.1, hspace⟩)
+  · intro p hp hpU
+    exact parabolicBallCutoffSpatialFDeriv2_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR p.time
+        (fun hspace ↦ hpU ⟨hp.1, hspace⟩)
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
 theorem norm_parabolicBallCutoffOperatorCommutator_le
     {J : Set Real}
     (aTime t₀ t₁ bTime : Real) (hat₀ : aTime < t₀)
@@ -408,6 +577,178 @@ theorem parabolicBallCutoffOperatorCommutator_holderWith_restrict
       aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
         q.time q.space
   · exact huNorm
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+theorem norm_parabolicBallCutoffOperatorCommutator_le_of_local_solution
+    {J : Set Real}
+    (aTime t₀ t₁ bTime : Real) (hat₀ : aTime < t₀)
+    (ht₀t₁ : t₀ ≤ t₁) (ht₁b : t₁ < bTime)
+    (center : Euc n) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F)
+    (du : ParabolicPoint (Euc n) → Euc n →L[Real] F)
+    (A : n → n → NNReal) (Mdu Mu : NNReal)
+    (haNorm : ∀ i j p,
+      p ∈ parabolicCylinder J Set.univ → ‖a i j p‖ ≤ A i j)
+    (hduNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.ball center R) → ‖du p‖ ≤ Mdu)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.ball center R) →
+        ‖u p.time p.space‖ ≤ Mu)
+    (p : ParabolicPoint (Euc n))
+    (hp : p ∈ parabolicCylinder J Set.univ) :
+    ‖parabolicCutoffOperatorCommutator a
+      (fun q ↦ parabolicBallCutoffTimeDerivative
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      (fun q ↦ parabolicBallCutoffSpatialFDeriv
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      (fun q ↦ parabolicBallCutoffSpatialFDeriv2
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      u du p‖ ≤
+        parabolicBallCutoffOperatorCommutatorSupConst
+          aTime t₀ t₁ bTime r R A Mdu Mu := by
+  let Q := parabolicCylinder J (Set.univ : Set (Euc n))
+  let U := parabolicCylinder J (Metric.ball center R)
+  apply norm_parabolicCutoffOperatorCommutator_le_of_eq_zero_outside
+    (Q := Q) (U := U) a
+      (fun q ↦ parabolicBallCutoffTimeDerivative
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      (fun q ↦ parabolicBallCutoffSpatialFDeriv
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      (fun q ↦ parabolicBallCutoffSpatialFDeriv2
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      u du A (intervalCutoffDerivSupConst aTime t₀ t₁ bTime)
+        (parabolicBallCutoffSpatialFDerivSupConst r R) Mdu
+        (parabolicBallCutoffSpatialFDeriv2SupConst r R) Mu
+  · exact haNorm
+  · intro q _hq
+    exact norm_parabolicBallCutoffTimeDerivative_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  · intro q _hq
+    exact norm_parabolicBallCutoffSpatialFDeriv_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  · intro q _hq hqU
+    exact hduNorm q (by simpa only [U] using hqU)
+  · intro q _hq
+    exact norm_parabolicBallCutoffSpatialFDeriv2_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  · intro q _hq hqU
+    exact huNorm q (by simpa only [U] using hqU)
+  · intro q hq hqU
+    exact parabolicBallCutoffTimeDerivative_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time
+        (fun hspace ↦ hqU ⟨hq.1, hspace⟩)
+  · intro q hq hqU
+    exact parabolicBallCutoffSpatialFDeriv_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time
+        (fun hspace ↦ hqU ⟨hq.1, hspace⟩)
+  · intro q hq hqU
+    exact parabolicBallCutoffSpatialFDeriv2_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time
+        (fun hspace ↦ hqU ⟨hq.1, hspace⟩)
+  · exact hp
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+theorem parabolicBallCutoffOperatorCommutator_holderWith_restrict_of_local_solution
+    {J : Set Real} {alpha Kdu Ku : NNReal}
+    (halpha1 : alpha ≤ 1)
+    (aTime t₀ t₁ bTime : Real) (hat₀ : aTime < t₀)
+    (ht₀t₁ : t₀ ≤ t₁) (ht₁b : t₁ < bTime)
+    (center : Euc n) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F)
+    (du : ParabolicPoint (Euc n) → Euc n →L[Real] F)
+    (A Ka : n → n → NNReal) (Mdu Mu : NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder J Set.univ).restrict (a i j)))
+    (hdu : HolderWith Kdu alpha
+      ((parabolicCylinder J (Metric.ball center R)).restrict du))
+    (hu : HolderWith Ku alpha
+      ((parabolicCylinder J (Metric.ball center R)).restrict
+        (fun p ↦ u p.time p.space)))
+    (haNorm : ∀ i j p,
+      p ∈ parabolicCylinder J Set.univ → ‖a i j p‖ ≤ A i j)
+    (hduNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.ball center R) → ‖du p‖ ≤ Mdu)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.ball center R) →
+        ‖u p.time p.space‖ ≤ Mu) :
+    HolderWith
+      (parabolicBallCutoffOperatorCommutatorHolderConst
+        aTime t₀ t₁ bTime center hr hrR A Ka Kdu Ku Mdu Mu)
+      alpha ((parabolicCylinder J Set.univ).restrict
+        (parabolicCutoffOperatorCommutator a
+          (fun q ↦ parabolicBallCutoffTimeDerivative
+            aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+              q.time q.space)
+          (fun q ↦ parabolicBallCutoffSpatialFDeriv
+            aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+              q.time q.space)
+          (fun q ↦ parabolicBallCutoffSpatialFDeriv2
+            aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+              q.time q.space)
+          u du)) := by
+  let Q := parabolicCylinder J (Set.univ : Set (Euc n))
+  let U := parabolicCylinder J (Metric.ball center R)
+  have hUQ : U ⊆ Q := fun p hp ↦ ⟨hp.1, Set.mem_univ p.space⟩
+  have hQU : Q ∩ U = U := Set.inter_eq_right.mpr hUQ
+  apply parabolicCutoffOperatorCommutator_holderWith_restrict_of_eq_zero_outside
+    (Q := Q) (U := U) a
+      (fun q ↦ parabolicBallCutoffTimeDerivative
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      (fun q ↦ parabolicBallCutoffSpatialFDeriv
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      (fun q ↦ parabolicBallCutoffSpatialFDeriv2
+        aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR
+          q.time q.space)
+      u du A Ka (intervalCutoffDerivSupConst aTime t₀ t₁ bTime)
+        (parabolicBallCutoffSpatialFDerivSupConst r R) Mdu
+        (parabolicBallCutoffSpatialFDeriv2SupConst r R) Mu
+  · exact ha
+  · exact parabolicBallCutoffTimeDerivative_holderWith_restrict
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR halpha1 J
+  · exact parabolicBallCutoffSpatialFDeriv_holderWith_restrict
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR halpha1 J
+  · rw [hQU]
+    simpa only [U] using hdu
+  · exact parabolicBallCutoffSpatialFDeriv2_holderWith_restrict
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR halpha1 J
+  · rw [hQU]
+    simpa only [U] using hu
+  · exact haNorm
+  · intro q _hq
+    exact norm_parabolicBallCutoffTimeDerivative_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  · intro q _hq
+    exact norm_parabolicBallCutoffSpatialFDeriv_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  · intro q _hq hqU
+    exact hduNorm q (by simpa only [U] using hqU)
+  · intro q _hq
+    exact norm_parabolicBallCutoffSpatialFDeriv2_le
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time q.space
+  · intro q _hq hqU
+    exact huNorm q (by simpa only [U] using hqU)
+  · intro q hq hqU
+    exact parabolicBallCutoffTimeDerivative_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time
+        (fun hspace ↦ hqU ⟨hq.1, hspace⟩)
+  · intro q hq hqU
+    exact parabolicBallCutoffSpatialFDeriv_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time
+        (fun hspace ↦ hqU ⟨hq.1, hspace⟩)
+  · intro q hq hqU
+    exact parabolicBallCutoffSpatialFDeriv2_eq_zero_of_space_not_mem
+      aTime t₀ t₁ bTime hat₀ ht₀t₁ ht₁b center hr hrR q.time
+        (fun hspace ↦ hqU ⟨hq.1, hspace⟩)
 
 theorem parabolic_variable_coefficient_ball_interior_schauder_estimate_of_cutoff_source_estimates
     {alpha Ksource Kcomm Bsource Bcomm X : NNReal}
