@@ -6,7 +6,7 @@ import Mathlib.Topology.Maps.Basic
 
 namespace DifferentialGeometry.Topology
 
-universe u v w
+universe u v w t
 
 open Filter Function Set
 
@@ -42,7 +42,7 @@ theorem isQuotientMap_adjunctionMk (i : A → B) (φ : A → X) :
     Topology.IsQuotientMap (adjunctionMk i φ) :=
   isQuotientMap_quot_mk
 
-theorem continuous_adjunction_lift (i : A → B) (φ : A → X) {Y : Type v} [TopologicalSpace Y]
+theorem continuous_adjunction_lift (i : A → B) (φ : A → X) {Y : Type t} [TopologicalSpace Y]
     {f : B ⊕ X → Y}
     (hr : ∀ a b : B ⊕ X, adjunctionRel i φ a b → f a = f b) (hf : Continuous f) :
     Continuous (Quot.lift f hr : AdjunctionSpace i φ → Y) :=

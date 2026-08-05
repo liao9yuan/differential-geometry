@@ -143,7 +143,6 @@ theorem second_order_taylor_integral (g : E → ℝ) (hg : ContDiff ℝ 2 g) (x 
     have hv' : IntervalIntegrable h'' volume (0 : ℝ) 1 :=
       ContinuousOn.intervalIntegrable_of_Icc (by norm_num : (0 : ℝ) ≤ 1) hcont''
     have hIBP' := intervalIntegral.integral_mul_deriv_eq_deriv_mul hu hv hu' hv'
-    -- ∫ (1 - t) * h'' t = (1 - 1) * h' 1 - (1 - 0) * h' 0 - ∫ (-1) * h' t
     simpa [h''] using hIBP'
   calc
     g x - g 0 = h 1 - h 0 := by

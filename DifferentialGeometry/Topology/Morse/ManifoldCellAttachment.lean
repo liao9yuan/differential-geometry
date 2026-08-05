@@ -32,7 +32,7 @@ private def openPartialHomeomorphSourceHomeo {X Y : Type} [TopologicalSpace X] [
       exact (Topology.IsInducing.subtypeVal.continuous_iff).2
         (continuousOn_iff_continuous_restrict.mp ψ.continuousOn_invFun) }
 
-def subtypeSubtypeOfSubset {X : Type} [TopologicalSpace X] {s t : Set X} (hst : s ⊆ t) :
+private def subtypeSubtypeOfSubset {X : Type} [TopologicalSpace X] {s t : Set X} (hst : s ⊆ t) :
     {x : X // x ∈ s} ≃ₜ {x : {x : X // x ∈ t} // x.1 ∈ s} where
   toFun := fun x => ⟨⟨x.1, hst x.2⟩, x.2⟩
   invFun := fun x => ⟨x.1.1, x.2⟩
@@ -43,7 +43,7 @@ def subtypeSubtypeOfSubset {X : Type} [TopologicalSpace X] {s t : Set X} (hst : 
   continuous_invFun := by
     fun_prop
 
-def subtypeSubtypeValHomeo {X : Type} [TopologicalSpace X] {s t : Set X} (ht : t ⊆ s) :
+private def subtypeSubtypeValHomeo {X : Type} [TopologicalSpace X] {s t : Set X} (ht : t ⊆ s) :
     {x : {y : X // y ∈ s} // x.1 ∈ t} ≃ₜ {x : X // x ∈ t} where
   toFun := fun x => ⟨x.1.1, x.2⟩
   invFun := fun x => ⟨⟨x.1, ht x.2⟩, x.2⟩
@@ -54,7 +54,7 @@ def subtypeSubtypeValHomeo {X : Type} [TopologicalSpace X] {s t : Set X} (ht : t
   continuous_invFun := by
     fun_prop
 
-def homeoRestrictPred {A B : Type} [TopologicalSpace A] [TopologicalSpace B] (h : A ≃ₜ B)
+private def homeoRestrictPred {A B : Type} [TopologicalSpace A] [TopologicalSpace B] (h : A ≃ₜ B)
     (p : A → Prop) (q : B → Prop) (hpq : ∀ a, p a ↔ q (h a)) :
     {a : A // p a} ≃ₜ {b : B // q b} where
   toFun := fun a => ⟨h a.1, (hpq a.1).1 a.2⟩
@@ -75,7 +75,7 @@ def homeoRestrictPred {A B : Type} [TopologicalSpace A] [TopologicalSpace B] (h 
   continuous_invFun := by
     fun_prop
 
-def subtypeAndNestedHomeo {X : Type} [TopologicalSpace X] (p q : X → Prop) :
+private def subtypeAndNestedHomeo {X : Type} [TopologicalSpace X] (p q : X → Prop) :
     {x : X // p x ∧ q x} ≃ₜ {x : {x : X // p x} // q x.1} where
   toFun := fun x => ⟨⟨x.1, x.2.1⟩, x.2.2⟩
   invFun := fun x => ⟨x.1.1, ⟨x.1.2, x.2⟩⟩
@@ -84,7 +84,7 @@ def subtypeAndNestedHomeo {X : Type} [TopologicalSpace X] (p q : X → Prop) :
   continuous_toFun := by fun_prop
   continuous_invFun := by fun_prop
 
-def andSwapHomeo {X : Type} [TopologicalSpace X] (p q : X → Prop) :
+private def andSwapHomeo {X : Type} [TopologicalSpace X] (p q : X → Prop) :
     {x : X // p x ∧ q x} ≃ₜ {x : X // q x ∧ p x} where
   toFun := fun x => ⟨x.1, ⟨x.2.2, x.2.1⟩⟩
   invFun := fun x => ⟨x.1, ⟨x.2.2, x.2.1⟩⟩
@@ -93,7 +93,7 @@ def andSwapHomeo {X : Type} [TopologicalSpace X] (p q : X → Prop) :
   continuous_toFun := by fun_prop
   continuous_invFun := by fun_prop
 
-def subtypeSetHomeo {X : Type} [TopologicalSpace X] {s t : Set X} (h : s = t) :
+private def subtypeSetHomeo {X : Type} [TopologicalSpace X] {s t : Set X} (h : s = t) :
     {x : X // x ∈ s} ≃ₜ {x : X // x ∈ t} where
   toFun := fun x => ⟨x.1, by rw [← h]; exact x.2⟩
   invFun := fun x => ⟨x.1, by rw [h]; exact x.2⟩
@@ -341,7 +341,7 @@ def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     (data : MorseChartData n k hk c I f) : Set M :=
   Set.range (cellEmbedding hk c data)
 
-def attachMap' {n k : ℕ} (hk : k ≤ n) (c : ℝ)
+def cellAttachingMap {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
     (data : MorseChartData n k hk c I f) :
@@ -359,27 +359,21 @@ def attachMap' {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     rw [hsq, hnorm1]
     linarith⟩
 
-theorem cellAttachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_flow {n : ℕ} {H : Type}
+    [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
-    (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ n)
-    (_hcrit : fderiv ℝ (fun y => f ((extChartAt I p).symm y)) (extChartAt I p p) = 0)
-    (_hnd : (QuadraticMap.associated (R := ℝ)
-      (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p))).SeparatingLeft)
-    (_hindex : sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) = k)
-    (_hfp : f p = c)
+    (c : ℝ) (k : ℕ) (hk : k ≤ n)
     (data : MorseChartData n k hk c I f)
-    (_hcompact : IsCompact (f ⁻¹' Set.Icc (c - data.ε) (c + data.ε)))
-    (_hunique : ∀ q ∈ f ⁻¹' Set.Icc (c - data.ε) (c + data.ε), IsCriticalPointAt I f q → q = p)
     (g : M → ℝ)
     (hglow : {x : M | g x ≤ c - data.ε} = sublevel f (c - data.ε) ∪ cellImage hk c data)
     (hgup : {x : M | g x ≤ c + data.ε} = sublevel f (c + data.ε))
     (Φ : GradientLikeFlow I g (c - data.ε) (c + data.ε)) :
     Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace f (c + data.ε))
-      (CellAdjunctionSpace k (attachMap' hk c data))) := by
+      (CellAdjunctionSpace k (cellAttachingMap hk c data))) := by
   let E : Set M := cellImage hk c data
   let c' : ClosedCell k → M := cellEmbedding hk c data
-  let φ : CellBoundary k → {x : M // x ∈ sublevel f (c - data.ε)} := attachMap' hk c data
+  let φ : CellBoundary k → {x : M // x ∈ sublevel f (c - data.ε)} := cellAttachingMap hk c data
   have hAdj : CellAdjunctionSpace k φ ≃ₜ {x : M // x ∈ sublevel f (c - data.ε) ∪ Set.range c'} := by
     refine cellAdjunctionHomeomorphUnionImage (n := k) (φ := φ) (c := c') ?hφ ?hc ?hcont ?hinterior ?hclosed
     · intro b
@@ -439,7 +433,7 @@ theorem cellAttachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Top
     · exact isClosed_Iic.preimage hf.continuous
   have hflow : (Φ.toDiffeomorph (c - data.ε - (c + data.ε))) ''
         sublevel g (c - data.ε) = sublevel g (c + data.ε) :=
-    noCriticalValues_toDiffeomorph Φ (by linarith [data.hεpos])
+    GradientLikeFlow.toDiffeomorph_image_sublevels Φ (by linarith [data.hεpos])
   have hflow' : (Φ.toDiffeomorph (c - data.ε - (c + data.ε))) ''
         (sublevel f (c - data.ε) ∪ E) = sublevel f (c + data.ε) := by
     change ((Φ.toDiffeomorph (c - data.ε - (c + data.ε))) '' {x : M | g x ≤ c - data.ε}) =

@@ -186,7 +186,6 @@ def spineMap {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) : MorseModel n :=
 
 theorem spineMap_split {n k : ℕ} (hk : k ≤ n) (c : ℝ) (y : MorseModel n) :
     morseNormalForm hk c (spineMap hk y) = c - (1 / 2) * ‖negPart hk y‖ ^ 2 := by
-  -- spine = (y⁻, 0): negPart unchanged, posPart = 0
   have hneg : negPart hk (spineMap hk y) = negPart hk y := by
     ext i
     dsimp [spineMap, negPart]
@@ -324,7 +323,6 @@ theorem cellRetractionStep_level {n k : ℕ} (hk : k ≤ n) (c : ℝ) {t : ℝ}
     (_ht0 : 0 ≤ t) (_ht1 : t ≤ 1) (y : MorseModel n) :
     morseNormalForm hk c (cellRetractionStep hk t y) =
       c + (1 / 2) * (t ^ 2 * ‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) := by
-  -- negPart (step) = negPart y; posPart (step) = t • posPart y
   have hneg : negPart hk (cellRetractionStep hk t y) = negPart hk y := by
     ext i
     dsimp [cellRetractionStep, negPart]
@@ -335,7 +333,6 @@ theorem cellRetractionStep_level {n k : ℕ} (hk : k ≤ n) (c : ℝ) {t : ℝ}
     rw [recombine_posPart]
     simp
   rw [morseNormalForm_split hk c (cellRetractionStep hk t y), hpos, hneg]
-  -- ‖t • posPart y‖² = t² ‖posPart y‖²
   rw [norm_smul, mul_pow]
   rw [Real.norm_eq_abs, sq_abs]
 
@@ -491,7 +488,6 @@ theorem continuous_cellRetractionStep {n k : ℕ} (hk : k ≤ n) :
     Continuous (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n =>
       cellRetractionStep hk (p.1 : ℝ) p.2) := by
   dsimp [cellRetractionStep]
-  -- (t, y) ↦ recombine (negPart y) (t • posPart y)
   have hneg' : Continuous (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n => negPart hk p.2) :=
     (continuous_negPart hk).comp continuous_snd
   have hpair1 : Continuous (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n =>
@@ -519,8 +515,7 @@ theorem continuous_cellMap {n k : ℕ} (hk : k ≤ n) (r : ℝ) :
   rw [continuousAt_pi]
   intro i
   by_cases hi : i.val < k
-  · -- cellMap r x i = r * x i
-    have hfun : (fun q : ClosedCell k => cellMap hk r (q : EuclideanSpace ℝ (Fin k)) i) =
+  · have hfun : (fun q : ClosedCell k => cellMap hk r (q : EuclideanSpace ℝ (Fin k)) i) =
         fun q : ClosedCell k => r * (q : EuclideanSpace ℝ (Fin k)) ⟨i.val, hi⟩ := by
       funext q
       dsimp [cellMap]
@@ -581,7 +576,6 @@ theorem cellInterior_disjoint {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 <
 
 theorem isClosed_sublevel_normalForm {n k : ℕ} (hk : k ≤ n) (c a : ℝ) :
     IsClosed (sublevel (morseNormalForm hk c) a) := by
-  -- the normal form is continuous
   have hcont : Continuous (morseNormalForm hk c) := by
     rw [show morseNormalForm hk c = fun y => c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) by
       funext y

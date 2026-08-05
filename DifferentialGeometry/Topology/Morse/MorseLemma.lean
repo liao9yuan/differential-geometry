@@ -6,7 +6,7 @@ import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 
 namespace DifferentialGeometry.Topology.Morse
 
--- Pullback of a bilinear form along a linear map.
+
 noncomputable def bilinPullback {n : ℕ}
     (H : MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
     (L : MorseModel n →L[ℝ] MorseModel (n + 1)) : MorseModel n →L[ℝ] MorseModel n →L[ℝ] ℝ :=
@@ -30,7 +30,7 @@ namespace Completion
 
 variable {n : ℕ}
 
--- View a continuous bilinear family as a LinearMap.BilinForm family.
+
 noncomputable def clmBilin {n : ℕ}
     (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ) :
     MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)) :=
@@ -41,8 +41,8 @@ noncomputable def clmBilin {n : ℕ}
       map_add' := by intro u₁ u₂; ext v; simp [map_add]
       map_smul' := by intro c u; ext v; simp [map_smul] }
 
--- Hessian of a composition at a critical point of the outer function:
--- d²(f∘σ)(0) = (d²f(0)) ∘ (dσ 0, dσ 0).
+
+
 theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
     (σ : MorseModel n → MorseModel (n + 1))
     (hf : ContDiff ℝ 2 f) (hσ : ContDiffAt ℝ 2 σ (0 : MorseModel n))
@@ -51,7 +51,6 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
     (fderiv ℝ (fderiv ℝ (fun x' : MorseModel n => f (σ x'))) (0 : MorseModel n)) u v =
     (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ σ (0 : MorseModel n) u)
         (fderiv ℝ σ (0 : MorseModel n) v) := by
-  -- fderiv (f∘σ) x = (fderiv f (σ x)).comp (fderiv σ x)
   have hfd : ∀ᶠ x in nhds (0 : MorseModel n), fderiv ℝ (fun x' : MorseModel n => f (σ x')) x =
       ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ
         (fderiv ℝ f (σ x)) (fderiv ℝ σ x) := by
@@ -74,7 +73,6 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
       _ = ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ
             (fderiv ℝ f (σ x)) (fderiv ℝ σ x) := by
         rw [ContinuousLinearMap.compL_apply]
-  -- the derivative of x ↦ fderiv f (σ x) at 0
   have hdf' : HasFDerivAt (fderiv ℝ f) (fderiv ℝ (fderiv ℝ f) (σ (0 : MorseModel n))) (σ (0 : MorseModel n)) :=
     by
       have h1 : ContDiffOn ℝ 1 (fderiv ℝ f) Set.univ :=
@@ -85,7 +83,6 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
       exact hd.hasFDerivAt
   have hdσ' : HasFDerivAt σ (fderiv ℝ σ (0 : MorseModel n)) (0 : MorseModel n) :=
     (hσ.differentiableAt (by decide : (2 : WithTop ℕ∞) ≠ 0)).hasFDerivAt
-  -- the derivative of x ↦ fderiv σ x at 0
   have hd2 : HasFDerivAt (fun x : MorseModel n => fderiv ℝ σ x)
       (fderiv ℝ (fderiv ℝ σ) (0 : MorseModel n)) (0 : MorseModel n) :=
     by
@@ -161,8 +158,6 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
             0)
       simpa [ContinuousLinearMap.comp_apply] using hhmain
     simpa [hfd] using hh
-  -- combine: at the critical point the second compL term vanishes
-  -- at the critical point the first compL term vanishes; the second is the pullback
   have hg' : fderiv ℝ (fun x : MorseModel n => fderiv ℝ f (σ x)) (0 : MorseModel n) =
       ContinuousLinearMap.comp (fderiv ℝ (fderiv ℝ f) (σ (0 : MorseModel n)))
         (fderiv ℝ σ (0 : MorseModel n)) := by
@@ -197,7 +192,6 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
   have hmain' : HasFDerivAt (fun x : MorseModel n => fderiv ℝ (fun x' : MorseModel n => f (σ x')) x)
       (bilinPullback (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ σ (0 : MorseModel n)))
       (0 : MorseModel n) := by
-    -- the function: by hfd near zero
     have hfun_ev : (fun x : MorseModel n => fderiv ℝ (fun x' : MorseModel n => f (σ x')) x) =ᶠ[nhds (0 : MorseModel n)]
         fun y : MorseModel n => ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ
           (fderiv ℝ f (σ y)) (fderiv ℝ σ y) := by
@@ -222,11 +216,10 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
   have hfinal : fderiv ℝ (fun x : MorseModel n => fderiv ℝ (fun x' : MorseModel n => f (σ x')) x)
       (0 : MorseModel n) = bilinPullback (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ σ (0 : MorseModel n)) :=
     hmain'.fderiv
-  -- apply both sides to u v
   have := congrArg (fun L : (MorseModel n) →L[ℝ] (MorseModel n →L[ℝ] ℝ) => L u v) hfinal
   simpa [bilinPullback, ContinuousLinearMap.comp_apply, ContinuousLinearMap.compL_apply] using this
 
--- The critical section as a map on the tail space.
+
 noncomputable def morseSection
     {n : ℕ} (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1))) :
     MorseModel n → MorseModel (n + 1) :=
@@ -253,15 +246,15 @@ theorem morseSection_head_critical {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     morseHead (morseSection φ x') = morseCriticalSection φ x' := by
   rfl
 
--- The completed-square head coordinate along the section.
+
 noncomputable def morseSectionHead {n : ℕ}
     (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
     (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1))) :
     MorseModel n → ℝ :=
   fun x' => morseHead (morseCompletionMap a (morseSection φ x'))
 
--- Reduction identity along the section:
--- f(σ x') = f 0 + 1/2 σ(x') h(x')² + 1/2 (reduced family at σ x')(x', x').
+
+
 theorem morseReduction_identity (f : MorseModel (n + 1) → ℝ) (hg : ContDiff ℝ 2 f)
     (hcrit : fderiv ℝ f 0 = 0)
     (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
@@ -305,12 +298,11 @@ theorem morseReduction_identity (f : MorseModel (n + 1) → ℝ) (hg : ContDiff 
   simp [b]
   ring_nf
 
--- The inverse of the Morse partial derivative preserves tails:
--- for tail vectors the tail is unchanged.
+
+
 theorem morsePartialDerivCLE_symm_tail {n : ℕ}
     (p' : MorseModel (n + 1) →L[ℝ] ℝ) (h₀ : p' morseE0 ≠ 0) (u : MorseModel n) :
     morseTail ((morsePartialDerivCLE p' h₀).symm (morseCons (0 : ℝ) u)) = u := by
-  -- use the explicit preimage from the surjectivity proof
   let v : MorseModel (n + 1) :=
     morseCons ((0 : ℝ) - p' (morseCons (0 : ℝ) u) / p' morseE0) u
   have hpre : morsePartialDeriv p' v = morseCons (0 : ℝ) u := by
@@ -339,8 +331,8 @@ theorem morsePartialDerivCLE_symm_tail {n : ℕ}
   funext j
   simp [v, morseTail, morseCons, Fin.cons_succ]
 
--- The derivative of the section at 0 preserves the tail:
--- dσ(0) u has tail u.
+
+
 theorem morseSection_fderiv_tail {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
     (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
@@ -349,7 +341,6 @@ theorem morseSection_fderiv_tail {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     (hdf : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n))
     {u : MorseModel n} :
     morseTail (fderiv ℝ (morseSection φ) (0 : MorseModel n) u) = u := by
-  -- the tail of the section is the identity near 0: morseTail (σ x') = x'
   have htail' : (fun x' : MorseModel n => morseTail (morseSection φ x')) =ᶠ[nhds (0 : MorseModel n)]
       (fun x' : MorseModel n => x') := by
     have hc : Continuous (fun x' : MorseModel n => morseCons (0 : ℝ) x') := by
@@ -377,11 +368,9 @@ theorem morseSection_fderiv_tail {n : ℕ} (f : MorseModel (n + 1) → ℝ)
       exact hca.preimage_mem_nhds hnhds'
     filter_upwards [hmem] with y hy
     exact morseSection_tail f φ hφ hy
-  -- fderiv of both sides at 0
   have hfd : fderiv ℝ (fun x' : MorseModel n => morseTail (morseSection φ x')) (0 : MorseModel n) =
       fderiv ℝ (fun x' : MorseModel n => x') (0 : MorseModel n) :=
     htail'.fderiv_eq
-  -- left: fderiv (morseTail ∘ σ) 0 = morseTailProj.comp (fderiv σ 0) by the chain rule
   have hchain : fderiv ℝ (fun x' : MorseModel n => morseTail (morseSection φ x')) (0 : MorseModel n) =
       (fderiv ℝ morseTail (morseSection φ (0 : MorseModel n))).comp
         (fderiv ℝ (morseSection φ) (0 : MorseModel n)) := by
@@ -403,16 +392,15 @@ theorem morseSection_fderiv_tail {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     exact (morseTailProj.hasFDerivAt).fderiv
   have hid : fderiv ℝ (fun x' : MorseModel n => x') (0 : MorseModel n) = (1 : MorseModel n →L[ℝ] MorseModel n) := by
     exact (hasFDerivAt_id (x := (0 : MorseModel n))).fderiv
-  -- apply to u
   have happ : (morseTailProj.comp (fderiv ℝ (morseSection φ) (0 : MorseModel n))) u = u := by
     rw [← hdtailproj]
     rw [← hchain, hfd, hid]
     simp
   simpa [ContinuousLinearMap.comp_apply] using happ
 
--- The completed-square head coordinate at the origin vanishes on the section derivative:
--- h₀(dσ(0) u) = 0, where h₀(x) = head x + cross₀(tail x)/p₀.
--- This follows from differentiating morsePartial f (σ x') = 0 at 0.
+
+
+
 theorem morseSection_fderiv_complete {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     (_a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
     (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
@@ -424,7 +412,6 @@ theorem morseSection_fderiv_complete {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     {u : MorseModel n} :
     (fderiv ℝ (morsePartial f) (morseSection φ (0 : MorseModel n)))
       (fderiv ℝ (morseSection φ) (0 : MorseModel n) u) = 0 := by
-  -- morsePartial f (σ x') = 0 near 0
   have hsec : (fun x' : MorseModel n => morsePartial f (morseSection φ x')) =ᶠ[nhds (0 : MorseModel n)]
       (fun _ : MorseModel n => 0) := by
     have hφ0 : φ 0 = 0 := by
@@ -462,7 +449,6 @@ theorem morseSection_fderiv_complete {n : ℕ} (f : MorseModel (n + 1) → ℝ)
       rw [hdec]
       exact morseCriticalSection_eq f φ hφ hy
     exact hsec'
-  -- differentiate at 0
   have hfd : fderiv ℝ (fun x' : MorseModel n => morsePartial f (morseSection φ x')) (0 : MorseModel n) =
       fderiv ℝ (fun _ : MorseModel n => (0 : ℝ)) (0 : MorseModel n) :=
     hsec.fderiv_eq
@@ -481,8 +467,8 @@ theorem morseSection_fderiv_complete {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     simp
   simpa [ContinuousLinearMap.comp_apply] using happ'
 
--- The derivative of the Morse partial function at 0 evaluates to the Hessian
--- applied to the e0 direction.
+
+
 theorem fderiv_morsePartial_e0 {n : ℕ} (f : MorseModel (n + 1) → ℝ) (hg : ContDiff ℝ 2 f) :
     ⇑(fderiv ℝ (morsePartial f) 0) =
       (fun w : MorseModel (n + 1) => (fderiv ℝ (fderiv ℝ f) 0) w morseE0) := by
@@ -513,8 +499,8 @@ theorem fderiv_morsePartial_e0 {n : ℕ} (f : MorseModel (n + 1) → ℝ) (hg : 
   funext w
   exact (ContinuousLinearMap.flip_apply (fderiv ℝ (fderiv ℝ f) 0) w morseE0).symm
 
--- A symmetric bilinear form evaluated on vectors whose completed head vanishes
--- reduces to the Schur-complement form on the tails.
+
+
 theorem bilin_completed_head_zero {n : ℕ}
     (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
     (hsym : ∀ x y z, a x y z = a x z y)
@@ -583,14 +569,11 @@ theorem bilin_completed_head_zero {n : ℕ}
         (a 0) (morseCons (0 : ℝ) (morseTail x)) (morseCons (0 : ℝ) (morseTail y)) := by
     dsimp [F]
   rw [hFe0, hFtail]
-  -- symmetrize the cross terms before simplifying the tails
   have hsymCLM0 : ∀ z w, (a 0) z w = (a 0) w z := by
     intro z w
     exact hsym 0 z w
-  -- both cross terms should have morseE0 on the left
   rw [← hsymCLM0 morseE0 (morseCons (0 : ℝ) (morseTail x))]
   rw [hsymCLM0 morseE0 (morseCons (0 : ℝ) (morseTail y))]
-  -- simplify the tails on the RHS
   have htailx' : morseTail (morseHead x • morseE0 + morseCons (0 : ℝ) (morseTail x)) = morseTail x := by
     rw [← morse_cons_smul' (morseHead x) (morseTail x)]
     exact morseCons_tail (morseHead x) (morseTail x)
@@ -610,7 +593,6 @@ theorem bilin_completed_head_zero {n : ℕ}
       hsym 0 (morseCons (0 : ℝ) (morseTail y)) morseE0
     rw [hswap]
     simpa [clmBilin] using hcrossy
-  -- the x-cross term is now in the form (a 0) morseE0 (cons 0 (tail x)); rewrite it directly
   have hcrossx0 : (a 0) morseE0 (morseCons (0 : ℝ) (morseTail x)) = -(morseHead x) * (a 0 morseE0 morseE0) := by
     simpa [clmBilin] using hcrossx
   rw [hcrossx0]
@@ -627,7 +609,7 @@ theorem bilin_completed_head_zero {n : ℕ}
   field_simp [hpiv']
   ring_nf
 
--- The Hessian of the reduced function f₁(x') = f(σ x') at 0 is the reduced family at 0.
+
 theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff ℝ 2 f)
     (hcrit : fderiv ℝ f 0 = 0)
     (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
@@ -643,15 +625,12 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
     (u v : MorseModel n) :
     (fderiv ℝ (fderiv ℝ (fun x' : MorseModel n => f (morseSection φ x'))) (0 : MorseModel n)) u v =
       morseReducedFamily (clmBilin a) 0 u v := by
-  -- pullback lemma
   have hpull := hessian_pullback_at_critical f (morseSection φ) hg hcont
     (morseSection_zero f φ hφ hcrit hsrc) hcrit u v
-  -- completed-square identity at 0
   have hcs := morse_complete_square_sqrt (clmBilin a) (by
     intro x y z
     simpa [clmBilin] using hsym x y z) (0 : MorseModel (n + 1)) (by
       simpa [morsePivot, clmBilin] using hpiv)
-  -- the section derivative kills the completed-square head term
   have hmain : (fun w : MorseModel (n + 1) =>
       (fderiv ℝ (morsePartial f) (morseSection φ (0 : MorseModel n))) w) =
       fun w : MorseModel (n + 1) => (clmBilin a 0) morseE0 w := by
@@ -682,14 +661,12 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
           (clmBilin a 0 morseE0 (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)) := by
         exact congrFun hmain (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)
       exact hpt.symm.trans hp0
-    -- decompose fderiv σ 0 u = morseCons h t with t = u
     have ht : morseTail (fderiv ℝ (morseSection φ) (0 : MorseModel n) u) = u :=
       morseSection_fderiv_tail f φ hφ hsrc hcrit hdf
     have hdec : fderiv ℝ (morseSection φ) (0 : MorseModel n) u =
         morseCons (morseHead (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)) u := by
       rw [morse_cons_decompose (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)]
       exact congrArg (morseCons (morseHead (fderiv ℝ (morseSection φ) (0 : MorseModel n) u))) ht
-    -- happ0 gives head * pivot + cross = 0, hence head + cross / pivot = 0
     have hh0' : (clmBilin a 0 morseE0 (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)) = 0 := happ0
     have hcross : clmBilin a 0 morseE0
         (morseHead (fderiv ℝ (morseSection φ) (0 : MorseModel n) u) • morseE0 + morseCons (0 : ℝ) u) =
@@ -715,32 +692,20 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
       exact (eq_zero_or_eq_zero_of_mul_eq_zero hmul).resolve_right hpiv'
     simpa [ht] using hdiv
   rw [hpull]
-  -- completed-square identity at 0 applied to x = dσ(0)u, y = dσ(0)v
   have ht' : morseTail (fderiv ℝ (morseSection φ) (0 : MorseModel n) u) = u :=
     morseSection_fderiv_tail f φ hφ hsrc hcrit hdf
   have ht'' : morseTail (fderiv ℝ (morseSection φ) (0 : MorseModel n) v) = v :=
     morseSection_fderiv_tail f φ hφ hsrc hcrit hdf
-  -- hcs is the completed-square identity at 0; use its polarization on x,y
   have hsq : (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)
       (fderiv ℝ (morseSection φ) (0 : MorseModel n) v) =
       morseReducedFamily (clmBilin a) 0 u v := by
-    -- derive from the quadratic identity by polarization or by direct expansion
-    -- using the bilinear decomposition d²f(0)(x,y) = head-part + reduced part
     have hdecomp : (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)
           (fderiv ℝ (morseSection φ) (0 : MorseModel n) v) =
         (morseReducedFamily (clmBilin a) 0 (morseTail (fderiv ℝ (morseSection φ) (0 : MorseModel n) u))
           (morseTail (fderiv ℝ (morseSection φ) (0 : MorseModel n) v))) := by
-      -- The completed-square identity at 0 (quadratic form version) is
-      -- Q(x) = s·h(x)² + R(tail x, tail x); polarizing with h(x)=h(y)=0 gives
-      -- B(x,y) = R(tail x, tail y).  We use the bilinear form directly:
-      -- B(x,y) = (B(x+y,x+y) - B(x-y,x-y))/4 by symmetry.
       have hxy : (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)
             (fderiv ℝ (morseSection φ) (0 : MorseModel n) v) =
           (morseReducedFamily (clmBilin a) 0 u v) := by
-        -- completed-square identity at 0 in the CLM form:
-        -- a0(x,x) = sign(p)·h₀(x)² + Rfam0(tail x, tail x), where
-        -- h₀(x) = head x + a0(e0, tail x)/p, and h₀(dσ(0)u) = 0 by hhead.
-        -- Polarizing: a0(x,y) = Rfam0(tail x, tail y) when h₀(x) = h₀(y) = 0.
         have ha0 : ∀ x y, (fderiv ℝ (fderiv ℝ f) 0) x y = (clmBilin a 0) x y := by
           intro x y
           have hx : (fderiv ℝ (fderiv ℝ f) 0) x y = a 0 x y := by
@@ -748,7 +713,6 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
             simp [smul_eq_mul]
           rw [hx]
           rfl
-        -- h₀(dσ(0)u) = 0 and h₀(dσ(0)v) = 0 by hhead
         have hhu : morseHead (fderiv ℝ (morseSection φ) (0 : MorseModel n) u) +
             (clmBilin a 0 morseE0 (morseCons (0 : ℝ) (morseTail (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)))) /
               morsePivot (clmBilin a) 0 = 0 := by
@@ -756,7 +720,6 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
         have hhv : morseHead (fderiv ℝ (morseSection φ) (0 : MorseModel n) v) +
             (clmBilin a 0 morseE0 (morseCons (0 : ℝ) (morseTail (fderiv ℝ (morseSection φ) (0 : MorseModel n) v)))) /
               morsePivot (clmBilin a) 0 = 0 := by
-          -- hhead restated for v: repeat the same proof with v
           have hp0v := morseSection_fderiv_complete (u := v) f a φ hφ hsrc hcrit hdf hdfp
           have hptv : (fderiv ℝ (morsePartial f) (morseSection φ (0 : MorseModel n)))
               (fderiv ℝ (morseSection φ) (0 : MorseModel n) v) =
@@ -787,8 +750,6 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
               exact hmain0v
             exact (eq_zero_or_eq_zero_of_mul_eq_zero hmulv).resolve_right hpiv'
           simpa [ht''] using hdivv
-        -- expand the bilinear form via the completed-square decomposition
-        -- B(x,y) = s·h₀(x)·h₀(y) + Rfam0(tail x, tail y)
         have hdu : fderiv ℝ (morseSection φ) (0 : MorseModel n) u =
             morseCons (morseHead (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)) u := by
           rw [morse_cons_decompose (fderiv ℝ (morseSection φ) (0 : MorseModel n) u)]
@@ -810,7 +771,7 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
     rw [hdecomp, ht', ht'']
   exact hsq
 
--- The reduced family at 0 is nondegenerate when the full Hessian is and the pivot is nonzero.
+
 theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
     (hsym : ∀ x y z, a x y z = a x z y)
     (hpiv : morsePivot (clmBilin a) 0 ≠ 0)
@@ -820,12 +781,9 @@ theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n 
   intro u hu
   have hu' : ∀ v : MorseModel n, morseReducedFamily (clmBilin a) 0 u v = 0 := by
     intro v
-    -- hu : (associated (morseReducedFamily ...).toQuadraticMap) u v = 0
-    -- and associated B.toQuadraticMap = B for symmetric B
     have hmain : (QuadraticMap.associated (R := ℝ) ((morseReducedFamily (clmBilin a) 0).toQuadraticMap)) u v =
         morseReducedFamily (clmBilin a) 0 u v := by
       rw [QuadraticMap.associated_apply]
-      -- Q(z) = B z z; expand Q(u+v) - Q u - Q v
       have hq : (morseReducedFamily (clmBilin a) 0) (u + v) (u + v) -
           (morseReducedFamily (clmBilin a) 0) u u -
           (morseReducedFamily (clmBilin a) 0) v v =
@@ -851,12 +809,10 @@ theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n 
     have hu'' : (QuadraticMap.associated (R := ℝ) ((morseReducedFamily (clmBilin a) 0).toQuadraticMap)) u v = 0 :=
       hu v
     rwa [hmain] at hu''
-  -- the Schur-complement witness: w = cons 0 u − (cross_u / p) • e0
   let cross_u : ℝ := (clmBilin a 0) morseE0 (morseCons (0 : ℝ) u)
   let w : MorseModel (n + 1) := morseCons (0 : ℝ) u - (cross_u / (clmBilin a 0 morseE0 morseE0)) • morseE0
   have hpiv' : (clmBilin a 0 morseE0 morseE0) ≠ 0 := by
     simpa [morsePivot] using hpiv
-  -- (clmBilin a 0) w z = 0 for all z
   have hfull : ∀ z : MorseModel (n + 1), (clmBilin a 0) w z = 0 := by
     intro z
     have hz : z = morseHead z • morseE0 + morseCons (0 : ℝ) (morseTail z) := by
@@ -864,7 +820,6 @@ theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n 
         z = morseCons (morseHead z) (morseTail z) := morse_cons_decompose z
         _ = morseHead z • morseE0 + morseCons (0 : ℝ) (morseTail z) :=
           morse_cons_smul' (morseHead z) (morseTail z)
-    -- (clmBilin a 0) w vanishes on e0 and on tails
     have hwe0 : (clmBilin a 0) w morseE0 = 0 := by
       dsimp [w, cross_u]
       have h1 : (clmBilin a 0) (morseCons (0 : ℝ) u - (cross_u / (clmBilin a 0 morseE0 morseE0)) • morseE0) =
@@ -895,7 +850,6 @@ theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n 
       change (clmBilin a 0) (morseCons (0 : ℝ) u) (morseCons (0 : ℝ) v) -
         (cross_u / (clmBilin a 0 morseE0 morseE0)) •
           (clmBilin a 0) morseE0 (morseCons (0 : ℝ) v) = 0
-      -- Rfam0(u, v) = 0 gives the tail identity
       have hru := hu' v
       have hfam : (clmBilin a 0) (morseCons (0 : ℝ) u) (morseCons (0 : ℝ) v) =
           (clmBilin a 0) morseE0 (morseCons (0 : ℝ) u) *
@@ -916,7 +870,6 @@ theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n 
       simp [smul_eq_mul]
       field_simp [hpiv']
       ring
-    -- combine: z = head • e0 + cons 0 (tail z)
     rw [hz]
     rw [map_add, map_smul]
     rw [hwe0, hwt]
@@ -924,8 +877,6 @@ theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n 
   have hzero : w = 0 := by
     apply hsep
     intro z
-    -- hsep uses the associated bilinear map; for symmetric clmBilin a 0 the
-    -- associated form agrees up to a scalar with clmBilin a 0.
     have hz : (QuadraticMap.associated (R := ℝ) ((clmBilin a 0).toQuadraticMap)) w z =
         (clmBilin a 0) w z := by
       rw [QuadraticMap.associated_apply]
@@ -936,7 +887,6 @@ theorem morseReducedFamily_separating (a : MorseModel (n + 1) → MorseModel (n 
       ring_nf
     rw [hz]
     exact hfull z
-  -- w = 0 forces u = 0 (tails of w and of cons 0 u agree)
   have htailw : morseTail w = morseTail (morseCons (0 : ℝ) u) := by
     change morseTail (morseCons (0 : ℝ) u - (cross_u / (clmBilin a 0 morseE0 morseE0)) • morseE0) =
       morseTail (morseCons (0 : ℝ) u)

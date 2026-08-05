@@ -178,7 +178,7 @@ theorem GradientLikeFlow.toDiffeomorph_image_sublevel (Φ : GradientLikeFlow I f
   simpa [toDiffeomorph] using Φ.flow_image_sublevel ht
 
 omit [TopologicalSpace M] in
-theorem noCriticalValues (Φ : UnitSpeedFlow f a b) (hab : a ≤ b) :
+theorem UnitSpeedFlow.image_sublevels (Φ : UnitSpeedFlow f a b) (hab : a ≤ b) :
     (fun x : M => Φ.flow (a - b) x) '' sublevel f a = sublevel f b := by
   have ht : b - a ∈ Set.Icc (0 : ℝ) (b - a) := ⟨sub_nonneg.mpr hab, le_rfl⟩
   ext y
@@ -204,9 +204,9 @@ theorem noCriticalValues (Φ : UnitSpeedFlow f a b) (hab : a ≤ b) :
         _ = Φ.flow 0 y := by rw [hz]
         _ = y := Φ.flow_zero y
 
-theorem noCriticalValues_toDiffeomorph (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
+theorem GradientLikeFlow.toDiffeomorph_image_sublevels (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
     Φ.toDiffeomorph (a - b) '' sublevel f a = sublevel f b := by
-  simpa [GradientLikeFlow.toDiffeomorph] using (noCriticalValues Φ.toUnitSpeedFlow hab)
+  simpa [GradientLikeFlow.toDiffeomorph] using (UnitSpeedFlow.image_sublevels Φ.toUnitSpeedFlow hab)
 
 noncomputable def linearModelFlow (a b : ℝ) (_hab : a ≤ b) :
     GradientLikeFlow 𝓘(ℝ, MorseModel 1) (fun y : MorseModel 1 => y 0) a b where
@@ -245,11 +245,11 @@ noncomputable def linearModelFlow (a b : ℝ) (_hab : a ≤ b) :
     · simp [sub_eq_add_neg]
       linarith
 
-theorem linearModelNoCriticalValues (a b : ℝ) (hab : a ≤ b) :
+theorem linearModelFlow_image_sublevels (a b : ℝ) (hab : a ≤ b) :
     (fun y : MorseModel 1 => (linearModelFlow a b hab).flow (a - b) y) ''
         sublevel (fun y : MorseModel 1 => y 0) a =
       sublevel (fun y : MorseModel 1 => y 0) b :=
-  noCriticalValues (linearModelFlow a b hab).toUnitSpeedFlow hab
+  UnitSpeedFlow.image_sublevels (linearModelFlow a b hab).toUnitSpeedFlow hab
 
 noncomputable def fin1Homeo : MorseModel 1 ≃ₜ ℝ where
   toFun := fun y => y 0
@@ -267,7 +267,6 @@ noncomputable def fin1Homeo : MorseModel 1 ≃ₜ ℝ where
 
 theorem linearModel_strip_compact (a b : ℝ) :
     IsCompact (sublevelStrip (fun y : MorseModel 1 => y 0) a b) := by
-  -- the strip is the preimage of Icc a b under the homeomorphism y ↦ y 0
   have hIcc : IsCompact (Set.Icc a b) := isCompact_Icc
   have himg : IsCompact (fin1Homeo.symm '' (Set.Icc a b)) :=
     hIcc.image fin1Homeo.symm.continuous
@@ -291,9 +290,7 @@ theorem linearModel_no_critical (a b : ℝ) :
     ∀ y : MorseModel 1, y ∈ sublevelStrip (fun y : MorseModel 1 => y 0) a b →
       fderiv ℝ (fun y : MorseModel 1 => y 0) y ≠ 0 := by
   intro y hy
-  -- fderiv of the projection at y is the projection itself (a nonzero continuous linear map)
   have hfd : fderiv ℝ (fun y : MorseModel 1 => y 0) y = ContinuousLinearMap.proj (0 : Fin 1) := by
-    -- the projection is linear, so its fderiv is itself
     have hlin : IsBoundedLinearMap ℝ (fun y : MorseModel 1 => y 0) :=
       (ContinuousLinearMap.proj (0 : Fin 1) : MorseModel 1 →L[ℝ] ℝ).isBoundedLinearMap
     exact hlin.fderiv
