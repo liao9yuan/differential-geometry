@@ -885,6 +885,7 @@ import DifferentialGeometry.Analysis.Schauder.ParabolicBallCutoff
 import DifferentialGeometry.Analysis.Schauder.ParabolicBallExtension
 import DifferentialGeometry.Analysis.Schauder.ParabolicBallRetraction
 import DifferentialGeometry.Analysis.Schauder.ParabolicChart
+import DifferentialGeometry.Analysis.Schauder.ParabolicChartTransition
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartEstimate
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartExtension
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartOperator

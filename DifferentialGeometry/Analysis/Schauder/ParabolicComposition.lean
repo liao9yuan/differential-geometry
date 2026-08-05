@@ -370,9 +370,10 @@ theorem eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le_of_li
   exact eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le
     hQR hmapLip hphi hDphiHolder hD2phiHolder hDphiNorm hD2phiNorm hu hsource
 
-theorem exists_eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le
-    {s : Set V} (hs : IsCompact s) (hsconv : Convex Real s)
-    {phi : V → W} (hphi : ContDiff Real 3 phi)
+theorem exists_eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le_of_contDiffOn
+    {s U : Set V} (hs : IsCompact s) (hsconv : Convex Real s)
+    (hU : IsOpen U) (hsU : s ⊆ U)
+    {phi : V → W} (hphi : ContDiffOn Real 3 phi U)
     {alpha : NNReal} (halpha : alpha ≤ 1) (J : Set Real)
     {R : Set (ParabolicPoint W)} {u : Real → W → F}
     (hQR : MapsTo (parabolicMap phi) (parabolicCylinder J s) R)
@@ -384,8 +385,8 @@ theorem exists_eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_l
         Cpull := by
   obtain ⟨L, K1, K2, M1, M2, hL, hphiLip, hDphiHolder,
       hD2phiHolder, hDphiNorm, hD2phiNorm⟩ :=
-    exists_c2Pullback_schauder_bounds_on_compact_convex
-      hs hsconv hphi halpha J
+    exists_c2Pullback_schauder_bounds_on_compact_convex_of_contDiffOn
+      hs hsconv hU hsU hphi halpha J
   have hparabolicLip : LipschitzOnWith L (parabolicMap phi)
       (parabolicCylinder J s) :=
     lipschitzOnWith_parabolicMap hL hphiLip J
@@ -399,8 +400,26 @@ theorem exists_eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_l
     alpha L C K1 K2 M1 M2, ?_⟩
   exact eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le
     hQR hmapLip
-    (fun _ _ => hphi.contDiffAt.of_le (by norm_num))
+    (fun p hp => ((hphi p.space (hsU hp.2)).contDiffAt
+      (hU.mem_nhds (hsU hp.2))).of_le (by norm_num))
     hDphiHolder hD2phiHolder hDphiNorm hD2phiNorm hu hsource
+
+theorem exists_eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le
+    {s : Set V} (hs : IsCompact s) (hsconv : Convex Real s)
+    {phi : V → W} (hphi : ContDiff Real 3 phi)
+    {alpha : NNReal} (halpha : alpha ≤ 1) (J : Set Real)
+    {R : Set (ParabolicPoint W)} {u : Real → W → F}
+    (hQR : MapsTo (parabolicMap phi) (parabolicCylinder J s) R)
+    (hu : IsParabolicC2On R u) {C : NNReal}
+    (hsource : eParabolicC2HolderGaugeWithLowerJetsOn alpha R u ≤ C) :
+    ∃ Cpull : NNReal,
+      eParabolicC2HolderGaugeWithLowerJetsOn alpha
+          (parabolicCylinder J s) (parabolicSpatialPullback phi u) ≤
+        Cpull := by
+  exact
+    exists_eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le_of_contDiffOn
+      hs hsconv isOpen_univ (subset_univ s) hphi.contDiffOn halpha J
+      hQR hu hsource
 
 end DifferentialGeometry.Analysis.Schauder
 
