@@ -248,6 +248,26 @@ theorem spatialCutoffBetween_sq_le
     have hmem := spatialCutoffBetween_mem_Icc rho middleLevel innerLevel x
     simpa using (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
 
+omit [Module.Finite ℝ E] in
+theorem spatialCutoffBetween_sq_le_rpow
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    {outerLevel middleLevel innerLevel : ℝ}
+    (houterMiddle : outerLevel < middleLevel)
+    (hmiddleInner : middleLevel < innerLevel) (p : ℝ) (x : M) :
+    (spatialCutoffBetween rho middleLevel innerLevel).toFun x ^ 2 ≤
+      (spatialCutoffBetween rho outerLevel middleLevel).toFun x ^ p := by
+  by_cases hx : rho.toFun x ≤ middleLevel
+  · rw [spatialCutoffBetween_eq_zero_of_le_inner hmiddleInner hx]
+    norm_num
+    exact Real.rpow_nonneg
+      (spatialCutoffBetween_mem_Icc rho outerLevel middleLevel x).1 p
+  · have hone :
+        (spatialCutoffBetween rho outerLevel middleLevel).toFun x = 1 :=
+      spatialCutoffBetween_eq_one_of_outer_le houterMiddle (le_of_not_ge hx)
+    rw [hone, Real.one_rpow]
+    have hmem := spatialCutoffBetween_mem_Icc rho middleLevel innerLevel x
+    simpa using (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
+
 theorem gradientFun_spatialCutoffBetween
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)

@@ -87,6 +87,18 @@ theorem abs_mul_rpow_half_critical
   rw [abs_of_nonneg (mul_nonneg ha hbrpow), Real.mul_rpow ha hbrpow,
     ← Real.rpow_mul hb.le, parabolicMoserExponent_half_mul_critical]
 
+omit [NeZero n] in
+theorem abs_mul_rpow_half_parabolic_gain
+    {a b q : ℝ} (ha : 0 ≤ a) (hb : 0 < b) :
+    |a * b ^ (q / 2)| ^ (2 + 4 / (n : ℝ)) =
+      a ^ (2 + 4 / (n : ℝ)) * b ^ (parabolicMoserGain n * q) := by
+  have hbrpow : 0 ≤ b ^ (q / 2) := Real.rpow_nonneg hb.le _
+  rw [abs_of_nonneg (mul_nonneg ha hbrpow), Real.mul_rpow ha hbrpow,
+    ← Real.rpow_mul hb.le]
+  congr 1
+  rw [parabolicMoserGain]
+  ring_nf
+
 theorem parabolicMoserExponent_pos {p₀ : ℝ} (hp₀ : 0 < p₀) (k : ℕ) :
     0 < parabolicMoserExponent n p₀ k := by
   rw [parabolicMoserExponent]
