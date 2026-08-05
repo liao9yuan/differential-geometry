@@ -561,93 +561,10 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_mul_of_chartTransit
               beta I source
                 (fun i ↦ parabolicCylinder J
                   (Metric.ball (sourceBallCenter i) (R i))) u := by
-  classical
-  letI := Fintype.ofFinite A
-  have hlocal : ∀ i, ∃ Ktarget : NNReal,
-      ∀ {utarget : Real → M → F},
-        MapsTo
-          (parabolicMap
-            (chartTransitionEuclid
-              (I := I) (M := M) (center i) (source i)))
-          (parabolicCylinder J (s i))
-          (parabolicCylinder J
-            (Metric.closedBall (sourceBallCenter i) (r i))) →
-        IsParabolicC2On
-          (parabolicCylinder J
-            (Metric.ball (sourceBallCenter i) (R i)))
-          (parabolicEuclideanChartRepresentation I (source i) utarget) →
-        eParabolicC2HolderGaugeInEuclideanChartOn
-            beta I (center i) (parabolicCylinder J (s i)) utarget ≤
-          Ktarget *
-            eParabolicC2HolderGaugeInEuclideanChartOn
-              beta I (source i)
-                (parabolicCylinder J
-                  (Metric.ball (sourceBallCenter i) (R i))) utarget := by
-    intro i
-    exact
-      exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_mul_of_chartTransition_of_nested_source_balls
-        (F := F) (center i) (source i) (hs i) (hsconv i) (hsOverlap i)
-        hbeta J hJ (sourceBallCenter i) (hrR i)
-  choose Ktarget htarget using hlocal
-  refine ⟨∑ i, Ktarget i, ?_⟩
-  intro u hmap hu
-  apply
-    (eParabolicC2HolderGaugeInEuclideanChartsOn_le_iff
-      beta I center (fun i ↦ parabolicCylinder J (s i)) u _).2
-  intro i
-  calc
-    eParabolicC2HolderGaugeInEuclideanChartOn
-        beta I (center i) (parabolicCylinder J (s i)) u ≤
-      (Ktarget i : ENNReal) *
-        eParabolicC2HolderGaugeInEuclideanChartOn
-          beta I (source i)
-            (parabolicCylinder J
-              (Metric.ball (sourceBallCenter i) (R i))) u :=
-      htarget i (hmap i) (hu i)
-    _ ≤ (Ktarget i : ENNReal) *
-        eParabolicC2HolderGaugeInEuclideanChartsOn
-          beta I source
-            (fun j ↦ parabolicCylinder J
-              (Metric.ball (sourceBallCenter j) (R j))) u := by
-      exact mul_le_mul_right
-        (eParabolicC2HolderGaugeInEuclideanChartOn_le_euclideanCharts
-          beta I source
-            (fun j ↦ parabolicCylinder J
-              (Metric.ball (sourceBallCenter j) (R j))) u i)
-        (Ktarget i)
-    _ ≤ ((∑ j, Ktarget j : NNReal) : ENNReal) *
-        eParabolicC2HolderGaugeInEuclideanChartsOn
-          beta I source
-            (fun j ↦ parabolicCylinder J
-              (Metric.ball (sourceBallCenter j) (R j))) u := by
-      have hcoefficient : (Ktarget i : ENNReal) ≤
-          ((∑ j, Ktarget j : NNReal) : ENNReal) := by
-        exact_mod_cast
-          (Finset.single_le_sum (fun j _ ↦ zero_le (Ktarget j))
-            (Finset.mem_univ i))
-      calc
-        (Ktarget i : ENNReal) *
-            eParabolicC2HolderGaugeInEuclideanChartsOn
-              beta I source
-                (fun j ↦ parabolicCylinder J
-                  (Metric.ball (sourceBallCenter j) (R j))) u =
-          eParabolicC2HolderGaugeInEuclideanChartsOn
-              beta I source
-                (fun j ↦ parabolicCylinder J
-                  (Metric.ball (sourceBallCenter j) (R j))) u *
-            Ktarget i := mul_comm _ _
-        _ ≤ eParabolicC2HolderGaugeInEuclideanChartsOn
-              beta I source
-                (fun j ↦ parabolicCylinder J
-                  (Metric.ball (sourceBallCenter j) (R j))) u *
-            ((∑ j, Ktarget j : NNReal) : ENNReal) :=
-          mul_le_mul_right hcoefficient _
-        _ = ((∑ j, Ktarget j : NNReal) : ENNReal) *
-            eParabolicC2HolderGaugeInEuclideanChartsOn
-              beta I source
-                (fun j ↦ parabolicCylinder J
-                  (Metric.ball (sourceBallCenter j) (R j))) u :=
-          mul_comm _ _
+  exact
+    exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_mul_of_chartTransitions
+      (F := F) center source (fun i ↦ i) s hs hsconv hsOverlap hbeta J hJ
+      sourceBallCenter r R hrR
 
 theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_chartTransitions_of_nested_source_balls
     [FiniteDimensional Real E] [I.Boundaryless] [IsManifold I ∞ M]
@@ -765,6 +682,92 @@ theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_of_cha
     eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_sum_of_finite
       beta I center (fun i ↦ parabolicCylinder J (s i)) u Ctarget htarget
 
+theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_mul_of_reindexed_chartTransitions
+    [FiniteDimensional Real E] [I.Boundaryless] [IsManifold I ∞ M]
+    {A B : Type*} [Finite A]
+    (targetCenter : A → M) (sourceCenter : B → M) (sourceIndex : A → B)
+    (s : A → Set (EuclideanSpace Real (Fin (Module.finrank Real E))))
+    (hs : ∀ i, IsCompact (s i)) (hsconv : ∀ i, Convex Real (s i))
+    (hsOverlap : ∀ i, s i ⊆
+      chartOverlapEuclid (I := I) (M := M)
+        (targetCenter i) (sourceCenter (sourceIndex i)))
+    {beta : NNReal} (hbeta : beta ≤ 1) (J : Set Real) :
+    ∃ K : NNReal,
+      ∀ {R : B → Set (ParabolicPoint
+          (EuclideanSpace Real (Fin (Module.finrank Real E))))}
+        {u : Real → M → F},
+        (∀ i, MapsTo
+          (parabolicMap
+            (chartTransitionEuclid (I := I) (M := M)
+              (targetCenter i) (sourceCenter (sourceIndex i))))
+          (parabolicCylinder J (s i)) (R (sourceIndex i))) →
+        (∀ j, IsParabolicC2On (R j)
+          (parabolicEuclideanChartRepresentation I (sourceCenter j) u)) →
+        eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+            beta I targetCenter (fun i => parabolicCylinder J (s i)) u ≤
+          K * eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+            beta I sourceCenter R u := by
+  classical
+  letI := Fintype.ofFinite A
+  have hlocal : ∀ i, ∃ Ki : NNReal,
+      ∀ {Ri : Set (ParabolicPoint
+          (EuclideanSpace Real (Fin (Module.finrank Real E))))}
+        {u : Real → M → F},
+        MapsTo
+          (parabolicMap
+            (chartTransitionEuclid (I := I) (M := M)
+              (targetCenter i) (sourceCenter (sourceIndex i))))
+          (parabolicCylinder J (s i)) Ri →
+        IsParabolicC2On Ri
+          (parabolicEuclideanChartRepresentation I
+            (sourceCenter (sourceIndex i)) u) →
+        eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+            beta I (targetCenter i) (parabolicCylinder J (s i)) u ≤
+          Ki * eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+            beta I (sourceCenter (sourceIndex i)) Ri u := by
+    intro i
+    exact
+      exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_mul_of_chartTransition
+        (F := F) (targetCenter i) (sourceCenter (sourceIndex i))
+        (hs i) (hsconv i) (hsOverlap i) hbeta J
+  choose Ki hKi using hlocal
+  refine ⟨∑ i, Ki i, ?_⟩
+  intro R u hmap hu
+  apply (eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_iff
+    beta I targetCenter (fun i => parabolicCylinder J (s i)) u _).2
+  intro i
+  calc
+    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+        beta I (targetCenter i) (parabolicCylinder J (s i)) u ≤
+      (Ki i : ENNReal) *
+        eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+          beta I (sourceCenter (sourceIndex i)) (R (sourceIndex i)) u :=
+      hKi i (hmap i) (hu (sourceIndex i))
+    _ ≤ (Ki i : ENNReal) *
+        eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+          beta I sourceCenter R u := by
+      exact mul_le_mul_right
+        (eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_euclideanCharts
+          beta I sourceCenter R u (sourceIndex i)) (Ki i)
+    _ ≤ ((∑ j, Ki j : NNReal) : ENNReal) *
+        eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+          beta I sourceCenter R u := by
+      have hKi : (Ki i : ENNReal) ≤ ((∑ j, Ki j : NNReal) : ENNReal) := by
+        exact_mod_cast Finset.single_le_sum
+          (fun j _ => zero_le (Ki j)) (Finset.mem_univ i)
+      calc
+        (Ki i : ENNReal) *
+            eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+              beta I sourceCenter R u =
+          eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+              beta I sourceCenter R u * Ki i := mul_comm _ _
+        _ ≤ eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+              beta I sourceCenter R u *
+            ((∑ j, Ki j : NNReal) : ENNReal) := mul_le_mul_right hKi _
+        _ = ((∑ j, Ki j : NNReal) : ENNReal) *
+            eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+              beta I sourceCenter R u := mul_comm _ _
+
 theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_mul_of_chartTransitions
     [FiniteDimensional Real E] [I.Boundaryless] [IsManifold I ∞ M]
     {A : Type*} [Finite A] (center source : A → M)
@@ -789,68 +792,9 @@ theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_mul_of
           Katlas *
             eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
               beta I source R u := by
-  classical
-  letI := Fintype.ofFinite A
-  have hlocal : ∀ i, ∃ Ktarget : NNReal,
-      ∀ {Rtarget : Set (ParabolicPoint
-          (EuclideanSpace Real (Fin (Module.finrank Real E))))}
-        {utarget : Real → M → F},
-        MapsTo
-          (parabolicMap
-            (chartTransitionEuclid (I := I) (M := M) (center i) (source i)))
-          (parabolicCylinder J (s i)) Rtarget →
-        IsParabolicC2On Rtarget
-          (parabolicEuclideanChartRepresentation I (source i) utarget) →
-        eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
-            beta I (center i) (parabolicCylinder J (s i)) utarget ≤
-          Ktarget *
-            eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
-              beta I (source i) Rtarget utarget := by
-    intro i
-    exact
-      exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_mul_of_chartTransition
-        (F := F) (center i) (source i) (hs i) (hsconv i) (hsOverlap i)
-        hbeta J
-  choose Ktarget htarget using hlocal
-  refine ⟨∑ i, Ktarget i, ?_⟩
-  intro R u hmap hu
-  apply
-    (eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_iff
-      beta I center (fun i ↦ parabolicCylinder J (s i)) u _).2
-  intro i
-  calc
-    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
-        beta I (center i) (parabolicCylinder J (s i)) u ≤
-        (Ktarget i : ENNReal) *
-          eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
-            beta I (source i) (R i) u := htarget i (hmap i) (hu i)
-    _ ≤ (Ktarget i : ENNReal) *
-        eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
-          beta I source R u := by
-      exact mul_le_mul_right
-        (eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_euclideanCharts
-          beta I source R u i) (Ktarget i)
-    _ ≤ ((∑ j, Ktarget j : NNReal) : ENNReal) *
-        eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
-          beta I source R u := by
-      have hcoefficient : (Ktarget i : ENNReal) ≤
-          ((∑ j, Ktarget j : NNReal) : ENNReal) := by
-        exact_mod_cast
-          (Finset.single_le_sum (fun j _ ↦ zero_le (Ktarget j))
-            (Finset.mem_univ i))
-      calc
-        (Ktarget i : ENNReal) *
-            eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
-              beta I source R u =
-            eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
-              beta I source R u * Ktarget i := mul_comm _ _
-        _ ≤ eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
-              beta I source R u *
-            ((∑ j, Ktarget j : NNReal) : ENNReal) :=
-          mul_le_mul_right hcoefficient _
-        _ = ((∑ j, Ktarget j : NNReal) : ENNReal) *
-            eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
-              beta I source R u := mul_comm _ _
+  exact
+    exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_mul_of_reindexed_chartTransitions
+      (F := F) center source (fun i ↦ i) s hs hsconv hsOverlap hbeta J
 
 theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_of_chartTransitions
     [FiniteDimensional Real E] [I.Boundaryless] [IsManifold I ∞ M]
