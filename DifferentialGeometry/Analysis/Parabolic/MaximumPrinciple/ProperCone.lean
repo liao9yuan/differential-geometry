@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotential
-import Mathlib.Analysis.Convex.Cone.InnerDual
+import DifferentialGeometry.Analysis.InnerProductSpace.ProperConeIsometry
 
 set_option autoImplicit false
 
