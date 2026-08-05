@@ -219,6 +219,36 @@ theorem parallelTransportLinearEquivOnIcc_inner [I.Boundaryless]
       g.inner (γ 0) v w :=
   parallelTransportLinearMapOnIcc_inner (I := I) g γ hγ hL v w
 
+noncomputable def parallelTransportLinearEquivBetween [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) :
+    TangentSpace I (γ a) ≃ₗ[ℝ] TangentSpace I (γ b) := by
+  have hshift : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) (fun s ↦ γ (s + a)) :=
+    hγ.comp (contMDiff_id.add contMDiff_const)
+  exact parallelTransportLinearEquivOnIcc (I := I) g (fun s ↦ γ (s + a))
+    hshift (sub_pos.mpr hab)
+
+theorem parallelTransportLinearEquivBetween_inner [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) (v w : TangentSpace I (γ a)) :
+    g.inner (γ b) (parallelTransportLinearEquivBetween (I := I) g γ hγ hab v)
+        (parallelTransportLinearEquivBetween (I := I) g γ hγ hab w) =
+      g.inner (γ a) v w := by
+  have hshift : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) (fun s ↦ γ (s + a)) :=
+    hγ.comp (contMDiff_id.add contMDiff_const)
+  change g.inner (γ b)
+      (parallelTransportLinearEquivOnIcc (I := I) g (fun s ↦ γ (s + a))
+        hshift (sub_pos.mpr hab) v)
+      (parallelTransportLinearEquivOnIcc (I := I) g (fun s ↦ γ (s + a))
+        hshift (sub_pos.mpr hab) w) =
+    g.inner (γ a) v w
+  convert parallelTransportLinearEquivOnIcc_inner (I := I) g
+    (fun s ↦ γ (s + a)) hshift (sub_pos.mpr hab) v w using 1
+  · rw [sub_add_cancel]
+  · rw [zero_add]
+
 end Variation
 end Riemannian
 end Geometry

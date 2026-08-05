@@ -174,6 +174,132 @@ theorem parallelTransportTensor02CLEOnIcc_mem_dualZeroFace_iff
         parallelTransportTensor02CLEOnIcc_eval (I := I) g γ hγ hL A v (e.symm w)
       _ = 0 := h
 
+noncomputable def parallelTransportTensor02CLEBetween [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) :
+    Tensor0SSpace 2 I (γ a) ≃L[ℝ] Tensor0SSpace 2 I (γ b) :=
+  tensor02PullbackCLE (I := I) (M := M)
+    (parallelTransportLinearEquivBetween (I := I) g γ hγ hab).symm
+
+@[simp]
+theorem parallelTransportTensor02CLEBetween_eval [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) (A : Tensor0SSpace 2 I (γ a))
+    (v w : TangentSpace I (γ a)) :
+    eval02 (I := I) (M := M)
+        (parallelTransportTensor02CLEBetween (I := I) g γ hγ hab A)
+        (parallelTransportLinearEquivBetween (I := I) g γ hγ hab v)
+        (parallelTransportLinearEquivBetween (I := I) g γ hγ hab w) =
+      eval02 (I := I) (M := M) A v w := by
+  let e := parallelTransportLinearEquivBetween (I := I) g γ hγ hab
+  change eval02 (I := I) (M := M)
+    (tensor02PullbackCLE (I := I) (M := M) e.symm A) (e v) (e w) = _
+  rw [tensor02PullbackCLE_apply, tensor02PullbackCLM_eval]
+  simp only [LinearEquiv.symm_apply_apply]
+
+@[simp]
+theorem parallelTransportTensor02CLEBetween_quad [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) (A : Tensor0SSpace 2 I (γ a))
+    (v : TangentSpace I (γ a)) :
+    quad02 (I := I) (M := M)
+        (parallelTransportTensor02CLEBetween (I := I) g γ hγ hab A)
+        (parallelTransportLinearEquivBetween (I := I) g γ hγ hab v) =
+      quad02 (I := I) (M := M) A v := by
+  rw [← eval02_self, parallelTransportTensor02CLEBetween_eval, eval02_self]
+
+theorem parallelTransportTensor02CLEBetween_mem_positiveSemidefiniteCone_iff
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) (A : Tensor0SSpace 2 I (γ a)) :
+    parallelTransportTensor02CLEBetween (I := I) g γ hγ hab A ∈
+        tensor02PositiveSemidefiniteCone (I := I) (M := M) ↔
+      A ∈ tensor02PositiveSemidefiniteCone (I := I) (M := M) :=
+  tensor02PullbackCLE_mem_positiveSemidefiniteCone_iff (I := I) (M := M)
+    (parallelTransportLinearEquivBetween (I := I) g γ hγ hab).symm A
+
+theorem tensor02PositiveSemidefiniteCone_map_parallelTransportBetween
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) :
+    ((tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+      ProperCone ℝ (Tensor0SSpace 2 I (γ a))).map
+        (parallelTransportTensor02CLEBetween
+          (I := I) g γ hγ hab).toContinuousLinearMap) =
+      (tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+        ProperCone ℝ (Tensor0SSpace 2 I (γ b))) :=
+  tensor02PositiveSemidefiniteCone_map_pullback (I := I) (M := M)
+    (parallelTransportLinearEquivBetween (I := I) g γ hγ hab).symm
+
+theorem twoTensorLeftKernel_map_parallelTransportBetween [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) (A : Tensor0SSpace 2 I (γ a)) :
+    (twoTensorLeftKernel (I := I) (M := M) A).map
+        (parallelTransportLinearEquivBetween (I := I) g γ hγ hab).toLinearMap =
+      twoTensorLeftKernel (I := I) (M := M)
+        (parallelTransportTensor02CLEBetween (I := I) g γ hγ hab A) := by
+  let e := parallelTransportLinearEquivBetween (I := I) g γ hγ hab
+  change (twoTensorLeftKernel (I := I) (M := M) A).map e.toLinearMap = _
+  apply Submodule.ext
+  intro w
+  rw [Submodule.mem_map_equiv]
+  rw [mem_twoTensorLeftKernel_iff, mem_twoTensorLeftKernel_iff]
+  constructor
+  · intro hw z
+    have h := hw (e.symm z)
+    have heval : eval02 (I := I) (M := M)
+        (parallelTransportTensor02CLEBetween (I := I) g γ hγ hab A)
+          (e (e.symm w)) (e (e.symm z)) =
+        eval02 (I := I) (M := M) A (e.symm w) (e.symm z) :=
+      parallelTransportTensor02CLEBetween_eval
+        (I := I) g γ hγ hab A (e.symm w) (e.symm z)
+    simpa only [e.apply_symm_apply] using heval.trans h
+  · intro hw z
+    have h := hw (e z)
+    have heval : eval02 (I := I) (M := M)
+        (parallelTransportTensor02CLEBetween (I := I) g γ hγ hab A)
+          (e (e.symm w)) (e z) =
+        eval02 (I := I) (M := M) A (e.symm w) z :=
+      parallelTransportTensor02CLEBetween_eval
+        (I := I) g γ hγ hab A (e.symm w) z
+    have heval' : eval02 (I := I) (M := M)
+        (parallelTransportTensor02CLEBetween (I := I) g γ hγ hab A) w (e z) =
+        eval02 (I := I) (M := M) A (e.symm w) z := by
+      simpa only [e.apply_symm_apply] using heval
+    exact heval'.symm.trans h
+
+theorem tensor02PositiveSemidefinite_dualZeroFace_map_parallelTransportBetween
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) (v : TangentSpace I (γ a)) :
+    (((tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+      ProperCone ℝ (Tensor0SSpace 2 I (γ a))).dualZeroFace
+        (tensor02EvalSelfCLM (I := I) (M := M) v)).map
+          (parallelTransportTensor02CLEBetween
+            (I := I) g γ hγ hab).toContinuousLinearMap) =
+      ((tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+        ProperCone ℝ (Tensor0SSpace 2 I (γ b))).dualZeroFace
+          (tensor02EvalSelfCLM (I := I) (M := M)
+            (parallelTransportLinearEquivBetween (I := I) g γ hγ hab v))) := by
+  let e := parallelTransportLinearEquivBetween (I := I) g γ hγ hab
+  change (((tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+      ProperCone ℝ (Tensor0SSpace 2 I (γ a))).dualZeroFace
+        (tensor02EvalSelfCLM (I := I) (M := M) v)).map
+          (tensor02PullbackCLE (I := I) (M := M) e.symm).toContinuousLinearMap) =
+    ((tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+      ProperCone ℝ (Tensor0SSpace 2 I (γ b))).dualZeroFace
+        (tensor02EvalSelfCLM (I := I) (M := M) (e v)))
+  simpa only [LinearEquiv.symm_apply_apply] using
+    tensor02PositiveSemidefinite_dualZeroFace_map_pullback (I := I) (M := M)
+      e.symm (e v)
+
 end Variation
 end Riemannian
 end Geometry
