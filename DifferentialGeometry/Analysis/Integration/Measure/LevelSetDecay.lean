@@ -1,5 +1,6 @@
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.MeasureTheory.Measure.MeasureSpace
+import Mathlib.MeasureTheory.Measure.Typeclasses.Finite
 
 noncomputable section
 
@@ -262,6 +263,37 @@ theorem level_set_exponential_decay_from_base
             (Real.exp (-level * (-Real.log ratio / step))) := by
         rw [ENNReal.ofReal_mul (by positivity)]
         ring
+
+theorem level_set_exponential_decay_from_base_real
+    (μ : Measure X) [IsFiniteMeasure μ]
+    {base : Set X} {levelSet : ℝ → Set X}
+    (hsub : ∀ level, levelSet level ⊆ base)
+    {step : ℝ} (hstep : 0 < step)
+    {ratio : ℝ} (hratio_pos : 0 < ratio) (hratio_lt : ratio < 1)
+    (hdecay : ∀ level : ℝ, step ≤ level →
+      μ (levelSet (level + step)) ≤
+        ENNReal.ofReal ratio * μ (levelSet level))
+    (level : ℝ) :
+    μ (levelSet level) ≤
+      ENNReal.ofReal
+        ((1 / ratio ^ 2 * μ.real base) *
+          Real.exp (-level * (-Real.log ratio / step))) := by
+  have hbound := level_set_exponential_decay_from_base μ hsub hstep
+    hratio_pos hratio_lt hdecay level
+  have hbase : μ base = ENNReal.ofReal (μ.real base) := by
+    rw [Measure.real, ENNReal.ofReal_toReal (measure_ne_top μ base)]
+  have hbase_nonneg : 0 ≤ μ.real base := ENNReal.toReal_nonneg
+  calc
+    μ (levelSet level) ≤
+        ENNReal.ofReal (1 / ratio ^ 2) * μ base *
+          ENNReal.ofReal
+            (Real.exp (-level * (-Real.log ratio / step))) := hbound
+    _ = ENNReal.ofReal
+        ((1 / ratio ^ 2 * μ.real base) *
+          Real.exp (-level * (-Real.log ratio / step))) := by
+      rw [hbase, ← ENNReal.ofReal_mul (by positivity),
+        ← ENNReal.ofReal_mul
+          (mul_nonneg (by positivity) hbase_nonneg)]
 
 end DifferentialGeometry.Analysis.Measure
 

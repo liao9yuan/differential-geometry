@@ -451,6 +451,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.BorelManifold.StandardI
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.CompactParametricIntegral
 import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv
+import DifferentialGeometry.Analysis.Integration.Measure.ExponentialTail
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuityParam

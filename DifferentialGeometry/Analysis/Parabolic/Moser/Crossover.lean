@@ -1,3 +1,5 @@
+import DifferentialGeometry.Analysis.Integration.Measure.ExponentialTail
+import DifferentialGeometry.Analysis.Integration.Measure.LevelSetDecay
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
@@ -88,6 +90,100 @@ theorem crossover_of_centered_exponential_bounds
     _ = (Real.exp (-p * c) * (∫ x, u x ^ p ∂μplus)) *
           (Real.exp (p * c) * (∫ x, u x ^ (-p) ∂μminus)) := by ring
     _ ≤ Aplus * Aminus := hmul
+
+theorem crossover_of_centered_exponential_tails
+    (μplus μminus : Measure α)
+    [IsFiniteMeasure μplus] [IsFiniteMeasure μminus]
+    (u : α → ℝ) (hpos : ∀ x, 0 < u x)
+    {p c decay Bplus Bminus : ℝ}
+    (hp : 0 < p) (hpdecay : p < decay)
+    (hBplus : 0 ≤ Bplus) (hBminus : 0 ≤ Bminus)
+    (hmeasPlus : AEMeasurable (fun x => Real.log (u x) - c) μplus)
+    (hmeasMinus : AEMeasurable (fun x => Real.log (u x) - c) μminus)
+    (htailPlus : ∀ level : ℝ, 0 < level →
+      μplus {x | level < Real.log (u x) - c} ≤
+        ENNReal.ofReal (Bplus * Real.exp (-decay * level)))
+    (htailMinus : ∀ level : ℝ, 0 < level →
+      μminus {x | level < -(Real.log (u x) - c)} ≤
+        ENNReal.ofReal (Bminus * Real.exp (-decay * level))) :
+    (∫ x, u x ^ p ∂μplus) * (∫ x, u x ^ (-p) ∂μminus) ≤
+      (μplus.real Set.univ + Bplus * p / (decay - p)) *
+        (μminus.real Set.univ + Bminus * p / (decay - p)) := by
+  have hplus :=
+    DifferentialGeometry.Analysis.Measure.integrable_exp_and_integral_le_of_exponential_tail
+      μplus (fun x => Real.log (u x) - c) hmeasPlus hp hpdecay hBplus htailPlus
+  have hminus :=
+    DifferentialGeometry.Analysis.Measure.integrable_exp_and_integral_le_of_exponential_tail
+      μminus (fun x => -(Real.log (u x) - c)) hmeasMinus.neg
+        hp hpdecay hBminus htailMinus
+  apply crossover_of_centered_exponential_bounds μplus μminus u hpos
+    (by
+      apply add_nonneg ENNReal.toReal_nonneg
+      exact div_nonneg (mul_nonneg hBplus hp.le) (sub_nonneg.mpr hpdecay.le))
+    hplus.2
+  simpa only [mul_neg, neg_mul] using hminus.2
+
+theorem crossover_of_centered_level_set_decay
+    (μplus μminus : Measure α)
+    [IsFiniteMeasure μplus] [IsFiniteMeasure μminus]
+    (u : α → ℝ) (hpos : ∀ x, 0 < u x)
+    {basePlus baseMinus : Set α}
+    {p c step ratio : ℝ}
+    (hstep : 0 < step) (hratio_pos : 0 < ratio) (hratio_lt : ratio < 1)
+    (hp : 0 < p) (hpdecay : p < -Real.log ratio / step)
+    (hmeasPlus : AEMeasurable (fun x => Real.log (u x) - c) μplus)
+    (hmeasMinus : AEMeasurable (fun x => Real.log (u x) - c) μminus)
+    (hsubPlus : ∀ level,
+      {x | level < Real.log (u x) - c} ⊆ basePlus)
+    (hsubMinus : ∀ level,
+      {x | level < -(Real.log (u x) - c)} ⊆ baseMinus)
+    (hdecayPlus : ∀ level : ℝ, step ≤ level →
+      μplus {x | level + step < Real.log (u x) - c} ≤
+        ENNReal.ofReal ratio * μplus {x | level < Real.log (u x) - c})
+    (hdecayMinus : ∀ level : ℝ, step ≤ level →
+      μminus {x | level + step < -(Real.log (u x) - c)} ≤
+        ENNReal.ofReal ratio * μminus {x | level < -(Real.log (u x) - c)}) :
+    (∫ x, u x ^ p ∂μplus) * (∫ x, u x ^ (-p) ∂μminus) ≤
+      (μplus.real Set.univ +
+          (1 / ratio ^ 2 * μplus.real basePlus) * p /
+            (-Real.log ratio / step - p)) *
+        (μminus.real Set.univ +
+          (1 / ratio ^ 2 * μminus.real baseMinus) * p /
+            (-Real.log ratio / step - p)) := by
+  have htailPlus : ∀ level : ℝ, 0 < level →
+      μplus {x | level < Real.log (u x) - c} ≤
+        ENNReal.ofReal
+          ((1 / ratio ^ 2 * μplus.real basePlus) *
+            Real.exp (-(-Real.log ratio / step) * level)) := by
+    intro level hlevel
+    have h :=
+      DifferentialGeometry.Analysis.Measure.level_set_exponential_decay_from_base_real
+        μplus hsubPlus hstep hratio_pos hratio_lt hdecayPlus level
+    have harg :
+        -level * (-Real.log ratio / step) =
+          -(-Real.log ratio / step) * level := by
+      ring
+    rw [harg] at h
+    exact h
+  have htailMinus : ∀ level : ℝ, 0 < level →
+      μminus {x | level < -(Real.log (u x) - c)} ≤
+        ENNReal.ofReal
+          ((1 / ratio ^ 2 * μminus.real baseMinus) *
+            Real.exp (-(-Real.log ratio / step) * level)) := by
+    intro level hlevel
+    have h :=
+      DifferentialGeometry.Analysis.Measure.level_set_exponential_decay_from_base_real
+        μminus hsubMinus hstep hratio_pos hratio_lt hdecayMinus level
+    have harg :
+        -level * (-Real.log ratio / step) =
+          -(-Real.log ratio / step) * level := by
+      ring
+    rw [harg] at h
+    exact h
+  exact crossover_of_centered_exponential_tails μplus μminus u hpos hp hpdecay
+    (mul_nonneg (by positivity) ENNReal.toReal_nonneg)
+    (mul_nonneg (by positivity) ENNReal.toReal_nonneg)
+    hmeasPlus hmeasMinus htailPlus htailMinus
 
 theorem weak_harnack_power_of_crossover
     {u A D B C p : ℝ}
