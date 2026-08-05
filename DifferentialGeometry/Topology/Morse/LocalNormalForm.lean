@@ -7,6 +7,7 @@ import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.Analysis.Normed.MulAction
 import Mathlib.Analysis.Normed.Operator.Basic
+import Mathlib.Analysis.Normed.Operator.Prod
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
@@ -1210,5 +1211,402 @@ theorem contDiffOn_morseTaylorBilin (g : E → ℝ) (hg : ContDiff ℝ 3 g) :
 theorem contDiffAt_morseTaylorBilin (g : E → ℝ) (hg : ContDiff ℝ 3 g) (x₀ : E) :
     ContDiffAt ℝ 1 (fun x : E => morseTaylorBilin g x) x₀ := by
   exact (contDiffOn_morseTaylorBilin g hg).contDiffAt Filter.univ_mem
+
+noncomputable def morseSegPath (p : E × E) (t : ℝ) : E :=
+  p.1 + t • (p.2 - p.1)
+
+noncomputable def morseSegDeriv (t : ℝ) : (E × E) →L[ℝ] E :=
+  (1 - t) • ContinuousLinearMap.fst ℝ E E + t • ContinuousLinearMap.snd ℝ E E
+
+omit [FiniteDimensional ℝ E] in
+theorem morseSegPath_apply_deriv (p : E × E) (t : ℝ) :
+    morseSegPath p t = morseSegDeriv t p := by
+  dsimp [morseSegPath, morseSegDeriv]
+  rw [smul_sub, sub_smul, one_smul]
+  abel
+
+omit [FiniteDimensional ℝ E] in
+theorem hasFDerivAt_morseSegPath (p : E × E) (t : ℝ) :
+    HasFDerivAt (fun q : E × E => morseSegPath q t) (morseSegDeriv t) p := by
+  have hfun : (fun q : E × E => morseSegPath q t) = (morseSegDeriv t) := by
+    funext q
+    exact morseSegPath_apply_deriv q t
+  have hder : HasFDerivAt (fun q : E × E => morseSegDeriv t q) (morseSegDeriv t) p := by
+    fun_prop
+  simpa [hfun] using hder
+
+omit [FiniteDimensional ℝ E] in
+theorem norm_morseSegDeriv_le (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) 1) :
+    ‖(morseSegDeriv t : (E × E) →L[ℝ] E)‖ ≤ 2 := by
+  have h1 : ‖(1 - t) • (ContinuousLinearMap.fst ℝ E E : (E × E) →L[ℝ] E)‖ ≤ 1 - t := by
+    rw [norm_smul]
+    have hfst : ‖(ContinuousLinearMap.fst ℝ E E : (E × E) →L[ℝ] E)‖ ≤ 1 :=
+      ContinuousLinearMap.norm_fst_le (𝕜 := ℝ) (E := E) (F := E)
+    calc
+      ‖1 - t‖ * ‖ContinuousLinearMap.fst ℝ E E‖ ≤ ‖1 - t‖ * 1 := by
+        exact mul_le_mul_of_nonneg_left hfst (norm_nonneg _)
+      _ = 1 - t := by
+        rw [mul_one, Real.norm_eq_abs, abs_of_nonneg]
+        linarith [ht.2]
+  have h2 : ‖t • (ContinuousLinearMap.snd ℝ E E : (E × E) →L[ℝ] E)‖ ≤ t := by
+    rw [norm_smul]
+    have hsnd : ‖(ContinuousLinearMap.snd ℝ E E : (E × E) →L[ℝ] E)‖ ≤ 1 :=
+      ContinuousLinearMap.norm_snd_le (𝕜 := ℝ) (E := E) (F := E)
+    calc
+      ‖t‖ * ‖ContinuousLinearMap.snd ℝ E E‖ ≤ ‖t‖ * 1 := by
+        exact mul_le_mul_of_nonneg_left hsnd (norm_nonneg _)
+      _ = t := by
+        rw [mul_one, Real.norm_eq_abs, abs_of_nonneg]
+        exact ht.1
+  calc
+    ‖(morseSegDeriv t : (E × E) →L[ℝ] E)‖ ≤ ‖(1 - t) • (ContinuousLinearMap.fst ℝ E E : (E × E) →L[ℝ] E)‖ +
+        ‖t • (ContinuousLinearMap.snd ℝ E E : (E × E) →L[ℝ] E)‖ := by
+      dsimp [morseSegDeriv]
+      exact norm_add_le _ _
+    _ ≤ (1 - t) + t := add_le_add h1 h2
+    _ ≤ 2 := by linarith
+
+omit [FiniteDimensional ℝ E] in
+theorem norm_morseSegPath_le {p₀ : E × E} {p : E × E} (hp : p ∈ Metric.ball p₀ 1)
+    (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) 1) :
+    ‖morseSegPath p t‖ ≤ ‖p₀.1‖ + ‖p₀.2 - p₀.1‖ + 3 := by
+  have hdist : ‖p - p₀‖ < 1 := by simpa [dist_eq_norm] using (Metric.mem_ball.mp hp)
+  have h₁ : ‖p.1 - p₀.1‖ ≤ ‖p - p₀‖ := by
+    calc
+      ‖p.1 - p₀.1‖ = ‖ContinuousLinearMap.fst ℝ E E (p - p₀)‖ := by
+        simp [ContinuousLinearMap.fst]
+      _ ≤ ‖ContinuousLinearMap.fst ℝ E E‖ * ‖p - p₀‖ := ContinuousLinearMap.le_opNorm _ _
+      _ ≤ ‖p - p₀‖ := by
+        calc
+          ‖ContinuousLinearMap.fst ℝ E E‖ * ‖p - p₀‖ ≤ 1 * ‖p - p₀‖ := by
+            exact mul_le_mul_of_nonneg_right
+              (ContinuousLinearMap.norm_fst_le (𝕜 := ℝ) (E := E) (F := E)) (norm_nonneg _)
+          _ = ‖p - p₀‖ := by rw [one_mul]
+  have h₂ : ‖(p.2 - p.1) - (p₀.2 - p₀.1)‖ ≤ ‖p - p₀‖ + ‖p - p₀‖ := by
+    calc
+      ‖(p.2 - p.1) - (p₀.2 - p₀.1)‖ = ‖(p.2 - p₀.2) - (p.1 - p₀.1)‖ := by
+        have hsub : (p.2 - p.1) - (p₀.2 - p₀.1) = (p.2 - p₀.2) - (p.1 - p₀.1) := by abel
+        rw [hsub]
+      _ ≤ ‖p.2 - p₀.2‖ + ‖p.1 - p₀.1‖ := by
+        rw [sub_eq_add_neg]
+        calc
+          ‖(p.2 - p₀.2) + -(p.1 - p₀.1)‖ ≤ ‖p.2 - p₀.2‖ + ‖-(p.1 - p₀.1)‖ := norm_add_le _ _
+          _ = ‖p.2 - p₀.2‖ + ‖p.1 - p₀.1‖ := by
+            rw [norm_neg]
+      _ ≤ ‖p - p₀‖ + ‖p - p₀‖ := by
+        exact add_le_add (by
+          calc
+            ‖p.2 - p₀.2‖ = ‖ContinuousLinearMap.snd ℝ E E (p - p₀)‖ := by
+              simp [ContinuousLinearMap.snd]
+            _ ≤ ‖ContinuousLinearMap.snd ℝ E E‖ * ‖p - p₀‖ := ContinuousLinearMap.le_opNorm _ _
+            _ ≤ ‖p - p₀‖ := by
+              calc
+                ‖ContinuousLinearMap.snd ℝ E E‖ * ‖p - p₀‖ ≤ 1 * ‖p - p₀‖ := by
+                  exact mul_le_mul_of_nonneg_right
+                    (ContinuousLinearMap.norm_snd_le (𝕜 := ℝ) (E := E) (F := E)) (norm_nonneg _)
+                _ = ‖p - p₀‖ := by rw [one_mul]) (by
+          calc
+            ‖p.1 - p₀.1‖ = ‖ContinuousLinearMap.fst ℝ E E (p - p₀)‖ := by
+              simp [ContinuousLinearMap.fst]
+            _ ≤ ‖ContinuousLinearMap.fst ℝ E E‖ * ‖p - p₀‖ := ContinuousLinearMap.le_opNorm _ _
+            _ ≤ ‖p - p₀‖ := by
+              calc
+                ‖ContinuousLinearMap.fst ℝ E E‖ * ‖p - p₀‖ ≤ 1 * ‖p - p₀‖ := by
+                  exact mul_le_mul_of_nonneg_right
+                    (ContinuousLinearMap.norm_fst_le (𝕜 := ℝ) (E := E) (F := E)) (norm_nonneg _)
+                _ = ‖p - p₀‖ := by rw [one_mul])
+  have hnorm : ‖morseSegPath p t‖ ≤ ‖p.1‖ + ‖p.2 - p.1‖ := by
+    calc
+      ‖p.1 + t • (p.2 - p.1)‖ ≤ ‖p.1‖ + ‖t • (p.2 - p.1)‖ := norm_add_le _ _
+      _ ≤ ‖p.1‖ + ‖p.2 - p.1‖ := by
+        have ht' : ‖t • (p.2 - p.1)‖ ≤ ‖p.2 - p.1‖ := by
+          calc
+            ‖t • (p.2 - p.1)‖ = |t| * ‖p.2 - p.1‖ := by rw [norm_smul, Real.norm_eq_abs]
+            _ ≤ 1 * ‖p.2 - p.1‖ := by
+              have ht' : |t| ≤ 1 := by
+                rw [abs_of_nonneg ht.1]
+                exact ht.2
+              exact mul_le_mul_of_nonneg_right ht' (norm_nonneg _)
+            _ = ‖p.2 - p.1‖ := by rw [one_mul]
+        linarith
+  calc
+    ‖morseSegPath p t‖ ≤ ‖p.1‖ + ‖p.2 - p.1‖ := hnorm
+    _ ≤ (‖p₀.1‖ + 1) + (‖p₀.2 - p₀.1‖ + 2) := by
+      have hb1 : ‖p.1‖ ≤ ‖p₀.1‖ + 1 := by
+        calc
+          ‖p.1‖ = ‖p₀.1 + (p.1 - p₀.1)‖ := by rw [add_sub_cancel]
+          _ ≤ ‖p₀.1‖ + ‖p.1 - p₀.1‖ := norm_add_le _ _
+          _ ≤ ‖p₀.1‖ + 1 := by linarith
+      have hb2 : ‖p.2 - p.1‖ ≤ ‖p₀.2 - p₀.1‖ + 2 := by
+        calc
+          ‖p.2 - p.1‖ = ‖(p₀.2 - p₀.1) + ((p.2 - p.1) - (p₀.2 - p₀.1))‖ := by
+            rw [add_sub_cancel]
+          _ ≤ ‖p₀.2 - p₀.1‖ + ‖(p.2 - p.1) - (p₀.2 - p₀.1)‖ := norm_add_le _ _
+          _ ≤ ‖p₀.2 - p₀.1‖ + 2 := by linarith
+      linarith [hb1, hb2]
+    _ = ‖p₀.1‖ + ‖p₀.2 - p₀.1‖ + 3 := by ring
+
+omit [FiniteDimensional ℝ E] in
+private theorem continuousOn_morseTaylorAtIntegrand (g : E → ℝ) (hg : ContDiff ℝ 2 g) (p : E × E) :
+    ContinuousOn (fun t : ℝ => (1 - t) • fderiv ℝ (fderiv ℝ g) (morseSegPath p t)) Set.univ := by
+  have h0 : ContDiffOn ℝ 0 (fderiv ℝ (fderiv ℝ g)) Set.univ := by
+    have h1 : ContDiffOn ℝ 1 (fderiv ℝ g) Set.univ :=
+      hg.contDiffOn.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
+    exact h1.fderiv_of_isOpen isOpen_univ (by decide : (0 : WithTop ℕ∞) + 1 ≤ (1 : WithTop ℕ∞))
+  have hcont : ContinuousOn (fderiv ℝ (fderiv ℝ g)) Set.univ := h0.continuousOn
+  have hsmul : Continuous (fun t : ℝ => morseSegPath p t) := by
+    dsimp [morseSegPath]
+    exact continuous_const.add (continuous_id.smul continuous_const)
+  have hcomp : ContinuousOn (fun t : ℝ => fderiv ℝ (fderiv ℝ g) (morseSegPath p t)) Set.univ := by
+    intro t ht
+    have hcAt : ContinuousAt (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t) :=
+      (hcont (morseSegPath p t) (Set.mem_univ _)).continuousAt Filter.univ_mem
+    exact (ContinuousAt.comp (f := fun t : ℝ => morseSegPath p t) (x := t) hcAt
+      hsmul.continuousAt).continuousWithinAt
+  exact (continuous_const.sub continuous_id).continuousOn.smul hcomp
+
+omit [FiniteDimensional ℝ E] in
+private theorem continuousOn_morseTaylorAtDerivIntegrand (g : E → ℝ) (hg : ContDiff ℝ 3 g)
+    (p : E × E) :
+    ContinuousOn (fun t : ℝ => (1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp
+      (morseSegDeriv t))) Set.univ := by
+  have h0 : ContDiffOn ℝ 0 (fderiv ℝ (fderiv ℝ (fderiv ℝ g))) Set.univ := by
+    have h2 : ContDiffOn ℝ 2 (fderiv ℝ g) Set.univ :=
+      hg.contDiffOn.fderiv_of_isOpen isOpen_univ (by decide : (2 : WithTop ℕ∞) + 1 ≤ (3 : WithTop ℕ∞))
+    have h1 : ContDiffOn ℝ 1 (fderiv ℝ (fderiv ℝ g)) Set.univ :=
+      h2.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
+    exact h1.fderiv_of_isOpen isOpen_univ (by decide : (0 : WithTop ℕ∞) + 1 ≤ (1 : WithTop ℕ∞))
+  have hcont : ContinuousOn (fderiv ℝ (fderiv ℝ (fderiv ℝ g))) Set.univ := h0.continuousOn
+  have hsmul : Continuous (fun t : ℝ => morseSegPath p t) := by
+    dsimp [morseSegPath]
+    exact continuous_const.add (continuous_id.smul continuous_const)
+  have hcomp : ContinuousOn (fun t : ℝ => fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t))
+      Set.univ := by
+    intro t ht
+    have hcAt : ContinuousAt (fderiv ℝ (fderiv ℝ (fderiv ℝ g))) (morseSegPath p t) :=
+      (hcont (morseSegPath p t) (Set.mem_univ _)).continuousAt Filter.univ_mem
+    exact (ContinuousAt.comp (f := fun t : ℝ => morseSegPath p t) (x := t) hcAt
+      hsmul.continuousAt).continuousWithinAt
+  have hcompCLM : ContinuousOn (fun t : ℝ => (fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp
+      (morseSegDeriv t)) Set.univ := by
+    have hL : ContinuousOn (fun t : ℝ => fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)) Set.univ := hcomp
+    have hM : Continuous (fun t : ℝ => (morseSegDeriv t : (E × E) →L[ℝ] E)) := by
+      dsimp [morseSegDeriv]
+      exact ((continuous_const.sub continuous_id).smul continuous_const).add
+        (continuous_id.smul continuous_const)
+    intro t ht
+    exact ContinuousOn.clm_comp hL hM.continuousOn t ht
+  exact (continuous_const.sub continuous_id).continuousOn.smul hcompCLM
+
+theorem hasFDerivAt_morseTaylorBilinAt (g : E → ℝ) (hg : ContDiff ℝ 3 g) (c₀ x₀ : E) :
+    HasFDerivAt (fun p : E × E => morseTaylorBilinAt g p.1 p.2)
+      (∫ t in (0 : ℝ)..1, (1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g))
+        (c₀ + t • (x₀ - c₀))).comp (morseSegDeriv t))) (c₀, x₀) := by
+  let F : (E × E) → ℝ → E →L[ℝ] (E →L[ℝ] ℝ) :=
+    fun p t => (1 - t) • fderiv ℝ (fderiv ℝ g) (morseSegPath p t)
+  let F' : (E × E) → ℝ → (E × E) →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)) :=
+    fun p t => (1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp
+      (morseSegDeriv t))
+  let p₀ : E × E := (c₀, x₀)
+  let s : Set (E × E) := Metric.ball p₀ 1
+  have hs : s ∈ nhds p₀ := Metric.ball_mem_nhds p₀ (by norm_num)
+  have hFcont : ∀ p : E × E, Continuous (F p) := by
+    intro p
+    have hg2 : ContDiff ℝ 2 g :=
+      hg.of_le (by decide : (2 : WithTop ℕ∞) ≤ (3 : WithTop ℕ∞))
+    exact continuousOn_univ.mp (continuousOn_morseTaylorAtIntegrand g hg2 p)
+  have hF'_cont : ∀ p : E × E, Continuous (F' p) := by
+    intro p
+    exact continuousOn_univ.mp (continuousOn_morseTaylorAtDerivIntegrand g hg p)
+  have hF_meas : ∀ᶠ p in nhds p₀,
+      AEStronglyMeasurable (F p) (volume.restrict (Ι (0 : ℝ) 1)) := by
+    exact Eventually.of_forall fun p => (hFcont p).aestronglyMeasurable
+  have hF'_meas : AEStronglyMeasurable (F' p₀) (volume.restrict (Ι (0 : ℝ) 1)) :=
+    (hF'_cont p₀).aestronglyMeasurable
+  have hF_int : IntervalIntegrable (F p₀) volume (0 : ℝ) 1 := by
+    exact ContinuousOn.intervalIntegrable_of_Icc (by norm_num : (0 : ℝ) ≤ 1)
+      ((continuousOn_morseTaylorAtIntegrand g (by
+        exact hg.of_le (by decide : (2 : WithTop ℕ∞) ≤ (3 : WithTop ℕ∞))) p₀).mono
+        (by intro t ht; exact Set.mem_univ t))
+  have h0 : ContDiffOn ℝ 0 (fderiv ℝ (fderiv ℝ (fderiv ℝ g))) Set.univ := by
+    have h2 : ContDiffOn ℝ 2 (fderiv ℝ g) Set.univ :=
+      hg.contDiffOn.fderiv_of_isOpen isOpen_univ (by decide : (2 : WithTop ℕ∞) + 1 ≤ (3 : WithTop ℕ∞))
+    have h1 : ContDiffOn ℝ 1 (fderiv ℝ (fderiv ℝ g)) Set.univ :=
+      h2.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
+    exact h1.fderiv_of_isOpen isOpen_univ (by decide : (0 : WithTop ℕ∞) + 1 ≤ (1 : WithTop ℕ∞))
+  let R : ℝ := ‖c₀‖ + ‖x₀ - c₀‖ + 3
+  have hC : ∃ C : ℝ, ∀ y ∈ Metric.closedBall (0 : E) R, ‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) y‖ ≤ C :=
+    IsCompact.exists_bound_of_continuousOn (isCompact_closedBall (x := (0 : E)) (r := R))
+      (h0.continuousOn.mono (by intro y hy; exact Set.mem_univ y))
+  rcases hC with ⟨C, hCbound⟩
+  have hbound_aux : ∀ p ∈ s, ∀ t ∈ Set.Icc (0 : ℝ) 1, ‖F' p t‖ ≤ 2 * C := by
+    intro p hp t ht
+    have htx_mem : morseSegPath p t ∈ Metric.closedBall (0 : E) R := by
+      have hle := norm_morseSegPath_le hp t ht
+      exact Metric.mem_closedBall.mpr (by
+        calc
+          dist (morseSegPath p t) 0 = ‖morseSegPath p t‖ := by rw [dist_zero_right]
+          _ ≤ R := by
+            dsimp [R]
+            linarith [hle])
+    have hnormcomp : ‖(fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp (morseSegDeriv t)‖ ≤
+        ‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)‖ * 2 := by
+      calc
+        ‖(fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp (morseSegDeriv t)‖ ≤
+            ‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)‖ * ‖morseSegDeriv t‖ :=
+          ContinuousLinearMap.opNorm_comp_le _ _
+        _ ≤ ‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)‖ * 2 := by
+          exact mul_le_mul_of_nonneg_left (norm_morseSegDeriv_le t ht) (norm_nonneg _)
+    calc
+      ‖F' p t‖ = ‖(1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp
+          (morseSegDeriv t))‖ := rfl
+      _ = |1 - t| * ‖(fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp
+          (morseSegDeriv t)‖ := by rw [norm_smul, Real.norm_eq_abs]
+      _ ≤ |1 - t| * (‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)‖ * 2) := by
+        exact mul_le_mul_of_nonneg_left hnormcomp (abs_nonneg _)
+      _ ≤ 1 * (C * 2) := by
+        have hC0 : 0 ≤ C := le_trans (norm_nonneg _) (hCbound (0 : E) (by
+          suffices 0 ≤ R from Metric.mem_closedBall.mpr (by simpa using this)
+          positivity))
+        have hleD : ‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)‖ ≤ C :=
+          hCbound (morseSegPath p t) htx_mem
+        have hle1 : |1 - t| ≤ 1 := abs_le.mpr
+          ⟨le_trans (by norm_num : (-1 : ℝ) ≤ 0) (sub_nonneg.mpr ht.2), sub_le_self 1 ht.1⟩
+        have hleDmul : ‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)‖ * 2 ≤ C * 2 :=
+          mul_le_mul hleD le_rfl (by norm_num) hC0
+        calc
+          |1 - t| * (‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)‖ * 2) ≤
+              1 * (‖fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)‖ * 2) :=
+            mul_le_mul hle1 le_rfl (mul_nonneg (norm_nonneg _) (by norm_num)) zero_le_one
+          _ ≤ 1 * (C * 2) := mul_le_mul le_rfl hleDmul (by norm_num) zero_le_one
+      _ = 2 * C := by ring
+  have h_bound : ∀ᵐ t ∂volume.restrict (Ι (0 : ℝ) 1), ∀ p ∈ s, ‖F' p t‖ ≤ (fun _ : ℝ => 2 * C) t := by
+    filter_upwards [ae_restrict_mem measurableSet_uIoc] with t ht
+    intro p hp
+    have htIcc : t ∈ Set.Icc (0 : ℝ) 1 := by
+      have : t ∈ Ι (0 : ℝ) 1 := ht
+      exact ⟨by simpa using (le_of_lt this.1), by simpa using this.2⟩
+    exact hbound_aux p hp t htIcc
+  have h_diff : ∀ᵐ t ∂volume.restrict (Ι (0 : ℝ) 1), ∀ p ∈ s, HasFDerivAt (F · t) (F' p t) p := by
+    exact Eventually.of_forall (by
+      intro t p hp
+      have hderiv : HasFDerivAt (fun q : E × E => fderiv ℝ (fderiv ℝ g) (morseSegPath q t))
+          ((fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp (morseSegDeriv t)) p := by
+        have hg' : HasFDerivAt (fderiv ℝ (fderiv ℝ g))
+            (fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)) (morseSegPath p t) := by
+          have h1 : ContDiffOn ℝ 1 (fderiv ℝ (fderiv ℝ g)) Set.univ :=
+            (by
+              have h2 : ContDiffOn ℝ 2 (fderiv ℝ g) Set.univ :=
+                hg.contDiffOn.fderiv_of_isOpen isOpen_univ
+                  (by decide : (2 : WithTop ℕ∞) + 1 ≤ (3 : WithTop ℕ∞))
+              exact h2.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞)))
+          have hd : DifferentiableAt ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t) :=
+            ((h1 (morseSegPath p t) (Set.mem_univ _)).differentiableWithinAt
+              (by decide : (1 : WithTop ℕ∞) ≠ 0)).differentiableAt Filter.univ_mem
+          exact hd.hasFDerivAt
+        exact HasFDerivAt.comp (x := p) (g := fderiv ℝ (fderiv ℝ g))
+          (g' := fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t))
+          (f := fun q : E × E => morseSegPath q t) (f' := morseSegDeriv t)
+          (hg := hg') (hf := hasFDerivAt_morseSegPath p t)
+      have hsmul : HasFDerivAt (fun q : E × E => (1 - t) • fderiv ℝ (fderiv ℝ g) (morseSegPath q t))
+          ((1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp (morseSegDeriv t))) p :=
+        hderiv.const_smul (1 - t)
+      simpa [F, F', Function.comp_def] using hsmul)
+  have hmain := hasFDerivAt_integral_of_dominated_of_fderiv_le'' (μ := volume) (a := (0 : ℝ)) (b := 1)
+    (s := s) (x₀ := p₀) (F := F) (F' := F') (bound := fun _ : ℝ => 2 * C) hs hF_meas hF_int hF'_meas
+    h_bound (intervalIntegrable_const : IntervalIntegrable (fun _ : ℝ => 2 * C) volume (0 : ℝ) 1) h_diff
+  simpa [morseTaylorBilinAt, F, F', p₀, morseSegPath] using hmain
+
+noncomputable def morseTaylorBilinAtDeriv (g : E → ℝ) (c x : E) :
+    (E × E) →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)) :=
+  ∫ t in (0 : ℝ)..1, (1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g))
+    (c + t • (x - c))).comp (morseSegDeriv t))
+
+theorem continuous_morseTaylorBilinAtDeriv (g : E → ℝ) (hg : ContDiff ℝ 3 g) :
+    Continuous (fun p : E × E => morseTaylorBilinAtDeriv g p.1 p.2) := by
+  let G : (E × E) → ℝ → (E × E) →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)) :=
+    fun p t => (1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath p t)).comp
+      (morseSegDeriv t))
+  have hg3 : Continuous (fderiv ℝ (fderiv ℝ (fderiv ℝ g))) := by
+    have h2 : ContDiffOn ℝ 2 (fderiv ℝ g) Set.univ :=
+      hg.contDiffOn.fderiv_of_isOpen isOpen_univ (by decide : (2 : WithTop ℕ∞) + 1 ≤ (3 : WithTop ℕ∞))
+    have h1 : ContDiffOn ℝ 1 (fderiv ℝ (fderiv ℝ g)) Set.univ :=
+      h2.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
+    have h0 : ContDiffOn ℝ 0 (fderiv ℝ (fderiv ℝ (fderiv ℝ g))) Set.univ :=
+      h1.fderiv_of_isOpen isOpen_univ (by decide : (0 : WithTop ℕ∞) + 1 ≤ (1 : WithTop ℕ∞))
+    exact continuousOn_univ.mp h0.continuousOn
+  have hpath : Continuous (fun q : (E × E) × ℝ => morseSegPath q.1 q.2) := by
+    have h1 : Continuous (fun q : (E × E) × ℝ => q.1.1) := by
+      exact ((continuous_fst : Continuous (fun r : E × E => r.1)).comp continuous_fst)
+    have h2 : Continuous (fun q : (E × E) × ℝ => q.1.2) := by
+      exact ((continuous_snd : Continuous (fun r : E × E => r.2)).comp continuous_fst)
+    have h3 : Continuous (fun q : (E × E) × ℝ => q.2) := continuous_snd
+    dsimp [morseSegPath]
+    exact h1.add (h3.smul (h2.sub h1))
+  have hhess : Continuous (fun q : (E × E) × ℝ =>
+      fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath q.1 q.2)) :=
+    hg3.comp hpath
+  have hsegDeriv : Continuous (fun q : (E × E) × ℝ =>
+      (morseSegDeriv q.2 : (E × E) →L[ℝ] E)) := by
+    dsimp [morseSegDeriv]
+    exact ((continuous_const.sub continuous_snd).smul continuous_const).add
+      (continuous_snd.smul continuous_const)
+  have hcomp : Continuous (fun q : (E × E) × ℝ =>
+      (fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (morseSegPath q.1 q.2)).comp
+        (morseSegDeriv q.2 : (E × E) →L[ℝ] E)) := by
+    let C : (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) →L[ℝ] ((E × E) →L[ℝ] E) →L[ℝ]
+        ((E × E) →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) :=
+      ContinuousLinearMap.compL ℝ (E × E) E (E →L[ℝ] (E →L[ℝ] ℝ))
+    have hC : Continuous (fun q : (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) × ((E × E) →L[ℝ] E) =>
+        C q.1 q.2) := by
+      exact (ContinuousLinearMap.continuous₂ C)
+    simpa using hC.comp (hhess.prodMk hsegDeriv)
+  have hscalar : Continuous (fun q : (E × E) × ℝ => 1 - q.2) :=
+    continuous_const.sub continuous_snd
+  have hG : Continuous G.uncurry := by
+    dsimp [G]
+    exact hscalar.smul hcomp
+  have hconv : (fun p : E × E => ∫ t in (0 : ℝ)..1, G p t) =
+      fun p : E × E => ∫ t in Set.Icc (0 : ℝ) 1, G p t := by
+    funext p
+    calc
+      ∫ t in (0 : ℝ)..1, G p t = ∫ t in Set.Ioc (0 : ℝ) 1, G p t :=
+        intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)
+      _ = ∫ t in Set.Icc (0 : ℝ) 1, G p t := by
+        rw [integral_Icc_eq_integral_Ioc' (by simp)]
+  have hdef : (fun p : E × E => morseTaylorBilinAtDeriv g p.1 p.2) =
+      fun p : E × E => ∫ t in (0 : ℝ)..1, G p t := by
+    funext p
+    simp [morseTaylorBilinAtDeriv, G, morseSegPath]
+  rw [hdef]
+  rw [hconv]
+  exact continuous_parametric_integral_of_continuous (X := E × E) (Y := ℝ)
+    (E := (E × E) →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) hG (isCompact_Icc : IsCompact (Set.Icc (0 : ℝ) 1))
+
+theorem contDiffOn_morseTaylorBilinAt (g : E → ℝ) (hg : ContDiff ℝ 3 g) :
+    ContDiffOn ℝ 1 (fun p : E × E => morseTaylorBilinAt g p.1 p.2) Set.univ := by
+  have hdiff : DifferentiableOn ℝ (fun p : E × E => morseTaylorBilinAt g p.1 p.2) Set.univ := by
+    intro p hp
+    exact (hasFDerivAt_morseTaylorBilinAt g hg p.1 p.2).differentiableAt.differentiableWithinAt
+  have hcont : ContinuousOn (fun p : E × E =>
+      fderiv ℝ (fun q : E × E => morseTaylorBilinAt g q.1 q.2) p) Set.univ := by
+    have hdeq : ∀ p : E × E, fderiv ℝ (fun q : E × E => morseTaylorBilinAt g q.1 q.2) p =
+        morseTaylorBilinAtDeriv g p.1 p.2 := by
+      intro p
+      exact (hasFDerivAt_morseTaylorBilinAt g hg p.1 p.2).fderiv
+    intro p hp
+    convert (continuous_morseTaylorBilinAtDeriv g hg).continuousAt.continuousWithinAt using 1
+    funext q
+    exact hdeq q
+  refine contDiffOn_succ_of_fderivWithin (n := 0) (s := Set.univ) hdiff ?_ ?_
+  · intro h
+    exact False.elim ((by decide : (0 : WithTop ℕ∞) ≠ ⊤) h)
+  · rw [contDiffOn_zero]
+    intro p hp
+    simpa [fderivWithin_univ] using hcont p hp
+
+theorem contDiffAt_morseTaylorBilinAt (g : E → ℝ) (hg : ContDiff ℝ 3 g) (c₀ x₀ : E) :
+    ContDiffAt ℝ 1 (fun p : E × E => morseTaylorBilinAt g p.1 p.2) (c₀, x₀) := by
+  exact (contDiffOn_morseTaylorBilinAt g hg).contDiffAt Filter.univ_mem
 
 end DifferentialGeometry.Topology.Morse
