@@ -1,5 +1,4 @@
-import DifferentialGeometry.Analysis.InnerProductSpace.ProperConeIsometry
-import Mathlib.Analysis.Convex.Exposed
+import DifferentialGeometry.Analysis.Convex.ProperConeFace
 
 set_option autoImplicit false
 
@@ -16,7 +15,13 @@ variable {E F : Type*}
 
 noncomputable def ProperCone.innerDualZeroFace
     (C : ProperCone ℝ E) (y : E) : ProperCone ℝ E :=
-  C ⊓ (⊥ : ProperCone ℝ ℝ).comap (innerSL ℝ y)
+  DifferentialGeometry.Analysis.Convex.ProperCone.dualZeroFace C (innerSL ℝ y)
+
+theorem ProperCone.innerDualZeroFace_eq_dualZeroFace
+    (C : ProperCone ℝ E) (y : E) :
+    ProperCone.innerDualZeroFace C y =
+      DifferentialGeometry.Analysis.Convex.ProperCone.dualZeroFace C (innerSL ℝ y) :=
+  rfl
 
 @[simp]
 theorem ProperCone.mem_innerDualZeroFace
