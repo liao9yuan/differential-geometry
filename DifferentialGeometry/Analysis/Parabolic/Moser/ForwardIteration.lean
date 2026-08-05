@@ -192,6 +192,74 @@ def canonicalForwardMoserIterationCost
       Real.log (canonicalForwardMoserStepEnvelope q a τ b B lower upper)) / p₀)
     (Real.log 16 / p₀) k
 
+def canonicalForwardMoserLogCost
+    (n : ℕ) (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (q a τ b B lower upper : ℝ) : ℝ :=
+  let theta := parabolicMoserDecay n
+  let C := max 1 (localizedSobolevConstant (I := I) (M := M) g hdim)
+  let A := canonicalForwardMoserStepEnvelope q a τ b B lower upper
+  (theta * Real.log C + Real.log A) / (1 - theta) +
+    Real.log 16 * (theta / (1 - theta) ^ 2)
+
+def canonicalForwardMoserReverseCost
+    (n : ℕ) (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (q a τ b B lower upper : ℝ) : ℝ :=
+  Real.exp (canonicalForwardMoserLogCost (I := I) (M := M)
+    n g hdim q a τ b B lower upper / (1 - parabolicMoserDecay n))
+
+theorem canonicalForwardMoserLogCost_nonneg
+    (n : ℕ) [NeZero n] (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (q a τ b B lower upper : ℝ) :
+    0 ≤ canonicalForwardMoserLogCost (I := I) (M := M)
+      n g hdim q a τ b B lower upper := by
+  have htheta : 0 ≤ parabolicMoserDecay n := (parabolicMoserDecay_pos n).le
+  have hdenom : 0 ≤ 1 - parabolicMoserDecay n :=
+    sub_nonneg.mpr (parabolicMoserDecay_lt_one n).le
+  have hC : 1 ≤ max 1 (localizedSobolevConstant (I := I) (M := M) g hdim) :=
+    le_max_left _ _
+  have hA : 1 ≤ canonicalForwardMoserStepEnvelope q a τ b B lower upper :=
+    le_max_left _ _
+  unfold canonicalForwardMoserLogCost
+  dsimp only
+  exact add_nonneg
+    (div_nonneg
+      (add_nonneg (mul_nonneg htheta (Real.log_nonneg hC)) (Real.log_nonneg hA))
+      hdenom)
+    (mul_nonneg (Real.log_nonneg (by norm_num))
+      (div_nonneg htheta (sq_nonneg _)))
+
+theorem one_le_canonicalForwardMoserReverseCost
+    (n : ℕ) [NeZero n] (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (q a τ b B lower upper : ℝ) :
+    1 ≤ canonicalForwardMoserReverseCost (I := I) (M := M)
+      n g hdim q a τ b B lower upper := by
+  unfold canonicalForwardMoserReverseCost
+  calc
+    1 = Real.exp 0 := Real.exp_zero.symm
+    _ ≤ Real.exp (canonicalForwardMoserLogCost (I := I) (M := M)
+        n g hdim q a τ b B lower upper / (1 - parabolicMoserDecay n)) :=
+      Real.exp_le_exp.mpr (div_nonneg
+        (canonicalForwardMoserLogCost_nonneg n g hdim q a τ b B lower upper)
+        (sub_nonneg.mpr (parabolicMoserDecay_lt_one n).le))
+
+theorem tsum_canonicalForwardMoserIterationCost
+    (n : ℕ) [NeZero n] (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    {p₀ : ℝ} (hp₀ : 0 < p₀) (q a τ b B lower upper : ℝ) :
+    ∑' k, canonicalForwardMoserIterationCost (I := I) (M := M)
+        n g hdim p₀ q a τ b B lower upper k =
+      canonicalForwardMoserLogCost (I := I) (M := M)
+        n g hdim q a τ b B lower upper / p₀ := by
+  unfold canonicalForwardMoserIterationCost canonicalForwardMoserLogCost
+  dsimp only
+  rw [tsum_moserIterationCost (parabolicMoserDecay_pos n).le
+    (parabolicMoserDecay_lt_one n)]
+  field_simp [hp₀.ne']
+
 theorem nestedForwardMoserGradientCost_canonical
     {B lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
     nestedForwardMoserGradientCost B

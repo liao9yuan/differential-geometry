@@ -185,6 +185,35 @@ theorem summable_moserIterationCost
   ring
 
 omit [NeZero n] in
+theorem tsum_moserIterationCost
+    {theta a b : ℝ} (htheta : 0 ≤ theta) (htheta_one : theta < 1) :
+    ∑' k, moserIterationCost theta a b k =
+      a / (1 - theta) + b * (theta / (1 - theta) ^ 2) := by
+  have htheta_norm : ‖theta‖ < 1 := by
+    simpa only [Real.norm_eq_abs, abs_of_nonneg htheta] using htheta_one
+  have hgeom : Summable (fun k : ℕ => theta ^ k) :=
+    summable_geometric_of_lt_one htheta htheta_one
+  have hlinear : Summable (fun k : ℕ => (k : ℝ) * theta ^ k) := by
+    exact summable_pow_mul_geometric_of_norm_lt_one (R := ℝ) 1 htheta_norm
+      |>.congr (fun k => by simp only [pow_one])
+  calc
+    ∑' k, moserIterationCost theta a b k =
+        ∑' k : ℕ, (a * theta ^ k + b * ((k : ℝ) * theta ^ k)) := by
+      apply tsum_congr
+      intro k
+      simp only [moserIterationCost]
+      ring
+    _ = a * (∑' k : ℕ, theta ^ k) +
+        b * (∑' k : ℕ, (k : ℝ) * theta ^ k) := by
+      rw [Summable.tsum_add (hgeom.mul_left a) (hlinear.mul_left b),
+        tsum_mul_left, tsum_mul_left]
+    _ = a * (1 - theta)⁻¹ + b * (theta / (1 - theta) ^ 2) := by
+      rw [tsum_geometric_of_lt_one htheta htheta_one,
+        tsum_coe_mul_geometric_of_norm_lt_one htheta_norm]
+    _ = a / (1 - theta) + b * (theta / (1 - theta) ^ 2) := by
+      simp only [div_eq_mul_inv]
+
+omit [NeZero n] in
 theorem additive_iteration_le_initial_add_tsum
     {X cost : ℕ → ℝ}
     (hcost : Summable cost) (hcost_nonneg : ∀ k, 0 ≤ cost k)
