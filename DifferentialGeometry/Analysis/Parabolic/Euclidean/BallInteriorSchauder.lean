@@ -46,6 +46,73 @@ def parabolicBallInteriorAbsorbedSchauderConst
     (1 - spdParabolicSchauderDefectConst
       (fun i j ↦ a i j p0) hA alpha Ka omega T)
 
+omit [Nonempty n] in
+theorem parabolicBallInteriorAbsorbedSchauderConst_add
+    {alpha : NNReal} (halpha1 : alpha < 1)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (aTime t₀ t₁ bTime r R : Real)
+    (Ksource₁ Ksource₂ Kcomm₁ Kcomm₂ Bsource₁ Bsource₂ Bcomm₁ Bcomm₂ : NNReal)
+    (Ka omega : n → n → NNReal) {T : Real} (hT : 0 ≤ T) :
+    parabolicBallInteriorAbsorbedSchauderConst a p0 hA alpha
+        aTime t₀ t₁ bTime r R (Ksource₁ + Ksource₂) (Kcomm₁ + Kcomm₂)
+        (Bsource₁ + Bsource₂) (Bcomm₁ + Bcomm₂) Ka omega T =
+      parabolicBallInteriorAbsorbedSchauderConst a p0 hA alpha
+          aTime t₀ t₁ bTime r R Ksource₁ Kcomm₁ Bsource₁ Bcomm₁ Ka omega T +
+        parabolicBallInteriorAbsorbedSchauderConst a p0 hA alpha
+          aTime t₀ t₁ bTime r R Ksource₂ Kcomm₂ Bsource₂ Bcomm₂ Ka omega T := by
+  unfold parabolicBallInteriorAbsorbedSchauderConst
+  rw [show parabolicCutoffSourceHolderConst
+      (parabolicBallCutoffHolderConst aTime t₀ t₁ bTime r R)
+      (Ksource₁ + Ksource₂) (Kcomm₁ + Kcomm₂) 1 (Bsource₁ + Bsource₂) =
+    parabolicCutoffSourceHolderConst
+        (parabolicBallCutoffHolderConst aTime t₀ t₁ bTime r R)
+        Ksource₁ Kcomm₁ 1 Bsource₁ +
+      parabolicCutoffSourceHolderConst
+        (parabolicBallCutoffHolderConst aTime t₀ t₁ bTime r R)
+        Ksource₂ Kcomm₂ 1 Bsource₂ by
+    unfold parabolicCutoffSourceHolderConst
+    ring]
+  rw [show parabolicCutoffSourceSupConst 1
+      (Bsource₁ + Bsource₂) (Bcomm₁ + Bcomm₂) =
+    parabolicCutoffSourceSupConst 1 Bsource₁ Bcomm₁ +
+      parabolicCutoffSourceSupConst 1 Bsource₂ Bcomm₂ by
+    unfold parabolicCutoffSourceSupConst
+    ring]
+  rw [spdHeatPotentialSchauderConst_add halpha1 _ hA _ _ _ _ hT]
+  rw [add_div]
+
+omit [Nonempty n] in
+theorem parabolicBallInteriorAbsorbedSchauderConst_nnreal_mul
+    (d alpha : NNReal)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (aTime t₀ t₁ bTime r R : Real)
+    (Ksource Kcomm Bsource Bcomm : NNReal)
+    (Ka omega : n → n → NNReal) (T : Real) :
+    parabolicBallInteriorAbsorbedSchauderConst a p0 hA alpha
+        aTime t₀ t₁ bTime r R (d * Ksource) (d * Kcomm)
+        (d * Bsource) (d * Bcomm) Ka omega T =
+      d * parabolicBallInteriorAbsorbedSchauderConst a p0 hA alpha
+        aTime t₀ t₁ bTime r R Ksource Kcomm Bsource Bcomm Ka omega T := by
+  unfold parabolicBallInteriorAbsorbedSchauderConst
+  rw [show parabolicCutoffSourceHolderConst
+      (parabolicBallCutoffHolderConst aTime t₀ t₁ bTime r R)
+      (d * Ksource) (d * Kcomm) 1 (d * Bsource) =
+    d * parabolicCutoffSourceHolderConst
+      (parabolicBallCutoffHolderConst aTime t₀ t₁ bTime r R)
+      Ksource Kcomm 1 Bsource by
+    unfold parabolicCutoffSourceHolderConst
+    ring]
+  rw [show parabolicCutoffSourceSupConst 1 (d * Bsource) (d * Bcomm) =
+      d * parabolicCutoffSourceSupConst 1 Bsource Bcomm by
+    unfold parabolicCutoffSourceSupConst
+    ring]
+  rw [spdHeatPotentialSchauderConst_nnreal_mul]
+  ring
+
 def parabolicBallCutoffOperatorCommutatorSupConst
     (aTime t₀ t₁ bTime r R : Real) (A : n → n → NNReal)
     (Mdu Mu : NNReal) : NNReal :=
@@ -67,6 +134,85 @@ def parabolicBallCutoffOperatorCommutatorHolderConst
     (parabolicBallCutoffSpatialFDeriv2HolderConst
       aTime t₀ t₁ bTime center hr hrR)
     Ku (intervalCutoffDerivSupConst aTime t₀ t₁ bTime)
+    (parabolicBallCutoffSpatialFDerivSupConst r R) Mdu
+    (parabolicBallCutoffSpatialFDeriv2SupConst r R) Mu
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] [CompleteSpace F] in
+theorem parabolicBallCutoffOperatorCommutatorSupConst_add
+    (aTime t₀ t₁ bTime r R : Real) (A : n → n → NNReal)
+    (Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal) :
+    parabolicBallCutoffOperatorCommutatorSupConst aTime t₀ t₁ bTime r R A
+        (Mdu₁ + Mdu₂) (Mu₁ + Mu₂) =
+      parabolicBallCutoffOperatorCommutatorSupConst
+          aTime t₀ t₁ bTime r R A Mdu₁ Mu₁ +
+        parabolicBallCutoffOperatorCommutatorSupConst
+          aTime t₀ t₁ bTime r R A Mdu₂ Mu₂ := by
+  unfold parabolicBallCutoffOperatorCommutatorSupConst
+  exact parabolicCutoffOperatorCommutatorSupConst_add (n := n) A
+    (intervalCutoffDerivSupConst aTime t₀ t₁ bTime)
+    (parabolicBallCutoffSpatialFDerivSupConst r R)
+    (parabolicBallCutoffSpatialFDeriv2SupConst r R)
+    Mdu₁ Mdu₂ Mu₁ Mu₂
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] [CompleteSpace F] in
+theorem parabolicBallCutoffOperatorCommutatorSupConst_nnreal_mul
+    (d : NNReal) (aTime t₀ t₁ bTime r R : Real)
+    (A : n → n → NNReal) (Mdu Mu : NNReal) :
+    parabolicBallCutoffOperatorCommutatorSupConst aTime t₀ t₁ bTime r R A
+        (d * Mdu) (d * Mu) =
+      d * parabolicBallCutoffOperatorCommutatorSupConst
+        aTime t₀ t₁ bTime r R A Mdu Mu := by
+  unfold parabolicBallCutoffOperatorCommutatorSupConst
+  exact parabolicCutoffOperatorCommutatorSupConst_nnreal_mul (n := n) d A
+    (intervalCutoffDerivSupConst aTime t₀ t₁ bTime)
+    (parabolicBallCutoffSpatialFDerivSupConst r R) Mdu
+    (parabolicBallCutoffSpatialFDeriv2SupConst r R) Mu
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] [CompleteSpace F] in
+theorem parabolicBallCutoffOperatorCommutatorHolderConst_add
+    (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R) (A Ka : n → n → NNReal)
+    (Kdu₁ Kdu₂ Ku₁ Ku₂ Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal) :
+    parabolicBallCutoffOperatorCommutatorHolderConst aTime t₀ t₁ bTime
+        center hr hrR A Ka (Kdu₁ + Kdu₂) (Ku₁ + Ku₂)
+        (Mdu₁ + Mdu₂) (Mu₁ + Mu₂) =
+      parabolicBallCutoffOperatorCommutatorHolderConst aTime t₀ t₁ bTime
+          center hr hrR A Ka Kdu₁ Ku₁ Mdu₁ Mu₁ +
+        parabolicBallCutoffOperatorCommutatorHolderConst aTime t₀ t₁ bTime
+          center hr hrR A Ka Kdu₂ Ku₂ Mdu₂ Mu₂ := by
+  unfold parabolicBallCutoffOperatorCommutatorHolderConst
+  exact parabolicCutoffOperatorCommutatorHolderConst_add
+    (n := n) A Ka
+    (parabolicBallCutoffTimeDerivativeHolderConst aTime t₀ t₁ bTime r R)
+    (parabolicBallCutoffSpatialFDerivHolderConst aTime t₀ t₁ bTime r R)
+    (parabolicBallCutoffSpatialFDeriv2HolderConst
+      aTime t₀ t₁ bTime center hr hrR)
+    (intervalCutoffDerivSupConst aTime t₀ t₁ bTime)
+    (parabolicBallCutoffSpatialFDerivSupConst r R)
+    (parabolicBallCutoffSpatialFDeriv2SupConst r R)
+    Kdu₁ Kdu₂ Ku₁ Ku₂ Mdu₁ Mdu₂ Mu₁ Mu₂
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] [CompleteSpace F] in
+theorem parabolicBallCutoffOperatorCommutatorHolderConst_nnreal_mul
+    (d : NNReal) (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R) (A Ka : n → n → NNReal)
+    (Kdu Ku Mdu Mu : NNReal) :
+    parabolicBallCutoffOperatorCommutatorHolderConst aTime t₀ t₁ bTime
+        center hr hrR A Ka (d * Kdu) (d * Ku) (d * Mdu) (d * Mu) =
+      d * parabolicBallCutoffOperatorCommutatorHolderConst aTime t₀ t₁ bTime
+        center hr hrR A Ka Kdu Ku Mdu Mu := by
+  unfold parabolicBallCutoffOperatorCommutatorHolderConst
+  exact parabolicCutoffOperatorCommutatorHolderConst_nnreal_mul
+    (n := n) d A Ka
+    (parabolicBallCutoffTimeDerivativeHolderConst aTime t₀ t₁ bTime r R)
+    (parabolicBallCutoffSpatialFDerivHolderConst aTime t₀ t₁ bTime r R)
+    Kdu (parabolicBallCutoffSpatialFDeriv2HolderConst
+      aTime t₀ t₁ bTime center hr hrR) Ku
+    (intervalCutoffDerivSupConst aTime t₀ t₁ bTime)
     (parabolicBallCutoffSpatialFDerivSupConst r R) Mdu
     (parabolicBallCutoffSpatialFDeriv2SupConst r R) Mu
 
@@ -124,6 +270,58 @@ def parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
     (parabolicBallCutoffOperatorCommutatorSupConst
       aTime t₀ t₁ bTime r R A Mdu Mu)
     Ka omega T
+
+omit [Nonempty n] in
+theorem parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst_add
+    {alpha : NNReal} (halpha1 : alpha < 1)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Ksource₁ Ksource₂ Kdu₁ Kdu₂ Ku₁ Ku₂ Bsource₁ Bsource₂
+      Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal)
+    (A Ka omega : n → n → NNReal) {T : Real} (hT : 0 ≤ T) :
+    parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        (Ksource₁ + Ksource₂) (Kdu₁ + Kdu₂) (Ku₁ + Ku₂)
+        (Bsource₁ + Bsource₂) (Mdu₁ + Mdu₂) (Mu₁ + Mu₂)
+        A Ka omega T =
+      parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Ksource₁ Kdu₁ Ku₁ Bsource₁ Mdu₁ Mu₁ A Ka omega T +
+        parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Ksource₂ Kdu₂ Ku₂ Bsource₂ Mdu₂ Mu₂ A Ka omega T := by
+  unfold parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+  rw [parabolicBallCutoffOperatorCommutatorHolderConst_add,
+    parabolicBallCutoffOperatorCommutatorSupConst_add]
+  exact parabolicBallInteriorAbsorbedSchauderConst_add halpha1
+    a p0 hA aTime t₀ t₁ bTime r R Ksource₁ Ksource₂ _ _
+    Bsource₁ Bsource₂ _ _ Ka omega hT
+
+omit [Nonempty n] in
+theorem parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst_nnreal_mul
+    (d alpha : NNReal)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Ksource Kdu Ku Bsource Mdu Mu : NNReal)
+    (A Ka omega : n → n → NNReal) (T : Real) :
+    parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        (d * Ksource) (d * Kdu) (d * Ku) (d * Bsource) (d * Mdu) (d * Mu)
+        A Ka omega T =
+      d * parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        Ksource Kdu Ku Bsource Mdu Mu A Ka omega T := by
+  unfold parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+  rw [parabolicBallCutoffOperatorCommutatorHolderConst_nnreal_mul,
+    parabolicBallCutoffOperatorCommutatorSupConst_nnreal_mul]
+  exact parabolicBallInteriorAbsorbedSchauderConst_nnreal_mul
+    d alpha a p0 hA aTime t₀ t₁ bTime r R Ksource _ Bsource _ Ka omega T
 
 omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
 theorem eParabolicC2HolderGaugeOn_parabolicBallCutoff_le

@@ -400,6 +400,21 @@ def parabolicValueInterpolationConst
   2 * C * epsilon ^ ((1 : NNReal) - alpha : Real) +
     2 * M / epsilon ^ (alpha : Real)
 
+theorem parabolicValueInterpolationConst_add
+    (epsilon alpha C₁ C₂ M₁ M₂ : NNReal) :
+    parabolicValueInterpolationConst epsilon alpha (C₁ + C₂) (M₁ + M₂) =
+      parabolicValueInterpolationConst epsilon alpha C₁ M₁ +
+        parabolicValueInterpolationConst epsilon alpha C₂ M₂ := by
+  unfold parabolicValueInterpolationConst
+  ring
+
+theorem parabolicValueInterpolationConst_nnreal_mul
+    (c epsilon alpha C M : NNReal) :
+    parabolicValueInterpolationConst epsilon alpha (c * C) (c * M) =
+      c * parabolicValueInterpolationConst epsilon alpha C M := by
+  unfold parabolicValueInterpolationConst
+  ring
+
 theorem parabolicValue_holderWith_restrict_of_interpolation
     {J : Set Real} (hJ : Convex Real J) {Omega : Set V}
     (hOmega : Convex Real Omega) (epsilon : NNReal)
@@ -793,6 +808,28 @@ def bufferedParabolicSpatialGradientInterpolationConst
       epsilon ^ ((1 : NNReal) - alpha : Real) +
     2 * (2 * M / epsilon + C * epsilon) /
       epsilon ^ (alpha : Real)
+
+theorem bufferedParabolicSpatialGradientInterpolationConst_add
+    (epsilon delta alpha C₁ C₂ M₁ M₂ : NNReal) :
+    bufferedParabolicSpatialGradientInterpolationConst epsilon delta alpha
+        (C₁ + C₂) (M₁ + M₂) =
+      bufferedParabolicSpatialGradientInterpolationConst
+          epsilon delta alpha C₁ M₁ +
+        bufferedParabolicSpatialGradientInterpolationConst
+          epsilon delta alpha C₂ M₂ := by
+  unfold bufferedParabolicSpatialGradientInterpolationConst
+    bufferedParabolicSpatialGradientConst
+  ring
+
+theorem bufferedParabolicSpatialGradientInterpolationConst_nnreal_mul
+    (c epsilon delta alpha C M : NNReal) :
+    bufferedParabolicSpatialGradientInterpolationConst epsilon delta alpha
+        (c * C) (c * M) =
+      c * bufferedParabolicSpatialGradientInterpolationConst
+        epsilon delta alpha C M := by
+  unfold bufferedParabolicSpatialGradientInterpolationConst
+    bufferedParabolicSpatialGradientConst
+  ring
 
 def bufferedParabolicC2HolderGaugeWithLowerJetsConst
     (C delta : NNReal) : NNReal :=

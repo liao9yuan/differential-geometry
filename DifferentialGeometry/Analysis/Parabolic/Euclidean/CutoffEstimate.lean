@@ -29,6 +29,78 @@ def parabolicMatrixCutoffCommutatorHolderConst
     (A i j * Md2chi) * Ku +
       Mu * (A i j * Kd2chi + Md2chi * Ka i j))
 
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicMatrixCutoffCommutatorSupConst_add
+    (A : n → n → NNReal) (Mdchi Md2chi Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal) :
+    parabolicMatrixCutoffCommutatorSupConst A Mdchi
+        (Mdu₁ + Mdu₂) Md2chi (Mu₁ + Mu₂) =
+      parabolicMatrixCutoffCommutatorSupConst A Mdchi Mdu₁ Md2chi Mu₁ +
+        parabolicMatrixCutoffCommutatorSupConst A Mdchi Mdu₂ Md2chi Mu₂ := by
+  unfold parabolicMatrixCutoffCommutatorSupConst
+  simp only [mul_add, Finset.sum_add_distrib]
+  ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicMatrixCutoffCommutatorSupConst_nnreal_mul
+    (d : NNReal) (A : n → n → NNReal)
+    (Mdchi Mdu Md2chi Mu : NNReal) :
+    parabolicMatrixCutoffCommutatorSupConst A Mdchi
+        (d * Mdu) Md2chi (d * Mu) =
+      d * parabolicMatrixCutoffCommutatorSupConst A Mdchi Mdu Md2chi Mu := by
+  unfold parabolicMatrixCutoffCommutatorSupConst
+  rw [mul_add]
+  congr 1
+  · rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i hi
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    ring
+  · rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i hi
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j hj
+    ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicMatrixCutoffCommutatorHolderConst_add
+    (A Ka : n → n → NNReal) (Kdchi Kd2chi Mdchi Md2chi : NNReal)
+    (Kdu₁ Kdu₂ Ku₁ Ku₂ Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal) :
+    parabolicMatrixCutoffCommutatorHolderConst A Ka Kdchi
+        (Kdu₁ + Kdu₂) Kd2chi (Ku₁ + Ku₂) Mdchi
+        (Mdu₁ + Mdu₂) Md2chi (Mu₁ + Mu₂) =
+      parabolicMatrixCutoffCommutatorHolderConst A Ka Kdchi
+          Kdu₁ Kd2chi Ku₁ Mdchi Mdu₁ Md2chi Mu₁ +
+        parabolicMatrixCutoffCommutatorHolderConst A Ka Kdchi
+          Kdu₂ Kd2chi Ku₂ Mdchi Mdu₂ Md2chi Mu₂ := by
+  unfold parabolicMatrixCutoffCommutatorHolderConst
+  simp only [mul_add, add_mul, Finset.sum_add_distrib]
+  ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicMatrixCutoffCommutatorHolderConst_nnreal_mul
+    (d : NNReal) (A Ka : n → n → NNReal)
+    (Kdchi Kdu Kd2chi Ku Mdchi Mdu Md2chi Mu : NNReal) :
+    parabolicMatrixCutoffCommutatorHolderConst A Ka Kdchi
+        (d * Kdu) Kd2chi (d * Ku) Mdchi (d * Mdu) Md2chi (d * Mu) =
+      d * parabolicMatrixCutoffCommutatorHolderConst A Ka Kdchi
+        Kdu Kd2chi Ku Mdchi Mdu Md2chi Mu := by
+  unfold parabolicMatrixCutoffCommutatorHolderConst
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j hj
+  ring
+
 omit [DecidableEq n] [Nonempty n] in
 theorem norm_parabolicMatrixCutoffCommutator_le
     {Q : Set (ParabolicPoint (Euc n))}
@@ -636,6 +708,64 @@ def parabolicCutoffOperatorCommutatorHolderConst
   MdtimeChi * Ku + Mu * KdtimeChi +
     parabolicMatrixCutoffCommutatorHolderConst A Ka
       Kdchi Kdu Kd2chi Ku Mdchi Mdu Md2chi Mu
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicCutoffOperatorCommutatorSupConst_add
+    (A : n → n → NNReal) (MdtimeChi Mdchi Md2chi : NNReal)
+    (Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal) :
+    parabolicCutoffOperatorCommutatorSupConst A MdtimeChi Mdchi
+        (Mdu₁ + Mdu₂) Md2chi (Mu₁ + Mu₂) =
+      parabolicCutoffOperatorCommutatorSupConst A MdtimeChi Mdchi
+          Mdu₁ Md2chi Mu₁ +
+        parabolicCutoffOperatorCommutatorSupConst A MdtimeChi Mdchi
+          Mdu₂ Md2chi Mu₂ := by
+  unfold parabolicCutoffOperatorCommutatorSupConst
+  rw [mul_add, parabolicMatrixCutoffCommutatorSupConst_add]
+  ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicCutoffOperatorCommutatorSupConst_nnreal_mul
+    (d : NNReal) (A : n → n → NNReal)
+    (MdtimeChi Mdchi Mdu Md2chi Mu : NNReal) :
+    parabolicCutoffOperatorCommutatorSupConst A MdtimeChi Mdchi
+        (d * Mdu) Md2chi (d * Mu) =
+      d * parabolicCutoffOperatorCommutatorSupConst A MdtimeChi Mdchi
+        Mdu Md2chi Mu := by
+  unfold parabolicCutoffOperatorCommutatorSupConst
+  rw [parabolicMatrixCutoffCommutatorSupConst_nnreal_mul]
+  ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicCutoffOperatorCommutatorHolderConst_add
+    (A Ka : n → n → NNReal)
+    (KdtimeChi Kdchi Kd2chi MdtimeChi Mdchi Md2chi : NNReal)
+    (Kdu₁ Kdu₂ Ku₁ Ku₂ Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal) :
+    parabolicCutoffOperatorCommutatorHolderConst A Ka KdtimeChi Kdchi
+        (Kdu₁ + Kdu₂) Kd2chi (Ku₁ + Ku₂) MdtimeChi Mdchi
+        (Mdu₁ + Mdu₂) Md2chi (Mu₁ + Mu₂) =
+      parabolicCutoffOperatorCommutatorHolderConst A Ka KdtimeChi Kdchi
+          Kdu₁ Kd2chi Ku₁ MdtimeChi Mdchi Mdu₁ Md2chi Mu₁ +
+        parabolicCutoffOperatorCommutatorHolderConst A Ka KdtimeChi Kdchi
+          Kdu₂ Kd2chi Ku₂ MdtimeChi Mdchi Mdu₂ Md2chi Mu₂ := by
+  unfold parabolicCutoffOperatorCommutatorHolderConst
+  rw [mul_add, add_mul, parabolicMatrixCutoffCommutatorHolderConst_add]
+  ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicCutoffOperatorCommutatorHolderConst_nnreal_mul
+    (d : NNReal) (A Ka : n → n → NNReal)
+    (KdtimeChi Kdchi Kdu Kd2chi Ku MdtimeChi Mdchi Mdu Md2chi Mu : NNReal) :
+    parabolicCutoffOperatorCommutatorHolderConst A Ka KdtimeChi Kdchi
+        (d * Kdu) Kd2chi (d * Ku) MdtimeChi Mdchi (d * Mdu) Md2chi (d * Mu) =
+      d * parabolicCutoffOperatorCommutatorHolderConst A Ka KdtimeChi Kdchi
+        Kdu Kd2chi Ku MdtimeChi Mdchi Mdu Md2chi Mu := by
+  unfold parabolicCutoffOperatorCommutatorHolderConst
+  rw [parabolicMatrixCutoffCommutatorHolderConst_nnreal_mul]
+  ring
 
 omit [DecidableEq n] [Nonempty n] in
 theorem norm_parabolicCutoffOperatorCommutator_le

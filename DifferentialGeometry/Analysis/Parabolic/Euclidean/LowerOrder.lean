@@ -523,6 +523,60 @@ def parabolicLowerOrderHolderConst
     (Kb Bb : n → NNReal) (Kc Kdu Ku Mdu Bc Mu : NNReal) : NNReal :=
   (∑ i, (Bb i * Kdu + Mdu * Kb i)) + (Bc * Ku + Mu * Kc)
 
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicLowerOrderSupConst_add
+    (Bb : n → NNReal) (Bc Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal) :
+    parabolicLowerOrderSupConst Bb Bc (Mdu₁ + Mdu₂) (Mu₁ + Mu₂) =
+      parabolicLowerOrderSupConst Bb Bc Mdu₁ Mu₁ +
+        parabolicLowerOrderSupConst Bb Bc Mdu₂ Mu₂ := by
+  unfold parabolicLowerOrderSupConst
+  simp only [mul_add, Finset.sum_add_distrib]
+  ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicLowerOrderSupConst_nnreal_mul
+    (d : NNReal) (Bb : n → NNReal) (Bc Mdu Mu : NNReal) :
+    parabolicLowerOrderSupConst Bb Bc (d * Mdu) (d * Mu) =
+      d * parabolicLowerOrderSupConst Bb Bc Mdu Mu := by
+  unfold parabolicLowerOrderSupConst
+  rw [mul_add, Finset.mul_sum]
+  congr 1
+  · apply Finset.sum_congr rfl
+    intro i hi
+    ring
+  · ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicLowerOrderHolderConst_add
+    (Kb Bb : n → NNReal) (Kc Bc : NNReal)
+    (Kdu₁ Kdu₂ Ku₁ Ku₂ Mdu₁ Mdu₂ Mu₁ Mu₂ : NNReal) :
+    parabolicLowerOrderHolderConst Kb Bb Kc
+        (Kdu₁ + Kdu₂) (Ku₁ + Ku₂) (Mdu₁ + Mdu₂) Bc (Mu₁ + Mu₂) =
+      parabolicLowerOrderHolderConst Kb Bb Kc Kdu₁ Ku₁ Mdu₁ Bc Mu₁ +
+        parabolicLowerOrderHolderConst Kb Bb Kc Kdu₂ Ku₂ Mdu₂ Bc Mu₂ := by
+  unfold parabolicLowerOrderHolderConst
+  simp only [mul_add, add_mul, Finset.sum_add_distrib]
+  ring
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem parabolicLowerOrderHolderConst_nnreal_mul
+    (d : NNReal) (Kb Bb : n → NNReal)
+    (Kc Bc Kdu Ku Mdu Mu : NNReal) :
+    parabolicLowerOrderHolderConst Kb Bb Kc
+        (d * Kdu) (d * Ku) (d * Mdu) Bc (d * Mu) =
+      d * parabolicLowerOrderHolderConst Kb Bb Kc Kdu Ku Mdu Bc Mu := by
+  unfold parabolicLowerOrderHolderConst
+  rw [mul_add, Finset.mul_sum]
+  congr 1
+  · apply Finset.sum_congr rfl
+    intro i hi
+    ring
+  · ring
+
 def parabolicLowerOrderInterpolationSupConst
     (Bb : n → NNReal) (Bc epsilon C M : NNReal) : NNReal :=
   parabolicLowerOrderSupConst Bb Bc (2 * M / epsilon + C * epsilon) M
@@ -547,6 +601,67 @@ def bufferedParabolicLowerOrderInterpolationHolderConst
       epsilon delta alpha C M)
     (parabolicValueInterpolationConst epsilon alpha C M)
     (2 * M / epsilon + C * epsilon) Bc M
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem bufferedParabolicLowerOrderInterpolationSupConst_add
+    (Bb : n → NNReal) (Bc epsilon C₁ C₂ M₁ M₂ : NNReal) :
+    bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon
+        (C₁ + C₂) (M₁ + M₂) =
+      bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon C₁ M₁ +
+        bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon C₂ M₂ := by
+  unfold bufferedParabolicLowerOrderInterpolationSupConst
+  rw [show 2 * (M₁ + M₂) / epsilon + (C₁ + C₂) * epsilon =
+      (2 * M₁ / epsilon + C₁ * epsilon) +
+        (2 * M₂ / epsilon + C₂ * epsilon) by ring]
+  exact parabolicLowerOrderSupConst_add Bb Bc _ _ _ _
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem bufferedParabolicLowerOrderInterpolationSupConst_nnreal_mul
+    (d : NNReal) (Bb : n → NNReal) (Bc epsilon C M : NNReal) :
+    bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon
+        (d * C) (d * M) =
+      d * bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon C M := by
+  unfold bufferedParabolicLowerOrderInterpolationSupConst
+  rw [show 2 * (d * M) / epsilon + d * C * epsilon =
+      d * (2 * M / epsilon + C * epsilon) by ring]
+  exact parabolicLowerOrderSupConst_nnreal_mul d Bb Bc _ _
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem bufferedParabolicLowerOrderInterpolationHolderConst_add
+    (Kb Bb : n → NNReal)
+    (Kc Bc epsilon delta alpha C₁ C₂ M₁ M₂ : NNReal) :
+    bufferedParabolicLowerOrderInterpolationHolderConst Kb Bb Kc Bc
+        epsilon delta alpha (C₁ + C₂) (M₁ + M₂) =
+      bufferedParabolicLowerOrderInterpolationHolderConst Kb Bb Kc Bc
+          epsilon delta alpha C₁ M₁ +
+        bufferedParabolicLowerOrderInterpolationHolderConst Kb Bb Kc Bc
+          epsilon delta alpha C₂ M₂ := by
+  unfold bufferedParabolicLowerOrderInterpolationHolderConst
+  rw [bufferedParabolicSpatialGradientInterpolationConst_add]
+  rw [parabolicValueInterpolationConst_add]
+  rw [show 2 * (M₁ + M₂) / epsilon + (C₁ + C₂) * epsilon =
+      (2 * M₁ / epsilon + C₁ * epsilon) +
+        (2 * M₂ / epsilon + C₂ * epsilon) by ring]
+  exact parabolicLowerOrderHolderConst_add Kb Bb Kc Bc _ _ _ _ _ _ _ _
+
+omit [DecidableEq n] [Nonempty n] [NormedAddCommGroup F]
+  [NormedSpace Real F] in
+theorem bufferedParabolicLowerOrderInterpolationHolderConst_nnreal_mul
+    (d : NNReal) (Kb Bb : n → NNReal)
+    (Kc Bc epsilon delta alpha C M : NNReal) :
+    bufferedParabolicLowerOrderInterpolationHolderConst Kb Bb Kc Bc
+        epsilon delta alpha (d * C) (d * M) =
+      d * bufferedParabolicLowerOrderInterpolationHolderConst Kb Bb Kc Bc
+        epsilon delta alpha C M := by
+  unfold bufferedParabolicLowerOrderInterpolationHolderConst
+  rw [bufferedParabolicSpatialGradientInterpolationConst_nnreal_mul]
+  rw [parabolicValueInterpolationConst_nnreal_mul]
+  rw [show 2 * (d * M) / epsilon + d * C * epsilon =
+      d * (2 * M / epsilon + C * epsilon) by ring]
+  exact parabolicLowerOrderHolderConst_nnreal_mul d Kb Bb Kc Bc _ _ _ _
 
 omit [DecidableEq n] [Nonempty n] in
 theorem norm_parabolicDriftTerm_le
