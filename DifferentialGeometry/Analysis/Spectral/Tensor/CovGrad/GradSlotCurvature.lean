@@ -27,7 +27,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Sobolev
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

@@ -31,7 +31,7 @@ open scoped Manifold ContDiff
 open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
-open DifferentialGeometry.PDE.RicciFlow.ODE
+open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry.Geometry.Operator

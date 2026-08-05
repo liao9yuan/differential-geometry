@@ -9,7 +9,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open Bundle
 open scoped Manifold ContDiff
@@ -124,6 +124,6 @@ theorem deTurckNonlinearitySpectral_principalPart_cancels
   deturck_ricci_principal_symbol_matches_rough_laplacian_of_symm
     (I := I) g₀ g_bg x ξ t ht
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral
 
 end

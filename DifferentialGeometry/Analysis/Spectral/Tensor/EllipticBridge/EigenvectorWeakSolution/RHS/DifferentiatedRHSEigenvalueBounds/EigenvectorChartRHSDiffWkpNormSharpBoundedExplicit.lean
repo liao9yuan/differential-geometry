@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHSEigenvalueBounds.EigenvectorChartRHSDiffWkpNormSharpBounded
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -90,7 +91,7 @@ private lemma sharpDiffExplicit_layerA_coeff_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma rhsZeroAggregate_le_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -707,7 +708,7 @@ private lemma rhsZeroAggregate_le_at_target
   refine h_sum_bound.trans (le_of_eq ?_)
   rw [hRhs_eff_def, ← mul_assoc, ← ENNReal.ofReal_mul hCagg_nn]
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma sharpDiffBdd_level_zero_wkpNorm_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -778,7 +779,7 @@ private lemma sharpDiffBdd_level_zero_wkpNorm_at_target
   ring_nf
   exact le_refl _
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma sharpDiffExplicit_iter_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -797,7 +798,7 @@ private lemma sharpDiffExplicit_iter_memWkp
   exact (eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
     (I := I) (M := M) g r s i α P₀ j K h_chart_cpt idx).1
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1195,7 +1196,7 @@ private lemma eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target
           rw [h_sum_ofReal]
   rw [h_pull]
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma sharpDiffExplicit_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1209,7 +1210,7 @@ private lemma sharpDiffExplicit_diff_memWkp
   eigenvectorChartRHSDiff_memWkp (I := I) (M := M) g r s i α P₀
     m K' l (fun β Q => H.h_pou_resolv i (m + 1 + K') β Q hN)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma sharpDiffBdd_recursion_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1517,7 +1518,7 @@ private lemma sharpDiffBdd_recursion_at_target
       ring_nf
       exact le_refl _
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp_bdd_explicit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

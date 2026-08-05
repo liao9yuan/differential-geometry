@@ -16,7 +16,7 @@ namespace Analysis
 namespace Spectral
 
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]

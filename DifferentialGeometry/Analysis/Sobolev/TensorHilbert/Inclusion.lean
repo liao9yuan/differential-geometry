@@ -16,8 +16,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
+namespace Sobolev
 namespace IntrinsicSobolev
 
 open DifferentialGeometry.Integral.Measure
@@ -856,8 +856,8 @@ theorem inclusionHk_succ_opNorm_le_one
   linarith
 
 end IntrinsicSobolev
-end RicciFlow
-end PDE
+end Sobolev
+end Analysis
 end DifferentialGeometry
 
 end

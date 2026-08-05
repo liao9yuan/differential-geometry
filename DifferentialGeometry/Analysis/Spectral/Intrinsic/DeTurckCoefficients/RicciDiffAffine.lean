@@ -15,9 +15,8 @@ open scoped Manifold Topology ContDiff BigOperators Matrix
 namespace DifferentialGeometry
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace DeTurckCoefficients
 
 open DifferentialGeometry.Integral.Measure
@@ -725,9 +724,8 @@ theorem exists_chartRicciTensor_lipschitz_on_compact
         linarith
 
 end DeTurckCoefficients
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

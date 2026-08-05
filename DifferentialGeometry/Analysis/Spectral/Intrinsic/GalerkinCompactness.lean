@@ -19,9 +19,8 @@ open Filter Set
 open scoped BigOperators BoundedContinuousFunction NNReal Topology
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 
 
@@ -157,9 +156,8 @@ theorem galerkin_subseq {ι : Type*} [Countable ι] {τ : ℝ} (hτ : 0 ≤ τ)
     change ulim (t : ℝ) i = g i t
     exact IccExtend_val hτ (fun x : J => g i x) t
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

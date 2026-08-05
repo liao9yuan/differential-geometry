@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradChristoffelLimit
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartial.EigenvectorWeakPartials
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossLimits
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -238,7 +239,7 @@ private lemma chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq
   rw [tensorChartComponentRaw_smul_pou (I := I) (M := M) g r s β S p.1 p.2]
   ring
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 noncomputable def covGradPouLeibnizCrossLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -253,7 +254,7 @@ noncomputable def covGradPouLeibnizCrossLimit
             g r s) i) β P₀ :
         EuclN → ℝ) y
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem covGradPouLeibnizCrossLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -282,7 +283,7 @@ theorem covGradPouLeibnizCrossLimit_memLp
   unfold covGradPouLeibnizCrossLimit
   rw [crossMultiplier_eq (I := I) (M := M) β k y]
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma cutoffComponent_smoothApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -420,7 +421,7 @@ private lemma crossTermApprox_memLp
     (crossTermApprox_ae_eq_crossTermCutoff (I := I) (M := M)
       g r s i β P₀ k n).symm
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem covGradPouLeibnizCrossLimit_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -597,7 +598,7 @@ private lemma christoffelTerm_tendsto
     (Filter.Eventually.of_forall (fun n => ?_))
   congr 1
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma covGrad_chartComponent_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -630,7 +631,7 @@ private lemma covGrad_chartComponent_tendsto
     tensorCovGradL2Compl_smoothToTensorH1Compl_eq_coe (I := I) (M := M)
       g r s (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)]
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

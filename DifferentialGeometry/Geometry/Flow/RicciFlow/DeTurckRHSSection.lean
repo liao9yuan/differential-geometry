@@ -5,6 +5,7 @@ import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
 
+open DifferentialGeometry.Analysis.Parabolic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

@@ -19,9 +19,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace NNReal
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.ODE
@@ -797,7 +796,7 @@ section
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (ccTensor02Symm symmS_smul domDomCongrSection)
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
   (smoothCcTensorBilinForm)
 
 omit [BoundarylessManifold I M] in
@@ -835,9 +834,9 @@ theorem deTurckSmoothRemainder_spectralCoercive_split'
     {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThresholdSharp (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
+      DifferentialGeometry.Analysis.Spectral.MetricRealization.metricCauchySchwarzBound
         (I := I) (M := M) g₀
-        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
+        (DifferentialGeometry.Analysis.Spectral.MetricRealization.ccTensorBilinSymm
           (I := I) g₀ T₀) δ) :
     ∃ (Cδ₀ : ℝ) (Crem : ℕ → ℝ), 0 ≤ Cδ₀ ∧ Cδ₀ < 1 ∧ (∀ k, 0 ≤ Crem k) ∧
       ∀ (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) (k : ℕ)
@@ -979,9 +978,9 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
     {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThresholdSharp (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
+      DifferentialGeometry.Analysis.Spectral.MetricRealization.metricCauchySchwarzBound
         (I := I) (M := M) g₀
-        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
+        (DifferentialGeometry.Analysis.Spectral.MetricRealization.ccTensorBilinSymm
           (I := I) g₀ T₀) δ)
     (htie : ∀ (T : SmoothCcTensor g₀ 0 2),
       deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
@@ -1114,15 +1113,15 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
           (0 : SmoothCcTensor g₀ 0 2) = (0 : SmoothCcTensor g₀ 0 2) := by
         rw [radialScaleSmooth, smul_zero]
       have hRemEq : ∀ (hp :
-        PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
+        DifferentialGeometry.Analysis.Spectral.MetricRealization.metricCauchySchwarzBound
               (I := I) (M := M) g₀
-              (PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
+              (DifferentialGeometry.Analysis.Spectral.MetricRealization.ccTensorBilinSymm
                 (I := I) g₀ (radialScaleSmooth (I := I) (M := M) g₀ a R₀
                   (0 : SmoothCcTensor g₀ 0 2))) δ)
             (hp0 :
-              PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
+              DifferentialGeometry.Analysis.Spectral.MetricRealization.metricCauchySchwarzBound
               (I := I) (M := M) g₀
-              (PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
+              (DifferentialGeometry.Analysis.Spectral.MetricRealization.ccTensorBilinSymm
                 (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
             deTurckSmoothRemainder (I := I) g₀ g_bg
                 (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (0 : SmoothCcTensor g₀ 0 2))
@@ -1558,9 +1557,8 @@ theorem deTurckGalerkin_forcing_closure_perScaleSymm
 
 end
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

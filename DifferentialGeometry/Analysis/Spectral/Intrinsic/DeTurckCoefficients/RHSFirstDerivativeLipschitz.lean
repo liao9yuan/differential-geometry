@@ -11,7 +11,7 @@ open DifferentialGeometry.Geometry.Operator
 
 
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 open scoped ContDiff Manifold Topology BigOperators
 open DifferentialGeometry
@@ -760,4 +760,4 @@ theorem chartLieD_sub
         (Module.finrank ℝ E : ℝ) * K_B * J := add_le_add (add_le_add hA hB) hC
     _ = (Module.finrank ℝ E : ℝ) * (K_A + 2 * K_B) * J := by ring
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+end DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients

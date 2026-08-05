@@ -27,8 +27,7 @@ open scoped ENNReal NNReal BigOperators Manifold ContDiff
 namespace DifferentialGeometry.Analysis.Sobolev.Tensor
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
+open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
@@ -57,10 +56,10 @@ private noncomputable def lpFiberJetLadder_rs
     Λ₀ * Real.sqrt ((DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal
   else if i = k then
     Integral.L2.tensorL2Norm (I := I) g r (s + k)
-      (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun
+      (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s k u).toFun
   else
     (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
-            ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toSection x)) ^ ((k : ℝ) / i)
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s i u).toSection x)) ^ ((k : ℝ) / i)
         ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
@@ -100,7 +99,7 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
   have hKsV_le : Ks * (1 / V) + Ks ≤ K := le_max_right _ _
   set J : ℕ → ℝ := fun i =>
     (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
-            ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toSection x)) ^ ((k : ℝ) / i)
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s i u).toSection x)) ^ ((k : ℝ) / i)
         ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k)) with hJdef
   have hJnn : ∀ i, 0 ≤ J i := by
     intro i; rw [hJdef]
@@ -113,22 +112,22 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
       rw [hJdef]
       simp only [lpFiberJetLadder_rs, if_neg (show i ≠ 0 by omega), if_true]
       set t : ℝ := Integral.L2.tensorL2Norm (I := I) g r (s + i)
-        (PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toFun with ht
+        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s i u).toFun with ht
       have htnn : 0 ≤ t := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r (s + i) _
       have hbridge : (∫ x, riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
-            ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toSection x)
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s i u).toSection x)
           ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) = t ^ 2 := by
         rw [ht, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g r
           (s + i)
-          (PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u)]
+          (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s i u)]
       have hii : (i : ℝ) / i = 1 := by
         rw [div_self]; exact_mod_cast (show i ≠ 0 by omega)
       symm
       calc (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toSection x)) ^ ((i : ℝ) / i)
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s i u).toSection x)) ^ ((i : ℝ) / i)
               ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * i))
           = (∫ x, riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toSection x)
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s i u).toSection x)
               ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((1 : ℝ) / 2) := by
               rw [hii]
               simp only [Real.rpow_one]
@@ -199,7 +198,7 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
         nlinarith [hKsKV, hΛ₀, mul_nonneg (le_trans zero_le_one hKs1) hΛ₀]
       exact mul_le_mul_of_nonneg_right hreconc hJ2nn
     · rw [hread (i + 1) (by omega), hread i hipos, hread (i + 2) (by omega)]
-      have hstep := hfin (s + i) (PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u) i hipos hik
+      have hstep := hfin (s + i) (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s i u) i hipos hik
       have e1 : ((i : ℝ) + 1) = ((i + 1 : ℕ) : ℝ) := by push_cast; ring
       have e2 : ((i : ℝ) + 2) = ((i + 2 : ℕ) : ℝ) := by push_cast; ring
       rw [e1, e2] at hstep
@@ -218,11 +217,11 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r s x (u.toSection x) ≤ Λ₀ ^ 2) →
         ∀ j : ℕ, 0 < j → j < k →
           (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
+                  ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
               ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((j : ℝ) / k) ≤
             C * Λ₀ ^ (2 * (1 - (j : ℝ) / k)) *
               (Integral.L2.tensorL2Norm (I := I) g r (s + k)
-                  (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun) ^
+                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s k u).toFun) ^
                     (2 * (j : ℝ) / k) := by
   classical
   obtain ⟨K, hK1, hlc⟩ := lpFiberJet_logConvex_iteratedCovGrad_rs (I := I) (M := M) g r s k _hk
@@ -257,16 +256,16 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
     simp only [hc_def, lpFiberJetLadder_rs, if_pos rfl]
     rw [hV]
   have hck_eq : c k = Integral.L2.tensorL2Norm (I := I) g r (s + k)
-      (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun := by
+      (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s k u).toFun := by
     simp only [hc_def, lpFiberJetLadder_rs, if_neg (show k ≠ 0 by omega), if_true]
   have hcj_sq : (c j) ^ 2 =
       (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
           ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((j : ℝ) / k) := by
     simp only [hc_def, lpFiberJetLadder_rs, if_neg (show j ≠ 0 by omega), if_neg
       (show j ≠ k by omega)]
     set Iint : ℝ := ∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
-            ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
         ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) with hIint
     have hIint_nn : 0 ≤ Iint := integral_nonneg (fun x =>
       Real.rpow_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + j) x _) _)
@@ -316,7 +315,7 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
   rw [hcj_sq] at hmono
   rw [hc0_eq, hck_eq] at hmono
   set ak : ℝ := Integral.L2.tensorL2Norm (I := I) g r (s + k)
-    (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun with hak_def
+    (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s k u).toFun with hak_def
   have hak_nn : 0 ≤ ak := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r (s + k) _
   have hak_pow : (ak ^ 2) ^ ((j : ℝ) / k) = ak ^ (2 * (j : ℝ) / k) := by
     rw [← Real.rpow_natCast ak 2, ← Real.rpow_mul hak_nn]
@@ -350,7 +349,7 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
       have hV2_le_max : V ^ 2 ≤ (max 1 V) ^ 2 := pow_le_pow_left₀ hVnn hmaxV 2
       linarith
   calc (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
           ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((j : ℝ) / k)
       ≤ K ^ (2 * k ^ 2) * ((Λ₀ * V) ^ 2) ^ ((1 : ℝ) - (j : ℝ) / k) * (ak ^ 2) ^ ((j : ℝ) / k) :=
         hmono

@@ -8,8 +8,7 @@ open DifferentialGeometry.Geometry.Connection
 noncomputable section
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
 namespace ODE
 
 open Bundle Set
@@ -146,6 +145,5 @@ theorem variational_flow_feeds_cartan_witness
     h_A h_B h_A_value h_B_value h_total rfl
 
 end ODE
-end RicciFlow
-end PDE
+end Analysis
 end DifferentialGeometry

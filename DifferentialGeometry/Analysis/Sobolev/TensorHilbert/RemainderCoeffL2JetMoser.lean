@@ -22,8 +22,8 @@ open scoped ENNReal NNReal BigOperators Manifold ContDiff
 namespace DifferentialGeometry.Analysis.Sobolev
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -34,7 +34,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
     deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff
     reindexCoeffGen reindexCoeffGen_toSection reindexCoeffFibGen_apply
     ricciArmOrder0RiemannCoeff ricciArmOrder0CurvCoeff ricciArmOrder1KoszulCoeff raisedKoszul)
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedFam)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1156,7 +1156,7 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic
     cometricDoubleTraceField_order0sup_jetL2_ballUniform_generic
       (I := I) (M := M) g₀ a ha_super hR hδ₀
   obtain ⟨Cemb, hCemb_nn, hCemb⟩ :=
-    IntrinsicSpectral.deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
+    DifferentialGeometry.Analysis.Spectral.deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
       (I := I) (M := M) g₀ a ha_super
   set ΛS : ℝ := Real.sqrt (10 * (Cemb ^ 2 * ((a + 1 + 1 : ℕ) : ℝ) * R ^ 2)) with hΛS_def
   have hΛS_nn : 0 ≤ ΛS := Real.sqrt_nonneg _

@@ -16,9 +16,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -208,9 +207,8 @@ theorem summable_tensorSobolevWeight_of_even
       tensorSobolevWeight_mono (I := I) (M := M) i hak
     exact mul_le_mul_of_nonneg_right hmono (sq_nonneg _)
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

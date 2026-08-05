@@ -360,7 +360,7 @@ theorem ricci_pullback_DT
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun z : M => TotalSpace.mk' E (E := TangentSpace I) z
           (Diffeomorph.pushforward (Φ_fam s) (W s) z)) := fun s =>
-    ODE.flowFamily_pushforward_contMDiff (I := I) Φ_fam s (W s).contMDiff
+    DifferentialGeometry.Analysis.ODE.flowFamily_pushforward_contMDiff (I := I) Φ_fam s (W s).contMDiff
   let Y : ℝ → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ := fun s =>
     ⟨Diffeomorph.pushforward (Φ_fam s) (W s), hPush s⟩
   have hYode : ∀ z : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,

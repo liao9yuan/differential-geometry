@@ -5,8 +5,7 @@ open DifferentialGeometry.Geometry.Connection
 noncomputable section
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
 namespace ODE
 
 open Bundle Set
@@ -162,6 +161,5 @@ theorem variational_flow_flat_pairing_hasDerivWithinAt
     T'v P'v T'w P'w hv_flat hw_flat hcorr_v hcorr_w).hasDerivWithinAt
 
 end ODE
-end RicciFlow
-end PDE
+end Analysis
 end DifferentialGeometry

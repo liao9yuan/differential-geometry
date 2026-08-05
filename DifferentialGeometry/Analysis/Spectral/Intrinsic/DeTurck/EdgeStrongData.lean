@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SmoothStrongPair
 import Mathlib.Analysis.ODE.Gronwall
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -26,7 +26,7 @@ noncomputable section
 open Bundle Filter MeasureTheory Set
 open scoped Manifold Topology ContDiff ENNReal BigOperators NNReal
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
@@ -50,7 +50,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 /-- Initial-edge Grönwall closure.  The energy is only differentiated on the
-open positive-time interval.  Continuity to the zero edge and the zero initial
+open positive-time interval. Continuity to the zero edge and the zero initial
 energy suffice: apply ordinary Grönwall on `[ε,t]` and send `ε → 0+`.
 
 This is the scalar endpoint argument needed after a Ricci--DeTurck difference
@@ -312,6 +312,6 @@ theorem edgeStrong_unique
   apply ccToHs_injective (I := I) (M := M) g₀ 2 (a : ℝ)
   simpa only [ccHs_eq_smoothHs] using hu
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral
 
 end

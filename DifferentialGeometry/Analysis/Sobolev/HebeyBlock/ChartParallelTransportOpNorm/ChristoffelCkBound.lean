@@ -8,7 +8,7 @@ open DifferentialGeometry.Geometry.Operator
 
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+namespace DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
@@ -214,4 +214,4 @@ theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
     intro j_idx hj y hy
     exact (hCj_bd j_idx y hy).trans (hC_ge j_idx hj)
 
-end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+end DifferentialGeometry.Analysis.Sobolev.HebeyBlock

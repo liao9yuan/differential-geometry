@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolev.TensorChartComponentSobolevIntrinsic
+open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 open DifferentialGeometry.Geometry.Curvature
 
 
@@ -12,15 +13,15 @@ open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
+namespace Sobolev
 namespace IntrinsicSobolev
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
@@ -292,8 +293,8 @@ theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
       (Filter.Eventually.of_forall (fun k => hy_in_closure (φ k)))
 
 end IntrinsicSobolev
-end RicciFlow
-end PDE
+end Sobolev
+end Analysis
 end DifferentialGeometry
 
 end

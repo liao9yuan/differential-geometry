@@ -23,7 +23,7 @@ namespace Spectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
 open TensorMultilinear
 open TensorRSNabla
 
@@ -279,7 +279,7 @@ private lemma fiberNormSqComponent_covGrad_slotExtend_eq_swap
     rw [covGrad_toSection_apply_eval (I := I) (M := M) g (r + 1) (s + 1)
       (slotExtend (I := I) (M := M) g r s Φ) x (coframeS (I := I) (M := M) g x (r + 1) e K')
       (fun k => (show E from e (J' k)))]
-    rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.tensorCovDerivAt_slotExtend_eq
+    rw [DifferentialGeometry.Analysis.Spectral.DeTurck.tensorCovDerivAt_slotExtend_eq
       (I := I) (M := M) g r s Φ x ((fun k => (show E from e (J' k))) 0)]
     rw [show Matrix.vecTail (fun k => (show E from e (J' k))) =
         Fin.cons (show E from e (J' 1))
@@ -573,7 +573,7 @@ private lemma covGrad_slotExtend_toSection_rsDomDomCongr
   conv_rhs => rw [← hfib]
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g (r + 1) (s + 1)
     (slotExtend (I := I) (M := M) g r s Φ) x d m]
-  rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.tensorCovDerivAt_slotExtend_eq
+  rw [DifferentialGeometry.Analysis.Spectral.DeTurck.tensorCovDerivAt_slotExtend_eq
     (I := I) (M := M) g r s Φ x (m 0)]
   rw [show Matrix.vecTail m =
       Fin.cons (m 1) (fun k : Fin s => m (Fin.succ (Fin.succ k))) from by

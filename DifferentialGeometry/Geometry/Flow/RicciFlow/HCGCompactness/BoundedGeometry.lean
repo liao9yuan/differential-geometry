@@ -9,9 +9,7 @@ open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

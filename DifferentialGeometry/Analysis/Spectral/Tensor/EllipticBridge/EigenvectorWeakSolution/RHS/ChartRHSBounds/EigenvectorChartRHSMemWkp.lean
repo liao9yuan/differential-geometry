@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHS
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradComponent
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.EigenvectorCutoffWeakPartials
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -265,7 +266,7 @@ private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
   filter_upwards [hgp_zero_V'] with y hy hy_mem hy_notKc
   exact hy ⟨hy_mem, hy_notKc⟩
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 lemma eigenvectorCutoffChartComponent_memW1p
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -287,7 +288,7 @@ lemma eigenvectorCutoffChartComponent_memW1p
   exact eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
     (I := I) (M := M) g r s i α P k
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -446,7 +447,7 @@ private lemma recipDensityOnEuclid_contDiffOn
     (fun _ hy =>
       (Laplacian.MetricExtension.densityOnEuclid_pos (I := I) g α hy).ne')
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma eigenvectorVec_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -512,7 +513,7 @@ private lemma eigenvectorVec_pou_memWkp
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand1_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -535,7 +536,7 @@ theorem eigenvectorChartRHS_summand1_memWkp
   (eigenvectorVec_pou_memWkp (I := I) (M := M) g r s i (K + 1)
     h_pou α P₀).le_of_le (Nat.le_succ K)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem crossLeftLimitComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -561,7 +562,7 @@ theorem crossLeftLimitComponent_memWkp
     (fun β Q => eigenvectorCovGrad_pou_memWkp (I := I) (M := M)
       g r s i K h_pou β Q)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem crossRightLimitComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -586,7 +587,7 @@ theorem crossRightLimitComponent_memWkp
       (eigenvectorResolvent (I := I) (M := M) g r s i)) α P K
     (fun β Q => (h_pou β Q).le_of_le (Nat.le_succ K))
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 lemma componentLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -648,7 +649,7 @@ lemma componentLpLimit_memWkp
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_comp i.fst.val)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma componentLpLimit_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -679,7 +680,7 @@ private lemma componentLpLimit_ae_zero_off_chartPouKernel
   filter_upwards [h_smul, h_comp_zero] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 lemma partialLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -755,7 +756,7 @@ lemma partialLpLimit_memWkp
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_weak_memWkp i.fst.val)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma partialLpLimit_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -830,7 +831,7 @@ private lemma partialLpLimit_ae_zero_off_chartPouKernel
   filter_upwards [h_smul, h_weak_zero'] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem cutoffPartialLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -922,7 +923,7 @@ theorem cutoffPartialLpLimit_memWkp
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_weak_memWkp i.fst.val)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem weightedGradCoeffDivLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1046,7 +1047,7 @@ theorem weightedGradCoeffDivLimit_memWkp
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
             (fun p _ => h_leaf P Q k p))))
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand2_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1117,7 +1118,7 @@ theorem eigenvectorChartRHS_summand2_memWkp
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       (fun Q _ => h_leaf P Q))
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand3_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1188,7 +1189,7 @@ theorem eigenvectorChartRHS_summand3_memWkp
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       (fun Q _ => h_leaf P Q))
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand4_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1257,7 +1258,7 @@ theorem eigenvectorChartRHS_summand4_memWkp
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
           (fun l _ => h_leaf P Q k l))))
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand5_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1387,7 +1388,7 @@ theorem eigenvectorChartRHS_summand5_memWkp
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
               (fun p _ => h_leaf P Q k l p)))))
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand6_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1433,7 +1434,7 @@ theorem eigenvectorChartRHS_summand6_memWkp
     (recipDensityOnEuclid_contDiffOn (I := I) (M := M) g α)
     h_sum h_sum_ae_zero
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_summand7_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1601,7 +1602,7 @@ theorem eigenvectorChartRHS_summand7_memWkp
     (recipDensityOnEuclid_contDiffOn (I := I) (M := M) g α)
     h_div h_div_ae_zero
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorChartRHS_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -23,9 +23,8 @@ open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace DeTurck
 
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
@@ -224,7 +223,6 @@ theorem trace_slot_flat (q h : SmoothRiemannianMetric I M) (x : M)
         rw [← hlin, hQexp c]
 
 end DeTurck
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry

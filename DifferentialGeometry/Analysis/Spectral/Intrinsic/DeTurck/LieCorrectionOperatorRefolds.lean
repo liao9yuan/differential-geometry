@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionMixedFibreIdentity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionRiemannFibreIdentity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Split
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -21,7 +21,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open LieCorr0Core
 open DifferentialGeometry
@@ -96,6 +96,6 @@ theorem lc0Riem_eq_lc0RiemField (g₀ g₁ : SmoothRiemannianMetric I M) :
   change TensorRSSpace.ofCLM (lieCorr0RiemFib (I := I) g₀ g₁ x) D = _
   exact (lc0b_riem_fiber (I := I) (M := M) g₀ g₁ x D).symm
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral
 
 end

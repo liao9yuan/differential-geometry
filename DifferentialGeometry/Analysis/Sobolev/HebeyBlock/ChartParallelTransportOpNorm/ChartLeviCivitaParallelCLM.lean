@@ -11,7 +11,7 @@ noncomputable section
 open Bundle ContinuousLinearMap Set Filter Finset
 open scoped Manifold ContDiff Topology BigOperators
 
-namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+namespace DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Operator
@@ -627,6 +627,6 @@ theorem chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unc
     rw [hC_def]; ring
   linarith
 
-end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+end DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 
 end

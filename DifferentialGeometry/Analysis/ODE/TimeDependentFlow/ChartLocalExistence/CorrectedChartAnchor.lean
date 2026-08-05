@@ -21,7 +21,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Set Function Bundle MeasureTheory
 open scoped Manifold Topology ContDiff
@@ -266,4 +266,4 @@ theorem corrected_chart_anchor_flow_build
     · rw [hΦ0_eq s, hext_round s hsIcc]
       exact ((hspec x).2 s hsIcc).2.2
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

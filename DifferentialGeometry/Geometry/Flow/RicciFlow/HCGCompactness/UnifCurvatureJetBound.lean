@@ -48,8 +48,7 @@ open scoped Manifold Topology ContDiff BigOperators
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Analysis.Laplacian
-open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.HCGCompactness

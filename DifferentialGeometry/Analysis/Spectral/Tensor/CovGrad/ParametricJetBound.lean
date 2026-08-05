@@ -20,7 +20,7 @@ open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff
 
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
 open Tensor0SBundle TensorRSNabla
 
 namespace DifferentialGeometry

@@ -14,6 +14,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RoughLaplacianAppCcCommutation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
@@ -26,15 +27,14 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace NNReal
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -101,7 +101,7 @@ private lemma jet_fibreNormSq_sup_le (g₀ : SmoothRiemannianMetric I M) (r s : 
           Tensor0SBundle.TensorRSSpace r (s + l) I x)‖ ≤ Ce * Cr * Sum4K := by
       calc ‖((iteratedCovGrad (I := I) g₀ r s l Ψ).toSection x :
               Tensor0SBundle.TensorRSSpace r (s + l) I x)‖
-          ≤ Ce * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := r) (s := s + l) (2 * K)
+          ≤ Ce * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := r) (s := s + l) (2 * K)
               (iteratedCovGrad (I := I) g₀ r s l Ψ)‖ := hemb
         _ ≤ Ce * (Cr * Sum4K) := mul_le_mul_of_nonneg_left hrev hCe_pos.le
         _ = Ce * Cr * Sum4K := by ring
@@ -500,9 +500,8 @@ lemma iteratedCovGrad_slotExtend_norm_le (g₀ : SmoothRiemannianMetric I M) (r 
   exact hsq
 
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

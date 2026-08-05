@@ -13,9 +13,8 @@ open Bundle Set Matrix
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace DeTurckCoefficients
 
 open DifferentialGeometry.Integral.Measure
@@ -244,9 +243,8 @@ theorem chartRicciTensor_sub_eq_christoffelDiff
     chartRicciFirstOrderTerm_sub_eq_christoffelDiff (I := I) g₁ g₂ α i k y]
 
 end DeTurckCoefficients
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

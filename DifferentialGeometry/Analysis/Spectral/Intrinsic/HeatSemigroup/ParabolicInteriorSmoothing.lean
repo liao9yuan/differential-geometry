@@ -9,9 +9,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -215,9 +214,8 @@ theorem solField_into_all_tensorHs_interior (hT : 0 ≤ T)
     ⟨solFieldAtOrder (I := I) (M := M) hT f σ hσ,
       solFieldAtOrder_timeModeCoeff (I := I) (M := M) hT f σ hσ⟩
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

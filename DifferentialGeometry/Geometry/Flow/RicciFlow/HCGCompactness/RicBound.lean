@@ -74,7 +74,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-open DifferentialGeometry.PDE.RicciFlow in
 omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] [IsManifold I 2 M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]

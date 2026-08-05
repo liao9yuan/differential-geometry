@@ -7,8 +7,7 @@ open DifferentialGeometry.Geometry.Connection
 noncomputable section
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
 namespace ODE
 
 open Bundle Set
@@ -202,6 +201,5 @@ theorem variational_flow_flat_paired_residual_hasDerivAt
 end MainPairing
 
 end ODE
-end RicciFlow
-end PDE
+end Analysis
 end DifferentialGeometry

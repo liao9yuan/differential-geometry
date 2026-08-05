@@ -10,7 +10,7 @@ open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [CompleteSpace E]
@@ -389,4 +389,4 @@ private lemma fromZeroChartField_center_eq
   rw [fromZeroChartField_eq_tangentCoordChange, hsymm]
   exact tangentCoordChange_self (I := I) (mem_extChartAt_source α)
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

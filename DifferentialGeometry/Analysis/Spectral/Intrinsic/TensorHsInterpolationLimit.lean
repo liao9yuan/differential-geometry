@@ -45,7 +45,7 @@ theorem tensorEigenIdx_one_add_lambda_lt_finite
           μ.val)
       · refine Set.Finite.subset
           (tensorResolvent_eigenvalues_finite_above (I := I) (M := M) g r s
-            (PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
+            (DifferentialGeometry.Analysis.Spectral.tensorResolventL2_isCompactOperator
               (I := I) (M := M) g r s)
             (show (0 : ℝ) < 1 / Λ by positivity)) ?_
         rintro x ⟨μ, hμB, rfl⟩

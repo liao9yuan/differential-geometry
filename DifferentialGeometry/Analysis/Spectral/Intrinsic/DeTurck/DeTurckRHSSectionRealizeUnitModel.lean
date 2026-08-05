@@ -7,11 +7,11 @@ noncomputable section
 open Bundle Tensor0SBundle Manifold
 open scoped Manifold ContDiff BigOperators
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (unitModel)
 
@@ -39,4 +39,4 @@ theorem unitModel_of_deTurckRHSSection_realize
   exact deTurckRHSSection_toModel_apply (I := I) g_bg
     (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x v
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral

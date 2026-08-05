@@ -382,7 +382,6 @@ private lemma euclidPartial_eigenvectorPouApprox_component_memLp
     (euclidPartial_eigenvectorPouApprox_component_hasCompactSupport
       (I := I) (M := M) g r s i α P₀ k n)).restrict _
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 omit [CompleteSpace E] in
 private lemma eigenvectorChartPartialCLM_smoothApprox_coeFn_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

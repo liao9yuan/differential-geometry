@@ -14,9 +14,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -235,9 +234,8 @@ theorem tensorPouSobolevHsNorm_le_ccSpectralEmbed (g : SmoothRiemannianMetric I 
     _ ≤ Cg * ((k + 1 : ℝ) * Nspec) := mul_le_mul_of_nonneg_left hsum_le hCg_nn
     _ = (Cg * (k + 1)) * Nspec := by ring
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

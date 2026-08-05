@@ -24,9 +24,8 @@ open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 
 open DifferentialGeometry.Geometry.Operator
@@ -293,9 +292,8 @@ theorem lapDiffOp_norm
   intro w
   simpa only [B, Submodule.coe_subtype] using hbound h w hsmall
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

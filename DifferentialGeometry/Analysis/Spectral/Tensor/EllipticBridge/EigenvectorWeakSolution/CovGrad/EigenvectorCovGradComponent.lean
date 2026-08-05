@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EnergyBound.EigenvectorChartWeightedMemLp
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.CutoffChartComponentMemWkp
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapSource
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -171,7 +172,7 @@ private lemma memWkp_coef_mul_factor
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma eigenvectorVec_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -249,7 +250,7 @@ private lemma eigenvectorVec_pou_memWkp
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma eigenvectorChartWeakPartial_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -297,7 +298,7 @@ private lemma eigenvectorChartWeakPartial_memWkp
     exact h_memLp.locallyIntegrable (by norm_num)
   exact memWkp_of_hasWeakPartialDeriv (K := K) hΩ_open hg_weak hg_loc hu
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma covGradPouLeibnizCrossLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -397,7 +398,7 @@ private lemma covGradPouLeibnizCrossLimit_memWkp
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
   exact h_prod
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 private lemma covGradChristoffelLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -554,7 +555,7 @@ private lemma covGradChristoffelLimit_memWkp
             EuclN → ℝ) y) Ω
   exact h_sum
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 theorem eigenvectorCovGrad_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

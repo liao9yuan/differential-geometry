@@ -5,7 +5,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Set Function Bundle
 open scoped Manifold Topology ContDiff
@@ -333,4 +333,4 @@ theorem seeley_time_extend
       _ = (∑ᶠ α, ρ α x) • X t x := (finsum_smul' hfin (X t x)).symm
       _ = X t x := by rw [hsum1, one_smul]
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

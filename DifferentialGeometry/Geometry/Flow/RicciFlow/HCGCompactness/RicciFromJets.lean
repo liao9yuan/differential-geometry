@@ -67,7 +67,7 @@ open scoped Manifold ContDiff Topology BigOperators
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 

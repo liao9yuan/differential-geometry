@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrin
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensor.IteratedNabla
 import Mathlib.Analysis.Normed.Operator.Extend
 
+open DifferentialGeometry.Analysis.Sobolev.HebeyBlock DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
 noncomputable section
 
 
@@ -21,8 +22,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
-open DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
+open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -53,7 +54,7 @@ def tensorHs_order2_isometryEquiv_tensorL2
   (tensorHsEquivOfFractionalPower (I := I) (M := M)
       (g := g) (r := r) (s := s) 2 0).trans
     (tensorHsZeroEquivL2 (I := I) (M := M)
-      (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
+      (DifferentialGeometry.Analysis.Spectral.tensorResolventL2_isCompactOperator
         (I := I) (M := M) g r s))
 
 def Order2NormEquivOnSmooth

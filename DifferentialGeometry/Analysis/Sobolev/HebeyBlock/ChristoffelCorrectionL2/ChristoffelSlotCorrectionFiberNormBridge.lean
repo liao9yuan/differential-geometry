@@ -11,8 +11,8 @@ open DifferentialGeometry.Geometry.Connection
 noncomputable section
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
+namespace Sobolev
 namespace HebeyBlock
 
 open Bundle Manifold Set Tensor0SBundle
@@ -209,8 +209,8 @@ theorem norm_sq_triv_neg_sum_add_sum_le_const_mul_sum_norm_sq_on_pouTsupport_int
   exact ⟨C_bridge, hC_nn, fun S k b hb => h S.toCcTensor k hb⟩
 
 end HebeyBlock
-end RicciFlow
-end PDE
+end Sobolev
+end Analysis
 end DifferentialGeometry
 
 end

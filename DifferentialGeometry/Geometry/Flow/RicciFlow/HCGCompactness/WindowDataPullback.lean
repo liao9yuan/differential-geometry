@@ -28,7 +28,6 @@ open DifferentialGeometry.Geometry.Curvature
 open Set Function Filter Bundle Manifold
 open scoped Manifold Topology ContDiff ENNReal
 
-open DifferentialGeometry.PDE.RicciFlow
 
 namespace DifferentialGeometry
 namespace HCGCompactness

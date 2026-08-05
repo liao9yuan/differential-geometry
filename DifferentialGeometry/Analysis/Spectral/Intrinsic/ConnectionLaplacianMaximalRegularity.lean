@@ -11,7 +11,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open Bundle
 open scoped Manifold ContDiff
@@ -23,7 +23,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
-open DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian
+open DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian
 
 private theorem apply_eq_apply_add_of_eq
     {X Y : Type*} [Add X] [Add Y]
@@ -256,4 +256,4 @@ theorem connection_laplacian_l2_maximal_regularity
       exact apply_eq_apply_add_of_eq Φ hsolves
         (ContinuousLinearMap.map_add Φ _ _) (hΦΦsymm f)
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral

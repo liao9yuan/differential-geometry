@@ -39,7 +39,7 @@ open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [CompleteSpace E]
@@ -204,4 +204,4 @@ theorem bare_fromZero_local
   have hpb : (extChartAt I α).symm (f₁ t) = (extChartAt I α).symm (f₂ t) := by rw [hfeq]
   rwa [hf₁, hf₂, (extChartAt I α).left_inv hsrc₁, (extChartAt I α).left_inv hsrc₂] at hpb
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

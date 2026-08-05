@@ -8,6 +8,7 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Operator.Bilinear
+open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
@@ -34,7 +35,7 @@ open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open PDE.RicciFlow.HebeyBlock
+open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -438,7 +439,7 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional
       (I := I) (M := M) g α
   obtain ⟨C_Jinv, hCJinv_nn, hCJinv_bound⟩ :=
-    PDE.RicciFlow.HebeyBlock.chartTrivInv_opNorm_isBounded_on_compact_unconditional
+    DifferentialGeometry.Analysis.Sobolev.HebeyBlock.chartTrivInv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   set C_e : ℝ := chartModelBasisVecSup' E with hCe_def
   have hCe_nn : 0 ≤ C_e := chartModelBasisVecSup'_nonneg

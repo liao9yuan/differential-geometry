@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrde
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
 open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
@@ -19,7 +20,7 @@ tensor.  The proof uses the mixed `H1 → L6` embedding, finite-volume
 `L6 → L3`, and the covariant Leibniz rule for `appCcRS`.
 -/
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 
 open scoped ContDiff Manifold Topology BigOperators ENNReal
@@ -944,4 +945,4 @@ theorem appRS_h2_h2_h2
       rw [mul_pow, mul_pow, show C ^ 2 = K by
         simp only [C, Real.sq_sqrt hK]]
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral

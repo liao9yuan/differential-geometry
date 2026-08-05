@@ -16,7 +16,7 @@ namespace Geometry
 namespace Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Sobolev
 open TensorMultilinear
 open TensorRSNabla
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

@@ -15,8 +15,8 @@ open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
+namespace Sobolev
 namespace HebeyBlock
 
 open DifferentialGeometry.Integral.Measure
@@ -447,8 +447,8 @@ theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport
     _ = Cfrom * Cprod * Cto * ‖T b‖ := by ring
 
 end HebeyBlock
-end RicciFlow
-end PDE
+end Sobolev
+end Analysis
 end DifferentialGeometry
 
 end

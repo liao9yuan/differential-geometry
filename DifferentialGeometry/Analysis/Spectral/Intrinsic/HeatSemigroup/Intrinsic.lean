@@ -11,9 +11,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -163,9 +162,8 @@ example (g : SmoothRiemannianMetric I M) (r s : ℕ) (t : ℝ) :
     TensorL2 r s g →L[ℝ] TensorL2 r s g :=
   tensorHeatSemigroup (I := I) (M := M) g r s t
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

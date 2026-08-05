@@ -18,9 +18,8 @@ open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
 open DifferentialGeometry
 open DifferentialGeometry.PDE
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.PDE.DeTurck
-open DifferentialGeometry.PDE.RicciFlow.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry.Geometry.Operator
@@ -286,7 +285,6 @@ private theorem flow_chartGram_contMDiffAt
 
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-open DifferentialGeometry.PDE.RicciFlow.Pullback in
 omit [NeZero (Module.finrank ℝ E)] in
 /-- **Joint Fréchet differentiability of the two-variable evaluation form.**
 
@@ -416,7 +414,6 @@ theorem evalForm_joint
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
-open DifferentialGeometry.PDE.RicciFlow.Pullback in
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 /-- **Moving-geometry slot of the evaluation form, via the covariant variational equation.**

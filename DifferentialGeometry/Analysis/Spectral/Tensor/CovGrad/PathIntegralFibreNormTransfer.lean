@@ -6,6 +6,7 @@ import Mathlib.Analysis.Convex.Integral
 import Mathlib.Analysis.Convex.Mul
 import Mathlib.Analysis.Seminorm
 import Mathlib.MeasureTheory.Integral.Prod
+open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
@@ -432,7 +433,7 @@ theorem tensorL2NormSq_pathIntegralCoeffField_le_intervalIntegral_normSq
         refine intervalIntegral.integral_congr (fun t _ => ?_)
         rw [hΦnormsq t]
 
-open DifferentialGeometry.PDE.RicciFlow (iteratedCovGrad)
+open DifferentialGeometry.Analysis.Sobolev (iteratedCovGrad)
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in

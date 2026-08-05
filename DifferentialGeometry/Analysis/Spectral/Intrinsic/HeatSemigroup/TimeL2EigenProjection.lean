@@ -13,9 +13,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators NNReal
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
@@ -286,7 +285,6 @@ theorem exists_timeL2EigenProjection (σ T : ℝ) :
     fun N => norm_timeL2EigenProj_le_one (I := I) (M := M) g σ T N,
     fun x => timeL2EigenProj_tendsto (I := I) (M := M) g σ T x⟩
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry

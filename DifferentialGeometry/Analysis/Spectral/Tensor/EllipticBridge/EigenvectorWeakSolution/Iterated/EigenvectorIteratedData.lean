@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevSupportPromotion
 
 
+open DifferentialGeometry.Analysis.Spectral
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -115,7 +116,7 @@ lemma chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
   · rw [chosenWeakPartial'_of_not_mem hW]
     exact Filter.Eventually.of_forall (fun _ => rfl)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -204,7 +205,7 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hV_open h_wp_V h_zero_V
     h_wp_loc h_zero_loc
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 lemma eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -297,7 +298,7 @@ lemma crossRightTestValueCoeff_eq_zero_off_chartPouKernel
   rw [gradChartCoeffEuclid_pou_eq_zero_off_chartPouKernel
     (I := I) (M := M) g α m hy, zero_mul]
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 omit [CompleteSpace E] in
 lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

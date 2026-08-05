@@ -46,7 +46,7 @@ theorem connDiff_push
       MDiffAt (fun y : M => (⟨y, σ y⟩ : TangentBundle I M)) x :=
     σ.mdifferentiableAt
   have hpushSmooth :=
-    ODE.flowFamily_pushforward_contMDiff (E := E) (H := H) (M := M) (I := I)
+    DifferentialGeometry.Analysis.ODE.flowFamily_pushforward_contMDiff (E := E) (H := H) (M := M) (I := I)
       (fun _ : ℝ => Φ) (0 : ℝ) (Y := fun z => σ z) σ.contMDiff
   have hpush :
       MDiffAt

@@ -22,14 +22,14 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open Bundle ContinuousLinearMap Tensor0SBundle
 open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
 
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -199,4 +199,4 @@ theorem deturck_ricci_rhs_nonlinearity_locally_lipschitz
     ⨆ z : M, rhsDiffGNorm (I := I) g_bg g g' g₀ z
   exact le_ciSup (bddAbove_gNorm_range (I := I) g_bg g g' g₀) y
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral

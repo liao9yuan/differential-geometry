@@ -36,7 +36,7 @@ open scoped ContDiff
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 /-- **Bootstrap for a given solution of `y'' = F (y, y')`.**  Let `J ⊆ ℝ` be
-open and `F : E × E → E` be `C^∞` on `V`.  If `y` is differentiable at every
+open and `F : E × E → E` be `C^∞` on `V`. If `y` is differentiable at every
 `t ∈ J`, its derivative differentiates with `(deriv y)' t = F (y t, deriv y t)`,
 and the phase orbit `(y t, deriv y t)` stays in `V`, then `y` and `deriv y`
 are `C^n` on `J` for every `n : ℕ`. -/

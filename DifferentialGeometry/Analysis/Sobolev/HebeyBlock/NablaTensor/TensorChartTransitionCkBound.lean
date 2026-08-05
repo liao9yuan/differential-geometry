@@ -5,7 +5,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+namespace DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 
 open Bundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -293,4 +293,4 @@ theorem tensorChartTransition_Ck_bound_on_compact_manifold
   have hf_mem : f x ∈ f '' K_M := ⟨x, hx, rfl⟩
   exact hC_bd j hj P₀ Q (f x) hf_mem
 
-end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+end DifferentialGeometry.Analysis.Sobolev.HebeyBlock

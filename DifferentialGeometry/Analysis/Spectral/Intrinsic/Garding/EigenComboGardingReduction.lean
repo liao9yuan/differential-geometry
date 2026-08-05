@@ -12,9 +12,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -152,9 +151,8 @@ theorem finiteEigenComboHs_norm_eq_sqrt_spectral
     ((2 * k : ℕ) : ℝ)
   rw [← h_sq, Real.sqrt_sq (norm_nonneg _)]
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

@@ -212,7 +212,6 @@ end OffKernelCoefBoundUniform
 
 section MainBoundUnconditional
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 omit [CompleteSpace E] in
 theorem wkpNorm_crossRightGradCoeffDivLimit_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -524,7 +523,6 @@ end MainBoundUnconditional
 
 section MainBoundUniformUnconditional
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 omit [CompleteSpace E] in
 theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

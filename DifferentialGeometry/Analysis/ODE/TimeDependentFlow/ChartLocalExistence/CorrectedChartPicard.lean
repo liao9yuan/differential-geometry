@@ -15,7 +15,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Set Function Bundle Metric
 open scoped Manifold Topology ContDiff NNReal
@@ -227,4 +227,4 @@ theorem corrected_chart_local_picard_from_zero
   have hbound := hnorm_le t ht (flow y t) hmem
   simpa only [hf_def] using hbound
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

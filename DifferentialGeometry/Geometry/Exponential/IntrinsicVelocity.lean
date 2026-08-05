@@ -150,7 +150,7 @@ theorem velocityLift_one
       (fun u : TangentBundle I M =>
         intrinsicVelocityLift (I := I) g hEnorm u.proj u.snd 1) := by
   have hslice :=
-    DifferentialGeometry.PDE.RicciFlow.ODE.flow_slice_smooth
+    DifferentialGeometry.Analysis.ODE.flow_slice_smooth
       (I := I.tangent) (v := geodesicVectorField (I := I) g)
       (Geodesic.geodesicVF_smooth (I := I) g)
       (D := Set.univ) isOpen_univ (a := (-1 : ℝ)) (b := 2) (t₀ := 0)

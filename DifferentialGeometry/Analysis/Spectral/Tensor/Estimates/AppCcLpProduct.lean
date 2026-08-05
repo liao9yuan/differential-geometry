@@ -16,7 +16,7 @@ It is independent of the Sobolev embeddings which later supply the two input
 norms.
 -/
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 
 open scoped ContDiff Manifold Topology ENNReal
@@ -329,4 +329,4 @@ theorem appCc_l6_l3_l2
   rw [← fiber_lp2_eq_l2 (I := I) (M := M) g 0 s Y]
   exact hreal
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral

@@ -3,7 +3,7 @@ import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Bundle
 open scoped Manifold ContDiff Topology
@@ -224,4 +224,4 @@ theorem manifoldFlow_hasMFDerivWithinAt_of_chartLocal
     (I := I) α u (Set.Icc 0 hper.T) t
     (X t ((chartAt H α).symm (I.symm (u t)))) htgt_t hconf hd
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

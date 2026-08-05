@@ -10,7 +10,7 @@ open DifferentialGeometry.Geometry.Operator
 
 
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 open scoped ContDiff Manifold Topology BigOperators
 open DifferentialGeometry
@@ -261,4 +261,4 @@ theorem chartRHS_abs_le
         exact mul_le_mul_of_nonneg_left hRic (by norm_num)
       · exact hLie
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+end DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients

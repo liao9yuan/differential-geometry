@@ -78,7 +78,7 @@ theorem exists_genuineCurvPureRSection_l2Norm_le_covGrad
     rw [Real.sq_sqrt (hkappa_nn 0 (s + 1)), hsec]
     have h := hkappa 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) x
     rw [Finset.sum_range_one,
-      DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_zero] at h
+      DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad_zero] at h
     exact h
   have hbound := tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two (I := I) (M := M) g
     (covGrad (I := I) (M := M) g 0 s S) (0 : SmoothCcTensor g 0 (s + 1))

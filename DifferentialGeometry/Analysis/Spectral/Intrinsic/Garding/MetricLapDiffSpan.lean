@@ -17,7 +17,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry.Integral.L2
 
@@ -154,6 +154,6 @@ theorem lapA20_span
         (G.metric (T : Real)) (G.metric ((T : Real) - s)) v (hsmall s hs)
   exact ⟨hreg, hA20cont, C2, hbound, hcore⟩
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral
 
 end

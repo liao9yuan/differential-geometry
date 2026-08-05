@@ -46,7 +46,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section Unconditional
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 section UniformTermBoundsUnconditional
 

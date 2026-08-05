@@ -22,8 +22,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
+namespace Elliptic
 namespace ConnectionLaplacian
 
 open DifferentialGeometry.Integral.Measure
@@ -253,8 +253,8 @@ theorem toL2_mem_connLaplacianL2_domain
   exact LinearMap.mem_range_self _ T
 
 end ConnectionLaplacian
-end RicciFlow
-end PDE
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

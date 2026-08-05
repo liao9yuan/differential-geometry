@@ -13,7 +13,7 @@ open Set Function Filter Bundle
 open scoped Topology Manifold ContDiff NNReal
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [CompleteSpace E]
@@ -779,4 +779,4 @@ private theorem existsForwardIntegralCurveUpTo_chain
     nlinarith [hn]
   have hkey := key n
   rwa [min_eq_right hn'] at hkey
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

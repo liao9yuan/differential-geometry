@@ -10,7 +10,7 @@ set_option autoImplicit false
 # Uniform source-flow covariant and time-Lipschitz bounds
 
 This file records the constants-first source-native analytic output used by the
-open-window convergence assembly.  It deliberately mentions neither bump
+open-window convergence assembly. It deliberately mentions neither bump
 functions nor the globally extended metrics: those are downstream localization
 devices, while the estimates here belong to the pulled-back Ricci flows on the
 varying source domains.

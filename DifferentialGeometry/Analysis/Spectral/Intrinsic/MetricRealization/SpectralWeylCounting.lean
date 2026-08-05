@@ -47,9 +47,8 @@ open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace MetricRealization
 
 open DifferentialGeometry.Analysis.Parabolic
@@ -145,9 +144,8 @@ theorem spectralSmoothRealizesAsSmooth_of_countingBound
     (eigenvalueTailSummable_of_countingBound (I := I) (M := M) g r s h)
 
 end MetricRealization
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

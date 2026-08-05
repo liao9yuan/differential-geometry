@@ -6,7 +6,7 @@ open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Set Function Bundle
 open scoped Manifold Topology ContDiff
@@ -81,4 +81,4 @@ theorem chartLeviCivita_flat_eq_sub_christoffel
   rw [hsplit]
   abel
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

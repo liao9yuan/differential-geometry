@@ -7,7 +7,7 @@ noncomputable section
 open Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped Manifold ContDiff
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open LieCorr0Core
 open DifferentialGeometry
@@ -54,6 +54,6 @@ lemma lc0b_amix_outer_fiber (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
   rw [lc0b_amix_middle_fiber (I := I) (M := M) g₀ g₁ g_bg x D]
   exact lc0Tr_fiber_apply (I := I) (M := M) g₀ g₁ 4 lieCorr0AMixPerm1 x _
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral
 
 end

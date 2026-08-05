@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartial.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
+open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -176,7 +177,7 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
   · exact (eigenvectorChartPartialLp_approx_coeFn (I := I) (M := M)
       g r s i α P₀ k n).symm
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 private lemma eigenvectorChartComponent_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -238,7 +239,7 @@ private lemma eigenvectorChartPartial_eLpNorm_tendsto
     (eigenvectorChartPartialLp_tendsto (I := I) (M := M)
       g r s i α P₀ k)
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+open DifferentialGeometry.Analysis.Spectral in
 theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

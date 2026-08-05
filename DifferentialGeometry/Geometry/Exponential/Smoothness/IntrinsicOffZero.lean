@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 
 
 /-!
+open DifferentialGeometry.Analysis.ODE
 # Chart-composed regularity of the intrinsic exponential map
 
 **L1 of the A0′ `VolumeComparisonInput` lane** (`HCGCompactness/C4/A0PRIME_VOLUME_PLAN.md`).

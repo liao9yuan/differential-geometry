@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjWSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WLower
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
@@ -27,7 +27,7 @@ open Bundle Filter MeasureTheory Set Tensor0SBundle
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open DifferentialGeometry.Analysis.Spectral
 open scoped Manifold ContDiff Topology
 
 universe u uE uH

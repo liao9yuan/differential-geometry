@@ -14,8 +14,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
+namespace Elliptic
 namespace ConnectionLaplacian
 
 open DifferentialGeometry.Integral.Measure
@@ -73,8 +73,8 @@ theorem connLaplacianMixed_scalar_eq_function
   exact connLaplacianMixed_def (I := I) g 0 0 T x
 
 end ConnectionLaplacian
-end RicciFlow
-end PDE
+end Elliptic
+end Analysis
 end DifferentialGeometry
 
 end

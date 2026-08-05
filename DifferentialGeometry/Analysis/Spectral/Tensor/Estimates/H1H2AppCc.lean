@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcLpProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1L6
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
+open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
@@ -16,7 +17,7 @@ mixed product is the Leibniz arm `slotExtend Φ · ∇U`; it is estimated by
 `H1 → L6`, finite-volume `L6 → L3`, and `L6 × L3 → L2`.
 -/
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open scoped ContDiff Manifold Topology BigOperators ENNReal
 open MeasureTheory
@@ -236,4 +237,4 @@ theorem appCc_h1_h2_h1
           _ = K * A * N := by dsimp [K]; ring) hCsp
     _ = (Csp * K) * A * N := by ring
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral

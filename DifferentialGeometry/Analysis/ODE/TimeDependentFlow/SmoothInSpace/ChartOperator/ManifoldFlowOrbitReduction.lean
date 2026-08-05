@@ -3,7 +3,7 @@ open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Set Function Bundle Filter
 open scoped Manifold Topology ContDiff
@@ -68,4 +68,4 @@ theorem rawVariationalIdentity_iff_hasDerivAt_chartCloseDop
 
 end OrbitReduction
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

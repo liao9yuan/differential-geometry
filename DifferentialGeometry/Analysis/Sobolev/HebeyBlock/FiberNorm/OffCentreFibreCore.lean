@@ -12,8 +12,8 @@ open Bundle Set IsManifold ContinuousLinearMap Filter Tensor0SBundle
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
+namespace Analysis
+namespace Sobolev
 namespace HebeyBlock
 
 open DifferentialGeometry.Integral.Measure
@@ -147,8 +147,8 @@ theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
   exact h_chain.trans h_slack
 
 end HebeyBlock
-end RicciFlow
-end PDE
+end Sobolev
+end Analysis
 end DifferentialGeometry
 
 end

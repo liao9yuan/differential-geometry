@@ -14,9 +14,8 @@ open Bundle Manifold Set Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace DeTurckCoefficients
 
 open DifferentialGeometry.Integral.L2
@@ -125,9 +124,8 @@ theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_chartRicciLie
   rw [hRic, hLie]
 
 end DeTurckCoefficients
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

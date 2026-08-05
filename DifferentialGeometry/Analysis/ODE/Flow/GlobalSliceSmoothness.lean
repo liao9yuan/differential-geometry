@@ -9,6 +9,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 
 
 
+open DifferentialGeometry.Analysis.ODE
 noncomputable section
 
 open Filter Function Metric Set
@@ -211,7 +212,7 @@ theorem exists_uniform_flow
     simpa only [uncurry_apply_pair] using hv.comp contDiff_snd
   choose r δ hr hδ Ψ hΨ ρ T hρ hT hρr hTδ hΨsm using
     fun y : E ↦
-      DifferentialGeometry.PDE.RicciFlow.ODE.exists_isLocalFlow_contDiffOn_top
+      DifferentialGeometry.Analysis.ODE.exists_isLocalFlow_contDiffOn_top
         (E := E) (f := fun _ : ℝ ↦ v) (t₀ := 0) (x₀ := y) hvTime
   let U : E → Set E := fun y ↦ ball y (ρ y)
   have hcover : K ⊆ ⋃ y, U y := by

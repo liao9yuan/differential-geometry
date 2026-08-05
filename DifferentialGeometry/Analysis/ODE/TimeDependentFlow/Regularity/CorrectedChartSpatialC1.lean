@@ -28,7 +28,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Set Function Bundle Metric
 open scoped Manifold Topology ContDiff NNReal
@@ -229,4 +229,4 @@ theorem corrected_chart_field_lipschitz_of_data
   · rw [← hcenter_eq]
     exact hcball_sub.trans interior_subset
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

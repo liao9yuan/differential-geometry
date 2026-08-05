@@ -12,9 +12,9 @@ open scoped ENNReal NNReal BigOperators Manifold ContDiff
 namespace DifferentialGeometry.Analysis.Sobolev
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (realizedFam convexPerturbation realizedFam_inner_of_mem convexPerturbation_gFibreOpBound_abs
     abs_convex_smallConstant_lt_one realizedSmallSet)
@@ -60,7 +60,7 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
   set κ : ℝ := Real.sqrt (1 / (1 - δ₁)) with hκ_def
   have hκ_nn : 0 ≤ κ := Real.sqrt_nonneg _
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.exists_Csob_convexPerturbation_pointwise_C2_le
+    DifferentialGeometry.Analysis.Parabolic.exists_Csob_convexPerturbation_pointwise_C2_le
       (I := I) (M := M) g₀ a ha_super
   set B : ℝ := Csob * R with hB_def
   have hB_nn : 0 ≤ B := mul_nonneg hCsob_nn hR

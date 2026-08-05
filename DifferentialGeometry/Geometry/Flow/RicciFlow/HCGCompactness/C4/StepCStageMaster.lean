@@ -106,7 +106,7 @@ private theorem cast_geom
 
 /-- A fixed integer-radius tail supplies the first three Step-B1 comparison
 fields directly on the master sequence: local diffeomorphism on the retained
-open ball, global injectivity there, and exact basepoint preservation.  The
+open ball, global injectivity there, and exact basepoint preservation. The
 witnessed radius-tail selector and index equality are retained so downstream
 metric estimates can use the very same transported map. -/
 theorem HasRadiusTail.geom_tail

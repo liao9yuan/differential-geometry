@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSC
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature

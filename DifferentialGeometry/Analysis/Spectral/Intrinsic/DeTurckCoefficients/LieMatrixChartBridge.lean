@@ -13,9 +13,8 @@ open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff Matrix BigOperators
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace DeTurckCoefficients
 
 
@@ -151,9 +150,8 @@ theorem chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp
       partialDeriv_chartCoeffOnE_deTurckVF_eq (I := I) g g_bg α j k hx]
 
 end DeTurckCoefficients
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

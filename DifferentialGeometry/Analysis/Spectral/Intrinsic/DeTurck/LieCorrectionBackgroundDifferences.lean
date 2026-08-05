@@ -21,7 +21,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped Manifold Topology ContDiff
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
 open LieCorr0Core
 open DifferentialGeometry
@@ -215,6 +215,6 @@ theorem lc0CdVField_sub_eq_comp_connDiff
   rw [appCcRS_sub_left]
   rfl
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral
 
 end

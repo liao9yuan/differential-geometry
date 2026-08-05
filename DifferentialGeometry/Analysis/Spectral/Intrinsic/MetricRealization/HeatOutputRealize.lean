@@ -69,9 +69,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace MetricRealization
 
 open DifferentialGeometry.Integral.Measure
@@ -265,9 +264,8 @@ theorem exists_smooth_metric_of_heatOutput_small
     (heatOutputSmoothRepr (I := I) (M := M) g 0 2 ht u₀ hu₀_fs) hδ'_lt hδ'
 
 end MetricRealization
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

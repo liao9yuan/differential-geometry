@@ -30,7 +30,7 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
@@ -812,12 +812,12 @@ private lemma jointChartLieDeTurckComp_contDiffOn
     (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun q : ℝ × E =>
-        IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp (I := I) (g_DT q.1) g_bg α i j
+        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartLieDeTurckComp (I := I) (g_DT q.1) g_bg α i j
           q.2)
       (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
   classical
   have hexp : (fun q : ℝ × E =>
-        IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp
+        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartLieDeTurckComp
           (I := I) (g_DT q.1) g_bg α i j q.2) =
       fun q : ℝ × E =>
         (∑ k : Fin (Module.finrank ℝ E),
@@ -833,7 +833,7 @@ private lemma jointChartLieDeTurckComp_contDiffOn
               Integral.DivergenceTheorem.partialDeriv (E := E) j
                 (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k) q.2) := by
     funext q
-    rw [IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp_def]
+    rw [DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartLieDeTurckComp_def]
   rw [hexp]
   refine ((ContDiffOn.sum (fun k _ => ?_)).add (ContDiffOn.sum (fun k _ => ?_))).add
     (ContDiffOn.sum (fun k _ => ?_))
@@ -853,19 +853,19 @@ private lemma jointChartDeTurckRicciRHS_contDiffOn
     (i k : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun q : ℝ × E =>
-        IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS
+        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS
           (I := I) (g_DT q.1) g_bg α i k q.2)
       (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
   classical
   have hexp : (fun q : ℝ × E =>
-        IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS
+        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS
           (I := I) (g_DT q.1) g_bg α i k q.2) =
       fun q : ℝ × E =>
         -2 * Integral.DivergenceTheorem.chartRicciTensor (I := I) (g_DT q.1) α i k q.2 +
-          IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp
+          DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartLieDeTurckComp
             (I := I) (g_DT q.1) g_bg α i k q.2 := by
     funext q
-    rw [IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS_def]
+    rw [DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS_def]
   rw [hexp]
   exact (contDiffOn_const.mul (jointChartRicci_contDiffOn T g_DT hJ α i k)).add
     (jointChartLieDeTurckComp_contDiffOn g_bg T g_DT hJ α i k)
@@ -879,12 +879,12 @@ theorem jointChartDeTurckRicciRHS_alongChart_contMDiffOn
     (i k : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
       (fun q : ℝ × M =>
-        IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I) (g_DT q.1) g_bg α i k
+        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I) (g_DT q.1) g_bg α i k
           (extChartAt I α q.2))
       (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
   set G : ℝ × E → ℝ :=
     fun q : ℝ × E =>
-      IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I) (g_DT q.1) g_bg α i k q.2
+      DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I) (g_DT q.1) g_bg α i k q.2
     with hG_def
   have hGEuclid : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) :=
     jointChartDeTurckRicciRHS_contDiffOn g_bg T g_DT hJ α i k
