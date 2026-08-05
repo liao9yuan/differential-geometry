@@ -75,10 +75,8 @@ theorem weak_harnack_of_localized_rpow_crossover
       Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
         deriv (fun s => u s x) t)
     (hcrossover :
-      let v : ℝ → M → ℝ := fun t x => u t x ^ (-p / 2)
-      let D := moserLocalizedMass (I := I) (M := M) (Module.finrank ℝ E)
-        rho v 2 a τ t₁ 0
-      A * D ≤ C) :
+      A * localizedSpacetimeRpowMoment (I := I) (M := M)
+        (spatialMoserCutoff rho 0) u (-p) a t₁ ≤ C) :
     let B := moserLocalBoundFactor (I := I) (M := M)
       g hdim rho 2 a τ t₁
     ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
@@ -88,9 +86,17 @@ theorem weak_harnack_of_localized_rpow_crossover
     rho v 2 a τ t₁ 0
   let B := moserLocalBoundFactor (I := I) (M := M)
     g hdim rho 2 a τ t₁
-  change A * D ≤ C at hcrossover
   change ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
     A ^ (1 / p) ≤ C ^ (1 / p) * B ^ (2 / p) * u t x
+  have hD_eq : D = localizedSpacetimeRpowMoment (I := I) (M := M)
+      (spatialMoserCutoff rho 0) u (-p) a t₁ := by
+    simpa only [D, v, neg_div] using
+      (moserLocalizedMass_rpow_half_eq_localizedSpacetimeRpowMoment
+        (I := I) (M := M) (Module.finrank ℝ E) rho u hu hpos
+          (p := -p) (τ := τ) (haτ.le.trans hτt₁))
+  have hcrossover' : A * D ≤ C := by
+    rw [hD_eq]
+    exact hcrossover
   have hD : 0 ≤ D := by
     exact moserLocalizedMass_nonneg (I := I) (M := M) (Module.finrank ℝ E)
       rho v haτ hτt₁
@@ -104,7 +110,7 @@ theorem weak_harnack_of_localized_rpow_crossover
     simpa only [v, B, D] using hreciprocal t ht x hx
   simpa only [mul_assoc] using
     (weak_harnack_of_crossover (hpos t x) hA hD hB hC hp
-      hcrossover hreciprocal')
+      hcrossover' hreciprocal')
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 

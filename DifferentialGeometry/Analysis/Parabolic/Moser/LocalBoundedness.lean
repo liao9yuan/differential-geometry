@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Moser.Iteration
 import DifferentialGeometry.Analysis.Parabolic.Moser.Power
+import DifferentialGeometry.Analysis.Parabolic.Moser.SpacetimeMeasure
 
 set_option autoImplicit false
 
@@ -92,6 +93,33 @@ theorem moserLocalizedMass_nonneg
   · intro t _
     exact integral_nonneg fun x => mul_nonneg (sq_nonneg _)
       (Real.rpow_nonneg (hu t x) _)
+
+omit [I.Boundaryless] in
+theorem moserLocalizedMass_rpow_half_eq_localizedSpacetimeRpowMoment
+    (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a τ t₁ : ℝ} (hat₁ : a ≤ t₁) :
+    moserLocalizedMass (I := I) (M := M) n rho
+        (fun t x => u t x ^ (p / 2)) 2 a τ t₁ 0 =
+      localizedSpacetimeRpowMoment (I := I) (M := M)
+        (spatialMoserCutoff rho 0) u p a t₁ := by
+  rw [moserLocalizedMass, moserTimeLevel_zero,
+    localizedSpacetimeRpowMoment_eq_intervalIntegral_of_continuous_pos
+      (I := I) (M := M) (spatialMoserCutoff rho 0) u
+        hu.continuous hpos hat₁]
+  apply intervalIntegral.integral_congr
+  intro t _
+  apply integral_congr_ae
+  filter_upwards with x
+  simp only [parabolicMoserExponent_zero]
+  congr 1
+  calc
+    (u t x ^ (p / 2)) ^ (2 : ℝ) = u t x ^ ((p / 2) * 2) :=
+      (Real.rpow_mul (hpos t x).le _ _).symm
+    _ = u t x ^ p := by ring_nf
 
 omit [I.Boundaryless] in
 theorem integral_rpow_le_moserLocalizedMass
