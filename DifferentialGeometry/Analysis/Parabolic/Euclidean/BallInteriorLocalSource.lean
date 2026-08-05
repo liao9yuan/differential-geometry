@@ -2074,6 +2074,110 @@ theorem parabolic_nondivergence_ball_interior_schauder_estimate_of_buffered_inte
       a p0 hA u dtimeU du d2u huTime hu hdu huCont hmatrixHolder
       hmatrixNorm A Ka omega ha homega haNorm hgauge huNorm hsmall)
 
+theorem parabolic_nondivergence_ball_interior_schauder_estimate_le_data_add_gauge_of_buffered_interpolation_of_local_source_estimates_of_small_freeze_defect
+    {alpha Ksource Kc Bsource Bc C M : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (epsilon delta : NNReal) (hepsilon : 0 < epsilon)
+    (hepsilonDelta : epsilon < delta)
+    {aTime t₀ t₁ bTime S T : Real}
+    (haTime : 0 < aTime) (hat₀ : aTime < t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (ht₁b : t₁ < bTime) (hbT : bTime < T) (hTS : T < S)
+    (center : Euc n) {r R Rout : Real}
+    (hr : 0 ≤ r) (hrR : r < R) (hbuffer : R + delta ≤ Rout)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u dtimeU : Real → BoundedContinuousFunction (Euc n) F)
+    (du : Real →
+      BoundedContinuousFunction (Euc n) (Euc n →L[Real] F))
+    (d2u : Real → BoundedContinuousFunction (Euc n)
+      (Euc n →L[Real] Euc n →L[Real] F))
+    (huTime : ∀ s ∈ Icc (0 : Real) S, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ Icc (0 : Real) S, ∀ x,
+      HasFDerivAt (u s : Euc n → F) (du s x) x)
+    (hdu : ∀ s ∈ Icc (0 : Real) S, ∀ x,
+      HasFDerivAt (du s : Euc n → Euc n →L[Real] F) (d2u s x) x)
+    (huCont : Continuous u)
+    (hsourceHolder : HolderWith Ksource alpha
+      ((parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R)).restrict
+        (parabolicNondivergenceOperator a b c (fun t x ↦ u t x))))
+    (hsourceNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center R) →
+        ‖parabolicNondivergenceOperator a b c (fun t x ↦ u t x) p‖ ≤
+          Bsource)
+    (Kb Bb : n → NNReal) (A Ka omega : n → n → NNReal)
+    (hb : ∀ i, HolderWith (Kb i) alpha
+      ((parabolicCylinder (Icc (0 : Real) S)
+        (Metric.closedBall center R)).restrict (b i)))
+    (hc : HolderWith Kc alpha
+      ((parabolicCylinder (Icc (0 : Real) S)
+        (Metric.closedBall center R)).restrict c))
+    (hbNorm : ∀ i p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S)
+        (Metric.closedBall center R) → ‖b i p‖ ≤ Bb i)
+    (hcNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S)
+        (Metric.closedBall center R) → ‖c p‖ ≤ Bc)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha
+      ((parabolicCylinder (Icc (0 : Real) S) Set.univ).restrict (a i j)))
+    (homega : ∀ i j p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖a i j p0 - a i j p‖ ≤ omega i j)
+    (haNorm : ∀ i j p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) Set.univ →
+        ‖a i j p‖ ≤ A i j)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Icc (0 : Real) S) (Metric.ball center Rout))
+      (fun t x ↦ u t x) ≤ C)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder (Icc (0 : Real) S) (Metric.ball center Rout) →
+        ‖u p.time p.space‖ ≤ M)
+    (hsmall : spdParabolicSchauderDefectConst
+      (fun i j ↦ a i j p0) hA alpha Ka omega T < 1) :
+    eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioo t₀ t₁) (Metric.ball center r))
+        (fun t x ↦ u t x) ≤
+      parabolicNondivergenceBufferedBallInteriorDataConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Ksource Kb Bb Kc Bc epsilon delta Bsource M A Ka omega T +
+        C * parabolicNondivergenceBufferedBallInteriorGaugeFactor
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Kb Bb Kc Bc epsilon delta A Ka omega T := by
+  have hT : 0 ≤ T := by linarith
+  have heq :=
+    parabolicNondivergenceBufferedBallInteriorConst_eq_data_add_gauge
+      halpha1 a p0 hA aTime t₀ t₁ bTime center hr hrR Ksource Kb Bb
+      Kc Bc epsilon delta Bsource C M A Ka omega hT
+  calc
+    eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder (Ioo t₀ t₁) (Metric.ball center r))
+        (fun t x ↦ u t x) ≤
+      parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        (Ksource + bufferedParabolicLowerOrderInterpolationHolderConst
+          Kb Bb Kc Bc epsilon delta alpha C M)
+        (bufferedParabolicSpatialGradientInterpolationConst
+          epsilon delta alpha C M)
+        (parabolicValueInterpolationConst epsilon alpha C M)
+        (Bsource + bufferedParabolicLowerOrderInterpolationSupConst
+          Bb Bc epsilon C M)
+        (2 * M / epsilon + C * epsilon) M A Ka omega T :=
+      parabolic_nondivergence_ball_interior_schauder_estimate_of_buffered_interpolation_of_local_source_estimates_of_small_freeze_defect
+        halpha0 halpha1 epsilon delta hepsilon hepsilonDelta haTime hat₀
+        ht₀t₁ ht₁b hbT hTS center hr hrR hbuffer a p0 hA b c u dtimeU
+        du d2u huTime hu hdu huCont hsourceHolder hsourceNorm Kb Bb A Ka
+        omega hb hc hbNorm hcNorm ha homega haNorm hgauge huNorm hsmall
+    _ = (parabolicNondivergenceBufferedBallInteriorDataConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Ksource Kb Bb Kc Bc epsilon delta Bsource M A Ka omega T +
+        C * parabolicNondivergenceBufferedBallInteriorGaugeFactor
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Kb Bb Kc Bc epsilon delta A Ka omega T : NNReal) := by
+      exact_mod_cast heq
+    _ = _ := by norm_cast
+
 theorem parabolic_nondivergence_ball_interior_schauder_estimate_of_interpolation_of_local_source_estimates_of_small_freeze_defect
     {alpha Ksource Kc Bsource Bc C M : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
