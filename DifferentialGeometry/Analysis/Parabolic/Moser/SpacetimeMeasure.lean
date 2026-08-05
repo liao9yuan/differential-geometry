@@ -58,6 +58,16 @@ def localizedSpacetimeMeasure {g : SmoothRiemannianMetric I M}
   (volume.restrict (Ioc a b)).prod
     (cutoffWeightedMeasure (I := I) (M := M) cutoff)
 
+theorem ae_localizedSpacetimeMeasure_fst_mem_Ioc
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g) (a b : ℝ) :
+    ∀ᵐ z ∂localizedSpacetimeMeasure (I := I) (M := M) cutoff a b,
+      z.1 ∈ Ioc a b := by
+  unfold localizedSpacetimeMeasure
+  rw [Measure.ae_prod_iff_ae_ae
+    (measurableSet_Ioc.preimage measurable_fst)]
+  filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht
+  exact ae_of_all _ fun _ => ht
+
 def localizedSpacetimeRpowMoment {g : SmoothRiemannianMetric I M}
     (cutoff : SmoothScalar g) (u : ℝ → M → ℝ)
     (p a b : ℝ) : ℝ :=
@@ -199,6 +209,47 @@ theorem localizedSpacetimeRpowNorm_mono_measure
     (localizedSpacetimeRpowMoment_mono (I := I) (M := M)
       u hu hpos hca hbd hcutoff)
     (div_pos one_pos hp).le
+
+theorem localizedSpacetimeRpowNorm_le_const_mul_of_ae
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u v : ℝ → M → ℝ)
+    (hu : Continuous (fun z : ℝ × M => u z.1 z.2))
+    (hv : Continuous (fun z : ℝ × M => v z.1 z.2))
+    (hupos : ∀ t x, 0 < u t x) (hvpos : ∀ t x, 0 < v t x)
+    {p a b C : ℝ} (hp : 0 < p) (hC : 0 < C)
+    (hbound : ∀ᵐ z ∂localizedSpacetimeMeasure (I := I) (M := M) cutoff a b,
+      u z.1 z.2 ≤ C * v z.1 z.2) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ≤
+      C * localizedSpacetimeRpowNorm (I := I) (M := M) cutoff v p a b := by
+  let U := localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b
+  let V := localizedSpacetimeRpowMoment (I := I) (M := M) cutoff v p a b
+  have hmoment : U ≤ C ^ p * V := by
+    dsimp only [U, V, localizedSpacetimeRpowMoment]
+    rw [← integral_const_mul]
+    apply integral_mono_ae
+      (integrable_localizedSpacetimeRpow_of_continuous_pos
+        (I := I) (M := M) cutoff u hu hupos p a b)
+      ((integrable_localizedSpacetimeRpow_of_continuous_pos
+        (I := I) (M := M) cutoff v hv hvpos p a b).const_mul _)
+    filter_upwards [hbound] with z hz
+    calc
+      u z.1 z.2 ^ p ≤ (C * v z.1 z.2) ^ p :=
+        Real.rpow_le_rpow (hupos z.1 z.2).le hz hp.le
+      _ = C ^ p * v z.1 z.2 ^ p :=
+        Real.mul_rpow hC.le (hvpos z.1 z.2).le
+  have hU : 0 ≤ U := localizedSpacetimeRpowMoment_nonneg
+    (I := I) (M := M) cutoff u (fun t x => (hupos t x).le) p a b
+  have hV : 0 ≤ V := localizedSpacetimeRpowMoment_nonneg
+    (I := I) (M := M) cutoff v (fun t x => (hvpos t x).le) p a b
+  have hroot := Real.rpow_le_rpow hU hmoment (div_pos one_pos hp).le
+  change U ^ (1 / p) ≤ C * V ^ (1 / p)
+  calc
+    U ^ (1 / p) ≤ (C ^ p * V) ^ (1 / p) := hroot
+    _ = C * V ^ (1 / p) := by
+      rw [Real.mul_rpow (Real.rpow_nonneg hC.le _) hV,
+        ← Real.rpow_mul hC.le]
+      have hcancel : p * (1 / p) = 1 := by field_simp [hp.ne']
+      rw [hcancel, Real.rpow_one]
 
 omit [CompactSpace M] in
 theorem localizedSpacetimeRpowNorm_nonneg

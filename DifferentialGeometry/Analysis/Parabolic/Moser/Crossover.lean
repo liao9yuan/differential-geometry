@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Integration.Measure.ExponentialTail
 import DifferentialGeometry.Analysis.Integration.Measure.LevelSetDecay
+import DifferentialGeometry.Analysis.Parabolic.ExponentialRescaling
+import DifferentialGeometry.Analysis.Parabolic.Moser.SpacetimeMeasure
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
@@ -184,6 +186,197 @@ theorem crossover_of_centered_level_set_decay
     (mul_nonneg (by positivity) ENNReal.toReal_nonneg)
     (mul_nonneg (by positivity) ENNReal.toReal_nonneg)
     hmeasPlus hmeasMinus htailPlus htailMinus
+
+open Bundle Manifold Set
+open scoped ContDiff Manifold Topology
+
+open DifferentialGeometry.Analysis.Parabolic
+open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Integral.DivergenceTheorem
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
+omit [I.Boundaryless] in
+theorem localizedSpacetimeRpowNorm_le_exponentialTimeRescale
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (rate center : ℝ) (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a b : ℝ} (hp : 0 < p) (hrate : 0 ≤ rate) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ≤
+      Real.exp (center - rate * a) *
+        localizedSpacetimeRpowNorm (I := I) (M := M) cutoff
+          (exponentialTimeRescale rate center u) p a b := by
+  let v := exponentialTimeRescale rate center u
+  have hv := contMDiff_exponentialTimeRescale rate center u hu
+  have hvpos := exponentialTimeRescale_pos rate center u hpos
+  apply localizedSpacetimeRpowNorm_le_const_mul_of_ae
+    (I := I) (M := M) cutoff u v hu.continuous hv.continuous hpos hvpos
+      hp (Real.exp_pos _)
+  filter_upwards [ae_localizedSpacetimeMeasure_fst_mem_Ioc
+    (I := I) (M := M) cutoff a b] with z hz
+  have hfactor : 1 ≤
+      Real.exp (center - rate * a) * Real.exp (rate * z.1 - center) := by
+    rw [← Real.exp_add]
+    apply Real.one_le_exp_iff.mpr
+    have := mul_nonneg hrate (sub_nonneg.mpr hz.1.le)
+    nlinarith
+  calc
+    u z.1 z.2 = 1 * u z.1 z.2 := (one_mul _).symm
+    _ ≤ (Real.exp (center - rate * a) * Real.exp (rate * z.1 - center)) *
+        u z.1 z.2 := mul_le_mul_of_nonneg_right hfactor (hpos z.1 z.2).le
+    _ = Real.exp (center - rate * a) * v z.1 z.2 := by
+      simp only [v, exponentialTimeRescale]
+      ring
+
+omit [I.Boundaryless] in
+theorem localizedSpacetimeRpowNorm_inv_le_exponentialTimeRescale_inv
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (rate center : ℝ) (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a b : ℝ} (hp : 0 < p) (hrate : 0 ≤ rate) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff
+        (fun t x => (u t x)⁻¹) p a b ≤
+      Real.exp (-center + rate * b) *
+        localizedSpacetimeRpowNorm (I := I) (M := M) cutoff
+          (fun t x => (exponentialTimeRescale rate center u t x)⁻¹) p a b := by
+  let v := exponentialTimeRescale rate center u
+  let uinv : ℝ → M → ℝ := fun t x => (u t x)⁻¹
+  let vinv : ℝ → M → ℝ := fun t x => (v t x)⁻¹
+  have hv := contMDiff_exponentialTimeRescale rate center u hu
+  have hvpos := exponentialTimeRescale_pos rate center u hpos
+  have huinv : Continuous (fun z : ℝ × M => uinv z.1 z.2) :=
+    hu.continuous.inv₀ fun z => (hpos z.1 z.2).ne'
+  have hvinv : Continuous (fun z : ℝ × M => vinv z.1 z.2) :=
+    hv.continuous.inv₀ fun z => (hvpos z.1 z.2).ne'
+  change localizedSpacetimeRpowNorm (I := I) (M := M) cutoff uinv p a b ≤
+    Real.exp (-center + rate * b) *
+      localizedSpacetimeRpowNorm (I := I) (M := M) cutoff vinv p a b
+  apply localizedSpacetimeRpowNorm_le_const_mul_of_ae
+    (I := I) (M := M) cutoff uinv vinv huinv hvinv
+      (fun t x => inv_pos.mpr (hpos t x))
+      (fun t x => inv_pos.mpr (hvpos t x)) hp (Real.exp_pos _)
+  filter_upwards [ae_localizedSpacetimeMeasure_fst_mem_Ioc
+    (I := I) (M := M) cutoff a b] with z hz
+  have hfactor : 1 ≤
+      Real.exp (-center + rate * b) * Real.exp (center - rate * z.1) := by
+    rw [← Real.exp_add]
+    apply Real.one_le_exp_iff.mpr
+    have := mul_nonneg hrate (sub_nonneg.mpr hz.2)
+    nlinarith
+  have hvinv_eq : vinv z.1 z.2 =
+      Real.exp (center - rate * z.1) * uinv z.1 z.2 := by
+    dsimp only [vinv, v, uinv, exponentialTimeRescale]
+    rw [mul_inv_rev, ← Real.exp_neg,
+      show -(rate * z.1 - center) = center - rate * z.1 by ring]
+    ring
+  rw [hvinv_eq]
+  calc
+    uinv z.1 z.2 = 1 * uinv z.1 z.2 := (one_mul _).symm
+    _ ≤ (Real.exp (-center + rate * b) * Real.exp (center - rate * z.1)) *
+        uinv z.1 z.2 :=
+      mul_le_mul_of_nonneg_right hfactor (inv_nonneg.mpr (hpos z.1 z.2).le)
+    _ = Real.exp (-center + rate * b) *
+        (Real.exp (center - rate * z.1) * uinv z.1 z.2) := by ring
+
+omit [I.Boundaryless] in
+theorem localizedSpacetimeRpowNorm_mul_inv_le_of_exponentialTimeRescale
+    {g : SmoothRiemannianMetric I M}
+    (earlyCutoff lateCutoff : SmoothScalar g)
+    (rate center : ℝ) (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a b c d A : ℝ} (hp : 0 < p) (hrate : 0 ≤ rate)
+    (hrescaled :
+      localizedSpacetimeRpowNorm (I := I) (M := M) earlyCutoff
+          (exponentialTimeRescale rate center u) p a b *
+        localizedSpacetimeRpowNorm (I := I) (M := M) lateCutoff
+          (fun t x => (exponentialTimeRescale rate center u t x)⁻¹) p c d ≤ A) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) earlyCutoff u p a b *
+        localizedSpacetimeRpowNorm (I := I) (M := M) lateCutoff
+          (fun t x => (u t x)⁻¹) p c d ≤
+      Real.exp (rate * (d - a)) * A := by
+  have hearly := localizedSpacetimeRpowNorm_le_exponentialTimeRescale
+    (I := I) (M := M) earlyCutoff rate center u hu hpos
+      (a := a) (b := b) hp hrate
+  have hlate := localizedSpacetimeRpowNorm_inv_le_exponentialTimeRescale_inv
+    (I := I) (M := M) lateCutoff rate center u hu hpos
+      (a := c) (b := d) hp hrate
+  have hrescaledEarlyNonneg := localizedSpacetimeRpowNorm_nonneg
+    (I := I) (M := M) earlyCutoff (exponentialTimeRescale rate center u)
+      (fun t x => (exponentialTimeRescale_pos rate center u hpos t x).le) p a b
+  have hproduct := mul_le_mul hearly hlate
+    (localizedSpacetimeRpowNorm_nonneg (I := I) (M := M) lateCutoff
+      (fun t x => (u t x)⁻¹) (fun t x => (inv_pos.mpr (hpos t x)).le) p c d)
+    (mul_nonneg (Real.exp_pos _).le hrescaledEarlyNonneg)
+  have hexp : Real.exp (center - rate * a) * Real.exp (-center + rate * d) =
+      Real.exp (rate * (d - a)) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  calc
+    localizedSpacetimeRpowNorm (I := I) (M := M) earlyCutoff u p a b *
+          localizedSpacetimeRpowNorm (I := I) (M := M) lateCutoff
+            (fun t x => (u t x)⁻¹) p c d ≤
+        (Real.exp (center - rate * a) *
+          localizedSpacetimeRpowNorm (I := I) (M := M) earlyCutoff
+            (exponentialTimeRescale rate center u) p a b) *
+          (Real.exp (-center + rate * d) *
+            localizedSpacetimeRpowNorm (I := I) (M := M) lateCutoff
+              (fun t x => (exponentialTimeRescale rate center u t x)⁻¹)
+                p c d) := hproduct
+    _ = (Real.exp (center - rate * a) * Real.exp (-center + rate * d)) *
+        (localizedSpacetimeRpowNorm (I := I) (M := M) earlyCutoff
+            (exponentialTimeRescale rate center u) p a b *
+          localizedSpacetimeRpowNorm (I := I) (M := M) lateCutoff
+            (fun t x => (exponentialTimeRescale rate center u t x)⁻¹)
+              p c d) := by ring
+    _ = Real.exp (rate * (d - a)) *
+        (localizedSpacetimeRpowNorm (I := I) (M := M) earlyCutoff
+            (exponentialTimeRescale rate center u) p a b *
+          localizedSpacetimeRpowNorm (I := I) (M := M) lateCutoff
+            (fun t x => (exponentialTimeRescale rate center u t x)⁻¹)
+              p c d) := by rw [hexp]
+    _ ≤ Real.exp (rate * (d - a)) * A :=
+      mul_le_mul_of_nonneg_left hrescaled (Real.exp_pos _).le
+
+omit [I.Boundaryless] in
+theorem localizedSpacetimeRpowNorm_mul_inv_le_of_exponentialTimeRescale_bounds
+    {g : SmoothRiemannianMetric I M}
+    (earlyCutoff lateCutoff : SmoothScalar g)
+    (rate center : ℝ) (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a b c d Aplus Aminus : ℝ} (hp : 0 < p) (hrate : 0 ≤ rate)
+    (hAplus : 0 ≤ Aplus)
+    (hplus : localizedSpacetimeRpowNorm (I := I) (M := M) earlyCutoff
+      (exponentialTimeRescale rate center u) p a b ≤ Aplus)
+    (hminus : localizedSpacetimeRpowNorm (I := I) (M := M) lateCutoff
+      (fun t x => (exponentialTimeRescale rate center u t x)⁻¹) p c d ≤ Aminus) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) earlyCutoff u p a b *
+        localizedSpacetimeRpowNorm (I := I) (M := M) lateCutoff
+          (fun t x => (u t x)⁻¹) p c d ≤
+      Real.exp (rate * (d - a)) * (Aplus * Aminus) := by
+  apply localizedSpacetimeRpowNorm_mul_inv_le_of_exponentialTimeRescale
+    (I := I) (M := M) earlyCutoff lateCutoff rate center u hu hpos hp hrate
+  exact mul_le_mul hplus hminus
+    (localizedSpacetimeRpowNorm_nonneg (I := I) (M := M) lateCutoff
+      (fun t x => (exponentialTimeRescale rate center u t x)⁻¹)
+      (fun t x => (inv_pos.mpr
+        (exponentialTimeRescale_pos rate center u hpos t x)).le) p c d)
+    hAplus
 
 theorem weak_harnack_power_of_crossover
     {u A D B C p : ℝ}
