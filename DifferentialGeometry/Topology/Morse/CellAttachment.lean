@@ -741,6 +741,380 @@ noncomputable def cellAttachmentModel {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (h
   (cellAttachmentHomotopyEquiv hk c ε hε).trans
     (cellAttachmentAdjunctionHomeo hk c ε hε).symm.toHomotopyEquiv
 
+abbrev morseNorm (n : ℕ) (y : MorseModel n) : ℝ :=
+  ‖(WithLp.toLp 2 y : EuclideanSpace ℝ (Fin n))‖
+
+private theorem sum_split_fin {n k : ℕ} (hk : k ≤ n) (f : Fin n → ℝ) :
+    (∑ i : Fin n, f i) =
+      (∑ i : Fin k, f (negIdx hk i)) + (∑ j : Fin (n - k), f (posIdx hk j)) := by
+  let e : Sum (Fin k) (Fin (n - k)) ≃ Fin n :=
+    { toFun := Sum.elim (negIdx hk) (posIdx hk)
+      invFun := fun z => if h : z.val < k then Sum.inl ⟨z.val, h⟩ else Sum.inr ⟨z.val - k, by
+        have hkle : k ≤ z.val := le_of_not_gt h
+        have hz : z.val < n := z.isLt
+        omega⟩
+      left_inv := by
+        intro s
+        cases s with
+        | inl i =>
+            simp [negIdx]
+        | inr j =>
+            simp [posIdx]
+      right_inv := by
+        intro z
+        by_cases h : z.val < k
+        · simp [h, negIdx]
+        · apply Fin.ext
+          simp [h, posIdx]
+          omega }
+  calc
+    (∑ i : Fin n, f i) = ∑ s : Sum (Fin k) (Fin (n - k)), f (e s) := by
+      symm
+      exact Fintype.sum_equiv e (fun s : Sum (Fin k) (Fin (n - k)) => f (e s))
+        (fun i : Fin n => f i) (by intro s; rfl)
+    _ = (∑ i : Fin k, f (e (Sum.inl i))) + (∑ j : Fin (n - k), f (e (Sum.inr j))) := by
+      rw [Fintype.sum_sum_type]
+    _ = (∑ i : Fin k, f (negIdx hk i)) + (∑ j : Fin (n - k), f (posIdx hk j)) := by
+      simp [e]
+
+private theorem morseNorm_sq_recombine {n k : ℕ} (hk : k ≤ n)
+    (a : EuclideanSpace ℝ (Fin k)) (b : EuclideanSpace ℝ (Fin (n - k))) :
+    morseNorm n (recombine hk a b) ^ 2 = ‖a‖ ^ 2 + ‖b‖ ^ 2 := by
+  have h1 : morseNorm n (recombine hk a b) ^ 2 = ∑ i : Fin n, ((recombine hk a b) i) ^ 2 := by
+    simpa [morseNorm] using (EuclideanSpace.real_norm_sq_eq (WithLp.toLp 2 (recombine hk a b)))
+  have h2 : ‖a‖ ^ 2 = ∑ i : Fin k, (a i) ^ 2 := by
+    simpa using (EuclideanSpace.real_norm_sq_eq a)
+  have h3 : ‖b‖ ^ 2 = ∑ j : Fin (n - k), (b j) ^ 2 := by
+    simpa using (EuclideanSpace.real_norm_sq_eq b)
+  rw [h1, h2, h3]
+  rw [sum_split_fin hk (fun i : Fin n => ((recombine hk a b) i) ^ 2)]
+  congr 1
+  · apply Finset.sum_congr rfl
+    intro i hi
+    rw [recombine_negPart]
+  · apply Finset.sum_congr rfl
+    intro j hj
+    rw [recombine_posPart]
+
+private theorem morseNorm_le_of_sq_le {n : ℕ} {y z : MorseModel n}
+    (h : morseNorm n y ^ 2 ≤ morseNorm n z ^ 2) : morseNorm n y ≤ morseNorm n z := by
+  have habs := sq_le_sq.mp h
+  have h1 : |morseNorm n y| = morseNorm n y := abs_of_nonneg (norm_nonneg _)
+  have h2 : |morseNorm n z| = morseNorm n z := abs_of_nonneg (norm_nonneg _)
+  simpa [h1, h2] using habs
+
+theorem norm_spineMap_le {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    morseNorm n (spineMap hk y) ≤ morseNorm n y := by
+  apply morseNorm_le_of_sq_le
+  rw [show spineMap hk y = recombine hk (negPart hk y) 0 by rfl]
+  rw [morseNorm_sq_recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))]
+  conv_rhs => rw [← recombine_decompose hk y]
+  rw [morseNorm_sq_recombine hk (negPart hk y) (posPart hk y)]
+  have hz : ‖(0 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = 0 := by simp
+  nlinarith [sq_nonneg ‖posPart hk y‖, hz]
+
+theorem norm_cellRetractionStep_le {n k : ℕ} (hk : k ≤ n) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1)
+    (y : MorseModel n) : morseNorm n (cellRetractionStep hk t y) ≤ morseNorm n y := by
+  apply morseNorm_le_of_sq_le
+  rw [show cellRetractionStep hk t y = recombine hk (negPart hk y) (t • posPart hk y) by rfl]
+  rw [morseNorm_sq_recombine hk (negPart hk y) (t • posPart hk y)]
+  conv_rhs => rw [← recombine_decompose hk y]
+  rw [morseNorm_sq_recombine hk (negPart hk y) (posPart hk y)]
+  have ht2 : t ^ 2 ≤ 1 := by nlinarith [sq_nonneg t, ht0, ht1]
+  have hts : ‖t • posPart hk y‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 := by
+    calc
+      ‖t • posPart hk y‖ ^ 2 = ‖t‖ ^ 2 * ‖posPart hk y‖ ^ 2 := by
+        rw [norm_smul, mul_pow]
+      _ = t ^ 2 * ‖posPart hk y‖ ^ 2 := by
+        rw [Real.norm_eq_abs, abs_of_nonneg ht0]
+      _ ≤ 1 * ‖posPart hk y‖ ^ 2 := by
+        exact mul_le_mul_of_nonneg_right ht2 (sq_nonneg _)
+      _ = ‖posPart hk y‖ ^ 2 := by rw [one_mul]
+  nlinarith [sq_nonneg ‖negPart hk y‖]
+
+theorem norm_cellMap_le {n k : ℕ} (hk : k ≤ n) (ε R : ℝ) (hR : Real.sqrt (2 * ε) ≤ R)
+    (x : EuclideanSpace ℝ (Fin k)) (hx : ‖x‖ ≤ 1) : morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x) ≤ R := by
+  have hsq : morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x) ^ 2 ≤ (Real.sqrt (2 * ε)) ^ 2 := by
+    have h1 : morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x) ^ 2 =
+        ∑ i : Fin n, ((cellMap hk (Real.sqrt (2 * ε)) x) i) ^ 2 := by
+      simpa [morseNorm] using
+        (EuclideanSpace.real_norm_sq_eq (WithLp.toLp 2 (cellMap hk (Real.sqrt (2 * ε)) x)))
+    rw [h1]
+    rw [sum_split_fin hk (fun i : Fin n => ((cellMap hk (Real.sqrt (2 * ε)) x) i) ^ 2)]
+    have hneg : (∑ i : Fin k, ((cellMap hk (Real.sqrt (2 * ε)) x) (negIdx hk i)) ^ 2) ≤
+        (Real.sqrt (2 * ε)) ^ 2 * ‖x‖ ^ 2 := by
+      calc
+        (∑ i : Fin k, ((cellMap hk (Real.sqrt (2 * ε)) x) (negIdx hk i)) ^ 2)
+            = (∑ i : Fin k, (Real.sqrt (2 * ε) * x i) ^ 2) := by
+              apply Finset.sum_congr rfl
+              intro i hi
+              rw [cellMap_negIdx]
+        _ ≤ (Real.sqrt (2 * ε)) ^ 2 * ‖x‖ ^ 2 := by
+          rw [EuclideanSpace.real_norm_sq_eq x]
+          rw [Finset.mul_sum]
+          apply Finset.sum_le_sum
+          intro i hi
+          exact le_of_eq (mul_pow (Real.sqrt (2 * ε)) (x i) 2)
+    have hpos : (∑ j : Fin (n - k), ((cellMap hk (Real.sqrt (2 * ε)) x) (posIdx hk j)) ^ 2) = 0 := by
+      apply Finset.sum_eq_zero
+      intro j hj
+      rw [cellMap_posIdx]
+      norm_num
+    have hx2 : ‖x‖ ^ 2 ≤ 1 := by
+      rw [pow_two]
+      simpa using (mul_le_mul hx hx (norm_nonneg x) (zero_le_one))
+    rw [hpos]
+    have hx : (Real.sqrt (2 * ε)) ^ 2 * ‖x‖ ^ 2 ≤ (Real.sqrt (2 * ε)) ^ 2 := by
+      simpa using (mul_le_mul_of_nonneg_left hx2 (sq_nonneg (Real.sqrt (2 * ε))))
+    nlinarith [hneg, hx, hx2]
+  have hnorm : morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x) ≤ Real.sqrt (2 * ε) := by
+    calc
+      morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x)
+          = |morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x)| := by
+            rw [abs_of_nonneg (norm_nonneg _)]
+      _ ≤ |Real.sqrt (2 * ε)| := sq_le_sq.mp hsq
+      _ = Real.sqrt (2 * ε) := abs_of_nonneg (Real.sqrt_nonneg (2 * ε))
+  exact le_trans hnorm hR
+
+abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
+  {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
+
+abbrev ballLowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
+  {y : MorseModel n //
+    (y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R) ∨
+      y ∈ Set.range (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))}
+
+theorem mem_ballLowerUnion_iff {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
+    (hR : Real.sqrt (2 * ε) ≤ R) (y : MorseModel n) :
+    y ∈ lowerCellUnion hk c ε ∧ morseNorm n y ≤ R ↔
+      (y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R) ∨
+        y ∈ Set.range (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) := by
+  constructor
+  · rintro ⟨h | ⟨x, hx⟩, hb⟩
+    · exact Or.inl ⟨h, hb⟩
+    · exact Or.inr ⟨x, hx⟩
+  · rintro (h | ⟨x, hx⟩)
+    · exact ⟨Or.inl h.1, h.2⟩
+    · rw [← hx]
+      exact ⟨Or.inr ⟨x, rfl⟩, norm_cellMap_le hk ε R hR (x : EuclideanSpace ℝ (Fin k)) x.2⟩
+
+theorem norm_le_of_mem_ballLowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
+    (hR : Real.sqrt (2 * ε) ≤ R) {y : MorseModel n}
+    (h : (y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R) ∨
+      y ∈ Set.range (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))) :
+    morseNorm n y ≤ R := by
+  rcases h with h | ⟨x, hx⟩
+  · exact h.2
+  · rw [← hx]
+    exact norm_cellMap_le hk ε R hR (x : EuclideanSpace ℝ (Fin k)) x.2
+
+def ballCellAttachmentMap {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε)
+    (y : ballUpperSublevel hk c ε R) : ballLowerUnion hk c ε R :=
+  ⟨spineMap hk y.1, by
+    rcases spineMap_mem_union hk c ε hε y.1 with h | ⟨x, hx⟩
+    · exact Or.inl ⟨h, le_trans (norm_spineMap_le hk y.1) y.2.2⟩
+    · exact Or.inr ⟨x, hx⟩⟩
+
+def ballCellAttachmentInclusion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 ≤ ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) (z : ballLowerUnion hk c ε R) : ballUpperSublevel hk c ε R :=
+  ⟨z.1, by
+    constructor
+    · exact cellAttachmentInclusion_mem hk c ε hε ⟨z.1, by
+        rcases z.2 with h | ⟨x, hx⟩
+        · exact Or.inl h.1
+        · exact Or.inr ⟨x, hx⟩⟩
+    · exact norm_le_of_mem_ballLowerUnion hk c ε R hR z.2⟩
+
+def ballCellRetractionHomotopyFun {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) :
+    Set.Icc (0 : ℝ) 1 × ballUpperSublevel hk c ε R → ballUpperSublevel hk c ε R :=
+  fun p =>
+    ⟨cellRetractionStep hk (p.1 : ℝ) p.2.1,
+      ⟨cellRetractionStep_mem_upper hk c ε (t := p.1.1) (y := p.2.1) p.1.2.1 p.1.2.2 p.2.2.1,
+        le_trans (norm_cellRetractionStep_le hk p.1.2.1 p.1.2.2 p.2.1) p.2.2.2⟩⟩
+
+def ballCellInclusionStepFun {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hR : Real.sqrt (2 * ε) ≤ R) :
+    Set.Icc (0 : ℝ) 1 × ballLowerUnion hk c ε R → ballLowerUnion hk c ε R :=
+  fun p =>
+    ⟨cellRetractionStep hk (p.1 : ℝ) p.2.1, by
+      have hmem : cellRetractionStep hk (p.1 : ℝ) p.2.1 ∈ lowerCellUnion hk c ε :=
+        cellInclusionStep_mem hk c ε p.1 ⟨p.2.1, by
+          rcases p.2.2 with h | ⟨x, hx⟩
+          · exact Or.inl h.1
+          · exact Or.inr ⟨x, hx⟩⟩
+      rcases hmem with h | ⟨x, hx⟩
+      · exact Or.inl ⟨h, le_trans (norm_cellRetractionStep_le hk p.1.2.1 p.1.2.2 p.2.1)
+          (norm_le_of_mem_ballLowerUnion hk c ε R hR p.2.2)⟩
+      · exact Or.inr ⟨x, hx⟩⟩
+
+theorem ballCellRetractionHomotopy_zero {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) (y : ballUpperSublevel hk c ε R) :
+    ballCellRetractionHomotopyFun hk c ε R (⟨0, by norm_num⟩, y) =
+      ballCellAttachmentInclusion hk c ε R (le_of_lt hε) hR (ballCellAttachmentMap hk c ε R hε y) := by
+  apply Subtype.ext
+  dsimp [ballCellRetractionHomotopyFun, ballCellAttachmentInclusion, ballCellAttachmentMap]
+  exact cellRetractionStep_spine hk y.1
+
+theorem ballCellRetractionHomotopy_one {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
+    (y : ballUpperSublevel hk c ε R) :
+    ballCellRetractionHomotopyFun hk c ε R (⟨1, by norm_num⟩, y) = y := by
+  apply Subtype.ext
+  dsimp [ballCellRetractionHomotopyFun]
+  exact cellRetractionStep_decompose hk y.1
+
+theorem ballCellInclusionStep_zero {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) (z : ballLowerUnion hk c ε R) :
+    ballCellInclusionStepFun hk c ε R hR (⟨0, by norm_num⟩, z) =
+      ballCellAttachmentMap hk c ε R hε (ballCellAttachmentInclusion hk c ε R (le_of_lt hε) hR z) := by
+  apply Subtype.ext
+  dsimp [ballCellInclusionStepFun, ballCellAttachmentMap, ballCellAttachmentInclusion]
+  exact cellRetractionStep_spine hk z.1
+
+theorem ballCellInclusionStep_one {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hR : Real.sqrt (2 * ε) ≤ R)
+    (z : ballLowerUnion hk c ε R) :
+    ballCellInclusionStepFun hk c ε R hR (⟨1, by norm_num⟩, z) = z := by
+  apply Subtype.ext
+  dsimp [ballCellInclusionStepFun]
+  exact cellRetractionStep_decompose hk z.1
+
+theorem continuous_ballCellAttachmentMap {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε) :
+    Continuous (ballCellAttachmentMap hk c ε R hε) := by
+  have h : Continuous (fun y : ballUpperSublevel hk c ε R => spineMap hk y.1) :=
+    (continuous_spineMap hk).comp continuous_subtype_val
+  have hcomp : (fun y : ballUpperSublevel hk c ε R =>
+      ((ballCellAttachmentMap hk c ε R hε y : ballLowerUnion hk c ε R) : MorseModel n)) =
+      fun y => spineMap hk y.1 := by
+    funext y
+    rfl
+  exact (Topology.IsInducing.subtypeVal.continuous_iff).2 (by simpa [hcomp] using h)
+
+theorem continuous_ballCellAttachmentInclusion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 ≤ ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) : Continuous (ballCellAttachmentInclusion hk c ε R hε hR) := by
+  have hcomp : (fun z : ballLowerUnion hk c ε R =>
+      ((ballCellAttachmentInclusion hk c ε R hε hR z : ballUpperSublevel hk c ε R) : MorseModel n)) =
+      fun z : ballLowerUnion hk c ε R => (z : MorseModel n) := by
+    funext z
+    rfl
+  exact (Topology.IsInducing.subtypeVal.continuous_iff).2
+    (by simpa [hcomp] using
+      (continuous_subtype_val : Continuous (fun z : ballLowerUnion hk c ε R => (z : MorseModel n))))
+
+theorem continuous_ballCellRetractionHomotopyFun {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) :
+    Continuous (ballCellRetractionHomotopyFun hk c ε R) := by
+  have hpair : Continuous (fun p : Set.Icc (0 : ℝ) 1 × ballUpperSublevel hk c ε R =>
+      (p.1, p.2.1)) :=
+    continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)
+  have h : Continuous (fun p : Set.Icc (0 : ℝ) 1 × ballUpperSublevel hk c ε R =>
+      cellRetractionStep hk (p.1 : ℝ) p.2.1) :=
+    continuous_cellRetractionStep hk |>.comp hpair
+  have hcomp : (fun p : Set.Icc (0 : ℝ) 1 × ballUpperSublevel hk c ε R =>
+      ((ballCellRetractionHomotopyFun hk c ε R p : ballUpperSublevel hk c ε R) : MorseModel n)) =
+      fun p => cellRetractionStep hk (p.1 : ℝ) p.2.1 := by
+    funext p
+    rfl
+  exact (Topology.IsInducing.subtypeVal.continuous_iff).2 (by simpa [hcomp] using h)
+
+theorem continuous_ballCellInclusionStepFun {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
+    (hR : Real.sqrt (2 * ε) ≤ R) : Continuous (ballCellInclusionStepFun hk c ε R hR) := by
+  have hpair : Continuous (fun p : Set.Icc (0 : ℝ) 1 × ballLowerUnion hk c ε R =>
+      (p.1, p.2.1)) :=
+    continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)
+  have h : Continuous (fun p : Set.Icc (0 : ℝ) 1 × ballLowerUnion hk c ε R =>
+      cellRetractionStep hk (p.1 : ℝ) p.2.1) :=
+    continuous_cellRetractionStep hk |>.comp hpair
+  have hcomp : (fun p : Set.Icc (0 : ℝ) 1 × ballLowerUnion hk c ε R =>
+      ((ballCellInclusionStepFun hk c ε R hR p : ballLowerUnion hk c ε R) : MorseModel n)) =
+      fun p => cellRetractionStep hk (p.1 : ℝ) p.2.1 := by
+    funext p
+    rfl
+  exact (Topology.IsInducing.subtypeVal.continuous_iff).2 (by simpa [hcomp] using h)
+
+noncomputable def ballCellAttachmentMapC {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε) :
+    C(ballUpperSublevel hk c ε R, ballLowerUnion hk c ε R) :=
+  ⟨ballCellAttachmentMap hk c ε R hε, continuous_ballCellAttachmentMap hk c ε R hε⟩
+
+noncomputable def ballCellAttachmentInclusionC {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 ≤ ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) : C(ballLowerUnion hk c ε R, ballUpperSublevel hk c ε R) :=
+  ⟨ballCellAttachmentInclusion hk c ε R hε hR, continuous_ballCellAttachmentInclusion hk c ε R hε hR⟩
+
+noncomputable def ballCellRetractionHomotopy {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) :
+    ContinuousMap.Homotopy
+      ((ballCellAttachmentInclusionC hk c ε R (le_of_lt hε) hR).comp
+        (ballCellAttachmentMapC hk c ε R hε))
+      (ContinuousMap.id (ballUpperSublevel hk c ε R)) where
+  toFun := ContinuousMap.mk (ballCellRetractionHomotopyFun hk c ε R)
+    (continuous_ballCellRetractionHomotopyFun hk c ε R)
+  map_zero_left := by
+    intro y
+    exact ballCellRetractionHomotopy_zero hk c ε R hε hR y
+  map_one_left := by
+    intro y
+    exact ballCellRetractionHomotopy_one hk c ε R y
+
+noncomputable def ballCellInclusionHomotopy {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) :
+    ContinuousMap.Homotopy
+      ((ballCellAttachmentMapC hk c ε R hε).comp
+        (ballCellAttachmentInclusionC hk c ε R (le_of_lt hε) hR))
+      (ContinuousMap.id (ballLowerUnion hk c ε R)) where
+  toFun := ContinuousMap.mk (ballCellInclusionStepFun hk c ε R hR)
+    (continuous_ballCellInclusionStepFun hk c ε R hR)
+  map_zero_left := by
+    intro z
+    exact ballCellInclusionStep_zero hk c ε R hε hR z
+  map_one_left := by
+    intro z
+    exact ballCellInclusionStep_one hk c ε R hR z
+
+noncomputable def ballCellAttachmentHomotopyEquiv {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) :
+    ContinuousMap.HomotopyEquiv (ballUpperSublevel hk c ε R) (ballLowerUnion hk c ε R) where
+  toFun := ballCellAttachmentMapC hk c ε R hε
+  invFun := ballCellAttachmentInclusionC hk c ε R (le_of_lt hε) hR
+  left_inv := ⟨ballCellRetractionHomotopy hk c ε R hε hR⟩
+  right_inv := ⟨ballCellInclusionHomotopy hk c ε R hε hR⟩
+
+def ballAttachMap {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 ≤ ε) (hR : Real.sqrt (2 * ε) ≤ R)
+    (x : CellBoundary k) : {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R} :=
+  ⟨cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)), by
+    constructor
+    · change morseNormalForm hk c (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ≤ c - ε
+      have hf := morseNormalForm_cellMap hk c (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))
+      rw [hf]
+      have hnorm : ‖(x : EuclideanSpace ℝ (Fin k))‖ = 1 := x.2
+      have hsq : (Real.sqrt (2 * ε)) ^ 2 = 2 * ε := by
+        rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε)]
+      rw [hsq, hnorm]
+      linarith
+    · exact norm_cellMap_le hk ε R hR (x : EuclideanSpace ℝ (Fin k)) (le_of_eq x.2)⟩
+
+noncomputable def ballCellAdjunctionHomeo {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) :
+    CellAdjunctionSpace k (ballAttachMap hk c ε R (le_of_lt hε) hR) ≃ₜ ballLowerUnion hk c ε R := by
+  refine cellAdjunctionHomeomorphUnionImage (n := k) (φ := ballAttachMap hk c ε R (le_of_lt hε) hR)
+    (c := fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))
+    ?hφ ?hc ?hcont ?hinterior ?hclosed
+  · intro b
+    rfl
+  · exact cellMap_injective hk ε hε
+  · exact continuous_cellMap hk (Real.sqrt (2 * ε))
+  · rw [Set.disjoint_left]
+    intro y hyA hyB
+    exact (Set.disjoint_left.mp (cellInterior_disjoint hk c ε hε)) hyA hyB.1
+  · have hclosed : IsClosed {y : MorseModel n |
+        y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R} := by
+      have hcont : Continuous (fun y : MorseModel n => morseNorm n y) :=
+        continuous_norm.comp (PiLp.continuous_toLp 2 (fun _ : Fin n => ℝ))
+      exact (isClosed_sublevel_normalForm hk c (c - ε)).inter (isClosed_Iic.preimage hcont)
+    exact hclosed
+
+noncomputable def ballCellAttachmentModel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε)
+    (hR : Real.sqrt (2 * ε) ≤ R) :
+    ContinuousMap.HomotopyEquiv (ballUpperSublevel hk c ε R)
+      (CellAdjunctionSpace k (ballAttachMap hk c ε R (le_of_lt hε) hR)) :=
+  (ballCellAttachmentHomotopyEquiv hk c ε R hε hR).trans
+    (ballCellAdjunctionHomeo hk c ε R hε hR).symm.toHomotopyEquiv
+
 end CellAttachment
 
 end
