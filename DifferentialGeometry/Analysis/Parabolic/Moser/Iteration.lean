@@ -92,6 +92,19 @@ theorem parabolicMoserExponent_pos {p₀ : ℝ} (hp₀ : 0 < p₀) (k : ℕ) :
   rw [parabolicMoserExponent]
   exact mul_pos hp₀ (pow_pos (parabolicMoserGain_pos n) k)
 
+theorem parabolicMoserExponent_strictMono {p₀ : ℝ} (hp₀ : 0 < p₀) :
+    StrictMono (parabolicMoserExponent n p₀) := by
+  apply strictMono_nat_of_lt_succ
+  intro k
+  rw [parabolicMoserExponent_succ]
+  exact lt_mul_of_one_lt_left (parabolicMoserExponent_pos n hp₀ k)
+    (one_lt_parabolicMoserGain n)
+
+theorem parabolicMoserExponent_decay_mul_self (q : ℝ) (m : ℕ) :
+    parabolicMoserExponent n (q * parabolicMoserDecay n ^ m) m = q := by
+  rw [parabolicMoserExponent, parabolicMoserDecay_eq_inv_gain, inv_pow]
+  field_simp [(parabolicMoserGain_pos n).ne']
+
 theorem parabolicMoserExponent_tendsto_atTop {p₀ : ℝ} (hp₀ : 0 < p₀) :
     Tendsto (parabolicMoserExponent n p₀) atTop atTop := by
   simpa only [parabolicMoserExponent, mul_comm] using
@@ -266,6 +279,27 @@ theorem multiplicative_iteration_bound
   exact hcost.sum_le_tsum (Finset.range k) (fun j _ => hcost_nonneg j)
 
 omit [NeZero n] in
+theorem finite_multiplicative_iteration
+    {X factor : ℕ → ℝ}
+    (k : ℕ) (hfactor : ∀ j < k, 0 ≤ factor j)
+    (hstep : ∀ j < k, X (j + 1) ≤ factor j * X j) :
+    X k ≤ (∏ j ∈ Finset.range k, factor j) * X 0 := by
+  induction k with
+  | zero => simp
+  | succ k hk =>
+      calc
+        X (k + 1) ≤ factor k * X k := hstep k (Nat.lt_succ_self k)
+        _ ≤ factor k * ((∏ j ∈ Finset.range k, factor j) * X 0) :=
+          mul_le_mul_of_nonneg_left
+            (hk
+              (fun j hj => hfactor j (hj.trans (Nat.lt_succ_self k)))
+              (fun j hj => hstep j (hj.trans (Nat.lt_succ_self k))))
+            (hfactor k (Nat.lt_succ_self k))
+        _ = (∏ j ∈ Finset.range (k + 1), factor j) * X 0 := by
+          rw [Finset.prod_range_succ]
+          ring
+
+omit [NeZero n] in
 theorem bddAbove_range_of_multiplicative_iteration
     {X cost : ℕ → ℝ}
     (hX_zero : 0 ≤ X 0)
@@ -301,6 +335,35 @@ theorem moser_iteration_bddAbove
   exact bddAbove_range_of_multiplicative_iteration hX_zero
     (summable_moserIterationCost htheta htheta_one)
     (moserIterationCost_nonneg htheta ha hb) hstep
+
+omit [NeZero n] in
+theorem normalized_exponent_gain_step
+    {L L' sobolev coefficient gain p : ℝ}
+    (hL : 0 ≤ L) (hL' : 0 ≤ L')
+    (hsobolev : 0 ≤ sobolev) (hcoefficient : 0 ≤ coefficient)
+    (hgain : 0 < gain) (hp : 0 < p)
+    (hstep : L' ≤ sobolev * (coefficient * L) ^ gain) :
+    L' ^ (1 / (gain * p)) ≤
+      sobolev ^ (1 / (gain * p)) * coefficient ^ (1 / p) * L ^ (1 / p) := by
+  have hgp : 0 < gain * p := mul_pos hgain hp
+  have hcoefficientL : 0 ≤ coefficient * L := mul_nonneg hcoefficient hL
+  have hright : 0 ≤ sobolev * (coefficient * L) ^ gain :=
+    mul_nonneg hsobolev (Real.rpow_nonneg hcoefficientL _)
+  have hroot := Real.rpow_le_rpow hL' hstep (div_nonneg zero_le_one hgp.le)
+  calc
+    L' ^ (1 / (gain * p)) ≤
+        (sobolev * (coefficient * L) ^ gain) ^ (1 / (gain * p)) := hroot
+    _ = sobolev ^ (1 / (gain * p)) *
+        ((coefficient * L) ^ gain) ^ (1 / (gain * p)) := by
+      rw [Real.mul_rpow hsobolev (Real.rpow_nonneg hcoefficientL _)]
+    _ = sobolev ^ (1 / (gain * p)) *
+        (coefficient * L) ^ (1 / p) := by
+      rw [← Real.rpow_mul hcoefficientL]
+      congr 2
+      field_simp [hgain.ne', hp.ne']
+    _ = sobolev ^ (1 / (gain * p)) * coefficient ^ (1 / p) * L ^ (1 / p) := by
+      rw [Real.mul_rpow hcoefficient hL]
+      ring
 
 theorem normalized_moser_step
     {p₀ C A L L' : ℝ}
