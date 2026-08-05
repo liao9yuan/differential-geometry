@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.NondivergenceSchauder
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.BoundedJetInterpolation
 import DifferentialGeometry.Analysis.Schauder.ParabolicChartExtension
 
 noncomputable section
@@ -519,6 +520,105 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoot
         (parabolicChartPrincipalCoefficient (I := I) G.metric chartCenter)
         p.1 (hposInner p.1 p.2) alpha (localScale p).1 Ka Kb Bb Kc Bc
         Ksource Ku Kdu Bsource Mu Mdu)) delta, hestimate⟩
+
+theorem exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn_of_interpolation
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {alpha Ksource Bsource C M0 : NNReal}
+    (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
+    (epsilon : NNReal) (hepsilon : 0 < epsilon)
+    {a t₀ t₁ b r R Rext : Real}
+    (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    (hat₀ : a < t₀) (ht₁b : t₁ < b) (hrR : r < R) (hRRext : R < Rext)
+    (chartCenter : M) (center : EuclM E)
+    (hchart : ((toEuclidean (E := E)).symm : EuclM E → E) ''
+      Metric.closedBall center R ⊆ interior (extChartAt I chartCenter).target)
+    (V : Real → M → Real)
+    (hV : ContDiffOn Real 1
+      (fun p : Real × E ↦ V p.1 ((extChartAt I chartCenter).symm p.2))
+      (Set.Icc a b ×ˢ
+        (((toEuclidean (E := E)).symm : EuclM E → E) ''
+          Metric.closedBall center R)))
+    (intrinsicU : Real → M → Real)
+    (u dtimeU : Real → BoundedContinuousFunction (EuclM E) Real)
+    (du : Real →
+      BoundedContinuousFunction (EuclM E) (EuclM E →L[Real] Real))
+    (d2u : Real → BoundedContinuousFunction (EuclM E)
+      (EuclM E →L[Real] EuclM E →L[Real] Real))
+    (huTime : ∀ s ∈ Set.Icc a b, HasDerivAt u (dtimeU s) s)
+    (hu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (u s : EuclM E → Real) (du s x) x)
+    (hdu : ∀ s ∈ Set.Icc a b, ∀ x,
+      HasFDerivAt (du s : EuclM E → EuclM E →L[Real] Real)
+        (d2u s x) x)
+    (huCont : Continuous u)
+    (hrealize : Set.EqOn (fun p ↦ u p.time p.space)
+      (fun p ↦ parabolicEuclideanChartRepresentation
+        I chartCenter intrinsicU p.time p.space)
+      (parabolicCylinder Set.univ (Metric.ball center Rext)))
+    (hsourceHolder : HolderWith Ksource alpha
+      ((parabolicCylinder (Set.Icc a b) (Metric.closedBall center R)).restrict
+        (parabolicNondivergenceOperatorInEuclideanChart (I := I)
+          G.metric V chartCenter intrinsicU)))
+    (hsourceNorm : ∀ p,
+      p ∈ parabolicCylinder (Set.Icc a b) (Metric.closedBall center R) →
+        ‖parabolicNondivergenceOperatorInEuclideanChart (I := I)
+          G.metric V chartCenter intrinsicU p‖ ≤ Bsource)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder (Set.Icc a b) Set.univ)
+      (fun t x ↦ u t x) ≤ C)
+    (huNorm : ∀ p, p ∈ parabolicCylinder (Set.Icc a b) Set.univ →
+      ‖u p.time p.space‖ ≤ M0) :
+    ∃ Cresult : NNReal,
+      eParabolicC2HolderGaugeInEuclideanChartOn alpha I chartCenter
+        (parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r))
+        intrinsicU ≤ Cresult := by
+  let J := Set.Icc a b
+  have huC2 : IsParabolicC2On
+      (parabolicCylinder J Set.univ) (fun t x ↦ u t x) := by
+    constructor
+    · intro p hp
+      exact (contDiff_two_of_hasFDerivAt (u p.time) (du p.time) (d2u p.time)
+        (hu p.time hp.1) (hdu p.time hp.1)).contDiffAt
+    · intro p hp
+      exact ((BoundedContinuousFunction.evalCLM Real p.space).hasFDerivAt
+        |>.comp_hasDerivAt p.time (huTime p.time hp.1)).differentiableAt
+  have huHolder := parabolicValue_holderWith_restrict_of_interpolation
+    (convex_Icc a b) convex_univ epsilon hepsilon halpha1.le
+    huC2 (by simpa only [J] using hgauge) (by simpa only [J] using huNorm)
+  have hdtimeUHolder :=
+    BoundedContinuousFunction.parabolicTimeDerivative_holderWith_restrict
+      u dtimeU huTime hgauge
+  have hduHolder :=
+    BoundedContinuousFunction.parabolicSpatialDerivative_holderWith_restrict_of_interpolation
+      (convex_Icc a b) epsilon hepsilon halpha1.le u du hu
+      (by simpa only [J] using huC2) hgauge huNorm
+  have hd2uHolder :=
+    BoundedContinuousFunction.parabolicSpatialSecondDerivative_holderWith_restrict
+      u du d2u hu hdu hgauge
+  have hdtimeUNorm :=
+    BoundedContinuousFunction.norm_parabolicTimeDerivative_le
+      u dtimeU huTime hgauge
+  have hduNorm :=
+    BoundedContinuousFunction.norm_parabolicSpatialDerivative_le_of_interpolation
+      epsilon hepsilon u du hu (by simpa only [J] using huC2) hgauge huNorm
+  have hd2uNorm :=
+    BoundedContinuousFunction.norm_parabolicSpatialSecondDerivative_le
+      u du d2u hu hdu hgauge
+  exact
+    exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn
+      hG (alpha := alpha) (Ksource := Ksource)
+      (Ku := parabolicValueInterpolationConst epsilon alpha C M0)
+      (KdtimeU := C)
+      (Kdu := parabolicSpatialGradientInterpolationConst epsilon alpha C M0)
+      (Kd2u := C) (Bsource := Bsource) (Mu := M0)
+      (MdtimeU := C) (Mdu := 2 * M0 / epsilon + C * epsilon)
+      (Md2u := C) halpha0 halpha1 hab habreg hat₀ ht₁b hrR hRRext
+      chartCenter center hchart V hV intrinsicU u dtimeU du d2u
+      huTime hu hdu huCont hrealize hsourceHolder hsourceNorm
+      (by simpa only [J] using huHolder) hdtimeUHolder hduHolder hd2uHolder
+      huNorm hdtimeUNorm hduNorm hd2uNorm
 
 theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_of_metricFamilySmoothOn
     {D : RealTimeInterval}
