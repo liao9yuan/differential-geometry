@@ -757,6 +757,18 @@ def bufferedParabolicC2HolderGaugeWithLowerJetsConst
     (C delta : NNReal) : NNReal :=
   8 * C + 2 * C / delta
 
+def bufferedParabolicC2HolderGaugeWithLowerJetsFactor
+    (delta : NNReal) : NNReal :=
+  8 + 2 / delta
+
+theorem bufferedParabolicC2HolderGaugeWithLowerJetsConst_eq_factor_mul
+    (C delta : NNReal) :
+    bufferedParabolicC2HolderGaugeWithLowerJetsConst C delta =
+      bufferedParabolicC2HolderGaugeWithLowerJetsFactor delta * C := by
+  unfold bufferedParabolicC2HolderGaugeWithLowerJetsConst
+  unfold bufferedParabolicC2HolderGaugeWithLowerJetsFactor
+  field_simp
+
 theorem norm_parabolicSpatialJet_one_time_sub_le_of_mem_buffered_ball
     {J : Set Real} (hJ : Convex Real J)
     (center : V) {r R : Real} (delta : NNReal)
@@ -1174,6 +1186,64 @@ theorem eParabolicC2HolderGaugeWithLowerJetsOn_le_of_nested_balls
   exact eParabolicC2HolderGaugeWithLowerJetsOn_le_of_buffered_ball
     hJ center (Real.toNNReal (R - r)) hdelta hbuffer
     halpha hu hgauge
+
+theorem eParabolicC2HolderGaugeWithLowerJetsOn_le_mul_of_nested_balls
+    {J : Set Real} (hJ : Convex Real J)
+    (center : V) {r R : Real} (hrR : r < R)
+    {alpha : NNReal} (halpha : alpha ≤ 1)
+    {u : Real → V → F}
+    (hu : IsParabolicC2On
+      (parabolicCylinder J (Metric.ball center R)) u) :
+    eParabolicC2HolderGaugeWithLowerJetsOn alpha
+        (parabolicCylinder J (Metric.closedBall center r)) u ≤
+      bufferedParabolicC2HolderGaugeWithLowerJetsFactor
+        (Real.toNNReal (R - r)) *
+          eParabolicC2HolderGaugeOn alpha
+            (parabolicCylinder J (Metric.ball center R)) u := by
+  let sourceGauge := eParabolicC2HolderGaugeOn alpha
+    (parabolicCylinder J (Metric.ball center R)) u
+  let delta := Real.toNNReal (R - r)
+  change eParabolicC2HolderGaugeWithLowerJetsOn alpha
+      (parabolicCylinder J (Metric.closedBall center r)) u ≤
+    (bufferedParabolicC2HolderGaugeWithLowerJetsFactor delta : ENNReal) *
+      sourceGauge
+  have hdelta : 0 < delta :=
+    Real.toNNReal_pos.mpr (sub_pos.mpr hrR)
+  by_cases htop : sourceGauge = ⊤
+  · have hfactorPos :
+        0 < bufferedParabolicC2HolderGaugeWithLowerJetsFactor delta := by
+      unfold bufferedParabolicC2HolderGaugeWithLowerJetsFactor
+      positivity
+    have hfactorNe :
+        (bufferedParabolicC2HolderGaugeWithLowerJetsFactor delta :
+          ENNReal) ≠ 0 := by
+      exact_mod_cast hfactorPos.ne'
+    rw [htop, ENNReal.mul_top hfactorNe]
+    exact le_top
+  · let C : NNReal := sourceGauge.toNNReal
+    have hsourceEq : (C : ENNReal) = sourceGauge :=
+      ENNReal.coe_toNNReal htop
+    have hsource : eParabolicC2HolderGaugeOn alpha
+        (parabolicCylinder J (Metric.ball center R)) u ≤ C := by
+      rw [hsourceEq]
+    have hraw :=
+      eParabolicC2HolderGaugeWithLowerJetsOn_le_of_nested_balls
+        hJ center hrR halpha hu hsource
+    have hfactor :
+        (bufferedParabolicC2HolderGaugeWithLowerJetsConst C delta :
+          ENNReal) =
+        (bufferedParabolicC2HolderGaugeWithLowerJetsFactor delta :
+          ENNReal) * C := by
+      exact_mod_cast
+        bufferedParabolicC2HolderGaugeWithLowerJetsConst_eq_factor_mul
+          C delta
+    calc
+      eParabolicC2HolderGaugeWithLowerJetsOn alpha
+          (parabolicCylinder J (Metric.closedBall center r)) u ≤
+        (bufferedParabolicC2HolderGaugeWithLowerJetsFactor delta :
+          ENNReal) * C := hraw.trans_eq hfactor
+      _ = bufferedParabolicC2HolderGaugeWithLowerJetsFactor delta *
+          sourceGauge := by rw [hsourceEq]
 
 theorem norm_parabolicSpatialJet_one_time_sub_le
     {alpha C : NNReal} {u : Real → V → F}
