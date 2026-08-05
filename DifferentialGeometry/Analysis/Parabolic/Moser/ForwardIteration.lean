@@ -44,6 +44,103 @@ def forwardMoserStepCoefficient (q a t₁ t₂ K : ℝ) : ℝ :=
   (t₁ - a + 1) * max 1 (q / (2 * (1 - q))) *
       (timeCutoffDerivConstant / (t₂ - t₁) + (2 * q / (1 - q)) * K) + K
 
+def forwardMoserStepCoefficientEnvelope (q a b T K : ℝ) : ℝ :=
+  (b - a + 1) * max 1 (q / (2 * (1 - q))) *
+      (timeCutoffDerivConstant * T + (2 * q / (1 - q)) * K) + K
+
+theorem div_one_sub_mono
+    {p q : ℝ} (hpq : p ≤ q) (hq : q < 1) :
+    p / (1 - p) ≤ q / (1 - q) := by
+  rw [div_le_div_iff₀ (sub_pos.mpr (hpq.trans_lt hq)) (sub_pos.mpr hq)]
+  nlinarith
+
+theorem forwardMoserStepCoefficient_le_envelope_mul_pow
+    {q qbar a t₁ t₂ b T K Kbar : ℝ} (k : ℕ)
+    (hq : 0 ≤ q) (hqqbar : q ≤ qbar) (hqbar_one : qbar < 1)
+    (hat₁ : a ≤ t₁) (ht₁b : t₁ ≤ b) (ht₁t₂ : t₁ < t₂)
+    (hK : 0 ≤ K)
+    (htime : (t₂ - t₁)⁻¹ ≤ T * 16 ^ k)
+    (hgradient : K ≤ Kbar * 16 ^ k) :
+    forwardMoserStepCoefficient q a t₁ t₂ K ≤
+      forwardMoserStepCoefficientEnvelope qbar a b T Kbar * 16 ^ k := by
+  have hqbar : 0 ≤ qbar := hq.trans hqqbar
+  have hq_one : q < 1 := hqqbar.trans_lt hqbar_one
+  have hratio : q / (1 - q) ≤ qbar / (1 - qbar) :=
+    div_one_sub_mono hqqbar hqbar_one
+  have hratio_nonneg : 0 ≤ q / (1 - q) :=
+    div_nonneg hq (sub_pos.mpr hq_one).le
+  have hratio_bar_nonneg : 0 ≤ qbar / (1 - qbar) :=
+    div_nonneg hqbar (sub_pos.mpr hqbar_one).le
+  have hsmallRatio : q / (2 * (1 - q)) ≤ qbar / (2 * (1 - qbar)) := by
+    rw [div_le_div_iff₀
+      (mul_pos (by norm_num) (sub_pos.mpr hq_one))
+      (mul_pos (by norm_num) (sub_pos.mpr hqbar_one))]
+    nlinarith
+  have hmax : max 1 (q / (2 * (1 - q))) ≤
+      max 1 (qbar / (2 * (1 - qbar))) := max_le_max_left 1 hsmallRatio
+  have hpow_nonneg : 0 ≤ (16 : ℝ) ^ k := pow_nonneg (by norm_num) k
+  have htime_nonneg : 0 ≤ timeCutoffDerivConstant / (t₂ - t₁) :=
+    div_nonneg timeCutoffDerivConstant_nonneg (sub_pos.mpr ht₁t₂).le
+  have htime_bound : timeCutoffDerivConstant / (t₂ - t₁) ≤
+      (timeCutoffDerivConstant * T) * 16 ^ k := by
+    calc
+      timeCutoffDerivConstant / (t₂ - t₁) =
+          timeCutoffDerivConstant * (t₂ - t₁)⁻¹ := div_eq_mul_inv _ _
+      _ ≤ timeCutoffDerivConstant * (T * 16 ^ k) :=
+        mul_le_mul_of_nonneg_left htime timeCutoffDerivConstant_nonneg
+      _ = (timeCutoffDerivConstant * T) * 16 ^ k := by ring
+  have hlargeRatio : 2 * q / (1 - q) ≤ 2 * qbar / (1 - qbar) := by
+    calc
+      2 * q / (1 - q) = 2 * (q / (1 - q)) := by ring
+      _ ≤ 2 * (qbar / (1 - qbar)) := by gcongr
+      _ = 2 * qbar / (1 - qbar) := by ring
+  have hlargeRatio_nonneg : 0 ≤ 2 * q / (1 - q) := by
+    simpa only [mul_div_assoc] using mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hratio_nonneg
+  have hlargeRatio_bar_nonneg : 0 ≤ 2 * qbar / (1 - qbar) := by
+    simpa only [mul_div_assoc] using
+      mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hratio_bar_nonneg
+  have hgradient_bound : (2 * q / (1 - q)) * K ≤
+      ((2 * qbar / (1 - qbar)) * Kbar) * 16 ^ k := by
+    calc
+      (2 * q / (1 - q)) * K ≤ (2 * qbar / (1 - qbar)) * K :=
+        mul_le_mul_of_nonneg_right hlargeRatio hK
+      _ ≤ (2 * qbar / (1 - qbar)) * (Kbar * 16 ^ k) :=
+        mul_le_mul_of_nonneg_left hgradient hlargeRatio_bar_nonneg
+      _ = ((2 * qbar / (1 - qbar)) * Kbar) * 16 ^ k := by ring
+  have hinside_nonneg : 0 ≤
+      timeCutoffDerivConstant / (t₂ - t₁) + (2 * q / (1 - q)) * K :=
+    add_nonneg htime_nonneg (mul_nonneg hlargeRatio_nonneg hK)
+  have hinside :
+      timeCutoffDerivConstant / (t₂ - t₁) + (2 * q / (1 - q)) * K ≤
+        (timeCutoffDerivConstant * T +
+          (2 * qbar / (1 - qbar)) * Kbar) * 16 ^ k := by
+    calc
+      _ ≤ (timeCutoffDerivConstant * T) * 16 ^ k +
+          ((2 * qbar / (1 - qbar)) * Kbar) * 16 ^ k :=
+        add_le_add htime_bound hgradient_bound
+      _ = _ := by ring
+  have houter :
+      (t₁ - a + 1) * max 1 (q / (2 * (1 - q))) ≤
+        (b - a + 1) * max 1 (qbar / (2 * (1 - qbar))) := by
+    exact mul_le_mul (by linarith) hmax
+      (zero_le_one.trans (le_max_left _ _)) (by linarith)
+  have houter_bar_nonneg : 0 ≤
+      (b - a + 1) * max 1 (qbar / (2 * (1 - qbar))) :=
+    mul_nonneg (by linarith) (zero_le_one.trans (le_max_left _ _))
+  unfold forwardMoserStepCoefficient forwardMoserStepCoefficientEnvelope
+  calc
+    (t₁ - a + 1) * max 1 (q / (2 * (1 - q))) *
+          (timeCutoffDerivConstant / (t₂ - t₁) + (2 * q / (1 - q)) * K) + K ≤
+        ((b - a + 1) * max 1 (qbar / (2 * (1 - qbar)))) *
+          ((timeCutoffDerivConstant * T +
+            (2 * qbar / (1 - qbar)) * Kbar) * 16 ^ k) +
+          Kbar * 16 ^ k := by
+      exact add_le_add
+        (mul_le_mul houter hinside hinside_nonneg houter_bar_nonneg) hgradient
+    _ = ((b - a + 1) * max 1 (qbar / (2 * (1 - qbar))) *
+          (timeCutoffDerivConstant * T +
+            (2 * qbar / (1 - qbar)) * Kbar) + Kbar) * 16 ^ k := by ring
+
 def forwardMoserStepFactor
     (n : ℕ) (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
