@@ -384,6 +384,245 @@ theorem parabolicMatrixCutoffCommutator_holderWith_restrict
   · simp only [parabolicMatrixCutoffCommutatorHolderConst, C, D, two_mul,
       add_assoc]
 
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicMatrixCutoffCommutator_holderWith_restrict_of_eq_zero_outside
+    {Q U : Set (ParabolicPoint (Euc n))}
+    {alpha Kdchi Kdu Kd2chi Ku : NNReal}
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (dchi : ParabolicPoint (Euc n) → Euc n →L[Real] Real)
+    (d2chi : ParabolicPoint (Euc n) →
+      Euc n →L[Real] Euc n →L[Real] Real)
+    (u : Real → Euc n → F)
+    (du : ParabolicPoint (Euc n) → Euc n →L[Real] F)
+    (A Ka : n → n → NNReal) (Mdchi Mdu Md2chi Mu : NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha (Q.restrict (a i j)))
+    (hdchi : HolderWith Kdchi alpha (Q.restrict dchi))
+    (hdu : HolderWith Kdu alpha ((Q ∩ U).restrict du))
+    (hd2chi : HolderWith Kd2chi alpha (Q.restrict d2chi))
+    (hu : HolderWith Ku alpha
+      ((Q ∩ U).restrict (fun p ↦ u p.time p.space)))
+    (haNorm : ∀ i j p, p ∈ Q → ‖a i j p‖ ≤ A i j)
+    (hdchiNorm : ∀ p, p ∈ Q → ‖dchi p‖ ≤ Mdchi)
+    (hduNorm : ∀ p, p ∈ Q → p ∈ U → ‖du p‖ ≤ Mdu)
+    (hd2chiNorm : ∀ p, p ∈ Q → ‖d2chi p‖ ≤ Md2chi)
+    (huNorm : ∀ p, p ∈ Q → p ∈ U → ‖u p.time p.space‖ ≤ Mu)
+    (hdchiZero : ∀ p, p ∈ Q → p ∉ U → dchi p = 0)
+    (hd2chiZero : ∀ p, p ∈ Q → p ∉ U → d2chi p = 0) :
+    HolderWith (parabolicMatrixCutoffCommutatorHolderConst A Ka
+      Kdchi Kdu Kd2chi Ku Mdchi Mdu Md2chi Mu) alpha
+      (Q.restrict (parabolicMatrixCutoffCommutator a dchi d2chi u du)) := by
+  classical
+  let C : n → n → NNReal := fun i j ↦
+    (A i j * Mdchi) * Kdu +
+      Mdu * (A i j * Kdchi + Mdchi * Ka i j)
+  let D : n → n → NNReal := fun i j ↦
+    (A i j * Md2chi) * Ku +
+      Mu * (A i j * Kd2chi + Md2chi * Ka i j)
+  have hcomponent : ∀ i j, HolderWith (C i j + C i j + D i j) alpha
+      (Q.restrict (fun p ↦
+        (a i j p * dchi p (EuclideanSpace.basisFun n Real i)) •
+            du p (EuclideanSpace.basisFun n Real j) +
+          (a i j p * dchi p (EuclideanSpace.basisFun n Real j)) •
+            du p (EuclideanSpace.basisFun n Real i) +
+          (a i j p * d2chi p (EuclideanSpace.basisFun n Real i)
+            (EuclideanSpace.basisFun n Real j)) • u p.time p.space)) := by
+    intro i j
+    have hdchii : HolderWith Kdchi alpha
+        (Q.restrict (fun p ↦ dchi p (EuclideanSpace.basisFun n Real i))) := by
+      simpa only [Set.restrict_apply] using
+        holderWith_comp_continuousLinearMap_of_norm_le_one
+          (ContinuousLinearMap.apply Real Real
+            (EuclideanSpace.basisFun n Real i))
+          (norm_apply_euclideanBasis_le_one i) hdchi
+    have hdchij : HolderWith Kdchi alpha
+        (Q.restrict (fun p ↦ dchi p (EuclideanSpace.basisFun n Real j))) := by
+      simpa only [Set.restrict_apply] using
+        holderWith_comp_continuousLinearMap_of_norm_le_one
+          (ContinuousLinearMap.apply Real Real
+            (EuclideanSpace.basisFun n Real j))
+          (norm_apply_euclideanBasis_le_one j) hdchi
+    have hdui : HolderWith Kdu alpha
+        ((Q ∩ U).restrict
+          (fun p ↦ du p (EuclideanSpace.basisFun n Real i))) := by
+      simpa only [Set.restrict_apply] using
+        holderWith_comp_continuousLinearMap_of_norm_le_one
+          (ContinuousLinearMap.apply Real F
+            (EuclideanSpace.basisFun n Real i))
+          (norm_apply_euclideanBasis_le_one i) hdu
+    have hduj : HolderWith Kdu alpha
+        ((Q ∩ U).restrict
+          (fun p ↦ du p (EuclideanSpace.basisFun n Real j))) := by
+      simpa only [Set.restrict_apply] using
+        holderWith_comp_continuousLinearMap_of_norm_le_one
+          (ContinuousLinearMap.apply Real F
+            (EuclideanSpace.basisFun n Real j))
+          (norm_apply_euclideanBasis_le_one j) hdu
+    have hd2chii : HolderWith Kd2chi alpha
+        (Q.restrict
+          (fun p ↦ d2chi p (EuclideanSpace.basisFun n Real i))) := by
+      simpa only [Set.restrict_apply] using
+        holderWith_comp_continuousLinearMap_of_norm_le_one
+          (ContinuousLinearMap.apply Real (Euc n →L[Real] Real)
+            (EuclideanSpace.basisFun n Real i))
+          (norm_apply_euclideanBasis_le_one i) hd2chi
+    have hd2chiij : HolderWith Kd2chi alpha
+        (Q.restrict (fun p ↦ d2chi p (EuclideanSpace.basisFun n Real i)
+          (EuclideanSpace.basisFun n Real j))) := by
+      simpa only [Set.restrict_apply] using
+        holderWith_comp_continuousLinearMap_of_norm_le_one
+          (ContinuousLinearMap.apply Real Real
+            (EuclideanSpace.basisFun n Real j))
+          (norm_apply_euclideanBasis_le_one j) hd2chii
+    have hadchii : HolderWith
+        (A i j * Kdchi + Mdchi * Ka i j) alpha
+        (Q.restrict (fun p ↦ a i j p *
+          dchi p (EuclideanSpace.basisFun n Real i))) := by
+      simpa only [smul_eq_mul, Set.restrict_apply] using
+        holderWith_smul_of_norm_le (ha i j) hdchii
+          (fun p ↦ haNorm i j p.1 p.2)
+          (fun p ↦ (by
+            exact (dchi p.1).le_opNorm _ |>.trans (by
+              simpa only
+                [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one i,
+                  mul_one] using hdchiNorm p.1 p.2)))
+    have hadchij : HolderWith
+        (A i j * Kdchi + Mdchi * Ka i j) alpha
+        (Q.restrict (fun p ↦ a i j p *
+          dchi p (EuclideanSpace.basisFun n Real j))) := by
+      simpa only [smul_eq_mul, Set.restrict_apply] using
+        holderWith_smul_of_norm_le (ha i j) hdchij
+          (fun p ↦ haNorm i j p.1 p.2)
+          (fun p ↦ (by
+            exact (dchi p.1).le_opNorm _ |>.trans (by
+              simpa only
+                [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one j,
+                  mul_one] using hdchiNorm p.1 p.2)))
+    have had2chi : HolderWith
+        (A i j * Kd2chi + Md2chi * Ka i j) alpha
+        (Q.restrict (fun p ↦ a i j p *
+          d2chi p (EuclideanSpace.basisFun n Real i)
+            (EuclideanSpace.basisFun n Real j))) := by
+      simpa only [smul_eq_mul, Set.restrict_apply] using
+        holderWith_smul_of_norm_le (ha i j) hd2chiij
+          (fun p ↦ haNorm i j p.1 p.2)
+          (fun p ↦ (by
+            calc
+              ‖d2chi p.1 (EuclideanSpace.basisFun n Real i)
+                  (EuclideanSpace.basisFun n Real j)‖ ≤
+                  ‖d2chi p.1 (EuclideanSpace.basisFun n Real i)‖ := by
+                simpa only
+                  [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one j,
+                    mul_one] using
+                  (d2chi p.1 (EuclideanSpace.basisFun n Real i)).le_opNorm
+                    (EuclideanSpace.basisFun n Real j)
+              _ ≤ ‖d2chi p.1‖ := by
+                simpa only
+                  [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one i,
+                    mul_one] using
+                  (d2chi p.1).le_opNorm (EuclideanSpace.basisFun n Real i)
+              _ ≤ Md2chi := hd2chiNorm p.1 p.2))
+    have hadchiNorm : ∀ k p, p ∈ Q → p ∈ U →
+        ‖a i j p * dchi p (EuclideanSpace.basisFun n Real k)‖ ≤
+          A i j * Mdchi := by
+      intro k p hp _hpU
+      rw [Real.norm_eq_abs, abs_mul]
+      exact_mod_cast mul_le_mul
+        (by simpa only [Real.norm_eq_abs] using haNorm i j p hp)
+        ((dchi p).le_opNorm _ |>.trans (by
+          simpa only
+            [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one k,
+              mul_one] using hdchiNorm p hp))
+        (abs_nonneg _) (A i j).coe_nonneg
+    have had2chiNorm : ∀ p, p ∈ Q → p ∈ U →
+        ‖a i j p * d2chi p (EuclideanSpace.basisFun n Real i)
+          (EuclideanSpace.basisFun n Real j)‖ ≤ A i j * Md2chi := by
+      intro p hp _hpU
+      rw [Real.norm_eq_abs, abs_mul]
+      exact_mod_cast mul_le_mul
+        (by simpa only [Real.norm_eq_abs] using haNorm i j p hp)
+        (by
+          calc
+            ‖d2chi p (EuclideanSpace.basisFun n Real i)
+                (EuclideanSpace.basisFun n Real j)‖ ≤
+                ‖d2chi p (EuclideanSpace.basisFun n Real i)‖ := by
+              simpa only
+                [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one j,
+                  mul_one] using
+                (d2chi p (EuclideanSpace.basisFun n Real i)).le_opNorm
+                  (EuclideanSpace.basisFun n Real j)
+            _ ≤ ‖d2chi p‖ := by
+              simpa only
+                [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one i,
+                  mul_one] using
+                (d2chi p).le_opNorm (EuclideanSpace.basisFun n Real i)
+            _ ≤ Md2chi := hd2chiNorm p hp)
+        (abs_nonneg _) (A i j).coe_nonneg
+    have hduNormEval : ∀ k p, p ∈ Q → p ∈ U →
+        ‖du p (EuclideanSpace.basisFun n Real k)‖ ≤ Mdu := by
+      intro k p hp hpU
+      exact (du p).le_opNorm _ |>.trans (by
+        simpa only
+          [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one k,
+            mul_one] using hduNorm p hp hpU)
+    have hadchiZero : ∀ k p, p ∈ Q → p ∉ U →
+        a i j p * dchi p (EuclideanSpace.basisFun n Real k) = 0 := by
+      intro k p hp hpU
+      rw [hdchiZero p hp hpU, ContinuousLinearMap.zero_apply, mul_zero]
+    have had2chiZero : ∀ p, p ∈ Q → p ∉ U →
+        a i j p * d2chi p (EuclideanSpace.basisFun n Real i)
+          (EuclideanSpace.basisFun n Real j) = 0 := by
+      intro p hp hpU
+      rw [hd2chiZero p hp hpU, ContinuousLinearMap.zero_apply,
+        ContinuousLinearMap.zero_apply, mul_zero]
+    have hcrossi : HolderWith (C i j) alpha
+        (Q.restrict (fun p ↦
+          (a i j p * dchi p (EuclideanSpace.basisFun n Real i)) •
+            du p (EuclideanSpace.basisFun n Real j))) := by
+      exact holderWith_smul_of_eq_zero_outside
+        (fun p ↦ a i j p * dchi p (EuclideanSpace.basisFun n Real i))
+        (fun p ↦ du p (EuclideanSpace.basisFun n Real j))
+        hadchii hduj (hadchiNorm i) (hduNormEval j) (hadchiZero i)
+    have hcrossj : HolderWith (C i j) alpha
+        (Q.restrict (fun p ↦
+          (a i j p * dchi p (EuclideanSpace.basisFun n Real j)) •
+            du p (EuclideanSpace.basisFun n Real i))) := by
+      exact holderWith_smul_of_eq_zero_outside
+        (fun p ↦ a i j p * dchi p (EuclideanSpace.basisFun n Real j))
+        (fun p ↦ du p (EuclideanSpace.basisFun n Real i))
+        hadchij hdui (hadchiNorm j) (hduNormEval i) (hadchiZero j)
+    have hhessian : HolderWith (D i j) alpha
+        (Q.restrict (fun p ↦
+          (a i j p * d2chi p (EuclideanSpace.basisFun n Real i)
+            (EuclideanSpace.basisFun n Real j)) • u p.time p.space)) := by
+      exact holderWith_smul_of_eq_zero_outside
+        (fun p ↦ a i j p * d2chi p (EuclideanSpace.basisFun n Real i)
+          (EuclideanSpace.basisFun n Real j))
+        (fun p ↦ u p.time p.space) had2chi hu had2chiNorm huNorm had2chiZero
+    exact hcrossi.add hcrossj |>.add hhessian
+  have hinner : ∀ i, HolderWith (∑ j, (C i j + C i j + D i j)) alpha
+      (Q.restrict (fun p ↦ ∑ j,
+        ((a i j p * dchi p (EuclideanSpace.basisFun n Real i)) •
+            du p (EuclideanSpace.basisFun n Real j) +
+          (a i j p * dchi p (EuclideanSpace.basisFun n Real j)) •
+            du p (EuclideanSpace.basisFun n Real i) +
+          (a i j p * d2chi p (EuclideanSpace.basisFun n Real i)
+            (EuclideanSpace.basisFun n Real j)) • u p.time p.space))) := by
+    intro i
+    exact holderWith_finset_sum Finset.univ (fun j _hj ↦ hcomponent i j)
+  have hall := holderWith_finset_sum Finset.univ
+    (K := fun i ↦ ∑ j, (C i j + C i j + D i j))
+    (f := fun i (p : Q) ↦ ∑ j,
+      ((a i j p.1 * dchi p.1 (EuclideanSpace.basisFun n Real i)) •
+          du p.1 (EuclideanSpace.basisFun n Real j) +
+        (a i j p.1 * dchi p.1 (EuclideanSpace.basisFun n Real j)) •
+          du p.1 (EuclideanSpace.basisFun n Real i) +
+        (a i j p.1 * d2chi p.1 (EuclideanSpace.basisFun n Real i)
+          (EuclideanSpace.basisFun n Real j)) • u p.1.time p.1.space))
+    (fun i _hi ↦ hinner i)
+  convert hall using 1
+  · simp only [parabolicMatrixCutoffCommutatorHolderConst, C, D, two_mul,
+      add_assoc]
+
 def parabolicCutoffOperatorCommutatorSupConst
     (A : n → n → NNReal) (MdtimeChi Mdchi Mdu Md2chi Mu : NNReal) :
     NNReal :=
@@ -512,6 +751,111 @@ theorem parabolicCutoffOperatorCommutator_holderWith_restrict
   change HolderWith _ alpha (fun p : Q ↦
     dtimeChi p.1 • u p.1.time p.1.space -
       parabolicMatrixCutoffCommutator a dchi d2chi u du p.1)
+  simpa only [sub_eq_add_neg, add_assoc] using hsum
+
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicCutoffOperatorCommutator_le_of_eq_zero_outside
+    {Q U : Set (ParabolicPoint (Euc n))}
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (dtimeChi : ParabolicPoint (Euc n) → Real)
+    (dchi : ParabolicPoint (Euc n) → Euc n →L[Real] Real)
+    (d2chi : ParabolicPoint (Euc n) →
+      Euc n →L[Real] Euc n →L[Real] Real)
+    (u : Real → Euc n → F)
+    (du : ParabolicPoint (Euc n) → Euc n →L[Real] F)
+    (A : n → n → NNReal) (MdtimeChi Mdchi Mdu Md2chi Mu : NNReal)
+    (haNorm : ∀ i j p, p ∈ Q → ‖a i j p‖ ≤ A i j)
+    (hdtimeChiNorm : ∀ p, p ∈ Q → ‖dtimeChi p‖ ≤ MdtimeChi)
+    (hdchiNorm : ∀ p, p ∈ Q → ‖dchi p‖ ≤ Mdchi)
+    (hduNorm : ∀ p, p ∈ Q → p ∈ U → ‖du p‖ ≤ Mdu)
+    (hd2chiNorm : ∀ p, p ∈ Q → ‖d2chi p‖ ≤ Md2chi)
+    (huNorm : ∀ p, p ∈ Q → p ∈ U → ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeChiZero : ∀ p, p ∈ Q → p ∉ U → dtimeChi p = 0)
+    (hdchiZero : ∀ p, p ∈ Q → p ∉ U → dchi p = 0)
+    (hd2chiZero : ∀ p, p ∈ Q → p ∉ U → d2chi p = 0)
+    (p : ParabolicPoint (Euc n)) (hp : p ∈ Q) :
+    ‖parabolicCutoffOperatorCommutator
+      a dtimeChi dchi d2chi u du p‖ ≤
+        parabolicCutoffOperatorCommutatorSupConst
+          A MdtimeChi Mdchi Mdu Md2chi Mu := by
+  by_cases hpU : p ∈ U
+  · exact norm_parabolicCutoffOperatorCommutator_le
+      (Q := Q ∩ U) a dtimeChi dchi d2chi u du
+      A MdtimeChi Mdchi Mdu Md2chi Mu
+      (fun i j q hq ↦ haNorm i j q hq.1)
+      (fun q hq ↦ hdtimeChiNorm q hq.1)
+      (fun q hq ↦ hdchiNorm q hq.1)
+      (fun q hq ↦ hduNorm q hq.1 hq.2)
+      (fun q hq ↦ hd2chiNorm q hq.1)
+      (fun q hq ↦ huNorm q hq.1 hq.2) p ⟨hp, hpU⟩
+  · unfold parabolicCutoffOperatorCommutator
+    rw [hdtimeChiZero p hp hpU, zero_smul]
+    have hmatrix : parabolicMatrixCutoffCommutator a dchi d2chi u du p = 0 := by
+      unfold parabolicMatrixCutoffCommutator
+      rw [hdchiZero p hp hpU, hd2chiZero p hp hpU]
+      simp only [ContinuousLinearMap.zero_apply, mul_zero, zero_smul,
+        zero_add, Finset.sum_const_zero]
+    rw [hmatrix, sub_zero, norm_zero]
+    positivity
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicCutoffOperatorCommutator_holderWith_restrict_of_eq_zero_outside
+    {Q U : Set (ParabolicPoint (Euc n))}
+    {alpha KdtimeChi Kdchi Kdu Kd2chi Ku : NNReal}
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (dtimeChi : ParabolicPoint (Euc n) → Real)
+    (dchi : ParabolicPoint (Euc n) → Euc n →L[Real] Real)
+    (d2chi : ParabolicPoint (Euc n) →
+      Euc n →L[Real] Euc n →L[Real] Real)
+    (u : Real → Euc n → F)
+    (du : ParabolicPoint (Euc n) → Euc n →L[Real] F)
+    (A Ka : n → n → NNReal)
+    (MdtimeChi Mdchi Mdu Md2chi Mu : NNReal)
+    (ha : ∀ i j, HolderWith (Ka i j) alpha (Q.restrict (a i j)))
+    (hdtimeChi : HolderWith KdtimeChi alpha (Q.restrict dtimeChi))
+    (hdchi : HolderWith Kdchi alpha (Q.restrict dchi))
+    (hdu : HolderWith Kdu alpha ((Q ∩ U).restrict du))
+    (hd2chi : HolderWith Kd2chi alpha (Q.restrict d2chi))
+    (hu : HolderWith Ku alpha
+      ((Q ∩ U).restrict (fun p ↦ u p.time p.space)))
+    (haNorm : ∀ i j p, p ∈ Q → ‖a i j p‖ ≤ A i j)
+    (hdtimeChiNorm : ∀ p, p ∈ Q → ‖dtimeChi p‖ ≤ MdtimeChi)
+    (hdchiNorm : ∀ p, p ∈ Q → ‖dchi p‖ ≤ Mdchi)
+    (hduNorm : ∀ p, p ∈ Q → p ∈ U → ‖du p‖ ≤ Mdu)
+    (hd2chiNorm : ∀ p, p ∈ Q → ‖d2chi p‖ ≤ Md2chi)
+    (huNorm : ∀ p, p ∈ Q → p ∈ U → ‖u p.time p.space‖ ≤ Mu)
+    (hdtimeChiZero : ∀ p, p ∈ Q → p ∉ U → dtimeChi p = 0)
+    (hdchiZero : ∀ p, p ∈ Q → p ∉ U → dchi p = 0)
+    (hd2chiZero : ∀ p, p ∈ Q → p ∉ U → d2chi p = 0) :
+    HolderWith (parabolicCutoffOperatorCommutatorHolderConst A Ka
+      KdtimeChi Kdchi Kdu Kd2chi Ku MdtimeChi Mdchi Mdu Md2chi Mu) alpha
+      (Q.restrict
+        (parabolicCutoffOperatorCommutator a dtimeChi dchi d2chi u du)) := by
+  have htime : HolderWith (MdtimeChi * Ku + Mu * KdtimeChi) alpha
+      (Q.restrict (fun p ↦ dtimeChi p • u p.time p.space)) :=
+    holderWith_smul_of_eq_zero_outside dtimeChi
+      (fun p ↦ u p.time p.space) hdtimeChi hu
+        (fun p hp _hpU ↦ hdtimeChiNorm p hp) huNorm hdtimeChiZero
+  have hmatrix :=
+    parabolicMatrixCutoffCommutator_holderWith_restrict_of_eq_zero_outside
+      a dchi d2chi u du A Ka Mdchi Mdu Md2chi Mu ha hdchi hdu hd2chi hu
+      haNorm hdchiNorm hduNorm hd2chiNorm huNorm hdchiZero hd2chiZero
+  have hmatrixNeg : HolderWith
+      (parabolicMatrixCutoffCommutatorHolderConst A Ka
+        Kdchi Kdu Kd2chi Ku Mdchi Mdu Md2chi Mu) alpha
+      (Q.restrict (fun p ↦ -parabolicMatrixCutoffCommutator
+        a dchi d2chi u du p)) := by
+    intro p q
+    simpa only [Set.restrict_apply, edist_neg_neg] using hmatrix p q
+  have hsum := htime.add hmatrixNeg
+  change HolderWith _ alpha (Q.restrict (fun p ↦
+    dtimeChi p • u p.time p.space +
+      -parabolicMatrixCutoffCommutator a dchi d2chi u du p)) at hsum
+  unfold parabolicCutoffOperatorCommutatorHolderConst
+    parabolicCutoffOperatorCommutator
+  change HolderWith _ alpha (Q.restrict (fun p ↦
+    dtimeChi p • u p.time p.space -
+      parabolicMatrixCutoffCommutator a dchi d2chi u du p))
   simpa only [sub_eq_add_neg, add_assoc] using hsum
 
 def parabolicDriftCutoffCommutatorSupConst
