@@ -12,16 +12,16 @@ open Filter Function Set
 
 section UnionRealization
 
-variable {Y : Type v} [TopologicalSpace Y] {n : ℕ}
+variable {Y : Type v} [TopologicalSpace Y] {A : Type*} {B : Type*} [TopologicalSpace B]
 
-def adjunctionUnionMap (X₀ : Set Y) (c : ClosedCell n → Y) :
-    ClosedCell n ⊕ X₀ → {y : Y // y ∈ X₀ ∪ Set.range c} :=
+def adjunctionUnionMap (X₀ : Set Y) (c : B → Y) :
+    B ⊕ X₀ → {y : Y // y ∈ X₀ ∪ Set.range c} :=
   Sum.elim (fun d => ⟨c d, Or.inr ⟨d, rfl⟩⟩) (fun x => ⟨x, Or.inl x.2⟩)
 
-omit [TopologicalSpace Y] in
-theorem adjunctionUnionMap_rel {X₀ : Set Y} (c : ClosedCell n → Y) {φ : CellBoundary n → X₀}
-    (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b)) :
-    ∀ a b : ClosedCell n ⊕ X₀, adjunctionRel n φ a b →
+omit [TopologicalSpace Y] [TopologicalSpace B] in
+theorem adjunctionUnionMap_rel {X₀ : Set Y} (i : A → B) (c : B → Y) {φ : A → X₀}
+    (hφ : ∀ a, (φ a : Y) = c (i a)) :
+    ∀ a b : B ⊕ X₀, adjunctionRel i φ a b →
       adjunctionUnionMap X₀ c a = adjunctionUnionMap X₀ c b := by
   intro a b h
   rcases h with ⟨x, hx | hx⟩
@@ -36,79 +36,69 @@ theorem adjunctionUnionMap_rel {X₀ : Set Y} (c : ClosedCell n → Y) {φ : Cel
     apply Subtype.ext
     exact hφ x
 
-def adjunctionRealization (X₀ : Set Y) (c : ClosedCell n → Y) (φ : CellBoundary n → X₀)
-    (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b)) :
-    AdjunctionSpace n φ → {y : Y // y ∈ X₀ ∪ Set.range c} :=
-  Quot.lift (adjunctionUnionMap X₀ c) (adjunctionUnionMap_rel c hφ)
+def adjunctionRealization (X₀ : Set Y) (i : A → B) (c : B → Y) (φ : A → X₀)
+    (hφ : ∀ a, (φ a : Y) = c (i a)) :
+    AdjunctionSpace i φ → {y : Y // y ∈ X₀ ∪ Set.range c} :=
+  Quot.lift (adjunctionUnionMap X₀ c) (adjunctionUnionMap_rel i c hφ)
 
-theorem continuous_adjunctionUnionMap {X₀ : Set Y} (c : ClosedCell n → Y) (hc : Continuous c) :
+theorem continuous_adjunctionUnionMap {X₀ : Set Y} (c : B → Y) (hc : Continuous c) :
     Continuous (adjunctionUnionMap X₀ c) := by
   dsimp [adjunctionUnionMap]
   exact Continuous.sumElim (hc.codRestrict (fun d => Or.inr ⟨d, rfl⟩))
     (continuous_subtype_val.codRestrict (fun x : X₀ => Or.inl x.2))
 
-theorem continuous_adjunctionRealization {X₀ : Set Y} (c : ClosedCell n → Y)
-    (φ : CellBoundary n → X₀)
-    (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b)) (hc : Continuous c) :
-    Continuous (adjunctionRealization X₀ c φ hφ) := by
+theorem continuous_adjunctionRealization {X₀ : Set Y} (i : A → B) (c : B → Y)
+    (φ : A → X₀)
+    (hφ : ∀ a, (φ a : Y) = c (i a)) (hc : Continuous c) :
+    Continuous (adjunctionRealization X₀ i c φ hφ) := by
   dsimp [adjunctionRealization]
-  exact continuous_quot_lift (adjunctionUnionMap_rel c hφ)
+  exact continuous_quot_lift (adjunctionUnionMap_rel i c hφ)
     (continuous_adjunctionUnionMap c hc)
 
-omit [TopologicalSpace Y] in
-theorem adjunctionRealization_surjective {X₀ : Set Y} (c : ClosedCell n → Y)
-    (φ : CellBoundary n → X₀)
-    (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b)) :
-    Function.Surjective (adjunctionRealization X₀ c φ hφ) := by
+omit [TopologicalSpace Y] [TopologicalSpace B] in
+theorem adjunctionRealization_surjective {X₀ : Set Y} (i : A → B) (c : B → Y)
+    (φ : A → X₀)
+    (hφ : ∀ a, (φ a : Y) = c (i a)) :
+    Function.Surjective (adjunctionRealization X₀ i c φ hφ) := by
   intro ⟨y, hy⟩
   rcases hy with hy₀ | ⟨d, hd⟩
-  · refine ⟨Quot.mk (adjunctionRel n φ) (Sum.inr ⟨y, hy₀⟩), ?_⟩
+  · refine ⟨Quot.mk (adjunctionRel i φ) (Sum.inr ⟨y, hy₀⟩), ?_⟩
     apply Subtype.ext
     rfl
-  · refine ⟨Quot.mk (adjunctionRel n φ) (Sum.inl d), ?_⟩
+  · refine ⟨Quot.mk (adjunctionRel i φ) (Sum.inl d), ?_⟩
     apply Subtype.ext
     exact hd
 
-omit [TopologicalSpace Y] in
-private theorem adjunctionRealization_inl_inr {X₀ : Set Y} (c : ClosedCell n → Y)
-    (φ : CellBoundary n → X₀)
-    (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b))
-    (hinterior : Disjoint (c '' Set.range (cellInteriorInclusion n)) X₀) {d : ClosedCell n}
+omit [TopologicalSpace Y] [TopologicalSpace B] in
+private theorem adjunctionRealization_inl_inr {X₀ : Set Y} (i : A → B) (c : B → Y) (φ : A → X₀)
+    (hφ : ∀ a, (φ a : Y) = c (i a))
+    (hboundary : ∀ d : B, c d ∈ X₀ → d ∈ Set.range i) {d : B}
     {x : X₀} (h : adjunctionUnionMap X₀ c (Sum.inl d) = adjunctionUnionMap X₀ c (Sum.inr x)) :
-    Quot.mk (adjunctionRel n φ) (Sum.inl d) = Quot.mk (adjunctionRel n φ) (Sum.inr x) := by
+    Quot.mk (adjunctionRel i φ) (Sum.inl d) = Quot.mk (adjunctionRel i φ) (Sum.inr x) := by
   have hcd : c d = (x : Y) := congrArg Subtype.val h
   have hx₀ : c d ∈ X₀ := by
     rw [hcd]
     exact x.2
-  have hnot : ¬ ‖(d : EuclideanSpace ℝ (Fin n))‖ < 1 := by
-    intro hlt
-    have hmem : c d ∈ c '' Set.range (cellInteriorInclusion n) :=
-      ⟨cellInteriorInclusion n (⟨d, hlt⟩ : CellInterior n),
-        ⟨⟨(⟨d, hlt⟩ : CellInterior n), rfl⟩, congrArg c (by ext; rfl)⟩⟩
-    exact (Set.disjoint_left.mp hinterior) hmem hx₀
-  have hEq : ‖(d : EuclideanSpace ℝ (Fin n))‖ = 1 := le_antisymm d.2 (le_of_not_gt hnot)
-  let b : CellBoundary n := ⟨d, hEq⟩
-  have hb : cellBoundaryInclusion n b = d := by
-    ext
-    rfl
+  rcases hboundary d hx₀ with ⟨a, ha⟩
   calc
-    Quot.mk (adjunctionRel n φ) (Sum.inl d) = Quot.mk (adjunctionRel n φ) (Sum.inr (φ b)) := by
-      rw [← hb]
-      exact Quot.sound ⟨b, Or.inl ⟨rfl, rfl⟩⟩
-    _ = Quot.mk (adjunctionRel n φ) (Sum.inr x) := by
-      apply congrArg (fun t : X₀ => Quot.mk (adjunctionRel n φ) (Sum.inr t))
+    Quot.mk (adjunctionRel i φ) (Sum.inl d) = Quot.mk (adjunctionRel i φ) (Sum.inl (i a)) := by
+      rw [← ha]
+    _ = Quot.mk (adjunctionRel i φ) (Sum.inr (φ a)) := by
+      exact Quot.sound ⟨a, Or.inl ⟨rfl, rfl⟩⟩
+    _ = Quot.mk (adjunctionRel i φ) (Sum.inr x) := by
+      apply congrArg (fun t : X₀ => Quot.mk (adjunctionRel i φ) (Sum.inr t))
       apply Subtype.ext
       calc
-        (φ b : Y) = c (cellBoundaryInclusion n b) := hφ b
-        _ = c d := by rw [hb]
+        (φ a : Y) = c (i a) := hφ a
+        _ = c d := by rw [ha]
         _ = (x : Y) := hcd
 
-omit [TopologicalSpace Y] in
-theorem adjunctionRealization_injective {X₀ : Set Y} (c : ClosedCell n → Y)
-    (φ : CellBoundary n → X₀)
-    (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b)) (hc : Function.Injective c)
-    (hinterior : Disjoint (c '' Set.range (cellInteriorInclusion n)) X₀) :
-    Function.Injective (adjunctionRealization X₀ c φ hφ) := by
+omit [TopologicalSpace Y] [TopologicalSpace B] in
+theorem adjunctionRealization_injective {X₀ : Set Y} (i : A → B) (c : B → Y)
+    (φ : A → X₀)
+    (hφ : ∀ a, (φ a : Y) = c (i a)) (hc : Function.Injective c)
+    (hboundary : ∀ d : B, c d ∈ X₀ → d ∈ Set.range i) :
+    Function.Injective (adjunctionRealization X₀ i c φ hφ) := by
   intro z z' hzz'
   rcases Quot.exists_rep z with ⟨a, rfl⟩
   rcases Quot.exists_rep z' with ⟨b, rfl⟩
@@ -117,16 +107,16 @@ theorem adjunctionRealization_injective {X₀ : Set Y} (c : ClosedCell n → Y)
   | inl d =>
       cases b with
       | inl d' =>
-          exact congrArg (fun d : ClosedCell n => Quot.mk (adjunctionRel n φ) (Sum.inl d))
+          exact congrArg (fun d : B => Quot.mk (adjunctionRel i φ) (Sum.inl d))
             (hc (congrArg Subtype.val hzz'))
       | inr x =>
-          exact adjunctionRealization_inl_inr c φ hφ hinterior hzz'
+          exact adjunctionRealization_inl_inr i c φ hφ hboundary hzz'
   | inr x =>
       cases b with
       | inl d =>
-          exact (adjunctionRealization_inl_inr c φ hφ hinterior hzz'.symm).symm
+          exact (adjunctionRealization_inl_inr i c φ hφ hboundary hzz'.symm).symm
       | inr x' =>
-          apply congrArg (fun t : X₀ => Quot.mk (adjunctionRel n φ) (Sum.inr t))
+          apply congrArg (fun t : X₀ => Quot.mk (adjunctionRel i φ) (Sum.inr t))
           ext
           simpa [adjunctionUnionMap] using congrArg Subtype.val hzz'
 
@@ -219,52 +209,52 @@ private theorem isClosed_union_of_isClosed_preimage {A B : Set Y} (hA : IsClosed
   exact (isClosed_image_of_isClosed_preimage_unionInclusionLeft hA hWA).union
     (isClosed_image_of_isClosed_preimage_unionInclusionRight hB hWB)
 
-omit [TopologicalSpace Y] in
-private theorem adjunctionRealization_leftPreimage_eq {X₀ : Set Y} (c : ClosedCell n → Y)
-    (φ : CellBoundary n → X₀) (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b))
-    (hc : Function.Injective c) (hinterior : Disjoint (c '' Set.range (cellInteriorInclusion n)) X₀)
-    {C : Set (AdjunctionSpace n φ)} :
-    unionInclusionLeft X₀ (Set.range c) ⁻¹' (adjunctionRealization X₀ c φ hφ '' C) =
-      Sum.inr ⁻¹' (adjunctionMk n φ ⁻¹' C) := by
+omit [TopologicalSpace Y] [TopologicalSpace B] in
+private theorem adjunctionRealization_leftPreimage_eq {X₀ : Set Y} (i : A → B) (c : B → Y)
+    (φ : A → X₀) (hφ : ∀ a, (φ a : Y) = c (i a)) (hc : Function.Injective c)
+    (hboundary : ∀ d : B, c d ∈ X₀ → d ∈ Set.range i)
+    {C : Set (AdjunctionSpace i φ)} :
+    unionInclusionLeft X₀ (Set.range c) ⁻¹' (adjunctionRealization X₀ i c φ hφ '' C) =
+      Sum.inr ⁻¹' (adjunctionMk i φ ⁻¹' C) := by
   ext x
   constructor
   · intro hx
     rcases hx with ⟨z, hzC, hz⟩
-    have hinj := adjunctionRealization_injective c φ hφ hc hinterior
-    have hz' : z = Quot.mk (adjunctionRel n φ) (Sum.inr x) :=
+    have hinj := adjunctionRealization_injective i c φ hφ hc hboundary
+    have hz' : z = Quot.mk (adjunctionRel i φ) (Sum.inr x) :=
       hinj (by
         calc
-          adjunctionRealization X₀ c φ hφ z = ⟨x, Or.inl x.2⟩ := hz
-          _ = adjunctionRealization X₀ c φ hφ (Quot.mk (adjunctionRel n φ) (Sum.inr x)) := by
+          adjunctionRealization X₀ i c φ hφ z = ⟨x, Or.inl x.2⟩ := hz
+          _ = adjunctionRealization X₀ i c φ hφ (Quot.mk (adjunctionRel i φ) (Sum.inr x)) := by
             simp [adjunctionRealization, adjunctionUnionMap])
     rw [hz'] at hzC
     exact hzC
   · intro hx
-    refine ⟨Quot.mk (adjunctionRel n φ) (Sum.inr x), hx, ?_⟩
+    refine ⟨Quot.mk (adjunctionRel i φ) (Sum.inr x), hx, ?_⟩
     rfl
 
-omit [TopologicalSpace Y] in
-private theorem adjunctionRealization_rightPreimage_eq {X₀ : Set Y} (c : ClosedCell n → Y)
-    (φ : CellBoundary n → X₀) (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b))
-    (hc : Function.Injective c) (hinterior : Disjoint (c '' Set.range (cellInteriorInclusion n)) X₀)
-    {C : Set (AdjunctionSpace n φ)} :
-    unionInclusionRight X₀ (Set.range c) ⁻¹' (adjunctionRealization X₀ c φ hφ '' C) =
-      (fun d : ClosedCell n => ⟨c d, ⟨d, rfl⟩⟩) '' (Sum.inl ⁻¹' (adjunctionMk n φ ⁻¹' C)) := by
+omit [TopologicalSpace Y] [TopologicalSpace B] in
+private theorem adjunctionRealization_rightPreimage_eq {X₀ : Set Y} (i : A → B) (c : B → Y)
+    (φ : A → X₀) (hφ : ∀ a, (φ a : Y) = c (i a)) (hc : Function.Injective c)
+    (hboundary : ∀ d : B, c d ∈ X₀ → d ∈ Set.range i)
+    {C : Set (AdjunctionSpace i φ)} :
+    unionInclusionRight X₀ (Set.range c) ⁻¹' (adjunctionRealization X₀ i c φ hφ '' C) =
+      (fun d : B => ⟨c d, ⟨d, rfl⟩⟩) '' (Sum.inl ⁻¹' (adjunctionMk i φ ⁻¹' C)) := by
   ext y
   constructor
   · intro hy
     rcases hy with ⟨z, hzC, hz⟩
-    have hd₀ : ∃ d : ClosedCell n, c d = (y : Y) := y.2
-    let d₀ : ClosedCell n := Classical.choose hd₀
+    have hd₀ : ∃ d : B, c d = (y : Y) := y.2
+    let d₀ : B := Classical.choose hd₀
     have hd₀spec : c d₀ = (y : Y) := Classical.choose_spec hd₀
-    have hinj := adjunctionRealization_injective c φ hφ hc hinterior
-    have hz' : z = Quot.mk (adjunctionRel n φ) (Sum.inl d₀) :=
+    have hinj := adjunctionRealization_injective i c φ hφ hc hboundary
+    have hz' : z = Quot.mk (adjunctionRel i φ) (Sum.inl d₀) :=
       hinj (by
         calc
-          adjunctionRealization X₀ c φ hφ z = ⟨y, Or.inr y.2⟩ := hz
-          _ = adjunctionRealization X₀ c φ hφ (Quot.mk (adjunctionRel n φ) (Sum.inl d₀)) := by
+          adjunctionRealization X₀ i c φ hφ z = ⟨y, Or.inr y.2⟩ := hz
+          _ = adjunctionRealization X₀ i c φ hφ (Quot.mk (adjunctionRel i φ) (Sum.inl d₀)) := by
             simp [adjunctionRealization, adjunctionUnionMap, hd₀spec])
-    have hd₀C : Quot.mk (adjunctionRel n φ) (Sum.inl d₀) ∈ C := by
+    have hd₀C : Quot.mk (adjunctionRel i φ) (Sum.inl d₀) ∈ C := by
       rw [← hz']
       exact hzC
     refine ⟨d₀, hd₀C, ?_⟩
@@ -272,32 +262,31 @@ private theorem adjunctionRealization_rightPreimage_eq {X₀ : Set Y} (c : Close
     exact hd₀spec
   · intro hy
     rcases hy with ⟨d, hdC, hdy⟩
-    refine ⟨Quot.mk (adjunctionRel n φ) (Sum.inl d), hdC, ?_⟩
+    refine ⟨Quot.mk (adjunctionRel i φ) (Sum.inl d), hdC, ?_⟩
     change adjunctionUnionMap X₀ c (Sum.inl d) = ⟨y, Or.inr y.2⟩
     have hdy' : c d = (y : Y) := congrArg Subtype.val hdy
     dsimp [adjunctionUnionMap]
     apply Subtype.ext
     exact hdy'
 
-theorem adjunctionRealization_isClosedMap {X₀ : Set Y} (c : ClosedCell n → Y)
-    (φ : CellBoundary n → X₀)
-    (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b)) (hc : Function.Injective c)
-    (hcont : Continuous c) (hinterior : Disjoint (c '' Set.range (cellInteriorInclusion n)) X₀)
-    (hclosed : IsClosed X₀) [T2Space Y] :
-    IsClosedMap (adjunctionRealization X₀ c φ hφ) := by
+theorem adjunctionRealization_isClosedMap {X₀ : Set Y} (i : A → B) (φ : A → X₀) (c : B → Y)
+    (hφ : ∀ a, (φ a : Y) = c (i a)) (hc : Function.Injective c)
+    (hcont : Continuous c) (hboundary : ∀ d : B, c d ∈ X₀ → d ∈ Set.range i)
+    (hclosed : IsClosed X₀) [CompactSpace B] [T2Space Y] :
+    IsClosedMap (adjunctionRealization X₀ i c φ hφ) := by
   intro C hC
-  let Q : Set (ClosedCell n ⊕ X₀) := adjunctionMk n φ ⁻¹' C
-  have hQ : IsClosed Q := hC.preimage (continuous_adjunctionMk n φ)
+  let Q : Set (B ⊕ X₀) := adjunctionMk i φ ⁻¹' C
+  have hQ : IsClosed Q := hC.preimage (continuous_adjunctionMk i φ)
   have hPc : IsClosed (Sum.inl ⁻¹' Q) := hQ.preimage continuous_inl
   have hPx : IsClosed (Sum.inr ⁻¹' Q) := hQ.preimage continuous_inr
   have hclosedRange : IsClosed (Set.range c) := by
     rw [← image_univ]
     exact (isCompact_univ.image hcont).isClosed
   refine isClosed_union_of_isClosed_preimage hclosed hclosedRange ?_ ?_
-  · rw [adjunctionRealization_leftPreimage_eq c φ hφ hc hinterior]
+  · rw [adjunctionRealization_leftPreimage_eq i c φ hφ hc hboundary]
     exact hPx
-  · rw [adjunctionRealization_rightPreimage_eq c φ hφ hc hinterior]
-    let c' : ClosedCell n → Set.range c := fun d => ⟨c d, ⟨d, rfl⟩⟩
+  · rw [adjunctionRealization_rightPreimage_eq i c φ hφ hc hboundary]
+    let c' : B → Set.range c := fun d => ⟨c d, ⟨d, rfl⟩⟩
     have hc'inj : Function.Injective c' := by
       intro d d' h
       apply hc
@@ -309,28 +298,44 @@ theorem adjunctionRealization_isClosedMap {X₀ : Set Y} (c : ClosedCell n → Y
       apply Subtype.ext
       exact hd
     have hc'cont : Continuous c' := hcont.codRestrict (fun d => show c d ∈ Set.range c from ⟨d, rfl⟩)
-    let hc'homeo : ClosedCell n ≃ₜ Set.range c :=
+    let hc'homeo : B ≃ₜ Set.range c :=
       Continuous.homeoOfEquivCompactToT2
         (f := Equiv.ofBijective c' ⟨hc'inj, hc'surj⟩) hc'cont
     have hc'closedMap : IsClosedMap c' := by
-      change IsClosedMap (fun d : ClosedCell n => (hc'homeo d : Set.range c))
+      change IsClosedMap (fun d : B => (hc'homeo d : Set.range c))
       exact hc'homeo.isClosedMap
     exact hc'closedMap (Sum.inl ⁻¹' Q) hPc
 
-noncomputable def adjunctionHomeomorphUnionImage {X₀ : Set Y} (c : ClosedCell n → Y)
-    (φ : CellBoundary n → X₀) (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b))
-    (hc : Function.Injective c) (hcont : Continuous c)
-    (hinterior : Disjoint (c '' Set.range (cellInteriorInclusion n)) X₀)
-    (hclosed : IsClosed X₀) [T2Space Y] :
-    AdjunctionSpace n φ ≃ₜ {y : Y // y ∈ X₀ ∪ Set.range c} := by
-  let f : AdjunctionSpace n φ → {y : Y // y ∈ X₀ ∪ Set.range c} :=
-    adjunctionRealization X₀ c φ hφ
-  have hfcont : Continuous f := continuous_adjunctionRealization c φ hφ hcont
-  have hfclosed : IsClosedMap f := adjunctionRealization_isClosedMap c φ hφ hc hcont hinterior hclosed
-  have hfinj : Function.Injective f := adjunctionRealization_injective c φ hφ hc hinterior
-  have hfsurj : Function.Surjective f := adjunctionRealization_surjective c φ hφ
+noncomputable def adjunctionHomeomorphUnionImage {X₀ : Set Y} (i : A → B) (φ : A → X₀) (c : B → Y)
+    (hφ : ∀ a, (φ a : Y) = c (i a)) (hc : Function.Injective c) (hcont : Continuous c)
+    (hboundary : ∀ d : B, c d ∈ X₀ → d ∈ Set.range i)
+    (hclosed : IsClosed X₀) [CompactSpace B] [T2Space Y] :
+    AdjunctionSpace i φ ≃ₜ {y : Y // y ∈ X₀ ∪ Set.range c} := by
+  let f : AdjunctionSpace i φ → {y : Y // y ∈ X₀ ∪ Set.range c} :=
+    adjunctionRealization X₀ i c φ hφ
+  have hfcont : Continuous f := continuous_adjunctionRealization i c φ hφ hcont
+  have hfclosed : IsClosedMap f := adjunctionRealization_isClosedMap i φ c hφ hc hcont hboundary hclosed
+  have hfinj : Function.Injective f := adjunctionRealization_injective i c φ hφ hc hboundary
+  have hfsurj : Function.Surjective f := adjunctionRealization_surjective i c φ hφ
   exact IsHomeomorph.homeomorph (f := f)
     (isHomeomorph_iff_continuous_isClosedMap_bijective.mpr ⟨hfcont, hfclosed, ⟨hfinj, hfsurj⟩⟩)
+
+noncomputable def cellAdjunctionHomeomorphUnionImage {n : ℕ} {X₀ : Set Y}
+    (φ : CellBoundary n → X₀) (c : ClosedCell n → Y)
+    (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b)) (hc : Function.Injective c)
+    (hcont : Continuous c)
+    (hinterior : Disjoint (c '' Set.range (cellInteriorInclusion n)) X₀)
+    (hclosed : IsClosed X₀) [T2Space Y] :
+    CellAdjunctionSpace n φ ≃ₜ {y : Y // y ∈ X₀ ∪ Set.range c} := by
+  refine adjunctionHomeomorphUnionImage (i := cellBoundaryInclusion n) φ c hφ hc hcont ?_ hclosed
+  intro d hd
+  have hnot : ¬ ‖(d : EuclideanSpace ℝ (Fin n))‖ < 1 := by
+    intro hlt
+    exact (Set.disjoint_left.mp hinterior)
+      ⟨cellInteriorInclusion n (⟨d, hlt⟩ : CellInterior n),
+        ⟨⟨(⟨d, hlt⟩ : CellInterior n), rfl⟩, congrArg c (by ext; rfl)⟩⟩ hd
+  have hEq : ‖(d : EuclideanSpace ℝ (Fin n))‖ = 1 := le_antisymm d.2 (le_of_not_gt hnot)
+  exact ⟨⟨d, hEq⟩, by ext; rfl⟩
 
 end UnionRealization
 

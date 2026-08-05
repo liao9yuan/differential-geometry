@@ -6,7 +6,7 @@ import Mathlib.Topology.Maps.Basic
 
 namespace DifferentialGeometry.Topology
 
-universe u v
+universe u v w
 
 open Filter Function Set
 
@@ -26,23 +26,26 @@ instance (n : ℕ) : CompactSpace (CellBoundary n) := by
 
 section AdjunctionSpace
 
-variable {X : Type u} [TopologicalSpace X] (n : ℕ) (φ : CellBoundary n → X)
+variable {A : Type v} {B : Type w} [TopologicalSpace B] {X : Type u} [TopologicalSpace X]
 
-theorem continuous_adjunctionMk : Continuous (adjunctionMk n φ) :=
+theorem continuous_adjunctionMk (i : A → B) (φ : A → X) : Continuous (adjunctionMk i φ) :=
   continuous_quot_mk
 
-theorem continuous_adjunctionLower : Continuous (adjunctionLower n φ) :=
+theorem continuous_adjunctionLower (i : A → B) (φ : A → X) :
+    Continuous (adjunctionLower (i := i) φ) :=
   continuous_quot_mk.comp continuous_inr
 
-theorem continuous_adjunctionCell : Continuous (adjunctionCell n φ) :=
+theorem continuous_adjunctionCell (i : A → B) (φ : A → X) : Continuous (adjunctionCell i φ) :=
   continuous_quot_mk.comp continuous_inl
 
-theorem isQuotientMap_adjunctionMk : Topology.IsQuotientMap (adjunctionMk n φ) :=
+theorem isQuotientMap_adjunctionMk (i : A → B) (φ : A → X) :
+    Topology.IsQuotientMap (adjunctionMk i φ) :=
   isQuotientMap_quot_mk
 
-theorem continuous_adjunction_lift {Y : Type v} [TopologicalSpace Y] {f : ClosedCell n ⊕ X → Y}
-    (hr : ∀ a b : ClosedCell n ⊕ X, adjunctionRel n φ a b → f a = f b) (hf : Continuous f) :
-    Continuous (Quot.lift f hr : AdjunctionSpace n φ → Y) :=
+theorem continuous_adjunction_lift (i : A → B) (φ : A → X) {Y : Type v} [TopologicalSpace Y]
+    {f : B ⊕ X → Y}
+    (hr : ∀ a b : B ⊕ X, adjunctionRel i φ a b → f a = f b) (hf : Continuous f) :
+    Continuous (Quot.lift f hr : AdjunctionSpace i φ → Y) :=
   continuous_quot_lift hr hf
 
 end AdjunctionSpace

@@ -26,8 +26,8 @@ abbrev SublevelSpace (f : M → ℝ) (a : ℝ) : Type :=
 def IsCriticalPointAt (I : ModelWithCorners ℝ E H) (f : M → ℝ) (x : M) : Prop :=
   mfderiv I 𝓘(ℝ, ℝ) f x = 0
 
-def chartHessianBilin (g : E → ℝ) : LinearMap.BilinForm ℝ E :=
-  { toFun := fun x => (fderiv ℝ (fderiv ℝ g) 0 x).toLinearMap
+def chartHessianBilinAt (g : E → ℝ) (y : E) : LinearMap.BilinForm ℝ E :=
+  { toFun := fun x => (fderiv ℝ (fderiv ℝ g) y x).toLinearMap
     map_add' := by
       intro x y
       ext z
@@ -37,13 +37,17 @@ def chartHessianBilin (g : E → ℝ) : LinearMap.BilinForm ℝ E :=
       ext z
       simp }
 
+def chartHessianAt (g : E → ℝ) (y : E) : QuadraticForm ℝ E :=
+  (chartHessianBilinAt g y).toQuadraticMap
+
 def chartHessian (g : E → ℝ) : QuadraticForm ℝ E :=
-  (chartHessianBilin g).toQuadraticMap
+  chartHessianAt g 0
 
 def IsNondegenerateCriticalPointAt (I : ModelWithCorners ℝ E H) (f : M → ℝ) (x : M) : Prop :=
   IsCriticalPointAt I f x ∧
     (QuadraticMap.associated (R := ℝ)
-      (chartHessian (g := fun y => f ((extChartAt I x).symm y)))).SeparatingLeft
+      (chartHessianAt (g := fun y => f ((extChartAt I x).symm y))
+        (extChartAt I x x))).SeparatingLeft
 
 end
 end DifferentialGeometry.Topology.Morse
