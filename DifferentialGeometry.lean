@@ -615,6 +615,7 @@ import DifferentialGeometry.Analysis.Parabolic.ExponentialRescaling
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLocalSource
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorLowerOrder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorSchauder
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.BoundedJetInterpolation
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.ClassicalSchauder
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.CutoffClassicalSchauder
