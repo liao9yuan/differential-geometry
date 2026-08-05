@@ -780,6 +780,34 @@ def eParabolicC2HolderGaugeOn (alpha : NNReal)
     eHolderSeminormOn alpha Q (parabolicSpatialJet 2 u) +
     eHolderSeminormOn alpha Q (parabolicTimeDerivative u)
 
+def eParabolicC2HolderGaugeWithLowerJetsOn (alpha : NNReal)
+    (Q : Set (ParabolicPoint V)) (u : Real → V → F) : ENNReal :=
+  eParabolicC2HolderGaugeOn alpha Q u +
+    eHolderSeminormOn alpha Q (fun p ↦ u p.time p.space) +
+    eHolderSeminormOn alpha Q (parabolicSpatialJet 1 u)
+
+theorem eParabolicC2HolderGaugeOn_le_with_lower_jets
+    (alpha : NNReal) (Q : Set (ParabolicPoint V)) (u : Real → V → F) :
+    eParabolicC2HolderGaugeOn alpha Q u ≤
+      eParabolicC2HolderGaugeWithLowerJetsOn alpha Q u := by
+  unfold eParabolicC2HolderGaugeWithLowerJetsOn
+  exact (le_add_right le_rfl).trans (le_add_right le_rfl)
+
+theorem eParabolicC2HolderGaugeWithLowerJetsOn_le
+    {alpha : NNReal} {Q : Set (ParabolicPoint V)} {u : Real → V → F}
+    (C Cvalue Cgradient : NNReal)
+    (hgauge : eParabolicC2HolderGaugeOn alpha Q u ≤ C)
+    (hvalue : HolderWith Cvalue alpha
+      (Q.restrict (fun p ↦ u p.time p.space)))
+    (hgradient : HolderWith Cgradient alpha
+      (Q.restrict (parabolicSpatialJet 1 u))) :
+    eParabolicC2HolderGaugeWithLowerJetsOn alpha Q u ≤
+      C + Cvalue + Cgradient := by
+  unfold eParabolicC2HolderGaugeWithLowerJetsOn
+  exact add_le_add
+    (add_le_add hgauge hvalue.eHolderNorm_le)
+    hgradient.eHolderNorm_le
+
 theorem eParabolicC2HolderGaugeOn_add_le
     (alpha : NNReal) (Q : Set (ParabolicPoint V))
     (u v : Real → V → F)
