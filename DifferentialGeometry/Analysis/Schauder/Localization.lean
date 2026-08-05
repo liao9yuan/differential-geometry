@@ -12,58 +12,6 @@ variable {X V F : Type*} [MetricSpace X]
   [NormedAddCommGroup V] [NormedSpace Real V]
   [NormedAddCommGroup F] [NormedSpace Real F]
 
-omit [MetricSpace X] [NormedSpace Real F]
-    [NormedAddCommGroup V] [NormedSpace Real V] in
-theorem eSupNormOn_mono {s t : Set X} (hst : s ⊆ t) (f : X → F) :
-    eSupNormOn s f ≤ eSupNormOn t f := by
-  apply iSup_le
-  intro x
-  exact le_iSup_of_le ⟨x, hst x.2⟩ le_rfl
-
-omit [NormedSpace Real F] [NormedAddCommGroup V] [NormedSpace Real V] in
-theorem eHolderSeminormOn_mono {s t : Set X} (hst : s ⊆ t)
-    (alpha : NNReal) (f : X → F) :
-    eHolderSeminormOn alpha s f ≤ eHolderSeminormOn alpha t f := by
-  unfold eHolderSeminormOn eHolderNorm
-  apply le_iInf
-  intro C
-  apply le_iInf
-  intro hC
-  exact HolderWith.eHolderNorm_le
-    ((HolderWith.restrict_iff.mp hC).mono hst).holderWith
-
-theorem eContDiffHolderGaugeOn_mono {s t : Set V} (hst : s ⊆ t)
-    (k : Nat) (alpha : NNReal) (f : V → F) :
-    eContDiffHolderGaugeOn k alpha s f ≤
-      eContDiffHolderGaugeOn k alpha t f := by
-  unfold eContDiffHolderGaugeOn
-  gcongr with j
-  · exact eSupNormOn_mono hst _
-  · exact eHolderSeminormOn_mono hst alpha _
-
-theorem eParabolicC2HolderGaugeOn_mono
-    {Q R : Set (ParabolicPoint V)} (hQR : Q ⊆ R)
-    (alpha : NNReal) (u : Real → V → F) :
-    eParabolicC2HolderGaugeOn alpha Q u ≤
-      eParabolicC2HolderGaugeOn alpha R u := by
-  unfold eParabolicC2HolderGaugeOn
-  gcongr with j
-  · exact eSupNormOn_mono hQR _
-  · exact eSupNormOn_mono hQR _
-  · exact eHolderSeminormOn_mono hQR alpha _
-  · exact eHolderSeminormOn_mono hQR alpha _
-
-theorem eParabolicC2HolderGaugeWithLowerJetsOn_mono
-    {Q R : Set (ParabolicPoint V)} (hQR : Q ⊆ R)
-    (alpha : NNReal) (u : Real → V → F) :
-    eParabolicC2HolderGaugeWithLowerJetsOn alpha Q u ≤
-      eParabolicC2HolderGaugeWithLowerJetsOn alpha R u := by
-  unfold eParabolicC2HolderGaugeWithLowerJetsOn
-  gcongr
-  · exact eParabolicC2HolderGaugeOn_mono hQR alpha u
-  · exact eHolderSeminormOn_mono hQR alpha _
-  · exact eHolderSeminormOn_mono hQR alpha _
-
 theorem ball_parabolicPoint_eq_parabolicCylinder
     {Y : Type*} [PseudoMetricSpace Y]
     (t0 R : Real) (hR : 0 ≤ R) (x0 : Y) :
