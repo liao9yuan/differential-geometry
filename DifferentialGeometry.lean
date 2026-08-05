@@ -19,6 +19,7 @@ import DifferentialGeometry.Analysis.Calculus.MatrixInverseSmooth
 import DifferentialGeometry.Analysis.Calculus.MatrixRiccati
 import DifferentialGeometry.Analysis.Calculus.MovingImplicit
 import DifferentialGeometry.Analysis.Calculus.MovingInverse
+import DifferentialGeometry.Analysis.Calculus.ParametricIntervalIntegral
 import DifferentialGeometry.Analysis.Calculus.PartialDerivIteratedFDerivOrderBridge
 import DifferentialGeometry.Analysis.Calculus.PiDeriv
 import DifferentialGeometry.Analysis.Calculus.RatioMonotonicity

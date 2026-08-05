@@ -20,6 +20,7 @@ import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Data.Sign.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.Real
 import Mathlib.LinearAlgebra.QuadraticForm.Signature
+import DifferentialGeometry.Analysis.Calculus.ParametricIntervalIntegral
 
 namespace DifferentialGeometry.Topology.Morse
 
@@ -1611,6 +1612,36 @@ theorem contDiffOn_morseTaylorBilinAt (g : E → ℝ) (hg : ContDiff ℝ 3 g) :
 theorem contDiffAt_morseTaylorBilinAt (g : E → ℝ) (hg : ContDiff ℝ 3 g) (c₀ x₀ : E) :
     ContDiffAt ℝ 1 (fun p : E × E => morseTaylorBilinAt g p.1 p.2) (c₀, x₀) := by
   exact (contDiffOn_morseTaylorBilinAt g hg).contDiffAt Filter.univ_mem
+
+theorem contDiffOn_morseTaylorBilinAt_smooth (g : E → ℝ)
+    (hg : ContDiff ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) g) :
+    ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun p : E × E => morseTaylorBilinAt g p.1 p.2) Set.univ := by
+  have hfd2 : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fderiv ℝ (fderiv ℝ g)) Set.univ := by
+    have h1 : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fderiv ℝ g) Set.univ :=
+      hg.contDiffOn.fderiv_of_isOpen isOpen_univ (by simp)
+    exact h1.fderiv_of_isOpen isOpen_univ (by simp)
+  have hpath : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : (E × E) × ℝ => morseSegPath q.1 q.2) Set.univ := by
+    unfold morseSegPath
+    fun_prop
+  have hH : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : (E × E) × ℝ => (1 - q.2) • fderiv ℝ (fderiv ℝ g) (morseSegPath q.1 q.2)) Set.univ := by
+    have hcomp : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun q : (E × E) × ℝ => fderiv ℝ (fderiv ℝ g) (morseSegPath q.1 q.2)) Set.univ :=
+      hfd2.comp hpath (by intro q hq; trivial)
+    have hscalar : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun q : (E × E) × ℝ => 1 - q.2) Set.univ := by
+      fun_prop
+    exact ContDiffOn.smul hscalar hcomp
+  have hmain := DifferentialGeometry.Analysis.Calculus.contDiffOn_paramIntervalIntegral
+    (f := fun p : E × E => fun t : ℝ =>
+    (1 - t) • fderiv ℝ (fderiv ℝ g) (morseSegPath p t)) hH
+  simpa [morseTaylorBilinAt] using hmain
+
+theorem contDiffAt_morseTaylorBilinAt_smooth (g : E → ℝ)
+    (hg : ContDiff ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) g) (c₀ x₀ : E) :
+    ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun p : E × E => morseTaylorBilinAt g p.1 p.2) (c₀, x₀) := by
+  exact (contDiffOn_morseTaylorBilinAt_smooth g hg).contDiffAt Filter.univ_mem
 
 theorem exists_smooth_extension {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] (n : ℕ) (f : E → ℝ)
