@@ -2915,6 +2915,7 @@ import DifferentialGeometry.Integration.Volume.Invariance
 import DifferentialGeometry.Topology.Attachment.Basic
 import DifferentialGeometry.Topology.Attachment.Defs
 import DifferentialGeometry.Topology.Attachment.Union
+import DifferentialGeometry.Topology.Morse.CellAttachment
 import DifferentialGeometry.Topology.Morse.Defs
 import DifferentialGeometry.Topology.Morse.Flow
 import DifferentialGeometry.Topology.Morse.LocalNormalForm
