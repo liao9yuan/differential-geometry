@@ -242,6 +242,30 @@ theorem holderWith_bilinear_of_opNorm_le_one
   · exact hfnorm
   · exact hgnorm
 
+theorem holderWith_bilinear_of_opNorm_le_one_of_eq_zero_outside
+    {Q U : Set X} {alpha Kf Kg Mf Mg : NNReal}
+    (L : A →L[Real] B →L[Real] C) (hL : ‖L‖ ≤ 1)
+    (f : X → A) (g : X → B)
+    (hf : HolderWith Kf alpha (Q.restrict f))
+    (hg : HolderWith Kg alpha ((Q ∩ U).restrict g))
+    (hfNorm : ∀ x, x ∈ Q → x ∈ U → ‖f x‖ ≤ Mf)
+    (hgNorm : ∀ x, x ∈ Q → x ∈ U → ‖g x‖ ≤ Mg)
+    (hfZero : ∀ x, x ∈ Q → x ∉ U → f x = 0) :
+    HolderWith (Mf * Kg + Mg * Kf) alpha
+      (Q.restrict (fun x ↦ L (f x) (g x))) := by
+  apply holderWith_bilinear_of_eq_zero_outside L
+  · intro a b
+    have hLa : ‖L‖ * ‖a‖ ≤ ‖a‖ := by
+      simpa only [one_mul] using
+        mul_le_mul_of_nonneg_right hL (norm_nonneg a)
+    exact (L.le_opNorm₂ a b).trans
+      (mul_le_mul_of_nonneg_right hLa (norm_nonneg b))
+  · exact hf
+  · exact hg
+  · exact hfNorm
+  · exact hgNorm
+  · exact hfZero
+
 section BoundedHolderSpace
 
 variable {X F : Type*} [MetricSpace X]
