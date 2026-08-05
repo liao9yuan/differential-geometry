@@ -16,13 +16,13 @@ variable {I : ModelWithCorners ℝ E H}
 
 set_option backward.isDefEq.respectTransparency false in
 theorem hasDerivAt_df_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
-    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) (t : ℝ) :
     HasDerivAt (f ∘ γ) ((mfderiv I 𝓘(ℝ, ℝ) f (γ t)) (v (γ t))) t := by
   have hγmd : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t := (hγ t).mdifferentiableAt
   have hfmd : MDifferentiableAt I 𝓘(ℝ, ℝ) f (γ t) :=
-    (hf (γ t)).mdifferentiableAt (by norm_num : (⊤ : WithTop ℕ∞) ≠ 0)
+    (hf (γ t)).mdifferentiableAt (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
   have hγder : mfderiv 𝓘(ℝ, ℝ) I γ t = (1 : ℝ →L[ℝ] ℝ).smulRight (v (γ t)) :=
     (hγ t).mfderiv
   have hcomp := mfderiv_comp (x := t) (g := f) (f := γ) (hg := hfmd) (hf := hγmd)
@@ -71,7 +71,7 @@ theorem hasDerivAt_df_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
 
 set_option backward.isDefEq.respectTransparency false in
 theorem hasDerivAt_f_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
-    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
     {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) (t : ℝ) :
@@ -83,7 +83,7 @@ theorem hasDerivAt_f_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
 
 set_option backward.isDefEq.respectTransparency false in
 theorem f_rate_bounds_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
-    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
@@ -131,7 +131,7 @@ theorem f_rate_bounds_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
 
 set_option backward.isDefEq.respectTransparency false in
 theorem f_eq_sub_of_integralCurve_on_strip [IsManifold I (⊤ : WithTop ℕ∞) M]
-    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     {a b : ℝ}
     (hdf : ∀ x ∈ f ⁻¹' Set.Icc a b, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
@@ -188,7 +188,7 @@ theorem curveAt_integralCurve (v : (x : M) → TangentSpace I x)
 
 set_option backward.isDefEq.respectTransparency false in
 theorem f_eq_sub_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
-    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
     {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) (t : ℝ) :

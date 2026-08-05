@@ -16,7 +16,7 @@ variable {I : ModelWithCorners ℝ (MorseModel n) H}
 
 theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
     [T2Space M] [SigmaCompactSpace M]
-    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)
     (hcompact : IsCompact (f ⁻¹' Set.Icc a b))
     (hregular : ∀ x ∈ f ⁻¹' Set.Icc a b, ¬ IsCriticalPointAt I f x) :
     ∃ Φ : Diffeomorph I I M M ∞,

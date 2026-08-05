@@ -116,7 +116,9 @@ private theorem exists_morseChart {n : ℕ} {H : Type} [TopologicalSpace H] {M :
     ∃ χ : OpenPartialHomeomorph (MorseModel n) M,
       (∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y) ∧
       (∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) := by
-  have hcrit' : IsCriticalPointAt I f p := (isCriticalPointAt_iff_chart_fderiv I f hf p).2 hcrit
+  have hcrit' : IsCriticalPointAt I f p :=
+    (isCriticalPointAt_iff_chart_fderiv I f
+      (hf.of_le (le_top : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))) p).2 hcrit
   have hnd' : IsNondegenerateCriticalPointAt I f p := ⟨hcrit', hnd⟩
   rcases morse_lemma I f hf p k hk hcrit' hnd' hindex with
     ⟨R, hRpos, χ, _, _, _, hχsrc, hnorm, _, _⟩

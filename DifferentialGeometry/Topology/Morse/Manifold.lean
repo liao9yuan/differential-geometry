@@ -518,7 +518,7 @@ theorem morseLemma_of_contMDiff {n : ℕ} {H : Type} [TopologicalSpace H] {M : T
 theorem isCriticalPointAt_iff_chart_fderiv {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
-    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f) (p : M) :
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) (p : M) :
     IsCriticalPointAt I f p ↔
       fderiv ℝ (fun y : MorseModel n => f ((extChartAt I p).symm y)) (extChartAt I p p) = 0 := by
   let e : PartialEquiv M (MorseModel n) := extChartAt I p
@@ -534,16 +534,17 @@ theorem isCriticalPointAt_iff_chart_fderiv {n : ℕ} {H : Type} [TopologicalSpac
   have hmdChart : MDifferentiableAt I 𝓘(ℝ, MorseModel n) e p :=
     (contMDiffAt_extChartAt (n := (⊤ : WithTop ℕ∞)) (x := p)).mdifferentiableAt (by norm_num)
   have hmdgAtEp : MDifferentiableAt I 𝓘(ℝ, ℝ) f (e.symm (e p)) := by
-    simpa [hep] using ((hf p).mdifferentiableAt (by norm_num : (⊤ : WithTop ℕ∞) ≠ 0))
+    simpa [hep] using ((hf p).mdifferentiableAt (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0))
   have hfuneq : (fun x : M => f x) =ᶠ[nhds p] (fun x : M => (f ∘ e.symm) (e x)) := by
     have hsrcopen : IsOpen e.source := isOpen_extChartAt_source p
     exact Filter.eventuallyEq_of_mem (by simpa [e] using (hsrcopen.mem_nhds hpsrc))
       (fun x hx => congrArg f (e.left_inv hx).symm)
   have hcomp := mfderiv_comp (x := p) (g := f ∘ e.symm) (f := e) (hg := by
     have hfg : MDifferentiableAt 𝓘(ℝ, MorseModel n) 𝓘(ℝ, ℝ) (f ∘ e.symm) (e p) := by
-      have hc : ContMDiffAt 𝓘(ℝ, MorseModel n) 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) (f ∘ e.symm) (e p) :=
+      have hc : ContMDiffAt 𝓘(ℝ, MorseModel n) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) (f ∘ e.symm) (e p) :=
         ContMDiffAt.comp (x := e p) (g := f) (f := e.symm)
-          (hg := by simpa [hep] using (hf p)) (hf := hσc)
+          (hg := by simpa [hep] using (hf p))
+          (hf := hσc.of_le (le_top : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞)))
       exact hc.mdifferentiableAt (by norm_num)
     exact hfg) (hf := hmdChart)
   have heq := Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)) hfuneq
@@ -587,7 +588,8 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
       ContMDiffAt 𝓘(ℝ, MorseModel n) I (1 : WithTop ℕ∞) Φ 0 ∧
       ContMDiffAt I 𝓘(ℝ, MorseModel n) (1 : WithTop ℕ∞) Φ.symm p := by
   have hcritChart : fderiv ℝ (fun y => f ((extChartAt I p).symm y)) (extChartAt I p p) = 0 :=
-    (isCriticalPointAt_iff_chart_fderiv I f hf p).1 hcrit
+    (isCriticalPointAt_iff_chart_fderiv I f
+      (hf.of_le (le_top : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))) p).1 hcrit
   have hndChart : (QuadraticMap.associated (R := ℝ)
       (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p))).SeparatingLeft := hnd.2
   rcases morseLemma_of_contMDiff I f hf p hcritChart hndChart

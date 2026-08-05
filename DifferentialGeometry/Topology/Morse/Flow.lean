@@ -34,7 +34,7 @@ structure GradientLikeFlow (I : ModelWithCorners ℝ E H) (f : M → ℝ) (a b :
 
 noncomputable def unitSpeedFlow_of_vectorField [T2Space M] (I : ModelWithCorners ℝ E H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (a b : ℝ) (f : M → ℝ)
-    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
@@ -257,7 +257,7 @@ theorem UnitSpeedFlow.image_sublevels (Φ : UnitSpeedFlow f a b) (hab : a ≤ b)
 
 theorem sublevel_transport_of_unitSpeedVectorField [T2Space M] (I : ModelWithCorners ℝ E H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (a b : ℝ) (f : M → ℝ)
-    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
@@ -271,7 +271,7 @@ theorem sublevel_transport_of_unitSpeedVectorField [T2Space M] (I : ModelWithCor
 set_option backward.isDefEq.respectTransparency false in
 theorem sublevel_transport_of_stripUnitSpeedVectorField [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
-    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)
     (v : (x : M) → TangentSpace I x)
     (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc a b,
