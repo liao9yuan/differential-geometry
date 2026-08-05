@@ -21,8 +21,11 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 variable {F : Type uF} [NormedAddCommGroup F] [InnerProductSpace Real F] [CompleteSpace F]
 
-def innerDualScalarization (u : Real → M → F) (y : F) : Real → M → Real :=
+def innerScalarization (u : Real → M → F) (y : F) : Real → M → Real :=
   fun t x ↦ ⟪u t x, y⟫
+
+abbrev innerDualScalarization (u : Real → M → F) (y : F) : Real → M → Real :=
+  innerScalarization u y
 
 def IsInnerDualHeatPotSupersolutionOn
     (D : RealTimeInterval)
@@ -31,7 +34,7 @@ def IsInnerDualHeatPotSupersolutionOn
     (C : ProperCone Real F)
     (u : Real → M → F) : Prop :=
   ∀ y : F, y ∈ ProperCone.innerDual (C : Set F) →
-    IsHeatPotSupersolutionOn D G potential (innerDualScalarization u y)
+    IsHeatPotSupersolutionOn D G potential (innerScalarization u y)
 
 abbrev IsInnerDualHeatSupersolutionOn
     (D : RealTimeInterval)
@@ -56,17 +59,17 @@ theorem properCone_heat_pot_supersolution_mem_of_potential_le
     ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C := by
   have hscalar : ∀ y : F, y ∈ ProperCone.innerDual (C : Set F) →
       ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
-        0 ≤ innerDualScalarization u y t x := by
+        0 ≤ innerScalarization u y t x := by
     intro y hy
     apply heat_pot_supersolution_nonneg (I := I) G hT potential
-      (innerDualScalarization u y) (hsol y hy) B hpotential
+      (innerScalarization u y) (hsol y hy) B hpotential
     intro x
     exact hy (hinit x)
   intro t ht x
   rw [← C.innerDual_innerDual]
   rw [ProperCone.mem_innerDual]
   intro y hy
-  simpa [innerDualScalarization, real_inner_comm] using hscalar y hy t ht x
+  simpa [innerScalarization, real_inner_comm] using hscalar y hy t ht x
 
 theorem properCone_heat_supersolution_mem
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]

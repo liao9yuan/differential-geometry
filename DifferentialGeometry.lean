@@ -756,6 +756,7 @@ import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.MetricFamilyStro
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ParallelCone
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ProperCone
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ScalarStrong
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.SemilinearConvex
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Strong
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Weak
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
