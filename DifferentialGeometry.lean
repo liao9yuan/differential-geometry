@@ -729,6 +729,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.SolutionCompactness
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.VariableCoefficient
 import DifferentialGeometry.Analysis.Parabolic.Harnack.PathIntegration
 import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiusti
+import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiustiCylinder
 import DifferentialGeometry.Analysis.Parabolic.Moser.Crossover
 import DifferentialGeometry.Analysis.Parabolic.Moser.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Moser.ForwardIteration

@@ -318,6 +318,25 @@ theorem spatialCutoffBetween_sq_le
     simpa using (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
 
 omit [Module.Finite ℝ E] in
+theorem spatialCutoffBetween_sq_le_of_nested_levels
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    {outerLower outerUpper innerLower innerUpper : ℝ}
+    (houter : outerLower < outerUpper) (hnested : outerUpper ≤ innerLower)
+    (hinner : innerLower < innerUpper) (x : M) :
+    (spatialCutoffBetween rho innerLower innerUpper).toFun x ^ 2 ≤
+      (spatialCutoffBetween rho outerLower outerUpper).toFun x ^ 2 := by
+  by_cases hx : rho.toFun x ≤ innerLower
+  · rw [spatialCutoffBetween_eq_zero_of_le_inner hinner hx]
+    simpa using sq_nonneg
+      ((spatialCutoffBetween rho outerLower outerUpper).toFun x)
+  · have hone : (spatialCutoffBetween rho outerLower outerUpper).toFun x = 1 :=
+      spatialCutoffBetween_eq_one_of_outer_le houter
+        (hnested.trans (le_of_not_ge hx))
+    rw [hone, one_pow]
+    have hmem := spatialCutoffBetween_mem_Icc rho innerLower innerUpper x
+    simpa using (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
+
+omit [Module.Finite ℝ E] in
 theorem spatialCutoffBetween_sq_le_rpow
     {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
     {outerLevel middleLevel innerLevel : ℝ}
