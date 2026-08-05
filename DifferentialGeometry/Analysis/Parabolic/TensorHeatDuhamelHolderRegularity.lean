@@ -234,6 +234,46 @@ theorem tensorHeatMildSolutionHs_differentiableOn_of_holder
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+theorem tensorHeatMildSolutionHsHolderDeriv_continuousOn
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
+    (T₀ : tensorHs (I := I) (M := M) g r s σ)
+    {F : ℝ → tensorHs (I := I) (M := M) g r s σ}
+    {K α : NNReal} (hα : 0 < α) (hF : HolderWith K α F) :
+    ContinuousOn
+      (tensorHeatMildSolutionHsHolderDeriv (I := I) (M := M)
+        g r s σ T₀ F)
+      (Set.Ioi 0) := by
+  simpa only [tensorHeatMildSolutionHsHolderDeriv] using
+    abstractSpectralDuhamelHolderDeriv_continuousOn
+      (tensorHsHilbertBasis (I := I) (M := M)
+        (g := g) (r := r) (s := s) σ)
+      (fun i => tensor_lambda_nonneg (I := I) (M := M) i)
+      T₀ hα hF
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensorHeatMildSolutionHs_contDiffOn_one_of_holder
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
+    (T₀ : tensorHs (I := I) (M := M) g r s σ)
+    {F : ℝ → tensorHs (I := I) (M := M) g r s σ}
+    {K α : NNReal} (hα : 0 < α) (hF : HolderWith K α F) :
+    ContDiffOn ℝ 1
+      (tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F)
+      (Set.Ioi 0) := by
+  rw [show (1 : WithTop ℕ∞) = (0 : WithTop ℕ∞) + 1 by rfl,
+    contDiffOn_succ_iff_deriv_of_isOpen isOpen_Ioi]
+  refine ⟨tensorHeatMildSolutionHs_differentiableOn_of_holder
+    (I := I) (M := M) g r s σ T₀ hα hF, ?_, ?_⟩
+  · simp only [WithTop.zero_ne_top, false_implies]
+  · rw [contDiffOn_zero]
+    refine (tensorHeatMildSolutionHsHolderDeriv_continuousOn
+      (I := I) (M := M) g r s σ T₀ hα hF).congr ?_
+    intro t ht
+    exact (tensorHeatMildSolutionHs_hasDerivAt_holder_candidate
+      (I := I) (M := M) g r s σ T₀ hα hF ht).deriv
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHsHolderDeriv_coeff_of_holderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
     (T₀ : tensorHs (I := I) (M := M) g r s σ)
@@ -434,6 +474,48 @@ theorem tensorHeatMildSolutionHs_differentiableOn_of_holderOn
   intro t ht
   exact (tensorHeatMildSolutionHs_hasDerivAt_of_holderOn
     (I := I) (M := M) g r s σ T₀ hα hF ht).differentiableAt.differentiableWithinAt
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensorHeatMildSolutionHsHolderDeriv_continuousOn_of_holderOn
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
+    (T₀ : tensorHs (I := I) (M := M) g r s σ)
+    {F : ℝ → tensorHs (I := I) (M := M) g r s σ}
+    {T : ℝ} {K α : NNReal} (hα : 0 < α)
+    (hF : HolderOnWith K α F (Set.Icc 0 T)) :
+    ContinuousOn
+      (tensorHeatMildSolutionHsHolderDeriv (I := I) (M := M)
+        g r s σ T₀ F)
+      (Set.Ioo 0 T) := by
+  simpa only [tensorHeatMildSolutionHsHolderDeriv] using
+    abstractSpectralDuhamelHolderDeriv_continuousOn_of_holderOn
+      (tensorHsHilbertBasis (I := I) (M := M)
+        (g := g) (r := r) (s := s) σ)
+      (fun i => tensor_lambda_nonneg (I := I) (M := M) i)
+      T₀ hα hF
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensorHeatMildSolutionHs_contDiffOn_one_of_holderOn
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
+    (T₀ : tensorHs (I := I) (M := M) g r s σ)
+    {F : ℝ → tensorHs (I := I) (M := M) g r s σ}
+    {T : ℝ} {K α : NNReal} (hα : 0 < α)
+    (hF : HolderOnWith K α F (Set.Icc 0 T)) :
+    ContDiffOn ℝ 1
+      (tensorHeatMildSolutionHs (I := I) (M := M) g r s σ T₀ F)
+      (Set.Ioo 0 T) := by
+  rw [show (1 : WithTop ℕ∞) = (0 : WithTop ℕ∞) + 1 by rfl,
+    contDiffOn_succ_iff_deriv_of_isOpen isOpen_Ioo]
+  refine ⟨tensorHeatMildSolutionHs_differentiableOn_of_holderOn
+    (I := I) (M := M) g r s σ T₀ hα hF, ?_, ?_⟩
+  · simp only [WithTop.zero_ne_top, false_implies]
+  · rw [contDiffOn_zero]
+    refine (tensorHeatMildSolutionHsHolderDeriv_continuousOn_of_holderOn
+      (I := I) (M := M) g r s σ T₀ hα hF).congr ?_
+    intro t ht
+    exact (tensorHeatMildSolutionHs_hasDerivAt_holderOn_candidate
+      (I := I) (M := M) g r s σ T₀ hα hF ht).deriv
 
 end TensorHeatEquation
 

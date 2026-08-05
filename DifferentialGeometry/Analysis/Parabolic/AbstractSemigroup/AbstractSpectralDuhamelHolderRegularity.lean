@@ -391,6 +391,25 @@ theorem abstractSpectralDuhamel_hasDerivAt_of_holder
     simpa only [b.repr_apply_apply] using hmodal
   exact hcandidate' ▸ hmodal'
 
+theorem abstractSpectralDuhamel_contDiffOn_one_of_holder
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) {F : ℝ → X} {K α : NNReal} (hα : 0 < α)
+    (hF : HolderWith K α F) :
+    ContDiffOn ℝ 1 (abstractSpectralDuhamel b hlam u₀ F) (Set.Ioi 0) := by
+  rw [show (1 : WithTop ℕ∞) = (0 : WithTop ℕ∞) + 1 by rfl,
+    contDiffOn_succ_iff_deriv_of_isOpen isOpen_Ioi]
+  refine ⟨?_, ?_, ?_⟩
+  · intro t ht
+    exact (abstractSpectralDuhamel_hasDerivAt_of_holder
+      b hlam u₀ hα hF ht).differentiableAt.differentiableWithinAt
+  · simp only [WithTop.zero_ne_top, false_implies]
+  · rw [contDiffOn_zero]
+    refine (abstractSpectralDuhamelHolderDeriv_continuousOn
+      b hlam u₀ hα hF).congr ?_
+    intro t ht
+    exact (abstractSpectralDuhamel_hasDerivAt_of_holder
+      b hlam u₀ hα hF ht).deriv
+
 private def holderIccExtension
     (F : ℝ → X) (T : ℝ) (hT : 0 ≤ T) (t : ℝ) : X :=
   F (Set.projIcc 0 T hT t)
@@ -506,6 +525,49 @@ theorem abstractSpectralDuhamel_hasDerivAt_of_holderOn
     abstractSpectralDuhamelHolderDeriv_eq_holderIccExtension
       b hlam u₀ F hT ⟨ht.1.le, ht.2.le⟩
   exact (hext.congr_of_eventuallyEq hfunctions).congr_deriv hderiv.symm
+
+theorem abstractSpectralDuhamelHolderDeriv_continuousOn_of_holderOn
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) {F : ℝ → X} {T : ℝ} {K α : NNReal}
+    (hα : 0 < α) (hF : HolderOnWith K α F (Set.Icc 0 T)) :
+    ContinuousOn
+      (abstractSpectralDuhamelHolderDeriv b hlam u₀ F)
+      (Set.Ioo 0 T) := by
+  rcases le_total 0 T with hT | hT
+  · let Fext : ℝ → X := holderIccExtension F T hT
+    have hFext : HolderWith K α Fext :=
+      holderIccExtension_holderWith hT hF
+    have hcont : ContinuousOn
+        (abstractSpectralDuhamelHolderDeriv b hlam u₀ Fext)
+        (Set.Ioo 0 T) :=
+      (abstractSpectralDuhamelHolderDeriv_continuousOn
+        b hlam u₀ hα hFext).mono Set.Ioo_subset_Ioi_self
+    refine hcont.congr ?_
+    intro t ht
+    simpa only [Fext] using
+      abstractSpectralDuhamelHolderDeriv_eq_holderIccExtension
+        b hlam u₀ F hT ⟨ht.1.le, ht.2.le⟩
+  · intro t ht
+    exact False.elim ((not_lt_of_ge hT) (ht.1.trans ht.2))
+
+theorem abstractSpectralDuhamel_contDiffOn_one_of_holderOn
+    (b : HilbertBasis ι ℝ X) {lam : ι → ℝ} (hlam : ∀ i, 0 ≤ lam i)
+    (u₀ : X) {F : ℝ → X} {T : ℝ} {K α : NNReal}
+    (hα : 0 < α) (hF : HolderOnWith K α F (Set.Icc 0 T)) :
+    ContDiffOn ℝ 1 (abstractSpectralDuhamel b hlam u₀ F) (Set.Ioo 0 T) := by
+  rw [show (1 : WithTop ℕ∞) = (0 : WithTop ℕ∞) + 1 by rfl,
+    contDiffOn_succ_iff_deriv_of_isOpen isOpen_Ioo]
+  refine ⟨?_, ?_, ?_⟩
+  · intro t ht
+    exact (abstractSpectralDuhamel_hasDerivAt_of_holderOn
+      b hlam u₀ hα hF ht).differentiableAt.differentiableWithinAt
+  · simp only [WithTop.zero_ne_top, false_implies]
+  · rw [contDiffOn_zero]
+    refine (abstractSpectralDuhamelHolderDeriv_continuousOn_of_holderOn
+      b hlam u₀ hα hF).congr ?_
+    intro t ht
+    exact (abstractSpectralDuhamel_hasDerivAt_of_holderOn
+      b hlam u₀ hα hF ht).deriv
 
 end Parabolic
 end Analysis
