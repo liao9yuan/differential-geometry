@@ -54,6 +54,181 @@ theorem hasFDerivAt_gradient
     HasFDerivAt (fun x ↦ du (parabolicPoint p.time x)) (d2u p) p.space :=
   h.2.2 p hp
 
+theorem parabolicTimeDerivative_eq
+    {Q : Set (ParabolicPoint E)}
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {p : ParabolicPoint E} (hp : p ∈ Q) :
+    parabolicTimeDerivative
+        (fun t x ↦ u (parabolicPoint t x)) p = dtimeU p := by
+  unfold parabolicTimeDerivative
+  rw [(h.hasDerivAt_time hp).hasFDerivAt.fderiv]
+  simp only [ContinuousLinearMap.toSpanSingleton_apply, one_smul]
+
+theorem continuousMultilinearCurryFin1_parabolicSpatialJet_one_eq
+    {Q : Set (ParabolicPoint E)}
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {p : ParabolicPoint E} (hp : p ∈ Q) :
+    continuousMultilinearCurryFin1 Real E F
+        (parabolicSpatialJet 1
+          (fun t x ↦ u (parabolicPoint t x)) p) = du p := by
+  ext v
+  simp only [parabolicSpatialJet, continuousMultilinearCurryFin1_apply,
+    iteratedFDeriv_one_apply]
+  rw [(h.hasFDerivAt_space hp).fderiv]
+  rfl
+
+theorem hessianCurryEquiv_parabolicSpatialJet_two_eq
+    {Q : Set (ParabolicPoint E)} (hQ : IsOpen Q)
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {p : ParabolicPoint E} (hp : p ∈ Q) :
+    hessianCurryEquiv E F
+        (parabolicSpatialJet 2
+          (fun t x ↦ u (parabolicPoint t x)) p) = d2u p := by
+  let spaceSlice : E → ParabolicPoint E := fun x ↦ parabolicPoint p.time x
+  let spaceDomain : Set E := spaceSlice ⁻¹' Q
+  have hspaceSlice : Continuous spaceSlice := by
+    simpa only [spaceSlice, parabolicPoint] using
+      (continuous_const : Continuous
+        (fun _ : E ↦ Metric.Snowflaking.toSnowflaking p.time)).prodMk continuous_id
+  have hspaceDomain : IsOpen spaceDomain := hQ.preimage hspaceSlice
+  have hpSpace : p.space ∈ spaceDomain := by
+    change parabolicPoint p.time p.space ∈ Q
+    simpa only [parabolicPoint_time_space] using hp
+  have hgradient : fderiv Real (fun x ↦ u (spaceSlice x)) =ᶠ[nhds p.space]
+      fun x ↦ du (spaceSlice x) := by
+    filter_upwards [hspaceDomain.mem_nhds hpSpace] with x hx
+    exact (h.hasFDerivAt_space hx).fderiv
+  ext v w
+  simp only [hessianCurryEquiv, LinearIsometryEquiv.trans_apply,
+    continuousMultilinearCurryFin1_apply,
+    continuousMultilinearCurryRightEquiv_apply', parabolicSpatialJet,
+    iteratedFDeriv_two_apply]
+  rw [show (fun x ↦ u (parabolicPoint p.time x)) =
+      fun x ↦ u (spaceSlice x) by rfl,
+    hgradient.fderiv_eq, (h.hasFDerivAt_gradient hp).fderiv]
+  rfl
+
+theorem holderWith_restrict_timeDerivative_of_lower_jets_gauge
+    {Q : Set (ParabolicPoint E)}
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {alpha C : NNReal}
+    (hgauge : eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C) :
+    HolderWith C alpha (Q.restrict dtimeU) := by
+  have hbase : eParabolicC2HolderGaugeOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C :=
+    (eParabolicC2HolderGaugeOn_le_with_lower_jets alpha Q _).trans hgauge
+  have hholder := parabolicTimeDerivative_holderWith_restrict hbase
+  have heq : Q.restrict (parabolicTimeDerivative
+      (fun t x ↦ u (parabolicPoint t x))) = Q.restrict dtimeU := by
+    funext p
+    exact h.parabolicTimeDerivative_eq p.2
+  rwa [heq] at hholder
+
+theorem holderWith_restrict_spatialDerivative_of_lower_jets_gauge
+    {Q : Set (ParabolicPoint E)}
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {alpha C : NNReal}
+    (hgauge : eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C) :
+    HolderWith C alpha (Q.restrict du) := by
+  let e := continuousMultilinearCurryFin1 Real E F
+  have hjet := parabolicSpatialGradient_holderWith_restrict_of_lower_jets hgauge
+  have hcomp := e.lipschitz.holderWith.comp hjet
+  have heq : e ∘ Q.restrict (parabolicSpatialJet 1
+      (fun t x ↦ u (parabolicPoint t x))) = Q.restrict du := by
+    funext p
+    exact h.continuousMultilinearCurryFin1_parabolicSpatialJet_one_eq p.2
+  rw [heq] at hcomp
+  simpa only [e, NNReal.coe_one, NNReal.rpow_one, one_mul] using hcomp
+
+theorem holderWith_restrict_spatialSecondDerivative_of_lower_jets_gauge
+    {Q : Set (ParabolicPoint E)} (hQ : IsOpen Q)
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {alpha C : NNReal}
+    (hgauge : eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C) :
+    HolderWith C alpha (Q.restrict d2u) := by
+  have hbase : eParabolicC2HolderGaugeOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C :=
+    (eParabolicC2HolderGaugeOn_le_with_lower_jets alpha Q _).trans hgauge
+  have hjet := parabolicSpatialJet_holderWith_restrict hbase
+  have hcomp := (hessianCurryEquiv E F).lipschitz.holderWith.comp hjet
+  have heq : hessianCurryEquiv E F ∘ Q.restrict (parabolicSpatialJet 2
+      (fun t x ↦ u (parabolicPoint t x))) = Q.restrict d2u := by
+    funext p
+    exact h.hessianCurryEquiv_parabolicSpatialJet_two_eq hQ p.2
+  rw [heq] at hcomp
+  simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul] using hcomp
+
+theorem norm_timeDerivative_le_of_lower_jets_gauge
+    {Q : Set (ParabolicPoint E)}
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {alpha C : NNReal}
+    (hgauge : eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C)
+    {p : ParabolicPoint E} (hp : p ∈ Q) : ‖dtimeU p‖ ≤ C := by
+  have hbase : eParabolicC2HolderGaugeOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C :=
+    (eParabolicC2HolderGaugeOn_le_with_lower_jets alpha Q _).trans hgauge
+  rw [← h.parabolicTimeDerivative_eq hp]
+  exact parabolicTimeDerivative_norm_le hbase hp
+
+theorem norm_spatialDerivative_le_of_lower_jets_gauge
+    {Q : Set (ParabolicPoint E)}
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {alpha C : NNReal}
+    (hgauge : eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C)
+    {p : ParabolicPoint E} (hp : p ∈ Q) : ‖du p‖ ≤ C := by
+  have hbase : eParabolicC2HolderGaugeOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C :=
+    (eParabolicC2HolderGaugeOn_le_with_lower_jets alpha Q _).trans hgauge
+  rw [← h.continuousMultilinearCurryFin1_parabolicSpatialJet_one_eq hp,
+    (continuousMultilinearCurryFin1 Real E F).norm_map]
+  exact parabolicSpatialJet_norm_le hbase (by norm_num) hp
+
+theorem norm_spatialSecondDerivative_le_of_lower_jets_gauge
+    {Q : Set (ParabolicPoint E)} (hQ : IsOpen Q)
+    {u dtimeU : ParabolicPoint E → F}
+    {du : ParabolicPoint E → E →L[Real] F}
+    {d2u : ParabolicPoint E → E →L[Real] E →L[Real] F}
+    (h : ParabolicJetRealizesOn Q u dtimeU du d2u)
+    {alpha C : NNReal}
+    (hgauge : eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C)
+    {p : ParabolicPoint E} (hp : p ∈ Q) : ‖d2u p‖ ≤ C := by
+  have hbase : eParabolicC2HolderGaugeOn alpha Q
+      (fun t x ↦ u (parabolicPoint t x)) ≤ C :=
+    (eParabolicC2HolderGaugeOn_le_with_lower_jets alpha Q _).trans hgauge
+  rw [← h.hessianCurryEquiv_parabolicSpatialJet_two_eq hQ hp,
+    (hessianCurryEquiv E F).norm_map]
+  exact parabolicSpatialJet_norm_le hbase (by norm_num) hp
+
 theorem isParabolicC2On
     {Q : Set (ParabolicPoint E)} (hQ : IsOpen Q)
     {u dtimeU : ParabolicPoint E → F}

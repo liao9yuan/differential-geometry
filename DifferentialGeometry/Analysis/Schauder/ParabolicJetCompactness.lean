@@ -236,6 +236,90 @@ theorem exists_parabolic_jet_subseq_with_locally_holderOnWith
     holderOnWith_of_tendsto (Eventually.of_forall fun n => hCd2 (phi n))
       (fun p _ => hd2u.tendsto_at p.2)⟩
 
+theorem exists_parabolic_jet_subseq_of_lower_jets_gauge
+    {Q : Set (ParabolicPoint E)} (hQ : IsOpen Q)
+    (uApprox dtimeUApprox : Nat → ParabolicPoint E → F)
+    (duApprox : Nat → ParabolicPoint E → E →L[Real] F)
+    (d2uApprox : Nat → ParabolicPoint E → E →L[Real] E →L[Real] F)
+    {r : NNReal} (hr : 0 < r) (C : NNReal)
+    (hgauge : ∀ n, eParabolicC2HolderGaugeWithLowerJetsOn r Q
+      (fun t x ↦ uApprox n (parabolicPoint t x)) ≤ C)
+    (hrealize : ∀ n, ParabolicJetRealizesOn Q
+      (uApprox n) (dtimeUApprox n) (duApprox n) (d2uApprox n)) :
+    ∃ (phi : Nat → Nat)
+        (u dtimeU : ParabolicPoint E → F)
+        (du : ParabolicPoint E → E →L[Real] F)
+        (d2u : ParabolicPoint E → E →L[Real] E →L[Real] F),
+      StrictMono phi ∧
+        TendstoLocallyUniformlyOn (fun n => uApprox (phi n)) u atTop Q ∧
+        TendstoLocallyUniformlyOn (fun n => dtimeUApprox (phi n)) dtimeU atTop Q ∧
+        TendstoLocallyUniformlyOn (fun n => duApprox (phi n)) du atTop Q ∧
+        TendstoLocallyUniformlyOn (fun n => d2uApprox (phi n)) d2u atTop Q ∧
+        ParabolicJetRealizesOn Q u dtimeU du d2u ∧
+        IsParabolicC2On Q (fun t x => u (parabolicPoint t x)) ∧
+        ∀ K : Set Q, IsCompact K →
+          ∃ Cu Ct Cd Cd2 : NNReal,
+            HolderOnWith Cu r (fun p : Q => u p) K ∧
+            HolderOnWith Ct r (fun p : Q => dtimeU p) K ∧
+            HolderOnWith Cd r (fun p : Q => du p) K ∧
+            HolderOnWith Cd2 r (fun p : Q => d2u p) K := by
+  have hbase : ∀ n, eParabolicC2HolderGaugeOn r Q
+      (fun t x ↦ uApprox n (parabolicPoint t x)) ≤ C := by
+    intro n
+    exact (eParabolicC2HolderGaugeOn_le_with_lower_jets r Q _).trans (hgauge n)
+  have huHolder : ∀ K : Set Q, IsCompact K →
+      ∃ C' : NNReal, ∀ n,
+        HolderOnWith C' r (fun p : Q => uApprox n p) K := by
+    intro K _
+    refine ⟨C, fun n => ?_⟩
+    have hholder := parabolicValue_holderWith_restrict_of_lower_jets (hgauge n)
+    simpa only [parabolicPoint_time_space] using hholder.holderOnWith K
+  have hdtimeUHolder : ∀ K : Set Q, IsCompact K →
+      ∃ C' : NNReal, ∀ n,
+        HolderOnWith C' r (fun p : Q => dtimeUApprox n p) K := by
+    intro K _
+    exact ⟨C, fun n =>
+      ((hrealize n).holderWith_restrict_timeDerivative_of_lower_jets_gauge
+        (hgauge n)).holderOnWith K⟩
+  have hduHolder : ∀ K : Set Q, IsCompact K →
+      ∃ C' : NNReal, ∀ n,
+        HolderOnWith C' r (fun p : Q => duApprox n p) K := by
+    intro K _
+    exact ⟨C, fun n =>
+      ((hrealize n).holderWith_restrict_spatialDerivative_of_lower_jets_gauge
+        (hgauge n)).holderOnWith K⟩
+  have hd2uHolder : ∀ K : Set Q, IsCompact K →
+      ∃ C' : NNReal, ∀ n,
+        HolderOnWith C' r (fun p : Q => d2uApprox n p) K := by
+    intro K _
+    exact ⟨C, fun n =>
+      ((hrealize n).holderWith_restrict_spatialSecondDerivative_of_lower_jets_gauge
+        hQ (hgauge n)).holderOnWith K⟩
+  have huBound : ∀ p : Q, ∃ M : Real, ∀ n, ‖uApprox n p‖ ≤ M := by
+    intro p
+    refine ⟨C, fun n => ?_⟩
+    have hzero := parabolicSpatialJet_norm_le (hbase n) (j := 0) (by norm_num) p.2
+    simpa only [parabolicSpatialJet, norm_iteratedFDeriv_zero,
+      parabolicPoint_time_space] using hzero
+  have hdtimeUBound : ∀ p : Q, ∃ M : Real,
+      ∀ n, ‖dtimeUApprox n p‖ ≤ M := by
+    intro p
+    exact ⟨C, fun n =>
+      (hrealize n).norm_timeDerivative_le_of_lower_jets_gauge (hgauge n) p.2⟩
+  have hduBound : ∀ p : Q, ∃ M : Real, ∀ n, ‖duApprox n p‖ ≤ M := by
+    intro p
+    exact ⟨C, fun n =>
+      (hrealize n).norm_spatialDerivative_le_of_lower_jets_gauge (hgauge n) p.2⟩
+  have hd2uBound : ∀ p : Q, ∃ M : Real, ∀ n, ‖d2uApprox n p‖ ≤ M := by
+    intro p
+    exact ⟨C, fun n =>
+      (hrealize n).norm_spatialSecondDerivative_le_of_lower_jets_gauge
+        hQ (hgauge n) p.2⟩
+  exact exists_parabolic_jet_subseq_with_locally_holderOnWith hQ
+    uApprox dtimeUApprox duApprox d2uApprox hr
+    huHolder hdtimeUHolder hduHolder hd2uHolder
+    huBound hdtimeUBound hduBound hd2uBound hrealize
+
 end DifferentialGeometry.Analysis.Schauder
 
 end
