@@ -395,6 +395,34 @@ theorem lipschitzOnWith_parabolicValue_of_parabolicC2HolderGaugeOn_of_convex
             simpa only [mul_one] using mul_le_mul_of_nonneg_left hpq'
               (by positivity : 0 ≤ ((2 * C : NNReal) : Real))
 
+def parabolicValueInterpolationConst
+    (epsilon alpha C M : NNReal) : NNReal :=
+  2 * C * epsilon ^ ((1 : NNReal) - alpha : Real) +
+    2 * M / epsilon ^ (alpha : Real)
+
+theorem parabolicValue_holderWith_restrict_of_interpolation
+    {J : Set Real} (hJ : Convex Real J) {Omega : Set V}
+    (hOmega : Convex Real Omega) (epsilon : NNReal)
+    (hepsilon : 0 < epsilon)
+    {alpha C M : NNReal} (halpha : alpha ≤ 1)
+    {u : Real → V → F}
+    (hu : IsParabolicC2On (parabolicCylinder J Omega) u)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J Omega) u ≤ C)
+    (huNorm : ∀ p, p ∈ parabolicCylinder J Omega →
+      ‖u p.time p.space‖ ≤ M) :
+    HolderWith (parabolicValueInterpolationConst epsilon alpha C M) alpha
+      ((parabolicCylinder J Omega).restrict
+        (fun p : ParabolicPoint V ↦ u p.time p.space)) := by
+  simpa only [parabolicValueInterpolationConst] using
+    holderWith_restrict_of_norm_le_of_lipschitzOnWith
+      (s := parabolicCylinder J Omega)
+      (f := fun p : ParabolicPoint V ↦ u p.time p.space)
+      (M := M) (L := 2 * C) (alpha := alpha) (epsilon := epsilon)
+      hepsilon halpha huNorm
+      (lipschitzOnWith_parabolicValue_of_parabolicC2HolderGaugeOn_of_convex
+        hJ hOmega hu hgauge)
+
 theorem parabolicValue_holderWith_restrict_of_convex
     {J : Set Real} (hJ : Convex Real J) {Omega : Set V}
     (hOmega : Convex Real Omega)

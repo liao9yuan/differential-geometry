@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.VariableCoefficient
+import DifferentialGeometry.Analysis.Schauder.Interpolation
 
 noncomputable section
 
@@ -522,6 +523,18 @@ def parabolicLowerOrderHolderConst
     (Kb Bb : n → NNReal) (Kc Kdu Ku Mdu Bc Mu : NNReal) : NNReal :=
   (∑ i, (Bb i * Kdu + Mdu * Kb i)) + (Bc * Ku + Mu * Kc)
 
+def parabolicLowerOrderInterpolationSupConst
+    (Bb : n → NNReal) (Bc epsilon C M : NNReal) : NNReal :=
+  parabolicLowerOrderSupConst Bb Bc (2 * M / epsilon + C * epsilon) M
+
+def parabolicLowerOrderInterpolationHolderConst
+    (Kb Bb : n → NNReal)
+    (Kc Bc epsilon delta alpha C M : NNReal) : NNReal :=
+  parabolicLowerOrderHolderConst Kb Bb Kc
+    (parabolicSpatialGradientInterpolationConst epsilon delta alpha C M)
+    (parabolicValueInterpolationConst epsilon alpha C M)
+    (2 * M / epsilon + C * epsilon) Bc M
+
 omit [DecidableEq n] [Nonempty n] in
 theorem norm_parabolicDriftTerm_le
     {Q : Set (ParabolicPoint (Euc n))}
@@ -662,6 +675,117 @@ theorem parabolicLowerOrderTerm_holderWith_restrict
     b u Kb Bb Mdu hb hbNorm hdu hduNorm).add
     (parabolicPotentialTerm_holderWith_restrict
       c u hc hu hcNorm huNorm)
+
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicLowerOrderTerm_le_of_interpolation
+    {J : Set Real} (center : Euc n) {r R : Real} (epsilon : NNReal)
+    (hepsilon : 0 < epsilon) (hbuffer : r + epsilon < R)
+    {alpha C M : NNReal}
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (Bb : n → NNReal) (Bc : NNReal)
+    (hu : IsParabolicC2On
+      (parabolicCylinder J (Metric.ball center R)) u)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J (Metric.ball center R)) u ≤ C)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.ball center R) →
+        ‖u p.time p.space‖ ≤ M)
+    (hbNorm : ∀ i p,
+      p ∈ parabolicCylinder J (Metric.closedBall center r) →
+        ‖b i p‖ ≤ Bb i)
+    (hcNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.closedBall center r) →
+        ‖c p‖ ≤ Bc)
+    (p : ParabolicPoint (Euc n))
+    (hp : p ∈ parabolicCylinder J (Metric.closedBall center r)) :
+    ‖parabolicLowerOrderTerm b c u p‖ ≤
+      parabolicLowerOrderInterpolationSupConst Bb Bc epsilon C M := by
+  have hsubset :
+      parabolicCylinder J (Metric.closedBall center r) ⊆
+        parabolicCylinder J (Metric.ball center R) := by
+    intro q hq
+    exact ⟨hq.1, (Metric.mem_closedBall.mp hq.2).trans_lt
+      ((lt_add_of_pos_right r (by exact_mod_cast hepsilon)).trans hbuffer)⟩
+  apply norm_parabolicLowerOrderTerm_le b c u Bb Bc
+    (2 * M / epsilon + C * epsilon) M hbNorm hcNorm
+  · intro q hq
+    exact norm_parabolicSpatialJet_one_le_of_buffered_ball
+      center epsilon hepsilon hbuffer hu hgauge huNorm q hq
+  · exact fun q hq ↦ huNorm q (hsubset hq)
+  · exact hp
+
+omit [DecidableEq n] [Nonempty n] in
+theorem parabolicLowerOrderTerm_holderWith_restrict_of_interpolation
+    {J : Set Real} (hJ : Convex Real J)
+    (center : Euc n) {r R : Real} (epsilon delta : NNReal)
+    (hepsilon : 0 < epsilon) (hepsilonDelta : epsilon < delta)
+    (hbuffer : r + delta ≤ R)
+    {alpha C M : NNReal} (halpha : alpha ≤ 1)
+    (b : n → ParabolicPoint (Euc n) → Real)
+    (c : ParabolicPoint (Euc n) → Real)
+    (u : Real → Euc n → F) (Kb Bb : n → NNReal) (Kc Bc : NNReal)
+    (hu : IsParabolicC2On
+      (parabolicCylinder J (Metric.ball center R)) u)
+    (hgauge : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J (Metric.ball center R)) u ≤ C)
+    (huNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.ball center R) →
+        ‖u p.time p.space‖ ≤ M)
+    (hb : ∀ i, HolderWith (Kb i) alpha
+      ((parabolicCylinder J (Metric.closedBall center r)).restrict (b i)))
+    (hc : HolderWith Kc alpha
+      ((parabolicCylinder J (Metric.closedBall center r)).restrict c))
+    (hbNorm : ∀ i p,
+      p ∈ parabolicCylinder J (Metric.closedBall center r) →
+        ‖b i p‖ ≤ Bb i)
+    (hcNorm : ∀ p,
+      p ∈ parabolicCylinder J (Metric.closedBall center r) →
+        ‖c p‖ ≤ Bc) :
+    HolderWith
+      (parabolicLowerOrderInterpolationHolderConst
+        Kb Bb Kc Bc epsilon delta alpha C M) alpha
+      ((parabolicCylinder J (Metric.closedBall center r)).restrict
+        (parabolicLowerOrderTerm b c u)) := by
+  have hdelta : 0 < delta := hepsilon.trans hepsilonDelta
+  have hrR : r < R := by
+    calc
+      r < r + (delta : Real) :=
+        lt_add_of_pos_right r (by exact_mod_cast hdelta)
+      _ ≤ R := hbuffer
+  have hsubset :
+      parabolicCylinder J (Metric.closedBall center r) ⊆
+        parabolicCylinder J (Metric.ball center R) := by
+    intro p hp
+    exact ⟨hp.1, (Metric.mem_closedBall.mp hp.2).trans_lt hrR⟩
+  have huInner : IsParabolicC2On
+      (parabolicCylinder J (Metric.closedBall center r)) u :=
+    ⟨fun p hp ↦ hu.1 p (hsubset hp), fun p hp ↦ hu.2 p (hsubset hp)⟩
+  have hgaugeInner : eParabolicC2HolderGaugeOn alpha
+      (parabolicCylinder J (Metric.closedBall center r)) u ≤ C :=
+    (eParabolicC2HolderGaugeOn_mono hsubset alpha u).trans hgauge
+  have huNormInner : ∀ p,
+      p ∈ parabolicCylinder J (Metric.closedBall center r) →
+        ‖u p.time p.space‖ ≤ M :=
+    fun p hp ↦ huNorm p (hsubset hp)
+  apply parabolicLowerOrderTerm_holderWith_restrict
+    b c u Kb Bb (2 * M / epsilon + C * epsilon) Bc M hb hc
+  · exact parabolicSpatialJet_one_holderWith_restrict_of_interpolation
+      hJ center epsilon delta hepsilon hepsilonDelta hbuffer
+        halpha hu hgauge huNorm
+  · exact parabolicValue_holderWith_restrict_of_interpolation
+      hJ (convex_closedBall center r) epsilon hepsilon halpha
+        huInner hgaugeInner huNormInner
+  · exact hbNorm
+  · exact hcNorm
+  · intro p hp
+    exact norm_parabolicSpatialJet_one_le_of_buffered_ball
+      center epsilon hepsilon (by
+        calc
+          r + (epsilon : Real) < r + (delta : Real) := by gcongr
+          _ ≤ R := hbuffer)
+      hu hgauge huNorm p hp
+  · exact huNormInner
 
 section Schauder
 
