@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.Oscillation
+import DifferentialGeometry.Analysis.Integration.Holder.Weighted
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.MeasureTheory.Integral.Prod
 
@@ -115,6 +116,22 @@ theorem localizedSpacetimeRpowNorm_pos
       localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b) :
     0 < localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b :=
   Real.rpow_pos_of_pos hmoment _
+
+theorem localizedSpacetimeRpowNorm_mono
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : Continuous (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p q a b : ℝ} (hp : 0 < p) (hpq : p ≤ q)
+    (hmass :
+      (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b).real
+        Set.univ ≤ 1) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ≤
+      localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u q a b := by
+  exact DifferentialGeometry.Integral.integral_rpow_root_mono_of_measure_le_one
+    hp hpq (ae_of_all _ fun z => (hpos z.1 z.2).le)
+      (integrable_localizedSpacetimeRpow_of_continuous_pos
+        (I := I) (M := M) cutoff u hu hpos q a b) hmass
 
 omit [CompactSpace M] in
 theorem integral_cutoffWeightedMeasure

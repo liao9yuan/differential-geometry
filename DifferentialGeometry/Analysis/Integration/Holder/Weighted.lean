@@ -126,6 +126,45 @@ theorem integral_rpow_le_integral_rpow_mul_measure
   rw [integral_congr_ae hpoint] at h
   simpa only [integral_const, smul_eq_mul, mul_one] using h
 
+theorem integral_rpow_root_mono_of_measure_le_one
+    [IsFiniteMeasure μ] {f : α → ℝ} {p q : ℝ}
+    (hp : 0 < p) (hpq : p ≤ q)
+    (hf_nonneg : 0 ≤ᵐ[μ] f)
+    (hfq : Integrable (fun x => f x ^ q) μ)
+    (hmass : μ.real Set.univ ≤ 1) :
+    (∫ x, f x ^ p ∂μ) ^ (1 / p) ≤
+      (∫ x, f x ^ q ∂μ) ^ (1 / q) := by
+  have hq : 0 < q := hp.trans_le hpq
+  have hratio_le : p / q ≤ 1 := (div_le_one hq).2 hpq
+  have hmass_power : μ.real Set.univ ^ (1 - p / q) ≤ 1 := by
+    exact Real.rpow_le_one ENNReal.toReal_nonneg hmass
+      (sub_nonneg.mpr hratio_le)
+  have hq_integral : 0 ≤ ∫ x, f x ^ q ∂μ :=
+    integral_nonneg_of_ae (hf_nonneg.mono fun x hx => Real.rpow_nonneg hx q)
+  have hp_integral : 0 ≤ ∫ x, f x ^ p ∂μ :=
+    integral_nonneg_of_ae (hf_nonneg.mono fun x hx => Real.rpow_nonneg hx p)
+  have hholder := integral_rpow_le_integral_rpow_mul_measure
+    hp.le hq hpq hf_nonneg hfq
+  have hmoment : (∫ x, f x ^ p ∂μ) ≤
+      (∫ x, f x ^ q ∂μ) ^ (p / q) := by
+    calc
+      (∫ x, f x ^ p ∂μ) ≤
+          (∫ x, f x ^ q ∂μ) ^ (p / q) *
+            μ.real Set.univ ^ (1 - p / q) := hholder
+      _ ≤ (∫ x, f x ^ q ∂μ) ^ (p / q) * 1 :=
+        mul_le_mul_of_nonneg_left hmass_power
+          (Real.rpow_nonneg hq_integral (p / q))
+      _ = (∫ x, f x ^ q ∂μ) ^ (p / q) := mul_one _
+  have hroot := Real.rpow_le_rpow hp_integral hmoment
+    (div_nonneg zero_le_one hp.le)
+  calc
+    (∫ x, f x ^ p ∂μ) ^ (1 / p) ≤
+        ((∫ x, f x ^ q ∂μ) ^ (p / q)) ^ (1 / p) := hroot
+    _ = (∫ x, f x ^ q ∂μ) ^ (1 / q) := by
+      rw [← Real.rpow_mul hq_integral]
+      congr 1
+      field_simp [hp.ne', hq.ne']
+
 private theorem critical_sobolev_rpow_factorization
     {d a : ℝ} (hd : 2 < d) :
     (a ^ 2) ^ (2 / d) *
