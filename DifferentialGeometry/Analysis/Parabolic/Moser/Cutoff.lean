@@ -174,6 +174,190 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite �
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+def spatialCutoffBetweenArgument
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (inner outer : ℝ) (x : M) : ℝ :=
+  1 + (outer - rho.toFun x) / (outer - inner)
+
+def spatialCutoffBetween
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (inner outer : ℝ) : SmoothScalar g where
+  toFun := fun x => CutoffProfile.value
+    (spatialCutoffBetweenArgument rho inner outer x)
+  smooth := by
+    apply CutoffProfile.contDiff.contMDiff.comp
+    exact contMDiff_const.add
+      ((contMDiff_const.sub rho.smooth).div_const (outer - inner))
+
+omit [Module.Finite ℝ E] in
+@[simp]
+theorem spatialCutoffBetween_toFun
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (inner outer : ℝ) (x : M) :
+    (spatialCutoffBetween rho inner outer).toFun x =
+      CutoffProfile.value (spatialCutoffBetweenArgument rho inner outer x) := rfl
+
+omit [Module.Finite ℝ E] in
+theorem spatialCutoffBetween_mem_Icc
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (inner outer : ℝ) (x : M) :
+    (spatialCutoffBetween rho inner outer).toFun x ∈ Icc (0 : ℝ) 1 :=
+  CutoffProfile.mem_Icc _
+
+omit [Module.Finite ℝ E] in
+theorem spatialCutoffBetween_eq_one_of_outer_le
+    {g : SmoothRiemannianMetric I M} {rho : SmoothScalar g}
+    {inner outer : ℝ} (hinnerOuter : inner < outer) {x : M}
+    (hx : outer ≤ rho.toFun x) :
+    (spatialCutoffBetween rho inner outer).toFun x = 1 := by
+  apply CutoffProfile.one_of_le_one
+  rw [spatialCutoffBetweenArgument]
+  have hwidth : 0 < outer - inner := sub_pos.mpr hinnerOuter
+  have hquotient : (outer - rho.toFun x) / (outer - inner) ≤ 0 :=
+    div_nonpos_of_nonpos_of_nonneg (sub_nonpos.mpr hx) hwidth.le
+  linarith
+
+omit [Module.Finite ℝ E] in
+theorem spatialCutoffBetween_eq_zero_of_le_inner
+    {g : SmoothRiemannianMetric I M} {rho : SmoothScalar g}
+    {inner outer : ℝ} (hinnerOuter : inner < outer) {x : M}
+    (hx : rho.toFun x ≤ inner) :
+    (spatialCutoffBetween rho inner outer).toFun x = 0 := by
+  apply CutoffProfile.zero_of_two_le
+  rw [spatialCutoffBetweenArgument]
+  have hwidth : 0 < outer - inner := sub_pos.mpr hinnerOuter
+  rw [show (2 : ℝ) = 1 + 1 by norm_num, add_le_add_iff_left,
+    le_div_iff₀ hwidth]
+  linarith
+
+omit [Module.Finite ℝ E] in
+theorem spatialCutoffBetween_sq_le
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    {outerLevel middleLevel innerLevel : ℝ}
+    (houterMiddle : outerLevel < middleLevel)
+    (hmiddleInner : middleLevel < innerLevel) (x : M) :
+    (spatialCutoffBetween rho middleLevel innerLevel).toFun x ^ 2 ≤
+      (spatialCutoffBetween rho outerLevel middleLevel).toFun x ^ 2 := by
+  by_cases hx : rho.toFun x ≤ middleLevel
+  · rw [spatialCutoffBetween_eq_zero_of_le_inner hmiddleInner hx]
+    simpa using sq_nonneg
+      ((spatialCutoffBetween rho outerLevel middleLevel).toFun x)
+  · have hone : (spatialCutoffBetween rho outerLevel middleLevel).toFun x = 1 :=
+      spatialCutoffBetween_eq_one_of_outer_le houterMiddle (le_of_not_ge hx)
+    rw [hone, one_pow]
+    have hmem := spatialCutoffBetween_mem_Icc rho middleLevel innerLevel x
+    simpa using (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
+
+theorem gradientFun_spatialCutoffBetween
+    [I.Boundaryless] [T2Space M]
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    (inner outer : ℝ) (x : M) :
+    gradientFun (I := I) g (spatialCutoffBetween rho inner outer).toFun x =
+      (deriv CutoffProfile.value
+          (spatialCutoffBetweenArgument rho inner outer x) *
+          (-1 / (outer - inner))) •
+        gradientFun (I := I) g rho.toFun x := by
+  let affine : ℝ → ℝ := fun s => 1 + (outer - s) / (outer - inner)
+  let profile : ℝ → ℝ := fun s => CutoffProfile.value (affine s)
+  have haffine : HasDerivAt affine (-1 / (outer - inner)) (rho.toFun x) := by
+    have h := (hasDerivAt_const (rho.toFun x) (1 : ℝ)).add
+      (((hasDerivAt_const (rho.toFun x) outer).sub
+        (hasDerivAt_id (rho.toFun x))).div_const (outer - inner))
+    simpa only [affine, zero_sub, zero_add] using h
+  have hvalue : HasDerivAt CutoffProfile.value
+      (deriv CutoffProfile.value (affine (rho.toFun x)))
+      (affine (rho.toFun x)) :=
+    (CutoffProfile.contDiff.differentiable (by simp) _).hasDerivAt
+  have hprofile : HasDerivAt profile
+      (deriv CutoffProfile.value (affine (rho.toFun x)) *
+        (-1 / (outer - inner))) (rho.toFun x) := by
+    simpa only [profile] using hvalue.comp (rho.toFun x) haffine
+  have hgradient := gradientFun_comp (I := I) g hprofile.differentiableAt
+    (rho.smooth.mdifferentiable (by simp) x)
+  simpa only [profile, affine, spatialCutoffBetween_toFun,
+    spatialCutoffBetweenArgument, hprofile.deriv] using hgradient
+
+theorem spatialCutoffBetween_gradient_le
+    [I.Boundaryless] [T2Space M]
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    {outerLevel middleLevel innerLevel B : ℝ}
+    (houterMiddle : outerLevel < middleLevel)
+    (hmiddleInner : middleLevel < innerLevel)
+    (hB : 0 ≤ B)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (x : M) :
+    g.inner x
+        (gradFun (I := I) g
+          (spatialCutoffBetween rho middleLevel innerLevel).toFun x)
+        (gradFun (I := I) g
+          (spatialCutoffBetween rho middleLevel innerLevel).toFun x) ≤
+      (CutoffProfile.derivBound ^ 2 * B / (innerLevel - middleLevel) ^ 2) *
+        (spatialCutoffBetween rho outerLevel middleLevel).toFun x ^ 2 := by
+  let argument := spatialCutoffBetweenArgument rho middleLevel innerLevel x
+  let coefficient := deriv CutoffProfile.value argument *
+    (-1 / (innerLevel - middleLevel))
+  have hgradient :
+      gradFun (I := I) g
+          (spatialCutoffBetween rho middleLevel innerLevel).toFun x =
+        coefficient • gradFun (I := I) g rho.toFun x := by
+    exact gradientFun_spatialCutoffBetween (I := I) g rho
+      middleLevel innerLevel x
+  by_cases hx : rho.toFun x ≤ middleLevel
+  · have hargument : 2 ≤ argument := by
+      dsimp only [argument, spatialCutoffBetweenArgument]
+      have hwidth : 0 < innerLevel - middleLevel := sub_pos.mpr hmiddleInner
+      rw [show (2 : ℝ) = 1 + 1 by norm_num, add_le_add_iff_left,
+        le_div_iff₀ hwidth]
+      linarith
+    have hderiv : deriv CutoffProfile.value argument = 0 :=
+      CutoffProfile.deriv_zero_of_ge hargument
+    rw [hgradient]
+    simp only [coefficient, hderiv, zero_mul, zero_smul, map_zero]
+    exact mul_nonneg
+      (div_nonneg (mul_nonneg (sq_nonneg _) hB)
+        (sq_nonneg (innerLevel - middleLevel)))
+      (sq_nonneg _)
+  · have hone :
+        (spatialCutoffBetween rho outerLevel middleLevel).toFun x = 1 :=
+      spatialCutoffBetween_eq_one_of_outer_le houterMiddle (le_of_not_ge hx)
+    have hinner_nonneg : 0 ≤
+        g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) :=
+      metric_inner_self_nonneg (I := I) (M := M) g x _
+    have hderiv_sq : deriv CutoffProfile.value argument ^ 2 ≤
+        CutoffProfile.derivBound ^ 2 := by
+      calc
+        deriv CutoffProfile.value argument ^ 2 =
+            |deriv CutoffProfile.value argument| ^ 2 :=
+          (sq_abs _).symm
+        _ ≤ CutoffProfile.derivBound ^ 2 :=
+          (sq_le_sq₀ (abs_nonneg _) CutoffProfile.derivBound_nonneg).2
+            (CutoffProfile.abs_deriv_le_derivBound argument)
+    rw [hgradient, metric_inner_smul_self, hone, one_pow, mul_one]
+    have hcoefficient : coefficient ^ 2 ≤
+        CutoffProfile.derivBound ^ 2 / (innerLevel - middleLevel) ^ 2 := by
+      dsimp only [coefficient]
+      rw [mul_pow, div_pow]
+      norm_num
+      exact div_le_div_of_nonneg_right hderiv_sq
+        (sq_nonneg (innerLevel - middleLevel))
+    calc
+      coefficient ^ 2 *
+          g.inner x
+            (gradFun (I := I) g rho.toFun x)
+            (gradFun (I := I) g rho.toFun x) ≤
+          (CutoffProfile.derivBound ^ 2 /
+            (innerLevel - middleLevel) ^ 2) * B :=
+        mul_le_mul hcoefficient (hrho x) hinner_nonneg
+          (div_nonneg (sq_nonneg _) (sq_nonneg _))
+      _ = CutoffProfile.derivBound ^ 2 * B /
+          (innerLevel - middleLevel) ^ 2 := by
+        ring
+
 def spatialMoserCutoffArgument
     {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g) (k : ℕ) (x : M) : ℝ :=
   1 + (moserCutoffLevel (k + 1) - rho.toFun x) / moserCutoffWidth k
@@ -185,6 +369,21 @@ def spatialMoserCutoff
     apply CutoffProfile.contDiff.contMDiff.comp
     exact contMDiff_const.add
       ((contMDiff_const.sub rho.smooth).div_const (moserCutoffWidth k))
+
+omit [Module.Finite ℝ E] in
+theorem spatialMoserCutoff_eq_spatialCutoffBetween
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g) (k : ℕ) :
+    spatialMoserCutoff rho k =
+      spatialCutoffBetween rho (moserCutoffLevel k) (moserCutoffLevel (k + 1)) := by
+  apply SmoothScalar.ext
+  funext x
+  change CutoffProfile.value (spatialMoserCutoffArgument rho k x) =
+    CutoffProfile.value
+      (spatialCutoffBetweenArgument rho
+        (moserCutoffLevel k) (moserCutoffLevel (k + 1)) x)
+  congr 1
+  rw [spatialMoserCutoffArgument, spatialCutoffBetweenArgument,
+    moserCutoffLevel_succ_sub]
 
 omit [Module.Finite ℝ E] in
 @[simp]
