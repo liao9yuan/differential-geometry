@@ -19,7 +19,7 @@ noncomputable section
 open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Tensor.RicciIdentity
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.SlotAlgebra
 open scoped Manifold ContDiff BigOperators
 

@@ -18,8 +18,8 @@ namespace DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
-open Tensor0SBundle
-open TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
+open DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

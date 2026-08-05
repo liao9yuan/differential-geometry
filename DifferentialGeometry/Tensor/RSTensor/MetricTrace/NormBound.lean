@@ -15,6 +15,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 open Bundle
@@ -160,3 +161,4 @@ theorem trace_normSq_rank_le
   simpa [basis, pow_add] using h
 
 end Tensor0SBundle
+end DifferentialGeometry

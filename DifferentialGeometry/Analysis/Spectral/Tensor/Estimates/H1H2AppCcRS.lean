@@ -25,7 +25,7 @@ namespace DifferentialGeometry.Analysis.Spectral
 
 open scoped ContDiff Manifold Topology BigOperators ENNReal
 open MeasureTheory
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure

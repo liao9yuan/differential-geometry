@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 noncomputable section
 
 open DifferentialGeometry.Analysis.Sobolev
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
   RealInnerProductSpace InnerProductSpace
 

@@ -13,7 +13,7 @@ open DifferentialGeometry.Geometry.Operator
 noncomputable section
 
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry.Analysis.Sobolev.TensorHilbert
@@ -25,7 +25,7 @@ open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
-open TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
+open DifferentialGeometry.TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
 
 variable
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

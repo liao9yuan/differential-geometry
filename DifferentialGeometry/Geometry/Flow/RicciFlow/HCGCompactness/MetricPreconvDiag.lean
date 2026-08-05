@@ -122,7 +122,7 @@ theorem exists_diag_subseq
 section Realization
 
 open scoped Manifold ContDiff Topology
-open Bundle Tensor0SBundle TensorLieDeriv
+open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorLieDeriv
 
 open DifferentialGeometry.PDE.RicciFlow
 

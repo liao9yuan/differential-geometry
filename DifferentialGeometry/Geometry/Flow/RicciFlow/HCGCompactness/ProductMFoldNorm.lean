@@ -44,7 +44,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.PDE.RicciFlow (iterCov_realizes)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

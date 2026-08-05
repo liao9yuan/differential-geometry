@@ -9,7 +9,7 @@ noncomputable section
 namespace DifferentialGeometry
 namespace Coordinates
 
-open Set Bundle Tensor0SBundle Filter
+open Set Bundle DifferentialGeometry.Tensor0SBundle Filter
 open scoped Topology Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

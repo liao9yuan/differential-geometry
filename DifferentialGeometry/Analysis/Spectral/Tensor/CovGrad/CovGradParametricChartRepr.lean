@@ -24,7 +24,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad covGrad_toS
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (contMDiffOn_clm_section_of_pointwise_joint_manifold_time
   jointContMDiff_toModel_continuous_slice)
-open Tensor0SBundle TensorRSNabla
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorRSNabla
 
 namespace DifferentialGeometry
 namespace Analysis

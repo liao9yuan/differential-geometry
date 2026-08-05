@@ -9,6 +9,7 @@ import DifferentialGeometry.Tensor.RSTensor.Field
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -184,3 +185,4 @@ theorem TensorRSField.lift_scalar0
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

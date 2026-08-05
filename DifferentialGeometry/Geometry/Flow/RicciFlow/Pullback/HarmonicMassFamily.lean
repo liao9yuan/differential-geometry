@@ -22,7 +22,7 @@ There is no metric-dependent or time-dependent shrinking.
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped ENNReal Manifold NNReal Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

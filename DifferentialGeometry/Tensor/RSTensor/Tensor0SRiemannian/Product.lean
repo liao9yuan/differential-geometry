@@ -13,6 +13,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -989,3 +990,4 @@ theorem deriv4sum
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

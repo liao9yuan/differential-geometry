@@ -20,7 +20,7 @@ open DifferentialGeometry.Geometry.Operator
 noncomputable section
 
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients

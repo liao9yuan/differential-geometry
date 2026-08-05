@@ -9,8 +9,9 @@ set_option backward.isDefEq.respectTransparency false
 
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
+namespace DifferentialGeometry
 namespace Tensor0SNabla
 
 variable
@@ -530,4 +531,5 @@ example
 
 end Tensor0SNabla
 
+end DifferentialGeometry
 end

@@ -5,6 +5,7 @@ import DifferentialGeometry.Tensor.Multilinear.Tensor
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 open Bundle Module
@@ -138,3 +139,4 @@ theorem extRS_basis
 end Mixed
 
 end Tensor0SBundle
+end DifferentialGeometry

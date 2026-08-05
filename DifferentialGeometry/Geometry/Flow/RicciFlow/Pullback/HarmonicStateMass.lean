@@ -21,7 +21,7 @@ the present operator at the identity map, not the nonlinear Galerkin mass.
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

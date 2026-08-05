@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Tensor.TensorRSRiemannian
-open TensorRSNabla
+open DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension hiding chartTargetEuclid

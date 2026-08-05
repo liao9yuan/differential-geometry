@@ -12,6 +12,7 @@ set_option backward.isDefEq.respectTransparency false
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative
 
+namespace DifferentialGeometry
 namespace HomConnectionGen
 
 variable
@@ -513,4 +514,5 @@ theorem homBundleCovariantDerivativeGen_apply
 
 end HomConnectionGen
 
+end DifferentialGeometry
 end

@@ -15,7 +15,7 @@ and its bundled tangent map has the expected one-lower regularity.
 
 noncomputable section
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

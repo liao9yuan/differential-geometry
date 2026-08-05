@@ -6,7 +6,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
 open DifferentialGeometry
 open DifferentialGeometry.PDE

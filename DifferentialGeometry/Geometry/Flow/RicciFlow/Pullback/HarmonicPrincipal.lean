@@ -48,7 +48,7 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxSynthPendingDepth 8
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped ENNReal Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

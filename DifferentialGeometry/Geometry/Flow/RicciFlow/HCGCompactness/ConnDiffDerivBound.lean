@@ -38,7 +38,7 @@ leaf is the ratified B2 home and its editable set.  Promote upstream once B2 ass
 noncomputable section
 
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry

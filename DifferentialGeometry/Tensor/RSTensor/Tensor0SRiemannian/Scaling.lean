@@ -11,6 +11,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -148,3 +149,4 @@ theorem normSq0S_two_scale
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

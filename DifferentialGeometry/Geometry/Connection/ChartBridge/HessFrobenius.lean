@@ -9,7 +9,7 @@ open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
-open Bundle Manifold Set FiberBundle Tensor0SBundle
+open Bundle Manifold Set FiberBundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 

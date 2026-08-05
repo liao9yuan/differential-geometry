@@ -19,7 +19,7 @@ namespace HebeyBlock
 open DifferentialGeometry.Integral.Measure
 
 open DifferentialGeometry.Tensor
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]

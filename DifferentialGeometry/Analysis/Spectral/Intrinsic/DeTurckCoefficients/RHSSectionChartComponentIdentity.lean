@@ -10,7 +10,7 @@ open DifferentialGeometry.Geometry.Connection
 noncomputable section
 
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry

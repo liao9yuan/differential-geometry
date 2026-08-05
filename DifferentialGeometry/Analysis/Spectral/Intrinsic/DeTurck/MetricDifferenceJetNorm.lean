@@ -18,7 +18,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

@@ -26,7 +26,7 @@ use the wrong realization identity.
 noncomputable section
 
 
-open Bundle Manifold MeasureTheory Tensor0SBundle
+open Bundle Manifold MeasureTheory DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry

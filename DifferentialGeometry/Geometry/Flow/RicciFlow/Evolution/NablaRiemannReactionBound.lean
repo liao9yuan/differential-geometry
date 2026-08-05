@@ -28,7 +28,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 
 open DifferentialGeometry.Geometry.Operator
@@ -842,7 +842,7 @@ theorem rmFrozenSlot_basis_component
       S.base.rm04 t x₀ (Function.update (fun i : Fin 4 => Vm i x₀) q e) :=
   rmFrozenSlotField_apply_vec (I := I) S t q Vm x₀ e
 
-open TensorLieDeriv in
+open DifferentialGeometry.TensorLieDeriv in
 omit [Module.Finite ℝ E] in
 theorem abs_nablaLapComm_T1_covConst_le
     [FiniteDimensional Real E]
@@ -1042,7 +1042,7 @@ theorem abs_nablaLapComm_T1_covConst_le
   ring_nf
   rfl
 
-open TensorLieDeriv in
+open DifferentialGeometry.TensorLieDeriv in
 omit [Module.Finite ℝ E] in
 theorem abs_nablaLapComm_T1_orthoBasis_le
     [FiniteDimensional Real E]

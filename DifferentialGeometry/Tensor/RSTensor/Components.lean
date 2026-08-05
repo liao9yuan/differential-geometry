@@ -76,6 +76,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 open Bundle Module
@@ -250,3 +251,4 @@ theorem extRS_basis_gen
 end Mixed
 
 end Tensor0SBundle
+end DifferentialGeometry

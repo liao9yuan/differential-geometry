@@ -17,7 +17,7 @@ covariant-derivative formalisms on `(0, s)`-tensors (see
   `totalNabla0S`/`metricCovDeriv`, built by trivialising to the model and reading the
   local connection endomorphism; and
 * the **abstract** bundled derivative
-  `Tensor0SNabla.tensor0SCovariantDerivative I M s cov` (built recursively via the
+  `DifferentialGeometry.Tensor0SNabla.tensor0SCovariantDerivative I M s cov` (built recursively via the
   curry isomorphism into the Hom-bundle).
 
 ## Route
@@ -49,7 +49,7 @@ set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 
 namespace DifferentialGeometry
@@ -63,8 +63,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-open Tensor0SNabla
-open Tensor0SPartialEval
+open DifferentialGeometry.Tensor0SNabla
+open DifferentialGeometry.Tensor0SPartialEval
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 

@@ -55,7 +55,7 @@ section BalLadder
 variable (g₀ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
-open Tensor0SBundle in
+open DifferentialGeometry.Tensor0SBundle in
 private lemma bal_rawLap_frame_sum_eval (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) (D : Tensor0SSpace r I x)
     (m : Fin s → TangentSpace I x) :
@@ -96,7 +96,7 @@ private lemma bal_rawLap_frame_sum_eval (g : SmoothRiemannianMetric I M) (r s : 
     x D m).symm
 
 set_option backward.isDefEq.respectTransparency false in
-open Tensor0SBundle in
+open DifferentialGeometry.Tensor0SBundle in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma bal_appCcRS_cometric_eval (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -127,7 +127,7 @@ private lemma bal_appCcRS_cometric_eval (g : SmoothRiemannianMetric I M) (r s : 
         K.toSection x) D)) m
 
 set_option backward.isDefEq.respectTransparency false in
-open Tensor0SBundle in
+open DifferentialGeometry.Tensor0SBundle in
 private lemma bal_rawLap_toSection_eq_cometric (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :
     (rawTensorConnLapSmooth (I := I) g r s Φ).toSection x =

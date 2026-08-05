@@ -15,7 +15,7 @@ open DifferentialGeometry.Analysis.Elliptic
 noncomputable section
 
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
@@ -29,7 +29,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
-open TensorRSNabla
+open DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
   (metricCauchySchwarzBound ccTensorBilinSymm)
 

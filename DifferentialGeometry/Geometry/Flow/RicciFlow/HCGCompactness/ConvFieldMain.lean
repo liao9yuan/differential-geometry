@@ -467,7 +467,7 @@ private theorem ofRP_supOn_def
           (resSrc (I := I) Φ hsrc k (gInf t))
           (refRes (I := I) Φ R hsrc k) := rfl
 
-open Tensor0SBundle in
+open DifferentialGeometry.Tensor0SBundle in
 include finiteE in
 omit neZeroE [I.Boundaryless] in
 theorem ofRP_supOn_eq

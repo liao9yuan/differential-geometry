@@ -350,7 +350,7 @@ variable [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 omit [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 private lemma scalarOnE_chartAtlasPOU_abs_le_one (α : M) (y : E) :

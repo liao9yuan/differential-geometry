@@ -8,6 +8,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -294,3 +295,4 @@ end TangentMetricData
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

@@ -13,7 +13,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.Analysis.Sobolev
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2

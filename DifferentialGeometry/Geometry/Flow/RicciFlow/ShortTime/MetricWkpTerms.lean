@@ -23,7 +23,7 @@ each fixed chart, uniform over the whole metric family and all components.
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
 
 namespace DifferentialGeometry.PDE.RicciFlow

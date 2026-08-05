@@ -9,7 +9,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
@@ -19,7 +19,7 @@ namespace Elliptic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
-open Tensor0SNabla
+open DifferentialGeometry.Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [CompleteSpace E]

@@ -24,7 +24,7 @@ noncomputable section
 
 universe u uE uH
 
-open Bundle Tensor0SBundle MeasureTheory
+open Bundle DifferentialGeometry.Tensor0SBundle MeasureTheory
 open scoped Manifold ContDiff ENNReal
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]

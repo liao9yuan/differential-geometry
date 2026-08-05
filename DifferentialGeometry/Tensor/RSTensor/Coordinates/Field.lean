@@ -9,6 +9,7 @@ import DifferentialGeometry.Tensor.Multilinear.Tensor
 open DifferentialGeometry.Tensor.Multilinear
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 noncomputable section
 
@@ -346,3 +347,4 @@ noncomputable def tensor0SField_product
 
 end
 end Tensor0SBundle
+end DifferentialGeometry

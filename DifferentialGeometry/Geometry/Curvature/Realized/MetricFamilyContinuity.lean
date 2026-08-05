@@ -27,7 +27,7 @@ set_option backward.isDefEq.respectTransparency false
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Geometry.Curvature
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff

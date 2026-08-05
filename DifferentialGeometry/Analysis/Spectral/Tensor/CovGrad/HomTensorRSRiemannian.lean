@@ -15,7 +15,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set IsManifold Tensor0SBundle ContinuousLinearMap Filter
+open Bundle Manifold Set IsManifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap Filter
 open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
 
 namespace DifferentialGeometry.Analysis.Spectral

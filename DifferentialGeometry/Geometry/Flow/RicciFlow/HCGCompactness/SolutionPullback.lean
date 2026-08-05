@@ -18,7 +18,7 @@ open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold Tensor0SBundle
+open Set Function Filter Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal
 
 open DifferentialGeometry.Geometry.Operator

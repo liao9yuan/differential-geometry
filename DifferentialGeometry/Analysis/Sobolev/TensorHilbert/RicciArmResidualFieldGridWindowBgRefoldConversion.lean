@@ -18,7 +18,7 @@ open DifferentialGeometry.Geometry.Operator
 noncomputable section
 
 
-open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry

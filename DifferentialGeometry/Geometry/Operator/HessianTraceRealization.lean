@@ -34,7 +34,7 @@ noncomputable section
 namespace DifferentialGeometry.Geometry.Operator
 
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff
 

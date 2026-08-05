@@ -31,7 +31,7 @@ shrinking is used.
 
 noncomputable section
 
-open Bundle Filter Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Filter Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ENNReal NNReal Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

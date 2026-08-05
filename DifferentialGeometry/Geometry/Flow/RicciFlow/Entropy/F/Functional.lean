@@ -29,7 +29,7 @@ open Filter MeasureTheory
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Tensor.Coordinates
 open DifferentialGeometry.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}
@@ -41,7 +41,7 @@ variable {M : Type*}
 
 
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}

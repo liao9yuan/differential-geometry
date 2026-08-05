@@ -5,7 +5,7 @@ noncomputable section
 
 set_option autoImplicit false
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff Topology
 
 namespace DifferentialGeometry.Geometry.Curvature

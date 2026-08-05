@@ -23,7 +23,7 @@ open scoped Manifold ContDiff Topology
 open DifferentialGeometry
 
 open DifferentialGeometry.HCGCompactness
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]

@@ -21,7 +21,7 @@ namespace Parabolic
 namespace TensorSpectral
 
 open DifferentialGeometry.Tensor
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 

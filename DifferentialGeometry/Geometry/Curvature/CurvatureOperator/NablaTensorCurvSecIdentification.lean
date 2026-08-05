@@ -15,7 +15,7 @@ namespace DifferentialGeometry
 namespace Geometry
 namespace Curvature
 
-open Tensor0SBundle Tensor0SNabla
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]

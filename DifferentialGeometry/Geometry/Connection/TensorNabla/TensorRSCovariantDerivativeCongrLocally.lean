@@ -6,7 +6,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle CovariantDerivative Filter Tensor0SBundle
+open Bundle CovariantDerivative Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 

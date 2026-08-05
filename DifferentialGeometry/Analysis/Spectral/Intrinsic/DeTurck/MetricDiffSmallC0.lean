@@ -23,7 +23,7 @@ lemma then promotes the uniform quadratic bound to the bilinear
 
 noncomputable section
 
-open Bundle Filter Set Tensor0SBundle
+open Bundle Filter Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral

@@ -427,7 +427,7 @@ theorem triv_toTensor_eq_modelFromTensorEquiv_symm {d : ℕ}
 
 end Bundle.continuousMultilinearMap
 
-namespace MultilinearSection
+namespace DifferentialGeometry.MultilinearSection
 
 variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
@@ -757,6 +757,6 @@ end BundleEquiv
 
 end TensorProductInstances
 
-end MultilinearSection
+end DifferentialGeometry.MultilinearSection
 
 end

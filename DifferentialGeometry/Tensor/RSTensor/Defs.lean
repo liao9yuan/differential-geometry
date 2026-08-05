@@ -9,6 +9,7 @@ import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 open DifferentialGeometry.Tensor.Multilinear
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 noncomputable section
 
@@ -708,3 +709,4 @@ theorem TensorRSSpace.smul_apply (r s : ℕ) (x : M)
 
 end
 end Tensor0SBundle
+end DifferentialGeometry

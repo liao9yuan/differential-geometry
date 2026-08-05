@@ -32,7 +32,7 @@ open scoped Manifold ContDiff BigOperators
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Curvature.CovariantDerivative
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]

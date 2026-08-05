@@ -33,7 +33,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
 
-open Tensor0SBundle TensorLieDeriv
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorLieDeriv
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]

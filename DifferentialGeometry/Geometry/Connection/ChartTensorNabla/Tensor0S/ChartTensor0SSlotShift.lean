@@ -6,8 +6,8 @@ noncomputable section
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
-open Tensor0SBundle
-open Tensor0SPartialEval
+open DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.Tensor0SPartialEval
 
 namespace DifferentialGeometry
 namespace Geometry

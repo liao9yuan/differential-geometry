@@ -41,7 +41,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open Filter Topology Asymptotics
 open DifferentialGeometry.PDE.RicciFlow
 

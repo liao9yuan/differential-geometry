@@ -24,7 +24,7 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Analysis.Spectral
 
-open Bundle ContinuousLinearMap Tensor0SBundle
+open Bundle ContinuousLinearMap DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
 

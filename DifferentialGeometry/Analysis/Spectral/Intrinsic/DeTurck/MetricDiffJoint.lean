@@ -22,7 +22,7 @@ against one fixed background metric, gives a jointly smooth family of
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-open Bundle Manifold Tensor0SBundle
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff RealInnerProductSpace InnerProductSpace
 namespace DifferentialGeometry.Analysis.Spectral
 

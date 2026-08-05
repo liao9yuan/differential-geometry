@@ -29,7 +29,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 section ParallelGeneral
 

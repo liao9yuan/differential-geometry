@@ -48,7 +48,7 @@ namespace DifferentialGeometry.Geometry.Curvature
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

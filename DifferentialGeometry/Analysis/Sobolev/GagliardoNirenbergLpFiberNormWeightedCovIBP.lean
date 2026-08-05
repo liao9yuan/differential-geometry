@@ -44,7 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section GeneralValenceRS
 
-open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
+open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla DifferentialGeometry.TensorMultilinear
 
 private theorem covDerivCrossLeft_weight_bound_rs
     (g : SmoothRiemannianMetric I M) (k m r : ℕ) (_hk : 1 ≤ k)

@@ -62,6 +62,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -525,3 +526,4 @@ end Intrinsic
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

@@ -24,7 +24,7 @@ open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
@@ -38,7 +38,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
-open TensorRSNabla
+open DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
   (metricCauchySchwarzBound ccTensorBilinSymm)
 
@@ -795,7 +795,7 @@ theorem covGrad_gInvDiffSlotCoeff_eq_appCcRS_composite
     (fun j : Fin 2 => if j = 0 then Y x else v)]
   simp only [Fin.isValue, if_true, if_neg (by decide : (1 : Fin 2) ≠ 0)]
 
-open TensorMultilinear
+open DifferentialGeometry.TensorMultilinear
 
 set_option backward.isDefEq.respectTransparency false in
 omit [CompactSpace M] in

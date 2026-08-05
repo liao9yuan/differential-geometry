@@ -66,7 +66,7 @@ attribute [local instance] Fintype.ofFinite Classical.propDecidable
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
-open Bundle Tensor0SBundle TensorLieDeriv
+open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorLieDeriv
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure

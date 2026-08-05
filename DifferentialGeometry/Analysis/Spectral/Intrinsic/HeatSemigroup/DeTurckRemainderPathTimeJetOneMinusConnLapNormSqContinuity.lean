@@ -40,7 +40,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 section OneMinusConnLapNormSqContinuity
 
-open Tensor0SBundle TensorMultilinear
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorMultilinear
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral

@@ -18,7 +18,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section
 
-open Bundle Tensor0SBundle Set
+open Bundle DifferentialGeometry.Tensor0SBundle Set
 open scoped Manifold ContDiff ENNReal
 
 open DifferentialGeometry.Integral.Measure

@@ -15,7 +15,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle CovariantDerivative
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 open DifferentialGeometry.Geometry.Operator
@@ -26,8 +26,8 @@ namespace Curvature
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open Tensor0SNabla
-open TensorRSNabla
+open DifferentialGeometry.Tensor0SNabla
+open DifferentialGeometry.TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]

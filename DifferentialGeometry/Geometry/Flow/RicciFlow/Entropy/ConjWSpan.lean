@@ -19,7 +19,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
 
-open Bundle Filter MeasureTheory Set Tensor0SBundle
+open Bundle Filter MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
 open DifferentialGeometry.Geometry.Operator

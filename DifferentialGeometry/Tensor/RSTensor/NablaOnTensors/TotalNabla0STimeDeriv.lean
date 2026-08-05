@@ -28,9 +28,10 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
-open Bundle Set IsManifold ContinuousLinearMap TensorLieDeriv DifferentialGeometry
+open Bundle Set IsManifold ContinuousLinearMap DifferentialGeometry.TensorLieDeriv DifferentialGeometry
 open scoped Manifold Topology Bundle ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -210,3 +211,4 @@ theorem totalNabla0SFun_hasDerivWithinAt {s : ℕ}
     (hswap t x₀ (Set.mem_singleton x₀) (X x₀)) hpt
 
 end Tensor0SBundle
+end DifferentialGeometry

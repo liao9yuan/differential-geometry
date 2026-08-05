@@ -21,7 +21,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Tensor0SBundle
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
   RealInnerProductSpace InnerProductSpace
 

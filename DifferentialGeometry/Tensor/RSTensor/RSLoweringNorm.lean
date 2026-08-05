@@ -24,9 +24,9 @@ namespace DifferentialGeometry
 namespace Tensor
 namespace RSTensor
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
-open TensorMetricLowering Tensor0SNabla TensorRSNabla
+open DifferentialGeometry.TensorMetricLowering DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

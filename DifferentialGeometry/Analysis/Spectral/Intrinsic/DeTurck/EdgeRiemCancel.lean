@@ -22,7 +22,7 @@ Riemann second-order budget remains in the boundary energy estimate.
 noncomputable section
 
 
-open Bundle Manifold Tensor0SBundle
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry

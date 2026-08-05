@@ -20,6 +20,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 set_option backward.isDefEq.respectTransparency false
@@ -207,3 +208,4 @@ theorem totalNabla0SRealizes_unique [T2Space M] {s : ℕ}
   rw [e1, e2]
 
 end Tensor0SBundle
+end DifferentialGeometry

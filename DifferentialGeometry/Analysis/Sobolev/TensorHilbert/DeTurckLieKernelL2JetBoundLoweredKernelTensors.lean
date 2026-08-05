@@ -26,7 +26,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Sobolev
@@ -65,7 +65,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 section DLaGridBrick
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure

@@ -19,7 +19,7 @@ open DifferentialGeometry.Geometry.Curvature
 noncomputable section
 
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
@@ -33,7 +33,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
-open TensorRSNabla
+open DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
   (metricCauchySchwarzBound ccTensorBilinSymm)
 
@@ -46,7 +46,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-open TensorMultilinear
+open DifferentialGeometry.TensorMultilinear
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in

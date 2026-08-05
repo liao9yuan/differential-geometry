@@ -20,7 +20,7 @@ set_option backward.isDefEq.respectTransparency false
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
 open DifferentialGeometry.Geometry.Operator

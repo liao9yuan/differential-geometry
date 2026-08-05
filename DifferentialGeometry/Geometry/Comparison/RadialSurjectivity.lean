@@ -13,8 +13,8 @@ open DifferentialGeometry.Geometry.Curvature
 
 
 
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace
+attribute [-instance] DifferentialGeometry.Tensor0SBundle.tangentSpace_normedAddCommGroup
+  DifferentialGeometry.Tensor0SBundle.tangentSpace_normedSpace
 
 noncomputable section
 

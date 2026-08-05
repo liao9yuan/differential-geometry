@@ -13,7 +13,7 @@ noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators
-open Tensor0SBundle Tensor0SNabla
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla
 
 namespace DifferentialGeometry
 namespace Geometry
@@ -24,8 +24,8 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open TensorMultilinear
-open TensorRSNabla
+open DifferentialGeometry.TensorMultilinear
+open DifferentialGeometry.TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

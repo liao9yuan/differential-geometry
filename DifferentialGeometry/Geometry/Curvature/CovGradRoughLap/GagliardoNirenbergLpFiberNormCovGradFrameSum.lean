@@ -43,7 +43,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section GeneralValenceRS
 
-open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
+open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla DifferentialGeometry.TensorMultilinear
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in

@@ -17,7 +17,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory intervalIntegral
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle MeasureTheory intervalIntegral
 open scoped Manifold Topology ContDiff BigOperators Matrix Interval
 
 namespace DifferentialGeometry

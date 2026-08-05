@@ -1,3 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Bianchi
 
+namespace DifferentialGeometry
+
 set_option autoImplicit false
+end DifferentialGeometry

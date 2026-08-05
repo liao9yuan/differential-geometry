@@ -14,6 +14,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -857,3 +858,4 @@ end PointwiseCS
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

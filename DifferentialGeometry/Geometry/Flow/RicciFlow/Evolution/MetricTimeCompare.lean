@@ -21,7 +21,7 @@ universe u uE uH
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Set Tensor0SBundle
+open Bundle Set DifferentialGeometry.Tensor0SBundle
 
 open scoped Manifold ContDiff Bundle Topology
 

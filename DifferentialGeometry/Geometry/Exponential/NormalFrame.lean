@@ -19,7 +19,7 @@ namespace Geometry
 namespace Riemannian
 namespace NormalCoordinates
 
-open Module Tensor0SBundle
+open Module DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff RealInnerProductSpace
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]

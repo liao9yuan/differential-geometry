@@ -48,7 +48,7 @@ open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]

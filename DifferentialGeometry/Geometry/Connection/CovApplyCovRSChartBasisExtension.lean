@@ -26,7 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
     [BoundarylessManifold I M] in

@@ -27,7 +27,7 @@ a high-order bound for the arbitrary endpoint solution.
 noncomputable section
 
 
-open Bundle Manifold Tensor0SBundle
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff RealInnerProductSpace
 
 namespace DifferentialGeometry

@@ -35,7 +35,7 @@ not an uninstantiated symbolic decomposition.
 noncomputable section
 
 
-open Bundle Manifold Tensor0SBundle
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry

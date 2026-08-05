@@ -9,7 +9,7 @@ open DifferentialGeometry.Geometry.Curvature
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
-open TensorRSNabla
+open DifferentialGeometry.TensorRSNabla
 
 section NormedReindexing
 

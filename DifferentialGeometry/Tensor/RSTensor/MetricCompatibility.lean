@@ -18,6 +18,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -438,3 +439,4 @@ theorem metricDerivsZero_nabla2
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

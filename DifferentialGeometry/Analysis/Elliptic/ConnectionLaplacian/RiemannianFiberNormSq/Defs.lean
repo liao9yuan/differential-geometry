@@ -15,7 +15,7 @@ namespace Analysis
 namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

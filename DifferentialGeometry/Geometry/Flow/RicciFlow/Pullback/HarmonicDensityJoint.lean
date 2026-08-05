@@ -35,7 +35,7 @@ the state derivative of the exponential chart.
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle Filter
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators Matrix
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

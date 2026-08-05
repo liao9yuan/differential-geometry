@@ -15,6 +15,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace MetricKoszul
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 def koszulCov
@@ -312,3 +313,4 @@ theorem koszulVec_sub_le
         (inv_nonneg.mpr hcB.le))
 
 end MetricKoszul
+end DifferentialGeometry

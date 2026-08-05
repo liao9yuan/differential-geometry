@@ -54,6 +54,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 open DifferentialGeometry.Geometry.Connection
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -745,3 +746,4 @@ theorem tensorNormBochnerSplit_mc {s : ℕ}
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

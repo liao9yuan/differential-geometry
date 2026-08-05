@@ -17,7 +17,7 @@ open DifferentialGeometry.Integral.Measure
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}

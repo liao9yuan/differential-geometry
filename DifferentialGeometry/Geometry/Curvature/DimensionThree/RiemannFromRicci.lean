@@ -29,7 +29,7 @@ noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

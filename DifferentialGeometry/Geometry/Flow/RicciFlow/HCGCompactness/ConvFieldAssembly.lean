@@ -625,7 +625,7 @@ end Bdd
 
 section Lip
 
-open Tensor0SBundle in
+open DifferentialGeometry.Tensor0SBundle in
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hgLip_gSeqExt

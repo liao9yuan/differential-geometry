@@ -4,7 +4,7 @@ open DifferentialGeometry.Analysis.Spectral
 
 noncomputable section
 
-open Bundle Manifold Tensor0SBundle ContinuousLinearMap
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
 open scoped Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral

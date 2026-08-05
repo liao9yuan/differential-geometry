@@ -53,7 +53,7 @@ open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn)
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open Filter Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

@@ -31,7 +31,7 @@ incorrect (Lean's total `fderiv` is zero when total differentiability fails).
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Bundle Manifold Topology ContDiff ENNReal NNReal BigOperators
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

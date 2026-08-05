@@ -17,7 +17,7 @@ namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.TensorRSRiemannianBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

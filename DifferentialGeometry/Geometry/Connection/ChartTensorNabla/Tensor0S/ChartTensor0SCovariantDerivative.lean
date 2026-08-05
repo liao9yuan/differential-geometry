@@ -7,7 +7,7 @@ noncomputable section
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 namespace DifferentialGeometry
 namespace Geometry

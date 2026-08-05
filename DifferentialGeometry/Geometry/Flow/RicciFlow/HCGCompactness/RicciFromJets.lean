@@ -68,7 +68,7 @@ open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
-open Tensor0SBundle TensorLieDeriv
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorLieDeriv
 open Filter Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

@@ -20,7 +20,7 @@ can depend on these identities without an import cycle.
 noncomputable section
 
 
-open Bundle Manifold Tensor0SBundle
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace
 
 namespace DifferentialGeometry

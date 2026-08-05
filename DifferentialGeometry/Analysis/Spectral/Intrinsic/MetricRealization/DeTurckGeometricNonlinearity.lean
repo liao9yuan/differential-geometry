@@ -146,7 +146,7 @@ open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
-open TensorMultilinear Tensor0SBundle
+open DifferentialGeometry.TensorMultilinear DifferentialGeometry.Tensor0SBundle
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]

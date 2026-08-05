@@ -9,7 +9,7 @@ open DifferentialGeometry.Geometry.Curvature
 noncomputable section
 
 
-open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter Topology Metric DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
 
 namespace DifferentialGeometry.Analysis.Parabolic

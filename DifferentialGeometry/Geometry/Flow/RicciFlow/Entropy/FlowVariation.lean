@@ -24,7 +24,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem

@@ -13,7 +13,7 @@ noncomputable section
 
 namespace DifferentialGeometry
 
-open Bundle Tensor0SBundle Set
+open Bundle DifferentialGeometry.Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

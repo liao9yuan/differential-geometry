@@ -19,7 +19,7 @@ namespace Analysis
 namespace Elliptic
 
 open DifferentialGeometry.Tensor
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]

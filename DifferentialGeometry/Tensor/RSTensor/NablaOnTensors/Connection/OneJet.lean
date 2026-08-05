@@ -9,13 +9,14 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Derivation
 
 
 
+namespace DifferentialGeometry
 namespace TensorLieDeriv
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
+open Bundle Set IsManifold ContinuousLinearMap VectorField Filter DifferentialGeometry.Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -387,3 +388,4 @@ end TangentOneJet
 end
 
 end TensorLieDeriv
+end DifferentialGeometry

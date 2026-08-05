@@ -50,7 +50,7 @@ def deTurckRHSReconSection (g₀ g_bg : SmoothRiemannianMetric I M)
 
 section RealizePathJointSmoothness
 
-open Tensor0SBundle TensorMultilinear
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorMultilinear
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral

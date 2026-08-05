@@ -10,7 +10,7 @@ set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff BigOperators
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 namespace DifferentialGeometry
 namespace Geometry

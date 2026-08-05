@@ -30,7 +30,7 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace DifferentialGeometry.Geometry.Curvature
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

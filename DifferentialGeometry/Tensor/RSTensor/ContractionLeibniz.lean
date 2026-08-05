@@ -46,6 +46,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -487,3 +488,4 @@ theorem nabla0SFun_metricPow_contraction_eval {s r : ℕ}
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

@@ -62,7 +62,7 @@ theorem triv_coord_domDomCongr {s s' d : ℕ}
 
 end Bundle.continuousMultilinearMap
 
-namespace MultilinearSection
+namespace DifferentialGeometry.MultilinearSection
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
@@ -182,4 +182,4 @@ theorem product_domDomCongr_left {s s' q : ℕ} (e : Fin s ≃ Fin s')
       finSumFinEquiv_symm_apply_natAdd, Sum.map_inr, finSumFinEquiv_apply_right,
       Equiv.refl_apply]
 
-end MultilinearSection
+end DifferentialGeometry.MultilinearSection

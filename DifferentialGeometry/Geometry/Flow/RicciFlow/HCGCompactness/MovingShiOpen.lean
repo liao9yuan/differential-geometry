@@ -33,7 +33,7 @@ universe u uE uH
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-open Bundle Set Tensor0SBundle
+open Bundle Set DifferentialGeometry.Tensor0SBundle
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow

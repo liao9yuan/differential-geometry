@@ -15,7 +15,7 @@ namespace Analysis
 namespace Sobolev
 namespace HebeyBlock
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 open DifferentialGeometry.Integral.Measure

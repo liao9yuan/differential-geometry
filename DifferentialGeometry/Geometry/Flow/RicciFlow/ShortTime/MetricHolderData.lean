@@ -24,7 +24,7 @@ route.  It does not use a high Sobolev norm and it does not use ellipticity.
 
 noncomputable section
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff NNReal ENNReal BigOperators
 
 namespace DifferentialGeometry.PDE.RicciFlow

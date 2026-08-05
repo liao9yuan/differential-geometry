@@ -25,7 +25,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open DifferentialGeometry.Geometry.Operator
 open Bundle
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
 

@@ -12,7 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.EigensectionSo
 noncomputable section
 
 open DifferentialGeometry.Analysis.Sobolev
-open Bundle Manifold MeasureTheory Set Filter Topology Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter Topology DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry.Analysis.Spectral

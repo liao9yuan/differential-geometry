@@ -54,7 +54,7 @@ set_option autoImplicit false
 noncomputable section
 
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization

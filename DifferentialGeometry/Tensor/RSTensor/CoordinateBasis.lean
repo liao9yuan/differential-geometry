@@ -58,6 +58,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 open Bundle Module
@@ -146,3 +147,4 @@ theorem tensor0S_apply_eq_sum
 end Tensor0S
 
 end Tensor0SBundle
+end DifferentialGeometry

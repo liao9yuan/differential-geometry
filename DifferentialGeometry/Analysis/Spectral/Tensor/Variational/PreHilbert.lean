@@ -26,7 +26,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
   RealInnerProductSpace InnerProductSpace
 
@@ -40,7 +40,7 @@ open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor.TensorRSRiemannian
-open TensorRSNabla
+open DifferentialGeometry.TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]

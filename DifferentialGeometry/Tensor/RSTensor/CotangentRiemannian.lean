@@ -12,6 +12,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -723,3 +724,4 @@ theorem cotangentMetricData_inner_eq_coord_gen
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

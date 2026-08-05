@@ -19,7 +19,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle MeasureTheory Set
+open Bundle DifferentialGeometry.Tensor0SBundle MeasureTheory Set
 open scoped Manifold ContDiff ENNReal
 
 universe u uE uH

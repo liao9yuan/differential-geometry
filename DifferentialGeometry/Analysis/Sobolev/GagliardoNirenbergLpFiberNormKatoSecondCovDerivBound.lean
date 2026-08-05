@@ -44,7 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section GeneralValenceRS
 
-open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
+open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla DifferentialGeometry.TensorMultilinear
 
 private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
     (g : SmoothRiemannianMetric I M) (r m : ℕ)

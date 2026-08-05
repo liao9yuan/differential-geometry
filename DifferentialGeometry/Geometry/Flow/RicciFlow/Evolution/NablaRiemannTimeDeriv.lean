@@ -204,7 +204,7 @@ end StepDeriv
 
 section Realized
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

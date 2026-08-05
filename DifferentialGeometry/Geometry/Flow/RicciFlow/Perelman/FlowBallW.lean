@@ -22,7 +22,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section
 
-open Bundle Tensor0SBundle MeasureTheory Set Function
+open Bundle DifferentialGeometry.Tensor0SBundle MeasureTheory Set Function
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.PDE.RicciFlow.Entropy
 

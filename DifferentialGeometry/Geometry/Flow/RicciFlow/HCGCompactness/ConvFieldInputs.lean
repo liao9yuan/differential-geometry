@@ -40,7 +40,7 @@ producers `hgLip0Sol`/`hgLipFinSol` on the Brick-2 flow `sourceFlow Φ k`, with 
 `covOrderBound_of_soln`, and compact initial bounds (`metricCovDerivNorm_bddOn`).
 
 The general prelims include the metric-compatibility endpoint `covNorm_self_succ`
-(`|∇_g^{a+1} g|_g = 0`, from `Tensor0SBundle.nabla_metric_zero`), the reverse triangle
+(`|∇_g^{a+1} g|_g = 0`, from `DifferentialGeometry.Tensor0SBundle.nabla_metric_zero`), the reverse triangle
 `covNorm_le_add`, the explicit-constant order-0 bound `covNorm0_le`, and the
 difference-slot congruence `derivNorm_congr_diff`.
 
@@ -50,7 +50,7 @@ the recorded gaps.
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold Tensor0SBundle
+open Set Function Filter Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 open DifferentialGeometry.Geometry.Operator

@@ -15,9 +15,10 @@ open DifferentialGeometry.Tensor.Multilinear
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
-open Bundle Set TensorLieDeriv
+open Bundle Set DifferentialGeometry.TensorLieDeriv
 open scoped Manifold ContDiff Topology
 
 noncomputable section
@@ -196,3 +197,4 @@ noncomputable def CanonicalSpatialDerivs0S.of_smooth_connection {s : ℕ}
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

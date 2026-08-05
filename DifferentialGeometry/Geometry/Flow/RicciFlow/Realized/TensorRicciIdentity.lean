@@ -3,4 +3,7 @@ import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Realization
 import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Formula
 import DifferentialGeometry.Tensor.RicciIdentity.MixedComponents
 
+namespace DifferentialGeometry
+
 set_option autoImplicit false
+end DifferentialGeometry

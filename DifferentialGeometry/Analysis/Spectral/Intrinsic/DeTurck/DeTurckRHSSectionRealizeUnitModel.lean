@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 
 noncomputable section
 
-open Bundle Tensor0SBundle Manifold
+open Bundle DifferentialGeometry.Tensor0SBundle Manifold
 open scoped Manifold ContDiff BigOperators
 
 namespace DifferentialGeometry.Analysis.Spectral

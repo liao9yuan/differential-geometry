@@ -20,7 +20,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 
 open DifferentialGeometry.Geometry.Operator

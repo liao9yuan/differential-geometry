@@ -20,7 +20,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
-open Bundle Tensor0SBundle Set
+open Bundle DifferentialGeometry.Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

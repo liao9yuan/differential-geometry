@@ -17,7 +17,7 @@ needed for coefficients depending polynomially on a metric two-jet.
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry.Analysis.Spectral

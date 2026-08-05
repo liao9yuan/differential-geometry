@@ -16,7 +16,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
@@ -30,7 +30,7 @@ open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
-open TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
+open DifferentialGeometry.TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

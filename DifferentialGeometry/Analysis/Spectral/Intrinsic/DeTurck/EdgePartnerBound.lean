@@ -22,7 +22,7 @@ monomial keeps one undifferentiated metric difference, hence gains the small
 noncomputable section
 
 
-open Bundle Manifold Tensor0SBundle
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace
 
 namespace DifferentialGeometry

@@ -55,6 +55,7 @@ open DifferentialGeometry.Tensor.Multilinear
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -345,3 +346,4 @@ end Trivialization
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

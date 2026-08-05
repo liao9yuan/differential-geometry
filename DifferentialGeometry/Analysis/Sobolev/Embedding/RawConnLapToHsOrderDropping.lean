@@ -61,7 +61,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -2092,7 +2092,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 
 set_option backward.isDefEq.respectTransparency false
 

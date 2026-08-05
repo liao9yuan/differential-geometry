@@ -15,13 +15,14 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 
 
+namespace DifferentialGeometry
 namespace TensorLieDeriv
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set IsManifold ContinuousLinearMap Tensor0SBundle
+open Bundle Set IsManifold ContinuousLinearMap DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology Bundle ContDiff
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -83,7 +84,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set IsManifold ContinuousLinearMap TensorLieDeriv
+open Bundle Set IsManifold ContinuousLinearMap DifferentialGeometry.TensorLieDeriv
 open scoped Manifold Topology Bundle ContDiff
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -647,7 +648,7 @@ section RealLinearity
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set IsManifold ContinuousLinearMap TensorLieDeriv
+open Bundle Set IsManifold ContinuousLinearMap DifferentialGeometry.TensorLieDeriv
 open scoped Manifold Topology Bundle ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -1042,3 +1043,4 @@ theorem TotalNabla0SRealizes.smul [T2Space M] {s : ℕ}
 end RealLinearity
 
 end Tensor0SBundle
+end DifferentialGeometry

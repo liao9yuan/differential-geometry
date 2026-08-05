@@ -9,7 +9,7 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
 open scoped Manifold ContDiff Topology
-open Bundle Set Tensor0SBundle
+open Bundle Set DifferentialGeometry.Tensor0SBundle
 
 namespace DifferentialGeometry
 namespace Geometry

@@ -12,6 +12,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -1301,3 +1302,4 @@ theorem inner0S_two_metricCompatible_extDerivFun
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

@@ -32,7 +32,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open scoped Manifold ContDiff BigOperators
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]

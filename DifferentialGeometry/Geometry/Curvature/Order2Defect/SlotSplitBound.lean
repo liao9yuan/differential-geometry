@@ -9,7 +9,7 @@ open DifferentialGeometry.Geometry.Curvature
 noncomputable section
 
 
-open Bundle Manifold Set Filter Tensor0SBundle CovariantDerivative
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry

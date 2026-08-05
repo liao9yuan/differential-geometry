@@ -14,6 +14,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 open scoped Manifold ContDiff
@@ -170,3 +171,4 @@ theorem connDiffVec_norm_le
     exact le_of_mul_le_mul_right hmul hpos
 
 end Tensor0SBundle
+end DifferentialGeometry

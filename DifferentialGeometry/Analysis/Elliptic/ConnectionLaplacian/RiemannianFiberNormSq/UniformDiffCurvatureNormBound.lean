@@ -21,7 +21,7 @@ namespace Elliptic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
-open Tensor0SBundle Tensor0SNabla
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

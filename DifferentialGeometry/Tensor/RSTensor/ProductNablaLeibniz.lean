@@ -20,6 +20,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 set_option backward.isDefEq.respectTransparency false
@@ -159,3 +160,4 @@ theorem nabla0S_product_realizes {s q : ℕ}
       simp only [Function.comp_apply, hidx, Fin.cons_succ]
 
 end Tensor0SBundle
+end DifferentialGeometry

@@ -29,6 +29,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -306,3 +307,4 @@ end MetricFiberData
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

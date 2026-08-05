@@ -22,7 +22,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow

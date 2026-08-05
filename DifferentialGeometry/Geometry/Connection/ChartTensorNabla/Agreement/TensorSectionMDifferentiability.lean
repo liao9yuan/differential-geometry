@@ -12,7 +12,7 @@ set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 
 namespace DifferentialGeometry
@@ -28,8 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open Tensor0SNabla
-open Tensor0SPartialEval
+open DifferentialGeometry.Tensor0SNabla
+open DifferentialGeometry.Tensor0SPartialEval
 
 def TensorSectionMDiffAt (n : ℕ)
     (T : Π b : M, Tensor0SSpace n I b) (b : M) : Prop :=

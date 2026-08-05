@@ -20,7 +20,7 @@ noncomputable section
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold CovariantDerivative Tensor0SBundle
+open Bundle Manifold CovariantDerivative DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 open DifferentialGeometry.Geometry.Operator

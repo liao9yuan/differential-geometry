@@ -42,7 +42,7 @@ maximal-regularity representation at the endpoint.
 
 noncomputable section
 
-open Bundle Filter Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Filter Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry

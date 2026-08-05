@@ -27,7 +27,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology BigOperators
 
 open DifferentialGeometry.Tensor.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]

@@ -13,7 +13,7 @@ namespace DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 open Bundle DifferentialGeometry
 open MeasureTheory
 open DifferentialGeometry.Integral.Measure
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral

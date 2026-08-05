@@ -28,7 +28,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 /-- The chart Hessian at `x`, packaged as an intrinsic covariant two-tensor.
 

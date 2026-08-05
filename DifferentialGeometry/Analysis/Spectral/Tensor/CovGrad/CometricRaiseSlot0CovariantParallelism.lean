@@ -9,7 +9,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
@@ -21,7 +21,7 @@ open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Spectral.DeTurck
-open Tensor0SNabla
+open DifferentialGeometry.Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

@@ -18,7 +18,7 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped Manifold ContDiff BigOperators
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]

@@ -12,7 +12,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 
@@ -22,7 +22,7 @@ namespace Connection
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open Tensor0SNabla
+open DifferentialGeometry.Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [CompleteSpace E]
@@ -147,7 +147,7 @@ theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_zero
     extDerivFun (I := I) f x v * h x + f x * extDerivFun (I := I) h x v
   ring
 
-open Tensor0SBundle in
+open DifferentialGeometry.Tensor0SBundle in
 omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
     [T2Space M] [BoundarylessManifold I M] in
 lemma toModel_tensor0S_curry_eq_curryLeft {s : ℕ} {x : M}
@@ -522,7 +522,7 @@ private lemma smoothOrthoBasis_apply
   unfold smoothOrthoBasis
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-open Tensor0SNabla in
+open DifferentialGeometry.Tensor0SNabla in
 noncomputable def tensorMetricCompatDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W T : Π x : M, Tensor0SSpace s I x) (x : M) :
@@ -553,7 +553,7 @@ lemma tensorMetricCompatDiff_apply
             (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g) T x v)) := by
   rfl
 
-open Tensor0SNabla HomConnection in
+open DifferentialGeometry.Tensor0SNabla DifferentialGeometry.HomConnection in
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_curriedSection_hom_leibniz
@@ -600,7 +600,7 @@ lemma tensor0SCovariantDerivative_curriedSection_hom_leibniz
   rw [hHom]
   abel
 
-open Tensor0SNabla HomConnection in
+open DifferentialGeometry.Tensor0SNabla DifferentialGeometry.HomConnection in
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_succ_consEval_peel
@@ -640,7 +640,7 @@ lemma tensor0SCovariantDerivative_succ_consEval_peel
     ContinuousMultilinearMap.add_apply, hterm2]
   ring
 
-open TensorRSNabla in
+open DifferentialGeometry.TensorRSNabla in
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tensor0SCovariantDerivative_apply_eq_of_vanishing
@@ -696,7 +696,7 @@ private lemma smoothOrthoFrame_connection_skew
   rw [hmfderiv0] at hmc
   exact hmc.symm
 
-open Tensor0SNabla in
+open DifferentialGeometry.Tensor0SNabla in
 private noncomputable def smoothOrthoFrameSection
     (g : SmoothRiemannianMetric I M) (x : M) (a : Fin (Module.finrank ℝ E)) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -709,7 +709,7 @@ private lemma smoothOrthoFrameSection_apply
     smoothOrthoFrameSection (I := I) (M := M) g x a y =
       smoothOrthoFrame (I := I) g x a y := rfl
 
-open Tensor0SNabla in
+open DifferentialGeometry.Tensor0SNabla in
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
     [BoundarylessManifold I M] in
 private lemma tensorSectionMDiffAt_curriedSection_apply
@@ -732,7 +732,7 @@ private lemma tensorSectionMDiffAt_curriedSection_apply
     (b := id) (ϕ := fun y : M => curriedSection I M W y)
     (v := fun y : M => Y y) hCurried hY
 
-open Tensor0SNabla in
+open DifferentialGeometry.Tensor0SNabla in
 omit [CompleteSpace E] in
 private lemma tensorMetricCompatDiff_succ_eq_sum
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -954,7 +954,7 @@ private lemma tensorMetricCompatDiff_succ_eq_sum
     rw [hskew, zero_mul]
   rw [hmain, herror, add_zero]
 
-open Tensor0SNabla in
+open DifferentialGeometry.Tensor0SNabla in
 omit [CompleteSpace E] in
 theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_aux
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -1033,7 +1033,7 @@ theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_aux
       have hSum' := hSum.congr_of_eventuallyEq hEq
       rwa [tensorMetricCompatDiff_succ_eq_sum (I := I) (M := M) g s W T hW hT] at hSum'
 
-open Tensor0SNabla in
+open DifferentialGeometry.Tensor0SNabla in
 omit [CompleteSpace E] in
 theorem tensorInnerPointwise_0s_mfderiv_metricCompatible
     (g : SmoothRiemannianMetric I M) (s : ℕ)

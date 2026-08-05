@@ -33,7 +33,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Tensor.Coordinates
 

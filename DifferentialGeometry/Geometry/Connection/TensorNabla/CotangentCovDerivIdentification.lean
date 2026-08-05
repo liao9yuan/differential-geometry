@@ -9,7 +9,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
-open Bundle Manifold Set Filter FiberBundle Tensor0SBundle
+open Bundle Manifold Set Filter FiberBundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 
@@ -19,8 +19,8 @@ namespace Connection
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open Tensor0SNabla
-open TensorRSNabla
+open DifferentialGeometry.Tensor0SNabla
+open DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

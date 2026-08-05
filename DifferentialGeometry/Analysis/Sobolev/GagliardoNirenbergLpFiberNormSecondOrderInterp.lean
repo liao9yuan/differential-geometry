@@ -43,7 +43,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section GeneralValenceRS
 
-open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
+open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla DifferentialGeometry.TensorMultilinear
 
 
 private lemma real_two_mul_add_nonneg {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :

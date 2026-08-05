@@ -10,7 +10,7 @@ noncomputable section
 
 open Filter MeasureTheory
 open DifferentialGeometry.Integral.Measure
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}

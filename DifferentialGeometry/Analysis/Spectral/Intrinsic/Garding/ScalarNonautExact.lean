@@ -17,7 +17,7 @@ time interval.
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace NNReal
 

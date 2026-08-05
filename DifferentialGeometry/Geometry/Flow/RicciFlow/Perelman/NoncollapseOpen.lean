@@ -19,7 +19,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section
 
-open Bundle MeasureTheory Set Tensor0SBundle
+open Bundle MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 

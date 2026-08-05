@@ -5,9 +5,10 @@ open DifferentialGeometry.Tensor.Multilinear
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
-open Bundle Set TensorLieDeriv
+open Bundle Set DifferentialGeometry.TensorLieDeriv
 open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -289,3 +290,4 @@ theorem nablaRS_reg (r s : ℕ)
         (bE := bE) (r := r) (s := s) hp (F p) ρ σ)
   simpa [G, F, e] using hG
 end Tensor0SBundle
+end DifferentialGeometry

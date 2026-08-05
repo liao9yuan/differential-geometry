@@ -19,7 +19,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter Finset Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter Finset DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
   RealInnerProductSpace InnerProductSpace
 

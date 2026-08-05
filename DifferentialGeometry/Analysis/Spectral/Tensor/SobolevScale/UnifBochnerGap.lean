@@ -51,8 +51,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Analysis.Sobolev.Tensor
-open Tensor0SBundle
-open TensorRSNabla
+open DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

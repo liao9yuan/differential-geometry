@@ -17,7 +17,7 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Set Tensor0SBundle
+open Bundle Set DifferentialGeometry.Tensor0SBundle
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.HCGCompactness

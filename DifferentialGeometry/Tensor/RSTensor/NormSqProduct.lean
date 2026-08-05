@@ -19,6 +19,7 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 open scoped Manifold ContDiff BigOperators
@@ -109,3 +110,4 @@ theorem normSq0S_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [Tensor0SSpace.domDomCongr_apply]
 
 end Tensor0SBundle
+end DifferentialGeometry

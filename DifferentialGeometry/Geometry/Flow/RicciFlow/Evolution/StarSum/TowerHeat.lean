@@ -19,7 +19,7 @@ open DifferentialGeometry.Geometry.Operator
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
 

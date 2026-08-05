@@ -9,7 +9,7 @@ open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
@@ -18,8 +18,8 @@ namespace Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev
-open TensorMultilinear
-open TensorRSNabla
+open DifferentialGeometry.TensorMultilinear
+open DifferentialGeometry.TensorRSNabla
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

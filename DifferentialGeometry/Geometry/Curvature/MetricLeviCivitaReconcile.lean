@@ -22,7 +22,7 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 open DifferentialGeometry.Integral.Measure

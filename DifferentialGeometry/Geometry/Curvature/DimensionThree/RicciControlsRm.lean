@@ -24,7 +24,7 @@ noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 

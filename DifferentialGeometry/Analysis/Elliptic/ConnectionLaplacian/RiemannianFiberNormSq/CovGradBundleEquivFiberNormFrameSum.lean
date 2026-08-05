@@ -20,7 +20,7 @@ namespace Elliptic
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

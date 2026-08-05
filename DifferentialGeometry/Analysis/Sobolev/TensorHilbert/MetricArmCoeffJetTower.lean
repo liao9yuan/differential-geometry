@@ -1,1 +1,4 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffReindexingNorm
+
+namespace DifferentialGeometry
+end DifferentialGeometry

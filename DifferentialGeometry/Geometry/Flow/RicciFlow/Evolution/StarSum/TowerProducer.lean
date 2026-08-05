@@ -24,7 +24,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff BigOperators
 

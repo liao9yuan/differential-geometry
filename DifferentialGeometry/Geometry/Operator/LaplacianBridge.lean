@@ -22,7 +22,7 @@ open scoped Manifold ContDiff BigOperators
 namespace DifferentialGeometry.Geometry.Operator
 
 open DifferentialGeometry.Integral.DivergenceTheorem
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 universe u uE uH
 

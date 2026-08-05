@@ -30,7 +30,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold Tensor0SBundle
+open Set Function Filter Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)

@@ -47,7 +47,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section GeneralValenceRS
 
-open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
+open Bundle DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla DifferentialGeometry.TensorMultilinear
 
 private noncomputable def lpFiberJetLadder_rs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (u : Integral.L2.SmoothCcTensor g r s)

@@ -300,7 +300,7 @@ theorem image_ball_local
 
 universe u uE uH
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 section Speed
 

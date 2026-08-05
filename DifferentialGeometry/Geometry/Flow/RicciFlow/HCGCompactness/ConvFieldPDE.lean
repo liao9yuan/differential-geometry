@@ -20,7 +20,7 @@ and the Ricci tensor across that germ equality.
 
 noncomputable section
 
-open Set Bundle Manifold TopologicalSpace Tensor0SBundle
+open Set Bundle Manifold TopologicalSpace DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 open DifferentialGeometry.PDE.RicciFlow (metric_derivWithin_eq_neg_two_ricci)

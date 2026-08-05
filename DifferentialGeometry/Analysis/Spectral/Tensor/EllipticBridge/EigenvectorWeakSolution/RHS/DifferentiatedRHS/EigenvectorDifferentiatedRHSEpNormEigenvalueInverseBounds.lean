@@ -23,7 +23,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Tensor.TensorRSRiemannian
-open TensorRSNabla
+open DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl

@@ -16,7 +16,7 @@ namespace Geometry
 namespace Curvature
 
 open DifferentialGeometry.Integral.Measure
-open Tensor0SBundle Tensor0SNabla
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.Tensor0SNabla
 
 section Generic
 

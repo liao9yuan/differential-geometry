@@ -16,7 +16,7 @@ chosen before both the family index and the time horizon.
 
 noncomputable section
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff NNReal ENNReal BigOperators
 
 namespace DifferentialGeometry.PDE.RicciFlow

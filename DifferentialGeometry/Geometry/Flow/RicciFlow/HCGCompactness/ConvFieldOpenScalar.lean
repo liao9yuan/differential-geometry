@@ -15,7 +15,7 @@ subsequence and one limit metric family supplied by `OpenConvOut`.
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold TopologicalSpace Tensor0SBundle
+open Set Function Filter Bundle Manifold TopologicalSpace DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 

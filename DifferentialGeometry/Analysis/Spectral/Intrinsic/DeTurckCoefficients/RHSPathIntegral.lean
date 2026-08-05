@@ -20,7 +20,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Set Bundle Manifold Tensor0SBundle ContinuousLinearMap MeasureTheory intervalIntegral
+open Set Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap MeasureTheory intervalIntegral
 open scoped Topology Manifold BigOperators ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients

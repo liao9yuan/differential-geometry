@@ -23,7 +23,7 @@ namespace Analysis
 namespace Elliptic
 
 open DifferentialGeometry.Tensor
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

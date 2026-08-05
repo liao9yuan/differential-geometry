@@ -96,7 +96,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open _root_.Bundle Manifold Tensor0SBundle
+open _root_.Bundle Manifold DifferentialGeometry.Tensor0SBundle
 
 open scoped Manifold Topology Bundle ContDiff
 

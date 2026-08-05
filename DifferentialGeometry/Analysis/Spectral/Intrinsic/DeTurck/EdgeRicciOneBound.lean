@@ -29,7 +29,7 @@ segment `P = s W`.  No `H2` or higher jet of the edge tensor is used.
 noncomputable section
 
 
-open Bundle Manifold MeasureTheory Tensor0SBundle
+open Bundle Manifold MeasureTheory DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry

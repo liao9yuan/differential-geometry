@@ -111,7 +111,7 @@ theorem smoothCcTensor_path_toFun_contDiffWithinAt
 
 section FiniteOrderReconJetEnergy
 
-open Tensor0SBundle TensorMultilinear
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorMultilinear
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 

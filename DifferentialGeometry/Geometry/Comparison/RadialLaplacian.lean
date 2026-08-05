@@ -26,7 +26,7 @@ in the selected branch.
 
 noncomputable section
 
-open Bundle Filter Function Manifold Tensor0SBundle
+open Bundle Filter Function Manifold DifferentialGeometry.Tensor0SBundle
 open scoped ContDiff Manifold Matrix Topology
 
 namespace DifferentialGeometry

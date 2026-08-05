@@ -6,7 +6,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
@@ -25,7 +25,7 @@ open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor.TensorRSRiemannian
-open TensorRSNabla
+open DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian

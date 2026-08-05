@@ -13,7 +13,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 namespace DifferentialGeometry
@@ -21,7 +21,7 @@ namespace Geometry
 namespace Curvature
 
 open DifferentialGeometry.Integral.L2
-open TensorMultilinear
+open DifferentialGeometry.TensorMultilinear
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

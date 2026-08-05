@@ -11,11 +11,12 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
 
-open Bundle Set TensorLieDeriv
+open Bundle Set DifferentialGeometry.TensorLieDeriv
 open scoped Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -83,3 +84,4 @@ noncomputable def nablaRS_smooth (r s : ℕ)
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

@@ -49,6 +49,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -944,3 +945,4 @@ theorem normSq_one_time {x : M} {t : Real}
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

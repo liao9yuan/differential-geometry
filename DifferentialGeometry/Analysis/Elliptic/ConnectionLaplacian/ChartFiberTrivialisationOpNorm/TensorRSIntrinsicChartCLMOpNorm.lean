@@ -14,7 +14,7 @@ namespace Analysis
 namespace Elliptic
 
 open DifferentialGeometry.Tensor
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 

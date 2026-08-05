@@ -34,7 +34,7 @@ the mc-comparison data the plan sanctions (`hequivT`/`hrel`/`hcp`/`hcovSrc`/
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold Tensor0SBundle
+open Set Function Filter Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)

@@ -28,7 +28,7 @@ namespace DifferentialGeometry.Tensor.RSTensor
 
 noncomputable section
 
-open Bundle Tensor0SBundle Filter
+open Bundle DifferentialGeometry.Tensor0SBundle Filter
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 

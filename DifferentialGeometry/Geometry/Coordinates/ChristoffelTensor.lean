@@ -19,7 +19,7 @@ namespace DifferentialGeometry.Tensor.Coordinates
 
 noncomputable section
 
-open Bundle Module Tensor0SBundle
+open Bundle Module DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

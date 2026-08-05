@@ -42,9 +42,10 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 open Bundle Set IsManifold ContinuousLinearMap
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
+namespace DifferentialGeometry
 namespace TensorMultilinear
 
 variable
@@ -1019,4 +1020,5 @@ theorem contMDiffAt_section_apply_one
 
 end TensorMultilinear
 
+end DifferentialGeometry
 end

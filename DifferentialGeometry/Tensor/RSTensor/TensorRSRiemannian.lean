@@ -24,6 +24,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -296,3 +297,4 @@ theorem sqrt_normSqRS_apply
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

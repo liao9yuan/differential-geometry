@@ -29,7 +29,7 @@ one-sided derivative at the initial edge.
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal
   RealInnerProductSpace InnerProductSpace
 

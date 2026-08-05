@@ -7,7 +7,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 
@@ -17,8 +17,8 @@ namespace Connection
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open TensorMetricLowering
-open Tensor0SNabla
+open DifferentialGeometry.TensorMetricLowering
+open DifferentialGeometry.Tensor0SNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [CompleteSpace E]
@@ -114,7 +114,7 @@ lemma loweredCovDerivAt_def
       tensor0SCovariantDerivative I M (r + s) (LeviCivita (I := I) g)
         (liftedTensorSection (I := I) (M := M) g r s S) x v := rfl
 
-open Tensor0SNabla in
+open DifferentialGeometry.Tensor0SNabla in
 omit [CompleteSpace E] in
 theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -150,7 +150,7 @@ theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (liftedTensorSection_mdiffAt (I := I) (M := M) g r s W x)
     (liftedTensorSection_mdiffAt (I := I) (M := M) g r s S x) v
 
-open Tensor0SNabla in
+open DifferentialGeometry.Tensor0SNabla in
 omit [CompleteSpace E] in
 theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

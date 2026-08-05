@@ -6,3 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Limit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Certification
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Final
+
+namespace DifferentialGeometry
+end DifferentialGeometry

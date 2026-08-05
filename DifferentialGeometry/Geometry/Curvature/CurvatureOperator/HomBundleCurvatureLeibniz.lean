@@ -11,6 +11,7 @@ open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative
 
 
+namespace DifferentialGeometry
 namespace HomConnectionGen
 
 variable
@@ -214,4 +215,5 @@ theorem riemannSec_homBundleGen_apply_eq
 
 end HomConnectionGen
 
+end DifferentialGeometry
 end

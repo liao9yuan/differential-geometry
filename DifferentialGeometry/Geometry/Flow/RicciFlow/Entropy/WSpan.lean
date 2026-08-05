@@ -22,7 +22,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
 
-open Bundle Filter MeasureTheory Set Tensor0SBundle
+open Bundle Filter MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
