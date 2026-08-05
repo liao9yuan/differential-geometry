@@ -10,6 +10,7 @@ namespace DifferentialGeometry.Analysis.Parabolic
 noncomputable section
 
 open Bundle Set
+open DifferentialGeometry.Analysis.Convex
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Integral.Connection
@@ -149,6 +150,58 @@ theorem parallelProperCone_heat_reaction_mem_of_tangent
         simpa only using hC.image_transport F x x₀
       rw [himage] at hmapped
       simpa [transportedReactionFamily, q] using hmapped
+    · intro x
+      exact (hC.transport_mem_iff F x x₀ (u 0 x)).2 (hinit x)
+  intro t ht x
+  apply (hC.transport_mem_iff F x x₀ (u t x)).1
+  simpa using hfixed t ht x
+
+omit [CompleteSpace E] in
+theorem parallelProperCone_heat_reaction_mem_of_dualZeroFace_nonneg
+    [∀ x, CompleteSpace (F x)]
+    [I.Boundaryless] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T)
+    (P : LinearIsometricTransport F)
+    (C : ProperConeFamily F)
+    (hC : IsParallelProperConeFamily F P C)
+    (x₀ : M)
+    (reaction : Real → (x : M) → F x → F x)
+    (u : Real → ∀ x, F x)
+    (hsol : IsInnerProductHeatReactionOn
+      (RealTimeInterval.closed 0 T hT) G
+        (transportedReactionFamily F P x₀ reaction)
+        (transportedSectionFamily F P x₀ u))
+    (L : NNReal)
+    (hL : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
+      LipschitzWith L (reaction t x))
+    (hreaction : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
+      ∀ φ : StrongDual Real (F x), ProperCone.IsDualElement (C x) φ →
+        ∀ p ∈ ProperCone.dualZeroFace (C x) φ, 0 ≤ φ (reaction t x p))
+    (hinit : ∀ x : M, u 0 x ∈ C x) :
+    ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C x := by
+  have hfixed : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
+      transportedSectionFamily F P x₀ u t x ∈ C x₀ := by
+    apply properCone_heat_reaction_mem_of_dualZeroFace_nonneg
+      (I := I) G hT (C x₀) (transportedReactionFamily F P x₀ reaction)
+        (transportedSectionFamily F P x₀ u) hsol L
+    · intro t ht x
+      simpa [transportedReactionFamily, Function.comp_def] using
+        (P.transport x x₀).lipschitz.comp
+          ((hL t ht x).comp (P.transport x₀ x).lipschitz)
+    · intro t ht x φ hφ p hp
+      let e := (P.transport x₀ x).toContinuousLinearEquiv
+      let ψ : StrongDual Real (F x) := φ.comp e.symm.toContinuousLinearMap
+      have hψ : ProperCone.IsDualElement (C x) ψ := by
+        rw [← hC x₀ x]
+        exact hφ.comp_symm e
+      let q : F x := P.transport x₀ x p
+      have hq : q ∈ ProperCone.dualZeroFace (C x) ψ := by
+        exact (hC.transport_mem_dualZeroFace_iff F x₀ x φ p).2 hp
+      simpa [transportedReactionFamily, e, ψ, q] using
+        hreaction t ht x ψ hψ q hq
     · intro x
       exact (hC.transport_mem_iff F x x₀ (u 0 x)).2 (hinit x)
   intro t ht x

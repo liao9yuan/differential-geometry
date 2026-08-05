@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Nagumo
+import DifferentialGeometry.Analysis.Convex.ProperConeFace
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ProperCone
 
 set_option autoImplicit false
@@ -8,6 +9,7 @@ namespace DifferentialGeometry.Analysis.Parabolic
 noncomputable section
 
 open Bundle Set Filter
+open DifferentialGeometry.Analysis.Convex
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff Topology RealInnerProductSpace NNReal
@@ -57,7 +59,7 @@ private theorem deriv_nonneg_at_right_endpoint_of_isMaxOn_Icc
   rw [heval] at hnonpos
   nlinarith
 
-theorem closed_convex_heat_reaction_mem_of_tangent
+theorem closed_convex_heat_reaction_mem_of_supporting_normal
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -71,8 +73,9 @@ theorem closed_convex_heat_reaction_mem_of_tangent
     (L : NNReal)
     (hL : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
       LipschitzWith L (reaction t x))
-    (htangent : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M, ∀ p ∈ C,
-      reaction t x p ∈ posTangentConeAt C p)
+    (hreaction : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M, ∀ p ∈ C, ∀ ν : F,
+      (∀ q ∈ C, inner Real ν (q - p) ≤ 0) →
+        inner Real ν (reaction t x p) ≤ 0)
     (hinit : ∀ x : M, u 0 x ∈ C) :
     ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C := by
   classical
@@ -227,10 +230,8 @@ theorem closed_convex_heat_reaction_mem_of_tangent
       rw [show u q₀.1 q₀.2 - p = ν from rfl,
         real_inner_self_eq_norm_sq] at hztime
       nlinarith [Real.exp_pos (-K * q₀.1)]
-    have htangentp := htangent q₀.1 hq₀reg q₀.2 p hpC
     have hreactionp : inner Real ν (reaction q₀.1 q₀.2 p) ≤ 0 :=
-      Convex.real_inner_sub_nonpos_of_norm_eq_iInf_of_mem_posTangentConeAt
-        hconvex hpC hpmin htangentp
+      hreaction q₀.1 hq₀reg q₀.2 p hpC ν hnormal
     have hLip := (hL q₀.1 hq₀reg q₀.2).norm_sub_le
       (u q₀.1 q₀.2) p
     have hinnerLip : inner Real ν
@@ -287,6 +288,36 @@ theorem closed_convex_heat_reaction_mem_of_tangent
       exact hIco s ⟨le_of_lt hs, hslt⟩ x
   · exact hIco t ⟨ht.1, htlt⟩ x
 
+theorem closed_convex_heat_reaction_mem_of_tangent
+    [I.Boundaryless] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T)
+    (C : Set F) (hne : C.Nonempty) (hclosed : IsClosed C) (hconvex : Convex Real C)
+    (reaction : Real → M → F → F)
+    (u : Real → M → F)
+    (hsol : IsInnerProductHeatReactionOn
+      (RealTimeInterval.closed 0 T hT) G reaction u)
+    (L : NNReal)
+    (hL : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
+      LipschitzWith L (reaction t x))
+    (htangent : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M, ∀ p ∈ C,
+      reaction t x p ∈ posTangentConeAt C p)
+    (hinit : ∀ x : M, u 0 x ∈ C) :
+    ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C := by
+  apply closed_convex_heat_reaction_mem_of_supporting_normal
+    (I := I) G hT C hne hclosed hconvex reaction u hsol L hL
+  · intro t ht x p hp ν hnormal
+    have hmax : IsMaxOn (fun q : F ↦ inner Real ν q) C p := by
+      intro q hq
+      change inner Real ν q ≤ inner Real ν p
+      rw [← sub_nonpos]
+      simpa [inner_sub_right] using hnormal q hq
+    exact hmax.localize.hasFDerivWithinAt_nonpos
+      (innerSL Real ν).hasFDerivAt.hasFDerivWithinAt (htangent t ht x p hp)
+  · exact hinit
+
 theorem properCone_heat_reaction_mem_of_tangent
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -307,6 +338,51 @@ theorem properCone_heat_reaction_mem_of_tangent
     ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C :=
   closed_convex_heat_reaction_mem_of_tangent
     (I := I) G hT C C.nonempty C.isClosed C.convex reaction u hsol L hL htangent hinit
+
+theorem properCone_heat_reaction_mem_of_dualZeroFace_nonneg
+    [I.Boundaryless] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T)
+    (C : ProperCone Real F)
+    (reaction : Real → M → F → F)
+    (u : Real → M → F)
+    (hsol : IsInnerProductHeatReactionOn
+      (RealTimeInterval.closed 0 T hT) G reaction u)
+    (L : NNReal)
+    (hL : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
+      LipschitzWith L (reaction t x))
+    (hreaction : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
+      ∀ φ : StrongDual Real F, ProperCone.IsDualElement C φ →
+        ∀ p ∈ ProperCone.dualZeroFace C φ, 0 ≤ φ (reaction t x p))
+    (hinit : ∀ x : M, u 0 x ∈ C) :
+    ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C := by
+  apply closed_convex_heat_reaction_mem_of_supporting_normal
+    (I := I) G hT C C.nonempty C.isClosed C.convex reaction u hsol L hL
+  · intro t ht x p hp ν hnormal
+    let φ : StrongDual Real F := -(innerSL Real ν)
+    have hνp_nonneg : 0 ≤ inner Real ν p := by
+      have h := hnormal 0 C.zero_mem
+      simpa using h
+    have hνp_nonpos : inner Real ν p ≤ 0 := by
+      have h2p : (2 : Real) • p ∈ C := C.smul_mem hp (by norm_num)
+      have h := hnormal ((2 : Real) • p) h2p
+      simpa [two_smul] using h
+    have hνp : inner Real ν p = 0 := le_antisymm hνp_nonpos hνp_nonneg
+    have hφ : ProperCone.IsDualElement C φ := by
+      intro q hq
+      have h := hnormal q hq
+      simp only [φ, ContinuousLinearMap.neg_apply, innerSL_apply_apply]
+      rw [inner_sub_right, hνp] at h
+      linarith
+    have hpface : p ∈ ProperCone.dualZeroFace C φ := by
+      rw [ProperCone.mem_dualZeroFace]
+      refine ⟨hp, ?_⟩
+      simp [φ, hνp]
+    have h := hreaction t ht x φ hφ p hpface
+    simpa [φ] using h
+  · exact hinit
 
 theorem properCone_heat_reaction_mem_of_mapsTo
     [I.Boundaryless] [CompactSpace M]
