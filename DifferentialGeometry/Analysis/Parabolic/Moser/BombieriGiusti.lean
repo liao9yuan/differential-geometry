@@ -933,6 +933,180 @@ theorem late_localizedSpacetimeMeasure_neg_log_superlevel_tail_of_supersolution
       (I := I) (M := M) g deviationCutoff averagingCutoff C hC hP
         u hu hpos hτb hr hmass hpde
 
+theorem early_localizedSpacetimeRpowNorm_le_exp_tsum_bombieriGiustiThreshold_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : ℕ → SmoothScalar g) (outer averagingCutoff : SmoothScalar g)
+    (reverseCost : ℕ → ℝ) (a b : ℕ → ℝ)
+    (C : ℝ) (hC : 0 < C)
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      outer averagingCutoff C)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ A τ : ℝ} (hp₀ : 0 < p₀)
+    (hreverseCost : ∀ k, 1 ≤ reverseCost k)
+    (hmeasure : ∀ k,
+      localizedSpacetimeMeasure (I := I) (M := M) (cutoff k) (a k) (b k) ≠ 0)
+    (hmeasure_le_one : ∀ k,
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (cutoff k) (a k) (b k)).real Set.univ ≤ 1)
+    (hstart : ∀ k, a (k + 1) ≤ a k)
+    (hend : ∀ k, b k ≤ b (k + 1))
+    (hcutoff : ∀ k x,
+      (cutoff k).toFun x ^ 2 ≤ (cutoff (k + 1)).toFun x ^ 2)
+    (hAτ : A ≤ τ) (hA : ∀ k, A ≤ a k) (hbτ : ∀ k, b k ≤ τ)
+    (houter : ∀ k x, (cutoff k).toFun x ^ 2 ≤ outer.toFun x ^ 2)
+    (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
+    (hpde : ∀ t ∈ Icc A τ, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun q => u q x) t)
+    (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
+      localizedSpacetimeRpowNorm (I := I) (M := M) (cutoff k)
+          (exponentialTimeRescale
+            (logCenterDrift (I := I) (M := M) g averagingCutoff)
+            (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+              u hu hpos τ) u) p₀ (a k) (b k) ≤
+        reverseCost k ^ (1 / p - 1 / p₀) *
+          localizedSpacetimeRpowNorm (I := I) (M := M) (cutoff (k + 1))
+            (exponentialTimeRescale
+              (logCenterDrift (I := I) (M := M) g averagingCutoff)
+              (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+                u hu hpos τ) u) p (a (k + 1)) (b (k + 1)))
+    (hsummable : Summable (fun k : ℕ =>
+      (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀
+          (2 * C * cutoffMass (I := I) (M := M) averagingCutoff)
+          (reverseCost k) / 4))) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) (cutoff 0)
+        (exponentialTimeRescale
+          (logCenterDrift (I := I) (M := M) g averagingCutoff)
+          (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+            u hu hpos τ) u) p₀ (a 0) (b 0) ≤
+      Real.exp (∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀
+          (2 * C * cutoffMass (I := I) (M := M) averagingCutoff)
+          (reverseCost k) / 4)) := by
+  let rate := logCenterDrift (I := I) (M := M) g averagingCutoff
+  let center := shiftedLogCenter (I := I) (M := M) g averagingCutoff
+    u hu hpos τ
+  let v := exponentialTimeRescale rate center u
+  let c₀ := 2 * C * cutoffMass (I := I) (M := M) averagingCutoff
+  have hc₀ : 0 < c₀ := mul_pos (mul_pos (by norm_num) hC) hmass
+  have hv := contMDiff_exponentialTimeRescale rate center u hu
+  have hvpos := exponentialTimeRescale_pos rate center u hpos
+  apply localizedSpacetimeRpowNorm_le_exp_tsum_bombieriGiustiThreshold
+    (I := I) (M := M) cutoff outer (fun z => v z.1 z.2) reverseCost a b
+      (p₀ := p₀) (c₀ := c₀) (c := A) (d := τ) hp₀ hc₀ hreverseCost
+      hv.continuous (fun z => hvpos z.1 z.2) hmeasure hmeasure_le_one
+      hstart hend hcutoff hA hbτ houter
+  · intro k r hr
+    let S : Set (ℝ × M) := {z | r < Real.log (v z.1 z.2)}
+    have hdom := localizedSpacetimeMeasure_mono (I := I) (M := M)
+      (hA k) (hbτ k) (houter k)
+    have hreal :
+        (localizedSpacetimeMeasure (I := I) (M := M)
+          (cutoff k) (a k) (b k)).real S ≤
+        (localizedSpacetimeMeasure (I := I) (M := M) outer A τ).real S :=
+      ENNReal.toReal_mono (measure_ne_top _ _) (hdom S)
+    exact hreal.trans (by
+      simpa only [S, v, rate, center, c₀] using
+        (early_localizedSpacetimeMeasure_log_superlevel_tail_of_supersolution
+          (I := I) (M := M) g outer averagingCutoff C hC.le hP
+            u hu hpos hAτ hr hmass hpde))
+  · intro k p hp hpp₀
+    simpa only [v, rate, center] using hreverse k hp hpp₀
+  · simpa only [c₀] using hsummable
+
+theorem late_localizedSpacetimeRpowNorm_inv_le_exp_tsum_bombieriGiustiThreshold_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (cutoff : ℕ → SmoothScalar g) (outer averagingCutoff : SmoothScalar g)
+    (reverseCost : ℕ → ℝ) (a b : ℕ → ℝ)
+    (C : ℝ) (hC : 0 < C)
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      outer averagingCutoff C)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ τ D : ℝ} (hp₀ : 0 < p₀)
+    (hreverseCost : ∀ k, 1 ≤ reverseCost k)
+    (hmeasure : ∀ k,
+      localizedSpacetimeMeasure (I := I) (M := M) (cutoff k) (a k) (b k) ≠ 0)
+    (hmeasure_le_one : ∀ k,
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (cutoff k) (a k) (b k)).real Set.univ ≤ 1)
+    (hstart : ∀ k, a (k + 1) ≤ a k)
+    (hend : ∀ k, b k ≤ b (k + 1))
+    (hcutoff : ∀ k x,
+      (cutoff k).toFun x ^ 2 ≤ (cutoff (k + 1)).toFun x ^ 2)
+    (hτD : τ ≤ D) (hτa : ∀ k, τ ≤ a k) (hbD : ∀ k, b k ≤ D)
+    (houter : ∀ k x, (cutoff k).toFun x ^ 2 ≤ outer.toFun x ^ 2)
+    (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
+    (hpde : ∀ t ∈ Icc τ D, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun q => u q x) t)
+    (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
+      localizedSpacetimeRpowNorm (I := I) (M := M) (cutoff k)
+          (fun t x => (exponentialTimeRescale
+            (logCenterDrift (I := I) (M := M) g averagingCutoff)
+            (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+              u hu hpos τ) u t x)⁻¹) p₀ (a k) (b k) ≤
+        reverseCost k ^ (1 / p - 1 / p₀) *
+          localizedSpacetimeRpowNorm (I := I) (M := M) (cutoff (k + 1))
+            (fun t x => (exponentialTimeRescale
+              (logCenterDrift (I := I) (M := M) g averagingCutoff)
+              (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+                u hu hpos τ) u t x)⁻¹) p (a (k + 1)) (b (k + 1)))
+    (hsummable : Summable (fun k : ℕ =>
+      (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀
+          (2 * C * cutoffMass (I := I) (M := M) averagingCutoff)
+          (reverseCost k) / 4))) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) (cutoff 0)
+        (fun t x => (exponentialTimeRescale
+          (logCenterDrift (I := I) (M := M) g averagingCutoff)
+          (shiftedLogCenter (I := I) (M := M) g averagingCutoff
+            u hu hpos τ) u t x)⁻¹) p₀ (a 0) (b 0) ≤
+      Real.exp (∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀
+          (2 * C * cutoffMass (I := I) (M := M) averagingCutoff)
+          (reverseCost k) / 4)) := by
+  let rate := logCenterDrift (I := I) (M := M) g averagingCutoff
+  let center := shiftedLogCenter (I := I) (M := M) g averagingCutoff
+    u hu hpos τ
+  let v := exponentialTimeRescale rate center u
+  let vinv : ℝ → M → ℝ := fun t x => (v t x)⁻¹
+  let c₀ := 2 * C * cutoffMass (I := I) (M := M) averagingCutoff
+  have hc₀ : 0 < c₀ := mul_pos (mul_pos (by norm_num) hC) hmass
+  have hv := contMDiff_exponentialTimeRescale rate center u hu
+  have hvpos := exponentialTimeRescale_pos rate center u hpos
+  have hvinv : Continuous (fun z : ℝ × M => vinv z.1 z.2) :=
+    hv.continuous.inv₀ fun z => (hvpos z.1 z.2).ne'
+  have hvinvpos : ∀ t x, 0 < vinv t x := fun t x => inv_pos.mpr (hvpos t x)
+  apply localizedSpacetimeRpowNorm_le_exp_tsum_bombieriGiustiThreshold
+    (I := I) (M := M) cutoff outer (fun z => vinv z.1 z.2) reverseCost a b
+      (p₀ := p₀) (c₀ := c₀) (c := τ) (d := D) hp₀ hc₀ hreverseCost
+      hvinv (fun z => hvinvpos z.1 z.2) hmeasure hmeasure_le_one
+      hstart hend hcutoff hτa hbD houter
+  · intro k r hr
+    let S : Set (ℝ × M) := {z | r < Real.log (vinv z.1 z.2)}
+    have hdom := localizedSpacetimeMeasure_mono (I := I) (M := M)
+      (hτa k) (hbD k) (houter k)
+    have hreal :
+        (localizedSpacetimeMeasure (I := I) (M := M)
+          (cutoff k) (a k) (b k)).real S ≤
+        (localizedSpacetimeMeasure (I := I) (M := M) outer τ D).real S :=
+      ENNReal.toReal_mono (measure_ne_top _ _) (hdom S)
+    exact hreal.trans (by
+      simpa only [S, vinv, v, rate, center, c₀, Real.log_inv] using
+        (late_localizedSpacetimeMeasure_neg_log_superlevel_tail_of_supersolution
+          (I := I) (M := M) g outer averagingCutoff C hC.le hP
+            u hu hpos hτD hr hmass hpde))
+  · intro k p hp hpp₀
+    simpa only [vinv, v, rate, center] using hreverse k hp hpp₀
+  · simpa only [c₀] using hsummable
+
 theorem early_integral_rpow_le_of_supersolution
     (g : SmoothRiemannianMetric I M)
     (deviationCutoff averagingCutoff : SmoothScalar g)
