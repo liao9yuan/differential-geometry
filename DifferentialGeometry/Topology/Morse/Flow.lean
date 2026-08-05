@@ -14,16 +14,19 @@ variable {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [Charte
 variable {I : ModelWithCorners ℝ E H}
 variable {f : M → ℝ} {a b : ℝ}
 
-structure GradientLikeFlow (I : ModelWithCorners ℝ E H) (f : M → ℝ) (a b : ℝ) where
+structure UnitSpeedFlow (f : M → ℝ) (a b : ℝ) where
   flow : ℝ → M → M
   flow_zero : ∀ x : M, flow 0 x = x
   flow_add : ∀ s t : ℝ, flow (s + t) = flow s ∘ flow t
-  contMDiffAt : ∀ t : ℝ, ∀ x : M, ContMDiffAt I I (⊤ : WithTop ℕ∞) (fun x : M => flow t x) x
-  contMDiffAt_t : ∀ x : M, ContMDiffAt 𝓘(ℝ, ℝ) I (⊤ : WithTop ℕ∞) (fun t : ℝ => flow t x) (0 : ℝ)
   strip_eq_sub : ∀ x : M, ∀ t : ℝ, 0 ≤ t → a ≤ f x - t → f (flow t x) = f x - t
   strip_eq_add_back : ∀ x : M, ∀ t : ℝ, 0 ≤ t → a ≤ f x → f x + t ≤ b →
     f (flow (-t) x) = f x + t
   rate_bound : ∀ x : M, ∀ t : ℝ, 0 ≤ t → f x - t ≤ f (flow t x) ∧ f (flow t x) ≤ f x
+
+structure GradientLikeFlow (I : ModelWithCorners ℝ E H) (f : M → ℝ) (a b : ℝ)
+    extends UnitSpeedFlow f a b where
+  contMDiffAt : ∀ t : ℝ, ∀ x : M, ContMDiffAt I I (⊤ : WithTop ℕ∞) (fun x : M => flow t x) x
+  contMDiffAt_t : ∀ x : M, ContMDiffAt 𝓘(ℝ, ℝ) I (⊤ : WithTop ℕ∞) (fun t : ℝ => flow t x) (0 : ℝ)
 
 def GradientLikeFlow.toDiffeomorph (Φ : GradientLikeFlow I f a b) (t : ℝ) :
     Diffeomorph I I M M (⊤ : WithTop ℕ∞) where
@@ -51,7 +54,8 @@ def GradientLikeFlow.toDiffeomorph (Φ : GradientLikeFlow I f a b) (t : ℝ) :
   contMDiff_toFun := Φ.contMDiffAt t
   contMDiff_invFun := Φ.contMDiffAt (-t)
 
-theorem GradientLikeFlow.flow_sublevel (Φ : GradientLikeFlow I f a b)
+omit [TopologicalSpace M] in
+theorem UnitSpeedFlow.flow_sublevel (Φ : UnitSpeedFlow f a b)
     {t : ℝ} (ht : t ∈ Set.Icc 0 (b - a)) {x : M} (hx : x ∈ sublevel f b) :
     Φ.flow t x ∈ sublevel f (b - t) := by
   change f (Φ.flow t x) ≤ b - t
@@ -93,7 +97,8 @@ theorem GradientLikeFlow.flow_sublevel (Φ : GradientLikeFlow I f a b)
           linarith
         _ ≤ b - t := by linarith [ht.2]
 
-theorem GradientLikeFlow.flow_sublevel_back (Φ : GradientLikeFlow I f a b)
+omit [TopologicalSpace M] in
+theorem UnitSpeedFlow.flow_sublevel_back (Φ : UnitSpeedFlow f a b)
     {t : ℝ} (ht : t ∈ Set.Icc 0 (b - a)) {y : M} (hy : y ∈ sublevel f (b - t)) :
     Φ.flow (-t) y ∈ sublevel f b := by
   change f (Φ.flow (-t) y) ≤ b
@@ -124,7 +129,8 @@ theorem GradientLikeFlow.flow_sublevel_back (Φ : GradientLikeFlow I f a b)
       _ ≤ f y + t := by linarith
       _ ≤ b := by linarith
 
-noncomputable def GradientLikeFlow.sublevelEquiv (Φ : GradientLikeFlow I f a b)
+omit [TopologicalSpace M] in
+noncomputable def UnitSpeedFlow.sublevelEquiv (Φ : UnitSpeedFlow f a b)
     {t : ℝ} (ht : t ∈ Set.Icc 0 (b - a)) :
     SublevelSpace f b ≃ SublevelSpace f (b - t) where
   toFun := fun x => ⟨Φ.flow t (x : M), Φ.flow_sublevel (t := t) ht (x := (x : M)) x.2⟩
@@ -150,7 +156,8 @@ noncomputable def GradientLikeFlow.sublevelEquiv (Φ : GradientLikeFlow I f a b)
       _ = Φ.flow 0 (y : M) := by simp
       _ = (y : M) := Φ.flow_zero (y : M)
 
-theorem GradientLikeFlow.flow_image_sublevel (Φ : GradientLikeFlow I f a b)
+omit [TopologicalSpace M] in
+theorem UnitSpeedFlow.flow_image_sublevel (Φ : UnitSpeedFlow f a b)
     {t : ℝ} (ht : t ∈ Set.Icc 0 (b - a)) :
     (fun x : M => Φ.flow t x) '' sublevel f b = sublevel f (b - t) := by
   ext y
@@ -170,7 +177,8 @@ theorem GradientLikeFlow.toDiffeomorph_image_sublevel (Φ : GradientLikeFlow I f
     Φ.toDiffeomorph t '' sublevel f b = sublevel f (b - t) := by
   simpa [toDiffeomorph] using Φ.flow_image_sublevel ht
 
-theorem noCriticalValues (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
+omit [TopologicalSpace M] in
+theorem noCriticalValues (Φ : UnitSpeedFlow f a b) (hab : a ≤ b) :
     (fun x : M => Φ.flow (a - b) x) '' sublevel f a = sublevel f b := by
   have ht : b - a ∈ Set.Icc (0 : ℝ) (b - a) := ⟨sub_nonneg.mpr hab, le_rfl⟩
   ext y
@@ -198,7 +206,7 @@ theorem noCriticalValues (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
 
 theorem noCriticalValues_toDiffeomorph (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
     Φ.toDiffeomorph (a - b) '' sublevel f a = sublevel f b := by
-  simpa [GradientLikeFlow.toDiffeomorph] using (noCriticalValues Φ hab)
+  simpa [GradientLikeFlow.toDiffeomorph] using (noCriticalValues Φ.toUnitSpeedFlow hab)
 
 noncomputable def linearModelFlow (a b : ℝ) (_hab : a ≤ b) :
     GradientLikeFlow 𝓘(ℝ, MorseModel 1) (fun y : MorseModel 1 => y 0) a b where
@@ -241,7 +249,7 @@ theorem linearModelNoCriticalValues (a b : ℝ) (hab : a ≤ b) :
     (fun y : MorseModel 1 => (linearModelFlow a b hab).flow (a - b) y) ''
         sublevel (fun y : MorseModel 1 => y 0) a =
       sublevel (fun y : MorseModel 1 => y 0) b :=
-  noCriticalValues (linearModelFlow a b hab) hab
+  noCriticalValues (linearModelFlow a b hab).toUnitSpeedFlow hab
 
 noncomputable def fin1Homeo : MorseModel 1 ≃ₜ ℝ where
   toFun := fun y => y 0
