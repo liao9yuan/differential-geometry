@@ -45,21 +45,27 @@ noncomputable def clmBilin {n : ℕ}
 -- d²(f∘σ)(0) = (d²f(0)) ∘ (dσ 0, dσ 0).
 theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
     (σ : MorseModel n → MorseModel (n + 1))
-    (hf : ContDiff ℝ 2 f) (hσ : ContDiff ℝ 2 σ)
+    (hf : ContDiff ℝ 2 f) (hσ : ContDiffAt ℝ 2 σ (0 : MorseModel n))
     (hσ0 : σ (0 : MorseModel n) = 0) (hcrit : fderiv ℝ f 0 = 0)
     (u v : MorseModel n) :
     (fderiv ℝ (fderiv ℝ (fun x' : MorseModel n => f (σ x'))) (0 : MorseModel n)) u v =
     (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ σ (0 : MorseModel n) u)
         (fderiv ℝ σ (0 : MorseModel n) v) := by
   -- fderiv (f∘σ) x = (fderiv f (σ x)).comp (fderiv σ x)
-  have hfd : ∀ x : MorseModel n, fderiv ℝ (fun x' : MorseModel n => f (σ x')) x =
+  have hfd : ∀ᶠ x in nhds (0 : MorseModel n), fderiv ℝ (fun x' : MorseModel n => f (σ x')) x =
       ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ
         (fderiv ℝ f (σ x)) (fderiv ℝ σ x) := by
-    intro x
+    rcases (hσ.contDiffOn (le_rfl : (2 : WithTop ℕ∞) ≤ (2 : WithTop ℕ∞))
+      (by intro h; norm_num at h)) with ⟨u, hu, hσOn⟩
+    rcases mem_nhds_iff.mp hu with ⟨u', hu'u, hu'open, hu'0⟩
+    have hσOn' : ContDiffOn ℝ 2 σ u' := hσOn.mono hu'u
+    have hσdiffOn : DifferentiableOn ℝ σ u' :=
+      hσOn'.differentiableOn (by norm_num : (2 : WithTop ℕ∞) ≠ 0)
+    filter_upwards [hu'open.mem_nhds hu'0] with x hx
     have hdf : DifferentiableAt ℝ f (σ x) :=
       (hf.contDiffAt (x := σ x)).differentiableAt (by decide : (2 : WithTop ℕ∞) ≠ 0)
     have hdσ : DifferentiableAt ℝ σ x :=
-      (hσ.contDiffAt (x := x)).differentiableAt (by decide : (2 : WithTop ℕ∞) ≠ 0)
+      (hσdiffOn x hx).differentiableAt (hu'open.mem_nhds hx)
     have h := fderiv_comp x (g := f) (f := σ) (hg := hdf) (hf := hdσ)
     calc
       fderiv ℝ (fun x' : MorseModel n => f (σ x')) x = fderiv ℝ (f ∘ σ) x := by
@@ -78,17 +84,15 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
           (by decide : (1 : WithTop ℕ∞) ≠ 0)).differentiableAt Filter.univ_mem
       exact hd.hasFDerivAt
   have hdσ' : HasFDerivAt σ (fderiv ℝ σ (0 : MorseModel n)) (0 : MorseModel n) :=
-    ((hσ.contDiffAt (x := (0 : MorseModel n))).differentiableAt
-      (by decide : (2 : WithTop ℕ∞) ≠ 0)).hasFDerivAt
+    (hσ.differentiableAt (by decide : (2 : WithTop ℕ∞) ≠ 0)).hasFDerivAt
   -- the derivative of x ↦ fderiv σ x at 0
   have hd2 : HasFDerivAt (fun x : MorseModel n => fderiv ℝ σ x)
       (fderiv ℝ (fderiv ℝ σ) (0 : MorseModel n)) (0 : MorseModel n) :=
     by
-      have h1 : ContDiffOn ℝ 1 (fderiv ℝ σ) Set.univ :=
-        hσ.contDiffOn.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
+      have h1 : ContDiffAt ℝ 1 (fderiv ℝ σ) (0 : MorseModel n) :=
+        hσ.fderiv_right (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
       have hd : DifferentiableAt ℝ (fderiv ℝ σ) (0 : MorseModel n) :=
-        ((h1 (0 : MorseModel n) (Set.mem_univ _)).differentiableWithinAt
-          (by decide : (1 : WithTop ℕ∞) ≠ 0)).differentiableAt Filter.univ_mem
+        h1.differentiableAt (by decide : (1 : WithTop ℕ∞) ≠ 0)
       exact hd.hasFDerivAt
   have hcomp' : HasFDerivAt (fun y : MorseModel n =>
         ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ
@@ -193,15 +197,12 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
   have hmain' : HasFDerivAt (fun x : MorseModel n => fderiv ℝ (fun x' : MorseModel n => f (σ x')) x)
       (bilinPullback (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ σ (0 : MorseModel n)))
       (0 : MorseModel n) := by
-    -- the function: by hfd
-    have hfun' : (fun x : MorseModel n => fderiv ℝ (fun x' : MorseModel n => f (σ x')) x) =
+    -- the function: by hfd near zero
+    have hfun_ev : (fun x : MorseModel n => fderiv ℝ (fun x' : MorseModel n => f (σ x')) x) =ᶠ[nhds (0 : MorseModel n)]
         fun y : MorseModel n => ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ
           (fderiv ℝ f (σ y)) (fderiv ℝ σ y) := by
-      funext x
-      exact hfd x
-    have hfun'' : (fun x : MorseModel n => fderiv ℝ (fun x' : MorseModel n => f (σ x')) x) =
-        fun y : MorseModel n => ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ
-          (fderiv ℝ f (σ y)) (fderiv ℝ σ y) := hfun'
+      filter_upwards [hfd] with x hx
+      exact hx
     have hderiv' : (ContinuousLinearMap.comp (ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ
           (fderiv ℝ f (σ (0 : MorseModel n)))) (fderiv ℝ (fderiv ℝ σ) (0 : MorseModel n)) +
         ContinuousLinearMap.comp ((ContinuousLinearMap.compL ℝ (MorseModel n) (MorseModel (n + 1)) ℝ).flip
@@ -216,9 +217,8 @@ theorem hessian_pullback_at_critical (f : MorseModel (n + 1) → ℝ)
           fderiv ℝ (fderiv ℝ σ) (0 : MorseModel n) := rfl
       rw [← hd2_3, ← hg2]
       exact hh0
-    rw [hfun'']
     rw [hderiv'] at hcomp'
-    exact hcomp'
+    exact (HasFDerivAt.congr_of_eventuallyEq hcomp' hfun_ev)
   have hfinal : fderiv ℝ (fun x : MorseModel n => fderiv ℝ (fun x' : MorseModel n => f (σ x')) x)
       (0 : MorseModel n) = bilinPullback (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ σ (0 : MorseModel n)) :=
     hmain'.fderiv
@@ -641,7 +641,7 @@ theorem hessian_morseReducedFn (f : MorseModel (n + 1) → ℝ) (hg : ContDiff �
     (hsrc : (0 : MorseModel (n + 1)) ∈ φ.source)
     (hdf : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n))
     (hdfp : DifferentiableAt ℝ (morsePartial f) (morseSection φ (0 : MorseModel n)))
-    (hcont : ContDiff ℝ 2 (morseSection φ))
+    (hcont : ContDiffAt ℝ 2 (morseSection φ) (0 : MorseModel n))
     (u v : MorseModel n) :
     (fderiv ℝ (fderiv ℝ (fun x' : MorseModel n => f (morseSection φ x'))) (0 : MorseModel n)) u v =
       morseReducedFamily (clmBilin a) 0 u v := by
@@ -979,7 +979,7 @@ theorem morseReducedFn_nondegenerate (f : MorseModel (n + 1) → ℝ) (hg : Cont
     (hsrc : (0 : MorseModel (n + 1)) ∈ φ.source)
     (hdf : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n))
     (hdfp : DifferentiableAt ℝ (morsePartial f) (morseSection φ (0 : MorseModel n)))
-    (hcont : ContDiff ℝ 2 (morseSection φ))
+    (hcont : ContDiffAt ℝ 2 (morseSection φ) (0 : MorseModel n))
     (hsep : (QuadraticMap.associated (R := ℝ) (chartHessianAt f 0)).SeparatingLeft) :
     (QuadraticMap.associated (R := ℝ)
       (chartHessianAt (fun x' : MorseModel n => f (morseSection φ x')) 0)).SeparatingLeft := by
@@ -1097,7 +1097,7 @@ theorem hessian_diagonal_reduced {n : ℕ} (f : MorseModel (n + 1) → ℝ) (hg 
     (hsrc : (0 : MorseModel (n + 1)) ∈ φ.source)
     (hdf : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n))
     (hdfp : DifferentiableAt ℝ (morsePartial f) (morseSection φ (0 : MorseModel n)))
-    (hcont : ContDiff ℝ 2 (morseSection φ))
+    (hcont : ContDiffAt ℝ 2 (morseSection φ) (0 : MorseModel n))
     (w : Fin (n + 1) → ℝ)
     (hdiag : ∀ u v : MorseModel (n + 1),
       (fderiv ℝ (fderiv ℝ f) 0 u) v = ∑ i : Fin (n + 1), w i * u i * v i)
@@ -1544,35 +1544,37 @@ theorem isLocalHomeomorphAt_morseSectionCompletion {n : ℕ} (f : MorseModel (n 
 
 theorem morseSection_smooth {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     (hcrit : fderiv ℝ f 0 = 0)
-    (hcont : ContDiffAt ℝ ⊤ (morsePartialMap f) 0)
+    (hcont : ContDiffAt ℝ (⊤ : ℕ∞) (morsePartialMap f) 0)
     (hdf : DifferentiableAt ℝ (morsePartial f) 0)
     (h₀ : fderiv ℝ (morsePartial f) 0 morseE0 ≠ 0) :
     ∃ φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)),
       (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f ∧ 0 ∈ φ.source ∧
-      ContDiffAt ℝ 1 (morseSection φ) (0 : MorseModel n) ∧
+      ContDiffAt ℝ 2 (morseSection φ) (0 : MorseModel n) ∧
       DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n) := by
   let φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)) :=
     ContDiffAt.toOpenPartialHomeomorph (f := morsePartialMap f)
       (f' := morsePartialDerivCLE (fderiv ℝ (morsePartial f) 0) h₀)
       hcont (hasFDerivAt_morsePartialMap f hdf h₀)
-      (by norm_num : (⊤ : WithTop ℕ∞) ≠ 0)
+      (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
   have hφ0 : morsePartialMap f 0 = 0 := by
     funext i
     cases i using Fin.cases <;> simp [morsePartialMap, morsePartial, morseCons, morseTail, hcrit]
-  have hφsymm : ContDiffAt ℝ ⊤ (φ.symm) (morsePartialMap f 0) := by
+  have hφsymm : ContDiffAt ℝ (⊤ : ℕ∞) (φ.symm) (morsePartialMap f 0) := by
     have hloc := hcont.to_localInverse (hasFDerivAt_morsePartialMap f hdf h₀)
-      (by norm_num : (⊤ : WithTop ℕ∞) ≠ 0)
+      (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
     simpa [φ, ContDiffAt.localInverse] using hloc
-  have hφsymm0 : ContDiffAt ℝ ⊤ (φ.symm) 0 := by
+  have hφsymm0 : ContDiffAt ℝ (⊤ : ℕ∞) (φ.symm) 0 := by
     simpa [hφ0] using hφsymm
   have hφsymm1 : ContDiffAt ℝ 1 (φ.symm) 0 :=
-    hφsymm0.of_le (by decide : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
-  have hcons0 : ContDiffAt ℝ ⊤ (fun x' : MorseModel n => morseCons (0 : ℝ) x') 0 := by
+    hφsymm0.of_le (by decide : (1 : WithTop ℕ∞) ≤ (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+  have hφsymm2 : ContDiffAt ℝ 2 (φ.symm) 0 :=
+    hφsymm0.of_le (by decide : (2 : WithTop ℕ∞) ≤ (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+  have hcons0 : ContDiffAt ℝ (⊤ : ℕ∞) (fun x' : MorseModel n => morseCons (0 : ℝ) x') 0 := by
     have hL : (fun x' : MorseModel n => morseConsLinearCLM (0, x')) =
         fun x' : MorseModel n => morseCons (0 : ℝ) x' := by
       funext x'
       rfl
-    have hc : ContDiffAt ℝ ⊤ (fun x' : MorseModel n => morseConsLinearCLM (0, x')) 0 := by
+    have hc : ContDiffAt ℝ (⊤ : ℕ∞) (fun x' : MorseModel n => morseConsLinearCLM (0, x')) 0 := by
       have hlin : (fun x' : MorseModel n => morseConsLinearCLM (0, x')) =
           (morseConsLinearCLM.comp (ContinuousLinearMap.inr ℝ ℝ (MorseModel n))) := by
         funext x'
@@ -1581,7 +1583,9 @@ theorem morseSection_smooth {n : ℕ} (f : MorseModel (n + 1) → ℝ)
       exact ((morseConsLinearCLM.comp (ContinuousLinearMap.inr ℝ ℝ (MorseModel n))).contDiff.contDiffAt)
     simpa [hL] using hc
   have hcons1 : ContDiffAt ℝ 1 (fun x' : MorseModel n => morseCons (0 : ℝ) x') 0 :=
-    hcons0.of_le (by decide : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+    hcons0.of_le (by decide : (1 : WithTop ℕ∞) ≤ (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+  have hcons2 : ContDiffAt ℝ 2 (fun x' : MorseModel n => morseCons (0 : ℝ) x') 0 :=
+    hcons0.of_le (by decide : (2 : WithTop ℕ∞) ≤ (↑(⊤ : ℕ∞) : WithTop ℕ∞))
   have hsec0 : φ.symm (morseCons (0 : ℝ) (0 : MorseModel n)) = 0 := by
     have hz : morseCons (0 : ℝ) (0 : MorseModel n) = (0 : MorseModel (n + 1)) := by
       funext i
@@ -1595,7 +1599,7 @@ theorem morseSection_smooth {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     have htarget : (0 : MorseModel (n + 1)) ∈ φ.target := by
       have ht : morsePartialMap f 0 ∈ φ.target := by
         simpa [φ] using (ContDiffAt.image_mem_toOpenPartialHomeomorph_target hcont
-          (hasFDerivAt_morsePartialMap f hdf h₀) (by norm_num : (⊤ : WithTop ℕ∞) ≠ 0))
+          (hasFDerivAt_morsePartialMap f hdf h₀) (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0))
       simpa [hφ0] using ht
     have hφinv : φ (φ.symm 0) = 0 := by
       simpa [hφ0'] using (φ.right_inv htarget)
@@ -1611,9 +1615,18 @@ theorem morseSection_smooth {n : ℕ} (f : MorseModel (n + 1) → ℝ)
       simpa [hz] using hφsymm1
     exact ContDiffAt.comp (x := 0) (g := φ.symm)
       (f := fun x' : MorseModel n => morseCons (0 : ℝ) x') (hg := hg') (hf := hcons1)
+  have hσ2 : ContDiffAt ℝ 2 (morseSection φ) (0 : MorseModel n) := by
+    change ContDiffAt ℝ 2 (fun x' : MorseModel n => φ.symm (morseCons (0 : ℝ) x')) (0 : MorseModel n)
+    have hg' : ContDiffAt ℝ 2 (φ.symm) (morseCons (0 : ℝ) (0 : MorseModel n)) := by
+      have hz : morseCons (0 : ℝ) (0 : MorseModel n) = (0 : MorseModel (n + 1)) := by
+        funext i
+        cases i using Fin.cases <;> simp [morseCons]
+      simpa [hz] using hφsymm2
+    exact ContDiffAt.comp (x := 0) (g := φ.symm)
+      (f := fun x' : MorseModel n => morseCons (0 : ℝ) x') (hg := hg') (hf := hcons2)
   have hσdiff : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n) :=
     (hσ1.differentiableAt (by decide : (1 : WithTop ℕ∞) ≠ 0))
-  refine ⟨φ, ?_, ?_, hσ1, hσdiff⟩
+  refine ⟨φ, ?_, ?_, hσ2, hσdiff⟩
   · rw [ContDiffAt.toOpenPartialHomeomorph_coe]
   · exact ContDiffAt.mem_toOpenPartialHomeomorph_source _ _ _
 
