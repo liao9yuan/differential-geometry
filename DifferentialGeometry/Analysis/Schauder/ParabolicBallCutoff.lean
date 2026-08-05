@@ -145,6 +145,41 @@ theorem parabolicBallCutoffTimeDerivative_eq_zero_of_time_not_mem
     intervalCutoffDerivBcf_eq_zero_of_not_mem ha ht hb htmem, zero_smul]
   rfl
 
+theorem parabolicBallCutoff_eq_zero_of_space_not_mem
+    (a t₀ t₁ b : Real) (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (t : Real) {x : V} (hx : x ∉ Metric.ball center R) :
+    parabolicBallCutoff a t₀ t₁ b ha ht hb center hr hrR t x = 0 := by
+  rw [parabolicBallCutoff_apply,
+    ballCutoff_eq_zero_of_not_mem_ball hr hrR hx, smul_zero]
+
+theorem parabolicBallCutoffTimeDerivative_eq_zero_of_space_not_mem
+    (a t₀ t₁ b : Real) (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (t : Real) {x : V} (hx : x ∉ Metric.ball center R) :
+    parabolicBallCutoffTimeDerivative
+      a t₀ t₁ b ha ht hb center hr hrR t x = 0 := by
+  rw [parabolicBallCutoffTimeDerivative_apply,
+    ballCutoff_eq_zero_of_not_mem_ball hr hrR hx, smul_zero]
+
+theorem parabolicBallCutoffSpatialFDeriv_eq_zero_of_space_not_mem
+    (a t₀ t₁ b : Real) (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (t : Real) {x : V} (hx : x ∉ Metric.ball center R) :
+    parabolicBallCutoffSpatialFDeriv
+      a t₀ t₁ b ha ht hb center hr hrR t x = 0 := by
+  rw [parabolicBallCutoffSpatialFDeriv_apply,
+    ballCutoffFDeriv_eq_zero_of_not_mem_ball hr hrR hx, smul_zero]
+
+theorem parabolicBallCutoffSpatialFDeriv2_eq_zero_of_space_not_mem
+    (a t₀ t₁ b : Real) (ha : a < t₀) (ht : t₀ ≤ t₁) (hb : t₁ < b)
+    (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (t : Real) {x : V} (hx : x ∉ Metric.ball center R) :
+    parabolicBallCutoffSpatialFDeriv2
+      a t₀ t₁ b ha ht hb center hr hrR t x = 0 := by
+  rw [parabolicBallCutoffSpatialFDeriv2_apply,
+    ballCutoffFDeriv2_eq_zero_of_not_mem_ball hr hrR hx, smul_zero]
+
 def parabolicBallCutoffSpatialFDerivSupConst (r R : Real) : NNReal :=
   Real.toNNReal (ballCutoffFDerivBound r R)
 
