@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.Oscillation
 import DifferentialGeometry.Analysis.Integration.Holder.Weighted
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.MeasureTheory.Integral.Prod
 
@@ -40,6 +41,17 @@ instance cutoffWeightedMeasure_isFiniteMeasure
     ((cutoff.smooth.continuous.pow 2).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)).hasFiniteIntegral
 
+omit [CompactSpace M] in
+theorem cutoffWeightedMeasure_mono
+    {g : SmoothRiemannianMetric I M} {cutoff outer : SmoothScalar g}
+    (hcutoff : ∀ x, cutoff.toFun x ^ 2 ≤ outer.toFun x ^ 2) :
+    cutoffWeightedMeasure (I := I) (M := M) cutoff ≤
+      cutoffWeightedMeasure (I := I) (M := M) outer := by
+  unfold cutoffWeightedMeasure
+  apply withDensity_mono
+  filter_upwards with x
+  exact ENNReal.ofReal_le_ofReal (hcutoff x)
+
 def localizedSpacetimeMeasure {g : SmoothRiemannianMetric I M}
     (cutoff : SmoothScalar g) (a b : ℝ) : Measure (ℝ × M) :=
   (volume.restrict (Ioc a b)).prod
@@ -55,6 +67,17 @@ def localizedSpacetimeRpowNorm {g : SmoothRiemannianMetric I M}
     (cutoff : SmoothScalar g) (u : ℝ → M → ℝ)
     (p a b : ℝ) : ℝ :=
   localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b ^ (1 / p)
+
+theorem localizedSpacetimeMeasure_mono
+    {g : SmoothRiemannianMetric I M} {cutoff outer : SmoothScalar g}
+    {a b c d : ℝ} (hca : c ≤ a) (hbd : b ≤ d)
+    (hcutoff : ∀ x, cutoff.toFun x ^ 2 ≤ outer.toFun x ^ 2) :
+    localizedSpacetimeMeasure (I := I) (M := M) cutoff a b ≤
+      localizedSpacetimeMeasure (I := I) (M := M) outer c d := by
+  unfold localizedSpacetimeMeasure
+  exact DifferentialGeometry.Integral.Measure.prod_mono
+    (Measure.restrict_mono_set volume (Set.Ioc_subset_Ioc hca hbd))
+    (cutoffWeightedMeasure_mono (I := I) (M := M) hcutoff)
 
 instance localizedSpacetimeMeasure_isFiniteMeasure
     {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g) (a b : ℝ) :
@@ -97,6 +120,21 @@ theorem localizedSpacetimeRpowMoment_nonneg
     (p a b : ℝ) :
     0 ≤ localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b := by
   exact integral_nonneg fun z => Real.rpow_nonneg (hu z.1 z.2) p
+
+theorem localizedSpacetimeRpowMoment_mono
+    {g : SmoothRiemannianMetric I M} {cutoff outer : SmoothScalar g}
+    (u : ℝ → M → ℝ)
+    (hu : Continuous (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a b c d : ℝ} (hca : c ≤ a) (hbd : b ≤ d)
+    (hcutoff : ∀ x, cutoff.toFun x ^ 2 ≤ outer.toFun x ^ 2) :
+    localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b ≤
+      localizedSpacetimeRpowMoment (I := I) (M := M) outer u p c d := by
+  exact integral_mono_measure
+    (localizedSpacetimeMeasure_mono (I := I) (M := M) hca hbd hcutoff)
+    (ae_of_all _ fun z => Real.rpow_nonneg (hpos z.1 z.2).le p)
+    (integrable_localizedSpacetimeRpow_of_continuous_pos
+      (I := I) (M := M) outer u hu hpos p c d)
 
 omit [CompactSpace M] in
 theorem localizedSpacetimeRpowNorm_nonneg
