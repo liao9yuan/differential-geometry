@@ -53,6 +53,17 @@ theorem eParabolicC2HolderGaugeOn_mono
   · exact eHolderSeminormOn_mono hQR alpha _
   · exact eHolderSeminormOn_mono hQR alpha _
 
+theorem eParabolicC2HolderGaugeWithLowerJetsOn_mono
+    {Q R : Set (ParabolicPoint V)} (hQR : Q ⊆ R)
+    (alpha : NNReal) (u : Real → V → F) :
+    eParabolicC2HolderGaugeWithLowerJetsOn alpha Q u ≤
+      eParabolicC2HolderGaugeWithLowerJetsOn alpha R u := by
+  unfold eParabolicC2HolderGaugeWithLowerJetsOn
+  gcongr
+  · exact eParabolicC2HolderGaugeOn_mono hQR alpha u
+  · exact eHolderSeminormOn_mono hQR alpha _
+  · exact eHolderSeminormOn_mono hQR alpha _
+
 theorem ball_parabolicPoint_eq_parabolicCylinder
     {Y : Type*} [PseudoMetricSpace Y]
     (t0 R : Real) (hR : 0 ≤ R) (x0 : Y) :

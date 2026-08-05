@@ -115,6 +115,39 @@ def eParabolicC2HolderGaugeInEuclideanChartOn
   eParabolicC2HolderGaugeOn alpha Q
     (parabolicEuclideanChartRepresentation I x₀ u)
 
+def eParabolicC2HolderGaugeWithLowerJetsInExtChartOn
+    (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
+    (Q : Set (ParabolicPoint E)) (u : Real → M → F) : ENNReal :=
+  eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
+    (parabolicExtChartRepresentation I x₀ u)
+
+def eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+    [FiniteDimensional Real E]
+    (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
+    (Q : Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) : ENNReal :=
+  eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
+    (parabolicEuclideanChartRepresentation I x₀ u)
+
+theorem eParabolicC2HolderGaugeInExtChartOn_le_with_lower_jets
+    (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
+    (Q : Set (ParabolicPoint E)) (u : Real → M → F) :
+    eParabolicC2HolderGaugeInExtChartOn alpha I x₀ Q u ≤
+      eParabolicC2HolderGaugeWithLowerJetsInExtChartOn alpha I x₀ Q u :=
+  eParabolicC2HolderGaugeOn_le_with_lower_jets alpha Q _
+
+theorem eParabolicC2HolderGaugeInEuclideanChartOn_le_with_lower_jets
+    [FiniteDimensional Real E]
+    (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
+    (Q : Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) :
+    eParabolicC2HolderGaugeInEuclideanChartOn alpha I x₀ Q u ≤
+      eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+        alpha I x₀ Q u :=
+  eParabolicC2HolderGaugeOn_le_with_lower_jets alpha Q _
+
 theorem eParabolicC2HolderGaugeInExtChartOn_mono
     {Q R : Set (ParabolicPoint E)} (hQR : Q ⊆ R)
     (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
@@ -132,6 +165,25 @@ theorem eParabolicC2HolderGaugeInEuclideanChartOn_mono
     eParabolicC2HolderGaugeInEuclideanChartOn alpha I x₀ Q u ≤
       eParabolicC2HolderGaugeInEuclideanChartOn alpha I x₀ R u := by
   exact eParabolicC2HolderGaugeOn_mono hQR alpha _
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInExtChartOn_mono
+    {Q R : Set (ParabolicPoint E)} (hQR : Q ⊆ R)
+    (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
+    (u : Real → M → F) :
+    eParabolicC2HolderGaugeWithLowerJetsInExtChartOn alpha I x₀ Q u ≤
+      eParabolicC2HolderGaugeWithLowerJetsInExtChartOn alpha I x₀ R u := by
+  exact eParabolicC2HolderGaugeWithLowerJetsOn_mono hQR alpha _
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_mono
+    [FiniteDimensional Real E]
+    {Q R : Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E))))}
+    (hQR : Q ⊆ R) (alpha : NNReal)
+    (I : ModelWithCorners Real E H) (x₀ : M) (u : Real → M → F) :
+    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn alpha I x₀ Q u ≤
+      eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+        alpha I x₀ R u := by
+  exact eParabolicC2HolderGaugeWithLowerJetsOn_mono hQR alpha _
 
 theorem eParabolicC2HolderGaugeInExtChartOn_eq_of_coordinate_representation
     [I.Boundaryless]
@@ -163,6 +215,50 @@ def eParabolicC2HolderGaugeInEuclideanChartsOn
     (u : Real → M → F) : ENNReal :=
   ⨆ i, eParabolicC2HolderGaugeInEuclideanChartOn alpha I (center i) (Q i) u
 
+def eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M) (Q : A → Set (ParabolicPoint E))
+    (u : Real → M → F) : ENNReal :=
+  ⨆ i, eParabolicC2HolderGaugeWithLowerJetsInExtChartOn
+    alpha I (center i) (Q i) u
+
+def eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+    [FiniteDimensional Real E]
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) : ENNReal :=
+  ⨆ i, eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+    alpha I (center i) (Q i) u
+
+theorem eParabolicC2HolderGaugeInExtChartsOn_le_with_lower_jets
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M) (Q : A → Set (ParabolicPoint E))
+    (u : Real → M → F) :
+    eParabolicC2HolderGaugeInExtChartsOn alpha I center Q u ≤
+      eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn
+        alpha I center Q u := by
+  apply iSup_mono
+  intro i
+  exact eParabolicC2HolderGaugeInExtChartOn_le_with_lower_jets
+    alpha I (center i) (Q i) u
+
+theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_with_lower_jets
+    [FiniteDimensional Real E]
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) :
+    eParabolicC2HolderGaugeInEuclideanChartsOn alpha I center Q u ≤
+      eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+        alpha I center Q u := by
+  apply iSup_mono
+  intro i
+  exact eParabolicC2HolderGaugeInEuclideanChartOn_le_with_lower_jets
+    alpha I (center i) (Q i) u
+
 theorem eParabolicC2HolderGaugeInExtChartOn_le_extCharts
     {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
     (center : A → M) (Q : A → Set (ParabolicPoint E))
@@ -184,6 +280,33 @@ theorem eParabolicC2HolderGaugeInEuclideanChartOn_le_euclideanCharts
   exact le_iSup (fun j ↦
     eParabolicC2HolderGaugeInEuclideanChartOn alpha I (center j) (Q j) u) i
 
+theorem eParabolicC2HolderGaugeWithLowerJetsInExtChartOn_le_extCharts
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M) (Q : A → Set (ParabolicPoint E))
+    (u : Real → M → F) (i : A) :
+    eParabolicC2HolderGaugeWithLowerJetsInExtChartOn
+        alpha I (center i) (Q i) u ≤
+      eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn
+        alpha I center Q u := by
+  exact le_iSup (fun j ↦
+    eParabolicC2HolderGaugeWithLowerJetsInExtChartOn
+      alpha I (center j) (Q j) u) i
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_euclideanCharts
+    [FiniteDimensional Real E]
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) (i : A) :
+    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+        alpha I (center i) (Q i) u ≤
+      eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+        alpha I center Q u := by
+  exact le_iSup (fun j ↦
+    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+      alpha I (center j) (Q j) u) i
+
 theorem eParabolicC2HolderGaugeInExtChartsOn_le_iff
     {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
     (center : A → M) (Q : A → Set (ParabolicPoint E))
@@ -204,6 +327,40 @@ theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_iff
         alpha I (center i) (Q i) u ≤ C := by
   exact iSup_le_iff
 
+theorem eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn_le_iff
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M) (Q : A → Set (ParabolicPoint E))
+    (u : Real → M → F) (C : ENNReal) :
+    eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn
+        alpha I center Q u ≤ C ↔
+      ∀ i, eParabolicC2HolderGaugeWithLowerJetsInExtChartOn
+        alpha I (center i) (Q i) u ≤ C := by
+  exact iSup_le_iff
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_iff
+    [FiniteDimensional Real E]
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) (C : ENNReal) :
+    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+        alpha I center Q u ≤ C ↔
+      ∀ i, eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+        alpha I (center i) (Q i) u ≤ C := by
+  exact iSup_le_iff
+
+theorem eParabolicC2HolderGaugeInExtChartsOn_le_iSup
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M) (Q : A → Set (ParabolicPoint E))
+    (u : Real → M → F) (C : A → ENNReal)
+    (h : ∀ i, eParabolicC2HolderGaugeInExtChartOn
+      alpha I (center i) (Q i) u ≤ C i) :
+    eParabolicC2HolderGaugeInExtChartsOn alpha I center Q u ≤
+      ⨆ i, C i := by
+  apply iSup_mono
+  exact h
+
 theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_iSup
     [FiniteDimensional Real E]
     {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
@@ -217,6 +374,50 @@ theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_iSup
       ⨆ i, C i := by
   apply iSup_mono
   exact h
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn_le_iSup
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M) (Q : A → Set (ParabolicPoint E))
+    (u : Real → M → F) (C : A → ENNReal)
+    (h : ∀ i, eParabolicC2HolderGaugeWithLowerJetsInExtChartOn
+      alpha I (center i) (Q i) u ≤ C i) :
+    eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn
+        alpha I center Q u ≤
+      ⨆ i, C i := by
+  apply iSup_mono
+  exact h
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_iSup
+    [FiniteDimensional Real E]
+    {A : Type*} (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) (C : A → ENNReal)
+    (h : ∀ i, eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+      alpha I (center i) (Q i) u ≤ C i) :
+    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+        alpha I center Q u ≤
+      ⨆ i, C i := by
+  apply iSup_mono
+  exact h
+
+theorem eParabolicC2HolderGaugeInExtChartsOn_le_sum_of_finite
+    {A : Type*} [Fintype A]
+    (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M) (Q : A → Set (ParabolicPoint E))
+    (u : Real → M → F) (C : A → NNReal)
+    (h : ∀ i, eParabolicC2HolderGaugeInExtChartOn
+      alpha I (center i) (Q i) u ≤ C i) :
+    eParabolicC2HolderGaugeInExtChartsOn alpha I center Q u ≤
+      ∑ i, C i := by
+  classical
+  unfold eParabolicC2HolderGaugeInExtChartsOn
+  apply iSup_le
+  intro i
+  exact (h i).trans
+    (ENNReal.coe_le_coe.mpr
+      (Finset.single_le_sum (fun j _ ↦ zero_le (C j)) (Finset.mem_univ i)))
 
 theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_sum_of_finite
     [FiniteDimensional Real E]
@@ -232,6 +433,45 @@ theorem eParabolicC2HolderGaugeInEuclideanChartsOn_le_sum_of_finite
       ∑ i, C i := by
   classical
   unfold eParabolicC2HolderGaugeInEuclideanChartsOn
+  apply iSup_le
+  intro i
+  exact (h i).trans
+    (ENNReal.coe_le_coe.mpr
+      (Finset.single_le_sum (fun j _ ↦ zero_le (C j)) (Finset.mem_univ i)))
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn_le_sum_of_finite
+    {A : Type*} [Fintype A]
+    (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M) (Q : A → Set (ParabolicPoint E))
+    (u : Real → M → F) (C : A → NNReal)
+    (h : ∀ i, eParabolicC2HolderGaugeWithLowerJetsInExtChartOn
+      alpha I (center i) (Q i) u ≤ C i) :
+    eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn
+        alpha I center Q u ≤
+      ∑ i, C i := by
+  classical
+  unfold eParabolicC2HolderGaugeWithLowerJetsInExtChartsOn
+  apply iSup_le
+  intro i
+  exact (h i).trans
+    (ENNReal.coe_le_coe.mpr
+      (Finset.single_le_sum (fun j _ ↦ zero_le (C j)) (Finset.mem_univ i)))
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_sum_of_finite
+    [FiniteDimensional Real E]
+    {A : Type*} [Fintype A]
+    (alpha : NNReal) (I : ModelWithCorners Real E H)
+    (center : A → M)
+    (Q : A → Set (ParabolicPoint
+      (EuclideanSpace Real (Fin (Module.finrank Real E)))))
+    (u : Real → M → F) (C : A → NNReal)
+    (h : ∀ i, eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
+      alpha I (center i) (Q i) u ≤ C i) :
+    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
+        alpha I center Q u ≤
+      ∑ i, C i := by
+  classical
+  unfold eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn
   apply iSup_le
   intro i
   exact (h i).trans
