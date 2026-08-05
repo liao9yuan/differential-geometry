@@ -116,4 +116,21 @@ theorem nagumo_isForwardInvariantForODE_of_lipschitz [CompleteSpace E]
   exact nagumo_mapsTo_of_lipschitz hne hclosed hconvex htangent L
     (fun t _ ↦ hL t) hγ ha
 
+theorem nagumo_convexCone_isForwardInvariantForODE_of_mapsTo [CompleteSpace E]
+    (C : ConvexCone ℝ E) (hne : (C : Set E).Nonempty) (hclosed : IsClosed (C : Set E))
+    {f : ℝ → E → E} (L : ℝ≥0) (hL : ∀ t, LipschitzWith L (f t))
+    (hf : ∀ t, MapsTo (f t) C C) :
+    IsForwardInvariantForODE f C :=
+  nagumo_isForwardInvariantForODE_of_lipschitz
+    hne hclosed C.convex
+      (ConvexCone.vectorFieldTangentTo_of_mapsTo C hf) L hL
+
+theorem nagumo_properCone_isForwardInvariantForODE_of_mapsTo [CompleteSpace E]
+    (C : ProperCone ℝ E) {f : ℝ → E → E} (L : ℝ≥0)
+    (hL : ∀ t, LipschitzWith L (f t)) (hf : ∀ t, MapsTo (f t) C C) :
+    IsForwardInvariantForODE f C :=
+  nagumo_isForwardInvariantForODE_of_lipschitz
+    C.nonempty C.isClosed C.convex
+      (ProperCone.vectorFieldTangentTo_of_mapsTo C hf) L hL
+
 end DifferentialGeometry.Analysis.ODE
