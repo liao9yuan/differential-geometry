@@ -46,6 +46,13 @@ def HasLocalizedPoincare (g : SmoothRiemannianMetric I M)
     localizedL2Oscillation (I := I) (M := M) averagingCutoff u ≤
       C * localizedDirichletEnergy (I := I) (M := M) energyCutoff u
 
+def HasLocalizedPoincareAtAverage (g : SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : SmoothScalar g) (C : ℝ) : Prop :=
+  ∀ u : SmoothScalar g,
+    localizedL2Deviation (I := I) (M := M) deviationCutoff u
+        (localizedAverage (I := I) (M := M) averagingCutoff u) ≤
+      C * localizedDirichletEnergy (I := I) (M := M) averagingCutoff u
+
 omit [I.Boundaryless] [CompactSpace M] in
 theorem cutoff_mass_nonneg {g : SmoothRiemannianMetric I M}
     (cutoff : SmoothScalar g) :
@@ -221,6 +228,20 @@ theorem has_localized_poincare_of_deviation
   obtain ⟨center, hcenter⟩ := hdeviation u
   exact (localized_l2_oscillation_le_deviation
     (I := I) (M := M) averagingCutoff u center hmass).trans hcenter
+
+omit [I.Boundaryless] in
+theorem HasLocalizedPoincareAtAverage.has_localized_poincare
+    {g : SmoothRiemannianMetric I M}
+    {deviationCutoff averagingCutoff : SmoothScalar g} {C : ℝ}
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      deviationCutoff averagingCutoff C)
+    (hmass : cutoffMass (I := I) (M := M) deviationCutoff ≠ 0) :
+    HasLocalizedPoincare (I := I) (M := M) g
+      deviationCutoff averagingCutoff C := by
+  intro u
+  exact (localized_l2_oscillation_le_deviation
+    (I := I) (M := M) deviationCutoff u
+      (localizedAverage (I := I) (M := M) averagingCutoff u) hmass).trans (hP u)
 
 omit [I.Boundaryless] in
 theorem cont_diff_localized_l2_oscillation
