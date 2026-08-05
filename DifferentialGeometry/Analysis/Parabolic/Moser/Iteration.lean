@@ -362,6 +362,32 @@ theorem finite_multiplicative_iteration
           ring
 
 omit [NeZero n] in
+theorem finite_moser_iteration_bound
+    {X : ℕ → ℝ} {theta a b : ℝ} (k : ℕ)
+    (hX_zero : 0 ≤ X 0)
+    (htheta : 0 ≤ theta) (htheta_one : theta < 1)
+    (ha : 0 ≤ a) (hb : 0 ≤ b)
+    (hstep : ∀ j < k, X (j + 1) ≤
+      Real.exp (moserIterationCost theta a b j) * X j) :
+    X k ≤ Real.exp (∑' j, moserIterationCost theta a b j) * X 0 := by
+  have hcost : Summable (moserIterationCost theta a b) :=
+    summable_moserIterationCost htheta htheta_one
+  have hcost_nonneg : ∀ j, 0 ≤ moserIterationCost theta a b j :=
+    moserIterationCost_nonneg htheta ha hb
+  have hfinite := finite_multiplicative_iteration k
+    (fun _ _ => (Real.exp_pos _).le) hstep
+  calc
+    X k ≤ (∏ j ∈ Finset.range k,
+          Real.exp (moserIterationCost theta a b j)) * X 0 := hfinite
+    _ = Real.exp (∑ j ∈ Finset.range k,
+          moserIterationCost theta a b j) * X 0 := by
+      rw [Real.exp_sum]
+    _ ≤ Real.exp (∑' j, moserIterationCost theta a b j) * X 0 := by
+      gcongr
+      exact hcost.sum_le_tsum (Finset.range k)
+        (fun j _ => hcost_nonneg j)
+
+omit [NeZero n] in
 theorem bddAbove_range_of_multiplicative_iteration
     {X cost : ℕ → ℝ}
     (hX_zero : 0 ≤ X 0)
