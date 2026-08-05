@@ -111,6 +111,53 @@ theorem morseTaylorBilin_zero (g : E → ℝ) :
       _ = 1 / 2 := by norm_num
   rw [intervalIntegral.integral_smul_const (fun t : ℝ => 1 - t) (fderiv ℝ (fderiv ℝ g) 0), hInt]
 
+noncomputable def morseTaylorBilinAt (g : E → ℝ) (c x : E) : E →L[ℝ] (E →L[ℝ] ℝ) :=
+  ∫ t in (0 : ℝ)..1, (1 - t) • fderiv ℝ (fderiv ℝ g) (c + t • (x - c))
+
+omit [FiniteDimensional ℝ E] in
+theorem morseTaylorBilin_translate (g : E → ℝ) (hg : ContDiff ℝ 2 g) (c x : E) :
+    morseTaylorBilin (fun z : E => g (z + c)) x = morseTaylorBilinAt g c (x + c) := by
+  dsimp [morseTaylorBilin, morseTaylorBilinAt]
+  apply intervalIntegral.integral_congr
+  intro t ht
+  have hinner : fderiv ℝ (fderiv ℝ (fun z : E => g (z + c))) (t • x) =
+      fderiv ℝ (fderiv ℝ g) (c + t • x) := by
+    rw [fderiv_fderiv_translate g hg c (t • x)]
+    congr 1
+    abel
+  have harg : c + t • x = c + t • (x + c - c) := by
+    congr 1
+    have hx : x + c - c = x := by abel
+    exact (congrArg (fun y : E => t • y) hx).symm
+  have hmain : fderiv ℝ (fderiv ℝ (fun z : E => g (z + c))) (t • x) =
+      fderiv ℝ (fderiv ℝ g) (c + t • (x + c - c)) := by
+    rw [hinner]
+    exact congrArg (fderiv ℝ (fderiv ℝ g)) harg
+  simpa using congrArg (fun L : E →L[ℝ] (E →L[ℝ] ℝ) => (1 - t) • L) hmain
+
+omit [FiniteDimensional ℝ E] in
+theorem second_order_taylor_bilin_at (g : E → ℝ) (hg : ContDiff ℝ 2 g) (c x : E) :
+    g x - g c = (fderiv ℝ g c) (x - c) + (morseTaylorBilinAt g c x) (x - c) (x - c) := by
+  let h : E → ℝ := fun z => g (z + c)
+  have hh : ContDiff ℝ 2 h := by
+    dsimp [h]
+    exact hg.comp (by
+      exact (contDiff_id : ContDiff ℝ 2 (fun z : E => z)).add
+        (contDiff_const : ContDiff ℝ 2 fun _ : E => c))
+  have ht := second_order_taylor_bilin h hh (x - c)
+  have h0 : h (x - c) = g x := by simp [h]
+  have h00 : h 0 = g c := by simp [h]
+  have hfd : fderiv ℝ h 0 = fderiv ℝ g c := by
+    dsimp [h]
+    simpa using fderiv_translate g c 0 (by
+      simpa using ((hg.contDiffAt (x := c)).differentiableAt (by decide : (2 : WithTop ℕ∞) ≠ 0)))
+  have hmtb : morseTaylorBilin h (x - c) = morseTaylorBilinAt g c x := by
+    dsimp [h]
+    rw [morseTaylorBilin_translate g hg c (x - c)]
+    simp [sub_add_cancel]
+  rw [h0, h00, hfd, hmtb] at ht
+  simpa using ht
+
 section Completion
 
 variable {n : ℕ}

@@ -161,5 +161,38 @@ theorem second_order_taylor_integral_of_fderiv_eq_zero (g : E → ℝ) (hg : Con
   rw [second_order_taylor_integral g hg x, hx₀]
   simp
 
+theorem fderiv_translate {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (g : E → F) (c y : E) (hg : DifferentiableAt ℝ g (y + c)) :
+    fderiv ℝ (fun z : E => g (z + c)) y = fderiv ℝ g (y + c) := by
+  have hc : HasFDerivAt (fun z : E => z + c) (1 : E →L[ℝ] E) y := by
+    have h := (hasFDerivAt_id (x := y) (𝕜 := ℝ)).add
+      (hasFDerivAt_const (x := y) (c := c) (𝕜 := ℝ))
+    convert h using 1
+    · ext z
+      simp
+  have hcomp : HasFDerivAt (fun z : E => g (z + c))
+      (ContinuousLinearMap.comp (fderiv ℝ g (y + c)) (1 : E →L[ℝ] E)) y := by
+    exact HasFDerivAt.comp (x := y) (g := g) (g' := fderiv ℝ g (y + c))
+      (f := fun z : E => z + c) (f' := (1 : E →L[ℝ] E)) (hg := hg.hasFDerivAt) (hf := hc)
+  have hcomp' : HasFDerivAt (fun z : E => g (z + c)) (fderiv ℝ g (y + c)) y := by
+    simpa using hcomp
+  exact hcomp'.fderiv
+
+theorem fderiv_fderiv_translate (g : E → ℝ) (hg : ContDiff ℝ 2 g) (c y : E) :
+    fderiv ℝ (fderiv ℝ (fun z : E => g (z + c))) y = fderiv ℝ (fderiv ℝ g) (y + c) := by
+  have hfun : fderiv ℝ (fun z : E => g (z + c)) = fun z : E => fderiv ℝ g (z + c) := by
+    funext z
+    exact fderiv_translate g c z (by
+      exact ((hg.contDiffAt (x := z + c)).differentiableAt (by decide : (2 : WithTop ℕ∞) ≠ 0)))
+  have hd : DifferentiableAt ℝ (fderiv ℝ g) (y + c) := by
+    have h1 : ContDiffOn ℝ 1 (fderiv ℝ g) Set.univ :=
+      hg.contDiffOn.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
+    exact ((h1 (y + c) (Set.mem_univ _)).differentiableWithinAt
+      (by decide : (1 : WithTop ℕ∞) ≠ 0)).differentiableAt Filter.univ_mem
+  calc
+    fderiv ℝ (fderiv ℝ (fun z : E => g (z + c))) y
+        = fderiv ℝ (fun z : E => fderiv ℝ g (z + c)) y := by rw [hfun]
+    _ = fderiv ℝ (fderiv ℝ g) (y + c) := fderiv_translate (fderiv ℝ g) c y hd
+
 end
 end DifferentialGeometry.Topology.Morse

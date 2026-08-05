@@ -617,7 +617,6 @@ theorem bilin_completed_head_zero {n : ℕ}
   rw [hcrossyCLM]
   rw [morseReducedFamily_apply]
   simp [clmBilin]
-  -- simplify the RHS cross term
   rw [hcrossxCLM]
   have hcrossy0 : (a 0) morseE0 (morseCons (0 : ℝ) (morseTail y)) = -(morseHead y) * (a 0 morseE0 morseE0) := by
     have hswap : (a 0) morseE0 (morseCons (0 : ℝ) (morseTail y)) = (a 0) (morseCons (0 : ℝ) (morseTail y)) morseE0 :=
@@ -989,7 +988,6 @@ theorem morseReducedFn_nondegenerate (f : MorseModel (n + 1) → ℝ) (hg : Cont
     intro u
     apply LinearMap.ext
     intro v
-    simp [chartHessianBilinAt, clmBilin]
     have hA : a 0 = fderiv ℝ (fderiv ℝ f) 0 := by
       rw [ha 0, morseTaylorBilin_zero f]
       apply ContinuousLinearMap.ext
@@ -997,7 +995,7 @@ theorem morseReducedFn_nondegenerate (f : MorseModel (n + 1) → ℝ) (hg : Cont
       apply ContinuousLinearMap.ext
       intro v
       simp [smul_eq_mul]
-    rw [hA]
+    simp [chartHessianBilinAt, clmBilin, hA]
   have hchart : chartHessianAt f 0 = (clmBilin a 0).toQuadraticMap := by
     change (chartHessianBilinAt f 0).toQuadraticMap = (clmBilin a 0).toQuadraticMap
     rw [hbilin0]
@@ -1011,8 +1009,8 @@ theorem morseReducedFn_nondegenerate (f : MorseModel (n + 1) → ℝ) (hg : Cont
     intro u
     apply LinearMap.ext
     intro v
-    simp [chartHessianBilinAt]
-    rw [hessian_morseReducedFn f hg hcrit a ha hsym hpiv φ hφ hsrc hdf hdfp hcont u v]
+    simpa [chartHessianBilinAt] using
+      (hessian_morseReducedFn f hg hcrit a ha hsym hpiv φ hφ hsrc hdf hdfp hcont u v)
   have hQ : QuadraticMap.associated (R := ℝ)
         (chartHessianAt (fun x' : MorseModel n => f (morseSection φ x')) 0) =
       QuadraticMap.associated (R := ℝ) ((morseReducedFamily (clmBilin a) 0).toQuadraticMap) := by
