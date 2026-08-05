@@ -156,6 +156,107 @@ theorem contDiffHolderSpaceLowerOrderTerm_apply
     contDiffHolderSpaceFDerivHolder_apply,
     contDiffHolderSpaceValueHolder_apply]
 
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+theorem norm_contDiffHolderSpaceLowerOrderTerm_le
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (b : n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (c : BoundedHolderSpace (X := Euc n) (F := Real) alpha) :
+    ‖contDiffHolderSpaceLowerOrderTerm
+      (F := F) alpha halpha b c‖ ≤
+      9 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by
+  classical
+  have hsmu : ∀ a : BoundedHolderSpace (X := Euc n) (F := Real) alpha,
+      ‖boundedHolderSpaceSmu (F := F) alpha a‖ ≤ 3 * ‖a‖ := by
+    intro a
+    calc
+      ‖boundedHolderSpaceSmu (F := F) alpha a‖ ≤
+          ‖boundedHolderSpaceSmu (X := Euc n)
+            (F := F) alpha‖ * ‖a‖ :=
+        (boundedHolderSpaceSmu (X := Euc n)
+          (F := F) alpha).le_opNorm a
+      _ ≤ 3 * ‖a‖ := mul_le_mul_of_nonneg_right
+        (norm_boundedHolderSpaceSmu_le
+          (X := Euc n) (F := F) alpha) (norm_nonneg _)
+  have hdrift : ∀ i,
+      ‖(boundedHolderSpaceSmu alpha (b i)).comp
+        ((boundedHolderSpaceMap alpha
+          (gradientComponentEval (F := F) i)).comp
+          (contDiffHolderSpaceFDerivHolder 2 alpha (by omega) halpha))‖ ≤
+        9 * ‖b i‖ := by
+    intro i
+    calc
+      ‖(boundedHolderSpaceSmu alpha (b i)).comp
+          ((boundedHolderSpaceMap alpha
+            (gradientComponentEval (F := F) i)).comp
+            (contDiffHolderSpaceFDerivHolder 2 alpha
+              (by omega) halpha))‖ ≤
+        ‖boundedHolderSpaceSmu alpha (b i)‖ *
+          ‖(boundedHolderSpaceMap alpha
+            (gradientComponentEval (F := F) i)).comp
+            (contDiffHolderSpaceFDerivHolder 2 alpha
+              (by omega) halpha)‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (3 * ‖b i‖) * (1 * 3) := mul_le_mul (hsmu (b i))
+        ((ContinuousLinearMap.opNorm_comp_le _ _).trans
+          (mul_le_mul
+            ((norm_boundedHolderSpaceMap_le alpha
+              (gradientComponentEval (F := F) i)).trans
+                (norm_apply_euclideanBasis_le_one (G := F) i))
+            (norm_contDiffHolderSpaceFDerivHolder_le
+              (V := Euc n) (F := F) 2 alpha (by omega) halpha)
+            (norm_nonneg _) zero_le_one))
+        (norm_nonneg _)
+        (mul_nonneg (by norm_num) (norm_nonneg (b i)))
+      _ = 9 * ‖b i‖ := by ring
+  have hpotential :
+      ‖(boundedHolderSpaceSmu (F := F) alpha c).comp
+        (contDiffHolderSpaceValueHolder 2 alpha
+          (by omega) halpha)‖ ≤ 9 * ‖c‖ := by
+    calc
+      ‖(boundedHolderSpaceSmu (F := F) alpha c).comp
+          (contDiffHolderSpaceValueHolder 2 alpha
+            (by omega) halpha)‖ ≤
+        ‖boundedHolderSpaceSmu (F := F) alpha c‖ *
+          ‖contDiffHolderSpaceValueHolder
+            (V := Euc n) (F := F) 2 alpha (by omega) halpha‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (3 * ‖c‖) * 3 := mul_le_mul (hsmu c)
+        (norm_contDiffHolderSpaceValueHolder_le
+          (V := Euc n) (F := F) 2 alpha (by omega) halpha)
+        (norm_nonneg _)
+        (mul_nonneg (by norm_num) (norm_nonneg c))
+      _ = 9 * ‖c‖ := by ring
+  unfold contDiffHolderSpaceLowerOrderTerm
+  calc
+    ‖(∑ i,
+          (boundedHolderSpaceSmu alpha (b i)).comp
+            ((boundedHolderSpaceMap alpha
+              (gradientComponentEval (F := F) i)).comp
+              (contDiffHolderSpaceFDerivHolder 2 alpha
+                (by omega) halpha))) +
+        (boundedHolderSpaceSmu (F := F) alpha c).comp
+          (contDiffHolderSpaceValueHolder 2 alpha
+            (by omega) halpha)‖ ≤
+      ‖∑ i,
+          (boundedHolderSpaceSmu alpha (b i)).comp
+            ((boundedHolderSpaceMap alpha
+              (gradientComponentEval (F := F) i)).comp
+              (contDiffHolderSpaceFDerivHolder 2 alpha
+                (by omega) halpha))‖ +
+        ‖(boundedHolderSpaceSmu (F := F) alpha c).comp
+          (contDiffHolderSpaceValueHolder 2 alpha
+            (by omega) halpha)‖ := norm_add_le _ _
+    _ ≤ (∑ i, 9 * ‖b i‖) + 9 * ‖c‖ := add_le_add
+      ((norm_sum_le Finset.univ fun i ↦
+        (boundedHolderSpaceSmu alpha (b i)).comp
+          ((boundedHolderSpaceMap alpha
+            (gradientComponentEval (F := F) i)).comp
+            (contDiffHolderSpaceFDerivHolder 2 alpha
+              (by omega) halpha))).trans
+        (Finset.sum_le_sum fun i _hi ↦ hdrift i)) hpotential
+    _ = 9 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by
+      rw [Finset.mul_sum]
+
 def contDiffHolderSpaceNondivergenceOperator
     (alpha : NNReal) (halpha : alpha ≤ 1)
     (a : n → n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
@@ -186,6 +287,33 @@ theorem contDiffHolderSpaceNondivergenceOperator_apply
     ContinuousLinearMap.add_apply, boundedHolderSpace_add_apply,
     contDiffHolderSpaceVariableMatrixLaplacian_apply,
     contDiffHolderSpaceLowerOrderTerm_apply]
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+theorem norm_contDiffHolderSpaceNondivergenceOperator_le
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (a : n → n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (b : n → BoundedHolderSpace (X := Euc n) (F := Real) alpha)
+    (c : BoundedHolderSpace (X := Euc n) (F := Real) alpha) :
+    ‖contDiffHolderSpaceNondivergenceOperator
+      (F := F) alpha halpha a b c‖ ≤
+      3 * (∑ i, ∑ j, ‖a i j‖) +
+        9 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by
+  calc
+    ‖contDiffHolderSpaceNondivergenceOperator
+        (F := F) alpha halpha a b c‖ ≤
+      ‖contDiffHolderSpaceVariableMatrixLaplacian
+        (F := F) alpha a‖ +
+      ‖contDiffHolderSpaceLowerOrderTerm
+        (F := F) alpha halpha b c‖ := norm_add_le _ _
+    _ ≤ 3 * (∑ i, ∑ j, ‖a i j‖) +
+        (9 * (∑ i, ‖b i‖) + 9 * ‖c‖) :=
+      add_le_add
+        (norm_contDiffHolderSpaceVariableMatrixLaplacian_le
+          (F := F) alpha a)
+        (norm_contDiffHolderSpaceLowerOrderTerm_le
+          (F := F) alpha halpha b c)
+    _ = 3 * (∑ i, ∑ j, ‖a i j‖) +
+        9 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by ring
 
 def parabolicC2HolderSpaceLowerOrderTerm
     (alpha : NNReal) (halpha : alpha ≤ 1)
@@ -329,6 +457,64 @@ theorem norm_parabolicC2HolderSpaceLowerOrderTerm_le
         (Finset.sum_le_sum fun i _hi ↦ hdrift i)) hpotential
     _ = 18 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by
       rw [Finset.mul_sum]
+
+def parabolicC2HolderSpaceNondivergenceOperator
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (b : n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (c : ParabolicHolderSpace (V := Euc n) (F := Real) alpha) :
+    ParabolicC2HolderSpace (V := Euc n) (F := F) alpha →L[Real]
+      ParabolicHolderSpace (V := Euc n) (F := F) alpha :=
+  parabolicC2HolderSpaceVariableMatrixOperator alpha a -
+    parabolicC2HolderSpaceLowerOrderTerm alpha halpha b c
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+@[simp]
+theorem parabolicC2HolderSpaceNondivergenceOperator_apply
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (b : n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (c : ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (u : ParabolicC2HolderSpace (V := Euc n) (F := F) alpha)
+    (p : ParabolicPoint (Euc n)) :
+    parabolicC2HolderSpaceNondivergenceOperator
+        alpha halpha a b c u p =
+      parabolicNondivergenceOperator
+        (fun i j q ↦ a i j q) (fun i q ↦ b i q) (fun q ↦ c q)
+        (parabolicC2HolderSpaceFun u) p := by
+  simp only [parabolicC2HolderSpaceNondivergenceOperator,
+    ContinuousLinearMap.sub_apply, boundedHolderSpace_sub_apply,
+    parabolicC2HolderSpaceVariableMatrixOperator_apply,
+    parabolicC2HolderSpaceLowerOrderTerm_apply,
+    parabolicNondivergenceOperator, parabolicVariableMatrixOperator,
+    parabolicVariableMatrixLap, Pi.sub_apply]
+
+omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
+theorem norm_parabolicC2HolderSpaceNondivergenceOperator_le
+    (alpha : NNReal) (halpha : alpha ≤ 1)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (b : n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (c : ParabolicHolderSpace (V := Euc n) (F := Real) alpha) :
+    ‖parabolicC2HolderSpaceNondivergenceOperator
+      (F := F) alpha halpha a b c‖ ≤
+      1 + 3 * (∑ i, ∑ j, ‖a i j‖) +
+        18 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by
+  calc
+    ‖parabolicC2HolderSpaceNondivergenceOperator
+        (F := F) alpha halpha a b c‖ ≤
+      ‖parabolicC2HolderSpaceVariableMatrixOperator
+        (F := F) alpha a‖ +
+      ‖parabolicC2HolderSpaceLowerOrderTerm
+        (F := F) alpha halpha b c‖ := norm_sub_le _ _
+    _ ≤ (1 + 3 * (∑ i, ∑ j, ‖a i j‖)) +
+        (18 * (∑ i, ‖b i‖) + 9 * ‖c‖) :=
+      add_le_add
+        (norm_parabolicC2HolderSpaceVariableMatrixOperator_le
+          (F := F) alpha a)
+        (norm_parabolicC2HolderSpaceLowerOrderTerm_le
+          (F := F) alpha halpha b c)
+    _ = 1 + 3 * (∑ i, ∑ j, ‖a i j‖) +
+        18 * (∑ i, ‖b i‖) + 9 * ‖c‖ := by ring
 
 omit [DecidableEq n] [Nonempty n] [CompleteSpace F] in
 theorem variableMatrixLap_eq_nondivergenceOperator_sub_lowerOrderTerm

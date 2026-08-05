@@ -90,6 +90,30 @@ theorem hessianComponentEval_apply (i j : n)
     ContinuousLinearMap.apply_apply, ContinuousLinearEquiv.coe_coe,
     LinearIsometryEquiv.coe_toContinuousLinearEquiv]
 
+theorem norm_hessianComponentEval_le_one (i j : n) :
+    ‖hessianComponentEval (F := F) i j‖ ≤ 1 := by
+  apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
+  intro H
+  rw [hessianComponentEval_apply, one_mul]
+  calc
+    ‖hessianCurryEquiv (EuclideanSpace Real n) F H
+        (EuclideanSpace.basisFun n Real i)
+        (EuclideanSpace.basisFun n Real j)‖ ≤
+      ‖hessianCurryEquiv (EuclideanSpace Real n) F H
+          (EuclideanSpace.basisFun n Real i)‖ *
+        ‖EuclideanSpace.basisFun n Real j‖ :=
+      (hessianCurryEquiv (EuclideanSpace Real n) F H
+        (EuclideanSpace.basisFun n Real i)).le_opNorm _
+    _ ≤ (‖hessianCurryEquiv (EuclideanSpace Real n) F H‖ *
+          ‖EuclideanSpace.basisFun n Real i‖) *
+        ‖EuclideanSpace.basisFun n Real j‖ := by
+      gcongr
+      exact (hessianCurryEquiv (EuclideanSpace Real n) F H).le_opNorm _
+    _ = ‖H‖ := by
+      rw [(EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one i,
+        (EuclideanSpace.basisFun n Real).orthonormal.norm_eq_one j,
+        LinearIsometryEquiv.norm_map, mul_one, mul_one]
+
 def matrixLaplacianEval (A : Matrix n n Real) :
     (EuclideanSpace Real n [×2]→L[Real] F) →L[Real] F :=
   ∑ i, ∑ j, (A i j) • hessianComponentEval (F := F) i j

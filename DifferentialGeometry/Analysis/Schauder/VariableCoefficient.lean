@@ -107,6 +107,237 @@ theorem contDiffHolderSpaceVariableMatrixLaplacian_apply
     boundedHolderSpaceMap_apply, contDiffHolderSpaceTopJet_apply,
     hessianComponentEval_apply, matrixLap]
 
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_contDiffHolderSpaceVariableMatrixLaplacian_le
+    (alpha : NNReal)
+    (a : n → n → BoundedHolderSpace (X := Euc n) (F := Real) alpha) :
+    ‖contDiffHolderSpaceVariableMatrixLaplacian
+      (F := F) alpha a‖ ≤ 3 * ∑ i, ∑ j, ‖a i j‖ := by
+  classical
+  have hsmu : ∀ f : BoundedHolderSpace (X := Euc n) (F := Real) alpha,
+      ‖boundedHolderSpaceSmu (F := F) alpha f‖ ≤ 3 * ‖f‖ := by
+    intro f
+    calc
+      ‖boundedHolderSpaceSmu (F := F) alpha f‖ ≤
+          ‖boundedHolderSpaceSmu (X := Euc n) (F := F) alpha‖ * ‖f‖ :=
+        (boundedHolderSpaceSmu (X := Euc n) (F := F) alpha).le_opNorm f
+      _ ≤ 3 * ‖f‖ := mul_le_mul_of_nonneg_right
+        (norm_boundedHolderSpaceSmu_le
+          (X := Euc n) (F := F) alpha) (norm_nonneg _)
+  have hterm : ∀ i j,
+      ‖(boundedHolderSpaceSmu alpha (a i j)).comp
+        ((boundedHolderSpaceMap alpha
+          (hessianComponentEval (F := F) i j)).comp
+          (contDiffHolderSpaceTopJet 2 alpha))‖ ≤
+        3 * ‖a i j‖ := by
+    intro i j
+    calc
+      ‖(boundedHolderSpaceSmu alpha (a i j)).comp
+          ((boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (contDiffHolderSpaceTopJet 2 alpha))‖ ≤
+        ‖boundedHolderSpaceSmu alpha (a i j)‖ *
+          ‖(boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (contDiffHolderSpaceTopJet 2 alpha)‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (3 * ‖a i j‖) * (1 * 1) := mul_le_mul (hsmu (a i j))
+        ((ContinuousLinearMap.opNorm_comp_le _ _).trans
+          (mul_le_mul
+            ((norm_boundedHolderSpaceMap_le alpha
+              (hessianComponentEval (F := F) i j)).trans
+                (norm_hessianComponentEval_le_one (F := F) i j))
+            (norm_contDiffHolderSpaceTopJet_le
+              (V := Euc n) (F := F) 2 alpha)
+            (norm_nonneg _) zero_le_one))
+        (norm_nonneg _)
+        (mul_nonneg (by norm_num) (norm_nonneg (a i j)))
+      _ = 3 * ‖a i j‖ := by ring
+  unfold contDiffHolderSpaceVariableMatrixLaplacian
+  calc
+    ‖∑ i, ∑ j,
+        (boundedHolderSpaceSmu alpha (a i j)).comp
+          ((boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (contDiffHolderSpaceTopJet 2 alpha))‖ ≤
+      ∑ i, ∑ j,
+        ‖(boundedHolderSpaceSmu alpha (a i j)).comp
+          ((boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (contDiffHolderSpaceTopJet 2 alpha))‖ :=
+      (norm_sum_le Finset.univ fun i ↦ ∑ j,
+        (boundedHolderSpaceSmu alpha (a i j)).comp
+          ((boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (contDiffHolderSpaceTopJet 2 alpha))).trans
+        (Finset.sum_le_sum fun i _hi ↦ norm_sum_le Finset.univ fun j ↦
+          (boundedHolderSpaceSmu alpha (a i j)).comp
+            ((boundedHolderSpaceMap alpha
+              (hessianComponentEval (F := F) i j)).comp
+              (contDiffHolderSpaceTopJet 2 alpha)))
+    _ ≤ ∑ i, ∑ j, 3 * ‖a i j‖ :=
+      Finset.sum_le_sum fun i _hi ↦
+        Finset.sum_le_sum fun j _hj ↦ hterm i j
+    _ = 3 * ∑ i, ∑ j, ‖a i j‖ := by
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro i hi
+      rw [Finset.mul_sum]
+
+def parabolicC2HolderSpaceVariableMatrixLaplacian
+    (alpha : NNReal)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha) :
+    ParabolicC2HolderSpace (V := Euc n) (F := F) alpha →L[Real]
+      ParabolicHolderSpace (V := Euc n) (F := F) alpha :=
+  ∑ i, ∑ j,
+    (boundedHolderSpaceSmu alpha (a i j)).comp
+      ((boundedHolderSpaceMap alpha
+        (hessianComponentEval (F := F) i j)).comp
+        (parabolicC2HolderSpaceSpatialHessian alpha))
+
+omit [DecidableEq n] [Nonempty n] in
+@[simp]
+theorem parabolicC2HolderSpaceVariableMatrixLaplacian_apply
+    (alpha : NNReal)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (u : ParabolicC2HolderSpace (V := Euc n) (F := F) alpha)
+    (p : ParabolicPoint (Euc n)) :
+    parabolicC2HolderSpaceVariableMatrixLaplacian alpha a u p =
+      matrixLap (fun i j ↦ a i j p)
+        (hessianCurryEquiv (Euc n) F
+          (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u) p)) := by
+  simp only [parabolicC2HolderSpaceVariableMatrixLaplacian,
+    ContinuousLinearMap.sum_apply, boundedHolderSpace_sum_apply,
+    ContinuousLinearMap.comp_apply, boundedHolderSpaceSmu_apply,
+    boundedHolderSpaceMap_apply,
+    parabolicC2HolderSpaceSpatialHessian_apply,
+    hessianComponentEval_apply, matrixLap]
+
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicC2HolderSpaceVariableMatrixLaplacian_le
+    (alpha : NNReal)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha) :
+    ‖parabolicC2HolderSpaceVariableMatrixLaplacian
+      (F := F) alpha a‖ ≤ 3 * ∑ i, ∑ j, ‖a i j‖ := by
+  classical
+  have hsmu : ∀ f : ParabolicHolderSpace
+      (V := Euc n) (F := Real) alpha,
+      ‖boundedHolderSpaceSmu (F := F) alpha f‖ ≤ 3 * ‖f‖ := by
+    intro f
+    calc
+      ‖boundedHolderSpaceSmu (F := F) alpha f‖ ≤
+          ‖boundedHolderSpaceSmu
+            (X := ParabolicPoint (Euc n)) (F := F) alpha‖ * ‖f‖ :=
+        (boundedHolderSpaceSmu
+          (X := ParabolicPoint (Euc n)) (F := F) alpha).le_opNorm f
+      _ ≤ 3 * ‖f‖ := mul_le_mul_of_nonneg_right
+        (norm_boundedHolderSpaceSmu_le
+          (X := ParabolicPoint (Euc n)) (F := F) alpha) (norm_nonneg _)
+  have hterm : ∀ i j,
+      ‖(boundedHolderSpaceSmu alpha (a i j)).comp
+        ((boundedHolderSpaceMap alpha
+          (hessianComponentEval (F := F) i j)).comp
+          (parabolicC2HolderSpaceSpatialHessian alpha))‖ ≤
+        3 * ‖a i j‖ := by
+    intro i j
+    calc
+      ‖(boundedHolderSpaceSmu alpha (a i j)).comp
+          ((boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (parabolicC2HolderSpaceSpatialHessian alpha))‖ ≤
+        ‖boundedHolderSpaceSmu alpha (a i j)‖ *
+          ‖(boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (parabolicC2HolderSpaceSpatialHessian alpha)‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ (3 * ‖a i j‖) * (1 * 1) := mul_le_mul (hsmu (a i j))
+        ((ContinuousLinearMap.opNorm_comp_le _ _).trans
+          (mul_le_mul
+            ((norm_boundedHolderSpaceMap_le alpha
+              (hessianComponentEval (F := F) i j)).trans
+                (norm_hessianComponentEval_le_one (F := F) i j))
+            (norm_parabolicC2HolderSpaceSpatialHessian_le
+              (V := Euc n) (F := F) alpha)
+            (norm_nonneg _) zero_le_one))
+        (norm_nonneg _)
+        (mul_nonneg (by norm_num) (norm_nonneg (a i j)))
+      _ = 3 * ‖a i j‖ := by ring
+  unfold parabolicC2HolderSpaceVariableMatrixLaplacian
+  calc
+    ‖∑ i, ∑ j,
+        (boundedHolderSpaceSmu alpha (a i j)).comp
+          ((boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (parabolicC2HolderSpaceSpatialHessian alpha))‖ ≤
+      ∑ i, ∑ j,
+        ‖(boundedHolderSpaceSmu alpha (a i j)).comp
+          ((boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (parabolicC2HolderSpaceSpatialHessian alpha))‖ :=
+      (norm_sum_le Finset.univ fun i ↦ ∑ j,
+        (boundedHolderSpaceSmu alpha (a i j)).comp
+          ((boundedHolderSpaceMap alpha
+            (hessianComponentEval (F := F) i j)).comp
+            (parabolicC2HolderSpaceSpatialHessian alpha))).trans
+        (Finset.sum_le_sum fun i _hi ↦ norm_sum_le Finset.univ fun j ↦
+          (boundedHolderSpaceSmu alpha (a i j)).comp
+            ((boundedHolderSpaceMap alpha
+              (hessianComponentEval (F := F) i j)).comp
+              (parabolicC2HolderSpaceSpatialHessian alpha)))
+    _ ≤ ∑ i, ∑ j, 3 * ‖a i j‖ :=
+      Finset.sum_le_sum fun i _hi ↦
+        Finset.sum_le_sum fun j _hj ↦ hterm i j
+    _ = 3 * ∑ i, ∑ j, ‖a i j‖ := by
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro i hi
+      rw [Finset.mul_sum]
+
+def parabolicC2HolderSpaceVariableMatrixOperator
+    (alpha : NNReal)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha) :
+    ParabolicC2HolderSpace (V := Euc n) (F := F) alpha →L[Real]
+      ParabolicHolderSpace (V := Euc n) (F := F) alpha :=
+  parabolicC2HolderSpaceTimeDerivative alpha -
+    parabolicC2HolderSpaceVariableMatrixLaplacian alpha a
+
+omit [DecidableEq n] [Nonempty n] in
+@[simp]
+theorem parabolicC2HolderSpaceVariableMatrixOperator_apply
+    (alpha : NNReal)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha)
+    (u : ParabolicC2HolderSpace (V := Euc n) (F := F) alpha)
+    (p : ParabolicPoint (Euc n)) :
+    parabolicC2HolderSpaceVariableMatrixOperator alpha a u p =
+      parabolicTimeDerivative (parabolicC2HolderSpaceFun u) p -
+        matrixLap (fun i j ↦ a i j p)
+          (hessianCurryEquiv (Euc n) F
+            (parabolicSpatialJet 2 (parabolicC2HolderSpaceFun u) p)) := by
+  simp only [parabolicC2HolderSpaceVariableMatrixOperator,
+    ContinuousLinearMap.sub_apply, boundedHolderSpace_sub_apply,
+    parabolicC2HolderSpaceTimeDerivative_apply,
+    parabolicC2HolderSpaceVariableMatrixLaplacian_apply]
+
+omit [DecidableEq n] [Nonempty n] in
+theorem norm_parabolicC2HolderSpaceVariableMatrixOperator_le
+    (alpha : NNReal)
+    (a : n → n → ParabolicHolderSpace (V := Euc n) (F := Real) alpha) :
+    ‖parabolicC2HolderSpaceVariableMatrixOperator
+      (F := F) alpha a‖ ≤ 1 + 3 * ∑ i, ∑ j, ‖a i j‖ := by
+  calc
+    ‖parabolicC2HolderSpaceVariableMatrixOperator
+        (F := F) alpha a‖ ≤
+      ‖parabolicC2HolderSpaceTimeDerivative
+        (V := Euc n) (F := F) alpha‖ +
+      ‖parabolicC2HolderSpaceVariableMatrixLaplacian
+        (F := F) alpha a‖ := norm_sub_le _ _
+    _ ≤ 1 + 3 * ∑ i, ∑ j, ‖a i j‖ :=
+      add_le_add
+        (norm_parabolicC2HolderSpaceTimeDerivative_le
+          (V := Euc n) (F := F) alpha)
+        (norm_parabolicC2HolderSpaceVariableMatrixLaplacian_le
+          (F := F) alpha a)
+
 def frozenMatrixLap
     (a : n → n → BoundedContinuousFunction (Euc n) Real) (x0 : Euc n)
     (d2u : BoundedContinuousFunction (Euc n)
