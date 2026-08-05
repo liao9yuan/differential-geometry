@@ -88,6 +88,14 @@ theorem moserCutoffLevelBetween_succ_inv_sq
     moserCutoffWidth_succ_inv_sq]
   field_simp [(sub_pos.mpr hlowerUpper).ne']
 
+theorem moserCutoffLevelBetween_even_succ_inv_sq
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    ((moserCutoffLevelBetween lower upper (2 * k + 2) -
+        moserCutoffLevelBetween lower upper (2 * k + 1)) ^ 2)⁻¹ =
+      (16 / (upper - lower) ^ 2) * 16 ^ k := by
+  rw [moserCutoffLevelBetween_succ_inv_sq hlowerUpper (2 * k)]
+  norm_num [pow_mul]
+
 theorem moserCutoffLevel_strictMono : StrictMono moserCutoffLevel := by
   apply strictMono_nat_of_lt_succ
   intro k
@@ -143,6 +151,24 @@ theorem moserUpperTimeWidth_pos {τ b : ℝ} (hτb : τ < b) (k : ℕ) :
 theorem moserUpperTimeWidth_inv (τ b : ℝ) (k : ℕ) :
     (moserUpperTimeWidth τ b k)⁻¹ = (2 : ℝ) ^ (k + 1) / (b - τ) := by
   simp only [moserUpperTimeWidth, mul_inv_rev, ← inv_pow, inv_inv, div_eq_mul_inv]
+
+theorem moserUpperTimeLevel_sub_succ_inv (τ b : ℝ) (k : ℕ) :
+    (moserUpperTimeLevel τ b k - moserUpperTimeLevel τ b (k + 1))⁻¹ =
+      (2 : ℝ) ^ (k + 1) / (b - τ) := by
+  rw [moserUpperTimeLevel_sub_succ, moserUpperTimeWidth_inv]
+
+theorem moserUpperTimeLevel_sub_succ_inv_le_mul_pow
+    {τ b : ℝ} (hτb : τ < b) (k : ℕ) :
+    (moserUpperTimeLevel τ b k - moserUpperTimeLevel τ b (k + 1))⁻¹ ≤
+      (2 / (b - τ)) * 16 ^ k := by
+  rw [moserUpperTimeLevel_sub_succ_inv, pow_succ]
+  have hpow : (2 : ℝ) ^ k ≤ 16 ^ k :=
+    pow_le_pow_left₀ (by norm_num) (by norm_num) k
+  calc
+    (2 : ℝ) ^ k * 2 / (b - τ) = (2 / (b - τ)) * 2 ^ k := by ring
+    _ ≤ (2 / (b - τ)) * 16 ^ k := by
+      exact mul_le_mul_of_nonneg_left hpow
+        (div_nonneg (by norm_num) (sub_pos.mpr hτb).le)
 
 theorem moserUpperTimeLevel_succ_lt {τ b : ℝ} (hτb : τ < b) (k : ℕ) :
     moserUpperTimeLevel τ b (k + 1) < moserUpperTimeLevel τ b k := by
