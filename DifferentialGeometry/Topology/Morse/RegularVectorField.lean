@@ -1,4 +1,5 @@
 import DifferentialGeometry.Topology.Morse.Manifold
+import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 
 namespace DifferentialGeometry.Topology.Morse
@@ -305,6 +306,136 @@ theorem exists_open_unitSpeedVectorField_at_noncritical (I : ModelWithCorners �
       · -- x ∈ (trivializationAt (MorseModel n) (TangentSpace I) x₀).baseSet
         simpa [U] using hx.2
     exact hmd'.contMDiffWithinAt (s := U)
+
+theorem contMDiff_section_smul_of_contMDiffOn [IsManifold I (1 : WithTop ℕ∞) M]
+    (ρ : M → ℝ) (W : (x : M) → TangentSpace I x) (U : Set M) (hUopen : IsOpen U)
+    (hρ : ContMDiffOn I 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞) ρ U)
+    (hW : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel n)) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, W x⟩ : TangentBundle I M)) U)
+    (hρts : tsupport ρ ⊆ U) :
+    ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, ρ x • W x⟩ : TangentBundle I M)) := by
+  intro y
+  by_cases hy : y ∈ U
+  · have hsmul : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel n)) (1 : WithTop ℕ∞)
+        (fun x : M => (⟨x, ρ x • W x⟩ : TangentBundle I M)) U := by
+      simpa [Pi.smul_apply] using (ContMDiffOn.smul_section (u := U) (n := (1 : WithTop ℕ∞)) hρ hW)
+    exact hsmul.contMDiffAt (hUopen.mem_nhds hy)
+  · have hyts : y ∉ tsupport ρ := fun h => hy (hρts h)
+    have hsub : (tsupport ρ)ᶜ ∈ nhds y := by
+      exact (isClosed_tsupport ρ).compl_mem_nhds hyts
+    have hzero : (fun x : M => (⟨x, ρ x • W x⟩ : TangentBundle I M)) =ᶠ[nhds y]
+        (fun x : M => (⟨x, (0 : TangentSpace I x)⟩ : TangentBundle I M)) := by
+      exact Filter.eventuallyEq_of_mem hsub (fun x hx => by
+        have hxnot : x ∉ Function.support ρ := fun hs => hx (subset_closure hs)
+        have hρ0 : ρ x = 0 := by
+          by_contra h
+          exact hxnot (by simpa [Function.support] using h)
+        simp [hρ0])
+    have hzeroSect : ContMDiffAt I (I.prod 𝓘(ℝ, MorseModel n)) (1 : WithTop ℕ∞)
+        (fun x : M => (⟨x, (0 : TangentSpace I x)⟩ : TangentBundle I M)) y := by
+      have hzs := Bundle.contMDiffAt_zeroSection (IB := I) (𝕜 := ℝ) (F := MorseModel n)
+        (E := TangentSpace I) (x := y) (n := (1 : WithTop ℕ∞))
+      simpa [Bundle.zeroSection, Bundle.TotalSpace.mk'] using hzs
+    exact ContMDiffAt.congr_of_eventuallyEq hzeroSect hzero
+
+set_option backward.isDefEq.respectTransparency false in
+theorem exists_unitSpeedVectorField_on_strip (I : ModelWithCorners ℝ (MorseModel n) H)
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [IsManifold I (1 : WithTop ℕ∞) M]
+    [T2Space M] [SigmaCompactSpace M]
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f) (a b : ℝ)
+    (hcompact : IsCompact (f ⁻¹' Set.Icc a b))
+    (hregular : ∀ x ∈ f ⁻¹' Set.Icc a b, ¬ IsCriticalPointAt I f x) :
+    ∃ V : (x : M) → TangentSpace I x,
+      ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) (1 : WithTop ℕ∞)
+        (fun x : M => (⟨x, V x⟩ : TangentBundle I M)) ∧
+      (∀ x ∈ f ⁻¹' Set.Icc a b,
+        (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V x)) = -1) := by
+  let K : Set M := f ⁻¹' Set.Icc a b
+  have hpts : ∀ x : K, ∃ U : Set M, x.1 ∈ U ∧ IsOpen U ∧ ∃ W : (x : M) → TangentSpace I x,
+      (∀ y ∈ U, (NormedSpace.fromTangentSpace (f y)) ((mfderiv I 𝓘(ℝ, ℝ) f y) (W y)) = -1) ∧
+      ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel n)) (1 : WithTop ℕ∞)
+        (fun y : M => (⟨y, W y⟩ : TangentBundle I M)) U :=
+    fun x => exists_open_unitSpeedVectorField_at_noncritical I f hf (hregular x x.2)
+  choose U hUmem hUopen W hWdf hWsec using hpts
+  have hKclosed : IsClosed K := hcompact.isClosed
+  have hcov : K ⊆ ⋃ x : K, U x := by
+    intro y hy
+    exact Set.mem_iUnion_of_mem ⟨y, hy⟩ (hUmem ⟨y, hy⟩)
+  rcases SmoothPartitionOfUnity.exists_isSubordinate (I := I) (s := K) (U := U)
+    (hs := hKclosed) (ho := hUopen) (hU := hcov) with ⟨ρ, hρsub⟩
+  let V : (x : M) → TangentSpace I x := fun y => ∑ᶠ x : K, (ρ x y : ℝ) • (W x y : TangentSpace I y)
+  refine ⟨V, ?_, ?_⟩
+  · have hsummand : ∀ x : K, ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) (1 : WithTop ℕ∞)
+        (fun y : M => (⟨y, ρ x y • W x y⟩ : TangentBundle I M)) := by
+      intro x
+      have hcoerce : (ρ x : M → ℝ) = (ρ x).1 := rfl
+      have hρOn : ContMDiffOn I 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞) (ρ x : M → ℝ) (U x) := by
+        have hc' : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) (ρ x : M → ℝ) Set.univ := by
+          simpa [hcoerce] using (ρ x).property.contMDiffOn
+        exact (hc'.mono (subset_univ _)).of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ↑(⊤ : ℕ∞))
+      exact contMDiff_section_smul_of_contMDiffOn (I := I) (ρ x) (W x) (U x) (hUopen x) hρOn (hWsec x) (hρsub x)
+    have hfin : LocallyFinite (fun x : K => {y : M | ρ x y • W x y ≠ 0}) := by
+      exact ρ.locallyFinite.subset (fun x => by
+        intro y hy
+        have hρy : ρ x y ≠ 0 := by
+          intro hρ0
+          apply hy
+          simp [hρ0]
+        exact hρy)
+    simpa [V] using (ContMDiff.finsum_section_of_locallyFinite hfin hsummand)
+  · intro y hy
+    have hyK : y ∈ K := hy
+    let L : TangentSpace I y →L[ℝ] ℝ :=
+      (NormedSpace.fromTangentSpace (𝕜 := ℝ) (f y) : TangentSpace 𝓘(ℝ, ℝ) (f y) →L[ℝ] ℝ).comp
+        (mfderiv I 𝓘(ℝ, ℝ) f y)
+    have hVdef : (NormedSpace.fromTangentSpace (f y)) ((mfderiv I 𝓘(ℝ, ℝ) f y) (V y)) = L (V y) := by
+      simp [L]
+    rw [hVdef]
+    have hfinSuppρ : Function.HasFiniteSupport (fun x : K => ρ x y) := by
+      have hlf : LocallyFinite (fun x : K => {z : M | ρ x z ≠ 0}) := ρ.locallyFinite
+      have hlfy := hlf y
+      rcases hlfy with ⟨N, hN, hfinN⟩
+      have hsub : (Function.support fun x : K => ρ x y) ⊆
+          {x : K | ((fun x : K => {z : M | ρ x z ≠ 0}) x ∩ N).Nonempty} := by
+        intro x hx
+        rw [Function.support] at hx
+        exact ⟨y, ⟨hx, mem_of_mem_nhds hN⟩⟩
+      exact Set.Finite.subset hfinN hsub
+    have hfinSupp : Function.HasFiniteSupport (fun x : K => ρ x y • W x y) := by
+      exact Set.Finite.subset hfinSuppρ (by intro x hx; exact fun hρ0 => hx (by simp [hρ0]))
+    have hlin : L (V y) = ∑ᶠ x : K, L (ρ x y • W x y) := by
+      dsimp [V]
+      have hmap := (AddMonoidHom.map_finsum (g := (L : TangentSpace I y →+ ℝ)) (hf := hfinSupp))
+      simpa using hmap
+    rw [hlin]
+    have hterm : ∀ x : K, L (ρ x y • W x y) = ρ x y • L (W x y) := by
+      intro x
+      rw [map_smul]
+    have hrew : (∑ᶠ x : K, L (ρ x y • W x y)) = ∑ᶠ x : K, ρ x y • (-1 : ℝ) := by
+      apply finsum_congr
+      intro x
+      rw [hterm x]
+      by_cases hyU : y ∈ U x
+      · have hdf := hWdf x y hyU
+        have hLval : L (W x y) = -1 := by
+          dsimp [L]
+          simpa using hdf
+        rw [hLval]
+      · have hρ0 : ρ x y = 0 := by
+          have hts : y ∉ tsupport (ρ x) := fun h => hyU (hρsub x h)
+          have hnot : y ∉ Function.support (ρ x) := fun hs => hts (subset_closure hs)
+          by_contra h
+          exact hnot (by simpa [Function.support] using h)
+        simp [hρ0]
+    rw [hrew]
+    have hsum1 : (∑ᶠ x : K, ρ x y • (-1 : ℝ)) = -1 := by
+      have hs1 : (∑ᶠ x : K, ρ x y) = 1 := ρ.sum_eq_one hyK
+      have hsmul' : (∑ᶠ x : K, ρ x y • (-1 : ℝ)) = (∑ᶠ x : K, ρ x y) • (-1 : ℝ) := by
+        exact (finsum_smul' hfinSuppρ (-1 : ℝ)).symm
+      rw [hsmul', hs1]
+      simp
+    exact hsum1
 
 end
 
