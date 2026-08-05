@@ -859,6 +859,7 @@ import DifferentialGeometry.Analysis.Schauder.BallCutoff
 import DifferentialGeometry.Analysis.Schauder.BallCutoffHessian
 import DifferentialGeometry.Analysis.Schauder.BallInterior
 import DifferentialGeometry.Analysis.Schauder.BilinearHolder
+import DifferentialGeometry.Analysis.Schauder.C2Composition
 import DifferentialGeometry.Analysis.Schauder.CompactEllipticity
 import DifferentialGeometry.Analysis.Schauder.CompactRegularity
 import DifferentialGeometry.Analysis.Schauder.Composition
