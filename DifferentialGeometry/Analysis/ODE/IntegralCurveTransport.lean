@@ -1,6 +1,7 @@
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 import Mathlib.Geometry.Manifold.IntegralCurve.Transform
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+import Mathlib.Analysis.Calculus.Deriv.MeanValue
 
 noncomputable section
 
@@ -14,12 +15,11 @@ variable {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [Charte
 variable {I : ModelWithCorners ℝ E H}
 
 set_option backward.isDefEq.respectTransparency false in
-theorem hasDerivAt_f_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem hasDerivAt_df_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
-    (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
     {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) (t : ℝ) :
-    HasDerivAt (f ∘ γ) (-1) t := by
+    HasDerivAt (f ∘ γ) ((mfderiv I 𝓘(ℝ, ℝ) f (γ t)) (v (γ t))) t := by
   have hγmd : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t := (hγ t).mdifferentiableAt
   have hfmd : MDifferentiableAt I 𝓘(ℝ, ℝ) f (γ t) :=
     (hf (γ t)).mdifferentiableAt (by norm_num : (⊤ : WithTop ℕ∞) ≠ 0)
@@ -40,17 +40,19 @@ theorem hasDerivAt_f_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
   have hfd : HasFDerivAt (f ∘ γ) (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (f ∘ γ) t) t := by
     rw [hD]
     exact hfd''
-  have hcomposed1 : ((mfderiv I 𝓘(ℝ, ℝ) f (γ t)).comp
-      ((1 : ℝ →L[ℝ] ℝ).smulRight (v (γ t)))) (1 : ℝ) = (-1 : ℝ) := by
+  have hcomposed : ((mfderiv I 𝓘(ℝ, ℝ) f (γ t)).comp
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (v (γ t)))) (1 : ℝ) =
+      (mfderiv I 𝓘(ℝ, ℝ) f (γ t)) (v (γ t)) := by
     rw [ContinuousLinearMap.comp_apply]
     rw [ContinuousLinearMap.smulRight_apply]
-    simpa using hdf (γ t)
-  have hD1v : (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (f ∘ γ) t) (1 : ℝ) = (-1 : ℝ) := by
+    simp
+  have hD1v : (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (f ∘ γ) t) (1 : ℝ) =
+      (mfderiv I 𝓘(ℝ, ℝ) f (γ t)) (v (γ t)) := by
     have hh := congrArg (fun L : (TangentSpace 𝓘(ℝ, ℝ) t →L[ℝ] TangentSpace 𝓘(ℝ, ℝ) ((f ∘ γ) t)) =>
       L (1 : ℝ)) hD.symm
-    exact (hh.symm.trans hcomposed1)
+    exact (hh.symm.trans hcomposed)
   have hDlsmul : mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (f ∘ γ) t =
-      (ContinuousLinearMap.toSpanSingleton ℝ (-1) : ℝ →L[ℝ] ℝ) := by
+      (ContinuousLinearMap.toSpanSingleton ℝ ((mfderiv I 𝓘(ℝ, ℝ) f (γ t)) (v (γ t))) : ℝ →L[ℝ] ℝ) := by
     apply ContinuousLinearMap.ext
     intro (r : ℝ)
     have hlin : (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (f ∘ γ) t) r =
@@ -61,11 +63,128 @@ theorem hasDerivAt_f_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
     calc
       (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (f ∘ γ) t) r
           = r • (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (f ∘ γ) t) (1 : ℝ) := hlin
-      _ = r • (-1 : ℝ) := by rw [hD1v]
-      _ = (ContinuousLinearMap.toSpanSingleton ℝ (-1) : ℝ →L[ℝ] ℝ) r := by
+      _ = r • ((mfderiv I 𝓘(ℝ, ℝ) f (γ t)) (v (γ t))) := by rw [hD1v]
+      _ = (ContinuousLinearMap.toSpanSingleton ℝ ((mfderiv I 𝓘(ℝ, ℝ) f (γ t)) (v (γ t))) : ℝ →L[ℝ] ℝ) r := by
         simp [ContinuousLinearMap.toSpanSingleton_apply, smul_eq_mul]
   rw [hasDerivAt_iff_hasFDerivAt]
   rwa [← hDlsmul]
+
+set_option backward.isDefEq.respectTransparency false in
+theorem hasDerivAt_f_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) (t : ℝ) :
+    HasDerivAt (f ∘ γ) (-1) t := by
+  have h := hasDerivAt_df_comp_integralCurve f hf v hγ t
+  have hval : (mfderiv I 𝓘(ℝ, ℝ) f (γ t)) (v (γ t)) = (-1 : ℝ) := by
+    simpa using hdf (γ t)
+  simpa [hval] using h
+
+set_option backward.isDefEq.respectTransparency false in
+theorem f_rate_bounds_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) {t : ℝ} (ht : 0 ≤ t) :
+    f (γ 0) - t ≤ f (γ t) ∧ f (γ t) ≤ f (γ 0) := by
+  let g : ℝ → ℝ := f ∘ γ
+  have hderiv : ∀ s : ℝ, HasDerivAt g ((mfderiv I 𝓘(ℝ, ℝ) f (γ s)) (v (γ s))) s :=
+    fun s => hasDerivAt_df_comp_integralCurve f hf v hγ s
+  have hgdiff : DifferentiableOn ℝ g (Set.Icc (0 : ℝ) t) := by
+    intro x hx
+    exact (hderiv x).differentiableAt.differentiableWithinAt
+  have hderivNonpos : ∀ x ∈ interior (Set.Icc (0 : ℝ) t), deriv g x ≤ 0 := by
+    intro x hx
+    rw [(hderiv x).deriv]
+    have hv : (NormedSpace.fromTangentSpace (f (γ x))) ((mfderiv I 𝓘(ℝ, ℝ) f (γ x)) (v (γ x))) ≤ 0 :=
+      (hrate (γ x)).2
+    simpa using hv
+  have hganti : AntitoneOn g (Set.Icc (0 : ℝ) t) :=
+    antitoneOn_of_deriv_nonpos (convex_Icc (0 : ℝ) t) hgdiff.continuousOn
+      (hgdiff.mono interior_subset) hderivNonpos
+  have hle : f (γ t) ≤ f (γ 0) := by
+    have hm := hganti (a := 0) (b := t) (by exact ⟨le_rfl, ht⟩) (by exact ⟨ht, le_rfl⟩) ht
+    simpa [g] using hm
+  let h : ℝ → ℝ := fun s => g s + s
+  have hhderiv : ∀ s : ℝ, HasDerivAt h
+      ((NormedSpace.fromTangentSpace (f (γ s))) ((mfderiv I 𝓘(ℝ, ℝ) f (γ s)) (v (γ s))) + 1) s :=
+    fun s => (hderiv s).add (hasDerivAt_id s)
+  have hhdiff : DifferentiableOn ℝ h (Set.Icc (0 : ℝ) t) := by
+    intro x hx
+    exact (hhderiv x).differentiableAt.differentiableWithinAt
+  have hderivNonneg : ∀ x ∈ interior (Set.Icc (0 : ℝ) t), 0 ≤ deriv h x := by
+    intro x hx
+    rw [(hhderiv x).deriv]
+    have hv : -1 ≤ (NormedSpace.fromTangentSpace (f (γ x))) ((mfderiv I 𝓘(ℝ, ℝ) f (γ x)) (v (γ x))) :=
+      (hrate (γ x)).1
+    linarith
+  have hhmono : MonotoneOn h (Set.Icc (0 : ℝ) t) :=
+    monotoneOn_of_deriv_nonneg (convex_Icc (0 : ℝ) t) hhdiff.continuousOn
+      (hhdiff.mono interior_subset) hderivNonneg
+  have hle' : f (γ 0) - t ≤ f (γ t) := by
+    have hm : h 0 ≤ h t := hhmono (a := 0) (b := t) (by exact ⟨le_rfl, ht⟩) (by exact ⟨ht, le_rfl⟩) ht
+    dsimp [h, g] at hm
+    linarith
+  exact ⟨hle', hle⟩
+
+set_option backward.isDefEq.respectTransparency false in
+theorem f_eq_sub_of_integralCurve_on_strip [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    {a b : ℝ}
+    (hdf : ∀ x ∈ f ⁻¹' Set.Icc a b, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) {t : ℝ} (ht : 0 ≤ t)
+    (hstay : ∀ s ∈ Set.Icc (0 : ℝ) t, γ s ∈ f ⁻¹' Set.Icc a b) :
+    f (γ t) = f (γ 0) - t := by
+  let g : ℝ → ℝ := f ∘ γ
+  let h : ℝ → ℝ := fun s => g s + s
+  have hderiv : ∀ s : ℝ, HasDerivAt g ((mfderiv I 𝓘(ℝ, ℝ) f (γ s)) (v (γ s))) s :=
+    fun s => hasDerivAt_df_comp_integralCurve f hf v hγ s
+  have hhderiv : ∀ s : ℝ, HasDerivAt h
+      ((NormedSpace.fromTangentSpace (f (γ s))) ((mfderiv I 𝓘(ℝ, ℝ) f (γ s)) (v (γ s))) + 1) s :=
+    fun s => (hderiv s).add (hasDerivAt_id s)
+  have hhdiff : DifferentiableOn ℝ h (Set.Icc (0 : ℝ) t) := by
+    intro x hx
+    exact (hhderiv x).differentiableAt.differentiableWithinAt
+  have hzeroderiv : ∀ x ∈ interior (Set.Icc (0 : ℝ) t), deriv h x = 0 := by
+    intro x hx
+    have hxcc : x ∈ Set.Icc (0 : ℝ) t := interior_subset hx
+    rw [(hhderiv x).deriv]
+    have hval : (NormedSpace.fromTangentSpace (f (γ x))) ((mfderiv I 𝓘(ℝ, ℝ) f (γ x)) (v (γ x))) = -1 :=
+      hdf (γ x) (hstay x hxcc)
+    linarith
+  have hmono : MonotoneOn h (Set.Icc (0 : ℝ) t) :=
+    monotoneOn_of_deriv_nonneg (convex_Icc (0 : ℝ) t) hhdiff.continuousOn
+      (hhdiff.mono interior_subset) (by
+      intro x hx
+      exact ge_of_eq (hzeroderiv x hx))
+  have hanti : AntitoneOn h (Set.Icc (0 : ℝ) t) :=
+    antitoneOn_of_deriv_nonpos (convex_Icc (0 : ℝ) t) hhdiff.continuousOn
+      (hhdiff.mono interior_subset) (by
+      intro x hx
+      exact le_of_eq (hzeroderiv x hx))
+  have hc : h 0 = h t := by
+    exact le_antisymm
+      (hmono (a := 0) (b := t) (by exact ⟨le_rfl, ht⟩) (by exact ⟨ht, le_rfl⟩) ht)
+      (hanti (a := 0) (b := t) (by exact ⟨le_rfl, ht⟩) (by exact ⟨ht, le_rfl⟩) ht)
+  dsimp [h, g] at hc
+  linarith
+
+noncomputable def curveAt (v : (x : M) → TangentSpace I x)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) : ℝ → M :=
+  Classical.choose (hcomplete x)
+
+theorem curveAt_zero (v : (x : M) → TangentSpace I x)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) :
+    curveAt v hcomplete x 0 = x :=
+  (Classical.choose_spec (hcomplete x)).1
+
+theorem curveAt_integralCurve (v : (x : M) → TangentSpace I x)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) :
+    IsMIntegralCurve (curveAt v hcomplete x) v :=
+  (Classical.choose_spec (hcomplete x)).2
 
 set_option backward.isDefEq.respectTransparency false in
 theorem f_eq_sub_of_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]

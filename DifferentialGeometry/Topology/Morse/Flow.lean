@@ -31,20 +31,6 @@ structure GradientLikeFlow (I : ModelWithCorners ℝ E H) (f : M → ℝ) (a b :
   contMDiffAt : ∀ t : ℝ, ∀ x : M, ContMDiffAt I I (⊤ : WithTop ℕ∞) (fun x : M => flow t x) x
   contMDiffAt_t : ∀ x : M, ContMDiffAt 𝓘(ℝ, ℝ) I (⊤ : WithTop ℕ∞) (fun t : ℝ => flow t x) (0 : ℝ)
 
-noncomputable def curveAt (v : (x : M) → TangentSpace I x)
-    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) : ℝ → M :=
-  Classical.choose (hcomplete x)
-
-theorem curveAt_zero (v : (x : M) → TangentSpace I x)
-    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) :
-    curveAt v hcomplete x 0 = x :=
-  (Classical.choose_spec (hcomplete x)).1
-
-theorem curveAt_integralCurve (v : (x : M) → TangentSpace I x)
-    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) :
-    IsMIntegralCurve (curveAt v hcomplete x) v :=
-  (Classical.choose_spec (hcomplete x)).2
-
 noncomputable def unitSpeedFlow_of_vectorField [T2Space M] (I : ModelWithCorners ℝ E H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (a b : ℝ) (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
