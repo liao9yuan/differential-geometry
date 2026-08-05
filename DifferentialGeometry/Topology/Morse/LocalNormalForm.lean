@@ -1136,4 +1136,79 @@ theorem hasFDerivAt_morseTaylorBilin (g : E → ℝ) (hg : ContDiff ℝ 3 g) (x�
     h_bound (intervalIntegrable_const : IntervalIntegrable (fun _ : ℝ => C) volume (0 : ℝ) 1) h_diff
   simpa [morseTaylorBilin, F, F'] using hmain
 
+noncomputable def morseTaylorBilinDeriv (g : E → ℝ) (x : E) :
+    E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)) :=
+  ∫ t in (0 : ℝ)..1, (1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (t • x)).comp
+    (t • (1 : E →L[ℝ] E)))
+
+theorem continuous_morseTaylorBilinDeriv (g : E → ℝ) (hg : ContDiff ℝ 3 g) :
+    Continuous (morseTaylorBilinDeriv g) := by
+  let F : E → ℝ → E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ)) :=
+    fun x t => (1 - t) • ((fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (t • x)).comp
+      (t • (1 : E →L[ℝ] E)))
+  have hg3 : Continuous (fderiv ℝ (fderiv ℝ (fderiv ℝ g))) := by
+    have h2 : ContDiffOn ℝ 2 (fderiv ℝ g) Set.univ :=
+      hg.contDiffOn.fderiv_of_isOpen isOpen_univ (by decide : (2 : WithTop ℕ∞) + 1 ≤ (3 : WithTop ℕ∞))
+    have h1 : ContDiffOn ℝ 1 (fderiv ℝ (fderiv ℝ g)) Set.univ :=
+      h2.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
+    have h0 : ContDiffOn ℝ 0 (fderiv ℝ (fderiv ℝ (fderiv ℝ g))) Set.univ :=
+      h1.fderiv_of_isOpen isOpen_univ (by decide : (0 : WithTop ℕ∞) + 1 ≤ (1 : WithTop ℕ∞))
+    exact continuousOn_univ.mp h0.continuousOn
+  have hpath : Continuous (fun p : E × ℝ => p.2 • p.1) :=
+    continuous_snd.smul continuous_fst
+  have hhess : Continuous (fun p : E × ℝ => fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (p.2 • p.1)) :=
+    hg3.comp hpath
+  have hsmul1 : Continuous (fun p : E × ℝ => p.2 • (1 : E →L[ℝ] E)) :=
+    continuous_snd.smul continuous_const
+  have hcomp : Continuous (fun p : E × ℝ =>
+      (fderiv ℝ (fderiv ℝ (fderiv ℝ g)) (p.2 • p.1)).comp (p.2 • (1 : E →L[ℝ] E))) := by
+    let C : (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) →L[ℝ] (E →L[ℝ] E) →L[ℝ]
+        (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) :=
+      ContinuousLinearMap.compL ℝ E E (E →L[ℝ] (E →L[ℝ] ℝ))
+    have hC : Continuous (fun p : (E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) × (E →L[ℝ] E) =>
+        C p.1 p.2) := by
+      exact (ContinuousLinearMap.continuous₂ C)
+    exact hC.comp (hhess.prodMk hsmul1)
+  have hscalar : Continuous (fun p : E × ℝ => 1 - p.2) :=
+    continuous_const.sub continuous_snd
+  have hF : Continuous F.uncurry := by
+    dsimp [F]
+    exact hscalar.smul hcomp
+  have hconv : (fun x : E => ∫ t in (0 : ℝ)..1, F x t) =
+      fun x : E => ∫ t in Set.Icc (0 : ℝ) 1, F x t := by
+    funext x
+    calc
+      ∫ t in (0 : ℝ)..1, F x t = ∫ t in Set.Ioc (0 : ℝ) 1, F x t :=
+        intervalIntegral.integral_of_le (by norm_num : (0 : ℝ) ≤ 1)
+      _ = ∫ t in Set.Icc (0 : ℝ) 1, F x t := by
+        rw [integral_Icc_eq_integral_Ioc' (by simp)]
+  change Continuous (fun x : E => ∫ t in (0 : ℝ)..1, F x t)
+  rw [hconv]
+  exact continuous_parametric_integral_of_continuous (X := E) (Y := ℝ)
+    (E := E →L[ℝ] (E →L[ℝ] (E →L[ℝ] ℝ))) hF (isCompact_Icc : IsCompact (Set.Icc (0 : ℝ) 1))
+
+theorem contDiffOn_morseTaylorBilin (g : E → ℝ) (hg : ContDiff ℝ 3 g) :
+    ContDiffOn ℝ 1 (fun x : E => morseTaylorBilin g x) Set.univ := by
+  have hdiff : DifferentiableOn ℝ (fun x : E => morseTaylorBilin g x) Set.univ := by
+    intro x hx
+    exact (hasFDerivAt_morseTaylorBilin g hg x).differentiableAt.differentiableWithinAt
+  have hcont : ContinuousOn (fun y : E => fderiv ℝ (fun x : E => morseTaylorBilin g x) y) Set.univ := by
+    have hdeq : ∀ y : E, fderiv ℝ (fun x : E => morseTaylorBilin g x) y = morseTaylorBilinDeriv g y := by
+      intro y
+      exact (hasFDerivAt_morseTaylorBilin g hg y).fderiv
+    intro y hy
+    convert (continuous_morseTaylorBilinDeriv g hg).continuousAt.continuousWithinAt using 1
+    funext z
+    exact hdeq z
+  refine contDiffOn_succ_of_fderivWithin (n := 0) (s := Set.univ) hdiff ?_ ?_
+  · intro h
+    exact False.elim ((by decide : (0 : WithTop ℕ∞) ≠ ⊤) h)
+  · rw [contDiffOn_zero]
+    intro y hy
+    simpa [fderivWithin_univ] using hcont y hy
+
+theorem contDiffAt_morseTaylorBilin (g : E → ℝ) (hg : ContDiff ℝ 3 g) (x₀ : E) :
+    ContDiffAt ℝ 1 (fun x : E => morseTaylorBilin g x) x₀ := by
+  exact (contDiffOn_morseTaylorBilin g hg).contDiffAt Filter.univ_mem
+
 end DifferentialGeometry.Topology.Morse
