@@ -7,6 +7,7 @@ import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.Analysis.Normed.MulAction
 import Mathlib.Analysis.Normed.Operator.Basic
+import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
@@ -277,12 +278,11 @@ theorem morse_complete_square_sqrt
 
 noncomputable def morseReducedInner
     (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
-    (x' v : MorseModel n) : MorseModel n →ₗ[ℝ] ℝ :=
+    (x : MorseModel (n + 1)) (v : MorseModel n) : MorseModel n →ₗ[ℝ] ℝ :=
   { toFun := fun w =>
-      a (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w) -
-        a (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) morseE0 *
-          a (morseCons (0 : ℝ) x') morseE0 (morseCons (0 : ℝ) w) /
-            morsePivot a (morseCons (0 : ℝ) x')
+      a x (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w) -
+        a x (morseCons (0 : ℝ) v) morseE0 *
+          a x morseE0 (morseCons (0 : ℝ) w) / morsePivot a x
     map_add' := by
       intro w₁ w₂
       simp [map_add]
@@ -294,39 +294,38 @@ noncomputable def morseReducedInner
 
 noncomputable def morseReducedFamily
     (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
-    (x' : MorseModel n) : LinearMap.BilinForm ℝ (MorseModel n) :=
-  { toFun := fun v => morseReducedInner a x' v
+    (x : MorseModel (n + 1)) : LinearMap.BilinForm ℝ (MorseModel n) :=
+  { toFun := fun v => morseReducedInner a x v
     map_add' := by
       intro v₁ v₂
       apply LinearMap.ext
       intro w
       rw [LinearMap.add_apply]
-      simp [morseReducedInner, morseCons_zero_add, map_add]
+      simp [morseReducedInner, map_add]
       ring
     map_smul' := by
       intro c v
       apply LinearMap.ext
       intro w
-      simp [morseReducedInner, morseCons_zero_smul, map_smul]
+      simp [morseReducedInner, map_smul]
       ring }
 
 theorem morseReducedFamily_apply
     (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
-    (x' v w : MorseModel n) :
-    morseReducedFamily a x' v w =
-      a (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w) -
-        a (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) morseE0 *
-          a (morseCons (0 : ℝ) x') morseE0 (morseCons (0 : ℝ) w) /
-            morsePivot a (morseCons (0 : ℝ) x') := by
+    (x : MorseModel (n + 1)) (v w : MorseModel n) :
+    morseReducedFamily a x v w =
+      a x (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w) -
+        a x (morseCons (0 : ℝ) v) morseE0 *
+          a x morseE0 (morseCons (0 : ℝ) w) / morsePivot a x := by
   rfl
 
 theorem morseReducedFamily_sym (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
-    (hsym : ∀ x y z, a x y z = a x z y) (x' v w : MorseModel n) :
-    morseReducedFamily a x' v w = morseReducedFamily a x' w v := by
+    (hsym : ∀ x y z, a x y z = a x z y) (x : MorseModel (n + 1)) (v w : MorseModel n) :
+    morseReducedFamily a x v w = morseReducedFamily a x w v := by
   rw [morseReducedFamily_apply, morseReducedFamily_apply]
-  rw [hsym (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w)]
-  rw [hsym (morseCons (0 : ℝ) x') (morseCons (0 : ℝ) v) morseE0]
-  rw [hsym (morseCons (0 : ℝ) x') morseE0 (morseCons (0 : ℝ) w)]
+  rw [hsym x (morseCons (0 : ℝ) v) (morseCons (0 : ℝ) w)]
+  rw [hsym x (morseCons (0 : ℝ) v) morseE0]
+  rw [hsym x morseE0 (morseCons (0 : ℝ) w)]
   ring
 
 theorem morseHead_add (v w : MorseModel (n + 1)) :
@@ -888,6 +887,35 @@ theorem morseCriticalSection_eq (f : MorseModel (n + 1) → ℝ)
   rw [morseCriticalSection]
   rw [← hdecomp]
   exact hhead
+
+theorem morseCriticalSection_tail (f : MorseModel (n + 1) → ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    {x' : MorseModel n} (hy : morseCons (0 : ℝ) x' ∈ φ.target) :
+    morseTail (φ.symm (morseCons (0 : ℝ) x')) = x' := by
+  have hφf : φ (φ.symm (morseCons (0 : ℝ) x')) = morsePartialMap f (φ.symm (morseCons (0 : ℝ) x')) := by
+    rw [hφ]
+  rw [φ.right_inv hy] at hφf
+  have := congrArg morseTail hφf
+  funext j
+  simpa [morsePartialMap, morseTail, morseCons] using (congrFun this j).symm
+
+theorem morseCriticalSection_zero (f : MorseModel (n + 1) → ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    (hcrit : fderiv ℝ f 0 = 0) (hsrc : (0 : MorseModel (n + 1)) ∈ φ.source) :
+    φ.symm (morseCons (0 : ℝ) (0 : MorseModel n)) = 0 := by
+  have hφ0 : φ 0 = 0 := by
+    have hφm : φ 0 = morsePartialMap f 0 := by rw [hφ]
+    rw [hφm]
+    funext i
+    cases i using Fin.cases <;> simp [morsePartialMap, morsePartial, hcrit, morseCons, morseTail]
+  have hz : morseCons (0 : ℝ) (0 : MorseModel n) = (0 : MorseModel (n + 1)) := by
+    funext i
+    cases i using Fin.cases <;> simp [morseCons]
+  rw [hz]
+  conv_lhs => rw [← hφ0]
+  exact φ.left_inv hsrc
 
 end Completion
 
