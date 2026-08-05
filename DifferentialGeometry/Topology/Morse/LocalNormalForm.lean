@@ -3,6 +3,7 @@ import DifferentialGeometry.Topology.Morse.Taylor
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Abs
+import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.Analysis.Normed.MulAction
 import Mathlib.Analysis.Normed.Operator.Basic
@@ -631,6 +632,101 @@ theorem hasFDerivAt_morseCompletionMap
       (morseCompletionDeriv a d').toContinuousLinearMap 0 := by
     simpa [heq] using hcomp
   simpa [morseCompletionMap, Function.comp_def] using hfinal
+
+noncomputable def morseCompletionDerivCLE
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (d' : MorseModel (n + 1) →L[ℝ] ℝ) (hpiv : morsePivot a 0 ≠ 0) (hd₀ : d' morseE0 = 0) :
+    MorseModel (n + 1) ≃L[ℝ] MorseModel (n + 1) :=
+  (LinearEquiv.ofBijective (morseCompletionDeriv a d')
+    ⟨morseCompletionDeriv_injective a d' hpiv hd₀,
+      morseCompletionDeriv_surjective a d' hpiv hd₀⟩).toContinuousLinearEquiv
+
+theorem hasFDerivAt_morseCompletionMap_CLE
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (p' d' : MorseModel (n + 1) →L[ℝ] ℝ)
+    (hs : HasFDerivAt (fun x => morsePivot a x) p' 0)
+    (hd : HasFDerivAt (fun x => a x morseE0 (morseCons (0 : ℝ) (morseTail x))) d' 0)
+    (hpiv : morsePivot a 0 ≠ 0) (hd₀ : d' morseE0 = 0) :
+    HasFDerivAt (morseCompletionMap a)
+      (morseCompletionDerivCLE a d' hpiv hd₀ : MorseModel (n + 1) →L[ℝ] MorseModel (n + 1)) 0 := by
+  simpa [morseCompletionDerivCLE] using hasFDerivAt_morseCompletionMap a p' d' hs hd hpiv
+
+theorem contDiffAt_morsePivotSqrt
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (hcontp : ContDiffAt ℝ 1 (fun x => morsePivot a x) 0) (hpiv : morsePivot a 0 ≠ 0) :
+    ContDiffAt ℝ 1 (fun x => Real.sqrt |morsePivot a x|) 0 := by
+  have habsp : ContDiffAt ℝ 1 (fun x => |morsePivot a x|) 0 := by
+    exact ContDiffAt.comp 0 (contDiffAt_abs hpiv) hcontp
+  have hsqrt : ContDiffAt ℝ 1 (Real.sqrt) |morsePivot a 0| :=
+    Real.contDiffAt_sqrt (abs_pos.mpr hpiv).ne'
+  simpa [Function.comp_def] using (ContDiffAt.comp 0 hsqrt habsp)
+
+theorem contDiffAt_morseComplete
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (hcontp : ContDiffAt ℝ 1 (fun x => morsePivot a x) 0)
+    (hcontd : ContDiffAt ℝ 1 (fun x => a x morseE0 (morseCons (0 : ℝ) (morseTail x))) 0)
+    (hpiv : morsePivot a 0 ≠ 0) :
+    ContDiffAt ℝ 1 (morseComplete a) 0 := by
+  have hhead : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => morseHead x) 0 := by
+    simpa [morseHead, morseHeadProj] using
+      ((morseHeadProj.contDiff.contDiffAt : ContDiffAt ℝ ⊤ (fun x => morseHeadProj x) 0).of_le
+        (by decide : (1 : WithTop ℕ∞) ≤ ⊤))
+  have hinv : ContDiffAt ℝ 1 (fun x => (morsePivot a x)⁻¹) 0 := hcontp.inv hpiv
+  have hquot : ContDiffAt ℝ 1
+      (fun x => a x morseE0 (morseCons (0 : ℝ) (morseTail x)) * (morsePivot a x)⁻¹) 0 :=
+    ContDiffAt.mul hcontd hinv
+  have hadd : ContDiffAt ℝ 1
+      (fun x => morseHead x + a x morseE0 (morseCons (0 : ℝ) (morseTail x)) * (morsePivot a x)⁻¹) 0 :=
+    ContDiffAt.add hhead hquot
+  simpa [morseComplete, div_eq_mul_inv] using hadd
+
+theorem contDiffAt_morseCompletionMap
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (hcontp : ContDiffAt ℝ 1 (fun x => morsePivot a x) 0)
+    (hcontd : ContDiffAt ℝ 1 (fun x => a x morseE0 (morseCons (0 : ℝ) (morseTail x))) 0)
+    (hpiv : morsePivot a 0 ≠ 0) :
+    ContDiffAt ℝ 1 (morseCompletionMap a) 0 := by
+  have hsqrt := contDiffAt_morsePivotSqrt a hcontp hpiv
+  have hcomplete := contDiffAt_morseComplete a hcontp hcontd hpiv
+  have hprod : ContDiffAt ℝ 1 (fun x => Real.sqrt |morsePivot a x| * morseComplete a x) 0 :=
+    ContDiffAt.mul hsqrt hcomplete
+  have htail : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => morseTail x) 0 := by
+    simpa [morseTail, morseTailProj] using
+      ((morseTailProj.contDiff.contDiffAt : ContDiffAt ℝ ⊤ (fun x => morseTailProj x) 0).of_le
+        (by decide : (1 : WithTop ℕ∞) ≤ ⊤))
+  have hcons : ContDiffAt ℝ 1 (fun p : ℝ × MorseModel n => morseConsLinearCLM p)
+      (Real.sqrt |morsePivot a 0| * morseComplete a 0, morseTail (0 : MorseModel (n + 1))) := by
+    exact ((morseConsLinearCLM.contDiff.contDiffAt :
+        ContDiffAt ℝ ⊤ (fun p => morseConsLinearCLM p)
+          (Real.sqrt |morsePivot a 0| * morseComplete a 0, morseTail (0 : MorseModel (n + 1)))).of_le
+      (by decide : (1 : WithTop ℕ∞) ≤ ⊤))
+  have hpair : ContDiffAt ℝ 1
+      (fun x => (Real.sqrt |morsePivot a x| * morseComplete a x, morseTail x)) 0 :=
+    ContDiffAt.prodMk hprod htail
+  have hcomp : ContDiffAt ℝ 1
+      (fun x => morseConsLinearCLM (Real.sqrt |morsePivot a x| * morseComplete a x, morseTail x)) 0 :=
+    ContDiffAt.comp 0 hcons hpair
+  simpa [morseCompletionMap, Function.comp_def] using hcomp
+
+theorem isLocalHomeomorphAt_morseCompletionMap
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (p' d' : MorseModel (n + 1) →L[ℝ] ℝ)
+    (hs : HasFDerivAt (fun x => morsePivot a x) p' 0)
+    (hd : HasFDerivAt (fun x => a x morseE0 (morseCons (0 : ℝ) (morseTail x))) d' 0)
+    (hpiv : morsePivot a 0 ≠ 0) (hd₀ : d' morseE0 = 0)
+    (hcontp : ContDiffAt ℝ 1 (fun x => morsePivot a x) 0)
+    (hcontd : ContDiffAt ℝ 1 (fun x => a x morseE0 (morseCons (0 : ℝ) (morseTail x))) 0) :
+    ∃ φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)),
+      (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morseCompletionMap a ∧ 0 ∈ φ.source := by
+  let φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)) :=
+    ContDiffAt.toOpenPartialHomeomorph (f := morseCompletionMap a)
+      (f' := morseCompletionDerivCLE a d' hpiv hd₀)
+      (contDiffAt_morseCompletionMap a hcontp hcontd hpiv)
+      (hasFDerivAt_morseCompletionMap_CLE a p' d' hs hd hpiv hd₀)
+      (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+  refine ⟨φ, ?_, ?_⟩
+  · rw [ContDiffAt.toOpenPartialHomeomorph_coe]
+  · exact ContDiffAt.mem_toOpenPartialHomeomorph_source _ _ _
 
 end Completion
 
