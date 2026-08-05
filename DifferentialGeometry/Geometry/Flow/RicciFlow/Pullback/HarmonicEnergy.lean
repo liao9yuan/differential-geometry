@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicGalerkin
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicTension
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuityParam
+open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature

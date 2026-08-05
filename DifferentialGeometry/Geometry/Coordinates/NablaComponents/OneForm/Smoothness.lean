@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Moving
+open DifferentialGeometry.Tensor.Multilinear
 
 
 

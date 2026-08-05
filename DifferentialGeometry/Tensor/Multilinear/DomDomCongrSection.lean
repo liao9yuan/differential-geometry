@@ -2,6 +2,7 @@
 
 
 import DifferentialGeometry.Tensor.Multilinear.Tensor
+open DifferentialGeometry.Tensor.Multilinear
 
 
 

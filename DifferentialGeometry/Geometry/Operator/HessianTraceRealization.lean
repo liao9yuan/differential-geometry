@@ -14,6 +14,7 @@ import DifferentialGeometry.Tensor.RicciIdentity.MixedComponents
 import DifferentialGeometry.Bundle.LocalFrameRegularity
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
+open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature

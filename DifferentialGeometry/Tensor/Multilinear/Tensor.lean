@@ -7,6 +7,7 @@ import DifferentialGeometry.Tensor.Product.Basis
 import DifferentialGeometry.Tensor.Product.Bundle
 import DifferentialGeometry.Bundle.Section
 import Mathlib.RingTheory.TensorProduct.Finite
+open DifferentialGeometry.Tensor.Multilinear
 
 
 noncomputable section

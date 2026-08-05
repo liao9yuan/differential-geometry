@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParal
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetricFieldParallel
+open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompCo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompContrNorm
 import DifferentialGeometry.Geometry.Connection.Realization.SmoothSectionsLocal
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
+open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature

@@ -305,7 +305,7 @@ private theorem tsMetricCovec_section_contMDiff (g₀ : SmoothRiemannianMetric I
         (E := fun z : M => Tensor0SSpace 2 I z) x (tsMetricCovec (I := I) g₀ x)) := by
   classical
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
-  refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+  refine (DifferentialGeometry.Tensor.Multilinear.contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
       (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
       (fun x : M => (tsMetricCovec (I := I) g₀ x :
         Bundle.continuousMultilinearMap ℝ 2 E (TangentSpace I) x))).mpr ?_
@@ -321,7 +321,7 @@ private theorem tsMetricCovec_section_contMDiff (g₀ : SmoothRiemannianMetric I
   refine hscalar.congr_of_eventuallyEq ?_
   have h_base₁ : ∀ᶠ x in 𝓝 x₀, x ∈ e₁.baseSet := e₁.open_baseSet.mem_nhds he₁
   filter_upwards [h_base₁, hY] with x hx₁ hYx
-  rw [continuousMultilinearMap_basis_repr]
+  rw [DifferentialGeometry.Tensor.Multilinear.continuousMultilinearMap_basis_repr]
   have hframeEq : ∀ k : Fin 2, e₁.symmL ℝ x (b (σ k)) = (Y (σ k)) x := by
     intro k
     rw [hYx (σ k), Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]

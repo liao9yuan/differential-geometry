@@ -3,6 +3,7 @@
 
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import Mathlib.Topology.VectorBundle.Basic
+open DifferentialGeometry.Tensor.Product
 
 
 noncomputable section

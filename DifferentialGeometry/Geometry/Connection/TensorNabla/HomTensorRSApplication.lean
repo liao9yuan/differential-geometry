@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SecondOrderHomBundle
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomTensorRSRiemannian
+open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Geometry.Curvature
 
 

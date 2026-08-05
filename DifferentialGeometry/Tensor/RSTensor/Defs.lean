@@ -6,6 +6,7 @@ import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
+open DifferentialGeometry.Tensor.Multilinear
 
 
 namespace Tensor0SBundle

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.Realization.Tensor0SBridge
 import DifferentialGeometry.Geometry.Connection.Realization.HomNabla
+open DifferentialGeometry.Geometry.Connection.Realization
 
 
 noncomputable section

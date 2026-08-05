@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSApplication
+open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Geometry.Curvature
 
 

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Trace04
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature

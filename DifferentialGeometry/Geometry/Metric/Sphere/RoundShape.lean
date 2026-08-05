@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.Sphere.RoundProjConnLC
 import Mathlib.Analysis.InnerProductSpace.Orthogonal
+open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary

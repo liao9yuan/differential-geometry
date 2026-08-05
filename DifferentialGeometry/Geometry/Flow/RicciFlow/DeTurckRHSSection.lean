@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.LieDerivativePairing
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
+open DifferentialGeometry.Tensor.Multilinear
 
 
 open DifferentialGeometry.Analysis.Parabolic

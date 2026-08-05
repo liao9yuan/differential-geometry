@@ -6,6 +6,7 @@ import DifferentialGeometry.Bundle.SectionRealized
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+open DifferentialGeometry.Tensor.RSTensor
 
 set_option autoImplicit false
 

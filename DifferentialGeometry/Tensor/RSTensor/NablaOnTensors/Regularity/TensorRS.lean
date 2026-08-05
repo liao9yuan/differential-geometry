@@ -1,4 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
+open DifferentialGeometry.Tensor.Multilinear
 
 
 

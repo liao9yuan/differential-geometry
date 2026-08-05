@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CorrFieldChris
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutionFiberNormBound
+open DifferentialGeometry.Geometry.Connection.Realization DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature

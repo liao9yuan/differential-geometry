@@ -7,6 +7,7 @@ import DifferentialGeometry.Tensor.Mixed.Naturality
 import DifferentialGeometry.Tensor.Mixed.DualMultilinearTransition
 import DifferentialGeometry.Tensor.Product.Section
 import DifferentialGeometry.Tensor.Product.HomEquiv
+open DifferentialGeometry.Tensor.Mixed DifferentialGeometry.Tensor.Multilinear DifferentialGeometry.Tensor.Product
 
 
 noncomputable section

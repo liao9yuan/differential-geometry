@@ -16,6 +16,8 @@ import Mathlib.Topology.Algebra.Module.Equiv
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
 
+namespace DifferentialGeometry.Tensor.Product
+
 open scoped Topology TensorProduct
 
 noncomputable section
@@ -148,3 +150,7 @@ by
     e.toLinearMap
 
 end TensorNorm
+
+end
+
+end DifferentialGeometry.Tensor.Product

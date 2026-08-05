@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvature
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import Mathlib.Topology.Order.Compact
+open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection

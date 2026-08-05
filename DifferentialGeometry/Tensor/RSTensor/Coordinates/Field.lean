@@ -6,6 +6,7 @@ import DifferentialGeometry.Tensor.RSTensor.Basis
 import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Tensor
+open DifferentialGeometry.Tensor.Multilinear
 
 
 namespace Tensor0SBundle

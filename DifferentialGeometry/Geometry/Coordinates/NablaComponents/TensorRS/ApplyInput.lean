@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.Basic
+open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Geometry.Operator
 
 

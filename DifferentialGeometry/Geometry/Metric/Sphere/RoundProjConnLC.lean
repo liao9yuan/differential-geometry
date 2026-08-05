@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Connection.Realization.Embedding
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 import DifferentialGeometry.Geometry.Curvature.Metric
 import Mathlib.Analysis.InnerProductSpace.Calculus
+open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

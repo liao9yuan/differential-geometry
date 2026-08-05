@@ -3,6 +3,7 @@
 
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 import DifferentialGeometry.Tensor.Multilinear.Basis
+open DifferentialGeometry.Tensor.Multilinear
 
 noncomputable section
 

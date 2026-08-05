@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
+open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section

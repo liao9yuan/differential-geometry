@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopPolarFramed
+open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

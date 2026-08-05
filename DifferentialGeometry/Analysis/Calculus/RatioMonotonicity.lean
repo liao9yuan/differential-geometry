@@ -2,6 +2,8 @@ import Mathlib.Analysis.Calculus.Deriv.MeanValue
 import Mathlib.Analysis.Calculus.Deriv.Inv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
+namespace DifferentialGeometry.Analysis.Calculus
+
 /-!
 # Monotonicity of a quotient from a cross-derivative inequality
 
@@ -71,3 +73,5 @@ theorem integralRatio_anti
       (hright.intervalIntegrable (μ := volume) 0 r) hpoint
     simpa only [intervalIntegral.integral_const_mul,
       intervalIntegral.integral_mul_const, mul_comm] using hint
+
+end DifferentialGeometry.Analysis.Calculus

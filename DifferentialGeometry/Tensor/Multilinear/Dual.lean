@@ -11,6 +11,7 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.Topology.VectorBundle.FiniteDimensional
+open DifferentialGeometry.Tensor.Multilinear
 
 
 noncomputable section

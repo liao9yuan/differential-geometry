@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.ApplyInput
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.ModelBridge
+open DifferentialGeometry.Tensor.Multilinear
 
 
 

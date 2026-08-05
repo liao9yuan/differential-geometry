@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Model.Tensor0S
+open DifferentialGeometry.Tensor.Multilinear
 
 
 

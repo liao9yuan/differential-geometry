@@ -10,6 +10,7 @@ import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.OneJet
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature

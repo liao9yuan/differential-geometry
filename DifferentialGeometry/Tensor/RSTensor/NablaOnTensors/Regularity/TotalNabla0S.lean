@@ -3,6 +3,7 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.BumpFunction
+open DifferentialGeometry.Tensor.Multilinear
 
 
 

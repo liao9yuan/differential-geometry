@@ -1,6 +1,7 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Derivation
 import DifferentialGeometry.Tensor.RSTensor.LocalFrameRegularity
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
+open DifferentialGeometry.Tensor.Multilinear
 
 
 

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
+open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Geometry.Curvature
 
 

@@ -44,6 +44,7 @@ import Mathlib.Data.Bundle
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.Topology.Algebra.Module.FiniteDimension
+open DifferentialGeometry.Tensor.Multilinear
 
 
 

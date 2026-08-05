@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibr
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDivergenceForm
+open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature

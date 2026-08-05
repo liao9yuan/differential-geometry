@@ -1,6 +1,8 @@
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Topology.MetricSpace.Lipschitz
 
+namespace DifferentialGeometry.Analysis.Calculus
+
 
 open scoped InnerProductSpace
 
@@ -320,3 +322,5 @@ theorem norm_map_ballRetraction_sub_le {Y : Type*} [NormedAddCommGroup Y]
       linarith
 
 end NormedDifference
+
+end DifferentialGeometry.Analysis.Calculus

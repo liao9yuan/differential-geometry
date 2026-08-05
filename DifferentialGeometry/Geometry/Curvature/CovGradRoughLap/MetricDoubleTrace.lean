@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TensorSlotSwap
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSSectionCalculus
+open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
