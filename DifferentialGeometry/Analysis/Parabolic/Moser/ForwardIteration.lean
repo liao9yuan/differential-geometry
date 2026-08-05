@@ -544,6 +544,67 @@ theorem nestedForwardMoserNorm_le_rpowNorm_of_supersolution
       mul_le_mul_of_nonneg_left hzero hP
     _ = _ := by rfl
 
+theorem exists_nested_forward_moser_iteration_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p q a B : ℝ} (level upperTime : ℕ → ℝ)
+    (hp : 0 < p) (hpq : p < q) (hq_one : q < 1)
+    (hlevel : StrictMono level) (htime : StrictAnti upperTime)
+    (haTime : ∀ k, a ≤ upperTime k) (hB : 0 ≤ B)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hpde : ∀ t ∈ Icc a (upperTime 0), ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (hmass :
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (spatialCutoffBetween rho (level 0) (level 1)) a (upperTime 0)).real
+          Set.univ ≤ 1) :
+    let n := Module.finrank ℝ E
+    ∃ m : ℕ,
+      let p₀ := q * parabolicMoserDecay n ^ m
+      p₀ < p ∧ p ≤ parabolicMoserGain n * p₀ ∧
+        parabolicMoserExponent n p₀ m = q ∧
+        nestedForwardMoserNorm (I := I) (M := M) n
+            rho u p₀ a level upperTime m ≤
+          (∏ k ∈ Finset.range m,
+            nestedForwardMoserStepFactor (I := I) (M := M)
+              n g hdim B p₀ a level upperTime k) *
+            localizedSpacetimeRpowNorm (I := I) (M := M)
+              (spatialCutoffBetween rho (level 0) (level 1)) u
+                p a (upperTime 0) := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  obtain ⟨m, hp₀p, hpp₀⟩ :=
+    exists_parabolic_moser_iteration_depth n hp hpq
+  let p₀ := q * parabolicMoserDecay n ^ m
+  have hq_pos : 0 < q := hp.trans hpq
+  have hp₀ : 0 < p₀ :=
+    mul_pos hq_pos (pow_pos (parabolicMoserDecay_pos n) m)
+  have htarget : parabolicMoserExponent n p₀ m = q := by
+    simpa only [p₀] using parabolicMoserExponent_decay_mul_self n q m
+  have hexponents : ∀ k < m, parabolicMoserExponent n p₀ k < 1 := by
+    intro k hk
+    calc
+      parabolicMoserExponent n p₀ k < parabolicMoserExponent n p₀ m :=
+        parabolicMoserExponent_strictMono n hp₀ hk
+      _ = q := htarget
+      _ < 1 := hq_one
+  have hbound := nestedForwardMoserNorm_le_rpowNorm_of_supersolution
+    (I := I) (M := M) g hdim rho u hu hpos level upperTime m hp₀
+      hp₀p.le hlevel htime (haTime m) hB hrho hpde hexponents hmass
+  refine ⟨m, ?_⟩
+  simpa only [p₀, n] using ⟨hp₀p, hpp₀, htarget, hbound⟩
+
 omit [I.Boundaryless] [CompactSpace M] in
 theorem forwardMoserLocalizedMass_nonneg
     (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
