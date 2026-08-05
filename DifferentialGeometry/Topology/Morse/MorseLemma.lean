@@ -1481,6 +1481,67 @@ theorem hasFDerivAt_morseSectionCompletion {n : ℕ} (f : MorseModel (n + 1) →
   simpa [morseSectionCompletionDerivCLE, morseSectionCompletionDeriv, ContinuousLinearMap.comp_apply]
     using hcomp'
 
+theorem morseSectionCompletion_value {n : ℕ} (f : MorseModel (n + 1) → ℝ) (hg : ContDiff ℝ 2 f)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    {x : MorseModel (n + 1)} (hx' : morseCons (0 : ℝ) (morseTail x) ∈ φ.target)
+    (hBx : morseSectionB f φ x ≠ 0) :
+    f x - f (morseSection φ (morseTail x)) =
+      (1 / 2 : ℝ) * SignType.sign (morseSectionB f φ x) *
+        (morseHead (morseSectionCompletion f φ x)) ^ 2 := by
+  have hso := section_second_order f hg φ hφ (x := x) hx'
+  have hhead : morseHead (morseSectionCompletion f φ x) =
+      Real.sqrt (2 * |morseSectionB f φ x|) * (morseHead x - morseCriticalSection φ (morseTail x)) := by
+    simp [morseSectionCompletion, morseHead, morseCons]
+  have hBabs : |morseSectionB f φ x| ≠ 0 := abs_ne_zero.mpr hBx
+  have hmul : (morseHead (morseSectionCompletion f φ x)) ^ 2 =
+      2 * |morseSectionB f φ x| * (morseHead x - morseCriticalSection φ (morseTail x)) ^ 2 := by
+    rw [hhead]
+    rw [mul_pow]
+    have hsq : (Real.sqrt (2 * |morseSectionB f φ x|)) ^ 2 = 2 * |morseSectionB f φ x| := by
+      rw [Real.sq_sqrt]
+      positivity
+    rw [hsq]
+  have hsign : morseSectionB f φ x = SignType.sign (morseSectionB f φ x) * |morseSectionB f φ x| := by
+    rw [sign_mul_abs]
+  calc
+    f x - f (morseSection φ (morseTail x)) =
+        (morseHead x - morseCriticalSection φ (morseTail x)) ^ 2 * morseSectionB f φ x := hso
+    _ = (morseHead x - morseCriticalSection φ (morseTail x)) ^ 2 *
+          (SignType.sign (morseSectionB f φ x) * |morseSectionB f φ x|) := by
+      conv_lhs =>
+        rw [hsign]
+    _ = (1 / 2 : ℝ) * SignType.sign (morseSectionB f φ x) *
+          (2 * |morseSectionB f φ x| * (morseHead x - morseCriticalSection φ (morseTail x)) ^ 2) := by ring
+    _ = (1 / 2 : ℝ) * SignType.sign (morseSectionB f φ x) *
+          (morseHead (morseSectionCompletion f φ x)) ^ 2 := by
+      rw [← hmul]
+
+theorem isLocalHomeomorphAt_morseSectionCompletion {n : ℕ} (f : MorseModel (n + 1) → ℝ)
+    (hf : ContDiff ℝ 3 f) (hcrit : fderiv ℝ f 0 = 0)
+    (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    (hsrc : (0 : MorseModel (n + 1)) ∈ φ.source)
+    (hdf : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n))
+    (hdfp : DifferentiableAt ℝ (morsePartial f) (morseSection φ (0 : MorseModel n)))
+    (hcontσ : ContDiffAt ℝ 1 (morseSection φ) (0 : MorseModel n))
+    (w : Fin (n + 1) → ℝ) (hw : ∀ i, w i = -1 ∨ w i = 1)
+    (hdiag : ∀ u v : MorseModel (n + 1),
+      (fderiv ℝ (fderiv ℝ f) 0 u) v = ∑ i : Fin (n + 1), w i * u i * v i)
+    (hB0 : morseSectionB f φ 0 ≠ 0) :
+    ∃ Φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)),
+      (Φ : MorseModel (n + 1) → MorseModel (n + 1)) = morseSectionCompletion f φ ∧ 0 ∈ Φ.source := by
+  let Φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)) :=
+    ContDiffAt.toOpenPartialHomeomorph (f := morseSectionCompletion f φ)
+      (f' := morseSectionCompletionDerivCLE f φ hB0)
+      (contDiffAt_morseSectionCompletion f hf hcrit φ hφ hsrc hcontσ hB0)
+      (hasFDerivAt_morseSectionCompletion f hf hcrit a φ hφ hsrc hdf hdfp hcontσ w hw hdiag hB0)
+      (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+  refine ⟨Φ, ?_, ?_⟩
+  · rw [ContDiffAt.toOpenPartialHomeomorph_coe]
+  · exact ContDiffAt.mem_toOpenPartialHomeomorph_source _ _ _
+
 end Completion
 
 end DifferentialGeometry.Topology.Morse

@@ -2,6 +2,7 @@ import DifferentialGeometry.Topology.Morse.Defs
 import DifferentialGeometry.Topology.Morse.Taylor
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Mul
+import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Analysis.Calculus.Deriv.Abs
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Analysis.Calculus.ParametricIntegral
@@ -1608,5 +1609,60 @@ theorem contDiffOn_morseTaylorBilinAt (g : E → ℝ) (hg : ContDiff ℝ 3 g) :
 theorem contDiffAt_morseTaylorBilinAt (g : E → ℝ) (hg : ContDiff ℝ 3 g) (c₀ x₀ : E) :
     ContDiffAt ℝ 1 (fun p : E × E => morseTaylorBilinAt g p.1 p.2) (c₀, x₀) := by
   exact (contDiffOn_morseTaylorBilinAt g hg).contDiffAt Filter.univ_mem
+
+omit [FiniteDimensional ℝ E] in
+theorem morseTaylorBilin_symm (g : E → ℝ) (hg : ContDiff ℝ 2 g) (x u v : E) :
+    (morseTaylorBilin g x) u v = (morseTaylorBilin g x) v u := by
+  have hsym : ∀ y : E, IsSymmSndFDerivAt ℝ g y := by
+    intro y
+    exact (hg.contDiffAt (x := y)).isSymmSndFDerivAt
+      (by norm_num [minSmoothness] : minSmoothness ℝ 2 ≤ (2 : WithTop ℕ∞))
+  have hinner : ∀ t : ℝ, (fderiv ℝ (fderiv ℝ g) (t • x)) u v = (fderiv ℝ (fderiv ℝ g) (t • x)) v u := by
+    intro t
+    exact (hsym (t • x)) u v
+  have hBint : IntervalIntegrable (fun t : ℝ => (1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) volume
+      (0 : ℝ) 1 := by
+    exact ContinuousOn.intervalIntegrable_of_Icc (by norm_num : (0 : ℝ) ≤ 1)
+      ((continuousOn_morseTaylorIntegrand g hg x).mono (by intro t ht; exact Set.mem_univ t))
+  have hBv1 : IntervalIntegrable (fun t : ℝ => ((1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) u) volume
+      (0 : ℝ) 1 := by
+    have hc : ContinuousOn (fun t : ℝ => ((1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) u) Set.univ := by
+      have hMain : ContinuousOn (fun t : ℝ => (1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) Set.univ :=
+        continuousOn_morseTaylorIntegrand g hg x
+      have hc' : ContinuousOn (fun _ : ℝ => u) Set.univ := continuous_const.continuousOn
+      exact ContinuousOn.clm_apply hMain hc'
+    exact ContinuousOn.intervalIntegrable_of_Icc (by norm_num : (0 : ℝ) ≤ 1)
+      (hc.mono (by intro t ht; exact Set.mem_univ t))
+  calc
+    (morseTaylorBilin g x) u v = (∫ t in (0 : ℝ)..1, (1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) u v := by
+      rfl
+    _ = ∫ t in (0 : ℝ)..1, (((1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) u) v := by
+      rw [ContinuousLinearMap.intervalIntegral_apply hBint u]
+      rw [ContinuousLinearMap.intervalIntegral_apply hBv1 v]
+    _ = ∫ t in (0 : ℝ)..1, (1 - t) * ((fderiv ℝ (fderiv ℝ g) (t • x)) u v) := by
+      apply intervalIntegral.integral_congr
+      intro t ht
+      simp [smul_eq_mul]
+    _ = ∫ t in (0 : ℝ)..1, (1 - t) * ((fderiv ℝ (fderiv ℝ g) (t • x)) v u) := by
+      apply intervalIntegral.integral_congr
+      intro t ht
+      exact congrArg (fun z : ℝ => (1 - t) * z) (hinner t)
+    _ = ∫ t in (0 : ℝ)..1, (((1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) v) u := by
+      apply intervalIntegral.integral_congr
+      intro t ht
+      simp [smul_eq_mul]
+    _ = (morseTaylorBilin g x) v u := by
+      have hBv1' : IntervalIntegrable (fun t : ℝ => ((1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) v) volume
+          (0 : ℝ) 1 := by
+        have hc : ContinuousOn (fun t : ℝ => ((1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) v) Set.univ := by
+          have hMain : ContinuousOn (fun t : ℝ => (1 - t) • fderiv ℝ (fderiv ℝ g) (t • x)) Set.univ :=
+            continuousOn_morseTaylorIntegrand g hg x
+          have hc' : ContinuousOn (fun _ : ℝ => v) Set.univ := continuous_const.continuousOn
+          exact ContinuousOn.clm_apply hMain hc'
+        exact ContinuousOn.intervalIntegrable_of_Icc (by norm_num : (0 : ℝ) ≤ 1)
+          (hc.mono (by intro t ht; exact Set.mem_univ t))
+      rw [← ContinuousLinearMap.intervalIntegral_apply hBv1' u]
+      rw [← ContinuousLinearMap.intervalIntegral_apply hBint v]
+      rfl
 
 end DifferentialGeometry.Topology.Morse
