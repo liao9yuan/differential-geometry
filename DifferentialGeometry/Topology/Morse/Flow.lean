@@ -169,6 +169,36 @@ theorem GradientLikeFlow.toDiffeomorph_image_sublevel (Φ : GradientLikeFlow I f
     Φ.toDiffeomorph t '' sublevel f b = sublevel f (b - t) := by
   simpa [toDiffeomorph] using Φ.flow_image_sublevel ht
 
+theorem noCriticalValues (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
+    (fun x : M => Φ.flow (a - b) x) '' sublevel f a = sublevel f b := by
+  have ht : b - a ∈ Set.Icc (0 : ℝ) (b - a) := ⟨sub_nonneg.mpr hab, le_rfl⟩
+  ext y
+  constructor
+  · rintro ⟨x, hx, hxy⟩
+    rw [← hxy]
+    have hb : b - (b - a) = a := by ring
+    have hx' : x ∈ sublevel f (b - (b - a)) := by
+      simpa [hb] using hx
+    have hback := Φ.flow_sublevel_back (t := b - a) ht (y := x) hx'
+    have hneg : -(b - a) = a - b := by ring
+    simpa [hneg] using hback
+  · intro hy
+    refine ⟨Φ.flow (b - a) y, ?_, ?_⟩
+    · have hsub := Φ.flow_sublevel (t := b - a) ht (x := y) hy
+      have hb : b - (b - a) = a := by ring
+      simpa [hb] using hsub
+    · have h := congrFun (Φ.flow_add (a - b) (b - a)) y
+      have hz : (a - b) + (b - a) = 0 := by ring
+      calc
+        Φ.flow (a - b) (Φ.flow (b - a) y) = (Φ.flow (a - b) ∘ Φ.flow (b - a)) y := rfl
+        _ = Φ.flow ((a - b) + (b - a)) y := h.symm
+        _ = Φ.flow 0 y := by rw [hz]
+        _ = y := Φ.flow_zero y
+
+theorem noCriticalValues_toDiffeomorph (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
+    Φ.toDiffeomorph (a - b) '' sublevel f a = sublevel f b := by
+  simpa [GradientLikeFlow.toDiffeomorph] using (noCriticalValues Φ hab)
+
 end
 
 end DifferentialGeometry.Topology.Morse
