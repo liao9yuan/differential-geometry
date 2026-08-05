@@ -186,6 +186,50 @@ theorem boundedHolderSpace_holderWith {alpha : NNReal}
         simp only [ofReal_norm_eq_enorm, enorm_eq_nnnorm]
   exact f.2.memHolder.holderWith.mono (ENNReal.coe_le_coe.mp hle)
 
+def boundedHolderSpaceHolderConst {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) : NNReal :=
+  nnHolderNorm alpha (boundedHolderSpaceFun f)
+
+theorem boundedHolderSpace_holderWith_holderConst {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) :
+    HolderWith (boundedHolderSpaceHolderConst f) alpha
+      (boundedHolderSpaceFun f) :=
+  f.2.memHolder.holderWith
+
+def boundedHolderSpaceOscillationAt {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) (x0 : X) : NNReal :=
+  (eSupNormOn Set.univ fun x ↦ f x0 - f x).toNNReal
+
+private theorem eSupNormOn_sub_at_ne_top {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) (x0 : X) :
+    eSupNormOn Set.univ (fun x ↦ f x0 - f x) ≠ ⊤ := by
+  have hle : eSupNormOn Set.univ (fun x ↦ f x0 - f x) ≤
+      ((2 * ‖f‖₊ : NNReal) : ENNReal) := by
+    rw [eSupNormOn_le]
+    intro x _hx
+    rw [ENNReal.ofReal_le_coe]
+    calc
+      ‖f x0 - f x‖ ≤ ‖f x0‖ + ‖f x‖ := norm_sub_le _ _
+      _ ≤ ‖f‖ + ‖f‖ :=
+        add_le_add (norm_boundedHolderSpace_apply_le f x0)
+          (norm_boundedHolderSpace_apply_le f x)
+      _ = ((2 * ‖f‖₊ : NNReal) : Real) := by
+        simp only [NNReal.coe_mul, NNReal.coe_ofNat, coe_nnnorm]
+        ring
+  exact ne_top_of_le_ne_top ENNReal.coe_ne_top hle
+
+theorem norm_sub_le_boundedHolderSpaceOscillationAt {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := F) alpha) (x0 x : X) :
+    ‖f x0 - f x‖ ≤ boundedHolderSpaceOscillationAt f x0 := by
+  rw [← ENNReal.ofReal_le_coe]
+  calc
+    ENNReal.ofReal ‖f x0 - f x‖ ≤
+        eSupNormOn Set.univ (fun y ↦ f x0 - f y) :=
+      norm_le_eSupNormOn Set.univ (fun y ↦ f x0 - f y) x
+        (Set.mem_univ x)
+    _ = (boundedHolderSpaceOscillationAt f x0 : ENNReal) := by
+      exact (ENNReal.coe_toNNReal (eSupNormOn_sub_at_ne_top f x0)).symm
+
 end BoundedHolder
 
 section ParabolicHolder

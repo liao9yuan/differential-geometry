@@ -1,9 +1,10 @@
 import DifferentialGeometry.Analysis.Schauder.Localization
+import DifferentialGeometry.Analysis.Schauder.HolderNormedSpace
 import Mathlib.Analysis.Normed.Operator.Bilinear
 
 noncomputable section
 
-open scoped NNReal
+open scoped ENNReal NNReal
 
 namespace DifferentialGeometry.Analysis.Schauder
 
@@ -201,6 +202,110 @@ theorem holderWith_bilinear_of_opNorm_le_one
   · exact hg
   · exact hfnorm
   · exact hgnorm
+
+section BoundedHolderSpace
+
+variable {X F : Type*} [MetricSpace X]
+  [NormedAddCommGroup F] [NormedSpace Real F]
+
+private theorem eHolderGauge_boundedHolderSpace_smul_le
+    {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := Real) alpha)
+    (g : BoundedHolderSpace (X := X) (F := F) alpha) :
+    eHolderGauge alpha (boundedHolderSpaceFun f • boundedHolderSpaceFun g) ≤
+      ((3 * ‖f‖₊ * ‖g‖₊ : NNReal) : ENNReal) := by
+  have hsup : eSupNormOn Set.univ
+      (boundedHolderSpaceFun f • boundedHolderSpaceFun g) ≤
+      ((‖f‖₊ * ‖g‖₊ : NNReal) : ENNReal) := by
+    rw [eSupNormOn_le]
+    intro x _hx
+    rw [ENNReal.ofReal_le_coe]
+    change ‖f x • g x‖ ≤ _
+    rw [norm_smul]
+    calc
+      ‖f x‖ * ‖g x‖ ≤ ‖f‖ * ‖g‖ :=
+        mul_le_mul (norm_boundedHolderSpace_apply_le f x)
+          (norm_boundedHolderSpace_apply_le g x)
+          (norm_nonneg _) (norm_nonneg _)
+      _ = ((‖f‖₊ * ‖g‖₊ : NNReal) : Real) := by simp
+  have hholder := holderWith_smul_of_norm_le
+    (boundedHolderSpace_holderWith f)
+    (boundedHolderSpace_holderWith g)
+    (norm_boundedHolderSpace_apply_le f)
+    (norm_boundedHolderSpace_apply_le g)
+  unfold eHolderGauge
+  calc
+    eSupNormOn Set.univ
+        (boundedHolderSpaceFun f • boundedHolderSpaceFun g) +
+        eHolderNorm alpha
+          (boundedHolderSpaceFun f • boundedHolderSpaceFun g) ≤
+      (‖f‖₊ * ‖g‖₊ : NNReal) +
+        (‖f‖₊ * ‖g‖₊ + ‖g‖₊ * ‖f‖₊ : NNReal) :=
+      add_le_add hsup hholder.eHolderNorm_le
+    _ = ((3 * ‖f‖₊ * ‖g‖₊ : NNReal) : ENNReal) := by
+      push_cast
+      ring
+
+private def boundedHolderSpaceSmuLinearMap
+    (alpha : NNReal) :
+    BoundedHolderSpace (X := X) (F := Real) alpha →ₗ[Real]
+      BoundedHolderSpace (X := X) (F := F) alpha →ₗ[Real]
+        BoundedHolderSpace (X := X) (F := F) alpha :=
+  LinearMap.mk₂ Real
+    (fun f g ↦ ⟨boundedHolderSpaceFun f • boundedHolderSpaceFun g,
+      ne_top_of_le_ne_top ENNReal.coe_ne_top
+        (eHolderGauge_boundedHolderSpace_smul_le f g)⟩)
+    (fun f₁ f₂ g ↦ by
+      apply boundedHolderSpace_ext
+      intro x
+      exact add_smul (f₁ x) (f₂ x) (g x))
+    (fun c f g ↦ by
+      apply boundedHolderSpace_ext
+      intro x
+      exact mul_smul c (f x) (g x))
+    (fun f g₁ g₂ ↦ by
+      apply boundedHolderSpace_ext
+      intro x
+      exact smul_add (f x) (g₁ x) (g₂ x))
+    (fun c f g ↦ by
+      apply boundedHolderSpace_ext
+      intro x
+      change f x • (c • g x) = c • (f x • g x)
+      rw [smul_smul, smul_smul, mul_comm])
+
+private theorem norm_boundedHolderSpaceSmuLinearMap_le
+    {alpha : NNReal}
+    (f : BoundedHolderSpace (X := X) (F := Real) alpha)
+    (g : BoundedHolderSpace (X := X) (F := F) alpha) :
+    ‖boundedHolderSpaceSmuLinearMap alpha f g‖ ≤
+      3 * ‖f‖ * ‖g‖ := by
+  rw [norm_boundedHolderSpace_eq]
+  have hreal := ENNReal.toReal_mono ENNReal.coe_ne_top
+    (eHolderGauge_boundedHolderSpace_smul_le f g)
+  simpa only [ENNReal.toReal_ofNat, ENNReal.toReal_mul,
+    ENNReal.coe_toReal, norm_boundedHolderSpace_eq] using hreal
+
+def boundedHolderSpaceSmu (alpha : NNReal) :
+    BoundedHolderSpace (X := X) (F := Real) alpha →L[Real]
+      BoundedHolderSpace (X := X) (F := F) alpha →L[Real]
+        BoundedHolderSpace (X := X) (F := F) alpha :=
+  LinearMap.mkContinuous₂ (boundedHolderSpaceSmuLinearMap alpha) 3
+    norm_boundedHolderSpaceSmuLinearMap_le
+
+@[simp]
+theorem boundedHolderSpaceSmu_apply
+    (alpha : NNReal)
+    (f : BoundedHolderSpace (X := X) (F := Real) alpha)
+    (g : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
+    boundedHolderSpaceSmu alpha f g x = f x • g x :=
+  rfl
+
+theorem norm_boundedHolderSpaceSmu_le (alpha : NNReal) :
+    ‖boundedHolderSpaceSmu (X := X) (F := F) alpha‖ ≤ 3 :=
+  LinearMap.mkContinuous₂_norm_le _ (by norm_num)
+    norm_boundedHolderSpaceSmuLinearMap_le
+
+end BoundedHolderSpace
 
 end DifferentialGeometry.Analysis.Schauder
 
