@@ -117,6 +117,113 @@ def bombieriGiustiSpatialCutoff
     (bombieriGiustiDescendingLevel lower upper (2 * k + 1))
     (bombieriGiustiDescendingLevel lower upper (2 * k))
 
+def bombieriGiustiReciprocalLocalizer
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (lower upper : ℝ) (k : ℕ) : SmoothScalar g where
+  toFun := fun x => 1 +
+    (rho.toFun x - bombieriGiustiDescendingLevel lower upper (2 * k + 1)) /
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2))
+  smooth := contMDiff_const.add
+    ((rho.smooth.sub contMDiff_const).div_const
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2)))
+
+theorem bombieriGiustiReciprocalLocalizer_gap_pos
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    0 < bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+      bombieriGiustiDescendingLevel lower upper (2 * k + 2) := by
+  exact sub_pos.mpr
+    (bombieriGiustiDescendingLevel_strictAnti hlowerUpper (by omega))
+
+omit [Module.Finite ℝ E] in
+theorem one_lt_bombieriGiustiReciprocalLocalizer_of_ne_zero
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) (x : M)
+    (hx : (bombieriGiustiSpatialCutoff rho lower upper k).toFun x ≠ 0) :
+    1 < (bombieriGiustiReciprocalLocalizer rho lower upper k).toFun x := by
+  have hlevel := bombieriGiustiDescendingLevel_strictAnti hlowerUpper
+  have hrho :
+      bombieriGiustiDescendingLevel lower upper (2 * k + 1) < rho.toFun x := by
+    by_contra h
+    apply hx
+    apply spatialCutoffBetween_eq_zero_of_le_inner
+      (hlevel (by omega)) (le_of_not_gt h)
+  change 1 < 1 +
+    (rho.toFun x - bombieriGiustiDescendingLevel lower upper (2 * k + 1)) /
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2))
+  exact lt_add_of_pos_right 1 (div_pos (sub_pos.mpr hrho)
+    (bombieriGiustiReciprocalLocalizer_gap_pos hlowerUpper k))
+
+omit [Module.Finite ℝ E] in
+theorem bombieriGiustiSpatialCutoff_le_reciprocalLocalizer
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) (x : M) :
+    (bombieriGiustiSpatialCutoff rho lower upper k).toFun x ^ 2 ≤
+      (spatialMoserCutoff
+        (bombieriGiustiReciprocalLocalizer rho lower upper k) 0).toFun x ^ 2 := by
+  by_cases hx : (bombieriGiustiSpatialCutoff rho lower upper k).toFun x = 0
+  · simpa [hx] using sq_nonneg
+      ((spatialMoserCutoff
+        (bombieriGiustiReciprocalLocalizer rho lower upper k) 0).toFun x)
+  · have hlocalizer := one_lt_bombieriGiustiReciprocalLocalizer_of_ne_zero
+      rho hlowerUpper k x hx
+    have hone : (spatialMoserCutoff
+        (bombieriGiustiReciprocalLocalizer rho lower upper k) 0).toFun x = 1 := by
+      apply spatialMoserCutoff_eq_one_of_level_le
+      norm_num [moserCutoffLevel]
+      linarith
+    rw [hone, one_pow]
+    have hmem := spatialCutoffBetween_mem_Icc rho
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1))
+      (bombieriGiustiDescendingLevel lower upper (2 * k)) x
+    simpa only [bombieriGiustiSpatialCutoff, one_pow] using
+      (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
+
+omit [Module.Finite ℝ E] in
+theorem reciprocalLocalizer_le_bombieriGiustiSpatialCutoff_succ
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) (x : M) :
+    (spatialMoserCutoff
+        (bombieriGiustiReciprocalLocalizer rho lower upper k) 0).toFun x ^ 2 ≤
+      (bombieriGiustiSpatialCutoff rho lower upper (k + 1)).toFun x ^ 2 := by
+  let localizer := bombieriGiustiReciprocalLocalizer rho lower upper k
+  change (spatialMoserCutoff localizer 0).toFun x ^ 2 ≤
+    (bombieriGiustiSpatialCutoff rho lower upper (k + 1)).toFun x ^ 2
+  by_cases hx : localizer.toFun x ≤ 0
+  · have hzero : (spatialMoserCutoff localizer 0).toFun x = 0 := by
+      apply spatialMoserCutoff_eq_zero_of_le_level
+      simpa [moserCutoffLevel] using hx
+    calc
+      (spatialMoserCutoff localizer 0).toFun x ^ 2 = 0 := by
+        rw [hzero]
+        norm_num
+      _ ≤ (bombieriGiustiSpatialCutoff rho lower upper (k + 1)).toFun x ^ 2 :=
+        sq_nonneg _
+  · have hlocalizer : 0 < localizer.toFun x := lt_of_not_ge hx
+    have hgap := bombieriGiustiReciprocalLocalizer_gap_pos hlowerUpper k
+    have hquotient :
+        (-1 : ℝ) <
+          (rho.toFun x - bombieriGiustiDescendingLevel lower upper (2 * k + 1)) /
+            (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+              bombieriGiustiDescendingLevel lower upper (2 * k + 2)) := by
+      dsimp only [localizer, bombieriGiustiReciprocalLocalizer] at hlocalizer
+      linarith
+    have hmul := (lt_div_iff₀ hgap).mp hquotient
+    have hrho :
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2) < rho.toFun x := by
+      linarith
+    have hone :
+        (bombieriGiustiSpatialCutoff rho lower upper (k + 1)).toFun x = 1 := by
+      apply spatialCutoffBetween_eq_one_of_outer_le
+      · exact bombieriGiustiDescendingLevel_strictAnti hlowerUpper (by omega)
+      · convert hrho.le using 1
+    rw [hone, one_pow]
+    have hmem := spatialMoserCutoff_mem_Icc localizer 0 x
+    simpa only [localizer, one_pow] using
+      (sq_le_sq₀ hmem.1 (by norm_num : (0 : ℝ) ≤ 1)).2 hmem.2
+
 omit [Module.Finite ℝ E] in
 theorem bombieriGiustiSpatialCutoff_mono
     {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
