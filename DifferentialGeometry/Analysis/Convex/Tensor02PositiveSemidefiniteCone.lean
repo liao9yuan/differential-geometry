@@ -11,6 +11,7 @@ namespace DifferentialGeometry
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Analysis.Convex
+open DifferentialGeometry.Analysis.InnerProductSpace
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -125,5 +126,59 @@ theorem mem_tensor02PositiveSemidefinite_dualZeroFace {x : M}
       (I := I) (M := M) A
       (mem_tensor02PositiveSemidefiniteCone.mp hA).1
       (mem_tensor02PositiveSemidefiniteCone.mp hA).2).mpr hv
+
+theorem tensor02PullbackCLE_mem_positiveSemidefiniteCone_iff {x y : M}
+    (e : TangentSpace I x ≃ₗ[Real] TangentSpace I y) (A : Tensor0SSpace 2 I y) :
+    tensor02PullbackCLE (I := I) (M := M) e A ∈
+        tensor02PositiveSemidefiniteCone (I := I) (M := M) ↔
+      A ∈ tensor02PositiveSemidefiniteCone (I := I) (M := M) := by
+  constructor
+  · intro hA
+    obtain ⟨hsym, hnonneg⟩ := mem_tensor02PositiveSemidefiniteCone.mp hA
+    apply mem_tensor02PositiveSemidefiniteCone.mpr
+    constructor
+    · intro v w
+      have h := hsym (e.symm v) (e.symm w)
+      simpa using h
+    · intro v
+      have h := hnonneg (e.symm v)
+      simpa using h
+  · intro hA
+    obtain ⟨hsym, hnonneg⟩ := mem_tensor02PositiveSemidefiniteCone.mp hA
+    apply mem_tensor02PositiveSemidefiniteCone.mpr
+    constructor
+    · intro v w
+      simpa using hsym (e v) (e w)
+    · intro v
+      simpa using hnonneg (e v)
+
+theorem tensor02PositiveSemidefiniteCone_map_pullback {x y : M}
+    (e : TangentSpace I x ≃ₗ[Real] TangentSpace I y) :
+    (tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+      ProperCone Real (Tensor0SSpace 2 I y)).map
+        (tensor02PullbackCLE (I := I) (M := M) e).toContinuousLinearMap =
+      (tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+        ProperCone Real (Tensor0SSpace 2 I x)) := by
+  apply ProperCone.ext
+  intro A
+  rw [ProperCone.mem_map_continuousLinearEquiv_iff]
+  simpa using tensor02PullbackCLE_mem_positiveSemidefiniteCone_iff
+    (I := I) (M := M) e.symm A
+
+theorem tensor02PositiveSemidefinite_dualZeroFace_map_pullback {x y : M}
+    (e : TangentSpace I x ≃ₗ[Real] TangentSpace I y) (v : TangentSpace I x) :
+    ((tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+      ProperCone Real (Tensor0SSpace 2 I y)).dualZeroFace
+        (tensor02EvalSelfCLM (I := I) (M := M) (e v))).map
+          (tensor02PullbackCLE (I := I) (M := M) e).toContinuousLinearMap =
+      ((tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+        ProperCone Real (Tensor0SSpace 2 I x)).dualZeroFace
+          (tensor02EvalSelfCLM (I := I) (M := M) v)) := by
+  rw [ProperCone.dualZeroFace_map_continuousLinearEquiv]
+  rw [tensor02PositiveSemidefiniteCone_map_pullback]
+  congr 1
+  apply ContinuousLinearMap.ext
+  intro A
+  simp
 
 end DifferentialGeometry
