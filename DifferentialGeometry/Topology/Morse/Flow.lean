@@ -1,4 +1,5 @@
 import DifferentialGeometry.Topology.Morse.Defs
+import DifferentialGeometry.Topology.Morse.LocalNormalForm
 import Mathlib.Geometry.Manifold.Diffeomorph
 
 namespace DifferentialGeometry.Topology.Morse
@@ -198,6 +199,49 @@ theorem noCriticalValues (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
 theorem noCriticalValues_toDiffeomorph (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
     Φ.toDiffeomorph (a - b) '' sublevel f a = sublevel f b := by
   simpa [GradientLikeFlow.toDiffeomorph] using (noCriticalValues Φ hab)
+
+noncomputable def linearModelFlow (a b : ℝ) (_hab : a ≤ b) :
+    GradientLikeFlow 𝓘(ℝ, MorseModel 1) (fun y : MorseModel 1 => y 0) a b where
+  flow := fun t y => (fun _ : Fin 1 => y 0 - t)
+  flow_zero := by
+    intro y
+    funext i
+    fin_cases i; simp
+  flow_add := by
+    intro s t
+    funext y
+    funext i
+    fin_cases i
+    change y 0 - (s + t) = (y 0 - t) - s
+    ring
+  contMDiffAt := by
+    intro t x
+    exact ContDiffAt.contMDiffAt (f := fun y : MorseModel 1 => (fun _ : Fin 1 => y 0 - t))
+      ((contDiff_pi' (fun i : Fin 1 => by fun_prop) :
+        ContDiff ℝ (⊤ : WithTop ℕ∞) (fun y : MorseModel 1 => (fun _ : Fin 1 => y 0 - t))).contDiffAt)
+  contMDiffAt_t := by
+    intro x
+    exact ContDiffAt.contMDiffAt (f := fun t : ℝ => (fun _ : Fin 1 => x 0 - t))
+      ((contDiff_pi' (fun i : Fin 1 => by fun_prop) :
+        ContDiff ℝ (⊤ : WithTop ℕ∞) (fun t : ℝ => (fun _ : Fin 1 => x 0 - t))).contDiffAt)
+  strip_eq_sub := by
+    intro x t ht hst
+    rfl
+  strip_eq_add_back := by
+    intro x t ht h1 h2
+    simp [sub_eq_add_neg]
+  rate_bound := by
+    intro x t ht
+    constructor
+    · rfl
+    · simp [sub_eq_add_neg]
+      linarith
+
+theorem linearModelNoCriticalValues (a b : ℝ) (hab : a ≤ b) :
+    (fun y : MorseModel 1 => (linearModelFlow a b hab).flow (a - b) y) ''
+        sublevel (fun y : MorseModel 1 => y 0) a =
+      sublevel (fun y : MorseModel 1 => y 0) b :=
+  noCriticalValues (linearModelFlow a b hab) hab
 
 end
 
