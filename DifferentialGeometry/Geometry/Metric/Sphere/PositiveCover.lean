@@ -1,9 +1,9 @@
 import DifferentialGeometry.Geometry.Metric.Sphere.KillingHopf
 import DifferentialGeometry.Geometry.Metric.Sphere.RoundInputs
-import DifferentialGeometry.Geometry.Topology.FiberBundleT2
-import DifferentialGeometry.Geometry.Topology.SemilocallySimplyConnected
-import DifferentialGeometry.Geometry.Topology.UniversalCover.CompletenessPullback
-import DifferentialGeometry.Geometry.Topology.UniversalCover.CurvaturePullback
+import DifferentialGeometry.Topology.FiberBundleT2
+import DifferentialGeometry.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Topology.Covering.CompletenessPullback
+import DifferentialGeometry.Topology.Covering.CurvaturePullback
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

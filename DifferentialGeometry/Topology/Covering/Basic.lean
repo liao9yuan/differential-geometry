@@ -2,7 +2,7 @@ import Mathlib.Topology.Bases
 import Mathlib.Topology.Connected.LocPathConnected
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.Homotopy.Path
-import DifferentialGeometry.Geometry.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Topology.SemilocallySimplyConnected
 
 
 

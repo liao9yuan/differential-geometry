@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoOpen
 import DifferentialGeometry.Geometry.Metric.Sphere.PuncturedCartan
 import DifferentialGeometry.Geometry.Metric.Sphere.PuncturedOverlap
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricFiberData
-import DifferentialGeometry.Geometry.Topology.CoveringSimple
+import DifferentialGeometry.Topology.CoveringSimple
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

@@ -1,9 +1,9 @@
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoOpen
 import DifferentialGeometry.Geometry.Metric.Sphere.IsometryRepresentation
 import DifferentialGeometry.Geometry.Metric.Sphere.QuotientDescent
-import DifferentialGeometry.Geometry.Topology.UniversalCover.DeckIsometry
-import DifferentialGeometry.Geometry.Topology.UniversalCover.FibreEquiv
-import DifferentialGeometry.Geometry.Topology.UniversalCover.LocalDiffeomorph
+import DifferentialGeometry.Topology.Covering.DeckIsometry
+import DifferentialGeometry.Topology.Covering.FibreEquiv
+import DifferentialGeometry.Topology.Covering.LocalDiffeomorph
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 

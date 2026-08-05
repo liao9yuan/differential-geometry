@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Topology.UniversalCover.Manifold
+import DifferentialGeometry.Topology.Covering.Manifold
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Hom

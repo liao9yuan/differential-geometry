@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
-import DifferentialGeometry.Geometry.Topology.UniversalCover.Manifold
+import DifferentialGeometry.Topology.Covering.Manifold
 
 /-!
 # The universal-cover projection as a local diffeomorphism

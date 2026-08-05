@@ -4,7 +4,7 @@ import Mathlib.Topology.Homotopy.Lifting
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.Connected.LocPathConnected
-import DifferentialGeometry.Geometry.Topology.UniversalCover.Basic
+import DifferentialGeometry.Topology.Covering.Basic
 
 
 

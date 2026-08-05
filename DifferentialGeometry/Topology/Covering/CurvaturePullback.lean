@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Topology.UniversalCover.Riemannian
-import DifferentialGeometry.Geometry.Topology.UniversalCover.ChartPullback
+import DifferentialGeometry.Topology.Covering.Riemannian
+import DifferentialGeometry.Topology.Covering.ChartPullback
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs

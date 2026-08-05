@@ -5,8 +5,8 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.Normed.Operator.LinearIsometry
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
-import DifferentialGeometry.Geometry.Topology.UniversalCover.Manifold
-import DifferentialGeometry.Geometry.Topology.UniversalCover.LiftedMetricSmoothness
+import DifferentialGeometry.Topology.Covering.Manifold
+import DifferentialGeometry.Topology.Covering.LiftedMetricSmoothness
 import Mathlib.Topology.VectorBundle.Riemannian
 
 

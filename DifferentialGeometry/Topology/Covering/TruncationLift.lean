@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Topology.UniversalCover.Basic
-import DifferentialGeometry.Geometry.Topology.UniversalCover.CoveringMap
+import DifferentialGeometry.Topology.Covering.Basic
+import DifferentialGeometry.Topology.Covering.CoveringMap
 import Mathlib.Topology.Path
 import Mathlib.Topology.Homotopy.Path
 import Mathlib.Topology.Homotopy.Lifting

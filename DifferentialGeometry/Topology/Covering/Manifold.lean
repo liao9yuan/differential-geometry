@@ -9,8 +9,8 @@ import Mathlib.Topology.Compactness.LocallyCompact
 import Mathlib.Topology.ShrinkingLemma
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
-import DifferentialGeometry.Geometry.Topology.UniversalCover.CoveringMap
-import DifferentialGeometry.Geometry.Topology.UniversalCover.CountablePi1
+import DifferentialGeometry.Topology.Covering.CoveringMap
+import DifferentialGeometry.Topology.Covering.CountablePi1
 
 
 

@@ -4,8 +4,8 @@ import Mathlib.Geometry.Manifold.Metrizable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
-import DifferentialGeometry.Geometry.Topology.DirectLimit
-import DifferentialGeometry.Geometry.Topology.FiberBundleT2
+import DifferentialGeometry.Topology.DirectLimit
+import DifferentialGeometry.Topology.FiberBundleT2
 import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Bundle.ClmSectionSmooth
 

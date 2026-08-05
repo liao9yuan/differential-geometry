@@ -1,6 +1,6 @@
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
 import Mathlib.Geometry.Manifold.Diffeomorph
-import DifferentialGeometry.Geometry.Topology.UniversalCover.Manifold
+import DifferentialGeometry.Topology.Covering.Manifold
 
 /-!
 # Deck transformations of the path-space universal cover

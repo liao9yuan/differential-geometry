@@ -4,11 +4,11 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinow
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCurve
-import DifferentialGeometry.Geometry.Topology.UniversalCover.CurvaturePullback
-import DifferentialGeometry.Geometry.Topology.UniversalCover.CompletenessPullback
-import DifferentialGeometry.Geometry.Topology.UniversalCover.FibreEquiv
+import DifferentialGeometry.Topology.Covering.CurvaturePullback
+import DifferentialGeometry.Topology.Covering.CompletenessPullback
+import DifferentialGeometry.Topology.Covering.FibreEquiv
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket
-import DifferentialGeometry.Geometry.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Topology.SemilocallySimplyConnected
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Topology.EMetricSpace.Diam
 import Mathlib.Topology.Compactness.Compact
