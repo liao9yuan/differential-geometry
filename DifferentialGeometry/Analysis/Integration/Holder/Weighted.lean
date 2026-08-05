@@ -85,6 +85,47 @@ theorem holder_integral_mul_rpow_le
     (by simp [Theta, Fin.sum_univ_two])
   simpa [F, Theta, Fin.prod_univ_two] using h
 
+theorem integrable_rpow_of_integrable_rpow
+    [IsFiniteMeasure μ] {f : α → ℝ} {p q : ℝ}
+    (hp : 0 ≤ p) (hpq : p ≤ q)
+    (hf : AEMeasurable f μ) (hf_nonneg : 0 ≤ᵐ[μ] f)
+    (hfq : Integrable (fun x => f x ^ q) μ) :
+    Integrable (fun x => f x ^ p) μ := by
+  apply (hfq.add (integrable_const (1 : ℝ))).mono'
+    (hf.pow_const p).aestronglyMeasurable
+  filter_upwards [hf_nonneg] with x hx
+  rw [Real.norm_of_nonneg (Real.rpow_nonneg hx p)]
+  by_cases hfx : f x ≤ 1
+  · exact (Real.rpow_le_one hx hfx hp).trans (le_add_of_nonneg_left (Real.rpow_nonneg hx q))
+  · exact (Real.rpow_le_rpow_of_exponent_le (le_of_not_ge hfx) hpq).trans
+      (le_add_of_nonneg_right zero_le_one)
+
+theorem integral_rpow_le_integral_rpow_mul_measure
+    [IsFiniteMeasure μ] {f : α → ℝ} {p q : ℝ}
+    (hp : 0 ≤ p) (hq : 0 < q) (hpq : p ≤ q)
+    (hf_nonneg : 0 ≤ᵐ[μ] f)
+    (hfq : Integrable (fun x => f x ^ q) μ) :
+    (∫ x, f x ^ p ∂μ) ≤
+      (∫ x, f x ^ q ∂μ) ^ (p / q) *
+        μ.real Set.univ ^ (1 - p / q) := by
+  have htheta : 0 ≤ p / q := div_nonneg hp hq.le
+  have htheta_one : p / q ≤ 1 := (div_le_one hq).2 hpq
+  have hone : Integrable (fun _ : α => (1 : ℝ)) μ := integrable_const _
+  have h := holder_integral_mul_rpow_le
+    (f := fun x => f x ^ q) (g := fun _ : α => (1 : ℝ))
+    hfq hone
+    (hf_nonneg.mono fun x hx => Real.rpow_nonneg hx q)
+    (Filter.Eventually.of_forall fun _ => zero_le_one)
+    htheta htheta_one
+  have hpoint : ∀ᵐ x ∂μ,
+      (f x ^ q) ^ (p / q) * (1 : ℝ) ^ (1 - p / q) = f x ^ p := by
+    filter_upwards [hf_nonneg] with x hx
+    rw [Real.one_rpow, mul_one, ← Real.rpow_mul hx]
+    congr 2
+    field_simp [hq.ne']
+  rw [integral_congr_ae hpoint] at h
+  simpa only [integral_const, smul_eq_mul, mul_one] using h
+
 private theorem critical_sobolev_rpow_factorization
     {d a : ℝ} (hd : 2 < d) :
     (a ^ 2) ^ (2 / d) *
