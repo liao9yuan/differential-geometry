@@ -65,7 +65,7 @@ private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
   exact green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g hf hf hf_cs
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem lichnerowicz_inequality
+private theorem lichnerowicz_inequality
     [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (hn_ge_two : 2 ≤ Module.finrank ℝ E)
@@ -596,7 +596,7 @@ theorem chartHessFrobeniusSq_continuous
   exact (h_bochner_isolate x).symm
 
 theorem lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (hn_ge_two : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (hK : 0 < K)
