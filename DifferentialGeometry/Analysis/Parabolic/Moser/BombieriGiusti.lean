@@ -520,6 +520,129 @@ theorem bombieriGiusti_hole_filling
       ring
     _ = bombieriGiustiThreshold p₀ c₀ reverseCost := rfl
 
+theorem integral_rpow_root_le_exp_bombieriGiustiThreshold
+    (mu : ℕ → Measure α) [∀ k, IsFiniteMeasure (mu k)]
+    (f : α → ℝ) {p₀ c₀ reverseCost : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hreverseCost : 1 ≤ reverseCost)
+    (hf : Measurable f) (hf_pos : ∀ x, 0 < f x)
+    (hintegrable : ∀ k, Integrable (fun x => f x ^ p₀) (mu k))
+    (hmoment_pos : ∀ k, 0 < ∫ x, f x ^ p₀ ∂(mu k))
+    (hmass : ∀ k, (mu k).real Set.univ ≤ 1)
+    (hmoment_mono : ∀ k,
+      (∫ x, f x ^ p₀ ∂(mu k)) ≤ ∫ x, f x ^ p₀ ∂(mu (k + 1)))
+    (hβ_bdd : BddAbove (Set.range (fun k =>
+      Real.log ((∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀)))))
+    (htail : ∀ k r, 0 < r →
+      (mu k).real {x | r < Real.log (f x)} ≤ c₀ / r)
+    (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
+      (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) ≤
+        reverseCost ^ (1 / p - 1 / p₀) *
+          (∫ x, f x ^ p ∂(mu (k + 1))) ^ (1 / p)) :
+    (∫ x, f x ^ p₀ ∂(mu 0)) ^ (1 / p₀) ≤
+      Real.exp (bombieriGiustiThreshold p₀ c₀ reverseCost) := by
+  let beta : ℕ → ℝ := fun k =>
+    Real.log ((∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀))
+  have hnorm_pos : ∀ k,
+      0 < (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) := fun k =>
+    Real.rpow_pos_of_pos (hmoment_pos k) _
+  have hbeta_mono : ∀ k, beta k ≤ beta (k + 1) := by
+    intro k
+    have hmoment_le : (∫ x, f x ^ p₀ ∂(mu k)) ≤
+        ∫ x, f x ^ p₀ ∂(mu (k + 1)) := hmoment_mono k
+    have hnorm_le :
+        (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) ≤
+          (∫ x, f x ^ p₀ ∂(mu (k + 1))) ^ (1 / p₀) :=
+      Real.rpow_le_rpow (hmoment_pos k).le hmoment_le
+        (div_pos one_pos hp₀).le
+    exact Real.log_le_log (hnorm_pos k) hnorm_le
+  have hbound := bombieriGiusti_hole_filling hp₀ hc₀ hreverseCost
+    (β := beta) (by simpa only [beta] using hβ_bdd) hbeta_mono
+    (fun k hk => by
+      let p := bombieriGiustiExponent p₀ c₀ (beta (k + 1))
+      have hthreshold := two_mul_le_bombieriGiustiThreshold
+        (p₀ := p₀) (reverseCost := reverseCost) hc₀.le hreverseCost
+      have hbeta_outer : 2 * c₀ < beta (k + 1) := hthreshold.trans_lt hk
+      have hp : 0 < p := bombieriGiustiExponent_pos hp₀ hc₀ hbeta_outer
+      have hpp₀ : p < p₀ := bombieriGiustiExponent_lt hp₀ hc₀ hbeta_outer
+      have htail_half :
+          (mu (k + 1)).real {x | beta (k + 1) / 2 < Real.log (f x)} ≤
+            2 * c₀ / beta (k + 1) := by
+        calc
+          (mu (k + 1)).real
+              {x | beta (k + 1) / 2 < Real.log (f x)} ≤
+              c₀ / (beta (k + 1) / 2) :=
+            htail (k + 1) (beta (k + 1) / 2)
+              (div_pos ((mul_pos (by norm_num) hc₀).trans hbeta_outer)
+                (by norm_num))
+          _ = 2 * c₀ / beta (k + 1) := by
+            field_simp [((mul_pos (by norm_num) hc₀).trans hbeta_outer).ne']
+      have htail_norm := integral_rpow_root_le_of_log_superlevel_tail
+        (mu (k + 1)) f hp₀ hc₀ hbeta_outer hf hf_pos
+          (hintegrable (k + 1)) (hmoment_pos (k + 1)) (hmass (k + 1))
+          rfl htail_half
+      have hreverse_norm := hreverse k hp hpp₀
+      change Real.exp (beta k) ≤
+        reverseCost ^ (1 / p - 1 / p₀) *
+          (2 ^ (1 / p) * Real.exp (beta (k + 1) / 2))
+      calc
+        Real.exp (beta k) =
+            (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) := by
+          exact Real.exp_log (hnorm_pos k)
+        _ ≤ reverseCost ^ (1 / p - 1 / p₀) *
+            (∫ x, f x ^ p ∂(mu (k + 1))) ^ (1 / p) := hreverse_norm
+        _ ≤ reverseCost ^ (1 / p - 1 / p₀) *
+            (2 ^ (1 / p) * Real.exp (beta (k + 1) / 2)) := by
+          exact mul_le_mul_of_nonneg_left
+            (by simpa only [p] using htail_norm)
+            (Real.rpow_nonneg (zero_le_one.trans hreverseCost) _))
+  calc
+    (∫ x, f x ^ p₀ ∂(mu 0)) ^ (1 / p₀) = Real.exp (beta 0) := by
+      exact (Real.exp_log (hnorm_pos 0)).symm
+    _ ≤ Real.exp (bombieriGiustiThreshold p₀ c₀ reverseCost) :=
+      Real.exp_le_exp.mpr hbound
+
+theorem integral_rpow_root_le_exp_bombieriGiustiThreshold_of_dominated
+    (mu : ℕ → Measure α) [∀ k, IsFiniteMeasure (mu k)]
+    (nu : Measure α) [IsFiniteMeasure nu]
+    (f : α → ℝ) {p₀ c₀ reverseCost : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hreverseCost : 1 ≤ reverseCost)
+    (hf : Measurable f) (hf_pos : ∀ x, 0 < f x)
+    (hnu_integrable : Integrable (fun x => f x ^ p₀) nu)
+    (hmoment_pos : ∀ k, 0 < ∫ x, f x ^ p₀ ∂(mu k))
+    (hmass : ∀ k, (mu k).real Set.univ ≤ 1)
+    (hmu : ∀ k, mu k ≤ mu (k + 1))
+    (hdominated : ∀ k, mu k ≤ nu)
+    (htail : ∀ k r, 0 < r →
+      (mu k).real {x | r < Real.log (f x)} ≤ c₀ / r)
+    (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
+      (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) ≤
+        reverseCost ^ (1 / p - 1 / p₀) *
+          (∫ x, f x ^ p ∂(mu (k + 1))) ^ (1 / p)) :
+    (∫ x, f x ^ p₀ ∂(mu 0)) ^ (1 / p₀) ≤
+      Real.exp (bombieriGiustiThreshold p₀ c₀ reverseCost) := by
+  have hintegrable : ∀ k, Integrable (fun x => f x ^ p₀) (mu k) := fun k =>
+    hnu_integrable.mono_measure (hdominated k)
+  have hβ_bdd : BddAbove (Set.range (fun k =>
+      Real.log ((∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀)))) := by
+    refine ⟨Real.log ((∫ x, f x ^ p₀ ∂nu) ^ (1 / p₀)), ?_⟩
+    rintro _ ⟨k, rfl⟩
+    have hmoment_le : (∫ x, f x ^ p₀ ∂(mu k)) ≤ ∫ x, f x ^ p₀ ∂nu := by
+      exact integral_mono_measure (hdominated k)
+        (ae_of_all nu fun x => Real.rpow_nonneg (hf_pos x).le p₀)
+        hnu_integrable
+    have hnorm_le :
+        (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) ≤
+          (∫ x, f x ^ p₀ ∂nu) ^ (1 / p₀) :=
+      Real.rpow_le_rpow (hmoment_pos k).le hmoment_le
+        (div_pos one_pos hp₀).le
+    exact Real.log_le_log (Real.rpow_pos_of_pos (hmoment_pos k) _) hnorm_le
+  exact integral_rpow_root_le_exp_bombieriGiustiThreshold mu f hp₀ hc₀
+    hreverseCost hf hf_pos hintegrable hmoment_pos hmass
+      (fun k => integral_mono_measure (hmu k)
+        (ae_of_all (mu (k + 1)) fun x => Real.rpow_nonneg (hf_pos x).le p₀)
+        (hintegrable (k + 1)))
+      hβ_bdd htail hreverse
+
 open Bundle Manifold
 open scoped ContDiff Manifold Topology
 
