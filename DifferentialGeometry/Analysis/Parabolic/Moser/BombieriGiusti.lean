@@ -674,6 +674,54 @@ theorem integral_rpow_root_le_exp_bombieriGiustiThreshold
     _ = Real.exp (bombieriGiustiThreshold p₀ c₀ reverseCost) := by
       rw [hsum]
 
+theorem integral_rpow_root_le_exp_tsum_bombieriGiustiThreshold_of_dominated
+    (mu : ℕ → Measure α) [∀ k, IsFiniteMeasure (mu k)]
+    (nu : Measure α) [IsFiniteMeasure nu]
+    (f : α → ℝ) (reverseCost : ℕ → ℝ) {p₀ c₀ : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀)
+    (hreverseCost : ∀ k, 1 ≤ reverseCost k)
+    (hf : Measurable f) (hf_pos : ∀ x, 0 < f x)
+    (hnu_integrable : Integrable (fun x => f x ^ p₀) nu)
+    (hmoment_pos : ∀ k, 0 < ∫ x, f x ^ p₀ ∂(mu k))
+    (hmass : ∀ k, (mu k).real Set.univ ≤ 1)
+    (hmu : ∀ k, mu k ≤ mu (k + 1))
+    (hdominated : ∀ k, mu k ≤ nu)
+    (htail : ∀ k r, 0 < r →
+      (mu k).real {x | r < Real.log (f x)} ≤ c₀ / r)
+    (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
+      (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) ≤
+        reverseCost k ^ (1 / p - 1 / p₀) *
+          (∫ x, f x ^ p ∂(mu (k + 1))) ^ (1 / p))
+    (hsummable : Summable (fun k : ℕ =>
+      (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4))) :
+    (∫ x, f x ^ p₀ ∂(mu 0)) ^ (1 / p₀) ≤
+      Real.exp (∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4)) := by
+  have hintegrable : ∀ k, Integrable (fun x => f x ^ p₀) (mu k) := fun k =>
+    hnu_integrable.mono_measure (hdominated k)
+  have hβ_bdd : BddAbove (Set.range (fun k =>
+      Real.log ((∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀)))) := by
+    refine ⟨Real.log ((∫ x, f x ^ p₀ ∂nu) ^ (1 / p₀)), ?_⟩
+    rintro _ ⟨k, rfl⟩
+    have hmoment_le : (∫ x, f x ^ p₀ ∂(mu k)) ≤ ∫ x, f x ^ p₀ ∂nu := by
+      exact integral_mono_measure (hdominated k)
+        (ae_of_all nu fun x => Real.rpow_nonneg (hf_pos x).le p₀)
+        hnu_integrable
+    have hnorm_le :
+        (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) ≤
+          (∫ x, f x ^ p₀ ∂nu) ^ (1 / p₀) :=
+      Real.rpow_le_rpow (hmoment_pos k).le hmoment_le
+        (div_pos one_pos hp₀).le
+    exact Real.log_le_log (Real.rpow_pos_of_pos (hmoment_pos k) _) hnorm_le
+  exact integral_rpow_root_le_exp_tsum_bombieriGiustiThreshold
+    mu f reverseCost hp₀ hc₀ hreverseCost hf hf_pos hintegrable
+      hmoment_pos hmass
+      (fun k => integral_mono_measure (hmu k)
+        (ae_of_all (mu (k + 1)) fun x => Real.rpow_nonneg (hf_pos x).le p₀)
+        (hintegrable (k + 1)))
+      hβ_bdd htail hreverse hsummable
+
 theorem integral_rpow_root_le_exp_bombieriGiustiThreshold_of_dominated
     (mu : ℕ → Measure α) [∀ k, IsFiniteMeasure (mu k)]
     (nu : Measure α) [IsFiniteMeasure nu]
