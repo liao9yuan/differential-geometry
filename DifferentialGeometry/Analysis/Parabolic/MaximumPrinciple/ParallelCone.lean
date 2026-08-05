@@ -1,4 +1,6 @@
+import DifferentialGeometry.Analysis.ODE.InvariantSetEquiv
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.ProperCone
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.SemilinearConvex
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.InvariantCone
 
 set_option autoImplicit false
@@ -8,6 +10,7 @@ namespace DifferentialGeometry.Analysis.Parabolic
 noncomputable section
 
 open Bundle Set
+open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff
@@ -29,6 +32,21 @@ theorem transportedSectionFamily_apply
     (P : LinearIsometricTransport F) (x₀ : M)
     (u : Real → ∀ x, F x) (t : Real) (x : M) :
     transportedSectionFamily F P x₀ u t x = P.transport x x₀ (u t x) :=
+  rfl
+
+def transportedReactionFamily
+    (P : LinearIsometricTransport F) (x₀ : M)
+    (reaction : Real → (x : M) → F x → F x) :
+    Real → M → F x₀ → F x₀ :=
+  fun t x v ↦ P.transport x x₀ (reaction t x (P.transport x₀ x v))
+
+@[simp]
+theorem transportedReactionFamily_apply
+    (P : LinearIsometricTransport F) (x₀ : M)
+    (reaction : Real → (x : M) → F x → F x)
+    (t : Real) (x : M) (v : F x₀) :
+    transportedReactionFamily F P x₀ reaction t x v =
+      P.transport x x₀ (reaction t x (P.transport x₀ x v)) :=
   rfl
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -85,6 +103,57 @@ theorem parallelProperCone_heat_supersolution_mem
     ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C x := by
   exact parallelProperCone_heat_pot_supersolution_mem_of_potential_le
     (I := I) F G hT (fun _ _ ↦ 0) P C hC x₀ u hsol 0 (by simp) hinit
+
+omit [CompleteSpace E] in
+theorem parallelProperCone_heat_reaction_mem_of_tangent
+    [∀ x, CompleteSpace (F x)]
+    [I.Boundaryless] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T)
+    (P : LinearIsometricTransport F)
+    (C : ProperConeFamily F)
+    (hC : IsParallelProperConeFamily F P C)
+    (x₀ : M)
+    (reaction : Real → (x : M) → F x → F x)
+    (u : Real → ∀ x, F x)
+    (hsol : IsInnerProductHeatReactionOn
+      (RealTimeInterval.closed 0 T hT) G
+        (transportedReactionFamily F P x₀ reaction)
+        (transportedSectionFamily F P x₀ u))
+    (L : NNReal)
+    (hL : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M,
+      LipschitzWith L (reaction t x))
+    (htangent : ∀ t : Real, t ∈ Set.Ioo 0 T → ∀ x : M, ∀ p ∈ C x,
+      reaction t x p ∈ posTangentConeAt (C x : Set (F x)) p)
+    (hinit : ∀ x : M, u 0 x ∈ C x) :
+    ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, u t x ∈ C x := by
+  have hfixed : ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M,
+      transportedSectionFamily F P x₀ u t x ∈ C x₀ := by
+    apply properCone_heat_reaction_mem_of_tangent
+      (I := I) G hT (C x₀) (transportedReactionFamily F P x₀ reaction)
+        (transportedSectionFamily F P x₀ u) hsol L
+    · intro t ht x
+      simpa [transportedReactionFamily, Function.comp_def] using
+        (P.transport x x₀).lipschitz.comp
+          ((hL t ht x).comp (P.transport x₀ x).lipschitz)
+    · intro t ht x p hp
+      let q : F x := P.transport x₀ x p
+      have hq : q ∈ C x := (hC.transport_mem_iff F x₀ x p).2 hp
+      have htangentq := htangent t ht x q hq
+      have hmapped := ContinuousLinearEquiv.mapsTo_posTangentConeAt
+        (P.transport x x₀).toContinuousLinearEquiv htangentq
+      have himage : (P.transport x x₀).toContinuousLinearEquiv ''
+          (C x : Set (F x)) = (C x₀ : Set (F x₀)) := by
+        simpa only using hC.image_transport F x x₀
+      rw [himage] at hmapped
+      simpa [transportedReactionFamily, q] using hmapped
+    · intro x
+      exact (hC.transport_mem_iff F x x₀ (u 0 x)).2 (hinit x)
+  intro t ht x
+  apply (hC.transport_mem_iff F x x₀ (u t x)).1
+  simpa using hfixed t ht x
 
 end
 
