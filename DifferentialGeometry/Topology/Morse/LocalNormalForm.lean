@@ -175,6 +175,13 @@ theorem morseCons_add (h₁ h₂ : ℝ) (t₁ t₂ : MorseModel n) :
   | zero => simp [morseCons]
   | succ j => simp [morseCons]
 
+@[simp] theorem morseCons_smul (c : ℝ) (h : ℝ) (t : MorseModel n) :
+    morseCons (c * h) (c • t) = c • morseCons h t := by
+  funext i
+  cases i using Fin.cases with
+  | zero => simp [morseCons]
+  | succ j => simp [morseCons]
+
 noncomputable def morsePivot (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
     (x : MorseModel (n + 1)) : ℝ :=
   a x morseE0 morseE0
@@ -547,6 +554,83 @@ theorem hasFDerivAt_morseComplete
       HasFDerivAt.add hasFDerivAt_morseHead hdiv
     simpa [morseCompleteDeriv] using hadd
   simpa [morseComplete] using hsum
+
+noncomputable def morseConsLinear : (ℝ × MorseModel n) →ₗ[ℝ] MorseModel (n + 1) :=
+  { toFun := fun p => morseCons p.1 p.2
+    map_add' := by
+      intro p q
+      exact morseCons_add p.1 q.1 p.2 q.2
+    map_smul' := by
+      intro c p
+      simp [morseCons_smul] }
+
+noncomputable def morseConsLinearCLM : (ℝ × MorseModel n) →L[ℝ] MorseModel (n + 1) :=
+  morseConsLinear.toContinuousLinearMap
+
+noncomputable def morseTailProj : MorseModel (n + 1) →L[ℝ] MorseModel n :=
+  ({ toFun := fun v => morseTail v
+     map_add' := by intro v w; exact morseTail_add v w
+     map_smul' := by intro c v; exact morseTail_smul c v } :
+      MorseModel (n + 1) →ₗ[ℝ] MorseModel n).toContinuousLinearMap
+
+theorem hasFDerivAt_morseTailProj :
+    HasFDerivAt (fun x : MorseModel (n + 1) => morseTail x) morseTailProj 0 := by
+  simpa [morseTailProj] using (morseTailProj.hasFDerivAt)
+
+theorem hasFDerivAt_morseCompletionMap
+    (a : MorseModel (n + 1) → LinearMap.BilinForm ℝ (MorseModel (n + 1)))
+    (p' d' : MorseModel (n + 1) →L[ℝ] ℝ)
+    (hs : HasFDerivAt (fun x => morsePivot a x) p' 0)
+    (hd : HasFDerivAt (fun x => a x morseE0 (morseCons (0 : ℝ) (morseTail x))) d' 0)
+    (hpiv : morsePivot a 0 ≠ 0) :
+    HasFDerivAt (morseCompletionMap a) (morseCompletionDeriv a d').toContinuousLinearMap 0 := by
+  have hsqrt := hasFDerivAt_sqrt_abs_morsePivot a p' hs hpiv
+  have hcomplete := hasFDerivAt_morseComplete a p' d' hs hd hpiv
+  have hprod : HasFDerivAt
+      (fun x => Real.sqrt |morsePivot a x| * morseComplete a x)
+      (Real.sqrt |morsePivot a 0| • (morseCompleteDeriv a d') +
+        morseComplete a 0 • morseSqrtDeriv a p') 0 :=
+    HasFDerivAt.mul hsqrt hcomplete
+  have hprod' : HasFDerivAt
+      (fun x => Real.sqrt |morsePivot a x| * morseComplete a x)
+      (Real.sqrt |morsePivot a 0| • (morseCompleteDeriv a d')) 0 := by
+    have hdeq : Real.sqrt |morsePivot a 0| • (morseCompleteDeriv a d') +
+          morseComplete a 0 • morseSqrtDeriv a p' =
+        Real.sqrt |morsePivot a 0| • (morseCompleteDeriv a d') := by
+      ext v
+      simp [morseComplete_zero]
+    simpa [hdeq] using hprod
+  have hpair : HasFDerivAt
+      (fun x => (Real.sqrt |morsePivot a x| * morseComplete a x, morseTail x))
+      ((Real.sqrt |morsePivot a 0| • (morseCompleteDeriv a d')).prod morseTailProj) 0 :=
+    HasFDerivAt.prodMk hprod' hasFDerivAt_morseTailProj
+  have hcons : HasFDerivAt (fun x : ℝ × MorseModel n => morseCons x.1 x.2)
+      morseConsLinearCLM 0 := by
+    simpa [morseConsLinearCLM, morseConsLinear] using (morseConsLinearCLM.hasFDerivAt)
+  have hcomp : HasFDerivAt (fun x => morseConsLinearCLM (Real.sqrt |morsePivot a x| * morseComplete a x, morseTail x))
+      (morseConsLinearCLM.comp
+        ((Real.sqrt |morsePivot a 0| • (morseCompleteDeriv a d')).prod morseTailProj)) 0 :=
+    by
+      have hcons' : HasFDerivAt (fun p : ℝ × MorseModel n => morseConsLinearCLM p)
+          morseConsLinearCLM (Real.sqrt |morsePivot a 0| * morseComplete a 0, morseTail 0) :=
+        morseConsLinearCLM.hasFDerivAt
+      exact HasFDerivAt.comp 0 (hg := hcons') (hf := hpair)
+  have heq : (morseConsLinearCLM.comp
+        ((Real.sqrt |morsePivot a 0| • (morseCompleteDeriv a d')).prod morseTailProj)) =
+      (morseCompletionDeriv a d').toContinuousLinearMap := by
+    ext v i
+    dsimp [morseConsLinearCLM, morseConsLinear, morseTailProj, morseCompleteDeriv,
+      morseCompletionDeriv, morseCompletionDerivMap, morseHeadProj, morseHead]
+    cases i using Fin.cases with
+    | zero =>
+        simp only [morseCons, Fin.cons_zero, div_eq_mul_inv]
+        ring_nf
+    | succ j =>
+        simp only [morseCons, Fin.cons_succ]
+  have hfinal : HasFDerivAt (fun x => morseConsLinearCLM (Real.sqrt |morsePivot a x| * morseComplete a x, morseTail x))
+      (morseCompletionDeriv a d').toContinuousLinearMap 0 := by
+    simpa [heq] using hcomp
+  simpa [morseCompletionMap, Function.comp_def] using hfinal
 
 end Completion
 
