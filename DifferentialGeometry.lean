@@ -2199,6 +2199,8 @@ import DifferentialGeometry.Geometry.Coordinates.PartialDiffeomorphOpens
 import DifferentialGeometry.Geometry.Coordinates.TangentPartialDiffeomorph
 import DifferentialGeometry.Geometry.Coordinates.Tensor
 import DifferentialGeometry.Geometry.Curvature.AlgebraicForm
+import DifferentialGeometry.Geometry.Curvature.AlgebraicTensor
+import DifferentialGeometry.Geometry.Curvature.AlgebraicTensorMetric
 import DifferentialGeometry.Geometry.Curvature.Basic
 import DifferentialGeometry.Geometry.Curvature.Bianchi
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete

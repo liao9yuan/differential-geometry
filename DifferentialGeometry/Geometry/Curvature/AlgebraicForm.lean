@@ -32,6 +32,32 @@ namespace IsAlgCurvForm
 
 variable {B B' : V → V → V → V → Real}
 
+theorem zero : IsAlgCurvForm (fun _ _ _ _ : V => 0) where
+  add_left := by simp
+  smul_left := by simp
+  anti_first := by simp
+  anti_last := by simp
+  bianchi := by simp
+
+theorem add (hB : IsAlgCurvForm B) (hB' : IsAlgCurvForm B') :
+    IsAlgCurvForm (fun x y z w => B x y z w + B' x y z w) where
+  add_left x₁ x₂ y z w := by
+    rw [hB.add_left, hB'.add_left]
+    ring
+  smul_left a x y z w := by
+    rw [hB.smul_left, hB'.smul_left]
+    ring
+  anti_first x y z w := by
+    rw [hB.anti_first, hB'.anti_first]
+    ring
+  anti_last x y z w := by
+    rw [hB.anti_last, hB'.anti_last]
+    ring
+  bianchi x y z w := by
+    have h := hB.bianchi x y z w
+    have h' := hB'.bianchi x y z w
+    linarith
+
 /-- Algebraic curvature forms are symmetric under swapping the two pairs. -/
 theorem pair_swap (hB : IsAlgCurvForm B) (x y z w : V) :
     B x y z w = B z w x y := by
