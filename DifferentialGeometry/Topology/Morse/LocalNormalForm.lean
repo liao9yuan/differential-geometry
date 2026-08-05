@@ -804,6 +804,91 @@ noncomputable def morsePartialDerivCLE (p' : MorseModel (n + 1) →L[ℝ] ℝ)
     (show Function.Bijective (morsePartialDeriv p') from
       ⟨morsePartialDeriv_injective p' h₀, morsePartialDeriv_surjective p' h₀⟩)).toContinuousLinearEquiv
 
+theorem hasFDerivAt_morsePartialMap (f : MorseModel (n + 1) → ℝ)
+    (hdf : DifferentiableAt ℝ (morsePartial f) 0)
+    (h₀ : fderiv ℝ (morsePartial f) 0 morseE0 ≠ 0) :
+    HasFDerivAt (morsePartialMap f)
+      (morsePartialDerivCLE (fderiv ℝ (morsePartial f) 0) h₀ :
+        MorseModel (n + 1) →L[ℝ] MorseModel (n + 1)) 0 := by
+  have hcons : HasFDerivAt (fun p : ℝ × MorseModel n => morseConsLinearCLM p)
+      morseConsLinearCLM (morsePartial f 0, morseTail (0 : MorseModel (n + 1))) :=
+    morseConsLinearCLM.hasFDerivAt
+  have hhead : HasFDerivAt (fun x : MorseModel (n + 1) => morsePartial f x)
+      (fderiv ℝ (morsePartial f) 0) 0 := hdf.hasFDerivAt
+  have htail : HasFDerivAt (fun x : MorseModel (n + 1) => morseTail x) morseTailProj 0 :=
+    hasFDerivAt_morseTailProj
+  have hpair : HasFDerivAt (fun x => (morsePartial f x, morseTail x))
+      ((fderiv ℝ (morsePartial f) 0).prod morseTailProj) 0 :=
+    HasFDerivAt.prodMk hhead htail
+  have hcomp : HasFDerivAt (fun x => morseConsLinearCLM (morsePartial f x, morseTail x))
+      (morseConsLinearCLM.comp ((fderiv ℝ (morsePartial f) 0).prod morseTailProj)) 0 :=
+    HasFDerivAt.comp 0 (hg := hcons) (hf := hpair)
+  have heq : (morseConsLinearCLM.comp ((fderiv ℝ (morsePartial f) 0).prod morseTailProj)) =
+      (morsePartialDerivCLE (fderiv ℝ (morsePartial f) 0) h₀ :
+        MorseModel (n + 1) →L[ℝ] MorseModel (n + 1)) := by
+    ext v
+    simp [morseConsLinearCLM, morseConsLinear, morseTailProj, morsePartialDerivCLE,
+      morsePartialDeriv]
+  simpa [morsePartialMap, heq, Function.comp_def] using hcomp
+
+theorem isLocalHomeomorphAt_morsePartialMap (f : MorseModel (n + 1) → ℝ)
+    (hdf : DifferentiableAt ℝ (morsePartial f) 0)
+    (hcont : ContDiffAt ℝ 1 (morsePartial f) 0)
+    (h₀ : fderiv ℝ (morsePartial f) 0 morseE0 ≠ 0) :
+    ∃ φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)),
+      (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f ∧ 0 ∈ φ.source := by
+  have hcont : ContDiffAt ℝ 1 (morsePartialMap f) 0 := by
+    have hhead : ContDiffAt ℝ 1 (morsePartial f) 0 := hcont
+    have htail : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => morseTail x) 0 := by
+      simpa [morseTail, morseTailProj] using
+        ((morseTailProj.contDiff.contDiffAt : ContDiffAt ℝ ⊤ (fun x => morseTailProj x) 0).of_le
+          (by decide : (1 : WithTop ℕ∞) ≤ ⊤))
+    have hpair : ContDiffAt ℝ 1 (fun x => (morsePartial f x, morseTail x)) 0 :=
+      ContDiffAt.prodMk hhead htail
+    have hcons : ContDiffAt ℝ 1 (fun p : ℝ × MorseModel n => morseConsLinearCLM p)
+        (morsePartial f 0, morseTail (0 : MorseModel (n + 1))) := by
+      exact ((morseConsLinearCLM.contDiff.contDiffAt : ContDiffAt ℝ ⊤ (fun p => morseConsLinearCLM p)
+        (morsePartial f 0, morseTail (0 : MorseModel (n + 1)))).of_le
+        (by decide : (1 : WithTop ℕ∞) ≤ ⊤))
+    have hcomp : ContDiffAt ℝ 1
+        (fun x => morseConsLinearCLM (morsePartial f x, morseTail x)) 0 :=
+      ContDiffAt.comp 0 hcons hpair
+    simpa [morsePartialMap, Function.comp_def] using hcomp
+  let φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)) :=
+    ContDiffAt.toOpenPartialHomeomorph (f := morsePartialMap f)
+      (f' := morsePartialDerivCLE (fderiv ℝ (morsePartial f) 0) h₀)
+      hcont (hasFDerivAt_morsePartialMap f hdf h₀) (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+  refine ⟨φ, ?_, ?_⟩
+  · rw [ContDiffAt.toOpenPartialHomeomorph_coe]
+  · exact ContDiffAt.mem_toOpenPartialHomeomorph_source _ _ _
+
+noncomputable def morseCriticalSection (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (x' : MorseModel n) : ℝ :=
+  morseHead (φ.symm (morseCons (0 : ℝ) x'))
+
+theorem morseCriticalSection_eq (f : MorseModel (n + 1) → ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    {x' : MorseModel n} (hy : morseCons (0 : ℝ) x' ∈ φ.target) :
+    morsePartial f (morseCons (morseCriticalSection φ x') x') = 0 := by
+  have hrinv : φ (φ.symm (morseCons (0 : ℝ) x')) = morseCons (0 : ℝ) x' := φ.right_inv hy
+  have hmorse : morsePartialMap f (φ.symm (morseCons (0 : ℝ) x')) = morseCons (0 : ℝ) x' := by
+    simpa [hφ] using hrinv
+  have hhead : morsePartial f (φ.symm (morseCons (0 : ℝ) x')) = 0 := by
+    have := congrArg morseHead hmorse
+    simpa [morsePartialMap, morseHead, morseCons] using this
+  have htail : morseTail (φ.symm (morseCons (0 : ℝ) x')) = x' := by
+    have := congrArg morseTail hmorse
+    funext j
+    simpa [morsePartialMap, morseTail, morseCons] using congrFun this j
+  have hdecomp : φ.symm (morseCons (0 : ℝ) x') =
+      morseCons (morseHead (φ.symm (morseCons (0 : ℝ) x'))) x' := by
+    rw [morse_cons_decompose (φ.symm (morseCons (0 : ℝ) x'))]
+    exact congrArg (morseCons (morseHead (φ.symm (morseCons (0 : ℝ) x')))) htail
+  rw [morseCriticalSection]
+  rw [← hdecomp]
+  exact hhead
+
 end Completion
 
 omit [FiniteDimensional ℝ E] in
