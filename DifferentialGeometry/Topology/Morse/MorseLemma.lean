@@ -1156,6 +1156,40 @@ noncomputable def morseSectionCompletion (f : MorseModel (n + 1) → ℝ)
   morseCons (Real.sqrt (2 * |morseSectionB f φ x|) *
       (morseHead x - morseCriticalSection φ (morseTail x))) (morseTail x)
 
+theorem contDiffAt_morseSectionB {n : ℕ} (f : MorseModel (n + 1) → ℝ)
+    (hf : ContDiff ℝ 3 f) (hcrit : fderiv ℝ f 0 = 0)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    (hsrc : (0 : MorseModel (n + 1)) ∈ φ.source)
+    (hcontσ : ContDiffAt ℝ 1 (morseSection φ) (0 : MorseModel n)) :
+    ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => morseSectionB f φ x) 0 := by
+  have htail : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => morseTail x) 0 := by
+    simpa [morseTail, morseTailProj] using
+      ((morseTailProj.contDiff.contDiffAt : ContDiffAt ℝ ⊤ (fun x => morseTailProj x) 0).of_le
+        (by decide : (1 : WithTop ℕ∞) ≤ ⊤))
+  have hσtail : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => morseSection φ (morseTail x)) 0 := by
+    simpa using (ContDiffAt.comp 0 hcontσ htail)
+  have hg : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => (morseSection φ (morseTail x), x)) 0 := by
+    exact ContDiffAt.prodMk hσtail (contDiffAt_id : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => x) 0)
+  have hσ0 : morseSection φ (morseTail (0 : MorseModel (n + 1))) = 0 := by
+    simpa using (morseSection_zero f φ hφ hcrit hsrc : morseSection φ (0 : MorseModel n) = 0)
+  have hfam : ContDiffAt ℝ 1 (fun p : MorseModel (n + 1) × MorseModel (n + 1) =>
+      morseTaylorBilinAt f p.1 p.2) (morseSection φ (morseTail (0 : MorseModel (n + 1))), 0) := by
+    rw [hσ0]
+    exact contDiffAt_morseTaylorBilinAt f hf 0 0
+  have hfam' : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) =>
+      morseTaylorBilinAt f (morseSection φ (morseTail x)) x) 0 := by
+    simpa [hσ0] using
+      (ContDiffAt.comp (x := 0)
+        (g := fun p : MorseModel (n + 1) × MorseModel (n + 1) => morseTaylorBilinAt f p.1 p.2)
+        (f := fun x : MorseModel (n + 1) => (morseSection φ (morseTail x), x))
+        (hg := hfam) (hf := hg))
+  have happly : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) =>
+      (morseTaylorBilinAt f (morseSection φ (morseTail x)) x) morseE0) 0 :=
+    hfam'.clm_apply (contDiffAt_const : ContDiffAt ℝ 1 (fun _ : MorseModel (n + 1) => morseE0) 0)
+  simpa [morseSectionB] using
+    (happly.clm_apply (contDiffAt_const : ContDiffAt ℝ 1 (fun _ : MorseModel (n + 1) => morseE0) 0))
+
 theorem contDiffAt_morseSectionCompletion {n : ℕ} (f : MorseModel (n + 1) → ℝ)
     (hf : ContDiff ℝ 3 f) (hcrit : fderiv ℝ f 0 = 0)
     (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
@@ -1186,11 +1220,7 @@ theorem contDiffAt_morseSectionCompletion {n : ℕ} (f : MorseModel (n + 1) → 
         (f := fun x : MorseModel (n + 1) => (morseSection φ (morseTail x), x))
         (hg := hfam) (hf := hg))
   have hB : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => morseSectionB f φ x) 0 := by
-    have happly : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) =>
-        (morseTaylorBilinAt f (morseSection φ (morseTail x)) x) morseE0) 0 :=
-      hfam'.clm_apply (contDiffAt_const : ContDiffAt ℝ 1 (fun _ : MorseModel (n + 1) => morseE0) 0)
-    simpa [morseSectionB] using
-      (happly.clm_apply (contDiffAt_const : ContDiffAt ℝ 1 (fun _ : MorseModel (n + 1) => morseE0) 0))
+    exact contDiffAt_morseSectionB f hf hcrit φ hφ hsrc hcontσ
   have hsqrt : ContDiffAt ℝ 1 (fun x => Real.sqrt (2 * |morseSectionB f φ x|)) 0 := by
     have habs : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => |morseSectionB f φ x|) 0 :=
       ContDiffAt.comp 0 (contDiffAt_abs hB0) hB
@@ -1240,6 +1270,216 @@ theorem contDiffAt_morseSectionCompletion {n : ℕ} (f : MorseModel (n + 1) → 
       (Real.sqrt (2 * |morseSectionB f φ x|) * (morseHead x - morseCriticalSection φ (morseTail x)),
         morseTail x)) 0
   simpa [morseSectionB] using hcomp
+
+theorem morseSection_fderiv_head_zero {n : ℕ} (f : MorseModel (n + 1) → ℝ) (hg : ContDiff ℝ 2 f)
+    (hcrit : fderiv ℝ f 0 = 0)
+    (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    (hsrc : (0 : MorseModel (n + 1)) ∈ φ.source)
+    (hdf : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n))
+    (hdfp : DifferentiableAt ℝ (morsePartial f) (morseSection φ (0 : MorseModel n)))
+    (w : Fin (n + 1) → ℝ) (hw : ∀ i, w i = -1 ∨ w i = 1)
+    (hdiag : ∀ u v : MorseModel (n + 1),
+      (fderiv ℝ (fderiv ℝ f) 0 u) v = ∑ i : Fin (n + 1), w i * u i * v i) :
+    (morseHeadProj.comp (fderiv ℝ (morseSection φ) (0 : MorseModel n))) = 0 := by
+  apply ContinuousLinearMap.ext
+  intro v
+  have hcomplete := morseSection_fderiv_complete f a φ hφ hsrc hcrit hdf hdfp (u := v)
+  have hσ0 : morseSection φ (0 : MorseModel n) = 0 := morseSection_zero f φ hφ hcrit hsrc
+  rw [hσ0] at hcomplete
+  have hfd0 := fderiv_morsePartial_e0 (n := n) f hg
+  have hh : (fderiv ℝ (fderiv ℝ f) 0) (fderiv ℝ (morseSection φ) 0 v) morseE0 =
+      w 0 * morseHead (fderiv ℝ (morseSection φ) 0 v) := by
+    have hd := hdiag (fderiv ℝ (morseSection φ) 0 v) morseE0
+    have hsum : (∑ i : Fin (n + 1), w i * (fderiv ℝ (morseSection φ) 0 v) i * morseE0 i) =
+        w 0 * morseHead (fderiv ℝ (morseSection φ) 0 v) := by
+      rw [Fin.sum_univ_succ]
+      simp [morseE0, morseHead]
+    rw [hd, hsum]
+  have happ : (fderiv ℝ (morsePartial f) 0) (fderiv ℝ (morseSection φ) 0 v) = 0 := hcomplete
+  have hmul : w 0 * morseHead (fderiv ℝ (morseSection φ) 0 v) = 0 := by
+    rw [← hh]
+    exact (congrFun hfd0 (fderiv ℝ (morseSection φ) 0 v)).symm.trans hcomplete
+  have hw0 : w 0 ≠ 0 := by
+    rcases hw 0 with h | h <;> simp [h]
+  have hhead0 : morseHead (fderiv ℝ (morseSection φ) 0 v) = 0 := by
+    exact (mul_eq_zero.mp hmul).resolve_left hw0
+  simpa [ContinuousLinearMap.comp_apply, morseHeadProj, morseHead] using hhead0
+
+noncomputable def morseSectionCompletionDeriv {n : ℕ} (f : MorseModel (n + 1) → ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1))) :
+    MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) :=
+  (morseConsLinearCLM : (ℝ × MorseModel n) →L[ℝ] MorseModel (n + 1)).comp
+    ((Real.sqrt (2 * |morseSectionB f φ 0|) •
+        (morseHeadProj : MorseModel (n + 1) →L[ℝ] ℝ)).prod
+      (morseTailProj : MorseModel (n + 1) →L[ℝ] MorseModel n))
+
+theorem morseSectionCompletionDeriv_apply {n : ℕ} (f : MorseModel (n + 1) → ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1))) (v : MorseModel (n + 1)) :
+    morseSectionCompletionDeriv f φ v =
+      morseCons (Real.sqrt (2 * |morseSectionB f φ 0|) * morseHead v) (morseTail v) := by
+  simp [morseSectionCompletionDeriv, morseConsLinearCLM, morseConsLinear, morseHeadProj,
+    morseTailProj, morseHead, morseCons, ContinuousLinearMap.comp_apply]
+
+theorem morseSectionCompletionDeriv_injective {n : ℕ} (f : MorseModel (n + 1) → ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hB0 : morseSectionB f φ 0 ≠ 0) :
+    Function.Injective (morseSectionCompletionDeriv f φ) := by
+  intro u v h
+  have hu := congrArg morseHead h
+  have hv := congrArg morseTail h
+  have hq : Real.sqrt (2 * |morseSectionB f φ 0|) ≠ 0 := by
+    have : |morseSectionB f φ 0| ≠ 0 := abs_ne_zero.mpr hB0
+    positivity
+  have hu' : morseHead u = morseHead v := by
+    rw [morseSectionCompletionDeriv_apply f φ u, morseSectionCompletionDeriv_apply f φ v] at hu
+    have hmul : Real.sqrt (2 * |morseSectionB f φ 0|) * morseHead u =
+        Real.sqrt (2 * |morseSectionB f φ 0|) * morseHead v := by
+      simpa [morseCons, morseHead] using hu
+    exact mul_left_cancel₀ hq hmul
+  have hv' : morseTail u = morseTail v := by
+    rw [morseSectionCompletionDeriv_apply f φ u, morseSectionCompletionDeriv_apply f φ v] at hv
+    simpa [morseCons, morseTail] using hv
+  rw [morse_cons_decompose u, morse_cons_decompose v]
+  rw [hu', hv']
+
+theorem morseSectionCompletionDeriv_surjective {n : ℕ} (f : MorseModel (n + 1) → ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hB0 : morseSectionB f φ 0 ≠ 0) :
+    Function.Surjective (morseSectionCompletionDeriv f φ) := by
+  intro y
+  let s : ℝ := Real.sqrt (2 * |morseSectionB f φ 0|)
+  have hs : s ≠ 0 := by
+    have : |morseSectionB f φ 0| ≠ 0 := abs_ne_zero.mpr hB0
+    positivity
+  let v : MorseModel (n + 1) := morseCons (morseHead y / s) (morseTail y)
+  refine ⟨v, ?_⟩
+  rw [morseSectionCompletionDeriv_apply f φ v]
+  have hmv : morseHead v = morseHead y / s := by simp [v, morseHead, morseCons]
+  have htv : morseTail v = morseTail y := by
+    simp [v, morseCons_tail]
+  rw [hmv, htv]
+  dsimp [s]
+  ext i
+  cases i using Fin.cases with
+  | zero =>
+      simp [morseCons, morseHead]
+      field_simp [hs]
+  | succ j =>
+      simp [morseCons, morseTail, Fin.cons_succ]
+
+noncomputable def morseSectionCompletionDerivCLE {n : ℕ} (f : MorseModel (n + 1) → ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hB0 : morseSectionB f φ 0 ≠ 0) : MorseModel (n + 1) ≃L[ℝ] MorseModel (n + 1) :=
+  (LinearEquiv.ofBijective (morseSectionCompletionDeriv f φ)
+    (show Function.Bijective (morseSectionCompletionDeriv f φ) from
+      ⟨morseSectionCompletionDeriv_injective f φ hB0,
+        morseSectionCompletionDeriv_surjective f φ hB0⟩)).toContinuousLinearEquiv
+
+theorem hasFDerivAt_morseSectionCompletion {n : ℕ} (f : MorseModel (n + 1) → ℝ)
+    (hf : ContDiff ℝ 3 f) (hcrit : fderiv ℝ f 0 = 0)
+    (a : MorseModel (n + 1) → MorseModel (n + 1) →L[ℝ] MorseModel (n + 1) →L[ℝ] ℝ)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    (hsrc : (0 : MorseModel (n + 1)) ∈ φ.source)
+    (hdf : DifferentiableAt ℝ (morseSection φ) (0 : MorseModel n))
+    (hdfp : DifferentiableAt ℝ (morsePartial f) (morseSection φ (0 : MorseModel n)))
+    (hcontσ : ContDiffAt ℝ 1 (morseSection φ) (0 : MorseModel n))
+    (w : Fin (n + 1) → ℝ) (hw : ∀ i, w i = -1 ∨ w i = 1)
+    (hdiag : ∀ u v : MorseModel (n + 1),
+      (fderiv ℝ (fderiv ℝ f) 0 u) v = ∑ i : Fin (n + 1), w i * u i * v i)
+    (hB0 : morseSectionB f φ 0 ≠ 0) :
+    HasFDerivAt (morseSectionCompletion f φ)
+      (morseSectionCompletionDerivCLE f φ hB0 : MorseModel (n + 1) →L[ℝ] MorseModel (n + 1)) 0 := by
+  have hBcont : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => morseSectionB f φ x) 0 :=
+    contDiffAt_morseSectionB f hf hcrit φ hφ hsrc hcontσ
+  have hB' : HasFDerivAt (fun x : MorseModel (n + 1) => morseSectionB f φ x)
+      (fderiv ℝ (fun x : MorseModel (n + 1) => morseSectionB f φ x) 0) 0 :=
+    (hBcont.differentiableAt (by decide : (1 : WithTop ℕ∞) ≠ 0)).hasFDerivAt
+  have hsd : HasFDerivAt (fun x : MorseModel (n + 1) => morseCriticalSection φ (morseTail x))
+      (0 : MorseModel (n + 1) →L[ℝ] ℝ) 0 := by
+    have hσd : HasFDerivAt (fun x : MorseModel (n + 1) => morseSection φ (morseTail x))
+        ((fderiv ℝ (morseSection φ) (0 : MorseModel n)).comp
+          (morseTailProj : MorseModel (n + 1) →L[ℝ] MorseModel n)) 0 :=
+      HasFDerivAt.comp (x := 0) (g := morseSection φ)
+        (g' := fderiv ℝ (morseSection φ) (0 : MorseModel n))
+        (f := fun x : MorseModel (n + 1) => morseTail x) (f' := morseTailProj)
+        (hg := hdf.hasFDerivAt) (hf := hasFDerivAt_morseTailProj)
+    have hheadc : HasFDerivAt (fun x : MorseModel (n + 1) => morseHead (morseSection φ (morseTail x)))
+        (morseHeadProj.comp ((fderiv ℝ (morseSection φ) (0 : MorseModel n)).comp
+          (morseTailProj : MorseModel (n + 1) →L[ℝ] MorseModel n))) 0 :=
+      HasFDerivAt.comp (x := 0) (g := fun y : MorseModel (n + 1) => morseHead y) (g' := morseHeadProj)
+        (f := fun x : MorseModel (n + 1) => morseSection φ (morseTail x))
+        (f' := (fderiv ℝ (morseSection φ) (0 : MorseModel n)).comp
+          (morseTailProj : MorseModel (n + 1) →L[ℝ] MorseModel n))
+        (hg := by simpa [morseHead, morseHeadProj] using
+          (morseHeadProj.hasFDerivAt : HasFDerivAt (fun y : MorseModel (n + 1) => morseHeadProj y)
+            morseHeadProj (morseSection φ (morseTail (0 : MorseModel (n + 1))))))
+        (hf := hσd)
+    have hh := morseSection_fderiv_head_zero f
+      (hf.of_le (by decide : (2 : WithTop ℕ∞) ≤ (3 : WithTop ℕ∞))) hcrit a φ hφ hsrc hdf hdfp w hw hdiag
+    have hzero : morseHeadProj.comp ((fderiv ℝ (morseSection φ) (0 : MorseModel n)).comp morseTailProj) = 0 := by
+      rw [← ContinuousLinearMap.comp_assoc, hh]
+      simp
+    have hsc : HasFDerivAt (fun x : MorseModel (n + 1) => morseHead (morseSection φ (morseTail x)))
+        (0 : MorseModel (n + 1) →L[ℝ] ℝ) 0 := by
+      simpa [hzero] using hheadc
+    convert hsc using 1
+  have hgsub : HasFDerivAt (fun x : MorseModel (n + 1) =>
+      morseHead x - morseCriticalSection φ (morseTail x)) morseHeadProj 0 := by
+    have hsub := HasFDerivAt.sub hasFDerivAt_morseHead hsd
+    simpa using hsub
+  have hsqrt' : HasFDerivAt (fun x : MorseModel (n + 1) => Real.sqrt (2 * |morseSectionB f φ x|))
+      (fderiv ℝ (fun x : MorseModel (n + 1) => Real.sqrt (2 * |morseSectionB f φ x|)) 0) 0 := by
+    have habs : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => |morseSectionB f φ x|) 0 :=
+      ContDiffAt.comp 0 (contDiffAt_abs hB0) hBcont
+    have hBcont' : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => 2 * |morseSectionB f φ x|) 0 :=
+      ContDiffAt.mul (contDiffAt_const : ContDiffAt ℝ 1 (fun _ : MorseModel (n + 1) => (2 : ℝ)) 0) habs
+    have hne : (2 * |morseSectionB f φ 0|) ≠ 0 := by
+      have : |morseSectionB f φ 0| ≠ 0 := abs_ne_zero.mpr hB0
+      positivity
+    have hsqrtc : ContDiffAt ℝ 1 (fun x : MorseModel (n + 1) => Real.sqrt (2 * |morseSectionB f φ x|)) 0 :=
+      (Real.contDiffAt_sqrt hne).comp 0 hBcont'
+    exact (hsqrtc.differentiableAt (by decide : (1 : WithTop ℕ∞) ≠ 0)).hasFDerivAt
+  have hg0 : morseHead (0 : MorseModel (n + 1)) - morseCriticalSection φ (morseTail (0 : MorseModel (n + 1))) = 0 := by
+    have htail0 : morseTail (0 : MorseModel (n + 1)) = 0 := by
+      funext i
+      simp [morseTail]
+    have hsec : φ.symm (morseCons (0 : ℝ) (morseTail (0 : MorseModel (n + 1)))) = 0 := by
+      rw [htail0]
+      simpa [morseSection] using (morseSection_zero f φ hφ hcrit hsrc : morseSection φ (0 : MorseModel n) = 0)
+    simp [morseCriticalSection, hsec]
+  have hmul' : HasFDerivAt (fun x : MorseModel (n + 1) =>
+      Real.sqrt (2 * |morseSectionB f φ x|) * (morseHead x - morseCriticalSection φ (morseTail x)))
+      (Real.sqrt (2 * |morseSectionB f φ 0|) • (morseHeadProj : MorseModel (n + 1) →L[ℝ] ℝ)) 0 := by
+    have hmul0 := HasFDerivAt.mul hsqrt' hgsub
+    simpa [hg0, smul_zero, add_zero, zero_add] using hmul0
+  have hpair : HasFDerivAt (fun x : MorseModel (n + 1) =>
+      (Real.sqrt (2 * |morseSectionB f φ x|) * (morseHead x - morseCriticalSection φ (morseTail x)),
+        morseTail x))
+      ((Real.sqrt (2 * |morseSectionB f φ 0|) • (morseHeadProj : MorseModel (n + 1) →L[ℝ] ℝ)).prod
+        (morseTailProj : MorseModel (n + 1) →L[ℝ] MorseModel n)) 0 :=
+    hmul'.prodMk hasFDerivAt_morseTailProj
+  have hcons' : HasFDerivAt (fun p : ℝ × MorseModel n => morseConsLinearCLM p) morseConsLinearCLM
+      (Real.sqrt (2 * |morseSectionB f φ 0|) * (morseHead (0 : MorseModel (n + 1)) -
+        morseCriticalSection φ (morseTail (0 : MorseModel (n + 1)))), morseTail (0 : MorseModel (n + 1))) := by
+    exact morseConsLinearCLM.hasFDerivAt
+  have hcomp' : HasFDerivAt (morseSectionCompletion f φ)
+      (morseConsLinearCLM.comp ((Real.sqrt (2 * |morseSectionB f φ 0|) •
+        (morseHeadProj : MorseModel (n + 1) →L[ℝ] ℝ)).prod
+        (morseTailProj : MorseModel (n + 1) →L[ℝ] MorseModel n))) 0 := by
+    have hc := HasFDerivAt.comp 0 (g := fun p : ℝ × MorseModel n => morseConsLinearCLM p)
+      (g' := morseConsLinearCLM)
+      (f := fun x : MorseModel (n + 1) =>
+        (Real.sqrt (2 * |morseSectionB f φ x|) * (morseHead x - morseCriticalSection φ (morseTail x)),
+          morseTail x))
+      (f' := (Real.sqrt (2 * |morseSectionB f φ 0|) • (morseHeadProj : MorseModel (n + 1) →L[ℝ] ℝ)).prod
+        (morseTailProj : MorseModel (n + 1) →L[ℝ] MorseModel n))
+      (hg := hcons') (hf := hpair)
+    simpa [morseSectionCompletion, morseSectionB, Function.comp_def] using hc
+  simpa [morseSectionCompletionDerivCLE, morseSectionCompletionDeriv, ContinuousLinearMap.comp_apply]
+    using hcomp'
 
 end Completion
 
