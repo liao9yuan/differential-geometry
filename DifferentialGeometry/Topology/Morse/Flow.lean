@@ -1,6 +1,9 @@
+import DifferentialGeometry.Analysis.ODE.IntegralCurveTransport
 import DifferentialGeometry.Topology.Morse.Defs
 import DifferentialGeometry.Topology.Morse.LocalNormalForm
 import Mathlib.Geometry.Manifold.Diffeomorph
+
+open DifferentialGeometry.Analysis.ODE
 
 namespace DifferentialGeometry.Topology.Morse
 
@@ -27,6 +30,67 @@ structure GradientLikeFlow (I : ModelWithCorners ℝ E H) (f : M → ℝ) (a b :
     extends UnitSpeedFlow f a b where
   contMDiffAt : ∀ t : ℝ, ∀ x : M, ContMDiffAt I I (⊤ : WithTop ℕ∞) (fun x : M => flow t x) x
   contMDiffAt_t : ∀ x : M, ContMDiffAt 𝓘(ℝ, ℝ) I (⊤ : WithTop ℕ∞) (fun t : ℝ => flow t x) (0 : ℝ)
+
+noncomputable def curveAt (v : (x : M) → TangentSpace I x)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) : ℝ → M :=
+  Classical.choose (hcomplete x)
+
+theorem curveAt_zero (v : (x : M) → TangentSpace I x)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) :
+    curveAt v hcomplete x 0 = x :=
+  (Classical.choose_spec (hcomplete x)).1
+
+theorem curveAt_integralCurve (v : (x : M) → TangentSpace I x)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) :
+    IsMIntegralCurve (curveAt v hcomplete x) v :=
+  (Classical.choose_spec (hcomplete x)).2
+
+noncomputable def unitSpeedFlow_of_vectorField [T2Space M] (I : ModelWithCorners ℝ E H)
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hdf : ∀ x, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) :
+    UnitSpeedFlow f a b where
+  flow := fun t x => curveAt v hcomplete x t
+  flow_zero := by
+    intro x
+    exact curveAt_zero v hcomplete x
+  flow_add := by
+    intro s t
+    funext x
+    have hγt : IsMIntegralCurve (curveAt v hcomplete x ∘ (· + t)) v :=
+      IsMIntegralCurve.comp_add (curveAt_integralCurve v hcomplete x) t
+    have hEq := integralCurve_eq_of_agree (t₀ := 0) v hv hγt
+      (curveAt_integralCurve v hcomplete (curveAt v hcomplete x t)) (by
+        simp [curveAt_zero v hcomplete (curveAt v hcomplete x t)])
+    have hmain : curveAt v hcomplete (curveAt v hcomplete x t) s = curveAt v hcomplete x (s + t) := by
+      have hh := congrFun hEq s
+      simpa [Function.comp_def] using hh.symm
+    change curveAt v hcomplete x (s + t) = curveAt v hcomplete (curveAt v hcomplete x t) s
+    exact hmain.symm
+  strip_eq_sub := by
+    intro x t ht hst
+    have hEq := f_eq_sub_of_integralCurve f hf v hdf (curveAt_integralCurve v hcomplete x) t
+    rw [curveAt_zero v hcomplete x] at hEq
+    exact hEq
+  strip_eq_add_back := by
+    intro x t ht h1 h2
+    have hEq := f_eq_sub_of_integralCurve f hf v hdf (curveAt_integralCurve v hcomplete x) (-t)
+    have hx0 : curveAt v hcomplete x 0 = x := curveAt_zero v hcomplete x
+    simpa [hx0, sub_neg_eq_add] using hEq
+  rate_bound := by
+    intro x t ht
+    have hEq := f_eq_sub_of_integralCurve f hf v hdf (curveAt_integralCurve v hcomplete x) t
+    have hx0 : curveAt v hcomplete x 0 = x := curveAt_zero v hcomplete x
+    constructor
+    · rw [curveAt_zero v hcomplete x] at hEq
+      exact le_of_eq hEq.symm
+    · have h1 : f (curveAt v hcomplete x t) ≤ f x := by
+        rw [hEq, hx0]
+        linarith
+      simpa using h1
 
 def GradientLikeFlow.toDiffeomorph (Φ : GradientLikeFlow I f a b) (t : ℝ) :
     Diffeomorph I I M M (⊤ : WithTop ℕ∞) where
