@@ -1020,6 +1020,61 @@ theorem morseReducedFn_nondegenerate (f : MorseModel (n + 1) → ℝ) (hg : Cont
     rw [hbilin]
   rwa [hQ]
 
+theorem section_second_order (f : MorseModel (n + 1) → ℝ) (hg : ContDiff ℝ 2 f)
+    (φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)))
+    (hφ : (φ : MorseModel (n + 1) → MorseModel (n + 1)) = morsePartialMap f)
+    {x : MorseModel (n + 1)} (hx' : morseCons (0 : ℝ) (morseTail x) ∈ φ.target) :
+    f x - f (morseSection φ (morseTail x)) =
+      (morseHead x - morseCriticalSection φ (morseTail x)) ^ 2 *
+        (morseTaylorBilinAt f (morseSection φ (morseTail x)) x) morseE0 morseE0 := by
+  let σ : MorseModel (n + 1) := morseSection φ (morseTail x)
+  let d : ℝ := morseHead x - morseCriticalSection φ (morseTail x)
+  have hlin := second_order_taylor_bilin_at f hg σ x
+  have hx : x = morseCons (morseHead x) (morseTail x) := morse_cons_decompose x
+  have hσ : σ = morseCons (morseCriticalSection φ (morseTail x)) (morseTail x) := by
+    dsimp [σ]
+    rw [morse_cons_decompose (morseSection φ (morseTail x))]
+    rw [morseSection_head_critical f φ hφ (x' := morseTail x) hx']
+    rw [morseSection_tail f φ hφ hx']
+  have hsub : ∀ (a b : ℝ) (t : MorseModel n),
+      morseCons a t - morseCons b t = morseCons (a - b) (0 : MorseModel n) := by
+    intro a b t
+    calc
+      morseCons a t - morseCons b t = morseCons a t + (-1 : ℝ) • morseCons b t := by
+        simp [sub_eq_add_neg]
+      _ = morseCons a t + morseCons (-b) ((-1 : ℝ) • t) := by
+        rw [← morseCons_smul (-1 : ℝ) b t]
+        simp
+      _ = morseCons (a - b) (0 : MorseModel n) := by
+        rw [← morseCons_add a (-b) t ((-1 : ℝ) • t)]
+        simp [sub_eq_add_neg]
+  have hvec : x - σ = d • morseE0 := by
+    rw [hx, hσ]
+    rw [hsub (morseHead x) (morseCriticalSection φ (morseTail x)) (morseTail x)]
+    have hz : morseCons (0 : ℝ) (0 : MorseModel n) = (0 : MorseModel (n + 1)) := by
+      funext i
+      cases i using Fin.cases <;> simp [morseCons]
+    have hsmul : morseCons d (0 : MorseModel n) = d • morseE0 := by
+      rw [morse_cons_smul' d (0 : MorseModel n)]
+      simp [hz]
+    simpa [d] using hsmul
+  have hfd : (fderiv ℝ f σ) (x - σ) = 0 := by
+    rw [hvec]
+    have hp : (fderiv ℝ f σ) morseE0 = 0 := by
+      have hσ' : σ = morseCons (morseCriticalSection φ (morseTail x)) (morseTail x) := hσ
+      rw [hσ']
+      have hp' := morseCriticalSection_eq f φ hφ hx'
+      simpa [morsePartial] using hp'
+    rw [map_smul]
+    simp [hp, smul_eq_mul]
+  have hquad : (morseTaylorBilinAt f σ x) (x - σ) (x - σ) =
+      d ^ 2 * (morseTaylorBilinAt f σ x) morseE0 morseE0 := by
+    rw [hvec]
+    simp [map_smul, smul_eq_mul]
+    ring
+  rw [hfd, hquad] at hlin
+  simpa [σ, d] using hlin
+
 end Completion
 
 end DifferentialGeometry.Topology.Morse
