@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.Crossover
 import DifferentialGeometry.Analysis.Parabolic.Moser.LocalBoundedness
+import DifferentialGeometry.Analysis.Parabolic.Moser.ReverseHolder
 
 noncomputable section
 

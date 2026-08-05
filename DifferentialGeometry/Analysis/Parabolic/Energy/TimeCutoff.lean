@@ -16,6 +16,12 @@ def timeCutoff (a b t : ℝ) : ℝ :=
 def timeCutoffDeriv (a b t : ℝ) : ℝ :=
   deriv Real.smoothTransition ((t - a) / (b - a)) / (b - a)
 
+def backwardTimeCutoff (a b t : ℝ) : ℝ :=
+  1 - timeCutoff a b t
+
+def backwardTimeCutoffDeriv (a b t : ℝ) : ℝ :=
+  -timeCutoffDeriv a b t
+
 theorem contDiff_timeCutoff (a b : ℝ) :
     ContDiff ℝ ∞ (timeCutoff a b) := by
   have haffine : ContDiff ℝ ∞ (fun t : ℝ => (t - a) / (b - a)) :=
@@ -45,9 +51,28 @@ theorem hasDerivAt_timeCutoff (a b t : ℝ) :
   simpa only [timeCutoff, timeCutoffDeriv, div_eq_mul_inv, one_mul] using
     houter.comp t hinner
 
+theorem contDiff_backwardTimeCutoff (a b : ℝ) :
+    ContDiff ℝ ∞ (backwardTimeCutoff a b) :=
+  contDiff_const.sub (contDiff_timeCutoff a b)
+
+theorem contDiff_backwardTimeCutoffDeriv (a b : ℝ) :
+    ContDiff ℝ ∞ (backwardTimeCutoffDeriv a b) :=
+  (contDiff_timeCutoffDeriv a b).neg
+
+theorem hasDerivAt_backwardTimeCutoff (a b t : ℝ) :
+    HasDerivAt (backwardTimeCutoff a b) (backwardTimeCutoffDeriv a b t) t := by
+  simpa only [backwardTimeCutoff, backwardTimeCutoffDeriv, zero_sub] using
+    (hasDerivAt_const t 1).sub (hasDerivAt_timeCutoff a b t)
+
 theorem timeCutoff_mem_Icc (a b t : ℝ) :
     timeCutoff a b t ∈ Icc (0 : ℝ) 1 :=
   ⟨Real.smoothTransition.nonneg _, Real.smoothTransition.le_one _⟩
+
+theorem backwardTimeCutoff_mem_Icc (a b t : ℝ) :
+    backwardTimeCutoff a b t ∈ Icc (0 : ℝ) 1 := by
+  have h := timeCutoff_mem_Icc a b t
+  change 0 ≤ 1 - timeCutoff a b t ∧ 1 - timeCutoff a b t ≤ 1
+  exact ⟨by linarith [h.2], by linarith [h.1]⟩
 
 theorem timeCutoff_eq_zero_of_le {a b t : ℝ} (hab : a < b) (ht : t ≤ a) :
     timeCutoff a b t = 0 := by
@@ -64,9 +89,32 @@ theorem timeCutoff_eq_one_of_le {a b t : ℝ} (hab : a < b) (ht : b ≤ t) :
   rw [one_le_div (sub_pos.mpr hab)]
   linarith
 
+theorem backwardTimeCutoff_eq_one_of_le
+    {a b t : ℝ} (hab : a < b) (ht : t ≤ a) :
+    backwardTimeCutoff a b t = 1 := by
+  rw [backwardTimeCutoff, timeCutoff_eq_zero_of_le hab ht, sub_zero]
+
+theorem backwardTimeCutoff_eq_zero_of_le
+    {a b t : ℝ} (hab : a < b) (ht : b ≤ t) :
+    backwardTimeCutoff a b t = 0 := by
+  rw [backwardTimeCutoff, timeCutoff_eq_one_of_le hab ht, sub_self]
+
+theorem backwardTimeCutoff_eq_zero (b : ℝ) {a : ℝ} (hab : a < b) :
+    backwardTimeCutoff a b b = 0 :=
+  backwardTimeCutoff_eq_zero_of_le hab le_rfl
+
 theorem timeCutoffDeriv_nonneg {a b : ℝ} (hab : a < b) (t : ℝ) :
     0 ≤ timeCutoffDeriv a b t := by
   exact div_nonneg Real.smoothTransition.monotone.deriv_nonneg (sub_pos.mpr hab).le
+
+theorem backwardTimeCutoffDeriv_nonpos {a b : ℝ} (hab : a < b) (t : ℝ) :
+    backwardTimeCutoffDeriv a b t ≤ 0 := by
+  exact neg_nonpos.mpr (timeCutoffDeriv_nonneg hab t)
+
+theorem neg_backwardTimeCutoffDeriv_nonneg
+    {a b : ℝ} (hab : a < b) (t : ℝ) :
+    0 ≤ -backwardTimeCutoffDeriv a b t := by
+  exact neg_nonneg.mpr (backwardTimeCutoffDeriv_nonpos hab t)
 
 private theorem exists_smoothTransition_deriv_bound :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ s : ℝ, |deriv Real.smoothTransition s| ≤ C := by
@@ -116,6 +164,11 @@ theorem timeCutoffDeriv_le
     {a b : ℝ} (hab : a < b) (t : ℝ) :
     timeCutoffDeriv a b t ≤ timeCutoffDerivConstant / (b - a) :=
   (Classical.choose_spec exists_timeCutoffDeriv_bound).2 hab t
+
+theorem neg_backwardTimeCutoffDeriv_le
+    {a b : ℝ} (hab : a < b) (t : ℝ) :
+    -backwardTimeCutoffDeriv a b t ≤ timeCutoffDerivConstant / (b - a) := by
+  simpa only [backwardTimeCutoffDeriv, neg_neg] using timeCutoffDeriv_le hab t
 
 theorem timeCutoff_mass_error_intervalIntegral_le
     {mass error outerMass : ℝ → ℝ}
@@ -199,6 +252,94 @@ theorem timeCutoff_mass_error_intervalIntegral_le
     _ ≤ (D + 4 * K) * ∫ s in a..t₁, outerMass s :=
       mul_le_mul_of_nonneg_left houter_mono hcoefficient
     _ ≤ (D + 4 * K) * L :=
+      mul_le_mul_of_nonneg_left houterMass_le hcoefficient
+
+theorem backwardTimeCutoff_mass_error_intervalIntegral_le
+    {mass error outerMass : ℝ → ℝ}
+    {a t t₁ b C D K L : ℝ}
+    (hat : a ≤ t) (htt₁ : t ≤ t₁) (ht₁b : t₁ < b)
+    (hC : 0 ≤ C) (hD : 0 ≤ D) (hK : 0 ≤ K)
+    (hmass : ContinuousOn mass (Icc a b))
+    (herror : ContinuousOn error (Icc a b))
+    (houterMass : ContinuousOn outerMass (Icc a b))
+    (hmass_nonneg : ∀ s ∈ Icc a b, 0 ≤ mass s)
+    (herror_nonneg : ∀ s ∈ Icc a b, 0 ≤ error s)
+    (houterMass_nonneg : ∀ s ∈ Icc a b, 0 ≤ outerMass s)
+    (hmass_le : ∀ s ∈ Icc a b, mass s ≤ outerMass s)
+    (herror_le : ∀ s ∈ Icc a b, error s ≤ K * outerMass s)
+    (hderiv_le : ∀ s ∈ Icc a b, -backwardTimeCutoffDeriv t₁ b s ≤ D)
+    (houterMass_le : (∫ s in a..b, outerMass s) ≤ L) :
+    (∫ s in t..b,
+      (-backwardTimeCutoffDeriv t₁ b s) * mass s +
+        backwardTimeCutoff t₁ b s * (C * error s)) ≤
+      (D + C * K) * L := by
+  have htb : t ≤ b := htt₁.trans ht₁b.le
+  let lhs : ℝ → ℝ := fun s =>
+    (-backwardTimeCutoffDeriv t₁ b s) * mass s +
+      backwardTimeCutoff t₁ b s * (C * error s)
+  let rhs : ℝ → ℝ := fun s => (D + C * K) * outerMass s
+  have hsubset : Icc t b ⊆ Icc a b := fun s hs => ⟨hat.trans hs.1, hs.2⟩
+  have hlhs_cont : ContinuousOn lhs (Icc t b) := by
+    exact ((contDiff_backwardTimeCutoffDeriv t₁ b).neg.continuous.continuousOn.mul
+      (hmass.mono hsubset)).add
+        ((contDiff_backwardTimeCutoff t₁ b).continuous.continuousOn.mul
+          (continuousOn_const.mul (herror.mono hsubset)))
+  have hrhs_cont : ContinuousOn rhs (Icc t b) :=
+    continuousOn_const.mul (houterMass.mono hsubset)
+  have hlhs_int : IntervalIntegrable lhs volume t b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le htb] using hlhs_cont
+  have hrhs_int : IntervalIntegrable rhs volume t b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le htb] using hrhs_cont
+  have hpoint : ∀ s ∈ Icc t b, lhs s ≤ rhs s := by
+    intro s hs
+    have hs' := hsubset hs
+    have htime := backwardTimeCutoff_mem_Icc t₁ b s
+    have htime_term :
+        (-backwardTimeCutoffDeriv t₁ b s) * mass s ≤ D * outerMass s := by
+      calc
+        _ ≤ D * mass s :=
+          mul_le_mul_of_nonneg_right (hderiv_le s hs') (hmass_nonneg s hs')
+        _ ≤ D * outerMass s :=
+          mul_le_mul_of_nonneg_left (hmass_le s hs') hD
+    have herror_term :
+        backwardTimeCutoff t₁ b s * (C * error s) ≤
+          C * K * outerMass s := by
+      calc
+        _ ≤ 1 * (C * error s) :=
+          mul_le_mul_of_nonneg_right htime.2
+            (mul_nonneg hC (herror_nonneg s hs'))
+        _ = C * error s := one_mul _
+        _ ≤ C * (K * outerMass s) :=
+          mul_le_mul_of_nonneg_left (herror_le s hs') hC
+        _ = C * K * outerMass s := by ring
+    dsimp only [lhs, rhs]
+    linarith
+  have hmono : (∫ s in t..b, lhs s) ≤ ∫ s in t..b, rhs s :=
+    intervalIntegral.integral_mono_on htb hlhs_int hrhs_int hpoint
+  have houter_int : IntervalIntegrable outerMass volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le (hat.trans htb)] using houterMass
+  have houter_mono : (∫ s in t..b, outerMass s) ≤ ∫ s in a..b, outerMass s := by
+    exact intervalIntegral.integral_mono_interval hat htb le_rfl
+      (by
+        filter_upwards [ae_restrict_mem measurableSet_Ioc] with s hs
+        exact houterMass_nonneg s ⟨hs.1.le, hs.2⟩)
+      houter_int
+  have hcoefficient : 0 ≤ D + C * K :=
+    add_nonneg hD (mul_nonneg hC hK)
+  calc
+    (∫ s in t..b,
+      (-backwardTimeCutoffDeriv t₁ b s) * mass s +
+        backwardTimeCutoff t₁ b s * (C * error s)) =
+        ∫ s in t..b, lhs s := rfl
+    _ ≤ ∫ s in t..b, rhs s := hmono
+    _ = (D + C * K) * ∫ s in t..b, outerMass s := by
+      simp only [rhs, intervalIntegral.integral_const_mul]
+    _ ≤ (D + C * K) * ∫ s in a..b, outerMass s :=
+      mul_le_mul_of_nonneg_left houter_mono hcoefficient
+    _ ≤ (D + C * K) * L :=
       mul_le_mul_of_nonneg_left houterMass_le hcoefficient
 
 theorem weight_mul_sub_eq_intervalIntegral
