@@ -866,6 +866,126 @@ theorem reciprocal_local_boundedness_of_supersolution_rpow
   rw [hvpower, hright] at hpower
   exact hpower
 
+theorem localizedSpacetimeRpowNorm_inv_reverse_holder_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho inner : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p q a τ t₁ c d : ℝ}
+    (hp : 0 < p) (hpq : p ≤ q)
+    (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hac : a ≤ c) (hτc : τ < c) (hcd : c ≤ d) (hdt₁ : d < t₁)
+    (hinner : ∀ x, inner.toFun x ≠ 0 → 1 < rho.toFun x)
+    (hcutoff : ∀ x,
+      inner.toFun x ^ 2 ≤ (spatialMoserCutoff rho 0).toFun x ^ 2)
+    (hmeasure : localizedSpacetimeMeasure (I := I) (M := M)
+      (spatialMoserCutoff rho 0) a t₁ ≠ 0)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    let B := moserLocalBoundFactor (I := I) (M := M)
+      g hdim rho 2 a τ t₁
+    localizedSpacetimeRpowNorm (I := I) (M := M) inner
+        (fun t x => (u t x)⁻¹) q c d ≤
+      (B ^ (2 : ℝ)) ^ (1 / p - 1 / q) *
+        localizedSpacetimeRpowNorm (I := I) (M := M)
+          (spatialMoserCutoff rho 0) (fun t x => (u t x)⁻¹) p a t₁ := by
+  let f : ℝ → M → ℝ := fun t x => (u t x)⁻¹
+  let v : ℝ → M → ℝ := fun t x => u t x ^ (-p / 2)
+  let B := moserLocalBoundFactor (I := I) (M := M)
+    g hdim rho 2 a τ t₁
+  let D := moserLocalizedMass (I := I) (M := M) (Module.finrank ℝ E)
+    rho v 2 a τ t₁ 0
+  let N := localizedSpacetimeRpowNorm (I := I) (M := M)
+    (spatialMoserCutoff rho 0) f p a t₁
+  let S := B ^ (2 / p) * D ^ (1 / p)
+  change localizedSpacetimeRpowNorm (I := I) (M := M) inner f q c d ≤
+    (B ^ (2 : ℝ)) ^ (1 / p - 1 / q) * N
+  have hf : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => f z.1 z.2) := by
+    simpa only [f, Real.rpow_neg_one] using
+      contMDiff_rpow_of_pos hu hpos (-1 : ℝ)
+  have hfpos : ∀ t x, 0 < f t x := fun t x => inv_pos.mpr (hpos t x)
+  have hD_eq : D = localizedSpacetimeRpowMoment (I := I) (M := M)
+      (spatialMoserCutoff rho 0) f p a t₁ := by
+    calc
+      D = localizedSpacetimeRpowMoment (I := I) (M := M)
+          (spatialMoserCutoff rho 0) u (-p) a t₁ := by
+        simpa only [D, v, neg_div] using
+          (moserLocalizedMass_rpow_half_eq_localizedSpacetimeRpowMoment
+            (I := I) (M := M) (Module.finrank ℝ E) rho u hu hpos
+              (p := -p) (τ := τ) (haτ.le.trans hτt₁))
+      _ = localizedSpacetimeRpowMoment (I := I) (M := M)
+          (spatialMoserCutoff rho 0) f p a t₁ := by
+        symm
+        simpa only [f] using
+          (localizedSpacetimeRpowMoment_inv (I := I) (M := M)
+            (spatialMoserCutoff rho 0) u p a t₁)
+  have hD : 0 < D := by
+    rw [hD_eq]
+    exact localizedSpacetimeRpowMoment_pos (I := I) (M := M)
+      (spatialMoserCutoff rho 0) f hf.continuous hfpos p a t₁ hmeasure
+  have hB : 0 < B := Real.exp_pos _
+  have hS : 0 < S := mul_pos
+    (Real.rpow_pos_of_pos hB _) (Real.rpow_pos_of_pos hD _)
+  have hpoint : ∀ t ∈ Icc c d, ∀ x, inner.toFun x ≠ 0 → f t x ≤ S := by
+    intro t ht x hx
+    have htInterior : t ∈ Ioo τ t₁ :=
+      ⟨hτc.trans_le ht.1, ht.2.trans_lt hdt₁⟩
+    change (u t x)⁻¹ ≤ B ^ (2 / p) * D ^ (1 / p)
+    simpa only [B, D, v] using
+      (reciprocal_local_boundedness_of_supersolution_rpow
+        (I := I) (M := M) g hdim rho u hu hpos hp haτ hτt₁ hpde
+          t htInterior x (hinner x hx))
+  have hinterpolation := localizedSpacetimeRpowNorm_le_of_bound_on_cutoff
+    (I := I) (M := M) inner f hf.continuous hfpos hp hpq hcd hS hpoint
+  have hmono : localizedSpacetimeRpowNorm (I := I) (M := M) inner f p c d ≤ N := by
+    simpa only [N] using
+      (localizedSpacetimeRpowNorm_mono_measure
+        (I := I) (M := M) f hf.continuous hfpos hp hac hdt₁.le hcutoff)
+  have hratio : 0 ≤ p / q := div_nonneg hp.le (hp.trans_le hpq).le
+  have hinnerNorm : 0 ≤
+      localizedSpacetimeRpowNorm (I := I) (M := M) inner f p c d :=
+    localizedSpacetimeRpowNorm_nonneg (I := I) (M := M)
+      inner f (fun t x => (hfpos t x).le) p c d
+  have hN : 0 < N := by
+    dsimp only [N, localizedSpacetimeRpowNorm]
+    rw [← hD_eq]
+    exact Real.rpow_pos_of_pos hD _
+  have hfirst :
+      localizedSpacetimeRpowNorm (I := I) (M := M) inner f p c d ^ (p / q) ≤
+        N ^ (p / q) := Real.rpow_le_rpow hinnerNorm hmono hratio
+  have hsratio : 0 ≤ 1 - p / q := by
+    exact sub_nonneg.mpr ((div_le_one (hp.trans_le hpq)).2 hpq)
+  have hDroot : D ^ (1 / p) = N := by
+    dsimp only [N, localizedSpacetimeRpowNorm]
+    rw [← hD_eq]
+  calc
+    localizedSpacetimeRpowNorm (I := I) (M := M) inner f q c d ≤
+        localizedSpacetimeRpowNorm (I := I) (M := M) inner f p c d ^ (p / q) *
+          S ^ (1 - p / q) := hinterpolation
+    _ ≤ N ^ (p / q) * S ^ (1 - p / q) :=
+      mul_le_mul_of_nonneg_right hfirst (Real.rpow_nonneg hS.le _)
+    _ = (B ^ (2 : ℝ)) ^ (1 / p - 1 / q) * N := by
+      dsimp only [S]
+      rw [hDroot, Real.mul_rpow (Real.rpow_nonneg hB.le _) hN.le]
+      rw [← Real.rpow_mul hB.le, ← Real.rpow_mul hB.le]
+      have hsum : p / q + (1 - p / q) = 1 := by ring
+      calc
+        N ^ (p / q) *
+              (B ^ (2 / p * (1 - p / q)) * N ^ (1 - p / q)) =
+            B ^ (2 / p * (1 - p / q)) *
+              (N ^ (p / q) * N ^ (1 - p / q)) := by ring
+        _ = B ^ (2 / p * (1 - p / q)) * N := by
+          rw [← Real.rpow_add_of_nonneg hN.le hratio hsratio, hsum,
+            Real.rpow_one]
+        _ = B ^ (2 * (1 / p - 1 / q)) * N := by
+          congr 1
+          field_simp [hp.ne', (hp.trans_le hpq).ne']
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.Oscillation
 import DifferentialGeometry.Analysis.Integration.Holder.Weighted
+import DifferentialGeometry.Analysis.Integration.Measure.CompactParametricIntegral
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.MeasureTheory.Integral.Prod
@@ -67,6 +68,29 @@ def localizedSpacetimeRpowNorm {g : SmoothRiemannianMetric I M}
     (cutoff : SmoothScalar g) (u : ℝ → M → ℝ)
     (p a b : ℝ) : ℝ :=
   localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b ^ (1 / p)
+
+omit [CompactSpace M] in
+theorem localizedSpacetimeRpowMoment_inv
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ) (p a b : ℝ) :
+    localizedSpacetimeRpowMoment (I := I) (M := M) cutoff
+        (fun t x => (u t x)⁻¹) p a b =
+      localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u (-p) a b := by
+  unfold localizedSpacetimeRpowMoment
+  apply integral_congr_ae
+  filter_upwards with z
+  exact (Real.rpow_neg_eq_inv_rpow (u z.1 z.2) p).symm
+
+omit [CompactSpace M] in
+theorem localizedSpacetimeRpowNorm_inv
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ) (p a b : ℝ) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff
+        (fun t x => (u t x)⁻¹) p a b =
+      localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u (-p) a b ^
+        (1 / p) := by
+  unfold localizedSpacetimeRpowNorm
+  rw [localizedSpacetimeRpowMoment_inv]
 
 theorem localizedSpacetimeMeasure_mono
     {g : SmoothRiemannianMetric I M} {cutoff outer : SmoothScalar g}
@@ -298,6 +322,118 @@ theorem localizedSpacetimeRpowMoment_eq_intervalIntegral_of_continuous_pos
     (I := I) (M := M) cutoff u hab
       (integrable_localizedSpacetimeRpow_of_continuous_pos
         (I := I) (M := M) cutoff u hu hpos p a b)
+
+theorem localizedSpacetimeRpowNorm_le_of_bound_on_cutoff
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : Continuous (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p q a b C : ℝ} (hp : 0 < p) (hpq : p ≤ q) (hab : a ≤ b)
+    (hC : 0 < C)
+    (hbound : ∀ t ∈ Icc a b, ∀ x, cutoff.toFun x ≠ 0 → u t x ≤ C) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u q a b ≤
+      localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ^ (p / q) *
+        C ^ (1 - p / q) := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  let P : ℝ → ℝ := fun t =>
+    ∫ x, cutoff.toFun x ^ 2 * u t x ^ p ∂μ
+  let Q : ℝ → ℝ := fun t =>
+    ∫ x, cutoff.toFun x ^ 2 * u t x ^ q ∂μ
+  let Mp := localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b
+  let Mq := localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u q a b
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hq : 0 < q := hp.trans_le hpq
+  have hjointP : Continuous (fun z : ℝ × M =>
+      cutoff.toFun z.2 ^ 2 * u z.1 z.2 ^ p) :=
+    ((cutoff.smooth.continuous.comp continuous_snd).pow 2).mul
+      (hu.rpow_const fun z => Or.inl (hpos z.1 z.2).ne')
+  have hjointQ : Continuous (fun z : ℝ × M =>
+      cutoff.toFun z.2 ^ 2 * u z.1 z.2 ^ q) :=
+    ((cutoff.smooth.continuous.comp continuous_snd).pow 2).mul
+      (hu.rpow_const fun z => Or.inl (hpos z.1 z.2).ne')
+  have hP_cont : ContinuousOn P (Icc a b) := by
+    simpa only [P, μ] using
+      (DifferentialGeometry.Integral.Measure.integral_contOn_cpt
+        (K := Icc a b) μ
+        (fun t x => cutoff.toFun x ^ 2 * u t x ^ p)
+        isCompact_Icc hjointP.continuousOn)
+  have hQ_cont : ContinuousOn Q (Icc a b) := by
+    simpa only [Q, μ] using
+      (DifferentialGeometry.Integral.Measure.integral_contOn_cpt
+        (K := Icc a b) μ
+        (fun t x => cutoff.toFun x ^ 2 * u t x ^ q)
+        isCompact_Icc hjointQ.continuousOn)
+  have hP_int : IntervalIntegrable P volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hP_cont
+  have hQ_int : IntervalIntegrable Q volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hQ_cont
+  have hpoint : ∀ t ∈ Icc a b, Q t ≤ C ^ (q - p) * P t := by
+    intro t ht
+    have hP_slice : Continuous (fun x : M => cutoff.toFun x ^ 2 * u t x ^ p) :=
+      (cutoff.smooth.continuous.pow 2).mul
+        ((hu.comp (continuous_const.prodMk continuous_id)).rpow_const
+          fun x => Or.inl (hpos t x).ne')
+    have hQ_slice : Continuous (fun x : M => cutoff.toFun x ^ 2 * u t x ^ q) :=
+      (cutoff.smooth.continuous.pow 2).mul
+        ((hu.comp (continuous_const.prodMk continuous_id)).rpow_const
+          fun x => Or.inl (hpos t x).ne')
+    change (∫ x, cutoff.toFun x ^ 2 * u t x ^ q ∂μ) ≤
+      C ^ (q - p) * ∫ x, cutoff.toFun x ^ 2 * u t x ^ p ∂μ
+    rw [← integral_const_mul]
+    apply integral_mono
+      (hQ_slice.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _))
+      ((continuous_const.mul hP_slice).integrable_of_hasCompactSupport
+        (HasCompactSupport.of_compactSpace _))
+    intro x
+    by_cases hcutoff : cutoff.toFun x = 0
+    · simp [hcutoff]
+    have hupow : u t x ^ (q - p) ≤ C ^ (q - p) :=
+      Real.rpow_le_rpow (hpos t x).le (hbound t ht x hcutoff)
+        (sub_nonneg.mpr hpq)
+    have hweight : 0 ≤ cutoff.toFun x ^ 2 * u t x ^ p :=
+      mul_nonneg (sq_nonneg _) (Real.rpow_nonneg (hpos t x).le _)
+    calc
+      cutoff.toFun x ^ 2 * u t x ^ q =
+          (cutoff.toFun x ^ 2 * u t x ^ p) * u t x ^ (q - p) := by
+        rw [show q = p + (q - p) by ring, Real.rpow_add (hpos t x)]
+        ring_nf
+      _ ≤ (cutoff.toFun x ^ 2 * u t x ^ p) * C ^ (q - p) :=
+        mul_le_mul_of_nonneg_left hupow hweight
+      _ = C ^ (q - p) * (cutoff.toFun x ^ 2 * u t x ^ p) := by ring
+  have hmoment : Mq ≤ C ^ (q - p) * Mp := by
+    dsimp only [Mq, Mp]
+    rw [localizedSpacetimeRpowMoment_eq_intervalIntegral_of_continuous_pos
+      (I := I) (M := M) cutoff u hu hpos hab]
+    rw [localizedSpacetimeRpowMoment_eq_intervalIntegral_of_continuous_pos
+      (I := I) (M := M) cutoff u hu hpos hab]
+    change (∫ t in a..b, Q t) ≤ C ^ (q - p) * ∫ t in a..b, P t
+    rw [← intervalIntegral.integral_const_mul]
+    exact intervalIntegral.integral_mono_on hab hQ_int
+      (hP_int.const_mul _) hpoint
+  have hMp : 0 ≤ Mp := localizedSpacetimeRpowMoment_nonneg
+    (I := I) (M := M) cutoff u (fun t x => (hpos t x).le) p a b
+  have hMq : 0 ≤ Mq := localizedSpacetimeRpowMoment_nonneg
+    (I := I) (M := M) cutoff u (fun t x => (hpos t x).le) q a b
+  have hroot := Real.rpow_le_rpow hMq hmoment (div_nonneg zero_le_one hq.le)
+  change Mq ^ (1 / q) ≤ (Mp ^ (1 / p)) ^ (p / q) * C ^ (1 - p / q)
+  calc
+    Mq ^ (1 / q) ≤ (C ^ (q - p) * Mp) ^ (1 / q) := hroot
+    _ = C ^ (1 - p / q) * Mp ^ (1 / q) := by
+      rw [Real.mul_rpow (Real.rpow_nonneg hC.le _) hMp]
+      rw [← Real.rpow_mul hC.le]
+      congr 1
+      field_simp [hq.ne']
+    _ = (Mp ^ (1 / p)) ^ (p / q) * C ^ (1 - p / q) := by
+      rw [← Real.rpow_mul hMp]
+      have hexponent : 1 / p * (p / q) = 1 / q := by
+        field_simp [hp.ne', hq.ne']
+      rw [hexponent]
+      ring
 
 theorem localizedSpacetimeMeasure_real_superlevel
     {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
