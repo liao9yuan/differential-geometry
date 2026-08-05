@@ -1886,6 +1886,33 @@ theorem exists_parabolicNondivergenceBufferedBallInteriorGaugeFactor_lt
     (hpos.and (hlt.and hsmall)).exists
   exact ⟨epsilon, hepsilon, hepsdelta, hfactor⟩
 
+omit [Nonempty n] in
+theorem exists_parabolicNondivergenceBufferedBallInteriorGaugeFactor_mul_lt_one
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (alpha : NNReal) (halpha1 : alpha < 1)
+    (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Kb Bb : n → NNReal) (Kc Bc delta : NNReal) (hdelta : 0 < delta)
+    (A Ka omega : n → n → NNReal) {T : Real} (hT : 0 ≤ T)
+    (B : NNReal) (hB : 0 < B) :
+    ∃ epsilon : NNReal, 0 < epsilon ∧ epsilon < delta ∧
+      parabolicNondivergenceBufferedBallInteriorGaugeFactor
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Kb Bb Kc Bc epsilon delta A Ka omega T * B < 1 := by
+  obtain ⟨epsilon, hepsilon, hepsdelta, hfactor⟩ :=
+    exists_parabolicNondivergenceBufferedBallInteriorGaugeFactor_lt
+      a p0 hA alpha halpha1 aTime t₀ t₁ bTime center hr hrR
+      Kb Bb Kc Bc delta hdelta A Ka omega hT B⁻¹ (inv_pos.mpr hB)
+  refine ⟨epsilon, hepsilon, hepsdelta, ?_⟩
+  calc
+    parabolicNondivergenceBufferedBallInteriorGaugeFactor
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Kb Bb Kc Bc epsilon delta A Ka omega T * B < B⁻¹ * B :=
+      mul_lt_mul_of_pos_right hfactor hB
+    _ = 1 := inv_mul_cancel₀ hB.ne'
+
 theorem parabolic_nondivergence_ball_interior_schauder_estimate_of_buffered_interpolation_of_local_source_estimates_of_small_freeze_defect
     {alpha Ksource Kc Bsource Bc C M : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
