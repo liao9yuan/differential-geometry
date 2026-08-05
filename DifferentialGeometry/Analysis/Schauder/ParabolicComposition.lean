@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Schauder.C2Composition
+import DifferentialGeometry.Analysis.Schauder.CompactRegularity
 
 noncomputable section
 
@@ -369,6 +369,38 @@ theorem eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le_of_li
       (fun p => hQR p.2)
   exact eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le
     hQR hmapLip hphi hDphiHolder hD2phiHolder hDphiNorm hD2phiNorm hu hsource
+
+theorem exists_eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le
+    {s : Set V} (hs : IsCompact s) (hsconv : Convex Real s)
+    {phi : V → W} (hphi : ContDiff Real 3 phi)
+    {alpha : NNReal} (halpha : alpha ≤ 1) (J : Set Real)
+    {R : Set (ParabolicPoint W)} {u : Real → W → F}
+    (hQR : MapsTo (parabolicMap phi) (parabolicCylinder J s) R)
+    (hu : IsParabolicC2On R u) {C : NNReal}
+    (hsource : eParabolicC2HolderGaugeWithLowerJetsOn alpha R u ≤ C) :
+    ∃ Cpull : NNReal,
+      eParabolicC2HolderGaugeWithLowerJetsOn alpha
+          (parabolicCylinder J s) (parabolicSpatialPullback phi u) ≤
+        Cpull := by
+  obtain ⟨L, K1, K2, M1, M2, hL, hphiLip, hDphiHolder,
+      hD2phiHolder, hDphiNorm, hD2phiNorm⟩ :=
+    exists_c2Pullback_schauder_bounds_on_compact_convex
+      hs hsconv hphi halpha J
+  have hparabolicLip : LipschitzOnWith L (parabolicMap phi)
+      (parabolicCylinder J s) :=
+    lipschitzOnWith_parabolicMap hL hphiLip J
+  have hmapLip : LipschitzWith L
+      (fun p : parabolicCylinder J s =>
+        (⟨parabolicMap phi p.1, hQR p.2⟩ : R)) := by
+    exact LipschitzWith.subtype_mk
+      (lipschitzOnWith_iff_restrict.mp hparabolicLip)
+      (fun p => hQR p.2)
+  refine ⟨parabolicSpatialPullbackGaugeWithLowerJetsConst
+    alpha L C K1 K2 M1 M2, ?_⟩
+  exact eParabolicC2HolderGaugeWithLowerJetsOn_parabolicSpatialPullback_le
+    hQR hmapLip
+    (fun _ _ => hphi.contDiffAt.of_le (by norm_num))
+    hDphiHolder hD2phiHolder hDphiNorm hD2phiNorm hu hsource
 
 end DifferentialGeometry.Analysis.Schauder
 

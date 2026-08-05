@@ -122,6 +122,30 @@ theorem lipschitzWith_parabolicMap
   · exact (hphi.dist_le_mul p.space q.space).trans
       (mul_le_mul_of_nonneg_left (le_max_right _ _) L.coe_nonneg)
 
+theorem lipschitzOnWith_parabolicMap
+    {L : NNReal} (hL : 1 ≤ L) {phi : X → Y} {s : Set X}
+    (hphi : LipschitzOnWith L phi s) (J : Set Real) :
+    LipschitzOnWith L (parabolicMap phi) (parabolicCylinder J s) := by
+  apply LipschitzOnWith.of_dist_le_mul
+  intro p hp q hq
+  rw [← parabolicPoint_time_space p, ← parabolicPoint_time_space q,
+    parabolicMap_apply, parabolicMap_apply, dist_parabolicPoint,
+    dist_parabolicPoint]
+  apply max_le
+  · calc
+      |p.time - q.time| ^ (1 / 2 : Real) ≤
+          max (|p.time - q.time| ^ (1 / 2 : Real)) (dist p.space q.space) :=
+        le_max_left _ _
+      _ = 1 * max (|p.time - q.time| ^ (1 / 2 : Real))
+          (dist p.space q.space) := by rw [one_mul]
+      _ ≤ L * max (|p.time - q.time| ^ (1 / 2 : Real))
+          (dist p.space q.space) := by
+        exact mul_le_mul_of_nonneg_right (by exact_mod_cast hL)
+          ((Real.rpow_nonneg (abs_nonneg _) _).trans
+            (le_max_left _ _))
+  · exact (hphi.dist_le_mul p.space hp.2 q.space hq.2).trans
+      (mul_le_mul_of_nonneg_left (le_max_right _ _) L.coe_nonneg)
+
 theorem lipschitzOnWith_parabolicToProduct_Icc
     (a b : Real) (Omega : Set X) :
     LipschitzOnWith (parabolicTimeSlabLipschitzConst a b)

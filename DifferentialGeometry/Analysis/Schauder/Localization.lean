@@ -558,6 +558,22 @@ theorem eParabolicC2HolderGaugeOn_congr
   unfold eParabolicC2HolderGaugeOn
   rw [hsum, hsupTime, hholderSpatial, hholderTime]
 
+theorem eParabolicC2HolderGaugeWithLowerJetsOn_congr
+    {Q : Set (ParabolicPoint V)} {u v : Real → V → F}
+    (hvalue : Set.EqOn (fun p ↦ u p.time p.space)
+      (fun p ↦ v p.time p.space) Q)
+    (hspatial : ∀ j ≤ 2,
+      Set.EqOn (parabolicSpatialJet j u) (parabolicSpatialJet j v) Q)
+    (htime : Set.EqOn (parabolicTimeDerivative u)
+      (parabolicTimeDerivative v) Q)
+    (alpha : NNReal) :
+    eParabolicC2HolderGaugeWithLowerJetsOn alpha Q u =
+      eParabolicC2HolderGaugeWithLowerJetsOn alpha Q v := by
+  unfold eParabolicC2HolderGaugeWithLowerJetsOn
+  rw [eParabolicC2HolderGaugeOn_congr hspatial htime alpha,
+    eHolderSeminormOn_congr hvalue alpha,
+    eHolderSeminormOn_congr (hspatial 1 (by norm_num)) alpha]
+
 theorem eParabolicC2HolderGaugeOn_congr_of_eqOn_open
     {Q U : Set (ParabolicPoint V)} (hU : IsOpen U) (hQU : Q ⊆ U)
     {u v : Real → V → F}
@@ -589,6 +605,30 @@ theorem eParabolicC2HolderGaugeOn_congr_of_eqOn_open
       exact huv ht
     unfold parabolicTimeDerivative
     rw [heq.fderiv_eq]
+
+theorem eParabolicC2HolderGaugeWithLowerJetsOn_congr_of_eqOn_open
+    {Q U : Set (ParabolicPoint V)} (hU : IsOpen U) (hQU : Q ⊆ U)
+    {u v : Real → V → F}
+    (huv : Set.EqOn (fun p ↦ u p.time p.space)
+      (fun p ↦ v p.time p.space) U)
+    (alpha : NNReal) :
+    eParabolicC2HolderGaugeWithLowerJetsOn alpha Q u =
+      eParabolicC2HolderGaugeWithLowerJetsOn alpha Q v := by
+  unfold eParabolicC2HolderGaugeWithLowerJetsOn
+  rw [eParabolicC2HolderGaugeOn_congr_of_eqOn_open hU hQU huv alpha,
+    eHolderSeminormOn_congr (huv.mono hQU) alpha]
+  congr 1
+  apply eHolderSeminormOn_congr
+  intro p hp
+  have hmap : ContinuousAt
+      (fun x ↦ parabolicPoint p.time x) p.space := by
+    unfold parabolicPoint
+    exact (continuous_const.prodMk continuous_id).continuousAt
+  have heq : u p.time =ᶠ[nhds p.space] v p.time := by
+    filter_upwards [hmap (hU.mem_nhds (hQU hp))] with x hx
+    exact huv hx
+  unfold parabolicSpatialJet
+  exact (Filter.EventuallyEq.iteratedFDeriv Real heq 1).eq_of_nhds
 
 theorem eContDiffHolderGaugeOn_congr_of_eqOn_open
     {s U : Set V} (hU : IsOpen U) (hsU : s ⊆ U)

@@ -694,6 +694,24 @@ theorem holderWith_parabolic_const_time
     simpa only [NNReal.one_rpow, mul_one, Function.comp_apply, one_mul] using hfull
   exact (hfull'.holderOnWith (parabolicCylinder J Set.univ)).holderWith
 
+theorem holderWith_restrict_parabolic_const_time
+    {V F : Type*} [PseudoMetricSpace V] [PseudoMetricSpace F]
+    {alpha K : NNReal} {s : Set V} (f : V → F)
+    (hf : HolderWith K alpha (s.restrict f)) (J : Set Real) :
+    HolderWith K alpha
+      ((parabolicCylinder J s).restrict (fun p => f p.space)) := by
+  have hsnd : LipschitzWith 1
+      (fun p : parabolicCylinder J s =>
+        (⟨p.1.space, p.2.2⟩ : s)) := by
+    exact LipschitzWith.subtype_mk
+      ((LipschitzWith.prod_snd : LipschitzWith 1
+        (fun p : ParabolicPoint V => p.space)).restrict
+          (parabolicCylinder J s))
+      (fun p => p.2.2)
+  have hcomp := hf.comp hsnd.holderWith
+  simpa only [NNReal.one_rpow, mul_one,
+    Function.comp_apply, Set.restrict_apply] using hcomp
+
 theorem holderWith_parabolic_const_space
     {V F : Type*} [PseudoMetricSpace V] [MetricSpace F]
     {alpha K : NNReal} {f : Real → F}

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Schauder.Composition
+import DifferentialGeometry.Analysis.Schauder.C2Composition
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 
 noncomputable section
@@ -101,6 +101,60 @@ theorem exists_norm_bound_and_holderWith_restrict_parabolicCylinder_Icc_of_contD
   refine ⟨C₀, Cα, ?_, hCα⟩
   intro p hp
   exact hC₀ (parabolicToProduct p) hp
+
+theorem exists_c2Pullback_schauder_bounds_on_compact_convex
+    {W : Type*} [NormedAddCommGroup W] [NormedSpace Real W]
+    {s : Set V} (hs : IsCompact s) (hsconv : Convex Real s)
+    {phi : V → W} (hphi : ContDiff Real 3 phi)
+    {alpha : NNReal} (halpha : alpha ≤ 1) (J : Set Real) :
+    ∃ L K1 K2 M1 M2 : NNReal,
+      1 ≤ L ∧
+      LipschitzOnWith L phi s ∧
+      HolderWith K1 alpha
+        ((parabolicCylinder J s).restrict
+          (fun p => fderiv Real phi p.space)) ∧
+      HolderWith K2 alpha
+        ((parabolicCylinder J s).restrict
+          (fun p => hessianCurryEquiv V W
+            (iteratedFDeriv Real 2 phi p.space))) ∧
+      (∀ p ∈ parabolicCylinder J s, ‖fderiv Real phi p.space‖ ≤ M1) ∧
+      ∀ p ∈ parabolicCylinder J s,
+        ‖hessianCurryEquiv V W
+          (iteratedFDeriv Real 2 phi p.space)‖ ≤ M2 := by
+  obtain ⟨L0, hL0⟩ :=
+    hphi.contDiffOn.exists_lipschitzOnWith (by norm_num) hsconv hs
+  let L : NNReal := max 1 L0
+  have hL : 1 ≤ L := le_max_left _ _
+  have hLip : LipschitzOnWith L phi s := by
+    apply LipschitzOnWith.of_dist_le_mul
+    intro x hx y hy
+    exact (hL0.dist_le_mul x hx y hy).trans
+      (mul_le_mul_of_nonneg_right (by
+        exact_mod_cast (le_max_right (1 : NNReal) L0)) dist_nonneg)
+  have hD1 : ContDiff Real 1 (fderiv Real phi) :=
+    hphi.fderiv_right (by norm_num)
+  obtain ⟨M1, K1, hM1, hK1⟩ :=
+    exists_norm_bound_and_holderWith_restrict_of_contDiffOn_isCompact
+      hs hsconv hD1.contDiffOn halpha
+  have hD2 : ContDiff Real 1 (iteratedFDeriv Real 2 phi) :=
+    hphi.iteratedFDeriv_right (m := 1) (i := 2) (by norm_num)
+  obtain ⟨M2, K2, hM2, hK2raw⟩ :=
+    exists_norm_bound_and_holderWith_restrict_of_contDiffOn_isCompact
+      hs hsconv hD2.contDiffOn halpha
+  have hK2 : HolderWith K2 alpha
+      (s.restrict (fun x => hessianCurryEquiv V W
+        (iteratedFDeriv Real 2 phi x))) := by
+    have hcomp := (hessianCurryEquiv V W).lipschitz.holderWith.comp hK2raw
+    simpa only [NNReal.coe_one, NNReal.rpow_one, one_mul,
+      Function.comp_apply, Set.restrict_apply] using hcomp
+  refine ⟨L, K1, K2, M1, M2, hL, hLip, ?_, ?_, ?_, ?_⟩
+  · exact holderWith_restrict_parabolic_const_time _ hK1 J
+  · exact holderWith_restrict_parabolic_const_time _ hK2 J
+  · intro p hp
+    exact hM1 p.space hp.2
+  · intro p hp
+    rw [(hessianCurryEquiv V W).norm_map]
+    exact hM2 p.space hp.2
 
 end DifferentialGeometry.Analysis.Schauder
 
