@@ -486,6 +486,30 @@ theorem bombieriGiusti_summable_hole_filling
   exact bombieriGiusti_hole_filling_step hp₀ hc₀ (hthreshold k) (hmono k)
     (hreverseCost k) (hreverse k) (herror k)
 
+theorem bombieriGiusti_summable_threshold_hole_filling
+    {p₀ c₀ : ℝ} {β reverseCost : ℕ → ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀)
+    (hreverseCost : ∀ k, 1 ≤ reverseCost k)
+    (hβ_bdd : BddAbove (Set.range β))
+    (hmono : ∀ k, β k ≤ β (k + 1))
+    (hreverse : ∀ k,
+      bombieriGiustiThreshold p₀ c₀ (reverseCost k) < β (k + 1) →
+        let p := bombieriGiustiExponent p₀ c₀ (β (k + 1))
+        Real.exp (β k) ≤
+          reverseCost k ^ (1 / p - 1 / p₀) *
+            (2 ^ (1 / p) * Real.exp (β (k + 1) / 2)))
+    (hsummable : Summable (fun k : ℕ =>
+      (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4))) :
+    β 0 ≤ ∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+      (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4) := by
+  exact bombieriGiusti_summable_hole_filling hp₀ hc₀ hβ_bdd
+    (fun k => two_mul_le_bombieriGiustiThreshold hc₀.le (hreverseCost k))
+    hmono (fun k => zero_lt_one.trans_le (hreverseCost k)) hreverse
+    (fun k hk => bombieriGiusti_log_error_le_of_threshold_lt
+      hc₀ (hreverseCost k) hk)
+    hsummable
+
 theorem bombieriGiusti_hole_filling
     {p₀ c₀ reverseCost : ℝ} {β : ℕ → ℝ}
     (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hreverseCost : 1 ≤ reverseCost)
@@ -520,10 +544,11 @@ theorem bombieriGiusti_hole_filling
       ring
     _ = bombieriGiustiThreshold p₀ c₀ reverseCost := rfl
 
-theorem integral_rpow_root_le_exp_bombieriGiustiThreshold
+theorem integral_rpow_root_le_exp_tsum_bombieriGiustiThreshold
     (mu : ℕ → Measure α) [∀ k, IsFiniteMeasure (mu k)]
-    (f : α → ℝ) {p₀ c₀ reverseCost : ℝ}
-    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hreverseCost : 1 ≤ reverseCost)
+    (f : α → ℝ) (reverseCost : ℕ → ℝ) {p₀ c₀ : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀)
+    (hreverseCost : ∀ k, 1 ≤ reverseCost k)
     (hf : Measurable f) (hf_pos : ∀ x, 0 < f x)
     (hintegrable : ∀ k, Integrable (fun x => f x ^ p₀) (mu k))
     (hmoment_pos : ∀ k, 0 < ∫ x, f x ^ p₀ ∂(mu k))
@@ -536,10 +561,14 @@ theorem integral_rpow_root_le_exp_bombieriGiustiThreshold
       (mu k).real {x | r < Real.log (f x)} ≤ c₀ / r)
     (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
       (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) ≤
-        reverseCost ^ (1 / p - 1 / p₀) *
-          (∫ x, f x ^ p ∂(mu (k + 1))) ^ (1 / p)) :
+        reverseCost k ^ (1 / p - 1 / p₀) *
+          (∫ x, f x ^ p ∂(mu (k + 1))) ^ (1 / p))
+    (hsummable : Summable (fun k : ℕ =>
+      (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4))) :
     (∫ x, f x ^ p₀ ∂(mu 0)) ^ (1 / p₀) ≤
-      Real.exp (bombieriGiustiThreshold p₀ c₀ reverseCost) := by
+      Real.exp (∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4)) := by
   let beta : ℕ → ℝ := fun k =>
     Real.log ((∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀))
   have hnorm_pos : ∀ k,
@@ -555,12 +584,13 @@ theorem integral_rpow_root_le_exp_bombieriGiustiThreshold
       Real.rpow_le_rpow (hmoment_pos k).le hmoment_le
         (div_pos one_pos hp₀).le
     exact Real.log_le_log (hnorm_pos k) hnorm_le
-  have hbound := bombieriGiusti_hole_filling hp₀ hc₀ hreverseCost
+  have hbound := bombieriGiusti_summable_threshold_hole_filling
+    hp₀ hc₀ hreverseCost
     (β := beta) (by simpa only [beta] using hβ_bdd) hbeta_mono
     (fun k hk => by
       let p := bombieriGiustiExponent p₀ c₀ (beta (k + 1))
       have hthreshold := two_mul_le_bombieriGiustiThreshold
-        (p₀ := p₀) (reverseCost := reverseCost) hc₀.le hreverseCost
+        (p₀ := p₀) (reverseCost := reverseCost k) hc₀.le (hreverseCost k)
       have hbeta_outer : 2 * c₀ < beta (k + 1) := hthreshold.trans_lt hk
       have hp : 0 < p := bombieriGiustiExponent_pos hp₀ hc₀ hbeta_outer
       have hpp₀ : p < p₀ := bombieriGiustiExponent_lt hp₀ hc₀ hbeta_outer
@@ -582,24 +612,67 @@ theorem integral_rpow_root_le_exp_bombieriGiustiThreshold
           rfl htail_half
       have hreverse_norm := hreverse k hp hpp₀
       change Real.exp (beta k) ≤
-        reverseCost ^ (1 / p - 1 / p₀) *
+        reverseCost k ^ (1 / p - 1 / p₀) *
           (2 ^ (1 / p) * Real.exp (beta (k + 1) / 2))
       calc
         Real.exp (beta k) =
             (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) := by
           exact Real.exp_log (hnorm_pos k)
-        _ ≤ reverseCost ^ (1 / p - 1 / p₀) *
+        _ ≤ reverseCost k ^ (1 / p - 1 / p₀) *
             (∫ x, f x ^ p ∂(mu (k + 1))) ^ (1 / p) := hreverse_norm
-        _ ≤ reverseCost ^ (1 / p - 1 / p₀) *
+        _ ≤ reverseCost k ^ (1 / p - 1 / p₀) *
             (2 ^ (1 / p) * Real.exp (beta (k + 1) / 2)) := by
           exact mul_le_mul_of_nonneg_left
             (by simpa only [p] using htail_norm)
-            (Real.rpow_nonneg (zero_le_one.trans hreverseCost) _))
+            (Real.rpow_nonneg (zero_le_one.trans (hreverseCost k)) _))
+    hsummable
   calc
     (∫ x, f x ^ p₀ ∂(mu 0)) ^ (1 / p₀) = Real.exp (beta 0) := by
       exact (Real.exp_log (hnorm_pos 0)).symm
-    _ ≤ Real.exp (bombieriGiustiThreshold p₀ c₀ reverseCost) :=
+    _ ≤ Real.exp (∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4)) :=
       Real.exp_le_exp.mpr hbound
+
+theorem integral_rpow_root_le_exp_bombieriGiustiThreshold
+    (mu : ℕ → Measure α) [∀ k, IsFiniteMeasure (mu k)]
+    (f : α → ℝ) {p₀ c₀ reverseCost : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hreverseCost : 1 ≤ reverseCost)
+    (hf : Measurable f) (hf_pos : ∀ x, 0 < f x)
+    (hintegrable : ∀ k, Integrable (fun x => f x ^ p₀) (mu k))
+    (hmoment_pos : ∀ k, 0 < ∫ x, f x ^ p₀ ∂(mu k))
+    (hmass : ∀ k, (mu k).real Set.univ ≤ 1)
+    (hmoment_mono : ∀ k,
+      (∫ x, f x ^ p₀ ∂(mu k)) ≤ ∫ x, f x ^ p₀ ∂(mu (k + 1)))
+    (hβ_bdd : BddAbove (Set.range (fun k =>
+      Real.log ((∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀)))))
+    (htail : ∀ k r, 0 < r →
+      (mu k).real {x | r < Real.log (f x)} ≤ c₀ / r)
+    (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
+      (∫ x, f x ^ p₀ ∂(mu k)) ^ (1 / p₀) ≤
+        reverseCost ^ (1 / p - 1 / p₀) *
+          (∫ x, f x ^ p ∂(mu (k + 1))) ^ (1 / p)) :
+    (∫ x, f x ^ p₀ ∂(mu 0)) ^ (1 / p₀) ≤
+      Real.exp (bombieriGiustiThreshold p₀ c₀ reverseCost) := by
+  let threshold := bombieriGiustiThreshold p₀ c₀ reverseCost
+  have hgeometric : Summable (fun k : ℕ => (3 / 4 : ℝ) ^ k) :=
+    summable_geometric_of_lt_one (by norm_num) (by norm_num)
+  have hsummable : Summable
+      (fun k : ℕ => (3 / 4 : ℝ) ^ k * (threshold / 4)) :=
+    Summable.mul_right (threshold / 4) hgeometric
+  have hbound := integral_rpow_root_le_exp_tsum_bombieriGiustiThreshold
+    mu f (fun _ => reverseCost) hp₀ hc₀ (fun _ => hreverseCost)
+      hf hf_pos hintegrable hmoment_pos hmass hmoment_mono hβ_bdd htail
+      (fun k {p} hp hpp₀ => hreverse k (p := p) hp hpp₀) hsummable
+  have hsum : (∑' k : ℕ, (3 / 4 : ℝ) ^ k * (threshold / 4)) = threshold := by
+    rw [hgeometric.tsum_mul_right (threshold / 4),
+      tsum_geometric_of_lt_one (by norm_num) (by norm_num)]
+    ring
+  calc
+    (∫ x, f x ^ p₀ ∂(mu 0)) ^ (1 / p₀) ≤
+        Real.exp (∑' k : ℕ, (3 / 4 : ℝ) ^ k * (threshold / 4)) := by
+      simpa only [threshold] using hbound
+    _ = Real.exp (bombieriGiustiThreshold p₀ c₀ reverseCost) := by
+      rw [hsum]
 
 theorem integral_rpow_root_le_exp_bombieriGiustiThreshold_of_dominated
     (mu : ℕ → Measure α) [∀ k, IsFiniteMeasure (mu k)]
