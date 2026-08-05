@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.LowerOrder
 
 noncomputable section
 
-open Matrix Real Set
+open Filter Matrix Real Set
 open scoped NNReal RealInnerProductSpace
 
 namespace DifferentialGeometry.Analysis.Parabolic.Euclidean
@@ -1511,6 +1511,34 @@ def parabolicNondivergenceBufferedBallInteriorGaugeFactor
     (bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon 1 0)
     epsilon 0 A Ka omega T
 
+def parabolicNondivergenceBufferedBallInteriorRpowGaugeFactor
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (alpha : NNReal) (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Kb Bb : n → NNReal) (Kc Bc delta : NNReal)
+    (A Ka omega : n → n → NNReal) (T : Real) : NNReal :=
+  parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+    a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+    (parabolicLowerOrderHolderConst Kb Bb Kc
+      (bufferedParabolicSpatialGradientConst 1 delta + 2) 2 0 Bc 0)
+    (bufferedParabolicSpatialGradientConst 1 delta + 2) 2 0 0 0
+    A Ka omega T
+
+def parabolicNondivergenceBufferedBallInteriorLinearGaugeFactor
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (alpha : NNReal) (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Kb Bb : n → NNReal) (Kc Bc : NNReal)
+    (A Ka omega : n → n → NNReal) (T : Real) : NNReal :=
+  parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+    a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+    (parabolicLowerOrderHolderConst Kb Bb Kc 0 0 1 Bc 0)
+    0 0 (parabolicLowerOrderSupConst Bb Bc 1 0) 1 0 A Ka omega T
+
 def parabolicNondivergenceBufferedBallInteriorDataConst
     (a : n → n → ParabolicPoint (Euc n) → Real)
     (p0 : ParabolicPoint (Euc n))
@@ -1690,6 +1718,173 @@ theorem parabolicNondivergenceBufferedBallInteriorConst_eq_data_add_gauge
     _ = _ := by
       rw [parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst_nnreal_mul]
       rfl
+
+omit [Nonempty n] in
+theorem parabolicNondivergenceBufferedBallInteriorGaugeFactor_eq_rpow_add_linear
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (alpha : NNReal) (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Kb Bb : n → NNReal) (Kc Bc epsilon delta : NNReal)
+    (halpha1 : alpha < 1) (hepsilon : 0 < epsilon)
+    (A Ka omega : n → n → NNReal) {T : Real} (hT : 0 ≤ T) :
+    parabolicNondivergenceBufferedBallInteriorGaugeFactor
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        Kb Bb Kc Bc epsilon delta A Ka omega T =
+      epsilon ^ ((1 : NNReal) - alpha : Real) *
+          parabolicNondivergenceBufferedBallInteriorRpowGaugeFactor
+            a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+            Kb Bb Kc Bc delta A Ka omega T +
+        epsilon * parabolicNondivergenceBufferedBallInteriorLinearGaugeFactor
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Kb Bb Kc Bc A Ka omega T := by
+  let q := epsilon ^ ((1 : NNReal) - alpha : Real)
+  let G := bufferedParabolicSpatialGradientConst 1 delta + 2
+  have hdu : bufferedParabolicSpatialGradientInterpolationConst
+      epsilon delta alpha 1 0 = q * G := by
+    unfold bufferedParabolicSpatialGradientInterpolationConst
+    simp only [mul_zero, zero_div, zero_add, one_mul]
+    rw [show 2 * epsilon / epsilon ^ (alpha : Real) = 2 * q by
+      calc
+        _ = 2 * (epsilon / epsilon ^ (alpha : Real)) := by ring
+        _ = _ := by rw [show epsilon / epsilon ^ (alpha : Real) = q by
+          dsimp only [q]
+          simpa only [NNReal.rpow_one] using
+            (NNReal.rpow_sub hepsilon.ne' 1 (alpha : Real)).symm]]
+    dsimp only [G, q]
+    ring
+  have hu : parabolicValueInterpolationConst epsilon alpha 1 0 = q * 2 := by
+    unfold parabolicValueInterpolationConst
+    dsimp only [q]
+    simp
+    ring
+  have hlo : bufferedParabolicLowerOrderInterpolationHolderConst
+      Kb Bb Kc Bc epsilon delta alpha 1 0 =
+    q * parabolicLowerOrderHolderConst Kb Bb Kc G 2 0 Bc 0 +
+      epsilon * parabolicLowerOrderHolderConst Kb Bb Kc 0 0 1 Bc 0 := by
+    unfold bufferedParabolicLowerOrderInterpolationHolderConst
+    rw [hdu, hu]
+    simp only [mul_zero, zero_div, zero_add, one_mul]
+    calc
+      _ = parabolicLowerOrderHolderConst Kb Bb Kc
+          (q * G + epsilon * 0) (q * 2 + epsilon * 0)
+          (q * 0 + epsilon * 1) Bc (q * 0 + epsilon * 0) := by simp
+      _ = parabolicLowerOrderHolderConst Kb Bb Kc
+            (q * G) (q * 2) (q * 0) Bc (q * 0) +
+          parabolicLowerOrderHolderConst Kb Bb Kc
+            (epsilon * 0) (epsilon * 0) (epsilon * 1) Bc
+              (epsilon * 0) :=
+        parabolicLowerOrderHolderConst_add Kb Bb Kc Bc
+          (q * G) (epsilon * 0) (q * 2) (epsilon * 0)
+          (q * 0) (epsilon * 1) (q * 0) (epsilon * 0)
+      _ = _ := by
+        rw [parabolicLowerOrderHolderConst_nnreal_mul,
+          parabolicLowerOrderHolderConst_nnreal_mul]
+  have hsup : bufferedParabolicLowerOrderInterpolationSupConst
+      Bb Bc epsilon 1 0 = epsilon * parabolicLowerOrderSupConst Bb Bc 1 0 := by
+    unfold bufferedParabolicLowerOrderInterpolationSupConst
+    simp only [mul_zero, zero_div, zero_add, one_mul]
+    simpa using parabolicLowerOrderSupConst_nnreal_mul epsilon Bb Bc 1 0
+  unfold parabolicNondivergenceBufferedBallInteriorGaugeFactor
+  rw [hlo, hdu, hu, hsup]
+  calc
+    _ = parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        (q * parabolicLowerOrderHolderConst Kb Bb Kc G 2 0 Bc 0 +
+          epsilon * parabolicLowerOrderHolderConst Kb Bb Kc 0 0 1 Bc 0)
+        (q * G + epsilon * 0) (q * 2 + epsilon * 0)
+        (q * 0 + epsilon * parabolicLowerOrderSupConst Bb Bc 1 0)
+        (q * 0 + epsilon * 1) (q * 0 + epsilon * 0) A Ka omega T := by simp
+    _ = parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          (q * parabolicLowerOrderHolderConst Kb Bb Kc G 2 0 Bc 0)
+          (q * G) (q * 2) (q * 0) (q * 0) (q * 0) A Ka omega T +
+        parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          (epsilon * parabolicLowerOrderHolderConst Kb Bb Kc 0 0 1 Bc 0)
+          (epsilon * 0) (epsilon * 0)
+          (epsilon * parabolicLowerOrderSupConst Bb Bc 1 0)
+          (epsilon * 1) (epsilon * 0) A Ka omega T := by
+      exact parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst_add
+        halpha1 a p0 hA aTime t₀ t₁ bTime center hr hrR
+        (q * parabolicLowerOrderHolderConst Kb Bb Kc G 2 0 Bc 0)
+        (epsilon * parabolicLowerOrderHolderConst Kb Bb Kc 0 0 1 Bc 0)
+        (q * G) (epsilon * 0) (q * 2) (epsilon * 0)
+        (q * 0) (epsilon * parabolicLowerOrderSupConst Bb Bc 1 0)
+        (q * 0) (epsilon * 1) (q * 0) (epsilon * 0) A Ka omega hT
+    _ = _ := by
+      rw [parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst_nnreal_mul,
+        parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst_nnreal_mul]
+      rfl
+
+omit [Nonempty n] in
+theorem tendsto_parabolicNondivergenceBufferedBallInteriorGaugeFactor_nhdsWithin_zero
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (alpha : NNReal) (halpha1 : alpha < 1)
+    (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Kb Bb : n → NNReal) (Kc Bc delta : NNReal)
+    (A Ka omega : n → n → NNReal) {T : Real} (hT : 0 ≤ T) :
+    Tendsto (fun epsilon : NNReal ↦
+      parabolicNondivergenceBufferedBallInteriorGaugeFactor
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        Kb Bb Kc Bc epsilon delta A Ka omega T)
+      (nhdsWithin 0 (Ioi 0)) (nhds 0) := by
+  have halphaReal : (alpha : Real) < 1 := by exact_mod_cast halpha1
+  have hbeta : 0 < (1 : Real) - alpha := by linarith
+  have hq : Tendsto (fun epsilon : NNReal ↦
+      epsilon ^ ((1 : NNReal) - alpha : Real)) (nhds 0) (nhds 0) := by
+    simpa only [NNReal.zero_rpow hbeta.ne'] using
+      (NNReal.continuousAt_rpow_const (x := (0 : NNReal))
+        (y := (1 : Real) - alpha) (Or.inr hbeta.le)).tendsto
+  have hmodel : Tendsto (fun epsilon : NNReal ↦
+      epsilon ^ ((1 : NNReal) - alpha : Real) *
+          parabolicNondivergenceBufferedBallInteriorRpowGaugeFactor
+            a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+            Kb Bb Kc Bc delta A Ka omega T +
+        epsilon * parabolicNondivergenceBufferedBallInteriorLinearGaugeFactor
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Kb Bb Kc Bc A Ka omega T)
+      (nhdsWithin 0 (Ioi 0)) (nhds 0) := by
+    simpa using ((hq.mono_left inf_le_left).mul_const _).add
+      ((tendsto_id.mono_left inf_le_left).mul_const _)
+  apply hmodel.congr'
+  filter_upwards [self_mem_nhdsWithin] with epsilon hepsilon
+  exact
+    (parabolicNondivergenceBufferedBallInteriorGaugeFactor_eq_rpow_add_linear
+      a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+      Kb Bb Kc Bc epsilon delta halpha1 hepsilon A Ka omega hT).symm
+
+omit [Nonempty n] in
+theorem exists_parabolicNondivergenceBufferedBallInteriorGaugeFactor_lt
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (alpha : NNReal) (halpha1 : alpha < 1)
+    (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Kb Bb : n → NNReal) (Kc Bc delta : NNReal) (hdelta : 0 < delta)
+    (A Ka omega : n → n → NNReal) {T : Real} (hT : 0 ≤ T)
+    (theta : NNReal) (htheta : 0 < theta) :
+    ∃ epsilon : NNReal, 0 < epsilon ∧ epsilon < delta ∧
+      parabolicNondivergenceBufferedBallInteriorGaugeFactor
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        Kb Bb Kc Bc epsilon delta A Ka omega T < theta := by
+  have ht :=
+    tendsto_parabolicNondivergenceBufferedBallInteriorGaugeFactor_nhdsWithin_zero
+      a p0 hA alpha halpha1 aTime t₀ t₁ bTime center hr hrR
+      Kb Bb Kc Bc delta A Ka omega hT
+  have hsmall := ht.eventually (Iio_mem_nhds htheta)
+  have hlt : ∀ᶠ epsilon : NNReal in nhdsWithin 0 (Ioi 0), epsilon < delta :=
+    (tendsto_id.mono_left inf_le_left).eventually (Iio_mem_nhds hdelta)
+  have hpos : ∀ᶠ epsilon : NNReal in nhdsWithin 0 (Ioi 0),
+      epsilon ∈ Ioi (0 : NNReal) := self_mem_nhdsWithin
+  obtain ⟨epsilon, hepsilon, hepsdelta, hfactor⟩ :=
+    (hpos.and (hlt.and hsmall)).exists
+  exact ⟨epsilon, hepsilon, hepsdelta, hfactor⟩
 
 theorem parabolic_nondivergence_ball_interior_schauder_estimate_of_buffered_interpolation_of_local_source_estimates_of_small_freeze_defect
     {alpha Ksource Kc Bsource Bc C M : NNReal}
