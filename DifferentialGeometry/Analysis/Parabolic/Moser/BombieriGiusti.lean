@@ -781,6 +781,74 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [I.Boundaryless] in
+theorem localizedSpacetimeRpowNorm_le_exp_tsum_bombieriGiustiThreshold
+    {g : SmoothRiemannianMetric I M}
+    (cutoff : ℕ → SmoothScalar g) (outer : SmoothScalar g)
+    (f : ℝ × M → ℝ) (reverseCost : ℕ → ℝ)
+    (a b : ℕ → ℝ) {p₀ c₀ c d : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀)
+    (hreverseCost : ∀ k, 1 ≤ reverseCost k)
+    (hf : Continuous f) (hf_pos : ∀ z, 0 < f z)
+    (hmeasure : ∀ k,
+      localizedSpacetimeMeasure (I := I) (M := M) (cutoff k) (a k) (b k) ≠ 0)
+    (hmass : ∀ k,
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (cutoff k) (a k) (b k)).real Set.univ ≤ 1)
+    (hstart : ∀ k, a (k + 1) ≤ a k)
+    (hend : ∀ k, b k ≤ b (k + 1))
+    (hcutoff : ∀ k x,
+      (cutoff k).toFun x ^ 2 ≤ (cutoff (k + 1)).toFun x ^ 2)
+    (hc : ∀ k, c ≤ a k) (hd : ∀ k, b k ≤ d)
+    (houter : ∀ k x, (cutoff k).toFun x ^ 2 ≤ outer.toFun x ^ 2)
+    (htail : ∀ k r, 0 < r →
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (cutoff k) (a k) (b k)).real {z | r < Real.log (f z)} ≤ c₀ / r)
+    (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
+      localizedSpacetimeRpowNorm (I := I) (M := M)
+          (cutoff k) (fun t x => f (t, x)) p₀ (a k) (b k) ≤
+        reverseCost k ^ (1 / p - 1 / p₀) *
+          localizedSpacetimeRpowNorm (I := I) (M := M)
+            (cutoff (k + 1)) (fun t x => f (t, x)) p
+              (a (k + 1)) (b (k + 1)))
+    (hsummable : Summable (fun k : ℕ =>
+      (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4))) :
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+        (cutoff 0) (fun t x => f (t, x)) p₀ (a 0) (b 0) ≤
+      Real.exp (∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4)) := by
+  let mu : ℕ → Measure (ℝ × M) := fun k =>
+    localizedSpacetimeMeasure (I := I) (M := M) (cutoff k) (a k) (b k)
+  let nu : Measure (ℝ × M) :=
+    localizedSpacetimeMeasure (I := I) (M := M) outer c d
+  have hnu_integrable : Integrable (fun z => f z ^ p₀) nu := by
+    exact integrable_localizedSpacetimeRpow_of_continuous_pos
+      (I := I) (M := M) outer (fun t x => f (t, x)) hf
+        (fun t x => hf_pos (t, x)) p₀ c d
+  have hmoment_pos : ∀ k, 0 < ∫ z, f z ^ p₀ ∂(mu k) := by
+    intro k
+    simpa only [mu] using localizedSpacetimeRpowMoment_pos
+      (I := I) (M := M) (cutoff k) (fun t x => f (t, x)) hf
+        (fun t x => hf_pos (t, x)) p₀ (a k) (b k) (hmeasure k)
+  have hmu : ∀ k, mu k ≤ mu (k + 1) := by
+    intro k
+    exact localizedSpacetimeMeasure_mono (I := I) (M := M)
+      (hstart k) (hend k) (hcutoff k)
+  have hdominated : ∀ k, mu k ≤ nu := by
+    intro k
+    exact localizedSpacetimeMeasure_mono (I := I) (M := M)
+      (hc k) (hd k) (houter k)
+  have hbound :=
+    integral_rpow_root_le_exp_tsum_bombieriGiustiThreshold_of_dominated
+      mu nu f reverseCost hp₀ hc₀ hreverseCost hf.measurable hf_pos
+        hnu_integrable hmoment_pos (by simpa only [mu] using hmass)
+        hmu hdominated (by simpa only [mu] using htail)
+        (by simpa only [localizedSpacetimeRpowNorm, mu] using hreverse)
+        hsummable
+  simpa only [localizedSpacetimeRpowNorm, localizedSpacetimeRpowMoment, mu] using
+    hbound
+
 theorem early_localizedSpacetimeMeasure_log_superlevel_tail_of_supersolution
     (g : SmoothRiemannianMetric I M)
     (deviationCutoff averagingCutoff : SmoothScalar g)

@@ -121,6 +121,29 @@ theorem localizedSpacetimeRpowMoment_nonneg
     0 ≤ localizedSpacetimeRpowMoment (I := I) (M := M) cutoff u p a b := by
   exact integral_nonneg fun z => Real.rpow_nonneg (hu z.1 z.2) p
 
+theorem localizedSpacetimeRpowMoment_pos
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : Continuous (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x) (p a b : ℝ)
+    (hmeasure : localizedSpacetimeMeasure (I := I) (M := M) cutoff a b ≠ 0) :
+    0 < localizedSpacetimeRpowMoment (I := I) (M := M)
+      cutoff u p a b := by
+  let mu := localizedSpacetimeMeasure (I := I) (M := M) cutoff a b
+  let f : ℝ × M → ℝ := fun z => u z.1 z.2 ^ p
+  have hf : Integrable f mu :=
+    integrable_localizedSpacetimeRpow_of_continuous_pos
+      (I := I) (M := M) cutoff u hu hpos p a b
+  have hnonneg : 0 ≤ f := fun z => Real.rpow_nonneg (hpos z.1 z.2).le p
+  change 0 < ∫ z, f z ∂mu
+  apply (integral_pos_iff_support_of_nonneg hnonneg hf).2
+  have hsupp : Function.support f = Set.univ := by
+    ext z
+    simp only [Function.mem_support, mem_univ, iff_true]
+    exact (Real.rpow_pos_of_pos (hpos z.1 z.2) p).ne'
+  rw [hsupp]
+  exact Measure.measure_univ_pos.mpr hmeasure
+
 theorem localizedSpacetimeRpowMoment_mono
     {g : SmoothRiemannianMetric I M} {cutoff outer : SmoothScalar g}
     (u : ℝ → M → ℝ)
