@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Schauder.ParabolicBallExtension
 
 noncomputable section
 
-open Set
+open Matrix Set
 open scoped ContDiff ENNReal Manifold NNReal
 
 namespace DifferentialGeometry.Analysis.Schauder
@@ -404,6 +404,111 @@ theorem exists_finite_buffered_chart_cover_with_uniform_parabolic_nondivergence_
     rw [← hpreimage x]
     exact (hpotential x).2.mono
       (Finset.single_le_sum (fun y _ ↦ zero_le (Kcx y)) (Finset.mem_univ x))
+
+theorem exists_finite_buffered_chart_cover_with_uniform_parabolic_nondivergence_operator_schauder_and_ellipticity_bounds
+    [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank Real E)]
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {a b : Real} (hab : a < b) (habreg : Set.Icc a b ⊆ D.regular)
+    (V : Real → M → Real)
+    (hV : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) 1
+      (fun p : Real × M ↦ V p.1 p.2) (Set.Icc a b ×ˢ Set.univ))
+    {alpha : NNReal} (halpha : alpha ≤ 1) :
+    ∃ s : Finset M, ∃ r R Rext : M → Real,
+      (∀ x ∈ s, 0 < r x ∧ r x < R x ∧ R x < Rext x) ∧
+      (∀ x ∈ s,
+        (toEuclidean (E := E)).symm ''
+            Metric.closedBall (toEuclidean (extChartAt I x x)) (Rext x) ⊆
+          (extChartAt I x).target) ∧
+      (∀ y : M, ∃ x ∈ s,
+        y ∈ (extChartAt I x).source ∧
+          toEuclidean (extChartAt I x y) ∈
+            Metric.ball (toEuclidean (extChartAt I x x)) (r x)) ∧
+      ∃ Apr Ka : Fin (Module.finrank Real E) →
+            Fin (Module.finrank Real E) → NNReal,
+        ∃ Bb Kb : Fin (Module.finrank Real E) → NNReal,
+        ∃ Bc Kc : NNReal, ∃ c : Real, 0 < c ∧
+        (∀ x : ↥s, ∀ i j p,
+          p ∈ parabolicCylinder (Set.Icc a b)
+              (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1)) →
+            ‖parabolicChartPrincipalCoefficient (I := I) G.metric x.1 i j p‖ ≤
+              Apr i j) ∧
+        (∀ x : ↥s, ∀ i j, HolderWith (Ka i j) alpha
+          ((parabolicCylinder (Set.Icc a b)
+            (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1))).restrict
+              (parabolicChartPrincipalCoefficient (I := I) G.metric x.1 i j))) ∧
+        (∀ x : ↥s, ∀ p,
+          p ∈ parabolicCylinder (Set.Icc a b)
+              (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1)) →
+            (Matrix.of fun i j : Fin (Module.finrank Real E) ↦
+              parabolicChartPrincipalCoefficient (I := I) G.metric x.1 i j p).PosDef) ∧
+        (∀ x : ↥s, ∀ p,
+          p ∈ parabolicCylinder (Set.Icc a b)
+              (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1)) →
+            ∀ v : EuclM E,
+              c * ‖v‖ ^ 2 ≤ star v ⬝ᵥ
+                ((Matrix.of fun i j : Fin (Module.finrank Real E) ↦
+                  parabolicChartPrincipalCoefficient (I := I)
+                    G.metric x.1 i j p) *ᵥ v)) ∧
+        (∀ x : ↥s, ∀ k p,
+          p ∈ parabolicCylinder (Set.Icc a b)
+              (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1)) →
+            ‖parabolicChartDriftCoefficient (I := I) G.metric x.1 k p‖ ≤ Bb k) ∧
+        (∀ x : ↥s, ∀ k, HolderWith (Kb k) alpha
+          ((parabolicCylinder (Set.Icc a b)
+            (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1))).restrict
+              (parabolicChartDriftCoefficient (I := I) G.metric x.1 k))) ∧
+        (∀ x : ↥s, ∀ p,
+          p ∈ parabolicCylinder (Set.Icc a b)
+              (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1)) →
+            ‖parabolicChartPotentialCoefficient (I := I) V x.1 p‖ ≤ Bc) ∧
+        ∀ x : ↥s, HolderWith Kc alpha
+          ((parabolicCylinder (Set.Icc a b)
+            (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1))).restrict
+              (parabolicChartPotentialCoefficient (I := I) V x.1)) := by
+  classical
+  obtain ⟨s, r, R, Rext, hradii, hchart, hcover,
+      Apr, Ka, Bb, Kb, Bc, Kc, hAnorm, ha, hpos, hbnorm, hb, hcnorm, hc⟩ :=
+    exists_finite_buffered_chart_cover_with_uniform_parabolic_nondivergence_operator_coefficient_schauder_bounds
+      hG hab habreg V hV halpha
+  let e := (toEuclidean (E := E)).symm
+  let center : ↥s → M := fun x ↦ x.1
+  let K : ↥s → Set E := fun x ↦ e ''
+    Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1)
+  have hK : ∀ x : ↥s, IsCompact (K x) := by
+    intro x
+    exact (isCompact_closedBall _ _).image e.continuous
+  have hKconv : ∀ x : ↥s, Convex Real (K x) := by
+    intro x
+    exact (convex_closedBall _ _).linear_image e.toLinearEquiv.toLinearMap
+  have hKchart : ∀ x : ↥s,
+      K x ⊆ interior (extChartAt I (center x)).target := by
+    intro x
+    rw [(isOpen_extChartAt_target x.1).interior_eq]
+    exact hchart x.1 x.2
+  obtain ⟨c, hcpos, hlower⟩ :=
+    exists_uniform_parabolic_chart_principal_coefficient_quadratic_lower_bound_of_finite
+      hG hab habreg center K hK hKconv hKchart
+  have hpreimage : ∀ x : ↥s,
+      parabolicLinearPreimage (e : EuclM E →L[Real] E)
+          (parabolicCylinder (Set.Icc a b) (K x)) =
+        parabolicCylinder (Set.Icc a b)
+          (Metric.closedBall (toEuclidean (extChartAt I x.1 x.1)) (Rext x.1)) := by
+    intro x
+    ext p
+    constructor
+    · intro hp
+      rcases hp.2 with ⟨z, hz, hzp⟩
+      have hzp' : e z = e p.space := hzp
+      exact ⟨hp.1, e.injective hzp' ▸ hz⟩
+    · intro hp
+      exact ⟨hp.1, ⟨p.space, hp.2, rfl⟩⟩
+  refine ⟨s, r, R, Rext, hradii, hchart, hcover,
+    Apr, Ka, Bb, Kb, Bc, Kc, c, hcpos, hAnorm, ha, hpos, ?_,
+      hbnorm, hb, hcnorm, hc⟩
+  intro x p hp v
+  exact hlower x p (by rw [hpreimage x]; exact hp) v
 
 end DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn
 
