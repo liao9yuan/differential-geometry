@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Schauder.Composition
+import DifferentialGeometry.Analysis.Schauder.Interpolation
 import DifferentialGeometry.Analysis.Schauder.Localization
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
@@ -129,6 +130,38 @@ def eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn
     (u : Real → M → F) : ENNReal :=
   eParabolicC2HolderGaugeWithLowerJetsOn alpha Q
     (parabolicEuclideanChartRepresentation I x₀ u)
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInExtChartOn_le_mul_of_nested_balls
+    {J : Set Real} (hJ : Convex Real J) (x₀ : M) (center : E)
+    {r R : Real} (hrR : r < R) {alpha : NNReal} (halpha : alpha ≤ 1)
+    {u : Real → M → F}
+    (hu : IsParabolicC2On (parabolicCylinder J (Metric.ball center R))
+      (parabolicExtChartRepresentation I x₀ u)) :
+    eParabolicC2HolderGaugeWithLowerJetsInExtChartOn alpha I x₀
+        (parabolicCylinder J (Metric.closedBall center r)) u ≤
+      bufferedParabolicC2HolderGaugeWithLowerJetsFactor
+          (Real.toNNReal (R - r)) *
+        eParabolicC2HolderGaugeInExtChartOn alpha I x₀
+          (parabolicCylinder J (Metric.ball center R)) u := by
+  exact eParabolicC2HolderGaugeWithLowerJetsOn_le_mul_of_nested_balls
+    hJ center hrR halpha hu
+
+theorem eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_mul_of_nested_balls
+    [FiniteDimensional Real E]
+    {J : Set Real} (hJ : Convex Real J) (x₀ : M)
+    (center : EuclideanSpace Real (Fin (Module.finrank Real E)))
+    {r R : Real} (hrR : r < R) {alpha : NNReal} (halpha : alpha ≤ 1)
+    {u : Real → M → F}
+    (hu : IsParabolicC2On (parabolicCylinder J (Metric.ball center R))
+      (parabolicEuclideanChartRepresentation I x₀ u)) :
+    eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn alpha I x₀
+        (parabolicCylinder J (Metric.closedBall center r)) u ≤
+      bufferedParabolicC2HolderGaugeWithLowerJetsFactor
+          (Real.toNNReal (R - r)) *
+        eParabolicC2HolderGaugeInEuclideanChartOn alpha I x₀
+          (parabolicCylinder J (Metric.ball center R)) u := by
+  exact eParabolicC2HolderGaugeWithLowerJetsOn_le_mul_of_nested_balls
+    hJ center hrR halpha hu
 
 theorem eParabolicC2HolderGaugeInExtChartOn_le_with_lower_jets
     (alpha : NNReal) (I : ModelWithCorners Real E H) (x₀ : M)
