@@ -238,4 +238,14 @@ theorem algebraicCurvatureTensorPullbackCLE_apply {x y : M}
         tensor0SPullbackCLE (I := I) (M := M) 4 e A :=
   rfl
 
+@[simp]
+theorem algebraicCurvatureTensorPullbackCLE_symm {x y : M}
+    (e : TangentSpace I x ≃ₗ[Real] TangentSpace I y) :
+    (algebraicCurvatureTensorPullbackCLE (I := I) (M := M) e).symm =
+      algebraicCurvatureTensorPullbackCLE (I := I) (M := M) e.symm := by
+  apply ContinuousLinearEquiv.ext
+  funext A
+  apply Subtype.ext
+  rfl
+
 end DifferentialGeometry.Integral.Connection
