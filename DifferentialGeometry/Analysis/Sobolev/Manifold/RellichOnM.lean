@@ -1188,7 +1188,7 @@ theorem rellich_kondrachov_chart_seq
     [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-    [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [IsManifold I ∞ M] [T2Space M] [CompactSpace M]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp_one : 1 < p)
     {u : ℕ → M → ℝ}

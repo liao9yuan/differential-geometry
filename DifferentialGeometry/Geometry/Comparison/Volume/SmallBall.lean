@@ -42,7 +42,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- Every positive-radius explicit-metric ball has positive finite real volume
 on a compact manifold. -/
 theorem edist_vol_pos
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (a : M) {r : ℝ} (hr : 0 < r) :
     0 < (riemannianVolumeMeasure (I := I) (M := M) g
       {x : M | riemannianEDistOf (I := I) g a x < ENNReal.ofReal r}).toReal := by

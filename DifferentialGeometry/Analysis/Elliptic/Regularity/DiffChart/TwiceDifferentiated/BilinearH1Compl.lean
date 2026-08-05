@@ -164,7 +164,7 @@ lemma densitySecondDerivOnEuclid_bounded_on_compact
   exact h_max hy
 
 structure DiffTwiceChartBilinearH1ComplData
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) where
 
   base1 : DiffChartBilinearH1ComplData (I := I) (M := M) g α
@@ -299,26 +299,26 @@ structure DiffTwiceChartBilinearH1ComplData
         ∂(volume : Measure EuclN))
 
 abbrev base1Data
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α) :
     DiffChartBilinearH1ComplData (I := I) (M := M) g α := D.base1
 
 abbrev baseData
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α) :
     ChartBilinearH1ComplData (I := I) (M := M) g α := D.base1.base
 
 abbrev direction1
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α) :
     Fin (Module.finrank ℝ E) := D.base1.direction
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem twice_differentiated_chart_bilinear_identity
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -389,7 +389,7 @@ theorem twice_differentiated_chart_bilinear_identity
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem differentiated_chart_bilinear_identity_via_base1
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -427,7 +427,7 @@ theorem differentiated_chart_bilinear_identity_via_base1
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem base_chart_bilinear_identity_via_base1
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -450,7 +450,7 @@ theorem base_chart_bilinear_identity_via_base1
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem u_chart_second_deriv_isMixedWeakPartial
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α) :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) D.direction2
@@ -464,7 +464,7 @@ theorem u_chart_second_deriv_isMixedWeakPartial
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem weak_partial_second_deriv_isMixedWeakPartial
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α)
     (i : Fin (Module.finrank ℝ E)) :

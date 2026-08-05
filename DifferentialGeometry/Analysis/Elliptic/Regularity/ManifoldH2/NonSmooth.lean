@@ -159,7 +159,7 @@ theorem wkpNormChart_two_le_tsum_chart_norms
   le_of_eq (wkpNormChart_two_eq_tsum (I := I) (M := M) g u)
 
 structure ChartH2NonSmoothBridgeData
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) (α : M) where
 
   D : ChartBilinearH1ComplData (I := I) (M := M) g α
@@ -224,7 +224,7 @@ end ChartH2NonSmoothBridgeData
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_two_of_chartH2NonSmoothBridgeData
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
     (h_bridge : ∀ α : M, ChartH2NonSmoothBridgeData (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
@@ -234,7 +234,7 @@ theorem memWkpChart_two_of_chartH2NonSmoothBridgeData
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChart_two_lt_top_of_chartH2NonSmoothBridgeData
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
     (h_bridge : ∀ α : M, ChartH2NonSmoothBridgeData (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart

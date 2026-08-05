@@ -40,7 +40,7 @@ variable {M : Type*} [TopologicalSpace M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
 noncomputable def Δ_g_classical
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
     {h : M → ℝ} (hh : ContMDiff (modelWithCornersEuclideanHalfSpace n) 𝓘(ℝ, ℝ) ∞ h) :
     M → ℝ :=
@@ -49,7 +49,7 @@ noncomputable def Δ_g_classical
     (grad_g_full_section (M := M) (n := n) g hh)
 
 @[simp] lemma Δ_g_classical_def
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
     {h : M → ℝ} (hh : ContMDiff (modelWithCornersEuclideanHalfSpace n) 𝓘(ℝ, ℝ) ∞ h)
     (x : M) :
@@ -73,7 +73,7 @@ private local instance instBorelSpaceE : @BorelSpace E _ (borel E) := ⟨rfl⟩
 omit [InnerProductSpace ℝ E] in
 private lemma integrable_divergence_g_with_boundary
     [hI : HasSmoothBoundary E H I]
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Integrable (divergence_g_with_boundary (I := I) g X)

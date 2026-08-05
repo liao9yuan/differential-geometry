@@ -1369,9 +1369,9 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
       (I := I) (M := M) g r s T α IJ' j
   rw [h_swap_j]
 
-omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] in
 theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ≥0∞, C ≠ ⊤ ∧
       ∀ (T : SmoothCcTensor g r s),
