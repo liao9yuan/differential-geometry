@@ -963,6 +963,961 @@ theorem modifiedNormalForm_no_critical_point_in_strip {n k : ℕ} (hk : k ≤ n)
     modifiedNormalForm_lt_of_posPart_zero hk c ε δ hε hδ hpos
   exact (not_lt_of_ge hy.1) hlt
 
+def modifiedCollarRetraction {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (y : MorseModel n) : MorseModel n :=
+  if morseNormalForm hk c y ≤ c - ε then y
+  else if ‖negPart hk y‖ ^ 2 ≤ 2 * ε then spineMap hk y
+  else recombine hk (negPart hk y)
+    ((Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2)) • posPart hk y)
+
+def modifiedCollarHomotopy {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (t : ℝ) (y : MorseModel n) :
+    MorseModel n :=
+  if morseNormalForm hk c y ≤ c - ε then y
+  else if ‖negPart hk y‖ ^ 2 ≤ 2 * ε then
+    recombine hk (negPart hk y) ((1 - t) • posPart hk y)
+  else recombine hk (negPart hk y)
+    ((1 - t + t * Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2)) • posPart hk y)
+
+theorem modifiedCollarRetraction_mem_lowerCellUnion {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    (hε : 0 < ε) (y : MorseModel n) :
+    modifiedCollarRetraction hk c ε y ∈ lowerCellUnion hk c ε := by
+  by_cases hf : morseNormalForm hk c y ≤ c - ε
+  · dsimp [modifiedCollarRetraction]
+    rw [if_pos hf]
+    exact Or.inl (by simpa [sublevel] using hf)
+  · by_cases hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε
+    · dsimp [modifiedCollarRetraction]
+      rw [if_neg hf, if_pos hb]
+      exact Or.inr (spineMap_mem_cell hk ε hε hb)
+    · have hP : ‖posPart hk y‖ ^ 2 ≠ 0 := by
+        intro hP
+        apply hf
+        have hN : 2 * ε < ‖negPart hk y‖ ^ 2 := lt_of_not_ge hb
+        rw [morseNormalForm_split]
+        have hP0 : ‖posPart hk y‖ = 0 := by
+          exact sq_eq_zero_iff.mp hP
+        nlinarith [sq_nonneg ‖negPart hk y‖, hN]
+      have hPpos : 0 < ‖posPart hk y‖ ^ 2 :=
+        sq_pos_of_ne_zero ((pow_ne_zero_iff (by norm_num : (2 : ℕ) ≠ 0)).mp hP)
+      have hNge : 0 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+        exact sub_nonneg.mpr (le_of_lt (lt_of_not_ge hb))
+      let s : ℝ := Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2)
+      have hs0 : 0 ≤ s := Real.sqrt_nonneg _
+      have hsq : s ^ 2 * ‖posPart hk y‖ ^ 2 = ‖negPart hk y‖ ^ 2 - 2 * ε := by
+        dsimp [s]
+        rw [Real.sq_sqrt (div_nonneg hNge (le_of_lt hPpos))]
+        rw [div_mul_eq_mul_div]
+        rw [mul_div_assoc]
+        rw [div_self hPpos.ne']
+        rw [mul_one]
+      have hval : morseNormalForm hk c (recombine hk (negPart hk y) (s • posPart hk y)) = c - ε := by
+        rw [morseNormalForm_split]
+        have hneg' : negPart hk (recombine hk (negPart hk y) (s • posPart hk y)) = negPart hk y := by
+          ext i
+          simp [negPart, recombine_negPart]
+        have hpos' : posPart hk (recombine hk (negPart hk y) (s • posPart hk y)) = s • posPart hk y := by
+          ext j
+          simp [posPart, recombine_posPart]
+        rw [hneg', hpos']
+        rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hs0]
+        nlinarith [hsq]
+      dsimp [modifiedCollarRetraction]
+      rw [if_neg hf, if_neg hb]
+      exact Or.inl (by simpa [s, sublevel] using (le_of_eq hval))
+
+theorem modifiedCollarHomotopy_mem_sublevel {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) {t : ℝ} (ht0 : 0 ≤ t) (ht1 : t ≤ 1) {y : MorseModel n}
+    (hy : modifiedNormalForm hk c ε δ y ≤ c - ε) :
+    modifiedNormalForm hk c ε δ (modifiedCollarHomotopy hk c ε t y) ≤ c - ε := by
+  by_cases hf : morseNormalForm hk c y ≤ c - ε
+  · simpa [modifiedCollarHomotopy, hf] using hy
+  · by_cases hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε
+    · have hs0 : 0 ≤ 1 - t := by linarith
+      have hs1 : 1 - t ≤ 1 := by linarith
+      have hle := modifiedNormalForm_recombine_scale_le hk c ε δ (negPart hk y) (posPart hk y)
+        hs0 hs1 hε hδ
+      have hy' : modifiedNormalForm hk c ε δ (recombine hk (negPart hk y) (posPart hk y)) ≤ c - ε := by
+        simpa [recombine_decompose] using hy
+      simpa [modifiedCollarHomotopy, hf, hb] using (le_trans hle hy')
+    · have hNPlt : ‖negPart hk y‖ ^ 2 - 2 * ε < ‖posPart hk y‖ ^ 2 := by
+        have hgt : c - ε < morseNormalForm hk c y := lt_of_not_ge hf
+        rw [morseNormalForm_split] at hgt
+        nlinarith
+      have hP : ‖posPart hk y‖ ^ 2 ≠ 0 := by
+        intro hP
+        apply hf
+        have hN : 2 * ε < ‖negPart hk y‖ ^ 2 := lt_of_not_ge hb
+        rw [morseNormalForm_split]
+        have hP0 : ‖posPart hk y‖ = 0 := sq_eq_zero_iff.mp hP
+        nlinarith [sq_nonneg ‖negPart hk y‖, hN]
+      have hPpos : 0 < ‖posPart hk y‖ ^ 2 :=
+        sq_pos_of_ne_zero ((pow_ne_zero_iff (by norm_num : (2 : ℕ) ≠ 0)).mp hP)
+      have hNge : 0 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+        exact sub_nonneg.mpr (le_of_lt (lt_of_not_ge hb))
+      have hratio : (‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2 ≤ 1 := by
+        exact le_of_lt ((div_lt_one hPpos).2 hNPlt)
+      have hs₀0 : 0 ≤ Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) :=
+        Real.sqrt_nonneg _
+      have hs₀1 : Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) ≤ 1 := by
+        exact Real.sqrt_le_one.mpr hratio
+      have hs0 : 0 ≤ 1 - t + t * Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) := by
+        nlinarith [ht0, hs₀0]
+      have hs1 : 1 - t + t * Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) ≤ 1 := by
+        nlinarith [ht0, hs₀1]
+      have hle := modifiedNormalForm_recombine_scale_le hk c ε δ (negPart hk y) (posPart hk y)
+        hs0 hs1 hε hδ
+      have hy' : modifiedNormalForm hk c ε δ (recombine hk (negPart hk y) (posPart hk y)) ≤ c - ε := by
+        simpa [recombine_decompose] using hy
+      simpa [modifiedCollarHomotopy, hf, hb] using (le_trans hle hy')
+
+theorem modifiedCollarHomotopy_zero {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (y : MorseModel n) :
+    modifiedCollarHomotopy hk c ε 0 y = y := by
+  dsimp [modifiedCollarHomotopy]
+  by_cases hf : morseNormalForm hk c y ≤ c - ε
+  · simp [hf]
+  · by_cases hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε
+    · simp [hf, hb, recombine_decompose]
+    · rw [if_neg hf, if_neg hb]
+      have hsc : (1 - 0 + 0 * Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2)) = 1 := by
+        norm_num
+      rw [hsc, one_smul]
+      exact recombine_decompose hk y
+
+theorem modifiedCollarHomotopy_one {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (y : MorseModel n) :
+    modifiedCollarHomotopy hk c ε 1 y = modifiedCollarRetraction hk c ε y := by
+  dsimp [modifiedCollarHomotopy, modifiedCollarRetraction]
+  by_cases hf : morseNormalForm hk c y ≤ c - ε
+  · simp [hf]
+  · by_cases hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε
+    · simp [hf, hb, spineMap]
+    · simp [hf, hb]
+
+theorem modifiedCollarHomotopy_mem_lowerCellUnion {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    (hε : 0 < ε) {t : ℝ} {y : MorseModel n} (hy : y ∈ lowerCellUnion hk c ε) :
+    modifiedCollarHomotopy hk c ε t y ∈ lowerCellUnion hk c ε := by
+  rcases hy with hf | hcell
+  · have hy' : morseNormalForm hk c y ≤ c - ε := by simpa [sublevel] using hf
+    dsimp [modifiedCollarHomotopy]
+    rw [if_pos hy']
+    exact Or.inl hf
+  · rcases hcell with ⟨x, hx⟩
+    have hpos : posPart hk y = 0 := by
+      rw [← hx]
+      ext j
+      simp [posPart, cellMap_posIdx]
+    by_cases hfy : morseNormalForm hk c y ≤ c - ε
+    · dsimp [modifiedCollarHomotopy]
+      rw [if_pos hfy]
+      exact Or.inr ⟨x, hx⟩
+    · have hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε := by
+        rw [← hx]
+        have hnp : negPart hk (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) =
+            (Real.sqrt (2 * ε)) • (x : EuclideanSpace ℝ (Fin k)) := by
+          ext i
+          simp [negPart, cellMap_negIdx]
+        rw [hnp]
+        rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+        have hxle : ‖(x : EuclideanSpace ℝ (Fin k))‖ ≤ 1 := x.2
+        have hsq : (Real.sqrt (2 * ε)) ^ 2 = 2 * ε := Real.sq_sqrt (by positivity)
+        have hsq' : (Real.sqrt (2 * ε) * ‖(x : EuclideanSpace ℝ (Fin k))‖) ^ 2 =
+            (Real.sqrt (2 * ε)) ^ 2 * ‖(x : EuclideanSpace ℝ (Fin k))‖ ^ 2 := by ring
+        have hxle2 : ‖(x : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤ 1 := by
+          have habs : |‖(x : EuclideanSpace ℝ (Fin k))‖| ≤ |(1 : ℝ)| := by
+            rw [abs_of_nonneg (norm_nonneg (x : EuclideanSpace ℝ (Fin k))),
+              abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1)]
+            exact hxle
+          simpa using (sq_le_sq.mpr habs)
+        have hbnd : (Real.sqrt (2 * ε)) ^ 2 * ‖(x : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤
+            (Real.sqrt (2 * ε)) ^ 2 := by
+          simpa using (mul_le_mul_of_nonneg_left hxle2 (sq_nonneg (Real.sqrt (2 * ε))))
+        nlinarith [hsq, hsq', hbnd]
+      have hstep : modifiedCollarHomotopy hk c ε t y = y := by
+        dsimp [modifiedCollarHomotopy]
+        rw [if_neg hfy, if_pos hb]
+        rw [hpos, smul_zero]
+        rw [← hpos]
+        exact recombine_decompose hk y
+      rw [hstep]
+      exact Or.inr ⟨x, hx⟩
+
+private lemma frontier_eq_of_continuous_le {X : Type} [TopologicalSpace X] (g : X → ℝ)
+    (hg : Continuous g) (a : ℝ) {x : X} (hx : x ∈ frontier {x : X | g x ≤ a}) : g x = a := by
+  have hyc : x ∈ closure {x : X | g x ≤ a} := frontier_subset_closure hx
+  have hle : g x ≤ a := by
+    have hclosed : IsClosed {x : X | g x ≤ a} := isClosed_le hg continuous_const
+    exact closure_minimal (by intro z hz; exact hz) hclosed hyc
+  have hyc2 : x ∈ closure {x : X | a < g x} := by
+    have hfront : x ∈ frontier {x : X | a < g x} := by
+      rw [show {x : X | a < g x} = ({x : X | g x ≤ a})ᶜ by ext z; simp]
+      rwa [frontier_compl]
+    exact frontier_subset_closure hfront
+  have hge : a ≤ g x := by
+    have hclosed : IsClosed {x : X | a ≤ g x} := isClosed_le continuous_const hg
+    exact closure_minimal (by intro z hz; exact le_of_lt (by simpa using hz)) hclosed hyc2
+  exact le_antisymm hle hge
+
+private lemma morseNormalForm_eq_of_mem_frontier_sublevel {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    {y : MorseModel n} (hy : y ∈ frontier {y : MorseModel n | morseNormalForm hk c y ≤ c - ε}) :
+    morseNormalForm hk c y = c - ε :=
+  frontier_eq_of_continuous_le (fun y : MorseModel n => morseNormalForm hk c y)
+    (contDiff_morseNormalForm hk c).continuous (c - ε) hy
+
+private lemma negPart_sq_eq_of_mem_frontier {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
+    {y : MorseModel n} (hy : y ∈ frontier {y : MorseModel n | ‖negPart hk y‖ ^ 2 ≤ 2 * ε}) :
+    ‖negPart hk y‖ ^ 2 = 2 * ε :=
+  frontier_eq_of_continuous_le (fun y : MorseModel n => ‖negPart hk y‖ ^ 2)
+    ((contDiff_norm_sq ℝ (n := 0)).continuous.comp (continuous_negPart hk)) (2 * ε) hy
+
+private lemma posPart_eq_zero_of_morseNormalForm_eq {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    {y : MorseModel n} (hf : morseNormalForm hk c y = c - ε)
+    (hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε) : posPart hk y = 0 := by
+  have hP : ‖posPart hk y‖ ^ 2 = 0 := by
+    have hsplit := morseNormalForm_split hk c y
+    rw [hf] at hsplit
+    nlinarith [hb, sq_nonneg ‖posPart hk y‖]
+  have hnorm : ‖posPart hk y‖ = 0 := sq_eq_zero_iff.mp hP
+  exact norm_eq_zero.mp hnorm
+
+private lemma recombine_ratio_eq_self_of_morseNormalForm_eq {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    {y : MorseModel n} (hf : morseNormalForm hk c y = c - ε)
+    (hb : ¬‖negPart hk y‖ ^ 2 ≤ 2 * ε) :
+    recombine hk (negPart hk y)
+      ((Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2)) • posPart hk y) = y := by
+  have hP : ‖posPart hk y‖ ^ 2 = ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    have hsplit := morseNormalForm_split hk c y
+    rw [hf] at hsplit
+    nlinarith
+  have hN : 2 * ε < ‖negPart hk y‖ ^ 2 := lt_of_not_ge hb
+  have hPne : ‖negPart hk y‖ ^ 2 - 2 * ε ≠ 0 := by linarith
+  have hs1 : Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) = 1 := by
+    rw [hP]
+    rw [div_self hPne]
+    exact Real.sqrt_one
+  rw [hs1, one_smul]
+  exact recombine_decompose hk y
+
+private lemma recombine_ratio_homotopy_eq_self_of_morseNormalForm_eq {n k : ℕ} (hk : k ≤ n)
+    (c ε : ℝ) (t : ℝ) {y : MorseModel n} (hf : morseNormalForm hk c y = c - ε)
+    (hb : ¬‖negPart hk y‖ ^ 2 ≤ 2 * ε) :
+    recombine hk (negPart hk y)
+      ((1 - t + t * Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2)) • posPart hk y) = y := by
+  have hP : ‖posPart hk y‖ ^ 2 = ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    have hsplit := morseNormalForm_split hk c y
+    rw [hf] at hsplit
+    nlinarith
+  have hN : 2 * ε < ‖negPart hk y‖ ^ 2 := lt_of_not_ge hb
+  have hPne : ‖negPart hk y‖ ^ 2 - 2 * ε ≠ 0 := by linarith
+  have hs1 : Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) = 1 := by
+    rw [hP]
+    rw [div_self hPne]
+    exact Real.sqrt_one
+  rw [hs1]
+  ring_nf
+  rw [one_smul]
+  exact recombine_decompose hk y
+
+private lemma norm_ratio_smul_posPart_le {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (y : MorseModel n) :
+    ‖Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) • posPart hk y‖ ≤
+      Real.sqrt (‖negPart hk y‖ ^ 2 - 2 * ε) := by
+  by_cases hN : 2 * ε ≤ ‖negPart hk y‖ ^ 2
+  · by_cases hP : ‖posPart hk y‖ = 0
+    · have h0 : Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) • posPart hk y = 0 := by
+        rw [hP]
+        simp
+      rw [h0]
+      simp
+    · have hPpos : 0 < ‖posPart hk y‖ :=
+        lt_of_le_of_ne (norm_nonneg (posPart hk y)) (Ne.symm hP)
+      rw [norm_smul]
+      have ha : 0 ≤ Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) :=
+        Real.sqrt_nonneg _
+      rw [Real.norm_eq_abs, abs_of_nonneg ha]
+      have hratio : 0 ≤ (‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2 := by
+        exact div_nonneg (sub_nonneg.mpr hN) (sq_nonneg _)
+      have hsqrt : Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) *
+          Real.sqrt (‖posPart hk y‖ ^ 2) = Real.sqrt (‖negPart hk y‖ ^ 2 - 2 * ε) := by
+        have hm : (‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2 * ‖posPart hk y‖ ^ 2 =
+            ‖negPart hk y‖ ^ 2 - 2 * ε := by
+          rw [div_mul_eq_mul_div]
+          rw [mul_div_assoc]
+          rw [div_self ((pow_ne_zero_iff (by norm_num : (2 : ℕ) ≠ 0)).mpr hP)]
+          rw [mul_one]
+        calc
+          Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) *
+              Real.sqrt (‖posPart hk y‖ ^ 2)
+              = Real.sqrt (((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) *
+                  ‖posPart hk y‖ ^ 2) := by
+                exact (Real.sqrt_mul hratio (‖posPart hk y‖ ^ 2)).symm
+          _ = Real.sqrt (‖negPart hk y‖ ^ 2 - 2 * ε) := by rw [hm]
+      have hsq : Real.sqrt (‖posPart hk y‖ ^ 2) = ‖posPart hk y‖ := by
+        rw [Real.sqrt_sq (norm_nonneg _)]
+      rw [hsq] at hsqrt
+      rw [hsqrt]
+  · have hsub : ‖negPart hk y‖ ^ 2 - 2 * ε < 0 := sub_neg.mpr (lt_of_not_ge hN)
+    have hsqrt2 : Real.sqrt (‖negPart hk y‖ ^ 2 - 2 * ε) = 0 :=
+      Real.sqrt_eq_zero_of_nonpos (le_of_lt hsub)
+    rw [hsqrt2]
+    have hneg : (‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2 ≤ 0 := by
+      exact div_nonpos_of_nonpos_of_nonneg (le_of_lt hsub) (sq_nonneg _)
+    have hsqrt : Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) = 0 :=
+      Real.sqrt_eq_zero_of_nonpos hneg
+    rw [hsqrt]
+    simp
+
+private theorem continuousAt_collarRatio {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
+    (y : MorseModel n) (hP : ‖posPart hk y‖ ≠ 0) :
+    ContinuousAt (fun z : MorseModel n =>
+      recombine hk (negPart hk z)
+        (Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2) • posPart hk z)) y := by
+  have hnum : ContinuousAt (fun z : MorseModel n => ‖negPart hk z‖ ^ 2 - 2 * ε) y :=
+    ((contDiff_norm_sq ℝ (n := 0)).continuous.comp (continuous_negPart hk)).continuousAt.sub
+      continuousAt_const
+  have hden : ContinuousAt (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y :=
+    ((contDiff_norm_sq ℝ (n := 0)).continuous.comp (continuous_posPart hk)).continuousAt
+  have hdenne : ‖posPart hk y‖ ^ 2 ≠ 0 :=
+    (pow_ne_zero_iff (by norm_num : (2 : ℕ) ≠ 0)).mpr hP
+  have hdiv : ContinuousAt (fun z : MorseModel n =>
+      (‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2) y :=
+    hnum.div hden hdenne
+  have hsqrt : ContinuousAt (fun z : MorseModel n =>
+      Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2)) y :=
+    Real.continuous_sqrt.continuousAt.comp hdiv
+  have hsmul : ContinuousAt (fun z : MorseModel n =>
+      Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2) • posPart hk z) y := by
+    have hpair : ContinuousAt (fun z : MorseModel n =>
+        (Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2), posPart hk z)) y :=
+      ContinuousAt.prodMk hsqrt (continuous_posPart hk).continuousAt
+    exact continuous_smul.continuousAt.comp hpair
+  have hpair2 : ContinuousAt (fun z : MorseModel n =>
+      (negPart hk z,
+        Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2) • posPart hk z)) y :=
+    ContinuousAt.prodMk (continuous_negPart hk).continuousAt hsmul
+  exact (continuous_recombine hk).continuousAt.comp hpair2
+
+private theorem continuousOn_collarRatio {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) :
+    ContinuousOn (fun y : MorseModel n =>
+      recombine hk (negPart hk y)
+        (Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) • posPart hk y))
+      {y : MorseModel n | 2 * ε ≤ ‖negPart hk y‖ ^ 2 ∧ c - ε ≤ morseNormalForm hk c y} := by
+  let S : Set (MorseModel n) := {y : MorseModel n |
+    2 * ε ≤ ‖negPart hk y‖ ^ 2 ∧ c - ε ≤ morseNormalForm hk c y}
+  let F : MorseModel n → MorseModel n := fun y =>
+    recombine hk (negPart hk y)
+      (Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) • posPart hk y)
+  intro y hy
+  by_cases hN : 2 * ε < ‖negPart hk y‖ ^ 2
+  · have hP : ‖posPart hk y‖ ≠ 0 := by
+      intro hz
+      have hf : morseNormalForm hk c y = c - (1 / 2) * ‖negPart hk y‖ ^ 2 := by
+        rw [morseNormalForm_split]
+        rw [hz]
+        norm_num
+        ring
+      have hle : c - ε ≤ c - (1 / 2) * ‖negPart hk y‖ ^ 2 := by
+        simpa [hf] using hy.2
+      nlinarith [hN, hle]
+    have hF := continuousAt_collarRatio hk ε y hP
+    have hUniv : ContinuousWithinAt F Set.univ y := hF.continuousWithinAt
+    exact hUniv.mono (s := S) (by intro z hz; trivial)
+  · have hN2 : ‖negPart hk y‖ ^ 2 = 2 * ε := le_antisymm (le_of_not_gt hN) hy.1
+    have hFy : F y = recombine hk (negPart hk y) 0 := by
+      dsimp [F]
+      rw [hN2]
+      simp
+    have hsqrt0 : Tendsto (fun z : MorseModel n => Real.sqrt (‖negPart hk z‖ ^ 2 - 2 * ε))
+        (nhdsWithin y S) (nhds 0) := by
+      have hcont : ContinuousAt (fun z : MorseModel n => Real.sqrt (‖negPart hk z‖ ^ 2 - 2 * ε)) y := by
+        have hnum : ContinuousAt (fun z : MorseModel n => ‖negPart hk z‖ ^ 2 - 2 * ε) y :=
+          ((contDiff_norm_sq ℝ (n := 0)).continuous.comp (continuous_negPart hk)).continuousAt.sub
+            continuousAt_const
+        exact Real.continuous_sqrt.continuousAt.comp hnum
+      have hmain : Tendsto (fun z : MorseModel n => Real.sqrt (‖negPart hk z‖ ^ 2 - 2 * ε))
+          (nhds y) (nhds 0) := by
+        simpa [hN2] using hcont.tendsto
+      exact hmain.mono_left nhdsWithin_le_nhds
+    have hvsq : Tendsto (fun z : MorseModel n =>
+        Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2) • posPart hk z)
+        (nhdsWithin y S) (nhds 0) := by
+      have hsqueeze : Tendsto (fun z : MorseModel n =>
+          ‖Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2) • posPart hk z‖)
+          (nhdsWithin y S) (nhds 0) := by
+        apply squeeze_zero'
+        · exact Eventually.of_forall (fun z => norm_nonneg _)
+        · exact Eventually.of_forall (fun z => norm_ratio_smul_posPart_le hk ε z)
+        · exact hsqrt0
+      exact (tendsto_zero_iff_norm_tendsto_zero).2 hsqueeze
+    have hpair : Tendsto (fun z : MorseModel n =>
+        (negPart hk z,
+          Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2) • posPart hk z))
+        (nhdsWithin y S) (nhds (negPart hk y, (0 : EuclideanSpace ℝ (Fin (n - k))))) := by
+      have hfst : Tendsto (fun z : MorseModel n => negPart hk z) (nhdsWithin y S)
+          (nhds (negPart hk y)) :=
+        (continuous_negPart hk).continuousWithinAt.tendsto
+      exact hfst.prodMk_nhds hvsq
+    have hcomp : Tendsto (fun z : MorseModel n =>
+        recombine hk (negPart hk z)
+          (Real.sqrt ((‖negPart hk z‖ ^ 2 - 2 * ε) / ‖posPart hk z‖ ^ 2) • posPart hk z))
+        (nhdsWithin y S) (nhds (recombine hk (negPart hk y) 0)) :=
+      ((continuous_recombine hk).tendsto
+        (x := (negPart hk y, (0 : EuclideanSpace ℝ (Fin (n - k)))))).comp hpair
+    change Tendsto F (nhdsWithin y S) (nhds (F y))
+    rw [hFy]
+    exact hcomp
+
+private theorem continuousOn_modifiedCollarRetraction_sublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε δ : ℝ) :
+    ContinuousOn (modifiedCollarRetraction hk c ε)
+      {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε} := by
+  let L : Set (MorseModel n) := {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε}
+  let inner : MorseModel n → MorseModel n := fun y =>
+    if ‖negPart hk y‖ ^ 2 ≤ 2 * ε then spineMap hk y
+    else recombine hk (negPart hk y)
+      (Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) • posPart hk y)
+  have hinnerOn : ContinuousOn inner (L ∩ closure {y : MorseModel n | ¬(morseNormalForm hk c y ≤ c - ε)}) := by
+    have hge : L ∩ closure {y : MorseModel n | ¬(morseNormalForm hk c y ≤ c - ε)} ⊆
+        {y : MorseModel n | c - ε ≤ morseNormalForm hk c y} := by
+      intro y hy
+      have hyc : y ∈ closure {z : MorseModel n | ¬(morseNormalForm hk c z ≤ c - ε)} := hy.2
+      have hclosed : IsClosed {z : MorseModel n | c - ε ≤ morseNormalForm hk c z} :=
+        isClosed_le continuous_const (contDiff_morseNormalForm hk c).continuous
+      exact closure_minimal (by intro z hz; exact le_of_lt (lt_of_not_ge hz)) hclosed hyc
+    have hin : ContinuousOn inner {y : MorseModel n | c - ε ≤ morseNormalForm hk c y} := by
+      refine ContinuousOn.if ?_ ?_ ?_
+      · intro y hy
+        have hEq := negPart_sq_eq_of_mem_frontier hk ε hy.2
+        have hspine : spineMap hk y = recombine hk (negPart hk y) 0 := rfl
+        rw [hspine]
+        congr 1
+        rw [hEq]
+        simp
+      · exact (continuous_spineMap hk).continuousOn.mono (by intro y hy; exact hy.1)
+      · exact (continuousOn_collarRatio hk c ε).mono (by
+          intro y hy
+          have hNge : 2 * ε ≤ ‖negPart hk y‖ ^ 2 := by
+            have hclosed : IsClosed {z : MorseModel n | 2 * ε ≤ ‖negPart hk z‖ ^ 2} :=
+              isClosed_le continuous_const
+                ((contDiff_norm_sq ℝ (n := 0)).continuous.comp (continuous_negPart hk))
+            exact closure_minimal (by intro z hz; exact le_of_lt (lt_of_not_ge hz)) hclosed hy.2
+          exact ⟨hNge, hy.1⟩)
+    exact hin.mono hge
+  refine ContinuousOn.if ?_ ?_ hinnerOn
+  · intro y hy
+    have hEq := morseNormalForm_eq_of_mem_frontier_sublevel hk c ε hy.2
+    by_cases hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε
+    · have hpos := posPart_eq_zero_of_morseNormalForm_eq hk c ε hEq hb
+      have hspine : spineMap hk y = y := by
+        dsimp [spineMap]
+        rw [← hpos]
+        exact recombine_decompose hk y
+      rw [if_pos hb]
+      exact hspine.symm
+    · have hr3 := recombine_ratio_eq_self_of_morseNormalForm_eq hk c ε hEq hb
+      rw [if_neg hb]
+      exact hr3.symm
+  · exact continuous_id.continuousOn.mono (by intro y hy; exact hy.1)
+
+
+private theorem continuousAt_collarRatioHomotopy {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
+    (p : Set.Icc (0 : ℝ) 1 × MorseModel n) (hP : ‖posPart hk p.2‖ ≠ 0) :
+    ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      recombine hk (negPart hk q.2)
+        ((1 - (q.1 : ℝ) + (q.1 : ℝ) * Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+          ‖posPart hk q.2‖ ^ 2)) • posPart hk q.2)) p := by
+  have hnum : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      ‖negPart hk q.2‖ ^ 2 - 2 * ε) p :=
+    ((contDiff_norm_sq ℝ (n := 0)).continuous.comp
+      ((continuous_negPart hk).comp continuous_snd)).continuousAt.sub continuousAt_const
+  have hden : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n => ‖posPart hk q.2‖ ^ 2) p :=
+    ((contDiff_norm_sq ℝ (n := 0)).continuous.comp
+      ((continuous_posPart hk).comp continuous_snd)).continuousAt
+  have hdenne : ‖posPart hk p.2‖ ^ 2 ≠ 0 :=
+    (pow_ne_zero_iff (by norm_num : (2 : ℕ) ≠ 0)).mpr hP
+  have hdiv : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      (‖negPart hk q.2‖ ^ 2 - 2 * ε) / ‖posPart hk q.2‖ ^ 2) p :=
+    hnum.div hden hdenne
+  have hsqrt : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) / ‖posPart hk q.2‖ ^ 2)) p :=
+    Real.continuous_sqrt.continuousAt.comp hdiv
+  have ht : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n => (q.1 : ℝ)) p :=
+    (continuous_subtype_val.comp continuous_fst).continuousAt
+  have hcoef : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      1 - (q.1 : ℝ) + (q.1 : ℝ) * Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+        ‖posPart hk q.2‖ ^ 2)) p :=
+    ((continuousAt_const.sub ht).add (ht.mul hsqrt))
+  have hsmul : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      (1 - (q.1 : ℝ) + (q.1 : ℝ) * Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+        ‖posPart hk q.2‖ ^ 2)) • posPart hk q.2) p := by
+    have hpair : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        (1 - (q.1 : ℝ) + (q.1 : ℝ) * Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+          ‖posPart hk q.2‖ ^ 2), posPart hk q.2)) p :=
+      ContinuousAt.prodMk hcoef ((continuous_posPart hk).comp continuous_snd).continuousAt
+    exact continuous_smul.continuousAt.comp hpair
+  have hpair2 : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      (negPart hk q.2,
+        (1 - (q.1 : ℝ) + (q.1 : ℝ) * Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+          ‖posPart hk q.2‖ ^ 2)) • posPart hk q.2)) p :=
+    ContinuousAt.prodMk ((continuous_negPart hk).comp continuous_snd).continuousAt hsmul
+  exact (continuous_recombine hk).continuousAt.comp hpair2
+
+private theorem continuousOn_collarRatioHomotopy {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) :
+    ContinuousOn (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      recombine hk (negPart hk p.2)
+        ((1 - (p.1 : ℝ) + (p.1 : ℝ) * Real.sqrt ((‖negPart hk p.2‖ ^ 2 - 2 * ε) /
+          ‖posPart hk p.2‖ ^ 2)) • posPart hk p.2))
+      (Set.univ ×ˢ {y : MorseModel n | 2 * ε ≤ ‖negPart hk y‖ ^ 2 ∧ c - ε ≤ morseNormalForm hk c y}) := by
+  let S : Set (MorseModel n) := {y : MorseModel n |
+    2 * ε ≤ ‖negPart hk y‖ ^ 2 ∧ c - ε ≤ morseNormalForm hk c y}
+  let P : Set (Set.Icc (0 : ℝ) 1 × MorseModel n) := Set.univ ×ˢ S
+  let F : Set.Icc (0 : ℝ) 1 × MorseModel n → MorseModel n := fun p =>
+    recombine hk (negPart hk p.2)
+      ((1 - (p.1 : ℝ) + (p.1 : ℝ) * Real.sqrt ((‖negPart hk p.2‖ ^ 2 - 2 * ε) /
+        ‖posPart hk p.2‖ ^ 2)) • posPart hk p.2)
+  intro p hp
+  by_cases hN : 2 * ε < ‖negPart hk p.2‖ ^ 2
+  · have hP : ‖posPart hk p.2‖ ≠ 0 := by
+      intro hz
+      have hf : morseNormalForm hk c p.2 = c - (1 / 2) * ‖negPart hk p.2‖ ^ 2 := by
+        rw [morseNormalForm_split]
+        rw [hz]
+        norm_num
+        ring
+      have hle : c - ε ≤ c - (1 / 2) * ‖negPart hk p.2‖ ^ 2 := by
+        simpa [hf] using hp.2.2
+      nlinarith [hN, hle]
+    have hF := continuousAt_collarRatioHomotopy hk ε p hP
+    have hUniv : ContinuousWithinAt F Set.univ p := hF.continuousWithinAt
+    exact hUniv.mono (s := P) (by intro q hq; trivial)
+  · have hN2 : ‖negPart hk p.2‖ ^ 2 = 2 * ε := le_antisymm (le_of_not_gt hN) hp.2.1
+    have hFy : F p = recombine hk (negPart hk p.2) ((1 - (p.1 : ℝ)) • posPart hk p.2) := by
+      dsimp [F]
+      rw [hN2]
+      simp
+    have hsqrt0 : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        Real.sqrt (‖negPart hk q.2‖ ^ 2 - 2 * ε)) (nhdsWithin p P) (nhds 0) := by
+      have hcont : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+          Real.sqrt (‖negPart hk q.2‖ ^ 2 - 2 * ε)) p := by
+        have hnum : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+            ‖negPart hk q.2‖ ^ 2 - 2 * ε) p :=
+          ((contDiff_norm_sq ℝ (n := 0)).continuous.comp
+            ((continuous_negPart hk).comp continuous_snd)).continuousAt.sub continuousAt_const
+        exact Real.continuous_sqrt.continuousAt.comp hnum
+      have hmain : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+          Real.sqrt (‖negPart hk q.2‖ ^ 2 - 2 * ε)) (nhds p) (nhds 0) := by
+        simpa [hN2] using hcont.tendsto
+      exact hmain.mono_left nhdsWithin_le_nhds
+    have hvsq : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) / ‖posPart hk q.2‖ ^ 2) • posPart hk q.2)
+        (nhdsWithin p P) (nhds 0) := by
+      have hsqueeze : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+          ‖Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) / ‖posPart hk q.2‖ ^ 2) • posPart hk q.2‖)
+          (nhdsWithin p P) (nhds 0) := by
+        apply squeeze_zero'
+        · exact Eventually.of_forall (fun q => norm_nonneg _)
+        · exact Eventually.of_forall (fun q => norm_ratio_smul_posPart_le hk ε q.2)
+        · exact hsqrt0
+      exact (tendsto_zero_iff_norm_tendsto_zero).2 hsqueeze
+    have hfst : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n => negPart hk q.2)
+        (nhdsWithin p P) (nhds (negPart hk p.2)) :=
+      ((continuous_negPart hk).comp continuous_snd).continuousWithinAt.tendsto
+    have ht0c : ContinuousAt (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n => (q.1 : ℝ)) p :=
+      (continuous_subtype_val.comp continuous_fst).continuousAt
+    have hpos : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n => posPart hk q.2)
+        (nhdsWithin p P) (nhds (posPart hk p.2)) :=
+      ((continuous_posPart hk).comp continuous_snd).continuousWithinAt.tendsto
+    have hpart1 : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        (1 - (q.1 : ℝ)) • posPart hk q.2)
+        (nhdsWithin p P) (nhds ((1 - (p.1 : ℝ)) • posPart hk p.2)) := by
+      have hpairo : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+          ((1 - (q.1 : ℝ)), posPart hk q.2))
+          (nhdsWithin p P) (nhds ((1 - (p.1 : ℝ)), posPart hk p.2)) :=
+        (continuousAt_const.sub ht0c).continuousWithinAt.tendsto.prodMk_nhds hpos
+      have hsmulT : Tendsto (fun tw : ℝ × EuclideanSpace ℝ (Fin (n - k)) => tw.1 • tw.2)
+          (nhds ((1 - (p.1 : ℝ)), posPart hk p.2))
+          (nhds ((1 - (p.1 : ℝ)) • posPart hk p.2)) :=
+        continuous_smul.tendsto ((1 - (p.1 : ℝ)), posPart hk p.2)
+      exact hsmulT.comp hpairo
+    have hpart2 : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        (q.1 : ℝ) • (Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) / ‖posPart hk q.2‖ ^ 2) •
+          posPart hk q.2))
+        (nhdsWithin p P) (nhds 0) := by
+      have hpairs : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+          ((q.1 : ℝ), Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) / ‖posPart hk q.2‖ ^ 2) •
+            posPart hk q.2))
+          (nhdsWithin p P) (nhds ((p.1 : ℝ), (0 : EuclideanSpace ℝ (Fin (n - k))))) :=
+        ht0c.continuousWithinAt.tendsto.prodMk_nhds hvsq
+      have hsmulT : Tendsto (fun tw : ℝ × EuclideanSpace ℝ (Fin (n - k)) => tw.1 • tw.2)
+          (nhds ((p.1 : ℝ), (0 : EuclideanSpace ℝ (Fin (n - k)))))
+          (nhds ((p.1 : ℝ) • (0 : EuclideanSpace ℝ (Fin (n - k))))) :=
+        continuous_smul.tendsto ((p.1 : ℝ), (0 : EuclideanSpace ℝ (Fin (n - k))))
+      simpa using (hsmulT.comp hpairs)
+    have hsum : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        (1 - (q.1 : ℝ)) • posPart hk q.2 +
+          (q.1 : ℝ) • (Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) / ‖posPart hk q.2‖ ^ 2) •
+            posPart hk q.2))
+        (nhdsWithin p P) (nhds ((1 - (p.1 : ℝ)) • posPart hk p.2)) := by
+      simpa using (hpart1.add hpart2)
+    have hpair2 : Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        (negPart hk q.2,
+          (1 - (q.1 : ℝ) + (q.1 : ℝ) * Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+            ‖posPart hk q.2‖ ^ 2)) • posPart hk q.2))
+        (nhdsWithin p P) (nhds (negPart hk p.2, (1 - (p.1 : ℝ)) • posPart hk p.2)) := by
+      have hfuneq : (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+          (negPart hk q.2,
+            (1 - (q.1 : ℝ) + (q.1 : ℝ) * Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+              ‖posPart hk q.2‖ ^ 2)) • posPart hk q.2)) =
+          (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+            (negPart hk q.2,
+              (1 - (q.1 : ℝ)) • posPart hk q.2 +
+                (q.1 : ℝ) • (Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+                  ‖posPart hk q.2‖ ^ 2) • posPart hk q.2))) := by
+        funext q
+        congr 1
+        rw [add_smul]
+        rw [smul_smul]
+      rw [hfuneq]
+      exact hfst.prodMk_nhds hsum
+    have hcomp2 : Tendsto F (nhdsWithin p P) (nhds (F p)) := by
+      change Tendsto (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        recombine hk (negPart hk q.2)
+          ((1 - (q.1 : ℝ) + (q.1 : ℝ) * Real.sqrt ((‖negPart hk q.2‖ ^ 2 - 2 * ε) /
+            ‖posPart hk q.2‖ ^ 2)) • posPart hk q.2))
+        (nhdsWithin p P) (nhds (F p))
+      rw [hFy]
+      exact ((continuous_recombine hk).tendsto
+        (x := (negPart hk p.2, (1 - (p.1 : ℝ)) • posPart hk p.2))).comp hpair2
+    exact hcomp2
+
+private theorem continuousOn_modifiedCollarHomotopy_sublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε δ : ℝ) :
+    ContinuousOn (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2)
+      (Set.univ ×ˢ {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε}) := by
+  let L : Set (MorseModel n) := {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε}
+  let P : Set (Set.Icc (0 : ℝ) 1 × MorseModel n) := Set.univ ×ˢ L
+  let inner : Set.Icc (0 : ℝ) 1 × MorseModel n → MorseModel n := fun p =>
+    if ‖negPart hk p.2‖ ^ 2 ≤ 2 * ε then
+      recombine hk (negPart hk p.2) ((1 - (p.1 : ℝ)) • posPart hk p.2)
+    else recombine hk (negPart hk p.2)
+      ((1 - (p.1 : ℝ) + (p.1 : ℝ) * Real.sqrt ((‖negPart hk p.2‖ ^ 2 - 2 * ε) /
+        ‖posPart hk p.2‖ ^ 2)) • posPart hk p.2)
+  have hbCont : Continuous (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+      recombine hk (negPart hk p.2) ((1 - (p.1 : ℝ)) • posPart hk p.2)) := by
+    have ht : Continuous (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n => 1 - (p.1 : ℝ)) :=
+      continuous_const.sub (continuous_subtype_val.comp continuous_fst)
+    have hsmul : Continuous (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n =>
+        (1 - (p.1 : ℝ)) • posPart hk p.2) :=
+      continuous_smul.comp (ht.prodMk ((continuous_posPart hk).comp continuous_snd))
+    exact continuous_recombine hk |>.comp
+      (((continuous_negPart hk).comp continuous_snd).prodMk hsmul)
+  have hinnerOn : ContinuousOn inner (P ∩ closure {p | ¬(morseNormalForm hk c p.2 ≤ c - ε)}) := by
+    have hge : P ∩ closure {p | ¬(morseNormalForm hk c p.2 ≤ c - ε)} ⊆
+        Set.univ ×ˢ {y : MorseModel n | c - ε ≤ morseNormalForm hk c y} := by
+      intro p hp
+      have hclosed : IsClosed {q : Set.Icc (0 : ℝ) 1 × MorseModel n |
+          c - ε ≤ morseNormalForm hk c q.2} :=
+        isClosed_le continuous_const
+          ((contDiff_morseNormalForm hk c).continuous.comp continuous_snd)
+      exact ⟨trivial, closure_minimal (by intro q hq; exact le_of_lt (lt_of_not_ge hq)) hclosed hp.2⟩
+    have hin : ContinuousOn inner (Set.univ ×ˢ {y : MorseModel n | c - ε ≤ morseNormalForm hk c y}) := by
+      refine ContinuousOn.if ?_ ?_ ?_
+      · intro p hp
+        have hEq := frontier_eq_of_continuous_le
+          (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n => ‖negPart hk q.2‖ ^ 2)
+          ((contDiff_norm_sq ℝ (n := 0)).continuous.comp
+            ((continuous_negPart hk).comp continuous_snd)) (2 * ε) hp.2
+        have hEq' : ‖negPart hk p.2‖ ^ 2 = 2 * ε := by simpa using hEq
+        congr 1
+        rw [hEq']
+        simp
+      · exact hbCont.continuousOn.mono (by intro p hp; exact hp.1)
+      · exact (continuousOn_collarRatioHomotopy hk c ε).mono (by
+          intro q hq
+          have hNge : 2 * ε ≤ ‖negPart hk q.2‖ ^ 2 := by
+            have hclosed : IsClosed {a : Set.Icc (0 : ℝ) 1 × MorseModel n |
+                2 * ε ≤ ‖negPart hk a.2‖ ^ 2} :=
+              isClosed_le continuous_const
+                ((contDiff_norm_sq ℝ (n := 0)).continuous.comp
+                  ((continuous_negPart hk).comp continuous_snd))
+            have hsub : {a : Set.Icc (0 : ℝ) 1 × MorseModel n |
+                ¬‖negPart hk a.2‖ ^ 2 ≤ 2 * ε} ⊆
+                {a : Set.Icc (0 : ℝ) 1 × MorseModel n | 2 * ε ≤ ‖negPart hk a.2‖ ^ 2} := by
+              intro a ha
+              exact le_of_lt (lt_of_not_ge ha)
+            exact closure_minimal hsub hclosed hq.2
+          exact ⟨trivial, ⟨hNge, hq.1.2⟩⟩)
+    exact hin.mono hge
+  refine ContinuousOn.if ?_ ?_ hinnerOn
+  · intro p hp
+    have hEq := frontier_eq_of_continuous_le
+      (fun q : Set.Icc (0 : ℝ) 1 × MorseModel n => morseNormalForm hk c q.2)
+      ((contDiff_morseNormalForm hk c).continuous.comp continuous_snd) (c - ε) hp.2
+    by_cases hb : ‖negPart hk p.2‖ ^ 2 ≤ 2 * ε
+    · have hpos := posPart_eq_zero_of_morseNormalForm_eq hk c ε hEq hb
+      have hstep : recombine hk (negPart hk p.2) ((1 - (p.1 : ℝ)) • posPart hk p.2) = p.2 := by
+        rw [hpos, smul_zero]
+        rw [← hpos]
+        exact recombine_decompose hk p.2
+      rw [if_pos hb]
+      exact hstep.symm
+    · have hr3 := recombine_ratio_homotopy_eq_self_of_morseNormalForm_eq hk c ε (p.1 : ℝ) hEq hb
+      rw [if_neg hb]
+      exact hr3.symm
+  · exact (continuous_snd.comp continuous_id).continuousOn.mono (by intro p hp; exact hp.1)
+
+private theorem lowerCellUnion_subset_modifiedSublevel {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) {y : MorseModel n} (hy : y ∈ lowerCellUnion hk c ε) :
+    modifiedNormalForm hk c ε δ y ≤ c - ε := by
+  rcases hy with hf | hcell
+  · have hfy : morseNormalForm hk c y ≤ c - ε := by simpa [sublevel] using hf
+    exact le_trans (modifiedNormalForm_le_f hk c ε δ hε y) hfy
+  · rcases hcell with ⟨x, hx⟩
+    rw [← hx]
+    exact modifiedNormalForm_cell_mem_lower hk c ε δ hε hδ x
+
+noncomputable def modifiedCollarRetractionC {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) :
+    C({y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}, lowerUnion hk c ε) :=
+  ⟨fun y => ⟨modifiedCollarRetraction hk c ε y.1,
+    modifiedCollarRetraction_mem_lowerCellUnion hk c ε hε y.1⟩, by
+    have hcont : Continuous (fun y : {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+        modifiedCollarRetraction hk c ε y.1) := by
+      change Continuous (({y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε}).restrict
+        (modifiedCollarRetraction hk c ε))
+      exact (continuousOn_iff_continuous_restrict).1 (continuousOn_modifiedCollarRetraction_sublevel hk c ε δ)
+    exact (Topology.IsInducing.subtypeVal.continuous_iff).2 hcont⟩
+
+noncomputable def modifiedCollarInclusionC {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) :
+    C(lowerUnion hk c ε, {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}) :=
+  ⟨fun y => ⟨y.1, lowerCellUnion_subset_modifiedSublevel hk c ε δ hε hδ y.2⟩, by
+    have hcont : Continuous (fun y : lowerUnion hk c ε => (y.1 : MorseModel n)) :=
+      continuous_subtype_val
+    exact (Topology.IsInducing.subtypeVal.continuous_iff).2 hcont⟩
+
+noncomputable def modifiedCollarRetractionHomotopyFun {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) :
+    Set.Icc (0 : ℝ) 1 × {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} →
+      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} :=
+  fun p => ⟨modifiedCollarHomotopy hk c ε (1 - (p.1 : ℝ)) p.2.1,
+    modifiedCollarHomotopy_mem_sublevel hk c ε δ hε hδ (by linarith [p.1.2.2]) (by linarith [p.1.2.1]) p.2.2⟩
+
+noncomputable def modifiedCollarInclusionHomotopyFun {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    (hε : 0 < ε) :
+    Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε → lowerUnion hk c ε :=
+  fun p => ⟨modifiedCollarHomotopy hk c ε (1 - (p.1 : ℝ)) p.2.1,
+    modifiedCollarHomotopy_mem_lowerCellUnion hk c ε hε p.2.2⟩
+
+theorem continuous_modifiedCollarRetractionHomotopyFun {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) :
+    Continuous (modifiedCollarRetractionHomotopyFun hk c ε δ hε hδ) := by
+  let S : Set (Set.Icc (0 : ℝ) 1 × MorseModel n) :=
+    Set.univ ×ˢ {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε}
+  let F : Set.Icc (0 : ℝ) 1 × MorseModel n → MorseModel n := fun p =>
+    modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2
+  have hmainRestr : Continuous (S.restrict F) :=
+    (continuousOn_iff_continuous_restrict).1 (continuousOn_modifiedCollarHomotopy_sublevel hk c ε δ)
+  have hembed : Continuous (fun p : Set.Icc (0 : ℝ) 1 ×
+      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+      (⟨(p.1, (p.2.1 : MorseModel n)), ⟨trivial, p.2.2⟩⟩ : S)) := by
+    exact Continuous.subtype_mk
+      (f := fun p : Set.Icc (0 : ℝ) 1 ×
+        {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+        (p.1, (p.2.1 : MorseModel n)))
+      (continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd))
+      (by intro p; exact ⟨trivial, p.2.2⟩)
+  have hstep : Continuous (fun p : Set.Icc (0 : ℝ) 1 ×
+      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+      modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2.1) := by
+    have hc : Continuous (fun p : Set.Icc (0 : ℝ) 1 ×
+        {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+        (S.restrict F) (⟨(p.1, (p.2.1 : MorseModel n)), ⟨trivial, p.2.2⟩⟩ : S)) :=
+      hmainRestr.comp hembed
+    have hfun : (fun p : Set.Icc (0 : ℝ) 1 ×
+        {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+        (S.restrict F) (⟨(p.1, (p.2.1 : MorseModel n)), ⟨trivial, p.2.2⟩⟩ : S)) =
+        (fun p : Set.Icc (0 : ℝ) 1 ×
+        {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+        modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2.1) := by
+      funext p
+      simp [S, F]
+    rwa [← hfun]
+  let reparam : Set.Icc (0 : ℝ) 1 ×
+      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} →
+      Set.Icc (0 : ℝ) 1 × {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} :=
+    fun p => ((⟨1 - (p.1 : ℝ), by linarith [p.1.2.2], by linarith [p.1.2.1]⟩ :
+      Set.Icc (0 : ℝ) 1), p.2)
+  have hreparam : Continuous reparam := by
+    have ht : Continuous (fun p : Set.Icc (0 : ℝ) 1 ×
+        {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+        (⟨1 - (p.1 : ℝ), by linarith [p.1.2.2], by linarith [p.1.2.1]⟩ :
+          Set.Icc (0 : ℝ) 1)) := by
+      exact Continuous.subtype_mk
+        (f := fun p : Set.Icc (0 : ℝ) 1 ×
+          {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+          1 - (p.1 : ℝ))
+        (continuous_const.sub (continuous_subtype_val.comp continuous_fst))
+        (by intro p; exact ⟨by linarith [p.1.2.2], by linarith [p.1.2.1]⟩)
+    simpa [reparam] using (ht.prodMk continuous_snd)
+  have hcont : Continuous (fun p : Set.Icc (0 : ℝ) 1 ×
+      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+      modifiedCollarHomotopy hk c ε (1 - (p.1 : ℝ)) p.2.1) := by
+    have hcomp := hstep.comp hreparam
+    have hfun : (fun p : Set.Icc (0 : ℝ) 1 ×
+        {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+        modifiedCollarHomotopy hk c ε (1 - (p.1 : ℝ)) p.2.1) =
+        ((fun p : Set.Icc (0 : ℝ) 1 ×
+          {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+          modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2.1) ∘ reparam) := by
+      funext p
+      simp [reparam]
+    change Continuous ((fun p : Set.Icc (0 : ℝ) 1 ×
+      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε} =>
+      modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2.1) ∘ reparam)
+    exact hcomp
+  exact (Topology.IsInducing.subtypeVal.continuous_iff).2 hcont
+
+theorem continuous_modifiedCollarInclusionHomotopyFun {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) :
+    Continuous (modifiedCollarInclusionHomotopyFun hk c ε hε) := by
+  let S : Set (Set.Icc (0 : ℝ) 1 × MorseModel n) :=
+    Set.univ ×ˢ {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε}
+  let F : Set.Icc (0 : ℝ) 1 × MorseModel n → MorseModel n := fun p =>
+    modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2
+  have hmainRestr : Continuous (S.restrict F) :=
+    (continuousOn_iff_continuous_restrict).1 (continuousOn_modifiedCollarHomotopy_sublevel hk c ε δ)
+  have hembed : Continuous (fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+      (⟨(p.1, (p.2.1 : MorseModel n)), ⟨trivial,
+        lowerCellUnion_subset_modifiedSublevel hk c ε δ hε hδ p.2.2⟩⟩ : S)) := by
+    exact Continuous.subtype_mk
+      (f := fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+        (p.1, (p.2.1 : MorseModel n)))
+      (continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd))
+      (by intro p; exact ⟨trivial, lowerCellUnion_subset_modifiedSublevel hk c ε δ hε hδ p.2.2⟩)
+  have hstep : Continuous (fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+      modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2.1) := by
+    have hc : Continuous (fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+        (S.restrict F) (⟨(p.1, (p.2.1 : MorseModel n)), ⟨trivial,
+          lowerCellUnion_subset_modifiedSublevel hk c ε δ hε hδ p.2.2⟩⟩ : S)) :=
+      hmainRestr.comp hembed
+    have hfun : (fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+        (S.restrict F) (⟨(p.1, (p.2.1 : MorseModel n)), ⟨trivial,
+          lowerCellUnion_subset_modifiedSublevel hk c ε δ hε hδ p.2.2⟩⟩ : S)) =
+        (fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+        modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2.1) := by
+      funext p
+      simp [S, F]
+    rwa [← hfun]
+  let reparam : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε →
+      Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε :=
+    fun p => ((⟨1 - (p.1 : ℝ), by linarith [p.1.2.2], by linarith [p.1.2.1]⟩ :
+      Set.Icc (0 : ℝ) 1), p.2)
+  have hreparam : Continuous reparam := by
+    have ht : Continuous (fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+        (⟨1 - (p.1 : ℝ), by linarith [p.1.2.2], by linarith [p.1.2.1]⟩ :
+          Set.Icc (0 : ℝ) 1)) := by
+      exact Continuous.subtype_mk
+        (f := fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε => 1 - (p.1 : ℝ))
+        (continuous_const.sub (continuous_subtype_val.comp continuous_fst))
+        (by intro p; exact ⟨by linarith [p.1.2.2], by linarith [p.1.2.1]⟩)
+    simpa [reparam] using (ht.prodMk continuous_snd)
+  have hcont : Continuous (fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+      modifiedCollarHomotopy hk c ε (1 - (p.1 : ℝ)) p.2.1) := by
+    have hcomp := hstep.comp hreparam
+    have hfun : (fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+        modifiedCollarHomotopy hk c ε (1 - (p.1 : ℝ)) p.2.1) =
+        ((fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+          modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2.1) ∘ reparam) := by
+      funext p
+      simp [reparam]
+    change Continuous ((fun p : Set.Icc (0 : ℝ) 1 × lowerUnion hk c ε =>
+      modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2.1) ∘ reparam)
+    exact hcomp
+  exact (Topology.IsInducing.subtypeVal.continuous_iff).2 hcont
+
+theorem modifiedCollarRetractionHomotopyFun_zero {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ)
+    (y : {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}) :
+    modifiedCollarRetractionHomotopyFun hk c ε δ hε hδ (⟨0, by norm_num⟩, y) =
+      (modifiedCollarInclusionC hk c ε δ hε hδ).comp
+        (modifiedCollarRetractionC hk c ε δ hε) y := by
+  apply Subtype.ext
+  dsimp [modifiedCollarRetractionHomotopyFun, modifiedCollarInclusionC, modifiedCollarRetractionC]
+  rw [sub_zero]
+  exact modifiedCollarHomotopy_one hk c ε y.1
+
+theorem modifiedCollarRetractionHomotopyFun_one {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ)
+    (y : {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}) :
+    modifiedCollarRetractionHomotopyFun hk c ε δ hε hδ (⟨1, by norm_num⟩, y) = y := by
+  apply Subtype.ext
+  dsimp [modifiedCollarRetractionHomotopyFun]
+  rw [sub_self]
+  exact modifiedCollarHomotopy_zero hk c ε y.1
+
+theorem modifiedCollarInclusionHomotopyFun_zero {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (z : lowerUnion hk c ε) :
+    modifiedCollarInclusionHomotopyFun hk c ε hε (⟨0, by norm_num⟩, z) =
+      (modifiedCollarRetractionC hk c ε δ hε).comp
+        (modifiedCollarInclusionC hk c ε δ hε hδ) z := by
+  apply Subtype.ext
+  dsimp [modifiedCollarInclusionHomotopyFun, modifiedCollarRetractionC, modifiedCollarInclusionC]
+  rw [sub_zero]
+  exact modifiedCollarHomotopy_one hk c ε z.1
+
+theorem modifiedCollarInclusionHomotopyFun_one {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    (hε : 0 < ε) (z : lowerUnion hk c ε) :
+    modifiedCollarInclusionHomotopyFun hk c ε hε (⟨1, by norm_num⟩, z) = z := by
+  apply Subtype.ext
+  dsimp [modifiedCollarInclusionHomotopyFun]
+  rw [sub_self]
+  exact modifiedCollarHomotopy_zero hk c ε z.1
+
+noncomputable def modifiedCollarRetractionHomotopy {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) :
+    ContinuousMap.Homotopy
+      ((modifiedCollarInclusionC hk c ε δ hε hδ).comp
+        (modifiedCollarRetractionC hk c ε δ hε))
+      (ContinuousMap.id {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}) where
+  toFun := ContinuousMap.mk (modifiedCollarRetractionHomotopyFun hk c ε δ hε hδ)
+    (continuous_modifiedCollarRetractionHomotopyFun hk c ε δ hε hδ)
+  map_zero_left := by
+    intro y
+    exact modifiedCollarRetractionHomotopyFun_zero hk c ε δ hε hδ y
+  map_one_left := by
+    intro y
+    exact modifiedCollarRetractionHomotopyFun_one hk c ε δ hε hδ y
+
+noncomputable def modifiedCollarInclusionHomotopy {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) :
+    ContinuousMap.Homotopy
+      ((modifiedCollarRetractionC hk c ε δ hε).comp
+        (modifiedCollarInclusionC hk c ε δ hε hδ))
+      (ContinuousMap.id (lowerUnion hk c ε)) where
+  toFun := ContinuousMap.mk (modifiedCollarInclusionHomotopyFun hk c ε hε)
+    (continuous_modifiedCollarInclusionHomotopyFun hk c ε δ hε hδ)
+  map_zero_left := by
+    intro z
+    exact modifiedCollarInclusionHomotopyFun_zero hk c ε δ hε hδ z
+  map_one_left := by
+    intro z
+    exact modifiedCollarInclusionHomotopyFun_one hk c ε hε z
+
+noncomputable def modifiedSublevelHomotopyEquiv {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) :
+    ContinuousMap.HomotopyEquiv
+      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}
+      (lowerUnion hk c ε) where
+  toFun := modifiedCollarRetractionC hk c ε δ hε
+  invFun := modifiedCollarInclusionC hk c ε δ hε hδ
+  left_inv := ⟨modifiedCollarRetractionHomotopy hk c ε δ hε hδ⟩
+  right_inv := ⟨modifiedCollarInclusionHomotopy hk c ε δ hε hδ⟩
+
+theorem modifiedSublevel_homotopyEquiv_lowerCellUnion {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) :
+    Nonempty (ContinuousMap.HomotopyEquiv
+      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}
+      (lowerUnion hk c ε)) :=
+  ⟨modifiedSublevelHomotopyEquiv hk c ε δ hε hδ⟩
+
 end
 
 end DifferentialGeometry.Topology.Morse.CellAttachment
