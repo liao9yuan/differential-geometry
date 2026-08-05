@@ -616,13 +616,11 @@ theorem bilin_completed_head_zero {n : ℕ}
   rw [hcrossx0]
   rw [hcrossyCLM]
   rw [morseReducedFamily_apply]
-  simp [clmBilin]
-  rw [hcrossxCLM]
   have hcrossy0 : (a 0) morseE0 (morseCons (0 : ℝ) (morseTail y)) = -(morseHead y) * (a 0 morseE0 morseE0) := by
     have hswap : (a 0) morseE0 (morseCons (0 : ℝ) (morseTail y)) = (a 0) (morseCons (0 : ℝ) (morseTail y)) morseE0 :=
       hsym 0 morseE0 (morseCons (0 : ℝ) (morseTail y))
-    rw [hswap]
-    exact hcrossyCLM
+    simpa [hswap] using hcrossyCLM
+  simp [clmBilin, hcrossxCLM]
   simp [hcrossy0]
   have hpiv2 : morsePivot (clmBilin a) 0 = (a 0 morseE0 morseE0) := rfl
   simp [hpiv2]
