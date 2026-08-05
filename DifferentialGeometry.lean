@@ -721,6 +721,7 @@ import DifferentialGeometry.Analysis.Parabolic.Moser.LocalBoundedness
 import DifferentialGeometry.Analysis.Parabolic.Moser.LogEnergy
 import DifferentialGeometry.Analysis.Parabolic.Moser.Power
 import DifferentialGeometry.Analysis.Parabolic.Moser.Sobolev
+import DifferentialGeometry.Analysis.Parabolic.Moser.WeakHarnack
 import DifferentialGeometry.Analysis.Parabolic.LionsMagenes
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation

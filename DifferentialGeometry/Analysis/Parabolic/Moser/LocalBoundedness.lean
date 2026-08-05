@@ -61,17 +61,23 @@ def moserStepConstant
         4 * spatialMoserCutoffGradientConstant (I := I) g rho) +
     spatialMoserCutoffGradientConstant (I := I) g rho
 
+def moserLocalBoundFactor
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g) (p₀ a τ t₁ : ℝ) : ℝ :=
+  Real.exp
+    (∑' j, moserIterationCost (parabolicMoserDecay (Module.finrank ℝ E))
+      ((parabolicMoserDecay (Module.finrank ℝ E) *
+          Real.log (max 1
+            (localizedSobolevConstant (I := I) (M := M) g hdim)) +
+          Real.log (max 1 (moserStepConstant (I := I) rho a τ t₁))) / p₀)
+      (Real.log 16 / p₀) j)
+
 def moserLocalBound
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
     (rho : SmoothScalar g) (u : ℝ → M → ℝ) (p₀ a τ t₁ : ℝ) : ℝ :=
-  Real.exp
-      (∑' j, moserIterationCost (parabolicMoserDecay (Module.finrank ℝ E))
-        ((parabolicMoserDecay (Module.finrank ℝ E) *
-            Real.log (max 1
-              (localizedSobolevConstant (I := I) (M := M) g hdim)) +
-            Real.log (max 1 (moserStepConstant (I := I) rho a τ t₁))) / p₀)
-        (Real.log 16 / p₀) j) *
+  moserLocalBoundFactor (I := I) (M := M) g hdim rho p₀ a τ t₁ *
     moserNormalizedMass (I := I) (M := M) (Module.finrank ℝ E)
       rho u p₀ a τ t₁ 0
 
