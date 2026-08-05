@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.Iteration
 import DifferentialGeometry.Analysis.Parabolic.Moser.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Moser.ReverseHolder
+import DifferentialGeometry.Analysis.Parabolic.Moser.SpacetimeMeasure
 
 set_option autoImplicit false
 
@@ -54,6 +55,203 @@ def forwardMoserStepFactor
         (moserUpperTimeLevel τ b (k + 1)) (moserUpperTimeLevel τ b k)
         (spatialMoserCutoffGradientConstant (I := I) g rho * 4 ^ (2 * k)) ^
       (1 / parabolicMoserExponent n p₀ k)
+
+omit [I.Boundaryless] in
+theorem localizedSpacetimeRpowMoment_gain_le
+    (n : ℕ) [NeZero n]
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q a b level₁ level₂ level₃ : ℝ}
+    (hab : a ≤ b) (hlevel₁₂ : level₁ < level₂)
+    (hlevel₂₃ : level₂ < level₃) :
+    localizedSpacetimeRpowMoment (I := I) (M := M)
+        (spatialCutoffBetween rho level₂ level₃) u
+        (parabolicMoserGain n * q) a b ≤
+      ∫ t in a..b, ∫ x,
+        |(spatialCutoffBetween rho level₁ level₂).toFun x *
+            u t x ^ (q / 2)| ^ (2 + 4 / (n : ℝ))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  let inner := spatialCutoffBetween rho level₂ level₃
+  let middle := spatialCutoffBetween rho level₁ level₂
+  let p := parabolicMoserGain n * q
+  let critical := 2 + 4 / (n : ℝ)
+  let left : ℝ → ℝ := fun t =>
+    ∫ x, inner.toFun x ^ 2 * u t x ^ p ∂μ
+  let right : ℝ → ℝ := fun t =>
+    ∫ x, |middle.toFun x * u t x ^ (q / 2)| ^ critical ∂μ
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hn : 0 < (n : ℝ) := by
+    exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne n)
+  have hcritical : 0 ≤ critical := by
+    dsimp only [critical]
+    positivity
+  have hleft_joint : Continuous (fun z : ℝ × M =>
+      inner.toFun z.2 ^ 2 * u z.1 z.2 ^ p) :=
+    (inner.smooth.continuous.comp continuous_snd).pow 2 |>.mul
+      (hu.continuous.rpow_const fun z => Or.inl (hpos z.1 z.2).ne')
+  have hright_base : Continuous (fun z : ℝ × M =>
+      |middle.toFun z.2 * u z.1 z.2 ^ (q / 2)|) :=
+    (((middle.smooth.continuous.comp continuous_snd).mul
+      (hu.continuous.rpow_const fun z => Or.inl (hpos z.1 z.2).ne'))).abs
+  have hright_joint : Continuous (fun z : ℝ × M =>
+      |middle.toFun z.2 * u z.1 z.2 ^ (q / 2)| ^ critical) :=
+    hright_base.rpow_const fun _ => Or.inr hcritical
+  have hleft_cont : ContinuousOn left (Icc a b) := by
+    have h := DifferentialGeometry.Integral.Measure.integral_contOn_cpt
+      (K := Icc a b) μ
+      (fun t x => inner.toFun x ^ 2 * u t x ^ p)
+      isCompact_Icc hleft_joint.continuousOn
+    simpa only [left] using h
+  have hright_cont : ContinuousOn right (Icc a b) := by
+    have h := DifferentialGeometry.Integral.Measure.integral_contOn_cpt
+      (K := Icc a b) μ
+      (fun t x => |middle.toFun x * u t x ^ (q / 2)| ^ critical)
+      isCompact_Icc hright_joint.continuousOn
+    simpa only [right] using h
+  have hleft_int : IntervalIntegrable left volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hleft_cont
+  have hright_int : IntervalIntegrable right volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hright_cont
+  have hpoint : ∀ t ∈ Icc a b, left t ≤ right t := by
+    intro t _
+    have hu_slice : Continuous (u t) :=
+      hu.continuous.comp (continuous_const.prodMk continuous_id)
+    have hleft_slice : Continuous (fun x : M =>
+        inner.toFun x ^ 2 * u t x ^ p) :=
+      (inner.smooth.continuous.pow 2).mul
+        (hu_slice.rpow_const fun x => Or.inl (hpos t x).ne')
+    have hright_slice : Continuous (fun x : M =>
+        |middle.toFun x * u t x ^ (q / 2)| ^ critical) :=
+      (((middle.smooth.continuous.mul
+        (hu_slice.rpow_const fun x => Or.inl (hpos t x).ne')).abs).rpow_const
+          fun _ => Or.inr hcritical)
+    apply integral_mono
+      (hleft_slice.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _))
+      (hright_slice.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _))
+    intro x
+    have hcutoff := spatialCutoffBetween_sq_le_rpow rho
+      hlevel₁₂ hlevel₂₃ critical x
+    have hu_pow : 0 ≤ u t x ^ p := Real.rpow_nonneg (hpos t x).le p
+    have hidentity := abs_mul_rpow_half_parabolic_gain n
+      (spatialCutoffBetween_mem_Icc rho level₁ level₂ x).1 (hpos t x)
+      (q := q)
+    change inner.toFun x ^ 2 * u t x ^ p ≤
+      |middle.toFun x * u t x ^ (q / 2)| ^ critical
+    calc
+      _ ≤ middle.toFun x ^ critical * u t x ^ p :=
+        mul_le_mul_of_nonneg_right (by
+          simpa only [inner, middle] using hcutoff) hu_pow
+      _ = _ := by
+        simpa only [p, critical, middle] using hidentity.symm
+  rw [localizedSpacetimeRpowMoment_eq_intervalIntegral_of_continuous_pos
+    (I := I) (M := M) inner u hu.continuous hpos hab]
+  exact intervalIntegral.integral_mono_on hab hleft_int hright_int hpoint
+
+theorem localizedSpacetimeRpowMoment_gain_le_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q a innerTime outerTime level₀ level₁ level₂ level₃ B : ℝ}
+    (hq_pos : 0 < q) (hq_one : q < 1)
+    (haInner : a ≤ innerTime) (hinnerOuter : innerTime < outerTime)
+    (hlevel₀₁ : level₀ < level₁) (hlevel₁₂ : level₁ < level₂)
+    (hlevel₂₃ : level₂ < level₃) (hB : 0 ≤ B)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hpde : ∀ t ∈ Icc a outerTime, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    let n := Module.finrank ℝ E
+    let K := CutoffProfile.derivBound ^ 2 * B / (level₂ - level₁) ^ 2
+    localizedSpacetimeRpowMoment (I := I) (M := M)
+        (spatialCutoffBetween rho level₂ level₃) u
+        (parabolicMoserGain n * q) a innerTime ≤
+      localizedSobolevConstant (I := I) (M := M) g hdim *
+        (forwardMoserStepCoefficient q a innerTime outerTime K *
+          localizedSpacetimeRpowMoment (I := I) (M := M)
+            (spatialCutoffBetween rho level₀ level₁) u q a outerTime) ^
+          parabolicMoserGain n := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let outer := spatialCutoffBetween rho level₀ level₁
+  let middle := spatialCutoffBetween rho level₁ level₂
+  let inner := spatialCutoffBetween rho level₂ level₃
+  let K := CutoffProfile.derivBound ^ 2 * B / (level₂ - level₁) ^ 2
+  let L := localizedSpacetimeRpowMoment (I := I) (M := M)
+    outer u q a outerTime
+  have haOuter : a ≤ outerTime := haInner.trans hinnerOuter.le
+  have hK : 0 ≤ K := by
+    exact div_nonneg (mul_nonneg (sq_nonneg _) hB) (sq_nonneg _)
+  have hL : 0 ≤ L := by
+    exact localizedSpacetimeRpowMoment_nonneg (I := I) (M := M)
+      outer u (fun t x => (hpos t x).le) q a outerTime
+  have houterMass :
+      (∫ t in a..outerTime,
+        localizedL2Mass (I := I) (M := M) outer
+          (smoothScalarSlice (I := I) g (fun s x => u s x ^ (q / 2))
+            (contMDiff_rpow_of_pos hu hpos (q / 2)) t)) = L := by
+    dsimp only [L]
+    rw [localizedSpacetimeRpowMoment_eq_intervalIntegral_of_continuous_pos
+      (I := I) (M := M) outer u hu.continuous hpos haOuter]
+    apply intervalIntegral.integral_congr
+    intro t _
+    simpa only [outer] using localizedL2Mass_rpow_half
+      (I := I) (M := M) g
+        (spatialCutoffBetween rho level₀ level₁) u hu hpos q t
+  have hreverse := positive_rpow_reverse_holder_step
+    (I := I) (M := M) g hdim middle outer u hu hpos
+      hq_pos hq_one haInner hinnerOuter hK hL hpde
+      (fun x => by
+        simpa only [middle, outer] using
+          spatialCutoffBetween_sq_le rho hlevel₀₁ hlevel₁₂ x)
+      (fun x => by
+        simpa only [middle, outer, K] using
+          spatialCutoffBetween_gradient_le (I := I) g rho
+            hlevel₀₁ hlevel₁₂ hB hrho x)
+      houterMass.le
+  have hbridge := localizedSpacetimeRpowMoment_gain_le n rho u hu hpos
+    haInner hlevel₁₂ hlevel₂₃ (q := q)
+  change localizedSpacetimeRpowMoment (I := I) (M := M) inner u
+      (parabolicMoserGain n * q) a innerTime ≤
+    localizedSobolevConstant (I := I) (M := M) g hdim *
+      (forwardMoserStepCoefficient q a innerTime outerTime K * L) ^
+        parabolicMoserGain n
+  calc
+    localizedSpacetimeRpowMoment (I := I) (M := M) inner u
+          (parabolicMoserGain n * q) a innerTime ≤
+        ∫ t in a..innerTime, ∫ x,
+          |middle.toFun x * u t x ^ (q / 2)| ^ (2 + 4 / (n : ℝ))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+      simpa only [inner, middle] using hbridge
+    _ ≤ localizedSobolevConstant (I := I) (M := M) g hdim *
+        (((innerTime - a + 1) *
+            positiveRpowCommonEnergyBound q innerTime outerTime K L + K * L) ^
+          parabolicMoserGain n) := by
+      simpa only [n, parabolicMoserGain] using hreverse
+    _ = localizedSobolevConstant (I := I) (M := M) g hdim *
+        (forwardMoserStepCoefficient q a innerTime outerTime K * L) ^
+          parabolicMoserGain n := by
+      congr 2
+      unfold forwardMoserStepCoefficient positiveRpowCommonEnergyBound
+        positiveRpowEnergyBound
+      ring
 
 theorem forwardMoserStepCoefficient_nonneg
     {q a t₁ t₂ K : ℝ}
