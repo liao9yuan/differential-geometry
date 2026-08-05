@@ -1,11 +1,13 @@
 import DifferentialGeometry.Topology.Morse.MorseLemma
 import Mathlib.Analysis.Calculus.FDeriv.Comp
+import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.LinearAlgebra.QuadraticForm.Real
 
 namespace DifferentialGeometry.Topology.Morse
 
 open Filter
 open scoped Topology
+open scoped Manifold
 
 noncomputable section
 
@@ -460,6 +462,47 @@ theorem morseLemma {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*} [Topol
     _ = h (ψ y) := rfl
     _ = h 0 + (1 / 2) * ∑ i : Fin n, w i * y i * y i := hnorm
     _ = f p + (1 / 2) * ∑ i : Fin n, w i * y i * y i := by rw [h0]
+
+theorem morseLemma_of_contMDiff {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
+    [TopologicalSpace M] [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H)
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f) (p : M)
+    (hcrit : fderiv ℝ (fun y => f ((extChartAt I p).symm y)) (extChartAt I p p) = 0)
+    (hnd : (QuadraticMap.associated (R := ℝ)
+      (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p))).SeparatingLeft) :
+    ∃ ψ : OpenPartialHomeomorph (MorseModel n) (MorseModel n),
+      0 ∈ ψ.source ∧ 0 ∈ ψ.target ∧ ψ 0 = 0 ∧
+      ∃ w : Fin n → ℝ,
+        (∀ i, w i = -1 ∨ w i = 1) ∧
+        {i : Fin n | w i < 0}.ncard =
+          sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) ∧
+        ∃ L : MorseModel n ≃ₗ[ℝ] MorseModel n,
+          ∀ y ∈ ψ.target,
+            f ((extChartAt I p).symm (extChartAt I p p + L.symm (ψ y))) =
+              f p + (1 / 2) * ∑ i : Fin n, w i * y i * y i := by
+  let gp : MorseModel n → ℝ := fun y => f ((extChartAt I p).symm y)
+  have hg : ContDiffOn ℝ (n + 3) gp (extChartAt I p).target := by
+    have hc : ContMDiffOn I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f Set.univ := by
+      intro x hx
+      exact hf x
+    have hcsub : ContMDiffOn I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f (chartAt H p).source :=
+      hc.mono (by intro x hx; trivial)
+    have hc' : ContMDiffOn 𝓘(ℝ, MorseModel n) 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞)
+        (f ∘ (extChartAt I p).symm) (extChartAt I p '' (chartAt H p).source) :=
+      (contMDiffOn_iff_source_of_mem_maximalAtlas (I := I) (I' := 𝓘(ℝ, ℝ))
+      (n := (⊤ : WithTop ℕ∞)) (e := chartAt H p) (IsManifold.chart_mem_maximalAtlas p)
+      (s := (chartAt H p).source) (hs := by intro x hx; exact hx)).1 hcsub
+    have hcd : ContDiffOn ℝ (⊤ : WithTop ℕ∞) (f ∘ (extChartAt I p).symm)
+        (extChartAt I p '' (chartAt H p).source) :=
+      (contMDiffOn_iff_contDiffOn).1 hc'
+    have hcd' : ContDiffOn ℝ (n + 3) (f ∘ (extChartAt I p).symm)
+        (extChartAt I p '' (chartAt H p).source) :=
+      hcd.of_le (by exact le_top : (n + 3 : WithTop ℕ∞) ≤ ⊤)
+    have hrange : extChartAt I p '' (chartAt H p).source = (extChartAt I p).target := by
+      exact (OpenPartialHomeomorph.extend_target_eq_image_source (f := chartAt H p) (I := I)).symm
+    rw [show gp = f ∘ (extChartAt I p).symm by rfl]
+    rwa [← hrange]
+  exact morseLemma I f p hg hcrit hnd
 
 end
 end DifferentialGeometry.Topology.Morse
