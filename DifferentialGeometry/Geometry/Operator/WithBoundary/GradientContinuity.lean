@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Gradient
+import DifferentialGeometry.Geometry.Operator.WithBoundary.Gradient
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Divergence.PartialDerivWithin
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
@@ -15,9 +15,13 @@ open scoped Manifold Topology ContDiff Matrix BigOperators ENNReal
 
 open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 namespace WithBoundary
+
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E]
@@ -232,13 +236,13 @@ private lemma g_inner_gradFun_gradFun_continuous_general
   exact (hcontOn x hx_chart).continuousAt (hopen.mem_nhds hx_chart)
 
 end WithBoundary
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry
 
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 namespace WithBoundary
 
 variable {n : ℕ} [NeZero n]
@@ -303,8 +307,8 @@ theorem integrable_g_inner_gradFun_gradFun
     (HasCompactSupport.of_compactSpace _)
 
 end WithBoundary
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry
 
 end

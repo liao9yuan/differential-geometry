@@ -19,6 +19,8 @@ namespace Integral
 namespace DivergenceTheorem
 namespace WithBoundary
 
+open DifferentialGeometry.Geometry.Operator.WithBoundary
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

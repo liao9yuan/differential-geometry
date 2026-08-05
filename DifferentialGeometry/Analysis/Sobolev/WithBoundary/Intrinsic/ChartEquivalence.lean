@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Intrinsic.Lp
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Intrinsic.Algebra
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Gradient
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Laplacian
+import DifferentialGeometry.Geometry.Operator.WithBoundary.Gradient
+import DifferentialGeometry.Geometry.Operator.WithBoundary.Laplacian
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Divergence.IntegrationByParts
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Divergence.InteriorCompactSupport
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Divergence.Global
@@ -36,6 +36,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 open DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp
 
 private lemma exists_bound_continuous_compactSpace

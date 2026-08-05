@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Laplacian
+import DifferentialGeometry.Geometry.Operator.WithBoundary.Laplacian
 import DifferentialGeometry.Geometry.Boundary.ModelBoundary
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 open DifferentialGeometry.Geometry.Curvature
@@ -88,6 +88,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 
 namespace DifferentialGeometry
 namespace Geometry

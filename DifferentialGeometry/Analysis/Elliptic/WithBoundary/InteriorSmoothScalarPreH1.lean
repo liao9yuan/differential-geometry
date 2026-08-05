@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Operator.Laplacian
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Gradient
+import DifferentialGeometry.Geometry.Operator.WithBoundary.Gradient
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Green
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Laplacian
+import DifferentialGeometry.Geometry.Operator.WithBoundary.Laplacian
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
@@ -29,6 +29,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 
 private local instance : MeasurableSpace (EuclideanSpace ℝ (Fin n)) :=
   borel _

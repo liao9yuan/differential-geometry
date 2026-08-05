@@ -27,6 +27,7 @@ variable {M : Type*} [TopologicalSpace M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 
 private local instance : MeasurableSpace (EuclideanSpace ℝ (Fin n)) :=
   borel _

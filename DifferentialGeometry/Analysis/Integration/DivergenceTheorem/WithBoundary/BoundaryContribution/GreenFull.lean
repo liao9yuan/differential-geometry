@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.GreenWithBoundary
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.GradientGlobalSection
+import DifferentialGeometry.Geometry.Operator.WithBoundary.GradientGlobalSection
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.SurfaceIntegralIdentification
 import DifferentialGeometry.Geometry.Boundary.OutwardNormal
 import DifferentialGeometry.Geometry.Boundary.SurfaceMeasure
@@ -22,6 +22,8 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 namespace WithBoundary
+
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 
 open DifferentialGeometry.Integral.Measure
 

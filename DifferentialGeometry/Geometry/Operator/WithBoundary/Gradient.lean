@@ -17,9 +17,13 @@ open scoped Manifold Topology ContDiff Matrix
 
 open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 namespace WithBoundary
+
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E]
@@ -642,6 +646,6 @@ lemma hasCompactSupport_grad_g_with_boundary [T2Space M]
   exact support_grad_g_with_boundary_subset (I := I) g f hx
 
 end WithBoundary
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry

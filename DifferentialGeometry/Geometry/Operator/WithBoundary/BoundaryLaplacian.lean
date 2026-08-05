@@ -10,9 +10,13 @@ open scoped Manifold Topology ContDiff
 
 open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 namespace WithBoundary
+
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -92,6 +96,6 @@ theorem boundaryLaplacian_eq_zero_of_boundaryless
   exact (IsEmpty.false x).elim
 
 end WithBoundary
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry

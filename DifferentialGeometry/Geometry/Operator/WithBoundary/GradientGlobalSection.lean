@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Gradient
+import DifferentialGeometry.Geometry.Operator.WithBoundary.Gradient
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Divergence.PartialDerivWithin
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
@@ -14,9 +14,13 @@ open scoped Manifold Topology ContDiff Matrix
 
 open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 namespace WithBoundary
+
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+open DifferentialGeometry.Geometry.Operator.WithBoundary
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E]
@@ -165,13 +169,13 @@ theorem gradFun_contMDiff_total_full
   exact hsm
 
 end WithBoundary
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry
 
 namespace DifferentialGeometry
-namespace Integral
-namespace DivergenceTheorem
+namespace Geometry
+namespace Operator
 namespace WithBoundary
 
 variable {n : ℕ} [NeZero n]
@@ -225,8 +229,8 @@ def grad_g_full_section
       grad_g_with_boundary (I := modelWithCornersEuclideanHalfSpace n) g f x := rfl
 
 end WithBoundary
-end DivergenceTheorem
-end Integral
+end Operator
+end Geometry
 end DifferentialGeometry
 
 end
