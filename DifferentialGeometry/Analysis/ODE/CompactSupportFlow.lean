@@ -35,7 +35,7 @@ theorem exists_uniform_localFlow_on_compactSupport [FiniteDimensional ℝ E] [Co
     [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (v : (x : M) → TangentSpace I x)
-    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (⊤ : WithTop ℕ∞)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     {K : Set M} (hK : IsCompact K) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ y ∈ K,
@@ -49,16 +49,12 @@ theorem exists_uniform_localFlow_on_compactSupport [FiniteDimensional ℝ E] [Co
             ((1 : ℝ →L[ℝ] ℝ).smulRight (v (Ψ p t)))) := by
   have hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (v q.2) : TangentBundle I M)) := by
-    have hle_top_inf : ∞ ≤ (⊤ : WithTop ℕ∞) := le_top
-    have hv_inf : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-        (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
-      hv.of_le hle_top_inf
     have hproj : ContMDiff (𝓘(ℝ, ℝ).prod I) I ∞
         (Prod.snd : ℝ × M → M) :=
       contMDiff_snd (I := 𝓘(ℝ, ℝ)) (J := I) (n := ∞)
     have hcomp : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         ((fun x : M => (⟨x, v x⟩ : TangentBundle I M)) ∘ (Prod.snd : ℝ × M → M)) :=
-      hv_inf.comp hproj
+      hv.comp hproj
     simpa [Function.comp_def] using hcomp
   have hlocal : ∀ y : K,
       ∃ U : Set M, y.1 ∈ U ∧ IsOpen U ∧ ∃ T : ℝ, 0 < T ∧
@@ -119,7 +115,7 @@ theorem exists_uniform_localIntegralCurveOn_of_compactSupport [FiniteDimensional
     [CompleteSpace E] [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (v : (x : M) → TangentSpace I x)
-    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (⊤ : WithTop ℕ∞)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v)) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ x : M,
@@ -143,13 +139,13 @@ theorem exists_globalIntegralCurve_of_compactSupport [FiniteDimensional ℝ E] [
     [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (v : (x : M) → TangentSpace I x)
-    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (⊤ : WithTop ℕ∞)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v)) :
     ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v := by
   rcases exists_uniform_localIntegralCurveOn_of_compactSupport v hv hsupp with ⟨ε, hε, hlocal⟩
   have hv1 : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
-    hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+    hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
   exact fun x => exists_isMIntegralCurve_of_isMIntegralCurveOn hv1 hε hlocal x
 
 lemma contMDiffAt_globalFlow_step [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless]
@@ -217,7 +213,7 @@ lemma contMDiffAt_globalFlow_step [FiniteDimensional ℝ E] [CompleteSpace E] [I
 theorem contMDiffAt_globalFlow_of_compactSupport_nonneg [FiniteDimensional ℝ E]
     [CompleteSpace E] [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (v : (x : M) → TangentSpace I x)
-    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (⊤ : WithTop ℕ∞)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v)) {t₀ : ℝ} (ht₀ : 0 ≤ t₀) (x₀ : M) :
     ContMDiffAt I I ∞
@@ -296,7 +292,7 @@ theorem contMDiffAt_globalFlow_of_compactSupport_nonneg [FiniteDimensional ℝ E
         dsimp [K, γ]
         exact ⟨s i, hsIcc i, rfl⟩
       have hv1 : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
-        hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+        hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
       have hstep' := contMDiffAt_globalFlow_step v hv1 hcomplete hε hflow
         (s := s i) (x₀ := x₀) (hP := hPi) (hγs := hγs) (σ := s (i + 1) - s i) (hstep i)
       simpa [hP, add_comm, sub_add_cancel] using hstep'
@@ -316,7 +312,7 @@ theorem contMDiffAt_globalFlow_of_compactSupport_nonneg [FiniteDimensional ℝ E
 theorem contMDiffAt_globalFlow_of_compactSupport [FiniteDimensional ℝ E] [CompleteSpace E]
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (v : (x : M) → TangentSpace I x)
-    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (⊤ : WithTop ℕ∞)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v)) (t₀ : ℝ) (x₀ : M) :
     ContMDiffAt I I ∞
@@ -324,7 +320,7 @@ theorem contMDiffAt_globalFlow_of_compactSupport [FiniteDimensional ℝ E] [Comp
   by_cases ht₀ : 0 ≤ t₀
   · exact contMDiffAt_globalFlow_of_compactSupport_nonneg v hv hsupp ht₀ x₀
   · have hneg : 0 ≤ -t₀ := by linarith
-    have hvneg : ContMDiff I (I.prod 𝓘(ℝ, E)) (⊤ : WithTop ℕ∞)
+    have hvneg : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun x : M => (⟨x, -v x⟩ : TangentBundle I M)) :=
       ContMDiff.neg_section hv
     have hsuppneg : IsCompact (tsupport (-v)) := by
@@ -344,7 +340,7 @@ theorem contMDiffAt_globalFlow_of_compactSupport [FiniteDimensional ℝ E] [Comp
       have hcomplete := exists_globalIntegralCurve_of_compactSupport v hv hsupp
       have hcomplete' := exists_globalIntegralCurve_of_compactSupport (-v) hvneg hsuppneg
       have hvneg1 : CMDiff 1 (fun x : M => (⟨x, -v x⟩ : TangentBundle I M)) :=
-        hvneg.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+        hvneg.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
       have hγ : IsMIntegralCurve (curveAt v hcomplete x) v :=
         curveAt_integralCurve v hcomplete x
       have hrev : IsMIntegralCurve (fun s : ℝ => curveAt v hcomplete x (-s)) (-v) := by

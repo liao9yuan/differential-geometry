@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.IntegralCurveTransport
+import DifferentialGeometry.Analysis.ODE.CompactSupportFlow
 import DifferentialGeometry.Topology.Morse.Defs
 import DifferentialGeometry.Topology.Morse.LocalNormalForm
 import Mathlib.Geometry.Manifold.Diffeomorph
@@ -263,9 +264,101 @@ theorem sublevel_transport_of_unitSpeedVectorField [T2Space M] (I : ModelWithCor
     (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
     (hab : a ≤ b) :
     (fun x : M => (unitSpeedFlow_of_vectorField I a b f hf v hv hdf hcomplete).flow (a - b) x) ''
-        sublevel f a = sublevel f b :=
+    sublevel f a = sublevel f b :=
   UnitSpeedFlow.image_sublevels (a := a) (b := b)
     (unitSpeedFlow_of_vectorField I a b f hf v hv hdf hcomplete) hab
+
+set_option backward.isDefEq.respectTransparency false in
+theorem sublevel_transport_of_stripUnitSpeedVectorField [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)
+    (v : (x : M) → TangentSpace I x)
+    (hv : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc a b,
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) :
+    (fun x : M => curveAt v hcomplete x (a - b)) '' sublevel f a = sublevel f b := by
+  let t : ℝ := b - a
+  have ht_def : t = b - a := rfl
+  have ht : 0 ≤ t := by dsimp [t]; linarith
+  let Φ : ℝ → M → M := fun s x => curveAt v hcomplete x s
+  have hΦadd : ∀ s r : ℝ, ∀ x : M, Φ (s + r) x = Φ r (Φ s x) := by
+    intro s r x
+    exact curveAt_add v hv hcomplete x s r
+  have hrate_Φ : ∀ x : M, ∀ s : ℝ, 0 ≤ s → f x - s ≤ f (Φ s x) ∧ f (Φ s x) ≤ f x := by
+    intro x s hs
+    have hrb := f_rate_bounds_of_integralCurve f hf v hrate (hγ := curveAt_integralCurve v hcomplete x) (t := s) hs
+    simpa [Φ, curveAt_zero v hcomplete x] using hrb
+  have hstrip_Φ : ∀ x : M, ∀ s : ℝ, 0 ≤ s →
+      (∀ u ∈ Set.Icc (0 : ℝ) s, Φ u x ∈ f ⁻¹' Set.Icc a b) →
+      f (Φ s x) = f x - s := by
+    intro x s hs hstay
+    have heq := f_eq_sub_of_integralCurve_on_strip f hf v hdfOn (hγ := curveAt_integralCurve v hcomplete x)
+      (t := s) hs (fun u hu => by simpa [Φ] using hstay u hu)
+    simpa [Φ, curveAt_zero v hcomplete x] using heq
+  ext y
+  constructor
+  · rintro ⟨x, hx, hxy⟩
+    rw [← hxy]
+    change f (Φ (a - b) x) ≤ b
+    have hγ' : IsMIntegralCurve (fun s : ℝ => Φ (s - t) x) v := by
+      have hc := IsMIntegralCurve.comp_add (curveAt_integralCurve v hcomplete x) (-t)
+      simpa [Φ, sub_eq_add_neg] using hc
+    have hrb := f_rate_bounds_of_integralCurve f hf v hrate (hγ := hγ') (t := t) ht
+    have hmain : f (Φ (-t) x) ≤ f x + t := by
+      have h1 : f (Φ (-t) x) - t ≤ f x := by
+        simpa [Φ, curveAt_zero v hcomplete x] using hrb.1
+      linarith
+    have hneg : a - b = -t := by dsimp [t]; ring
+    rw [hneg]
+    have hx' : f x ≤ a := by simpa [sublevel] using hx
+    linarith [ht_def]
+  · intro hy
+    have hflow : f (Φ t y) ≤ a := by
+      by_cases hst : a ≤ f y - t
+      · have hstay : ∀ s ∈ Set.Icc (0 : ℝ) t, Φ s y ∈ f ⁻¹' Set.Icc a b := by
+          intro s hs
+          have hrb := hrate_Φ y s hs.1
+          have hfy : f y ≤ b := by simpa [sublevel] using hy
+          constructor <;> linarith [hst, hrb.1, hrb.2, hs.2, hfy]
+        have heq := hstrip_Φ y t ht hstay
+        have hfy : f y ≤ b := by simpa [sublevel] using hy
+        linarith [heq, hfy, ht_def]
+      · by_cases hbelow : f y ≤ a
+        · exact (hrate_Φ y t ht).2.trans hbelow
+        · have hafy : a < f y := lt_of_not_ge hbelow
+          let s₀ : ℝ := f y - a
+          have hs₀pos : 0 < s₀ := by dsimp [s₀]; linarith
+          have hs₀t : s₀ < t := by
+            dsimp [s₀]
+            linarith
+          have hstay₀ : ∀ s ∈ Set.Icc (0 : ℝ) s₀, Φ s y ∈ f ⁻¹' Set.Icc a b := by
+            intro s hs
+            have hrb := hrate_Φ y s hs.1
+            have hfy : f y ≤ b := by simpa [sublevel] using hy
+            constructor <;> linarith [hs.2, hrb.1, hrb.2, hfy]
+          have heq₀ := hstrip_Φ y s₀ (le_of_lt hs₀pos) hstay₀
+          have hval₀ : f (Φ s₀ y) = a := by
+            dsimp [s₀] at heq₀ ⊢
+            linarith
+          have hrb := hrate_Φ (Φ s₀ y) (t - s₀) (by linarith)
+          have hflow' : Φ t y = Φ (t - s₀) (Φ s₀ y) := by
+            have hh := hΦadd s₀ (t - s₀) y
+            change Φ (s₀ + (t - s₀)) y = Φ (t - s₀) (Φ s₀ y) at hh
+            rwa [add_sub_cancel] at hh
+          rw [hflow']
+          linarith
+    refine ⟨Φ t y, ?_, ?_⟩
+    · change f (Φ t y) ≤ a
+      exact hflow
+    · have hh := hΦadd t (a - b) y
+      have hz : t + (a - b) = 0 := by dsimp [t]; ring
+      calc
+        Φ (a - b) (Φ t y) = Φ (t + (a - b)) y := hh.symm
+        _ = Φ 0 y := by rw [hz]
+        _ = y := by dsimp [Φ]; exact curveAt_zero v hcomplete y
 
 theorem GradientLikeFlow.toDiffeomorph_image_sublevels (Φ : GradientLikeFlow I f a b) (hab : a ≤ b) :
     Φ.toDiffeomorph (a - b) '' sublevel f a = sublevel f b := by

@@ -2924,6 +2924,7 @@ import DifferentialGeometry.Topology.Morse.LocalNormalForm
 import DifferentialGeometry.Topology.Morse.Manifold
 import DifferentialGeometry.Topology.Morse.ManifoldCellAttachment
 import DifferentialGeometry.Topology.Morse.MorseLemma
+import DifferentialGeometry.Topology.Morse.NoCriticalValues
 import DifferentialGeometry.Topology.Morse.RegularVectorField
 import DifferentialGeometry.Topology.Morse.Taylor
 import DifferentialGeometry.Tensor.Alternating.Basis
