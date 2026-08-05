@@ -22,6 +22,16 @@ def IsParallelProperConeFamily
 
 namespace LinearIsometricTransport
 
+def transportSectionTo
+    (P : LinearIsometricTransport V) (y : X) (u : ∀ x, V x) : X → V y :=
+  fun x ↦ P.transport x y (u x)
+
+@[simp]
+theorem transportSectionTo_apply
+    (P : LinearIsometricTransport V) (y : X) (u : ∀ x, V x) (x : X) :
+    P.transportSectionTo V y u x = P.transport x y (u x) :=
+  rfl
+
 def ofBasepoint (x₀ : X) (e : ∀ x, V x₀ ≃ₗᵢ[ℝ] V x) :
     LinearIsometricTransport V where
   transport x y := (e x).symm.trans (e y)
