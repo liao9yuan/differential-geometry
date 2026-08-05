@@ -294,6 +294,66 @@ theorem integral_rpow_root_le_of_log_superlevel_tail
       congr 1
       field_simp [hp.ne']
 
+theorem bombieriGiusti_log_contraction
+    {p₀ c₀ βInner βOuter reverseCost : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 < c₀) (hβOuter : 2 * c₀ < βOuter)
+    (hreverseCost : 0 < reverseCost)
+    (hreverse :
+      let p := bombieriGiustiExponent p₀ c₀ βOuter
+      Real.exp βInner ≤
+        reverseCost ^ (1 / p - 1 / p₀) *
+          (2 ^ (1 / p) * Real.exp (βOuter / 2)))
+    (herror :
+      let p := bombieriGiustiExponent p₀ c₀ βOuter
+      (1 / p - 1 / p₀) * Real.log reverseCost +
+          (1 / p) * Real.log 2 ≤ βOuter / 4) :
+    βInner ≤ 3 * βOuter / 4 := by
+  let p := bombieriGiustiExponent p₀ c₀ βOuter
+  have hp : 0 < p := bombieriGiustiExponent_pos hp₀ hc₀ hβOuter
+  have hreverse' : Real.exp βInner ≤
+      reverseCost ^ (1 / p - 1 / p₀) *
+        (2 ^ (1 / p) * Real.exp (βOuter / 2)) := by
+    simpa only [p] using hreverse
+  have herror' :
+      (1 / p - 1 / p₀) * Real.log reverseCost +
+          (1 / p) * Real.log 2 ≤ βOuter / 4 := by
+    simpa only [p] using herror
+  have hidentity :
+      reverseCost ^ (1 / p - 1 / p₀) *
+          (2 ^ (1 / p) * Real.exp (βOuter / 2)) =
+        Real.exp
+          ((1 / p - 1 / p₀) * Real.log reverseCost +
+            (1 / p) * Real.log 2 + βOuter / 2) := by
+    rw [Real.rpow_def_of_pos hreverseCost, Real.rpow_def_of_pos (by norm_num : (0 : ℝ) < 2)]
+    rw [← Real.exp_add, ← Real.exp_add]
+    congr 1
+    ring
+  rw [hidentity] at hreverse'
+  have hlog := Real.exp_le_exp.mp hreverse'
+  linarith
+
+theorem bombieriGiusti_log_error
+    (p₀ c₀ β reverseCost : ℝ) :
+    let p := bombieriGiustiExponent p₀ c₀ β
+    (1 / p - 1 / p₀) * Real.log reverseCost +
+        (1 / p) * Real.log 2 =
+      β / (2 * Real.log (β / (2 * c₀))) *
+          (Real.log reverseCost + Real.log 2) +
+        Real.log 2 / p₀ := by
+  let p := bombieriGiustiExponent p₀ c₀ β
+  have hgap : 1 / p - 1 / p₀ =
+      β / (2 * Real.log (β / (2 * c₀))) := by
+    simpa only [p] using bombieriGiustiExponent_inv_sub p₀ c₀ β
+  have hinv : 1 / p =
+      1 / p₀ + β / (2 * Real.log (β / (2 * c₀))) := by
+    linarith
+  change (1 / p - 1 / p₀) * Real.log reverseCost +
+      (1 / p) * Real.log 2 =
+    β / (2 * Real.log (β / (2 * c₀))) *
+        (Real.log reverseCost + Real.log 2) + Real.log 2 / p₀
+  rw [hgap, hinv]
+  ring
+
 open Bundle Manifold
 open scoped ContDiff Manifold Topology
 
