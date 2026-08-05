@@ -1493,6 +1493,204 @@ theorem parabolic_nondivergence_ball_interior_schauder_estimate_of_local_source_
       huHolder hdtimeUHolder hduHolder hd2uHolder huNorm hdtimeUNorm
       hduNorm hd2uNorm hsmall
 
+def parabolicNondivergenceBufferedBallInteriorGaugeFactor
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (alpha : NNReal) (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Kb Bb : n → NNReal) (Kc Bc epsilon delta : NNReal)
+    (A Ka omega : n → n → NNReal) (T : Real) : NNReal :=
+  parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+    a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+    (bufferedParabolicLowerOrderInterpolationHolderConst
+      Kb Bb Kc Bc epsilon delta alpha 1 0)
+    (bufferedParabolicSpatialGradientInterpolationConst
+      epsilon delta alpha 1 0)
+    (parabolicValueInterpolationConst epsilon alpha 1 0)
+    (bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon 1 0)
+    epsilon 0 A Ka omega T
+
+def parabolicNondivergenceBufferedBallInteriorDataConst
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (alpha : NNReal) (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Ksource : NNReal) (Kb Bb : n → NNReal)
+    (Kc Bc epsilon delta Bsource M : NNReal)
+    (A Ka omega : n → n → NNReal) (T : Real) : NNReal :=
+  parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+    a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+    (Ksource + bufferedParabolicLowerOrderInterpolationHolderConst
+      Kb Bb Kc Bc epsilon delta alpha 0 M)
+    (bufferedParabolicSpatialGradientInterpolationConst
+      epsilon delta alpha 0 M)
+    (parabolicValueInterpolationConst epsilon alpha 0 M)
+    (Bsource + bufferedParabolicLowerOrderInterpolationSupConst
+      Bb Bc epsilon 0 M)
+    (2 * M / epsilon) M A Ka omega T
+
+omit [Nonempty n] in
+theorem parabolicNondivergenceBufferedBallInteriorConst_eq_data_add_gauge
+    {alpha : NNReal} (halpha1 : alpha < 1)
+    (a : n → n → ParabolicPoint (Euc n) → Real)
+    (p0 : ParabolicPoint (Euc n))
+    (hA : Matrix.PosDef (fun i j ↦ a i j p0))
+    (aTime t₀ t₁ bTime : Real) (center : Euc n)
+    {r R : Real} (hr : 0 ≤ r) (hrR : r < R)
+    (Ksource : NNReal) (Kb Bb : n → NNReal)
+    (Kc Bc epsilon delta Bsource C M : NNReal)
+    (A Ka omega : n → n → NNReal) {T : Real} (hT : 0 ≤ T) :
+    parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        (Ksource + bufferedParabolicLowerOrderInterpolationHolderConst
+          Kb Bb Kc Bc epsilon delta alpha C M)
+        (bufferedParabolicSpatialGradientInterpolationConst
+          epsilon delta alpha C M)
+        (parabolicValueInterpolationConst epsilon alpha C M)
+        (Bsource + bufferedParabolicLowerOrderInterpolationSupConst
+          Bb Bc epsilon C M)
+        (2 * M / epsilon + C * epsilon) M A Ka omega T =
+      parabolicNondivergenceBufferedBallInteriorDataConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Ksource Kb Bb Kc Bc epsilon delta Bsource M A Ka omega T +
+        C * parabolicNondivergenceBufferedBallInteriorGaugeFactor
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          Kb Bb Kc Bc epsilon delta A Ka omega T := by
+  have hlo : bufferedParabolicLowerOrderInterpolationHolderConst
+      Kb Bb Kc Bc epsilon delta alpha C M =
+    bufferedParabolicLowerOrderInterpolationHolderConst
+        Kb Bb Kc Bc epsilon delta alpha 0 M +
+      C * bufferedParabolicLowerOrderInterpolationHolderConst
+        Kb Bb Kc Bc epsilon delta alpha 1 0 := by
+    calc
+      _ = bufferedParabolicLowerOrderInterpolationHolderConst
+          Kb Bb Kc Bc epsilon delta alpha (0 + C * 1) (M + C * 0) := by simp
+      _ = bufferedParabolicLowerOrderInterpolationHolderConst
+            Kb Bb Kc Bc epsilon delta alpha 0 M +
+          bufferedParabolicLowerOrderInterpolationHolderConst
+            Kb Bb Kc Bc epsilon delta alpha (C * 1) (C * 0) :=
+        bufferedParabolicLowerOrderInterpolationHolderConst_add
+          Kb Bb Kc Bc epsilon delta alpha 0 (C * 1) M (C * 0)
+      _ = _ := by
+        rw [bufferedParabolicLowerOrderInterpolationHolderConst_nnreal_mul]
+  have hdu : bufferedParabolicSpatialGradientInterpolationConst
+      epsilon delta alpha C M =
+    bufferedParabolicSpatialGradientInterpolationConst
+        epsilon delta alpha 0 M +
+      C * bufferedParabolicSpatialGradientInterpolationConst
+        epsilon delta alpha 1 0 := by
+    calc
+      _ = bufferedParabolicSpatialGradientInterpolationConst
+          epsilon delta alpha (0 + C * 1) (M + C * 0) := by simp
+      _ = bufferedParabolicSpatialGradientInterpolationConst
+            epsilon delta alpha 0 M +
+          bufferedParabolicSpatialGradientInterpolationConst
+            epsilon delta alpha (C * 1) (C * 0) :=
+        bufferedParabolicSpatialGradientInterpolationConst_add
+          epsilon delta alpha 0 (C * 1) M (C * 0)
+      _ = _ := by
+        rw [bufferedParabolicSpatialGradientInterpolationConst_nnreal_mul]
+  have hu : parabolicValueInterpolationConst epsilon alpha C M =
+    parabolicValueInterpolationConst epsilon alpha 0 M +
+      C * parabolicValueInterpolationConst epsilon alpha 1 0 := by
+    calc
+      _ = parabolicValueInterpolationConst epsilon alpha
+          (0 + C * 1) (M + C * 0) := by simp
+      _ = parabolicValueInterpolationConst epsilon alpha 0 M +
+          parabolicValueInterpolationConst epsilon alpha (C * 1) (C * 0) :=
+        parabolicValueInterpolationConst_add epsilon alpha 0 (C * 1) M (C * 0)
+      _ = _ := by rw [parabolicValueInterpolationConst_nnreal_mul]
+  have hlosup : bufferedParabolicLowerOrderInterpolationSupConst
+      Bb Bc epsilon C M =
+    bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon 0 M +
+      C * bufferedParabolicLowerOrderInterpolationSupConst
+        Bb Bc epsilon 1 0 := by
+    calc
+      _ = bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon
+          (0 + C * 1) (M + C * 0) := by simp
+      _ = bufferedParabolicLowerOrderInterpolationSupConst
+            Bb Bc epsilon 0 M +
+          bufferedParabolicLowerOrderInterpolationSupConst
+            Bb Bc epsilon (C * 1) (C * 0) :=
+        bufferedParabolicLowerOrderInterpolationSupConst_add
+          Bb Bc epsilon 0 (C * 1) M (C * 0)
+      _ = _ := by
+        rw [bufferedParabolicLowerOrderInterpolationSupConst_nnreal_mul]
+  have hsourceSplit : Ksource +
+      bufferedParabolicLowerOrderInterpolationHolderConst
+        Kb Bb Kc Bc epsilon delta alpha C M =
+    (Ksource + bufferedParabolicLowerOrderInterpolationHolderConst
+      Kb Bb Kc Bc epsilon delta alpha 0 M) +
+      C * bufferedParabolicLowerOrderInterpolationHolderConst
+        Kb Bb Kc Bc epsilon delta alpha 1 0 := by rw [hlo]; ring
+  have hsupSplit : Bsource +
+      bufferedParabolicLowerOrderInterpolationSupConst Bb Bc epsilon C M =
+    (Bsource + bufferedParabolicLowerOrderInterpolationSupConst
+      Bb Bc epsilon 0 M) +
+      C * bufferedParabolicLowerOrderInterpolationSupConst
+        Bb Bc epsilon 1 0 := by rw [hlosup]; ring
+  calc
+    _ = parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+        a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+        ((Ksource + bufferedParabolicLowerOrderInterpolationHolderConst
+            Kb Bb Kc Bc epsilon delta alpha 0 M) +
+          C * bufferedParabolicLowerOrderInterpolationHolderConst
+            Kb Bb Kc Bc epsilon delta alpha 1 0)
+        (bufferedParabolicSpatialGradientInterpolationConst
+            epsilon delta alpha 0 M +
+          C * bufferedParabolicSpatialGradientInterpolationConst
+            epsilon delta alpha 1 0)
+        (parabolicValueInterpolationConst epsilon alpha 0 M +
+          C * parabolicValueInterpolationConst epsilon alpha 1 0)
+        ((Bsource + bufferedParabolicLowerOrderInterpolationSupConst
+            Bb Bc epsilon 0 M) +
+          C * bufferedParabolicLowerOrderInterpolationSupConst
+            Bb Bc epsilon 1 0)
+        ((2 * M / epsilon) + C * epsilon) (M + C * 0)
+        A Ka omega T := by rw [hsourceSplit, hdu, hu, hsupSplit]; simp
+    _ = parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          (Ksource + bufferedParabolicLowerOrderInterpolationHolderConst
+            Kb Bb Kc Bc epsilon delta alpha 0 M)
+          (bufferedParabolicSpatialGradientInterpolationConst
+            epsilon delta alpha 0 M)
+          (parabolicValueInterpolationConst epsilon alpha 0 M)
+          (Bsource + bufferedParabolicLowerOrderInterpolationSupConst
+            Bb Bc epsilon 0 M)
+          (2 * M / epsilon) M A Ka omega T +
+        parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst
+          a p0 hA alpha aTime t₀ t₁ bTime center hr hrR
+          (C * bufferedParabolicLowerOrderInterpolationHolderConst
+            Kb Bb Kc Bc epsilon delta alpha 1 0)
+          (C * bufferedParabolicSpatialGradientInterpolationConst
+            epsilon delta alpha 1 0)
+          (C * parabolicValueInterpolationConst epsilon alpha 1 0)
+          (C * bufferedParabolicLowerOrderInterpolationSupConst
+            Bb Bc epsilon 1 0)
+          (C * epsilon) (C * 0) A Ka omega T := by
+      exact parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst_add
+        halpha1 a p0 hA aTime t₀ t₁ bTime center hr hrR
+        (Ksource + bufferedParabolicLowerOrderInterpolationHolderConst
+          Kb Bb Kc Bc epsilon delta alpha 0 M)
+        (C * bufferedParabolicLowerOrderInterpolationHolderConst
+          Kb Bb Kc Bc epsilon delta alpha 1 0)
+        (bufferedParabolicSpatialGradientInterpolationConst
+          epsilon delta alpha 0 M)
+        (C * bufferedParabolicSpatialGradientInterpolationConst
+          epsilon delta alpha 1 0)
+        (parabolicValueInterpolationConst epsilon alpha 0 M)
+        (C * parabolicValueInterpolationConst epsilon alpha 1 0)
+        (Bsource + bufferedParabolicLowerOrderInterpolationSupConst
+          Bb Bc epsilon 0 M)
+        (C * bufferedParabolicLowerOrderInterpolationSupConst
+          Bb Bc epsilon 1 0)
+        (2 * M / epsilon) (C * epsilon) M (C * 0) A Ka omega hT
+    _ = _ := by
+      rw [parabolicVariableCoefficientBallInteriorAbsorbedSchauderConst_nnreal_mul]
+      rfl
+
 theorem parabolic_nondivergence_ball_interior_schauder_estimate_of_buffered_interpolation_of_local_source_estimates_of_small_freeze_defect
     {alpha Ksource Kc Bsource Bc C M : NNReal}
     (halpha0 : 0 < alpha) (halpha1 : alpha < 1)
