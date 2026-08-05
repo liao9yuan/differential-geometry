@@ -252,6 +252,56 @@ theorem geometric_hole_filling
   simpa only [div_eq_mul_inv] using hlimit
 
 omit [NeZero n] in
+theorem summable_hole_filling
+    {X cost : ℕ → ℝ} {theta : ℝ}
+    (hX_bdd : BddAbove (Set.range X))
+    (htheta : 0 ≤ theta) (htheta_one : theta < 1)
+    (hcost_nonneg : ∀ k, 0 ≤ cost k)
+    (hcost : Summable (fun k : ℕ => theta ^ k * cost k))
+    (hstep : ∀ k, X k ≤ theta * X (k + 1) + cost k) :
+    X 0 ≤ ∑' k : ℕ, theta ^ k * cost k := by
+  obtain ⟨K, hK⟩ := hX_bdd
+  have hfinite : ∀ m : ℕ,
+      X 0 ≤ theta ^ m * X m + ∑ k ∈ Finset.range m, theta ^ k * cost k := by
+    intro m
+    induction m with
+    | zero => simp
+    | succ m hm =>
+        calc
+          X 0 ≤ theta ^ m * X m +
+              ∑ k ∈ Finset.range m, theta ^ k * cost k := hm
+          _ ≤ theta ^ m * (theta * X (m + 1) + cost m) +
+              ∑ k ∈ Finset.range m, theta ^ k * cost k := by
+            exact add_le_add
+              (mul_le_mul_of_nonneg_left (hstep m) (pow_nonneg htheta m)) le_rfl
+          _ = theta ^ (m + 1) * X (m + 1) +
+              ∑ k ∈ Finset.range (m + 1), theta ^ k * cost k := by
+            rw [Finset.sum_range_succ, pow_succ]
+            ring
+  have hbound : ∀ m : ℕ,
+      X 0 ≤ theta ^ m * K + ∑' k : ℕ, theta ^ k * cost k := by
+    intro m
+    calc
+      X 0 ≤ theta ^ m * X m +
+          ∑ k ∈ Finset.range m, theta ^ k * cost k := hfinite m
+      _ ≤ theta ^ m * K +
+          ∑ k ∈ Finset.range m, theta ^ k * cost k := by
+        exact add_le_add
+          (mul_le_mul_of_nonneg_left (hK (Set.mem_range_self m))
+            (pow_nonneg htheta m)) le_rfl
+      _ ≤ theta ^ m * K + ∑' k : ℕ, theta ^ k * cost k := by
+        gcongr
+        exact hcost.sum_le_tsum (Finset.range m)
+          (fun k _ => mul_nonneg (pow_nonneg htheta k) (hcost_nonneg k))
+  have htendsto : Tendsto
+      (fun m : ℕ => theta ^ m * K + ∑' k : ℕ, theta ^ k * cost k)
+      atTop (nhds (∑' k : ℕ, theta ^ k * cost k)) := by
+    simpa using
+      ((tendsto_pow_atTop_nhds_zero_of_lt_one htheta htheta_one).mul_const K).add_const
+        (∑' k : ℕ, theta ^ k * cost k)
+  exact ge_of_tendsto htendsto (Filter.Eventually.of_forall hbound)
+
+omit [NeZero n] in
 theorem multiplicative_iteration_bound
     {X cost : ℕ → ℝ}
     (hX_zero : 0 ≤ X 0)
