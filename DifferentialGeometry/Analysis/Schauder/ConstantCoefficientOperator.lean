@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamel
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.FrozenDuhamelSPD
 import DifferentialGeometry.Analysis.Schauder.HolderOperator
 
 noncomputable section
@@ -64,6 +65,53 @@ theorem norm_contDiffHolderSpaceLaplacian_le (alpha : NNReal) :
           (V := V) (F := F) 2 alpha
     _ ≤ Module.finrank Real V := by
       simpa only [mul_one] using norm_laplacianEval_le (V := V) (F := F)
+
+section Matrix
+
+variable {n : Type*} [Fintype n]
+
+def matrixLaplacianEval (A : Matrix n n Real) :
+    (EuclideanSpace Real n [×2]→L[Real] F) →L[Real] F :=
+  ∑ i, ∑ j, (A i j) •
+    ((ContinuousLinearMap.apply Real F
+      (EuclideanSpace.basisFun n Real j)).comp
+      ((ContinuousLinearMap.apply Real
+        (EuclideanSpace Real n →L[Real] F)
+        (EuclideanSpace.basisFun n Real i)).comp
+        (hessianCurryEquiv (EuclideanSpace Real n) F).toContinuousLinearEquiv.toContinuousLinearMap))
+
+@[simp]
+theorem matrixLaplacianEval_apply (A : Matrix n n Real)
+    (H : EuclideanSpace Real n [×2]→L[Real] F) :
+    matrixLaplacianEval A H =
+      DifferentialGeometry.Analysis.Parabolic.Euclidean.matrixLap A
+        (hessianCurryEquiv (EuclideanSpace Real n) F H) := by
+  simp only [matrixLaplacianEval,
+    DifferentialGeometry.Analysis.Parabolic.Euclidean.matrixLap,
+    ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
+    ContinuousLinearEquiv.coe_coe,
+    LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+
+def contDiffHolderSpaceMatrixLaplacian
+    (A : Matrix n n Real) (alpha : NNReal) :
+    ContDiffHolderSpace (V := EuclideanSpace Real n) (F := F) 2 alpha →L[Real]
+      BoundedHolderSpace (X := EuclideanSpace Real n) (F := F) alpha :=
+  (boundedHolderSpaceMap alpha (matrixLaplacianEval (F := F) A)).comp
+    (contDiffHolderSpaceTopJet 2 alpha)
+
+@[simp]
+theorem contDiffHolderSpaceMatrixLaplacian_apply
+    (A : Matrix n n Real) (alpha : NNReal)
+    (u : ContDiffHolderSpace
+      (V := EuclideanSpace Real n) (F := F) 2 alpha)
+    (x : EuclideanSpace Real n) :
+    contDiffHolderSpaceMatrixLaplacian A alpha u x =
+      matrixLaplacianEval A
+        (iteratedFDeriv Real 2 (contDiffHolderSpaceFun u) x) :=
+  rfl
+
+end Matrix
 
 def parabolicC2HolderSpaceLaplacian (alpha : NNReal) :
     ParabolicC2HolderSpace (V := V) (F := F) alpha →L[Real]

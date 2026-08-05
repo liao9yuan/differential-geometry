@@ -328,6 +328,38 @@ theorem contDiffHolderSpaceHessian_apply
     contDiffHolderSpaceJet_apply]
   exact hessianCurryEquiv_iteratedFDeriv_two_eq_fderiv _ _
 
+theorem contDiffHolderSpace_hasFDerivAt
+    (k : Nat) (alpha : NNReal) (hk : 1 ≤ k)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    HasFDerivAt (contDiffHolderSpaceFun f)
+      (contDiffHolderSpaceFDeriv k alpha hk f x) x := by
+  rw [contDiffHolderSpaceFDeriv_apply]
+  exact ((f.2.1.1 x (Set.mem_univ x)).differentiableAt
+    (by exact_mod_cast (Nat.ne_zero_of_lt hk))).hasFDerivAt
+
+theorem contDiffHolderSpaceFDeriv_hasFDerivAt
+    (k : Nat) (alpha : NNReal) (hk : 2 ≤ k)
+    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
+    HasFDerivAt
+      (contDiffHolderSpaceFDeriv k alpha ((by omega : 1 ≤ 2).trans hk) f :
+        V → V →L[Real] F)
+      (contDiffHolderSpaceHessian k alpha hk f x) x := by
+  have hf : ContDiff Real 2 (contDiffHolderSpaceFun f) := by
+    rw [contDiff_iff_contDiffAt]
+    intro y
+    exact (f.2.1.1 y (Set.mem_univ y)).of_le (by exact_mod_cast hk)
+  have hfd : ContDiff Real 1 (fderiv Real (contDiffHolderSpaceFun f)) := by
+    exact ((contDiff_succ_iff_fderiv (n := 1)).mp
+      (by simpa using hf)).2.2
+  have heq :
+      (contDiffHolderSpaceFDeriv k alpha ((by omega : 1 ≤ 2).trans hk) f :
+        V → V →L[Real] F) = fderiv Real (contDiffHolderSpaceFun f) := by
+    funext y
+    exact contDiffHolderSpaceFDeriv_apply k alpha
+      ((by omega : 1 ≤ 2).trans hk) f y
+  rw [heq, contDiffHolderSpaceHessian_apply]
+  exact (hfd.differentiable (by norm_num) x).hasFDerivAt
+
 end EllipticBoundedContinuousFunction
 
 section RestrictUniv
