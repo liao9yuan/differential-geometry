@@ -268,7 +268,8 @@ theorem bombieriGiustiReciprocalLocalizer_gap_pos
 
 theorem gradFun_bombieriGiustiReciprocalLocalizer
     [I.Boundaryless] [T2Space M]
-    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    (g : SmoothRiemannianMetric I M) {q : SmoothRiemannianMetric I M}
+    (rho : SmoothScalar q)
     (lower upper : ℝ) (k : ℕ) (x : M) :
     gradFun (I := I) g
         (bombieriGiustiReciprocalLocalizer rho lower upper k).toFun x =
@@ -293,6 +294,26 @@ theorem gradFun_bombieriGiustiReciprocalLocalizer
     (rho.smooth.mdifferentiable (by simp) x)
   simpa only [affine, bombieriGiustiReciprocalLocalizer, haffine.deriv,
     gradientFun] using hgradient
+
+theorem bombieriGiustiReciprocalLocalizer_inner_grad_self_le
+    [I.Boundaryless] [T2Space M]
+    (g : SmoothRiemannianMetric I M) {q : SmoothRiemannianMetric I M}
+    (rho : SmoothScalar q) {G lower upper : ℝ}
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ G)
+    (k : ℕ) (x : M) :
+    g.inner x
+        (gradFun (I := I) g
+          (bombieriGiustiReciprocalLocalizer rho lower upper k).toFun x)
+        (gradFun (I := I) g
+          (bombieriGiustiReciprocalLocalizer rho lower upper k).toFun x) ≤
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+          bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ ^ 2 * G := by
+  rw [gradFun_bombieriGiustiReciprocalLocalizer,
+    metric_inner_smul_self]
+  exact mul_le_mul_of_nonneg_left (hrho x) (sq_nonneg _)
 
 theorem bombieriGiustiReciprocalLocalizer_gradientSqSup_le
     [I.Boundaryless] [T2Space M] [CompactSpace M]

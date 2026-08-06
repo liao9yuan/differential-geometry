@@ -150,6 +150,63 @@ theorem evolvingBombieriGiustiReciprocalGradientCost_nonneg
   unfold evolvingBombieriGiustiReciprocalGradientCost
   positivity
 
+omit [SigmaCompactSpace M] [CompactSpace M] in
+theorem spatialMoserCutoff_bombieriGiustiReciprocalLocalizer_gradient_le
+    (g : SmoothRiemannianMetric I M) {q : SmoothRiemannianMetric I M}
+    (rho : SmoothScalar q) {G lower upper : ℝ}
+    (hG : 0 ≤ G)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ G)
+    (k j : ℕ) (x : M) :
+    g.inner x
+        (gradientFun (I := I) g
+          (spatialMoserCutoff
+            (bombieriGiustiReciprocalLocalizer rho lower upper k)
+            (2 * j + 1)).toFun x)
+        (gradientFun (I := I) g
+          (spatialMoserCutoff
+            (bombieriGiustiReciprocalLocalizer rho lower upper k)
+            (2 * j + 1)).toFun x) ≤
+      evolvingMoserSpatialGradientCost
+          (evolvingBombieriGiustiReciprocalGradientCost G lower upper k) j *
+        (spatialMoserCutoff
+          (bombieriGiustiReciprocalLocalizer rho lower upper k)
+          (2 * j)).toFun x ^ 2 := by
+  let localizer := bombieriGiustiReciprocalLocalizer rho lower upper k
+  let gap := bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+    bombieriGiustiDescendingLevel lower upper (2 * k + 2)
+  let K := gap⁻¹ ^ 2 * G
+  have hK : 0 ≤ K := mul_nonneg (sq_nonneg _) hG
+  have hlocalizer : ∀ y : M,
+      g.inner y
+          (gradFun (I := I) g localizer.toFun y)
+          (gradFun (I := I) g localizer.toFun y) ≤ K := by
+    intro y
+    simpa only [localizer, gap, K] using
+      (bombieriGiustiReciprocalLocalizer_inner_grad_self_le
+        (I := I) g rho hrho k y)
+  have hcutoff := spatialMoserCutoff_succ_gradient_le
+    (I := I) g localizer hK hlocalizer (2 * j) x
+  calc
+    g.inner x
+        (gradientFun (I := I) g
+          (spatialMoserCutoff localizer (2 * j + 1)).toFun x)
+        (gradientFun (I := I) g
+          (spatialMoserCutoff localizer (2 * j + 1)).toFun x) ≤
+      (CutoffProfile.derivBound ^ 2 * K /
+          moserCutoffWidth (2 * j + 1) ^ 2) *
+        (spatialMoserCutoff localizer (2 * j)).toFun x ^ 2 := hcutoff
+    _ = evolvingMoserSpatialGradientCost
+          (evolvingBombieriGiustiReciprocalGradientCost G lower upper k) j *
+        (spatialMoserCutoff localizer (2 * j)).toFun x ^ 2 := by
+      rw [div_eq_mul_inv, moserCutoffWidth_succ_inv_sq]
+      unfold evolvingMoserSpatialGradientCost
+        evolvingBombieriGiustiReciprocalGradientCost
+      dsimp only [K, gap]
+      ring
+
 def canonicalEvolvingLateBombieriGiustiReverseCost
     (n : ℕ) (Vfixed Vmoving : ℝ≥0∞)
     (C G B τ c d D lower upper : ℝ) (k : ℕ) : ℝ :=
@@ -166,7 +223,7 @@ theorem one_le_canonicalEvolvingLateBombieriGiustiReverseCost
       n Vfixed Vmoving C G B τ c d D lower upper k := by
   exact le_max_left _ _
 
-theorem localizedSpacetimeRpowNorm_inv_le_canonicalEvolvingLateBombieriGiustiReverseCost_of_volume_le
+theorem localizedSpacetimeRpowNorm_inv_le_canonicalEvolvingLateBombieriGiustiReverseCost_of_gradient_bound_of_volume_le
     (qMetric : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
@@ -375,6 +432,76 @@ theorem localizedSpacetimeRpowNorm_inv_le_canonicalEvolvingLateBombieriGiustiRev
           (zero_le_one.trans (one_le_canonicalEvolvingLateBombieriGiustiReverseCost
             (Module.finrank ℝ E) Vfixed Vmoving C G B
               τ c d D lower upper k)) _)
+
+theorem localizedSpacetimeRpowNorm_inv_le_canonicalEvolvingLateBombieriGiustiReverseCost_of_volume_le
+    (qMetric : SmoothRiemannianMetric I M)
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar qMetric)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ τ c d D C G B lower upper t₀ : ℝ}
+    (Vfixed Vmoving : ℝ≥0∞)
+    (hτc : τ < c) (hcd : c ≤ d) (hdD : d < D)
+    (hC : 0 ≤ C) (hG : 0 ≤ G) (hB : 0 ≤ B)
+    (hlowerUpper : lower < upper)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun z : ℝ × M =>
+          chartGramMatrix (I := I) (g z.1) x₀ z.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hSobolev : ∀ t ∈ Icc τ D,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (hpde : ∀ t ∈ Icc τ D, ∀ x : M,
+      Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (htrace : ∀ t ∈ Icc τ D, ∀ x : M,
+      traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hrho : ∀ t ∈ Icc τ D, ∀ x : M,
+      (g t).inner x
+          (gradFun (I := I) (g t) rho.toFun x)
+          (gradFun (I := I) (g t) rho.toFun x) ≤ G)
+    (hVfixedTop : Vfixed ≠ ⊤)
+    (hVmovingZero : Vmoving ≠ 0) (hVmovingTop : Vmoving ≠ ⊤)
+    (hfixedVolume : ∀ t ∈ Icc τ D,
+      riemannianVolumeMeasure (I := I) (M := M) qMetric ≤
+        Vfixed • riemannianMeasureFamily (I := I) (M := M) g t)
+    (hmovingVolume : ∀ t ∈ Icc τ D,
+      riemannianMeasureFamily (I := I) (M := M) g t ≤
+        Vmoving • riemannianVolumeMeasure (I := I) (M := M) qMetric)
+    (hmeasure : ∀ k,
+      localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k)
+          (bombieriGiustiDescendingLevel τ c k)
+          (bombieriGiustiIncreasingLevel d D k) ≠ 0) :
+    ∀ k {p : ℝ}, 0 < p → p < p₀ →
+      localizedSpacetimeRpowNorm (I := I) (M := M)
+          (bombieriGiustiSpatialCutoff rho lower upper k)
+          (fun t x => (u t x)⁻¹) p₀
+          (bombieriGiustiDescendingLevel τ c k)
+          (bombieriGiustiIncreasingLevel d D k) ≤
+        canonicalEvolvingLateBombieriGiustiReverseCost
+            (Module.finrank ℝ E) Vfixed Vmoving C G B
+              τ c d D lower upper k ^ (1 / p - 1 / p₀) *
+          localizedSpacetimeRpowNorm (I := I) (M := M)
+            (bombieriGiustiSpatialCutoff rho lower upper (k + 1))
+            (fun t x => (u t x)⁻¹) p
+            (bombieriGiustiDescendingLevel τ c (k + 1))
+            (bombieriGiustiIncreasingLevel d D (k + 1)) := by
+  exact
+    localizedSpacetimeRpowNorm_inv_le_canonicalEvolvingLateBombieriGiustiReverseCost_of_gradient_bound_of_volume_le
+      (I := I) (M := M) qMetric g hdim rho u hu hpos Vfixed Vmoving
+        hτc hcd hdD hC hG hB hlowerUpper hg hgram hSobolev hpde htrace
+        (fun k j t ht x =>
+          spatialMoserCutoff_bombieriGiustiReciprocalLocalizer_gradient_le
+            (I := I) (g t) rho hG (hrho t ht) k j x)
+        hVfixedTop hVmovingZero hVmovingTop hfixedVolume hmovingVolume hmeasure
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 

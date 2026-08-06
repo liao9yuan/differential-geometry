@@ -565,7 +565,8 @@ theorem spatialMoserCutoff_add_two_sq_le_rpow
 
 theorem gradientFun_spatialMoserCutoff
     [I.Boundaryless] [T2Space M]
-    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g) (k : ℕ) (x : M) :
+    (g : SmoothRiemannianMetric I M) {q : SmoothRiemannianMetric I M}
+    (rho : SmoothScalar q) (k : ℕ) (x : M) :
     gradientFun (I := I) g (spatialMoserCutoff rho k).toFun x =
       (deriv CutoffProfile.value (spatialMoserCutoffArgument rho k x) *
           (-1 / moserCutoffWidth k)) •
@@ -593,7 +594,8 @@ theorem gradientFun_spatialMoserCutoff
 
 theorem spatialMoserCutoff_succ_gradient_le
     [I.Boundaryless] [T2Space M]
-    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    (g : SmoothRiemannianMetric I M) {q : SmoothRiemannianMetric I M}
+    (rho : SmoothScalar q)
     {B : ℝ} (hB : 0 ≤ B)
     (hrho : ∀ x : M,
       g.inner x
