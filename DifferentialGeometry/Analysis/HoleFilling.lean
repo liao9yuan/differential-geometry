@@ -1,3 +1,4 @@
+import Mathlib.Analysis.MeanInequalities
 import Mathlib.Analysis.SpecificLimits.Normed
 
 noncomputable section
@@ -5,6 +6,47 @@ noncomputable section
 open Filter
 
 namespace DifferentialGeometry.Analysis
+
+theorem weighted_young_inequality
+    {a x alpha beta theta : ℝ}
+    (ha : 0 ≤ a) (hx : 0 ≤ x)
+    (halpha : 0 < alpha) (hbeta : 0 < beta)
+    (halphaBeta : alpha + beta = 1) (htheta : 0 < theta) :
+    a * x ^ beta ≤
+      alpha * (a * (beta / theta) ^ beta) ^ (1 / alpha) + theta * x := by
+  let y := (a * (beta / theta) ^ beta) ^ (1 / alpha)
+  let z := theta / beta * x
+  have hbetaTheta : 0 ≤ beta / theta := div_nonneg hbeta.le htheta.le
+  have hthetaBeta : 0 ≤ theta / beta := div_nonneg htheta.le hbeta.le
+  have hy : 0 ≤ y := Real.rpow_nonneg (mul_nonneg ha (Real.rpow_nonneg hbetaTheta _)) _
+  have hz : 0 ≤ z := mul_nonneg hthetaBeta hx
+  have hyPow : y ^ alpha = a * (beta / theta) ^ beta := by
+    dsimp only [y]
+    rw [← Real.rpow_mul (mul_nonneg ha (Real.rpow_nonneg hbetaTheta _))]
+    field_simp [halpha.ne']
+    rw [Real.rpow_one]
+  have hzPow : z ^ beta = (theta / beta) ^ beta * x ^ beta := by
+    exact Real.mul_rpow hthetaBeta hx
+  have hratio :
+      (beta / theta) ^ beta * (theta / beta) ^ beta = 1 := by
+    rw [← Real.mul_rpow hbetaTheta hthetaBeta]
+    have hmul : beta / theta * (theta / beta) = 1 := by
+      field_simp [halpha.ne', hbeta.ne', htheta.ne']
+    rw [hmul, Real.one_rpow]
+  have hgeom := Real.geom_mean_le_arith_mean2_weighted
+    halpha.le hbeta.le hy hz halphaBeta
+  calc
+    a * x ^ beta = y ^ alpha * z ^ beta := by
+      rw [hyPow, hzPow]
+      calc
+        a * x ^ beta =
+            a * ((beta / theta) ^ beta * (theta / beta) ^ beta) * x ^ beta := by
+          rw [hratio, mul_one]
+        _ = a * (beta / theta) ^ beta * ((theta / beta) ^ beta * x ^ beta) := by ring
+    _ ≤ alpha * y + beta * z := hgeom
+    _ = alpha * (a * (beta / theta) ^ beta) ^ (1 / alpha) + theta * x := by
+      dsimp only [y, z]
+      field_simp [hbeta.ne']
 
 theorem geometric_hole_filling
     {X : ℕ → ℝ} {theta A B : ℝ}
@@ -63,6 +105,29 @@ theorem geometric_hole_filling
   have hlimit : X 0 ≤ A * (1 - theta * B)⁻¹ :=
     ge_of_tendsto htendsto (Filter.Eventually.of_forall hbound)
   simpa only [div_eq_mul_inv] using hlimit
+
+theorem weighted_geometric_hole_filling
+    {X coefficient : ℕ → ℝ} {alpha beta theta A B : ℝ}
+    (hX_bdd : BddAbove (Set.range X))
+    (hX_nonneg : ∀ k, 0 ≤ X k) (hcoefficient_nonneg : ∀ k, 0 ≤ coefficient k)
+    (halpha : 0 < alpha) (hbeta : 0 < beta)
+    (halphaBeta : alpha + beta = 1) (htheta : 0 < theta)
+    (hB : 1 ≤ B) (hA : 0 ≤ A) (hthetaB : theta * B < 1)
+    (hcoefficient : ∀ k,
+      alpha * (coefficient k * (beta / theta) ^ beta) ^ (1 / alpha) ≤ A * B ^ k)
+    (hstep : ∀ k, X k ≤ coefficient k * X (k + 1) ^ beta) :
+    X 0 ≤ A / (1 - theta * B) := by
+  apply geometric_hole_filling hX_bdd htheta.le hB hA hthetaB
+  intro k
+  calc
+    X k ≤ coefficient k * X (k + 1) ^ beta := hstep k
+    _ ≤ alpha * (coefficient k * (beta / theta) ^ beta) ^ (1 / alpha) +
+          theta * X (k + 1) :=
+      weighted_young_inequality (hcoefficient_nonneg k) (hX_nonneg (k + 1))
+        halpha hbeta halphaBeta htheta
+    _ ≤ theta * X (k + 1) + A * B ^ k := by
+      rw [add_comm]
+      exact add_le_add le_rfl (hcoefficient k)
 
 theorem nnreal_affine_geometric_hole_filling
     {X data factor : ℕ → NNReal} {theta A B : NNReal}
