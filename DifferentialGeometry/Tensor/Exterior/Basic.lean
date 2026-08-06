@@ -105,17 +105,6 @@ private lemma tangentCoordChange_comp_self {x₀ x : M} (hx : x ∈ (extChartAt 
   rw [tangentCoordChange_comp (I := IM) (w := x₀) (x := x) (y := x₀) (z := x) hw]
   exact tangentCoordChange_self (I := IM) (x := x₀) (z := x) hx
 
-noncomputable def exteriorDerivativeAt (α : DifferentialForm IM M k) (x : M) :
-    Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
-      (Bundle.Trivial M ℝ) x :=
-  (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
-      (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
-        (Bundle.Trivial M ℝ)) x).symmL ℝ x
-    (extDeriv (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
-        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
-          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
-      ((extChartAt IM x) x))
-
 private lemma chartChange_contDiffAt {x₀ x : M} (hx : x ∈ (extChartAt IM x₀).source)
     (hxi : ModelWithCorners.IsInteriorPoint IM x) :
     ContDiffAt ℝ ⊤ ((extChartAt IM x₀) ∘ (extChartAt IM x).symm : EM → EM)
