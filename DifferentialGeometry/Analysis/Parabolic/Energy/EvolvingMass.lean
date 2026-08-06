@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Integration.Measure.Family
+import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 
 
 noncomputable section
@@ -44,6 +44,52 @@ theorem evolvingLocalizedL2Mass_nonneg
     (u : ℝ → M → ℝ) (t : ℝ) :
     0 ≤ evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u t := by
   exact integral_nonneg (fun x => mul_nonneg (sq_nonneg _) (sq_nonneg _))
+
+theorem evolvingLocalizedIntegral_continuousOn
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {K : Set ℝ} (hK : IsCompact K) {t : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2)) :
+    ContinuousOn
+      (evolvingLocalizedIntegral (I := I) (M := M) g cutoff u) K := by
+  apply integral_family_cont (I := I) (M := M) hK
+  · intro x₀ i j
+    exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
+      (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
+  · exact ((hcutoff.comp continuous_snd).pow 2).mul hu |>.continuousOn
+
+theorem evolvingLocalizedL2Mass_continuousOn
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {K : Set ℝ} (hK : IsCompact K) {t : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2)) :
+    ContinuousOn
+      (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) K := by
+  apply integral_family_cont (I := I) (M := M) hK
+  · intro x₀ i j
+    exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
+      (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
+  · exact (((hcutoff.comp continuous_snd).pow 2).mul (hu.pow 2)).continuousOn
+
+theorem evolvingLocalizedVolumeDistortion_continuousOn
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {K : Set ℝ} (hK : IsCompact K) {t : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2)) :
+    ContinuousOn
+      (evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff u) K := by
+  apply integral_family_cont (I := I) (M := M) hK
+  · intro x₀ i j
+    exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
+      (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
+  · exact
+      (((hcutoff.comp continuous_snd).pow 2).mul
+        ((continuous_const.mul
+          (traceTimeDerivMetric_joint_continuous (I := I) (M := M) hg)).mul
+            (hu.pow 2))).continuousOn
 
 theorem hasDerivAt_evolvingLocalizedIntegral
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
@@ -120,6 +166,43 @@ theorem hasDerivAt_evolvingLocalizedL2Mass
   apply integral_congr_ae
   filter_upwards [] with x
   rw [hderiv x]
+
+theorem deriv_evolvingLocalizedL2Mass_continuousOn
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {K : Set ℝ} (hK : IsCompact K) {t : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2)) :
+    ContinuousOn
+      (fun s => deriv
+        (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) s) K := by
+  let F : C^∞⟮(modelWithCornersSelf ℝ ℝ).prod I, ℝ × M; ℝ⟯ :=
+    ⟨fun p => u p.1 p.2, hu⟩
+  have htime : Continuous
+      (fun p : ℝ × M => deriv (fun s => u s p.2) p.1) := by
+    simpa only [F] using
+      (DifferentialGeometry.contMDiff_partial_deriv_fst I F).continuous
+  have hintegral : ContinuousOn
+      (fun s => ∫ x, cutoff x ^ 2 *
+          (2 * u s x * deriv (fun r => u r x) s +
+            (1 / 2) * traceTimeDerivMetric (I := I) g s x * u s x ^ 2)
+        ∂(riemannianMeasureFamily (I := I) (M := M) g s)) K := by
+    apply integral_family_cont (I := I) (M := M) hK
+    · intro x₀ i j
+      exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
+        (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
+    · exact
+        (((hcutoff.continuous.comp continuous_snd).pow 2).mul
+          (((continuous_const.mul hu.continuous).mul htime).add
+            ((continuous_const.mul
+              (traceTimeDerivMetric_joint_continuous
+                (I := I) (M := M) hg)).mul (hu.continuous.pow 2)))) |>.continuousOn
+  refine hintegral.congr ?_
+  intro s _
+  exact (hasDerivAt_evolvingLocalizedL2Mass
+    (I := I) (M := M) g cutoff u s (hg.at_any s) hcutoff hu).deriv
 
 theorem evolvingLocalizedVolumeDistortion_le
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)

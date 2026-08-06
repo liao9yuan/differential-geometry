@@ -425,6 +425,23 @@ lemma continuousOn_traceTimeDerivMetric_of_base
       (I := I) (M := M) (t := p.1) (hreg.at_any p.1) α hp.2
   exact h_base.congr h_eq
 
+lemma traceTimeDerivMetric_joint_continuous
+    {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
+    (hreg : MetricFamilyRegularAt (I := I) g_fam t) :
+    Continuous
+      (fun p : ℝ × M => traceTimeDerivMetric (I := I) g_fam p.1 p.2) := by
+  rw [continuous_iff_continuousAt]
+  intro p
+  let e := trivializationAt E (TangentSpace I) p.2
+  have hopen : IsOpen ((Set.univ : Set ℝ) ×ˢ e.baseSet) :=
+    isOpen_univ.prod e.open_baseSet
+  have hp : p ∈ (Set.univ : Set ℝ) ×ˢ e.baseSet := by
+    exact ⟨Set.mem_univ _, by simp [e]⟩
+  exact
+    ((continuousOn_traceTimeDerivMetric_of_base
+      (I := I) (M := M) hreg p.2) p hp).continuousAt
+      (hopen.mem_nhds hp)
+
 lemma continuousOn_chartDensity_family
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M) :
