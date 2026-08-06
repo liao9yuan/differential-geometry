@@ -50,6 +50,10 @@ def evolvingMoserStepCoefficient
         4 * evolvingMoserSpatialGradientCost G k + (1 / 2) * B) +
     evolvingMoserSpatialGradientCost G k
 
+def evolvingMoserStepConstant (G B a τ t₁ : ℝ) : ℝ :=
+  (t₁ - a + 1) *
+      (2 * timeCutoffDerivConstant / (τ - a) + 4 * G + (1 / 2) * B) + G
+
 omit [I.Boundaryless] [CompactSpace M] in
 theorem evolvingMoserLocalizedMass_nonneg
     (n : ℕ) (g : ℝ → SmoothRiemannianMetric I M)
@@ -315,6 +319,329 @@ theorem evolvingMoserLocalizedMass_succ_le_of_subsolution
             ((t₁ - moserTimeLevel a τ (k + 1) + 1) *
                 (D + 4 * K + (1 / 2) * B) + K) * L
         ring
+
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+theorem evolvingMoserStepCoefficient_nonneg
+    {G B a τ t₁ : ℝ} (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hG : 0 ≤ G) (hB : 0 ≤ B) (k : ℕ) :
+    0 ≤ evolvingMoserStepCoefficient G B a τ t₁ k := by
+  have hduration : 0 ≤ t₁ - moserTimeLevel a τ (k + 1) + 1 := by
+    linarith [moserTimeLevel_lt haτ (k + 1)]
+  exact add_nonneg
+    (mul_nonneg hduration
+      (add_nonneg
+        (add_nonneg (moserTimeDerivativeCost_nonneg haτ k)
+          (mul_nonneg (by norm_num)
+            (mul_nonneg hG (pow_nonneg (by norm_num) _))))
+        (mul_nonneg (by norm_num) hB)))
+    (mul_nonneg hG (pow_nonneg (by norm_num) _))
+
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+theorem evolvingMoserStepConstant_nonneg
+    {G B a τ t₁ : ℝ} (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hG : 0 ≤ G) (hB : 0 ≤ B) :
+    0 ≤ evolvingMoserStepConstant G B a τ t₁ := by
+  have hduration : 0 ≤ t₁ - a + 1 := by linarith
+  exact add_nonneg
+    (mul_nonneg hduration
+      (add_nonneg
+        (add_nonneg
+          (div_nonneg
+            (mul_nonneg (by norm_num) timeCutoffDerivConstant_nonneg)
+            (sub_pos.mpr haτ).le)
+          (mul_nonneg (by norm_num) hG))
+        (mul_nonneg (by norm_num) hB))) hG
+
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+theorem evolvingMoserStepCoefficient_le
+    {G B a τ t₁ : ℝ} (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hG : 0 ≤ G) (hB : 0 ≤ B) (k : ℕ) :
+    evolvingMoserStepCoefficient G B a τ t₁ k ≤
+      evolvingMoserStepConstant G B a τ t₁ * 16 ^ k := by
+  let D := 2 * timeCutoffDerivConstant / (τ - a)
+  have hD : 0 ≤ D := by
+    exact div_nonneg
+      (mul_nonneg (by norm_num) timeCutoffDerivConstant_nonneg)
+      (sub_pos.mpr haτ).le
+  have hpow_two : (2 : ℝ) ^ k ≤ 16 ^ k :=
+    pow_le_pow_left₀ (by norm_num) (by norm_num) k
+  have hpow_one : (1 : ℝ) ≤ 16 ^ k := one_le_pow₀ (by norm_num)
+  have hgradient : evolvingMoserSpatialGradientCost G k = G * 16 ^ k := by
+    rw [evolvingMoserSpatialGradientCost]
+    change G * 4 ^ (2 * k) = G * 16 ^ k
+    rw [pow_mul]
+    norm_num
+  have htime : moserTimeDerivativeCost a τ k = D * 2 ^ k := rfl
+  have hduration_nonneg : 0 ≤ t₁ - moserTimeLevel a τ (k + 1) + 1 := by
+    linarith [moserTimeLevel_lt haτ (k + 1)]
+  have hduration_le :
+      t₁ - moserTimeLevel a τ (k + 1) + 1 ≤ t₁ - a + 1 := by
+    linarith [moserTimeLevel_le haτ (k + 1)]
+  have hduration_max_nonneg : 0 ≤ t₁ - a + 1 := by linarith
+  have hcost_le :
+      D * 2 ^ k + 4 * (G * 16 ^ k) + (1 / 2) * B ≤
+        (D + 4 * G + (1 / 2) * B) * 16 ^ k := by
+    have hDterm : D * 2 ^ k ≤ D * 16 ^ k :=
+      mul_le_mul_of_nonneg_left hpow_two hD
+    have hBterm : (1 / 2) * B ≤ ((1 / 2) * B) * 16 ^ k := by
+      calc
+        (1 / 2) * B = ((1 / 2) * B) * 1 := (mul_one _).symm
+        _ ≤ ((1 / 2) * B) * 16 ^ k :=
+          mul_le_mul_of_nonneg_left hpow_one
+            (mul_nonneg (by norm_num) hB)
+    calc
+      D * 2 ^ k + 4 * (G * 16 ^ k) + (1 / 2) * B ≤
+          D * 16 ^ k + 4 * (G * 16 ^ k) + ((1 / 2) * B) * 16 ^ k := by
+        exact add_le_add (add_le_add hDterm le_rfl) hBterm
+      _ = (D + 4 * G + (1 / 2) * B) * 16 ^ k := by ring
+  rw [evolvingMoserStepCoefficient, evolvingMoserStepConstant, htime, hgradient]
+  change
+    (t₁ - moserTimeLevel a τ (k + 1) + 1) *
+          (D * 2 ^ k + 4 * (G * 16 ^ k) + (1 / 2) * B) + G * 16 ^ k ≤
+      ((t₁ - a + 1) * (D + 4 * G + (1 / 2) * B) + G) * 16 ^ k
+  calc
+    _ ≤ (t₁ - a + 1) *
+          ((D + 4 * G + (1 / 2) * B) * 16 ^ k) + G * 16 ^ k := by
+      gcongr
+    _ = ((t₁ - a + 1) * (D + 4 * G + (1 / 2) * B) + G) * 16 ^ k := by
+      ring
+
+theorem evolvingMoserLocalizedMass_succ_le_majorant
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    {q : SmoothRiemannianMetric I M} (rho : SmoothScalar q)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a τ t₁ B C G s₀ : ℝ}
+    (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hB : 0 ≤ B) (hC : 0 ≤ C) (hG : 0 ≤ G)
+    (hg : MetricFamilyRegularAt (I := I) g s₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hSobolev : ∀ t ∈ Icc a t₁,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x)
+    (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
+      traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hgradient : ∀ k t, t ∈ Icc a t₁ → ∀ x : M,
+      (g t).inner x
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x)
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x) ≤
+        evolvingMoserSpatialGradientCost G k *
+          (spatialMoserCutoff rho (2 * k)).toFun x ^ 2)
+    (k : ℕ) :
+    evolvingMoserLocalizedMass
+        (I := I) (M := M) (Module.finrank ℝ E) g rho u p₀ a τ t₁ (k + 1) ≤
+      max 1 C *
+        ((max 1 (evolvingMoserStepConstant G B a τ t₁) * 16 ^ k) *
+          evolvingMoserLocalizedMass
+            (I := I) (M := M) (Module.finrank ℝ E) g rho u p₀ a τ t₁ k) ^
+          parabolicMoserGain (Module.finrank ℝ E) := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let A := evolvingMoserStepConstant G B a τ t₁
+  let coefficient := evolvingMoserStepCoefficient G B a τ t₁ k
+  let L := evolvingMoserLocalizedMass
+    (I := I) (M := M) n g rho u p₀ a τ t₁ k
+  let gain := parabolicMoserGain n
+  have hA : 0 ≤ A := evolvingMoserStepConstant_nonneg haτ hτt₁ hG hB
+  have hcoefficient : 0 ≤ coefficient :=
+    evolvingMoserStepCoefficient_nonneg haτ hτt₁ hG hB k
+  have hL : 0 ≤ L := evolvingMoserLocalizedMass_nonneg
+    (I := I) (M := M) n g rho u haτ hτt₁
+      (fun t x => (hpos t x).le) k
+  have hgain : 0 ≤ gain := (parabolicMoserGain_pos n).le
+  have hcoefficient_le : coefficient ≤ A * 16 ^ k :=
+    evolvingMoserStepCoefficient_le haτ hτt₁ hG hB k
+  have hA_le : A * 16 ^ k * L ≤ max 1 A * 16 ^ k * L := by
+    gcongr
+    exact le_max_right 1 A
+  have hfirst := evolvingMoserLocalizedMass_succ_le_of_subsolution
+    (I := I) (M := M) g hdim rho u hu hpos hp₀ haτ hτt₁ hB hC hG
+      hg hgram hSobolev hpde htrace k (fun t ht x => hgradient k t ht x)
+  calc
+    _ ≤ C * (coefficient * L) ^ gain := by
+      simpa only [n, coefficient, L, gain] using hfirst
+    _ ≤ C * (A * 16 ^ k * L) ^ gain := by gcongr
+    _ ≤ max 1 C * (A * 16 ^ k * L) ^ gain := by
+      gcongr
+      exact le_max_right 1 C
+    _ ≤ max 1 C * ((max 1 A * 16 ^ k) * L) ^ gain := by
+      have hleft_nonneg : 0 ≤ A * 16 ^ k * L := by positivity
+      have hrpow := Real.rpow_le_rpow hleft_nonneg hA_le hgain
+      exact mul_le_mul_of_nonneg_left hrpow
+        ((by norm_num : (0 : ℝ) ≤ 1).trans (le_max_left 1 C))
+    _ = _ := by simp only [n, A, L, gain]
+
+theorem evolvingMoserNormalizedMass_succ_le_of_subsolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    {q : SmoothRiemannianMetric I M} (rho : SmoothScalar q)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a τ t₁ B C G s₀ : ℝ}
+    (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hB : 0 ≤ B) (hC : 0 ≤ C) (hG : 0 ≤ G)
+    (hg : MetricFamilyRegularAt (I := I) g s₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hSobolev : ∀ t ∈ Icc a t₁,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x)
+    (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
+      traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hgradient : ∀ k t, t ∈ Icc a t₁ → ∀ x : M,
+      (g t).inner x
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x)
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x) ≤
+        evolvingMoserSpatialGradientCost G k *
+          (spatialMoserCutoff rho (2 * k)).toFun x ^ 2)
+    (k : ℕ) :
+    evolvingMoserNormalizedMass
+        (I := I) (M := M) (Module.finrank ℝ E) g rho u p₀ a τ t₁ (k + 1) ≤
+      Real.exp
+          (moserIterationCost (parabolicMoserDecay (Module.finrank ℝ E))
+            ((parabolicMoserDecay (Module.finrank ℝ E) *
+                Real.log (max 1 C) +
+                Real.log (max 1 (evolvingMoserStepConstant G B a τ t₁))) / p₀)
+            (Real.log 16 / p₀) k) *
+        evolvingMoserNormalizedMass
+          (I := I) (M := M) (Module.finrank ℝ E) g rho u p₀ a τ t₁ k := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let S := max 1 C
+  let A := max 1 (evolvingMoserStepConstant G B a τ t₁)
+  let L := evolvingMoserLocalizedMass
+    (I := I) (M := M) n g rho u p₀ a τ t₁ k
+  let L' := evolvingMoserLocalizedMass
+    (I := I) (M := M) n g rho u p₀ a τ t₁ (k + 1)
+  have hp₀pos : 0 < p₀ := lt_of_lt_of_le (by norm_num) hp₀
+  have hS : 1 ≤ S := le_max_left 1 _
+  have hA : 1 ≤ A := le_max_left 1 _
+  have hL : 0 ≤ L := evolvingMoserLocalizedMass_nonneg
+    (I := I) (M := M) n g rho u haτ hτt₁
+      (fun t x => (hpos t x).le) k
+  have hL' : 0 ≤ L' := evolvingMoserLocalizedMass_nonneg
+    (I := I) (M := M) n g rho u haτ hτt₁
+      (fun t x => (hpos t x).le) (k + 1)
+  have hstep := evolvingMoserLocalizedMass_succ_le_majorant
+    (I := I) (M := M) g hdim rho u hu hpos hp₀ haτ hτt₁ hB hC hG
+      hg hgram hSobolev hpde htrace hgradient k
+  have hnormalized := normalized_moser_step (n := n) hp₀pos hS hA hL hL' k
+    (by simpa only [S, A, L, L', n] using hstep)
+  simpa only [evolvingMoserNormalizedMass, n, S, A, L, L'] using hnormalized
+
+theorem evolvingMoserNormalizedMass_le_of_subsolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    {q : SmoothRiemannianMetric I M} (rho : SmoothScalar q)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a τ t₁ B C G s₀ : ℝ}
+    (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hB : 0 ≤ B) (hC : 0 ≤ C) (hG : 0 ≤ G)
+    (hg : MetricFamilyRegularAt (I := I) g s₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hSobolev : ∀ t ∈ Icc a t₁,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x)
+    (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
+      traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hgradient : ∀ k t, t ∈ Icc a t₁ → ∀ x : M,
+      (g t).inner x
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x)
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x) ≤
+        evolvingMoserSpatialGradientCost G k *
+          (spatialMoserCutoff rho (2 * k)).toFun x ^ 2)
+    (k : ℕ) :
+    evolvingMoserNormalizedMass
+        (I := I) (M := M) (Module.finrank ℝ E) g rho u p₀ a τ t₁ k ≤
+      Real.exp
+          (∑' j, moserIterationCost (parabolicMoserDecay (Module.finrank ℝ E))
+            ((parabolicMoserDecay (Module.finrank ℝ E) *
+                Real.log (max 1 C) +
+                Real.log (max 1 (evolvingMoserStepConstant G B a τ t₁))) / p₀)
+            (Real.log 16 / p₀) j) *
+        evolvingMoserNormalizedMass
+          (I := I) (M := M) (Module.finrank ℝ E) g rho u p₀ a τ t₁ 0 := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let theta := parabolicMoserDecay n
+  let S := max 1 C
+  let A := max 1 (evolvingMoserStepConstant G B a τ t₁)
+  let initialCost := (theta * Real.log S + Real.log A) / p₀
+  let linearCost := Real.log 16 / p₀
+  let X : ℕ → ℝ := fun j =>
+    evolvingMoserNormalizedMass
+      (I := I) (M := M) n g rho u p₀ a τ t₁ j
+  have hp₀pos : 0 < p₀ := lt_of_lt_of_le (by norm_num) hp₀
+  have htheta : 0 ≤ theta := (parabolicMoserDecay_pos n).le
+  have htheta_one : theta < 1 := parabolicMoserDecay_lt_one n
+  have hS : 1 ≤ S := le_max_left 1 _
+  have hA : 1 ≤ A := le_max_left 1 _
+  have hinitialCost : 0 ≤ initialCost := by
+    exact div_nonneg
+      (add_nonneg (mul_nonneg htheta (Real.log_nonneg hS))
+        (Real.log_nonneg hA)) hp₀pos.le
+  have hlinearCost : 0 ≤ linearCost := by
+    exact div_nonneg (Real.log_nonneg (by norm_num)) hp₀pos.le
+  have hXzero : 0 ≤ X 0 := Real.rpow_nonneg
+    (evolvingMoserLocalizedMass_nonneg
+      (I := I) (M := M) n g rho u haτ hτt₁
+        (fun t x => (hpos t x).le) 0) _
+  have hstep : ∀ j, X (j + 1) ≤
+      Real.exp (moserIterationCost theta initialCost linearCost j) * X j := by
+    intro j
+    simpa only [X, theta, initialCost, linearCost, S, A, n] using
+      evolvingMoserNormalizedMass_succ_le_of_subsolution
+        (I := I) (M := M) g hdim rho u hu hpos hp₀ haτ hτt₁
+          hB hC hG hg hgram hSobolev hpde htrace hgradient j
+  have hbound := moser_iteration_bound hXzero htheta htheta_one
+    hinitialCost hlinearCost hstep k
+  simpa only [X, theta, initialCost, linearCost, S, A, n] using hbound
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
