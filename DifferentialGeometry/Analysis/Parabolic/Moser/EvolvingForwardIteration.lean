@@ -27,7 +27,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 omit [I.Boundaryless] in
-private theorem intervalIntegral_fixed_le_moving_of_volume_le
+theorem intervalIntegral_fixed_le_moving_of_volume_le
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
     (f : ℝ → M → ℝ)
@@ -93,7 +93,7 @@ private theorem intervalIntegral_fixed_le_moving_of_volume_le
   simpa only [fixed, moving] using hmono
 
 omit [I.Boundaryless] in
-private theorem intervalIntegral_moving_le_fixed_of_volume_le
+theorem intervalIntegral_moving_le_fixed_of_volume_le
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
     (f : ℝ → M → ℝ)
