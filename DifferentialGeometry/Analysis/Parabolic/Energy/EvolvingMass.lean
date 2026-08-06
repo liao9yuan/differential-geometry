@@ -31,6 +31,13 @@ def evolvingLocalizedL2Mass
   ∫ x, cutoff x ^ 2 * u t x ^ 2
     ∂(riemannianMeasureFamily (I := I) (M := M) g t)
 
+def evolvingLocalizedVolumeDistortion
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t : ℝ) : ℝ :=
+  ∫ x, cutoff x ^ 2 *
+      ((1 / 2) * traceTimeDerivMetric (I := I) g t x * u t x ^ 2)
+    ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+
 omit [CompactSpace M] in
 theorem evolvingLocalizedL2Mass_nonneg
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
@@ -113,6 +120,42 @@ theorem hasDerivAt_evolvingLocalizedL2Mass
   apply integral_congr_ae
   filter_upwards [] with x
   rw [hderiv x]
+
+theorem evolvingLocalizedVolumeDistortion_le
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t B : ℝ)
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : Continuous cutoff) (hu : Continuous (u t))
+    (htrace : ∀ x : M, traceTimeDerivMetric (I := I) g t x ≤ B) :
+    evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff u t ≤
+      (1 / 2) * B * evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u t := by
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  have htrace_cont : Continuous
+      (fun x : M => traceTimeDerivMetric (I := I) g t x) :=
+    traceTimeDerivMetric_continuous (I := I) (M := M) hg
+  have hleft_int : Integrable (fun x : M => cutoff x ^ 2 *
+      ((1 / 2) * traceTimeDerivMetric (I := I) g t x * u t x ^ 2)) μ :=
+    ((hcutoff.pow 2).mul
+      ((continuous_const.mul htrace_cont).mul (hu.pow 2)))
+      |>.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hright_int : Integrable (fun x : M =>
+      ((1 / 2) * B) * (cutoff x ^ 2 * u t x ^ 2)) μ :=
+    (continuous_const.mul ((hcutoff.pow 2).mul (hu.pow 2)))
+      |>.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  change (∫ x, cutoff x ^ 2 *
+      ((1 / 2) * traceTimeDerivMetric (I := I) g t x * u t x ^ 2) ∂μ) ≤
+    (1 / 2) * B * ∫ x, cutoff x ^ 2 * u t x ^ 2 ∂μ
+  rw [← integral_const_mul]
+  apply integral_mono hleft_int hright_int
+  intro x
+  have ht := mul_le_mul_of_nonneg_right (htrace x) (sq_nonneg (u t x))
+  have hh := mul_le_mul_of_nonneg_left ht (by norm_num : 0 ≤ (1 / 2 : ℝ))
+  have hc := mul_le_mul_of_nonneg_left hh (sq_nonneg (cutoff x))
+  nlinarith
 
 theorem deriv_evolvingLocalizedL2Mass_le_of_trace_le
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)

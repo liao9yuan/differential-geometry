@@ -171,4 +171,95 @@ theorem caccioppoli_differential_evolving_of_subsolution
     (I := I) (M := M) g cutoff u t hg hcutoff hu]
   linarith
 
+theorem caccioppoli_differential_evolving_of_trace_le
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u source : ℝ → M → ℝ) (t B : ℝ)
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    (hpde : ∀ x : M,
+      deriv (fun s => u s x) t =
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x + source t x)
+    (htrace : ∀ x : M, traceTimeDerivMetric (I := I) g t x ≤ B) :
+    deriv (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) t +
+        localizedDirichletEnergy (I := I) (M := M)
+          (⟨cutoff, hcutoff⟩ : SmoothScalar (g t))
+          (smoothScalarSlice (I := I) (g t) u hu t) ≤
+      4 * cutoffGradientError (I := I) (M := M)
+          (⟨cutoff, hcutoff⟩ : SmoothScalar (g t))
+          (smoothScalarSlice (I := I) (g t) u hu t) +
+        ∫ x, 2 * cutoff x ^ 2 * u t x * source t x
+          ∂(riemannianMeasureFamily (I := I) (M := M) g t) +
+        (1 / 2) * B * evolvingLocalizedL2Mass
+          (I := I) (M := M) g cutoff u t := by
+  have henergy := caccioppoli_differential_evolving
+    (I := I) (M := M) g cutoff u source t hg hcutoff hu hsource hpde
+  change deriv (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) t +
+        localizedDirichletEnergy (I := I) (M := M)
+          (⟨cutoff, hcutoff⟩ : SmoothScalar (g t))
+          (smoothScalarSlice (I := I) (g t) u hu t) ≤
+      4 * cutoffGradientError (I := I) (M := M)
+          (⟨cutoff, hcutoff⟩ : SmoothScalar (g t))
+          (smoothScalarSlice (I := I) (g t) u hu t) +
+        ∫ x, 2 * cutoff x ^ 2 * u t x * source t x
+          ∂(riemannianMeasureFamily (I := I) (M := M) g t) +
+        evolvingLocalizedVolumeDistortion
+          (I := I) (M := M) g cutoff u t at henergy
+  have hvolume := evolvingLocalizedVolumeDistortion_le
+    (I := I) (M := M) g cutoff u t B hg hcutoff.continuous
+      (hu.comp (contMDiff_const.prodMk contMDiff_id)).continuous htrace
+  linarith
+
+theorem caccioppoli_differential_evolving_of_subsolution_of_trace_le
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u source : ℝ → M → ℝ) (t B : ℝ)
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    (hu_nonneg : ∀ x : M, 0 ≤ u t x)
+    (hpde : ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x + source t x)
+    (htrace : ∀ x : M, traceTimeDerivMetric (I := I) g t x ≤ B) :
+    deriv (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) t +
+        localizedDirichletEnergy (I := I) (M := M)
+          (⟨cutoff, hcutoff⟩ : SmoothScalar (g t))
+          (smoothScalarSlice (I := I) (g t) u hu t) ≤
+      4 * cutoffGradientError (I := I) (M := M)
+          (⟨cutoff, hcutoff⟩ : SmoothScalar (g t))
+          (smoothScalarSlice (I := I) (g t) u hu t) +
+        ∫ x, 2 * cutoff x ^ 2 * u t x * source t x
+          ∂(riemannianMeasureFamily (I := I) (M := M) g t) +
+        (1 / 2) * B * evolvingLocalizedL2Mass
+          (I := I) (M := M) g cutoff u t := by
+  have henergy := caccioppoli_differential_evolving_of_subsolution
+    (I := I) (M := M) g cutoff u source t hg hcutoff hu hsource hu_nonneg hpde
+  change deriv (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) t +
+        localizedDirichletEnergy (I := I) (M := M)
+          (⟨cutoff, hcutoff⟩ : SmoothScalar (g t))
+          (smoothScalarSlice (I := I) (g t) u hu t) ≤
+      4 * cutoffGradientError (I := I) (M := M)
+          (⟨cutoff, hcutoff⟩ : SmoothScalar (g t))
+          (smoothScalarSlice (I := I) (g t) u hu t) +
+        ∫ x, 2 * cutoff x ^ 2 * u t x * source t x
+          ∂(riemannianMeasureFamily (I := I) (M := M) g t) +
+        evolvingLocalizedVolumeDistortion
+          (I := I) (M := M) g cutoff u t at henergy
+  have hvolume := evolvingLocalizedVolumeDistortion_le
+    (I := I) (M := M) g cutoff u t B hg hcutoff.continuous
+      (hu.comp (contMDiff_const.prodMk contMDiff_id)).continuous htrace
+  linarith
+
 end DifferentialGeometry.Analysis.Parabolic.Energy
