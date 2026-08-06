@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingSmallExponentLocalBoundedness
+import DifferentialGeometry.Analysis.Calculus.SmoothClamp
+import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 
 set_option autoImplicit false
 
@@ -64,11 +66,11 @@ theorem evolving_harnack_on_separated_cylinders
     (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
       (modelWithCornersSelf ℝ ℝ) ∞
       (fun z : ℝ × M => u z.1 z.2))
-    (hpos : ∀ t x, 0 < u t x)
     (Ccenter Ctail H W rate : ℝ)
     {p₀ A earlyLower earlyUpper b τ c d D C G Bearly Blate
       lower upper innerLower innerUpper t₀ : ℝ}
     (V : ℝ≥0∞)
+    (hpos : ∀ t ∈ Icc A D, ∀ x, 0 < u t x)
     (hp₀ : 0 < p₀) (hp₀_one : p₀ < 1)
     (hAearly : A < earlyLower) (hearly : earlyLower ≤ earlyUpper)
     (hearlyb : earlyUpper < b) (hbτ : b < τ)
@@ -150,10 +152,56 @@ theorem evolving_harnack_on_separated_cylinders
                 A earlyLower earlyUpper b τ c d D lower upper
                 innerLower innerUpper *
             u q y := by
+  let U : ℝ × M → ℝ := fun z => u z.1 z.2
+  have hU : Continuous U := hu.continuous
+  have hAD : A ≤ D :=
+    hAearly.le.trans (hearly.trans
+      (hearlyb.le.trans (hbτ.le.trans (hτc.le.trans (hcd.trans hdD.le)))))
+  have hK : IsCompact (Icc A D ×ˢ (Set.univ : Set M)) :=
+    isCompact_Icc.prod isCompact_univ
+  have hKne : (Icc A D ×ˢ (Set.univ : Set M)).Nonempty := by
+    obtain ⟨x, _⟩ := hne
+    exact ⟨(A, x), ⟨⟨le_rfl, hAD⟩, Set.mem_univ x⟩⟩
+  obtain ⟨clamp, hclamp, hclamp_pos, hclamp_eq⟩ :=
+    DifferentialGeometry.exists_smooth_positive_clamp_eventuallyEq_on_compact
+      hK hKne hU (fun z hz => hpos z.1 hz.1 z.2)
+  let v : ℝ → M → ℝ := fun t x => clamp (u t x)
+  have hv : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => v z.1 z.2) := by
+    simpa only [v, U, Function.comp_apply] using hclamp.contMDiff.comp hu
+  have hvpos : ∀ t x, 0 < v t x := fun t x => hclamp_pos (u t x)
+  have hv_eq_u : ∀ t ∈ Icc A D, ∀ x, v t x = u t x := by
+    intro t ht x
+    have heq := (hclamp_eq (t, x) ⟨ht, Set.mem_univ x⟩).self_of_nhds
+    simpa only [v, U, Function.comp_apply] using heq
+  have hpde_v : ∀ t ∈ Icc A D, ∀ x : M,
+      deriv (fun s => v s x) t =
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) v hv t).smooth x := by
+    intro t ht x
+    have hjoint := hclamp_eq (t, x) ⟨ht, Set.mem_univ x⟩
+    have htime :
+        (fun s : ℝ => v s x) =ᶠ[nhds t] (fun s : ℝ => u s x) := by
+      simpa only [v, U, Function.comp_apply] using
+        hjoint.comp_tendsto (continuousAt_id.prodMk continuousAt_const)
+    have hspace :
+        (fun y : M => v t y) =ᶠ[nhds x] (fun y : M => u t y) := by
+      simpa only [v, U, Function.comp_apply] using
+        hjoint.comp_tendsto (continuousAt_const.prodMk continuousAt_id)
+    calc
+      deriv (fun s => v s x) t = deriv (fun s => u s x) t := htime.deriv_eq
+      _ = Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x := hpde t ht x
+      _ = Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) v hv t).smooth x := by
+        exact (Δ_g_congr_of_eventuallyEq (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) v hv t).smooth
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth hspace).symm
   let n := Module.finrank ℝ E
   let c₀ := max 1 (V.toReal * (4 * Ctail * W))
   let earlyNorm := localizedSpacetimeRpowNorm (I := I) (M := M)
-    (bombieriGiustiSpatialCutoff rho lower upper 0) u p₀ A b
+    (bombieriGiustiSpatialCutoff rho lower upper 0) v p₀ A b
   let earlyFactor := evolvingMoserPositiveExponentLocalBoundFactor
     n V V C G Blate p₀ A earlyLower earlyUpper b innerLower innerUpper
   let weakFactor := canonicalEvolvingBombieriGiustiWeakHarnackBound
@@ -181,35 +229,43 @@ theorem evolving_harnack_on_separated_cylinders
       simpa [bombieriGiustiSpatialCutoff] using hle
     rw [hzero, zero_pow (by norm_num : 2 ≠ 0)] at hle'
     exact hy (sq_eq_zero_iff.mp (le_antisymm hle' (sq_nonneg _)))
-  have hlocal : u t x ≤ earlyFactor * earlyNorm := by
+  have hlocal : v t x ≤ earlyFactor * earlyNorm := by
     simpa [earlyFactor, earlyNorm, n, bombieriGiustiSpatialCutoff] using
       (evolving_local_boundedness_of_subsolution_rpow_of_volume_le
-        (I := I) (M := M) qMetric g hdim rho u hu hpos V V hp₀
+        (I := I) (M := M) qMetric g hdim rho v hv hvpos V V hp₀
           hAearly hearly hearlyb hC hG hBlate houterSpatial hupperInner
           hinner hg hgram
           (fun s hs => hSobolev s ⟨hs.1, hs.2.trans hbD⟩)
-          (fun s hs z => (hpde s ⟨hs.1, hs.2.trans hbD⟩ z).le)
+          (fun s hs z => (hpde_v s ⟨hs.1, hs.2.trans hbD⟩ z).le)
           (fun s hs z => htraceLate s ⟨hs.1, hs.2.trans hbD⟩ z)
           (fun s hs z => hrho s ⟨hs.1, hs.2.trans hbD⟩ z)
           hVtop hVtop
           (fun s hs => (hvolume s ⟨hs.1, hs.2.trans hbD⟩).2)
           (fun s hs => (hvolume s ⟨hs.1, hs.2.trans hbD⟩).1)
           t ht x hx)
-  have hweak : earlyNorm ≤ weakFactor * u q y := by
+  have hweak : earlyNorm ≤ weakFactor * v q y := by
     simpa only [earlyNorm, weakFactor, c₀, n] using
       (localizedSpacetimeRpowNorm_le_canonicalEvolvingBombieriGiustiWeakHarnackBound_mul_of_supersolution
         (I := I) (M := M) qMetric g hdim rho outer averagingCutoff
-          u hu hpos Ccenter Ctail H W rate V hp₀ hp₀_one hAb hbτ
+          v hv hvpos Ccenter Ctail H W rate V hp₀ hp₀_one hAb hbτ
           hτc hcd hdD hC hG hBearly hBlate hCtail hrate hlowerUpper
           hg hgram haveragingCutoff hne hPcenter hPtail htraceAbs hmass_le
           hdrift_le hSobolev htraceEarly htraceLate hrho
-          (fun s hs z => (hpde s hs z).ge)
+          (fun s hs z => (hpde_v s hs z).ge)
           hVzero hVtop hvolume hearlyMeasure hearlyMeasure_le_one
           hlateMeasure hlateMeasure_le_one houter q hq y hyOuter)
+  have htAD : t ∈ Icc A D := by
+    exact ⟨hAearly.le.trans ht.1,
+      ht.2.trans (hearlyb.le.trans hbD)⟩
+  have hqAD : q ∈ Icc A D := by
+    exact ⟨hAb.trans (hbτ.le.trans (hτc.le.trans hq.1)),
+      hq.2.trans hdD.le⟩
   calc
-    u t x ≤ earlyFactor * earlyNorm := hlocal
+    u t x = v t x := (hv_eq_u t htAD x).symm
+    _ ≤ earlyFactor * earlyNorm := hlocal
     _ ≤ earlyFactor * (weakFactor * u q y) :=
-      mul_le_mul_of_nonneg_left hweak hearlyFactor
+      mul_le_mul_of_nonneg_left (by simpa [hv_eq_u q hqAD y] using hweak)
+        hearlyFactor
     _ = evolvingSeparatedCylinderHarnackFactor
           n V C G Bearly Blate rate p₀ Ctail W A earlyLower earlyUpper b
             τ c d D lower upper innerLower innerUpper * u q y := by
