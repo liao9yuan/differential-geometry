@@ -383,6 +383,7 @@ import DifferentialGeometry.Analysis.Heat.Semigroup.Duhamel
 import DifferentialGeometry.Analysis.Heat.Semigroup.Generator
 import DifferentialGeometry.Analysis.Heat.Semigroup.MildSolutionPDE
 import DifferentialGeometry.Analysis.Heat.Semigroup.StrongSolution
+import DifferentialGeometry.Analysis.Heat.Semigroup.ClassicalSolution
 import DifferentialGeometry.Analysis.Heat.Semigroup.SpectralBounds
 import DifferentialGeometry.Analysis.Heat.Smoothing.HeatSemigroupIteratedDomain
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothRepresentative
