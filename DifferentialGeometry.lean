@@ -741,6 +741,7 @@ import DifferentialGeometry.Analysis.Parabolic.Moser.LocalBoundedness
 import DifferentialGeometry.Analysis.Parabolic.Moser.LogEnergy
 import DifferentialGeometry.Analysis.Parabolic.Moser.LogTail
 import DifferentialGeometry.Analysis.Parabolic.Moser.Oscillation
+import DifferentialGeometry.Analysis.Parabolic.Moser.ParabolicHarnack
 import DifferentialGeometry.Analysis.Parabolic.Moser.Power
 import DifferentialGeometry.Analysis.Parabolic.Moser.ReverseHolder
 import DifferentialGeometry.Analysis.Parabolic.Moser.Sobolev
