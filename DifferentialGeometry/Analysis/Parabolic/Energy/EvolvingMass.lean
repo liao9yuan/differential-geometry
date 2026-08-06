@@ -114,4 +114,61 @@ theorem hasDerivAt_evolvingLocalizedL2Mass
   filter_upwards [] with x
   rw [hderiv x]
 
+theorem deriv_evolvingLocalizedL2Mass_le_of_trace_le
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t B : ℝ)
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (htrace : ∀ x : M, traceTimeDerivMetric (I := I) g t x ≤ B) :
+    deriv (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) t ≤
+      ∫ x, cutoff x ^ 2 *
+          (2 * u t x * deriv (fun s => u s x) t +
+            (1 / 2) * B * u t x ^ 2)
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t) := by
+  rw [(hasDerivAt_evolvingLocalizedL2Mass
+    (I := I) (M := M) g cutoff u t hg hcutoff hu).deriv]
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  have hu_t : Continuous (u t) :=
+    (hu.comp (contMDiff_const.prodMk contMDiff_id)).continuous
+  let F : C^∞⟮(modelWithCornersSelf ℝ ℝ).prod I, ℝ × M; ℝ⟯ :=
+    ⟨fun p => u p.1 p.2, hu⟩
+  have htime : Continuous (fun x : M => deriv (fun s => u s x) t) := by
+    exact ((DifferentialGeometry.contMDiff_partial_deriv_fst I F).comp
+      (contMDiff_const.prodMk contMDiff_id)).continuous
+  have htrace_cont : Continuous
+      (fun x : M => traceTimeDerivMetric (I := I) g t x) :=
+    traceTimeDerivMetric_continuous (I := I) (M := M) hg
+  have hleft_cont : Continuous (fun x : M => cutoff x ^ 2 *
+      (2 * u t x * deriv (fun s => u s x) t +
+        (1 / 2) * traceTimeDerivMetric (I := I) g t x * u t x ^ 2)) :=
+    (hcutoff.continuous.pow 2).mul
+      (((continuous_const.mul hu_t).mul htime).add
+        ((continuous_const.mul htrace_cont).mul (hu_t.pow 2)))
+  have hright_cont : Continuous (fun x : M => cutoff x ^ 2 *
+      (2 * u t x * deriv (fun s => u s x) t +
+        (1 / 2) * B * u t x ^ 2)) :=
+    (hcutoff.continuous.pow 2).mul
+      (((continuous_const.mul hu_t).mul htime).add
+        ((continuous_const.mul continuous_const).mul (hu_t.pow 2)))
+  have hleft_int : Integrable (fun x : M => cutoff x ^ 2 *
+      (2 * u t x * deriv (fun s => u s x) t +
+        (1 / 2) * traceTimeDerivMetric (I := I) g t x * u t x ^ 2)) μ :=
+    hleft_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hright_int : Integrable (fun x : M => cutoff x ^ 2 *
+      (2 * u t x * deriv (fun s => u s x) t +
+        (1 / 2) * B * u t x ^ 2)) μ :=
+    hright_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  apply integral_mono hleft_int hright_int
+  intro x
+  apply mul_le_mul_of_nonneg_left _ (sq_nonneg (cutoff x))
+  have hmul := mul_le_mul_of_nonneg_right (htrace x) (sq_nonneg (u t x))
+  nlinarith
+
 end DifferentialGeometry.Analysis.Parabolic.Energy
