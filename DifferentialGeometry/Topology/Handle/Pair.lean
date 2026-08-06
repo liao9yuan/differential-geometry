@@ -1,0 +1,117 @@
+import DifferentialGeometry.Topology.Handle.Defs
+import DifferentialGeometry.Topology.Handle.Basic
+import DifferentialGeometry.Topology.Handle.Duality
+import DifferentialGeometry.Topology.Handle.Retraction
+import Mathlib.Topology.ContinuousMap.Basic
+import Mathlib.Topology.Homotopy.Basic
+
+namespace DifferentialGeometry.Topology.Handle
+
+open ContinuousMap
+open unitInterval
+
+def coreProjection (k l : ℕ) : C(StandardHandle k l, ClosedCell k) :=
+  ⟨fun p => p.1, continuous_fst⟩
+
+def cocoreProjection (k l : ℕ) : C(StandardHandle k l, ClosedCell l) :=
+  ⟨fun p => p.2, continuous_snd⟩
+
+def coreDiskInclusionC (k l : ℕ) : C(ClosedCell k, StandardHandle k l) :=
+  ⟨coreDiskInclusion k l, continuous_coreDiskInclusion k l⟩
+
+def cocoreDiskInclusionC (k l : ℕ) : C(ClosedCell l, StandardHandle k l) :=
+  ⟨cocoreDiskInclusion k l, continuous_cocoreDiskInclusion k l⟩
+
+theorem coreProjection_attachingInclusion (k l : ℕ) (a : AttachingRegion k l) :
+    coreProjection k l (attachingInclusion k l a) = cellBoundaryInclusion k a.1 := by
+  rcases a with ⟨u, y⟩
+  simp [coreProjection, attachingInclusion]
+
+theorem coreProjection_coreDiskInclusion (k l : ℕ) (x : ClosedCell k) :
+    coreProjection k l (coreDiskInclusion k l x) = x := by
+  simp [coreProjection, coreDiskInclusion]
+
+theorem cocoreProjection_beltInclusion (k l : ℕ) (a : BeltRegion k l) :
+    cocoreProjection k l (beltInclusion k l a) = cellBoundaryInclusion l a.2 := by
+  rcases a with ⟨x, v⟩
+  simp [cocoreProjection, beltInclusion]
+
+theorem cocoreProjection_cocoreDiskInclusion (k l : ℕ) (y : ClosedCell l) :
+    cocoreProjection k l (cocoreDiskInclusion k l y) = y := by
+  simp [cocoreProjection, cocoreDiskInclusion]
+
+noncomputable def coreProjection_centerInclusion_homotopy (k l : ℕ) :
+    ContinuousMap.HomotopyRel (ContinuousMap.id (StandardHandle k l))
+      ((coreDiskInclusionC k l).comp (coreProjection k l))
+      (coreDisk k l) := by
+  have h₁ : (((ContinuousMap.id (StandardHandle k l)).restrict (coreDisk k l)).comp
+        (coreRetract k l).retraction) =
+      (coreDiskInclusionC k l).comp (coreProjection k l) := by
+    apply ContinuousMap.ext
+    intro p
+    rcases p with ⟨x, y⟩
+    apply Prod.ext
+    · simp [coreDiskInclusionC, coreDiskInclusion, coreProjection, coreRetract]
+    · simp [coreDiskInclusionC, coreDiskInclusion, coreProjection, coreRetract]
+  exact (coreRetract k l).homotopy.cast rfl h₁
+
+theorem coreProjection_centerInclusion_fixed (k l : ℕ) (t : I) {p : StandardHandle k l}
+    (hp : p ∈ coreDisk k l) :
+    (coreProjection_centerInclusion_homotopy k l) (t, p) = p :=
+  (coreProjection_centerInclusion_homotopy k l).eq_fst t hp
+
+theorem coreProjection_centerInclusion_preserves_attachingRegion (k l : ℕ) (t : I)
+    {p : StandardHandle k l} (hp : p ∈ attachingRegion k l) :
+    (coreProjection_centerInclusion_homotopy k l) (t, p) ∈ attachingRegion k l := by
+  simpa [coreProjection_centerInclusion_homotopy] using
+    (coreRetract_preserves_attachingRegion k l t hp)
+
+noncomputable def cocoreProjection_centerInclusion_homotopy (k l : ℕ) :
+    ContinuousMap.HomotopyRel (ContinuousMap.id (StandardHandle k l))
+      ((cocoreDiskInclusionC k l).comp (cocoreProjection k l))
+      (cocoreDisk k l) := by
+  have h₁ : (((ContinuousMap.id (StandardHandle k l)).restrict (cocoreDisk k l)).comp
+        (cocoreRetract k l).retraction) =
+      (cocoreDiskInclusionC k l).comp (cocoreProjection k l) := by
+    apply ContinuousMap.ext
+    intro p
+    rcases p with ⟨x, y⟩
+    apply Prod.ext
+    · simp [cocoreDiskInclusionC, cocoreDiskInclusion, cocoreProjection, cocoreRetract]
+    · simp [cocoreDiskInclusionC, cocoreDiskInclusion, cocoreProjection, cocoreRetract]
+  exact (cocoreRetract k l).homotopy.cast rfl h₁
+
+theorem cocoreProjection_centerInclusion_fixed (k l : ℕ) (t : I) {p : StandardHandle k l}
+    (hp : p ∈ cocoreDisk k l) :
+    (cocoreProjection_centerInclusion_homotopy k l) (t, p) = p :=
+  (cocoreProjection_centerInclusion_homotopy k l).eq_fst t hp
+
+theorem cocoreProjection_centerInclusion_preserves_beltRegion (k l : ℕ) (t : I)
+    {p : StandardHandle k l} (hp : p ∈ beltRegion k l) :
+    (cocoreProjection_centerInclusion_homotopy k l) (t, p) ∈ beltRegion k l := by
+  simpa [cocoreProjection_centerInclusion_homotopy] using
+    (cocoreRetract_preserves_beltRegion k l t hp)
+
+theorem coreProjection_swap (k l : ℕ) (p : StandardHandle l k) :
+    coreProjection k l (swap l k p) = cocoreProjection l k p := by
+  rcases p with ⟨y, x⟩
+  simp [coreProjection, cocoreProjection]
+
+theorem cocoreProjection_swap (k l : ℕ) (p : StandardHandle l k) :
+    cocoreProjection k l (swap l k p) = coreProjection l k p := by
+  rcases p with ⟨y, x⟩
+  simp [coreProjection, cocoreProjection]
+
+theorem swap_coreProjection_centerInclusion_homotopy (k l : ℕ) (t : I) (p : StandardHandle k l) :
+    swap k l ((coreProjection_centerInclusion_homotopy k l) (t, p)) =
+      (cocoreProjection_centerInclusion_homotopy l k) (t, swap k l p) := by
+  simpa [coreProjection_centerInclusion_homotopy, cocoreProjection_centerInclusion_homotopy]
+    using coreRetract_swap k l t p
+
+theorem swap_cocoreProjection_centerInclusion_homotopy (k l : ℕ) (t : I) (p : StandardHandle k l) :
+    swap k l ((cocoreProjection_centerInclusion_homotopy k l) (t, p)) =
+      (coreProjection_centerInclusion_homotopy l k) (t, swap k l p) := by
+  simpa [coreProjection_centerInclusion_homotopy, cocoreProjection_centerInclusion_homotopy]
+    using cocoreRetract_swap k l t p
+
+end DifferentialGeometry.Topology.Handle
