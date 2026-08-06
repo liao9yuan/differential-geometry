@@ -320,7 +320,7 @@ theorem evolvingShiftedLogCenter_monotoneOn_of_supersolution
       (modelWithCornersSelf ℝ ℝ) ∞
       (fun p : ℝ × M => u p.1 p.2))
     (hpos : ∀ t x, 0 < u t x)
-    (C H : ℝ) {a b t₀ : ℝ}
+    (C H base : ℝ) {a b t₀ : ℝ}
     (hg : MetricFamilyRegularAt (I := I) g t₀)
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
@@ -339,13 +339,13 @@ theorem evolvingShiftedLogCenter_monotoneOn_of_supersolution
         deriv (fun s => u s x) t) :
     MonotoneOn
       (evolvingShiftedLogCenter
-        (I := I) (M := M) g cutoff u C H a) (Icc a b) := by
+        (I := I) (M := M) g cutoff u C H base) (Icc a b) := by
   let shifted := evolvingShiftedLogCenter
-    (I := I) (M := M) g cutoff u C H a
+    (I := I) (M := M) g cutoff u C H base
   have hshifted : ∀ t, HasDerivAt shifted (deriv shifted t) t := by
     intro t
     exact (hasDerivAt_evolvingShiftedLogCenter
-      (I := I) (M := M) g cutoff u hu hpos C H a t hg hgram hcutoff hne)
+      (I := I) (M := M) g cutoff u hu hpos C H base t hg hgram hcutoff hne)
         |>.differentiableAt.hasDerivAt
   apply monotoneOn_of_deriv_nonneg (convex_Icc a b)
   · intro t _
@@ -356,7 +356,7 @@ theorem evolvingShiftedLogCenter_monotoneOn_of_supersolution
     have ht' : t ∈ Icc a b := interior_subset ht
     have henergy :=
       quarter_evolving_log_dirichlet_energy_le_shifted_center_deriv_of_supersolution
-        (I := I) (M := M) g cutoff u hu hpos t C H a (Icc a b)
+        (I := I) (M := M) g cutoff u hu hpos t C H base (Icc a b)
           hg hgram hcutoff hne hP ht' (htrace t ht') (hpde t ht')
     have hnonneg : 0 ≤
         ((1 / 4 : ℝ) * evolvingLocalizedDirichletEnergy

@@ -10,6 +10,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
@@ -158,6 +159,148 @@ theorem evolving_sublevel_tail_of_poincareAtAverage
         (I := I) (M := M) g averagingCutoff u t) hr hlevel
   exact hchebyshev.trans (by
     simpa only [u_t, smoothScalarSlice_toFun] using hP t ht u_t)
+
+theorem early_evolving_log_superlevel_tail_with_center_gap_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H base : ℝ) {a τ s t₀ r : ℝ}
+    (haτ : a ≤ τ) (hs : s ∈ Icc a τ) (hr : 0 ≤ r)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hdeviationCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ deviationCutoff)
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc a τ))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g deviationCutoff averagingCutoff Ctail (Icc a τ))
+    (htrace : ∀ t ∈ Icc a τ, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun q => u q x) t) :
+    (evolvingShiftedLogCenter
+          (I := I) (M := M) g averagingCutoff u Ccenter H base τ -
+        evolvingShiftedLogCenter
+          (I := I) (M := M) g averagingCutoff u Ccenter H base s + r) ^ 2 *
+      evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g deviationCutoff
+          (fun q x => Real.log (u q x)) s
+          (evolvingShiftedLogCenter
+              (I := I) (M := M) g averagingCutoff u Ccenter H base τ -
+            (∫ q in base..s,
+              evolvingLogCenterDrift
+                (I := I) (M := M) g averagingCutoff Ccenter H q) + r) ≤
+      Ctail * evolvingLocalizedDirichletEnergy
+        (I := I) (M := M) g averagingCutoff
+          (fun q x => Real.log (u q x)) s := by
+  let logu : ℝ → M → ℝ := fun q x => Real.log (u q x)
+  let shifted := evolvingShiftedLogCenter
+    (I := I) (M := M) g averagingCutoff u Ccenter H base
+  let driftIntegral : ℝ → ℝ := fun t => ∫ q in base..t,
+    evolvingLogCenterDrift
+      (I := I) (M := M) g averagingCutoff Ccenter H q
+  let gap := shifted τ - shifted s + r
+  let level := shifted τ - driftIntegral s + r
+  let hlog := contMDiff_log_of_pos hu hpos
+  have hmono := evolvingShiftedLogCenter_monotoneOn_of_supersolution
+    (I := I) (M := M) g averagingCutoff u hu hpos Ccenter H base hg hgram
+      haveragingCutoff hne hPcenter htrace hpde
+  have hcenter_mono := hmono hs ⟨haτ, le_rfl⟩ hs.2
+  have hgap : 0 ≤ gap := by
+    dsimp only [gap]
+    linarith
+  have hlevel : evolvingLocalizedAverage
+      (I := I) (M := M) g averagingCutoff logu s + gap ≤ level := by
+    dsimp only [gap, level, shifted, driftIntegral, logu]
+    simp only [evolvingShiftedLogCenter]
+    ring_nf
+    exact le_rfl
+  simpa only [gap, level, shifted, driftIntegral, logu] using
+    evolving_superlevel_tail_of_poincareAtAverage
+      (I := I) (M := M) g deviationCutoff averagingCutoff logu hlog
+        hdeviationCutoff Ctail (Icc a τ) hPtail s hs hgap hlevel
+
+theorem late_evolving_log_sublevel_tail_with_center_gap_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H base : ℝ) {τ b s t₀ r : ℝ}
+    (hτb : τ ≤ b) (hs : s ∈ Icc τ b) (hr : 0 ≤ r)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hdeviationCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ deviationCutoff)
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc τ b))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g deviationCutoff averagingCutoff Ctail (Icc τ b))
+    (htrace : ∀ t ∈ Icc τ b, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun q => u q x) t) :
+    (evolvingShiftedLogCenter
+          (I := I) (M := M) g averagingCutoff u Ccenter H base s -
+        evolvingShiftedLogCenter
+          (I := I) (M := M) g averagingCutoff u Ccenter H base τ + r) ^ 2 *
+      evolvingLocalizedSublevelMass
+        (I := I) (M := M) g deviationCutoff
+          (fun q x => Real.log (u q x)) s
+          (evolvingShiftedLogCenter
+              (I := I) (M := M) g averagingCutoff u Ccenter H base τ -
+            (∫ q in base..s,
+              evolvingLogCenterDrift
+                (I := I) (M := M) g averagingCutoff Ccenter H q) - r) ≤
+      Ctail * evolvingLocalizedDirichletEnergy
+        (I := I) (M := M) g averagingCutoff
+          (fun q x => Real.log (u q x)) s := by
+  let logu : ℝ → M → ℝ := fun q x => Real.log (u q x)
+  let shifted := evolvingShiftedLogCenter
+    (I := I) (M := M) g averagingCutoff u Ccenter H base
+  let driftIntegral : ℝ → ℝ := fun t => ∫ q in base..t,
+    evolvingLogCenterDrift
+      (I := I) (M := M) g averagingCutoff Ccenter H q
+  let gap := shifted s - shifted τ + r
+  let level := shifted τ - driftIntegral s - r
+  let hlog := contMDiff_log_of_pos hu hpos
+  have hmono := evolvingShiftedLogCenter_monotoneOn_of_supersolution
+    (I := I) (M := M) g averagingCutoff u hu hpos Ccenter H base hg hgram
+      haveragingCutoff hne hPcenter htrace hpde
+  have hcenter_mono := hmono ⟨le_rfl, hτb⟩ hs hs.1
+  have hgap : 0 ≤ gap := by
+    dsimp only [gap]
+    linarith
+  have hlevel : level ≤ evolvingLocalizedAverage
+      (I := I) (M := M) g averagingCutoff logu s - gap := by
+    dsimp only [gap, level, shifted, driftIntegral, logu]
+    simp only [evolvingShiftedLogCenter]
+    ring_nf
+    exact le_rfl
+  simpa only [gap, level, shifted, driftIntegral, logu] using
+    evolving_sublevel_tail_of_poincareAtAverage
+      (I := I) (M := M) g deviationCutoff averagingCutoff logu hlog
+        hdeviationCutoff Ctail (Icc τ b) hPtail s hs hgap hlevel
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
