@@ -290,6 +290,67 @@ theorem localizedSpacetimeRpowNorm_inv_le_exponentialTimeRescale_inv
         (Real.exp (center - rate * z.1) * uinv z.1 z.2) := by ring
 
 omit [I.Boundaryless] in
+theorem localizedSpacetimeRpowNorm_le_of_exponentialTimeRescale_bound_of_inv_bound
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    (rate center : ℝ) (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (x : M) {p a b t D A B : ℝ}
+    (hp : 0 < p) (hrate : 0 ≤ rate) (htD : t ≤ D)
+    (hA : 0 ≤ A) (hB : 0 ≤ B)
+    (hnorm : localizedSpacetimeRpowNorm (I := I) (M := M) cutoff
+      (exponentialTimeRescale rate center u) p a b ≤ A)
+    (hinv : (exponentialTimeRescale rate center u t x)⁻¹ ≤ B) :
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ≤
+      Real.exp (rate * (D - a)) * (A * B) * u t x := by
+  let v := exponentialTimeRescale rate center u
+  have hvpos : 0 < v t x := exponentialTimeRescale_pos rate center u hpos t x
+  have hrescale := localizedSpacetimeRpowNorm_le_exponentialTimeRescale
+    (I := I) (M := M) cutoff rate center u hu hpos
+      (a := a) (b := b) hp hrate
+  have hnorm' : localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ≤
+      Real.exp (center - rate * a) * A :=
+    hrescale.trans (mul_le_mul_of_nonneg_left hnorm (Real.exp_pos _).le)
+  have hone : 1 ≤ B * v t x := by
+    calc
+      1 = (v t x)⁻¹ * v t x := (inv_mul_cancel₀ hvpos.ne').symm
+      _ ≤ B * v t x := mul_le_mul_of_nonneg_right hinv hvpos.le
+  have hfirst : Real.exp (center - rate * a) * A ≤
+      Real.exp (center - rate * a) * A * (B * v t x) := by
+    calc
+      Real.exp (center - rate * a) * A =
+          Real.exp (center - rate * a) * A * 1 := (mul_one _).symm
+      _ ≤ Real.exp (center - rate * a) * A * (B * v t x) :=
+        mul_le_mul_of_nonneg_left hone
+          (mul_nonneg (Real.exp_pos _).le hA)
+  have hexp : Real.exp (center - rate * a) * A * (B * v t x) =
+      Real.exp (rate * (t - a)) * (A * B) * u t x := by
+    dsimp only [v, exponentialTimeRescale]
+    calc
+      Real.exp (center - rate * a) * A *
+          (B * (Real.exp (rate * t - center) * u t x)) =
+        (Real.exp (center - rate * a) * Real.exp (rate * t - center)) *
+          (A * B) * u t x := by ring
+      _ = Real.exp ((center - rate * a) + (rate * t - center)) *
+          (A * B) * u t x := by rw [Real.exp_add]
+      _ = Real.exp (rate * (t - a)) * (A * B) * u t x := by
+        congr 1
+        ring_nf
+  have htime : Real.exp (rate * (t - a)) ≤ Real.exp (rate * (D - a)) := by
+    exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left
+      (sub_le_sub_right htD a) hrate)
+  calc
+    localizedSpacetimeRpowNorm (I := I) (M := M) cutoff u p a b ≤
+        Real.exp (center - rate * a) * A := hnorm'
+    _ ≤ Real.exp (center - rate * a) * A * (B * v t x) := hfirst
+    _ = Real.exp (rate * (t - a)) * (A * B) * u t x := hexp
+    _ ≤ Real.exp (rate * (D - a)) * (A * B) * u t x := by
+      exact mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right htime (mul_nonneg hA hB)) (hpos t x).le
+
+omit [I.Boundaryless] in
 theorem localizedSpacetimeRpowNorm_mul_inv_le_of_exponentialTimeRescale
     {g : SmoothRiemannianMetric I M}
     (earlyCutoff lateCutoff : SmoothScalar g)
