@@ -250,4 +250,30 @@ theorem exists_smooth_time_clamp
           field_simp [hmargin.ne']
           ring
 
+theorem exists_smooth_positive_clamp
+    (a b : ℝ) (ha : 0 < a) (hab : a < b) :
+    ∃ rho : ℝ → ℝ, ContDiff ℝ ∞ rho ∧
+      (∀ t ∈ Set.Icc a b, rho t = t) ∧
+      (∀ t ∈ Set.Icc a b, HasDerivAt rho 1 t) ∧
+      (∀ t : ℝ, 0 < rho t) ∧
+      ∀ t : ℝ, rho t ∈ Set.Icc (a / 2) (b + a / 2) := by
+  have hmargin : 0 < a / 2 := by linarith
+  obtain ⟨rho, hrho, hrho_id, hrho_deriv, hrho_range⟩ :=
+    exists_smooth_time_clamp a b (a / 2) hab hmargin
+  refine ⟨rho, hrho, hrho_id, hrho_deriv, ?_, ?_⟩
+  · intro t
+    linarith [(hrho_range t).1]
+  · intro t
+    have ht := hrho_range t
+    constructor <;> linarith [ht.1, ht.2]
+
+theorem eventuallyEq_comp_of_eqOn_Icc_of_mem_Ioo
+    {X : Type*} [TopologicalSpace X]
+    {rho : ℝ → ℝ} {u : X → ℝ} {a b : ℝ} {x : X}
+    (hrho : Set.EqOn rho id (Set.Icc a b))
+    (hu : ContinuousAt u x) (hx : u x ∈ Set.Ioo a b) :
+    (rho ∘ u) =ᶠ[nhds x] u := by
+  filter_upwards [hu (isOpen_Ioo.mem_nhds hx)] with y hy
+  simpa only [Function.comp_apply, id_eq] using hrho ⟨hy.1.le, hy.2.le⟩
+
 end DifferentialGeometry
