@@ -743,6 +743,7 @@ import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingSobolev
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingPower
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLocalBoundedness
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLogEnergy
+import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLogTail
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingOscillation
 import DifferentialGeometry.Analysis.Parabolic.Moser.ForwardIteration
 import DifferentialGeometry.Analysis.Parabolic.Moser.Iteration

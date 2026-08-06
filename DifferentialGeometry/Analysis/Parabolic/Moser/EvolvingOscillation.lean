@@ -53,6 +53,17 @@ def HasEvolvingLocalizedPoincare
       C * evolvingLocalizedDirichletEnergy
         (I := I) (M := M) g energyCutoff (fun _ x => u.toFun x) t
 
+def HasEvolvingLocalizedPoincareAtAverage
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : M → ℝ) (C : ℝ) (J : Set ℝ) : Prop :=
+  ∀ t ∈ J, ∀ u : SmoothScalar (g t),
+    evolvingLocalizedL2Deviation
+        (I := I) (M := M) g deviationCutoff (fun _ x => u.toFun x)
+        (evolvingLocalizedAverage
+          (I := I) (M := M) g averagingCutoff (fun _ x => u.toFun x) t) t ≤
+      C * evolvingLocalizedDirichletEnergy
+        (I := I) (M := M) g averagingCutoff (fun _ x => u.toFun x) t
+
 omit [CompactSpace M] in
 theorem hasEvolvingLocalizedPoincare_iff
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -80,6 +91,36 @@ theorem hasEvolvingLocalizedPoincare_iff
       localizedDirichletEnergy, HasEvolvingLocalizedPoincare,
       evolvingLocalizedL2Oscillation, evolvingLocalizedL2Deviation,
       evolvingLocalizedAverage, evolvingCutoffMass, evolvingLocalizedIntegral,
+      evolvingLocalizedDirichletEnergy, riemannianMeasureFamily, mul_one,
+      grad_g_apply] using h t ht u
+
+omit [CompactSpace M] in
+theorem hasEvolvingLocalizedPoincareAtAverage_iff
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : M → ℝ) (C : ℝ) (J : Set ℝ)
+    (hdeviationCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ deviationCutoff)
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff) :
+    HasEvolvingLocalizedPoincareAtAverage
+        (I := I) (M := M) g deviationCutoff averagingCutoff C J ↔
+      ∀ t ∈ J,
+        HasLocalizedPoincareAtAverage (I := I) (M := M) (g t)
+          ⟨deviationCutoff, hdeviationCutoff⟩
+          ⟨averagingCutoff, haveragingCutoff⟩ C := by
+  constructor
+  · intro h t ht u
+    simpa only [HasLocalizedPoincareAtAverage, localizedL2Deviation,
+      localizedAverage, localizedIntegral, cutoffMass,
+      localizedDirichletEnergy, HasEvolvingLocalizedPoincareAtAverage,
+      evolvingLocalizedL2Deviation, evolvingLocalizedAverage,
+      evolvingCutoffMass, evolvingLocalizedIntegral,
+      evolvingLocalizedDirichletEnergy, riemannianMeasureFamily, mul_one,
+      grad_g_apply] using h t ht u
+  · intro h t ht u
+    simpa only [HasLocalizedPoincareAtAverage, localizedL2Deviation,
+      localizedAverage, localizedIntegral, cutoffMass,
+      localizedDirichletEnergy, HasEvolvingLocalizedPoincareAtAverage,
+      evolvingLocalizedL2Deviation, evolvingLocalizedAverage,
+      evolvingCutoffMass, evolvingLocalizedIntegral,
       evolvingLocalizedDirichletEnergy, riemannianMeasureFamily, mul_one,
       grad_g_apply] using h t ht u
 
