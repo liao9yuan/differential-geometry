@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set
+open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.Analysis.Parabolic.Energy
@@ -37,6 +37,35 @@ def evolvingLocalizedVolumeDistortion
   ∫ x, cutoff x ^ 2 *
       ((1 / 2) * traceTimeDerivMetric (I := I) g t x * u t x ^ 2)
     ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+
+private def strictSuperlevelRamp (n : ℕ) (r : ℝ) : ℝ :=
+  min 1 ((n : ℝ) * max r 0)
+
+private theorem continuous_strictSuperlevelRamp (n : ℕ) :
+    Continuous (strictSuperlevelRamp n) := by
+  exact continuous_const.min
+    (continuous_const.mul (continuous_id.max continuous_const))
+
+private theorem strictSuperlevelRamp_nonneg (n : ℕ) (r : ℝ) :
+    0 ≤ strictSuperlevelRamp n r := by
+  exact le_min zero_le_one (mul_nonneg (Nat.cast_nonneg _) (le_max_right _ _))
+
+private theorem strictSuperlevelRamp_le_one (n : ℕ) (r : ℝ) :
+    strictSuperlevelRamp n r ≤ 1 := min_le_left _ _
+
+private theorem tendsto_strictSuperlevelRamp (r : ℝ) :
+    Tendsto (fun n => strictSuperlevelRamp n r) atTop
+      (𝓝 ({x : ℝ | 0 < x}.indicator (fun _ => (1 : ℝ)) r)) := by
+  by_cases hr : 0 < r
+  · have htop : Tendsto (fun n : ℕ => (n : ℝ) * r) atTop atTop :=
+      tendsto_natCast_atTop_atTop.atTop_mul_const hr
+    have hevent : ∀ᶠ n : ℕ in atTop, 1 ≤ (n : ℝ) * r :=
+      htop.eventually (eventually_ge_atTop 1)
+    apply tendsto_const_nhds.congr'
+    filter_upwards [hevent] with n hn
+    simp [Set.indicator, hr, strictSuperlevelRamp, hr.le, hn]
+  · have hr' : r ≤ 0 := le_of_not_gt hr
+    simp [Set.indicator, hr, strictSuperlevelRamp, hr']
 
 omit [CompactSpace M] in
 theorem evolvingLocalizedL2Mass_nonneg
@@ -73,6 +102,140 @@ theorem evolvingLocalizedIntegral_continuous
       (K := Icc (t - 1) (t + 1)) isCompact_Icc hg hcutoff hu
   exact hlocal.continuousAt
     (Icc_mem_nhds (by linarith) (by linarith))
+
+theorem measurable_evolvingLocalizedSuperlevelIntegral
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (level : ℝ → ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2))
+    (hlevel : Continuous level) :
+    Measurable (fun t => ∫ x in {x : M | level t < u t x}, cutoff x ^ 2
+      ∂(riemannianMeasureFamily (I := I) (M := M) g t)) := by
+  let ramp : ℕ → ℝ → M → ℝ := fun n t x =>
+    strictSuperlevelRamp n (u t x - level t)
+  let approximation : ℕ → ℝ → ℝ := fun n =>
+    evolvingLocalizedIntegral (I := I) (M := M) g cutoff (ramp n)
+  have happ_cont : ∀ n, Continuous (approximation n) := by
+    intro n
+    apply evolvingLocalizedIntegral_continuous
+      (I := I) (M := M) g cutoff (ramp n) hg hcutoff
+    exact (continuous_strictSuperlevelRamp n).comp
+      (hu.sub (hlevel.comp continuous_fst))
+  have hlim : ∀ t, Tendsto (fun n => approximation n t) atTop
+      (𝓝 (∫ x in {x : M | level t < u t x}, cutoff x ^ 2
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t))) := by
+    intro t
+    let μ := riemannianMeasureFamily (I := I) (M := M) g t
+    let S : Set M := {x : M | level t < u t x}
+    let weight : M → ℝ := fun x => cutoff x ^ 2
+    let F : ℕ → M → ℝ := fun n x => weight x * ramp n t x
+    letI : IsFiniteMeasure μ := by
+      dsimp only [μ, riemannianMeasureFamily_def]
+      exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+        (I := I) (M := M) (g t)
+    have hS : MeasurableSet S :=
+      (isOpen_lt continuous_const
+        (hu.comp (continuous_const.prodMk continuous_id))).measurableSet
+    have hweight_int : Integrable weight μ := by
+      exact (hcutoff.pow 2).integrable_of_hasCompactSupport
+        (HasCompactSupport.of_compactSpace _)
+    have hF_meas : ∀ n, AEStronglyMeasurable (F n) μ := by
+      intro n
+      exact ((hcutoff.pow 2).mul
+        ((continuous_strictSuperlevelRamp n).comp
+          ((hu.comp (continuous_const.prodMk continuous_id)).sub continuous_const))).aestronglyMeasurable
+    have hbound : ∀ n, ∀ᵐ x ∂μ, ‖F n x‖ ≤ weight x := by
+      intro n
+      filter_upwards with x
+      rw [Real.norm_eq_abs, abs_of_nonneg
+        (mul_nonneg (sq_nonneg _) (strictSuperlevelRamp_nonneg _ _))]
+      exact mul_le_of_le_one_right (sq_nonneg _)
+        (strictSuperlevelRamp_le_one _ _)
+    have hpoint : ∀ᵐ x ∂μ,
+        Tendsto (fun n => F n x) atTop (𝓝 (S.indicator weight x)) := by
+      filter_upwards with x
+      have hramp := tendsto_strictSuperlevelRamp (u t x - level t)
+      have hmul :=
+        (tendsto_const_nhds : Tendsto (fun _ : ℕ => weight x) atTop
+          (𝓝 (weight x))).mul hramp
+      simpa [F, ramp, weight, S, Set.indicator, sub_pos] using hmul
+    have hdct := tendsto_integral_of_dominated_convergence weight hF_meas
+      hweight_int hbound hpoint
+    rw [integral_indicator hS] at hdct
+    simpa only [approximation, evolvingLocalizedIntegral, F, ramp, weight, μ, S]
+      using hdct
+  exact measurable_of_tendsto_metrizable
+    (fun n => (happ_cont n).measurable) (tendsto_pi_nhds.2 hlim)
+
+theorem measurable_evolvingLocalizedSublevelIntegral
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (level : ℝ → ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2))
+    (hlevel : Continuous level) :
+    Measurable (fun t => ∫ x in {x : M | u t x < level t}, cutoff x ^ 2
+      ∂(riemannianMeasureFamily (I := I) (M := M) g t)) := by
+  simpa only [neg_lt_neg_iff] using
+    measurable_evolvingLocalizedSuperlevelIntegral
+      (I := I) (M := M) g cutoff (fun t x => -u t x) (fun t => -level t)
+        hg hcutoff hu.neg hlevel.neg
+
+theorem intervalIntegrable_evolvingLocalizedSuperlevelIntegral
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (level : ℝ → ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2))
+    (hlevel : Continuous level) (a b : ℝ) :
+    IntervalIntegrable
+      (fun t => ∫ x in {x : M | level t < u t x}, cutoff x ^ 2
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t)) volume a b := by
+  let mass : ℝ → ℝ := fun t =>
+    ∫ x in {x : M | level t < u t x}, cutoff x ^ 2
+      ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+  let total := evolvingLocalizedIntegral
+    (I := I) (M := M) g cutoff (fun _ _ => (1 : ℝ))
+  have hmass_meas : Measurable mass := by
+    exact measurable_evolvingLocalizedSuperlevelIntegral
+      (I := I) (M := M) g cutoff u level hg hcutoff hu hlevel
+  have htotal_cont : Continuous total := by
+    exact evolvingLocalizedIntegral_continuous
+      (I := I) (M := M) g cutoff (fun _ _ => (1 : ℝ))
+        hg hcutoff continuous_const
+  apply (htotal_cont.intervalIntegrable a b).mono_fun'
+    hmass_meas.aestronglyMeasurable.restrict
+  filter_upwards with t
+  have hnonneg : 0 ≤ mass t := integral_nonneg fun x => sq_nonneg _
+  rw [Real.norm_eq_abs, abs_of_nonneg hnonneg]
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily_def]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  have hweight_int : Integrable (fun x : M => cutoff x ^ 2) μ :=
+    (hcutoff.pow 2).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have hle := setIntegral_le_integral hweight_int
+    (ae_of_all μ fun x => sq_nonneg (cutoff x))
+      (s := {x : M | level t < u t x})
+  simpa only [mass, total, evolvingLocalizedIntegral, mul_one, μ] using hle
+
+theorem intervalIntegrable_evolvingLocalizedSublevelIntegral
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (level : ℝ → ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2))
+    (hlevel : Continuous level) (a b : ℝ) :
+    IntervalIntegrable
+      (fun t => ∫ x in {x : M | u t x < level t}, cutoff x ^ 2
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t)) volume a b := by
+  simpa only [neg_lt_neg_iff] using
+    intervalIntegrable_evolvingLocalizedSuperlevelIntegral
+      (I := I) (M := M) g cutoff (fun t x => -u t x) (fun t => -level t)
+        hg hcutoff hu.neg hlevel.neg a b
 
 theorem evolvingLocalizedL2Mass_continuousOn
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
