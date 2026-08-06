@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.Moser.LogEnergy
 import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.Operators
+import DifferentialGeometry.Geometry.Operator.VossWeyl
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
@@ -331,6 +332,348 @@ theorem gradientFun_time_deriv
     exact hgoal
   exact hgoal'
 
-end DifferentialGeometry.Analysis.Parabolic.Harnack
+variable [SigmaCompactSpace M]
 
-end
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
+theorem scalarOnE_jointContDiffAt
+    (f : ℝ → M → ℝ)
+    (hf : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2))
+    (α : M) {t : ℝ} {y : E}
+    (hy : y ∈ (extChartAt I α).target) :
+    ContDiffAt ℝ ∞
+      (fun r : ℝ × E => scalarOnE (I := I) α (f r.1) r.2) (t, y) := by
+  have hU : ContMDiffOn ((𝓘(ℝ, ℝ).prod I)) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2) Set.univ := hf.contMDiffOn
+  have hids : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) 𝓘(ℝ, ℝ) ∞
+      (fun r : ℝ × E => r.1) (Set.univ ×ˢ (extChartAt I α).target) :=
+    contMDiffOn_fst
+  have hsym : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) I ∞
+      (fun r : ℝ × E => (extChartAt I α).symm r.2)
+      (Set.univ ×ˢ (extChartAt I α).target) := by
+    refine (contMDiffOn_extChartAt_symm (I := I) α).comp ?_ ?_
+    · exact contMDiffOn_snd
+    · intro r hr
+      exact hr.2
+  have hsymm : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ((𝓘(ℝ, ℝ).prod I)) ∞
+      (fun r : ℝ × E => (r.1, (extChartAt I α).symm r.2))
+      (Set.univ ×ˢ (extChartAt I α).target) :=
+    hids.prodMk hsym
+  have hcomp : ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) 𝓘(ℝ, ℝ) ∞
+      (fun r : ℝ × E => f r.1 ((extChartAt I α).symm r.2))
+      (Set.univ ×ˢ (extChartAt I α).target) :=
+    hU.comp hsymm (fun r hr => Set.mem_univ _)
+  have hcd : ContDiffOn ℝ ∞
+      (fun r : ℝ × E => f r.1 ((extChartAt I α).symm r.2))
+      (Set.univ ×ˢ (extChartAt I α).target) := by
+    rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod,
+      ← chartedSpaceSelf_prod]
+    exact hcomp
+  have hpt : (t, y) ∈ Set.univ ×ˢ (extChartAt I α).target := ⟨Set.mem_univ _, hy⟩
+  have hopen : IsOpen ((Set.univ : Set ℝ) ×ˢ (extChartAt I α).target) :=
+    isOpen_univ.prod (isOpen_extChartAt_target (I := I) α)
+  have hat := hcd.contDiffAt
+    (hopen.mem_nhds hpt)
+  simpa [scalarOnE_def] using hat
+
+theorem laplacian_time_deriv
+    (g : SmoothRiemannianMetric I M)
+    (f : ℝ → M → ℝ)
+    (hf : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2))
+    (t : ℝ)
+    (hft : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) t))
+    (x : M) :
+    deriv (fun s : ℝ => Δ_g g (smoothScalarSlice g f hf s).smooth x) t =
+      Δ_g g
+        (smoothScalarSlice g (fun _ : ℝ => fun y : M => deriv (fun σ : ℝ => f σ y) t) hft t).smooth x := by
+  classical
+  set α : M := x with hα
+  have hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [trivializationAt_baseSet_eq_chartAt_source (I := I) α]
+    exact mem_chart_source H α
+  have hxsrc : x ∈ (chartAt H α).source := by
+    rw [trivializationAt_baseSet_eq_chartAt_source (I := I) α] at hxbase
+    exact hxbase
+  have hxextsrc : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I) α]
+    exact hxsrc
+  have hxtarget : (extChartAt I α) x ∈ (extChartAt I α).target :=
+    (extChartAt I α).map_source hxextsrc
+  have hxint : (extChartAt I α) x ∈ interior (extChartAt I α).target := by
+    rw [(isOpen_extChartAt_target (I := I) α).interior_eq]
+    exact hxtarget
+  have hΦ : ∀ y : E, y ∈ (extChartAt I α).target →
+      ContDiffAt ℝ ∞
+        (fun r : ℝ × E => scalarOnE (I := I) α (f r.1) r.2) (t, y) :=
+    fun y hy => scalarOnE_jointContDiffAt (I := I) (M := M) f hf α hy
+  have hpd : ∀ (j : Fin (Module.finrank ℝ E)) (y : E),
+      y ∈ (extChartAt I α).target →
+      HasDerivAt
+        (fun s : ℝ => partialDeriv (E := E) j (scalarOnE (I := I) α (f s)) y)
+        (partialDeriv (E := E) j (scalarOnE (I := I) α
+          (fun z : M => deriv (fun s : ℝ => f s z) t)) y) t := by
+    intro j y hy
+    have hc := fderiv_deriv_hasDerivAt_comm
+      (fun r : ℝ × E => scalarOnE (I := I) α (f r.1) r.2) t y
+      (chartModelBasis E j) (hΦ y hy)
+    have hc1 : HasDerivAt
+        (fun s : ℝ => partialDeriv (E := E) j (scalarOnE (I := I) α (f s)) y)
+        (fderiv ℝ (fun z : E => deriv (fun s : ℝ => scalarOnE (I := I) α (f s) z) t)
+          y (chartModelBasis E j)) t := by
+      simpa [partialDeriv] using hc
+    have hfun : (fun z : E => deriv (fun s : ℝ => scalarOnE (I := I) α (f s) z) t) =
+        scalarOnE (I := I) α (fun w : M => deriv (fun s : ℝ => f s w) t) := by
+      funext z
+      rfl
+    have hval : fderiv ℝ (fun z : E => deriv (fun s : ℝ => scalarOnE (I := I) α (f s) z) t)
+          y (chartModelBasis E j) =
+        partialDeriv (E := E) j (scalarOnE (I := I) α
+          (fun w : M => deriv (fun s : ℝ => f s w) t)) y := by
+      rw [hfun]
+      rfl
+    simpa [hval, partialDeriv] using hc1
+  have hcoeff : ∀ (i : Fin (Module.finrank ℝ E)) (y : E),
+      y ∈ (extChartAt I α).target →
+      HasDerivAt
+        (fun s : ℝ => gradChartCoeffOnE (I := I) g α (f s) i y)
+        (gradChartCoeffOnE (I := I) g α
+          (fun w : M => deriv (fun s : ℝ => f s w) t) i y) t := by
+    intro i y hy
+    have hsum : ∀ j : Fin (Module.finrank ℝ E),
+        HasDerivAt
+          (fun s : ℝ => chartInvGramOnE (I := I) g α i j y *
+            partialDeriv (E := E) j (scalarOnE (I := I) α (f s)) y)
+          (chartInvGramOnE (I := I) g α i j y *
+            partialDeriv (E := E) j (scalarOnE (I := I) α
+              (fun w : M => deriv (fun s : ℝ => f s w) t)) y) t := by
+        intro j
+        exact (hpd j y hy).const_mul (chartInvGramOnE (I := I) g α i j y)
+    have hsumall : HasDerivAt
+        (fun s : ℝ => ∑ j : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) g α i j y *
+            partialDeriv (E := E) j (scalarOnE (I := I) α (f s)) y)
+        (∑ j : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) g α i j y *
+            partialDeriv (E := E) j (scalarOnE (I := I) α
+              (fun w : M => deriv (fun s : ℝ => f s w) t)) y) t := by
+      exact HasDerivAt.fun_sum (u := Finset.univ) (fun j _ => hsum j)
+    simpa [gradChartCoeffOnE_def] using hsumall
+  have hint : ∀ (i : Fin (Module.finrank ℝ E)) (y : E),
+      y ∈ (extChartAt I α).target →
+      HasDerivAt
+        (fun s : ℝ => gradChartCoeffOnE (I := I) g α (f s) i y *
+          chartDensityOnE (I := I) g α y)
+        (gradChartCoeffOnE (I := I) g α
+          (fun w : M => deriv (fun s : ℝ => f s w) t) i y *
+          chartDensityOnE (I := I) g α y) t := by
+    intro i y hy
+    exact (hcoeff i y hy).mul_const (chartDensityOnE (I := I) g α y)
+  have hpd_joint : ∀ (j : Fin (Module.finrank ℝ E)) (y : E),
+      y ∈ (extChartAt I α).target →
+      ContDiffAt ℝ ∞
+        (fun p : ℝ × E => partialDeriv (E := E) j
+          (fun z : E => scalarOnE (I := I) α (f p.1) z) p.2)
+        (t, y) := by
+    intro j y hy
+    have hproj : ContDiffAt ℝ ∞ (fun q : (ℝ × E) × E => (q.1.1, q.2))
+        ((t, y), y) := by
+      exact contDiffAt_fst.fst.prodMk contDiffAt_snd
+    have hf : ContDiffAt ℝ ∞ (Function.uncurry
+        (fun (p : ℝ × E) => fun (z : E) => scalarOnE (I := I) α (f p.1) z))
+        ((t, y), y) := by
+      exact (hΦ y hy).comp ((t, y), y) hproj
+    have hg : ContDiffAt ℝ ∞ (fun p : ℝ × E => p.2) (t, y) := contDiffAt_snd
+    have hfd := ContDiffAt.fderiv
+      (f := fun (p : ℝ × E) => fun (z : E) => scalarOnE (I := I) α (f p.1) z)
+      (g := fun p : ℝ × E => p.2) hf hg (by simp)
+    simpa [partialDeriv] using
+      ((ContinuousLinearMap.apply ℝ ℝ (chartModelBasis E j)).contDiff.contDiffAt.comp
+        (t, y) hfd)
+  have hΨ : ∀ (i : Fin (Module.finrank ℝ E)) (y : E),
+      y ∈ (extChartAt I α).target →
+      ContDiffAt ℝ ∞
+        (fun p : ℝ × E => gradChartCoeffOnE (I := I) g α (f p.1) i p.2 *
+          chartDensityOnE (I := I) g α p.2)
+        (t, y) := by
+    intro i y hy
+    have hsum_cd : ∀ j : Fin (Module.finrank ℝ E),
+        ContDiffAt ℝ ∞
+          (fun p : ℝ × E => chartInvGramOnE (I := I) g α i j p.2 *
+            partialDeriv (E := E) j (fun z : E => scalarOnE (I := I) α (f p.1) z) p.2)
+          (t, y) := by
+      intro j
+      have hgram : ContDiffAt ℝ ∞ (fun p : ℝ × E => chartInvGramOnE (I := I) g α i j p.2)
+          (t, y) := by
+        change ContDiffAt ℝ ∞
+          ((fun z : E => chartInvGramOnE (I := I) g α i j z) ∘
+            (fun p : ℝ × E => p.2)) (t, y)
+        refine ContDiffAt.comp (t, y) ?_ ?_
+        · exact (chartInvGramOnE_contDiffOn (I := I) g α i j).contDiffAt
+            ((isOpen_extChartAt_target (I := I) α).mem_nhds hy)
+        · exact (contDiffAt_snd : ContDiffAt ℝ ∞ (fun p : ℝ × E => p.2) (t, y))
+      exact hgram.mul (hpd_joint j y hy)
+    have hsumall_cd : ContDiffAt ℝ ∞
+        (fun p : ℝ × E => ∑ j : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) g α i j p.2 *
+            partialDeriv (E := E) j (fun z : E => scalarOnE (I := I) α (f p.1) z) p.2)
+        (t, y) := by
+      exact ContDiffAt.sum (s := Finset.univ) (fun j _ => hsum_cd j)
+    have hρ : ContDiffAt ℝ ∞ (fun p : ℝ × E => chartDensityOnE (I := I) g α p.2)
+        (t, y) := by
+      change ContDiffAt ℝ ∞
+        ((fun z : E => chartDensityOnE (I := I) g α z) ∘
+          (fun p : ℝ × E => p.2)) (t, y)
+      refine ContDiffAt.comp (t, y) ?_ ?_
+      · exact (chartDensityOnE_contDiffOn (I := I) g α).contDiffAt
+          ((isOpen_extChartAt_target (I := I) α).mem_nhds hy)
+      · exact (contDiffAt_snd : ContDiffAt ℝ ∞ (fun p : ℝ × E => p.2) (t, y))
+    have hprod_cd : ContDiffAt ℝ ∞
+        (fun p : ℝ × E =>
+          (∑ j : Fin (Module.finrank ℝ E),
+            chartInvGramOnE (I := I) g α i j p.2 *
+              partialDeriv (E := E) j (fun z : E => scalarOnE (I := I) α (f p.1) z) p.2) *
+            chartDensityOnE (I := I) g α p.2)
+        (t, y) := hsumall_cd.mul hρ
+    simpa [gradChartCoeffOnE_def] using hprod_cd
+  have hpartial : ∀ i : Fin (Module.finrank ℝ E),
+      HasDerivAt
+        (fun s : ℝ => partialDeriv (E := E) i
+          (chartVossWeylIntegrand (I := I) g α (f s) i) ((extChartAt I α) x))
+        (partialDeriv (E := E) i
+          (chartVossWeylIntegrand (I := I) g α
+            (fun w : M => deriv (fun s : ℝ => f s w) t) i) ((extChartAt I α) x)) t := by
+    intro i
+    have hy : (extChartAt I α) x ∈ (extChartAt I α).target := hxtarget
+    have hc := fderiv_deriv_hasDerivAt_comm
+      (fun p : ℝ × E => gradChartCoeffOnE (I := I) g α (f p.1) i p.2 *
+        chartDensityOnE (I := I) g α p.2) t
+      ((extChartAt I α) x) (chartModelBasis E i) (hΨ i ((extChartAt I α) x) hy)
+    have hc1 : HasDerivAt
+        (fun s : ℝ => partialDeriv (E := E) i
+          (fun z : E => gradChartCoeffOnE (I := I) g α (f s) i z *
+            chartDensityOnE (I := I) g α z) ((extChartAt I α) x))
+        (fderiv ℝ (fun z : E => deriv (fun s : ℝ =>
+          gradChartCoeffOnE (I := I) g α (f s) i z * chartDensityOnE (I := I) g α z) t)
+          ((extChartAt I α) x) (chartModelBasis E i)) t := by
+      simpa [partialDeriv] using hc
+    have hfun : (fun z : E => deriv (fun s : ℝ =>
+        gradChartCoeffOnE (I := I) g α (f s) i z * chartDensityOnE (I := I) g α z) t) =ᶠ[𝓝 ((extChartAt I α) x)]
+        fun z : E => gradChartCoeffOnE (I := I) g α
+          (fun w : M => deriv (fun s : ℝ => f s w) t) i z * chartDensityOnE (I := I) g α z := by
+      have hh : ∀ z : E, z ∈ (extChartAt I α).target →
+          deriv (fun s : ℝ =>
+            gradChartCoeffOnE (I := I) g α (f s) i z * chartDensityOnE (I := I) g α z) t =
+            gradChartCoeffOnE (I := I) g α
+              (fun w : M => deriv (fun s : ℝ => f s w) t) i z * chartDensityOnE (I := I) g α z := by
+        intro z hz
+        exact (hint i z hz).deriv
+      rw [Filter.eventuallyEq_iff_exists_mem]
+      refine ⟨(extChartAt I α).target, ?_, ?_⟩
+      · exact (isOpen_extChartAt_target (I := I) α).mem_nhds hxtarget
+      · intro z hz
+        exact hh z hz
+    have hval2 : (fderiv ℝ (fun z : E => deriv (fun s : ℝ =>
+          gradChartCoeffOnE (I := I) g α (f s) i z * chartDensityOnE (I := I) g α z) t)
+          ((extChartAt I α) x)) (chartModelBasis E i) =
+        partialDeriv (E := E) i
+          (fun z : E => gradChartCoeffOnE (I := I) g α
+            (fun w : M => deriv (fun s : ℝ => f s w) t) i z *
+            chartDensityOnE (I := I) g α z) ((extChartAt I α) x) := by
+      rw [Filter.EventuallyEq.fderiv_eq hfun]
+      unfold partialDeriv
+      rfl
+    have hc1'' : HasDerivAt
+        (fun s : ℝ => partialDeriv (E := E) i
+          (fun z : E => gradChartCoeffOnE (I := I) g α (f s) i z *
+            chartDensityOnE (I := I) g α z) ((extChartAt I α) x))
+        (partialDeriv (E := E) i
+          (fun z : E => gradChartCoeffOnE (I := I) g α
+            (fun w : M => deriv (fun s : ℝ => f s w) t) i z *
+            chartDensityOnE (I := I) g α z) ((extChartAt I α) x)) t := by
+      change HasDerivAt
+        (fun s : ℝ => partialDeriv (E := E) i
+          (fun z : E => gradChartCoeffOnE (I := I) g α (f s) i z *
+            chartDensityOnE (I := I) g α z) ((extChartAt I α) x))
+        ((fderiv ℝ (fun z : E => gradChartCoeffOnE (I := I) g α
+            (fun w : M => deriv (fun s : ℝ => f s w) t) i z *
+            chartDensityOnE (I := I) g α z) ((extChartAt I α) x))
+          (chartModelBasis E i)) t
+      have hval2' : (fderiv ℝ (fun z : E => deriv (fun s : ℝ =>
+            gradChartCoeffOnE (I := I) g α (f s) i z * chartDensityOnE (I := I) g α z) t)
+            ((extChartAt I α) x)) (chartModelBasis E i) =
+          (fderiv ℝ (fun z : E => gradChartCoeffOnE (I := I) g α
+            (fun w : M => deriv (fun s : ℝ => f s w) t) i z *
+            chartDensityOnE (I := I) g α z) ((extChartAt I α) x))
+            (chartModelBasis E i) := by
+        simpa [partialDeriv] using hval2
+      rw [← hval2']
+      exact hc1
+    change HasDerivAt
+      (fun s : ℝ => partialDeriv (E := E) i
+        (fun z : E => gradChartCoeffOnE (I := I) g α (f s) i z *
+          chartDensityOnE (I := I) g α z) ((extChartAt I α) x))
+      (partialDeriv (E := E) i
+        (fun z : E => gradChartCoeffOnE (I := I) g α
+          (fun w : M => deriv (fun s : ℝ => f s w) t) i z *
+          chartDensityOnE (I := I) g α z) ((extChartAt I α) x)) t
+    exact hc1''
+  have hsumall : HasDerivAt
+      (fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (f s) i)
+          ((extChartAt I α) x))
+      (∑ i : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α
+          (fun w : M => deriv (fun s : ℝ => f s w) t) i) ((extChartAt I α) x)) t := by
+    exact HasDerivAt.fun_sum (u := Finset.univ) (fun i _ => hpartial i)
+  have hdiv : HasDerivAt
+      (fun s : ℝ => (∑ i : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (f s) i)
+          ((extChartAt I α) x)) / chartDensity (I := I) g α x)
+      ((∑ i : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α
+          (fun w : M => deriv (fun s : ℝ => f s w) t) i) ((extChartAt I α) x)) /
+        chartDensity (I := I) g α x) t := by
+    exact hsumall.div_const (chartDensity (I := I) g α x)
+  have hvw : ∀ s : ℝ, chartVossWeylLaplacian (I := I) g α (f s) x =
+      (∑ i : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (f s) i)
+          ((extChartAt I α) x)) / chartDensity (I := I) g α x := by
+    intro s
+    rfl
+  have hgoal : HasDerivAt
+      (fun s : ℝ => chartVossWeylLaplacian (I := I) g α (f s) x)
+      (chartVossWeylLaplacian (I := I) g α
+        (fun w : M => deriv (fun s : ℝ => f s w) t) x) t := by
+    simpa [chartVossWeylLaplacian_def, chartVossWeylIntegrand_def] using hdiv
+  have hslice_mdiff : ∀ s : ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ (f s) := by
+    intro s
+    exact hf.comp (contMDiff_const.prodMk contMDiff_id)
+  have htarget_mdiff : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun w : M => deriv (fun s : ℝ => f s w) t) := by
+    exact hft.comp ((contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => t)).prodMk contMDiff_id)
+  have hmain : HasDerivAt
+      (fun s : ℝ => Δ_g (I := I) g (smoothScalarSlice (I := I) g f hf s).smooth x)
+      (Δ_g (I := I) g
+        (smoothScalarSlice (I := I) g (fun _ : ℝ => fun y : M => deriv (fun σ : ℝ => f σ y) t) hft t).smooth x)
+      t := by
+    have hw : ∀ s : ℝ, Δ_g (I := I) g (smoothScalarSlice (I := I) g f hf s).smooth x =
+        chartVossWeylLaplacian (I := I) g α (f s) x := by
+      intro s
+      exact voss_weyl_laplacian_formula_pointwise (I := I) g α
+        (hslice_mdiff s) hxsrc
+    have hw' : Δ_g (I := I) g
+        (smoothScalarSlice (I := I) g (fun _ : ℝ => fun y : M => deriv (fun σ : ℝ => f σ y) t) hft t).smooth x =
+        chartVossWeylLaplacian (I := I) g α
+          (fun w : M => deriv (fun s : ℝ => f s w) t) x := by
+      exact voss_weyl_laplacian_formula_pointwise (I := I) g α htarget_mdiff hxsrc
+    have hfun_eq : (fun s : ℝ => Δ_g (I := I) g (smoothScalarSlice (I := I) g f hf s).smooth x) =
+        fun s : ℝ => chartVossWeylLaplacian (I := I) g α (f s) x := by
+      funext s
+      exact hw s
+    rw [hfun_eq, hw']
+    exact hgoal
+  exact hmain.deriv
+
+end DifferentialGeometry.Analysis.Parabolic.Harnack
