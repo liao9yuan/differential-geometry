@@ -27,6 +27,30 @@ theorem pointwise_oscillation_decay_of_complementary_harnack
     u y - u x ≤ (M - m) - (M - m) / F := by linarith
     _ = (1 - 1 / F) * (M - m) := by ring
 
+theorem one_sub_inv_mem_Ico {F : ℝ} (hF : 1 ≤ F) :
+    1 - 1 / F ∈ Set.Ico 0 1 := by
+  have hFpos : 0 < F := zero_lt_one.trans_le hF
+  have hinvpos : 0 < 1 / F := div_pos zero_lt_one hFpos
+  have hinvle : 1 / F ≤ 1 := (div_le_one hFpos).2 hF
+  constructor <;> linarith
+
+theorem dist_le_oscillation_contraction_of_complementary_harnack
+    {X : Type*} {early late : Set X} (hearly : early.Nonempty)
+    (u : X → ℝ) (m M F : ℝ) (hF : 1 ≤ F)
+    (hupper : ∀ e ∈ early, ∀ y ∈ late,
+      M - u e ≤ F * (M - u y))
+    (hlower : ∀ e ∈ early, ∀ y ∈ late,
+      u e - m ≤ F * (u y - m)) :
+    ∀ x ∈ late, ∀ y ∈ late,
+      dist (u x) (u y) ≤ (1 - 1 / F) * (M - m) := by
+  intro x hx y hy
+  have hxy := pointwise_oscillation_decay_of_complementary_harnack
+    hearly u m M F hF hupper hlower x hx y hy
+  have hyx := pointwise_oscillation_decay_of_complementary_harnack
+    hearly u m M F hF hupper hlower y hy x hx
+  rw [Real.dist_eq, abs_le]
+  constructor <;> linarith
+
 theorem geometric_oscillation_decay
     (oscillation : ℕ → ℝ) {theta : ℝ}
     (htheta : 0 ≤ theta)
@@ -74,6 +98,15 @@ theorem exists_holder_exponent_of_contraction
   apply Real.rpow_le_rpow_of_exponent_ge hlambda hlambda_one.le
   change (alpha : ℝ) ≤ beta
   exact min_le_right _ _
+
+theorem exists_holder_exponent_of_harnack_factor
+    {lambda F : ℝ}
+    (hlambda : 0 < lambda) (hlambda_one : lambda < 1) (hF : 1 ≤ F) :
+    ∃ alpha : NNReal, 0 < alpha ∧ alpha ≤ 1 ∧
+      1 - 1 / F ≤ lambda ^ (alpha : ℝ) := by
+  have htheta := one_sub_inv_mem_Ico hF
+  exact exists_holder_exponent_of_contraction
+    hlambda hlambda_one htheta.1 htheta.2
 
 theorem dist_le_rpow_of_geometric_oscillation_decay
     {X Y : Type*} [MetricSpace X] [PseudoMetricSpace Y]
