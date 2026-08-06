@@ -42,6 +42,39 @@ theorem geometric_oscillation_decay
           mul_le_mul_of_nonneg_left ih htheta
         _ = theta ^ (k + 1) * oscillation 0 := by ring
 
+theorem exists_holder_exponent_of_contraction
+    {lambda theta : ℝ}
+    (hlambda : 0 < lambda) (hlambda_one : lambda < 1)
+    (htheta : 0 ≤ theta) (htheta_one : theta < 1) :
+    ∃ alpha : NNReal, 0 < alpha ∧ alpha ≤ 1 ∧
+      theta ≤ lambda ^ (alpha : ℝ) := by
+  by_cases htheta_zero : theta = 0
+  · refine ⟨1, zero_lt_one, le_rfl, ?_⟩
+    rw [htheta_zero]
+    exact Real.rpow_nonneg hlambda.le _
+  have htheta_pos : 0 < theta := lt_of_le_of_ne htheta (Ne.symm htheta_zero)
+  have hlog_theta : Real.log theta < 0 := Real.log_neg htheta_pos htheta_one
+  have hlog_lambda : Real.log lambda < 0 := Real.log_neg hlambda hlambda_one
+  let beta := Real.log theta / Real.log lambda
+  have hbeta : 0 < beta := div_pos_of_neg_of_neg hlog_theta hlog_lambda
+  let alpha : NNReal := ⟨min 1 beta, (lt_min zero_lt_one hbeta).le⟩
+  have halpha : 0 < alpha := by
+    exact_mod_cast (lt_min zero_lt_one hbeta)
+  have halpha_one : alpha ≤ 1 := by
+    exact_mod_cast (min_le_left 1 beta)
+  refine ⟨alpha, halpha, halpha_one, ?_⟩
+  have heq : theta = lambda ^ beta := by
+    rw [Real.rpow_def_of_pos hlambda]
+    rw [show Real.log lambda * beta = Real.log theta by
+      dsimp only [beta]
+      field_simp [ne_of_lt hlog_lambda]
+    ]
+    exact (Real.exp_log htheta_pos).symm
+  rw [heq]
+  apply Real.rpow_le_rpow_of_exponent_ge hlambda hlambda_one.le
+  change (alpha : ℝ) ≤ beta
+  exact min_le_right _ _
+
 theorem dist_le_rpow_of_geometric_oscillation_decay
     {X Y : Type*} [MetricSpace X] [PseudoMetricSpace Y]
     {s : Set X} (u : X → Y)
@@ -101,45 +134,47 @@ theorem dist_le_rpow_of_geometric_oscillation_decay
 theorem holderOnWith_of_geometric_oscillation_decay
     {X Y : Type*} [MetricSpace X] [PseudoMetricSpace Y]
     {s : Set X} (u : X → Y)
-    {R lambda theta Omega alpha : ℝ}
+    {R lambda theta Omega : ℝ} {alpha : NNReal}
     (hR : 0 < R) (hlambda : 0 < lambda) (hlambda_one : lambda < 1)
     (htheta : 0 ≤ theta) (hOmega : 0 ≤ Omega) (halpha : 0 < alpha)
-    (htheta_lambda : theta ≤ lambda ^ alpha)
+    (htheta_lambda : theta ≤ lambda ^ (alpha : ℝ))
     (hdiameter : ∀ x ∈ s, ∀ y ∈ s, dist x y ≤ R)
     (hdecay : ∀ c ∈ s, ∀ k : ℕ, ∀ x ∈ s,
       dist c x ≤ lambda ^ k * R →
         dist (u c) (u x) ≤ Omega * theta ^ k) :
     HolderOnWith
-      ⟨Omega * (lambda * R) ^ (-alpha),
+      ⟨Omega * (lambda * R) ^ (-(alpha : ℝ)),
         mul_nonneg hOmega (Real.rpow_nonneg (mul_pos hlambda hR).le _)⟩
-      ⟨alpha, halpha.le⟩ u s := by
+      alpha u s := by
   intro x hx y hy
+  have halpha_real : 0 < (alpha : ℝ) := by exact_mod_cast halpha
   have hreal := dist_le_rpow_of_geometric_oscillation_decay u hR hlambda
-    hlambda_one htheta hOmega halpha htheta_lambda hdecay hx hy
+    hlambda_one htheta hOmega halpha_real htheta_lambda hdecay hx hy
       (hdiameter x hx y hy)
-  have hconstant : 0 ≤ Omega * (lambda * R) ^ (-alpha) :=
+  have hconstant : 0 ≤ Omega * (lambda * R) ^ (-(alpha : ℝ)) :=
     mul_nonneg hOmega (Real.rpow_nonneg (mul_pos hlambda hR).le _)
-  let K : NNReal := ⟨Omega * (lambda * R) ^ (-alpha), hconstant⟩
+  let K : NNReal := ⟨Omega * (lambda * R) ^ (-(alpha : ℝ)), hconstant⟩
   have hofReal := ENNReal.ofReal_le_ofReal hreal
-  change edist (u x) (u y) ≤ (K : ENNReal) * edist x y ^ alpha
+  change edist (u x) (u y) ≤ (K : ENNReal) * edist x y ^ (alpha : ℝ)
   calc
     edist (u x) (u y) = ENNReal.ofReal (dist (u x) (u y)) := edist_dist _ _
     _ ≤ ENNReal.ofReal
-        ((Omega * (lambda * R) ^ (-alpha)) * dist x y ^ alpha) := hofReal
-    _ = ENNReal.ofReal (Omega * (lambda * R) ^ (-alpha)) *
-        ENNReal.ofReal (dist x y ^ alpha) := by
+        ((Omega * (lambda * R) ^ (-(alpha : ℝ))) *
+          dist x y ^ (alpha : ℝ)) := hofReal
+    _ = ENNReal.ofReal (Omega * (lambda * R) ^ (-(alpha : ℝ))) *
+        ENNReal.ofReal (dist x y ^ (alpha : ℝ)) := by
       rw [ENNReal.ofReal_mul hconstant]
-    _ = (K : ENNReal) * edist x y ^ alpha := by
-      rw [edist_dist, ENNReal.ofReal_rpow_of_nonneg dist_nonneg halpha.le]
+    _ = (K : ENNReal) * edist x y ^ (alpha : ℝ) := by
+      rw [edist_dist, ENNReal.ofReal_rpow_of_nonneg dist_nonneg halpha_real.le]
       rw [(ENNReal.ofReal_eq_coe_nnreal hconstant).symm]
 
 theorem holderOnWith_of_oscillation_decay
     {X Y : Type*} [MetricSpace X] [PseudoMetricSpace Y]
     {s : Set X} (u : X → Y) (oscillation : X → ℕ → ℝ)
-    {R lambda theta Omega alpha : ℝ}
+    {R lambda theta Omega : ℝ} {alpha : NNReal}
     (hR : 0 < R) (hlambda : 0 < lambda) (hlambda_one : lambda < 1)
     (htheta : 0 ≤ theta) (hOmega : 0 ≤ Omega) (halpha : 0 < alpha)
-    (htheta_lambda : theta ≤ lambda ^ alpha)
+    (htheta_lambda : theta ≤ lambda ^ (alpha : ℝ))
     (hdiameter : ∀ x ∈ s, ∀ y ∈ s, dist x y ≤ R)
     (hinitial : ∀ c ∈ s, oscillation c 0 ≤ Omega)
     (hstep : ∀ c ∈ s, ∀ k : ℕ,
@@ -148,9 +183,9 @@ theorem holderOnWith_of_oscillation_decay
       dist c x ≤ lambda ^ k * R →
         dist (u c) (u x) ≤ oscillation c k) :
     HolderOnWith
-      ⟨Omega * (lambda * R) ^ (-alpha),
+      ⟨Omega * (lambda * R) ^ (-(alpha : ℝ)),
         mul_nonneg hOmega (Real.rpow_nonneg (mul_pos hlambda hR).le _)⟩
-      ⟨alpha, halpha.le⟩ u s := by
+      alpha u s := by
   apply holderOnWith_of_geometric_oscillation_decay u hR hlambda
     hlambda_one htheta hOmega halpha htheta_lambda hdiameter
   intro c hc k x hx hdist
@@ -161,5 +196,29 @@ theorem holderOnWith_of_oscillation_decay
     _ ≤ theta ^ k * Omega :=
       mul_le_mul_of_nonneg_left (hinitial c hc) (pow_nonneg htheta k)
     _ = Omega * theta ^ k := mul_comm _ _
+
+theorem exists_holderOnWith_of_oscillation_decay
+    {X Y : Type*} [MetricSpace X] [PseudoMetricSpace Y]
+    {s : Set X} (u : X → Y) (oscillation : X → ℕ → ℝ)
+    {R lambda theta Omega : ℝ}
+    (hR : 0 < R) (hlambda : 0 < lambda) (hlambda_one : lambda < 1)
+    (htheta : 0 ≤ theta) (htheta_one : theta < 1) (hOmega : 0 ≤ Omega)
+    (hdiameter : ∀ x ∈ s, ∀ y ∈ s, dist x y ≤ R)
+    (hinitial : ∀ c ∈ s, oscillation c 0 ≤ Omega)
+    (hstep : ∀ c ∈ s, ∀ k : ℕ,
+      oscillation c (k + 1) ≤ theta * oscillation c k)
+    (hbound : ∀ c ∈ s, ∀ k : ℕ, ∀ x ∈ s,
+      dist c x ≤ lambda ^ k * R →
+        dist (u c) (u x) ≤ oscillation c k) :
+    ∃ alpha : NNReal, 0 < alpha ∧ alpha ≤ 1 ∧
+      HolderOnWith
+        ⟨Omega * (lambda * R) ^ (-(alpha : ℝ)),
+          mul_nonneg hOmega (Real.rpow_nonneg (mul_pos hlambda hR).le _)⟩
+        alpha u s := by
+  obtain ⟨alpha, halpha, halpha_one, htheta_alpha⟩ :=
+    exists_holder_exponent_of_contraction hlambda hlambda_one htheta htheta_one
+  refine ⟨alpha, halpha, halpha_one, ?_⟩
+  exact holderOnWith_of_oscillation_decay u oscillation hR hlambda hlambda_one
+    htheta hOmega halpha htheta_alpha hdiameter hinitial hstep hbound
 
 end DifferentialGeometry.Analysis.Parabolic.Harnack
