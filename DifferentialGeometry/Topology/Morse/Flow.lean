@@ -149,6 +149,13 @@ theorem UnitSpeedFlow.flow_sublevel (Φ : UnitSpeedFlow f a b)
         _ ≤ b - t := by linarith [ht.2]
 
 omit [TopologicalSpace M] in
+theorem UnitSpeedFlow.flow_sublevel_of_mem_lower (Φ : UnitSpeedFlow f a b)
+    {t : ℝ} (ht : 0 ≤ t) {x : M} (hx : x ∈ sublevel f a) :
+    Φ.flow t x ∈ sublevel f a := by
+  change f (Φ.flow t x) ≤ a
+  exact le_trans (Φ.rate_bound x t ht).2 hx
+
+omit [TopologicalSpace M] in
 theorem UnitSpeedFlow.flow_sublevel_back (Φ : UnitSpeedFlow f a b)
     {t : ℝ} (ht : t ∈ Set.Icc 0 (b - a)) {y : M} (hy : y ∈ sublevel f (b - t)) :
     Φ.flow (-t) y ∈ sublevel f b := by
@@ -364,7 +371,7 @@ theorem GradientLikeFlow.toDiffeomorph_image_sublevels (Φ : GradientLikeFlow I 
     Φ.toDiffeomorph (a - b) '' sublevel f a = sublevel f b := by
   simpa [GradientLikeFlow.toDiffeomorph] using (UnitSpeedFlow.image_sublevels Φ.toUnitSpeedFlow hab)
 
-noncomputable def linearModelFlow (a b : ℝ) (_hab : a ≤ b) :
+noncomputable def linearModelFlow (a b : ℝ) :
     GradientLikeFlow 𝓘(ℝ, MorseModel 1) (fun y : MorseModel 1 => y 0) a b where
   flow := fun t y => (fun _ : Fin 1 => y 0 - t)
   flow_zero := by
@@ -402,10 +409,10 @@ noncomputable def linearModelFlow (a b : ℝ) (_hab : a ≤ b) :
       linarith
 
 theorem linearModelFlow_image_sublevels (a b : ℝ) (hab : a ≤ b) :
-    (fun y : MorseModel 1 => (linearModelFlow a b hab).flow (a - b) y) ''
+    (fun y : MorseModel 1 => (linearModelFlow a b).flow (a - b) y) ''
         sublevel (fun y : MorseModel 1 => y 0) a =
       sublevel (fun y : MorseModel 1 => y 0) b :=
-  UnitSpeedFlow.image_sublevels (linearModelFlow a b hab).toUnitSpeedFlow hab
+  UnitSpeedFlow.image_sublevels (linearModelFlow a b).toUnitSpeedFlow hab
 
 noncomputable def fin1Homeo : MorseModel 1 ≃ₜ ℝ where
   toFun := fun y => y 0

@@ -3805,9 +3805,7 @@ theorem morseLemmaDiagonal_succ (n : ℕ)
     _ = g 0 + (1 / 2 : ℝ) * ∑ i : Fin (n + 1), w i * y i * y i := hfinal
     _ = f 0 + (1 / 2 : ℝ) * ∑ i : Fin (n + 1), w i * y i * y i := by rfl
 
-theorem morseLemmaDiagonal_zero (f : MorseModel 0 → ℝ) (_hf : ContDiff ℝ 3 f)
-    (_hcrit : fderiv ℝ f 0 = 0) (w : Fin 0 → ℝ) (_hw : ∀ i, w i = -1 ∨ w i = 1)
-    (_hdiag : ∀ u v : MorseModel 0, (fderiv ℝ (fderiv ℝ f) 0 u) v = ∑ i : Fin 0, w i * u i * v i) :
+theorem morseLemmaDiagonal_zero (f : MorseModel 0 → ℝ) (w : Fin 0 → ℝ) :
     ∃ φ : OpenPartialHomeomorph (MorseModel 0) (MorseModel 0),
       0 ∈ φ.source ∧ 0 ∈ φ.target ∧ φ 0 = 0 ∧
       ContDiffAt ℝ 1 (φ : MorseModel 0 → MorseModel 0) 0 ∧
@@ -3837,14 +3835,12 @@ theorem morseLemmaDiagonal (n : ℕ) (f : MorseModel n → ℝ) (hf : ContDiff �
       ∀ y ∈ φ.target, f (φ y) = f 0 + (1 / 2) * ∑ i : Fin n, w i * y i * y i := by
   induction n with
   | zero =>
-      exact morseLemmaDiagonal_zero f hf hcrit w hw hdiag
+      exact morseLemmaDiagonal_zero f w
   | succ n ih =>
       exact morseLemmaDiagonal_succ n ih f hf hcrit w hw hdiag
 
 theorem morseLemmaDiagonal_zero_smooth (f : MorseModel 0 → ℝ)
-    (_hf : ContDiff ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
-    (_hcrit : fderiv ℝ f 0 = 0) (w : Fin 0 → ℝ) (_hw : ∀ i, w i = -1 ∨ w i = 1)
-    (_hdiag : ∀ u v : MorseModel 0, (fderiv ℝ (fderiv ℝ f) 0 u) v = ∑ i : Fin 0, w i * u i * v i) :
+    (w : Fin 0 → ℝ) :
     ∃ φ : OpenPartialHomeomorph (MorseModel 0) (MorseModel 0),
       0 ∈ φ.source ∧ 0 ∈ φ.target ∧ φ 0 = 0 ∧
       ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ : MorseModel 0 → MorseModel 0) 0 ∧
@@ -3890,7 +3886,7 @@ theorem morseLemmaDiagonal_smooth (n : ℕ) (f : MorseModel n → ℝ)
       ∀ y ∈ φ.target, f (φ y) = f 0 + (1 / 2) * ∑ i : Fin n, w i * y i * y i := by
   induction n with
   | zero =>
-      exact morseLemmaDiagonal_zero_smooth f hf hcrit w hw hdiag
+      exact morseLemmaDiagonal_zero_smooth f w
   | succ n ih =>
       exact morseLemmaDiagonal_succ_smooth n ih f hf hcrit w hw hdiag
 
