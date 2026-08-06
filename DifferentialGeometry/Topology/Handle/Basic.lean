@@ -29,19 +29,19 @@ theorem continuous_beltCornerInclusion (k l : ℕ) : Continuous (beltCornerInclu
   exact (continuous_cellBoundaryInclusion k).prodMap continuous_id
 
 theorem continuous_coreDiskInclusion (k l : ℕ) : Continuous (coreDiskInclusion k l) := by
-  change Continuous (fun x : ClosedCell k => (x, center l))
+  change Continuous (fun x : ClosedCell k => (x, closedCellCenter l))
   exact continuous_id.prodMk continuous_const
 
 theorem continuous_cocoreDiskInclusion (k l : ℕ) : Continuous (cocoreDiskInclusion k l) := by
-  change Continuous (fun y : ClosedCell l => (center k, y))
+  change Continuous (fun y : ClosedCell l => (closedCellCenter k, y))
   exact continuous_const.prodMk continuous_id
 
 theorem continuous_attachingSphereInclusion (k l : ℕ) : Continuous (attachingSphereInclusion k l) := by
-  change Continuous (fun x : CellBoundary k => (cellBoundaryInclusion k x, center l))
+  change Continuous (fun x : CellBoundary k => (cellBoundaryInclusion k x, closedCellCenter l))
   exact (continuous_cellBoundaryInclusion k).prodMk continuous_const
 
 theorem continuous_beltSphereInclusion (k l : ℕ) : Continuous (beltSphereInclusion k l) := by
-  change Continuous (fun y : CellBoundary l => (center k, cellBoundaryInclusion l y))
+  change Continuous (fun y : CellBoundary l => (closedCellCenter k, cellBoundaryInclusion l y))
   exact continuous_const.prodMk (continuous_cellBoundaryInclusion l)
 
 theorem injective_attachingInclusion (k l : ℕ) : Injective (attachingInclusion k l) := by
@@ -258,7 +258,7 @@ theorem range_attachingSphereInclusion (k l : ℕ) :
   constructor
   · rintro ⟨x, rfl⟩
     simpa [attachingSphereInclusion, attachingSphere, cellBoundaryInclusion] using
-      And.intro x.2 (rfl : center l = center l)
+      And.intro x.2 (rfl : closedCellCenter l = closedCellCenter l)
   · intro hp
     refine ⟨⟨(p.1 : EuclideanSpace ℝ (Fin k)), hp.1⟩, ?_⟩
     apply Prod.ext
@@ -271,12 +271,34 @@ theorem range_beltSphereInclusion (k l : ℕ) :
   constructor
   · rintro ⟨x, rfl⟩
     simpa [beltSphereInclusion, beltSphere, cellBoundaryInclusion] using
-      And.intro (rfl : center k = center k) x.2
+      And.intro (rfl : closedCellCenter k = closedCellCenter k) x.2
   · intro hp
     refine ⟨⟨(p.2 : EuclideanSpace ℝ (Fin l)), hp.2⟩, ?_⟩
     apply Prod.ext
     · simp [beltSphereInclusion, hp.1]
     · simp [beltSphereInclusion, cellBoundaryInclusion]
+
+@[simp]
+theorem attachingInclusion_comp_attachingCornerInclusion {k l : ℕ} (a : Corner k l) :
+    attachingInclusion k l (attachingCornerInclusion k l a) = cornerInclusion k l a := by
+  rcases a with ⟨a₁, a₂⟩
+  simp [attachingInclusion, attachingCornerInclusion, cornerInclusion]
+
+@[simp]
+theorem beltInclusion_comp_beltCornerInclusion {k l : ℕ} (a : Corner k l) :
+    beltInclusion k l (beltCornerInclusion k l a) = cornerInclusion k l a := by
+  rcases a with ⟨a₁, a₂⟩
+  simp [beltInclusion, beltCornerInclusion, cornerInclusion]
+
+@[simp]
+theorem coreDiskInclusion_comp_cellBoundaryInclusion {k l : ℕ} (x : CellBoundary k) :
+    coreDiskInclusion k l (cellBoundaryInclusion k x) = attachingSphereInclusion k l x := by
+  simp [coreDiskInclusion, attachingSphereInclusion]
+
+@[simp]
+theorem cocoreDiskInclusion_comp_cellBoundaryInclusion {k l : ℕ} (y : CellBoundary l) :
+    cocoreDiskInclusion k l (cellBoundaryInclusion l y) = beltSphereInclusion k l y := by
+  simp [cocoreDiskInclusion, beltSphereInclusion]
 
 @[simp]
 theorem mem_attachingRegion {k l : ℕ} {p : StandardHandle k l} :
@@ -295,22 +317,22 @@ theorem mem_corner {k l : ℕ} {p : StandardHandle k l} :
 
 @[simp]
 theorem mem_coreDisk {k l : ℕ} {p : StandardHandle k l} :
-    p ∈ coreDisk k l ↔ p.2 = center l := by
+    p ∈ coreDisk k l ↔ p.2 = closedCellCenter l := by
   rfl
 
 @[simp]
 theorem mem_cocoreDisk {k l : ℕ} {p : StandardHandle k l} :
-    p ∈ cocoreDisk k l ↔ p.1 = center k := by
+    p ∈ cocoreDisk k l ↔ p.1 = closedCellCenter k := by
   rfl
 
 @[simp]
 theorem mem_attachingSphere {k l : ℕ} {p : StandardHandle k l} :
-    p ∈ attachingSphere k l ↔ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 ∧ p.2 = center l := by
+    p ∈ attachingSphere k l ↔ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 ∧ p.2 = closedCellCenter l := by
   rfl
 
 @[simp]
 theorem mem_beltSphere {k l : ℕ} {p : StandardHandle k l} :
-    p ∈ beltSphere k l ↔ p.1 = center k ∧ ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ = 1 := by
+    p ∈ beltSphere k l ↔ p.1 = closedCellCenter k ∧ ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ = 1 := by
   rfl
 
 theorem attachingRegion_inter_beltRegion (k l : ℕ) :
@@ -319,7 +341,7 @@ theorem attachingRegion_inter_beltRegion (k l : ℕ) :
   simp [attachingRegion, beltRegion, corner]
 
 theorem coreDisk_inter_cocoreDisk (k l : ℕ) :
-    coreDisk k l ∩ cocoreDisk k l = {(center k, center l)} := by
+    coreDisk k l ∩ cocoreDisk k l = {(closedCellCenter k, closedCellCenter l)} := by
   ext p
   constructor
   · intro hp

@@ -6,131 +6,141 @@ namespace DifferentialGeometry.Topology.Handle
 
 open Set
 
-theorem range_cellSet (n : ℕ) :
-    Set.range (fun x : ClosedCell n => (x : EuclideanSpace ℝ (Fin n))) = cellSet n := by
-  ext x
-  constructor
-  · rintro ⟨y, rfl⟩
-    simp [cellSet]
-  · intro hx
-    exact ⟨⟨x, hx⟩, rfl⟩
+private theorem closure_closedBall_unit (n : ℕ) :
+    closure (Metric.closedBall (0 : EuclideanSpace ℝ (Fin n)) 1) =
+      Metric.closedBall (0 : EuclideanSpace ℝ (Fin n)) 1 := by
+  exact Metric.isClosed_closedBall.closure_eq
 
-theorem range_sphereSet (n : ℕ) :
-    Set.range (fun x : CellBoundary n => (x : EuclideanSpace ℝ (Fin n))) = sphereSet n := by
-  ext x
-  constructor
-  · rintro ⟨y, rfl⟩
-    simp [sphereSet]
-  · intro hx
-    exact ⟨⟨x, hx⟩, rfl⟩
-
-private theorem closure_cellSet (n : ℕ) : closure (cellSet n) = cellSet n := by
-  rw [closure_eq_iff_isClosed]
-  simpa [cellSet] using
-    (isClosed_Iic : IsClosed (Set.Iic (1 : ℝ))).preimage
-      (continuous_norm : Continuous (fun x : EuclideanSpace ℝ (Fin n) => ‖x‖))
-
-private theorem frontier_cellSet (n : ℕ) : frontier (cellSet n) = sphereSet n := by
+private theorem frontier_closedBall_unit (n : ℕ) :
+    frontier (Metric.closedBall (0 : EuclideanSpace ℝ (Fin n)) 1) =
+      Metric.sphere (0 : EuclideanSpace ℝ (Fin n)) 1 := by
   by_cases hn : n = 0
   · subst n
-    have hcell : cellSet 0 = (Set.univ : Set (EuclideanSpace ℝ (Fin 0))) := by
+    have hball : Metric.closedBall (0 : EuclideanSpace ℝ (Fin 0)) 1 =
+        (Set.univ : Set (EuclideanSpace ℝ (Fin 0))) := by
       ext x
       have hx0 : ‖x‖ = (0 : ℝ) := by
         have hxeq : x = 0 := Subsingleton.elim x 0
         rw [hxeq, norm_zero]
-      simp [cellSet, hx0]
-    have hsphere : sphereSet 0 = (∅ : Set (EuclideanSpace ℝ (Fin 0))) := by
+      simp [Metric.closedBall, hx0]
+    have hsphere : Metric.sphere (0 : EuclideanSpace ℝ (Fin 0)) 1 =
+        (∅ : Set (EuclideanSpace ℝ (Fin 0))) := by
       ext x
       constructor
       · intro hx
-        have hx1 : ‖x‖ = (1 : ℝ) := by simpa [sphereSet] using hx
-        have hx0 : ‖x‖ = (0 : ℝ) := by
+        have hx1 : dist x 0 = (1 : ℝ) := by simpa [Metric.sphere] using hx
+        have hx0 : dist x 0 = (0 : ℝ) := by
           have hxeq : x = 0 := Subsingleton.elim x 0
-          rw [hxeq, norm_zero]
+          rw [hxeq, dist_self]
         linarith
       · intro hx
         exact False.elim hx
-    rw [hcell, hsphere]
+    rw [hball, hsphere]
     exact frontier_univ
   · haveI : Nontrivial (EuclideanSpace ℝ (Fin n)) := by
       haveI : Nonempty (Fin n) := ⟨⟨0, Nat.pos_of_ne_zero hn⟩⟩
       infer_instance
-    have hcell : cellSet n = Metric.closedBall (0 : EuclideanSpace ℝ (Fin n)) 1 := by
-      ext x
-      simp [cellSet, Metric.closedBall, dist_zero_right]
-    have hsphere : sphereSet n = Metric.sphere (0 : EuclideanSpace ℝ (Fin n)) 1 := by
-      ext x
-      simp [sphereSet, Metric.sphere, dist_zero_right]
-    rw [hcell, hsphere]
     exact frontier_closedBall' (0 : EuclideanSpace ℝ (Fin n)) 1
 
 theorem frontier_handleSet (k l : ℕ) :
     frontier (handleSet k l) = attachingSet k l ∪ beltSet k l := by
-  change frontier (cellSet k ×ˢ cellSet l) = attachingSet k l ∪ beltSet k l
+  change frontier (Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+    Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1) = attachingSet k l ∪ beltSet k l
   rw [frontier_prod_eq]
-  rw [closure_cellSet, frontier_cellSet, frontier_cellSet, closure_cellSet]
+  rw [closure_closedBall_unit, frontier_closedBall_unit, frontier_closedBall_unit,
+    closure_closedBall_unit]
   rw [Set.union_comm]
   simp [attachingSet, beltSet]
 
 theorem range_toAmbient (k l : ℕ) :
     Set.range (toAmbient : StandardHandle k l →
-      EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)) = handleSet k l := by
+      EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)) =
+      Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+        Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1 := by
   ext p
   constructor
   · rintro ⟨q, rfl⟩
-    simp [toAmbient, handleSet, cellSet]
+    rw [show toAmbient q =
+      ((q.1 : EuclideanSpace ℝ (Fin k)), (q.2 : EuclideanSpace ℝ (Fin l))) by rfl]
+    exact mem_prod.mpr ⟨by simp [Metric.closedBall, dist_zero_right],
+      by simp [Metric.closedBall, dist_zero_right]⟩
   · intro hp
-    rcases (show ‖p.1‖ ≤ 1 ∧ ‖p.2‖ ≤ 1 from by simpa [handleSet, mem_prod] using hp)
+    rcases (show p.1 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1 from by simpa [mem_prod] using hp)
       with ⟨h1, h2⟩
-    refine ⟨(⟨p.1, h1⟩, ⟨p.2, h2⟩), ?_⟩
+    have h1' : ‖p.1‖ ≤ (1 : ℝ) := by simpa [Metric.closedBall, dist_zero_right] using h1
+    have h2' : ‖p.2‖ ≤ (1 : ℝ) := by simpa [Metric.closedBall, dist_zero_right] using h2
+    refine ⟨(⟨p.1, h1'⟩, ⟨p.2, h2'⟩), ?_⟩
     ext <;> rfl
 
 theorem toAmbient_attachingRegion (k l : ℕ) :
-    toAmbient '' attachingRegion k l = attachingSet k l := by
+    toAmbient '' attachingRegion k l =
+      Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+        Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1 := by
   ext p
   constructor
   · rintro ⟨q, hq, rfl⟩
-    rw [show attachingSet k l = sphereSet k ×ˢ cellSet l by rfl]
+    have hq' : ‖(q.1 : EuclideanSpace ℝ (Fin k))‖ = 1 := by simpa [attachingRegion] using hq
     rw [show toAmbient q =
       ((q.1 : EuclideanSpace ℝ (Fin k)), (q.2 : EuclideanSpace ℝ (Fin l))) by rfl]
-    exact mem_prod.mpr ⟨by simpa [sphereSet] using hq, q.2.2⟩
+    exact mem_prod.mpr ⟨by simp [Metric.sphere, dist_zero_right, hq'],
+      by simp [Metric.closedBall, dist_zero_right]⟩
   · intro hp
-    rcases (show ‖p.1‖ = 1 ∧ ‖p.2‖ ≤ 1 from by simpa [attachingSet, mem_prod] using hp)
+    rcases (show p.1 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1 from by simpa [mem_prod] using hp)
       with ⟨hp1, hp2⟩
-    refine ⟨(⟨p.1, le_of_eq hp1⟩, ⟨p.2, hp2⟩), ?_, ?_⟩
-    · simpa [attachingRegion]
+    have hp1' : ‖p.1‖ = (1 : ℝ) := by simpa [Metric.sphere, dist_zero_right] using hp1
+    have hp2' : ‖p.2‖ ≤ (1 : ℝ) := by simpa [Metric.closedBall, dist_zero_right] using hp2
+    refine ⟨(⟨p.1, le_of_eq hp1'⟩, ⟨p.2, hp2'⟩), ?_, ?_⟩
+    · change ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1
+      exact hp1'
     · ext <;> rfl
 
 theorem toAmbient_beltRegion (k l : ℕ) :
-    toAmbient '' beltRegion k l = beltSet k l := by
+    toAmbient '' beltRegion k l =
+      Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+        Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1 := by
   ext p
   constructor
   · rintro ⟨q, hq, rfl⟩
-    rw [show beltSet k l = cellSet k ×ˢ sphereSet l by rfl]
+    have hq' : ‖(q.2 : EuclideanSpace ℝ (Fin l))‖ = 1 := by simpa [beltRegion] using hq
     rw [show toAmbient q =
       ((q.1 : EuclideanSpace ℝ (Fin k)), (q.2 : EuclideanSpace ℝ (Fin l))) by rfl]
-    exact mem_prod.mpr ⟨q.1.2, by simpa [sphereSet] using hq⟩
+    exact mem_prod.mpr ⟨by simp [Metric.closedBall, dist_zero_right],
+      by simp [Metric.sphere, dist_zero_right, hq']⟩
   · intro hp
-    rcases (show ‖p.1‖ ≤ 1 ∧ ‖p.2‖ = 1 from by simpa [beltSet, mem_prod] using hp)
+    rcases (show p.1 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1 from by simpa [mem_prod] using hp)
       with ⟨hp1, hp2⟩
-    refine ⟨(⟨p.1, hp1⟩, ⟨p.2, le_of_eq hp2⟩), ?_, ?_⟩
-    · simpa [beltRegion]
+    have hp1' : ‖p.1‖ ≤ (1 : ℝ) := by simpa [Metric.closedBall, dist_zero_right] using hp1
+    have hp2' : ‖p.2‖ = (1 : ℝ) := by simpa [Metric.sphere, dist_zero_right] using hp2
+    refine ⟨(⟨p.1, hp1'⟩, ⟨p.2, le_of_eq hp2'⟩), ?_, ?_⟩
+    · change ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ = 1
+      exact hp2'
     · ext <;> rfl
 
 theorem toAmbient_corner (k l : ℕ) :
-    toAmbient '' corner k l = cornerSet k l := by
+    toAmbient '' corner k l =
+      Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+        Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1 := by
   ext p
   constructor
   · rintro ⟨q, hq, rfl⟩
-    rw [show cornerSet k l = sphereSet k ×ˢ sphereSet l by rfl]
+    have hq' : ‖(q.1 : EuclideanSpace ℝ (Fin k))‖ = 1 ∧ ‖(q.2 : EuclideanSpace ℝ (Fin l))‖ = 1 := by
+      simpa [corner] using hq
     rw [show toAmbient q =
       ((q.1 : EuclideanSpace ℝ (Fin k)), (q.2 : EuclideanSpace ℝ (Fin l))) by rfl]
-    exact mem_prod.mpr ⟨by simpa [sphereSet] using hq.1, by simpa [sphereSet] using hq.2⟩
+    exact mem_prod.mpr ⟨by simp [Metric.sphere, dist_zero_right, hq'.1],
+      by simp [Metric.sphere, dist_zero_right, hq'.2]⟩
   · intro hp
-    rcases (show ‖p.1‖ = 1 ∧ ‖p.2‖ = 1 from by simpa [cornerSet, mem_prod] using hp)
+    rcases (show p.1 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1 from by simpa [mem_prod] using hp)
       with ⟨hp1, hp2⟩
-    refine ⟨(⟨p.1, le_of_eq hp1⟩, ⟨p.2, le_of_eq hp2⟩), ?_, ?_⟩
-    · simpa [corner]
+    have hp1' : ‖p.1‖ = (1 : ℝ) := by simpa [Metric.sphere, dist_zero_right] using hp1
+    have hp2' : ‖p.2‖ = (1 : ℝ) := by simpa [Metric.sphere, dist_zero_right] using hp2
+    refine ⟨(⟨p.1, le_of_eq hp1'⟩, ⟨p.2, le_of_eq hp2'⟩), ?_, ?_⟩
+    · change ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 ∧ ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ = 1
+      exact And.intro hp1' hp2'
     · ext <;> rfl
 
 theorem attachingSet_inter_beltSet (k l : ℕ) :
@@ -138,50 +148,66 @@ theorem attachingSet_inter_beltSet (k l : ℕ) :
   ext p
   constructor
   · intro hp
-    rcases (show ‖p.1‖ = 1 ∧ ‖p.2‖ ≤ 1 from by simpa [attachingSet, mem_prod] using hp.1)
+    rcases (show p.1 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1 from
+        by simpa [attachingSet, mem_prod] using hp.1)
       with ⟨hp1, _⟩
-    rcases (show ‖p.1‖ ≤ 1 ∧ ‖p.2‖ = 1 from by simpa [beltSet, mem_prod] using hp.2)
+    rcases (show p.1 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1 from
+        by simpa [beltSet, mem_prod] using hp.2)
       with ⟨_, hp2⟩
-    simpa [cornerSet, sphereSet] using And.intro hp1 hp2
+    simpa [cornerSet] using And.intro hp1 hp2
   · intro hp
-    rcases (show ‖p.1‖ = 1 ∧ ‖p.2‖ = 1 from by simpa [cornerSet, mem_prod] using hp)
+    rcases (show p.1 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1 from
+        by simpa [cornerSet, mem_prod] using hp)
       with ⟨hp1, hp2⟩
+    have hp1' : ‖p.1‖ = (1 : ℝ) := by simpa [Metric.sphere, dist_zero_right] using hp1
+    have hp2' : ‖p.2‖ = (1 : ℝ) := by simpa [Metric.sphere, dist_zero_right] using hp2
     constructor
-    · simpa [attachingSet, sphereSet, cellSet, mem_prod] using And.intro hp1 (le_of_eq hp2)
-    · simpa [beltSet, sphereSet, cellSet, mem_prod] using And.intro (le_of_eq hp1) hp2
+    · change p.1 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1
+      exact And.intro hp1 (Metric.mem_closedBall.mpr
+        (by simpa [dist_zero_right] using (le_of_eq hp2')))
+    · change p.1 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1
+      exact And.intro (Metric.mem_closedBall.mpr
+        (by simpa [dist_zero_right] using (le_of_eq hp1'))) hp2
 
 theorem frontier_range_toAmbient (k l : ℕ) :
     frontier (Set.range (toAmbient : StandardHandle k l →
       EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l))) =
       toAmbient '' attachingRegion k l ∪ toAmbient '' beltRegion k l := by
-  rw [range_toAmbient, toAmbient_attachingRegion, toAmbient_beltRegion, frontier_handleSet]
-
-@[simp]
-theorem mem_cellSet {n : ℕ} {x : EuclideanSpace ℝ (Fin n)} : x ∈ cellSet n ↔ ‖x‖ ≤ 1 := by
-  rfl
-
-@[simp]
-theorem mem_sphereSet {n : ℕ} {x : EuclideanSpace ℝ (Fin n)} : x ∈ sphereSet n ↔ ‖x‖ = 1 := by
-  rfl
+  rw [range_toAmbient, toAmbient_attachingRegion, toAmbient_beltRegion]
+  change frontier (handleSet k l) = attachingSet k l ∪ beltSet k l
+  exact frontier_handleSet k l
 
 @[simp]
 theorem mem_handleSet {k l : ℕ} {p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)} :
-    p ∈ handleSet k l ↔ ‖p.1‖ ≤ 1 ∧ ‖p.2‖ ≤ 1 := by
-  simp [handleSet, cellSet]
+    p ∈ handleSet k l ↔
+      p.1 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1 := by
+  simp [handleSet]
 
 @[simp]
 theorem mem_attachingSet {k l : ℕ} {p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)} :
-    p ∈ attachingSet k l ↔ ‖p.1‖ = 1 ∧ ‖p.2‖ ≤ 1 := by
-  simp [attachingSet, sphereSet, cellSet]
+    p ∈ attachingSet k l ↔
+      p.1 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1 := by
+  simp [attachingSet]
 
 @[simp]
 theorem mem_beltSet {k l : ℕ} {p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)} :
-    p ∈ beltSet k l ↔ ‖p.1‖ ≤ 1 ∧ ‖p.2‖ = 1 := by
-  simp [beltSet, sphereSet, cellSet]
+    p ∈ beltSet k l ↔
+      p.1 ∈ Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1 := by
+  simp [beltSet]
 
 @[simp]
 theorem mem_cornerSet {k l : ℕ} {p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)} :
-    p ∈ cornerSet k l ↔ ‖p.1‖ = 1 ∧ ‖p.2‖ = 1 := by
-  simp [cornerSet, sphereSet]
+    p ∈ cornerSet k l ↔
+      p.1 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ∧
+        p.2 ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1 := by
+  simp [cornerSet]
 
 end DifferentialGeometry.Topology.Handle

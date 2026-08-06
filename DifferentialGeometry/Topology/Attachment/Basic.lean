@@ -35,6 +35,26 @@ theorem injective_cellBoundaryInclusion (n : ℕ) : Function.Injective (cellBoun
   apply Subtype.ext
   exact hval
 
+theorem range_closedCell (n : ℕ) :
+    Set.range (fun x : ClosedCell n => (x : EuclideanSpace ℝ (Fin n))) =
+      Metric.closedBall (0 : EuclideanSpace ℝ (Fin n)) 1 := by
+  ext x
+  constructor
+  · rintro ⟨y, rfl⟩
+    simp [Metric.closedBall]
+  · intro hx
+    exact ⟨⟨x, by simpa [Metric.closedBall] using hx⟩, rfl⟩
+
+theorem range_cellBoundary (n : ℕ) :
+    Set.range (fun x : CellBoundary n => (x : EuclideanSpace ℝ (Fin n))) =
+      Metric.sphere (0 : EuclideanSpace ℝ (Fin n)) 1 := by
+  ext x
+  constructor
+  · rintro ⟨y, rfl⟩
+    simp [Metric.sphere]
+  · intro hx
+    exact ⟨⟨x, by simpa [Metric.sphere] using hx⟩, rfl⟩
+
 section AdjunctionSpace
 
 variable {A : Type v} {B : Type w} [TopologicalSpace B] {X : Type u} [TopologicalSpace X]

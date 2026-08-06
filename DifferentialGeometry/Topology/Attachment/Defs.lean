@@ -17,6 +17,9 @@ abbrev CellInterior (n : ℕ) : Type :=
 def cellBoundaryInclusion (n : ℕ) : CellBoundary n → ClosedCell n :=
   fun x => ⟨x, le_of_eq x.2⟩
 
+def closedCellCenter (n : ℕ) : ClosedCell n :=
+  ⟨0, by simp⟩
+
 def cellInteriorInclusion (n : ℕ) : CellInterior n → ClosedCell n :=
   fun x => ⟨x, le_of_lt x.2⟩
 

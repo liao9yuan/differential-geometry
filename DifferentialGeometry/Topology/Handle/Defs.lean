@@ -12,9 +12,6 @@ abbrev BeltRegion (k l : ℕ) : Type := ClosedCell k × CellBoundary l
 
 abbrev Corner (k l : ℕ) : Type := CellBoundary k × CellBoundary l
 
-def center (n : ℕ) : ClosedCell n :=
-  ⟨0, by simp⟩
-
 def attachingInclusion (k l : ℕ) : AttachingRegion k l → StandardHandle k l :=
   Prod.map (cellBoundaryInclusion k) (id : ClosedCell l → ClosedCell l)
 
@@ -31,16 +28,16 @@ def beltCornerInclusion (k l : ℕ) : Corner k l → BeltRegion k l :=
   Prod.map (cellBoundaryInclusion k) (id : CellBoundary l → CellBoundary l)
 
 def coreDiskInclusion (k l : ℕ) : ClosedCell k → StandardHandle k l :=
-  fun x => (x, center l)
+  fun x => (x, closedCellCenter l)
 
 def cocoreDiskInclusion (k l : ℕ) : ClosedCell l → StandardHandle k l :=
-  fun y => (center k, y)
+  fun y => (closedCellCenter k, y)
 
 def attachingSphereInclusion (k l : ℕ) : CellBoundary k → StandardHandle k l :=
-  fun x => (cellBoundaryInclusion k x, center l)
+  fun x => (cellBoundaryInclusion k x, closedCellCenter l)
 
 def beltSphereInclusion (k l : ℕ) : CellBoundary l → StandardHandle k l :=
-  fun y => (center k, cellBoundaryInclusion l y)
+  fun y => (closedCellCenter k, cellBoundaryInclusion l y)
 
 def attachingRegion (k l : ℕ) : Set (StandardHandle k l) :=
   {p | ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1}
@@ -52,34 +49,32 @@ def corner (k l : ℕ) : Set (StandardHandle k l) :=
   {p | ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 ∧ ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ = 1}
 
 def coreDisk (k l : ℕ) : Set (StandardHandle k l) :=
-  {p | p.2 = center l}
+  {p | p.2 = closedCellCenter l}
 
 def cocoreDisk (k l : ℕ) : Set (StandardHandle k l) :=
-  {p | p.1 = center k}
+  {p | p.1 = closedCellCenter k}
 
 def attachingSphere (k l : ℕ) : Set (StandardHandle k l) :=
-  {p | ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 ∧ p.2 = center l}
+  {p | ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 ∧ p.2 = closedCellCenter l}
 
 def beltSphere (k l : ℕ) : Set (StandardHandle k l) :=
-  {p | p.1 = center k ∧ ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ = 1}
-
-def cellSet (n : ℕ) : Set (EuclideanSpace ℝ (Fin n)) :=
-  {x | ‖x‖ ≤ 1}
-
-def sphereSet (n : ℕ) : Set (EuclideanSpace ℝ (Fin n)) :=
-  {x | ‖x‖ = 1}
+  {p | p.1 = closedCellCenter k ∧ ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ = 1}
 
 def handleSet (k l : ℕ) : Set (EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)) :=
-  cellSet k ×ˢ cellSet l
+  Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+    Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1
 
 def attachingSet (k l : ℕ) : Set (EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)) :=
-  sphereSet k ×ˢ cellSet l
+  Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+    Metric.closedBall (0 : EuclideanSpace ℝ (Fin l)) 1
 
 def beltSet (k l : ℕ) : Set (EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)) :=
-  cellSet k ×ˢ sphereSet l
+  Metric.closedBall (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+    Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1
 
 def cornerSet (k l : ℕ) : Set (EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l)) :=
-  sphereSet k ×ˢ sphereSet l
+  Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 ×ˢ
+    Metric.sphere (0 : EuclideanSpace ℝ (Fin l)) 1
 
 def toAmbient {k l : ℕ} (p : StandardHandle k l) :
     EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin l) :=
