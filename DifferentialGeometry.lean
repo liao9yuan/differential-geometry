@@ -386,6 +386,7 @@ import DifferentialGeometry.Analysis.Heat.Semigroup.StrongSolution
 import DifferentialGeometry.Analysis.Heat.Semigroup.ClassicalSolution
 import DifferentialGeometry.Analysis.Heat.Semigroup.SpectralBounds
 import DifferentialGeometry.Analysis.Heat.Smoothing.HeatSemigroupIteratedDomain
+import DifferentialGeometry.Analysis.Heat.Smoothing.MildSolution
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothRepresentative
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingFromChartBridges
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingOfClosed
@@ -758,6 +759,7 @@ import DifferentialGeometry.Analysis.Parabolic.Moser.WeakHarnack
 import DifferentialGeometry.Analysis.Parabolic.LionsMagenes
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeEndpoint
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
