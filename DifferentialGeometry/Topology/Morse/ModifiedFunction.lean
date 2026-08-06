@@ -1363,7 +1363,7 @@ private theorem continuousOn_collarRatio {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
     rw [hFy]
     exact hcomp
 
-private theorem continuousOn_modifiedCollarRetraction_sublevel {n k : ℕ} (hk : k ≤ n)
+theorem continuousOn_modifiedCollarRetraction_sublevel {n k : ℕ} (hk : k ≤ n)
     (c ε δ : ℝ) :
     ContinuousOn (modifiedCollarRetraction hk c ε)
       {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε} := by
@@ -1586,7 +1586,7 @@ private theorem continuousOn_collarRatioHomotopy {n k : ℕ} (hk : k ≤ n) (c �
         (x := (negPart hk p.2, (1 - (p.1 : ℝ)) • posPart hk p.2))).comp hpair2
     exact hcomp2
 
-private theorem continuousOn_modifiedCollarHomotopy_sublevel {n k : ℕ} (hk : k ≤ n)
+theorem continuousOn_modifiedCollarHomotopy_sublevel {n k : ℕ} (hk : k ≤ n)
     (c ε δ : ℝ) :
     ContinuousOn (fun p : Set.Icc (0 : ℝ) 1 × MorseModel n =>
       modifiedCollarHomotopy hk c ε (p.1 : ℝ) p.2)
@@ -1992,6 +1992,128 @@ theorem modMu_mul_modGamma_eq_zero_of_norm_gt {n k : ℕ} (hk : k ≤ n) (ε δ 
     rw [morseNorm_sq_eq_negPart_add_posPart hk y]
     nlinarith [hN, hP2]
   exact (not_lt_of_ge (le_of_lt hy)) hnorm
+
+private lemma morseNorm_recombine_scale_le {n k : ℕ} (hk : k ≤ n)
+    (a : EuclideanSpace ℝ (Fin k)) (b : EuclideanSpace ℝ (Fin (n - k))) {s : ℝ}
+    (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
+    morseNorm n (recombine hk a (s • b)) ≤ morseNorm n (recombine hk a b) := by
+  have h1 : morseNorm n (recombine hk a (s • b)) ^ 2 ≤ morseNorm n (recombine hk a b) ^ 2 := by
+    rw [morseNorm_sq_eq_negPart_add_posPart hk (recombine hk a (s • b)),
+      morseNorm_sq_eq_negPart_add_posPart hk (recombine hk a b)]
+    have hna : negPart hk (recombine hk a (s • b)) = a := by
+      ext i
+      simp [negPart, recombine_negPart]
+    have hpa : posPart hk (recombine hk a (s • b)) = s • b := by
+      ext j
+      simp [posPart, recombine_posPart]
+    have hnb : negPart hk (recombine hk a b) = a := by
+      ext i
+      simp [negPart, recombine_negPart]
+    have hpb : posPart hk (recombine hk a b) = b := by
+      ext j
+      simp [posPart, recombine_posPart]
+    rw [hna, hpa, hnb, hpb]
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hs0]
+    have habs : |s| ≤ |(1 : ℝ)| := by
+      rw [abs_of_nonneg hs0, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1)]
+      exact hs1
+    nlinarith [sq_le_sq.mpr habs, sq_nonneg ‖b‖]
+  have hnn : 0 ≤ morseNorm n (recombine hk a (s • b)) := norm_nonneg _
+  have hny : 0 ≤ morseNorm n (recombine hk a b) := norm_nonneg _
+  have habs := sq_le_sq.mp h1
+  rwa [abs_of_nonneg hnn, abs_of_nonneg hny] at habs
+
+theorem morseNorm_modifiedCollarHomotopy_le {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) {t : ℝ}
+    (ht0 : 0 ≤ t) (ht1 : t ≤ 1) (y : MorseModel n) :
+    morseNorm n (modifiedCollarHomotopy hk c ε t y) ≤ morseNorm n y := by
+  by_cases hf : morseNormalForm hk c y ≤ c - ε
+  · dsimp [modifiedCollarHomotopy]
+    rw [if_pos hf]
+  · by_cases hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε
+    · have hcoef0 : 0 ≤ 1 - t := by linarith
+      have hcoef1 : 1 - t ≤ 1 := by linarith
+      dsimp [modifiedCollarHomotopy]
+      rw [if_neg hf, if_pos hb]
+      calc
+        morseNorm n (recombine hk (negPart hk y) ((1 - t) • posPart hk y))
+            ≤ morseNorm n (recombine hk (negPart hk y) (posPart hk y)) :=
+          morseNorm_recombine_scale_le hk (negPart hk y) (posPart hk y) hcoef0 hcoef1
+        _ = morseNorm n y := by rw [recombine_decompose]
+    · have hNPlt : ‖negPart hk y‖ ^ 2 - 2 * ε < ‖posPart hk y‖ ^ 2 := by
+        have hgt : c - ε < morseNormalForm hk c y := lt_of_not_ge hf
+        rw [morseNormalForm_split] at hgt
+        nlinarith
+      have hP : ‖posPart hk y‖ ^ 2 ≠ 0 := by
+        intro hP
+        apply hf
+        have hN : 2 * ε < ‖negPart hk y‖ ^ 2 := lt_of_not_ge hb
+        rw [morseNormalForm_split]
+        have hP0 : ‖posPart hk y‖ = 0 := by exact sq_eq_zero_iff.mp hP
+        nlinarith [sq_nonneg ‖negPart hk y‖, hN]
+      have hPpos : 0 < ‖posPart hk y‖ ^ 2 :=
+        sq_pos_of_ne_zero ((pow_ne_zero_iff (by norm_num : (2 : ℕ) ≠ 0)).mp hP)
+      have hNge : 0 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+        exact sub_nonneg.mpr (le_of_lt (lt_of_not_ge hb))
+      have hratio : (‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2 ≤ 1 := by
+        exact le_of_lt ((div_lt_one hPpos).2 hNPlt)
+      have hs0 : 0 ≤ Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) :=
+        Real.sqrt_nonneg _
+      have hs1 : Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) ≤ 1 := by
+        exact Real.sqrt_le_one.mpr hratio
+      have hcoef0 : 0 ≤ 1 - t + t * Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) := by
+        nlinarith [ht0, hs0]
+      have hcoef1 : 1 - t + t * Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2) ≤ 1 := by
+        nlinarith [ht0, hs1]
+      dsimp [modifiedCollarHomotopy]
+      rw [if_neg hf, if_neg hb]
+      calc
+        morseNorm n (recombine hk (negPart hk y)
+            ((1 - t + t * Real.sqrt ((‖negPart hk y‖ ^ 2 - 2 * ε) / ‖posPart hk y‖ ^ 2)) •
+              posPart hk y))
+            ≤ morseNorm n (recombine hk (negPart hk y) (posPart hk y)) :=
+          morseNorm_recombine_scale_le hk (negPart hk y) (posPart hk y) hcoef0 hcoef1
+        _ = morseNorm n y := by rw [recombine_decompose]
+
+theorem modifiedCollarHomotopy_fix_cell {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    (hε : 0 < ε) {t : ℝ} {y : MorseModel n}
+    (hy : y ∈ Set.range (fun x : ClosedCell k =>
+      cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))) :
+    modifiedCollarHomotopy hk c ε t y = y := by
+  rcases hy with ⟨x, hx⟩
+  have hpos : posPart hk y = 0 := by
+    rw [← hx]
+    ext j
+    simp [posPart, cellMap_posIdx]
+  by_cases hfy : morseNormalForm hk c y ≤ c - ε
+  · dsimp [modifiedCollarHomotopy]
+    rw [if_pos hfy]
+  · have hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε := by
+      rw [← hx]
+      have hnp : negPart hk (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) =
+          (Real.sqrt (2 * ε)) • (x : EuclideanSpace ℝ (Fin k)) := by
+        ext i
+        simp [negPart, cellMap_negIdx]
+      rw [hnp]
+      rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+      have hxle : ‖(x : EuclideanSpace ℝ (Fin k))‖ ≤ 1 := x.2
+      have hsq : (Real.sqrt (2 * ε)) ^ 2 = 2 * ε := Real.sq_sqrt (by positivity)
+      have hsq' : (Real.sqrt (2 * ε) * ‖(x : EuclideanSpace ℝ (Fin k))‖) ^ 2 =
+          (Real.sqrt (2 * ε)) ^ 2 * ‖(x : EuclideanSpace ℝ (Fin k))‖ ^ 2 := by ring
+      have hxle2 : ‖(x : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤ 1 := by
+        have habs : |‖(x : EuclideanSpace ℝ (Fin k))‖| ≤ |(1 : ℝ)| := by
+          rw [abs_of_nonneg (norm_nonneg (x : EuclideanSpace ℝ (Fin k))),
+            abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1)]
+          exact hxle
+        simpa using (sq_le_sq.mpr habs)
+      have hbnd : (Real.sqrt (2 * ε)) ^ 2 * ‖(x : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤
+          (Real.sqrt (2 * ε)) ^ 2 := by
+        simpa using (mul_le_mul_of_nonneg_left hxle2 (sq_nonneg (Real.sqrt (2 * ε))))
+      nlinarith [hsq, hsq', hbnd]
+    dsimp [modifiedCollarHomotopy]
+    rw [if_neg hfy, if_pos hb]
+    rw [hpos, smul_zero]
+    rw [← hpos]
+    exact recombine_decompose hk y
 
 end
 
