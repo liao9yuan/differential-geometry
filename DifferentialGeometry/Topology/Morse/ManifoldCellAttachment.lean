@@ -1336,7 +1336,7 @@ theorem morseModifiedRetractionHomotopy_mem_sublevel {n k : ℕ} (hk : k ≤ n) 
     rw [if_neg hC]
     exact hx
 
-theorem lowerUnionCellImage_subset_sublevelG {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ)
+theorem lowerUnionCellImage_subset_modifiedSublevel {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hεR : Real.sqrt (2 * ε) ≤ R)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
@@ -1449,12 +1449,12 @@ noncomputable def morseModifiedLowerSublevelHomotopyEquiv {n k : ℕ} (hk : k �
       SublevelSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f) (c - ε)) :=
     ContinuousMap.mk
       (fun x : {x : M // x ∈ sublevel f (c - ε) ∪ χ '' cellRange} =>
-        ⟨x.1, (lowerUnionCellImage_subset_sublevelG (H := H) (M := M) hk c ε δ R hε hδ hεR
+        ⟨x.1, (lowerUnionCellImage_subset_modifiedSublevel (H := H) (M := M) hk c ε δ R hε hδ hεR
           χ f hnorm hχsrc) x.2⟩)
       (by
         exact Continuous.subtype_mk continuous_subtype_val (by
           intro x
-          exact lowerUnionCellImage_subset_sublevelG (H := H) (M := M) hk c ε δ R hε hδ hεR
+          exact lowerUnionCellImage_subset_modifiedSublevel (H := H) (M := M) hk c ε δ R hε hδ hεR
             χ f hnorm hχsrc x.2))
   let leftHomo : ContinuousMap.Homotopy (invFun.comp toFun)
       (ContinuousMap.id (SublevelSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f)
@@ -1580,9 +1580,13 @@ noncomputable def sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeom
     (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
     (hflow : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel g (c + data.ε))
     (htie : ∀ x : M, Φ.toEquiv x = curveAt v hcomplete x (c - data.ε - (c + data.ε))) :
-    DifferentialGeometry.Topology.HomotopyEquivUnder
-      (B := SublevelSpace f (c - data.ε)) (X := SublevelSpace f (c + data.ε))
-      (Y := CellAdjunctionSpace k (cellAttachingMap hk c data)) := by
+    {e : DifferentialGeometry.Topology.HomotopyEquivUnder
+        (B := SublevelSpace f (c - data.ε)) (X := SublevelSpace f (c + data.ε))
+        (Y := CellAdjunctionSpace k (cellAttachingMap hk c data)) //
+      e.toBase = sublevelInclusion f (by linarith [data.hεpos]) ∧
+      e.fromBase = ContinuousMap.mk
+        (adjunctionLower (i := cellBoundaryInclusion k) (cellAttachingMap hk c data))
+        (continuous_adjunctionLower (i := cellBoundaryInclusion k) (cellAttachingMap hk c data))} := by
   let E : Set M := cellImage hk c data
   let φ : C(CellBoundary k, SublevelSpace f (c - data.ε)) := cellAttachingMap hk c data
   let U₀ : Set M := data.χ '' (Set.range (fun z : ClosedCell k =>
@@ -1790,11 +1794,12 @@ noncomputable def sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeom
       change Φ.toEquiv x.1 = Φ.toEquiv (hlow.invFun ⟨x.1, Or.inl x.2⟩).1
       exact congrArg Φ.toEquiv (hlow_inv_lower x).symm
   exact
-    { toBase := ι
-      fromBase := j
-      toHomotopyEquiv := e
-      left_comm := leftHomo
-      right_comm := rightHomo }
+    ⟨{ toBase := ι
+       fromBase := j
+       toHomotopyEquiv := e
+       left_comm := leftHomo
+       right_comm := rightHomo }, by
+      exact ⟨by rfl, by rfl⟩⟩
 
 theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
@@ -1814,7 +1819,10 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
       ∃ e : DifferentialGeometry.Topology.HomotopyEquivUnder
         (B := SublevelSpace f (c - ε)) (X := SublevelSpace f (c + ε))
         (Y := CellAdjunctionSpace k φ),
-        e.toBase = sublevelInclusion f (by linarith [hε]) := by
+        e.toBase = sublevelInclusion f (by linarith [hε]) ∧
+        e.fromBase = ContinuousMap.mk
+          (adjunctionLower (i := cellBoundaryInclusion k) φ)
+          (continuous_adjunctionLower (i := cellBoundaryInclusion k) φ) := by
   rcases morse_lemma I f hf p k hk hnd hindex with
     ⟨R, hRpos, χ, hχ0src, hχ0tgt, hχ0val, hχsrc, hnorm0, hχmd, hχsmd,
       R', hR'pos, hχon, hχsymmOn⟩
@@ -1937,16 +1945,15 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
       hR' hΦr hRpos hR'pos hεa I f p χ hχ0val hnorm hχsrc hχsymmOn hχon hunique hx
   rcases no_critical_values (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀) hcompactG hregularG with
     ⟨v, Φ, hv, hsupp, hrate, hcomplete, hflow, htie⟩
-  let hunder : DifferentialGeometry.Topology.HomotopyEquivUnder :=
-    sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeomorph (I := I) (hf := hf)
+  rcases sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeomorph (I := I) (hf := hf)
       (f := f) (c := c) (k := k) (hk := hk) (data := data) (g := g) hgmd hg_le hlow0
-      hcell hlow_lower hlow_inv_lower hgup v hv hsupp hcomplete hrate Φ hflow htie
+      hcell hlow_lower hlow_inv_lower hgup v hv hsupp hcomplete hrate Φ hflow htie with
+    ⟨hunder, hlaws⟩
+  rcases hlaws with ⟨htoBase, hfromBase⟩
   refine ⟨ε₀, hε₀, hεa, cellAttachingMap hk c data, ?_⟩
-  refine ⟨hunder, ?_⟩
-  change sublevelInclusion f (by linarith [data.hεpos]) =
-    sublevelInclusion f (by linarith [hε₀])
-  ext x
-  rfl
+  refine ⟨hunder, ?_, ?_⟩
+  · exact htoBase
+  · exact hfromBase
 
 end ManifoldCellAttachment
 

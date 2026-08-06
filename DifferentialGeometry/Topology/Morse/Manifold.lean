@@ -167,7 +167,7 @@ theorem fderiv_fderiv_eq_associated_chartHessian (f : E → ℝ) (hf : ContDiff 
     exact htwoL
   exact mul_left_cancel₀ (by norm_num : (2 : ℝ) ≠ 0) hmain
 
-theorem morseLemma {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*} [TopologicalSpace M]
+private theorem morseLemma {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*} [TopologicalSpace M]
     [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
     (f : M → ℝ) (p : M)
     (hg : ContDiffOn ℝ (n + 3) (fun y : MorseModel n => f ((extChartAt I p).symm y))
@@ -368,7 +368,7 @@ theorem morseLemma {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*} [Topol
     rw [hpb]
     rw [h1]
     exact hmain
-  rcases Completion.morseLemmaDiagonal n h hh hcrit_h w hw hdiag_h
+  rcases Completion.morse_lemma_diagonal n h hh hcrit_h w hw hdiag_h
     with ⟨ψ, hψsrc, hψtarget, hψ0, hψsmooth, hψsymmSmooth, hψnorm⟩
   rcases mem_nhds_iff.mp hg1Eq with ⟨U, hUg, hUopen, hU0⟩
   let D : Set (MorseModel n) := ψ.target ∩ (fun y => σ (ψ y)) ⁻¹' U
@@ -472,7 +472,7 @@ theorem morseLemma {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*} [Topol
     _ = h 0 + (1 / 2) * ∑ i : Fin n, w i * y i * y i := hnorm
     _ = f p + (1 / 2) * ∑ i : Fin n, w i * y i * y i := by rw [h0]
 
-theorem morseLemma_smooth {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*}
+theorem morse_lemma_smooth {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*}
     [TopologicalSpace M] [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H)
     [I.Boundaryless] (f : M → ℝ) (p : M)
     (hg : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun y : MorseModel n => f ((extChartAt I p).symm y))
@@ -676,7 +676,7 @@ theorem morseLemma_smooth {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*}
     rw [hpb]
     rw [h1]
     exact hmain
-  rcases Completion.morseLemmaDiagonal_smooth n h hh hcrit_h w hw hdiag_h
+  rcases Completion.morse_lemma_diagonal_smooth n h hh hcrit_h w hw hdiag_h
     with ⟨ψ, hψsrc, hψtarget, hψ0, hψsmooth, hψsymmSmooth, hψLocal, hψnorm⟩
   rcases mem_nhds_iff.mp hg1Eq with ⟨U, hUg, hUopen, hU0⟩
   let D : Set (MorseModel n) := ψ.target ∩ (fun y => σ (ψ y)) ⁻¹' U
@@ -781,7 +781,7 @@ theorem morseLemma_smooth {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*}
     _ = h 0 + (1 / 2) * ∑ i : Fin n, w i * y i * y i := hnorm
     _ = f p + (1 / 2) * ∑ i : Fin n, w i * y i * y i := by rw [h0]
 
-theorem morseLemma_of_contMDiff {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
+theorem morse_lemma_of_contMDiff {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f) (p : M)
@@ -825,7 +825,7 @@ theorem morseLemma_of_contMDiff {n : ℕ} {H : Type} [TopologicalSpace H] {M : T
       exact (OpenPartialHomeomorph.extend_target_eq_image_source (f := chartAt H p) (I := I)).symm
     rw [show gp = f ∘ (extChartAt I p).symm by rfl]
     rwa [← hrange]
-  exact morseLemma_smooth I f p hg hcrit hnd
+  exact morse_lemma_smooth I f p hg hcrit hnd
 
 theorem isCriticalPointAt_iff_chart_fderiv {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H)
@@ -956,7 +956,7 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
       (hf.of_le (le_top : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))) p).1 hcrit
   have hndChart : (QuadraticMap.associated (R := ℝ)
       (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p))).SeparatingLeft := hnd.2
-  rcases morseLemma_of_contMDiff I f hf p hcritChart hndChart
+  rcases morse_lemma_of_contMDiff I f hf p hcritChart hndChart
     with ⟨ψ, hψsrc, hψtarget, hψ0, hψsmooth, hψsymmSmooth, hψLocal, w, hw, hsig, L, hnormal⟩
   have hcard : {i : Fin n | w i < 0}.ncard = k := by
     exact hsig.trans hindex

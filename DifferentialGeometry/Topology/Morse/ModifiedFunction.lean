@@ -1673,7 +1673,7 @@ private theorem lowerCellUnion_subset_modifiedSublevel {n k : ℕ} (hk : k ≤ n
     rw [← hx]
     exact modifiedNormalForm_cell_mem_lower hk c ε δ hε hδ x
 
-noncomputable def modifiedCollarRetractionC {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+private noncomputable def modifiedCollarRetractionC {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
     (hε : 0 < ε) :
     C({y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}, lowerUnion hk c ε) :=
   ⟨fun y => ⟨modifiedCollarRetraction hk c ε y.1,
@@ -1685,7 +1685,7 @@ noncomputable def modifiedCollarRetractionC {n k : ℕ} (hk : k ≤ n) (c ε δ 
       exact (continuousOn_iff_continuous_restrict).1 (continuousOn_modifiedCollarRetraction_sublevel hk c ε δ)
     exact (Topology.IsInducing.subtypeVal.continuous_iff).2 hcont⟩
 
-noncomputable def modifiedCollarInclusionC {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+private noncomputable def modifiedCollarInclusionC {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) :
     C(lowerUnion hk c ε, {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}) :=
   ⟨fun y => ⟨y.1, lowerCellUnion_subset_modifiedSublevel hk c ε δ hε hδ y.2⟩, by

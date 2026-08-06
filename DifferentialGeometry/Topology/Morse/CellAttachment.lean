@@ -678,11 +678,11 @@ theorem continuous_cellInclusionStepFun {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) 
     rfl
   exact (Topology.IsInducing.subtypeVal.continuous_iff).2 (by simpa [hcomp] using h)
 
-noncomputable def cellAttachmentMapC {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 < ε) :
+private noncomputable def cellAttachmentMapC {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 < ε) :
     C(upperSublevel hk c ε, lowerUnion hk c ε) :=
   ⟨cellAttachmentMap hk c ε hε, continuous_cellAttachmentMap hk c ε hε⟩
 
-noncomputable def cellAttachmentInclusionC {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 ≤ ε) :
+private noncomputable def cellAttachmentInclusionC {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 ≤ ε) :
     C(lowerUnion hk c ε, upperSublevel hk c ε) :=
   ⟨cellAttachmentInclusion hk c ε hε, continuous_cellAttachmentInclusion hk c ε hε⟩
 
@@ -1022,11 +1022,11 @@ theorem continuous_ballCellInclusionStepFun {n k : ℕ} (hk : k ≤ n) (c ε R :
     rfl
   exact (Topology.IsInducing.subtypeVal.continuous_iff).2 (by simpa [hcomp] using h)
 
-noncomputable def ballCellAttachmentMapC {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε) :
+private noncomputable def ballCellAttachmentMapC {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 < ε) :
     C(ballUpperSublevel hk c ε R, ballLowerUnion hk c ε R) :=
   ⟨ballCellAttachmentMap hk c ε R hε, continuous_ballCellAttachmentMap hk c ε R hε⟩
 
-noncomputable def ballCellAttachmentInclusionC {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 ≤ ε)
+private noncomputable def ballCellAttachmentInclusionC {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 ≤ ε)
     (hR : Real.sqrt (2 * ε) ≤ R) : C(ballLowerUnion hk c ε R, ballUpperSublevel hk c ε R) :=
   ⟨ballCellAttachmentInclusion hk c ε R hε hR, continuous_ballCellAttachmentInclusion hk c ε R hε hR⟩
 
