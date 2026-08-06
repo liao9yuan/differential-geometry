@@ -611,6 +611,7 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldCo
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
 import DifferentialGeometry.Analysis.Parabolic.Energy.Caccioppoli
+import DifferentialGeometry.Analysis.Parabolic.Energy.EvolvingCaccioppoli
 import DifferentialGeometry.Analysis.Parabolic.Energy.EvolvingMass
 import DifferentialGeometry.Analysis.Parabolic.Energy.Supersolution
 import DifferentialGeometry.Analysis.Parabolic.Energy.TimeCutoff
