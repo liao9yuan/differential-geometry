@@ -64,6 +64,33 @@ theorem evolvingCutoffGradientError_nonneg
   exact integral_nonneg fun x => mul_nonneg (sq_nonneg _)
     (metric_inner_self_nonneg (I := I) (M := M) (g t) x _)
 
+theorem evolvingCutoffGradientError_le_evolvingLocalizedL2Mass
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (cutoff outer : M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (houter : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ outer)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (t : ℝ) {K : ℝ}
+    (hgrad : ∀ x : M,
+      (g t).inner x
+          (gradientFun (I := I) (g t) cutoff x)
+          (gradientFun (I := I) (g t) cutoff x) ≤
+        K * outer x ^ 2) :
+    evolvingCutoffGradientError (I := I) (M := M) g cutoff u t ≤
+      K * evolvingLocalizedL2Mass (I := I) (M := M) g outer u t := by
+  let cutoff_t : SmoothScalar (g t) := ⟨cutoff, hcutoff⟩
+  let outer_t : SmoothScalar (g t) := ⟨outer, houter⟩
+  let u_t : SmoothScalar (g t) :=
+    ⟨u t, hu.comp (contMDiff_const.prodMk contMDiff_id)⟩
+  have hfixed := cutoffGradientError_le_localizedL2Mass
+    (I := I) (M := M) cutoff_t outer_t u_t hgrad
+  simpa only [evolvingCutoffGradientError, evolvingLocalizedL2Mass,
+    cutoffGradientError, localizedL2Mass, riemannianMeasureFamily_def,
+    cutoff_t, outer_t, u_t] using hfixed
+
 omit [I.Boundaryless] in
 theorem evolvingLocalizedDirichletEnergy_continuousOn
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
@@ -143,6 +170,57 @@ theorem evolvingCutoffGradientError_continuousOn
     exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
       (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
   · exact ((hu.continuous.pow 2).mul hgrad.continuous).continuousOn
+
+theorem intervalIntegral_evolvingCutoffGradientError_le_evolvingLocalizedL2Mass
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (cutoff outer : M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (houter : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ outer)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b K t₀ : ℝ} (hab : a ≤ b)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hgrad : ∀ t ∈ Icc a b, ∀ x : M,
+      (g t).inner x
+          (gradientFun (I := I) (g t) cutoff x)
+          (gradientFun (I := I) (g t) cutoff x) ≤
+        K * outer x ^ 2) :
+    (∫ t in a..b,
+      evolvingCutoffGradientError (I := I) (M := M) g cutoff u t) ≤
+      K * ∫ t in a..b,
+        evolvingLocalizedL2Mass (I := I) (M := M) g outer u t := by
+  let error : ℝ → ℝ := fun t =>
+    evolvingCutoffGradientError (I := I) (M := M) g cutoff u t
+  let outerMass : ℝ → ℝ := fun t =>
+    evolvingLocalizedL2Mass (I := I) (M := M) g outer u t
+  have herror_cont : ContinuousOn error (Icc a b) := by
+    simpa only [error] using evolvingCutoffGradientError_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hgram hcutoff hu
+  have hmass_cont : ContinuousOn outerMass (Icc a b) := by
+    simpa only [outerMass] using evolvingLocalizedL2Mass_continuousOn
+      (I := I) (M := M) g outer u isCompact_Icc hg
+        houter.continuous hu.continuous
+  have herror_int : IntervalIntegrable error volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using herror_cont
+  have hmass_int : IntervalIntegrable outerMass volume a b := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hab] using hmass_cont
+  have hmono : (∫ t in a..b, error t) ≤ ∫ t in a..b, K * outerMass t :=
+    intervalIntegral.integral_mono_on hab herror_int (hmass_int.const_mul K)
+      (fun t ht => evolvingCutoffGradientError_le_evolvingLocalizedL2Mass
+        (I := I) (M := M) g cutoff outer hcutoff houter u hu t
+          (hgrad t ht))
+  rw [intervalIntegral.integral_const_mul] at hmono
+  simpa only [error, outerMass] using hmono
 
 omit [I.Boundaryless] in
 theorem evolvingLocalizedForcing_continuousOn
