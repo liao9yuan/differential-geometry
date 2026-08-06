@@ -310,9 +310,9 @@ noncomputable def rmOneOpC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
     (Real.sqrt Λ) ^ 5 * Kb₁
 
 /-- The full first-curvature operator coefficient is nonnegative when its
-comparability and fixed-background inputs are nonnegative. -/
+comparability and first fixed-background input are nonnegative. -/
 theorem rmOneOpC_nonneg {Λ Kb₀ Kb₁ : ℝ}
-    (hΛ : 0 ≤ Λ) (hKb₀ : 0 ≤ Kb₀) (hKb₁ : 0 ≤ Kb₁) :
+    (hΛ : 0 ≤ Λ) (hKb₁ : 0 ≤ Kb₁) :
     0 ≤ rmOneOpC Λ Kb₀ Kb₁ := by
   unfold rmOneOpC curvConnC palatiniOneC riemannDiffC
   positivity

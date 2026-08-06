@@ -2139,28 +2139,36 @@ theorem exists_pointwiseTensorCurv_fiberNormSq_bound
     pointwiseTensorCurv_fiberNormSq_le_first_order (I := I) (M := M) g
   exact ⟨K_R s, K_dR s, hK_R_nn s, hK_dR_nn s, fun S x => hbound s S x⟩
 
-/-- Explicit rank-two, order-zero curvature-action coefficient from supplied tangent `R` and `∇R`
+/-- Explicit rank-fixed, order-zero curvature-action coefficient from supplied tangent `R` and `∇R`
 caps. The two square-root arms are respectively the `R · ∇S` and `(∇R) · S` coefficients in the
 pointwise squared commutator estimate. -/
-noncomputable def ptCurvZeroC (d : ℕ) (C0 C1 : ℝ) : ℝ :=
+noncomputable def ptCurvRankC (d s : ℕ) (C0 C1 : ℝ) : ℝ :=
   let dR : ℝ := d
-  let Kpure : ℝ := dR * (dR * ((2 : ℝ) ^ 2 * C0 ^ 2))
+  let Kpure : ℝ := dR * (dR * ((s : ℝ) ^ 2 * C0 ^ 2))
   let Kw : ℝ := dR ^ 2 * C1 ^ 2
-  let Cd : ℝ := (2 : ℝ) ^ 2 * Kw
+  let Cd : ℝ := (s : ℝ) ^ 2 * Kw
   let Cc : ℝ := dR * (dR * dR * C0 ^ 2)
   max (Real.sqrt (dR * (16 * Kpure + 2 * Cc)))
     (Real.sqrt (dR * (4 * Cd)))
 
-/-- The explicit rank-two, order-zero curvature-action coefficient is nonnegative. -/
-theorem ptCurvZeroC_nonneg (d : ℕ) (C0 C1 : ℝ) : 0 ≤ ptCurvZeroC d C0 C1 := by
-  dsimp [ptCurvZeroC]
+/-- The explicit rank-fixed curvature-action coefficient is nonnegative. -/
+theorem ptCurvRankC_nonneg (d s : ℕ) (C0 C1 : ℝ) : 0 ≤ ptCurvRankC d s C0 C1 := by
+  dsimp [ptCurvRankC]
   exact le_trans (Real.sqrt_nonneg _) (le_max_left _ _)
 
-/-- **Rank-two `p = 0` curvature action from supplied `R` and `∇R` caps.** A tangent curvature
+/-- Explicit rank-two specialization of `ptCurvRankC`. -/
+noncomputable def ptCurvZeroC (d : ℕ) (C0 C1 : ℝ) : ℝ :=
+  ptCurvRankC d 2 C0 C1
+
+/-- The explicit rank-two, order-zero curvature-action coefficient is nonnegative. -/
+theorem ptCurvZeroC_nonneg (d : ℕ) (C0 C1 : ℝ) : 0 ≤ ptCurvZeroC d C0 C1 := by
+  exact ptCurvRankC_nonneg d 2 C0 C1
+
+/-- **Rank-fixed `p = 0` curvature action from supplied `R` and `∇R` caps.** A tangent curvature
 cap `C0` and a nonnegative first-curvature-derivative cap `C1` give an explicit `L²`
-first-order bound for the rank-two Bochner commutator, with no compactness-chosen constants. -/
-theorem ptCurv_zero_of
-    (g : SmoothRiemannianMetric I M) {C0 C1 : ℝ}
+first-order bound for the rank-`s` Bochner commutator, with no compactness-chosen constants. -/
+theorem ptCurv_zero_rank_of
+    (g : SmoothRiemannianMetric I M) (s : ℕ) {C0 C1 : ℝ}
     (hR0 : ∀ (x : M) (v w u : TangentSpace I x),
       g.inner x (riemannOp (LeviCivita (I := I) g) x v w u)
           (riemannOp (LeviCivita (I := I) g) x v w u) ≤
@@ -2171,18 +2179,18 @@ theorem ptCurv_zero_of
           (nablaRiemannOp (I := I) g x D X Y Z)) ≤
         C1 * Real.sqrt (g.inner x D D) * Real.sqrt (g.inner x X X) *
           Real.sqrt (g.inner x Y Y) * Real.sqrt (g.inner x Z Z))
-    (S : SmoothCcTensor g 0 2) :
-    ‖pointwiseTensorCurv (I := I) (M := M) g 2 S‖ ≤
-      ptCurvZeroC (Module.finrank ℝ E) C0 C1 *
-        (‖S‖ + ‖covGrad (I := I) (M := M) g 0 2 S‖) := by
+    (S : SmoothCcTensor g 0 s) :
+    ‖pointwiseTensorCurv (I := I) (M := M) g s S‖ ≤
+      ptCurvRankC (Module.finrank ℝ E) s C0 C1 *
+        (‖S‖ + ‖covGrad (I := I) (M := M) g 0 s S‖) := by
   classical
   let d : ℝ := Module.finrank ℝ E
   let Kpure : ℕ → ℝ := fun s => d * (d * ((s : ℝ) ^ 2 * C0 ^ 2))
   let Kw : ℝ := d ^ 2 * C1 ^ 2
   let Cd : ℕ → ℝ := fun s => (s : ℝ) ^ 2 * Kw
   let Cc : ℕ → ℝ := fun _ => d * (d * d * C0 ^ 2)
-  let P : ℝ := d * (16 * Kpure 2 + 2 * Cc 2)
-  let Q : ℝ := d * (4 * Cd 2)
+  let P : ℝ := d * (16 * Kpure s + 2 * Cc s)
+  let Q : ℝ := d * (4 * Cd s)
   let C : ℝ := max (Real.sqrt P) (Real.sqrt Q)
 
   have hd : 0 ≤ d := Nat.cast_nonneg _
@@ -2264,11 +2272,11 @@ theorem ptCurv_zero_of
 
   have hP : 0 ≤ P := by
     dsimp [P]
-    exact mul_nonneg hd (add_nonneg (mul_nonneg (by positivity) (hKpure 2))
-      (mul_nonneg (by positivity) (hCc 2)))
+    exact mul_nonneg hd (add_nonneg (mul_nonneg (by positivity) (hKpure s))
+      (mul_nonneg (by positivity) (hCc s)))
   have hQ : 0 ≤ Q := by
     dsimp [Q]
-    exact mul_nonneg hd (mul_nonneg (by positivity) (hCd 2))
+    exact mul_nonneg hd (mul_nonneg (by positivity) (hCd s))
   have hC : 0 ≤ C := by
     dsimp [C]
     exact le_trans (Real.sqrt_nonneg P) (le_max_left _ _)
@@ -2282,31 +2290,51 @@ theorem ptCurv_zero_of
     nlinarith [Real.sqrt_nonneg Q]
 
   have hpack := tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two
-    (I := I) (M := M) g S (covGrad (I := I) (M := M) g 0 2 S)
-      (pointwiseTensorCurv (I := I) (M := M) g 2 S) C hC (fun x => ?_)
-  · simpa [ptCurvZeroC, C, P, Q, Kpure, Cd, Cc, Kw, d] using hpack
-  · set grad : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-        ((covGrad (I := I) (M := M) g 0 2 S).toSection x)
-    set base : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 2 x (S.toSection x)
+    (I := I) (M := M) g S (covGrad (I := I) (M := M) g 0 s S)
+      (pointwiseTensorCurv (I := I) (M := M) g s S) C hC (fun x => ?_)
+  · simpa [ptCurvRankC, C, P, Q, Kpure, Cd, Cc, Kw, d] using hpack
+  · set grad : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+        ((covGrad (I := I) (M := M) g 0 s S).toSection x)
+    set base : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)
     have hgrad : 0 ≤ grad :=
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 x _
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
     have hbase : 0 ≤ base :=
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x _
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
     have hsq := pointwiseTensorCurv_fiberNormSq_squared_bound
-      (I := I) (M := M) g 2 S x Kpure Cd Cc hKpure_bd hCd_bd hCc_bd
+      (I := I) (M := M) g s S x Kpure Cd Cc hKpure_bd hCd_bd hCc_bd
     have hsq' :
-        riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-            ((pointwiseTensorCurv (I := I) (M := M) g 2 S).toSection x) ≤
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection x) ≤
           P * grad + Q * base := by
       simpa [P, Q, d, grad, base] using hsq
     calc
-      riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-          ((pointwiseTensorCurv (I := I) (M := M) g 2 S).toSection x)
+      riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection x)
           ≤ P * grad + Q * base := hsq'
       _ ≤ C ^ 2 * grad + C ^ 2 * base :=
         add_le_add (mul_le_mul_of_nonneg_right hPle hgrad)
           (mul_le_mul_of_nonneg_right hQle hbase)
       _ = C ^ 2 * (base + grad) := by ring
+
+/-- **Rank-two `p = 0` curvature action from supplied `R` and `∇R` caps.** -/
+theorem ptCurv_zero_of
+    (g : SmoothRiemannianMetric I M) {C0 C1 : ℝ}
+    (hR0 : ∀ (x : M) (v w u : TangentSpace I x),
+      g.inner x (riemannOp (LeviCivita (I := I) g) x v w u)
+          (riemannOp (LeviCivita (I := I) g) x v w u) ≤
+        C0 ^ 2 * g.inner x v v * g.inner x w w * g.inner x u u)
+    (hC1 : 0 ≤ C1)
+    (hR1 : ∀ (x : M) (D X Y Z : TangentSpace I x),
+      Real.sqrt (g.inner x (nablaRiemannOp (I := I) g x D X Y Z)
+          (nablaRiemannOp (I := I) g x D X Y Z)) ≤
+        C1 * Real.sqrt (g.inner x D D) * Real.sqrt (g.inner x X X) *
+          Real.sqrt (g.inner x Y Y) * Real.sqrt (g.inner x Z Z))
+    (S : SmoothCcTensor g 0 2) :
+    ‖pointwiseTensorCurv (I := I) (M := M) g 2 S‖ ≤
+      ptCurvZeroC (Module.finrank ℝ E) C0 C1 *
+        (‖S‖ + ‖covGrad (I := I) (M := M) g 0 2 S‖) := by
+  simpa only [ptCurvZeroC] using
+    ptCurv_zero_rank_of (I := I) (M := M) g 2 hR0 hC1 hR1 S
 
 end Connection
 end Integral

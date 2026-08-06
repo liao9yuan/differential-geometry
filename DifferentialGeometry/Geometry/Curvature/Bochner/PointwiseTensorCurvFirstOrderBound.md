@@ -61,3 +61,24 @@ by itself change the whole-campaign percentage.
 The downstream adapter should live in
 `HCGCompactness/UnifCurvActionZero.lean`, import `UnifCurvatureJetOne` plus this native module, and
 package the endpoint under a short HCG-facing name such as `unifPtCurvZero`.
+
+## 2026-08-05: fixed-rank extension for the H3 route
+
+The live `H3` covariant-jet comparison specializes the odd-order proof at base
+rank two.  Its top derivative is an `H2` Bochner estimate on `covGrad S`, which
+has covariant rank three.  Thus the class-uniform finite route needs the same
+supplied-cap estimate at ranks two and three; this is not an all-rank or
+all-order curvature assumption.
+
+`ptCurvRankC d s C0 C1` and `ptCurv_zero_rank_of` now expose the already
+rank-generic supplied-cap proof at one explicitly chosen covariant rank `s`.
+The previous rank-two API is preserved by `ptCurvZeroC` and
+`ptCurv_zero_of` as compatibility specializations.  Focused one-thread
+verification and the direct module refresh both passed; no new warnings were
+introduced.
+
+Progress accounting: the fixed-rank native producer is 100% implemented and
+verified.  The finite `H3` comparison theorem that will consume the rank-two
+and rank-three packages is still unstated (0%); its dedicated curvature-action
+producer machinery is now 100%.  The `(N)` uniform-existence theorem remains
+unproved (0%).

@@ -19,7 +19,10 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
 open DifferentialGeometry.HCGCompactness
+open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -53,7 +56,7 @@ structure IsLowZeroUnif
           (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
           gFibreOpBound (I := I) (M := M) g
             (ccTensorBilinSymm (I := I) g T) δ)
-      (hcore : Continuous
+      (_hcore : Continuous
         (coreN (I := I) (M := M) g gBase hδ hreal)),
       ‖lowRegN (I := I) (M := M) g gBase hR hδ hreal
         ⟨0, zero_mem_lowerState (I := I) (M := M) g 1 hR.le⟩‖ ≤ Z.zeroBd

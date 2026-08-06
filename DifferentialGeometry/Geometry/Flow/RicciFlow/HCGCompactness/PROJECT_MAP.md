@@ -67,6 +67,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` + `C4/MetricCompactnessEndpoint.md` | **100% checked for the concrete conditional route.** `compactness_canon` now proves its canonical whole-source metric-equivalence and all-order covariant bounds by joining the `D.close` tail with compact finite-head collars, then transports them through the canonical pullback and nested subsequence. `StepDAssembly` and `MetricCompactnessEndpoint` are focused- and exact-green on the live framed import chain; no `HasCanonBounds` frontier remains. |
 | Native [H6] normal-coordinate producer | `C4/H6_RADIUS_CONSULT.md` + `C4/H6NormalData.md` + `C4/StepCProducersH6.md` + `C4/StepCStageComparisonH6.md` + `C4/MetricCompactnessUncondH6.md` | **Branch-carrying producer 100%; Gate 5 provider substitution 100%; provider-native raw-B1/Step-D route 100%; unconditional Theorem 3.9 100%.** `exists_h6NormalData` constructs one uniform whole-ball chart package. The same `d.chart` passes through support, target decode, transition inverse laws, metric/branch diagonals, root/jet consumers, intrinsic forward/reverse estimates, the five-field raw B1 input, and Step D. No extra radius or chart-agreement assumption is introduced. The legacy `NormalRadiusProfile.le_exp_radius` theorem is separate, still 0%, and absent from the completed endpoint dependency path. |
 | Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `P4_PRODUCER_RULING.md` + `P4_CUTOFF_CONSULT.md` + `DISTANCE_CALABI_CONSULT.md` + `CALABI_BRANCH_CONSULT.md` + **`CALABI_BRANCH_PLAN.md`** + `DISTANCE_BARRIER_PERF_CONSULT.md` + `ConvFieldCanon.md` | fixed-window/open consumer assembly is checked through `open_upgrade_of_raw`; the grow-only `hcovTail` migration is green and the Step-D provenance branch is closed. `rm04Base_of_solution_any`, `e0Residual`, the arbitrary-index fixed successor `resStarNext`, global residual capstone `rmResidual_cost`, direct tower `towerHeatSol_raw`, HCG `rmTowerCost`, constants-first `srcCovLip_of_soln`, and `open_upgrade_canon` are focused- and exact-green. Route B-prime is now closed through the public no-extra-input Shi wrapper: fixed-first Calabi support, evolving distance barrier, concrete point-centered cutoff producer, Kato-controlled barrier Bernstein consumer, constants-first single-flow theorem, and canonical-window sequence wrapper are all focused/exact-green. The earlier `whnf` blocker was a redundant normed-space instance diamond and required no new hypothesis or resource override. `CurvBoundInput.movingShi_open` is theorem-level 100% and axiom-clean apart from the standard three axioms. Thm 3.10 itself stays 0% until its final visible `sorry` is replaced; dedicated P4 consumer machinery remains about 98%, the selected complete-Shi producer sublane is 100%, and whole HCG supporting machinery remains about 60%. |
+| Uniform low-regularity existence `(N)` | `../ShortTime/UNIF_EXISTENCE_PLAN6.md` + `../ShortTime/CONSULT_UNIF_TAME_PRODUCER.md` + `../ShortTime/CONSULT_UNIF_TAME_PRODUCER_FOLLOWUP.md` + `../ShortTime/UnifRealizeRadius.lean` + `../ShortTime/UnifNZeroClass.lean` | **Finite realization face 100%; zero-state face 100%; class-first joint tame producer 0%.**  The explicit packages are focused/exact-green and their narrow census is standard-axiom-only.  `lowreg_bounds_unif`, `lowreg_dt_unif`, and `ricci_flow_unif_existence` remain theorem-level 0%. |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
 | A0′ volume-overlap and total-packing producers (unconditional 3.9) | `C4/A0PRIME_VOLUME_PLAN.md` + `C4/VolumeOverlap.md` | **COMPLETE 2026-07-28. Endpoints `volInput_of_bg` and `packInput_of_bg`: 100%; dedicated volume/packing machinery: 100%.** `segBall_vol_le`, `segBall_vol_fin`, and `segBall_vol_rel` are proved and exact-current. `packInput_of_bg` applies the accepted `segBall_card` count at separation `hd.lambda D r`, ratio `r / hd.lambda D r`, and comparison cap `r + 1`, producing packing data for every positive `D` without an unbounded-ratio assumption. `VolumeOverlap` is exact-green (`4028/4028`) and axiom-clean apart from the standard three axioms. These producers are now consumed by `metricSeedOfBG` in the completed unconditional Theorem 3.9 route. |
 | Space-form / quotient curvature | same-name `.md`s under `Geometry/Metric/Sphere` and `DimensionThree/HamiltonPositiveRicci.md` | **CLOSED, exact-green and axiom-clean;** parallel and unrelated to 3.9/3.10 |
@@ -114,7 +115,7 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-29)
+## 6. Honest progress (updated 2026-08-05)
 
 - **Conditional Thm 3.9 endpoint: 100% checked.**
   `MetricCompactBase.exists_b1_raw` is checked and fills the concrete
@@ -620,19 +621,27 @@ its docstring BEFORE consumers are built against it.
   `LowRegBoundData` / `IsLowBoundsAt` for exact metricwise witnesses and
   `LowRegHorizonData` / `IsLowBoundsCap` for the common scalar envelope, with
   `unif_solve_of_caps` proving the one-horizon fixed-point assembly against
-  the fixed background.  Its actual producer `lowreg_bounds_unif` remains 0%:
-  the realization, A2, affine, and nonlinearity constants still need
-  class-uniform exposed siblings.  The older `IsLowGateUnif` all-rung boundary
-  is not on this lifetime path; its rung-five H6 comparison needs curvature and
-  metric jets beyond the order-three class and therefore cannot be uniformly
-  produced from `(N)`'s hypotheses.  Qualitative up-to-corner smoothing must be
-  bootstrapped separately after the common low solution.  Finally, this lane is three-dimensional while
-  the current `(N)` statement is dimension-generic, so the endpoint or the
-  ladder requires an explicit design change.  Thus
+  the fixed background.  The finite realization package
+  `LowRegRealizeData` / `IsLowRealizeUnif` / `exists_lowRealize` is complete,
+  including explicit threshold nonnegativity and a positive common realization
+  radius.  The zero-state package `LowRegZeroData` / `IsLowZeroUnif` /
+  `exists_lowZero` / `lowZero_nfun` is also complete with one nonnegative common
+  `zeroBd` cap.  Both package chains are focused/exact-green and their narrow
+  census contains only the standard three axioms.  The sole open envelope face
+  is the class-first joint tame/continuity producer: common `top/base/slope`
+  upper caps and a positive `outer` floor, with exact metricwise `hcont`,
+  `Continuous coreN`, and three-arm `htame` certificates.  The older
+  `IsLowGateUnif` all-rung boundary is not on this lifetime path; its rung-five
+  H6 comparison needs curvature and metric jets beyond the order-three class
+  and therefore cannot be uniformly produced from `(N)`'s hypotheses.
+  `LowRegBgA2Time` is a separate continuation/Galerkin packet, not this top
+  second-order remainder producer.  Qualitative up-to-corner smoothing must be
+  bootstrapped separately after the common low solution.  Thus
   `lowreg_bounds_unif`, the class-uniform DeTurck endpoint, and
   `ricci_flow_unif_existence` remain theorem-level 0%; see the live ledger
-  `../ShortTime/UNIF_EXISTENCE_PLAN6.md` (No. 176;
-  PLAN5/PLAN4/PLAN3/PLAN2/PLAN frozen).
+  `../ShortTime/UNIF_EXISTENCE_PLAN6.md` (No. 177) and the producer consult
+  `../ShortTime/CONSULT_UNIF_TAME_PRODUCER_FOLLOWUP.md`
+  (PLAN5/PLAN4/PLAN3/PLAN2/PLAN frozen).
 - **B/C support-local H6 integration (historical milestone; superseded by the
   checked selected-route capstone below):** the normalized limit-weight projection,
   actual-support compact cages, producer-owned finite source cover,

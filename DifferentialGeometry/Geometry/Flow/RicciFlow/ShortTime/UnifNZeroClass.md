@@ -16,15 +16,17 @@ interface.  The cap is chosen before the class metric varies.
 - `lowZero_nfun` presents the bound in the exact `IsLowBoundsAt.hzero` shape.
 
 The smooth-core continuity hypothesis remains explicit because it is produced
-together with the future tame/A2/affine packet.  No new frontier assumption is
+together with the future joint tame packet.  No new frontier assumption is
 introduced here.
 
 ## Boundary
 
-This closes only the zero-state scalar cap.  The top/A2 radius and the lower
-affine coefficients still lack class-first supplied-constant producers.
+This closes only the zero-state scalar cap.  The top second-order remainder arm
+and the two lower arms still lack a class-first joint tame producer.
 
 ## Verification
 
-Pending focused verification after the current single-process dependency
-refresh finishes.
+Focused verification passes without local warnings, and the exact targeted
+refresh is current.  The narrow package census reports only `propext`,
+`Classical.choice`, and `Quot.sound` for `lowZero_unif_of`, `exists_lowZero`,
+and `lowZero_nfun`.

@@ -767,3 +767,64 @@ low-regularity supporting machinery toward `(N)`: approximately **90%**.
 closure: approximately **3%**.  Campaign changes remain uncommitted.
 
 ---
+
+## 177. Explicit realization/zero packages closed; joint tame producer isolated (2026-08-05)
+
+This pass replaces the remaining informal realization and zero-state slots by
+explicit data/proof packages without changing the final endpoint statements.
+
+- `LowRegRealizeData` / `IsLowRealizeUnif` / `exists_lowRealize` close the
+  finite rank-two realization face.  The predicate records
+  `0 <= threshold`, `threshold < 1`, a positive common realization radius, and
+  the class-uniform realization theorem.  The route uses the rank-two Morrey
+  coefficient and the rank-two, order-zero curvature-action bound; it does not
+  assume an all-rank curvature family.
+- `LowRegZeroData` / `IsLowZeroUnif` / `exists_lowZero` / `lowZero_nfun` close
+  the zero-state face with one nonnegative common `zeroBd` cap while retaining
+  each metric's smooth-core continuity witness.
+- Both package modules pass focused verification and exact targeted refreshes.
+  The narrow package census reports only `propext`, `Classical.choice`, and
+  `Quot.sound`; no `sorryAx` enters the exported realization/zero chain.
+
+The remaining analytic endpoint is now a single **class-first joint tame
+producer**.  The preferred interface is cap-oriented: each metric keeps an
+exact tame packet, while the class package supplies common upper caps for
+`top`, `base`, and `slope`, plus a positive lower floor for `outer`.  The exact
+packet must carry `hcont`, `Continuous coreN`, and the joint three-arm `htame`
+certificate so that the zero package can reuse the same continuity witness.
+This producer is not yet stated or proved, so it remains 0%.
+
+A first external consult correctly observed that bounded-curvature theorems of
+Shi/Simon type validate the class-first mathematical statement, but they do not
+construct `IsLowBoundsCap`.  A live repository audit found no existing
+bounded-curvature initial-flow producer: the native Shi/Bernstein declarations
+assume a flow, and the available restart path depends on `(N)`.  Therefore a
+curvature-first proof would introduce a new major analytic theorem and is not
+the selected implementation route.
+
+The producer-only consult prompts are
+`CONSULT_UNIF_TAME_PRODUCER.md` and
+`CONSULT_UNIF_TAME_PRODUCER_FOLLOWUP.md`.  The follow-up requires an exact A/B/C
+decision, a live constant/jet-budget table, and the first three lower-layer Lean
+bricks.  The current working hypothesis is Candidate C.  Its first risk is the
+finite-rank mixed Sobolev/application layer for the H3-to-H1 top arm and the
+H2-to-H1 lower arms; unlike the completed H2 realization route, the H3 tame
+comparison may additionally need the rank-three order-zero curvature-action
+cap.  This must be proved from the live call graph before adding that finite
+rank adapter.
+
+`LowRegBgA2Time` remains a continuation/Galerkin packet and is not part of this
+producer.  The phrase "top second-order remainder arm" is used here to avoid
+conflating it with that packet.  The invalid all-rung `lowreg_gate_unif` route
+also remains excluded because rung five exceeds the order-three varying-metric
+jet budget.
+
+**Honest denominators.**  Per-metric all-real chain: **100%**.  Explicit
+common-time package and conditional cap assembly: **100%**.  Realization face:
+**100%**.  Zero-state face: **100%**.  Class-first tame producer: **0%**.
+Actual `lowreg_bounds_unif`: **0%**.  Dedicated low-regularity supporting
+machinery toward `(N)`: approximately **92%**.  `lowreg_dt_unif`: **0%**;
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**.  Campaign changes remain uncommitted.
+
+---
