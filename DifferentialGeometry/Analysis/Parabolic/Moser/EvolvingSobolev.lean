@@ -194,6 +194,104 @@ theorem evolving_localized_parabolic_sobolev_time_le_of_chartGramMatrix_smooth
   · exact evolvingCutoffGradientError_continuousOn
       (I := I) (M := M) g cutoff u isCompact_Icc hg hgram hcutoff hu
 
+theorem evolving_localized_parabolic_sobolev_of_energy_bound_le
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff : M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b A C t₀ : ℝ} (hab : a ≤ b) (hA : 0 ≤ A)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hC : 0 ≤ C)
+    (hSobolev : ∀ t ∈ Icc a b,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (hmass_le : ∀ t ∈ Icc a b,
+      evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u t ≤ A)
+    (hdirichlet : ContinuousOn
+      (evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u)
+      (Icc a b))
+    (herror : ContinuousOn
+      (evolvingCutoffGradientError (I := I) (M := M) g cutoff u)
+      (Icc a b))
+    (henergy_le :
+      (∫ t in a..b,
+        evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u t +
+          evolvingLocalizedDirichletEnergy
+            (I := I) (M := M) g cutoff u t +
+          evolvingCutoffGradientError (I := I) (M := M) g cutoff u t) ≤ A) :
+    (∫ t in a..b, ∫ x,
+        |cutoff x * u t x| ^
+          (2 + 4 / (Module.finrank ℝ E : ℝ))
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t)) ≤
+      C * A ^ (1 + 2 / (Module.finrank ℝ E : ℝ)) := by
+  have htime := evolving_localized_parabolic_sobolev_time_le
+    (I := I) (M := M) g hdim cutoff hcutoff u hu hab hg hC
+      hSobolev hmass_le hdirichlet herror
+  refine htime.trans ?_
+  have hdpos : 0 < (Module.finrank ℝ E : ℝ) := by linarith
+  have htheta : 0 ≤ 2 / (Module.finrank ℝ E : ℝ) :=
+    div_nonneg (by norm_num) hdpos.le
+  have hfactor : 0 ≤ C * A ^ (2 / (Module.finrank ℝ E : ℝ)) :=
+    mul_nonneg hC (Real.rpow_nonneg hA _)
+  calc
+    C * A ^ (2 / (Module.finrank ℝ E : ℝ)) *
+          (∫ t in a..b,
+            evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u t +
+              evolvingLocalizedDirichletEnergy
+                (I := I) (M := M) g cutoff u t +
+              evolvingCutoffGradientError
+                (I := I) (M := M) g cutoff u t) ≤
+        C * A ^ (2 / (Module.finrank ℝ E : ℝ)) * A :=
+      mul_le_mul_of_nonneg_left henergy_le hfactor
+    _ = C * A ^ (1 + 2 / (Module.finrank ℝ E : ℝ)) := by
+      rw [Real.rpow_add_of_nonneg hA (by norm_num) htheta, Real.rpow_one]
+      ring
+
+theorem evolving_localized_parabolic_sobolev_of_energy_bound_le_of_chartGramMatrix_smooth
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff : M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b A C t₀ : ℝ} (hab : a ≤ b) (hA : 0 ≤ A)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hC : 0 ≤ C)
+    (hSobolev : ∀ t ∈ Icc a b,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (hmass_le : ∀ t ∈ Icc a b,
+      evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u t ≤ A)
+    (henergy_le :
+      (∫ t in a..b,
+        evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u t +
+          evolvingLocalizedDirichletEnergy
+            (I := I) (M := M) g cutoff u t +
+          evolvingCutoffGradientError (I := I) (M := M) g cutoff u t) ≤ A) :
+    (∫ t in a..b, ∫ x,
+        |cutoff x * u t x| ^
+          (2 + 4 / (Module.finrank ℝ E : ℝ))
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t)) ≤
+      C * A ^ (1 + 2 / (Module.finrank ℝ E : ℝ)) := by
+  apply evolving_localized_parabolic_sobolev_of_energy_bound_le
+    (I := I) (M := M) g hdim cutoff hcutoff u hu hab hA hg hC
+      hSobolev hmass_le
+  · exact evolvingLocalizedDirichletEnergy_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hgram hcutoff hu
+  · exact evolvingCutoffGradientError_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hgram hcutoff hu
+  · exact henergy_le
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
