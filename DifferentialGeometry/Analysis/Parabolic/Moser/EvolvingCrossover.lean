@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLogTail
 import DifferentialGeometry.Analysis.Parabolic.Moser.SpacetimeMeasure
+import DifferentialGeometry.Analysis.Integration.Measure.CompactVolumeEquiv
 
 noncomputable section
 
@@ -110,6 +111,56 @@ theorem localizedSpacetimeMeasure_real_sublevel_le_evolvingLocalizedSublevelMass
         hvolume (level := -level)
   simpa only [neg_lt_neg_iff, evolvingLocalizedSuperlevelMass,
     evolvingLocalizedSublevelMass] using h
+
+omit [I.Boundaryless] in
+theorem exists_localizedSpacetimeMeasure_real_superlevel_le_evolvingLocalizedSuperlevelMass
+    (g : ℝ → SmoothRiemannianMetric I M)
+    {q : SmoothRiemannianMetric I M} (cutoff : SmoothScalar q)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b level t₀ : ℝ} (hab : a ≤ b)
+    (hg : MetricFamilyRegularAt (I := I) g t₀) :
+    ∃ C : ℝ≥0∞, C ≠ 0 ∧ C ≠ ⊤ ∧
+      (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b).real
+          {z | level < u z.1 z.2} ≤
+        C.toReal * ∫ t in a..b,
+          evolvingLocalizedSuperlevelMass
+            (I := I) (M := M) g cutoff.toFun u t level := by
+  obtain ⟨C, hCzero, hCtop, hvolume⟩ := volume_uniform_equiv
+    (I := I) (M := M) q g isCompact_Icc (fun x₀ i j =>
+      (hg.continuousOn_chartGramMatrix x₀ i j).mono
+        (Set.prod_mono (Set.subset_univ (Icc a b)) Set.Subset.rfl))
+  refine ⟨C, hCzero, hCtop, ?_⟩
+  exact localizedSpacetimeMeasure_real_superlevel_le_evolvingLocalizedSuperlevelMass
+    (I := I) (M := M) g cutoff u hu hab hg C hCtop
+      (fun t ht => (hvolume t ht).2)
+
+omit [I.Boundaryless] in
+theorem exists_localizedSpacetimeMeasure_real_sublevel_le_evolvingLocalizedSublevelMass
+    (g : ℝ → SmoothRiemannianMetric I M)
+    {q : SmoothRiemannianMetric I M} (cutoff : SmoothScalar q)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a b level t₀ : ℝ} (hab : a ≤ b)
+    (hg : MetricFamilyRegularAt (I := I) g t₀) :
+    ∃ C : ℝ≥0∞, C ≠ 0 ∧ C ≠ ⊤ ∧
+      (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b).real
+          {z | u z.1 z.2 < level} ≤
+        C.toReal * ∫ t in a..b,
+          evolvingLocalizedSublevelMass
+            (I := I) (M := M) g cutoff.toFun u t level := by
+  obtain ⟨C, hCzero, hCtop, hvolume⟩ := volume_uniform_equiv
+    (I := I) (M := M) q g isCompact_Icc (fun x₀ i j =>
+      (hg.continuousOn_chartGramMatrix x₀ i j).mono
+        (Set.prod_mono (Set.subset_univ (Icc a b)) Set.Subset.rfl))
+  refine ⟨C, hCzero, hCtop, ?_⟩
+  exact localizedSpacetimeMeasure_real_sublevel_le_evolvingLocalizedSublevelMass
+    (I := I) (M := M) g cutoff u hu hab hg C hCtop
+      (fun t ht => (hvolume t ht).2)
 
 theorem early_localizedSpacetimeMeasure_centered_log_superlevel_tail_of_evolving_supersolution
     (g : ℝ → SmoothRiemannianMetric I M)
