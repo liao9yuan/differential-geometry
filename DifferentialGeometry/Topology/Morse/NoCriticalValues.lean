@@ -14,7 +14,7 @@ noncomputable section
 variable {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
 variable {I : ModelWithCorners ℝ (MorseModel n) H}
 
-theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem no_critical_value_transport [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
     [T2Space M] [SigmaCompactSpace M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)
     (hcompact : IsCompact (f ⁻¹' Set.Icc a b))
@@ -73,6 +73,16 @@ theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞)
     simpa [flow] using htransport
   · intro x
     rfl
+
+theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+    [T2Space M] [SigmaCompactSpace M]
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)
+    (hcompact : IsCompact (f ⁻¹' Set.Icc a b))
+    (hregular : ∀ x ∈ f ⁻¹' Set.Icc a b, ¬ IsCriticalPointAt I f x) :
+    ∃ Φ : Diffeomorph I I M M ∞, Φ.toEquiv '' sublevel f a = sublevel f b := by
+  rcases no_critical_value_transport (I := I) f hf hab hcompact hregular with
+    ⟨v, Φ, hv, hsupp, hrate, hcomplete, hflow, htie⟩
+  exact ⟨Φ, hflow⟩
 
 end
 

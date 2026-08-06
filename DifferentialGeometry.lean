@@ -34,6 +34,7 @@ import DifferentialGeometry.Analysis.Calculus.SmoothExtension.ChartRicciJet
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.IteratedFDerivProdMatch
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.JetGlueParam
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.JetPartialDeriv
+import DifferentialGeometry.Analysis.Calculus.SmoothExtension.Local
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.SmoothJetGlue
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
 import DifferentialGeometry.Analysis.Calculus.SpectralEigenSeriesJointGramProjectionJetBound
@@ -2929,7 +2930,7 @@ import DifferentialGeometry.Topology.Morse.ModifiedFunction
 import DifferentialGeometry.Topology.Morse.MorseLemma
 import DifferentialGeometry.Topology.Morse.NoCriticalValues
 import DifferentialGeometry.Topology.Morse.RegularVectorField
-import DifferentialGeometry.Topology.Morse.Taylor
+import DifferentialGeometry.Analysis.Calculus.Taylor
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Alternating.Bundle
 import DifferentialGeometry.Tensor.Alternating.Comp

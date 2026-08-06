@@ -1,5 +1,6 @@
 import DifferentialGeometry.Topology.Morse.MorseLemma
 import DifferentialGeometry.Topology.Morse.CellAttachment
+import DifferentialGeometry.Analysis.Calculus.SmoothExtension.Local
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.LinearAlgebra.QuadraticForm.Real
@@ -8,6 +9,7 @@ namespace DifferentialGeometry.Topology.Morse
 
 open Filter
 open Set
+open DifferentialGeometry.Analysis
 open scoped Topology
 open scoped Manifold
 

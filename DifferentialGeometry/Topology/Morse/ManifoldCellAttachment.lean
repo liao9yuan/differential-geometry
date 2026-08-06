@@ -1943,7 +1943,7 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
     dsimp [g] at hx ⊢
     exact no_critical_point_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R R' a hε₀ hδ₀ hδε
       hR' hΦr hRpos hR'pos hεa I f p χ hχ0val hnorm hχsrc hχsymmOn hχon hunique hx
-  rcases no_critical_values (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀) hcompactG hregularG with
+  rcases no_critical_value_transport (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀) hcompactG hregularG with
     ⟨v, Φ, hv, hsupp, hrate, hcomplete, hflow, htie⟩
   rcases sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeomorph (I := I) (hf := hf)
       (f := f) (c := c) (k := k) (hk := hk) (data := data) (g := g) hgmd hg_le hlow0

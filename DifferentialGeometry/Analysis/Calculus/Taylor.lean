@@ -7,7 +7,8 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.ContDiff
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 
-namespace DifferentialGeometry.Topology.Morse
+namespace DifferentialGeometry
+namespace Analysis
 
 open Filter Function MeasureTheory Set
 open scoped Interval Topology
@@ -16,7 +17,7 @@ noncomputable section
 
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-private theorem hasDerivAt_second_morse (g : E → ℝ) (hg : ContDiff ℝ 2 g) (x : E) (t : ℝ) :
+private theorem hasDerivAt_second (g : E → ℝ) (hg : ContDiff ℝ 2 g) (x : E) (t : ℝ) :
     HasDerivAt (fun t : ℝ => (fderiv ℝ g (t • x)) x)
       (((fderiv ℝ (fderiv ℝ g) (t • x)) x) x) t := by
   have hsmul : HasFDerivAt (fun t : ℝ => t • x) ((1 : ℝ →L[ℝ] ℝ).smulRight x) t := by
@@ -48,7 +49,7 @@ private theorem hasDerivAt_second_morse (g : E → ℝ) (hg : ContDiff ℝ 2 g) 
   rw [hasDerivAt_iff_hasFDerivAt]
   simpa [hdeq] using hcapp
 
-private theorem hasDerivAt_first_morse (g : E → ℝ) (hg : ContDiff ℝ 2 g) (x : E) (t : ℝ) :
+private theorem hasDerivAt_first (g : E → ℝ) (hg : ContDiff ℝ 2 g) (x : E) (t : ℝ) :
     HasDerivAt (fun t : ℝ => g (t • x)) ((fderiv ℝ g (t • x)) x) t := by
   have hsmul : HasFDerivAt (fun t : ℝ => t • x) ((1 : ℝ →L[ℝ] ℝ).smulRight x) t := by
     exact (hasStrictFDerivAt_id (x := t)).hasFDerivAt.smul_const x
@@ -78,10 +79,10 @@ theorem second_order_taylor_integral (g : E → ℝ) (hg : ContDiff ℝ 2 g) (x 
   let h'' : ℝ → ℝ := fun t => ((fderiv ℝ (fderiv ℝ g) (t • x)) x) x
   have hh' : ∀ t : ℝ, HasDerivAt h (h' t) t := by
     intro t
-    simpa [h, h'] using hasDerivAt_first_morse g hg x t
+    simpa [h, h'] using hasDerivAt_first g hg x t
   have hh'' : ∀ t : ℝ, HasDerivAt h' (h'' t) t := by
     intro t
-    simpa [h', h''] using hasDerivAt_second_morse g hg x t
+    simpa [h', h''] using hasDerivAt_second g hg x t
   have hcont' : ContinuousOn h' (Set.Icc (0 : ℝ) 1) := by
     have h1 : ContDiffOn ℝ 1 (fderiv ℝ g) Set.univ :=
       hg.contDiffOn.fderiv_of_isOpen isOpen_univ (by decide : (1 : WithTop ℕ∞) + 1 ≤ (2 : WithTop ℕ∞))
@@ -194,4 +195,6 @@ theorem fderiv_fderiv_translate (g : E → ℝ) (hg : ContDiff ℝ 2 g) (c y : E
     _ = fderiv ℝ (fderiv ℝ g) (y + c) := fderiv_translate (fderiv ℝ g) c y hd
 
 end
-end DifferentialGeometry.Topology.Morse
+
+end Analysis
+end DifferentialGeometry

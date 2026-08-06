@@ -12,7 +12,7 @@ noncomputable section
 variable {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
 variable {I : ModelWithCorners ℝ (MorseModel n) H}
 
-theorem fderiv_ne_zero_iff_exists_coord (g : MorseModel n → ℝ) (y : MorseModel n)
+private theorem exists_coord_of_fderiv_ne_zero (g : MorseModel n → ℝ) (y : MorseModel n)
     (h : fderiv ℝ g y ≠ 0) :
     ∃ i : Fin n, (fderiv ℝ g y) (Pi.single i (1 : ℝ)) ≠ 0 := by
   by_contra! hz
@@ -91,7 +91,7 @@ theorem localUnitSpeedVectorField_at_noncritical (I : ModelWithCorners ℝ (Mors
     have hiff := isCriticalPointAt_iff_chart_fderiv I f hf x₀
     intro hz
     exact hcrit (hiff.2 hz)
-  rcases fderiv_ne_zero_iff_exists_coord (fun y : MorseModel n => f ((extChartAt I x₀).symm y))
+  rcases exists_coord_of_fderiv_ne_zero (fun y : MorseModel n => f ((extChartAt I x₀).symm y))
     (extChartAt I x₀ x₀) hcritChart with ⟨i, hi⟩
   let e : PartialEquiv M (MorseModel n) := extChartAt I x₀
   let g : MorseModel n → ℝ := fun y => f (e.symm y)
@@ -307,41 +307,8 @@ theorem exists_open_unitSpeedVectorField_at_noncritical (I : ModelWithCorners �
           rw [contMDiffAt_iff_source_of_mem_source (x := x₀) (x' := x) hxsrc]
           exact hmdComposed
         exact ContMDiffAt.congr_of_eventuallyEq hc hfib
-      · -- x ∈ (trivializationAt (MorseModel n) (TangentSpace I) x₀).baseSet
-        simpa [U] using hx.2
+      · simpa [U] using hx.2
     exact hmd'.contMDiffWithinAt (s := U)
-
-theorem contMDiff_section_smul_of_contMDiffOn [IsManifold I (⊤ : WithTop ℕ∞) M]
-    (ρ : M → ℝ) (W : (x : M) → TangentSpace I x) (U : Set M) (hUopen : IsOpen U)
-    (hρ : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ ρ U)
-    (hW : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel n)) ∞
-      (fun x : M => (⟨x, W x⟩ : TangentBundle I M)) U)
-    (hρts : tsupport ρ ⊆ U) :
-    ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
-      (fun x : M => (⟨x, ρ x • W x⟩ : TangentBundle I M)) := by
-  intro y
-  by_cases hy : y ∈ U
-  · have hsmul : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel n)) ∞
-        (fun x : M => (⟨x, ρ x • W x⟩ : TangentBundle I M)) U := by
-      simpa [Pi.smul_apply] using (ContMDiffOn.smul_section (u := U) (n := ∞) hρ hW)
-    exact hsmul.contMDiffAt (hUopen.mem_nhds hy)
-  · have hyts : y ∉ tsupport ρ := fun h => hy (hρts h)
-    have hsub : (tsupport ρ)ᶜ ∈ nhds y := by
-      exact (isClosed_tsupport ρ).compl_mem_nhds hyts
-    have hzero : (fun x : M => (⟨x, ρ x • W x⟩ : TangentBundle I M)) =ᶠ[nhds y]
-        (fun x : M => (⟨x, (0 : TangentSpace I x)⟩ : TangentBundle I M)) := by
-      exact Filter.eventuallyEq_of_mem hsub (fun x hx => by
-        have hxnot : x ∉ Function.support ρ := fun hs => hx (subset_closure hs)
-        have hρ0 : ρ x = 0 := by
-          by_contra h
-          exact hxnot (by simpa [Function.support] using h)
-        simp [hρ0])
-    have hzeroSect : ContMDiffAt I (I.prod 𝓘(ℝ, MorseModel n)) ∞
-        (fun x : M => (⟨x, (0 : TangentSpace I x)⟩ : TangentBundle I M)) y := by
-      have hzs := Bundle.contMDiffAt_zeroSection (IB := I) (𝕜 := ℝ) (F := MorseModel n)
-        (E := TangentSpace I) (x := y) (n := ∞)
-      simpa [Bundle.zeroSection, Bundle.TotalSpace.mk'] using hzs
-    exact ContMDiffAt.congr_of_eventuallyEq hzeroSect hzero
 
 set_option backward.isDefEq.respectTransparency false in
 theorem exists_unitSpeedVectorField_on_strip (I : ModelWithCorners ℝ (MorseModel n) H)
@@ -440,8 +407,8 @@ theorem exists_unitSpeedVectorField_on_strip (I : ModelWithCorners ℝ (MorseMod
         have hc' : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) (ρ x : M → ℝ) Set.univ := by
           simpa [hcoerce] using (ρ x).property.contMDiffOn
         exact (hc'.mono (subset_univ _)).of_le le_rfl
-      exact contMDiff_section_smul_of_contMDiffOn (I := I) (ρ x) (W x) (U' x) (hU'open x) hρOn
-        ((hWsec x).mono (by intro y hy; exact hy.1)) (hρsub x)
+      exact (ContMDiffOn.smul_section_of_tsupport (u := U' x) hρOn (hU'open x) (hρsub x)
+        ((hWsec x).mono (by intro y hy; exact hy.1)))
     have hfin : LocallyFinite (fun x : K => {y : M | ρ x y • W x y ≠ 0}) := by
       exact ρ.locallyFinite.subset (fun x => by
         intro y hy

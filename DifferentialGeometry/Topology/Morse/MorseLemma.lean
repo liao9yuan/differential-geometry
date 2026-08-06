@@ -1,5 +1,5 @@
-import DifferentialGeometry.Topology.Morse.Taylor
 import DifferentialGeometry.Topology.Morse.LocalNormalForm
+import DifferentialGeometry.Analysis.Calculus.SmoothExtension.Local
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
@@ -24,6 +24,7 @@ noncomputable def bilinPullback {n : ℕ}
       fun_prop }
 
 open Filter
+open DifferentialGeometry.Analysis
 open scoped Topology
 
 namespace Completion

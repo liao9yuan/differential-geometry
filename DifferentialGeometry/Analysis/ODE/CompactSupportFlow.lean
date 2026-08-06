@@ -31,7 +31,7 @@ theorem curveAt_add [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2
     simpa [Function.comp_def] using hh
   simpa [add_comm] using hmain
 
-theorem exists_uniform_localFlow_on_compactSupport [FiniteDimensional ℝ E] [CompleteSpace E]
+theorem exists_uniform_localFlow_on_compact [FiniteDimensional ℝ E] [CompleteSpace E]
     [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (v : (x : M) → TangentSpace I x)
@@ -120,7 +120,7 @@ theorem exists_uniform_localIntegralCurveOn_of_compactSupport [FiniteDimensional
     (hsupp : IsCompact (tsupport v)) :
     ∃ ε : ℝ, 0 < ε ∧ ∀ x : M,
       ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurveOn γ v (Ioo (-ε) ε) := by
-  rcases exists_uniform_localFlow_on_compactSupport v hv hsupp with ⟨ε, hε, hflow⟩
+  rcases exists_uniform_localFlow_on_compact v hv hsupp with ⟨ε, hε, hflow⟩
   refine ⟨ε, hε, ?_⟩
   intro x
   by_cases hxK : x ∈ tsupport v
@@ -224,7 +224,7 @@ theorem contMDiffAt_globalFlow_of_compactSupport_nonneg [FiniteDimensional ℝ E
   have hK : IsCompact K := by
     exact (isCompact_Icc : IsCompact (Set.Icc (0 : ℝ) t₀)).image
       (curveAt_integralCurve v hcomplete x₀).continuous
-  rcases exists_uniform_localFlow_on_compactSupport v hv hK with ⟨ε, hε, hflow⟩
+  rcases exists_uniform_localFlow_on_compact v hv hK with ⟨ε, hε, hflow⟩
   let δ : ℝ := ε / 2
   have hδ : 0 < δ := by dsimp [δ]; positivity
   have hδε : δ < ε := by dsimp [δ]; linarith
@@ -374,7 +374,7 @@ private theorem continuousAt_globalFlow_of_compactSupport_nonneg [FiniteDimensio
   have hK : IsCompact K := by
     exact (isCompact_Icc : IsCompact (Set.Icc (0 : ℝ) t₀)).image
       (curveAt_integralCurve v hcomplete x₀).continuous
-  rcases exists_uniform_localFlow_on_compactSupport v hv hK with ⟨ε, hε, hflow⟩
+  rcases exists_uniform_localFlow_on_compact v hv hK with ⟨ε, hε, hflow⟩
   let δ : ℝ := ε / 2
   have hδ : 0 < δ := by dsimp [δ]; positivity
   rcases exists_nat_gt (t₀ / δ) with ⟨n, hn⟩
