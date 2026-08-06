@@ -703,14 +703,15 @@ theorem exists_spatialMoserCutoff_gradient_bound
 
 def spatialMoserCutoffGradientConstant
     (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g) : ℝ :=
-  Classical.choose (exists_spatialMoserCutoff_gradient_bound (I := I) g rho)
+  16 * CutoffProfile.derivBound ^ 2 * rho.gradientSqSup
 
-omit [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem spatialMoserCutoffGradientConstant_nonneg
     (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g) :
-    0 ≤ spatialMoserCutoffGradientConstant (I := I) g rho :=
-  (Classical.choose_spec
-    (exists_spatialMoserCutoff_gradient_bound (I := I) g rho)).1
+    0 ≤ spatialMoserCutoffGradientConstant (I := I) g rho := by
+  exact mul_nonneg
+    (mul_nonneg (by norm_num) (sq_nonneg CutoffProfile.derivBound))
+    rho.gradientSqSup_nonneg
 
 omit [SigmaCompactSpace M] in
 theorem spatialMoserCutoff_gradient_le
@@ -720,9 +721,18 @@ theorem spatialMoserCutoff_gradient_le
         (gradFun (I := I) g (spatialMoserCutoff rho (k + 1)).toFun x)
         (gradFun (I := I) g (spatialMoserCutoff rho (k + 1)).toFun x) ≤
       spatialMoserCutoffGradientConstant (I := I) g rho * 4 ^ k *
-        (spatialMoserCutoff rho k).toFun x ^ 2 :=
-  (Classical.choose_spec
-    (exists_spatialMoserCutoff_gradient_bound (I := I) g rho)).2 k x
+        (spatialMoserCutoff rho k).toFun x ^ 2 := by
+  have hgradient := spatialMoserCutoff_succ_gradient_le (I := I) g rho
+    rho.gradientSqSup_nonneg rho.inner_grad_self_le_gradientSqSup k x
+  calc
+    _ ≤ (CutoffProfile.derivBound ^ 2 * rho.gradientSqSup /
+          moserCutoffWidth (k + 1) ^ 2) *
+        (spatialMoserCutoff rho k).toFun x ^ 2 := hgradient
+    _ = spatialMoserCutoffGradientConstant (I := I) g rho * 4 ^ k *
+        (spatialMoserCutoff rho k).toFun x ^ 2 := by
+      rw [div_eq_mul_inv, moserCutoffWidth_succ_inv_sq]
+      unfold spatialMoserCutoffGradientConstant
+      ring
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 

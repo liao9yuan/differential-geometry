@@ -454,14 +454,14 @@ theorem moserTimeDerivativeCost_nonneg
       (sub_pos.mpr haτ).le)
     (pow_nonneg (by norm_num) k)
 
-omit [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem moserSpatialGradientCost_nonneg
     {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g) (k : ℕ) :
     0 ≤ moserSpatialGradientCost (I := I) rho k := by
   exact mul_nonneg (spatialMoserCutoffGradientConstant_nonneg (I := I) g rho)
     (pow_nonneg (by norm_num) _)
 
-omit [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem moserStepCoefficient_nonneg
     {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
     {a τ t₁ : ℝ} (haτ : a < τ) (hτt₁ : τ ≤ t₁) (k : ℕ) :
@@ -474,7 +474,7 @@ theorem moserStepCoefficient_nonneg
         (mul_nonneg (by norm_num) (moserSpatialGradientCost_nonneg rho k))))
     (moserSpatialGradientCost_nonneg rho k)
 
-omit [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem moserStepConstant_nonneg
     {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
     {a τ t₁ : ℝ} (haτ : a < τ) (hτt₁ : τ ≤ t₁) :
@@ -490,7 +490,7 @@ theorem moserStepConstant_nonneg
           (spatialMoserCutoffGradientConstant_nonneg (I := I) g rho))))
     (spatialMoserCutoffGradientConstant_nonneg (I := I) g rho)
 
-omit [SigmaCompactSpace M] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem moserStepCoefficient_le
     {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
     {a τ t₁ : ℝ} (haτ : a < τ) (hτt₁ : τ ≤ t₁) (k : ℕ) :
