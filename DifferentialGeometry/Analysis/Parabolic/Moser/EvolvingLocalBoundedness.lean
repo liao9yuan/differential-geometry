@@ -1092,6 +1092,165 @@ theorem evolving_reciprocal_local_boundedness_of_supersolution
     (I := I) (M := M) g hdim rho v hv hvpos hp₀ haτ hτt₁
       hB hC hG hg hgram hSobolev hvpde htrace hgradient
 
+theorem evolving_reciprocal_local_boundedness_of_supersolution_rpow_of_volume_le
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    {q : SmoothRiemannianMetric I M} (rho : SmoothScalar q)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a τ t₁ B C G s₀ : ℝ}
+    (hp : 0 < p) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hB : 0 ≤ B) (hC : 0 ≤ C) (hG : 0 ≤ G)
+    (hg : MetricFamilyRegularAt (I := I) g s₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun z : ℝ × M =>
+          chartGramMatrix (I := I) (g z.1) x₀ z.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hSobolev : ∀ t ∈ Icc a t₁,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
+      traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hgradient : ∀ k t, t ∈ Icc a t₁ → ∀ x : M,
+      (g t).inner x
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x)
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x) ≤
+        evolvingMoserSpatialGradientCost G k *
+          (spatialMoserCutoff rho (2 * k)).toFun x ^ 2)
+    (V : ℝ≥0∞) (hV : V ≠ ⊤)
+    (hvolume : ∀ t ∈ Icc a t₁,
+      riemannianVolumeMeasure (I := I) (M := M) q ≤
+        V • riemannianMeasureFamily (I := I) (M := M) g t) :
+    let v : ℝ → M → ℝ := fun t x => u t x ^ (-p / 2)
+    let F := max 1 V.toReal *
+      evolvingMoserLocalBoundFactor
+        (Module.finrank ℝ E) C G B 2 a τ t₁
+    let D := evolvingMoserLocalizedMass
+      (I := I) (M := M) (Module.finrank ℝ E) g rho v 2 a τ t₁ 0
+    ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
+      (u t x)⁻¹ ≤ F ^ (2 / p) * D ^ (1 / p) := by
+  let v : ℝ → M → ℝ := fun t x => u t x ^ (-p / 2)
+  let F := max 1 V.toReal *
+    evolvingMoserLocalBoundFactor
+      (Module.finrank ℝ E) C G B 2 a τ t₁
+  let D := evolvingMoserLocalizedMass
+    (I := I) (M := M) (Module.finrank ℝ E) g rho v 2 a τ t₁ 0
+  have hv : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => v z.1 z.2) :=
+    contMDiff_rpow_of_pos hu hpos (-p / 2)
+  have hvpos : ∀ t x, 0 < v t x := fun t x =>
+    Real.rpow_pos_of_pos (hpos t x) _
+  have hvpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      deriv (fun s => v s x) t ≤
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) v hv t).smooth x := by
+    intro t ht x
+    have h := rpow_subsolution_of_supersolution
+      (I := I) (M := M) (g t) u (fun _ _ => 0) hu hpos
+        (q := -p / 2) (by linarith) (t := t) (x := x)
+        (by simpa using hpde t ht x)
+    simpa only [v, rpowSource, mul_zero, add_zero] using h
+  have hF : 0 ≤ F := by
+    exact mul_nonneg (zero_le_one.trans (le_max_left 1 V.toReal))
+      (Real.exp_pos _).le
+  have hD : 0 ≤ D := by
+    exact evolvingMoserLocalizedMass_nonneg
+      (I := I) (M := M) (Module.finrank ℝ E) g rho v
+        haτ hτt₁ (fun t x => (hvpos t x).le) 0
+  change ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
+    (u t x)⁻¹ ≤ F ^ (2 / p) * D ^ (1 / p)
+  intro t ht x hx
+  have hlocal := evolving_local_boundedness_of_subsolution_of_volume_le
+    (I := I) (M := M) g hdim rho v hv hvpos
+      (p₀ := 2) (by norm_num) haτ hτt₁ hB hC hG hg hgram
+      hSobolev hvpde htrace hgradient V hV hvolume t ht x hx
+  have hlocal' : v t x ≤ F * D ^ ((1 : ℝ) / 2) := by
+    simpa only [evolvingMoserLocalBound, evolvingMoserNormalizedMass,
+      parabolicMoserExponent_zero, F, D, mul_assoc] using hlocal
+  have hpower : v t x ^ (2 / p) ≤
+      (F * D ^ ((1 : ℝ) / 2)) ^ (2 / p) :=
+    Real.rpow_le_rpow (hvpos t x).le hlocal'
+      (div_nonneg (by norm_num) hp.le)
+  have hvpower : v t x ^ (2 / p) = (u t x)⁻¹ := by
+    dsimp only [v]
+    rw [← Real.rpow_mul (hpos t x).le]
+    have hexponent : -p / 2 * (2 / p) = (-1 : ℝ) := by
+      field_simp [hp.ne']
+    rw [hexponent, Real.rpow_neg_one]
+  have hright : (F * D ^ ((1 : ℝ) / 2)) ^ (2 / p) =
+      F ^ (2 / p) * D ^ (1 / p) := by
+    rw [Real.mul_rpow hF (Real.rpow_nonneg hD _), ← Real.rpow_mul hD]
+    congr 1
+    field_simp [hp.ne']
+  rw [hvpower, hright] at hpower
+  exact hpower
+
+theorem evolving_reciprocal_local_boundedness_of_supersolution_rpow
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    {q : SmoothRiemannianMetric I M} (rho : SmoothScalar q)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p a τ t₁ B C G s₀ : ℝ}
+    (hp : 0 < p) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hB : 0 ≤ B) (hC : 0 ≤ C) (hG : 0 ≤ G)
+    (hg : MetricFamilyRegularAt (I := I) g s₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun z : ℝ × M =>
+          chartGramMatrix (I := I) (g z.1) x₀ z.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hSobolev : ∀ t ∈ Icc a t₁,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
+      Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
+      traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hgradient : ∀ k t, t ∈ Icc a t₁ → ∀ x : M,
+      (g t).inner x
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x)
+          (gradientFun (I := I) (g t)
+            (spatialMoserCutoff rho (2 * k + 1)).toFun x) ≤
+        evolvingMoserSpatialGradientCost G k *
+          (spatialMoserCutoff rho (2 * k)).toFun x ^ 2) :
+    ∃ A : ℝ, 1 ≤ A ∧
+      ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
+        (u t x)⁻¹ ≤
+          (A * evolvingMoserLocalBoundFactor
+              (Module.finrank ℝ E) C G B 2 a τ t₁) ^ (2 / p) *
+            (evolvingMoserLocalizedMass
+              (I := I) (M := M) (Module.finrank ℝ E) g rho
+                (fun s y => u s y ^ (-p / 2)) 2 a τ t₁ 0) ^ (1 / p) := by
+  obtain ⟨V, _hVzero, hVtop, hvolume⟩ := volume_uniform_equiv
+    (I := I) (M := M) q g isCompact_Icc (fun x₀ i j =>
+      (hgram x₀ i j).continuousOn.mono
+        (Set.prod_mono (Set.subset_univ (Icc a t₁)) Set.Subset.rfl))
+  let A := max 1 V.toReal
+  refine ⟨A, le_max_left 1 _, ?_⟩
+  simpa only [A] using
+    (evolving_reciprocal_local_boundedness_of_supersolution_rpow_of_volume_le
+      (I := I) (M := M) g hdim rho u hu hpos hp haτ hτt₁
+        hB hC hG hg hgram hSobolev hpde htrace hgradient V hVtop
+        (fun t ht => (hvolume t ht).2))
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
