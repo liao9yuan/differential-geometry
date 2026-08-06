@@ -38,6 +38,14 @@ theorem bombieriGiustiInvScale_succ_lt (k : ℕ) :
   · positivity
   · norm_num
 
+theorem bombieriGiustiInvScale_sub_succ (k : ℕ) :
+    bombieriGiustiInvScale k - bombieriGiustiInvScale (k + 1) =
+      1 / ((k + 1 : ℝ) * (k + 2 : ℝ)) := by
+  unfold bombieriGiustiInvScale
+  field_simp
+  push_cast
+  ring
+
 theorem bombieriGiustiInvScale_strictAnti :
     StrictAnti bombieriGiustiInvScale := by
   exact strictAnti_nat_of_succ_lt bombieriGiustiInvScale_succ_lt
@@ -107,6 +115,50 @@ theorem bombieriGiustiIncreasingLevel_lt
   unfold bombieriGiustiIncreasingLevel
   exact sub_lt_self upper
     (mul_pos (sub_pos.mpr hlowerUpper) (bombieriGiustiInvScale_pos k))
+
+theorem bombieriGiustiDescendingLevel_sub_succ
+    (lower upper : ℝ) (k : ℕ) :
+    bombieriGiustiDescendingLevel lower upper k -
+        bombieriGiustiDescendingLevel lower upper (k + 1) =
+      (upper - lower) / ((k + 1 : ℝ) * (k + 2 : ℝ)) := by
+  rw [show bombieriGiustiDescendingLevel lower upper k -
+      bombieriGiustiDescendingLevel lower upper (k + 1) =
+        (upper - lower) *
+          (bombieriGiustiInvScale k - bombieriGiustiInvScale (k + 1)) by
+    unfold bombieriGiustiDescendingLevel
+    ring,
+    bombieriGiustiInvScale_sub_succ]
+  ring
+
+theorem bombieriGiustiIncreasingLevel_succ_sub
+    (lower upper : ℝ) (k : ℕ) :
+    bombieriGiustiIncreasingLevel lower upper (k + 1) -
+        bombieriGiustiIncreasingLevel lower upper k =
+      (upper - lower) / ((k + 1 : ℝ) * (k + 2 : ℝ)) := by
+  rw [show bombieriGiustiIncreasingLevel lower upper (k + 1) -
+      bombieriGiustiIncreasingLevel lower upper k =
+        (upper - lower) *
+          (bombieriGiustiInvScale k - bombieriGiustiInvScale (k + 1)) by
+    unfold bombieriGiustiIncreasingLevel
+    ring,
+    bombieriGiustiInvScale_sub_succ]
+  ring
+
+theorem bombieriGiustiDescendingLevel_sub_succ_inv
+    (lower upper : ℝ) (k : ℕ) :
+    (bombieriGiustiDescendingLevel lower upper k -
+        bombieriGiustiDescendingLevel lower upper (k + 1))⁻¹ =
+      ((k + 1 : ℝ) * (k + 2 : ℝ)) / (upper - lower) := by
+  rw [bombieriGiustiDescendingLevel_sub_succ]
+  field_simp
+
+theorem bombieriGiustiIncreasingLevel_succ_sub_inv
+    (lower upper : ℝ) (k : ℕ) :
+    (bombieriGiustiIncreasingLevel lower upper (k + 1) -
+        bombieriGiustiIncreasingLevel lower upper k)⁻¹ =
+      ((k + 1 : ℝ) * (k + 2 : ℝ)) / (upper - lower) := by
+  rw [bombieriGiustiIncreasingLevel_succ_sub]
+  field_simp
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

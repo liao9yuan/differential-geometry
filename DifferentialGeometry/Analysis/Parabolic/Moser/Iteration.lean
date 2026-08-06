@@ -51,6 +51,32 @@ theorem parabolicMoserDecay_lt_one :
   rw [parabolicMoserDecay]
   exact (div_lt_one (by positivity)).2 (by linarith)
 
+omit [NeZero n] in
+theorem one_sub_parabolicMoserDecay :
+    1 - parabolicMoserDecay n = 2 / ((n : ℝ) + 2) := by
+  have hn : (n : ℝ) + 2 ≠ 0 := by positivity
+  unfold parabolicMoserDecay
+  field_simp
+  ring
+
+omit [NeZero n] in
+theorem inv_one_sub_parabolicMoserDecay :
+    (1 - parabolicMoserDecay n)⁻¹ = ((n : ℝ) + 2) / 2 := by
+  rw [one_sub_parabolicMoserDecay]
+  field_simp
+
+omit [NeZero n] in
+theorem four_mul_inv_one_sub_parabolicMoserDecay_sq :
+    4 * (1 - parabolicMoserDecay n)⁻¹ ^ 2 = ((n : ℝ) + 2) ^ 2 := by
+  rw [inv_one_sub_parabolicMoserDecay]
+  ring
+
+omit [NeZero n] in
+theorem two_mul_inv_one_sub_parabolicMoserDecay :
+    2 * (1 - parabolicMoserDecay n)⁻¹ = (n : ℝ) + 2 := by
+  rw [inv_one_sub_parabolicMoserDecay]
+  ring
+
 theorem parabolicMoserDecay_eq_inv_gain :
     parabolicMoserDecay n = (parabolicMoserGain n)⁻¹ := by
   have hn : (n : ℝ) ≠ 0 := by
