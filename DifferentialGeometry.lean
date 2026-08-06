@@ -742,6 +742,7 @@ import DifferentialGeometry.Analysis.Parabolic.Moser.Cutoff
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingCrossover
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingSobolev
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingPower
+import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingReverseHolder
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLocalBoundedness
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLogEnergy
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLogTail
