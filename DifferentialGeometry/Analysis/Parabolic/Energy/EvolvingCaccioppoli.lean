@@ -64,6 +64,29 @@ theorem evolvingCutoffGradientError_nonneg
   exact integral_nonneg fun x => mul_nonneg (sq_nonneg _)
     (metric_inner_self_nonneg (I := I) (M := M) (g t) x _)
 
+omit [I.Boundaryless] in
+theorem evolvingLocalizedL2Mass_le_of_sq_le
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (cutoff outer : M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (houter : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ outer)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (t : ℝ)
+    (hle : ∀ x : M, cutoff x ^ 2 ≤ outer x ^ 2) :
+    evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u t ≤
+      evolvingLocalizedL2Mass (I := I) (M := M) g outer u t := by
+  let cutoff_t : SmoothScalar (g t) := ⟨cutoff, hcutoff⟩
+  let outer_t : SmoothScalar (g t) := ⟨outer, houter⟩
+  let u_t : SmoothScalar (g t) :=
+    ⟨u t, hu.comp (contMDiff_const.prodMk contMDiff_id)⟩
+  have hfixed := localizedL2Mass_le_of_sq_le
+    (I := I) (M := M) cutoff_t outer_t u_t hle
+  simpa only [evolvingLocalizedL2Mass, localizedL2Mass,
+    riemannianMeasureFamily_def, cutoff_t, outer_t, u_t] using hfixed
+
 theorem evolvingCutoffGradientError_le_evolvingLocalizedL2Mass
     (g : ℝ → SmoothRiemannianMetric I M)
     (cutoff outer : M → ℝ)
@@ -221,6 +244,170 @@ theorem intervalIntegral_evolvingCutoffGradientError_le_evolvingLocalizedL2Mass
           (hgrad t ht))
   rw [intervalIntegral.integral_const_mul] at hmono
   simpa only [error, outerMass] using hmono
+
+theorem timeCutoff_caccioppoli_evolving_rhs_le
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (cutoff outer : M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (houter : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ outer)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    {a t₀ t t₁ B D K L s₀ : ℝ}
+    (hat₀ : a < t₀) (ht₀t : t₀ ≤ t) (htt₁ : t ≤ t₁)
+    (hB : 0 ≤ B) (hD : 0 ≤ D) (hK : 0 ≤ K)
+    (hg : MetricFamilyRegularAt (I := I) g s₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff_le : ∀ x : M, cutoff x ^ 2 ≤ outer x ^ 2)
+    (hgrad : ∀ s ∈ Icc a t₁, ∀ x : M,
+      (g s).inner x
+          (gradientFun (I := I) (g s) cutoff x)
+          (gradientFun (I := I) (g s) cutoff x) ≤
+        K * outer x ^ 2)
+    (hderiv_le : ∀ s ∈ Icc a t₁, timeCutoffDeriv a t₀ s ≤ D)
+    (htrace : ∀ s ∈ Icc a t₁, ∀ x : M,
+      traceTimeDerivMetric (I := I) g s x ≤ B)
+    (houterMass_le :
+      (∫ s in a..t₁,
+        evolvingLocalizedL2Mass (I := I) (M := M) g outer u s) ≤ L) :
+    (∫ s in a..t,
+      timeCutoffDeriv a t₀ s *
+          evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u s +
+        timeCutoff a t₀ s *
+          (4 * evolvingCutoffGradientError
+              (I := I) (M := M) g cutoff u s +
+            evolvingLocalizedVolumeDistortion
+              (I := I) (M := M) g cutoff u s)) ≤
+      (D + 4 * K + (1 / 2) * B) * L := by
+  let mass : ℝ → ℝ :=
+    evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u
+  let error : ℝ → ℝ :=
+    evolvingCutoffGradientError (I := I) (M := M) g cutoff u
+  let distortion : ℝ → ℝ :=
+    evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff u
+  let outerMass : ℝ → ℝ :=
+    evolvingLocalizedL2Mass (I := I) (M := M) g outer u
+  let lhs : ℝ → ℝ := fun s =>
+    timeCutoffDeriv a t₀ s * mass s +
+      timeCutoff a t₀ s * (4 * error s + distortion s)
+  let coefficient : ℝ := D + 4 * K + (1 / 2) * B
+  have hat : a ≤ t := hat₀.le.trans ht₀t
+  have hat₁ : a ≤ t₁ := hat.trans htt₁
+  have hmass_cont : ContinuousOn mass (Icc a t₁) := by
+    simpa only [mass] using evolvingLocalizedL2Mass_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg
+        hcutoff.continuous hu.continuous
+  have herror_cont : ContinuousOn error (Icc a t₁) := by
+    simpa only [error] using evolvingCutoffGradientError_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hgram hcutoff hu
+  have hdistortion_cont : ContinuousOn distortion (Icc a t₁) := by
+    simpa only [distortion] using evolvingLocalizedVolumeDistortion_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg
+        hcutoff.continuous hu.continuous
+  have houter_cont : ContinuousOn outerMass (Icc a t₁) := by
+    simpa only [outerMass] using evolvingLocalizedL2Mass_continuousOn
+      (I := I) (M := M) g outer u isCompact_Icc hg
+        houter.continuous hu.continuous
+  have hlhs_cont : ContinuousOn lhs (Icc a t) := by
+    have hsubset : Icc a t ⊆ Icc a t₁ := fun s hs =>
+      ⟨hs.1, hs.2.trans htt₁⟩
+    exact ((contDiff_timeCutoffDeriv a t₀).continuous.continuousOn.mul
+      (hmass_cont.mono hsubset)).add
+        ((contDiff_timeCutoff a t₀).continuous.continuousOn.mul
+          ((continuousOn_const.mul (herror_cont.mono hsubset)).add
+            (hdistortion_cont.mono hsubset)))
+  have houter_int : IntervalIntegrable outerMass volume a t₁ := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hat₁] using houter_cont
+  have hlhs_int : IntervalIntegrable lhs volume a t := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hat] using hlhs_cont
+  have hcoefficient : 0 ≤ coefficient := by
+    dsimp only [coefficient]
+    positivity
+  have hrhs_int : IntervalIntegrable (fun s => coefficient * outerMass s)
+      volume a t := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hat] using continuousOn_const.mul
+      (houter_cont.mono (fun s hs => ⟨hs.1, hs.2.trans htt₁⟩))
+  have hpoint : ∀ s ∈ Icc a t, lhs s ≤ coefficient * outerMass s := by
+    intro s hs
+    have hs' : s ∈ Icc a t₁ := ⟨hs.1, hs.2.trans htt₁⟩
+    have hmass_nonneg := evolvingLocalizedL2Mass_nonneg
+      (I := I) (M := M) g cutoff u s
+    have houter_nonneg := evolvingLocalizedL2Mass_nonneg
+      (I := I) (M := M) g outer u s
+    have hmass_le := evolvingLocalizedL2Mass_le_of_sq_le
+      (I := I) (M := M) g cutoff outer hcutoff houter u hu s hcutoff_le
+    have herror_le := evolvingCutoffGradientError_le_evolvingLocalizedL2Mass
+      (I := I) (M := M) g cutoff outer hcutoff houter u hu s
+        (hgrad s hs')
+    have hdistortion_le := evolvingLocalizedVolumeDistortion_le
+      (I := I) (M := M) g cutoff u s B (hg.at_any s)
+        hcutoff.continuous
+        (hu.comp (contMDiff_const.prodMk contMDiff_id)).continuous
+        (htrace s hs')
+    have htime := timeCutoff_mem_Icc a t₀ s
+    have htime_term : timeCutoffDeriv a t₀ s * mass s ≤ D * outerMass s := by
+      calc
+        timeCutoffDeriv a t₀ s * mass s ≤ D * mass s :=
+          mul_le_mul_of_nonneg_right (hderiv_le s hs') hmass_nonneg
+        _ ≤ D * outerMass s := mul_le_mul_of_nonneg_left hmass_le hD
+    have herror_term : timeCutoff a t₀ s * (4 * error s) ≤
+        4 * K * outerMass s := by
+      calc
+        timeCutoff a t₀ s * (4 * error s) ≤ 1 * (4 * error s) :=
+          mul_le_mul_of_nonneg_right htime.2
+            (mul_nonneg (by norm_num)
+              (evolvingCutoffGradientError_nonneg
+                (I := I) (M := M) g cutoff u s))
+        _ = 4 * error s := one_mul _
+        _ ≤ 4 * (K * outerMass s) :=
+          mul_le_mul_of_nonneg_left herror_le (by norm_num)
+        _ = 4 * K * outerMass s := by ring
+    have hdistortion_term : timeCutoff a t₀ s * distortion s ≤
+        (1 / 2) * B * outerMass s := by
+      calc
+        timeCutoff a t₀ s * distortion s ≤
+            timeCutoff a t₀ s * ((1 / 2) * B * mass s) :=
+          mul_le_mul_of_nonneg_left hdistortion_le htime.1
+        _ ≤ timeCutoff a t₀ s * ((1 / 2) * B * outerMass s) :=
+          mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hmass_le
+              (mul_nonneg (by norm_num) hB)) htime.1
+        _ ≤ 1 * ((1 / 2) * B * outerMass s) :=
+          mul_le_mul_of_nonneg_right htime.2
+            (mul_nonneg (mul_nonneg (by norm_num) hB) houter_nonneg)
+        _ = (1 / 2) * B * outerMass s := one_mul _
+    dsimp only [lhs, coefficient, mass, error, distortion, outerMass]
+    linarith
+  have hmono : (∫ s in a..t, lhs s) ≤
+      ∫ s in a..t, coefficient * outerMass s :=
+    intervalIntegral.integral_mono_on hat hlhs_int hrhs_int hpoint
+  have houter_inner : (∫ s in a..t, outerMass s) ≤
+      ∫ s in a..t₁, outerMass s :=
+    intervalIntegral.integral_mono_interval le_rfl hat htt₁
+      (by
+        filter_upwards [ae_restrict_mem measurableSet_Ioc] with s hs
+        exact evolvingLocalizedL2Mass_nonneg
+          (I := I) (M := M) g outer u s)
+      houter_int
+  calc
+    (∫ s in a..t, lhs s) ≤ ∫ s in a..t, coefficient * outerMass s := hmono
+    _ = coefficient * ∫ s in a..t, outerMass s := by
+      rw [intervalIntegral.integral_const_mul]
+    _ ≤ coefficient * ∫ s in a..t₁, outerMass s :=
+      mul_le_mul_of_nonneg_left houter_inner hcoefficient
+    _ ≤ coefficient * L :=
+      mul_le_mul_of_nonneg_left
+        (by simpa only [outerMass] using houterMass_le) hcoefficient
+    _ = (D + 4 * K + (1 / 2) * B) * L := rfl
 
 omit [I.Boundaryless] in
 theorem evolvingLocalizedForcing_continuousOn

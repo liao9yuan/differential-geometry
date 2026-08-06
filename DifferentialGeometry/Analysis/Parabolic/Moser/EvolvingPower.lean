@@ -174,6 +174,121 @@ theorem evolving_rpow_moser_step_le
       henergy.1 henergy.2 hgrad
   simpa only [huq] using houterMass_le
 
+theorem evolving_rpow_moser_step_homogeneous_le
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (cutoff outer : M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (houter : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ outer)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq : 1 ≤ q)
+    {t : ℝ} (hg : MetricFamilyRegularAt (I := I) g t)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {C a t₀ t₁ B D K L : ℝ} (hC : 0 ≤ C)
+    (hSobolev : ∀ s ∈ Icc a t₁,
+      localizedSobolevConstant (I := I) (M := M) (g s) hdim ≤ C)
+    (hat₀ : a < t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (hB : 0 ≤ B) (hD : 0 ≤ D) (hK : 0 ≤ K) (hL : 0 ≤ L)
+    (hpde : ∀ s ∈ Icc a t₁, ∀ x : M,
+      deriv (fun r => u r x) s ≤
+        Δ_g (I := I) (g s)
+          (smoothScalarSlice (I := I) (g s) u hu s).smooth x)
+    (hcutoff_le : ∀ x : M, cutoff x ^ 2 ≤ outer x ^ 2)
+    (hgrad : ∀ s ∈ Icc a t₁, ∀ x : M,
+      (g s).inner x
+          (gradientFun (I := I) (g s) cutoff x)
+          (gradientFun (I := I) (g s) cutoff x) ≤
+        K * outer x ^ 2)
+    (hderiv_le : ∀ s ∈ Icc a t₁, timeCutoffDeriv a t₀ s ≤ D)
+    (htrace : ∀ s ∈ Icc a t₁, ∀ x : M,
+      traceTimeDerivMetric (I := I) g s x ≤ B)
+    (houterMass_le :
+      (∫ s in a..t₁,
+        evolvingLocalizedL2Mass
+          (I := I) (M := M) g outer (fun r x => u r x ^ q) s) ≤ L) :
+    (∫ s in t₀..t₁, ∫ x,
+        |cutoff x * u s x ^ q| ^
+          (2 + 4 / (Module.finrank ℝ E : ℝ))
+        ∂(riemannianMeasureFamily (I := I) (M := M) g s)) ≤
+      C * (((t₁ - t₀ + 1) *
+          ((D + 4 * K + (1 / 2) * B) * L) + K * L) ^
+        (1 + 2 / (Module.finrank ℝ E : ℝ))) := by
+  let huq := contMDiff_rpow_of_pos hu hpos q
+  let zeroSource : ℝ → M → ℝ := fun _ _ => 0
+  have hzeroSource : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => zeroSource p.1 p.2) := contMDiff_const
+  have hrhs_le : ∀ s ∈ Icc t₀ t₁,
+      (∫ r in a..s,
+        timeCutoffDeriv a t₀ r * evolvingLocalizedL2Mass
+            (I := I) (M := M) g cutoff (fun z x => u z x ^ q) r +
+          timeCutoff a t₀ r *
+            (4 * evolvingCutoffGradientError
+                (I := I) (M := M) g cutoff (fun z x => u z x ^ q) r +
+              evolvingLocalizedForcing
+                (I := I) (M := M) g cutoff (fun z x => u z x ^ q)
+                  (rpowSource q u zeroSource) r +
+              evolvingLocalizedVolumeDistortion
+                (I := I) (M := M) g cutoff (fun z x => u z x ^ q) r)) ≤
+        (D + 4 * K + (1 / 2) * B) * L := by
+    intro s hs
+    have hraw := timeCutoff_caccioppoli_evolving_rhs_le
+      (I := I) (M := M) g cutoff outer hcutoff houter
+        (fun r x => u r x ^ q) huq hat₀ hs.1 hs.2 hB hD hK hg hgram
+        hcutoff_le hgrad hderiv_le htrace
+        (by simpa only [huq] using houterMass_le)
+    simpa only [zeroSource, rpowSource, mul_zero, evolvingLocalizedForcing,
+      integral_zero, add_zero, huq] using hraw
+  have houterMass_inner_le :
+      (∫ s in t₀..t₁,
+        evolvingLocalizedL2Mass
+          (I := I) (M := M) g outer (fun r x => u r x ^ q) s) ≤ L := by
+    let mass : ℝ → ℝ := fun s =>
+      evolvingLocalizedL2Mass
+        (I := I) (M := M) g outer (fun r x => u r x ^ q) s
+    have hmass_cont : ContinuousOn mass (Icc a t₁) := by
+      simpa only [mass] using evolvingLocalizedL2Mass_continuousOn
+        (I := I) (M := M) g outer (fun r x => u r x ^ q)
+          isCompact_Icc hg houter.continuous huq.continuous
+    have hmass_int : IntervalIntegrable mass volume a t₁ := by
+      apply ContinuousOn.intervalIntegrable
+      simpa [uIcc_of_le (hat₀.le.trans ht₀t₁)] using hmass_cont
+    have hmono : (∫ s in t₀..t₁, mass s) ≤ ∫ s in a..t₁, mass s :=
+      intervalIntegral.integral_mono_interval hat₀.le ht₀t₁ le_rfl
+        (by
+          filter_upwards [ae_restrict_mem measurableSet_Ioc] with s hs
+          exact evolvingLocalizedL2Mass_nonneg
+            (I := I) (M := M) g outer (fun r x => u r x ^ q) s)
+        hmass_int
+    exact hmono.trans (by simpa only [mass, huq] using houterMass_le)
+  apply evolving_rpow_moser_step_le
+    (I := I) (M := M) g hdim cutoff outer hcutoff houter u zeroSource
+      hu hzeroSource hpos hq hg hgram hC hat₀.le ht₀t₁
+      (mul_nonneg
+        (add_nonneg (add_nonneg hD (mul_nonneg (by norm_num) hK))
+          (mul_nonneg (by norm_num) hB)) hL)
+      hK (contDiff_timeCutoffDeriv a t₀).continuous.continuousOn
+      (fun s _ => hasDerivAt_timeCutoff a t₀ s)
+      (fun s _ => (timeCutoff_mem_Icc a t₀ s).1)
+      (timeCutoff_eq_zero a hat₀)
+      (fun s hs => timeCutoff_eq_one_of_le hat₀ hs.1)
+      (fun s hs => hSobolev s ⟨hat₀.le.trans hs.1, hs.2⟩)
+  · intro s hs x
+    simpa only [zeroSource, add_zero] using hpde s hs x
+  · simpa only [huq, zeroSource] using hrhs_le
+  · intro s hs
+    exact hgrad s ⟨hat₀.le.trans hs.1, hs.2⟩
+  · simpa only [huq] using houterMass_inner_le
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
