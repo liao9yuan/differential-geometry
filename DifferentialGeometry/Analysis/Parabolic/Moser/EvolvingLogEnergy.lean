@@ -127,6 +127,93 @@ theorem hasDerivAt_evolvingShiftedLogCenter
       hdrift.aestronglyMeasurable.stronglyMeasurableAtFilter hdrift.continuousAt
   simpa only [evolvingShiftedLogCenter, logu] using haverage'.add hprimitive
 
+omit [I.Boundaryless] in
+theorem contDiff_evolvingShiftedLogCenter
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (C H base : ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hne : ∃ x, cutoff x ≠ 0) :
+    ContDiff ℝ 1 (evolvingShiftedLogCenter
+      (I := I) (M := M) g cutoff u C H base) := by
+  let logu : ℝ → M → ℝ := fun s x => Real.log (u s x)
+  let average := evolvingLocalizedAverage
+    (I := I) (M := M) g cutoff logu
+  let mass := evolvingCutoffMass (I := I) (M := M) g cutoff
+  let trace : ℝ → M → ℝ := fun t x =>
+    (1 / 2) * traceTimeDerivMetric (I := I) g t x
+  let averageDerivativeIntegrand : ℝ → M → ℝ := fun t x =>
+    deriv (fun s => logu s x) t + trace t x * (logu t x - average t)
+  let averageDerivative : ℝ → ℝ := fun t =>
+    evolvingLocalizedIntegral
+      (I := I) (M := M) g cutoff averageDerivativeIntegrand t / mass t
+  let centerDerivative : ℝ → ℝ := fun t =>
+    averageDerivative t +
+      evolvingLogCenterDrift (I := I) (M := M) g cutoff C H t
+  let shifted := evolvingShiftedLogCenter
+    (I := I) (M := M) g cutoff u C H base
+  let hlog := contMDiff_log_of_pos hu hpos
+  let F : C^∞⟮(modelWithCornersSelf ℝ ℝ).prod I, ℝ × M; ℝ⟯ :=
+    ⟨fun p => logu p.1 p.2, hlog⟩
+  have htime : Continuous (fun p : ℝ × M =>
+      deriv (fun s => logu s p.2) p.1) := by
+    simpa only [F, logu] using
+      (DifferentialGeometry.contMDiff_partial_deriv_fst I F).continuous
+  have htrace : Continuous (fun p : ℝ × M => trace p.1 p.2) := by
+    exact continuous_const.mul
+      (traceTimeDerivMetric_joint_continuous (I := I) (M := M) hg)
+  have haverage : Continuous average := by
+    exact evolvingLocalizedAverage_continuous
+      (I := I) (M := M) g cutoff logu hg hcutoff.continuous hlog.continuous hne
+  have hintegrand : Continuous (fun p : ℝ × M =>
+      averageDerivativeIntegrand p.1 p.2) := by
+    exact htime.add (htrace.mul
+      (hlog.continuous.sub (haverage.comp continuous_fst)))
+  have hnumerator : Continuous (fun t =>
+      evolvingLocalizedIntegral
+        (I := I) (M := M) g cutoff averageDerivativeIntegrand t) :=
+    evolvingLocalizedIntegral_continuous
+      (I := I) (M := M) g cutoff averageDerivativeIntegrand
+        hg hcutoff.continuous hintegrand
+  have hmass : Continuous mass :=
+    evolvingCutoffMass_continuous
+      (I := I) (M := M) g cutoff hg hcutoff.continuous
+  have haverageDerivative : Continuous averageDerivative :=
+    hnumerator.div hmass fun t =>
+      (evolvingCutoffMass_pos
+        (I := I) (M := M) g cutoff t hcutoff.continuous hne).ne'
+  have hdrift := evolvingLogCenterDrift_continuous
+    (I := I) (M := M) g cutoff C H hg hgram hcutoff hne
+  have hcenterDerivative : Continuous centerDerivative :=
+    haverageDerivative.add hdrift
+  have hshifted : ∀ t, HasDerivAt shifted (centerDerivative t) t := by
+    intro t
+    have hmass_t := (evolvingCutoffMass_pos
+      (I := I) (M := M) g cutoff t hcutoff.continuous hne).ne'
+    have haverage_eq := deriv_evolvingLocalizedAverage_eq_integral_centered
+      (I := I) (M := M) g cutoff logu t (hg.at_any t) hcutoff hlog hmass_t
+    have hraw := hasDerivAt_evolvingShiftedLogCenter
+      (I := I) (M := M) g cutoff u hu hpos C H base t hg hgram hcutoff hne
+    convert hraw using 1
+    rw [haverage_eq]
+    rfl
+  apply contDiff_one_iff_deriv.mpr
+  constructor
+  · exact fun t => (hshifted t).differentiableAt
+  · rw [show deriv shifted = centerDerivative from funext fun t => (hshifted t).deriv]
+    exact hcenterDerivative
+
 theorem evolving_log_spatial_energy_differential_of_supersolution
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
     (u : ℝ → M → ℝ)
