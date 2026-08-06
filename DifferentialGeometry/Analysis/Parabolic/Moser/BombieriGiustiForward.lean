@@ -395,7 +395,7 @@ theorem localizedSpacetimeRpowNorm_le_canonicalEarlyBombieriGiustiReverseCost_of
     exact forward_initial_spatialCutoffBetween_le_bombieriGiustiSpatialCutoff_succ
       rho hlowerUpper k x
 
-theorem early_localizedSpacetimeRpowNorm_le_exp_tsum_canonicalBombieriGiustiThreshold_of_supersolution
+theorem early_localizedSpacetimeRpowNorm_le_exp_tsum_canonicalBombieriGiustiThreshold_of_supersolution_of_summable
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
     (rho outer averagingCutoff : SmoothScalar g)
@@ -498,6 +498,66 @@ theorem early_localizedSpacetimeRpowNorm_le_exp_tsum_canonicalBombieriGiustiThre
         (I := I) (M := M) g hdim rho v hv hvpos hp₀_one hAb hbτ hB
           hlowerUpper hrho hvpde k hp hpp₀)
   · simpa only [n] using hsummable
+
+theorem early_localizedSpacetimeRpowNorm_le_exp_tsum_canonicalBombieriGiustiThreshold_of_supersolution
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho outer averagingCutoff : SmoothScalar g)
+    (C : ℝ) (hC : 0 < C)
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      outer averagingCutoff C)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ A b τ B lower upper : ℝ}
+    (hp₀ : 0 < p₀) (hp₀_one : p₀ < 1)
+    (hAb : A ≤ b) (hbτ : b < τ)
+    (hB : 0 ≤ B) (hlowerUpper : lower < upper)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hmeasure : ∀ k,
+      localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k) A
+          (bombieriGiustiIncreasingLevel b τ k) ≠ 0)
+    (hmeasure_le_one : ∀ k,
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k) A
+          (bombieriGiustiIncreasingLevel b τ k)).real Set.univ ≤ 1)
+    (houter : ∀ k x,
+      (bombieriGiustiSpatialCutoff rho lower upper k).toFun x ^ 2 ≤
+        outer.toFun x ^ 2)
+    (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
+    (hpde : ∀ t ∈ Icc A τ, ∀ x : M,
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+        deriv (fun q => u q x) t) :
+    let rate := logCenterDrift (I := I) (M := M) g averagingCutoff
+    let center := shiftedLogCenter (I := I) (M := M) g averagingCutoff
+      u hu hpos τ
+    let v := exponentialTimeRescale rate center u
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper 0) v p₀ A b ≤
+      Real.exp (∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+        (bombieriGiustiThreshold p₀
+          (2 * C * cutoffMass (I := I) (M := M) averagingCutoff)
+          (canonicalEarlyBombieriGiustiReverseCost (I := I) (M := M)
+            (Module.finrank ℝ E) g hdim p₀ A b τ B lower upper k) / 4)) := by
+  apply
+    early_localizedSpacetimeRpowNorm_le_exp_tsum_canonicalBombieriGiustiThreshold_of_supersolution_of_summable
+      g hdim rho outer averagingCutoff C hC hP u hu hpos hp₀ hp₀_one
+        hAb hbτ hB hlowerUpper hrho hmeasure hmeasure_le_one houter hmass hpde
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  have hc₀ : 0 ≤
+      2 * C * cutoffMass (I := I) (M := M) averagingCutoff :=
+    mul_nonneg (mul_nonneg (by norm_num) hC.le) hmass.le
+  simpa only [n] using
+    summable_canonicalEarlyBombieriGiustiThreshold
+      n g hdim hp₀ hp₀_one hc₀ hAb hbτ hB hlowerUpper
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
