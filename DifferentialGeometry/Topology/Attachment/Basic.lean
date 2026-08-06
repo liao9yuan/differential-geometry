@@ -24,6 +24,17 @@ instance (n : ℕ) : CompactSpace (CellBoundary n) := by
     simp [Metric.sphere, dist_zero_right]
   exact isCompact_iff_compactSpace.mp h
 
+theorem continuous_cellBoundaryInclusion (n : ℕ) : Continuous (cellBoundaryInclusion n) := by
+  exact continuous_subtype_val.subtype_mk (p := fun y : EuclideanSpace ℝ (Fin n) => ‖y‖ ≤ 1)
+    (fun x : CellBoundary n => le_of_eq x.2)
+
+theorem injective_cellBoundaryInclusion (n : ℕ) : Function.Injective (cellBoundaryInclusion n) := by
+  intro x y h
+  have hval : (x : EuclideanSpace ℝ (Fin n)) = (y : EuclideanSpace ℝ (Fin n)) := by
+    simpa using congrArg (fun z : ClosedCell n => (z : EuclideanSpace ℝ (Fin n))) h
+  apply Subtype.ext
+  exact hval
+
 section AdjunctionSpace
 
 variable {A : Type v} {B : Type w} [TopologicalSpace B] {X : Type u} [TopologicalSpace X]
