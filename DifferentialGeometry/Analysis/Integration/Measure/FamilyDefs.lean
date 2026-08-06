@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Analysis.Integration.Measure.JacobiFormula
+import DifferentialGeometry.Bundle.PartialMfderiv
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.SpecialFunctions.Sqrt
@@ -84,6 +85,24 @@ structure FunctionRegularAt (f : ℝ → M → ℝ) (t₀ : ℝ) : Prop where
 
   continuous_deriv_joint :
     Continuous (fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) p.1)
+
+omit [Module.Finite ℝ E] in
+theorem FunctionRegularAt.of_contMDiff
+    (f : ℝ → M → ℝ)
+    (hf : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2)) (t₀ : ℝ) :
+    FunctionRegularAt f t₀ := by
+  let F : C^∞⟮(modelWithCornersSelf ℝ ℝ).prod I, ℝ × M; ℝ⟯ :=
+    ⟨fun p => f p.1 p.2, hf⟩
+  refine ⟨?_, hf.continuous, ?_⟩
+  · intro x t
+    have htime : ContDiff ℝ ∞ (fun s => f s x) :=
+      contMDiff_iff_contDiff.mp
+        (hf.comp (contMDiff_id.prodMk contMDiff_const))
+    exact (htime.differentiable (by norm_num)).differentiableAt.hasDerivAt
+  · simpa only [F] using
+      (DifferentialGeometry.contMDiff_partial_deriv_fst I F).continuous
 
 section ChartDensityFamily
 
