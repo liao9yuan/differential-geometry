@@ -160,6 +160,175 @@ theorem hasDerivAt_evolvingLocalizedAverage
     (I := I) (M := M) g cutoff t hg hcutoff
   simpa only [evolvingLocalizedAverage] using hnum.div hden hmass
 
+private theorem covariance_young_lower {d h K H : ℝ}
+    (hK : 0 < K) (hh : |h| ≤ H) :
+    -(1 / (4 * K)) * d ^ 2 - K * H ^ 2 ≤ h * d := by
+  have hh_bounds := abs_le.mp hh
+  have hh_sq : h ^ 2 ≤ H ^ 2 := by
+    nlinarith
+  have hsquare : 0 ≤ (d + 2 * K * h) ^ 2 := sq_nonneg _
+  have hraw : -d ^ 2 - 4 * K ^ 2 * H ^ 2 ≤ 4 * K * (h * d) := by
+    nlinarith
+  have hden : 0 < 4 * K := mul_pos (by norm_num) hK
+  calc
+    -(1 / (4 * K)) * d ^ 2 - K * H ^ 2 =
+        (-d ^ 2 - 4 * K ^ 2 * H ^ 2) / (4 * K) := by
+          field_simp [hK.ne']
+    _ ≤ (4 * K * (h * d)) / (4 * K) :=
+      (div_le_div_iff_of_pos_right hden).mpr hraw
+    _ = h * d := by field_simp [hK.ne']
+
+private theorem quarter_dirichlet_le_covariance_cost
+    {oscillation dirichlet K : ℝ} (hK : 0 < K)
+    (hbound : oscillation ≤ K * dirichlet) :
+    -(1 / 4) * dirichlet ≤ -(1 / (4 * K)) * oscillation := by
+  have hden : 0 < 4 * K := mul_pos (by norm_num) hK
+  have hfrac : oscillation / (4 * K) ≤ dirichlet / 4 := by
+    apply (div_le_iff₀ hden).2
+    calc
+      oscillation ≤ K * dirichlet := hbound
+      _ = dirichlet / 4 * (4 * K) := by ring
+  have hneg := neg_le_neg hfrac
+  convert hneg using 1 <;> field_simp [hK.ne']
+
+omit [CompactSpace M] in
+theorem evolving_volume_covariance_lower_bound
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t K H : ℝ)
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hcutoff_compact : HasCompactSupport cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hK : 0 < K)
+    (htrace : ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H) :
+    -(1 / (4 * K)) *
+          evolvingLocalizedL2Oscillation (I := I) (M := M) g cutoff u t -
+        K * H ^ 2 * evolvingCutoffMass (I := I) (M := M) g cutoff t ≤
+      ∫ x, cutoff x ^ 2 *
+          ((1 / 2) * traceTimeDerivMetric (I := I) g t x) *
+          (u t x - evolvingLocalizedAverage
+            (I := I) (M := M) g cutoff u t)
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t) := by
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  let center := evolvingLocalizedAverage (I := I) (M := M) g cutoff u t
+  let h : M → ℝ := fun x =>
+    (1 / 2) * traceTimeDerivMetric (I := I) g t x
+  let dev : M → ℝ := fun x => u t x - center
+  letI : IsFiniteMeasureOnCompacts μ := by
+    dsimp only [μ, riemannianMeasureFamily]
+    exact riemannianVolumeMeasure_isFiniteMeasureOnCompacts
+      (I := I) (M := M) (g t)
+  have hu_t : Continuous (u t) :=
+    (hu.comp (contMDiff_const.prodMk contMDiff_id)).continuous
+  have hh : Continuous h := by
+    exact continuous_const.mul
+      (traceTimeDerivMetric_continuous (I := I) (M := M) hg)
+  have hdev : Continuous dev := hu_t.sub continuous_const
+  have hweight_support : HasCompactSupport (fun x : M => cutoff x ^ 2) := by
+    simpa only [pow_two] using
+      (hcutoff_compact.mul_left : HasCompactSupport (cutoff * cutoff))
+  have hweight : Integrable (fun x : M => cutoff x ^ 2) μ :=
+    (hcutoff.continuous.pow 2).integrable_of_hasCompactSupport
+      hweight_support
+  have hdeviation : Integrable
+      (fun x : M => cutoff x ^ 2 * dev x ^ 2) μ :=
+    ((hcutoff.continuous.pow 2).mul (hdev.pow 2))
+      |>.integrable_of_hasCompactSupport hweight_support.mul_right
+  have hinside : Continuous
+      (fun x : M => -(1 / (4 * K)) * dev x ^ 2 - K * H ^ 2) :=
+    (continuous_const.mul (hdev.pow 2)).sub continuous_const
+  have hleft : Integrable
+      (fun x : M => cutoff x ^ 2 *
+        (-(1 / (4 * K)) * dev x ^ 2 - K * H ^ 2)) μ :=
+    ((hcutoff.continuous.pow 2).mul hinside)
+      |>.integrable_of_hasCompactSupport hweight_support.mul_right
+  have hright : Integrable
+      (fun x : M => cutoff x ^ 2 * h x * dev x) μ :=
+    (((hcutoff.continuous.pow 2).mul hh).mul hdev)
+      |>.integrable_of_hasCompactSupport hweight_support.mul_right.mul_right
+  have hpointwise : ∀ x : M,
+      cutoff x ^ 2 * (-(1 / (4 * K)) * dev x ^ 2 - K * H ^ 2) ≤
+        cutoff x ^ 2 * h x * dev x := by
+    intro x
+    have hyoung := covariance_young_lower (d := dev x) (h := h x) hK (htrace x)
+    have hmul := mul_le_mul_of_nonneg_left hyoung (sq_nonneg (cutoff x))
+    convert hmul using 1
+    all_goals ring
+  have hintegral := integral_mono hleft hright hpointwise
+  have hleft_eq :
+      (∫ x, cutoff x ^ 2 *
+          (-(1 / (4 * K)) * dev x ^ 2 - K * H ^ 2) ∂μ) =
+        -(1 / (4 * K)) * (∫ x, cutoff x ^ 2 * dev x ^ 2 ∂μ) -
+          K * H ^ 2 * ∫ x, cutoff x ^ 2 ∂μ := by
+    calc
+      _ = ∫ x,
+          (-(1 / (4 * K))) * (cutoff x ^ 2 * dev x ^ 2) +
+            (-(K * H ^ 2)) * cutoff x ^ 2 ∂μ := by
+              refine integral_congr_ae (ae_of_all μ fun x => ?_)
+              ring
+      _ = _ := by
+        rw [integral_add (hdeviation.const_mul (-(1 / (4 * K))))
+          (hweight.const_mul (-(K * H ^ 2))),
+          integral_const_mul, integral_const_mul]
+        ring
+  rw [hleft_eq] at hintegral
+  simpa only [evolvingLocalizedL2Oscillation, evolvingLocalizedL2Deviation,
+    evolvingCutoffMass, evolvingLocalizedIntegral, center, dev, h, μ, mul_one]
+    using hintegral
+
+omit [CompactSpace M] in
+theorem evolving_volume_covariance_lower_bound_of_poincare
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (averagingCutoff energyCutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t C H : ℝ) (J : Set ℝ)
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (haveragingCutoff_compact : HasCompactSupport averagingCutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hP : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff energyCutoff C J)
+    (ht : t ∈ J)
+    (htrace : ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H) :
+    -(1 / 4) * evolvingLocalizedDirichletEnergy
+          (I := I) (M := M) g energyCutoff u t -
+        max 1 C * H ^ 2 *
+          evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤
+      ∫ x, averagingCutoff x ^ 2 *
+          ((1 / 2) * traceTimeDerivMetric (I := I) g t x) *
+          (u t x - evolvingLocalizedAverage
+            (I := I) (M := M) g averagingCutoff u t)
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t) := by
+  let K := max 1 C
+  let oscillation := evolvingLocalizedL2Oscillation
+    (I := I) (M := M) g averagingCutoff u t
+  let dirichlet := evolvingLocalizedDirichletEnergy
+    (I := I) (M := M) g energyCutoff u t
+  have hK : 0 < K := lt_of_lt_of_le zero_lt_one (le_max_left 1 C)
+  have hdirichlet : 0 ≤ dirichlet :=
+    evolvingLocalizedDirichletEnergy_nonneg
+      (I := I) (M := M) g energyCutoff u t
+  have hoscillation : oscillation ≤ C * dirichlet := by
+    simpa only [oscillation, dirichlet, smoothScalarSlice_toFun] using
+      hP t ht (smoothScalarSlice (I := I) (g t) u hu t)
+  have hoscillationK : oscillation ≤ K * dirichlet :=
+    hoscillation.trans
+      (mul_le_mul_of_nonneg_right (le_max_right 1 C) hdirichlet)
+  have hquarter := quarter_dirichlet_le_covariance_cost hK hoscillationK
+  have hbase := evolving_volume_covariance_lower_bound
+    (I := I) (M := M) g averagingCutoff u t K H hg
+      haveragingCutoff haveragingCutoff_compact hu hK htrace
+  change -(1 / 4) * dirichlet -
+      K * H ^ 2 * evolvingCutoffMass
+        (I := I) (M := M) g averagingCutoff t ≤ _
+  exact (sub_le_sub_right hquarter _).trans (by
+    simpa only [oscillation, K] using hbase)
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
