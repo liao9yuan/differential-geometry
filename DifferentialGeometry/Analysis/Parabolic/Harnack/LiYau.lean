@@ -3,6 +3,10 @@ import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.Operators
 import DifferentialGeometry.Geometry.Operator.VossWeyl
+import DifferentialGeometry.Geometry.Operator.LaplacianBridge
+import DifferentialGeometry.Geometry.Operator.NormGradSq
+import DifferentialGeometry.Geometry.Operator.HessianTraceInequality
+import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
@@ -771,5 +775,311 @@ theorem time_deriv_slice_contMDiff
       rfl
     rw [hcomp_eq]
     simpa [ModelWithCorners.range_eq_univ I, α] using hcd_w
+
+theorem liYauQuantity_evolution_identity
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (hpde : ∀ t x, deriv (fun s => u s x) t =
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    (hq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2))
+    (t : ℝ) (x : M) :
+    deriv (fun s => liYauQuantity g (fun τ y => Real.log (u τ y)) s x) t -
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g
+          (fun τ y => liYauQuantity g (fun σ z => Real.log (u σ z)) τ y) hq t).smooth x =
+      2 * g.inner x
+            (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
+            (gradientFun (I := I) g (fun y => liYauQuantity g (fun σ z => Real.log (u σ z)) t y) x) -
+        2 * chartHessFrobeniusSq (I := I) g (fun y => Real.log (u t y)) x -
+        2 * ricciTensor (I := I) g x
+            (gradFun (I := I) g (fun y => Real.log (u t y)) x)
+            (gradFun (I := I) g (fun y => Real.log (u t y)) x) := by
+  classical
+  let f : ℝ → M → ℝ := fun τ y => Real.log (u τ y)
+  let hlog : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2) := Moser.contMDiff_log_of_pos hu hpos
+  let q : ℝ → M → ℝ := fun τ y => liYauQuantity g f τ y
+  let hq' : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => q p.1 p.2) := hq
+  have hqid : ∀ τ y, q τ y = -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog τ).smooth y :=
+    fun τ y => liYauQuantity_eq_neg_laplacian (I := I) (M := M) g u hu hpos (hpde τ y)
+  have hft : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) t) := by
+    have hs : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => deriv (fun s : ℝ => f s x) t) :=
+      time_deriv_slice_contMDiff f hlog t
+    exact hs.comp (contMDiff_snd : ContMDiff (𝓘(ℝ, ℝ).prod I) I ∞ (fun p : ℝ × M => p.2))
+  have hlap_t : deriv (fun s : ℝ => Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog s).smooth x) t =
+      Δ_g (I := I) g
+        (smoothScalarSlice (I := I) g (fun _ : ℝ => fun y : M => deriv (fun σ : ℝ => f σ y) t) hft t).smooth x :=
+    laplacian_time_deriv (I := I) (M := M) g f hlog t hft x
+  have hdq : deriv (fun s : ℝ => q s x) t =
+      -Δ_g (I := I) g
+        (smoothScalarSlice (I := I) g (fun _ : ℝ => fun y : M => deriv (fun σ : ℝ => f σ y) t) hft t).smooth x := by
+    have hfun_eq : (fun s : ℝ => q s x) = fun s : ℝ => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog s).smooth x := by
+      funext s
+      exact hqid s x
+    rw [hfun_eq]
+    rw [show deriv (fun s : ℝ => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog s).smooth x) t =
+        -deriv (fun s : ℝ => Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog s).smooth x) t from
+      deriv.neg (f := fun s : ℝ => Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog s).smooth x)]
+    exact congrArg Neg.neg hlap_t
+  have hdq_laplacian : Δ_g (I := I) g (smoothScalarSlice (I := I) g q hq' t).smooth x =
+      -Δ_g (I := I) g (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x := by
+    have heq : (smoothScalarSlice (I := I) g q hq' t).toFun =ᶠ[𝓝 x]
+        (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) := by
+      rw [Filter.eventuallyEq_iff_exists_mem]
+      refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+      intro y hy
+      rw [smoothScalarSlice_toFun]
+      exact hqid t y
+    have hneg : ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) :=
+      ContMDiff.neg (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth)
+    have hcongr := Δ_g_congr_of_eventuallyEq (I := I) g
+      (smoothScalarSlice (I := I) g q hq' t).smooth hneg heq
+    rw [hcongr]
+    exact Δ_g_neg (I := I) g (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) (x := x)
+  have hheq : ∀ y, deriv (fun s : ℝ => f s y) t -
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y =
+      normGradSqFun (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun y := by
+    intro y
+    have hle := heatSolution_log_evolution (I := I) (M := M) g u hu hpos (hpde t y)
+    have hle' : deriv (fun s : ℝ => f s y) t =
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y +
+          g.inner y (gradientFun (I := I) g (f t) y) (gradientFun (I := I) g (f t) y) := by
+      simpa [f] using hle
+    have hnorm : g.inner y (gradientFun (I := I) g (f t) y) (gradientFun (I := I) g (f t) y) =
+        normGradSqFun (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun y := by
+      have hvec : ∀ h : M → ℝ, gradientFun (I := I) g h y = gradFun (I := I) g h y := by
+        intro h
+        apply (metricFlatEquiv (I := I) g y).injective
+        ext w
+        change g.inner y (gradientFun (I := I) g h y) w = g.inner y (gradFun (I := I) g h y) w
+        rw [inner_gradientFun (I := I) g h y w]
+        rw [inner_gradFun (I := I) g h y w]
+      rw [normGradSqFun]
+      rw [hvec (f t)]
+      rw [show (smoothScalarSlice (I := I) g f hlog t).toFun = f t by
+        funext z
+        rfl]
+    have hle'' : deriv (fun s : ℝ => f s y) t =
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y +
+          normGradSqFun (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun y := by
+      rw [← hnorm]
+      exact hle'
+    linarith
+  have hftslice : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => deriv (fun s : ℝ => f s y) t) :=
+    time_deriv_slice_contMDiff f hlog t
+  have hmain : deriv (fun s : ℝ => q s x) t -
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g q hq' t).smooth x =
+      -Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g
+        (smoothScalarSlice (I := I) g f hlog t).smooth) x := by
+    rw [hdq, hdq_laplacian]
+    have hsub_fun : (fun y : M => deriv (fun s : ℝ => f s y) t -
+          Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) =ᶠ[𝓝 x]
+        (fun y : M => normGradSqFun (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun y) := by
+      rw [Filter.eventuallyEq_iff_exists_mem]
+      refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+      intro y hy
+      exact hheq y
+    have hΔsub : Δ_g (I := I) g
+        (hftslice.sub (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth)) x =
+        Δ_g (I := I) g hftslice x -
+          Δ_g (I := I) g (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x := by
+      have h1 := Δ_g_add (I := I) g hftslice
+        (ContMDiff.neg (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth)) x
+      have h2 := Δ_g_neg (I := I) g (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) (x := x)
+      have hsub_eq : (fun y : M => deriv (fun s : ℝ => f s y) t -
+            Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) =ᶠ[𝓝 x]
+          (fun y : M => deriv (fun s : ℝ => f s y) t +
+            -(Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y)) := by
+        rw [Filter.eventuallyEq_iff_exists_mem]
+        refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+        intro y hy
+        ring
+      have hbridge := Δ_g_congr_of_eventuallyEq (I := I) g
+        (hftslice.sub (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth))
+        (hftslice.add (ContMDiff.neg (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth)))
+        hsub_eq
+      rw [hbridge, h1, h2]
+      ring
+    have hΔnorm : Δ_g (I := I) g
+        (hftslice.sub (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth)) x =
+        Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g
+          (smoothScalarSlice (I := I) g f hlog t).smooth) x :=
+      Δ_g_congr_of_eventuallyEq (I := I) g
+        (hftslice.sub (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth))
+        (normGradSqFun_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) hsub_fun
+    have hdft_slice : Δ_g (I := I) g
+        (smoothScalarSlice (I := I) g (fun _ : ℝ => fun y : M => deriv (fun σ : ℝ => f σ y) t) hft t).smooth x =
+        Δ_g (I := I) g hftslice x :=
+      Δ_g_congr_of_eventuallyEq (I := I) g
+        (smoothScalarSlice (I := I) g (fun _ : ℝ => fun y : M => deriv (fun σ : ℝ => f σ y) t) hft t).smooth
+        hftslice (by
+          rw [Filter.eventuallyEq_iff_exists_mem]
+          refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+          intro y hy
+          rw [smoothScalarSlice_toFun]
+          )
+    rw [hdft_slice]
+    have hstep : Δ_g (I := I) g hftslice x -
+        Δ_g (I := I) g (Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x =
+        Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g
+          (smoothScalarSlice (I := I) g f hlog t).smooth) x :=
+      hΔsub.symm.trans hΔnorm
+    linarith
+  have hbochner := bochner_pointwise_concrete_metric_unconditional (I := I) g
+    (smoothScalarSlice (I := I) g f hlog t).smooth x
+  have hvecg : ∀ h : M → ℝ, gradientFun (I := I) g h x = gradFun (I := I) g h x := by
+    intro h
+    apply (metricFlatEquiv (I := I) g x).injective
+    ext w
+    change g.inner x (gradientFun (I := I) g h x) w = g.inner x (gradFun (I := I) g h x) w
+    rw [inner_gradientFun (I := I) g h x w]
+    rw [inner_gradFun (I := I) g h x w]
+  have hgrad : 2 * g.inner x
+        (gradFun (I := I) g (fun y => Real.log (u t y)) x)
+        (gradFun (I := I) g (fun y => liYauQuantity g (fun σ z => Real.log (u σ z)) t y) x) =
+      2 * g.inner x (gradFun (I := I) g (f t) x)
+         (gradFun (I := I) g (fun y => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) x) := by
+    rw [show (fun y : M => Real.log (u t y)) = f t by
+      funext y
+      rfl]
+    rw [show (fun y : M => liYauQuantity g (fun σ z => Real.log (u σ z)) t y) =
+        (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) by
+      funext y
+      exact hqid t y]
+  have hmain' : deriv (fun s : ℝ => q s x) t -
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g q hq' t).smooth x =
+      -2 * chartHessFrobeniusSq (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun x -
+        2 * ricciTensor (I := I) g x
+          (gradFun (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun x)
+          (gradFun (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun x) -
+        2 * g.inner x (gradFun (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun x)
+          (gradFun (I := I) g (Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x) := by
+    rw [hmain, hbochner]
+    ring
+  rw [hvecg (fun y : M => Real.log (u t y))]
+  rw [hvecg (fun y : M => liYauQuantity g (fun σ z => Real.log (u σ z)) t y)]
+  rw [hgrad]
+  rw [show (fun y : M => Real.log (u t y)) =
+      (smoothScalarSlice (I := I) g f hlog t).toFun by
+    funext y
+    rfl]
+  rw [hmain']
+  have hinner_eq : 2 * g.inner x (gradFun (I := I) g (f t) x)
+        (gradFun (I := I) g (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) x) =
+      -2 * g.inner x (gradFun (I := I) g (smoothScalarSlice (I := I) g f hlog t).toFun x)
+        (gradFun (I := I) g (Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x) := by
+    have hfun : (f t) = (smoothScalarSlice (I := I) g f hlog t).toFun := by
+      funext y
+      rfl
+    have hgradneg : gradFun (I := I) g
+        (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) x =
+        -gradFun (I := I) g (Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x := by
+      have hneg : gradientFun (I := I) g
+          (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) x =
+          -gradientFun (I := I) g (Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x :=
+        gradientFun_neg g
+          ((Δ_g_contMDiff (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth).mdifferentiableAt (by simp))
+      calc
+        gradFun (I := I) g
+            (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) x
+            = gradientFun (I := I) g
+                (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y) x :=
+              (hvecg (fun y : M => -Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth y)).symm
+        _ = -gradientFun (I := I) g (Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x := hneg
+        _ = -gradFun (I := I) g (Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth) x := by
+              rw [hvecg (Δ_g (I := I) g (smoothScalarSlice (I := I) g f hlog t).smooth)]
+    rw [hfun, hgradneg]
+    rw [map_neg]
+    ring
+  rw [hinner_eq]
+  ring
+
+theorem liYauQuantity_evolution_inequality
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) {K : ℝ}
+    (hK : 0 ≤ K)
+    (hRic : ∀ x v, -K * g.inner x v v ≤ ricciTensor (I := I) g x v v)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (hpde : ∀ t x, deriv (fun s => u s x) t =
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    (hq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2))
+    (t : ℝ) (x : M) :
+    deriv (fun s => liYauQuantity g (fun τ y => Real.log (u τ y)) s x) t -
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g
+          (fun τ y => liYauQuantity g (fun σ z => Real.log (u σ z)) τ y) hq t).smooth x ≤
+      2 * g.inner x
+            (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
+            (gradientFun (I := I) g (fun y => liYauQuantity g (fun σ z => Real.log (u σ z)) t y) x) -
+        (2 / (Module.finrank ℝ E : ℝ)) *
+          (liYauQuantity g (fun σ z => Real.log (u σ z)) t x)^2 +
+        2 * K * g.inner x
+            (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
+            (gradientFun (I := I) g (fun y => Real.log (u t y)) x) := by
+  classical
+  let hlog : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => Real.log (u p.1 p.2)) := Moser.contMDiff_log_of_pos hu hpos
+  let logut : M → ℝ := fun y => Real.log (u t y)
+  have hvecg : ∀ h : M → ℝ, gradientFun (I := I) g h x = gradFun (I := I) g h x := by
+    intro h
+    apply (metricFlatEquiv (I := I) g x).injective
+    ext w
+    change g.inner x (gradientFun (I := I) g h x) w = g.inner x (gradFun (I := I) g h x) w
+    rw [inner_gradientFun (I := I) g h x w]
+    rw [inner_gradFun (I := I) g h x w]
+  have hid := liYauQuantity_evolution_identity (I := I) (M := M) g u hu hpos hpde hq t x
+  have htrace0 := laplacian_sq_le_dim_mul_hessianFrobeniusSq_of_boundaryless (I := I) g
+    (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x
+  have hn : (0 : ℝ) < (Module.finrank ℝ E : ℝ) := by
+    exact_mod_cast (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
+  have hle0 : (Δ_g (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 ≤
+      chartHessFrobeniusSq (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).toFun x *
+        (Module.finrank ℝ E : ℝ) := by
+    rw [mul_comm] at htrace0
+    exact htrace0
+  have hdiv : (Δ_g (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 /
+        (Module.finrank ℝ E : ℝ) ≤ chartHessFrobeniusSq (I := I) g logut x := by
+    change (Δ_g (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 /
+        (Module.finrank ℝ E : ℝ) ≤ chartHessFrobeniusSq (I := I) g
+          (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).toFun x
+    exact (div_le_iff₀ hn).2 hle0
+  have htrace' : -2 * chartHessFrobeniusSq (I := I) g logut x ≤
+      -(2 / (Module.finrank ℝ E : ℝ)) *
+        (Δ_g (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 := by
+    have hstep : -2 * chartHessFrobeniusSq (I := I) g logut x ≤
+        -2 * ((Δ_g (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 /
+          (Module.finrank ℝ E : ℝ)) := by
+      nlinarith [hdiv]
+    have hring : -2 * ((Δ_g (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 /
+          (Module.finrank ℝ E : ℝ)) =
+        -(2 / (Module.finrank ℝ E : ℝ)) *
+          (Δ_g (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 := by
+      ring_nf
+    rwa [← hring]
+  have hRic' : -2 * ricciTensor (I := I) g x (gradFun (I := I) g logut x) (gradFun (I := I) g logut x) ≤
+      2 * K * g.inner x (gradientFun (I := I) g logut x) (gradientFun (I := I) g logut x) := by
+    have hr := hRic x (gradFun (I := I) g logut x)
+    have hin : g.inner x (gradientFun (I := I) g logut x) (gradientFun (I := I) g logut x) =
+        g.inner x (gradFun (I := I) g logut x) (gradFun (I := I) g logut x) := by
+      rw [hvecg logut]
+    nlinarith [hr, hin]
+  have hqsq : (liYauQuantity g (fun σ z => Real.log (u σ z)) t x)^2 =
+      (Δ_g (I := I) g (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 := by
+    have hqid := liYauQuantity_eq_neg_laplacian (I := I) (M := M) g u hu hpos (hpde t x)
+    rw [hqid]
+    ring
+  rw [hid]
+  rw [hqsq]
+  nlinarith [htrace', hRic']
 
 end DifferentialGeometry.Analysis.Parabolic.Harnack
