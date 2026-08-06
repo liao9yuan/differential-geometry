@@ -206,6 +206,35 @@ theorem summable_hole_filling
         (∑' k : ℕ, theta ^ k * cost k)
   exact ge_of_tendsto htendsto (Filter.Eventually.of_forall hbound)
 
+theorem weighted_summable_hole_filling
+    {X coefficient : ℕ → ℝ} {alpha beta theta : ℝ}
+    (hX_bdd : BddAbove (Set.range X))
+    (hX_nonneg : ∀ k, 0 ≤ X k) (hcoefficient_nonneg : ∀ k, 0 ≤ coefficient k)
+    (halpha : 0 < alpha) (hbeta : 0 < beta)
+    (halphaBeta : alpha + beta = 1) (htheta : 0 < theta) (htheta_one : theta < 1)
+    (hsummable : Summable (fun k : ℕ ↦ theta ^ k *
+      (alpha * (coefficient k * (beta / theta) ^ beta) ^ (1 / alpha))))
+    (hstep : ∀ k, X k ≤ coefficient k * X (k + 1) ^ beta) :
+    X 0 ≤ ∑' k : ℕ, theta ^ k *
+      (alpha * (coefficient k * (beta / theta) ^ beta) ^ (1 / alpha)) := by
+  apply summable_hole_filling hX_bdd htheta.le htheta_one
+  · intro k
+    exact mul_nonneg halpha.le
+      (Real.rpow_nonneg
+        (mul_nonneg (hcoefficient_nonneg k)
+          (Real.rpow_nonneg (div_nonneg hbeta.le htheta.le) _)) _)
+  · exact hsummable
+  · intro k
+    calc
+      X k ≤ coefficient k * X (k + 1) ^ beta := hstep k
+      _ ≤ alpha * (coefficient k * (beta / theta) ^ beta) ^ (1 / alpha) +
+            theta * X (k + 1) :=
+        weighted_young_inequality (hcoefficient_nonneg k) (hX_nonneg (k + 1))
+          halpha hbeta halphaBeta htheta
+      _ = theta * X (k + 1) +
+          alpha * (coefficient k * (beta / theta) ^ beta) ^ (1 / alpha) :=
+        add_comm _ _
+
 end DifferentialGeometry.Analysis
 
 end
