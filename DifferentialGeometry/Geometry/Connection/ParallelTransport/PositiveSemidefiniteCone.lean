@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Convex.Tensor02PositiveSemidefiniteCone
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.Endpoint
+import Mathlib.LinearAlgebra.Dimension.Finrank
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -273,6 +274,19 @@ theorem twoTensorLeftKernel_map_parallelTransportBetween [I.Boundaryless]
         eval02 (I := I) (M := M) A (e.symm w) z := by
       simpa only [e.apply_symm_apply] using heval
     exact heval'.symm.trans h
+
+theorem twoTensorNullSpace_finrank_eq_parallelTransportBetween [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I (2 : ℕ∞) γ)
+    {a b : ℝ} (hab : a < b) (A : Tensor0SSpace 2 I (γ a)) :
+    Module.finrank ℝ (twoTensorLeftKernel (I := I) (M := M)
+        (parallelTransportTensor02CLEBetween (I := I) g γ hγ hab A)) =
+      Module.finrank ℝ (twoTensorLeftKernel (I := I) (M := M) A) := by
+  let e := parallelTransportLinearEquivBetween (I := I) g γ hγ hab
+  have hmap := twoTensorLeftKernel_map_parallelTransportBetween
+    (I := I) g γ hγ hab A
+  rw [← hmap]
+  exact LinearEquiv.finrank_map_eq e (twoTensorLeftKernel (I := I) (M := M) A)
 
 theorem tensor02PositiveSemidefinite_dualZeroFace_map_parallelTransportBetween
     [I.Boundaryless]
