@@ -39,6 +39,160 @@ def canonicalLateBombieriGiustiReverseCost
       (bombieriGiustiLatePivot τ c k)
       (bombieriGiustiIncreasingLevel d D (k + 1)) ^ (2 : ℝ)
 
+def canonicalLateBombieriGiustiStepPolynomialCoefficient
+    {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (τ c D lower upper : ℝ) : ℝ :=
+  let K := (36 / (upper - lower) ^ 2) *
+    spatialMoserCutoffGradientConstant (I := I) g rho
+  max 1 ((D - τ + 1) *
+    (8 * timeCutoffDerivConstant / (c - τ) + 4 * K) + K)
+
+omit [SigmaCompactSpace M] in
+theorem canonicalLateBombieriGiustiStepConstant_le_polynomial
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    {τ c d D lower upper : ℝ}
+    (hτc : τ < c) (hcd : c ≤ d) (hdD : d < D)
+    (hlowerUpper : lower < upper) (k : ℕ) :
+    moserStepConstant (I := I)
+        (bombieriGiustiReciprocalLocalizer rho lower upper k)
+        (bombieriGiustiDescendingLevel τ c (k + 1))
+        (bombieriGiustiLatePivot τ c k)
+        (bombieriGiustiIncreasingLevel d D (k + 1)) ≤
+      canonicalLateBombieriGiustiStepPolynomialCoefficient (I := I)
+          rho τ c D lower upper * (k + 1 : ℝ) ^ 4 := by
+  let m : ℝ := k + 1
+  let gap := bombieriGiustiDescendingLevel τ c k -
+    bombieriGiustiDescendingLevel τ c (k + 1)
+  let Kbase := spatialMoserCutoffGradientConstant (I := I) g rho
+  let K := (36 / (upper - lower) ^ 2) * Kbase
+  let T := 8 * timeCutoffDerivConstant / (c - τ)
+  have hm : 1 ≤ m := by norm_num [m]
+  have hm_nonneg : 0 ≤ m := zero_le_one.trans hm
+  have hm_four : 1 ≤ m ^ 4 := one_le_pow₀ hm
+  have hm_sq_four : m ^ 2 ≤ m ^ 4 := by
+    have hm_le_sq : m ≤ m ^ 2 := by
+      nlinarith [mul_nonneg hm_nonneg (sub_nonneg.mpr hm)]
+    have hpow := pow_le_pow_left₀ hm_nonneg hm_le_sq 2
+    nlinarith
+  have hgap : 0 < gap := by
+    dsimp only [gap]
+    exact sub_pos.mpr
+      (bombieriGiustiDescendingLevel_strictAnti hτc (Nat.lt_succ_self k))
+  have hKbase : 0 ≤ Kbase :=
+    spatialMoserCutoffGradientConstant_nonneg (I := I) g rho
+  have hK : 0 ≤ K := mul_nonneg
+    (div_nonneg (by norm_num) (sq_nonneg _)) hKbase
+  have hT : 0 ≤ T := div_nonneg
+    (mul_nonneg (by norm_num) timeCutoffDerivConstant_nonneg)
+    (sub_pos.mpr hτc).le
+  have hlocalizer : spatialMoserCutoffGradientConstant (I := I) g
+      (bombieriGiustiReciprocalLocalizer rho lower upper k) ≤
+      K * m ^ 4 := by
+    have hscale :=
+      spatialMoserCutoffGradientConstant_reciprocalLocalizer_le
+        g rho lower upper k
+    have hgapSq := bombieriGiustiDescendingLevel_odd_gap_inv_sq_le
+      hlowerUpper k
+    calc
+      _ ≤ (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+            bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ ^ 2 *
+          Kbase := by simpa only [Kbase] using hscale
+      _ ≤ ((36 / (upper - lower) ^ 2) * m ^ 4) * Kbase :=
+        mul_le_mul_of_nonneg_right (by simpa only [m] using hgapSq) hKbase
+      _ = K * m ^ 4 := by
+        dsimp only [K]
+        ring
+  have hpivot : bombieriGiustiLatePivot τ c k -
+      bombieriGiustiDescendingLevel τ c (k + 1) = gap / 2 := by
+    dsimp only [bombieriGiustiLatePivot, gap]
+    ring
+  have htime : 2 * timeCutoffDerivConstant /
+      (bombieriGiustiLatePivot τ c k -
+        bombieriGiustiDescendingLevel τ c (k + 1)) ≤ T * m ^ 4 := by
+    have hgapInv := bombieriGiustiDescendingLevel_gap_inv_le hτc k
+    calc
+      2 * timeCutoffDerivConstant /
+          (bombieriGiustiLatePivot τ c k -
+            bombieriGiustiDescendingLevel τ c (k + 1)) =
+          4 * timeCutoffDerivConstant * gap⁻¹ := by
+        rw [hpivot]
+        field_simp [hgap.ne']
+        ring
+      _ ≤ 4 * timeCutoffDerivConstant *
+          ((2 / (c - τ)) * m ^ 2) :=
+        mul_le_mul_of_nonneg_left (by simpa only [gap, m] using hgapInv)
+          (mul_nonneg (by norm_num) timeCutoffDerivConstant_nonneg)
+      _ = T * m ^ 2 := by
+        dsimp only [T]
+        ring
+      _ ≤ T * m ^ 4 := mul_le_mul_of_nonneg_left hm_sq_four hT
+  have houter :
+      bombieriGiustiIncreasingLevel d D (k + 1) -
+          bombieriGiustiDescendingLevel τ c (k + 1) + 1 ≤
+        D - τ + 1 := by
+    have hleft := bombieriGiustiDescendingLevel_gt hτc (k + 1)
+    have hright := bombieriGiustiIncreasingLevel_lt hdD (k + 1)
+    linarith
+  have houter_nonneg : 0 ≤
+      bombieriGiustiIncreasingLevel d D (k + 1) -
+        bombieriGiustiDescendingLevel τ c (k + 1) + 1 := by
+    have hleft := bombieriGiustiDescendingLevel_le hτc (k + 1)
+    have hright := bombieriGiustiIncreasingLevel_ge hdD (k + 1)
+    linarith
+  have houter_bound_nonneg : 0 ≤ D - τ + 1 :=
+    houter_nonneg.trans houter
+  have hinside :
+      2 * timeCutoffDerivConstant /
+          (bombieriGiustiLatePivot τ c k -
+            bombieriGiustiDescendingLevel τ c (k + 1)) +
+        4 * spatialMoserCutoffGradientConstant (I := I) g
+          (bombieriGiustiReciprocalLocalizer rho lower upper k) ≤
+      (T + 4 * K) * m ^ 4 := by
+    calc
+      _ ≤ T * m ^ 4 + 4 * (K * m ^ 4) :=
+        add_le_add htime (mul_le_mul_of_nonneg_left hlocalizer (by norm_num))
+      _ = (T + 4 * K) * m ^ 4 := by ring
+  have hinside_nonneg : 0 ≤
+      2 * timeCutoffDerivConstant /
+          (bombieriGiustiLatePivot τ c k -
+            bombieriGiustiDescendingLevel τ c (k + 1)) +
+        4 * spatialMoserCutoffGradientConstant (I := I) g
+          (bombieriGiustiReciprocalLocalizer rho lower upper k) := by
+    apply add_nonneg
+    · exact div_nonneg
+        (mul_nonneg (by norm_num) timeCutoffDerivConstant_nonneg)
+        (by rw [hpivot]; positivity)
+    · exact mul_nonneg (by norm_num)
+        (spatialMoserCutoffGradientConstant_nonneg (I := I) g _)
+  unfold moserStepConstant
+  let raw := (D - τ + 1) * (T + 4 * K) + K
+  have hraw :
+      (bombieriGiustiIncreasingLevel d D (k + 1) -
+          bombieriGiustiDescendingLevel τ c (k + 1) + 1) *
+          (2 * timeCutoffDerivConstant /
+              (bombieriGiustiLatePivot τ c k -
+                bombieriGiustiDescendingLevel τ c (k + 1)) +
+            4 * spatialMoserCutoffGradientConstant (I := I) g
+              (bombieriGiustiReciprocalLocalizer rho lower upper k)) +
+        spatialMoserCutoffGradientConstant (I := I) g
+          (bombieriGiustiReciprocalLocalizer rho lower upper k) ≤
+        raw * m ^ 4 := by
+    calc
+      _ ≤ (D - τ + 1) * ((T + 4 * K) * m ^ 4) + K * m ^ 4 := by
+        exact add_le_add
+          (mul_le_mul houter hinside
+            hinside_nonneg houter_bound_nonneg)
+          hlocalizer
+      _ = raw * m ^ 4 := by
+        dsimp only [raw]
+        ring
+  have hcoefficient : raw ≤
+      canonicalLateBombieriGiustiStepPolynomialCoefficient (I := I)
+        rho τ c D lower upper := by
+    exact le_max_right _ _
+  exact hraw.trans (mul_le_mul_of_nonneg_right hcoefficient
+    (pow_nonneg hm_nonneg 4))
+
 theorem one_le_canonicalLateBombieriGiustiReverseCost
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
@@ -52,6 +206,143 @@ theorem one_le_canonicalLateBombieriGiustiReverseCost
       (bombieriGiustiReciprocalLocalizer rho lower upper k)
       (by norm_num) _ _ _)
     (by norm_num)
+
+theorem exists_polynomial_bound_canonicalLateBombieriGiustiReverseCost
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    { τ c d D lower upper : ℝ }
+    (hτc : τ < c) (hcd : c ≤ d) (hdD : d < D)
+    (hlowerUpper : lower < upper) :
+    ∃ C : ℝ, 1 ≤ C ∧ ∀ k : ℕ,
+      canonicalLateBombieriGiustiReverseCost (I := I) (M := M)
+          g hdim rho τ c d D lower upper k ≤
+        C * (k + 1 : ℝ) ^ (2 * (Module.finrank ℝ E + 2)) := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let theta := parabolicMoserDecay n
+  let S := max 1 (localizedSobolevConstant (I := I) (M := M) g hdim)
+  let Abar := canonicalLateBombieriGiustiStepPolynomialCoefficient
+    (I := I) rho τ c D lower upper
+  let base := (theta * Real.log S + Real.log Abar) / (1 - theta) +
+    Real.log 16 * (theta / (1 - theta) ^ 2)
+  let C := Real.exp base
+  have htheta : 0 ≤ theta := (parabolicMoserDecay_pos n).le
+  have hdenom : 0 < 1 - theta := sub_pos.mpr (parabolicMoserDecay_lt_one n)
+  have hS : 1 ≤ S := le_max_left _ _
+  have hAbar : 1 ≤ Abar := by
+    exact le_max_left _ _
+  have hbase : 0 ≤ base := by
+    dsimp only [base]
+    exact add_nonneg
+      (div_nonneg
+        (add_nonneg (mul_nonneg htheta (Real.log_nonneg hS))
+          (Real.log_nonneg hAbar)) hdenom.le)
+      (mul_nonneg (Real.log_nonneg (by norm_num))
+        (div_nonneg htheta (sq_nonneg _)))
+  refine ⟨C, ?_, ?_⟩
+  · exact (Real.one_le_exp_iff).2 hbase
+  · intro k
+    let m : ℝ := k + 1
+    let Ak := max 1 (moserStepConstant (I := I)
+      (bombieriGiustiReciprocalLocalizer rho lower upper k)
+      (bombieriGiustiDescendingLevel τ c (k + 1))
+      (bombieriGiustiLatePivot τ c k)
+      (bombieriGiustiIncreasingLevel d D (k + 1)))
+    have hm : 0 < m := by positivity
+    have hAk : 1 ≤ Ak := le_max_left _ _
+    have hAk_bound : Ak ≤ Abar * m ^ 4 := by
+      apply max_le
+      · calc
+          1 ≤ m ^ 4 := one_le_pow₀ (by norm_num [m])
+          _ ≤ Abar * m ^ 4 := by
+            exact le_mul_of_one_le_left (pow_nonneg hm.le 4) hAbar
+      · simpa only [Abar, m] using
+          canonicalLateBombieriGiustiStepConstant_le_polynomial
+            g rho hτc hcd hdD hlowerUpper k
+    have hlog : Real.log Ak ≤ Real.log Abar + 4 * Real.log m := by
+      have hmono := Real.log_le_log (zero_lt_one.trans_le hAk) hAk_bound
+      rw [Real.log_mul (zero_lt_one.trans_le hAbar).ne'
+          (pow_pos hm 4).ne', Real.log_pow] at hmono
+      norm_num at hmono ⊢
+      exact hmono
+    have hdegree : (((2 * (n + 2) : ℕ) : ℝ)) =
+        4 * (1 - theta)⁻¹ := by
+      calc
+        (((2 * (n + 2) : ℕ) : ℝ)) = 2 * ((n : ℝ) + 2) := by
+          push_cast
+          ring
+        _ = 4 * (1 - parabolicMoserDecay n)⁻¹ := by
+          rw [← two_mul_inv_one_sub_parabolicMoserDecay]
+          ring
+        _ = 4 * (1 - theta)⁻¹ := by rfl
+    have hscaled : Real.log Ak * (1 - theta)⁻¹ ≤
+        (Real.log Abar + 4 * Real.log m) * (1 - theta)⁻¹ :=
+      mul_le_mul_of_nonneg_right hlog (inv_nonneg.mpr hdenom.le)
+    have hexponent :
+        (((theta * Real.log S + Real.log Ak) / 2) / (1 - theta) +
+            (Real.log 16 / 2) *
+              (theta / (1 - theta) ^ 2)) +
+          (((theta * Real.log S + Real.log Ak) / 2) / (1 - theta) +
+            (Real.log 16 / 2) *
+              (theta / (1 - theta) ^ 2)) ≤
+          base + (((2 * (n + 2) : ℕ) : ℝ) * Real.log m) := by
+      rw [div_eq_mul_inv, div_eq_mul_inv, div_eq_mul_inv, div_eq_mul_inv]
+      calc
+        _ = theta * Real.log S * (1 - theta)⁻¹ +
+              Real.log Ak * (1 - theta)⁻¹ +
+              Real.log 16 * theta * ((1 - theta) ^ 2)⁻¹ := by ring
+        _ ≤ theta * Real.log S * (1 - theta)⁻¹ +
+              (Real.log Abar + 4 * Real.log m) * (1 - theta)⁻¹ +
+              Real.log 16 * theta * ((1 - theta) ^ 2)⁻¹ := by
+          gcongr
+        _ = base + (4 * (1 - theta)⁻¹) * Real.log m := by
+          dsimp only [base]
+          rw [div_eq_mul_inv, div_eq_mul_inv]
+          ring
+        _ = base + (((2 * (n + 2) : ℕ) : ℝ) * Real.log m) := by
+          rw [hdegree]
+    unfold canonicalLateBombieriGiustiReverseCost
+    rw [moserLocalBoundFactor_eq_exp, Real.rpow_two, pow_two,
+      ← Real.exp_add]
+    calc
+      Real.exp
+          ((((theta * Real.log S + Real.log Ak) / 2) / (1 - theta) +
+              (Real.log 16 / 2) *
+                (theta / (1 - theta) ^ 2)) +
+            (((theta * Real.log S + Real.log Ak) / 2) / (1 - theta) +
+              (Real.log 16 / 2) *
+                (theta / (1 - theta) ^ 2))) ≤
+          Real.exp
+            (base + (((2 * (n + 2) : ℕ) : ℝ) * Real.log m)) := by
+        exact Real.exp_le_exp.mpr hexponent
+      _ = Real.exp base * Real.exp
+          (((2 * (n + 2) : ℕ) : ℝ) * Real.log m) := Real.exp_add _ _
+      _ = C * m ^ (2 * (n + 2)) := by
+        rw [Real.exp_nat_mul (Real.log m) (2 * (n + 2)), Real.exp_log hm]
+      _ = C * (k + 1 : ℝ) ^ (2 * (Module.finrank ℝ E + 2)) := by rfl
+
+theorem summable_canonicalLateBombieriGiustiThreshold
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar g)
+    {p₀ c₀ τ c d D lower upper : ℝ}
+    (hp₀ : 0 < p₀) (hc₀ : 0 ≤ c₀)
+    (hτc : τ < c) (hcd : c ≤ d) (hdD : d < D)
+    (hlowerUpper : lower < upper) :
+    Summable (fun k : ℕ => (3 / 4 : ℝ) ^ k *
+      (bombieriGiustiThreshold p₀ c₀
+        (canonicalLateBombieriGiustiReverseCost (I := I) (M := M)
+          g hdim rho τ c d D lower upper k) / 4)) := by
+  rcases exists_polynomial_bound_canonicalLateBombieriGiustiReverseCost
+      g hdim rho hτc hcd hdD hlowerUpper with ⟨C, hC, hbound⟩
+  exact summable_geometric_mul_bombieriGiustiThreshold_of_polynomial_le
+    (2 * (Module.finrank ℝ E + 2)) hp₀ hc₀ hC
+    (fun k => one_le_canonicalLateBombieriGiustiReverseCost
+      g hdim rho τ c d D lower upper k)
+    hbound
 
 theorem localizedSpacetimeRpowNorm_inv_le_canonicalLateBombieriGiustiReverseCost_of_supersolution
     (g : SmoothRiemannianMetric I M)

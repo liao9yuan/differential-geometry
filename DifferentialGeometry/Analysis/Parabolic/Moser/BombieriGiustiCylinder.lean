@@ -180,6 +180,25 @@ theorem two_mul_bombieriGiustiIncreasingLevel_gap_inv_le
     _ = (4 / (upper - lower)) * (k + 1 : ℝ) ^ 2 := by
       ring
 
+theorem bombieriGiustiDescendingLevel_gap_inv_le
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    (bombieriGiustiDescendingLevel lower upper k -
+        bombieriGiustiDescendingLevel lower upper (k + 1))⁻¹ ≤
+      (2 / (upper - lower)) * (k + 1 : ℝ) ^ 2 := by
+  rw [bombieriGiustiDescendingLevel_sub_succ_inv]
+  have hm : 1 ≤ (k + 1 : ℝ) := by norm_num
+  have hwidth : 0 ≤ (upper - lower)⁻¹ :=
+    inv_nonneg.mpr (sub_pos.mpr hlowerUpper).le
+  calc
+    (((k + 1 : ℝ) * (k + 2 : ℝ)) / (upper - lower)) =
+        ((k + 1 : ℝ) * (k + 2 : ℝ)) * (upper - lower)⁻¹ := by
+      ring
+    _ ≤ (2 * (k + 1 : ℝ) ^ 2) * (upper - lower)⁻¹ := by
+      apply mul_le_mul_of_nonneg_right _ hwidth
+      norm_num at hm ⊢
+      nlinarith
+    _ = (2 / (upper - lower)) * (k + 1 : ℝ) ^ 2 := by ring
+
 theorem bombieriGiustiDescendingLevel_odd_gap_inv_le
     {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
     (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
