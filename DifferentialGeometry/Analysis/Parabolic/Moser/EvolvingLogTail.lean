@@ -71,6 +71,54 @@ def evolvingLocalizedSublevelMass
   ∫ x in {x : M | u t x < level}, cutoff x ^ 2
     ∂(riemannianMeasureFamily (I := I) (M := M) g t)
 
+omit [I.Boundaryless] [CompactSpace M] in
+theorem evolvingLocalizedSuperlevelMass_log_exponentialTimeRescale
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (rate center : ℝ) (u : ℝ → M → ℝ)
+    (hpos : ∀ t x, 0 < u t x) (t level : ℝ) :
+    evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g cutoff
+          (fun s x => Real.log (exponentialTimeRescale rate center u s x))
+          t level =
+      evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g cutoff (fun s x => Real.log (u s x))
+          t (center - rate * t + level) := by
+  unfold evolvingLocalizedSuperlevelMass
+  have hset :
+      {x : M | level < Real.log (exponentialTimeRescale rate center u t x)} =
+        {x : M | center - rate * t + level < Real.log (u t x)} := by
+    ext x
+    change level < Real.log (exponentialTimeRescale rate center u t x) ↔
+      center - rate * t + level < Real.log (u t x)
+    simp only [exponentialTimeRescale]
+    rw [Real.log_mul (Real.exp_ne_zero _) (hpos t x).ne', Real.log_exp]
+    constructor <;> intro h <;> linarith
+  rw [hset]
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem evolvingLocalizedSublevelMass_log_exponentialTimeRescale
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (rate center : ℝ) (u : ℝ → M → ℝ)
+    (hpos : ∀ t x, 0 < u t x) (t level : ℝ) :
+    evolvingLocalizedSublevelMass
+        (I := I) (M := M) g cutoff
+          (fun s x => Real.log (exponentialTimeRescale rate center u s x))
+          t level =
+      evolvingLocalizedSublevelMass
+        (I := I) (M := M) g cutoff (fun s x => Real.log (u s x))
+          t (center - rate * t + level) := by
+  unfold evolvingLocalizedSublevelMass
+  have hset :
+      {x : M | Real.log (exponentialTimeRescale rate center u t x) < level} =
+        {x : M | Real.log (u t x) < center - rate * t + level} := by
+    ext x
+    change Real.log (exponentialTimeRescale rate center u t x) < level ↔
+      Real.log (u t x) < center - rate * t + level
+    simp only [exponentialTimeRescale]
+    rw [Real.log_mul (Real.exp_ne_zero _) (hpos t x).ne', Real.log_exp]
+    constructor <;> intro h <;> linarith
+  rw [hset]
+
 omit [I.Boundaryless] in
 theorem evolvingLocalizedSuperlevelMass_le_evolvingCutoffMass
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
