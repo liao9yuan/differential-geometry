@@ -2884,7 +2884,7 @@ import DifferentialGeometry.Geometry.Operator.Operators
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 import DifferentialGeometry.Geometry.Operator.Scaling
 import DifferentialGeometry.Geometry.Operator.VossWeyl
-import DifferentialGeometry.Topology.CoveringSimple
+import DifferentialGeometry.Topology.Covering.SimplyConnected
 import DifferentialGeometry.Topology.DirectLimit
 import DifferentialGeometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Topology.FiberBundleT2
