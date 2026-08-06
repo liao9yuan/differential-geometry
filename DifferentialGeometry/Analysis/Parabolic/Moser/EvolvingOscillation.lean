@@ -54,7 +54,7 @@ def HasEvolvingLocalizedPoincare
         (I := I) (M := M) g energyCutoff (fun _ x => u.toFun x) t
 
 omit [CompactSpace M] in
-theorem hasEvolvingLocalizedPoincare_iff [I.Boundaryless]
+theorem hasEvolvingLocalizedPoincare_iff
     (g : ℝ → SmoothRiemannianMetric I M)
     (averagingCutoff energyCutoff : M → ℝ) (C : ℝ) (J : Set ℝ)
     (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
@@ -110,6 +110,31 @@ theorem evolvingCutoffMass_pos
     ((hcutoff.pow 2).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _))
     (fun y => sq_nonneg (cutoff y)) hsq
+
+theorem evolvingCutoffMass_continuous
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hcutoff : Continuous cutoff) :
+    Continuous (evolvingCutoffMass (I := I) (M := M) g cutoff) := by
+  have h := evolvingLocalizedIntegral_continuous
+    (I := I) (M := M) g cutoff (fun _ _ => 1) hg hcutoff continuous_const
+  simpa only [evolvingCutoffMass] using h
+
+theorem evolvingLocalizedAverage_continuous
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2))
+    (hne : ∃ x, cutoff x ≠ 0) :
+    Continuous (evolvingLocalizedAverage (I := I) (M := M) g cutoff u) := by
+  have hnum := evolvingLocalizedIntegral_continuous
+    (I := I) (M := M) g cutoff u hg hcutoff hu
+  have hden := evolvingCutoffMass_continuous
+    (I := I) (M := M) g cutoff hg hcutoff
+  exact hnum.div hden fun t =>
+    (evolvingCutoffMass_pos
+      (I := I) (M := M) g cutoff t hcutoff hne).ne'
 
 omit [CompactSpace M] in
 theorem evolvingLocalizedL2Oscillation_nonneg

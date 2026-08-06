@@ -194,6 +194,31 @@ theorem evolvingCutoffGradientError_continuousOn
       (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
   · exact ((hu.continuous.pow 2).mul hgrad.continuous).continuousOn
 
+omit [I.Boundaryless] in
+theorem evolvingCutoffGradientError_continuous
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2)) :
+    Continuous (evolvingCutoffGradientError
+      (I := I) (M := M) g cutoff u) := by
+  rw [continuous_iff_continuousAt]
+  intro t
+  have hlocal := evolvingCutoffGradientError_continuousOn
+    (I := I) (M := M) g cutoff u
+      (K := Icc (t - 1) (t + 1)) isCompact_Icc hg hgram hcutoff hu
+  exact hlocal.continuousAt
+    (Icc_mem_nhds (by linarith) (by linarith))
+
 theorem intervalIntegral_evolvingCutoffGradientError_le_evolvingLocalizedL2Mass
     (g : ℝ → SmoothRiemannianMetric I M)
     (cutoff outer : M → ℝ)

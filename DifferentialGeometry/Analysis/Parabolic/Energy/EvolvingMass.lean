@@ -59,6 +59,21 @@ theorem evolvingLocalizedIntegral_continuousOn
       (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
   · exact ((hcutoff.comp continuous_snd).pow 2).mul hu |>.continuousOn
 
+theorem evolvingLocalizedIntegral_continuous
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2)) :
+    Continuous (evolvingLocalizedIntegral (I := I) (M := M) g cutoff u) := by
+  rw [continuous_iff_continuousAt]
+  intro t
+  have hlocal := evolvingLocalizedIntegral_continuousOn
+    (I := I) (M := M) g cutoff u
+      (K := Icc (t - 1) (t + 1)) isCompact_Icc hg hcutoff hu
+  exact hlocal.continuousAt
+    (Icc_mem_nhds (by linarith) (by linarith))
+
 theorem evolvingLocalizedL2Mass_continuousOn
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
     (u : ℝ → M → ℝ) {K : Set ℝ} (hK : IsCompact K) {t : ℝ}
