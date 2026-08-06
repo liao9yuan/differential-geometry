@@ -746,6 +746,7 @@ import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingReverseHolder
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingReciprocal
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingBombieriGiusti
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLocalBoundedness
+import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingSmallExponentLocalBoundedness
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingWeakHarnack
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLogEnergy
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingLogTail
