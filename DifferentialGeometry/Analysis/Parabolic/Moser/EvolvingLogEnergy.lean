@@ -83,6 +83,32 @@ theorem evolvingLogCenterDrift_continuous
   simpa only [evolvingLogCenterDrift] using hratio.add continuous_const
 
 omit [I.Boundaryless] in
+theorem exists_nonnegative_evolving_log_center_drift_upper_bound
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (C H : ℝ) {a b t₀ : ℝ} (hab : a ≤ b)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun z : ℝ × M ↦
+          chartGramMatrix (I := I) (g z.1) x₀ z.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hne : ∃ x, cutoff x ≠ 0) :
+    ∃ rate : ℝ, 0 ≤ rate ∧ ∀ t ∈ Icc a b,
+      evolvingLogCenterDrift (I := I) (M := M) g cutoff C H t ≤ rate := by
+  let drift := evolvingLogCenterDrift (I := I) (M := M) g cutoff C H
+  have hdrift := evolvingLogCenterDrift_continuous
+    (I := I) (M := M) g cutoff C H hg hgram hcutoff hne
+  obtain ⟨t, ht, hmax⟩ := isCompact_Icc.exists_isMaxOn
+    (Set.nonempty_Icc.mpr hab) hdrift.continuousOn
+  refine ⟨drift t, ?_, ?_⟩
+  · exact evolvingLogCenterDrift_nonneg
+      (I := I) (M := M) g cutoff C H t
+  · intro s hs
+    exact hmax hs
+
+omit [I.Boundaryless] in
 theorem hasDerivAt_evolvingShiftedLogCenter
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
     (u : ℝ → M → ℝ)

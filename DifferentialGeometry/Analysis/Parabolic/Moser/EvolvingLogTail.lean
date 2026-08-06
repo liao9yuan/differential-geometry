@@ -1056,6 +1056,229 @@ theorem integrated_late_centered_evolving_log_sublevel_tail_of_supersolution
   rw [hK_eq] at hresult
   simpa only [tailMass, center, logu, D, Z, drift] using hresult
 
+theorem integrated_early_evolving_log_superlevel_tail_of_exponentialTimeRescale_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M ↦ u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H W rate : ℝ) {a τ t₀ r : ℝ}
+    (haτ : a ≤ τ) (hr : 0 < r) (hCtail : 0 ≤ Ctail)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun z : ℝ × M ↦
+          chartGramMatrix (I := I) (g z.1) x₀ z.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hdeviationCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ deviationCutoff)
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc a τ))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g deviationCutoff averagingCutoff Ctail (Icc a τ))
+    (htrace : ∀ t ∈ Icc a τ, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hmass_le : ∀ t ∈ Icc a τ,
+      evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
+    (hdrift_le : ∀ t ∈ Icc a τ,
+      evolvingLogCenterDrift
+        (I := I) (M := M) g averagingCutoff Ccenter H t ≤ rate)
+    (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s ↦ u s x) t) :
+    let center := evolvingLocalizedAverage
+      (I := I) (M := M) g averagingCutoff
+        (fun s x ↦ Real.log (u s x)) τ + rate * τ
+    (∫ s in a..τ,
+      evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g deviationCutoff
+          (fun q x ↦ Real.log (exponentialTimeRescale rate center u q x)) s r) ≤
+      4 * Ctail * W / r := by
+  let logu : ℝ → M → ℝ := fun q x ↦ Real.log (u q x)
+  let drift := evolvingLogCenterDrift
+    (I := I) (M := M) g averagingCutoff Ccenter H
+  let average := evolvingLocalizedAverage
+    (I := I) (M := M) g averagingCutoff logu τ
+  let center := average + rate * τ
+  let shiftedLevel : ℝ → ℝ := fun s ↦
+    average - (∫ q in τ..s, drift q) + r
+  let rescaledLog : ℝ → M → ℝ := fun q x ↦
+    Real.log (exponentialTimeRescale rate center u q x)
+  let rescaledMass : ℝ → ℝ := fun s ↦
+    evolvingLocalizedSuperlevelMass
+      (I := I) (M := M) g deviationCutoff rescaledLog s r
+  let shiftedMass : ℝ → ℝ := fun s ↦
+    evolvingLocalizedSuperlevelMass
+      (I := I) (M := M) g deviationCutoff logu s (shiftedLevel s)
+  have hlog := contMDiff_log_of_pos hu hpos
+  have hrescaled := contMDiff_exponentialTimeRescale rate center u hu
+  have hrescaled_pos := exponentialTimeRescale_pos rate center u hpos
+  have hrescaledLog := contMDiff_log_of_pos hrescaled hrescaled_pos
+  have hdrift := evolvingLogCenterDrift_continuous
+    (I := I) (M := M) g averagingCutoff Ccenter H hg hgram
+      haveragingCutoff hne
+  have hshiftedLevel : Continuous shiftedLevel := by
+    exact continuous_const.sub
+      (intervalIntegral.differentiable_integral_of_continuous hdrift).continuous
+        |>.add continuous_const
+  have hrescaled_int : IntervalIntegrable rescaledMass volume a τ := by
+    simpa only [rescaledMass, rescaledLog] using
+      intervalIntegrable_evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g deviationCutoff rescaledLog hrescaledLog
+          (fun _ ↦ r) continuous_const hg hdeviationCutoff a τ
+  have hshifted_int : IntervalIntegrable shiftedMass volume a τ := by
+    simpa only [shiftedMass] using
+      intervalIntegrable_evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g deviationCutoff logu hlog shiftedLevel
+          hshiftedLevel hg hdeviationCutoff a τ
+  have hlevel : ∀ s ∈ Icc a τ,
+      shiftedLevel s ≤ center - rate * s + r := by
+    intro s hs
+    have hdrift_int : IntervalIntegrable drift volume s τ := hdrift.intervalIntegrable s τ
+    have hrate_int : IntervalIntegrable (fun _ : ℝ ↦ rate) volume s τ :=
+      intervalIntegrable_const
+    have hintegral := intervalIntegral.integral_mono_on hs.2 hdrift_int hrate_int
+      (fun q hq ↦ hdrift_le q ⟨hs.1.trans hq.1, hq.2⟩)
+    have hintegral' : (∫ q in s..τ, drift q) ≤ rate * (τ - s) := by
+      simpa only [intervalIntegral.integral_const, smul_eq_mul, mul_comm] using hintegral
+    dsimp only [shiftedLevel, center]
+    rw [intervalIntegral.integral_symm s τ]
+    linarith
+  have hpoint : ∀ s ∈ Icc a τ, rescaledMass s ≤ shiftedMass s := by
+    intro s hs
+    rw [show rescaledMass s = evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g deviationCutoff logu s (center - rate * s + r) by
+      simpa only [rescaledMass, rescaledLog, logu] using
+        evolvingLocalizedSuperlevelMass_log_exponentialTimeRescale
+          (I := I) (M := M) g deviationCutoff rate center u hpos s r]
+    exact evolvingLocalizedSuperlevelMass_antitone
+      (I := I) (M := M) g deviationCutoff logu s
+        hdeviationCutoff.continuous (hlevel s hs)
+  have hmono : (∫ s in a..τ, rescaledMass s) ≤ ∫ s in a..τ, shiftedMass s :=
+    intervalIntegral.integral_mono_on haτ hrescaled_int hshifted_int hpoint
+  have htail := integrated_early_evolving_log_superlevel_tail_of_supersolution
+    (I := I) (M := M) g deviationCutoff averagingCutoff u hu hpos
+      Ccenter Ctail H τ W haτ hr hCtail hg hgram hdeviationCutoff
+        haveragingCutoff hne hPcenter hPtail htrace hmass_le hpde
+  exact hmono.trans (by
+    simpa only [shiftedMass, shiftedLevel, average, drift, logu,
+      evolvingShiftedLogCenter, intervalIntegral.integral_same, add_zero] using htail)
+
+theorem integrated_late_evolving_log_sublevel_tail_of_exponentialTimeRescale_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M ↦ u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H W rate : ℝ) {τ b t₀ r : ℝ}
+    (hτb : τ ≤ b) (hr : 0 < r) (hCtail : 0 ≤ Ctail)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun z : ℝ × M ↦
+          chartGramMatrix (I := I) (g z.1) x₀ z.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hdeviationCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ deviationCutoff)
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc τ b))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g deviationCutoff averagingCutoff Ctail (Icc τ b))
+    (htrace : ∀ t ∈ Icc τ b, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hmass_le : ∀ t ∈ Icc τ b,
+      evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
+    (hdrift_le : ∀ t ∈ Icc τ b,
+      evolvingLogCenterDrift
+        (I := I) (M := M) g averagingCutoff Ccenter H t ≤ rate)
+    (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s ↦ u s x) t) :
+    let center := evolvingLocalizedAverage
+      (I := I) (M := M) g averagingCutoff
+        (fun s x ↦ Real.log (u s x)) τ + rate * τ
+    (∫ s in τ..b,
+      evolvingLocalizedSublevelMass
+        (I := I) (M := M) g deviationCutoff
+          (fun q x ↦ Real.log (exponentialTimeRescale rate center u q x)) s (-r)) ≤
+      4 * Ctail * W / r := by
+  let logu : ℝ → M → ℝ := fun q x ↦ Real.log (u q x)
+  let drift := evolvingLogCenterDrift
+    (I := I) (M := M) g averagingCutoff Ccenter H
+  let average := evolvingLocalizedAverage
+    (I := I) (M := M) g averagingCutoff logu τ
+  let center := average + rate * τ
+  let shiftedLevel : ℝ → ℝ := fun s ↦
+    average - (∫ q in τ..s, drift q) - r
+  let rescaledLog : ℝ → M → ℝ := fun q x ↦
+    Real.log (exponentialTimeRescale rate center u q x)
+  let rescaledMass : ℝ → ℝ := fun s ↦
+    evolvingLocalizedSublevelMass
+      (I := I) (M := M) g deviationCutoff rescaledLog s (-r)
+  let shiftedMass : ℝ → ℝ := fun s ↦
+    evolvingLocalizedSublevelMass
+      (I := I) (M := M) g deviationCutoff logu s (shiftedLevel s)
+  have hlog := contMDiff_log_of_pos hu hpos
+  have hrescaled := contMDiff_exponentialTimeRescale rate center u hu
+  have hrescaled_pos := exponentialTimeRescale_pos rate center u hpos
+  have hrescaledLog := contMDiff_log_of_pos hrescaled hrescaled_pos
+  have hdrift := evolvingLogCenterDrift_continuous
+    (I := I) (M := M) g averagingCutoff Ccenter H hg hgram
+      haveragingCutoff hne
+  have hshiftedLevel : Continuous shiftedLevel := by
+    exact continuous_const.sub
+      (intervalIntegral.differentiable_integral_of_continuous hdrift).continuous
+        |>.sub continuous_const
+  have hrescaled_int : IntervalIntegrable rescaledMass volume τ b := by
+    simpa only [rescaledMass, rescaledLog] using
+      intervalIntegrable_evolvingLocalizedSublevelMass
+        (I := I) (M := M) g deviationCutoff rescaledLog hrescaledLog
+          (fun _ ↦ -r) continuous_const hg hdeviationCutoff τ b
+  have hshifted_int : IntervalIntegrable shiftedMass volume τ b := by
+    simpa only [shiftedMass] using
+      intervalIntegrable_evolvingLocalizedSublevelMass
+        (I := I) (M := M) g deviationCutoff logu hlog shiftedLevel
+          hshiftedLevel hg hdeviationCutoff τ b
+  have hlevel : ∀ s ∈ Icc τ b,
+      center - rate * s - r ≤ shiftedLevel s := by
+    intro s hs
+    have hdrift_int : IntervalIntegrable drift volume τ s := hdrift.intervalIntegrable τ s
+    have hrate_int : IntervalIntegrable (fun _ : ℝ ↦ rate) volume τ s :=
+      intervalIntegrable_const
+    have hintegral := intervalIntegral.integral_mono_on hs.1 hdrift_int hrate_int
+      (fun q hq ↦ hdrift_le q ⟨hq.1, hq.2.trans hs.2⟩)
+    have hintegral' : (∫ q in τ..s, drift q) ≤ rate * (s - τ) := by
+      simpa only [intervalIntegral.integral_const, smul_eq_mul, mul_comm] using hintegral
+    dsimp only [shiftedLevel, center]
+    linarith
+  have hpoint : ∀ s ∈ Icc τ b, rescaledMass s ≤ shiftedMass s := by
+    intro s hs
+    rw [show rescaledMass s = evolvingLocalizedSublevelMass
+        (I := I) (M := M) g deviationCutoff logu s (center - rate * s - r) by
+      simpa only [rescaledMass, rescaledLog, logu] using
+        evolvingLocalizedSublevelMass_log_exponentialTimeRescale
+          (I := I) (M := M) g deviationCutoff rate center u hpos s (-r)]
+    exact evolvingLocalizedSublevelMass_mono
+      (I := I) (M := M) g deviationCutoff logu s
+        hdeviationCutoff.continuous (hlevel s hs)
+  have hmono : (∫ s in τ..b, rescaledMass s) ≤ ∫ s in τ..b, shiftedMass s :=
+    intervalIntegral.integral_mono_on hτb hrescaled_int hshifted_int hpoint
+  have htail := integrated_late_evolving_log_sublevel_tail_of_supersolution
+    (I := I) (M := M) g deviationCutoff averagingCutoff u hu hpos
+      Ccenter Ctail H τ W hτb hr hCtail hg hgram hdeviationCutoff
+        haveragingCutoff hne hPcenter hPtail htrace hmass_le hpde
+  exact hmono.trans (by
+    simpa only [shiftedMass, shiftedLevel, average, drift, logu,
+      evolvingShiftedLogCenter, intervalIntegral.integral_same, add_zero] using htail)
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
