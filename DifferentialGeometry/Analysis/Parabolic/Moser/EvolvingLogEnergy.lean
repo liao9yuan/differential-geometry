@@ -21,6 +21,112 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+def evolvingLogCenterDrift
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (C H t : ℝ) : ℝ :=
+  2 * evolvingCutoffGradientError
+      (I := I) (M := M) g cutoff (fun _ _ => 1) t /
+      evolvingCutoffMass (I := I) (M := M) g cutoff t +
+    max 1 C * H ^ 2
+
+def evolvingShiftedLogCenter
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (C H base t : ℝ) : ℝ :=
+  evolvingLocalizedAverage
+      (I := I) (M := M) g cutoff (fun s x => Real.log (u s x)) t +
+    ∫ s in base..t,
+      evolvingLogCenterDrift (I := I) (M := M) g cutoff C H s
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem evolvingLogCenterDrift_nonneg
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (C H t : ℝ) :
+    0 ≤ evolvingLogCenterDrift (I := I) (M := M) g cutoff C H t := by
+  exact add_nonneg
+    (div_nonneg
+      (mul_nonneg (by norm_num)
+        (evolvingCutoffGradientError_nonneg
+          (I := I) (M := M) g cutoff (fun _ _ => 1) t))
+      (evolvingCutoffMass_nonneg (I := I) (M := M) g cutoff t))
+    (mul_nonneg (zero_le_one.trans (le_max_left 1 C)) (sq_nonneg H))
+
+omit [I.Boundaryless] in
+theorem evolvingLogCenterDrift_continuous
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (C H : ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hne : ∃ x, cutoff x ≠ 0) :
+    Continuous (evolvingLogCenterDrift
+      (I := I) (M := M) g cutoff C H) := by
+  have herror := evolvingCutoffGradientError_continuous
+    (I := I) (M := M) g cutoff (fun _ _ => 1) hg hgram hcutoff contMDiff_const
+  have hmass := evolvingCutoffMass_continuous
+    (I := I) (M := M) g cutoff hg hcutoff.continuous
+  have hnum : Continuous (fun t =>
+      2 * evolvingCutoffGradientError
+        (I := I) (M := M) g cutoff (fun _ _ => 1) t) :=
+    continuous_const.mul herror
+  have hratio : Continuous (fun t =>
+      2 * evolvingCutoffGradientError
+          (I := I) (M := M) g cutoff (fun _ _ => 1) t /
+        evolvingCutoffMass (I := I) (M := M) g cutoff t) :=
+    hnum.div hmass fun t =>
+      (evolvingCutoffMass_pos
+        (I := I) (M := M) g cutoff t hcutoff.continuous hne).ne'
+  simpa only [evolvingLogCenterDrift] using hratio.add continuous_const
+
+omit [I.Boundaryless] in
+theorem hasDerivAt_evolvingShiftedLogCenter
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (C H base t : ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hne : ∃ x, cutoff x ≠ 0) :
+    HasDerivAt
+      (evolvingShiftedLogCenter
+        (I := I) (M := M) g cutoff u C H base)
+      (deriv (evolvingLocalizedAverage
+          (I := I) (M := M) g cutoff (fun s x => Real.log (u s x))) t +
+        evolvingLogCenterDrift (I := I) (M := M) g cutoff C H t) t := by
+  let logu : ℝ → M → ℝ := fun s x => Real.log (u s x)
+  let hlog := contMDiff_log_of_pos hu hpos
+  have hmass := (evolvingCutoffMass_pos
+    (I := I) (M := M) g cutoff t hcutoff.continuous hne).ne'
+  have haverage := hasDerivAt_evolvingLocalizedAverage
+    (I := I) (M := M) g cutoff logu t (hg.at_any t) hcutoff hlog hmass
+  have haverage' : HasDerivAt
+      (evolvingLocalizedAverage (I := I) (M := M) g cutoff logu)
+      (deriv (evolvingLocalizedAverage (I := I) (M := M) g cutoff logu) t) t :=
+    haverage.differentiableAt.hasDerivAt
+  have hdrift := evolvingLogCenterDrift_continuous
+    (I := I) (M := M) g cutoff C H hg hgram hcutoff hne
+  have hprimitive : HasDerivAt
+      (fun q => ∫ s in base..q,
+        evolvingLogCenterDrift (I := I) (M := M) g cutoff C H s)
+      (evolvingLogCenterDrift (I := I) (M := M) g cutoff C H t) t :=
+    intervalIntegral.integral_hasDerivAt_right
+      (hdrift.intervalIntegrable base t)
+      hdrift.aestronglyMeasurable.stronglyMeasurableAtFilter hdrift.continuousAt
+  simpa only [evolvingShiftedLogCenter, logu] using haverage'.add hprimitive
+
 theorem evolving_log_spatial_energy_differential_of_supersolution
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
     (u : ℝ → M → ℝ)
@@ -161,6 +267,107 @@ theorem evolving_log_average_deriv_lower_bound_of_supersolution
   rw [haverage]
   apply (div_le_div_iff_of_pos_right hmass).2
   simpa only [logu, mass, average, trace, μ] using hsum
+
+theorem quarter_evolving_log_dirichlet_energy_le_shifted_center_deriv_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (t C H base : ℝ) (J : Set ℝ) {t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hne : ∃ x, cutoff x ≠ 0)
+    (hP : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g cutoff cutoff C J)
+    (ht : t ∈ J)
+    (htrace : ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hpde : ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    ((1 / 4 : ℝ) * evolvingLocalizedDirichletEnergy
+        (I := I) (M := M) g cutoff (fun s x => Real.log (u s x)) t) /
+      evolvingCutoffMass (I := I) (M := M) g cutoff t ≤
+        deriv (evolvingShiftedLogCenter
+          (I := I) (M := M) g cutoff u C H base) t := by
+  have hlower := evolving_log_average_deriv_lower_bound_of_supersolution
+    (I := I) (M := M) g cutoff u hu hpos t C H J (hg.at_any t)
+      hcutoff hne hP ht htrace hpde
+  have hshifted := hasDerivAt_evolvingShiftedLogCenter
+    (I := I) (M := M) g cutoff u hu hpos C H base t hg hgram hcutoff hne
+  rw [hshifted.deriv]
+  change _ ≤ deriv (evolvingLocalizedAverage
+      (I := I) (M := M) g cutoff (fun s x => Real.log (u s x))) t +
+    (2 * evolvingCutoffGradientError
+        (I := I) (M := M) g cutoff (fun _ _ => 1) t /
+        evolvingCutoffMass (I := I) (M := M) g cutoff t +
+      max 1 C * H ^ 2)
+  ring_nf at hlower ⊢
+  linarith
+
+theorem evolvingShiftedLogCenter_monotoneOn_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (C H : ℝ) {a b t₀ : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hne : ∃ x, cutoff x ≠ 0)
+    (hP : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g cutoff cutoff C (Icc a b))
+    (htrace : ∀ t ∈ Icc a b, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    MonotoneOn
+      (evolvingShiftedLogCenter
+        (I := I) (M := M) g cutoff u C H a) (Icc a b) := by
+  let shifted := evolvingShiftedLogCenter
+    (I := I) (M := M) g cutoff u C H a
+  have hshifted : ∀ t, HasDerivAt shifted (deriv shifted t) t := by
+    intro t
+    exact (hasDerivAt_evolvingShiftedLogCenter
+      (I := I) (M := M) g cutoff u hu hpos C H a t hg hgram hcutoff hne)
+        |>.differentiableAt.hasDerivAt
+  apply monotoneOn_of_deriv_nonneg (convex_Icc a b)
+  · intro t _
+    exact (hshifted t).continuousAt.continuousWithinAt
+  · intro t _
+    exact (hshifted t).differentiableAt.differentiableWithinAt
+  · intro t ht
+    have ht' : t ∈ Icc a b := interior_subset ht
+    have henergy :=
+      quarter_evolving_log_dirichlet_energy_le_shifted_center_deriv_of_supersolution
+        (I := I) (M := M) g cutoff u hu hpos t C H a (Icc a b)
+          hg hgram hcutoff hne hP ht' (htrace t ht') (hpde t ht')
+    have hnonneg : 0 ≤
+        ((1 / 4 : ℝ) * evolvingLocalizedDirichletEnergy
+          (I := I) (M := M) g cutoff (fun s x => Real.log (u s x)) t) /
+          evolvingCutoffMass (I := I) (M := M) g cutoff t :=
+      div_nonneg
+        (mul_nonneg (by norm_num)
+          (evolvingLocalizedDirichletEnergy_nonneg
+            (I := I) (M := M) g cutoff (fun s x => Real.log (u s x)) t))
+        (evolvingCutoffMass_nonneg (I := I) (M := M) g cutoff t)
+    exact hnonneg.trans (by simpa only [shifted] using henergy)
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
