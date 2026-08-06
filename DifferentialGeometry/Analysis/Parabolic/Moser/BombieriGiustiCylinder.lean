@@ -160,6 +160,63 @@ theorem bombieriGiustiIncreasingLevel_succ_sub_inv
   rw [bombieriGiustiIncreasingLevel_succ_sub]
   field_simp
 
+theorem two_mul_bombieriGiustiIncreasingLevel_gap_inv_le
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    2 * (bombieriGiustiIncreasingLevel lower upper (k + 1) -
+        bombieriGiustiIncreasingLevel lower upper k)⁻¹ ≤
+      (4 / (upper - lower)) * (k + 1 : ℝ) ^ 2 := by
+  rw [bombieriGiustiIncreasingLevel_succ_sub_inv]
+  have hm : 1 ≤ (k + 1 : ℝ) := by norm_num
+  have hwidth : 0 ≤ (upper - lower)⁻¹ :=
+    inv_nonneg.mpr (sub_pos.mpr hlowerUpper).le
+  calc
+    2 * (((k + 1 : ℝ) * (k + 2 : ℝ)) / (upper - lower)) =
+        (2 * (k + 1 : ℝ) * (k + 2 : ℝ)) * (upper - lower)⁻¹ := by
+      ring
+    _ ≤ (4 * (k + 1 : ℝ) ^ 2) * (upper - lower)⁻¹ := by
+      apply mul_le_mul_of_nonneg_right _ hwidth
+      norm_num at hm ⊢
+      nlinarith
+    _ = (4 / (upper - lower)) * (k + 1 : ℝ) ^ 2 := by
+      ring
+
+theorem bombieriGiustiDescendingLevel_odd_gap_inv_le
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ ≤
+      (6 / (upper - lower)) * (k + 1 : ℝ) ^ 2 := by
+  rw [show 2 * k + 2 = (2 * k + 1) + 1 by omega,
+    bombieriGiustiDescendingLevel_sub_succ_inv]
+  have hm : 1 ≤ (k + 1 : ℝ) := by norm_num
+  have hwidth : 0 ≤ (upper - lower)⁻¹ :=
+    inv_nonneg.mpr (sub_pos.mpr hlowerUpper).le
+  rw [div_eq_mul_inv, div_eq_mul_inv]
+  calc
+    ( ((2 * k + 1 : ℕ) : ℝ) + 1) *
+          (((2 * k + 1 : ℕ) : ℝ) + 2) * (upper - lower)⁻¹ ≤
+        (6 * (k + 1 : ℝ) ^ 2) * (upper - lower)⁻¹ := by
+      apply mul_le_mul_of_nonneg_right _ hwidth
+      push_cast
+      nlinarith
+    _ = 6 * (upper - lower)⁻¹ * (k + 1 : ℝ) ^ 2 := by ring
+
+theorem bombieriGiustiDescendingLevel_odd_gap_inv_sq_le
+    {lower upper : ℝ} (hlowerUpper : lower < upper) (k : ℕ) :
+    (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ ^ 2 ≤
+      (36 / (upper - lower) ^ 2) * (k + 1 : ℝ) ^ 4 := by
+  have hgap : 0 <
+      bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2) :=
+    sub_pos.mpr (bombieriGiustiDescendingLevel_strictAnti hlowerUpper (by omega))
+  have hpow := pow_le_pow_left₀ (inv_nonneg.mpr hgap.le)
+    (bombieriGiustiDescendingLevel_odd_gap_inv_le hlowerUpper k) 2
+  calc
+    _ ≤ ((6 / (upper - lower)) * (k + 1 : ℝ) ^ 2) ^ 2 := hpow
+    _ = (36 / (upper - lower) ^ 2) * (k + 1 : ℝ) ^ 4 := by
+      rw [mul_pow, div_pow]
+      ring
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
