@@ -276,4 +276,35 @@ theorem eventuallyEq_comp_of_eqOn_Icc_of_mem_Ioo
   filter_upwards [hu (isOpen_Ioo.mem_nhds hx)] with y hy
   simpa only [Function.comp_apply, id_eq] using hrho ⟨hy.1.le, hy.2.le⟩
 
+theorem exists_smooth_positive_clamp_eventuallyEq_on_compact
+    {X : Type*} [TopologicalSpace X]
+    {K : Set X} {u : X → ℝ}
+    (hK : IsCompact K) (hKne : K.Nonempty)
+    (hu : Continuous u) (hpos : ∀ x ∈ K, 0 < u x) :
+    ∃ rho : ℝ → ℝ, ContDiff ℝ ∞ rho ∧
+      (∀ t : ℝ, 0 < rho t) ∧
+      (∀ x ∈ K, (rho ∘ u) =ᶠ[nhds x] u) := by
+  obtain ⟨xmin, hxmin, hmin⟩ := hK.exists_isMinOn hKne hu.continuousOn
+  obtain ⟨xmax, hxmax, hmax⟩ := hK.exists_isMaxOn hKne hu.continuousOn
+  let a := u xmin / 2
+  let b := u xmax + a
+  have ha : 0 < a := by
+    dsimp [a]
+    linarith [hpos xmin hxmin]
+  have hab : a < b := by
+    dsimp [b]
+    linarith [hpos xmax hxmax]
+  obtain ⟨rho, hrho, hrho_id, _hrho_deriv, hrho_pos, _hrho_range⟩ :=
+    exists_smooth_positive_clamp a b ha hab
+  refine ⟨rho, hrho, hrho_pos, ?_⟩
+  intro x hx
+  have hminx : u xmin ≤ u x := hmin hx
+  have hmaxx : u x ≤ u xmax := hmax hx
+  apply eventuallyEq_comp_of_eqOn_Icc_of_mem_Ioo hrho_id hu.continuousAt
+  constructor
+  · change u xmin / 2 < u x
+    linarith [hpos xmin hxmin, hminx]
+  · change u x < u xmax + u xmin / 2
+    linarith [hpos xmin hxmin, hmaxx]
+
 end DifferentialGeometry
