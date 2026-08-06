@@ -321,7 +321,7 @@ open scoped Bundle Manifold
 open Bundle Pretrivialization
 
 variable {𝕜 ι B F₁ F₂ M : Type*} {E₁ : B → Type*} {E₂ : B → Type*}
-  [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+  [NontriviallyNormedField 𝕜] [CharZero 𝕜]
   [Fintype ι]
   {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
   {HB : Type*} [TopologicalSpace HB]
@@ -346,7 +346,6 @@ variable {𝕜 ι B F₁ F₂ M : Type*} {E₁ : B → Type*} {E₂ : B → Type
 variable {F₃ F₄ : Type*}
   [NormedAddCommGroup F₃] [NormedSpace 𝕜 F₃]
   [NormedAddCommGroup F₄] [NormedSpace 𝕜 F₄]
-  [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
 
 local notation "AE₁E₂" => Bundle.TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯
 
