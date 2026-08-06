@@ -1,5 +1,41 @@
 # TameForcingFixedPoint
 
+## 2026-08-04 — the tame contraction is now EXPORTED
+
+Until now `partial_sol_tame` built its contraction internally and exported
+nothing: the modulus `Λ` was a local `set`, and the `L²` Nemytskii map was a
+local `(memLp_tame …).toLp` with `memLp_tame` `private`.  Any consumer that
+needed to compare two fixed points (the Galerkin identification) therefore could
+not be stated at all.  Fixed:
+
+* `nemytskiiTame` / `nemytskiiTame_coeFn` — the geometric tame forcing field:
+  `nemytskiiTameOn` with `tensorHsInclusion` as its state operator (whose bound
+  on `lowerState` *is* the definition of that set, so the wrapper hides two
+  derivable arguments).  This is the object whose fixed point `partial_sol_tame`
+  produces.
+* `tameMap_dist_le` — the exported contraction, in the *unretracted* form the
+  two fixed points need:
+  `‖Ψ F − Ψ F'‖ ≤ Λ‖F − F'‖`,
+  `Λ = A·R(1+T) + B·2√T + 2·C·ρ·√(1+T)(1+T)`,
+  for `F, F'` in the `ρ`-ball.  It is the same estimate `hΨ_retr` runs on the
+  retracted map; the only change is `ρt F ↦ F`, legitimate because both fixed
+  points lie where the retraction is the identity.  The tame third arm is
+  charged to the ball through `‖field G‖ ≤ (1+T)ρ` — that is precisely why no
+  global Lipschitz constant is needed.
+
+The abstract pieces moved *down* to `LocalNemytskii.lean` (public
+`timeL2_norm_le_four`, `memLp_tame`, `nemytskiiTameOn`); the private copies here
+were deleted, so there is one canonical API and no duplicated 115-line proof.
+`partial_sol_tame`'s statement and body are otherwise unchanged.
+
+Lean lesson (cost me one iteration): after `set fld := fun G => maxRegDuhamel… G`,
+an *incoming* hypothesis `hF : ∀ᵐ t, maxRegDuhamel… F t ∈ S` is NOT refolded by
+`set` (it contains the beta-reduced application, not the lambda), so
+`simp only [aeSetLift, dif_pos hF-at-t]` silently fails to fire and the `calc`
+LHS mismatches.  Re-derive the folded form first
+(`have hFm : ∀ᵐ t, fld F t ∈ S := hF`, which typechecks by defeq) and pass
+*that* to `filter_upwards`.
+
 ## Status
 
 The source implementation is complete, its focused Lean check passed with no

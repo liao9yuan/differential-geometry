@@ -45,3 +45,13 @@ theorem).  The next abstraction boundary is to expose the fixed-background
 constants before the existential radius choices, prove that those constants
 are uniformly bounded under the stated family bounds, and then realize and
 smooth the solutions on the resulting common horizon.
+
+## J0a (2026-08-04): `realize_at_thr` is now a one-liner
+
+`realize_at_thr` keeps its exact statement but its body is
+`realize_at_delta hDim g (deTurckArmContractionThreshold''_pos _)` — the
+δ-generic lemma now lives in `LowRegRealize.lean` (the lower file; see
+`LowRegRealize.md` for why the plan's placement was corrected).  Its two
+consumers (`LowRegApplyTwo.lean`, and `:338` here) are untouched; in
+`lowreg_solve_two` the call was additionally switched to `realize_at_delta`
+directly so the fibre threshold can be a parameter.  Focused check green.

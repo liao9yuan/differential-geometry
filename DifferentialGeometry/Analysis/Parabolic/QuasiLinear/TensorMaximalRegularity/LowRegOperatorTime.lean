@@ -712,6 +712,70 @@ theorem lowA2_small
   · exact a2Lo_total_le (I := I) (M := M) g hρ0 hδ0 hδ_le hreal'
       hlipLo.continuous hcoreLo (fun S => (hpairdata S hρ0 hρA_le).2.1) v
 
+/-- A non-vacuous version of `lowA2_small`: the realized cutoff is chosen after
+the common pair coefficient, so the reported operator floor satisfies
+`C * ρ < 1`.  The completed maps retain the same continuity, bounds, and
+commuting square. -/
+theorem lowA2_small_one
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}
+    (hρ₀ : 0 < ρ₀) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+    (hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ₀ →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ) :
+    ∃ ρ C : ℝ, 0 < ρ ∧ ρ ≤ ρ₀ ∧ 0 ≤ C ∧ C * ρ < 1 ∧
+      ∀ (hρ0 : 0 ≤ ρ)
+        (hreal' : ∀ S : SmoothCcTensor g 0 2,
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
+            gFibreOpBound (I := I) (M := M) g
+              (ccTensorBilinSymm (I := I) g S) δ),
+        Continuous (lowA2Hi (I := I) (M := M) g hρ0 hδ0 hδ_le hreal') ∧
+          Continuous (lowA2Lo (I := I) (M := M) g hρ0 hδ0 hδ_le hreal') ∧
+          (∀ v : metricH2 (I := I) (M := M) g,
+            ‖show a2Op (I := I) (M := M) g from
+              lowA2Hi (I := I) (M := M) g hρ0 hδ0 hδ_le hreal' v‖ ≤ C * ρ) ∧
+          (∀ v : metricH2 (I := I) (M := M) g,
+            ‖show a2LoOp (I := I) (M := M) g from
+              lowA2Lo (I := I) (M := M) g hρ0 hδ0 hδ_le hreal' v‖ ≤ C * ρ) ∧
+          (∀ v : metricH2 (I := I) (M := M) g,
+            (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+                (show (1 : ℝ) ≤ 2 by norm_num)).comp
+                  (lowA2Hi (I := I) (M := M) g hρ0 hδ0 hδ_le hreal' v) =
+              (lowA2Lo (I := I) (M := M) g hρ0 hδ0 hδ_le hreal' v).comp
+                (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+                  (show (3 : ℝ) ≤ 4 by norm_num))) := by
+  obtain ⟨ρL, CL, hρL, hρL_le, hlipdata⟩ :=
+    radialA2_lip (I := I) (M := M) hDim g hρ₀ hδ0 hδ_le hreal
+  have hrealL : ∀ S : SmoothCcTensor g 0 2,
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρL →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ :=
+    fun S hS => hreal S (hS.trans hρL_le)
+  obtain ⟨ρA, CA, hρA_le, hρA, hCA, hpairdata⟩ :=
+    radialA2_pairR (I := I) (M := M) hDim g hρL hδ0 hδ_le hrealL
+  let ρ : ℝ := min ρA (1 / (CA + 1))
+  have hden : 0 < CA + 1 := by linarith only [hCA]
+  have hρ : 0 < ρ := lt_min hρA (one_div_pos.mpr hden)
+  have hρA' : ρ ≤ ρA := min_le_left _ _
+  have hρL' : ρ ≤ ρL := hρA'.trans hρA_le
+  have hρ₀' : ρ ≤ ρ₀ := hρL'.trans hρL_le
+  have hρcap : ρ ≤ 1 / (CA + 1) := min_le_right _ _
+  have hsmall : CA * ρ < 1 := by
+    calc
+      CA * ρ ≤ CA * (1 / (CA + 1)) := mul_le_mul_of_nonneg_left hρcap hCA
+      _ = CA / (CA + 1) := by ring
+      _ < 1 := (div_lt_one hden).2 (by linarith only [hCA])
+  refine ⟨ρ, CA, hρ, hρ₀', hCA, hsmall, ?_⟩
+  intro hρ0 hreal'
+  obtain ⟨hlip, hlipLo, hcore, hcoreLo, hsq⟩ :=
+    hlipdata (r := ρ) hρ0 hρL'
+  refine ⟨hlip.continuous, hlipLo.continuous, fun v => ?_, fun v => ?_, hsq⟩
+  · exact a2Hi_total_le (I := I) (M := M) g hρ0 hδ0 hδ_le hreal'
+      hlip.continuous hcore (fun S => (hpairdata hρ0 hρA' S).1) v
+  · exact a2Lo_total_le (I := I) (M := M) g hρ0 hδ0 hδ_le hreal'
+      hlipLo.continuous hcoreLo (fun S => (hpairdata hρ0 hρA' S).2.1) v
+
 /-- The complete second-order family along the order-one solution is strongly
 measurable and uniformly small in operator norm, on one positive spectral `H2`
 radius that also controls the solution's own state ball. -/

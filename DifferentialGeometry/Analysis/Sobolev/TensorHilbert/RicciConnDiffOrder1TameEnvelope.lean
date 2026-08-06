@@ -646,25 +646,32 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
       _ ≤ 4 * (2 * aL q + 2 * KD q) * (1 + ∑ j ∈ Finset.range (q + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := hprod
 
-private def kOutPerm0312 : Equiv.Perm (Fin 4) :=
+/-- Outer slot permutation of the first Ricci kernel arm. -/
+def kOutPerm0312 : Equiv.Perm (Fin 4) :=
   ⟨![0, 3, 1, 2], ![0, 2, 3, 1], by decide, by decide⟩
 
-private def kOutPerm0213 : Equiv.Perm (Fin 4) :=
+/-- Outer slot permutation of the second Ricci kernel arm. -/
+def kOutPerm0213 : Equiv.Perm (Fin 4) :=
   ⟨![0, 2, 1, 3], ![0, 2, 1, 3], by decide, by decide⟩
 
-private def kOutPerm2301 : Equiv.Perm (Fin 4) :=
+/-- Outer slot permutation of the third Ricci kernel arm. -/
+def kOutPerm2301 : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 
-private def kOutPerm1302 : Equiv.Perm (Fin 4) :=
+/-- Outer slot permutation of the fourth Ricci kernel arm. -/
+def kOutPerm1302 : Equiv.Perm (Fin 4) :=
   ⟨![1, 3, 0, 2], ![2, 0, 3, 1], by decide, by decide⟩
 
-private def kOutPerm1203 : Equiv.Perm (Fin 4) :=
+/-- Outer slot permutation of the fifth Ricci kernel arm. -/
+def kOutPerm1203 : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 0, 3], ![2, 0, 1, 3], by decide, by decide⟩
 
-private def kInPerm102 : Equiv.Perm (Fin 3) :=
+/-- Contravariant reindexing of the first, second and fourth kernel arms. -/
+def kInPerm102 : Equiv.Perm (Fin 3) :=
   ⟨![1, 0, 2], ![1, 0, 2], by decide, by decide⟩
 
-private def kInPerm120 : Equiv.Perm (Fin 3) :=
+/-- Contravariant reindexing of the third and fifth kernel arms. -/
+def kInPerm120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
 set_option linter.unusedVariables false in
@@ -687,7 +694,10 @@ private theorem slotPermCcFib_contMDiff (g₀ : SmoothRiemannianMetric I M) {d :
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x t) rfl
 
-private def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
+/-- The parallel operator field that permutes the `d` covariant slots of its
+argument.  Used as the outer arm of an `appCcRS` product whenever a slot
+permutation has to be exposed to the Leibniz/jet machinery. -/
+def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
     SmoothCcTensor g₀ d d where
   toSection :=
     { toFun := fun x : M =>
@@ -735,7 +745,15 @@ set_option linter.unusedSectionVars false in
         connContrCLM (I := I) 2 1 x ((connDiffSection (I := I) g₁ g₀).toSection x)) := rfl
 
 set_option linter.unusedSectionVars false in
-private theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
+/-- **The order-one Ricci kernel is five permuted copies of one insertion.**
+
+`linearizedRicciConnDiffOrder1KernelField g₀ g₁` is the negated sum of five
+slot-permuted, reindexed copies of the single field
+`connDiffContrInsertionField g₀ g₁`.  Each copy carries exactly **one**
+connection difference, which is why the order-one arm is linear in `∇P` and
+admits a radius-free jet bound; the permutations are parallel, so every copy has
+the same fibre jets as the original. -/
+theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
           (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)

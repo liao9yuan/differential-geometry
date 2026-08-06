@@ -313,3 +313,111 @@ Focused check green; targeted module build
   lowregStateRad / lowregHorizon + lowreg_partial_sol_of_bounds +
   lowreg_bounds_exist), sorry-free, targeted module build green.  Lane E's
   remaining work is now exactly 'bound six numbers'; see the E8a section above.
+
+## 2026-08-04, brick S0-bis — `IsLowSolve` and `isLowSolve_of_sol`
+
+Two new declarations, both sorry-free and axiom-clean.
+
+`IsLowSolve g₀ hT hT1 fLo` packages the order-one solve **as a property of its
+forcing**: existentially bound background metric, threshold `δ < 1` and the six
+numbers, then the four producer certificates of `lowreg_partial_sol_of_bounds`
+(realization at `P`, continuity, the three-arm tame estimate, the zero-state
+bound `D`), the horizon cap `T ≤ lowregHorizon …`, and the two things that
+theorem *concludes* about its forcing — the ball `‖fLo‖ ≤ lowregStateRad …/4`
+and the a.e. Nemytskii identity along `fLo`'s own zero-datum Duhamel field.
+
+`isLowSolve_of_sol` is the honest-input witness: it takes exactly the arguments
+and results of a `lowreg_partial_sol_of_bounds` call and returns the package by
+anonymous constructor.  `lowreg_solve_two` uses it at
+`LowRegApplyTwo.lean:711`, and stays axiom-clean — so the package is
+**satisfiable in the campaign, not an assumption**.
+
+Design notes:
+
+* the state-ball conjunct `∀ᵐ t, field t ∈ lowerState …` was deliberately left
+  out: `field_mem_lower` rebuilds it from the ball bound, so carrying it would
+  violate weakest-assumptions;
+* `g_bg` and `δ` are existential.  The consumer (`lowreg_loMass`) states a bound
+  whose constant is existentially quantified *after* all data, so nothing is
+  lost, and no consumer has to relate its own threshold to the solve's;
+* everything is spelled at `((1 : ℕ) : ℝ)`, never the literal `1` — the scale is
+  a type index and the two are not interchangeable.
+
+Why it exists: every *energy* estimate on the trajectory has to be run at the
+scale where the contraction runs.  The `H²` lift (`force_hi_id`) remembers only
+the lifted forcing — not the fixed-point equation, the ball, or the
+nonlinearity's constants — so an `a = 2` statement cannot reach a Galerkin
+argument.  See `ShortTime/LowRegAllOrderJet.md` (2026-08-04) for the consumer
+side and for the tame-vs-Lipschitz gap in the identification layer.
+
+## J0a (2026-08-04): `IsLowSolve` made an honest contract
+
+**Status: DONE, sorry-free.**  Three repairs from `POSTTAME_J0J5_PLAN.md` §A.4:
+
+1. the `(g_bg : SmoothRiemannianMetric I M)` binder is DELETED — the background is
+   now `g₀` itself.  The unique producer always ran the contraction at the
+   self-background (`isLowSolve_of_sol … g g …`), so nothing was lost; what was
+   gained is that a consumer can no longer receive a package about an unrelated
+   metric, which no jet ladder could have used.
+2. `0 ≤ δ ∧ δ ≤ 1/3` are now body conjuncts.  `δ < 1` (the binder) is what the
+   *nonlinearity* needs; `δ ≤ 1/3` is what the *ladders* need, and it was
+   previously thrown away by the producer.
+3. `Continuous (coreN g₀ g₀ hδ (lowregRealRad g₀ … hP.le hreal))` is a body
+   conjunct.  The `lowregRealRad …` spelling is deliberate: it is the SAME term
+   `lowregNfun` itself applies, so `hcore` and `hcont` speak about one realization.
+
+`isLowSolve_of_sol` drops its `g_bg` argument and gains `hδ0`, `hδ3`, `hcore`.
+
+**The proof-irrelevance discharge worked exactly as the plan predicted.**  At the
+unique call site (`LowRegApplyTwo.lean`, in `lowreg_solve_two`) the available term
+is `hcoreN : Continuous (coreN g g hδ (realizeOfLE g le_rfl hrealR))` while the
+slot wants `Continuous (coreN g g hδ hrealR)`.  `realizeOfLE g le_rfl hrealR` and
+`hrealR` prove the SAME `Prop` (the realization statement is a Pi-type into
+`gFibreOpBound … : Prop`), so Lean 4's definitional proof irrelevance closes it
+with a bare `exact hcoreN` — no `convert`, no `show`.  This is the S0/S0-bis
+precedent: every new field was already a named `have` in the producer's context.
+
+The only destructuring consumer is `LowRegGalerkinIdent.lean` (`lowreg_proj_tendsto`);
+it re-patterns with three `-` for the fields it does not yet use, and its one
+`g_bg` occurrence becomes `g₀`.
+
+New/none: no new lemma was needed here.  Verification: focused check green.
+
+## 2026-08-05 — explicit solve witnesses
+
+`IsLowSolveAt` is the witness-preserving sibling of `IsLowSolve`: its threshold
+and six solver constants are explicit indices, and its final field records the
+actual state-radius cap used by the producer.  `isLowSolveAt_of_sol` packages the
+existing fixed-point output at exactly those witnesses;
+`IsLowSolveAt.toIsLowSolve` forgets them for compatibility.  The original
+`IsLowSolve` declaration and constructor were not changed.
+
+Focused verification passed without warnings, and the direct module refresh
+passed.  This is interface machinery only: `lowreg_loMass` remains 0%, its
+dedicated machinery remains approximately 86% until the calibrated producer and
+consumer route are verified, `(N)` remains 0%, and whole HCG remains about 3%.
+
+## 2026-08-05 — background-aware six-number packages
+
+The common-time lane now has a data/proof/output split at the fixed-point
+engine's native layer:
+
+- `LowRegBoundData` stores the threshold and the certified six horizon numbers;
+- `IsLowBoundsAt g₀ g_bg K` stores exactly the realization, continuity, tame,
+  and zero-state certificates for that packet and background;
+- `IsLowSolveBg g₀ g_bg K hK ...` retains the corresponding fixed-point output;
+- `lowreg_sol_of_data` runs `lowreg_partial_sol_of_bounds` and constructs that
+  output package.
+
+The scalar horizon layer is weaker than literal packet equality.
+`LowRegHorizonData` stores four upper coefficient caps and two positive radius
+floors; `IsLowBoundCap K U` records the six monotonicity directions, and
+`horizon_le_of_cap` proves that `U`'s closed horizon is below `K`'s.  Thus each
+metric may retain its exact packet while the class shares only the real horizon
+envelope.
+
+Unlike the older `IsLowSolveAt`, this package is intentionally
+background-aware and contains no high-rung absorption data.  This lets the
+uniform lane use the fixed class background without changing the settled
+self-background compatibility API.  Focused verification and the direct
+module refresh passed.

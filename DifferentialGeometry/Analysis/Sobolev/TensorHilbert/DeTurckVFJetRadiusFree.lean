@@ -965,7 +965,11 @@ lemma rfns_iCG_cometricCastG0_atgw_rf
 public R-free head engine + `single_factor_mul_antidiagonalTupleGrid_le`.  The `wXi` grid bound builds
 on this (through the connDiffLoweredCc↔connDiffSection valence bridge). -/
 set_option linter.unusedVariables false in
-private lemma rfns_iCG_connDiffSection_atgw_rf
+/-- **Pointwise radius-free `atgw` bound for the connection difference**:
+`|∇ˡ(connDiffSection g₁ g₀)|²(x) ≤ Ccd l · atgw(bP)(l + 2)`.  The offset is
+`+2` because the connection difference costs one derivative of the state; this
+is the base currency every order-one arm folds against. -/
+lemma rfns_iCG_connDiffSection_atgw_rf
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ccd : ℕ → ℝ, (∀ l, 0 ≤ Ccd l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

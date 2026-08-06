@@ -279,33 +279,35 @@ theorem covsumHsC_nonneg (n : ℕ) : 0 ≤ covsumHsC Fc d n := by
 
 end ConstNonneg
 
+/-- A rank-fixed, order-zero package for the curvature action in the Bochner identity.
+
+Unlike the all-order `hcurv` interface below, this records only the estimate actually used by
+one Bochner step: `pointwiseTensorCurv` at one covariant rank, with no differentiated curvature
+action and no quantification over unrelated tensor ranks. -/
+structure IsCurvAction0 (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (K : ℝ) : Prop where
+  nonneg : 0 ≤ K
+  bound : ∀ S : SmoothCcTensor g₀ 0 s,
+    ‖pointwiseTensorCurv (I := I) (M := M) g₀ s S‖ ≤
+      K * ∑ a ∈ Finset.range 2, ‖iteratedCovGrad (I := I) g₀ 0 s a S‖
+
 set_option maxHeartbeats 1600000 in
 -- The final `nlinarith` (Weitzenböck identity + Cauchy–Schwarz curvature pairing) is
 -- elaboration-heavy; the budget is raised as at `DirichletSpectralBochnerGap.lean:1219`.
-/-- **The class-uniform single Bochner step.**  Uniform sibling of
+/-- **The rank-fixed single Bochner step.**  Uniform sibling of
 `iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower`
-(`DirichletSpectralBochnerGap.lean:1220`) with an EXPLICIT constant `Cbase + Fc 0`.
+(`DirichletSpectralBochnerGap.lean:1220`) with an explicit constant `Cbase + K`.
 
 Hypotheses (both discharged downstream, not `Classical.choose`):
-* `hcurv` — the class-uniform Weitzenböck-defect bound, order/rank-generic, with
-  constant family `Fc`.  It is exactly the conclusion of
-  `exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le` but with the explicit `Fc`
-  in place of the choose-witness `K`.  Discharged by brick 2a from
-  `sup_x ‖∇^{g₀,a} Riemann(g₀)‖ ≤ F(Λ,n)`.
+* `hact` — the finite order-zero curvature-action package at rank `s + k`;
 * `hbase` — the class-uniform commutator base+lower bound (uniform sibling of
   `rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLap_base_add_lower`),
   with constant `Cbase`.  Expressing `Cbase` through `Fc` is the next sub-brick.
 
 Conclusion: for every smooth compactly-supported `(0,s)`-tensor `u`,
-`‖∇^{k+2} u‖²_{L²} ≤ ‖∇^{k}(Δ_∇ u)‖²_{L²} + (Cbase + Fc 0)·(∑_{a≤k+1} ‖∇^a u‖)²`. -/
-theorem bochner_step_unif
+`‖∇^{k+2} u‖²_{L²} ≤ ‖∇^{k}(Δ_∇ u)‖²_{L²} + (Cbase + K)·(∑_{a≤k+1} ‖∇^a u‖)²`. -/
+theorem bochner_step_action
     (g₀ : SmoothRiemannianMetric I M) (s k : ℕ)
-    (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
-    (hcurv : ∀ (r p : ℕ) (S : SmoothCcTensor g₀ 0 r),
-        ‖iteratedCovGrad (I := I) g₀ 0 (r + 1) p
-            (pointwiseTensorCurv (I := I) (M := M) g₀ r S)‖ ≤
-          Fc p * ∑ a ∈ Finset.range (p + 2),
-            ‖iteratedCovGrad (I := I) g₀ 0 r a S‖)
+    (K : ℝ) (hact : IsCurvAction0 (I := I) (M := M) g₀ (s + k) K)
     (Cbase : ℝ)
     (hbase : ∀ (u : SmoothCcTensor g₀ 0 s),
         ‖rawTensorConnLapSmooth (I := I) g₀ 0 (s + k)
@@ -318,7 +320,7 @@ theorem bochner_step_unif
       ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (k + 2) u)‖ ^ 2 ≤
         ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s k
             (rawTensorConnLapSmooth (I := I) g₀ 0 s u))‖ ^ 2
-        + (Cbase + Fc 0) * (∑ a ∈ Finset.range (k + 2),
+        + (Cbase + K) * (∑ a ∈ Finset.range (k + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 s a u‖) ^ 2 := by
   classical
   intro u
@@ -386,14 +388,13 @@ theorem bochner_step_unif
       (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P)
       (covGrad (I := I) (M := M) g₀ 0 (s + k) P)
   have hcurvnorm :
-      ‖pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P‖ ≤ Fc 0 * SUM := by
-    have hKb := hcurv (s + k) 0 P
+      ‖pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P‖ ≤ K * SUM := by
+    have hKb := hact.bound P
     have hsumexp :
-        ∑ a ∈ Finset.range (0 + 2), ‖iteratedCovGrad (I := I) g₀ 0 (s + k) a P‖ =
+        ∑ a ∈ Finset.range 2, ‖iteratedCovGrad (I := I) g₀ 0 (s + k) a P‖ =
           ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ := by
-      rw [show (0 + 2) = 2 by ring, Finset.sum_range_succ, Finset.sum_range_one]
+      rw [Finset.sum_range_succ, Finset.sum_range_one]
       simp only [iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero]
-    rw [iteratedCovGrad_zero] at hKb
     rw [hsumexp] at hKb
     refine le_trans hKb ?_
     have hsum_le : ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ ≤ SUM := by
@@ -416,20 +417,20 @@ theorem bochner_step_unif
         rw [Finset.sum_insert (by simp), Finset.sum_singleton]
       rw [hpairsum] at hsub
       exact hsub
-    nlinarith [hsum_le, hFc 0, hSUM_nn]
+    nlinarith [hsum_le, hact.nonneg, hSUM_nn]
   have hpair_bound :
       |tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
           (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
-          (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun| ≤ Fc 0 * SUM ^ 2 := by
+          (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun| ≤ K * SUM ^ 2 := by
     calc |tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
             (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
             (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun|
         ≤ ‖pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P‖ *
             ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ := hpair_le
-      _ ≤ (Fc 0 * SUM) * SUM := by
+      _ ≤ (K * SUM) * SUM := by
           refine mul_le_mul hcurvnorm hgradPnorm (norm_nonneg _) ?_
-          exact mul_nonneg (hFc 0) hSUM_nn
-      _ = Fc 0 * SUM ^ 2 := by ring
+          exact mul_nonneg hact.nonneg hSUM_nn
+      _ = K * SUM ^ 2 := by ring
   have hbase_le := hbase u
   rw [← hP_def] at hbase_le
   have hbase_toL2 :
@@ -443,7 +444,142 @@ theorem bochner_step_unif
     (tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
       (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
       (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun)
-  nlinarith [hbase_le, hpair_bound, hneg_le, hSUM_nn, hFc 0]
+  nlinarith [hbase_le, hpair_bound, hneg_le, hSUM_nn, hact.nonneg]
+
+/-- The all-rank/all-order compatibility wrapper around `bochner_step_action`. -/
+theorem bochner_step_unif
+    (g₀ : SmoothRiemannianMetric I M) (s k : ℕ)
+    (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
+    (hcurv : ∀ (r p : ℕ) (S : SmoothCcTensor g₀ 0 r),
+        ‖iteratedCovGrad (I := I) g₀ 0 (r + 1) p
+            (pointwiseTensorCurv (I := I) (M := M) g₀ r S)‖ ≤
+          Fc p * ∑ a ∈ Finset.range (p + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 r a S‖)
+    (Cbase : ℝ)
+    (hbase : ∀ (u : SmoothCcTensor g₀ 0 s),
+        ‖rawTensorConnLapSmooth (I := I) g₀ 0 (s + k)
+            (iteratedCovGrad (I := I) g₀ 0 s k u)‖ ^ 2 ≤
+          ‖iteratedCovGrad (I := I) g₀ 0 s k
+              (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ ^ 2
+          + Cbase * (∑ a ∈ Finset.range (k + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 s a u‖) ^ 2) :
+    ∀ (u : SmoothCcTensor g₀ 0 s),
+      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (k + 2) u)‖ ^ 2 ≤
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s k
+            (rawTensorConnLapSmooth (I := I) g₀ 0 s u))‖ ^ 2
+        + (Cbase + Fc 0) * (∑ a ∈ Finset.range (k + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 s a u‖) ^ 2 := by
+  refine bochner_step_action (I := I) (M := M) g₀ s k (Fc 0) ?_ Cbase hbase
+  refine ⟨hFc 0, ?_⟩
+  intro S
+  simpa only [iteratedCovGrad_zero, Nat.zero_add] using hcurv (s + k) 0 S
+
+/-- Closed covariant-jet constant for the finite `H²` Bochner estimate. -/
+def h2CovsumC (K : ℝ) : ℝ := 2 + Real.sqrt (1 + 4 * K)
+
+/-- The finite `H²` covariant-jet constant is nonnegative. -/
+theorem h2CovsumC_nonneg (K : ℝ) : 0 ≤ h2CovsumC K := by
+  unfold h2CovsumC
+  positivity
+
+/-- The finite curvature-action specialization of the hard `H²` Sobolev comparison.
+
+Only `IsCurvAction0 g₀ s K` is needed: the order-zero curvature action at the tensor rank being
+estimated.  No differentiated action, unrelated tensor rank, or all-order curvature family enters
+this estimate. -/
+theorem covsum_hs_two
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {K : ℝ}
+    (hact : IsCurvAction0 (I := I) (M := M) g₀ s K)
+    (S : SmoothCcTensor g₀ 0 s) :
+    ∑ j ∈ Finset.range 3, ‖iteratedCovGrad (I := I) g₀ 0 s j S‖ ≤
+      h2CovsumC K * ‖ccTensorToHs (I := I) (M := M) g₀ s (2 : ℝ) S‖ := by
+  classical
+  set N : ℝ := ‖ccTensorToHs (I := I) (M := M) g₀ s (2 : ℝ) S‖ with hN
+  have hN_nn : 0 ≤ N := norm_nonneg _
+  have hbase : ‖S‖ ≤ N := by
+    have hzero := rawIter_even (I := I) (M := M) g₀ s 0 S
+    rw [rawTensorConnLapIter_zero, SmoothCcTensor.norm_toL2] at hzero
+    refine hzero.trans ?_
+    rw [hN]
+    exact ccToHs_norm_mono (I := I) (M := M) g₀ s (by norm_num) S
+  have hlap : ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ ≤ N := by
+    have hone := rawIter_even (I := I) (M := M) g₀ s 1 S
+    rw [rawTensorConnLapIter_one, SmoothCcTensor.norm_toL2] at hone
+    simpa [hN] using hone
+  have hdir :
+      ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ ^ 2 ≤
+        ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ * ‖S‖ := by
+    have h := covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g₀ s S
+    rw [tensorL2Norm_toFun_eq_norm (I := I) (M := M) g₀
+        (covGrad (I := I) (M := M) g₀ 0 s S),
+      tensorL2Norm_toFun_eq_norm (I := I) (M := M) g₀
+        (rawTensorConnLapSmooth (I := I) g₀ 0 s S),
+      tensorL2Norm_toFun_eq_norm (I := I) (M := M) g₀ S] at h
+    exact h
+  have hgrad_sq : ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ ^ 2 ≤ N ^ 2 := by
+    calc
+      ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ ^ 2
+          ≤ ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ * ‖S‖ := hdir
+      _ ≤ N * N := mul_le_mul hlap hbase (norm_nonneg _) hN_nn
+      _ = N ^ 2 := by ring
+  have hgrad : ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ ≤ N :=
+    le_of_sq_le_sq hgrad_sq hN_nn
+  have hcomm : ∀ u : SmoothCcTensor g₀ 0 s,
+      ‖rawTensorConnLapSmooth (I := I) g₀ 0 (s + 0)
+          (iteratedCovGrad (I := I) g₀ 0 s 0 u)‖ ^ 2 ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 s 0
+            (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ ^ 2 +
+          0 * (∑ a ∈ Finset.range (0 + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 s a u‖) ^ 2 := by
+    intro u
+    simp only [Nat.add_zero, iteratedCovGrad_zero, zero_mul, add_zero]
+    exact le_rfl
+  have hstep := bochner_step_action (I := I) (M := M) g₀ s 0 K hact 0 hcomm S
+  rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_toL2] at hstep
+  simp only [zero_add, iteratedCovGrad_zero] at hstep
+  have hsum01 :
+      ∑ a ∈ Finset.range 2, ‖iteratedCovGrad (I := I) g₀ 0 s a S‖ ≤ 2 * N := by
+    rw [Finset.sum_range_succ, Finset.sum_range_one, iteratedCovGrad_zero]
+    nlinarith
+  have hlap_sq : ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ ^ 2 ≤ N ^ 2 :=
+    pow_le_pow_left₀ (norm_nonneg _) hlap 2
+  have hsum_sq :
+      (∑ a ∈ Finset.range 2, ‖iteratedCovGrad (I := I) g₀ 0 s a S‖) ^ 2 ≤
+        (2 * N) ^ 2 :=
+    pow_le_pow_left₀ (Finset.sum_nonneg (fun _ _ => norm_nonneg _)) hsum01 2
+  have hKsum :
+      K * (∑ a ∈ Finset.range 2,
+          ‖iteratedCovGrad (I := I) g₀ 0 s a S‖) ^ 2 ≤ K * (2 * N) ^ 2 :=
+    mul_le_mul_of_nonneg_left hsum_sq hact.nonneg
+  have hsqrt_arg : 0 ≤ 1 + 4 * K := by nlinarith [hact.nonneg]
+  have hsqrt_sq : Real.sqrt (1 + 4 * K) ^ 2 = 1 + 4 * K :=
+    Real.sq_sqrt hsqrt_arg
+  have hsecond_sq :
+      ‖iteratedCovGrad (I := I) g₀ 0 s 2 S‖ ^ 2 ≤
+        (Real.sqrt (1 + 4 * K) * N) ^ 2 := by
+    calc
+      ‖iteratedCovGrad (I := I) g₀ 0 s 2 S‖ ^ 2 ≤
+          ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ ^ 2 +
+            K * (∑ a ∈ Finset.range 2,
+              ‖iteratedCovGrad (I := I) g₀ 0 s a S‖) ^ 2 := hstep
+      _ ≤ N ^ 2 + K * (2 * N) ^ 2 := add_le_add hlap_sq hKsum
+      _ = (1 + 4 * K) * N ^ 2 := by ring
+      _ = Real.sqrt (1 + 4 * K) ^ 2 * N ^ 2 := by rw [hsqrt_sq]
+      _ = (Real.sqrt (1 + 4 * K) * N) ^ 2 := by ring
+  have hsecond : ‖iteratedCovGrad (I := I) g₀ 0 s 2 S‖ ≤
+      Real.sqrt (1 + 4 * K) * N :=
+    le_of_sq_le_sq hsecond_sq (mul_nonneg (Real.sqrt_nonneg _) hN_nn)
+  calc
+    ∑ j ∈ Finset.range 3, ‖iteratedCovGrad (I := I) g₀ 0 s j S‖ =
+        ‖S‖ + ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ +
+          ‖iteratedCovGrad (I := I) g₀ 0 s 2 S‖ := by
+            norm_num [Finset.sum_range_succ, iteratedCovGrad_zero]
+    _ ≤ N + N + Real.sqrt (1 + 4 * K) * N := by linarith
+    _ = h2CovsumC K *
+        ‖ccTensorToHs (I := I) (M := M) g₀ s (2 : ℝ) S‖ := by
+      rw [hN]
+      unfold h2CovsumC
+      ring
 
 /-- **Constant-exposed form of `roughLapComm_unif`** (brick E1).  Same bound, but with the closed
 formula `roughLapCommC Fc m p = ∑_{q<m} Fc (p+q)` in place of an existential witness, so two

@@ -119,6 +119,111 @@ theorem lowRegN_on_smooth
     rw [hrep]
   simpa only [u, x] using hx.trans hN
 
+/-- **The static seed mass of the low-regularity Ricci--DeTurck forcing.**
+
+`𝒩(0)` — the value of the dense-extension nonlinearity `lowRegN` at the zero
+state — is, by `lowRegN_on_smooth` at the zero smooth representative, the
+order-one spectral embedding of the genuine smooth remainder
+`deTurckSmoothRemainder g₀ g_bg (symmS g₀ 0)`.  Hence every FINITE
+`(1 + λᵢ)^n`-weighted mode mass of `𝒩(0)` is bounded by a constant squared that
+depends only on the data `(g₀, g_bg, δ)` — in particular not on the mode set,
+so not on a Galerkin level `N`.  This is the shape the rung Grönwall consumes
+for its additive seed term.
+
+It is the `a = 1` analogue of `deTurckGalerkinForcing_seed_mass`, whose
+`2·finrank + 10 ≤ a` supercriticality gate blocks direct reuse at the low base;
+here the identification of `𝒩(0)` with a smooth remainder comes from the dense
+extension instead, so no gate is needed.  The finite-mass step is the existing
+finite-set Bessel truncation `cc_partial_le_norm`; no new spectral input is
+used. -/
+theorem lowRegSeedMass
+    (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
+    (hR : 0 < R) (hδ : δ < 1)
+    (hreal : ∀ P : SmoothCcTensor g₀ 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (((1 : ℕ) : ℝ) + 1) P‖ ≤ R →
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ)
+    (hcore : Continuous (coreN (I := I) (M := M) g₀ g_bg hδ hreal)) :
+    ∃ Cseed : ℕ → ℝ, (∀ n, 0 ≤ Cseed n) ∧
+      ∀ (n : ℕ) (F : Finset
+          (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2)),
+        ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (n : ℝ) *
+            ((lowRegN (I := I) (M := M) g₀ g_bg hR hδ hreal
+              ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩).coeff i) ^ 2 ≤
+          Cseed n ^ 2 := by
+  classical
+  have hzero_embed :
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) =
+        smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+          (0 : SmoothCcTensor g₀ 0 2) := by
+    refine tensorHs.ext ?_
+    funext i
+    rw [tensorHs.zero_coeff, smoothCcToTensorHs_coeff,
+      show SmoothCcTensor.toL2 (0 : SmoothCcTensor g₀ 0 2) = 0 from map_zero _,
+      tensorL2Coeff_eq_inner, inner_zero_right]
+  have hS : ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+      (smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+        (0 : SmoothCcTensor g₀ 0 2))‖ ≤ R := by
+    rw [← hzero_embed]
+    simpa only [map_zero, norm_zero] using hR.le
+  have hsub : (⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩ :
+        lowerState (I := I) (M := M) g₀ 1 R) =
+      ⟨smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2)
+        (0 : SmoothCcTensor g₀ 0 2), hS⟩ := Subtype.ext hzero_embed
+  have hN := lowRegN_on_smooth (I := I) (M := M) g₀ g_bg hR hδ hreal hcore
+    (0 : SmoothCcTensor g₀ 0 2) hS
+  refine ⟨fun n => ‖smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ)
+      (deTurckSmoothRemainder (I := I) g₀ g_bg
+        (symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+        (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+          (0 : SmoothCcTensor g₀ 0 2) hS)))‖,
+    fun n => norm_nonneg _, ?_⟩
+  intro n F
+  have hcoeff : ∀ i, (lowRegN (I := I) (M := M) g₀ g_bg hR hδ hreal
+        ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩).coeff i =
+      (ccTensorToHs (I := I) (M := M) g₀ 2 (n : ℝ)
+        (deTurckSmoothRemainder (I := I) g₀ g_bg
+          (symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+          (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+            (0 : SmoothCcTensor g₀ 0 2) hS)))).coeff i := by
+    intro i
+    rw [hsub, hN, deTurckSmoothN_coeff, ccTensorToHs_coeff]
+  have hbridge : ccTensorToHs (I := I) (M := M) g₀ 2 (n : ℝ)
+        (deTurckSmoothRemainder (I := I) g₀ g_bg
+          (symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+          (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+            (0 : SmoothCcTensor g₀ 0 2) hS))) =
+      smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ)
+        (deTurckSmoothRemainder (I := I) g₀ g_bg
+          (symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+          (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+            (0 : SmoothCcTensor g₀ 0 2) hS))) :=
+    tensorHs.ext (funext (fun _ => rfl))
+  calc ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (n : ℝ) *
+        ((lowRegN (I := I) (M := M) g₀ g_bg hR hδ hreal
+          ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hR.le⟩).coeff i) ^ 2
+      = ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (n : ℝ) *
+          ((ccTensorToHs (I := I) (M := M) g₀ 2 (n : ℝ)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg
+              (symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+              (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+                (0 : SmoothCcTensor g₀ 0 2) hS)))).coeff i) ^ 2 :=
+        Finset.sum_congr rfl (fun i _ => by rw [hcoeff i])
+    _ ≤ ‖ccTensorToHs (I := I) (M := M) g₀ 2 (n : ℝ)
+          (deTurckSmoothRemainder (I := I) g₀ g_bg
+            (symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+            (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+              (0 : SmoothCcTensor g₀ 0 2) hS)))‖ ^ 2 :=
+        cc_partial_le_norm (I := I) (M := M) g₀ 2 (n : ℝ) _ F
+    _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ)
+          (deTurckSmoothRemainder (I := I) g₀ g_bg
+            (symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)) hδ
+            (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
+              (0 : SmoothCcTensor g₀ 0 2) hS)))‖ ^ 2 := by rw [hbridge]
+
 /-- If a smooth representative family is pinned to the lower-regularity
 maximal-regularity field, its forcing is the genuine smooth Ricci--DeTurck
 forcing almost everywhere on the original time interval `T`. -/

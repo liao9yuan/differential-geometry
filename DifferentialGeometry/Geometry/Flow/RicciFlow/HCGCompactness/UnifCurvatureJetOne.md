@@ -21,6 +21,12 @@ order-zero curvature, and differentiated Palatini producers. The class input
 stops at metric-jet order three. No lowering defect or fourth metric derivative
 appears.
 
+`unifRmOpOne_of` is also public.  It retains the sharper covariant
+Riemann-operator estimate with both fixed-background caps supplied, which is
+the exact first-jet input needed by the rank-two curvature-action package; no
+all-rank or all-order curvature envelope is introduced.  Its closed coefficient
+has the reusable sign lemma `rmOneOpC_nonneg`.
+
 Focused verification and the exact targeted module refresh pass. Direct axiom
 audits of `unifRmJetOne` and `unifRmSecOne` report only `propext`,
 `Classical.choice`, and `Quot.sound`. The file has no placeholders; the exact
@@ -37,8 +43,9 @@ rank-five tensor norm and then to smooth-section currency.
 
 ## Next consumer
 
-Use `unifRmSecOne` to close the `j = 1` static-field `Ksup` packet and hence the
-remaining E6 hypothesis.
+Use `unifRmSecOne` to close the `j = 1` static-field `Ksup` packet.  Use the
+supplied-cap operator face `unifRmOpOne_of` in the separate rank-two
+curvature-action producer for the finite `H²` realization radius.
 
 ## Project accounting
 

@@ -1173,7 +1173,7 @@ private lemma b4_unit_read (g₀ : SmoothRiemannianMetric I M)
 
 /-- **The radius-free `mcd` split** (the session's fibre identity): by `htie`, the `g₁`-lowered
 connection difference is its `g₀`-lowering plus the two-orientation `P`-trace correction. -/
-private theorem b4_mcd_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+theorem b4_mcd_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
@@ -1776,7 +1776,7 @@ fixed tensor (per-order constants via `exists_bound_riemannianFiberNormSq_smooth
 stripping the source reindex); the `slotExtend³ P` arm lands in the grid window at `l + 1`
 (order `0` through the `Λ₀` sup, positive orders through `b4_bP_le_grid`).  Constants depend
 only on `g₀`, `Λ₀`, `l`, `dim E`. -/
-private lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
+lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kphi : ℕ → ℝ, (∀ l, 0 ≤ Kphi l) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2)
@@ -2013,8 +2013,13 @@ private lemma b4_app_atgw (g₀ gb : SmoothRiemannianMetric I M) (σ : Equiv.Per
 set_option linter.unusedVariables false in
 /-- **(2) Pointwise radius-free `atgw` bound for the `g₁`-lowered connection difference** via
 the fibre identity `b4_mcd_eq`:
-`|∇ⁿ(metricConnDiffLoweredCc g₀ g₁ gb)|²(x) ≤ Kmcd n · atgw(bP)(n+2)`. -/
-private lemma b4_mcd_atgw (g₀ gb : SmoothRiemannianMetric I M)
+`|∇ⁿ(metricConnDiffLoweredCc g₀ g₁ gb)|²(x) ≤ Kmcd n · atgw(bP)(n+2)`.
+
+Offset `+2` — one derivative of the state — because the moving lowering only adds an
+order-zero factor to the background-lowered connection difference `wXi`.  Public: this is
+the currency the DeTurck order-one Lie arm spends on `lieArm1PsiB`, whose `Ψ` factor is
+exactly this arm raised and slot-permuted. -/
+theorem b4_mcd_atgw (g₀ gb : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kmcd : ℕ → ℝ, (∀ n, 0 ≤ Kmcd n) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -2218,8 +2223,12 @@ theorem mcd_l2_radiusFree
 set_option linter.unusedVariables false in
 /-- **(3) Pointwise radius-free `atgw` bound for `wOmega`** — the in-proof fold of the tower's
 `wOmega_lowOrder_jetL2_radiusFree` re-derived at the pointwise level from the two exposed
-producers: `|∇ⁿ(wOmega g₀ g₁ gb)|²(x) ≤ KΩ n · atgw(bP)(n+2)`. -/
-private lemma b4_wOmega_atgw (g₀ gb : SmoothRiemannianMetric I M)
+producers: `|∇ⁿ(wOmega g₀ g₁ gb)|²(x) ≤ KΩ n · atgw(bP)(n+2)`.
+
+Public: it is the tail arm of `lc0VBPass`, and the `∇P`-capped re-derivation of the
+`lc0VB` window (`Lc0VBCapWindow.lean`, brick A1-CUR-2) has to re-enter the fold at
+the ARM level rather than reuse the already-folded `b4_vb_atgw`. -/
+theorem b4_wOmega_atgw (g₀ gb : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ KΩ : ℕ → ℝ, (∀ n, 0 ≤ KΩ n) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

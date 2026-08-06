@@ -363,6 +363,87 @@ theorem radialA2_pair
   · simp only [C]
     ring
 
+/-- The radial second-order pair estimate with a free smaller cutoff.  The
+coefficient `C` is chosen before `r`, so a consumer may shrink `r` after seeing
+`C` while retaining both operator bounds and the inclusion square. -/
+theorem radialA2_pairR
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M)
+    {ρ₀ δ : ℝ} (hρ₀ : 0 < ρ₀) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+    (hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ₀ →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ) :
+    ∃ (ρ C : ℝ) (hρ_le : ρ ≤ ρ₀), 0 < ρ ∧ 0 ≤ C ∧
+      ∀ {r : ℝ} (hr0 : 0 ≤ r) (hr_le : r ≤ ρ)
+        (T : SmoothCcTensor g 0 2),
+      let hreal' : ∀ S : SmoothCcTensor g 0 2,
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ r →
+            gFibreOpBound (I := I) (M := M) g
+              (ccTensorBilinSymm (I := I) g S) δ :=
+        fun S hS => hreal S (hS.trans (hr_le.trans hρ_le))
+      let A := lowCoreData (I := I) (M := M)
+        g hr0 hδ0 hδ_le hreal' T
+      ‖A.a2Hi (I := I) (M := M)‖ ≤ C * r ∧
+        ‖A.a2Lo (I := I) (M := M)‖ ≤ C * r ∧
+        (tensorHsInclusion (I := I) (M := M) (g := g)
+            (r := 0) (s := 2) (show (1 : ℝ) ≤ 2 by norm_num)).comp
+              (A.a2Hi (I := I) (M := M)) =
+          (A.a2Lo (I := I) (M := M)).comp
+            (tensorHsInclusion (I := I) (M := M) (g := g)
+              (r := 0) (s := 2) (show (3 : ℝ) ≤ 4 by norm_num)) := by
+  obtain ⟨ρ₂, C₂, hρ₂, hC₂, hc₂⟩ :=
+    c2_h2_small (I := I) (M := M) hDim g
+  obtain ⟨Cₐ, hCₐ, hpair⟩ :=
+    a2_pair (I := I) (M := M) hDim g
+  let ρ : ℝ := min ρ₀ ρ₂
+  let C : ℝ := Cₐ * C₂
+  have hρ : 0 < ρ := lt_min hρ₀ hρ₂
+  have hρ_le : ρ ≤ ρ₀ := min_le_left _ _
+  have hρ₂_le : ρ ≤ ρ₂ := min_le_right _ _
+  have hC : 0 ≤ C := mul_nonneg hCₐ hC₂
+  refine ⟨ρ, C, hρ_le, hρ, hC, ?_⟩
+  intro r hr0 hr_le T
+  dsimp only
+  let S : SmoothCcTensor g 0 2 :=
+    lowRadial (I := I) (M := M) g r T
+  have hSr :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ r :=
+    lowRadial_norm (I := I) (M := M) g hr0 T
+  have hSδ :
+      gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g S) δ :=
+    hreal S (hSr.trans (hr_le.trans hρ_le))
+  have hzeroHs :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (0 : SmoothCcTensor g 0 2)‖ ≤ ρ₀ := by
+    rw [show (0 : SmoothCcTensor g 0 2) =
+        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) by simp,
+      ccTensorToHs_smul, zero_smul, norm_zero]
+    exact hρ₀.le
+  have hZδ :
+      gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g
+          (0 : SmoothCcTensor g 0 2)) δ :=
+    hreal _ hzeroHs
+  let A : LowBaseActionData g :=
+    lowCoreData (I := I) (M := M) g hr0 hδ0 hδ_le
+      (fun P hP => hreal P (hP.trans (hr_le.trans hρ_le))) T
+  obtain ⟨hpoint, hjet⟩ :=
+    hc₂ S
+      (lowRadial_symm (I := I) (M := M) g r T)
+      hδ_le hδ0 hSδ hZδ hr0 (hr_le.trans hρ₂_le) hSr
+  have hB : 0 ≤ C₂ * r := mul_nonneg hC₂ hr0
+  obtain ⟨hHi, hLo, _, _, hcompat⟩ :=
+    hpair A (C₂ * r) hB (by
+      simpa only [A, lowCoreData, S] using hpoint) (by
+      simpa only [A, lowCoreData, S] using hjet)
+  refine ⟨hHi.trans_eq ?_, hLo.trans_eq ?_, hcompat⟩
+  · simp only [C]
+    ring
+  · simp only [C]
+    ring
+
 /-- Below one realized spectral `H2` cutoff, both total radial second-order
 operator maps are Lipschitz on the completed `H2` state space.  The same
 modulus, smooth-core read-offs, and commuting square hold at every smaller

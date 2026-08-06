@@ -1,40 +1,37 @@
-# UnifRealizeRadius.lean — the `P` slot of the six-number solve (Lane E, brick E5 tail)
+# UnifRealizeRadius.lean — the explicit finite-action realization package
 
-Status 2026-07-30: **landed, sorry-free, axiom-clean**.  Verification: focused check green,
-targeted module build green, `#print axioms` clean.
+Status 2026-08-05: the finite rank-two package is implemented and awaiting its
+dependency-ordered focused check.  The older all-order horizon theorem remains
+as compatibility API.
 
 ## Content
 
-One theorem, `lowregHorizon_unif_pos`:
+- `LowRegRealizeData` separates the threshold and radius data from proofs.
+- `IsLowRealizeUnif gBase Λ R` states that one pair has positive radius,
+  threshold below one, and realizes every order-three class metric.
+- `lowRealizeData` is the closed pair built from `morreyTwoC` and
+  `unifPtCurvZeroC`.
+- `lowRealize_unif_of` proves the package from two supplied fixed-background
+  curvature caps.
+- `exists_lowRealize` chooses those two caps before the variable class metric,
+  producing one honest class-uniform package.
+- `horizon_action_pos` inserts the finite-action radius into `lowregHorizon`.
 
-```
-0 < lowregHorizon Ctop B0 B1 D ρ (unifRealizeRad Cpt Fc d)
-```
+## Route
 
-from `lowregHorizon_pos` (`ShortTime/UnifClassBounds.lean`, brick E8a) and
-`unifRealizeRad_pos` (`Analysis/Spectral/Tensor/Estimates/H2PointwiseUnif.lean`, brick E5).
+The live route is finite and rank-specific.  Metric comparability plus jets
+through order two give the rank-two Morrey coefficient.  Jets through order
+three and fixed-background `R`/`nabla R` caps give `IsCurvAction0 g 2 K`.
+`realize_at_action` then supplies the uniform fibre realization statement in
+dimension three.  No all-rank curvature family is required.
 
-## Why it is only one theorem
+## Boundary
 
-The other two `P`-side obligations of `lowreg_partial_sol_of_bounds` are already discharged
-in `H2PointwiseUnif.lean` in exactly the shape that theorem wants:
+This closes only the realization face of `IsLowBoundsAt`.  The A2, affine, and
+nonlinear coefficient producers remain open, so the actual common envelope
+`lowreg_bounds_unif` and the uniform-existence endpoint are still unproved.
 
-* `hP : 0 < P` is `unifRealizeRad_pos`;
-* `hreal : ∀ T, ‖smoothCcToTensorHs g₀ ((1:ℕ)+1) T‖ ≤ P → gFibreOpBound g₀
-  (ccTensorBilinSymm g₀ T) δ` is `realize_at_unif`, verbatim, at
-  `δ = deTurckArmContractionThreshold'' (finrank ℝ E)`.
+## Verification
 
-So the only genuinely new fact at this layer is that the closed horizon stays positive at the
-closed radius.  A full specialization of `lowreg_partial_sol_of_bounds` with
-`P := unifRealizeRad …` was deliberately NOT written: it is pure mechanical substitution (the
-`hcont`/`htame`/`hzero` hypotheses would have to be re-typed against the specific `hreal`
-term, ~50 lines of copy with no mathematics), and its remaining inputs — `Ctop, B0, B1, D, ρ`
-— are exactly what bricks E6/E7 do not yet supply.  That instantiation is brick E8b and
-should be written once, there, when the five coefficient bounds exist.
-
-## Effect on Lane E
-
-`P` is no longer a source of `g₀`-dependence in the horizon: given class-uniform inputs
-`Cpt` (brick E4, NOT landed — currently a hypothesis) and `Fc` (brick E3, open), two metrics
-of the same `Λ`-class receive the SAME realization radius, hence — via `lowregHorizon_mono`
-plus class bounds on the five coefficient numbers — the same positive horizon.
+Pending restoration and verification of the native pointwise curvature-action
+dependency, followed by focused checking of this module.

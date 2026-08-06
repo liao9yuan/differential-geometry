@@ -268,3 +268,25 @@ the private `b4Phi` representation.
 Focused verification of both pairwise additions is GREEN.  Their consumer is
 the pairwise `C0` coefficient estimate in
 `DeTurckRemainderLowBaseLip.lean`.
+
+## 2026-08-04 — `b4_mcd_atgw` promoted to public
+
+Single-word change (`private lemma` → `theorem`, docstring extended); the proof
+and every other declaration in the file are untouched.
+
+Reason: `b4_mcd_atgw` is the radius-free pointwise `atgw(n+2)` window of
+`metricConnDiffLoweredCc g₀ g₁ gb` — the connection difference lowered by the
+*moving* metric.  By the public sign identity
+`metricConnDiffLoweredCc_eq_neg_kappa` that object is `-lieArm1LoweredBgKappa`,
+which is exactly the `Ψ` factor of the DeTurck order-one Lie arm's `lieArm1PsiB`.
+`Analysis/Sobolev/TensorHilbert/Low1KerRadiusFree.lean` consumes it to close
+`low1Ker_jet` (brick A1-CUR-1); without it the only alternative was to promote
+four private defs plus a private theorem out of
+`DeTurckLieArm1CoeffL2JetBound.lean` and re-derive the same window.
+
+The name was collision-scanned tree-wide before promotion (no other
+`b4_mcd_atgw` exists).  Downstream impact: the file's three direct importers
+(`DeTurckRemainderLowBaseAction`, `DeTurckRemainderLowBaseC1Lip`,
+`RHSRefoldTameH2`) rebuild; the census-target build after the promotion
+completed with 0 errors and the file's own axiom census is unchanged
+(everything `[propext, Classical.choice, Quot.sound]`).

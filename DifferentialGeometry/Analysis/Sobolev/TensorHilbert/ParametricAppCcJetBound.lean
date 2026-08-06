@@ -101,6 +101,255 @@ theorem app_jet_sq_le
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g 0 (b + l)])
 
+/-- **The head/tail `L²` Leibniz assembly of `appCc`: one Hölder side per
+Leibniz index.**
+
+`app_jet_sq_le` puts the coefficient in `L^∞` at *every* Leibniz index.  This
+sibling makes the opposite choice from index `1` on: index `0` keeps the
+coefficient in `L^∞` (one pointwise cap `B` on `Φ` itself) with the whole data
+window in `L²`, while every index `i ≥ 1` puts the *data window* `l ≤ j - i` in
+`L^∞` (its own cap `D i`) and reads the coefficient jet `∇ⁱΦ` in `L²`:
+
+`‖∇ʲ(appCc Φ W)‖² ≤ appCcGdiag j · (B · ∑_{l ≤ j} ‖∇ˡW‖²
+    + ∑_{1 ≤ i ≤ j} D i · ‖∇ⁱΦ‖²)`.
+
+This is the shape needed when the coefficient's *top* jets are expensive in
+`L^∞` — a coefficient whose `L²` tower already spends the state's own jets, so
+that the extra `+2` orders of the fibre Sobolev embedding would overshoot the
+budget — while the data is a low-order object whose sup norm is affordable.
+The constant is fixed before every argument and no Sobolev ball occurs. -/
+theorem app_jet_sq_head
+    (g : SmoothRiemannianMetric I M) (b c j : ℕ)
+    (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b) (B : ℝ) (D : ℕ → ℝ)
+    (hΦ : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g b c x (Φ.toSection x) ≤ B)
+    (hW : ∀ i, 1 ≤ i → ∀ x : M,
+      ∑ l ∈ Finset.range (j + 1 - i),
+          riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+            ((iteratedCovGrad (I := I) g 0 b l W).toSection x) ≤ D i) :
+    ‖iteratedCovGrad (I := I) g 0 c j
+        (appCc (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
+      appCcGdiag (E := E) j *
+        (B * ∑ l ∈ Finset.range (j + 1),
+            ‖iteratedCovGrad (I := I) g 0 b l W‖ ^ 2 +
+          ∑ i ∈ Finset.Icc 1 j, D i *
+            ‖iteratedCovGrad (I := I) g b c i Φ‖ ^ 2) := by
+  classical
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  have hWint : ∀ l : ℕ, MeasureTheory.Integrable (fun x : M =>
+      riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+        ((iteratedCovGrad (I := I) g 0 b l W).toSection x)) μ := fun l =>
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 (b + l)
+      (iteratedCovGrad (I := I) g 0 b l W)
+  have hCint : ∀ i : ℕ, MeasureTheory.Integrable (fun x : M =>
+      riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+        ((iteratedCovGrad (I := I) g b c i Φ).toSection x)) μ := fun i =>
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g b (c + i)
+      (iteratedCovGrad (I := I) g b c i Φ)
+  set F : M → ℝ := fun x => appCcGdiag (E := E) j *
+    (B * ∑ l ∈ Finset.range (j + 1),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+          ((iteratedCovGrad (I := I) g 0 b l W).toSection x) +
+      ∑ i ∈ Finset.Icc 1 j, D i *
+        riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+          ((iteratedCovGrad (I := I) g b c i Φ).toSection x)) with hF_def
+  have hF_int : MeasureTheory.Integrable F μ := by
+    rw [hF_def]
+    exact (((MeasureTheory.integrable_finset_sum (Finset.range (j + 1))
+        (fun l _ => hWint l)).const_mul B).add
+      (MeasureTheory.integrable_finset_sum (Finset.Icc 1 j)
+        (fun i _ => (hCint i).const_mul (D i)))).const_mul _
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (c + j) x
+          ((iteratedCovGrad (I := I) g 0 c j
+            (appCc (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
+    intro x
+    refine le_trans
+      (appCc_iteratedCovGrad_diagonalProductGrid_le
+        (I := I) (M := M) g b c Φ W j x) ?_
+    rw [hF_def]
+    refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
+    have hsplit : Finset.range (j + 1) = insert 0 (Finset.Icc 1 j) := by
+      ext i
+      simp only [Finset.mem_range, Finset.mem_insert, Finset.mem_Icc]
+      omega
+    have hnotmem : (0 : ℕ) ∉ Finset.Icc 1 j := by simp
+    conv_lhs => rw [hsplit]
+    rw [Finset.sum_insert hnotmem]
+    refine add_le_add ?_ (Finset.sum_le_sum (fun i hi => ?_))
+    · simp only [iteratedCovGrad_zero, Nat.add_zero, Nat.sub_zero]
+      exact mul_le_mul_of_nonneg_right (hΦ x)
+        (Finset.sum_nonneg (fun l _ =>
+          riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (b + l) x _))
+    · rw [Finset.mem_Icc] at hi
+      rw [mul_comm]
+      exact mul_le_mul_of_nonneg_right (hW i hi.1 x)
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g b (c + i) x _)
+  have hnorm := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    (I := I) (M := M) g 0 (c + j)
+    (iteratedCovGrad (I := I) g 0 c j
+      (appCc (I := I) (M := M) g b c Φ W)) F hF_int hpt
+  refine le_trans hnorm (le_of_eq ?_)
+  rw [hF_def, MeasureTheory.integral_const_mul,
+    MeasureTheory.integral_add
+      ((MeasureTheory.integrable_finset_sum (Finset.range (j + 1))
+        (fun l _ => hWint l)).const_mul B)
+      (MeasureTheory.integrable_finset_sum (Finset.Icc 1 j)
+        (fun i _ => (hCint i).const_mul (D i)))]
+  apply congrArg (fun z : ℝ => appCcGdiag (E := E) j * z)
+  refine congrArg₂ (· + ·) ?_ ?_
+  · rw [MeasureTheory.integral_const_mul,
+      MeasureTheory.integral_finset_sum (Finset.range (j + 1))
+        (fun l _ => hWint l)]
+    apply congrArg (fun z : ℝ => B * z)
+    exact Finset.sum_congr rfl (fun l _ => by
+      rw [SmoothCcTensor.norm_def,
+        tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+          (I := I) (M := M) g 0 (b + l)])
+  · rw [MeasureTheory.integral_finset_sum (Finset.Icc 1 j)
+      (fun i _ => (hCint i).const_mul (D i))]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [MeasureTheory.integral_const_mul]
+    apply congrArg (fun z : ℝ => D i * z)
+    rw [SmoothCcTensor.norm_def,
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+        (I := I) (M := M) g b (c + i)]
+
+/-- **The mixed per-index Hölder split of the `appCc` Leibniz sum.**
+
+`app_jet_sq_le` puts the coefficient in `L^∞` at *every* Leibniz index and
+`app_jet_sq_head` does so at index `0` only; this engine takes the choice as a
+parameter.  At the indices `i ∈ S` the coefficient jet `∇ⁱΦ` is capped
+pointwise (`B i`) and its companion data window `l ≤ j - i` is read in `L²`; at
+the indices `i ∉ S` the roles are exchanged — the data window is capped
+pointwise (`D i`) and `∇ⁱΦ` is read in `L²`:
+
+`‖∇ʲ(appCc Φ W)‖² ≤ appCcGdiag j · (∑_{i ∈ S} B i · ∑_{l ≤ j-i} ‖∇ˡW‖²`
+  `+ ∑_{i ∈ range (j+1) \ S} D i · ‖∇ⁱΦ‖²)`.
+
+`S = range (j+1)` is `app_jet_sq_le` and `S = {0}` is `app_jet_sq_head`.  The
+intended use is a threshold `S = range j`: a coefficient sup costs the fibre
+Sobolev embedding's `+2` orders on top of the coefficient's own tower index, so
+it stays inside an order budget exactly while that tower index is below the top
+one, and the last Leibniz index is priced from the data side instead.  The
+constant is fixed before every argument and no Sobolev ball occurs. -/
+theorem app_jet_sq_split
+    (g : SmoothRiemannianMetric I M) (b c j : ℕ)
+    (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b)
+    (S : Finset ℕ) (hS : S ⊆ Finset.range (j + 1)) (B D : ℕ → ℝ)
+    (hΦ : ∀ i ∈ S, ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+          ((iteratedCovGrad (I := I) g b c i Φ).toSection x) ≤ B i)
+    (hW : ∀ i ∈ Finset.range (j + 1) \ S, ∀ x : M,
+      ∑ l ∈ Finset.range (j + 1 - i),
+          riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+            ((iteratedCovGrad (I := I) g 0 b l W).toSection x) ≤ D i) :
+    ‖iteratedCovGrad (I := I) g 0 c j
+        (appCc (I := I) (M := M) g b c Φ W)‖ ^ 2 ≤
+      appCcGdiag (E := E) j *
+        (∑ i ∈ S, B i * ∑ l ∈ Finset.range (j + 1 - i),
+            ‖iteratedCovGrad (I := I) g 0 b l W‖ ^ 2 +
+          ∑ i ∈ Finset.range (j + 1) \ S, D i *
+            ‖iteratedCovGrad (I := I) g b c i Φ‖ ^ 2) := by
+  classical
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  have hWint : ∀ l : ℕ, MeasureTheory.Integrable (fun x : M =>
+      riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+        ((iteratedCovGrad (I := I) g 0 b l W).toSection x)) μ := fun l =>
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 (b + l)
+      (iteratedCovGrad (I := I) g 0 b l W)
+  have hCint : ∀ i : ℕ, MeasureTheory.Integrable (fun x : M =>
+      riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+        ((iteratedCovGrad (I := I) g b c i Φ).toSection x)) μ := fun i =>
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g b (c + i)
+      (iteratedCovGrad (I := I) g b c i Φ)
+  set F : M → ℝ := fun x => appCcGdiag (E := E) j *
+    (∑ i ∈ S, B i * ∑ l ∈ Finset.range (j + 1 - i),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+          ((iteratedCovGrad (I := I) g 0 b l W).toSection x) +
+      ∑ i ∈ Finset.range (j + 1) \ S, D i *
+        riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+          ((iteratedCovGrad (I := I) g b c i Φ).toSection x)) with hF_def
+  have hF_int : MeasureTheory.Integrable F μ := by
+    rw [hF_def]
+    exact ((MeasureTheory.integrable_finset_sum S (fun i _ =>
+        (MeasureTheory.integrable_finset_sum (Finset.range (j + 1 - i))
+          (fun l _ => hWint l)).const_mul (B i))).add
+      (MeasureTheory.integrable_finset_sum (Finset.range (j + 1) \ S)
+        (fun i _ => (hCint i).const_mul (D i)))).const_mul _
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (c + j) x
+          ((iteratedCovGrad (I := I) g 0 c j
+            (appCc (I := I) (M := M) g b c Φ W)).toSection x) ≤ F x := by
+    intro x
+    refine le_trans
+      (appCc_iteratedCovGrad_diagonalProductGrid_le
+        (I := I) (M := M) g b c Φ W j x) ?_
+    rw [hF_def]
+    refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
+    rw [← Finset.sum_sdiff hS]
+    have hdiff : (∑ i ∈ Finset.range (j + 1) \ S,
+        riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+            ((iteratedCovGrad (I := I) g b c i Φ).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+              ((iteratedCovGrad (I := I) g 0 b l W).toSection x)) ≤
+        ∑ i ∈ Finset.range (j + 1) \ S, D i *
+          riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+            ((iteratedCovGrad (I := I) g b c i Φ).toSection x) := by
+      refine Finset.sum_le_sum (fun i hi => ?_)
+      rw [mul_comm (D i)]
+      exact mul_le_mul_of_nonneg_left (hW i hi x)
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g b (c + i) x _)
+    have hin : (∑ i ∈ S,
+        riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+            ((iteratedCovGrad (I := I) g b c i Φ).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+              ((iteratedCovGrad (I := I) g 0 b l W).toSection x)) ≤
+        ∑ i ∈ S, B i * ∑ l ∈ Finset.range (j + 1 - i),
+          riemannianFiberNormSq (I := I) (M := M) g 0 (b + l) x
+            ((iteratedCovGrad (I := I) g 0 b l W).toSection x) := by
+      refine Finset.sum_le_sum (fun i hi => ?_)
+      exact mul_le_mul_of_nonneg_right (hΦ i hi x)
+        (Finset.sum_nonneg (fun l _ =>
+          riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (b + l) x _))
+    linarith only [hdiff, hin]
+  have hnorm := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    (I := I) (M := M) g 0 (c + j)
+    (iteratedCovGrad (I := I) g 0 c j
+      (appCc (I := I) (M := M) g b c Φ W)) F hF_int hpt
+  refine le_trans hnorm (le_of_eq ?_)
+  rw [hF_def, MeasureTheory.integral_const_mul,
+    MeasureTheory.integral_add
+      (MeasureTheory.integrable_finset_sum S (fun i _ =>
+        (MeasureTheory.integrable_finset_sum (Finset.range (j + 1 - i))
+          (fun l _ => hWint l)).const_mul (B i)))
+      (MeasureTheory.integrable_finset_sum (Finset.range (j + 1) \ S)
+        (fun i _ => (hCint i).const_mul (D i)))]
+  apply congrArg (fun z : ℝ => appCcGdiag (E := E) j * z)
+  refine congrArg₂ (· + ·) ?_ ?_
+  · rw [MeasureTheory.integral_finset_sum S (fun i _ =>
+      (MeasureTheory.integrable_finset_sum (Finset.range (j + 1 - i))
+        (fun l _ => hWint l)).const_mul (B i))]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [MeasureTheory.integral_const_mul,
+      MeasureTheory.integral_finset_sum (Finset.range (j + 1 - i))
+        (fun l _ => hWint l)]
+    apply congrArg (fun z : ℝ => B i * z)
+    exact Finset.sum_congr rfl (fun l _ => by
+      rw [SmoothCcTensor.norm_def,
+        tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+          (I := I) (M := M) g 0 (b + l)])
+  · rw [MeasureTheory.integral_finset_sum (Finset.range (j + 1) \ S)
+      (fun i _ => (hCint i).const_mul (D i))]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [MeasureTheory.integral_const_mul]
+    apply congrArg (fun z : ℝ => D i * z)
+    rw [SmoothCcTensor.norm_def,
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+        (I := I) (M := M) g b (c + i)]
+
 /-- A common pointwise coefficient-jet envelope gives one `L²` action-jet
 window for an arbitrary parameter family. -/
 theorem app_jet_of_bdd

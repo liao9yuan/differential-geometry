@@ -374,6 +374,290 @@ theorem lowreg_partial_sol_of_bounds (g₀ g_bg : SmoothRiemannianMetric I M)
   have hTT₀ : T ≤ T₀ := hTτ.trans hτ.le
   simpa only [Nat.cast_one] using hsol hT hTT₀ hT1
 
+/-! ### The solve, packaged as a property of its forcing -/
+
+/-- **The order-one low-lane solve at one explicit witness tuple.**
+
+This is the witness-preserving sibling of `IsLowSolve`.  Its numerical
+parameters are indices rather than existential fields, and `hcap` records the
+external radius cap used by the producer.  Energy and absorption arguments use
+this package when they must relate the solver's actual `δ` and state radius to
+constants chosen before the solve. -/
+structure IsLowSolveAt (g₀ : SmoothRiemannianMetric I M)
+    {δ Ctop B0 B1 D ρ P T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
+    (Rcap : ℝ) : Prop where
+  hδ : δ < 1
+  hCtop : 0 ≤ Ctop
+  hB1 : 0 ≤ B1
+  hρ : 0 < ρ
+  hP : 0 < P
+  hreal : ∀ S : SmoothCcTensor g₀ 0 2,
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) S‖ ≤ P →
+      gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ S) δ
+  hδ0 : 0 ≤ δ
+  hδ3 : δ ≤ 1 / 3
+  hcore : Continuous (coreN (I := I) (M := M) g₀ g₀ hδ
+    (lowregRealRad (I := I) (M := M) g₀ (Ctop := Ctop) (B1 := B1) (ρ := ρ)
+      hP.le hreal))
+  hB0 : 0 ≤ B0
+  hcont : Continuous
+    (lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal)
+  htame : ∀ u v : lowerState (I := I) (M := M) g₀ 1
+      (lowregStateRad Ctop B1 ρ P),
+    ‖lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal u -
+        lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal v‖ ≤
+      Ctop * lowregOuterRad Ctop ρ P *
+          ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+            (((1 : ℕ) : ℝ) + 2)) - v.1‖ +
+        B0 *
+          ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+            ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1)‖ +
+        B1 *
+            (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2))‖ +
+              ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2))‖) *
+          ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+            ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1)‖
+  hzero : ‖lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
+      ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1
+        (lowregStateRad_pos hCtop hB1 hρ hP).le⟩‖ ≤ D
+  hTτ : T ≤ lowregHorizon Ctop B0 B1 D ρ P
+  hball : ‖fLo‖ ≤ lowregStateRad Ctop B1 ρ P / 4
+  hforce : fLo =ᵐ[timeMeasure T]
+    (fun t => lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
+      (aeSetLift (zero_mem_lowerState (I := I) (M := M) g₀ 1
+          (lowregStateRad_pos hCtop hB1 hρ hP).le)
+        (maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2))
+          fLo) t))
+  hcap : lowregStateRad Ctop B1 ρ P ≤ Rcap
+
+/-- **The order-one low-lane solve, as a property of its forcing.**
+
+`fLo` is a *low solve* on the horizon `T` when it is the forcing of the
+order-one Ricci--DeTurck contraction run at `g₀` **against itself**: there are a
+fibre threshold `δ` and the six numbers `Ctop, B0, B1, D, ρ, P` of
+`lowreg_partial_sol_of_bounds` together with
+
+* the producer certificates for `lowregNfun` at those numbers -- the metric
+  realization bound at radius `P`, continuity, the three-arm tame estimate on
+  the closed state ball, and the zero-state bound `D`;
+* the quantitative certificates the jet ladders consume: `0 ≤ δ ≤ 1/3` (not
+  merely `δ < 1`) and continuity of the smooth core `coreN` at the *same*
+  realization used by `lowregNfun`;
+* the horizon cap `T ≤ lowregHorizon Ctop B0 B1 D ρ P`;
+* the two facts about `fLo` itself that the solve exports: the forcing ball
+  `‖fLo‖ ≤ lowregStateRad Ctop B1 ρ P / 4` and the a.e. Nemytskii identity
+  along `fLo`'s own zero-datum Duhamel field.
+
+Every field is either a hypothesis or a conclusion of
+`lowreg_partial_sol_of_bounds`, so a producer that has already run that
+theorem obtains the package for free (`isLowSolve_of_sol`); nothing here is a
+new proof obligation.
+
+**Why the background is `g₀` itself.**  The solve producers run the contraction
+at the self-background: the exact calibrated route is `lowreg_solve_adapt`
+through `lowreg_solve_two_at`, while `lowreg_solve_two` retains the compatibility
+interface.  Every
+downstream jet estimate on the trajectory compares the flow with `g₀`.  Leaving
+the background existential would let a consumer receive a package about an
+unrelated metric, which no ladder can use; so it is pinned rather than bound.
+
+**Why it is a package.**  It is the compatibility input of the base *energy*
+estimates on the order-one trajectory.  Absorption-aware rung estimates instead
+consume `IsAdaptedLowSolve`, which retains this package's exact witnesses through
+`IsLowSolveAt` and adds the ordered rung and absorption certificates.  A
+Galerkin argument works on the spectrally
+truncated system, and to compare the truncated forcing with `fLo` it needs the
+nonlinearity's contraction constants, the state ball and the fixed-point
+equation -- none of which survives the `H²` lift, which remembers only the
+lifted forcing.  The threshold and the six numbers are existentially bound so
+that a consumer states no condition relating them to its own data. -/
+def IsLowSolve (g₀ : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
+    (hT1 : T ≤ 1)
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T) : Prop :=
+  ∃ (δ Ctop B0 B1 D ρ P : ℝ) (hδ : δ < 1)
+    (hCtop : 0 ≤ Ctop) (hB1 : 0 ≤ B1) (hρ : 0 < ρ) (hP : 0 < P)
+    (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) S‖ ≤ P →
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ S) δ),
+    0 ≤ δ ∧ δ ≤ 1 / 3 ∧
+      Continuous (coreN (I := I) (M := M) g₀ g₀ hδ
+        (lowregRealRad (I := I) (M := M) g₀ (Ctop := Ctop) (B1 := B1) (ρ := ρ)
+          hP.le hreal)) ∧
+      0 ≤ B0 ∧
+      Continuous
+        (lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal) ∧
+      (∀ u v : lowerState (I := I) (M := M) g₀ 1
+          (lowregStateRad Ctop B1 ρ P),
+        ‖lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal u -
+            lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal v‖ ≤
+          Ctop * lowregOuterRad Ctop ρ P *
+              ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - v.1‖ +
+            B0 *
+              ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+                ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2)) - v.1)‖ +
+            B1 *
+                (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2))‖ +
+                  ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                    (((1 : ℕ) : ℝ) + 2))‖) *
+              ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+                ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2)) - v.1)‖) ∧
+      ‖lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
+        ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1
+          (lowregStateRad_pos hCtop hB1 hρ hP).le⟩‖ ≤ D ∧
+      T ≤ lowregHorizon Ctop B0 B1 D ρ P ∧
+      ‖fLo‖ ≤ lowregStateRad Ctop B1 ρ P / 4 ∧
+      fLo =ᵐ[timeMeasure T]
+        (fun t => lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
+          (aeSetLift (zero_mem_lowerState (I := I) (M := M) g₀ 1
+              (lowregStateRad_pos hCtop hB1 hρ hP).le)
+            (maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2))
+              fLo) t))
+
+/-- **Satisfiability of `IsLowSolve`.**  A producer that has run
+`lowreg_partial_sol_of_bounds` at the self-background holds every field of the
+package: its own hypotheses, the two quantitative certificates `0 ≤ δ ≤ 1/3`
+and `coreN`-continuity, its horizon cap, and the two conclusions about the
+produced forcing.  This is the honest-input witness for the compatibility
+`IsLowSolve` interface.  Exact absorption-aware callers retain the same witness
+through `IsLowSolveAt` and then package it as `IsAdaptedLowSolve`. -/
+theorem isLowSolve_of_sol (g₀ : SmoothRiemannianMetric I M)
+    {δ Ctop B0 B1 D ρ P : ℝ} (hδ : δ < 1) (hCtop : 0 ≤ Ctop) (hB0 : 0 ≤ B0)
+    (hB1 : 0 ≤ B1) (hρ : 0 < ρ) (hP : 0 < P)
+    (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) S‖ ≤ P →
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ S) δ)
+    (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
+    (hcore : Continuous (coreN (I := I) (M := M) g₀ g₀ hδ
+      (lowregRealRad (I := I) (M := M) g₀ (Ctop := Ctop) (B1 := B1) (ρ := ρ)
+        hP.le hreal)))
+    (hcont : Continuous
+      (lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal))
+    (htame : ∀ u v : lowerState (I := I) (M := M) g₀ 1
+        (lowregStateRad Ctop B1 ρ P),
+      ‖lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal u -
+          lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal v‖ ≤
+        Ctop * lowregOuterRad Ctop ρ P *
+            ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1‖ +
+          B0 *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - v.1)‖ +
+          B1 *
+              (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2))‖ +
+                ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2))‖) *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - v.1)‖)
+    (hzero : ‖lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
+        ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1
+          (lowregStateRad_pos hCtop hB1 hρ hP).le⟩‖ ≤ D)
+    {T : ℝ} (hT : 0 < T) (hTτ : T ≤ lowregHorizon Ctop B0 B1 D ρ P)
+    (hT1 : T ≤ 1)
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
+    (hball : ‖fLo‖ ≤ lowregStateRad Ctop B1 ρ P / 4)
+    (hforce : fLo =ᵐ[timeMeasure T]
+      (fun t => lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
+        (aeSetLift (zero_mem_lowerState (I := I) (M := M) g₀ 1
+            (lowregStateRad_pos hCtop hB1 hρ hP).le)
+          (maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2))
+            fLo) t))) :
+    IsLowSolve (I := I) (M := M) g₀ hT hT1 fLo :=
+  ⟨δ, Ctop, B0, B1, D, ρ, P, hδ, hCtop, hB1, hρ, hP, hreal, hδ0, hδ3, hcore,
+    hB0, hcont, htame, hzero, hTτ, hball, hforce⟩
+
+/-- Build the explicit solve package from the exact hypotheses and conclusions
+of `lowreg_partial_sol_of_bounds`, together with the producer's external state
+radius cap. -/
+theorem isLowSolveAt_of_sol (g₀ : SmoothRiemannianMetric I M)
+    {δ Ctop B0 B1 D ρ P : ℝ} (hδ : δ < 1) (hCtop : 0 ≤ Ctop) (hB0 : 0 ≤ B0)
+    (hB1 : 0 ≤ B1) (hρ : 0 < ρ) (hP : 0 < P)
+    (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) S‖ ≤ P →
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ S) δ)
+    (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
+    (hcore : Continuous (coreN (I := I) (M := M) g₀ g₀ hδ
+      (lowregRealRad (I := I) (M := M) g₀ (Ctop := Ctop) (B1 := B1) (ρ := ρ)
+        hP.le hreal)))
+    (hcont : Continuous
+      (lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal))
+    (htame : ∀ u v : lowerState (I := I) (M := M) g₀ 1
+        (lowregStateRad Ctop B1 ρ P),
+      ‖lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal u -
+          lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal v‖ ≤
+        Ctop * lowregOuterRad Ctop ρ P *
+            ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1‖ +
+          B0 *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - v.1)‖ +
+          B1 *
+              (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2))‖ +
+                ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                  (((1 : ℕ) : ℝ) + 2))‖) *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+              ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2)) - v.1)‖)
+    (hzero : ‖lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
+        ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1
+          (lowregStateRad_pos hCtop hB1 hρ hP).le⟩‖ ≤ D)
+    {T : ℝ} (hT : 0 < T) (hTτ : T ≤ lowregHorizon Ctop B0 B1 D ρ P)
+    (hT1 : T ≤ 1)
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
+    (hball : ‖fLo‖ ≤ lowregStateRad Ctop B1 ρ P / 4)
+    (hforce : fLo =ᵐ[timeMeasure T]
+      (fun t => lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
+        (aeSetLift (zero_mem_lowerState (I := I) (M := M) g₀ 1
+            (lowregStateRad_pos hCtop hB1 hρ hP).le)
+          (maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2))
+            fLo) t)))
+    {Rcap : ℝ} (hcap : lowregStateRad Ctop B1 ρ P ≤ Rcap) :
+    IsLowSolveAt (I := I) (M := M) (δ := δ) (Ctop := Ctop) (B0 := B0)
+      (B1 := B1) (D := D) (ρ := ρ) (P := P) g₀ hT hT1 fLo Rcap :=
+  ⟨hδ, hCtop, hB1, hρ, hP, hreal, hδ0, hδ3, hcore, hB0, hcont, htame,
+    hzero, hTτ, hball, hforce, hcap⟩
+
+/-- Forget the explicit witnesses and external cap, recovering the stable
+existential low-solve API. -/
+theorem IsLowSolveAt.toIsLowSolve {g₀ : SmoothRiemannianMetric I M}
+    {δ Ctop B0 B1 D ρ P T Rcap : ℝ} {hT : 0 < T} {hT1 : T ≤ 1}
+    {fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T}
+    (h : IsLowSolveAt (I := I) (M := M) (δ := δ) (Ctop := Ctop) (B0 := B0)
+      (B1 := B1) (D := D) (ρ := ρ) (P := P) g₀ hT hT1 fLo Rcap) :
+    IsLowSolve (I := I) (M := M) g₀ hT hT1 fLo :=
+  isLowSolve_of_sol (I := I) (M := M) g₀ h.hδ h.hCtop h.hB0 h.hB1 h.hρ h.hP
+    h.hreal h.hδ0 h.hδ3 h.hcore h.hcont h.htame h.hzero hT h.hTτ hT1 fLo
+    h.hball h.hforce
+
 /-- Satisfiability of the six-number hypotheses.  For every metric the
 existing per-metric producers supply constants `Ctop, B0, B1, D` and an outer
 radius `ρ` for which the hypotheses of `lowreg_partial_sol_of_bounds` hold at
@@ -445,6 +729,183 @@ theorem lowreg_bounds_exist (hDim : Module.finrank ℝ E = 3)
     ‖lowregNfun (I := I) (M := M) g₀ g_bg hδ hCtop hB1Q hρ hP hreal
       ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1 hRpos.le⟩‖,
     ρ, hCtop, hB1Q, hρ, hB0f _ hQpos.le, hcont0, hbound0, le_rfl⟩
+
+/-! ### Explicit six-number input and output packages -/
+
+/-- The certified scalar data used by the order-one fixed-point engine.
+
+The fields `top`, `base`, `slope`, `zeroBd`, `outer`, and `realize` are the
+six numbers `Ctop`, `B0`, `B1`, `D`, `ρ`, and `P` in `lowregHorizon`.  The
+threshold is included because the realization and nonlinearity certificates
+are indexed by it, although it does not enter the horizon formula. -/
+structure LowRegBoundData where
+  threshold : ℝ
+  top : ℝ
+  base : ℝ
+  slope : ℝ
+  zeroBd : ℝ
+  outer : ℝ
+  realize : ℝ
+  threshold_lt : threshold < 1
+  top_nonneg : 0 ≤ top
+  base_nonneg : 0 ≤ base
+  slope_nonneg : 0 ≤ slope
+  zero_nonneg : 0 ≤ zeroBd
+  outer_pos : 0 < outer
+  realize_pos : 0 < realize
+
+/-- Certified scalar data for one common lower bound on the closed horizon. -/
+structure LowRegHorizonData where
+  top : ℝ
+  base : ℝ
+  slope : ℝ
+  zeroBd : ℝ
+  outer : ℝ
+  realize : ℝ
+  top_nonneg : 0 ≤ top
+  base_nonneg : 0 ≤ base
+  slope_nonneg : 0 ≤ slope
+  zero_nonneg : 0 ≤ zeroBd
+  outer_pos : 0 < outer
+  realize_pos : 0 < realize
+
+/-- Forget the threshold of an exact fixed-point packet, retaining its horizon
+data. -/
+def LowRegBoundData.toHorizon (K : LowRegBoundData) : LowRegHorizonData where
+  top := K.top
+  base := K.base
+  slope := K.slope
+  zeroBd := K.zeroBd
+  outer := K.outer
+  realize := K.realize
+  top_nonneg := K.top_nonneg
+  base_nonneg := K.base_nonneg
+  slope_nonneg := K.slope_nonneg
+  zero_nonneg := K.zero_nonneg
+  outer_pos := K.outer_pos
+  realize_pos := K.realize_pos
+
+/-- `U` is a common horizon envelope for the exact metricwise packet `K`.
+
+The four coefficient slots are bounded above, while the outer and realization
+radii are bounded below.  These are exactly the directions in which
+`lowregHorizon` decreases. -/
+structure IsLowBoundCap (K : LowRegBoundData) (U : LowRegHorizonData) : Prop where
+  top_le : K.top ≤ U.top
+  base_le : K.base ≤ U.base
+  slope_le : K.slope ≤ U.slope
+  zero_le : K.zeroBd ≤ U.zeroBd
+  outer_le : U.outer ≤ K.outer
+  realize_le : U.realize ≤ K.realize
+
+/-- Every exact packet is capped by its own horizon data. -/
+theorem boundCap_refl (K : LowRegBoundData) :
+    IsLowBoundCap K K.toHorizon :=
+  ⟨le_rfl, le_rfl, le_rfl, le_rfl, le_rfl, le_rfl⟩
+
+/-- A common envelope has no larger closed horizon than the exact metricwise
+packet that it caps. -/
+theorem horizon_le_of_cap {K : LowRegBoundData} {U : LowRegHorizonData}
+    (h : IsLowBoundCap K U) :
+    lowregHorizon U.top U.base U.slope U.zeroBd U.outer U.realize ≤
+      lowregHorizon K.top K.base K.slope K.zeroBd K.outer K.realize := by
+  exact lowregHorizon_mono K.top_nonneg K.base_nonneg K.slope_nonneg
+    K.zero_nonneg
+    (lowregStateRad_pos U.top_nonneg U.slope_nonneg U.outer_pos U.realize_pos).le
+    h.top_le h.base_le h.slope_le h.zero_le h.outer_le h.realize_le
+
+/-- The exact analytic certificates attached to one explicit six-number packet
+for the initial metric `g₀` and DeTurck background `g_bg`.
+
+This is the background-aware input package of `lowreg_partial_sol_of_bounds`;
+it contains no class-uniformity claim and no high-rung regularity data. -/
+structure IsLowBoundsAt (g₀ g_bg : SmoothRiemannianMetric I M)
+    (K : LowRegBoundData) : Prop where
+  hreal : ∀ S : SmoothCcTensor g₀ 0 2,
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) S‖ ≤ K.realize →
+      gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ S) K.threshold
+  hcont : Continuous
+    (lowregNfun (I := I) (M := M) g₀ g_bg K.threshold_lt K.top_nonneg
+      K.slope_nonneg K.outer_pos K.realize_pos hreal)
+  htame : ∀ u v : lowerState (I := I) (M := M) g₀ 1
+      (lowregStateRad K.top K.slope K.outer K.realize),
+    ‖lowregNfun (I := I) (M := M) g₀ g_bg K.threshold_lt K.top_nonneg
+          K.slope_nonneg K.outer_pos K.realize_pos hreal u -
+        lowregNfun (I := I) (M := M) g₀ g_bg K.threshold_lt K.top_nonneg
+          K.slope_nonneg K.outer_pos K.realize_pos hreal v‖ ≤
+      K.top * lowregOuterRad K.top K.outer K.realize *
+          ‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+            (((1 : ℕ) : ℝ) + 2)) - v.1‖ +
+        K.base *
+          ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+            ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1)‖ +
+        K.slope *
+            (‖(u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2))‖ +
+              ‖(v.1 : tensorHs (I := I) (M := M) g₀ 0 2
+                (((1 : ℕ) : ℝ) + 2))‖) *
+          ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
+            ((u.1 : tensorHs (I := I) (M := M) g₀ 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1)‖
+  hzero : ‖lowregNfun (I := I) (M := M) g₀ g_bg K.threshold_lt K.top_nonneg
+      K.slope_nonneg K.outer_pos K.realize_pos hreal
+      ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1
+        (lowregStateRad_pos K.top_nonneg K.slope_nonneg K.outer_pos
+          K.realize_pos).le⟩‖ ≤ K.zeroBd
+
+/-- The fixed-point output associated with one explicit input packet. -/
+structure IsLowSolveBg (g₀ g_bg : SmoothRiemannianMetric I M)
+    (K : LowRegBoundData) (hK : IsLowBoundsAt (I := I) (M := M) g₀ g_bg K)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) ((1 : ℕ) : ℝ) T)
+    (gforce : timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T) : Prop where
+  map_eq : u = maxRegDuhamelMap (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+    (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) gforce
+  field_mem : ∀ᵐ t ∂(timeMeasure T),
+    maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) gforce t ∈
+      lowerState (I := I) (M := M) g₀ 1
+        (lowregStateRad K.top K.slope K.outer K.realize)
+  force_eq : gforce =ᵐ[timeMeasure T]
+    (fun t => lowregNfun (I := I) (M := M) g₀ g_bg K.threshold_lt K.top_nonneg
+      K.slope_nonneg K.outer_pos K.realize_pos hK.hreal
+      (aeSetLift (zero_mem_lowerState (I := I) (M := M) g₀ 1
+        (lowregStateRad_pos K.top_nonneg K.slope_nonneg K.outer_pos
+          K.realize_pos).le)
+        (maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2))
+          gforce) t))
+  trace_zero : timeH1.trace0 _ T u = 0
+  pde : timeH1.timeDeriv _ T u =
+    timeScaleLaplacian (I := I) (M := M) ((1 : ℕ) : ℝ)
+      (maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2))
+        gforce) + gforce
+  force_bound : ‖gforce‖ ≤
+    lowregStateRad K.top K.slope K.outer K.realize / 4
+
+/-- Run the six-number fixed-point engine from one explicit background-aware
+input package. -/
+theorem lowreg_sol_of_data (g₀ g_bg : SmoothRiemannianMetric I M)
+    (K : LowRegBoundData) (hK : IsLowBoundsAt (I := I) (M := M) g₀ g_bg K) :
+    ∀ {T : ℝ} (hT : 0 < T)
+      (_ : T ≤ lowregHorizon K.top K.base K.slope K.zeroBd K.outer K.realize)
+      (hT1 : T ≤ 1),
+      ∃ (u : MaxRegSolutionSpace (I := I) (M := M) ((1 : ℕ) : ℝ) T)
+        (gforce : timeL2
+          (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T),
+        IsLowSolveBg (I := I) (M := M) g₀ g_bg K hK hT hT1 u gforce := by
+  intro T hT hTτ hT1
+  obtain ⟨u, gforce, hmap, hmem, hforce, htrace, hpde, hbound⟩ :=
+    lowreg_partial_sol_of_bounds (I := I) (M := M) g₀ g_bg K.threshold_lt
+      K.top_nonneg K.base_nonneg K.slope_nonneg K.outer_pos K.realize_pos
+      hK.hreal hK.hcont hK.htame hK.hzero hT hTτ hT1
+  exact ⟨u, gforce, hmap, hmem, hforce, htrace, hpde, hbound⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

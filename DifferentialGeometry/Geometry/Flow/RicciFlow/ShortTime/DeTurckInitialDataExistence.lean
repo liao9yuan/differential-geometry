@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.QuasilinearMetricSho
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRealizedSolutionFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.QuasilinearAbstractShortTimeExistence
-import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSRepresentation
 
 /-! # DeTurck–Ricci parabolic short-time existence and interior regularity
 
@@ -57,38 +57,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-private theorem rawTensorConnLapSmooth_symmS
-    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
-    rawTensorConnLapSmooth (I := I) g₀ 0 2 (symmS (I := I) (M := M) g₀ S) =
-      symmS (I := I) (M := M) g₀ (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) := by
-  have hhalf : ∀ W : SmoothCcTensor g₀ 0 2,
-      (1 / 2 : ℝ) • W + (1 / 2 : ℝ) • W = W := fun W => by
-    rw [← add_smul, show (1 / 2 : ℝ) + 1 / 2 = 1 by norm_num, one_smul]
-  have hzero : rawTensorConnLapSmooth (I := I) g₀ 0 2 (0 : SmoothCcTensor g₀ 0 2) = 0 := by
-    have h := rawTensorConnLapSmooth_sub (I := I) (M := M) g₀ 0 2 S S
-    rwa [sub_self, sub_self] at h
-  have hadd : ∀ A B : SmoothCcTensor g₀ 0 2,
-      rawTensorConnLapSmooth (I := I) g₀ 0 2 (A + B) =
-        rawTensorConnLapSmooth (I := I) g₀ 0 2 A +
-          rawTensorConnLapSmooth (I := I) g₀ 0 2 B := by
-    intro A B
-    have hAB : A + B = A - (0 - B) := by rw [zero_sub, sub_neg_eq_add]
-    rw [hAB, rawTensorConnLapSmooth_sub (I := I) (M := M) g₀ 0 2 A (0 - B),
-      rawTensorConnLapSmooth_sub (I := I) (M := M) g₀ 0 2 0 B, hzero, zero_sub, sub_neg_eq_add]
-  have hLV : rawTensorConnLapSmooth (I := I) g₀ 0 2 (symmS (I := I) (M := M) g₀ S) +
-      rawTensorConnLapSmooth (I := I) g₀ 0 2 (symmS (I := I) (M := M) g₀ S) =
-      rawTensorConnLapSmooth (I := I) g₀ 0 2 S +
-        domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) := by
-    rw [← hadd, symmS, hhalf, hadd,
-      rawTensorConnLapSmooth_domDomCongrSection (I := I) (M := M) g₀
-        (Equiv.swap (0 : Fin 2) 1) S]
-  have hgoal : symmS (I := I) (M := M) g₀ (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) =
-      (1 / 2 : ℝ) • (rawTensorConnLapSmooth (I := I) g₀ 0 2 (symmS (I := I) (M := M) g₀ S) +
-        rawTensorConnLapSmooth (I := I) g₀ 0 2 (symmS (I := I) (M := M) g₀ S)) := by
-    rw [symmS, ← hLV]
-  rw [hgoal, smul_add, hhalf]
-
 theorem deTurckRicci_solution_with_jointReg
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
@@ -96,55 +64,6 @@ theorem deTurckRicci_solution_with_jointReg
         (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT ∧
       JointChartGramSmooth (I := I) T g_DT := by
   have ha_super : 2 * Module.finrank ℝ E + 10 ≤ 4 * Module.finrank ℝ E + 10 := by omega
-  have hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-      (hδ : gFibreOpBound (I := I) (M := M) g₀
-        (ccTensorBilinSymm (I := I) g₀ S) δ)
-      (x : M) (v w : TangentSpace I x),
-      ccTensorBilinSymm (I := I) g₀
-          (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
-              (symmS (I := I) (M := M) g₀ S) hδ_lt
-              (gFibreOpBound_symmS (I := I) (M := M) g₀ S hδ) +
-            rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w =
-        deTurckRicciRHS (I := I) g_bg
-          (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδ) x v w := by
-    intro S δ hδ_lt hδ x v w
-    have hlap : ccTensorBilinSymm (I := I) g₀
-        (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w =
-        ccTensorBilinSymm (I := I) g₀
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 (symmS (I := I) (M := M) g₀ S)) x v w := by
-      rw [rawTensorConnLapSmooth_symmS (I := I) (M := M) g₀ S,
-        ccTensorBilinSymm_symmS_apply (I := I) (M := M) g₀
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w]
-    rw [ccTensorBilinSymm_add (I := I) g₀
-        (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
-          (symmS (I := I) (M := M) g₀ S) hδ_lt
-          (gFibreOpBound_symmS (I := I) (M := M) g₀ S hδ))
-        (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w,
-      hlap,
-      ← ccTensorBilinSymm_add (I := I) g₀
-        (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
-          (symmS (I := I) (M := M) g₀ S) hδ_lt
-          (gFibreOpBound_symmS (I := I) (M := M) g₀ S hδ))
-        (rawTensorConnLapSmooth (I := I) g₀ 0 2 (symmS (I := I) (M := M) g₀ S)) x v w]
-    set gDT := tensorSectionRealizeMetric (I := I) g₀ (symmS (I := I) (M := M) g₀ S) hδ_lt
-      (gFibreOpBound_symmS (I := I) (M := M) g₀ S hδ) with hgDT_def
-    set R : SmoothCcTensor g₀ 0 2 :=
-      { toSection := (deTurckRHSSection (I := I) g_bg gDT).toSection
-        hasCompactSupport := (deTurckRHSSection (I := I) g_bg gDT).hasCompactSupport }
-      with hR_def
-    have hsum_eq : deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
-        (symmS (I := I) (M := M) g₀ S) hδ_lt
-        (gFibreOpBound_symmS (I := I) (M := M) g₀ S hδ) +
-        rawTensorConnLapSmooth (I := I) g₀ 0 2 (symmS (I := I) (M := M) g₀ S) = R := by
-      rw [deTurckSmoothRemainder, sub_add_cancel]
-    rw [hsum_eq,
-      ccTensorBilinSymm_toSection_congr R (deTurckRHSSectionBg (I := I) g_bg gDT)
-        (by rw [hR_def, deTurckRHSSectionBg_toSection]) x v w]
-    have hreal : gDT = tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδ :=
-      tensorSectionRealizeMetric_symmS_eq (I := I) g₀ S hδ_lt hδ hδ_lt
-        (gFibreOpBound_symmS (I := I) (M := M) g₀ S hδ)
-    rw [← hreal]
-    exact deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS (I := I) g_bg gDT x v w
   exact quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence (I := I)
     (deTurckRicciRHS (I := I) g_bg) g₀ (4 * Module.finrank ℝ E + 10) ha_super
     (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg (4 * Module.finrank ℝ E + 10))
@@ -157,7 +76,7 @@ theorem deTurckRicci_solution_with_jointReg
     (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
       (g_bg := g_bg) (4 * Module.finrank ℝ E + 10) ha_super)
     (deTurckRicciRHS_isSmoothQuasilinear (I := I) g_bg)
-    hRepr
+    (deTurck_rem_repr (I := I) (M := M) g₀ g_bg)
     (deTurckRicci_forcingBootstrap_symm (I := I) (M := M) g₀ g_bg
       (4 * Module.finrank ℝ E + 10) (by omega))
 

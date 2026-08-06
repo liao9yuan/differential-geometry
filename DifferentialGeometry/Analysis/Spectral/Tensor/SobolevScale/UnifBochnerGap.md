@@ -410,3 +410,21 @@ scope; E5/E6 can now quote `hsCovsumC` / `covsumHsC` by name instead of an opaqu
   awaits `hbase`.  No plan edits; no commit.
 - 2026-07-24 (session 4): stage α `bochner_step_unif` GREEN + axiom-clean.  Curvature
   abstracted as `hcurv` (consumable currency); commutator base abstracted as `hbase`.
+
+## Finite H2 curvature-action specialization (2026-08-05)
+
+The hard comparison at spectral order `2` does not consume the all-rank/all-order `hcurv`
+interface. Its call graph is `covsum` even branch -> `jetEven` at `k = 1` -> elliptic budget
+`J = 2` -> one Bochner step at `k = 0`. At that step the commutator/base defect is identically
+zero, and the only geometric input is the order-zero `pointwiseTensorCurv` action at the same
+tensor rank.
+
+The native API now records that exact finite input as `IsCurvAction0 g s K`.
+`bochner_step_action` carries the existing proof under the rank-fixed package;
+`bochner_step_unif` remains as the all-order compatibility wrapper. The endpoint
+`covsum_hs_two` proves the `H²` jet bound with the closed constant
+`h2CovsumC K = 2 + sqrt (1 + 4 K)`. No differentiated curvature action and no unrelated rank
+enters this endpoint.
+
+Verification status: focused verification passed with one Lean thread and no warnings. No
+mathematical blocker was found.

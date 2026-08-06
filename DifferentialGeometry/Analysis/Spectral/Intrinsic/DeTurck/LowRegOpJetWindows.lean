@@ -166,8 +166,8 @@ theorem jetNeg (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     norm_num
 
 omit [BoundarylessManifold I M] in
-/-- `2`-subadditivity of the squared covariant jet on a sum. -/
-theorem jetAdd (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
+/-- `2`-subadditivity of the squared covariant jet on a sum, for the operator-window lane. -/
+theorem opJetAdd (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     (X Y : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (X + Y) ≤
       2 * (lowJetSq (I := I) (M := M) g m X +
@@ -248,7 +248,7 @@ theorem moserWin_add {g : SmoothRiemannianMetric I M} {r c : ℕ}
   · have hT : (0 : ℝ) ≤ 1 + lowJetSq (I := I) (M := M) g n T := by
       have := jetNn (I := I) (M := M) (m := n) g T
       linarith
-    exact le_trans (jetAdd (I := I) (M := M) g n X Y)
+    exact le_trans (opJetAdd (I := I) (M := M) g n X Y)
       (by nlinarith [hX.2.2 n, hY.2.2 n])
 
 omit [BoundarylessManifold I M] in
@@ -273,8 +273,8 @@ theorem moserWin_sub {g : SmoothRiemannianMetric I M} {r c : ℕ}
       (by nlinarith [hX.2.2 n, hY.2.2 n])
 
 omit [BoundarylessManifold I M] in
-/-- The squared covariant jet is homogeneous of degree two. -/
-theorem jetSmul (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ) (a : ℝ)
+/-- The squared covariant jet is homogeneous of degree two in the operator-window lane. -/
+theorem opJetSmul (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ) (a : ℝ)
     (X : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (a • X) =
       a ^ 2 * lowJetSq (I := I) (M := M) g m X := by
@@ -292,7 +292,7 @@ theorem moserWin_smul {g : SmoothRiemannianMetric I M} {r c : ℕ}
   · rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
       riemannianFiberNormSq_smul, mul_pow, sq_abs]
     exact mul_le_mul_of_nonneg_left (h.2.1 x) (sq_nonneg a)
-  · rw [jetSmul]
+  · rw [opJetSmul]
     have hT : (0 : ℝ) ≤ 1 + lowJetSq (I := I) (M := M) g n T := by
       have := jetNn (I := I) (M := M) (m := n) g T
       linarith
@@ -1335,7 +1335,7 @@ theorem pathPert_rad (g : SmoothRiemannianMetric I M)
       Pi.smul_apply, riemannianFiberNormSq_smul]
     nlinarith [hTsup x, riemannianFiberNormSq_nonneg
       (I := I) (M := M) g 0 2 x (T.toSection x)]
-  · rw [cvxRad, jetSmul]
+  · rw [cvxRad, opJetSmul]
     nlinarith [jetNn (I := I) (M := M) (m := n) g T]
 
 /-- **All-order window for the `lieRefold2` summand of `topKernel_eq`.**

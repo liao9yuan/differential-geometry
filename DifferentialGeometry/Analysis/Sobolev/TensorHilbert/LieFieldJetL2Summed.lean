@@ -32,11 +32,12 @@ This is constituent 4-of-5 of the data-weighted threeArm precursor (R1τ item (2
 `UNIF_EXISTENCE_PLAN.md` "Planner acceptance №5" and `RemainderCoeffTopSeparated.md`.  Only
 `traceHessian` remains after this.
 
-The private arm-combination helpers (`slotPermCc`, the seven permutations,
-`kernelField_eq_neg_arm_combination`, `armOuter_rfns_eq`, `armFull_rfns_eq`, `armOuter_norm_eq`,
-`armFull_norm_eq`, `c3_norm_five_le`) are copied verbatim from the committed-clean
-`RicciConnDiffOrder1TameEnvelope.lean` (where they are `private`, hence not importable); provenance
-comments mark each.  They use only public sub-lemmas.
+`slotPermCc`, the seven permutations and `kernelField_eq_neg_arm_combination` are **imported** from
+`RicciConnDiffOrder1TameEnvelope.lean`, where they were promoted to public in 2026-08-03 (brick
+A1-CUR-1); the local copies this file used to carry were deleted then.  The remaining helpers
+(`armOuter_rfns_eq`, `armFull_rfns_eq`, `armOuter_norm_eq`, `armFull_norm_eq`, `c3_norm_five_le`)
+are still local copies of `private` originals there; provenance comments mark each.  They use only
+public sub-lemmas.
 -/
 
 set_option autoImplicit false
@@ -74,85 +75,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### Copied private arm-combination stack
+/-! ### Arm-combination stack — now imported, not copied
 
-All eight declarations below are copied verbatim from the committed-clean
-`RicciConnDiffOrder1TameEnvelope.lean` (lines ~649–886), where they are `private` and hence not
-importable.  They depend only on public sub-lemmas (`slotPermCLM`, `slotPermCLM_apply`,
-`slotPermCLM_field_contMDiff`, `rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr`,
-`rfns_iteratedCovGrad_reindexCoeffGen_eq`, `Tensor0SSpace.toModel_ofModel`, `SmoothCcTensor.norm_def`,
-`tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs`). -/
-
-private def kOutPerm0312 : Equiv.Perm (Fin 4) :=
-  ⟨![0, 3, 1, 2], ![0, 2, 3, 1], by decide, by decide⟩
-
-private def kOutPerm0213 : Equiv.Perm (Fin 4) :=
-  ⟨![0, 2, 1, 3], ![0, 2, 1, 3], by decide, by decide⟩
-
-private def kOutPerm2301 : Equiv.Perm (Fin 4) :=
-  ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
-
-private def kOutPerm1302 : Equiv.Perm (Fin 4) :=
-  ⟨![1, 3, 0, 2], ![2, 0, 3, 1], by decide, by decide⟩
-
-private def kOutPerm1203 : Equiv.Perm (Fin 4) :=
-  ⟨![1, 2, 0, 3], ![2, 0, 1, 3], by decide, by decide⟩
-
-private def kInPerm102 : Equiv.Perm (Fin 3) :=
-  ⟨![1, 0, 2], ![1, 0, 2], by decide, by decide⟩
-
-private def kInPerm120 : Equiv.Perm (Fin 3) :=
-  ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
-
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-private theorem slotPermCcFib_contMDiff (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
-    (ρ : Equiv.Perm (Fin d)) :
-    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel d d ℝ E)) ∞
-      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel d d ℝ E)
-        (E := fun z : M => Tensor0SBundle.TensorRSSpace d d I z) x
-        (show Tensor0SBundle.TensorRSSpace d d I x from slotPermCLM (I := I) ρ x)) := by
-  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SBundle.Tensor0SModel d ℝ E)
-    (V₁ := fun z : M => Tensor0SBundle.Tensor0SSpace d I z)
-    (F₂ := Tensor0SBundle.Tensor0SModel d ℝ E)
-    (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace d I z)
-    (φ := fun x : M => slotPermCLM (I := I) ρ x)
-  intro Y
-  have h := slotPermCLM_field_contMDiff (I := I) ρ (fun x => Y x) Y.contMDiff
-  refine h.congr (fun x => ?_)
-  exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
-    (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x t) rfl
-
-private def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
-    SmoothCcTensor g₀ d d where
-  toSection :=
-    { toFun := fun x : M =>
-        (show Tensor0SBundle.TensorRSSpace d d I x from slotPermCLM (I := I) ρ x)
-      contMDiff_toFun := slotPermCcFib_contMDiff (I := I) (M := M) g₀ ρ }
-  hasCompactSupport := HasCompactSupport.of_compactSpace _
-
-set_option linter.unusedSectionVars false in
-private theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
-    linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
-      -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
-          (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0312)
-            (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm102
-        + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm0213)
-              (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm120
-        + appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm2301)
-            (connDiffContrInsertionField (I := I) g₀ g₁)
-        + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1302)
-              (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm102
-        + reindexCoeffGen (I := I) (M := M) g₀ 3 4
-            (appCcRS (I := I) (M := M) g₀ 3 4 4 (slotPermCc (I := I) (M := M) g₀ kOutPerm1203)
-              (connDiffContrInsertionField (I := I) g₀ g₁)) kInPerm120) := by
-  apply SmoothCcTensor.ext
-  apply ContMDiffSection.ext
-  intro x
-  rfl
+The seven permutations (`kOutPerm*`, `kInPerm*`), `slotPermCc` and
+`kernelField_eq_neg_arm_combination` used to be copied verbatim into this file because they were
+`private` in `RicciConnDiffOrder1TameEnvelope.lean`.  They were promoted to public there
+(2026-08-03, brick A1-CUR-1) and the copies deleted; everything below now uses the imported
+originals. -/
 
 set_option linter.unusedSectionVars false in
 private theorem armOuter_rfns_eq (g₀ g₁ : SmoothRiemannianMetric I M)

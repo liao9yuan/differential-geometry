@@ -1432,3 +1432,1584 @@ split brick releases the Lean slot → dispatch ONE executor for
 [`selfLow_jet` ball-threading surgery + A1-CUR-1 (C1 radius-free,
 A1CUR_PLAN.md §7 handoff)] (same-file bundle), then A1-CUR-2 (C0
 estimate, 3–4 sessions) after.  Route-error counter: **0/3**.
+
+## Executor report — CCDJT monolith split (No. 112 brick) (2026-08-03)
+
+**0% new mathematics.**  Every one of the 245 declarations moved
+verbatim, statement AND proof.  This is the compile-stabilization
+brick that unblocks the A1-CUR estimate work; `(N)` remains 0%.
+
+### Result
+
+`CurvatureCoefficientDifferenceJetTower.lean` (15111 lines) is now a
+pure umbrella — module docstring plus imports of 15 chunk modules in
+`CovGrad/CurvatureCoefficientDifferenceJetTower/`.  All eleven
+downstream consumers are untouched: the 78 public declarations keep
+their exact names at `Integral.Connection`, so import transitivity
+re-exports the whole API.
+
+Recipe as ruled (C0Core, PLAN2 No. 91): each chunk repeats the
+monolith preamble verbatim; `private ` is stripped from the 167
+internal declarations, which are wrapped in an internal
+`namespace CurvatureCoefficientDifferenceJetTower` that each chunk
+`open`s, so the public namespace is unpolluted.  A collision scan
+before promoting found only two names shared with
+`Analysis/Sobolev/AntidiagonalTupleProductGrid.lean` — in
+`DifferentialGeometry.Combinatorics`, which this module does not open
+— plus the `iteratedCovGrad_smul_pt/_b` copies already queued for
+dedup; the internal namespace keeps all of them contained.  Fourteen
+other files' same-named helpers were checked and are all `private` in
+their own modules, so nothing outside the chunk directory is affected.
+
+Content preservation was verified mechanically, not by eye: all 15051
+body lines reappear verbatim and in order across the chunks, and the
+245 declarations appear in identical order with identical names
+(generator + checker: `.codex-scratch/ccdjt-split/{split,verify}.py`;
+pre-split file kept as `*.before-split.lean`).
+
+### Chunk map and verification
+
+Full table, per-chunk contents, import DAG and memory figures:
+`CovGrad/CurvatureCoefficientDifferenceJetTower.md`; brief per-chunk
+notes sit beside each chunk.  Sizes 191–2306 lines.  Chunks 1–8 are the
+linear spine (`Grid → Lowered → Palatini → PairTrace → TraceGrid →
+Envelope → TsTransport → TsRungs`); the residual-integrator region is a
+DAG branch off `Envelope`, with `ResidualCells` rooted directly on the
+monolith's own 22 imports.
+
+### The real finding: chunk sizing is per-declaration, not per-line
+
+The ≤2500-line rule was necessary but nowhere near sufficient.  Three
+things mattered more, and all three cost a failed build to learn:
+
+1. **One declaration owns the peak.**
+   `boundedFactorGrid_cappedTopLayer_integral_flat` alone drives the
+   Lean working set from the ~3.2 GB import floor to ~7.8 GB, and every
+   declaration elaborated after it in the same process inherits that
+   high-water mark.  Halving line counts around it achieved nothing; it
+   had to be alone in a 302-line file.  By contrast `ResidualCells` —
+   823 lines holding BOTH heavy product-cell lemmas — builds in 51 s at
+   3.5 GB.
+2. **Import closure is part of the memory budget.**  A linear chunk
+   chain charges every chunk for everything before it.  The hog needs
+   exactly one thing from this module (`cappedTopLayerCell_integral_le`),
+   so that lemma and its sibling were pulled into `ResidualCells`, which
+   imports only the original 22.  Measurement: the ~3.2 GB floor IS
+   those 22 imports and is irreducible; the chunk `.olean`s are noise
+   beside it.
+3. **Trim before the heavy build** (the No. 112 protocol step).
+   `EmptyWorkingSet` across all processes returned ~0.5 GB, and that was
+   the entire margin: guarded, the hog then peaked at 7.78 GB with free
+   physical bottoming at **0.44 GB**, just above the 0.40 GB floor,
+   instead of being killed at 0.34 GB.
+
+`ResidualFlat` therefore sits ~0.05 GB inside the safety margin on this
+machine.  Anyone rebuilding it must trim first and run nothing else
+concurrently.  Four separate attempts were killed by the watchdog
+before the combination above cleared it; the floor was never relaxed.
+
+Two mechanical traps in the source, worth remembering for the next
+split: a doc comment containing a blank line (`pureTrace`), which
+defeats a naive "walk back to the blank line" prelude finder; and a
+dangling `set_option … in` separated from its command by a blank line
+(old line 7138), where a chunk boundary severs the modifier from its
+command.  Also: the first inter-chunk dependency scan used
+`([^ ({:\[]+)` to capture declaration names, which swallows the trailing
+newline for any declaration whose name ends its line — it silently
+reported the hog as depending on nothing.  Exclude `\r\n`, and strip
+block comments before searching for uses.
+
+### Concurrency note (not caused by this brick)
+
+At 15:33:52, mid-brick, commit `7f54201cf "uniform existence consult"`
+captured the in-progress split (nine chunk files at their then-current
+content, including a `Residual.lean` that has since been re-split).  No
+git write command was issued by this executor.  Another lane in this
+shared worktree is committing automatically; the working tree is
+correct and verified, but the committed snapshot is an intermediate
+state and should be superseded by a commit of the final tree.
+
+### Honest denominators
+
+Unchanged by this brick: `(N)` stated, proof 0%; F6 ≈ 70%; front 2
+≈ 53%; machinery ≈ 92%; whole HCG compactness project still low single
+digits.  This entry moved compile health only.
+
+## Planner update No. 115 (2026-08-03) - SECOND PRO RULING INTEGRATED: ARCHITECTURE VIABLE, NO ITEM UNSOUND; PAPER BRICK P-STOP NOW GATES THE GALERKIN LANE
+
+The user submitted the design-review consult (`CONSULT_UNIF_N_REVIEW.md`)
+and brought back the referee verdict.  Recorded as
+`ShortTime/UNIF_N_PRO_RULING2.md` (NOTE: `UNIF_N_PRO_RULING.md` is the
+FIRST ruling, 2026-07-22 R1τ — a filename collision was caught before
+overwrite; the ruling files now mirror the ledger volume convention).
+
+Verdict: **architecture VIABLE, not yet closed; nothing UNSOUND.**
+R-1 (floor deletion) SOUND — externally closes the No. 106 design.
+G-1 (DeTurck→Ricci conversion) SOUND — Phase C is mathematically clear.
+R-2/R-3/R-4/R-5/R-6/G-2 SOUND-WITH-CAVEAT with named smallest repairs.
+Dominant risk confirmed = Galerkin bottom-scale bootstrap +
+identification with the A1 fixed point (R-2 + R-4).
+
+INTEGRATION (queue and spec changes):
+1. **NEW MANDATORY PAPER BRICK "P-STOP"** (Pro's item (i)) — the
+   stopped, projected bottom-scale energy proposition in its full
+   quantitative form (c* independent of N and rung; no inverse
+   inequalities; top-energy coefficients from already-closed LOWER
+   norms — the true cap is `‖∇P‖_∞`/H³, never let the nominal H⁵ ball
+   into coefficients; per-datum high norms on the RHS only; STRICT
+   improvement Φ < R₀²/2 with T = τ₀ from class data; compactness +
+   uniqueness for identification).  Folded into P-STOP: R-3's
+   non-cancellation check (one frozen-symbol/single-component test that
+   the total quadratic `∇P·∇P` C0 symbol is nonzero) and R-5's
+   absorption exposure (`δ* = min{1/3, δ_abs(κ, c_par)}`, trajectory
+   operator-bound cap moves to δ*; display the pairing algebra once —
+   `C(m)` must land on `E_m`/`E_{m−1}`, never on `D_m` or superlinear).
+   **P-STOP GATES E1′a/E1′b/E4/G4** — no further Galerkin Lean until it
+   is written and verified on paper.  Owner: planner (consult re-check
+   if it resists).  If P-STOP holds in the stated form, R-2 + R-4 +
+   most of R-5 close together; if false, the Galerkin route is dead as
+   designed (Pro's words) and we re-consult BEFORE building.
+2. R-4 spec change for G4: ONE approximant sequence and ONE limit for
+   all rungs σ (diagonal + uniqueness); the H¹/C⁰ uniqueness chain is
+   PART of A2 — add a hypothesis-match audit (uniqueness chain vs the
+   Galerkin limit class) to the G4 handoff.
+3. R-6 sharpens front-3 G3 into the declaration-by-declaration
+   transport audit: every LOW-RUNG constant in the τ₀/radius formulas
+   depends only on `(gBase, Λ, ∇_{gBase}^{≤3} g₀)`; per-datum high
+   norms only in a-posteriori constants.
+4. G-1 opens a new statement-level lane item **PHASE-C**: DeTurck
+   vector-field flow + pullback + glue over T < τ₀, sign convention
+   fixed, one-sided derivative at t = 0 — mathematically cleared;
+   sequence after the A2/A4 endpoints exist.
+5. G-2 adapters recorded: rebasing explicitness (the campaign IS the
+   `g₀ + u` route — document it in the architecture statement);
+   finite-chart transfer adapter; a.e.→representative plumbing
+   (exists, conditional on `lowreg_spatialMass`); Icc-solve/Ico-state
+   harmless; no measurable selection; no class compactness.
+6. **Standing stop-signal list adopted** (RULING2 §(ii), ten signals) —
+   every future Galerkin/A1-CUR brick handoff carries it verbatim.
+
+Queue after integration: [in flight: split verification tail] →
+[`selfLow_jet` ball-thread + A1-CUR-1] (unchanged; R-3 ratifies both) →
+**P-STOP (paper, planner)** → A1-CUR-2 (C0, carries the
+non-cancellation certificate) → B3/B4/B5 opportunistic → E1′ (with δ*)
+→ E4 → G4 (with the identification audit) → Z → A4 wiring → front-3
+transport audit → PHASE-C → (N) assembly.
+
+Repo-hygiene note: commit `7f54201cf` (15:33, user-side, made to push
+the consult evidence) froze a MID-SPLIT intermediate tree.  Once the
+split verification tail is green, the user should make a fresh commit
+of the final tree to supersede it.
+
+Honest denominators: the verdict proves nothing new — percentages
+unchanged (F6 ≈ 70% per the split report's baseline, A1CUR-adjusted
+≈ 60% per No. 113; front 2 ≈ 50–53%; (N) 0%; machinery ≈ 92%; whole
+project low single digits) — but the mathematical risk is now
+externally triaged: ONE paper proposition stands between the campaign
+and the entire remaining Galerkin lane.  Route-error counter: 0/3.
+
+## Planner update No. 116 (2026-08-03) - MACHINE BSOD No. 2; USER RULING: NO MORE LEAN TODAY; SPLIT TAIL FROZEN AT 5 CHUNKS; P-STOP STARTS
+
+Incident: SECOND bugcheck `0x0000010e` at 16:45 (Resource-Exhaustion
+2004 events at 16:26/16:42, `lean.exe` again).  Trigger chain: the
+resumed split executor RE-SPLIT the Residual region at 16:07
+(invalidating the already-built hog olean), then ran the rebuild
+directly through lake-locked — OUTSIDE the planner's dual-watchdog
+wrapper — and commit exhaustion crossed the fixed 35 GB ceiling.
+The harness process died with the machine; the executor never
+appended a phase-2 report.
+
+Salvage state (verified by filesystem inventory, no Lean run):
+- 10/15 chunk oleans VALID: spine 1–8 (`Grid → … → TsRungs`, built
+  15:16–15:33) + `ResidualCells` (16:09) + `Residual` (16:12).
+- MISSING: `ResidualBase`, `ResidualFlat` (the 7.78 GB hog),
+  `ResidualFree`, `ResidualWindow`, `ResidualAllOrd`; then the
+  umbrella olean; then `LowRegOpJetWindows` refresh (its olean is
+  stale, 11:17 pre-E3) and `LowRegC01JetTower`'s first focused check.
+- Hog census: `ResidualFlat.lean` holds exactly ONE declaration
+  (`boundedFactorGrid_cappedTopLayer_integral_flat`, :57) with exactly
+  ONE consumer (`ResidualWindow.lean:85`) — LOAD-BEARING, cannot be
+  orphaned from the umbrella.  It must elaborate once more (its
+  phase-1 build cleared at 7.78 GB peak / 0.44 GB floor after trim
+  with nothing else running — reproducible conditions).
+- Locks: this lane's five dead claim tokens + the dead elaboration
+  lock force-released/removed; other lanes' stale claims untouched
+  (note: PID-reuse after reboot can make a dead claim display
+  "running" — ownership is decided by the claim record, not the pid).
+
+STANDING RULE (added to the No. 112 protocol): any build in the
+CCDJT subtree runs ONLY through the planner's dual-watchdog wrapper
+(commit-free < 3 GB OR phys-free < 0.35 GB ⟹ kill lean); executors
+may not invoke raw lake-locked builds there.
+
+USER RULING: no further Lean today.  The 5-chunk tail + umbrella +
+OpJetWindows refresh + C01 check are FROZEN pending a user-chosen
+quiet window (options presented: pagefile 20→32 GB raise recommended
+to make the BSOD mechanism unreachable; watchdog-only also viable).
+Meanwhile the campaign advances on the ZERO-LEAN track: the planner
+writes P-STOP (`ShortTime/PSTOP_PROPOSITION.md`, per No. 115 /
+RULING2 item (i)) — the stopped projected bottom-scale energy
+proposition that gates E1′/E4/G4.
+
+Honest denominators: unchanged ((N) 0%; F6 ≈ 60% A1CUR-adjusted;
+front 2 ≈ 50%; machinery ≈ 92%; whole project low single digits).
+Route-error counter: 0/3 (both BSODs are tooling/resource incidents,
+not route errors).
+
+SAME-DAY CORRECTION: the "no more Lean today" answer was a mis-click;
+the user's actual ruling is "直接跑" — run the tail now, watchdog-
+wrapped, no system-setting change.  Topo order established by import
+scan: `ResidualFlat` (hog FIRST, at maximum free memory) → `Window` →
+`Free` → `Base` → `AllOrd` → umbrella → `LowRegOpJetWindows` refresh,
+one module per invocation, trim before each, dual watchdog
+(commit-free < 3 GB OR phys-free < 0.35 GB ⟹ kill) on every step;
+`LowRegC01JetTower` focused check follows separately.
+
+## Planner update No. 117 (2026-08-03) - FIVE WATCHDOG KILLS = SQUEEZE PLATEAU; HOG PROOF-REFACTOR BRICK DISPATCHED
+
+Retry campaign result: four planner-wrapped attempts (peaks
+7.58 → 8.04 → 8.66 → 8.43 GB, kills at phys-free 0.07–0.27 GB; zero
+BSODs — the wrapper held) after the agent-side kill.  The iterative
+squeeze plateaued (start-free 7.35 → 8.12 → 9.09 → 9.24 → 9.54 GB
+with nothing user-closable left: top consumers are svchost 0.91 GB
+and the harness 0.75 GB).  CONCLUSION: the machine's effective runway
+with the session ≈ 8.7 GB; the re-split `ResidualFlat`'s elaboration
+peak exceeds it (the phase-1 "7.78 GB" figure belonged to the
+PRE-re-split file with a different import closure — figures do not
+transfer across re-splits; lesson recorded).
+
+Structural response (dispatched): PROOF refactor of the single hog
+theorem `boundedFactorGrid_cappedTopLayer_integral_flat` — statement
+byte-unchanged; extract `hΛsup_low` (ball→pointwise sup),
+`hGNv` (GN interpolation, constants passed as parameters to avoid
+re-`choose`), and the GENERIC-in-`b` grid/integrability layer
+(`hgrid_eq` + cell integrability — no tensor types, near-zero cost)
+into sibling piece files; scope down the section-level
+`backward.isDefEq.respectTransparency false` (:54) to only the
+pieces that need it (prime suspect for the blowup, together with the
+whole-grid `rfl` at :250).  Executor carries an embedded memory
+guard on every build (mandatory), success criterion = reassembled
+peak well under 6 GB, then completes the frozen chain (Window →
+Free → Base → AllOrd → umbrella → OpJetWindows → C01 first check +
+census).
+
+Honest denominators: unchanged ((N) 0%; F6 ≈ 60%; front 2 ≈ 50%;
+machinery ≈ 92%).  This entire №112–117 arc is compile-health
+infrastructure — zero new mathematics.  Route-error counter: 0/3
+(resource walls, not route errors).  P-STOP meanwhile at ≈ 65%
+(§6 resolved on paper: self-dependent stopped-rung coefficients
+REFUTED via the requirement-4 violation, forcing the tower-direct
+jet-explicit pairing at rungs 3–5; remaining = write the rung-3..5
+pairing + the §7 identification audit).
+
+## Executor report — hog proof refactor (No. 117 brick) (2026-08-03)
+
+VERDICT: **the hog is fixed and green**, and the diagnosis in the brick
+was wrong in an instructive way.  `boundedFactorGrid_cappedTopLayer_
+integral_flat` now checks at **3.09 GB / 19 s** and builds at
+**2.86 GB / 17 s**, against ≥8.7 GB and five kills before.  The
+statement is byte-identical — diffed both against the split file and
+against `.codex-scratch/ccdjt-split/*.before-split.lean`.  The CCDJT
+umbrella built for the first time since the split.  The chain then hit
+an UNRELATED wall (below).
+
+### What actually caused the blowup: one `ring`
+
+The three extractions the brick ordered were done in full —
+`hΛsup_low` → `ResidualFlatSup.jetSupLow`, `hGNv` →
+`ResidualFlatGN.jetGNInterp` (constants as parameters, no re-`choose`),
+the whole grid/integrability layer → the tensor-free
+`Analysis/Sobolev/BoundedFactorGridIntegral` — and the section-level
+`backward.isDefEq.respectTransparency false` was dropped entirely.
+**That moved the peak 8.43 → 8.25 GB.  Still killed.**
+
+Rather than extract more blindly, I bisected the declaration with
+`sorry`-truncated copies in a scratch root module (six runs, ~20 s
+each).  Every prefix — statement, all the `set` constants, the sup/GN
+inputs, `set b`, integrability, the `cappedTopLayerCell_integral_le`
+application, the grid→double-sum step, and calc steps 1–3 — sat at
+**3.08–3.09 GB**.  Adding the last calc step, `by ring`, took it to
+**7.95 GB and a kill**.  That `ring` was proving
+`A * (B * C) = A * B * C`.  `(mul_assoc _ _ _).symm` closes it, and the
+whole declaration lands at 3.09 GB.  One token, ~5 GB.
+
+Mechanism (recorded in `lessons.md` and the chunk-map note): `ring`
+identifies atoms up to reducible defeq, and `set`-introduced locals are
+let-bound, so they zeta-unfold during that comparison.  The atoms
+`gcount i` and `MB i ^ (9 * (i + 2))` unfold through `MB → vol, Lam,
+Cgn` into a `dite` around `Exists.choose` of the Gagliardo–Nirenberg
+existential, with a symbolic exponent preventing any collapse.  The
+same `ring` survives in `jetSupLow`, where the locals are ordinary
+parameters, and costs nothing.
+
+RULE for the campaign: **bisect the declaration before splitting the
+file.**  Line counts and "obviously heavy" blocks mislead; all three of
+the brick's named suspects (the transparency escape, the whole-grid
+`rfl`, the `.choose` constant) were innocent.  And never leave a
+normalizer (`ring`, `ring_nf`, `field_simp`) below a `set` when the
+goal is a fixed rearrangement — name the lemma.
+
+### Verification chain (every build guarded; `-LeanThreads 1`; serial)
+
+| step | result | peak |
+|---|---|---|
+| `Analysis/Sobolev/BoundedFactorGridIntegral` check / build | GREEN | 1.41 / 0.99 GB |
+| `ResidualFlatSup` check / build | GREEN | 2.79 / 2.82 GB |
+| `ResidualFlatGN` check / build | GREEN | 3.09 / 2.81 GB |
+| `ResidualFlat` check / build (**the criterion**) | GREEN | 3.09 / **2.86 GB** |
+| `+ResidualWindow` | GREEN | 3.43 GB |
+| `+ResidualFree` | GREEN | 3.24 GB |
+| `+ResidualBase` | GREEN | 3.18 GB |
+| `+ResidualAllOrd` | GREEN | 3.17 GB |
+| `+CurvatureCoefficientDifferenceJetTower` (umbrella) | GREEN | 2.81 GB |
+| `+LowRegOpJetWindows` | **KILLED ×2** | 7.60 / 7.95 GB |
+
+None of the four new/edited files needs
+`backward.isDefEq.respectTransparency false`; no new `maxHeartbeats`
+(the file-level 3200000 / 1600000 moved verbatim into each piece).
+
+Axiom census, all six new/refactored declarations
+(`boundedFactorGrid_cappedTopLayer_integral_flat`, `jetSupLow`,
+`jetGNInterp`, `rfnsIterCont`, `bdFactorGrid_int_eq`,
+`bdFactorCell_int`): exactly `[propext, Classical.choice, Quot.sound]`.
+No `sorryAx`.
+
+### THE NEXT WALL (not this brick's, and not caused by it)
+
+`+LowRegOpJetWindows` rebuilt ~140 stale modules over 35 min and then
+died on **`DeTurck/DeTurckRemainderTameLipschitz.lean` — 46,927 lines**,
+peaking 7.60 GB (kill at 0.37 GB free), and again at 7.95 GB (0.31 GB)
+on a trimmed retry.  It does **not** import the CCDJT tree at all
+(`grep` count 0), so its staleness is the pre-existing E3
+`DeTurckRemainderDefs` invalidation, not this refactor.  Its `.olean` is
+now deleted (the standing kill hazard), so **`LowRegC01JetTower`'s first
+focused check and the `c1_jet_tower`/`c0_jet_tower` census are blocked
+behind it**.  Static census of that file meanwhile: exactly the two
+expected `sorry`s, `low1Ker_jet` (:88) and `selfLow_jet` (:176).
+
+That file is three times the size of the CCDJT monolith and is the
+natural next split/refactor brick — and the first thing to try on it is
+the cheap `sorry`-bisection above, not a split: the CCDJT lesson is that
+a 5 GB excess can live in a single tactic call.
+
+Two stale-lock notes: a guard kill leaves
+`.lake/codex-locks/lean-elaboration.lock` owned by a dead pid, which
+makes the next build refuse to start; `release -Force -Lake` does not
+clear it (that releases the Lake lock), the lock directory has to be
+removed once the owner pid is confirmed dead.
+
+Honest denominators: unchanged.  **This is 0% new mathematics** — the
+statement is byte-identical and nothing was proved that was not proved
+before; it is compile-health infrastructure.  (N) 0%; F6 ≈ 60%; front 2
+≈ 50%; machinery ≈ 92%.  Route-error counter: 0/3.
+
+## Executor report — TameLipschitz memory probe (2026-08-03)
+
+VERDICT: **no hotspot exists; the weight is DISTRIBUTED, and a split
+ruling is required.**  `DeTurckRemainderTameLipschitz.lean` (46,927
+lines) was measured, not edited — the file is byte-unchanged and no
+statement was touched, because there is nothing local to fix.  The
+`ResidualFlat` hypothesis (one runaway tactic holding several GB) is
+**refuted for this file.**  The chain therefore remains blocked and
+`LowRegC01JetTower` still has no first check.
+
+### Probe map (each run under `lake env lean -M <cap>`, `-LeanThreads 1`, guarded)
+
+| prefix (cut line) | peak lean WS | wall |
+|---|---|---|
+| 116 — imports/opens only | **3.51 GB** | 24 s |
+| 2546 | 4.00 GB | 57 s |
+| 2609 | 4.01 GB | 65 s |
+| 5079 | 4.25 GB | 105 s |
+| 8988 | 4.60 GB | 154 s |
+| 12984 | 4.80 GB | 170 s |
+| 16002 | 5.30 GB | 186 s |
+| 20010 | 5.87 GB | 211 s |
+| 23997 | 6.38 GB | 211 s |
+| 26340 | 6.57 GB | 227 s |
+| 36051 | **> 7.60 GB** (cap hit) | 276 s |
+| whole file (solo `check`) | ≥ 8.20 GB, still climbing at kill | killed 292 s |
+
+Zero errors in every probe.  The climb is smooth and monotone — **no
+prefix jump anywhere**, which is precisely the stop condition the brick
+named.  Two numbers carry the ruling: the **import closure alone costs
+3.51 GB** (40% of the budget, 37 imports, before one line of this file
+elaborates), and the file's own content adds a near-constant **≈ 0.117 GB
+per 1000 lines**, projecting **≈ 8.8–9.0 GB** total against the ~8.7 GB
+runway.  The file is 0.1–0.3 GB over the wall — which explains both why it
+once built and why five squeeze attempts plateaued.  No tactic swap can
+close a ~2 GB gap.
+
+Two diagnostic traps worth recording.  A solo guarded check showed the
+log frozen at line 2398 while memory grew 3.87 → 8.20 GB over four
+minutes, which reads as "one stuck declaration at :2546"; a probe cleared
+:2546 at 4.01 GB.  Lean's streamed stdout under `lake env lean` is
+buffered and is **not** a position signal.  And peak memory must be summed
+over all `lean`/`lake` processes — a `lake build` runs module jobs in
+parallel, so the earlier "7.60 GB on TameLipschitz" from the
+`+LowRegOpJetWindows` chain was a whole-machine figure that did not by
+itself implicate this module.  (It does: solo it reaches ≥ 8.20 GB.)
+
+### The split lever (data-driven, for the planner's ruling)
+
+Best single move: **lines 10276–17800 — 187 private `nf_*` normal-form
+lemmas, 7.5k lines, with ZERO geometric types** (grep-verified: no
+`SmoothRiemannianMetric`, `SmoothCcTensor`, `TangentSpace`,
+`iteratedCovGrad`, `riemannianFiberNormSq`, `appCc`, `unitModel`,
+`ccTensorBilin`, `Manifold`, `ChartedSpace`).  They are pure
+`Fin n → … → ℝ` index algebra with 20-hypothesis symmetry bundles and
+6-fold nested `Finset.sum` chains.  Extracted to a standalone algebra
+module they pay almost **none** of the 3.51 GB geometric baseline — the
+same win as `BoundedFactorGridIntegral` in the CCDJT refactor, and the
+only available change that *lowers* the baseline instead of dividing it.
+This is also exactly what this file's own 2026-07-16 note already
+demanded ("split that algebra into coefficient-layer modules").
+
+Other clean boundaries: 116–3013 (Lie path-value layer); 3014–5074
+(chart-open section); 5075–10275 (`O1Abstract`); **26571–30633
+(`LieCorr0BoundsA`…`F4`, already delimited sections — cheapest mechanical
+extraction)**; 30633–46925 (16.3k-line tail with no section markers).
+Sizing: ~4 pieces of ~12k lines → ≈ 5.0/5.4/5.8/6.2 GB; ~5 pieces of
+~9.4k lines → ≈ 4.6–5.8 GB.  Pull the `nf_*` algebra first.
+
+### Chain outcomes
+
+`+LowRegOpJetWindows` and the `LowRegC01JetTower` check were **not run**:
+both sit behind this module's `.olean`, which is still absent, so they can
+only reproduce the same kill.  No new monster was discovered in the
+OpJetWindows chain because the chain was not re-entered.  Static census of
+`LowRegC01JetTower.lean` (356 lines) is unchanged and as expected:
+**exactly two `sorry`s, `low1Ker_jet` (:88) and `selfLow_jet` (:176)**;
+`c1_jet_tower` (:196) and `c0_jet_tower` (:265) are present.  The axiom
+census remains blocked behind the olean.
+
+Honest denominators: unchanged, and **0% new mathematics** — this brick
+produced a measurement, not a proof; nothing was proved, nothing was
+edited.  (N) 0%; F6 ≈ 60%; front 2 ≈ 50%; machinery ≈ 92%; whole project
+low single digits.  Route-error counter: 0/3 (a resource wall, not a route
+error).
+
+## Planner update No. 118 (2026-08-03) - HOG FIXED (ROOT CAUSE: ONE `ring`); CCDJT TREE GREEN; NEW BLOCKER = 46.9k-LINE TameLipschitz; PROBE DISPATCHED
+
+ResidualFlat refactor ACCEPTED (planner spot-check: `mul_assoc` at
+:206, zero `ring` residue; executor diffed the statement byte-identical
+against both the split file and the pre-split backup; census clean).
+The hog now checks at **3.09 GB / 19 s** (was ≥ 8.7 GB, five kills).
+
+**ROOT CAUSE — promoted to a STANDING RULE.**  The extractions and the
+`respectTransparency` removal moved the peak only 8.43 → 8.25 GB; the
+executor then sorry-bisected the declaration and found the entire
+blowup in ONE final-calc `by ring` proving `A*(B*C) = A*B*C`.
+Mechanism: `ring` compares atoms up to reducible defeq, and
+`set`-bound locals are LET-bound, so they zeta-unfold during that
+comparison — here through `MB → vol, Lam, Cgn` into a `dite`-wrapped
+`Exists.choose` of the GN existential.  Fix: `(mul_assoc _ _ _).symm`.
+One token ≈ 5 GB.  RULE: in any context holding `set`-bound locals
+that wrap `Exists.choose`/`dite`, do NOT use `ring`/`ring_nf`/
+`nlinarith`-family tactics on goals mentioning those locals — use the
+explicit rewrite, or `clear_value`/generalize the lets first.  (Same
+root as the opacity-discipline heartbeat lesson; now shown to blow
+MEMORY too.)  Diagnostic technique validated: sorry-truncation
+bisection with ~20 s guarded probe runs — cheap and decisive; use it
+BEFORE any split of a heavy file.
+
+Piece map landed: generic `Analysis/Sobolev/BoundedFactorGridIntegral
+.lean` (tensor-free, 1.4 GB) + `ResidualFlatSup` (2.8) +
+`ResidualFlatGN` (3.1) + reassembled `ResidualFlat` (2.86 build).
+`respectTransparency false` is GONE from ResidualFlat (no piece needed
+it).  Chain: Window 3.43 / Free 3.24 / Base 3.18 / AllOrd 3.17 /
+**umbrella 2.81 — the whole CCDJT tree is green for the first time
+since the split**, axiom census exactly `[propext, Classical.choice,
+Quot.sound]` on all six touched declarations.
+
+NEW BLOCKER (pre-existing, exposed by the chain): the
+`+LowRegOpJetWindows` refresh rebuilt ~140 stale modules, then died
+twice (7.60 / 7.95 GB) on `DeTurck/DeTurckRemainderTameLipschitz.lean`
+— **46,927 lines**, 3× the CCDJT monolith, no CCDJT import; stale
+purely from E3's `DeTurckRemainderDefs` edit; its olean is now
+deleted.  `LowRegC01JetTower`'s first check + the tower census are
+blocked behind it (static census of C01: exactly the two expected
+sorries `low1Ker_jet` :88, `selfLow_jet` :176).  DISPATCHED: probe
+brick — pattern-scan for the ring/set-zeta family first, then
+sorry-bisection on scratch copies, one-token-style fix if a hotspot,
+STOP-and-report for a split ruling if the weight is distributed.
+
+Honest denominators: unchanged; the №112–118 arc remains 0% new
+mathematics.  (N) 0%.  Route-error counter: 0/3.
+
+## Planner update No. 119 (2026-08-03) - TameLipschitz PROBE ACCEPTED (DISTRIBUTED WEIGHT); 4-CHUNK SPLIT RULED AND DISPATCHED
+
+(Note: the probe's executor report was appended concurrently with
+No. 118 — read entries by date, the interleaving is cosmetic.)
+
+Probe accepted: NO hotspot — a clean prefix ladder shows the import
+closure alone at 3.51 GB and content adding ≈0.117 GB per 1000 lines,
+smooth and monotone (whole file ≥8.2 GB and climbing at the kill,
+projecting 8.8–9.0 vs the ~8.7 runway — over the wall by only
+0.1–0.3 GB, which explains its historical builds and the squeeze
+plateau).  Zero edits made — correct per the stop condition; the
+`ResidualFlat` precedent does not transfer.  Blocking status
+CONFIRMED empirically: the `+LowRegOpJetWindows` build itself
+attempted TameLipschitz (lake builds only the target's closure).
+
+Two phantom-hotspot traps recorded (lessons.md): block-buffered
+stdout under `lake env lean` freezes the log while memory climbs
+(falsely accused a declaration the probe then cleared at 4.01 GB);
+and peak memory must be SUMMED over all lean/lake processes — the
+original "7.60 GB on TameLipschitz" was a whole-machine figure with a
+parallel build.  New validated instrument: `lake env lean -M <cap>`
+aborts an over-budget probe safely.
+
+RULING: 4-chunk split, sized by the measured slope — each chunk
+≤ ~15k lines ⟹ ≈5.3 GB peak (this file's weight is distributed, so
+BIG chunks are safe; CCDJT needed fine chunks only because single
+declarations spiked).  The tensor-free `nf_*` block (10,276–17,800,
+187 private lemmas, zero geometric types) becomes its own MINIMAL-
+import chunk (the baseline-lowering move the file's own 2026-07-16
+note demanded); `LieCorr0BoundsA…F4` (26,571–30,633) is a natural
+seam.  Umbrella preserves the import path; CCDJT recipe + tooling
+reused; mechanical content-preservation verification mandatory.
+Dispatched with the full chain tail: chunks → umbrella →
+`+LowRegOpJetWindows` → `LowRegC01JetTower` first check + census.
+
+Honest denominators: unchanged ((N) 0%; F6 ≈ 60%; front 2 ≈ 50%;
+machinery ≈ 92%; the compile-health arc is still 0% new
+mathematics).  Route-error counter: 0/3.
+
+## Executor report — TameLipschitz monolith split (No. 118 follow-on brick) (2026-08-03)
+
+VERDICT: **DONE, GREEN, and the frozen chain is unblocked.**
+`DeTurckRemainderTameLipschitz.lean` (46927 lines) is now a pure umbrella over
+**fifteen** chunk modules.  Worst single Lean process across the whole tree:
+**5.26 GB** (the monolith was killed at ≥ 8.20 GB and still climbing).
+`+LowRegOpJetWindows` rebuilt to completion (9593 jobs), and
+`LowRegC01JetTower` got its **first check ever** — which found two pre-existing
+syntax errors, now fixed; it is green with exactly the two expected `sorry`s and
+its towers were censused for the first time.
+
+**0% new mathematics.**  Every declaration moved verbatim, statement and proof,
+with its `set_option … in` prelude; no `maxHeartbeats` was introduced; no
+statement was touched.
+
+### Chunk map (src lines / peak GB / wall s, guarded targeted builds, `-LeanThreads 1`)
+
+| # | chunk | lines | peak | wall | imports |
+|---|-------|-------|------|------|---------|
+| 1 | `Base` | 4958 | 4.45 | 89 | *(orig 37)* |
+| 2 | `O1Alg` | 1307 | **1.40** | 8 | *(7 Mathlib)* |
+| 3 | `LieValue` | 3555 | 4.55 | 73 | Base, O1Alg |
+| 4 | `M0Defs` | 810 | **1.51** | 13 | *(7 Mathlib)* |
+| 5 | `M0Gen1` | 7046 | **2.62** | 39 | M0Defs |
+| 6 | `M0Gen2` | 7514 | **2.48** | 23 | M0Gen1 |
+| 7 | `Master` | 1216 | 3.76 | 41 | LieValue, M0Gen2 |
+| 8 | `BoundsA` | 1860 | 4.14 | 49 | Master |
+| 9 | `BoundsB` | 2244 | **5.26** | 186 | BoundsA |
+| 10 | `TameL2` | 2894 | 4.34 | 57 | BoundsB |
+| 11 | `TameJet` | 2651 | 4.35 | 97 | TameL2 |
+| 12 | `Refold` | 2387 | 4.43 | 49 | TameJet |
+| 13 | `Dim1` | 2100 | 4.09 | 57 | Refold |
+| 14 | `Kernel` | 2606 | 4.14 | 65 | Dim1 |
+| 15 | `Envelope` | 3646 | 4.36 | 65 | Kernel |
+| — | umbrella | — | 3.39 | 13 | all 15 |
+
+Whole tree, cold and serial: about 15 minutes.
+
+### The lever, and why the chunk count is 15 rather than 4
+
+The probe's ruling was right and it was the *only* thing that mattered: the two
+index-algebra layers `O1Abstract` (1.3k lines) and `M0Abstract` (15.4k lines)
+carry **zero geometric types**, so they were given modules with **seven Mathlib
+imports** instead of the monolith's 37.  36% of the file now pays a ~1.3 GB
+baseline instead of the 3.51 GB geometric one and elaborates in 83 s total —
+`M0Gen2` is 7514 lines at 2.48 GB, where the same 7514 geometric lines would
+have been ~4.4 GB.  Their namespaces are unchanged, so the `Master` call sites
+were not touched.
+
+The geometric remainder needed more pieces than the plan's ~4 because **measured
+cost is not linear in line count**: `BoundsB` is 2244 lines at 5.26 GB while
+`Base` is 4958 lines at 4.45 GB.  The `LieCorr0Bounds*` sections (section-level
+`respectTransparency false` + 1.6M heartbeats) cost ~3× per line what the rest
+does.  Two rounds of re-splitting were driven by measurement, not by guessing:
+a 5322-line `Master` measured 5.79 GB and was cut at `LieCorr0BoundsE1`.
+
+### Name handling (the correctness-critical part)
+
+Of 1076 `private` declarations only **262** are referenced from another chunk —
+established by a comment-stripped cross-chunk usage scan, not by promoting
+everything.  Those at `IntrinsicSpectral` level are wrapped in the internal
+namespace `DeTurckRemainderTameLipschitz` (opened by every geometric chunk); the
+ones already inside `O1Abstract`/`M0Abstract` keep their place.  The other 814
+stay `private`, byte-identical to the monolith.
+
+A collision scan found 64 of the private names also declared publicly elsewhere,
+seven of them in the **bare** `IntrinsicSpectral` namespace, where an imported
+homonym out-ranks an `open`ed internal namespace and would silently re-resolve
+(`lc0Kappa`, `lc0PbLow`, `lc0IVPerm`, `lc0VFlat`, `lieCorr0Field`,
+`lc0KappaField`, `lc0PbLowField`).  The monolith's 1247-module project import
+closure was computed: **none of the declaring modules is in it**, so the
+promotion is safe.  Recompute if the imports change.
+
+### Content preservation — mechanical
+
+All 46794 body lines reappear verbatim and in order across the fifteen chunks;
+1100 declarations in identical order with identical names; `private` stripped on
+exactly the 262 promoted names; every chunk balanced; no declaration hides in a
+generated header.  Public API: the 24 public signature blocks are byte-identical
+and all 24 names still resolve at their original full names (`#check @…`).  The
+monolith's 50-line module docstring (which sits above the first declaration)
+was moved to the umbrella.  Backup and tooling:
+`.codex-scratch/tamelip-split/{*.before-split.lean, analyze, usage, split,
+verify}.py`.
+
+### Chain, C01 and census
+
+- `+LowRegOpJetWindows`: **green**, 9593 jobs, 349 s, 5.49 GB whole-machine.
+  **No new monster surfaced** — the dry run showed 9584 of 9593 jobs already up
+  to date, i.e. TameLipschitz was the only wall left in that chain.
+- `LowRegC01JetTower` first check: **two pre-existing syntax errors** at `:65`
+  and `:154` — `set_option … in` placed *between* the doc comment and the
+  `theorem` keyword (`unexpected token 'set_option'; expected 'lemma'`).  The
+  file had never been parsed, because it was written while its chain was broken.
+  Fixed by moving the modifier pairs above their doc comments (the order this
+  same file already uses at `section Towers`); no statement or proof changed.
+  Check then green in 19 s / 3.53 GB with **exactly the two expected `sorry`s**,
+  `low1Ker_jet` (:88) and `selfLow_jet` (:176).
+- Axiom census, first time possible: `c1_jet_tower` and `c0_jet_tower` =
+  `[propext, sorryAx, Classical.choice, Quot.sound]`, and the `sorryAx` enters
+  **only** through those two integrands — `selfLow_split`, `c1_eq`, `c0_eq`,
+  `selfLow_joint`, `c2_jet_tower`, `rhsLow1_path_joint` and `path_jetL2_le` all
+  censused clean.
+- Downstream: all three direct consumers of the umbrella (`RHSRefoldTameH2`,
+  `SobolevNonlinearityExistence`, `ShortTime/LowRegRHSSymm`) rebuilt green
+  (9730 jobs, 23 min, 5.73 GB whole-machine) — the import path is transparent
+  to them, no downstream `import`/`open`/name had to change.
+- Four moved TameLipschitz public endpoints censused
+  `[propext, Classical.choice, Quot.sound]` — **no `sorryAx`**.  On the "4
+  pre-existing prose hits": all four are prose, but one of them is a **stale
+  claim** — the doc comment of
+  `rawTensorConnLapSmooth_fiberNormSq_le_secondCovGrad_jet` still says "its body
+  is `sorry`, and consumers transitively depend on its `sorryAx`", while the
+  declaration in fact has a real proof through
+  `rawConnLap_fiberNormSq_le_secondCovGrad`.  The census disproves the sentence;
+  it should be deleted the next time that region is edited.
+
+### Traps worth carrying forward
+
+- **An `open` emitted inside the internal namespace expires at the next `end`.**
+  The first draft lost 30 identifiers this way.  `open`, `variable`, non-`in`
+  `set_option`, `attribute` and `local instance` must be pinned to the level
+  they had in the monolith.
+- `attribute [-instance] … in` (both occurrences here) is a **one-command
+  modifier**: it travels with its declaration and must not be replayed in a
+  preamble.
+- Chunk starts must absorb a `set_option … in` chain separated from its
+  declaration by a **blank line** — same trap the CCDJT split recorded.
+- A file written while its import chain is broken **has never been parsed**;
+  budget a syntax pass for its first check.
+
+### Honest denominators
+
+Unchanged, and this brick is **0% new mathematics** — it moved bytes and
+measured memory.  (N) still **0%** (stated at `ExtendViaUniqueness.lean:80`,
+proof not started).  F6 ≈ 60%; front 2 ≈ 50%; machinery ≈ 92%; whole project low
+single digits.  Route-error counter: 0/3 (a resource wall, plus one pre-existing
+syntax slip found by the first check — neither is a route error).
+
+## Planner update No. 120 (2026-08-04) - TameLipschitz SPLIT ACCEPTED COMPLETE; COMPILE-HEALTH ARC CLOSED; PAUSED AT USER REQUEST
+
+Acceptance: the split brick finished IN FULL before the user-requested
+stop (the kill interrupted only the umbrella-docstring restoration,
+which planner inspection shows was ALSO already completed — the
+umbrella carries the full original module docstring + layout note).
+Verified state: 15 chunks green (worst single process 5.26 GB, the
+two geometry-free index-algebra layers at a ~1.3–1.5 GB baseline);
+umbrella green; `+LowRegOpJetWindows` green (9593 jobs, no further
+monster — TameLipschitz was the last wall in that chain);
+`LowRegC01JetTower` FIRST CHECK GREEN (two pre-existing
+never-parsed syntax slips fixed — `set_option … in` between doc
+comment and keyword; exactly the two expected sorries `low1Ker_jet`
+:88 / `selfLow_jet` :176); census: towers carry `sorryAx` ONLY
+through the two integrands; `selfLow_split`/`c1_eq`/`c0_eq`/
+`c2_jet_tower`/`path_jetL2_le` clean; four moved TameLipschitz
+endpoints clean (and one STALE doc claim found — the
+`rawTensorConnLapSmooth_fiberNormSq_le_secondCovGrad_jet` docstring
+still says "body is sorry" while the census disproves it; delete on
+next edit of that region).  Three downstream consumers rebuilt green
+(9730 jobs).  Traps recorded by the executor (internal-namespace
+`open` expiring at `end`; one-command `attribute [-instance] … in`;
+blank-line-separated `set_option` chains; never-parsed files need a
+syntax pass) stand in the report above.
+
+**The №112–120 compile-health arc is CLOSED.**  The Lean lane is
+fully unblocked; the mathematical queue resumes at
+[`selfLow_jet` ball-thread + A1-CUR-1] per No. 114, then P-STOP
+completion gates the Galerkin lane per No. 115.
+
+PAUSED at user request (the user needs the machine): split agent
+stopped post-completion, zero lean/lake processes, stale elaboration
+lock removed, both of the brick's claims released, ~7 GB free.
+Residual on resume: ONE ~13 s umbrella re-elaboration (the docstring
+edit changed its hash) folded into the next targeted build; nothing
+else pending.  RECOMMENDED USER ACTION: a checkpoint commit of the
+final tree (superseding the mid-split snapshot `7f54201cf`) — the
+entire verified CCDJT + TameLipschitz restructuring and the C01
+syntax fixes are uncommitted, and today produced two machine crashes.
+Resume word: 继续.
+
+## Planner update No. 121 (2026-08-04) - RESUMED; [BALL-THREAD + A1-CUR-1] DISPATCHED; P-STOP §6.1: FIRST-EXIT DISSOLVED (R0 SUPERSEDED)
+
+Resumed on the user's word.  Tree unchanged over the pause (HEAD still
+`7f54201cf`; checkpoint-commit recommendation stands).  The
+[`selfLow_jet` ball-thread + A1-CUR-1] brick is OUT per No. 114/115
+(A1CUR_PLAN.md §7 spec; standing stop signals attached; success
+criterion = `low1Ker_jet` and `c1_jet_tower` sorryAx-free, file sorry
+census = exactly `selfLow_jet`).
+
+**P-STOP §6.1 (paper): the first-exit machinery is DISSOLVED — R0's
+option-2 is SUPERSEDED by something strictly simpler.**  Key
+observation: `Π_N` commutes with Δ/resolvents/semigroup and is
+norm-nonincreasing on every scale, so the ENTIRE A1 fixed-point solve
+replays verbatim at the projected level with the SAME constants —
+giving the Galerkin approximants an N-UNIFORM, CLASS-uniform
+projected state ball AND a projected maximal-regularity bound
+`‖U_N‖_{C_tH³} ≤ B₃` (class data).  The C0 tower's `‖∇P‖_∞` cap is
+therefore an A-PRIORI class bound for the approximants — not a
+stopped radius — and rungs 3–5 close by tower-direct plain Grönwall
+(coefficients from {δ*, B₃, class}; per-datum statics on the right
+only; downward coupling only; all six Pro requirements met with
+margin).  `R₅ := (2Φ₅)^{1/2}+1` is then a per-datum DEFINITION handed
+to the `a2_ladder` high rungs.  No first-exit, no stopped system, no
+retraction.  E4 simplifies (the projected contraction can replace or
+derive the Galerkin ODE construction).  P-STOP ≈ 85%; remaining =
+the §7 identification audit + two small Lean-hypothesis reads
+(MR engine accepts projected forcing; the A1 Lipschitz lemma is
+operator-level reusable).
+
+Design constraint DISCOVERED and sent to the in-flight brick (§6.1
+(c)): `selfLow_jet`'s threaded ball must be instantiable at the H³
+level — generic `(a : ℕ)` with gate `1 ≤ a`, or a direct pointwise
+`‖∇T‖_∞`-cap hypothesis; a hard `3 ≤ a` gate would starve the
+Galerkin bottom rungs (they hold `B₃`, not an `H⁵` ball).
+A1-CUR-2's handoff must carry the same constraint.
+
+Honest denominators: (N) 0%; F6 ≈ 60% (A1-CUR-1 in flight would move
+it); front 2 ≈ 50%; machinery ≈ 92%; whole project low single digits.
+Route-error counter: 0/3 (superseding R0 by a simpler sound route is
+a refinement, not an error — nothing was built on first-exit).
+
+## Executor report — [`selfLow_jet` ball-thread + A1-CUR-1] (No. 114 brick) (2026-08-03)
+
+**LEAD WITH THE FAILURE: A1-CUR-1 did NOT close.**  `low1Ker_jet` is
+still `sorry`.  `LowRegC01JetTower.lean` carries **two** sorries, not
+the targeted one.  Part 1 landed in full; Part 2 delivered the
+currency layer the estimate consumes, not the estimate.
+
+### Part 1 — C0 statement surgery: DONE, green, 0% new mathematics
+
+`selfLow_jet` widened, verbatim:
+
+```lean
+theorem selfLow_jet
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)
+    {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    ∃ Kk : ℕ → ℝ, (∀ i, 0 ≤ Kk i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ),
+        ‖smoothCcToTensorHs (I := I) (M := M) g ((a : ℝ) + 2) T‖ ≤ R₀ →
+        ∀ (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        lowJetSq (I := I) (M := M) g i
+            (rhsSelfLow (I := I) (M := M) g g T hδg hδZ s) ≤
+          Kk i * (1 + ∑ j ∈ Finset.range (i + 2),
+            ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+  sorry
+```
+
+**Form chosen: ball, generic gate `1 ≤ a`** — per the coordinator's
+P-STOP §6.1 supplement.  The pointwise-`‖∇T‖_∞` alternative was
+considered and **rejected**: `c0_jet_tower` would then have to produce
+a fibre-Morrey `H^{a+2} → C¹` bridge that does not exist in the tree,
+injecting a NEW frontier into `c0_jet_tower` and breaking its
+"sorryAx only via `selfLow_jet`" status.  With the ball form
+`c0_jet_tower` passes its already-in-scope `hball` through verbatim.
+`a ≥ 16` was NOT inherited.
+
+`c0_jet_tower` gained `(ha : 1 ≤ a)` — it previously had **no** gate
+and cannot discharge the widened window without one.  Its only current
+reference is the axiom census, and its eventual consumer carries
+`a2_ladder`'s `3 ≤ a`, so the change is free.  `low1Ker_jet` stays
+ball-free.  Docstrings on both record why the ball is required
+(quadratic-in-`∇P` summands; ball-free form false by concentration).
+
+### Part 2 — A1-CUR-1: currency layer landed, estimate NOT landed
+
+**No stop-signal was hit.**  No summand of `rhsLow1Coeff` carries two
+bare connection differences (verified from the *definitions*:
+`ricci1Split`'s five copies carry one `connDiffSection` each;
+`lieArm1Piece`'s three arguments likewise).  The Ricci kernel folds at
+`atgw(l + 2)`, **not** `(l + 3)`.  The route in `A1CUR_PLAN.md` §7 is
+confirmed sound.
+
+What landed, all sorry-free and focus-checked:
+
+* **NEW `Analysis/Sobolev/TensorHilbert/AtgwArmFold.lean`** — the
+  generic radius-free composer, extracted once instead of per arm:
+  `gridBase`, `foldConst`/`foldConst_nn`, **`atgwFold`** (pointwise
+  two-arm Leibniz fold at generic left rank `p`, generic valences and
+  generic offsets: `atgw(i'+u+1)` × `atgw(l+v+1)` → `atgw(n+u+v+1)`),
+  **`atgwToJet`** (the integration step: pointwise window at offset
+  `w` → `K·(∑Kint)·(1 + ∑_{j<n+w}‖∇ʲP‖²)`).  Radius-free and
+  **gate-free**.  This is the piece `A1CUR_PLAN.md` §7 budgeted at
+  ~225 lines *per arm* and that `LieCorr0CoeffDiffRadiusFree` repeats
+  eight times (`b4_*_atgw`); it also serves A1-CUR-2's five C0
+  summands.
+* **NEW `Analysis/Sobolev/TensorHilbert/RicciOrder1RadiusFree.lean`** —
+  `permAppEqRs` (public re-derivation of the read-only-file `private`
+  `permApp_eq_rs`), **`ricci1Split`** (the plan's step-1 public
+  re-derivation, in `rsDomDomCongrSection` form), `insertAtgw`
+  (`connDiffContrInsertionField` window at `+2`, constant
+  `finrank²·Ccd l`), **`ricciKerAtgw`**
+  (`linearizedRicciConnDiffOrder1KernelField` window at `+2`, constant
+  `46·Cins l`).
+* **Promotions.**  `rfns_iCG_connDiffSection_atgw_rf`
+  (`DeTurckVFJetRadiusFree.lean:968`) `private` → public.
+  `slotPermCc`, `kernelField_eq_neg_arm_combination` and the seven
+  `kOutPerm*`/`kInPerm*` (`RicciConnDiffOrder1TameEnvelope.lean`)
+  `private` → public, docstrings added.  **Plan correction:** the plan
+  said to promote the `LieFieldJetL2Summed.lean:136` copy; that module
+  is NOT in `LowRegC01JetTower`'s import chain, while the envelope copy
+  IS.  The envelope copy was promoted, the other left untouched, no
+  duplicate created and no new import added.
+
+Remaining for `low1Ker_jet`, in dependency order (all now small
+because the fold is generic):
+
+1. `ricciCometricFourTraceCastG0` `atgw` at `+1` — a valence-`(4,2)`
+   clone of `rfns_iCG_cometricCastG0_atgw_rf` (~134 lines); both
+   inputs already radius-free.
+2. Ricci arm = `atgwFold (u:=0) (v:=1)` against `ricciKerAtgw`, then
+   `atgwToJet (w:=2)`.  ~60 lines.
+3. Lie arm: `atgw` at `+1` for `deTurckLieTraceCoeff`, at `+2` for the
+   three `Ψ`.  **At the tower's call site `g_bg = g₀`**, so
+   `lieArm1ConnDiffBgCc g₀ g₁ g₀ = connDiffSection g₁ g₀` is already
+   covered; only `lieArm1PsiB` is genuinely new.
+4. Assembly via `jetAdd`/`jetSmul` + the `moserWin_sharp`
+   `choose`-over-`a` idiom; `IsPathPert` + `pathPert_rad` supply
+   `htie`, `Λ₀ = finrank·δ₀` and `lowJetSq g n P ≤ lowJetSq g n T`
+   exactly as the engines want.
+
+### Census
+
+`c1_jet_tower`, `c0_jet_tower` → `sorryAx` only via their integrands
+(`low1Ker_jet` / `selfLow_jet` respectively); `selfLow_split` clean;
+`atgwFold`, `atgwToJet`, `permAppEqRs`, `ricci1Split`, `insertAtgw`,
+`ricciKerAtgw`, `rfns_iCG_connDiffSection_atgw_rf`,
+`kernelField_eq_neg_arm_combination` all
+`[propext, Classical.choice, Quot.sound]`.  Sorry census of
+`LowRegC01JetTower.lean`: **two** (`low1Ker_jet`, `selfLow_jet`).
+
+### Honest denominators
+
+* Part 1: **0% new mathematics** — statement repair.  `selfLow_jet`
+  (A1-CUR-2) remains **0%**, and its statement is now honest rather
+  than false, which is the whole content of the change.
+* `low1Ker_jet` (A1-CUR-1): still **0%** — not stated-and-proved.  Its
+  dedicated machinery moved ≈ 70% → ≈ **85%**: the generic composer and
+  the Ricci-kernel currency exist and are verified; the outer Ricci
+  factor, the Lie arm's factors, and the assembly do not.
+* A1-CUR as a whole ≈ **30%** (was ≈ 10%).
+* `c1_jet_tower` / `c0_jet_tower`: derivations proved, integrands 0%
+  ⟹ ≈ 15% / 20%, unchanged.
+* **F6 ≈ 62%** (was ≈ 60%): real reusable movement, but the two
+  integrand estimates are both still open.
+* Front 2 ≈ 50%.  (N) `ricci_flow_unif_existence`: **0%** — not stated
+  in the form the campaign targets.  Machinery ≈ 92%.  Whole HCG
+  compactness project: low single digits.
+* Route errors: none this session; no stop-signal encountered.
+
+### Traps recorded
+
+* Namespace: `ccTensorBilinSymm`/`gFibreOpBound` live under
+  `…IntrinsicSpectral.MetricRealization`.  A missing `open` gives
+  `Invalid argument name 'I' for function`, not "unknown identifier".
+* `Combinatorics.antidiagonalTupleGridWindow` is a plain `def`: `rw`
+  on it fails with "Failed to rewrite using equation theorems"; state
+  the unfolding as a `rfl`-proved function equality.
+* `riemannianFiberNormSq_add_le` concludes `≤ 2a + 2b`, not `2(a+b)`.
+* `rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le` is left-rank-0
+  only; the general one is
+  `…_rankLeft_le` (`MetricArmCoeffJetTower.lean:2361`).  Both Ricci and
+  Lie outer arms need it (left rank 4 and 3).
+
+### Addendum to the executor report — promotion fallout, resolved
+
+Promoting `slotPermCc` / `kernelField_eq_neg_arm_combination` / the seven
+permutations broke `LieFieldJetL2Summed.lean` with nine
+"a non-private declaration … has already been declared" errors: that
+module transitively imports the envelope and carried its own `private`
+copies of exactly those names in the same namespace.  **`private` hides
+a name from importers; it does not give it a distinct fully-qualified
+name for collision purposes.**  Recorded as a durable trap.
+
+Resolved by deleting the nine local copies (the plan's own dedup step,
+applied on the other side) and correcting both stale docstrings that
+claimed the declarations were "not importable".  A tree-wide scan found
+no further `private` copies of the promoted names.
+
+**Final verification: `lake build` of the dedup + census targets —
+9599 jobs, completed successfully, 0 errors.**  Census as reported
+above: the eight new/promoted declarations clean; `selfLow_split` clean;
+`c1_jet_tower`/`c0_jet_tower` carry `sorryAx` only through
+`low1Ker_jet`/`selfLow_jet`.  `LowRegC01JetTower.lean` sorry census:
+**two** (`:88` `low1Ker_jet`, `:170` `selfLow_jet`).
+
+## Planner update No. 122 (2026-08-04) - SURGERY GREEN + CURRENCY LANDED; A1-CUR-1 COMPLETION BRICK DISPATCHED
+
+Acceptance of the [ball-thread + A1-CUR-1] brick:
+- **Part 1 GREEN and RATIFIED**: `selfLow_jet` widened at generic
+  gate `1 ≤ a` per the No. 121 constraint; the executor's rejection
+  of the pointwise-`‖∇T‖_∞` form is ratified (it would need a
+  nonexistent fibre-Morrey `H^{a+2} → C¹` bridge and inject a NEW
+  frontier into `c0_jet_tower`; the ball form passes the in-scope
+  `hball` verbatim).  `c0_jet_tower` gaining `(ha : 1 ≤ a)` is
+  accepted (it had no gate and cannot discharge the window without
+  one; no consumers yet; the eventual consumer carries `3 ≤ a`).
+- **Part 2 partial, currency ACCEPTED**: the generic `atgwFold`/
+  `atgwToJet` composer (supersedes eight per-arm fold duplicates and
+  serves A1-CUR-2), the Ricci radius-free window layer, and the
+  promotions with the plan correction (envelope copy, not
+  `LieFieldJetL2Summed`) are all census-clean; 9599-job build green.
+  `low1Ker_jet` itself remains 0% with machinery ≈ 85% and a
+  4-step remaining list recorded in the report above.
+- Durable lesson accepted into the trap list: `private` does NOT
+  give a distinct fully-qualified name — promoting a name collides
+  with `private` copies in downstream modules; dedup on promotion
+  (cost this session: one ~40 min rebuild).
+
+DISPATCHED: A1-CUR-1 COMPLETION (assemble `low1Ker_jet` per the
+4-step list; narrow-the-sorry fallback; success = `low1Ker_jet` +
+`c1_jet_tower` sorryAx-free, file census exactly `selfLow_jet`).
+A1-CUR-2 inheritance recorded: the two quadratic C0 summands need a
+`Λ₁`-capped sibling of the grid workhorse (where the threaded ball
+enters — matches P-STOP §6.1(c)); the linear three compose with
+`atgwFold` as-is.
+
+Honest denominators (per the report, planner-endorsed): A1-CUR ≈ 30%;
+F6 ≈ 62%; front 2 ≈ 50%; `low1Ker_jet` 0% (machinery ≈ 85%);
+`selfLow_jet` 0% (statement now honest); (N) 0% (stated at
+`Evolution/ExtendViaUniqueness.lean:80`, sorry :98 — the report's
+"not stated in the campaign's target form" phrasing is corrected
+here: it IS formally stated; the campaign's task is its proof).
+Machinery ≈ 92%.  Whole HCG project: low single digits.
+Route-error counter: 0/3.
+
+## Executor report — A1-CUR-1 COMPLETION (No. 122 brick) (2026-08-04)
+
+**`low1Ker_jet` is CLOSED, sorry-free.**  `c1_jet_tower` is now
+unconditional: `[propext, Classical.choice, Quot.sound]`, no `sorryAx`.
+`LowRegC01JetTower.lean`'s sorry census is **one** — `selfLow_jet`,
+brick A1-CUR-2 — down from two.  No statement anywhere was changed and
+the fallback "narrow the sorry" clause did not fire.
+
+### What the proof is
+
+`rhsLow1Coeff g g T 0 s` is, definitionally,
+`(-2) • linearizedRicciConnDiffOrder1CoeffField g g₁ + deTurckLieArm1Coeff g g₁ g`
+with `g₁ = realizedFam g T 0 s`.  Both arms are **linear** in the
+connection difference, so both carry a radius-free, gate-free pointwise
+`antidiagonalTupleGridWindow` bound at offset `+2` — one derivative of
+the state.  `pathPert_rad` at `δ₀ = 1/3` supplies the perturbation data
+uniformly on `s ∈ [0,1]` (tie, fibre bound, the order-zero cap
+`Λ₀ = finrank·(1/3)` that `atgwToJet` consumes, and
+`lowJetSq g n P ≤ lowJetSq g n T`), so no constant sees `s`.
+`atgwToJet` at `w = 2` integrates the window into the `range (i+2)`
+budget with `Kk i = ∑_{q<i+1} Kw q · (∑_{k<q+2} Kint k)`, manifestly
+nonnegative — the `le_abs_self` trick of `topKer_jet` was not needed,
+and neither was `moserWin_sharp` (radius-free windows carry no order
+gate, so there is nothing to `choose` away).
+
+### Summand → window map
+
+| summand | windows fed in | offsets | fold |
+| --- | --- | --- | --- |
+| Ricci arm = `appCcRS (fourTrace) (order-1 kernel)` | `fourTrAtgw` × `ricciKerAtgw` | `+1` × `+2` | `atgwFold (u:=0)(v:=1)` |
+| each of 14 `lieArm1Piece`s | `dltcAtgw` × slot-extended `Ψ` | `+1` × `+2` | `atgwFold (u:=0)(v:=1)` |
+| `Ψ = lieArm1ConnDiffBgCc g g₁ g` | `bgCcEqConn` collapse, then `rfns_iCG_connDiffSection_atgw_rf` | `+2` | — |
+| `Ψ = connDiffSection g₁ g` | `rfns_iCG_connDiffSection_atgw_rf` | `+2` | — |
+| `Ψ = lieArm1PsiB g g₁ g` | `kappaAtgw` × `sfEndoAtgw` | `+2` × `+1` | `atgwFold (u:=1)(v:=0)` |
+| total | `ricci1Atgw`, `lieA1Atgw` | `+2` | 2-subadditivity |
+
+All of it lives in the new
+`Analysis/Sobolev/TensorHilbert/Low1KerRadiusFree.lean` (866 lines, 12
+public declarations).  Not one line re-derives the Leibniz grid
+argument: every fold is a single `atgwFold` call — the payoff of last
+session's generic composer.
+
+### The two findings that made the brick small
+
+1. **The Ricci and Lie outer trace factors are the same object.**
+   `deTurckLieTraceCoeff g₀ g₁ σ = reindexCoeffGen (ricciArmPrincipalCoeffPure g₀ g₁) σ`
+   (`dltcEqPure`, by `ext` / `reindexCoeffFibGen_apply` / `rfl`), and
+   `ricciCometricFourTraceCastG0` is a `(1/2)`-combination of four
+   reindexings of that same object.  One window (`pureAtgw`) serves both
+   arms.  Moreover the **Ricci** factor's `+1` window already existed:
+   §9 item 1 budgeted a ~134-line clone of
+   `rfns_iCG_cometricCastG0_atgw_rf`, but
+   `rfns_iteratedCovGrad_ricciCometricFourTraceCastG0_diagonalProductGrid_le`
+   states `C n · ∑_{k<n+1} atg b k`, which *is* `C n · atgw b (n+1)` by
+   `rfl`.  `fourTrAtgw` is 12 lines.
+2. **`lieArm1PsiB` needed no new geometry, and no promotion out of the
+   Lie file.**  It is `appCcRS (raise∘permute κ) (sharpFlatEndoCc)` with
+   `κ = lieArm1LoweredBgKappa = -metricConnDiffLoweredCc` (public
+   `metricConnDiffLoweredCc_eq_neg_kappa`), whose `+2` window already
+   existed as the `private` `b4_mcd_atgw` in
+   `LieCorr0CoeffDiffRadiusFree.lean`.  Raise-slot-0 and slot-permute are
+   fibre isometries at every jet order via two **public** lemmas
+   (`rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq`,
+   `riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection`), so
+   `lieArm1_rfns_icg_raiseDomDom_eq`, `lieArm1_kappa_add_decomp`,
+   `lieArm1PbLow` and `lieArm1LowFix` all stayed private and untouched.
+
+### The one edit outside the new module
+
+`b4_mcd_atgw` (`LieCorr0CoeffDiffRadiusFree.lean:2017`) promoted
+`private` → public, docstring extended; nothing else in that file
+changed.  The name was collision-scanned tree-wide first (standing
+lesson: `private` hides a name from importers but does **not** give it a
+distinct fully-qualified name); no collision.  Cost was measured before
+committing: the reverse-dependency closure is 61 modules, but only 3 sit
+in `LowRegC01JetTower`'s import chain (`DeTurckRemainderLowBaseAction`,
+`LowRegOpJetWindows`, the tower), and the rebuild stayed well inside the
+memory guard.
+
+### Census
+
+`low1Ker_jet` → `[propext, Classical.choice, Quot.sound]`.
+`c1_jet_tower` → `[propext, Classical.choice, Quot.sound]`.
+`c0_jet_tower` → `sorryAx`, only through `selfLow_jet`.
+`selfLow_jet` → `sorryAx` (unchanged).
+`b4_mcd_atgw` and all twelve declarations of `Low1KerRadiusFree.lean`
+(`pureAtgw`, `fourTrAtgw`, `dltcEqPure`, `dltcAtgw`, `ricci1Atgw`,
+`sfEndoAtgw`, `kappaAtgw`, `psiBAtgw`, `bgCcEqConn`, `pieceAtgw`,
+`lieA1Atgw`, `low1Atgw`) → `[propext, Classical.choice, Quot.sound]`.
+File sorry census of `LowRegC01JetTower.lean`: **exactly one**.
+
+### Verification
+
+Every check and build ran under the memory guard (background job, 8 s
+poll, `-LeanThreads 1`); no trip, no kill.  Focused checks: promoted
+module 121 s, new module 24 s, tower 19 s — green, no warnings beyond
+the expected `selfLow_jet` sorry.  Final targeted build of the census
+target — which rebuilds the promoted module,
+`DeTurckRemainderLowBaseAction`, `LowRegOpJetWindows` and the tower —
+**completed successfully, 0 errors**.
+
+### Traps recorded (durably, in `Low1KerRadiusFree.md`)
+
+* `foldConst_nn`'s `{u v}` are implicit and unconstrained by its
+  hypotheses: fine under a `refine ⟨…⟩` that fixes them, "cannot
+  synthesize implicit `v`" in a bare `have`.
+* There is no public `riemannianFiberNormSq_neg`; go through the public
+  `riemannianFiberNormSq_smul` with `-X = (-1:ℝ)•X`.  After
+  `SmoothCcTensor.toSection_neg` the pointwise step needs
+  `ContMDiffSection.coe_neg`/`Pi.neg_apply`, mirroring the `add` case.
+* `atgwToJet` takes `X` **before** `K`; writing `_ (hK)` binds the proof
+  into the `ℝ` slot.
+
+### Honest denominators
+
+* **`low1Ker_jet` (A1-CUR-1): 100%** — stated and proved.
+  **`c1_jet_tower`: 100%**, unconditional.  This closes **one of the two**
+  integrand frontiers of the low-base jet towers.
+* **`selfLow_jet` (A1-CUR-2): 0%** — THE open estimate, unchanged.  Its
+  dedicated machinery ≈ 35% → ≈ **45%**: the composer, the integration
+  step, `pureAtgw`, `sfEndoAtgw`, `pieceAtgw` and `b4_mcd_atgw` all
+  transfer to the three *linear* summands of `selfLow_split`, but the
+  `∇P`-capped (`Λ₁`) currency the two **quadratic** summands require —
+  the `A·A` arm inside `ricciGoodLow`, and `lc0VB` — does not exist
+  anywhere in the tree.  A genuine new currency layer, not packaging;
+  the 3–4 session estimate stands.
+* `c0_jet_tower`: ≈ **20%**, unchanged.  A1-CUR overall ≈ 30% → ≈ **45%**.
+* **F6 ≈ 62% → ≈ 66%.**  Real movement — an integrand estimate that was
+  0% is now done and its consumer is unconditional — but the harder of
+  the two integrands is untouched.
+* Front 2 ≈ **52%**.  Machinery ≈ **93%**.
+* **(N) `ricci_flow_unif_existence`: 0%.**  It IS stated
+  (`Evolution/ExtendViaUniqueness.lean:80`, `sorry` at `:98`); the proof
+  is not started, and nothing this session moved it.
+* Whole HCG compactness project: low single digits.
+* Route-error counter: unchanged, 0/3 — no stop-signal, no failed route.
+
+### What A1-CUR-2 inherits
+
+* `low1Atgw`'s shape is the template: pointwise window at `+2` against
+  `gridBase g₀ P x`, then `atgwToJet (w := 2)` plus `pathPert_rad` in the
+  tower.  `c0_jet_tower`'s derivation is already written over
+  `selfLow_jet` in exactly that shape, with `hball` already threaded.
+* At the `c0_jet_tower` call site `g_bg = g₀` too, so the `bgCcEqConn`
+  collapse applies to any C0 summand carrying a background arm.
+* Of `selfLow_split`'s five summands,
+  `deTurckLieCovDerivArmField − edgeLiePairFam`, `lc0AMix` and `lc0Riem`
+  are linear and should fall to the currency now in place;
+  `(-2)•ricciGoodLow`'s `A·A` arm and `lc0VB` are the quadratic pair
+  needing the new `Λ₁` layer.  `LieCorr0CoeffDiffRadiusFree.lean`'s
+  ball-uniform siblings (`lc0VB_perOrder_rf`, `lc0AMix_perOrder_rf`) are
+  the models for the capped statements.
+
+## Planner update No. 123 (2026-08-04) - A1-CUR-1 ACCEPTED CLOSED: c1_jet_tower UNCONDITIONAL (FIRST TOWER); A1-CUR-2 SESSION 1 DISPATCHED
+
+Acceptance: `low1Ker_jet` PROVED, census `[propext, Classical.choice,
+Quot.sound]` — no sorryAx; `c1_jet_tower` 100% UNCONDITIONAL, the
+first of the two low-base jet towers.  Planner's independent
+pre-notification grep already matched (file sorry census = exactly
+`selfLow_jet`).  No statement changed; no stop signal; the
+narrow-the-sorry fallback did not fire.  New module
+`Analysis/Sobolev/TensorHilbert/Low1KerRadiusFree.lean` (866 lines,
+12 declarations); one promotion outside (`b4_mcd_atgw`,
+collision-scanned, 3-module rebuild cost measured before committing).
+Two brick-shrinking findings recorded: `dltcEqPure` (the Ricci and
+Lie outer trace factors are the SAME object — one window serves
+both) and `fourTrAtgw` = 12 lines via an `rfl` identity where the
+plan budgeted ~134.  `pathPert_rad` at δ₀ = 1/3 supplies tie, fibre
+bound, `Λ₀`, and the jet comparison uniformly in `s` — no constant
+sees `s`.
+
+Milestone framing (honest): of F6's two integrand frontiers, the C1
+side is now CLOSED end-to-end (`low1Ker_jet` → `c1_jet_tower`); the
+C0 side (`selfLow_jet`, A1-CUR-2) is the LAST real estimate in the
+F6 chain, and its two quadratic summands need machinery that does
+not exist in the tree — including the fibre-Morrey `H^{a+2} → C¹`
+bridge itself at low gate.
+
+DISPATCHED: A1-CUR-2 SESSION 1 — two deliverables: D1 the `Λ₁`
+producer (pointwise `‖∇P‖` cap from the ball at gate `1 ≤ a`, dim 3;
+scout-first per walls discipline, the supercritical `a ≥ 16`
+producers may NOT be inherited), D2 the `Λ₁`-capped `atgw` sibling
+(one ∇P factor absorbed at the cap, the other kept in the grid at
+`range (i+2)` — the `range (i+3)` stop signal armed), smoke-tested
+on ONE quadratic summand.  Assembly = session 2+.
+
+Honest denominators: F6 ≈ 66% (was 62); A1-CUR ≈ 45%;
+`low1Ker_jet`/`c1_jet_tower` 100%; `selfLow_jet` 0% (machinery
+≈ 45%); front 2 ≈ 52%; (N) 0% (stated, sorry :98); machinery ≈ 93%;
+whole HCG project low single digits.  Route-error counter: 0/3.
+
+## Executor report — A1-CUR-2 SESSION 1 (No. 123 brick) (2026-08-04)
+
+**Both deliverables landed, sorry-free, plus the smoke test.**  No stop
+signal: the repaired estimate lands at `range (i+2)`, and no `a ≥ 16`
+gate was inherited — the gate is `1 ≤ a`.  `selfLow_jet` itself is
+untouched and still `sorry`; `LowRegC01JetTower.lean`'s census is
+still exactly one.
+
+### The finding that shaped everything
+
+A purely pointwise/combinatorial repair of the quadratic summands is
+**impossible**.  The over-budget term is `∫ |∇^αP|²|∇^βP|²` with
+`α + β = n + 2`, `α, β ≥ 1`; at `α ≈ β ≈ n/2` neither factor is capped,
+so no inequality `|∇^αP|²|∇^βP|² ≤ CΛ²·(weight ≤ n+1 entries)` holds.
+The improvement is an INTEGRAL fact — Gagliardo–Nirenberg with
+interpolation endpoint `‖∇P‖_∞` instead of `‖P‖_∞`.
+
+Consequence: **the capped currency is the ordinary radius-free currency
+run on the base tensor `∇P` at valence `(0,3)`**, with `Λ₁ = ‖∇P‖_∞` in
+the role `Λ₀ = ‖P‖_∞` plays at `(0,2)`.  The whole session follows from
+this one observation.
+
+### D1 — the `Λ₁` producer: BUILT (the engine was found, the bridge was not)
+
+Scout result: the fibre-Morrey engine **already exists, public and
+ungated** —
+`exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical`
+(`Analysis/Sobolev/Embedding/SobolevEmbeddingSharpC0JetSum.lean:717`),
+valence-generic, needing only the jets through order `finrank/2 + 1`.
+The `a ≥ 16` of
+`deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow`
+comes from ITS route (`L = 4K+4 ≤ a+1`), not from the embedding — so
+the gate was correctly not inherited.  What did NOT exist is the
+ball-to-cap bridge; that is D1.  Verbatim:
+
+```lean
+theorem gradCapOfBall (hDim : Module.finrank ℝ E = 3)
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)
+    {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    ∃ Λ₁ : ℝ, 0 ≤ Λ₁ ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R₀ →
+        ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x) ≤ Λ₁ ^ 2
+```
+
+with `Λ₁ = C_emb(g₀)·√3·C₂·R₀`.  A jet-ball sibling `gradCapOfJets` is
+the actual content; `gradCapOfBall` is the two-line Hs-ball wrapper.
+`1 ≤ a` is exactly `a + 2 ≥ finrank/2 + 2 = 3` in dimension three.
+
+### D2 — the capped currency: BUILT, and it needed an upstream generalization
+
+The grid engines were hard-wired to base valence `(0,2)`.  Generalized
+**in place**, with the `(0,2)` statements kept verbatim as one-line
+instances, so **no call site anywhere changed** — which was mandatory,
+one of the 13 call sites being in the READ-ONLY
+`DeTurckRemainderLowBaseAction.lean`:
+
+| file | change |
+| --- | --- |
+| `JetProductIntegral.lean` | `grid_prod_int_le` valence `{r s}` implicit (inferred from `P`) |
+| `.../CurvatureCoefficientDifferenceJetTower/ResidualFree.lean` | new generic `atgGridIntRs`, `bfGridWinIntRs`; the two old names are now their `(0,2)` instances |
+| `AtgwArmFold.lean` | `gridBase`/`gridBase_nn`/`atgwFold` base valence implicit; new `atgwToJetRs`, with `atgwToJet` its `(0,2)` instance |
+
+New module `Analysis/Sobolev/TensorHilbert/GradCapAtgw.lean` (11 public
+declarations):
+
+* `icgNormComp`, `gradBase_eq`, `gradBase_fun` — the shifted base;
+  `gridBase g₀ (∇P) x j = |∇^{j+1}P|²(x)`, one `exact` from the PUBLIC
+  `rfns_iteratedCovGrad_comp`.
+* `gradCapOfJets`, `gradCapOfBall` — D1.
+* `shiftConst`, `atgwShift` — **the base shift**, the one genuinely new
+  combinatorial brick: `atgw b (k+1) ≤ shiftConst Λ k · atgw b' k` for
+  `k ≥ 1`, given `b 0, b 1 ≤ Λ`, `1 ≤ Λ`.  Proof = partition each
+  antidiagonal tuple into parts `= 0`, `= 1`, `≥ 2`; the first two are
+  eaten by the caps, the third re-indexes along `Finset.equivFin` into a
+  legitimate grid term of the shifted base at weight `≤ m − 1`.  Sharp
+  for arms LINEAR in `∇P`.
+* `armShift` — an arm's EXISTING window at `bP`-offset `u+2` becomes a
+  shifted-base window at level `i+u+1`.  **No arm is re-derived.**
+* `atgwCapToJet` — the capped integration step: shifted window at offset
+  `w` ⟹ `range (n + w + 1)` in `P`'s jets.  At `w = 1`: `range (n+2)`.
+* `atgwCapArm` / `atgwCapFold` — the capped two-arm workhorse, pointwise
+  and integrated.  Two arms each carrying one derivative of the state
+  land on `range (n+2)` — the same budget the linear summands enjoy.
+
+### Smoke test — `lc0VB`, landed, first build
+
+`Analysis/Sobolev/TensorHilbert/Lc0VBCapWindow.lean`:
+`lc0VBCapAtgw` (pointwise, shifted window at `i+1`) and `lc0VBCapJet`
+
+`‖∇ⁱ(lc0VB g₀ g₁)‖² ≤ K i · (1 + ∑_{j<i+2} ‖∇ʲP‖²)`,
+
+against `lc0VB_perOrder_rf`'s `range (i+3)`.  Route:
+
+```
+vbMcdArm           atgw bP (m+2)  --armShift-->  atgw b'P (m+1)
+ipLowCc (wOmega)   atgw bP (q+2)  --armShift-->  atgw b'P (q+1)
+  atgwCapArm + vbSplit      -> lc0VBPass : atgw b'P (n+1)
+lc0RiemLive        atgw bP (m+1) ≤ atgw bP (m+2) --armShift--> atgw b'P (m+1)
+  armShift + atgwFold(0,0) + lc0VB_eq_app  -> lc0VB : atgw b'P (n+1)
+  atgwCapToJet (w = 1)                     -> range (n+2)          ✓
+```
+
+Cost: **one** promotion, `b4_wOmega_atgw` (collision-scanned; three
+references, all in its own file).  The other six ingredients were
+already public.  Not one line of `lc0VB`'s geometry was re-proved.
+
+### The OTHER quadratic summand is NOT reachable this way (route note for session 2)
+
+`ricciAAArm` cannot be handled by shifting its folded window:
+`ricciAAKer` is a single arm that is ITSELF quadratic, and the shift is
+sharp only when every grid entry of the bound carries a factor — true
+for a bound on an arm linear in `∇P`, false for a quadratic one.
+Session 2 must descend into `aaKer_eq`'s six `appCcRS` nests
+(`DeTurckRemainderLowBaseAction.lean:4400`, all `private` in a READ-ONLY
+file) and shift the individual `connDiffContrInsertionField` factors, or
+obtain a public two-arm split of `ricciAAKer`.  **This is the single
+concrete blocker for the assembly.**
+
+### Census
+
+All new/changed declarations `[propext, Classical.choice, Quot.sound]`:
+`grid_prod_int_le`, `atgGridIntRs`, `bfGridWinIntRs`, the two `(0,2)`
+compatibility instances, `atgwToJetRs`, `atgwFold`, `atgwToJet`,
+`icgNormComp`, `gradBase_eq`, `gradBase_fun`, `gradCapOfJets`,
+`gradCapOfBall`, `shiftConst_nn`, `atgwShift`, `atgwCapToJet`,
+`armShift`, `atgwCapArm`, `atgwCapFold`, `b4_wOmega_atgw`,
+`lc0VBCapAtgw`, `lc0VBCapJet`.  `c1_jet_tower`, `low1Ker_jet`,
+`selfLow_split` clean (unchanged).  `c0_jet_tower`/`selfLow_jet` carry
+`sorryAx` only through `selfLow_jet` (unchanged).  **File sorry census
+of `LowRegC01JetTower.lean`: exactly one (`:272`).**
+
+### Verification
+
+Every build and check ran under the memory guard (background job,
+poll, `-LeanThreads 1`); no trip, no kill.  Three full targeted builds
+completed successfully: **9404 jobs** (valence generalization),
+**9607 jobs** (currency + tower + census), **9608 jobs** (final census
+including the smoke test).  Focused checks of the new module: 19–20 s.
+Zero new sorries.
+
+### Traps recorded (durably, in `GradCapAtgw.md` / `Lc0VBCapWindow.md`)
+
+* Generalizing a valence in place is FREE of call-site churn when the
+  valence can be made implicit and inferred from an explicit argument
+  (`grid_prod_int_le`); when it cannot (the valence sits under an `∃`),
+  keep the old statement as a one-line instance rather than editing 13
+  call sites — one of which was in a read-only file.
+* `gridShift` at `m = 0` is FALSE (the shifted window of level `0` is
+  empty); the `m = 0` level must be absorbed at the outer window, where
+  `1 ≤ atgw b' k` is available.
+* `Fintype.sum_equiv`/`Fintype.prod_equiv` along `Finset.equivFin.symm`
+  close the re-indexing goals by `rfl` — but only if the tuple is NOT
+  `set`-bound (a `set` name blocks the `rfl`).
+* `Real.sqrt Λ` is the clean way to feed a `Λ`-shaped cap into an engine
+  whose hypothesis is `≤ Λ₁ ^ 2`.
+
+### Honest denominators
+
+* **`selfLow_jet` (A1-CUR-2): still 0%** — not stated-and-proved; the
+  estimate is untouched.  Its dedicated machinery ≈ 45% → ≈ **70%**: the
+  capped currency exists, is verified, and one of the two quadratic
+  summands is already through it end-to-end.  What is missing is
+  `ricciAAArm`'s inner split and the five-summand assembly.
+* `c0_jet_tower`: ≈ **20%**, unchanged (derivation proved, integrand 0%).
+* A1-CUR overall ≈ 45% → ≈ **60%**.
+* **F6 ≈ 66% → ≈ 70%.**  Real movement — the last genuinely new estimate
+  machinery in the F6 chain now exists and is smoke-tested — but the C0
+  integrand is still 0% and it is the last open estimate.
+* Front 2 ≈ **54%**.  Machinery ≈ **94%**.
+* **(N) `ricci_flow_unif_existence`: 0%.**  Stated at
+  `Evolution/ExtendViaUniqueness.lean:80`, `sorry` at `:98`; nothing this
+  session moved it.
+* Whole HCG compactness project: low single digits.
+* Route-error counter: unchanged, **0/3** — no stop signal, no failed
+  route, no statement changed.
+
+### What session 2 (the assembly) needs
+
+1. A public two-arm split of `ricciAAKer` (or promotion of `aaKer_eq` +
+   the six `aa*`), then `armShift`/`atgwCapArm` on each nest.
+2. The three LINEAR summands of `selfLow_split`
+   (`deTurckLieCovDerivArmField − edgeLiePairFam`, `lc0AMix`, `lc0Riem`)
+   through the EXISTING radius-free currency — unchanged, per No. 122.
+3. `gradCapOfBall` wired at the `selfLow_jet` call site to produce `Λ₁`
+   from the already-threaded `hball`; `pathPert_rad` supplies the other
+   cap.  Take `Λ := max (Λ₀²) (Λ₁²) ⊔ 1` so both `gridBase … 0 ≤ Λ` and
+   `gridBase … 1 ≤ Λ` and `1 ≤ Λ` hold at once.
+4. `jetAdd`/`jetSmul` assembly and `low1Atgw`'s template shape.
+
+## Planner update No. 124 (2026-08-04) - A1-CUR-2 SESSION 1 ACCEPTED (CAPPED CURRENCY COMPLETE, lc0VB SMOKE-TESTED); SESSION 2 (ASSEMBLY) DISPATCHED
+
+Acceptance: both deliverables + the smoke test landed sorry-free (21
+new/changed declarations census-clean; three guarded targeted builds
+green, 9404/9607/9608 jobs; zero kills; `LowRegC01JetTower.lean`
+census unchanged at exactly `selfLow_jet`).  No stop signal — the
+capped route lands at `range (i+2)` and the gate is `1 ≤ a`.
+
+Structural finding RATIFIED: the quadratic repair is an INTEGRAL
+fact (GN with endpoint `‖∇P‖_∞`), so the capped currency is the SAME
+radius-free currency run on the base tensor `∇P` at valence `(0,3)`
+with `Λ₁` in place of `Λ₀` — realized as `atgwShift`/`armShift`/
+`atgwCapToJet`/`atgwCapArm`/`atgwCapFold` (`GradCapAtgw.lean`), with
+NO arm re-derived.  Stocked-instance NINETEEN: the fibre-Morrey
+ENGINE was public, valence-generic and UNGATED all along
+(`SobolevEmbeddingSharpC0JetSum.lean:717` — the `a ≥ 16` belonged to
+the tame producer's own route); only the ball→cap bridge was missing
+(now `gradCapOfBall`/`gradCapOfJets`, `Λ₁ = C_emb·√3·C₂·R₀`, and
+`1 ≤ a` is exactly the dim-3 supercritical threshold).  The in-place
+valence generalization of the grid engines (with `(0,2)` kept as
+one-line instances so ZERO call sites changed — one of 13 being in a
+read-only file) is the model for future upstream generalizations.
+
+DISPATCHED: SESSION 2 (assembly) — (1) public two-arm split of
+`ricciAAKer` (re-derive `aaKer_eq` + six `aa*` from the read-only
+file; the identified single blocker), (2) window the five
+`selfLow_split` summands (lc0VB done; three linear via existing
+currency; A·A via the split + `armShift` per nest), (3) assemble
+`selfLow_jet` (`Λ := max(Λ₀², Λ₁²) ⊔ 1` trick; constants before
+state; no constant sees `s`).  Success = `selfLow_jet` AND
+`c0_jet_tower` sorryAx-free, file census ZERO — the F6 estimate
+chain then closes COMPLETELY, leaving only the routine A1c/A1d
+assembly bricks before the (P-STOP-gated) Galerkin lane.
+
+Honest denominators (endorsed from the report): `selfLow_jet` 0%
+(machinery ≈ 70%); A1-CUR ≈ 60%; F6 ≈ 70%; front 2 ≈ 54%;
+machinery ≈ 94%; (N) 0% (stated, sorry :98); whole HCG project low
+single digits.  Route-error counter: 0/3.
+
+## Executor report — A1-CUR-2 SESSION 2 (the assembly) (2026-08-04)
+
+**`selfLow_jet`'s `sorry` is gone: the estimate is assembled and proved.
+It is NOT yet unconditional — it stands on two `private` per-arm windows
+that are still `sorry`.**  Leading with that, because the success
+criterion of the dispatch was a sorryAx-free `selfLow_jet` and that was
+NOT met.
+
+### Where the work stopped
+
+Two of the six arm-windows the assembly consumes are open:
+
+* `ricciDACap` — the Palatini arm `ricciDALow g₀ g₁ P` inside
+  `ricciGoodLow`;
+* `lieCovCap` — the pair
+  `deTurckLieCovDerivArmField − edgeLiePairFam`.
+
+Both are `private` in `LowRegC01JetTower.lean` (`:249`, `:333`), both are
+stated in exactly the form the assembly consumes, and both are per-ARM,
+not per-summand: `ricciGoodCap` is proved from `ricciAACap` + `ricciDACap`
+through `ccInputSymm`.  File sorry census: exactly two.
+
+Neither is a mathematical obstruction.  `ricciDACap` is missing a leaf
+inventory only — the generic structural identity
+`refoldKernelContractionMonomialField_eq_mvPairTraceRefold` is public and
+holds for an ARBITRARY `(0,4)` argument (the tame layer's hard-wiring to
+`G = ∇²(symmS P)` is in its *bound*, not in the identity), so what is
+left is capped windows for `mvPairTraceOp`, `slotInsertEndoCc
+(fullRaisedEndoField)`, `koszulOp`, plus a `capDdc0` sibling for
+`domDomCongrSection` at valence `(0,s)`.  Short brick.  `lieCovCap` is
+bigger: `lieCov_residual` is public and reduces the pair to a single
+product, and `lieCovPair` should be `appCcRS (pureTrace 2) (pureTrace 4)`
+by `rfl` (`bdPureDT` and `pureTrace` are the same field), but the inner
+`lieCovR4 = (-(s/2))•lrCurvF T − lrQuadF g₁` needs windows for `lrQA`/
+`lrQB`/`lrRiemW1`/`lrRiemW2` that exist only as `private bd*_gridWindow`
+in `RiemannCoefficientPalatiniRefold.lean`.  About a session.
+
+### What landed, sorry-free
+
+**The assembly itself** (the dispatch's item 3) — `selfLow_jet` is a
+complete proof.  `gradCapOfBall` fixes `Λ₁`; `Λ := max 1 (max (finrank·
+(1/3))² Λ₁²)` is chosen before the state and never sees `s`; `P = s•T`
+with `s ∈ [0,1]` contracts the `∇T` cap to a `∇P` cap; the five summand
+windows are chained by `capSmul`/`capAdd`, transported along
+`selfLow_split` by `capCongr`, integrated once by `capJet`, and
+`pathPert_rad`'s jet comparison converts `P`'s jets to `T`'s.  Lands at
+`range (i + 2)` with gate `1 ≤ a`.  **Neither stop signal fired.**
+
+**The `ricciAAKer` two-arm split** (item 1) — session 1's named blocker.
+The six pieces exist twice *privately*: as `aa*` in the read-only
+low-base action file, and as `ricQuad*` in the editable
+`EdgeRicciPairing.lean`.  Publicizing either set was rejected: the
+`ricPerm*` permutations they are built from are duplicated under the same
+names in the same namespace inside the read-only file, so exporting them
+risks an ambiguity error in a file that cannot be repaired.  Re-derived
+instead (the `ricci1Split` precedent) as `aaCoreP`/`aaCore`/`aaKerSplit`
+in a new module; `aaKerSplit` is `rfl`.  Zero edits outside the new
+files and the tower.
+
+**Four of the six arm windows** (item 2): `ricciAACap`, `lc0AMixCap`,
+`lc0RiemCap` new, plus session 1's `lc0VBCapAtgw` consumed directly (its
+conclusion IS `HasCapWin` unfolded).
+
+**A reusable arm calculus.**  New module
+`Analysis/Sobolev/TensorHilbert/GradCapArms.lean` (323 lines): the
+predicate `HasCapWin g₀ P X K` and fourteen closure lemmas
+(`capOfArm`, `capOfBnd`, `capApp`, `capAdd`/`capSub`/`capSmul`/`capNeg`,
+`capReindex`/`capDdc`, `capSlotExt`/`capIter`, `capMono`/`capCongr`,
+`capJet`).  The load-bearing fact is that the capped level `i+1` is
+CLOSED under `appCcRS` (`atgwFold` at `(0,0)`), so an arbitrary product
+tree of once-differentiated arms stays in budget and only the constants
+grow.  This is what made a five-factor nest like `lc0AMix` a 60-line
+proof.  New module `SelfLowCapWindows.lean` (482 lines) holds the
+summand windows.
+
+### Two corrections to the record
+
+* **`lc0AMix` is NOT linear** (No. 122 and session 1 both listed it among
+  the three linear summands).  `amix_refold_rf` is a five-factor nest
+  with TWO lowered connection differences; `b4_amix_atgw` lands at
+  `atgw bP (i+3)`.  It is a quadratic summand and needed the cap.  Only
+  `lc0Riem` of the three was genuinely linear;
+  `deTurckLieCovDerivArmField − edgeLiePairFam` is worse than linear
+  (each half has a second-derivative head and only the difference is
+  controllable).
+* **The `a ≥ 16` gate was never in danger.**  It sits in
+  `lc0AMix_perOrder_rf`/`lc0Riem_perOrder_rf` because those route through
+  `cometricCastG0_order0sup_jetL2_radiusFree`; the capped route uses
+  `trace_grid_rf` and `b4_mcd_atgw`, both gate-free.
+
+### Census (explicit)
+
+Full targeted build of the census target: **9610 jobs, successful.**
+
+* `selfLow_jet`, `c0_jet_tower`: `[propext, sorryAx, Classical.choice,
+  Quot.sound]` — the two per-arm frontiers, and nothing else.
+* `c1_jet_tower`, `low1Ker_jet`, `selfLow_split`: `[propext,
+  Classical.choice, Quot.sound]` — clean, unchanged.
+* All session-2 declarations clean: `HasCapWin` and the fourteen calculus
+  lemmas, `lc0RiemCap`, `lc0AMixCap`, `aaCoreP`, `aaCore`, `aaKerSplit`,
+  `ricciAACap`.
+* Exactly two declarations in the whole census carry `sorryAx`.
+* `LowRegC01JetTower.lean` sorry census: **two** (was one — the single
+  `selfLow_jet` sorry became two narrower, strictly more local ones).
+* No downstream build was possible: `c0_jet_tower`/`c1_jet_tower` have NO
+  consumer in the tree yet (A1c `a1_ladder` and A1d `n_diff_hm_rung` are
+  unwritten), so the requested `LowRegLadderRung` check is vacuous.
+
+### Honest denominators
+
+* **`selfLow_jet`: still 0% as an unconditional theorem** — it depends on
+  two `sorry`s, so it is not proved.  Its dedicated machinery ≈ 70% →
+  **≈ 88%**: the assembly is done, the currency is done, four of the six
+  arm windows are done, and the two open ones have identified routes.
+* `c0_jet_tower`: ≈ 20%, unchanged (derivation proved, integrand still
+  conditional).
+* A1-CUR ≈ 60% → **≈ 78%**.
+* **F6 ≈ 70% → ≈ 76%.**  Real movement, but the C0 integrand is still not
+  unconditional and it is still the last open estimate in the chain.
+  F6 also still lacks A1c (`a1_ladder`) and A1d (`n_diff_hm_rung`) —
+  routine assembly bricks over the towers, both unwritten (0%).
+* Front 2 ≈ **56%**.  Machinery ≈ **95%**.
+* **(N) `ricci_flow_unif_existence`: 0%.**  Stated at
+  `Evolution/ExtendViaUniqueness.lean:80`, `sorry` at `:98`.  Nothing
+  this session moved it.
+* Whole HCG compactness project: low single digits.
+* Route-error counter: unchanged, **0/3** — no failed route, no statement
+  changed, no stop signal.
+
+### Next target
+
+`ricciDACap` first (short, leaf-inventory only), then `lieCovCap`.  With
+both, `selfLow_jet` and `c0_jet_tower` become unconditional and the F6
+estimate chain closes.
+
+## Planner update No. 125 (2026-08-04) - SESSION 2 ACCEPTED (NARROWED-PARTIAL, 4/6 WINDOWS + ASSEMBLY PROVED); SESSION 3 (CLOSE THE TWO ARMS) DISPATCHED
+
+Acceptance: the sanctioned narrow-the-sorry pattern fired correctly —
+`selfLow_jet`'s five-summand ASSEMBLY is proved, standing on exactly
+two precisely-scoped private arm windows (`ricciDACap` :240,
+`lieCovCap` :315), each with a diagnosed route and leaf inventory.
+Census honest and verified (9610-job build): the towers' sorryAx
+enters ONLY via those two; all 20+ session-2 declarations clean;
+`c1_jet_tower`/`low1Ker_jet` untouched-clean.  The aaKer blocker is
+DISSOLVED by `rfl`-split re-derivation (`aaCoreP`/`aaCore`/
+`aaKerSplit`), and the executor's REFUSAL to promote is ratified —
+the `ricPerm*` names are duplicated in the same namespace inside the
+read-only file, so promotion would have created unrepairable
+ambiguity (new flavor of the private-FQN trap; recorded).
+
+TWO RECORD CORRECTIONS accepted (plan-file errors, not route errors):
+`lc0AMix` is NOT linear (five-factor nest, two lowered connection
+differences — went through the cap; only `lc0Riem` of the "three
+linear" was genuinely linear, and the lieCov pair is worse than
+linear with only the DIFFERENCE controllable); the `a ≥ 16` gate was
+never in danger (it belongs to the `cometricCastG0_order0sup` route,
+bypassed by the capped route).  Reusable yield: `GradCapArms.lean`
+(the capped level `i+1` is CLOSED under `appCcRS` — the load-bearing
+calculus that made a five-factor nest a 60-line proof).
+
+DISPATCHED: SESSION 3 — close `ricciDACap` (short: capped windows for
+`mvPairTraceOp` / `slotInsertEndoCc (fullRaisedEndoField)` /
+`koszulOp` + `capDdc0`; the :5945 refold identity is public and
+argument-generic) and `lieCovCap` (re-derive the four `lr*` windows
+publicly from the `private bd*_gridWindow` references — cost-measure
+rules out promotion in the ~19k-line Palatini file; `lrQuadF` is
+quadratic = exactly what the cap is for; no constant sees `s`).
+Success = file census ZERO ⟹ **the F6 estimate chain closes**.
+
+Honest denominators: `selfLow_jet` 0% unconditional (machinery
+≈ 88%); A1-CUR ≈ 78%; F6 ≈ 76% (still lacking, after the chain:
+A1c `a1_ladder` + A1d `n_diff_hm_rung`, both 0%, routine assembly);
+front 2 ≈ 56%; machinery ≈ 95%; (N) 0% (stated, sorry :98); whole
+HCG project low single digits.  Route-error counter: 0/3.
+
+---
+
+**THIS FILE IS FULL** (3000-line project limit).  The A1-CUR-2 SESSION 3
+executor report — **both windows CLOSED, F6 estimate chain CLOSED** — and
+everything after it live in **`UNIF_EXISTENCE_PLAN4.md`**, in this directory.
+Continue there.

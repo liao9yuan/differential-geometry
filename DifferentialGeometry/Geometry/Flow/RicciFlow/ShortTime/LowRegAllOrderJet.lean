@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegApplyTwo
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegHigherRung
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegSolutionJointlySmooth
 
 /-!
@@ -17,19 +17,24 @@ all-order smooth-in-time forcing-coordinate package, and supplying it is this fi
 
 ## Layout
 
-* `lowreg_spatialMass` — the single honest FRONTIER (`sorry`), and a purely
-  **spatial** statement: for every real `σ`, a `t`-uniform `σ`-weighted spectral-mass
-  bound for the per-mode convolutions of the trajectory's own forcing on `Icc 0 T`.
-  No time derivative occurs in it.  It is pinned to the low-lane forcing identity
-  (`force_hi_id`'s conclusion), so it is not vacuous, and to the state ball `hballU`
-  together with the smooth-core bridge `hbridge`, without which it would be false.
+* `lowreg_loMass` — the proved all-real **spatial** producer at the
+  statement at the ORDER-ONE scale: for every real `σ`, a `t`-uniform `σ`-weighted
+  spectral-mass bound for the per-mode convolutions of a forcing that solves the
+  order-one contraction with its exact calibrated package (`IsAdaptedLowSolve`).  No time
+  derivative occurs in it.
+* `lowreg_spatialMass` — the same statement at `a = 2`, sorry-free over
+  `lowreg_loMass`: the time-`L²` scale inclusion preserves every mode coordinate
+  (`timeModeCoeff_timeL2Inclusion`), so `hincl` collapses the two.  It is pinned to
+  the low-lane forcing identity (`force_hi_id`'s conclusion), so it is not vacuous,
+  and to the state ball `hballU` together with the smooth-core bridge `hbridge`,
+  without which it would be false.
 * `liftN_smoothN_coeff` — the state-level bridge: the frozen split `liftHiN`,
   evaluated at the `H⁴` embedding of a smooth in-ball state, has the
   eigen-coordinates of `deTurckSmoothN g g 2 (symmS g ·)`.  This replaces the
   supercritical identification `deTurckSobolevNHa2_eq_smoothN`.
 * `lowreg_forceJetStep` / `lowreg_forceDriver` — the `a = 2` transplant of the
   supercritical finite-order forcing bootstrap, on the FULL horizon (no shrink).
-* `lowreg_forceJetMass` — sorry-free over `lowreg_spatialMass`: it runs the driver,
+* `lowreg_forceJetMass` — sorry-free over `lowreg_loMass`: it runs the driver,
   diagonalizes the finite-order tower into `JetSpectralMassControl`, and reads the
   a-priori realizability radius off the `σ = 4`, `j = 0` majorant.
 * `lowreg_allOrderJet` — sorry-free glue over that leaf: it unpacks
@@ -37,12 +42,12 @@ all-order smooth-in-time forcing-coordinate package, and supplying it is this fi
   (`timeH1.ext` against `maxRegDuhamelMap_init` / `maxRegDuhamelMap_timeDeriv_eq`),
   and turns the leaf's coordinate family into exactly the four forcing slots
   (`hf_smooth`, `hf_mass`, `hf_id`, and the folded `R₀` / `hball_full`) that the
-  endpoint consumes.  CONDITIONAL on `lowreg_spatialMass`.
-* `lowreg_joint_smooth` — sorry-free, and independent of the frontier: it runs the
+  endpoint consumes.  Its mass input is discharged by `lowreg_spatialMass`.
+* `lowreg_joint_smooth` — independent of the mass producer: it runs the
   endpoint at `a = 2` on a supplied package, feeding `hs2_opBound_at_two` into the
-  `hC` slot.  Its `hfloor` and `hForce` slots stay visible hypotheses; see below.
+  `hC` slot.  Its `hstate` and `hForce` slots stay visible hypotheses; see below.
 
-## Why the frontier is spatial and not "all-order time regularity"
+## Why the key producer is spatial and not "all-order time regularity"
 
 `ForcingCoordinateTimeRegularity.lean` splits the supercritical statement into
 (A) interior-time smoothing of the solution field and (B) order-preserving
@@ -64,13 +69,14 @@ brick F1), and the a.e.-agreement diagonal.  The one supercritical step that is
 genuinely order-gated — identifying the completed Nemytskii with its smooth core
 on the realizability ball — is replaced here by `liftN_smoothN_coeff`, which is
 proved from the widened `IsRealizedTwo` certificates alone.  What remains is
-therefore exactly the a-priori estimate (S1₂), i.e. `lowreg_spatialMass`.
+therefore exactly the a-priori estimate (S1₂), and that in turn reduces to its
+order-one form (S1₁), i.e. `lowreg_loMass`.
 
 Both horizon shrinks of the supercritical driver are *dropped*, not transplanted:
 they existed only to enter the completed Nemytskii's realizability ball, and at
 `a = 2` that ball is the hypothesis `hballU` on all of `[0,T]`.
 
-## `hForce` is discharged; `hfloor` is not
+## `hForce` and `hstate` are both discharged
 
 `IsRealizedTwo` now re-exports the producer certificates (`R` with `hreal` and
 the a.e. state-ball bound on the carrier, `hNcont`, `hcoreN`, `hA2cont`,
@@ -79,15 +85,16 @@ two commuting squares `hA2sq`/`hFComm`).  With them `coord_eq_smoothN` proves th
 endpoint's `hForce` slot outright for the concrete `lowregNsec`, so
 `lowreg_joint_of_re` no longer carries it.
 
-`hfloor` (`√T · ‖u.deriv‖ ≤ 1/(2C)`) stays visible, and this is not a packaging
-gap.  `u.deriv = timeScaleLaplacian 2 u.hiL2 + fHi` and `IsRealizedTwo` carries
-no size bound at the high scale; even granting one (a Neumann bound for the
-exported fixed-point equation `fHi = nonautL2Map … fHi + liftForceHi`, which
-would need the contraction certificate `hsmallHi` exported too), `hfloor` is a
-*smallness condition on `T` itself*.  For an arbitrary `T` admitting an
-`IsRealizedTwo` package it is simply false, so it can only be discharged by
-shrinking the horizon `T₀` that `lowreg_solve_two` reports — a change to that
-theorem, i.e. a separate brick.
+The engine's other slot is the **state ball** `‖timeH1.toFun u t‖ ≤ 1/(2C)` on
+`Icc 0 T`, and it is discharged from the same package: the a.e. bound `hballU`
+at the package's radius `R`, its cap `R ≤ Rcap`, and `timeH1.norm_le_of_ae_le`
+for the upgrade to every time of the closed slab.  Nothing here is a condition
+on `T` — the cap is met by the realization RADIUS that `lowreg_solve_adapt`
+chooses, so the reported horizon is untouched.  (Historically the slot was a
+derivative floor `√T·‖u.deriv‖ ≤ 1/(2C)`, discharged by shrinking `T₀`; that
+route needed a Neumann bound on the high fixed point and put the norm of the
+order-2 static force — four metric derivatives — into the horizon.  It is
+deleted.  `timeH1.state_le_of_sqrt_floor` still records it as generic API.)
 -/
 
 noncomputable section
@@ -987,13 +994,61 @@ private theorem carrier_coeff_pmConv
     (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with s hs
   rw [Set.IccExtend_of_mem hT.le _ hs, hFrep_coeff s i, hpr_id s hs]
 
-/-! ## The honest analytic frontier -/
+/-! ## The spatial analytic producer -/
+
+/-- **(S1₁): the all-order uniform SPATIAL spectral mass of the
+order-one low-lane forcing.**
+
+For a forcing `fLo` equipped with `IsAdaptedLowSolve` on `[0,T]`—the exact
+order-one solve constants, state cap, stored ordered rung certificate, and proved
+absorption budget—and for **every real** `σ`, the
+per-mode convolutions `perModeConv λᵢ (timeModeCoeff fLo i)` carry a `t`-uniform
+`σ`-weighted spectral-mass bound on the closed slab `Icc 0 T`.
+
+**Why the scale is `a = 1` and not `a = 2`.**  The campaign's contraction solve runs
+at `((1 : ℕ) : ℝ)` (`lowreg_partial_sol_of_bounds`); the `a = 2` forcing is its `H²`
+*lift* (`force_hi_id`), not a fixed point of anything at scale `2`.  All the Galerkin
+inputs -- the projected system `proj_partial_sol`, the truncation-defect stability
+`projFix_le_two`, the `V_N`-valuedness lemmas -- live at the scale where the
+contraction lives.  The conclusion transports back up because the time-`L²` scale
+inclusion preserves every mode coordinate (`timeModeCoeff_timeL2Inclusion`), which is
+exactly how `lowreg_spatialMass` consumes this lemma.
+
+**Why the adapted package is part of the statement.**  The generic `IsLowSolve`
+erases the exact witnesses that the ordered energy estimate prices.  The adapted
+package keeps those witnesses coherent from the solver through projection and Fatou,
+so its stored continuation can be invoked at the calibrated radius without reselecting
+constants.
+
+**Closure.**  `lowregAllMassAt` first keeps the projected trajectory, mode
+convergence, ODE data, and `E₅` cap in one explicit package.  The stored
+all-order remainder coefficient then closes every energy `E_{6+k}` directly at
+the same common absorption gate, and a final Fatou adapter chooses
+`k ≥ σ - 5`.  No projected witness is reselected and no rung induction is
+needed. -/
+theorem lowreg_loMass (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M)
+    {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}
+    (hT : 0 < T) (hT1 : T ≤ 1)
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (hlo : IsAdaptedLowSolve (I := I) (M := M) (δ := δ) (Ctop := Ctop)
+      (B0 := B0) (B1 := B1) (D := D) (ρ := ρ) (P := P)
+      g hT hT1 fLo Rcap Ctop₂ Kr2 Kr1 Kcap)
+    (σ : ℝ) :
+    ∃ Cσ : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
+          (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) fLo i) u) t) ^ 2) ∧
+        ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
+            (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+              (fun u => (timeModeCoeff (I := I) (M := M) fLo i) u) t) ^ 2 ≤ Cσ := by
+  exact (fun _hDim : Module.finrank ℝ E = 3 =>
+    lowregAllMassAt (I := I) (M := M) g hT hT1 fLo hlo σ) hDim
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 set_option linter.unusedVariables false in
-/-- **FRONTIER (`sorry`) — (S1₂): the all-order uniform SPATIAL spectral mass of the
-`a = 2` low-lane trajectory, on the state ball where the frozen split IS the smooth
-core.**
+/-- **(S1₂): the all-order uniform SPATIAL spectral mass of the `a = 2` low-lane
+trajectory, on the state ball where the frozen split IS the smooth core.**
 
 For the high forcing `fHi` pinned to the frozen Ricci--DeTurck split along its own
 zero-datum Duhamel trajectory (`hfix`), whose `H²` state stays in the radius-`R` ball
@@ -1016,34 +1071,33 @@ only reason a Galerkin argument can be run at all.  Both hypotheses are the ones
 itself), so the widening costs no producer work.  `hRρ` accompanies them because the
 fibre-smallness certificate `hreal'` is stated at radius `ρ`.
 
+**Why `fLo`, `hlo` and `hincl` are part of the statement.**  Without them the claim is
+unprovable, though not false (`Cσ` is existentially quantified after all the data).
+The `a = 2` forcing is not a fixed point of anything: `force_hi_id` obtains it as the
+`H²` *lift* of the order-one forcing `fLo`, and every route to the conclusion must
+identify the trajectory with a finite-dimensional approximation, which needs the
+forcing ball and the fixed-point equation of the *contraction's own* scale.  `hincl`
+(the shape `force_hi_id` both consumes and the call site provides) ties the two, and
+`hlo` carries the order-one solve data.  All three are already stocked where the
+package is produced -- `lowreg_partial_sol_of_bounds` is called with exactly that
+bundle -- so the widening costs no producer work.
+
 **Role.**  This is the ONLY analytic input of the `a = 2` forcing-coordinate package.
 `lowreg_forceDriver` turns it into the finite-order time-jet tower, and
 `lowreg_forceJetMass` diagonalizes that tower into `JetSpectralMassControl` and reads the
 realizability radius off its `σ = 4`, `j = 0` majorant.  Everything between here and
 `lowreg_allOrderJet` is sorry-free wiring.
 
-**Why it is true.**  It is the `a = 2` instance of the supercritical Galerkin estimate
-`deTurckGalerkin_solField_uniformSpatialMass_allOrderSymm`
-(`HeatSemigroup/GalerkinLimitUniformMass.lean`): finite-dimensional Galerkin ODE,
-per-scale energy closure, Grönwall, Fatou.  The Grönwall engine
-`galerkin_energy_uniform_bound_perScale` (`GalerkinParabolicEnergy.lean`) is already
-order-generic and sorry-free — its `σ₀ : ℝ` is free and it carries no metric, no `a` and
-no nonlinearity.  In dimension three the state control at `a = 2` is `H⁴ ⊂ C^{2,1/2}`,
-ample for the coefficients of a second-order operator, so the required per-scale
-dissipation closure holds.
-
-**Why it is not proved here.**  The per-scale closure that the engine consumes,
-`deTurckGalerkin_forcing_dissipation_perScaleSymm`
-(`GalerkinParabolicEnergyDeTurck.lean`), is gated on `4·finrank ℝ E + 10 ≤ a` (internally
-weakened to `2·finrank ℝ E + 10 ≤ a`), i.e. `a ≥ 16` in dimension three, and it is built
-from the *retracted completed* Nemytskii `deTurckSobolevNHa2Symm`, which does not exist
-at `a = 2`.  Writing it at base order 2 needs (i) a Galerkin forcing defined directly
-from `deTurckSmoothN g g (2 + k)` on the finite-dimensional eigen-combination space, and
-(ii) a new tame-splitting estimate at base order 2.  That is a genuinely new estimate,
-not a missing theory; see `ShortTime/FORCEJETMASS_PLAN.md` §7.2–§7.3 (brick F6) and the
-brick sequence in `ShortTime/F6_ESTIMATE_RECON.md` §7.6.  Do not consume this downstream
-except through `lowreg_forceJetMass`. -/
-theorem lowreg_spatialMass (g : SmoothRiemannianMetric I M)
+**Proof route.**  The conclusion is *inclusion-invariant*: the time-`L²` scale
+inclusion preserves every mode coordinate (`timeModeCoeff_timeL2Inclusion`), so
+`hincl` makes `timeModeCoeff fHi i` and `timeModeCoeff fLo i` the same element of
+`L²(0,T)`, and the whole statement collapses to its order-one form `lowreg_loMass` --
+the proved order-one mass theorem.  Nothing at scale `2` is used: `hbridge`,
+`hballU` and the fibre certificates are kept because `lowreg_forceDriver` consumes
+them at the same call site and because they pin the trajectory (see the FALSE-without
+argument above), not because the mass estimate needs them. -/
+theorem lowreg_spatialMass (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M)
     {R ρ δ : ℝ} (hρ : 0 < ρ) (hRρ : R ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal' : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
@@ -1076,6 +1130,14 @@ theorem lowreg_spatialMass (g : SmoothRiemannianMetric I M)
         (show (2 : ℝ) ≤ (2 : ℝ) + 2 by norm_num)
         (maxRegDuhamelSolField (I := I) (M := M) (2 : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g 0 2 ((2 : ℝ) + 2)) fHi t)‖ ≤ R)
+    {Ctop B0 B1 D ρlo P Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (hincl : ∀ᵐ t ∂timeMeasure T,
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+        (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num) (fHi t) = fLo t)
+    (hlo : IsAdaptedLowSolve (I := I) (M := M) (δ := δ) (Ctop := Ctop)
+      (B0 := B0) (B1 := B1) (D := D) (ρ := ρlo) (P := P)
+      g hT hT1 fLo Rcap Ctop₂ Kr2 Kr1 Kcap)
     (σ : ℝ) :
     ∃ Cσ : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
@@ -1084,7 +1146,25 @@ theorem lowreg_spatialMass (g : SmoothRiemannianMetric I M)
         ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
             (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
               (fun u => (timeModeCoeff (I := I) (M := M) fHi i) u) t) ^ 2 ≤ Cσ := by
-  sorry
+  -- `fLo` is literally the time-`L²` scale inclusion of `fHi`
+  have hfeq : timeL2Inclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+      (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num) fHi = fLo := by
+    refine MeasureTheory.Lp.ext ?_
+    have hcoe := (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+        (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num)).coeFn_compLpL
+        (p := 2) (μ := timeMeasure T) fHi
+    filter_upwards [hcoe, hincl] with t h1 h2
+    exact h1.trans h2
+  -- hence every mode coordinate is the same element of `L²(0,T)`
+  have hmode : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
+      timeModeCoeff (I := I) (M := M) fLo i =
+        timeModeCoeff (I := I) (M := M) fHi i := by
+    intro i
+    rw [← hfeq]
+    exact timeModeCoeff_timeL2Inclusion (I := I) (M := M)
+      (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num) fHi i
+  obtain ⟨Cσ, hCσ⟩ := lowreg_loMass (I := I) (M := M) hDim g hT hT1 fLo hlo σ
+  exact ⟨Cσ, fun t ht => by simpa only [hmode] using hCσ t ht⟩
 
 /-! ## The all-order forcing-coordinate leaf -/
 
@@ -1112,14 +1192,14 @@ The conclusion is the pair the joint-smoothness endpoint consumes at `a = 2`:
   `t ↦ (fHi t).coeff i`.
 
 **Proof route.**  `lowreg_forceDriver` produces the finite-order tower on the full
-horizon from the single spatial posit `lowreg_spatialMass`; all rungs agree a.e., hence
+horizon from the proved spatial producer `lowreg_spatialMass`; all rungs agree a.e., hence
 `EqOn` on the slab by continuity, so rung `0` is `ContDiffOn ℝ ∞` there and extends
 globally by `contDiffOn_Icc_scalar_globalExtend`.  The radius is then read off the
 `σ = 4`, `j = 0` majorant of `perModeConv_allOrder_timeDeriv_spectralMass_le` — no
 horizon shrink is needed, because the low lane's state ball is a hypothesis on all of
 `[0,T]`.
 
-CONDITIONAL: through `lowreg_spatialMass` only. -/
+The spatial input is discharged by `lowreg_spatialMass`. -/
 theorem lowreg_forceJetMass (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {R ρ δ : ℝ}
     (hR : 0 < R) (hρ : 0 < ρ) (hRρ : R ≤ ρ)
@@ -1179,7 +1259,15 @@ theorem lowreg_forceJetMass (hDim : Module.finrank ℝ E = 3)
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
         (show (2 : ℝ) ≤ (2 : ℝ) + 2 by norm_num)
         (maxRegDuhamelSolField (I := I) (M := M) (2 : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g 0 2 ((2 : ℝ) + 2)) fHi t)‖ ≤ R) :
+          (0 : tensorHs (I := I) (M := M) g 0 2 ((2 : ℝ) + 2)) fHi t)‖ ≤ R)
+    {Ctop B0 B1 D ρlo P Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (hincl : ∀ᵐ t ∂timeMeasure T,
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+        (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num) (fHi t) = fLo t)
+    (hlo : IsAdaptedLowSolve (I := I) (M := M) (δ := δ) (Ctop := Ctop)
+      (B0 := B0) (B1 := B1) (D := D) (ρ := ρlo) (P := P)
+      g hT hT1 fLo Rcap Ctop₂ Kr2 Kr1 Kcap) :
     ∃ R₀ : ℝ, 0 < R₀ ∧
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ S : SmoothCcTensor g 0 2,
         SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) S =
@@ -1212,11 +1300,11 @@ theorem lowreg_forceJetMass (hDim : Module.finrank ℝ E = 3)
       liftN_smoothN_coeff (I := I) (M := M) hDim g hR hρ hRρ hδ0 hδ_le hδlt
         hreal hreal' hNcont hcoreN hA2cont hA2core FHi FLo hFLo hFLoCore
         hA2sq hFComm S hS2 δ' hδ_lt hδ' i
-  -- the finite-order tower, from the single spatial posit
+  -- the finite-order tower, from the proved spatial producer
   have hdrv := lowreg_forceDriver (I := I) (M := M) g hρ hRρ hδ0 hδ_le hreal'
     FHi hbridge hT hT1 fHi hfix hballU
-    (fun σ => lowreg_spatialMass (I := I) (M := M) g hρ hRρ hδ0 hδ_le hreal' FHi
-      hT hT1 fHi hfix hbridge hballU σ)
+    (fun σ => lowreg_spatialMass (I := I) (M := M) hDim g hρ hRρ hδ0 hδ_le
+      hreal' FHi hT hT1 fHi hfix hbridge hballU fLo hincl hlo σ)
   choose Fk hFk_smooth hFk_mass hFk_ae using hdrv
   -- the diagonal glue
   set f0 : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ := Fk 0 with hf0_def
@@ -1318,7 +1406,7 @@ theorem lowreg_forceJetMass (hDim : Module.finrank ℝ E = 3)
 /-- **The all-order forcing-coordinate package at `a = 2` (brick B1).**
 
 From the realized adjacent-scale `(1, 2)` package `IsRealizedTwo` — the output of
-`lowreg_solve_two`, whose horizon is built from `hDim` and `g` alone — produce the
+`lowreg_solve_adapt`, whose horizon is built from `hDim` and `g` alone — produce the
 four forcing slots of `maxreg_solution_jointly_smooth_representative_of_tame_nemytskii`
 on the **full, unshrunk** horizon `T`:
 
@@ -1334,14 +1422,14 @@ on the **full, unshrunk** horizon `T`:
   the producer certificates the widened `IsRealizedTwo` now carries (and with a
   *weaker* hypothesis than the endpoint asks: no `hball` on `Ico 0 T` is
   needed, the `L²` pin alone suffices);
-* the package's forcing floor `√T·‖fHi‖ ≤ Kf`, forwarded verbatim.  Composed
-  with `‖u.deriv‖ ≤ 2‖fHi‖` (the zero-datum Duhamel derivative split) it is
-  what discharges the endpoint's `hfloor` in `lowreg_joint_of_re`.
+* the **state bound** `‖u(t)‖ ≤ Rcap` at EVERY time of `Icc 0 T`, obtained from
+  the package's a.e. state ball and its cap `R ≤ Rcap` through
+  `timeH1.norm_le_of_ae_le`.  It is what discharges the endpoint's `hstate` in
+  `lowreg_joint_of_re`, directly and with no derivative proxy.
 
-CONDITIONAL: the coordinate family and the radius come from
-`lowreg_forceJetMass`, so this theorem transitively depends on the single spatial
-frontier `lowreg_spatialMass`.  The carrier identification, the per-mode identity
-and the forcing-coordinate identity are sorry-free glue. -/
+The coordinate family and the radius come from `lowreg_forceJetMass`, whose
+spatial mass input is proved by `lowreg_spatialMass`.  The carrier identification,
+the per-mode identity, and the forcing-coordinate identity are direct glue. -/
 theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 < ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1350,8 +1438,16 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
         gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g S) δ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 (1 : ℝ)) T) {Kf : ℝ}
-    (hre : IsRealizedTwo (I := I) (M := M) g hρ hδ0 hδ_le hreal' hT hT1 f Kf) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 (1 : ℝ)) T) {Rcap : ℝ}
+    (hre : IsRealizedTwo (I := I) (M := M) g hρ hδ0 hδ_le hreal' hT hT1 f Rcap)
+    {Ctop B0 B1 D ρlo P Ctop₂ Kr2 Kr1 Kcap : ℝ}
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (hfLo : ∀ᵐ t ∂timeMeasure T, f t =
+      tensorHsCongr (I := I) (M := M) g 0 2
+        (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num) (fLo t))
+    (hlo : IsAdaptedLowSolve (I := I) (M := M) (δ := δ) (Ctop := Ctop)
+      (B0 := B0) (B1 := B1) (D := D) (ρ := ρlo) (P := P)
+      g hT hT1 fLo Rcap Ctop₂ Kr2 Kr1 Kcap) :
     ∃ (u : MaxRegSolutionSpace (I := I) (M := M) (g := g) (r := 0) (s := 2) (2 : ℝ) T)
       (fHi : timeL2 (tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)) T)
       (fc : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ) (R₀ : ℝ),
@@ -1392,15 +1488,34 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
               (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2)
                 (lowregNsec (I := I) (M := M) g (F t) hδ_lt (hδ' t))) i) ∧
-      Real.sqrt T * ‖fHi‖ ≤ Kf := by
+      (∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun u t‖ ≤ Rcap) := by
   classical
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2 with hhc
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := 0) (s := 2) hc
   obtain ⟨FHi, C2Hi, hA2Hi, hC2Hi, hA1Hi, uHi, fHi, ucs, FLo, R, hR, hreal,
-    -, hhiL2, -, htr, hder, -, -, -, -, -, -, -, hforceId,
+    -, hhiL2, -, htr, hder, -, hfInc, -, -, -, -, -, hforceId,
     hRρ, hNcont, hcoreN, hA2cont, hA2core, -, -, hFLo, hFLoCore, hA2sq,
-    hFComm, hballU, hfHiNorm⟩ := hre
+    hFComm, hballU, hRcapLe⟩ := hre
+  -- the order-one partner of `fHi`, at the scale where the contraction lives
+  have hincl : ∀ᵐ t ∂timeMeasure T,
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+        (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num) (fHi t) = fLo t := by
+    filter_upwards [hfInc, hfLo] with t h1 h2
+    refine (tensorHsCongr (I := I) (M := M) g 0 2
+      (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)).injective ?_
+    rw [tensorHsCongr_incl (I := I) (M := M) (g := g) (r := 0) (s := 2)
+        (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)
+        (show (2 : ℝ) = (2 : ℝ) from rfl)
+        (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num)
+        (show (1 : ℝ) ≤ (2 : ℝ) by norm_num) (fHi t),
+      tensorHsCongr_refl]
+    exact h1.trans h2
+  -- The engine's state slot: the a.e. ball at radius `R`, capped by `Rcap` and
+  -- upgraded to every time of the closed slab.
+  have hstateU : ∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun ucs.lo t‖ ≤ Rcap :=
+    ucs.lo.norm_le_of_ae_le hT
+      (by filter_upwards [hballU] with t ht using ht.trans hRcapLe)
   have hδlt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)
   have hfid0 := hforceId
   -- (1) the low carrier IS the affine zero-datum Duhamel map of `fHi`
@@ -1425,7 +1540,7 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
         exact maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (h_compact := hc)
           hT hT1 _ fHi
       rw [e1, e2, hhiL2]
-  -- (2) the frontier, pinned to the low-lane forcing identity
+  -- (2) the proved spatial mass input, pinned to the low-lane forcing identity
   rw [hhiL2] at hforceId
   have hballD : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)),
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
@@ -1445,7 +1560,7 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
   obtain ⟨R₀, hR₀_pos, hball, fc, ⟨hf_smooth, hf_mass⟩, hpin⟩ :=
     lowreg_forceJetMass (I := I) (M := M) hDim g hR hρ hRρ hδ0 hδ_le hδlt
       hreal hreal' hNcont hcoreN hA2cont hA2core FHi FLo hFLo hFLoCore
-      hA2sq hFComm hT hT1 fHi hforceId hballD
+      hA2sq hFComm hT hT1 fHi hforceId hballD fLo hincl hlo
   -- (3) the per-mode Duhamel identity on the closed slab
   have hf_mass0 : ∃ B : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable B ∧
       ∀ i, ∀ s ∈ Set.Icc (0 : ℝ) T,
@@ -1465,7 +1580,7 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
     exact carrier_coeff_pmConv (I := I) (M := M) g hT hT1 fHi fc
       (fun j => (hf_smooth j).continuous) hf_mass0 hpin t ht i
   refine ⟨ucs.lo, fHi, fc, R₀, htr, hduh, hpin, hf_smooth, hf_mass, hf_id,
-    hR₀_pos, ?_, ?_, hfHiNorm⟩
+    hR₀_pos, ?_, ?_, hstateU⟩
   · intro t ht S hS
     exact hball t ht S (by rw [hS, hduh])
   · intro F δ' hδ_lt hδ' h_pin
@@ -1493,16 +1608,18 @@ triple on the FULL supplied horizon `T` — no `∃ T₁ ≤ T` shrink:
 
 `lowreg_allOrderJet` is the producer of `u`, `htrace`, `fc`, `hf_smooth`,
 `hf_mass`, `hf_id`, `R₀`, `hR₀_pos` and `hball_full` for the trajectory of
-`lowreg_solve_two`.
+`lowreg_solve_adapt`.
 
-`hfloor` and `hForce` stay parameters *here* because this theorem is the raw
+`hstate` and `hForce` stay parameters *here* because this theorem is the raw
 endpoint wrapper.  Its caller `lowreg_joint_of_re` discharges `hForce` from
 `lowreg_allOrderJet` (route `hiN_incl → lowreg_N_affine → lowRegN_on_smooth`,
-with the a.e.-to-everywhere upgrade of `coord_eq_smoothN`); only `hfloor`, the
-one-time horizon floor of `LOWREG_BOOTSTRAP_PLAN.md` §8.3, survives.  The
-endpoint itself now takes the state ball `‖timeH1.toFun u t‖ ≤ 1 / (2 * C)` on
-`[0,T]`; `hfloor` reaches it through `timeH1.state_le_of_sqrt_floor`, so a
-caller with a state bound in hand may bypass the floor entirely.
+with the a.e.-to-everywhere upgrade of `coord_eq_smoothN`), and `hstate` from
+the same producer's state bound against the trajectory's own state cap.
+
+`hstate` is the engine's slot verbatim — the state ball
+`‖timeH1.toFun u t‖ ≤ 1/(2C)` on `[0,T]` against the dimension-three fibre
+constant `C`.  It is a smallness of the SOLUTION, carrying no condition on the
+horizon: the caller meets it by shrinking its realization radius, not `T`.
 
 `F_RHS`, `Nsec` and `hRepr` are kept generic, exactly as in the endpoint;
 `DeTurckInitialDataExistence.lean` (the `hRepr` block of
@@ -1542,7 +1659,7 @@ theorem lowreg_joint_smooth (hDim : Module.finrank ℝ E = 3)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
             (show (0 : ℝ) ≤ (2 : ℝ) by norm_num) (timeH1.toFun u t)) i =
         perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (fc i) t)
-    (hfloor : Real.sqrt T * ‖u.deriv‖ ≤
+    (hstate : ∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun u t‖ ≤
       1 / (2 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose))
     {R₀ : ℝ} (hR₀_pos : 0 < R₀)
     (hball_full : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ S : SmoothCcTensor g 0 2,
@@ -1584,16 +1701,16 @@ theorem lowreg_joint_smooth (hDim : Module.finrank ℝ E = 3)
       JointChartGramSmooth (I := I) T
         (fun t : ℝ => tensorSectionRealizeMetric (I := I) g (F t) hδ_lt (hδ t)) := by
   obtain ⟨hC_pos, hC⟩ := (hs2_opBound_at_two (I := I) (M := M) hDim g).choose_spec
-  have hinit : u.init = 0 := by have := htrace; rwa [timeH1.trace0_apply] at this
   exact maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     (I := I) (M := M) g 2 F_RHS Nsec hRepr hT hT1 u htrace fc hf_smooth hf_mass
-    hf_id _ hC_pos hC (u.state_le_of_sqrt_floor hinit hfloor) hR₀_pos hball_full hForce
+    hf_id _ hC_pos hC hstate hR₀_pos hball_full hForce
 
 set_option linter.unusedVariables false in
 /-- **Front 2, composed: the realized `(1, 2)` rung reaches the `(N)` fields on
 its own horizon.**
 
-Along the trajectory of `lowreg_solve_two` (i.e. from `IsRealizedTwo` alone) the
+Along the trajectory of `lowreg_solve_adapt` (i.e. from its realized and adapted
+packages) the
 `(N)`-shaped triple holds on the FULL horizon `T` that the solver reported:
 `F 0 = 0`, the `Ico`-slab PDE with `HasDerivWithinAt … (Set.Ici 0)`, and
 `JointChartGramSmooth T` on the closed slab.  No horizon shrink is taken
@@ -1603,23 +1720,21 @@ Both endpoint slots that used to be visible here are now discharged.
 
 * `hForce`: with the producer certificates carried by `IsRealizedTwo`,
   `coord_eq_smoothN` proves it outright for the concrete `lowregNsec`.
-* `hfloor` (`√T·‖u.deriv‖ ≤ 1/(2C)` against the dimension-three fibre constant
-  `C` of `hs2_opBound_at_two`, `LOWREG_BOOTSTRAP_PLAN.md` §8.3): the carrier is
-  the zero-datum Duhamel map of `fHi`, so `maxRegDuhamelMap_deriv` together with
-  `maxRegHomogeneousDerivField_norm_le` at `u₀ = 0` and
-  `maximalRegularityDerivField_norm_le` gives `‖u.deriv‖ ≤ 2‖fHi‖`; the package's
-  forcing floor `√T·‖fHi‖ ≤ Kf` then closes it as soon as `Kf ≤ 1/(4C)`.  The
-  floor is a smallness condition on `T`, and it is met by shrinking the horizon
-  that `lowreg_solve_two` reports — that is what `Kf` is for.
+* `hstate` (`‖timeH1.toFun u t‖ ≤ 1/(2C)` on `Icc 0 T`, against the
+  dimension-three fibre constant `C` of `hs2_opBound_at_two`): it is the
+  trajectory's own state bound, exported by `lowreg_allOrderJet` at the
+  package's cap level `Rcap`, and it closes as soon as `Rcap ≤ 1/(2C)`.  No
+  derivative proxy and no horizon shrink are involved: the cap is a condition on
+  the realization RADIUS, met inside `lowreg_solve_adapt` by the endpoint/absorption `min`
+  component in `P` — that is what `Rcap` is for.
 
 `hRepr` stays a hypothesis: it is the order-free Ricci--DeTurck representation
 block of `deTurckRicci_solution_with_jointReg`
 (`ShortTime/DeTurckInitialDataExistence.lean`), whose extraction is a separate
 brick.
 
-CONDITIONAL on the spatial frontier `lowreg_spatialMass` (through
-`lowreg_forceJetMass` and `lowreg_allOrderJet`); the endpoint step itself is
-sorry-free. -/
+The spatial mass input is discharged through `lowreg_forceJetMass` and
+`lowreg_allOrderJet`; this endpoint step adds no analytic hypothesis. -/
 theorem lowreg_joint_of_re (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     (F_RHS : SmoothRiemannianMetric I M →
@@ -1638,10 +1753,18 @@ theorem lowreg_joint_of_re (hDim : Module.finrank ℝ E = 3)
         gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g S) δ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 (1 : ℝ)) T) {Kf : ℝ}
-    (hre : IsRealizedTwo (I := I) (M := M) g hρ hδ0 hδ_le hreal' hT hT1 f Kf)
-    (hKfC : Kf ≤
-      1 / (4 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose)) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 (1 : ℝ)) T) {Rcap : ℝ}
+    (hre : IsRealizedTwo (I := I) (M := M) g hρ hδ0 hδ_le hreal' hT hT1 f Rcap)
+    {Ctop B0 B1 D ρlo P Ctop₂ Kr2 Kr1 Kcap : ℝ}
+    (fLo : timeL2 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (hfLo : ∀ᵐ t ∂timeMeasure T, f t =
+      tensorHsCongr (I := I) (M := M) g 0 2
+        (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num) (fLo t))
+    (hlo : IsAdaptedLowSolve (I := I) (M := M) (δ := δ) (Ctop := Ctop)
+      (B0 := B0) (B1 := B1) (D := D) (ρ := ρlo) (P := P)
+      g hT hT1 fLo Rcap Ctop₂ Kr2 Kr1 Kcap)
+    (hRcapC : Rcap ≤
+      1 / (2 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose)) :
     ∃ (u : MaxRegSolutionSpace (I := I) (M := M)
         (g := g) (r := 0) (s := 2) (2 : ℝ) T)
         (F : ℝ → SmoothCcTensor g 0 2) (δ' : ℝ) (hδ_lt : δ' < 1)
@@ -1662,41 +1785,16 @@ theorem lowreg_joint_of_re (hDim : Module.finrank ℝ E = 3)
       JointChartGramSmooth (I := I) T
         (fun t : ℝ => tensorSectionRealizeMetric (I := I) g (F t) hδ_lt (hδ' t)) := by
   obtain ⟨u, fHi, fc, R₀, htr, hduh, hpin, hf_smooth, hf_mass, hf_id,
-    hR₀_pos, hball_full, hForce, hfHiNorm⟩ :=
+    hR₀_pos, hball_full, hForce, hstateU⟩ :=
     lowreg_allOrderJet (I := I) (M := M) hDim g hρ hδ0 hδ_le hreal' hT hT1 f hre
-  obtain ⟨hC_pos, -⟩ := (hs2_opBound_at_two (I := I) (M := M) hDim g).choose_spec
-  -- The carrier is the zero-datum Duhamel map of `fHi`, so its `L²` time
-  -- derivative is bounded by twice the forcing.
-  have hderiv : ‖u.deriv‖ ≤ 2 * ‖fHi‖ := by
-    have hhom : ‖maxRegHomogeneousDerivField (I := I) (M := M) (2 : ℝ) T
-        (0 : tensorHs (I := I) (M := M) g 0 2 ((2 : ℝ) + 2))‖ = 0 := by
-      refine le_antisymm ?_ (norm_nonneg _)
-      simpa using maxRegHomogeneousDerivField_norm_le (I := I) (M := M)
-        (h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
-        (a := (2 : ℝ)) (0 : tensorHs (I := I) (M := M) g 0 2 ((2 : ℝ) + 2)) hT.le
-    have hreg : ‖maximalRegularityDerivField (I := I) (M := M) (2 : ℝ) hT.le fHi‖ ≤
-        2 * ‖fHi‖ :=
-      maximalRegularityDerivField_norm_le (I := I) (M := M)
-        (h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
-        hT.le fHi
-    rw [hduh, maxRegDuhamelMap_deriv]
-    refine (norm_add_le _ _).trans ?_
-    linarith only [hhom, hreg]
-  have hfloor : Real.sqrt T * ‖u.deriv‖ ≤
-      1 / (2 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose) := by
-    have hs0 : (0 : ℝ) ≤ Real.sqrt T := Real.sqrt_nonneg _
-    have hC := hC_pos.ne'
-    calc Real.sqrt T * ‖u.deriv‖ ≤ Real.sqrt T * (2 * ‖fHi‖) :=
-          mul_le_mul_of_nonneg_left hderiv hs0
-      _ = 2 * (Real.sqrt T * ‖fHi‖) := by ring
-      _ ≤ 2 * (1 / (4 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose)) := by
-          linarith only [hfHiNorm, hKfC]
-      _ = 1 / (2 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose) := by
-          field_simp
-          norm_num
+      fLo hfLo hlo
+  -- The engine's state slot: the trajectory's own bound, capped at `1/(2C)`.
+  have hstate : ∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun u t‖ ≤
+      1 / (2 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose) :=
+    fun t ht => (hstateU t ht).trans hRcapC
   exact ⟨u, lowreg_joint_smooth (I := I) (M := M) hDim g F_RHS
     (lowregNsec (I := I) (M := M) g) hRepr hT hT1 u htr
-    fc hf_smooth hf_mass hf_id hfloor hR₀_pos hball_full
+    fc hf_smooth hf_mass hf_id hstate hR₀_pos hball_full
     (fun F _ hδ_lt hδ' h_pin _ => hForce F hδ_lt hδ' h_pin)⟩
 
 /-! ## The self-contained front-2 endpoint -/
@@ -1704,19 +1802,16 @@ theorem lowreg_joint_of_re (hDim : Module.finrank ℝ E = 3)
 /-- **Front 2, self-contained: the `(N)` fields on a horizon built from `hDim`
 and `g` alone.**
 
-`lowreg_solve_two` at the forcing floor `Kf = 1/(4C)` — `C` the dimension-three
+`lowreg_solve_adapt` at the endpoint cap `Rmax = 1/(2C)` — `C` the dimension-three
 fibre constant of `hs2_opBound_at_two` — composed with `lowreg_joint_of_re`.
-The floor is exactly what the endpoint's `hfloor` needs after
-`‖u.deriv‖ ≤ 2‖fHi‖`, and `lowreg_solve_two` meets it by folding
-`lowregFloorHorizon g c Kf` into the horizon it reports.  So no size or horizon
+The resulting cap is exactly what the endpoint's `hstate` needs, and
+`lowreg_solve_adapt` meets it while also enforcing the absorption radius.  So no size or horizon
 obligation is left for the caller: it supplies only a contraction level `c`
 between the reported coefficient bound `B2` and `1`, and a horizon below the
 `T₀` reported for that `c`.
 
-The two remaining inputs are the spatial frontier `lowreg_spatialMass` (through
-`lowreg_forceJetMass` and `lowreg_allOrderJet`, whose `sorry` this theorem
-transitively depends on) and `hRepr` (the order-free Ricci--DeTurck
-representation block, brick B6). -/
+The mass chain is fully discharged.  The remaining explicit mathematical input
+is `hRepr`, the order-free Ricci--DeTurck representation block. -/
 theorem lowreg_joint_two (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     (F_RHS : SmoothRiemannianMetric I M →
@@ -1755,18 +1850,81 @@ theorem lowreg_joint_two (hDim : Module.finrank ℝ E = 3)
                 (fun t : ℝ =>
                   tensorSectionRealizeMetric (I := I) g (F t) hδ_lt (hδ' t)) := by
   obtain ⟨hC_pos, -⟩ := (hs2_opBound_at_two (I := I) (M := M) hDim g).choose_spec
-  obtain ⟨ρ, δ, hρ, hδ0, hδ_le, hreal', B2, hB2, hsolve⟩ :=
-    lowreg_solve_two (I := I) (M := M) hDim g
-      (Kf := 1 / (4 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose))
+  obtain ⟨Ctop₂, Kr2, Kr1, Kcap, δ, Rcap, ρ, hδ, hδ_le, _hRcap,
+      hRcapC, hρ, hreal', B2, hB2, hsolve⟩ :=
+    lowreg_solve_adapt (I := I) (M := M) hDim g
+      (Rmax := 1 / (2 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose))
       (div_pos one_pos (by linarith only [hC_pos]))
   refine ⟨B2, hB2, ?_⟩
   intro c hB2c hc1
   obtain ⟨T₀, hT₀, hpack⟩ := hsolve hB2c hc1
   refine ⟨T₀, hT₀, ?_⟩
   intro T hT hTT₀ hT1
-  obtain ⟨f, hre⟩ := hpack hT hTT₀ hT1
-  exact lowreg_joint_of_re (I := I) (M := M) hDim g F_RHS hRepr hρ hδ0 hδ_le
-    hreal' hT hT1 f hre le_rfl
+  obtain ⟨f, fLo, Ctop, B0, B1, D, ρlo, P, hre, hfLo, hlo⟩ :=
+    hpack hT hTT₀ hT1
+  exact lowreg_joint_of_re (I := I) (M := M) hDim g F_RHS hRepr hρ hδ.le hδ_le
+    hreal' hT hT1 f hre fLo hfLo hlo hRcapC
+
+/-- The self-contained per-metric low-regularity endpoint on one positive
+horizon.  Unlike `lowreg_joint_two`, this theorem chooses an admissible
+contraction level internally from the proved strict bound on the operator
+floor.  Its lifetime is still metric-dependent; class uniformity is a separate
+producer. -/
+theorem lowreg_joint_open (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M)
+    (F_RHS : SmoothRiemannianMetric I M →
+      (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
+    (hRepr : ∀ (S : SmoothCcTensor g 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ)
+        (x : M) (v w : TangentSpace I x),
+      ccTensorBilinSymm (I := I) g
+          (lowregNsec (I := I) (M := M) g S hδ_lt hδ +
+            rawTensorConnLapSmooth (I := I) g 0 2 S) x v w =
+        F_RHS (tensorSectionRealizeMetric (I := I) g S hδ_lt hδ) x v w) :
+    ∃ T₀ : ℝ, 0 < T₀ ∧
+      ∀ {T : ℝ} (_hT : 0 < T) (_ : T ≤ T₀) (_hT1 : T ≤ 1),
+        ∃ (u : MaxRegSolutionSpace (I := I) (M := M)
+            (g := g) (r := 0) (s := 2) (2 : ℝ) T)
+            (F : ℝ → SmoothCcTensor g 0 2) (δ' : ℝ) (hδ_lt : δ' < 1)
+            (hδ' : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g
+              (ccTensorBilinSymm (I := I) g (F t)) δ'),
+          F 0 = 0 ∧
+          (∀ t ∈ Set.Icc (0 : ℝ) T,
+            SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (F t) =
+              tensorHsToL2 (I := I) (M := M) (g := g) (r := 0) (s := 2)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+                (show (0 : ℝ) ≤ (2 : ℝ) by norm_num) (timeH1.toFun u t)) ∧
+          (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+            HasDerivWithinAt
+              (fun s : ℝ => ccTensorBilinSymm (I := I) g (F s) x v w)
+              (F_RHS
+                (tensorSectionRealizeMetric (I := I) g (F t) hδ_lt (hδ' t))
+                  x v w)
+              (Set.Ici 0) t) ∧
+          JointChartGramSmooth (I := I) T
+            (fun t : ℝ =>
+              tensorSectionRealizeMetric (I := I) g (F t) hδ_lt (hδ' t)) := by
+  obtain ⟨hC_pos, -⟩ := (hs2_opBound_at_two (I := I) (M := M) hDim g).choose_spec
+  obtain ⟨Ctop₂, Kr2, Kr1, Kcap, δ, Rcap, ρ, hδ, hδ_le, _hRcap,
+      hRcapC, hρ, hreal', B2, _hB2, hB2lt, hsolve⟩ :=
+    lowreg_adapt_open (I := I) (M := M) hDim g
+      (Rmax := 1 / (2 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose))
+      (div_pos one_pos (by linarith only [hC_pos]))
+  let c : ℝ := (B2 + 1) / 2
+  have hB2c : B2 ≤ c := by
+    dsimp only [c]
+    linarith
+  have hc1 : c < 1 := by
+    dsimp only [c]
+    linarith only [hB2lt]
+  obtain ⟨T₀, hT₀, hpack⟩ := hsolve hB2c hc1
+  refine ⟨T₀, hT₀, ?_⟩
+  intro T hT hTT₀ hT1
+  obtain ⟨f, fLo, Ctop, B0, B1, D, ρout, P, hre, hfLo, hlo⟩ :=
+    hpack hT hTT₀ hT1
+  exact lowreg_joint_of_re (I := I) (M := M) hDim g F_RHS hRepr hρ hδ.le hδ_le
+    hreal' hT hT1 f hre fLo hfLo hlo hRcapC
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

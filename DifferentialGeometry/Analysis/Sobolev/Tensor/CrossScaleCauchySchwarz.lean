@@ -209,6 +209,181 @@ theorem two_mul_sum_sameScale_le_sqrt
     _ ≤ 2 * (Real.sqrt A * c) := by linarith [hmono]
     _ = 2 * c * Real.sqrt A := by ring
 
+/-- **Parabolic energy closure from a ladder bound on the forcing.**
+
+The forcing coordinates split as `f = fd + fs` on `S`, where the *difference* part
+`fd` obeys a ladder bound one scale below (`α` on the top scale `σ + 1`, `β` on the
+middle scale `σ`) and the *static* part `fs` is bounded at the middle scale by `D`.
+Then the pairing `2 ∑ w^σ · u · f` — the source term of the `H^σ` energy identity —
+is dominated by
+
+  `(2α + ε) · E_{σ+1}(u) + (β²/ε) · E_σ(u) + 2D · √(E_σ(u))`,
+
+which is exactly the closure hypothesis of the parabolic energy hierarchy: a small
+multiple of the dissipation, a benign multiple of the energy at the same scale, and
+a `√`-seed carrying the static source.  The dissipation constant is `2α + ε`, so the
+absorption margin is available as soon as `α < 1`, with `ε` free to be chosen inside
+the remaining room.
+
+The two halves are `abs_sum_crossScale_le` (the weight-split Cauchy–Schwarz that
+shifts one derivative from the forcing to the state) and
+`two_mul_sum_sameScale_le_sqrt` (the same-scale pairing of the static source); the
+only extra ingredient is one Young inequality on the mixed term `√E_{σ+1}·√E_σ`. -/
+theorem two_mul_sum_ladder_le
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
+    (u fd fs f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
+    {α β D ε : ℝ} (hD : 0 ≤ D) (hε : 0 < ε)
+    (hsplit : ∀ i ∈ S, f i = fd i + fs i)
+    (hladder :
+      Real.sqrt (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ - 1) * (fd i) ^ 2) ≤
+        α * Real.sqrt
+            (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (u i) ^ 2) +
+          β * Real.sqrt (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i) ^ 2))
+    (hstat : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (fs i) ^ 2 ≤ D ^ 2) :
+    2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * f i) ≤
+      (2 * α + ε) *
+          (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (u i) ^ 2) +
+        (β ^ 2 / ε) * (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i) ^ 2) +
+        2 * D * Real.sqrt (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i) ^ 2) := by
+  set A := ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (u i) ^ 2 with hAdef
+  set Eσ := ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i) ^ 2 with hEdef
+  set B := ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ - 1) * (fd i) ^ 2 with hBdef
+  have hA0 : 0 ≤ A :=
+    Finset.sum_nonneg (fun i _ =>
+      mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (σ + 1)) (sq_nonneg _))
+  have hE0 : 0 ≤ Eσ :=
+    Finset.sum_nonneg (fun i _ =>
+      mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i σ) (sq_nonneg _))
+  set sA := Real.sqrt A with hsAdef
+  set sE := Real.sqrt Eσ with hsEdef
+  have hsA0 : 0 ≤ sA := Real.sqrt_nonneg _
+  have hsE0 : 0 ≤ sE := Real.sqrt_nonneg _
+  have hsA2 : sA ^ 2 = A := Real.sq_sqrt hA0
+  have hsE2 : sE ^ 2 = Eσ := Real.sq_sqrt hE0
+  -- split the pairing into its difference and static halves
+  have hsum : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * f i) =
+      (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i)) +
+        ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fs i) := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    rw [hsplit i hi]; ring
+  -- the difference half: Cauchy-Schwarz across scales, then the ladder, then Young
+  have hcross : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i) ≤
+      sA * Real.sqrt B :=
+    le_trans (le_abs_self _) (abs_sum_crossScale_le (I := I) (M := M) S σ u fd)
+  have hstep : sA * Real.sqrt B ≤ sA * (α * sA + β * sE) :=
+    mul_le_mul_of_nonneg_left hladder hsA0
+  have hyoung : 2 * β * (sA * sE) ≤ ε * A + (β ^ 2 / ε) * Eσ := by
+    set sε := Real.sqrt ε with hsεdef
+    have hsεpos : 0 < sε := Real.sqrt_pos.mpr hε
+    have hsε2 : sε ^ 2 = ε := Real.sq_sqrt hε.le
+    have hexpand : (sε * sA - (β / sε) * sE) ^ 2 =
+        sε ^ 2 * sA ^ 2 - 2 * (sε * (β / sε)) * (sA * sE) + (β ^ 2 / sε ^ 2) * sE ^ 2 := by
+      field_simp
+      ring
+    have hcancel : sε * (β / sε) = β := by field_simp
+    rw [hcancel, hsε2, hsA2, hsE2] at hexpand
+    nlinarith [sq_nonneg (sε * sA - (β / sε) * sE), hexpand]
+  have hdiff : 2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i) ≤
+      (2 * α + ε) * A + (β ^ 2 / ε) * Eσ := by
+    have hchain : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i) ≤
+        α * A + β * (sA * sE) := by
+      refine le_trans (le_trans hcross hstep) ?_
+      have : sA * (α * sA + β * sE) = α * (sA ^ 2) + β * (sA * sE) := by ring
+      rw [this, hsA2]
+    nlinarith [hchain, hyoung]
+  -- the static half: same-scale pairing
+  have hstatle := two_mul_sum_sameScale_le_sqrt (I := I) (M := M) S σ u fs hD hstat
+  rw [← hEdef, ← hsEdef] at hstatle
+  rw [hsum]
+  linarith [hdiff, hstatle]
+
+/-- **Parabolic energy closure from a ladder bound carrying an additive constant.**
+
+`two_mul_sum_ladder_le` with the ladder hypothesis widened by a constant term
+`γ`, i.e. `‖fd‖_{σ-1} ≤ α‖u‖_{σ+1} + β‖u‖_σ + γ`.  A low-regularity ladder
+produces such a `γ` whenever a Leibniz slot is priced by a fixed radius rather
+than by the state, so the closure must carry it.
+
+The extra term is absorbed by one further Young inequality
+`2γ√E_{σ+1} ≤ ε·E_{σ+1} + γ²/ε` at the *same* `ε` as the mixed term, so the
+dissipation constant is `2α + 2ε` — the absorption margin is available as soon
+as `α + ε < 1` — and the closure gains the additive slot `γ²/ε`, which the
+single-scale Grönwall engine consumes. -/
+theorem two_sum_ladder_add_le
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
+    (u fd fs f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
+    {α β γ D ε : ℝ} (hD : 0 ≤ D) (hε : 0 < ε)
+    (hsplit : ∀ i ∈ S, f i = fd i + fs i)
+    (hladder :
+      Real.sqrt (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ - 1) * (fd i) ^ 2) ≤
+        α * Real.sqrt
+            (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (u i) ^ 2) +
+          β * Real.sqrt (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i) ^ 2) +
+          γ)
+    (hstat : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (fs i) ^ 2 ≤ D ^ 2) :
+    2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * f i) ≤
+      (2 * α + 2 * ε) *
+          (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (u i) ^ 2) +
+        (β ^ 2 / ε) * (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i) ^ 2) +
+        2 * D * Real.sqrt (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i) ^ 2) +
+        γ ^ 2 / ε := by
+  set A := ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (u i) ^ 2 with hAdef
+  set Eσ := ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i) ^ 2 with hEdef
+  set B := ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ - 1) * (fd i) ^ 2 with hBdef
+  have hA0 : 0 ≤ A :=
+    Finset.sum_nonneg (fun i _ =>
+      mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (σ + 1)) (sq_nonneg _))
+  have hE0 : 0 ≤ Eσ :=
+    Finset.sum_nonneg (fun i _ =>
+      mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i σ) (sq_nonneg _))
+  set sA := Real.sqrt A with hsAdef
+  set sE := Real.sqrt Eσ with hsEdef
+  have hsA0 : 0 ≤ sA := Real.sqrt_nonneg _
+  have hsE0 : 0 ≤ sE := Real.sqrt_nonneg _
+  have hsA2 : sA ^ 2 = A := Real.sq_sqrt hA0
+  have hsE2 : sE ^ 2 = Eσ := Real.sq_sqrt hE0
+  have hsum : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * f i) =
+      (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i)) +
+        ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fs i) := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i hi => ?_)
+    rw [hsplit i hi]; ring
+  have hcross : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i) ≤
+      sA * Real.sqrt B :=
+    le_trans (le_abs_self _) (abs_sum_crossScale_le (I := I) (M := M) S σ u fd)
+  have hstep : sA * Real.sqrt B ≤ sA * (α * sA + β * sE + γ) :=
+    mul_le_mul_of_nonneg_left hladder hsA0
+  have hyoung : 2 * β * (sA * sE) ≤ ε * A + (β ^ 2 / ε) * Eσ := by
+    set sε := Real.sqrt ε with hsεdef
+    have hsεpos : 0 < sε := Real.sqrt_pos.mpr hε
+    have hsε2 : sε ^ 2 = ε := Real.sq_sqrt hε.le
+    have hexpand : (sε * sA - (β / sε) * sE) ^ 2 =
+        sε ^ 2 * sA ^ 2 - 2 * (sε * (β / sε)) * (sA * sE) + (β ^ 2 / sε ^ 2) * sE ^ 2 := by
+      field_simp
+      ring
+    have hcancel : sε * (β / sε) = β := by field_simp
+    rw [hcancel, hsε2, hsA2, hsE2] at hexpand
+    nlinarith [sq_nonneg (sε * sA - (β / sε) * sE), hexpand]
+  -- the new Young step, at the same `ε`: `2γ·√A ≤ ε·A + γ²/ε`
+  have hyoung' : 2 * γ * sA ≤ ε * A + γ ^ 2 / ε := by
+    have hkey : ε * (ε * A + γ ^ 2 / ε - 2 * γ * sA) = (ε * sA - γ) ^ 2 := by
+      rw [← hsA2]; field_simp; ring
+    nlinarith [sq_nonneg (ε * sA - γ), hkey, hε]
+  have hdiff : 2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i) ≤
+      (2 * α + 2 * ε) * A + (β ^ 2 / ε) * Eσ + γ ^ 2 / ε := by
+    have hchain : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i) ≤
+        α * A + β * (sA * sE) + γ * sA := by
+      refine le_trans (le_trans hcross hstep) ?_
+      have hexp : sA * (α * sA + β * sE + γ) =
+          α * (sA ^ 2) + β * (sA * sE) + γ * sA := by ring
+      rw [hexp, hsA2]
+    nlinarith [hchain, hyoung, hyoung']
+  have hstatle := two_mul_sum_sameScale_le_sqrt (I := I) (M := M) S σ u fs hD hstat
+  rw [← hEdef, ← hsEdef] at hstatle
+  rw [hsum]
+  linarith [hdiff, hstatle]
+
 end TensorHeatEquation
 end Parabolic
 end Analysis

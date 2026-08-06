@@ -62,6 +62,78 @@ theorem holder_integral_prod_rpow_le_prod_integral_rpow
           MeasureTheory.integral_eq_lintegral_of_nonneg_ae (hf_nn i hi)
             (hf_int i hi).aestronglyMeasurable]
 
+/-- **Lyapunov interpolation between two powers of a nonnegative function.**
+
+For `0 ≤ F` and an exponent `c` on the segment between `a` and `b`,
+`c = lam·a + (1 - lam)·b` with `lam ∈ [0,1]`,
+```
+∫ F^c ≤ (∫ F^a)^lam · (∫ F^b)^(1 - lam).
+```
+
+Equivalently `p ↦ ‖F‖_{L^p}` is log-convex.  This is the missing bridge BETWEEN
+two `Lᵖ` scales: a quantity controlled separately at exponents `a` and `b` is
+controlled at every intermediate exponent, with the two controls entering at the
+interpolation weights.  It is the two-function case of
+`holder_integral_prod_rpow_le_prod_integral_rpow`, applied to the constant
+factorization `F^c = (F^a)^lam · (F^b)^(1-lam)`. -/
+theorem lyapunov_pow_le (F : α → ℝ) (hF_nn : ∀ᵐ x ∂μ, 0 ≤ F x)
+    {a b c lam : ℝ} (ha : 0 < a) (hb : 0 < b)
+    (hlam0 : 0 ≤ lam) (hlam1 : lam ≤ 1)
+    (hc : c = lam * a + (1 - lam) * b)
+    (hFa : MeasureTheory.Integrable (fun x => F x ^ a) μ)
+    (hFb : MeasureTheory.Integrable (fun x => F x ^ b) μ) :
+    ∫ x, F x ^ c ∂μ ≤
+      (∫ x, F x ^ a ∂μ) ^ lam * (∫ x, F x ^ b ∂μ) ^ (1 - lam) := by
+  classical
+  have hc_pos : 0 < c := by
+    rcases eq_or_lt_of_le hlam0 with h | h
+    · rw [hc, ← h]; simpa using hb
+    · rcases eq_or_lt_of_le hlam1 with h' | h'
+      · rw [hc, h']; simpa using ha
+      · have h1 : 0 < lam * a := mul_pos h ha
+        have h2 : 0 < (1 - lam) * b := mul_pos (by linarith) hb
+        rw [hc]; linarith
+  set f : Fin 2 → α → ℝ := ![fun x => F x ^ a, fun x => F x ^ b] with hf
+  set θ : Fin 2 → ℝ := ![lam, 1 - lam] with hθ
+  have hθ1 : ∑ i ∈ (Finset.univ : Finset (Fin 2)), θ i = 1 := by
+    rw [Fin.sum_univ_two, hθ]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+    ring
+  have hθ_nn : ∀ i ∈ (Finset.univ : Finset (Fin 2)), 0 ≤ θ i := by
+    intro i _
+    fin_cases i
+    · simpa [hθ] using hlam0
+    · simpa [hθ] using (by linarith : (0 : ℝ) ≤ 1 - lam)
+  have hf_int : ∀ i ∈ (Finset.univ : Finset (Fin 2)),
+      MeasureTheory.Integrable (f i) μ := by
+    intro i _
+    fin_cases i
+    · simpa [hf] using hFa
+    · simpa [hf] using hFb
+  have hf_nn : ∀ i ∈ (Finset.univ : Finset (Fin 2)), (0 : α → ℝ) ≤ᵐ[μ] f i := by
+    intro i _
+    fin_cases i
+    · filter_upwards [hF_nn] with x hx
+      simpa [hf] using Real.rpow_nonneg hx a
+    · filter_upwards [hF_nn] with x hx
+      simpa [hf] using Real.rpow_nonneg hx b
+  have key := holder_integral_prod_rpow_le_prod_integral_rpow
+    (Finset.univ : Finset (Fin 2)) f θ hf_int hf_nn hθ_nn hθ1
+  have hpt : ∀ᵐ x ∂μ,
+      F x ^ c = ∏ i ∈ (Finset.univ : Finset (Fin 2)), f i x ^ θ i := by
+    filter_upwards [hF_nn] with x hx
+    rw [Fin.prod_univ_two, hf, hθ]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+    rw [← Real.rpow_mul hx, ← Real.rpow_mul hx,
+      ← Real.rpow_add' hx (by
+        rw [show a * lam + b * (1 - lam) = c by rw [hc]; ring]
+        exact ne_of_gt hc_pos), hc]
+    ring_nf
+  rw [MeasureTheory.integral_congr_ae hpt]
+  refine key.trans (le_of_eq ?_)
+  rw [Fin.prod_univ_two, hf, hθ]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+
 end ScalarHolder
 
 namespace Connection

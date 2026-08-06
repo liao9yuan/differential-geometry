@@ -610,19 +610,29 @@ its docstring BEFORE consumers are built against it.
   basepoint noncollapse does not replace that base's A0-prime
   arbitrary-center volume-overlap, CGT decay/packing, or H6 inputs.  Whole-HCG
   supporting machinery is now about 61%.
-- **Hamilton E1 low-regularity short-time input:** `LowRegCoeff` and
-  `exists_low_reg_coeff` now package two-sided active-chart ellipticity, Gram
-  bounds through order three, a uniform absolute Ricci--DeTurck RHS bound, and
-  RHS-value Lipschitz control against metric `2`-jet differences directly from
-  the restart theorem's `Lambda`-equivalence and
-  `MetricCovDerivOrderBoundOn` hypotheses.  This
-  coefficient sublane is checked and axiom-clean.  The next missing producer
-  is the three-dimensional mixed `H^3 -> H^1` tame estimate; the uniformly
-  parabolic low-regularity solver, same-interval smoothing, and
-  `ricci_flow_unif_existence` remain theorem-level 0%; see
-  `../SHORTTIME_MERGE_PLAN.md`, and for the running (N)-discharge
-  campaign the live ledger `../ShortTime/UNIF_EXISTENCE_PLAN3.md`
-  (No. 104+; PLAN2/PLAN frozen).
+- **Hamilton E1 low-regularity short-time input:** the per-metric low-regularity
+  chain is now complete through every real spatial order.  The explicit solve,
+  ordered rung-three/four/five and higher-rung packages feed the proved
+  `lowreg_loMass`; the radius-flexible A2 estimate gives a strict contraction
+  floor, and `lowreg_dt_open` supplies a genuine positive self-background
+  Ricci--DeTurck horizon for every fixed three-dimensional metric.  The common
+  lifetime now has its correct lower interface:
+  `LowRegBoundData` / `IsLowBoundsAt` for exact metricwise witnesses and
+  `LowRegHorizonData` / `IsLowBoundsCap` for the common scalar envelope, with
+  `unif_solve_of_caps` proving the one-horizon fixed-point assembly against
+  the fixed background.  Its actual producer `lowreg_bounds_unif` remains 0%:
+  the realization, A2, affine, and nonlinearity constants still need
+  class-uniform exposed siblings.  The older `IsLowGateUnif` all-rung boundary
+  is not on this lifetime path; its rung-five H6 comparison needs curvature and
+  metric jets beyond the order-three class and therefore cannot be uniformly
+  produced from `(N)`'s hypotheses.  Qualitative up-to-corner smoothing must be
+  bootstrapped separately after the common low solution.  Finally, this lane is three-dimensional while
+  the current `(N)` statement is dimension-generic, so the endpoint or the
+  ladder requires an explicit design change.  Thus
+  `lowreg_bounds_unif`, the class-uniform DeTurck endpoint, and
+  `ricci_flow_unif_existence` remain theorem-level 0%; see the live ledger
+  `../ShortTime/UNIF_EXISTENCE_PLAN6.md` (No. 176;
+  PLAN5/PLAN4/PLAN3/PLAN2/PLAN frozen).
 - **B/C support-local H6 integration (historical milestone; superseded by the
   checked selected-route capstone below):** the normalized limit-weight projection,
   actual-support compact cages, producer-owned finite source cover,

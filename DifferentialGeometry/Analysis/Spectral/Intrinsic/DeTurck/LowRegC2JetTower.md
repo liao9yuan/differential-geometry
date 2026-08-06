@@ -165,3 +165,28 @@ same conclusion ball-free and gate-free, so the rejection cost nothing.
   three lines.  Probing with a scratch `#check` file against exactly the target
   file's imports is the cheap way to settle such reachability questions.
 * File checks in ~21 s.
+
+## 2026-08-05 — window sharpening (PSTOP adapter G / (B-WIN))
+
+`topKerJetSharp` is now the mathematical content, at the **sharp** window
+`Kk i * (1 + ∑_{j ∈ range (i+1)} ‖∇^j T‖²)` — i.e. `1 + lowJetSq g i T` itself.
+`topKer_jet` survives with a **byte-identical** statement at `range (i+2)` as a
+five-line weakened wrapper, so no consumer moved.
+
+The sharpening was free, exactly as the §6.4 recon predicted: the old proof
+reached `hfin.2.2 i : … ≤ A i·(1 + lowJetSq g i T)` and then spent its last two
+`calc` steps (`hsub`/`hmono`) throwing the sharp window away for shape-uniformity
+with the C0/C1 towers.  Deleting those two steps leaves
+`mul_le_mul_of_nonneg_right (le_abs_self _) …` and a `rfl`-level rewrite
+`lowJetSq g i T = ∑ j ∈ range (i+1), ‖∇^j T‖²`.
+
+Why it matters: the tower-direct rung `k` reads the a₂ tower at index `k+1`
+(sup-embedding cost `+2` on Leibniz index `k−1`); with `range (i+2)` that is a
+state jet of order `k+2`, above `E_{k+1}` and hence circular, while `range (i+1)`
+lands exactly on `H^{k+1}`.  Consumer of the sharp form: `c2JetTowerSharp`
+(`LowRegLadderRung.lean`) → `c2SupJet` (`LowRegA2PerIndex.lean`).
+
+STOP-signal from the dispatch (a consumer needing more than one weakening line)
+did **not** fire: `topKer_jet`'s only Lean consumer was `c2JetTowerQ`, and that
+one is itself now a wrapper of a sharp sibling.  Census unchanged (three standard
+axioms) for both the sharp theorem and the compatibility wrapper.

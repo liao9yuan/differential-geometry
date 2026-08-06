@@ -5,7 +5,7 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.RoughLaplacianSecondCo
 
 /-! # The intrinsic Moser tame product and Gagliardo–Nirenberg interpolation
 
-This file isolates the genuinely-missing **Sobolev·Sobolev** multiplication estimates on a
+This file provides the **Sobolev·Sobolev** multiplication estimates on a
 closed Riemannian manifold, phrased intrinsically against the iterated covariant gradient
 `iteratedCovGrad` and the metric `L²` norm `tensorL2Norm` of smooth compactly-supported
 tensor sections.
@@ -20,8 +20,8 @@ in each, one factor is a fixed `C^∞` function whose every derivative is sup-bo
 the *other* factor carries Sobolev regularity.  The genuinely new content here is the
 estimate when **both** factors carry only Sobolev regularity (the high-order derivative is
 *shared* between the two factors and must be redistributed by interpolation): the Moser tame
-inequality and the Gagliardo–Nirenberg interpolation inequality, neither of which exists in
-Mathlib or in this library.
+inequality and the Gagliardo–Nirenberg interpolation inequality, neither of which previously
+existed in Mathlib or elsewhere in this library.
 
 These are the analytic engine of the higher-order covariant Faà-di-Bruno / Nemytskii estimate
 for the second-order quasilinear Ricci–DeTurck right-hand side
@@ -44,14 +44,16 @@ Gagliardo–Nirenberg interpolation is reduced by a genuine `k`-th-root `rpow` e
 integer-power form `l2Interp_pow_iteratedCovGrad`, which is proven outright by composing the
 discrete log-convexity of the covariant `L²`-jets `aᵢ := ‖∇^i u‖_{L²}`
 (`l2jet_logConvex_iteratedCovGrad`, `aᵢ₊₁² ≤ K·aᵢ·aᵢ₊₂` — the closed-manifold covariant
-Green/IBP input on the iterated bundle connection Laplacian, the only posited deep analytic
-input), the discrete Hardy–Littlewood–Pólya power law (`hlp_real`, proven here as elementary
-real arithmetic via the discrete chord bound), and the `L^∞`-to-`L²` endpoint
-`l2Norm_le_sup_mul_sqrt_vol` (`a₀ ≤ Λ₀·vol^{1/2}`).  The single `sorry` is therefore isolated in
-`l2jet_logConvex_iteratedCovGrad`; its integration-by-parts half is available on disk as
-`Integral.Connection.covGrad_l2NormSq_le_rawConnLap_mul_self_gen`, the only residual being the
-rough-Laplacian-to-second-covariant-gradient `L²` trace bound (a `Geometry/Connection`-layer
-fact).  All displayed cross-term statements are general real-valued `L²`-norm
+Green/IBP identity on the iterated bundle connection Laplacian), the discrete
+Hardy–Littlewood–Pólya power law (`hlp_real`, proven here as elementary real arithmetic via the
+discrete chord bound), and the `L^∞`-to-`L²` endpoint `l2Norm_le_sup_mul_sqrt_vol`
+(`a₀ ≤ Λ₀·vol^{1/2}`).  The log-convexity is in turn proven from the two closed-manifold Bochner
+halves: the integration-by-parts half
+`Integral.Connection.covGrad_l2NormSq_le_rawConnLap_mul_self_gen` and the valence-uniform
+rough-Laplacian-to-second-covariant-gradient `L²` trace bound
+`exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen`
+(`Geometry/Connection/Laplacian/RoughLaplacianSecondCovGradL2Bound.lean`).  All displayed
+cross-term statements are general real-valued `L²`-norm
 product/interpolation inequalities on iterated covariant gradients, structurally unrelated to the
 Nemytskii conclusions that consume them; no packaging. -/
 
@@ -96,17 +98,16 @@ cross term**
 This is the genuine **Moser tame inequality**: the top-order derivative is redistributed so that
 each product summand carries the high derivative on *one* factor (in `L²`) and the low
 derivatives on the other (in `L^∞`).  The proof composes the pointwise Leibniz product hypothesis
-with the finite-sum pointwise-to-`L²` packaging `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum`
-and the Gagliardo–Nirenberg interpolation `exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le`
-below (to move each intermediate-order factor between `L²` and `L^∞`), together with the on-disk
-smooth-coefficient multiplier bounds for the bounded factor.
+with the `C^k`-sup domination of the bounded factor's covariant jets (each Leibniz summand keeps
+its high derivative on the perturbation factor in `L²`), the finite-sum pointwise-to-`L²`
+packaging `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum`, and a reflection reindexing; no
+interpolation is needed, since the coefficient factor is `L^∞`-controlled at every order.
 
 The hypotheses are genuine analytic inputs about the *separate* tensors `c, w` (sup bounds on
 their covariant jets) and a *pointwise* Leibniz domination of `∇^k P`; the conclusion is a
 global `L²` bound on `∇^k P`.  The conclusion is structurally distinct from any consumer's
 Nemytskii conclusion (it is a `c, w`-cross-term `L²` product bound, not a chart-Sobolev or
-spectral statement); no packaging.  Its body is `sorry`: the genuine Sobolev·Sobolev
-tame-multiplication content. -/
+spectral statement); no packaging. -/
 theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) (p q k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -777,7 +778,7 @@ The proof reduces (via the `a (i+1)^2 ≤ M a i a (i+2)` square bound) to the al
 case, in which `i ↦ Real.log (a i)` has a discrete second difference bounded below by
 `-Real.log M`; the chord bound `chord_bound` then yields the linear inequality on logs,
 which exponentiates to the claimed power law. This is elementary real arithmetic on the
-abstract `L²`-jets; it carries no `sorry`. -/
+abstract `L²`-jets. -/
 private theorem hlp_real (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM : 1 ≤ M)
     (hlc : ∀ i, (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2)) (j k : ℕ) (hj : 0 < j) (hjk : j < k) :
     (a j) ^ k ≤ M ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := by
@@ -861,12 +862,10 @@ It is proven by composition over the general-valence trace bound
 `exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen`
 (`Geometry/Connection/Laplacian/RoughLaplacianSecondCovGradL2Bound.lean`), whose elementary
 metric-trace assembly (the diagonal `g`-trace sum, the `n`-sub-additivity of the squared fibre
-norm, and the pointwise-to-`L²` integration) is fully discharged on top of the single genuine
-general-valence geometric input `secondCovDeriv_unit_frame_fiberNormSq_le`: the orthonormal-frame
+norm, and the pointwise-to-`L²` integration) rests on the general-valence geometric input
+`secondCovDeriv_unit_frame_fiberNormSq_le`, proved in the same file: the orthonormal-frame
 Hessian-component fibre-norm bound `‖∇²_{Bᵢ,Bᵢ} S (x)‖_{fibre} ≤ ‖∇²S (x)‖_{fibre}` (the two-step
-covariant-gradient evaluation currying together with its component comparison — the general-valence
-analogue of the on-disk valence-`2` currying tower, which exists only at fixed low valence). That
-input carries the only `sorry`; consumers transitively depend on its `sorryAx`. -/
+covariant-gradient evaluation currying together with its component comparison). -/
 private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 1 ≤ K ∧
@@ -901,8 +900,7 @@ diagonal Green identity gives
 are intrinsic and metric; the conclusion is a real-valued `L²`-jet inequality, structurally
 unrelated to any Nemytskii conclusion.
 
-It is proven outright from the two `L²` Bochner halves; it carries no `sorry` of its own, but
-depends transitively on the `sorryAx` of the valence-uniform trace bound. -/
+It is proven outright from the two `L²` Bochner halves. -/
 private theorem l2jet_logConvex_iteratedCovGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ K : ℝ, 1 ≤ K ∧
@@ -1011,15 +1009,13 @@ recorded because all powers are then integer, which lets the companion statement
 single `k`-th-root (`rpow (1/k)`) extraction.
 
 The proof composes three pieces: the log-convexity `l2jet_logConvex_iteratedCovGrad`
-(`aᵢ₊₁² ≤ K·aᵢ·aᵢ₊₂`, the posited covariant Green/IBP input, carrying the only `sorry`); the
+(`aᵢ₊₁² ≤ K·aᵢ·aᵢ₊₂`, the closed-manifold covariant Green/IBP identity); the
 discrete Hardy–Littlewood–Pólya power law `hlp_real` (`aⱼ^k ≤ K^{k³}·a₀^{k-j}·aₖ^j`, proven
 outright as elementary real arithmetic on the abstract jets); and the `L^∞`-to-`L²` endpoint
 `l2Norm_le_sup_mul_sqrt_vol` (`a₀ ≤ Λ₀·√(vol M)`, the compact-manifold constant comparison).
 Choosing `C := K^{k²}·max 1 √(vol M)` absorbs the volume factor `√(vol M)^{k-j} ≤ (max 1 √(vol M))^k`,
-turning the HLP bound into the displayed interpolation.  It therefore depends transitively only on
-the `sorry` of `l2jet_logConvex_iteratedCovGrad`, which `#print axioms` records as `sorryAx`; its
-conclusion is the integer-power interpolation, structurally distinct from any consumer's
-conclusion; no packaging. -/
+turning the HLP bound into the displayed interpolation.  Its conclusion is the integer-power
+interpolation, structurally distinct from any consumer's conclusion; no packaging. -/
 private theorem l2Interp_pow_iteratedCovGrad
     (g : SmoothRiemannianMetric I M) (s k : ℕ) (_hk : 1 ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1115,10 +1111,7 @@ The proof is the genuine `k`-th-root (`rpow (1/k)`) extraction from the integer-
 `l2Interp_pow_iteratedCovGrad` (`‖∇^j u‖²·…`, all exponents integer): take `rpow (1/k)` of both
 sides — monotone on nonnegatives — and simplify with `Real.pow_rpow_inv_natCast`, `Real.mul_rpow`,
 `Real.rpow_natCast`, `Real.rpow_mul`, using `(k - j : ℕ) = k - j` (since `j < k`) to turn the
-integer exponent `k - j` into the real interpolation weight `1 − j/k`.  It therefore depends
-transitively on the `sorry` of `l2Interp_pow_iteratedCovGrad` (the deep closed-manifold tensor
-interpolation), which `#print axioms` records as `sorryAx`; the displayed real-power statement is
-proven outright on top of that single posited analytic input. -/
+integer exponent `k - j` into the real interpolation weight `1 − j/k`. -/
 theorem exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) (s k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -94,3 +94,29 @@ brick E3 (open, the hard geometric brick).
 E5 is done modulo E4.  The remaining `g₀`-dependence of the horizon is entirely in the five
 numbers `Ctop, B0, B1, D, ρ` (bricks E6/E7) plus the two inputs `Cpt` (E4) and `Fc` (E3).
 Consumer side: `ShortTime/UnifRealizeRadius.lean`.
+
+## Finite H2 curvature-action face (2026-08-05)
+
+`covsumHs2_smoothCc` is now the rank-`(0,2)` DeTurck-currency face of
+`UnifBochnerGap.covsum_hs_two`. It consumes only `IsCurvAction0 g 2 K`, rather than the old
+all-rank/all-order `hcurv` family. This is the precise hard comparison needed by the H2
+realization bound; higher curvature-action derivatives are not part of this interface.
+
+Verification status: focused verification passed with one Lean thread and no warnings, after the
+required targeted refresh of `UnifBochnerGap`.
+
+### Finite-action realization package
+
+The finite comparison now reaches the actual realization producer without falling back to the
+all-order API:
+
+- `hs2FibreActionC` and `hs2OpActionC` are closed in the rank-two Morrey constant `Cpt` and
+  order-zero curvature-action constant `K`;
+- `hs2_fiber_sq_action` and `hs2_op_bound_action` reuse `covsumHs2_smoothCc` and the existing
+  fibre/operator algebra;
+- `actionRealizeRad` is the positive dimension-threshold quotient by `hs2OpActionC`;
+- `realize_at_action` has the exact realization conclusion, with hypotheses only
+  `IsCurvAction0 g 2 K`, `0 ≤ Cpt`, and the rank-two Morrey estimate.
+
+The existing `Fc`/`hcurv` endpoints remain unchanged as compatibility APIs. Focused verification
+of the finite-action realization siblings passed with one Lean thread and no warnings.

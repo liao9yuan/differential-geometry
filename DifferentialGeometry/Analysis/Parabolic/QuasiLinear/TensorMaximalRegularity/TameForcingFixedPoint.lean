@@ -262,194 +262,65 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/- A four-term `L²` Minkowski estimate.  It is kept private because its public
-consumer is the three-arm fixed-point theorem below. -/
-private theorem l2_four
-    {T : ℝ} {X Y Z W V : Type*}
-    [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-    [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
-    [NormedAddCommGroup Z] [InnerProductSpace ℝ Z] [CompleteSpace Z]
-    [NormedAddCommGroup W] [InnerProductSpace ℝ W] [CompleteSpace W]
-    [NormedAddCommGroup V] [InnerProductSpace ℝ V] [CompleteSpace V]
-    (h : timeL2 X T) (p : timeL2 Y T) (q : timeL2 Z T)
-    (r : timeL2 W T) (s : timeL2 V T) {A B C D : ℝ}
-    (hA : 0 ≤ A) (hB : 0 ≤ B) (hC : 0 ≤ C) (hD : 0 ≤ D)
-    (hbound : ∀ᵐ t ∂(timeMeasure T),
-      ‖h t‖ ≤ A * ‖p t‖ + B * ‖q t‖ + C * ‖r t‖ + D * ‖s t‖) :
-    ‖h‖ ≤ A * ‖p‖ + B * ‖q‖ + C * ‖r‖ + D * ‖s‖ := by
-  let Pf : ℝ → ℝ := fun t => ‖(p : ℝ → Y) t‖
-  let Qf : ℝ → ℝ := fun t => ‖(q : ℝ → Z) t‖
-  let Rf : ℝ → ℝ := fun t => ‖(r : ℝ → W) t‖
-  let Sf : ℝ → ℝ := fun t => ‖(s : ℝ → V) t‖
-  have hPm : AEStronglyMeasurable Pf (timeMeasure T) := (Lp.aestronglyMeasurable p).norm
-  have hQm : AEStronglyMeasurable Qf (timeMeasure T) := (Lp.aestronglyMeasurable q).norm
-  have hRm : AEStronglyMeasurable Rf (timeMeasure T) := (Lp.aestronglyMeasurable r).norm
-  have hSm : AEStronglyMeasurable Sf (timeMeasure T) := (Lp.aestronglyMeasurable s).norm
-  have hAPm : AEStronglyMeasurable (A • Pf) (timeMeasure T) := hPm.const_smul A
-  have hBQm : AEStronglyMeasurable (B • Qf) (timeMeasure T) := hQm.const_smul B
-  have hCRm : AEStronglyMeasurable (C • Rf) (timeMeasure T) := hRm.const_smul C
-  have hDSm : AEStronglyMeasurable (D • Sf) (timeMeasure T) := hSm.const_smul D
-  let major : ℝ → ℝ := A • Pf + B • Qf + C • Rf + D • Sf
-  have hmono : eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤
-      eLpNorm major 2 (timeMeasure T) := by
-    refine eLpNorm_mono_ae ?_
-    filter_upwards [hbound] with t ht
-    have happ : major t =
-        A * ‖p t‖ + B * ‖q t‖ + C * ‖r t‖ + D * ‖s t‖ := by
-      simp only [major, Pf, Qf, Rf, Sf, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
-    have hnonneg : 0 ≤ major t := by
-      rw [happ]
-      positivity
-    rw [Real.norm_eq_abs, abs_of_nonneg hnonneg, happ]
-    exact ht
-  have htri₁ : eLpNorm major 2 (timeMeasure T) ≤
-      eLpNorm (A • Pf + B • Qf + C • Rf) 2 (timeMeasure T) +
-        eLpNorm (D • Sf) 2 (timeMeasure T) := by
-    exact eLpNorm_add_le ((hAPm.add hBQm).add hCRm) hDSm (by norm_num)
-  have htri₂ : eLpNorm (A • Pf + B • Qf + C • Rf) 2 (timeMeasure T) ≤
-      eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) +
-        eLpNorm (C • Rf) 2 (timeMeasure T) := by
-    exact eLpNorm_add_le (hAPm.add hBQm) hCRm (by norm_num)
-  have htri₃ : eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) ≤
-      eLpNorm (A • Pf) 2 (timeMeasure T) +
-        eLpNorm (B • Qf) 2 (timeMeasure T) :=
-    eLpNorm_add_le hAPm hBQm (by norm_num)
-  have hscaleP : eLpNorm (A • Pf) 2 (timeMeasure T) =
-      ENNReal.ofReal A * eLpNorm (p : ℝ → Y) 2 (timeMeasure T) := by
-    rw [eLpNorm_const_smul, eLpNorm_norm, Real.enorm_eq_ofReal hA]
-  have hscaleQ : eLpNorm (B • Qf) 2 (timeMeasure T) =
-      ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) := by
-    rw [eLpNorm_const_smul, eLpNorm_norm, Real.enorm_eq_ofReal hB]
-  have hscaleR : eLpNorm (C • Rf) 2 (timeMeasure T) =
-      ENNReal.ofReal C * eLpNorm (r : ℝ → W) 2 (timeMeasure T) := by
-    rw [eLpNorm_const_smul, eLpNorm_norm, Real.enorm_eq_ofReal hC]
-  have hscaleS : eLpNorm (D • Sf) 2 (timeMeasure T) =
-      ENNReal.ofReal D * eLpNorm (s : ℝ → V) 2 (timeMeasure T) := by
-    rw [eLpNorm_const_smul, eLpNorm_norm, Real.enorm_eq_ofReal hD]
-  have hfinal : eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤
-      ENNReal.ofReal A * eLpNorm (p : ℝ → Y) 2 (timeMeasure T) +
-        ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) +
-        ENNReal.ofReal C * eLpNorm (r : ℝ → W) 2 (timeMeasure T) +
-        ENNReal.ofReal D * eLpNorm (s : ℝ → V) 2 (timeMeasure T) := by
-    calc
-      eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤ eLpNorm major 2 (timeMeasure T) := hmono
-      _ ≤ eLpNorm (A • Pf + B • Qf + C • Rf) 2 (timeMeasure T) +
-          eLpNorm (D • Sf) 2 (timeMeasure T) := htri₁
-      _ ≤ (eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) +
-            eLpNorm (C • Rf) 2 (timeMeasure T)) +
-          eLpNorm (D • Sf) 2 (timeMeasure T) :=
-        add_le_add htri₂ le_rfl
-      _ ≤ ((eLpNorm (A • Pf) 2 (timeMeasure T) +
-              eLpNorm (B • Qf) 2 (timeMeasure T)) +
-            eLpNorm (C • Rf) 2 (timeMeasure T)) +
-          eLpNorm (D • Sf) 2 (timeMeasure T) :=
-        add_le_add (add_le_add htri₃ le_rfl) le_rfl
-      _ = _ := by rw [hscaleP, hscaleQ, hscaleR, hscaleS]
-  have hp_top : eLpNorm (p : ℝ → Y) 2 (timeMeasure T) ≠ ⊤ := (Lp.memLp p).2.ne
-  have hq_top : eLpNorm (q : ℝ → Z) 2 (timeMeasure T) ≠ ⊤ := (Lp.memLp q).2.ne
-  have hr_top : eLpNorm (r : ℝ → W) 2 (timeMeasure T) ≠ ⊤ := (Lp.memLp r).2.ne
-  have hs_top : eLpNorm (s : ℝ → V) 2 (timeMeasure T) ≠ ⊤ := (Lp.memLp s).2.ne
-  have hp_mul : ENNReal.ofReal A * eLpNorm (p : ℝ → Y) 2 (timeMeasure T) ≠ ⊤ :=
-    ENNReal.mul_ne_top ENNReal.ofReal_ne_top hp_top
-  have hq_mul : ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) ≠ ⊤ :=
-    ENNReal.mul_ne_top ENNReal.ofReal_ne_top hq_top
-  have hr_mul : ENNReal.ofReal C * eLpNorm (r : ℝ → W) 2 (timeMeasure T) ≠ ⊤ :=
-    ENNReal.mul_ne_top ENNReal.ofReal_ne_top hr_top
-  have hs_mul : ENNReal.ofReal D * eLpNorm (s : ℝ → V) 2 (timeMeasure T) ≠ ⊤ :=
-    ENNReal.mul_ne_top ENNReal.ofReal_ne_top hs_top
-  have hrhs_ne :
-      ENNReal.ofReal A * eLpNorm (p : ℝ → Y) 2 (timeMeasure T) +
-        ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) +
-        ENNReal.ofReal C * eLpNorm (r : ℝ → W) 2 (timeMeasure T) +
-        ENNReal.ofReal D * eLpNorm (s : ℝ → V) 2 (timeMeasure T) ≠ ⊤ := by
-    exact ENNReal.add_ne_top.mpr
-      ⟨ENNReal.add_ne_top.mpr ⟨ENNReal.add_ne_top.mpr ⟨hp_mul, hq_mul⟩, hr_mul⟩, hs_mul⟩
-  change (eLpNorm (h : ℝ → X) 2 (timeMeasure T)).toReal ≤
-    A * (eLpNorm (p : ℝ → Y) 2 (timeMeasure T)).toReal +
-      B * (eLpNorm (q : ℝ → Z) 2 (timeMeasure T)).toReal +
-      C * (eLpNorm (r : ℝ → W) 2 (timeMeasure T)).toReal +
-      D * (eLpNorm (s : ℝ → V) 2 (timeMeasure T)).toReal
-  refine le_trans (ENNReal.toReal_mono hrhs_ne hfinal) ?_
-  rw [ENNReal.toReal_add (ENNReal.add_ne_top.mpr
-        ⟨ENNReal.add_ne_top.mpr ⟨hp_mul, hq_mul⟩, hr_mul⟩) hs_mul,
-    ENNReal.toReal_add (ENNReal.add_ne_top.mpr ⟨hp_mul, hq_mul⟩) hr_mul,
-    ENNReal.toReal_add hp_mul hq_mul,
-    ENNReal.toReal_mul, ENNReal.toReal_mul, ENNReal.toReal_mul, ENNReal.toReal_mul,
-    ENNReal.toReal_ofReal hA, ENNReal.toReal_ofReal hB,
-    ENNReal.toReal_ofReal hC, ENNReal.toReal_ofReal hD]
+/-- **The tame forcing field of a state-ball nonlinearity.**  This is
+`nemytskiiTameOn` with the lower-order Sobolev inclusion as its state operator,
+whose bound on `lowerState` is the definition of that set.  It is the `L²` map
+whose fixed point `partial_sol_tame` produces, and the object the spectral
+truncation is compared against. -/
+def nemytskiiTame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R)
+    {A B C : ℝ≥0}
+    {Nfun : lowerState (I := I) (M := M) g₀ a R →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
+    (hcont : Continuous Nfun)
+    (hsingle : ∀ u u' : lowerState (I := I) (M := M) g₀ a R,
+      ‖Nfun u - Nfun u'‖ ≤
+        (A : ℝ) * R *
+            ‖(u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) - (u' : _)‖ +
+          (B : ℝ) *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((u : _) - (u' : _))‖ +
+          (C : ℝ) *
+              (‖(u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ +
+                ‖(u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖) *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((u : _) - (u' : _))‖)
+    {T : ℝ}
+    (f : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T)
+    (hf : ∀ᵐ t ∂(timeMeasure T), f t ∈ lowerState (I := I) (M := M) g₀ a R) :
+    timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T :=
+  nemytskiiTameOn (zero_mem_lowerState (I := I) (M := M) g₀ a hR) hR
+    (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith))
+    (fun u => by simpa only [lowerState, lowerBall] using u.property)
+    hcont hsingle f hf
 
-/- A continuous state-set map satisfying the three-arm estimate sends every
-top-order `L²` field which remains in the state set to an `L²` forcing field. -/
-private theorem memLp_tame
-    {T R : ℝ} {X Y Z : Type*}
-    [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
-    [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
-    [NormedAddCommGroup Z] [NormedSpace ℝ Z]
-    {S : Set X} (hzero : (0 : X) ∈ S) (hR : 0 ≤ R)
-    (J : X →L[ℝ] Z) (hstate : ∀ u : S, ‖J (u : X)‖ ≤ R)
-    (N : S → Y) (hN : Continuous N) (A B C : ℝ≥0)
-    (htame : ∀ u v : S,
-      ‖N u - N v‖ ≤
-        (A : ℝ) * R * ‖(u : X) - (v : X)‖ +
-          (B : ℝ) * ‖J ((u : X) - (v : X))‖ +
-          (C : ℝ) * (‖(u : X)‖ + ‖(v : X)‖) *
-            ‖J ((u : X) - (v : X))‖)
-    (f : timeL2 X T) (hf : ∀ᵐ t ∂(timeMeasure T), f t ∈ S) :
-    MemLp (fun t => N (aeSetLift hzero f t)) 2 (timeMeasure T) := by
-  let z : S := ⟨0, hzero⟩
-  let K : ℝ := (A : ℝ) * R + (C : ℝ) * R
-  let Q : ℝ := (B : ℝ) * R + ‖N z‖
-  have hK : 0 ≤ K := by dsimp only [K]; positivity
-  have hQ : 0 ≤ Q := by dsimp only [Q]; positivity
-  have hlift := aeSetLift_aesm hzero f hf
-  have hmeas : AEStronglyMeasurable
-      (fun t => N (aeSetLift hzero f t)) (timeMeasure T) :=
-    hN.comp_aestronglyMeasurable hlift
-  let major : ℝ → ℝ := fun t => K * ‖f t‖ + Q
-  have hmajor : MemLp major 2 (timeMeasure T) := by
-    have hnorm : MemLp (fun t => ‖f t‖) 2 (timeMeasure T) := (Lp.memLp f).norm
-    have hscaled : MemLp (K • fun t => ‖f t‖) 2 (timeMeasure T) := hnorm.const_smul K
-    have hconst : MemLp (fun _ : ℝ => Q) 2 (timeMeasure T) := memLp_const Q
-    have hadd := hscaled.add hconst
-    simpa only [major, Pi.add_apply, Pi.smul_apply, smul_eq_mul] using hadd
-  refine hmajor.of_le hmeas ?_
-  filter_upwards [hf] with t ht
-  let u : S := ⟨f t, ht⟩
-  have huJ : ‖J (f t)‖ ≤ R := by
-    simpa only [u] using hstate u
-  have hdiff : ‖N u - N z‖ ≤ K * ‖f t‖ + (B : ℝ) * R := by
-    have hraw := htame u z
-    have hraw' : ‖N u - N z‖ ≤
-        (A : ℝ) * R * ‖f t‖ + (B : ℝ) * ‖J (f t)‖ +
-          (C : ℝ) * ‖f t‖ * ‖J (f t)‖ := by
-      simpa only [u, z, Subtype.coe_mk, sub_zero, map_zero, norm_zero, add_zero] using hraw
-    calc
-      ‖N u - N z‖ ≤
-          (A : ℝ) * R * ‖f t‖ + (B : ℝ) * ‖J (f t)‖ +
-            (C : ℝ) * ‖f t‖ * ‖J (f t)‖ := hraw'
-      _ ≤ (A : ℝ) * R * ‖f t‖ + (B : ℝ) * R +
-            (C : ℝ) * ‖f t‖ * R := by
-        gcongr
-      _ = K * ‖f t‖ + (B : ℝ) * R := by
-        dsimp only [K]
-        ring
-  have hn : ‖N u‖ ≤ major t := by
-    calc
-      ‖N u‖ = ‖(N u - N z) + N z‖ := by rw [sub_add_cancel]
-      _ ≤ ‖N u - N z‖ + ‖N z‖ := norm_add_le _ _
-      _ ≤ (K * ‖f t‖ + (B : ℝ) * R) + ‖N z‖ :=
-        add_le_add hdiff le_rfl
-      _ = major t := by
-        dsimp only [major, Q]
-        ring
-  have hmajor0 : 0 ≤ major t := by
-    dsimp only [major]
-    exact add_nonneg (mul_nonneg hK (norm_nonneg _)) hQ
-  change ‖N (aeSetLift hzero f t)‖ ≤ ‖major t‖
-  have hu : aeSetLift hzero f t = u := by
-    simp only [aeSetLift, dif_pos ht, u]
-  rw [hu, Real.norm_eq_abs, abs_of_nonneg hmajor0]
-  exact hn
+/-- `nemytskiiTame` is represented by the nonlinearity evaluated on the
+canonical state-set lift. -/
+theorem nemytskiiTame_coeFn (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
+    (hR : 0 ≤ R) {A B C : ℝ≥0}
+    {Nfun : lowerState (I := I) (M := M) g₀ a R →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
+    (hcont : Continuous Nfun)
+    (hsingle : ∀ u u' : lowerState (I := I) (M := M) g₀ a R,
+      ‖Nfun u - Nfun u'‖ ≤
+        (A : ℝ) * R *
+            ‖(u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) - (u' : _)‖ +
+          (B : ℝ) *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((u : _) - (u' : _))‖ +
+          (C : ℝ) *
+              (‖(u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ +
+                ‖(u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖) *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((u : _) - (u' : _))‖)
+    {T : ℝ}
+    (f : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T)
+    (hf : ∀ᵐ t ∂(timeMeasure T), f t ∈ lowerState (I := I) (M := M) g₀ a R) :
+    nemytskiiTame (I := I) (M := M) g₀ a hR hcont hsingle f hf
+        =ᵐ[timeMeasure T]
+      fun t => Nfun (aeSetLift
+        (zero_mem_lowerState (I := I) (M := M) g₀ a hR) f t) :=
+  nemytskiiTameOn_coeFn _ hR _ _ hcont hsingle f hf
 
 /-- Quantitative forcing-space existence for a continuous nonlinearity on a
 lower-order state ball satisfying the critical three-arm tame estimate.
@@ -787,7 +658,7 @@ theorem partial_sol_tame
                   (field F - field F')) t‖ +
               ((C : ℝ) * S) * ‖field F t‖ +
               ((C : ℝ) * S) * ‖field F' t‖ := by ac_rfl
-    have hmain := l2_four
+    have hmain := timeL2_norm_le_four
       (T := T)
       (X := tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
       (Y := tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
@@ -942,6 +813,233 @@ theorem partial_sol_tame
       (a := (a : ℝ)) (T := T) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar]
   · simpa only [hρdef] using hFstar
+
+/-- **The tame forcing map is a `Λ`-contraction on the forcing ball**, with
+
+  `Λ = A·R·(1+T) + B·2√T + 2·C·ρ·√(1+T)·(1+T)`.
+
+This is the estimate `partial_sol_tame` runs internally on its retracted map;
+the factor is a local `set` there and is not exported, so it is restated here in
+the unretracted form the two fixed points need — both of them lie in the
+`ρ`-ball where the retraction is the identity.  The third arm is the tame one:
+its `(‖u‖ + ‖v‖)` factor is charged to the ball radius through the Duhamel bound
+`‖field G‖ ≤ (1+T)ρ`, which is exactly why no global Lipschitz constant is
+needed. -/
+theorem tameMap_dist_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R)
+    {A B C : ℝ≥0}
+    {Nfun : lowerState (I := I) (M := M) g₀ a R →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
+    (hcont : Continuous Nfun)
+    (hsingle : ∀ u u' : lowerState (I := I) (M := M) g₀ a R,
+      ‖Nfun u - Nfun u'‖ ≤
+        (A : ℝ) * R *
+            ‖(u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) - (u' : _)‖ +
+          (B : ℝ) *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((u : _) - (u' : _))‖ +
+          (C : ℝ) *
+              (‖(u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ +
+                ‖(u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖) *
+            ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((u : _) - (u' : _))‖)
+    {T ρ : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hFb : ‖F‖ ≤ ρ) (hFb' : ‖F'‖ ≤ ρ)
+    (hF : ∀ᵐ t ∂(timeMeasure T),
+      maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F t ∈
+        lowerState (I := I) (M := M) g₀ a R)
+    (hF' : ∀ᵐ t ∂(timeMeasure T),
+      maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F' t ∈
+        lowerState (I := I) (M := M) g₀ a R) :
+    ‖nemytskiiTame (I := I) (M := M) g₀ a hR hcont hsingle
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F) hF -
+        nemytskiiTame (I := I) (M := M) g₀ a hR hcont hsingle
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F') hF'‖ ≤
+      ((A : ℝ) * R * (1 + T) + (B : ℝ) * (2 * Real.sqrt T) +
+          2 * (C : ℝ) * ρ * Real.sqrt (1 + T) * (1 + T)) * ‖F - F'‖ := by
+  have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+  have ha12 : (a : ℝ) + 1 ≤ (a : ℝ) + 2 := by linarith
+  set hz := zero_mem_lowerState (I := I) (M := M) g₀ a hR with hzdef
+  set fld : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
+      timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T :=
+    fun G => maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) G with hflddef
+  have hfield_dist : ‖fld F - fld F'‖ ≤ (1 + T) * ‖F - F'‖ :=
+    maxRegDuhamelSolField_dist_le (I := I) (M := M) (h_compact := h_compact)
+      (a := (a : ℝ)) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F F'
+  have hincl_dist :
+      ‖timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          ha12 (fld F - fld F')‖ ≤ 2 * Real.sqrt T * ‖F - F'‖ := by
+    rw [hflddef]
+    dsimp only
+    rw [map_sub,
+      timeL2Inclusion_maxRegDuhamelSolField (I := I) (M := M) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F,
+      timeL2Inclusion_maxRegDuhamelSolField (I := I) (M := M) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F']
+    exact maxRegDuhamelSolFieldHa1_dist_le (I := I) (M := M)
+      (h_compact := h_compact) (a := (a : ℝ)) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F F'
+  have hfield_norm : ∀ G, ‖G‖ ≤ ρ → ‖fld G‖ ≤ (1 + T) * ρ := by
+    intro G hG
+    calc
+      ‖fld G‖ ≤ (1 + T) * ‖G‖ :=
+        norm_maxRegDuhamelSolField_zero_le (I := I) (M := M) (g₀ := g₀) hT hT1 G
+      _ ≤ (1 + T) * ρ := mul_le_mul_of_nonneg_left hG (by linarith)
+  have hfield_sub : fld F - fld F' = fld (F - F') := by
+    rw [hflddef]
+    dsimp only
+    have hsub := maxRegDuhamelSolField_sub (I := I) (M := M)
+      (h_compact := h_compact) (a := (a : ℝ)) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F F'
+    have hdiffzero := maxRegDuhamelSolField_sub (I := I) (M := M)
+      (h_compact := h_compact) (a := (a : ℝ)) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (F - F') 0
+    rw [sub_zero,
+      maxRegDuhamelSolField_zero_zero (I := I) (M := M) (g₀ := g₀) hT hT1,
+      sub_zero] at hdiffzero
+    exact hsub.trans hdiffzero.symm
+  have hpoint : ∀ᵐ t ∂(timeMeasure T),
+      ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        ha12 (fld F - fld F')) t‖ ≤ Real.sqrt (1 + T) * ‖F - F'‖ := by
+    rw [hfield_sub, hflddef]
+    exact maxRegDuhamelSolField_inclusion_Ha1_ae_pointwise_le
+      (I := I) (M := M) (g₀ := g₀) hT hT1 (F - F')
+  set Sq : ℝ := Real.sqrt (1 + T) * ‖F - F'‖ with hSqdef
+  have hSq : 0 ≤ Sq := by rw [hSqdef]; positivity
+  set Ψ₁ := nemytskiiTame (I := I) (M := M) g₀ a hR hcont hsingle (fld F) hF
+    with hΨ₁def
+  set Ψ₂ := nemytskiiTame (I := I) (M := M) g₀ a hR hcont hsingle (fld F') hF'
+    with hΨ₂def
+  have hΨF : Ψ₁ =ᵐ[timeMeasure T] fun t => Nfun (aeSetLift hz (fld F) t) :=
+    nemytskiiTame_coeFn (I := I) (M := M) g₀ a hR hcont hsingle (fld F) hF
+  have hΨF' : Ψ₂ =ᵐ[timeMeasure T] fun t => Nfun (aeSetLift hz (fld F') t) :=
+    nemytskiiTame_coeFn (I := I) (M := M) g₀ a hR hcont hsingle (fld F') hF'
+  have hFm : ∀ᵐ t ∂(timeMeasure T),
+      fld F t ∈ lowerState (I := I) (M := M) g₀ a R := hF
+  have hFm' : ∀ᵐ t ∂(timeMeasure T),
+      fld F' t ∈ lowerState (I := I) (M := M) g₀ a R := hF'
+  have hΨsub := Lp.coeFn_sub Ψ₁ Ψ₂
+  have hfieldsub := Lp.coeFn_sub (fld F) (fld F')
+  have hinclcoe :
+      ⇑(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        ha12 (fld F - fld F'))
+        =ᵐ[timeMeasure T]
+      fun t => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        ha12 ((fld F - fld F') t) :=
+    (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      ha12).coeFn_compLpL (p := 2) (μ := timeMeasure T) (fld F - fld F')
+  have hbound : ∀ᵐ t ∂(timeMeasure T),
+      ‖(Ψ₁ - Ψ₂) t‖ ≤
+        (A : ℝ) * R * ‖(fld F - fld F') t‖ +
+          (B : ℝ) *
+            ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              ha12 (fld F - fld F')) t‖ +
+          ((C : ℝ) * Sq) * ‖fld F t‖ +
+          ((C : ℝ) * Sq) * ‖fld F' t‖ := by
+    filter_upwards [hΨsub, hΨF, hΨF', hfieldsub, hinclcoe, hpoint, hFm, hFm']
+      with t htΨ htF htF' htfsub htincl htpoint htstate htstate'
+    rw [htΨ, Pi.sub_apply, htF, htF']
+    simp only [aeSetLift, dif_pos htstate, dif_pos htstate']
+    set u : lowerState (I := I) (M := M) g₀ a R := ⟨fld F t, htstate⟩ with hudef
+    set u' : lowerState (I := I) (M := M) g₀ a R := ⟨fld F' t, htstate'⟩ with hu'def
+    have hraw := hsingle u u'
+    have htfsub' : fld F t - fld F' t = (fld F - fld F') t := by
+      calc
+        fld F t - fld F' t = (⇑(fld F) - ⇑(fld F')) t := rfl
+        _ = (fld F - fld F') t := htfsub.symm
+    have htincl_sub :
+        tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            ha12 ((fld F - fld F') t) =
+          (timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            ha12 (fld F - fld F')) t := htincl.symm
+    have hraw' : ‖Nfun u - Nfun u'‖ ≤
+        (A : ℝ) * R * ‖(fld F - fld F') t‖ +
+          (B : ℝ) *
+            ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              ha12 (fld F - fld F')) t‖ +
+          (C : ℝ) * (‖fld F t‖ + ‖fld F' t‖) *
+            ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              ha12 (fld F - fld F')) t‖ := by
+      simpa only [hudef, hu'def, Subtype.coe_mk, htfsub', htincl_sub] using hraw
+    have hthird :
+        (C : ℝ) * (‖fld F t‖ + ‖fld F' t‖) *
+            ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              ha12 (fld F - fld F')) t‖ ≤
+          ((C : ℝ) * Sq) * ‖fld F t‖ + ((C : ℝ) * Sq) * ‖fld F' t‖ := by
+      calc
+        (C : ℝ) * (‖fld F t‖ + ‖fld F' t‖) *
+              ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                ha12 (fld F - fld F')) t‖ ≤
+            (C : ℝ) * (‖fld F t‖ + ‖fld F' t‖) * Sq :=
+          mul_le_mul_of_nonneg_left (by simpa only [hSqdef] using htpoint)
+            (mul_nonneg C.coe_nonneg (by positivity))
+        _ = ((C : ℝ) * Sq) * ‖fld F t‖ + ((C : ℝ) * Sq) * ‖fld F' t‖ := by ring
+    calc
+      ‖Nfun u - Nfun u'‖ ≤
+          ((A : ℝ) * R * ‖(fld F - fld F') t‖ +
+            (B : ℝ) *
+              ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                ha12 (fld F - fld F')) t‖) +
+            (C : ℝ) * (‖fld F t‖ + ‖fld F' t‖) *
+              ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                ha12 (fld F - fld F')) t‖ := hraw'
+      _ ≤ ((A : ℝ) * R * ‖(fld F - fld F') t‖ +
+            (B : ℝ) *
+              ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                ha12 (fld F - fld F')) t‖) +
+            (((C : ℝ) * Sq) * ‖fld F t‖ + ((C : ℝ) * Sq) * ‖fld F' t‖) :=
+        add_le_add_right hthird _
+      _ = (A : ℝ) * R * ‖(fld F - fld F') t‖ +
+            (B : ℝ) *
+              ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                ha12 (fld F - fld F')) t‖ +
+            ((C : ℝ) * Sq) * ‖fld F t‖ +
+            ((C : ℝ) * Sq) * ‖fld F' t‖ := by ac_rfl
+  have hmain := timeL2_norm_le_four
+    (T := T)
+    (X := tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (Y := tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (Z := tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+    (W := tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (V := tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (A := (A : ℝ) * R) (B := (B : ℝ))
+    (C := (C : ℝ) * Sq) (D := (C : ℝ) * Sq)
+    (Ψ₁ - Ψ₂) (fld F - fld F')
+    (timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      ha12 (fld F - fld F'))
+    (fld F) (fld F')
+    (mul_nonneg A.coe_nonneg hR) B.coe_nonneg
+    (mul_nonneg C.coe_nonneg hSq) (mul_nonneg C.coe_nonneg hSq) hbound
+  calc
+    ‖Ψ₁ - Ψ₂‖ ≤
+        (A : ℝ) * R * ‖fld F - fld F'‖ +
+          (B : ℝ) *
+            ‖timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              ha12 (fld F - fld F')‖ +
+          ((C : ℝ) * Sq) * ‖fld F‖ + ((C : ℝ) * Sq) * ‖fld F'‖ := hmain
+    _ ≤ (A : ℝ) * R * ((1 + T) * ‖F - F'‖) +
+          (B : ℝ) * (2 * Real.sqrt T * ‖F - F'‖) +
+          ((C : ℝ) * Sq) * ((1 + T) * ρ) +
+          ((C : ℝ) * Sq) * ((1 + T) * ρ) :=
+      add_le_add
+        (add_le_add
+          (add_le_add
+            (mul_le_mul_of_nonneg_left hfield_dist (mul_nonneg A.coe_nonneg hR))
+            (mul_le_mul_of_nonneg_left hincl_dist B.coe_nonneg))
+          (mul_le_mul_of_nonneg_left (hfield_norm F hFb)
+            (mul_nonneg C.coe_nonneg hSq)))
+        (mul_le_mul_of_nonneg_left (hfield_norm F' hFb')
+          (mul_nonneg C.coe_nonneg hSq))
+    _ = ((A : ℝ) * R * (1 + T) + (B : ℝ) * (2 * Real.sqrt T) +
+          2 * (C : ℝ) * ρ * Real.sqrt (1 + T) * (1 + T)) * ‖F - F'‖ := by
+      rw [hSqdef]; ring
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

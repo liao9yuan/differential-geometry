@@ -262,3 +262,13 @@ whole: ≈ 72% (was ≈ 62%) — the estimate side's `a₂` arm is closed; what 
 of F6 is the rest of E0's assembly, not this chain.  Front 2 (fixed-horizon
 bootstrap): ≈ 53%.  (N) `ricci_flow_unif_existence`: **0%** (stated, unproved).
 Machinery ≈ 92%.  Whole HCG compactness project: low single digits.
+
+## 2026-08-05: canonical `jetAdd` import repair
+
+The explicit low-solve package is the first consumer to import this window lane
+together with the H² low-base lane.  Both lanes carried the same public
+`jetAdd` statement but different proof bodies, so Lean could not merge their
+environments.  The window-local declarations are now `opJetAdd` and
+`opJetSmul`; the canonical global `jetAdd` and `jetSmul` remain the
+already-established H² declarations.  No estimate or hypothesis changed.
+Focused verification and the targeted module refresh passed after both renames.

@@ -336,14 +336,49 @@ its `Ico` sibling by exactly one hypothesis, `hne : (0:ℝ) ≠ T` (discharged b
 Route B (the `H¹` floor via `FieldHa1TimeSupTrace`) is therefore NOT needed and
 stays unused.  `norm_le_of_ae_le` has no consumer yet — B5 is its consumer.
 
-Remaining: B3, B4 (`LowRegApplyTwo.lean`, front-2 shared file — claim after the
-front-2 leaf releases) and B5.  Until those land, `‖staticForce g g 2‖` is still
-in the horizon: B1/B2 are the refactor half and move no mathematics by
-themselves.
+**B3 + B4 + B5 LANDED GREEN 2026-08-04.  OPTION (b) IS COMPLETE.**  Details in
+`LowRegApplyTwo.md` (B3/B4) and `LowRegAllOrderJet.md` (B5).  Summary:
 
-Honest denominators (unchanged by this file — a design note moves no
-mathematics): black box (N) is **stated, proof 0%**.  Front 3
-(`UnifClassBounds` design) ~?%; this recon closes the *design* of front 3's one
-genuinely individual constant, item (C)1, which is roughly one of ~8 front-3
-work items, so front 3 advances by design only, ~0% in proved Lean.  Machinery
-~88%.  Whole HCG compactness: low single digits.
+* `IsRealizedTwo`'s parameter `Kf` became `Rcap` and its last conjunct
+  `√T·‖fHi‖ ≤ Kf` became **`R ≤ Rcap`**; `lowregFloorHorizon`,
+  `lowregFloorHorizon_pos`, `norm_fix_le` and `nonautL2Map_zero` are DELETED
+  (75 lines).  `lowreg_apply_two` takes `hRcap : R ≤ Rcap` where `hTfloor` was.
+* `lowreg_solve_two` caps the realization radius,
+  `P := min (min (min ρ ρN) ((1-c)/(6(L+1)))) Rcap`, and its reported `T₀` drops
+  the floor factor.  **§6's predicted arithmetic composed exactly as written**:
+  every constraint on `P` is an upper bound, each `hP*` gained one `le_trans`,
+  and the cap discharged as `hRP.trans hPcap : lowregStateRad … P ≤ P ≤ Rcap`.
+  The §8 fallback trigger's second limb never fired either — option (a) is dead
+  on both limbs.
+* `lowreg_joint_smooth`'s slot is now `hstate` (the engine's own state ball),
+  fed by `timeH1.norm_le_of_ae_le` + the cap; the `state_le_of_sqrt_floor` shim
+  and the whole `‖u.deriv‖ ≤ 2‖fHi‖` derivation in `lowreg_joint_of_re` are
+  gone.  `lowreg_joint_two` instantiates `Rcap := 1/(2C)` (not `1/(4C)`: the
+  factor 2 was the derivative proxy's cost, and there is no proxy now).
+  `state_le_of_sqrt_floor` stays as public `timeH1` API with no campaign caller.
+
+Grep-proof: `lowregFloorHorizon` has zero `.lean` occurrences repo-wide;
+`staticForce` has zero occurrences in `LowRegApplyTwo.lean` and
+`LowRegAllOrderJet.lean`.  `‖staticForce … 2‖` survives ONLY as the hypothesis
+variable of `norm_liftForceHi_le` (`LowRegLiftNTerm.lean:260`), which now has no
+consumers; and `staticForce … 2` as an OBJECT in `LowRegForceHi.lean:144,215,284`
+inside the frozen split `liftHiN`, where nothing bounds its norm.  So the order-2
+static force appears in **no horizon, radius or existence formula**.
+
+Verification: targeted builds GREEN — `LowRegApplyTwo` [9984/9984],
+`LowRegAllOrderJet` [9985/9985] first try.  Axiom census unchanged:
+`lowreg_joint_smooth`, `lowreg_apply_two`, `lowreg_solve_two` are `sorryAx`-free;
+`lowreg_allOrderJet` / `lowreg_joint_of_re` / `lowreg_joint_two` /
+`lowreg_forceJetMass` carry `sorryAx` only through `lowreg_spatialMass`.
+Campaign sorry census unchanged: `lowreg_spatialMass` + (N) itself.
+
+Honest denominators: option (b) **5/5 bricks, 100%** — but it is a DELETION, so
+its own new-mathematics content is ~0%.  What it buys is real and structural:
+`τ₀` is now closed in `(Ctop, B0, B1, D, ρ, P, C)` with `D` the ORDER-1 force
+number, so front 3's item (C)1 is **dissolved in Lean**, not merely in design —
+τ₀'s class-uniformity now needs only order-1 force data, inside (N)'s `∀ a ≤ 3`
+budget.  One of front 3's ~8 items is therefore closed.  §9's residual is
+untouched: `C` is still `(hs2_opBound_at_two hDim g).choose`, opaque; exposing it
+is front 3's brick G3.  (N) is **stated, proof 0%**
+(`Evolution/ExtendViaUniqueness.lean:80`, `sorry` at `:98`).  Whole HCG
+compactness: low single digits.

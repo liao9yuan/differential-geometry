@@ -159,9 +159,15 @@ of the integrand
 
 `rhsRefoldTop g g T s + rhsSelfTop g T s - deTurckPhiMetTotal g g g`
 
-is controlled by the state's own jets through order `i + 1`, with a constant
-depending only on the background metric and `i` — in particular on neither the
-state nor the path parameter.
+is controlled by the state's own jets through order `i` — the **sharp** window
+`∑_{j < i+1}`, i.e. `lowJetSq g i T` itself — with a constant depending only on
+the background metric and `i`, in particular on neither the state nor the path
+parameter.
+
+The wider `range (i + 2)` form is kept as `topKer_jet` below, for consumers
+written against the C0/C1 towers' shape.  The sharp window is what the
+tower-direct rung-`k` pairing needs: it keeps the coefficient's `L^∞` cost at
+state order `k + 1` rather than `k + 2` (PSTOP §6.4 adapter G / (B-WIN)).
 
 **Why no a-priori ball appears.**  `c2_jet_tower` — the consumer — is stated at
 an *arbitrary* order `a`, so the `H^{a+2}` ball it carries gives no usable
@@ -180,8 +186,8 @@ dominated by `T`'s (`pathPert_rad`); the three summands are then the
 all-order Moser windows `moserWin_lieRef2`, `moserWin_phiDev` and
 `moserWin_ricciTop` of `LowRegOpJetWindows.lean`, combined by `moserWin_add`
 and `moserWin_smul`.  Every window has derivative offset `w = 0`, i.e. order
-`i` on the left costs order `i` of `T`, so the `range (i + 2)` budget here has
-a full order of slack.
+`i` on the left costs order `i` of `T`; that is precisely the sharp window
+stated here, with no order of slack left in it.
 
 The two scalars cost nothing: `|-2s| ≤ 2` and `s ≤ 1` on `[0,1]`, absorbed by
 `moserWin_mono`, which is why no constant below mentions `s`.
@@ -193,7 +199,7 @@ deliberately *not* used: it gates on `2 * finrank ℝ E + 10 ≤ a` (dimension
 three: `a ≥ 16`), which would undo `a2_ladder`'s `3 ≤ a` bottom, and its data
 hypothesis is a pointwise jet window rather than an `L^∞` bound.  The Moser
 route reaches the same conclusion ball-free and gate-free. -/
-theorem topKer_jet
+theorem topKerJetSharp
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ Kk : ℕ → ℝ, (∀ i, 0 ≤ Kk i) ∧
@@ -212,7 +218,7 @@ theorem topKer_jet
             (rhsRefoldTop (I := I) (M := M) g g T hδg hδZ s +
               LowBaseInternal.rhsSelfTop (I := I) (M := M) g T hδg hδZ s -
               deTurckPhiMetTotal (I := I) (M := M) g g g) ≤
-          Kk i * (1 + ∑ j ∈ Finset.range (i + 2),
+          Kk i * (1 + ∑ j ∈ Finset.range (i + 1),
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
   classical
   have h30 : (0 : ℝ) ≤ 1 / 3 := by norm_num
@@ -260,24 +266,53 @@ theorem topKer_jet
   refine (hfin.2.2 i).trans ?_
   have hjetT : (0 : ℝ) ≤ lowJetSq (I := I) (M := M) g i T :=
     jetNn (I := I) (M := M) (m := i) g T
+  have hwin : lowJetSq (I := I) (M := M) g i T =
+      ∑ j ∈ Finset.range (i + 1), ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 := rfl
+  rw [← hwin]
+  exact mul_le_mul_of_nonneg_right (le_abs_self _) (by linarith only [hjetT])
+
+set_option linter.unusedVariables false in
+/-- **The `range (i + 2)` compatibility form of `topKerJetSharp`.**
+
+Byte-identical to the statement this file carried before the window
+sharpening, so that every consumer written against the wider window keeps
+working unchanged.  The mathematical content is `topKerJetSharp`; this is its
+one-step weakening by `Finset.sum_le_sum_of_subset_of_nonneg`. -/
+theorem topKer_jet
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Kk : ℕ → ℝ, (∀ i, 0 ≤ Kk i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        lowJetSq (I := I) (M := M) g i
+            (rhsRefoldTop (I := I) (M := M) g g T hδg hδZ s +
+              LowBaseInternal.rhsSelfTop (I := I) (M := M) g T hδg hδZ s -
+              deTurckPhiMetTotal (I := I) (M := M) g g g) ≤
+          Kk i * (1 + ∑ j ∈ Finset.range (i + 2),
+            ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+  obtain ⟨Kk, hKk_nn, hker⟩ := topKerJetSharp (I := I) (M := M) hDim g
+  refine ⟨Kk, hKk_nn, ?_⟩
+  intro T hT δ hδ0 hδ_le hδg hδZ i s hs
+  refine (hker T hT hδ0 hδ_le hδg hδZ i s hs).trans ?_
   have hsub : Finset.range (i + 1) ⊆ Finset.range (i + 2) := by
     intro x hx
     rw [Finset.mem_range] at hx ⊢
     omega
-  have hmono : lowJetSq (I := I) (M := M) g i T ≤
-      ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 := by
-    unfold lowJetSq
-    exact Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => sq_nonneg _)
-  calc
-    2 * (2 * (AL i + AP i) + 4 * AR i) *
-        (1 + lowJetSq (I := I) (M := M) g i T) ≤
-        |2 * (2 * (AL i + AP i) + 4 * AR i)| *
-          (1 + lowJetSq (I := I) (M := M) g i T) :=
-      mul_le_mul_of_nonneg_right (le_abs_self _) (by linarith only [hjetT])
-    _ ≤ |2 * (2 * (AL i + AP i) + 4 * AR i)| *
-        (1 + ∑ j ∈ Finset.range (i + 2),
-          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
-      mul_le_mul_of_nonneg_left (by linarith only [hmono]) (abs_nonneg _)
+  have hmono : ∑ j ∈ Finset.range (i + 1),
+      ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤
+      ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 :=
+    Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => sq_nonneg _)
+  exact mul_le_mul_of_nonneg_left (by linarith only [hmono]) (hKk_nn i)
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

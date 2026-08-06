@@ -309,6 +309,14 @@ noncomputable def rmOneOpC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   curvConnC Λ Kb₀ + (Real.sqrt Λ) ^ 5 * palatiniOneC Λ +
     (Real.sqrt Λ) ^ 5 * Kb₁
 
+/-- The full first-curvature operator coefficient is nonnegative when its
+comparability and fixed-background inputs are nonnegative. -/
+theorem rmOneOpC_nonneg {Λ Kb₀ Kb₁ : ℝ}
+    (hΛ : 0 ≤ Λ) (hKb₀ : 0 ≤ Kb₀) (hKb₁ : 0 ≤ Kb₁) :
+    0 ≤ rmOneOpC Λ Kb₀ Kb₁ := by
+  unfold rmOneOpC curvConnC palatiniOneC riemannDiffC
+  positivity
+
 /-- Explicit section-norm coefficient for the full first curvature jet. -/
 noncomputable def rmOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) * rmOneOpC Λ Kb₀ Kb₁
@@ -673,7 +681,12 @@ private theorem jet1_norm_le
       rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hK]
 
 set_option linter.unusedSectionVars false in
-private theorem unifRmOpOne_of
+/-- The first covariant Riemann-operator jet with both fixed-background caps supplied.
+
+This operator-norm face is the reusable input for rank-fixed curvature-action estimates;
+its constant depends only on `Λ` and the two supplied background caps, while the variable
+metric enters only through comparability and metric jets through order three. -/
+theorem unifRmOpOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
     {Kb₀ Kb₁ : ℝ} (hKb₀0 : 0 ≤ Kb₀)

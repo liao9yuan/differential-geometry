@@ -709,3 +709,167 @@ Focused checks GREEN for `LowRegLiftSmall`, `LowRegApplyTwo`, `LowRegAllOrderJet
 targeted builds of all three GREEN ("Build completed successfully").  No new
 `sorry`/`admit`/`axiom`, no heartbeat option.  Sorry census over the three files:
 exactly one, the frontier `lowreg_forceJetMass`.
+
+## 2026-08-04, option-(b) bricks B3 + B4 — the floor is DELETED, GREEN
+
+Ruling No. 106 / `OPTIONB_FLOOR_PLAN.md` §6.  Brick 9 above (the forcing floor)
+is **reverted by design**: the smallness it bought is relocated from the horizon
+to the radius, and with it `‖staticForce g g 2‖` leaves this file entirely.
+
+### What changed
+
+* `IsRealizedTwo`'s parameter `Kf` is renamed `Rcap` and its last conjunct
+  `Real.sqrt T * ‖fHi‖ ≤ Kf` is replaced by **`R ≤ Rcap`**.  Nothing else in the
+  40-field existential moved; the a.e. state ball `∀ᵐ t, ‖u.lo.toFun t‖ ≤ R`
+  immediately before it is untouched, and the pair of them is now the package's
+  whole smallness content.
+* Deleted outright: `lowregFloorHorizon`, `lowregFloorHorizon_pos`, and the two
+  privates that existed only to feed them — `nonautL2Map_zero` and the Neumann
+  bound `norm_fix_le` (75 lines).  `norm_liftForceHi_le`
+  (`LowRegLiftNTerm.lean:259`) loses its only consumer and stays as unused API;
+  it is now the ONLY place in the tree where `‖staticForce … 2‖` is even named,
+  and it is named as a hypothesis variable, not inside a formula.
+* `lowreg_apply_two`: `hTfloor` → `hRcap : R ≤ Rcap` (same slot position), the
+  `hfloorHi` block deleted, `hRcap` forwarded verbatim into the existential.
+* `lowreg_solve_two`: `{Kf} (hKf : 0 < Kf)` → `{Rcap} (hRcap : 0 < Rcap)`; the
+  reported `T₀` loses its third `min` factor and is back to
+  `min (lowregHorizon Ctop B0 B1 D ρout P) (lowregLiftHorizon' c Z)`.
+
+### The `P`-cap arithmetic (the one identified failure mode — it composed)
+
+```lean
+set P : ℝ := min (min (min ρ ρN) ((1 - c) / (6 * (L + 1)))) Rcap
+```
+
+Every pre-existing constraint on `P` is an UPPER bound, so a fourth `min`
+component costs nothing: each `hP*` fact gains one `le_trans` through the new
+`hPle0 : P ≤ min (min ρ ρN) ((1-c)/(6(L+1)))`, and `hPpos` gains one `lt_min`
+against `hRcap`.  The cap discharges as a two-step chain
+
+```lean
+hRP.trans hPcap : lowregStateRad Ctop B1 ρout P ≤ P ≤ Rcap
+```
+
+with `hRP := lowregStateRad_le_P hPpos.le` (already in scope) and
+`hPcap := min_le_right _ _`.  No inequality had to be re-derived, no positivity
+argument changed shape, and the `hmargin` chain (`‖f‖ ≤ P/4`, `P·6(L+1) ≤ 1-c`)
+is untouched because it reads `P` only through `hPc`.  **The `(a)`-fallback
+trigger's surviving limb never fired.**
+
+### Cost
+
+`τ₀` shrinks: `lowregHorizon`'s `(R/4/(2(D+1)))²` factor now sees the smaller
+`R ≤ Rcap`.  It stays positive (`lowregHorizon_pos`, unchanged hypotheses) and
+the horizon is monotone in the radius.  `D` is the ORDER-1 force number, already
+class-bounded — so the horizon's individual-metric content strictly decreased.
+
+### Lean notes
+
+* `set x := e with h` keeps `x` defeq to `e`, so a three-deep `min` still takes
+  `min_le_left`/`min_le_right` directly at each level; only the composition
+  needed spelling out.
+* Deleting a private theorem that a docstring still cites is a silent
+  documentation rot — grep the prose for the name too, not just the code
+  (`norm_fix_le` was cited in two docstrings, `hTfloor` in one).
+
+### Verification
+
+Targeted build of `LowRegApplyTwo` GREEN, [9984/9984], zero errors.  Zero
+textual `sorry` in the file.  `#print axioms`: `lowreg_apply_two` and
+`lowreg_solve_two` are both `[propext, Classical.choice, Quot.sound]` —
+`sorryAx`-free, unchanged from before the edit.
+
+Tooling: the run needed several restarts because the guarded build kept killing
+lean on a single `FreePhysicalMemory < 0.4 GB` sample.  That threshold is BELOW
+this machine's normal working point for the heavy modules
+(`DeTurckRemainderLowBaseLip` completes in 239 s while sitting at 0.30 GB free);
+`FreeVirtualMemory` — the real OOM predictor — never went below 5.2 GB in any
+run.  Debouncing the physical limb and keeping the commit limb hard is what let
+the build finish.
+
+## 2026-08-04, brick S0-bis — `lowreg_solve_two` exports its order-one partner
+
+The conclusion changed from `∃ f, IsRealizedTwo … f Rcap` to
+
+```
+∃ (f : timeL2 (tensorHs g 0 2 (1:ℝ)) T)
+  (fLo : timeL2 (tensorHs g 0 2 ((1:ℕ):ℝ)) T),
+  IsRealizedTwo … f Rcap ∧
+  (∀ᵐ t ∂timeMeasure T, f t = tensorHsCongr g 0 2 (‹((1:ℕ):ℝ) = (1:ℝ)›) (fLo t)) ∧
+  IsLowSolve g hT hT1 fLo
+```
+
+Both new components cost **nothing**: `fLo` is the `gforce` that
+`lowreg_partial_sol_of_bounds` already produces at `:711`, the transport is the
+`hfae` that was already proved at `:725` (`f` is defined as
+`(tensorHsCongrL …).compLpL … gforce`), and `IsLowSolve` is
+`isLowSolve_of_sol` applied to the same arguments and the same two results
+(`hgf`, `hforce`).  The theorem stays axiom-clean.
+
+Proof-shape note: the old `refine ⟨f, ?_⟩` right after `set f := …` had to move
+to the end, because `hfae` is proved *after* it.  The tail is now
+`refine ⟨f, gforce, lowreg_apply_two …, hfae, ?_⟩` followed by the
+`isLowSolve_of_sol` application — the intermediate `have`s elaborate unchanged
+since none of them depends on the goal.
+
+Why: everything above this file that wants an *energy* estimate on the
+trajectory has to work at the scale where the contraction lives.  The `H²` lift
+forgets the fixed-point equation and the nonlinearity's constants.  See
+`ShortTime/LowRegAllOrderJet.md` (2026-08-04); `lowreg_joint_two`'s statement was
+NOT changed, so this widening is invisible above the chain.
+
+## J0a (2026-08-04): the fibre threshold is a parameter of `lowreg_solve_two`
+
+**Status: DONE, sorry-free.**  `lowreg_solve_two` gained
+`{thr : ℝ} (hthr : 0 < thr) (hthr3 : thr ≤ 1/3)`.  The three `have`s that used to
+pin the threshold at `deTurckArmContractionThreshold'' (finrank ℝ E)` are now
+`hδ0 := hthr.le`, `hδ_le := hthr3`, `hδ := lt_of_le_of_lt hthr3 (by norm_num)`,
+and `realize_at_thr` is replaced by `realize_at_delta … hthr`.  The CONCLUSION is
+unchanged — `δ` stays existentially bound, and is now instantiated to `thr`.
+
+Name note: `thr`, not `δ★`/`δ*` — ASCII, no shadowing of the existential `δ` in
+the conclusion.
+
+Why this was the only real pin.  Everything else in the chain was already
+`δ`-generic and needed no edit: `refold_aff`, `radialA2_lip`, `lowA2_small`,
+`lowRegN_outer`, `lowreg_bounds_exist` all bind `{δ}` with `0 ≤ δ ≤ 1/3` (or
+`δ < 1`).  The single hard-coded witness lived in `realize_at_thr`'s `(θ/C, θ)`.
+Confirmed by grep before editing, and confirmed by the check afterwards: three
+type ascriptions (`hrealcap`, `hrealL`, `hreal'`) were the entire body churn.
+
+One call site (`LowRegAllOrderJet.lean`, `lowreg_joint_solve`-side), which supplies
+`thr := deTurckArmContractionThreshold'' (finrank ℝ E)` and keeps behaviour
+identical.  When J0b lands, that call site is where `δ★` gets chosen from `κ`
+instead — no producer change will be needed.
+
+`isLowSolve_of_sol` call updated: one fewer metric argument, three more
+certificates (`hδ0`, `hδ_le`, `hcoreN`).  `hcoreN` — already in context from
+`lowRegN_outer` — closes the `hcore` slot by DEFINITIONAL PROOF IRRELEVANCE
+(`realizeOfLE g le_rfl hrealR` vs `hrealR`); a bare `exact` suffices.
+Verification: focused check green.
+
+## 2026-08-05 — exact-witness producer
+
+The heavy solve proof now lives in `lowreg_solve_two_at`.  Unlike the former
+existential result, it exposes the supplied threshold `thr` literally and
+returns the exact `Ctop,B0,B1,D,ρout,P` used to construct an `IsLowSolveAt`,
+including `lowregStateRad ... ≤ Rcap`.  The old `lowreg_solve_two` statement is
+preserved as a thin projection through `IsLowSolveAt.toIsLowSolve`.
+
+Focused verification passed without warnings.  The targeted module refresh
+also passed; it was long because the exported declaration sits above the full
+short-time dependency cone.  No analytic estimate changed.  The endpoint
+theorems remain 0%; this is witness-retention machinery for GAP-ADAPTH.
+
+## 2026-08-05 - strict contraction package
+
+`lowreg_solve_open` is now the proof-bearing producer.  It uses the
+radius-flexible second-order estimate and returns the actual coefficient floor
+`B2` together with `0 <= B2` and the non-vacuity certificate `B2 < 1`.
+Therefore every requested contraction level in `[B2,1)` has a positive solve
+horizon.  The older `lowreg_solve_two_at` remains as a compatibility projection
+that forgets only the strict inequality.
+
+Focused verification and the direct module refresh passed warning-free.  This
+closes the per-metric contraction-admissibility gap; it does not yet provide one
+coefficient floor or one horizon uniformly over a metric class.

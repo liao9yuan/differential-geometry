@@ -199,6 +199,26 @@ lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
   positivity
 
 omit [CompleteSpace E] in
+/-- **Finite-set Bessel truncation in `Hˢ`.**  Every FINITE partial sum of the
+weighted squared spectral coordinates of `T ∈ Hˢ` is bounded by `‖T‖²`:
+`∑_{i ∈ S} (1 + λᵢ)^σ · (coeff i T)² ≤ ‖T‖²`.
+
+The `Finset` form of `weight_mul_coeff_sq_le_normSq`.  It is the step that lets a
+spectrally truncated (Galerkin) energy estimate read an `Hˢ` bound on a function
+that is NOT in the truncation subspace: the projected pairing term is a finite
+sum over `S`, while the jet ladder bounding it speaks about the full `Hˢ` norm. -/
+lemma weight_sum_le_normSq {σ : ℝ}
+    (T : tensorHs (I := I) (M := M) g r s σ)
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) :
+    ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (T.coeff i) ^ 2 ≤
+      ‖T‖ ^ 2 := by
+  rw [norm_sq_eq_tsum (I := I) (M := M) T]
+  refine Summable.sum_le_tsum S (fun i _ => ?_) T.weighted_summable
+  have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ :=
+    tensorSobolevWeight_nonneg (I := I) (M := M) i σ
+  positivity
+
+omit [CompleteSpace E] in
 /-- **Per-mode coordinate continuity from `Hˢ` convergence to zero.** If the
 `Hˢ` norms of `d n` tend to `0`, then each fixed coordinate `(d n).coeff i`
 tends to `0`. -/

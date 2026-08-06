@@ -401,3 +401,191 @@ those is a statement-level problem, not a tactic problem.
   assembly is packaging" — true for the `Atop` heads, false for the budget: the
   quadratic-in-`∇P` summands are a separate, statement-level obstruction that no
   regrouping removes.
+
+## 9. STATUS 2026-08-03 — A1-CUR-1 partially executed; §7 steps 1–2 done, 3–5 open
+
+Executed against §7.  **`low1Ker_jet` is still `sorry`.**
+
+### Done and verified sorry-free
+
+* §7 step 1 — public re-derivation of `ricci1_split` and promotion of
+  `kernelField_eq_neg_arm_combination`.  **Correction to §4/§7:** the plan named
+  the `LieFieldJetL2Summed.lean:136` copy, but that module is **not** in
+  `LowRegC01JetTower`'s import chain while
+  `RicciConnDiffOrder1TameEnvelope.lean:738` **is**.  The envelope copy was
+  promoted (with `slotPermCc` and the seven `kOutPerm*`/`kInPerm*`); the
+  `LieFieldJetL2Summed` copy was left untouched; no duplicate, no new import.
+  The `rsDomDomCongrSection` form is `ricci1Split`, obtained via a public
+  re-derivation `permAppEqRs` of the read-only-file `private` `permApp_eq_rs`.
+  Home: new `Analysis/Sobolev/TensorHilbert/RicciOrder1RadiusFree.lean`.
+* §7 step 2 — `ricciKerAtgw` (the plan's `rfns_iCG_ricciOrder1Kernel_atgw_rf`),
+  via `insertAtgw`.  Lands at **`atgw(l + 2)`**, i.e. the plan's stop-signal
+  (ii) did NOT fire.
+* `rfns_iCG_connDiffSection_atgw_rf` promoted `private` → public
+  (`DeTurckVFJetRadiusFree.lean`); §7 step 2 needs it and a new file cannot see
+  a `private`.
+* **NEW, not in §7 — the generic composer.**  §7 steps 3 and 4 were each
+  budgeted at a ~225-line re-instantiation of
+  `wOmega_lowOrder_jetL2_radiusFree`.  Inspection showed that proof is entirely
+  generic in its two arms, so it was extracted once as
+  `Analysis/Sobolev/TensorHilbert/AtgwArmFold.lean`: `atgwFold` (pointwise
+  two-arm Leibniz fold, generic left rank / valences / offsets) and `atgwToJet`
+  (the integration step).  This also serves A1-CUR-2's five C0 summands and
+  supersedes the eight duplicated `b4_*_atgw` folds of
+  `LieCorr0CoeffDiffRadiusFree`.  Steps 3 and 4 are now ~60 lines each.
+
+### Open — the exact remaining frontier
+
+1. `ricciCometricFourTraceCastG0` `atgw` at offset `+1`: a valence-`(4,2)` clone
+   of `rfns_iCG_cometricCastG0_atgw_rf` (`DeTurckVFJetRadiusFree.lean:824`,
+   ~134 lines).  Inputs already radius-free:
+   `rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le`
+   and `exists_bound_riemannianFiberNormSq_smoothCcTensor` on
+   `cometricDoubleTraceField g₀ 2`; structure from
+   `ricciCometricFourTraceCastG0_eq_reindex_combination` +
+   `ricciArmPrincipalCoeffPure_eq_doubleTrace_add_appCcRS`.
+2. §7 step 3 = `atgwFold (u := 0) (v := 1)` of 1 against `ricciKerAtgw`, then
+   `atgwToJet (w := 2)`.
+3. §7 step 4 = the same for the three `lieArm1Piece`s.  **At the tower's call
+   site `g_bg = g₀`**, so `lieArm1ConnDiffBgCc g₀ g₁ g₀ = connDiffSection g₁ g₀`
+   is already covered by the promoted lemma; only `lieArm1PsiB`
+   (`connDiffLoweredCc` against `sharpFlatEndoCc`) and
+   `deTurckLieTraceCoeff` (at `+1`) are new.
+4. §7 step 5 = assembly.  `IsPathPert` (`LowRegOpJetWindows.lean:547`) is the
+   exact bridge to the engines (it carries `htie`, `Λ₀ = finrank·δ₀`, and
+   `lowJetSq g n P ≤ lowJetSq g n T`); `pathPert_rad` produces it for the radial
+   path; `moserWin_sharp` (`:684`) is the `choose`-over-`a` template that
+   removes the `i ≤ a + 1` gate.
+
+### Correction to §8 denominators
+
+`low1Ker_jet` still **0%**; its dedicated machinery ≈ 70% → ≈ **85%**.
+A1-CUR overall ≈ 10% → ≈ **30%**.  F6 ≈ **62%**.  `selfLow_jet` unchanged at
+0%, but its statement is now honest (ball threaded, gate `1 ≤ a`, option (a) as
+ratified).
+
+### Trap found while executing
+
+`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le` is **left-rank-0 only**.
+Both the Ricci outer arm (rank 4) and the Lie outer arm (rank 3) need
+`…_rankLeft_le` (`MetricArmCoeffJetTower.lean:2361`).  `atgwFold` was
+generalised accordingly.
+
+## 10. STATUS 2026-08-04 — A1-CUR-1 **CLOSED**; only A1-CUR-2 remains
+
+`low1Ker_jet` is proved sorry-free; `c1_jet_tower` is now unconditional
+(`[propext, Classical.choice, Quot.sound]`).  §7's five steps are all done.
+No statement anywhere was changed.
+
+### How the four open items of §9 actually closed
+
+1. *(§9 item 1, budgeted ~134 lines)* — **not needed as planned.**  The existing
+   `rfns_iteratedCovGrad_ricciCometricFourTraceCastG0_diagonalProductGrid_le`
+   (`RicciConnDiffOrder0KernelJetGrid.lean:1037`) already *is* the `+1` window:
+   its RHS `C n * ∑_{k<n+1} atg b k` is `C n * atgw b (n+1)` by `rfl`.
+   `fourTrAtgw` is 12 lines.  A `pureAtgw` (window of
+   `ricciArmPrincipalCoeffPure`, ~65 lines via `atgwFold`) *was* written, but for
+   the **Lie** outer factor, not the Ricci one — see item 3.
+2. *(§9 item 2)* `ricci1Atgw` = `atgwFold (u := 0) (v := 1)` of `fourTrAtgw`
+   against `ricciKerAtgw`, ~30 lines as predicted.
+3. *(§9 item 3)* **`deTurckLieTraceCoeff g₀ g₁ σ = reindexCoeffGen (ricciArmPrincipalCoeffPure g₀ g₁) σ`**
+   (`dltcEqPure`) — both are the moving cometric double trace read through a
+   fixed source-slot permutation.  So the Lie outer factor's `+1` window is
+   `pureAtgw` composed with `rfns_iteratedCovGrad_reindexCoeffGen_eq`.  This is
+   the structural fact §7 did not anticipate; it is why the Ricci and Lie arms
+   cost one window between them rather than two.
+   `lieArm1PsiB` was closed **without** promoting anything out of
+   `DeTurckLieArm1CoeffL2JetBound.lean`: it is
+   `appCcRS (raised κ) (sharpFlatEndoCc)` with
+   `κ = -metricConnDiffLoweredCc` (public `metricConnDiffLoweredCc_eq_neg_kappa`),
+   whose `+2` window already existed as the `private` `b4_mcd_atgw` in
+   `LieCorr0CoeffDiffRadiusFree.lean`.  Promoting that one lemma was the **only**
+   edit outside the new module.  `sharpFlatEndoCc`'s `+1` window is the public
+   `exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid`.
+4. *(§9 item 4)* Assembly used `pathPert_rad` + `atgwToJet (w := 2)` exactly as
+   §9 predicted.  `moserWin_sharp` was **not** needed — the radius-free windows
+   carry no order gate, so there is nothing to `choose` over.  The `le_abs_self`
+   trick was also unnecessary: `Kk i = ∑_{q<i+1} Kw q · (∑_{k<q+2} Kint k)` is
+   manifestly nonnegative.
+
+Home: new `Analysis/Sobolev/TensorHilbert/Low1KerRadiusFree.lean` (12 public
+declarations, all axiom-clean; see `Low1KerRadiusFree.md` for the map and the
+traps).
+
+### Denominators after this session
+
+* `low1Ker_jet` / A1-CUR-1: **100%** (stated and proved).
+* `c1_jet_tower`: **100%** — unconditional, `sorryAx`-free.
+* `selfLow_jet` / A1-CUR-2: **0%**, unchanged.  Its dedicated machinery ≈ 35% →
+  ≈ **45%**: `atgwFold`/`atgwToJet`/`pureAtgw`/`sfEndoAtgw`/`pieceAtgw`/
+  `b4_mcd_atgw` are directly reusable for the three *linear* summands of
+  `selfLow_split`, but the `Λ₁`-capped (`∇P`-capped) currency the two
+  **quadratic** summands need (the `A·A` arm inside `ricciGoodLow`, and `lc0VB`)
+  still does not exist anywhere in the tree.  That, not packaging, is the
+  remaining brick.
+* `c0_jet_tower`: ≈ **20%**, unchanged (derivation proved, integrand 0%).
+* A1-CUR overall ≈ 30% → ≈ **45%**.
+* F6 ≈ 62% → ≈ **66%**.
+
+## 11. STATUS 2026-08-04 (session 2 of A1-CUR-2 prep) — the `Λ₁`-capped currency EXISTS
+
+Recommendation **(a)** of §7 was executed.  The `∇P`-capped currency is built,
+verified and smoke-tested; `selfLow_jet` itself is still `sorry`.
+
+Key correction to §7's cost model: the capped layer is NOT a "capped sibling of
+the `b4_*_atgw` folds".  A pointwise/combinatorial repair is impossible (the
+over-budget term `∫|∇^αP|²|∇^βP|²` with `α ≈ β ≈ n/2` has neither factor
+capped).  The capped currency is the SAME radius-free currency run on the base
+tensor `∇P` at valence `(0,3)`, with `Λ₁ = ‖∇P‖_∞` where `Λ₀ = ‖P‖_∞` sits at
+`(0,2)`.  That required generalizing `grid_prod_int_le` /
+`antidiagonalTupleGrid_integral_radiusFree` / `gridBase`/`atgwFold`/`atgwToJet`
+in base valence — done in place, with the old `(0,2)` statements kept as
+one-line instances so no call site changed (one lives in a READ-ONLY file).
+
+Landed, all axiom-clean:
+
+* `GradCapAtgw.lean` — `gradCapOfJets`/`gradCapOfBall` (the `Λ₁` producer at
+  gate `1 ≤ a`; §5.4's "bespoke `‖∇P‖_∞` producer at `a ≥ 1`" — the `a ≥ 16`
+  producers were NOT inherited), `atgwShift` (the base shift), `armShift`,
+  `atgwCapToJet`, `atgwCapArm`, `atgwCapFold`.
+* `Lc0VBCapWindow.lean` — `lc0VB` on `range (i+2)`.  One promotion
+  (`b4_wOmega_atgw`).
+
+### Denominators after this session
+
+* `selfLow_jet` / A1-CUR-2: **0%**, unchanged.  Machinery ≈ 45% → ≈ **70%**.
+* `c0_jet_tower`: ≈ **20%**, unchanged.  A1-CUR overall ≈ **60%**.  F6 ≈ **70%**.
+
+### Remaining frontier (the ONE blocker for the assembly)
+
+`ricciAAArm` is not reachable by shifting its folded window: `ricciAAKer` is a
+single arm that is itself quadratic, and the shift is sharp only when every grid
+entry of the bound carries a factor.  Session 2 needs a public two-arm split of
+`ricciAAKer` (`aaKer_eq` + the six `aa*`, all `private` in the READ-ONLY
+`DeTurckRemainderLowBaseAction.lean:4400`) and `armShift` on each nest.
+
+---
+
+## 2026-08-04 — A1-CUR CLOSED (session 3)
+
+The frontier recorded above (the `ricciAAKer` two-arm split) was resolved in
+session 2 by public re-derivation (`aaKerSplit`), and the two per-arm windows
+it left, `ricciDACap` and `lieCovCap`, were proved in session 3.
+
+**A1-CUR: 100%.**  `selfLow_jet` and `c0_jet_tower` are unconditional and
+axiom-clean; `c1_jet_tower` was already.  Both towers of the F6 estimate chain
+now stand on no `sorry`, so **the F6 estimate chain is closed**.
+
+* Code: new `Analysis/Spectral/Intrinsic/DeTurck/SelfLowArmCaps.lean` (both
+  windows, sorry-free); `GradCapArms.lean` gained `capOfP`, `capOfDP`,
+  `capDdc0`; `LowRegC01JetTower.lean` lost both private stubs and is
+  sorry-free.
+* Route, traps and the corrected wall census: `SelfLowArmCaps.md` and
+  `LowRegC01JetTower.md` (session N+4 entry).
+* Executor report and honest denominators: `UNIF_EXISTENCE_PLAN4.md`
+  (PLAN3 hit the 3000-line limit).
+
+Next in F6: **A1c `a1_ladder`** then **A1d `n_diff_hm_rung`**, routine assembly
+over the two towers, both unwritten (0%).  `a1_ladder`'s binder shape, adapted
+from `a2_ladder` (`DeTurck/LowRegLadderRung.lean:232`), is spelled out at the
+end of `UNIF_EXISTENCE_PLAN4.md`.

@@ -42,3 +42,23 @@ These APIs and their dedicated machinery are 100% complete.  The downstream
 the separate `scalar_gal_limit` strong-solution identification theorem.  The
 Perelman noncollapsing endpoint theorem remains theorem-level 0% and is not
 claimed by this API addition.
+
+## M1 (2026-08-04): `weight_sum_le_normSq` — Finset Bessel truncation
+
+Added beside `weight_mul_coeff_sq_le_normSq`, whose single-mode statement it
+generalizes to any finite index set:
+`∑_{i∈S} (1+λᵢ)^σ (T.coeff i)² ≤ ‖T‖²`.
+
+Why here: this is the step a spectrally truncated (Galerkin) energy estimate needs
+in order to read a FULL-`Hˢ` bound on a function that is not in the truncation
+subspace — the projected pairing term is a finite sum over `S`, while the DeTurck
+jet ladder that bounds it speaks about `‖·‖_{Hˢ}`.  It is prerequisite (M1) of the
+rung-3 tower-direct closure (see `ShortTime/LowRegAllOrderJet.md` and
+`ShortTime/UNIF_EXISTENCE_PLAN5.md` No. 146-executor).
+
+Lean lesson: the Mathlib name is `Summable.sum_le_tsum`, NOT `Finset.sum_le_tsum`
+(which does not exist outside the `ENNReal` namespace).  Its argument order is
+`(s : Finset ι) (hs : ∀ i ∉ s, 0 ≤ f i) (hf : Summable f)` — Finset FIRST,
+Summable LAST — which is the opposite of the neighbouring `Summable.le_tsum`
+(Summable first).  First attempt used the wrong name; focused check green after
+the one-token fix.

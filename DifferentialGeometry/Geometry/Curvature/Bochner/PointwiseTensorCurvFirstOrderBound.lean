@@ -14,6 +14,8 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutio
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.NablaTensorCurvSecIdentification
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvatureUnitEvalBridge
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.UniformDiffCurvatureNormBound
 
 /-!
@@ -906,6 +908,158 @@ private lemma riemannianFiberNormSq_eq_embedRS_unitEval
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T)
       (unitZeroSec (I := I) (M := M) x)) e K₀ J]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+/-- Non-negativity of the metric quadratic form `g.inner x v v`. -/
+private lemma metric_inner_self_nonneg' (g : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) : 0 ≤ g.inner x v v := by
+  rcases eq_or_ne v 0 with hv0 | hv0
+  · rw [hv0]
+    simp
+  · exact (g.pos x v hv0).le
+
+/-- A supplied tangent curvature-operator cap induces the corresponding rank-`s` covariant-tensor
+curvature cap, with the structural slot factor `s²`. -/
+private theorem tensorCurv_le_of
+    (g : SmoothRiemannianMetric I M) (s : ℕ) {C0 : ℝ}
+    (hR0 : ∀ (x : M) (v w u : TangentSpace I x),
+      g.inner x (riemannOp (LeviCivita (I := I) g) x v w u)
+          (riemannOp (LeviCivita (I := I) g) x v w u) ≤
+        C0 ^ 2 * g.inner x v v * g.inner x w w * g.inner x u u)
+    (x : M) (v w : TangentSpace I x) (T : TensorRSSpace 0 s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (riemannOp (tensorCov (I := I) g 0 s) x v w T) ≤
+      ((s : ℝ) ^ 2 * C0 ^ 2) * g.inner x v v * g.inner x w w *
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x T := by
+  classical
+  set T₀ : Tensor0SSpace s I x :=
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T)
+      (unitZeroSec (I := I) (M := M) x) with hT₀
+  have hTlift : unitScalarRSLift (I := I) (M := M) x T₀ = T := by
+    apply tensorRSSpace_ext (𝕜 := ℝ) 0 s x
+    intro D
+    rw [unitScalarRSLift_apply]
+    conv_rhs => rw [zeroTensor_eq_smul_unit (I := I) (M := M) x D]
+    rw [ContinuousLinearMap.map_smul]
+
+  set W : TangentSpace I x →L[ℝ] TangentSpace I x :=
+    riemannOp (LeviCivita (I := I) g) x v w with hW
+  have hslot :
+      riemannOp
+          (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          x v w T₀ =
+        - ∑ k : Fin s,
+          tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k W) T₀ := by
+    letI : TopologicalSpace (TotalSpace (Tensor0SModel s ℝ E)
+        (fun y : M => Tensor0SSpace s I y)) := tensor0SBundle_topology s
+    letI : FiberBundle (Tensor0SModel s ℝ E) (fun y : M => Tensor0SSpace s I y) :=
+      tensor0SBundle_fiber s
+    letI : VectorBundle ℝ (Tensor0SModel s ℝ E) (fun y : M => Tensor0SSpace s I y) :=
+      tensor0SBundle_vector s
+    letI : ContMDiffVectorBundle (∞ : WithTop ℕ∞) (Tensor0SModel s ℝ E)
+        (fun y : M => Tensor0SSpace s I y) I := tensor0SBundle_smooth ∞ s
+    set X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+      ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
+        (smoothExtensionTangent_contMDiff (I := I) x v) with hX
+    set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+      ContMDiffSection.mk (smoothExtensionTangent (I := I) x w)
+        (smoothExtensionTangent_contMDiff (I := I) x w) with hY
+    have hXx : X x = v := smoothExtensionTangent_eq (I := I) x v
+    have hYx : Y x = w := smoothExtensionTangent_eq (I := I) x w
+    let A : Π b : M, Tensor0SSpace s I b :=
+      smoothExtensionFiber (I := I) (F := Tensor0SModel s ℝ E)
+        (V := fun b : M => Tensor0SSpace s I b) x T₀
+    have hAx : A x = T₀ :=
+      smoothExtensionFiber_eq (I := I) (F := Tensor0SModel s ℝ E)
+        (V := fun b : M => Tensor0SSpace s I b) x T₀
+    have hA_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
+        (fun b => TotalSpace.mk' (Tensor0SModel s ℝ E)
+          (E := fun z : M => Tensor0SSpace s I z) b (A b)) :=
+      smoothExtensionFiber_contMDiff (I := I) (F := Tensor0SModel s ℝ E)
+        (V := fun b : M => Tensor0SSpace s I b) x T₀
+    have hop :
+        riemannOp
+            (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            x v w T₀ =
+          riemannSec
+            (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            (fun y => X y) (fun y => Y y) A x := by
+      rw [← hXx, ← hYx, ← hAx]
+      exact riemannOp_apply_smooth
+        (cov := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        X.contMDiff Y.contMDiff hA_smooth
+    rw [hop]
+    apply Tensor0SSpace.toModel_injective
+    apply ContinuousMultilinearMap.ext
+    intro u
+    rw [riemannSec_tensor0SCov_apply_eval (I := I) g s X Y A hA_smooth x u]
+    rw [hAx]
+    have hbase : ∀ z : TangentSpace I x, baseSlotCurv (I := I) g X Y x z = W z := by
+      intro z
+      rw [baseSlotCurv]
+      rw [riemannSec_eq_riemannOp_smooth (cov := LeviCivita (I := I) g)
+        X.contMDiff Y.contMDiff (smoothExtensionTangent_contMDiff (I := I) x z)]
+      rw [smoothExtensionTangent_eq (I := I) x z, hXx, hYx, hW]
+    simp_rw [hbase]
+    rw [Tensor0SSpace.toModel_neg, ContinuousMultilinearMap.neg_apply]
+    rw [show Tensor0SSpace.toModel
+          (∑ k : Fin s,
+            tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k W) T₀) =
+        ∑ k : Fin s, Tensor0SSpace.toModel
+          (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k W) T₀) from by
+      rw [← Tensor0SSpace.toModelL_apply, map_sum]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [Tensor0SSpace.toModelL_apply]]
+    rw [ContinuousMultilinearMap.sum_apply]
+    congr 1
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [toModel_tensorSlotSubstCLM_apply]
+
+  have hleft :
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (riemannOp (tensorCov (I := I) g 0 s) x v w T) =
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (embedRS (I := I) (M := M) x s
+            (- ∑ k : Fin s,
+              tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k W) T₀)) := by
+    rw [← hTlift]
+    rw [riemannianFiberNormSq_eq_embedRS_unitEval (I := I) (M := M) g x s]
+    rw [riemannOp_tensorCov_unitScalarRSLift_unitEval (I := I) (M := M) g s x v w T₀]
+    rw [hslot]
+  have hright :
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x T =
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (embedRS (I := I) (M := M) x s T₀) := by
+    rw [riemannianFiberNormSq_eq_embedRS_unitEval (I := I) (M := M) g x s T]
+
+  set Kw : ℝ := C0 ^ 2 * g.inner x v v * g.inner x w w with hKw
+  have hKw_nn : 0 ≤ Kw := by
+    rw [hKw]
+    exact mul_nonneg
+      (mul_nonneg (sq_nonneg C0) (metric_inner_self_nonneg' (I := I) (M := M) g x v))
+      (metric_inner_self_nonneg' (I := I) (M := M) g x w)
+  have hW_bound : ∀ u : TangentSpace I x,
+      g.inner x (W u) (W u) ≤ Kw * g.inner x u u := by
+    intro u
+    rw [hW, hKw]
+    simpa [mul_assoc] using hR0 x v w u
+  rw [hleft, hright]
+  have hbd := riemannianFiberNormSq_slotSub_le (I := I) (M := M) g x s T₀ W Kw
+    hKw_nn hW_bound
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (embedRS (I := I) (M := M) x s
+          (- ∑ k : Fin s,
+            tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k W) T₀))
+        ≤ ((s : ℝ) ^ 2 * Kw) *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s x
+              (embedRS (I := I) (M := M) x s T₀) := hbd
+    _ = ((s : ℝ) ^ 2 * C0 ^ 2) * g.inner x v v * g.inner x w w *
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (embedRS (I := I) (M := M) x s T₀) := by
+      rw [hKw]
+      ring
+
 /-- **Unit-evaluation intertwines the `(0, s)`-tensor section curvature across the two connections.**
 For smooth tangent fields `X, W` and a smooth `(r = 0, s)`-tensor section `τ`, the section-level
 Riemann curvature of the `(0, s)`-tensor connection `tensorCov g 0 s` (`= tensorRSCovariantDerivative
@@ -1092,40 +1246,32 @@ lemma nablaTensorCurvSec_tensorRSCov_unitEval
     congr 1
     rw [covApply_unit_eval_eq_genVal (I := I) (M := M) g s τ (fun b => X b)]
 
-/-- **The `∇R · S` arm uniform fibre bound (the divergence-of-curvature slot substitution).** For a
-closed smooth Riemannian manifold `(M, g)` there is a valence-dependent nonnegative constant
-`Cd : ℕ → ℝ` such that, at every rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, point `x`,
-and frame index `a`, the frame-summed differentiated-curvature contraction
-`∑ᵢ nablaTensorCurvSec g (tensorCov g 0 s) Bᵢ Bᵢ Bₐ S (x)` (the genuine `(∇R) · S` term, where
-`Bⱼ := smoothOrthoFrame g x j`) is fibre-bounded `rfns(S)`-order, uniformly in `x, a`:
-```
-rfns( ∑ᵢ nablaTensorCurvSec g (tensorCov g 0 s) Bᵢ Bᵢ Bₐ S (x) ) ≤ Cd s · rfns(S)(x).
-```
-The constant is `Cd s = s² · Kw`, where `Kw` is the compact-uniform `g`-operator bound of the
-frame-summed differentiated curvature `W := nablaBaseSlotCurvFrameSumCLM g B Bₐ x`
-(`exists_uniform_nablaCurvSec_LeviCivita_gNorm_bound`). The mechanism is the **divergence-of-curvature
-slot substitution**: unit-evaluating the abstract second-order curvature transports the frame sum onto
-the differentiated `(0, s)`-tensor curvature (`nablaTensorCurvSec_tensorRSCov_unitEval`), whose diagonal
-frame trace `frame_sum_nablaTensor0SCurv_diag_baseSlot_eval` collapses (once-contracted second Bianchi)
-to the negated slot substitution `slotSub(S(x), W) = − ∑ₖ S(x)(update · k (W ·))` of the single tangent
-endomorphism `W`. The fibre norm of the value coincides with that of the `embedRS`-embedding of its unit
-evaluation (`riemannianFiberNormSq_eq_embedRS_unitEval`), and the purely tensor-algebraic slot
-substitution bound `riemannianFiberNormSq_slotSub_le` (factor `s² · Kw`) controls it by `rfns(S)`. -/
-private theorem exists_frameSummed_nablaTensorCurvSec_fiberNormSq_le
-    (g : SmoothRiemannianMetric I M) :
-    ∃ Cd : ℕ → ℝ, (∀ s, 0 ≤ Cd s) ∧
-      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) (a : Fin (Module.finrank ℝ E)),
-        riemannianFiberNormSq (I := I) (M := M) g 0 s x
-            (∑ i : Fin (Module.finrank ℝ E),
-              nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
-                (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
-                (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x) ≤
-          Cd s * riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) := by
+/-- A supplied bound on the frame-contracted first derivative of the base curvature operator
+controls the differentiated-curvature arm on rank-`s` covariant tensors. -/
+private theorem frameNablaR_le_of
+    (g : SmoothRiemannianMetric I M) (s : ℕ) {Kw : ℝ} (hKw_nn : 0 ≤ Kw)
+    (hKw : ∀ (x : M) (a : Fin (Module.finrank ℝ E)) (u : TangentSpace I x),
+      g.inner x
+          (nablaBaseSlotCurvFrameSumCLM (I := I) g
+            (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+              (smoothOrthoFrame_smooth (I := I) g x a)) x u)
+          (nablaBaseSlotCurvFrameSumCLM (I := I) g
+            (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+              (smoothOrthoFrame_smooth (I := I) g x a)) x u) ≤
+        Kw * g.inner x u u)
+    (S : SmoothCcTensor g 0 s) (x : M) (a : Fin (Module.finrank ℝ E)) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (∑ i : Fin (Module.finrank ℝ E),
+          nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
+            (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x) ≤
+      ((s : ℝ) ^ 2 * Kw) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) := by
   classical
-  obtain ⟨Kw, hKw_nn, hKw⟩ :=
-    exists_uniform_nablaCurvSec_LeviCivita_gNorm_bound (I := I) (M := M) g
-  refine ⟨fun s => (s : ℝ) ^ 2 * Kw, fun s => by positivity, fun s S x a => ?_⟩
-
   set B : Fin (Module.finrank ℝ E) →
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ := fun i =>
     ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
@@ -1233,12 +1379,160 @@ private theorem exists_frameSummed_nablaTensorCurvSec_fiberNormSq_le
   exact riemannianFiberNormSq_slotSub_le (I := I) (M := M) g x s (A x) W Kw hKw_nn
     (fun u => hKw x a u)
 
-/-- Non-negativity of the metric quadratic form `g.inner x v v`. -/
-private lemma metric_inner_self_nonneg' (g : SmoothRiemannianMetric I M) (x : M)
-    (v : TangentSpace I x) : 0 ≤ g.inner x v v := by
-  rcases eq_or_ne v 0 with hv0 | hv0
-  · rw [hv0]; simp
-  · exact (g.pos x v hv0).le
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+    [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+/-- A uniform bound on the metric lengths of finitely many tangent vectors controls the metric
+square of their sum. -/
+private theorem frameSum_sq_le
+    (g : SmoothRiemannianMetric I M) (x : M) {n : ℕ} (C : ℝ) (hC : 0 ≤ C)
+    (u : TangentSpace I x) (F : Fin n → TangentSpace I x)
+    (hF : ∀ i : Fin n,
+      Real.sqrt (g.inner x (F i) (F i)) ≤ C * Real.sqrt (g.inner x u u)) :
+    g.inner x (∑ i : Fin n, F i) (∑ i : Fin n, F i) ≤
+      ((n : ℝ) ^ 2 * C ^ 2) * g.inner x u u := by
+  classical
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun z : TangentSpace I x => cd.inner z z) 0 :=
+    g.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ
+      {z : TangentSpace I x | RCLike.re (cd.inner z z) < 1} :=
+    g.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  have hinner_eq : ∀ p q : TangentSpace I x, (inner ℝ p q : ℝ) = g.inner x p q :=
+    fun _ _ => rfl
+  have hnorm_sq : ∀ z : TangentSpace I x, ‖z‖ ^ 2 = g.inner x z z := by
+    intro z
+    rw [← hinner_eq z z]
+    exact (real_inner_self_eq_norm_sq z).symm
+  have hnorm_eq : ∀ z : TangentSpace I x, ‖z‖ = Real.sqrt (g.inner x z z) := by
+    intro z
+    rw [← hinner_eq z z, norm_eq_sqrt_real_inner]
+  have hF_norm : ∀ i : Fin n, ‖F i‖ ≤ C * ‖u‖ := by
+    intro i
+    rw [hnorm_eq (F i), hnorm_eq u]
+    exact hF i
+  have hsum : ‖∑ i : Fin n, F i‖ ≤ (n : ℝ) * C * ‖u‖ := by
+    calc
+      ‖∑ i : Fin n, F i‖ ≤ ∑ i : Fin n, ‖F i‖ := norm_sum_le _ _
+      _ ≤ ∑ _i : Fin n, C * ‖u‖ := Finset.sum_le_sum (fun i _ => hF_norm i)
+      _ = (n : ℝ) * C * ‖u‖ := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+        ring
+  have hrhs : 0 ≤ (n : ℝ) * C * ‖u‖ :=
+    mul_nonneg (mul_nonneg (Nat.cast_nonneg n) hC) (norm_nonneg u)
+  have hsq : ‖∑ i : Fin n, F i‖ ^ 2 ≤ ((n : ℝ) * C * ‖u‖) ^ 2 :=
+    sq_le_sq' (le_trans (neg_nonpos.mpr hrhs) (norm_nonneg _)) hsum
+  rw [← hnorm_sq (∑ i : Fin n, F i), ← hnorm_sq u]
+  calc
+    ‖∑ i : Fin n, F i‖ ^ 2 ≤ ((n : ℝ) * C * ‖u‖) ^ 2 := hsq
+    _ = ((n : ℝ) ^ 2 * C ^ 2) * ‖u‖ ^ 2 := by ring
+
+omit [CompactSpace M] in
+/-- An uncontracted first-curvature-derivative cap controls the frame-contracted tangent
+endomorphism with coefficient `n² C1²`. -/
+private theorem frameNablaCap_of
+    (g : SmoothRiemannianMetric I M) {C1 : ℝ} (hC1 : 0 ≤ C1)
+    (hR1 : ∀ (x : M) (D X Y Z : TangentSpace I x),
+      Real.sqrt (g.inner x (nablaRiemannOp (I := I) g x D X Y Z)
+          (nablaRiemannOp (I := I) g x D X Y Z)) ≤
+        C1 * Real.sqrt (g.inner x D D) * Real.sqrt (g.inner x X X) *
+          Real.sqrt (g.inner x Y Y) * Real.sqrt (g.inner x Z Z)) :
+    ∀ (x : M) (a : Fin (Module.finrank ℝ E)) (u : TangentSpace I x),
+      g.inner x
+          (nablaBaseSlotCurvFrameSumCLM (I := I) g
+            (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+              (smoothOrthoFrame_smooth (I := I) g x a)) x u)
+          (nablaBaseSlotCurvFrameSumCLM (I := I) g
+            (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+              (smoothOrthoFrame_smooth (I := I) g x a)) x u) ≤
+        ((Module.finrank ℝ E : ℝ) ^ 2 * C1 ^ 2) * g.inner x u u := by
+  classical
+  intro x a u
+  set B : Fin (Module.finrank ℝ E) →
+      Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ := fun i =>
+    ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i) with hB
+  set Ba : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+      (smoothOrthoFrame_smooth (I := I) g x a) with hBa
+  let F : Fin (Module.finrank ℝ E) → TangentSpace I x := fun i =>
+    nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u
+
+  have hFpoint : ∀ i : Fin (Module.finrank ℝ E),
+      F i = nablaRiemannOp (I := I) g x (B i x) (B i x) (Ba x) u := by
+    intro i
+    change nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u = _
+    rw [nablaBaseSlotCurv_eq_nablaCurvSec]
+    have hsec := nablaRiemannOp_sec (I := I) g (B i) (B i) Ba
+      (ContMDiffSection.mk (smoothExtensionTangent (I := I) x u)
+        (smoothExtensionTangent_contMDiff (I := I) x u)) x
+    simpa only [ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq] using hsec.symm
+  have hBinner : ∀ i : Fin (Module.finrank ℝ E),
+      g.inner x (B i x) (B i x) = 1 := by
+    intro i
+    simpa [hB] using smoothOrthoFrame_orthonormal_at_center (I := I) g x i i
+  have hBainner : g.inner x (Ba x) (Ba x) = 1 := by
+    simpa [hBa] using smoothOrthoFrame_orthonormal_at_center (I := I) g x a a
+  have hF_len : ∀ i : Fin (Module.finrank ℝ E),
+      Real.sqrt (g.inner x (F i) (F i)) ≤ C1 * Real.sqrt (g.inner x u u) := by
+    intro i
+    rw [hFpoint i]
+    have h := hR1 x (B i x) (B i x) (Ba x) u
+    rw [hBinner i, hBainner, Real.sqrt_one] at h
+    simpa [mul_assoc] using h
+  have hsum_eq :
+      nablaBaseSlotCurvFrameSumCLM (I := I) g
+          (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i))
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+            (smoothOrthoFrame_smooth (I := I) g x a)) x u =
+        ∑ i : Fin (Module.finrank ℝ E), F i := by
+    rw [nablaBaseSlotCurvFrameSumCLM_apply]
+  rw [hsum_eq]
+  exact frameSum_sq_le (I := I) (M := M) g x C1 hC1 u F hF_len
+
+/-- **The `∇R · S` arm uniform fibre bound (the divergence-of-curvature slot substitution).** For a
+closed smooth Riemannian manifold `(M, g)` there is a valence-dependent nonnegative constant
+`Cd : ℕ → ℝ` such that, at every rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, point `x`,
+and frame index `a`, the frame-summed differentiated-curvature contraction
+`∑ᵢ nablaTensorCurvSec g (tensorCov g 0 s) Bᵢ Bᵢ Bₐ S (x)` (the genuine `(∇R) · S` term, where
+`Bⱼ := smoothOrthoFrame g x j`) is fibre-bounded `rfns(S)`-order, uniformly in `x, a`:
+```
+rfns( ∑ᵢ nablaTensorCurvSec g (tensorCov g 0 s) Bᵢ Bᵢ Bₐ S (x) ) ≤ Cd s · rfns(S)(x).
+```
+The constant is `Cd s = s² · Kw`, where `Kw` is the compact-uniform `g`-operator bound of the
+frame-summed differentiated curvature `W := nablaBaseSlotCurvFrameSumCLM g B Bₐ x`
+(`exists_uniform_nablaCurvSec_LeviCivita_gNorm_bound`). The mechanism is the **divergence-of-curvature
+slot substitution**: unit-evaluating the abstract second-order curvature transports the frame sum onto
+the differentiated `(0, s)`-tensor curvature (`nablaTensorCurvSec_tensorRSCov_unitEval`), whose diagonal
+frame trace `frame_sum_nablaTensor0SCurv_diag_baseSlot_eval` collapses (once-contracted second Bianchi)
+to the negated slot substitution `slotSub(S(x), W) = − ∑ₖ S(x)(update · k (W ·))` of the single tangent
+endomorphism `W`. The fibre norm of the value coincides with that of the `embedRS`-embedding of its unit
+evaluation (`riemannianFiberNormSq_eq_embedRS_unitEval`), and the purely tensor-algebraic slot
+substitution bound `riemannianFiberNormSq_slotSub_le` (factor `s² · Kw`) controls it by `rfns(S)`. -/
+private theorem exists_frameSummed_nablaTensorCurvSec_fiberNormSq_le
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Cd : ℕ → ℝ, (∀ s, 0 ≤ Cd s) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) (a : Fin (Module.finrank ℝ E)),
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (∑ i : Fin (Module.finrank ℝ E),
+              nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
+                (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+                (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x) ≤
+          Cd s * riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) := by
+  classical
+  obtain ⟨Kw, hKw_nn, hKw⟩ :=
+    exists_uniform_nablaCurvSec_LeviCivita_gNorm_bound (I := I) (M := M) g
+  refine ⟨fun s => (s : ℝ) ^ 2 * Kw, fun s => by positivity, fun s S x a => ?_⟩
+
+  exact frameNablaR_le_of (I := I) (M := M) g s hKw_nn hKw S x a
 
 /-- **Per-frame-direction slot-`0` slice domination.** For a `g_x`-orthonormal frame `e` (with the
 rank-`s` and rank-`(s + 1)` fibre-norm frame representations `hreprS`, `hreprSucc` it induces), the
@@ -1388,6 +1682,134 @@ private lemma rfns_tensorCovDerivAt_direction_le
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hnE]
         ring
 
+/-- A cap on one tangent direction transfers the general directional covariant-derivative
+estimate to the same cap times the full gradient fibre norm. -/
+private lemma covDeriv_dir_le
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (w : TangentSpace I x) {Kbase : ℝ} (hw : g.inner x w w ≤ Kbase) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        ((tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x w) ≤
+      (Module.finrank ℝ E : ℝ) * Kbase *
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        ((tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x w) ≤
+        (Module.finrank ℝ E : ℝ) * g.inner x w w *
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            ((covGrad (I := I) (M := M) g 0 s S).toSection x) :=
+      rfns_tensorCovDerivAt_direction_le (I := I) (M := M) g s S x w
+    _ ≤ (Module.finrank ℝ E : ℝ) * Kbase *
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+      refine mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_left hw (Nat.cast_nonneg (Module.finrank ℝ E))) ?_
+      exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
+/-- A common fibre bound for a finite family controls the fibre norm of its sum. -/
+private lemma rfns_finSum_le
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) {n : ℕ}
+    (F : Fin n → TensorRSSpace 0 s I x) {K : ℝ}
+    (hF : ∀ i : Fin n,
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) ≤ K) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x (∑ i : Fin n, F i) ≤
+      (n : ℝ) ^ 2 * K := by
+  classical
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x (∑ i : Fin n, F i) ≤
+        (n : ℝ) * ∑ i : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) := by
+      have hsum := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 s x
+        (Finset.univ : Finset (Fin n)) F
+      simpa only [Finset.card_univ, Fintype.card_fin] using hsum
+    _ ≤ (n : ℝ) * ∑ _i : Fin n, K := by
+      exact mul_le_mul_of_nonneg_left
+        (Finset.sum_le_sum (fun i _ => hF i)) (Nat.cast_nonneg n)
+    _ = (n : ℝ) ^ 2 * K := by
+      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+      ring
+
+/-- Uniformly bounded directions give a finite-sum covariant-derivative estimate. -/
+private lemma covDeriv_sum_le
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    {n : ℕ} (w : Fin n → TangentSpace I x) {Kbase : ℝ}
+    (hw : ∀ i : Fin n, g.inner x (w i) (w i) ≤ Kbase) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (∑ i : Fin n,
+          (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x (w i)) ≤
+      (n : ℝ) ^ 2 *
+        ((Module.finrank ℝ E : ℝ) * Kbase *
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            ((covGrad (I := I) (M := M) g 0 s S).toSection x)) := by
+  exact rfns_finSum_le (I := I) (M := M) g s x
+    (fun i => (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x (w i))
+    (fun i => covDeriv_dir_le (I := I) (M := M) g s S x (w i) (hw i))
+
+omit [CompactSpace M] [I.Boundaryless] in
+/-- The supplied tangent curvature cap bounds each diagonal moving-frame curvature direction. -/
+private lemma frameCurvVec_le
+    (g : SmoothRiemannianMetric I M) {Kbase : ℝ}
+    (hKbase : ∀ (x : M) (v w u : TangentSpace I x),
+      g.inner x (riemannOp (LeviCivita (I := I) g) x v w u)
+          (riemannOp (LeviCivita (I := I) g) x v w u) ≤
+        Kbase * g.inner x v v * g.inner x w w * g.inner x u u)
+    (x : M) (a i : Fin (Module.finrank ℝ E)) :
+    g.inner x
+        (riemannOp (LeviCivita (I := I) g) x (smoothOrthoFrame (I := I) g x i x)
+          (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x i x))
+        (riemannOp (LeviCivita (I := I) g) x (smoothOrthoFrame (I := I) g x i x)
+          (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x i x)) ≤
+      Kbase := by
+  have hi := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i
+  have ha := smoothOrthoFrame_orthonormal_at_center (I := I) g x a a
+  rw [if_pos rfl] at hi ha
+  have h := hKbase x (smoothOrthoFrame (I := I) g x i x)
+    (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x i x)
+  simpa only [hi, ha, mul_one] using h
+
+/-- A supplied tangent curvature-operator cap controls the frame-summed
+curvature-direction covariant-derivative arm on every rank-`s` tensor. -/
+private theorem frameCurvDir_le_of
+    (g : SmoothRiemannianMetric I M) (s : ℕ) {Kbase : ℝ}
+    (hKbase : ∀ (x : M) (v w u : TangentSpace I x),
+      g.inner x (riemannOp (LeviCivita (I := I) g) x v w u)
+          (riemannOp (LeviCivita (I := I) g) x v w u) ≤
+        Kbase * g.inner x v v * g.inner x w w * g.inner x u u)
+    (S : SmoothCcTensor g 0 s) (x : M) (a : Fin (Module.finrank ℝ E)) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (∑ i : Fin (Module.finrank ℝ E),
+          (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x
+            (riemannOp (LeviCivita (I := I) g) x (smoothOrthoFrame (I := I) g x i x)
+              (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x i x))) ≤
+      (Module.finrank ℝ E : ℝ) *
+          ((Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ) * Kbase) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+  classical
+  let w : Fin (Module.finrank ℝ E) → TangentSpace I x := fun i =>
+    riemannOp (LeviCivita (I := I) g) x (smoothOrthoFrame (I := I) g x i x)
+      (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x i x)
+  have hw_bd : ∀ i : Fin (Module.finrank ℝ E),
+      g.inner x (w i) (w i) ≤ Kbase := by
+    intro i
+    simpa only [w] using frameCurvVec_le (I := I) (M := M) g hKbase x a i
+  have hsum := covDeriv_sum_le (I := I) (M := M) g s S x w hw_bd
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (∑ i : Fin (Module.finrank ℝ E),
+          (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x (w i)) ≤
+        (Module.finrank ℝ E : ℝ) ^ 2 *
+          ((Module.finrank ℝ E : ℝ) * Kbase *
+            riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+              ((covGrad (I := I) (M := M) g 0 s S).toSection x)) := hsum
+    _ = (Module.finrank ℝ E : ℝ) *
+          ((Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ) * Kbase) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+      ring
+
 /-- **The `∇_{R·B} S` arm uniform fibre bound (the curvature-direction covariant-derivative slice).**
 For a closed smooth Riemannian manifold `(M, g)` there is a valence-dependent nonnegative constant
 `Cc : ℕ → ℝ` such that, at every rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, point `x`,
@@ -1423,54 +1845,7 @@ private theorem exists_frameSummed_curvDirCovDeriv_fiberNormSq_le
   set n : ℕ := Module.finrank ℝ E with hn
   refine ⟨fun _ => (n : ℝ) * ((n : ℝ) * (n : ℝ) * Kbase),
     fun _ => by positivity, fun s S x a => ?_⟩
-  set grad : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-    ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hgrad
-  have hgrad_nn : 0 ≤ grad := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
-
-  set w : Fin n → TangentSpace I x := fun i =>
-    riemannOp (LeviCivita (I := I) g) x (smoothOrthoFrame (I := I) g x i x)
-      (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x i x) with hw
-  set F : Fin n → TensorRSSpace 0 s I x := fun i =>
-    (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x (w i) with hF
-  have hgB : ∀ i : Fin n, g.inner x (smoothOrthoFrame (I := I) g x i x)
-      (smoothOrthoFrame (I := I) g x i x) = 1 := by
-    intro i
-    have := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i; rwa [if_pos rfl] at this
-  have hga : g.inner x (smoothOrthoFrame (I := I) g x a x)
-      (smoothOrthoFrame (I := I) g x a x) = 1 := by
-    have := smoothOrthoFrame_orthonormal_at_center (I := I) g x a a; rwa [if_pos rfl] at this
-  have hw_bd : ∀ i : Fin n, g.inner x (w i) (w i) ≤ Kbase := by
-    intro i
-    have h := hKbase x (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x a x)
-      (smoothOrthoFrame (I := I) g x i x)
-    rw [hgB i, hga, mul_one, mul_one, mul_one] at h
-    rw [hw]
-    exact h
-
-  have hper : ∀ i : Fin n,
-      riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) ≤ (n : ℝ) * Kbase * grad := by
-    intro i
-    rw [hF]
-    refine le_trans (rfns_tensorCovDerivAt_direction_le (I := I) (M := M) g s S x (w i)) ?_
-    rw [← hn]
-    have hwi_nn : 0 ≤ g.inner x (w i) (w i) := metric_inner_self_nonneg' (I := I) (M := M) g x (w i)
-    have hstep : (n : ℝ) * g.inner x (w i) (w i) * grad ≤ (n : ℝ) * Kbase * grad := by
-      have hle : (n : ℝ) * g.inner x (w i) (w i) ≤ (n : ℝ) * Kbase :=
-        mul_le_mul_of_nonneg_left (hw_bd i) (Nat.cast_nonneg n)
-      exact mul_le_mul_of_nonneg_right hle hgrad_nn
-    exact hstep
-
-  calc riemannianFiberNormSq (I := I) (M := M) g 0 s x (∑ i : Fin n, F i)
-      ≤ (n : ℝ) * ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) := by
-        have := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 s x
-          (Finset.univ : Finset (Fin n)) F
-        rwa [Finset.card_univ, Fintype.card_fin] at this
-    _ ≤ (n : ℝ) * ∑ _i : Fin n, ((n : ℝ) * Kbase * grad) :=
-        mul_le_mul_of_nonneg_left (Finset.sum_le_sum (fun i _ => hper i)) (Nat.cast_nonneg n)
-    _ = (n : ℝ) * ((n : ℝ) * (n : ℝ) * Kbase) * grad := by
-        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-        ring
-
+  simpa [hn] using frameCurvDir_le_of (I := I) (M := M) g s hKbase S x a
 /-- **Per-direction-slice arm bound for the C1 (`R·∇S`) term.** The pure-Riemann curvature trace
 `∑ᵢ R(Bᵢ, Bₐ)(∇_{Bᵢ} S)(x)` of the frame-free slice (at the gradient-frame direction
 `Bₐ := smoothOrthoFrame g x a`) coincides with the packaged pure-Riemann genuine trace
@@ -1763,6 +2138,175 @@ theorem exists_pointwiseTensorCurv_fiberNormSq_bound
   obtain ⟨K_R, K_dR, hK_R_nn, hK_dR_nn, hbound⟩ :=
     pointwiseTensorCurv_fiberNormSq_le_first_order (I := I) (M := M) g
   exact ⟨K_R s, K_dR s, hK_R_nn s, hK_dR_nn s, fun S x => hbound s S x⟩
+
+/-- Explicit rank-two, order-zero curvature-action coefficient from supplied tangent `R` and `∇R`
+caps. The two square-root arms are respectively the `R · ∇S` and `(∇R) · S` coefficients in the
+pointwise squared commutator estimate. -/
+noncomputable def ptCurvZeroC (d : ℕ) (C0 C1 : ℝ) : ℝ :=
+  let dR : ℝ := d
+  let Kpure : ℝ := dR * (dR * ((2 : ℝ) ^ 2 * C0 ^ 2))
+  let Kw : ℝ := dR ^ 2 * C1 ^ 2
+  let Cd : ℝ := (2 : ℝ) ^ 2 * Kw
+  let Cc : ℝ := dR * (dR * dR * C0 ^ 2)
+  max (Real.sqrt (dR * (16 * Kpure + 2 * Cc)))
+    (Real.sqrt (dR * (4 * Cd)))
+
+/-- The explicit rank-two, order-zero curvature-action coefficient is nonnegative. -/
+theorem ptCurvZeroC_nonneg (d : ℕ) (C0 C1 : ℝ) : 0 ≤ ptCurvZeroC d C0 C1 := by
+  dsimp [ptCurvZeroC]
+  exact le_trans (Real.sqrt_nonneg _) (le_max_left _ _)
+
+/-- **Rank-two `p = 0` curvature action from supplied `R` and `∇R` caps.** A tangent curvature
+cap `C0` and a nonnegative first-curvature-derivative cap `C1` give an explicit `L²`
+first-order bound for the rank-two Bochner commutator, with no compactness-chosen constants. -/
+theorem ptCurv_zero_of
+    (g : SmoothRiemannianMetric I M) {C0 C1 : ℝ}
+    (hR0 : ∀ (x : M) (v w u : TangentSpace I x),
+      g.inner x (riemannOp (LeviCivita (I := I) g) x v w u)
+          (riemannOp (LeviCivita (I := I) g) x v w u) ≤
+        C0 ^ 2 * g.inner x v v * g.inner x w w * g.inner x u u)
+    (hC1 : 0 ≤ C1)
+    (hR1 : ∀ (x : M) (D X Y Z : TangentSpace I x),
+      Real.sqrt (g.inner x (nablaRiemannOp (I := I) g x D X Y Z)
+          (nablaRiemannOp (I := I) g x D X Y Z)) ≤
+        C1 * Real.sqrt (g.inner x D D) * Real.sqrt (g.inner x X X) *
+          Real.sqrt (g.inner x Y Y) * Real.sqrt (g.inner x Z Z))
+    (S : SmoothCcTensor g 0 2) :
+    ‖pointwiseTensorCurv (I := I) (M := M) g 2 S‖ ≤
+      ptCurvZeroC (Module.finrank ℝ E) C0 C1 *
+        (‖S‖ + ‖covGrad (I := I) (M := M) g 0 2 S‖) := by
+  classical
+  let d : ℝ := Module.finrank ℝ E
+  let Kpure : ℕ → ℝ := fun s => d * (d * ((s : ℝ) ^ 2 * C0 ^ 2))
+  let Kw : ℝ := d ^ 2 * C1 ^ 2
+  let Cd : ℕ → ℝ := fun s => (s : ℝ) ^ 2 * Kw
+  let Cc : ℕ → ℝ := fun _ => d * (d * d * C0 ^ 2)
+  let P : ℝ := d * (16 * Kpure 2 + 2 * Cc 2)
+  let Q : ℝ := d * (4 * Cd 2)
+  let C : ℝ := max (Real.sqrt P) (Real.sqrt Q)
+
+  have hd : 0 ≤ d := Nat.cast_nonneg _
+  have hKw : 0 ≤ Kw := by
+    dsimp [Kw]
+    exact mul_nonneg (sq_nonneg d) (sq_nonneg C1)
+  have hKpure : ∀ s, 0 ≤ Kpure s := by
+    intro s
+    dsimp [Kpure]
+    positivity
+  have hCd : ∀ s, 0 ≤ Cd s := by
+    intro s
+    dsimp [Cd]
+    positivity
+  have hCc : ∀ s, 0 ≤ Cc s := by
+    intro s
+    dsimp [Cc]
+    positivity
+
+  have hKpure_bd : ∀ (s : ℕ) (T : SmoothCcTensor g 0 s) (x : M)
+      (v : TangentSpace I x), g.inner x v v = 1 →
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (genuineCurvTraceFixedFramePureR (I := I) g s
+            (smoothExtensionTangent (I := I) x v) (smoothOrthoFrame (I := I) g x)
+            (fun y : M => T.toSection y) x) ≤
+        Kpure s * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((covGrad (I := I) (M := M) g 0 s T).toSection x) := by
+    intro s T x v hv
+    have htensor : ∀ (y : M) (p q : TangentSpace I y) (A : TensorRSSpace 0 s I y),
+        riemannianFiberNormSq (I := I) (M := M) g 0 s y
+            (riemannOp (tensorCov (I := I) g 0 s) y p q A) ≤
+          ((s : ℝ) ^ 2 * C0 ^ 2) * g.inner y p p * g.inner y q q *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s y A := by
+      intro y p q A
+      exact tensorCurv_le_of (I := I) (M := M) g s hR0 y p q A
+    have h := genuineTrace_le_of (I := I) (M := M) g s
+      (C := (s : ℝ) ^ 2 * C0 ^ 2) (by positivity) htensor T x v hv
+    simpa [Kpure, d] using h
+
+  have hframe : ∀ (x : M) (a : Fin (Module.finrank ℝ E)) (u : TangentSpace I x),
+      g.inner x
+          (nablaBaseSlotCurvFrameSumCLM (I := I) g
+            (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+              (smoothOrthoFrame_smooth (I := I) g x a)) x u)
+          (nablaBaseSlotCurvFrameSumCLM (I := I) g
+            (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+              (smoothOrthoFrame_smooth (I := I) g x a)) x u) ≤
+        Kw * g.inner x u u := by
+    intro x a u
+    simpa [Kw, d] using frameNablaCap_of (I := I) (M := M) g hC1 hR1 x a u
+
+  have hCd_bd : ∀ (s : ℕ) (T : SmoothCcTensor g 0 s) (x : M)
+      (a : Fin (Module.finrank ℝ E)),
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (∑ i : Fin (Module.finrank ℝ E),
+            nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
+              (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame (I := I) g x a) (fun y : M => T.toSection y) x) ≤
+        Cd s * riemannianFiberNormSq (I := I) (M := M) g 0 s x (T.toSection x) := by
+    intro s T x a
+    simpa [Cd] using frameNablaR_le_of (I := I) (M := M) g s hKw hframe T x a
+
+  have hCc_bd : ∀ (s : ℕ) (T : SmoothCcTensor g 0 s) (x : M)
+      (a : Fin (Module.finrank ℝ E)),
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (∑ i : Fin (Module.finrank ℝ E),
+            (tensorCov (I := I) g 0 s).toFun (fun y : M => T.toSection y) x
+              (riemannOp (LeviCivita (I := I) g) x (smoothOrthoFrame (I := I) g x i x)
+                (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x i x))) ≤
+        Cc s * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((covGrad (I := I) (M := M) g 0 s T).toSection x) := by
+    intro s T x a
+    simpa [Cc, d] using
+      frameCurvDir_le_of (I := I) (M := M) g s hR0 T x a
+
+  have hP : 0 ≤ P := by
+    dsimp [P]
+    exact mul_nonneg hd (add_nonneg (mul_nonneg (by positivity) (hKpure 2))
+      (mul_nonneg (by positivity) (hCc 2)))
+  have hQ : 0 ≤ Q := by
+    dsimp [Q]
+    exact mul_nonneg hd (mul_nonneg (by positivity) (hCd 2))
+  have hC : 0 ≤ C := by
+    dsimp [C]
+    exact le_trans (Real.sqrt_nonneg P) (le_max_left _ _)
+  have hPle : P ≤ C ^ 2 := by
+    have hs : Real.sqrt P ≤ C := le_max_left _ _
+    rw [← Real.sq_sqrt hP]
+    nlinarith [Real.sqrt_nonneg P]
+  have hQle : Q ≤ C ^ 2 := by
+    have hs : Real.sqrt Q ≤ C := le_max_right _ _
+    rw [← Real.sq_sqrt hQ]
+    nlinarith [Real.sqrt_nonneg Q]
+
+  have hpack := tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two
+    (I := I) (M := M) g S (covGrad (I := I) (M := M) g 0 2 S)
+      (pointwiseTensorCurv (I := I) (M := M) g 2 S) C hC (fun x => ?_)
+  · simpa [ptCurvZeroC, C, P, Q, Kpure, Cd, Cc, Kw, d] using hpack
+  · set grad : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 3 x
+        ((covGrad (I := I) (M := M) g 0 2 S).toSection x)
+    set base : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 2 x (S.toSection x)
+    have hgrad : 0 ≤ grad :=
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 x _
+    have hbase : 0 ≤ base :=
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x _
+    have hsq := pointwiseTensorCurv_fiberNormSq_squared_bound
+      (I := I) (M := M) g 2 S x Kpure Cd Cc hKpure_bd hCd_bd hCc_bd
+    have hsq' :
+        riemannianFiberNormSq (I := I) (M := M) g 0 3 x
+            ((pointwiseTensorCurv (I := I) (M := M) g 2 S).toSection x) ≤
+          P * grad + Q * base := by
+      simpa [P, Q, d, grad, base] using hsq
+    calc
+      riemannianFiberNormSq (I := I) (M := M) g 0 3 x
+          ((pointwiseTensorCurv (I := I) (M := M) g 2 S).toSection x)
+          ≤ P * grad + Q * base := hsq'
+      _ ≤ C ^ 2 * grad + C ^ 2 * base :=
+        add_le_add (mul_le_mul_of_nonneg_right hPle hgrad)
+          (mul_le_mul_of_nonneg_right hQle hbase)
+      _ = C ^ 2 * (base + grad) := by ring
 
 end Connection
 end Integral

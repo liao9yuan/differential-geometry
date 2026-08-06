@@ -22,19 +22,15 @@ chain.  The endpoint's `hC` slot is filled by `hs2_opBound_at_two`
 | 105 | `tensorHsCongr_coeff` | proved; canonical home is `SobolevScale/ExponentCongr.lean` (not claimed by this brick) |
 | 119 | `lowregNsec` | the concrete `Nsec` = symmetrized smooth DeTurck remainder |
 | 148 | `coord_eq_smoothN` | private; proved; the `a = 2` analogue of `realizedForcingCoord_eq_smoothNSymm` |
-| 421 | `lowreg_forceJetMass` | **FRONTIER, `sorry` (body at line 450)** |
-| 478 | `lowreg_allOrderJet` | proved; CONDITIONAL on the frontier |
+| 421 | `lowreg_forceJetMass` | historical frontier; now proved |
+| 478 | `lowreg_allOrderJet` | proved; historical dependency now discharged |
 | 659 | `lowreg_joint_smooth` | proved; independent of the frontier |
-| 768 | `lowreg_joint_of_re` | proved; CONDITIONAL on the frontier |
+| 768 | `lowreg_joint_of_re` | proved; historical dependency now discharged |
 
 ## Sorry census
 
-**SUPERSEDED by the 2026-08-03 F2-F5 pass at the end of this file** - the single
-code `sorry` is now `lowreg_spatialMass`, and `lowreg_forceJetMass` is PROVED.
-
-Exactly **one** code `sorry`: the body of `lowreg_forceJetMass` (line 450).
-`grep -nw sorry` on the file shows that occurrence plus docstring prose only.
-Targeted build reports exactly one `declaration uses 'sorry'` warning.
+**Historical snapshot, superseded by the dated closure entries at the end of
+this file.**  The implementation now has no proof-body `sorry` in this chain.
 
 ## The posit design choice: ONE leaf, not the supercritical two
 
@@ -642,3 +638,402 @@ statement at zero proof cost; the frontier is still **0% proved**.  Everything
 that used to be reported as "conditional on `lowreg_spatialMass`" was, until
 today, conditional on something unprovable — that is the only real change in the
 tree's meaning.  (N) `ricci_flow_unif_existence`: **0%**.
+
+## 2026-08-04, option-(b) brick B5 — the endpoint reads the STATE, GREEN
+
+Ruling No. 106 / `OPTIONB_FLOOR_PLAN.md` §6, the last of B3/B4/B5.  Brick 9's
+`hfloor` route (recorded above) is now fully retired: the engine slot is fed by
+the trajectory's own state bound, never by a derivative proxy.
+
+### What changed
+
+* `lowreg_allOrderJet`: `{Kf}` → `{Rcap}`, and its last conclusion conjunct
+  `Real.sqrt T * ‖fHi‖ ≤ Kf` becomes
+  `∀ t ∈ Set.Icc (0:ℝ) T, ‖timeH1.toFun u t‖ ≤ Rcap`.  Three lines produce it:
+
+  ```lean
+  have hstateU : ∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun ucs.lo t‖ ≤ Rcap :=
+    ucs.lo.norm_le_of_ae_le hT
+      (by filter_upwards [hballU] with t ht using ht.trans hRcapLe)
+  ```
+
+  i.e. B2's producer (`TimeH1Modulus.lean:156`) applied to the package's a.e.
+  ball composed with the new `R ≤ Rcap` conjunct.  `hballU` keeps its other
+  consumers (`hballD`, `coord_eq_smoothN`), so nothing else moved.
+* `lowreg_joint_smooth`: the slot `hfloor : √T·‖u.deriv‖ ≤ 1/(2C)` becomes
+  `hstate : ∀ t ∈ Icc 0 T, ‖timeH1.toFun u t‖ ≤ 1/(2C)`, passed straight to the
+  engine.  The B1 shim `u.state_le_of_sqrt_floor hinit hfloor` and the local
+  `hinit` are gone.  `state_le_of_sqrt_floor` itself STAYS — it is public
+  `timeH1` API with its own docstring; only this call site disappears.
+* `lowreg_joint_of_re`: `hKfC : Kf ≤ 1/(4C)` → `hRcapC : Rcap ≤ 1/(2C)`, and the
+  whole `hderiv` / `hfloor` derivation (the `maxRegDuhamelMap_deriv` +
+  `maxRegHomogeneousDerivField_norm_le` + `maximalRegularityDerivField_norm_le`
+  chain giving `‖u.deriv‖ ≤ 2‖fHi‖`, ~30 lines) is deleted in favour of
+
+  ```lean
+  fun t ht => (hstateU t ht).trans hRcapC
+  ```
+
+  The `obtain ⟨hC_pos, -⟩ := … .choose_spec` there is now unused and removed.
+* `lowreg_joint_two`: instantiates `Rcap := 1/(2C)` instead of `Kf := 1/(4C)`;
+  the final `le_rfl` still discharges the cap.  Public statement UNCHANGED.
+
+### Why the factor is `1/(2C)` and not `1/(4C)`
+
+`1/(4C)` was a *forcing* level: it had to survive `‖u.deriv‖ ≤ 2‖fHi‖`, which
+costs a factor 2.  The state bound is compared with the engine's slot directly,
+so the cap is the engine's own constant `1/(2C)`.  Read the factor off
+`MaxRegSolutionJointlySmooth.lean:1349`, not off the old floor.
+
+### Verification
+
+Targeted build GREEN first try, [9985/9985], zero errors.  The only `sorry`
+warning is `:1047` — `lowreg_spatialMass`, the single pre-existing campaign
+frontier (its `sorry` is at `:1088`).  Axiom census, unchanged from before:
+
+* `lowreg_joint_smooth`: `[propext, Classical.choice, Quot.sound]` —
+  **`sorryAx`-free**;
+* `lowreg_forceJetMass`, `lowreg_allOrderJet`, `lowreg_joint_of_re`,
+  `lowreg_joint_two`: `sorryAx` **only** through `lowreg_spatialMass`.
+
+### Grep-proof that the order-2 static force left the horizon
+
+`lowregFloorHorizon`: zero occurrences repo-wide in `.lean`.  `staticForce`:
+zero occurrences in `LowRegApplyTwo.lean` and `LowRegAllOrderJet.lean`.  What
+survives, and why it is harmless:
+
+* `LowRegLiftNTerm.lean` — the `def staticForce` itself, `liftForceHi`, and
+  `norm_liftForceHi_le` (whose `hD : ‖staticForce g₀ g_bg 2‖ ≤ D` is now the
+  only `‖staticForce … 2‖` in the tree).  `norm_liftForceHi_le` has **no
+  consumers**; it is unused API, not a horizon.
+* `LowRegForceHi.lean:144,215,284` — `staticForce … 2` as an OBJECT inside the
+  frozen split `liftHiN` and its inclusion naturality.  The high forcing still
+  contains the static field; nothing bounds its norm any more.
+
+So `‖staticForce … 2‖` appears in **no** horizon, radius, or existence formula.
+
+### Honest accounting
+
+**0% new mathematics** in this brick either: B3/B4/B5 delete a redundant route
+and re-route a slot.  What they DO change is the horizon's dependency: `τ₀` is
+now closed in `(Ctop, B0, B1, D, ρ, P, C)` with `D` the ORDER-1 force number, so
+front 3's item (C)1 is dissolved in Lean and not merely in design.  The residual
+noted in the plan's §9 is unchanged: `C` is still
+`(hs2_opBound_at_two hDim g).choose`, an opaque witness — exposing it is front
+3's brick G3, untouched here.  (N) `ricci_flow_unif_existence`: **0%**.
+
+## 2026-08-04, brick S0-bis + Z — the frontier moved from `a = 2` down to `a = 1`
+
+### What changed
+
+`lowreg_spatialMass` is **no longer the `sorry`**.  It is now proved outright,
+sorry-free, from a new named leaf `lowreg_loMass` which states the same thing
+about the **order-one** forcing.  The whole content of the step is that the
+conclusion is *inclusion-invariant*:
+
+* `hincl` (the shape `force_hi_id` uses) says `fLo` is the pointwise scale
+  inclusion of `fHi`, hence `timeL2Inclusion … fHi = fLo` by `Lp.ext`;
+* `timeModeCoeff_timeL2Inclusion` then gives
+  `timeModeCoeff fLo i = timeModeCoeff fHi i` **as elements of `L²(0,T)`**, so
+  the two `perModeConv` families are literally the same functions of `t` and
+  the mass statements are interchangeable by `simp only [hmode]`.
+
+The widening list (planner-approved, ledger No. 132) landed as three arguments
+rather than a dozen: `fLo`, `hincl`, and `hlo : IsLowSolve g hT hT1 fLo`.
+`IsLowSolve` (new, `ShortTime/UnifClassBounds.lean`) is the whole
+`lowreg_partial_sol_of_bounds` bundle packaged as a *property of its forcing* —
+background metric, threshold, the six numbers, the four producer certificates,
+the horizon cap, the forcing ball `‖fLo‖ ≤ lowregStateRad …/4`, and the a.e.
+Nemytskii identity along `fLo`'s own Duhamel field, with everything but `fLo`
+existentially bound.
+
+### The propagation, and why the top endpoint is unchanged
+
+`lowreg_spatialMass` → `lowreg_forceJetMass` → `lowreg_allOrderJet` →
+`lowreg_joint_of_re` each gained `fLo` plus (at the two lower levels) `hincl`,
+(at the two upper levels) the transport `hfLo : ∀ᵐ t, f t = tensorHsCongr … (fLo t)`,
+and `hlo`.  `lowreg_allOrderJet` rebuilds `hincl` from `hfLo` and the pointwise
+inclusion conjunct of `IsRealizedTwo` (previously discarded as `-` in the big
+`obtain`; it is conjunct 7, now named `hfInc`) by `tensorHsCongr_incl` +
+injectivity of the isometry `tensorHsCongr` — the same three lines as
+`force_hi_id`'s ending.
+
+`lowreg_solve_two` (`ShortTime/LowRegApplyTwo.lean`) now exports
+`∃ f fLo, IsRealizedTwo … ∧ (∀ᵐ t, f t = tensorHsCongr … (fLo t)) ∧ IsLowSolve …`.
+Both new components are FREE at that call site: `f` is literally
+`tensorHsCongrL … gforce`, so `hfae` (already there at `:725`) is the transport,
+and `isLowSolve_of_sol` packages the arguments and results of the
+`lowreg_partial_sol_of_bounds` call at `:711` verbatim.  Consequently
+**`lowreg_joint_two`'s statement did not change at all**, and `lowreg_solve_two`
+is still axiom-clean — the honest-input audit for the widening is discharged,
+not deferred.
+
+### The blocker for `lowreg_loMass` — TWO gaps, one of them new
+
+`lowreg_loMass` is 0% and did not move.  Beyond the analytic derivation, a
+**second, independent and previously unrecorded gap** was found while wiring:
+
+**The identification layer does not apply to the campaign's solver.**
+`EigenProjPartialSol.lean` (adapter B/C: `proj_partial_sol`, `forceMap_dist_le`,
+`projFix_dist_le`, `projFix_le_two`) is stated over `partial_sol_const`, whose
+nonlinearity is **globally Lipschitz** (`hLip : LipschitzWith L Nfun`, needed to
+form `nemytskiiOn`).  The campaign's order-one solve is `partial_sol_tame`, and
+`lowregNfun` is **not** Lipschitz:
+
+* `lowerState g₀ a R = lowerBall J R = {x | ‖J x‖ ≤ R}` bounds only the
+  `H^{a+1}` norm, never the ambient `H^{a+2}` one;
+* the third arm of the tame estimate is `B1·(‖u‖+‖v‖)·‖J(u−v)‖` with `‖u‖` the
+  `H^{a+2}` norm — unbounded on that set.  (`partial_sol_const`'s two-arm
+  `hsingle` *does* imply Lipschitz, `L = C₁R + C₂‖J‖`; that is exactly the arm
+  the quasilinear DeTurck nonlinearity adds and `partial_sol_const` cannot
+  express.)
+
+So `projFix_le_two` cannot be instantiated at the campaign data as adapter C's
+hand-off assumed.  `partial_sol_tame` *does* build the contraction internally
+(`Λ` at `TameForcingFixedPoint.lean:534`, `hΨ_lip` at `:831`, `Λ ≤ 1/2` at
+`:575`) but exports none of it, and its `L²` Nemytskii is the local
+`(memLp_tame …).toLp`, with `memLp_tame` `private`.
+
+The missing API is therefore: a public tame Nemytskii (`nemytskiiTameOn` +
+`coeFn`) beside `nemytskiiOn` in
+`…/TensorMaximalRegularity/LocalNemytskii.lean`, then tame analogues of
+`projN_nemytskii`, `forceMap_dist_le`, `projFix_dist_le`, `projFix_le_two`, and
+a `proj_partial_sol_tame` (which is just `partial_sol_tame` at `projNfun`, since
+`‖Π_N x‖ ≤ ‖x‖` gives the tame estimate with the same constants and `Π_N ∘ N`
+is continuous).  That is one adapter-C-sized brick.  **This is a design choice
+for the planner** — the alternative is to re-derive the campaign's `a = 1`
+estimate in `partial_sol_const`'s two-arm shape, which the quasilinear structure
+appears to forbid.
+
+The second gap is the one session 1 already scoped: the DeTurck rung derivation
+at base order 1, calibrated into the `(α, β, D)` of `two_mul_sum_ladder_le`
+(`α < 1` is the absorption) and fed to `galerkin_energy_l1_bound`, then
+`fatou_sq_mass`.  Untouched.
+
+### Verification
+
+Focused checks green on all three edited Lean files; targeted module builds
+green in dependency order (`UnifClassBounds` → `LowRegApplyTwo` 9984 jobs →
+`LowRegAllOrderJet` 9985 jobs).  Axiom census: `isLowSolve_of_sol`,
+`lowreg_solve_two` and `lowreg_joint_smooth` are `[propext, Classical.choice,
+Quot.sound]`; `lowreg_loMass` and everything above it carry `sorryAx`.  Sorry
+census of `LowRegAllOrderJet.lean`: **1**, at `lowreg_loMass` — the file's only
+one, as before, but one scale lower.  No `maxHeartbeats`, no git.
+
+### Lean notes worth keeping
+
+* `timeL2Inclusion` is a plain `def` over `compLpL`, so `rw [h1]` against a
+  `coeFn_compLpL` hypothesis fails on the *syntactic* mismatch
+  `↑↑((timeL2Inclusion ⋯) fHi) t` vs `↑↑((compLpL …) fHi) t`.  `exact h1.trans h2`
+  closes it — `exact` unfolds the `def` at default transparency.  Do not reach
+  for `simp [timeL2Inclusion]`.
+* Keep `a` symbolic: the order-one objects are spelled `((1 : ℕ) : ℝ)` and are
+  NOT interchangeable with the literal `1` (the scale sits in a type index).
+  `IsLowSolve`, `lowreg_loMass` and the transport all use `((1 : ℕ) : ℝ)`; only
+  `IsRealizedTwo`'s `f` sits at the literal `(1 : ℝ)`, which is precisely why
+  `hfLo` exists.
+* `tensorHsCongr` is a `≃ₗᵢ`, so `.injective` is available directly — no
+  `tensorHsCongr_injective` lemma is needed (and none exists).
+
+### Honest accounting
+
+`lowreg_spatialMass` went from 0% to **proved** (its content was the transport,
+which is real but small).  `lowreg_loMass`, the leaf that now carries the
+mathematics, is **0%**.  Front 2's spatialMass chain is therefore NOT complete
+and the campaign sorry census did NOT drop to (N) alone.  (N)
+`ricci_flow_unif_existence`: **0%**, unchanged.
+
+## 2026-08-04, tame identification layer + Z session 3
+
+### What landed elsewhere, and what it buys `lowreg_loMass`
+
+The second gap diagnosed by session 2 — the identification layer being stated
+over `partial_sol_const` while the campaign solves with `partial_sol_tame` — is
+**closed**.  Three files, all axiom-clean:
+
+* `TensorMaximalRegularity/LocalNemytskii.lean`: public `timeL2_norm_le_four`,
+  `memLp_tame`, `nemytskiiTameOn`, `nemytskiiTameOn_coeFn`.
+* `TensorMaximalRegularity/TameForcingFixedPoint.lean`: `nemytskiiTame`,
+  `nemytskiiTame_coeFn`, and **`tameMap_dist_le`** — the contraction
+  `partial_sol_tame` previously ran internally and did not export.
+* `HeatSemigroup/EigenProjTameSol.lean` (new): `projN_cont`, `projN_tame`,
+  `proj_partial_sol_tame`, `projN_nemytskiiTame`, `projFixTame_dist_le`,
+  `projFixTame_le_two`.
+
+Instantiated at the campaign data in `ShortTime/LowRegGalerkinIdent.lean` (new):
+`lowreg_proj_tendsto` exhibits `fLo` as the `L²([0,T]; H^1)` limit of
+`Π_N`-fixed forcings, and `lowreg_projMode_tendsto` descends that to every
+eigen-coordinate at every `t ∈ Icc 0 T`.  The latter is literally the
+convergence hypothesis of `fatou_sq_mass`.  `lowreg_loMass`'s docstring was
+updated to record this; the file now imports `LowRegGalerkinIdent`.
+
+### What `lowreg_loMass` still needs — and it is NOT small
+
+`fatou_sq_mass` takes two inputs.  The convergence half is now proved.  The
+other half — an `N`-uniform bound on
+`∑_{i ∈ eigenIdxFinset N} w_σ(i)·(perModeConv λᵢ (timeModeCoeff (fseq N) i) t)²`
+— is the whole analytic frontier, and it needs three order-one producers that
+exist today only above the Lipschitz gate `2·finrank ℝ E + 10 ≤ a`
+(`≥ 16` in dimension three), listed with their high-order analogues in
+`ShortTime/LowRegGalerkinIdent.md`: the `V_N` Galerkin ODE system for
+`lowregNfun`, the identification of its coordinates with `perModeConv`, and the
+per-scale closure at base order `1`.  The `(α, β, D)` calibration of
+`two_mul_sum_ladder_le` sits *after* the third of these and was again **not
+reached**, so there is still no `(α, β, D)` outcome to report.
+
+### Honest accounting (2026-08-04, session 3)
+
+`lowreg_loMass` is still **0%** and still the single `sorry` of this file
+(`:1052` after the added import).  What moved is its *machinery*: the
+identification half of the pipeline went from unreachable (session 2's blocker)
+to proved and instantiated.  The campaign sorry census did **NOT** drop to (N)
+alone: `lowreg_loMass`, `lowreg_spatialMass`, `lowreg_forceJetMass`,
+`lowreg_allOrderJet`, `lowreg_joint_of_re` and `lowreg_joint_two` all still
+carry `sorryAx`.  (N) `ricci_flow_unif_existence`: **0%**, unchanged, still
+stated-and-unproved at `Evolution/ExtendViaUniqueness.lean:80` with its `sorry`
+at `:98`.
+
+## J0a (2026-08-04): `hDim` on the two mass theorems
+
+`lowreg_loMass` and `lowreg_spatialMass` each gained a leading
+`(hDim : Module.finrank ℝ E = 3)`.  The conclusions are untouched.  Propagation
+was one argument at two call sites (`lowreg_spatialMass` → `lowreg_loMass`, and
+`lowreg_forceJetMass` → `lowreg_spatialMass`, both of which already bound `hDim`).
+The endpoint at the tail of the file already carried `hDim`.
+
+Also: the `lowreg_solve_two` call now supplies the new fibre-threshold parameter
+`thr := deTurckArmContractionThreshold'' (finrank ℝ E)` with its positivity and
+`≤ 1/3` proofs — behaviour identical, but the choice is now visible at the call
+site, which is where J0b will re-choose it from the ladder constant `κ`.
+
+`lowreg_loMass` is still `sorry`.  The widening is what makes the eventual proof
+STATABLE (dimension three is needed by every ladder and tower it must call); it
+proves nothing by itself.
+
+## J4-rung-3 (2026-08-04): NOT DELIVERED — precise narrowing
+
+The dispatched framing was "the engine `two_mul_sum_ladder_le` needs only
+`(α, β, D)` supplied".  Grep says that under-counts by three pieces.  Recording
+the census so the next brick does not re-derive it.
+
+**The pairing budget at k = 3 does NOT fail** (the dispatch's STOP condition is
+NOT met).  Rung `k = 3`, `σ = 3`: the engine wants
+`‖fd‖_{H^{σ−1}} ≤ α‖u‖_{H^{σ+1}} + β‖u‖_{H^σ}`, i.e. `H²  ≤ α·H⁴ + β·H³`.  That is
+EXACTLY `n_diff_hm_rung`'s shape read at `m = k−1 = 2`.  And `c0_jet_tower_quad`
+at `i = 2` has window `range (i+2) = range 4`, i.e. state jets `j ≤ 3`, inside
+`E₃` and strictly below `E₄` — PSTOP §6.3's displayed pairing, confirmed.
+
+**What exists (verified, no work needed).**
+* engine `two_mul_sum_ladder_le` (`Sobolev/Tensor/CrossScaleCauchySchwarz.lean`),
+  ZERO consumers — built for exactly this job.  Its RHS
+  `(2α+ε)E_{σ+1} + (β²/ε)E_σ + 2D√E_σ` maps onto the `hclosure` slot by
+  `Cδ = 2α+ε`, `Cmid k + A N t = β²/ε`, `seed k = 2D`;
+* the consumer slot itself, now `N`-indexed (J5, this brick);
+* the `H^m` ladders `a2_ladder` / `a1_ladder` / `n_diff_hm_rung`;
+* the ball-free towers `c0_jet_tower_quad`, `selfLow_jet_quad` (J3);
+* spectral norm = weighted sum for FINITE combos:
+  `finiteEigenCombo_spectral_normSq`, `finiteEigenComboHs_norm_eq_sqrt_spectral`
+  (`Garding/EigenComboGardingReduction.lean`).
+
+**What is missing (the three real pieces).**
+* **(M1) Finset-form Bessel truncation.**  `∑_{i∈S} w i σ (v.coeff i)² ≤ ‖v‖²_{H^σ}`
+  for general `v`.  Only the SINGLE-mode `weight_mul_coeff_sq_le_normSq`
+  (`Spectral/Intrinsic/TensorHsInterpolationLimit.lean`) exists; no Finset-sum
+  form in the tree.  This is what converts "the ladder bounds
+  `‖𝒩(U)−𝒩(0)‖_{H²}`" into the engine's `hladder` left-hand side.  Small,
+  reusable, canonical home is next to the single-mode lemma.  Do this first.
+* **(M2) a low-lane Galerkin forcing at `a = 1`.**  `deTurckGalerkinForcingSymm`
+  (`HeatSemigroup/GalerkinParabolicEnergyDeTurck.lean:58`) is defined through
+  `deTurckSobolevNHa2Symm`, which only EXISTS above the Lipschitz gate
+  (`deTurckSobolevNHa2_exists_of_super`, `2·finrank+10 ≤ a`).  At `a = 1` the
+  object is `lowregNfun`/`lowRegN`, and no mode-coordinate forcing function is
+  defined for it.  Without it the rung-3 closure has no `Fseq` to be stated
+  ABOUT — this is the second of the three order-one producers listed in
+  `lowreg_loMass`'s own docstring, and it is a prerequisite, not a detail.
+* **(M3) ball-free (quad) ladders.**  `a2_ladder` / `a1_ladder` / `n_diff_hm_rung`
+  all carry `‖T‖_{H^{a+2}} ≤ R₀` with `3 ≤ a` (resp. `2 ≤ a`), i.e. an H⁵ (resp.
+  H⁴) ball — precisely what rung 3 must avoid.  J3 delivered the ball-free
+  `c0_jet_tower_quad`, but the ladders ABOVE it were not re-derived on it:
+  `a1_ladder` still calls `c0_jet_tower` + the private `coeffCap`
+  (`DeTurck/LowRegLadderRung.lean:321`), which turns a tower into a fibre cap via
+  `(1 + (C2·R₀)²)`.
+  The quad route is feasible and dimension three is why: `coeffCap`'s window is
+  `range (finrank/2 + 2) = range 3`, i.e. state jets `j ≤ 2` — so only the H²
+  STATE BALL (PSTOP §6.1(i)) is needed, never H⁵, with the extra
+  `K2·‖T‖²_{H³}` term carrying the `L²_tH³` (PSTOP §6.1(ii)) dependence that
+  becomes the `A N t` coefficient.  This is exactly why J5 had to land first.
+
+**Over-count check, run in both directions.**  `c2_jet_tower`
+(`LowRegLadderRung.lean:145`) BINDS `a`, `R₀`, `hball`, but its conclusion is
+already ball-free in shape and its proof goes through `topKer_jet g`, which takes
+only `hDim` and `g`.  The ball there looks VESTIGIAL, so the a₂ arm's ball
+dependence is likely in `appCc_cap_hs_le`, not in the C2 tower.  Confirm this
+before pricing M3 — it may make the a₂ half of M3 nearly free.
+
+**Why nothing was stated.**  A rung-3 closure written now would need M1+M2+M3 as
+three fresh hypotheses.  That is the frontier-wrapper failure mode CLAUDE.md
+forbids ("at most one genuine mathematical frontier", "no adapter theorems whose
+main content is turning the current goal into new hypotheses").  The honest next
+brick is M1 alone (small, reusable, unblocks the transport), then M3, then M2.
+
+**M3 refinement (grep-verified, same session).**  The a₂ arm's H⁵ ball is NOT in
+`c2_jet_tower` — it is in `appCc_cap_hs_le` (`DeTurck/LowRegLadderRung.lean:78`),
+whose gate is `max 2 (finrank ℝ E / 2 * 2 + 1) ≤ a`, i.e. `a ≥ 3` in dimension
+three, and whose ball is `‖T₀‖_{H^{a+2}} ≤ R₀` ⟹ H⁵.  `c2_jet_tower` binds
+`a`, `R₀`, `hball` but proves its (already ball-free) conclusion through
+`topKer_jet g`, which takes only `hDim` and `g`.
+So M3 splits: the a₂ half needs `appCc_cap_hs_le` re-read at a smaller `a`
+(or a quad sibling), and the a₁ half needs `c0_jet_tower_quad` threaded through
+the private `coeffCap`.  Neither is blocked; both are unwritten.
+
+## 2026-08-05: explicit adapted package threaded through front two
+
+`lowreg_loMass` now consumes `IsAdaptedLowSolve`, and that exact package is
+threaded unchanged through `lowreg_spatialMass`, `lowreg_forceJetMass`,
+`lowreg_allOrderJet`, and `lowreg_joint_of_re`.  The unique producer
+`lowreg_joint_two` now calls `lowreg_solve_adapt` at the endpoint cap; the
+producer's `min` simultaneously preserves that cap and the calibrated
+absorption cap.
+
+The `σ ≤ 3` branch of `lowreg_loMass` is a proved call to `lowregMassLowAt`.
+The single remaining `sorry` is now confined to `3 < σ`, where rungs 4–5 and
+the general-`k` dissipation export are still missing.  Focused verification of
+the whole file and its targeted module refresh passed; the only diagnostic is
+the intentional `sorry` warning.
+
+Honest denominator: `lowreg_loMass` as an all-real-σ theorem remains unproved
+(0%); its σ≤3 branch is closed.  The explicit-package/GAP-ADAPTH machinery is
+complete for one metric, while class-uniform calibration remains separate.
+The `(N)` theorem remains unproved (0%); whole HCG remains about 3%.
+
+## 2026-08-05: all-real low-mass frontier closed
+
+This section supersedes the status immediately above.  `lowreg_loMass` is now a
+proved call to `lowregAllMassAt` for every real exponent.  The proof keeps one
+projected sequence through its ODE, fixed fifth-energy cap, all higher energies,
+and Fatou limit; it neither reselects a path nor performs rung induction.
+
+The source chain `lowreg_spatialMass` → `lowreg_forceJetMass` →
+`lowreg_allOrderJet` → `lowreg_joint_of_re` → `lowreg_joint_two` therefore has
+no residual low-mass frontier.  Focused checks and direct module refreshes
+passed warning-free; the widened axiom census is recorded separately.
+
+Honest denominator: `lowreg_loMass` theorem 100%, and its dedicated all-real
+machinery 100%.  The chain remains a per-metric self-background producer;
+`ricci_flow_unif_existence` is stated but still unproved from it (0%), because one
+threshold, radius, and horizon must be hoisted before `∀ g₀`.  Whole HCG
+compactness remains about 3%.
+
+## 2026-08-05: positive per-metric joint endpoint
+
+`lowreg_joint_open` calls the strict adapted producer, chooses the midpoint
+`(B2 + 1) / 2` internally, and returns one positive horizon carrying the full
+all-order joint endpoint.  Unlike the compatibility route, the theorem no
+longer asks a caller to supply a contraction level whose interval might be
+empty.
+
+Focused verification and the targeted module refresh passed warning-free.  The
+endpoint is complete for each fixed metric (with the representation identity as
+its explicit geometric input).  It is not `(N)`: the horizon is selected after
+the metric, while `ricci_flow_unif_existence` requires one positive horizon
+chosen before the whole metric class.

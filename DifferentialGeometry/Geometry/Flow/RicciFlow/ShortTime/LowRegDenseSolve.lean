@@ -39,7 +39,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 /-- The `H2` realization radius with its fibre bound fixed at the positive
-DeTurck contraction threshold. -/
+DeTurck contraction threshold: the instance of `realize_at_delta`
+(`ShortTime/LowRegRealize.lean`) at `δ = deTurckArmContractionThreshold''`. -/
 theorem realize_at_thr
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -49,35 +50,9 @@ theorem realize_at_thr
           (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
           gFibreOpBound (I := I) (M := M) g
             (ccTensorBilinSymm (I := I) g T)
-              (deTurckArmContractionThreshold'' (Module.finrank ℝ E)) := by
-  obtain ⟨C, hC, hOp⟩ := hs2_op_bound (I := I) (M := M) hDim g
-  let θ : ℝ := deTurckArmContractionThreshold'' (Module.finrank ℝ E)
-  have hθ : 0 < θ := deTurckArmContractionThreshold''_pos (Module.finrank ℝ E)
-  refine ⟨θ / C, div_pos hθ hC, ?_⟩
-  intro T hT
-  have htwo : ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T =
-      smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T :=
-    by
-      ext i
-      rfl
-  have hTtwo :
-      ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T‖ ≤ θ / C := by
-    rw [Nat.cast_one] at hT
-    rw [show (1 : ℝ) + 1 = 2 by norm_num] at hT
-    exact hT
-  have hT' : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ θ / C := by
-    simpa only [htwo] using hTtwo
-  have hdelta : C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ θ := by
-    calc
-      C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
-          ≤ C * (θ / C) := mul_le_mul_of_nonneg_left hT' hC.le
-      _ = θ := by field_simp
-  have hsmall := hOp T
-  intro x v w
-  refine (hsmall x v w).trans ?_
-  exact mul_le_mul_of_nonneg_right
-    (mul_le_mul_of_nonneg_right hdelta (Real.sqrt_nonneg _))
-    (Real.sqrt_nonneg _)
+              (deTurckArmContractionThreshold'' (Module.finrank ℝ E)) :=
+  realize_at_delta (I := I) (M := M) hDim g
+    (deTurckArmContractionThreshold''_pos (Module.finrank ℝ E))
 
 /-- A realization bound valid on an outer radius restricts to every smaller
 lower-state radius. -/

@@ -68,3 +68,29 @@ axiom audit reports only `propext`, `Classical.choice`, and `Quot.sound`.
 (0%); its dedicated machinery is approximately 68% complete.  The independent
 high-side Nemytskii realization remains the next substantial frontier, and the
 whole HCG compactness project remains in the low single digits.
+
+## Reverse-jet packet (2026-08-05)
+
+`reverseJetPack` now exposes the exact bidirectional order-one/order-two metric
+jet data needed by `fibreMorrey_unif_class`.  From `Λ`-equivalence and the
+forward order-one and order-two metric-jet bounds it supplies the common
+first-order coefficient `max (revJetOneC Λ) Λ`, the reverse second-order
+coefficient `revJetTwoC Λ`, their nonnegativity, and all three
+bound predicates in the required orientations.  The constants are fixed by
+the class data before the varying metric; the order-three class hypothesis is
+not used by this Morrey subroute.
+
+Focused verification passed.  The remaining realization-radius boundary is
+separate: the current `realize_at_unif` interface still asks for its
+unrestricted curvature-defect family, whereas the rank-two `H2` use only needs
+a finite low-order curvature producer.
+
+## Narrow reverse-jet extraction (2026-08-05)
+
+The order-at-most-two reverse-jet machinery has moved to
+`UnifReverseJetTwo.lean`.  That module now owns the private metric-parallelism
+helpers, `metric_self_sum`, `revJetOneC`, `revJetTwoC`, `reverseJetOne`,
+`reverseJetTwo`, and `reverseJetPack`.  This file imports the narrow producer;
+its order-three constant, reverse-order-three proof, and all downstream
+Ricci--DeTurck estimates remain here unchanged.  Verification of the extracted
+module and this consumer is pending.
