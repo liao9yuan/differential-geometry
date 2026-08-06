@@ -3065,6 +3065,7 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
 import DifferentialGeometry.Geometry.Operator.MetricFamilyRegularity
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+import DifferentialGeometry.Geometry.Operator.HessianTraceInequality
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Geometry.Operator.LaplacianMinimum
