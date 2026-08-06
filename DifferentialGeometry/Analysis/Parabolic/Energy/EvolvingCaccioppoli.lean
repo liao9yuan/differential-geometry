@@ -691,4 +691,94 @@ theorem caccioppoli_evolving_of_subsolution
       evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff u t at hraw
   exact hraw
 
+theorem caccioppoli_evolving_inner_energy_of_subsolution
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u source : ℝ → M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    {t : ℝ} (hg : MetricFamilyRegularAt (I := I) g t)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {weight dweight : ℝ → ℝ} {a t₀ t₁ A : ℝ}
+    (hat₀ : a ≤ t₀) (ht₀t₁ : t₀ ≤ t₁)
+    (hdweight : ContinuousOn dweight (Icc a t₁))
+    (hweight : ∀ s ∈ Icc a t₁, HasDerivAt weight (dweight s) s)
+    (hweight_nonneg : ∀ s ∈ Icc a t₁, 0 ≤ weight s)
+    (hweight_a : weight a = 0)
+    (hweight_inner : ∀ s ∈ Icc t₀ t₁, weight s = 1)
+    (hu_nonneg : ∀ s ∈ Icc a t₁, ∀ x : M, 0 ≤ u s x)
+    (hpde : ∀ s ∈ Icc a t₁, ∀ x : M,
+      deriv (fun r => u r x) s ≤
+        Δ_g (I := I) (g s)
+          (smoothScalarSlice (I := I) (g s) u hu s).smooth x + source s x)
+    (hrhs_le : ∀ s ∈ Icc t₀ t₁,
+      (∫ r in a..s,
+        dweight r * evolvingLocalizedL2Mass
+            (I := I) (M := M) g cutoff u r +
+          weight r *
+            (4 * evolvingCutoffGradientError
+                (I := I) (M := M) g cutoff u r +
+              evolvingLocalizedForcing
+                (I := I) (M := M) g cutoff u source r +
+              evolvingLocalizedVolumeDistortion
+                (I := I) (M := M) g cutoff u r)) ≤ A) :
+    (∀ s ∈ Icc t₀ t₁,
+      evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u s ≤ A) ∧
+      (∫ s in t₀..t₁,
+        evolvingLocalizedDirichletEnergy
+          (I := I) (M := M) g cutoff u s) ≤ A := by
+  let mass : ℝ → ℝ :=
+    evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u
+  let dissipation : ℝ → ℝ :=
+    evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u
+  have hdirichlet : ContinuousOn dissipation (Icc a t₁) := by
+    simpa only [dissipation] using evolvingLocalizedDirichletEnergy_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hgram hcutoff hu
+  let rhs : ℝ → ℝ := fun s =>
+    dweight s * mass s +
+      weight s *
+        (4 * evolvingCutoffGradientError
+            (I := I) (M := M) g cutoff u s +
+          evolvingLocalizedForcing
+            (I := I) (M := M) g cutoff u source s +
+          evolvingLocalizedVolumeDistortion
+            (I := I) (M := M) g cutoff u s)
+  apply inner_mass_and_dissipation_le
+    (weight := weight) (mass := mass) (dissipation := dissipation) (source := rhs)
+    hat₀ ht₀t₁
+  · intro s hs
+    exact (hweight s hs).continuousAt.continuousWithinAt
+  · simpa only [dissipation] using hdirichlet
+  · exact hweight_nonneg
+  · intro s _
+    exact evolvingLocalizedDirichletEnergy_nonneg
+      (I := I) (M := M) g cutoff u s
+  · exact hweight_a
+  · exact hweight_inner
+  · intro s _
+    exact evolvingLocalizedL2Mass_nonneg
+      (I := I) (M := M) g cutoff u s
+  · simpa only [rhs, mass] using hrhs_le
+  · intro s hs
+    have has : a ≤ s := hat₀.trans hs.1
+    have hsubset : Icc a s ⊆ Icc a t₁ := fun r hr =>
+      ⟨hr.1, hr.2.trans hs.2⟩
+    have henergy := caccioppoli_evolving_of_subsolution
+      (I := I) (M := M) g cutoff u source hcutoff hu hsource hg hgram
+      has (hdweight.mono hsubset)
+      (fun r hr => hweight r (hsubset hr))
+      (fun r hr => hweight_nonneg r (hsubset hr))
+      (fun r hr => hu_nonneg r (hsubset hr))
+      (fun r hr => hpde r (hsubset hr))
+    simpa only [mass, dissipation, rhs] using henergy
+
 end DifferentialGeometry.Analysis.Parabolic.Energy
