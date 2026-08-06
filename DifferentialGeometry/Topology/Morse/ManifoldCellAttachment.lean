@@ -368,7 +368,8 @@ theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_flow {n : ℕ} {
     (c : ℝ) (k : ℕ) (hk : k ≤ n)
     (data : MorseChartData n k hk c I f)
     (g : M → ℝ)
-    (hglow : {x : M | g x ≤ c - data.ε} = sublevel f (c - data.ε) ∪ cellImage hk c data)
+    (hlow : Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ cellImage hk c data}))
     (hgup : {x : M | g x ≤ c + data.ε} = sublevel f (c + data.ε))
     (Φ : GradientLikeFlow I g (c - data.ε) (c + data.ε)) :
     Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace f (c + data.ε))
@@ -436,21 +437,24 @@ theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_flow {n : ℕ} {
   have hflow : (Φ.toDiffeomorph (c - data.ε - (c + data.ε))) ''
         sublevel g (c - data.ε) = sublevel g (c + data.ε) :=
     GradientLikeFlow.toDiffeomorph_image_sublevels Φ (by linarith [data.hεpos])
-  have hflow' : (Φ.toDiffeomorph (c - data.ε - (c + data.ε))) ''
-        (sublevel f (c - data.ε) ∪ E) = sublevel f (c + data.ε) := by
+  let d : M ≃ₜ M := (Φ.toDiffeomorph (c - data.ε - (c + data.ε))).toHomeomorph
+  let s : Set M := sublevel g (c - data.ε)
+  have hflow' : (Φ.toDiffeomorph (c - data.ε - (c + data.ε))) '' sublevel g (c - data.ε) =
+      sublevel f (c + data.ε) := by
     change ((Φ.toDiffeomorph (c - data.ε - (c + data.ε))) '' {x : M | g x ≤ c - data.ε}) =
         {x : M | g x ≤ c + data.ε} at hflow
-    rw [hglow, hgup] at hflow
+    rw [hgup] at hflow
     exact hflow
-  let d : M ≃ₜ M := (Φ.toDiffeomorph (c - data.ε - (c + data.ε))).toHomeomorph
-  let s : Set M := sublevel f (c - data.ε) ∪ E
-  have hflowHomeo : {x : M // x ∈ s} ≃ₜ SublevelSpace f (c + data.ε) := by
+  have hflowHomeo : SublevelSpace g (c - data.ε) ≃ₜ SublevelSpace f (c + data.ε) := by
     have himg : d '' s = sublevel f (c + data.ε) := by
       simpa [d, s] using hflow'
     exact (Homeomorph.image d s).trans (subtypeSetHomeo himg)
-  have hAdj' : CellAdjunctionSpace k φ ≃ₜ {x : M // x ∈ s} := by
-    simpa [s, E, c', cellImage] using hAdj
-  exact ⟨(hflowHomeo.symm.trans hAdj'.symm).toHomotopyEquiv⟩
+  have hlowE : ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ Set.range c'} := Classical.choice hlow
+  have hAdjE : ContinuousMap.HomotopyEquiv
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ Set.range c'}
+      (CellAdjunctionSpace k φ) := hAdj.symm.toHomotopyEquiv
+  exact ⟨(hlowE.symm.trans hflowHomeo.toHomotopyEquiv).symm.trans hAdjE⟩
 
 theorem cellAdjunctionSpace_homeomorph_lowerUnion {n : ℕ} {H : Type}
     [TopologicalSpace H] {M : Type} [TopologicalSpace M]
@@ -530,7 +534,8 @@ theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_diffeomorph {n :
     (c : ℝ) (k : ℕ) (hk : k ≤ n)
     (data : MorseChartData n k hk c I f)
     (g : M → ℝ)
-    (hglow : {x : M | g x ≤ c - data.ε} = sublevel f (c - data.ε) ∪ cellImage hk c data)
+    (hlow : Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ cellImage hk c data}))
     (hgup : {x : M | g x ≤ c + data.ε} = sublevel f (c + data.ε))
     (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
     (hflow : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel g (c + data.ε)) :
@@ -541,19 +546,22 @@ theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_diffeomorph {n :
       {x : M // x ∈ sublevel f (c - data.ε) ∪ E} := by
     simpa [E] using (Classical.choice
       (cellAdjunctionSpace_homeomorph_lowerUnion (I := I) (hf := hf) (data := data)))
-  have hflow' : Φ.toEquiv '' (sublevel f (c - data.ε) ∪ E) = sublevel f (c + data.ε) := by
+  have hflow' : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel f (c + data.ε) := by
     change (Φ.toEquiv '' {x : M | g x ≤ c - data.ε}) = {x : M | g x ≤ c + data.ε} at hflow
-    rw [hglow, hgup] at hflow
+    rw [hgup] at hflow
     exact hflow
   let d : M ≃ₜ M := Φ.toHomeomorph
-  let s : Set M := sublevel f (c - data.ε) ∪ E
-  have hflowHomeo : {x : M // x ∈ s} ≃ₜ SublevelSpace f (c + data.ε) := by
+  let s : Set M := sublevel g (c - data.ε)
+  have hflowHomeo : SublevelSpace g (c - data.ε) ≃ₜ SublevelSpace f (c + data.ε) := by
     have himg : d '' s = sublevel f (c + data.ε) := by
       simpa [d, s] using hflow'
     exact (Homeomorph.image d s).trans (subtypeSetHomeo himg)
-  have hAdj' : CellAdjunctionSpace k (cellAttachingMap hk c data) ≃ₜ {x : M // x ∈ s} := by
-    simpa [s, E, cellImage] using hAdj
-  exact ⟨(hflowHomeo.symm.trans hAdj'.symm).toHomotopyEquiv⟩
+  have hlowE : ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ E} := Classical.choice hlow
+  have hAdjE : ContinuousMap.HomotopyEquiv
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ E}
+      (CellAdjunctionSpace k (cellAttachingMap hk c data)) := hAdj.symm.toHomotopyEquiv
+  exact ⟨(hlowE.symm.trans hflowHomeo.toHomotopyEquiv).symm.trans hAdjE⟩
 
 end ManifoldCellAttachment
 
