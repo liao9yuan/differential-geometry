@@ -64,6 +64,35 @@ theorem riemannianFiberNorm_sq (g : SmoothRiemannianMetric I M) (r s : ℕ) (b :
   rw [riemannianFiberNorm_eq_sqrt]
   exact Real.sq_sqrt (riemannianFiberNormSq_nonneg (I := I) (M := M) g r s b T)
 
+theorem riemannianFiberNorm_eq_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
+    (T : TensorRSSpace r s I b) :
+    riemannianFiberNorm g r s b T = 0 ↔ T = 0 := by
+  letI : NormedAddCommGroup (TensorRSSpace r s I b) :=
+    riemannianFiberNormedAddCommGroup g r s b
+  exact norm_eq_zero
+
+theorem riemannianFiberNorm_add_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
+    (S T : TensorRSSpace r s I b) :
+    riemannianFiberNorm g r s b (S + T) ≤
+      riemannianFiberNorm g r s b S + riemannianFiberNorm g r s b T := by
+  letI : NormedAddCommGroup (TensorRSSpace r s I b) :=
+    riemannianFiberNormedAddCommGroup g r s b
+  exact norm_add_le S T
+
+theorem riemannianFiberNorm_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
+    (c : ℝ) (T : TensorRSSpace r s I b) :
+    riemannianFiberNorm g r s b (c • T) = |c| * riemannianFiberNorm g r s b T := by
+  letI : Bundle.RiemannianBundle (fun x : M => TensorRSSpace r s I x) :=
+    tensorRS_riemannianBundle (I := I) (M := M) g r s
+  let h : Bundle.RiemannianBundle (fun x : M => TensorRSSpace r s I x) := inferInstance
+  letI : NormedAddCommGroup (TensorRSSpace r s I b) :=
+    (h.g.toCore b).toNormedAddCommGroupOfTopology
+      (h.g.continuousAt b) (h.g.isVonNBounded b)
+  letI : NormedSpace ℝ (TensorRSSpace r s I b) :=
+    (h.g.toCore b).toNormedSpaceOfTopology
+      (h.g.continuousAt b) (h.g.isVonNBounded b)
+  exact norm_smul c T
+
 end Elliptic
 end Analysis
 end DifferentialGeometry
