@@ -40,6 +40,7 @@ import DifferentialGeometry.Analysis.Calculus.SmoothExtension.SmoothJetGlue
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
 import DifferentialGeometry.Analysis.Calculus.SpectralEigenSeriesJointGramProjectionJetBound
 import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
+import DifferentialGeometry.Analysis.Calculus.Extrema
 import DifferentialGeometry.Analysis.Calculus.TimeJetEvolution
 import DifferentialGeometry.Analysis.Calculus.TimeJetMatch
 import DifferentialGeometry.Analysis.Calculus.TimeSliceBootstrap
