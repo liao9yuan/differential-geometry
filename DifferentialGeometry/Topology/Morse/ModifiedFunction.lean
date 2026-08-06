@@ -247,9 +247,9 @@ theorem modifiedNormalForm_sublevel_upper {n k : ℕ} (hk : k ≤ n) (c ε δ : 
 
 theorem modifiedNormalForm_cell_mem_lower {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (x : ClosedCell k) :
-    modifiedNormalForm hk c ε δ (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ≤
+    modifiedNormalForm hk c ε δ (cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ≤
       c - ε := by
-  let y : MorseModel n := cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))
+  let y : MorseModel n := cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))
   have hpos : posPart hk y = 0 := by
     ext j
     dsimp [y, posPart]
@@ -1110,7 +1110,7 @@ theorem modifiedCollarHomotopy_mem_lowerCellUnion {n k : ℕ} (hk : k ≤ n) (c 
       exact Or.inr ⟨x, hx⟩
     · have hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε := by
         rw [← hx]
-        have hnp : negPart hk (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) =
+        have hnp : negPart hk (cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) =
             (Real.sqrt (2 * ε)) • (x : EuclideanSpace ℝ (Fin k)) := by
           ext i
           simp [negPart, cellMap_negIdx]
@@ -2077,7 +2077,7 @@ theorem morseNorm_modifiedCollarHomotopy_le {n k : ℕ} (hk : k ≤ n) (c ε : �
 theorem modifiedCollarHomotopy_fix_cell {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
     (hε : 0 < ε) {t : ℝ} {y : MorseModel n}
     (hy : y ∈ Set.range (fun x : ClosedCell k =>
-      cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))) :
+      cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))) :
     modifiedCollarHomotopy hk c ε t y = y := by
   rcases hy with ⟨x, hx⟩
   have hpos : posPart hk y = 0 := by
@@ -2089,7 +2089,7 @@ theorem modifiedCollarHomotopy_fix_cell {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
     rw [if_pos hfy]
   · have hb : ‖negPart hk y‖ ^ 2 ≤ 2 * ε := by
       rw [← hx]
-      have hnp : negPart hk (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) =
+      have hnp : negPart hk (cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) =
           (Real.sqrt (2 * ε)) • (x : EuclideanSpace ℝ (Fin k)) := by
         ext i
         simp [negPart, cellMap_negIdx]

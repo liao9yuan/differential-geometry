@@ -338,7 +338,7 @@ def cellEmbedding {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
     (data : MorseChartData n k hk c I f) : ClosedCell k → M :=
-  fun x => data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
+  fun x => data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
@@ -351,9 +351,9 @@ def cellAttachingMap {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
     (data : MorseChartData n k hk c I f) :
     CellBoundary k → {x : M // x ∈ sublevel f (c - data.ε)} :=
-  fun b => ⟨data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))), by
-    change f (data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)))) ≤ c - data.ε
-    have hn := data.hnorm (cellMap hk (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))) (by
+  fun b => ⟨data.χ (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))), by
+    change f (data.χ (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)))) ≤ c - data.ε
+    have hn := data.hnorm (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))) (by
       exact norm_cellMap_le hk data.ε data.R data.hεR (b : EuclideanSpace ℝ (Fin k)) (le_of_eq b.2))
     rw [hn]
     have hf := morseNormalForm_cellMap hk c (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))
@@ -385,52 +385,52 @@ theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_flow {n : ℕ} {
     · intro b
       rfl
     · intro x y hxy
-      have hx : cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) ∈
+      have hx : cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) ∈
           {y : MorseModel n | morseNorm n y ≤ data.R} := by
         exact norm_cellMap_le hk data.ε data.R data.hεR (x : EuclideanSpace ℝ (Fin k)) x.2
-      have hy : cellMap hk (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) ∈
+      have hy : cellMap (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) ∈
           {y : MorseModel n | morseNorm n y ≤ data.R} := by
         exact norm_cellMap_le hk data.ε data.R data.hεR (y : EuclideanSpace ℝ (Fin k)) y.2
-      have hχ : cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) =
-          cellMap hk (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) := by
+      have hχ : (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n) =
+          (cellMap (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) : MorseModel n) := by
         exact data.χ.injOn (data.hχsrc _ hx) (data.hχsrc _ hy) (by
           simpa [c', cellEmbedding] using hxy)
       exact cellMap_injective hk data.ε data.hεpos hχ
     · have hc'cont : Continuous (fun x : ClosedCell k =>
-          cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) :=
-        continuous_cellMap hk (Real.sqrt (2 * data.ε))
+          (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n)) :=
+        continuous_cellMap (Real.sqrt (2 * data.ε))
       have hmap : Set.MapsTo (fun x : ClosedCell k =>
-          cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) Set.univ data.χ.source := by
+          cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) Set.univ data.χ.source := by
         intro x hx
-        exact data.hχsrc (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
+        exact data.hχsrc (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
           (norm_cellMap_le hk data.ε data.R data.hεR (x : EuclideanSpace ℝ (Fin k)) x.2)
       have hcont : ContinuousOn (fun x : ClosedCell k =>
-          data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))) Set.univ :=
+          data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))) Set.univ :=
         data.χ.continuousOn_toFun.comp hc'cont.continuousOn hmap
       change Continuous (fun x : ClosedCell k =>
-        data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))))
+        data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))))
       exact (continuousOn_univ.mp hcont)
     · rw [Set.disjoint_left]
       intro x hxA hxB
       rcases hxA with ⟨y, hy, hxy⟩
       rcases hy with ⟨z, hz⟩
       have hfz : f x ≤ c - data.ε := by simpa [sublevel] using hxB
-      have hxeq : x = data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
+      have hxeq : x = data.χ (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
         rw [← hxy]
         have hzval : (y : EuclideanSpace ℝ (Fin k)) = (z : EuclideanSpace ℝ (Fin k)) := by
           simpa [cellInteriorInclusion] using
             (congrArg (fun w : ClosedCell k => (w : EuclideanSpace ℝ (Fin k))) hz).symm
         dsimp [c', cellEmbedding]
         simp [hzval]
-      have hfz' : f x = morseNormalForm hk c (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
+      have hfz' : f x = morseNormalForm hk c (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
         rw [hxeq]
-        rw [data.hnorm (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) (by
+        rw [data.hnorm (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) (by
           exact norm_cellMap_le hk data.ε data.R data.hεR (z : EuclideanSpace ℝ (Fin k)) (le_of_lt z.2))]
-      have hnot : ¬ morseNormalForm hk c (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) ≤
+      have hnot : ¬ morseNormalForm hk c (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) ≤
           c - data.ε := by
         intro hn
-        have hmem : cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k)) ∈
-            (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) ''
+        have hmem : (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k)) : MorseModel n) ∈
+            (fun x : ClosedCell k => (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n)) ''
               Set.range (cellInteriorInclusion k) := by
           refine ⟨cellInteriorInclusion k z, ?_, rfl⟩
           exact Set.mem_range.mpr ⟨z, rfl⟩
@@ -476,52 +476,52 @@ theorem cellAdjunctionSpace_homeomorph_lowerUnion {n : ℕ} {H : Type}
     · intro b
       rfl
     · intro x y hxy
-      have hx : cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) ∈
+      have hx : cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) ∈
           {y : MorseModel n | morseNorm n y ≤ data.R} := by
         exact norm_cellMap_le hk data.ε data.R data.hεR (x : EuclideanSpace ℝ (Fin k)) x.2
-      have hy : cellMap hk (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) ∈
+      have hy : cellMap (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) ∈
           {y : MorseModel n | morseNorm n y ≤ data.R} := by
         exact norm_cellMap_le hk data.ε data.R data.hεR (y : EuclideanSpace ℝ (Fin k)) y.2
-      have hχ : cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) =
-          cellMap hk (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) := by
+      have hχ : (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n) =
+          (cellMap (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) : MorseModel n) := by
         exact data.χ.injOn (data.hχsrc _ hx) (data.hχsrc _ hy) (by
           simpa [c', cellEmbedding] using hxy)
       exact cellMap_injective hk data.ε data.hεpos hχ
     · have hc'cont : Continuous (fun x : ClosedCell k =>
-          cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) :=
-        continuous_cellMap hk (Real.sqrt (2 * data.ε))
+          (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n)) :=
+        continuous_cellMap (Real.sqrt (2 * data.ε))
       have hmap : Set.MapsTo (fun x : ClosedCell k =>
-          cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) Set.univ data.χ.source := by
+          cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) Set.univ data.χ.source := by
         intro x hx
-        exact data.hχsrc (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
+        exact data.hχsrc (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
           (norm_cellMap_le hk data.ε data.R data.hεR (x : EuclideanSpace ℝ (Fin k)) x.2)
       have hcont : ContinuousOn (fun x : ClosedCell k =>
-          data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))) Set.univ :=
+          data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))) Set.univ :=
         data.χ.continuousOn_toFun.comp hc'cont.continuousOn hmap
       change Continuous (fun x : ClosedCell k =>
-        data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))))
+        data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))))
       exact (continuousOn_univ.mp hcont)
     · rw [Set.disjoint_left]
       intro x hxA hxB
       rcases hxA with ⟨y, hy, hxy⟩
       rcases hy with ⟨z, hz⟩
       have hfz : f x ≤ c - data.ε := by simpa [sublevel] using hxB
-      have hxeq : x = data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
+      have hxeq : x = data.χ (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
         rw [← hxy]
         have hzval : (y : EuclideanSpace ℝ (Fin k)) = (z : EuclideanSpace ℝ (Fin k)) := by
           simpa [cellInteriorInclusion] using
             (congrArg (fun w : ClosedCell k => (w : EuclideanSpace ℝ (Fin k))) hz).symm
         dsimp [c', cellEmbedding]
         simp [hzval]
-      have hfz' : f x = morseNormalForm hk c (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
+      have hfz' : f x = morseNormalForm hk c (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
         rw [hxeq]
-        rw [data.hnorm (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) (by
+        rw [data.hnorm (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) (by
           exact norm_cellMap_le hk data.ε data.R data.hεR (z : EuclideanSpace ℝ (Fin k)) (le_of_lt z.2))]
-      have hnot : ¬ morseNormalForm hk c (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) ≤
+      have hnot : ¬ morseNormalForm hk c (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) ≤
           c - data.ε := by
         intro hn
-        have hmem : cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k)) ∈
-            (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) ''
+        have hmem : (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k)) : MorseModel n) ∈
+            (fun x : ClosedCell k => (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n)) ''
               Set.range (cellInteriorInclusion k) := by
           refine ⟨cellInteriorInclusion k z, ?_, rfl⟩
           exact Set.mem_range.mpr ⟨z, rfl⟩
@@ -1477,7 +1477,7 @@ theorem morseModifiedRetraction_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε 
     {x : M} (hx : morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f x ≤ c - ε) :
     morseModifiedRetraction (H := H) (M := M) hk c ε R χ x ∈
       sublevel f (c - ε) ∪ χ '' (Set.range (fun z : ClosedCell k =>
-        cellMap hk (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k)))) := by
+        cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k)))) := by
   let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f
   let ball : Set (MorseModel n) := {y : MorseModel n | morseNorm n y ≤ R}
   change g x ≤ c - ε at hx
@@ -1579,7 +1579,7 @@ theorem lowerUnionCellImage_subset_sublevelG {n k : ℕ} (hk : k ≤ n) (c ε δ
     (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
     (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) :
     {x : M | x ∈ sublevel f (c - ε) ∪ χ '' (Set.range (fun z : ClosedCell k =>
-      cellMap hk (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))))} ⊆
+      cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))))} ⊆
     {x : M | morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f x ≤ c - ε} := by
   let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f
   intro x hx
@@ -1608,7 +1608,7 @@ theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k �
     (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source)
     {x : M}
     (hx : x ∈ sublevel f (c - ε) ∪ χ '' (Set.range (fun z : ClosedCell k =>
-      cellMap hk (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))))) :
+      cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))))) :
     morseModifiedRetraction (H := H) (M := M) hk c ε R χ x = x := by
   let ball : Set (MorseModel n) := {y : MorseModel n | morseNorm n y ≤ R}
   rcases hx with hflow | hcell
@@ -1632,7 +1632,7 @@ theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k �
       rw [if_neg hC]
   · rcases hcell with ⟨y, hy, hxy⟩
     have hyCell : y ∈ Set.range (fun z : ClosedCell k =>
-        cellMap hk (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))) := hy
+        cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))) := hy
     rcases hy with ⟨u, hu⟩
     have hyb : morseNorm n y ≤ R := by
       rw [← hu]
@@ -1659,9 +1659,9 @@ theorem sublevel_lower_homotopyEquiv_morseModifiedFunction {n k : ℕ} (hk : k �
     Nonempty (ContinuousMap.HomotopyEquiv
       (SublevelSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f) (c - ε))
       {x : M // x ∈ sublevel f (c - ε) ∪ χ '' (Set.range (fun z : ClosedCell k =>
-        cellMap hk (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))))}) := by
+        cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))))}) := by
   let cellRange : Set (MorseModel n) := Set.range (fun z : ClosedCell k =>
-    cellMap hk (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k)))
+    cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k)))
   let A : Type := SublevelSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f) (c - ε)
   let B : Type := {x : M // x ∈ sublevel f (c - ε) ∪ χ '' cellRange}
   have hretrCont : Continuous (fun x : SublevelSpace (morseModifiedFunction (H := H) (M := M)
@@ -1858,13 +1858,13 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
     have hlow0 := sublevel_lower_homotopyEquiv_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R
       hε₀ hδ₀ hR' hRpos hεR χ f hg hnorm hχsrc
     have hcell : cellImage hk c data = χ '' (Set.range (fun z : ClosedCell k =>
-        cellMap hk (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) := by
+        cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) := by
       change Set.range (fun z : ClosedCell k =>
-          χ (cellMap hk (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) =
+          χ (cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) =
         χ '' (Set.range (fun z : ClosedCell k =>
-          cellMap hk (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k))))
+          cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k))))
       exact Set.range_comp (g := fun y : MorseModel n => χ y)
-        (f := fun z : ClosedCell k => cellMap hk (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))
+        (f := fun z : ClosedCell k => cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))
     change Nonempty (ContinuousMap.HomotopyEquiv
       (SublevelSpace (morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R χ f) (c - ε₀))
       {x : M // x ∈ sublevel f (c - ε₀) ∪ cellImage hk c data})

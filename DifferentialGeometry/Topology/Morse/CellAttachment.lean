@@ -23,30 +23,30 @@ def morseNormalForm {n k : ℕ} (hk : k ≤ n) (c : ℝ) (y : MorseModel n) : �
   c + (1 / 2) * (∑ i : Fin k, - (y (negIdx hk i)) ^ 2 +
     ∑ j : Fin (n - k), (y (posIdx hk j)) ^ 2)
 
-def cellMap {n k : ℕ} (_hk : k ≤ n) (r : ℝ) (x : EuclideanSpace ℝ (Fin k)) :
+def cellMap {n k : ℕ} (r : ℝ) (x : EuclideanSpace ℝ (Fin k)) :
     MorseModel n :=
   fun i => if h : i.val < k then r * x ⟨i.val, h⟩ else 0
 
 theorem cellMap_negIdx {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
     (x : EuclideanSpace ℝ (Fin k)) (i : Fin k) :
-    cellMap hk ε x (negIdx hk i) = ε * x i := by
+    cellMap ε x (negIdx hk i) = ε * x i := by
   dsimp [cellMap, negIdx]
   simp [i.isLt]
 
 theorem cellMap_posIdx {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
     (x : EuclideanSpace ℝ (Fin k)) (j : Fin (n - k)) :
-    cellMap hk ε x (posIdx hk j) = 0 := by
+    cellMap ε x (posIdx hk j) = 0 := by
   dsimp [cellMap, posIdx]
   rw [dif_neg]
   omega
 
 theorem morseNormalForm_cellMap {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
     (x : EuclideanSpace ℝ (Fin k)) :
-    morseNormalForm hk c (cellMap hk ε x) = c + (1 / 2) * (-(ε ^ 2) * ‖x‖ ^ 2) := by
+    morseNormalForm hk c (cellMap ε x) = c + (1 / 2) * (-(ε ^ 2) * ‖x‖ ^ 2) := by
   dsimp [morseNormalForm]
-  have hneg : (∑ i : Fin k, - (cellMap hk ε x (negIdx hk i)) ^ 2) = -(ε ^ 2) * ‖x‖ ^ 2 := by
+  have hneg : (∑ i : Fin k, - (cellMap ε x (negIdx hk i)) ^ 2) = -(ε ^ 2) * ‖x‖ ^ 2 := by
     calc
-      (∑ i : Fin k, - (cellMap hk ε x (negIdx hk i)) ^ 2)
+      (∑ i : Fin k, - (cellMap ε x (negIdx hk i)) ^ 2)
           = ∑ i : Fin k, - (ε * x i) ^ 2 := by
             apply Finset.sum_congr rfl
             intro i hi
@@ -62,16 +62,16 @@ theorem morseNormalForm_cellMap {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
       _ = -(ε ^ 2) * ‖x‖ ^ 2 := by
         congr 1
         exact (EuclideanSpace.real_norm_sq_eq x).symm
-  have hpos : (∑ j : Fin (n - k), (cellMap hk ε x (posIdx hk j)) ^ 2) = 0 := by
+  have hpos : (∑ j : Fin (n - k), (cellMap ε x (posIdx hk j)) ^ 2) = 0 := by
     simp [cellMap_posIdx]
   rw [hneg, hpos]
   ring
 
 def attachMap {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 ≤ ε) (x : CellBoundary k) :
     sublevel (morseNormalForm hk c) (c - ε) :=
-  ⟨cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)), by
+  ⟨cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)), by
     have hnorm : ‖(x : EuclideanSpace ℝ (Fin k))‖ = 1 := x.2
-    have hf : morseNormalForm hk c (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) =
+    have hf : morseNormalForm hk c (cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) =
         c + (1 / 2) * (-((Real.sqrt (2 * ε)) ^ 2) * ‖(x : EuclideanSpace ℝ (Fin k))‖ ^ 2) := by
       rw [morseNormalForm_cellMap]
     have hsq : (Real.sqrt (2 * ε)) ^ 2 = 2 * ε := by
@@ -84,9 +84,9 @@ def attachMap {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 ≤ ε) (x : Cell
 
 theorem cellMap_mem_sublevel_upper {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
     (x : ClosedCell k) (hε : 0 ≤ ε) :
-    cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) ∈
+    cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) ∈
       sublevel (morseNormalForm hk c) (c + ε) := by
-  change morseNormalForm hk c (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ≤ c + ε
+  change morseNormalForm hk c (cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ≤ c + ε
   have hnorm : ‖(x : EuclideanSpace ℝ (Fin k))‖ ≤ 1 := x.2
   have hf := morseNormalForm_cellMap hk c (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))
   rw [hf]
@@ -208,7 +208,7 @@ theorem spineMap_mem_lower {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
 
 theorem spineMap_mem_cell {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 < ε)
     {y : MorseModel n} (hy : ‖negPart hk y‖ ^ 2 ≤ 2 * ε) :
-    spineMap hk y ∈ Set.range (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) := by
+    spineMap hk y ∈ Set.range (fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) := by
   have hr : 0 < Real.sqrt (2 * ε) := by
     exact Real.sqrt_pos.2 (by positivity : 0 < 2 * ε)
   let x : ClosedCell k :=
@@ -237,8 +237,8 @@ theorem spineMap_mem_cell {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 < ε)
       apply Fin.ext
       rfl
     calc
-      cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) i
-          = cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) (negIdx hk ⟨i.val, hi⟩) := by rw [← hi']
+      cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) i
+          = cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) (negIdx hk ⟨i.val, hi⟩) := by rw [← hi']
       _ = Real.sqrt (2 * ε) * (x : EuclideanSpace ℝ (Fin k)) ⟨i.val, hi⟩ :=
         cellMap_negIdx hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) ⟨i.val, hi⟩
       _ = Real.sqrt (2 * ε) * ((Real.sqrt (2 * ε))⁻¹ * negPart hk y ⟨i.val, hi⟩) := by
@@ -258,8 +258,8 @@ theorem spineMap_mem_cell {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 < ε)
       change ↑i = k + (↑i - k)
       rw [Nat.add_sub_of_le hkle]
     calc
-      cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) i
-          = cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) (posIdx hk ⟨i.val - k, _⟩) := by rw [← hi']
+      cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) i
+          = cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) (posIdx hk ⟨i.val - k, _⟩) := by rw [← hi']
       _ = 0 := cellMap_posIdx hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) ⟨i.val - k, _⟩
       _ = recombine hk (negPart hk y) 0 (posIdx hk ⟨i.val - k, _⟩) := by
         rw [recombine_posPart]
@@ -269,7 +269,7 @@ theorem spineMap_mem_cell {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 < ε)
 
 noncomputable def lowerCellUnion {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) : Set (MorseModel n) :=
   sublevel (morseNormalForm hk c) (c - ε) ∪
-    Set.range (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))
+    Set.range (fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))
 
 abbrev upperSublevel {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) : Type :=
   SublevelSpace (morseNormalForm hk c) (c + ε)
@@ -508,14 +508,14 @@ theorem continuous_spineMap {n k : ℕ} (hk : k ≤ n) :
   dsimp [spineMap]
   exact continuous_recombine hk |>.comp ((continuous_negPart hk).prodMk continuous_const)
 
-theorem continuous_cellMap {n k : ℕ} (hk : k ≤ n) (r : ℝ) :
-    Continuous (fun x : ClosedCell k => cellMap hk r (x : EuclideanSpace ℝ (Fin k))) := by
+theorem continuous_cellMap {n k : ℕ} (r : ℝ) :
+    Continuous (fun x : ClosedCell k => (cellMap r (x : EuclideanSpace ℝ (Fin k)) : MorseModel n)) := by
   rw [continuous_iff_continuousAt]
   intro x
   rw [continuousAt_pi]
   intro i
   by_cases hi : i.val < k
-  · have hfun : (fun q : ClosedCell k => cellMap hk r (q : EuclideanSpace ℝ (Fin k)) i) =
+  · have hfun : (fun q : ClosedCell k => cellMap r (q : EuclideanSpace ℝ (Fin k)) i) =
         fun q : ClosedCell k => r * (q : EuclideanSpace ℝ (Fin k)) ⟨i.val, hi⟩ := by
       funext q
       dsimp [cellMap]
@@ -523,7 +523,7 @@ theorem continuous_cellMap {n k : ℕ} (hk : k ≤ n) (r : ℝ) :
     rw [hfun]
     exact ((continuous_const.mul (PiLp.continuous_apply (p := (2 : ENNReal)) (β := fun _ : Fin k => ℝ)
       ⟨i.val, hi⟩)).comp continuous_subtype_val).continuousAt
-  · have hfun : (fun q : ClosedCell k => cellMap hk r (q : EuclideanSpace ℝ (Fin k)) i) =
+  · have hfun : (fun q : ClosedCell k => cellMap r (q : EuclideanSpace ℝ (Fin k)) i) =
       fun _ => 0 := by
       funext q
       dsimp [cellMap]
@@ -533,12 +533,12 @@ theorem continuous_cellMap {n k : ℕ} (hk : k ≤ n) (r : ℝ) :
 
 theorem cellMap_injective {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 < ε) :
     Function.Injective (fun x : ClosedCell k =>
-      cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) := by
+      (cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n)) := by
   intro x y hxy
   apply Subtype.ext
   ext i
-  have hx : cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) (negIdx hk i) =
-      cellMap hk (Real.sqrt (2 * ε)) (y : EuclideanSpace ℝ (Fin k)) (negIdx hk i) := by
+  have hx : cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) (negIdx hk i) =
+      cellMap (Real.sqrt (2 * ε)) (y : EuclideanSpace ℝ (Fin k)) (negIdx hk i) := by
     exact congrFun hxy (negIdx hk i)
   rw [cellMap_negIdx, cellMap_negIdx] at hx
   have hr : Real.sqrt (2 * ε) ≠ 0 := by
@@ -546,7 +546,7 @@ theorem cellMap_injective {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 < ε) :
   exact mul_left_cancel₀ hr hx
 
 theorem cellInterior_disjoint {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 < ε) :
-    Disjoint ((fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ''
+    Disjoint ((fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ''
       Set.range (cellInteriorInclusion k))
       (sublevel (morseNormalForm hk c) (c - ε)) := by
   rw [Set.disjoint_left]
@@ -720,12 +720,12 @@ noncomputable def cellAttachmentHomotopyEquiv {n k : ℕ} (hk : k ≤ n) (c ε :
 noncomputable def cellAttachmentAdjunctionHomeo {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 < ε) :
     CellAdjunctionSpace k (attachMap hk c ε (le_of_lt hε)) ≃ₜ lowerUnion hk c ε := by
   refine cellAdjunctionHomeomorphUnionImage (n := k) (φ := attachMap hk c ε (le_of_lt hε))
-    (c := fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))
+    (c := fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))
     ?hφ ?hc ?hcont ?hinterior ?hclosed
   · intro b
     rfl
   · exact cellMap_injective hk ε hε
-  · exact continuous_cellMap hk (Real.sqrt (2 * ε))
+  · exact continuous_cellMap (Real.sqrt (2 * ε))
   · exact cellInterior_disjoint hk c ε hε
   · exact isClosed_sublevel_normalForm hk c (c - ε)
 
@@ -827,18 +827,18 @@ theorem norm_cellRetractionStep_le {n k : ℕ} (hk : k ≤ n) {t : ℝ} (ht0 : 0
   nlinarith [sq_nonneg ‖negPart hk y‖]
 
 theorem norm_cellMap_le {n k : ℕ} (hk : k ≤ n) (ε R : ℝ) (hR : Real.sqrt (2 * ε) ≤ R)
-    (x : EuclideanSpace ℝ (Fin k)) (hx : ‖x‖ ≤ 1) : morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x) ≤ R := by
-  have hsq : morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x) ^ 2 ≤ (Real.sqrt (2 * ε)) ^ 2 := by
-    have h1 : morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x) ^ 2 =
-        ∑ i : Fin n, ((cellMap hk (Real.sqrt (2 * ε)) x) i) ^ 2 := by
+    (x : EuclideanSpace ℝ (Fin k)) (hx : ‖x‖ ≤ 1) : morseNorm n (cellMap (Real.sqrt (2 * ε)) x) ≤ R := by
+  have hsq : morseNorm n (cellMap (Real.sqrt (2 * ε)) x) ^ 2 ≤ (Real.sqrt (2 * ε)) ^ 2 := by
+    have h1 : morseNorm n (cellMap (Real.sqrt (2 * ε)) x) ^ 2 =
+        ∑ i : Fin n, ((cellMap (Real.sqrt (2 * ε)) x) i) ^ 2 := by
       simpa [morseNorm] using
-        (EuclideanSpace.real_norm_sq_eq (WithLp.toLp 2 (cellMap hk (Real.sqrt (2 * ε)) x)))
+        (EuclideanSpace.real_norm_sq_eq (WithLp.toLp 2 (cellMap (Real.sqrt (2 * ε)) x)))
     rw [h1]
-    rw [sum_split_fin hk (fun i : Fin n => ((cellMap hk (Real.sqrt (2 * ε)) x) i) ^ 2)]
-    have hneg : (∑ i : Fin k, ((cellMap hk (Real.sqrt (2 * ε)) x) (negIdx hk i)) ^ 2) ≤
+    rw [sum_split_fin hk (fun i : Fin n => ((cellMap (Real.sqrt (2 * ε)) x) i) ^ 2)]
+    have hneg : (∑ i : Fin k, ((cellMap (Real.sqrt (2 * ε)) x) (negIdx hk i)) ^ 2) ≤
         (Real.sqrt (2 * ε)) ^ 2 * ‖x‖ ^ 2 := by
       calc
-        (∑ i : Fin k, ((cellMap hk (Real.sqrt (2 * ε)) x) (negIdx hk i)) ^ 2)
+        (∑ i : Fin k, ((cellMap (Real.sqrt (2 * ε)) x) (negIdx hk i)) ^ 2)
             = (∑ i : Fin k, (Real.sqrt (2 * ε) * x i) ^ 2) := by
               apply Finset.sum_congr rfl
               intro i hi
@@ -849,7 +849,7 @@ theorem norm_cellMap_le {n k : ℕ} (hk : k ≤ n) (ε R : ℝ) (hR : Real.sqrt 
           apply Finset.sum_le_sum
           intro i hi
           exact le_of_eq (mul_pow (Real.sqrt (2 * ε)) (x i) 2)
-    have hpos : (∑ j : Fin (n - k), ((cellMap hk (Real.sqrt (2 * ε)) x) (posIdx hk j)) ^ 2) = 0 := by
+    have hpos : (∑ j : Fin (n - k), ((cellMap (Real.sqrt (2 * ε)) x) (posIdx hk j)) ^ 2) = 0 := by
       apply Finset.sum_eq_zero
       intro j hj
       rw [cellMap_posIdx]
@@ -861,10 +861,10 @@ theorem norm_cellMap_le {n k : ℕ} (hk : k ≤ n) (ε R : ℝ) (hR : Real.sqrt 
     have hx : (Real.sqrt (2 * ε)) ^ 2 * ‖x‖ ^ 2 ≤ (Real.sqrt (2 * ε)) ^ 2 := by
       simpa using (mul_le_mul_of_nonneg_left hx2 (sq_nonneg (Real.sqrt (2 * ε))))
     nlinarith [hneg, hx, hx2]
-  have hnorm : morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x) ≤ Real.sqrt (2 * ε) := by
+  have hnorm : morseNorm n (cellMap (Real.sqrt (2 * ε)) x) ≤ Real.sqrt (2 * ε) := by
     calc
-      morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x)
-          = |morseNorm n (cellMap hk (Real.sqrt (2 * ε)) x)| := by
+      morseNorm n (cellMap (Real.sqrt (2 * ε)) x)
+          = |morseNorm n (cellMap (Real.sqrt (2 * ε)) x)| := by
             rw [abs_of_nonneg (norm_nonneg _)]
       _ ≤ |Real.sqrt (2 * ε)| := sq_le_sq.mp hsq
       _ = Real.sqrt (2 * ε) := abs_of_nonneg (Real.sqrt_nonneg (2 * ε))
@@ -876,13 +876,13 @@ abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
 abbrev ballLowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n //
     (y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R) ∨
-      y ∈ Set.range (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))}
+      y ∈ Set.range (fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))}
 
 theorem mem_ballLowerUnion_iff {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hR : Real.sqrt (2 * ε) ≤ R) (y : MorseModel n) :
     y ∈ lowerCellUnion hk c ε ∧ morseNorm n y ≤ R ↔
       (y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R) ∨
-        y ∈ Set.range (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) := by
+        y ∈ Set.range (fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) := by
   constructor
   · rintro ⟨h | ⟨x, hx⟩, hb⟩
     · exact Or.inl ⟨h, hb⟩
@@ -895,7 +895,7 @@ theorem mem_ballLowerUnion_iff {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
 theorem norm_le_of_mem_ballLowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hR : Real.sqrt (2 * ε) ≤ R) {y : MorseModel n}
     (h : (y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R) ∨
-      y ∈ Set.range (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))) :
+      y ∈ Set.range (fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))) :
     morseNorm n y ≤ R := by
   rcases h with h | ⟨x, hx⟩
   · exact h.2
@@ -1070,9 +1070,9 @@ noncomputable def ballCellAttachmentHomotopyEquiv {n k : ℕ} (hk : k ≤ n) (c 
 
 def ballAttachMap {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) (hε : 0 ≤ ε) (hR : Real.sqrt (2 * ε) ≤ R)
     (x : CellBoundary k) : {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R} :=
-  ⟨cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)), by
+  ⟨cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)), by
     constructor
-    · change morseNormalForm hk c (cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ≤ c - ε
+    · change morseNormalForm hk c (cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) ≤ c - ε
       have hf := morseNormalForm_cellMap hk c (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))
       rw [hf]
       have hnorm : ‖(x : EuclideanSpace ℝ (Fin k))‖ = 1 := x.2
@@ -1086,12 +1086,12 @@ noncomputable def ballCellAdjunctionHomeo {n k : ℕ} (hk : k ≤ n) (c ε R : �
     (hR : Real.sqrt (2 * ε) ≤ R) :
     CellAdjunctionSpace k (ballAttachMap hk c ε R (le_of_lt hε) hR) ≃ₜ ballLowerUnion hk c ε R := by
   refine cellAdjunctionHomeomorphUnionImage (n := k) (φ := ballAttachMap hk c ε R (le_of_lt hε) hR)
-    (c := fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))
+    (c := fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)))
     ?hφ ?hc ?hcont ?hinterior ?hclosed
   · intro b
     rfl
   · exact cellMap_injective hk ε hε
-  · exact continuous_cellMap hk (Real.sqrt (2 * ε))
+  · exact continuous_cellMap (Real.sqrt (2 * ε))
   · rw [Set.disjoint_left]
     intro y hyA hyB
     exact (Set.disjoint_left.mp (cellInterior_disjoint hk c ε hε)) hyA hyB.1
