@@ -10,6 +10,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
@@ -109,6 +110,138 @@ theorem localizedSpacetimeMeasure_real_sublevel_le_evolvingLocalizedSublevelMass
         hvolume (level := -level)
   simpa only [neg_lt_neg_iff, evolvingLocalizedSuperlevelMass,
     evolvingLocalizedSublevelMass] using h
+
+theorem early_localizedSpacetimeMeasure_centered_log_superlevel_tail_of_evolving_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    {q : SmoothRiemannianMetric I M} (deviationCutoff : SmoothScalar q)
+    (averagingCutoff : M → ℝ) (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H W Wdeviation : ℝ) {a τ t₀ r : ℝ}
+    (haτ : a ≤ τ) (hr : 0 < r) (hCtail : 0 ≤ Ctail)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (Cvolume : ℝ≥0∞) (hCvolume : Cvolume ≠ ⊤)
+    (hvolume : ∀ t ∈ Icc a τ,
+      riemannianVolumeMeasure (I := I) (M := M) q ≤
+        Cvolume • riemannianMeasureFamily (I := I) (M := M) g t)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc a τ))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g deviationCutoff.toFun averagingCutoff Ctail (Icc a τ))
+    (htrace : ∀ t ∈ Icc a τ, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hmass_le : ∀ t ∈ Icc a τ,
+      evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
+    (hdeviationMass_le : ∀ t ∈ Icc a τ,
+      evolvingCutoffMass
+        (I := I) (M := M) g deviationCutoff.toFun t ≤ Wdeviation)
+    (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    (localizedSpacetimeMeasure (I := I) (M := M) deviationCutoff a τ).real
+        {z | evolvingLocalizedAverage
+              (I := I) (M := M) g averagingCutoff
+                (fun s x => Real.log (u s x)) τ + r <
+            Real.log (u z.1 z.2)} ≤
+      Cvolume.toReal *
+        (max
+            (2 * (∫ s in a..τ,
+              evolvingLogCenterDrift
+                (I := I) (M := M) g averagingCutoff Ccenter H s) *
+              ((τ - a) * Wdeviation))
+            (8 * Ctail * W) / r) := by
+  have hlog := contMDiff_log_of_pos hu hpos
+  have hbridge :=
+    localizedSpacetimeMeasure_real_superlevel_le_evolvingLocalizedSuperlevelMass
+      (I := I) (M := M) g deviationCutoff
+        (fun s x => Real.log (u s x)) hlog haτ hg Cvolume hCvolume hvolume
+        (level := evolvingLocalizedAverage
+          (I := I) (M := M) g averagingCutoff
+            (fun s x => Real.log (u s x)) τ + r)
+  have htail :=
+    integrated_early_centered_evolving_log_superlevel_tail_of_supersolution
+      (I := I) (M := M) g deviationCutoff.toFun averagingCutoff u hu hpos
+        Ccenter Ctail H W Wdeviation haτ hr hCtail hg hgram
+          deviationCutoff.smooth haveragingCutoff hne hPcenter hPtail htrace
+            hmass_le hdeviationMass_le hpde
+  exact hbridge.trans
+    (mul_le_mul_of_nonneg_left htail ENNReal.toReal_nonneg)
+
+theorem late_localizedSpacetimeMeasure_centered_log_sublevel_tail_of_evolving_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    {q : SmoothRiemannianMetric I M} (deviationCutoff : SmoothScalar q)
+    (averagingCutoff : M → ℝ) (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H W Wdeviation : ℝ) {τ b t₀ r : ℝ}
+    (hτb : τ ≤ b) (hr : 0 < r) (hCtail : 0 ≤ Ctail)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (Cvolume : ℝ≥0∞) (hCvolume : Cvolume ≠ ⊤)
+    (hvolume : ∀ t ∈ Icc τ b,
+      riemannianVolumeMeasure (I := I) (M := M) q ≤
+        Cvolume • riemannianMeasureFamily (I := I) (M := M) g t)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc τ b))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g deviationCutoff.toFun averagingCutoff Ctail (Icc τ b))
+    (htrace : ∀ t ∈ Icc τ b, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hmass_le : ∀ t ∈ Icc τ b,
+      evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
+    (hdeviationMass_le : ∀ t ∈ Icc τ b,
+      evolvingCutoffMass
+        (I := I) (M := M) g deviationCutoff.toFun t ≤ Wdeviation)
+    (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    (localizedSpacetimeMeasure (I := I) (M := M) deviationCutoff τ b).real
+        {z | Real.log (u z.1 z.2) <
+            evolvingLocalizedAverage
+              (I := I) (M := M) g averagingCutoff
+                (fun s x => Real.log (u s x)) τ - r} ≤
+      Cvolume.toReal *
+        (max
+            (2 * (∫ s in τ..b,
+              evolvingLogCenterDrift
+                (I := I) (M := M) g averagingCutoff Ccenter H s) *
+              ((b - τ) * Wdeviation))
+            (8 * Ctail * W) / r) := by
+  have hlog := contMDiff_log_of_pos hu hpos
+  have hbridge :=
+    localizedSpacetimeMeasure_real_sublevel_le_evolvingLocalizedSublevelMass
+      (I := I) (M := M) g deviationCutoff
+        (fun s x => Real.log (u s x)) hlog hτb hg Cvolume hCvolume hvolume
+        (level := evolvingLocalizedAverage
+          (I := I) (M := M) g averagingCutoff
+            (fun s x => Real.log (u s x)) τ - r)
+  have htail :=
+    integrated_late_centered_evolving_log_sublevel_tail_of_supersolution
+      (I := I) (M := M) g deviationCutoff.toFun averagingCutoff u hu hpos
+        Ccenter Ctail H W Wdeviation hτb hr hCtail hg hgram
+          deviationCutoff.smooth haveragingCutoff hne hPcenter hPtail htrace
+            hmass_le hdeviationMass_le hpde
+  exact hbridge.trans
+    (mul_le_mul_of_nonneg_left htail ENNReal.toReal_nonneg)
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
