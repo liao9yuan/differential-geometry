@@ -2021,6 +2021,35 @@ def canonicalEvolvingLateBombieriGiustiThresholdSum
       (canonicalEvolvingLateBombieriGiustiReverseCost
         n Vfixed Vmoving C G B τ c d D lower upper k) / 4)
 
+def canonicalEvolvingLateBombieriGiustiThresholdSumNatAdd
+    (n : ℕ) (Vfixed Vmoving : ℝ≥0∞)
+    (C G B p₀ c₀ τ c d D lower upper : ℝ) (j : ℕ) : ℝ :=
+  ∑' k : ℕ, (3 / 4 : ℝ) ^ k *
+    (bombieriGiustiThreshold p₀ c₀
+      (canonicalEvolvingLateBombieriGiustiReverseCost
+        n Vfixed Vmoving C G B τ c d D lower upper (j + k)) / 4)
+
+theorem evolvingBombieriGiustiLatePointwiseFactor_nonneg
+    (n : ℕ) (V : ℝ≥0∞) (C G B p τ c d D lower upper : ℝ) :
+    0 ≤ evolvingBombieriGiustiLatePointwiseFactor
+      n V C G B p τ c d D lower upper := by
+  exact mul_nonneg
+    (Real.rpow_nonneg
+      (mul_nonneg (zero_le_one.trans (le_max_left 1 V.toReal))
+        (Real.exp_pos _).le) _)
+    (Real.rpow_nonneg ENNReal.toReal_nonneg _)
+
+def canonicalEvolvingBombieriGiustiWeakHarnackBound
+    (n : ℕ) (V : ℝ≥0∞)
+    (C G Bearly Blate rate p₀ c₀ A b τ c d D lower upper : ℝ) : ℝ :=
+  Real.exp (rate * (D - A)) *
+    (Real.exp (canonicalEvolvingEarlyBombieriGiustiThresholdSum
+      n V C p₀ c₀ A b τ G Bearly lower upper) *
+    (evolvingBombieriGiustiLatePointwiseFactor
+      n V C G Blate p₀ τ c d D lower upper *
+    Real.exp (canonicalEvolvingLateBombieriGiustiThresholdSumNatAdd
+      n V V C G Blate p₀ c₀ τ c d D lower upper 1)))
+
 def canonicalEvolvingBombieriGiustiCrossoverBound
     (n : ℕ) (V : ℝ≥0∞)
     (C G Bearly Blate rate p₀ c₀ A b τ c d D lower upper : ℝ) : ℝ :=
@@ -2067,6 +2096,45 @@ theorem localizedSpacetimeRpowNorm_mul_inv_le_canonicalEvolvingBombieriGiustiCro
       (bombieriGiustiSpatialCutoff rho lower upper 0)
       rate center u hu hpos hp₀ hrate (Real.exp_pos _).le hearly hlate
   simpa only [canonicalEvolvingBombieriGiustiCrossoverBound] using hbound
+
+omit [I.Boundaryless] in
+theorem localizedSpacetimeRpowNorm_le_canonicalEvolvingBombieriGiustiWeakHarnackBound_mul_of_exponentialTimeRescale_bounds
+    {qMetric : SmoothRiemannianMetric I M}
+    (rho : SmoothScalar qMetric)
+    (rate center : ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (x : M)
+    {n : ℕ} {V : ℝ≥0∞}
+    {C G Bearly Blate p₀ c₀ A b τ c d D lower upper t : ℝ}
+    (hp₀ : 0 < p₀) (hrate : 0 ≤ rate) (htD : t ≤ D)
+    (hearly : localizedSpacetimeRpowNorm (I := I) (M := M)
+      (bombieriGiustiSpatialCutoff rho lower upper 0)
+      (exponentialTimeRescale rate center u) p₀ A b ≤
+        Real.exp (canonicalEvolvingEarlyBombieriGiustiThresholdSum
+          n V C p₀ c₀ A b τ G Bearly lower upper))
+    (hlate : (exponentialTimeRescale rate center u t x)⁻¹ ≤
+      evolvingBombieriGiustiLatePointwiseFactor
+          n V C G Blate p₀ τ c d D lower upper *
+        Real.exp (canonicalEvolvingLateBombieriGiustiThresholdSumNatAdd
+          n V V C G Blate p₀ c₀ τ c d D lower upper 1)) :
+    localizedSpacetimeRpowNorm (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper 0) u p₀ A b ≤
+      canonicalEvolvingBombieriGiustiWeakHarnackBound
+        n V C G Bearly Blate rate p₀ c₀ A b τ c d D lower upper * u t x := by
+  have hbound :=
+    localizedSpacetimeRpowNorm_le_of_exponentialTimeRescale_bound_of_inv_bound
+      (I := I) (M := M) (bombieriGiustiSpatialCutoff rho lower upper 0)
+        rate center u hu hpos x hp₀ hrate htD (Real.exp_pos _).le
+        (mul_nonneg
+          (evolvingBombieriGiustiLatePointwiseFactor_nonneg
+            n V C G Blate p₀ τ c d D lower upper)
+          (Real.exp_pos _).le)
+        hearly hlate
+  simpa only [canonicalEvolvingBombieriGiustiWeakHarnackBound] using hbound
 
 theorem localizedSpacetimeRpowNorm_mul_inv_le_canonicalEvolvingBombieriGiustiCrossoverBound_of_supersolution
     (qMetric : SmoothRiemannianMetric I M)
