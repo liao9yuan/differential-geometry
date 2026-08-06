@@ -320,6 +320,21 @@ noncomputable def adjunctionHomeomorphUnionImage {X₀ : Set Y} (i : A → B) (�
   exact IsHomeomorph.homeomorph (f := f)
     (isHomeomorph_iff_continuous_isClosedMap_bijective.mpr ⟨hfcont, hfclosed, ⟨hfinj, hfsurj⟩⟩)
 
+theorem adjunctionHomeomorphUnionImage_lower {X₀ : Set Y} (i : A → B) (φ : A → X₀) (c : B → Y)
+    (hφ : ∀ a, (φ a : Y) = c (i a)) (hc : Function.Injective c) (hcont : Continuous c)
+    (hboundary : ∀ d : B, c d ∈ X₀ → d ∈ Set.range i)
+    (hclosed : IsClosed X₀) [CompactSpace B] [T2Space Y] (x : X₀) :
+    (adjunctionHomeomorphUnionImage i φ c hφ hc hcont hboundary hclosed)
+      (adjunctionLower φ x) = ⟨x, Or.inl x.2⟩ := by
+  change adjunctionRealization X₀ i c φ hφ (adjunctionLower φ x) = ⟨x, Or.inl x.2⟩
+  dsimp [adjunctionRealization, adjunctionUnionMap, adjunctionLower, adjunctionMk]
+
+omit [TopologicalSpace Y] [TopologicalSpace B] in
+theorem adjunctionRealization_lower {X₀ : Set Y} (i : A → B) (c : B → Y) {φ : A → X₀}
+    (hφ : ∀ a, (φ a : Y) = c (i a)) (x : X₀) :
+    adjunctionRealization X₀ i c φ hφ (adjunctionLower φ x) = ⟨x, Or.inl x.2⟩ := by
+  dsimp [adjunctionRealization, adjunctionUnionMap, adjunctionLower, adjunctionMk]
+
 noncomputable def cellAdjunctionHomeomorphUnionImage {n : ℕ} {X₀ : Set Y}
     (φ : CellBoundary n → X₀) (c : ClosedCell n → Y)
     (hφ : ∀ b, (φ b : Y) = c (cellBoundaryInclusion n b)) (hc : Function.Injective c)

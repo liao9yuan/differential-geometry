@@ -1,4 +1,5 @@
 import DifferentialGeometry.Topology.Morse.CellAttachment
+import DifferentialGeometry.Topology.Attachment.Relative
 import DifferentialGeometry.Topology.Morse.Flow
 import DifferentialGeometry.Topology.Morse.Manifold
 import DifferentialGeometry.Topology.Morse.ModifiedFunction
@@ -8,7 +9,9 @@ import Mathlib.Topology.MetricSpace.Bounded
 namespace DifferentialGeometry.Topology.Morse
 
 open Manifold
-open scoped Topology Manifold
+open DifferentialGeometry.Topology
+open DifferentialGeometry.Analysis.ODE
+open scoped Topology Manifold ContDiff
 
 noncomputable section
 
@@ -106,217 +109,67 @@ private def subtypeSetHomeo {X : Type} [TopologicalSpace X] {s t : Set X} (h : s
   continuous_invFun := by fun_prop
 
 
-private theorem exists_morseChart {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
-    [TopologicalSpace M] [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
-    (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ n)
-    (hcrit : fderiv ℝ (fun y => f ((extChartAt I p).symm y)) (extChartAt I p p) = 0)
-    (hnd : (QuadraticMap.associated (R := ℝ)
-      (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p))).SeparatingLeft)
-    (hindex : sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) = k)
-    (hfp : f p = c) :
-    ∃ R : ℝ, 0 < R ∧
-    ∃ χ : OpenPartialHomeomorph (MorseModel n) M,
-      (∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y) ∧
-      (∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) := by
-  have hcrit' : IsCriticalPointAt I f p :=
-    (isCriticalPointAt_iff_chart_fderiv I f
-      (hf.of_le (le_top : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))) p).2 hcrit
-  have hnd' : IsNondegenerateCriticalPointAt I f p := ⟨hcrit', hnd⟩
-  rcases morse_lemma I f hf p k hk hcrit' hnd' hindex with
-    ⟨R, hRpos, χ, _, _, _, hχsrc, hnorm, _, _⟩
-  refine ⟨R, hRpos, χ, ?_, ?_⟩
-  · intro y hy
-    rw [← hfp]
-    exact hnorm y hy
-  · exact hχsrc
-
-private theorem chartBallHomeo_eval {n : ℕ} {M : Type} [TopologicalSpace M]
-    (χ : OpenPartialHomeomorph (MorseModel n) M) (R : ℝ)
-    (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) :
-    ∃ he : {y : MorseModel n // morseNorm n y ≤ R} ≃ₜ
-        {x : M // x ∈ χ '' {y : MorseModel n | morseNorm n y ≤ R}},
-      ∀ y : {y : MorseModel n // morseNorm n y ≤ R}, (he y : M) = χ y.1 := by
-  let ball : Set (MorseModel n) := {y : MorseModel n | morseNorm n y ≤ R}
-  let U : Set M := χ '' ball
-  let hχ : χ.source ≃ₜ χ.target := openPartialHomeomorphSourceHomeo χ
-  have himg : χ '' ball ⊆ χ.target := by
-    intro x hx
-    rcases hx with ⟨y, hy, hxy⟩
-    rw [← hxy]
-    exact χ.map_source (hχsrc y hy)
-  let he : {y : MorseModel n // morseNorm n y ≤ R} ≃ₜ {x : M // x ∈ U} :=
-    { toFun := fun y => ⟨χ y.1, ⟨y.1, y.2, rfl⟩⟩
-      invFun := fun x => ⟨χ.symm x.1, by
-        rcases x.2 with ⟨y, hy, hxy⟩
-        have hyin : y ∈ χ.source := hχsrc y hy
-        have hround : χ.symm x.1 = y := by
-          rw [← hxy]
-          exact χ.left_inv hyin
-        rw [hround]
-        exact hy⟩
-      left_inv := by
-        intro y
-        apply Subtype.ext
-        exact χ.left_inv (hχsrc y.1 y.2)
-      right_inv := by
-        intro x
-        apply Subtype.ext
-        exact χ.right_inv (himg x.2)
-      continuous_toFun := by
-        have h1 : Continuous (fun y : {y : MorseModel n // y ∈ χ.source} => χ y.1) :=
-          continuousOn_iff_continuous_restrict.mp χ.continuousOn_toFun
-        have h2 : Continuous (fun y : {y : MorseModel n // morseNorm n y ≤ R} =>
-            (⟨y.1, hχsrc y.1 y.2⟩ : {y : MorseModel n // y ∈ χ.source})) := by
-          exact (Topology.IsInducing.subtypeVal.continuous_iff).2 continuous_subtype_val
-        exact (Topology.IsInducing.subtypeVal.continuous_iff).2 (h1.comp h2)
-      continuous_invFun := by
-        have h1 : Continuous (fun x : {x : M // x ∈ χ.target} => χ.symm x.1) :=
-          continuousOn_iff_continuous_restrict.mp χ.continuousOn_invFun
-        have h2 : Continuous (fun x : {x : M // x ∈ U} =>
-            (⟨x.1, himg x.2⟩ : {x : M // x ∈ χ.target})) := by
-          exact (Topology.IsInducing.subtypeVal.continuous_iff).2 continuous_subtype_val
-        exact (Topology.IsInducing.subtypeVal.continuous_iff).2 (h1.comp h2) }
-  have heval : ∀ y : {y : MorseModel n // morseNorm n y ≤ R}, (he y : M) = χ y.1 := by
-    intro y
-    simp [he]
-  exact ⟨he, heval⟩
-
-theorem morseCellAttachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
-    [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
-    (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ n)
-    (hcrit : fderiv ℝ (fun y => f ((extChartAt I p).symm y)) (extChartAt I p p) = 0)
-    (hnd : (QuadraticMap.associated (R := ℝ)
-      (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p))).SeparatingLeft)
-    (hindex : sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) = k)
-    (hfp : f p = c) :
-    ∃ R : ℝ, 0 < R ∧
-    ∃ χ : OpenPartialHomeomorph (MorseModel n) M,
-      (∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y) ∧
-      (∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) ∧
-      ∃ ε : ℝ, 0 < ε ∧ Real.sqrt (2 * ε) ≤ R ∧
-        ∃ φ : CellBoundary k →
-            {x : {x : M // x ∈ χ '' {y : MorseModel n | morseNorm n y ≤ R}} //
-              x.1 ∈ sublevel f (c - ε)},
-          Nonempty (ContinuousMap.HomotopyEquiv
-            {x : M // x ∈ χ '' {y : MorseModel n | morseNorm n y ≤ R} ∧ x ∈ sublevel f (c + ε)}
-            (CellAdjunctionSpace k φ)) := by
-  rcases exists_morseChart I f hf p c k hk hcrit hnd hindex hfp with ⟨R, hRpos, χ, hnorm, hχsrc⟩
-  let ε : ℝ := R ^ 2 / 4
-  have hεpos : 0 < ε := by dsimp [ε]; positivity
-  have hεR : Real.sqrt (2 * ε) ≤ R := by
-    dsimp [ε]
-    have hRnonneg : 0 ≤ R := le_of_lt hRpos
-    have hsq : (Real.sqrt (2 * (R ^ 2 / 4))) ^ 2 ≤ R ^ 2 := by
-      rw [Real.sq_sqrt (by nlinarith [sq_nonneg R])]
-      ring_nf
-      nlinarith [sq_nonneg R]
-    have habs := sq_le_sq.mp hsq
-    calc
-      Real.sqrt (2 * (R ^ 2 / 4)) = |Real.sqrt (2 * (R ^ 2 / 4))| :=
-        (abs_of_nonneg (Real.sqrt_nonneg _)).symm
-      _ ≤ |R| := habs
-      _ = R := abs_of_nonneg hRnonneg
-  let he : {y : MorseModel n // morseNorm n y ≤ R} ≃ₜ
-      {x : M // x ∈ χ '' {y : MorseModel n | morseNorm n y ≤ R}} :=
-    Classical.choose (chartBallHomeo_eval (M := M) χ R hχsrc)
-  have heval : ∀ y : {y : MorseModel n // morseNorm n y ≤ R}, (he y : M) = χ y.1 :=
-    Classical.choose_spec (chartBallHomeo_eval (M := M) χ R hχsrc)
-  let ball : Set (MorseModel n) := {y : MorseModel n | morseNorm n y ≤ R}
-  let U : Set M := χ '' ball
-  refine ⟨R, hRpos, χ, hnorm, hχsrc, ε, hεpos, hεR, ?_⟩
-  have hpLower : ∀ y : {y : MorseModel n // morseNorm n y ≤ R},
-      y.1 ∈ sublevel (morseNormalForm hk c) (c - ε) ↔ (he y : M) ∈ sublevel f (c - ε) := by
-    intro y
-    have hval : f (he y : M) = morseNormalForm hk c y.1 := by
-      rw [heval y]
-      exact hnorm y.1 y.2
-    constructor
-    · intro hy
-      change f (he y : M) ≤ c - ε
-      rw [hval]
-      exact hy
-    · intro hy
-      change morseNormalForm hk c y.1 ≤ c - ε
-      rw [← hval]
-      exact hy
-  let hLower : {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R} ≃ₜ
-      {x : {x : M // x ∈ U} // x.1 ∈ sublevel f (c - ε)} :=
-    (andSwapHomeo (fun y : MorseModel n => y ∈ sublevel (morseNormalForm hk c) (c - ε))
-      (fun y : MorseModel n => morseNorm n y ≤ R)).trans
-      ((subtypeAndNestedHomeo (fun y : MorseModel n => morseNorm n y ≤ R)
-        (fun y : MorseModel n => y ∈ sublevel (morseNormalForm hk c) (c - ε))).trans
-      (homeoRestrictPred he (fun y => y.1 ∈ sublevel (morseNormalForm hk c) (c - ε))
-        (fun x => x.1 ∈ sublevel f (c - ε)) hpLower))
-  let φB : CellBoundary k →
-      {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c - ε) ∧ morseNorm n y ≤ R} :=
-    ballAttachMap hk c ε R (le_of_lt hεpos) hεR
-  let φ : CellBoundary k → {x : {x : M // x ∈ U} // x.1 ∈ sublevel f (c - ε)} := hLower ∘ φB
-  have hUpper : {x : M // x ∈ U ∧ x ∈ sublevel f (c + ε)} ≃ₜ ballUpperSublevel hk c ε R := by
-    have hpUpper : ∀ y : {y : MorseModel n // morseNorm n y ≤ R},
-        y.1 ∈ sublevel (morseNormalForm hk c) (c + ε) ↔ (he y : M) ∈ sublevel f (c + ε) := by
-      intro y
-      have hval : f (he y : M) = morseNormalForm hk c y.1 := by
-        rw [heval y]
-        exact hnorm y.1 y.2
-      constructor
-      · intro hy
-        change f (he y : M) ≤ c + ε
-        rw [hval]
-        exact hy
-      · intro hy
-        change morseNormalForm hk c y.1 ≤ c + ε
-        rw [← hval]
-        exact hy
-    have hU' : {y : {y : MorseModel n // morseNorm n y ≤ R} // y.1 ∈ sublevel (morseNormalForm hk c) (c + ε)} ≃ₜ
-        {x : {x : M // x ∈ U} // x.1 ∈ sublevel f (c + ε)} :=
-      homeoRestrictPred he (fun y => y.1 ∈ sublevel (morseNormalForm hk c) (c + ε))
-        (fun x => x.1 ∈ sublevel f (c + ε)) hpUpper
-    have hcast : {y : {y : MorseModel n // morseNorm n y ≤ R} //
-        y.1 ∈ sublevel (morseNormalForm hk c) (c + ε)} ≃ₜ ballUpperSublevel hk c ε R :=
-      ((andSwapHomeo (fun y : MorseModel n => y ∈ sublevel (morseNormalForm hk c) (c + ε))
-        (fun y : MorseModel n => morseNorm n y ≤ R)).trans
-        (subtypeAndNestedHomeo (fun y : MorseModel n => morseNorm n y ≤ R)
-          (fun y : MorseModel n => y ∈ sublevel (morseNormalForm hk c) (c + ε)))).symm
-    exact (subtypeAndNestedHomeo (fun x : M => x ∈ U) (fun x : M => x ∈ sublevel f (c + ε))).trans
-      (hU'.symm.trans hcast)
-  have hAdj : CellAdjunctionSpace k φB ≃ₜ CellAdjunctionSpace k φ :=
-    (adjunctionHomeoOfLowerEquiv (cellBoundaryInclusion k) φB hLower).symm
-  exact ⟨φ, ⟨(hUpper.toHomotopyEquiv.trans
-    (ballCellAttachmentModel hk c ε R hεpos hεR)).trans hAdj.toHomotopyEquiv⟩⟩
-
-structure MorseChartData (n k : ℕ) (hk : k ≤ n) (c : ℝ)
+structure MorseChart (n k : ℕ) (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     (I : ModelWithCorners ℝ (MorseModel n) H) (f : M → ℝ) where
+  p : M
   R : ℝ
+  R' : ℝ
   ε : ℝ
   χ : OpenPartialHomeomorph (MorseModel n) M
+  hχ0 : χ 0 = p
   hRpos : 0 < R
+  hR'pos : 0 < R'
   hεpos : 0 < ε
   hεR : Real.sqrt (2 * ε) ≤ R
   hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y
   hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source
+  hχon : ContMDiffOn 𝓘(ℝ, MorseModel n) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ
+    (Metric.ball (0 : MorseModel n) R')
+  hχsymmOn : ContMDiffOn I 𝓘(ℝ, MorseModel n) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ.symm
+    (χ '' Metric.ball (0 : MorseModel n) R')
 
-noncomputable def morseChartData {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+noncomputable def morseChart {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
     (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ n)
-    (hcrit : fderiv ℝ (fun y => f ((extChartAt I p).symm y)) (extChartAt I p p) = 0)
-    (hnd : (QuadraticMap.associated (R := ℝ)
-      (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p))).SeparatingLeft)
+    (hnd : IsNondegenerateCriticalPointAt I f p)
     (hindex : sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) = k)
-    (hfp : f p = c) : MorseChartData n k hk c I f := by
-  let hdata := exists_morseChart I f hf p c k hk hcrit hnd hindex hfp
+    (hfp : f p = c) : MorseChart n k hk c I f := by
+  let hdata := morse_lemma I f hf p k hk hnd hindex
   let R : ℝ := Classical.choose hdata
   have hR : 0 < R ∧ ∃ χ : OpenPartialHomeomorph (MorseModel n) M,
-      (∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y) ∧
-      (∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) := Classical.choose_spec hdata
+      (0 : MorseModel n) ∈ χ.source ∧ p ∈ χ.target ∧ χ 0 = p ∧
+      (∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) ∧
+      (∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk (f p) y) ∧
+      ContMDiffAt 𝓘(ℝ, MorseModel n) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ 0 ∧
+      ContMDiffAt I 𝓘(ℝ, MorseModel n) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ.symm p ∧
+      ∃ R' : ℝ, 0 < R' ∧
+        ContMDiffOn 𝓘(ℝ, MorseModel n) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ (Metric.ball (0 : MorseModel n) R') ∧
+        ContMDiffOn I 𝓘(ℝ, MorseModel n) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ.symm
+          (χ '' Metric.ball (0 : MorseModel n) R') := Classical.choose_spec hdata
   rcases hR with ⟨hRpos, hχ⟩
   let χ : OpenPartialHomeomorph (MorseModel n) M := Classical.choose hχ
-  have hχspec : (∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y) ∧
-      (∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) := Classical.choose_spec hχ
-  rcases hχspec with ⟨hnorm, hχsrc⟩
+  have hχspec : (0 : MorseModel n) ∈ χ.source ∧ p ∈ χ.target ∧ χ 0 = p ∧
+      (∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) ∧
+      (∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk (f p) y) ∧
+      ContMDiffAt 𝓘(ℝ, MorseModel n) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ 0 ∧
+      ContMDiffAt I 𝓘(ℝ, MorseModel n) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ.symm p ∧
+      ∃ R' : ℝ, 0 < R' ∧
+        ContMDiffOn 𝓘(ℝ, MorseModel n) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ (Metric.ball (0 : MorseModel n) R') ∧
+        ContMDiffOn I 𝓘(ℝ, MorseModel n) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ.symm
+          (χ '' Metric.ball (0 : MorseModel n) R') := Classical.choose_spec hχ
+  rcases hχspec with ⟨hχ0src, hχ0tgt, hχ0val, hχsrc, hnorm0, hχmd, hχsmd, htail⟩
+  let R' : ℝ := Classical.choose htail
+  have hR'tail : 0 < R' ∧
+      ContMDiffOn 𝓘(ℝ, MorseModel n) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ (Metric.ball (0 : MorseModel n) R') ∧
+      ContMDiffOn I 𝓘(ℝ, MorseModel n) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ.symm
+        (χ '' Metric.ball (0 : MorseModel n) R') := Classical.choose_spec htail
+  rcases hR'tail with ⟨hR'pos, hχon, hχsymmOn⟩
+  have hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y := by
+    intro y hy
+    rw [← hfp]
+    exact hnorm0 y hy
   let ε : ℝ := R ^ 2 / 4
   have hεpos : 0 < ε := by dsimp [ε]; positivity
   have hεR : Real.sqrt (2 * ε) ≤ R := by
@@ -332,26 +185,26 @@ noncomputable def morseChartData {n : ℕ} {H : Type} [TopologicalSpace H] {M : 
         (abs_of_nonneg (Real.sqrt_nonneg _)).symm
       _ ≤ |R| := habs
       _ = R := abs_of_nonneg hRnonneg
-  exact MorseChartData.mk R ε χ hRpos hεpos hεR hnorm hχsrc
+  exact MorseChart.mk p R R' ε χ hχ0val hRpos hR'pos hεpos hεR hnorm hχsrc hχon hχsymmOn
 
 def cellEmbedding {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
-    (data : MorseChartData n k hk c I f) : ClosedCell k → M :=
+    (data : MorseChart n k hk c I f) : ClosedCell k → M :=
   fun x => data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
-    (data : MorseChartData n k hk c I f) : Set M :=
+    (data : MorseChart n k hk c I f) : Set M :=
   Set.range (cellEmbedding hk c data)
 
 def cellAttachingMap {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
-    (data : MorseChartData n k hk c I f) :
-    CellBoundary k → {x : M // x ∈ sublevel f (c - data.ε)} :=
-  fun b => ⟨data.χ (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))), by
+    (data : MorseChart n k hk c I f) :
+    C(CellBoundary k, {x : M // x ∈ sublevel f (c - data.ε)}) :=
+  ContinuousMap.mk (fun b => ⟨data.χ (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))), by
     change f (data.χ (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)))) ≤ c - data.ε
     have hn := data.hnorm (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))) (by
       exact norm_cellMap_le hk data.ε data.R data.hεR (b : EuclideanSpace ℝ (Fin k)) (le_of_eq b.2))
@@ -362,111 +215,58 @@ def cellAttachingMap {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     have hsq : (Real.sqrt (2 * data.ε)) ^ 2 = 2 * data.ε := by
       rw [Real.sq_sqrt (by exact mul_nonneg (by norm_num) (le_of_lt data.hεpos))]
     rw [hsq, hnorm1]
-    linarith⟩
-
-theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_flow {n : ℕ} {H : Type}
-    [TopologicalSpace H] {M : Type} [TopologicalSpace M]
-    [ChartedSpace H M] [T2Space M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
-    (c : ℝ) (k : ℕ) (hk : k ≤ n)
-    (data : MorseChartData n k hk c I f)
-    (g : M → ℝ)
-    (hlow : Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
-      {x : M // x ∈ sublevel f (c - data.ε) ∪ cellImage hk c data}))
-    (hgup : {x : M | g x ≤ c + data.ε} = sublevel f (c + data.ε))
-    (Φ : GradientLikeFlow I g (c - data.ε) (c + data.ε)) :
-    Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace f (c + data.ε))
-      (CellAdjunctionSpace k (cellAttachingMap hk c data))) := by
-  let E : Set M := cellImage hk c data
-  let c' : ClosedCell k → M := cellEmbedding hk c data
-  let φ : CellBoundary k → {x : M // x ∈ sublevel f (c - data.ε)} := cellAttachingMap hk c data
-  have hAdj : CellAdjunctionSpace k φ ≃ₜ {x : M // x ∈ sublevel f (c - data.ε) ∪ Set.range c'} := by
-    refine cellAdjunctionHomeomorphUnionImage (n := k) (φ := φ) (c := c') ?hφ ?hc ?hcont ?hinterior ?hclosed
-    · intro b
-      rfl
-    · intro x y hxy
-      have hx : cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) ∈
-          {y : MorseModel n | morseNorm n y ≤ data.R} := by
-        exact norm_cellMap_le hk data.ε data.R data.hεR (x : EuclideanSpace ℝ (Fin k)) x.2
-      have hy : cellMap (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) ∈
-          {y : MorseModel n | morseNorm n y ≤ data.R} := by
-        exact norm_cellMap_le hk data.ε data.R data.hεR (y : EuclideanSpace ℝ (Fin k)) y.2
-      have hχ : (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n) =
-          (cellMap (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) : MorseModel n) := by
-        exact data.χ.injOn (data.hχsrc _ hx) (data.hχsrc _ hy) (by
-          simpa [c', cellEmbedding] using hxy)
-      exact cellMap_injective hk data.ε data.hεpos hχ
-    · have hc'cont : Continuous (fun x : ClosedCell k =>
+    linarith⟩) (by
+    have hcellCont : Continuous (fun b : CellBoundary k =>
+        (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)) : MorseModel n)) := by
+      have hbcont : Continuous (cellBoundaryInclusion k) := by
+        exact Continuous.subtype_mk continuous_subtype_val (by intro x; exact le_of_eq x.2)
+      have hcell' : Continuous (fun x : ClosedCell k =>
           (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n)) :=
         continuous_cellMap (Real.sqrt (2 * data.ε))
-      have hmap : Set.MapsTo (fun x : ClosedCell k =>
-          cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) Set.univ data.χ.source := by
-        intro x hx
-        exact data.hχsrc (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
-          (norm_cellMap_le hk data.ε data.R data.hεR (x : EuclideanSpace ℝ (Fin k)) x.2)
-      have hcont : ContinuousOn (fun x : ClosedCell k =>
-          data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))) Set.univ :=
-        data.χ.continuousOn_toFun.comp hc'cont.continuousOn hmap
-      change Continuous (fun x : ClosedCell k =>
-        data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))))
-      exact (continuousOn_univ.mp hcont)
-    · rw [Set.disjoint_left]
-      intro x hxA hxB
-      rcases hxA with ⟨y, hy, hxy⟩
-      rcases hy with ⟨z, hz⟩
-      have hfz : f x ≤ c - data.ε := by simpa [sublevel] using hxB
-      have hxeq : x = data.χ (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
-        rw [← hxy]
-        have hzval : (y : EuclideanSpace ℝ (Fin k)) = (z : EuclideanSpace ℝ (Fin k)) := by
-          simpa [cellInteriorInclusion] using
-            (congrArg (fun w : ClosedCell k => (w : EuclideanSpace ℝ (Fin k))) hz).symm
-        dsimp [c', cellEmbedding]
-        simp [hzval]
-      have hfz' : f x = morseNormalForm hk c (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
-        rw [hxeq]
-        rw [data.hnorm (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) (by
-          exact norm_cellMap_le hk data.ε data.R data.hεR (z : EuclideanSpace ℝ (Fin k)) (le_of_lt z.2))]
-      have hnot : ¬ morseNormalForm hk c (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) ≤
-          c - data.ε := by
-        intro hn
-        have hmem : (cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k)) : MorseModel n) ∈
-            (fun x : ClosedCell k => (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) : MorseModel n)) ''
-              Set.range (cellInteriorInclusion k) := by
-          refine ⟨cellInteriorInclusion k z, ?_, rfl⟩
-          exact Set.mem_range.mpr ⟨z, rfl⟩
-        exact (Set.disjoint_left.mp (cellInterior_disjoint hk c data.ε data.hεpos)) hmem hn
-      exact hnot (by rw [← hfz']; exact hfz)
-    · exact isClosed_Iic.preimage hf.continuous
-  have hflow : (Φ.toDiffeomorph (c - data.ε - (c + data.ε))) ''
-        sublevel g (c - data.ε) = sublevel g (c + data.ε) :=
-    GradientLikeFlow.toDiffeomorph_image_sublevels Φ (by linarith [data.hεpos])
-  let d : M ≃ₜ M := (Φ.toDiffeomorph (c - data.ε - (c + data.ε))).toHomeomorph
-  let s : Set M := sublevel g (c - data.ε)
-  have hflow' : (Φ.toDiffeomorph (c - data.ε - (c + data.ε))) '' sublevel g (c - data.ε) =
-      sublevel f (c + data.ε) := by
-    change ((Φ.toDiffeomorph (c - data.ε - (c + data.ε))) '' {x : M | g x ≤ c - data.ε}) =
-        {x : M | g x ≤ c + data.ε} at hflow
-    rw [hgup] at hflow
-    exact hflow
-  have hflowHomeo : SublevelSpace g (c - data.ε) ≃ₜ SublevelSpace f (c + data.ε) := by
-    have himg : d '' s = sublevel f (c + data.ε) := by
-      simpa [d, s] using hflow'
-    exact (Homeomorph.image d s).trans (subtypeSetHomeo himg)
-  have hlowE : ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
-      {x : M // x ∈ sublevel f (c - data.ε) ∪ Set.range c'} := Classical.choice hlow
-  have hAdjE : ContinuousMap.HomotopyEquiv
-      {x : M // x ∈ sublevel f (c - data.ε) ∪ Set.range c'}
-      (CellAdjunctionSpace k φ) := hAdj.symm.toHomotopyEquiv
-  exact ⟨(hlowE.symm.trans hflowHomeo.toHomotopyEquiv).symm.trans hAdjE⟩
+      have hcomp := hcell'.comp hbcont
+      simpa using hcomp
+    have hmap : Set.MapsTo (fun b : CellBoundary k =>
+        (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)) : MorseModel n))
+        Set.univ data.χ.source := by
+      intro b hb
+      exact data.hχsrc (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))) (by
+        exact norm_cellMap_le hk data.ε data.R data.hεR (b : EuclideanSpace ℝ (Fin k)) (le_of_eq b.2))
+    have hχcont : ContinuousOn data.χ ((fun b : CellBoundary k =>
+        (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)) : MorseModel n)) '' Set.univ) :=
+      data.χ.continuousOn_toFun.mono (by
+        intro z hz
+        rcases hz with ⟨b, hb, hbz⟩
+        rw [← hbz]
+        exact hmap trivial)
+    have hcont : Continuous (fun b : CellBoundary k =>
+        data.χ (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)))) := by
+      have hstep := ContinuousOn.comp' hχcont hcellCont.continuousOn (Set.mapsTo_image
+        (fun b : CellBoundary k =>
+          (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)) : MorseModel n))
+        Set.univ)
+      exact (continuousOn_univ.mp hstep)
+    exact Continuous.subtype_mk hcont (by
+      intro b
+      change f (data.χ (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k)))) ≤ c - data.ε
+      have hn := data.hnorm (cellMap (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))) (by
+        exact norm_cellMap_le hk data.ε data.R data.hεR (b : EuclideanSpace ℝ (Fin k)) (le_of_eq b.2))
+      rw [hn]
+      have hf := morseNormalForm_cellMap hk c (Real.sqrt (2 * data.ε)) (b : EuclideanSpace ℝ (Fin k))
+      rw [hf]
+      have hnorm1 : ‖(b : EuclideanSpace ℝ (Fin k))‖ = 1 := b.2
+      have hsq : (Real.sqrt (2 * data.ε)) ^ 2 = 2 * data.ε := by
+        rw [Real.sq_sqrt (by exact mul_nonneg (by norm_num) (le_of_lt data.hεpos))]
+      rw [hsq, hnorm1]
+      linarith))
 
-theorem cellAdjunctionSpace_homeomorph_lowerUnion {n : ℕ} {H : Type}
+noncomputable def cellAdjunctionSpaceHomeomorphLowerUnion {n : ℕ} {H : Type}
     [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
     (c : ℝ) (k : ℕ) (hk : k ≤ n)
-    (data : MorseChartData n k hk c I f) :
-    Nonempty (CellAdjunctionSpace k (cellAttachingMap hk c data) ≃ₜ
-      {x : M // x ∈ sublevel f (c - data.ε) ∪ cellImage hk c data}) := by
+    (data : MorseChart n k hk c I f) :
+    CellAdjunctionSpace k (cellAttachingMap hk c data) ≃ₜ
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ cellImage hk c data} := by
   let E : Set M := cellImage hk c data
   let c' : ClosedCell k → M := cellEmbedding hk c data
   let φ : CellBoundary k → {x : M // x ∈ sublevel f (c - data.ε)} := cellAttachingMap hk c data
@@ -528,43 +328,7 @@ theorem cellAdjunctionSpace_homeomorph_lowerUnion {n : ℕ} {H : Type}
         exact (Set.disjoint_left.mp (cellInterior_disjoint hk c data.ε data.hεpos)) hmem hn
       exact hnot (by rw [← hfz']; exact hfz)
     · exact isClosed_Iic.preimage hf.continuous
-  exact ⟨by simpa [E, c', cellImage] using hAdj⟩
-
-theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_diffeomorph {n : ℕ} {H : Type}
-    [TopologicalSpace H] {M : Type} [TopologicalSpace M]
-    [ChartedSpace H M] [T2Space M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
-    (c : ℝ) (k : ℕ) (hk : k ≤ n)
-    (data : MorseChartData n k hk c I f)
-    (g : M → ℝ)
-    (hlow : Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
-      {x : M // x ∈ sublevel f (c - data.ε) ∪ cellImage hk c data}))
-    (hgup : {x : M | g x ≤ c + data.ε} = sublevel f (c + data.ε))
-    (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
-    (hflow : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel g (c + data.ε)) :
-    Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace f (c + data.ε))
-      (CellAdjunctionSpace k (cellAttachingMap hk c data))) := by
-  let E : Set M := cellImage hk c data
-  have hAdj : CellAdjunctionSpace k (cellAttachingMap hk c data) ≃ₜ
-      {x : M // x ∈ sublevel f (c - data.ε) ∪ E} := by
-    simpa [E] using (Classical.choice
-      (cellAdjunctionSpace_homeomorph_lowerUnion (I := I) (hf := hf) (data := data)))
-  have hflow' : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel f (c + data.ε) := by
-    change (Φ.toEquiv '' {x : M | g x ≤ c - data.ε}) = {x : M | g x ≤ c + data.ε} at hflow
-    rw [hgup] at hflow
-    exact hflow
-  let d : M ≃ₜ M := Φ.toHomeomorph
-  let s : Set M := sublevel g (c - data.ε)
-  have hflowHomeo : SublevelSpace g (c - data.ε) ≃ₜ SublevelSpace f (c + data.ε) := by
-    have himg : d '' s = sublevel f (c + data.ε) := by
-      simpa [d, s] using hflow'
-    exact (Homeomorph.image d s).trans (subtypeSetHomeo himg)
-  have hlowE : ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
-      {x : M // x ∈ sublevel f (c - data.ε) ∪ E} := Classical.choice hlow
-  have hAdjE : ContinuousMap.HomotopyEquiv
-      {x : M // x ∈ sublevel f (c - data.ε) ∪ E}
-      (CellAdjunctionSpace k (cellAttachingMap hk c data)) := hAdj.symm.toHomotopyEquiv
-  exact ⟨(hlowE.symm.trans hflowHomeo.toHomotopyEquiv).symm.trans hAdjE⟩
+  exact hAdj
 
 open Classical in
 def morseModifiedFunction {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ)
@@ -1648,7 +1412,7 @@ theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k �
     rw [hsymm, hfix]
     exact hxy
 
-theorem sublevel_lower_homotopyEquiv_morseModifiedFunction {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ)
+noncomputable def morseModifiedLowerSublevelHomotopyEquiv {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hR : 4 * ε + 9 * δ ^ 2 / 4 < R ^ 2) (hRpos : 0 < R)
     (hεR : Real.sqrt (2 * ε) ≤ R)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -1656,10 +1420,10 @@ theorem sublevel_lower_homotopyEquiv_morseModifiedFunction {n k : ℕ} (hk : k �
     (hg : Continuous (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f))
     (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
     (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) :
-    Nonempty (ContinuousMap.HomotopyEquiv
+    ContinuousMap.HomotopyEquiv
       (SublevelSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f) (c - ε))
       {x : M // x ∈ sublevel f (c - ε) ∪ χ '' (Set.range (fun z : ClosedCell k =>
-        cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))))}) := by
+        cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k))))} := by
   let cellRange : Set (MorseModel n) := Set.range (fun z : ClosedCell k =>
     cellMap (Real.sqrt (2 * ε)) (z : EuclideanSpace ℝ (Fin k)))
   let A : Type := SublevelSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f) (c - ε)
@@ -1760,7 +1524,277 @@ theorem sublevel_lower_homotopyEquiv_morseModifiedFunction {n k : ℕ} (hk : k �
       map_one_left := by
         intro x
         rfl }
-  exact ⟨{ toFun := toFun, invFun := invFun, left_inv := ⟨leftHomo⟩, right_inv := ⟨rightHomo⟩ }⟩
+  exact { toFun := toFun, invFun := invFun, left_inv := ⟨leftHomo⟩, right_inv := ⟨rightHomo⟩ }
+
+theorem morseModifiedLowerSublevelHomotopyEquiv_lower {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hR : 4 * ε + 9 * δ ^ 2 / 4 < R ^ 2) (hRpos : 0 < R)
+    (hεR : Real.sqrt (2 * ε) ≤ R)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
+    (hg : Continuous (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f))
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
+    (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) :
+    (∀ x : SublevelSpace f (c - ε),
+      ((morseModifiedLowerSublevelHomotopyEquiv hk c ε δ R hε hδ hR hRpos hεR χ f hg hnorm hχsrc).toFun
+        ⟨x.1, le_trans (morseModifiedFunction_le_f (H := H) (M := M) hk c ε δ R hε χ f hnorm x.1)
+          (by change f x.1 ≤ c - ε; exact x.2)⟩).1 = x.1) ∧
+    (∀ x : SublevelSpace f (c - ε),
+      ((morseModifiedLowerSublevelHomotopyEquiv hk c ε δ R hε hδ hR hRpos hεR χ f hg hnorm hχsrc).invFun
+        ⟨x.1, Or.inl x.2⟩).1 = x.1) := by
+  constructor
+  · intro x
+    change morseModifiedRetraction (H := H) (M := M) hk c ε R χ x.1 = x.1
+    exact (morseModifiedRetraction_eq_self_of_mem_lowerUnion (H := H) (M := M) hk c ε R hε hεR
+      χ f hnorm hχsrc (Or.inl x.2))
+  · intro x
+    change x.1 = x.1
+    rfl
+
+noncomputable def sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeomorph {n : ℕ} {H : Type}
+    [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (c : ℝ) (k : ℕ) (hk : k ≤ n)
+    (data : MorseChart n k hk c I f)
+    (g : M → ℝ) (hg : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g)
+    (hg_le : ∀ x : M, g x ≤ f x)
+    (hlow : ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ data.χ '' (Set.range (fun z : ClosedCell k =>
+        cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))))})
+    (hcell : cellImage hk c data = data.χ '' (Set.range (fun z : ClosedCell k =>
+      cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k)))))
+    (hlow_lower : ∀ x : SublevelSpace f (c - data.ε),
+      ((hlow.toFun ⟨x.1, le_trans (hg_le x.1) (by change f x.1 ≤ c - data.ε; exact x.2)⟩).1 : M) =
+        x.1)
+    (hlow_inv_lower : ∀ x : SublevelSpace f (c - data.ε),
+      ((hlow.invFun ⟨x.1, Or.inl x.2⟩).1 : M) = x.1)
+    (hgup : {x : M | g x ≤ c + data.ε} = sublevel f (c + data.ε))
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) ≤ 0)
+    (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+    (hflow : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel g (c + data.ε))
+    (htie : ∀ x : M, Φ.toEquiv x = curveAt v hcomplete x (c - data.ε - (c + data.ε))) :
+    DifferentialGeometry.Topology.HomotopyEquivUnder
+      (B := SublevelSpace f (c - data.ε)) (X := SublevelSpace f (c + data.ε))
+      (Y := CellAdjunctionSpace k (cellAttachingMap hk c data)) := by
+  let E : Set M := cellImage hk c data
+  let φ : C(CellBoundary k, SublevelSpace f (c - data.ε)) := cellAttachingMap hk c data
+  let U₀ : Set M := data.χ '' (Set.range (fun z : ClosedCell k =>
+    cellMap (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))))
+  have hset : sublevel f (c - data.ε) ∪ U₀ = sublevel f (c - data.ε) ∪ E := by
+    simp [E, U₀, hcell]
+  let hcast : {x : M // x ∈ sublevel f (c - data.ε) ∪ U₀} ≃ₜ
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ E} := subtypeSetHomeo hset
+  let hAdj : CellAdjunctionSpace k φ ≃ₜ {x : M // x ∈ sublevel f (c - data.ε) ∪ E} := by
+    simpa [E, φ] using (cellAdjunctionSpaceHomeomorphLowerUnion (I := I) (hf := hf) (data := data))
+  have hflow' : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel f (c + data.ε) := by
+    change (Φ.toEquiv '' {x : M | g x ≤ c - data.ε}) = {x : M | g x ≤ c + data.ε} at hflow
+    rw [hgup] at hflow
+    exact hflow
+  let hflowHomeo : SublevelSpace g (c - data.ε) ≃ₜ SublevelSpace f (c + data.ε) :=
+    { toEquiv :=
+        { toFun := fun x : SublevelSpace g (c - data.ε) => ⟨Φ.toEquiv x.1, by
+            rw [← hflow']
+            exact ⟨x.1, x.2, rfl⟩⟩
+          invFun := fun y : SublevelSpace f (c + data.ε) => ⟨Φ.toEquiv.symm y.1, by
+            have hy' : y.1 ∈ Φ.toEquiv '' sublevel g (c - data.ε) := by
+              have hmem : y.1 ∈ sublevel f (c + data.ε) := y.2
+              exact hflow'.symm ▸ hmem
+            rcases hy' with ⟨z, hz, hzΦ⟩
+            have hz' : Φ.toEquiv.symm y.1 = z := by
+              rw [← hzΦ]
+              exact Φ.toEquiv.left_inv z
+            change g (Φ.toEquiv.symm y.1) ≤ c - data.ε
+            simpa [hz'] using hz⟩
+          left_inv := by
+            intro x
+            apply Subtype.ext
+            exact Φ.toEquiv.left_inv x.1
+          right_inv := by
+            intro y
+            apply Subtype.ext
+            exact Φ.toEquiv.right_inv y.1 }
+      continuous_toFun := by
+        have hc : Continuous (fun x : SublevelSpace g (c - data.ε) => Φ.toEquiv x.1) :=
+          Φ.contMDiff_toFun.continuous.comp continuous_subtype_val
+        exact Continuous.subtype_mk hc (by intro x; rw [← hflow']; exact ⟨x.1, x.2, rfl⟩)
+      continuous_invFun := by
+        have hc : Continuous (fun y : SublevelSpace f (c + data.ε) => Φ.toEquiv.symm y.1) :=
+          Φ.contMDiff_invFun.continuous.comp continuous_subtype_val
+        exact Continuous.subtype_mk hc (by intro y; exact (by
+          have hy' : y.1 ∈ Φ.toEquiv '' sublevel g (c - data.ε) := by
+            have hmem : y.1 ∈ sublevel f (c + data.ε) := y.2
+            exact hflow'.symm ▸ hmem
+          rcases hy' with ⟨z, hz, hzΦ⟩
+          have hz' : Φ.toEquiv.symm y.1 = z := by
+            rw [← hzΦ]
+            exact Φ.toEquiv.left_inv z
+          change g (Φ.toEquiv.symm y.1) ≤ c - data.ε
+          simpa [hz'] using hz)) }
+  let hlowE : ContinuousMap.HomotopyEquiv (SublevelSpace g (c - data.ε))
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ E} :=
+    hlow.trans hcast.toHomotopyEquiv
+  let hAdjE : ContinuousMap.HomotopyEquiv
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ E}
+      (CellAdjunctionSpace k φ) := hAdj.symm.toHomotopyEquiv
+  let e : ContinuousMap.HomotopyEquiv (SublevelSpace f (c + data.ε))
+      (CellAdjunctionSpace k φ) :=
+    (hlowE.symm.trans hflowHomeo.toHomotopyEquiv).symm.trans hAdjE
+  let ι : C(SublevelSpace f (c - data.ε), SublevelSpace f (c + data.ε)) :=
+    sublevelInclusion f (by linarith [data.hεpos])
+  let ι₀ : C(SublevelSpace f (c - data.ε), SublevelSpace g (c - data.ε)) :=
+    ContinuousMap.mk (fun x => ⟨x.1, le_trans (hg_le x.1) (by change f x.1 ≤ c - data.ε; exact x.2)⟩)
+      (by exact Continuous.subtype_mk continuous_subtype_val (by
+        intro x
+        exact le_trans (hg_le x.1) (by change f x.1 ≤ c - data.ε; exact x.2)))
+  let j : C(SublevelSpace f (c - data.ε), CellAdjunctionSpace k φ) :=
+    ContinuousMap.mk (adjunctionLower (i := cellBoundaryInclusion k) φ)
+      (continuous_adjunctionLower (i := cellBoundaryInclusion k) φ)
+  have hAdjLower : ∀ x : SublevelSpace f (c - data.ε),
+      hAdj (adjunctionLower (i := cellBoundaryInclusion k) φ x) = ⟨x.1, Or.inl x.2⟩ := by
+    intro x
+    change adjunctionRealization (sublevel f (c - data.ε)) (cellBoundaryInclusion k)
+      (cellEmbedding hk c data)
+      (fun b : CellBoundary k => cellAttachingMap hk c data b) (by intro b; rfl)
+      (adjunctionLower (i := cellBoundaryInclusion k) (cellAttachingMap hk c data) x) =
+      ⟨x.1, Or.inl x.2⟩
+    exact adjunctionRealization_lower (i := cellBoundaryInclusion k)
+      (c := cellEmbedding hk c data) (by intro b; rfl) x
+  have hv1 : ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
+    hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+  have hflowJoint : Continuous (fun p : ℝ × M => curveAt v hcomplete p.2 p.1) :=
+    continuous_globalFlow_of_compactSupport v hv hsupp
+  have hrate_flow : ∀ x : M, ∀ s : ℝ, 0 ≤ s → g x - s ≤ g (curveAt v hcomplete x s) ∧
+      g (curveAt v hcomplete x s) ≤ g x := by
+    intro x s hs
+    have hrb := f_rate_bounds_of_integralCurve g hg v hrate
+      (hγ := curveAt_integralCurve v hcomplete x) (t := s) hs
+    simpa [curveAt_zero v hcomplete x] using hrb
+  let t2 : ℝ := 2 * data.ε
+  have ht2pos : 0 < t2 := by dsimp [t2]; nlinarith [data.hεpos]
+  have ht2_def : t2 = c + data.ε - (c - data.ε) := by dsimp [t2]; ring
+  have htie_neg : ∀ y : M, Φ.toEquiv y = curveAt v hcomplete y (-t2) := by
+    intro y
+    have h := htie y
+    have hsub : c - data.ε - (c + data.ε) = -t2 := by dsimp [t2]; ring
+    rwa [hsub] at h
+  have htie_inv : ∀ y : M, Φ.toEquiv.symm y = curveAt v hcomplete y t2 := by
+    intro y
+    have hΦ : Φ.toEquiv (curveAt v hcomplete y t2) = y := by
+      rw [htie_neg (curveAt v hcomplete y t2)]
+      have hh := curveAt_add v hv1 hcomplete y t2 (-t2)
+      rw [show t2 + -t2 = 0 by ring] at hh
+      rw [← hh]
+      exact curveAt_zero v hcomplete y
+    have hh2 := congrArg Φ.toEquiv.symm hΦ
+    rw [← hh2]
+    exact Φ.toEquiv.left_inv (curveAt v hcomplete y t2)
+  let hflowHomo : ContinuousMap.Homotopy
+      ((hflowHomeo.symm : C(SublevelSpace f (c + data.ε), SublevelSpace g (c - data.ε))).comp ι) ι₀ :=
+    let hmap : C(Set.Icc (0 : ℝ) 1 × SublevelSpace f (c - data.ε),
+        SublevelSpace g (c - data.ε)) :=
+      ContinuousMap.mk
+        (fun p : Set.Icc (0 : ℝ) 1 × SublevelSpace f (c - data.ε) =>
+          ⟨curveAt v hcomplete p.2.1 (t2 * (1 - (p.1 : ℝ))), by
+            have hs : 0 ≤ t2 * (1 - (p.1 : ℝ)) := by
+              nlinarith [p.1.2.2, ht2pos]
+            have hb := (hrate_flow p.2.1 (t2 * (1 - (p.1 : ℝ))) hs).2
+            change g (curveAt v hcomplete p.2.1 (t2 * (1 - (p.1 : ℝ)))) ≤ c - data.ε
+            exact le_trans hb (le_trans (hg_le p.2.1)
+              (by change f p.2.1 ≤ c - data.ε; exact p.2.2))⟩)
+        (by
+          have hreparam : Continuous (fun p : Set.Icc (0 : ℝ) 1 × SublevelSpace f (c - data.ε) =>
+              (t2 * (1 - (p.1 : ℝ)), p.2.1)) := by
+            fun_prop
+          have hmain : Continuous (fun p : Set.Icc (0 : ℝ) 1 × SublevelSpace f (c - data.ε) =>
+              curveAt v hcomplete p.2.1 (t2 * (1 - (p.1 : ℝ)))) := by
+            have hc := hflowJoint.comp hreparam
+            simpa [Function.comp_def] using hc
+          exact Continuous.subtype_mk hmain (by
+            intro p
+            have hs : 0 ≤ t2 * (1 - (p.1 : ℝ)) := by
+              nlinarith [p.1.2.2, ht2pos]
+            have hb := (hrate_flow p.2.1 (t2 * (1 - (p.1 : ℝ))) hs).2
+            change g (curveAt v hcomplete p.2.1 (t2 * (1 - (p.1 : ℝ)))) ≤ c - data.ε
+            exact le_trans hb (le_trans (hg_le p.2.1)
+              (by change f p.2.1 ≤ c - data.ε; exact p.2.2))))
+    { toFun := hmap
+      map_zero_left := by
+        intro x
+        apply Subtype.ext
+        change curveAt v hcomplete x.1 (t2 * (1 - (0 : ℝ))) =
+          (hflowHomeo.symm (ι x)).1
+        simp only [t2, sub_zero, mul_one]
+        have hsymm : (hflowHomeo.symm (ι x)).1 = Φ.toEquiv.symm x.1 := by
+          rfl
+        rw [hsymm]
+        exact (htie_inv x.1).symm
+      map_one_left := by
+        intro x
+        apply Subtype.ext
+        change curveAt v hcomplete x.1 (t2 * (1 - (1 : ℝ))) = x.1
+        simp [curveAt_zero v hcomplete x.1] }
+  have hlow_fix_map : hlowE.toFun.comp ι₀ = ⟨fun x => ⟨x.1, Or.inl x.2⟩, by
+      exact Continuous.subtype_mk continuous_subtype_val (by intro x; exact Or.inl x.2)⟩ := by
+    ext x
+    change (hcast.toFun (hlow.toFun (ι₀ x))).1 = x.1
+    dsimp [hcast, subtypeSetHomeo]
+    exact hlow_lower x
+  have hlow_inv_map : hlowE.invFun.comp ⟨fun x => ⟨x.1, Or.inl x.2⟩, by
+      exact Continuous.subtype_mk continuous_subtype_val (by intro x; exact Or.inl x.2)⟩ = ι₀ := by
+    ext x
+    change (hlow.invFun (hcast.invFun ⟨x.1, Or.inl x.2⟩)).1 = x.1
+    dsimp [hcast, subtypeSetHomeo]
+    simpa using (hlow_inv_lower x)
+  have hAdj_map : hAdjE.toFun.comp ⟨fun x => ⟨x.1, Or.inl x.2⟩, by
+      exact Continuous.subtype_mk continuous_subtype_val (by intro x; exact Or.inl x.2)⟩ = j := by
+    ext x
+    change hAdj.symm ⟨x.1, Or.inl x.2⟩ = adjunctionLower (i := cellBoundaryInclusion k) φ x
+    have hb : hAdj.symm ⟨x.1, Or.inl x.2⟩ =
+        adjunctionLower (i := cellBoundaryInclusion k) φ ⟨x.1, x.2⟩ := by
+      have hleft := hAdj.left_inv (adjunctionLower (i := cellBoundaryInclusion k) φ ⟨x.1, x.2⟩)
+      simpa [hAdjLower ⟨x.1, x.2⟩] using hleft
+    rw [hb]
+  let leftHomo : ContinuousMap.Homotopy (e.toFun.comp ι) j := by
+    have hstep := (ContinuousMap.Homotopy.refl (hAdjE.toFun.comp hlowE.toFun)).comp hflowHomo
+    refine hstep.cast ?_ ?_
+    · ext x
+      rfl
+    · change hAdjE.toFun.comp (hlowE.toFun.comp ι₀) = j
+      rw [hlow_fix_map]
+      exact hAdj_map
+  let rightHomo : ContinuousMap.Homotopy (e.invFun.comp j) ι := by
+    have hstep := (ContinuousMap.Homotopy.refl
+      (hflowHomeo : C(SublevelSpace g (c - data.ε), SublevelSpace f (c + data.ε)))).comp hflowHomo
+    have hright_id : (hflowHomeo : C(SublevelSpace g (c - data.ε), SublevelSpace f (c + data.ε))).comp
+        ((hflowHomeo.symm : C(SublevelSpace f (c + data.ε), SublevelSpace g (c - data.ε))).comp ι) = ι := by
+      ext x
+      exact congrArg Subtype.val (hflowHomeo.right_inv (ι x))
+    refine (hstep.cast hright_id ?_).symm
+    · ext x
+      change (hflowHomeo.toFun (ι₀ x)).1 = (e.invFun (j x)).1
+      have h1 : (e.invFun (j x)).1 = (hflowHomeo.toFun (hlowE.invFun (hAdj (j x)))).1 := by
+        rfl
+      rw [h1]
+      have h2 : hAdj (j x) = ⟨x.1, Or.inl x.2⟩ := by
+        change hAdj (adjunctionLower (i := cellBoundaryInclusion k) φ x) = ⟨x.1, Or.inl x.2⟩
+        exact hAdjLower x
+      rw [h2]
+      change Φ.toEquiv x.1 = Φ.toEquiv (hlow.invFun ⟨x.1, Or.inl x.2⟩).1
+      exact congrArg Φ.toEquiv (hlow_inv_lower x).symm
+  exact
+    { toBase := ι
+      fromBase := j
+      toHomotopyEquiv := e
+      left_comm := leftHomo
+      right_comm := rightHomo }
 
 theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
@@ -1768,7 +1802,6 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
     (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ n)
-    (hcrit : IsCriticalPointAt I f p)
     (hnd : IsNondegenerateCriticalPointAt I f p)
     (hindex : sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) = k)
     (hfp : f p = c)
@@ -1776,10 +1809,13 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
     (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
     (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
       x = p ∨ ¬ IsCriticalPointAt I f x) :
-    ∃ ε : ℝ, 0 < ε ∧ ∃ φ : CellBoundary k → {x : M // x ∈ sublevel f (c - ε)},
-      Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace f (c + ε))
-        (CellAdjunctionSpace k φ)) := by
-  rcases morse_lemma I f hf p k hk hcrit hnd hindex with
+    ∃ ε : ℝ, ∃ hε : 0 < ε, ε ≤ a ∧
+    ∃ φ : C(CellBoundary k, SublevelSpace f (c - ε)),
+      ∃ e : DifferentialGeometry.Topology.HomotopyEquivUnder
+        (B := SublevelSpace f (c - ε)) (X := SublevelSpace f (c + ε))
+        (Y := CellAdjunctionSpace k φ),
+        e.toBase = sublevelInclusion f (by linarith [hε]) := by
+  rcases morse_lemma I f hf p k hk hnd hindex with
     ⟨R, hRpos, χ, hχ0src, hχ0tgt, hχ0val, hχsrc, hnorm0, hχmd, hχsmd,
       R', hR'pos, hχon, hχsymmOn⟩
   have hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y := by
@@ -1844,32 +1880,47 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
     have hnonneg : 0 ≤ Real.sqrt (2 * ε₀) := Real.sqrt_nonneg _
     have habs := sq_le_sq.mp hsq
     rwa [abs_of_nonneg hnonneg, abs_of_nonneg (le_of_lt hRpos)] at habs
-  let data : MorseChartData n k hk c I f :=
-    { R := R, ε := ε₀, χ := χ, hRpos := hRpos, hεpos := hε₀, hεR := hεR,
-      hnorm := hnorm, hχsrc := hχsrc }
+  let data : MorseChart n k hk c I f :=
+    { p := p, R := R, R' := R', ε := ε₀, χ := χ, hχ0 := hχ0val, hRpos := hRpos,
+      hR'pos := hR'pos, hεpos := hε₀, hεR := hεR, hnorm := hnorm, hχsrc := hχsrc,
+      hχon := hχon, hχsymmOn := hχsymmOn }
   let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R χ f
   have hgmd : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g := by
     dsimp [g]
     exact contMDiff_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R R' hε₀ hδ₀
       hR' hΦr hRpos hR'pos I f hf χ hnorm hχsrc hχsymmOn
   have hg : Continuous g := hgmd.continuous
-  have hlow : Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace g (c - ε₀))
-      {x : M // x ∈ sublevel f (c - ε₀) ∪ cellImage hk c data}) := by
-    have hlow0 := sublevel_lower_homotopyEquiv_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R
+  have hg_le : ∀ x : M, g x ≤ f x := by
+    intro x
+    dsimp [g]
+    exact morseModifiedFunction_le_f (H := H) (M := M) hk c ε₀ δ₀ R hε₀ χ f hnorm x
+  let hlow0 : ContinuousMap.HomotopyEquiv (SublevelSpace (morseModifiedFunction (H := H) (M := M)
+      hk c ε₀ δ₀ R χ f) (c - ε₀))
+      {x : M // x ∈ sublevel f (c - ε₀) ∪ χ '' (Set.range (fun z : ClosedCell k =>
+        cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k))))} :=
+    morseModifiedLowerSublevelHomotopyEquiv (H := H) (M := M) hk c ε₀ δ₀ R hε₀ hδ₀ hR' hRpos hεR
+      χ f hg hnorm hχsrc
+  have hcell : cellImage hk c data = χ '' (Set.range (fun z : ClosedCell k =>
+      cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) := by
+    change Set.range (fun z : ClosedCell k =>
+        χ (cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) =
+      χ '' (Set.range (fun z : ClosedCell k =>
+        cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k))))
+    exact Set.range_comp (g := fun y : MorseModel n => χ y)
+      (f := fun z : ClosedCell k => cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))
+  have hlow_lower : ∀ x : SublevelSpace f (c - ε₀),
+      ((hlow0.toFun ⟨x.1, le_trans (hg_le x.1) (by change f x.1 ≤ c - ε₀; exact x.2)⟩).1 : M) =
+        x.1 := by
+    intro x
+    have hfix := morseModifiedLowerSublevelHomotopyEquiv_lower (H := H) (M := M) hk c ε₀ δ₀ R
       hε₀ hδ₀ hR' hRpos hεR χ f hg hnorm hχsrc
-    have hcell : cellImage hk c data = χ '' (Set.range (fun z : ClosedCell k =>
-        cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) := by
-      change Set.range (fun z : ClosedCell k =>
-          χ (cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))) =
-        χ '' (Set.range (fun z : ClosedCell k =>
-          cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k))))
-      exact Set.range_comp (g := fun y : MorseModel n => χ y)
-        (f := fun z : ClosedCell k => cellMap (Real.sqrt (2 * ε₀)) (z : EuclideanSpace ℝ (Fin k)))
-    change Nonempty (ContinuousMap.HomotopyEquiv
-      (SublevelSpace (morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R χ f) (c - ε₀))
-      {x : M // x ∈ sublevel f (c - ε₀) ∪ cellImage hk c data})
-    rw [hcell]
-    exact hlow0
+    simpa [hlow0, g] using (hfix.1 x)
+  have hlow_inv_lower : ∀ x : SublevelSpace f (c - ε₀),
+      ((hlow0.invFun ⟨x.1, Or.inl x.2⟩).1 : M) = x.1 := by
+    intro x
+    have hfix := morseModifiedLowerSublevelHomotopyEquiv_lower (H := H) (M := M) hk c ε₀ δ₀ R
+      hε₀ hδ₀ hR' hRpos hεR χ f hg hnorm hχsrc
+    simpa [hlow0, g] using (hfix.2 x)
   have hgup : {x : M | g x ≤ c + ε₀} = sublevel f (c + ε₀) := by
     dsimp [g]
     exact sublevel_upper_identity_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R hε₀ hδ₀
@@ -1885,12 +1936,17 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
     exact no_critical_point_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R R' a hε₀ hδ₀ hδε
       hR' hΦr hRpos hR'pos hεa I f p χ hχ0val hnorm hχsrc hχsymmOn hχon hunique hx
   rcases no_critical_values (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀) hcompactG hregularG with
-    ⟨Φ, hflow⟩
-  have hfinal : Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace f (c + ε₀))
-      (CellAdjunctionSpace k (cellAttachingMap hk c data))) :=
-    sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_diffeomorph (I := I) (hf := hf)
-      (f := f) (c := c) (k := k) (hk := hk) (data := data) (g := g) hlow hgup Φ hflow
-  exact ⟨ε₀, hε₀, cellAttachingMap hk c data, hfinal⟩
+    ⟨v, Φ, hv, hsupp, hrate, hcomplete, hflow, htie⟩
+  let hunder : DifferentialGeometry.Topology.HomotopyEquivUnder :=
+    sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeomorph (I := I) (hf := hf)
+      (f := f) (c := c) (k := k) (hk := hk) (data := data) (g := g) hgmd hg_le hlow0
+      hcell hlow_lower hlow_inv_lower hgup v hv hsupp hcomplete hrate Φ hflow htie
+  refine ⟨ε₀, hε₀, hεa, cellAttachingMap hk c data, ?_⟩
+  refine ⟨hunder, ?_⟩
+  change sublevelInclusion f (by linarith [data.hεpos]) =
+    sublevelInclusion f (by linarith [hε₀])
+  ext x
+  rfl
 
 end ManifoldCellAttachment
 

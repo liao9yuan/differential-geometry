@@ -19,8 +19,17 @@ theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞)
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)
     (hcompact : IsCompact (f ⁻¹' Set.Icc a b))
     (hregular : ∀ x ∈ f ⁻¹' Set.Icc a b, ¬ IsCriticalPointAt I f x) :
-    ∃ Φ : Diffeomorph I I M M ∞,
-      (Φ.toEquiv '' sublevel f a) = sublevel f b := by
+    ∃ v : (x : M) → TangentSpace I x,
+      ∃ Φ : Diffeomorph I I M M ∞,
+        ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
+          (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) ∧
+        IsCompact (tsupport v) ∧
+        (∀ x,
+          -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+          (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0) ∧
+        (∃ hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v,
+          (Φ.toEquiv '' sublevel f a) = sublevel f b ∧
+          ∀ x : M, Φ.toEquiv x = curveAt v hcomplete x (a - b)) := by
   rcases exists_unitSpeedVectorField_on_strip I f hf a b hcompact hregular with
     ⟨v, hv, hsupp, hdfOn, hrate⟩
   have hcomplete := exists_globalIntegralCurve_of_compactSupport v hv hsupp
@@ -59,9 +68,11 @@ theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞)
               _ = x := hflow0 x }
       contMDiff_toFun := hflowSmooth (a - b)
       contMDiff_invFun := hflowSmooth (b - a) }
-  refine ⟨Φ, ?_⟩
-  change (fun x : M => flow (a - b) x) '' sublevel f a = sublevel f b
-  simpa [flow] using htransport
+  refine ⟨v, Φ, hv, hsupp, hrate, hcomplete, ?_, ?_⟩
+  · change (fun x : M => flow (a - b) x) '' sublevel f a = sublevel f b
+    simpa [flow] using htransport
+  · intro x
+    rfl
 
 end
 

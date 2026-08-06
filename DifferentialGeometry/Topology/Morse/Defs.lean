@@ -1,6 +1,7 @@
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.Basic
 import Mathlib.LinearAlgebra.QuadraticForm.Signature
+import Mathlib.Topology.ContinuousMap.Basic
 
 namespace DifferentialGeometry.Topology.Morse
 
@@ -22,6 +23,16 @@ def sublevelStrip (f : M → ℝ) (a b : ℝ) : Set M :=
 
 abbrev SublevelSpace (f : M → ℝ) (a : ℝ) : Type :=
   {x : M // x ∈ sublevel f a}
+
+noncomputable def sublevelInclusion {M : Type} [TopologicalSpace M] (f : M → ℝ) {a b : ℝ}
+    (hab : a ≤ b) : C(SublevelSpace f a, SublevelSpace f b) :=
+  ContinuousMap.mk (fun x => ⟨x.1, by
+    change f x.1 ≤ b
+    exact le_trans (by change f x.1 ≤ a; exact x.2) hab⟩) (by
+    exact Continuous.subtype_mk continuous_subtype_val (by
+      intro x
+      change f x.1 ≤ b
+      exact le_trans (by change f x.1 ≤ a; exact x.2) hab))
 
 def IsCriticalPointAt (I : ModelWithCorners ℝ E H) (f : M → ℝ) (x : M) : Prop :=
   mfderiv I 𝓘(ℝ, ℝ) f x = 0
