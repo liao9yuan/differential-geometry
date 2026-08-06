@@ -452,6 +452,109 @@ theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_flow {n : ℕ} {
     simpa [s, E, c', cellImage] using hAdj
   exact ⟨(hflowHomeo.symm.trans hAdj'.symm).toHomotopyEquiv⟩
 
+theorem cellAdjunctionSpace_homeomorph_lowerUnion {n : ℕ} {H : Type}
+    [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (c : ℝ) (k : ℕ) (hk : k ≤ n)
+    (data : MorseChartData n k hk c I f) :
+    Nonempty (CellAdjunctionSpace k (cellAttachingMap hk c data) ≃ₜ
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ cellImage hk c data}) := by
+  let E : Set M := cellImage hk c data
+  let c' : ClosedCell k → M := cellEmbedding hk c data
+  let φ : CellBoundary k → {x : M // x ∈ sublevel f (c - data.ε)} := cellAttachingMap hk c data
+  have hAdj : CellAdjunctionSpace k φ ≃ₜ
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ Set.range c'} := by
+    refine cellAdjunctionHomeomorphUnionImage (n := k) (φ := φ) (c := c') ?hφ ?hc ?hcont ?hinterior ?hclosed
+    · intro b
+      rfl
+    · intro x y hxy
+      have hx : cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) ∈
+          {y : MorseModel n | morseNorm n y ≤ data.R} := by
+        exact norm_cellMap_le hk data.ε data.R data.hεR (x : EuclideanSpace ℝ (Fin k)) x.2
+      have hy : cellMap hk (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) ∈
+          {y : MorseModel n | morseNorm n y ≤ data.R} := by
+        exact norm_cellMap_le hk data.ε data.R data.hεR (y : EuclideanSpace ℝ (Fin k)) y.2
+      have hχ : cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)) =
+          cellMap hk (Real.sqrt (2 * data.ε)) (y : EuclideanSpace ℝ (Fin k)) := by
+        exact data.χ.injOn (data.hχsrc _ hx) (data.hχsrc _ hy) (by
+          simpa [c', cellEmbedding] using hxy)
+      exact cellMap_injective hk data.ε data.hεpos hχ
+    · have hc'cont : Continuous (fun x : ClosedCell k =>
+          cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) :=
+        continuous_cellMap hk (Real.sqrt (2 * data.ε))
+      have hmap : Set.MapsTo (fun x : ClosedCell k =>
+          cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) Set.univ data.χ.source := by
+        intro x hx
+        exact data.hχsrc (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
+          (norm_cellMap_le hk data.ε data.R data.hεR (x : EuclideanSpace ℝ (Fin k)) x.2)
+      have hcont : ContinuousOn (fun x : ClosedCell k =>
+          data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))) Set.univ :=
+        data.χ.continuousOn_toFun.comp hc'cont.continuousOn hmap
+      change Continuous (fun x : ClosedCell k =>
+        data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))))
+      exact (continuousOn_univ.mp hcont)
+    · rw [Set.disjoint_left]
+      intro x hxA hxB
+      rcases hxA with ⟨y, hy, hxy⟩
+      rcases hy with ⟨z, hz⟩
+      have hfz : f x ≤ c - data.ε := by simpa [sublevel] using hxB
+      have hxeq : x = data.χ (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
+        rw [← hxy]
+        have hzval : (y : EuclideanSpace ℝ (Fin k)) = (z : EuclideanSpace ℝ (Fin k)) := by
+          simpa [cellInteriorInclusion] using
+            (congrArg (fun w : ClosedCell k => (w : EuclideanSpace ℝ (Fin k))) hz).symm
+        dsimp [c', cellEmbedding]
+        simp [hzval]
+      have hfz' : f x = morseNormalForm hk c (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) := by
+        rw [hxeq]
+        rw [data.hnorm (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) (by
+          exact norm_cellMap_le hk data.ε data.R data.hεR (z : EuclideanSpace ℝ (Fin k)) (le_of_lt z.2))]
+      have hnot : ¬ morseNormalForm hk c (cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k))) ≤
+          c - data.ε := by
+        intro hn
+        have hmem : cellMap hk (Real.sqrt (2 * data.ε)) (z : EuclideanSpace ℝ (Fin k)) ∈
+            (fun x : ClosedCell k => cellMap hk (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k))) ''
+              Set.range (cellInteriorInclusion k) := by
+          refine ⟨cellInteriorInclusion k z, ?_, rfl⟩
+          exact Set.mem_range.mpr ⟨z, rfl⟩
+        exact (Set.disjoint_left.mp (cellInterior_disjoint hk c data.ε data.hεpos)) hmem hn
+      exact hnot (by rw [← hfz']; exact hfz)
+    · exact isClosed_Iic.preimage hf.continuous
+  exact ⟨by simpa [E, c', cellImage] using hAdj⟩
+
+theorem sublevel_cellAdjunction_homotopyEquiv_of_morseChart_and_diffeomorph {n : ℕ} {H : Type}
+    [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (c : ℝ) (k : ℕ) (hk : k ≤ n)
+    (data : MorseChartData n k hk c I f)
+    (g : M → ℝ)
+    (hglow : {x : M | g x ≤ c - data.ε} = sublevel f (c - data.ε) ∪ cellImage hk c data)
+    (hgup : {x : M | g x ≤ c + data.ε} = sublevel f (c + data.ε))
+    (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+    (hflow : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel g (c + data.ε)) :
+    Nonempty (ContinuousMap.HomotopyEquiv (SublevelSpace f (c + data.ε))
+      (CellAdjunctionSpace k (cellAttachingMap hk c data))) := by
+  let E : Set M := cellImage hk c data
+  have hAdj : CellAdjunctionSpace k (cellAttachingMap hk c data) ≃ₜ
+      {x : M // x ∈ sublevel f (c - data.ε) ∪ E} := by
+    simpa [E] using (Classical.choice
+      (cellAdjunctionSpace_homeomorph_lowerUnion (I := I) (hf := hf) (data := data)))
+  have hflow' : Φ.toEquiv '' (sublevel f (c - data.ε) ∪ E) = sublevel f (c + data.ε) := by
+    change (Φ.toEquiv '' {x : M | g x ≤ c - data.ε}) = {x : M | g x ≤ c + data.ε} at hflow
+    rw [hglow, hgup] at hflow
+    exact hflow
+  let d : M ≃ₜ M := Φ.toHomeomorph
+  let s : Set M := sublevel f (c - data.ε) ∪ E
+  have hflowHomeo : {x : M // x ∈ s} ≃ₜ SublevelSpace f (c + data.ε) := by
+    have himg : d '' s = sublevel f (c + data.ε) := by
+      simpa [d, s] using hflow'
+    exact (Homeomorph.image d s).trans (subtypeSetHomeo himg)
+  have hAdj' : CellAdjunctionSpace k (cellAttachingMap hk c data) ≃ₜ {x : M // x ∈ s} := by
+    simpa [s, E, cellImage] using hAdj
+  exact ⟨(hflowHomeo.symm.trans hAdj'.symm).toHomotopyEquiv⟩
+
 end ManifoldCellAttachment
 
 end
