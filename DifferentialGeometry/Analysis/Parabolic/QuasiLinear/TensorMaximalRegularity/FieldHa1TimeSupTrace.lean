@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DuhamelSmoothing
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeEndpoint
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
@@ -26,7 +26,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -192,7 +191,9 @@ theorem maxRegDuhamelSolField_inclusion_Ha1_ae_pointwise_le
             (0 : tensorHs (I := I) (M := M) g₀ r s (a + 2)) F)) t‖ ≤
         Real.sqrt (1 + T) * ‖F‖ := by
   classical
-  have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ r s
+  have h_compact :=
+    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.tensorResolventL2_isCompactOperator
+      (I := I) (M := M) g₀ r s
   haveI := countable_tensorEigenIdx (I := I) (M := M)
     (g := g₀) (r := r) (s := s) h_compact
   set field := maxRegDuhamelSolField (I := I) (M := M) a hT hT1
