@@ -24,6 +24,160 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [I.Boundaryless] [CompactSpace M] in
+theorem evolvingLocalizedL2Mass_rpow_half
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hpos : ∀ t x, 0 < u t x) (p t : ℝ) :
+    evolvingLocalizedL2Mass
+        (I := I) (M := M) g cutoff (fun s x => u s x ^ (p / 2)) t =
+      evolvingLocalizedIntegral
+        (I := I) (M := M) g cutoff (fun s x => u s x ^ p) t := by
+  unfold evolvingLocalizedL2Mass evolvingLocalizedIntegral
+  apply integral_congr_ae
+  filter_upwards with x
+  congr 1
+  rw [← Real.rpow_natCast (u t x ^ (p / 2)) 2,
+    ← Real.rpow_mul (hpos t x).le]
+  congr 1
+  ring
+
+theorem caccioppoli_evolving_positive_rpow_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq_pos : 0 < q) (hq_one : q < 1)
+    (t B : ℝ) (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (htrace : ∀ x : M,
+      -traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hpde : ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    (2 * (1 - q) / q) *
+        evolvingLocalizedDirichletEnergy
+          (I := I) (M := M) g cutoff (fun s x => u s x ^ (q / 2)) t ≤
+      deriv
+          (evolvingLocalizedL2Mass
+            (I := I) (M := M) g cutoff (fun s x => u s x ^ (q / 2))) t +
+        (2 * q / (1 - q)) *
+          evolvingCutoffGradientError
+            (I := I) (M := M) g cutoff (fun s x => u s x ^ (q / 2)) t +
+        (1 / 2) * B *
+          evolvingLocalizedL2Mass
+            (I := I) (M := M) g cutoff (fun s x => u s x ^ (q / 2)) t := by
+  let huHalf := contMDiff_rpow_of_pos hu hpos (q / 2)
+  let huq := contMDiff_rpow_of_pos hu hpos q
+  let w : ℝ → M → ℝ := fun s x => u s x ^ (q / 2)
+  let uq : ℝ → M → ℝ := fun s x => u s x ^ q
+  let cutoff_t : SmoothScalar (g t) := ⟨cutoff, hcutoff⟩
+  let mass : ℝ → ℝ :=
+    evolvingLocalizedL2Mass (I := I) (M := M) g cutoff w
+  let timeIntegral : ℝ :=
+    ∫ x, cutoff x ^ 2 * deriv (fun s => uq s x) t
+      ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+  have hfixed := caccioppoli_positive_rpow_of_supersolution
+    (I := I) (M := M) (g t) cutoff_t u hu hpos hq_pos hq_one t hpde
+  have hfixedDeriv := hasDerivAt_localizedIntegral
+    (I := I) (M := M) cutoff_t uq huq t
+  rw [hfixedDeriv.deriv] at hfixed
+  have hfixed' :
+      (2 * (1 - q) / q) *
+          evolvingLocalizedDirichletEnergy
+            (I := I) (M := M) g cutoff w t ≤
+        timeIntegral + (2 * q / (1 - q)) *
+          evolvingCutoffGradientError
+            (I := I) (M := M) g cutoff w t := by
+    simpa only [w, uq, huHalf, cutoff_t, timeIntegral,
+      evolvingLocalizedDirichletEnergy, localizedDirichletEnergy,
+      evolvingCutoffGradientError, cutoffGradientError,
+      riemannianMeasureFamily_def] using hfixed
+  have hmass_eq : mass =
+      evolvingLocalizedIntegral (I := I) (M := M) g cutoff uq := by
+    funext s
+    simpa only [mass, w, uq] using
+      evolvingLocalizedL2Mass_rpow_half
+        (I := I) (M := M) g cutoff u hpos q s
+  have hmoving := hasDerivAt_evolvingLocalizedIntegral
+    (I := I) (M := M) g cutoff uq t hg hcutoff huq
+  have huq_t : Continuous (uq t) :=
+    (huq.comp (contMDiff_const.prodMk contMDiff_id)).continuous
+  let F : C^∞⟮(modelWithCornersSelf ℝ ℝ).prod I, ℝ × M; ℝ⟯ :=
+    ⟨fun p => uq p.1 p.2, huq⟩
+  have htime : Continuous (fun x : M => deriv (fun s => uq s x) t) := by
+    exact ((DifferentialGeometry.contMDiff_partial_deriv_fst I F).comp
+      (contMDiff_const.prodMk contMDiff_id)).continuous
+  have htrace_cont : Continuous
+      (fun x : M => traceTimeDerivMetric (I := I) g t x) :=
+    traceTimeDerivMetric_continuous (I := I) (M := M) hg
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  have htime_int : Integrable
+      (fun x : M => cutoff x ^ 2 * deriv (fun s => uq s x) t) μ :=
+    ((hcutoff.continuous.pow 2).mul htime).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have hdist_int : Integrable (fun x : M => cutoff x ^ 2 *
+      ((1 / 2) * traceTimeDerivMetric (I := I) g t x * uq t x)) μ :=
+    ((hcutoff.continuous.pow 2).mul
+      ((continuous_const.mul htrace_cont).mul huq_t))
+      |>.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hderiv_split : deriv mass t = timeIntegral +
+      evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff w t := by
+    rw [hmass_eq, hmoving.deriv]
+    change (∫ x, cutoff x ^ 2 *
+        (deriv (fun s => uq s x) t +
+          (1 / 2) * traceTimeDerivMetric (I := I) g t x * uq t x) ∂μ) =
+      (∫ x, cutoff x ^ 2 * deriv (fun s => uq s x) t ∂μ) +
+        ∫ x, cutoff x ^ 2 *
+          ((1 / 2) * traceTimeDerivMetric (I := I) g t x * w t x ^ 2) ∂μ
+    have hdist_eq :
+        (∫ x, cutoff x ^ 2 *
+          ((1 / 2) * traceTimeDerivMetric (I := I) g t x * w t x ^ 2) ∂μ) =
+          ∫ x, cutoff x ^ 2 *
+            ((1 / 2) * traceTimeDerivMetric (I := I) g t x * uq t x) ∂μ := by
+      apply integral_congr_ae
+      filter_upwards with x
+      have hrpow : w t x ^ 2 = uq t x := by
+        dsimp only [w, uq]
+        rw [← Real.rpow_natCast (u t x ^ (q / 2)) 2,
+          ← Real.rpow_mul (hpos t x).le]
+        congr 1
+        ring
+      rw [hrpow]
+    rw [hdist_eq, ← integral_add htime_int hdist_int]
+    apply integral_congr_ae
+    filter_upwards with x
+    ring
+  have hdist := neg_evolvingLocalizedVolumeDistortion_le
+    (I := I) (M := M) g cutoff w t B hg hcutoff.continuous
+      ((huHalf.comp (contMDiff_const.prodMk contMDiff_id)).continuous) htrace
+  have htime_le : timeIntegral ≤ deriv mass t + (1 / 2) * B * mass t := by
+    rw [hderiv_split]
+    linarith
+  have hcombined :
+      timeIntegral + (2 * q / (1 - q)) *
+          evolvingCutoffGradientError
+            (I := I) (M := M) g cutoff w t ≤
+        deriv mass t + (2 * q / (1 - q)) *
+            evolvingCutoffGradientError
+              (I := I) (M := M) g cutoff w t +
+          (1 / 2) * B * mass t := by
+    calc
+      _ ≤ (deriv mass t + (1 / 2) * B * mass t) +
+          (2 * q / (1 - q)) *
+            evolvingCutoffGradientError
+              (I := I) (M := M) g cutoff w t :=
+        add_le_add htime_le le_rfl
+      _ = _ := by ring
+  have hresult := hfixed'.trans hcombined
+  simpa only [mass, w] using hresult
+
 theorem caccioppoli_evolving_rpow_of_subsolution
     (g : ℝ → SmoothRiemannianMetric I M)
     (cutoff : M → ℝ)
