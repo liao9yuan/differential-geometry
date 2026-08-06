@@ -806,6 +806,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.QuasilinearMetricShor
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarHeat.EnergyEstimates
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarHeat.HeatSemigroupInstance
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarHeat.MildSolution
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarHeat.MildSolutionClassical
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Semigroup
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.Contraction
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.DuhamelMap
