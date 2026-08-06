@@ -88,6 +88,26 @@ theorem heatSolution_log_evolution
       rw [hlap, hloggrad']
       ring
 
+theorem liYauQuantity_eq_neg_laplacian_log
+    (g : SmoothRiemannianMetric I M)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {t : ℝ} {x : M}
+    (hpde : deriv (fun s => u s x) t =
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+    g.inner x
+          (gradientFun (I := I) g (fun y : M => Real.log (u t y)) x)
+          (gradientFun (I := I) g (fun y : M => Real.log (u t y)) x) -
+        deriv (fun s : ℝ => Real.log (u s x)) t =
+      -Δ_g (I := I) g
+        (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y))
+          (Moser.contMDiff_log_of_pos hu hpos) t).smooth x := by
+  have h := heatSolution_log_evolution (I := I) (M := M) g u hu hpos hpde
+  rw [h]
+  ring
+
 omit [T2Space M] in
 theorem gradientFun_time_deriv
     (g : SmoothRiemannianMetric I M)
