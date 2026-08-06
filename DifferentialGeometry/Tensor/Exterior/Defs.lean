@@ -207,7 +207,7 @@ instance instModule : Module ℝ (DifferentialForm IM M k) :=
     mul_smul := by intro c d a; ext x; simp [mul_smul]
     one_smul := by intro a; ext x; simp }
 
-private lemma altTriv_apply (m : ℕ) (x₀ x : M)
+lemma altTriv_apply (m : ℕ) (x₀ x : M)
     (L : Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) :
     (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
       (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀ ⟨x, L⟩).2 =
