@@ -25,6 +25,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 variable [I.Boundaryless] [T2Space M]
 
+def liYauQuantity (g : SmoothRiemannianMetric I M) (f : ℝ → M → ℝ) (t : ℝ) (x : M) : ℝ :=
+  g.inner x (gradientFun (I := I) g (f t) x) (gradientFun (I := I) g (f t) x) -
+    deriv (fun s : ℝ => f s x) t
+
 theorem heatSolution_log_evolution
     (g : SmoothRiemannianMetric I M)
     (u : ℝ → M → ℝ)
@@ -108,6 +112,22 @@ theorem liYauQuantity_eq_neg_laplacian_log
   have h := heatSolution_log_evolution (I := I) (M := M) g u hu hpos hpde
   rw [h]
   ring
+
+theorem liYauQuantity_eq_neg_laplacian
+    (g : SmoothRiemannianMetric I M)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {t : ℝ} {x : M}
+    (hpde : deriv (fun s => u s x) t =
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+    liYauQuantity g (fun τ y => Real.log (u τ y)) t x =
+      -Δ_g (I := I) g
+        (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y))
+          (Moser.contMDiff_log_of_pos hu hpos) t).smooth x := by
+  simpa [liYauQuantity] using
+    liYauQuantity_eq_neg_laplacian_log (I := I) (M := M) g u hu hpos hpde
 
 omit [T2Space M] in
 theorem gradientFun_time_deriv
@@ -675,5 +695,81 @@ theorem laplacian_time_deriv
     rw [hfun_eq, hw']
     exact hgoal
   exact hmain.deriv
+
+omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] in
+theorem time_deriv_slice_contMDiff
+    (f : ℝ → M → ℝ)
+    (hf : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2))
+    (t : ℝ) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => deriv (fun s : ℝ => f s x) t) := by
+  classical
+  intro x₀
+  rw [contMDiffAt_iff]
+  set α : M := x₀ with hα
+  have hx₀target : (extChartAt I α) x₀ ∈ (extChartAt I α).target :=
+    (extChartAt I α).map_source (mem_extChartAt_source (I := I) α)
+  have hΦ : ContDiffAt ℝ ∞
+      (fun r : ℝ × E => scalarOnE (I := I) α (f r.1) r.2) (t, (extChartAt I α) x₀) :=
+    scalarOnE_jointContDiffAt (I := I) (M := M) f hf α hx₀target
+  have hcd_slice : ContDiffAt ℝ ∞
+      (fun y : E => deriv (fun s : ℝ => scalarOnE (I := I) α (f s) y) t)
+      ((extChartAt I α) x₀) := by
+    have hswap : ContDiffAt ℝ ∞ (fun p : E × ℝ => (p.2, p.1))
+        ((extChartAt I α) x₀, t) :=
+      contDiffAt_snd.prodMk contDiffAt_fst
+    have hf' : ContDiffAt ℝ ∞ (Function.uncurry
+        (fun (y : E) => fun (s : ℝ) => scalarOnE (I := I) α (f s) y))
+        ((extChartAt I α) x₀, t) := by
+      exact hΦ.comp ((extChartAt I α) x₀, t) hswap
+    have hg : ContDiffAt ℝ ∞ (fun _ : E => (t : ℝ)) ((extChartAt I α) x₀) := contDiffAt_const
+    have hfd := ContDiffAt.fderiv
+      (f := fun (y : E) => fun (s : ℝ) => scalarOnE (I := I) α (f s) y)
+      (g := fun _ : E => (t : ℝ)) hf' hg (by simp)
+    have hcd0 : ContDiffAt ℝ ∞
+        (fun y : E => (fderiv ℝ (fun s : ℝ => scalarOnE (I := I) α (f s) y) t) (1 : ℝ))
+        ((extChartAt I α) x₀) := by
+      simpa using
+        ((ContinuousLinearMap.apply ℝ ℝ (1 : ℝ)).contDiff.contDiffAt.comp
+          ((extChartAt I α) x₀) hfd)
+    change ContDiffAt ℝ ∞
+        (fun y : E => deriv (fun s : ℝ => scalarOnE (I := I) α (f s) y) t)
+        ((extChartAt I α) x₀)
+    exact hcd0
+  have hpull : ContDiffAt ℝ ∞
+      (scalarOnE (I := I) α (fun x : M => deriv (fun s : ℝ => f s x) t))
+      ((extChartAt I α) x₀) := by
+    simpa [scalarOnE_def] using hcd_slice
+  constructor
+  · have hcont_pull : ContinuousAt
+        (scalarOnE (I := I) α (fun x : M => deriv (fun s : ℝ => f s x) t))
+        ((extChartAt I α) x₀) := hpull.continuousAt
+    have hw_eq : (fun x : M => deriv (fun s : ℝ => f s x) t) =ᶠ[𝓝 x₀]
+        (scalarOnE (I := I) α (fun x : M => deriv (fun s : ℝ => f s x) t)) ∘
+          (extChartAt I α) := by
+      rw [Filter.eventuallyEq_iff_exists_mem]
+      refine ⟨(extChartAt I α).source,
+        (isOpen_extChartAt_source (I := I) α).mem_nhds (mem_extChartAt_source (I := I) α), ?_⟩
+      intro y hy
+      have hlinv : (extChartAt I α).symm ((extChartAt I α) y) = y :=
+        (extChartAt I α).left_inv hy
+      change deriv (fun s : ℝ => f s y) t =
+        deriv (fun s : ℝ => f s ((extChartAt I α).symm ((extChartAt I α) y))) t
+      rw [hlinv]
+    exact (hcont_pull.comp (continuousAt_extChartAt α)).congr_of_eventuallyEq hw_eq
+  · have hcd_w : ContDiffWithinAt ℝ ∞
+        (scalarOnE (I := I) α (fun x : M => deriv (fun s : ℝ => f s x) t))
+        Set.univ ((extChartAt I α) x₀) := hpull.contDiffWithinAt
+    have hcomp_eq : (extChartAt 𝓘(ℝ, ℝ) (deriv (fun s : ℝ => f s x₀) t) ∘
+        (fun x : M => deriv (fun s : ℝ => f s x) t) ∘
+          (extChartAt I α).symm) =
+        scalarOnE (I := I) α (fun x : M => deriv (fun s : ℝ => f s x) t) := by
+      funext z
+      simp only [Function.comp_def, extChartAt_coe_symm, α]
+      change scalarOnE (I := I) α (fun x : M => deriv (fun s : ℝ => f s x) t) z =
+        scalarOnE (I := I) α (fun x : M => deriv (fun s : ℝ => f s x) t) z
+      rfl
+    rw [hcomp_eq]
+    simpa [ModelWithCorners.range_eq_univ I, α] using hcd_w
 
 end DifferentialGeometry.Analysis.Parabolic.Harnack

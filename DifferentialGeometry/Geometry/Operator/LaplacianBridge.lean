@@ -124,6 +124,26 @@ theorem Δ_g_congr_of_eventuallyEq
 omit [NeZero (Module.finrank Real E)] in
 omit [CompactSpace M] in
 omit [SigmaCompactSpace M] in
+theorem Δ_g_neg
+    (g : SmoothRiemannianMetric I M) {f : M → Real} {x : M}
+    (hf : ContMDiff I 𝓘(Real, Real) ∞ f) :
+    Δ_g (I := I) g (ContMDiff.neg hf) x = -Δ_g (I := I) g hf x := by
+  classical
+  have hadd := Δ_g_add (I := I) g hf (ContMDiff.neg hf) x
+  have hcancel : Δ_g (I := I) g (hf.add (ContMDiff.neg hf)) x = 0 := by
+    have heq : (fun y : M => f y + -f y) =ᶠ[nhds x] (fun _ : M => (0 : Real)) := by
+      rw [Filter.EventuallyEq]
+      exact Filter.Eventually.of_forall (fun y => by ring)
+    have hz := Δ_g_congr_of_eventuallyEq (I := I) g
+      (hf.add (ContMDiff.neg hf))
+      (contMDiff_const : ContMDiff I 𝓘(Real, Real) ∞ (fun _ : M => (0 : Real))) heq
+    rw [hz]
+    exact Δ_g_const (I := I) g (0 : Real) x
+  linarith
+
+omit [NeZero (Module.finrank Real E)] in
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
 theorem laplacianAt_eq_delta
     (G : RealizedMetricFamily (I := I) (M := M) Real) (t : Real)
     {f : M → Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
