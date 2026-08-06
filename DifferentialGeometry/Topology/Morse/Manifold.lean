@@ -17,7 +17,7 @@ noncomputable section
 
 variable {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-theorem fderiv_fderiv_translate_of_contDiffOn (g : E → ℝ) (c : E) (r : ℝ)
+private theorem fderiv_fderiv_translate_of_contDiffOn (g : E → ℝ) (c : E) (r : ℝ)
     (hr : 0 < r) (hg : ContDiffOn ℝ 2 g (Metric.ball c r)) :
     fderiv ℝ (fderiv ℝ (fun z : E => g (z + c))) 0 = fderiv ℝ (fderiv ℝ g) c := by
   have hfun : (fun z : E => fderiv ℝ (fun z : E => g (z + c)) z) =ᶠ[nhds (0 : E)]
@@ -44,7 +44,7 @@ theorem fderiv_fderiv_translate_of_contDiffOn (g : E → ℝ) (c : E) (r : ℝ)
     simpa using fderiv_translate (fderiv ℝ g) c (0 : E) (by simpa using hd)
   rw [hfder, hlast]
 
-theorem hessian_linearPullback_at_critical {E F : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
+private theorem hessian_linearPullback_at_critical {E F : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
     (f : E → ℝ) (σ : F →L[ℝ] E) (hf : ContDiff ℝ 2 f)
     (u v : F) :
@@ -106,7 +106,7 @@ theorem hessian_linearPullback_at_critical {E F : Type} [NormedAddCommGroup E] [
           ((fderiv ℝ (fderiv ℝ f) 0).comp σ)) u) v := by rw [hder]
     _ = (fderiv ℝ (fderiv ℝ f) 0) (σ u) (σ v) := hmain
 
-theorem associated_weightedSumSquares_apply {n : ℕ} (w : Fin n → ℝ) (u v : Fin n → ℝ) :
+private theorem associated_weightedSumSquares_apply {n : ℕ} (w : Fin n → ℝ) (u v : Fin n → ℝ) :
     QuadraticMap.associated (R := ℝ) (QuadraticMap.weightedSumSquares ℝ w) u v =
       ∑ i : Fin n, w i * u i * v i := by
   calc
@@ -970,38 +970,38 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
       continuousOn_toFun := continuousOn_extChartAt_symm p
       continuousOn_invFun := continuousOn_extChartAt p }
   let κ : OpenPartialHomeomorph (MorseModel n) M :=
-    ((ψ.trans (homeoToOpenPartialHomeomorph Lh)).trans
-      (homeoToOpenPartialHomeomorph (addHomeo n e₀))).trans
+    ((ψ.trans (Lh.toOpenPartialHomeomorph)).trans
+      ((addHomeo n e₀).toOpenPartialHomeomorph)).trans
       chart
   let T : MorseModel n ≃ₜ MorseModel n := reindexHomeo σe
   let Φ : OpenPartialHomeomorph (MorseModel n) M :=
-    (homeoToOpenPartialHomeomorph T).trans κ
+    (T.toOpenPartialHomeomorph).trans κ
   let S : Set (MorseModel n) := κ.source ∩ ψ.target
   have hSopen : IsOpen S := κ.open_source.inter ψ.open_target
   have hS0 : (0 : MorseModel n) ∈ S := by
     dsimp [S]
     constructor
-    · have h1 : (0 : MorseModel n) ∈ (ψ.trans (homeoToOpenPartialHomeomorph Lh)).source := by
+    · have h1 : (0 : MorseModel n) ∈ (ψ.trans (Lh.toOpenPartialHomeomorph)).source := by
         rw [OpenPartialHomeomorph.trans_source]
-        exact ⟨hψsrc, by simp [homeoToOpenPartialHomeomorph]⟩
+        exact ⟨hψsrc, by simp⟩
       have h2 : (0 : MorseModel n) ∈
-          ((ψ.trans (homeoToOpenPartialHomeomorph Lh)).trans
-            (homeoToOpenPartialHomeomorph (addHomeo n e₀))).source := by
+          ((ψ.trans (Lh.toOpenPartialHomeomorph)).trans
+            ((addHomeo n e₀).toOpenPartialHomeomorph)).source := by
         rw [OpenPartialHomeomorph.trans_source]
         refine ⟨h1, ?_⟩
-        simp [homeoToOpenPartialHomeomorph]
+        simp
       have h3 : (0 : MorseModel n) ∈ κ.source := by
         rw [OpenPartialHomeomorph.trans_source]
         refine ⟨h2, ?_⟩
-        have hval : ((ψ.trans (homeoToOpenPartialHomeomorph Lh)).trans
-            (homeoToOpenPartialHomeomorph (addHomeo n e₀))) 0 = e₀ := by
+        have hval : ((ψ.trans (Lh.toOpenPartialHomeomorph)).trans
+            ((addHomeo n e₀).toOpenPartialHomeomorph)) 0 = e₀ := by
           have hL0 : Lh 0 = 0 := by
             dsimp [Lh]
             exact L.symm.map_zero
-          simp [addHomeo, homeoToOpenPartialHomeomorph, OpenPartialHomeomorph.trans_apply, hψ0, hL0,
+          simp [addHomeo, OpenPartialHomeomorph.trans_apply, hψ0, hL0,
             add_zero]
-        change ((ψ.trans (homeoToOpenPartialHomeomorph Lh)).trans
-          (homeoToOpenPartialHomeomorph (addHomeo n e₀))) 0 ∈ chart.source
+        change ((ψ.trans (Lh.toOpenPartialHomeomorph)).trans
+          ((addHomeo n e₀).toOpenPartialHomeomorph)) 0 ∈ chart.source
         rw [hval]
         change e₀ ∈ (extChartAt I p).target
         dsimp [e₀]
@@ -1028,7 +1028,6 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
     have hyS : T y ∈ S := (Set.mem_preimage.mp (hball y hy))
     have hyκ : T y ∈ κ.source := hyS.1
     dsimp [Φ]
-    dsimp [homeoToOpenPartialHomeomorph]
     simp [hyκ]
   have hΦsrc0 : (0 : MorseModel n) ∈ Φ.source := by
     have hmemR : morseNorm n 0 ≤ R := by
@@ -1037,7 +1036,7 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
   have hκ0val : κ 0 = p := by
     have hL0 : Lh 0 = 0 := by dsimp [Lh]; exact L.symm.map_zero
     dsimp [κ]
-    simp [chart, addHomeo, homeoToOpenPartialHomeomorph, hψ0, hL0, e₀]
+    simp [chart, addHomeo, hψ0, hL0, e₀]
   have hT0val : T 0 = 0 := by
     dsimp [T]
     funext i
@@ -1051,10 +1050,10 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
     rw [OpenPartialHomeomorph.trans_target]
     constructor
     · exact hκp
-    · simp [homeoToOpenPartialHomeomorph]
+    · simp
   have hΦ0 : Φ 0 = p := by
     dsimp [Φ]
-    simp [homeoToOpenPartialHomeomorph, hT0val, hκ0val]
+    simp [hT0val, hκ0val]
   have hnormal' : ∀ y : MorseModel n, morseNorm n y ≤ R → f (Φ y) = morseNormalForm hk (f p) y := by
     intro y hy
     have hyS : T y ∈ S := (Set.mem_preimage.mp (hball y hy))
@@ -1337,7 +1336,7 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
     simpa [hfun] using hψLhaddChart
   have hTpre : {y : MorseModel n | T y ∈ Metric.ball (0 : MorseModel n) rκ} ∈ nhds (0 : MorseModel n) := by
     have hc : ContinuousAt (T : MorseModel n → MorseModel n) (0 : MorseModel n) :=
-      (homeoToOpenPartialHomeomorph T).continuousAt (by simp [homeoToOpenPartialHomeomorph])
+      (T.toOpenPartialHomeomorph).continuousAt (by simp)
     have hval : T (0 : MorseModel n) = 0 := by dsimp [T]; simp [reindexHomeo]
     exact hc.preimage_mem_nhds (by
       rw [hval]
@@ -1441,8 +1440,6 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
     have hfun : (fun x : M => κ.symm x) =
         fun x => ψ.symm (Lh.symm ((addHomeo n e₀).symm (chart.symm x))) := by
       dsimp [κ]
-      funext x
-      rfl
     simpa [hfun] using h3
   have hΦimg_sub : Φ '' Metric.ball (0 : MorseModel n) rΦ ⊆ κ '' Metric.ball (0 : MorseModel n) rκ := by
     intro x hx
@@ -1467,8 +1464,6 @@ theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [Topolo
     simpa [Function.comp_def] using (hTInv.comp hκinvOn' (by intro x hx; trivial))
   have hfun : (fun x : M => Φ.symm x) = fun x => T.symm (κ.symm x) := by
     dsimp [Φ]
-    funext x
-    rfl
   simpa [hfun] using hΦsymmOn
 
 end

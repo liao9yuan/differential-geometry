@@ -1272,22 +1272,6 @@ theorem w_sum_reindexed {n k : ℕ} (hk : k ≤ n) (w : Fin n → ℝ)
         rw [hwpos j]
         simp
 
-def homeoToOpenPartialHomeomorph {X Y : Type} [TopologicalSpace X] [TopologicalSpace Y]
-    (h : X ≃ₜ Y) : OpenPartialHomeomorph X Y where
-  toPartialEquiv :=
-    { toFun := h
-      invFun := h.symm
-      source := Set.univ
-      target := Set.univ
-      map_source' := by intro x hx; trivial
-      map_target' := by intro y hy; trivial
-      left_inv' := by intro x hx; exact h.left_inv x
-      right_inv' := by intro y hy; exact h.right_inv y }
-  open_source := isOpen_univ
-  open_target := isOpen_univ
-  continuousOn_toFun := h.continuous.continuousOn
-  continuousOn_invFun := h.symm.continuous.continuousOn
-
 def addHomeo (n : ℕ) (a : MorseModel n) : MorseModel n ≃ₜ MorseModel n where
   toFun := fun z => a + z
   invFun := fun z => z - a

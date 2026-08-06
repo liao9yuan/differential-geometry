@@ -320,7 +320,7 @@ theorem differentiableAt_modGamma {δ : ℝ} (x : ℝ) : DifferentiableAt ℝ (m
   have hc1 : DifferentiableAt ℝ (fun _ : ℝ => (1 : ℝ)) x := differentiableAt_const (1 : ℝ)
   exact hc1.sub hcomp
 
-lemma fderiv_apply_eq_deriv_line {n : ℕ} {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]
+private lemma fderiv_apply_eq_deriv_line {n : ℕ} {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {g : MorseModel n → F} {y e : MorseModel n}
     (hgdiff : DifferentiableAt ℝ g y) {D : F}
     (hline : HasDerivAt (fun h : ℝ => g (y + h • e)) D 0) :
@@ -364,7 +364,7 @@ lemma fderiv_apply_eq_deriv_line {n : ℕ} {F : Type} [NormedAddCommGroup F] [No
   rw [← hline']
   simpa using hh.symm
 
-lemma hasDerivAt_smul_const {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F] (w : F) :
+private lemma hasDerivAt_smul_const {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F] (w : F) :
     HasDerivAt (fun h : ℝ => h • w) w 0 := by
   rw [hasDerivAt_iff_hasFDerivAt]
   have hL : HasFDerivAt (fun h : ℝ => h • w) ((1 : ℝ →L[ℝ] ℝ).smulRight w) 0 := by
@@ -374,7 +374,7 @@ lemma hasDerivAt_smul_const {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F
     simp [ContinuousLinearMap.toSpanSingleton_apply]
   rwa [hEq]
 
-lemma hasDerivAt_const_add_smul {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F] (x w : F) :
+private lemma hasDerivAt_const_add_smul {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F] (x w : F) :
     HasDerivAt (fun h : ℝ => x + h • w) w 0 := by
   rw [hasDerivAt_iff_hasFDerivAt]
   have h1 : HasFDerivAt (fun h : ℝ => h • w) ((1 : ℝ →L[ℝ] ℝ).smulRight w) 0 := by
@@ -390,7 +390,7 @@ lemma hasDerivAt_const_add_smul {F : Type} [NormedAddCommGroup F] [NormedSpace �
     rw [add_comm]
   · simp [hEq']
 
-lemma hasDerivAt_norm_add_smul {F : Type} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+private lemma hasDerivAt_norm_add_smul {F : Type} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
     {x w : F} (hx : x ≠ 0) :
     HasDerivAt (fun h : ℝ => ‖x + h • w‖) (inner ℝ x w / ‖x‖) 0 := by
   have hsmulw : HasDerivAt (fun h : ℝ => h • w) w 0 := hasDerivAt_smul_const w
@@ -1910,13 +1910,6 @@ noncomputable def modifiedSublevelHomotopyEquiv {n k : ℕ} (hk : k ≤ n) (c ε
   invFun := modifiedCollarInclusionC hk c ε δ hε hδ
   left_inv := ⟨modifiedCollarRetractionHomotopy hk c ε δ hε hδ⟩
   right_inv := ⟨modifiedCollarInclusionHomotopy hk c ε δ hε hδ⟩
-
-theorem modifiedSublevel_homotopyEquiv_lowerCellUnion {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
-    (hε : 0 < ε) (hδ : 0 < δ) :
-    Nonempty (ContinuousMap.HomotopyEquiv
-      {y : MorseModel n // modifiedNormalForm hk c ε δ y ≤ c - ε}
-      (lowerUnion hk c ε)) :=
-  ⟨modifiedSublevelHomotopyEquiv hk c ε δ hε hδ⟩
 
 theorem modifiedNormalForm_eq_of_modulation_zero {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
     {y : MorseModel n} (hy : modMu ε (‖negPart hk y‖ ^ 2) * modGamma δ ‖posPart hk y‖ = 0) :
