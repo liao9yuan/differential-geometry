@@ -355,6 +355,121 @@ theorem localizedSpacetimeRpowMoment_gain_le_of_evolving_supersolution
       rw [hfactor]
       ring
 
+def evolvingNestedForwardMoserStepFactor
+    (n : ℕ) (V : ℝ≥0∞) (C G B p₀ a : ℝ)
+    (level upperTime : ℕ → ℝ) (k : ℕ) : ℝ :=
+  (V.toReal * C) ^ (1 / parabolicMoserExponent n p₀ (k + 1)) *
+    (evolvingForwardMoserStepCoefficient
+        (parabolicMoserExponent n p₀ k) a
+        (upperTime (k + 1)) (upperTime k)
+        (nestedForwardMoserGradientCost G level k) B * V.toReal) ^
+      (1 / parabolicMoserExponent n p₀ k)
+
+theorem nestedForwardMoserNorm_succ_le_of_evolving_supersolution
+    (qMetric : SmoothRiemannianMetric I M)
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho : SmoothScalar qMetric)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a C G B t₀ : ℝ} (V : ℝ≥0∞)
+    (level upperTime : ℕ → ℝ) (k : ℕ)
+    (hp₀ : 0 < p₀)
+    (hexponent_one :
+      parabolicMoserExponent (Module.finrank ℝ E) p₀ k < 1)
+    (haTime : a ≤ upperTime (k + 1))
+    (htime : upperTime (k + 1) < upperTime k)
+    (hlevel₀₁ : level (2 * k) < level (2 * k + 1))
+    (hlevel₁₂ : level (2 * k + 1) < level (2 * k + 2))
+    (hlevel₂₃ : level (2 * k + 2) < level (2 * k + 3))
+    (hC : 0 ≤ C) (hG : 0 ≤ G) (hB : 0 ≤ B)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun z : ℝ × M =>
+          chartGramMatrix (I := I) (g z.1) x₀ z.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hSobolev : ∀ t ∈ Icc a (upperTime k),
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (htrace : ∀ t ∈ Icc a (upperTime k), ∀ x : M,
+      -traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hrho : ∀ t ∈ Icc a (upperTime k), ∀ x : M,
+      (g t).inner x
+          (gradFun (I := I) (g t) rho.toFun x)
+          (gradFun (I := I) (g t) rho.toFun x) ≤ G)
+    (hpde : ∀ t ∈ Icc a (upperTime k), ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (hVtop : V ≠ ⊤)
+    (hvolume : ∀ t ∈ Icc a (upperTime k),
+      riemannianMeasureFamily (I := I) (M := M) g t ≤
+          V • riemannianVolumeMeasure (I := I) (M := M) qMetric ∧
+        riemannianVolumeMeasure (I := I) (M := M) qMetric ≤
+          V • riemannianMeasureFamily (I := I) (M := M) g t) :
+    nestedForwardMoserNorm (I := I) (M := M) (Module.finrank ℝ E)
+        rho u p₀ a level upperTime (k + 1) ≤
+      evolvingNestedForwardMoserStepFactor (Module.finrank ℝ E)
+          V C G B p₀ a level upperTime k *
+        nestedForwardMoserNorm (I := I) (M := M) (Module.finrank ℝ E)
+          rho u p₀ a level upperTime k := by
+  let n := Module.finrank ℝ E
+  letI : NeZero n := by
+    refine ⟨Nat.ne_of_gt ?_⟩
+    exact_mod_cast (by linarith : 0 < (n : ℝ))
+  let p := parabolicMoserExponent n p₀ k
+  let K := nestedForwardMoserGradientCost G level k
+  let coefficient :=
+    evolvingForwardMoserStepCoefficient p a
+      (upperTime (k + 1)) (upperTime k) K B * V.toReal
+  let L := nestedForwardMoserMoment (I := I) (M := M)
+    n rho u p₀ a level upperTime k
+  let L' := nestedForwardMoserMoment (I := I) (M := M)
+    n rho u p₀ a level upperTime (k + 1)
+  have hp_pos : 0 < p := parabolicMoserExponent_pos n hp₀ k
+  have hK : 0 ≤ K := by
+    dsimp only [K, nestedForwardMoserGradientCost]
+    exact div_nonneg (mul_nonneg (sq_nonneg _) hG) (sq_nonneg _)
+  have hstepCoefficient : 0 ≤
+      evolvingForwardMoserStepCoefficient p a
+        (upperTime (k + 1)) (upperTime k) K B :=
+    evolvingForwardMoserStepCoefficient_nonneg hp_pos
+      (by simpa only [p, n] using hexponent_one) haTime htime hK hB
+  have hcoefficient : 0 ≤ coefficient :=
+    mul_nonneg hstepCoefficient ENNReal.toReal_nonneg
+  have hL : 0 ≤ L := by
+    exact localizedSpacetimeRpowMoment_nonneg (I := I) (M := M)
+      (spatialCutoffBetween rho (level (2 * k)) (level (2 * k + 1)))
+      u (fun t x => (hpos t x).le) p a (upperTime k)
+  have hL' : 0 ≤ L' := by
+    exact localizedSpacetimeRpowMoment_nonneg (I := I) (M := M)
+      (spatialCutoffBetween rho (level (2 * (k + 1)))
+        (level (2 * (k + 1) + 1)))
+      u (fun t x => (hpos t x).le)
+      (parabolicMoserExponent n p₀ (k + 1)) a (upperTime (k + 1))
+  have hstep₀ := localizedSpacetimeRpowMoment_gain_le_of_evolving_supersolution
+    (I := I) (M := M) qMetric g hdim rho u hu hpos hp_pos
+      (by simpa only [p, n] using hexponent_one) haTime htime
+      hlevel₀₁ hlevel₁₂ hlevel₂₃ hC hG hB hg hgram
+      (fun t ht => hSobolev t ⟨ht.1, ht.2.trans htime.le⟩)
+      htrace hrho hpde V V hVtop hVtop
+      (fun t ht => (hvolume t ⟨ht.1, ht.2.trans htime.le⟩).2)
+      (fun t ht => (hvolume t ht).1)
+  have hstep : L' ≤ V.toReal * C *
+      (coefficient * L) ^ parabolicMoserGain n := by
+    simpa only [L, L', coefficient, K, p, nestedForwardMoserMoment,
+      parabolicMoserExponent_succ, Nat.mul_add, Nat.mul_one, Nat.add_assoc,
+      n, mul_assoc] using hstep₀
+  have hnormalized := normalized_exponent_gain_step
+    hL hL' (mul_nonneg ENNReal.toReal_nonneg hC) hcoefficient
+      (parabolicMoserGain_pos n) hp_pos hstep
+  simpa only [nestedForwardMoserNorm, evolvingNestedForwardMoserStepFactor,
+    L, L', coefficient, K, p, parabolicMoserExponent_succ, n, mul_assoc] using
+      hnormalized
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
