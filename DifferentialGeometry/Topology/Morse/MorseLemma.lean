@@ -2145,6 +2145,7 @@ theorem isLocalHomeomorphAt_morseSectionCompletion_contDiffOn_smooth {n : ℕ}
     ∃ Φ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)),
       (Φ : MorseModel (n + 1) → MorseModel (n + 1)) = morseSectionCompletion f φ ∧ 0 ∈ Φ.source ∧
       ∃ u : Set (MorseModel (n + 1)), IsOpen u ∧ (0 : MorseModel (n + 1)) ∈ u ∧
+        u ⊆ Φ.source ∧
         ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (Φ : MorseModel (n + 1) → MorseModel (n + 1)) u ∧
         ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (Φ.symm : MorseModel (n + 1) → MorseModel (n + 1)) (Φ '' u) := by
   rcases morseSectionCompletion_contDiffOn_smooth f hf φ hcontσ hB0
@@ -2206,6 +2207,13 @@ theorem isLocalHomeomorphAt_morseSectionCompletion_contDiffOn_smooth {n : ℕ}
     constructor
     · exact ContDiffAt.mem_toOpenPartialHomeomorph_source _ _ _
     · exact hu0
+  have huΦsrc : u ⊆ Φ.source := by
+    intro x hx
+    have hsrc : Φ.source = Φ₀.source ∩ u := by
+      dsimp [Φ]
+    exact (hsrc.symm ▸ ⟨(by
+      dsimp [u] at hx
+      exact hx.1.1), hx⟩)
   have hΦOn : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
       (Φ : MorseModel (n + 1) → MorseModel (n + 1)) u := by
     rw [hΦfun]
@@ -2228,7 +2236,7 @@ theorem isLocalHomeomorphAt_morseSectionCompletion_contDiffOn_smooth {n : ℕ}
       refine ⟨e, ?_⟩
       rw [hΦfun]
       exact he
-  refine ⟨Φ, hΦfun, hΦsrc0, u, huOpen, hu0, hΦOn, ?_⟩
+  refine ⟨Φ, hΦfun, hΦsrc0, u, huOpen, hu0, huΦsrc, hΦOn, ?_⟩
   exact hΦsymmOn.mono (by
     intro x hx
     rcases hx with ⟨y, hy, rfl⟩
@@ -2442,6 +2450,9 @@ theorem morseLemmaDiagonal_succ_smooth (n : ℕ)
         0 ∈ ψ.source ∧ 0 ∈ ψ.target ∧ ψ 0 = 0 ∧
         ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (ψ : MorseModel n → MorseModel n) 0 ∧
         ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (ψ.symm : MorseModel n → MorseModel n) 0 ∧
+        (∃ v : Set (MorseModel n), IsOpen v ∧ (0 : MorseModel n) ∈ v ∧
+          ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (ψ : MorseModel n → MorseModel n) v ∧
+          ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (ψ.symm : MorseModel n → MorseModel n) (ψ '' v)) ∧
         ∀ y ∈ ψ.target, g (ψ y) = g 0 + (1 / 2) * ∑ i : Fin n, w' i * y i * y i)
     (f : MorseModel (n + 1) → ℝ)
     (hf : ContDiff ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
@@ -2453,6 +2464,9 @@ theorem morseLemmaDiagonal_succ_smooth (n : ℕ)
       0 ∈ φ.source ∧ 0 ∈ φ.target ∧ φ 0 = 0 ∧
       ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ : MorseModel (n + 1) → MorseModel (n + 1)) 0 ∧
       ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ.symm : MorseModel (n + 1) → MorseModel (n + 1)) 0 ∧
+      (∃ v : Set (MorseModel (n + 1)), IsOpen v ∧ (0 : MorseModel (n + 1)) ∈ v ∧
+        ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ : MorseModel (n + 1) → MorseModel (n + 1)) v ∧
+        ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ.symm : MorseModel (n + 1) → MorseModel (n + 1)) (φ '' v)) ∧
       ∀ y ∈ φ.target, f (φ y) = f 0 + (1 / 2) * ∑ i : Fin (n + 1), w i * y i * y i := by
   let g : MorseModel (n + 1) → ℝ := f
   have hgSmooth : ContDiff ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) g := by simpa [g] using hf
@@ -2555,8 +2569,9 @@ theorem morseLemmaDiagonal_succ_smooth (n : ℕ)
     simpa [hσ0] using hdfp
   have hcontσ1 : ContDiffAt ℝ 1 (morseSection φ₀) (0 : MorseModel n) :=
     hcontσ2.of_le (by decide : (1 : WithTop ℕ∞) ≤ (2 : WithTop ℕ∞))
-  rcases isLocalHomeomorphAt_morseSectionCompletion_smooth g hf hcritg a φ₀ hφ₀ hsrc₀ hdfσ hdfp0 hcontσk
-    w hw hdiagg hB0 with ⟨Φ, hΦ, hΦsrc, hΦsmooth, hΦsymmSmooth⟩
+  rcases morseSection_contDiffOn_smooth g hgSmooth hcritg h₀ φ₀ hφ₀ hsrc₀ with ⟨rσ, hrσ, hσOn⟩
+  rcases isLocalHomeomorphAt_morseSectionCompletion_contDiffOn_smooth g hf hcritg a φ₀ hφ₀ hsrc₀ hdfσ hdfp0
+    ⟨rσ, hrσ, hσOn⟩ w hw hdiagg hB0 with ⟨Φ, hΦ, hΦsrc, uΦ, huΦOpen, huΦ0, huΦsrc, hΦOn, hΦsymmOn⟩
   let g₁ : MorseModel n → ℝ := fun x' => g (morseSection φ₀ x')
   have hg₁local : ∃ r : ℝ, 0 < r ∧
       ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) g₁ (Metric.ball (0 : MorseModel n) r) := by
@@ -2611,7 +2626,7 @@ theorem morseLemmaDiagonal_succ_smooth (n : ℕ)
     rw [hfd2]
     simpa [g₁] using hdiagg₁ u v
   rcases ih g1ext hg1extSmooth hcritg1ext (fun j => w (Fin.succ j)) (by intro j; exact hw (Fin.succ j)) hdiagg1ext
-    with ⟨ψ, hψsrc, hψtarget, hψ0, hψsmooth, hψsymmSmooth, hψnorm⟩
+    with ⟨ψ, hψsrc, hψtarget, hψ0, hψsmooth, hψsymmSmooth, hψLocal, hψnorm⟩
   rcases mem_nhds_iff.mp hg1extEq with ⟨U, hUg1, hUopen, hU0⟩
   rcases morseTail_embedding ψ with ⟨ι, hι, hιsymm, hιsrc, hιtarget⟩
   let Θ : OpenPartialHomeomorph (MorseModel (n + 1)) (MorseModel (n + 1)) := ι.trans Φ.symm
@@ -2650,6 +2665,198 @@ theorem morseLemmaDiagonal_succ_smooth (n : ℕ)
       cases i using Fin.cases <;> simp [morseCons]
     dsimp [morseSectionCompletion]
     simp [morseHead, htail0, hc0, hz0]
+  have hΦsmooth : ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (Φ : MorseModel (n + 1) → MorseModel (n + 1)) 0 :=
+    hΦOn.contDiffAt (huΦOpen.mem_nhds huΦ0)
+  have hΦsymmSmooth : ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (Φ.symm : MorseModel (n + 1) → MorseModel (n + 1)) 0 := by
+    have hmem : Φ '' uΦ ∈ nhds (0 : MorseModel (n + 1)) := by
+      have huΦopen : IsOpen (Φ '' uΦ) := Φ.isOpen_image_of_subset_source huΦOpen huΦsrc
+      have hval : Φ (0 : MorseModel (n + 1)) = 0 := hΦ0
+      exact huΦopen.mem_nhds (by refine ⟨0, huΦ0, ?_⟩; simp [hval])
+    exact hΦsymmOn.contDiffAt hmem
+  have hιOnLocal : ∃ v : Set (MorseModel (n + 1)), IsOpen v ∧ (0 : MorseModel (n + 1)) ∈ v ∧
+      ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (ι : MorseModel (n + 1) → MorseModel (n + 1)) v ∧
+      ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (ι.symm : MorseModel (n + 1) → MorseModel (n + 1)) (ι '' v) := by
+    rcases hψLocal with ⟨vψ, hvψOpen, hvψ0, hψOn, hψsymmOn⟩
+    let vι : Set (MorseModel (n + 1)) := (fun z : MorseModel (n + 1) => morseTail z) ⁻¹' vψ
+    have htailc : Continuous (fun z : MorseModel (n + 1) => morseTail z) := by
+      change Continuous (fun z : MorseModel (n + 1) => morseTailProj z)
+      exact (morseTailProj : (MorseModel (n + 1)) →L[ℝ] MorseModel n).cont
+    have hvιOpen : IsOpen vι := by
+      dsimp [vι]
+      exact htailc.isOpen_preimage vψ hvψOpen
+    have hvι0 : (0 : MorseModel (n + 1)) ∈ vι := by
+      dsimp [vι]
+      change morseTail (0 : MorseModel (n + 1)) ∈ vψ
+      have hz : morseTail (0 : MorseModel (n + 1)) = 0 := by
+        funext i
+        simp [morseTail]
+      simpa [hz] using hvψ0
+    have hιOnV : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (ι : MorseModel (n + 1) → MorseModel (n + 1)) vι := by
+      rw [hι]
+      have hhead : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun z : MorseModel (n + 1) => morseHead z) vι := by
+        simpa [morseHead, morseHeadProj] using
+          (morseHeadProj.contDiff.contDiffOn : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+            (fun z : MorseModel (n + 1) => morseHeadProj z) Set.univ).mono (by intro z hz; trivial)
+      have htail : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun z : MorseModel (n + 1) => morseTail z) vι := by
+        change ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun z : MorseModel (n + 1) => morseTailProj z) vι
+        exact ((morseTailProj.contDiff.contDiffOn : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun z : MorseModel (n + 1) => morseTailProj z) Set.univ).mono (by intro z hz; trivial))
+      have hψtail : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun z : MorseModel (n + 1) => ψ (morseTail z)) vι :=
+        hψOn.comp htail (by intro z hz; dsimp [vι] at hz; exact hz)
+      have hpair : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun z : MorseModel (n + 1) => (morseHead z, ψ (morseTail z))) vι :=
+        ContDiffOn.prodMk hhead hψtail
+      have hcons : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun p : ℝ × MorseModel n => morseConsLinearCLM p) Set.univ :=
+        (morseConsLinearCLM.contDiff.contDiffOn : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun p : ℝ × MorseModel n => morseConsLinearCLM p) Set.univ)
+      have hcomp : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun z : MorseModel (n + 1) => morseConsLinearCLM (morseHead z, ψ (morseTail z))) vι :=
+        hcons.comp hpair (by intro z hz; trivial)
+      simpa [morseCons] using hcomp
+    have hιsymmOnV : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (ι.symm : MorseModel (n + 1) → MorseModel (n + 1)) (ι '' vι) := by
+      rw [hιsymm]
+      have hmaps : Set.MapsTo (fun y : MorseModel (n + 1) => morseTail y) (ι '' vι) (ψ '' vψ) := by
+        intro y hy
+        rcases hy with ⟨z, hz, rfl⟩
+        refine ⟨morseTail z, ?_, ?_⟩
+        · dsimp [vι] at hz
+          exact hz
+        · rw [hι]
+          simp [morseCons_tail]
+      have hhead : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : MorseModel (n + 1) => morseHead y) (ι '' vι) := by
+        simpa [morseHead, morseHeadProj] using
+          (morseHeadProj.contDiff.contDiffOn : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+            (fun y : MorseModel (n + 1) => morseHeadProj y) Set.univ).mono (by intro y hy; trivial)
+      have htail : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : MorseModel (n + 1) => morseTail y) (ι '' vι) := by
+        change ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : MorseModel (n + 1) => morseTailProj y) (ι '' vι)
+        exact ((morseTailProj.contDiff.contDiffOn : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : MorseModel (n + 1) => morseTailProj y) Set.univ).mono (by intro y hy; trivial))
+      have hψsymmtail : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : MorseModel (n + 1) => ψ.symm (morseTail y)) (ι '' vι) :=
+        hψsymmOn.comp htail hmaps
+      have hpair : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : MorseModel (n + 1) => (morseHead y, ψ.symm (morseTail y))) (ι '' vι) :=
+        ContDiffOn.prodMk hhead hψsymmtail
+      have hcons : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun p : ℝ × MorseModel n => morseConsLinearCLM p) Set.univ :=
+        (morseConsLinearCLM.contDiff.contDiffOn : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun p : ℝ × MorseModel n => morseConsLinearCLM p) Set.univ)
+      have hcomp : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : MorseModel (n + 1) => morseConsLinearCLM (morseHead y, ψ.symm (morseTail y))) (ι '' vι) :=
+        hcons.comp hpair (by intro y hy; trivial)
+      simpa [morseCons] using hcomp
+    exact ⟨vι, hvιOpen, hvι0, hιOnV, hιsymmOnV⟩
+  have hΘOnLocal : ∃ v : Set (MorseModel (n + 1)), IsOpen v ∧ (0 : MorseModel (n + 1)) ∈ v ∧
+      ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (Θ : MorseModel (n + 1) → MorseModel (n + 1)) v ∧
+      ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (Θ.symm : MorseModel (n + 1) → MorseModel (n + 1)) (Θ '' v) := by
+    rcases hιOnLocal with ⟨vι, hvιOpen, hvι0, hιOnV, hιsymmOnV⟩
+    have huΦopen : IsOpen (Φ '' uΦ) :=
+      Φ.isOpen_image_of_subset_source huΦOpen huΦsrc
+    let vΘ : Set (MorseModel (n + 1)) := vι ∩ (fun y : MorseModel (n + 1) => ι y) ⁻¹' (Φ '' uΦ)
+    have hvΘOpen : IsOpen vΘ := by
+      dsimp [vΘ]
+      rw [isOpen_iff_mem_nhds]
+      intro x hx
+      have hc : ContinuousAt ι x :=
+        (hιOnV.continuousOn x hx.1).continuousAt (hvιOpen.mem_nhds hx.1)
+      exact Filter.inter_mem (hvιOpen.mem_nhds hx.1)
+        (hc.preimage_mem_nhds (huΦopen.mem_nhds hx.2))
+    have hvΘ0 : (0 : MorseModel (n + 1)) ∈ vΘ := by
+      dsimp [vΘ]
+      constructor
+      · exact hvι0
+      · change ι (0 : MorseModel (n + 1)) ∈ Φ '' uΦ
+        have h0in : (0 : MorseModel (n + 1)) ∈ Φ '' uΦ := by
+          refine ⟨0, huΦ0, ?_⟩
+          simp [hΦ0]
+        have hι0v : ι (0 : MorseModel (n + 1)) = 0 := by
+          rw [hι]
+          funext i
+          cases i using Fin.cases with
+          | zero => simp [morseHead, morseCons]
+          | succ j =>
+              change (ψ (morseTail (0 : MorseModel (n + 1)))) j = 0
+              have htail0 : morseTail (0 : MorseModel (n + 1)) = 0 := by
+                funext i
+                simp [morseTail]
+              rw [htail0, hψ0]
+              simp
+        rw [hι0v]
+        exact h0in
+    have hΘOnV : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (Θ : MorseModel (n + 1) → MorseModel (n + 1)) vΘ := by
+      have hfun : (Θ : MorseModel (n + 1) → MorseModel (n + 1)) =
+          (fun y => Φ.symm (ι y)) := by
+        dsimp [Θ]
+        funext y
+        rfl
+      have hιOnV' : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (ι : MorseModel (n + 1) → MorseModel (n + 1)) vΘ :=
+        hιOnV.mono (by intro y hy; exact hy.1)
+      have hmaps : Set.MapsTo (fun y : MorseModel (n + 1) => ι y) vΘ (Φ '' uΦ) := by
+        intro y hy
+        dsimp [vΘ] at hy
+        exact hy.2
+      have hcomp := hΦsymmOn.comp hιOnV' hmaps
+      rw [hfun]
+      exact hcomp
+    have hΘsymmOnV : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (Θ.symm : MorseModel (n + 1) → MorseModel (n + 1)) (Θ '' vΘ) := by
+      have hsymmfun : (Θ.symm : MorseModel (n + 1) → MorseModel (n + 1)) =
+          (fun y => ι.symm (Φ y)) := by
+        dsimp [Θ]
+        funext y
+        rfl
+      have hΦu_target : Φ '' uΦ ⊆ Φ.target := by
+        intro x hx
+        rcases hx with ⟨y, hy, rfl⟩
+        exact Φ.map_source (huΦsrc hy)
+      have hΘv_sub_uΦ : Θ '' vΘ ⊆ uΦ := by
+        intro y hy
+        rcases hy with ⟨z, hz, rfl⟩
+        have hιz : ι z ∈ Φ '' uΦ := by
+          dsimp [vΘ] at hz
+          exact hz.2
+        rcases hιz with ⟨w, hw, hιzw⟩
+        have hwsrc : w ∈ Φ.source := huΦsrc hw
+        have hleft : Φ.symm (Φ w) = w := Φ.left_inv hwsrc
+        have hΘz : Θ z = Φ.symm (ι z) := by
+          dsimp [Θ]
+        rw [hΘz, ← hιzw, hleft]
+        exact hw
+      have hΦOnV : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : MorseModel (n + 1) => Φ y) (Θ '' vΘ) :=
+        hΦOn.mono hΘv_sub_uΦ
+      have hmaps : Set.MapsTo (fun y : MorseModel (n + 1) => Φ y) (Θ '' vΘ) (ι '' vι) := by
+        intro y hy
+        rcases hy with ⟨z, hz, rfl⟩
+        have hιzΦ : ι z ∈ Φ.target := hΦu_target (by
+          dsimp [vΘ] at hz
+          exact hz.2)
+        have hΦy : Φ (Θ z) = ι z := by
+          have hΘz : Θ z = Φ.symm (ι z) := by
+            dsimp [Θ]
+          rw [hΘz]
+          exact Φ.right_inv hιzΦ
+        refine ⟨z, ?_, hΦy.symm⟩
+        dsimp [vΘ] at hz
+        exact hz.1
+      have hcomp := hιsymmOnV.comp hΦOnV hmaps
+      rw [hsymmfun]
+      exact hcomp
+    exact ⟨vΘ, hvΘOpen, hvΘ0, hΘOnV, hΘsymmOnV⟩
   have hΦtarget0 : (0 : MorseModel (n + 1)) ∈ Φ.target := by
     simpa [hΦ0] using (Φ.map_source hΦsrc)
   have hΦsymm0 : Φ.symm 0 = 0 := by
@@ -2900,7 +3107,14 @@ theorem morseLemmaDiagonal_succ_smooth (n : ℕ)
     calc
       φ 0 = Θ 0 := by rfl
       _ = 0 := hΘ0
-  refine ⟨φ, hφsrc0, hφtarget0, hφ0, ?_, ?_, ?_⟩
+  have hφLocal : ∃ v : Set (MorseModel (n + 1)), IsOpen v ∧ (0 : MorseModel (n + 1)) ∈ v ∧
+      ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ : MorseModel (n + 1) → MorseModel (n + 1)) v ∧
+      ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ.symm : MorseModel (n + 1) → MorseModel (n + 1)) (φ '' v) := by
+    rcases hΘOnLocal with ⟨vΘ, hvΘOpen, hvΘ0, hΘOnV, hΘsymmOnV⟩
+    refine ⟨vΘ, hvΘOpen, hvΘ0, ?_, ?_⟩
+    · simpa using hΘOnV
+    · simpa using hΘsymmOnV
+  refine ⟨φ, hφsrc0, hφtarget0, hφ0, ?_, ?_, hφLocal, ?_⟩
   · simpa using hΘsmooth
   · simpa using hΘsymmSmooth
   intro y hy
@@ -3635,8 +3849,11 @@ theorem morseLemmaDiagonal_zero_smooth (f : MorseModel 0 → ℝ)
       0 ∈ φ.source ∧ 0 ∈ φ.target ∧ φ 0 = 0 ∧
       ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ : MorseModel 0 → MorseModel 0) 0 ∧
       ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ.symm : MorseModel 0 → MorseModel 0) 0 ∧
+      (∃ v : Set (MorseModel 0), IsOpen v ∧ (0 : MorseModel 0) ∈ v ∧
+        ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ : MorseModel 0 → MorseModel 0) v ∧
+        ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ.symm : MorseModel 0 → MorseModel 0) (φ '' v)) ∧
       ∀ y ∈ φ.target, f (φ y) = f 0 + (1 / 2) * ∑ i : Fin 0, w i * y i * y i := by
-  refine ⟨OpenPartialHomeomorph.refl (MorseModel 0), ?_, ?_, ?_, ?_, ?_, ?_⟩
+  refine ⟨OpenPartialHomeomorph.refl (MorseModel 0), ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · simp
   · simp
   · rfl
@@ -3644,6 +3861,15 @@ theorem morseLemmaDiagonal_zero_smooth (f : MorseModel 0 → ℝ)
     exact contDiffAt_id
   · change ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (id : MorseModel 0 → MorseModel 0) 0
     exact contDiffAt_id
+  · refine ⟨Set.univ, isOpen_univ, by simp, ?_, ?_⟩
+    · change ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (id : MorseModel 0 → MorseModel 0) Set.univ
+      exact contDiffOn_id
+    · have hfun : (↑(OpenPartialHomeomorph.refl (MorseModel 0)).symm : MorseModel 0 → MorseModel 0) = id := rfl
+      have himg : (↑(OpenPartialHomeomorph.refl (MorseModel 0)) '' Set.univ) = Set.univ := by
+        ext y
+        simp
+      rw [hfun, himg]
+      exact contDiffOn_id
   · intro y hy
     have hy0 : y = 0 := by
       funext i
@@ -3658,6 +3884,9 @@ theorem morseLemmaDiagonal_smooth (n : ℕ) (f : MorseModel n → ℝ)
       0 ∈ φ.source ∧ 0 ∈ φ.target ∧ φ 0 = 0 ∧
       ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ : MorseModel n → MorseModel n) 0 ∧
       ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ.symm : MorseModel n → MorseModel n) 0 ∧
+      (∃ v : Set (MorseModel n), IsOpen v ∧ (0 : MorseModel n) ∈ v ∧
+        ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ : MorseModel n → MorseModel n) v ∧
+        ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) (φ.symm : MorseModel n → MorseModel n) (φ '' v)) ∧
       ∀ y ∈ φ.target, f (φ y) = f 0 + (1 / 2) * ∑ i : Fin n, w i * y i * y i := by
   induction n with
   | zero =>
