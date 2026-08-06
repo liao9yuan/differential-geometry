@@ -2285,6 +2285,205 @@ theorem localizedSpacetimeRpowNorm_mul_inv_le_canonicalEvolvingBombieriGiustiCro
     (localizedSpacetimeRpowNorm_mul_inv_le_canonicalEvolvingBombieriGiustiCrossoverBound_of_exponentialTimeRescale_bounds
       (I := I) (M := M) rho rate center u hu hpos hp₀ hrate hearly hlate)
 
+theorem localizedSpacetimeRpowNorm_le_canonicalEvolvingBombieriGiustiWeakHarnackBound_mul_of_supersolution
+    (qMetric : SmoothRiemannianMetric I M)
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho outer : SmoothScalar qMetric)
+    (averagingCutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M => u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H W rate : ℝ)
+    {p₀ A b τ c d D C G Bearly Blate lower upper t₀ : ℝ}
+    (V : ℝ≥0∞)
+    (hp₀ : 0 < p₀) (hp₀_one : p₀ < 1)
+    (hAb : A ≤ b) (hbτ : b < τ)
+    (hτc : τ < c) (hcd : c ≤ d) (hdD : d < D)
+    (hC : 0 ≤ C) (hG : 0 ≤ G)
+    (hBearly : 0 ≤ Bearly) (hBlate : 0 ≤ Blate)
+    (hCtail : 0 ≤ Ctail) (hrate : 0 ≤ rate)
+    (hlowerUpper : lower < upper)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun z : ℝ × M =>
+          chartGramMatrix (I := I) (g z.1) x₀ z.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞
+      averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc A D))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g outer.toFun averagingCutoff Ctail (Icc A D))
+    (htraceAbs : ∀ t ∈ Icc A D, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hmass_le : ∀ t ∈ Icc A D,
+      evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
+    (hdrift_le : ∀ t ∈ Icc A D,
+      evolvingLogCenterDrift
+        (I := I) (M := M) g averagingCutoff Ccenter H t ≤ rate)
+    (hSobolev : ∀ t ∈ Icc A D,
+      localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
+    (htraceEarly : ∀ t ∈ Icc A D, ∀ x : M,
+      -traceTimeDerivMetric (I := I) g t x ≤ Bearly)
+    (htraceLate : ∀ t ∈ Icc A D, ∀ x : M,
+      traceTimeDerivMetric (I := I) g t x ≤ Blate)
+    (hrho : ∀ t ∈ Icc A D, ∀ x : M,
+      (g t).inner x
+          (gradFun (I := I) (g t) rho.toFun x)
+          (gradFun (I := I) (g t) rho.toFun x) ≤ G)
+    (hpde : ∀ t ∈ Icc A D, ∀ x : M,
+      Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t)
+    (hVzero : V ≠ 0) (hVtop : V ≠ ⊤)
+    (hvolume : ∀ t ∈ Icc A D,
+      riemannianMeasureFamily (I := I) (M := M) g t ≤
+          V • riemannianVolumeMeasure (I := I) (M := M) qMetric ∧
+        riemannianVolumeMeasure (I := I) (M := M) qMetric ≤
+          V • riemannianMeasureFamily (I := I) (M := M) g t)
+    (hearlyMeasure : ∀ k,
+      localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k) A
+          (bombieriGiustiIncreasingLevel b τ k) ≠ 0)
+    (hearlyMeasure_le_one : ∀ k,
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k) A
+          (bombieriGiustiIncreasingLevel b τ k)).real Set.univ ≤ 1)
+    (hlateMeasure : ∀ k,
+      localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k)
+          (bombieriGiustiDescendingLevel τ c k)
+          (bombieriGiustiIncreasingLevel d D k) ≠ 0)
+    (hlateMeasure_le_one : ∀ k,
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k)
+          (bombieriGiustiDescendingLevel τ c k)
+          (bombieriGiustiIncreasingLevel d D k)).real Set.univ ≤ 1)
+    (houter : ∀ k x,
+      (bombieriGiustiSpatialCutoff rho lower upper k).toFun x ^ 2 ≤
+        outer.toFun x ^ 2) :
+    let c₀ := max 1 (V.toReal * (4 * Ctail * W))
+    ∀ t ∈ Icc c d, ∀ x : M,
+      (bombieriGiustiSpatialCutoff rho lower upper 0).toFun x ≠ 0 →
+      localizedSpacetimeRpowNorm (I := I) (M := M)
+          (bombieriGiustiSpatialCutoff rho lower upper 0) u p₀ A b ≤
+        canonicalEvolvingBombieriGiustiWeakHarnackBound
+          (Module.finrank ℝ E) V C G Bearly Blate rate p₀ c₀
+            A b τ c d D lower upper * u t x := by
+  let n := Module.finrank ℝ E
+  let logu : ℝ → M → ℝ := fun s x => Real.log (u s x)
+  let center := evolvingLocalizedAverage
+    (I := I) (M := M) g averagingCutoff logu τ + rate * τ
+  let v := exponentialTimeRescale rate center u
+  let c₀ := max 1 (V.toReal * (4 * Ctail * W))
+  have hc₀ : 0 < c₀ := zero_lt_one.trans_le (le_max_left _ _)
+  have hAτ : A ≤ τ := hAb.trans hbτ.le
+  have hτD : τ ≤ D := hτc.le.trans (hcd.trans hdD.le)
+  have hv := contMDiff_exponentialTimeRescale rate center u hu
+  have hvpos := exponentialTimeRescale_pos rate center u hpos
+  have hvpde : ∀ t ∈ Icc τ D, ∀ x : M,
+      Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) v hv t).smooth x ≤
+        deriv (fun s => v s x) t := by
+    intro t ht x
+    exact exponential_time_rescale_supersolution
+      (I := I) (M := M) (g t) rate center hrate u hu hpos
+        (hpde t ⟨hAτ.trans ht.1, ht.2⟩ x)
+  have htail : ∀ r, 0 < r →
+      (localizedSpacetimeMeasure (I := I) (M := M) outer τ D).real
+        {z | Real.log (v z.1 z.2) < -r} ≤ c₀ / r := by
+    intro r hr
+    have hraw :=
+      late_localizedSpacetimeMeasure_log_sublevel_tail_of_exponentialTimeRescale_of_evolving_supersolution
+        (I := I) (M := M) g outer averagingCutoff u hu hpos
+          Ccenter Ctail H W rate hτD hr hCtail hg V hVtop
+          (fun t ht => (hvolume t ⟨hAτ.trans ht.1, ht.2⟩).2) hgram
+          haveragingCutoff hne
+          (fun t ht => hPcenter t ⟨hAτ.trans ht.1, ht.2⟩)
+          (fun t ht => hPtail t ⟨hAτ.trans ht.1, ht.2⟩)
+          (fun t ht => htraceAbs t ⟨hAτ.trans ht.1, ht.2⟩)
+          (fun t ht => hmass_le t ⟨hAτ.trans ht.1, ht.2⟩)
+          (fun t ht => hdrift_le t ⟨hAτ.trans ht.1, ht.2⟩)
+          (fun t ht => hpde t ⟨hAτ.trans ht.1, ht.2⟩)
+    calc
+      (localizedSpacetimeMeasure (I := I) (M := M) outer τ D).real
+          {z | Real.log (v z.1 z.2) < -r} ≤
+        V.toReal * (4 * Ctail * W / r) := by
+          simpa only [v, center, logu] using hraw
+      _ = (V.toReal * (4 * Ctail * W)) / r := by ring
+      _ ≤ c₀ / r := div_le_div_of_nonneg_right (le_max_right _ _) hr.le
+  have hearly : localizedSpacetimeRpowNorm (I := I) (M := M)
+      (bombieriGiustiSpatialCutoff rho lower upper 0) v p₀ A b ≤
+    Real.exp (canonicalEvolvingEarlyBombieriGiustiThresholdSum
+      n V C p₀ c₀ A b τ G Bearly lower upper) := by
+    simpa only [v, center, logu, c₀, n,
+      canonicalEvolvingEarlyBombieriGiustiThresholdSum] using
+      (early_localizedSpacetimeRpowNorm_le_exp_tsum_canonicalEvolvingBombieriGiustiThreshold_of_exponentialTimeRescale_of_evolving_supersolution
+        (I := I) (M := M) qMetric g hdim rho outer averagingCutoff
+          u hu hpos Ccenter Ctail H W rate V hp₀ hp₀_one hAb hbτ
+          hC hG hBearly hCtail hrate hlowerUpper hg hgram
+          haveragingCutoff hne
+          (fun t ht => hPcenter t ⟨ht.1, ht.2.trans hτD⟩)
+          (fun t ht => hPtail t ⟨ht.1, ht.2.trans hτD⟩)
+          (fun t ht => htraceAbs t ⟨ht.1, ht.2.trans hτD⟩)
+          (fun t ht => hmass_le t ⟨ht.1, ht.2.trans hτD⟩)
+          (fun t ht => hdrift_le t ⟨ht.1, ht.2.trans hτD⟩)
+          (fun t ht => hSobolev t ⟨ht.1, ht.2.trans hτD⟩)
+          (fun t ht => htraceEarly t ⟨ht.1, ht.2.trans hτD⟩)
+          (fun t ht => hrho t ⟨ht.1, ht.2.trans hτD⟩)
+          (fun t ht => hpde t ⟨ht.1, ht.2.trans hτD⟩)
+          hVtop (fun t ht => hvolume t ⟨ht.1, ht.2.trans hτD⟩)
+          hearlyMeasure hearlyMeasure_le_one houter)
+  have hlate : localizedSpacetimeRpowNorm (I := I) (M := M)
+      (bombieriGiustiSpatialCutoff rho lower upper 1)
+      (fun s x => (v s x)⁻¹) p₀
+      (bombieriGiustiDescendingLevel τ c 1)
+      (bombieriGiustiIncreasingLevel d D 1) ≤
+    Real.exp (canonicalEvolvingLateBombieriGiustiThresholdSumNatAdd
+      n V V C G Blate p₀ c₀ τ c d D lower upper 1) := by
+    simpa only [n, canonicalEvolvingLateBombieriGiustiThresholdSumNatAdd] using
+      (late_localizedSpacetimeRpowNorm_inv_le_exp_tsum_canonicalEvolvingBombieriGiustiThreshold_nat_add_of_supersolution_of_log_tail_of_volume_le
+        (I := I) (M := M) qMetric g hdim rho outer v hv hvpos
+          V V hp₀ hc₀ hτc hcd hdD hC hG hBlate hlowerUpper hg hgram
+          (fun t ht => hSobolev t ⟨hAτ.trans ht.1, ht.2⟩)
+          hvpde
+          (fun t ht => htraceLate t ⟨hAτ.trans ht.1, ht.2⟩)
+          (fun t ht => hrho t ⟨hAτ.trans ht.1, ht.2⟩)
+          hVtop hVzero hVtop
+          (fun t ht => (hvolume t ⟨hAτ.trans ht.1, ht.2⟩).2)
+          (fun t ht => (hvolume t ⟨hAτ.trans ht.1, ht.2⟩).1)
+          hlateMeasure hlateMeasure_le_one houter htail 1)
+  dsimp only
+  intro t ht x hx
+  have hpoint :=
+    inv_le_evolvingBombieriGiustiLatePointwiseFactor_mul_localizedSpacetimeRpowNorm_of_volume_le
+      (I := I) (M := M) qMetric g hdim rho v hv hvpos V hp₀
+        hτc hcd hdD hC hG hBlate hlowerUpper hg hgram
+        (fun s hs => hSobolev s ⟨hAτ.trans hs.1, hs.2⟩)
+        hvpde
+        (fun s hs y => htraceLate s ⟨hAτ.trans hs.1, hs.2⟩ y)
+        (fun s hs y => hrho s ⟨hAτ.trans hs.1, hs.2⟩ y)
+        hVzero hVtop (fun s hs => hvolume s ⟨hAτ.trans hs.1, hs.2⟩)
+        t ht x hx
+  have hpoint' : (v t x)⁻¹ ≤
+      evolvingBombieriGiustiLatePointwiseFactor
+          n V C G Blate p₀ τ c d D lower upper *
+        Real.exp (canonicalEvolvingLateBombieriGiustiThresholdSumNatAdd
+          n V V C G Blate p₀ c₀ τ c d D lower upper 1) :=
+    hpoint.trans (mul_le_mul_of_nonneg_left hlate
+      (evolvingBombieriGiustiLatePointwiseFactor_nonneg
+        n V C G Blate p₀ τ c d D lower upper))
+  simpa only [c₀, n, v] using
+    (localizedSpacetimeRpowNorm_le_canonicalEvolvingBombieriGiustiWeakHarnackBound_mul_of_exponentialTimeRescale_bounds
+      (I := I) (M := M) rho rate center u hu hpos x hp₀ hrate
+        (ht.2.trans hdD.le) hearly hpoint')
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
