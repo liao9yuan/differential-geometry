@@ -1,6 +1,7 @@
 import DifferentialGeometry.Tensor.Exterior.Defs
 import Mathlib.Analysis.Calculus.DifferentialForm.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
+import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
 noncomputable section
 
@@ -84,6 +85,47 @@ private lemma localRep_contDiffOn (α : DifferentialForm IM M k) (x₀ : M) :
       ((extChartAt IM x₀).target) := by
     exact hsec.comp (contMDiffOn_extChartAt_symm x₀) (fun y hy => (extChartAt IM x₀).map_target hy)
   exact hcomp.contDiffOn
+
+private lemma compContinuousLinearMap_compContinuousLinearMap {m n : ℕ}
+    (L : EM [⋀^Fin m]→L[ℝ] (EM [⋀^Fin n]→L[ℝ] ℝ))
+    (A : EM →L[ℝ] EM) (B : EM →L[ℝ] EM) :
+    (L.compContinuousLinearMap A).compContinuousLinearMap B =
+      L.compContinuousLinearMap (A ∘L B) := by
+  ext v
+  rfl
+
+private lemma tangentCoordChange_comp_self {x₀ x : M} (hx : x ∈ (extChartAt IM x₀).source) :
+    (tangentCoordChange IM x x₀ x) ∘L (tangentCoordChange IM x₀ x x) =
+      ContinuousLinearMap.id ℝ EM := by
+  apply ContinuousLinearMap.ext
+  intro v
+  rw [ContinuousLinearMap.coe_comp', Function.comp_apply]
+  have hw : x ∈ (extChartAt IM x₀).source ∩ (extChartAt IM x).source ∩ (extChartAt IM x₀).source := by
+    exact ⟨⟨hx, by simp⟩, hx⟩
+  rw [tangentCoordChange_comp (I := IM) (w := x₀) (x := x) (y := x₀) (z := x) hw]
+  exact tangentCoordChange_self (I := IM) (x := x₀) (z := x) hx
+
+noncomputable def exteriorDerivativeAt (α : DifferentialForm IM M k) (x : M) :
+    Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
+      (Bundle.Trivial M ℝ) x :=
+  (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x).symmL ℝ x
+    (extDeriv (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
+      ((extChartAt IM x) x))
+
+private lemma chartChange_contDiffAt {x₀ x : M} (hx : x ∈ (extChartAt IM x₀).source)
+    (hxi : ModelWithCorners.IsInteriorPoint IM x) :
+    ContDiffAt ℝ ⊤ ((extChartAt IM x₀) ∘ (extChartAt IM x).symm : EM → EM)
+      ((extChartAt IM x) x) := by
+  have hy : (extChartAt IM x) x ∈ ((extChartAt IM x).symm ≫ (extChartAt IM x₀)).source := by
+    rw [PartialEquiv.trans_source, PartialEquiv.symm_source]
+    exact ⟨(extChartAt IM x).map_source (by rw [extChartAt_source]; exact mem_chart_source (H := HM) x),
+      by simpa [extChartAt_source] using hx⟩
+  exact (contDiffWithinAt_ext_coord_change (I := IM) x₀ x hy).contDiffAt
+    (range_mem_nhds_isInteriorPoint hxi)
 
 end DifferentialForm
 end DifferentialGeometry
