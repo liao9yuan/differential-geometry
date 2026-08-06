@@ -2921,6 +2921,11 @@ import DifferentialGeometry.Topology.Attachment.Basic
 import DifferentialGeometry.Topology.Attachment.Defs
 import DifferentialGeometry.Topology.Attachment.Relative
 import DifferentialGeometry.Topology.Attachment.Union
+import DifferentialGeometry.Topology.Handle.Attachment
+import DifferentialGeometry.Topology.Handle.Basic
+import DifferentialGeometry.Topology.Handle.Boundary
+import DifferentialGeometry.Topology.Handle.Defs
+import DifferentialGeometry.Topology.Handle.Duality
 import DifferentialGeometry.Topology.Morse.CellAttachment
 import DifferentialGeometry.Topology.Morse.Defs
 import DifferentialGeometry.Topology.Morse.Flow
