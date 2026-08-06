@@ -8,7 +8,7 @@ import DifferentialGeometry.Topology.Covering.CurvaturePullback
 import DifferentialGeometry.Topology.Covering.CompletenessPullback
 import DifferentialGeometry.Topology.Covering.FibreEquiv
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket
-import DifferentialGeometry.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Topology.Covering.SemilocallySimplyConnected
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Topology.EMetricSpace.Diam
 import Mathlib.Topology.Compactness.Compact

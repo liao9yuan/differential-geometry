@@ -1,4 +1,4 @@
-import DifferentialGeometry.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Topology.Covering.SemilocallySimplyConnected
 import DifferentialGeometry.Topology.Covering.TruncateHomotopy
 import Mathlib.Topology.Bases
 import Mathlib.Topology.Connected.LocPathConnected

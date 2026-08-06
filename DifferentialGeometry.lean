@@ -2889,7 +2889,7 @@ import DifferentialGeometry.Topology.DirectLimit
 import DifferentialGeometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Topology.FiberBundleT2
 import DifferentialGeometry.Topology.FiniteAtlasIndexOnCompact
-import DifferentialGeometry.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Topology.Covering.SemilocallySimplyConnected
 import DifferentialGeometry.Topology.SigmaCompactOpen
 import DifferentialGeometry.Topology.StandardModel
 import DifferentialGeometry.Topology.Covering.Basic

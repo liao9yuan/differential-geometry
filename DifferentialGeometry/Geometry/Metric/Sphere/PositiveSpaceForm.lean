@@ -2,7 +2,7 @@ import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 import DifferentialGeometry.Geometry.Metric.Sphere.CoverQuotient
 import DifferentialGeometry.Geometry.Metric.Sphere.PositiveCover
-import DifferentialGeometry.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Topology.Covering.SemilocallySimplyConnected
 import DifferentialGeometry.Topology.StandardModel
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
