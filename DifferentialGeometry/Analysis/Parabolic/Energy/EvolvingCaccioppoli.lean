@@ -23,6 +23,144 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+def evolvingLocalizedDirichletEnergy
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t : ℝ) : ℝ :=
+  ∫ x, cutoff x ^ 2 *
+      (g t).inner x
+        (gradientFun (I := I) (g t) (u t) x)
+        (gradientFun (I := I) (g t) (u t) x)
+    ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+
+def evolvingCutoffGradientError
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t : ℝ) : ℝ :=
+  ∫ x, u t x ^ 2 *
+      (g t).inner x
+        (gradientFun (I := I) (g t) cutoff x)
+        (gradientFun (I := I) (g t) cutoff x)
+    ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+
+def evolvingLocalizedForcing
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u source : ℝ → M → ℝ) (t : ℝ) : ℝ :=
+  ∫ x, 2 * cutoff x ^ 2 * u t x * source t x
+    ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem evolvingLocalizedDirichletEnergy_nonneg
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t : ℝ) :
+    0 ≤ evolvingLocalizedDirichletEnergy
+      (I := I) (M := M) g cutoff u t := by
+  exact integral_nonneg fun x => mul_nonneg (sq_nonneg _)
+    (metric_inner_self_nonneg (I := I) (M := M) (g t) x _)
+
+omit [I.Boundaryless] [CompactSpace M] in
+theorem evolvingCutoffGradientError_nonneg
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t : ℝ) :
+    0 ≤ evolvingCutoffGradientError (I := I) (M := M) g cutoff u t := by
+  exact integral_nonneg fun x => mul_nonneg (sq_nonneg _)
+    (metric_inner_self_nonneg (I := I) (M := M) (g t) x _)
+
+omit [I.Boundaryless] in
+theorem evolvingLocalizedDirichletEnergy_continuousOn
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {K : Set ℝ} (hK : IsCompact K) {t : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2)) :
+    ContinuousOn
+      (evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u) K := by
+  let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
+    { metric := g
+      connection := fun s => LeviCivita (I := I) (g s)
+      metricCompatible := fun s => by
+        simpa [LeviCivita] using
+          (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) (g s)) }
+  have hgrad : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M =>
+        (g p.1).inner p.2
+          (gradientFun (I := I) (g p.1) (u p.1) p.2)
+          (gradientFun (I := I) (g p.1) (u p.1) p.2)) := by
+    have hraw := gradSq_joint (I := I) G isOpen_univ hgram u hu.contMDiffOn
+    simpa only [G, Set.univ_prod_univ, contMDiffOn_univ] using hraw
+  apply integral_family_cont (I := I) (M := M) hK
+  · intro x₀ i j
+    exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
+      (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
+  · exact (((hcutoff.continuous.comp continuous_snd).pow 2).mul
+      hgrad.continuous).continuousOn
+
+omit [I.Boundaryless] in
+theorem evolvingCutoffGradientError_continuousOn
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) {K : Set ℝ} (hK : IsCompact K) {t : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2)) :
+    ContinuousOn
+      (evolvingCutoffGradientError (I := I) (M := M) g cutoff u) K := by
+  let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
+    { metric := g
+      connection := fun s => LeviCivita (I := I) (g s)
+      metricCompatible := fun s => by
+        simpa [LeviCivita] using
+          (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) (g s)) }
+  have hcutoff_joint : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => cutoff p.2) :=
+    hcutoff.comp contMDiff_snd
+  have hgrad : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M =>
+        (g p.1).inner p.2
+          (gradientFun (I := I) (g p.1) cutoff p.2)
+          (gradientFun (I := I) (g p.1) cutoff p.2)) := by
+    have hraw := gradSq_joint (I := I) G isOpen_univ hgram
+      (fun _ => cutoff) hcutoff_joint.contMDiffOn
+    simpa only [G, Set.univ_prod_univ, contMDiffOn_univ] using hraw
+  apply integral_family_cont (I := I) (M := M) hK
+  · intro x₀ i j
+    exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
+      (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
+  · exact ((hu.continuous.pow 2).mul hgrad.continuous).continuousOn
+
+omit [I.Boundaryless] in
+theorem evolvingLocalizedForcing_continuousOn
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u source : ℝ → M → ℝ) {K : Set ℝ} (hK : IsCompact K) {t : ℝ}
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : Continuous cutoff)
+    (hu : Continuous (fun p : ℝ × M => u p.1 p.2))
+    (hsource : Continuous (fun p : ℝ × M => source p.1 p.2)) :
+    ContinuousOn
+      (evolvingLocalizedForcing (I := I) (M := M) g cutoff u source) K := by
+  apply integral_family_cont (I := I) (M := M) hK
+  · intro x₀ i j
+    exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
+      (Set.prod_mono (Set.subset_univ K) Set.Subset.rfl)
+  · exact ((((continuous_const.mul
+      ((hcutoff.comp continuous_snd).pow 2)).mul hu).mul hsource)).continuousOn
+
 omit [I.Boundaryless] in
 theorem deriv_evolvingLocalizedL2Mass_eq_deriv_localizedL2Mass_add_volume
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
@@ -261,5 +399,218 @@ theorem caccioppoli_differential_evolving_of_subsolution_of_trace_le
     (I := I) (M := M) g cutoff u t B hg hcutoff.continuous
       (hu.comp (contMDiff_const.prodMk contMDiff_id)).continuous htrace
   linarith
+
+omit [I.Boundaryless] in
+private theorem caccioppoli_evolving_of_differential
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u source : ℝ → M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    {t₀ : ℝ} (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {weight dweight : ℝ → ℝ} {a b : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
+    (hdifferential : ∀ t ∈ Icc a b,
+      deriv (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) t +
+          evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u t ≤
+        4 * evolvingCutoffGradientError (I := I) (M := M) g cutoff u t +
+          evolvingLocalizedForcing (I := I) (M := M) g cutoff u source t +
+          evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff u t) :
+    weight b * evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u b -
+        weight a * evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u a +
+        ∫ t in a..b, weight t *
+          evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u t ≤
+      ∫ t in a..b,
+        dweight t * evolvingLocalizedL2Mass
+            (I := I) (M := M) g cutoff u t +
+          weight t *
+            (4 * evolvingCutoffGradientError
+                (I := I) (M := M) g cutoff u t +
+              evolvingLocalizedForcing
+                (I := I) (M := M) g cutoff u source t +
+              evolvingLocalizedVolumeDistortion
+                (I := I) (M := M) g cutoff u t) := by
+  let mass : ℝ → ℝ :=
+    evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u
+  let dirichlet : ℝ → ℝ :=
+    evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u
+  let error : ℝ → ℝ :=
+    evolvingCutoffGradientError (I := I) (M := M) g cutoff u
+  let forcing : ℝ → ℝ :=
+    evolvingLocalizedForcing (I := I) (M := M) g cutoff u source
+  let distortion : ℝ → ℝ :=
+    evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff u
+  have hmass_cont : ContinuousOn mass (Icc a b) := by
+    simpa only [mass] using evolvingLocalizedL2Mass_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hcutoff.continuous hu.continuous
+  have hdmass_cont : ContinuousOn (deriv mass) (Icc a b) := by
+    simpa only [mass] using deriv_evolvingLocalizedL2Mass_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hcutoff hu
+  have hmass_deriv : ∀ t ∈ Icc a b,
+      HasDerivAt mass (deriv mass t) t := by
+    intro t _
+    have hraw := hasDerivAt_evolvingLocalizedL2Mass
+      (I := I) (M := M) g cutoff u t (hg.at_any t) hcutoff hu
+    simpa only [mass] using hraw.congr_deriv hraw.deriv.symm
+  have hdirichlet : ContinuousOn dirichlet (Icc a b) := by
+    simpa only [dirichlet] using evolvingLocalizedDirichletEnergy_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hgram hcutoff hu
+  have herror : ContinuousOn error (Icc a b) := by
+    simpa only [error] using evolvingCutoffGradientError_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg hgram hcutoff hu
+  have hforcing : ContinuousOn forcing (Icc a b) := by
+    simpa only [forcing] using evolvingLocalizedForcing_continuousOn
+      (I := I) (M := M) g cutoff u source isCompact_Icc hg
+        hcutoff.continuous hu.continuous hsource.continuous
+  have hdistortion : ContinuousOn distortion (Icc a b) := by
+    simpa only [distortion] using evolvingLocalizedVolumeDistortion_continuousOn
+      (I := I) (M := M) g cutoff u isCompact_Icc hg
+        hcutoff.continuous hu.continuous
+  have hweight_cont : ContinuousOn weight (Icc a b) :=
+    fun t ht => (hweight t ht).continuousAt.continuousWithinAt
+  have hdissipation : ContinuousOn
+      (fun t => weight t * dirichlet t) (Icc a b) :=
+    hweight_cont.mul hdirichlet
+  have hrhs : ContinuousOn
+      (fun t => dweight t * mass t +
+        weight t * (4 * error t + forcing t + distortion t)) (Icc a b) :=
+    (hdweight.mul hmass_cont).add
+      (hweight_cont.mul
+        (((continuousOn_const.mul herror).add hforcing).add hdistortion))
+  have hpointwise : ∀ t ∈ Icc a b,
+      dweight t * mass t + weight t * deriv mass t + weight t * dirichlet t ≤
+        dweight t * mass t +
+          weight t * (4 * error t + forcing t + distortion t) := by
+    intro t ht
+    have hmul := mul_le_mul_of_nonneg_left (hdifferential t ht)
+      (hweight_nonneg t ht)
+    change weight t * (deriv mass t + dirichlet t) ≤
+      weight t * (4 * error t + forcing t + distortion t) at hmul
+    linarith
+  have hresult := weight_mul_energy_inequality
+    hab hdweight hweight hdmass_cont hmass_deriv hdissipation hrhs hpointwise
+  simpa only [mass, dirichlet, error, forcing, distortion] using hresult
+
+theorem caccioppoli_evolving
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u source : ℝ → M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    {t₀ : ℝ} (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {weight dweight : ℝ → ℝ} {a b : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      deriv (fun s => u s x) t =
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x + source t x) :
+    weight b * evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u b -
+        weight a * evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u a +
+        ∫ t in a..b, weight t *
+          evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u t ≤
+      ∫ t in a..b,
+        dweight t * evolvingLocalizedL2Mass
+            (I := I) (M := M) g cutoff u t +
+          weight t *
+            (4 * evolvingCutoffGradientError
+                (I := I) (M := M) g cutoff u t +
+              evolvingLocalizedForcing
+                (I := I) (M := M) g cutoff u source t +
+              evolvingLocalizedVolumeDistortion
+                (I := I) (M := M) g cutoff u t) := by
+  apply caccioppoli_evolving_of_differential
+    (I := I) (M := M) g cutoff u source hcutoff hu hsource hg hgram
+      hab hdweight hweight hweight_nonneg
+  intro t ht
+  have hraw := caccioppoli_differential_evolving
+    (I := I) (M := M) g cutoff u source t (hg.at_any t)
+      hcutoff hu hsource (hpde t ht)
+  change deriv (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) t +
+      evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u t ≤
+    4 * evolvingCutoffGradientError (I := I) (M := M) g cutoff u t +
+      evolvingLocalizedForcing (I := I) (M := M) g cutoff u source t +
+      evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff u t at hraw
+  exact hraw
+
+theorem caccioppoli_evolving_of_subsolution
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u source : ℝ → M → ℝ)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hsource : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => source p.1 p.2))
+    {t₀ : ℝ} (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {weight dweight : ℝ → ℝ} {a b : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
+    (hu_nonneg : ∀ t ∈ Icc a b, ∀ x : M, 0 ≤ u t x)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      deriv (fun s => u s x) t ≤
+        Δ_g (I := I) (g t)
+          (smoothScalarSlice (I := I) (g t) u hu t).smooth x + source t x) :
+    weight b * evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u b -
+        weight a * evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u a +
+        ∫ t in a..b, weight t *
+          evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u t ≤
+      ∫ t in a..b,
+        dweight t * evolvingLocalizedL2Mass
+            (I := I) (M := M) g cutoff u t +
+          weight t *
+            (4 * evolvingCutoffGradientError
+                (I := I) (M := M) g cutoff u t +
+              evolvingLocalizedForcing
+                (I := I) (M := M) g cutoff u source t +
+              evolvingLocalizedVolumeDistortion
+                (I := I) (M := M) g cutoff u t) := by
+  apply caccioppoli_evolving_of_differential
+    (I := I) (M := M) g cutoff u source hcutoff hu hsource hg hgram
+      hab hdweight hweight hweight_nonneg
+  intro t ht
+  have hraw := caccioppoli_differential_evolving_of_subsolution
+    (I := I) (M := M) g cutoff u source t (hg.at_any t)
+      hcutoff hu hsource (hu_nonneg t ht) (hpde t ht)
+  change deriv (evolvingLocalizedL2Mass (I := I) (M := M) g cutoff u) t +
+      evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff u t ≤
+    4 * evolvingCutoffGradientError (I := I) (M := M) g cutoff u t +
+      evolvingLocalizedForcing (I := I) (M := M) g cutoff u source t +
+      evolvingLocalizedVolumeDistortion (I := I) (M := M) g cutoff u t at hraw
+  exact hraw
 
 end DifferentialGeometry.Analysis.Parabolic.Energy
