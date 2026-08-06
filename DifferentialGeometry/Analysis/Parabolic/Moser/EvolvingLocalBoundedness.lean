@@ -173,6 +173,90 @@ theorem moserLocalizedMass_le_toReal_mul_evolvingMoserLocalizedMass
     fixed, moving, lower, p] using hmono
 
 omit [I.Boundaryless] in
+theorem evolvingMoserLocalizedMass_le_toReal_mul_moserLocalizedMass
+    (n : ℕ)
+    (g : ℝ → SmoothRiemannianMetric I M)
+    {q : SmoothRiemannianMetric I M} (rho : SmoothScalar q)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {p₀ a τ t₁ s₀ : ℝ} (haτ : a < τ) (hτt₁ : τ ≤ t₁)
+    (hg : MetricFamilyRegularAt (I := I) g s₀)
+    (C : ℝ≥0∞) (hC : C ≠ ⊤)
+    (k : ℕ)
+    (hvolume : ∀ t ∈ Icc (moserTimeLevel a τ k) t₁,
+      riemannianMeasureFamily (I := I) (M := M) g t ≤
+        C • riemannianVolumeMeasure (I := I) (M := M) q) :
+    evolvingMoserLocalizedMass
+        (I := I) (M := M) n g rho u p₀ a τ t₁ k ≤
+      C.toReal * moserLocalizedMass
+        (I := I) (M := M) n rho u p₀ a τ t₁ k := by
+  let lower := moserTimeLevel a τ k
+  let p := parabolicMoserExponent n p₀ k
+  let fixed : ℝ → ℝ := fun t =>
+    ∫ x, (spatialMoserCutoff rho (2 * k)).toFun x ^ 2 * u t x ^ p
+      ∂(riemannianVolumeMeasure (I := I) (M := M) q)
+  let moving : ℝ → ℝ := fun t =>
+    ∫ x, (spatialMoserCutoff rho (2 * k)).toFun x ^ 2 * u t x ^ p
+      ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+  letI : IsFiniteMeasure
+      (riemannianVolumeMeasure (I := I) (M := M) q) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) q
+  have hlower : lower ≤ t₁ :=
+    (moserTimeLevel_lt haτ k).le.trans hτt₁
+  have hintegrand : Continuous (fun z : ℝ × M =>
+      (spatialMoserCutoff rho (2 * k)).toFun z.2 ^ 2 * u z.1 z.2 ^ p) :=
+    ((spatialMoserCutoff rho (2 * k)).smooth.continuous.comp
+      continuous_snd).pow 2 |>.mul
+        (hu.continuous.rpow_const (fun z => Or.inl (hpos z.1 z.2).ne'))
+  have hfixed_cont : ContinuousOn fixed (Icc lower t₁) := by
+    have h := DifferentialGeometry.Integral.Measure.integral_contOn_cpt
+      (K := Icc lower t₁)
+      (riemannianVolumeMeasure (I := I) (M := M) q)
+      (fun t x => (spatialMoserCutoff rho (2 * k)).toFun x ^ 2 * u t x ^ p)
+      isCompact_Icc hintegrand.continuousOn
+    simpa only [fixed] using h
+  have hmoving_cont : ContinuousOn moving (Icc lower t₁) := by
+    apply integral_family_cont (I := I) (M := M) isCompact_Icc
+    · intro x₀ i j
+      exact (hg.continuousOn_chartGramMatrix x₀ i j).mono
+        (Set.prod_mono (Set.subset_univ (Icc lower t₁)) Set.Subset.rfl)
+    · exact hintegrand.continuousOn
+  have hfixed_int : IntervalIntegrable fixed volume lower t₁ := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hlower] using hfixed_cont
+  have hmoving_int : IntervalIntegrable moving volume lower t₁ := by
+    apply ContinuousOn.intervalIntegrable
+    simpa [uIcc_of_le hlower] using hmoving_cont
+  have hpoint : ∀ t ∈ Icc lower t₁, moving t ≤ C.toReal * fixed t := by
+    intro t ht
+    let μ := riemannianVolumeMeasure (I := I) (M := M) q
+    letI : IsFiniteMeasure (C • μ) := μ.smul_finite hC
+    let f : M → ℝ := fun x =>
+      (spatialMoserCutoff rho (2 * k)).toFun x ^ 2 * u t x ^ p
+    have hf_cont : Continuous f :=
+      ((spatialMoserCutoff rho (2 * k)).smooth.continuous.pow 2).mul
+        ((hu.continuous.comp (continuous_const.prodMk continuous_id)).rpow_const
+          (fun x => Or.inl (hpos t x).ne'))
+    have hf_int : Integrable f (C • μ) :=
+      hf_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+    have hmono := integral_mono_measure (hvolume t ht)
+      (ae_of_all _ fun x => mul_nonneg (sq_nonneg _)
+        (Real.rpow_nonneg (hpos t x).le _)) hf_int
+    rw [integral_smul_measure] at hmono
+    simpa only [fixed, moving, μ, f, smul_eq_mul] using hmono
+  have hmono : (∫ t in lower..t₁, moving t) ≤
+      ∫ t in lower..t₁, C.toReal * fixed t :=
+    intervalIntegral.integral_mono_on hlower hmoving_int
+      (hfixed_int.const_mul C.toReal) hpoint
+  rw [intervalIntegral.integral_const_mul] at hmono
+  simpa only [moserLocalizedMass, evolvingMoserLocalizedMass,
+    fixed, moving, lower, p] using hmono
+
+omit [I.Boundaryless] in
 theorem evolvingMoserLocalizedMass_succ_le
     (n : ℕ) [NeZero n]
     (g : ℝ → SmoothRiemannianMetric I M)
