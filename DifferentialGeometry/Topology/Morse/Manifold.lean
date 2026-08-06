@@ -885,6 +885,55 @@ theorem isCriticalPointAt_iff_chart_fderiv {n : ℕ} {H : Type} [TopologicalSpac
     rw [hzero]
     simp
 
+theorem isCriticalPointAt_iff_fderiv_of_localInverse {n : ℕ} {H : Type} [TopologicalSpace H]
+    {M : Type} [TopologicalSpace M] [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H)
+    {x : M} {σ : M → MorseModel n} {τ : MorseModel n → M} {h : MorseModel n → ℝ}
+    (hleft : (τ ∘ σ) =ᶠ[nhds x] id)
+    (hright : (σ ∘ τ) =ᶠ[nhds (σ x)] id)
+    (hσmd : MDifferentiableAt I 𝓘(ℝ, MorseModel n) σ x)
+    (hτmd : MDifferentiableAt 𝓘(ℝ, MorseModel n) I τ (σ x))
+    (hh : ContMDiffAt 𝓘(ℝ, MorseModel n) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) h (σ x)) :
+    IsCriticalPointAt I (h ∘ σ) x ↔ fderiv ℝ h (σ x) = 0 := by
+  have hτσx : τ (σ x) = x := hleft.eq_of_nhds
+  have hσmd' : MDifferentiableAt I 𝓘(ℝ, MorseModel n) σ (τ (σ x)) := by
+    simpa [hτσx] using hσmd
+  have hcompA : (mfderiv I 𝓘(ℝ, MorseModel n) σ x).comp
+      (mfderiv 𝓘(ℝ, MorseModel n) I τ (σ x)) =
+      ContinuousLinearMap.id ℝ (TangentSpace 𝓘(ℝ, MorseModel n) (σ x)) := by
+    have hcomp' := mfderiv_comp (x := σ x) (g := σ) (f := τ) (hg := hσmd') (hf := hτmd)
+    have heq := Filter.EventuallyEq.mfderiv_eq (I := 𝓘(ℝ, MorseModel n))
+      (I' := 𝓘(ℝ, MorseModel n)) hright
+    rw [heq] at hcomp'
+    rw [hτσx] at hcomp'
+    simpa using hcomp'.symm
+  have hA_surj : Function.Surjective (mfderiv I 𝓘(ℝ, MorseModel n) σ x) := by
+    intro v
+    refine ⟨(mfderiv 𝓘(ℝ, MorseModel n) I τ (σ x)) v, ?_⟩
+    simpa using (DFunLike.congr_fun hcompA v)
+  have hmain : mfderiv I 𝓘(ℝ, ℝ) (h ∘ σ) x =
+      (fderiv ℝ h (σ x)).comp (mfderiv I 𝓘(ℝ, MorseModel n) σ x) := by
+    have hcomp' := mfderiv_comp (x := x) (g := h) (f := σ)
+      (hg := hh.mdifferentiableAt (by norm_num)) (hf := hσmd)
+    simpa using hcomp'
+  constructor
+  · intro hcrit
+    change mfderiv I 𝓘(ℝ, ℝ) (h ∘ σ) x = 0 at hcrit
+    have hzero : (fderiv ℝ h (σ x)).comp (mfderiv I 𝓘(ℝ, MorseModel n) σ x) = 0 := by
+      rwa [← hmain]
+    ext v
+    rcases hA_surj v with ⟨w, hw⟩
+    calc
+      fderiv ℝ h (σ x) v = fderiv ℝ h (σ x) ((mfderiv I 𝓘(ℝ, MorseModel n) σ x) w) := by rw [hw]
+      _ = ((fderiv ℝ h (σ x)).comp (mfderiv I 𝓘(ℝ, MorseModel n) σ x)) w := rfl
+      _ = 0 := by
+        rw [hzero]
+        simp
+  · intro hfd
+    change mfderiv I 𝓘(ℝ, ℝ) (h ∘ σ) x = 0
+    rw [hmain, hfd]
+    simp only [ContinuousLinearMap.zero_comp]
+    rfl
+
 theorem morse_lemma {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)

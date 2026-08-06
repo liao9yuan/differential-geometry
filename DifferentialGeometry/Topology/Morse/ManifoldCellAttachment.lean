@@ -753,6 +753,319 @@ theorem contMDiff_morseModifiedFunction {n k : ℕ} (hk : k ≤ n) (c ε δ R r�
         rw [if_neg hle']
       · rw [if_neg hzt]
     exact (ContMDiffAt.congr_of_eventuallyEq (hfInfty x) hagree)
+
+theorem sublevel_upper_identity_morseModifiedFunction {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδε : 9 * δ ^ 2 < 4 * ε)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y) :
+    {x : M | morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f x ≤ c + ε} =
+      sublevel f (c + ε) := by
+  ext x
+  constructor
+  · intro hx
+    by_cases hxt : x ∈ χ.target
+    · by_cases hb : morseNorm n (χ.symm x) ≤ R
+      · have hg : morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f x =
+            modifiedNormalForm hk c ε δ (χ.symm x) := by
+          simp [morseModifiedFunction, hxt, hb]
+        have hmod : modifiedNormalForm hk c ε δ (χ.symm x) ≤ c + ε := by
+          rw [← hg]
+          exact hx
+        have hup := modifiedNormalForm_sublevel_upper hk c ε δ hε hδ hδε
+        have hf : morseNormalForm hk c (χ.symm x) ≤ c + ε := (Set.ext_iff.mp hup (χ.symm x)).1 hmod
+        change f x ≤ c + ε
+        rw [← χ.right_inv hxt]
+        rw [hnorm (χ.symm x) hb]
+        exact hf
+      · change f x ≤ c + ε
+        simpa [morseModifiedFunction, hxt, hb] using hx
+    · change f x ≤ c + ε
+      simpa [morseModifiedFunction, hxt] using hx
+  · intro hx
+    by_cases hxt : x ∈ χ.target
+    · by_cases hb : morseNorm n (χ.symm x) ≤ R
+      · dsimp [morseModifiedFunction]
+        rw [if_pos hxt, if_pos hb]
+        exact le_trans (modifiedNormalForm_le_f hk c ε δ hε (χ.symm x)) (by
+          rw [← hnorm (χ.symm x) hb]
+          rw [χ.right_inv hxt]
+          exact hx)
+      · dsimp [morseModifiedFunction]
+        rw [if_pos hxt, if_neg hb]
+        exact hx
+    · dsimp [morseModifiedFunction]
+      rw [if_neg hxt]
+      exact hx
+
+private lemma isClosed_chartBallImage {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
+    [TopologicalSpace M] [T2Space M] (χ : OpenPartialHomeomorph (MorseModel n) M) (R : ℝ)
+    (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) :
+    IsClosed (χ '' {y : MorseModel n | morseNorm n y ≤ R}) := by
+  let ball : Set (MorseModel n) := {y : MorseModel n | morseNorm n y ≤ R}
+  have hclosed : IsClosed ball := by
+    have hcont : Continuous (fun y : MorseModel n => morseNorm n y) := by
+      simpa [ball, morseNorm] using
+        (continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin n => ℝ)))
+    have hpre : IsClosed ((fun y : MorseModel n => morseNorm n y) ⁻¹' Set.Iic R) :=
+      by simpa using (hcont.continuousOn.preimage_isClosed_of_isClosed isClosed_univ isClosed_Iic)
+    simpa [ball] using hpre
+  have hbounded : Bornology.IsBounded ball := by
+    rw [Metric.isBounded_iff]
+    refine ⟨2 * R, ?_⟩
+    intro x hx y hy
+    have hx' : ‖x‖ ≤ R := le_trans (supNorm_le_morseNorm x) hx
+    have hy' : ‖y‖ ≤ R := le_trans (supNorm_le_morseNorm y) hy
+    rw [dist_eq_norm]
+    exact le_trans (norm_sub_le x y) (by nlinarith [hx', hy'])
+  have hballComp : IsCompact ball := Metric.isCompact_iff_isClosed_bounded.2 ⟨hclosed, hbounded⟩
+  have hmap : Set.MapsTo χ ball χ.target := by intro y hy; exact χ.map_source (hχsrc y hy)
+  have hcont : ContinuousOn χ ball := χ.continuousOn_toFun.mono hχsrc
+  exact (hballComp.image_of_continuousOn hcont).isClosed
+
+theorem morseModifiedFunction_le_f {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ) (hε : 0 < ε)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y) :
+    ∀ x : M, morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f x ≤ f x := by
+  intro x
+  by_cases hxt : x ∈ χ.target
+  · by_cases hb : morseNorm n (χ.symm x) ≤ R
+    · dsimp [morseModifiedFunction]
+      rw [if_pos hxt, if_pos hb]
+      exact le_trans (modifiedNormalForm_le_f hk c ε δ hε (χ.symm x)) (by
+        rw [← hnorm (χ.symm x) hb]
+        rw [χ.right_inv hxt])
+    · dsimp [morseModifiedFunction]
+      rw [if_pos hxt, if_neg hb]
+  · dsimp [morseModifiedFunction]
+    rw [if_neg hxt]
+
+theorem isCompact_strip_morseModifiedFunction {n k : ℕ} (hk : k ≤ n) (c ε δ R a : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδε : 9 * δ ^ 2 < 4 * ε) (hεa : ε ≤ a)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    [T2Space M] (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
+    (hf : Continuous f)
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
+    (hg : Continuous (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f))
+    (hcomp : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a))) :
+    IsCompact ((morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f) ⁻¹'
+      Set.Icc (c - ε) (c + ε)) := by
+  let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f
+  have hle : ∀ x : M, g x ≤ f x := by
+    intro x
+    exact morseModifiedFunction_le_f (H := H) (M := M) hk c ε δ R hε χ f hnorm x
+  have hup : {x : M | g x ≤ c + ε} = sublevel f (c + ε) :=
+    sublevel_upper_identity_morseModifiedFunction (H := H) (M := M) hk c ε δ R hε hδ hδε χ f hnorm
+  have hsub : g ⁻¹' Set.Icc (c - ε) (c + ε) ⊆ f ⁻¹' Set.Icc (c - ε) (c + ε) := by
+    intro x hx
+    constructor
+    · exact le_trans hx.1 (hle x)
+    · have hg2 : g x ≤ c + ε := hx.2
+      have hmem : x ∈ sublevel f (c + ε) := by
+        rw [← hup]
+        exact hg2
+      exact hmem
+  have hfsub : f ⁻¹' Set.Icc (c - ε) (c + ε) ⊆ f ⁻¹' Set.Icc (c - a) (c + a) := by
+    intro x hx
+    constructor
+    · exact le_trans (by linarith) hx.1
+    · exact le_trans hx.2 (by linarith)
+  have hfcomp : IsCompact (f ⁻¹' Set.Icc (c - ε) (c + ε)) :=
+    hcomp.of_isClosed_subset (isClosed_Icc.preimage hf) hfsub
+  exact hfcomp.of_isClosed_subset (isClosed_Icc.preimage hg) hsub
+
+theorem no_critical_point_morseModifiedFunction {n k : ℕ} (hk : k ≤ n) (c ε δ R rΦ a : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδε : 9 * δ ^ 2 < 4 * ε)
+    (hR : 4 * ε + 9 * δ ^ 2 / 4 < R ^ 2)
+    (hΦr : 4 * ε + 9 * δ ^ 2 / 4 < rΦ ^ 2) (hRpos : 0 < R) (hΦpos : 0 < rΦ)
+    (hεa : ε ≤ a)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    (I : ModelWithCorners ℝ (MorseModel n) H) (f : M → ℝ) (p : M)
+    (χ : OpenPartialHomeomorph (MorseModel n) M)
+    (hχ0 : χ 0 = p)
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
+    (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source)
+    (hχsymmOn : ContMDiffOn I 𝓘(ℝ, MorseModel n) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ.symm
+      (χ '' Metric.ball (0 : MorseModel n) rΦ))
+    (hχon : ContMDiffOn 𝓘(ℝ, MorseModel n) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ
+      (Metric.ball (0 : MorseModel n) rΦ))
+    (hreg : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) → x = p ∨ ¬ IsCriticalPointAt I f x)
+    {x : M} (hx : morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f x ∈
+      Set.Icc (c - ε) (c + ε)) :
+    ¬ IsCriticalPointAt I (morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f) x := by
+  let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f
+  let ball : Set (MorseModel n) := {y : MorseModel n | morseNorm n y ≤ R}
+  change g x ∈ Set.Icc (c - ε) (c + ε) at hx
+  have hχballClosed : IsClosed (χ '' ball) := by
+    simpa [ball] using isClosed_chartBallImage (H := H) (M := M) χ R hχsrc
+  classical
+  intro hcrit
+  change IsCriticalPointAt I g x at hcrit
+  change mfderiv I 𝓘(ℝ, ℝ) g x = 0 at hcrit
+  have hfval : f x ∈ Set.Icc (c - a) (c + a) := by
+    have hle : g x ≤ f x :=
+      morseModifiedFunction_le_f (H := H) (M := M) hk c ε δ R hε χ f hnorm x
+    have hup : {x : M | g x ≤ c + ε} = sublevel f (c + ε) :=
+      sublevel_upper_identity_morseModifiedFunction (H := H) (M := M) hk c ε δ R hε hδ hδε χ f hnorm
+    constructor
+    · exact le_trans (le_trans (by linarith) hx.1) hle
+    · have hmem : x ∈ sublevel f (c + ε) := by
+        rw [← hup]
+        exact hx.2
+      exact le_trans hmem (by linarith)
+  rcases hreg x hfval with hxp | hfreg
+  · exfalso
+    have h0norm : morseNorm n (0 : MorseModel n) = 0 := by
+      dsimp [morseNorm]
+      simp
+    have h0src : (0 : MorseModel n) ∈ χ.source := hχsrc 0 (by
+      rw [h0norm]
+      exact le_of_lt hRpos)
+    have hgp : g p = c - 3 / 2 * ε := by
+      rw [← hχ0]
+      dsimp [g, morseModifiedFunction]
+      rw [if_pos (χ.map_source h0src)]
+      have hinner : morseNorm n (χ.symm (χ 0)) ≤ R := by
+        rw [χ.left_inv h0src]
+        rw [h0norm]
+        exact le_of_lt hRpos
+      rw [if_pos hinner]
+      rw [χ.left_inv h0src]
+      exact modifiedNormalForm_zero hk c ε δ hε hδ
+    have hlt : g p < c - ε := by linarith
+    have hx1 : c - ε ≤ g p := by simpa [hxp] using hx.1
+    exact (not_lt_of_ge hx1) hlt
+  · by_cases hxball : x ∈ χ '' ball
+    · by_cases hbig : 4 * ε + 9 * δ ^ 2 / 4 < morseNorm n (χ.symm x) ^ 2
+      · have hxt : x ∈ χ.target := by
+          rcases hxball with ⟨y, hy, hxy⟩
+          rw [← hxy]
+          exact χ.map_source (hχsrc y hy)
+        have hO₂mem : {x : M | x ∈ χ.target ∧ 4 * ε + 9 * δ ^ 2 / 4 < morseNorm n (χ.symm x) ^ 2} ∈
+            nhds x :=
+          (isOpen_morseModifiedRegion_gt (H := H) χ (4 * ε + 9 * δ ^ 2 / 4)).mem_nhds ⟨hxt, hbig⟩
+        have hagree : g =ᶠ[nhds x] f := by
+          refine Filter.eventuallyEq_of_mem hO₂mem ?_
+          intro z hz
+          dsimp [g, morseModifiedFunction]
+          rw [if_pos hz.1]
+          by_cases hle : morseNorm n (χ.symm z) ≤ R
+          · rw [if_pos hle]
+            have hmod : modifiedNormalForm hk c ε δ (χ.symm z) = morseNormalForm hk c (χ.symm z) :=
+              modifiedNormalForm_eq_of_modulation_zero hk c ε δ
+                (modMu_mul_modGamma_eq_zero_of_norm_gt hk ε δ hε hδ hz.2)
+            rw [hmod]
+            simpa [χ.right_inv hz.1] using (hnorm (χ.symm z) hle).symm
+          · rw [if_neg hle]
+        have hcritf : IsCriticalPointAt I f x := by
+          have hmd : mfderiv I 𝓘(ℝ, ℝ) f x = mfderiv I 𝓘(ℝ, ℝ) g x :=
+            Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)) hagree.symm
+          change mfderiv I 𝓘(ℝ, ℝ) f x = 0
+          rw [hmd]
+          exact hcrit
+        exact hfreg hcritf
+      · have hxt : x ∈ χ.target := by
+          rcases hxball with ⟨y, hy, hxy⟩
+          rw [← hxy]
+          exact χ.map_source (hχsrc y hy)
+        have hnorm_le : morseNorm n (χ.symm x) ^ 2 ≤ 4 * ε + 9 * δ ^ 2 / 4 := le_of_not_gt hbig
+        have hRlt : morseNorm n (χ.symm x) < R := by
+          have hsq : morseNorm n (χ.symm x) ^ 2 < R ^ 2 :=
+            lt_of_le_of_lt hnorm_le (by nlinarith [hR])
+          have habs := sq_lt_sq.mp hsq
+          rwa [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (le_of_lt hRpos)] at habs
+        have hΦlt : morseNorm n (χ.symm x) < rΦ := by
+          have hsq : morseNorm n (χ.symm x) ^ 2 < rΦ ^ 2 :=
+            lt_of_le_of_lt hnorm_le (by nlinarith [hΦr])
+          have habs := sq_lt_sq.mp hsq
+          rwa [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (le_of_lt hΦpos)] at habs
+        have hO₃mem : {x : M | x ∈ χ.target ∧ morseNorm n (χ.symm x) < R} ∩
+            {x : M | x ∈ χ.target ∧ morseNorm n (χ.symm x) < rΦ} ∈ nhds x :=
+          (IsOpen.inter (isOpen_morseModifiedRegion_lt (H := H) χ R)
+            (isOpen_morseModifiedRegion_lt (H := H) χ rΦ)).mem_nhds ⟨⟨hxt, hRlt⟩, ⟨hxt, hΦlt⟩⟩
+        have hagree : g =ᶠ[nhds x] (fun z : M => modifiedNormalForm hk c ε δ (χ.symm z)) := by
+          refine Filter.eventuallyEq_of_mem hO₃mem ?_
+          intro z hz
+          dsimp [g, morseModifiedFunction]
+          rw [if_pos hz.1.1]
+          rw [if_pos (le_of_lt hz.1.2)]
+        have hy' : χ.symm x ∈ Metric.ball (0 : MorseModel n) rΦ := by
+          have hsup : ‖χ.symm x‖ ≤ morseNorm n (χ.symm x) := supNorm_le_morseNorm (χ.symm x)
+          rw [Metric.mem_ball, dist_zero_right]
+          exact lt_of_le_of_lt hsup hΦlt
+        have hleft : (χ ∘ χ.symm) =ᶠ[nhds x] id := by
+          refine Filter.eventuallyEq_of_mem (χ.open_target.mem_nhds hxt) ?_
+          intro z hz
+          exact χ.right_inv hz
+        have hright : (χ.symm ∘ χ) =ᶠ[nhds (χ.symm x)] id := by
+          have hy'' : χ.symm x ∈ Metric.ball (0 : MorseModel n) rΦ ∩ χ.source :=
+            ⟨hy', hχsrc (χ.symm x) (le_of_lt hRlt)⟩
+          have hmem : Metric.ball (0 : MorseModel n) rΦ ∩ χ.source ∈ nhds (χ.symm x) :=
+            (IsOpen.inter Metric.isOpen_ball χ.open_source).mem_nhds hy''
+          refine Filter.eventuallyEq_of_mem hmem ?_
+          intro z hz
+          exact χ.left_inv hz.2
+        have hσmd : MDifferentiableAt I 𝓘(ℝ, MorseModel n) χ.symm x := by
+          have hxball' : x ∈ χ '' Metric.ball (0 : MorseModel n) rΦ := by
+            refine ⟨χ.symm x, hy', ?_⟩
+            exact χ.right_inv hxt
+          have hopen : IsOpen (χ '' (Metric.ball (0 : MorseModel n) rΦ ∩ χ.source)) := by
+            exact χ.isOpen_image_of_subset_source (IsOpen.inter Metric.isOpen_ball χ.open_source)
+              (by intro y hy; exact hy.2)
+          have hpre : χ.symm x ∈ Metric.ball (0 : MorseModel n) rΦ ∩ χ.source :=
+            ⟨hy', hχsrc (χ.symm x) (le_of_lt hRlt)⟩
+          have hxball'' : x ∈ χ '' (Metric.ball (0 : MorseModel n) rΦ ∩ χ.source) :=
+            ⟨χ.symm x, hpre, χ.right_inv hxt⟩
+          have hballNhds : χ '' Metric.ball (0 : MorseModel n) rΦ ∈ nhds x :=
+            Filter.mem_of_superset (hopen.mem_nhds hxball'') (by
+              intro z hz
+              exact Set.image_mono (by intro y hy; exact hy.1) hz)
+          exact ((hχsymmOn x hxball').contMDiffAt hballNhds).mdifferentiableAt (by norm_num)
+        have hτmd : MDifferentiableAt 𝓘(ℝ, MorseModel n) I χ (χ.symm x) := by
+          exact ((hχon (χ.symm x) hy').contMDiffAt (Metric.isOpen_ball.mem_nhds hy')).mdifferentiableAt
+            (by norm_num)
+        have hh : ContMDiffAt 𝓘(ℝ, MorseModel n) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+            (modifiedNormalForm hk c ε δ) (χ.symm x) :=
+          (contDiff_modifiedNormalForm hk c ε δ hδ).contMDiff.contMDiffAt
+        have htrans := isCriticalPointAt_iff_fderiv_of_localInverse (I := I)
+          (σ := χ.symm) (τ := χ) (h := modifiedNormalForm hk c ε δ)
+          hleft hright hσmd hτmd hh
+        have hstrip : modifiedNormalForm hk c ε δ (χ.symm x) ∈ Set.Icc (c - ε) (c + ε) := by
+          have hgx : g x = modifiedNormalForm hk c ε δ (χ.symm x) := hagree.eq_of_nhds
+          rw [← hgx]
+          exact hx
+        have hcrit' : IsCriticalPointAt I (fun z : M => modifiedNormalForm hk c ε δ (χ.symm z)) x := by
+          have hmd : mfderiv I 𝓘(ℝ, ℝ) (fun z : M => modifiedNormalForm hk c ε δ (χ.symm z)) x =
+              mfderiv I 𝓘(ℝ, ℝ) g x :=
+            Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)) hagree.symm
+          change mfderiv I 𝓘(ℝ, ℝ) (fun z : M => modifiedNormalForm hk c ε δ (χ.symm z)) x = 0
+          rw [hmd]
+          exact hcrit
+        have hfd : fderiv ℝ (modifiedNormalForm hk c ε δ) (χ.symm x) = 0 := htrans.1 hcrit'
+        exact (modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ hstrip) hfd
+    · have houtside : {x : M | x ∉ χ '' ball} ∈ nhds x := by
+        exact (isOpen_compl_iff.mpr hχballClosed).mem_nhds hxball
+      have hagree : g =ᶠ[nhds x] f := by
+        refine Filter.eventuallyEq_of_mem houtside ?_
+        intro z hz
+        dsimp [g, morseModifiedFunction]
+        by_cases hzt : z ∈ χ.target
+        · rw [if_pos hzt]
+          have hle' : ¬ morseNorm n (χ.symm z) ≤ R := by
+            intro hle
+            apply hz
+            exact ⟨χ.symm z, hle, χ.right_inv hzt⟩
+          rw [if_neg hle']
+        · rw [if_neg hzt]
+      have hcritf : IsCriticalPointAt I f x := by
+        have hmd : mfderiv I 𝓘(ℝ, ℝ) f x = mfderiv I 𝓘(ℝ, ℝ) g x :=
+          Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)) hagree.symm
+        change mfderiv I 𝓘(ℝ, ℝ) f x = 0
+        rw [hmd]
+        exact hcrit
+      exact hfreg hcritf
+
 end ManifoldCellAttachment
 
 end
