@@ -227,7 +227,8 @@ private theorem morseLemma {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*
       simp
       simpa [gp] using hcrit
     simpa [g₀] using hmain
-  rcases exists_smooth_extension (n + 3) g₀ hg₀ with ⟨g1, hg1, hg1Eq⟩
+  rcases exists_contDiff_extension (n + 3 : ℕ∞) g₀ (0 : MorseModel n) hg₀ with
+    ⟨g1, hg1, hg1Eq⟩
   have hcrit₁ : fderiv ℝ g1 0 = 0 := by
     have hfd : fderiv ℝ g1 0 = fderiv ℝ g₀ 0 := hg1Eq.fderiv_eq
     simpa [hcrit₀] using hfd
@@ -315,8 +316,11 @@ private theorem morseLemma {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*
     intro x
     dsimp [σ, L, σe]
     rfl
-  have hg1₂ : ContDiff ℝ 2 g1 :=
-    hg1.of_le (by exact_mod_cast (by omega : 2 ≤ n + 3))
+  have hg1₂ : ContDiff ℝ 2 g1 := by
+    have hle1 : (2 : ℕ) ≤ n + 3 := by omega
+    have hle2 : (2 : ℕ∞) ≤ (↑n + 3 : ℕ∞) := by
+      exact (WithTop.coe_le_coe (α := ℕ) (a := (n + 3 : ℕ)) (b := (2 : ℕ))).mpr hle1
+    exact hg1.of_le ((WithTop.coe_le_coe (α := ℕ∞) (a := (↑n + 3 : ℕ∞)) (b := ((2 : ℕ) : ℕ∞))).mpr hle2)
   have hdiag_h : ∀ u v : MorseModel n,
       (fderiv ℝ (fderiv ℝ h) 0 u) v = ∑ i : Fin n, w i * u i * v i := by
     intro u v
@@ -535,7 +539,8 @@ theorem morse_lemma_smooth {n : ℕ} {H : Type*} [TopologicalSpace H] {M : Type*
       simp
       simpa [gp] using hcrit
     simpa [g₀] using hmain
-  rcases exists_smooth_extension_smooth g₀ hg₀ with ⟨g1, hg1, hg1Eq⟩
+  rcases exists_contDiff_extension (⊤ : ℕ∞) g₀ (0 : MorseModel n) hg₀ with
+    ⟨g1, hg1, hg1Eq⟩
   have hcrit₁ : fderiv ℝ g1 0 = 0 := by
     have hfd : fderiv ℝ g1 0 = fderiv ℝ g₀ 0 := hg1Eq.fderiv_eq
     simpa [hcrit₀] using hfd

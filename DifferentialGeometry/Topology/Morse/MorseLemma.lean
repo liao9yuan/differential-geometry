@@ -2601,7 +2601,8 @@ theorem morse_lemma_diagonal_succ_smooth (n : ℕ)
     intro u v
     have hred := hessian_diagonal_reduced g hg2 hcritg a ha hsym hpiv φ₀ hφ₀ hsrc₀ hdfσ hdfp0 hcontσ2 w hdiagg u v
     simpa [g₁] using hred
-  rcases exists_smooth_extension_smooth g₁ hg₁local with ⟨g1ext, hg1extSmooth, hg1extEq⟩
+  rcases exists_contDiff_extension (⊤ : ℕ∞) g₁ (0 : MorseModel n) hg₁local with
+    ⟨g1ext, hg1extSmooth, hg1extEq⟩
   have hcritg1ext : fderiv ℝ g1ext 0 = 0 := by
     have hfd : fderiv ℝ g1ext 0 = fderiv ℝ g₁ 0 := Filter.EventuallyEq.fderiv_eq hg1extEq
     simpa [hcritg₁] using hfd
@@ -3382,7 +3383,8 @@ theorem morse_lemma_diagonal_succ (n : ℕ)
     intro u v
     have hred := hessian_diagonal_reduced g hg2 hcritg a ha hsym hpiv φ₀ hφ₀ hsrc₀ hdfσ hdfp0 hcontσ2 w hdiagg u v
     simpa [g₁] using hred
-  rcases exists_smooth_extension (n + 3) g₁ hg₁local with ⟨g1ext, hg1extSmooth, hg1extEq⟩
+  rcases exists_contDiff_extension (n + 3 : ℕ∞) g₁ (0 : MorseModel n) hg₁local with
+    ⟨g1ext, hg1extSmooth, hg1extEq⟩
   have hcritg1ext : fderiv ℝ g1ext 0 = 0 := by
     have hfd : fderiv ℝ g1ext 0 = fderiv ℝ g₁ 0 := Filter.EventuallyEq.fderiv_eq hg1extEq
     simpa [hcritg₁] using hfd

@@ -38,6 +38,7 @@ import DifferentialGeometry.Analysis.Calculus.SmoothExtension.Local
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.SmoothJetGlue
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
 import DifferentialGeometry.Analysis.Calculus.SpectralEigenSeriesJointGramProjectionJetBound
+import DifferentialGeometry.Analysis.Calculus.Taylor
 import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
 import DifferentialGeometry.Analysis.Calculus.TimeJetEvolution
 import DifferentialGeometry.Analysis.Calculus.TimeJetMatch
@@ -2930,7 +2931,6 @@ import DifferentialGeometry.Topology.Morse.ModifiedFunction
 import DifferentialGeometry.Topology.Morse.MorseLemma
 import DifferentialGeometry.Topology.Morse.NoCriticalValues
 import DifferentialGeometry.Topology.Morse.RegularVectorField
-import DifferentialGeometry.Analysis.Calculus.Taylor
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Alternating.Bundle
 import DifferentialGeometry.Tensor.Alternating.Comp
