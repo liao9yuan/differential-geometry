@@ -34,6 +34,31 @@ private theorem mul_dirichlet_le_mul_mass_bound_normalized
     _ ≤ C * (W * (D / m)) := mul_le_mul_of_nonneg_left hscaled hC
     _ = (C * W) * (D / m) := by ring
 
+private theorem recentered_tail_le
+    {D Z K r value : ℝ}
+    (hZ : 0 ≤ Z) (hK : 0 ≤ K) (hr : 0 < r)
+    (hsmall : value ≤ Z)
+    (hlarge : D < r → value ≤ K / (r - D)) :
+    value ≤ max (2 * D * Z) (2 * K) / r := by
+  by_cases hcase : r ≤ 2 * D
+  · calc
+      value ≤ Z := hsmall
+      _ ≤ (2 * D * Z) / r := by
+        apply (le_div_iff₀ hr).2
+        nlinarith
+      _ ≤ max (2 * D * Z) (2 * K) / r := by
+        exact div_le_div_of_nonneg_right (le_max_left _ _) hr.le
+  · have h2D : 2 * D < r := lt_of_not_ge hcase
+    have hDr : D < r := by linarith
+    have hdenom : 0 < r - D := sub_pos.mpr hDr
+    calc
+      value ≤ K / (r - D) := hlarge hDr
+      _ ≤ (2 * K) / r := by
+        apply (div_le_div_iff₀ hdenom hr).2
+        nlinarith
+      _ ≤ max (2 * D * Z) (2 * K) / r := by
+        exact div_le_div_of_nonneg_right (le_max_right _ _) hr.le
+
 def evolvingLocalizedSuperlevelMass
     (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
     (u : ℝ → M → ℝ) (t level : ℝ) : ℝ :=
@@ -45,6 +70,92 @@ def evolvingLocalizedSublevelMass
     (u : ℝ → M → ℝ) (t level : ℝ) : ℝ :=
   ∫ x in {x : M | u t x < level}, cutoff x ^ 2
     ∂(riemannianMeasureFamily (I := I) (M := M) g t)
+
+omit [I.Boundaryless] in
+theorem evolvingLocalizedSuperlevelMass_le_evolvingCutoffMass
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t level : ℝ)
+    (hcutoff : Continuous cutoff) :
+    evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g cutoff u t level ≤
+      evolvingCutoffMass (I := I) (M := M) g cutoff t := by
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily_def]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  have hweight_int : Integrable (fun x : M => cutoff x ^ 2) μ :=
+    (hcutoff.pow 2).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  simpa only [evolvingLocalizedSuperlevelMass, evolvingCutoffMass,
+    evolvingLocalizedIntegral, mul_one, μ] using
+    setIntegral_le_integral hweight_int
+      (ae_of_all μ fun x => sq_nonneg (cutoff x))
+        (s := {x : M | level < u t x})
+
+omit [I.Boundaryless] in
+theorem evolvingLocalizedSublevelMass_le_evolvingCutoffMass
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t level : ℝ)
+    (hcutoff : Continuous cutoff) :
+    evolvingLocalizedSublevelMass
+        (I := I) (M := M) g cutoff u t level ≤
+      evolvingCutoffMass (I := I) (M := M) g cutoff t := by
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily_def]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  have hweight_int : Integrable (fun x : M => cutoff x ^ 2) μ :=
+    (hcutoff.pow 2).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  simpa only [evolvingLocalizedSublevelMass, evolvingCutoffMass,
+    evolvingLocalizedIntegral, mul_one, μ] using
+    setIntegral_le_integral hweight_int
+      (ae_of_all μ fun x => sq_nonneg (cutoff x))
+        (s := {x : M | u t x < level})
+
+omit [I.Boundaryless] in
+theorem evolvingLocalizedSuperlevelMass_antitone
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t : ℝ) {lower upper : ℝ}
+    (hcutoff : Continuous cutoff) (hlevel : lower ≤ upper) :
+    evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g cutoff u t upper ≤
+      evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g cutoff u t lower := by
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily_def]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  have hweight_int : Integrable (fun x : M => cutoff x ^ 2) μ :=
+    (hcutoff.pow 2).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  apply setIntegral_mono_set hweight_int.restrict
+  · exact ae_of_all _ fun x => sq_nonneg (cutoff x)
+  · exact ae_of_all _ fun x hx => hlevel.trans_lt hx
+
+omit [I.Boundaryless] in
+theorem evolvingLocalizedSublevelMass_mono
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t : ℝ) {lower upper : ℝ}
+    (hcutoff : Continuous cutoff) (hlevel : lower ≤ upper) :
+    evolvingLocalizedSublevelMass
+        (I := I) (M := M) g cutoff u t lower ≤
+      evolvingLocalizedSublevelMass
+        (I := I) (M := M) g cutoff u t upper := by
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily_def]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  have hweight_int : Integrable (fun x : M => cutoff x ^ 2) μ :=
+    (hcutoff.pow 2).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  apply setIntegral_mono_set hweight_int.restrict
+  · exact ae_of_all _ fun x => sq_nonneg (cutoff x)
+  · exact ae_of_all _ fun x hx => hx.trans_le hlevel
 
 omit [I.Boundaryless] in
 theorem intervalIntegrable_evolvingLocalizedSuperlevelMass
@@ -605,6 +716,297 @@ theorem integrated_late_evolving_log_sublevel_tail_of_supersolution
       calc
         (∫ s in τ..b, tailMass s) ≤ 2 * (Ctail * W) * 2 / r := hresult
         _ = 4 * Ctail * W / r := by ring)
+
+theorem integrated_early_centered_evolving_log_superlevel_tail_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H W Wdeviation : ℝ) {a τ t₀ r : ℝ}
+    (haτ : a ≤ τ) (hr : 0 < r) (hCtail : 0 ≤ Ctail)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hdeviationCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ deviationCutoff)
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc a τ))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g deviationCutoff averagingCutoff Ctail (Icc a τ))
+    (htrace : ∀ t ∈ Icc a τ, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hmass_le : ∀ t ∈ Icc a τ,
+      evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
+    (hdeviationMass_le : ∀ t ∈ Icc a τ,
+      evolvingCutoffMass (I := I) (M := M) g deviationCutoff t ≤ Wdeviation)
+    (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun q => u q x) t) :
+    (∫ s in a..τ,
+      evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g deviationCutoff
+          (fun q x => Real.log (u q x)) s
+          (evolvingLocalizedAverage
+            (I := I) (M := M) g averagingCutoff
+              (fun q x => Real.log (u q x)) τ + r)) ≤
+      max
+          (2 * (∫ q in a..τ,
+            evolvingLogCenterDrift
+              (I := I) (M := M) g averagingCutoff Ccenter H q) *
+            ((τ - a) * Wdeviation))
+          (8 * Ctail * W) / r := by
+  let logu : ℝ → M → ℝ := fun q x => Real.log (u q x)
+  let drift := evolvingLogCenterDrift
+    (I := I) (M := M) g averagingCutoff Ccenter H
+  let D := ∫ q in a..τ, drift q
+  let Z := (τ - a) * Wdeviation
+  let K := 4 * Ctail * W
+  let center := evolvingLocalizedAverage
+    (I := I) (M := M) g averagingCutoff logu τ
+  let tailMass : ℝ → ℝ := fun s =>
+    evolvingLocalizedSuperlevelMass
+      (I := I) (M := M) g deviationCutoff logu s (center + r)
+  have hlog := contMDiff_log_of_pos hu hpos
+  have hdrift := evolvingLogCenterDrift_continuous
+    (I := I) (M := M) g averagingCutoff Ccenter H hg hgram
+      haveragingCutoff hne
+  have hdrift_nonneg : ∀ q, 0 ≤ drift q := fun q =>
+    evolvingLogCenterDrift_nonneg
+      (I := I) (M := M) g averagingCutoff Ccenter H q
+  have hdrift_int : IntervalIntegrable drift volume a τ :=
+    hdrift.intervalIntegrable a τ
+  have hW : 0 ≤ W :=
+    (evolvingCutoffMass_nonneg
+      (I := I) (M := M) g averagingCutoff a).trans
+        (hmass_le a ⟨le_rfl, haτ⟩)
+  have hWdeviation : 0 ≤ Wdeviation :=
+    (evolvingCutoffMass_nonneg
+      (I := I) (M := M) g deviationCutoff a).trans
+        (hdeviationMass_le a ⟨le_rfl, haτ⟩)
+  have hZ : 0 ≤ Z := mul_nonneg (sub_nonneg.mpr haτ) hWdeviation
+  have hK : 0 ≤ K := mul_nonneg (mul_nonneg (by norm_num) hCtail) hW
+  have htail_int : IntervalIntegrable tailMass volume a τ := by
+    simpa only [tailMass, center] using
+      intervalIntegrable_evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g deviationCutoff logu hlog
+          (fun _ => center + r) continuous_const hg hdeviationCutoff a τ
+  have hsmall : (∫ s in a..τ, tailMass s) ≤ Z := by
+    have hconst_int : IntervalIntegrable
+        (fun _ : ℝ => Wdeviation) volume a τ := intervalIntegrable_const
+    have hmono := intervalIntegral.integral_mono_on haτ htail_int hconst_int
+      (fun s hs =>
+        (evolvingLocalizedSuperlevelMass_le_evolvingCutoffMass
+          (I := I) (M := M) g deviationCutoff logu s (center + r)
+            hdeviationCutoff.continuous).trans (hdeviationMass_le s hs))
+    simpa only [Z, intervalIntegral.integral_const, smul_eq_mul] using hmono
+  have haccum : ∀ s ∈ Icc a τ, -(∫ q in τ..s, drift q) ≤ D := by
+    intro s hs
+    rw [intervalIntegral.integral_symm s τ, neg_neg]
+    exact intervalIntegral.integral_mono_interval hs.1 hs.2 le_rfl
+      (ae_of_all _ fun q => hdrift_nonneg q) hdrift_int
+  have hcenter : evolvingShiftedLogCenter
+      (I := I) (M := M) g averagingCutoff u Ccenter H τ τ = center := by
+    simp only [evolvingShiftedLogCenter, intervalIntegral.integral_same,
+      add_zero, center, logu]
+  have hlarge : D < r → (∫ s in a..τ, tailMass s) ≤ K / (r - D) := by
+    intro hDr
+    let q := r - D
+    let shiftedLevel : ℝ → ℝ := fun s =>
+      evolvingShiftedLogCenter
+          (I := I) (M := M) g averagingCutoff u Ccenter H τ τ -
+        (∫ z in τ..s, drift z) + q
+    let shiftedMass : ℝ → ℝ := fun s =>
+      evolvingLocalizedSuperlevelMass
+        (I := I) (M := M) g deviationCutoff logu s (shiftedLevel s)
+    have hq : 0 < q := sub_pos.mpr hDr
+    have hlevel_cont : Continuous shiftedLevel := by
+      exact continuous_const.sub
+        (intervalIntegral.differentiable_integral_of_continuous hdrift).continuous
+          |>.add continuous_const
+    have hshifted_int : IntervalIntegrable shiftedMass volume a τ := by
+      simpa only [shiftedMass] using
+        intervalIntegrable_evolvingLocalizedSuperlevelMass
+          (I := I) (M := M) g deviationCutoff logu hlog shiftedLevel
+            hlevel_cont hg hdeviationCutoff a τ
+    have hlevel : ∀ s ∈ Icc a τ, shiftedLevel s ≤ center + r := by
+      intro s hs
+      have hsaccum := haccum s hs
+      dsimp only [shiftedLevel, q]
+      rw [hcenter]
+      linarith
+    have hmono : (∫ s in a..τ, tailMass s) ≤ ∫ s in a..τ, shiftedMass s := by
+      exact intervalIntegral.integral_mono_on haτ htail_int hshifted_int
+        (fun s hs => evolvingLocalizedSuperlevelMass_antitone
+          (I := I) (M := M) g deviationCutoff logu s
+            hdeviationCutoff.continuous (hlevel s hs))
+    have hbound :=
+      integrated_early_evolving_log_superlevel_tail_of_supersolution
+        (I := I) (M := M) g deviationCutoff averagingCutoff u hu hpos
+          Ccenter Ctail H τ W haτ hq hCtail hg hgram hdeviationCutoff
+            haveragingCutoff hne hPcenter hPtail htrace hmass_le hpde
+    calc
+      (∫ s in a..τ, tailMass s) ≤ ∫ s in a..τ, shiftedMass s := hmono
+      _ ≤ K / (r - D) := by
+        simpa only [shiftedMass, shiftedLevel, drift, logu, q, K] using hbound
+  have hresult := recentered_tail_le hZ hK hr hsmall hlarge
+  have hK_eq : 2 * K = 8 * Ctail * W := by
+    dsimp only [K]
+    ring
+  rw [hK_eq] at hresult
+  simpa only [tailMass, center, logu, D, Z, drift] using hresult
+
+theorem integrated_late_centered_evolving_log_sublevel_tail_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (deviationCutoff averagingCutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (Ccenter Ctail H W Wdeviation : ℝ) {τ b t₀ r : ℝ}
+    (hτb : τ ≤ b) (hr : 0 < r) (hCtail : 0 ≤ Ctail)
+    (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hdeviationCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ deviationCutoff)
+    (haveragingCutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ averagingCutoff)
+    (hne : ∃ x, averagingCutoff x ≠ 0)
+    (hPcenter : HasEvolvingLocalizedPoincare
+      (I := I) (M := M) g averagingCutoff averagingCutoff Ccenter (Icc τ b))
+    (hPtail : HasEvolvingLocalizedPoincareAtAverage
+      (I := I) (M := M) g deviationCutoff averagingCutoff Ctail (Icc τ b))
+    (htrace : ∀ t ∈ Icc τ b, ∀ x : M,
+      |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
+    (hmass_le : ∀ t ∈ Icc τ b,
+      evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
+    (hdeviationMass_le : ∀ t ∈ Icc τ b,
+      evolvingCutoffMass (I := I) (M := M) g deviationCutoff t ≤ Wdeviation)
+    (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun q => u q x) t) :
+    (∫ s in τ..b,
+      evolvingLocalizedSublevelMass
+        (I := I) (M := M) g deviationCutoff
+          (fun q x => Real.log (u q x)) s
+          (evolvingLocalizedAverage
+            (I := I) (M := M) g averagingCutoff
+              (fun q x => Real.log (u q x)) τ - r)) ≤
+      max
+          (2 * (∫ q in τ..b,
+            evolvingLogCenterDrift
+              (I := I) (M := M) g averagingCutoff Ccenter H q) *
+            ((b - τ) * Wdeviation))
+          (8 * Ctail * W) / r := by
+  let logu : ℝ → M → ℝ := fun q x => Real.log (u q x)
+  let drift := evolvingLogCenterDrift
+    (I := I) (M := M) g averagingCutoff Ccenter H
+  let D := ∫ q in τ..b, drift q
+  let Z := (b - τ) * Wdeviation
+  let K := 4 * Ctail * W
+  let center := evolvingLocalizedAverage
+    (I := I) (M := M) g averagingCutoff logu τ
+  let tailMass : ℝ → ℝ := fun s =>
+    evolvingLocalizedSublevelMass
+      (I := I) (M := M) g deviationCutoff logu s (center - r)
+  have hlog := contMDiff_log_of_pos hu hpos
+  have hdrift := evolvingLogCenterDrift_continuous
+    (I := I) (M := M) g averagingCutoff Ccenter H hg hgram
+      haveragingCutoff hne
+  have hdrift_nonneg : ∀ q, 0 ≤ drift q := fun q =>
+    evolvingLogCenterDrift_nonneg
+      (I := I) (M := M) g averagingCutoff Ccenter H q
+  have hdrift_int : IntervalIntegrable drift volume τ b :=
+    hdrift.intervalIntegrable τ b
+  have hW : 0 ≤ W :=
+    (evolvingCutoffMass_nonneg
+      (I := I) (M := M) g averagingCutoff τ).trans
+        (hmass_le τ ⟨le_rfl, hτb⟩)
+  have hWdeviation : 0 ≤ Wdeviation :=
+    (evolvingCutoffMass_nonneg
+      (I := I) (M := M) g deviationCutoff τ).trans
+        (hdeviationMass_le τ ⟨le_rfl, hτb⟩)
+  have hZ : 0 ≤ Z := mul_nonneg (sub_nonneg.mpr hτb) hWdeviation
+  have hK : 0 ≤ K := mul_nonneg (mul_nonneg (by norm_num) hCtail) hW
+  have htail_int : IntervalIntegrable tailMass volume τ b := by
+    simpa only [tailMass, center] using
+      intervalIntegrable_evolvingLocalizedSublevelMass
+        (I := I) (M := M) g deviationCutoff logu hlog
+          (fun _ => center - r) continuous_const hg hdeviationCutoff τ b
+  have hsmall : (∫ s in τ..b, tailMass s) ≤ Z := by
+    have hconst_int : IntervalIntegrable
+        (fun _ : ℝ => Wdeviation) volume τ b := intervalIntegrable_const
+    have hmono := intervalIntegral.integral_mono_on hτb htail_int hconst_int
+      (fun s hs =>
+        (evolvingLocalizedSublevelMass_le_evolvingCutoffMass
+          (I := I) (M := M) g deviationCutoff logu s (center - r)
+            hdeviationCutoff.continuous).trans (hdeviationMass_le s hs))
+    simpa only [Z, intervalIntegral.integral_const, smul_eq_mul] using hmono
+  have haccum : ∀ s ∈ Icc τ b, (∫ q in τ..s, drift q) ≤ D := by
+    intro s hs
+    exact intervalIntegral.integral_mono_interval le_rfl hs.1 hs.2
+      (ae_of_all _ fun q => hdrift_nonneg q) hdrift_int
+  have hcenter : evolvingShiftedLogCenter
+      (I := I) (M := M) g averagingCutoff u Ccenter H τ τ = center := by
+    simp only [evolvingShiftedLogCenter, intervalIntegral.integral_same,
+      add_zero, center, logu]
+  have hlarge : D < r → (∫ s in τ..b, tailMass s) ≤ K / (r - D) := by
+    intro hDr
+    let q := r - D
+    let shiftedLevel : ℝ → ℝ := fun s =>
+      evolvingShiftedLogCenter
+          (I := I) (M := M) g averagingCutoff u Ccenter H τ τ -
+        (∫ z in τ..s, drift z) - q
+    let shiftedMass : ℝ → ℝ := fun s =>
+      evolvingLocalizedSublevelMass
+        (I := I) (M := M) g deviationCutoff logu s (shiftedLevel s)
+    have hq : 0 < q := sub_pos.mpr hDr
+    have hlevel_cont : Continuous shiftedLevel := by
+      exact continuous_const.sub
+        (intervalIntegral.differentiable_integral_of_continuous hdrift).continuous
+          |>.sub continuous_const
+    have hshifted_int : IntervalIntegrable shiftedMass volume τ b := by
+      simpa only [shiftedMass] using
+        intervalIntegrable_evolvingLocalizedSublevelMass
+          (I := I) (M := M) g deviationCutoff logu hlog shiftedLevel
+            hlevel_cont hg hdeviationCutoff τ b
+    have hlevel : ∀ s ∈ Icc τ b, center - r ≤ shiftedLevel s := by
+      intro s hs
+      have hsaccum := haccum s hs
+      dsimp only [shiftedLevel, q]
+      rw [hcenter]
+      linarith
+    have hmono : (∫ s in τ..b, tailMass s) ≤ ∫ s in τ..b, shiftedMass s := by
+      exact intervalIntegral.integral_mono_on hτb htail_int hshifted_int
+        (fun s hs => evolvingLocalizedSublevelMass_mono
+          (I := I) (M := M) g deviationCutoff logu s
+            hdeviationCutoff.continuous (hlevel s hs))
+    have hbound :=
+      integrated_late_evolving_log_sublevel_tail_of_supersolution
+        (I := I) (M := M) g deviationCutoff averagingCutoff u hu hpos
+          Ccenter Ctail H τ W hτb hq hCtail hg hgram hdeviationCutoff
+            haveragingCutoff hne hPcenter hPtail htrace hmass_le hpde
+    calc
+      (∫ s in τ..b, tailMass s) ≤ ∫ s in τ..b, shiftedMass s := hmono
+      _ ≤ K / (r - D) := by
+        simpa only [shiftedMass, shiftedLevel, drift, logu, q, K] using hbound
+  have hresult := recentered_tail_le hZ hK hr hsmall hlarge
+  have hK_eq : 2 * K = 8 * Ctail * W := by
+    dsimp only [K]
+    ring
+  rw [hK_eq] at hresult
+  simpa only [tailMass, center, logu, D, Z, drift] using hresult
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
