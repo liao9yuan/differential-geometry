@@ -178,6 +178,141 @@ theorem caccioppoli_evolving_positive_rpow_of_supersolution
   have hresult := hfixed'.trans hcombined
   simpa only [mass, w] using hresult
 
+theorem weighted_caccioppoli_evolving_positive_rpow_of_supersolution
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {q : ℝ} (hq_pos : 0 < q) (hq_one : q < 1)
+    {t₀ : ℝ} (hg : MetricFamilyRegularAt (I := I) g t₀)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn ((modelWithCornersSelf ℝ ℝ).prod I)
+        (modelWithCornersSelf ℝ ℝ) ∞
+        (fun p : ℝ × M =>
+          chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    {weight dweight : ℝ → ℝ} {a b B : ℝ}
+    (hab : a ≤ b)
+    (hdweight : ContinuousOn dweight (Icc a b))
+    (hweight : ∀ t ∈ Icc a b, HasDerivAt weight (dweight t) t)
+    (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
+    (htrace : ∀ t ∈ Icc a b, ∀ x : M,
+      -traceTimeDerivMetric (I := I) g t x ≤ B)
+    (hpde : ∀ t ∈ Icc a b, ∀ x : M,
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+        deriv (fun s => u s x) t) :
+    weight a * evolvingLocalizedL2Mass
+          (I := I) (M := M) g cutoff (fun s x => u s x ^ (q / 2)) a -
+        weight b * evolvingLocalizedL2Mass
+          (I := I) (M := M) g cutoff (fun s x => u s x ^ (q / 2)) b +
+        ∫ t in a..b, weight t *
+          ((2 * (1 - q) / q) *
+            evolvingLocalizedDirichletEnergy
+              (I := I) (M := M) g cutoff
+                (fun s x => u s x ^ (q / 2)) t) ≤
+      ∫ t in a..b,
+        (-dweight t) * evolvingLocalizedL2Mass
+            (I := I) (M := M) g cutoff (fun s x => u s x ^ (q / 2)) t +
+          weight t *
+            ((2 * q / (1 - q)) *
+                evolvingCutoffGradientError
+                  (I := I) (M := M) g cutoff
+                    (fun s x => u s x ^ (q / 2)) t +
+              (1 / 2) * B * evolvingLocalizedL2Mass
+                (I := I) (M := M) g cutoff
+                  (fun s x => u s x ^ (q / 2)) t) := by
+  let huHalf := contMDiff_rpow_of_pos hu hpos (q / 2)
+  let w : ℝ → M → ℝ := fun t x => u t x ^ (q / 2)
+  let mass : ℝ → ℝ :=
+    evolvingLocalizedL2Mass (I := I) (M := M) g cutoff w
+  let dirichlet : ℝ → ℝ :=
+    evolvingLocalizedDirichletEnergy (I := I) (M := M) g cutoff w
+  let error : ℝ → ℝ :=
+    evolvingCutoffGradientError (I := I) (M := M) g cutoff w
+  let c := 2 * (1 - q) / q
+  let e := 2 * q / (1 - q)
+  let v := (1 / 2) * B
+  let negMass : ℝ → ℝ := fun t => -mass t
+  have hmass_cont : ContinuousOn mass (Icc a b) := by
+    simpa only [mass] using evolvingLocalizedL2Mass_continuousOn
+      (I := I) (M := M) g cutoff w isCompact_Icc hg
+        hcutoff.continuous huHalf.continuous
+  have hdmass_cont : ContinuousOn (deriv mass) (Icc a b) := by
+    simpa only [mass] using deriv_evolvingLocalizedL2Mass_continuousOn
+      (I := I) (M := M) g cutoff w isCompact_Icc hg hcutoff huHalf
+  have hmass_deriv : ∀ t ∈ Icc a b,
+      HasDerivAt mass (deriv mass t) t := by
+    intro t _
+    have hraw := hasDerivAt_evolvingLocalizedL2Mass
+      (I := I) (M := M) g cutoff w t (hg.at_any t) hcutoff huHalf
+    simpa only [mass] using hraw.congr_deriv hraw.deriv.symm
+  have hnegMass_deriv : ∀ t ∈ Icc a b,
+      HasDerivAt negMass (deriv negMass t) t := by
+    intro t ht
+    exact (hmass_deriv t ht).neg.congr_deriv
+      ((hmass_deriv t ht).neg.deriv.symm)
+  have hdnegMass_cont : ContinuousOn (deriv negMass) (Icc a b) := by
+    have heq : deriv negMass = fun t => -deriv mass t := by
+      funext t
+      have hraw := hasDerivAt_evolvingLocalizedL2Mass
+        (I := I) (M := M) g cutoff w t (hg.at_any t) hcutoff huHalf
+      have hmass_at : HasDerivAt mass (deriv mass t) t := by
+        simpa only [mass] using hraw.congr_deriv hraw.deriv.symm
+      simpa only [negMass] using hmass_at.neg.deriv
+    rw [heq]
+    exact hdmass_cont.neg
+  have hdirichlet : ContinuousOn dirichlet (Icc a b) := by
+    simpa only [dirichlet] using evolvingLocalizedDirichletEnergy_continuousOn
+      (I := I) (M := M) g cutoff w isCompact_Icc hg hgram hcutoff huHalf
+  have herror : ContinuousOn error (Icc a b) := by
+    simpa only [error] using evolvingCutoffGradientError_continuousOn
+      (I := I) (M := M) g cutoff w isCompact_Icc hg hgram hcutoff huHalf
+  have hweight_cont : ContinuousOn weight (Icc a b) :=
+    fun t ht => (hweight t ht).continuousAt.continuousWithinAt
+  have hdissipation : ContinuousOn
+      (fun t => weight t * (c * dirichlet t)) (Icc a b) :=
+    hweight_cont.mul (continuousOn_const.mul hdirichlet)
+  have hrhs : ContinuousOn
+      (fun t => dweight t * negMass t +
+        weight t * (e * error t + v * mass t)) (Icc a b) :=
+    (hdweight.mul hmass_cont.neg).add
+      (hweight_cont.mul
+        ((continuousOn_const.mul herror).add
+          (continuousOn_const.mul hmass_cont)))
+  have hpointwise : ∀ t ∈ Icc a b,
+      dweight t * negMass t + weight t * deriv negMass t +
+          weight t * (c * dirichlet t) ≤
+        dweight t * negMass t + weight t * (e * error t + v * mass t) := by
+    intro t ht
+    have hdiff := caccioppoli_evolving_positive_rpow_of_supersolution
+      (I := I) (M := M) g cutoff u hu hpos hq_pos hq_one t B
+        (hg.at_any t) hcutoff (htrace t ht) (hpde t ht)
+    have hneg_deriv : deriv negMass t = -deriv mass t := by
+      simpa only [negMass] using (hmass_deriv t ht).neg.deriv
+    have hbase : deriv negMass t + c * dirichlet t ≤
+        e * error t + v * mass t := by
+      rw [hneg_deriv]
+      simpa only [c, e, v, dirichlet, error, mass, w] using (show
+        -deriv mass t +
+            (2 * (1 - q) / q) * dirichlet t ≤
+          (2 * q / (1 - q)) * error t + (1 / 2) * B * mass t by
+        linarith)
+    have hmul := mul_le_mul_of_nonneg_left hbase (hweight_nonneg t ht)
+    ring_nf at hmul ⊢
+    linarith
+  have hresult := weight_mul_energy_inequality
+    hab hdweight hweight hdnegMass_cont hnegMass_deriv hdissipation hrhs hpointwise
+  simp only [negMass, mass, dirichlet, error, c, e, v, w,
+    mul_neg, sub_neg_eq_add] at hresult
+  convert hresult using 1
+  · ring
+  · apply intervalIntegral.integral_congr
+    intro t _
+    ring
+
 theorem caccioppoli_evolving_rpow_of_subsolution
     (g : ℝ → SmoothRiemannianMetric I M)
     (cutoff : M → ℝ)
