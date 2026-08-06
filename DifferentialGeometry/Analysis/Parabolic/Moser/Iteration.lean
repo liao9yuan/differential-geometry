@@ -231,6 +231,21 @@ theorem summable_moserIterationCost
   ring
 
 omit [NeZero n] in
+theorem summable_geometric_mul_nat_add_pow
+    {r : ℝ} (hr₀ : r ≠ 0) (hr : ‖r‖ < 1) (m : ℕ) :
+    Summable (fun k : ℕ => r ^ k * (k + 1 : ℝ) ^ m) := by
+  have hbase : Summable (fun k : ℕ => (k : ℝ) ^ m * r ^ k) :=
+    summable_pow_mul_geometric_of_norm_lt_one (R := ℝ) m hr
+  have hshift : Summable (fun k : ℕ =>
+      (k + 1 : ℝ) ^ m * r ^ (k + 1)) := by
+    simpa only [Nat.cast_add, Nat.cast_one] using
+      (summable_nat_add_iff 1).2 hbase
+  refine (hshift.mul_left r⁻¹).congr ?_
+  intro k
+  rw [pow_succ]
+  field_simp
+
+omit [NeZero n] in
 theorem tsum_moserIterationCost
     {theta a b : ℝ} (htheta : 0 ≤ theta) (htheta_one : theta < 1) :
     ∑' k, moserIterationCost theta a b k =

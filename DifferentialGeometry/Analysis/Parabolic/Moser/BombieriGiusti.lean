@@ -360,6 +360,99 @@ def bombieriGiustiThreshold (p₀ c₀ reverseCost : ℝ) : ℝ :=
       (4 * (Real.log reverseCost + Real.log 2)))
     (8 * Real.log 2 / p₀)
 
+theorem bombieriGiustiThreshold_eq_max_pow
+    {p₀ c₀ reverseCost : ℝ} (hreverseCost : 0 < reverseCost) :
+    bombieriGiustiThreshold p₀ c₀ reverseCost =
+      max (32 * c₀ * reverseCost ^ 4) (8 * Real.log 2 / p₀) := by
+  have hreversePow :
+      Real.exp (4 * Real.log reverseCost) = reverseCost ^ 4 := by
+    rw [show 4 * Real.log reverseCost =
+        Real.log reverseCost + Real.log reverseCost +
+          Real.log reverseCost + Real.log reverseCost by ring,
+      Real.exp_add, Real.exp_add, Real.exp_add, Real.exp_log hreverseCost]
+    ring
+  have htwoPow : Real.exp (4 * Real.log 2) = (2 : ℝ) ^ 4 := by
+    rw [show 4 * Real.log 2 =
+        Real.log 2 + Real.log 2 + Real.log 2 + Real.log 2 by ring,
+      Real.exp_add, Real.exp_add, Real.exp_add,
+      Real.exp_log (by norm_num : (0 : ℝ) < 2)]
+    ring
+  unfold bombieriGiustiThreshold
+  congr 1
+  rw [show 4 * (Real.log reverseCost + Real.log 2) =
+      4 * Real.log reverseCost + 4 * Real.log 2 by ring,
+    Real.exp_add, hreversePow, htwoPow]
+  ring
+
+theorem summable_geometric_mul_bombieriGiustiThreshold_of_polynomial_le
+    {p₀ c₀ C : ℝ} {reverseCost : ℕ → ℝ} (degree : ℕ)
+    (hp₀ : 0 < p₀) (hc₀ : 0 ≤ c₀) (hC : 1 ≤ C)
+    (hreverseCost : ∀ k, 1 ≤ reverseCost k)
+    (hbound : ∀ k, reverseCost k ≤ C * (k + 1 : ℝ) ^ degree) :
+    Summable (fun k : ℕ => (3 / 4 : ℝ) ^ k *
+      (bombieriGiustiThreshold p₀ c₀ (reverseCost k) / 4)) := by
+  let r : ℝ := 3 / 4
+  let constant : ℝ := 8 * Real.log 2 / p₀
+  let coefficient : ℝ := 32 * c₀ * C ^ 4
+  have hr_nonneg : 0 ≤ r := by norm_num [r]
+  have hr_norm : ‖r‖ < 1 := by norm_num [r, Real.norm_eq_abs]
+  have hC_nonneg : 0 ≤ C := zero_le_one.trans hC
+  have hconstant : 0 ≤ constant := by
+    exact div_nonneg
+      (mul_nonneg (by norm_num) (Real.log_nonneg (by norm_num))) hp₀.le
+  have hcoefficient : 0 ≤ coefficient := by
+    exact mul_nonneg (mul_nonneg (by norm_num) hc₀) (pow_nonneg hC_nonneg 4)
+  have hpoly : Summable (fun k : ℕ =>
+      r ^ k * (k + 1 : ℝ) ^ (4 * degree)) :=
+    summable_geometric_mul_nat_add_pow (by norm_num [r]) hr_norm (4 * degree)
+  have hgeom : Summable (fun k : ℕ => r ^ k) :=
+    summable_geometric_of_norm_lt_one hr_norm
+  have hmajor : Summable (fun k : ℕ => r ^ k *
+      ((coefficient * (k + 1 : ℝ) ^ (4 * degree) + constant) / 4)) := by
+    refine ((hpoly.mul_right (coefficient / 4)).add
+      (hgeom.mul_right (constant / 4))).congr ?_
+    intro k
+    ring
+  apply Summable.of_nonneg_of_le
+    (fun k => mul_nonneg (pow_nonneg hr_nonneg k)
+      (div_nonneg
+        ((mul_nonneg (mul_nonneg (by norm_num) hc₀)
+          (Real.exp_pos _).le).trans (le_max_left _ _)) (by norm_num)))
+  · intro k
+    have hcost_nonneg : 0 ≤ reverseCost k :=
+      zero_le_one.trans (hreverseCost k)
+    have hcost_pow : reverseCost k ^ 4 ≤
+        (C * (k + 1 : ℝ) ^ degree) ^ 4 :=
+      pow_le_pow_left₀ hcost_nonneg (hbound k) 4
+    have hpower : (C * (k + 1 : ℝ) ^ degree) ^ 4 =
+        C ^ 4 * (k + 1 : ℝ) ^ (4 * degree) := by
+      rw [mul_pow]
+      congr 1
+      rw [← pow_mul, Nat.mul_comm degree 4]
+    have hfirst : 32 * c₀ * reverseCost k ^ 4 ≤
+        coefficient * (k + 1 : ℝ) ^ (4 * degree) := by
+      dsimp only [coefficient]
+      calc
+        32 * c₀ * reverseCost k ^ 4 ≤
+            32 * c₀ * (C * (k + 1 : ℝ) ^ degree) ^ 4 :=
+          mul_le_mul_of_nonneg_left hcost_pow
+            (mul_nonneg (by norm_num) hc₀)
+        _ = 32 * c₀ *
+            (C ^ 4 * (k + 1 : ℝ) ^ (4 * degree)) := by rw [hpower]
+        _ = 32 * c₀ * C ^ 4 * (k + 1 : ℝ) ^ (4 * degree) := by ring
+    have hthreshold : bombieriGiustiThreshold p₀ c₀ (reverseCost k) ≤
+        coefficient * (k + 1 : ℝ) ^ (4 * degree) + constant := by
+      rw [bombieriGiustiThreshold_eq_max_pow
+        (zero_lt_one.trans_le (hreverseCost k))]
+      apply max_le
+      · exact hfirst.trans (le_add_of_nonneg_right hconstant)
+      · exact le_add_of_nonneg_left
+          (mul_nonneg hcoefficient (pow_nonneg (by positivity) _))
+    exact mul_le_mul_of_nonneg_left
+      (div_le_div_of_nonneg_right hthreshold (by norm_num))
+      (pow_nonneg hr_nonneg k)
+  · simpa only [r, constant, coefficient] using hmajor
+
 theorem two_mul_le_bombieriGiustiThreshold
     {p₀ c₀ reverseCost : ℝ}
     (hc₀ : 0 ≤ c₀) (hreverseCost : 1 ≤ reverseCost) :
