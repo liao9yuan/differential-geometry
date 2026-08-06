@@ -10,6 +10,8 @@ open scoped ContDiff Manifold Topology
 namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
 
 def bombieriGiustiInvScale (k : ℕ) : ℝ :=
   1 / (k + 1 : ℝ)
@@ -135,6 +137,75 @@ theorem bombieriGiustiReciprocalLocalizer_gap_pos
       bombieriGiustiDescendingLevel lower upper (2 * k + 2) := by
   exact sub_pos.mpr
     (bombieriGiustiDescendingLevel_strictAnti hlowerUpper (by omega))
+
+theorem gradFun_bombieriGiustiReciprocalLocalizer
+    [I.Boundaryless] [T2Space M]
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    (lower upper : ℝ) (k : ℕ) (x : M) :
+    gradFun (I := I) g
+        (bombieriGiustiReciprocalLocalizer rho lower upper k).toFun x =
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+          bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ •
+        gradFun (I := I) g rho.toFun x := by
+  let affine : ℝ → ℝ := fun s => 1 +
+    (s - bombieriGiustiDescendingLevel lower upper (2 * k + 1)) /
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2))
+  have haffine : HasDerivAt affine
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+        bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹
+      (rho.toFun x) := by
+    have h := (hasDerivAt_const (rho.toFun x) (1 : ℝ)).add
+      (((hasDerivAt_id (rho.toFun x)).sub_const
+        (bombieriGiustiDescendingLevel lower upper (2 * k + 1))).div_const
+          (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+            bombieriGiustiDescendingLevel lower upper (2 * k + 2)))
+    simpa only [affine, zero_add, one_div] using h
+  have hgradient := gradientFun_comp (I := I) g haffine.differentiableAt
+    (rho.smooth.mdifferentiable (by simp) x)
+  simpa only [affine, bombieriGiustiReciprocalLocalizer, haffine.deriv,
+    gradientFun] using hgradient
+
+theorem bombieriGiustiReciprocalLocalizer_gradientSqSup_le
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    (lower upper : ℝ) (k : ℕ) :
+    (bombieriGiustiReciprocalLocalizer rho lower upper k).gradientSqSup ≤
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+          bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ ^ 2 *
+        rho.gradientSqSup := by
+  refine SmoothScalar.gradientSqSup_le _
+    (mul_nonneg (sq_nonneg _) rho.gradientSqSup_nonneg) ?_
+  intro x
+  rw [gradFun_bombieriGiustiReciprocalLocalizer,
+    metric_inner_smul_self]
+  exact mul_le_mul_of_nonneg_left
+    (rho.inner_grad_self_le_gradientSqSup x) (sq_nonneg _)
+
+theorem spatialMoserCutoffGradientConstant_reciprocalLocalizer_le
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M) (rho : SmoothScalar g)
+    (lower upper : ℝ) (k : ℕ) :
+    spatialMoserCutoffGradientConstant (I := I) g
+        (bombieriGiustiReciprocalLocalizer rho lower upper k) ≤
+      (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+          bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ ^ 2 *
+        spatialMoserCutoffGradientConstant (I := I) g rho := by
+  unfold spatialMoserCutoffGradientConstant
+  calc
+    16 * CutoffProfile.derivBound ^ 2 *
+          (bombieriGiustiReciprocalLocalizer rho lower upper k).gradientSqSup ≤
+        16 * CutoffProfile.derivBound ^ 2 *
+          ((bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+              bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ ^ 2 *
+            rho.gradientSqSup) :=
+      mul_le_mul_of_nonneg_left
+        (bombieriGiustiReciprocalLocalizer_gradientSqSup_le g rho lower upper k)
+        (mul_nonneg (by norm_num) (sq_nonneg _))
+    _ = (bombieriGiustiDescendingLevel lower upper (2 * k + 1) -
+            bombieriGiustiDescendingLevel lower upper (2 * k + 2))⁻¹ ^ 2 *
+          (16 * CutoffProfile.derivBound ^ 2 * rho.gradientSqSup) := by
+      ring
 
 omit [Module.Finite ℝ E] in
 theorem one_lt_bombieriGiustiReciprocalLocalizer_of_ne_zero

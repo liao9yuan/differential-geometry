@@ -185,6 +185,33 @@ theorem SmoothScalar.gradientSqSup_nonneg
     0 ≤ f.gradientSqSup :=
   le_max_right _ _
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+theorem SmoothScalar.gradientSqSup_le
+    {g : SmoothRiemannianMetric I M} (f : SmoothScalar g) {B : ℝ}
+    (hB : 0 ≤ B)
+    (hbound : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g f.toFun x)
+          (gradFun (I := I) g f.toFun x) ≤ B) :
+    f.gradientSqSup ≤ B := by
+  unfold gradientSqSup
+  apply max_le
+  · rcases isEmpty_or_nonempty M with hM | hM
+    · have hrange : Set.range (fun x : M =>
+          g.inner x
+            (gradFun (I := I) g f.toFun x)
+            (gradFun (I := I) g f.toFun x)) = (∅ : Set ℝ) := by
+        rw [Set.range_eq_empty_iff]
+        exact hM
+      rw [hrange, Real.sSup_empty]
+      exact hB
+    · letI : Nonempty M := hM
+      apply csSup_le (Set.range_nonempty _)
+      intro b hb
+      obtain ⟨x, rfl⟩ := hb
+      exact hbound x
+  · exact hB
+
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem SmoothScalar.inner_grad_self_le_gradientSqSup
     {g : SmoothRiemannianMetric I M} (f : SmoothScalar g) (x : M) :
