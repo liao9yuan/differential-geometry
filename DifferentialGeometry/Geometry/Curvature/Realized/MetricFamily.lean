@@ -28,6 +28,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
+open DifferentialGeometry.Analysis
 namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle DifferentialGeometry.Tensor0SBundle

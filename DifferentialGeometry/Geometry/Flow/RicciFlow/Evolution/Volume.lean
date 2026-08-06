@@ -18,6 +18,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+open DifferentialGeometry.Analysis
 namespace DifferentialGeometry.PDE.RicciFlow
 namespace Evolution
 namespace Volume
