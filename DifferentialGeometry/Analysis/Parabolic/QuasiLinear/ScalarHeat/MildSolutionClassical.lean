@@ -163,6 +163,56 @@ theorem scalarQuasilinear_smooth_representative_of_forcingSpectralMass
   rw [hu_smooth]
   simpa [f] using hw.symm
 
+theorem scalarQuasilinear_satisfies_heat_equation_of_forcingSpectralMass
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : scalarHs (I := I) (M := M) g 0)
+    {N : scalarHs (I := I) (M := M) g 0 → scalarHs (I := I) (M := M) g 0}
+    {L : NNReal} (hN : LipschitzWith L N)
+    {T : ℝ} {u : ℝ → scalarHs (I := I) (M := M) g 0}
+    (hu_cont : ContinuousOn u (Set.Icc 0 T))
+    (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
+      u t = heatSemigroupHsExt (I := I) (M := M) g 0 t u₀ +
+        ∫ τ in (0:ℝ)..t,
+          heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ)))
+    (hf : ContDiff ℝ 1 (fun s : ℝ =>
+      scalarHsZeroEquivL2 (I := I) (M := M) g (N (u s))))
+    {t : ℝ} (ht : 0 < t) (htT : t ≤ T)
+    (hmass : ∀ k : ℕ,
+      Summable (forcingSpectralMass (I := I) (M := M) g
+        (fun s : ℝ => scalarHsZeroEquivL2 (I := I) (M := M) g (N (u s))) t k))
+    (hmass_deriv : ∀ k : ℕ,
+      Summable (forcingSpectralMass (I := I) (M := M) g
+        (deriv (fun s : ℝ => scalarHsZeroEquivL2 (I := I) (M := M) g (N (u s)))) t k))
+    (f_smooth : SmoothScalar g)
+    (hf_smooth : smoothToLp (I := I) (M := M) g f_smooth =
+      scalarHsZeroEquivL2 (I := I) (M := M) g (N (u t))) :
+    ∃ u_smooth du_smooth : SmoothScalar g,
+      smoothToLp (I := I) (M := M) g u_smooth =
+          scalarHsZeroEquivL2 (I := I) (M := M) g (u t) ∧
+        smoothToLp (I := I) (M := M) g du_smooth =
+          -(heatPower (I := I) (M := M) g 1 t
+              (scalarHsZeroEquivL2 (I := I) (M := M) g u₀)) +
+            mildSolution (I := I) (M := M) g
+              ((fun s : ℝ => scalarHsZeroEquivL2 (I := I) (M := M) g (N (u s))) 0)
+              (deriv (fun s : ℝ => scalarHsZeroEquivL2 (I := I) (M := M) g (N (u s)))) t ∧
+        du_smooth = u_smooth.laplacian + f_smooth := by
+  classical
+  let f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure I M g) := fun s : ℝ =>
+    scalarHsZeroEquivL2 (I := I) (M := M) g (N (u s))
+  obtain ⟨u_smooth, du_smooth, hu, hdu, hdeq⟩ :=
+    mildSolution_has_classical_representatives_of_forcingSpectralMass
+      (I := I) (M := M) g
+      (scalarHsZeroEquivL2 (I := I) (M := M) g u₀) hf ht
+      (by simpa [f] using hmass) (by simpa [f] using hmass_deriv)
+      f_smooth (by simpa [f] using hf_smooth)
+  have hw := scalarQuasilinearMildSolution_eq_mildSolution
+    (I := I) (M := M) g u₀ hN hu_cont hu_eq t ⟨le_of_lt ht, htT⟩
+  refine ⟨u_smooth, du_smooth, ?_, ?_, ?_⟩
+  · rw [hu]
+    simpa [f] using hw.symm
+  · simpa [f] using hdu
+  · exact hdeq
+
 end QuasiLinear
 end Parabolic
 end Analysis
