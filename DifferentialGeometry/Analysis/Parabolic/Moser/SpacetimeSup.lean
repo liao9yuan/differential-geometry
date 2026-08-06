@@ -70,6 +70,30 @@ theorem localizedSpacetimeSup_pos
   exact (hpos a x).trans_le
     (le_localizedSpacetimeSup cutoff u hu ⟨le_rfl, hab⟩ hx)
 
+omit [Module.Finite ℝ E] [T2Space M] in
+theorem bddAbove_range_localizedSpacetimeSup
+    {g : SmoothRiemannianMetric I M} (cutoff : ℕ → SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : Continuous (fun z : ℝ × M ↦ u z.1 z.2))
+    {a b : ℕ → ℝ} {A B : ℝ}
+    (ha : ∀ k, A ≤ a k) (hb : ∀ k, b k ≤ B)
+    (hab : ∀ k, a k ≤ b k) (hcutoff : ∀ k, ∃ x, (cutoff k).toFun x ≠ 0) :
+    BddAbove (Set.range (fun k ↦
+      localizedSpacetimeSup (I := I) (cutoff k) u (a k) (b k))) := by
+  have hglobal : BddAbove ((fun z : ℝ × M ↦ u z.1 z.2) ''
+      (Icc A B ×ˢ (Set.univ : Set M))) :=
+    ((isCompact_Icc.prod isCompact_univ).image hu).bddAbove
+  obtain ⟨K, hK⟩ := hglobal
+  refine ⟨K, ?_⟩
+  intro y hy
+  obtain ⟨k, rfl⟩ := hy
+  change localizedSpacetimeSup (I := I) (cutoff k) u (a k) (b k) ≤ K
+  apply localizedSpacetimeSup_le (I := I) (M := M) (g := g)
+    (cutoff k) u (C := K) (hab k) (hcutoff k)
+  intro t ht x _
+  apply hK
+  exact ⟨(t, x), ⟨⟨(ha k).trans ht.1, ht.2.trans (hb k)⟩, mem_univ x⟩, rfl⟩
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end

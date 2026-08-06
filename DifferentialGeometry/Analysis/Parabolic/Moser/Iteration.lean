@@ -272,6 +272,26 @@ theorem summable_geometric_mul_nat_add_pow
   field_simp
 
 omit [NeZero n] in
+theorem summable_geometric_mul_nat_add_rpow
+    {r : ℝ} (hr₀ : r ≠ 0) (hr : ‖r‖ < 1) (s : ℝ) :
+    Summable (fun k : ℕ ↦ r ^ k * (k + 1 : ℝ) ^ s) := by
+  let m := ⌈max s 0⌉₊
+  have hrnorm₀ : ‖r‖ ≠ 0 := norm_ne_zero_iff.mpr hr₀
+  have hrnorm : ‖‖r‖‖ < 1 := by simpa using hr
+  have hmajor : Summable (fun k : ℕ ↦ ‖r‖ ^ k * (k + 1 : ℝ) ^ m) :=
+    summable_geometric_mul_nat_add_pow hrnorm₀ hrnorm m
+  apply Summable.of_norm_bounded hmajor
+  intro k
+  have hbase : 1 ≤ (k + 1 : ℝ) := by norm_num
+  have hsm : s ≤ (m : ℝ) := by
+    exact (le_max_left s 0).trans (Nat.le_ceil (max s 0))
+  rw [norm_mul, norm_pow, Real.norm_of_nonneg (Real.rpow_nonneg (by positivity) _)]
+  exact mul_le_mul_of_nonneg_left
+    (by simpa only [Real.rpow_natCast] using
+      Real.rpow_le_rpow_of_exponent_le hbase hsm)
+    (pow_nonneg (norm_nonneg r) k)
+
+omit [NeZero n] in
 theorem tsum_moserIterationCost
     {theta a b : ℝ} (htheta : 0 ≤ theta) (htheta_one : theta < 1) :
     ∑' k, moserIterationCost theta a b k =

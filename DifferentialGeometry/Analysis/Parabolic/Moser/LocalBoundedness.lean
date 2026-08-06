@@ -171,6 +171,38 @@ theorem moserLocalizedMass_rpow_half_eq_localizedSpacetimeRpowMoment
     _ = u t x ^ p := by ring_nf
 
 omit [I.Boundaryless] in
+theorem moserLocalizedMass_zero_eq_localizedSpacetimeRpowMoment
+    (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M ↦ u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x) {p a τ t₁ : ℝ} (hat₁ : a ≤ t₁) :
+    moserLocalizedMass (I := I) (M := M) n rho u p a τ t₁ 0 =
+      localizedSpacetimeRpowMoment (I := I) (M := M)
+        (spatialMoserCutoff rho 0) u p a t₁ := by
+  rw [moserLocalizedMass, moserTimeLevel_zero,
+    localizedSpacetimeRpowMoment_eq_intervalIntegral_of_continuous_pos
+      (I := I) (M := M) (spatialMoserCutoff rho 0) u
+        hu.continuous hpos hat₁]
+  simp only [parabolicMoserExponent_zero]
+
+omit [I.Boundaryless] in
+theorem moserNormalizedMass_zero_eq_localizedSpacetimeRpowNorm
+    (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M ↦ u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x) {p a τ t₁ : ℝ} (hat₁ : a ≤ t₁) :
+    moserNormalizedMass (I := I) (M := M) n rho u p a τ t₁ 0 =
+      localizedSpacetimeRpowNorm (I := I) (M := M)
+        (spatialMoserCutoff rho 0) u p a t₁ := by
+  unfold moserNormalizedMass localizedSpacetimeRpowNorm
+  rw [moserLocalizedMass_zero_eq_localizedSpacetimeRpowMoment
+    (I := I) (M := M) n rho u hu hpos hat₁, parabolicMoserExponent_zero]
+
+omit [I.Boundaryless] in
 theorem integral_rpow_le_moserLocalizedMass
     (n : ℕ) {g : SmoothRiemannianMetric I M} (rho : SmoothScalar g)
     (u : ℝ → M → ℝ)
