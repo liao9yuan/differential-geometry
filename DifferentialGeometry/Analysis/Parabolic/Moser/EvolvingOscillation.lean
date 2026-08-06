@@ -160,6 +160,103 @@ theorem hasDerivAt_evolvingLocalizedAverage
     (I := I) (M := M) g cutoff t hg hcutoff
   simpa only [evolvingLocalizedAverage] using hnum.div hden hmass
 
+theorem deriv_evolvingLocalizedAverage_eq_integral_centered
+    (g : ℝ → SmoothRiemannianMetric I M) (cutoff : M → ℝ)
+    (u : ℝ → M → ℝ) (t : ℝ)
+    (hg : MetricFamilyRegularAt (I := I) g t)
+    (hcutoff : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ cutoff)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2))
+    (hmass : evolvingCutoffMass (I := I) (M := M) g cutoff t ≠ 0) :
+    deriv (evolvingLocalizedAverage (I := I) (M := M) g cutoff u) t =
+      (∫ x, cutoff x ^ 2 *
+          (deriv (fun s => u s x) t +
+            (1 / 2) * traceTimeDerivMetric (I := I) g t x *
+              (u t x - evolvingLocalizedAverage
+                (I := I) (M := M) g cutoff u t))
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t)) /
+        evolvingCutoffMass (I := I) (M := M) g cutoff t := by
+  let μ := riemannianMeasureFamily (I := I) (M := M) g t
+  let mass := evolvingCutoffMass (I := I) (M := M) g cutoff t
+  let average := evolvingLocalizedAverage (I := I) (M := M) g cutoff u t
+  let trace : M → ℝ := fun x =>
+    (1 / 2) * traceTimeDerivMetric (I := I) g t x
+  let timeDeriv : M → ℝ := fun x => deriv (fun s => u s x) t
+  letI : IsFiniteMeasure μ := by
+    dsimp only [μ, riemannianMeasureFamily]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) (g t)
+  let F : C^∞⟮(modelWithCornersSelf ℝ ℝ).prod I, ℝ × M; ℝ⟯ :=
+    ⟨fun p => u p.1 p.2, hu⟩
+  have hu_t : Continuous (u t) :=
+    (hu.comp (contMDiff_const.prodMk contMDiff_id)).continuous
+  have htimeDeriv : Continuous timeDeriv := by
+    exact ((DifferentialGeometry.contMDiff_partial_deriv_fst I F).comp
+      (contMDiff_const.prodMk contMDiff_id)).continuous
+  have htrace : Continuous trace :=
+    continuous_const.mul
+      (traceTimeDerivMetric_continuous (I := I) (M := M) hg)
+  have hweight : Continuous (fun x : M => cutoff x ^ 2) :=
+    hcutoff.continuous.pow 2
+  have htime_int : Integrable
+      (fun x : M => cutoff x ^ 2 * timeDeriv x) μ :=
+    (hweight.mul htimeDeriv).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have htrace_u_int : Integrable
+      (fun x : M => cutoff x ^ 2 * trace x * u t x) μ :=
+    ((hweight.mul htrace).mul hu_t).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have htrace_int : Integrable
+      (fun x : M => cutoff x ^ 2 * trace x) μ :=
+    (hweight.mul htrace).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have hcentered :
+      (∫ x, cutoff x ^ 2 *
+          (timeDeriv x + trace x * (u t x - average)) ∂μ) =
+        (∫ x, cutoff x ^ 2 *
+          (timeDeriv x + trace x * u t x) ∂μ) -
+          average * ∫ x, cutoff x ^ 2 * trace x ∂μ := by
+    have hsum_int : Integrable
+        (fun x : M => cutoff x ^ 2 *
+          (timeDeriv x + trace x * u t x)) μ := by
+      simpa only [mul_add, mul_assoc] using htime_int.add htrace_u_int
+    calc
+      _ = ∫ x,
+          cutoff x ^ 2 * (timeDeriv x + trace x * u t x) -
+            average * (cutoff x ^ 2 * trace x) ∂μ := by
+              refine integral_congr_ae (ae_of_all μ fun x => ?_)
+              ring
+      _ = (∫ x, cutoff x ^ 2 *
+            (timeDeriv x + trace x * u t x) ∂μ) -
+          ∫ x, average * (cutoff x ^ 2 * trace x) ∂μ :=
+            integral_sub hsum_int (htrace_int.const_mul average)
+      _ = _ := by rw [integral_const_mul]
+  have hnumerator_eq :
+      (∫ x, cutoff x ^ 2 *
+          (deriv (fun s => u s x) t +
+            (1 / 2) * traceTimeDerivMetric (I := I) g t x * u t x)
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t)) =
+        ∫ x, cutoff x ^ 2 *
+          (timeDeriv x + trace x * u t x) ∂μ := by
+    refine integral_congr_ae (ae_of_all μ fun x => ?_)
+    dsimp only [timeDeriv, trace]
+  have hmassDeriv_eq :
+      (∫ x, cutoff x ^ 2 *
+          ((1 / 2) * traceTimeDerivMetric (I := I) g t x)
+        ∂(riemannianMeasureFamily (I := I) (M := M) g t)) =
+        ∫ x, cutoff x ^ 2 * trace x ∂μ := by
+    refine integral_congr_ae (ae_of_all μ fun x => ?_)
+    rfl
+  rw [(hasDerivAt_evolvingLocalizedAverage
+    (I := I) (M := M) g cutoff u t hg hcutoff hu hmass).deriv]
+  rw [hnumerator_eq, hmassDeriv_eq]
+  change _ = (∫ x, cutoff x ^ 2 *
+      (timeDeriv x + trace x * (u t x - average)) ∂μ) / mass
+  rw [hcentered]
+  dsimp only [average, evolvingLocalizedAverage, mass]
+  field_simp [hmass]
+
 private theorem covariance_young_lower {d h K H : ℝ}
     (hK : 0 < K) (hh : |h| ≤ H) :
     -(1 / (4 * K)) * d ^ 2 - K * H ^ 2 ≤ h * d := by
