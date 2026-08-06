@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
 import DifferentialGeometry.Geometry.Operator.Laplacian
+import DifferentialGeometry.Geometry.Operator.GradientRegularity
 
 set_option autoImplicit false
 
@@ -105,6 +106,20 @@ theorem laplacian_levi_eq
       Δ_g (I := I) g hf x := by
   have hdiv := divergence_levi_eq (I := I) g (grad_g (I := I) g hf) x
   simpa only [laplacian_eq, grad_g_apply, Δ_g_def] using hdiv
+
+omit [NeZero (Module.finrank Real E)] in
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
+theorem Δ_g_congr_of_eventuallyEq
+    (g : SmoothRiemannianMetric I M) {f h : M → Real} {x : M}
+    (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
+    (hh : ContMDiff I 𝓘(Real, Real) ∞ h)
+    (heq : f =ᶠ[nhds x] h) :
+    Δ_g (I := I) g hf x = Δ_g (I := I) g hh x := by
+  rw [← laplacian_levi_eq (I := I) g hf x]
+  rw [← laplacian_levi_eq (I := I) g hh x]
+  exact laplacian_congr_of_eventuallyEq (I := I)
+    (LeviCivita (I := I) g) g hf.contMDiffAt hh.contMDiffAt heq
 
 omit [NeZero (Module.finrank Real E)] in
 omit [CompactSpace M] in

@@ -76,7 +76,7 @@ private theorem gradientFun_coeff_eq_sum
           extDerivFun (I := I) f y (coordinateFrameAt (I := I) x₀ l y) := by
           rw [hbasis_l]
 
-private theorem gradientFun_contMDiffAt
+theorem gradientFun_contMDiffAt
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} {x₀ : M}
     (hf : ContMDiffAt I 𝓘(Real, Real) ∞ f x₀) :
@@ -151,6 +151,33 @@ theorem gradientFun_mdiffAt
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
     MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x :=
   (gradientFun_smooth (I := I) g hf).contMDiffAt.mdifferentiableAt (by simp)
+
+theorem laplacian_congr_of_eventuallyEq
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (g : SmoothRiemannianMetric I M) {f h : M → Real} {x : M}
+    (hf : ContMDiffAt I 𝓘(Real, Real) ∞ f x)
+    (hh : ContMDiffAt I 𝓘(Real, Real) ∞ h x)
+    (heq : f =ᶠ[nhds x] h) :
+    laplacian (I := I) cov g f x = laplacian (I := I) cov g h x := by
+  have hgrad_eq :
+      (fun y : M => gradientFun (I := I) g f y) =ᶠ[nhds x]
+        (fun y : M => gradientFun (I := I) g h y) := by
+    filter_upwards [heq.eventuallyEq_nhds] with y hy
+    unfold gradientFun metricSharp
+    rw [hy.mfderiv_eq]
+  have hgrad_f : MDiffAt
+      (T% fun y : M => gradientFun (I := I) g f y) x :=
+    (gradientFun_contMDiffAt (I := I) g hf).mdifferentiableAt (by simp)
+  have hgrad_h : MDiffAt
+      (T% fun y : M => gradientFun (I := I) g h y) x :=
+    (gradientFun_contMDiffAt (I := I) g hh).mdifferentiableAt (by simp)
+  have hcov :
+      cov (fun y : M => gradientFun (I := I) g f y) x =
+        cov (fun y : M => gradientFun (I := I) g h y) x :=
+    cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      hgrad_f hgrad_h Filter.univ_mem hgrad_eq
+  unfold laplacian divergence
+  rw [hcov]
 
 /-- The gradient section of a scalar composition is differentiable at a point
 when the inner scalar is differentiable nearby. -/

@@ -281,62 +281,6 @@ private def fixedMetricFamily
     (fixedMetricFamily (I := I) g).connection t = LeviCivita (I := I) g := by
   rfl
 
-private theorem laplacian_congr_of_eventuallyEq
-    [T2Space M]
-    [VectorBundle Real E (TangentSpace I : M → Type _)]
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (g : SmoothRiemannianMetric I M) {f h : M → Real} {x : M}
-    (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
-    (hh : ContMDiff I 𝓘(Real, Real) ∞ h)
-    (heq : f =ᶠ[nhds x] h) :
-    laplacian (I := I) cov g f x = laplacian (I := I) cov g h x := by
-  have hgrad_eq :
-      (fun y : M => gradientFun (I := I) g f y) =ᶠ[nhds x]
-        (fun y : M => gradientFun (I := I) g h y) := by
-    filter_upwards [heq.eventuallyEq_nhds] with y hy
-    unfold gradientFun metricSharp
-    rw [hy.mfderiv_eq]
-  have hgrad_total :
-      (T% fun y : M => gradientFun (I := I) g f y) =ᶠ[nhds x]
-        (T% fun y : M => gradientFun (I := I) g h y) := by
-    filter_upwards [hgrad_eq] with y hy
-    rw [hy]
-  have hgrad_f : MDiffAt
-      (T% fun y : M => gradientFun (I := I) g f y) x :=
-    gradientFun_mdiffAt (I := I) g hf x
-  have hgrad_h : MDiffAt
-      (T% fun y : M => gradientFun (I := I) g h y) x :=
-    gradientFun_mdiffAt (I := I) g hh x
-  have hcov :
-      cov (fun y : M => gradientFun (I := I) g f y) x =
-        cov (fun y : M => gradientFun (I := I) g h y) x :=
-    cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
-      hgrad_f hgrad_h Filter.univ_mem hgrad_eq
-  unfold laplacian divergence
-  rw [hcov]
-
-private theorem delta_congr_of_eventuallyEq
-    [I.Boundaryless] [T2Space M]
-    [VectorBundle Real E (TangentSpace I : M → Type _)]
-    (g : SmoothRiemannianMetric I M) {f h : M → Real} {x : M}
-    (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
-    (hh : ContMDiff I 𝓘(Real, Real) ∞ h)
-    (heq : f =ᶠ[nhds x] h) :
-    Δ_g (I := I) g hf x = Δ_g (I := I) g hh x := by
-  have hfLap := laplacianAt_eq_delta (I := I)
-    (fixedMetricFamily (I := I) g) 0 hf rfl x
-  have hhLap := laplacianAt_eq_delta (I := I)
-    (fixedMetricFamily (I := I) g) 0 hh rfl x
-  calc
-    Δ_g (I := I) g hf x =
-        laplacianAt (I := I) (fixedMetricFamily (I := I) g) 0 f x := by
-          simpa using hfLap.symm
-    _ = laplacianAt (I := I) (fixedMetricFamily (I := I) g) 0 h x := by
-      exact laplacian_congr_of_eventuallyEq (I := I)
-        (LeviCivita (I := I) g) g hf hh heq
-    _ = Δ_g (I := I) g hh x := by
-      simpa using hhLap
-
 private theorem exists_abs_laplacian_le_on_chartClosedAnnulus
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {c : M}
@@ -508,7 +452,7 @@ private theorem delta_barrierRadius_eq_compactCoordRadiusSq
     (R : Real) :
     Δ_g (I := I) g (barrierRadius_contMDiff (I := I) b R) x =
       Δ_g (I := I) g (compactCoordRadiusSq_contMDiff (I := I) b) x :=
-  delta_congr_of_eventuallyEq (I := I) g
+  Δ_g_congr_of_eventuallyEq (I := I) g
     (barrierRadius_contMDiff (I := I) b R)
     (compactCoordRadiusSq_contMDiff (I := I) b)
     (barrierRadius_eventuallyEq_compactCoordRadiusSq (I := I) b hx hd R)
