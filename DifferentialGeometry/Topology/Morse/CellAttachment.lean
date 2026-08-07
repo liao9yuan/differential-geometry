@@ -1057,6 +1057,55 @@ theorem recombine_contDiff {n k : ℕ} (hk : k ≤ n) (r ε : ℝ) :
     rw [hcomp]
     fun_prop
 
+theorem recombine_contDiff_cocore {n k : ℕ} (hk : k ≤ n) (r ε : ℝ) (hε : 0 < ε) :
+    ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) p.1)) (r • p.2)) := by
+  rw [contDiff_pi]
+  intro i
+  by_cases hi : i.val < k
+  · have hcomp : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) p.1)) (r • p.2) i) =
+        fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) * p.1 ⟨i.val, hi⟩ := by
+      funext p
+      have hrew : recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) p.1))
+            (r • p.2) i = (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) p.1))
+            ⟨i.val, hi⟩ := by
+        dsimp [recombine]
+        rw [dif_pos hi]
+      rw [hrew]
+      exact negPart_cellMap_apply hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) p.1 ⟨i.val, hi⟩
+    rw [hcomp]
+    have harg : ContDiff ℝ (⊤ : ℕ∞)
+        (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          2 * ε + r ^ 2 * ‖p.2‖ ^ 2) := by
+      have hnorm2 : ContDiff ℝ (⊤ : ℕ∞)
+          (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+            ‖p.2‖ ^ 2) := (contDiff_norm_sq ℝ).comp contDiff_snd
+      exact contDiff_const.add (contDiff_const.mul hnorm2)
+    have hsqrt : ContDiff ℝ (⊤ : ℕ∞)
+        (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) :=
+      harg.sqrt (by intro p; positivity)
+    have hcoord : ContDiff ℝ (⊤ : ℕ∞)
+        (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          p.1 ⟨i.val, hi⟩) := by
+      fun_prop
+    exact hsqrt.mul hcoord
+  · have hcomp : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) p.1)) (r • p.2) i) =
+        fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          r * p.2 ⟨i.val - k, by
+            have hkle : k ≤ i.val := le_of_not_gt hi
+            have hi' : i.val < n := i.isLt
+            omega⟩ := by
+      funext p
+      dsimp [recombine]
+      rw [dif_neg hi]
+    rw [hcomp]
+    fun_prop
+
 theorem morseNorm_recombine_sq {n k : ℕ} (hk : k ≤ n) (a : EuclideanSpace ℝ (Fin k))
     (b : EuclideanSpace ℝ (Fin (n - k))) :
     morseNorm n (recombine hk a b) ^ 2 = ‖a‖ ^ 2 + ‖b‖ ^ 2 := by
@@ -1165,6 +1214,45 @@ theorem recombine_cellMap_injective {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε
   · have hcocore := congrArg Prod.snd h1
     apply Subtype.ext
     exact (smul_right_injective (EuclideanSpace ℝ (Fin (n - k))) (r := r) hr) hcocore
+
+theorem recombine_cellMap_cocore_injective {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 < ε)
+    (hr : r ≠ 0) :
+    Function.Injective (fun p : CellBoundary k × ClosedCell (n - k) =>
+      recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+          (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+  intro p q h
+  have hneg : negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+        (p.1 : EuclideanSpace ℝ (Fin k))) =
+      negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖(q.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+        (q.1 : EuclideanSpace ℝ (Fin k))) := by
+    have h' := congrArg (negPart hk) h
+    simpa [negPart_recombine] using h'
+  have hpos : r • (p.2 : EuclideanSpace ℝ (Fin (n - k))) = r • (q.2 : EuclideanSpace ℝ (Fin (n - k))) := by
+    have h' := congrArg (posPart hk) h
+    simpa [posPart_recombine] using h'
+  have hw : (p.2 : EuclideanSpace ℝ (Fin (n - k))) = (q.2 : EuclideanSpace ℝ (Fin (n - k))) :=
+    (smul_right_injective (EuclideanSpace ℝ (Fin (n - k))) (r := r) hr) hpos
+  have hrad : Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) =
+      Real.sqrt (2 * ε + r ^ 2 * ‖(q.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) := by
+    rw [hw]
+  have hinj : Function.Injective (fun u : CellBoundary k =>
+      negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+        (u : EuclideanSpace ℝ (Fin k)))) := by
+    intro u v huv
+    apply Subtype.ext
+    ext i
+    have hc := congrArg (fun w : EuclideanSpace ℝ (Fin k) => w i) huv
+    have h1 : Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+          (u : EuclideanSpace ℝ (Fin k)) i =
+        Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+          (v : EuclideanSpace ℝ (Fin k)) i := by
+      simpa [negPart_cellMap_apply] using hc
+    exact (mul_left_cancel₀ (by positivity) h1)
+  apply Prod.ext
+  · exact hinj (by
+      rwa [← hrad] at hneg)
+  · apply Subtype.ext
+    exact hw
 
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
