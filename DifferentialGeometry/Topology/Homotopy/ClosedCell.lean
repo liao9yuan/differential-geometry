@@ -8,6 +8,25 @@ namespace DifferentialGeometry.Topology.Homotopy
 open ContinuousMap
 open unitInterval
 
+def icoToI (t : Set.Ico (0 : ℝ) 1) : I :=
+  ⟨(t : ℝ), ⟨t.2.1, le_of_lt t.2.2⟩⟩
+
+@[simp]
+theorem icoToI_apply (t : Set.Ico (0 : ℝ) 1) : (icoToI t : ℝ) = (t : ℝ) :=
+  rfl
+
+theorem continuous_icoToI : Continuous (icoToI : Set.Ico (0 : ℝ) 1 → I) := by
+  exact Continuous.subtype_mk continuous_subtype_val (fun t => ⟨t.2.1, le_of_lt t.2.2⟩)
+
+theorem one_minus_norm_mem_Ico {n : ℕ} {x : ClosedCell n}
+    (hx : (x : EuclideanSpace ℝ (Fin n)) ≠ 0) :
+    1 - ‖(x : EuclideanSpace ℝ (Fin n))‖ ∈ Set.Ico (0 : ℝ) 1 := by
+  constructor
+  · have hle : ‖(x : EuclideanSpace ℝ (Fin n))‖ ≤ 1 := x.2
+    linarith
+  · have hlt : 0 < ‖(x : EuclideanSpace ℝ (Fin n))‖ := norm_pos_iff.mpr hx
+    linarith
+
 def radialStep (n : ℕ) (t : I) (x : ClosedCell n) : ClosedCell n :=
   ⟨(1 - (t : ℝ)) • (x : EuclideanSpace ℝ (Fin n)), by
     have ht₀ : 0 ≤ 1 - (t : ℝ) := unitInterval.one_minus_nonneg t

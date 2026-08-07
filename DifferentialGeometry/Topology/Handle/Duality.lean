@@ -119,4 +119,17 @@ theorem swap_beltSphereInclusion {k l : ℕ} (y : CellBoundary l) :
     swap k l (beltSphereInclusion k l y) = attachingSphereInclusion l k y := by
   simp [swap, beltSphereInclusion, attachingSphereInclusion]
 
+theorem swap_attachingInclusion_attachingSphereInclusionAttachingRegion (k l : ℕ)
+    (u : CellBoundary k) :
+    swap k l (attachingInclusion k l (attachingSphereInclusionAttachingRegion k l u)) =
+      beltInclusion l k (beltSphereInclusionBeltRegion l k u) := by
+  rw [swap_attachingInclusion]
+  simp [attachingSphereInclusionAttachingRegion, beltSphereInclusionBeltRegion]
+
+theorem swap_beltInclusion_beltSphereInclusionBeltRegion (k l : ℕ) (v : CellBoundary l) :
+    swap k l (beltInclusion k l (beltSphereInclusionBeltRegion k l v)) =
+      attachingInclusion l k (attachingSphereInclusionAttachingRegion l k v) := by
+  rw [swap_beltInclusion]
+  simp [beltSphereInclusionBeltRegion, attachingSphereInclusionAttachingRegion]
+
 end DifferentialGeometry.Topology.Handle

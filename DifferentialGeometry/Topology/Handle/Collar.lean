@@ -8,19 +8,9 @@ open DifferentialGeometry.Topology.Homotopy
 open ContinuousMap
 open unitInterval
 
-def IcoToI (t : Set.Ico (0 : ℝ) 1) : I :=
-  ⟨(t : ℝ), ⟨t.2.1, le_of_lt t.2.2⟩⟩
-
-@[simp]
-theorem IcoToI_apply (t : Set.Ico (0 : ℝ) 1) : (IcoToI t : ℝ) = (t : ℝ) :=
-  rfl
-
-theorem continuous_IcoToI : Continuous (IcoToI : Set.Ico (0 : ℝ) 1 → I) := by
-  exact Continuous.subtype_mk continuous_subtype_val (fun t => ⟨t.2.1, le_of_lt t.2.2⟩)
-
 private theorem radialStep_cellBoundary_norm (k : ℕ) (t : Set.Ico (0 : ℝ) 1)
     (u : CellBoundary k) :
-    ‖(radialStep k (IcoToI t) (cellBoundaryInclusion k u) : EuclideanSpace ℝ (Fin k))‖ =
+    ‖(radialStep k (icoToI t) (cellBoundaryInclusion k u) : EuclideanSpace ℝ (Fin k))‖ =
       1 - (t : ℝ) := by
   rw [radialStep_norm]
   have hb : ‖(cellBoundaryInclusion k u : EuclideanSpace ℝ (Fin k))‖ = 1 := by
@@ -29,7 +19,7 @@ private theorem radialStep_cellBoundary_norm (k : ℕ) (t : Set.Ico (0 : ℝ) 1)
 
 private theorem radialStep_cellBoundary_norm' (l : ℕ) (t : Set.Ico (0 : ℝ) 1)
     (v : CellBoundary l) :
-    ‖(radialStep l (IcoToI t) (cellBoundaryInclusion l v) : EuclideanSpace ℝ (Fin l))‖ =
+    ‖(radialStep l (icoToI t) (cellBoundaryInclusion l v) : EuclideanSpace ℝ (Fin l))‖ =
       1 - (t : ℝ) := by
   rw [radialStep_norm]
   have hb : ‖(cellBoundaryInclusion l v : EuclideanSpace ℝ (Fin l))‖ = 1 := by
@@ -38,7 +28,7 @@ private theorem radialStep_cellBoundary_norm' (l : ℕ) (t : Set.Ico (0 : ℝ) 1
 
 private theorem radialStep_cellBoundary_ne_zero (k : ℕ) (t : Set.Ico (0 : ℝ) 1)
     (u : CellBoundary k) :
-    (radialStep k (IcoToI t) (cellBoundaryInclusion k u) : EuclideanSpace ℝ (Fin k)) ≠ 0 := by
+    (radialStep k (icoToI t) (cellBoundaryInclusion k u) : EuclideanSpace ℝ (Fin k)) ≠ 0 := by
   intro hz
   have hnorm := radialStep_cellBoundary_norm k t u
   rw [hz, norm_zero] at hnorm
@@ -47,7 +37,7 @@ private theorem radialStep_cellBoundary_ne_zero (k : ℕ) (t : Set.Ico (0 : ℝ)
 
 private theorem radialStep_cellBoundary_ne_zero' (l : ℕ) (t : Set.Ico (0 : ℝ) 1)
     (v : CellBoundary l) :
-    (radialStep l (IcoToI t) (cellBoundaryInclusion l v) : EuclideanSpace ℝ (Fin l)) ≠ 0 := by
+    (radialStep l (icoToI t) (cellBoundaryInclusion l v) : EuclideanSpace ℝ (Fin l)) ≠ 0 := by
   intro hz
   have hnorm := radialStep_cellBoundary_norm' l t v
   rw [hz, norm_zero] at hnorm
@@ -91,29 +81,9 @@ theorem ne_zero_of_not_mem_core (k l : ℕ) {p : StandardHandle k l}
   intro hz
   exact hp (Subtype.ext (by simpa [closedCellCenter] using hz))
 
-theorem Ico_one_minus_norm_mem {k l : ℕ} {p : StandardHandle k l}
-    (hp : p ∉ cocoreDisk k l) :
-    1 - ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ∈ Set.Ico (0 : ℝ) 1 := by
-  constructor
-  · have hle : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ≤ 1 := p.1.2
-    linarith
-  · have hlt : 0 < ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := by
-      exact norm_pos_iff.mpr (ne_zero_of_not_mem_cocore k l hp)
-    linarith
-
-theorem Ico_one_minus_norm_mem' {k l : ℕ} {p : StandardHandle k l}
-    (hp : p ∉ coreDisk k l) :
-    1 - ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ ∈ Set.Ico (0 : ℝ) 1 := by
-  constructor
-  · have hle : ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ ≤ 1 := p.2.2
-    linarith
-  · have hlt : 0 < ‖(p.2 : EuclideanSpace ℝ (Fin l))‖ := by
-      exact norm_pos_iff.mpr (ne_zero_of_not_mem_core k l hp)
-    linarith
-
 private theorem radialStep_boundaryNormalize {k : ℕ} (x : EuclideanSpace ℝ (Fin k))
     (hx : x ≠ 0) (hle : ‖x‖ ≤ 1) :
-    radialStep k (IcoToI ⟨1 - ‖x‖, by
+    radialStep k (icoToI ⟨1 - ‖x‖, by
       constructor
       · linarith
       · have hlt : 0 < ‖x‖ := norm_pos_iff.mpr hx
@@ -137,7 +107,7 @@ private noncomputable def attachingCollarInvFun (k l : ℕ) :
   fun p => ((boundaryNormalize ((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))
       (ne_zero_of_not_mem_cocore k l p.2), (p : StandardHandle k l).2),
     ⟨1 - ‖((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))‖,
-      Ico_one_minus_norm_mem p.2⟩)
+      one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2)⟩)
 
 private theorem continuous_attachingCollarInvFun (k l : ℕ) :
     Continuous (attachingCollarInvFun k l) := by
@@ -145,7 +115,7 @@ private theorem continuous_attachingCollarInvFun (k l : ℕ) :
     ((boundaryNormalize ((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))
       (ne_zero_of_not_mem_cocore k l p.2), (p : StandardHandle k l).2),
       (⟨1 - ‖((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))‖,
-        Ico_one_minus_norm_mem p.2⟩ : Set.Ico (0 : ℝ) 1)))
+        one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2)⟩ : Set.Ico (0 : ℝ) 1)))
   have h₂ : Continuous (fun p : {p : StandardHandle k l // p ∉ cocoreDisk k l} =>
       ((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))) :=
     continuous_subtype_val.comp (continuous_fst.comp continuous_subtype_val)
@@ -163,9 +133,9 @@ private theorem continuous_attachingCollarInvFun (k l : ℕ) :
       h₂
   have hJ : Continuous (fun p : {p : StandardHandle k l // p ∉ cocoreDisk k l} =>
       (⟨1 - ‖((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))‖,
-        Ico_one_minus_norm_mem p.2⟩ : Set.Ico (0 : ℝ) 1)) := by
+        one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2)⟩ : Set.Ico (0 : ℝ) 1)) := by
     exact Continuous.subtype_mk (p := fun r : ℝ => r ∈ Set.Ico (0 : ℝ) 1)
-      (continuous_const.sub h₁) (fun p => Ico_one_minus_norm_mem p.2)
+      (continuous_const.sub h₁) (fun p => one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2))
   have hregion : Continuous (fun p : {p : StandardHandle k l // p ∉ cocoreDisk k l} =>
       (boundaryNormalize ((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))
         (ne_zero_of_not_mem_cocore k l p.2), (p : StandardHandle k l).2)) := by
@@ -178,7 +148,7 @@ private theorem continuous_attachingCollarInvFun (k l : ℕ) :
 noncomputable def attachingCollar (k l : ℕ) :
     (AttachingRegion k l × Set.Ico (0 : ℝ) 1) ≃ₜ
       {p : StandardHandle k l // p ∉ cocoreDisk k l} where
-  toFun := fun z => ⟨(radialStep k (IcoToI z.2) (cellBoundaryInclusion k z.1.1), z.1.2), by
+  toFun := fun z => ⟨(radialStep k (icoToI z.2) (cellBoundaryInclusion k z.1.1), z.1.2), by
     exact not_mem_cocore_of_ne_zero k l (radialStep_cellBoundary_ne_zero k z.2 z.1.1)⟩
   invFun := attachingCollarInvFun k l
   left_inv := by
@@ -187,9 +157,9 @@ noncomputable def attachingCollar (k l : ℕ) :
     apply Prod.ext
     · apply Prod.ext
       · apply Subtype.ext
-        have hx : (radialStep k (IcoToI t) (cellBoundaryInclusion k u) :
+        have hx : (radialStep k (icoToI t) (cellBoundaryInclusion k u) :
             EuclideanSpace ℝ (Fin k)) = (1 - (t : ℝ)) • (u : EuclideanSpace ℝ (Fin k)) := by
-          simp [radialStep, IcoToI, cellBoundaryInclusion]
+          simp [radialStep, icoToI, cellBoundaryInclusion]
         dsimp [attachingCollarInvFun]
         dsimp [boundaryNormalize]
         rw [hx]
@@ -202,7 +172,7 @@ noncomputable def attachingCollar (k l : ℕ) :
         simp
       · rfl
     · apply Subtype.ext
-      change 1 - ‖(radialStep k (IcoToI t) (cellBoundaryInclusion k u) :
+      change 1 - ‖(radialStep k (icoToI t) (cellBoundaryInclusion k u) :
         EuclideanSpace ℝ (Fin k))‖ = (t : ℝ)
       rw [radialStep_cellBoundary_norm]
       ring
@@ -218,9 +188,9 @@ noncomputable def attachingCollar (k l : ℕ) :
     · rfl
   continuous_toFun := by
     have h₁ : Continuous (fun z : AttachingRegion k l × Set.Ico (0 : ℝ) 1 =>
-        radialStep k (IcoToI z.2) (cellBoundaryInclusion k z.1.1)) := by
+        radialStep k (icoToI z.2) (cellBoundaryInclusion k z.1.1)) := by
       exact (continuous_radialStep k).comp
-        ((continuous_IcoToI.comp continuous_snd).prodMk
+        ((continuous_icoToI.comp continuous_snd).prodMk
           ((continuous_cellBoundaryInclusion k).comp (continuous_fst.comp continuous_fst)))
     have h₂ : Continuous (fun z : AttachingRegion k l × Set.Ico (0 : ℝ) 1 => z.1.2) :=
       continuous_snd.comp continuous_fst
@@ -238,7 +208,7 @@ private noncomputable def beltCollarInvFun (k l : ℕ) :
     boundaryNormalize ((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))
       (ne_zero_of_not_mem_core k l p.2)),
     ⟨1 - ‖((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))‖,
-      Ico_one_minus_norm_mem' p.2⟩)
+      one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2)⟩)
 
 private theorem continuous_beltCollarInvFun (k l : ℕ) :
     Continuous (beltCollarInvFun k l) := by
@@ -247,7 +217,7 @@ private theorem continuous_beltCollarInvFun (k l : ℕ) :
       boundaryNormalize ((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))
         (ne_zero_of_not_mem_core k l p.2)),
       (⟨1 - ‖((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))‖,
-        Ico_one_minus_norm_mem' p.2⟩ : Set.Ico (0 : ℝ) 1)))
+        one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2)⟩ : Set.Ico (0 : ℝ) 1)))
   have h₂ : Continuous (fun p : {p : StandardHandle k l // p ∉ coreDisk k l} =>
       ((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))) :=
     continuous_subtype_val.comp (continuous_snd.comp continuous_subtype_val)
@@ -265,9 +235,9 @@ private theorem continuous_beltCollarInvFun (k l : ℕ) :
       h₂
   have hJ : Continuous (fun p : {p : StandardHandle k l // p ∉ coreDisk k l} =>
       (⟨1 - ‖((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))‖,
-        Ico_one_minus_norm_mem' p.2⟩ : Set.Ico (0 : ℝ) 1)) := by
+        one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2)⟩ : Set.Ico (0 : ℝ) 1)) := by
     exact Continuous.subtype_mk (p := fun r : ℝ => r ∈ Set.Ico (0 : ℝ) 1)
-      (continuous_const.sub h₁) (fun p => Ico_one_minus_norm_mem' p.2)
+      (continuous_const.sub h₁) (fun p => one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2))
   have hregion : Continuous (fun p : {p : StandardHandle k l // p ∉ coreDisk k l} =>
       ((p : StandardHandle k l).1,
         boundaryNormalize ((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))
@@ -281,7 +251,7 @@ private theorem continuous_beltCollarInvFun (k l : ℕ) :
 noncomputable def beltCollar (k l : ℕ) :
     (BeltRegion k l × Set.Ico (0 : ℝ) 1) ≃ₜ
       {p : StandardHandle k l // p ∉ coreDisk k l} where
-  toFun := fun z => ⟨(z.1.1, radialStep l (IcoToI z.2) (cellBoundaryInclusion l z.1.2)), by
+  toFun := fun z => ⟨(z.1.1, radialStep l (icoToI z.2) (cellBoundaryInclusion l z.1.2)), by
     exact not_mem_core_of_ne_zero k l (radialStep_cellBoundary_ne_zero' l z.2 z.1.2)⟩
   invFun := beltCollarInvFun k l
   left_inv := by
@@ -291,9 +261,9 @@ noncomputable def beltCollar (k l : ℕ) :
     · apply Prod.ext
       · rfl
       · apply Subtype.ext
-        have hx : (radialStep l (IcoToI t) (cellBoundaryInclusion l v) :
+        have hx : (radialStep l (icoToI t) (cellBoundaryInclusion l v) :
             EuclideanSpace ℝ (Fin l)) = (1 - (t : ℝ)) • (v : EuclideanSpace ℝ (Fin l)) := by
-          simp [radialStep, IcoToI, cellBoundaryInclusion]
+          simp [radialStep, icoToI, cellBoundaryInclusion]
         dsimp [beltCollarInvFun]
         dsimp [boundaryNormalize]
         rw [hx]
@@ -305,7 +275,7 @@ noncomputable def beltCollar (k l : ℕ) :
         rw [inv_mul_cancel₀ h]
         simp
     · apply Subtype.ext
-      change 1 - ‖(radialStep l (IcoToI t) (cellBoundaryInclusion l v) :
+      change 1 - ‖(radialStep l (icoToI t) (cellBoundaryInclusion l v) :
         EuclideanSpace ℝ (Fin l))‖ = (t : ℝ)
       rw [radialStep_cellBoundary_norm']
       ring
@@ -321,9 +291,9 @@ noncomputable def beltCollar (k l : ℕ) :
           (ne_zero_of_not_mem_core k l hq) q.2.2)
   continuous_toFun := by
     have h₁ : Continuous (fun z : BeltRegion k l × Set.Ico (0 : ℝ) 1 =>
-        radialStep l (IcoToI z.2) (cellBoundaryInclusion l z.1.2)) := by
+        radialStep l (icoToI z.2) (cellBoundaryInclusion l z.1.2)) := by
       exact (continuous_radialStep l).comp
-        ((continuous_IcoToI.comp continuous_snd).prodMk
+        ((continuous_icoToI.comp continuous_snd).prodMk
           ((continuous_cellBoundaryInclusion l).comp (continuous_snd.comp continuous_fst)))
     have h₂ : Continuous (fun z : BeltRegion k l × Set.Ico (0 : ℝ) 1 => z.1.1) :=
       continuous_fst.comp continuous_fst
@@ -342,9 +312,9 @@ private noncomputable def bicollarInvFun (k l : ℕ) :
     boundaryNormalize ((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))
       (ne_zero_of_not_mem_core k l p.2.1)),
     (⟨1 - ‖((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))‖,
-        Ico_one_minus_norm_mem p.2.2⟩,
+        one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2.2)⟩,
       ⟨1 - ‖((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))‖,
-        Ico_one_minus_norm_mem' p.2.1⟩))
+        one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2.1)⟩))
 
 private theorem continuous_bicollarInvFun (k l : ℕ) :
     Continuous (bicollarInvFun k l) := by
@@ -354,9 +324,9 @@ private theorem continuous_bicollarInvFun (k l : ℕ) :
       boundaryNormalize ((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))
         (ne_zero_of_not_mem_core k l p.2.1)),
       ((⟨1 - ‖((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))‖,
-          Ico_one_minus_norm_mem p.2.2⟩ : Set.Ico (0 : ℝ) 1),
+          one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2.2)⟩ : Set.Ico (0 : ℝ) 1),
         (⟨1 - ‖((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))‖,
-          Ico_one_minus_norm_mem' p.2.1⟩ : Set.Ico (0 : ℝ) 1))))
+          one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2.1)⟩ : Set.Ico (0 : ℝ) 1))))
   have h₁c : Continuous (fun p : {p : StandardHandle k l // p ∉ coreDisk k l ∧ p ∉ cocoreDisk k l} =>
       ((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))) :=
     continuous_subtype_val.comp (continuous_fst.comp continuous_subtype_val)
@@ -383,14 +353,14 @@ private theorem continuous_bicollarInvFun (k l : ℕ) :
       h₂c
   have hJ₁ : Continuous (fun p : {p : StandardHandle k l // p ∉ coreDisk k l ∧ p ∉ cocoreDisk k l} =>
       (⟨1 - ‖((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))‖,
-        Ico_one_minus_norm_mem p.2.2⟩ : Set.Ico (0 : ℝ) 1)) := by
+        one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2.2)⟩ : Set.Ico (0 : ℝ) 1)) := by
     exact Continuous.subtype_mk (p := fun r : ℝ => r ∈ Set.Ico (0 : ℝ) 1)
-      (continuous_const.sub hn₁) (fun p => Ico_one_minus_norm_mem p.2.2)
+      (continuous_const.sub hn₁) (fun p => one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2.2))
   have hJ₂ : Continuous (fun p : {p : StandardHandle k l // p ∉ coreDisk k l ∧ p ∉ cocoreDisk k l} =>
       (⟨1 - ‖((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))‖,
-        Ico_one_minus_norm_mem' p.2.1⟩ : Set.Ico (0 : ℝ) 1)) := by
+        one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2.1)⟩ : Set.Ico (0 : ℝ) 1)) := by
     exact Continuous.subtype_mk (p := fun r : ℝ => r ∈ Set.Ico (0 : ℝ) 1)
-      (continuous_const.sub hn₂) (fun p => Ico_one_minus_norm_mem' p.2.1)
+      (continuous_const.sub hn₂) (fun p => one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2.1))
   exact ((Continuous.subtype_mk (p := fun z : EuclideanSpace ℝ (Fin k) => ‖z‖ = 1)
       hsmul₁ (fun p => by
         exact normalize_norm ((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))
@@ -404,8 +374,8 @@ private theorem continuous_bicollarInvFun (k l : ℕ) :
 noncomputable def bicollar (k l : ℕ) :
     (Corner k l × Set.Ico (0 : ℝ) 1 × Set.Ico (0 : ℝ) 1) ≃ₜ
       {p : StandardHandle k l // p ∉ coreDisk k l ∧ p ∉ cocoreDisk k l} where
-  toFun := fun z => ⟨(radialStep k (IcoToI z.2.1) (cellBoundaryInclusion k z.1.1),
-    radialStep l (IcoToI z.2.2) (cellBoundaryInclusion l z.1.2)), by
+  toFun := fun z => ⟨(radialStep k (icoToI z.2.1) (cellBoundaryInclusion k z.1.1),
+    radialStep l (icoToI z.2.2) (cellBoundaryInclusion l z.1.2)), by
     constructor
     · exact not_mem_core_of_ne_zero k l (radialStep_cellBoundary_ne_zero' l z.2.2 z.1.2)
     · exact not_mem_cocore_of_ne_zero k l (radialStep_cellBoundary_ne_zero k z.2.1 z.1.1)⟩
@@ -416,9 +386,9 @@ noncomputable def bicollar (k l : ℕ) :
     apply Prod.ext
     · apply Prod.ext
       · apply Subtype.ext
-        have hx₁ : (radialStep k (IcoToI t₁) (cellBoundaryInclusion k u) :
+        have hx₁ : (radialStep k (icoToI t₁) (cellBoundaryInclusion k u) :
             EuclideanSpace ℝ (Fin k)) = (1 - (t₁ : ℝ)) • (u : EuclideanSpace ℝ (Fin k)) := by
-          simp [radialStep, IcoToI, cellBoundaryInclusion]
+          simp [radialStep, icoToI, cellBoundaryInclusion]
         dsimp [bicollarInvFun]
         dsimp [boundaryNormalize]
         rw [hx₁]
@@ -430,9 +400,9 @@ noncomputable def bicollar (k l : ℕ) :
         rw [inv_mul_cancel₀ h₁]
         simp
       · apply Subtype.ext
-        have hx₂ : (radialStep l (IcoToI t₂) (cellBoundaryInclusion l v) :
+        have hx₂ : (radialStep l (icoToI t₂) (cellBoundaryInclusion l v) :
             EuclideanSpace ℝ (Fin l)) = (1 - (t₂ : ℝ)) • (v : EuclideanSpace ℝ (Fin l)) := by
-          simp [radialStep, IcoToI, cellBoundaryInclusion]
+          simp [radialStep, icoToI, cellBoundaryInclusion]
         dsimp [bicollarInvFun]
         dsimp [boundaryNormalize]
         rw [hx₂]
@@ -445,12 +415,12 @@ noncomputable def bicollar (k l : ℕ) :
         simp
     · apply Prod.ext
       · apply Subtype.ext
-        change 1 - ‖(radialStep k (IcoToI t₁) (cellBoundaryInclusion k u) :
+        change 1 - ‖(radialStep k (icoToI t₁) (cellBoundaryInclusion k u) :
           EuclideanSpace ℝ (Fin k))‖ = (t₁ : ℝ)
         rw [radialStep_cellBoundary_norm]
         ring
       · apply Subtype.ext
-        change 1 - ‖(radialStep l (IcoToI t₂) (cellBoundaryInclusion l v) :
+        change 1 - ‖(radialStep l (icoToI t₂) (cellBoundaryInclusion l v) :
           EuclideanSpace ℝ (Fin l))‖ = (t₂ : ℝ)
         rw [radialStep_cellBoundary_norm']
         ring
@@ -469,14 +439,14 @@ noncomputable def bicollar (k l : ℕ) :
           (ne_zero_of_not_mem_core k l hq.1) q.2.2)
   continuous_toFun := by
     have h₁ : Continuous (fun z : Corner k l × Set.Ico (0 : ℝ) 1 × Set.Ico (0 : ℝ) 1 =>
-        radialStep k (IcoToI z.2.1) (cellBoundaryInclusion k z.1.1)) := by
+        radialStep k (icoToI z.2.1) (cellBoundaryInclusion k z.1.1)) := by
       exact (continuous_radialStep k).comp
-        ((continuous_IcoToI.comp (continuous_fst.comp continuous_snd)).prodMk
+        ((continuous_icoToI.comp (continuous_fst.comp continuous_snd)).prodMk
           ((continuous_cellBoundaryInclusion k).comp (continuous_fst.comp continuous_fst)))
     have h₂ : Continuous (fun z : Corner k l × Set.Ico (0 : ℝ) 1 × Set.Ico (0 : ℝ) 1 =>
-        radialStep l (IcoToI z.2.2) (cellBoundaryInclusion l z.1.2)) := by
+        radialStep l (icoToI z.2.2) (cellBoundaryInclusion l z.1.2)) := by
       exact (continuous_radialStep l).comp
-        ((continuous_IcoToI.comp (continuous_snd.comp continuous_snd)).prodMk
+        ((continuous_icoToI.comp (continuous_snd.comp continuous_snd)).prodMk
           ((continuous_cellBoundaryInclusion l).comp (continuous_snd.comp continuous_fst)))
     exact Continuous.subtype_mk
       (h₁.prodMk h₂)
@@ -491,36 +461,36 @@ theorem attachingCollar_zero (k l : ℕ) (a : AttachingRegion k l) :
     ((attachingCollar k l) (a, ⟨0, by norm_num⟩) : StandardHandle k l) =
       attachingInclusion k l a := by
   rcases a with ⟨u, y⟩
-  simp [attachingCollar, attachingInclusion, IcoToI]
+  simp [attachingCollar, attachingInclusion, icoToI]
 
 theorem beltCollar_zero (k l : ℕ) (a : BeltRegion k l) :
     ((beltCollar k l) (a, ⟨0, by norm_num⟩) : StandardHandle k l) =
       beltInclusion k l a := by
   rcases a with ⟨x, v⟩
-  simp [beltCollar, beltInclusion, IcoToI]
+  simp [beltCollar, beltInclusion, icoToI]
 
 theorem bicollar_zero (k l : ℕ) (c : Corner k l) :
     ((bicollar k l) (c, (⟨0, by norm_num⟩, ⟨0, by norm_num⟩)) : StandardHandle k l) =
       cornerInclusion k l c := by
   rcases c with ⟨u, v⟩
-  simp [bicollar, cornerInclusion, IcoToI]
+  simp [bicollar, cornerInclusion, icoToI]
 
 theorem attachingCollar_apply (k l : ℕ) (a : AttachingRegion k l) (t : Set.Ico (0 : ℝ) 1) :
     ((attachingCollar k l) (a, t) : StandardHandle k l) =
-      (radialStep k (IcoToI t) (cellBoundaryInclusion k a.1), a.2) := by
+      (radialStep k (icoToI t) (cellBoundaryInclusion k a.1), a.2) := by
   rcases a with ⟨u, y⟩
   rfl
 
 theorem beltCollar_apply (k l : ℕ) (a : BeltRegion k l) (t : Set.Ico (0 : ℝ) 1) :
     ((beltCollar k l) (a, t) : StandardHandle k l) =
-      (a.1, radialStep l (IcoToI t) (cellBoundaryInclusion l a.2)) := by
+      (a.1, radialStep l (icoToI t) (cellBoundaryInclusion l a.2)) := by
   rcases a with ⟨x, v⟩
   rfl
 
 theorem bicollar_apply (k l : ℕ) (c : Corner k l) (t₁ t₂ : Set.Ico (0 : ℝ) 1) :
     ((bicollar k l) (c, (t₁, t₂)) : StandardHandle k l) =
-      (radialStep k (IcoToI t₁) (cellBoundaryInclusion k c.1),
-        radialStep l (IcoToI t₂) (cellBoundaryInclusion l c.2)) := by
+      (radialStep k (icoToI t₁) (cellBoundaryInclusion k c.1),
+        radialStep l (icoToI t₂) (cellBoundaryInclusion l c.2)) := by
   rcases c with ⟨u, v⟩
   rfl
 
@@ -529,7 +499,7 @@ theorem attachingCollar_symm_apply (k l : ℕ) (p : {p : StandardHandle k l // p
       ((boundaryNormalize ((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))
           (ne_zero_of_not_mem_cocore k l p.2), (p : StandardHandle k l).2),
         ⟨1 - ‖((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))‖,
-          Ico_one_minus_norm_mem p.2⟩) := by
+          one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2)⟩) := by
   rfl
 
 theorem beltCollar_symm_apply (k l : ℕ) (p : {p : StandardHandle k l // p ∉ coreDisk k l}) :
@@ -538,7 +508,7 @@ theorem beltCollar_symm_apply (k l : ℕ) (p : {p : StandardHandle k l // p ∉ 
         boundaryNormalize ((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))
           (ne_zero_of_not_mem_core k l p.2)),
         ⟨1 - ‖((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))‖,
-          Ico_one_minus_norm_mem' p.2⟩) := by
+          one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2)⟩) := by
   rfl
 
 theorem bicollar_symm_apply (k l : ℕ) (p : {p : StandardHandle k l //
@@ -549,9 +519,9 @@ theorem bicollar_symm_apply (k l : ℕ) (p : {p : StandardHandle k l //
         boundaryNormalize ((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))
           (ne_zero_of_not_mem_core k l p.2.1)),
         (⟨1 - ‖((p : StandardHandle k l).1 : EuclideanSpace ℝ (Fin k))‖,
-            Ico_one_minus_norm_mem p.2.2⟩,
+            one_minus_norm_mem_Ico (ne_zero_of_not_mem_cocore k l p.2.2)⟩,
           ⟨1 - ‖((p : StandardHandle k l).2 : EuclideanSpace ℝ (Fin l))‖,
-            Ico_one_minus_norm_mem' p.2.1⟩)) := by
+            one_minus_norm_mem_Ico (ne_zero_of_not_mem_core k l p.2.1)⟩)) := by
   rfl
 
 theorem swap_attachingCollar (k l : ℕ) (a : AttachingRegion k l) (t : Set.Ico (0 : ℝ) 1) :
@@ -571,6 +541,94 @@ theorem swap_bicollar (k l : ℕ) (c : Corner k l) (t₁ t₂ : Set.Ico (0 : ℝ
       (bicollar l k (Prod.swap c, (t₂, t₁)) : StandardHandle l k) := by
   rcases c with ⟨u, v⟩
   simp [bicollar_apply]
+
+theorem bicollar_eq_attaching_belt (k l : ℕ) (c : Corner k l) (t₁ t₂ : Set.Ico (0 : ℝ) 1) :
+    ((bicollar k l (c, (t₁, t₂))) : StandardHandle k l) =
+      ((attachingCollar k l
+        ((c.1, radialStep l (icoToI t₂) (cellBoundaryInclusion l c.2)), t₁)) :
+        StandardHandle k l) := by
+  rcases c with ⟨u, v⟩
+  simp [bicollar_apply, attachingCollar_apply]
+
+theorem bicollar_eq_belt_attaching (k l : ℕ) (c : Corner k l) (t₁ t₂ : Set.Ico (0 : ℝ) 1) :
+    ((bicollar k l (c, (t₁, t₂))) : StandardHandle k l) =
+      ((beltCollar k l
+        ((radialStep k (icoToI t₁) (cellBoundaryInclusion k c.1), c.2), t₂)) :
+        StandardHandle k l) := by
+  rcases c with ⟨u, v⟩
+  simp [bicollar_apply, beltCollar_apply]
+
+theorem swap_attachingCollar_symm (k l : ℕ) (p : {p : StandardHandle k l // p ∉ cocoreDisk k l}) :
+    (attachingCollar k l).symm p =
+      (Prod.map (Prod.swap : BeltRegion l k → AttachingRegion k l)
+        (id : Set.Ico (0 : ℝ) 1 → Set.Ico (0 : ℝ) 1))
+        ((beltCollar l k).symm ⟨swap k l (p : StandardHandle k l), by
+          intro h
+          have hmem : (p : StandardHandle k l) ∈ cocoreDisk k l := by
+            have h' : swap k l (p : StandardHandle k l) ∈ swap k l '' cocoreDisk k l := by
+              rwa [swap_cocoreDisk k l]
+            rcases h' with ⟨z, hz, hzswap⟩
+            have hz' : z = (p : StandardHandle k l) := by
+              have hz'0 : swap l k (swap k l z) = swap l k (swap k l (p : StandardHandle k l)) :=
+                congrArg (swap l k) hzswap
+              simpa [swap_swap] using hz'0
+            simpa [hz'] using hz
+          exact p.2 hmem⟩) := by
+  rw [attachingCollar_symm_apply, beltCollar_symm_apply]
+  simp
+
+theorem swap_beltCollar_symm (k l : ℕ) (p : {p : StandardHandle k l // p ∉ coreDisk k l}) :
+    (beltCollar k l).symm p =
+      (Prod.map (Prod.swap : AttachingRegion l k → BeltRegion k l)
+        (id : Set.Ico (0 : ℝ) 1 → Set.Ico (0 : ℝ) 1))
+        ((attachingCollar l k).symm ⟨swap k l (p : StandardHandle k l), by
+          intro h
+          have hmem : (p : StandardHandle k l) ∈ coreDisk k l := by
+            have h' : swap k l (p : StandardHandle k l) ∈ swap k l '' coreDisk k l := by
+              rwa [swap_coreDisk k l]
+            rcases h' with ⟨z, hz, hzswap⟩
+            have hz' : z = (p : StandardHandle k l) := by
+              have hz'0 : swap l k (swap k l z) = swap l k (swap k l (p : StandardHandle k l)) :=
+                congrArg (swap l k) hzswap
+              simpa [swap_swap] using hz'0
+            simpa [hz'] using hz
+          exact p.2 hmem⟩) := by
+  rw [beltCollar_symm_apply, attachingCollar_symm_apply]
+  simp
+
+theorem swap_bicollar_symm (k l : ℕ) (p : {p : StandardHandle k l //
+      p ∉ coreDisk k l ∧ p ∉ cocoreDisk k l}) :
+    (bicollar k l).symm p =
+      (Prod.map (Prod.swap : Corner l k → Corner k l)
+        (fun r : Set.Ico (0 : ℝ) 1 × Set.Ico (0 : ℝ) 1 => (r.2, r.1)))
+        ((bicollar l k).symm ⟨swap k l (p : StandardHandle k l), by
+          constructor
+          · intro h
+            have hmem : (p : StandardHandle k l) ∈ cocoreDisk k l := by
+              have h' : swap k l (p : StandardHandle k l) ∈ swap k l '' cocoreDisk k l := by
+                rwa [swap_cocoreDisk k l]
+              rcases h' with ⟨z, hz, hzswap⟩
+              have hz' : z = (p : StandardHandle k l) := by
+                have hz'0 : swap l k (swap k l z) =
+                    swap l k (swap k l (p : StandardHandle k l)) :=
+                  congrArg (swap l k) hzswap
+                simpa [swap_swap] using hz'0
+              simpa [hz'] using hz
+            exact p.2.2 hmem
+          · intro h
+            have hmem : (p : StandardHandle k l) ∈ coreDisk k l := by
+              have h' : swap k l (p : StandardHandle k l) ∈ swap k l '' coreDisk k l := by
+                rwa [swap_coreDisk k l]
+              rcases h' with ⟨z, hz, hzswap⟩
+              have hz' : z = (p : StandardHandle k l) := by
+                have hz'0 : swap l k (swap k l z) =
+                    swap l k (swap k l (p : StandardHandle k l)) :=
+                  congrArg (swap l k) hzswap
+                simpa [swap_swap] using hz'0
+              simpa [hz'] using hz
+            exact p.2.1 hmem⟩) := by
+  rw [bicollar_symm_apply, bicollar_symm_apply]
+  simp
 
 theorem attachingCollar_range (k l : ℕ) :
     ((fun z : AttachingRegion k l × Set.Ico (0 : ℝ) 1 =>

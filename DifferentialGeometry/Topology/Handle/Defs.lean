@@ -39,6 +39,12 @@ def attachingSphereInclusion (k l : ℕ) : CellBoundary k → StandardHandle k l
 def beltSphereInclusion (k l : ℕ) : CellBoundary l → StandardHandle k l :=
   fun y => (closedCellCenter k, cellBoundaryInclusion l y)
 
+def attachingSphereInclusionAttachingRegion (k l : ℕ) : CellBoundary k → AttachingRegion k l :=
+  fun u => (u, closedCellCenter l)
+
+def beltSphereInclusionBeltRegion (k l : ℕ) : CellBoundary l → BeltRegion k l :=
+  fun v => (closedCellCenter k, v)
+
 def attachingRegion (k l : ℕ) : Set (StandardHandle k l) :=
   {p | ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1}
 

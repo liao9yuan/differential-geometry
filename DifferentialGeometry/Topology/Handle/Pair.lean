@@ -16,11 +16,54 @@ def coreProjection (k l : ℕ) : C(StandardHandle k l, ClosedCell k) :=
 def cocoreProjection (k l : ℕ) : C(StandardHandle k l, ClosedCell l) :=
   ⟨fun p => p.2, continuous_snd⟩
 
-def coreDiskInclusionC (k l : ℕ) : C(ClosedCell k, StandardHandle k l) :=
+def coreDiskInclusionContinuous (k l : ℕ) : C(ClosedCell k, StandardHandle k l) :=
   ⟨coreDiskInclusion k l, continuous_coreDiskInclusion k l⟩
 
-def cocoreDiskInclusionC (k l : ℕ) : C(ClosedCell l, StandardHandle k l) :=
+def cocoreDiskInclusionContinuous (k l : ℕ) : C(ClosedCell l, StandardHandle k l) :=
   ⟨cocoreDiskInclusion k l, continuous_cocoreDiskInclusion k l⟩
+
+def attachingProjection (k l : ℕ) : C(AttachingRegion k l, CellBoundary k) :=
+  ⟨fun a => a.1, continuous_fst⟩
+
+def beltProjection (k l : ℕ) : C(BeltRegion k l, CellBoundary l) :=
+  ⟨fun p => p.2, continuous_snd⟩
+
+theorem attachingProjection_apply (k l : ℕ) (a : AttachingRegion k l) :
+    attachingProjection k l a = a.1 := rfl
+
+theorem beltProjection_apply (k l : ℕ) (p : BeltRegion k l) :
+    beltProjection k l p = p.2 := rfl
+
+theorem attachingProjection_comp_attachingSphereInclusionAttachingRegion (k l : ℕ)
+    (u : CellBoundary k) :
+    attachingProjection k l (attachingSphereInclusionAttachingRegion k l u) = u := by
+  rfl
+
+theorem beltProjection_comp_beltSphereInclusionBeltRegion (k l : ℕ) (v : CellBoundary l) :
+    beltProjection k l (beltSphereInclusionBeltRegion k l v) = v := by
+  rfl
+
+theorem coreProjection_attachingProjection (k l : ℕ) (a : AttachingRegion k l) :
+    coreProjection k l (attachingInclusion k l a) =
+      cellBoundaryInclusion k (attachingProjection k l a) := by
+  rcases a with ⟨u, y⟩
+  simp [coreProjection, attachingInclusion, attachingProjection]
+
+theorem cocoreProjection_beltProjection (k l : ℕ) (p : BeltRegion k l) :
+    cocoreProjection k l (beltInclusion k l p) =
+      cellBoundaryInclusion l (beltProjection k l p) := by
+  rcases p with ⟨x, v⟩
+  simp [cocoreProjection, beltInclusion, beltProjection]
+
+theorem coreProjection_attachingSphereInclusionAttachingRegion (k l : ℕ) (u : CellBoundary k) :
+    coreProjection k l (attachingInclusion k l (attachingSphereInclusionAttachingRegion k l u)) =
+      cellBoundaryInclusion k u := by
+  simp [coreProjection, attachingInclusion, attachingSphereInclusionAttachingRegion]
+
+theorem cocoreProjection_beltSphereInclusionBeltRegion (k l : ℕ) (v : CellBoundary l) :
+    cocoreProjection k l (beltInclusion k l (beltSphereInclusionBeltRegion k l v)) =
+      cellBoundaryInclusion l v := by
+  simp [cocoreProjection, beltInclusion, beltSphereInclusionBeltRegion]
 
 theorem coreProjection_attachingInclusion (k l : ℕ) (a : AttachingRegion k l) :
     coreProjection k l (attachingInclusion k l a) = cellBoundaryInclusion k a.1 := by
@@ -42,17 +85,17 @@ theorem cocoreProjection_cocoreDiskInclusion (k l : ℕ) (y : ClosedCell l) :
 
 noncomputable def coreProjection_centerInclusion_homotopy (k l : ℕ) :
     ContinuousMap.HomotopyRel (ContinuousMap.id (StandardHandle k l))
-      ((coreDiskInclusionC k l).comp (coreProjection k l))
+      ((coreDiskInclusionContinuous k l).comp (coreProjection k l))
       (coreDisk k l) := by
   have h₁ : (((ContinuousMap.id (StandardHandle k l)).restrict (coreDisk k l)).comp
         (coreRetract k l).retraction) =
-      (coreDiskInclusionC k l).comp (coreProjection k l) := by
+      (coreDiskInclusionContinuous k l).comp (coreProjection k l) := by
     apply ContinuousMap.ext
     intro p
     rcases p with ⟨x, y⟩
     apply Prod.ext
-    · simp [coreDiskInclusionC, coreDiskInclusion, coreProjection, coreRetract]
-    · simp [coreDiskInclusionC, coreDiskInclusion, coreProjection, coreRetract]
+    · simp [coreDiskInclusionContinuous, coreDiskInclusion, coreProjection, coreRetract]
+    · simp [coreDiskInclusionContinuous, coreDiskInclusion, coreProjection, coreRetract]
   exact (coreRetract k l).homotopy.cast rfl h₁
 
 theorem coreProjection_centerInclusion_fixed (k l : ℕ) (t : I) {p : StandardHandle k l}
@@ -68,17 +111,17 @@ theorem coreProjection_centerInclusion_preserves_attachingRegion (k l : ℕ) (t 
 
 noncomputable def cocoreProjection_centerInclusion_homotopy (k l : ℕ) :
     ContinuousMap.HomotopyRel (ContinuousMap.id (StandardHandle k l))
-      ((cocoreDiskInclusionC k l).comp (cocoreProjection k l))
+      ((cocoreDiskInclusionContinuous k l).comp (cocoreProjection k l))
       (cocoreDisk k l) := by
   have h₁ : (((ContinuousMap.id (StandardHandle k l)).restrict (cocoreDisk k l)).comp
         (cocoreRetract k l).retraction) =
-      (cocoreDiskInclusionC k l).comp (cocoreProjection k l) := by
+      (cocoreDiskInclusionContinuous k l).comp (cocoreProjection k l) := by
     apply ContinuousMap.ext
     intro p
     rcases p with ⟨x, y⟩
     apply Prod.ext
-    · simp [cocoreDiskInclusionC, cocoreDiskInclusion, cocoreProjection, cocoreRetract]
-    · simp [cocoreDiskInclusionC, cocoreDiskInclusion, cocoreProjection, cocoreRetract]
+    · simp [cocoreDiskInclusionContinuous, cocoreDiskInclusion, cocoreProjection, cocoreRetract]
+    · simp [cocoreDiskInclusionContinuous, cocoreDiskInclusion, cocoreProjection, cocoreRetract]
   exact (cocoreRetract k l).homotopy.cast rfl h₁
 
 theorem cocoreProjection_centerInclusion_fixed (k l : ℕ) (t : I) {p : StandardHandle k l}

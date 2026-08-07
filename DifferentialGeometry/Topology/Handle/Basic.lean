@@ -44,6 +44,16 @@ theorem continuous_beltSphereInclusion (k l : ℕ) : Continuous (beltSphereInclu
   change Continuous (fun y : CellBoundary l => (closedCellCenter k, cellBoundaryInclusion l y))
   exact continuous_const.prodMk (continuous_cellBoundaryInclusion l)
 
+theorem continuous_attachingSphereInclusionAttachingRegion (k l : ℕ) :
+    Continuous (attachingSphereInclusionAttachingRegion k l) := by
+  change Continuous (fun u : CellBoundary k => (u, closedCellCenter l))
+  exact continuous_id.prodMk continuous_const
+
+theorem continuous_beltSphereInclusionBeltRegion (k l : ℕ) :
+    Continuous (beltSphereInclusionBeltRegion k l) := by
+  change Continuous (fun v : CellBoundary l => (closedCellCenter k, v))
+  exact continuous_const.prodMk continuous_id
+
 theorem injective_attachingInclusion (k l : ℕ) : Injective (attachingInclusion k l) := by
   change Injective (Prod.map (cellBoundaryInclusion k) (id : ClosedCell l → ClosedCell l))
   exact Injective.prodMap (injective_cellBoundaryInclusion k)
@@ -87,6 +97,16 @@ theorem injective_beltSphereInclusion (k l : ℕ) : Injective (beltSphereInclusi
   apply Subtype.ext
   have hsnd := congrArg Prod.snd h
   simpa using congrArg (fun z : ClosedCell l => (z : EuclideanSpace ℝ (Fin l))) hsnd
+
+theorem injective_attachingSphereInclusionAttachingRegion (k l : ℕ) :
+    Injective (attachingSphereInclusionAttachingRegion k l) := by
+  intro x y h
+  simpa [attachingSphereInclusionAttachingRegion] using congrArg Prod.fst h
+
+theorem injective_beltSphereInclusionBeltRegion (k l : ℕ) :
+    Injective (beltSphereInclusionBeltRegion k l) := by
+  intro x y h
+  simpa [beltSphereInclusionBeltRegion] using congrArg Prod.snd h
 
 theorem isClosedEmbedding_attachingInclusion (k l : ℕ) : Topology.IsClosedEmbedding (attachingInclusion k l) := by
   exact Topology.IsClosedEmbedding.of_continuous_injective_isClosedMap
@@ -278,6 +298,32 @@ theorem range_beltSphereInclusion (k l : ℕ) :
     · simp [beltSphereInclusion, hp.1]
     · simp [beltSphereInclusion, cellBoundaryInclusion]
 
+theorem range_attachingSphereInclusionAttachingRegion (k l : ℕ) :
+    Set.range (attachingSphereInclusionAttachingRegion k l) =
+      {p : AttachingRegion k l | p.2 = closedCellCenter l} := by
+  ext p
+  constructor
+  · rintro ⟨u, rfl⟩
+    rfl
+  · intro hp
+    refine ⟨p.1, ?_⟩
+    apply Prod.ext
+    · rfl
+    · exact hp.symm
+
+theorem range_beltSphereInclusionBeltRegion (k l : ℕ) :
+    Set.range (beltSphereInclusionBeltRegion k l) =
+      {p : BeltRegion k l | p.1 = closedCellCenter k} := by
+  ext p
+  constructor
+  · rintro ⟨v, rfl⟩
+    rfl
+  · intro hp
+    refine ⟨p.2, ?_⟩
+    apply Prod.ext
+    · exact hp.symm
+    · rfl
+
 @[simp]
 theorem attachingInclusion_comp_attachingCornerInclusion {k l : ℕ} (a : Corner k l) :
     attachingInclusion k l (attachingCornerInclusion k l a) = cornerInclusion k l a := by
@@ -299,6 +345,18 @@ theorem coreDiskInclusion_comp_cellBoundaryInclusion {k l : ℕ} (x : CellBounda
 theorem cocoreDiskInclusion_comp_cellBoundaryInclusion {k l : ℕ} (y : CellBoundary l) :
     cocoreDiskInclusion k l (cellBoundaryInclusion l y) = beltSphereInclusion k l y := by
   simp [cocoreDiskInclusion, beltSphereInclusion]
+
+@[simp]
+theorem attachingInclusion_comp_attachingSphereInclusionAttachingRegion {k l : ℕ}
+    (u : CellBoundary k) :
+    attachingInclusion k l (attachingSphereInclusionAttachingRegion k l u) =
+      attachingSphereInclusion k l u := by
+  rfl
+
+@[simp]
+theorem beltInclusion_comp_beltSphereInclusionBeltRegion {k l : ℕ} (v : CellBoundary l) :
+    beltInclusion k l (beltSphereInclusionBeltRegion k l v) = beltSphereInclusion k l v := by
+  rfl
 
 @[simp]
 theorem mem_attachingRegion {k l : ℕ} {p : StandardHandle k l} :
