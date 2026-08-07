@@ -837,6 +837,272 @@ theorem cocoreAttachingEmbedding_injective {n k : ℕ} (hk : k ≤ n) (c ε r : 
     data.χ.injOn hsrc_p hsrc_q hχ
   exact (recombine_cellMap_cocore_injective hk ε r hε hr) hy
 
+noncomputable def handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (v : (x : M) → TangentSpace I x)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) :
+    AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1 → M :=
+  fun q =>
+    curveAt v hcomplete (cocoreAttachingEmbedding hk c ε r data hε hεr q.1).1
+      (-(r ^ 2 * (1 - (q.2 : ℝ)) / 2))
+
+theorem handleCollarMap_value {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hδ : r ^ 2 / 2 < δ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1) :
+    f (handleCollarMap hk c ε r data hε hεr v hcomplete q) =
+      c - ε + r ^ 2 * (1 - (q.2 : ℝ)) / 2 := by
+  let s : ℝ := r ^ 2 * (1 - (q.2 : ℝ)) / 2
+  let x : M := (cocoreAttachingEmbedding hk c ε r data hε hεr q.1).1
+  have hs0 : 0 ≤ s := by
+    dsimp [s]
+    have h1 : 0 ≤ 1 - (q.2 : ℝ) := sub_nonneg.mpr q.2.property.2
+    exact div_nonneg (mul_nonneg (sq_nonneg r) h1) (by norm_num)
+  have hx : f x = c - ε := cocoreAttachingEmbedding_value hk c ε r data hε hεr q.1
+  have hstay : ∀ t ∈ Set.Icc (0 : ℝ) s,
+      curveAt v hcomplete x (-t) ∈ f ⁻¹' Set.Icc (c - ε) (c + δ) := by
+    intro t ht
+    have hrb := f_rate_bounds_of_integralCurve_back f hf v hrate
+      (hγ := curveAt_integralCurve v hcomplete x) (t := t) ht.1
+    have hlo : c - ε ≤ f (curveAt v hcomplete x (-t)) := by
+      have hb := hrb.1
+      simpa [curveAt_zero v hcomplete x, hx] using hb
+    have hhi : f (curveAt v hcomplete x (-t)) ≤ c + δ := by
+      have hb := hrb.2
+      have hb' : f (curveAt v hcomplete x (-t)) ≤ f x + t := by
+        simpa [curveAt_zero v hcomplete x] using hb
+      have htle : t ≤ s := ht.2
+      have hsle : c - ε + s ≤ c + δ := by
+        have hs : s ≤ r ^ 2 / 2 := by
+          dsimp [s]
+          have h1 : 0 ≤ 1 - (q.2 : ℝ) := sub_nonneg.mpr q.2.property.2
+          have h1' : 0 ≤ (q.2 : ℝ) := q.2.property.1
+          nlinarith [sq_nonneg r, h1, h1']
+        nlinarith [hδ, hs, hε]
+      nlinarith [hx, hb', htle, hsle]
+    change c - ε ≤ f (curveAt v hcomplete x (-t)) ∧ f (curveAt v hcomplete x (-t)) ≤ c + δ
+    exact ⟨hlo, hhi⟩
+  have hEq := f_add_of_integralCurve_back f hf v hdfOn
+    (hγ := curveAt_integralCurve v hcomplete x) (t := s) hs0 hstay
+  change f (curveAt v hcomplete x (-s)) = c - ε + r ^ 2 * (1 - (q.2 : ℝ)) / 2
+  rw [hEq]
+  rw [curveAt_zero v hcomplete x, hx]
+
+theorem contMDiff_handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) (hRltR' : data.R < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    [NeZero k] [NeZero (m + 1 - k)]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    @ContMDiff ℝ _
+      ((EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) ×
+        EuclideanSpace ℝ (Fin 1)) _ _
+      (ModelProd (ModelProd (EuclideanSpace ℝ (Fin (k - 1)))
+        (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) (EuclideanHalfSpace 1)) _
+      (((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))).prod
+        (modelWithCornersEuclideanHalfSpace 1))
+      (AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1) _
+      (prodChartedSpace (ModelProd (EuclideanSpace ℝ (Fin (k - 1)))
+        (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) (AttachingRegion k (m + 1 - k))
+        (EuclideanHalfSpace 1) (Set.Icc (0 : ℝ) 1))
+      (MorseModel (m + 1)) _ _ H _
+      I M _ _
+      (⊤ : ℕ∞)
+      (handleCollarMap hk c ε r data hε hεr v hcomplete) := by
+  classical
+  letI : ChartedSpace (MorseModel m) (LevelSetSpace f (c - ε)) :=
+    manifoldLevelSetChartedSpace I f (c - ε) hf hreg
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) :=
+    cellBoundaryChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((m + 1 - k - 1) + 1)) (ClosedCell (m + 1 - k)) :=
+    closedCellChartedSpace (m + 1 - k)
+  letI : ChartedSpace (EuclideanHalfSpace ((m + 1 - k - 1) + 1)) (ClosedCell ((m + 1 - k - 1) + 1)) :=
+    closedCellChartedSpaceSucc (m + 1 - k - 1)
+  letI : IsManifold (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) := cellBoundaryIsManifold k
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell ((m + 1 - k - 1) + 1)) := closedCellIsManifold (m + 1 - k - 1)
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell (m + 1 - k)) :=
+    isManifoldOfHomeomorph (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+      (closedCellReindexHomeo (m + 1 - k))
+  let Iatt : ModelWithCorners ℝ
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1)))
+      (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) :=
+    (𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+  letI : IsManifold Iatt (⊤ : ℕ∞) (AttachingRegion k (m + 1 - k)) :=
+    attachingRegionIsManifold k (m + 1 - k)
+  have hφ : ContMDiff Iatt I (⊤ : ℕ∞) (fun p : AttachingRegion k (m + 1 - k) =>
+      (cocoreAttachingEmbedding hk c ε r data hε hεr p).1) := by
+    have hφ' : ContMDiff Iatt (𝓘(ℝ, MorseModel m)) (⊤ : ℕ∞)
+        (cocoreAttachingEmbedding hk c ε r data hε hεr) := by
+      simpa [Iatt] using (contMDiff_cocoreAttachingEmbedding hk c ε r data hε hεr hRltR' hf hreg)
+    have hinc : ContMDiff (𝓘(ℝ, MorseModel m)) I (⊤ : ℕ∞)
+        (fun x : LevelSetSpace f (c - ε) => x.1) :=
+      contMDiff_levelSetInclusion I f (c - ε) hf hreg
+    exact hinc.comp hφ'
+  have hlin : ContDiff ℝ (⊤ : ℕ∞) (fun z : ℝ => -(r ^ 2 * (1 - z) / 2)) := by
+    fun_prop
+  have hcoe : ContMDiff (𝓡∂ 1) (𝓘(ℝ, ℝ)) (⊤ : ℕ∞)
+      (fun z : Set.Icc (0 : ℝ) 1 => (z : ℝ)) :=
+    contMDiff_subtype_coe_Icc (x := 0) (y := 1) (n := (⊤ : ℕ∞))
+  have hsnd : ContMDiff (Iatt.prod (𝓡∂ 1)) (𝓡∂ 1) (⊤ : ℕ∞)
+      (fun q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1 => q.2) :=
+    contMDiff_snd (I := Iatt) (J := 𝓡∂ 1) (n := (⊤ : ℕ∞))
+  have hT : ContMDiff (Iatt.prod (𝓡∂ 1)) (𝓘(ℝ, ℝ)) (⊤ : ℕ∞)
+      (fun q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1 =>
+        -(r ^ 2 * (1 - (q.2 : ℝ)) / 2)) :=
+    (contMDiff_iff_contDiff.mpr hlin).comp (hcoe.comp hsnd)
+  have hfst : ContMDiff (Iatt.prod (𝓡∂ 1)) Iatt (⊤ : ℕ∞)
+      (fun q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1 => q.1) :=
+    contMDiff_fst (I := Iatt) (J := 𝓡∂ 1) (n := (⊤ : ℕ∞))
+  have hφ1 : ContMDiff (Iatt.prod (𝓡∂ 1)) I (⊤ : ℕ∞)
+      (fun q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1 =>
+        (cocoreAttachingEmbedding hk c ε r data hε hεr q.1).1) :=
+    hφ.comp hfst
+  have hpair : ContMDiff (Iatt.prod (𝓡∂ 1)) ((𝓘(ℝ, ℝ)).prod I) (⊤ : ℕ∞)
+      (fun q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1 =>
+        (-(r ^ 2 * (1 - (q.2 : ℝ)) / 2),
+          (cocoreAttachingEmbedding hk c ε r data hε hεr q.1).1)) :=
+    ContMDiff.prodMk hT hφ1
+  have hflow0 : ContMDiff ((𝓘(ℝ, ℝ)).prod I) I (⊤ : ℕ∞)
+      (fun q : ℝ × M => curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) q.2 q.1) :=
+    contMDiff_globalFlow_joint_of_compactSupport (E := MorseModel (m + 1)) (I := I)
+      (v := v) (hv := hv) (hsupp := hsupp)
+  have hflow : ContMDiff ((𝓘(ℝ, ℝ)).prod I) I (⊤ : ℕ∞)
+      (fun q : ℝ × M => curveAt v hcomplete q.2 q.1) := by
+    refine hflow0.congr ?_
+    intro q
+    exact curveAt_hcomplete_irrel (E := MorseModel (m + 1)) (I := I) v
+      (hv := (hv.of_le (show (1 : WithTop ℕ∞) ≤ (⊤ : ℕ∞) by
+        exact_mod_cast (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞)))))
+      (exists_globalIntegralCurve_of_compactSupport v hv hsupp) hcomplete q.2 q.1
+  have hmain : ContMDiff (Iatt.prod (𝓡∂ 1)) I (⊤ : ℕ∞)
+      (fun q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1 =>
+        curveAt v hcomplete (cocoreAttachingEmbedding hk c ε r data hε hεr q.1).1
+          (-(r ^ 2 * (1 - (q.2 : ℝ)) / 2))) :=
+    hflow.comp hpair
+  refine hmain.congr ?_
+  intro q
+  rfl
+
+theorem handleCollarMap_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hδ : r ^ 2 / 2 < δ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) :
+    Function.Injective (handleCollarMap hk c ε r data hε hεr v hcomplete) := by
+  intro q q' h
+  let s : ℝ := r ^ 2 * (1 - (q.2 : ℝ)) / 2
+  let s' : ℝ := r ^ 2 * (1 - (q'.2 : ℝ)) / 2
+  let x : M := (cocoreAttachingEmbedding hk c ε r data hε hεr q.1).1
+  let x' : M := (cocoreAttachingEmbedding hk c ε r data hε hεr q'.1).1
+  have hs0 : 0 ≤ s := by
+    dsimp [s]
+    have h1 : 0 ≤ 1 - (q.2 : ℝ) := sub_nonneg.mpr q.2.property.2
+    exact div_nonneg (mul_nonneg (sq_nonneg r) h1) (by norm_num)
+  have hs0' : 0 ≤ s' := by
+    dsimp [s']
+    have h1 : 0 ≤ 1 - (q'.2 : ℝ) := sub_nonneg.mpr q'.2.property.2
+    exact div_nonneg (mul_nonneg (sq_nonneg r) h1) (by norm_num)
+  have hfz : f (curveAt v hcomplete x (-s)) = c - ε + s := by
+    have hval := handleCollarMap_value hk c ε r δ data hε hεr hδ hf v hdfOn hrate hcomplete q
+    change f (curveAt v hcomplete (cocoreAttachingEmbedding hk c ε r data hε hεr q.1).1
+        (-(r ^ 2 * (1 - (q.2 : ℝ)) / 2))) = c - ε + r ^ 2 * (1 - (q.2 : ℝ)) / 2 at hval
+    dsimp [x, s] at hval ⊢
+    exact hval
+  have hfz' : f (curveAt v hcomplete x' (-s')) = c - ε + s' := by
+    have hval := handleCollarMap_value hk c ε r δ data hε hεr hδ hf v hdfOn hrate hcomplete q'
+    change f (curveAt v hcomplete (cocoreAttachingEmbedding hk c ε r data hε hεr q'.1).1
+        (-(r ^ 2 * (1 - (q'.2 : ℝ)) / 2))) = c - ε + r ^ 2 * (1 - (q'.2 : ℝ)) / 2 at hval
+    dsimp [x', s'] at hval ⊢
+    exact hval
+  have hcong := congrArg f h
+  have hcong' : f (curveAt v hcomplete x (-s)) = f (curveAt v hcomplete x' (-s')) := by
+    change f (handleCollarMap hk c ε r data hε hεr v hcomplete q) =
+      f (handleCollarMap hk c ε r data hε hεr v hcomplete q') at hcong
+    exact hcong
+  have hq : (q.2 : ℝ) = (q'.2 : ℝ) := by
+    rw [hfz, hfz'] at hcong'
+    have hcancel : r ^ 2 / 2 ≠ 0 := div_ne_zero (pow_ne_zero 2 hr) (by norm_num)
+    have hmul : (r ^ 2 / 2) * (1 - (q.2 : ℝ)) = (r ^ 2 / 2) * (1 - (q'.2 : ℝ)) := by
+      dsimp [s, s'] at hcong'
+      nlinarith
+    have hsub : 1 - (q.2 : ℝ) = 1 - (q'.2 : ℝ) := mul_left_cancel₀ hcancel hmul
+    linarith
+  have hfs : s = s' := by
+    dsimp [s, s']
+    rw [hq]
+  have hv1 : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
+    hv.of_le (show (1 : WithTop ℕ∞) ≤ (⊤ : ℕ∞) by
+      exact_mod_cast (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞)))
+  have hback : curveAt v hcomplete (curveAt v hcomplete x (-s)) s = x := by
+    have h1 := curveAt_add v hv1 hcomplete x (-s) s
+    rw [show (-s) + s = 0 by ring, curveAt_zero v hcomplete x] at h1
+    exact h1.symm
+  have hback' : curveAt v hcomplete (curveAt v hcomplete x' (-s')) s' = x' := by
+    have h1 := curveAt_add v hv1 hcomplete x' (-s') s'
+    rw [show (-s') + s' = 0 by ring, curveAt_zero v hcomplete x'] at h1
+    exact h1.symm
+  have hx : x = x' := by
+    have hc := congrArg (fun z : M => curveAt v hcomplete z s) h
+    have hc' : curveAt v hcomplete (curveAt v hcomplete x (-s)) s =
+        curveAt v hcomplete (curveAt v hcomplete x' (-s')) s := by
+      change curveAt v hcomplete (handleCollarMap hk c ε r data hε hεr v hcomplete q) s =
+        curveAt v hcomplete (handleCollarMap hk c ε r data hε hεr v hcomplete q') s at hc
+      exact hc
+    have hback'' : curveAt v hcomplete (curveAt v hcomplete x' (-s)) s = x' := by
+      simpa [hfs.symm] using hback'
+    rw [hback] at hc'
+    rw [← hfs] at hc'
+    rw [hback''] at hc'
+    exact hc'
+  apply Prod.ext
+  · have hφ : (cocoreAttachingEmbedding hk c ε r data hε hεr q.1) =
+        (cocoreAttachingEmbedding hk c ε r data hε hεr q'.1) := by
+      apply Subtype.ext
+      change x = x'
+      exact hx
+    exact cocoreAttachingEmbedding_injective hk c ε r data hε hr hεr hφ
+  · apply Subtype.ext
+    exact hq
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}

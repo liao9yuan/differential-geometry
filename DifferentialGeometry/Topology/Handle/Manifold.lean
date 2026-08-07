@@ -2551,6 +2551,13 @@ noncomputable def attachingRegionChartedSpace (k l : ℕ) [NeZero k] [NeZero l]
     closedCellChartedSpace l
   infer_instance
 
+instance attachingRegionChartedSpaceInst (k l : ℕ) [NeZero k] [NeZero l]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (l = (l - 1) + 1)] :
+    ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((l - 1) + 1)))
+      (AttachingRegion k l) :=
+  attachingRegionChartedSpace k l
+
 @[reducible]
 noncomputable def attachingRegionIsManifold (k l : ℕ) [NeZero k] [NeZero l]
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
@@ -2580,6 +2587,13 @@ noncomputable def attachingRegionIsManifold (k l : ℕ) [NeZero k] [NeZero l]
   exact IsManifold.prod (I := 𝓡 (k - 1))
     (I' := modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (n := (⊤ : ℕ∞))
     (CellBoundary k) (ClosedCell l)
+
+instance attachingRegionIsManifoldInst (k l : ℕ) [NeZero k] [NeZero l]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (l = (l - 1) + 1)] :
+    IsManifold ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))) (⊤ : ℕ∞)
+      (AttachingRegion k l) :=
+  attachingRegionIsManifold k l
 
 end
 
