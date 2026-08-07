@@ -448,6 +448,77 @@ theorem heat_solution_harnack_of_nonnegative_ricci
     rw [hτa, hτb] at hfinal
     simpa [n] using hfinal
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem heat_solution_harnack_uniform_upper_bound_of_nonnegative_ricci
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+    [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (hpde : ∀ t x, deriv (fun s => u s x) t =
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    {a b : ℝ} (ha : 0 < a) (hab : a < b) (y₀ : M) :
+    ∃ C : ℝ, 0 < C ∧ ∀ x : M, u a x ≤ C * u b y₀ := by
+  classical
+  have hfcont : Continuous (fun x : M => riemannianEDist I x y₀) :=
+    continuous_riemannianEDist_to (I := I) y₀
+  obtain ⟨xmax, _hxm, hmax⟩ :=
+    (isCompact_univ : IsCompact (Set.univ : Set M)).exists_isMaxOn
+      Set.univ_nonempty hfcont.continuousOn
+  let D : ℝ := (riemannianEDist I xmax y₀).toReal
+  have hDnonneg : 0 ≤ D := ENNReal.toReal_nonneg
+  have hbound : ∀ x : M, (riemannianEDist I x y₀).toReal ≤ D := by
+    intro x
+    have hle : riemannianEDist I x y₀ ≤ riemannianEDist I xmax y₀ :=
+      hmax (Set.mem_univ x)
+    have hne1 : riemannianEDist I x y₀ ≠ ⊤ := riemannianEDist_ne_top (I := I) x y₀
+    have hne2 : riemannianEDist I xmax y₀ ≠ ⊤ := riemannianEDist_ne_top (I := I) xmax y₀
+    exact (ENNReal.toReal_le_toReal hne1 hne2).mpr hle
+  let C : ℝ := (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+    Real.exp (D ^ 2 / (4 * (b - a)))
+  have hbpos : 0 < b := lt_trans ha hab
+  have hba_pos : 0 < b / a := div_pos hbpos ha
+  have hA_nonneg : 0 ≤ (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) := by
+    exact Real.rpow_nonneg (le_of_lt hba_pos) _
+  have hC_pos : 0 < C := by
+    dsimp [C]
+    exact mul_pos (Real.rpow_pos_of_pos hba_pos _) (Real.exp_pos _)
+  refine ⟨C, hC_pos, ?_⟩
+  intro x
+  have hxy := heat_solution_harnack_of_nonnegative_ricci
+    (I := I) (M := M) g hEnorm hRic u hu hpos hpde ha hab x y₀
+  have hdD : (riemannianEDist I x y₀).toReal ^ 2 ≤ D ^ 2 := by
+    have hd : 0 ≤ (riemannianEDist I x y₀).toReal := ENNReal.toReal_nonneg
+    have hmul := mul_self_le_mul_self hd (hbound x)
+    simpa [pow_two] using hmul
+  have hexp_le : Real.exp ((riemannianEDist I x y₀).toReal ^ 2 / (4 * (b - a))) ≤
+      Real.exp (D ^ 2 / (4 * (b - a))) := by
+    have hba : 0 < b - a := sub_pos.mpr hab
+    exact Real.exp_le_exp.mpr (div_le_div_of_nonneg_right hdD (by positivity))
+  have hprod_le : (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+        Real.exp ((riemannianEDist I x y₀).toReal ^ 2 / (4 * (b - a))) * u b y₀ ≤
+      C * u b y₀ := by
+    have h1 : (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+          Real.exp ((riemannianEDist I x y₀).toReal ^ 2 / (4 * (b - a))) ≤
+        (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+          Real.exp (D ^ 2 / (4 * (b - a))) := by
+      exact mul_le_mul_of_nonneg_left hexp_le hA_nonneg
+    have h2 := mul_le_mul_of_nonneg_right h1 (le_of_lt (hpos b y₀))
+    simpa [C] using h2
+  linarith
+
 end DifferentialGeometry.Analysis.Parabolic.Harnack
 
 end
