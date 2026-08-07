@@ -632,6 +632,117 @@ theorem mem_levelSetChart_source {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a :
   · rw [← d.hu₁]
     exact d.hc
 
+noncomputable def levelSetChartValue {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    MorseModel (m + 1) → MorseModel m :=
+  let d := levelSetChartData.mk g a x hg hreg
+  fun y => levelSetSplitFst m (levelSetReindex d.e y)
+
+noncomputable def levelSetChartInvValueRaw {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    MorseModel m → MorseModel (m + 1) :=
+  let d := levelSetChartData.mk g a x hg hreg
+  fun z => levelSetReindex d.e (d.ψ.symm (a, z))
+
+noncomputable def levelSetChartInvValue {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    MorseModel m → MorseModel (m + 1) :=
+  fun z => levelSetChartInvValueRaw g a x hg hreg z
+
+noncomputable def levelSetChartDomain {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    Set (MorseModel m) :=
+  let d := levelSetChartData.mk g a x hg hreg
+  {z : MorseModel m | (a, z) ∈ d.ψ.target}
+
+theorem levelSetChart_apply_value' {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0)
+    (y : LevelSetSpace g a) :
+    ((levelSetChart g a x hg hreg) y : MorseModel m) = levelSetChartValue g a x hg hreg y.1 := by
+  classical
+  let d := levelSetChartData.mk g a x hg hreg
+  change ((d.ψ : MorseModel (m + 1) → ℝ × MorseModel m) (levelSetReindex d.e y.1)).2 =
+    levelSetSplitFst m (levelSetReindex d.e y.1)
+  rw [d.hψ]
+  rfl
+
+theorem levelSetChart_symm_value' {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0)
+    {z : MorseModel m} (hz : z ∈ (levelSetChart g a x hg hreg).target) :
+    (levelSetChart g a x hg hreg).symm z =
+      (⟨levelSetChartInvValueRaw g a x hg hreg z, by
+        let d := levelSetChartData.mk g a x hg hreg
+        change g (levelSetReindex d.e (d.ψ.symm (a, z))) = a
+        exact levelSetChart_invFun_mem g d.e d.ψ d.hψ hz⟩ : LevelSetSpace g a) := by
+  classical
+  let d := levelSetChartData.mk g a x hg hreg
+  change (if h : (a, z) ∈ d.ψ.target then
+        (⟨levelSetReindex d.e (d.ψ.symm (a, z)),
+          levelSetChart_invFun_mem g d.e d.ψ d.hψ h⟩ : LevelSetSpace g a)
+      else ⟨x.1, x.2⟩) = (⟨levelSetReindex d.e (d.ψ.symm (a, z)),
+        levelSetChart_invFun_mem g d.e d.ψ d.hψ hz⟩ : LevelSetSpace g a)
+  rw [dif_pos (show (a, z) ∈ d.ψ.target from hz)]
+
+theorem isOpen_levelSetChartDomain {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    IsOpen (levelSetChartDomain g a x hg hreg) := by
+  classical
+  let d := levelSetChartData.mk g a x hg hreg
+  have hcont : Continuous (fun z : MorseModel m => (a, z)) := by fun_prop
+  change IsOpen {z : MorseModel m | (a, z) ∈ d.ψ.target}
+  exact d.ψ.open_target.preimage hcont
+
+theorem contDiff_levelSetChartValue {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    ContDiff ℝ (⊤ : ℕ∞) (levelSetChartValue g a x hg hreg) := by
+  classical
+  let d := levelSetChartData.mk g a x hg hreg
+  have hsplitFst : ContDiff ℝ (⊤ : ℕ∞) (levelSetSplitFst m) :=
+    (levelSetSplitFst m).contDiff
+  have hreindex : ContDiff ℝ (⊤ : ℕ∞) (levelSetReindex d.e) :=
+    (levelSetReindex d.e).toContinuousLinearEquiv.contDiff
+  change ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) =>
+    levelSetSplitFst m (levelSetReindex d.e y))
+  fun_prop
+
+theorem contDiffOn_levelSetChartInvValueRaw {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : LevelSetSpace g a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (levelSetChartInvValueRaw g a x hg hreg)
+      (levelSetChartDomain g a x hg hreg) := by
+  classical
+  rw [IsOpen.contDiffOn_iff (isOpen_levelSetChartDomain g a x hg hreg)]
+  intro z hz
+  let d := levelSetChartData.mk g a x hg hreg
+  let e : Fin (m + 1) ≃ Fin (m + 1) := d.e
+  let ψ : OpenPartialHomeomorph (MorseModel (m + 1)) (ℝ × MorseModel m) := d.ψ
+  have hψ : (ψ : MorseModel (m + 1) → ℝ × MorseModel m) = levelSetChartMap g e := d.hψ
+  let w : MorseModel (m + 1) := ψ.symm (a, z)
+  have hz' : (a, z) ∈ ψ.target := hz
+  have hwsrc : w ∈ ψ.source := ψ.map_target hz'
+  have hc₁' : (fderiv ℝ (fun v => g (levelSetReindex e v)) w) levelSetLastBasis ≠ 0 := by
+    rw [d.hψsource] at hwsrc
+    exact hwsrc.2
+  have hpair : ContDiffAt ℝ (⊤ : ℕ∞) (fun z : MorseModel m => (a, z)) z := by fun_prop
+  have hsymm : ContDiffAt ℝ (⊤ : ℕ∞)
+      (ψ.symm : (ℝ × MorseModel m) → MorseModel (m + 1)) (a, z) := by
+    refine OpenPartialHomeomorph.contDiffAt_symm ψ
+      (f₀' := levelSetChartDerivEquiv g e w hc₁') ?_ ?_ ?_
+    · exact hz'
+    · rw [hψ]
+      exact hasFDerivAt_levelSetChartMap g e w hg.contDiffAt hc₁'
+    · rw [hψ]
+      exact contDiffAt_levelSetChartMap g e w hg.contDiffAt
+  have h₁ : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel m => ψ.symm (a, z)) z := hsymm.comp z hpair
+  have hlin : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun v : MorseModel (m + 1) => levelSetReindex e v) (ψ.symm (a, z)) :=
+    ((levelSetReindex e).toContinuousLinearEquiv :
+      MorseModel (m + 1) →L[ℝ] MorseModel (m + 1)).contDiff.contDiffAt
+  exact (by
+    change ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel m => levelSetReindex e (ψ.symm (a, z))) z
+    exact hlin.comp z h₁)
+
 
 
 theorem levelSetChart_transition_contDiffAt {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)

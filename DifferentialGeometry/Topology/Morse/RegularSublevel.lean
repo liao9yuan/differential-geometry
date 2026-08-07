@@ -1221,6 +1221,578 @@ noncomputable def manifoldSublevelIsManifold [I.Boundaryless]
   letI := manifoldSublevelChartedSpace I f a hf hreg
   exact { toHasGroupoid := manifoldSublevelHasGroupoid I f a hf hreg }
 
+noncomputable def levelSetPullbackCutoffPoint (f : M → ℝ) (a : ℝ) (x : LevelSetSpace f a)
+    (b : ContDiffBump ((extChartAt I x.1) x.1)) :
+    LevelSetSpace (sublevelPullbackCutoff I f x.1 b) a :=
+  ⟨(extChartAt I x.1) x.1, by
+    have hpball : (extChartAt I x.1) x.1 ∈ Metric.ball ((extChartAt I x.1) x.1) b.rIn :=
+      Metric.mem_ball_self b.rIn_pos
+    rw [sublevelPullbackCutoff_eqOn I f x.1 b hpball]
+    change f ((extChartAt I x.1).symm ((extChartAt I x.1) x.1)) = a
+    rw [(extChartAt I x.1).left_inv (mem_extChartAt_source (I := I) x.1)]
+    exact x.2⟩
+
+theorem levelSetPullbackCutoffPoint_value (f : M → ℝ) (a : ℝ) (x : LevelSetSpace f a)
+    (b : ContDiffBump ((extChartAt I x.1) x.1)) :
+    (sublevelPullbackCutoff I f x.1 b) (levelSetPullbackCutoffPoint I f a x b).1 = a := by
+  change (sublevelPullbackCutoff I f x.1 b) ((extChartAt I x.1) x.1) = a
+  have hpball : (extChartAt I x.1) x.1 ∈ Metric.ball ((extChartAt I x.1) x.1) b.rIn :=
+    Metric.mem_ball_self b.rIn_pos
+  rw [sublevelPullbackCutoff_eqOn I f x.1 b hpball]
+  change f ((extChartAt I x.1).symm ((extChartAt I x.1) x.1)) = a
+  rw [(extChartAt I x.1).left_inv (mem_extChartAt_source (I := I) x.1)]
+  exact x.2
+
+theorem fderiv_levelSetPullbackCutoffPoint_ne_zero [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) (a : ℝ)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) (x : LevelSetSpace f a)
+    (b : ContDiffBump ((extChartAt I x.1) x.1)) :
+    fderiv ℝ (sublevelPullbackCutoff I f x.1 b) (levelSetPullbackCutoffPoint I f a x b).1 ≠ 0 := by
+  change fderiv ℝ (sublevelPullbackCutoff I f x.1 b) ((extChartAt I x.1) x.1) ≠ 0
+  apply fderiv_sublevelPullbackCutoff_ne_zero I f x.1 b
+  have hx₀ : f ((extChartAt I x.1).symm ((extChartAt I x.1) x.1)) = a := by
+    rw [(extChartAt I x.1).left_inv (mem_extChartAt_source (I := I) x.1)]
+    exact x.2
+  have hyt : (extChartAt I x.1) x.1 ∈ (extChartAt I x.1).target :=
+    (extChartAt I x.1).map_source (mem_extChartAt_source (I := I) x.1)
+  exact fderiv_sublevelPullback_ne_zero I f hf a hreg hx₀ hyt
+
+noncomputable def levelSetPullbackChart (f : M → ℝ) (a : ℝ) (x : LevelSetSpace f a)
+    (b : ContDiffBump ((extChartAt I x.1) x.1))
+    (hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target) :
+    OpenPartialHomeomorph (LevelSetSpace f a)
+      (LevelSetSpace (sublevelPullbackCutoff I f x.1 b) a) := by
+  classical
+  let e : PartialEquiv M (MorseModel (m + 1)) := extChartAt I x.1
+  let p : MorseModel (m + 1) := (extChartAt I x.1) x.1
+  let toFun' : LevelSetSpace f a → LevelSetSpace (sublevelPullbackCutoff I f x.1 b) a :=
+    fun x' =>
+      if hx : x'.1 ∈ e.source ∧ e x'.1 ∈ Metric.ball p b.rIn then
+        ⟨e x'.1, by
+          rw [sublevelPullbackCutoff_eqOn I f x.1 b hx.2]
+          change f ((extChartAt I x.1).symm (e x'.1)) = a
+          rw [(extChartAt I x.1).left_inv hx.1]
+          exact x'.2⟩
+      else
+        ⟨p, by
+          have hpball : p ∈ Metric.ball p b.rIn := Metric.mem_ball_self b.rIn_pos
+          rw [sublevelPullbackCutoff_eqOn I f x.1 b hpball]
+          change f ((extChartAt I x.1).symm ((extChartAt I x.1) x.1)) = a
+          rw [(extChartAt I x.1).left_inv (mem_extChartAt_source (I := I) x.1)]
+          exact x.2⟩
+  let invFun' : LevelSetSpace (sublevelPullbackCutoff I f x.1 b) a → LevelSetSpace f a :=
+    fun z =>
+      if hz : z.1 ∈ Metric.ball p b.rIn then
+        ⟨(extChartAt I x.1).symm z.1, by
+          change (sublevelPullback I f x.1 z.1) = a
+          rw [← sublevelPullbackCutoff_eqOn I f x.1 b hz]
+          exact z.2⟩
+      else ⟨x.1, x.2⟩
+  exact
+    { toPartialEquiv :=
+        { toFun := toFun'
+          invFun := invFun'
+          source := {x' : LevelSetSpace f a | x'.1 ∈ e.source ∧ e x'.1 ∈ Metric.ball p b.rIn}
+          target := {z : LevelSetSpace (sublevelPullbackCutoff I f x.1 b) a |
+            z.1 ∈ Metric.ball p b.rIn}
+          map_source' := by
+            intro x' hx'
+            change x'.1 ∈ e.source ∧ e x'.1 ∈ Metric.ball p b.rIn at hx'
+            change (toFun' x').1 ∈ Metric.ball p b.rIn
+            simp only [toFun']
+            rw [dif_pos hx']
+            exact hx'.2
+          map_target' := by
+            intro z hz
+            change z.1 ∈ Metric.ball p b.rIn at hz
+            change (invFun' z).1 ∈ e.source ∧ e ((invFun' z).1) ∈ Metric.ball p b.rIn
+            simp only [invFun']
+            rw [dif_pos hz]
+            change (extChartAt I x.1).symm z.1 ∈ e.source ∧
+              e ((extChartAt I x.1).symm z.1) ∈ Metric.ball p b.rIn
+            have hzt : z.1 ∈ (extChartAt I x.1).target :=
+              ((Metric.ball_subset_ball (le_of_lt b.rIn_lt_rOut)).trans
+                Metric.ball_subset_closedBall).trans hb hz
+            constructor
+            · exact (extChartAt I x.1).map_target hzt
+            · rw [(extChartAt I x.1).right_inv hzt]
+              exact hz
+          left_inv' := by
+            intro x' hx'
+            change x'.1 ∈ e.source ∧ e x'.1 ∈ Metric.ball p b.rIn at hx'
+            apply Subtype.ext
+            change (invFun' (toFun' x')).1 = x'.1
+            simp only [toFun']
+            rw [dif_pos hx']
+            simp only [invFun']
+            rw [dif_pos (by exact hx'.2)]
+            change (extChartAt I x.1).symm (e x'.1) = x'.1
+            exact (extChartAt I x.1).left_inv hx'.1
+          right_inv' := by
+            intro z hz
+            change z.1 ∈ Metric.ball p b.rIn at hz
+            apply Subtype.ext
+            change (toFun' (invFun' z)).1 = z.1
+            simp only [invFun']
+            rw [dif_pos hz]
+            have hzt : z.1 ∈ (extChartAt I x.1).target :=
+              ((Metric.ball_subset_ball (le_of_lt b.rIn_lt_rOut)).trans
+                Metric.ball_subset_closedBall).trans hb hz
+            have hsrc : (extChartAt I x.1).symm z.1 ∈ e.source :=
+              (extChartAt I x.1).map_target hzt
+            have hcond : (extChartAt I x.1).symm z.1 ∈ e.source ∧
+                e ((extChartAt I x.1).symm z.1) ∈ Metric.ball p b.rIn := by
+              constructor
+              · exact hsrc
+              · rw [(extChartAt I x.1).right_inv hzt]
+                exact hz
+            simp only [toFun']
+            rw [dif_pos hcond]
+            change (extChartAt I x.1) ((extChartAt I x.1).symm z.1) = z.1
+            exact (extChartAt I x.1).right_inv hzt }
+      open_source := by
+        have hcont : Continuous (fun x' : LevelSetSpace f a => (x' : M)) := continuous_subtype_val
+        have h₁ : IsOpen {x' : LevelSetSpace f a | x'.1 ∈ e.source} :=
+          (isOpen_extChartAt_source (I := I) x.1).preimage hcont
+        have hf : ContinuousOn (fun x' : LevelSetSpace f a => e x'.1)
+            {x' : LevelSetSpace f a | x'.1 ∈ e.source} := by
+          exact (continuousOn_extChartAt x.1).comp hcont.continuousOn (by intro x' hx'; exact hx')
+        simpa using (hf.isOpen_inter_preimage h₁ (Metric.isOpen_ball))
+      open_target := by
+        have hcont : Continuous (fun z : LevelSetSpace (sublevelPullbackCutoff I f x.1 b) a =>
+            (z : MorseModel (m + 1))) := continuous_subtype_val
+        exact (Metric.isOpen_ball).preimage hcont
+      continuousOn_toFun := by
+        refine continuousOn_iff_continuous_restrict.mpr ?_
+        have hcont : Continuous (fun x' : {x' : LevelSetSpace f a |
+            x'.1 ∈ e.source ∧ e x'.1 ∈ Metric.ball p b.rIn} => e x'.1.1) := by
+          exact continuousOn_univ.mp ((continuousOn_extChartAt x.1).comp
+            (Continuous.continuousOn (continuous_subtype_val.comp continuous_subtype_val))
+            (by intro x' hx'; exact x'.2.1))
+        refine (Continuous.subtype_mk hcont (by
+          intro x'
+          rw [sublevelPullbackCutoff_eqOn I f x.1 b x'.2.2]
+          change f ((extChartAt I x.1).symm (e x'.1.1)) = a
+          rw [(extChartAt I x.1).left_inv x'.2.1]
+          exact x'.1.2)).congr ?_
+        intro x'
+        simp only [Set.restrict]
+        apply Subtype.ext
+        change e x'.1.1 = (toFun' x'.1).1
+        simp only [toFun']
+        rw [dif_pos (show x'.1.1 ∈ e.source ∧ e x'.1.1 ∈ Metric.ball p b.rIn from x'.2)]
+      continuousOn_invFun := by
+        refine continuousOn_iff_continuous_restrict.mpr ?_
+        have hcont : Continuous (fun z : {z : LevelSetSpace (sublevelPullbackCutoff I f x.1 b) a |
+            z.1 ∈ Metric.ball p b.rIn} => (extChartAt I x.1).symm z.1.1) := by
+          exact continuousOn_univ.mp ((continuousOn_extChartAt_symm x.1).comp
+            (Continuous.continuousOn (continuous_subtype_val.comp continuous_subtype_val))
+            (by intro z hz; exact ((Metric.ball_subset_ball (le_of_lt b.rIn_lt_rOut)).trans
+              Metric.ball_subset_closedBall).trans hb z.2))
+        refine (Continuous.subtype_mk hcont (by
+          intro z
+          change (sublevelPullback I f x.1 z.1.1) = a
+          rw [← sublevelPullbackCutoff_eqOn I f x.1 b z.2]
+          exact z.1.2)).congr ?_
+        intro z
+        simp only [Set.restrict]
+        apply Subtype.ext
+        change (extChartAt I x.1).symm z.1.1 = (invFun' z.1).1
+        simp only [invFun']
+        rw [dif_pos (show z.1.1 ∈ Metric.ball p b.rIn from z.2)]
+      }
+
+theorem mem_levelSetPullbackChart_source (f : M → ℝ) (a : ℝ) (x : LevelSetSpace f a)
+    (b : ContDiffBump ((extChartAt I x.1) x.1))
+    (hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target) :
+    x ∈ (levelSetPullbackChart I f a x b hb).source := by
+  simpa [levelSetPullbackChart] using (show x.1 ∈ (extChartAt I x.1).source ∧
+    (extChartAt I x.1) x.1 ∈ Metric.ball ((extChartAt I x.1) x.1) b.rIn from by
+      constructor
+      · exact mem_extChartAt_source (I := I) x.1
+      · exact Metric.mem_ball_self b.rIn_pos)
+
+theorem levelSetPullbackChart_apply_of_mem (f : M → ℝ) (a : ℝ) (x : LevelSetSpace f a)
+    (b : ContDiffBump ((extChartAt I x.1) x.1))
+    (hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target)
+    {x' : LevelSetSpace f a} (hx : x' ∈ (levelSetPullbackChart I f a x b hb).source) :
+    (levelSetPullbackChart I f a x b hb x').1 = (extChartAt I x.1) x'.1 := by
+  have hx' : x'.1 ∈ (extChartAt I x.1).source ∧
+      (extChartAt I x.1) x'.1 ∈ Metric.ball ((extChartAt I x.1) x.1) b.rIn := by
+    simpa [levelSetPullbackChart] using hx
+  change x'.1 ∈ (chartAt H x.1).source ∩ (chartAt H x.1) ⁻¹' I.source ∧
+      I ((chartAt H x.1) x'.1) ∈ Metric.ball (I ((chartAt H x.1) x.1)) b.rIn at hx'
+  dsimp [levelSetPullbackChart]
+  rw [dif_pos hx']
+
+theorem levelSetPullbackChart_symm_value (f : M → ℝ) (a : ℝ) (x : LevelSetSpace f a)
+    (b : ContDiffBump ((extChartAt I x.1) x.1))
+    (hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target)
+    {z : LevelSetSpace (sublevelPullbackCutoff I f x.1 b) a}
+    (hz : z ∈ (levelSetPullbackChart I f a x b hb).target) :
+    ((levelSetPullbackChart I f a x b hb).symm z).1 = (extChartAt I x.1).symm z.1 := by
+  have hz' : z.1 ∈ Metric.ball ((extChartAt I x.1) x.1) b.rIn := by
+    simpa [levelSetPullbackChart] using hz
+  change z.1 ∈ Metric.ball (I ((chartAt H x.1) x.1)) b.rIn at hz'
+  dsimp [levelSetPullbackChart]
+  rw [dif_pos hz']
+
+private theorem levelSetPullbackChart_transition_mem_aux
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (a : ℝ) (x₁ x₂ : LevelSetSpace f a)
+    (b₁ : ContDiffBump ((extChartAt I x₁.1) x₁.1))
+    (hb₁ : Metric.closedBall ((extChartAt I x₁.1) x₁.1) b₁.rOut ⊆ (extChartAt I x₁.1).target)
+    (b₂ : ContDiffBump ((extChartAt I x₂.1) x₂.1))
+    (hb₂ : Metric.closedBall ((extChartAt I x₂.1) x₂.1) b₂.rOut ⊆ (extChartAt I x₂.1).target)
+    (m₁ : OpenPartialHomeomorph (LevelSetSpace (sublevelPullbackCutoff I f x₁.1 b₁) a)
+      (MorseModel m))
+    (m₂ : OpenPartialHomeomorph (LevelSetSpace (sublevelPullbackCutoff I f x₂.1 b₂) a)
+      (MorseModel m))
+    {y : MorseModel m}
+    (hy : y ∈ ((levelSetPullbackChart I f a x₁ b₁ hb₁ ≫ₕ m₁).symm ≫ₕ
+        (levelSetPullbackChart I f a x₂ b₂ hb₂ ≫ₕ m₂)).source) :
+    y ∈ m₁.target ∧
+    m₁.symm y ∈ (levelSetPullbackChart I f a x₁ b₁ hb₁).target ∧
+    (levelSetPullbackChart I f a x₁ b₁ hb₁).symm (m₁.symm y) ∈
+      (levelSetPullbackChart I f a x₂ b₂ hb₂).source ∧
+    (levelSetPullbackChart I f a x₂ b₂ hb₂)
+      ((levelSetPullbackChart I f a x₁ b₁ hb₁).symm (m₁.symm y)) ∈ m₂.source := by
+  classical
+  let e₁ : OpenPartialHomeomorph (LevelSetSpace f a)
+      (LevelSetSpace (sublevelPullbackCutoff I f x₁.1 b₁) a) :=
+    levelSetPullbackChart I f a x₁ b₁ hb₁
+  let e₂ : OpenPartialHomeomorph (LevelSetSpace f a)
+      (LevelSetSpace (sublevelPullbackCutoff I f x₂.1 b₂) a) :=
+    levelSetPullbackChart I f a x₂ b₂ hb₂
+  let c₁ : OpenPartialHomeomorph (LevelSetSpace f a) (MorseModel m) := e₁ ≫ₕ m₁
+  let c₂ : OpenPartialHomeomorph (LevelSetSpace f a) (MorseModel m) := e₂ ≫ₕ m₂
+  have hy1 : y ∈ (c₁.symm ≫ₕ c₂).source := hy
+  have hz1 : y ∈ c₁.target := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1
+    simpa using hy1.1
+  have hz1c : y ∈ (e₁ ≫ₕ m₁).target := by
+    simpa [c₁] using hz1
+  have hm₁ : y ∈ m₁.target := by
+    rw [OpenPartialHomeomorph.trans_target] at hz1c
+    exact hz1c.1
+  have hme₁ : m₁.symm y ∈ e₁.target := by
+    rw [OpenPartialHomeomorph.trans_target] at hz1c
+    exact hz1c.2
+  have hc₁₂ : c₁.symm y ∈ c₂.source := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1
+    exact hy1.2
+  have hcs : c₁.symm y = e₁.symm (m₁.symm y) := by
+    rw [show c₁.symm = (e₁ ≫ₕ m₁).symm from rfl]
+    rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm]
+    rfl
+  have hc₁₂e₂ : e₁.symm (m₁.symm y) ∈ e₂.source := by
+    simpa [hcs] using hc₁₂.1
+  have hm₂ : e₂ (e₁.symm (m₁.symm y)) ∈ m₂.source := by
+    rw [OpenPartialHomeomorph.trans_source] at hc₁₂
+    simpa [hcs] using hc₁₂.2
+  exact ⟨hm₁, hme₁, hc₁₂e₂, hm₂⟩
+
+private theorem levelSetPullbackChart_transition_reduce_aux
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (a : ℝ) (x₁ x₂ : LevelSetSpace f a)
+    (b₁ : ContDiffBump ((extChartAt I x₁.1) x₁.1))
+    (hb₁ : Metric.closedBall ((extChartAt I x₁.1) x₁.1) b₁.rOut ⊆ (extChartAt I x₁.1).target)
+    (b₂ : ContDiffBump ((extChartAt I x₂.1) x₂.1))
+    (hb₂ : Metric.closedBall ((extChartAt I x₂.1) x₂.1) b₂.rOut ⊆ (extChartAt I x₂.1).target)
+    (m₁ : OpenPartialHomeomorph (LevelSetSpace (sublevelPullbackCutoff I f x₁.1 b₁) a)
+      (MorseModel m))
+    (m₂ : OpenPartialHomeomorph (LevelSetSpace (sublevelPullbackCutoff I f x₂.1 b₂) a)
+      (MorseModel m))
+    (w₁ : MorseModel m → MorseModel (m + 1))
+    (v₂ : MorseModel (m + 1) → MorseModel m)
+    (hW₁val : ∀ z : MorseModel m, z ∈ m₁.target → (m₁.symm z).1 = w₁ z)
+    (hV₂val : ∀ w : LevelSetSpace (sublevelPullbackCutoff I f x₂.1 b₂) a,
+      w ∈ m₂.source → (m₂ w : MorseModel m) = v₂ w.1)
+    {y : MorseModel m}
+    (hy : y ∈ ((levelSetPullbackChart I f a x₁ b₁ hb₁ ≫ₕ m₁).symm ≫ₕ
+        (levelSetPullbackChart I f a x₂ b₂ hb₂ ≫ₕ m₂)).source) :
+    (((levelSetPullbackChart I f a x₁ b₁ hb₁ ≫ₕ m₁).symm ≫ₕ
+        (levelSetPullbackChart I f a x₂ b₂ hb₂ ≫ₕ m₂)) y : MorseModel m) =
+      v₂ (sublevelChartTransition I x₁.1 x₂.1 (w₁ y)) := by
+  classical
+  let e₁ : OpenPartialHomeomorph (LevelSetSpace f a)
+      (LevelSetSpace (sublevelPullbackCutoff I f x₁.1 b₁) a) :=
+    levelSetPullbackChart I f a x₁ b₁ hb₁
+  let e₂ : OpenPartialHomeomorph (LevelSetSpace f a)
+      (LevelSetSpace (sublevelPullbackCutoff I f x₂.1 b₂) a) :=
+    levelSetPullbackChart I f a x₂ b₂ hb₂
+  have hmems := levelSetPullbackChart_transition_mem_aux I f a x₁ x₂ b₁ hb₁ b₂ hb₂ m₁ m₂ hy
+  change (m₂ (e₂ (e₁.symm (m₁.symm y))) : MorseModel m) =
+    v₂ (sublevelChartTransition I x₁.1 x₂.1 (w₁ y))
+  rw [hV₂val (e₂ (e₁.symm (m₁.symm y))) hmems.2.2.2]
+  rw [levelSetPullbackChart_apply_of_mem I f a x₂ b₂ hb₂ hmems.2.2.1]
+  rw [levelSetPullbackChart_symm_value I f a x₁ b₁ hb₁ hmems.2.1]
+  rw [hW₁val y hmems.1]
+  rfl
+
+private theorem levelSetPullbackChart_transition_w₁_mem_aux
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (a : ℝ) (x₁ x₂ : LevelSetSpace f a)
+    (b₁ : ContDiffBump ((extChartAt I x₁.1) x₁.1))
+    (hb₁ : Metric.closedBall ((extChartAt I x₁.1) x₁.1) b₁.rOut ⊆ (extChartAt I x₁.1).target)
+    (b₂ : ContDiffBump ((extChartAt I x₂.1) x₂.1))
+    (hb₂ : Metric.closedBall ((extChartAt I x₂.1) x₂.1) b₂.rOut ⊆ (extChartAt I x₂.1).target)
+    (m₁ : OpenPartialHomeomorph (LevelSetSpace (sublevelPullbackCutoff I f x₁.1 b₁) a)
+      (MorseModel m))
+    (m₂ : OpenPartialHomeomorph (LevelSetSpace (sublevelPullbackCutoff I f x₂.1 b₂) a)
+      (MorseModel m))
+    (w₁ : MorseModel m → MorseModel (m + 1))
+    (hW₁val : ∀ z : MorseModel m, z ∈ m₁.target → (m₁.symm z).1 = w₁ z)
+    {y : MorseModel m}
+    (hy : y ∈ ((levelSetPullbackChart I f a x₁ b₁ hb₁ ≫ₕ m₁).symm ≫ₕ
+        (levelSetPullbackChart I f a x₂ b₂ hb₂ ≫ₕ m₂)).source) :
+    w₁ y ∈ sublevelChartTransitionDomain I x₁.1 x₂.1 := by
+  classical
+  have hmems := levelSetPullbackChart_transition_mem_aux I f a x₁ x₂ b₁ hb₁ b₂ hb₂ m₁ m₂ hy
+  have hw₁y : (m₁.symm y).1 = w₁ y := hW₁val y hmems.1
+  have htarget : (m₁.symm y).1 ∈ (extChartAt I x₁.1).target := by
+    have hball : (m₁.symm y).1 ∈ Metric.ball ((extChartAt I x₁.1) x₁.1) b₁.rIn := by
+      simpa [levelSetPullbackChart] using hmems.2.1
+    exact ((Metric.ball_subset_ball (le_of_lt b₁.rIn_lt_rOut)).trans
+      Metric.ball_subset_closedBall).trans hb₁ hball
+  have hsrc : (extChartAt I x₁.1).symm ((m₁.symm y).1) ∈ (extChartAt I x₂.1).source := by
+    have hmem₂ : (levelSetPullbackChart I f a x₁ b₁ hb₁).symm (m₁.symm y) ∈
+        (levelSetPullbackChart I f a x₂ b₂ hb₂).source := hmems.2.2.1
+    have hval : ((levelSetPullbackChart I f a x₁ b₁ hb₁).symm (m₁.symm y)).1 =
+        (extChartAt I x₁.1).symm ((m₁.symm y).1) :=
+      levelSetPullbackChart_symm_value I f a x₁ b₁ hb₁ hmems.2.1
+    have hmem₂' : ((levelSetPullbackChart I f a x₁ b₁ hb₁).symm (m₁.symm y)).1 ∈
+        (chartAt H x₂.1).source := by
+      have hconj : ((levelSetPullbackChart I f a x₁ b₁ hb₁).symm (m₁.symm y)).1 ∈
+          (extChartAt I x₂.1).source ∧
+        (extChartAt I x₂.1) ((levelSetPullbackChart I f a x₁ b₁ hb₁).symm (m₁.symm y)).1 ∈
+          Metric.ball ((extChartAt I x₂.1) x₂.1) b₂.rIn := hmem₂
+      simpa [extChartAt_source] using hconj.1
+    rw [← hval]
+    simpa [extChartAt_source] using hmem₂'
+  change w₁ y ∈ sublevelChartTransitionDomain I x₁.1 x₂.1
+  rw [sublevelChartTransitionDomain]
+  constructor
+  · rwa [← hw₁y]
+  · rwa [← hw₁y]
+
+private theorem levelSetPullbackChart_transition_contDiffOn_aux
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (a : ℝ) (x₁ x₂ : LevelSetSpace f a)
+    (b₁ : ContDiffBump ((extChartAt I x₁.1) x₁.1))
+    (hb₁ : Metric.closedBall ((extChartAt I x₁.1) x₁.1) b₁.rOut ⊆ (extChartAt I x₁.1).target)
+    (b₂ : ContDiffBump ((extChartAt I x₂.1) x₂.1))
+    (hb₂ : Metric.closedBall ((extChartAt I x₂.1) x₂.1) b₂.rOut ⊆ (extChartAt I x₂.1).target)
+    (m₁ : OpenPartialHomeomorph (LevelSetSpace (sublevelPullbackCutoff I f x₁.1 b₁) a)
+      (MorseModel m))
+    (m₂ : OpenPartialHomeomorph (LevelSetSpace (sublevelPullbackCutoff I f x₂.1 b₂) a)
+      (MorseModel m))
+    (w₁ : MorseModel m → MorseModel (m + 1))
+    (v₂ : MorseModel (m + 1) → MorseModel m) (D₁ : Set (MorseModel m))
+    (hW₁ : ContDiffOn ℝ (⊤ : ℕ∞) w₁ D₁)
+    (hV₂ : ContDiff ℝ (⊤ : ℕ∞) v₂)
+    (hW₁val : ∀ z : MorseModel m, z ∈ m₁.target → (m₁.symm z).1 = w₁ z)
+    (hV₂val : ∀ w : LevelSetSpace (sublevelPullbackCutoff I f x₂.1 b₂) a,
+      w ∈ m₂.source → (m₂ w : MorseModel m) = v₂ w.1)
+    (hD₁ : ∀ y : MorseModel m, y ∈ m₁.target → y ∈ D₁) :
+    ContDiffOn ℝ (⊤ : ℕ∞)
+      ((levelSetPullbackChart I f a x₁ b₁ hb₁ ≫ₕ m₁).symm ≫ₕ
+        (levelSetPullbackChart I f a x₂ b₂ hb₂ ≫ₕ m₂) : MorseModel m → MorseModel m)
+      ((levelSetPullbackChart I f a x₁ b₁ hb₁ ≫ₕ m₁).symm ≫ₕ
+        (levelSetPullbackChart I f a x₂ b₂ hb₂ ≫ₕ m₂)).source := by
+  classical
+  let s : Set (MorseModel m) := ((levelSetPullbackChart I f a x₁ b₁ hb₁ ≫ₕ m₁).symm ≫ₕ
+    (levelSetPullbackChart I f a x₂ b₂ hb₂ ≫ₕ m₂)).source
+  intro y hy
+  have hw : ContDiffWithinAt ℝ (⊤ : ℕ∞) w₁ s y := by
+    exact (hW₁.mono (by intro y' hy'; exact hD₁ y' (by
+      have hmems' := levelSetPullbackChart_transition_mem_aux I f a x₁ x₂ b₁ hb₁ b₂ hb₂ m₁ m₂ hy'
+      exact hmems'.1))) y hy
+  have hwt : w₁ y ∈ sublevelChartTransitionDomain I x₁.1 x₂.1 :=
+    levelSetPullbackChart_transition_w₁_mem_aux I f a x₁ x₂ b₁ hb₁ b₂ hb₂ m₁ m₂ w₁ hW₁val hy
+  have hφ : ContDiffWithinAt ℝ (⊤ : ℕ∞) (sublevelChartTransition I x₁.1 x₂.1)
+      (sublevelChartTransitionDomain I x₁.1 x₂.1) (w₁ y) :=
+    (contDiffOn_sublevelChartTransition I x₁.1 x₂.1) _ hwt
+  have hφw : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (sublevelChartTransition I x₁.1 x₂.1 ∘ w₁) s y := by
+    refine hφ.comp y hw ?_
+    intro y' hy'
+    exact levelSetPullbackChart_transition_w₁_mem_aux I f a x₁ x₂ b₁ hb₁ b₂ hb₂ m₁ m₂ w₁ hW₁val hy'
+  have hv : ContDiffWithinAt ℝ (⊤ : ℕ∞) v₂ (Set.univ)
+      (sublevelChartTransition I x₁.1 x₂.1 (w₁ y)) :=
+    hV₂.contDiffAt.contDiffWithinAt
+  have hcd : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (v₂ ∘ sublevelChartTransition I x₁.1 x₂.1 ∘ w₁) s y := by
+    refine hv.comp y hφw ?_
+    intro y' hy'
+    trivial
+  change ContDiffWithinAt ℝ (⊤ : ℕ∞)
+    (fun y' : MorseModel m => ((levelSetPullbackChart I f a x₁ b₁ hb₁ ≫ₕ m₁).symm ≫ₕ
+      (levelSetPullbackChart I f a x₂ b₂ hb₂ ≫ₕ m₂)) y') s y
+  refine hcd.congr_of_eventuallyEq ?_ ?_
+  · filter_upwards [self_mem_nhdsWithin] with y' hy'
+    simpa using (levelSetPullbackChart_transition_reduce_aux I f a x₁ x₂ b₁ hb₁ b₂ hb₂ m₁ m₂
+      w₁ v₂ hW₁val hV₂val hy')
+  · simpa using (levelSetPullbackChart_transition_reduce_aux I f a x₁ x₂ b₁ hb₁ b₂ hb₂ m₁ m₂
+      w₁ v₂ hW₁val hV₂val hy)
+
+noncomputable def manifoldLevelSetChart [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) (x : LevelSetSpace f a) :
+    OpenPartialHomeomorph (LevelSetSpace f a) (MorseModel m) :=
+  let b : ContDiffBump ((extChartAt I x.1) x.1) := sublevelPullbackBump I x.1
+  let hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target :=
+    sublevelPullbackBump_closedBall_target (I := I) x.1
+  let g : MorseModel (m + 1) → ℝ := sublevelPullbackCutoff I f x.1 b
+  let p : LevelSetSpace g a := levelSetPullbackCutoffPoint I f a x b
+  levelSetPullbackChart I f a x b hb ≫ₕ
+    levelSetChart g a p (contDiff_sublevelPullbackCutoff I f hf x.1 b hb)
+      (fderiv_levelSetPullbackCutoffPoint_ne_zero I f hf a hreg x b)
+
+theorem mem_manifoldLevelSetChart_source [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) (x : LevelSetSpace f a) :
+    x ∈ (manifoldLevelSetChart I f a hf hreg x).source := by
+  let b : ContDiffBump ((extChartAt I x.1) x.1) := sublevelPullbackBump I x.1
+  let hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target :=
+    sublevelPullbackBump_closedBall_target (I := I) x.1
+  let g : MorseModel (m + 1) → ℝ := sublevelPullbackCutoff I f x.1 b
+  let p : LevelSetSpace g a := levelSetPullbackCutoffPoint I f a x b
+  dsimp [manifoldLevelSetChart]
+  constructor
+  · exact mem_levelSetPullbackChart_source I f a x b hb
+  · change (levelSetPullbackChart I f a x b hb) x ∈
+      (levelSetChart g a p (contDiff_sublevelPullbackCutoff I f hf x.1 b hb)
+        (fderiv_levelSetPullbackCutoffPoint_ne_zero I f hf a hreg x b)).source
+    have hpt : (levelSetPullbackChart I f a x b hb) x = levelSetPullbackCutoffPoint I f a x b := by
+      apply Subtype.ext
+      change ((levelSetPullbackChart I f a x b hb) x).1 =
+        (levelSetPullbackCutoffPoint I f a x b).1
+      rw [levelSetPullbackChart_apply_of_mem I f a x b hb
+        (mem_levelSetPullbackChart_source I f a x b hb)]
+      rfl
+    rw [hpt]
+    exact mem_levelSetChart_source g a p (contDiff_sublevelPullbackCutoff I f hf x.1 b hb)
+      (fderiv_levelSetPullbackCutoffPoint_ne_zero I f hf a hreg x b)
+
+theorem contDiffOn_manifoldLevelSet_transition [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x)
+    (x₁ x₂ : LevelSetSpace f a) :
+    ContDiffOn ℝ (⊤ : ℕ∞)
+      ((manifoldLevelSetChart I f a hf hreg x₁).symm ≫ₕ
+        (manifoldLevelSetChart I f a hf hreg x₂) : MorseModel m → MorseModel m)
+      ((manifoldLevelSetChart I f a hf hreg x₁).symm ≫ₕ
+        (manifoldLevelSetChart I f a hf hreg x₂)).source := by
+  classical
+  let b₁ : ContDiffBump ((extChartAt I x₁.1) x₁.1) := sublevelPullbackBump I x₁.1
+  let hb₁ : Metric.closedBall ((extChartAt I x₁.1) x₁.1) b₁.rOut ⊆ (extChartAt I x₁.1).target :=
+    sublevelPullbackBump_closedBall_target (I := I) x₁.1
+  let b₂ : ContDiffBump ((extChartAt I x₂.1) x₂.1) := sublevelPullbackBump I x₂.1
+  let hb₂ : Metric.closedBall ((extChartAt I x₂.1) x₂.1) b₂.rOut ⊆ (extChartAt I x₂.1).target :=
+    sublevelPullbackBump_closedBall_target (I := I) x₂.1
+  let g₁ : MorseModel (m + 1) → ℝ := sublevelPullbackCutoff I f x₁.1 b₁
+  let g₂ : MorseModel (m + 1) → ℝ := sublevelPullbackCutoff I f x₂.1 b₂
+  let p₁ : LevelSetSpace g₁ a := levelSetPullbackCutoffPoint I f a x₁ b₁
+  let p₂ : LevelSetSpace g₂ a := levelSetPullbackCutoffPoint I f a x₂ b₂
+  let hg₁ : ContDiff ℝ (⊤ : ℕ∞) g₁ := contDiff_sublevelPullbackCutoff I f hf x₁.1 b₁ hb₁
+  let hg₂ : ContDiff ℝ (⊤ : ℕ∞) g₂ := contDiff_sublevelPullbackCutoff I f hf x₂.1 b₂ hb₂
+  let hr₁ : fderiv ℝ g₁ p₁.1 ≠ 0 :=
+    fderiv_levelSetPullbackCutoffPoint_ne_zero I f hf a hreg x₁ b₁
+  let hr₂ : fderiv ℝ g₂ p₂.1 ≠ 0 :=
+    fderiv_levelSetPullbackCutoffPoint_ne_zero I f hf a hreg x₂ b₂
+  let m₁ : OpenPartialHomeomorph (LevelSetSpace g₁ a) (MorseModel m) :=
+    levelSetChart g₁ a p₁ hg₁ hr₁
+  let m₂ : OpenPartialHomeomorph (LevelSetSpace g₂ a) (MorseModel m) :=
+    levelSetChart g₂ a p₂ hg₂ hr₂
+  let w₁ : MorseModel m → MorseModel (m + 1) := levelSetChartInvValue g₁ a p₁ hg₁ hr₁
+  let v₂ : MorseModel (m + 1) → MorseModel m := levelSetChartValue g₂ a p₂ hg₂ hr₂
+  let D₁ : Set (MorseModel m) := levelSetChartDomain g₁ a p₁ hg₁ hr₁
+  have hW₁ : ContDiffOn ℝ (⊤ : ℕ∞) w₁ D₁ := by
+    dsimp [w₁]
+    exact contDiffOn_levelSetChartInvValueRaw g₁ a p₁ hg₁ hr₁
+  have hV₂ : ContDiff ℝ (⊤ : ℕ∞) v₂ := by
+    dsimp [v₂]
+    exact contDiff_levelSetChartValue g₂ a p₂ hg₂ hr₂
+  have hW₁val : ∀ z : MorseModel m, z ∈ m₁.target → (m₁.symm z).1 = w₁ z := by
+    intro z hz
+    rw [levelSetChart_symm_value' g₁ a p₁ hg₁ hr₁ hz]
+    rfl
+  have hV₂val : ∀ w : LevelSetSpace g₂ a, w ∈ m₂.source → (m₂ w : MorseModel m) = v₂ w.1 := by
+    intro w hw
+    exact levelSetChart_apply_value' g₂ a p₂ hg₂ hr₂ w
+  have hD₁ : ∀ y : MorseModel m, y ∈ m₁.target → y ∈ D₁ := by
+    intro y hy
+    simpa [levelSetChartDomain] using hy
+  simpa [manifoldLevelSetChart, b₁, b₂, hb₁, hb₂, g₁, g₂, p₁, p₂, m₁, m₂] using
+    (levelSetPullbackChart_transition_contDiffOn_aux I f a x₁ x₂ b₁ hb₁ b₂ hb₂ m₁ m₂
+      w₁ v₂ D₁ hW₁ hV₂ hW₁val hV₂val hD₁)
+
+@[reducible]
+noncomputable def manifoldLevelSetChartedSpace [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) :
+    ChartedSpace (MorseModel m) (LevelSetSpace f a) where
+  atlas := Set.range (fun x : LevelSetSpace f a => manifoldLevelSetChart I f a hf hreg x)
+  chartAt := fun x : LevelSetSpace f a => manifoldLevelSetChart I f a hf hreg x
+  mem_chart_source := fun x => mem_manifoldLevelSetChart_source I f a hf hreg x
+  chart_mem_atlas := fun x => ⟨x, rfl⟩
+
+@[reducible]
+noncomputable def manifoldLevelSetHasGroupoid [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) :
+    @HasGroupoid (MorseModel m) _ (LevelSetSpace f a) _
+      (manifoldLevelSetChartedSpace I f a hf hreg)
+      (contDiffGroupoid (⊤ : ℕ∞) (𝓘(ℝ, MorseModel m))) := by
+  classical
+  letI := manifoldLevelSetChartedSpace I f a hf hreg
+  refine hasGroupoid_of_pregroupoid (contDiffPregroupoid (⊤ : ℕ∞) (𝓘(ℝ, MorseModel m))) ?_
+  intro e e' he he'
+  rcases he with ⟨x₁, rfl⟩
+  rcases he' with ⟨x₂, rfl⟩
+  have hfun : 𝓘(ℝ, MorseModel m) ∘
+        (manifoldLevelSetChart I f a hf hreg x₁).symm ≫ₕ
+          (manifoldLevelSetChart I f a hf hreg x₂) ∘ (𝓘(ℝ, MorseModel m)).symm =
+      (manifoldLevelSetChart I f a hf hreg x₁).symm ≫ₕ
+        (manifoldLevelSetChart I f a hf hreg x₂) := by
+    ext y
+    simp [modelWithCornersSelf, ModelWithCorners.ofTargetUniv]
+  have hdom : (𝓘(ℝ, MorseModel m)).symm ⁻¹'
+        ((manifoldLevelSetChart I f a hf hreg x₁).symm ≫ₕ
+          (manifoldLevelSetChart I f a hf hreg x₂)).source ∩
+      Set.range (𝓘(ℝ, MorseModel m)) =
+      ((manifoldLevelSetChart I f a hf hreg x₁).symm ≫ₕ
+        (manifoldLevelSetChart I f a hf hreg x₂)).source := by
+    ext y
+    simp [modelWithCornersSelf, ModelWithCorners.ofTargetUniv]
+  change ContDiffOn ℝ (⊤ : ℕ∞) (𝓘(ℝ, MorseModel m) ∘
+      ((manifoldLevelSetChart I f a hf hreg x₁).symm ≫ₕ
+        (manifoldLevelSetChart I f a hf hreg x₂) : MorseModel m → MorseModel m) ∘
+      (𝓘(ℝ, MorseModel m)).symm)
+      ((𝓘(ℝ, MorseModel m)).symm ⁻¹'
+        ((manifoldLevelSetChart I f a hf hreg x₁).symm ≫ₕ
+          (manifoldLevelSetChart I f a hf hreg x₂)).source ∩
+        Set.range (𝓘(ℝ, MorseModel m)))
+  rw [hfun, hdom]
+  exact contDiffOn_manifoldLevelSet_transition I f a hf hreg x₁ x₂
+
+@[reducible]
+noncomputable def manifoldLevelSetIsManifold [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) :
+    @IsManifold ℝ _ (MorseModel m) _ _ (MorseModel m) _ (𝓘(ℝ, MorseModel m))
+      (⊤ : ℕ∞) (LevelSetSpace f a) _ (manifoldLevelSetChartedSpace I f a hf hreg) := by
+  letI := manifoldLevelSetChartedSpace I f a hf hreg
+  exact { toHasGroupoid := manifoldLevelSetHasGroupoid I f a hf hreg }
+
 end
 
 end DifferentialGeometry.Topology.Morse
