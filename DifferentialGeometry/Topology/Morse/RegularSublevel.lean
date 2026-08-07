@@ -1,5 +1,6 @@
 import DifferentialGeometry.Topology.Morse.LevelSet
 import DifferentialGeometry.Topology.Morse.Manifold
+import DifferentialGeometry.Analysis.ODE.CompactSupportFlow
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
@@ -1891,6 +1892,89 @@ noncomputable def manifoldSublevelBoundaryEquiv (f : M → ℝ) (a : ℝ) :
         exact le_of_eq y.2))
       (fun y : LevelSetSpace f a => by
         simpa using y.2)
+
+theorem contMDiff_levelSetInclusion [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (a : ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x)
+    (hcs : ChartedSpace (MorseModel m) (LevelSetSpace f a) :=
+      manifoldLevelSetChartedSpace I f a hf hreg)
+    (hchart : ∀ x : LevelSetSpace f a, hcs.chartAt x = manifoldLevelSetChart I f a hf hreg x := by
+      intro x
+      rfl) :
+    ContMDiff (𝓘(ℝ, MorseModel m)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : LevelSetSpace f a => x.1) := by
+  classical
+  letI := hcs
+  intro x
+  rw [contMDiffAt_iff]
+  constructor
+  · exact continuous_subtype_val.continuousAt
+  · let b : ContDiffBump ((extChartAt I x.1) x.1) := sublevelPullbackBump I x.1
+    let hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target :=
+      sublevelPullbackBump_closedBall_target (I := I) x.1
+    let g : MorseModel (m + 1) → ℝ := sublevelPullbackCutoff I f x.1 b
+    let p : LevelSetSpace g a := levelSetPullbackCutoffPoint I f a x b
+    let hg : ContDiff ℝ (⊤ : ℕ∞) g := contDiff_sublevelPullbackCutoff I f hf x.1 b hb
+    let hr : fderiv ℝ g p.1 ≠ 0 := fderiv_levelSetPullbackCutoffPoint_ne_zero I f hf a hreg x b
+    let c : OpenPartialHomeomorph (LevelSetSpace f a) (MorseModel m) :=
+      manifoldLevelSetChart I f a hf hreg x
+    let e : OpenPartialHomeomorph (LevelSetSpace f a) (LevelSetSpace g a) :=
+      levelSetPullbackChart I f a x b hb
+    let mc : OpenPartialHomeomorph (LevelSetSpace g a) (MorseModel m) :=
+      levelSetChart g a p hg hr
+    let F : MorseModel m → MorseModel (m + 1) :=
+      extChartAt I x.1 ∘ (fun y : LevelSetSpace f a => y.1) ∘
+        (extChartAt (𝓘(ℝ, MorseModel m)) x).symm
+    let z₀ : MorseModel m := (extChartAt (𝓘(ℝ, MorseModel m)) x) x
+    have hsymm₀ : ∀ z : MorseModel m, (extChartAt (𝓘(ℝ, MorseModel m)) x).symm z = c.symm z := by
+      intro z
+      change (hcs.chartAt x).symm z = c.symm z
+      rw [hchart x]
+    have hz₀ : z₀ ∈ c.target := by
+      have hval₀ : c x ∈ c.target :=
+        c.map_source (mem_manifoldLevelSetChart_source I f a hf hreg x)
+      dsimp [z₀]
+      simpa [hchart x] using hval₀
+    have hval : ∀ z ∈ c.target, F z = levelSetChartInvValueRaw g a p hg hr z := by
+      intro z hz
+      have hz' : z ∈ mc.target := by
+        dsimp [c, manifoldLevelSetChart] at hz
+        exact hz.1
+      have hze : mc.symm z ∈ e.target := by
+        dsimp [c, manifoldLevelSetChart] at hz
+        exact hz.2
+      have hsymm₁ := levelSetChart_symm_value' g a p hg hr hz'
+      have hsymm₂ := levelSetPullbackChart_symm_value I f a x b hb hze
+      have hzball : (mc.symm z).1 ∈ Metric.ball ((extChartAt I x.1) x.1) b.rIn := by
+        simpa [e, levelSetPullbackChart] using hze
+      have hzt : (mc.symm z).1 ∈ (extChartAt I x.1).target :=
+        ((Metric.ball_subset_ball (le_of_lt b.rIn_lt_rOut)).trans
+          Metric.ball_subset_closedBall).trans hb hzball
+      change (extChartAt I x.1) ((((extChartAt (𝓘(ℝ, MorseModel m)) x).symm z) :
+          LevelSetSpace f a).1) = levelSetChartInvValueRaw g a p hg hr z
+      rw [hsymm₀ z]
+      have hc : c.symm z = e.symm (mc.symm z) := by
+        dsimp [c, e, mc, manifoldLevelSetChart]
+      rw [hc]
+      rw [hsymm₂]
+      change (extChartAt I x.1) ((extChartAt I x.1).symm ((mc.symm z).1)) =
+        levelSetChartInvValueRaw g a p hg hr z
+      rw [(extChartAt I x.1).right_inv hzt]
+      rw [hsymm₁]
+    have hF : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) F c.target := by
+      have hraw : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (levelSetChartInvValueRaw g a p hg hr) (levelSetChartDomain g a p hg hr) :=
+        contDiffOn_levelSetChartInvValueRaw g a p hg hr
+      have hsub : c.target ⊆ levelSetChartDomain g a p hg hr := by
+        intro z hz
+        have hz' : z ∈ mc.target := by
+          dsimp [c, manifoldLevelSetChart] at hz
+          exact hz.1
+        simpa [levelSetChartDomain] using hz'
+      exact (hraw.mono hsub).congr (by intro z hz; exact hval z hz)
+    have hFAt : ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) F z₀ :=
+      hF.contDiffAt (c.open_target.mem_nhds hz₀)
+    simpa [F, modelWithCornersSelf, ModelWithCorners.ofTargetUniv] using hFAt.contDiffWithinAt
 
 end
 
