@@ -685,6 +685,103 @@ theorem cocoreModelPoint_norm_le {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 
     nlinarith [hw, sq_nonneg r, hR2]
   · exact Real.sqrt_nonneg _
 
+theorem cocoreModelPoint_surjective_levelSet {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
+    (hε : 0 < ε) (hR : 0 ≤ R) (hRε : 2 * ε < R ^ 2)
+    (y : MorseModel n) (hy : morseNormalForm hk c y = c - ε) (hnorm : morseNorm n y ≤ R) :
+    ∃ p : CellBoundary k × ClosedCell (n - k),
+      cocoreModelPoint hk ε (Real.sqrt ((R ^ 2 - 2 * ε) / 2)) p = y := by
+  let a : EuclideanSpace ℝ (Fin k) := negPart hk y
+  let b : EuclideanSpace ℝ (Fin (n - k)) := posPart hk y
+  let r : ℝ := Real.sqrt ((R ^ 2 - 2 * ε) / 2)
+  have hnormForm : morseNormalForm hk c y = c + (1 / 2) * (-‖a‖ ^ 2 + ‖b‖ ^ 2) := by
+    dsimp [morseNormalForm, a, b]
+    congr 1
+    rw [show (∑ i : Fin k, - (y (negIdx hk i)) ^ 2) = -(∑ i : Fin k, (y (negIdx hk i)) ^ 2) by
+      rw [Finset.sum_neg_distrib]]
+    rw [show (∑ i : Fin k, (y (negIdx hk i)) ^ 2) = ‖negPart hk y‖ ^ 2 by
+      rw [EuclideanSpace.real_norm_sq_eq (negPart hk y)]
+      apply Finset.sum_congr rfl
+      intro i hi
+      change (y (negIdx hk i)) ^ 2 = ((negPart hk y).ofLp i) ^ 2
+      rfl]
+    rw [show (∑ j : Fin (n - k), (y (posIdx hk j)) ^ 2) = ‖posPart hk y‖ ^ 2 by
+      rw [EuclideanSpace.real_norm_sq_eq (posPart hk y)]
+      apply Finset.sum_congr rfl
+      intro j hj
+      change (y (posIdx hk j)) ^ 2 = ((posPart hk y).ofLp j) ^ 2
+      rfl]
+  have hle : morseNorm n y ^ 2 ≤ R ^ 2 := by
+    exact sq_le_sq.mpr (by
+      rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg hR]
+      exact hnorm)
+  have hnormSq : ‖a‖ ^ 2 + ‖b‖ ^ 2 ≤ R ^ 2 := by
+    have hle' : ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 ≤ R ^ 2 := by
+      rw [morseNorm_sq_eq_negPart_add_posPart hk y] at hle
+      exact hle
+    simpa [a, b] using hle'
+  have hrel : ‖a‖ ^ 2 = ‖b‖ ^ 2 + 2 * ε := by
+    rw [hnormForm] at hy
+    nlinarith
+  have hb : ‖b‖ ^ 2 ≤ r ^ 2 := by
+    dsimp [r]
+    have h1 : 0 ≤ (R ^ 2 - 2 * ε) / 2 := by
+      nlinarith [hRε, sq_nonneg R]
+    rw [Real.sq_sqrt h1]
+    nlinarith [hnormSq, hrel]
+  have ha0 : ‖a‖ ≠ 0 := by
+    have hpos : 0 < ‖a‖ := by
+      have hsq : 0 < ‖a‖ ^ 2 := by nlinarith [hrel, hε, sq_nonneg ‖b‖]
+      exact lt_of_le_of_ne (norm_nonneg a) (Ne.symm (sq_pos_iff.mp hsq))
+    exact ne_of_gt hpos
+  have hpos_a : 0 < ‖a‖ := lt_of_le_of_ne (norm_nonneg a) (Ne.symm ha0)
+  have hr : 0 < r := by
+    dsimp [r]
+    exact Real.sqrt_pos.mpr (by nlinarith [hRε])
+  let u : CellBoundary k := ⟨(‖a‖)⁻¹ • a, by
+    simpa [norm_smul, Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr hpos_a.le)] using
+      (inv_mul_cancel₀ ha0)⟩
+  let w : ClosedCell (n - k) := ⟨r⁻¹ • b, by
+    rw [norm_smul]
+    rw [Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (le_of_lt hr))]
+    have hb' : ‖b‖ ≤ r := le_of_sq_le_sq hb (le_of_lt hr)
+    have hm : r⁻¹ * ‖b‖ ≤ 1 := by
+      calc
+        r⁻¹ * ‖b‖ ≤ r⁻¹ * r := mul_le_mul_of_nonneg_left hb' (inv_nonneg.mpr (le_of_lt hr))
+        _ = 1 := inv_mul_cancel₀ (ne_of_gt hr)
+    simpa using hm⟩
+  refine ⟨(u, w), ?_⟩
+  change recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖(w : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+      (u : EuclideanSpace ℝ (Fin k)))) (r • (w : EuclideanSpace ℝ (Fin (n - k)))) = y
+  have hrw : (r • (w : EuclideanSpace ℝ (Fin (n - k)))) = b := by
+    dsimp [w]
+    rw [smul_smul, mul_inv_cancel₀ (ne_of_gt hr), one_smul]
+  have hw : ‖(w : EuclideanSpace ℝ (Fin (n - k)))‖ = r⁻¹ * ‖b‖ := by
+    dsimp [w]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (le_of_lt hr))]
+  have hs : Real.sqrt (2 * ε + r ^ 2 * ‖(w : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) = ‖a‖ := by
+    have hsqb : r ^ 2 * (r⁻¹ * ‖b‖) ^ 2 = ‖b‖ ^ 2 := by
+      calc
+        r ^ 2 * (r⁻¹ * ‖b‖) ^ 2 = (r ^ 2 * r⁻¹ ^ 2) * ‖b‖ ^ 2 := by ring
+        _ = ‖b‖ ^ 2 := by
+          have hri : r ^ 2 * r⁻¹ ^ 2 = 1 := by
+            rw [← mul_pow, mul_inv_cancel₀ (ne_of_gt hr), one_pow]
+          rw [hri, one_mul]
+    have hsq : 2 * ε + r ^ 2 * ‖(w : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = ‖a‖ ^ 2 := by
+      rw [hw]
+      rw [hsqb]
+      nlinarith [hrel]
+    rw [hsq]
+    exact Real.sqrt_sq (norm_nonneg a)
+  have hna : negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖(w : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+      (u : EuclideanSpace ℝ (Fin k))) = a := by
+    ext i
+    rw [negPart_cellMap_apply]
+    rw [hs]
+    dsimp [u]
+    rw [← mul_assoc, mul_inv_cancel₀ ha0, one_mul]
+  rw [hna, hrw, ← recombine_decompose hk y]
+
 noncomputable def cocoreAttachingEmbedding {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
