@@ -4,6 +4,7 @@ import DifferentialGeometry.Topology.Morse.Flow
 import DifferentialGeometry.Topology.Morse.Manifold
 import DifferentialGeometry.Topology.Morse.ModifiedFunction
 import DifferentialGeometry.Topology.Morse.NoCriticalValues
+import DifferentialGeometry.Topology.Morse.RegularSublevel
 import Mathlib.Topology.MetricSpace.Bounded
 
 namespace DifferentialGeometry.Topology.Morse
@@ -193,6 +194,140 @@ def cellEmbedding {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
     (data : MorseChart n k hk c I f) : ClosedCell k → M :=
   fun x => data.χ (cellMap (Real.sqrt (2 * data.ε)) (x : EuclideanSpace ℝ (Fin k)))
+
+noncomputable def cocoreAttachingMap {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 ≤ ε) (hδ : r ^ 2 / 2 < δ) (hεr : Real.sqrt (2 * ε + r ^ 2) ≤ data.R)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) :
+    CellBoundary k × ClosedCell (n - k) → LevelSetSpace f (c - ε) :=
+  fun p =>
+    let u : EuclideanSpace ℝ (Fin k) := p.1
+    let w : EuclideanSpace ℝ (Fin (n - k)) := p.2
+    let y : MorseModel n := recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) (r • w)
+    let x : M := data.χ y
+    let T : ℝ := r ^ 2 * ‖w‖ ^ 2 / 2
+    ⟨curveAt v hcomplete x T, by
+      have hnormb : morseNorm n y ≤ data.R := by
+        exact le_trans (morseNorm_recombine_cellMap_bound hk ε r hε u p.1.2 w p.2.2) hεr
+      have hy : y ∈ data.χ.source := data.hχsrc y hnormb
+      have hTge : 0 ≤ T := by
+        dsimp [T]
+        positivity
+      have hval : f x = c - ε + T := by
+        have hnorm := data.hnorm y hnormb
+        have hrecomb := morseNormalForm_recombine_cellMap hk c ε hε u (r • w)
+        rw [hnorm]
+        rw [hrecomb]
+        have hnorm2 : ‖(r • w : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = r ^ 2 * ‖w‖ ^ 2 := by
+          rw [norm_smul]
+          rw [Real.norm_eq_abs]
+          rw [mul_pow]
+          rw [sq_abs]
+        rw [hnorm2, p.1.2]
+        dsimp [T]
+        ring_nf
+      have hw : ‖w‖ ^ 2 ≤ 1 := by
+        have hneg : -1 ≤ ‖w‖ := by linarith [norm_nonneg w]
+        exact (sq_le_sq' hneg p.2.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+      have hTle : T < δ := by
+        dsimp [T]
+        nlinarith [hδ, hw, sq_nonneg r]
+      have hstart : x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ) := by
+        change c - ε ≤ f x ∧ f x ≤ c + δ
+        rw [hval]
+        constructor
+        · linarith [hTge]
+        · linarith
+      have hstayFwd : ∀ s ∈ Set.Icc (0 : ℝ) T, curveAt v hcomplete x s ∈ f ⁻¹' Set.Icc (c - ε) (c + δ) := by
+        intro s hs
+        have hrb := f_rate_bounds_of_integralCurve f hf v hrate
+          (hγ := curveAt_integralCurve v hcomplete x) (t := s) hs.1
+        have hrb' : c - ε + T - s ≤ f (curveAt v hcomplete x s) ∧
+            f (curveAt v hcomplete x s) ≤ c - ε + T := by
+          simpa [curveAt_zero v hcomplete x, hval] using hrb
+        change c - ε ≤ f (curveAt v hcomplete x s) ∧ f (curveAt v hcomplete x s) ≤ c + δ
+        constructor
+        · linarith [hs.2]
+        · linarith [hTle]
+      have hEq := f_eq_sub_of_integralCurve_on_strip f hf v hdfOn
+        (hγ := curveAt_integralCurve v hcomplete x) (t := T) hTge hstayFwd
+      change f (curveAt v hcomplete x T) = c - ε
+      rw [hEq, curveAt_zero v hcomplete x, hval]
+      ring_nf⟩
+
+theorem cocoreAttachingMap_value {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 ≤ ε) (hδ : r ^ 2 / 2 < δ) (hεr : Real.sqrt (2 * ε + r ^ 2) ≤ data.R)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (p : CellBoundary k × ClosedCell (n - k)) :
+    f ((cocoreAttachingMap hk c ε r δ data hε hδ hεr hf v hdfOn hrate hcomplete p).1) = c - ε := by
+  change f (curveAt v hcomplete (data.χ
+    (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+      (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))))
+    (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 / 2)) = c - ε
+  let u : EuclideanSpace ℝ (Fin k) := p.1
+  let w : EuclideanSpace ℝ (Fin (n - k)) := p.2
+  let y : MorseModel n := recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) (r • w)
+  let x : M := data.χ y
+  let T : ℝ := r ^ 2 * ‖w‖ ^ 2 / 2
+  have hnormb : morseNorm n y ≤ data.R := by
+    exact le_trans (morseNorm_recombine_cellMap_bound hk ε r hε u p.1.2 w p.2.2) hεr
+  have hTge : 0 ≤ T := by
+    dsimp [T]
+    positivity
+  have hval : f x = c - ε + T := by
+    have hnorm := data.hnorm y hnormb
+    have hrecomb := morseNormalForm_recombine_cellMap hk c ε hε u (r • w)
+    rw [hnorm]
+    rw [hrecomb]
+    have hnorm2 : ‖(r • w : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = r ^ 2 * ‖w‖ ^ 2 := by
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [mul_pow]
+      rw [sq_abs]
+    rw [hnorm2, p.1.2]
+    dsimp [T]
+    ring_nf
+  have hw : ‖w‖ ^ 2 ≤ 1 := by
+    have hneg : -1 ≤ ‖w‖ := by linarith [norm_nonneg w]
+    exact (sq_le_sq' hneg p.2.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+  have hTle : T < δ := by
+    dsimp [T]
+    nlinarith [hδ, hw, sq_nonneg r]
+  have hstayFwd : ∀ s ∈ Set.Icc (0 : ℝ) T, curveAt v hcomplete x s ∈ f ⁻¹' Set.Icc (c - ε) (c + δ) := by
+    intro s hs
+    have hrb := f_rate_bounds_of_integralCurve f hf v hrate
+      (hγ := curveAt_integralCurve v hcomplete x) (t := s) hs.1
+    have hrb' : c - ε + T - s ≤ f (curveAt v hcomplete x s) ∧
+        f (curveAt v hcomplete x s) ≤ c - ε + T := by
+      simpa [curveAt_zero v hcomplete x, hval] using hrb
+    change c - ε ≤ f (curveAt v hcomplete x s) ∧ f (curveAt v hcomplete x s) ≤ c + δ
+    constructor
+    · linarith [hs.2]
+    · linarith [hTle]
+  have hEq := f_eq_sub_of_integralCurve_on_strip f hf v hdfOn
+    (hγ := curveAt_integralCurve v hcomplete x) (t := T) hTge hstayFwd
+  change f (curveAt v hcomplete x T) = c - ε
+  rw [hEq, curveAt_zero v hcomplete x, hval]
+  ring_nf
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
