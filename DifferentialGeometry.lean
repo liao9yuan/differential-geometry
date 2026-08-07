@@ -2934,9 +2934,11 @@ import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
 import DifferentialGeometry.Tensor.Auxiliary.SlotAlgebra
 import DifferentialGeometry.Tensor.Exterior.Basic
-import DifferentialGeometry.Tensor.Exterior.Congr
+import DifferentialGeometry.Tensor.Exterior.Cochain
 import DifferentialGeometry.Tensor.Exterior.Defs
-import DifferentialGeometry.Tensor.Exterior.Rough
+import DifferentialGeometry.Tensor.Exterior.Exact
+import DifferentialGeometry.Tensor.Exterior.Model
+import DifferentialGeometry.Tensor.Exterior.ZeroForm
 import DifferentialGeometry.Tensor.Mixed.Bundle
 import DifferentialGeometry.Tensor.Mixed.DualFiber
 import DifferentialGeometry.Tensor.Mixed.DualMultilinearTransition

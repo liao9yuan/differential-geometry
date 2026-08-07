@@ -48,21 +48,21 @@ instance fiberZSMul (x : M) : SMul ℤ
 
 set_option backward.isDefEq.respectTransparency false in
 @[instance_reducible]
-private def seminormedAddCommGroupTangentSpace (x : M) : SeminormedAddCommGroup (TangentSpace IM x) :=
+def seminormedAddCommGroupTangentSpace (x : M) : SeminormedAddCommGroup (TangentSpace IM x) :=
   inferInstanceAs (SeminormedAddCommGroup EM)
 
 attribute [local instance] seminormedAddCommGroupTangentSpace
 
 set_option backward.isDefEq.respectTransparency false in
 @[instance_reducible]
-private def normedAddCommGroupTangentSpace (x : M) : NormedAddCommGroup (TangentSpace IM x) :=
+def normedAddCommGroupTangentSpace (x : M) : NormedAddCommGroup (TangentSpace IM x) :=
   inferInstanceAs (NormedAddCommGroup EM)
 
 attribute [local instance] normedAddCommGroupTangentSpace
 
 set_option backward.isDefEq.respectTransparency false in
 @[instance_reducible]
-private def normedSpaceTangentSpace (x : M) : NormedSpace ℝ (TangentSpace IM x) :=
+def normedSpaceTangentSpace (x : M) : NormedSpace ℝ (TangentSpace IM x) :=
   inferInstanceAs (NormedSpace ℝ EM)
 
 attribute [local instance] normedSpaceTangentSpace
