@@ -1,5 +1,6 @@
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Slope
+import Mathlib.Analysis.Calculus.LocalExtr.Basic
 
 noncomputable section
 
@@ -61,6 +62,25 @@ theorem deriv_nonpos_of_isMaxOn_right {f : ℝ → ℝ} {a : ℝ}
     have hprod : (f x - f a) * (x - a)⁻¹ ≤ 0 := mul_nonpos_of_nonpos_of_nonneg hnum hinv
     simpa [smul_eq_mul, mul_comm] using hprod
   exact le_of_tendsto hright hnonpos
+
+theorem deriv_nonneg_at_right_endpoint_of_isMaxOn_Icc
+    {f : ℝ → ℝ} {a d : ℝ} (ha : 0 < a)
+    (hmax : IsMaxOn f (Set.Icc 0 a) a)
+    (hderiv : HasDerivAt f d a) :
+    0 ≤ d := by
+  have hdir : -(a / 2) ∈ posTangentConeAt (Set.Icc 0 a) a := by
+    apply mem_posTangentConeAt_of_segment_subset
+    rw [show a + -(a / 2) = a / 2 by ring, segment_symm,
+      segment_eq_Icc (by linarith : a / 2 ≤ a)]
+    intro s hs
+    exact ⟨by linarith [hs.1], hs.2⟩
+  have hnonpos := hmax.localize.hasFDerivWithinAt_nonpos
+    hderiv.hasFDerivAt.hasFDerivWithinAt hdir
+  have heval : (ContinuousLinearMap.toSpanSingleton ℝ d) (-(a / 2)) =
+      -(a / 2) * d := by
+    simp [ContinuousLinearMap.toSpanSingleton_apply, mul_comm]
+  rw [heval] at hnonpos
+  nlinarith
 
 end DifferentialGeometry.Analysis.Calculus
 

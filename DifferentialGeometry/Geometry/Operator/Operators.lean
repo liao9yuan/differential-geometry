@@ -220,6 +220,38 @@ theorem gradientFun_eq_zero_of_isLocalMin
     _ = 0 := by
       simpa [writtenInExtChartAt] using hderiv_chart
 
+theorem gradientFun_eq_zero_of_isLocalMax
+    [I.Boundaryless] (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M}
+    (hmax : IsLocalMax f x)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
+    gradientFun (I := I) g f x = 0 := by
+  apply gradientFun_eq_zero_of_mfderiv_eq_zero
+  have hmax_chart :
+      IsLocalMax (fun y : E => f ((extChartAt I x).symm y))
+        ((extChartAt I x) x) := by
+    have hmax' :
+        IsLocalMax f ((extChartAt I x).symm ((extChartAt I x) x)) := by
+      simpa only [mfld_simps] using hmax
+    simpa only [Function.comp_apply] using
+      hmax'.comp_continuous (continuousAt_extChartAt_symm (I := I) x)
+  have hderiv_chart :
+      fderiv Real (fun y : E => f ((extChartAt I x).symm y))
+        ((extChartAt I x) x) = 0 :=
+    hmax_chart.fderiv_eq_zero
+  have hrange : Set.range I ∈ nhds ((extChartAt I x) x) := by
+    rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
+    exact Filter.univ_mem
+  calc
+    mfderiv I 𝓘(Real, Real) f x =
+        fderivWithin Real (writtenInExtChartAt I 𝓘(Real, Real) x f)
+          (Set.range I) ((extChartAt I x) x) := by
+      exact hf.mfderiv
+    _ = fderiv Real (writtenInExtChartAt I 𝓘(Real, Real) x f)
+          ((extChartAt I x) x) := by
+      exact fderivWithin_of_mem_nhds hrange
+    _ = 0 := by
+      simpa [writtenInExtChartAt] using hderiv_chart
 
 @[simp] theorem gradientFun_const
     (g : SmoothRiemannianMetric I M) (c : Real) (x : M) :

@@ -7,6 +7,11 @@ import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 import DifferentialGeometry.Geometry.Operator.HessianTraceInequality
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
+import DifferentialGeometry.Analysis.Calculus.Extrema
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Weak
+import DifferentialGeometry.Geometry.Curvature.Realized.Operators
+import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
+import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
@@ -19,6 +24,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Harnack
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
+open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
@@ -1374,5 +1380,341 @@ theorem liYauQuantity_contMDiff
     rw [hcomp_eq, hbase, hrange]
     exact hcd_pull
 
+
+theorem liYau_estimate_of_nonnegative_ricci
+    [CompactSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M)
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (hpde : ∀ t x, deriv (fun s => u s x) t =
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    {t : ℝ} (ht : 0 < t) (x : M) :
+    liYauQuantity g (fun τ y => Real.log (u τ y)) t x ≤
+      (Module.finrank ℝ E : ℝ) / (2 * t) := by
+  classical
+  let f : ℝ → M → ℝ := fun τ y => Real.log (u τ y)
+  let hlog : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2) := Moser.contMDiff_log_of_pos hu hpos
+  let q : ℝ → M → ℝ := fun τ y => liYauQuantity g f τ y
+  let hq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => q p.1 p.2) := by
+    simpa [f, q] using liYauQuantity_contMDiff (I := I) (M := M) g u hu hpos
+  let n : ℝ := (Module.finrank ℝ E : ℝ)
+  have hevol : ∀ (τ : ℝ) (y : M),
+      deriv (fun s => q s y) τ -
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g q hq τ).smooth y ≤
+        2 * g.inner y (gradientFun (I := I) g (f τ) y) (gradientFun (I := I) g (q τ) y) -
+          (2 / n) * (q τ y)^2 := by
+    intro τ y
+    have hric0 : ∀ (x : M) (v : TangentSpace I x),
+        -(0 : ℝ) * g.inner x v v ≤ ricciTensor (I := I) g x v v := by
+      intro x v
+      simpa using hRic x v
+    simpa [f, q, n] using liYauQuantity_evolution_inequality (I := I) (M := M) g
+      (K := 0) le_rfl hric0 u hu hpos hpde hq τ y
+  let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
+    { metric := fun _ => g
+      connection := fun _ => LeviCivita (I := I) g
+      metricCompatible := fun _ =>
+        leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g }
+  let H : ℝ → ℝ → M → ℝ := fun eps τ y => τ * q τ y - n / 2 - eps * τ
+  have hH_nonpos : ∀ eps : ℝ, 0 < eps → ∀ τ : ℝ, 0 < τ → ∀ y : M, H eps τ y ≤ 0 := by
+    intro eps heps τ hτ y
+    by_contra hH
+    have hHpos : 0 < H eps τ y := lt_of_not_ge hH
+    have hslab : IsCompact (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) :=
+      (isCompact_Icc : IsCompact (Set.Icc 0 τ)).prod isCompact_univ
+    have hcont : ContinuousOn (fun p : ℝ × M => H eps p.1 p.2)
+        (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := by
+      -- H eps p.1 p.2 = p.1 * q p.1 p.2 - n/2 - eps*p.1
+      have hqcont : ContinuousOn (fun p : ℝ × M => q p.1 p.2)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := by
+        exact ContinuousOn.mono
+          (s := Set.univ) (t := Set.Icc 0 τ ×ˢ (Set.univ : Set M))
+          (Continuous.continuousOn hq.continuous) (by intro p hp; trivial)
+      have hfst : ContinuousOn (fun p : ℝ × M => p.1)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := continuousOn_fst
+      have hmult : ContinuousOn (fun p : ℝ × M => p.1 * q p.1 p.2)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := hfst.mul hqcont
+      have hconst : ContinuousOn (fun p : ℝ × M => n / 2)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := continuousOn_const
+      have hsub1 : ContinuousOn (fun p : ℝ × M => p.1 * q p.1 p.2 - n / 2)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := hmult.sub hconst
+      have heps : ContinuousOn (fun p : ℝ × M => eps * p.1)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := continuousOn_const.mul hfst
+      have hsub : ContinuousOn (fun p : ℝ × M => p.1 * q p.1 p.2 - n / 2 - eps * p.1)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := hsub1.sub heps
+      exact hsub.congr (by intro p hp; rfl)
+    have hnonempty : (Set.Icc 0 τ ×ˢ (Set.univ : Set M)).Nonempty :=
+      ⟨(τ, y), ⟨⟨le_of_lt hτ, le_rfl⟩, trivial⟩⟩
+    obtain ⟨sx, hsx, hmax⟩ := hslab.exists_isMaxOn hnonempty hcont
+    rcases sx with ⟨s, x₀⟩
+    have hmax' : ∀ z : ℝ × M, z ∈ Set.Icc 0 τ ×ˢ Set.univ → H eps z.1 z.2 ≤ H eps s x₀ :=
+      hmax
+    have hmpos : 0 < H eps s x₀ := lt_of_lt_of_le hHpos (hmax' (τ, y) ⟨⟨le_of_lt hτ, le_rfl⟩, trivial⟩)
+    have hsx0 : 0 ≤ s := hsx.1.1
+    have hspos : 0 < s := by
+      have hs_ne0 : s ≠ 0 := by
+        intro hs0
+        have hnnonneg : 0 ≤ n := by
+          dsimp [n]
+          exact_mod_cast Nat.zero_le _
+        have h0 : H eps 0 x₀ ≤ 0 := by
+          simp [H]
+          linarith
+        have : H eps s x₀ ≤ 0 := by
+          simpa [hs0] using h0
+        exact (not_lt_of_ge this) hmpos
+      exact lt_of_le_of_ne hsx0 (Ne.symm hs_ne0)
+    have hzmax : IsMaxOn (fun τ' : ℝ => H eps τ' x₀) (Set.Icc 0 s) s := by
+      intro τ' hτ'
+      exact hmax' (τ', x₀) ⟨⟨hτ'.1, hτ'.2.trans hsx.1.2⟩, trivial⟩
+    have hval : deriv (fun τ' : ℝ => H eps τ' x₀) s =
+        q s x₀ + s * deriv (fun τ' : ℝ => q τ' x₀) s - eps := by
+      have hc : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun τ' : ℝ => (τ', x₀)) :=
+        contMDiff_id.prodMk contMDiff_const
+      have hqτ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => q τ' x₀) := hq.comp hc
+      have hqτdiff : DifferentiableAt ℝ (fun τ' : ℝ => q τ' x₀) s :=
+        ContDiff.differentiable (contMDiff_iff_contDiff.mp hqτ) (by norm_num) s
+      have hlin : HasDerivAt (fun τ' : ℝ => τ' * q τ' x₀)
+          (q s x₀ + s * deriv (fun τ' : ℝ => q τ' x₀) s) s := by
+        simpa using (hasDerivAt_id s).mul hqτdiff.hasDerivAt
+      have hconst : HasDerivAt (fun _ : ℝ => n / 2) 0 s := hasDerivAt_const s (n / 2)
+      have heps : HasDerivAt (fun τ' : ℝ => eps * τ') eps s := by
+        simpa using (hasDerivAt_id s).const_mul eps
+      have hmain : HasDerivAt (fun τ' : ℝ => τ' * q τ' x₀ - n / 2 - eps * τ')
+          (q s x₀ + s * deriv (fun τ' : ℝ => q τ' x₀) s - eps) s := by
+        simpa using (hlin.sub hconst).sub heps
+      simpa [H] using hmain.deriv
+    have hder : HasDerivAt (fun τ' : ℝ => H eps τ' x₀)
+        (deriv (fun τ' : ℝ => H eps τ' x₀) s) s := by
+      have hc : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun τ' : ℝ => (τ', x₀)) :=
+        contMDiff_id.prodMk contMDiff_const
+      have hqτ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => q τ' x₀) := hq.comp hc
+      have hqτdiff : DifferentiableAt ℝ (fun τ' : ℝ => q τ' x₀) s :=
+        ContDiff.differentiable (contMDiff_iff_contDiff.mp hqτ) (by norm_num) s
+      have hlin : HasDerivAt (fun τ' : ℝ => τ' * q τ' x₀)
+          (q s x₀ + s * deriv (fun τ' : ℝ => q τ' x₀) s) s := by
+        simpa using (hasDerivAt_id s).mul hqτdiff.hasDerivAt
+      have hconst : HasDerivAt (fun _ : ℝ => n / 2) 0 s := hasDerivAt_const s (n / 2)
+      have heps : HasDerivAt (fun τ' : ℝ => eps * τ') eps s := by
+        simpa using (hasDerivAt_id s).const_mul eps
+      have hmain : HasDerivAt (fun τ' : ℝ => τ' * q τ' x₀ - n / 2 - eps * τ')
+          (q s x₀ + s * deriv (fun τ' : ℝ => q τ' x₀) s - eps) s := by
+        simpa using (hlin.sub hconst).sub heps
+      simpa [H, hval] using hmain
+    have htime : 0 ≤ deriv (fun τ' : ℝ => H eps τ' x₀) s :=
+      deriv_nonneg_at_right_endpoint_of_isMaxOn_Icc hspos hzmax hder
+    have hxmax : IsLocalMax (H eps s) x₀ := by
+      exact Filter.Eventually.of_forall (fun y => hmax' (s, y) ⟨⟨hsx.1.1, hsx.1.2⟩, trivial⟩)
+    have hqslice_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (q s) :=
+      hq.comp (contMDiff_const.prodMk contMDiff_id)
+    have hslice_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (H eps s) := by
+      have hmain : ContMDiff I 𝓘(ℝ, ℝ) ∞
+          (fun y : M => s * q s y - n / 2 - eps * s) := by
+        exact ((contMDiff_const.mul hqslice_smooth).sub contMDiff_const).sub
+          (contMDiff_const.mul contMDiff_const)
+      simpa [H] using hmain
+    have hlap : laplacianAt (I := I) G s (H eps s) x₀ ≤ 0 :=
+      laplacianAt_nonpos_at_spatial_max (I := I) G s hxmax hslice_smooth
+    have hgrad : gradientFun (I := I) g (H eps s) x₀ = 0 := by
+      exact gradientFun_eq_zero_of_isLocalMax (I := I) g hxmax
+        (hslice_smooth.mdifferentiableAt (x := x₀) (by simp))
+    have hgradq : gradientFun (I := I) g (q s) x₀ = 0 := by
+      have hgradH : gradientFun (I := I) g (H eps s) x₀ = 0 := hgrad
+      have hqs_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) (q s) x₀ :=
+        hqslice_smooth.mdifferentiableAt (x := x₀) (by simp)
+      have h1 : gradientFun (I := I) g (fun y : M => s * q s y) x₀ =
+          s • gradientFun (I := I) g (q s) x₀ := by
+        have hsmul : (fun y : M => s * q s y) = s • q s := rfl
+        rw [hsmul]
+        exact gradientFun_const_smul (I := I) g s hqs_mdiff
+      have h2 : gradientFun (I := I) g (fun _ : M => n / 2 + eps * s) x₀ = 0 := by
+        exact gradientFun_const (I := I) g (n / 2 + eps * s) x₀
+      have hsub : gradientFun (I := I) g (fun y : M => s * q s y - (n / 2 + eps * s)) x₀ =
+          gradientFun (I := I) g (fun y : M => s * q s y) x₀ -
+            gradientFun (I := I) g (fun _ : M => n / 2 + eps * s) x₀ :=
+          gradientFun_sub (I := I) g
+            ((contMDiff_const.mul hqslice_smooth).mdifferentiableAt (x := x₀) (by simp))
+            ((contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => n / 2 + eps * s)).mdifferentiableAt
+              (x := x₀) (by norm_num))
+      have hHdef : (H eps s) = fun y : M => s * q s y - (n / 2 + eps * s) := by
+        funext y
+        simp [H]
+        ring
+      rw [hHdef] at hgradH
+      rw [hsub, h1, h2] at hgradH
+      have hgradH' : s • gradientFun (I := I) g (q s) x₀ = 0 := by
+        exact sub_eq_zero.mp hgradH
+      exact (smul_eq_zero.mp hgradH').resolve_left (ne_of_gt hspos)
+    have hgradq' : g.inner x₀ (gradientFun (I := I) g (f s) x₀) (gradientFun (I := I) g (q s) x₀) = 0 := by
+      rw [hgradq]
+      simp
+    have hconn : G.connection s = LeviCivita (G.metric s) := by
+      simp [G]
+    have hev0 := hevol s x₀
+    have hdq_Δq : deriv (fun τ' : ℝ => q τ' x₀) s - laplacianAt (I := I) G s (q s) x₀ ≤
+        -(2 / n) * (q s x₀)^2 := by
+      have hΔq : Δ_g (I := I) g (smoothScalarSlice (I := I) g q hq s).smooth x₀ =
+          Δ_g (I := I) g hqslice_smooth x₀ := by
+        exact Δ_g_congr_of_eventuallyEq (I := I) g
+          (smoothScalarSlice (I := I) g q hq s).smooth hqslice_smooth (by
+            rw [Filter.eventuallyEq_iff_exists_mem]
+            refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+            intro y hy
+            rw [smoothScalarSlice_toFun])
+      have hlapeq : laplacianAt (I := I) G s (q s) x₀ = Δ_g (I := I) g hqslice_smooth x₀ := by
+        rw [laplacianAt_eq_delta (I := I) G s hqslice_smooth hconn]
+      have hcanc : 2 * g.inner x₀ (gradientFun (I := I) g (f s) x₀) (gradientFun (I := I) g (q s) x₀) = 0 := by
+        rw [hgradq']
+        ring
+      have hev0' : deriv (fun τ' : ℝ => q τ' x₀) s - Δ_g (I := I) g hqslice_smooth x₀ ≤
+          -(2 / n) * (q s x₀)^2 := by
+        rw [hΔq] at hev0
+        nlinarith [hev0, hcanc]
+      rw [hlapeq]
+      exact hev0'
+    have hlapH : laplacianAt (I := I) G s (H eps s) x₀ =
+        s * laplacianAt (I := I) G s (q s) x₀ := by
+      have hHdef : (H eps s) = fun y : M => s • q s y - (n / 2 + eps * s) := by
+        funext y
+        simp [H]
+        ring
+      have hcq : laplacianAt (I := I) G s (fun _ : M => n / 2 + eps * s) x₀ = 0 := by
+        rw [laplacianAt_eq_delta (I := I) G s contMDiff_const hconn]
+        simpa [G] using (Δ_g_const (I := I) g (n / 2 + eps * s) x₀ :
+          Δ_g (I := I) g (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞
+            (fun _ : M => n / 2 + eps * s)) x₀ = 0)
+      have hsub_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞
+          (fun y : M => s • q s y - (n / 2 + eps * s)) := by
+        have hscd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => s • q s y) := by
+          simpa [Pi.smul_apply] using contMDiff_const.mul hqslice_smooth
+        exact hscd.sub contMDiff_const
+      have hdiff : laplacianAt (I := I) G s
+          (fun y : M => s • q s y - (n / 2 + eps * s)) x₀ =
+          laplacianAt (I := I) G s (s • q s) x₀ - laplacianAt (I := I) G s
+            (fun _ : M => n / 2 + eps * s) x₀ := by
+        rw [laplacianAt_eq_delta (I := I) G s hsub_cd hconn]
+        have hscd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => s • q s y) := by
+          simpa [Pi.smul_apply] using contMDiff_const.mul hqslice_smooth
+        have hc_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => n / 2 + eps * s) :=
+          contMDiff_const
+        change Δ_g (I := I) (G.metric s) hsub_cd x₀ =
+          laplacianAt (I := I) G s (fun y : M => s • q s y) x₀ -
+            laplacianAt (I := I) G s (fun _ : M => n / 2 + eps * s) x₀
+        rw [laplacianAt_eq_delta (I := I) G s hscd hconn]
+        rw [laplacianAt_eq_delta (I := I) G s hc_cd hconn]
+        change Δ_g (I := I) g hsub_cd x₀ =
+          Δ_g (I := I) g hscd x₀ - Δ_g (I := I) g hc_cd x₀
+        have hsum := Δ_g_add (I := I) g hscd (ContMDiff.neg hc_cd) x₀
+        have hneg := Δ_g_neg (I := I) g hc_cd (x := x₀)
+        have hc' : Δ_g (I := I) g hc_cd x₀ = 0 := by
+          change Δ_g (I := I) g (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞
+            (fun _ : M => n / 2 + eps * s)) x₀ = 0
+          exact Δ_g_const (I := I) g (n / 2 + eps * s) x₀
+        have hc_eq : (fun y : M => s • q s y - (n / 2 + eps * s)) =ᶠ[𝓝 x₀]
+            (fun y : M => s • q s y + -(n / 2 + eps * s)) := by
+          rw [Filter.eventuallyEq_iff_exists_mem]
+          refine ⟨Set.univ, Filter.univ_mem, ?_⟩
+          intro y hy
+          ring
+        have hbridge := Δ_g_congr_of_eventuallyEq (I := I) g hsub_cd
+          (hscd.add (ContMDiff.neg hc_cd)) hc_eq
+        rw [hbridge]
+        rw [hsum]
+        rw [hneg]
+        rw [hc']
+        ring
+      have hlapS : laplacianAt (I := I) G s (s • q s) x₀ =
+          s * laplacianAt (I := I) G s (q s) x₀ := by
+        exact laplacianAt_smul (I := I) G s s
+          (fun y => hqslice_smooth.mdifferentiableAt (x := y) (by simp))
+          (gradientFun_mdiffAt (I := I) (G.metric s) hqslice_smooth x₀)
+      rw [hHdef, hdiff, hcq, hlapS]
+      ring
+    have hineq : deriv (fun τ' : ℝ => H eps τ' x₀) s -
+        laplacianAt (I := I) G s (H eps s) x₀ ≤
+        q s x₀ - (2 * s / n) * (q s x₀)^2 - eps := by
+      rw [hval, hlapH]
+      have hlin2 : s * (deriv (fun τ' : ℝ => q τ' x₀) s - laplacianAt (I := I) G s (q s) x₀) ≤
+          s * (-(2 / n) * (q s x₀)^2) :=
+        mul_le_mul_of_nonneg_left hdq_Δq hspos.le
+      have hrewrite : s * (-(2 / n) * (q s x₀)^2) = -((2 * s / n) * (q s x₀)^2) := by
+        field_simp [n, hspos.ne']
+      rw [hrewrite] at hlin2
+      linarith
+    have hnonneg : 0 ≤ deriv (fun τ' : ℝ => H eps τ' x₀) s -
+        laplacianAt (I := I) G s (H eps s) x₀ := by
+      linarith [htime, hlap]
+    have hqbig : n / (2 * s) < q s x₀ := by
+      have hHpos' : 0 < s * q s x₀ - n / 2 - eps * s := by
+        simpa [H] using hmpos
+      have hn : 0 < n := by
+        dsimp [n]
+        exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))
+      have hs2 : 0 < 2 * s := mul_pos zero_lt_two hspos
+      have hq_gt : n / (2 * s) + eps < q s x₀ := by
+        have hmain : n / 2 + eps * s < s * q s x₀ := by linarith
+        have hmain' : n / 2 + eps * s < q s x₀ * s := by nlinarith [hmain]
+        have hdiv : (n / 2 + eps * s) / s < q s x₀ :=
+          (div_lt_iff₀ hspos).mpr hmain'
+        have hrewrite : (n / 2 + eps * s) / s = n / (2 * s) + eps := by
+          field_simp [hspos.ne']
+        simpa [hrewrite] using hdiv
+      linarith
+    have hneg : q s x₀ - (2 * s / n) * (q s x₀)^2 - eps < 0 := by
+      have hn : 0 < n := by
+        dsimp [n]
+        exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))
+      have hqpos : 0 < q s x₀ := lt_trans
+        (div_pos hn (mul_pos zero_lt_two hspos)) hqbig
+      have h1 : 1 - (2 * s / n) * q s x₀ < 0 := by
+        have hmul : (2 * s / n) * q s x₀ > (2 * s / n) * (n / (2 * s)) :=
+          mul_lt_mul_of_pos_left hqbig
+            (div_pos (mul_pos zero_lt_two hspos) hn)
+        have hcancel : (2 * s / n) * (n / (2 * s)) = 1 := by
+          field_simp [hspos.ne', hn.ne']
+        have hmul' : 1 < (2 * s / n) * q s x₀ := by
+          simpa [hcancel] using hmul
+        linarith
+      have hq_main : q s x₀ - (2 * s / n) * (q s x₀)^2 < 0 := by
+        have hfactor : q s x₀ - (2 * s / n) * (q s x₀)^2 =
+            q s x₀ * (1 - (2 * s / n) * q s x₀) := by ring
+        rw [hfactor]
+        exact mul_neg_of_pos_of_neg hqpos h1
+      linarith
+    exact (lt_irrefl (0 : ℝ))
+      (lt_of_le_of_lt (le_trans hnonneg hineq) hneg)
+  have hfin : ∀ eps : ℝ, 0 < eps → H eps t x ≤ 0 :=
+    fun eps heps => hH_nonpos eps heps t ht x
+  have hqt : liYauQuantity g f t x ≤ n / (2 * t) := by
+    have htq_le : t * liYauQuantity g f t x - n / 2 ≤ 0 := by
+      by_contra hnot
+      have hpos : 0 < t * liYauQuantity g f t x - n / 2 := lt_of_not_ge hnot
+      let eps : ℝ := (t * liYauQuantity g f t x - n / 2) / (2 * t)
+      have heps_pos : 0 < eps := div_pos hpos (mul_pos zero_lt_two ht)
+      have hfin_eps : H eps t x ≤ 0 := hfin eps heps_pos
+      have hle : t * liYauQuantity g f t x - n / 2 ≤ eps * t := by
+        simpa [H, eps] using hfin_eps
+      have hrewrite : eps * t = (t * liYauQuantity g f t x - n / 2) / 2 := by
+        dsimp [eps]
+        field_simp [ht.ne']
+      have heps_lt : eps * t < t * liYauQuantity g f t x - n / 2 := by
+        rw [hrewrite]
+        linarith
+      exact (not_le_of_gt heps_lt) hle
+    have htle : t * liYauQuantity g f t x ≤ n / 2 := by linarith
+    have hq2 : liYauQuantity g f t x * (2 * t) ≤ n := by
+      have h2tq : 2 * (t * liYauQuantity g f t x) ≤ n := by nlinarith [htle]
+      have hring : liYauQuantity g f t x * (2 * t) = 2 * (t * liYauQuantity g f t x) := by ring
+      rwa [hring]
+    exact (le_div_iff₀ (mul_pos zero_lt_two ht)).mpr hq2
+  simpa [f, q, n] using hqt
 
 end DifferentialGeometry.Analysis.Parabolic.Harnack
