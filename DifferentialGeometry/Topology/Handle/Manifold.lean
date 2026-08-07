@@ -1427,6 +1427,199 @@ noncomputable def closedCellIsManifold (m : ℕ) :
   letI := closedCellChartedSpaceSucc m
   exact { toHasGroupoid := closedCellHasGroupoid m }
 
+theorem hasGroupoid_prod {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*}
+    [NormedAddCommGroup E] [NormedSpace 𝕜 E] {H : Type*} [TopologicalSpace H]
+    {I : ModelWithCorners 𝕜 E H} {E' : Type*} [NormedAddCommGroup E'] [NormedSpace 𝕜 E']
+    {H' : Type*} [TopologicalSpace H'] {I' : ModelWithCorners 𝕜 E' H'}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] {M' : Type*} [TopologicalSpace M']
+    [ChartedSpace H' M'] {n : WithTop ℕ∞}
+    [HasGroupoid M (contDiffGroupoid n I)] [HasGroupoid M' (contDiffGroupoid n I')] :
+    HasGroupoid (M × M') (contDiffGroupoid n (I.prod I')) := by
+  refine ⟨?_⟩
+  intro e e' he he'
+  rcases he with ⟨e₁, he₁, e₂, he₂, rfl⟩
+  rcases he' with ⟨e₁', he₁', e₂', he₂', rfl⟩
+  change ((e₁.prod e₂).symm ≫ₕ (e₁'.prod e₂')) ∈ contDiffGroupoid n (I.prod I')
+  rw [OpenPartialHomeomorph.prod_symm]
+  rw [OpenPartialHomeomorph.prod_trans]
+  change ((e₁.symm ≫ₕ e₁').prod (e₂.symm ≫ₕ e₂') :
+      OpenPartialHomeomorph (ModelProd H H') (ModelProd H H')) ∈
+    contDiffGroupoid n (I.prod I')
+  rw [contDiffGroupoid]
+  apply mem_groupoid_of_pregroupoid.mpr
+  let t₁ : OpenPartialHomeomorph H H := e₁.symm ≫ₕ e₁'
+  let t₂ : OpenPartialHomeomorph H' H' := e₂.symm ≫ₕ e₂'
+  have ht₁ : (e₁.symm ≫ₕ e₁') ∈ contDiffGroupoid n I := HasGroupoid.compatible he₁ he₁'
+  have ht₂ : (e₂.symm ≫ₕ e₂') ∈ contDiffGroupoid n I' := HasGroupoid.compatible he₂ he₂'
+  rw [contDiffGroupoid, mem_groupoid_of_pregroupoid] at ht₁ ht₂
+  have hr : Set.range (I.prod I') = Set.range I ×ˢ Set.range I' := by
+    change Set.range (Prod.map (I : H → E) (I' : H' → E')) = Set.range I ×ˢ Set.range I'
+    exact Set.range_prodMap
+  constructor
+  · let s₁ : Set E := (I.symm ⁻¹' t₁.source ∩ Set.range I)
+    let s₂ : Set E' := (I'.symm ⁻¹' t₂.source ∩ Set.range I')
+    let s : Set (E × E') := {p | p.1 ∈ s₁ ∧ p.2 ∈ s₂}
+    have hf₁ : ContDiffOn 𝕜 n (I ∘ (t₁ : H → H) ∘ I.symm) s₁ := ht₁.1
+    have hf₂ : ContDiffOn 𝕜 n (I' ∘ (t₂ : H' → H') ∘ I'.symm) s₂ := ht₂.1
+    have hprod : ContDiffOn 𝕜 n
+        (fun p : E × E' => ((I ∘ (t₁ : H → H) ∘ I.symm) p.1,
+          (I' ∘ (t₂ : H' → H') ∘ I'.symm) p.2)) s :=
+      (ContDiffOn.prodMap hf₁ hf₂).mono (by
+        intro p hp
+        exact hp)
+    have hD : (I.prod I').symm ⁻¹' (t₁.prod t₂).source ∩ Set.range (I.prod I') = s := by
+      ext p
+      constructor
+      · intro hp
+        have hpsrc : (I.prod I').symm p ∈ (t₁.prod t₂).source := hp.1
+        have hprange : p ∈ Set.range (I.prod I') := hp.2
+        change p.1 ∈ s₁ ∧ p.2 ∈ s₂
+        constructor
+        · constructor
+          · change I.symm p.1 ∈ t₁.source
+            have hsymm : (I.prod I').symm p = (I.symm p.1, I'.symm p.2) := rfl
+            have hsrc : (I.symm p.1, I'.symm p.2) ∈ (t₁.prod t₂).source := by
+              rwa [hsymm] at hpsrc
+            have hpsrc' : (I.symm p.1, I'.symm p.2) ∈ t₁.source ×ˢ t₂.source := by
+              simpa [PartialEquiv.prod_source] using hsrc
+            exact hpsrc'.1
+          · rw [hr] at hprange
+            exact hprange.1
+        · constructor
+          · change I'.symm p.2 ∈ t₂.source
+            have hsymm : (I.prod I').symm p = (I.symm p.1, I'.symm p.2) := rfl
+            have hsrc : (I.symm p.1, I'.symm p.2) ∈ (t₁.prod t₂).source := by
+              rwa [hsymm] at hpsrc
+            have hpsrc' : (I.symm p.1, I'.symm p.2) ∈ t₁.source ×ˢ t₂.source := by
+              simpa [PartialEquiv.prod_source] using hsrc
+            exact hpsrc'.2
+          · rw [hr] at hprange
+            exact hprange.2
+      · intro hp
+        constructor
+        · change (I.prod I').symm p ∈ (t₁.prod t₂).source
+          have hsymm : (I.prod I').symm p = (I.symm p.1, I'.symm p.2) := rfl
+          rw [hsymm]
+          simpa [PartialEquiv.prod_source] using ⟨hp.1.1, hp.2.1⟩
+        · rw [hr]
+          exact ⟨hp.1.2, hp.2.2⟩
+    have hfun : (I.prod I') ∘ (t₁.prod t₂) ∘ (I.prod I').symm =
+        fun p : E × E' => ((I ∘ (t₁ : H → H) ∘ I.symm) p.1,
+          (I' ∘ (t₂ : H' → H') ∘ I'.symm) p.2) := by
+      funext p
+      rfl
+    change ContDiffOn 𝕜 n ((I.prod I') ∘ (t₁.prod t₂) ∘ (I.prod I').symm)
+      ((I.prod I').symm ⁻¹' (t₁.prod t₂).source ∩ Set.range (I.prod I'))
+    rw [hD, hfun]
+    exact hprod
+  · change (contDiffPregroupoid n (I.prod I')).property
+      (((e₁.symm ≫ₕ e₁').prod (e₂.symm ≫ₕ e₂')).symm)
+      (((e₁.symm ≫ₕ e₁').prod (e₂.symm ≫ₕ e₂')).target)
+    rw [OpenPartialHomeomorph.prod_symm]
+    have htarget : (t₁.prod t₂).target = (t₁.symm.prod t₂.symm).source := by
+      rw [show (t₁.prod t₂).target = (t₁.toPartialEquiv.prod t₂.toPartialEquiv).target from rfl]
+      rw [PartialEquiv.prod_target]
+      rw [show (t₁.symm.prod t₂.symm).source = (t₁.symm.toPartialEquiv.prod t₂.symm.toPartialEquiv).source from rfl]
+      rw [PartialEquiv.prod_source]
+      rfl
+    rw [htarget]
+    change (contDiffPregroupoid n (I.prod I')).property
+      (t₁.symm.prod t₂.symm) (t₁.symm.prod t₂.symm).source
+    let s₁ : Set E := (I.symm ⁻¹' t₁.symm.source ∩ Set.range I)
+    let s₂ : Set E' := (I'.symm ⁻¹' t₂.symm.source ∩ Set.range I')
+    let s : Set (E × E') := {p | p.1 ∈ s₁ ∧ p.2 ∈ s₂}
+    have hf₁ : ContDiffOn 𝕜 n (I ∘ (t₁.symm : H → H) ∘ I.symm) s₁ := ht₁.2
+    have hf₂ : ContDiffOn 𝕜 n (I' ∘ (t₂.symm : H' → H') ∘ I'.symm) s₂ := ht₂.2
+    have hprod : ContDiffOn 𝕜 n
+        (fun p : E × E' => ((I ∘ (t₁.symm : H → H) ∘ I.symm) p.1,
+          (I' ∘ (t₂.symm : H' → H') ∘ I'.symm) p.2)) s :=
+      (ContDiffOn.prodMap hf₁ hf₂).mono (by
+        intro p hp
+        exact hp)
+    have hD : (I.prod I').symm ⁻¹' (t₁.symm.prod t₂.symm).source ∩ Set.range (I.prod I') = s := by
+      ext p
+      constructor
+      · intro hp
+        have hpsrc : (I.prod I').symm p ∈ (t₁.symm.prod t₂.symm).source := hp.1
+        have hprange : p ∈ Set.range (I.prod I') := hp.2
+        change p.1 ∈ s₁ ∧ p.2 ∈ s₂
+        constructor
+        · constructor
+          · change I.symm p.1 ∈ t₁.symm.source
+            have hsymm : (I.prod I').symm p = (I.symm p.1, I'.symm p.2) := rfl
+            have hsrc : (I.symm p.1, I'.symm p.2) ∈ (t₁.symm.prod t₂.symm).source := by
+              rwa [hsymm] at hpsrc
+            have hpsrc' : (I.symm p.1, I'.symm p.2) ∈ t₁.symm.source ×ˢ t₂.symm.source := by
+              simpa [PartialEquiv.prod_source] using hsrc
+            exact hpsrc'.1
+          · rw [hr] at hprange
+            exact hprange.1
+        · constructor
+          · change I'.symm p.2 ∈ t₂.symm.source
+            have hsymm : (I.prod I').symm p = (I.symm p.1, I'.symm p.2) := rfl
+            have hsrc : (I.symm p.1, I'.symm p.2) ∈ (t₁.symm.prod t₂.symm).source := by
+              rwa [hsymm] at hpsrc
+            have hpsrc' : (I.symm p.1, I'.symm p.2) ∈ t₁.symm.source ×ˢ t₂.symm.source := by
+              simpa [PartialEquiv.prod_source] using hsrc
+            exact hpsrc'.2
+          · rw [hr] at hprange
+            exact hprange.2
+      · intro hp
+        constructor
+        · change (I.prod I').symm p ∈ (t₁.symm.prod t₂.symm).source
+          have hsymm : (I.prod I').symm p = (I.symm p.1, I'.symm p.2) := rfl
+          rw [hsymm]
+          simpa [PartialEquiv.prod_source] using ⟨hp.1.1, hp.2.1⟩
+        · rw [hr]
+          exact ⟨hp.1.2, hp.2.2⟩
+    have hfun : (I.prod I') ∘ (t₁.symm.prod t₂.symm) ∘ (I.prod I').symm =
+        fun p : E × E' => ((I ∘ (t₁.symm : H → H) ∘ I.symm) p.1,
+          (I' ∘ (t₂.symm : H' → H') ∘ I'.symm) p.2) := by
+      funext p
+      rfl
+    change ContDiffOn 𝕜 n ((I.prod I') ∘ (t₁.symm.prod t₂.symm) ∘ (I.prod I').symm)
+      ((I.prod I').symm ⁻¹' (t₁.symm.prod t₂.symm).source ∩ Set.range (I.prod I'))
+    rw [hD, hfun]
+    exact hprod
+
+@[reducible]
+noncomputable def standardHandleChartedSpaceSucc (m n : ℕ) :
+    ChartedSpace (ModelProd (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (n + 1)))
+      (ClosedCell (m + 1) × ClosedCell (n + 1)) := by
+  letI : ChartedSpace (EuclideanHalfSpace (m + 1)) (ClosedCell (m + 1)) :=
+    closedCellChartedSpaceSucc m
+  letI : ChartedSpace (EuclideanHalfSpace (n + 1)) (ClosedCell (n + 1)) :=
+    closedCellChartedSpaceSucc n
+  exact prodChartedSpace (EuclideanHalfSpace (m + 1)) (ClosedCell (m + 1))
+    (EuclideanHalfSpace (n + 1)) (ClosedCell (n + 1))
+
+@[reducible]
+noncomputable def standardHandleHasGroupoid (m n : ℕ) :
+    @HasGroupoid (ModelProd (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (n + 1))) _
+      (ClosedCell (m + 1) × ClosedCell (n + 1)) _ (standardHandleChartedSpaceSucc m n)
+      (contDiffGroupoid (⊤ : ℕ∞)
+        ((modelWithCornersEuclideanHalfSpace (m + 1)).prod
+          (modelWithCornersEuclideanHalfSpace (n + 1)))) := by
+  letI : ChartedSpace (EuclideanHalfSpace (m + 1)) (ClosedCell (m + 1)) :=
+    closedCellChartedSpaceSucc m
+  letI : ChartedSpace (EuclideanHalfSpace (n + 1)) (ClosedCell (n + 1)) :=
+    closedCellChartedSpaceSucc n
+  letI : HasGroupoid (ClosedCell (m + 1)) (contDiffGroupoid (⊤ : ℕ∞)
+      (modelWithCornersEuclideanHalfSpace (m + 1))) := closedCellHasGroupoid m
+  letI : HasGroupoid (ClosedCell (n + 1)) (contDiffGroupoid (⊤ : ℕ∞)
+      (modelWithCornersEuclideanHalfSpace (n + 1))) := closedCellHasGroupoid n
+  exact hasGroupoid_prod
+
+@[reducible]
+noncomputable def standardHandleIsManifold (m n : ℕ) :
+    @IsManifold ℝ _ (EuclideanSpace ℝ (Fin (m + 1)) × EuclideanSpace ℝ (Fin (n + 1))) _ _
+      (ModelProd (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (n + 1))) _
+      ((modelWithCornersEuclideanHalfSpace (m + 1)).prod
+        (modelWithCornersEuclideanHalfSpace (n + 1))) (⊤ : ℕ∞)
+      (ClosedCell (m + 1) × ClosedCell (n + 1)) _ (standardHandleChartedSpaceSucc m n) := by
+  letI := standardHandleChartedSpaceSucc m n
+  exact { toHasGroupoid := standardHandleHasGroupoid m n }
+
 end
 
 end DifferentialGeometry.Topology.Handle
