@@ -245,8 +245,8 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci_on
       have hreg_t : Ioo 0 t ⊆ D.regular := by
         intro s hs
         exact hslabRegular ⟨hs.1, hs.2.trans_le ht.2⟩
-      simpa [n] using liYau_estimate_of_nonnegative_ricci_on (I := I) (M := M) g hRic D G
-        hGmetric hGconn u hu hpos htreg htpos hcar_t hreg_t hqCont x
+      simpa [n] using liYau_estimate_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
+        (I := I) (M := M) g hRic D G hGmetric hGconn u hu hpos htreg htpos hcar_t hreg_t hqCont x
   have hliYau_bound : ∀ t ∈ Set.Icc a b,
       -(n / 2 / t) ≤ deriv (fun s => u s x) t / u t x := by
     intro t ht
@@ -652,8 +652,8 @@ theorem heat_solution_harnack_of_nonnegative_ricci_on
       have hreg_t : Ioo 0 t ⊆ D.regular := by
         intro s hs
         exact hslabRegular ⟨hs.1, hs.2.trans_le ht.2⟩
-      simpa [n] using liYau_estimate_of_nonnegative_ricci_on (I := I) (M := M) g hRic D G
-        hGmetric hGconn u hu hpos htreg htpos hcar_t hreg_t hqCont z
+      simpa [n] using liYau_estimate_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
+        (I := I) (M := M) g hRic D G hGmetric hGconn u hu hpos htreg htpos hcar_t hreg_t hqCont z
     let τ' : ℝ → (p : M) → TangentSpace I p :=
       fun t _ => mfderiv 𝓘(ℝ, ℝ) I τ t (1 : ℝ)
     have hτ'_def : ∀ t : ℝ, τ' t (τ t) = mfderiv 𝓘(ℝ, ℝ) I τ t (1 : ℝ) := by

@@ -1388,8 +1388,139 @@ theorem liYauQuantity_contMDiff
       exact hcd_pull
   exact hqAt.contMDiffWithinAt
 
+omit [T2Space M] [SigmaCompactSpace M] in
+theorem normGradSqFun_contMDiffOn
+    {D : RealTimeInterval}
+    (g : SmoothRiemannianMetric I M)
+    (f : ℝ → M → ℝ)
+    (hf : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2) (D.regular ×ˢ univ))
+    (hslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞ (f t)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => normGradSqFun (I := I) g (f p.1) p.2)
+      (D.regular ×ˢ univ) := by
+  classical
+  intro p₀ hp₀
+  rcases p₀ with ⟨t₀, x₀⟩
+  have ht₀ : t₀ ∈ D.regular := hp₀.1
+  have hNAt : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => normGradSqFun (I := I) g (f p.1) p.2) (t₀, x₀) := by
+    rw [contMDiffAt_iff]
+    set α : M := x₀ with hα
+    have hy₀ : (extChartAt I α) x₀ ∈ (extChartAt I α).target :=
+      (extChartAt I α).map_source (mem_extChartAt_source (I := I) α)
+    have hΦ : ContDiffAt ℝ ∞
+        (fun r : ℝ × E => scalarOnE (I := I) α (f r.1) r.2) (t₀, (extChartAt I α) x₀) :=
+      scalarOnE_jointContDiffAt (I := I) (M := M) (D := D) f hf α ht₀ hy₀
+    have hpd : ∀ i : Fin (Module.finrank ℝ E), ContDiffAt ℝ ∞
+        (fun p : ℝ × E => partialDeriv (E := E) i
+          (fun z : E => scalarOnE (I := I) α (f p.1) z) p.2)
+        (t₀, (extChartAt I α) x₀) :=
+      fun i => partialDeriv_joint_contDiffAt (fun t z => scalarOnE (I := I) α (f t) z) hΦ i
+    have hgram : ∀ (i j : Fin (Module.finrank ℝ E)), ContDiffAt ℝ ∞
+        (fun p : ℝ × E => chartInvGramOnE (I := I) g α i j p.2)
+        (t₀, (extChartAt I α) x₀) := by
+      intro i j
+      change ContDiffAt ℝ ∞
+          ((fun z : E => chartInvGramOnE (I := I) g α i j z) ∘
+            (fun p : ℝ × E => p.2)) (t₀, (extChartAt I α) x₀)
+      refine ContDiffAt.comp (t₀, (extChartAt I α) x₀) ?_ contDiffAt_snd
+      exact (chartInvGramOnE_contDiffOn (I := I) g α i j).contDiffAt
+        ((isOpen_extChartAt_target (I := I) α).mem_nhds hy₀)
+    have hNpull : ContDiffAt ℝ ∞
+        (fun p : ℝ × E =>
+          normGradSqFun (I := I) g (f p.1) ((extChartAt I α).symm p.2))
+        (t₀, (extChartAt I α) x₀) := by
+      have hsum : ContDiffAt ℝ ∞
+          (fun p : ℝ × E =>
+            ∑ k : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) g α k i p.2 *
+                partialDeriv (E := E) i (fun z : E => scalarOnE (I := I) α (f p.1) z) p.2 *
+                partialDeriv (E := E) k (fun z : E => scalarOnE (I := I) α (f p.1) z) p.2)
+          (t₀, (extChartAt I α) x₀) := by
+        refine (ContDiffAt.sum (s := Finset.univ) (fun k _ => ?_))
+        refine ContDiffAt.sum (s := Finset.univ) (fun i _ => ?_)
+        exact ((hgram k i).mul (hpd i)).mul (hpd k)
+      exact hsum.congr_of_eventuallyEq (by
+        rw [Filter.eventuallyEq_iff_exists_mem]
+        refine ⟨D.regular ×ˢ (extChartAt I α).target,
+          (IsOpen.prod D.regular_isOpen (isOpen_extChartAt_target (I := I) α)).mem_nhds
+            ⟨ht₀, hy₀⟩, ?_⟩
+        intro z hz
+        have hx : (extChartAt I α).symm z.2 ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+          simpa [trivializationAt_baseSet_eq_chartAt_source (I := I) α] using
+            (extChartAt I α).map_target hz.2
+        have hformula := normGradSqFun_eq_chartInvGram_sum (I := I) g α
+          (hf := hslice z.1 hz.1)
+          ((extChartAt I α).symm z.2) hx
+        change normGradSqFun (I := I) g (f z.1) ((extChartAt I α).symm z.2) =
+          (∑ k : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+            chartInvGramOnE (I := I) g α k i z.2 *
+              partialDeriv (E := E) i (fun w : E => scalarOnE (I := I) α (f z.1) w) z.2 *
+              partialDeriv (E := E) k (fun w : E => scalarOnE (I := I) α (f z.1) w) z.2)
+        rw [hformula]
+        refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun i _ => ?_))
+        rw [← (chartInvGramOnE_def (I := I) g α k i z.2)]
+        rw [(extChartAt I α).right_inv hz.2])
+    constructor
+    · have hcont_pull : ContinuousAt
+          (fun p : ℝ × E => normGradSqFun (I := I) g (f p.1) ((extChartAt I α).symm p.2))
+          (t₀, (extChartAt I α) x₀) := hNpull.continuousAt
+      have hw_eq : (fun p : ℝ × M => normGradSqFun (I := I) g (f p.1) p.2) =ᶠ[𝓝 (t₀, x₀)]
+          (fun p : ℝ × E => normGradSqFun (I := I) g (f p.1) ((extChartAt I α).symm p.2)) ∘
+            (fun p : ℝ × M => (p.1, (extChartAt I α) p.2)) := by
+        rw [Filter.eventuallyEq_iff_exists_mem]
+        refine ⟨Set.univ ×ˢ (extChartAt I α).source,
+          (isOpen_univ.prod (isOpen_extChartAt_source (I := I) α)).mem_nhds
+            ⟨Set.mem_univ _, mem_extChartAt_source (I := I) α⟩, ?_⟩
+        intro y hy
+        change normGradSqFun (I := I) g (f y.1) y.2 =
+          normGradSqFun (I := I) g (f y.1) ((extChartAt I α).symm ((extChartAt I α) y.2))
+        rw [(extChartAt I α).left_inv hy.2]
+      have hcomp : ContinuousAt
+          ((fun p : ℝ × E => normGradSqFun (I := I) g (f p.1) ((extChartAt I α).symm p.2)) ∘
+            (fun p : ℝ × M => (p.1, (extChartAt I α) p.2))) (t₀, x₀) :=
+        ContinuousAt.comp
+          (f := fun p : ℝ × M => (p.1, (extChartAt I α) p.2))
+          (x := (t₀, x₀)) hcont_pull (by
+          refine (continuousAt_fst : ContinuousAt (fun p : ℝ × M => p.1) (t₀, x₀)).prodMk ?_
+          show ContinuousAt (fun p : ℝ × M => (extChartAt I α) p.2) (t₀, x₀)
+          exact ContinuousAt.comp
+            (f := fun p : ℝ × M => p.2) (x := (t₀, x₀))
+            (continuousAt_extChartAt x₀) continuousAt_snd)
+      exact hcomp.congr_of_eventuallyEq hw_eq
+    · have hcd_pull : ContDiffWithinAt ℝ ∞
+          (fun p : ℝ × E => normGradSqFun (I := I) g (f p.1) ((extChartAt I α).symm p.2))
+          Set.univ (t₀, (extChartAt I α) x₀) := hNpull.contDiffWithinAt
+      have hcomp_eq : (extChartAt 𝓘(ℝ, ℝ) (normGradSqFun (I := I) g (f t₀) x₀) ∘
+          (fun p : ℝ × M => normGradSqFun (I := I) g (f p.1) p.2) ∘
+            (extChartAt (𝓘(ℝ, ℝ).prod I) (t₀, x₀)).symm) =
+          (fun p : ℝ × E => normGradSqFun (I := I) g (f p.1) ((extChartAt I α).symm p.2)) := by
+        funext z
+        simp only [Function.comp_def, extChartAt_prod, extChartAt_coe_symm, α]
+        change normGradSqFun (I := I) g (f z.1) ((extChartAt I x₀).symm z.2) =
+          normGradSqFun (I := I) g (f z.1) ((extChartAt I x₀).symm z.2)
+        rfl
+      have hbase : (extChartAt (𝓘(ℝ, ℝ).prod I) (t₀, x₀)) (t₀, x₀) =
+          (t₀, (extChartAt I α) x₀) := by
+        rw [extChartAt_prod (x := (t₀, x₀))]
+        simp [α]
+      have hrange : range (𝓘(ℝ, ℝ).prod I) = Set.univ := by
+        apply Set.Subset.antisymm
+        · intro y hy
+          trivial
+        · intro y hy
+          have hy2 : y.2 ∈ range I := by
+            rw [ModelWithCorners.range_eq_univ I]
+            trivial
+          rcases hy2 with ⟨x₂, hx₂⟩
+          exact ⟨(y.1, x₂), by simp [hx₂]⟩
+      rw [hcomp_eq, hbase, hrange]
+      exact hcd_pull
+  exact hNAt.contMDiffWithinAt
 
-theorem liYau_estimate_of_nonnegative_ricci_on
+
+theorem liYau_estimate_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
@@ -1438,7 +1569,8 @@ theorem liYau_estimate_of_nonnegative_ricci_on
         hGconn τ (D.regular_subset hτ)
       rw [laplacianAt_eq_delta (I := I) G τ (hu.sliceSmooth τ (D.regular_subset hτ)) hconn x]
       rw [hGmetric τ (D.regular_subset hτ)]
-    have heq0 : HasDerivAt (fun s => u s x) (laplacianAt (I := I) G τ (u τ) x) τ := by
+    have heq0 : HasDerivAt (fun s => u s x)
+        (laplacianAt (I := I) G τ (u τ) x) τ := by
       simpa using heq
     exact heq0.congr_deriv hbridge
   let n : ℝ := (Module.finrank ℝ E : ℝ)
@@ -1741,6 +1873,39 @@ theorem liYau_estimate_of_nonnegative_ricci_on
     exact (le_div_iff₀ (mul_pos zero_lt_two ht0)).mpr hq2
   simpa [f, q, n] using hqt
 
+theorem liYau_estimate_of_nonnegative_ricci_on
+    [CompactSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M)
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (D : RealTimeInterval)
+    (hopen : D.carrier ⊆ D.regular)
+    (u : ℝ → M → ℝ)
+    (hu : IsHeatOnStationary D g u)
+    (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
+    {t : ℝ} (ht : t ∈ D.regular) (ht0 : 0 < t)
+    (hslabCarrier : Icc 0 t ⊆ D.carrier)
+    (hslabRegular : Ioo 0 t ⊆ D.regular)
+    (x : M) :
+    liYauQuantity g (fun τ y => Real.log (u τ y)) t x ≤
+      (Module.finrank ℝ E : ℝ) / (2 * t) := by
+  have hqCont : ContinuousOn (fun p : ℝ × M =>
+      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (D.carrier ×ˢ univ) := by
+    have hqOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2)
+        (D.regular ×ˢ univ) := by
+      exact liYauQuantity_contMDiff (I := I) (M := M) (D := D) g u
+        hu.jointSmooth hu.sliceSmooth hpos
+    exact hqOn.continuousOn.mono (by
+      intro p hp
+      exact ⟨hopen hp.1, hp.2⟩)
+  exact liYau_estimate_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
+    (I := I) (M := M) g hRic D (stationaryMetricFamily (I := I) (M := M) g)
+    (by intro τ hτ; rfl) (by intro τ hτ; rfl)
+    u hu hpos ht ht0 hslabCarrier hslabRegular hqCont x
+
 theorem liYau_estimate_of_nonnegative_ricci
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
@@ -1759,17 +1924,16 @@ theorem liYau_estimate_of_nonnegative_ricci
   classical
   let D : RealTimeInterval := RealTimeInterval.univ 0
   let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
-    { metric := fun _ => g
-      connection := fun _ => LeviCivita (I := I) g
-      metricCompatible := fun _ =>
-        leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g }
-  have hGmetric : ∀ τ : ℝ, τ ∈ D.carrier → G.metric τ = g := by
-    intro τ hτ
+    stationaryMetricFamily (I := I) (M := M) g
+  have hGmetric : ∀ τ : ℝ, G.metric τ = g := by
+    intro τ
+    dsimp [G]
     rfl
-  have hGconn : ∀ τ : ℝ, τ ∈ D.carrier → G.connection τ = LeviCivita (G.metric τ) := by
-    intro τ hτ
+  have hGconn : ∀ τ : ℝ, G.connection τ = LeviCivita (G.metric τ) := by
+    intro τ
+    dsimp [G]
     rfl
-  have huOn : IsHeatOn D G u := by
+  have huOn : IsHeatOnStationary D g u := by
     refine ⟨?_, ?_, ?_, ?_⟩
     · simpa [D] using hu.contMDiffOn
     · exact hu.continuous.continuousOn
@@ -1784,30 +1948,18 @@ theorem liYau_estimate_of_nonnegative_ricci
           Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x := by
         change laplacianAt (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).toFun x =
           Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x
-        rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth (by rfl) x]
+        rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth (hGconn τ) x]
+        rw [hGmetric τ]
       have hderiv : deriv (fun s => u s x) τ = laplacianAt (I := I) G τ (u τ) x := by
         rw [hpde τ x, ← hlap]
       convert hder.congr_deriv hderiv using 1
-      simp
-  have hqcd : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2)
-      (univ ×ˢ univ) := by
-    change ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2)
-      (D.regular ×ˢ univ)
-    simpa [D] using liYauQuantity_contMDiff (I := I) (M := M) (D := D) g u hu.contMDiffOn
-      (fun τ hτ => hu.comp (contMDiff_const.prodMk contMDiff_id)) (fun τ hτ x => hpos τ x)
-  have hqCont : ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (D.carrier ×ˢ univ) := by
-    change ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (univ ×ˢ univ)
-    exact hqcd.continuousOn
-  simpa [D] using liYau_estimate_of_nonnegative_ricci_on (I := I) (M := M) g hRic D G
-    hGmetric hGconn u huOn (fun τ hτ x => hpos τ x) (t := t)
+      simp [G]
+  simpa [D, G] using liYau_estimate_of_nonnegative_ricci_on (I := I) (M := M) g hRic D
+    (by intro τ hτ; trivial) u huOn (fun τ hτ x => hpos τ x) (t := t)
     (by change t ∈ (Set.univ : Set ℝ); trivial)
-    ht (by intro τ hτ; trivial) (by intro τ hτ; trivial) hqCont x
+    ht (by intro τ hτ; trivial) (by intro τ hτ; trivial) x
 
-theorem heat_solution_differential_harnack_of_nonnegative_ricci_on
+theorem heat_solution_differential_harnack_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
@@ -1832,8 +1984,8 @@ theorem heat_solution_differential_harnack_of_nonnegative_ricci_on
         g.inner x (gradientFun (I := I) g (u t) x)
           (gradientFun (I := I) g (u t) x) / (u t x ^ 2) := by
   classical
-  have hly := liYau_estimate_of_nonnegative_ricci_on (I := I) (M := M) g hRic D G
-    hGmetric hGconn u hu hpos ht ht0 hslabCarrier hslabRegular hqCont x
+  have hly := liYau_estimate_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
+    (I := I) (M := M) g hRic D G hGmetric hGconn u hu hpos ht ht0 hslabCarrier hslabRegular hqCont x
   have hlogderiv : deriv (fun s => Real.log (u s x)) t = deriv (fun s => u s x) t / u t x := by
     have hder : HasDerivAt (fun s => u s x) (deriv (fun s => u s x) t) t := by
       exact (hu.equation t ht x).congr_deriv (hu.equation t ht x).deriv.symm
@@ -1860,6 +2012,41 @@ theorem heat_solution_differential_harnack_of_nonnegative_ricci_on
   have h1 : -(Module.finrank ℝ E : ℝ) / (2 * t) = -((Module.finrank ℝ E : ℝ) / (2 * t)) := by ring
   rw [h1]
   linarith
+
+theorem heat_solution_differential_harnack_of_nonnegative_ricci_on
+    [CompactSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M)
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (D : RealTimeInterval)
+    (hopen : D.carrier ⊆ D.regular)
+    (u : ℝ → M → ℝ)
+    (hu : IsHeatOnStationary D g u)
+    (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
+    {t : ℝ} (ht : t ∈ D.regular) (ht0 : 0 < t)
+    (hslabCarrier : Icc 0 t ⊆ D.carrier)
+    (hslabRegular : Ioo 0 t ⊆ D.regular)
+    (x : M) :
+    -(Module.finrank ℝ E : ℝ) / (2 * t) ≤
+      deriv (fun s => u s x) t / u t x -
+        g.inner x (gradientFun (I := I) g (u t) x)
+          (gradientFun (I := I) g (u t) x) / (u t x ^ 2) := by
+  have hqCont : ContinuousOn (fun p : ℝ × M =>
+      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (D.carrier ×ˢ univ) := by
+    have hqOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2)
+        (D.regular ×ˢ univ) := by
+      exact liYauQuantity_contMDiff (I := I) (M := M) (D := D) g u
+        hu.jointSmooth hu.sliceSmooth hpos
+    exact hqOn.continuousOn.mono (by
+      intro p hp
+      exact ⟨hopen hp.1, hp.2⟩)
+  exact heat_solution_differential_harnack_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
+    (I := I) (M := M) g hRic D (stationaryMetricFamily (I := I) (M := M) g)
+    (by intro τ hτ; rfl) (by intro τ hτ; rfl)
+    u hu hpos ht ht0 hslabCarrier hslabRegular hqCont x
 
 theorem heat_solution_differential_harnack_of_nonnegative_ricci
     [CompactSpace M]

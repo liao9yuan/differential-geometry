@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.Operators
+import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
 
 set_option autoImplicit false
 
@@ -65,6 +66,12 @@ abbrev IsHeatOn
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (u : Real → M → Real) : Prop :=
   IsHeatPotOn D G (fun _ _ => 0) u
+
+abbrev IsHeatOnStationary
+    (D : RealTimeInterval)
+    (g : SmoothRiemannianMetric I M)
+    (u : Real → M → Real) : Prop :=
+  IsHeatOn D (stationaryMetricFamily (I := I) (M := M) g) u
 
 structure IsHeatPotSubsolutionOn
     (D : RealTimeInterval)
