@@ -450,4 +450,29 @@ theorem algebraicCurvatureOperatorNonnegative_iff_ricci_upper_bound3
     exact algebraicCurvatureOperatorNonnegative_of_components_eq_rm basis A K12 K13 K23
       hK12' hK13' hK23' (by intro a b c d; simpa [R] using hcomp a b c d)
 
+theorem curvatureOperatorUpperBoundReaction_null_nonneg3
+    (l1 l2 l3 : ℝ)
+    (hT2 : 0 ≤ (l1 + l2 + l3) / 2 - l2)
+    (hT3 : 0 ≤ (l1 + l2 + l3) / 2 - l3)
+    (hnull : (l1 + l2 + l3) / 2 = l1) :
+    0 ≤ (l1^2 + l2^2 + l3^2) - (l1 + l2 + l3) * l1 -
+      2 * (sec12Ric3 l1 l2 l3 * l2 + sec13Ric3 l1 l2 l3 * l3) + 2 * l1^2 := by
+  have hsum : l1 = l2 + l3 := by nlinarith
+  have hl2 : 0 ≤ l2 := by
+    have h : 0 ≤ (l1 + l2 + l3) / 2 - l3 := hT3
+    rw [hsum] at h
+    field_simp at h
+    linarith
+  have hl3 : 0 ≤ l3 := by
+    have h : 0 ≤ (l1 + l2 + l3) / 2 - l2 := hT2
+    rw [hsum] at h
+    field_simp at h
+    linarith
+  have hreaction : (l1^2 + l2^2 + l3^2) - (l1 + l2 + l3) * l1 -
+      2 * (sec12Ric3 l1 l2 l3 * l2 + sec13Ric3 l1 l2 l3 * l3) + 2 * l1^2 =
+    2 * l2 * l3 := by
+    dsimp [sec12Ric3, sec13Ric3]
+    nlinarith [hsum]
+  rw [hreaction]
+  exact mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hl2) hl3
 end DifferentialGeometry.Integral.Connection
