@@ -1029,7 +1029,7 @@ private theorem fixed_metric_local_positivity
         (fixedMetricFamily (I := I) g) T (fun _ _ => 0) w t x = _ at hsub
     rw [hsub]
     linarith [hu_super t ht htpos x]
-  have hw_nonneg := strict_barrier_posReg (I := I)
+  have hw_nonneg := strict_barrier_positive_region (I := I)
     (fixedMetricFamily (I := I) g) T hT.le (fun _ _ => 0) w
     hw_cont hw0 hw_time hw_mdiff
     (by simpa using hw_grad) hnegative T ⟨hT.le, le_rfl⟩ y

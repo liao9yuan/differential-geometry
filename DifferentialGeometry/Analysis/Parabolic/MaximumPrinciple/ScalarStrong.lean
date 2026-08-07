@@ -683,7 +683,7 @@ private theorem fixed_metric_lower_bound_from_positive_time
     unfold heatOperatorWithDrift driftTerm
     rw [hlapAt]
     simpa [G] using hu_super (a + s) hq hqpos x
-  have hv_nonneg := strict_barrier_posReg (I := I) G S hS (fun _ _ => 0) v
+  have hv_nonneg := strict_barrier_positive_region (I := I) G S hS (fun _ _ => 0) v
     hv_cont hv0 hv_time hv_mdiff hv_grad
     (fun s hs hspos x _ => hv_super s hs hspos x)
   intro t ht x
@@ -1253,7 +1253,7 @@ private theorem fixed_metric_with_drift_lower_bound_from_positive_time
     unfold heatOperatorWithDrift driftTerm gradientAt
     rw [hlapAt]
     simpa [G, X'] using hu_super (a + s) hq hqpos x
-  have hv_nonneg := strict_barrier_posReg (I := I) G S hS X' v
+  have hv_nonneg := strict_barrier_positive_region (I := I) G S hS X' v
     hv_cont hv0 hv_time hv_mdiff hv_grad
     (fun s hs hspos x _ => hv_super s hs hspos x)
   intro t ht x
@@ -1988,7 +1988,7 @@ private theorem time_dependent_metric_with_drift_lower_bound_from_positive_time
     simpa [G', X', shiftedStrongMetricFamily, heatOperatorWithDrift, driftTerm,
       gradientAt, parabolicOperatorWithDrift] using
         hu_super (a + s) hq hqpos x
-  have hv_nonneg := strict_barrier_posReg (I := I) G' S hS X' v
+  have hv_nonneg := strict_barrier_positive_region (I := I) G' S hS X' v
     hv_cont hv0 hv_time hv_mdiff hv_grad
     (fun s hs hspos x _ => hv_super s hs hspos x)
   intro t ht x

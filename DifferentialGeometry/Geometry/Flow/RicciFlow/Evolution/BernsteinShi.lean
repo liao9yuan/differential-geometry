@@ -379,7 +379,7 @@ theorem scalar_subsolution_affine_bound
     linarith
   have hw_nonneg :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x :=
-    DifferentialGeometry.Integral.Connection.strict_barrier_posReg (I := I) G T hT X w
+    DifferentialGeometry.Integral.Connection.strict_barrier_positive_region (I := I) G T hT X w
       hw_cont hw0 hw_time hw_mdiff hw_grad hnegative
   intro t ht x
   have := hw_nonneg t ht x

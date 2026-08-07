@@ -920,7 +920,7 @@ theorem strict_barrier_nonnegative_of_positive_time
 
 
 
-theorem strict_barrier_posReg
+theorem strict_barrier_positive_region
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1345,7 +1345,7 @@ theorem strict_barrier_nonnegative
 
 
 
-theorem scalar_wmp_sub_const_of_parabolic_nonpos
+theorem scalar_weak_maximum_principle_sub_const_of_parabolic_nonpos
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1398,7 +1398,7 @@ theorem scalar_wmp_sub_const_of_parabolic_nonpos
 
 
 
-theorem scalar_sub_const_posReg
+theorem scalar_sub_const_positive_region
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1441,7 +1441,7 @@ theorem scalar_sub_const_posReg
     exact neg_nonneg.mpr (hsub t ht htpos x)
   have hw_nonneg :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x :=
-    strict_barrier_posReg (I := I) G T hT X w
+    strict_barrier_positive_region (I := I) G T hT X w
       (by simpa [w] using hw_cont) hw0
       (by simpa [w] using hw_time)
       (by simpa [w] using hw_mdiff)
@@ -1654,7 +1654,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
 
 
 
-theorem msm110_ch4_scalar_supersolutions
+theorem scalar_weak_maximum_principle_supersolution_lower_bound
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1702,7 +1702,7 @@ theorem msm110_ch4_scalar_supersolutions
 
 
 
-theorem msm110_ch4_scalar_pointwise_bounds
+theorem scalar_weak_maximum_principle_pointwise_bounds
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1746,12 +1746,12 @@ theorem msm110_ch4_scalar_pointwise_bounds
       C1 <= u t x ∧ u t x <= C2 := by
   have hlower :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, C1 <= u t x :=
-    msm110_ch4_scalar_supersolutions (I := I) G T hT X u C1
+    scalar_weak_maximum_principle_supersolution_lower_bound (I := I) G T hT X u C1
       hlower_cont hlower_time hlower_mdiff hlower_grad hinit_lower hlower_negative
   have hupper_nonneg :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= C2 - u t x := by
     simpa using
-      (msm110_ch4_scalar_supersolutions (I := I) G T hT X
+      (scalar_weak_maximum_principle_supersolution_lower_bound (I := I) G T hT X
         (fun t x => C2 - u t x) 0
         (by simpa using hupper_cont)
         (by simpa using hupper_time)
@@ -1768,7 +1768,7 @@ theorem msm110_ch4_scalar_pointwise_bounds
 
 
 
-theorem msm110_ch4_scalar_linear_reaction
+theorem scalar_weak_maximum_principle_linear_reaction_nonneg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1801,7 +1801,7 @@ theorem msm110_ch4_scalar_linear_reaction
   have hJ_nonneg :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= J t x := by
     simpa [J] using
-      (msm110_ch4_scalar_supersolutions (I := I) G T hT X J 0
+      (scalar_weak_maximum_principle_supersolution_lower_bound (I := I) G T hT X J 0
         (by simpa [J] using hJ_cont)
         (by simpa [J] using hJ_time)
         (by simpa [J] using hJ_mdiff)
@@ -1818,7 +1818,7 @@ theorem msm110_ch4_scalar_linear_reaction
 
 
 
-theorem linear_react_nonneg
+theorem linear_reaction_nonneg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1854,7 +1854,7 @@ theorem linear_react_nonneg
         beta t x * u t x)
     (hinit : forall x : M, 0 <= u 0 x) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= u t x := by
-  refine msm110_ch4_scalar_linear_reaction (I := I) G T hT X u beta C hbeta
+  refine scalar_weak_maximum_principle_linear_reaction_nonneg (I := I) G T hT X u beta C hbeta
     hJ_cont hJ_time hJ_mdiff hJ_grad hinit ?_
   intro t ht x hJneg
   by_cases hTpos : 0 < T
@@ -2015,7 +2015,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_va
 
 
 
-theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
+theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_regular
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -2104,7 +2104,7 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
 
 
 
-theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular_positive_time
+theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_regular_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -2282,7 +2282,7 @@ theorem exists_time_dependent_lipschitz_bound_on_values_of_locallyLipschitz
     (fun t ht => (hF t ht).locallyLipschitzOn) hcompact
 
 
-def scalarWMPValueSet (T : Real) (u : Real -> M -> Real) (c : Real -> Real) : Set Real :=
+def scalarWeakMaximumPrincipleValueSet (T : Real) (u : Real -> M -> Real) (c : Real -> Real) : Set Real :=
   (fun p : Real × M => u p.1 p.2) '' spacetimeSlab (M := M) T ∪ c '' Set.Icc 0 T
 
 
@@ -2290,7 +2290,7 @@ omit [TopologicalSpace M] in
 theorem scalarWMPValueSet_u_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     {t : Real} (ht : t ∈ Set.Icc 0 T) (x : M) :
-    u t x ∈ scalarWMPValueSet (M := M) T u c := by
+    u t x ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c := by
   left
   refine ⟨(t, x), ?_, rfl⟩
   exact ⟨ht, trivial⟩
@@ -2300,7 +2300,7 @@ omit [TopologicalSpace M] in
 theorem scalarWMPValueSet_c_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     {t : Real} (ht : t ∈ Set.Icc 0 T) :
-    c t ∈ scalarWMPValueSet (M := M) T u c := by
+    c t ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c := by
   right
   exact ⟨t, ht, rfl⟩
 
@@ -2312,7 +2312,7 @@ theorem scalarWMPValueSet_isCompact
     (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
       (spacetimeSlab (M := M) T))
     (hc_cont : ContinuousOn c (Set.Icc 0 T)) :
-    IsCompact (scalarWMPValueSet (M := M) T u c) := by
+    IsCompact (scalarWeakMaximumPrincipleValueSet (M := M) T u c) := by
   have hslab : IsCompact (spacetimeSlab (M := M) T) := by
     simpa [spacetimeSlab] using (isCompact_Icc.prod (isCompact_univ : IsCompact (Set.univ : Set M)))
   exact (hslab.image_of_continuousOn hu_cont).union (isCompact_Icc.image_of_continuousOn hc_cont)
@@ -2320,18 +2320,18 @@ theorem scalarWMPValueSet_isCompact
 
 
 omit [TopologicalSpace M] in
-theorem scalarWMP_lipschitz_on_valueSet_bound
+theorem scalarWeakMaximumPrincipleLipschitzOnValueSetBound
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     (F : Real -> Real -> Real) (K : NNReal)
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => F a t)
-        (scalarWMPValueSet (M := M) T u c)) :
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
       |F (u t x) t - F (c t) t| <= (K : Real) * |u t x - c t| := by
   intro t ht x
-  have hu_mem : u t x ∈ scalarWMPValueSet (M := M) T u c :=
+  have hu_mem : u t x ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c :=
     scalarWMPValueSet_u_mem (M := M) T u c ht x
-  have hc_mem : c t ∈ scalarWMPValueSet (M := M) T u c :=
+  have hc_mem : c t ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c :=
     scalarWMPValueSet_c_mem (M := M) T u c ht
   simpa [Real.dist_eq] using (hF_lip t ht).dist_le_mul (u t x) hu_mem (c t) hc_mem
 
@@ -2342,7 +2342,7 @@ theorem scalarWMP_lipschitz_on_valueSet_bound
 
 
 
-theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
+theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -2380,17 +2380,17 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     (hinit : forall x : M, c 0 <= u 0 x)
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => F a t)
-        (scalarWMPValueSet (M := M) T u c)) :
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x := by
-  exact scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
+  exact scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_regular
     (I := I) G T hT X u c F (K : Real)
     hw_cont hw_mdiff hw_grad hu_time hc_time hu_space hv_space hv_grad
     hsuper hode hinit
-    (scalarWMP_lipschitz_on_valueSet_bound (M := M) T u c F K hF_lip)
+    (scalarWeakMaximumPrincipleLipschitzOnValueSetBound (M := M) T u c F K hF_lip)
 
 
 
-theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
+theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -2428,13 +2428,13 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_
     (hinit : forall x : M, c 0 <= u 0 x)
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => F a t)
-        (scalarWMPValueSet (M := M) T u c)) :
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x := by
-  exact scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular_positive_time
+  exact scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_regular_positive_time
     (I := I) G T hT X u c F (K : Real)
     hw_cont hw_mdiff hw_grad hu_time hc_time hu_space hv_space hv_grad
     hsuper hode hinit
-    (scalarWMP_lipschitz_on_valueSet_bound (M := M) T u c F K hF_lip)
+    (scalarWeakMaximumPrincipleLipschitzOnValueSetBound (M := M) T u c F K hF_lip)
 
 
 
@@ -2500,9 +2500,9 @@ theorem scalar_weak_maximum_principle_ode_compare_supersolution
     (hinit : forall x : M, c 0 <= u 0 x)
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => F a t)
-        (scalarWMPValueSet (M := M) T u c)) :
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x :=
-  scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
+  scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular
     (I := I) G T hT X u c F K hw_cont hw_mdiff hw_grad hu_time hc_time
     hu_space hv_space hv_grad hsuper hode hinit hF_lip
 
@@ -2552,7 +2552,7 @@ theorem scalar_weak_maximum_principle_ode_compare_subsolution
     (hinit : forall x : M, u 0 x <= c 0)
     (hF_lip_neg : forall t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => -F (-a) t)
-        (scalarWMPValueSet (M := M) T
+        (scalarWeakMaximumPrincipleValueSet (M := M) T
           (fun t x => -u t x) (fun t => -c t))) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, u t x <= c t := by
   have hneg :
@@ -2604,7 +2604,7 @@ theorem scalar_weak_maximum_principle_ode_compare_supersolution_autonomous
     (hinit : forall x : M, c 0 <= u 0 x)
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => F a)
-        (scalarWMPValueSet (M := M) T u c)) :
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x :=
   scalar_weak_maximum_principle_ode_compare_supersolution
     (I := I) G T hT X u c (fun a _ => F a) K

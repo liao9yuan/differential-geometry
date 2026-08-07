@@ -1474,7 +1474,7 @@ theorem ham3_lip74
           forall t : Real, t ∈ Set.Icc 0 T ->
             LipschitzOnWith (K T)
               (fun a : Real => DifferentialGeometry.PDE.RicciFlow.scalarLowerReaction 3 a t)
-              (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T
+              (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
                 (ham3Scalar (I := I) P)
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
   classical
@@ -1485,7 +1485,7 @@ theorem ham3_lip74
           ∀ t : Real, t ∈ Set.Icc 0 T ->
             LipschitzOnWith K
               (fun a : Real => DifferentialGeometry.PDE.RicciFlow.scalarLowerReaction 3 a t)
-              (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T
+              (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
                 (ham3Scalar (I := I) P)
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
     intro T hT hTω hPole
@@ -1510,7 +1510,7 @@ theorem ham3_lip74
       exact continuousOn_const.div hden_cont (fun t ht => ne_of_gt (hden t ht))
     have hcompact :
         IsCompact
-          (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T
+          (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
             (ham3Scalar (I := I) P)
             (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) :=
       DifferentialGeometry.Integral.Connection.scalarWMPValueSet_isCompact
@@ -1570,7 +1570,7 @@ theorem ham3_scalar74
             forall t : Real, t ∈ Set.Icc 0 T ->
               LipschitzOnWith (K T)
                 (fun a : Real => DifferentialGeometry.PDE.RicciFlow.scalarLowerReaction 3 a t)
-                (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+                (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
                   (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0))) := by
   rcases hM with ⟨hcompact, _hconnected, _hboundaryless, hdim⟩
   letI : CompactSpace M := hcompact
@@ -2262,7 +2262,7 @@ theorem ham3_scalar_pos
           ∀ t : Real, t ∈ Set.Icc 0 T ->
             LipschitzOnWith (K T)
               (fun a : Real => DifferentialGeometry.PDE.RicciFlow.scalarLowerReaction 3 a t)
-              (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T
+              (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
                 (ham3Scalar (I := I) P)
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
     intro T hT hTω hPole

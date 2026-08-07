@@ -1166,7 +1166,7 @@ theorem scalar_strong_maximum_principle_of_barrier
     change parabolicOperatorWithDrift (I := I) G T X w t x = _ at hsub
     rw [hsub]
     linarith [hu_super t ht htpos x]
-  have hw_nonneg := strict_barrier_posReg (I := I)
+  have hw_nonneg := strict_barrier_positive_region (I := I)
     G T hT.le X w hw_cont hw0 hw_time hw_mdiff hw_grad hnegative
     T ⟨hT.le, le_rfl⟩ y
   have hphaseT : strongBarrierPhase rho kappa T T y = rho y := by

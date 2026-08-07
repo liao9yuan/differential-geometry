@@ -987,7 +987,7 @@ theorem pinchQuot_slab_bound
       (pinchQuotient (I := I) S epsilon) C t x
       ((uniqueDiffOn_Icc hTpos).uniqueDiffWithinAt ht)
       hu_time hu_space hu_grad
-  exact DifferentialGeometry.Integral.Connection.scalar_sub_const_posReg (I := I)
+  exact DifferentialGeometry.Integral.Connection.scalar_sub_const_positive_region (I := I)
     (flowG (I := I) S) T hT
     (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
     (pinchQuotient (I := I) S epsilon) C

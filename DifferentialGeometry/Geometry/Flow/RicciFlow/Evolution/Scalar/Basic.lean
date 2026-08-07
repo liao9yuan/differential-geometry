@@ -93,7 +93,7 @@ theorem scalarEvolutionEquationOn_of_contractedBianchi
 
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
-theorem msm110_ch6_1_scalar_curvature_evolution
+theorem scalar_curvature_evolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap contractedRicciHessian ricciNormSq : Real -> M -> Real)
     (hpre : ScalarPreBianchiEvolutionEquationOn (D := D)

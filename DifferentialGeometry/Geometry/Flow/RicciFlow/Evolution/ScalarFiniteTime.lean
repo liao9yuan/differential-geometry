@@ -200,7 +200,7 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
       T < scalarBlowupTime n c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction n a t)
-            (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
               (scalarLowerBarrier n c0))) :
     ScalarLowerBarrierBoundUpToPole (M := M) scalar n c0 omega := by
   intro T hT_pos hT_omega hT_blow x
@@ -252,7 +252,7 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
       T < scalarBlowupTime n c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction n a t)
-            (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
               (scalarLowerBarrier n c0))) :
     omega <= scalarBlowupTime n c0 := by
   have hc0 : 0 < c0 :=
@@ -310,7 +310,7 @@ theorem finiteTime3D
       T < scalarBlowupTime 3 c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction 3 a t)
-            (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
               (scalarLowerBarrier 3 c0))) :
     0 < c0 ∧ omega <= 3 / (2 * c0) := by
   have hc0 : 0 < c0 :=

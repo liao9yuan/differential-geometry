@@ -106,14 +106,14 @@ theorem scalarLowerReaction_locallyLipschitz (n t : Real) :
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem exists_scalarLowerReaction_lipschitzOn_valueSet
     (n T : Real) (u : Real -> M -> Real) (c : Real -> Real)
-    (hcompact : IsCompact (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T u
+    (hcompact : IsCompact (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T u
       c)) :
     ∃ K : NNReal,
       ∀ t : Real, t ∈ Set.Icc 0 T ->
         LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-          (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T u c) := by
+          (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T u c) := by
   have hloc :
-      LocallyLipschitzOn (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T u c)
+      LocallyLipschitzOn (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T u c)
         (fun a : Real => scalarLowerReaction n a 0) :=
     (scalarLowerReaction_locallyLipschitz n 0).locallyLipschitzOn
   obtain ⟨K, hK⟩ :=
@@ -174,12 +174,12 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
     (hinit : ∀ x : M, c0 <= scalar 0 x)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x := by
   refine
-    Integral.Connection.scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
+    Integral.Connection.scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     (I := I) G T (le_of_lt hT) X scalar (scalarLowerBarrier n c0)
     (scalarLowerReaction n) K hw_cont hw_mdiff hw_grad hscalar_time ?_
     hscalar_space hdiff_space hdiff_grad hparabolic ?_ ?_ hF_lip
@@ -620,7 +620,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
     (hinit : InitialScalarLowerBound (M := M) scalar c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x := by
@@ -659,7 +659,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
     (hinit : InitialScalarLowerBound (M := M) scalar c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x :=
@@ -694,7 +694,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
     (hinit : InitialScalarLowerBound (M := M) scalar c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x := by
@@ -765,7 +765,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
     (hinit : InitialScalarMinimum (M := M) scalar c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x :=
@@ -850,7 +850,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
       (scalarTraceInFrame (I := I) S gInv frame) c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T
+        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
           (scalarTraceInFrame (I := I) S gInv frame)
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
@@ -911,7 +911,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
       (scalarTraceInFrame (I := I) S gInv frame) c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T
+        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
           (scalarTraceInFrame (I := I) S gInv frame)
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,

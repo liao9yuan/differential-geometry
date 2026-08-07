@@ -134,7 +134,7 @@ private theorem heat_pot_supersolution_nonneg_on_strict_subinterval
     linarith
   have hJ_nonneg : forall t : Real, t ∈ Set.Icc 0 T' ->
       forall x : M, 0 <= J t x :=
-    strict_barrier_posReg (I := I) G T' hT' X J hJ_cont hJ0
+    strict_barrier_positive_region (I := I) G T' hT' X J hJ_cont hJ0
       hJ_time hJ_mdiff hJ_grad hnegative
   intro t ht x
   have hprod : 0 <= Real.exp (-C * t) * u t x := by
@@ -394,7 +394,7 @@ private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
         (I := I) G hT V u hsol C c hV hu_nonneg T' hT'lt t ht htpos x
   have hw_nonneg : forall t : Real, t ∈ Set.Icc 0 T' ->
       forall x : M, 0 <= w t x :=
-    strict_barrier_posReg (I := I) G T' hT' X w hw_cont hw0
+    strict_barrier_positive_region (I := I) G T' hT' X w hw_cont hw0
       hw_time hw_mdiff hw_grad hnegative
   intro t ht x
   exact sub_nonneg.mp (by simpa only [w, z] using hw_nonneg t ht x)
