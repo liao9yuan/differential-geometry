@@ -793,4 +793,464 @@ noncomputable def levelSetIsManifold {m : ℕ} (g : MorseModel (m + 1) → ℝ) 
   exact { toHasGroupoid := levelSetHasGroupoid g a hg hreg }
 end
 
+abbrev MorseHalfSpace (m : ℕ) : Type := {x : MorseModel (m + 1) // 0 ≤ x (Fin.last m)}
+
+theorem convex_morseHalfSpace (m : ℕ) :
+    Convex ℝ ({x : MorseModel (m + 1) | 0 ≤ x (Fin.last m)} : Set (MorseModel (m + 1))) := by
+  exact convex_halfSpace_ge (f := fun x : MorseModel (m + 1) => x (Fin.last m)) (by
+    refine ⟨?_, ?_⟩
+    · intro x y
+      rfl
+    · intro c x
+      rfl) (0 : ℝ)
+
+theorem isOpen_morseHalfSpace_interior (m : ℕ) :
+    IsOpen ({x : MorseModel (m + 1) | 0 < x (Fin.last m)}) := by
+  exact isOpen_Ioi.preimage (continuous_apply (Fin.last m))
+
+theorem interior_morseHalfSpace_nonempty (m : ℕ) :
+    (interior ({x : MorseModel (m + 1) | 0 ≤ x (Fin.last m)} : Set (MorseModel (m + 1)))).Nonempty := by
+  refine ⟨fun _ : Fin (m + 1) => (1 : ℝ), ?_⟩
+  have h₁ : (fun _ : Fin (m + 1) => (1 : ℝ)) ∈ interior {x : MorseModel (m + 1) | 0 < x (Fin.last m)} := by
+    rw [(isOpen_morseHalfSpace_interior m).interior_eq]
+    simp
+  exact interior_mono (by
+    intro x hx
+    change 0 < x (Fin.last m) at hx
+    exact le_of_lt hx) h₁
+
+noncomputable def morseHalfSpaceClamp {m : ℕ} (x : MorseModel (m + 1)) : MorseModel (m + 1) :=
+  HAdd.hAdd x (HSMul.hSMul (max (-(x (Fin.last m))) 0) levelSetLastBasis)
+
+theorem morseHalfSpaceClamp_last (m : ℕ) (x : MorseModel (m + 1)) :
+    morseHalfSpaceClamp x (Fin.last m) = max (x (Fin.last m)) 0 := by
+  by_cases h : 0 ≤ x (Fin.last m)
+  · have h1 : max (-(x (Fin.last m))) 0 = 0 := max_eq_right (by linarith)
+    rw [morseHalfSpaceClamp, h1]
+    rw [max_eq_left h]
+    simp
+  · have h1 : max (-(x (Fin.last m))) 0 = -(x (Fin.last m)) := max_eq_left (by linarith)
+    rw [morseHalfSpaceClamp, h1]
+    rw [max_eq_right (by linarith)]
+    simp [levelSetLastBasis]
+
+theorem morseHalfSpaceClamp_of_mem (m : ℕ) {x : MorseModel (m + 1)} (hx : 0 ≤ x (Fin.last m)) :
+    morseHalfSpaceClamp x = x := by
+  ext i
+  by_cases hi : i = Fin.last m
+  · subst i
+    rw [morseHalfSpaceClamp_last]
+    exact max_eq_left hx
+  · have h0 : (HSMul.hSMul (max (-(x (Fin.last m))) 0) levelSetLastBasis) i = 0 := by
+      simp [levelSetLastBasis, hi, Pi.smul_apply, smul_eq_mul]
+    simp [morseHalfSpaceClamp, h0]
+
+noncomputable def morseModelWithCornersHalfSpace (m : ℕ) :
+    ModelWithCorners ℝ (MorseModel (m + 1)) (MorseHalfSpace m) :=
+  ModelWithCorners.ofConvexRange
+    { toFun := fun x : MorseHalfSpace m => (x : MorseModel (m + 1))
+      invFun := fun x : MorseModel (m + 1) =>
+        ⟨morseHalfSpaceClamp x, by
+          rw [morseHalfSpaceClamp_last]
+          exact le_max_right _ _⟩
+      source := Set.univ
+      target := {x : MorseModel (m + 1) | 0 ≤ x (Fin.last m)}
+      map_source' := by intro x hx; exact x.2
+      map_target' := by intro x hx; trivial
+      left_inv' := by
+        intro x hx
+        apply Subtype.ext
+        exact morseHalfSpaceClamp_of_mem m x.2
+      right_inv' := by
+        intro x hx
+        exact morseHalfSpaceClamp_of_mem m hx }
+    rfl (convex_morseHalfSpace m)
+    (by fun_prop)
+    (by
+      have hcont : Continuous (morseHalfSpaceClamp (m := m)) := by
+        change Continuous (fun x : MorseModel (m + 1) =>
+          HAdd.hAdd x (HSMul.hSMul (max (-(x (Fin.last m))) 0) levelSetLastBasis))
+        fun_prop
+      exact Continuous.subtype_mk hcont (fun x => by
+        rw [morseHalfSpaceClamp_last]
+        exact le_max_right _ _))
+    (interior_morseHalfSpace_nonempty m)
+
+theorem sublevelBoundaryChart_invFun_mem {m : ℕ} (g : MorseModel (m + 1) → ℝ)
+    (e : Fin (m + 1) ≃ Fin (m + 1)) (a : ℝ)
+    (ψ : OpenPartialHomeomorph (MorseModel (m + 1)) (ℝ × MorseModel m))
+    (hψ : (ψ : MorseModel (m + 1) → ℝ × MorseModel m) = levelSetChartMap g e)
+    {z : MorseHalfSpace m} (hz : (a - (z : MorseModel (m + 1)) (Fin.last m),
+      levelSetSplitFst m (z : MorseModel (m + 1))) ∈ ψ.target) :
+    g (levelSetReindex e (ψ.symm (a - (z : MorseModel (m + 1)) (Fin.last m),
+      levelSetSplitFst m (z : MorseModel (m + 1))))) ≤ a := by
+  have hval : (ψ (ψ.symm (a - (z : MorseModel (m + 1)) (Fin.last m),
+      levelSetSplitFst m (z : MorseModel (m + 1))))).1 =
+      a - (z : MorseModel (m + 1)) (Fin.last m) := by
+    rw [ψ.right_inv hz]
+  have h1 : (ψ (ψ.symm (a - (z : MorseModel (m + 1)) (Fin.last m),
+      levelSetSplitFst m (z : MorseModel (m + 1))))).1 =
+      g (levelSetReindex e (ψ.symm (a - (z : MorseModel (m + 1)) (Fin.last m),
+        levelSetSplitFst m (z : MorseModel (m + 1))))) := by
+    rw [hψ]
+    rfl
+  rw [← h1]
+  rw [hval]
+  linarith [z.2]
+
+noncomputable def sublevelBoundaryChart {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : SublevelSpace g a) (hx : g x.1 = a)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    OpenPartialHomeomorph (SublevelSpace g a) (MorseHalfSpace m) := by
+  classical
+  let d := levelSetChartData.mk g a ⟨x.1, hx⟩ hg hreg
+  let ψ : OpenPartialHomeomorph (MorseModel (m + 1)) (ℝ × MorseModel m) := d.ψ
+  have hψ : (ψ : MorseModel (m + 1) → ℝ × MorseModel m) = levelSetChartMap g d.e := d.hψ
+  let inv : MorseHalfSpace m → SublevelSpace g a := fun z =>
+    if hz : (a - (z : MorseModel (m + 1)) (Fin.last m), levelSetSplitFst m (z : MorseModel (m + 1))) ∈ ψ.target then
+      ⟨levelSetReindex d.e (ψ.symm (a - (z : MorseModel (m + 1)) (Fin.last m),
+          levelSetSplitFst m (z : MorseModel (m + 1)))),
+        sublevelBoundaryChart_invFun_mem g d.e a ψ hψ hz⟩
+    else ⟨x.1, x.2⟩
+  let toFunVal : SublevelSpace g a → MorseModel (m + 1) := fun y =>
+    levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+        a - (ψ (levelSetReindex d.e y.1)).1)
+  let toFun' : SublevelSpace g a → MorseHalfSpace m := fun y =>
+    ⟨toFunVal y, by
+      change 0 ≤ (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+          a - (ψ (levelSetReindex d.e y.1)).1)) (Fin.last m)
+      have h1 : (ψ (levelSetReindex d.e y.1)).1 =
+          g (levelSetReindex d.e (levelSetReindex d.e y.1)) := by
+        rw [hψ]
+        rfl
+      rw [h1]
+      rw [d.he, levelSetReindex_swap_swap]
+      simp [levelSetSplit]
+      linarith [show g y.1 ≤ a from y.2]⟩
+  exact
+    { toPartialEquiv :=
+        { toFun := toFun'
+          invFun := inv
+          source := {y : SublevelSpace g a | levelSetReindex d.e y.1 ∈ ψ.source}
+          target := {z : MorseHalfSpace m |
+            (a - (z : MorseModel (m + 1)) (Fin.last m), levelSetSplitFst m (z : MorseModel (m + 1))) ∈ ψ.target}
+          map_source' := by
+            intro y hy
+            change (a - (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                a - (ψ (levelSetReindex d.e y.1)).1)) (Fin.last m),
+              levelSetSplitFst m (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                a - (ψ (levelSetReindex d.e y.1)).1))) ∈ ψ.target
+            have hlast : (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                a - (ψ (levelSetReindex d.e y.1)).1)) (Fin.last m) =
+                a - (ψ (levelSetReindex d.e y.1)).1 := by
+              simp [levelSetSplit]
+            have hp : levelSetSplitFst m (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                a - (ψ (levelSetReindex d.e y.1)).1)) =
+                levelSetSplitFst m (levelSetReindex d.e y.1) := by
+              rw [levelSetSplitFst_split]
+            rw [hlast, hp]
+            have hpair : (a - (a - (ψ (levelSetReindex d.e y.1)).1),
+                levelSetSplitFst m (levelSetReindex d.e y.1)) = ψ (levelSetReindex d.e y.1) := by
+              apply Prod.ext
+              · ring
+              · have hpp : levelSetSplitFst m (levelSetReindex d.e y.1) =
+                    (ψ (levelSetReindex d.e y.1)).2 := by
+                  rw [hψ]
+                  rfl
+                rw [hpp]
+            rw [hpair]
+            exact ψ.map_source hy
+          map_target' := by
+            intro z hz
+            change levelSetReindex d.e ((inv z).1) ∈ ψ.source
+            change levelSetReindex d.e ((if h : (a - (z : MorseModel (m + 1)) (Fin.last m),
+                levelSetSplitFst m (z : MorseModel (m + 1))) ∈ ψ.target then
+                  (⟨levelSetReindex d.e (ψ.symm (a - (z : MorseModel (m + 1)) (Fin.last m),
+                      levelSetSplitFst m (z : MorseModel (m + 1)))),
+                    sublevelBoundaryChart_invFun_mem g d.e a ψ hψ h⟩ : SublevelSpace g a)
+                else ⟨x.1, x.2⟩).1) ∈ ψ.source
+            simp only [dif_pos (show (a - (z : MorseModel (m + 1)) (Fin.last m),
+              levelSetSplitFst m (z : MorseModel (m + 1))) ∈ ψ.target from hz)]
+            rw [d.he, levelSetReindex_swap_swap]
+            exact ψ.map_target hz
+          left_inv' := by
+            intro y hy
+            have h1 : (ψ (levelSetReindex d.e y.1)).1 =
+                g (levelSetReindex d.e (levelSetReindex d.e y.1)) := by
+              rw [hψ]
+              rfl
+            have hlast : (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                a - (ψ (levelSetReindex d.e y.1)).1)) (Fin.last m) =
+                a - (ψ (levelSetReindex d.e y.1)).1 := by
+              simp [levelSetSplit]
+            have hp : levelSetSplitFst m (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                a - (ψ (levelSetReindex d.e y.1)).1)) =
+                levelSetSplitFst m (levelSetReindex d.e y.1) := by
+              rw [levelSetSplitFst_split]
+            have hpair : (a - (a - (ψ (levelSetReindex d.e y.1)).1),
+                levelSetSplitFst m (levelSetReindex d.e y.1)) = ψ (levelSetReindex d.e y.1) := by
+              apply Prod.ext
+              · ring
+              · have hpp : levelSetSplitFst m (levelSetReindex d.e y.1) =
+                    (ψ (levelSetReindex d.e y.1)).2 := by
+                  rw [hψ]
+                  rfl
+                rw [hpp]
+            have hz : (a - toFunVal y (Fin.last m), levelSetSplitFst m (toFunVal y)) ∈ ψ.target := by
+              change (a - (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                  a - (ψ (levelSetReindex d.e y.1)).1)) (Fin.last m),
+                levelSetSplitFst m (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                  a - (ψ (levelSetReindex d.e y.1)).1))) ∈ ψ.target
+              rw [hlast, hp, hpair]
+              exact ψ.map_source hy
+            change inv (toFun' y) = y
+            change (if h : (a - (toFun' y : MorseModel (m + 1)) (Fin.last m),
+                levelSetSplitFst m ((toFun' y : MorseModel (m + 1)))) ∈ ψ.target then
+                  ⟨levelSetReindex d.e (ψ.symm (a - (toFun' y : MorseModel (m + 1)) (Fin.last m),
+                      levelSetSplitFst m ((toFun' y : MorseModel (m + 1))))),
+                    sublevelBoundaryChart_invFun_mem g d.e a ψ hψ h⟩
+                else ⟨x.1, x.2⟩) = y
+            rw [dif_pos (show (a - (toFun' y : MorseModel (m + 1)) (Fin.last m),
+              levelSetSplitFst m ((toFun' y : MorseModel (m + 1)))) ∈ ψ.target from by
+                change (a - toFunVal y (Fin.last m), levelSetSplitFst m (toFunVal y)) ∈ ψ.target
+                exact hz)]
+            apply Subtype.ext
+            change levelSetReindex d.e (ψ.symm (a - (toFun' y : MorseModel (m + 1)) (Fin.last m),
+                levelSetSplitFst m ((toFun' y : MorseModel (m + 1))))) = y.1
+            change levelSetReindex d.e (ψ.symm (a - toFunVal y (Fin.last m),
+                levelSetSplitFst m (toFunVal y))) = y.1
+            change levelSetReindex d.e (ψ.symm (a - (levelSetSplit m (levelSetSplitFst m
+                (levelSetReindex d.e y.1), a - (ψ (levelSetReindex d.e y.1)).1)) (Fin.last m),
+                levelSetSplitFst m (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                  a - (ψ (levelSetReindex d.e y.1)).1)))) = y.1
+            rw [hlast, hp]
+            rw [hpair]
+            have hleft : ψ.symm (ψ (levelSetReindex d.e y.1)) = levelSetReindex d.e y.1 :=
+              ψ.left_inv hy
+            rw [hleft]
+            rw [d.he, levelSetReindex_swap_swap]
+          right_inv' := by
+            intro z hz
+            change (toFun' (if h : (a - (z : MorseModel (m + 1)) (Fin.last m),
+                levelSetSplitFst m (z : MorseModel (m + 1))) ∈ ψ.target then
+                  ⟨levelSetReindex d.e (ψ.symm (a - (z : MorseModel (m + 1)) (Fin.last m),
+                      levelSetSplitFst m (z : MorseModel (m + 1)))),
+                    sublevelBoundaryChart_invFun_mem g d.e a ψ hψ h⟩
+                else ⟨x.1, x.2⟩)) = z
+            rw [dif_pos (show (a - (z : MorseModel (m + 1)) (Fin.last m),
+              levelSetSplitFst m (z : MorseModel (m + 1))) ∈ ψ.target from hz)]
+            apply Subtype.ext
+            change toFunVal ⟨levelSetReindex d.e (ψ.symm (a - (z : MorseModel (m + 1)) (Fin.last m),
+                levelSetSplitFst m (z : MorseModel (m + 1)))), _⟩ = (z : MorseModel (m + 1))
+            let t : ℝ := a - (z : MorseModel (m + 1)) (Fin.last m)
+            let y' : MorseModel m := levelSetSplitFst m (z : MorseModel (m + 1))
+            let w : MorseModel (m + 1) := ψ.symm (t, y')
+            change levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e (levelSetReindex d.e w)),
+                a - (ψ (levelSetReindex d.e (levelSetReindex d.e w))).1) = (z : MorseModel (m + 1))
+            have hpair : ψ w = (t, y') := by
+              simpa [t, y', w] using ψ.right_inv hz
+            have hG : (ψ (levelSetReindex d.e (levelSetReindex d.e w))).1 = t := by
+              rw [hψ]
+              simp only [levelSetChartMap]
+              rw [d.he, levelSetReindex_swap_swap, ← d.he]
+              have h1 : (ψ w).1 = g (levelSetReindex d.e w) := by
+                rw [hψ]
+                rfl
+              rw [← h1]
+              exact congrArg Prod.fst hpair
+            have hp : levelSetSplitFst m (levelSetReindex d.e (levelSetReindex d.e w)) = y' := by
+              rw [d.he, levelSetReindex_swap_swap]
+              have h1 : levelSetSplitFst m w = (ψ w).2 := by
+                rw [hψ]
+                rfl
+              rw [h1]
+              exact congrArg Prod.snd hpair
+            rw [hG, hp]
+            change levelSetSplit m (y', a - t) = (z : MorseModel (m + 1))
+            have ht : a - t = (z : MorseModel (m + 1)) (Fin.last m) := by
+              dsimp [t]
+              ring
+            rw [ht]
+            change levelSetSplit m ((levelSetSplitFst m (z : MorseModel (m + 1))),
+                (z : MorseModel (m + 1)) (Fin.last m)) = (z : MorseModel (m + 1))
+            change levelSetSplit m ((levelSetSplit m).symm (z : MorseModel (m + 1))) =
+                (z : MorseModel (m + 1))
+            exact (levelSetSplit m).apply_symm_apply (z : MorseModel (m + 1)) }
+      open_source := by
+        have hcont : Continuous (fun y : SublevelSpace g a => levelSetReindex d.e y.1) :=
+          ((levelSetReindex d.e).toContinuousLinearEquiv :
+            MorseModel (m + 1) →L[ℝ] MorseModel (m + 1)).continuous.comp continuous_subtype_val
+        exact ψ.open_source.preimage hcont
+      open_target := by
+        have hcont1 : Continuous (fun z : MorseHalfSpace m =>
+            a - (z : MorseModel (m + 1)) (Fin.last m)) :=
+          continuous_const.sub ((continuous_apply (Fin.last m)).comp continuous_subtype_val)
+        have hcont2 : Continuous (fun z : MorseHalfSpace m =>
+            levelSetSplitFst m (z : MorseModel (m + 1))) :=
+          (levelSetSplitFst m).continuous.comp continuous_subtype_val
+        have hcont : Continuous (fun z : MorseHalfSpace m =>
+            (a - (z : MorseModel (m + 1)) (Fin.last m), levelSetSplitFst m (z : MorseModel (m + 1)))) :=
+          hcont1.prodMk hcont2
+        exact ψ.open_target.preimage hcont
+      continuousOn_toFun := by
+        have hf : Continuous (fun y : SublevelSpace g a => levelSetReindex d.e y.1) :=
+          ((levelSetReindex d.e).toContinuousLinearEquiv :
+            MorseModel (m + 1) →L[ℝ] MorseModel (m + 1)).continuous.comp continuous_subtype_val
+        have hcomp : ContinuousOn (fun y : SublevelSpace g a => ψ (levelSetReindex d.e y.1))
+            {y : SublevelSpace g a | levelSetReindex d.e y.1 ∈ ψ.source} :=
+          ψ.continuousOn.comp hf.continuousOn (by intro y hy; exact hy)
+        have hc1 : ContinuousOn (fun y : SublevelSpace g a =>
+            levelSetSplitFst m (levelSetReindex d.e y.1))
+            {y : SublevelSpace g a | levelSetReindex d.e y.1 ∈ ψ.source} :=
+          (levelSetSplitFst m).continuous.comp_continuousOn hf.continuousOn
+        have hc2 : ContinuousOn (fun y : SublevelSpace g a =>
+            a - (ψ (levelSetReindex d.e y.1)).1)
+            {y : SublevelSpace g a | levelSetReindex d.e y.1 ∈ ψ.source} := by
+          have hc2' : ContinuousOn (fun y : SublevelSpace g a =>
+              (ψ (levelSetReindex d.e y.1)).1)
+              {y : SublevelSpace g a | levelSetReindex d.e y.1 ∈ ψ.source} :=
+            continuous_fst.comp_continuousOn hcomp
+          simpa [sub_eq_add_neg] using
+            (continuous_const.sub continuous_id).comp_continuousOn hc2'
+        have hpair : ContinuousOn (fun y : SublevelSpace g a =>
+            (levelSetSplitFst m (levelSetReindex d.e y.1),
+              a - (ψ (levelSetReindex d.e y.1)).1))
+            {y : SublevelSpace g a | levelSetReindex d.e y.1 ∈ ψ.source} :=
+          hc1.prodMk hc2
+        have hunder : ContinuousOn (fun y : SublevelSpace g a =>
+            levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+              a - (ψ (levelSetReindex d.e y.1)).1))
+            {y : SublevelSpace g a | levelSetReindex d.e y.1 ∈ ψ.source} :=
+          (by
+            have hsplit : Continuous (levelSetSplit m) := (levelSetSplit m).toContinuousLinearEquiv.continuous
+            exact hsplit.comp_continuousOn hpair)
+        refine continuousOn_iff_continuous_restrict.mpr ?_
+        have hrest : Continuous (fun x : {y : SublevelSpace g a |
+            levelSetReindex d.e y.1 ∈ ψ.source} => toFunVal x.1) := by
+          exact continuousOn_iff_continuous_restrict.mp (by
+            change ContinuousOn (fun y : SublevelSpace g a =>
+                levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e y.1),
+                  a - (ψ (levelSetReindex d.e y.1)).1))
+                {y : SublevelSpace g a | levelSetReindex d.e y.1 ∈ ψ.source}
+            exact hunder)
+        have hsub : Continuous (fun x : {y : SublevelSpace g a |
+            levelSetReindex d.e y.1 ∈ ψ.source} => (⟨toFunVal x.1, (toFun' x.1).2⟩ :
+              MorseHalfSpace m)) :=
+          Continuous.subtype_mk hrest (fun x => (toFun' x.1).2)
+        have hcongr : Continuous (fun x : {y : SublevelSpace g a |
+            levelSetReindex d.e y.1 ∈ ψ.source} => toFun' x.1) := by
+          refine hsub.congr ?_
+          intro x
+          exact (Subtype.ext rfl).symm
+        exact hcongr
+      continuousOn_invFun := by
+        let s : Set (MorseHalfSpace m) := {z | (a - (z : MorseModel (m + 1)) (Fin.last m),
+          levelSetSplitFst m (z : MorseModel (m + 1))) ∈ ψ.target}
+        refine continuousOn_iff_continuous_restrict.mpr ?_
+        have hc : Continuous (fun z : s =>
+            (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+              levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1)))) := by
+          have hc1 : Continuous (fun z : s =>
+              a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m)) :=
+            continuous_const.sub (((continuous_apply (Fin.last m)).comp continuous_subtype_val).comp continuous_subtype_val)
+          have hc2 : Continuous (fun z : s =>
+              levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1))) :=
+            (levelSetSplitFst m).continuous.comp (continuous_subtype_val.comp continuous_subtype_val)
+          exact hc1.prodMk hc2
+        have hc0 : Continuous (fun z : s => ψ.symm
+            (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+              levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1)))) := by
+          have hc0' : ContinuousOn (fun z : s => ψ.symm
+              (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+                levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1)))) (Set.univ : Set s) := by
+            refine ψ.symm.continuousOn.comp hc.continuousOn ?_
+            intro z hz
+            exact z.2
+          exact continuousOn_univ.mp hc0'
+        have hc1 : Continuous (fun z : s =>
+            (⟨levelSetReindex d.e (ψ.symm
+                (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+                  levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1)))),
+              sublevelBoundaryChart_invFun_mem g d.e a ψ hψ
+                (show (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+                  levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1))) ∈ ψ.target from z.2)⟩ :
+                  SublevelSpace g a)) :=
+          Continuous.subtype_mk
+            (((levelSetReindex d.e).toContinuousLinearEquiv :
+              MorseModel (m + 1) →L[ℝ] MorseModel (m + 1)).continuous.comp hc0)
+            (fun z : s => sublevelBoundaryChart_invFun_mem g d.e a ψ hψ
+              (show (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+                levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1))) ∈ ψ.target from z.2))
+        refine hc1.congr ?_
+        intro z
+        change (⟨levelSetReindex d.e (ψ.symm
+            (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+              levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1)))),
+          sublevelBoundaryChart_invFun_mem g d.e a ψ hψ
+            (show (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+              levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1))) ∈ ψ.target from z.2)⟩ :
+                SublevelSpace g a) =
+          (if hz : (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+              levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1))) ∈ ψ.target then
+                (⟨levelSetReindex d.e (ψ.symm (a - ((z : MorseHalfSpace m) : MorseModel (m + 1))
+                  (Fin.last m), levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1)))),
+                  sublevelBoundaryChart_invFun_mem g d.e a ψ hψ hz⟩ : SublevelSpace g a)
+              else ⟨x.1, x.2⟩)
+        rw [dif_pos (show (a - ((z : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+          levelSetSplitFst m ((z : MorseHalfSpace m) : MorseModel (m + 1))) ∈ ψ.target from z.2)] }
+
+
+theorem mem_sublevelBoundaryChart_source {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : SublevelSpace g a) (hx : g x.1 = a)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    x ∈ (sublevelBoundaryChart g a x hx hg hreg).source := by
+  classical
+  let d := levelSetChartData.mk g a ⟨x.1, hx⟩ hg hreg
+  change levelSetReindex d.e x.1 ∈ d.ψ.source
+  rw [d.hψsource]
+  constructor
+  · rw [← d.hu₁]
+    exact ContDiffAt.mem_toOpenPartialHomeomorph_source (f := levelSetChartMap g d.e)
+      (contDiffAt_levelSetChartMap g d.e d.u₁ (by
+        rw [d.hu₁, d.he, levelSetReindex_swap_swap]
+        exact hg.contDiffAt))
+      (hasFDerivAt_levelSetChartMap g d.e d.u₁ (by
+        rw [d.hu₁, d.he, levelSetReindex_swap_swap]
+        exact hg.contDiffAt) d.hc)
+      (by norm_num)
+  · rw [← d.hu₁]
+    exact d.hc
+
+theorem sublevelBoundaryChart_extend_last_zero {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : SublevelSpace g a) (hx : g x.1 = a)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : fderiv ℝ g x.1 ≠ 0) :
+    (sublevelBoundaryChart g a x hx hg hreg).extend (morseModelWithCornersHalfSpace m) x
+        (Fin.last m) = 0 := by
+  classical
+  let d := levelSetChartData.mk g a ⟨x.1, hx⟩ hg hreg
+  let ψ : OpenPartialHomeomorph (MorseModel (m + 1)) (ℝ × MorseModel m) := d.ψ
+  have hψ : (ψ : MorseModel (m + 1) → ℝ × MorseModel m) = levelSetChartMap g d.e := d.hψ
+  rw [OpenPartialHomeomorph.extend_coe]
+  change (morseModelWithCornersHalfSpace m) (⟨levelSetSplit m (levelSetSplitFst m
+      (levelSetReindex d.e x.1), a - (ψ (levelSetReindex d.e x.1)).1), by
+        have h1 : (ψ (levelSetReindex d.e x.1)).1 =
+            g (levelSetReindex d.e (levelSetReindex d.e x.1)) := by
+          rw [hψ]
+          rfl
+        rw [h1]
+        rw [d.he, levelSetReindex_swap_swap]
+        simp [levelSetSplit]
+        linarith [show g x.1 ≤ a from x.2]⟩ : MorseHalfSpace m)
+      (Fin.last m) = 0
+  change (levelSetSplit m (levelSetSplitFst m (levelSetReindex d.e x.1),
+      a - (ψ (levelSetReindex d.e x.1)).1)) (Fin.last m) = 0
+  have h1 : (ψ (levelSetReindex d.e x.1)).1 =
+      g (levelSetReindex d.e (levelSetReindex d.e x.1)) := by
+    rw [hψ]
+    rfl
+  rw [h1]
+  rw [d.he, levelSetReindex_swap_swap]
+  simp [levelSetSplit]
+  linarith
+
 end DifferentialGeometry.Topology.Morse
