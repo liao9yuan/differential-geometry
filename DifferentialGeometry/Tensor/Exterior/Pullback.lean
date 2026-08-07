@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.Exterior.Basic
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
+import Mathlib.Geometry.Manifold.ContMDiffMap
 
 noncomputable section
 
@@ -121,6 +122,16 @@ noncomputable def pullback (f : M → N) (hf : ContMDiff IM IN ⊤ f)
 @[simp] theorem pullback_apply (f : M → N) (hf : ContMDiff IM IN ⊤ f)
     (η : DifferentialForm IN N k) (x : M) :
     (pullback f hf η) x = (η (f x)).compContinuousLinearMap (mfderiv IM IN f x) :=
+  rfl
+
+
+noncomputable def pullbackMap (f : C^⊤⟮IM, M; IN, N⟯)
+    (η : DifferentialForm IN N k) : DifferentialForm IM M k :=
+  pullback f.1 f.2 η
+
+@[simp] theorem pullbackMap_apply (f : C^⊤⟮IM, M; IN, N⟯)
+    (η : DifferentialForm IN N k) (x : M) :
+    (pullbackMap f η) x = (η (f x)).compContinuousLinearMap (mfderiv IM IN f x) :=
   rfl
 
 private lemma fderiv_chartLocalMap_eq_inTangentCoordinates (f : M → N)
@@ -519,6 +530,14 @@ theorem exteriorDerivative_pullback [BoundarylessManifold IM M] [BoundarylessMan
       ((exteriorDerivative (pullback f hf η)) x)
   rw [← h₁, ← h₂]
   exact hfinal
+
+
+
+theorem exteriorDerivative_pullbackMap [BoundarylessManifold IM M] [BoundarylessManifold IN N]
+    (f : C^⊤⟮IM, M; IN, N⟯) (η : DifferentialForm IN N k) :
+    pullbackMap f (exteriorDerivative (IM := IN) (M := N) η) =
+      exteriorDerivative (pullbackMap f η) := by
+  simpa [pullbackMap] using exteriorDerivative_pullback f.1 f.2 η
 
 end DifferentialForm
 end DifferentialGeometry

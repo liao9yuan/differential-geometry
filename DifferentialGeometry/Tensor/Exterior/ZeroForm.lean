@@ -1,4 +1,5 @@
 import DifferentialGeometry.Tensor.Exterior.Basic
+import Mathlib.Geometry.Manifold.ContMDiffMap
 
 noncomputable section
 
@@ -55,6 +56,14 @@ noncomputable def ofFunction (f : M → ℝ) (hf : ContMDiff IM 𝓘(ℝ, ℝ) �
         (E := TangentSpace IM x) (E' := EM) (y := f x)
         (A := (trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)))
     ⟩
+
+
+
+noncomputable def ofFunctionMap (f : C^⊤⟮IM, M; ℝ⟯) : DifferentialForm IM M 0 :=
+  ofFunction f.1 f.2
+
+@[simp] theorem ofFunctionMap_apply (f : C^⊤⟮IM, M; ℝ⟯) (x : M) :
+    (ofFunctionMap f) x = ofFunction f.1 f.2 x := rfl
 
 noncomputable def toFunction (α : DifferentialForm IM M 0) : M → ℝ :=
   fun x => (α x).toFun (0 : Fin 0 → TangentSpace IM x)
