@@ -3,9 +3,11 @@ import DifferentialGeometry.Topology.Morse.Manifold
 import DifferentialGeometry.Analysis.ODE.CompactSupportFlow
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+import Mathlib.Geometry.Manifold.Instances.Icc
 
 namespace DifferentialGeometry.Topology.Morse
 
+open DifferentialGeometry.Analysis.ODE
 open scoped Manifold Topology
 
 noncomputable section
@@ -1975,6 +1977,66 @@ theorem contMDiff_levelSetInclusion [I.Boundaryless] [IsManifold I (⊤ : WithTo
     have hFAt : ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) F z₀ :=
       hF.contDiffAt (c.open_target.mem_nhds hz₀)
     simpa [F, modelWithCornersSelf, ModelWithCorners.ofTargetUniv] using hFAt.contDiffWithinAt
+
+noncomputable def levelSetCollarMap [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
+    (f : M → ℝ) {a b : ℝ}
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v)) :
+    LevelSetSpace f a × Set.Icc (0 : ℝ) (b - a) → M :=
+  fun p => curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) p.1.1 (-(p.2 : ℝ))
+
+theorem contMDiff_levelSetCollarMap [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
+    (f : M → ℝ) (a : ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x) {b : ℝ} [Fact (0 < b - a)]
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hcs : ChartedSpace (MorseModel m) (LevelSetSpace f a) :=
+      manifoldLevelSetChartedSpace I f a hf hreg)
+    (hchart : ∀ x : LevelSetSpace f a, hcs.chartAt x = manifoldLevelSetChart I f a hf hreg x := by
+      intro x
+      rfl) :
+    ContMDiff ((𝓘(ℝ, MorseModel m)).prod (𝓡∂ 1)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (levelSetCollarMap I f v hv hsupp :
+        LevelSetSpace f a × Set.Icc (0 : ℝ) (b - a) → M) := by
+  classical
+  letI := hcs
+  have hflow : ContMDiff (𝓘(ℝ, ℝ).prod I) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : ℝ × M => curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) p.2 p.1) :=
+    contMDiff_globalFlow_joint_of_compactSupport (E := MorseModel (m + 1)) (I := I)
+      (v := v) (hv := hv) (hsupp := hsupp)
+  have hinc : ContMDiff (𝓘(ℝ, MorseModel m)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : LevelSetSpace f a => x.1) :=
+    contMDiff_levelSetInclusion I f a hf hreg hcs hchart
+  have hproj₁ : ContMDiff ((𝓘(ℝ, MorseModel m)).prod (𝓡∂ 1)) (𝓘(ℝ, MorseModel m))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : LevelSetSpace f a × Set.Icc (0 : ℝ) (b - a) => p.1) :=
+    contMDiff_fst (I := 𝓘(ℝ, MorseModel m)) (J := 𝓡∂ 1) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+  have hproj₂ : ContMDiff ((𝓘(ℝ, MorseModel m)).prod (𝓡∂ 1)) (𝓡∂ 1)
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : LevelSetSpace f a × Set.Icc (0 : ℝ) (b - a) => p.2) :=
+    contMDiff_snd (I := 𝓘(ℝ, MorseModel m)) (J := 𝓡∂ 1) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+  have hcoe : ContMDiff (𝓡∂ 1) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun t : Set.Icc (0 : ℝ) (b - a) => (t : ℝ)) :=
+    contMDiff_subtype_coe_Icc (x := (0 : ℝ)) (y := b - a) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+  have hneg : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun r : ℝ => -r) := by
+    exact (contDiff_neg : ContDiff ℝ (⊤ : ℕ∞) (fun r : ℝ => -r)).contMDiff
+  have h₂ : ContMDiff ((𝓘(ℝ, MorseModel m)).prod (𝓡∂ 1)) 𝓘(ℝ, ℝ)
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun p : LevelSetSpace f a × Set.Icc (0 : ℝ) (b - a) =>
+        -(p.2 : ℝ)) :=
+    hneg.comp (hcoe.comp hproj₂)
+  have h₁ : ContMDiff ((𝓘(ℝ, MorseModel m)).prod (𝓡∂ 1)) (𝓘(ℝ, ℝ).prod I)
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : LevelSetSpace f a × Set.Icc (0 : ℝ) (b - a) => (-(p.2 : ℝ), p.1.1)) :=
+    h₂.prodMk (hinc.comp hproj₁)
+  have hcollar : ContMDiff ((𝓘(ℝ, MorseModel m)).prod (𝓡∂ 1)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : LevelSetSpace f a × Set.Icc (0 : ℝ) (b - a) =>
+        curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) p.1.1 (-(p.2 : ℝ))) :=
+    hflow.comp h₁
+  simpa [levelSetCollarMap] using hcollar
 
 end
 
