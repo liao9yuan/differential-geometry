@@ -575,6 +575,83 @@ theorem exteriorDerivative_smul [BoundarylessManifold IM M] (c : ℝ) (α : Diff
     rfl
   rw [hsmul, extDeriv_smul, map_smul]
 
+theorem exteriorDerivative_extDeriv [BoundarylessManifold IM M] (α : DifferentialForm IM M k) :
+    exteriorDerivative (exteriorDerivative α) = 0 := by
+  ext x
+  let e := trivializationAt (EM [⋀^Fin (k + 2)]→L[ℝ] ℝ)
+    (Bundle.continuousAlternatingMap ℝ (Fin (k + 2)) EM (TangentSpace IM) ℝ
+      (Bundle.Trivial M ℝ)) x
+  have hmem : (extChartAt IM x) x ∈ interior ((extChartAt IM x).target) :=
+    (ModelWithCorners.isInteriorPoint_iff (I := IM)).1
+      (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))
+  have hrep : ContDiffAt ℝ ⊤ (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
+      ((extChartAt IM x) x) :=
+    (localRep_contDiffOn α x).contDiffAt (mem_interior_iff_mem_nhds.mp hmem)
+  have hdrep : ContDiffAt ℝ ⊤ (fun y : EM => extDeriv (fun y : EM =>
+      (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2) y)
+      ((extChartAt IM x) x) := by
+    have hdOn : ContDiffOn ℝ ⊤ (fun y : EM => extDeriv (fun y : EM =>
+        (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2) y)
+        (interior ((extChartAt IM x).target)) := by
+      exact contDiffOn_extDeriv (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
+        ((localRep_contDiffOn α x).mono (by intro y hy; exact interior_subset hy)) isOpen_interior
+    exact hdOn.contDiffAt (mem_interior_iff_mem_nhds.mp
+      (mem_interior.mpr ⟨interior ((extChartAt IM x).target),
+        subset_rfl, isOpen_interior, hmem⟩))
+  have hdd : extDeriv (fun y : EM => (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, exteriorDerivativeAt α ((extChartAt IM x).symm y)⟩).2)
+      ((extChartAt IM x) x) = 0 := by
+    have hloc := exteriorDerivative_localRep (IM := IM) (M := M) (α := α)
+      (x₀ := x) (x := x) (by simp)
+      (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))
+    have hrepEq : (fun y : EM => (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, exteriorDerivativeAt α ((extChartAt IM x).symm y)⟩).2) =ᶠ[𝓝 ((extChartAt IM x) x)]
+        (fun y : EM => extDeriv (fun y : EM =>
+          (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+            (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+              (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2) y) := by
+      filter_upwards [mem_interior_iff_mem_nhds.mp
+        (mem_interior.mpr ⟨interior ((extChartAt IM x).target),
+          subset_rfl, isOpen_interior, hmem⟩)] with y hy
+      have hyint : ModelWithCorners.IsInteriorPoint IM ((extChartAt IM x).symm y) := by
+        exact (ModelWithCorners.isInteriorPoint_iff_of_mem_atlas (I := IM) (n := 1)
+          (e := (chartAt HM x)) (hn := by norm_num)
+          (he := chart_mem_atlas (H := HM) x)
+          (hx := by simpa [extChartAt_source] using (extChartAt IM x).map_target (interior_subset hy))).2
+          (by
+            have hy' : (extChartAt IM x) ((extChartAt IM x).symm y) ∈ interior ((extChartAt IM x).target) := by
+              rwa [(extChartAt IM x).right_inv (interior_subset hy)]
+            exact hy')
+      have hlocal := exteriorDerivative_localRep (IM := IM) (M := M) (α := α)
+        (x₀ := x) (x := (extChartAt IM x).symm y)
+        (by simpa [extChartAt_source] using (extChartAt IM x).map_target (interior_subset hy))
+        hyint
+      rwa [(extChartAt IM x).right_inv (interior_subset hy)] at hlocal
+    rw [Filter.EventuallyEq.extDeriv_eq hrepEq]
+    exact extDeriv_extDeriv_apply hrep (by norm_num)
+  change exteriorDerivativeAt (exteriorDerivative α) x = 0
+  have hz : exteriorDerivativeAt (exteriorDerivative α) x = 0 := by
+    change (trivializationAt (EM [⋀^Fin ((k + 1) + 1)]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin ((k + 1) + 1)) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x).symmL ℝ x
+        (extDeriv (fun y : EM => (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, exteriorDerivativeAt α ((extChartAt IM x).symm y)⟩).2)
+          ((extChartAt IM x) x)) = 0
+    rw [hdd]
+    exact ContinuousLinearMap.map_zero _
+  exact hz
+
 end DifferentialForm
 end DifferentialGeometry
 
