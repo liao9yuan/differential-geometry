@@ -149,17 +149,17 @@ def d1DuhMajor (v : V) (K : ℝ≥0) (t s : ℝ) : ℝ :=
 
 omit [Nontrivial V] in
 /-- The gradient-potential majorant is interval integrable. -/
-theorem d1DuhMajor_intble {t : ℝ} (ht : 0 < t) (v : V) (K : ℝ≥0) :
+theorem d1DuhMajor_intble {t : ℝ} (v : V) (K : ℝ≥0) :
     IntervalIntegrable (d1DuhMajor v K t) volume 0 t := by
-  exact (scale12_intble ht).const_mul (d1DuhConst v K)
+  exact (scale12_intble).const_mul (d1DuhConst v K)
 
 omit [Nontrivial V] in
 /-- Exact integral of the gradient-potential majorant. -/
-theorem d1DuhMajor_int {t : ℝ} (ht : 0 < t) (v : V) (K : ℝ≥0) :
+theorem d1DuhMajor_int {t : ℝ} (v : V) (K : ℝ≥0) :
     ∫ s : ℝ in 0..t, d1DuhMajor v K t s =
       d1DuhConst v K * (2 * t ^ (1 / 2 : ℝ)) := by
   unfold d1DuhMajor
-  rw [intervalIntegral.integral_const_mul, timeScale12_int ht]
+  rw [intervalIntegral.integral_const_mul, timeScale12_int]
 
 /-- Time Duhamel integral of the first spatial heat derivative. -/
 def heatD1Duh (t : ℝ) (v : V)
@@ -178,7 +178,7 @@ theorem heatD1Duh_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       (volume.restrict (Set.uIoc (0 : ℝ) t))) :
     IntervalIntegrable
       (fun s : ℝ => heatD1Sup (t - s) v (f s) x) volume 0 t := by
-  apply (d1DuhMajor_intble ht v K).mono_fun' hmeas
+  apply (d1DuhMajor_intble v K).mono_fun' hmeas
   have hne : ∀ᵐ s ∂(volume : Measure ℝ), s ≠ t := by
     simp [ae_iff, measure_singleton]
   filter_upwards [ae_restrict_mem measurableSet_uIoc,
@@ -221,7 +221,7 @@ theorem heatD1Duh_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       intervalIntegral.norm_integral_le_integral_norm ht.le
     _ ≤ ∫ s : ℝ in 0..t, d1DuhMajor v K t s := by
       apply intervalIntegral.integral_mono_on_of_le_Ioo ht.le hint.norm
-        (d1DuhMajor_intble ht v K)
+        (d1DuhMajor_intble v K)
       intro s hs
       have hpos : 0 < t - s := sub_pos.mpr hs.2
       have hcoef : 0 ≤ ‖v‖ * (heatScale (t - s))⁻¹ * heatC1 V := by
@@ -240,7 +240,7 @@ theorem heatD1Duh_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
           unfold d1DuhMajor d1DuhConst
           ring
     _ = d1DuhConst v K * (2 * t ^ (1 / 2 : ℝ)) :=
-      d1DuhMajor_int ht v K
+      d1DuhMajor_int v K
     _ = 2 * d1DuhConst v K * Real.sqrt t := by
       rw [Real.sqrt_eq_rpow]
       ring

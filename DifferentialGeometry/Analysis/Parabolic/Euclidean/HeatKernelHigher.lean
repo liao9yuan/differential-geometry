@@ -209,7 +209,7 @@ omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 /-- At positive time, `heatD3` is the actual Fréchet derivative of
 `heatD2`. -/
-theorem heatD2_hasFDeriv {t : ℝ} (_ht : 0 < t) (v w x : V) :
+theorem heatD2_hasFDeriv {t : ℝ} (v w x : V) :
     HasFDerivAt (heatD2 t v w) (heatD3Map t v w x) x := by
   let S : V →L[ℝ] V := (heatScale t)⁻¹ • ContinuousLinearMap.id ℝ V
   have hS : HasFDerivAt (fun y : V => (heatScale t)⁻¹ • y) S x := by

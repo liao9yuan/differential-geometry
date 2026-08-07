@@ -613,7 +613,7 @@ private theorem integral_heatLapTriangleMajor_right
         exact hs ⟨h.1, h.2.trans hr.2⟩
       simp [Set.indicator, hs, hsrMem]
   rw [hsection, intervalIntegral.integral_const_mul,
-    timeHolderHeatScale_int halpha hr.1]
+    timeHolderHeatScale_int halpha]
 
 omit [Nontrivial V] in
 private theorem heatLapTriangleMajor_integrable
@@ -636,7 +636,7 @@ private theorem heatLapTriangleMajor_integrable
       hmeas.prodMk_left] with r hr hrmeas
     have hraw : IntervalIntegrable
         (fun s : Real => A * holderHeatScale alpha (r - s)) volume 0 r :=
-      (holderHeatScale_intble halpha hr.1).const_mul A
+      (holderHeatScale_intble halpha).const_mul A
     have hOn : IntegrableOn
         (fun s : Real => A * holderHeatScale alpha (r - s))
         (Ioo (0 : Real) r) volume := by

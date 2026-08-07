@@ -40,7 +40,7 @@ theorem heatScale12_eq {t : ℝ} (ht : 0 < t) :
 
 /-- The `t^(-1/2)` first-derivative heat singularity is interval integrable
 after reflection about the terminal time. -/
-theorem scale12_intble {t : ℝ} (_ht : 0 < t) :
+theorem scale12_intble {t : ℝ} :
     IntervalIntegrable (fun s : ℝ => heatScale12 (t - s)) volume 0 t := by
   have hpow : IntervalIntegrable (fun u : ℝ => u ^ (-(1 : ℝ) / 2)) volume 0 t :=
     intervalIntegral.intervalIntegrable_rpow' (by norm_num)
@@ -48,7 +48,7 @@ theorem scale12_intble {t : ℝ} (_ht : 0 < t) :
   simpa only [heatScale12, sub_self, sub_zero] using href
 
 /-- Exact primitive of the reflected `t^(-1/2)` singularity. -/
-theorem timeScale12_int {t : ℝ} (_ht : 0 < t) :
+theorem timeScale12_int {t : ℝ} :
     ∫ s : ℝ in 0..t, heatScale12 (t - s) =
       2 * t ^ (1 / 2 : ℝ) := by
   unfold heatScale12
@@ -62,7 +62,7 @@ theorem timeScale12_int {t : ℝ} (_ht : 0 < t) :
 
 /-- The `t^(-3/4)` heat-cancellation singularity is interval integrable after
 reflection about the terminal time. -/
-theorem scale34_intble {t : ℝ} (_ht : 0 < t) :
+theorem scale34_intble {t : ℝ} :
     IntervalIntegrable (fun s : ℝ => heatScale34 (t - s)) volume 0 t := by
   have hpow : IntervalIntegrable (fun u : ℝ => u ^ (-(3 : ℝ) / 4)) volume 0 t :=
     intervalIntegral.intervalIntegrable_rpow' (by norm_num)
@@ -70,7 +70,7 @@ theorem scale34_intble {t : ℝ} (_ht : 0 < t) :
   simpa only [heatScale34, sub_self, sub_zero] using href
 
 /-- Exact primitive of the reflected `t^(-3/4)` singularity. -/
-theorem timeScale34_int {t : ℝ} (_ht : 0 < t) :
+theorem timeScale34_int {t : ℝ} :
     ∫ s : ℝ in 0..t, heatScale34 (t - s) =
       4 * t ^ (1 / 4 : ℝ) := by
   unfold heatScale34
@@ -103,17 +103,17 @@ def d2DuhMajor (v w : V) (K : ℝ≥0) (t s : ℝ) : ℝ :=
 
 omit [Nontrivial V] in
 /-- The scalar Duhamel majorant is interval integrable. -/
-theorem d2DuhMajor_intble {t : ℝ} (ht : 0 < t) (v w : V) (K : ℝ≥0) :
+theorem d2DuhMajor_intble {t : ℝ} (v w : V) (K : ℝ≥0) :
     IntervalIntegrable (d2DuhMajor v w K t) volume 0 t := by
-  exact (scale34_intble ht).const_mul (d2DuhConst v w K)
+  exact (scale34_intble).const_mul (d2DuhConst v w K)
 
 omit [Nontrivial V] in
 /-- Exact integral of the scalar Duhamel majorant. -/
-theorem d2DuhMajor_int {t : ℝ} (ht : 0 < t) (v w : V) (K : ℝ≥0) :
+theorem d2DuhMajor_int {t : ℝ} (v w : V) (K : ℝ≥0) :
     ∫ s : ℝ in 0..t, d2DuhMajor v w K t s =
       d2DuhConst v w K * (4 * t ^ (1 / 4 : ℝ)) := by
   unfold d2DuhMajor
-  rw [intervalIntegral.integral_const_mul, timeScale34_int ht]
+  rw [intervalIntegral.integral_const_mul, timeScale34_int]
 
 /-- Time Duhamel integral of the raw second heat derivative.  Spatial
 cancellation is inserted by `heatD2Conv_eq_cancel` in the estimates below. -/
@@ -141,7 +141,7 @@ theorem heatD2Duh_int {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       (volume.restrict (Set.uIoc (0 : ℝ) t))) :
     IntervalIntegrable
       (fun s : ℝ => heatD2Conv (t - s) v w (f s) x) volume 0 t := by
-  apply (d2DuhMajor_intble ht v w K).mono_fun' hmeas
+  apply (d2DuhMajor_intble v w K).mono_fun' hmeas
   have hne : ∀ᵐ s ∂(volume : Measure ℝ), s ≠ t := by
     simp [ae_iff, measure_singleton]
   filter_upwards [ae_restrict_mem measurableSet_uIoc,
@@ -174,7 +174,7 @@ theorem heatD2Duh_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       intervalIntegral.norm_integral_le_integral_norm ht.le
     _ ≤ ∫ s : ℝ in 0..t, d2DuhMajor v w K t s := by
       apply intervalIntegral.integral_mono_on_of_le_Ioo ht.le hint.norm
-        (d2DuhMajor_intble ht v w K)
+        (d2DuhMajor_intble v w K)
       intro s hs
       rw [heatD2Conv_eq_cancel (sub_pos.mpr hs.2)
         (hf s ⟨hs.1.le, hs.2.le⟩) v w x]
@@ -183,7 +183,7 @@ theorem heatD2Duh_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       unfold d2DuhMajor d2DuhConst
       ring
     _ = d2DuhConst v w K * (4 * t ^ (1 / 4 : ℝ)) :=
-      d2DuhMajor_int ht v w K
+      d2DuhMajor_int v w K
 
 end Duhamel
 

@@ -1393,7 +1393,6 @@ theorem liYau_estimate_of_nonnegative_ricci_on
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M)
     (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
@@ -1746,7 +1745,6 @@ theorem liYau_estimate_of_nonnegative_ricci
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M)
     (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
@@ -1813,7 +1811,6 @@ theorem heat_solution_differential_harnack_of_nonnegative_ricci_on
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M)
     (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
@@ -1868,7 +1865,6 @@ theorem heat_solution_differential_harnack_of_nonnegative_ricci
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M)
     (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)

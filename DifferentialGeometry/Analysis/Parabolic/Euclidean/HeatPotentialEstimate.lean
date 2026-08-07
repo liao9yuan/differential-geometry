@@ -450,7 +450,7 @@ theorem heatDuhGradientMap_norm_le
     ‖heatDuhGradientMap t f x‖ ≤
       2 * (B : Real) * heatC1 V * Real.sqrt t := by
   have hint := heatDuhGradient_int (V := V) ht f hbound x hmeas
-  have hmajor := heatDuhGradientMajor_intble (V := V) ht B
+  have hmajor := heatDuhGradientMajor_intble (V := V) (t := t) B
   unfold heatDuhGradientMap
   calc
     ‖∫ s : Real in 0..t, heatSupGradient (t - s) (f s) x‖ ≤
@@ -474,7 +474,7 @@ theorem heatDuhGradientMap_norm_le
           ring
     _ = 2 * (B : Real) * heatC1 V * Real.sqrt t := by
       unfold heatDuhGradientMajor
-      rw [intervalIntegral.integral_const_mul, timeScale12_int ht,
+      rw [intervalIntegral.integral_const_mul, timeScale12_int,
         Real.sqrt_eq_rpow]
       ring
 

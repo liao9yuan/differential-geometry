@@ -508,7 +508,6 @@ theorem parabolicRescaleAt_apply
         (p0.space + (r : Real) • x) :=
   rfl
 
-@[simp]
 theorem coe_parabolicRescaleAt
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]
@@ -519,7 +518,6 @@ theorem coe_parabolicRescaleAt
         r p0 (fun t x ↦ u t x) :=
   rfl
 
-@[simp]
 theorem coe_parabolicTimeCenteredRescaleAt
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
     [NormedAddCommGroup F] [NormedSpace Real F]

@@ -17,8 +17,7 @@ variable {V : Type*}
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-theorem heatD2_space_sub_eq_integral_heatD3 {t : Real} (ht : 0 < t)
-    (h v w z : V) :
+theorem heatD2_space_sub_eq_integral_heatD3 {t : Real} (h v w z : V) :
     heatD2 t v w (z - h) - heatD2 t v w z =
       ∫ s : Real in 0..1, -heatD3 t h v w (z + s • (-h)) := by
   let gamma : Real → V := fun s => z + s • (-h)
@@ -31,7 +30,7 @@ theorem heatD2_space_sub_eq_integral_heatD3 {t : Real} (ht : 0 < t)
       HasDerivAt (fun r : Real => heatD2 t v w (gamma r))
         (-heatD3 t h v w (gamma s)) s := by
     intro s
-    have h0 := (heatD2_hasFDeriv (t := t) ht v w (gamma s)).comp_hasDerivAt s (hgamma s)
+    have h0 := (heatD2_hasFDeriv (t := t) v w (gamma s)).comp_hasDerivAt s (hgamma s)
     convert h0 using 1
     simp only [heatD3Map_apply]
     simp [heatD3, baseD3]
@@ -290,7 +289,7 @@ theorem heatD2Conv_space_sub_eq_integral_heatD3Conv_of_holder
           -heatD3 t h v w (z + s • (-h))) • f (x - z) := by
       apply integral_congr_ae
       filter_upwards with z
-      rw [heatD2_space_sub_eq_integral_heatD3 ht]
+      rw [heatD2_space_sub_eq_integral_heatD3]
     _ = ∫ z : V, ∫ s : Real in 0..1,
         (-heatD3 t h v w (z + s • (-h))) • f (x - z) := by
       apply integral_congr_ae
@@ -409,11 +408,11 @@ private theorem holderHeatScale_intervalIntegrable {alpha : NNReal}
 
 omit [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F] in
 private theorem holderHeatScale_terminal_interval_int {alpha : NNReal}
-    (halpha0 : 0 < alpha) {a b : Real} (hab : a < b) :
+    (halpha0 : 0 < alpha) {a b : Real} :
     ∫ s : Real in a..b, holderHeatScale alpha (b - s) =
       (2 / (alpha : Real)) * (b - a) ^ ((alpha : Real) / 2) := by
   rw [intervalIntegral.integral_comp_sub_left]
-  have h := timeHolderHeatScale_int halpha0 (sub_pos.mpr hab)
+  have h := timeHolderHeatScale_int (t := b - a) halpha0
   rw [intervalIntegral.integral_comp_sub_left] at h
   simpa only [sub_self, sub_zero] using h
 
@@ -634,7 +633,7 @@ theorem heatD2Duh_space_sub_norm_le_of_holder {alpha K : NNReal}
   · have htr : t ≤ ‖h‖ ^ 2 := le_of_lt (lt_of_not_ge hsplit)
     have hscale : IntervalIntegrable
         (fun s : Real ↦ holderHeatScale alpha (t - s)) volume 0 t :=
-      holderHeatScale_intble halpha0 ht
+      holderHeatScale_intble halpha0
     have hfull :
         ‖∫ s : Real in 0..t, q s‖ ≤
           ∫ s : Real in 0..t, A2 * holderHeatScale alpha (t - s) := by
@@ -669,7 +668,7 @@ theorem heatD2Duh_space_sub_norm_le_of_holder {alpha K : NNReal}
           ∫ s : Real in 0..t, A2 * holderHeatScale alpha (t - s) := hfull
       _ = A2 * ((2 / (alpha : Real)) * t ^ ((alpha : Real) / 2)) := by
         rw [intervalIntegral.integral_const_mul,
-          timeHolderHeatScale_int halpha0 ht]
+          timeHolderHeatScale_int halpha0]
       _ ≤ A2 * ((2 / (alpha : Real)) * ‖h‖ ^ (alpha : Real)) := by
         gcongr
       _ ≤ d2DuhSpaceHolderConst alpha v w K * ‖h‖ ^ (alpha : Real) := by
@@ -1008,8 +1007,7 @@ private theorem heatD2Duh_time_add_new_norm_le
     _ = d2DuhHolderConst alpha v w K *
         ((2 / (alpha : Real)) * d ^ ((alpha : Real) / 2)) := by
       rw [intervalIntegral.integral_const_mul,
-        holderHeatScale_terminal_interval_int halpha0
-          (lt_add_of_pos_right tau hd), add_sub_cancel_left]
+        holderHeatScale_terminal_interval_int halpha0, add_sub_cancel_left]
 
 private theorem heatD2Duh_time_add_late_norm_le
     {alpha K : NNReal} (halpha0 : 0 < alpha) (halpha1 : alpha ≤ 1)
@@ -1152,8 +1150,7 @@ private theorem heatD2Duh_time_add_near_norm_le
     _ = d2DuhHolderConst alpha v w K *
         ((4 / (alpha : Real)) * d ^ ((alpha : Real) / 2)) := by
       rw [intervalIntegral.integral_const_mul,
-        holderHeatScale_terminal_interval_int halpha0 (sub_lt_self tau hd),
-        sub_sub_cancel]
+        holderHeatScale_terminal_interval_int halpha0, sub_sub_cancel]
       ring
 
 private theorem heatD2Duh_time_add_sub_norm_le_small

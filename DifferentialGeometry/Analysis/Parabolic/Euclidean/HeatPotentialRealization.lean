@@ -89,9 +89,9 @@ def heatDuhGradientMajor (B : NNReal) (t s : Real) : Real :=
 
 omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
   [CompleteSpace F] in
-theorem heatDuhGradientMajor_intble {t : Real} (ht : 0 < t) (B : NNReal) :
+theorem heatDuhGradientMajor_intble {t : Real} (B : NNReal) :
     IntervalIntegrable (heatDuhGradientMajor (V := V) B t) volume 0 t :=
-  (scale12_intble ht).const_mul ((B : Real) * heatC1 V)
+  (scale12_intble).const_mul ((B : Real) * heatC1 V)
 
 omit [CompleteSpace F] in
 theorem heatDuh_hasFDerivAt {t : Real} (ht : 0 < t) {B : NNReal}
@@ -148,7 +148,7 @@ theorem heatDuh_hasFDerivAt {t : Real} (ht : 0 < t) {B : NNReal}
   have h := intervalIntegral.hasFDerivAt_integral_of_dominated_of_fderiv_le
     (F := G) (F' := DG) (bound := bound) (s := (Set.univ : Set V))
       univ_mem hGmeas hGint hDGmeas hbound
-      (heatDuhGradientMajor_intble (V := V) ht B) hdiff
+      (heatDuhGradientMajor_intble (V := V) B) hdiff
   simpa only [G, DG, heatDuh, heatDuhGradientMap] using h
 
 omit [CompleteSpace F] in
@@ -160,7 +160,7 @@ theorem heatDuhGradient_int {t : Real} (ht : 0 < t) {B : NNReal}
       (volume.restrict (uIoc (0 : Real) t))) :
     IntervalIntegrable
       (fun s : Real => heatSupGradient (t - s) (f s) x) volume 0 t := by
-  apply (heatDuhGradientMajor_intble (V := V) ht B).mono_fun' hmeas
+  apply (heatDuhGradientMajor_intble (V := V) B).mono_fun' hmeas
   have hne : ∀ᵐ s ∂(volume : Measure Real), s ≠ t := by
     simp [ae_iff, measure_singleton]
   filter_upwards [ae_restrict_mem measurableSet_uIoc,
@@ -213,9 +213,9 @@ def heatDuhHessianMajor (alpha K : NNReal) (t s : Real) : Real :=
 omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
   [CompleteSpace F] in
 theorem heatDuhHessianMajor_intble {alpha : NNReal} (halpha : 0 < alpha)
-    {t : Real} (ht : 0 < t) (K : NNReal) :
+    {t : Real} (K : NNReal) :
     IntervalIntegrable (heatDuhHessianMajor (V := V) alpha K t) volume 0 t :=
-  (holderHeatScale_intble halpha ht).const_mul
+  (holderHeatScale_intble halpha).const_mul
     ((K : Real) * heatC2Holder (V := V) alpha)
 
 theorem heatDuhGradientMap_hasFDerivAt
@@ -273,7 +273,7 @@ theorem heatDuhGradientMap_hasFDerivAt
   have h := intervalIntegral.hasFDerivAt_integral_of_dominated_of_fderiv_le
     (F := G) (F' := DG) (bound := bound) (s := (Set.univ : Set V))
       univ_mem hGmeas hGint hDGmeas hmajor
-      (heatDuhHessianMajor_intble (V := V) halpha0 ht K) hdiff
+      (heatDuhHessianMajor_intble (V := V) halpha0 K) hdiff
   simpa only [G, DG, heatDuhGradientMap, heatDuhHessian] using h
 
 def heatD2DuhMap (t : Real) (v : V)
@@ -287,9 +287,9 @@ def heatD2DuhMapMajor (alpha K : NNReal) (v : V) (t s : Real) : Real :=
 omit [Nontrivial V] [NormedAddCommGroup F] [NormedSpace Real F]
   [CompleteSpace F] in
 theorem heatD2DuhMapMajor_intble {alpha : NNReal} (halpha : 0 < alpha)
-    {t : Real} (ht : 0 < t) (K : NNReal) (v : V) :
+    {t : Real} (K : NNReal) (v : V) :
     IntervalIntegrable (heatD2DuhMapMajor (V := V) alpha K v t) volume 0 t :=
-  (holderHeatScale_intble halpha ht).const_mul
+  (holderHeatScale_intble halpha).const_mul
     (‖v‖ * (K : Real) * heatC2Holder (V := V) alpha)
 
 theorem heatD2DuhMap_int
@@ -303,7 +303,7 @@ theorem heatD2DuhMap_int
       (volume.restrict (uIoc (0 : Real) t))) :
     IntervalIntegrable
       (fun s : Real => heatD2ConvMap (t - s) v (f s) x) volume 0 t := by
-  apply (heatD2DuhMapMajor_intble (V := V) halpha0 ht K v).mono_fun' hmeas
+  apply (heatD2DuhMapMajor_intble (V := V) halpha0 K v).mono_fun' hmeas
   have hne : ∀ᵐ s ∂(volume : Measure Real), s ≠ t := by
     simp [ae_iff, measure_singleton]
   filter_upwards [ae_restrict_mem measurableSet_uIoc,
@@ -397,7 +397,7 @@ theorem heatD1Duh_hasFDerivAt
   have h := intervalIntegral.hasFDerivAt_integral_of_dominated_of_fderiv_le
     (F := G) (F' := DG) (bound := bound) (s := (Set.univ : Set V))
       univ_mem hGmeas hGint hDGmeas hmajor
-      (heatD2DuhMapMajor_intble (V := V) halpha0 ht K v) hdiff
+      (heatD2DuhMapMajor_intble (V := V) halpha0 K v) hdiff
   simpa only [G, DG, heatD1Duh, heatD2DuhMap] using h
 
 omit [CompleteSpace F] in

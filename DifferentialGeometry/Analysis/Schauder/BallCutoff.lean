@@ -465,7 +465,6 @@ theorem lapEval_ballCutoffFDeriv2
   unfold ballCutoffLaplacian
   ring
 
-@[simp]
 theorem coreLap_ballCutoffFDeriv2Bcf
     (center : V) {r R : Real} (hr : 0 ≤ r) (hrR : r < R) (x : V) :
     coreLap (ballCutoffFDeriv2Bcf center hr hrR) x =

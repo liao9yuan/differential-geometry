@@ -63,7 +63,7 @@ theorem heatSemigroup_smooth_representative_of_closed
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
           riemannianVolumeMeasure (I := I) (M := M) g] u_smooth := by
   apply heatSemigroup_smooth_representative_of_chartSideBridges
-    (I := I) (M := M) g ht u_0
+    (I := I) (M := M) g u_0
   intro k
   exact chartSideH2kBridge_heat_unconditional
     (I := I) (M := M) g ht u_0 k

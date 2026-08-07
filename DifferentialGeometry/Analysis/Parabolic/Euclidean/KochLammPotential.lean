@@ -65,23 +65,21 @@ def heatSplitGrad (t : ℝ) (w : V) (f₀ f₁ : ℝ × V → F)
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [CompleteSpace F] in
 /-- The ordinary-source spatial integrand has the first-heat-derivative CLM
 as its exact Fréchet derivative. -/
-theorem heatTerm0_fderiv {t s : ℝ} (hts : 0 < t - s)
-    (f : ℝ × V → F) (x y : V) :
+theorem heatTerm0_fderiv {t s : ℝ} (f : ℝ × V → F) (x y : V) :
     HasFDerivAt (fun z : V ↦ heatKernel (t - s) (z - y) • f (s, y))
       ((heatD1Map (t - s) (x - y)).smulRight (f (s, y))) x := by
   simpa using
-    ((heatKernel_hasFDeriv hts (x - y)).smul_const (f (s, y))).comp x
+    ((heatKernel_hasFDeriv (x - y)).smul_const (f (s, y))).comp x
       ((hasFDerivAt_id x).sub_const y)
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] [CompleteSpace F] in
 /-- The directional-flux spatial integrand has the second-heat-derivative
 CLM as its exact Fréchet derivative. -/
-theorem heatTerm1_fderiv {t s : ℝ} (hts : 0 < t - s) (w : V)
-    (f : ℝ × V → F) (x y : V) :
+theorem heatTerm1_fderiv {t s : ℝ} (w : V) (f : ℝ × V → F) (x y : V) :
     HasFDerivAt (fun z : V ↦ heatD1 (t - s) w (z - y) • f (s, y))
       ((heatD2Map (t - s) w (x - y)).smulRight (f (s, y))) x := by
   simpa using
-    ((heatD1_hasFDeriv hts w (x - y)).smul_const (f (s, y))).comp x
+    ((heatD1_hasFDeriv w (x - y)).smul_const (f (s, y))).comp x
       ((hasFDerivAt_id x).sub_const y)
 
 end Euclidean

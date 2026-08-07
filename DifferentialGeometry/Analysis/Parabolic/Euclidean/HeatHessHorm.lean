@@ -308,8 +308,7 @@ theorem heatD3_norm_int {t : ℝ} (ht : 0 < t) (u v w : V) :
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 /-- Pointwise segment estimate for a spatial translate of `heatD2`. -/
-private theorem d2Space_point {t : ℝ} (ht : 0 < t)
-    (h v w x : V) :
+private theorem d2Space_point {t : ℝ} (h v w x : V) :
     ‖heatD2 t v w (x - h) - heatD2 t v w x‖ ≤
       ∫ s : ℝ in Set.Ioc 0 1,
         ‖heatD3 t h v w (x + s • (-h))‖ := by
@@ -323,7 +322,7 @@ private theorem d2Space_point {t : ℝ} (ht : 0 < t)
       HasDerivAt (fun r : ℝ => heatD2 t v w (γ r))
         (-heatD3 t h v w (γ s)) s := by
     intro s
-    have h0 := (heatD2_hasFDeriv (t := t) ht v w (γ s)).comp_hasDerivAt s (hγ s)
+    have h0 := (heatD2_hasFDeriv (t := t) v w (γ s)).comp_hasDerivAt s (hγ s)
     convert h0 using 1
     simp only [heatD3Map_apply]
     simp [heatD3, baseD3]
@@ -407,7 +406,7 @@ theorem heatD2_space_diff {t : ℝ} (ht : 0 < t) (h v w : V) :
     (∫ x : V, ‖heatD2 t v w (x - h) - heatD2 t v w x‖) ≤
         ∫ x : V, ∫ s : ℝ, G (s, x) ∂μ := by
       exact integral_mono hleft hright (fun x => by
-        simpa only [μ, G] using d2Space_point ht h v w x)
+        simpa only [μ, G] using d2Space_point h v w x)
     _ = ∫ s : ℝ, (∫ x : V, G (s, x)) ∂μ := by
       exact (integral_integral_swap
         (f := fun s x => G (s, x)) hGint).symm

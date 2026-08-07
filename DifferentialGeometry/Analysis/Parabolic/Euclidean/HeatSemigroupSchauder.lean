@@ -197,7 +197,7 @@ theorem heatD2Conv_space_sub_eq_integral_heatD3Conv_of_bounded
           -heatD3 t h v w (z + s • (-h))) • u (x - z) := by
       apply integral_congr_ae
       filter_upwards with z
-      rw [heatD2_space_sub_eq_integral_heatD3 ht]
+      rw [heatD2_space_sub_eq_integral_heatD3]
     _ = ∫ z : V, ∫ s : Real in 0..1,
         (-heatD3 t h v w (z + s • (-h))) • u (x - z) := by
       apply integral_congr_ae

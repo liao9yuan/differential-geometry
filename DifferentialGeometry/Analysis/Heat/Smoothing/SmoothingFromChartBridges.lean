@@ -41,7 +41,7 @@ theorem chartSideH2kBridge_iff_memWkpChart_two_k
 
 theorem heatSemigroup_smooth_representative_of_chartSideBridges
     (g : SmoothRiemannianMetric I M)
-    {t : ℝ} (ht : 0 < t)
+    {t : ℝ}
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (h_bridges : ∀ k : ℕ,
       ChartSideH2kBridge (I := I) (M := M) g k
@@ -59,7 +59,7 @@ theorem heatSemigroup_smooth_representative_of_chartSideBridges
     intro k
     exact (chartSideH2kBridge_iff_memWkpChart_two_k
       (I := I) (M := M) g k _).mp (h_bridges k)
-  exact heatSemigroup_smooth_representative (I := I) (M := M) g ht u_0
+  exact heatSemigroup_smooth_representative (I := I) (M := M) g u_0
     h_iterated_regularity
 
 theorem heatSemigroup_smooth_in_space_and_time_of_chartSideBridges
@@ -84,7 +84,7 @@ theorem heatSemigroup_smooth_in_space_and_time_of_chartSideBridges
   refine ⟨?_, ?_⟩
   · intro t ht
     exact heatSemigroup_smooth_representative_of_chartSideBridges
-      (I := I) (M := M) g ht u_0 (h_bridges_uniform t ht)
+      (I := I) (M := M) g u_0 (h_bridges_uniform t ht)
   · exact heatSemigroup_contMDiff_in_time (I := I) (M := M) g u_0
 
 theorem chartSideH2kBridge_heat_implies_chartSideH2kBridge_lifts

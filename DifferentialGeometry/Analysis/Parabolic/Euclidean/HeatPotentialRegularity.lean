@@ -364,7 +364,7 @@ theorem heatSup_hasFDerivAt {t : Real} (ht : 0 < t)
         (ContinuousLinearMap.id Real V) z :=
       (hasFDerivAt_id z).sub_const y
     unfold G DG
-    simpa using ((heatKernel_hasFDeriv ht (z - y)).comp z hsub).smul_const (u y)
+    simpa using ((heatKernel_hasFDeriv (z - y)).comp z hsub).smul_const (u y)
   have h := hasFDerivAt_integral_of_dominated_of_fderiv_le
     (F := G) (F' := DG) (bound := bound) hs hGmeas hGint hDGmeas
       hbound hboundInt hdiff
@@ -581,7 +581,7 @@ theorem heatD1Sup_hasFDerivAt {t : Real} (ht : 0 < t) (v : V)
         (ContinuousLinearMap.id Real V) z :=
       (hasFDerivAt_id z).sub_const y
     unfold G DG
-    simpa using ((heatD1_hasFDeriv ht v (z - y)).comp z hsub).smul_const (u y)
+    simpa using ((heatD1_hasFDeriv v (z - y)).comp z hsub).smul_const (u y)
   have h := hasFDerivAt_integral_of_dominated_of_fderiv_le
     (F := G) (F' := DG) (bound := bound) hs hGmeas hGint hDGmeas
       hbound hboundInt hdiff

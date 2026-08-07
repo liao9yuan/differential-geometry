@@ -683,7 +683,7 @@ omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 /-- At positive time, `heatD1` is exactly the Frechet derivative of the heat
 kernel. -/
-theorem heatKernel_hasFDeriv {t : ℝ} (_ht : 0 < t) (x : V) :
+theorem heatKernel_hasFDeriv {t : ℝ} (x : V) :
     HasFDerivAt (heatKernel t) (heatD1Map t x) x := by
   let S : V →L[ℝ] V := (heatScale t)⁻¹ • ContinuousLinearMap.id ℝ V
   have hS : HasFDerivAt (fun y : V => (heatScale t)⁻¹ • y) S x := by
@@ -698,7 +698,7 @@ theorem heatKernel_hasFDeriv {t : ℝ} (_ht : 0 < t) (x : V) :
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
 /-- At positive time, `heatD2` is exactly the Frechet derivative of the first
 heat derivative kernel. -/
-theorem heatD1_hasFDeriv {t : ℝ} (_ht : 0 < t) (v x : V) :
+theorem heatD1_hasFDeriv {t : ℝ} (v x : V) :
     HasFDerivAt (heatD1 t v) (heatD2Map t v x) x := by
   let S : V →L[ℝ] V := (heatScale t)⁻¹ • ContinuousLinearMap.id ℝ V
   have hS : HasFDerivAt (fun y : V => (heatScale t)⁻¹ • y) S x := by

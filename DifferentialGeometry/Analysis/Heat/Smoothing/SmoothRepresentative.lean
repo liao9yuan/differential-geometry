@@ -147,7 +147,7 @@ theorem smooth_representative_of_memWkpChart_forall
 
 theorem heatSemigroup_smooth_representative
     (g : SmoothRiemannianMetric I M)
-    {t : ℝ} (_ht : 0 < t)
+    {t : ℝ}
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (h_iterated_regularity :
       ∀ k : ℕ,
@@ -208,7 +208,7 @@ theorem heatSemigroup_smooth_in_space_and_time
       (Set.Ioi (0 : ℝ)) := by
   refine ⟨?_, ?_⟩
   · intro t ht
-    exact heatSemigroup_smooth_representative (I := I) (M := M) g ht u_0
+    exact heatSemigroup_smooth_representative (I := I) (M := M) g u_0
       (h_iterated_regularity_uniform t ht)
   · exact heatSemigroup_contMDiff_in_time (I := I) (M := M) g u_0
 

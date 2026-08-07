@@ -34,7 +34,6 @@ instance {alpha : NNReal} :
       (fun _ ↦ X → F) where
   coe := boundedHolderSpaceFun
 
-@[simp]
 theorem boundedHolderSpaceFun_apply {alpha : NNReal}
     (f : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
     boundedHolderSpaceFun f x = f x :=
@@ -90,7 +89,7 @@ instance (alpha : NNReal) :
     Norm (BoundedHolderSpace (X := X) (F := F) alpha) where
   norm f := (eHolderGauge alpha f).toReal
 
-def boundedHolderSpaceNormedSpaceCore (alpha : NNReal) :
+instance boundedHolderSpaceNormedSpaceCore (alpha : NNReal) :
     NormedSpace.Core Real
       (BoundedHolderSpace (X := X) (F := F) alpha) where
   norm_nonneg _ := ENNReal.toReal_nonneg
@@ -272,7 +271,6 @@ instance {k : Nat} {alpha : NNReal} :
       (fun _ ↦ V → F) where
   coe := contDiffHolderSpaceFun
 
-@[simp]
 theorem contDiffHolderSpaceFun_apply {k : Nat} {alpha : NNReal}
     (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
     contDiffHolderSpaceFun f x = f x :=
@@ -329,7 +327,7 @@ instance (k : Nat) (alpha : NNReal) :
     Norm (ContDiffHolderSpace (V := V) (F := F) k alpha) where
   norm f := (eContDiffHolderGaugeOn k alpha Set.univ f).toReal
 
-def contDiffHolderSpaceNormedSpaceCore (k : Nat) (alpha : NNReal) :
+instance contDiffHolderSpaceNormedSpaceCore (k : Nat) (alpha : NNReal) :
     NormedSpace.Core Real
       (ContDiffHolderSpace (V := V) (F := F) k alpha) where
   norm_nonneg _ := ENNReal.toReal_nonneg
@@ -456,7 +454,6 @@ instance {alpha : NNReal} :
       (fun _ ↦ Real → V → F) where
   coe := parabolicC2HolderSpaceFun
 
-@[simp]
 theorem parabolicC2HolderSpaceFun_apply {alpha : NNReal}
     (u : ParabolicC2HolderSpace (V := V) (F := F) alpha)
     (t : Real) (x : V) :
@@ -519,7 +516,7 @@ instance (alpha : NNReal) :
     Norm (ParabolicC2HolderSpace (V := V) (F := F) alpha) where
   norm u := (eParabolicC2HolderGaugeOn alpha Set.univ u).toReal
 
-def parabolicC2HolderSpaceNormedSpaceCore (alpha : NNReal) :
+instance parabolicC2HolderSpaceNormedSpaceCore (alpha : NNReal) :
     NormedSpace.Core Real
       (ParabolicC2HolderSpace (V := V) (F := F) alpha) where
   norm_nonneg _ := ENNReal.toReal_nonneg

@@ -63,7 +63,6 @@ theorem ricciUpperBoundSec_at_point
 
 
 
-@[simp]
 theorem ricciUpperBoundSec_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]

@@ -74,7 +74,6 @@ def parabolicMatrixCoefficientRescale
   fun i j p ↦ a i j (parabolicDilationAt r p0 p)
 
 omit [DecidableEq n] [Nonempty n] in
-@[simp]
 theorem parabolicMatrixCoefficientRescale_apply
     (r : NNReal) (p0 : ParabolicPoint (Euc n))
     (a : n → n → ParabolicPoint (Euc n) → Real)
