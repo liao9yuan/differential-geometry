@@ -1793,6 +1793,105 @@ noncomputable def manifoldLevelSetIsManifold [I.Boundaryless]
   letI := manifoldLevelSetChartedSpace I f a hf hreg
   exact { toHasGroupoid := manifoldLevelSetHasGroupoid I f a hf hreg }
 
+theorem manifoldSublevelBoundaryChart_extend_last_zero [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x)
+    (x : SublevelSpace f a) (hx : f x.1 = a) :
+    (manifoldSublevelBoundaryChart I f a x hx hf hreg x : MorseModel (m + 1)) (Fin.last m) = 0 := by
+  classical
+  let b : ContDiffBump ((extChartAt I x.1) x.1) := sublevelPullbackBump I x.1
+  let hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target :=
+    sublevelPullbackBump_closedBall_target (I := I) x.1
+  dsimp [manifoldSublevelBoundaryChart]
+  have he : (sublevelPullbackChart I f a x b hb) x = sublevelPullbackCutoffPoint I f a x b := by
+    apply Subtype.ext
+    change ((sublevelPullbackChart I f a x b hb) x).1 =
+      (sublevelPullbackCutoffPoint I f a x b).1
+    rw [sublevelPullbackChart_apply_of_mem I f a x b hb
+      (mem_sublevelPullbackChart_source I f a x b hb)]
+    rfl
+  rw [he]
+  have hzero := sublevelBoundaryChart_extend_last_zero (sublevelPullbackCutoff I f x.1 b) a
+    (sublevelPullbackCutoffPoint I f a x b) (sublevelPullbackCutoffPoint_value I f a x b hx)
+    (contDiff_sublevelPullbackCutoff I f hf x.1 b hb)
+    (fderiv_sublevelPullbackCutoffPoint_ne_zero I f hf a hreg x b hx)
+  rw [OpenPartialHomeomorph.extend_coe] at hzero
+  simpa using hzero
+
+theorem manifoldSublevelInteriorChart_extend_last_pos [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a : ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (x : SublevelSpace f a) (hx : f x.1 < a) :
+    0 < (manifoldSublevelInteriorChart I f a x hx hf x : MorseModel (m + 1)) (Fin.last m) := by
+  classical
+  let b : ContDiffBump ((extChartAt I x.1) x.1) := sublevelPullbackBump I x.1
+  let hb : Metric.closedBall ((extChartAt I x.1) x.1) b.rOut ⊆ (extChartAt I x.1).target :=
+    sublevelPullbackBump_closedBall_target (I := I) x.1
+  let g : MorseModel (m + 1) → ℝ := sublevelPullbackCutoff I f x.1 b
+  let p : SublevelSpace g a := sublevelPullbackCutoffPoint I f a x b
+  let hx' : g p.1 < a := sublevelPullbackCutoffPoint_value_lt I f a x b hx
+  let hg : ContDiff ℝ (⊤ : ℕ∞) g := contDiff_sublevelPullbackCutoff I f hf x.1 b hb
+  dsimp [manifoldSublevelInteriorChart]
+  have he : (sublevelPullbackChart I f a x b hb) x = sublevelPullbackCutoffPoint I f a x b := by
+    apply Subtype.ext
+    change ((sublevelPullbackChart I f a x b hb) x).1 =
+      (sublevelPullbackCutoffPoint I f a x b).1
+    rw [sublevelPullbackChart_apply_of_mem I f a x b hb
+      (mem_sublevelPullbackChart_source I f a x b hb)]
+    rfl
+  rw [he]
+  have hval := sublevelInteriorChart_apply_value g a p hx' hg p (by
+    have hmem := mem_sublevelInteriorChart_source g a p hx' hg
+    simpa [sublevelInteriorChart] using hmem)
+  rw [hval]
+  have hnorm : |p.1 (Fin.last m)| ≤ ‖p.1‖ := by
+    have hle : ‖p.1 (Fin.last m)‖ ≤ ‖p.1‖ := by
+      have h := (pi_norm_le_iff_of_nonempty (ι := Fin (m + 1)) (f := p.1) (r := ‖p.1‖))
+      exact h.mp le_rfl (Fin.last m)
+    simpa using hle
+  have hlow : -(‖p.1‖) ≤ p.1 (Fin.last m) := (abs_le.mp hnorm).1
+  have hc : 0 < sublevelInteriorShift g a p hx' hg := by
+    dsimp [sublevelInteriorShift]
+    have hρ : 0 < sublevelInteriorRadius g a p hx' hg := by
+      dsimp [sublevelInteriorRadius]
+      exact (Classical.choose_spec (Metric.mem_nhds_iff.mp
+        ((isOpen_Iio.preimage hg.continuous).mem_nhds hx'))).1
+    linarith [hρ, norm_nonneg p.1]
+  change 0 < morseHalfSpaceShift (sublevelInteriorShift g a p hx' hg) p.1 (Fin.last m)
+  rw [morseHalfSpaceShift_last]
+  have hnonneg : 0 ≤ p.1 (Fin.last m) + ‖p.1‖ := by linarith [hlow]
+  have hρ : 0 < sublevelInteriorRadius g a p hx' hg := by
+    dsimp [sublevelInteriorRadius]
+    exact (Classical.choose_spec (Metric.mem_nhds_iff.mp
+      ((isOpen_Iio.preimage hg.continuous).mem_nhds hx'))).1
+  have hshift : 0 < sublevelInteriorRadius g a p hx' hg + 1 := by linarith [hρ]
+  dsimp [sublevelInteriorShift]
+  linarith [hnonneg, hshift]
+
+noncomputable def manifoldSublevelBoundaryEquiv (f : M → ℝ) (a : ℝ) :
+    {x : SublevelSpace f a // f x.1 = a} ≃ₜ
+      LevelSetSpace f a where
+  toFun := fun x => ⟨x.1.1, x.2⟩
+  invFun := fun y => ⟨⟨y.1, le_of_eq y.2⟩, y.2⟩
+  left_inv := by
+    intro x
+    apply Subtype.ext
+    rfl
+  right_inv := by
+    intro y
+    apply Subtype.ext
+    rfl
+  continuous_toFun := by
+    exact Continuous.subtype_mk (continuous_subtype_val.comp continuous_subtype_val) (fun x => x.2)
+  continuous_invFun := by
+    exact Continuous.subtype_mk
+      (Continuous.subtype_mk continuous_subtype_val (fun y : LevelSetSpace f a => by
+        change f y.1 ≤ a
+        exact le_of_eq y.2))
+      (fun y : LevelSetSpace f a => by
+        simpa using y.2)
+
 end
 
 end DifferentialGeometry.Topology.Morse
