@@ -2927,6 +2927,7 @@ import DifferentialGeometry.Topology.Handle.Boundary
 import DifferentialGeometry.Topology.Handle.Collar
 import DifferentialGeometry.Topology.Handle.Defs
 import DifferentialGeometry.Topology.Handle.Duality
+import DifferentialGeometry.Topology.Handle.Manifold
 import DifferentialGeometry.Topology.Handle.Pair
 import DifferentialGeometry.Topology.Handle.Retraction
 import DifferentialGeometry.Topology.Homotopy.ClosedCell
