@@ -508,6 +508,28 @@ theorem heat_pot_pos
     exact hpos_of_lower T x hlower
   · exact hpos_of_lower t x (hIco t ⟨ht.1, htT⟩ x)
 
+theorem heat_nonneg
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T) (u : Real → M → Real)
+    (hsol : IsHeatOn (RealTimeInterval.closed 0 T hT) G u)
+    (hinit : ∀ x : M, 0 ≤ u 0 x) :
+    ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, 0 ≤ u t x := by
+  exact heat_pot_nonneg (I := I) G hT (fun _ _ => 0) u hsol 0
+    (by intro t ht x; rfl) hinit
+
+theorem heat_pos
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T) (u : Real → M → Real)
+    (hsol : IsHeatOn (RealTimeInterval.closed 0 T hT) G u)
+    (hinit : ∀ x : M, 0 < u 0 x) :
+    ∀ t : Real, t ∈ Set.Icc 0 T → ∀ x : M, 0 < u t x := by
+  exact heat_pot_pos (I := I) G hT (fun _ _ => 0) u hsol 0
+    (by intro t ht x; simp) hinit
+
 end
 
 end DifferentialGeometry.Analysis.Parabolic
