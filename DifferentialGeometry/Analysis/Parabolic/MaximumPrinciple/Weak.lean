@@ -564,11 +564,6 @@ theorem parabolic_comp
     hφ hφ' hu_space hu_grad]
   ring
 
-/-! ## Algebraic core of the negative-region estimate -/
-
-
-
-
 theorem reaction_difference_lower_bound_on_negative_region
     {uval cval Fu Fc L : Real}
     (hlip : |Fu - Fc| <= L * |uval - cval|)
@@ -2448,7 +2443,26 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_
 
 
 
-theorem scalar_wmp_super_theorem_7_1
+
+end
+
+end DifferentialGeometry.Integral.Connection
+
+
+
+namespace DifferentialGeometry.Analysis.Parabolic
+
+open Bundle Filter Set
+open DifferentialGeometry.Integral.Connection
+open scoped Manifold ContDiff Topology
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  [FiniteDimensional Real E]
+variable {H : Type*} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+theorem scalar_weak_maximum_principle_ode_compare_supersolution
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -2457,7 +2471,6 @@ theorem scalar_wmp_super_theorem_7_1
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
     (F : Real -> Real -> Real) (K : NNReal)
-    (_hF_mono : forall t : Real, t ∈ Set.Icc 0 T -> Monotone (fun a : Real => F a t))
     (hw_cont : ContinuousOn
       (fun p : Real × M => Real.exp (-(K : Real) * p.1) * (u p.1 p.2 - c p.1))
       (spacetimeSlab (M := M) T))
@@ -2493,14 +2506,7 @@ theorem scalar_wmp_super_theorem_7_1
     (I := I) G T hT X u c F K hw_cont hw_mdiff hw_grad hu_time hc_time
     hu_space hv_space hv_grad hsuper hode hinit hF_lip
 
-
-
-
-
-
-
-
-theorem scalar_wmp_sub_theorem_7_2
+theorem scalar_weak_maximum_principle_ode_compare_subsolution
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -2509,7 +2515,6 @@ theorem scalar_wmp_sub_theorem_7_2
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
     (F : Real -> Real -> Real) (K : NNReal)
-    (hF_mono : forall t : Real, t ∈ Set.Icc 0 T -> Monotone (fun a : Real => F a t))
     (hw_cont : ContinuousOn
       (fun p : Real × M => Real.exp (-(K : Real) * p.1) *
         ((-u p.1 p.2) - (-c p.1)))
@@ -2550,28 +2555,18 @@ theorem scalar_wmp_sub_theorem_7_2
         (scalarWMPValueSet (M := M) T
           (fun t x => -u t x) (fun t => -c t))) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, u t x <= c t := by
-  have hG_mono : forall t : Real, t ∈ Set.Icc 0 T ->
-      Monotone (fun a : Real => -F (-a) t) := by
-    intro t ht a b hab
-    exact neg_le_neg (hF_mono t ht (neg_le_neg hab))
   have hneg :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, -c t <= -u t x :=
-    scalar_wmp_super_theorem_7_1
+    scalar_weak_maximum_principle_ode_compare_supersolution
       (I := I) G T hT X (fun t x => -u t x) (fun t => -c t)
-      (fun a t => -F (-a) t) K hG_mono
+      (fun a t => -F (-a) t) K
       hw_cont hw_mdiff hw_grad hneg_u_time hneg_c_time
       hneg_u_space hneg_v_space hneg_v_grad hsub_as_super hode_neg
       (fun x => by linarith [hinit x]) hF_lip_neg
   intro t ht x
   linarith [hneg t ht x]
 
-
-
-
-
-
-
-theorem msm110_ch4_scalar_ode_lower
+theorem scalar_weak_maximum_principle_ode_compare_supersolution_autonomous
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -2579,7 +2574,7 @@ theorem msm110_ch4_scalar_ode_lower
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
-    (F : Real -> Real) (K : NNReal) (_hF_mono : Monotone F)
+    (F : Real -> Real) (K : NNReal)
     (hw_cont : ContinuousOn
       (fun p : Real × M => Real.exp (-(K : Real) * p.1) * (u p.1 p.2 - c p.1))
       (spacetimeSlab (M := M) T))
@@ -2610,18 +2605,10 @@ theorem msm110_ch4_scalar_ode_lower
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => F a)
         (scalarWMPValueSet (M := M) T u c)) :
-    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x := by
-  refine scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x :=
+  scalar_weak_maximum_principle_ode_compare_supersolution
     (I := I) G T hT X u c (fun a _ => F a) K
     hw_cont hw_mdiff hw_grad hu_time hc_time hu_space hv_space hv_grad
-    ?_ ?_ hinit ?_
-  · intro t ht x
-    exact hsuper t ht x
-  · intro t ht
-    exact hode t ht
-  · intro t ht
-    simpa using hF_lip t ht
+    hsuper hode hinit (fun t ht => by simpa using hF_lip t ht)
 
-end
-
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Analysis.Parabolic

@@ -1432,7 +1432,6 @@ theorem liYau_estimate_of_nonnegative_ricci
       (isCompact_Icc : IsCompact (Set.Icc 0 τ)).prod isCompact_univ
     have hcont : ContinuousOn (fun p : ℝ × M => H eps p.1 p.2)
         (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := by
-      -- H eps p.1 p.2 = p.1 * q p.1 p.2 - n/2 - eps*p.1
       have hqcont : ContinuousOn (fun p : ℝ × M => q p.1 p.2)
           (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := by
         exact ContinuousOn.mono

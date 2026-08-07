@@ -421,7 +421,7 @@ private abbrev EuclM (E : Type vE) [NormedAddCommGroup E]
     [NormedSpace Real E] [FiniteDimensional Real E] :=
   EuclideanSpace Real (Fin (Module.finrank Real E))
 
-theorem exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn
+theorem eParabolicC2HolderGaugeInEuclideanChartOn_bounded_of_lower_jet_bounds
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -521,7 +521,7 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoot
         p.1 (hposInner p.1 p.2) alpha (localScale p).1 Ka Kb Bb Kc Bc
         Ksource Ku Kdu Bsource Mu Mdu)) delta, hestimate⟩
 
-theorem exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn_of_interpolation
+theorem eParabolicC2HolderGaugeInEuclideanChartOn_bounded_of_lower_jet_bounds_of_interpolation
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -607,7 +607,7 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoot
     BoundedContinuousFunction.norm_parabolicSpatialSecondDerivative_le
       u du d2u hu hdu hgauge
   exact
-    exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn
+    eParabolicC2HolderGaugeInEuclideanChartOn_bounded_of_lower_jet_bounds
       hG (alpha := alpha) (Ksource := Ksource)
       (Ku := parabolicValueInterpolationConst epsilon alpha C M0)
       (KdtimeU := C)
@@ -620,7 +620,7 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoot
       (by simpa only [J] using huHolder) hdtimeUHolder hduHolder hd2uHolder
       huNorm hdtimeUNorm hduNorm hd2uNorm
 
-theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_of_metricFamilySmoothOn
+theorem eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_bounded_of_lower_jet_bounds
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -692,7 +692,7 @@ theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_of_metr
         (parabolicCylinder (Set.Icc t₀ t₁) (Metric.closedBall center r))
         intrinsicU ≤ C := by
   obtain ⟨C, hC⟩ :=
-    exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn
+    eParabolicC2HolderGaugeInEuclideanChartOn_bounded_of_lower_jet_bounds
       hG (halpha0 := halpha0) (halpha1 := halpha1)
       hab habreg hat₀ ht₁b hrBufferR hRRext chartCenter center hchart V hV
       intrinsicU u dtimeU du d2u huTime hu hdu huCont hrealize
@@ -737,7 +737,7 @@ theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_of_metr
   exact hinterpolation.trans (by
     exact mul_le_mul_right hCball _)
 
-theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoothOn_of_finite
+theorem eParabolicC2HolderGaugeInEuclideanChartsOn_bounded_of_lower_jet_bounds_of_finite
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -820,7 +820,7 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoo
         (parabolicCylinder (Set.Icc t₀ t₁)
           (Metric.closedBall (center i) (r i))) intrinsicU ≤ C := by
     intro i
-    exact exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn
+    exact eParabolicC2HolderGaugeInEuclideanChartOn_bounded_of_lower_jet_bounds
       hG (halpha0 := halpha0) (halpha1 := halpha1)
       hab habreg hat₀ ht₁b (hrR i) (hRRext i) (chartCenter i) (center i)
       (hchart i) V (hV i) intrinsicU (u i) (dtimeU i) (du i) (d2u i)
@@ -835,7 +835,7 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoo
       (fun i ↦ parabolicCylinder (Set.Icc t₀ t₁)
         (Metric.closedBall (center i) (r i))) intrinsicU C hC
 
-theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoothOn_of_interpolation_of_finite
+theorem eParabolicC2HolderGaugeInEuclideanChartsOn_bounded_of_lower_jet_bounds_of_interpolation_of_finite
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -903,7 +903,7 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoo
           (Metric.closedBall (center i) (r i))) intrinsicU ≤ Cresult := by
     intro i
     exact
-      exists_eParabolicC2HolderGaugeInEuclideanChartOn_le_of_metricFamilySmoothOn_of_interpolation
+      eParabolicC2HolderGaugeInEuclideanChartOn_bounded_of_lower_jet_bounds_of_interpolation
         hG (halpha0 := halpha0) (halpha1 := halpha1)
         (epsilon i) (hepsilon i) hab habreg hat₀ ht₁b (hrR i) (hRRext i)
         (chartCenter i) (center i) (hchart i) V (hV i) intrinsicU
@@ -917,7 +917,7 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoo
       (fun i ↦ parabolicCylinder (Set.Icc t₀ t₁)
         (Metric.closedBall (center i) (r i))) intrinsicU Cresult hCresult
 
-theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoothOn_of_uniform_interpolation_of_finite
+theorem eParabolicC2HolderGaugeInEuclideanChartsOn_bounded_of_lower_jet_bounds_of_uniform_interpolation_of_finite
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -978,14 +978,14 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoo
         (fun i ↦ parabolicCylinder (Set.Icc t₀ t₁)
           (Metric.closedBall (center i) (r i))) intrinsicU ≤ Cresult := by
   exact
-    exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_metricFamilySmoothOn_of_interpolation_of_finite
+    eParabolicC2HolderGaugeInEuclideanChartsOn_bounded_of_lower_jet_bounds_of_interpolation_of_finite
       hG halpha0 halpha1 hab habreg hat₀ ht₁b (fun _ ↦ epsilon)
       (fun _ ↦ hepsilon) chartCenter center r R Rext hrR hRRext hchart V hV
       intrinsicU u dtimeU du d2u huTime hu hdu huCont hrealize
       (fun _ ↦ Ksource) (fun _ ↦ Bsource) (fun _ ↦ C) (fun _ ↦ M0)
       hsourceHolder hsourceNorm hgauge huNorm
 
-theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_of_metricFamilySmoothOn_of_finite
+theorem eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_bounded_of_lower_jet_bounds_of_finite
     {D : RealTimeInterval}
     {G : RealizedMetricFamilyOn (I := I) (M := M) D}
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
@@ -1073,7 +1073,7 @@ theorem exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartsOn_le_of_met
           (Metric.closedBall (center i) (r i))) intrinsicU ≤ C := by
     intro i
     exact
-      exists_eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_le_of_metricFamilySmoothOn
+      eParabolicC2HolderGaugeWithLowerJetsInEuclideanChartOn_bounded_of_lower_jet_bounds
         hG (halpha0 := halpha0) (halpha1 := halpha1)
         hab habreg hat₀ ht₁b (hrBuffer i) (hrBufferR i) (hRRext i)
         (chartCenter i) (center i) (hchart i) V (hV i) intrinsicU
