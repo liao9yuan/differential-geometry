@@ -546,14 +546,16 @@ theorem shiftRic_add_g
     {δ c : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
     (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
-    (hδ : δ < (1 : Real) / 3)
+    (hden : (1 : Real) - 3 * δ ≠ 0)
     (A : Tensor02At (I := I) (M := M) x) :
     shiftRic3At (I := I) (M := M) δ g
         (A + c • metricTensorField (I := I) g x) =
       shiftRic3At (I := I) (M := M) δ g A +
         (c / (1 - 3 * δ)) • metricTensorField (I := I) g x := by
-  have hden : 1 - 3 * δ ≠ 0 := by nlinarith
-  have hden' : 1 - δ * 3 ≠ 0 := by nlinarith
+  have hden' : 1 - δ * 3 ≠ 0 := by
+    intro h'
+    apply hden
+    nlinarith
   apply ext0S_basis (I := I) basis
   intro slots
   simp [shiftRic3At, shiftScalar_add_g (I := I) (M := M) basis horth A]
@@ -567,7 +569,7 @@ theorem shiftScalar3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
     (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
-    (hδ : δ < (1 : Real) / 3)
+    (hden : (1 : Real) - 3 * δ ≠ 0)
     (Ric : Tensor02At (I := I) (M := M) x) :
     shiftScalar3At (I := I) (M := M) δ g
         (Ric - (δ * metricTracePair0SAt (I := I) g Ric) •
@@ -586,8 +588,6 @@ theorem shiftScalar3At_pinch
     rw [metricTracePair0SAt_eq_sum_basis (I := I) g basis
       DifferentialGeometry.Integral.Connection.delta3 hinv]
     norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3]
-  have hden : 1 - 3 * δ ≠ 0 := by
-    nlinarith
   have horth' :
       ∀ i j : Fin 3, g.inner x (basis i) (basis j) =
         DifferentialGeometry.Integral.Connection.delta3 i j := horth
@@ -610,7 +610,7 @@ theorem shiftRic3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
     (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
-    (hδ : δ < (1 : Real) / 3)
+    (hden : (1 : Real) - 3 * δ ≠ 0)
     (Ric : Tensor02At (I := I) (M := M) x) :
     shiftRic3At (I := I) (M := M) δ g
         (Ric - (δ * metricTracePair0SAt (I := I) g Ric) •
@@ -619,7 +619,7 @@ theorem shiftRic3At_pinch
   apply ContinuousMultilinearMap.ext
   intro slots
   rw [shiftRic3At, shiftScalar3At_pinch
-    (I := I) (M := M) basis horth hδ Ric]
+    (I := I) (M := M) basis horth hden Ric]
   simp
 
 
@@ -1166,7 +1166,7 @@ theorem shiftNAt_pinch
     {δ t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
     (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
-    (hδ : δ < (1 : Real) / 3)
+    (hden : (1 : Real) - 3 * δ ≠ 0)
     (Ric : Tensor02At (I := I) (M := M) x) :
     shiftNAt (I := I) (M := M) δ t g x
         (Ric - (δ * metricTracePair0SAt (I := I) g Ric) •
@@ -1176,7 +1176,7 @@ theorem shiftNAt_pinch
           (inner0S (I := I) g x 2 Ric Ric •
               metricTensorField (I := I) g x -
             metricTracePair0SAt (I := I) g Ric • Ric) := by
-  rw [shiftNAt, shiftRic3At_pinch (I := I) (M := M) basis horth hδ Ric]
+  rw [shiftNAt, shiftRic3At_pinch (I := I) (M := M) basis horth hden Ric]
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem finCons1_eq_vec2
@@ -1400,7 +1400,7 @@ theorem shiftNAt_add_g_comp
     {delta c t : Real} {g : SmoothRiemannianMetric I M} {x : M}
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
     (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis)
-    (hdelta : delta < (1 : Real) / 3)
+    (hden : (1 : Real) - 3 * delta ≠ 0)
     (A : Tensor02At (I := I) (M := M) x) :
     shiftNAt (I := I) (M := M) delta t g x
         (A + c • metricTensorField (I := I) g x)
@@ -1423,7 +1423,7 @@ theorem shiftNAt_add_g_comp
           (vec2 (I := I) (basis p) (basis q)) =
         Ric p q + a * DifferentialGeometry.Integral.Connection.delta3 p q := by
     intro p q
-    rw [shiftRic_add_g (I := I) (M := M) basis horth hdelta A]
+    rw [shiftRic_add_g (I := I) (M := M) basis horth hden A]
     simp [Ric, a, metricTensorField_apply, horth p q,
       vec2, DifferentialGeometry.Integral.Connection.vec2, smul_eq_mul]
   have hRmAdd : ∀ p q r s : Fin 3,
@@ -1460,7 +1460,7 @@ theorem shiftNAt_add_g_comp
 omit [IsManifold I 2 M] in
 theorem shiftNAt_add_g_quad
     {delta c t : Real} {g : SmoothRiemannianMetric I M} {x : M}
-    (hdelta : delta < (1 : Real) / 3)
+    (hden : (1 : Real) - 3 * delta ≠ 0)
     (hdim : Module.finrank Real (TangentSpace I x) = 3)
     (A : Tensor02At (I := I) (M := M) x) (v : TangentSpace I x) :
     shiftNAt (I := I) (M := M) delta t g x
@@ -1524,7 +1524,7 @@ theorem shiftNAt_add_g_quad
       shiftNAt_add_g_comp (I := I) (M := M)
         (delta := delta) (c := c) (t := t)
         nb.basis nb.orthonormal
-        hdelta A
+        hden A
     have hmetric00 :
         metricTensorField (I := I) g x
             (vec2 (I := I) (nb.basis 0) (nb.basis 0)) = 1 := by

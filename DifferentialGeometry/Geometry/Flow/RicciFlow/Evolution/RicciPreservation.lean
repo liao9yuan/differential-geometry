@@ -1040,7 +1040,7 @@ theorem pinchSec_eq
   rw [h0, h1]
   ring
 
-private theorem pinchSec_at_trace
+theorem pinchSec_at_trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -1292,6 +1292,7 @@ theorem shiftNRaw_barrier_diff
           (2 * delta - 1) *
           (pinchLipSec (I := I) S t x) (vec2 (I := I) v v) := by
   let c : Real := epsilon * (d + t - t0)
+  have hden : (1 : Real) - 3 * delta ≠ 0 := by nlinarith
   rw [shiftNRaw_barrier (I := I) (M := M) S
       (fun s : Real => S.base.metric s) delta epsilon d t0 t x v v]
   rw [shiftNRaw_pinch (I := I) (M := M) S delta t
@@ -1299,7 +1300,7 @@ theorem shiftNRaw_barrier_diff
   have hdiff :=
     shiftNAt_add_g_quad (I := I) (M := M)
       (delta := delta) (c := c) (t := t) (g := S.base.metric t)
-      (x := x) hdelta hdim ((pinchSec (I := I) S delta) t x) v
+      (x := x) hden hdim ((pinchSec (I := I) S delta) t x) v
   have hcoeff :
       ((3 : Real) •
           shiftRic3At (I := I) (M := M) delta (S.base.metric t)
@@ -1325,7 +1326,7 @@ theorem shiftNRaw_barrier_diff
       have hpinch := pinchSec_at_trace (I := I) (M := M) S delta t x
       have hshift :=
         shiftRic3At_pinch (I := I) (M := M) nb.basis nb.orthonormal
-          hdelta (S.ricci t x)
+          hden (S.ricci t x)
       rw [← hpinch] at hshift
       have htrace :
           metricTracePair0SAt (I := I) (S.base.metric t)
@@ -3000,7 +3001,7 @@ private theorem reaction3_apply
   simp only [Tensor0SSpace.sub_apply, Tensor0SSpace.nsmul_apply,
     nsmul_eq_mul, Nat.cast_ofNat]
 
-private theorem ricciActualReactAt_eq_reaction_basis
+theorem ricciActualReactAt_eq_reaction3
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -3064,7 +3065,7 @@ private theorem ricciActualReactAt_eq_reaction_basis
         exact (reaction3_apply (I := I) (M := M) (S.base.metric t)
           (S.ricci t x) (vec2 (I := I) (basis i) (basis j))).symm
 
-private theorem ricciCoordReact_eq_actual
+theorem ricciCoordReact_eq_actual
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -3196,6 +3197,34 @@ private theorem ricciCoordReact_eq_actual
           ∑ j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
             c i j * L i j
   exact sum_coord_react_cancel c L R Q
+
+
+theorem ricciCoordReact_eq_reaction3
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    {t : Real} {x : M}
+    (hdim : Module.finrank Real (TangentSpace I x) = 3)
+    (v : TangentSpace I x) :
+    ricciCoordReact (I := I) S t x v =
+      ricciReaction3At (I := I) (M := M) (S.base.metric t) (S.ricci t x)
+        (vec2 (I := I) v v) := by
+  by_cases hv : v = 0
+  · subst v
+    have hsym : DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricci t x) :=
+      ricciAt_symm (I := I) S t x
+    obtain ⟨basis, _l1, _l2, _l3, horth, _hdiag⟩ :=
+      ricciEigen3 (I := I) (M := M) (S.base.metric t) (S.ricci t x) hdim hsym
+    have hreact := ricciActualReactAt_eq_reaction3 (I := I) (M := M) S t x basis horth
+    rw [ricciCoordReact_eq_actual (I := I) S t x 0]
+    rw [← hreact]
+  · obtain ⟨nb⟩ :=
+      exists_nullOrthonormalBasis3At (I := I) (M := M) (S.base.metric t)
+        (x := x) (v := v) hdim hv
+    have hreact := ricciActualReactAt_eq_reaction3 (I := I) (M := M) S t x
+      nb.basis nb.orthonormal
+    rw [ricciCoordReact_eq_actual (I := I) S t x v]
+    rw [← hreact]
 
 
 
@@ -3396,11 +3425,12 @@ theorem shiftNRaw_pinchCoordReact
       exists_nullOrthonormalBasis3At (I := I) (M := M)
         (S.base.metric t) hdim hv
     have hpinch := pinchSec_at_trace (I := I) (M := M) S delta t x
+    have hden : (1 : Real) - 3 * delta ≠ 0 := by nlinarith
     have hshift :=
       shiftNAt_pinch (I := I) (M := M) nb.basis nb.orthonormal
-        hdelta13 (S.ricci t x) (t := t)
+        hden (S.ricci t x) (t := t)
     have hactual :=
-      ricciActualReactAt_eq_reaction_basis (I := I) (M := M) S t x
+      ricciActualReactAt_eq_reaction3 (I := I) (M := M) S t x
         nb.basis nb.orthonormal
     have hcoord := ricciCoordReact_eq_actual (I := I) S t x v
     rw [shiftNRaw_pinch (I := I) (M := M) S delta t (S.base.metric t) x v v]
