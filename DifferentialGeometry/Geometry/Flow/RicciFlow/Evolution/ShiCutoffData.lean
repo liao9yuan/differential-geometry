@@ -15,6 +15,7 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter Set
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff Topology Bundle
 

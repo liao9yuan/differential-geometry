@@ -71,11 +71,11 @@ theorem parabolicOperatorWithDrift_affine_sub
     (hF_space : forall y : M, MDifferentiableAt I 𝓘(Real, Real) (F t) y)
     (hF_grad : MDiffAt (T% fun y : M =>
       DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y) x) :
-    DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X
+    DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X
         (fun s y => (a + b * s) - F s y) t x =
-      b - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t
+      b - DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X F t
         x := by
-  unfold DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift
+  unfold DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift
   have hbarrier_const : DifferentiableWithinAt Real
       (fun s : Real => a + b * s) (Set.Icc 0 T) t := by
     have hlin : DifferentiableWithinAt Real (fun s : Real => b * s) (Set.Icc 0 T) t := by
@@ -280,7 +280,7 @@ theorem scalar_subsolution_affine_bound
     (F : Real -> M -> Real) (a b : Real)
     (hw_cont : ContinuousOn
       (fun p : Real × M => (a + b * p.1) - F p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hF_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, DifferentiableWithinAt Real
         (fun s : Real => F s x) (Set.Icc 0 T) t)
@@ -291,7 +291,7 @@ theorem scalar_subsolution_affine_bound
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t) (F t) y) x)
     (hinit : forall x : M, F 0 x <= a)
     (hsub : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
-      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x <=
+      DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X F t x <=
         b) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, F t x <= a + b * t := by
   let w : Real -> M -> Real := fun t x => (a + b * t) - F t x
@@ -362,14 +362,14 @@ theorem scalar_subsolution_affine_bound
     exact (hF_grad t ht htpos x).smul_const_section (a := (-1 : Real))
   have hnegative : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, w t x < 0 ->
-        0 <= DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X w t
+        0 <= DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X w t
           x := by
     intro t ht htpos x _hwneg
     have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
       (uniqueDiffOn_Icc (lt_of_lt_of_le htpos ht.2)).uniqueDiffWithinAt ht
     have hident :
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X w t x =
-          b - DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X w t x =
+          b - DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X F t
             x := by
       simpa [w] using
         parabolicOperatorWithDrift_affine_sub (I := I) G T X F a b t x huniq
@@ -379,7 +379,7 @@ theorem scalar_subsolution_affine_bound
     linarith
   have hw_nonneg :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x :=
-    DifferentialGeometry.Integral.Connection.strict_barrier_positive_region (I := I) G T hT X w
+    DifferentialGeometry.Analysis.Parabolic.strict_barrier_positive_region (I := I) G T hT X w
       hw_cont hw0 hw_time hw_mdiff hw_grad hnegative
   intro t ht x
   have := hw_nonneg t ht x
@@ -467,7 +467,7 @@ theorem bernstein_first_derivative_estimate
       (fun p : Real × M =>
         ((1 + cReact * alpha) * K ^ 2 + ((1 + cReact * alpha) * (16 * K ^ 3)) * p.1) -
           (p.1 * u p.1 p.2 + (1 + cReact * alpha) * v p.1 p.2))
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hF_time : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
       DifferentiableWithinAt Real
         (fun s : Real => s * u s x + (1 + cReact * alpha) * v s x) (Set.Icc 0 T) t)
@@ -509,7 +509,7 @@ theorem bernstein_first_derivative_estimate
           mul_le_mul_of_nonneg_left (hsqrt_v_le t ht x) ht.1
       _ <= alpha := htK
   have hsub : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x <=
+      DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X F t x <=
         b := by
     intro t ht htpos x
     let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D :=
@@ -566,10 +566,10 @@ theorem bernstein_first_derivative_estimate
       have hFt : F t = (fun z : M => t * u t z + β * v t z) := rfl
       rw [hFt, hcombo, huLap t ht htpos x, hvLap t ht htpos x]
     have hParab :
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X F t x =
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X F t x =
           u t x + (t * (du - uLap t x) + β * (-2 * u t x + reaction t x)) := by
       have hXt : X t = (fun _y : M => (0 : TangentSpace I _y)) := rfl
-      rw [DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift_eq, hderivWithin, hXt,
+      rw [DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift_eq, hderivWithin, hXt,
         hheatF]
       ring
     rw [hParab]

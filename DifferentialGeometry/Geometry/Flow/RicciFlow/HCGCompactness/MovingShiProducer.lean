@@ -11,6 +11,7 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Tensor0SBundle
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
 open scoped Manifold ContDiff BigOperators

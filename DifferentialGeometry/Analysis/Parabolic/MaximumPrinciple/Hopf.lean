@@ -7,6 +7,7 @@ set_option autoImplicit false
 noncomputable section
 
 open Bundle Set
+open DifferentialGeometry.Analysis.Parabolic
 open scoped Manifold ContDiff Topology
 
 namespace DifferentialGeometry.Integral.Connection

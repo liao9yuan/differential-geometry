@@ -24,6 +24,7 @@ universe u uE uH
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter Set
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential

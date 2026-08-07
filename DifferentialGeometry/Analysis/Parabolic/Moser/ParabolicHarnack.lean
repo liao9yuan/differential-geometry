@@ -203,7 +203,7 @@ theorem harnack_on_separated_cylinders
       rfl
 
 
-theorem harnack_on_separated_cylinders_canonical
+theorem harnack_on_separated_cylinders_of_global_volume_normalization
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
     (rho outer averagingCutoff : SmoothScalar g)

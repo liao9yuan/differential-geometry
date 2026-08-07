@@ -8,6 +8,7 @@ namespace DifferentialGeometry.Integral.Connection
 noncomputable section
 
 open Bundle Set
+open DifferentialGeometry.Analysis.Parabolic
 open scoped Manifold ContDiff Topology
 
 universe u uE uH

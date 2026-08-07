@@ -9,6 +9,7 @@ namespace DifferentialGeometry.Integral.Connection
 noncomputable section
 
 open Bundle Filter Set
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian
 open scoped Manifold ContDiff Topology Pointwise

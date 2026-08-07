@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.Operators
+import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Topology.Algebra.MetricSpace.Lipschitz
@@ -19,11 +20,10 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
-
-noncomputable section
+namespace DifferentialGeometry.Analysis.Parabolic
 
 open Bundle Filter Set
+open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -31,6 +31,8 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+noncomputable section
 
 
 def spacetimeSlab (T : Real) : Set (Real × M) :=
@@ -812,11 +814,11 @@ theorem strict_barrier_nonnegative_of_positive_time
     (w : Real -> M -> Real)
     (hw_cont : ContinuousOn (fun p : Real × M => w p.1 p.2) (spacetimeSlab (M := M) T))
     (hw0 : forall x : M, 0 <= w 0 x)
-    (hw_time : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, DifferentiableWithinAt Real (fun s : Real => w s x) (Set.Icc 0 T) t)
-    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDifferentiableAt I 𝓘(Real, Real) (w t) x)
-    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t) (w t) y) x)
     (hnegative : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
@@ -864,7 +866,7 @@ theorem strict_barrier_nonnegative_of_positive_time
     have htime_diff :
         DifferentiableWithinAt Real (fun s : Real => w s x0 + ε * s)
           (Set.Icc 0 T) t0 := by
-      exact (hw_time t0 hp0_time x0).add
+      exact (hw_time t0 hp0_time ht0_pos x0).add
         ((differentiableWithinAt_id' (𝕜 := Real) (s := Set.Icc 0 T) (x := t0)).const_mul ε)
     have hbarrier_deriv_nonpos :
         derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 <= 0 :=
@@ -872,7 +874,7 @@ theorem strict_barrier_nonnegative_of_positive_time
     have hderiv_eq :
       derivWithin (fun s : Real => w s x0 + ε * s) (Set.Icc 0 T) t0 =
         derivWithin (fun s : Real => w s x0) (Set.Icc 0 T) t0 + ε :=
-      derivWithin_add_eps_mul_time (M := M) huniq (hw_time t0 hp0_time x0)
+      derivWithin_add_eps_mul_time (M := M) huniq (hw_time t0 hp0_time ht0_pos x0)
     have hw_deriv_le : derivWithin (fun s : Real => w s x0) (Set.Icc 0 T) t0 <= -ε := by
       linarith
     have hw_t0_neg : w t0 x0 < 0 := by
@@ -888,9 +890,9 @@ theorem strict_barrier_nonnegative_of_positive_time
     have hheat_nonneg :
         0 <= heatOperatorWithDrift (I := I) G t0 (X t0) (w t0) x0 :=
       heatOperatorWithDrift_at_spatial_min_nonneg (I := I) G t0 (X t0)
-        hspatial_min (hw_mdiff t0 hp0_time x0)
-        (Filter.Eventually.of_forall fun y => hw_mdiff t0 hp0_time y)
-        (hw_grad t0 hp0_time x0)
+        hspatial_min (hw_mdiff t0 hp0_time ht0_pos x0)
+        (Filter.Eventually.of_forall fun y => hw_mdiff t0 hp0_time ht0_pos y)
+        (hw_grad t0 hp0_time ht0_pos x0)
     have hP_neg :
         parabolicOperatorWithDrift (I := I) G T X w t0 x0 < 0 := by
       unfold parabolicOperatorWithDrift
@@ -1336,7 +1338,10 @@ theorem strict_barrier_nonnegative
         0 <= parabolicOperatorWithDrift (I := I) G T X w t x) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x :=
   strict_barrier_nonnegative_of_positive_time (I := I) G T hT X w
-    hw_cont hw0 hw_time hw_mdiff hw_grad
+    hw_cont hw0
+    (fun t ht _htpos x => hw_time t ht x)
+    (fun t ht _htpos x => hw_mdiff t ht x)
+    (fun t ht _htpos x => hw_grad t ht x)
     (fun t ht _htpos x hwneg => hnegative t ht x hwneg)
 
 
@@ -1389,9 +1394,9 @@ theorem scalar_weak_maximum_principle_sub_const_of_parabolic_nonpos
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x :=
     strict_barrier_nonnegative_of_positive_time (I := I) G T hT X w
       (by simpa [w] using hw_cont) hw0
-      (by simpa [w] using hw_time)
-      (by simpa [w] using hw_mdiff)
-      (by simpa [w] using hw_grad)
+      (fun t ht _htpos x => by simpa [w] using hw_time t ht x)
+      (fun t ht _htpos x => by simpa [w] using hw_mdiff t ht x)
+      (fun t ht _htpos x => by simpa [w] using hw_grad t ht x)
       hnegative
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
@@ -1565,29 +1570,29 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
     (hw_cont : ContinuousOn
       (fun p : Real × M => Real.exp (-L * p.1) * (u p.1 p.2 - c p.1))
       (spacetimeSlab (M := M) T))
-    (hw_time : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, DifferentiableWithinAt Real
         (fun s : Real => Real.exp (-L * s) * (u s x - c s)) (Set.Icc 0 T) t)
-    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => Real.exp (-L * t) * (u t y - c t)) x)
-    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t)
           (fun z : M => Real.exp (-L * t) * (u t z - c t)) y) x)
     (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       F (u t x) t <= parabolicOperatorWithDrift (I := I) G T X u t x)
-    (hode : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       derivWithin c (Set.Icc 0 T) t = F (c t) t)
     (hinit : forall x : M, c 0 <= u 0 x)
     (hlip : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
       |F (u t x) t - F (c t) t| <= L * |u t x - c t|)
-    (hsubCalc : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hsubCalc : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       parabolicOperatorWithDrift (I := I) G T X
           (fun s y => u s y - c s) t x =
         parabolicOperatorWithDrift (I := I) G T X u t x -
           derivWithin c (Set.Icc 0 T) t)
-    (hexpCalc : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hexpCalc : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       parabolicOperatorWithDrift (I := I) G T X
           (fun s y => Real.exp (-L * s) * (u s y - c s)) t x =
         Real.exp (-L * t) *
@@ -1617,8 +1622,8 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
           parabolicOperatorWithDrift (I := I) G T X v t x := by
       exact negative_region_parabolic_lower_bound
         (hsuper t ht htpos x)
-        (hode t ht)
-        (by simpa [v] using hsubCalc t ht x)
+        (hode t ht htpos)
+        (by simpa [v] using hsubCalc t ht htpos x)
         (hlip t ht x)
         (by simpa [v] using hvneg)
     have hregion :
@@ -1629,13 +1634,14 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
           (parabolicOperatorWithDrift (I := I) G T X v t x - L * v t x) := by
         exact mul_nonneg (le_of_lt hexppos) hregion
       _ = parabolicOperatorWithDrift (I := I) G T X w t x := by
-        rw [← hexpCalc t ht x]
+        rw [← hexpCalc t ht htpos x]
   have hw_nonneg :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x :=
     strict_barrier_nonnegative_of_positive_time (I := I) G T hT X w
       (by simpa [w, v] using hw_cont) hw0
-      (by simpa [w, v] using hw_time)
-      (by simpa [w, v] using hw_mdiff) (by simpa [w, v] using hw_grad)
+      (fun t ht htpos x => by simpa [w, v] using hw_time t ht htpos x)
+      (fun t ht htpos x => by simpa [w, v] using hw_mdiff t ht htpos x)
+      (fun t ht htpos x => by simpa [w, v] using hw_grad t ht htpos x)
       hnegative
   intro t ht x
   have hvnonneg : 0 <= v t x := by
@@ -2116,28 +2122,28 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_r
     (hw_cont : ContinuousOn
       (fun p : Real × M => Real.exp (-L * p.1) * (u p.1 p.2 - c p.1))
       (spacetimeSlab (M := M) T))
-    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => Real.exp (-L * t) * (u t y - c t)) x)
-    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t)
           (fun z : M => Real.exp (-L * t) * (u t z - c t)) y) x)
-    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       DifferentiableWithinAt Real (fun s : Real => u s x) (Set.Icc 0 T) t)
-    (hc_time : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       DifferentiableWithinAt Real c (Set.Icc 0 T) t)
-    (hu_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hu_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
-    (hv_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hv_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun z : M => u t z - c t) y)
-    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t) (fun z : M => u t z - c t) y) x)
     (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       F (u t x) t <= parabolicOperatorWithDrift (I := I) G T X u t x)
-    (hode : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       derivWithin c (Set.Icc 0 T) t = F (c t) t)
     (hinit : forall x : M, c 0 <= u 0 x)
     (hlip : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
@@ -2147,11 +2153,11 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_r
   · refine scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_positive_time
       (I := I) G T hT X u c F L hw_cont ?_ hw_mdiff hw_grad
       hsuper hode hinit hlip ?_ ?_
-    · intro t ht x
+    · intro t ht htpos x
       have hv_time :
           DifferentiableWithinAt Real (fun s : Real => u s x - c s)
             (Set.Icc 0 T) t :=
-        (hu_time t ht x).sub (hc_time t ht)
+        (hu_time t ht htpos x).sub (hc_time t ht htpos)
       have hscale :
           DifferentiableWithinAt Real (fun s : Real => Real.exp (-L * s))
             (Set.Icc 0 T) t := by
@@ -2161,16 +2167,16 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_r
             (differentiableWithinAt_id' (𝕜 := Real) (s := Set.Icc 0 T) (x := t)).const_mul (-L)
         exact hlinear.exp
       exact hscale.mul hv_time
-    · intro t ht x
+    · intro t ht htpos x
       exact parabolic_sub_time_curve_identity (I := I) G T X u c t ht
-        (hu_space t ht) x (hu_time t ht x) (hc_time t ht)
-    · intro t ht x
+        (hu_space t ht htpos) x (hu_time t ht htpos x) (hc_time t ht htpos)
+    · intro t ht htpos x
       have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
         uniqueDiffOn_Icc hTpos t ht
       have hv_time :
           DifferentiableWithinAt Real (fun s : Real => u s x - c s)
             (Set.Icc 0 T) t :=
-        (hu_time t ht x).sub (hc_time t ht)
+        (hu_time t ht htpos x).sub (hc_time t ht htpos)
       have hscale :
           DifferentiableWithinAt Real (fun s : Real => Real.exp (-L * s))
             (Set.Icc 0 T) t := by
@@ -2180,8 +2186,8 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_r
             (differentiableWithinAt_id' (𝕜 := Real) (s := Set.Icc 0 T) (x := t)).const_mul (-L)
         exact hlinear.exp
       exact parabolic_exp_rescale_identity (I := I) G T L X
-        (fun s y => u s y - c s) t ht huniq (hv_space t ht) x
-        (hv_grad t ht x) hv_time hscale
+        (fun s y => u s y - c s) t ht huniq (hv_space t ht htpos) x
+        (hv_grad t ht htpos x) hv_time hscale
   · have hTle : T <= 0 := le_of_not_gt hTpos
     have hT0 : T = 0 := le_antisymm hTle hT
     intro t ht x
@@ -2287,7 +2293,7 @@ def scalarWeakMaximumPrincipleValueSet (T : Real) (u : Real -> M -> Real) (c : R
 
 
 omit [TopologicalSpace M] in
-theorem scalarWMPValueSet_u_mem
+theorem scalarWeakMaximumPrincipleValueSet_u_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     {t : Real} (ht : t ∈ Set.Icc 0 T) (x : M) :
     u t x ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c := by
@@ -2297,7 +2303,7 @@ theorem scalarWMPValueSet_u_mem
 
 
 omit [TopologicalSpace M] in
-theorem scalarWMPValueSet_c_mem
+theorem scalarWeakMaximumPrincipleValueSet_c_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     {t : Real} (ht : t ∈ Set.Icc 0 T) :
     c t ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c := by
@@ -2306,7 +2312,7 @@ theorem scalarWMPValueSet_c_mem
 
 
 
-theorem scalarWMPValueSet_isCompact
+theorem scalarWeakMaximumPrincipleValueSet_isCompact
     [CompactSpace M]
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
     (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
@@ -2316,6 +2322,38 @@ theorem scalarWMPValueSet_isCompact
   have hslab : IsCompact (spacetimeSlab (M := M) T) := by
     simpa [spacetimeSlab] using (isCompact_Icc.prod (isCompact_univ : IsCompact (Set.univ : Set M)))
   exact (hslab.image_of_continuousOn hu_cont).union (isCompact_Icc.image_of_continuousOn hc_cont)
+
+omit [TopologicalSpace M] in
+theorem scalarWeakMaximumPrincipleValueSet_mono
+    {T T' : Real} (hTT' : T' <= T)
+    (u : Real -> M -> Real) (c : Real -> Real) :
+    scalarWeakMaximumPrincipleValueSet (M := M) T' u c ⊆
+      scalarWeakMaximumPrincipleValueSet (M := M) T u c := by
+  intro a ha
+  rcases ha with ⟨p, hp, rfl⟩ | ⟨t, ht, rfl⟩
+  · left
+    refine ⟨p, ?_, rfl⟩
+    exact ⟨⟨hp.1.1, hp.1.2.trans hTT'⟩, hp.2⟩
+  · right
+    exact ⟨t, ⟨ht.1, ht.2.trans hTT'⟩, rfl⟩
+
+omit [TopologicalSpace M] in
+theorem scalarWeakMaximumPrincipleValueSet_neg_mem
+    (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
+    {a : Real} (ha : a ∈ scalarWeakMaximumPrincipleValueSet (M := M) T
+      (fun t x => -u t x) (fun t => -c t)) :
+    -a ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c := by
+  rcases ha with ⟨p, hp, hpa⟩ | ⟨t, ht, hta⟩
+  · left
+    refine ⟨p, hp, ?_⟩
+    have hneg : -(u p.1 p.2) = a := hpa
+    rw [← hneg]
+    ring
+  · right
+    refine ⟨t, ht, ?_⟩
+    have hneg : -(c t) = a := hta
+    rw [← hneg]
+    ring
 
 
 
@@ -2330,9 +2368,9 @@ theorem scalarWeakMaximumPrincipleLipschitzOnValueSetBound
       |F (u t x) t - F (c t) t| <= (K : Real) * |u t x - c t| := by
   intro t ht x
   have hu_mem : u t x ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c :=
-    scalarWMPValueSet_u_mem (M := M) T u c ht x
+    scalarWeakMaximumPrincipleValueSet_u_mem (M := M) T u c ht x
   have hc_mem : c t ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c :=
-    scalarWMPValueSet_c_mem (M := M) T u c ht
+    scalarWeakMaximumPrincipleValueSet_c_mem (M := M) T u c ht
   simpa [Real.dist_eq] using (hF_lip t ht).dist_le_mul (u t x) hu_mem (c t) hc_mem
 
 
@@ -2402,28 +2440,28 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_o
     (hw_cont : ContinuousOn
       (fun p : Real × M => Real.exp (-(K : Real) * p.1) * (u p.1 p.2 - c p.1))
       (spacetimeSlab (M := M) T))
-    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => Real.exp (-(K : Real) * t) * (u t y - c t)) x)
-    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t)
           (fun z : M => Real.exp (-(K : Real) * t) * (u t z - c t)) y) x)
-    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       DifferentiableWithinAt Real (fun s : Real => u s x) (Set.Icc 0 T) t)
-    (hc_time : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       DifferentiableWithinAt Real c (Set.Icc 0 T) t)
-    (hu_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hu_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
-    (hv_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hv_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun z : M => u t z - c t) y)
-    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t) (fun z : M => u t z - c t) y) x)
     (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       F (u t x) t <= parabolicOperatorWithDrift (I := I) G T X u t x)
-    (hode : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       derivWithin c (Set.Icc 0 T) t = F (c t) t)
     (hinit : forall x : M, c 0 <= u 0 x)
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
@@ -2446,22 +2484,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_o
 
 end
 
-end DifferentialGeometry.Integral.Connection
-
-
-
-namespace DifferentialGeometry.Analysis.Parabolic
-
-open Bundle Filter Set
-open DifferentialGeometry.Integral.Connection
-open scoped Manifold ContDiff Topology
-
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [FiniteDimensional Real E]
-variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
 theorem scalar_weak_maximum_principle_ode_compare_supersolution
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2474,35 +2496,35 @@ theorem scalar_weak_maximum_principle_ode_compare_supersolution
     (hw_cont : ContinuousOn
       (fun p : Real × M => Real.exp (-(K : Real) * p.1) * (u p.1 p.2 - c p.1))
       (spacetimeSlab (M := M) T))
-    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => Real.exp (-(K : Real) * t) * (u t y - c t)) x)
-    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t)
           (fun z : M => Real.exp (-(K : Real) * t) * (u t z - c t)) y) x)
-    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       DifferentiableWithinAt Real (fun s : Real => u s x) (Set.Icc 0 T) t)
-    (hc_time : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       DifferentiableWithinAt Real c (Set.Icc 0 T) t)
-    (hu_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hu_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
-    (hv_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hv_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun z : M => u t z - c t) y)
-    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t) (fun z : M => u t z - c t) y) x)
-    (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       F (u t x) t <= parabolicOperatorWithDrift (I := I) G T X u t x)
-    (hode : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       derivWithin c (Set.Icc 0 T) t = F (c t) t)
     (hinit : forall x : M, c 0 <= u 0 x)
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => F a t)
         (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x :=
-  scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular
+  scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     (I := I) G T hT X u c F K hw_cont hw_mdiff hw_grad hu_time hc_time
     hu_space hv_space hv_grad hsuper hode hinit hF_lip
 
@@ -2519,34 +2541,34 @@ theorem scalar_weak_maximum_principle_ode_compare_subsolution
       (fun p : Real × M => Real.exp (-(K : Real) * p.1) *
         ((-u p.1 p.2) - (-c p.1)))
       (spacetimeSlab (M := M) T))
-    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => Real.exp (-(K : Real) * t) *
           ((-u t y) - (-c t))) x)
-    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t)
           (fun z : M => Real.exp (-(K : Real) * t) *
             ((-u t z) - (-c t))) y) x)
-    (hneg_u_time : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hneg_u_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       DifferentiableWithinAt Real (fun s : Real => -u s x) (Set.Icc 0 T) t)
-    (hneg_c_time : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hneg_c_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       DifferentiableWithinAt Real (fun s : Real => -c s) (Set.Icc 0 T) t)
-    (hneg_u_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hneg_u_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun z : M => -u t z) y)
-    (hneg_v_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hneg_v_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun z : M => (-u t z) - (-c t)) y)
-    (hneg_v_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hneg_v_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t)
           (fun z : M => (-u t z) - (-c t)) y) x)
-    (hsub_as_super : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hsub_as_super : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       (fun a : Real => -F (-a) t) (-u t x) <=
         parabolicOperatorWithDrift (I := I) G T X
           (fun s y => -u s y) t x)
-    (hode_neg : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hode_neg : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       derivWithin (fun s : Real => -c s) (Set.Icc 0 T) t =
         (fun a : Real => -F (-a) t) (-c t))
     (hinit : forall x : M, u 0 x <= c 0)
@@ -2578,28 +2600,28 @@ theorem scalar_weak_maximum_principle_ode_compare_supersolution_autonomous
     (hw_cont : ContinuousOn
       (fun p : Real × M => Real.exp (-(K : Real) * p.1) * (u p.1 p.2 - c p.1))
       (spacetimeSlab (M := M) T))
-    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M => Real.exp (-(K : Real) * t) * (u t y - c t)) x)
-    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t)
           (fun z : M => Real.exp (-(K : Real) * t) * (u t z - c t)) y) x)
-    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       DifferentiableWithinAt Real (fun s : Real => u s x) (Set.Icc 0 T) t)
-    (hc_time : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       DifferentiableWithinAt Real c (Set.Icc 0 T) t)
-    (hu_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hu_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
-    (hv_space : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hv_space : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall y : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun z : M => u t z - c t) y)
-    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       forall x : M, MDiffAt (T% fun y : M =>
         gradientFun (I := I) (G.metric t) (fun z : M => u t z - c t) y) x)
-    (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,
       F (u t x) <= parabolicOperatorWithDrift (I := I) G T X u t x)
-    (hode : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       derivWithin c (Set.Icc 0 T) t = F (c t))
     (hinit : forall x : M, c 0 <= u 0 x)
     (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
@@ -2610,5 +2632,381 @@ theorem scalar_weak_maximum_principle_ode_compare_supersolution_autonomous
     (I := I) G T hT X u c (fun a _ => F a) K
     hw_cont hw_mdiff hw_grad hu_time hc_time hu_space hv_space hv_grad
     hsuper hode hinit (fun t ht => by simpa using hF_lip t ht)
+
+private theorem scalar_weak_maximum_principle_ode_compare_supersolution_of_heat_pot_on_strict_subinterval
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hTpos : 0 < T)
+    (V u : Real -> M -> Real) (c : Real -> Real)
+    (F : Real -> Real -> Real) (K : NNReal)
+    (hu : IsHeatPotSupersolutionOn (RealTimeInterval.closed 0 T (le_of_lt hTpos)) G V u)
+    (hc_cont : ContinuousOn c (Set.Icc 0 T))
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      DifferentiableWithinAt Real c (Set.Icc 0 T) t)
+    (hF_le : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      F (u t x) t <= V t x * u t x)
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      derivWithin c (Set.Icc 0 T) t = F (c t) t)
+    (hinit : forall x : M, c 0 <= u 0 x)
+    (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
+      LipschitzOnWith K (fun a : Real => F a t)
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c))
+    {T' : Real} (hT'pos : 0 < T') (hT'lt : T' < T) :
+    forall t : Real, t ∈ Set.Icc 0 T' -> forall x : M, c t <= u t x := by
+  let X : Real -> (x : M) -> TangentSpace I x := fun _ x => 0
+  have hT'le : 0 <= T' := le_of_lt hT'pos
+  have hw_cont : ContinuousOn
+      (fun p : Real × M => Real.exp (-(K : Real) * p.1) * (u p.1 p.2 - c p.1))
+      (spacetimeSlab (M := M) T') := by
+    have hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+        (spacetimeSlab (M := M) T') := by
+      apply (by
+        simpa only [RealTimeInterval.closed]
+          using hu.jointCont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+            (Set.Icc (0 : Real) T ×ˢ Set.univ)).mono
+      intro p hp
+      exact ⟨⟨hp.1.1, hp.1.2.trans hT'lt.le⟩, hp.2⟩
+    have hc_cont_slab : ContinuousOn (fun p : Real × M => c p.1)
+        (spacetimeSlab (M := M) T') := by
+      refine hc_cont.comp continuousOn_fst ?_
+      intro p hp
+      exact ⟨hp.1.1, hp.1.2.trans hT'lt.le⟩
+    have hexp_cont : ContinuousOn (fun p : Real × M =>
+        Real.exp (-(K : Real) * p.1)) (spacetimeSlab (M := M) T') := by
+      exact (by fun_prop : Continuous (fun p : Real × M =>
+        Real.exp (-(K : Real) * p.1))).continuousOn
+    exact hexp_cont.mul (hu_cont.sub hc_cont_slab)
+  have hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t ->
+      forall x : M, MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => Real.exp (-(K : Real) * t) * (u t y - c t)) x := by
+    intro t ht htpos x
+    have htcarrier : t ∈ (RealTimeInterval.closed 0 T (le_of_lt hTpos)).carrier := by
+      change t ∈ Set.Icc 0 T
+      exact ⟨ht.1, le_trans ht.2 hT'lt.le⟩
+    have hslice : ContMDiff I 𝓘(Real, Real) ∞
+        (fun y : M => Real.exp (-(K : Real) * t) * (u t y - c t)) := by
+      exact contMDiff_const.mul ((hu.sliceSmooth t htcarrier).sub contMDiff_const)
+    exact hslice.mdifferentiable (by simp) x
+  have hw_grad : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t ->
+      forall x : M, MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t)
+          (fun z : M => Real.exp (-(K : Real) * t) * (u t z - c t)) y) x := by
+    intro t ht htpos x
+    have htcarrier : t ∈ (RealTimeInterval.closed 0 T (le_of_lt hTpos)).carrier := by
+      change t ∈ Set.Icc 0 T
+      exact ⟨ht.1, le_trans ht.2 hT'lt.le⟩
+    have hslice : ContMDiff I 𝓘(Real, Real) ∞
+        (fun y : M => Real.exp (-(K : Real) * t) * (u t y - c t)) := by
+      exact contMDiff_const.mul ((hu.sliceSmooth t htcarrier).sub contMDiff_const)
+    exact gradientFun_mdiffAt (I := I) (G.metric t) hslice x
+  have hu_time : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t -> forall x : M,
+      DifferentiableWithinAt Real (fun s : Real => u s x) (Set.Icc 0 T') t := by
+    intro t ht htpos x
+    have htreg : t ∈ (RealTimeInterval.closed 0 T (le_of_lt hTpos)).regular := by
+      change t ∈ Set.Ioo 0 T
+      exact ⟨htpos, lt_of_le_of_lt ht.2 hT'lt⟩
+    exact (hu.timeDiff t htreg x).differentiableWithinAt
+  have hc_time' : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t ->
+      DifferentiableWithinAt Real c (Set.Icc 0 T') t := by
+    intro t ht htpos
+    have htT : t ∈ Set.Icc 0 T := ⟨ht.1, le_trans ht.2 hT'lt.le⟩
+    exact (hc_time t htT htpos).mono (by
+      intro s hs
+      exact ⟨hs.1, le_trans hs.2 hT'lt.le⟩)
+  have hu_space : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t ->
+      forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y := by
+    intro t ht htpos y
+    have htcarrier : t ∈ (RealTimeInterval.closed 0 T (le_of_lt hTpos)).carrier := by
+      change t ∈ Set.Icc 0 T
+      exact ⟨ht.1, le_trans ht.2 hT'lt.le⟩
+    exact (hu.sliceSmooth t htcarrier).mdifferentiable (by simp) y
+  have hv_space : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t ->
+      forall y : M, MDifferentiableAt I 𝓘(Real, Real)
+        (fun z : M => u t z - c t) y := by
+    intro t ht htpos y
+    have htcarrier : t ∈ (RealTimeInterval.closed 0 T (le_of_lt hTpos)).carrier := by
+      change t ∈ Set.Icc 0 T
+      exact ⟨ht.1, le_trans ht.2 hT'lt.le⟩
+    have hslice : ContMDiff I 𝓘(Real, Real) ∞ (fun z : M => u t z - c t) :=
+      (hu.sliceSmooth t htcarrier).sub contMDiff_const
+    exact hslice.mdifferentiable (by simp) y
+  have hv_grad : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t ->
+      forall x : M, MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (fun z : M => u t z - c t) y) x := by
+    intro t ht htpos x
+    have htcarrier : t ∈ (RealTimeInterval.closed 0 T (le_of_lt hTpos)).carrier := by
+      change t ∈ Set.Icc 0 T
+      exact ⟨ht.1, le_trans ht.2 hT'lt.le⟩
+    have hslice : ContMDiff I 𝓘(Real, Real) ∞ (fun z : M => u t z - c t) :=
+      (hu.sliceSmooth t htcarrier).sub contMDiff_const
+    exact gradientFun_mdiffAt (I := I) (G.metric t) hslice x
+  have hsuper : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t -> forall x : M,
+      F (u t x) t <= parabolicOperatorWithDrift (I := I) G T' X u t x := by
+    intro t ht htpos x
+    have htreg : t ∈ (RealTimeInterval.closed 0 T (le_of_lt hTpos)).regular := by
+      change t ∈ Set.Ioo 0 T
+      exact ⟨htpos, lt_of_le_of_lt ht.2 hT'lt⟩
+    have htcarrier : t ∈ (RealTimeInterval.closed 0 T (le_of_lt hTpos)).carrier := by
+      change t ∈ Set.Icc 0 T
+      exact ⟨ht.1, le_trans ht.2 hT'lt.le⟩
+    have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T') t :=
+      (uniqueDiffOn_Icc hT'pos).uniqueDiffWithinAt ht
+    have hderiv : derivWithin (fun s : Real => u s x) (Set.Icc 0 T') t =
+        deriv (fun s : Real => u s x) t :=
+      (hu.timeDiff t htreg x).derivWithin huniq
+    have hlap : heatOperatorWithDrift (I := I) G t (X t) (u t) x =
+        laplacianAt (I := I) G t (u t) x := by
+      rw [show X t = (fun y : M => (0 : TangentSpace I y)) from rfl]
+      rw [heatOperatorWithDrift_zero_drift, heatOperator_eq_laplacianAt]
+    have hV : V t x * u t x <=
+        deriv (fun s : Real => u s x) t - laplacianAt (I := I) G t (u t) x := by
+      linarith [hu.equation_ge t htreg x]
+    rw [parabolicOperatorWithDrift_eq, hderiv]
+    rw [hlap]
+    exact le_trans (hF_le t htcarrier x) hV
+  have hode' : forall t : Real, t ∈ Set.Icc 0 T' -> 0 < t ->
+      derivWithin c (Set.Icc 0 T') t = F (c t) t := by
+    intro t ht htpos
+    have htT : t ∈ Set.Icc 0 T := ⟨ht.1, le_trans ht.2 hT'lt.le⟩
+    have huniq' : UniqueDiffWithinAt Real (Set.Icc 0 T') t :=
+      (uniqueDiffOn_Icc hT'pos).uniqueDiffWithinAt ht
+    have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
+      (uniqueDiffOn_Icc hTpos).uniqueDiffWithinAt htT
+    have hwithin : DifferentiableWithinAt Real c (Set.Icc 0 T') t :=
+      (hc_time t htT htpos).mono (by
+        intro s hs
+        exact ⟨hs.1, le_trans hs.2 hT'lt.le⟩)
+    have hdiff : DifferentiableAt Real c t := by
+      have hIoo : Set.Ioo 0 T ∈ 𝓝 t :=
+        isOpen_Ioo.mem_nhds ⟨htpos, lt_of_le_of_lt ht.2 hT'lt⟩
+      have hIcc_mem : Set.Icc 0 T ∈ 𝓝 t :=
+        mem_of_superset hIoo Set.Ioo_subset_Icc_self
+      exact (hc_time t htT htpos).differentiableAt hIcc_mem
+    have h1 : derivWithin c (Set.Icc 0 T') t = deriv c t :=
+      hdiff.derivWithin huniq'
+    have h2 : derivWithin c (Set.Icc 0 T) t = deriv c t :=
+      hdiff.derivWithin huniq
+    calc
+      derivWithin c (Set.Icc 0 T') t = deriv c t := h1
+      _ = derivWithin c (Set.Icc 0 T) t := h2.symm
+      _ = F (c t) t := hode t htT htpos
+  have hF_lip' : forall t : Real, t ∈ Set.Icc 0 T' ->
+      LipschitzOnWith K (fun a : Real => F a t)
+        (scalarWeakMaximumPrincipleValueSet (M := M) T' u c) := by
+    intro t ht
+    exact (hF_lip t ⟨ht.1, le_trans ht.2 hT'lt.le⟩).mono
+      (scalarWeakMaximumPrincipleValueSet_mono (M := M) hT'lt.le u c)
+  exact scalar_weak_maximum_principle_ode_compare_supersolution
+    (I := I) G T' hT'le X u c F K hw_cont hw_mdiff hw_grad
+    hu_time hc_time' hu_space hv_space hv_grad hsuper hode' hinit hF_lip'
+
+theorem scalar_weak_maximum_principle_ode_compare_supersolution_of_heat_pot
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (hT : 0 <= T)
+    (u : Real -> M -> Real) (c : Real -> Real)
+    (F : Real -> Real -> Real) (K : NNReal)
+    (V : Real -> M -> Real)
+    (hu : IsHeatPotSupersolutionOn (RealTimeInterval.closed 0 T hT) G V u)
+    (hc_cont : ContinuousOn c (Set.Icc 0 T))
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      DifferentiableWithinAt Real c (Set.Icc 0 T) t)
+    (hF_le : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      F (u t x) t <= V t x * u t x)
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      derivWithin c (Set.Icc 0 T) t = F (c t) t)
+    (hinit : forall x : M, c 0 <= u 0 x)
+    (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
+      LipschitzOnWith K (fun a : Real => F a t)
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x := by
+  by_cases hTzero : T = 0
+  · intro t ht x
+    have htzero : t = 0 := le_antisymm (by simpa [hTzero] using ht.2) ht.1
+    simpa [htzero] using hinit x
+  have hTpos : 0 < T := lt_of_le_of_ne hT (Ne.symm hTzero)
+  have hshort : forall T' : Real, 0 < T' -> T' < T ->
+      forall t : Real, t ∈ Set.Icc 0 T' -> forall x : M, c t <= u t x := by
+    intro T' hT'pos hT'lt
+    exact scalar_weak_maximum_principle_ode_compare_supersolution_of_heat_pot_on_strict_subinterval
+      (I := I) G hTpos V u c F K hu hc_cont hc_time hF_le hode hinit hF_lip
+      (T' := T') hT'pos hT'lt
+  have hIco : forall t : Real, t ∈ Set.Ico 0 T -> forall x : M, c t <= u t x := by
+    intro t ht x
+    let T' : Real := (t + T) / 2
+    have hT'pos : 0 < T' := by
+      dsimp [T']
+      linarith [ht.1, hTpos]
+    have hT'lt : T' < T := by
+      dsimp [T']
+      linarith [ht.2]
+    have htT' : t <= T' := by
+      dsimp [T']
+      linarith [ht.2]
+    exact hshort T' hT'pos hT'lt t ⟨ht.1, htT'⟩ x
+  have hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (Set.Icc (0 : Real) T ×ˢ Set.univ) := by
+    simpa only [RealTimeInterval.closed] using hu.jointCont
+  intro t ht x
+  rcases eq_or_lt_of_le ht.2 with htT | htT
+  · have ht_eq : t = T := htT
+    rw [ht_eq]
+    have hT_in : (T, x) ∈ Set.Icc (0 : Real) T ×ˢ (Set.univ : Set M) :=
+      ⟨right_mem_Icc.mpr hT, Set.mem_univ x⟩
+    have h_cont_at := hu_cont (T, x) hT_in
+    have h_tend : Filter.Tendsto (fun s : Real => u s x)
+        (𝓝[<] T) (𝓝 (u T x)) := by
+      have h_pair : Filter.Tendsto (fun s : Real => (s, x))
+          (𝓝[<] T) (𝓝 (T, x)) := by
+        refine Filter.Tendsto.prodMk_nhds ?_ tendsto_const_nhds
+        exact nhdsWithin_le_nhds
+      have h_evt : ∀ᶠ s in 𝓝[<] T,
+          (s, x) ∈ Set.Icc (0 : Real) T ×ˢ (Set.univ : Set M) := by
+        have h0 : Set.Ioi (0 : Real) ∈ 𝓝 T := Ioi_mem_nhds hTpos
+        have h0' : Set.Ioi (0 : Real) ∈ 𝓝[<] T := nhdsWithin_le_nhds h0
+        filter_upwards [h0', self_mem_nhdsWithin] with s hs hslt
+        exact ⟨⟨le_of_lt hs, le_of_lt hslt⟩, Set.mem_univ x⟩
+      have h_pair_within : Filter.Tendsto (fun s : Real => (s, x))
+          (𝓝[<] T) (𝓝[Set.Icc 0 T ×ˢ Set.univ] (T, x)) := by
+        rw [tendsto_nhdsWithin_iff]
+        exact ⟨h_pair, h_evt⟩
+      exact h_cont_at.tendsto.comp h_pair_within
+    have hc_tend : Filter.Tendsto (fun s : Real => c s) (𝓝[<] T) (𝓝 (c T)) := by
+      have h_pair_id : Filter.Tendsto (fun s : Real => s) (𝓝[<] T) (𝓝 T) :=
+        nhdsWithin_le_nhds
+      have h_evt : ∀ᶠ s in 𝓝[<] T, s ∈ Set.Icc 0 T := by
+        have h0 : Set.Ioi (0 : Real) ∈ 𝓝 T := Ioi_mem_nhds hTpos
+        have h0' : Set.Ioi (0 : Real) ∈ 𝓝[<] T := nhdsWithin_le_nhds h0
+        filter_upwards [h0', self_mem_nhdsWithin] with s hs hslt
+        exact ⟨le_of_lt hs, le_of_lt hslt⟩
+      have h_id_within : Filter.Tendsto (fun s : Real => s)
+          (𝓝[<] T) (𝓝[Set.Icc 0 T] T) := by
+        rw [tendsto_nhdsWithin_iff]
+        exact ⟨h_pair_id, h_evt⟩
+      exact (hc_cont.continuousWithinAt (right_mem_Icc.mpr hT)).tendsto.comp h_id_within
+    have hdiff_tend : Filter.Tendsto (fun s : Real => u s x - c s)
+        (𝓝[<] T) (𝓝 (u T x - c T)) := h_tend.sub hc_tend
+    have hneg_tend : Filter.Tendsto (fun s : Real => -(u s x - c s))
+        (𝓝[<] T) (𝓝 (-(u T x - c T))) := hdiff_tend.neg
+    have h_evt_nonpos : ∀ᶠ s in 𝓝[<] T, -(u s x - c s) <= 0 := by
+      have h0 : Set.Ioi (0 : Real) ∈ 𝓝 T := Ioi_mem_nhds hTpos
+      have h0' : Set.Ioi (0 : Real) ∈ 𝓝[<] T := nhdsWithin_le_nhds h0
+      filter_upwards [h0', self_mem_nhdsWithin] with s hs hslt
+      exact neg_nonpos.mpr (sub_nonneg.mpr (hIco s ⟨le_of_lt hs, hslt⟩ x))
+    have h_nonneg : 0 <= u T x - c T :=
+      neg_nonpos.mp (le_of_tendsto hneg_tend h_evt_nonpos)
+    exact sub_nonneg.mp h_nonneg
+  · exact hIco t ⟨ht.1, htT⟩ x
+
+theorem scalar_weak_maximum_principle_ode_compare_subsolution_of_heat_pot
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (hT : 0 <= T)
+    (u : Real -> M -> Real) (c : Real -> Real)
+    (F : Real -> Real -> Real) (K : NNReal)
+    (V : Real -> M -> Real)
+    (hu : IsHeatPotSubsolutionOn (RealTimeInterval.closed 0 T hT) G V u)
+    (hc_cont : ContinuousOn c (Set.Icc 0 T))
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      DifferentiableWithinAt Real c (Set.Icc 0 T) t)
+    (hF_ge : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      V t x * u t x <= F (u t x) t)
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      derivWithin c (Set.Icc 0 T) t = F (c t) t)
+    (hinit : forall x : M, u 0 x <= c 0)
+    (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
+      LipschitzOnWith K (fun a : Real => F a t)
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, u t x <= c t := by
+  let uneg : Real -> M -> Real := fun t x => -u t x
+  let cneg : Real -> Real := fun t => -c t
+  let Fneg : Real -> Real -> Real := fun a t => -F (-a) t
+  have huneg : IsHeatPotSupersolutionOn (RealTimeInterval.closed 0 T hT) G V uneg :=
+    hu.neg
+  have hcneg_cont : ContinuousOn cneg (Set.Icc 0 T) := by
+    simpa only [cneg] using hc_cont.neg
+  have hcneg_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      DifferentiableWithinAt Real cneg (Set.Icc 0 T) t := by
+    intro t ht htpos
+    simpa only [cneg] using (hc_time t ht htpos).neg
+  have hFneg_le : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      Fneg (uneg t x) t <= V t x * uneg t x := by
+    intro t ht x
+    dsimp [uneg, Fneg]
+    have h1 : -F (u t x) t <= -(V t x * u t x) := neg_le_neg (hF_ge t ht x)
+    simpa [uneg, Fneg, mul_neg] using h1
+  have hode_neg : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      derivWithin cneg (Set.Icc 0 T) t = Fneg (cneg t) t := by
+    intro t ht htpos
+    dsimp [cneg, Fneg]
+    have hd : derivWithin (fun s : Real => -c s) (Set.Icc 0 T) t =
+        -derivWithin c (Set.Icc 0 T) t := by
+      have hder : HasDerivWithinAt (fun s : Real => -c s)
+          (-derivWithin c (Set.Icc 0 T) t) (Set.Icc 0 T) t := by
+        simpa using ((hc_time t ht htpos).hasDerivWithinAt).neg
+      have hTpos' : 0 < T := lt_of_lt_of_le htpos ht.2
+      have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
+        (uniqueDiffOn_Icc hTpos').uniqueDiffWithinAt ht
+      exact hder.derivWithin huniq
+    rw [hd, hode t ht htpos]
+    ring_nf
+  have hinit_neg : forall x : M, cneg 0 <= uneg 0 x := by
+    intro x
+    dsimp [uneg, cneg]
+    linarith [hinit x]
+  have hFneg_lip : forall t : Real, t ∈ Set.Icc 0 T ->
+      LipschitzOnWith K (fun a : Real => Fneg a t)
+        (scalarWeakMaximumPrincipleValueSet (M := M) T uneg cneg) := by
+    intro t ht
+    rw [lipschitzOnWith_iff_dist_le_mul]
+    intro a ha b hb
+    have ha' : -a ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c :=
+      scalarWeakMaximumPrincipleValueSet_neg_mem (M := M) T u c ha
+    have hb' : -b ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c :=
+      scalarWeakMaximumPrincipleValueSet_neg_mem (M := M) T u c hb
+    have hbound := (hF_lip t ht).dist_le_mul (-a) ha' (-b) hb'
+    simpa [Fneg, dist_neg_neg] using hbound
+  have hcmp := scalar_weak_maximum_principle_ode_compare_supersolution_of_heat_pot
+    (I := I) G T hT uneg cneg Fneg K V huneg hcneg_cont hcneg_time
+    hFneg_le hode_neg hinit_neg hFneg_lip
+  intro t ht x
+  have hle : cneg t <= uneg t x := hcmp t ht x
+  dsimp [uneg, cneg] at hle
+  linarith
+
+theorem scalar_weak_maximum_principle_ode_compare_supersolution_autonomous_of_heat_pot
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (hT : 0 <= T)
+    (u : Real -> M -> Real) (c : Real -> Real)
+    (F : Real -> Real) (K : NNReal)
+    (V : Real -> M -> Real)
+    (hu : IsHeatPotSupersolutionOn (RealTimeInterval.closed 0 T hT) G V u)
+    (hc_cont : ContinuousOn c (Set.Icc 0 T))
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      DifferentiableWithinAt Real c (Set.Icc 0 T) t)
+    (hF_le : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      F (u t x) <= V t x * u t x)
+    (hode : forall t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
+      derivWithin c (Set.Icc 0 T) t = F (c t))
+    (hinit : forall x : M, c 0 <= u 0 x)
+    (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
+      LipschitzOnWith K (fun a : Real => F a)
+        (scalarWeakMaximumPrincipleValueSet (M := M) T u c)) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x :=
+  scalar_weak_maximum_principle_ode_compare_supersolution_of_heat_pot
+    (I := I) G T hT u c (fun a _ => F a) K V hu hc_cont hc_time
+    (fun t ht x => hF_le t ht x)
+    (fun t ht htpos => by simpa using hode t ht htpos)
+    hinit
+    (fun t ht => by simpa using hF_lip t ht)
 
 end DifferentialGeometry.Analysis.Parabolic

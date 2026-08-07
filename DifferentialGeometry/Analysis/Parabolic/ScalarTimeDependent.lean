@@ -191,6 +191,22 @@ end IsHeatPotOn
 
 namespace IsHeatPotSupersolutionOn
 
+theorem mono
+    {D D' : RealTimeInterval}
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    {V u : Real → M → Real}
+    (h : IsHeatPotSupersolutionOn D G V u)
+    (hcarrier : D'.carrier ⊆ D.carrier)
+    (hregular : D'.regular ⊆ D.regular) :
+    IsHeatPotSupersolutionOn D' G V u where
+  jointSmooth := h.jointSmooth.mono
+    (Set.prod_mono hregular Set.Subset.rfl)
+  jointCont := h.jointCont.mono
+    (Set.prod_mono hcarrier Set.Subset.rfl)
+  sliceSmooth t ht := h.sliceSmooth t (hcarrier ht)
+  timeDiff t ht x := h.timeDiff t (hregular ht) x
+  equation_ge t ht x := h.equation_ge t (hregular ht) x
+
 theorem sub
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     {D : RealTimeInterval}
@@ -248,6 +264,22 @@ theorem neg
 end IsHeatPotSupersolutionOn
 
 namespace IsHeatPotSubsolutionOn
+
+theorem mono
+    {D D' : RealTimeInterval}
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    {V u : Real → M → Real}
+    (h : IsHeatPotSubsolutionOn D G V u)
+    (hcarrier : D'.carrier ⊆ D.carrier)
+    (hregular : D'.regular ⊆ D.regular) :
+    IsHeatPotSubsolutionOn D' G V u where
+  jointSmooth := h.jointSmooth.mono
+    (Set.prod_mono hregular Set.Subset.rfl)
+  jointCont := h.jointCont.mono
+    (Set.prod_mono hcarrier Set.Subset.rfl)
+  sliceSmooth t ht := h.sliceSmooth t (hcarrier ht)
+  timeDiff t ht x := h.timeDiff t (hregular ht) x
+  equation_le t ht x := h.equation_le t (hregular ht) x
 
 theorem neg
     [VectorBundle Real E (TangentSpace I : M → Type _)]

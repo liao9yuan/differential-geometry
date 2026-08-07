@@ -9,6 +9,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 noncomputable section
 
 open Bundle Set Tensor0SBundle
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff Topology
 
@@ -121,7 +122,9 @@ theorem scalar_curvature_positive_of_nonnegative_initial
       0 ≤ S.scalar t x := by
     exact strict_barrier_nonnegative_of_positive_time
       (I := I) G T hT.le X S.scalar hscalarContinuous hinit
-      hscalarTime hscalarSpace hscalarGrad
+      (fun t ht htpos x => hscalarTime t ht x)
+      (fun t ht htpos x => hscalarSpace t ht x)
+      (fun t ht htpos x => hscalarGrad t ht x)
       (fun t ht htpos x _ ↦ hscalarSuper t ht htpos x)
   obtain ⟨a, ha, hscalarA⟩ :=
     exists_positive_scalar_time (M := M) hT S.scalar hscalarContinuous hx₀

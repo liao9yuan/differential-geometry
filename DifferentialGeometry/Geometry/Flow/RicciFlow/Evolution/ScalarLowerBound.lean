@@ -106,14 +106,14 @@ theorem scalarLowerReaction_locallyLipschitz (n t : Real) :
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem exists_scalarLowerReaction_lipschitzOn_valueSet
     (n T : Real) (u : Real -> M -> Real) (c : Real -> Real)
-    (hcompact : IsCompact (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T u
+    (hcompact : IsCompact (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T u
       c)) :
     ∃ K : NNReal,
       ∀ t : Real, t ∈ Set.Icc 0 T ->
         LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-          (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T u c) := by
+          (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T u c) := by
   have hloc :
-      LocallyLipschitzOn (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T u c)
+      LocallyLipschitzOn (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T u c)
         (fun a : Real => scalarLowerReaction n a 0) :=
     (scalarLowerReaction_locallyLipschitz n 0).locallyLipschitzOn
   obtain ⟨K, hK⟩ :=
@@ -144,7 +144,7 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
       (fun p : Real × M =>
         Real.exp (-(K : Real) * p.1) *
           (scalar p.1 p.2 - scalarLowerBarrier n c0 p.1))
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hw_mdiff : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M =>
@@ -169,30 +169,35 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
           (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x)
     (hparabolic : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
       scalarLowerReaction n (scalar t x) t <=
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T X scalar t
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T X scalar t
           x)
     (hinit : ∀ x : M, c0 <= scalar 0 x)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
+        (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x := by
   refine
-    Integral.Connection.scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
+    Analysis.Parabolic.scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     (I := I) G T (le_of_lt hT) X scalar (scalarLowerBarrier n c0)
-    (scalarLowerReaction n) K hw_cont hw_mdiff hw_grad hscalar_time ?_
-    hscalar_space hdiff_space hdiff_grad hparabolic ?_ ?_ hF_lip
-  · intro t ht
-    exact (scalarLowerBarrier_hasDerivWithinAt
-      (s := Set.Icc 0 T) n c0 t hn
-      (ne_of_gt (hden t ht))).differentiableWithinAt
-  · intro t ht
-    exact scalarLowerBarrier_derivWithin
-      (T := T) (n := n) (c0 := c0) (t := t)
-      (uniqueDiffOn_Icc hT t ht) hn (ne_of_gt (hden t ht))
-  · intro x
-    simpa using hinit x
+    (scalarLowerReaction n) K hw_cont
+    (fun t ht htpos => hw_mdiff t ht)
+    (fun t ht htpos => hw_grad t ht)
+    (fun t ht htpos x => hscalar_time t ht x)
+    (fun t ht htpos =>
+      (scalarLowerBarrier_hasDerivWithinAt
+        (s := Set.Icc 0 T) n c0 t hn
+        (ne_of_gt (hden t ht))).differentiableWithinAt)
+    (fun t ht htpos y => hscalar_space t ht y)
+    (fun t ht htpos y => hdiff_space t ht y)
+    (fun t ht htpos x => hdiff_grad t ht x)
+    hparabolic
+    (fun t ht htpos =>
+      scalarLowerBarrier_derivWithin
+        (T := T) (n := n) (c0 := c0) (t := t)
+        (uniqueDiffOn_Icc hT t ht) hn (ne_of_gt (hden t ht)))
+    (fun x => by simpa using hinit x) hF_lip
 
 
 theorem scalar_curvature_positive_of_lower_barrier
@@ -266,7 +271,7 @@ structure ScalarLowerBoundWMPRegularity
     (fun p : Real × M =>
       Real.exp (-(K : Real) * p.1) *
         (scalar p.1 p.2 - scalarLowerBarrier n c0 p.1))
-    (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)
+    (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T)
   weighted_mdiff : ∀ t : Real, t ∈ Set.Icc 0 T ->
     ∀ x : M, MDifferentiableAt I 𝓘(Real, Real)
       (fun y : M =>
@@ -315,21 +320,21 @@ theorem scalarRegOfSmooth
   let hreg := hS.scalarRegular
   have hscalar_cont : ContinuousOn
       (fun p : Real × M => S.scalar p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
     refine hreg.scalar_continuousOn.mono ?_
     intro p hp
     exact ⟨hsubset p.1 hp.1, trivial⟩
   have hbar_cont : ContinuousOn
       (fun p : Real × M => scalarLowerBarrier n c0 p.1)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
-    have hden_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Integral.Connection.spacetimeSlab
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
+    have hden_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Analysis.Parabolic.spacetimeSlab
       (M := M) T ->
         1 - (2 / n) * c0 * p.1 ≠ 0 := by
       intro p hp
       exact hden p.1 hp.1
     have hden_cont : ContinuousOn
         (fun p : Real × M => 1 - (2 / n) * c0 * p.1)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
       have hlin : Continuous
           (fun p : Real × M => ((2 / n) * c0) * p.1) :=
         continuous_const.mul continuous_fst
@@ -339,7 +344,7 @@ theorem scalarRegOfSmooth
       simpa [mul_assoc] using hcont.continuousOn
     have hconst : ContinuousOn
         (fun _p : Real × M => c0)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
       exact continuous_const.continuousOn
     simpa [scalarLowerBarrier] using hconst.div hden_cont hden_ne
   refine
@@ -352,7 +357,7 @@ theorem scalarRegOfSmooth
       diff_grad := ?_ }
   · have hexp_cont : ContinuousOn
         (fun p : Real × M => Real.exp (-(K : Real) * p.1))
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
       have hlin : Continuous
           (fun p : Real × M => -((K : Real) * p.1)) :=
         (continuous_const.mul continuous_fst).neg
@@ -416,7 +421,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
       (1 / n) * (scalar t x) ^ 2 <= ricciNormSq t x) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerReaction n (scalar t x) t <=
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x := by
   intro t ht x
   have hderiv :
@@ -424,14 +429,14 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
         scalarLap t x + 2 * ricciNormSq t x :=
     (hscalar t ht x).derivWithin (uniqueDiffOn_Icc hT t ht)
   have hparabolic :
-      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+      DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x =
         2 * ricciNormSq t x := by
     have hlap_zero :=
       ScalarLaplacianRealizesHeatOperatorOn.zero_drift
         (I := I) (G := G) (T := T) (scalar := scalar)
         (scalarLap := scalarLap) hlap t ht x
-    rw [DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift_eq, hderiv, hlap_zero]
+    rw [DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift_eq, hderiv, hlap_zero]
     ring
   have hscale :
       2 * ((1 / n) * (scalar t x) ^ 2) <= 2 * ricciNormSq t x :=
@@ -442,7 +447,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
           rw [scalarLowerReaction]
           ring
     _ <= 2 * ricciNormSq t x := hscale
-    _ = DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+    _ = DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x := hparabolic.symm
 
 
@@ -468,7 +473,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
       (1 / n) * (scalar t x) ^ 2 <= ricciNormSq t x) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
       scalarLowerReaction n (scalar t x) t <=
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x := by
   intro t ht htpos x
   let τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D :=
@@ -484,14 +489,14 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
         scalarLap t x + 2 * ricciNormSq t x :=
     hwithin.derivWithin (uniqueDiffOn_Icc hT t ht)
   have hparabolic :
-      DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+      DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x =
         2 * ricciNormSq t x := by
     have hlap_zero :=
       ScalarLaplacianRealizesHeatOperatorOn.zero_drift
         (I := I) (G := G) (T := T) (scalar := scalar)
         (scalarLap := scalarLap) hlap t ht x
-    rw [DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift_eq, hderiv, hlap_zero]
+    rw [DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift_eq, hderiv, hlap_zero]
     ring
   have hscale :
       2 * ((1 / n) * (scalar t x) ^ 2) <= 2 * ricciNormSq t x :=
@@ -502,7 +507,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
           rw [scalarLowerReaction]
           ring
     _ <= 2 * ricciNormSq t x := hscale
-    _ = DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+    _ = DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x := hparabolic.symm
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -518,7 +523,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes
       (1 / n) * (scalar t x) ^ 2 <= ricciNormSq t x) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerReaction n (scalar t x) t <=
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x :=
   scalar_parabolic_inequality_of_scalarEvolution_allTimes
     (I := I) G T n hT scalar scalarLap ricciNormSq
@@ -554,7 +559,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
       (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerReaction n (scalarTraceInFrame (I := I) S gInv frame t x) t <=
-        DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x))
           (scalarTraceInFrame (I := I) S gInv frame) t x := by
   have hricci :
@@ -590,7 +595,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
       (fun p : Real × M =>
         Real.exp (-(K : Real) * p.1) *
           (scalar p.1 p.2 - scalarLowerBarrier n c0 p.1))
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hw_mdiff : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M =>
@@ -620,14 +625,14 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
     (hinit : InitialScalarLowerBound (M := M) scalar c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
+        (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x := by
   have hparabolic :
       ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
         scalarLowerReaction n (scalar t x) t <=
-          DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
+          DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G T
             (fun _t x => (0 : TangentSpace I x)) scalar t x :=
     scalar_parabolic_inequality_of_scalarEvolution_regularTime
       (I := I) (D := D) G T n hT scalar scalarLap ricciNormSq
@@ -659,7 +664,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
     (hinit : InitialScalarLowerBound (M := M) scalar c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
+        (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x :=
@@ -694,7 +699,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
     (hinit : InitialScalarLowerBound (M := M) scalar c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
+        (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x := by
@@ -735,7 +740,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
       (fun p : Real × M =>
         Real.exp (-(K : Real) * p.1) *
           (scalar p.1 p.2 - scalarLowerBarrier n c0 p.1))
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hw_mdiff : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M =>
@@ -765,7 +770,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
     (hinit : InitialScalarMinimum (M := M) scalar c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
+        (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       scalarLowerBarrier n c0 t <= scalar t x :=
@@ -807,7 +812,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
         Real.exp (-(K : Real) * p.1) *
           (scalarTraceInFrame (I := I) S gInv frame p.1 p.2 -
             scalarLowerBarrier n c0 p.1))
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hw_mdiff : ∀ t : Real, t ∈ Set.Icc 0 T ->
       ∀ x : M, MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M =>
@@ -850,7 +855,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
       (scalarTraceInFrame (I := I) S gInv frame) c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
+        (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T
           (scalarTraceInFrame (I := I) S gInv frame)
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
@@ -911,7 +916,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
       (scalarTraceInFrame (I := I) S gInv frame) c0)
     (hF_lip : ∀ t : Real, t ∈ Set.Icc 0 T ->
       LipschitzOnWith K (fun a : Real => scalarLowerReaction n a t)
-        (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
+        (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T
           (scalarTraceInFrame (I := I) S gInv frame)
           (scalarLowerBarrier n c0))) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,

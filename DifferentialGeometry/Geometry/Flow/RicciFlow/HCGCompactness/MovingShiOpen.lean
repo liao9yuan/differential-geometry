@@ -27,6 +27,7 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open Bundle Set Tensor0SBundle
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 open scoped Manifold ContDiff BigOperators Bundle

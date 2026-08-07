@@ -1309,12 +1309,12 @@ theorem ham3_cont74
     (T : Real) (hTω : T < omega) :
     ContinuousOn
       (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
   have hreg :
       DifferentialGeometry.PDE.RicciFlow.ScalarSTContOn
         (I := I) (M := M) (ham3Solution (I := I) P) :=
     ham3_scalarSTCont (I := I) (M := M) P
-  simpa [ham3Scalar, DifferentialGeometry.Integral.Connection.spacetimeSlab] using
+  simpa [ham3Scalar, DifferentialGeometry.Analysis.Parabolic.spacetimeSlab] using
     DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_continuousOn
       (I := I) (M := M) (ham3Solution (I := I) P)
       P.isSmooth.isSolution hreg
@@ -1467,14 +1467,14 @@ theorem ham3_lip74
     (hc0 : 0 < c0)
     (hcont : forall T : Real, 0 <= T -> T < omega ->
       ContinuousOn (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) :
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T)) :
     exists K : Real -> NNReal,
       forall T : Real, 0 < T -> T < omega ->
         T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
           forall t : Real, t ∈ Set.Icc 0 T ->
             LipschitzOnWith (K T)
               (fun a : Real => DifferentialGeometry.PDE.RicciFlow.scalarLowerReaction 3 a t)
-              (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
+              (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T
                 (ham3Scalar (I := I) P)
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
   classical
@@ -1485,14 +1485,14 @@ theorem ham3_lip74
           ∀ t : Real, t ∈ Set.Icc 0 T ->
             LipschitzOnWith K
               (fun a : Real => DifferentialGeometry.PDE.RicciFlow.scalarLowerReaction 3 a t)
-              (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
+              (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T
                 (ham3Scalar (I := I) P)
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
     intro T hT hTω hPole
     have hscalar_cont_T :
         ContinuousOn
           (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-          (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) :=
+          (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) :=
       hcont T (le_of_lt hT) hTω
     have hden :
         ∀ t : Real, t ∈ Set.Icc 0 T ->
@@ -1510,10 +1510,10 @@ theorem ham3_lip74
       exact continuousOn_const.div hden_cont (fun t ht => ne_of_gt (hden t ht))
     have hcompact :
         IsCompact
-          (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
+          (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T
             (ham3Scalar (I := I) P)
             (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) :=
-      DifferentialGeometry.Integral.Connection.scalarWMPValueSet_isCompact
+      DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet_isCompact
         (M := M) T (ham3Scalar (I := I) P)
         (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0) hscalar_cont_T hbar_cont
     exact
@@ -1549,7 +1549,7 @@ theorem ham3_scalar74
         (forall x : M, 0 < scalar 0 x) /\
         (forall T : Real, 0 <= T -> T < omega ->
           ContinuousOn (fun p : Real × M => scalar p.1 p.2)
-            (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) /\
+            (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T)) /\
         (forall T : Real, 0 < T -> T < omega ->
           T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
             DifferentialGeometry.PDE.RicciFlow.ScalarLowerBoundWMPRegularity
@@ -1570,7 +1570,7 @@ theorem ham3_scalar74
             forall t : Real, t ∈ Set.Icc 0 T ->
               LipschitzOnWith (K T)
                 (fun a : Real => DifferentialGeometry.PDE.RicciFlow.scalarLowerReaction 3 a t)
-                (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
+                (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
                   (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0))) := by
   rcases hM with ⟨hcompact, _hconnected, _hboundaryless, hdim⟩
   letI : CompactSpace M := hcompact
@@ -1580,7 +1580,7 @@ theorem ham3_scalar74
   have hcont :
       forall T : Real, 0 <= T -> T < omega ->
         ContinuousOn (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-          (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+          (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
     intro T _hT hTω
     exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
   have hc0 : 0 < c0 :=
@@ -1725,7 +1725,7 @@ private theorem ham3_scalar_cont_slab
     T < omega ->
     ContinuousOn
       (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
   intro hTω
   exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
 
@@ -1734,16 +1734,16 @@ private theorem slab_max_of_continuousOn
     [CompactSpace M]
     {f : Real × M -> Real}
     {T t : Real} {x : M}
-    (hcont : ContinuousOn f (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+    (hcont : ContinuousOn f (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (ht : t ∈ Set.Icc 0 T) :
     ∃ tmax : Real, ∃ xmax : M,
       tmax ∈ Set.Icc 0 T ∧
         ∀ s : Real, s ∈ Set.Icc 0 T -> ∀ y : M,
           f (s, y) <= f (tmax, xmax) := by
   classical
-  let slab := DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T
+  let slab := DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T
   have hcompact : IsCompact slab := by
-    unfold slab DifferentialGeometry.Integral.Connection.spacetimeSlab
+    unfold slab DifferentialGeometry.Analysis.Parabolic.spacetimeSlab
     exact isCompact_Icc.prod isCompact_univ
   have hnonempty : slab.Nonempty := ⟨(t, x), ⟨ht, trivial⟩⟩
   rcases hcompact.exists_isMaxOn hnonempty hcont with ⟨p, hp, hmax⟩
@@ -1842,7 +1842,7 @@ theorem ham3_point_select
   have hcont_half :
       ContinuousOn
         (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) half) :=
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) half) :=
     ham3_scalar_cont_slab (I := I) (M := M) h0ω P hD half hhalf_lt_omega
   have hbounded_half :
       DifferentialGeometry.PDE.RicciFlow.ScalarBoundedAboveOnSlab
@@ -2217,7 +2217,7 @@ theorem ham3_scalar_pos
   have hcont :
       forall T : Real, 0 <= T -> T < omega ->
         ContinuousOn (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-          (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+          (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
     intro T _hT hTω
     exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
   have hc0 : 0 < c0 :=
@@ -2262,7 +2262,7 @@ theorem ham3_scalar_pos
           ∀ t : Real, t ∈ Set.Icc 0 T ->
             LipschitzOnWith (K T)
               (fun a : Real => DifferentialGeometry.PDE.RicciFlow.scalarLowerReaction 3 a t)
-              (DifferentialGeometry.Integral.Connection.scalarWeakMaximumPrincipleValueSet (M := M) T
+              (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T
                 (ham3Scalar (I := I) P)
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
     intro T hT hTω hPole
