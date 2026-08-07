@@ -1449,7 +1449,7 @@ private theorem uncurryFin_wedge_productL_precompL_fiber
     _ = ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w (Quot.out τ') j := rfl
 
 
-private theorem uncurryFin_wedge_productL_precompL_eq_domDomCongr
+theorem uncurryFin_wedge_productL_precompL_eq_domDomCongr
     (f : N →L[𝕜] N' →L[𝕜] N'')
     (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N') :
     uncurryFin ((wedge_productL f).precompL M g' h) =
