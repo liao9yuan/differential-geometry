@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiustiCrossover
 import DifferentialGeometry.Analysis.Parabolic.Moser.SmallExponentLocalBoundedness
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
 set_option autoImplicit false
 
@@ -200,6 +201,181 @@ theorem harnack_on_separated_cylinders
             lateLower lateUpper d D B lower upper innerLower innerUpper *
           u q y := by
       rfl
+
+
+theorem harnack_on_separated_cylinders_canonical
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho outer averagingCutoff : SmoothScalar g)
+    (C : ℝ) (hC : 0 < C)
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      outer averagingCutoff C)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M ↦ u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {A α β b c γ δ d D : ℝ}
+    (hAα : A < α) (hαβ : α < β) (hβb : β < b) (hbc : b < c)
+    (hcγ : c < γ) (hγδ : γ < δ) (hδd : δ < d) (hdD : d < D)
+    {p lower upper innerLower innerUpper B : ℝ}
+    (hp : 0 < p) (hp_one : p < 1)
+    (hlowerUpper : lower < upper) (hupperInner : upper ≤ innerLower)
+    (hinner : innerLower < innerUpper)
+    (hrhoLevels : ∀ x : M, innerUpper ≤ rho.toFun x)
+    (hrho : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (hB : 0 ≤ B)
+    (houter : ∀ x : M, 1 ≤ outer.toFun x)
+    (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
+    (hcyl : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ∧
+      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
+    (hpde : ∀ t ∈ Icc A D, ∀ x : M,
+      deriv (fun q ↦ u q x) t =
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+    ∀ t ∈ Icc α β, ∀ x : M, ∀ q ∈ Icc γ δ, ∀ y : M,
+      u t x ≤
+        separatedCylinderHarnackFactor (I := I) (M := M)
+            g hdim rho averagingCutoff C p A α β b ((b + c) / 2) c γ δ d D B
+              lower upper innerLower innerUpper *
+          u q y := by
+  classical
+  let τ : ℝ := (b + c) / 2
+  have hτb : b < τ := by
+    dsimp [τ]
+    linarith
+  have hτc : τ < c := by
+    dsimp [τ]
+    linarith
+  have hvol_pos : 0 < (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+    have hDA : 0 < D - A := by linarith
+    exact pos_of_mul_pos_right hcyl.1 (le_of_lt hDA)
+  have hvol_nonneg : 0 ≤ (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ :=
+    le_of_lt hvol_pos
+  have hcutoff_one : ∀ (k : ℕ) (x : M),
+      (bombieriGiustiSpatialCutoff rho lower upper k).toFun x = 1 := by
+    intro k x
+    unfold bombieriGiustiSpatialCutoff
+    exact spatialCutoffBetween_eq_one_of_outer_le
+      (bombieriGiustiDescendingLevel_strictAnti hlowerUpper (by omega)) (by
+        calc
+          bombieriGiustiDescendingLevel lower upper (2 * k) ≤ upper :=
+            bombieriGiustiDescendingLevel_le hlowerUpper _
+          _ ≤ innerLower := hupperInner
+          _ ≤ rho.toFun x := le_trans (le_of_lt hinner) (hrhoLevels x))
+  have hcutoffMass : ∀ (k : ℕ),
+      cutoffMass (I := I) (M := M) (bombieriGiustiSpatialCutoff rho lower upper k) =
+        (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+    intro k
+    unfold cutoffMass
+    have hfun : (fun x : M => (bombieriGiustiSpatialCutoff rho lower upper k).toFun x ^ 2) =
+        (fun _ : M => (1 : ℝ)) := by
+      funext x
+      rw [hcutoff_one k x]
+      norm_num
+    rw [hfun]
+    simp
+  have hcutoffMass_ne : ∀ (k : ℕ),
+      cutoffMass (I := I) (M := M) (bombieriGiustiSpatialCutoff rho lower upper k) ≠ 0 := by
+    intro k
+    rw [hcutoffMass k]
+    exact ne_of_gt hvol_pos
+  have houter_engine : ∀ (k : ℕ) (x : M),
+      (bombieriGiustiSpatialCutoff rho lower upper k).toFun x ^ 2 ≤ outer.toFun x ^ 2 := by
+    intro k x
+    rw [hcutoff_one k x]
+    simpa [pow_two] using mul_le_mul (houter x) (houter x) zero_le_one
+      (le_trans zero_le_one (houter x))
+  have hA_increasing : ∀ (k : ℕ),
+      A < bombieriGiustiIncreasingLevel b τ k := by
+    intro k
+    have hinc_ge : b ≤ bombieriGiustiIncreasingLevel b τ k :=
+      bombieriGiustiIncreasingLevel_ge hτb k
+    linarith
+  have hinc_lt_D : ∀ (k : ℕ), bombieriGiustiIncreasingLevel b τ k < D := by
+    intro k
+    have hinc : bombieriGiustiIncreasingLevel b τ k < τ :=
+      bombieriGiustiIncreasingLevel_lt hτb k
+    linarith
+  have hearlyMeasure : ∀ (k : ℕ),
+      localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k) A
+          (bombieriGiustiIncreasingLevel b τ k) ≠ 0 := by
+    intro k
+    exact localizedSpacetimeMeasure_ne_zero_of
+      (bombieriGiustiSpatialCutoff rho lower upper k) (hA_increasing k) (hcutoffMass_ne k)
+  have hearlyMeasure_le_one : ∀ (k : ℕ),
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k) A
+          (bombieriGiustiIncreasingLevel b τ k)).real Set.univ ≤ 1 := by
+    intro k
+    apply localizedSpacetimeMeasure_le_one_of
+    · exact le_of_lt (hA_increasing k)
+    · have hinc_le_D : bombieriGiustiIncreasingLevel b τ k ≤ D := le_of_lt (hinc_lt_D k)
+      have hmul_le : (bombieriGiustiIncreasingLevel b τ k - A) *
+            (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤
+          (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+        exact mul_le_mul_of_nonneg_right (sub_le_sub_right hinc_le_D A) hvol_nonneg
+      rw [hcutoffMass k]
+      exact le_trans hmul_le hcyl.2
+  have hdesc_gt_A : ∀ (k : ℕ), A < bombieriGiustiDescendingLevel τ c k := by
+    intro k
+    have hdesc_gt : τ < bombieriGiustiDescendingLevel τ c k :=
+      bombieriGiustiDescendingLevel_gt hτc k
+    linarith
+  have hdesc_lt_inc : ∀ (k : ℕ),
+      bombieriGiustiDescendingLevel τ c k < bombieriGiustiIncreasingLevel d D k := by
+    intro k
+    have hdesc_le_c : bombieriGiustiDescendingLevel τ c k ≤ c :=
+      bombieriGiustiDescendingLevel_le hτc k
+    have hinc_ge_d : d ≤ bombieriGiustiIncreasingLevel d D k :=
+      bombieriGiustiIncreasingLevel_ge hdD k
+    linarith
+  have hinc_d_lt_D : ∀ (k : ℕ), bombieriGiustiIncreasingLevel d D k < D := by
+    intro k
+    exact bombieriGiustiIncreasingLevel_lt hdD k
+  have hlateMeasure : ∀ (k : ℕ),
+      localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k)
+          (bombieriGiustiDescendingLevel τ c k)
+          (bombieriGiustiIncreasingLevel d D k) ≠ 0 := by
+    intro k
+    exact localizedSpacetimeMeasure_ne_zero_of
+      (bombieriGiustiSpatialCutoff rho lower upper k) (hdesc_lt_inc k) (hcutoffMass_ne k)
+  have hlateMeasure_le_one : ∀ (k : ℕ),
+      (localizedSpacetimeMeasure (I := I) (M := M)
+        (bombieriGiustiSpatialCutoff rho lower upper k)
+          (bombieriGiustiDescendingLevel τ c k)
+          (bombieriGiustiIncreasingLevel d D k)).real Set.univ ≤ 1 := by
+    intro k
+    apply localizedSpacetimeMeasure_le_one_of
+    · exact le_of_lt (hdesc_lt_inc k)
+    · have hlen : bombieriGiustiIncreasingLevel d D k - bombieriGiustiDescendingLevel τ c k ≤ D - A := by
+        linarith [hinc_d_lt_D k, hdesc_gt_A k]
+      have hmul_le : (bombieriGiustiIncreasingLevel d D k - bombieriGiustiDescendingLevel τ c k) *
+            (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤
+          (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+        exact mul_le_mul_of_nonneg_right hlen hvol_nonneg
+      rw [hcutoffMass k]
+      exact le_trans hmul_le hcyl.2
+  have hcutoff_target_one : ∀ (x : M),
+      (bombieriGiustiSpatialCutoff rho innerLower innerUpper 0).toFun x = 1 := by
+    intro x
+    unfold bombieriGiustiSpatialCutoff
+    exact spatialCutoffBetween_eq_one_of_outer_le
+      (bombieriGiustiDescendingLevel_strictAnti hinner (by norm_num)) (by
+        calc
+          bombieriGiustiDescendingLevel innerLower innerUpper 0 ≤ innerUpper := by simp
+          _ ≤ rho.toFun x := hrhoLevels x)
+  intro t ht x q hq y
+  have h := harnack_on_separated_cylinders (I := I) (M := M) g hdim rho outer averagingCutoff
+    C hC hP u hu hpos hp hp_one hAα (le_of_lt hαβ) hβb hτb hτc hcγ (le_of_lt hγδ)
+    hδd hdD hB hlowerUpper hupperInner hinner hrho hearlyMeasure hearlyMeasure_le_one
+    hlateMeasure hlateMeasure_le_one houter_engine hmass (fun t ht x => hpde t ht x)
+  exact h t ht x (by rw [hcutoff_target_one x]; norm_num) q hq y
+    (by rw [hcutoff_target_one y]; norm_num)
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 

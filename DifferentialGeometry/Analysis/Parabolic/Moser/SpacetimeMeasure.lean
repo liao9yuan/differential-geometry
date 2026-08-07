@@ -350,6 +350,72 @@ theorem integral_localizedSpacetimeMeasure
   simp_rw [integral_cutoffWeightedMeasure (I := I) (M := M)]
   exact (intervalIntegral.integral_of_le hab).symm
 
+theorem localizedSpacetimeMeasure_real_univ
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    {a b : ℝ} (hab : a ≤ b) :
+    (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b).real Set.univ =
+      (b - a) * cutoffMass (I := I) (M := M) cutoff := by
+  let μ : Measure ℝ := volume.restrict (Ioc a b)
+  let ν : Measure M := cutoffWeightedMeasure (I := I) (M := M) cutoff
+  have hprod : (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b) = μ.prod ν := rfl
+  have hμ : μ Set.univ = ENNReal.ofReal (b - a) := by
+    dsimp [μ]
+    rw [Measure.restrict_apply MeasurableSet.univ]
+    simp [Real.volume_Ioc]
+  have hν : ν Set.univ = ENNReal.ofReal (cutoffMass (I := I) (M := M) cutoff) := by
+    dsimp [ν]
+    unfold cutoffWeightedMeasure
+    haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
+      riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+    have hlin : (∫⁻ x, ENNReal.ofReal (cutoff.toFun x ^ 2)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+        ENNReal.ofReal (∫ x, cutoff.toFun x ^ 2
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+      exact (MeasureTheory.ofReal_integral_eq_lintegral_ofReal
+        ((cutoff.smooth.continuous.pow 2).integrable_of_hasCompactSupport
+          (HasCompactSupport.of_compactSpace _))
+        (Filter.Eventually.of_forall (fun x => sq_nonneg (cutoff.toFun x)))).symm
+    rw [withDensity_apply]
+    · simpa [cutoffMass] using hlin
+    · exact MeasurableSet.univ
+  have hprod_univ : (μ.prod ν) Set.univ =
+      ENNReal.ofReal (b - a) * ENNReal.ofReal (cutoffMass (I := I) (M := M) cutoff) := by
+    rw [Measure.prod_apply]
+    · have hfiber : (fun x : ℝ => ν (Prod.mk x ⁻¹' Set.univ)) = fun _ : ℝ => ν Set.univ := by
+        funext x
+        simp
+      rw [hfiber]
+      rw [lintegral_const]
+      rw [hμ, hν]
+      ring
+    · exact MeasurableSet.univ
+  change ENNReal.toReal ((localizedSpacetimeMeasure (I := I) (M := M) cutoff a b) Set.univ) =
+    (b - a) * cutoffMass (I := I) (M := M) cutoff
+  rw [hprod]
+  rw [hprod_univ]
+  rw [ENNReal.toReal_mul]
+  rw [ENNReal.toReal_ofReal (sub_nonneg.mpr hab)]
+  rw [ENNReal.toReal_ofReal (cutoff_mass_nonneg (I := I) (M := M) cutoff)]
+
+theorem localizedSpacetimeMeasure_ne_zero_of
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    {a b : ℝ} (hab : a < b)
+    (hcutoff : cutoffMass (I := I) (M := M) cutoff ≠ 0) :
+    localizedSpacetimeMeasure (I := I) (M := M) cutoff a b ≠ 0 := by
+  by_contra hzero
+  have hreal : (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b).real Set.univ ≠ 0 := by
+    rw [localizedSpacetimeMeasure_real_univ (I := I) (M := M) cutoff (le_of_lt hab)]
+    exact mul_ne_zero (sub_pos.mpr hab).ne' hcutoff
+  exact hreal (by simp [hzero])
+
+theorem localizedSpacetimeMeasure_le_one_of
+    {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
+    {a b : ℝ} (hab : a ≤ b)
+    (hbound : (b - a) * cutoffMass (I := I) (M := M) cutoff ≤ 1) :
+    (localizedSpacetimeMeasure (I := I) (M := M) cutoff a b).real Set.univ ≤ 1 := by
+  rw [localizedSpacetimeMeasure_real_univ (I := I) (M := M) cutoff hab]
+  exact hbound
+
 theorem localizedSpacetimeRpowMoment_eq_intervalIntegral
     {g : SmoothRiemannianMetric I M} (cutoff : SmoothScalar g)
     (u : ℝ → M → ℝ) {p a b : ℝ} (hab : a ≤ b)
