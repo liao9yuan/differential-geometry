@@ -491,6 +491,90 @@ noncomputable def exteriorDerivative [BoundarylessManifold IM M] (α : Different
           subset_rfl hx
     exact (hsec.contMDiffAt ((isOpen_extChartAt_source (I := IM) x₀).mem_nhds (mem_extChartAt_source x₀)))⟩
 
+@[simp] theorem exteriorDerivative_apply [BoundarylessManifold IM M] (α : DifferentialForm IM M k) (x : M) :
+    (exteriorDerivative α) x = exteriorDerivativeAt α x := rfl
+
+theorem exteriorDerivative_add [BoundarylessManifold IM M] (α β : DifferentialForm IM M k) :
+    exteriorDerivative (α + β) = exteriorDerivative α + exteriorDerivative β := by
+  ext x
+  have hα : DifferentiableAt ℝ (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
+      ((extChartAt IM x) x) := by
+    have hmem : (extChartAt IM x) x ∈ interior ((extChartAt IM x).target) :=
+      (ModelWithCorners.isInteriorPoint_iff (I := IM)).1
+        (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))
+    exact ((localRep_contDiffOn α x).contDiffAt
+      (mem_interior_iff_mem_nhds.mp hmem)).differentiableAt (by norm_num)
+  have hβ : DifferentiableAt ℝ (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, β ((extChartAt IM x).symm y)⟩).2)
+      ((extChartAt IM x) x) := by
+    have hmem : (extChartAt IM x) x ∈ interior ((extChartAt IM x).target) :=
+      (ModelWithCorners.isInteriorPoint_iff (I := IM)).1
+        (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))
+    exact ((localRep_contDiffOn β x).contDiffAt
+      (mem_interior_iff_mem_nhds.mp hmem)).differentiableAt (by norm_num)
+  change exteriorDerivativeAt (α + β) x = exteriorDerivativeAt α x + exteriorDerivativeAt β x
+  rw [exteriorDerivativeAt, exteriorDerivativeAt, exteriorDerivativeAt]
+  have hsum : (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, (α + β) ((extChartAt IM x).symm y)⟩).2) =
+      (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2) +
+        (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, β ((extChartAt IM x).symm y)⟩).2) := by
+    funext y
+    let z : M := (extChartAt IM x).symm y
+    rw [add_apply]
+    change (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨z, α z + β z⟩).2 =
+      (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨z, α z⟩).2 +
+        (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨z, β z⟩).2
+    rw [DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+      (L := α z + β z),
+      DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+      (L := α z),
+      DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+      (L := β z)]
+    rfl
+  rw [hsum, extDeriv_add hα hβ]
+  rw [map_add]
+
+theorem exteriorDerivative_smul [BoundarylessManifold IM M] (c : ℝ) (α : DifferentialForm IM M k) :
+    exteriorDerivative (c • α) = c • exteriorDerivative α := by
+  ext x
+  change exteriorDerivativeAt (c • α) x = c • exteriorDerivativeAt α x
+  rw [exteriorDerivativeAt, exteriorDerivativeAt]
+  have hsmul : (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, (c • α) ((extChartAt IM x).symm y)⟩).2) =
+      c • (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2) := by
+    funext y
+    let z : M := (extChartAt IM x).symm y
+    rw [smul_apply]
+    change (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨z, c • α z⟩).2 =
+      c • (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨z, α z⟩).2
+    rw [DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+      (L := c • α z),
+      DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+      (L := α z)]
+    rfl
+  rw [hsmul, extDeriv_smul, map_smul]
+
 end DifferentialForm
 end DifferentialGeometry
 
