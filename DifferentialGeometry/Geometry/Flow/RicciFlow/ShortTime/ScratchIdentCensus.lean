@@ -10,6 +10,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegAllOrderJet
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegDeTurckOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegUnifGate
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegUnifBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifBgLift
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgLift
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegForceHiBg
 
 -- J4-PREP: the widened Galerkin identification (constants and certificates
 -- bound once outside `∀ N`; six per-`N` conjuncts exposed).
@@ -253,3 +256,28 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegUnifBounds
   DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.IsLowBoundsUnif.toCaps
 #print axioms
   DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.unif_solve_of_caps
+
+-- Class-first fixed-background adjacent-scale packages and the frozen high
+-- forcing adapter.  Scalar choices are made before the class metric, while
+-- `IsBgLiftAt` certifies the metricwise completed maps.
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BgLiftData
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BgLiftData.horizon_pos
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BgLiftData.commonHorizon_pos
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BgLiftData.commonHorizon_le_low
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BgLiftData.commonHorizon_le_lift
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.IsLowSolveBg.force_le_cap
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BgLiftOps
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BgLiftData.realize
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.IsBgLiftAt
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.lowBaseForceBg_eq
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.liftHiNBg
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.lowBaseNBgWith
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.hiNBg_incl

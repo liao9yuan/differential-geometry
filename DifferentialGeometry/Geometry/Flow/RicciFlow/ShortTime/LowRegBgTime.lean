@@ -790,6 +790,260 @@ theorem radialA1Hi_self
         ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U‖ := by
       simp only [D]
 
+/-- One positive spectral cutoff radius makes the arbitrary-background radial
+high first-order action locally Lipschitz on every bounded `H3` core ball. -/
+theorem radialA1HiBg_pair
+    (hDim : Module.finrank ℝ E = 3)
+    (g gB : SmoothRiemannianMetric I M) :
+    ∃ ρ₀ : ℝ, 0 < ρ₀ ∧
+      ∀ {ρ δ : ℝ} (hρ : 0 < ρ) (_ : ρ ≤ ρ₀)
+        (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hreal : ∀ S : SmoothCcTensor g 0 2,
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
+            gFibreOpBound (I := I) (M := M) g
+              (ccTensorBilinSymm (I := I) g S) δ),
+        BgA1HiCorePair (I := I) (M := M)
+          g gB hρ.le hδ0 hδ_le hreal := by
+  obtain ⟨ρ₀, Bs, B0, B1, O0, O1, Ca, hρ₀, hBs, hB0, hB1,
+      hO0, hO1, hCa, hpair⟩ :=
+    a1Hi_bg_pair (I := I) (M := M) hDim g gB
+  obtain ⟨C2, hC2, hjet2⟩ := jet2_le_hs (I := I) (M := M) g
+  obtain ⟨C3, hC3, hjet3⟩ := jet3_le_hs (I := I) (M := M) g
+  refine ⟨ρ₀, hρ₀, ?_⟩
+  intro ρ δ hρ hρρ₀ hδ0 hδ_le hreal
+  dsimp only [BgA1HiCorePair]
+  intro r
+  let R2 : ℝ := C2 * ρ
+  let A3 : ℝ := C3 * r
+  let L : ℝ := 1 + (1 / ρ) * r
+  let Fs : ℝ := Bs R2 * (1 + A3 ^ 2) * (C3 * L + C2 + 1)
+  let Fb : ℝ :=
+    B0 R2 * C3 * L + B1 R2 * C2 + B1 R2 * A3 * C2 +
+      B1 R2 + B1 R2 * A3
+  let F1 : ℝ := O0 * C3 * L + O1 + O1 * A3
+  let E0 : ℝ := 2 * (Fs ^ 2 + Fb ^ 2) + F1 ^ 2
+  let K : ℝ := Ca * Real.sqrt E0
+  refine ⟨K, ?_⟩
+  intro T U hTr hUr
+  have hr : 0 ≤ r := (norm_nonneg _).trans hTr
+  have hρ0 : 0 ≤ ρ := hρ.le
+  have hR2 : 0 ≤ R2 := mul_nonneg hC2 hρ0
+  have hA3 : 0 ≤ A3 := mul_nonneg hC3 hr
+  have hρinv : 0 ≤ (1 / ρ : ℝ) := (one_div_pos.mpr hρ).le
+  have hL : 0 ≤ L := by
+    dsimp only [L]
+    positivity
+  let D : ℝ :=
+    ‖ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) T -
+      ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U‖
+  let D2r : ℝ := C2 * D
+  let D3r : ℝ := C3 * L * D
+  have hD : 0 ≤ D := norm_nonneg _
+  have hD2r : 0 ≤ D2r := mul_nonneg hC2 hD
+  have hD3r : 0 ≤ D3r := mul_nonneg (mul_nonneg hC3 hL) hD
+  let T0 : SmoothCcTensor g 0 2 :=
+    lowRadial (I := I) (M := M) g ρ T
+  let U0 : SmoothCcTensor g 0 2 :=
+    lowRadial (I := I) (M := M) g ρ U
+  have hT0ρ :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T0‖ ≤ ρ :=
+    lowRadial_norm (I := I) (M := M) g hρ0 T
+  have hU0ρ :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U0‖ ≤ ρ :=
+    lowRadial_norm (I := I) (M := M) g hρ0 U
+  have hTδ :
+      gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g T0) δ :=
+    hreal T0 hT0ρ
+  have hUδ :
+      gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g U0) δ :=
+    hreal U0 hU0ρ
+  have hZδ :
+      gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g
+          (0 : SmoothCcTensor g 0 2)) δ :=
+    zero_fibre_bound (I := I) (M := M) g hδ0
+  have hT2 :
+      lowJetSq (I := I) (M := M) g 2 T0 ≤ R2 ^ 2 := by
+    refine (hjet2 T0).trans ?_
+    exact pow_le_pow_left₀
+      (mul_nonneg hC2 (norm_nonneg _))
+      (mul_le_mul_of_nonneg_left hT0ρ hC2) 2
+  have hU2 :
+      lowJetSq (I := I) (M := M) g 2 U0 ≤ R2 ^ 2 := by
+    refine (hjet2 U0).trans ?_
+    exact pow_le_pow_left₀
+      (mul_nonneg hC2 (norm_nonneg _))
+      (mul_le_mul_of_nonneg_left hU0ρ hC2) 2
+  have hT0top :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T0‖ ≤ r := by
+    have hrad := lowRadialH3_le (I := I) (M := M) g hρ
+      (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) T)
+    rw [lowRadialH3_core (I := I) (M := M) g hρ T] at hrad
+    simp only [ccToHsLin_apply] at hrad
+    exact hrad.trans hTr
+  have hU0top :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U0‖ ≤ r := by
+    have hrad := lowRadialH3_le (I := I) (M := M) g hρ
+      (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U)
+    rw [lowRadialH3_core (I := I) (M := M) g hρ U] at hrad
+    simp only [ccToHsLin_apply] at hrad
+    exact hrad.trans hUr
+  have hT3 :
+      lowJetSq (I := I) (M := M) g 3 T0 ≤ A3 ^ 2 := by
+    refine (hjet3 T0).trans ?_
+    exact pow_le_pow_left₀
+      (mul_nonneg hC3 (norm_nonneg _))
+      (mul_le_mul_of_nonneg_left hT0top hC3) 2
+  have hU3 :
+      lowJetSq (I := I) (M := M) g 3 U0 ≤ A3 ^ 2 := by
+    refine (hjet3 U0).trans ?_
+    exact pow_le_pow_left₀
+      (mul_nonneg hC3 (norm_nonneg _))
+      (mul_le_mul_of_nonneg_left hU0top hC3) 2
+  have hincl :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T -
+          ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ D := by
+    have h := tensorHsInclusion_norm_le (I := I) (M := M)
+      (g := g) (r := 0) (s := 2)
+      (show (2 : ℝ) ≤ (3 : ℝ) by norm_num)
+      (ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T -
+        ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U)
+    rw [map_sub, inclCc32_bg (I := I) (M := M) g T,
+      inclCc32_bg (I := I) (M := M) g U] at h
+    simpa only [D, ccToHsLin_apply] using h
+  have hrad2 :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T0 - U0)‖ ≤ D := by
+    rw [ccToHsSub_bg]
+    exact (lowRadial_lip (I := I) (M := M) g hρ0 T U).trans hincl
+  have hTU2 :
+      lowJetSq (I := I) (M := M) g 2 (T0 - U0) ≤ D2r ^ 2 := by
+    refine (hjet2 (T0 - U0)).trans ?_
+    exact pow_le_pow_left₀
+      (mul_nonneg hC2 (norm_nonneg _))
+      (mul_le_mul_of_nonneg_left hrad2 hC2) 2
+  have hmax :
+      max
+          ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+          ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖ ≤ r :=
+    max_le hTr hUr
+  have hprod :
+      max
+          ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+          ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖ *
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T -
+            ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤
+        r * D :=
+    mul_le_mul hmax hincl (norm_nonneg _) hr
+  have hrad3 :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) (T0 - U0)‖ ≤
+        L * D := by
+    rw [ccToHsSub_bg]
+    refine (lowRadial_h3_sub (I := I) (M := M) g hρ T U).trans ?_
+    have hscaled := mul_le_mul_of_nonneg_left hprod hρinv
+    have hscaled' :
+        (1 / ρ) *
+              max
+                ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+                ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖ *
+              ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T -
+                ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤
+          (1 / ρ) * (r * D) := by
+      calc
+        (1 / ρ) *
+              max
+                ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+                ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖ *
+              ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T -
+                ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ =
+            (1 / ρ) *
+              (max
+                  ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+                  ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖ *
+                ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T -
+                  ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖) := by ring
+        _ ≤ (1 / ρ) * (r * D) := hscaled
+    calc
+      ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T -
+          ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖ +
+            (1 / ρ) *
+              max
+                ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+                ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖ *
+              ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T -
+                ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤
+          D + (1 / ρ) * (r * D) := by
+        change D + _ ≤ D + _
+        exact add_le_add_right hscaled' D
+      _ = L * D := by
+        simp only [L]
+        ring
+  have hTU3 :
+      lowJetSq (I := I) (M := M) g 3 (T0 - U0) ≤ D3r ^ 2 := by
+    refine (hjet3 (T0 - U0)).trans ?_
+    simpa only [D3r, mul_assoc] using pow_le_pow_left₀
+      (mul_nonneg hC3 (norm_nonneg _))
+      (mul_le_mul_of_nonneg_left hrad3 hC3) 2
+  have hout := hpair T0 U0
+    (lowRadial_symm (I := I) (M := M) g ρ T)
+    (lowRadial_symm (I := I) (M := M) g ρ U)
+    hδ_le hδ0 hTδ hUδ hZδ
+    R2 A3 D2r D3r D hR2 hA3 hD2r hD3r hD
+    hT2 hU2 hT3 hU3 hTU2 hTU3
+    (hT0ρ.trans hρρ₀) (hU0ρ.trans hρρ₀) hrad2
+  dsimp only at hout
+  have hcore :
+      ‖(lowCoreDataBg (I := I) (M := M)
+            g gB hρ.le hδ0 hδ_le hreal T).a1Hi (I := I) (M := M) -
+          (lowCoreDataBg (I := I) (M := M)
+            g gB hρ.le hδ0 hδ_le hreal U).a1Hi (I := I) (M := M)‖ ≤
+        Ca * Real.sqrt
+          (2 * ((Bs R2 * (1 + A3 ^ 2) * (D3r + D2r + D)) ^ 2 +
+              (B0 R2 * D3r + B1 R2 * D2r + B1 R2 * A3 * D2r +
+                B1 R2 * D + B1 R2 * A3 * D) ^ 2) +
+            (O0 * D3r + O1 * D + O1 * A3 * D) ^ 2) := by
+    simpa only [lowCoreDataBg, T0, U0] using hout
+  have hE0 : 0 ≤ E0 := by
+    dsimp only [E0]
+    exact add_nonneg
+      (mul_nonneg (by norm_num) (add_nonneg (sq_nonneg Fs) (sq_nonneg Fb)))
+      (sq_nonneg F1)
+  have hquad :
+      2 * ((Bs R2 * (1 + A3 ^ 2) * (D3r + D2r + D)) ^ 2 +
+            (B0 R2 * D3r + B1 R2 * D2r + B1 R2 * A3 * D2r +
+              B1 R2 * D + B1 R2 * A3 * D) ^ 2) +
+          (O0 * D3r + O1 * D + O1 * A3 * D) ^ 2 =
+        E0 * D ^ 2 := by
+    simp only [D2r, D3r, E0, Fs, Fb, F1]
+    ring
+  have hsqrt :
+      Real.sqrt
+          (2 * ((Bs R2 * (1 + A3 ^ 2) * (D3r + D2r + D)) ^ 2 +
+                (B0 R2 * D3r + B1 R2 * D2r + B1 R2 * A3 * D2r +
+                  B1 R2 * D + B1 R2 * A3 * D) ^ 2) +
+            (O0 * D3r + O1 * D + O1 * A3 * D) ^ 2) =
+        Real.sqrt E0 * D := by
+    rw [hquad]
+    exact sqrt_scale E0 D hE0 hD
+  calc
+    ‖(lowCoreDataBg (I := I) (M := M)
+          g gB hρ.le hδ0 hδ_le hreal T).a1Hi (I := I) (M := M) -
+        (lowCoreDataBg (I := I) (M := M)
+          g gB hρ.le hδ0 hδ_le hreal U).a1Hi (I := I) (M := M)‖ ≤
+        Ca * Real.sqrt
+          (2 * ((Bs R2 * (1 + A3 ^ 2) * (D3r + D2r + D)) ^ 2 +
+              (B0 R2 * D3r + B1 R2 * D2r + B1 R2 * A3 * D2r +
+                B1 R2 * D + B1 R2 * A3 * D) ^ 2) +
+            (O0 * D3r + O1 * D + O1 * A3 * D) ^ 2) := hcore
+    _ = K * D := by
+      rw [hsqrt]
+      simp only [K]
+      ring
+    _ = K * ‖ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) T -
+        ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U‖ := by
+      simp only [D]
+
 set_option synthInstance.maxHeartbeats 1000000 in
 /-- The completed arbitrary-background low first-order map takes its canonical
 value on every smooth H3 core state. -/

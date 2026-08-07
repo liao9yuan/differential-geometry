@@ -22,6 +22,11 @@ difference coefficient; the critical `H3/H2` two-arm shape is unchanged.  The
 Ricci order-one term is background-independent, so this banks the complete
 arbitrary-background order-one coefficient pair.
 
+The local duplicate proof of `pbLow_h2_mul` was removed after the producer was
+exported canonically from `LowRegCoeffJets`.  A direct dependency refresh had
+correctly exposed the duplicate declaration that stale imports had hidden;
+the consumer now reuses the exported theorem and focused verification passes.
+
 The remaining arbitrary-background first-order wall is now the order-zero
 Palatini pair, beginning with `dlaBg_pair_h1`.  Its proof must preserve the
 `DLb + insert` cancellation before estimating; a separate bound of those two

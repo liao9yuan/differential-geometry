@@ -10,6 +10,8 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SelfLowCapWindows
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinParabolicEnergy
 import DifferentialGeometry.Analysis.Sobolev.Tensor.CrossScaleCauchySchwarz
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LowRegOperatorTime
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegTraceH3Pair
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.HsTwoJet
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -198,3 +200,12 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 -- The radius-flexible A2 pair and its strict-contraction specialization.
 #print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.radialA2_pairR
 #print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.lowA2_small_one
+
+-- The arbitrary-background H3 inverse-slot pair and the curvature-free easy
+-- spectral H2 comparison used by the new high-coefficient lanes.
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.app_h3_tame
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.inv_slot_pair_h3
+#print axioms
+  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LowBaseInternal.trace1_pair_h3
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.rawLap_le_grad2
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.hs_two_le_jet

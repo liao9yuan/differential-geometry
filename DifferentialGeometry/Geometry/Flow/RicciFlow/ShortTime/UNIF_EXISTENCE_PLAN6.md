@@ -1502,3 +1502,83 @@ toward `(N)`: approximately **99%**.  `lowreg_dt_unif`: **0%**;
 **3%**.  Campaign changes remain uncommitted.
 
 ---
+
+## 193. Lift packages explicit; moving-trace H3 closed; high-A2 order wall isolated (2026-08-06)
+
+The external re-audit at remote commit `f8e47f859` was checked against the
+actual declaration tree.  Two premises were corrected before more consumer
+wrappers were added:
+
+- `DenseTameData`, `IsDenseTameAt`, `exists_dense_tame`, and
+  `dense_tame_unif` do not exist at this commit.  `UnifDenseTame` exports
+  `coreN_outer_unif` and `lowRegN_outer_unif`, which bound the total
+  nonlinearity rather than completed operator-valued A1 maps.
+- the general dense-extension API is not the obstruction: `exists_extend_le`
+  already preserves an affine envelope, and the background time files contain
+  the standard dense equalizer argument for compatibility squares.
+
+The corrected class-first package boundary is now explicit and focused-green:
+
+- `BgLiftData` stores the coefficient radius, contraction, affine zero/slope,
+  the actual low-solve force cap, the radius sandwich
+  `stateRad <= coeffRadius <= K.realize`, the force margin, and the common
+  low/lift horizon before the class metric varies.
+- `BgLiftOps` is data only, while `IsBgLiftAt` is the metricwise proof
+  certificate.  Its fields use the actual `lowCoreDataBg` A1/A2 arms, both
+  completed continuity/bound certificates, and both inclusion squares.
+- `liftHiNBg`, `lowBaseNBgWith`, and `hiNBg_incl` give the background-aware
+  frozen high/low split and its scale compatibility without constructing an
+  orbit or reselecting time.
+
+The arbitrary-background pointwise H2 program also advanced:
+
+- `dlaBg_pair_h2` is complete in `LowRegBgC0PairH2`;
+- `app_h3_tame`, `inv_slot_pair_h3`, and `trace1_pair_h3` close the previously
+  missing moving one-trace H3 producer with the exact
+  `D3 + D2 + A * D2` scale;
+- `dlbIns_pair_h2` closes the cancellation-preserving `DLb + Insert` H2 arm;
+- `lie0_bg_pair_h2` combines all three arms after the exact background split
+  and exports the common five-term critical modulus.  The complete pointwise
+  arbitrary-background order-zero `H2` pair is therefore closed.
+
+The remaining metricwise A1 chain is mechanical: the path-integrated background C0 pair,
+`c0_bg_pair_h2`, `a1Hi_bg_pair`, and `radialA1HiBg_pair`, followed by the
+already defined canonical completions `lowA1HiBg` and `lowA1LoBg`.  The later
+class-first producer still needs a common radius and affine H2 bound for the
+actual `lowCoreDataBg` C0 arm.  `refold_aff_bg` is not a substitute: its core
+formula is `c0CoreData + oneCoreBg`, and no theorem in the current tree
+identifies that operator with the actual background core required by
+`IsBgLiftAt`.
+
+The A2 high arm has one honest unresolved order-budget issue.  The new
+dimension-only `hs_two_le_jet` proves the easy covariant-jet2 to spectral-H2
+direction.  The existing `appD2Hs_norm` route still needs the hard spectral-H4
+to covariant-jet4 comparison.  The class-first packet currently stops at
+`covsum_hs_three`; a finite H4 Bochner step introduces differentiated curvature
+and naturally asks for a fourth metric jet.  The proposed fixed-background
+graph-norm shortcut was audited and does not remove this order: the rough
+Laplacian on `(0,2)` tensors has a zeroth-order coefficient containing second
+metric derivatives, and squaring it differentiates that coefficient twice.
+Equivalently, the intrinsic `H4` commutator contains `nabla^2 Rm`.  The smallest
+honest continuation of the canonical adjacent-scale route is therefore a
+class-four `covsum_hs_four`/`appD2Hs_norm_unif` producer.  If the class-three
+budget remains binding, this part needs a substantive differentiated parabolic
+bootstrap for `nabla u`, not another completion wrapper.  Until one of those
+two designs is implemented, no class-first A2 existence theorem is to be
+claimed.
+
+**Honest denominators.**  The new scalar interface, metricwise certificate
+interface, frozen high-force adapter, all three order-zero H2 arms, their full
+`lie0` assembly, moving-trace H3 package, and easy H2 comparison: **100%**
+individually.  `IsBgLiftAt` existence producer: **0%**.  Full
+arbitrary-background A1 pair endpoint: unstated, **0%**; its complete
+pointwise order-zero input is now **100%**, while the metricwise path/refold
+assembly and class-first actual-core bound remain.  Class-first A2 high
+producer: unstated, **0%**; its canonical route is blocked at the hard H4 input
+comparison, and preserving class three requires a new differentiated-flow
+design.  `lowreg_apply_two_bg`, the background all-order adapter,
+`lowreg_dt_unif`, and `ricci_flow_unif_existence`: **0%**.  Dedicated uniform-
+existence machinery overall remains approximately **80%**; whole HCG theorem
+closure remains approximately **3%**.  Campaign changes remain uncommitted.
+
+---
