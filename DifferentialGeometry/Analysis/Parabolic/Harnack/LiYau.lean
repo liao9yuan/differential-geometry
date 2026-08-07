@@ -1717,4 +1717,54 @@ theorem liYau_estimate_of_nonnegative_ricci
     exact (le_div_iff₀ (mul_pos zero_lt_two ht)).mpr hq2
   simpa [f, q, n] using hqt
 
+theorem heat_solution_differential_harnack_of_nonnegative_ricci
+    [CompactSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M)
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (hpde : ∀ t x, deriv (fun s => u s x) t =
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    {t : ℝ} (ht : 0 < t) (x : M) :
+    -(Module.finrank ℝ E : ℝ) / (2 * t) ≤
+      deriv (fun s => u s x) t / u t x -
+        g.inner x (gradientFun (I := I) g (u t) x)
+          (gradientFun (I := I) g (u t) x) / (u t x ^ 2) := by
+  classical
+  have hly := liYau_estimate_of_nonnegative_ricci (I := I) (M := M) g hRic u hu hpos hpde ht x
+  have hlogderiv : deriv (fun s => Real.log (u s x)) t = deriv (fun s => u s x) t / u t x := by
+    have hu_slice : ContDiff ℝ ∞ (fun s => u s x) := by
+      have hc : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun s : ℝ => (s, x)) :=
+        contMDiff_id.prodMk contMDiff_const
+      exact contMDiff_iff_contDiff.mp (hu.comp hc)
+    have hder : HasDerivAt (fun s => u s x) (deriv (fun s => u s x) t) t :=
+      (ContDiff.differentiable hu_slice (by norm_num) t).hasDerivAt
+    exact (hder.log (hpos t x).ne').deriv
+  have hloggrad : g.inner x
+        (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
+        (gradientFun (I := I) g (fun y => Real.log (u t y)) x) =
+      (u t x ^ 2)⁻¹ *
+        g.inner x (gradientFun (I := I) g (u t) x)
+          (gradientFun (I := I) g (u t) x) := by
+    have hu_slice_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) (u t) x :=
+      (hu.comp (contMDiff_const.prodMk contMDiff_id)).mdifferentiableAt (x := x) (by simp)
+    exact Moser.inner_gradientFun_log_self (I := I) g hu_slice_mdiff (hpos t x)
+  unfold liYauQuantity at hly
+  rw [hloggrad, hlogderiv] at hly
+  have hrewrite : (u t x ^ 2)⁻¹ * g.inner x
+        (gradientFun (I := I) g (u t) x)
+        (gradientFun (I := I) g (u t) x) =
+      g.inner x (gradientFun (I := I) g (u t) x)
+          (gradientFun (I := I) g (u t) x) / (u t x ^ 2) := by
+    field_simp [ne_of_gt (hpos t x)]
+  rw [hrewrite] at hly
+  have h1 : -(Module.finrank ℝ E : ℝ) / (2 * t) = -((Module.finrank ℝ E : ℝ) / (2 * t)) := by ring
+  rw [h1]
+  linarith
+
 end DifferentialGeometry.Analysis.Parabolic.Harnack
