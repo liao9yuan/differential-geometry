@@ -782,6 +782,35 @@ theorem cocoreModelPoint_surjective_levelSet {n k : ℕ} (hk : k ≤ n) (c ε R 
     rw [← mul_assoc, mul_inv_cancel₀ ha0, one_mul]
   rw [hna, hrw, ← recombine_decompose hk y]
 
+theorem modelFlow_levelSet_cover {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
+    (hε : 0 < ε) (hR : 0 ≤ R) (hRε : 2 * ε < R ^ 2)
+    (z : MorseModel n)
+    (hz : c - ε ≤ morseNormalForm hk c z)
+    (hτ : 2 * (morseNormalForm hk c z - (c - ε)) ≤ ‖posPart hk z‖ ^ 2)
+    (hnorm : morseNorm n z ≤ R) :
+    ∃ p : CellBoundary k × ClosedCell (n - k),
+      modelFlow hk (morseNormalForm hk c z - (c - ε)) z =
+        cocoreModelPoint hk ε (Real.sqrt ((R ^ 2 - 2 * ε) / 2)) p := by
+  let τ : ℝ := morseNormalForm hk c z - (c - ε)
+  let w : MorseModel n := modelFlow hk τ z
+  have hτ0 : 0 ≤ τ := by
+    dsimp [τ]
+    linarith
+  have hτ' : τ ≤ ‖posPart hk z‖ ^ 2 / 2 := by
+    dsimp [τ]
+    nlinarith [hτ]
+  have hwf : morseNormalForm hk c w = c - ε := by
+    dsimp [w]
+    rw [modelFlow_f_sub hk c τ z hτ0 hτ']
+    dsimp [τ]
+    ring
+  have hwnorm : morseNorm n w ≤ R := by
+    dsimp [w]
+    exact le_trans (modelFlow_norm_le hk τ z hτ0 hτ') hnorm
+  rcases cocoreModelPoint_surjective_levelSet hk c ε R hε hR hRε w hwf hwnorm with ⟨p, hp⟩
+  refine ⟨p, ?_⟩
+  simpa [w] using hp.symm
+
 noncomputable def cocoreAttachingEmbedding {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}

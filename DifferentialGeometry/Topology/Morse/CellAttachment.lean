@@ -1331,6 +1331,54 @@ theorem modelFlow_f_sub {n k : ℕ} (hk : k ≤ n) (c t : ℝ) (y : MorseModel n
   rw [hnf, hnfy, hnorm]
   ring
 
+theorem modelFlow_norm_le {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (ht0 : 0 ≤ t) (ht : t ≤ ‖posPart hk y‖ ^ 2 / 2) :
+    morseNorm n (modelFlow hk t y) ≤ morseNorm n y := by
+  apply le_of_sq_le_sq
+  · let a : EuclideanSpace ℝ (Fin k) := negPart hk y
+    let b : EuclideanSpace ℝ (Fin (n - k)) := posPart hk y
+    have hsq : 0 ≤ 1 - 2 * t / ‖b‖ ^ 2 := by
+      have hdiv : 2 * t / ‖b‖ ^ 2 ≤ 1 := by
+        by_cases hb : ‖b‖ = 0
+        · have ht' : t = 0 := by
+            rw [hb] at ht
+            exact le_antisymm (by simpa using ht) ht0
+          rw [ht', hb]
+          norm_num
+        · have hbpos : 0 < ‖b‖ := lt_of_le_of_ne (norm_nonneg b) (Ne.symm hb)
+          have hb2pos : 0 < ‖b‖ ^ 2 := sq_pos_of_pos hbpos
+          rw [div_le_one hb2pos]
+          nlinarith [ht, hb2pos, ht0]
+      nlinarith [hdiv, ht0, sq_nonneg ‖b‖]
+    have hnorm2 : ‖(Real.sqrt (1 - 2 * t / ‖b‖ ^ 2) • b)‖ ^ 2 = ‖b‖ ^ 2 - 2 * t := by
+      rw [norm_smul]
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+      rw [mul_pow]
+      rw [Real.sq_sqrt hsq]
+      by_cases hb2 : ‖b‖ ^ 2 = 0
+      · have ht0' : t = 0 := by
+          have hle : t ≤ 0 := by
+            rw [hb2] at ht
+            simpa using ht
+          linarith
+        have hb0 : b = 0 := norm_eq_zero.mp (sq_eq_zero_iff.mp hb2)
+        rw [ht0', hb0]
+        simp
+      · rw [sub_mul, one_mul]
+        rw [div_mul_cancel₀ (2 * t) hb2]
+    have hmain : morseNorm n (modelFlow hk t y) ^ 2 ≤ morseNorm n y ^ 2 := by
+      rw [morseNorm_sq_eq_negPart_add_posPart hk (modelFlow hk t y)]
+      rw [morseNorm_sq_eq_negPart_add_posPart hk y]
+      dsimp [modelFlow]
+      rw [negPart_recombine]
+      rw [posPart_recombine]
+      have hnorm2' : ‖(Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) • posPart hk y)‖ ^ 2 =
+          ‖posPart hk y‖ ^ 2 - 2 * t := by
+        simpa [a, b] using hnorm2
+      nlinarith [hnorm2', ht0]
+    exact hmain
+  · exact norm_nonneg _
+
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
 
