@@ -1643,7 +1643,7 @@ private theorem actualRm04Contr_eq_canonical
           (rm04OfRic3At_comp_orthonormal
             (I := I) (M := M) basis horth Ric i k j l).symm
 
-private theorem traceData_metricTrace
+theorem traceData_metricTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)

@@ -2446,6 +2446,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckVFTimeFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.Ham3ShortAxioms
+import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.CurvatureOperatorPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjCriticalSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjCriticalTame
