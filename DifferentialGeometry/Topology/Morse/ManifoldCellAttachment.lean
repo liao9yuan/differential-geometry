@@ -1,5 +1,5 @@
 import DifferentialGeometry.Topology.Morse.CellAttachment
-import DifferentialGeometry.Topology.Attachment.Relative
+import DifferentialGeometry.Topology.Homotopy.EquivUnder
 import DifferentialGeometry.Topology.Morse.Flow
 import DifferentialGeometry.Topology.Morse.Manifold
 import DifferentialGeometry.Topology.Morse.ModifiedFunction
@@ -1550,7 +1550,7 @@ theorem morseModifiedLowerSublevelHomotopyEquiv_lower {n k : ℕ} (hk : k ≤ n)
     change x.1 = x.1
     rfl
 
-noncomputable def sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeomorph {n : ℕ} {H : Type}
+noncomputable def sublevelCellAdjunctionBaseCommutingHomotopyEquivOfMorseChartAndDiffeomorph {n : ℕ} {H : Type}
     [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M] (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
@@ -1580,7 +1580,7 @@ noncomputable def sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeom
     (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
     (hflow : Φ.toEquiv '' sublevel g (c - data.ε) = sublevel g (c + data.ε))
     (htie : ∀ x : M, Φ.toEquiv x = curveAt v hcomplete x (c - data.ε - (c + data.ε))) :
-    {e : DifferentialGeometry.Topology.HomotopyEquivUnder
+    {e : DifferentialGeometry.Topology.Homotopy.BaseCommutingHomotopyEquiv
         (B := SublevelSpace f (c - data.ε)) (X := SublevelSpace f (c + data.ε))
         (Y := CellAdjunctionSpace k (cellAttachingMap hk c data)) //
       e.toBase = sublevelInclusion f (by linarith [data.hεpos]) ∧
@@ -1816,7 +1816,7 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
       x = p ∨ ¬ IsCriticalPointAt I f x) :
     ∃ ε : ℝ, ∃ hε : 0 < ε, ε ≤ a ∧
     ∃ φ : C(CellBoundary k, SublevelSpace f (c - ε)),
-      ∃ e : DifferentialGeometry.Topology.HomotopyEquivUnder
+      ∃ e : DifferentialGeometry.Topology.Homotopy.BaseCommutingHomotopyEquiv
         (B := SublevelSpace f (c - ε)) (X := SublevelSpace f (c + ε))
         (Y := CellAdjunctionSpace k φ),
         e.toBase = sublevelInclusion f (by linarith [hε]) ∧
@@ -1945,7 +1945,7 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
       hR' hΦr hRpos hR'pos hεa I f p χ hχ0val hnorm hχsrc hχsymmOn hχon hunique hx
   rcases no_critical_value_transport (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀) hcompactG hregularG with
     ⟨v, Φ, hv, hsupp, hrate, hcomplete, hflow, htie⟩
-  rcases sublevelCellAdjunctionHomotopyEquivUnderOfMorseChartAndDiffeomorph (I := I) (hf := hf)
+  rcases sublevelCellAdjunctionBaseCommutingHomotopyEquivOfMorseChartAndDiffeomorph (I := I) (hf := hf)
       (f := f) (c := c) (k := k) (hk := hk) (data := data) (g := g) hgmd hg_le hlow0
       hcell hlow_lower hlow_inv_lower hgup v hv hsupp hcomplete hrate Φ hflow htie with
     ⟨hunder, hlaws⟩

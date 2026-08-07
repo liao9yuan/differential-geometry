@@ -2919,8 +2919,6 @@ import DifferentialGeometry.Integration.Volume.Family.Variation
 import DifferentialGeometry.Integration.Volume.Invariance
 import DifferentialGeometry.Topology.Attachment.Basic
 import DifferentialGeometry.Topology.Attachment.Defs
-import DifferentialGeometry.Topology.Attachment.QuotientProduct
-import DifferentialGeometry.Topology.Attachment.Relative
 import DifferentialGeometry.Topology.Attachment.Union
 import DifferentialGeometry.Topology.Handle.Attachment
 import DifferentialGeometry.Topology.Handle.AttachmentComparison

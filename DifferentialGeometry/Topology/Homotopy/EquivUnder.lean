@@ -32,4 +32,34 @@ theorem map_fromBase_apply (e : HomotopyEquivUnder toBase fromBase) (x : X) :
 
 end HomotopyEquivUnder
 
+structure BaseCommutingHomotopyEquiv {B : Type u} [TopologicalSpace B] {X : Type v}
+    [TopologicalSpace X] {Y : Type w} [TopologicalSpace Y] where
+  toBase : C(B, X)
+  fromBase : C(B, Y)
+  toHomotopyEquiv : ContinuousMap.HomotopyEquiv X Y
+  left_comm : ContinuousMap.Homotopy (toHomotopyEquiv.toFun.comp toBase) fromBase
+  right_comm : ContinuousMap.Homotopy (toHomotopyEquiv.invFun.comp fromBase) toBase
+
+namespace BaseCommutingHomotopyEquiv
+
+variable {B : Type u} [TopologicalSpace B] {X : Type v} [TopologicalSpace X]
+variable {Y : Type w} [TopologicalSpace Y]
+
+def refl (i : C(B, X)) : BaseCommutingHomotopyEquiv (B := B) (X := X) (Y := X) where
+  toBase := i
+  fromBase := i
+  toHomotopyEquiv := ContinuousMap.HomotopyEquiv.refl X
+  left_comm := ContinuousMap.Homotopy.refl i
+  right_comm := ContinuousMap.Homotopy.refl i
+
+def symm (e : BaseCommutingHomotopyEquiv (B := B) (X := X) (Y := Y)) :
+    BaseCommutingHomotopyEquiv (B := B) (X := Y) (Y := X) where
+  toBase := e.fromBase
+  fromBase := e.toBase
+  toHomotopyEquiv := e.toHomotopyEquiv.symm
+  left_comm := e.right_comm
+  right_comm := e.left_comm
+
+end BaseCommutingHomotopyEquiv
+
 end DifferentialGeometry.Topology.Homotopy
