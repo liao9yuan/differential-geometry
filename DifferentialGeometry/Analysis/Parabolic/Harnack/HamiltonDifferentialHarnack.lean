@@ -87,6 +87,13 @@ theorem normGradSq_timeDeriv_of_log_heat
     (G' := gradientFun (I := I) g (fun y => deriv (fun σ : ℝ => f σ y) t) x) hgrad
   simpa [f, g.symm] using hmain
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem gradientFun_add
+    (g : SmoothRiemannianMetric I M) {f h : M → ℝ} (x : M)
+    (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) (hh : MDifferentiableAt I 𝓘(ℝ, ℝ) h x) :
+    gradientFun (I := I) g (f + h) x = gradientFun (I := I) g f x + gradientFun (I := I) g h x := by
+  simpa using (DifferentialGeometry.Integral.DivergenceTheorem.gradFun_add g hf hh)
+
 end DifferentialGeometry.Analysis.Parabolic.Harnack
 
 end
