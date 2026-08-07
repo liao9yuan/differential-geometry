@@ -2088,4 +2088,30 @@ theorem sublevelInteriorInterior_transition_reduce {m : ℕ} (g : MorseModel (m 
     morseHalfSpaceShift c₂ (morseHalfSpaceShift (-c₁) y)
   rw [hsymm₁]
 
+
+theorem contDiff_morseHalfSpaceShift {m : ℕ} (c : ℝ) :
+    ContDiff ℝ (⊤ : ℕ∞) (fun x : MorseModel (m + 1) => morseHalfSpaceShift c x) := by
+  change ContDiff ℝ (⊤ : ℕ∞) (fun x : MorseModel (m + 1) =>
+    HAdd.hAdd x (HSMul.hSMul c levelSetLastBasis))
+  fun_prop
+
+noncomputable def sublevelInteriorTransitionUnderlying {m : ℕ} (c₁ c₂ : ℝ) :
+    MorseModel (m + 1) → MorseModel (m + 1) :=
+  fun x => HAdd.hAdd (HAdd.hAdd x (HSMul.hSMul c₁ levelSetLastBasis))
+    (HSMul.hSMul c₂ levelSetLastBasis)
+
+theorem contDiff_sublevelInteriorTransitionUnderlying {m : ℕ} (c₁ c₂ : ℝ) :
+    ContDiff ℝ (⊤ : ℕ∞) (fun x : MorseModel (m + 1) =>
+      sublevelInteriorTransitionUnderlying (m := m) c₁ c₂ x) := by
+  change ContDiff ℝ (⊤ : ℕ∞) (fun x : MorseModel (m + 1) =>
+    HAdd.hAdd (HAdd.hAdd x (HSMul.hSMul c₁ levelSetLastBasis))
+      (HSMul.hSMul c₂ levelSetLastBasis))
+  fun_prop
+
+theorem morseHalfSpaceShift_shift {m : ℕ} (c₁ c₂ : ℝ) (x : MorseModel (m + 1)) :
+    morseHalfSpaceShift c₂ (morseHalfSpaceShift c₁ x) = sublevelInteriorTransitionUnderlying c₁ c₂ x := by
+  ext i
+  simp [morseHalfSpaceShift, sublevelInteriorTransitionUnderlying, Pi.add_apply, Pi.smul_apply,
+    smul_eq_mul]
+
 end DifferentialGeometry.Topology.Morse
