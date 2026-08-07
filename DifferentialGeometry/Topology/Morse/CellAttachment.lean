@@ -1058,6 +1058,74 @@ theorem morseNorm_recombine_cellMap_bound {n k : ℕ} (hk : k ≤ n) (ε r : ℝ
     rwa [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + r ^ 2)]
   exact le_of_sq_le_sq hsq' hns
 
+theorem negPart_cellMap_injective {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 < ε) :
+    Function.Injective (fun u : CellBoundary k =>
+      negPart hk (cellMap (Real.sqrt (2 * ε)) (u : EuclideanSpace ℝ (Fin k)))) := by
+  intro u v h
+  have hneg : ∀ i : Fin k,
+      (cellMap (Real.sqrt (2 * ε)) (u : EuclideanSpace ℝ (Fin k)) (negIdx hk i)) =
+        cellMap (Real.sqrt (2 * ε)) (v : EuclideanSpace ℝ (Fin k)) (negIdx hk i) := by
+    intro i
+    exact congrArg (fun w : EuclideanSpace ℝ (Fin k) => w i) h
+  have hcore : ∀ i : Fin n,
+      (cellMap (Real.sqrt (2 * ε)) (u : EuclideanSpace ℝ (Fin k))) i =
+        (cellMap (Real.sqrt (2 * ε)) (v : EuclideanSpace ℝ (Fin k))) i := by
+    intro i
+    by_cases hi : i.val < k
+    · have hni : negIdx hk ⟨i.val, hi⟩ = i := by
+        ext
+        rfl
+      calc
+        (cellMap (Real.sqrt (2 * ε)) (u : EuclideanSpace ℝ (Fin k))) i
+            = (cellMap (Real.sqrt (2 * ε)) (u : EuclideanSpace ℝ (Fin k))) (negIdx hk ⟨i.val, hi⟩) := by
+              rw [hni]
+        _ = (cellMap (Real.sqrt (2 * ε)) (v : EuclideanSpace ℝ (Fin k))) (negIdx hk ⟨i.val, hi⟩) :=
+              hneg ⟨i.val, hi⟩
+        _ = (cellMap (Real.sqrt (2 * ε)) (v : EuclideanSpace ℝ (Fin k))) i := by
+              rw [hni]
+    · have hpos : ∃ j : Fin (n - k), posIdx hk j = i := by
+        refine ⟨⟨i.val - k, by omega⟩, ?_⟩
+        dsimp [posIdx]
+        apply Fin.ext
+        simp
+        omega
+      rcases hpos with ⟨j, rfl⟩
+      simp [cellMap_posIdx]
+  have hcellmap : (cellMap (Real.sqrt (2 * ε)) (u : EuclideanSpace ℝ (Fin k)) : MorseModel n) =
+      (cellMap (Real.sqrt (2 * ε)) (v : EuclideanSpace ℝ (Fin k)) : MorseModel n) := by
+    funext i
+    exact hcore i
+  have hu : (⟨u, le_of_eq u.2⟩ : ClosedCell k) = ⟨v, le_of_eq v.2⟩ := by
+    exact (cellMap_injective hk ε hε) hcellmap
+  apply Subtype.ext
+  simpa [cellBoundaryInclusion] using congrArg (fun z : ClosedCell k => (z : EuclideanSpace ℝ (Fin k))) hu
+
+theorem recombine_injective {n k : ℕ} (hk : k ≤ n) :
+    Function.Injective (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+      recombine hk p.1 p.2) := by
+  intro p q h
+  apply Prod.ext
+  · have hneg := congrArg (negPart hk) h
+    simpa [negPart_recombine] using hneg
+  · have hpos := congrArg (posPart hk) h
+    simpa [posPart_recombine] using hpos
+
+theorem recombine_cellMap_injective {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 < ε) (hr : r ≠ 0) :
+    Function.Injective (fun p : CellBoundary k × ClosedCell (n - k) =>
+      recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+        (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+  intro p q h
+  have h1 : (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))),
+        r • (p.2 : EuclideanSpace ℝ (Fin (n - k)))) =
+      (negPart hk (cellMap (Real.sqrt (2 * ε)) (q.1 : EuclideanSpace ℝ (Fin k))),
+        r • (q.2 : EuclideanSpace ℝ (Fin (n - k)))) := by
+    exact recombine_injective hk h
+  apply Prod.ext
+  · exact negPart_cellMap_injective hk ε hε (congrArg Prod.fst h1)
+  · have hcocore := congrArg Prod.snd h1
+    apply Subtype.ext
+    exact (smul_right_injective (EuclideanSpace ℝ (Fin (n - k))) (r := r) hr) hcocore
+
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
 

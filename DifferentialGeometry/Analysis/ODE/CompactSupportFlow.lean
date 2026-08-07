@@ -31,6 +31,23 @@ theorem curveAt_add [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2
     simpa [Function.comp_def] using hh
   simpa [add_comm] using hmain
 
+theorem curveAt_injective' [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (t : ℝ) :
+    Function.Injective (fun x : M => curveAt v hcomplete x t) := by
+  intro x y h
+  have hx : curveAt v hcomplete (curveAt v hcomplete x t) (-t) = curveAt v hcomplete (curveAt v hcomplete y t) (-t) := by
+    exact congrArg (fun z : M => curveAt v hcomplete z (-t)) h
+  have h1 : curveAt v hcomplete (curveAt v hcomplete x t) (-t) = curveAt v hcomplete x (t + (-t)) := by
+    exact (curveAt_add v hv hcomplete x t (-t)).symm
+  have h2 : curveAt v hcomplete (curveAt v hcomplete y t) (-t) = curveAt v hcomplete y (t + (-t)) := by
+    exact (curveAt_add v hv hcomplete y t (-t)).symm
+  have hz : t + (-t) = 0 := by ring
+  rw [h1, h2, hz, curveAt_zero v hcomplete x, curveAt_zero v hcomplete y] at hx
+  exact hx
+
 theorem exists_uniform_localFlow_on_compact [FiniteDimensional ℝ E] [CompleteSpace E]
     [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
