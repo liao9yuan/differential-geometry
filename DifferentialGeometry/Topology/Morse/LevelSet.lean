@@ -3,6 +3,7 @@ import Mathlib.Analysis.Calculus.ImplicitContDiff
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.IsManifold.Basic
+import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.ChartedSpace
 
 open scoped Manifold Topology
@@ -1580,5 +1581,186 @@ noncomputable def sublevelChartedSpace {m : ℕ} (g : MorseModel (m + 1) → ℝ
       exact mem_sublevelInteriorChart_source g a x
         (lt_of_le_of_ne (show g x.1 ≤ a from x.2) hx) hg
   chart_mem_atlas := fun x => ⟨x, rfl⟩
+
+
+theorem range_morseModelWithCornersHalfSpace (m : ℕ) :
+    Set.range (morseModelWithCornersHalfSpace m) = {x : MorseModel (m + 1) | 0 ≤ x (Fin.last m)} := by
+  ext x
+  constructor
+  · rintro ⟨z, rfl⟩
+    exact z.2
+  · intro hx
+    refine ⟨⟨x, hx⟩, rfl⟩
+
+theorem norm_levelSetLastBasis (m : ℕ) : ‖levelSetLastBasis (m := m)‖ = 1 := by
+  apply le_antisymm
+  · have hle : ∀ i : Fin (m + 1), ‖levelSetLastBasis (m := m) i‖ ≤ 1 := by
+      intro i
+      by_cases hi : i = Fin.last m
+      · subst i
+        simp [levelSetLastBasis]
+      · simp [levelSetLastBasis, hi]
+    exact (pi_norm_le_iff_of_nonempty (ι := Fin (m + 1)) (f := levelSetLastBasis (m := m))
+      (r := (1 : ℝ))).mpr hle
+  · have h1 : ‖levelSetLastBasis (m := m) (Fin.last m)‖ ≤ ‖levelSetLastBasis (m := m)‖ := by
+      have h := (pi_norm_le_iff_of_nonempty (ι := Fin (m + 1)) (f := levelSetLastBasis (m := m))
+        (r := ‖levelSetLastBasis (m := m)‖)).mp le_rfl
+      exact h (Fin.last m)
+    have h2 : ‖levelSetLastBasis (m := m) (Fin.last m)‖ = 1 := by
+      simp [levelSetLastBasis]
+    linarith
+
+theorem interior_morseHalfSpace_range (m : ℕ) :
+    interior ({x : MorseModel (m + 1) | 0 ≤ x (Fin.last m)} : Set (MorseModel (m + 1))) =
+      {x : MorseModel (m + 1) | 0 < x (Fin.last m)} := by
+  apply le_antisymm
+  · intro x hx
+    by_contra h
+    have hxle : 0 ≤ x (Fin.last m) := by
+      simpa using (interior_subset hx)
+    have hx0 : x (Fin.last m) = 0 := le_antisymm (not_lt.mp h) hxle
+    have hnh : (interior ({y : MorseModel (m + 1) | 0 ≤ y (Fin.last m)}) : Set _) ∈ 𝓝 x :=
+      isOpen_interior.mem_nhds hx
+    rcases Metric.mem_nhds_iff.mp hnh with ⟨ε, hε, hball⟩
+    let x' : MorseModel (m + 1) := x - (ε / 2) • levelSetLastBasis
+    have hx'lt : x' (Fin.last m) < 0 := by
+      change (HSub.hSub x (HSMul.hSMul (ε / 2) levelSetLastBasis)) (Fin.last m) < 0
+      rw [Pi.sub_apply, Pi.smul_apply, smul_eq_mul, hx0, levelSetLastBasis]
+      have hε2 : 0 < ε / 2 := by positivity
+      simp [hε2]
+    have hx'ball : x' ∈ Metric.ball x ε := by
+      rw [Metric.mem_ball, dist_eq_norm]
+      have hnorm : ‖x' - x‖ = ε / 2 := by
+        change ‖(HSub.hSub x (HSMul.hSMul (ε / 2) levelSetLastBasis)) - x‖ = ε / 2
+        have hsub : (HSub.hSub x (HSMul.hSMul (ε / 2) levelSetLastBasis)) - x =
+            -(HSMul.hSMul (ε / 2) levelSetLastBasis) := by
+          ext i
+          simp
+        rw [hsub, norm_neg]
+        rw [norm_smul]
+        rw [norm_levelSetLastBasis]
+        rw [Real.norm_eq_abs]
+        rw [abs_of_nonneg (by positivity : 0 ≤ ε / 2)]
+        ring
+      rw [hnorm]
+      linarith [hε]
+    exact (not_le_of_gt hx'lt) (by simpa using (interior_subset (hball hx'ball)))
+  · intro x hx
+    have hsub : {y : MorseModel (m + 1) | 0 < y (Fin.last m)} ⊆
+        {y : MorseModel (m + 1) | 0 ≤ y (Fin.last m)} := by
+      intro y hy
+      change 0 < y (Fin.last m) at hy
+      exact le_of_lt hy
+    exact interior_mono hsub (by
+      rw [(isOpen_morseHalfSpace_interior m).interior_eq]
+      exact hx)
+
+theorem frontier_morseHalfSpace_range (m : ℕ) :
+    frontier (Set.range (morseModelWithCornersHalfSpace m)) =
+      {x : MorseModel (m + 1) | x (Fin.last m) = 0} := by
+  rw [range_morseModelWithCornersHalfSpace]
+  rw [frontier, interior_morseHalfSpace_range]
+  have hclosed : IsClosed ({x : MorseModel (m + 1) | 0 ≤ x (Fin.last m)} : Set _) := by
+    exact isClosed_Ici.preimage (continuous_apply (Fin.last m))
+  have hclosure : closure ({x : MorseModel (m + 1) | 0 ≤ x (Fin.last m)} : Set _) =
+      {x : MorseModel (m + 1) | 0 ≤ x (Fin.last m)} := hclosed.closure_eq
+  rw [hclosure]
+  ext x
+  constructor
+  · intro hx
+    have hxle : 0 ≤ x (Fin.last m) := hx.1
+    have hxnot : ¬ 0 < x (Fin.last m) := hx.2
+    exact le_antisymm (not_lt.mp hxnot) hxle
+  · intro hx
+    constructor
+    · change 0 ≤ x (Fin.last m)
+      rw [hx]
+    · change ¬ 0 < x (Fin.last m)
+      rw [hx]
+      norm_num
+
+
+theorem sublevelInteriorChart_extend_last_pos {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x : SublevelSpace g a) (hx : g x.1 < a) (hg : ContDiff ℝ (⊤ : ℕ∞) g) :
+    0 < (sublevelInteriorChart g a x hx hg).extend (morseModelWithCornersHalfSpace m) x
+        (Fin.last m) := by
+  classical
+  have hspec : ∃ ε > 0, Metric.ball x.1 ε ⊆ {y : MorseModel (m + 1) | g y < a} := by
+    exact Metric.mem_nhds_iff.mp ((isOpen_Iio.preimage hg.continuous).mem_nhds hx)
+  let ρ : ℝ := Classical.choose hspec
+  have hρ : 0 < ρ ∧ Metric.ball x.1 ρ ⊆ {y : MorseModel (m + 1) | g y < a} :=
+    Classical.choose_spec hspec
+  let c : ℝ := ρ + ‖x.1‖ + 1
+  have htest : ρ = (Classical.choose (Metric.mem_nhds_iff.mp
+      ((isOpen_Iio.preimage hg.continuous).mem_nhds hx))) := rfl
+  have hsrc : x ∈ (sublevelInteriorChart g a x hx hg).source :=
+    mem_sublevelInteriorChart_source g a x hx hg
+  have hdist : dist x.1 x.1 < ρ := by
+    change dist x.1 x.1 < ρ at hsrc
+    exact hsrc
+  rw [OpenPartialHomeomorph.extend_coe]
+  have hchart : ((sublevelInteriorChart g a x hx hg) x : MorseModel (m + 1)) =
+      morseHalfSpaceShift c x.1 := by
+    simp only [sublevelInteriorChart]
+    change ((if h : dist x.1 x.1 < ρ then
+        (⟨morseHalfSpaceShift c x.1, _⟩ : MorseHalfSpace m) else ⟨morseHalfSpaceShift c x.1, _⟩ :
+          MorseHalfSpace m) : MorseModel (m + 1)) = morseHalfSpaceShift c x.1
+    rw [dif_pos hdist]
+  change 0 < ((sublevelInteriorChart g a x hx hg) x : MorseModel (m + 1)) (Fin.last m)
+  rw [hchart]
+  rw [morseHalfSpaceShift_last]
+  have hnormx : |x.1 (Fin.last m)| ≤ ‖x.1‖ := by
+    have hle : ‖x.1 (Fin.last m)‖ ≤ ‖x.1‖ := by
+      have h := (pi_norm_le_iff_of_nonempty (ι := Fin (m + 1)) (f := x.1) (r := ‖x.1‖))
+      exact h.mp le_rfl (Fin.last m)
+    simpa using hle
+  have hxlow : -(‖x.1‖) ≤ x.1 (Fin.last m) := (abs_le.mp hnormx).1
+  dsimp [c]
+  linarith [hρ.1, hxlow]
+
+
+theorem sublevelBoundary_iff_mem_levelSet {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hreg : ∀ x : MorseModel (m + 1), g x = a → fderiv ℝ g x ≠ 0)
+    (x : SublevelSpace g a) :
+    @ModelWithCorners.IsBoundaryPoint ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (SublevelSpace g a) _ (sublevelChartedSpace g a hg hreg) x ↔
+      g x.1 = a := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m) (SublevelSpace g a) := sublevelChartedSpace g a hg hreg
+  rw [@ModelWithCorners.isBoundaryPoint_iff ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (SublevelSpace g a) _ (sublevelChartedSpace g a hg hreg)]
+  rw [frontier_morseHalfSpace_range]
+  constructor
+  · intro hx
+    by_contra hxne
+    have hlt : g x.1 < a := lt_of_le_of_ne (show g x.1 ≤ a from x.2) hxne
+    have hchart : chartAt (MorseHalfSpace m) x = sublevelInteriorChart g a x hlt hg := by
+      change (if h : g x.1 = a then sublevelBoundaryChart g a x h hg (hreg x.1 h)
+        else sublevelInteriorChart g a x (lt_of_le_of_ne (show g x.1 ≤ a from x.2) h) hg) =
+        sublevelInteriorChart g a x hlt hg
+      rw [dif_neg hxne]
+    change (chartAt (MorseHalfSpace m) x).extend (morseModelWithCornersHalfSpace m) x ∈
+      {w : MorseModel (m + 1) | w (Fin.last m) = 0} at hx
+    rw [hchart] at hx
+    have hpos := sublevelInteriorChart_extend_last_pos g a x hlt hg
+    have hzero : (sublevelInteriorChart g a x hlt hg).extend (morseModelWithCornersHalfSpace m) x
+        (Fin.last m) = 0 := by
+      change (sublevelInteriorChart g a x hlt hg).extend (morseModelWithCornersHalfSpace m) x ∈
+        {w : MorseModel (m + 1) | w (Fin.last m) = 0} at hx
+      exact hx
+    linarith
+  · intro hx
+    have hchart : chartAt (MorseHalfSpace m) x = sublevelBoundaryChart g a x hx hg (hreg x.1 hx) := by
+      change (if h : g x.1 = a then sublevelBoundaryChart g a x h hg (hreg x.1 h)
+        else sublevelInteriorChart g a x (lt_of_le_of_ne (show g x.1 ≤ a from x.2) h) hg) =
+        sublevelBoundaryChart g a x hx hg (hreg x.1 hx)
+      rw [dif_pos hx]
+    change (chartAt (MorseHalfSpace m) x).extend (morseModelWithCornersHalfSpace m) x ∈
+      {w : MorseModel (m + 1) | w (Fin.last m) = 0}
+    rw [hchart]
+    have hzero := sublevelBoundaryChart_extend_last_zero g a x hx hg (hreg x.1 hx)
+    change (sublevelBoundaryChart g a x hx hg (hreg x.1 hx)).extend
+        (morseModelWithCornersHalfSpace m) x (Fin.last m) = 0
+    exact hzero
 
 end DifferentialGeometry.Topology.Morse
