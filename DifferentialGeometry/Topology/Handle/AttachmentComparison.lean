@@ -1,9 +1,9 @@
-import DifferentialGeometry.Topology.Attachment.QuotientProduct
 import DifferentialGeometry.Topology.Attachment.Union
 import DifferentialGeometry.Topology.Handle.Basic
 import DifferentialGeometry.Topology.Handle.Defs
 import DifferentialGeometry.Topology.Homotopy.ClosedCell
 import DifferentialGeometry.Topology.Homotopy.EquivUnder
+import Mathlib.Topology.CompactOpen
 import Mathlib.Topology.UnitInterval
 
 namespace DifferentialGeometry.Topology.Handle
@@ -14,16 +14,16 @@ open DifferentialGeometry.Topology.Homotopy
 open ContinuousMap
 open unitInterval
 
-def thickenedPsi (k l : ℕ) {X : Type u} (psi : CellBoundary k → X) : AttachingRegion k l → X :=
+def thickenedAttachingMap (k l : ℕ) {X : Type u} (psi : CellBoundary k → X) : AttachingRegion k l → X :=
   fun p => psi p.1
 
 @[simp]
-theorem thickenedPsi_apply (k l : ℕ) {X : Type u} (psi : CellBoundary k → X)
-    (s : CellBoundary k) (y : ClosedCell l) : thickenedPsi k l psi (s, y) = psi s := by
+theorem thickenedAttachingMap_apply (k l : ℕ) {X : Type u} (psi : CellBoundary k → X)
+    (s : CellBoundary k) (y : ClosedCell l) : thickenedAttachingMap k l psi (s, y) = psi s := by
   rfl
 
-theorem continuous_thickenedPsi {k l : ℕ} {X : Type u} [TopologicalSpace X]
-    (psi : CellBoundary k → X) (hpsi : Continuous psi) : Continuous (thickenedPsi k l psi) := by
+theorem continuous_thickenedAttachingMap {k l : ℕ} {X : Type u} [TopologicalSpace X]
+    (psi : CellBoundary k → X) (hpsi : Continuous psi) : Continuous (thickenedAttachingMap k l psi) := by
   change Continuous (fun p : AttachingRegion k l => psi (p.1 : CellBoundary k))
   exact hpsi.comp continuous_fst
 
@@ -35,7 +35,7 @@ private def collapseMap (k l : ℕ) {X : Type u} (psi : CellBoundary k → X) :
 
 private theorem collapseMap_rel (k l : ℕ) {X : Type u} (psi : CellBoundary k → X)
     (a b : StandardHandle k l ⊕ X)
-    (h : DifferentialGeometry.Topology.adjunctionRel (attachingInclusion k l) (thickenedPsi k l psi) a b) :
+    (h : DifferentialGeometry.Topology.adjunctionRel (attachingInclusion k l) (thickenedAttachingMap k l psi) a b) :
     collapseMap k l psi a = collapseMap k l psi b := by
   rcases h with ⟨x, hx | hx⟩
   · rcases hx with ⟨ha, hb⟩
@@ -56,11 +56,11 @@ private theorem collapseMap_rel (k l : ℕ) {X : Type u} (psi : CellBoundary k �
     exact (DifferentialGeometry.Topology.adjunction_coherence (cellBoundaryInclusion k) psi s).symm
 
 private def thickenMap (k l : ℕ) {X : Type u} (psi : CellBoundary k → X) :
-    ClosedCell k ⊕ X → AdjunctionSpace k l (thickenedPsi k l psi) :=
+    ClosedCell k ⊕ X → AdjunctionSpace k l (thickenedAttachingMap k l psi) :=
   Sum.elim (fun x : ClosedCell k =>
-    DifferentialGeometry.Topology.adjunctionCell (attachingInclusion k l) (thickenedPsi k l psi)
+    DifferentialGeometry.Topology.adjunctionCell (attachingInclusion k l) (thickenedAttachingMap k l psi)
       (x, closedCellCenter l))
-    (DifferentialGeometry.Topology.adjunctionLower (i := attachingInclusion k l) (thickenedPsi k l psi))
+    (DifferentialGeometry.Topology.adjunctionLower (i := attachingInclusion k l) (thickenedAttachingMap k l psi))
 
 private theorem thickenMap_rel (k l : ℕ) {X : Type u} (psi : CellBoundary k → X)
     (a b : ClosedCell k ⊕ X)
@@ -70,26 +70,26 @@ private theorem thickenMap_rel (k l : ℕ) {X : Type u} (psi : CellBoundary k �
   · rcases hx with ⟨ha, hb⟩
     subst a
     subst b
-    change DifferentialGeometry.Topology.adjunctionCell (attachingInclusion k l) (thickenedPsi k l psi)
+    change DifferentialGeometry.Topology.adjunctionCell (attachingInclusion k l) (thickenedAttachingMap k l psi)
         (cellBoundaryInclusion k x, closedCellCenter l) =
-      DifferentialGeometry.Topology.adjunctionLower (i := attachingInclusion k l) (thickenedPsi k l psi)
+      DifferentialGeometry.Topology.adjunctionLower (i := attachingInclusion k l) (thickenedAttachingMap k l psi)
         (psi x)
     exact DifferentialGeometry.Topology.adjunction_coherence (attachingInclusion k l)
-      (thickenedPsi k l psi) (x, closedCellCenter l)
+      (thickenedAttachingMap k l psi) (x, closedCellCenter l)
   · rcases hx with ⟨hb, ha⟩
     subst a
     subst b
-    change DifferentialGeometry.Topology.adjunctionLower (i := attachingInclusion k l) (thickenedPsi k l psi)
+    change DifferentialGeometry.Topology.adjunctionLower (i := attachingInclusion k l) (thickenedAttachingMap k l psi)
         (psi x) =
-      DifferentialGeometry.Topology.adjunctionCell (attachingInclusion k l) (thickenedPsi k l psi)
+      DifferentialGeometry.Topology.adjunctionCell (attachingInclusion k l) (thickenedAttachingMap k l psi)
         (cellBoundaryInclusion k x, closedCellCenter l)
     exact (DifferentialGeometry.Topology.adjunction_coherence (attachingInclusion k l)
-      (thickenedPsi k l psi) (x, closedCellCenter l)).symm
+      (thickenedAttachingMap k l psi) (x, closedCellCenter l)).symm
 
 noncomputable def collapse (k l : ℕ) {X : Type u} [TopologicalSpace X]
-    (psi : CellBoundary k → X) : C(AdjunctionSpace k l (thickenedPsi k l psi), CellAdjunctionSpace k psi) :=
+    (psi : CellBoundary k → X) : C(AdjunctionSpace k l (thickenedAttachingMap k l psi), CellAdjunctionSpace k psi) :=
   ⟨Quot.lift (collapseMap k l psi) (collapseMap_rel k l psi),
-    continuous_adjunction_lift (attachingInclusion k l) (thickenedPsi k l psi) (collapseMap_rel k l psi)
+    continuous_adjunction_lift (attachingInclusion k l) (thickenedAttachingMap k l psi) (collapseMap_rel k l psi)
       (by
         dsimp [collapseMap]
         refine Continuous.sumElim ?_ ?_
@@ -97,38 +97,38 @@ noncomputable def collapse (k l : ℕ) {X : Type u} [TopologicalSpace X]
         · exact continuous_adjunctionLower (i := cellBoundaryInclusion k) psi)⟩
 
 noncomputable def thicken (k l : ℕ) {X : Type u} [TopologicalSpace X]
-    (psi : CellBoundary k → X) : C(CellAdjunctionSpace k psi, AdjunctionSpace k l (thickenedPsi k l psi)) :=
+    (psi : CellBoundary k → X) : C(CellAdjunctionSpace k psi, AdjunctionSpace k l (thickenedAttachingMap k l psi)) :=
   ⟨Quot.lift (thickenMap k l psi) (thickenMap_rel k l psi),
     continuous_adjunction_lift (cellBoundaryInclusion k) psi (thickenMap_rel k l psi)
       (by
         dsimp [thickenMap]
         refine Continuous.sumElim ?_ ?_
-        · exact (continuous_adjunctionCell (attachingInclusion k l) (thickenedPsi k l psi)).comp
+        · exact (continuous_adjunctionCell (attachingInclusion k l) (thickenedAttachingMap k l psi)).comp
             (continuous_id.prodMk continuous_const)
-        · exact continuous_adjunctionLower (i := attachingInclusion k l) (thickenedPsi k l psi))⟩
+        · exact continuous_adjunctionLower (i := attachingInclusion k l) (thickenedAttachingMap k l psi))⟩
 
 theorem collapse_lower {k l : ℕ} {X : Type u} [TopologicalSpace X]
     (psi : CellBoundary k → X) (x : X) :
-    collapse k l psi (lower (thickenedPsi k l psi) x) =
+    collapse k l psi (lower (thickenedAttachingMap k l psi) x) =
       DifferentialGeometry.Topology.adjunctionLower (i := cellBoundaryInclusion k) psi x := by
   rfl
 
 theorem collapse_cell {k l : ℕ} {X : Type u} [TopologicalSpace X]
     (psi : CellBoundary k → X) (p : StandardHandle k l) :
-    collapse k l psi (cell (thickenedPsi k l psi) p) =
+    collapse k l psi (cell (thickenedAttachingMap k l psi) p) =
       DifferentialGeometry.Topology.adjunctionCell (cellBoundaryInclusion k) psi p.1 := by
   rfl
 
 theorem thicken_lower {k l : ℕ} {X : Type u} [TopologicalSpace X]
     (psi : CellBoundary k → X) (x : X) :
     thicken k l psi (DifferentialGeometry.Topology.adjunctionLower (i := cellBoundaryInclusion k) psi x) =
-      lower (thickenedPsi k l psi) x := by
+      lower (thickenedAttachingMap k l psi) x := by
   rfl
 
 theorem thicken_cell {k l : ℕ} {X : Type u} [TopologicalSpace X]
     (psi : CellBoundary k → X) (x : ClosedCell k) :
     thicken k l psi (DifferentialGeometry.Topology.adjunctionCell (cellBoundaryInclusion k) psi x) =
-      cell (thickenedPsi k l psi) (x, closedCellCenter l) := by
+      cell (thickenedAttachingMap k l psi) (x, closedCellCenter l) := by
   rfl
 
 theorem collapse_comp_thicken {k l : ℕ} {X : Type u} [TopologicalSpace X]
@@ -145,24 +145,24 @@ theorem collapse_comp_thicken {k l : ℕ} {X : Type u} [TopologicalSpace X]
       adjunctionMk]
 
 private def homotopyCellMap (k l : ℕ) {X : Type u} (psi : CellBoundary k → X) :
-    I × StandardHandle k l → AdjunctionSpace k l (thickenedPsi k l psi) :=
+    I × StandardHandle k l → AdjunctionSpace k l (thickenedAttachingMap k l psi) :=
   fun p => DifferentialGeometry.Topology.adjunctionCell (attachingInclusion k l)
-    (thickenedPsi k l psi) (p.2.1, radialStep l p.1 p.2.2)
+    (thickenedAttachingMap k l psi) (p.2.1, radialStep l p.1 p.2.2)
 
 private def homotopyLowerMap (k l : ℕ) {X : Type u} (psi : CellBoundary k → X) :
-    I × X → AdjunctionSpace k l (thickenedPsi k l psi) :=
+    I × X → AdjunctionSpace k l (thickenedAttachingMap k l psi) :=
   fun p => DifferentialGeometry.Topology.adjunctionLower (i := attachingInclusion k l)
-    (thickenedPsi k l psi) p.2
+    (thickenedAttachingMap k l psi) p.2
 
 private def homotopyRep (k l : ℕ) {X : Type u} (psi : CellBoundary k → X) (t : I) :
-    StandardHandle k l ⊕ X → AdjunctionSpace k l (thickenedPsi k l psi) :=
+    StandardHandle k l ⊕ X → AdjunctionSpace k l (thickenedAttachingMap k l psi) :=
   Sum.elim (fun q : StandardHandle k l => homotopyCellMap k l psi (t, q))
     (fun x : X => homotopyLowerMap k l psi (t, x))
 
 private theorem homotopyRep_rel (k l : ℕ) {X : Type u} (psi : CellBoundary k → X) (t : I)
     (a b : StandardHandle k l ⊕ X)
     (h : DifferentialGeometry.Topology.adjunctionRel (attachingInclusion k l)
-      (thickenedPsi k l psi) a b) :
+      (thickenedAttachingMap k l psi) a b) :
     homotopyRep k l psi t a = homotopyRep k l psi t b := by
   rcases h with ⟨x, hx | hx⟩
   · rcases hx with ⟨ha, hb⟩
@@ -171,34 +171,34 @@ private theorem homotopyRep_rel (k l : ℕ) {X : Type u} (psi : CellBoundary k �
     rcases x with ⟨s, y⟩
     simpa [homotopyRep, homotopyCellMap, homotopyLowerMap] using
       (DifferentialGeometry.Topology.adjunction_coherence (attachingInclusion k l)
-        (thickenedPsi k l psi) (s, radialStep l t y))
+        (thickenedAttachingMap k l psi) (s, radialStep l t y))
   · rcases hx with ⟨hb, ha⟩
     subst a
     subst b
     rcases x with ⟨s, y⟩
     simpa [homotopyRep, homotopyCellMap, homotopyLowerMap] using
       (DifferentialGeometry.Topology.adjunction_coherence (attachingInclusion k l)
-        (thickenedPsi k l psi) (s, radialStep l t y)).symm
+        (thickenedAttachingMap k l psi) (s, radialStep l t y)).symm
 
 noncomputable def thickenCollapseHomotopy (k l : ℕ) {X : Type u} [TopologicalSpace X]
     (psi : CellBoundary k → X) :
-    ContinuousMap.HomotopyRel (ContinuousMap.id (AdjunctionSpace k l (thickenedPsi k l psi)))
+    ContinuousMap.HomotopyRel (ContinuousMap.id (AdjunctionSpace k l (thickenedAttachingMap k l psi)))
       ((thicken k l psi).comp (collapse k l psi))
-      (Set.range (lower (thickenedPsi k l psi))) where
+      (Set.range (lower (thickenedAttachingMap k l psi))) where
   toHomotopy := {
-    toContinuousMap := ⟨fun p : I × AdjunctionSpace k l (thickenedPsi k l psi) =>
+    toContinuousMap := ⟨fun p : I × AdjunctionSpace k l (thickenedAttachingMap k l psi) =>
       Quot.lift (fun z : StandardHandle k l ⊕ X => homotopyRep k l psi p.1 z)
         (homotopyRep_rel k l psi p.1) p.2, by
           have hCell : Continuous (homotopyCellMap k l psi) := by
             dsimp [homotopyCellMap]
-            exact (continuous_adjunctionCell (attachingInclusion k l) (thickenedPsi k l psi)).comp
+            exact (continuous_adjunctionCell (attachingInclusion k l) (thickenedAttachingMap k l psi)).comp
               ((continuous_fst.comp continuous_snd).prodMk
                 ((continuous_radialStep l).comp (continuous_fst.prodMk
                   (continuous_snd.comp continuous_snd))))
           have hLower : Continuous (homotopyLowerMap k l psi) := by
             dsimp [homotopyLowerMap]
             exact (continuous_adjunctionLower (i := attachingInclusion k l)
-              (thickenedPsi k l psi)).comp continuous_snd
+              (thickenedAttachingMap k l psi)).comp continuous_snd
           have hf_eq : (fun p : I × (StandardHandle k l ⊕ X) => homotopyRep k l psi p.1 p.2) =
               (Sum.elim (homotopyCellMap k l psi) (homotopyLowerMap k l psi)) ∘
                 (Homeomorph.prodSumDistrib (X := I) (Y := StandardHandle k l) (Z := X)) := by
@@ -216,10 +216,12 @@ noncomputable def thickenCollapseHomotopy (k l : ℕ) {X : Type u} [TopologicalS
             rw [hf_eq]
             exact (Continuous.sumElim hCell hLower).comp
               (Homeomorph.prodSumDistrib (X := I) (Y := StandardHandle k l) (Z := X)).continuous
-          exact continuous_quot_lift_prod (r := DifferentialGeometry.Topology.adjunctionRel
-              (attachingInclusion k l) (thickenedPsi k l psi))
-            (f := fun p : I × (StandardHandle k l ⊕ X) => homotopyRep k l psi p.1 p.2)
-            (fun t a b h => homotopyRep_rel k l psi t a b h) hcont_f⟩
+          exact (Topology.IsQuotientMap.continuous_lift_prod_right
+            (isQuotientMap_quot_mk (r := DifferentialGeometry.Topology.adjunctionRel
+              (attachingInclusion k l) (thickenedAttachingMap k l psi))) (Y := I)
+            (g := fun p : I × AdjunctionSpace k l (thickenedAttachingMap k l psi) =>
+              Quot.lift (fun z : StandardHandle k l ⊕ X => homotopyRep k l psi p.1 z)
+                (homotopyRep_rel k l psi p.1) p.2) hcont_f)⟩
     map_zero_left := by
       apply Quot.ind
       intro z
@@ -243,26 +245,26 @@ noncomputable def thickenCollapseHomotopy (k l : ℕ) {X : Type u} [TopologicalS
     intro t q hq
     rcases hq with ⟨x, rfl⟩
     change Quot.lift (fun z : StandardHandle k l ⊕ X => homotopyRep k l psi t z)
-        (homotopyRep_rel k l psi t) (lower (thickenedPsi k l psi) x) =
-      lower (thickenedPsi k l psi) x
+        (homotopyRep_rel k l psi t) (lower (thickenedAttachingMap k l psi) x) =
+      lower (thickenedAttachingMap k l psi) x
     simp [homotopyRep, homotopyLowerMap, lower, adjunctionLower, adjunctionMk]
 
 theorem thickenCollapseHomotopy_apply_cell {k l : ℕ} {X : Type u} [TopologicalSpace X]
     (psi : CellBoundary k → X) (t : I) (p : StandardHandle k l) :
-    thickenCollapseHomotopy k l psi (t, cell (thickenedPsi k l psi) p) =
-      cell (thickenedPsi k l psi) (p.1, radialStep l t p.2) := by
+    thickenCollapseHomotopy k l psi (t, cell (thickenedAttachingMap k l psi) p) =
+      cell (thickenedAttachingMap k l psi) (p.1, radialStep l t p.2) := by
   rfl
 
 theorem thickenCollapseHomotopy_apply_lower {k l : ℕ} {X : Type u} [TopologicalSpace X]
     (psi : CellBoundary k → X) (t : I) (x : X) :
-    thickenCollapseHomotopy k l psi (t, lower (thickenedPsi k l psi) x) =
-      lower (thickenedPsi k l psi) x := by
+    thickenCollapseHomotopy k l psi (t, lower (thickenedAttachingMap k l psi) x) =
+      lower (thickenedAttachingMap k l psi) x := by
   rfl
 
 theorem collapse_comp_lower {k l : ℕ} {X : Type u} [TopologicalSpace X]
     (psi : CellBoundary k → X) :
-    (collapse k l psi).comp ⟨lower (thickenedPsi k l psi),
-        continuous_adjunctionLower (i := attachingInclusion k l) (thickenedPsi k l psi)⟩ =
+    (collapse k l psi).comp ⟨lower (thickenedAttachingMap k l psi),
+        continuous_adjunctionLower (i := attachingInclusion k l) (thickenedAttachingMap k l psi)⟩ =
       ⟨DifferentialGeometry.Topology.adjunctionLower (i := cellBoundaryInclusion k) psi,
         continuous_adjunctionLower (i := cellBoundaryInclusion k) psi⟩ := by
   apply ContinuousMap.ext
@@ -274,8 +276,8 @@ theorem thicken_comp_lower {k l : ℕ} {X : Type u} [TopologicalSpace X]
     (thicken k l psi).comp
         ⟨DifferentialGeometry.Topology.adjunctionLower (i := cellBoundaryInclusion k) psi,
           continuous_adjunctionLower (i := cellBoundaryInclusion k) psi⟩ =
-      ⟨lower (thickenedPsi k l psi),
-        continuous_adjunctionLower (i := attachingInclusion k l) (thickenedPsi k l psi)⟩ := by
+      ⟨lower (thickenedAttachingMap k l psi),
+        continuous_adjunctionLower (i := attachingInclusion k l) (thickenedAttachingMap k l psi)⟩ := by
   apply ContinuousMap.ext
   intro x
   exact thicken_lower (k := k) (l := l) psi x
@@ -283,8 +285,8 @@ theorem thicken_comp_lower {k l : ℕ} {X : Type u} [TopologicalSpace X]
 noncomputable def handleCellAdjunctionHomotopyEquivUnder (k l : ℕ) {X : Type u}
     [TopologicalSpace X] (psi : CellBoundary k → X) :
     HomotopyEquivUnder
-      ⟨lower (thickenedPsi k l psi),
-        continuous_adjunctionLower (i := attachingInclusion k l) (thickenedPsi k l psi)⟩
+      ⟨lower (thickenedAttachingMap k l psi),
+        continuous_adjunctionLower (i := attachingInclusion k l) (thickenedAttachingMap k l psi)⟩
       ⟨DifferentialGeometry.Topology.adjunctionLower (i := cellBoundaryInclusion k) psi,
         continuous_adjunctionLower (i := cellBoundaryInclusion k) psi⟩ where
   toFun := collapse k l psi
