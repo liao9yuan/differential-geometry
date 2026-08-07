@@ -9,7 +9,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
-namespace TensorHeatEquation
+namespace TensorSpectral
+namespace SobolevScale
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -18,6 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -72,7 +74,8 @@ omit [NeZero (Module.finrank ℝ E)] in
       u.coeff i :=
   rfl
 
-end TensorHeatEquation
+end SobolevScale
+end TensorSpectral
 end Parabolic
 end Analysis
 end DifferentialGeometry
