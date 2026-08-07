@@ -2,8 +2,10 @@ import DifferentialGeometry.Topology.Attachment.Defs
 import Mathlib.Analysis.InnerProductSpace.Calculus
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.SpecialFunctions.Sqrt
+import Mathlib.Geometry.Manifold.Instances.Sphere
 import Mathlib.Geometry.Manifold.Instances.Real
 import Mathlib.Geometry.Manifold.IsManifold.Basic
+import Mathlib.LinearAlgebra.Dimension.Finrank
 
 namespace DifferentialGeometry.Topology.Handle
 
@@ -1619,6 +1621,141 @@ noncomputable def standardHandleIsManifold (m n : ℕ) :
       (ClosedCell (m + 1) × ClosedCell (n + 1)) _ (standardHandleChartedSpaceSucc m n) := by
   letI := standardHandleChartedSpaceSucc m n
   exact { toHasGroupoid := standardHandleHasGroupoid m n }
+
+noncomputable def cellBoundarySphereHomeomorph (k : ℕ) :
+    CellBoundary k ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 where
+  toFun := fun x => ⟨x.1, by
+    change dist (x.1 : EuclideanSpace ℝ (Fin k)) 0 = 1
+    rw [dist_eq_norm, sub_zero]
+    exact x.2⟩
+  invFun := fun x => ⟨x.1, by
+    have hx := x.2
+    change dist (x.1 : EuclideanSpace ℝ (Fin k)) 0 = 1 at hx
+    rw [dist_eq_norm, sub_zero] at hx
+    exact hx⟩
+  left_inv := by
+    intro x
+    apply Subtype.ext
+    rfl
+  right_inv := by
+    intro x
+    apply Subtype.ext
+    rfl
+  continuous_toFun := by
+    exact Continuous.subtype_mk continuous_subtype_val (fun x => by
+      change dist (x.1 : EuclideanSpace ℝ (Fin k)) 0 = 1
+      rw [dist_eq_norm, sub_zero]
+      exact x.2)
+  continuous_invFun := by
+    exact Continuous.subtype_mk continuous_subtype_val (fun x => by
+      have hx := x.2
+      change dist (x.1 : EuclideanSpace ℝ (Fin k)) 0 = 1 at hx
+      rw [dist_eq_norm, sub_zero] at hx
+      exact hx)
+
+instance (k : ℕ) : Neg (CellBoundary k) :=
+  ⟨fun x => ⟨-x.1, by simp [x.2]⟩⟩
+
+noncomputable def cellBoundaryChart (k : ℕ) [NeZero k]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    (v : CellBoundary k) :
+    OpenPartialHomeomorph (CellBoundary k) (EuclideanSpace ℝ (Fin (k - 1))) :=
+  (cellBoundarySphereHomeomorph k).toOpenPartialHomeomorph ≫ₕ
+    stereographic' (k - 1) (cellBoundarySphereHomeomorph k v)
+
+@[reducible]
+noncomputable def cellBoundaryChartedSpace (k : ℕ) [NeZero k]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)] :
+    ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) where
+  atlas := Set.range (fun v : CellBoundary k => cellBoundaryChart k v)
+  chartAt := fun v : CellBoundary k => cellBoundaryChart k (-v)
+  mem_chart_source := by
+    intro v
+    have hne : v ≠ -v := by
+      intro h
+      have h0 : (v : EuclideanSpace ℝ (Fin k)) = 0 := by
+        have h2 : (2 : ℝ) • (v : EuclideanSpace ℝ (Fin k)) = 0 := by
+          have h' : (v : EuclideanSpace ℝ (Fin k)) = -(v : EuclideanSpace ℝ (Fin k)) :=
+            congrArg (fun z : CellBoundary k => (z : EuclideanSpace ℝ (Fin k))) h
+          have hplus : (v : EuclideanSpace ℝ (Fin k)) + (v : EuclideanSpace ℝ (Fin k)) = 0 := by
+            nth_rewrite 1 [h']
+            simp
+          simpa [two_smul] using hplus
+        exact smul_eq_zero.mp h2 |>.resolve_left (by norm_num)
+      have hnorm : ‖(v : EuclideanSpace ℝ (Fin k))‖ = 1 := v.2
+      rw [h0] at hnorm
+      norm_num at hnorm
+    change v ∈ (cellBoundaryChart k (-v)).source
+    dsimp [cellBoundaryChart]
+    constructor
+    · trivial
+    · change (cellBoundarySphereHomeomorph k v) ∈
+        (stereographic' (k - 1) (cellBoundarySphereHomeomorph k (-v))).source
+      rw [stereographic'_source]
+      change (cellBoundarySphereHomeomorph k v) ≠ (cellBoundarySphereHomeomorph k (-v))
+      exact fun hh => hne (by
+        have hh' := congrArg (fun z : Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 => z.1) hh
+        exact Subtype.ext hh')
+  chart_mem_atlas := fun v => ⟨-v, rfl⟩
+
+@[reducible]
+noncomputable def cellBoundaryHasGroupoid (k : ℕ) [NeZero k]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)] :
+    @HasGroupoid (EuclideanSpace ℝ (Fin (k - 1))) _ (CellBoundary k) _
+      (cellBoundaryChartedSpace k)
+      (contDiffGroupoid (↑(⊤ : ℕ∞) : WithTop ℕ∞) (𝓡 (k - 1))) := by
+  classical
+  letI := cellBoundaryChartedSpace k
+  refine hasGroupoid_of_pregroupoid (contDiffPregroupoid (↑(⊤ : ℕ∞) : WithTop ℕ∞) (𝓡 (k - 1))) ?_
+  intro e e' he he'
+  rcases he with ⟨v₁, rfl⟩
+  rcases he' with ⟨v₂, rfl⟩
+  let h : CellBoundary k ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 :=
+    cellBoundarySphereHomeomorph k
+  let s₁ : OpenPartialHomeomorph (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1)
+      (EuclideanSpace ℝ (Fin (k - 1))) := stereographic' (k - 1) (h v₁)
+  let s₂ : OpenPartialHomeomorph (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1)
+      (EuclideanSpace ℝ (Fin (k - 1))) := stereographic' (k - 1) (h v₂)
+  have hmid : h.toOpenPartialHomeomorph.symm ≫ₕ h.toOpenPartialHomeomorph =
+      (OpenPartialHomeomorph.refl (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1) :
+        OpenPartialHomeomorph (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1)
+          (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1)) := by
+    apply OpenPartialHomeomorph.ext
+    · intro x
+      change h.toPartialEquiv.toFun (h.toOpenPartialHomeomorph.symm x) = x
+      exact h.right_inv x
+    · intro x
+      change h.toPartialEquiv.toFun (h.toOpenPartialHomeomorph.symm x) = x
+      exact h.right_inv x
+    · ext x
+      simp
+  have ht : (cellBoundaryChart k v₁).symm ≫ₕ (cellBoundaryChart k v₂) = s₁.symm ≫ₕ s₂ := by
+    dsimp [cellBoundaryChart]
+    rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm]
+    change (s₁.symm ≫ₕ h.toOpenPartialHomeomorph.symm) ≫ₕ
+        (h.toOpenPartialHomeomorph ≫ₕ s₂) = s₁.symm ≫ₕ s₂
+    rw [OpenPartialHomeomorph.trans_assoc]
+    rw [← OpenPartialHomeomorph.trans_assoc (e'' := s₂)]
+    rw [hmid]
+    simp
+  rw [ht]
+  have hmemOmega : s₁.symm ≫ₕ s₂ ∈ contDiffGroupoid (⊤ : WithTop ℕ∞) (𝓡 (k - 1)) :=
+    (inferInstance : HasGroupoid (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1)
+      (contDiffGroupoid (⊤ : WithTop ℕ∞) (𝓡 (k - 1)))).compatible ⟨h v₁, rfl⟩ ⟨h v₂, rfl⟩
+  have hmemInfty : s₁.symm ≫ₕ s₂ ∈ contDiffGroupoid (↑(⊤ : ℕ∞) : WithTop ℕ∞) (𝓡 (k - 1)) :=
+    contDiffGroupoid_le (by exact le_top : (⊤ : ℕ∞) ≤ (⊤ : WithTop ℕ∞)) hmemOmega
+  have hm : s₁.symm ≫ₕ s₂ ∈ Pregroupoid.groupoid
+      (contDiffPregroupoid (↑(⊤ : ℕ∞) : WithTop ℕ∞) (𝓡 (k - 1))) := by
+    simpa [contDiffGroupoid] using hmemInfty
+  exact (mem_groupoid_of_pregroupoid.mp hm).1
+
+@[reducible]
+noncomputable def cellBoundaryIsManifold (k : ℕ) [NeZero k]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)] :
+    @IsManifold ℝ _ (EuclideanSpace ℝ (Fin (k - 1))) _ _ (EuclideanSpace ℝ (Fin (k - 1))) _
+      (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) _ (cellBoundaryChartedSpace k) := by
+  letI := cellBoundaryChartedSpace k
+  exact { toHasGroupoid := cellBoundaryHasGroupoid k }
 
 end
 
