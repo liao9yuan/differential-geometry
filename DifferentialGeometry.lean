@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Calculus.CLMNeumann
 import DifferentialGeometry.Analysis.Calculus.CompactCutoff
 import DifferentialGeometry.Analysis.Calculus.ContDiffExtendInterval
 import DifferentialGeometry.Analysis.Calculus.ContDiffOnTsum
+import DifferentialGeometry.Analysis.Calculus.CurveDerivative
 import DifferentialGeometry.Analysis.Calculus.Cutoff
 import DifferentialGeometry.Analysis.Calculus.CutoffProfile
 import DifferentialGeometry.Analysis.Calculus.DyadicScale

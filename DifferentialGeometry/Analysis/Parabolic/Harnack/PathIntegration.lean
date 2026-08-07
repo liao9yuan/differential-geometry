@@ -171,6 +171,29 @@ theorem harnack_endpoint_of_li_yau_bound
       halpha (gradient t) (velocity t)
     nlinarith [hliYau t ht]
 
+theorem harnack_endpoint_of_li_yau_bound_abstract
+    {u derivative timePart gradSq innerGV speedSq : ℝ → ℝ} {a b c alpha : ℝ}
+    (ha : 0 < a) (hab : a ≤ b)
+    (hu : ∀ t ∈ Icc a b, 0 < u t)
+    (hderivative : ContinuousOn derivative (Icc a b))
+    (hspeed : ContinuousOn speedSq (Icc a b))
+    (hu_deriv : ∀ t ∈ Icc a b, HasDerivAt u (derivative t) t)
+    (hpath : ∀ t ∈ Icc a b, derivative t / u t = timePart t + innerGV t)
+    (hliYau : ∀ t ∈ Icc a b, -(c / t) + gradSq t / alpha ≤ timePart t)
+    (hquad : ∀ t ∈ Icc a b, -(alpha / 4) * speedSq t ≤ gradSq t / alpha + innerGV t) :
+    u a ≤ (b / a) ^ c * Real.exp (∫ t in a..b, alpha / 4 * speedSq t) * u b := by
+  apply harnack_endpoint_of_derivative_lower_bound_with_time_pole
+    (u := u) (derivative := derivative)
+    (error := fun t => alpha / 4 * speedSq t)
+    ha hab hu hderivative
+  · exact continuousOn_const.mul hspeed
+  · exact hu_deriv
+  · intro t ht
+    rw [hpath t ht]
+    have hly := hliYau t ht
+    have hq := hquad t ht
+    nlinarith
+
 end DifferentialGeometry.Analysis.Parabolic.Harnack
 
 end
