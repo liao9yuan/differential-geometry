@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.Alternating.Wedge
 import DifferentialGeometry.Tensor.Auxiliary.Perm
+import Mathlib.Analysis.Calculus.DifferentialForm.Basic
 
 noncomputable section
 
@@ -347,5 +348,78 @@ theorem uncurryFin_precompR_eq (f : N →L[𝕜] N' →L[𝕜] N'')
             rw [hsum, pow_add, pow_mul, neg_one_sq, one_pow, one_mul]]
 
 end ContinuousAlternatingMap
+
+namespace DifferentialForm
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  {n k l : ℕ} {x : E}
+
+theorem extDeriv_eq_uncurryFin (ω : E → E [⋀^Fin n]→L[ℝ] F)
+    (hω : DifferentiableAt ℝ ω x) :
+    extDeriv ω x = ContinuousAlternatingMap.uncurryFin (fderiv ℝ ω x) := by
+  ext v
+  rw [extDeriv_apply hω, ContinuousAlternatingMap.uncurryFin_apply]
+  refine Finset.sum_congr rfl ?_
+  intro i hi
+  congr 1
+  let Eval : (E [⋀^Fin n]→L[ℝ] F) →L[ℝ] F :=
+    { toFun := fun L => L (i.removeNth v)
+      map_add' := by intro a b; rfl
+      map_smul' := by intro c a; rfl }
+  have hEval : fderiv ℝ (fun L : E [⋀^Fin n]→L[ℝ] F => L (i.removeNth v)) (ω x) = Eval := by
+    simpa [Eval] using (Eval.fderiv : fderiv ℝ (⇑Eval) (ω x) = Eval)
+  have hcomp : HasFDerivAt (fun y : E => (ω y) (i.removeNth v))
+      (Eval.comp (fderiv ℝ ω x)) x := by
+    have hg : HasFDerivAt (fun L : E [⋀^Fin n]→L[ℝ] F => L (i.removeNth v)) Eval (ω x) := by
+      simpa [Eval] using Eval.hasFDerivAt
+    exact HasFDerivAt.comp x hg hω.hasFDerivAt
+  have hmain : fderiv ℝ (fun y : E => (ω y) (i.removeNth v)) x = Eval.comp (fderiv ℝ ω x) := by
+    simpa using hcomp.fderiv
+  rw [hmain]
+  rfl
+
+theorem fderiv_wedge_apply (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^Fin l]→L[ℝ] ℝ)
+    (ha : DifferentiableAt ℝ a x) (hb : DifferentiableAt ℝ b x) :
+    fderiv ℝ (fun y : E => a y ∧[ℝ] b y) x =
+      (wedge_productL (ContinuousLinearMap.mul ℝ ℝ)).precompR E (a x) (fderiv ℝ b x) +
+        (wedge_productL (ContinuousLinearMap.mul ℝ ℝ)).precompL E (fderiv ℝ a x) (b x) := by
+  let W : (E [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (E [⋀^Fin l]→L[ℝ] ℝ) →L[ℝ]
+      (E [⋀^Fin (k + l)]→L[ℝ] ℝ) := wedge_productL (ContinuousLinearMap.mul ℝ ℝ)
+  have hf : HasFDerivAt (fun y : E => (W (a y)) (b y))
+      ((W (a x)).comp (fderiv ℝ b x) + (W.comp (fderiv ℝ a x)).flip (b x)) x := by
+    have hc : HasFDerivAt (fun y : E => W (a y)) (W.comp (fderiv ℝ a x)) x := by
+      simpa using (hasFDerivAt_const (x := x) (c := W)).clm_apply ha.hasFDerivAt
+    simpa using hc.clm_apply hb.hasFDerivAt
+  have hfderiv : fderiv ℝ (fun y : E => a y ∧[ℝ] b y) x =
+      (W (a x)).comp (fderiv ℝ b x) + (W.comp (fderiv ℝ a x)).flip (b x) := by
+    simpa [W, ContinuousLinearMap.mul_apply'] using hf.fderiv
+  rw [hfderiv]
+  ext h
+  simp [ContinuousLinearMap.precompR_apply, ContinuousLinearMap.compL_apply,
+    ContinuousLinearMap.comp_apply, ContinuousLinearMap.precompL_apply, W,
+    ContinuousLinearMap.flip_apply]
+
+theorem extDeriv_wedge (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^Fin l]→L[ℝ] ℝ)
+    (ha : ContDiff ℝ ⊤ a) (hb : ContDiff ℝ ⊤ b) :
+    extDeriv (fun x => a x ∧[ℝ] b x) =
+      fun x => domDomCongr Fin.finAddFlipAssoc ((extDeriv a x) ∧[ℝ] (b x)) +
+        (-1 : ℝ) ^ k • (a x ∧[ℝ] (extDeriv b x)) := by
+  funext x
+  let W : (E [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (E [⋀^Fin l]→L[ℝ] ℝ) →L[ℝ]
+      (E [⋀^Fin (k + l)]→L[ℝ] ℝ) := wedge_productL (ContinuousLinearMap.mul ℝ ℝ)
+  have hda : DifferentiableAt ℝ a x := (ha.differentiable (by simp)).differentiableAt
+  have hdb : DifferentiableAt ℝ b x := (hb.differentiable (by simp)).differentiableAt
+  have hdab : DifferentiableAt ℝ (fun y : E => a y ∧[ℝ] b y) x := by
+    exact ((W.contDiff.comp ha).clm_apply hb).differentiable (by simp) |>.differentiableAt
+  rw [extDeriv_eq_uncurryFin (fun y : E => a y ∧[ℝ] b y) hdab]
+  rw [fderiv_wedge_apply a b hda hdb]
+  rw [ContinuousAlternatingMap.uncurryFin_add]
+  rw [ContinuousAlternatingMap.uncurryFin_precompR_eq]
+  rw [ContinuousAlternatingMap.uncurryFin_wedge_productL_precompL_eq_domDomCongr]
+  rw [← extDeriv_eq_uncurryFin a hda, ← extDeriv_eq_uncurryFin b hdb]
+  exact add_comm _ _
+
+end DifferentialForm
 
 end
