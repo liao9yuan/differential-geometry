@@ -1,12 +1,14 @@
 import DifferentialGeometry.Topology.Morse.Defs
 import DifferentialGeometry.Topology.Morse.LocalNormalForm
 import DifferentialGeometry.Topology.Attachment.Union
+import DifferentialGeometry.Topology.Handle.Defs
 import Mathlib.Topology.Homotopy.Basic
 import Mathlib.Topology.Homotopy.Equiv
 
 namespace DifferentialGeometry.Topology.Morse
 
 open Filter
+open DifferentialGeometry.Topology.Handle
 open scoped Topology
 
 noncomputable section
@@ -1378,6 +1380,350 @@ theorem modelFlow_norm_le {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n
       nlinarith [hnorm2', ht0]
     exact hmain
   · exact norm_nonneg _
+
+def modelHandleMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : StandardHandle k (n - k)) : MorseModel n :=
+  recombine hk
+    ((Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) •
+      (p.1 : EuclideanSpace ℝ (Fin k)))
+    (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))
+
+theorem negPart_cellMap_smul {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
+    (u : EuclideanSpace ℝ (Fin k)) :
+    negPart hk (cellMap ε u) = ε • u := by
+  ext i
+  rw [negPart_cellMap_apply]
+  rfl
+
+theorem modelHandleMap_negPart {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : StandardHandle k (n - k)) :
+    negPart hk (modelHandleMap hk ε r p) =
+      (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) •
+        (p.1 : EuclideanSpace ℝ (Fin k)) := by
+  dsimp [modelHandleMap]
+  rw [negPart_recombine]
+
+theorem modelHandleMap_posPart {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : StandardHandle k (n - k)) :
+    posPart hk (modelHandleMap hk ε r p) =
+      r • (p.2 : EuclideanSpace ℝ (Fin (n - k))) := by
+  dsimp [modelHandleMap]
+  rw [posPart_recombine]
+
+theorem modelHandleMap_f_value {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 ≤ ε)
+    (p : StandardHandle k (n - k)) :
+    morseNormalForm hk c (modelHandleMap hk ε r p) =
+      c + (1 / 2) *
+        (-((2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+            ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2) +
+          r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) := by
+  dsimp [modelHandleMap]
+  rw [← negPart_cellMap_smul hk]
+  have hrec := morseNormalForm_recombine hk c
+    (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+    (p.1 : EuclideanSpace ℝ (Fin k)) (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))
+  rw [hrec]
+  have hsq : (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) ^ 2 =
+      2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+    rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)]
+  have hnorm : ‖(r • (p.2 : EuclideanSpace ℝ (Fin (n - k))) : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 =
+      r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    rw [mul_pow]
+    rw [sq_abs]
+  rw [hsq, hnorm]
+  nlinarith
+
+theorem modelHandleMap_f_sub {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 ≤ ε)
+    (p : StandardHandle k (n - k)) :
+    morseNormalForm hk c (modelHandleMap hk ε r p) - (c - ε) =
+      (1 / 2) * (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+        (1 - ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2) := by
+  have hval := modelHandleMap_f_value hk c ε r hε p
+  rw [hval]
+  ring
+
+theorem modelHandleMap_f_ge {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 ≤ ε)
+    (p : StandardHandle k (n - k)) :
+    c - ε ≤ morseNormalForm hk c (modelHandleMap hk ε r p) := by
+  rw [← sub_nonneg]
+  rw [modelHandleMap_f_sub hk c ε r hε]
+  have hnonneg : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by positivity
+  have hle : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤ 1 := by
+    have hneg : -1 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := by
+      linarith [norm_nonneg (p.1 : EuclideanSpace ℝ (Fin k))]
+    exact (sq_le_sq' hneg p.1.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+  nlinarith [hnonneg, hle]
+
+theorem modelHandleMap_f_eq_lower_iff {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 < ε)
+    (p : StandardHandle k (n - k)) :
+    morseNormalForm hk c (modelHandleMap hk ε r p) = c - ε ↔
+      ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 := by
+  rw [← sub_eq_zero]
+  rw [modelHandleMap_f_sub hk c ε r (le_of_lt hε)]
+  constructor
+  · intro h
+    have hmain : (1 / 2 : ℝ) * (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) ≠ 0 := by
+      positivity
+    have hzero : 1 - ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 = 0 :=
+      (mul_eq_zero.mp h).resolve_left hmain
+    have hsq : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 = 1 := by linarith
+    rcases sq_eq_one_iff.mp hsq with h1 | h2
+    · exact h1
+    · linarith [norm_nonneg (p.1 : EuclideanSpace ℝ (Fin k))]
+  · intro h
+    rw [h]
+    ring
+
+theorem modelHandleMap_f_boundary {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    (hε : 0 ≤ ε) (u : CellBoundary k) (w : ClosedCell (n - k)) :
+    morseNormalForm hk c (modelHandleMap hk ε r (cellBoundaryInclusion k u, w)) = c - ε := by
+  rw [modelHandleMap_f_value hk c ε r hε]
+  simp only [cellBoundaryInclusion]
+  rw [u.2]
+  ring
+
+theorem modelHandleMap_norm_le {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 ≤ ε)
+    (p : StandardHandle k (n - k)) :
+    morseNorm n (modelHandleMap hk ε r p) ≤ Real.sqrt (2 * ε + 2 * r ^ 2) := by
+  apply le_of_sq_le_sq
+  · change morseNorm n (recombine hk
+      ((Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) •
+        (p.1 : EuclideanSpace ℝ (Fin k)))
+      (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))) ^ 2 ≤
+      (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2
+    rw [morseNorm_recombine_sq hk
+      ((Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) •
+        (p.1 : EuclideanSpace ℝ (Fin k)))
+      (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))]
+    have h1 : ‖((Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) •
+        (p.1 : EuclideanSpace ℝ (Fin k)))‖ ^ 2 ≤ 2 * ε + r ^ 2 := by
+      rw [norm_smul]
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+      rw [mul_pow]
+      rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)]
+      have hx : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤ 1 := by
+        have hneg : -1 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := by
+          linarith [norm_nonneg (p.1 : EuclideanSpace ℝ (Fin k))]
+        exact (sq_le_sq' hneg p.1.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+      have hw : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ 1 := by
+        have hneg : -1 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := by
+          linarith [norm_nonneg (p.2 : EuclideanSpace ℝ (Fin (n - k)))]
+        exact (sq_le_sq' hneg p.2.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+      have hcore : (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+          ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤
+          2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+        simpa using mul_le_mul_of_nonneg_left hx
+          (by positivity : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)
+      have hA : 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ 2 * ε + r ^ 2 := by
+        nlinarith [hw, sq_nonneg r]
+      exact le_trans hcore hA
+    have h2 : ‖(r • (p.2 : EuclideanSpace ℝ (Fin (n - k))) : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ r ^ 2 := by
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [mul_pow]
+      rw [sq_abs]
+      have hw : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ 1 := by
+        have hneg : -1 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := by
+          linarith [norm_nonneg (p.2 : EuclideanSpace ℝ (Fin (n - k)))]
+        exact (sq_le_sq' hneg p.2.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+      nlinarith [hw]
+    have hR2 : 2 * ε + 2 * r ^ 2 ≤ (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 := by
+      rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + 2 * r ^ 2)]
+    nlinarith [h1, h2, hR2]
+  · exact Real.sqrt_nonneg _
+
+theorem modelHandleMap_injective {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 < ε)
+    (hr : r ≠ 0) :
+    Function.Injective (modelHandleMap hk ε r) := by
+  intro p q h
+  have hneg := congrArg (negPart hk) h
+  have hpos := congrArg (posPart hk) h
+  simp only [modelHandleMap_negPart, modelHandleMap_posPart] at hneg hpos
+  have hw : (p.2 : EuclideanSpace ℝ (Fin (n - k))) = (q.2 : EuclideanSpace ℝ (Fin (n - k))) :=
+    (smul_right_injective (EuclideanSpace ℝ (Fin (n - k))) (r := r) hr) hpos
+  have hscale : Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) =
+      Real.sqrt (2 * ε + r ^ 2 * ‖(q.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) := by
+    rw [hw]
+  have hneg' : (Real.sqrt (2 * ε + r ^ 2 * ‖(q.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) •
+        (p.1 : EuclideanSpace ℝ (Fin k)) =
+      (Real.sqrt (2 * ε + r ^ 2 * ‖(q.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) •
+        (q.1 : EuclideanSpace ℝ (Fin k)) := by
+    simpa [hscale] using hneg
+  have hu : (p.1 : EuclideanSpace ℝ (Fin k)) = (q.1 : EuclideanSpace ℝ (Fin k)) :=
+    (smul_right_injective (EuclideanSpace ℝ (Fin k))
+      (r := Real.sqrt (2 * ε + r ^ 2 * ‖(q.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) (by positivity))
+      hneg'
+  apply Prod.ext
+  · apply Subtype.ext
+    exact hu
+  · apply Subtype.ext
+    exact hw
+
+theorem modelHandleMap_attachingRegion {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (u : CellBoundary k) (w : ClosedCell (n - k)) :
+    modelHandleMap hk ε r (cellBoundaryInclusion k u, w) =
+      recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖(w : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+        (u : EuclideanSpace ℝ (Fin k)))) (r • (w : EuclideanSpace ℝ (Fin (n - k)))) := by
+  dsimp [modelHandleMap, cellBoundaryInclusion]
+  rw [negPart_cellMap_smul]
+
+def modelHandle {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) : Set (MorseModel n) :=
+  {y : MorseModel n | ‖posPart hk y‖ ^ 2 ≤ r ^ 2 ∧
+    ‖negPart hk y‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 + 2 * ε}
+
+theorem modelHandleMap_mem {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 ≤ ε)
+    (p : StandardHandle k (n - k)) :
+    modelHandleMap hk ε r p ∈ modelHandle hk ε r := by
+  dsimp [modelHandle]
+  constructor
+  · rw [modelHandleMap_posPart]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    rw [mul_pow]
+    rw [sq_abs]
+    have hw : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ 1 := by
+      have hneg : -1 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := by
+        linarith [norm_nonneg (p.2 : EuclideanSpace ℝ (Fin (n - k)))]
+      exact (sq_le_sq' hneg p.2.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+    nlinarith [hw]
+  · rw [modelHandleMap_posPart, modelHandleMap_negPart]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+    rw [mul_pow]
+    rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    rw [mul_pow]
+    rw [sq_abs]
+    have hx : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤ 1 := by
+      have hneg : -1 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := by
+        linarith [norm_nonneg (p.1 : EuclideanSpace ℝ (Fin k))]
+      exact (sq_le_sq' hneg p.1.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+    have hw : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ 1 := by
+      have hneg : -1 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := by
+        linarith [norm_nonneg (p.2 : EuclideanSpace ℝ (Fin (n - k)))]
+      exact (sq_le_sq' hneg p.2.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+    have hcore : (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+        ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤
+        2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+      simpa using mul_le_mul_of_nonneg_left hx
+        (by positivity : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)
+    nlinarith [hcore]
+
+theorem mem_modelHandle {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 < ε) (hr : r ≠ 0)
+    (y : MorseModel n) :
+    y ∈ modelHandle hk ε r ↔
+      ∃ p : StandardHandle k (n - k), modelHandleMap hk ε r p = y := by
+  constructor
+  · intro hy
+    dsimp [modelHandle] at hy
+    rcases hy with ⟨hb, ha⟩
+    let a : EuclideanSpace ℝ (Fin k) := negPart hk y
+    let b : EuclideanSpace ℝ (Fin (n - k)) := posPart hk y
+    have hscale : 0 < Real.sqrt (2 * ε + ‖b‖ ^ 2) := by
+      have hpos : 0 < 2 * ε + ‖b‖ ^ 2 := by positivity
+      exact Real.sqrt_pos.2 hpos
+    let x : EuclideanSpace ℝ (Fin k) := (Real.sqrt (2 * ε + ‖b‖ ^ 2))⁻¹ • a
+    have hx' : ‖x‖ ^ 2 ≤ 1 := by
+      dsimp [x]
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [mul_pow]
+      rw [sq_abs]
+      rw [inv_pow]
+      rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + ‖b‖ ^ 2)]
+      rw [mul_comm]
+      rw [← div_eq_mul_inv]
+      rw [div_le_one (by positivity : 0 < 2 * ε + ‖b‖ ^ 2)]
+      nlinarith [ha]
+    have hxle : ‖x‖ ≤ 1 := by
+      exact le_of_sq_le_sq (by simpa using hx') (by norm_num)
+    let w : EuclideanSpace ℝ (Fin (n - k)) := r⁻¹ • b
+    have hw' : ‖w‖ ^ 2 ≤ 1 := by
+      dsimp [w]
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [mul_pow]
+      rw [sq_abs]
+      rw [inv_pow]
+      rw [mul_comm]
+      rw [← div_eq_mul_inv]
+      rw [div_le_one (sq_pos_of_ne_zero hr)]
+      exact hb
+    have hwle : ‖w‖ ≤ 1 := by
+      exact le_of_sq_le_sq (by simpa using hw') (by norm_num)
+    have hw2 : r ^ 2 * ‖w‖ ^ 2 = ‖b‖ ^ 2 := by
+      dsimp [w]
+      calc
+        r ^ 2 * ‖(r⁻¹ • b : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 =
+            r ^ 2 * ((r⁻¹) ^ 2 * ‖b‖ ^ 2) := by
+              rw [norm_smul]
+              rw [Real.norm_eq_abs]
+              rw [mul_pow]
+              rw [sq_abs]
+        _ = (r ^ 2 * (r ^ 2)⁻¹) * ‖b‖ ^ 2 := by
+          rw [inv_pow]
+          ring
+        _ = ‖b‖ ^ 2 := by
+          rw [mul_inv_cancel₀ (pow_ne_zero 2 hr), one_mul]
+    have hcore_eq : Real.sqrt (2 * ε + r ^ 2 * ‖w‖ ^ 2) =
+        Real.sqrt (2 * ε + ‖b‖ ^ 2) := by
+      rw [hw2]
+    have hcore_scale : Real.sqrt (2 * ε + ‖b‖ ^ 2) *
+        (Real.sqrt (2 * ε + ‖b‖ ^ 2))⁻¹ = 1 := by
+      exact mul_inv_cancel₀ (ne_of_gt hscale)
+    have hsmul1 : (Real.sqrt (2 * ε + ‖b‖ ^ 2)) •
+        ((Real.sqrt (2 * ε + ‖b‖ ^ 2))⁻¹ • a) = a := by
+      rw [smul_smul]
+      rw [hcore_scale, one_smul]
+    have hsmul2 : r • (r⁻¹ • b) = b := by
+      rw [smul_smul]
+      rw [mul_inv_cancel₀ hr, one_smul]
+    refine ⟨(⟨x, hxle⟩, ⟨w, hwle⟩), ?_⟩
+    dsimp [modelHandleMap, x, w]
+    rw [hcore_eq]
+    rw [hsmul1, hsmul2]
+    change recombine hk (negPart hk y) (posPart hk y) = y
+    exact recombine_decompose hk y
+  · intro hp
+    rcases hp with ⟨p, rfl⟩
+    exact modelHandleMap_mem hk ε r (le_of_lt hε) p
+
+theorem modelHandle_meets_lower_sublevel {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 < ε)
+    (hr : r ≠ 0) :
+    modelHandle hk ε r ∩ sublevel (morseNormalForm hk c) (c - ε) =
+      Set.range (fun p : CellBoundary k × ClosedCell (n - k) =>
+        modelHandleMap hk ε r (cellBoundaryInclusion k p.1, p.2)) := by
+  ext y
+  constructor
+  · intro hy
+    rcases hy with ⟨hyh, hyl⟩
+    have hmem := (mem_modelHandle hk ε r hε hr y).1 hyh
+    rcases hmem with ⟨p, hp⟩
+    have hf : morseNormalForm hk c y = c - ε := by
+      apply le_antisymm
+      · change y ∈ sublevel (morseNormalForm hk c) (c - ε)
+        exact hyl
+      · rw [← hp]
+        exact modelHandleMap_f_ge hk c ε r (le_of_lt hε) p
+    have hx : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 := by
+      have hpf := modelHandleMap_f_eq_lower_iff hk c ε r hε p
+      exact hpf.1 (by simpa [hp] using hf)
+    refine ⟨(⟨(p.1 : EuclideanSpace ℝ (Fin k)), hx⟩, p.2), ?_⟩
+    have hpi : (cellBoundaryInclusion k ⟨(p.1 : EuclideanSpace ℝ (Fin k)), hx⟩ : ClosedCell k) = p.1 := by
+      apply Subtype.ext
+      rfl
+    simpa [hpi] using hp
+  · intro hy
+    rcases hy with ⟨p, hp⟩
+    constructor
+    · rw [← hp]
+      exact modelHandleMap_mem hk ε r (le_of_lt hε) (cellBoundaryInclusion k p.1, p.2)
+    · rw [← hp]
+      change morseNormalForm hk c (modelHandleMap hk ε r (cellBoundaryInclusion k p.1, p.2)) ≤ c - ε
+      rw [modelHandleMap_f_boundary hk c ε r (le_of_lt hε) p.1 p.2]
 
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
