@@ -1,4 +1,5 @@
 import DifferentialGeometry.Topology.Attachment.Defs
+import DifferentialGeometry.Topology.Handle.Defs
 import Mathlib.Analysis.InnerProductSpace.Calculus
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.SpecialFunctions.Sqrt
@@ -12,6 +13,68 @@ namespace DifferentialGeometry.Topology.Handle
 open scoped Manifold Topology
 
 noncomputable section
+
+universe u v w
+
+@[reducible]
+noncomputable def chartedSpaceOfHomeomorph {H : Type u} [TopologicalSpace H]
+    {M : Type v} [TopologicalSpace M] {M' : Type w} [TopologicalSpace M']
+    (h : M' ≃ₜ M) [ChartedSpace H M] : ChartedSpace H M' where
+  atlas := {e : OpenPartialHomeomorph M' H | ∃ e₀ : OpenPartialHomeomorph M H,
+    e₀ ∈ ChartedSpace.atlas (H := H) (M := M) ∧ e = h.toOpenPartialHomeomorph ≫ₕ e₀}
+  chartAt := fun x : M' => h.toOpenPartialHomeomorph ≫ₕ (chartAt (H := H) (M := M) (h x))
+  mem_chart_source := by
+    intro x
+    have hx : h x ∈ (chartAt (H := H) (M := M) (h x)).source :=
+      mem_chart_source (H := H) (M := M) (h x)
+    dsimp
+    constructor
+    · trivial
+    · exact hx
+  chart_mem_atlas := by
+    intro x
+    exact ⟨(chartAt (H := H) (M := M) (h x)), chart_mem_atlas (H := H) (M := M) (h x), rfl⟩
+
+@[reducible]
+noncomputable def isManifoldOfHomeomorph {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E H : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [TopologicalSpace H]
+    (I : ModelWithCorners 𝕜 E H) {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {n : WithTop ℕ∞} {M' : Type*} [TopologicalSpace M'] (h : M' ≃ₜ M)
+    [IsManifold I n M] :
+    @IsManifold 𝕜 _ E _ _ H _ I n M' _ (chartedSpaceOfHomeomorph h) := by
+  classical
+  letI : ChartedSpace H M' := chartedSpaceOfHomeomorph h
+  have hmid : h.toOpenPartialHomeomorph.symm ≫ₕ h.toOpenPartialHomeomorph =
+      (OpenPartialHomeomorph.refl M : OpenPartialHomeomorph M M) := by
+    apply OpenPartialHomeomorph.ext
+    · intro x
+      change h.toPartialEquiv.toFun (h.toOpenPartialHomeomorph.symm x) = x
+      exact h.right_inv x
+    · intro x
+      change h.toPartialEquiv.toFun (h.toOpenPartialHomeomorph.symm x) = x
+      exact h.right_inv x
+    · ext x
+      simp
+  have hgr : HasGroupoid M' (contDiffGroupoid n I) := by
+    refine hasGroupoid_of_pregroupoid (contDiffPregroupoid n I) ?_
+    intro e e' he he'
+    rcases he with ⟨e₁, he₁, rfl⟩
+    rcases he' with ⟨e₂, he₂, rfl⟩
+    have htrans : (h.toOpenPartialHomeomorph ≫ₕ e₁).symm ≫ₕ (h.toOpenPartialHomeomorph ≫ₕ e₂) =
+        e₁.symm ≫ₕ e₂ := by
+      rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm]
+      rw [OpenPartialHomeomorph.trans_assoc]
+      rw [← OpenPartialHomeomorph.trans_assoc (e'' := e₂)]
+      rw [hmid]
+      simp
+    rw [htrans]
+    have hmem : e₁.symm ≫ₕ e₂ ∈ contDiffGroupoid n I :=
+      (inferInstance : HasGroupoid M (contDiffGroupoid n I)).compatible he₁ he₂
+    have hm : e₁.symm ≫ₕ e₂ ∈ Pregroupoid.groupoid (contDiffPregroupoid n I) := by
+      simpa [contDiffGroupoid] using hmem
+    exact (mem_groupoid_of_pregroupoid.mp hm).1
+  change IsManifold I n M'
+  exact { toHasGroupoid := hgr }
 
 noncomputable def closedCellPermute {n : ℕ} (e : Fin n ≃ Fin n) :
     EuclideanSpace ℝ (Fin n) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin n) :=
@@ -1756,6 +1819,78 @@ noncomputable def cellBoundaryIsManifold (k : ℕ) [NeZero k]
       (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) _ (cellBoundaryChartedSpace k) := by
   letI := cellBoundaryChartedSpace k
   exact { toHasGroupoid := cellBoundaryHasGroupoid k }
+
+noncomputable def closedCellReindex (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
+    EuclideanSpace ℝ (Fin l) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin ((l - 1) + 1)) :=
+  (EuclideanSpace.basisFun (Fin l) ℝ).reindex
+    (Equiv.cast (congrArg Fin (Fact.out : l = (l - 1) + 1))) |>.repr
+
+noncomputable def closedCellReindexHomeo (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
+    ClosedCell l ≃ₜ ClosedCell ((l - 1) + 1) := by
+  let e : EuclideanSpace ℝ (Fin l) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin ((l - 1) + 1)) :=
+    closedCellReindex l
+  refine { toFun := fun x => ⟨e x.1, by
+             exact (le_of_eq (e.norm_map x.1)).trans x.2⟩,
+           invFun := fun x => ⟨e.symm x.1, by
+             exact (le_of_eq (e.symm.norm_map x.1)).trans x.2⟩,
+           left_inv := by intro x; apply Subtype.ext; exact e.symm_apply_apply x.1,
+           right_inv := by intro x; apply Subtype.ext; exact e.apply_symm_apply x.1,
+           continuous_toFun := by
+             exact Continuous.subtype_mk (e.continuous.comp continuous_subtype_val) (fun x => by
+               exact (le_of_eq (e.norm_map x.1)).trans x.2),
+           continuous_invFun := by
+             exact Continuous.subtype_mk (e.symm.continuous.comp continuous_subtype_val) (fun x => by
+               exact (le_of_eq (e.symm.norm_map x.1)).trans x.2) }
+
+@[reducible]
+noncomputable def closedCellChartedSpace (l : ℕ) [NeZero l]
+    [Fact (l = (l - 1) + 1)] :
+    ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l) := by
+  letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell ((l - 1) + 1)) :=
+    closedCellChartedSpaceSucc (l - 1)
+  exact chartedSpaceOfHomeomorph (closedCellReindexHomeo l)
+
+@[reducible]
+noncomputable def attachingRegionChartedSpace (k l : ℕ) [NeZero k] [NeZero l]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (l = (l - 1) + 1)] :
+    ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((l - 1) + 1)))
+      (AttachingRegion k l) := by
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) :=
+    cellBoundaryChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l) :=
+    closedCellChartedSpace l
+  infer_instance
+
+@[reducible]
+noncomputable def attachingRegionIsManifold (k l : ℕ) [NeZero k] [NeZero l]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (l = (l - 1) + 1)] :
+    @IsManifold ℝ _
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((l - 1) + 1))) _
+      _ (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((l - 1) + 1))) _
+      ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))) (⊤ : ℕ∞)
+      (AttachingRegion k l) _ (attachingRegionChartedSpace k l) := by
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) :=
+    cellBoundaryChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l) :=
+    closedCellChartedSpace l
+  letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell ((l - 1) + 1)) :=
+    closedCellChartedSpaceSucc (l - 1)
+  letI : IsManifold (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) := cellBoundaryIsManifold k
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell ((l - 1) + 1)) := closedCellIsManifold (l - 1)
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell l) := isManifoldOfHomeomorph
+        (modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (closedCellReindexHomeo l)
+  change @IsManifold ℝ _
+    (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((l - 1) + 1))) _
+    _ (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((l - 1) + 1))) _
+    ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))) (⊤ : ℕ∞)
+    (CellBoundary k × ClosedCell l) _ (attachingRegionChartedSpace k l)
+  exact IsManifold.prod (I := 𝓡 (k - 1))
+    (I' := modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (n := (⊤ : ℕ∞))
+    (CellBoundary k) (ClosedCell l)
 
 end
 
