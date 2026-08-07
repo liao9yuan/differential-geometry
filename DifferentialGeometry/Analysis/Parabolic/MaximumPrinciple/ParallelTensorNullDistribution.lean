@@ -206,6 +206,79 @@ theorem parallelTensorNullSpace_of_terminal_null
     (I := I) G hT tr hC x₀ u v₀ V hsol htau hmem
       hgrad_cont hlaplacian_cont L hV hzero) t ht x |>.1
 
+theorem parallelTensorNullSpace_eq_transported_terminal_of_constant_finrank
+    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+    [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle Real E (TangentSpace I : M → Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    {T : Real} (hT : 0 ≤ T)
+    (tr : ∀ x y : M, Tensor0SSpace 2 I x ≃L[Real] Tensor0SSpace 2 I y)
+    (hC : ∀ x y : M,
+      (tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+        ProperCone Real (Tensor0SSpace 2 I x)).map
+          (tr x y : Tensor0SSpace 2 I x →L[Real] Tensor0SSpace 2 I y) =
+        (tensor02PositiveSemidefiniteCone (I := I) (M := M) :
+          ProperCone Real (Tensor0SSpace 2 I y)))
+    (x₀ : M)
+    (u : Real → ∀ x : M, Tensor0SSpace 2 I x)
+    (V : Real → M → Real)
+    {tau : Real} (htau : tau ∈ Set.Ioo 0 T)
+    {x₁ : M}
+    (hsol : ∀ v₀ : TangentSpace I x₀,
+      v₀ ∈ twoTensorLeftKernel (I := I) (M := M) (tr x₁ x₀ (u tau x₁)) →
+      IsHeatPotSupersolutionOn
+        (RealTimeInterval.closed 0 T hT) G V
+        (dualScalarization (fun t : Real => fun x : M => tr x x₀ (u t x))
+          (tensor02EvalSelfCLM (I := I) (M := M) v₀ :
+            StrongDual Real (Tensor0SSpace 2 I x₀))))
+    (hmem : ∀ t : Real, t ∈ Set.Icc 0 tau → ∀ x : M,
+      u t x ∈ tensor02PositiveSemidefiniteCone (I := I) (M := M))
+    (hgrad_cont : ∀ rho : M → Real,
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M ↦
+        (G.metric p.1).inner p.2
+          (gradientFun (I := I) (G.metric p.1) rho p.2)
+          (gradientFun (I := I) (G.metric p.1) rho p.2))
+        (spacetimeSlab (M := M) tau))
+    (hlaplacian_cont : ∀ rho : M → Real,
+      ContMDiff I 𝓘(Real, Real) ∞ rho →
+      ContinuousOn (fun p : Real × M ↦
+        laplacianAt (I := I) G p.1 rho p.2)
+        (spacetimeSlab (M := M) tau))
+    (L : Real)
+    (hV : ∀ t : Real, t ∈ Set.Icc 0 tau → ∀ x : M, L ≤ V t x)
+    (hfinrank : ∀ t : Real, t ∈ Set.Icc 0 tau → ∀ x : M,
+      Module.finrank Real (twoTensorLeftKernel (I := I) (M := M) (tr x x₀ (u t x))) =
+      Module.finrank Real (twoTensorLeftKernel (I := I) (M := M) (tr x₁ x₀ (u tau x₁)))) :
+    ∀ t : Real, t ∈ Set.Icc 0 tau → ∀ x : M,
+      twoTensorLeftKernel (I := I) (M := M) (tr x x₀ (u t x)) =
+      twoTensorLeftKernel (I := I) (M := M) (tr x₁ x₀ (u tau x₁)) := by
+  classical
+  intro t ht x
+  let Kterm : Submodule Real (TangentSpace I x₀) :=
+    twoTensorLeftKernel (I := I) (M := M) (tr x₁ x₀ (u tau x₁))
+  let Ktx : Submodule Real (TangentSpace I x₀) :=
+    twoTensorLeftKernel (I := I) (M := M) (tr x x₀ (u t x))
+  change Ktx = Kterm
+  have hdim : Module.finrank Real Ktx = Module.finrank Real Kterm := by
+    simpa [Kterm, Ktx] using hfinrank t ht x
+  have hle : Kterm ≤ Ktx := by
+    intro v₀ hv₀
+    exact parallelTensorNullSpace_of_terminal_null
+      (I := I) G hT tr hC x₀ u v₀ V (hsol v₀ (by simpa [Kterm] using hv₀))
+      htau hmem hgrad_cont hlaplacian_cont L hV
+      (by simpa [Kterm] using hv₀) t ht x
+  apply le_antisymm
+  · by_contra hnot
+    have hne : Kterm ≠ Ktx := by
+      intro hEq
+      exact hnot (le_of_eq hEq.symm)
+    have hlt : Kterm < Ktx := lt_of_le_of_ne hle hne
+    have hltfin : Module.finrank Real Kterm < Module.finrank Real Ktx :=
+      Submodule.finrank_lt_finrank_of_lt hlt
+    omega
+  · exact hle
+
 end
 
 end DifferentialGeometry.Analysis.Parabolic
