@@ -18,13 +18,13 @@ namespace StrongDeformationRetract
 
 variable {X : Type u} [TopologicalSpace X] {A : Set X}
 
-theorem fixed_on_A (r : StrongDeformationRetract A) (t : I) {x : X} (hx : x ∈ A) :
+theorem homotopy_fixed_on (r : StrongDeformationRetract A) (t : I) {x : X} (hx : x ∈ A) :
     r.homotopy (t, x) = x :=
   r.homotopy.eq_fst t hx
 
 theorem retraction_eq (r : StrongDeformationRetract A) {x : X} (hx : x ∈ A) :
     (r.retraction x : X) = x :=
-  (r.homotopy.apply_one x).symm.trans (r.fixed_on_A 1 hx)
+  (r.homotopy.apply_one x).symm.trans (r.homotopy_fixed_on 1 hx)
 
 noncomputable def toHomotopyEquiv (r : StrongDeformationRetract A) : X ≃ₕ A where
   toFun := r.retraction

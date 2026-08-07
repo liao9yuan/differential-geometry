@@ -8,16 +8,6 @@ namespace DifferentialGeometry.Topology.Homotopy
 open ContinuousMap
 open unitInterval
 
-def icoToI (t : Set.Ico (0 : ℝ) 1) : I :=
-  ⟨(t : ℝ), ⟨t.2.1, le_of_lt t.2.2⟩⟩
-
-@[simp]
-theorem icoToI_apply (t : Set.Ico (0 : ℝ) 1) : (icoToI t : ℝ) = (t : ℝ) :=
-  rfl
-
-theorem continuous_icoToI : Continuous (icoToI : Set.Ico (0 : ℝ) 1 → I) := by
-  exact Continuous.subtype_mk continuous_subtype_val (fun t => ⟨t.2.1, le_of_lt t.2.2⟩)
-
 theorem one_minus_norm_mem_Ico {n : ℕ} {x : ClosedCell n}
     (hx : (x : EuclideanSpace ℝ (Fin n)) ≠ 0) :
     1 - ‖(x : EuclideanSpace ℝ (Fin n))‖ ∈ Set.Ico (0 : ℝ) 1 := by
@@ -64,7 +54,7 @@ noncomputable def boundaryNormalize {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (
     exact inv_mul_cancel₀ (norm_ne_zero_iff.mpr hx)⟩
 
 @[simp]
-theorem boundaryNormalize_apply {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (hx : x ≠ 0) :
+theorem norm_boundaryNormalize {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (hx : x ≠ 0) :
     ‖(boundaryNormalize x hx : EuclideanSpace ℝ (Fin n))‖ = 1 := by
   rw [boundaryNormalize]
   rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (norm_nonneg x))]

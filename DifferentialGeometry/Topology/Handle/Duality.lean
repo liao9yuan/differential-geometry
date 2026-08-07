@@ -10,7 +10,6 @@ def swap (k l : ℕ) : StandardHandle k l ≃ₜ StandardHandle l k :=
 theorem swap_apply {k l : ℕ} (p : StandardHandle k l) : swap k l p = (p.2, p.1) := by
   simp [swap, Prod.swap]
 
-@[simp]
 theorem swap_swap {k l : ℕ} (p : StandardHandle k l) : swap l k (swap k l p) = p := by
   simp [swap]
 
@@ -118,6 +117,117 @@ theorem swap_attachingSphereInclusion {k l : ℕ} (x : CellBoundary k) :
 theorem swap_beltSphereInclusion {k l : ℕ} (y : CellBoundary l) :
     swap k l (beltSphereInclusion k l y) = attachingSphereInclusion l k y := by
   simp [swap, beltSphereInclusion, attachingSphereInclusion]
+
+private theorem swap_mem_core_of_mem_cocore {k l : ℕ} {p : StandardHandle k l}
+    (hp : p ∉ cocoreDisk k l) : swap k l p ∉ coreDisk l k := by
+  intro h
+  have hmem : p ∈ cocoreDisk k l := by
+    have h' : swap k l p ∈ swap k l '' cocoreDisk k l := by
+      rwa [swap_cocoreDisk k l]
+    rcases h' with ⟨z, hz, hzswap⟩
+    have hz' : z = p := by
+      have hz'0 : swap l k (swap k l z) = swap l k (swap k l p) := congrArg (swap l k) hzswap
+      simpa [swap_swap] using hz'0
+    simpa [hz'] using hz
+  exact hp hmem
+
+private theorem swap_mem_cocore_of_mem_core {k l : ℕ} {p : StandardHandle k l}
+    (hp : p ∉ coreDisk k l) : swap k l p ∉ cocoreDisk l k := by
+  intro h
+  have hmem : p ∈ coreDisk k l := by
+    have h' : swap k l p ∈ swap k l '' coreDisk k l := by
+      rwa [swap_coreDisk k l]
+    rcases h' with ⟨z, hz, hzswap⟩
+    have hz' : z = p := by
+      have hz'0 : swap l k (swap k l z) = swap l k (swap k l p) := congrArg (swap l k) hzswap
+      simpa [swap_swap] using hz'0
+    simpa [hz'] using hz
+  exact hp hmem
+
+def swapCocoreComplement (k l : ℕ) :
+    {p : StandardHandle k l // p ∉ cocoreDisk k l} ≃ₜ
+      {p : StandardHandle l k // p ∉ coreDisk l k} where
+  toFun := fun p => ⟨swap k l (p : StandardHandle k l), swap_mem_core_of_mem_cocore p.2⟩
+  invFun := fun q => ⟨swap l k (q : StandardHandle l k),
+    swap_mem_cocore_of_mem_core (k := l) (l := k) q.2⟩
+  left_inv := by
+    intro p
+    apply Subtype.ext
+    exact swap_swap (p : StandardHandle k l)
+  right_inv := by
+    intro q
+    apply Subtype.ext
+    exact swap_swap (q : StandardHandle l k)
+  continuous_toFun := Continuous.subtype_mk
+    (p := fun r : StandardHandle l k => r ∉ coreDisk l k)
+    ((swap k l).continuous.comp continuous_subtype_val) (fun p => swap_mem_core_of_mem_cocore p.2)
+  continuous_invFun := Continuous.subtype_mk
+    (p := fun r : StandardHandle k l => r ∉ cocoreDisk k l)
+    ((swap l k).continuous.comp continuous_subtype_val)
+    (fun q => swap_mem_cocore_of_mem_core (k := l) (l := k) q.2)
+
+def swapCoreComplement (k l : ℕ) :
+    {p : StandardHandle k l // p ∉ coreDisk k l} ≃ₜ
+      {p : StandardHandle l k // p ∉ cocoreDisk l k} where
+  toFun := fun p => ⟨swap k l (p : StandardHandle k l), swap_mem_cocore_of_mem_core p.2⟩
+  invFun := fun q => ⟨swap l k (q : StandardHandle l k),
+    swap_mem_core_of_mem_cocore (k := l) (l := k) q.2⟩
+  left_inv := by
+    intro p
+    apply Subtype.ext
+    exact swap_swap (p : StandardHandle k l)
+  right_inv := by
+    intro q
+    apply Subtype.ext
+    exact swap_swap (q : StandardHandle l k)
+  continuous_toFun := Continuous.subtype_mk
+    (p := fun r : StandardHandle l k => r ∉ cocoreDisk l k)
+    ((swap k l).continuous.comp continuous_subtype_val) (fun p => swap_mem_cocore_of_mem_core p.2)
+  continuous_invFun := Continuous.subtype_mk
+    (p := fun r : StandardHandle k l => r ∉ coreDisk k l)
+    ((swap l k).continuous.comp continuous_subtype_val)
+    (fun q => swap_mem_core_of_mem_cocore (k := l) (l := k) q.2)
+
+def swapCornerComplement (k l : ℕ) :
+    {p : StandardHandle k l // p ∉ coreDisk k l ∧ p ∉ cocoreDisk k l} ≃ₜ
+      {p : StandardHandle l k // p ∉ coreDisk l k ∧ p ∉ cocoreDisk l k} where
+  toFun := fun p => ⟨swap k l (p : StandardHandle k l),
+    ⟨swap_mem_core_of_mem_cocore p.2.2, swap_mem_cocore_of_mem_core p.2.1⟩⟩
+  invFun := fun q => ⟨swap l k (q : StandardHandle l k),
+    ⟨swap_mem_core_of_mem_cocore (k := l) (l := k) q.2.2,
+      swap_mem_cocore_of_mem_core (k := l) (l := k) q.2.1⟩⟩
+  left_inv := by
+    intro p
+    apply Subtype.ext
+    exact swap_swap (p : StandardHandle k l)
+  right_inv := by
+    intro q
+    apply Subtype.ext
+    exact swap_swap (q : StandardHandle l k)
+  continuous_toFun := Continuous.subtype_mk
+    (p := fun r : StandardHandle l k => r ∉ coreDisk l k ∧ r ∉ cocoreDisk l k)
+    ((swap k l).continuous.comp continuous_subtype_val)
+    (fun p => ⟨swap_mem_core_of_mem_cocore p.2.2, swap_mem_cocore_of_mem_core p.2.1⟩)
+  continuous_invFun := Continuous.subtype_mk
+    (p := fun r : StandardHandle k l => r ∉ coreDisk k l ∧ r ∉ cocoreDisk k l)
+    ((swap l k).continuous.comp continuous_subtype_val)
+    (fun q => ⟨swap_mem_core_of_mem_cocore (k := l) (l := k) q.2.2,
+      swap_mem_cocore_of_mem_core (k := l) (l := k) q.2.1⟩)
+
+@[simp]
+theorem swapCocoreComplement_apply (k l : ℕ)
+    (p : {p : StandardHandle k l // p ∉ cocoreDisk k l}) :
+    (swapCocoreComplement k l p : StandardHandle l k) = swap k l (p : StandardHandle k l) := rfl
+
+@[simp]
+theorem swapCoreComplement_apply (k l : ℕ)
+    (p : {p : StandardHandle k l // p ∉ coreDisk k l}) :
+    (swapCoreComplement k l p : StandardHandle l k) = swap k l (p : StandardHandle k l) := rfl
+
+@[simp]
+theorem swapCornerComplement_apply (k l : ℕ)
+    (p : {p : StandardHandle k l // p ∉ coreDisk k l ∧ p ∉ cocoreDisk k l}) :
+    (swapCornerComplement k l p : StandardHandle l k) = swap k l (p : StandardHandle k l) := rfl
 
 theorem swap_attachingInclusion_attachingSphereInclusionAttachingRegion (k l : ℕ)
     (u : CellBoundary k) :

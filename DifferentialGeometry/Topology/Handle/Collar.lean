@@ -1,6 +1,7 @@
 import DifferentialGeometry.Topology.Handle.Basic
 import DifferentialGeometry.Topology.Handle.Duality
 import DifferentialGeometry.Topology.Homotopy.ClosedCell
+import DifferentialGeometry.Topology.Homotopy.Interval
 
 namespace DifferentialGeometry.Topology.Handle
 
@@ -562,18 +563,7 @@ theorem swap_attachingCollar_symm (k l : ℕ) (p : {p : StandardHandle k l // p 
     (attachingCollar k l).symm p =
       (Prod.map (Prod.swap : BeltRegion l k → AttachingRegion k l)
         (id : Set.Ico (0 : ℝ) 1 → Set.Ico (0 : ℝ) 1))
-        ((beltCollar l k).symm ⟨swap k l (p : StandardHandle k l), by
-          intro h
-          have hmem : (p : StandardHandle k l) ∈ cocoreDisk k l := by
-            have h' : swap k l (p : StandardHandle k l) ∈ swap k l '' cocoreDisk k l := by
-              rwa [swap_cocoreDisk k l]
-            rcases h' with ⟨z, hz, hzswap⟩
-            have hz' : z = (p : StandardHandle k l) := by
-              have hz'0 : swap l k (swap k l z) = swap l k (swap k l (p : StandardHandle k l)) :=
-                congrArg (swap l k) hzswap
-              simpa [swap_swap] using hz'0
-            simpa [hz'] using hz
-          exact p.2 hmem⟩) := by
+        ((beltCollar l k).symm (swapCocoreComplement k l p)) := by
   rw [attachingCollar_symm_apply, beltCollar_symm_apply]
   simp
 
@@ -581,18 +571,7 @@ theorem swap_beltCollar_symm (k l : ℕ) (p : {p : StandardHandle k l // p ∉ c
     (beltCollar k l).symm p =
       (Prod.map (Prod.swap : AttachingRegion l k → BeltRegion k l)
         (id : Set.Ico (0 : ℝ) 1 → Set.Ico (0 : ℝ) 1))
-        ((attachingCollar l k).symm ⟨swap k l (p : StandardHandle k l), by
-          intro h
-          have hmem : (p : StandardHandle k l) ∈ coreDisk k l := by
-            have h' : swap k l (p : StandardHandle k l) ∈ swap k l '' coreDisk k l := by
-              rwa [swap_coreDisk k l]
-            rcases h' with ⟨z, hz, hzswap⟩
-            have hz' : z = (p : StandardHandle k l) := by
-              have hz'0 : swap l k (swap k l z) = swap l k (swap k l (p : StandardHandle k l)) :=
-                congrArg (swap l k) hzswap
-              simpa [swap_swap] using hz'0
-            simpa [hz'] using hz
-          exact p.2 hmem⟩) := by
+        ((attachingCollar l k).symm (swapCoreComplement k l p)) := by
   rw [beltCollar_symm_apply, attachingCollar_symm_apply]
   simp
 
@@ -601,32 +580,7 @@ theorem swap_bicollar_symm (k l : ℕ) (p : {p : StandardHandle k l //
     (bicollar k l).symm p =
       (Prod.map (Prod.swap : Corner l k → Corner k l)
         (fun r : Set.Ico (0 : ℝ) 1 × Set.Ico (0 : ℝ) 1 => (r.2, r.1)))
-        ((bicollar l k).symm ⟨swap k l (p : StandardHandle k l), by
-          constructor
-          · intro h
-            have hmem : (p : StandardHandle k l) ∈ cocoreDisk k l := by
-              have h' : swap k l (p : StandardHandle k l) ∈ swap k l '' cocoreDisk k l := by
-                rwa [swap_cocoreDisk k l]
-              rcases h' with ⟨z, hz, hzswap⟩
-              have hz' : z = (p : StandardHandle k l) := by
-                have hz'0 : swap l k (swap k l z) =
-                    swap l k (swap k l (p : StandardHandle k l)) :=
-                  congrArg (swap l k) hzswap
-                simpa [swap_swap] using hz'0
-              simpa [hz'] using hz
-            exact p.2.2 hmem
-          · intro h
-            have hmem : (p : StandardHandle k l) ∈ coreDisk k l := by
-              have h' : swap k l (p : StandardHandle k l) ∈ swap k l '' coreDisk k l := by
-                rwa [swap_coreDisk k l]
-              rcases h' with ⟨z, hz, hzswap⟩
-              have hz' : z = (p : StandardHandle k l) := by
-                have hz'0 : swap l k (swap k l z) =
-                    swap l k (swap k l (p : StandardHandle k l)) :=
-                  congrArg (swap l k) hzswap
-                simpa [swap_swap] using hz'0
-              simpa [hz'] using hz
-            exact p.2.1 hmem⟩) := by
+        ((bicollar l k).symm (swapCornerComplement k l p)) := by
   rw [bicollar_symm_apply, bicollar_symm_apply]
   simp
 
