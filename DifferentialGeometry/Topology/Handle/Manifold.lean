@@ -830,6 +830,133 @@ theorem closedCellInteriorBoundaryTransition_contDiff {m : ℕ} (i : Fin (m + 1)
     hnorm.prodMk htail
   simpa using (closedCellCons_contDiff (m := m)).comp hpair
 
+noncomputable def closedCellBoundaryInteriorTransition {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    (y : EuclideanSpace ℝ (Fin (m + 1))) : EuclideanSpace ℝ (Fin (m + 1)) :=
+  closedCellShiftSucc m 1 (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+    (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+      (closedCellTail m y)))
+
+theorem closedCellBoundaryInteriorTransition_contDiffOn {m : ℕ} (i : Fin (m + 1)) (σ : Bool) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (closedCellBoundaryInteriorTransition i σ)
+      {y : EuclideanSpace ℝ (Fin (m + 1)) | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} := by
+  let s : Set (EuclideanSpace ℝ (Fin (m + 1))) :=
+    {y | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2}
+  have htail : ContDiff ℝ (⊤ : ℕ∞) (closedCellTail m) := closedCellTail_contDiff (m := m)
+  have hargAll : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2) := by
+    have h1 : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+        1 - y (0 : Fin (m + 1))) := by
+      exact (contDiff_const.sub (by fun_prop))
+    have h2 : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+        ‖closedCellTail m y‖ ^ 2) :=
+      (contDiff_norm_sq ℝ).comp htail
+    exact h1.sub h2
+  have harg : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2) s :=
+    hargAll.contDiffOn.mono (Set.subset_univ s)
+  have hsqrt : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2)) s :=
+    ContDiffOn.sqrt (hf := harg) (s := s) (fun y hy => ne_of_gt hy)
+  have hfirst : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2),
+        closedCellTail m y)) s :=
+    ((contDiffOn_const : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun _ : EuclideanSpace ℝ (Fin (m + 1)) => closedCellSign σ) s).mul hsqrt).prodMk
+      htail.contDiffOn
+  have hcons : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+        (closedCellTail m y)) s :=
+    (closedCellCons_contDiff (m := m)).contDiffOn.comp hfirst (by intro y hy; exact Set.mem_univ _)
+  have hperm : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+        (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+          (closedCellTail m y))) s :=
+    (closedCellPermute_contDiff (Equiv.swap i (0 : Fin (m + 1))).symm).contDiffOn.comp hcons
+      (by intro y hy; exact Set.mem_univ _)
+  have hshift : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellShiftSucc m 1 (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+        (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+          (closedCellTail m y)))) s :=
+    (closedCellShiftSucc_contDiff 1).contDiffOn.comp hperm (by intro y hy; exact Set.mem_univ _)
+  simpa [closedCellBoundaryInteriorTransition, s] using hshift
+
+noncomputable def closedCellBoundaryBoundaryTransition {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    (i' : Fin (m + 1))
+    (y : EuclideanSpace ℝ (Fin (m + 1))) : EuclideanSpace ℝ (Fin (m + 1)) :=
+  closedCellCons m (y (0 : Fin (m + 1)))
+    (closedCellTail m (closedCellPermute (Equiv.swap i' (0 : Fin (m + 1)))
+      (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+        (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+          (closedCellTail m y)))))
+
+theorem closedCellBoundaryBoundaryTransition_contDiffOn {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    (i' : Fin (m + 1)) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (closedCellBoundaryBoundaryTransition i σ i')
+      {y : EuclideanSpace ℝ (Fin (m + 1)) | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} := by
+  let s : Set (EuclideanSpace ℝ (Fin (m + 1))) :=
+    {y | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2}
+  have htail : ContDiff ℝ (⊤ : ℕ∞) (closedCellTail m) := closedCellTail_contDiff (m := m)
+  have hc0 : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) => y (0 : Fin (m + 1))) := by
+    fun_prop
+  have hargAll : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2) := by
+    have h1 : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+        1 - y (0 : Fin (m + 1))) := by
+      exact (contDiff_const.sub (by fun_prop))
+    have h2 : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+        ‖closedCellTail m y‖ ^ 2) :=
+      (contDiff_norm_sq ℝ).comp htail
+    exact h1.sub h2
+  have harg : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2) s :=
+    hargAll.contDiffOn.mono (Set.subset_univ s)
+  have hsqrt : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2)) s :=
+    ContDiffOn.sqrt (hf := harg) (s := s) (fun y hy => ne_of_gt hy)
+  have hfirst : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2),
+        closedCellTail m y)) s :=
+    ((contDiffOn_const : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun _ : EuclideanSpace ℝ (Fin (m + 1)) => closedCellSign σ) s).mul hsqrt).prodMk
+      htail.contDiffOn
+  have hcons : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+        (closedCellTail m y)) s :=
+    (closedCellCons_contDiff (m := m)).contDiffOn.comp hfirst (by intro y hy; exact Set.mem_univ _)
+  have hperm : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+        (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+          (closedCellTail m y))) s :=
+    (closedCellPermute_contDiff (Equiv.swap i (0 : Fin (m + 1))).symm).contDiffOn.comp hcons
+      (by intro y hy; exact Set.mem_univ _)
+  have hperm' : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellPermute (Equiv.swap i' (0 : Fin (m + 1)))
+        (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+          (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+            (closedCellTail m y)))) s :=
+    (closedCellPermute_contDiff (Equiv.swap i' (0 : Fin (m + 1)))).contDiffOn.comp hperm
+      (by intro y hy; exact Set.mem_univ _)
+  have htail' : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellTail m (closedCellPermute (Equiv.swap i' (0 : Fin (m + 1)))
+        (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+          (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+            (closedCellTail m y))))) s :=
+    htail.contDiffOn.comp hperm' (by intro y hy; exact Set.mem_univ _)
+  have hfinal : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      (y (0 : Fin (m + 1)), closedCellTail m (closedCellPermute (Equiv.swap i' (0 : Fin (m + 1)))
+        (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+          (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+            (closedCellTail m y)))))) s :=
+    hc0.contDiffOn.prodMk htail'
+  have hout : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellCons m (y (0 : Fin (m + 1)))
+        (closedCellTail m (closedCellPermute (Equiv.swap i' (0 : Fin (m + 1)))
+          (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+            (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+              (closedCellTail m y)))))) s :=
+    (closedCellCons_contDiff (m := m)).contDiffOn.comp hfinal (by intro y hy; exact Set.mem_univ _)
+  simpa [closedCellBoundaryBoundaryTransition, s] using hout
+
 end
 
 end DifferentialGeometry.Topology.Handle
