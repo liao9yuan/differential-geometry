@@ -1,0 +1,46 @@
+import DifferentialGeometry.Tensor.Exterior.Basic
+
+noncomputable section
+
+open Bundle Set ContinuousAlternatingMap Function Filter
+open scoped Topology Manifold ContDiff Bundle
+
+namespace DifferentialGeometry
+namespace DifferentialForm
+
+variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
+  {HM : Type*} [TopologicalSpace HM]
+  {IM : ModelWithCorners ℝ EM HM}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
+  {k : ℕ}
+
+def Closed [BoundarylessManifold IM M] (α : DifferentialForm IM M k) : Prop :=
+  exteriorDerivative α = 0
+
+def Exact [BoundarylessManifold IM M] (α : DifferentialForm IM M (k + 1)) : Prop :=
+  ∃ β : DifferentialForm IM M k, exteriorDerivative β = α
+
+theorem exact_closed [BoundarylessManifold IM M] {α : DifferentialForm IM M (k + 1)}
+    (h : Exact α) : Closed α := by
+  rcases h with ⟨β, hβ⟩
+  rw [Closed, ← hβ]
+  exact exteriorDerivative_extDeriv β
+
+noncomputable def exteriorDerivativeLinearMap [BoundarylessManifold IM M] (k : ℕ) :
+    DifferentialForm IM M k →ₗ[ℝ] DifferentialForm IM M (k + 1) :=
+  { toFun := exteriorDerivative
+    map_add' := exteriorDerivative_add
+    map_smul' := exteriorDerivative_smul }
+
+theorem closed_iff_mem_ker [BoundarylessManifold IM M] (α : DifferentialForm IM M k) :
+    Closed α ↔ α ∈ LinearMap.ker (exteriorDerivativeLinearMap (IM := IM) (M := M) k) := by
+  simp [Closed, exteriorDerivativeLinearMap]
+
+theorem exact_iff_mem_range [BoundarylessManifold IM M] (α : DifferentialForm IM M (k + 1)) :
+    Exact α ↔ α ∈ LinearMap.range (exteriorDerivativeLinearMap (IM := IM) (M := M) k) := by
+  simp [Exact, exteriorDerivativeLinearMap]
+
+end DifferentialForm
+end DifferentialGeometry
+
+end
