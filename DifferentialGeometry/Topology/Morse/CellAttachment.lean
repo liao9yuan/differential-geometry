@@ -158,6 +158,81 @@ theorem recombine_decompose {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
         change y (posIdx hk ⟨i.val - k, _⟩) = y i
         rw [hi']
 
+theorem negPart_cellMap_apply {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
+    (u : EuclideanSpace ℝ (Fin k)) (i : Fin k) :
+    negPart hk (cellMap ε u) i = ε * u i := by
+  dsimp [negPart, cellMap, negIdx]
+  simp [i.isLt]
+
+theorem negPart_cellMap_norm_sq {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
+    (u : EuclideanSpace ℝ (Fin k)) :
+    ‖negPart hk (cellMap ε u)‖ ^ 2 = ε ^ 2 * ‖u‖ ^ 2 := by
+  calc
+    ‖negPart hk (cellMap ε u)‖ ^ 2
+        = ∑ i : Fin k, (negPart hk (cellMap ε u) i) ^ 2 := by
+          rw [EuclideanSpace.real_norm_sq_eq (negPart hk (cellMap ε u))]
+    _ = ∑ i : Fin k, (ε * u i) ^ 2 := by
+      apply Finset.sum_congr rfl
+      intro i hi
+      rw [negPart_cellMap_apply]
+    _ = ε ^ 2 * ∑ i : Fin k, (u i) ^ 2 := by
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro i hi
+      rw [mul_pow]
+    _ = ε ^ 2 * ‖u‖ ^ 2 := by
+      rw [EuclideanSpace.real_norm_sq_eq u]
+
+theorem morseNormalForm_recombine {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
+    (u : EuclideanSpace ℝ (Fin k)) (v : EuclideanSpace ℝ (Fin (n - k))) :
+    morseNormalForm hk c (recombine hk (negPart hk (cellMap ε u)) v) =
+      c + (1 / 2) * (-(ε ^ 2) * ‖u‖ ^ 2 + ‖v‖ ^ 2) := by
+  dsimp [morseNormalForm]
+  have hneg : (∑ i : Fin k, - (recombine hk (negPart hk (cellMap ε u)) v (negIdx hk i)) ^ 2) =
+      -(ε ^ 2) * ‖u‖ ^ 2 := by
+    calc
+      (∑ i : Fin k, - (recombine hk (negPart hk (cellMap ε u)) v (negIdx hk i)) ^ 2)
+          = ∑ i : Fin k, - (negPart hk (cellMap ε u) i) ^ 2 := by
+            apply Finset.sum_congr rfl
+            intro i hi
+            rw [recombine_negPart]
+      _ = -((ε ^ 2) * ‖u‖ ^ 2) := by
+        rw [Finset.sum_neg_distrib]
+        congr 1
+        rw [← EuclideanSpace.real_norm_sq_eq (negPart hk (cellMap ε u))]
+        exact negPart_cellMap_norm_sq hk ε u
+      _ = -(ε ^ 2) * ‖u‖ ^ 2 := by
+        ring
+  have hpos : (∑ j : Fin (n - k),
+      (recombine hk (negPart hk (cellMap ε u)) v (posIdx hk j)) ^ 2) = ‖v‖ ^ 2 := by
+    calc
+      (∑ j : Fin (n - k), (recombine hk (negPart hk (cellMap ε u)) v (posIdx hk j)) ^ 2)
+          = ∑ j : Fin (n - k), (v j) ^ 2 := by
+            apply Finset.sum_congr rfl
+            intro j hj
+            rw [recombine_posPart]
+      _ = ‖v‖ ^ 2 := by
+        exact (EuclideanSpace.real_norm_sq_eq v).symm
+  rw [hneg, hpos]
+
+theorem morseNormalForm_recombine_cellMap {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 ≤ ε)
+    (u : EuclideanSpace ℝ (Fin k)) (v : EuclideanSpace ℝ (Fin (n - k))) :
+    morseNormalForm hk c (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) v) =
+      c + (1 / 2) * (-(2 * ε) * ‖u‖ ^ 2 + ‖v‖ ^ 2) := by
+  rw [morseNormalForm_recombine hk c (Real.sqrt (2 * ε)) u v]
+  have hsq : (Real.sqrt (2 * ε)) ^ 2 = 2 * ε := by
+    rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε)]
+  rw [hsq]
+
+theorem morseNormalForm_cocoreMap_boundary {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (hε : 0 ≤ ε)
+    (u : EuclideanSpace ℝ (Fin k)) (hu : ‖u‖ = 1)
+    (v : EuclideanSpace ℝ (Fin (n - k))) :
+    morseNormalForm hk c (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) v) =
+      c - ε + (1 / 2) * ‖v‖ ^ 2 := by
+  have hval := morseNormalForm_recombine_cellMap hk c ε hε u v
+  rw [hval, hu]
+  ring
+
 theorem morseNormalForm_split {n k : ℕ} (hk : k ≤ n) (c : ℝ) (y : MorseModel n) :
     morseNormalForm hk c y =
       c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) := by
