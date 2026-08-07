@@ -450,6 +450,768 @@ private theorem derivShuffleLeft_expanded_summand_eq
     have hjz : (-1 : ℤ) ^ (derivShuffleRank k σ).val = -1 := hj.neg_one_pow
     simp [hqu, hqz, hju, hjz]
 
+private theorem uncurryFinLeftExpandedSummand_sum_coset
+    (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
+    (w : Fin (m + 1) ⊕ Fin n → M)
+    {τ₁ τ₂ : Equiv.Perm (Fin (m + 1) ⊕ Fin n)}
+    (hcoset : (Quotient.mk'' τ₁ : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
+      Quotient.mk'' τ₂) :
+    (∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w τ₁ j) =
+      ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w τ₂ j := by
+  rw [← uncurrySum_summand_uncurryFin_left_expand_mk f g' h w τ₁,
+    ← uncurrySum_summand_uncurryFin_left_expand_mk f g' h w τ₂, hcoset]
+
+
+/-- Remove the element `p` from `Fin (m+1)`, giving `Fin m`. -/
+def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) : Fin m :=
+  if h : x < p then
+    ⟨x.val, by
+      have hxmp : x.val < p.val := h
+      have hpm : p.val ≤ m := Nat.lt_succ_iff.mp (by simpa using p.isLt)
+      omega⟩
+  else
+    ⟨x.val - 1, by
+      have hp : p.val < x.val := lt_of_le_of_ne (le_of_not_gt h) (by
+        intro heq
+        exact hx (Fin.ext heq.symm))
+      have hxm : x.val ≤ m := Nat.lt_succ_iff.mp (by simpa using x.isLt)
+      omega⟩
+
+@[simp] theorem succAbove_removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) :
+    p.succAbove (removeHole p x hx) = x := by
+  by_cases h : x < p
+  · let i : Fin m := ⟨x.val, by
+        have hxmp : x.val < p.val := h
+        have hpm : p.val ≤ m := Nat.lt_succ_iff.mp (by simpa using p.isLt)
+        omega⟩
+    have h1 : removeHole p x hx = i := by
+      rw [removeHole]
+      simp [h, i]
+    rw [h1]
+    have hcond : (Fin.castSucc i : Fin (m + 1)) < p := by
+      simpa [i] using h
+    rw [Fin.succAbove]
+    rw [if_pos hcond]
+    change i.castSucc = x
+    apply Fin.ext
+    simp [i]
+  · have hp : p.val < x.val := lt_of_le_of_ne (le_of_not_gt h) (by
+      intro heq
+      exact hx (Fin.ext heq.symm))
+    let i : Fin m := ⟨x.val - 1, by
+        have hxm : x.val ≤ m := Nat.lt_succ_iff.mp (by simpa using x.isLt)
+        omega⟩
+    have h1 : removeHole p x hx = i := by
+      rw [removeHole]
+      simp [h, i]
+    rw [h1]
+    have hnot : ¬ (Fin.castSucc i : Fin (m + 1)) < p := by
+      intro hc
+      have hi : i.val = x.val - 1 := rfl
+      have hcv : (Fin.castSucc i : Fin (m + 1)).val = x.val - 1 := rfl
+      omega
+    have hxsub : x.val - 1 + 1 = x.val := by omega
+    rw [Fin.succAbove]
+    rw [if_neg hnot]
+    change i.succ = x
+    apply Fin.ext
+    simp [i, hxsub]
+
+@[simp] theorem removeHole_succAbove {m : ℕ} (p : Fin (m + 1)) (i : Fin m) :
+    removeHole p (p.succAbove i) (Fin.succAbove_ne p i) = i := by
+  apply Fin.ext
+  by_cases h : (Fin.castSucc i : Fin (m + 1)) < p
+  · have hcast : p.succAbove i = (Fin.castSucc i : Fin (m + 1)) := by
+      rw [Fin.succAbove]
+      rw [if_pos h]
+    simp [removeHole, hcast, h]
+  · have hsucc : p.succAbove i = (i.succ : Fin (m + 1)) := by
+      rw [Fin.succAbove]
+      rw [if_neg h]
+    have hnot : ¬ (i.succ : Fin (m + 1)) < p := by
+      intro hc
+      have hcv : (Fin.castSucc i : Fin (m + 1)).val = i.val := rfl
+      have hsv : (i.succ : Fin (m + 1)).val = i.val + 1 := rfl
+      omega
+    simp [removeHole, hsucc, hnot]
+
+def inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) : Equiv.Perm (Fin m) where
+  toFun i := removeHole (τl j) (τl (j.succAbove i)) (by
+    intro h
+    exact Fin.succAbove_ne j i (Equiv.injective τl h))
+  invFun i := removeHole j (τl.symm ((τl j).succAbove i)) (by
+    intro h
+    have h' : (τl j).succAbove i = τl j := by
+      simpa using congrArg τl h
+    exact Fin.succAbove_ne (τl j) i h')
+  left_inv i := by
+    simp [removeHole_succAbove]
+  right_inv i := by
+    simp [removeHole_succAbove]
+
+theorem inducedPerm_succAbove {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) (i : Fin m) :
+    (τl j).succAbove (inducedPerm τl j i) = τl (j.succAbove i) := by
+  unfold inducedPerm
+  exact succAbove_removeHole (τl j) (τl (j.succAbove i)) (by
+    intro h
+    exact Fin.succAbove_ne j i (Equiv.injective τl h))
+
+theorem inducedPerm_mul {m : ℕ} (τ₁ τ₂ : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
+    inducedPerm (τ₁ * τ₂) j = inducedPerm τ₁ (τ₂ j) * inducedPerm τ₂ j := by
+  ext i
+  simp [inducedPerm]
+
+theorem inducedPerm_one {m : ℕ} (j : Fin (m + 1)) :
+    inducedPerm (1 : Equiv.Perm (Fin (m + 1))) j = 1 := by
+  ext i
+  simpa [inducedPerm] using removeHole_succAbove j i
+
+theorem succAbove_val_of_lt {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : i.val < j.val) :
+    (j.succAbove i).val = i.val := by
+  rw [Fin.succAbove]
+  rw [if_pos (by simpa using h)]
+  rfl
+
+theorem succAbove_val_of_ge {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : j.val ≤ i.val) :
+    (j.succAbove i).val = i.val + 1 := by
+  rw [Fin.succAbove]
+  rw [if_neg]
+  · rfl
+  · intro hc
+    have hcv : (Fin.castSucc i : Fin (m + 1)).val = i.val := rfl
+    omega
+
+theorem removeHole_val_of_lt {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p)
+    (h : x.val < p.val) : (removeHole p x hx).val = x.val := by
+  rw [removeHole]
+  by_cases hx' : x < p
+  · simp [hx']
+  · have hnp : ¬ x.val < p.val := by
+      intro hc
+      exact hx' hc
+    omega
+
+theorem removeHole_val_of_ge {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p)
+    (h : p.val < x.val) : (removeHole p x hx).val = x.val - 1 := by
+  rw [removeHole]
+  by_cases hx' : x < p
+  · have hc : x.val < p.val := hx'
+    omega
+  · simp [hx']
+
+-- transposition case: j < b, inducedPerm (swap j b) j = cycleIcc j (b-1)
+theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
+    inducedPerm (Equiv.swap j b) j =
+      Fin.cycleIcc (⟨j.val, by omega⟩ : Fin m) ⟨b.val - 1, by omega⟩ := by
+  ext i
+  dsimp [inducedPerm]
+  by_cases hm : m = 0
+  · subst hm
+    exact Fin.elim0 i
+  haveI : NeZero m := ⟨hm⟩
+  have hbj1 : b.val - 1 < m := by omega
+  have hjm : j.val < m := by omega
+  by_cases h1 : i.val < j.val
+  · have hsucc : (j.succAbove i).val = i.val := succAbove_val_of_lt j i h1
+    have hne2 : j.succAbove i ≠ b := by
+      intro hne
+      have : i.val = b.val := by
+        simpa [hsucc] using congrArg Fin.val hne
+      omega
+    have hswap : (Equiv.swap j b (j.succAbove i)).val = i.val := by
+      simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2, hsucc]
+    have hrm : (removeHole b (j.succAbove i) hne2).val = i.val := by
+      have hx : (j.succAbove i).val < b.val := by
+        rw [hsucc]
+        omega
+      rw [removeHole_val_of_lt b (j.succAbove i) hne2 hx]
+      exact hsucc
+    have hcyc : (Fin.cycleIcc (⟨j.val, hjm⟩ : Fin m) ⟨b.val - 1, hbj1⟩ i).val = i.val := by
+      have hlt : i < ⟨j.val, hjm⟩ := h1
+      exact congrArg Fin.val (Fin.cycleIcc_of_lt hlt)
+    have hswapel : Equiv.swap j b (j.succAbove i) = j.succAbove i := by
+      simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2]
+    simp [Equiv.swap_apply_def, hne2, Fin.succAbove_ne]
+    rw [hrm]
+    simpa using hcyc.symm
+  · have hge : j.val ≤ i.val := le_of_not_gt h1
+    by_cases h2 : i.val < b.val - 1
+    · have hsucc : (j.succAbove i).val = i.val + 1 := succAbove_val_of_ge j i hge
+      have hne2 : j.succAbove i ≠ b := by
+        intro hne
+        have : i.val + 1 = b.val := by
+          simpa [hsucc] using congrArg Fin.val hne
+        omega
+      have hswap : (Equiv.swap j b (j.succAbove i)).val = i.val + 1 := by
+        simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2, hsucc]
+      have hrm : (removeHole b (j.succAbove i) hne2).val = i.val + 1 := by
+        have hx : (j.succAbove i).val < b.val := by
+          rw [hsucc]
+          omega
+        rw [removeHole_val_of_lt b (j.succAbove i) hne2 hx]
+        exact hsucc
+      have hcyc : (Fin.cycleIcc (⟨j.val, hjm⟩ : Fin m) ⟨b.val - 1, hbj1⟩ i).val = i.val + 1 := by
+        have hle : (⟨j.val, hjm⟩ : Fin m) ≤ i := by
+          exact hge
+        have hlt2 : i < ⟨b.val - 1, hbj1⟩ := h2
+        have hstep := congrArg Fin.val (Fin.cycleIcc_of_ge_of_lt hle hlt2)
+        rw [hstep]
+        exact Fin.val_add_one_of_lt' (by omega)
+      simp [Equiv.swap_apply_def, hne2, Fin.succAbove_ne]
+      rw [hrm]
+      simpa using hcyc.symm
+    · have hge2 : b.val - 1 ≤ i.val := le_of_not_gt h2
+      by_cases h3 : i.val = b.val - 1
+      · have hsucc : (j.succAbove i).val = i.val + 1 := succAbove_val_of_ge j i hge
+        have hb : j.succAbove i = b := by
+          apply Fin.ext
+          have hjvb : j.val < b.val := hjb
+          have hbpos : 0 < b.val := lt_of_le_of_lt (Nat.zero_le j.val) hjvb
+          simp [hsucc, h3]
+          omega
+        have hsa : Equiv.swap j b (j.succAbove i) = j := by
+          rw [hb]
+          simp [Equiv.swap_apply_def]
+        have hrm' : (Equiv.swap j b (j.succAbove i)) ≠ (Equiv.swap j b) j := by
+          intro hne
+          have : j = b := by
+            rw [hsa, Equiv.swap_apply_left] at hne
+            exact hne
+          exact hjb.ne this
+        have hrm : (removeHole ((Equiv.swap j b) j) (Equiv.swap j b (j.succAbove i)) hrm').val = j.val := by
+          have hx : (Equiv.swap j b (j.succAbove i)).val < (Equiv.swap j b j).val := by
+            rw [hsa, Equiv.swap_apply_left]
+            exact hjb
+          exact (removeHole_val_of_lt (Equiv.swap j b j) (Equiv.swap j b (j.succAbove i)) hrm' hx).trans (congrArg Fin.val hsa)
+        have hcyc : (Fin.cycleIcc (⟨j.val, hjm⟩ : Fin m) ⟨b.val - 1, hbj1⟩ i).val = j.val := by
+          have hjvb : j.val < b.val := hjb
+          have hbpos : 0 < b.val := lt_of_le_of_lt (Nat.zero_le j.val) hjvb
+          have hle : (⟨j.val, hjm⟩ : Fin m) ≤ ⟨b.val - 1, hbj1⟩ := by
+            exact (show j.val ≤ b.val - 1 from by omega)
+          have hi : i = (⟨b.val - 1, hbj1⟩ : Fin m) := by
+            apply Fin.ext
+            exact h3
+          have hlast : Fin.cycleIcc (⟨j.val, hjm⟩ : Fin m) ⟨b.val - 1, hbj1⟩ i = ⟨j.val, hjm⟩ := by
+            rw [hi]
+            exact Fin.cycleIcc_of_last hle
+          exact congrArg Fin.val hlast
+        exact hrm.trans hcyc.symm
+      · have hge3 : b.val ≤ i.val := by omega
+        have hsucc : (j.succAbove i).val = i.val + 1 := succAbove_val_of_ge j i hge
+        have hne2 : j.succAbove i ≠ b := by
+          intro hne
+          have : i.val + 1 = b.val := by
+            simpa [hsucc] using congrArg Fin.val hne
+          omega
+        have hswap : (Equiv.swap j b (j.succAbove i)).val = i.val + 1 := by
+          simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2, hsucc]
+        have hrm : (removeHole b (j.succAbove i) hne2).val = i.val := by
+          have hx : b.val < (j.succAbove i).val := by
+            rw [hsucc]
+            omega
+          rw [removeHole_val_of_ge b (j.succAbove i) hne2 hx]
+          omega
+        have hcyc : (Fin.cycleIcc (⟨j.val, hjm⟩ : Fin m) ⟨b.val - 1, hbj1⟩ i).val = i.val := by
+          have hgt : (⟨b.val - 1, hbj1⟩ : Fin m) < i := by
+            exact (show b.val - 1 < i.val from by omega)
+          exact congrArg Fin.val (Fin.cycleIcc_of_gt hgt)
+        have hswapel : Equiv.swap j b (j.succAbove i) = j.succAbove i := by
+          simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2]
+        simp [Equiv.swap_apply_def, hne2, Fin.succAbove_ne]
+        exact hrm.trans hcyc.symm
+
+
+theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
+    inducedPerm ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹)
+      (Fin.rev j) =
+      (Fin.revPerm : Equiv.Perm (Fin m)) * inducedPerm τl j * (Fin.revPerm : Equiv.Perm (Fin m))⁻¹ := by
+  ext i
+  have hconj : (Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹ =
+      Fin.revPerm * τl * Fin.revPerm⁻¹ := rfl
+  have hmain : ∀ x : Fin m, Fin.rev (inducedPerm τl j x) =
+      (inducedPerm ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹) (Fin.rev j)) (Fin.rev x) := by
+    intro x
+    have hsa := inducedPerm_succAbove τl j x
+    have hL : (Fin.rev (τl j)).succAbove (Fin.rev (inducedPerm τl j x)) =
+        Fin.rev ((τl j).succAbove (inducedPerm τl j x)) := by
+      simpa [Fin.succAbove_rev_left]
+    have hR : ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹)
+          ((Fin.rev j).succAbove (Fin.rev x)) =
+        Fin.rev (τl (j.succAbove x)) := by
+      have hstep1 : ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹)
+          ((Fin.rev j).succAbove (Fin.rev x)) =
+          Fin.revPerm (τl (Fin.revPerm⁻¹ ((Fin.rev j).succAbove (Fin.rev x)))) := by
+        rfl
+      rw [hstep1]
+      have hsj : Fin.rev (j.succAbove x) = (Fin.rev j).succAbove (Fin.rev x) := by
+        simpa [Fin.succAbove_rev_left, Fin.succAbove_rev_right, Fin.rev_rev]
+      have hsj' : Fin.revPerm⁻¹ ((Fin.rev j).succAbove (Fin.rev x)) = j.succAbove x := by
+        rw [← hsj]
+        simp [Fin.rev_rev]
+      rw [hsj']
+      rfl
+    have hleft : (Fin.rev (τl j)).succAbove (Fin.rev (inducedPerm τl j x)) =
+        ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹)
+          ((Fin.rev j).succAbove (Fin.rev x)) := by
+      rw [hL, hsa, hR]
+    have hright : (Fin.rev (τl j)).succAbove
+          ((inducedPerm ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹) (Fin.rev j)) (Fin.rev x)) =
+        ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹)
+          ((Fin.rev j).succAbove (Fin.rev x)) := by
+      simpa [hconj, Fin.rev_rev, Function.comp_apply] using
+        inducedPerm_succAbove ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹) (Fin.rev j) (Fin.rev x)
+    exact (Fin.succAbove_right_injective (p := Fin.rev (τl j))).eq_iff.mp (hleft.trans hright.symm)
+  change (inducedPerm ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹) (Fin.rev j) i).val =
+    (Fin.rev (inducedPerm τl j (Fin.rev i))).val
+  have hsub := hmain (Fin.rev i)
+  rw [hsub]
+  congr 1
+  simp [Fin.rev_rev]
+
+
+theorem sign_swap_ne {m : ℕ} (j b : Fin (m + 1)) (h : j ≠ b) :
+    Equiv.Perm.sign (Equiv.swap j b) = (-1 : ℤˣ) := by
+  simp [Equiv.swap_apply_def, h]
+
+private theorem neg_one_pow_ite (n : ℕ) : (-1 : ℤˣ) ^ n = if Even n then 1 else -1 := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    have hstep : (-1 : ℤˣ) ^ n.succ = (-1 : ℤˣ) ^ n * (-1 : ℤˣ) := by
+      simpa using (pow_succ (a := (-1 : ℤˣ)) (n := n))
+    rw [hstep, ih]
+    by_cases hn : Even n
+    · have hodd : ¬ Even (n + 1) := by
+        rw [Nat.even_iff]
+        have hn' : n % 2 = 0 := (Nat.even_iff.mp hn)
+        omega
+      simp [hn, hodd]
+    · have hev : Even (n + 1) := by
+        rw [Nat.even_iff]
+        have hn' : n % 2 = 1 := by
+          have hcases := Nat.mod_two_eq_zero_or_one n
+          have hn0 : n % 2 ≠ 0 := by
+            intro h0
+            apply hn
+            rw [Nat.even_iff]
+            exact h0
+          omega
+        omega
+      simp [hn, hev]
+
+theorem neg_one_pow_add (n m : ℕ) : (-1 : ℤˣ) ^ (n + m) = (-1 : ℤˣ) ^ n * (-1 : ℤˣ) ^ m := by
+  rw [neg_one_pow_ite (n := n + m), neg_one_pow_ite (n := n), neg_one_pow_ite (n := m)]
+  have hmod : (n + m) % 2 = (n % 2 + m % 2) % 2 := by omega
+  rcases Nat.mod_two_eq_zero_or_one n with hn | hn <;> rcases Nat.mod_two_eq_zero_or_one m with hm | hm <;>
+    simp [Nat.even_iff, hn, hm, hmod]
+
+theorem inducedPerm_swap_sign_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
+    Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) =
+      Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ (j.val + b.val) := by
+  rw [inducedPerm_swap_left j b hjb]
+  have hle : (⟨j.val, by omega⟩ : Fin m) ≤ ⟨b.val - 1, by omega⟩ := by
+    exact (show j.val ≤ b.val - 1 from by omega)
+  rw [Fin.sign_cycleIcc_of_le hle]
+  rw [sign_swap_ne j b hjb.ne]
+  have hcombine : (-1 : ℤˣ) * (-1 : ℤˣ) ^ (j.val + b.val) = (-1 : ℤˣ) ^ (1 + j.val + b.val) := by
+    rw [mul_comm]
+    have hstep : (-1 : ℤˣ) ^ (j.val + b.val).succ = (-1 : ℤˣ) ^ (j.val + b.val) * (-1 : ℤˣ) := by
+      simpa using (pow_succ (a := (-1 : ℤˣ)) (n := j.val + b.val))
+    rw [← hstep]
+    rw [show (j.val + b.val).succ = 1 + j.val + b.val from by omega]
+  rw [hcombine]
+  have hpow_ite (n : ℕ) : (-1 : ℤˣ) ^ n = if Even n then 1 else -1 := by
+    induction n with
+    | zero => simp
+    | succ n ih =>
+      have hstep : (-1 : ℤˣ) ^ n.succ = (-1 : ℤˣ) ^ n * (-1 : ℤˣ) := by
+        simpa using (pow_succ (a := (-1 : ℤˣ)) (n := n))
+      rw [hstep, ih]
+      by_cases hn : Even n
+      · have hodd : ¬ Even (n + 1) := by
+          rw [Nat.even_iff]
+          have hn' : n % 2 = 0 := (Nat.even_iff.mp hn)
+          omega
+        simp [hn, hodd]
+      · have hev : Even (n + 1) := by
+          rw [Nat.even_iff]
+          have hn' : n % 2 = 1 := by
+            have hcases := Nat.mod_two_eq_zero_or_one n
+            have hn0 : n % 2 ≠ 0 := by
+              intro h
+              apply hn
+              rw [Nat.even_iff]
+              exact h
+            omega
+          omega
+        simp [hn, hev]
+  have hjvb : j.val < b.val := hjb
+  have hmod : (b.val - 1 - j.val) % 2 = (1 + j.val + b.val) % 2 := by omega
+  have hvals : (⟨b.val - 1, by omega⟩ : Fin m).val - (⟨j.val, by omega⟩ : Fin m).val = b.val - 1 - j.val := by
+    rw [show (⟨b.val - 1, by omega⟩ : Fin m).val = b.val - 1 from rfl,
+      show (⟨j.val, by omega⟩ : Fin m).val = j.val from rfl]
+  rw [hvals]
+  change (-1 : ℤˣ) ^ (b.val - 1 - j.val) = (-1 : ℤˣ) ^ (1 + j.val + b.val)
+  simp [hpow_ite, Nat.even_iff, hmod]
+
+
+theorem inducedPerm_swap_sign_right {m : ℕ} (j b : Fin (m + 1)) (hbj : b < j) :
+    Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) =
+      Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ (j.val + b.val) := by
+  have hrev := inducedPerm_revPerm (τl := Equiv.swap j b) (j := j)
+  have hconj : (Fin.revPerm : Equiv.Perm (Fin (m + 1))) * Equiv.swap j b * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹ =
+      Equiv.swap (Fin.rev j) (Fin.rev b) := by
+    ext x
+    by_cases hx : x = Fin.rev j
+    · subst hx
+      simp [Fin.revPerm, Fin.rev_rev]
+    · by_cases hx' : x = Fin.rev b
+      · subst hx'
+        simp [Fin.revPerm, Fin.rev_rev]
+      · have hrnj : Fin.rev x ≠ j := by
+          intro h
+          apply hx
+          rw [← h]
+          simp [Fin.rev_rev]
+        have hrnb : Fin.rev x ≠ b := by
+          intro h
+          apply hx'
+          rw [← h]
+          simp [Fin.rev_rev]
+        simp [Equiv.swap_apply_def, hx, hx', hrnj, hrnb, Fin.rev_rev]
+  have hjv : (Fin.rev j).val = m - j.val := by
+    change (m + 1) - (j.val + 1) = m - j.val
+    omega
+  have hbv : (Fin.rev b).val = m - b.val := by
+    change (m + 1) - (b.val + 1) = m - b.val
+    omega
+  have hrevlt : Fin.rev j < Fin.rev b := by
+    change (Fin.rev j).val < (Fin.rev b).val
+    rw [hjv, hbv]
+    omega
+  have hsig1 := inducedPerm_swap_sign_left (j := Fin.rev j) (b := Fin.rev b) hrevlt
+  have hsign_conj : Equiv.Perm.sign (Equiv.swap (Fin.rev j) (Fin.rev b)) = Equiv.Perm.sign (Equiv.swap j b) := by
+    rw [sign_swap_ne (Fin.rev j) (Fin.rev b) (ne_of_lt hrevlt), sign_swap_ne j b (ne_of_lt hbj).symm]
+  have hsign_rev : Equiv.Perm.sign ((Fin.revPerm : Equiv.Perm (Fin m)) * inducedPerm (Equiv.swap j b) j * (Fin.revPerm : Equiv.Perm (Fin m))⁻¹) =
+      Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) := by
+    rw [Equiv.Perm.sign_mul, Equiv.Perm.sign_mul, Equiv.Perm.sign_inv]
+    have h1 : Equiv.Perm.sign (Fin.revPerm : Equiv.Perm (Fin m)) * (Equiv.Perm.sign (Fin.revPerm : Equiv.Perm (Fin m)) * Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j)) =
+        Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) := by
+      rw [← mul_assoc]
+      have hs : Equiv.Perm.sign (Fin.revPerm : Equiv.Perm (Fin m)) * Equiv.Perm.sign (Fin.revPerm : Equiv.Perm (Fin m)) = 1 := by
+        rw [← Equiv.Perm.sign_mul]
+        congr 1
+        ext x
+        simp [Fin.rev_rev]
+      rw [hs, one_mul]
+    simpa [mul_assoc, mul_comm, mul_left_comm] using h1
+  have hmain : Equiv.Perm.sign (inducedPerm ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * Equiv.swap j b * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹) (Fin.rev j)) =
+      Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) := by
+    rw [hrev]
+    exact hsign_rev
+  rw [← hmain]
+  rw [hconj]
+  rw [hsig1]
+  rw [hsign_conj]
+  change Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ ((Fin.rev j).val + (Fin.rev b).val) =
+    Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ (j.val + b.val)
+  congr 1
+  have hmod : ((m - j.val) + (m - b.val)) % 2 = (j.val + b.val) % 2 := by omega
+  change (-1 : ℤˣ) ^ ((Fin.rev j).val + (Fin.rev b).val) = (-1 : ℤˣ) ^ (j.val + b.val)
+  simp [neg_one_pow_ite, Nat.even_iff, hmod]
+
+theorem inducedPerm_swap_sign {m : ℕ} (j b : Fin (m + 1)) :
+    Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) =
+      Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ (j.val + b.val) := by
+  by_cases h : j = b
+  · subst h
+    have h1 : inducedPerm (Equiv.swap j j) j = (1 : Equiv.Perm (Fin m)) := by
+      simpa using inducedPerm_one j
+    rw [h1]
+    simp
+    have hjj : Even (j.val + j.val) := by
+      rw [Nat.even_iff]
+      omega
+    rw [show (-1 : ℤˣ) ^ (j.val + j.val) = 1 from by
+      rw [neg_one_pow_ite (n := j.val + j.val)]
+      simp [hjj]]
+  · rcases lt_or_gt_of_ne h with hjb | hbj
+    · exact inducedPerm_swap_sign_left j b hjb
+    · exact inducedPerm_swap_sign_right j b hbj
+
+
+
+theorem removeHole_congr {m : ℕ} (p : Fin (m + 1)) {x y : Fin (m + 1)} (hxy : x = y)
+    (hx : x ≠ p) (hy : y ≠ p) : removeHole p x hx = removeHole p y hy := by
+  subst y
+  apply Fin.ext
+  by_cases hlt : x < p
+  · rw [removeHole_val_of_lt p x hx hlt]
+  · have hpne : p ≠ x := by
+      intro h
+      exact hx h.symm
+    have hvne : p.val ≠ x.val := by
+      intro h
+      exact hpne (Fin.ext h)
+    have hge : p.val < x.val := lt_of_le_of_ne (le_of_not_gt hlt) hvne
+    rw [removeHole_val_of_ge p x hx hge]
+
+theorem inducedPerm_swap_away {m : ℕ} (a b j' : Fin (m + 1)) (haj : j' ≠ a) (hbj : j' ≠ b) :
+    inducedPerm (Equiv.swap a b) j' =
+      Equiv.swap (removeHole j' a (Ne.symm haj)) (removeHole j' b (Ne.symm hbj)) := by
+  ext i
+  dsimp [inducedPerm]
+  by_cases hia : j'.succAbove i = a
+  · have hne : Equiv.swap a b (j'.succAbove i) ≠ j' := by
+      rw [hia]
+      intro h
+      have hb : b = j' := by
+        simpa [Equiv.swap_apply_def] using h
+      exact (Ne.symm hbj) hb
+    have hrm : (removeHole j' (Equiv.swap a b (j'.succAbove i)) hne).val = (removeHole j' b (Ne.symm hbj)).val := by
+      have harg : Equiv.swap a b (j'.succAbove i) = b := by
+        rw [hia]
+        simp [Equiv.swap_apply_def]
+      exact congrArg Fin.val (removeHole_congr j' harg hne (Ne.symm hbj))
+    have hi : i = removeHole j' a (Ne.symm haj) := by
+      have hsa1 : j'.succAbove (removeHole j' a (Ne.symm haj)) = a := succAbove_removeHole j' a (Ne.symm haj)
+      exact ((Fin.succAbove_right_injective (p := j')).eq_iff.mp (hsa1.trans hia.symm)).symm
+    rw [hi]
+    simp [Equiv.swap_apply_def, hrm, haj, hbj]
+  · by_cases hib : j'.succAbove i = b
+    · have hne : Equiv.swap a b (j'.succAbove i) ≠ j' := by
+        rw [hib]
+        intro h
+        have ha : a = j' := by
+          simpa [Equiv.swap_apply_def] using h
+        exact (Ne.symm haj) ha
+      have hrm : (removeHole j' (Equiv.swap a b (j'.succAbove i)) hne).val = (removeHole j' a (Ne.symm haj)).val := by
+        have harg : Equiv.swap a b (j'.succAbove i) = a := by
+          rw [hib]
+          simp [Equiv.swap_apply_def]
+        exact congrArg Fin.val (removeHole_congr j' harg hne (Ne.symm haj))
+      have hi : i = removeHole j' b (Ne.symm hbj) := by
+        have hsa1 : j'.succAbove (removeHole j' b (Ne.symm hbj)) = b := succAbove_removeHole j' b (Ne.symm hbj)
+        exact ((Fin.succAbove_right_injective (p := j')).eq_iff.mp (hsa1.trans hib.symm)).symm
+      rw [hi]
+      simp [Equiv.swap_apply_def, hrm, haj, hbj]
+    · have hfix : Equiv.swap a b (j'.succAbove i) = j'.succAbove i := by
+        simp [Equiv.swap_apply_def, hia, hib]
+      have hne : Equiv.swap a b (j'.succAbove i) ≠ j' := by
+        intro h
+        exact Fin.succAbove_ne j' i (hfix.symm.trans h)
+      have hrm : (removeHole j' (Equiv.swap a b (j'.succAbove i)) hne).val = i.val := by
+        have h1 : removeHole j' (Equiv.swap a b (j'.succAbove i)) hne = removeHole j' (j'.succAbove i) (Fin.succAbove_ne j' i) :=
+          removeHole_congr j' hfix hne (Fin.succAbove_ne j' i)
+        have h2 : (removeHole j' (j'.succAbove i) (Fin.succAbove_ne j' i)).val = i.val :=
+          congrArg Fin.val (removeHole_succAbove j' i)
+        exact (congrArg Fin.val h1).trans h2
+      have hne_a : i ≠ removeHole j' a (Ne.symm haj) := by
+        intro h
+        have : j'.succAbove (removeHole j' a (Ne.symm haj)) = j'.succAbove i := by rw [h]
+        have : j'.succAbove i = a := by
+          rw [succAbove_removeHole] at this
+          exact this.symm
+        exact hia this
+      have hne_b : i ≠ removeHole j' b (Ne.symm hbj) := by
+        intro h
+        have : j'.succAbove (removeHole j' b (Ne.symm hbj)) = j'.succAbove i := by rw [h]
+        have : j'.succAbove i = b := by
+          rw [succAbove_removeHole] at this
+          exact this.symm
+        exact hib this
+      simp [Equiv.swap_apply_def, hne_a, hne_b, hrm, haj, hbj, hia, hib]
+
+theorem inducedPerm_swap_sign' {m : ℕ} (a b j' : Fin (m + 1)) :
+    Equiv.Perm.sign (inducedPerm (Equiv.swap a b) j') =
+      Equiv.Perm.sign (Equiv.swap a b) * (-1 : ℤˣ) ^ (j'.val + (Equiv.swap a b j').val) := by
+  by_cases hab : a = b
+  · rw [hab]
+    simp [inducedPerm_one]
+    have hrefl : inducedPerm (Equiv.refl (Fin (m + 1))) j' = 1 := by
+      simpa using inducedPerm_one j'
+    rw [hrefl]
+    simp
+    have hjj : Even (j'.val + j'.val) := by
+      rw [Nat.even_iff]
+      omega
+    rw [show (-1 : ℤˣ) ^ (j'.val + j'.val) = 1 from by
+      rw [neg_one_pow_ite (n := j'.val + j'.val)]
+      simp [hjj]]
+  · by_cases haj : j' = a
+    · rw [haj]
+      simpa using inducedPerm_swap_sign a b
+    · by_cases hbj : j' = b
+      · rw [hbj]
+        simpa [Equiv.swap_comm] using inducedPerm_swap_sign b a
+      · rw [inducedPerm_swap_away a b j' haj hbj]
+        have hsa : Equiv.swap a b j' = j' := by
+          simp [Equiv.swap_apply_def, haj, hbj]
+        rw [hsa]
+        have hne : removeHole j' a (Ne.symm haj) ≠ removeHole j' b (Ne.symm hbj) := by
+          intro h
+          have h1 : j'.succAbove (removeHole j' a (Ne.symm haj)) = a := succAbove_removeHole j' a (Ne.symm haj)
+          have h2 : j'.succAbove (removeHole j' b (Ne.symm hbj)) = b := succAbove_removeHole j' b (Ne.symm hbj)
+          have hcong : j'.succAbove (removeHole j' a (Ne.symm haj)) = j'.succAbove (removeHole j' b (Ne.symm hbj)) := by
+            exact congrArg (fun z => j'.succAbove z) h
+          exact hab (h1.symm.trans (hcong.trans h2))
+        have hsig1 : Equiv.Perm.sign (Equiv.swap (removeHole j' a (Ne.symm haj)) (removeHole j' b (Ne.symm hbj))) = (-1 : ℤˣ) := by
+          simp [Equiv.Perm.sign_swap, hne]
+        rw [hsig1]
+        simp [Equiv.Perm.sign_swap, hab]
+        have hjj : Even (j'.val + j'.val) := by
+          rw [Nat.even_iff]
+          omega
+        rw [show (-1 : ℤˣ) ^ (j'.val + j'.val) = 1 from by
+          rw [neg_one_pow_ite (n := j'.val + j'.val)]
+          simp [hjj]]
+
+
+theorem sign_inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
+    Equiv.Perm.sign (inducedPerm τl j) =
+      Equiv.Perm.sign τl * (-1 : ℤˣ) ^ (j.val + (τl j).val) := by
+  refine Trunc.induction_on (Equiv.Perm.truncSwapFactors τl) ?_
+  rintro ⟨l, hprod, hswap⟩
+  have hP' : ∀ (l : List (Equiv.Perm (Fin (m + 1)))), (∀ g ∈ l, g.IsSwap) →
+      Equiv.Perm.sign (inducedPerm l.prod j) =
+        Equiv.Perm.sign l.prod * (-1 : ℤˣ) ^ (j.val + (l.prod j).val) := by
+    intro l
+    induction l with
+    | nil =>
+        intro hswap
+        have hjj : Even (j.val + j.val) := by
+          rw [Nat.even_iff]
+          omega
+        simp [List.prod_nil, inducedPerm_one]
+        rw [show (-1 : ℤˣ) ^ (j.val + j.val) = 1 from by
+          rw [neg_one_pow_ite (n := j.val + j.val)]
+          simp [hjj]]
+    | cons s l' ih =>
+        intro hswap
+        rcases hswap s (by simp) with ⟨a, b, hab, rfl⟩
+        have hsig_sub := ih (fun g hg => hswap g (by simp [hg]))
+        have hsign_mul : Equiv.Perm.sign (inducedPerm (Equiv.swap a b * l'.prod) j) =
+            Equiv.Perm.sign (Equiv.swap a b) * (-1 : ℤˣ) ^ ((l'.prod j).val + (Equiv.swap a b (l'.prod j)).val) *
+              (Equiv.Perm.sign l'.prod * (-1 : ℤˣ) ^ (j.val + (l'.prod j).val)) := by
+          rw [inducedPerm_mul]
+          rw [Equiv.Perm.sign_mul]
+          rw [inducedPerm_swap_sign' a b (l'.prod j)]
+          rw [hsig_sub]
+        have hpow : (-1 : ℤˣ) ^ ((l'.prod j).val + (Equiv.swap a b (l'.prod j)).val + (j.val + (l'.prod j).val)) =
+            (-1 : ℤˣ) ^ (j.val + (Equiv.swap a b (l'.prod j)).val) := by
+          rw [neg_one_pow_ite, neg_one_pow_ite]
+          have hmod : ((l'.prod j).val + (Equiv.swap a b (l'.prod j)).val + (j.val + (l'.prod j).val)) % 2 =
+              (j.val + (Equiv.swap a b (l'.prod j)).val) % 2 := by omega
+          simp [Nat.even_iff, hmod]
+        calc
+          Equiv.Perm.sign (inducedPerm (Equiv.swap a b * l'.prod) j)
+              = Equiv.Perm.sign (Equiv.swap a b) * (-1 : ℤˣ) ^ ((l'.prod j).val + (Equiv.swap a b (l'.prod j)).val) *
+                  (Equiv.Perm.sign l'.prod * (-1 : ℤˣ) ^ (j.val + (l'.prod j).val)) := hsign_mul
+          _ = (Equiv.Perm.sign (Equiv.swap a b) * Equiv.Perm.sign l'.prod) *
+                (-1 : ℤˣ) ^ ((l'.prod j).val + (Equiv.swap a b (l'.prod j)).val + (j.val + (l'.prod j).val)) := by
+                rw [neg_one_pow_add ((l'.prod j).val + (Equiv.swap a b (l'.prod j)).val) (j.val + (l'.prod j).val)]
+                ac_rfl
+          _ = Equiv.Perm.sign (Equiv.swap a b * l'.prod) * (-1 : ℤˣ) ^ (j.val + (Equiv.swap a b (l'.prod j)).val) := by
+                rw [← Equiv.Perm.sign_mul, hpow]
+          _ = Equiv.Perm.sign (Equiv.swap a b * l'.prod) * (-1 : ℤˣ) ^ (j.val + ((Equiv.swap a b * l'.prod) j).val) := by
+                congr 1
+  have hP := hP' l hswap
+  rw [← hprod]
+  exact hP
+
+section Transport
+
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {M : Type*} [NormedAddCommGroup M] [NormedSpace 𝕜 M]
+  {N : Type*} [NormedAddCommGroup N] [NormedSpace 𝕜 N]
+  {N' : Type*} [NormedAddCommGroup N'] [NormedSpace 𝕜 N']
+  {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
+  {m n : ℕ}
+
+theorem removeNth_comp_perm' (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1))
+    (a : Fin (m + 1) → M) :
+    j.removeNth (a ∘ τl) = (τl j).removeNth a ∘ inducedPerm τl j := by
+  ext i
+  change a (τl (j.succAbove i)) = a ((τl j).succAbove (inducedPerm τl j i))
+  rw [inducedPerm_succAbove]
+
+theorem uncurryFinLeftExpandedSummand_mul_sumCongr
+    (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
+    (w : Fin (m + 1) ⊕ Fin n → M)
+    (τ₀ : Equiv.Perm (Fin (m + 1) ⊕ Fin n))
+    (τl : Equiv.Perm (Fin (m + 1))) (τr : Equiv.Perm (Fin n)) (j : Fin (m + 1)) :
+    uncurryFinLeftExpandedSummand f g' h w (τ₀ * Equiv.Perm.sumCongr τl τr) j =
+      uncurryFinLeftExpandedSummand f g' h w τ₀ (τl j) := by
+  unfold uncurryFinLeftExpandedSummand
+  rw [Equiv.Perm.sign_mul, Equiv.Perm.sign_sumCongr]
+  have hh : h (fun i : Fin n => w ((τ₀ * Equiv.Perm.sumCongr τl τr) (Sum.inr i))) =
+      Equiv.Perm.sign τr • h (fun i : Fin n => w (τ₀ (Sum.inr i))) := by
+    have hcomp : (fun i : Fin n => w ((τ₀ * Equiv.Perm.sumCongr τl τr) (Sum.inr i))) =
+        (fun i : Fin n => w (τ₀ (Sum.inr i))) ∘ τr := by
+      funext i
+      simp [Function.comp_apply, Equiv.Perm.coe_mul]
+    rw [hcomp]
+    exact h.map_perm (fun i : Fin n => w (τ₀ (Sum.inr i))) τr
+  have hg : g' (w ((τ₀ * Equiv.Perm.sumCongr τl τr) (Sum.inl j))) (j.removeNth (fun i : Fin (m + 1) => w ((τ₀ * Equiv.Perm.sumCongr τl τr) (Sum.inl i)))) =
+      Equiv.Perm.sign (inducedPerm τl j) • g' (w (τ₀ (Sum.inl (τl j)))) ((τl j).removeNth (fun i : Fin (m + 1) => w (τ₀ (Sum.inl i)))) := by
+    have hfirst : (τ₀ * Equiv.Perm.sumCongr τl τr) (Sum.inl j) = τ₀ (Sum.inl (τl j)) := by
+      simp [Equiv.Perm.coe_mul]
+    rw [hfirst]
+    have hcomp : (fun i : Fin (m + 1) => w ((τ₀ * Equiv.Perm.sumCongr τl τr) (Sum.inl i))) =
+        (fun i : Fin (m + 1) => w (τ₀ (Sum.inl i))) ∘ τl := by
+      funext i
+      simp [Function.comp_apply, Equiv.Perm.coe_mul]
+    rw [hcomp]
+    rw [removeNth_comp_perm' τl j (fun i : Fin (m + 1) => w (τ₀ (Sum.inl i)))]
+    exact (g' (w (τ₀ (Sum.inl (τl j))))).map_perm
+      ((τl j).removeNth (fun i : Fin (m + 1) => w (τ₀ (Sum.inl i)))) (inducedPerm τl j)
+  -- now combine the smuls:
+  -- goal: sign τ₀ · sign τl · sign τr • f (((-1)^j) • g' ...) (h ...)
+  --     = sign τ₀ • f (((-1)^(τl j)) • g' ...) (h ...)
+  -- with hg and hh applied:
+  rw [hh, hg]
+  -- now the algebra: sign τ₀ · sign τl · sign τr • f (a • (sign ip • g' x t)) (sign τr • h u)
+  -- = sign τ₀ • f (b • g' x t) (h u) — via bilinearity and sign_inducedPerm
+  have hsig : Equiv.Perm.sign (inducedPerm τl j) = Equiv.Perm.sign τl * (-1 : ℤˣ) ^ (j.val + (τl j).val) :=
+    sign_inducedPerm τl j
+  -- use smul algebra: f (s • x) (t • y) = (s * t) • f x y for the bilinear f
+  have hsig : Equiv.Perm.sign (inducedPerm τl j) = Equiv.Perm.sign τl * (-1 : ℤˣ) ^ (j.val + (τl j).val) :=
+    sign_inducedPerm τl j
+  simp only [Units.smul_def, smul_smul, mul_assoc]
+  simp only [Int.reduceNeg, Units.val_mul, map_zsmul, ContinuousLinearMap.coe_smul',
+    Pi.smul_apply, smul_smul, mul_assoc]
+  rw [hsig]
+  congr 1
+  -- scalar algebra: the coefficients in ℤ
+  have hjj : Even (j.val + j.val) := by
+    rw [Nat.even_iff]
+    omega
+  have hpow2 : (-1 : ℤ) ^ (j.val + j.val) = 1 := by
+    rw [show j.val + j.val = 2 * j.val from by omega]
+    rw [pow_mul]
+    simp
+  -- the coefficient equality — after all simplifications it should be:
+  -- sign τl · sign τl · sign τr · sign τr · (-1)^{j + j + τl j} = (-1)^{τl j} — all the sign² cancel
+  -- let me try omega-free: norm_num-like with the ℤˣ signs:
+  have hsgn (x : ℤˣ) : (x : ℤ) * (x : ℤ) = 1 := by
+    rcases Int.units_eq_one_or x with rfl | rfl <;> simp
+  have hunitpow (k : ℕ) : (↑((-1 : ℤˣ) ^ k) : ℤ) = (-1 : ℤ) ^ k := by
+    exact map_pow (Units.coeHom ℤ) (-1 : ℤˣ) k
+  have hpowj : (-1 : ℤ) ^ j.val * (-1 : ℤ) ^ (j.val + (τl j).val) = (-1 : ℤ) ^ (τl j).val := by
+    rw [← pow_add (a := (-1 : ℤ)) (m := j.val) (n := j.val + (τl j).val)]
+    rw [show j.val + (j.val + (τl j).val) = (j.val + j.val) + (τl j).val from by omega]
+    rw [pow_add (a := (-1 : ℤ)) (m := j.val + j.val) (n := (τl j).val)]
+    rw [hpow2]
+    simp
+  rcases Int.units_eq_one_or (Equiv.Perm.sign τl) with hτl | hτl <;>
+    rcases Int.units_eq_one_or (Equiv.Perm.sign τr) with hτr | hτr <;>
+      rcases Int.units_eq_one_or (Equiv.Perm.sign τ₀) with hτ₀ | hτ₀ <;>
+        simp [hτl, hτr, hτ₀, hpowj, hunitpow]
+
+end Transport
+
 private theorem zero_wedge' (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     wedge_product (0 : M [⋀^Fin m]→L[𝕜] 𝕜) h (ContinuousLinearMap.mul 𝕜 𝕜) = 0 := by
   have := add_wedge (0 : M [⋀^Fin m]→L[𝕜] 𝕜) 0 h (ContinuousLinearMap.mul 𝕜 𝕜)
