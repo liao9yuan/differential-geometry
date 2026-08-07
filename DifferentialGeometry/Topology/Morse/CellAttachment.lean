@@ -1254,6 +1254,83 @@ theorem recombine_cellMap_cocore_injective {n k : ℕ} (hk : k ≤ n) (ε r : �
   · apply Subtype.ext
     exact hw
 
+noncomputable def modelFlow {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n) : MorseModel n :=
+  recombine hk (negPart hk y) ((Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)) • posPart hk y)
+
+theorem modelFlow_zero {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    modelFlow hk 0 y = y := by
+  dsimp [modelFlow]
+  have hsq : Real.sqrt (1 - 2 * 0 / ‖posPart hk y‖ ^ 2) = 1 := by norm_num
+  rw [hsq, one_smul]
+  exact recombine_decompose hk y
+
+theorem modelFlow_f_sub {n k : ℕ} (hk : k ≤ n) (c t : ℝ) (y : MorseModel n)
+    (ht0 : 0 ≤ t) (ht : t ≤ ‖posPart hk y‖ ^ 2 / 2) :
+    morseNormalForm hk c (modelFlow hk t y) = morseNormalForm hk c y - t := by
+  let a : EuclideanSpace ℝ (Fin k) := negPart hk y
+  let b : EuclideanSpace ℝ (Fin (n - k)) := posPart hk y
+  have hsq : 0 ≤ 1 - 2 * t / ‖b‖ ^ 2 := by
+    have hb2 : 0 ≤ ‖b‖ ^ 2 := sq_nonneg ‖b‖
+    have hdiv : 2 * t / ‖b‖ ^ 2 ≤ 1 := by
+      by_cases hb : ‖b‖ = 0
+      · have ht' : t = 0 := by
+          rw [hb] at ht
+          exact le_antisymm (by simpa using ht) ht0
+        rw [ht', hb]
+        norm_num
+      · have hbpos : 0 < ‖b‖ := lt_of_le_of_ne (norm_nonneg b) (Ne.symm hb)
+        have hb2pos : 0 < ‖b‖ ^ 2 := sq_pos_of_pos hbpos
+        rw [div_le_one hb2pos]
+        nlinarith [ht, hb2pos, ht0]
+    nlinarith [hdiv, ht0]
+  have hnorm : ‖(Real.sqrt (1 - 2 * t / ‖b‖ ^ 2) • b)‖ ^ 2 = ‖b‖ ^ 2 - 2 * t := by
+    rw [norm_smul]
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+    rw [mul_pow]
+    rw [Real.sq_sqrt hsq]
+    by_cases hb2 : ‖b‖ ^ 2 = 0
+    · have ht0' : t = 0 := by
+        have hle : t ≤ 0 := by
+          rw [hb2] at ht
+          simpa using ht
+        linarith
+      have hb0 : b = 0 := norm_eq_zero.mp (sq_eq_zero_iff.mp hb2)
+      rw [ht0', hb0]
+      simp
+    · rw [sub_mul, one_mul]
+      rw [div_mul_cancel₀ (2 * t) hb2]
+  have hnf : morseNormalForm hk c (modelFlow hk t y) =
+      c + (1 / 2) * (-‖a‖ ^ 2 + ‖Real.sqrt (1 - 2 * t / ‖b‖ ^ 2) • b‖ ^ 2) := by
+    dsimp [modelFlow, a, b]
+    have hcid : negPart hk (cellMap 1 (negPart hk y)) = negPart hk y := by
+      ext i
+      rw [negPart_cellMap_apply]
+      simp
+    have hrec := morseNormalForm_recombine hk c 1 (negPart hk y)
+      (Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) • posPart hk y)
+    rw [hcid] at hrec
+    have h1 : (1 : ℝ) ^ 2 * ‖negPart hk y‖ ^ 2 = ‖negPart hk y‖ ^ 2 := by ring
+    simpa [h1] using hrec
+  have hnfy : morseNormalForm hk c y = c + (1 / 2) * (-‖a‖ ^ 2 + ‖b‖ ^ 2) := by
+    dsimp [morseNormalForm, a, b]
+    congr 1
+    rw [show (∑ i : Fin k, - (y (negIdx hk i)) ^ 2) = -(∑ i : Fin k, (y (negIdx hk i)) ^ 2) by
+      rw [Finset.sum_neg_distrib]]
+    rw [show (∑ i : Fin k, (y (negIdx hk i)) ^ 2) = ‖negPart hk y‖ ^ 2 by
+      rw [EuclideanSpace.real_norm_sq_eq (negPart hk y)]
+      apply Finset.sum_congr rfl
+      intro i hi
+      change (y (negIdx hk i)) ^ 2 = ((negPart hk y).ofLp i) ^ 2
+      rfl]
+    rw [show (∑ j : Fin (n - k), (y (posIdx hk j)) ^ 2) = ‖posPart hk y‖ ^ 2 by
+      rw [EuclideanSpace.real_norm_sq_eq (posPart hk y)]
+      apply Finset.sum_congr rfl
+      intro j hj
+      change (y (posIdx hk j)) ^ 2 = ((posPart hk y).ofLp j) ^ 2
+      rfl]
+  rw [hnf, hnfy, hnorm]
+  ring
+
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
 
