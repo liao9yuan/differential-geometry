@@ -1492,6 +1492,79 @@ noncomputable def closedCellIsManifold (m : ℕ) :
   letI := closedCellChartedSpaceSucc m
   exact { toHasGroupoid := closedCellHasGroupoid m }
 
+theorem closedCellBoundaryInvValue_contDiffOn {m : ℕ} (e : Fin (m + 1) ≃ Fin (m + 1))
+    (s : ℝ) :
+    ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+        (closedCellBoundaryInvValue m e s y : EuclideanSpace ℝ (Fin (m + 1))))
+      {y : EuclideanSpace ℝ (Fin (m + 1)) |
+        0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} := by
+  have htail : ContDiff ℝ (⊤ : ℕ∞) (closedCellTail m) := closedCellTail_contDiff (m := m)
+  have hargAll : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2) := by
+    have h1 : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+        1 - y (0 : Fin (m + 1))) := by
+      exact (contDiff_const.sub (by fun_prop))
+    have h2 : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+        ‖closedCellTail m y‖ ^ 2) :=
+      (contDiff_norm_sq ℝ).comp htail
+    exact h1.sub h2
+  have harg : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2)
+      {y | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} :=
+    hargAll.contDiffOn.mono (Set.subset_univ _)
+  have hsqrt : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+      {y | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} := by
+    intro y hy
+    have hc : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2)
+        {z | 0 < 1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2} y := harg y hy
+    exact (ContDiffWithinAt.sqrt hc (ne_of_gt hy))
+  have hfirst : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      (s * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2),
+        closedCellTail m y)) {y | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} := by
+    have hsmul : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+        s * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+        {y | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} := by
+      intro y hy
+      simpa [mul_comm] using (hsqrt y hy).mul (contDiffWithinAt_const (c := s))
+    exact hsmul.prodMk (htail.contDiffOn.mono (Set.subset_univ _))
+  have hcons : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellCons m (s * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+        (closedCellTail m y)) {y | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} :=
+    (closedCellCons_contDiff (m := m)).contDiffOn.comp hfirst (by intro y hy; exact Set.mem_univ _)
+  have hperm : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellPermute e.symm (closedCellCons m (s * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+        (closedCellTail m y))) {y | 0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2} :=
+    (closedCellPermute_contDiff e.symm).contDiffOn.comp hcons (by intro y hy; exact Set.mem_univ _)
+  have hdef : (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      (closedCellBoundaryInvValue m e s y : EuclideanSpace ℝ (Fin (m + 1)))) =
+      fun y => closedCellPermute e.symm
+        (closedCellCons m (s * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+          (closedCellTail m y)) := by
+    funext y
+    rfl
+  rw [hdef]
+  exact hperm
+
+theorem closedCellInteriorChart_symm_val {m : ℕ} (y : EuclideanHalfSpace (m + 1))
+    (hy : y ∈ (closedCellInteriorChart m).target) :
+    ((closedCellInteriorChart m).symm y : EuclideanSpace ℝ (Fin (m + 1))) =
+      closedCellShiftSucc m (-1) y.1 := by
+  dsimp [closedCellInteriorChart]
+  rw [closedCellProject_of_mem (le_of_lt hy)]
+
+theorem closedCellBoundaryChart_symm_val {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    (y : EuclideanHalfSpace (m + 1)) (hy : y ∈ (closedCellBoundaryChart m i σ).target) :
+    ((closedCellBoundaryChart m i σ).symm y : EuclideanSpace ℝ (Fin (m + 1))) =
+      closedCellBoundaryInvValue m (Equiv.swap i (0 : Fin (m + 1))) (closedCellSign σ) y.1 := by
+  dsimp [closedCellBoundaryChart]
+  rw [closedCellProject_of_mem (closedCellBoundaryInvValue_norm_le_one (Equiv.swap i (0 : Fin (m + 1)))
+    (by
+      dsimp [closedCellSign]
+      exact closedCellSign_sq σ) y.1 hy.2 y.2)]
+
 theorem hasGroupoid_prod {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*}
     [NormedAddCommGroup E] [NormedSpace 𝕜 E] {H : Type*} [TopologicalSpace H]
     {I : ModelWithCorners 𝕜 E H} {E' : Type*} [NormedAddCommGroup E'] [NormedSpace 𝕜 E']
