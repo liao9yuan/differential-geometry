@@ -580,7 +580,7 @@ theorem swap_bicollar_symm (k l : ℕ) (p : {p : StandardHandle k l //
     (bicollar k l).symm p =
       (Prod.map (Prod.swap : Corner l k → Corner k l)
         (fun r : Set.Ico (0 : ℝ) 1 × Set.Ico (0 : ℝ) 1 => (r.2, r.1)))
-        ((bicollar l k).symm (swapCornerComplement k l p)) := by
+        ((bicollar l k).symm (swapCoreCocoreComplement k l p)) := by
   rw [bicollar_symm_apply, bicollar_symm_apply]
   simp
 
