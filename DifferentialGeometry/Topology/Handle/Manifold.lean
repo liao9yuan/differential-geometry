@@ -2201,6 +2201,104 @@ noncomputable def cellBoundaryIsManifold (k : ℕ) [NeZero k]
   letI := cellBoundaryChartedSpace k
   exact { toHasGroupoid := cellBoundaryHasGroupoid k }
 
+theorem cellBoundaryInclusion_contMDiff (k : ℕ) [NeZero k]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)] :
+    @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin (k - 1))) _ _ (EuclideanSpace ℝ (Fin (k - 1))) _
+      (𝓡 (k - 1)) (CellBoundary k) _ (cellBoundaryChartedSpace k)
+      (EuclideanSpace ℝ (Fin k)) _ _ (EuclideanSpace ℝ (Fin k)) _
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin k))) (EuclideanSpace ℝ (Fin k)) _ _
+      (⊤ : ℕ∞)
+      (fun u : CellBoundary k => (u : EuclideanSpace ℝ (Fin k))) := by
+  classical
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) :=
+    cellBoundaryChartedSpace k
+  letI : IsManifold (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) := cellBoundaryIsManifold k
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin (k - 1)))
+      (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1) :=
+    EuclideanSpace.instChartedSpaceSphere (n := k - 1)
+  letI : IsManifold (𝓡 (k - 1)) (⊤ : WithTop ℕ∞)
+      (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1) :=
+    EuclideanSpace.instIsManifoldSphere (n := k - 1)
+  intro u
+  let h : CellBoundary k ≃ₜ Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 :=
+    cellBoundarySphereHomeomorph k
+  have hchart : chartAt (H := EuclideanSpace ℝ (Fin (k - 1))) (M := CellBoundary k) u =
+      cellBoundaryChart k (-u) := rfl
+  have hc : ContMDiffOn (𝓡 (k - 1)) (𝓡 (k - 1)) (⊤ : ℕ∞)
+      (cellBoundaryChart k (-u)) (cellBoundaryChart k (-u)).source := by
+    have h := contMDiffOn_chart (I := 𝓡 (k - 1))
+      (H := EuclideanSpace ℝ (Fin (k - 1))) (M := CellBoundary k) (n := (⊤ : ℕ∞)) (x := u)
+    simpa [hchart] using h
+  let s₀ : OpenPartialHomeomorph (Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1)
+      (EuclideanSpace ℝ (Fin (k - 1))) := stereographic' (k - 1) (h (-u))
+  have hs : chartAt (H := EuclideanSpace ℝ (Fin (k - 1)))
+      (M := Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1) (h u) = s₀ := by
+    dsimp [s₀]
+    change stereographic' (k - 1) (-(h u)) = stereographic' (k - 1) (h (-u))
+    congr 1
+  have hchartDef : cellBoundaryChart k (-u) = h.toOpenPartialHomeomorph ≫ₕ s₀ := by
+    rfl
+  have hsymm0 : ContMDiffOn (𝓡 (k - 1)) (𝓡 (k - 1)) (⊤ : ℕ∞)
+      s₀.symm s₀.target := by
+    have hω := contMDiffOn_chart_symm (I := 𝓡 (k - 1))
+      (H := EuclideanSpace ℝ (Fin (k - 1)))
+      (M := Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1) (n := (⊤ : WithTop ℕ∞)) (x := h u)
+    simpa [hs] using hω.of_le (by exact le_top : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+  have hcoe : ContMDiffOn (𝓡 (k - 1)) (𝓘(ℝ, EuclideanSpace ℝ (Fin k))) (⊤ : ℕ∞)
+      ((↑) : Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1 → EuclideanSpace ℝ (Fin k)) Set.univ :=
+    contMDiffOn_univ.mpr (contMDiff_coe_sphere (m := (⊤ : ℕ∞)) (n := k - 1))
+  have hsymm : ContMDiffOn (𝓡 (k - 1)) (𝓘(ℝ, EuclideanSpace ℝ (Fin k))) (⊤ : ℕ∞)
+      (fun y : EuclideanSpace ℝ (Fin (k - 1)) =>
+        ((s₀.symm y : Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1) :
+          EuclideanSpace ℝ (Fin k)))
+      s₀.target := by
+    refine hcoe.comp hsymm0 ?_
+    intro y hy
+    trivial
+  have htarget : (cellBoundaryChart k (-u)).target = s₀.target := by
+    rw [hchartDef]
+    simp
+  have hval : ∀ y ∈ s₀.target,
+      ((cellBoundaryChart k (-u)).symm y : EuclideanSpace ℝ (Fin k)) =
+        ((s₀.symm y : Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1) :
+          EuclideanSpace ℝ (Fin k)) := by
+    intro y hy
+    rw [hchartDef]
+    change (((s₀.symm.trans h.toOpenPartialHomeomorph.symm) y : CellBoundary k) :
+        EuclideanSpace ℝ (Fin k)) =
+      ((s₀.symm y : Metric.sphere (0 : EuclideanSpace ℝ (Fin k)) 1) :
+        EuclideanSpace ℝ (Fin k))
+    rw [OpenPartialHomeomorph.coe_trans]
+    rfl
+  have hg : ContMDiffOn (𝓡 (k - 1)) (𝓘(ℝ, EuclideanSpace ℝ (Fin k))) (⊤ : ℕ∞)
+      (fun y : EuclideanSpace ℝ (Fin (k - 1)) =>
+        ((cellBoundaryChart k (-u)).symm y : EuclideanSpace ℝ (Fin k)))
+      (cellBoundaryChart k (-u)).target := by
+    rw [htarget]
+    exact hsymm.congr hval
+  have hst : (cellBoundaryChart k (-u)).source ⊆
+      (cellBoundaryChart k (-u)) ⁻¹' (cellBoundaryChart k (-u)).target := by
+    intro y hy
+    exact (cellBoundaryChart k (-u)).mapsTo hy
+  have hcomp : ContMDiffOn (𝓡 (k - 1)) (𝓘(ℝ, EuclideanSpace ℝ (Fin k))) (⊤ : ℕ∞)
+      (fun x : CellBoundary k =>
+        ((cellBoundaryChart k (-u)).symm ((cellBoundaryChart k (-u)) x) :
+          EuclideanSpace ℝ (Fin k)))
+      (cellBoundaryChart k (-u)).source :=
+    hg.comp hc hst
+  have hcong : ContMDiffOn (𝓡 (k - 1)) (𝓘(ℝ, EuclideanSpace ℝ (Fin k))) (⊤ : ℕ∞)
+      (fun u : CellBoundary k => (u : EuclideanSpace ℝ (Fin k)))
+      (cellBoundaryChart k (-u)).source := by
+    refine hcomp.congr ?_
+    intro y hy
+    change (y : EuclideanSpace ℝ (Fin k)) =
+      ((cellBoundaryChart k (-u)).symm ((cellBoundaryChart k (-u)) y) :
+        EuclideanSpace ℝ (Fin k))
+    rw [(cellBoundaryChart k (-u)).left_inv hy]
+  exact hcong.contMDiffAt ((cellBoundaryChart k (-u)).open_source.mem_nhds (by
+    simpa [hchart] using (mem_chart_source (H := EuclideanSpace ℝ (Fin (k - 1)))
+      (M := CellBoundary k) u)))
+
 noncomputable def closedCellReindex (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
     EuclideanSpace ℝ (Fin l) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin ((l - 1) + 1)) :=
   (EuclideanSpace.basisFun (Fin l) ℝ).reindex
@@ -2230,6 +2328,216 @@ noncomputable def closedCellChartedSpace (l : ℕ) [NeZero l]
   letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell ((l - 1) + 1)) :=
     closedCellChartedSpaceSucc (l - 1)
   exact chartedSpaceOfHomeomorph (closedCellReindexHomeo l)
+
+theorem closedCellInclusion_contMDiff_of (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
+    @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin ((l - 1) + 1))) _ _
+      (EuclideanHalfSpace ((l - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+      (ClosedCell l) _ (closedCellChartedSpace l)
+      (EuclideanSpace ℝ (Fin l)) _ _ (EuclideanSpace ℝ (Fin l)) _
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (EuclideanSpace ℝ (Fin l)) _ _
+      (⊤ : ℕ∞)
+      (fun v : ClosedCell l => (v : EuclideanSpace ℝ (Fin l))) := by
+  classical
+  letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l) :=
+    closedCellChartedSpace l
+  letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell ((l - 1) + 1)) :=
+    closedCellChartedSpaceSucc (l - 1)
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell ((l - 1) + 1)) := closedCellIsManifold (l - 1)
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell l) :=
+    isManifoldOfHomeomorph (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+      (closedCellReindexHomeo l)
+  intro x
+  let r : ClosedCell l ≃ₜ ClosedCell ((l - 1) + 1) := closedCellReindexHomeo l
+  let e : EuclideanSpace ℝ (Fin l) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin ((l - 1) + 1)) :=
+    closedCellReindex l
+  have hnorm : ‖(r x).1‖ = ‖x.1‖ := by
+    change ‖(e x.1 : EuclideanSpace ℝ (Fin ((l - 1) + 1)))‖ = ‖x.1‖
+    rw [e.norm_map]
+  have hchartBase : chartAt (H := EuclideanHalfSpace ((l - 1) + 1)) (M := ClosedCell l) x =
+      r.toOpenPartialHomeomorph ≫ₕ (chartAt (H := EuclideanHalfSpace ((l - 1) + 1))
+        (M := ClosedCell ((l - 1) + 1)) (r x)) := rfl
+  by_cases hx : ‖x.1‖ < 1
+  · have hc' : chartAt (H := EuclideanHalfSpace ((l - 1) + 1))
+        (M := ClosedCell ((l - 1) + 1)) (r x) = closedCellInteriorChart (l - 1) := by
+      change closedCellChartAt (r x) = closedCellInteriorChart (l - 1)
+      rw [closedCellChartAt, dif_pos (by
+        rwa [hnorm])]
+    have hchart : chartAt (H := EuclideanHalfSpace ((l - 1) + 1)) (M := ClosedCell l) x =
+        r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1) := by
+      rw [hchartBase, hc']
+    have hc : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (⊤ : ℕ∞)
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1))
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).source := by
+      have h := contMDiffOn_chart (I := modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (H := EuclideanHalfSpace ((l - 1) + 1)) (M := ClosedCell l) (n := (⊤ : ℕ∞)) (x := x)
+      simpa [hchart] using h
+    have hg0 : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin ((l - 1) + 1)))) (⊤ : ℕ∞)
+        (fun y : EuclideanHalfSpace ((l - 1) + 1) =>
+          ((closedCellInteriorChart (l - 1)).symm y :
+            EuclideanSpace ℝ (Fin ((l - 1) + 1))))
+        (closedCellInteriorChart (l - 1)).target :=
+      closedCellInteriorChart_symm_smooth (m := l - 1)
+    have hele : ContMDiffOn (𝓘(ℝ, EuclideanSpace ℝ (Fin ((l - 1) + 1))))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (e.symm : EuclideanSpace ℝ (Fin ((l - 1) + 1)) → EuclideanSpace ℝ (Fin l)) Set.univ :=
+      contMDiffOn_univ.mpr (contMDiff_iff_contDiff.mpr e.symm.contDiff)
+    have hg1 : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (fun y : EuclideanHalfSpace ((l - 1) + 1) =>
+          e.symm (((closedCellInteriorChart (l - 1)).symm y :
+            EuclideanSpace ℝ (Fin ((l - 1) + 1)))))
+        (closedCellInteriorChart (l - 1)).target := by
+      refine hele.comp hg0 ?_
+      intro y hy
+      trivial
+    have hval : ∀ y ∈ (closedCellInteriorChart (l - 1)).target,
+        (((r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).symm y : ClosedCell l) :
+            EuclideanSpace ℝ (Fin l)) =
+          e.symm (((closedCellInteriorChart (l - 1)).symm y :
+            EuclideanSpace ℝ (Fin ((l - 1) + 1)))) := by
+      intro y hy
+      change ((((closedCellInteriorChart (l - 1)).symm.trans r.toOpenPartialHomeomorph.symm) y :
+          ClosedCell l) : EuclideanSpace ℝ (Fin l)) =
+        e.symm (((closedCellInteriorChart (l - 1)).symm y :
+          EuclideanSpace ℝ (Fin ((l - 1) + 1))))
+      rw [OpenPartialHomeomorph.coe_trans]
+      rfl
+    have htarget : (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).target =
+        (closedCellInteriorChart (l - 1)).target := by
+      simp
+    have hg : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (fun y : EuclideanHalfSpace ((l - 1) + 1) =>
+          (((r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).symm y : ClosedCell l) :
+            EuclideanSpace ℝ (Fin l)))
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).target := by
+      rw [htarget]
+      exact hg1.congr hval
+    have hst : (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).source ⊆
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)) ⁻¹'
+          (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).target := by
+      intro y hy
+      exact (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).mapsTo hy
+    have hcomp : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (fun v : ClosedCell l =>
+          (((r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).symm
+            ((r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)) v) : ClosedCell l) :
+            EuclideanSpace ℝ (Fin l)))
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).source :=
+      hg.comp hc hst
+    have hcong : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (fun v : ClosedCell l => (v : EuclideanSpace ℝ (Fin l)))
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).source := by
+      refine hcomp.congr ?_
+      intro y hy
+      change (y : EuclideanSpace ℝ (Fin l)) =
+        (((r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).symm
+          ((r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)) y) : ClosedCell l) :
+          EuclideanSpace ℝ (Fin l))
+      rw [(r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).left_inv hy]
+    exact hcong.contMDiffAt ((r.toOpenPartialHomeomorph ≫ₕ closedCellInteriorChart (l - 1)).open_source.mem_nhds (by
+      simpa [hchart] using (mem_chart_source (H := EuclideanHalfSpace ((l - 1) + 1))
+        (M := ClosedCell l) x)))
+  · let i : Fin ((l - 1) + 1) := Classical.choose (closedCell_exists_coord_ne_zero (r x).1 (by
+      have hle : ‖(r x).1‖ ≤ 1 := (r x).2
+      have hnot : ¬ ‖(r x).1‖ < 1 := by
+        intro h
+        exact hx (by
+          rwa [← hnorm])
+      linarith))
+    let σ : Bool := 0 < (r x).1 i
+    have hc' : chartAt (H := EuclideanHalfSpace ((l - 1) + 1))
+        (M := ClosedCell ((l - 1) + 1)) (r x) = closedCellBoundaryChart (l - 1) i σ := by
+      change closedCellChartAt (r x) = closedCellBoundaryChart (l - 1) i σ
+      rw [closedCellChartAt, dif_neg (by
+        rwa [hnorm])]
+    have hchart : chartAt (H := EuclideanHalfSpace ((l - 1) + 1)) (M := ClosedCell l) x =
+        r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ := by
+      rw [hchartBase, hc']
+    have hxsrc : x ∈ (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).source := by
+      simpa [hchart] using (mem_chart_source (H := EuclideanHalfSpace ((l - 1) + 1))
+        (M := ClosedCell l) x)
+    have hc : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (⊤ : ℕ∞)
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ)
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).source := by
+      have h := contMDiffOn_chart (I := modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (H := EuclideanHalfSpace ((l - 1) + 1)) (M := ClosedCell l) (n := (⊤ : ℕ∞)) (x := x)
+      simpa [hchart] using h
+    have hg0 : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin ((l - 1) + 1)))) (⊤ : ℕ∞)
+        (fun y : EuclideanHalfSpace ((l - 1) + 1) =>
+          ((closedCellBoundaryChart (l - 1) i σ).symm y :
+            EuclideanSpace ℝ (Fin ((l - 1) + 1))))
+        (closedCellBoundaryChart (l - 1) i σ).target :=
+      closedCellBoundaryChart_symm_smooth (m := l - 1) i σ
+    have hele : ContMDiffOn (𝓘(ℝ, EuclideanSpace ℝ (Fin ((l - 1) + 1))))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (e.symm : EuclideanSpace ℝ (Fin ((l - 1) + 1)) → EuclideanSpace ℝ (Fin l)) Set.univ :=
+      contMDiffOn_univ.mpr (contMDiff_iff_contDiff.mpr e.symm.contDiff)
+    have hg1 : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (fun y : EuclideanHalfSpace ((l - 1) + 1) =>
+          e.symm (((closedCellBoundaryChart (l - 1) i σ).symm y :
+            EuclideanSpace ℝ (Fin ((l - 1) + 1)))))
+        (closedCellBoundaryChart (l - 1) i σ).target := by
+      refine hele.comp hg0 ?_
+      intro y hy
+      trivial
+    have hval : ∀ y ∈ (closedCellBoundaryChart (l - 1) i σ).target,
+        (((r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).symm y : ClosedCell l) :
+            EuclideanSpace ℝ (Fin l)) =
+          e.symm (((closedCellBoundaryChart (l - 1) i σ).symm y :
+            EuclideanSpace ℝ (Fin ((l - 1) + 1)))) := by
+      intro y hy
+      change ((((closedCellBoundaryChart (l - 1) i σ).symm.trans
+          r.toOpenPartialHomeomorph.symm) y : ClosedCell l) : EuclideanSpace ℝ (Fin l)) =
+        e.symm (((closedCellBoundaryChart (l - 1) i σ).symm y :
+          EuclideanSpace ℝ (Fin ((l - 1) + 1))))
+      rw [OpenPartialHomeomorph.coe_trans]
+      rfl
+    have htarget : (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).target =
+        (closedCellBoundaryChart (l - 1) i σ).target := by
+      simp
+    have hg : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (fun y : EuclideanHalfSpace ((l - 1) + 1) =>
+          (((r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).symm y : ClosedCell l) :
+            EuclideanSpace ℝ (Fin l)))
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).target := by
+      rw [htarget]
+      exact hg1.congr hval
+    have hst : (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).source ⊆
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ) ⁻¹'
+          (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).target := by
+      intro y hy
+      exact (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).mapsTo hy
+    have hcomp : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (fun v : ClosedCell l =>
+          (((r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).symm
+            ((r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ) v) : ClosedCell l) :
+            EuclideanSpace ℝ (Fin l)))
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).source :=
+      hg.comp hc hst
+    have hcong : ContMDiffOn (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin l))) (⊤ : ℕ∞)
+        (fun v : ClosedCell l => (v : EuclideanSpace ℝ (Fin l)))
+        (r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).source := by
+      refine hcomp.congr ?_
+      intro y hy
+      change (y : EuclideanSpace ℝ (Fin l)) =
+        (((r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).symm
+          ((r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ) y) : ClosedCell l) :
+          EuclideanSpace ℝ (Fin l))
+      rw [(r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).left_inv hy]
+    exact hcong.contMDiffAt ((r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).open_source.mem_nhds hxsrc)
 
 @[reducible]
 noncomputable def attachingRegionChartedSpace (k l : ℕ) [NeZero k] [NeZero l]

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Topology.Morse.CellAttachment
+import DifferentialGeometry.Topology.Handle.Manifold
 import DifferentialGeometry.Topology.Homotopy.EquivUnder
 import DifferentialGeometry.Topology.Morse.Flow
 import DifferentialGeometry.Topology.Morse.Manifold
@@ -11,6 +12,7 @@ namespace DifferentialGeometry.Topology.Morse
 
 open Manifold
 open DifferentialGeometry.Topology
+open DifferentialGeometry.Topology.Handle
 open DifferentialGeometry.Topology.Homotopy
 open DifferentialGeometry.Analysis.ODE
 open scoped Topology Manifold ContDiff
@@ -328,6 +330,72 @@ theorem cocoreAttachingMap_value {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
   change f (curveAt v hcomplete x T) = c - ε
   rw [hEq, curveAt_zero v hcomplete x, hval]
   ring_nf
+
+theorem attachingRegionRecombine_contMDiff {n k : ℕ} (hk : k ≤ n) (r ε : ℝ)
+    [NeZero k] [NeZero (n - k)]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (n - k = (n - k - 1) + 1)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((n - k - 1) + 1))) _ _
+      (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((n - k - 1) + 1))) _
+      ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1)))
+      (AttachingRegion k (n - k)) _ (attachingRegionChartedSpace k (n - k))
+      (MorseModel n) _ _ (MorseModel n) _
+      (𝓘(ℝ, MorseModel n)) (MorseModel n) _ _
+      (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (n - k) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+          (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+  classical
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) :=
+    cellBoundaryChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((n - k - 1) + 1)) (ClosedCell (n - k)) :=
+    closedCellChartedSpace (n - k)
+  letI : ChartedSpace (EuclideanHalfSpace ((n - k - 1) + 1)) (ClosedCell ((n - k - 1) + 1)) :=
+    closedCellChartedSpaceSucc (n - k - 1)
+  letI : IsManifold (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) := cellBoundaryIsManifold k
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell ((n - k - 1) + 1)) := closedCellIsManifold (n - k - 1)
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell (n - k)) :=
+    isManifoldOfHomeomorph (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1))
+      (closedCellReindexHomeo (n - k))
+  have h1 : ContMDiff (𝓡 (k - 1)) (𝓘(ℝ, EuclideanSpace ℝ (Fin k))) (⊤ : ℕ∞)
+      (fun u : CellBoundary k => (u : EuclideanSpace ℝ (Fin k))) :=
+    cellBoundaryInclusion_contMDiff k
+  have h2 : ContMDiff (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1))
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - k)))) (⊤ : ℕ∞)
+      (fun v : ClosedCell (n - k) => (v : EuclideanSpace ℝ (Fin (n - k)))) :=
+    closedCellInclusion_contMDiff_of (n - k)
+  have hprod : ContMDiff ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1)))
+      ((𝓘(ℝ, EuclideanSpace ℝ (Fin k))).prod (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - k))))) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (n - k) =>
+        ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+    exact ContMDiff.prodMap h1 h2
+  have hF : ContMDiff ((𝓘(ℝ, EuclideanSpace ℝ (Fin k))).prod
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - k)))))
+      (𝓘(ℝ, MorseModel n)) (⊤ : ℕ∞)
+      (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) q.1)) (r • q.2)) := by
+    rw [contMDiff_iff]
+    constructor
+    · exact (recombine_contDiff hk r ε).continuous
+    · intro x y
+      apply (recombine_contDiff hk r ε).contDiffOn.congr
+      intro q hq
+      simp [extChartAt, Function.comp_def, OpenPartialHomeomorph.refl_prod_refl]
+      rfl
+  have hfun : (fun p : AttachingRegion k (n - k) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+          (r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))) =
+      (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) q.1)) (r • q.2)) ∘
+        (fun p : AttachingRegion k (n - k) =>
+          ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+    funext p
+    rfl
+  rw [hfun]
+  exact hF.comp hprod
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]

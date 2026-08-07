@@ -1017,6 +1017,39 @@ theorem posPart_recombine {n k : ℕ} (hk : k ≤ n) (a : EuclideanSpace ℝ (Fi
   ext j
   simpa using (recombine_posPart hk a b j)
 
+theorem recombine_contDiff {n k : ℕ} (hk : k ≤ n) (r ε : ℝ) :
+    ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) p.1)) (r • p.2)) := by
+  rw [contDiff_pi]
+  intro i
+  by_cases hi : i.val < k
+  · have hcomp : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) p.1)) (r • p.2) i) =
+        fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          Real.sqrt (2 * ε) * p.1 ⟨i.val, hi⟩ := by
+      funext p
+      have hrew : recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) p.1)) (r • p.2) i =
+          (negPart hk (cellMap (Real.sqrt (2 * ε)) p.1)) ⟨i.val, hi⟩ := by
+        dsimp [recombine]
+        rw [dif_pos hi]
+      rw [hrew]
+      exact negPart_cellMap_apply hk (Real.sqrt (2 * ε)) p.1 ⟨i.val, hi⟩
+    rw [hcomp]
+    fun_prop
+  · have hcomp : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) p.1)) (r • p.2) i) =
+        fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          r * p.2 ⟨i.val - k, by
+            have hkle : k ≤ i.val := le_of_not_gt hi
+            have hi' : i.val < n := i.isLt
+            omega⟩ := by
+      funext p
+      dsimp [recombine]
+      rw [dif_neg hi]
+    rw [hcomp]
+    fun_prop
+
 theorem morseNorm_recombine_sq {n k : ℕ} (hk : k ≤ n) (a : EuclideanSpace ℝ (Fin k))
     (b : EuclideanSpace ℝ (Fin (n - k))) :
     morseNorm n (recombine hk a b) ^ 2 = ‖a‖ ^ 2 + ‖b‖ ^ 2 := by
