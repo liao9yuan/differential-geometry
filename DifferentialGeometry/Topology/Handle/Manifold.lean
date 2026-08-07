@@ -807,11 +807,14 @@ theorem closedCellCons_contDiffOn_left {m : ℕ} :
     exact hcomp
   exact hcons.contDiffOn
 
+noncomputable def closedCellInteriorBoundaryTransition {m : ℕ} (i : Fin (m + 1))
+    (y : EuclideanSpace ℝ (Fin (m + 1))) : EuclideanSpace ℝ (Fin (m + 1)) :=
+  closedCellCons m (1 - ‖closedCellShiftSucc m (-1) y‖ ^ 2)
+    (closedCellTail m (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))
+      (closedCellShiftSucc m (-1) y)))
+
 theorem closedCellInteriorBoundaryTransition_contDiff {m : ℕ} (i : Fin (m + 1)) :
-    ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
-      closedCellCons m (1 - ‖closedCellShiftSucc m (-1) y‖ ^ 2)
-        (closedCellTail m (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))
-          (closedCellShiftSucc m (-1) y)))) := by
+    ContDiff ℝ (⊤ : ℕ∞) (closedCellInteriorBoundaryTransition i) := by
   have hshift : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
       closedCellShiftSucc m (-1) y) := closedCellShiftSucc_contDiff (-1)
   have hperm : ContDiff ℝ (⊤ : ℕ∞) (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))) :=
@@ -828,7 +831,7 @@ theorem closedCellInteriorBoundaryTransition_contDiff {m : ℕ} (i : Fin (m + 1)
         closedCellTail m (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))
           (closedCellShiftSucc m (-1) y)))) :=
     hnorm.prodMk htail
-  simpa using (closedCellCons_contDiff (m := m)).comp hpair
+  simpa [closedCellInteriorBoundaryTransition] using (closedCellCons_contDiff (m := m)).comp hpair
 
 noncomputable def closedCellBoundaryInteriorTransition {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
     (y : EuclideanSpace ℝ (Fin (m + 1))) : EuclideanSpace ℝ (Fin (m + 1)) :=
@@ -956,6 +959,473 @@ theorem closedCellBoundaryBoundaryTransition_contDiffOn {m : ℕ} (i : Fin (m + 
               (closedCellTail m y)))))) s :=
     (closedCellCons_contDiff (m := m)).contDiffOn.comp hfinal (by intro y hy; exact Set.mem_univ _)
   simpa [closedCellBoundaryBoundaryTransition, s] using hout
+
+theorem closedCellInteriorBoundary_transition_reduce {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    {y : EuclideanSpace ℝ (Fin (m + 1))}
+    (hy : y ∈ ((modelWithCornersEuclideanHalfSpace (m + 1)).symm ⁻¹'
+        ((closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ)).source ∩
+      Set.range (modelWithCornersEuclideanHalfSpace (m + 1)))) :
+    (modelWithCornersEuclideanHalfSpace (m + 1)) (((closedCellInteriorChart m).symm ≫ₕ
+        (closedCellBoundaryChart m i σ)) ((modelWithCornersEuclideanHalfSpace (m + 1)).symm y)) =
+      closedCellInteriorBoundaryTransition i y := by
+  classical
+  let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+    modelWithCornersEuclideanHalfSpace (m + 1)
+  let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+    (closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ)
+  have hy1 : I.symm y ∈ t.source := hy.1
+  have hy2 : y ∈ Set.range I := hy.2
+  have hy2' : 0 ≤ y (0 : Fin (m + 1)) := by
+    rw [range_modelWithCornersEuclideanHalfSpace (m + 1)] at hy2
+    exact hy2
+  have hy2t : y ∈ I.target := by
+    change y ∈ {x : EuclideanSpace ℝ (Fin (m + 1)) | 0 ≤ x (0 : Fin (m + 1))}
+    exact hy2'
+  let z : EuclideanHalfSpace (m + 1) := ⟨y, hy2'⟩
+  have hclamp : I.symm y = z := by
+    apply Subtype.ext
+    have hz : I (I.symm y) = y := I.right_inv' hy2t
+    exact hz
+  have hy1z : z ∈ t.source := by
+    rw [hclamp] at hy1
+    exact hy1
+  have hz1 : z ∈ (closedCellInteriorChart m).target := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1z
+    exact hy1z.1
+  have hz2 : (closedCellInteriorChart m).symm z ∈ (closedCellBoundaryChart m i σ).source := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1z
+    exact hy1z.2
+  rw [hclamp]
+  rw [OpenPartialHomeomorph.trans_apply]
+  change I ((closedCellBoundaryChart m i σ) ((closedCellInteriorChart m).symm z)) =
+    closedCellInteriorBoundaryTransition i y
+  have hsymm : (closedCellInteriorChart m).symm z =
+      (⟨closedCellShiftSucc m (-1) z.1, le_of_lt hz1⟩ : ClosedCell (m + 1)) := by
+    change closedCellProject (closedCellShiftSucc m (-1) z.1) =
+      (⟨closedCellShiftSucc m (-1) z.1, le_of_lt hz1⟩ : ClosedCell (m + 1))
+    exact closedCellProject_of_mem (le_of_lt hz1)
+  rw [hsymm]
+  change I ((closedCellBoundaryChart m i σ)
+    (⟨closedCellShiftSucc m (-1) z.1, le_of_lt hz1⟩ : ClosedCell (m + 1))) =
+      closedCellInteriorBoundaryTransition i y
+  change (closedCellBoundaryChartValue m (Equiv.swap i (0 : Fin (m + 1)))
+    (⟨closedCellShiftSucc m (-1) z.1, le_of_lt hz1⟩ : ClosedCell (m + 1))).1 =
+      closedCellInteriorBoundaryTransition i y
+  rw [closedCellBoundaryChartValue_coe]
+  change closedCellCons m (1 - ‖closedCellShiftSucc m (-1) z.1‖ ^ 2)
+      (closedCellTail m (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))
+        (closedCellShiftSucc m (-1) z.1))) = closedCellInteriorBoundaryTransition i y
+  change closedCellCons m (1 - ‖closedCellShiftSucc m (-1) y‖ ^ 2)
+      (closedCellTail m (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))
+        (closedCellShiftSucc m (-1) y))) = closedCellInteriorBoundaryTransition i y
+  rfl
+
+theorem closedCellBoundaryInterior_transition_reduce {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    {y : EuclideanSpace ℝ (Fin (m + 1))}
+    (hy : y ∈ ((modelWithCornersEuclideanHalfSpace (m + 1)).symm ⁻¹'
+        ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m)).source ∩
+      Set.range (modelWithCornersEuclideanHalfSpace (m + 1)))) :
+    (modelWithCornersEuclideanHalfSpace (m + 1)) (((closedCellBoundaryChart m i σ).symm ≫ₕ
+        (closedCellInteriorChart m)) ((modelWithCornersEuclideanHalfSpace (m + 1)).symm y)) =
+      closedCellBoundaryInteriorTransition i σ y := by
+  classical
+  let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+    modelWithCornersEuclideanHalfSpace (m + 1)
+  let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+    (closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m)
+  have hy1 : I.symm y ∈ t.source := hy.1
+  have hy2 : y ∈ Set.range I := hy.2
+  have hy2' : 0 ≤ y (0 : Fin (m + 1)) := by
+    rw [range_modelWithCornersEuclideanHalfSpace (m + 1)] at hy2
+    exact hy2
+  have hy2t : y ∈ I.target := by
+    change y ∈ {x : EuclideanSpace ℝ (Fin (m + 1)) | 0 ≤ x (0 : Fin (m + 1))}
+    exact hy2'
+  let z : EuclideanHalfSpace (m + 1) := ⟨y, hy2'⟩
+  have hclamp : I.symm y = z := by
+    apply Subtype.ext
+    have hz : I (I.symm y) = y := I.right_inv' hy2t
+    exact hz
+  have hy1z : z ∈ t.source := by
+    rw [hclamp] at hy1
+    exact hy1
+  have hz1 : z ∈ (closedCellBoundaryChart m i σ).target := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1z
+    exact hy1z.1
+  have hz2 : (closedCellBoundaryChart m i σ).symm z ∈ (closedCellInteriorChart m).source := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1z
+    exact hy1z.2
+  rw [hclamp]
+  rw [OpenPartialHomeomorph.trans_apply]
+  change I ((closedCellInteriorChart m) ((closedCellBoundaryChart m i σ).symm z)) =
+    closedCellBoundaryInteriorTransition i σ y
+  have hsymm : (closedCellBoundaryChart m i σ).symm z =
+      (⟨closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+        (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+          (closedCellTail m z.1)),
+          closedCellBoundaryInvValue_norm_le_one (Equiv.swap i (0 : Fin (m + 1)))
+            (closedCellSign_sq σ) z.1 hz1.2 z.2⟩ : ClosedCell (m + 1)) := by
+    change closedCellProject (closedCellBoundaryInvValue m (Equiv.swap i (0 : Fin (m + 1)))
+      (closedCellSign σ) z.1) = ⟨closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+        (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+          (closedCellTail m z.1)),
+          closedCellBoundaryInvValue_norm_le_one (Equiv.swap i (0 : Fin (m + 1)))
+            (closedCellSign_sq σ) z.1 hz1.2 z.2⟩
+    exact closedCellProject_of_mem (closedCellBoundaryInvValue_norm_le_one
+      (Equiv.swap i (0 : Fin (m + 1))) (closedCellSign_sq σ) z.1 hz1.2 z.2)
+  rw [hsymm]
+  change I ((closedCellInteriorChart m) (⟨closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+      (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+        (closedCellTail m z.1)), _⟩ : ClosedCell (m + 1))) = closedCellBoundaryInteriorTransition i σ y
+  change (closedCellInteriorChartValue m (⟨closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+      (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+        (closedCellTail m z.1)), _⟩ : ClosedCell (m + 1))).1 = closedCellBoundaryInteriorTransition i σ y
+  rw [closedCellInteriorChartValue_coe]
+  change closedCellShiftSucc m 1 (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+      (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+        (closedCellTail m z.1))) = closedCellBoundaryInteriorTransition i σ y
+  change closedCellShiftSucc m 1 (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+      (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+        (closedCellTail m y))) = closedCellBoundaryInteriorTransition i σ y
+  rfl
+
+theorem closedCellBoundaryBoundary_transition_reduce {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    (i' : Fin (m + 1)) (σ' : Bool)
+    {y : EuclideanSpace ℝ (Fin (m + 1))}
+    (hy : y ∈ ((modelWithCornersEuclideanHalfSpace (m + 1)).symm ⁻¹'
+        ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellBoundaryChart m i' σ')).source ∩
+      Set.range (modelWithCornersEuclideanHalfSpace (m + 1)))) :
+    (modelWithCornersEuclideanHalfSpace (m + 1)) (((closedCellBoundaryChart m i σ).symm ≫ₕ
+        (closedCellBoundaryChart m i' σ')) ((modelWithCornersEuclideanHalfSpace (m + 1)).symm y)) =
+      closedCellBoundaryBoundaryTransition i σ i' y := by
+  classical
+  let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+    modelWithCornersEuclideanHalfSpace (m + 1)
+  let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+    (closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellBoundaryChart m i' σ')
+  have hy1 : I.symm y ∈ t.source := hy.1
+  have hy2 : y ∈ Set.range I := hy.2
+  have hy2' : 0 ≤ y (0 : Fin (m + 1)) := by
+    rw [range_modelWithCornersEuclideanHalfSpace (m + 1)] at hy2
+    exact hy2
+  have hy2t : y ∈ I.target := by
+    change y ∈ {x : EuclideanSpace ℝ (Fin (m + 1)) | 0 ≤ x (0 : Fin (m + 1))}
+    exact hy2'
+  let z : EuclideanHalfSpace (m + 1) := ⟨y, hy2'⟩
+  have hclamp : I.symm y = z := by
+    apply Subtype.ext
+    have hz : I (I.symm y) = y := I.right_inv' hy2t
+    exact hz
+  have hy1z : z ∈ t.source := by
+    rw [hclamp] at hy1
+    exact hy1
+  have hz1 : z ∈ (closedCellBoundaryChart m i σ).target := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1z
+    exact hy1z.1
+  have hz2 : (closedCellBoundaryChart m i σ).symm z ∈ (closedCellBoundaryChart m i' σ').source := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1z
+    exact hy1z.2
+  rw [hclamp]
+  rw [OpenPartialHomeomorph.trans_apply]
+  change I ((closedCellBoundaryChart m i' σ') ((closedCellBoundaryChart m i σ).symm z)) =
+    closedCellBoundaryBoundaryTransition i σ i' y
+  have hsymm : (closedCellBoundaryChart m i σ).symm z =
+      (⟨closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+        (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+          (closedCellTail m z.1)),
+          closedCellBoundaryInvValue_norm_le_one (Equiv.swap i (0 : Fin (m + 1)))
+            (closedCellSign_sq σ) z.1 hz1.2 z.2⟩ : ClosedCell (m + 1)) := by
+    change closedCellProject (closedCellBoundaryInvValue m (Equiv.swap i (0 : Fin (m + 1)))
+      (closedCellSign σ) z.1) = ⟨closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+        (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+          (closedCellTail m z.1)),
+          closedCellBoundaryInvValue_norm_le_one (Equiv.swap i (0 : Fin (m + 1)))
+            (closedCellSign_sq σ) z.1 hz1.2 z.2⟩
+    exact closedCellProject_of_mem (closedCellBoundaryInvValue_norm_le_one
+      (Equiv.swap i (0 : Fin (m + 1))) (closedCellSign_sq σ) z.1 hz1.2 z.2)
+  rw [hsymm]
+  change I ((closedCellBoundaryChart m i' σ') (⟨closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+      (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+        (closedCellTail m z.1)), _⟩ : ClosedCell (m + 1))) = closedCellBoundaryBoundaryTransition i σ i' y
+  change (closedCellBoundaryChartValue m (Equiv.swap i' (0 : Fin (m + 1)))
+    (⟨closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+      (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+        (closedCellTail m z.1)), _⟩ : ClosedCell (m + 1))).1 = closedCellBoundaryBoundaryTransition i σ i' y
+  rw [closedCellBoundaryChartValue_coe]
+  have hnorm : ‖closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+      (closedCellCons m (closedCellSign σ * Real.sqrt (1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2))
+        (closedCellTail m z.1))‖ ^ 2 = 1 - z.1 (0 : Fin (m + 1)) := by
+    simpa [closedCellBoundaryInvValue] using (closedCellBoundaryInvValue_norm_sq
+      (Equiv.swap i (0 : Fin (m + 1))) (closedCellSign_sq σ) z.1 hz1.2)
+  rw [hnorm]
+  rw [show 1 - (1 - z.1 (0 : Fin (m + 1))) = z.1 (0 : Fin (m + 1)) by ring]
+  change closedCellCons m (y (0 : Fin (m + 1)))
+      (closedCellTail m (closedCellPermute (Equiv.swap i' (0 : Fin (m + 1)))
+        (closedCellPermute (Equiv.swap i (0 : Fin (m + 1))).symm
+          (closedCellCons m (closedCellSign σ * Real.sqrt (1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2))
+            (closedCellTail m y))))) = closedCellBoundaryBoundaryTransition i σ i' y
+  rfl
+
+theorem closedCellInteriorInterior_transition_reduce {m : ℕ}
+    {y : EuclideanSpace ℝ (Fin (m + 1))}
+    (hy : y ∈ ((modelWithCornersEuclideanHalfSpace (m + 1)).symm ⁻¹'
+        ((closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m)).source ∩
+      Set.range (modelWithCornersEuclideanHalfSpace (m + 1)))) :
+    (modelWithCornersEuclideanHalfSpace (m + 1)) (((closedCellInteriorChart m).symm ≫ₕ
+        (closedCellInteriorChart m)) ((modelWithCornersEuclideanHalfSpace (m + 1)).symm y)) = y := by
+  classical
+  let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+    modelWithCornersEuclideanHalfSpace (m + 1)
+  let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+    (closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m)
+  have hy1 : I.symm y ∈ t.source := hy.1
+  have hy2 : y ∈ Set.range I := hy.2
+  have hy2' : 0 ≤ y (0 : Fin (m + 1)) := by
+    rw [range_modelWithCornersEuclideanHalfSpace (m + 1)] at hy2
+    exact hy2
+  have hy2t : y ∈ I.target := by
+    change y ∈ {x : EuclideanSpace ℝ (Fin (m + 1)) | 0 ≤ x (0 : Fin (m + 1))}
+    exact hy2'
+  let z : EuclideanHalfSpace (m + 1) := ⟨y, hy2'⟩
+  have hclamp : I.symm y = z := by
+    apply Subtype.ext
+    have hz : I (I.symm y) = y := I.right_inv' hy2t
+    exact hz
+  have hy1z : z ∈ t.source := by
+    rw [hclamp] at hy1
+    exact hy1
+  have hz1 : z ∈ (closedCellInteriorChart m).target := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1z
+    exact hy1z.1
+  have hz2 : (closedCellInteriorChart m).symm z ∈ (closedCellInteriorChart m).source := by
+    rw [OpenPartialHomeomorph.trans_source] at hy1z
+    exact hy1z.2
+  rw [hclamp]
+  rw [OpenPartialHomeomorph.trans_apply]
+  change I ((closedCellInteriorChart m) ((closedCellInteriorChart m).symm z)) = y
+  change ((closedCellInteriorChart m) ((closedCellInteriorChart m).symm z)).1 = y
+  exact congrArg Subtype.val ((closedCellInteriorChart m).right_inv hz1)
+
+theorem closedCellBoundaryChart_trans_source_mem_sqrt_domain {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    {e : OpenPartialHomeomorph (ClosedCell (m + 1)) (EuclideanHalfSpace (m + 1))}
+    {y : EuclideanSpace ℝ (Fin (m + 1))}
+    (hy : y ∈ ((modelWithCornersEuclideanHalfSpace (m + 1)).symm ⁻¹'
+        ((closedCellBoundaryChart m i σ).symm ≫ₕ e).source ∩
+      Set.range (modelWithCornersEuclideanHalfSpace (m + 1)))) :
+    0 < 1 - y (0 : Fin (m + 1)) - ‖closedCellTail m y‖ ^ 2 := by
+  classical
+  let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+    modelWithCornersEuclideanHalfSpace (m + 1)
+  have hy2 : y ∈ Set.range I := hy.2
+  have hy2' : 0 ≤ y (0 : Fin (m + 1)) := by
+    rw [range_modelWithCornersEuclideanHalfSpace (m + 1)] at hy2
+    exact hy2
+  have hy2t : y ∈ I.target := by
+    change y ∈ {x : EuclideanSpace ℝ (Fin (m + 1)) | 0 ≤ x (0 : Fin (m + 1))}
+    exact hy2'
+  let z : EuclideanHalfSpace (m + 1) := ⟨y, hy2'⟩
+  have hclamp : I.symm y = z := by
+    apply Subtype.ext
+    have hz : I (I.symm y) = y := I.right_inv' hy2t
+    exact hz
+  have hz1 : z ∈ (closedCellBoundaryChart m i σ).target := by
+    have hsrc : I.symm y ∈ (closedCellBoundaryChart m i σ).symm.source := by
+      have htrans : I.symm y ∈ (closedCellBoundaryChart m i σ).symm.source ∩
+          (closedCellBoundaryChart m i σ).symm ⁻¹' e.source := by
+        simpa [OpenPartialHomeomorph.trans_source] using hy.1
+      exact htrans.1
+    rw [← hclamp]
+    exact hsrc
+  have hz1' : 0 < 1 - z.1 (0 : Fin (m + 1)) - ‖closedCellTail m z.1‖ ^ 2 := hz1.2
+  simpa [z] using hz1'
+
+theorem closedCellInteriorInterior_transition_mem_groupoid {m : ℕ} :
+    ((closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m)) ∈
+      contDiffGroupoid (⊤ : ℕ∞) (modelWithCornersEuclideanHalfSpace (m + 1)) := by
+  rw [contDiffGroupoid, mem_groupoid_of_pregroupoid]
+  constructor
+  · let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+      modelWithCornersEuclideanHalfSpace (m + 1)
+    let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+      (closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m)
+    exact (contDiff_id.contDiffOn : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) => y)
+      (I.symm ⁻¹' t.source ∩ Set.range I)).congr (by
+        intro y hy
+        exact closedCellInteriorInterior_transition_reduce hy)
+  · rw [show ((closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m)).symm =
+        (closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m) from by
+        rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm]
+        simp]
+    rw [show ((closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m)).target =
+        ((closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m)).source from by
+        rw [OpenPartialHomeomorph.trans_target, OpenPartialHomeomorph.trans_source]
+        rfl]
+    let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+      modelWithCornersEuclideanHalfSpace (m + 1)
+    let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+      (closedCellInteriorChart m).symm ≫ₕ (closedCellInteriorChart m)
+    exact (contDiff_id.contDiffOn : ContDiffOn ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) => y)
+      (I.symm ⁻¹' t.source ∩ Set.range I)).congr (by
+        intro y hy
+        exact closedCellInteriorInterior_transition_reduce hy)
+
+theorem closedCellInteriorBoundary_transition_mem_groupoid {m : ℕ} (i : Fin (m + 1)) (σ : Bool) :
+    ((closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ)) ∈
+      contDiffGroupoid (⊤ : ℕ∞) (modelWithCornersEuclideanHalfSpace (m + 1)) := by
+  rw [contDiffGroupoid, mem_groupoid_of_pregroupoid]
+  constructor
+  · let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+      modelWithCornersEuclideanHalfSpace (m + 1)
+    let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+      (closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ)
+    exact ((closedCellInteriorBoundaryTransition_contDiff i).contDiffOn.mono (Set.subset_univ _)).congr
+      (by intro y hy; exact closedCellInteriorBoundary_transition_reduce i σ hy)
+  · rw [show ((closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ)).symm =
+        (closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m) from by
+        rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm]
+        rfl]
+    rw [show ((closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ)).target =
+        ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m)).source from by
+        rw [OpenPartialHomeomorph.trans_target, OpenPartialHomeomorph.trans_source]
+        rfl]
+    let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+      modelWithCornersEuclideanHalfSpace (m + 1)
+    let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+      (closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m)
+    exact ((closedCellBoundaryInteriorTransition_contDiffOn i σ).mono (by
+      intro y hy
+      exact closedCellBoundaryChart_trans_source_mem_sqrt_domain i σ hy)).congr (by
+        intro y hy
+        exact closedCellBoundaryInterior_transition_reduce i σ hy)
+
+theorem closedCellBoundaryInterior_transition_mem_groupoid {m : ℕ} (i : Fin (m + 1)) (σ : Bool) :
+    ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m)) ∈
+      contDiffGroupoid (⊤ : ℕ∞) (modelWithCornersEuclideanHalfSpace (m + 1)) := by
+  rw [contDiffGroupoid, mem_groupoid_of_pregroupoid]
+  constructor
+  · let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+      modelWithCornersEuclideanHalfSpace (m + 1)
+    let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+      (closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m)
+    exact ((closedCellBoundaryInteriorTransition_contDiffOn i σ).mono (by
+      intro y hy
+      exact closedCellBoundaryChart_trans_source_mem_sqrt_domain i σ hy)).congr (by
+        intro y hy
+        exact closedCellBoundaryInterior_transition_reduce i σ hy)
+  · rw [show ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m)).symm =
+        (closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ) from by
+        rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm]
+        rfl]
+    rw [show ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellInteriorChart m)).target =
+        ((closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ)).source from by
+        rw [OpenPartialHomeomorph.trans_target, OpenPartialHomeomorph.trans_source]
+        rfl]
+    let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+      modelWithCornersEuclideanHalfSpace (m + 1)
+    let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+      (closedCellInteriorChart m).symm ≫ₕ (closedCellBoundaryChart m i σ)
+    exact ((closedCellInteriorBoundaryTransition_contDiff i).contDiffOn.mono (Set.subset_univ _)).congr
+      (by intro y hy; exact closedCellInteriorBoundary_transition_reduce i σ hy)
+
+theorem closedCellBoundaryBoundary_transition_mem_groupoid {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
+    (i' : Fin (m + 1)) (σ' : Bool) :
+    ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellBoundaryChart m i' σ')) ∈
+      contDiffGroupoid (⊤ : ℕ∞) (modelWithCornersEuclideanHalfSpace (m + 1)) := by
+  rw [contDiffGroupoid, mem_groupoid_of_pregroupoid]
+  constructor
+  · let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+      modelWithCornersEuclideanHalfSpace (m + 1)
+    let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+      (closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellBoundaryChart m i' σ')
+    exact ((closedCellBoundaryBoundaryTransition_contDiffOn i σ i').mono (by
+      intro y hy
+      exact closedCellBoundaryChart_trans_source_mem_sqrt_domain i σ hy)).congr (by
+        intro y hy
+        exact closedCellBoundaryBoundary_transition_reduce i σ i' σ' hy)
+  · rw [show ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellBoundaryChart m i' σ')).symm =
+        (closedCellBoundaryChart m i' σ').symm ≫ₕ (closedCellBoundaryChart m i σ) from by
+        rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm]
+        rfl]
+    rw [show ((closedCellBoundaryChart m i σ).symm ≫ₕ (closedCellBoundaryChart m i' σ')).target =
+        ((closedCellBoundaryChart m i' σ').symm ≫ₕ (closedCellBoundaryChart m i σ)).source from by
+        rw [OpenPartialHomeomorph.trans_target, OpenPartialHomeomorph.trans_source]
+        rfl]
+    let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+      modelWithCornersEuclideanHalfSpace (m + 1)
+    let t : OpenPartialHomeomorph (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (m + 1)) :=
+      (closedCellBoundaryChart m i' σ').symm ≫ₕ (closedCellBoundaryChart m i σ)
+    exact ((closedCellBoundaryBoundaryTransition_contDiffOn i' σ' i).mono (by
+      intro y hy
+      exact closedCellBoundaryChart_trans_source_mem_sqrt_domain i' σ' hy)).congr (by
+        intro y hy
+        exact closedCellBoundaryBoundary_transition_reduce i' σ' i σ hy)
+
+theorem closedCellChart_transition_mem_groupoid {m : ℕ} (x₁ x₂ : ClosedCell (m + 1)) :
+    (closedCellChartAt x₁).symm ≫ₕ (closedCellChartAt x₂) ∈
+      contDiffGroupoid (⊤ : ℕ∞) (modelWithCornersEuclideanHalfSpace (m + 1)) := by
+  by_cases hx₁ : ‖x₁.1‖ < 1
+  · by_cases hx₂ : ‖x₂.1‖ < 1
+    · unfold closedCellChartAt
+      rw [dif_pos hx₁, dif_pos hx₂]
+      exact closedCellInteriorInterior_transition_mem_groupoid
+    · unfold closedCellChartAt
+      rw [dif_pos hx₁, dif_neg hx₂]
+      exact closedCellInteriorBoundary_transition_mem_groupoid
+        (Classical.choose (closedCell_exists_coord_ne_zero x₂.1 (by
+          have hle : ‖x₂.1‖ ≤ 1 := x₂.2
+          have hnot : ¬ ‖x₂.1‖ < 1 := hx₂
+          linarith))) (0 < x₂.1 (Classical.choose (closedCell_exists_coord_ne_zero x₂.1 (by
+          have hle : ‖x₂.1‖ ≤ 1 := x₂.2
+          have hnot : ¬ ‖x₂.1‖ < 1 := hx₂
+          linarith))))
+  · by_cases hx₂ : ‖x₂.1‖ < 1
+    · unfold closedCellChartAt
+      rw [dif_neg hx₁, dif_pos hx₂]
+      exact closedCellBoundaryInterior_transition_mem_groupoid
+        (Classical.choose (closedCell_exists_coord_ne_zero x₁.1 (by
+          have hle : ‖x₁.1‖ ≤ 1 := x₁.2
+          have hnot : ¬ ‖x₁.1‖ < 1 := hx₁
+          linarith))) (0 < x₁.1 (Classical.choose (closedCell_exists_coord_ne_zero x₁.1 (by
+          have hle : ‖x₁.1‖ ≤ 1 := x₁.2
+          have hnot : ¬ ‖x₁.1‖ < 1 := hx₁
+          linarith))))
+    · unfold closedCellChartAt
+      rw [dif_neg hx₁, dif_neg hx₂]
+      exact closedCellBoundaryBoundary_transition_mem_groupoid
+        (Classical.choose (closedCell_exists_coord_ne_zero x₁.1 (by
+          have hle : ‖x₁.1‖ ≤ 1 := x₁.2
+          have hnot : ¬ ‖x₁.1‖ < 1 := hx₁
+          linarith))) (0 < x₁.1 (Classical.choose (closedCell_exists_coord_ne_zero x₁.1 (by
+          have hle : ‖x₁.1‖ ≤ 1 := x₁.2
+          have hnot : ¬ ‖x₁.1‖ < 1 := hx₁
+          linarith))))
+        (Classical.choose (closedCell_exists_coord_ne_zero x₂.1 (by
+          have hle : ‖x₂.1‖ ≤ 1 := x₂.2
+          have hnot : ¬ ‖x₂.1‖ < 1 := hx₂
+          linarith))) (0 < x₂.1 (Classical.choose (closedCell_exists_coord_ne_zero x₂.1 (by
+          have hle : ‖x₂.1‖ ≤ 1 := x₂.2
+          have hnot : ¬ ‖x₂.1‖ < 1 := hx₂
+          linarith))))
+
+@[reducible]
+noncomputable def closedCellHasGroupoid (m : ℕ) :
+    @HasGroupoid (EuclideanHalfSpace (m + 1)) _ (ClosedCell (m + 1)) _
+      (closedCellChartedSpaceSucc m) (contDiffGroupoid (⊤ : ℕ∞)
+        (modelWithCornersEuclideanHalfSpace (m + 1))) := by
+  letI := closedCellChartedSpaceSucc m
+  refine ⟨?_⟩
+  intro e e' he he'
+  rcases he with ⟨x₁, rfl⟩
+  rcases he' with ⟨x₂, rfl⟩
+  exact closedCellChart_transition_mem_groupoid x₁ x₂
+
+@[reducible]
+noncomputable def closedCellIsManifold (m : ℕ) :
+    @IsManifold ℝ _ (EuclideanSpace ℝ (Fin (m + 1))) _ _ (EuclideanHalfSpace (m + 1)) _
+      (modelWithCornersEuclideanHalfSpace (m + 1)) (⊤ : ℕ∞) (ClosedCell (m + 1)) _
+      (closedCellChartedSpaceSucc m) := by
+  letI := closedCellChartedSpaceSucc m
+  exact { toHasGroupoid := closedCellHasGroupoid m }
 
 end
 
