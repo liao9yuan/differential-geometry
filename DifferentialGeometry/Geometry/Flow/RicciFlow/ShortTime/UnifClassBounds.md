@@ -421,3 +421,20 @@ background-aware and contains no high-rung absorption data.  This lets the
 uniform lane use the fixed class background without changing the settled
 self-background compatibility API.  Focused verification and the direct
 module refresh passed.
+
+## 2026-08-06 — explicit H2 endpoint constant
+
+`stateRad_le_P4` records the exact scalar consequence used by the smooth
+endpoint: the closed solver state radius is at most `P / 4`.
+
+`realize_h2_bound` removes the earlier dependence on the opaque witness
+selected by `hs2_opBound_at_two`.  From a realization certificate on the
+positive `H²` ball of radius `P` and `δ ≤ 1`, it chooses the explicit global
+linear constant `C = 1 / P`, proves the fibre bound by radial rescaling, and
+shows `P / 4 ≤ 1 / (2 * C)`.  The zero-norm branch uses the public
+`smoothHs_inj` and the zero fibre-bound theorem.
+
+The helper is dimension-independent and verified, including a direct module
+refresh.  It closes an API/coercion seam only; it does not prove the
+same-horizon order-one-to-order-two bootstrap.  That producer remains the sole
+analytic frontier of the uniform-existence lane.

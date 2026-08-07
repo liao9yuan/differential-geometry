@@ -449,7 +449,9 @@ private lemma omRecoverEndoCc_eq_idEndo_add_raise
     rw [unitModel_eq_ccTensorBilin_loc, ccTensorBilin_symmS]]
   rw [htie]
 
-private lemma rfns_idEndo_le (g₀ : SmoothRiemannianMetric I M) (x : M) :
+/-- The self sharp-flat endomorphism has a dimension-only squared fibre-norm
+bound, uniformly over the metric. -/
+theorem rfns_idEndo_le (g₀ : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 1 x
         ((sharpFlatEndoCc (I := I) g₀ g₀).toSection x) ≤
       (Module.finrank ℝ E : ℝ) ^ 2 := by

@@ -425,6 +425,114 @@ theorem normSq_iCG_dlbField_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i 
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))
 
+set_option backward.isDefEq.respectTransparency false in
+private lemma dlb_reindex_sub (g₀ : SmoothRiemannianMetric I M)
+    (A B : SmoothCcTensor g₀ 2 2) (ρ : Equiv.Perm (Fin 2)) :
+    reindexCoeffGen (I := I) (M := M) g₀ 2 2 (A - B) ρ =
+      reindexCoeffGen (I := I) (M := M) g₀ 2 2 A ρ -
+        reindexCoeffGen (I := I) (M := M) g₀ 2 2 B ρ := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+    reindexCoeffGen_toSection, reindexCoeffGen_toSection,
+    reindexCoeffGen_toSection, SmoothCcTensor.toSection_sub,
+    ContMDiffSection.coe_sub, Pi.sub_apply]
+  apply ContinuousLinearMap.ext
+  intro D
+  rw [ContinuousLinearMap.sub_apply, reindexCoeffFibGen_apply,
+    reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
+    ContinuousLinearMap.sub_apply]
+
+set_option linter.unusedSectionVars false in
+/-- A background difference of `DLb` jets is bounded by the corresponding
+inserted DeTurck-endomorphism difference jet. -/
+theorem dlbDiff_jet_le
+    (g₀ g₁ g_bg g_ref : SmoothRiemannianMetric I M) (i : ℕ) :
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg -
+          deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_ref)‖ ^ 2 ≤
+      4 * (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg -
+            deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_ref)‖ ^ 2 := by
+  let W : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) :=
+    deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg -
+      deTurckLieWEndoSection (I := I) (M := M) g₁ g_ref
+  have hWI :
+      slotInsertEndoCc (I := I) (M := M) g₀ 0 W =
+        deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg -
+          deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_ref := by
+    dsimp only [W, deTurckLieWEndoInsert]
+    exact slotInsertEndoCc_sub (I := I) (M := M) g₀ 0 _ _
+  have hdiff :
+      deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg -
+          deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_ref =
+        slotInsertEndoCc (I := I) (M := M) g₀ 1 W +
+          reindexCoeffGen (I := I) (M := M) g₀ 2 2
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2
+              (Equiv.swap (0 : Fin 2) 1)
+              (slotInsertEndoCc (I := I) (M := M) g₀ 1 W))
+            (Equiv.swap (0 : Fin 2) 1) := by
+    rw [deTurckLieDLbCoeffField_eq_slotInsert_sum
+      (I := I) (M := M) g₀ g₁ g_bg,
+      deTurckLieDLbCoeffField_eq_slotInsert_sum
+        (I := I) (M := M) g₀ g₁ g_ref]
+    dsimp only [W]
+    simp only [slotInsertEndoCc_sub, rsDomDomCongr_sub, dlb_reindex_sub]
+    abel
+  have hL2A :
+      ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1 W)‖ ^ 2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg -
+            deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_ref)‖ ^ 2 := by
+    rw [← hWI]
+    exact normSq_iteratedCovGrad_le_scaled_of_pointwise
+      (I := I) (M := M) g₀
+      (slotInsertEndoCc (I := I) (M := M) g₀ 1 W)
+      (slotInsertEndoCc (I := I) (M := M) g₀ 0 W) i
+      (Module.finrank ℝ E : ℝ) (fun x => by
+        have h := rfns_iteratedCovGrad_slotInsertEndoCc_le_endo
+          (I := I) (M := M) g₀ 1 W i x
+        rwa [pow_one] at h)
+  have hL2B :
+      ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2
+            (Equiv.swap (0 : Fin 2) 1)
+            (slotInsertEndoCc (I := I) (M := M) g₀ 1 W))
+          (Equiv.swap (0 : Fin 2) 1))‖ ^ 2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ‖iteratedCovGrad (I := I) g₀ 1 1 i
+          (deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_bg -
+            deTurckLieWEndoInsert (I := I) (M := M) g₀ g₁ g_ref)‖ ^ 2 := by
+    rw [← hWI]
+    exact normSq_iteratedCovGrad_le_scaled_of_pointwise
+      (I := I) (M := M) g₀
+      (reindexCoeffGen (I := I) (M := M) g₀ 2 2
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2
+          (Equiv.swap (0 : Fin 2) 1)
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1 W))
+        (Equiv.swap (0 : Fin 2) 1))
+      (slotInsertEndoCc (I := I) (M := M) g₀ 0 W) i
+      (Module.finrank ℝ E : ℝ) (fun x => by
+        have heq := rfns_iteratedCovGrad_rsDomDomCongr_both_eq
+          (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+          (Equiv.swap (0 : Fin 2) 1)
+          (slotInsertEndoCc (I := I) (M := M) g₀ 1 W) i x
+        have h := rfns_iteratedCovGrad_slotInsertEndoCc_le_endo
+          (I := I) (M := M) g₀ 1 W i x
+        rw [pow_one] at h
+        exact heq.trans_le h)
+  have hgrad := congrArg (iteratedCovGrad (I := I) g₀ 2 2 i) hdiff
+  rw [iteratedCovGrad_add] at hgrad
+  rw [hgrad]
+  refine le_trans (sq_le_two_add _ _ _ _ _ (norm_nonneg _) (norm_nonneg _)
+    (norm_nonneg _) (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))
+
 set_option linter.unusedVariables false in
 /-- **`realizedFam` per-order top-separated jet-L2 bound** for the DLb coefficient field.  Thin
 `×4·finrank` transport of `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated` through

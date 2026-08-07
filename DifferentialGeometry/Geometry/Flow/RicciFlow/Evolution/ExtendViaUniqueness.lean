@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueWiring
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgBootstrap
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegGaugeRemoval
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -58,7 +60,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Black box (N): uniform short-time existence on C³-bounded, uniformly-elliptic data**
+/-- **Black box (N): uniform short-time existence on three-dimensional,
+C³-bounded, uniformly-elliptic data**
 (parabolic continuous dependence — the faithful, non-circular quantitative source for the interior
 restart). For a fixed background metric `gBase` the box chooses a finite chart-centre family `S`
 (internally: a covering good-set atlas); then for every bound `Λ ≥ 1` there is a uniform existence
@@ -77,7 +80,8 @@ and coefficient/data bounds, uniformly on such sets (GSM77 Ch. 7 vocabulary); th
 blow-up criterion, so citing it for `extends_of_rmBounded` is non-circular (verified,
 `ExtendViaUniqueness.md` §VERIFIED). Faithful cited PDE input, same lane as
 `deturck_ricci_flow_parabolic_short_time_existence`; may later migrate to the `ShortTime` layer. -/
-theorem ricci_flow_unif_existence (gBase : SmoothRiemannianMetric I M) :
+theorem ricci_flow_unif_existence (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M) :
     ∀ Λ : ℝ, 1 ≤ Λ → ∃ τ₀ : ℝ, 0 < τ₀ ∧
       ∀ g₀ : SmoothRiemannianMetric I M,
         (∀ x : M, ∀ v : TangentSpace I x,
@@ -95,7 +99,17 @@ theorem ricci_flow_unif_existence (gBase : SmoothRiemannianMetric I M) :
           (∀ t ∈ Set.Ico (0 : ℝ) τ₀, ∀ x : M, ∀ v w : TangentSpace I x,
             HasDerivWithinAt (fun u : ℝ => (rr u).inner x v w)
               ((-2 : ℝ) * ricciTensor (I := I) (rr t) x v w) (Set.Ici 0) t) := by
-  sorry
+  intro Λ hΛ
+  obtain ⟨T, hT, hDTclass⟩ :=
+    IntrinsicSpectral.lowreg_dt_unif (I := I) (M := M) hDim gBase hΛ
+  refine ⟨T, hT, ?_⟩
+  intro g₀ hcomp hcov
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ := by
+    exact ⟨hΛ, fun x _hx v => hcomp x v⟩
+  obtain ⟨g_DT, hDT, hJ⟩ := hDTclass g₀ hEq hcov
+  obtain ⟨Φ_fam, hΦ0, hΦflow, g_RF, hpull, hinit, hsmooth, hcont, hpde⟩ :=
+    ricci_gauge_of_dt (I := I) g₀ gBase g_DT hDT hJ
+  exact ⟨g_RF, hinit, hsmooth, hcont, hpde⟩
 
 /-- **(A) revised: interior restart reaching past ω — a WIRING TARGET (provable from
 `ricci_flow_unif_existence`), NOT a black box.** Hypotheses are the two tail-bound producers near
@@ -108,6 +122,7 @@ chart bootstrap, Chow–Knopf pp. 223–224). Proof route (Brick V): obtain `S` 
 ambient flow is jointly smooth up to `t_star` for the smooth-class (B) consumer, per the 2026-07-25
 ruling) and `ω < t_star + τ₀`; apply the box at `g₀ := g_fam t_star`; `TT := τ₀`. -/
 theorem ricci_flow_interior_restart
+    (hDim : Module.finrank ℝ E = 3)
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαω : α < omega)
     (hell : ∃ Λ : ℝ, 1 ≤ Λ ∧ ∃ t₁ ∈ Set.Ico α omega, ∀ s ∈ Set.Ico t₁ omega,
       ∀ x : M, ∀ v : TangentSpace I x,
@@ -129,7 +144,7 @@ theorem ricci_flow_interior_restart
           HasDerivWithinAt (fun u : ℝ => (rr u).inner x v w)
             ((-2 : ℝ) * ricciTensor (I := I) (rr t) x v w) (Set.Ici 0) t) := by
   -- (N) provides a uniform existence time `τ₀(Λ)` over bounded-geometry data (no chart cover now).
-  have hbox := ricci_flow_unif_existence (I := I) (g_fam α)
+  have hbox := ricci_flow_unif_existence (I := I) hDim (g_fam α)
   obtain ⟨Λ₁, hΛ₁, t₁, ht₁, hell'⟩ := hell
   obtain ⟨Λ₂, hΛ₂, t₂, ht₂, hcov'⟩ := hcov
   -- one bound `Λ` dominating both producers; feed it to the box.

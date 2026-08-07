@@ -58,35 +58,37 @@ private theorem grad_icg2_norm
       (iteratedCovGrad (I := I) g 0 s 2 U)),
     norm_nonneg (iteratedCovGrad (I := I) g 0 s 3 U)]
 
-/-- The differentiated-coefficient cross term is bounded by an `H²` jet
-envelope on each factor.  This is the `L⁴ × L⁴` cell of the mixed-rank
-Gagliardo--Nirenberg two-arm estimate. -/
-theorem appCc_grad_l2
-    (g : SmoothRiemannianMetric I M) (s c : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (Φ : SmoothCcTensor g (s + 2) c)
-        (V : SmoothCcTensor g 0 (s + 1)) (A B : ℝ),
-        0 ≤ A → 0 ≤ B →
-        (∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g (s + 2) c x
-              (Φ.toSection x) ≤ A ^ 2) →
-        (∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-              (V.toSection x) ≤ B ^ 2) →
-        (∑ j ∈ Finset.range 3,
-          ‖iteratedCovGrad (I := I) g (s + 2) c j Φ‖ ^ 2) ≤ A ^ 2 →
-        (∑ j ∈ Finset.range 3,
-          ‖iteratedCovGrad (I := I) g 0 (s + 1) j V‖ ^ 2) ≤ B ^ 2 →
-        ‖appCc (I := I) (M := M) g (s + 2) (c + 1)
-            (covGrad (I := I) (M := M) g (s + 2) c Φ)
-            (covGrad (I := I) (M := M) g 0 (s + 1) V)‖ ≤
-          C * A * B := by
+/-- A supplied order-two two-arm grid controls the differentiated-coefficient
+cross term.  This separates the universal contraction estimate from the
+choice of a metricwise or class-uniform grid coefficient. -/
+theorem appCc_grad_of_grid
+    (g : SmoothRiemannianMetric I M) (s c : ℕ) (Cg : ℝ) (hCg : 0 ≤ Cg)
+    (Φ : SmoothCcTensor g (s + 2) c) (V : SmoothCcTensor g 0 (s + 1))
+    (A B : ℝ) (hA : 0 ≤ A) (hB : 0 ≤ B)
+    (hgridInt : MeasureTheory.Integrable
+      (fun x => ∑ i ∈ Finset.range 3,
+        riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + i) x
+            ((iteratedCovGrad (I := I) g (s + 2) c i Φ).toSection x) *
+          ∑ l ∈ Finset.range (3 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + l) x
+              ((iteratedCovGrad (I := I) g 0 (s + 1) l V).toSection x))
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+        (I := I) (M := M) g))
+    (hgridBd :
+      (∫ x, (∑ i ∈ Finset.range 3,
+          riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + i) x
+              ((iteratedCovGrad (I := I) g (s + 2) c i Φ).toSection x) *
+            ∑ l ∈ Finset.range (3 - i),
+              riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + l) x
+                ((iteratedCovGrad (I := I) g 0 (s + 1) l V).toSection x))
+        ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+          (I := I) (M := M) g)) ≤
+        Cg * A ^ 2 * B ^ 2) :
+    ‖appCc (I := I) (M := M) g (s + 2) (c + 1)
+        (covGrad (I := I) (M := M) g (s + 2) c Φ)
+        (covGrad (I := I) (M := M) g 0 (s + 1) V)‖ ≤
+      Real.sqrt Cg * A * B := by
   classical
-  obtain ⟨Cg, hCg, hgrid⟩ :=
-    exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
-      (I := I) (M := M) g (s + 2) 0 c (s + 1) 2
-  refine ⟨Real.sqrt (2 * Cg), Real.sqrt_nonneg _, ?_⟩
-  intro Φ V A B hA hB hΦsup hVsup hΦjet hVjet
   let grid : M → ℝ := fun x =>
     ∑ i ∈ Finset.range 3,
       riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + i) x
@@ -94,20 +96,15 @@ theorem appCc_grad_l2
         ∑ l ∈ Finset.range (3 - i),
           riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + l) x
             ((iteratedCovGrad (I := I) g 0 (s + 1) l V).toSection x)
-  obtain ⟨hgrid_int, hgrid_bound⟩ :=
-    hgrid Φ V A B hA hB hΦsup hVsup
   have hgrid_int' : MeasureTheory.Integrable grid
       (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
         (I := I) (M := M) g) := by
-    simpa [grid] using hgrid_int
+    simpa [grid] using hgridInt
   have hgrid_bound' :
       (∫ x, grid x ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
         (I := I) (M := M) g)) ≤
-        Cg * (B ^ 2 * ∑ i ∈ Finset.range 3,
-              ‖iteratedCovGrad (I := I) g (s + 2) c i Φ‖ ^ 2 +
-            A ^ 2 * ∑ l ∈ Finset.range 3,
-              ‖iteratedCovGrad (I := I) g 0 (s + 1) l V‖ ^ 2) := by
-    simpa [grid] using hgrid_bound
+        Cg * A ^ 2 * B ^ 2 := by
+    simpa [grid] using hgridBd
   have hcross : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g (s + 2) (c + 1) x
           ((covGrad (I := I) (M := M) g (s + 2) c Φ).toSection x) *
@@ -155,6 +152,43 @@ theorem appCc_grad_l2
       (I := I) (M := M) g 0 (s + 2) (c + 1) x _ _).trans (hcross x)
   have hsq := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
     (I := I) (M := M) g 0 (c + 1) Z grid hgrid_int' hpt
+  have hsq' : ‖Z‖ ^ 2 ≤ Cg * A ^ 2 * B ^ 2 := hsq.trans hgrid_bound'
+  change ‖Z‖ ≤ Real.sqrt Cg * A * B
+  refine le_of_sq_le_sq ?_ (by positivity)
+  rw [mul_pow, mul_pow, Real.sq_sqrt hCg]
+  simpa [mul_assoc] using hsq'
+
+/-- The differentiated-coefficient cross term is bounded by an `H²` jet
+envelope on each factor.  This is the `L⁴ × L⁴` cell of the mixed-rank
+Gagliardo--Nirenberg two-arm estimate. -/
+theorem appCc_grad_l2
+    (g : SmoothRiemannianMetric I M) (s c : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (Φ : SmoothCcTensor g (s + 2) c)
+        (V : SmoothCcTensor g 0 (s + 1)) (A B : ℝ),
+        0 ≤ A → 0 ≤ B →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g (s + 2) c x
+              (Φ.toSection x) ≤ A ^ 2) →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+              (V.toSection x) ≤ B ^ 2) →
+        (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g (s + 2) c j Φ‖ ^ 2) ≤ A ^ 2 →
+        (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 (s + 1) j V‖ ^ 2) ≤ B ^ 2 →
+        ‖appCc (I := I) (M := M) g (s + 2) (c + 1)
+            (covGrad (I := I) (M := M) g (s + 2) c Φ)
+            (covGrad (I := I) (M := M) g 0 (s + 1) V)‖ ≤
+          C * A * B := by
+  classical
+  obtain ⟨Cg, hCg, hgrid⟩ :=
+    exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+      (I := I) (M := M) g (s + 2) 0 c (s + 1) 2
+  refine ⟨Real.sqrt (2 * Cg), Real.sqrt_nonneg _, ?_⟩
+  intro Φ V A B hA hB hΦsup hVsup hΦjet hVjet
+  obtain ⟨hgridInt, hgridBd⟩ :=
+    hgrid Φ V A B hA hB hΦsup hVsup
   have hleft :
       B ^ 2 * (∑ i ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g (s + 2) c i Φ‖ ^ 2) ≤
@@ -165,23 +199,20 @@ theorem appCc_grad_l2
           ‖iteratedCovGrad (I := I) g 0 (s + 1) l V‖ ^ 2) ≤
         A ^ 2 * B ^ 2 :=
     mul_le_mul_of_nonneg_left hVjet (sq_nonneg A)
-  have hsq' : ‖Z‖ ^ 2 ≤ 2 * Cg * A ^ 2 * B ^ 2 := by
+  have hraw :
+      Cg * (B ^ 2 * ∑ i ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g (s + 2) c i Φ‖ ^ 2 +
+          A ^ 2 * ∑ l ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g 0 (s + 1) l V‖ ^ 2) ≤
+        2 * Cg * A ^ 2 * B ^ 2 := by
     calc
-      ‖Z‖ ^ 2 ≤ ∫ x, grid x
-          ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
-            (I := I) (M := M) g) := hsq
-      _ ≤ Cg * (B ^ 2 * ∑ i ∈ Finset.range 3,
-              ‖iteratedCovGrad (I := I) g (s + 2) c i Φ‖ ^ 2 +
-            A ^ 2 * ∑ l ∈ Finset.range 3,
-              ‖iteratedCovGrad (I := I) g 0 (s + 1) l V‖ ^ 2) := hgrid_bound'
       _ ≤ Cg * (2 * A ^ 2 * B ^ 2) := by
         refine mul_le_mul_of_nonneg_left ?_ hCg
         nlinarith [hleft, hright]
       _ = 2 * Cg * A ^ 2 * B ^ 2 := by ring
-  change ‖Z‖ ≤ Real.sqrt (2 * Cg) * A * B
-  refine le_of_sq_le_sq ?_ (by positivity)
-  rw [mul_pow, mul_pow, Real.sq_sqrt (by positivity : 0 ≤ 2 * Cg)]
-  simpa [mul_assoc] using hsq'
+  have hgridProd := hgridBd.trans hraw
+  exact appCc_grad_of_grid (I := I) (M := M) g s c (2 * Cg)
+    (mul_nonneg (by norm_num) hCg) Φ V A B hA hB hgridInt hgridProd
 
 /-- In dimension three, an operator coefficient with a pointwise zeroth-order
 bound and an `H²` covariant-jet envelope acts on `nabla² U` from spectral

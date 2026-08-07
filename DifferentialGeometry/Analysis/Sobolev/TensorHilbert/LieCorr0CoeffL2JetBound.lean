@@ -5,6 +5,8 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrde
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffL2JetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InteriorProductJetBound
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorDerivative
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.PairTrace
 
 /-!
 # `lieCorr0Field` realizedFam jet-L2 top-separated producer
@@ -225,6 +227,292 @@ noncomputable def lc0RiemPass (g₀ : SmoothRiemannianMetric I M) :
           TensorRSSpace.ofCLM (lc0RiemPassFib (I := I) g₀ x))
       contMDiff_toFun := lc0RiemPassFib_contMDiff (I := I) g₀ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+private lemma lc0RiemPass_sum
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 4 → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+          (lc0RiemPass (I := I) (M := M) g).toSection x) D) v =
+      ∑ e : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel D
+            ![((smoothOrthoFrame (I := I) g x e x :
+              TangentSpace I x) : E), (v 1 : E)] *
+          g.inner x
+            (riemannOp (LeviCivita (I := I) g) x
+              (v 2) (v 3) (v 0))
+            (smoothOrthoFrame (I := I) g x e x) := by
+  classical
+  set Y : Tensor0SSpace 6 I x :=
+    domDomCongrFibRank (I := I) 6 lieCorr0RiemPerm1 x
+      (tensor0SProdKappaFib (I := I) (p := 2) (q := 4) x
+        (lieCorr0RiemLoweredFib (I := I) g x) D) with hY_def
+  have hYval : ∀ w : Fin 6 → TangentSpace I x,
+      Tensor0SSpace.toModel Y w =
+        Tensor0SSpace.toModel D ![(w 1 : E), (w 5 : E)] *
+          g.inner x
+            (riemannOp (LeviCivita (I := I) g) x
+              (w 2) (w 3) (w 4)) (w 0) := by
+    intro w
+    rw [hY_def, domDomCongrFibRank_apply,
+      Tensor0SSpace.toModel_ofModel,
+      ContinuousMultilinearMap.domDomCongr_apply,
+      tensor0SProdKappaFib_apply,
+      Tensor0SSpace.toModel_ofModel,
+      Bundle.continuousMultilinearMap.modelProduct_apply]
+    have hDargs :
+        ((fun i : Fin 6 ↦ w (lieCorr0RiemPerm1 i)) ∘
+            Fin.castAdd 4) =
+          ![w 1, w 5] := by
+      funext i
+      fin_cases i <;> rfl
+    have hRargs :
+        ((fun i : Fin 6 ↦ w (lieCorr0RiemPerm1 i)) ∘
+            Fin.natAdd 2) =
+          ![w 2, w 3, w 4, w 0] := by
+      funext i
+      fin_cases i <;> rfl
+    rw [hDargs, hRargs, lieCorr0RiemLoweredFib_toModel]
+    simp
+  change Tensor0SSpace.toModel
+      (lc0RiemPassFib (I := I) g x D) v = _
+  rw [lc0RiemPassFib, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.comp_apply,
+    domDomCongrFibRank_apply,
+    Tensor0SSpace.toModel_ofModel,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  have htop :
+      (fun i : Fin 4 ↦ v (lieCorr0RiemPerm2 i)) =
+        ![v 2, v 3, v 0, v 1] := by
+    funext i
+    fin_cases i <;> rfl
+  rw [htop]
+  rw [lieCorr0TraceStep, ContinuousLinearMap.comp_apply, ← hY_def]
+  rw [cometricDoubleTraceFib_eq_orthoFrame_diag
+    (I := I) g 4 x
+    (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x) Y]
+  rw [← Tensor0SSpace.toModelL_apply, map_sum,
+    ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun e _ ↦ ?_)
+  rw [Tensor0SSpace.toModelL_apply]
+  rw [TensorMultilinear.tensor0S_curry_apply_eval
+        (I := I) (M := M) (n := 4),
+      TensorMultilinear.tensor0S_curry_apply_eval
+        (I := I) (M := M) (n := 5)]
+  rw [hYval]
+  rfl
+
+/-- The fixed Riemann passenger evaluates by inserting the curvature operator
+in its first covariant passenger slot. -/
+theorem lc0RiemPass_eval
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 4 → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+          (lc0RiemPass (I := I) (M := M) g).toSection x) D) v =
+      Tensor0SSpace.toModel D
+        ![((riemannOp (LeviCivita (I := I) g) x
+          (v 2) (v 3) (v 0) : TangentSpace I x) : E), (v 1 : E)] := by
+  classical
+  rw [lc0RiemPass_sum]
+  let Rv : TangentSpace I x :=
+    riemannOp (LeviCivita (I := I) g) x (v 2) (v 3) (v 0)
+  let B : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun e ↦ smoothOrthoFrame (I := I) g x e x
+  change
+    (∑ e, Tensor0SSpace.toModel D
+          ![(B e : E), (v 1 : E)] *
+        g.inner x Rv (B e)) =
+      Tensor0SSpace.toModel D
+        ![(Rv : E), (v 1 : E)]
+  have hpair (z : E) :
+      (![z, (v 1 : E)] : Fin 2 → E) =
+        Fin.cons z (fun _ : Fin 1 ↦ (v 1 : E)) := by
+    funext i
+    fin_cases i <;> rfl
+  have hrep :
+      Rv = ∑ e, g.inner x (B e) Rv • B e := by
+    simpa only [B] using
+      CurvatureCoefficientDifferenceJetTower.orthoFrame_center_repr
+        (I := I) (M := M) g x Rv
+  calc
+    _ = ∑ e, g.inner x (B e) Rv *
+          Tensor0SSpace.toModel D
+            ![(B e : E), (v 1 : E)] := by
+      refine Finset.sum_congr rfl (fun e _ ↦ ?_)
+      rw [g.symm x Rv (B e), mul_comm]
+    _ = ∑ e, g.inner x (B e) Rv *
+          Tensor0SSpace.toModel D
+            (Fin.cons (B e : E) (fun _ : Fin 1 ↦ (v 1 : E))) := by
+      refine Finset.sum_congr rfl (fun e _ ↦ ?_)
+      rw [hpair]
+    _ = Tensor0SSpace.toModel D
+          (Fin.cons
+            (∑ e, g.inner x (B e) Rv • (B e : E))
+            (fun _ : Fin 1 ↦ (v 1 : E))) :=
+      (CurvatureCoefficientDifferenceJetTower.toModel_cons_sum_smul
+        (E := E) x
+        (Tensor0SSpace.toModel D)
+        (Module.finrank ℝ E)
+        (fun e ↦ g.inner x (B e) Rv)
+        (fun e ↦ (B e : E))
+        (fun _ : Fin 1 ↦ (v 1 : E))).symm
+    _ = Tensor0SSpace.toModel D
+          ![(∑ e, g.inner x (B e) Rv • (B e : E)), (v 1 : E)] := by
+      rw [hpair]
+    _ = _ := by
+      rw [← hrep]
+
+private lemma lc0RiemRF_eval
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 4 → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+          (rsDomDomCongrSection (I := I) (M := M) g 2 4
+            lieCorr0VBPerm
+            (reindexCoeffGen (I := I) (M := M) g 2 4
+              (slotExtendIter (I := I) (M := M) g 1 3 1
+                (slotFreeOpCc (I := I) (M := M) g 1))
+              (Equiv.swap (0 : Fin 2) 1))).toSection x) D) v =
+      -Tensor0SSpace.toModel D
+        ![((riemannOp (LeviCivita (I := I) g) x
+          (v 2) (v 3) (v 0) : TangentSpace I x) : E), (v 1 : E)] := by
+  classical
+  let Rv : TangentSpace I x :=
+    riemannOp (LeviCivita (I := I) g) x (v 2) (v 3) (v 0)
+  rw [rsDomDomCongrSection_toSection,
+    toModel_rsDomDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  have hout :
+      (fun i : Fin 4 ↦ v (lieCorr0VBPerm i)) =
+        ![v 1, v 2, v 3, v 0] := by
+    funext i
+    fin_cases i <;> rfl
+  rw [hout]
+  simp only [slotExtendIter, Nat.add_zero]
+  set D' : Tensor0SSpace 2 I x :=
+    Tensor0SSpace.ofModel (I := I) (x := x)
+      (ContinuousMultilinearMap.domDomCongr
+        (Equiv.swap (0 : Fin 2) 1)
+        (Tensor0SSpace.toModel D)) with hD'_def
+  have hreindex :
+      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (reindexCoeffGen (I := I) (M := M) g 2 4
+          (slotExtend (I := I) (M := M) g 1 3
+            (slotFreeOpCc (I := I) (M := M) g 1))
+          (Equiv.swap (0 : Fin 2) 1)).toSection x) D) =
+        slotExtendFib (I := I) (M := M) g 1 3 x
+          (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+            (slotFreeOpCc (I := I) (M := M) g 1).toSection x) D' := by
+    rw [hD'_def]
+    exact reindexCoeffFibGen_apply
+      (I := I) 2 4 (Equiv.swap (0 : Fin 2) 1) x _ D
+  rw [hreindex]
+  rw [show
+    (![v 1, v 2, v 3, v 0] : Fin 4 → TangentSpace I x) =
+      Fin.cons (v 1)
+        (![v 2, v 3, v 0] : Fin 3 → TangentSpace I x) from by
+    funext i
+    fin_cases i <;> rfl]
+  rw [slotExtendFib_apply_eval
+    (I := I) (M := M) g 1 3 x
+    (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+      (slotFreeOpCc (I := I) (M := M) g 1).toSection x)
+    D' (v 1) (![v 2, v 3, v 0] : Fin 3 → E)]
+  let A : Tensor0SSpace 1 I x :=
+    tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x D' (v 1)
+  let m : Fin 1 → TangentSpace I x := fun _ ↦ v 0
+  have hcurv :
+      (![v 2, v 3, v 0] : Fin 3 → TangentSpace I x) =
+        Fin.cons (v 2) (Fin.cons (v 3) m) := by
+    funext i
+    fin_cases i <;> rfl
+  have hpair :
+      ![(Rv : E), (v 1 : E)] =
+        Fin.cons (Rv : E) (fun _ : Fin 1 ↦ (v 1 : E)) := by
+    funext i
+    fin_cases i <;> rfl
+  rw [hcurv, hpair]
+  change
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (slotFreeOpCc (I := I) (M := M) g 1).toSection x) A)
+        (Fin.cons (v 2) (Fin.cons (v 3) m)) =
+      -Tensor0SSpace.toModel D
+        (Fin.cons (Rv : E) (fun _ : Fin 1 ↦ (v 1 : E)))
+  have hsf :
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+            (slotFreeOpCc (I := I) (M := M) g 1).toSection x) A)
+          (Fin.cons (v 2) (Fin.cons (v 3) m)) =
+        -Tensor0SSpace.toModel A
+          (Function.update m 0 Rv) := by
+    rw [slotFreeOpCc_apply]
+    simpa only [Fin.sum_univ_one] using
+      slotFreeCurvOpFib_apply_eval
+        (I := I) (M := M) g 1 x A (v 2) (v 3) m
+  rw [hsf]
+  have hupd :
+      Function.update m (0 : Fin 1) Rv =
+        fun _ : Fin 1 ↦ Rv := by
+    funext i
+    fin_cases i
+    simp
+  rw [hupd]
+  change
+    -Tensor0SSpace.toModel
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+          D' (v 1))
+        (fun _ : Fin 1 ↦ Rv) =
+      -Tensor0SSpace.toModel D
+        (Fin.cons (Rv : E) (fun _ : Fin 1 ↦ (v 1 : E)))
+  rw [TensorMultilinear.tensor0S_curry_apply_eval
+      (I := I) (M := M),
+    hD'_def, Tensor0SSpace.toModel_ofModel,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  congr 1
+  apply congrArg (Tensor0SSpace.toModel D)
+  funext i
+  fin_cases i <;> rfl
+
+/-- The fixed Riemann passenger is a source swap, one slot extension, and an
+output permutation of the canonical rank-one free-slot curvature operator. -/
+theorem lc0RiemPass_refold
+    (g : SmoothRiemannianMetric I M) :
+    lc0RiemPass (I := I) (M := M) g =
+      -rsDomDomCongrSection (I := I) (M := M) g 2 4
+        lieCorr0VBPerm
+        (reindexCoeffGen (I := I) (M := M) g 2 4
+          (slotExtendIter (I := I) (M := M) g 1 3 1
+            (slotFreeOpCc (I := I) (M := M) g 1))
+          (Equiv.swap (0 : Fin 2) 1)) := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [SmoothCcTensor.toSection_neg,
+    ContMDiffSection.coe_neg, Pi.neg_apply]
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  change Tensor0SSpace.toModel
+      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (lc0RiemPass (I := I) (M := M) g).toSection x) D) v =
+    Tensor0SSpace.toModel
+      (-((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (rsDomDomCongrSection (I := I) (M := M) g 2 4
+          lieCorr0VBPerm
+          (reindexCoeffGen (I := I) (M := M) g 2 4
+            (slotExtendIter (I := I) (M := M) g 1 3 1
+              (slotFreeOpCc (I := I) (M := M) g 1))
+            (Equiv.swap (0 : Fin 2) 1))).toSection x) D)) v
+  rw [Tensor0SSpace.toModel_neg,
+    ContinuousMultilinearMap.neg_apply,
+    lc0RiemPass_eval,
+    lc0RiemRF_eval]
+  ring
 
 /-- Fibrewise form of the two-arm factorization of the fixed-curvature piece. -/
 private theorem lc0RiemFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
@@ -1073,7 +1361,7 @@ private lemma vbPK_eq_slotExt (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     have hj : Fin.natAdd 1 j = Fin.succ j := by
       apply Fin.ext
       simp [Fin.natAdd, Fin.succ, Nat.add_comm]
-    show Fin.cons (u 0) (Fin.tail u) (Fin.natAdd 1 j) = Fin.tail u j
+    change Fin.cons (u 0) (Fin.tail u) (Fin.natAdd 1 j) = Fin.tail u j
     rw [hj, Fin.cons_succ]
   rw [hcast, hnat]
   rw [metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x (fun j => Fin.tail u j)]

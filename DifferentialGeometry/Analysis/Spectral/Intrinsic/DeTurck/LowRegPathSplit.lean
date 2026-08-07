@@ -44,7 +44,9 @@ private local instance instCompleteSpaceE : CompleteSpace E :=
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-private theorem phi_dev_joint
+/-- The deviation of the total top coefficient along a realized path has the
+joint regularity needed to form its coefficient path integral. -/
+theorem phi_dev_joint
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound g₀
@@ -76,7 +78,8 @@ private theorem phi_dev_joint
     (E := fun z : M => TensorRSSpace 4 2 I z) p.1 t) ?_
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
 
-private theorem reindex_sub
+/-- Coefficient reindexing commutes with subtraction. -/
+theorem reindex_sub
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
     reindexCoeffGen (I := I) (M := M) g₀ r s (A - B) ρ =
@@ -397,7 +400,8 @@ theorem path_add_sub_cap
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-private theorem norm_sq_add_le
+/-- The squared norm of a sum is bounded by twice the two squared norms. -/
+theorem norm_sq_add_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) :
     ‖A + B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
@@ -409,7 +413,8 @@ private theorem norm_sq_add_le
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-private theorem norm_sq_sub_le
+/-- The squared norm of a difference is bounded by twice the two squared norms. -/
+theorem norm_sq_sub_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) :
     ‖A - B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
@@ -419,7 +424,8 @@ private theorem norm_sq_sub_le
   have hAB : 0 ≤ ‖A - B‖ := norm_nonneg _
   nlinarith [sq_nonneg (‖A‖ - ‖B‖)]
 
-private theorem reindex_norm_sq
+/-- Reindexing upper coefficient slots preserves every covariant-jet norm square. -/
+theorem reindex_norm_sq
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (A : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
     ‖iteratedCovGrad (I := I) g₀ r s i
@@ -428,7 +434,9 @@ private theorem reindex_norm_sq
   rw [iteratedCovGrad_reindexCoeffGen (I := I) (M := M) g₀ r s A ρ i,
     norm_reindexCoeffGen_eq (I := I) (M := M) g₀ r (s + i)]
 
-private theorem convex_hs_bound
+/-- A convex combination of two tensors in the same spectral `H²` ball
+remains in that ball. -/
+theorem convex_hs_bound
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {s R : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1)
     (hT : ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R)

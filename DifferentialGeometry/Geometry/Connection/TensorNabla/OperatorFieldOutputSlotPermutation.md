@@ -21,3 +21,8 @@ warnings were pre-existing.
 The module has no `sorry` or `whnf`.  Its imports are restricted to smooth
 section definitions, the pointwise Hom-section smoothness bridge, and
 multilinear basis coordinates.
+
+The public `rsDomDomCongr_sub` lemma now records subtraction linearity at this
+canonical mixed-operator layer.  Focused verification and the exact module
+refresh both passed; the lemma is reused by the `DLb` background-difference
+transport and introduces no new analytic hypothesis.

@@ -45,3 +45,19 @@ The module already imported `GradSlotCurvature`, but its selective opening of
 visibility failure.  The named downstream target build and this file's focused
 source check pass.  `phiMet_symm_zero` and `phiMet_curv_fold` remain 100%; the
 unconditional mixed remainder and uniform-existence endpoint remain 0%.
+
+## 2026-08-06 explicit gradient-swap coefficient
+
+`gradSwapCurvCoeff` now aliases the canonical explicit producer
+`gradSlotCurvCoeff` instead of selecting an opaque existential witness.
+`gradSwapCurv_apply` exposes its exact
+`TensorRSSpace.ofCLM (slotFreeCurvOpFib g₀ 2 x)` fibre value, and
+`gradSwapCurv_spec` delegates to the direct canonical commutator theorem
+`gradSlotCurv_spec`.  The existing public names and theorem statements are
+preserved.
+
+Focused verification passed with four Lean threads under the 6 GB cap.  The
+three public compatibility declarations use only the standard project axioms
+`propext`, `Classical.choice`, and `Quot.sound`.  The existing symmetry and
+curvature-fold proofs are unchanged apart from consuming the canonical
+specification.

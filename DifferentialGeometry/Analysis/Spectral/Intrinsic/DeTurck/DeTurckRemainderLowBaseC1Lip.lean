@@ -1138,7 +1138,7 @@ private theorem slotExt_norm_le
   exact hsq
 
 set_option linter.unusedVariables false in
-private theorem reindex_sub
+private theorem reindex_sub_c1
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) (ρ : Equiv.Perm (Fin r)) :
     reindexCoeffGen (I := I) (M := M) g r s (A - B) ρ =
@@ -1239,7 +1239,7 @@ private theorem connIns_sub_eq
       (I := I) (M := M) g gT,
     connDiffContrInsertionField_eq_reindex_slotExtend_two
       (I := I) (M := M) g gU,
-    ← reindex_sub (I := I) (M := M) g,
+    ← reindex_sub_c1 (I := I) (M := M) g,
     ← slotExtend_sub, ← slotExtend_sub]
 
 private def kO0312 : Equiv.Perm (Fin 4) :=
@@ -1298,7 +1298,7 @@ private theorem kerOfIns_sub
       kerOfIns (I := I) (M := M) g A -
         kerOfIns (I := I) (M := M) g B := by
   simp only [kerOfIns, appCcRS_sub_right,
-    reindex_sub (I := I) (M := M)]
+    reindex_sub_c1 (I := I) (M := M)]
   module
 
 private theorem outPerm_rfns
@@ -3245,7 +3245,7 @@ private theorem four_sub
     fourOf (I := I) (M := M) g (P - Q) =
       fourOf (I := I) (M := M) g P -
         fourOf (I := I) (M := M) g Q := by
-  simp only [fourOf, reindex_sub (I := I) (M := M) g 4 2,
+  simp only [fourOf, reindex_sub_c1 (I := I) (M := M) g 4 2,
     smul_sub]
   module
 
@@ -3744,7 +3744,7 @@ private theorem liePiece_sub
             (slotExtend (I := I) (M := M) g 2 3
               (slotExtend (I := I) (M := M) g 1 2 ΨT))) ρ := by
   simp only [lieArm1Piece]
-  rw [← reindex_sub (I := I) (M := M) g,
+  rw [← reindex_sub_c1 (I := I) (M := M) g,
     slotExtend_sub, slotExtend_sub,
     appCcRS_sub_right, appCcRS_sub_left]
   congr 1
@@ -6055,7 +6055,7 @@ theorem lie1_pair_h2
               pureTrace (I := I) (M := M) g gU 2) σ := by
       rw [lieTrace_eq (I := I) (M := M) g gT σ,
         lieTrace_eq (I := I) (M := M) g gU σ,
-        reindex_sub (I := I) (M := M) g 4 2]
+        reindex_sub_c1 (I := I) (M := M) g 4 2]
     rw [heq, reindex_h2_eq (I := I) (M := M)]
     simpa only [N] using
       htracePair T U gT gU hTtie hUtie hTHst hUHst

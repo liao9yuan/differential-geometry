@@ -696,14 +696,12 @@ theorem covsum_hs_three
   have hPsum :
       ∑ a ∈ Finset.range 2, ‖iteratedCovGrad (I := I) g₀ 0 (s + 1) a P‖ ≤
         C₂ * N := by
-    have hcomp₁ := icg_comp_norm (I := I) (M := M) g₀ s 1 1 S
     have hP0 : ‖P‖ = ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ := by
       rfl
     have hP1 :
         ‖iteratedCovGrad (I := I) g₀ 0 (s + 1) 1 P‖ =
           ‖iteratedCovGrad (I := I) g₀ 0 s 2 S‖ := by
       dsimp [P]
-      simpa using hcomp₁
     rw [Finset.sum_range_succ, Finset.sum_range_one, iteratedCovGrad_zero]
     rw [hP0, hP1]
     exact hlow_two
@@ -724,12 +722,10 @@ theorem covsum_hs_three
     rw [Real.sq_sqrt hrad]
   have htop_sq :
       ‖iteratedCovGrad (I := I) g₀ 0 s 3 S‖ ^ 2 ≤ (C₃ * N) ^ 2 := by
-    have hcomp₂ := icg_comp_norm (I := I) (M := M) g₀ s 1 2 S
     have htop_eq :
         ‖iteratedCovGrad (I := I) g₀ 0 (s + 1) 2 P‖ =
           ‖iteratedCovGrad (I := I) g₀ 0 s 3 S‖ := by
       dsimp [P]
-      simpa using hcomp₂
     have hstep' :
         ‖iteratedCovGrad (I := I) g₀ 0 (s + 1) 2 P‖ ^ 2 ≤
           ‖rawTensorConnLapSmooth (I := I) g₀ 0 (s + 1) P‖ ^ 2 +

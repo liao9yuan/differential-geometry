@@ -40,3 +40,12 @@ API, and this module all pass focused verification.  This module's exact
 targeted refresh is also current.  The narrow package census reports only
 `propext`, `Classical.choice`, and `Quot.sound` for the exported realization
 chain.
+
+## 2026-08-06 — bootstrap-facing threshold range
+
+`IsLowRealizeUnif` now retains the proved upper threshold
+`threshold ≤ 1 / 3`, in addition to nonnegativity.  This is not a stronger
+geometric assumption: it is already part of the finite-action realization
+construction and is now preserved for the same-horizon regularity consumer.
+The realization package remains class-first and dimension three.  Focused
+verification and its direct refresh passed.

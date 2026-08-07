@@ -6000,6 +6000,152 @@ theorem deTurckLieDLaCoeffField_realizedFam_jetL2_summed_topSeparated
     (fun j => add_nonneg (sq_nonneg _) (sq_nonneg _))
     (fun i hi => hper T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs i hi)
 
+/-! ### Internal extraction surface for class-first finite windows
+
+The DLa factorization predates the split into lower-layer uniform modules and
+is intentionally implemented above with module-private declarations.  The
+following small namespace exports only the algebraic objects and already-proved
+estimates needed by the class-first finite-window producer.  No estimate is
+reproved here; the substantive uniform proof lives in the sibling `Uniform`
+module. -/
+
+namespace DLaUniformInternal
+
+/-- The raised DLa connection kernel used by the finite-window producer. -/
+noncomputable abbrev dlaKernel := @dLaKernelRaisedCc
+
+/-- The metric-lowered DLa connection kernel. -/
+noncomputable abbrev dlaLowered := @dLaLoweredCc
+
+/-- A quadratic connection-difference arm in the DLa kernel. -/
+noncomputable abbrev dlaQuad := @dLaQuadCc
+
+/-- The perturbative inverse-metric endomorphism used when lowering by the moving metric. -/
+noncomputable abbrev dlaPerturb := @dLaPerturbSharpEndoField
+
+/-- The perturbative lowering correction for the DLa kernel. -/
+noncomputable abbrev dlaLoweredPerturb := @dLaLoweredPerturbCc
+
+/-- The DLa kernel lowered with the moving metric. -/
+noncomputable abbrev dlaLoweredG1 := @dLaLoweredG1Cc
+
+/-- The symmetrized lowered DLa kernel. -/
+noncomputable abbrev dlaSym := @dLaSymCc
+
+/-- The double moving-trace operator in the DLa factorization. -/
+noncomputable abbrev dlaPairTrace := @pairTraceOpDla
+
+/-- The input-slot permutation in the DLa pair-trace factorization. -/
+abbrev dlaSigma := @sigmaE0dla
+
+/-- The finite combinatorial coefficient for products of two DLa grid windows. -/
+noncomputable abbrev dlaPairCount := dLaPairCount
+
+/-- A nonempty DLa grid window contains the constant grid term. -/
+abbrev grid_one_le := @one_le_dLaGridWin
+
+/-- A positive-order single jet is bounded by its antidiagonal grid. -/
+abbrev grid_single_le := @single_le_grid_dla
+
+/-- One antidiagonal grid term is bounded by a containing DLa window. -/
+abbrev grid_term_le := @grid_le_dLaGridWin
+
+/-- The DLa product-window coefficient is nonnegative. -/
+theorem pair_nonneg (m1 m2 : ℕ) : 0 ≤ dlaPairCount m1 m2 :=
+  dLaPairCount_nonneg m1 m2
+
+/-- The product of two DLa windows is bounded by one larger window. -/
+theorem grid_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m1 m2 m3 : ℕ)
+    (h3 : m1 + m2 ≤ m3 + 1) :
+    dLaGridWin b m1 * dLaGridWin b m2 ≤
+      dlaPairCount m1 m2 * dLaGridWin b m3 :=
+  dLaGridWin_mul_le b hb m1 m2 m3 h3
+
+/-- Squared fibre-norm subadditivity for an iterated covariant derivative of a difference. -/
+abbrev rfns_sub := @rfns_iCG_sub_le_dla
+
+/-- Squared fibre-norm subadditivity for an iterated covariant derivative of a sum. -/
+abbrev rfns_add := @rfns_iCG_add_le_dla
+
+/-- A quadratic DLa arm is controlled by the two supplied connection-difference towers. -/
+theorem quad_tower
+    (g₀ ga gb : SmoothRiemannianMetric I M)
+    (j : ℕ) (x : M) (b : ℕ → ℝ) (hb : ∀ l, 0 ≤ b l)
+    (Ba Bb : ℕ → ℝ) (hBa_nn : ∀ i, 0 ≤ Ba i) (hBb_nn : ∀ l, 0 ≤ Bb l)
+    (harm : ∀ i, i ≤ j →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 i
+          (connDiffSection (I := I) ga g₀)).toSection x) ≤
+      Ba i * dLaGridWin b (i + 2))
+    (hin : ∀ l, l ≤ j →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 l
+          (connDiffSection (I := I) gb g₀)).toSection x) ≤
+      Bb l * dLaGridWin b (l + 2)) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + j) x
+        ((iteratedCovGrad (I := I) g₀ 1 3 j
+          (dlaQuad (I := I) (M := M) g₀ ga gb)).toSection x) ≤
+      (appCcGdiag (E := E) j * ∑ i ∈ Finset.range (j + 1),
+        (Module.finrank ℝ E : ℝ) * Ba i *
+          ∑ l ∈ Finset.range (j + 1 - i),
+            Bb l * dlaPairCount (i + 2) (l + 2)) *
+        dLaGridWin b (j + 3) :=
+  dLaQuad_tower_of_factors (I := I) (M := M) g₀ ga gb j x b hb
+    Ba Bb hBa_nn hBb_nn harm hin
+
+/-- Raising the first slot of the lowered kernel recovers the raised DLa kernel. -/
+theorem lower_raise (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    cometricRaiseSlot0Field (I := I) (M := M) g₀ 2
+        (dlaLowered (I := I) (M := M) g₀ g₁ g_bg) =
+      dlaKernel (I := I) (M := M) g₀ g₁ g_bg :=
+  dLaLoweredCc_raise_repr (I := I) (M := M) g₀ g₁ g_bg
+
+/-- Symmetrization does not increase the squared fibre norm of a tensor jet. -/
+abbrev symm_rfns := @rfns_iCG_symmS_le_dla
+
+/-- The perturbative slot insertion is controlled by the symmetrized perturbation jet. -/
+theorem insert_rfns (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 4 4 j
+          (slotInsertEndoCc (I := I) (M := M) g₀ 3
+            (dlaPerturb (I := I) (M := M) g₀ T))).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 3 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 j
+            (symmS (I := I) (M := M) g₀ T)).toSection x) :=
+  rfns_iCG_slotInsert3_dLaPerturb_le (I := I) (M := M) g₀ T j x
+
+/-- Iterated covariant derivatives commute with scalar multiplication. -/
+abbrev iter_smul := @iteratedCovGrad_smul_dla
+
+/-- Squared fibre norm under scalar multiplication. -/
+abbrev rfns_smul := @rfns_smul_dla
+
+/-- The private double trace agrees definitionally with the public moving trace. -/
+theorem pair_trace_def (g₀ g₁ : SmoothRiemannianMetric I M) :
+    dlaPairTrace (I := I) (M := M) g₀ g₁ =
+      appCcRS (I := I) (M := M) g₀ 6 4 2
+        (pureTrace (I := I) (M := M) g₀ g₁ 2)
+        (pureTrace (I := I) (M := M) g₀ g₁ 4) := by
+  rfl
+
+/-- Exact pair-trace factorization of the DLa coefficient. -/
+theorem dla_field_eq
+    (g₀ g_bg g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w) :
+    deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg =
+      (-1 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+        (dlaPairTrace (I := I) (M := M) g₀ g₁)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6
+          dlaSigma
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (dlaSym (I := I) (M := M) g₀ T g₁ g_bg))) :=
+  deTurckLieDLaCoeffField_eq_pairTrace (I := I) (M := M) g₀ g_bg g₁ T htie
+
+end DLaUniformInternal
+
 end DLaGridBrick
 
 end DifferentialGeometry.Integral.Connection

@@ -153,6 +153,17 @@ private theorem unitModel_add (g : SmoothRiemannianMetric I M) (s : ℕ)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
+/-- `unitModel` respects subtraction of sections. -/
+private theorem unitModel_sub (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S S' : SmoothCcTensor g 0 s) (x : M) :
+    unitModel (I := I) (M := M) g s (S - S') x =
+      unitModel (I := I) (M := M) g s S x - unitModel (I := I) (M := M) g s S' x := by
+  simp only [unitModel]
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+    ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub]
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 /-- The unit-evaluated model fibre of a rank-cast `castRankCc g 0 h W` is the rank-cast of the
 unit-evaluated model fibre of `W`.  Proved by `subst` on the rank equality, which collapses the cast to
 the identity on both sides. -/
@@ -268,6 +279,24 @@ theorem domDomCongrSection_unitModel (g : SmoothRiemannianMetric I M) {s : ℕ}
       (Tensor0SSpace.ofModel
         (ContinuousMultilinearMap.domDomCongr σ (unitModel (I := I) (M := M) g s S x))) = _
   rw [Tensor0SSpace.toModel_ofModel]
+
+set_option linter.unusedSectionVars false in
+/-- Slot permutation of smooth covariant tensor sections respects subtraction. -/
+theorem domDomCongr_sub (g : SmoothRiemannianMetric I M) {s : ℕ}
+    (σ : Equiv.Perm (Fin s)) (S S' : SmoothCcTensor g 0 s) :
+    domDomCongrSection (I := I) g σ (S - S') =
+      domDomCongrSection (I := I) g σ S - domDomCongrSection (I := I) g σ S' := by
+  refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
+  rw [domDomCongrSection_unitModel (I := I) g σ (S - S') x,
+    unitModel_sub (I := I) (M := M) g s S S' x,
+    unitModel_sub (I := I) (M := M) g s
+      (domDomCongrSection (I := I) g σ S) (domDomCongrSection (I := I) g σ S') x,
+    domDomCongrSection_unitModel (I := I) g σ S x,
+    domDomCongrSection_unitModel (I := I) g σ S' x]
+  refine ContinuousMultilinearMap.ext (fun w => ?_)
+  rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.sub_apply,
+    ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
 
 /-- **Iterated-gradient naturality through the constructive slot-permutation operator.**  At every
 gradient order `i` there is a slot permutation `σ'` of `Fin (s + i)` relating the unit fibres of the

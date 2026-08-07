@@ -3032,6 +3032,21 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
+/-- The metric-independent coefficient in the mixed-valence second-order
+Gagliardo–Nirenberg step. -/
+def gnStepConst (n k : ℕ) : ℝ :=
+  max (2 * ((k : ℝ) - 1) + Real.sqrt (n : ℝ)) 1
+
+/-- The mixed-valence jet log-convexity coefficient at volume radius `V`. -/
+def gnLogConst (n k : ℕ) (V : ℝ) : ℝ :=
+  max (max (gnStepConst n k) 1)
+    (gnStepConst n k * (1 / V) + gnStepConst n k)
+
+/-- The explicit mixed-valence Gagliardo–Nirenberg coefficient at volume
+radius `V = sqrt (vol M)`. -/
+def gnRsConst (n k : ℕ) (V : ℝ) : ℝ :=
+  gnLogConst n k V ^ (2 * k ^ 2) * (max 1 V) ^ 2
+
 /-- The general-valence `(r, s)` mixed-`L^p` fibre-jet ladder of a smooth compactly-supported
 `(r, s)`-tensor `u` at top order `k`: the value at order `i` is the `L^{2k/i}` norm of the pointwise
 fibre norm `|∇^i u|`, with the two endpoints folded in (`c_0 := Λ₀ · √(vol M)`,
@@ -4853,7 +4868,9 @@ over the covariant IBP engine `weightedCovIBP_lpFiberJet_fin` and the three-func
 `real_holder_three_nonneg`, both themselves proven, so this step is `sorry`-free. -/
 private theorem secondOrderInterp_lpFiberJet_fin_rs
     (g : SmoothRiemannianMetric I M) (k r : ℕ) (_hk : 1 ≤ k) :
-    ∃ K' : ℝ, 1 ≤ K' ∧
+    ∃ K' : ℝ,
+      K' = gnStepConst (Module.finrank ℝ E) k ∧
+      1 ≤ K' ∧
       ∀ (m : ℕ) (w : Integral.L2.SmoothCcTensor g r m) (i : ℕ), 1 ≤ i → i + 1 < k →
         ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
               ((covGrad (I := I) (M := M) g r m w).toSection x)) ^ ((k : ℝ) / (i + 1))
@@ -4868,14 +4885,17 @@ private theorem secondOrderInterp_lpFiberJet_fin_rs
   classical
   have hkR : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one _hk)
 
-  refine ⟨max (max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1) 1, ?_, ?_⟩
-  · exact le_trans (le_max_right _ _) (le_max_left _ _)
+  refine ⟨gnStepConst (Module.finrank ℝ E) k, rfl, ?_, ?_⟩
+  · rw [gnStepConst]
+    exact le_max_right _ _
   intro m w i hi1 hreg_lt
   set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   haveI : MeasureTheory.IsFiniteMeasure μ :=
     Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  set K' : ℝ := max (max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1) 1
-    with hK'def
+  set K' : ℝ := gnStepConst (Module.finrank ℝ E) k with hK'def
+  have hK'_nn : 0 ≤ K' := by
+    rw [hK'def, gnStepConst]
+    exact le_trans zero_le_one (le_max_right _ _)
 
   set a : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x)
     with ha_def
@@ -5018,13 +5038,14 @@ private theorem secondOrderInterp_lpFiberJet_fin_rs
         nlinarith [hkR, hiR]
       have hDk : D ≤ 2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) := by
         rw [hD_def]; linarith
-      exact le_trans hDk (le_trans (le_max_left _ _) (le_max_left _ _))
+      rw [hK'def, gnStepConst]
+      exact le_trans hDk (le_max_left _ _)
 
     rw [hLHS_sq]
     rcases eq_or_lt_of_le hIb_nn with hIb0 | hIbpos
     · -- `Ib = 0`: LHS = `0^{1/p} = 0 ≤ RHS`.
       rw [← hIb0, Real.zero_rpow (by rw [hinvp]; positivity)]
-      positivity
+      exact mul_nonneg (mul_nonneg hK'_nn hAw_nn) hC_nn
     · have hIbβ_pos : 0 < Ib ^ (1 / β) := Real.rpow_pos_of_pos hIbpos _
 
       have hIb_split : Ib = Ib ^ ((1 : ℝ) / p) * Ib ^ (1 / β) := by
@@ -5066,7 +5087,9 @@ conclusion reads the genuine covariant derivatives of `w`.  It is proven outrigh
 covariant IBP `weightedCovIBP_lpFiberJet_sup` and a two-function Hölder, so it is `sorry`-free. -/
 private theorem secondOrderInterp_lpFiberJet_sup_rs
     (g : SmoothRiemannianMetric I M) (k r : ℕ) (_hk : 1 ≤ k) :
-    ∃ K' : ℝ, 1 ≤ K' ∧
+    ∃ K' : ℝ,
+      K' = gnStepConst (Module.finrank ℝ E) k ∧
+      1 ≤ K' ∧
       ∀ (m : ℕ) (w : Integral.L2.SmoothCcTensor g r m) (A : ℝ), 0 ≤ A →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r m x (w.toSection x) ≤ A ^ 2) →
         ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
@@ -5079,12 +5102,17 @@ private theorem secondOrderInterp_lpFiberJet_sup_rs
                 ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((2 : ℝ) / (2 * k))) := by
   classical
   have hkR : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one _hk)
-  refine ⟨max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1, le_max_right _ _, ?_⟩
+  refine ⟨gnStepConst (Module.finrank ℝ E) k, rfl, ?_, ?_⟩
+  · rw [gnStepConst]
+    exact le_max_right _ _
   intro m w A hA hsup
   set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   haveI : MeasureTheory.IsFiniteMeasure μ :=
     Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  set K' : ℝ := max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1 with hK'def
+  set K' : ℝ := gnStepConst (Module.finrank ℝ E) k with hK'def
+  have hK'_nn : 0 ≤ K' := by
+    rw [hK'def, gnStepConst]
+    exact le_trans zero_le_one (le_max_right _ _)
   set b : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x
     ((covGrad (I := I) (M := M) g r m w).toSection x) with hb_def
   set c : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g r (m + 1 + 1) x
@@ -5191,7 +5219,9 @@ private theorem secondOrderInterp_lpFiberJet_sup_rs
       rw [hJ_def]
       exact hH
 
-  have hcoef_le : D ≤ K' := by rw [hD_def]; exact le_max_left _ _
+  have hcoef_le : D ≤ K' := by
+    rw [hD_def, hK'def, gnStepConst]
+    exact le_max_left _ _
   have hAC_nn : 0 ≤ A * C := mul_nonneg hA hC_nn
 
   have hsum_k : (1 : ℝ) / k + ((k : ℝ) - 1) / k = 1 := by
@@ -5199,7 +5229,7 @@ private theorem secondOrderInterp_lpFiberJet_sup_rs
   rcases eq_or_lt_of_le hIb_nn with hIb0 | hIbpos
   · -- `Ib = 0`: LHS = `0^{1/k} = 0 ≤ RHS`.
     rw [← hIb0, Real.zero_rpow (by positivity)]
-    positivity
+    exact mul_nonneg (mul_nonneg hK'_nn hA) hC_nn
   · -- `Ib > 0`: cancel `Ib^{(k-1)/k}`.
     have hIbβ_pos : 0 < Ib ^ (((k : ℝ) - 1) / k) := Real.rpow_pos_of_pos hIbpos _
     have hIb_split : Ib = Ib ^ ((1 : ℝ) / k) * Ib ^ (((k : ℝ) - 1) / k) := by
@@ -5268,7 +5298,10 @@ the `i`-th covariant jet of `u`), not a free sequence, so no degenerate witness 
 with a nonvanishing intermediate jet rejects the `K = 0` reading by positivity of `c_i`). -/
 private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (hk : 1 ≤ k) :
-    ∃ K : ℝ, 1 ≤ K ∧
+    ∃ K : ℝ,
+      K = gnLogConst (Module.finrank ℝ E) k
+        (Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal) ∧
+      1 ≤ K ∧
       ∀ (u : Integral.L2.SmoothCcTensor g r s) (Λ₀ : ℝ), 0 ≤ Λ₀ →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r s x (u.toSection x) ≤ Λ₀ ^ 2) →
         ∀ i : ℕ, i + 1 < k →
@@ -5276,20 +5309,28 @@ private theorem lpFiberJet_logConvex_iteratedCovGrad_rs
             K * lpFiberJetLadder_rs (I := I) (M := M) g r s k u Λ₀ i *
               lpFiberJetLadder_rs (I := I) (M := M) g r s k u Λ₀ (i + 2) := by
   classical
-  obtain ⟨Kf, hKf1, hfin⟩ := secondOrderInterp_lpFiberJet_fin_rs (I := I) (M := M) g k r hk
-  obtain ⟨Ks, hKs1, hsupc⟩ := secondOrderInterp_lpFiberJet_sup_rs (I := I) (M := M) g k r hk
+  obtain ⟨Kf, hKf_eq, hKf1, hfin⟩ :=
+    secondOrderInterp_lpFiberJet_fin_rs (I := I) (M := M) g k r hk
+  obtain ⟨Ks, hKs_eq, hKs1, hsupc⟩ :=
+    secondOrderInterp_lpFiberJet_sup_rs (I := I) (M := M) g k r hk
   have hk0 : (k : ℕ) ≠ 0 := by omega
   have hkR : (k : ℝ) ≠ 0 := by exact_mod_cast hk0
   have hkRpos : (0 : ℝ) < (k : ℝ) := by positivity
   set V : ℝ := Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
   have hVnn : 0 ≤ V := Real.sqrt_nonneg _
 
-  refine ⟨max (max Kf 1) (Ks * (1 / V) + Ks), ?_, ?_⟩
-  · exact le_trans (le_max_right _ _) (le_max_left _ _)
+  refine ⟨gnLogConst (Module.finrank ℝ E) k V, ?_, ?_, ?_⟩
+  · rw [hV]
+  · rw [gnLogConst]
+    exact le_trans (le_max_right _ _) (le_max_left _ _)
   intro u Λ₀ hΛ₀ hsup
-  set K : ℝ := max (max Kf 1) (Ks * (1 / V) + Ks) with hKdef
-  have hKf_le : Kf ≤ K := le_trans (le_max_left _ _) (le_max_left _ _)
-  have hKsV_le : Ks * (1 / V) + Ks ≤ K := le_max_right _ _
+  set K : ℝ := gnLogConst (Module.finrank ℝ E) k V with hKdef
+  have hKf_le : Kf ≤ K := by
+    rw [hKf_eq, hKdef, gnLogConst]
+    exact le_trans (le_max_left _ _) (le_max_left _ _)
+  have hKsV_le : Ks * (1 / V) + Ks ≤ K := by
+    rw [hKs_eq, hKdef, gnLogConst]
+    exact le_max_right _ _
 
   set J : ℕ → ℝ := fun i =>
     (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
@@ -5459,20 +5500,24 @@ single-step log-convexity `lpFiberJet_logConvex_iteratedCovGrad`, and this assem
 outright, so `#print axioms` records only `[propext, Classical.choice, Quot.sound]` — `sorry`-free.
 No packaging: the conclusion is a real-valued `L^p` interpolation inequality on a single tensor's
 covariant jets, structurally distinct from any consumer's Nemytskii conclusion. -/
-theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+theorem gn_rs_bound
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (_hk : 1 ≤ k) :
-    ∃ C : ℝ, 0 ≤ C ∧
+    0 ≤ gnRsConst (Module.finrank ℝ E) k
+        (Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal) ∧
       ∀ (u : Integral.L2.SmoothCcTensor g r s) (Λ₀ : ℝ), 0 ≤ Λ₀ →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r s x (u.toSection x) ≤ Λ₀ ^ 2) →
         ∀ j : ℕ, 0 < j → j < k →
           (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
                   ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
               ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((j : ℝ) / k) ≤
-            C * Λ₀ ^ (2 * (1 - (j : ℝ) / k)) *
+            gnRsConst (Module.finrank ℝ E) k
+                (Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal) *
+              Λ₀ ^ (2 * (1 - (j : ℝ) / k)) *
               (Integral.L2.tensorL2Norm (I := I) g r (s + k)
                   (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun) ^ (2 * (j : ℝ) / k) := by
   classical
-  obtain ⟨K, hK1, hlc⟩ := lpFiberJet_logConvex_iteratedCovGrad_rs (I := I) (M := M) g r s k _hk
+  obtain ⟨K, hK_eq, hK1, hlc⟩ :=
+    lpFiberJet_logConvex_iteratedCovGrad_rs (I := I) (M := M) g r s k _hk
   set V : ℝ := Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
   have hVnn : 0 ≤ V := Real.sqrt_nonneg _
   have hmax1 : (1 : ℝ) ≤ max 1 V := le_max_left _ _
@@ -5482,8 +5527,13 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
   set C : ℝ := K ^ (2 * k ^ 2) * (max 1 V) ^ 2 with hC
   have hKnn : 0 ≤ K := le_trans zero_le_one hK1
   have hC_nn : 0 ≤ C := by rw [hC]; positivity
-  refine ⟨C, hC_nn, ?_⟩
+  have hC_eq : C = gnRsConst (Module.finrank ℝ E) k V := by
+    rw [hC, gnRsConst, hK_eq]
+  refine ⟨?_, ?_⟩
+  · rw [← hC_eq]
+    exact hC_nn
   intro u Λ₀ hΛ₀ hsup j hj0 hjk
+  rw [← hC_eq]
   have hk0 : (k : ℕ) ≠ 0 := by omega
   have hkR : (k : ℝ) ≠ 0 := by exact_mod_cast hk0
   have hkRpos : (0 : ℝ) < (k : ℝ) := by positivity
@@ -5633,6 +5683,23 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
     _ = (K ^ (2 * k ^ 2) * (max 1 V) ^ 2) * Λ₀ ^ (2 * (1 - (j : ℝ) / k)) *
           ak ^ (2 * (j : ℝ) / k) := by ring
     _ = C * Λ₀ ^ (2 * (1 - (j : ℝ) / k)) * ak ^ (2 * (j : ℝ) / k) := by rw [hC]
+
+/-- Existential compatibility form of `gn_rs_bound`. -/
+theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ) (hk : 1 ≤ k) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (u : Integral.L2.SmoothCcTensor g r s) (Λ₀ : ℝ), 0 ≤ Λ₀ →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r s x (u.toSection x) ≤ Λ₀ ^ 2) →
+        ∀ j : ℕ, 0 < j → j < k →
+          (∫ x, (riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s j u).toSection x)) ^ ((k : ℝ) / j)
+              ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((j : ℝ) / k) ≤
+            C * Λ₀ ^ (2 * (1 - (j : ℝ) / k)) *
+              (Integral.L2.tensorL2Norm (I := I) g r (s + k)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) g r s k u).toFun) ^ (2 * (j : ℝ) / k) := by
+  refine ⟨gnRsConst (Module.finrank ℝ E) k
+    (Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal), ?_⟩
+  exact gn_rs_bound (I := I) (M := M) g r s k hk
 
 
 end GeneralValenceRS

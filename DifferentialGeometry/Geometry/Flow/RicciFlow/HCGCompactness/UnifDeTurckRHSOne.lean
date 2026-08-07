@@ -554,6 +554,254 @@ private theorem connLow_unit
     (E := (TangentSpace I : M → Type _)) ∞
       (connDiffLoweredField (I := I) g₀ gBase)
 
+/-- Explicit squared fibre-norm coefficient for the undifferentiated
+connection difference, read in the class metric. -/
+noncomputable def connDiffZeroSqC (Λ : ℝ) : ℝ :=
+  let C₁ := revJetOneC (E := E) Λ
+  let C := 3 / 2 * Λ ^ 3 * C₁
+  (Module.finrank ℝ E : ℝ) ^ 3 * C ^ 2
+
+set_option linter.unusedSectionVars false in
+/-- The class-first pointwise square-norm bound for the undifferentiated
+fixed-background connection difference. -/
+theorem unifConnDiffZero
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ) :
+    ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 0) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 0
+            (connDiffSection (I := I) gBase g₀)).toSection x) ≤
+        connDiffZeroSqC (E := E) Λ := by
+  classical
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
+    ⟨hΛ, fun x _ v => hcomp x v⟩
+  have hEq' := metricUniformEquivalentOn_symm (I := I) hEq
+  let C₁ : ℝ := revJetOneC (E := E) Λ
+  have hrev1 := reverseJetOne (I := I) gBase g₀ hEq hjet1
+  have hC₁0 : 0 ≤ C₁ := by
+    dsimp [C₁, revJetOneC]
+    positivity
+  let C : ℝ := 3 / 2 * Λ ^ 3 * C₁
+  have hC0 : 0 ≤ C := by
+    dsimp [C]
+    positivity
+  let d : ℝ := Module.finrank ℝ E
+  have hd0 : 0 ≤ d := by
+    dsimp [d]
+    positivity
+  intro x
+  obtain ⟨basis, _hbasis, horth⟩ := centeredBasis (I := I) g₀ x
+  have hinv : MetricInverseInBasis_gen (I := I) g₀ x basis
+      (identityInvMetric (Idx := Fin (Module.finrank ℝ E))) := by
+    simpa [identityInvMetric, diagonalInvMetric] using
+      metricInverseInBasis_of_orthonormal (I := I) g₀ basis horth
+  have hunit : ∀ i, g₀.inner x (basis i) (basis i) = 1 := by
+    intro i
+    rw [horth i i]
+    simp
+  let T : Tensor0SSpace 3 I x :=
+    connDiffLoweredField (I := I) g₀ gBase x
+  have hcompB : ∀ slots : Fin 3 → Fin (Module.finrank ℝ E),
+      |component0S (I := I) basis T slots| ≤ C := by
+    intro slots
+    let N : TangentSpace I x :=
+      PDE.DeTurck.connDiff (I := I) gBase g₀ x
+        (basis (slots 0)) (basis (slots 1))
+    have hNN : Real.sqrt (g₀.inner x N N) ≤ C := by
+      have h := connDiff_gJet_le (I := I) hEq' hrev1 (Set.mem_univ x)
+        (basis (slots 1)) (basis (slots 0))
+      rw [hunit (slots 1), hunit (slots 0)] at h
+      simpa [C, N, PDE.DeTurck.connDiff] using h
+    have hval :
+        component0S (I := I) basis T slots =
+          g₀.inner x N (basis (slots 2)) := by
+      rfl
+    rw [hval]
+    calc
+      |g₀.inner x N (basis (slots 2))| ≤
+          Real.sqrt (g₀.inner x N N) *
+            Real.sqrt (g₀.inner x (basis (slots 2)) (basis (slots 2))) :=
+        abs_metric_inner_le_sqrt_metric_quadratic
+          (I := I) (M := M) g₀ x N (basis (slots 2))
+      _ = Real.sqrt (g₀.inner x N N) := by
+        rw [hunit (slots 2)]
+        simp
+      _ ≤ C := hNN
+  have hcard :=
+    normSq0S_le_card_of_component_bound (I := I) g₀ x 3 basis hinv T C hC0 hcompB
+  have hcardval :
+      (Fintype.card (Fin 3 → Fin (Module.finrank ℝ E)) : ℝ) =
+        (Module.finrank ℝ E : ℝ) ^ 3 := by
+    rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+    push_cast
+    ring
+  rw [hcardval] at hcard
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 0) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 0
+            (connDiffSection (I := I) gBase g₀)).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 0) x
+          ((iteratedCovGrad (I := I) g₀ 0 3 0
+            (connDiffLoweredCc (I := I) g₀ gBase)).toSection x) :=
+      (connLow_rfns (I := I) (M := M) g₀ gBase 0 x).symm
+    _ = normSq0S (I := I) g₀ x 3 T := by
+      rw [rfns_iterCovGrad_eq (I := I) g₀ 3 0
+        (connDiffLoweredCc (I := I) g₀ gBase) x,
+        connLow_unit (I := I) g₀ gBase]
+      rfl
+    _ ≤ d ^ 3 * C ^ 2 := by
+      simpa [d] using hcard
+    _ = connDiffZeroSqC (E := E) Λ := rfl
+
+/-- Explicit squared fibre-norm coefficient for the first class-metric
+covariant derivative of the fixed-background connection difference. -/
+noncomputable def connDiffOneSqC (Λ : ℝ) : ℝ :=
+  let C₁ := revJetOneC (E := E) Λ
+  let C₂ := revJetTwoC (E := E) Λ
+  let C := 3 / 2 * Λ ^ 4 * (C₂ + Λ * C₁ ^ 2)
+  (Module.finrank ℝ E : ℝ) ^ 4 * C ^ 2
+
+set_option linter.unusedSectionVars false in
+/-- The class-first pointwise square-norm bound for the first class-metric
+covariant derivative of the fixed-background connection difference. -/
+theorem unifConnDiffOne
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
+    (hΛ : 1 ≤ Λ)
+    (hcomp : ∀ (x : M) (v : TangentSpace I x),
+      Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
+        g₀.inner x v v ≤ Λ * gBase.inner x v v)
+    (hjet1 : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ)
+    (hjet2 : MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g₀ gBase Λ) :
+    ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 1) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 1
+            (connDiffSection (I := I) gBase g₀)).toSection x) ≤
+        connDiffOneSqC (E := E) Λ := by
+  classical
+  have hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ :=
+    ⟨hΛ, fun x _ v => hcomp x v⟩
+  have hEq' := metricUniformEquivalentOn_symm (I := I) hEq
+  let C₁ : ℝ := revJetOneC (E := E) Λ
+  let C₂ : ℝ := revJetTwoC (E := E) Λ
+  have hrev1 := reverseJetOne (I := I) gBase g₀ hEq hjet1
+  have hrev2 := reverseJetTwo (I := I) gBase g₀ hEq hjet1 hjet2
+  have hC₁0 : 0 ≤ C₁ := by
+    dsimp [C₁, revJetOneC]
+    positivity
+  have hC₂0 : 0 ≤ C₂ := by
+    dsimp [C₂, revJetTwoC]
+    exact le_max_left _ _
+  let C : ℝ := 3 / 2 * Λ ^ 4 * (C₂ + Λ * C₁ ^ 2)
+  have hC0 : 0 ≤ C := by
+    dsimp [C]
+    positivity
+  let d : ℝ := Module.finrank ℝ E
+  have hd0 : 0 ≤ d := by
+    dsimp [d]
+    positivity
+  intro x
+  obtain ⟨basis, _hbasis, horth⟩ := centeredBasis (I := I) g₀ x
+  have hinv : MetricInverseInBasis_gen (I := I) g₀ x basis
+      (identityInvMetric (Idx := Fin (Module.finrank ℝ E))) := by
+    simpa [identityInvMetric, diagonalInvMetric] using
+      metricInverseInBasis_of_orthonormal (I := I) g₀ basis horth
+  have hunit : ∀ i, g₀.inner x (basis i) (basis i) = 1 := by
+    intro i
+    rw [horth i i]
+    simp
+  let T : Tensor0SSpace 4 I x :=
+    iterCov (I := I) g₀ 3 (connDiffLoweredField (I := I) g₀ gBase) 1 x
+  have hcompB : ∀ slots : Fin 4 → Fin (Module.finrank ℝ E),
+      |component0S (I := I) basis T slots| ≤ C := by
+    intro slots
+    let X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 0)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 0))⟩
+    let Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 1)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 1))⟩
+    let Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 2)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 2))⟩
+    let W : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _) :=
+      ⟨smoothExtensionTangent (I := I) x (basis (slots 3)),
+        smoothExtensionTangent_contMDiff (I := I) x (basis (slots 3))⟩
+    have hX : X x = basis (slots 0) :=
+      smoothExtensionTangent_eq (I := I) x (basis (slots 0))
+    have hY : Y x = basis (slots 1) :=
+      smoothExtensionTangent_eq (I := I) x (basis (slots 1))
+    have hZ : Z x = basis (slots 2) :=
+      smoothExtensionTangent_eq (I := I) x (basis (slots 2))
+    have hW : W x = basis (slots 3) :=
+      smoothExtensionTangent_eq (I := I) x (basis (slots 3))
+    have hvec : (fun a : Fin 4 => basis (slots a)) =
+        vec4 (I := I) (basis (slots 0)) (basis (slots 1))
+          (basis (slots 2)) (basis (slots 3)) := by
+      funext a
+      fin_cases a <;> simp [vec4]
+    have hval :
+        component0S (I := I) basis T slots =
+          g₀.inner x
+            (covDerivConnDiff (I := I) g₀ gBase X Z Y x) (W x) := by
+      rw [component0S]
+      rw [show (fun a : Fin 4 => basis (slots a)) =
+          vec4 (I := I) (X x) (Y x) (Z x) (W x) by
+        rw [hX, hY, hZ, hW]
+        exact hvec]
+      exact connLowOne_eval (I := I) gBase g₀ X Y Z W x
+    let N : TangentSpace I x :=
+      covDerivConnDiff (I := I) g₀ gBase X Z Y x
+    have hNN : Real.sqrt (g₀.inner x N N) ≤ C := by
+      have h := covDerivConnDiff_gJet_le (I := I)
+        hEq' hrev1 hrev2 (Set.mem_univ x)
+        (basis (slots 0)) (basis (slots 2)) (basis (slots 1))
+      rw [hunit (slots 0), hunit (slots 2), hunit (slots 1)] at h
+      simpa [C, N, X, Y, Z] using h
+    rw [hval]
+    change |g₀.inner x N (W x)| ≤ C
+    calc
+      |g₀.inner x N (W x)| ≤
+          Real.sqrt (g₀.inner x N N) *
+            Real.sqrt (g₀.inner x (W x) (W x)) :=
+        abs_metric_inner_le_sqrt_metric_quadratic
+          (I := I) (M := M) g₀ x N (W x)
+      _ = Real.sqrt (g₀.inner x N N) := by
+        rw [hW, hunit (slots 3)]
+        simp
+      _ ≤ C := hNN
+  have hcard :=
+    normSq0S_le_card_of_component_bound (I := I) g₀ x 4 basis hinv T C hC0 hcompB
+  have hcardval :
+      (Fintype.card (Fin 4 → Fin (Module.finrank ℝ E)) : ℝ) =
+        (Module.finrank ℝ E : ℝ) ^ 4 := by
+    rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+    push_cast
+    ring
+  rw [hcardval] at hcard
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 1) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 1
+            (connDiffSection (I := I) gBase g₀)).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 1) x
+          ((iteratedCovGrad (I := I) g₀ 0 3 1
+            (connDiffLoweredCc (I := I) g₀ gBase)).toSection x) :=
+      (connLow_rfns (I := I) (M := M) g₀ gBase 1 x).symm
+    _ = normSq0S (I := I) g₀ x 4 T := by
+      rw [rfns_iterCovGrad_eq (I := I) g₀ 3 1
+        (connDiffLoweredCc (I := I) g₀ gBase) x,
+        connLow_unit (I := I) g₀ gBase]
+    _ ≤ d ^ 4 * C ^ 2 := by
+      simpa [d] using hcard
+    _ = connDiffOneSqC (E := E) Λ := rfl
+
 /-- Explicit coefficient for the second covariant derivative of the connection
 difference under the class metric-jet bounds. -/
 noncomputable def connDiffTwoC (Λ : ℝ) : ℝ :=
@@ -567,7 +815,9 @@ noncomputable def connDiffTwoC (Λ : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) ^ 5 * C ^ 2
 
 set_option linter.unusedSectionVars false in
-private theorem unifConnDiffTwo
+/-- The class-first pointwise square-norm bound for the second class-metric
+covariant derivative of the fixed-background connection difference. -/
+theorem unifConnDiffTwo
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),

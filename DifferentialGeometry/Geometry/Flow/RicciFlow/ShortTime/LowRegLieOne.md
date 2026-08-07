@@ -3,9 +3,11 @@
 ## Role
 
 This module is the dimension-three, `C3`-compatible producer for the concrete
-order-one DeTurck Lie coefficient.  Its public endpoint is
-`lie1_h2_tame`, with the same affine `H3` dependence used by
-`ricci1_h2_tame`; `lie1_h2` is the one-parameter compatibility wrapper.
+order-one DeTurck Lie coefficient.  Its class-first public endpoint is
+`lie1_h2_unif`; the older metricwise endpoints `lie1_h2_tame` and `lie1_h2`
+remain available as compatibility interfaces.  The uniform theorem fixes the
+background, class parameter, and coefficient functions before the class metric
+varies, and uses only class metric jets through order three.
 
 ## Mathematical route
 
@@ -21,20 +23,33 @@ order-one DeTurck Lie coefficient.  Its public endpoint is
 - The canonical fourteen-piece decomposition of `deTurckLieArm1Coeff` is
   assembled without changing its cancellations or introducing an order-four
   metric jet.
+- `lieFix_h2_unif`, `pbLow_h2_unif`, `psi_h2_unif`, and `piece_h2_unif`
+  replace every metric-local compactness coefficient in that decomposition by
+  a class-first coefficient.  The orientation identity `fix_eq_neg` connects
+  the fixed Lie tensor to the public fixed-background connection producer.
+- `kappaBg_h1_unif` reuses the same class-first fixed-connection and low
+  product bounds to control the full background connection-difference tensor
+  in `H1`.  This is the dimension-three coefficient needed by the uniform
+  `AMix` leaf.
 
 ## Current verification state
 
-The source implementation contains no `sorry`, `admit`, or new axiom and is
-1023 lines, below the hand-maintained-file limit.  It has received static diff
-and dependency/API review only.  A focused Lean check has intentionally not
-been run yet because the shared verification slot is owned by another lane.
-Until that focused check passes, the exact Lean theorem remains unverified and
-the Phase N endpoint remains 0%; this file is machinery, not the endpoint.
+The 1893-line source remains below the hand-maintained-file limit and contains
+no `sorry`, `admit`, or new axiom.  The previously established
+`lie1_h2_unif` check and export remain green.  The newly added
+`kappaBg_h1_unif` now also passes a warning-free focused check, has a fresh
+exact module export, and audits to only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+Progress accounting: `lie1_h2_unif` itself is proved and verified (100%); the
+joint class-first RHS tame producer that consumes it is still unstated (0%);
+`lowreg_bounds_unif` and `ricci_flow_unif_existence` remain unproved (0% each).
+The dedicated uniform-existence supporting machinery is about 99%, while the
+whole HCG project remains about 3%.
 
 ## Next check
 
-Run the lock-aware focused check for `LowRegLieOne.lean`.  If elaboration finds
-a bridge mismatch, keep the same mathematical route and repair only the
-smallest local equality (most likely a definitional reindex/slot-extension
-normalization).  After it checks, import `LowRegLieOne` in the order-one RHS
-path producer and combine it with `ricci1_h2_tame` through `rhs1_h2_of_aux`.
+Verify the `amix_h1_unif` consumer of `kappaBg_h1_unif`, then combine the five
+closed order-zero leaves into the class-first tail producer.  Do not reopen the
+fixed-connection orientation or the fourteen-piece Lie assembly unless a
+downstream interface exposes a genuinely different target.

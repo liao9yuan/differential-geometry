@@ -58,3 +58,12 @@ All field-level endpoints (2 DLb + 2 combined) verified: whole-file `lake env le
 errors, zero new warnings), and direct-`lean` axiom audit (project `LEAN_PATH`) — every endpoint
 depends only on `[propext, Classical.choice, Quot.sound]`.  The DLb insert-level producers are green
 (see `DeTurckVectorFieldL2JetBound.md`).  The `deTurckLieCoeffField` constituent is CLOSED.
+
+## Background-difference bridge (2026-08-06)
+
+Added the public `dlbDiff_jet_le` adapter.  It transports each jet of a
+background difference of `deTurckLieDLbCoeffField` to the matching jet of the
+inserted DeTurck-endomorphism difference with factor `4 * finrank`.  The proof
+uses the existing slot-insert and output-reindex isometries after taking the
+difference, so it adds no metric or perturbation assumptions.  Focused
+verification and the exact exported-module refresh both passed.

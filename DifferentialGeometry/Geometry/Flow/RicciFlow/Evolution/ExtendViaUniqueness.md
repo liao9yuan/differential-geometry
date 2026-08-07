@@ -701,3 +701,30 @@ Residual, in leverage order (full analysis: `ForwardUniqueWiring.md`):
    the compact `M`) of the three constructed pointwise speed families.
 3. **`henergy`** — continuity of the Kotschwar energy up to the closed initial
    edge.
+
+## 2026-08-06 — uniform-existence interface specialized to dimension three
+
+The public `(N)` theorem now takes the explicit hypothesis
+`Module.finrank ℝ E = 3`.  The proved wiring theorem
+`ricci_flow_interior_restart` takes and forwards the same hypothesis.  This
+matches the live low-regularity producer instead of leaving a misleading
+dimension-generic endpoint above dimension-three machinery.
+
+Focused verification of this file passes with only the intentional `(N)`
+`sorry` warning.  Its direct export and the downstream `MaximalTime` export
+also pass.  The interface migration is complete; `(N)` itself remains unproved
+(0%), while its common low fixed-point producer is now verified separately.
+
+## 2026-08-06 — final `(N)` consumer assembly proved
+
+`ricci_flow_unif_existence` no longer has its own proof-body `sorry`.  It calls
+the class-first `lowreg_dt_unif`, converts the pointwise comparison hypotheses
+to `MetricUniformEquivalentOn`, and applies the verified DeTurck gauge-removal
+theorem.  The initial value, one-sided Ricci-flow PDE, interior smoothness, and
+closed-edge continuity fields are all supplied by that composition.
+
+The direct theorem body and the `MaximalTime` consumer pass focused
+verification.  Axiom replay still contains one `sorryAx`, inherited solely
+from `LowRegBgBootstrap.bg_packet_of_solve`.  Therefore the final assembly is
+100%, but the theorem itself remains 0% under the project rule until that
+producer is proved.

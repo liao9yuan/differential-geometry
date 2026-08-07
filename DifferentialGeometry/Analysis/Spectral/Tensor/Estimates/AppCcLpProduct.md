@@ -10,7 +10,9 @@ operator coefficient.  It deliberately does not import the high-order
 
 - `fiberLpFun` is the intrinsic pointwise fibre norm as a real-valued function.
 - `fiberLp_slotExtend` gives the exact `sqrt(dim)` scaling under `slotExtend`.
-- `fiberLp3_le_lp6` is the finite-volume `L6 -> L3` comparison.
+- `fiberLp3_le_6` is the finite-volume `L6 -> L3` comparison with the explicit
+  sixth root of the total volume; `fiberLp3_le_lp6` packages the same estimate
+  existentially for compatibility.
 - `appCc_l2_right` is the `L2 x L-infinity -> L2` arm.
 - `appCc_l6_l3_l2` is the intrinsic Holder `L6 x L3 -> L2` arm.
 
@@ -26,7 +28,8 @@ mixed-`L2` packaging modules actually used by these facts.
 
 ## Verification
 
-Focused source verification passes without local warnings, and the named
-`AppCcLpProduct:olean` target is exported.  The product-cell machinery in this
-file is 100% complete; the downstream `H1 x H2 -> H1` assembly is recorded in
-`H1H2AppCc.md`.
+Focused source verification after exposing the explicit volume factor passed
+with four Lean threads and without local warnings.  The product-cell machinery
+in this file is 100% complete; the class-uniform volume wrapper belongs in the
+HCG compactness layer, while the downstream `H1 x H2 -> H1` assembly is
+recorded in `H1H2AppCc.md`.

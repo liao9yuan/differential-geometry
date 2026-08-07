@@ -161,6 +161,15 @@ the jets, not just norms.  See `UnifCurvaturePack.md` (dated section).
 
 ## 6. Honest progress
 
+2026-08-05 dependency update: this module now imports the light
+`UnifCurvatureSup` core directly and obtains the rank-four order-zero bound from
+`unifCurvSup`. Its old `Λ < 2` argument remains in the public signature for
+compatibility but is no longer consumed by that step. Static import analysis
+confirms the route through `UnifCurvatureJetOne` is now `TsTransport`-free.
+Downstream focused verification awaits export of the already focused-green
+core; the first export attempt was stopped at the memory gate after an
+unexpected broad dependency replay.
+
 * brick 2a-hi (order-1 curvature jet envelope): **~35 %** — split + connection
   term + the order-0 `(0,4)` sup + the fixed-metric sup are banked; the Palatini
   term (the majority of the mathematical content) is 0 %.

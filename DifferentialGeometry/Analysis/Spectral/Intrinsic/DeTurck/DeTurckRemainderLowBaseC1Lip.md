@@ -94,3 +94,10 @@ The exact reverse-orientation identity `LowBaseInternal.fullRev_sub` is now
 public as the canonical algebraic input for the arbitrary fixed-background
 `DLa` pair.  This is an interface exposure only: the existing proof and the
 `revSlot_pair_h2` / `revSlot_bdd_h2` estimates are unchanged.
+
+## 2026-08-06 — stale helper-name collision repaired
+
+The local helper formerly named `reindex_sub` was renamed `reindex_sub_c1` to
+avoid colliding with the exported helper now present in its import closure.
+Its statement and proof are unchanged.  This was a stale-import/name-resolution
+repair only and adds no mathematical assumption or new frontier.

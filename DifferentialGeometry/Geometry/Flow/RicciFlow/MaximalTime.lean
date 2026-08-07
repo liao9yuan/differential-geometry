@@ -191,7 +191,7 @@ theorem extends_of_rmBounded
     (K := (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K') (by positivity) hric hbound_can
   -- (A): interior restart + short-time flow `rr` on `[0, TT)` with `t* + TT > ω`.
   obtain ⟨t_star, ht_star, TT, hreach, rr, hrr0, hrr_smooth, hrr_cont, hrr_pde⟩ :=
-    ricci_flow_interior_restart (I := I) g_fam hαω hell hcov
+    ricci_flow_interior_restart (I := I) hdim g_fam hαω hell hcov
   have ht0 : alpha < t_star := ht_star.1
   have ht1 : alpha ≤ t_star := ht_star.1.le
   have ht2 : t_star < omega := ht_star.2

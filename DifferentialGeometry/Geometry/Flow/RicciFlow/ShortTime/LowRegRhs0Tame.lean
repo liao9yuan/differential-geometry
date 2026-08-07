@@ -294,6 +294,7 @@ private theorem app_h2h1
   simpa only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add] using hsquare
 
+set_option linter.unusedVariables false in
 /-- Affine `H1` bound for the order-zero Ricci connection-difference
 coefficient. -/
 theorem ricci0_h1_tame
@@ -330,6 +331,7 @@ theorem ricci0_h1_tame
     R A hR hA hP2 htop
     (fun i hi x ↦ hpt g₁ P htie hδ_le hδ_nonneg hbound i x)
 
+set_option linter.unusedVariables false in
 /-- Affine `H1` bound for the order-zero `DLa` coefficient. -/
 theorem dla_h1_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -365,6 +367,7 @@ theorem dla_h1_tame
     R A hR hA hP2 htop
     (fun i hi x ↦ hpt g₁ P htie hδ_le hδ_nonneg hbound i x)
 
+set_option linter.unusedVariables false in
 /-- Affine `H1` bound for the change of fixed DeTurck background in `DLb`. -/
 theorem dlbDiff_h1_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -831,6 +834,7 @@ theorem amix_h1_tame
 
 -/
 
+set_option linter.unusedVariables false in
 /-- Affine `H1` bound for the cancellation-preserving `DLb + lieCorr0` tail. -/
 theorem tail_h1_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -948,12 +952,31 @@ theorem tail_h1_tame
       rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 5)]
     _ = (B0 R + B1 R * A) ^ 2 := by rw [hfactor]
 
-/-- A lower endpoint `H2` radius and an independent endpoint `H3` radius give
-the complete affine `H1` bound for `rhsLow0Coeff` along the same convex path. -/
-theorem rhs0_h1_tame
+/-- Fixed convex-path `H2` and `H3` jet certificates give the complete affine
+`H1` bound for `rhsLow0Coeff`. -/
+theorem rhs0_h1_of_conv
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)
-    {δ₀ : ℝ} (hδ₀_nonneg : 0 ≤ δ₀) (hδ₀_lt : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀_nonneg : 0 ≤ δ₀) (hδ₀_lt : δ₀ < 1)
+    (C2 C3 : ℝ) (hC2 : 0 ≤ C2) (hC3 : 0 ≤ C3)
+    (hpath2 :
+      ∀ (T T' : SmoothCcTensor g₀ 0 2) (R : ℝ), 0 ≤ R →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ ≤ R →
+        ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 →
+          (∑ j ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j
+              (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2) ≤
+            (C2 * R) ^ 2)
+    (hpath3 :
+      ∀ (T T' : SmoothCcTensor g₀ 0 2) (R : ℝ), 0 ≤ R →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T‖ ≤ R →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T'‖ ≤ R →
+        ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 →
+          (∑ j ∈ Finset.range 4,
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j
+              (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2) ≤
+            (C3 * R) ^ 2) :
     ∃ B0 B1 : ℝ → ℝ,
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
@@ -974,8 +997,6 @@ theorem rhs0_h1_tame
                 T T' hδ hδ' s)‖ ^ 2) ≤
             (B0 R + B1 R * A) ^ 2 := by
   classical
-  obtain ⟨C2, hC2, hpath2⟩ := convex_h2_jet (I := I) (M := M) g₀
-  obtain ⟨C3, hC3, hpath3⟩ := convex_h3_jet (I := I) (M := M) g₀
   obtain ⟨Br0, Br1, hBr0, hBr1, hric⟩ :=
     ricci0_h1_tame (I := I) (M := M) hDim g₀ hδ₀_lt
   obtain ⟨Bd0, Bd1, hBd0, hBd1, hdla⟩ :=
@@ -1106,5 +1127,35 @@ theorem rhs0_h1_tame
     abel
   rw [hrhs]
   exact hout.trans (hbound.trans_eq (by rw [hfactor]))
+
+/-- A lower endpoint `H2` radius and an independent endpoint `H3` radius give
+the complete affine `H1` bound for `rhsLow0Coeff` along the same convex path. -/
+theorem rhs0_h1_tame
+    (hDim : Module.finrank ℝ E = 3)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀_nonneg : 0 ≤ δ₀) (hδ₀_lt : δ₀ < 1) :
+    ∃ B0 B1 : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T) δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T') δ₀)
+        (R A : ℝ), 0 ≤ R → 0 ≤ A →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ ≤ R →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T‖ ≤ A →
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T'‖ ≤ A →
+        ∀ s : ℝ, s ∈ Set.Icc (0 : ℝ) 1 →
+          (∑ i ∈ Finset.range 2,
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (rhsLow0Coeff (I := I) (M := M) g₀ g_bg
+                T T' hδ hδ' s)‖ ^ 2) ≤
+            (B0 R + B1 R * A) ^ 2 := by
+  obtain ⟨C2, hC2, hpath2⟩ := convex_h2_jet (I := I) (M := M) g₀
+  obtain ⟨C3, hC3, hpath3⟩ := convex_h3_jet (I := I) (M := M) g₀
+  exact rhs0_h1_of_conv (I := I) (M := M) hDim g₀ g_bg
+    hδ₀_nonneg hδ₀_lt C2 C3 hC2 hC3 hpath2 hpath3
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

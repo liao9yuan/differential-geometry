@@ -35,6 +35,26 @@ The chain runs pointwise → `L²` → E4:
 6. `kjet_of_class` — E4's `hjet` slot from `Λ`-class data.
 7. `fibreMorrey_unif_class` — brick E4 with **no abstract input left**.
 
+## 2026-08-06: order-one transfer extension
+
+The file now also exposes the strict two-term window needed by the class-first
+mixed `H¹ → L⁶` route:
+
+* `jetOnePt n Λ Λ' s = √(Λ^(s+1)) · (1 + D₁)`;
+* `kjetOneC n Λ Λ' s = √(2·√(Λⁿ)) · jetOnePt n Λ Λ' s`;
+* `sqrtRfns_one_le`, the pointwise order-`≤ 1` transfer;
+* `jetCross_l2_one`, its cross-volume `L²` face.
+
+This extension consumes only `MetricUniformEquivalentOn univ gBase g₀ Λ`,
+`MetricCovDerivOrderBoundOn univ 1 g₀ gBase Λ'`, and `0 ≤ Λ'`.  In particular,
+it does not smuggle in the reverse first jet or any second metric jet.  Focused
+verification passed without warnings or `sorry`; the two theorem axiom audits
+report exactly `propext`, `Classical.choice`, and `Quot.sound`, with no
+`sorryAx`.  The adapter is 100% complete.  It is one infrastructure input for
+the still-unstated class-first `h1Lp6RS_unif`; that target remains 0% until its
+Lean declaration is added.  `lowreg_bounds_unif` and
+`ricci_flow_unif_existence` also remain theorem-level 0%.
+
 ## The closed constants
 
 ```

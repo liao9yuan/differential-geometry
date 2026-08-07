@@ -18,9 +18,10 @@ The concrete exports are:
 - `vb_h1_tame` and `amix_h1_tame`, preserving the existing exact refolds and
   assigning the unique top derivative to the self-background Koszul factor;
 - `tail_h1_tame`, assembled only after the `DLb + lieCorr0` cancellation;
-- `rhs0_h1_tame`, which transfers independent endpoint spectral `H2` and `H3`
-  bounds to the same convex path and returns the complete
-  `rhsLow0Coeff` estimate in affine form.
+- `rhs0_h1_of_conv`, the canonical assembly theorem from fixed nonnegative
+  `H2`/`H3` convex-path constants and their exact jet certificates;
+- `rhs0_h1_tame`, retained with its original statement as the compatibility
+  wrapper that chooses `convex_h2_jet` and `convex_h3_jet` and invokes the core.
 
 No auxiliary analytic hypothesis, replacement producer, axiom, `sorry`, or
 `admit` was introduced.  The complete metric jet needed by the Koszul factor
@@ -29,9 +30,9 @@ into an exact affine function of `A`.
 
 ## Verification and project accounting
 
-This file was intentionally written source-only while the root agent owns the
-sequential Lean slot.  Focused verification has not yet been run, so none of
-these declarations is counted as checked until that verification succeeds.
+The core/wrapper extraction is source-complete, but focused verification is
+pending because the shared sequential Lean slot is unavailable.  The new core
+and compatibility wrapper are therefore not counted as checked yet.
 
 The exact theorem `ricci_flow_unif_existence` remains 0% until its unchanged
 public statement is proved and verified.  This file advances only the

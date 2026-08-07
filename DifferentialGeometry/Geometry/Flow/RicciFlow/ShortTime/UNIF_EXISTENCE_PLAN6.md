@@ -63,6 +63,119 @@ every append (concurrent-append collisions are routine).
 
 ---
 
+## 190. Structural tame chain and class-first low bounds closed (2026-08-06)
+
+The structural chain left open in section 189 is now complete.  The following
+dimension-three, class-first declarations are focused-check green, directly
+exported, and have axiom audits containing only `propext`,
+`Classical.choice`, and `Quot.sound`:
+
+- `rem_h1_unif` combines the uniform top, lower, RHS0, and RHS1 path packets
+  with the exact mixed-remainder split.
+- `smoothN_h1_unif` and `coreN_tame_unif` transport that estimate through the
+  spectral smooth nonlinearity and dense core.
+- `coreN_outer_unif` freezes the affine coefficients at an outer radius, and
+  `lowRegN_outer_unif` performs the dense extension to the complete lower-state
+  ball without changing the three-arm constants.
+- `exists_lowBounds` combines `exists_lowRealize`, `exists_lowZero`, and the
+  dense tame packet into one literal `LowRegBoundData` selected before the
+  class metric.
+- `lowreg_bounds_unif` projects that strong packet to the requested
+  `IsLowBoundsCap` common-envelope interface.
+- `lowreg_solve_unif` composes that envelope with `unif_solve_of_caps`, giving
+  one positive horizon and an `IsLowSolveBg g gBase` fixed-point output for
+  every class metric and every smaller positive time.
+
+This closes the producer design requested by the consult: all scalar choices
+are now made before `g`, the DeTurck background is the fixed `gBase`, and the
+varying-metric input stops at background-covariant metric jets through order
+three.  No all-rung gate, new foundational class, or consumer-side assumption
+was introduced.
+
+The public `(N)` theorem and `ricci_flow_interior_restart` now carry the honest
+dimension-three hypothesis, propagated through their only Lean consumer in
+`MaximalTime`.  The next genuine frontier is no longer horizon selection or a
+consumer wrapper: it is a horizon-preserving realization/bootstrap theorem
+from `IsLowSolveBg g gBase` to a smooth geometric Ricci--DeTurck family with
+`JointChartGramSmooth`.  Existing `lowreg_joint_of_re` cannot be called
+directly because its all-order packet is self-background and materially
+richer.  After that bridge, the already proved DeTurck gauge removal and final
+`ricci_flow_unif_existence` assembly are local.
+
+**Honest denominators.**  Every declaration listed above: **100%**.
+The actual producer `lowreg_bounds_unif` and low solver
+`lowreg_solve_unif`: **100%**.  Their dedicated
+low-regularity tame/realization/zero machinery: **100%**.  The downstream
+`lowreg_dt_unif`: **0%** until its theorem is stated and proved from this
+packet; `ricci_flow_unif_existence`: **0%**; whole HCG theorem closure remains
+approximately **3%**.  Campaign changes remain uncommitted.
+
+---
+
+## 191. Same-horizon H2 representative exported from the uniform low solve (2026-08-06)
+
+The completed class-first tame/bounds chain was replayed under the current
+resource discipline: `MetricLoweringTower`, `morreyRS_unif`,
+`coreN_tame_unif`, and `LowRegUnifBounds` all pass focused checks with one Lean
+thread and the 6 GB memory cap, with no overlapping Lean process.
+
+`lowSolve_cross` is the first concrete producer inside the remaining bootstrap.
+From the supplied fixed-background `IsLowSolveBg` it constructs the canonical
+`duhamelCross` on the original horizon, identifies its lower carrier with the
+given maximal-regularity solution, and promotes the almost-everywhere lower-
+state bound to an every-time `H2` bound on `Icc 0 T` by `crossRepr_ball`.
+The theorem is focused-green.  It introduces no new assumption and does not
+reselect or shorten the common time.
+
+This is not yet an order-two maximal-regularity lift.  The next honest producer
+must construct that fixed-background adjacent-scale lift on the same horizon;
+only then can the existing all-order mass/jet assembly be generalized from
+self-background `(g,g)` to `(g,gBase)`.
+
+**Honest denominators.**  The four replayed class-first producers and
+`lowSolve_cross`: **100%**.  The fixed-background order-two lift and
+`bg_packet_of_solve`: **0%**.  Consequently `ricci_flow_unif_existence` remains
+**0%** theorem completion; whole HCG project remains approximately **3%**.
+
+---
+
+## 192. Bootstrap interface corrected; arbitrary-background AMix H2 pair landed (2026-08-07)
+
+The previous claim that the `bg_packet_of_solve` interface was settled is
+withdrawn.  `IsLowSolveBg` alone does not carry the constants or the certificate
+needed by the implemented adjacent-scale contraction.  In particular, the
+lift route requires a full background-aware high/low `A1` affine packet,
+background-aware `A2` contraction data, a force margin, and
+`T ≤ lowregLiftHorizon' c Z`.  The class-first time must be capped by this lift
+horizon before the class metric varies.  The corrected design will package
+those witnesses explicitly and separate low-solve-to-realization from
+realization-to-closed-slab-bootstrap.
+
+The first genuine analytic brick of that correction is now complete:
+
+- `kappa_pair_h2` proves the exact self-background Koszul two-state estimate;
+- `pbLow_h2_mul` exposes the linear fixed-background pairing constant at the
+  coefficient-jet layer;
+- the new sibling `LowRegBgC0PairH2.lean` proves `amixBg_pair_h2`, the full
+  arbitrary-background mixed order-zero correction in the same
+  `B0 * D3 + B1 * N + B1 * A * N` currency as `c1_bg_pair_h2`.
+
+The mixed arm is one of three pointwise order-zero arms.  The next smallest
+producer is the arbitrary-background `DLa` `H2` pair; `DLb + Insert` still
+appears to require a higher moving-trace/omega producer.  Only after all three
+arms are assembled can the background correction be integrated in time and
+used in the explicit high `A1` packet.
+
+**Honest denominators.**  `kappa_pair_h2`, `pbLow_h2_mul`, and
+`amixBg_pair_h2`: **100%**.  Full arbitrary-background pointwise order-zero
+`H2` pair endpoint: unstated, **0%** (one of three arms complete).  Corrected
+explicit lift-package endpoint: unstated, **0%**; its dedicated machinery is
+approximately **65%**.  `bg_packet_of_solve` and
+`ricci_flow_unif_existence`: **0%**.  Whole HCG project remains approximately
+**3%**.
+
+---
+
 ## №167 (executor, 2026-08-05) — **F2 FATOU-IDENT DONE.**  The rung now rides
 ## the PROJECTED sequence: `hUcont`/`hUderiv`/`hUinit` all land, and the
 ## endpoint `lowregFatouE3` is Fatou's `hbound`, sorry-free
@@ -711,6 +824,412 @@ toward `(N)`: approximately **90%**.  `lowreg_dt_unif`: **0%**;
 
 ---
 
+## 184. Final endpoint isolated to one background bootstrap producer (2026-08-06)
+
+The class-first low solve is now connected all the way to the public Ricci-flow
+endpoint, with one deliberately visible analytic leaf.
+
+- `stateRad_le_P4` and `realize_h2_bound` replace the opaque
+  `hs2_opBound_at_two.choose` comparison by the explicit constant
+  `C = 1 / K.realize`.
+- `BgSmoothPacket g g_bg K T` is the exact closed-slab order-two packet consumed
+  by the existing joint-smoothness endpoint.
+- `dt_of_bg_packet`, `lowreg_dt_of_solve`, and `lowreg_dt_unif` are proved on the
+  original common horizon.
+- `ricci_flow_unif_existence` is now a proved consumer composition through the
+  existing DeTurck gauge removal; `MaximalTime` remains green.
+
+The only proof-body `sorry` in the direct route is
+`LowRegBgBootstrap.bg_packet_of_solve`.  It must bootstrap
+`IsLowSolveBg g gBase K` from order one to an order-two carrier on the same
+horizon and provide its all-order closed-slab mode packet.  The already proved
+`lowreg_allOrderJet` cannot simply discharge it: that theorem consumes the much
+richer `IsRealizedTwo` package, whose producer and forcing identities are
+self-background `(g,g)`, whereas the uniform lane is fixed-background
+`(g,gBase)`.
+
+The qinz short-time-existence source confirms that the intended endpoint is
+genuinely smooth up to `t = 0`: its `JointChartGramSmooth` predicate is joint
+smoothness on `Icc 0 T`.  It does not close this uniform leaf because its
+quantifier order is per metric (`∀ g₀, ∃ T`) and its construction may choose a
+smaller time after the metric and solution are known.
+
+Verification status: the explicit H2 adapter, packet endpoint, direct module
+exports, final `(N)` consumer, and `MaximalTime` focused checks pass.  The
+axiom path of `(N)` has one `sorryAx`, traced solely to
+`bg_packet_of_solve`.
+
+**Honest denominators.**  Class-first bounds and low solve: 100%.  Packet-to-
+DeTurck endpoint and gauge/final assembly: 100%.  The theorem
+`bg_packet_of_solve`: 0% until proved.  Consequently
+`ricci_flow_unif_existence`: 0% theorem completion despite its finished
+consumer body.  Whole HCG project: approximately 3%.
+
+---
+
+## 189. Five-piece order-zero tail and class-first RHS0 path closed (2026-08-06)
+
+The last five cancellation-preserving order-zero leaves are now assembled by
+`tail_h1_unif`.  Its base and slope functions are selected before the class
+metric, it consumes only class metric jets through order three, and it reuses
+the exact `tail_h1_parts` decomposition.  The result is focused-green, directly
+exported, and its axiom census contains only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+`rhs0_h1_parts` exposes the supplied Ricci/DLa/tail assembly that had previously
+been hidden inside the metricwise `rhs0_h1_of_aux`.  The actual class-first
+`rhs0_h1_unif` now combines `exists_convex_jets`, `ricci0_h1_unif`,
+`dla_h1_unif`, and `tail_h1_unif` without commuting any existential across the
+class metric.  `rhs0_path_unif` transports the same affine functions through
+the interval integral.  Both endpoints are focused-green, directly exported,
+and axiom-audited with only the three standard axioms above.
+
+The next exact chain is structural rather than a new estimate:
+`rem_h1_unif` -> `smoothN_h1_unif` -> `coreN_tame_unif` ->
+`coreN_outer_unif` -> `lowRegN_outer_unif`.  It must replay the existing
+per-metric transports with the newly class-first top, lower, RHS0, and RHS1
+witnesses; calling the old existential wrappers would restore the wrong
+quantifier order.
+
+**Honest denominators.**  The five-piece tail, order-zero RHS coefficient, and
+order-zero path endpoints are each **100%**.  Every theorem in the structural
+chain named above is currently unstated and therefore **0%**.  The actual
+`lowreg_bounds_unif`, `lowreg_dt_unif`, and `ricci_flow_unif_existence` remain
+**0%**.  Dedicated low-regularity supporting machinery toward `(N)` remains
+approximately **99%**; whole HCG theorem closure remains approximately **3%**.
+Campaign changes remain uncommitted.
+
+---
+
+## 184. Self top coefficient, fixed-curvature action, and class-first RHS1 landed (2026-08-06)
+
+The representation and integration chain left open after section 183 is now
+closed.  Every declaration below is focused-green, warning-free, directly
+exported, and has a temporary axiom census containing only `propext`,
+`Classical.choice`, and `Quot.sound`:
+
+- `phiSelfC`, `phiSelfC_nonneg`, and `phiSelf_grid` give an explicit
+  dimension-only pointwise jet cap for
+  `deTurckPhiMetTotal g gBase g - ricciArmPrincipalCoeffPure g g`.  The cap is
+  `34 * dim^6` at order zero and zero at every positive order.
+- `phiCurv_jet_unif` integrates that self coefficient together with the
+  class-first order-zero/one grid for `gradSlotCurvCoeff`.  It deliberately
+  uses `appRS_h2_unif` in the `H2 operator x H1 curvature passenger -> H1`
+  orientation.  Consequently it consumes metric jets only through order three;
+  the stronger `H2 x H2` wrapper would incorrectly require a second derivative
+  of curvature and fourth metric jets.
+- `fixed_curv_h1_unif` composes the coefficient cap with `appCc_h1_unif` and
+  selects one spectral `H2 -> H1` action constant before the class metric.
+- `rhs1_h2_unif` selects the convex-path packet and both Ricci/Lie order-one
+  coefficient functions before the class metric, then reuses the public
+  `rhs1_h2_of_aux` assembly.  This removes the quantifier leak retained by the
+  older compatibility theorem `rhs1_h2_of_unif`.
+
+The next routine integrations are the path-integrated sibling of
+`rhs1_h2_unif` and the class-first top-path split.  The next genuine order-zero
+RHS leaf is lower: arbitrary-rank class-first moving traces are needed for the
+insertion, vector-bilinear, and mixed Lie corrections, while DLa still needs a
+public class-first pointwise factor grid in
+`DeTurckLieKernelL2JetBound.lean`.  No metricwise existential wrapper is counted
+as a substitute.
+
+Normal focused checks, direct exports, and axiom audits used four Lean threads
+under the 6 GB cap, with one elaboration process at a time.  The temporary
+orphaned elaboration lock caused by an externally timed-out wrapper was verified
+against its dead PID and moved to a recoverable quarantine path before work
+continued.
+
+**Honest denominators.**  The four theorem bricks listed above: **100%**.
+Class-first joint tame producer: still unstated, therefore **0%**.  Actual
+`lowreg_bounds_unif`: **0%**.  Dedicated low-regularity supporting machinery
+toward `(N)`: approximately **99%**.  `lowreg_dt_unif`: **0%**;
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**.  Campaign changes remain uncommitted.
+
+---
+
+## 185. Integrated RHS1/top path and first order-zero leaf landed (2026-08-06)
+
+The two routine integrations left after section 184 and the first genuine
+order-zero leaf are now closed.  Every declaration below is focused-green,
+warning-free, directly exported, and has an axiom census containing only
+`propext`, `Classical.choice`, and `Quot.sound`:
+
+- `rhs1_path_unif` carries the class-first affine order-one coefficient through
+  `path_jetL2_le` without changing its two coefficient functions.
+- `top_path_h1_unif` combines `top_path_dev_unif`, `appCc_h23_unif`, and
+  `fixed_curv_h1_unif`; one radius and both action constants are selected
+  before the class metric varies.
+- `cometricTrace_rfns_p`, `trace_grid_unif p`, and `trace_h2_unif p` provide
+  the arbitrary-rank moving-trace chain.  The generic self-trace proof uses an
+  explicit source-slot three-cycle and the exact dimension factor from slot
+  extension.  Existing rank-two APIs remain compatibility specializations.
+- `h1_low_unif` integrates the shorter `range (i+2)` pointwise window using
+  only perturbation `H2`; `connSec_h1_unif` instantiates it for the moving
+  connection difference.
+- `insert_h1_unif` combines the rank-one moving trace, the fixed-background
+  connection packet, the two class-first application estimates, and the exact
+  insertion factorization.  Class metric jet three is used only by the fixed
+  connection term; the perturbation remains `H2`-only.
+
+Normal checks used four Lean threads under the 6 GB cap, one elaboration
+process at a time.  The only source repair was local: numeric `Fin` coercions in
+the generic trace permutation were replaced by explicit indices so Lean did
+not have to normalize modulo-valued numerals at arbitrary rank.
+
+The active order-zero work now splits cleanly.  The curvature arm is an
+`H2` moving trace acting on an `H1` curvature passenger.  DLa needs the real
+finite-window class-first pointwise factory in its owning lower layer.  VB and
+AMix are being audited against the generic trace package.  No metricwise
+existential wrapper is counted as a class-first producer.
+
+**Honest denominators.**  The theorem bricks listed above: **100%** locally.
+Class-first joint tame producer: still unstated, **0%**.  Actual
+`lowreg_bounds_unif`: **0%**.  Dedicated low-regularity supporting machinery
+toward `(N)`: approximately **99%**.  `lowreg_dt_unif`: **0%**;
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**.  Campaign changes remain uncommitted.
+
+---
+
+## 186. Three-dimensional lowering/Morrey replayed and DLa pointwise factory landed (2026-08-06)
+
+The two mixed-tensor producers requested for the dimension-three public route
+have been replayed against the current worktree rather than accepted from old
+notes or stale artifacts:
+
+- `lowerCc_jet_rfns` and `lowerCc_jet_norm` give the exact order-zero-through-two
+  lowering isometry needed to reuse the covariant Morrey stack for mixed
+  tensors.
+- `morreyRS_unif` chooses its coefficient before the class metric and retains
+  generic tensor valence while fixing `finrank = 3` at the public interface.
+
+Both files are focused-green, exactly exported, and axiom-audited with only
+`propext`, `Classical.choice`, and `Quot.sound`.
+
+The DLa lower-layer pointwise factory is now also verified.  The old owner
+exports only a small `DLaUniformInternal` extraction surface; the proof itself
+lives in `DeTurckLieKernelL2JetBoundUniform.lean`.  Its public
+`dla_grid_of_conn` has the class-first order
+`δ₀,F → ∃ C → ∀ g₀ g_bg g₁ P`, consumes a fixed connection cap only for
+`j < 3`, and produces the DLa coefficient grid for `i < 2`.  The owner and
+uniform files are focused-green, their exports are current, and the public
+producer's axiom audit contains only the standard three axioms.
+
+All verification in this section used one Lean process, one Lean thread, and a
+6144 MB cap.  One exact export outlived its external wrapper timeout; its exact
+owned process tree was monitored until natural exit, the stale wrapper lock was
+quarantined recoverably, and the fresh target was subsequently imported by the
+axiom audit.  No timeout is counted as green by itself.
+
+The next integration is the three-dimensional spectral `H1` DLa cap obtained by
+combining this pointwise factory with the existing fixed-background connection
+class cap and `h1_grid_unif`.  It is recorded as landed in §187 below.
+
+**Honest denominators.**  `MetricLoweringTower`, `morreyRS_unif`, and
+`dla_grid_of_conn`: **100%**.  The spectral/class DLa integration is accounted
+separately in §187.  Class-first joint tame producer: still unstated, **0%**.
+Actual `lowreg_bounds_unif`: **0%**.  Dedicated low-regularity supporting
+machinery toward `(N)`: approximately **99%**.  `lowreg_dt_unif`: **0%**;
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**.  Campaign changes remain uncommitted.
+
+## 187. Three-dimensional class-first DLa `H1` cap landed (2026-08-06)
+
+The reusable fixed-connection pointwise family `connFix_grid_unif` and the
+spectral adapter `dla_h1_unif` are now implemented and verified.  The former
+packages the order-zero-through-two connection-difference estimates under one
+family `F`, chosen from `(gBase, Λ)` before `g₀` varies.  The latter composes
+that family with `dla_grid_of_conn` and the dimension-three `h1_grid_unif`.
+
+The resulting affine coefficient functions are chosen from
+`(gBase, Λ, δ₀)` before the class metric varies.  The exact budget is class
+metric jets through order three, perturbation low jets through order two, and
+one separate perturbation order-three top bound.  There is no class metric jet
+four and no curvature-jet input.
+
+The fixed-connection module and `UnifDLaH1.lean` are focused-green without
+local warnings and exactly exported using one Lean process, one Lean thread,
+and the 6144 MB cap.  `dla_h1_unif` has an explicit axiom census containing
+only `propext`, `Classical.choice`, and `Quot.sound`.
+
+The next smallest missing analytic branch is the order-zero cancellation tail
+`DLb + lieCorr0`; top-path, lower-path, and RHS1 already have class-first
+producers.  The whole joint tame producer is not counted until its public Lean
+statement and proof exist.
+
+**Honest denominators.**  `dla_h1_unif`: **100%**.  Dedicated DLa
+pointwise-to-`H1` machinery: **100%**.  Order-zero cancellation tail:
+**0%** until stated and proved.  Class-first joint tame producer: still
+unstated, **0%**.  Actual `lowreg_bounds_unif`: **0%**.  Dedicated
+low-regularity supporting machinery toward `(N)`: approximately **99%**.
+`lowreg_dt_unif`: **0%**; `ricci_flow_unif_existence`: **0%**; whole HCG
+theorem closure: approximately **3%**.  Campaign changes remain uncommitted.
+
+## 188. Class-first `lc0VB` producer verified (2026-08-06)
+
+The next order-zero leaf is isolated in `UnifVBH1.lean`.  Its public
+`vb_h1_unif` interface fixes dimension three and chooses both affine
+coefficient functions from `(gBase, Λ, δ₀)` before the class metric varies.
+The class metric budget is exactly jets one and two; the perturbation input is
+the low `H2` radius plus one separate third-derivative top bound.
+
+The implementation replays the cancellation-compatible `vb_tame` factorization
+using class-first moving traces, connection lowering, and mixed application
+packages.  In particular, the fixed cometric trace inside `ipLowCc` is bounded
+by the uniform moving-trace package at the zero perturbation, rather than by
+the old compactness witness chosen after `g₀`.
+
+The local replay exposed only proof-shape defects: an unsimplified `|0|`, a
+private scalar-jet helper, a zero-tensor jet incorrectly delegated to the
+zero-th-derivative simp lemma, and a fixed scalar-square normalization.  These
+are now closed using `abs_zero`, `iteratedCovGrad_smul_real`, and `mul_pow`.
+The ordinary focused check and the exact module export are green under the
+single-thread 6 GB discipline.  A direct axiom audit of `vb_h1_unif` reports
+only `propext`, `Classical.choice`, and `Quot.sound`, with no `sorryAx`.  A
+persistent LSP probe was also attempted after repeated local diagnostics, but
+timed out without actionable proof state and was shut down before verification.
+
+**Honest denominators.**  `vb_h1_unif`: **100%**.  Order-zero cancellation
+tail: approximately **15%** (one verified leaf; the remaining leaves and their
+joint assembly are open).  Class-first joint tame producer: unstated, **0%**.
+Actual `lowreg_bounds_unif`: **0%**.
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**.  The next action is the smallest remaining class-first cancellation
+leaf, preserving the same affine low-radius plus separated-top interface.
+
+---
+
+## 180. Explicit convex-jet packages landed; memory gate paused class instantiation (2026-08-05)
+
+The next independent producer from section 179 is now split at the correct data/proof boundary.
+
+- `CurvActionData` stores the rank-two and rank-three order-zero curvature-action constants;
+  `IsCurvActionUnif` fixes them before the class metric varies.
+- `ConvexJetData` stores the resulting finite `H²` and `H³` coefficients;
+  `IsConvexJetUnif` records both squared covariant-jet estimates along every convex tensor path.
+- `convex_h23_of_act` and `convex_jets_of_act` convert the first package to the second using
+  `covsum_hs_two`, `covsum_hs_three`, and spectral-norm convexity.  Both are focused-green,
+  warning-free, contain no `sorry`, and their temporary axiom census reports only `propext`,
+  `Classical.choice`, and `Quot.sound`.
+
+The intended metric-class adapter is routine composition of `unifCurvAction0_of` and
+`unifCurvAction3_of`, but its old import closure reached the unrelated residual coefficient
+tower and the missing `TsTransport.olean`.  The dependency boundary has therefore been corrected:
+the canonical order-zero block was extracted into `UnifCurvatureSup.lean`, the old
+`UnifCurvatureJetBound.lean` retains only its compatibility layer, and
+`UnifCurvatureJet1Diff.lean` now imports the light core and calls `unifCurvSup`.  The moved and
+retained blocks were mechanically compared, the new core is focused-green, and static import
+analysis confirms that the chain through `UnifCurvActionZero` is now `TsTransport`-free.
+
+Downstream verification remains paused.  Exporting the new core unexpectedly replayed 9,276
+jobs and entered `ConnectionDifferenceArmRfnsBound`; the memory guard stopped the owned process
+tree when free physical memory reached 912 MB.  The deleted dependency artifact was restored
+from the audit worktree after exact source-hash and Lean-toolchain checks.  There is no remaining
+Lean/Lake process or elaboration lock.  This is a performance/verification blocker, not a failed
+proof.  Under the fail-closed rule, resume only after explicit user instruction and restart the
+interrupted export from the beginning; do not retry under the same memory/dependency conditions.
+
+The next declaration after safe downstream verification is `class_curv_actions`, followed by
+the public class-first `convex_h23_unif` wrapper.  Only then should the RHS tame consumers replace
+their metric-late convex `H²`/`H³` choices.
+
+**Honest denominators.** Explicit curvature-action-to-convex package layer: **100%**.
+Metric-class instantiation of that package: **0%** as a declaration. Class-first joint
+H3-to-H1 / H2-to-H1 tame producer: **0%**. Actual `lowreg_bounds_unif`: **0%**.
+Dedicated low-regularity supporting machinery toward `(N)`: approximately **94%**.
+`lowreg_dt_unif`: **0%**; `ricci_flow_unif_existence`: **0%**; whole HCG theorem closure:
+approximately **3%**. Campaign changes remain uncommitted.
+
+---
+
+## 179. Class-first H2/H3 single-tensor grid package closed (2026-08-05)
+
+The routing correction in section 178 is now implemented. The class-first
+single-tensor grid branch is distinct from the two-arm product grid used by
+`appCc_grad_l2`.
+
+- `rankTwoGridC` / `rank_two_grid_unif` combine the existing rank-two Morrey
+  cap, class-first mixed GN coefficient, and the per-cell
+  `grid_prod_int_le`. Their constant is chosen before the metric and tensor
+  vary and consumes only metric jets of orders one and two.
+- `h2GridC` / `h2_grid_unif` cover `k <= 2`; `k = 0` is the honest total-volume
+  branch from `volumeReal_cross`, while positive orders use the new producer.
+- `h3TopGridC` / `h3_top_grid_unif` cover the total-order-three grid with the
+  lower H2 radius separated from the top third-derivative bound.
+
+All six declarations are focused-green without warnings and contain no
+`sorry`. A temporary axiom census for the three grid theorems reports only
+`propext`, `Classical.choice`, and `Quot.sound`. The exact module artifact is
+not refreshed: a guarded target build
+replayed the large dependency closure, entered
+`ConnectionDifferenceArmRfnsBound`, and crossed the physical-memory floor at
+about 1.1 GB free. The interrupted dependency artifact was restored from an
+aligned worktree only after exact source-hash and Lean-toolchain equality were
+checked. This is a verification/performance boundary, not a theorem error;
+do not rerun the same export until the memory/dependency situation changes.
+
+The next source-level analytic adapter is the class-first finite summation
+around `grid_h1_le` and `grid_h2_le`. The independent `appCc_grad_l2` branch
+still needs the class wrapper around the explicit two-arm coefficient after
+that lower module can be exported safely.
+
+**Honest denominators.** Class-first positive-order/H2/H3 single-tensor grid
+lane: **100%**. Class-first joint H3-to-H1 / H2-to-H1 tame producer: **0%**.
+Actual `lowreg_bounds_unif`: **0%**. Dedicated low-regularity supporting
+machinery toward `(N)`: approximately **94%**. `lowreg_dt_unif`: **0%**;
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**. Campaign changes remain uncommitted.
+
+---
+
+## 178. Finite H3 comparison and class-first GN producer closed (2026-08-05)
+
+The first two analytic leaves identified by the joint-tame audit are now
+explicit and verified.
+
+- `covsum_hs_three` gives the finite H3 covariant-sum comparison without an
+  all-order curvature family.  It consumes only `IsCurvAction0 g s K0` and
+  `IsCurvAction0 g (s + 1) K1`.  The class curvature lane now supplies the
+  required fixed ranks two and three through `unifCurvAction0_of` and
+  `unifCurvAction3_of`.
+- The single-metric mixed-valence interpolation theorem now exposes the exact
+  coefficient `gnRsConst n k sqrt(vol)`, while preserving its old existential
+  API as a compatibility wrapper.
+- `UnifGagliardoNirenberg.lean` proves the two-sided real-volume/radius adapters,
+  an explicit class cap for both `sqrt(vol)` and its reciprocal, and
+  `gn_rs_unif`.  Its constant is chosen before the class metric, tensor
+  valences, tensor, and interpolation rung.
+
+The new class-first GN chain is focused-green without warnings.  A temporary
+in-source axiom census reports only `propext`, `Classical.choice`, and
+`Quot.sound`.  The large GN source and its one directly missing dependency were
+refreshed with `.olean`-only targets; attempts to refresh the new downstream
+module were stopped when free physical memory fell below 1 GB, so no broader
+targeted-build claim is made for that module.
+
+The two-arm grid used directly by `appCc_grad_l2` now exposes the explicit
+per-metric coefficient `gridRsConst`; its old existential API is a compatibility
+wrapper and the refactored source is focused-green.  The remaining class wrapper
+is finite-sum monotonicity from `gnClassC`.  Its `.olean`-only refresh was stopped
+at the memory threshold, so the downstream wrapper has not yet been added.
+
+Routing correction: `h2_grid_int` and `h3_top_grid_int` do not call the two-arm
+theorem.  They use GN directly plus the supercritical rank-two pointwise bound.
+Their common next producer is a positive-order single-tensor grid theorem built
+from `morreyTwoC_spec` and `gn_rs_unif`; the `k = 0` H2 case is a separate
+volume branch.  No new Sobolev theorem is needed, but these are distinct
+consumer shapes and must not be counted as closed by the two-arm refactor.
+
+**Honest denominators.**  `covsum_hs_three`: **100%**.  Class-first mixed GN
+kernel: **100%**.  The joint H3-to-H1 / H2-to-H1 tame producer itself remains
+unstated and therefore **0%**.  Actual `lowreg_bounds_unif`: **0%**.  Dedicated
+low-regularity supporting machinery toward `(N)`: approximately **93%**.
+`lowreg_dt_unif`: **0%**; `ricci_flow_unif_existence`: **0%**; whole HCG theorem
+closure: approximately **3%**.
+
+---
+
 ## №176 (Codex executor, 2026-08-05) — common-time package split LANDED;
 ## `lowreg_gate_unif` removed from the lifetime path
 
@@ -824,6 +1343,161 @@ common-time package and conditional cap assembly: **100%**.  Realization face:
 **100%**.  Zero-state face: **100%**.  Class-first tame producer: **0%**.
 Actual `lowreg_bounds_unif`: **0%**.  Dedicated low-regularity supporting
 machinery toward `(N)`: approximately **92%**.  `lowreg_dt_unif`: **0%**;
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**.  Campaign changes remain uncommitted.
+
+---
+
+## 181. Three-dimensional class-first application chain closed (2026-08-06)
+
+The public uniform-existence interface is now intentionally specialized to
+dimension three.  Generic tensor valences are retained only where that makes
+the implementation and the finite consumer table smaller.
+
+The following class-first producer chain is focused-green, warning-free,
+directly exported, and has temporary axiom censuses containing only `propext`,
+`Classical.choice`, and `Quot.sound`:
+
+- `appCc_h23_unif` closes the rank-`(4,2)` coefficient acting on `∇²U` from
+  spectral `H³` to spectral `H¹`.
+- `fiberLp3_le_6` exposes the exact finite-volume `L⁶ -> L³` factor, and
+  `fiberLp3_le_6_unif` caps it uniformly over the metric class without metric
+  jet assumptions.
+- `appRS_h1_of` is the supplied-provider mixed `H¹ × H² -> H¹` kernel.  The
+  old metricwise `appRS_h1_h2_h1` now calls this kernel; its duplicated proof
+  body was removed.
+- `appRS_h1_unif` is generic in tensor valence but fixed to dimension three.
+  It consumes only metric jets of orders one and two and covers all four live
+  mixed consumers plus the lower-path `(0,2,2)` specialization.
+- `appCc_h1_unif` converts that specialization from intrinsic mixed `H¹` to
+  the exact spectral rank-two `H¹` norm and uses the finite `H²` covariant-jet
+  comparison for the passenger.
+- `lower_jet_unif` assembles the lower order-zero and differentiated arms with
+  the coefficient `C₀ + C₁`.  The extra metricwise Morrey enlargement in the
+  old `lower_jet_h1` is no longer present because both class cells produce the
+  needed pointwise bounds internally.
+
+Ordinary verification for these medium files used four Lean threads with the
+6 GB Lean memory cap.  One short client timeout orphaned only its elaboration
+lock after the owned Lean process had already exited; the confirmed stale lock
+was moved recoverably before restarting the check.  No overlapping Lean
+processes were run.
+
+The next genuine frontier is no longer the lower application layer.  It is the
+class-first cap/floor producer for the numerical witnesses still chosen after
+`g` in the top-path and RHS tame packets.  Read-only audits are resolving the
+exact smallest declaration before another wrapper is added.
+
+**Honest denominators.**  Every declaration listed above: **100%**.
+Class-first joint tame producer: still unstated, therefore **0%**.  Actual
+`lowreg_bounds_unif`: **0%**.  Dedicated low-regularity supporting machinery
+toward `(N)`: approximately **97%**.  `lowreg_dt_unif`: **0%**;
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**.  Campaign changes remain uncommitted.
+
+---
+
+## 182. Class-first top deviation and explicit coefficient packages landed (2026-08-06)
+
+The top-path constant leak has been reduced to the fixed curvature commutator.
+Every declaration in the following chain is focused-green, warning-free,
+directly exported, and has a temporary axiom census containing only `propext`,
+`Classical.choice`, and `Quot.sound`:
+
+- `invDiff_zero_unif`, `invDiff_slot_unif`, and `invDiff_grid_unif` select the
+  inverse-metric derivative-grid constants before both metrics vary.
+- `appRS_h22_unif` supplies the dimension-three mixed `H² × H² → H²`
+  product cell needed by the order-one coefficient packet.
+- `inv_coeff_h2_unif` selects one positive spectral `H²` radius and one
+  pointwise/two-jet inverse-coefficient constant before the class metric.
+- `h1_grid_unif` and `h2_tame_unif` are the class-first finite-summation
+  adapters for the exact affine grid conclusions used by the RHS packets.
+- `cometricTrace_rfns` bounds the self-cometric double trace by `dim^6`.
+  The explicit extraction interfaces `pcc_rfns_of_bound` and
+  `ricci_sub_rfns` then avoid the old metricwise compactness witness.
+- `PrincipalCoeffDimBound` gives pointwise and `L²` jet bounds for the
+  DeTurck principal, Ricci principal-difference, and trace-Hessian-difference
+  coefficients with explicit constants `appCcGdiag i * dim^8` and
+  `(10 / 4) * appCcGdiag i * dim^8`.
+- `phi_dev_h2_unif` combines those constants with `inv_coeff_h2_unif` and
+  selects the unintegrated top-deviation radius and coefficient before `g`.
+- `top_path_dev_unif` transports the same class-first estimate through the
+  canonical coefficient path integral.
+
+The exact remaining top-path obstruction is now representation-level rather
+than analytic.  `gradSwapCurvCoeff` is an opaque choice from the curvature
+commutator specification.  Uniform `Rm` and `∇Rm` bounds already exist from
+metric jets through order three, but the library lacks a public canonical
+readout and one-derivative theorem identifying this coefficient with the
+slot-free curvature operator.  The smallest next tensor API is the canonical
+`gradSlotCurvCoeff` together with its fibre readout and `gradSlot_cov_eval`;
+after that, `phiCurv_jet_unif` feeds `appCc_h1_unif` directly.
+
+In parallel, the RHS branch is being reduced at its primitive coefficient
+producers.  The generic class-first `h1_grid_unif` and `h2_tame_unif` are now
+available, but the final `rhs0`/`rhs1` coefficient functions must still be
+selected before `g`; metricwise existential wrappers do not establish that
+quantifier order.
+
+Normal focused checks and direct exports used four Lean threads under the
+6 GB cap.  The 1200-line extraction/path files used two threads.  No Lean
+processes overlapped.
+
+**Honest denominators.**  Every declaration listed as landed above: **100%**.
+Class-first joint tame producer: still unstated, therefore **0%**.  Actual
+`lowreg_bounds_unif`: **0%**.  Dedicated low-regularity supporting machinery
+toward `(N)`: approximately **99%**.  `lowreg_dt_unif`: **0%**;
+`ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
+**3%**.  Campaign changes remain uncommitted.
+
+---
+
+## 183. Class-first coefficient H2 packets and Ricci order-one arm landed (2026-08-06)
+
+The connection-difference and moving-trace coefficient branches now select
+their constants before the class metric varies.  The following declarations
+are focused-green, warning-free, directly exported, and have axiom audits
+containing only `propext`, `Classical.choice`, and `Quot.sound`:
+
+- `sharpFlat_grid_unif` and `connDiff_grid_unif` are the class-first pointwise
+  grids for the inverse recovery endomorphism and lowered connection
+  difference.
+- `trace2_grid_unif` is the class-first rank-two moving-trace grid.  The
+  metric-local rank-generic `trace_grid_rf` remains its compatibility API.
+- `h2_low_unif` integrates a low-window pointwise grid uniformly over the
+  three-dimensional metric class, using only class metric jets one and two.
+- `trace2_h2_unif` and `connLow_tame_unif` are the resulting moving-trace and
+  affine lowered-connection `H2` packages.
+- `ricci1_h2_unif` composes those packages with `appRS_h22_unif`.  Its explicit
+  coefficient functions are
+  `Capp * (2 * Bt R) * (15 * Bc0 R)` and
+  `Capp * (2 * Bt R) * (15 * Bc1 R)`.
+
+The fixed-curvature representation gap recorded in §182 is also closed.
+`slotFreeOpCc` is the canonical arbitrary-rank free-slot curvature operator,
+`slotFree_cov_eval` identifies its covariant derivative with the slotwise
+`∇Rm` action, and `gradSlot_cov_eval` exposes the rank-two result in the exact
+spectral `covGrad` vocabulary.  A monolithic proof exceeded the heartbeat
+budget; factoring the pointwise curvature identity and smooth-section identity
+into separate declarations reduced the same check to about half a minute at
+the ordinary 3.2-million proof-heavy setting.
+
+The next two honest producers are independent.  The Lie order-one arm needs a
+class-first `H2` cap for `connDiffSection gBase g₀`, using the already proved
+pointwise orders zero through two and class metric jets through order three.
+The Ricci order-zero arm needs the class-first order-zero/one jet grid for
+`gradSlotCurvCoeff`, now enabled by `gradSlot_cov_eval`.  Neither final RHS arm
+is counted complete until its theorem is stated and checked.
+
+Normal verification used four Lean threads and the 6 GB Lean memory cap, with
+one Lean process at a time.  The fixed-curvature file was treated as a semantic
+hotspot; proof factoring, rather than permanent single-threading or an
+unbounded heartbeat increase, resolved its performance issue.
+
+**Honest denominators.**  Every declaration listed as landed above: **100%**.
+Class-first joint tame producer: still unstated, therefore **0%**.  Actual
+`lowreg_bounds_unif`: **0%**.  Dedicated low-regularity supporting machinery
+toward `(N)`: approximately **99%**.  `lowreg_dt_unif`: **0%**;
 `ricci_flow_unif_existence`: **0%**; whole HCG theorem closure: approximately
 **3%**.  Campaign changes remain uncommitted.
 

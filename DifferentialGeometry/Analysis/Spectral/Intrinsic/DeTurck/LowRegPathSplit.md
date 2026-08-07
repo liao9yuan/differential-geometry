@@ -97,3 +97,18 @@ the declaration even after its defining artifact was refreshed.  The module
 now imports that canonical home directly.  Focused verification passes.  This
 is an import-boundary repair only; it does not change the top-arm theorem or
 advance the still-unstated compatible full action split.
+
+## 2026-08-06 reusable deviation algebra
+
+The five small algebraic helpers used by the class-first top-deviation sibling
+are now exported from their existing canonical proof site: `reindex_sub`,
+`norm_sq_add_le`, `norm_sq_sub_le`, `reindex_norm_sq`, and
+`convex_hs_bound`.  Their proof bodies and the metricwise top-path API are
+unchanged.  The existing joint-regularity fact `phi_dev_joint` is also public
+so a class-first path-integral sibling can reuse the same analytic path object.
+Focused verification passed with two Lean threads under the 6 GB cap, and all
+six axiom audits report only `propext`, `Classical.choice`, and `Quot.sound`.
+
+This is reusable infrastructure; it does not change the 0% theorem-level
+status of `lowreg_bounds_unif` or `ricci_flow_unif_existence`.  Whole HCG
+closure remains approximately 3%.

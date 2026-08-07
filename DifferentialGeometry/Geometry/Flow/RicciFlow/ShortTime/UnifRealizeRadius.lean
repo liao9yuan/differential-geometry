@@ -74,6 +74,7 @@ structure IsLowRealizeUnif
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ)
     (R : LowRegRealizeData) : Prop where
   threshold_nonneg : 0 ≤ R.threshold
+  threshold_le_third : R.threshold ≤ 1 / 3
   threshold_lt : R.threshold < 1
   radius_pos : 0 < R.radius
   realize : ∀ (g : SmoothRiemannianMetric I M),
@@ -116,8 +117,9 @@ theorem lowRealize_unif_of
     rw [hDim]
   obtain ⟨hCpt, hmorrey⟩ :=
     morreyTwoC_spec (I := I) (M := M) gBase (le_trans zero_le_one hΛ) hMorreyDim
-  refine ⟨?_, ?_, ?_, ?_⟩
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
   · exact (deTurckArmContractionThreshold''_pos (Module.finrank ℝ E)).le
+  · exact deTurckArmContractionThreshold''_le_third' (Module.finrank ℝ E)
   · exact deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)
   · exact actionRealizeRad_pos hCpt
       (unifPtCurvZeroC (Module.finrank ℝ E) Λ Kb₀ Kb₁)

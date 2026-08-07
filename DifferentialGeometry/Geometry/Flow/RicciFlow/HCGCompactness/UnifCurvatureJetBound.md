@@ -608,6 +608,14 @@ conversion is fully proved.
   higher-order curvature-difference extension the current asset lacks).
 
 ## Status
+- 2026-08-05: **ORDER-ZERO CORE SPLIT TO A LIGHT MODULE.** The canonical
+  declarations from `riemannDiffC` through `unifCurvSup` moved unchanged to
+  `UnifCurvatureSup.lean`; this file now retains only the older metric-
+  difference, small-perturbation, and convex-path compatibility layer. Source
+  comparison confirmed the moved block and retained tail exactly. The new core
+  passed focused one-thread verification. Its artifact refresh hit an
+  unexpected full dependency replay and the memory gate, so downstream export
+  verification remains pending.
 - 2026-07-31: **ARBITRARY-`Λ` ORDER ZERO CLOSED.**
   `riemannDiff_gJet_le` and `unifCurvSup` are focused/exact GREEN and
   axiom-clean.  The finite-order connection-difference route replaced the

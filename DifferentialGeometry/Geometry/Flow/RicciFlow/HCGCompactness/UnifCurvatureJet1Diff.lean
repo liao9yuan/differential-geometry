@@ -1,13 +1,13 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJetsLow
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureSup
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCovSumCross
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullback
 
 /-!
 # The order-`1` curvature-jet difference for the `Λ`-class (brick 2a-hi, stage 2)
 
-The order-`0` curvature layer of brick E3 is `UnifCurvatureJetsLow.lean`
+The order-`0` curvature layer of brick E3 is `UnifCurvatureSup.lean`
 (`unifRicSup`, `unifRicBilin`, `unifConnDiffSup`, `unifCovConnDiffSup`) together
-with `unifCurvatureSup_singleLink` (`UnifCurvatureJetBound.lean`).  This file
+with `unifCurvSup` (`UnifCurvatureSup.lean`).  This file
 opens the order-`1` layer: the object
 
 `∇^{g₀} Rm(g₀) − ∇^{gBase} Rm(gBase)`,
@@ -29,7 +29,7 @@ The content here is the **split** and its **first term**:
 
 * `unifRm04Sup` — the class-uniform order-`0` sup of the *lowered* curvature
   tensor in `normSq0S` currency, `|Rm(g₀)|_{g₀} ≤ n²·F`, obtained from the
-  operator sup `unifCurvatureSup_singleLink` by evaluating the components in a
+  operator sup `unifCurvSup` by evaluating the components in a
   `g₀`-orthonormal frame.  This is the first `Λ`-class curvature bound in the
   tree stated on the `(0,4)` field rather than on `riemannOp`, and it is what the
   generic `diffStep` norm layer consumes;
@@ -118,13 +118,14 @@ theorem curvJet1_diff_eq (g₀ gBase : SmoothRiemannianMetric I M) :
   simp only [diffStep]
   abel
 
+set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
 /-- **Class-uniform lowered-curvature sup (`1 ≤ Λ < 2`), `normSq0S` currency.**
 
 Under `Λ`-comparability of `g₀` with `gBase` and the class metric-jet bounds at
 orders `1` and `2`, the `g₀`-fibre norm of the lowered Riemann tensor `Rm(g₀)` is
 bounded by `n² · F`, where `n = dim E` and `F` is the operator constant of
-`unifCurvatureSup_singleLink` (closed in `(Λ, gBase)` alone).
+`unifCurvSup` (closed in `(Λ, gBase)` alone).
 
 The proof evaluates the components of `metricRm04 g₀ x` in a `g₀`-orthonormal
 frame through `metricRm04StdAt_eq_inner_riemannOp`: each component is a `g₀`-inner
@@ -147,7 +148,7 @@ theorem unifRm04Sup
           (metricRm04 (I := I) (M := M) g₀ x)) ≤ C := by
   classical
   obtain ⟨F, hF0, hF⟩ :=
-    unifCurvatureSup_singleLink (I := I) (M := M) gBase g₀ hΛ hΛ2 hcomp hjet1 hjet2
+    unifCurvSup (I := I) (M := M) gBase g₀ hΛ hcomp hjet1 hjet2
   refine ⟨(Module.finrank ℝ E : ℝ) ^ 2 * F, by positivity, fun x => ?_⟩
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g₀ x
   have hinv : MetricInverseInBasis_gen (I := I) g₀ x basis
@@ -217,7 +218,7 @@ the closed constant
 
 `4 · √(n⁵) · (3/2)·√(Λ³)·Λ · (n² · F)`,
 
-`F` the operator constant of `unifCurvatureSup_singleLink`; the constant depends
+`F` the operator constant of `unifCurvSup`; the constant depends
 only on `(Λ, gBase)` and is fixed before any class member `g₀` is named.
 
 Composes the generic single-step connection-difference estimate

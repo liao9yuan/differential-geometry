@@ -145,3 +145,21 @@ Quot.sound]` (audit lines then stripped).  Field/perOrder/summed produced NO err
 `(N) ricci_flow_unif_existence` remains **0%**; piece 4 completes the field-level lift of the DLa half
 (`deTurckLieDLaCoeffField`) — one of the 2 genuinely-missing C₀ constituents.  DLb + the DLa+DLb
 combined-coefficient assembly (`deTurckLieCoeffField = DLa + DLb`) still open.
+
+## 2026-08-06: class-first finite-window extraction
+
+The old private DLa factorization is now exposed only through the small
+`DLaUniformInternal` namespace at the end of this file.  Those declarations are
+reducible aliases or theorem wrappers around existing proofs; the substantive
+new estimate was kept out of this already-oversized module.
+
+The sibling `DeTurckLieKernelL2JetBoundUniform.lean` now proves
+`dla_grid_of_conn`, with quantifiers `δ₀,F → ∃ C → ∀ metrics`, output window
+`i < 2`, and fixed-connection input window `j < 3`.  The eight proof aliases in
+the extraction surface use transparent `abbrev` declarations; the first draft's
+untyped `theorem ... :=` syntax was invalid and has been removed.
+
+The whole owning file passes focused verification and its exact module export is
+current.  The sibling producer is focused-green without warnings, has a current
+exported `.olean`, and its public theorem's axiom census contains only
+`propext`, `Classical.choice`, and `Quot.sound`.

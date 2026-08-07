@@ -135,6 +135,15 @@ theorem lowregStateRad_le_P {Ctop B1 ρ P : ℝ} (hP : 0 ≤ P) :
   have h2 : lowregOuterRad Ctop ρ P ≤ P / 2 := lowregOuterRad_le_P
   linarith
 
+/-- The closed solver radius is at most one quarter of the realization
+radius. -/
+theorem stateRad_le_P4 {Ctop B1 ρ P : ℝ} :
+    lowregStateRad Ctop B1 ρ P ≤ P / 4 := by
+  have h1 : lowregStateRad Ctop B1 ρ P ≤ lowregOuterRad Ctop ρ P / 2 :=
+    lowregStateRad_le_Q
+  have h2 : lowregOuterRad Ctop ρ P ≤ P / 2 := lowregOuterRad_le_P
+  linarith
+
 /-- The high-size arm contracts on the state radius. -/
 theorem lowregStateRad_small {Ctop B1 ρ P : ℝ} (hB1 : 0 ≤ B1) :
     B1 * lowregStateRad Ctop B1 ρ P ≤ 1 / 16 := by
@@ -228,6 +237,89 @@ theorem lowregRealRad (g₀ : SmoothRiemannianMetric I M) {δ Ctop B1 ρ P : ℝ
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ :=
   realizeOfLE (I := I) (M := M) g₀ (lowregStateRad_le_P hP) hreal
+
+/-- A fibre bound on the closed `H²` ball of radius `P` gives a global
+linear fibre bound whose small-state threshold contains the half-radius
+required by the joint-smoothness endpoint. -/
+theorem realize_h2_bound (g₀ : SmoothRiemannianMetric I M) {δ P : ℝ}
+    (hP : 0 < P) (hδ : δ ≤ 1)
+    (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 1) T‖ ≤ P →
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    ∃ C : ℝ, 0 < C ∧
+      (∀ T : SmoothCcTensor g₀ 0 2,
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T)
+          (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀
+            (((1 : ℕ) : ℝ) + 1) T‖)) ∧
+      P / 4 ≤ 1 / (2 * C) := by
+  let C : ℝ := 1 / P
+  refine ⟨C, one_div_pos.mpr hP, ?_, ?_⟩
+  · intro T
+    let n : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀
+      (((1 : ℕ) : ℝ) + 1) T‖
+    by_cases hn : n = 0
+    · have hTemb : smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 1) T = 0 := norm_eq_zero.mp hn
+      have hzero : smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 1) (0 : SmoothCcTensor g₀ 0 2) = 0 := by
+        simpa only [zero_smul] using
+          (smoothCcToTensorHs_smul (I := I) (M := M) g₀
+            (((1 : ℕ) : ℝ) + 1) (0 : ℝ) (0 : SmoothCcTensor g₀ 0 2))
+      have hT0 : T = 0 :=
+        smoothHs_inj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1)
+          (hTemb.trans hzero.symm)
+      subst T
+      simpa only [C, hzero, norm_zero, mul_zero] using
+        gFibreOpBound_ccTensorBilinSymm_zero (I := I) (M := M) g₀
+    · have hnpos : 0 < n := lt_of_le_of_ne (norm_nonneg _) (Ne.symm hn)
+      let T₀ : SmoothCcTensor g₀ 0 2 := (P / n) • T
+      have hT₀norm : ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          (((1 : ℕ) : ℝ) + 1) T₀‖ = P := by
+        dsimp only [T₀]
+        rw [smoothCcToTensorHs_smul, tensorHs_norm_smul,
+          abs_of_pos (div_pos hP hnpos)]
+        exact div_mul_cancel₀ P hn
+      have hb₀ := hreal T₀ hT₀norm.le
+      have hb := gFibreOpBound_ccTensorBilinSymm_smul
+        (I := I) (M := M) g₀ (n / P) T₀ hb₀
+      have hback : (n / P) • T₀ = T := by
+        dsimp only [T₀]
+        rw [smul_smul]
+        have hscalar : n / P * (P / n) = 1 := by
+          field_simp [ne_of_gt hP, ne_of_gt hnpos]
+        rw [hscalar, one_smul]
+      rw [hback] at hb
+      have hquot : 0 ≤ n / P := (div_pos hnpos hP).le
+      have hcoeff : |n / P| * δ ≤ C * n := by
+        rw [abs_of_pos (div_pos hnpos hP)]
+        calc
+          n / P * δ ≤ n / P * 1 := mul_le_mul_of_nonneg_left hδ hquot
+          _ = C * n := by simp only [C]; ring
+      intro x v w
+      refine le_trans (hb x v w) ?_
+      have hnn : 0 ≤ Real.sqrt (g₀.inner x v v) *
+          Real.sqrt (g₀.inner x w w) :=
+        mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+      calc
+        (|n / P| * δ) * Real.sqrt (g₀.inner x v v) *
+            Real.sqrt (g₀.inner x w w) =
+            (|n / P| * δ) * (Real.sqrt (g₀.inner x v v) *
+              Real.sqrt (g₀.inner x w w)) := by ring
+        _ ≤ (C * n) * (Real.sqrt (g₀.inner x v v) *
+              Real.sqrt (g₀.inner x w w)) :=
+          mul_le_mul_of_nonneg_right hcoeff hnn
+        _ = (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀
+              (((1 : ℕ) : ℝ) + 1) T‖) *
+              Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+          simp only [n]
+          ring
+  · have hrecip : 1 / (2 * (1 / P)) = P / 2 := by
+      field_simp [ne_of_gt hP]
+    simp only [C, hrecip]
+    linarith
 
 /-- The genuine lower-regularity Ricci--DeTurck nonlinearity on the state ball
 of the closed radius `lowregStateRad Ctop B1 ρ P`. -/
@@ -817,10 +909,14 @@ theorem horizon_le_of_cap {K : LowRegBoundData} {U : LowRegHorizonData}
 /-- The exact analytic certificates attached to one explicit six-number packet
 for the initial metric `g₀` and DeTurck background `g_bg`.
 
-This is the background-aware input package of `lowreg_partial_sol_of_bounds`;
-it contains no class-uniformity claim and no high-rung regularity data. -/
+This is the background-aware input package of `lowreg_partial_sol_of_bounds`.
+Besides the fixed-point estimates it retains the threshold range and smooth-core
+continuity needed by the same-horizon regularity bootstrap; it contains no
+class-uniformity claim and no high-rung regularity data. -/
 structure IsLowBoundsAt (g₀ g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData) : Prop where
+  threshold_nonneg : 0 ≤ K.threshold
+  threshold_le_third : K.threshold ≤ 1 / 3
   hreal : ∀ S : SmoothCcTensor g₀ 0 2,
     ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 1) S‖ ≤ K.realize →
       gFibreOpBound (I := I) (M := M) g₀
@@ -856,6 +952,11 @@ structure IsLowBoundsAt (g₀ g_bg : SmoothRiemannianMetric I M)
       ⟨0, zero_mem_lowerState (I := I) (M := M) g₀ 1
         (lowregStateRad_pos K.top_nonneg K.slope_nonneg K.outer_pos
           K.realize_pos).le⟩‖ ≤ K.zeroBd
+  core_cont : Continuous
+    (coreN (I := I) (M := M) g₀ g_bg K.threshold_lt
+      (lowregRealRad (I := I) (M := M) g₀
+        (Ctop := K.top) (B1 := K.slope) (ρ := K.outer)
+        K.realize_pos.le hreal))
 
 /-- The fixed-point output associated with one explicit input packet. -/
 structure IsLowSolveBg (g₀ g_bg : SmoothRiemannianMetric I M)

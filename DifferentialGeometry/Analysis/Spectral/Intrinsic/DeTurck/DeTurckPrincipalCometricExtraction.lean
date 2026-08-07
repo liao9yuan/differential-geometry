@@ -1135,6 +1135,38 @@ private lemma rfns_iteratedCovGrad_deTurckPrincipalCometricCoeff_le
               ((iteratedCovGrad (I := I) g₀ 2 2 l
                 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) := by ring
 
+/-- A supplied pointwise bound for the background double trace gives an
+explicit pointwise jet bound for the DeTurck principal coefficient. -/
+theorem pcc_rfns_of_bound
+    (g₀ g₁ : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
+    (hKb : ∀ b : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 b
+      ((cometricDoubleTraceField (I := I) g₀ 2).toSection b) ≤ K)
+    (i : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁)).toSection x) ≤
+      appCcGdiag (E := E) i * K * (Module.finrank ℝ E : ℝ) ^ 2 *
+        ∑ l ∈ Finset.range (i + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 l
+              (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) :=
+  rfns_iteratedCovGrad_deTurckPrincipalCometricCoeff_le
+    (I := I) (M := M) g₀ g₁ hK hKb i x
+
+/-- The Ricci principal-coefficient difference is pointwise controlled by the
+DeTurck principal coefficient with a universal factor. -/
+theorem ricci_sub_rfns
+    (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 4 2 i
+          (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+            - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)).toSection x) ≤
+      (10 / 4 : ℝ) * riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁)).toSection x) :=
+  rfns_iteratedCovGrad_ricciArmPrincipalCoeff_sub_le
+    (I := I) (M := M) g₀ g₁ i x
+
 set_option linter.unusedSectionVars false in
 
 theorem ricciArmPrincipalCoeff_sub_perOrder_rfns_le_gInvDiffSlotCoeff

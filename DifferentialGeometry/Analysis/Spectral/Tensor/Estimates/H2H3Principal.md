@@ -39,6 +39,13 @@ The first wrapper attempt relied on an unavailable `add_self` rewrite and did
 not normalize multiplication associativity.  An explicit `calc` followed by
 `ring` is stable and keeps the constant-factor conversion visible.
 
+`appCc_grad_of_grid` now isolates the universal contraction argument from the
+choice of the order-two two-arm grid coefficient.  The original
+`appCc_grad_l2` public theorem is unchanged and reuses this helper with its
+metricwise grid witness; class-first consumers can supply a uniform grid
+certificate without duplicating the tensor/integral proof.  Focused
+verification of the refactor passed without warnings or `sorry`.
+
 ## Frontier
 
 The next geometric producer must supply the separated pointwise and first-jet

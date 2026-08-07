@@ -859,9 +859,54 @@ private theorem young_arm_split_arm
     _ ≤ CS * CT * (wi * (ΛT ^ 2 * NS ^ 2) + wl * (ΛS ^ 2 * NT ^ 2)) :=
         mul_le_mul_of_nonneg_left hyoung (by positivity)
 
-theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+/-- The explicit mixed-valence Gagliardo--Nirenberg coefficient at one product-grid total order.
+The order-zero branch is unused by interpolation cells and is normalized to zero. -/
+noncomputable def gnGridCoeff
+    (g : SmoothRiemannianMetric I M) (m : ℕ) : ℝ :=
+  if 1 ≤ m then
+    DifferentialGeometry.Analysis.Sobolev.Tensor.gnRsConst
+      (Module.finrank ℝ E) m
+      (Real.sqrt ((riemannianVolumeMeasure (I := I) (M := M) g) Set.univ).toReal)
+  else 0
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
+/-- `gnGridCoeff` is nonnegative. -/
+theorem gnGridCoeff_nonneg
+    (g : SmoothRiemannianMetric I M) (m : ℕ) :
+    0 ≤ gnGridCoeff (I := I) (M := M) g m := by
+  unfold gnGridCoeff
+  split
+  · unfold DifferentialGeometry.Analysis.Sobolev.Tensor.gnRsConst
+    exact mul_nonneg (pow_nonneg (le_trans zero_le_one
+      (le_trans (le_max_right _ _) (le_max_left _ _))) _) (sq_nonneg _)
+  · exact le_refl 0
+
+/-- The explicit per-metric coefficient for the mixed-valence diagonal two-arm product grid. -/
+noncomputable def gridRsConst
+    (g : SmoothRiemannianMetric I M) (k : ℕ) : ℝ :=
+  (k + 1) ^ 2 *
+    (1 + ∑ m ∈ Finset.range (k + 1),
+      gnGridCoeff (I := I) (M := M) g m * gnGridCoeff (I := I) (M := M) g m)
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
+/-- `gridRsConst` is nonnegative. -/
+theorem gridRsConst_nonneg
+    (g : SmoothRiemannianMetric I M) (k : ℕ) :
+    0 ≤ gridRsConst (I := I) (M := M) g k := by
+  unfold gridRsConst
+  apply mul_nonneg
+  · positivity
+  · exact add_nonneg zero_le_one (Finset.sum_nonneg (fun m _ =>
+      mul_nonneg (gnGridCoeff_nonneg (I := I) (M := M) g m)
+        (gnGridCoeff_nonneg (I := I) (M := M) g m)))
+
+/-- The integrated mixed-valence diagonal two-arm product grid with its explicit per-metric
+Gagliardo--Nirenberg coefficient. -/
+theorem grid_rs_bound
     (g : SmoothRiemannianMetric I M) (r₁ r₂ s₁ s₂ k : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧
+    0 ≤ gridRsConst (I := I) (M := M) g k ∧
       ∀ (S : SmoothCcTensor g r₁ s₁) (T : SmoothCcTensor g r₂ s₂)
         (ΛS ΛT : ℝ), 0 ≤ ΛS → 0 ≤ ΛT →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r₁ s₁ x (S.toSection x) ≤ ΛS ^ 2) →
@@ -881,7 +926,8 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
                     riemannianFiberNormSq (I := I) (M := M) g r₂ (s₂ + l) x
                       ((iteratedCovGrad (I := I) g r₂ s₂ l T).toSection x))
               ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
-            C * (ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+            gridRsConst (I := I) (M := M) g k *
+              (ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
                   ‖iteratedCovGrad (I := I) g r₁ s₁ i S‖ ^ 2
                 + ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
                   ‖iteratedCovGrad (I := I) g r₂ s₂ l T‖ ^ 2) := by
@@ -892,28 +938,16 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
   haveI : BorelSpace M := ⟨rfl⟩
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
-  set CSf : ℕ → ℝ := fun m =>
-    if h : 1 ≤ m then
-      (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-        (I := I) (M := M) g r₁ s₁ m h).choose
-    else 0 with hCSf
-  set CTf : ℕ → ℝ := fun m =>
-    if h : 1 ≤ m then
-      (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-        (I := I) (M := M) g r₂ s₂ m h).choose
-    else 0 with hCTf
+  set CSf : ℕ → ℝ := fun m => gnGridCoeff (I := I) (M := M) g m with hCSf
+  set CTf : ℕ → ℝ := fun m => gnGridCoeff (I := I) (M := M) g m with hCTf
   have hCSf_nn : ∀ m, 0 ≤ CSf m := by
-    intro m; rw [hCSf]; dsimp only; split
-    · rename_i h
-      exact (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-        (I := I) (M := M) g r₁ s₁ m h).choose_spec.1
-    · exact le_refl 0
+    intro m
+    rw [hCSf]
+    exact gnGridCoeff_nonneg (I := I) (M := M) g m
   have hCTf_nn : ∀ m, 0 ≤ CTf m := by
-    intro m; rw [hCTf]; dsimp only; split
-    · rename_i h
-      exact (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-        (I := I) (M := M) g r₂ s₂ m h).choose_spec.1
-    · exact le_refl 0
+    intro m
+    rw [hCTf]
+    exact gnGridCoeff_nonneg (I := I) (M := M) g m
   set Cbig : ℝ := 1 + ∑ m ∈ Finset.range (k + 1), CSf m * CTf m with hCbig
   have hCbig1 : (1 : ℝ) ≤ Cbig := by
     rw [hCbig]
@@ -928,8 +962,11 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
     have hterm : CSf m * CTf m ≤ ∑ m' ∈ Finset.range (k + 1), CSf m' * CTf m' :=
       Finset.single_le_sum (fun m' _ => mul_nonneg (hCSf_nn m') (hCTf_nn m')) hmem
     linarith
-  refine ⟨(k + 1) ^ 2 * Cbig, by positivity, ?_⟩
+  have hconst : (k + 1) ^ 2 * Cbig = gridRsConst (I := I) (M := M) g k := by
+    simp only [hCbig, gridRsConst, hCSf, hCTf]
+  refine ⟨gridRsConst_nonneg (I := I) (M := M) g k, ?_⟩
   intro S T ΛS ΛT hΛS hΛT hSsup hTsup
+  rw [← hconst]
   set μ : MeasureTheory.Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ
   set Sj : ℕ → M → ℝ := fun a x =>
     riemannianFiberNormSq (I := I) (M := M) g r₁ (s₁ + a) x
@@ -1077,16 +1114,31 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
         have h1p : (1 : ℝ) / p = wi := by rw [hp, one_div_div, hwi]
         have h1q : (1 : ℝ) / q = wl := by rw [hq, one_div_div, hwl]
         rw [h1p, h1q] at hHolder
-        have hSe := (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-          (I := I) (M := M) g r₁ s₁ m hm1).choose_spec.2 S ΛS hΛS hSsup i hipos hmi
-        have hTe := (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-          (I := I) (M := M) g r₂ s₂ m hm1).choose_spec.2 T ΛT hΛT hTsup l hlpos hml
-        have hCSf_m : (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-            (I := I) (M := M) g r₁ s₁ m hm1).choose = CSf m := by
-          simp only [hCSf, dif_pos hm1]
-        have hCTf_m : (DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
-            (I := I) (M := M) g r₂ s₂ m hm1).choose = CTf m := by
-          simp only [hCTf, dif_pos hm1]
+        have hSe := (DifferentialGeometry.Analysis.Sobolev.Tensor.gn_rs_bound
+          (I := I) (M := M) g r₁ s₁ m hm1).2 S ΛS hΛS hSsup i hipos hmi
+        have hTe := (DifferentialGeometry.Analysis.Sobolev.Tensor.gn_rs_bound
+          (I := I) (M := M) g r₂ s₂ m hm1).2 T ΛT hΛT hTsup l hlpos hml
+        have hCoeff_m :
+            DifferentialGeometry.Analysis.Sobolev.Tensor.gnRsConst
+                (Module.finrank ℝ E) m
+                (Real.sqrt ((riemannianVolumeMeasure (I := I) (M := M) g) Set.univ).toReal) =
+              gnGridCoeff (I := I) (M := M) g m := by
+          unfold gnGridCoeff
+          rw [if_pos hm1]
+        have hCSf_m :
+            DifferentialGeometry.Analysis.Sobolev.Tensor.gnRsConst
+                (Module.finrank ℝ E) m
+                (Real.sqrt ((riemannianVolumeMeasure (I := I) (M := M) g) Set.univ).toReal) =
+              CSf m := by
+          rw [hCSf, hCTf]
+          exact hCoeff_m
+        have hCTf_m :
+            DifferentialGeometry.Analysis.Sobolev.Tensor.gnRsConst
+                (Module.finrank ℝ E) m
+                (Real.sqrt ((riemannianVolumeMeasure (I := I) (M := M) g) Set.univ).toReal) =
+              CTf m := by
+          rw [hCTf]
+          exact hCoeff_m
         rw [hCSf_m] at hSe
         rw [hCTf_m] at hTe
         rw [mul_div_assoc 2 (i : ℝ) m, ← hwi] at hSe
@@ -1228,6 +1280,38 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
     refine le_trans hdouble (le_of_eq ?_)
     rw [hc]
     ring
+
+/-- Existential compatibility form of `grid_rs_bound`. -/
+theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+    (g : SmoothRiemannianMetric I M) (r₁ r₂ s₁ s₂ k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : SmoothCcTensor g r₁ s₁) (T : SmoothCcTensor g r₂ s₂)
+        (ΛS ΛT : ℝ), 0 ≤ ΛS → 0 ≤ ΛT →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g r₁ s₁ x (S.toSection x) ≤ ΛS ^ 2) →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g r₂ s₂ x (T.toSection x) ≤ ΛT ^ 2) →
+        MeasureTheory.Integrable
+            (fun x => ∑ i ∈ Finset.range (k + 1),
+              riemannianFiberNormSq (I := I) (M := M) g r₁ (s₁ + i) x
+                  ((iteratedCovGrad (I := I) g r₁ s₁ i S).toSection x)
+                * ∑ l ∈ Finset.range (k + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g r₂ (s₂ + l) x
+                      ((iteratedCovGrad (I := I) g r₂ s₂ l T).toSection x))
+            (riemannianVolumeMeasure (I := I) (M := M) g) ∧
+          (∫ x, (∑ i ∈ Finset.range (k + 1),
+              riemannianFiberNormSq (I := I) (M := M) g r₁ (s₁ + i) x
+                  ((iteratedCovGrad (I := I) g r₁ s₁ i S).toSection x)
+                * ∑ l ∈ Finset.range (k + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g r₂ (s₂ + l) x
+                      ((iteratedCovGrad (I := I) g r₂ s₂ l T).toSection x))
+              ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+            C * (ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+                  ‖iteratedCovGrad (I := I) g r₁ s₁ i S‖ ^ 2
+                + ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
+                  ‖iteratedCovGrad (I := I) g r₂ s₂ l T‖ ^ 2) := by
+  refine ⟨gridRsConst (I := I) (M := M) g k, ?_⟩
+  exact grid_rs_bound (I := I) (M := M) g r₁ r₂ s₁ s₂ k
 
 noncomputable def cometricCastG0 (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 3 1 where

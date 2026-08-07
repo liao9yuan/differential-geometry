@@ -143,6 +143,7 @@ theorem connDiffContrInsertionInnerField_eq_reindex_slotExtend
     fin_cases j <;> rfl
   exact hL.trans hR.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cDualBasis_eq_coord' (B : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E)
     (k : Fin (Module.finrank ℝ E)) :
     B.cDualBasis k = LinearMap.toContinuousLinearMap (B.coord k) := by
@@ -449,7 +450,7 @@ private def kMid0Perm120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
 set_option linter.unusedSectionVars false in
-private theorem slotPermCc0Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
+private theorem slotPermCc0Fib_contMDiff {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel d d ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel d d ℝ E)
@@ -472,7 +473,7 @@ private def slotPermCc0 (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equi
   toSection :=
     { toFun := fun x : M =>
         (show Tensor0SBundle.TensorRSSpace d d I x from slotPermCLM (I := I) ρ x)
-      contMDiff_toFun := slotPermCc0Fib_contMDiff (I := I) (M := M) g₀ ρ }
+      contMDiff_toFun := slotPermCc0Fib_contMDiff (I := I) (M := M) ρ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
@@ -695,10 +696,11 @@ private lemma rfns_eightArm_cascade (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 set_option linter.unusedVariables false in
 
-theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalProductGrid_le
-    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+/-- A single fibre-smallness ceiling fixes the order-zero Ricci connection-kernel
+grid before either metric varies. -/
+theorem ricci0_ker_grid_unif {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ l, 0 ≤ C l) ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
@@ -713,7 +715,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalPr
                 ((iteratedCovGrad (I := I) g₀ 0 2 j' P).toSection x)) k := by
   classical
   obtain ⟨CA, hCA_nn, hCA⟩ :=
-    exists_rfns_iteratedCovGrad_connDiffSection_tgrid (I := I) (M := M) g₀ hδ₀
+    connDiff_grid_unif (I := I) (M := M) hδ₀
   set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
   have hfr : 0 ≤ fr := Nat.cast_nonneg _
   set CQ : ℕ → ℝ := fun l => appCcGdiag (E := E) l *
@@ -734,7 +736,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalPr
     exact mul_nonneg hfr (hCA_nn (l + 1))
   refine ⟨fun l => 376 * CQ l + 6 * CL l,
     fun l => by have := hCQ_nn l; have := hCL_nn l; linarith, ?_⟩
-  intro g₁ P htie δ hδ_le hδ0 hbound l x
+  intro g₀ g₁ P htie δ hδ_le hδ0 hbound l x
   have hcomb := order0KernelField_eq_arm_combination (I := I) (M := M) g₀ g₁
   set b : ℕ → ℝ := fun j' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j') x
     ((iteratedCovGrad (I := I) g₀ 0 2 j' P).toSection x) with hb_def
@@ -745,7 +747,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalPr
   have hA : ∀ j : ℕ, riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
       ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
       CA j * Combinatorics.antidiagonalTupleGridWindow b (j + 2) :=
-    fun j => hCA g₁ P htie hδ_le hδ0 hbound j x
+    fun j => hCA g₀ g₁ P htie hδ_le hδ0 hbound j x
   have hInner : ∀ m : ℕ, riemannianFiberNormSq (I := I) (M := M) g₀ 2 (3 + m) x
       ((iteratedCovGrad (I := I) g₀ 2 3 m
         (connDiffContrInsertionInnerField (I := I) g₀ g₁)).toSection x) ≤
@@ -1031,6 +1033,28 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalPr
   rw [hgoal]
   exact rfns_eightArm_cascade (I := I) (M := M) g₀ 2 (4 + l) x
     _ _ _ _ _ _ _ _ hB1 hB2 hB3 hB4 hB5 hB6 hB7 hB8
+
+set_option linter.unusedVariables false in
+
+/-- Metric-local compatibility wrapper for `ricci0_ker_grid_unif`. -/
+theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalProductGrid_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ l, 0 ≤ C l) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (l : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
+            ((iteratedCovGrad (I := I) g₀ 2 4 l
+              (linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁)).toSection x) ≤
+          C l * ∑ k ∈ Finset.range (l + 3),
+            Combinatorics.antidiagonalTupleGrid
+              (fun j' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j') x
+                ((iteratedCovGrad (I := I) g₀ 0 2 j' P).toSection x)) k := by
+  obtain ⟨C, hC, hbnd⟩ := ricci0_ker_grid_unif (I := I) (M := M) hδ₀
+  exact ⟨C, hC, hbnd g₀⟩
 
 set_option linter.unusedVariables false in
 

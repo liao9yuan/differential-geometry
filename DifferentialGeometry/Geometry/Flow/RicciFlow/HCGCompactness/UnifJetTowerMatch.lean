@@ -40,6 +40,8 @@ version, obtained by the same induction on the order.
   generic rank `(0, s)`.
 * `rfns_iterCovGrad_eq` — the two composed: the Morrey chain's pointwise currency
   written in the cross-metric layer's currency.
+* `jetOnePt`, `kjetOneC`, `jetCross_l2_one` — the order-one transfer with only
+  `∇^{gBase} g₀` as metric-jet input.
 * `jetTowerPt`, `sqrtRfns_cross_le` — the pointwise cross-metric jet bound at
   orders `≤ 2`, with a closed constant in `(Λ, Λ', Λ'', finrank ℝ E, s)`.
 * `kjetConst`, `jetCross_l2` — its `L²` face, across the two volume measures.
@@ -55,6 +57,10 @@ supercritical window at `finrank ℝ E = 3` (`range (3/2 + 2) = range 3`).  So t
 lane's only `sorry`, `hAcc_of_jets` (`UnifCovSumN3.lean`), is **not** on this
 path.  `kjet_of_class` therefore carries the dimension hypothesis
 `finrank ℝ E / 2 + 2 = 3`.
+
+The separate order-one window uses only `iterCovG1_le` at `N = 1`; its
+accumulator vanishes.  Consequently `jetCross_l2_one` needs neither the reverse
+first metric jet nor an order-two metric jet.
 -/
 
 set_option autoImplicit false
@@ -289,6 +295,20 @@ private theorem dtowerNonneg (n : ℕ) {q : ℝ} (hq : 0 ≤ q) (r : ℕ) {Racc 
           Dtower n q r Racc N := mul_nonneg h2 ih
       simp only [Dtower]; linarith
 
+/-- The closed pointwise cross-metric jet constant for the order-one window. -/
+def jetOnePt (n : ℕ) (Λ Λ' : ℝ) (r : ℕ) : ℝ :=
+  Real.sqrt (Λ ^ (r + 1)) *
+    (1 + Dtower n ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) r (fun _ => 0) 1)
+
+lemma jetOnePt_nonneg {Λ Λ' : ℝ} (hΛ' : 0 ≤ Λ') (n r : ℕ) :
+    0 ≤ jetOnePt n Λ Λ' r := by
+  have hq : (0 : ℝ) ≤ (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ') :=
+    mul_nonneg (by norm_num) (mul_nonneg (Real.sqrt_nonneg _) hΛ')
+  have hD : (0 : ℝ) ≤
+      Dtower n ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) r (fun _ => 0) 1 :=
+    dtowerNonneg n hq r (fun _ => le_refl 0) 1
+  exact mul_nonneg (Real.sqrt_nonneg _) (add_nonneg zero_le_one hD)
+
 /-- Nonnegativity of the `N = 2` accumulator family of `iterCovG1_two`. -/
 private lemma raccTwoNonneg {Λ Λ' Λ'' : ℝ} (hΛ : 0 ≤ Λ) (hΛ' : 0 ≤ Λ') (hΛ'' : 0 ≤ Λ'')
     (n r : ℕ) (m : ℕ) :
@@ -368,6 +388,129 @@ private theorem sqrtNormSq0SZero (g : SmoothRiemannianMetric I M) (x : M) (s : �
   · exact Real.sqrt_zero
   · refine Finset.sum_eq_zero (fun slots _ => ?_)
     rw [component0S_apply]; simp
+
+/-- The cross-metric covariant jet tower bound on the order-one window. -/
+private theorem towerCrossOne_le
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ')
+    (s : ℕ)
+    (U : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    {j : ℕ} (hj : j ≤ 1) (x : M) :
+    Real.sqrt (normSq0S (I := I) g₀ x (s + j) (iterCov (I := I) gBase s U j x)) ≤
+      (1 + Dtower (Module.finrank ℝ E)
+        ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) s (fun _ => 0) 1) *
+        ∑ k ∈ Finset.range 2,
+          Real.sqrt (normSq0S (I := I) g₀ x (s + k)
+            (iterCov (I := I) g₀ s U k x)) := by
+  classical
+  have hΛ'nn : (0 : ℝ) ≤ Λ' :=
+    le_trans (Real.sqrt_nonneg _) (hjet x (Set.mem_univ x))
+  have hq : (0 : ℝ) ≤ (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ') :=
+    mul_nonneg (by norm_num) (mul_nonneg (Real.sqrt_nonneg _) hΛ'nn)
+  have hD : (0 : ℝ) ≤ Dtower (Module.finrank ℝ E)
+      ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) s (fun _ => 0) 1 :=
+    dtowerNonneg _ hq s (fun _ => le_refl 0) 1
+  have hS2 : (0 : ℝ) ≤ ∑ k ∈ Finset.range 2,
+      Real.sqrt (normSq0S (I := I) g₀ x (s + k)
+        (iterCov (I := I) g₀ s U k x)) :=
+    Finset.sum_nonneg (fun k _ => Real.sqrt_nonneg _)
+  interval_cases j
+  · have hterm : Real.sqrt (normSq0S (I := I) g₀ x (s + 0)
+        (iterCov (I := I) gBase s U 0 x)) ≤
+        ∑ k ∈ Finset.range 2,
+          Real.sqrt (normSq0S (I := I) g₀ x (s + k)
+            (iterCov (I := I) g₀ s U k x)) :=
+      Finset.single_le_sum
+        (f := fun k => Real.sqrt (normSq0S (I := I) g₀ x (s + k)
+          (iterCov (I := I) g₀ s U k x)))
+        (fun k _ => Real.sqrt_nonneg _) (Finset.mem_range.mpr (by norm_num))
+    nlinarith
+  · have hacc : ∀ m, m < 1 →
+        Real.sqrt (normSq0S (I := I) g₀ x (s + m + 1)
+            (covStep (I := I) g₀ (s + m)
+              (telescAccum (I := I) gBase g₀ s U m) x)) ≤
+          (fun _ : ℕ => (0 : ℝ)) m * ∑ k ∈ Finset.range (m + 2),
+            Real.sqrt (normSq0S (I := I) g₀ x (s + k)
+              (iterCov (I := I) g₀ s U k x)) := by
+      intro m hm
+      have hm0 : m = 0 := Nat.lt_one_iff.mp hm
+      subst hm0
+      rw [show telescAccum (I := I) gBase g₀ s U 0 = 0 from rfl,
+        covStepZero (I := I) g₀ (s + 0)]
+      simp only [ContMDiffSection.coe_zero, Pi.zero_apply, sqrtNormSq0SZero,
+        zero_mul, le_refl]
+    have h1 := iterCovG1_le (I := I) gBase g₀ s U x (fun _ => (0 : ℝ))
+      (fun _ => le_refl 0) hEq hjet (Set.mem_univ x) 1 hacc
+    nlinarith
+
+/-- Pointwise cross-metric jet transfer on the order-one window, in the
+Riemannian fibre-norm currency used by the Sobolev estimates. -/
+theorem sqrtRfns_one_le
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ')
+    (s : ℕ) (T : SmoothCcTensor g₀ 0 s) {j : ℕ} (hj : j ≤ 1) (x : M) :
+    Real.sqrt (riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
+        ((iteratedCovGrad (I := I) gBase 0 s j (T.recast (g' := gBase))).toSection x)) ≤
+      jetOnePt (Module.finrank ℝ E) Λ Λ' s *
+        ∑ k ∈ Finset.range 2,
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + k) x
+            ((iteratedCovGrad (I := I) g₀ 0 s k T).toSection x)) := by
+  classical
+  have hL : riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
+        ((iteratedCovGrad (I := I) gBase 0 s j (T.recast (g' := gBase))).toSection x) =
+      normSq0S (I := I) gBase x (s + j)
+        (iterCov (I := I) gBase s (ccUnitField (I := I) g₀ s T) j x) := by
+    rw [rfns_iterCovGrad_eq (I := I) gBase s j (T.recast (g' := gBase)) x,
+      ccUnitField_recast (I := I) g₀ gBase s T]
+  have hR : ∀ k : ℕ, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + k) x
+        ((iteratedCovGrad (I := I) g₀ 0 s k T).toSection x) =
+      normSq0S (I := I) g₀ x (s + k)
+        (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x) :=
+    fun k => rfns_iterCovGrad_eq (I := I) g₀ s k T x
+  rw [hL]
+  rw [show (∑ k ∈ Finset.range 2,
+      Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + k) x
+        ((iteratedCovGrad (I := I) g₀ 0 s k T).toSection x))) =
+      ∑ k ∈ Finset.range 2,
+        Real.sqrt (normSq0S (I := I) g₀ x (s + k)
+          (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x)) from
+    Finset.sum_congr rfl (fun k _ => by rw [hR k])]
+  have hfib := covsumCross_fibNorm (I := I) g₀ gBase
+    (metricUniformEquivalentOn_symm (I := I) hEq) x (s + j)
+    (iterCov (I := I) gBase s (ccUnitField (I := I) g₀ s T) j x)
+  have htow := towerCrossOne_le (I := I) gBase g₀ hEq hjet s
+    (ccUnitField (I := I) g₀ s T) hj x
+  have hle : Λ ^ (s + j) ≤ Λ ^ (s + 1) := by
+    refine pow_le_pow_right₀ hEq.1 ?_
+    omega
+  have hpow : Real.sqrt (Λ ^ (s + j)) ≤ Real.sqrt (Λ ^ (s + 1)) :=
+    Real.sqrt_le_sqrt hle
+  have hnn : (0 : ℝ) ≤ Real.sqrt (normSq0S (I := I) g₀ x (s + j)
+      (iterCov (I := I) gBase s (ccUnitField (I := I) g₀ s T) j x)) :=
+    Real.sqrt_nonneg _
+  unfold jetOnePt
+  calc
+    Real.sqrt (normSq0S (I := I) gBase x (s + j)
+        (iterCov (I := I) gBase s (ccUnitField (I := I) g₀ s T) j x))
+        ≤ Real.sqrt (Λ ^ (s + j)) *
+          Real.sqrt (normSq0S (I := I) g₀ x (s + j)
+            (iterCov (I := I) gBase s (ccUnitField (I := I) g₀ s T) j x)) := hfib
+    _ ≤ Real.sqrt (Λ ^ (s + 1)) *
+          ((1 + Dtower (Module.finrank ℝ E)
+              ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) s (fun _ => 0) 1) *
+            ∑ k ∈ Finset.range 2,
+              Real.sqrt (normSq0S (I := I) g₀ x (s + k)
+                (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x))) :=
+      mul_le_mul hpow htow hnn (Real.sqrt_nonneg _)
+    _ = Real.sqrt (Λ ^ (s + 1)) *
+          (1 + Dtower (Module.finrank ℝ E)
+              ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) s (fun _ => 0) 1) *
+            ∑ k ∈ Finset.range 2,
+              Real.sqrt (normSq0S (I := I) g₀ x (s + k)
+                (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x)) := by ring
 
 /-- **The cross-metric jet tower bound at orders `≤ 2`, in `normSq0S` currency.**
 
@@ -545,6 +688,162 @@ theorem sqrtRfns_cross_le
                 (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x)) := by ring
 
 /-! ### The `L²` face -/
+
+/-- The closed cross-metric `L²` jet-transfer constant for the order-one window. -/
+def kjetOneC (n : ℕ) (Λ Λ' : ℝ) (s : ℕ) : ℝ :=
+  Real.sqrt (2 * Real.sqrt (Λ ^ n)) * jetOnePt n Λ Λ' s
+
+lemma kjetOneC_nonneg {Λ Λ' : ℝ} (hΛ' : 0 ≤ Λ') (n s : ℕ) :
+    0 ≤ kjetOneC n Λ Λ' s :=
+  mul_nonneg (Real.sqrt_nonneg _) (jetOnePt_nonneg hΛ' n s)
+
+/-- Cross-metric `L²` transfer of covariant jets on the order-one window.
+Only the first derivative of the varying metric relative to the background is
+used. -/
+theorem jetCross_l2_one
+    (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g₀ gBase Λ')
+    (hΛ' : 0 ≤ Λ')
+    (s : ℕ) (T : SmoothCcTensor g₀ 0 s) {j : ℕ} (hj : j ≤ 1) :
+    ‖iteratedCovGrad (I := I) gBase 0 s j (T.recast (g' := gBase))‖ ≤
+      kjetOneC (Module.finrank ℝ E) Λ Λ' s *
+        ∑ k ∈ Finset.range 2, ‖iteratedCovGrad (I := I) g₀ 0 s k T‖ := by
+  classical
+  set P : ℝ := jetOnePt (Module.finrank ℝ E) Λ Λ' s with hPdef
+  have hPnn : 0 ≤ P := by
+    rw [hPdef]
+    exact jetOnePt_nonneg hΛ' _ s
+  set c : ℝ := Real.sqrt (Λ ^ Module.finrank ℝ E) with hcdef
+  have hcnn : 0 ≤ c := by
+    rw [hcdef]
+    exact Real.sqrt_nonneg _
+  set μB := riemannianVolumeMeasure (I := I) (M := M) gBase with hμB
+  set μ0 := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ0
+  set A : SmoothCcTensor gBase 0 (s + j) :=
+    iteratedCovGrad (I := I) gBase 0 s j (T.recast (g' := gBase)) with hA
+  set b : ℕ → ℝ := fun k => ‖iteratedCovGrad (I := I) g₀ 0 s k T‖ with hb
+  have hbnn : ∀ k, 0 ≤ b k := fun k => norm_nonneg _
+  set R : ℕ → M → ℝ := fun k x =>
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + k) x
+      ((iteratedCovGrad (I := I) g₀ 0 s k T).toSection x) with hR
+  have hRnn : ∀ k x, 0 ≤ R k x := fun k x =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + k) x _
+  set F : M → ℝ := fun x => 2 * P ^ 2 * ∑ k ∈ Finset.range 2, R k x with hF
+  have hFnn : ∀ x, 0 ≤ F x := by
+    intro x
+    have hsum : (0 : ℝ) ≤ ∑ k ∈ Finset.range 2, R k x :=
+      Finset.sum_nonneg (fun k _ => hRnn k x)
+    exact mul_nonneg (by positivity : (0 : ℝ) ≤ 2 * P ^ 2) hsum
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
+        (A.toSection x) ≤ F x := by
+    intro x
+    have h := sqrtRfns_one_le (I := I) gBase g₀ hEq hjet s T hj x
+    have hLnn : (0 : ℝ) ≤
+        riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
+          (A.toSection x) :=
+      riemannianFiberNormSq_nonneg (I := I) (M := M) gBase 0 (s + j) x _
+    have hcs : (∑ k ∈ Finset.range 2, Real.sqrt (R k x)) ^ 2 ≤
+        2 * ∑ k ∈ Finset.range 2, R k x := by
+      have hch := sq_sum_le_card_mul_sum_sq (s := Finset.range 2)
+        (f := fun k => Real.sqrt (R k x))
+      rw [Finset.card_range] at hch
+      have hsq : ∑ k ∈ Finset.range 2, Real.sqrt (R k x) ^ 2 =
+          ∑ k ∈ Finset.range 2, R k x :=
+        Finset.sum_congr rfl (fun k _ => Real.sq_sqrt (hRnn k x))
+      rw [hsq] at hch
+      exact_mod_cast hch
+    have hsq2 :
+        riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
+            (A.toSection x) ≤
+          (P * ∑ k ∈ Finset.range 2, Real.sqrt (R k x)) ^ 2 := by
+      have hsquare := pow_le_pow_left₀ (Real.sqrt_nonneg _) h 2
+      rwa [Real.sq_sqrt hLnn] at hsquare
+    have hstep : (P * ∑ k ∈ Finset.range 2, Real.sqrt (R k x)) ^ 2 ≤ F x := by
+      have hmul := mul_le_mul_of_nonneg_left hcs (sq_nonneg P)
+      calc
+        (P * ∑ k ∈ Finset.range 2, Real.sqrt (R k x)) ^ 2 =
+            P ^ 2 * (∑ k ∈ Finset.range 2, Real.sqrt (R k x)) ^ 2 := by ring
+        _ ≤ P ^ 2 * (2 * ∑ k ∈ Finset.range 2, R k x) := hmul
+        _ = F x := by rw [hF]; ring
+    exact le_trans hsq2 hstep
+  have hIntA : Integrable
+      (fun x => riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
+        (A.toSection x)) μB :=
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) gBase 0 (s + j) A
+  have hIntR : ∀ k, Integrable (R k) μ0 := fun k =>
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (s + k) _
+  have hIntF0 : Integrable F μ0 := by
+    rw [hF]
+    exact (integrable_finset_sum (Finset.range 2) (fun k _ => hIntR k)).const_mul
+      (2 * P ^ 2)
+  have hmeasle : μB ≤ ENNReal.ofReal c • μ0 :=
+    (volumeMeasure_cross_le (I := I) gBase g₀ hEq).2
+  have hIntFs : Integrable F (ENNReal.ofReal c • μ0) :=
+    hIntF0.smul_measure ENNReal.ofReal_ne_top
+  have hIntFB : Integrable F μB := hIntFs.mono_measure hmeasle
+  have hnormA : ‖A‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
+        (A.toSection x) ∂μB := by
+    rw [SmoothCcTensor.norm_def (I := I) (M := M) A, hμB]
+    exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
+      (I := I) (M := M) gBase (s + j) A
+  have hnormB : ∀ k, b k ^ 2 = ∫ x, R k x ∂μ0 := by
+    intro k
+    rw [hb, hR, hμ0]
+    simp only
+    rw [SmoothCcTensor.norm_def (I := I) (M := M)
+      (iteratedCovGrad (I := I) g₀ 0 s k T)]
+    exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
+      (I := I) (M := M) g₀ (s + k)
+        (iteratedCovGrad (I := I) g₀ 0 s k T)
+  have hIF0 : ∫ x, F x ∂μ0 =
+      2 * P ^ 2 * ∑ k ∈ Finset.range 2, b k ^ 2 := by
+    rw [hF, MeasureTheory.integral_const_mul]
+    congr 1
+    rw [MeasureTheory.integral_finset_sum (Finset.range 2) (fun k _ => hIntR k)]
+    exact (Finset.sum_congr rfl (fun k _ => hnormB k)).symm
+  have hchain : ‖A‖ ^ 2 ≤
+      c * (2 * P ^ 2 * ∑ k ∈ Finset.range 2, b k ^ 2) := by
+    rw [hnormA]
+    calc
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
+          (A.toSection x) ∂μB
+          ≤ ∫ x, F x ∂μB := MeasureTheory.integral_mono hIntA hIntFB hpt
+      _ ≤ ∫ x, F x ∂(ENNReal.ofReal c • μ0) :=
+        MeasureTheory.integral_mono_measure hmeasle
+          (Filter.Eventually.of_forall hFnn) hIntFs
+      _ = c * ∫ x, F x ∂μ0 := by
+        rw [MeasureTheory.integral_smul_measure, ENNReal.toReal_ofReal hcnn,
+          smul_eq_mul]
+      _ = c * (2 * P ^ 2 * ∑ k ∈ Finset.range 2, b k ^ 2) := by rw [hIF0]
+  have hsumsq : ∑ k ∈ Finset.range 2, b k ^ 2 ≤
+      (∑ k ∈ Finset.range 2, b k) ^ 2 :=
+    Finset.sum_sq_le_sq_sum_of_nonneg (fun k _ => hbnn k)
+  have hSnn : (0 : ℝ) ≤ ∑ k ∈ Finset.range 2, b k :=
+    Finset.sum_nonneg (fun k _ => hbnn k)
+  have hfinal : ‖A‖ ^ 2 ≤
+      (kjetOneC (Module.finrank ℝ E) Λ Λ' s *
+        ∑ k ∈ Finset.range 2, b k) ^ 2 := by
+    have hexp :
+        (kjetOneC (Module.finrank ℝ E) Λ Λ' s *
+          ∑ k ∈ Finset.range 2, b k) ^ 2 =
+            2 * c * P ^ 2 * (∑ k ∈ Finset.range 2, b k) ^ 2 := by
+      rw [kjetOneC, ← hPdef, ← hcdef, mul_pow, mul_pow,
+        Real.sq_sqrt (by positivity : (0 : ℝ) ≤ 2 * c)]
+    rw [hexp]
+    have hstep : c * (2 * P ^ 2 * ∑ k ∈ Finset.range 2, b k ^ 2) ≤
+        2 * c * P ^ 2 * (∑ k ∈ Finset.range 2, b k) ^ 2 := by
+      have hcoef : (0 : ℝ) ≤ 2 * P ^ 2 := by positivity
+      nlinarith [mul_le_mul_of_nonneg_left hsumsq hcoef]
+    exact le_trans hchain hstep
+  have hKnn : (0 : ℝ) ≤
+      kjetOneC (Module.finrank ℝ E) Λ Λ' s *
+        ∑ k ∈ Finset.range 2, b k :=
+    mul_nonneg (kjetOneC_nonneg hΛ' _ s) hSnn
+  have hsqrt := Real.sqrt_le_sqrt hfinal
+  rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hKnn] at hsqrt
 
 /-- **The closed cross-metric `L²` jet-transfer constant.**
 

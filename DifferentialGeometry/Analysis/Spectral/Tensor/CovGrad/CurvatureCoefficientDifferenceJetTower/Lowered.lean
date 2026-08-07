@@ -627,10 +627,12 @@ lemma rfns_iteratedCovGrad_raisedKoszul_pointwise (g₀ g₁ : SmoothRiemannianM
   exact rfns_iteratedCovGrad_koszulCovecCc_pointwise (I := I) (M := M) g₀ T i x
 
 set_option linter.unusedVariables false in
-theorem exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid
-    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+/-- A single fibre-smallness ceiling fixes the sharp-flat endomorphism grid
+before either metric varies. -/
+theorem sharpFlat_grid_unif
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ S : ℕ → ℝ, (∀ l, 0 ≤ S l) ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
         {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
@@ -643,14 +645,14 @@ theorem exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid
               ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection x)) l := by
   classical
   obtain ⟨CD, hCD_nn, hCD⟩ :=
-    rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
-      (I := I) (M := M) g₀ hδ₀
-  obtain ⟨cid, hcid_nn, hcid⟩ := exists_bound_riemannianFiberNormSq_smoothCcTensor
-    (I := I) (M := M) g₀ 1 1
-    (slotInsertEndoCc (I := I) (M := M) g₀ 0 (fullRaisedEndoField (I := I) (M := M) g₀ g₀))
+    invDiff_zero_unif (I := I) (M := M) hδ₀
+  let cid : ℝ := (Module.finrank ℝ E : ℝ) ^ 2
+  have hcid_nn : 0 ≤ cid := by
+    dsimp [cid]
+    positivity
   refine ⟨fun l => 2 * CD l + 2 * cid,
     fun l => by have := hCD_nn l; linarith, ?_⟩
-  intro g₁ T htie δ hδ_le hδ0 hbound l x
+  intro g₀ g₁ T htie δ hδ_le hδ0 hbound l x
   set b : ℕ → ℝ := fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
     ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection x) with hb_def
   have hb : ∀ j, 0 ≤ b j :=
@@ -680,7 +682,7 @@ theorem exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid
         (slotInsertEndoCc (I := I) (M := M) g₀ 0
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) ≤
       CD l * Combinatorics.antidiagonalTupleGrid b l :=
-    hCD g₁ T htie hδ_le hδ0 hbound l x
+    hCD g₀ g₁ T htie hδ_le hδ0 hbound l x
   have hB : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + l) x
       ((iteratedCovGrad (I := I) g₀ 1 1 l
         (slotInsertEndoCc (I := I) (M := M) g₀ 0
@@ -690,7 +692,8 @@ theorem exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid
     | 0 =>
         rw [iteratedCovGrad_zero]
         rw [Combinatorics.antidiagonalTupleGrid_zero, mul_one]
-        exact hcid x
+        rw [← sharpFlatEndoCc_eq_slotInsert_fullRaised (I := I) (M := M) g₀ g₀]
+        exact rfns_idEndo_le (I := I) (M := M) g₀ x
     | (m + 1) =>
         rw [iteratedCovGrad_slotInsert_fullRaised_id_succ_eq_zero (I := I) (M := M) g₀ m]
         rw [show ((0 : SmoothCcTensor g₀ 1 (1 + (m + 1))).toSection x) =
@@ -715,6 +718,27 @@ theorem exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid
               (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x)
         linarith
     _ = (2 * CD l + 2 * cid) * Combinatorics.antidiagonalTupleGrid b l := by ring
+
+set_option linter.unusedVariables false in
+/-- Metric-local compatibility wrapper for `sharpFlat_grid_unif`. -/
+theorem exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ S : ℕ → ℝ, (∀ l, 0 ≤ S l) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (l : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + l) x
+            ((iteratedCovGrad (I := I) g₀ 1 1 l
+              (sharpFlatEndoCc (I := I) g₀ g₁)).toSection x) ≤
+          S l * Combinatorics.antidiagonalTupleGrid
+            (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection x)) l := by
+  obtain ⟨S, hS, hbnd⟩ := sharpFlat_grid_unif (I := I) (M := M) hδ₀
+  exact ⟨S, hS, hbnd g₀⟩
 
 omit [BoundarylessManifold I M] in
 lemma rfns_iteratedCovGrad_order_congr_ts (g : SmoothRiemannianMetric I M)
@@ -1147,10 +1171,12 @@ lemma rfns_iteratedCovGrad_armSlotPass_connDiffArm_le
 end CurvatureCoefficientDifferenceJetTower
 
 set_option linter.unusedVariables false in
-theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
-    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+/-- A single fibre-smallness ceiling fixes the connection-difference grid
+before either metric varies. -/
+theorem connDiff_grid_unif
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ CA : ℕ → ℝ, (∀ j, 0 ≤ CA j) ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
         {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
@@ -1164,14 +1190,13 @@ theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
               (fun j' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j') x
                 ((iteratedCovGrad (I := I) g₀ 0 2 j' T).toSection x)) k := by
   classical
-  obtain ⟨S, hS_nn, hS⟩ := exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid
-    (I := I) (M := M) g₀ hδ₀
+  obtain ⟨S, hS_nn, hS⟩ := sharpFlat_grid_unif (I := I) (M := M) hδ₀
   refine ⟨fun j => appCcGdiag (E := E) j *
       ∑ i ∈ Finset.range (j + 1), 10 * ∑ l ∈ Finset.range (j + 1 - i), S l,
     fun j => mul_nonneg (appCcGdiag_nonneg (E := E) j)
       (Finset.sum_nonneg fun i _ => mul_nonneg (by norm_num)
         (Finset.sum_nonneg fun l _ => hS_nn l)), ?_⟩
-  intro g₁ T htie δ hδ_le hδ0 hbound j x
+  intro g₀ g₁ T htie δ hδ_le hδ0 hbound j x
   set b : ℕ → ℝ := fun j' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j') x
     ((iteratedCovGrad (I := I) g₀ 0 2 j' T).toSection x) with hb_def
   have hb : ∀ j', 0 ≤ b j' :=
@@ -1189,7 +1214,7 @@ theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
       (10 * S l) * G := by
     intro i hi l hl
     have h1 := rfns_iteratedCovGrad_raisedKoszul_pointwise (I := I) (M := M) g₀ g₁ T htie i x
-    have h2 := hS g₁ T htie hδ_le hδ0 hbound l x
+    have h2 := hS g₀ g₁ T htie hδ_le hδ0 hbound l x
     have h1_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 1 (2 + i) x
       ((iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁)).toSection x)
     have h2_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 1 (1 + l) x
@@ -1256,6 +1281,28 @@ theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
     _ = (appCcGdiag (E := E) j *
           ∑ i ∈ Finset.range (j + 1), 10 * ∑ l ∈ Finset.range (j + 1 - i), S l) * G := by
         ring
+
+set_option linter.unusedVariables false in
+/-- Metric-local compatibility wrapper for `connDiff_grid_unif`. -/
+theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ CA : ℕ → ℝ, (∀ j, 0 ≤ CA j) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (j : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 j
+              (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+          CA j * ∑ k ∈ Finset.range (j + 2),
+            Combinatorics.antidiagonalTupleGrid
+              (fun j' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j') x
+                ((iteratedCovGrad (I := I) g₀ 0 2 j' T).toSection x)) k := by
+  obtain ⟨CA, hCA, hbnd⟩ := connDiff_grid_unif (I := I) (M := M) hδ₀
+  exact ⟨CA, hCA, hbnd g₀⟩
 
 end RiemannLoweredDifference
 

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0AMixRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFJetRadiusFree
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CometricTraceSelfBound
 
 /-!
 # Radius-free pointwise bounds for moving `lc0AMix` traces
@@ -37,51 +38,55 @@ variable
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedVariables false in
-/-- Pointwise low-window control of a moving rank-`(p + 2, p)` trace. -/
-theorem trace_grid_rf
-    (p : ℕ) (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
-    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+private theorem trace_grid_of
+    (p : ℕ) (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ}
+    (CD S : ℕ → ℝ) (hCD_nn : ∀ i, 0 ≤ CD i)
+    (hCD : ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
         (hbound : gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (σ : Equiv.Perm (Fin (p + 2))) (i : ℕ) (x : M),
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + i) x
+            ((iteratedCovGrad (I := I) g₀ 1 1 i
+              (slotInsertEndoCc (I := I) (M := M) g₀ 0
+                (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) ≤
+          CD i * ∑ n ∈ Finset.range (i + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
+    (hS_nn : ∀ i, 0 ≤ S i)
+    (hS : ∀ (i : ℕ) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + i) x
+          ((iteratedCovGrad (I := I) g₀ (p + 2) p i
+            (cometricDoubleTraceField (I := I) g₀ p)).toSection x) ≤ S i) :
+    ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+      (htie : ∀ (y : M) (v w : TangentSpace I y),
+        g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+      {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
+      (hbound : gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ P) δ)
+      (σ : Equiv.Perm (Fin (p + 2))) (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + i) x
             ((iteratedCovGrad (I := I) g₀ (p + 2) p i
               (lc0TraceRF (I := I) (M := M) g₀ g₁ p σ)).toSection x) ≤
-          C i * ∑ k ∈ Finset.range (i + 1),
+          (2 * (appCcGdiag (E := E) i *
+              ∑ m ∈ Finset.range (i + 1),
+                S m * ∑ l ∈ Finset.range (i + 1 - m),
+                  (Module.finrank ℝ E : ℝ) ^ (p + 1) * CD l) + 2 * S i) *
+            ∑ k ∈ Finset.range (i + 1),
             Combinatorics.antidiagonalTupleGrid
               (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) k := by
   classical
-  obtain ⟨CD, hCD_nn, hCD⟩ :=
-    rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
-      (I := I) (M := M) g₀ hδ₀
   let Φ : SmoothCcTensor g₀ (p + 2) p := cometricDoubleTraceField (I := I) g₀ p
-  have hS_ex : ∀ m : ℕ, ∃ S : ℝ, 0 ≤ S ∧ ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + m) x
-        ((iteratedCovGrad (I := I) g₀ (p + 2) p m Φ).toSection x) ≤ S :=
-    fun m => exists_bound_riemannianFiberNormSq_smoothCcTensor
-      (I := I) (M := M) g₀ (p + 2) (p + m)
-      (iteratedCovGrad (I := I) g₀ (p + 2) p m Φ)
-  choose S hS_nn hS using hS_ex
   let fr : ℝ := Module.finrank ℝ E
   let CQ : ℕ → ℝ := fun i => appCcGdiag (E := E) i *
     ∑ m ∈ Finset.range (i + 1),
       S m * ∑ l ∈ Finset.range (i + 1 - m), fr ^ (p + 1) * CD l
-  let C : ℕ → ℝ := fun i => 2 * CQ i + 2 * S i
   have hfr : 0 ≤ fr := Nat.cast_nonneg _
-  have hCQ : ∀ i, 0 ≤ CQ i := by
-    intro i
-    exact mul_nonneg (appCcGdiag_nonneg (E := E) i)
-      (Finset.sum_nonneg fun m _ => mul_nonneg (hS_nn m)
-        (Finset.sum_nonneg fun l _ => mul_nonneg (pow_nonneg hfr (p + 1)) (hCD_nn l)))
-  refine ⟨C, fun i => by
-    dsimp [C]
-    exact add_nonneg (mul_nonneg (by norm_num) (hCQ i))
-      (mul_nonneg (by norm_num) (hS_nn i)), ?_⟩
   intro g₁ P htie δ hδ_le hδ_nonneg hbound σ i x
   let b : ℕ → ℝ := fun j =>
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -198,10 +203,151 @@ theorem trace_grid_rf
     iteratedCovGrad_add, SmoothCcTensor.toSection_add]
   refine le_trans
     (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ (p + 2) (p + i) x _ _) ?_
-  change 2 * _ + 2 * _ ≤ C i * G
+  change 2 * _ + 2 * _ ≤ (2 * CQ i + 2 * S i) * G
   have hQ' := mul_le_mul_of_nonneg_left hQ (by norm_num : (0 : ℝ) ≤ 2)
   have hfixed' := mul_le_mul_of_nonneg_left hfixed (by norm_num : (0 : ℝ) ≤ 2)
-  change _ ≤ (2 * CQ i + 2 * S i) * G
   linarith
+
+set_option linter.unusedVariables false in
+/-- At every passenger rank, one smallness ceiling fixes the moving-trace
+pointwise grid before either metric varies. -/
+theorem trace_grid_unif
+    (p : ℕ) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (σ : Equiv.Perm (Fin (p + 2))) (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + i) x
+            ((iteratedCovGrad (I := I) g₀ (p + 2) p i
+              (lc0TraceRF (I := I) (M := M) g₀ g₁ p σ)).toSection x) ≤
+          C i * ∑ k ∈ Finset.range (i + 1),
+            Combinatorics.antidiagonalTupleGrid
+              (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) k := by
+  classical
+  obtain ⟨CD, hCD_nn, hCD⟩ := invDiff_zero_unif (I := I) (M := M) hδ₀
+  let fr : ℝ := Module.finrank ℝ E
+  let S : ℕ → ℝ := fun i => if i = 0 then fr ^ (p + 6) else 0
+  let C : ℕ → ℝ := fun i =>
+    2 * (appCcGdiag (E := E) i *
+      ∑ m ∈ Finset.range (i + 1),
+        S m * ∑ l ∈ Finset.range (i + 1 - m), fr ^ (p + 1) * CD l) + 2 * S i
+  have hfr : 0 ≤ fr := Nat.cast_nonneg _
+  have hS_nn : ∀ i, 0 ≤ S i := by
+    intro i
+    dsimp only [S]
+    split <;> positivity
+  have hC : ∀ i, 0 ≤ C i := by
+    intro i
+    dsimp only [C]
+    exact add_nonneg
+      (mul_nonneg (by norm_num) (mul_nonneg (appCcGdiag_nonneg (E := E) i)
+        (Finset.sum_nonneg fun m _ => mul_nonneg (hS_nn m)
+          (Finset.sum_nonneg fun l _ =>
+            mul_nonneg (pow_nonneg hfr (p + 1)) (hCD_nn l)))))
+      (mul_nonneg (by norm_num) (hS_nn i))
+  refine ⟨C, hC, ?_⟩
+  intro g₀ g₁ P htie δ hδ_le hδ_nonneg hbound σ i x
+  have hS : ∀ (m : ℕ) (y : M),
+      riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + m) y
+          ((iteratedCovGrad (I := I) g₀ (p + 2) p m
+            (cometricDoubleTraceField (I := I) g₀ p)).toSection y) ≤ S m := by
+    intro m y
+    match m with
+    | 0 =>
+        rw [iteratedCovGrad_zero]
+        simpa only [S, fr, if_pos] using
+          (cometricTrace_rfns_p (I := I) (M := M) p g₀ y)
+    | (m' + 1) =>
+        rw [iteratedCovGrad_eq_zero_of_covGrad_eq_zero (I := I) (M := M) g₀
+          (p + 2) p (cometricDoubleTraceField (I := I) g₀ p)
+          (cometricDoubleTraceField_covGrad_eq_zero (I := I) g₀ p) m']
+        rw [show ((0 : SmoothCcTensor g₀ (p + 2) (p + (m' + 1))).toSection y) =
+            (0 : TensorRSSpace (p + 2) (p + (m' + 1)) I y) from by
+          rw [SmoothCcTensor.toSection_zero]
+          rfl]
+        rw [riemannianFiberNormSq_zero (I := I) (M := M) g₀
+          (p + 2) (p + (m' + 1)) y]
+        simp [S]
+  simpa only [C, fr] using
+    trace_grid_of (I := I) (M := M) p g₀ CD S hCD_nn (hCD g₀) hS_nn hS
+      g₁ P htie hδ_le hδ_nonneg hbound σ i x
+
+set_option linter.unusedVariables false in
+/-- Rank-two specialization of `trace_grid_unif`. -/
+theorem trace2_grid_unif
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (σ : Equiv.Perm (Fin 4)) (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 4 2 i
+              (lc0TraceRF (I := I) (M := M) g₀ g₁ 2 σ)).toSection x) ≤
+          C i * ∑ k ∈ Finset.range (i + 1),
+            Combinatorics.antidiagonalTupleGrid
+              (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) k := by
+  simpa only [Nat.reduceAdd] using trace_grid_unif (I := I) (M := M) 2 hδ₀
+
+set_option linter.unusedVariables false in
+/-- Metric-local compatibility wrapper for `trace2_grid_unif` and the
+rank-generic pointwise moving-trace grid. -/
+theorem trace_grid_rf
+    (p : ℕ) (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (σ : Equiv.Perm (Fin (p + 2))) (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + i) x
+            ((iteratedCovGrad (I := I) g₀ (p + 2) p i
+              (lc0TraceRF (I := I) (M := M) g₀ g₁ p σ)).toSection x) ≤
+          C i * ∑ k ∈ Finset.range (i + 1),
+            Combinatorics.antidiagonalTupleGrid
+              (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) k := by
+  classical
+  obtain ⟨CD, hCD_nn, hCD⟩ :=
+    rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
+      (I := I) (M := M) g₀ hδ₀
+  let Φ : SmoothCcTensor g₀ (p + 2) p := cometricDoubleTraceField (I := I) g₀ p
+  have hS_ex : ∀ m : ℕ, ∃ S : ℝ, 0 ≤ S ∧ ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + m) x
+        ((iteratedCovGrad (I := I) g₀ (p + 2) p m Φ).toSection x) ≤ S :=
+    fun m => exists_bound_riemannianFiberNormSq_smoothCcTensor
+      (I := I) (M := M) g₀ (p + 2) (p + m)
+      (iteratedCovGrad (I := I) g₀ (p + 2) p m Φ)
+  choose S hS_nn hS using hS_ex
+  let fr : ℝ := Module.finrank ℝ E
+  let C : ℕ → ℝ := fun i =>
+    2 * (appCcGdiag (E := E) i *
+      ∑ m ∈ Finset.range (i + 1),
+        S m * ∑ l ∈ Finset.range (i + 1 - m), fr ^ (p + 1) * CD l) + 2 * S i
+  have hfr : 0 ≤ fr := Nat.cast_nonneg _
+  have hC : ∀ i, 0 ≤ C i := by
+    intro i
+    dsimp only [C]
+    exact add_nonneg
+      (mul_nonneg (by norm_num) (mul_nonneg (appCcGdiag_nonneg (E := E) i)
+        (Finset.sum_nonneg fun m _ => mul_nonneg (hS_nn m)
+          (Finset.sum_nonneg fun l _ => mul_nonneg (pow_nonneg hfr (p + 1)) (hCD_nn l)))))
+      (mul_nonneg (by norm_num) (hS_nn i))
+  refine ⟨C, hC, ?_⟩
+  intro g₁ P htie δ hδ_le hδ_nonneg hbound σ i x
+  simpa only [C, fr] using
+    trace_grid_of (I := I) (M := M) p g₀ CD S hCD_nn hCD hS_nn hS
+      g₁ P htie hδ_le hδ_nonneg hbound σ i x
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

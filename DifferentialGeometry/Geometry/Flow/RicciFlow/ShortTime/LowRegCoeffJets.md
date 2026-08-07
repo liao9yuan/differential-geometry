@@ -32,10 +32,40 @@ control of the insertion difference, vector--bilinear, and mixed fields in
 
 ## Verification and accounting
 
-The source has not yet been focused-checked because the shared build is under
-an exclusive sequential artifact refresh.  None of the new declarations in
-this file is counted as verified until that check completes.
+The current source passes focused verification.  This establishes elaboration
+of the local coefficient-jet producers; it does not discharge any unrelated
+analytic `sorry` elsewhere in the short-time tree.
 
 `ricci_flow_unif_existence` remains 0%.  This machinery is currently a
 three-dimensional route and therefore does not by itself close the existing
 dimension-generic public endpoint statement.
+
+## 2026-08-06 supplied order-zero assembly
+
+`rhs0_h1_parts` now exposes the reusable supplied-parts assembly hidden inside
+the older metricwise `rhs0_h1_of_aux`.  It accepts `H1` bounds for the Ricci,
+`DLa`, and cancellation-preserving tail pieces and returns the exact complete
+order-zero RHS coefficient bound.  This is a projection/assembly lemma, not a
+new analytic frontier and not a replacement hypothesis.
+
+Focused verification and direct export passed.  Its axiom census contains only
+`propext`, `Classical.choice`, and `Quot.sound`.  This helper is 100% complete;
+the final class-uniform low-bound packet remains a separate unstated theorem.
+
+## 2026-08-07 self-kappa H2 pair
+
+`symm_grad3_sub` and `koszul_covec_sub` record the exact subtraction laws for
+the fixed Koszul operator.  The public `kappa_pair_h2` then proves that the
+two-state self-background lowered connection difference has an `H2` jet
+bounded by ten times the `H3` jet of the perturbation difference.  The proof
+uses exact Koszul cancellation, so it needs neither an inverse-metric estimate
+nor a spectral small-ball hypothesis.
+
+Focused verification passed.  This brick is complete and is the self-kappa
+input for lifting the arbitrary-background `AMix` telescope from `H1` to `H2`;
+the full `AMix` arm and the other two order-zero arms remain separate work.
+
+The public `pbLow_h2_mul` also exposes the linear-in-radius form of the fixed
+background pairing estimate.  Its focused verification and direct module
+refresh passed.  This is the second connection-factor input consumed by
+`amixBg_pair_h2`; it does not by itself estimate a complete order-zero arm.

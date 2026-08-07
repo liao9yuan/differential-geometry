@@ -758,6 +758,7 @@ Honest sessions-to-`lc0VB`-green: **~1** (Findings 1–2 are reuse; only the ip-
 Sessions-to-`lc0AMix`-green after: **~1** (two `slotExtend` arms, no ip).
 
 ## Honest accounting (updated 2026-07-26, session 9 — FINAL for `lc0VB`)
+
 `(N) ricci_flow_unif_existence` still **0%** (both endpoints STILL UNSTATED = 0%).  Dedicated
 machinery: top piece + **3 of 4 Kc atoms GREEN and axiom-clean (`lc0Riem`, `lc0Insert`-diff,
 `lc0VB` — zero `sorry` left in this leaf)**; `lc0AMix` unstarted (its route: two
@@ -767,3 +768,53 @@ mirroring `lc0RiemLive`; no ip).  The generic ip engine now lives in
 `InteriorProductJetBound.lean` and is reusable (brick 4's R-free re-derivation consumes
 `norm_icg_ipLow_le`, which is radius-agnostic, + `wOmega_lowOrder_jetL2_radiusFree`).
 Sessions-to-`lc0AMix`: ~1–2 (fibre identity + rank transports; producers committed).
+
+## 2026-08-06 — class-first `lc0RiemPass` H1 audit
+
+**Status: source audit failed at a missing single-slot connection-calculus API; no Lean
+declaration was changed.**  The desired zero-order identity is
+
+`lc0RiemPass(g)(D)(v0,v1,v2,v3) = D(R_g(v2,v3)v0,v1)`.
+
+Its first covariant derivative should replace `R_g` by `nablaRiemannOp g` and add a
+leading derivative slot.  This is mathematically routine because the trace uses the same
+metric whose Levi-Civita connection differentiates the coefficient.  It is not currently a
+public consequence of the available operator-field API, however:
+
+- `gradSlotCurvCoeff` supplies only the **sum** of the two tensor-slot insertions.  One
+  insertion cannot be bounded from that sum because the two terms can cancel.
+- Expanding the private `lc0RiemPassFib` proves the value formula only after a
+  metric trace/lowering contraction; no public theorem commutes that particular contraction
+  with `covGrad`.
+- Rewriting the passenger through `slotFreeOpCc g 1`, `slotExtend`, a domain transpose,
+  and an output permutation reaches the same gap: output permutations have public norm
+  invariance, but the exact covariant naturality needed for the domain transpose is only
+  available in private/local proofs elsewhere.
+
+The smallest reusable repair belongs below this consumer and should expose a single-slot
+free-curvature operator field, parameterized by `k : Fin s`, together with its value and
+first-covariant-derivative evaluations:
+
+`A(m[k := R(u,w)(m k)])` and
+`A(m[k := nablaRiemannOp(d,u,w,m k)])`.
+
+Then `lc0RiemPass_eval` and `lc0RiemPass_cov_eval` are algebraic reindexing corollaries, and
+the uniform H1 passenger bound follows from `unifCurvSup_of` and `unifRmOpOne_of` without
+using the full-slot sum or fourth metric jets.  This looks like a substantial but localized
+API addition, not a mathematical obstruction and not a consumer-side wrapper.
+
+## 2026-08-06 — class-first `lc0RiemPass` H1 resolution
+
+The preceding audit is superseded.  The existing rank-one specialization
+`slotFreeOpCc g 1` is sufficient: after one source swap, one slot extension,
+and the output permutation `lieCorr0VBPerm`, it gives the passenger exactly,
+including the required sign.  The trace collapse uses the public orthonormal
+frame representation and `toModel_cons_sum_smul`; no new foundational class or
+single-slot hierarchy was needed.
+
+The new public `lc0RiemPass_eval` and `lc0RiemPass_refold` pass focused
+verification and have a fresh exact module export.  Their axiom audit reports
+only `propext`, `Classical.choice`, and `Quot.sound`.  Failed intermediate
+attempts were only tuple-normal-form mismatches (`![…]` versus `Fin.cons`) and
+one `toModel`-under-negation rewrite shape; explicit local equalities resolved
+them without changing the mathematical route.

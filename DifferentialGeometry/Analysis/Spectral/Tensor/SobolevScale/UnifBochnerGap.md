@@ -428,3 +428,15 @@ enters this endpoint.
 
 Verification status: focused verification passed with one Lean thread and no warnings. No
 mathematical blocker was found.
+
+## Finite H3 curvature-action specialization (2026-08-05)
+
+`covsum_hs_three` now proves the hard spectral `H³` to covariant-jet comparison from exactly
+two finite inputs: `IsCurvAction0 g s K₀` and `IsCurvAction0 g (s + 1) K₁`. The proof reuses
+`covsum_hs_two` for orders zero through two, applies one rank-`s + 1` Bochner step to `∇S`,
+and bounds `Δ∇S = ∇ΔS + pointwiseTensorCurv S` with the rank-`s` action package. It therefore
+does not consume the all-rank/all-order `Fc` interface.
+
+The closed coefficient is `h3CovsumC K₀ K₁`; focused verification passed with one Lean
+thread and no warnings. For the short-time metric lane at `s = 2`, the remaining geometric
+input is the separately packaged rank-three action producer.

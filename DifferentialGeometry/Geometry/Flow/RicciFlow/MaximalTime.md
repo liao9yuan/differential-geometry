@@ -501,3 +501,15 @@ genuine multi-session assembly whose last frontier is `rm04Cont`. Matches the 20
 ("multi-brick, ~one BBS brick"). Resume by importing `ExtendedSolutionRegularity.lean` into `MaximalTime`
 once the linchpin + `rm04Cont` land.
 
+## 2026-08-06 — dimension-three restart input propagated
+
+`extends_of_rmBounded` now passes its existing `hdim` hypothesis to the newly
+dimension-three `ricci_flow_interior_restart` interface.  No mathematical
+content or conclusion changed.  The focused check and direct module export
+pass; `(N)` remains the separate unproved analytic endpoint.
+
+The later packet/gauge refactor does not change this consumer interface.
+Focused verification remains green after the new `lowreg_dt_unif` import
+chain; the sole inherited analytic dependency is still
+`bg_packet_of_solve` through `(N)`.
+

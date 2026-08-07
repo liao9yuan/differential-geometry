@@ -150,22 +150,21 @@ theorem fiberLp_slotExtend
   rw [coe_nnnorm, Real.norm_of_nonneg (Real.sqrt_nonneg _)]
 
 /-- On a closed manifold, the intrinsic fibre `L6` norm controls its `L3`
-norm.  The constant depends only on the background volume. -/
-theorem fiberLp3_le_lp6
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ S : SmoothCcTensor g r s,
+norm with the explicit sixth root of the total volume. -/
+theorem fiberLp3_le_6
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) :
       lpNorm (fiberLpFun g r s S) 3
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
-        C * lpNorm (fiberLpFun g r s S) 6
+        (((riemannianVolumeMeasure (I := I) (M := M) g) Set.univ) ^
+            (1 / 6 : ℝ)).toReal *
+          lpNorm (fiberLpFun g r s S) 6
           (riemannianVolumeMeasure (I := I) (M := M) g) := by
   let μ := riemannianVolumeMeasure (I := I) (M := M) g
   letI : IsFiniteMeasure μ := by
     dsimp [μ]
     exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I) (M := M) g
-  let V : ℝ := (μ Set.univ ^ (1 / 6 : ℝ)).toReal
-  refine ⟨V, ENNReal.toReal_nonneg, ?_⟩
-  intro S
   have hcont := fiberLpFun_continuous (I := I) (M := M) g r s S
   have hmem : MemLp (fiberLpFun g r s S) 6 μ :=
     hcont.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
@@ -183,7 +182,20 @@ theorem fiberLp3_le_lp6
     toReal_eLpNorm hcont.aestronglyMeasurable,
     show 1 / (3 : ℝ≥0∞).toReal - 1 / (6 : ℝ≥0∞).toReal =
       (1 / 6 : ℝ) by norm_num] at hreal
-  simpa only [V, mul_comm] using hreal
+  simpa only [μ, mul_comm] using hreal
+
+/-- On a closed manifold, the intrinsic fibre `L6` norm controls its `L3`
+norm.  The packaged constant depends only on the total volume. -/
+theorem fiberLp3_le_lp6
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ S : SmoothCcTensor g r s,
+      lpNorm (fiberLpFun g r s S) 3
+          (riemannianVolumeMeasure (I := I) (M := M) g) ≤
+        C * lpNorm (fiberLpFun g r s S) 6
+          (riemannianVolumeMeasure (I := I) (M := M) g) := by
+  refine ⟨(((riemannianVolumeMeasure (I := I) (M := M) g) Set.univ) ^
+      (1 / 6 : ℝ)).toReal, ENNReal.toReal_nonneg, ?_⟩
+  exact fiberLp3_le_6 (I := I) (M := M) g r s
 
 /-- An operator field in metric `L2` acting on a pointwise-bounded covariant
 tensor is bounded in metric `L2`. -/

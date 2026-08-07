@@ -22,7 +22,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (unitModel unitTensor smoothCcTensor_ext_of_unitModel traceHessianCoeff
-    ricciArmPrincipalCoeff gradSlot_sub_eq_curv)
+    ricciArmPrincipalCoeff gradSlotCurvCoeff gradSlotCurv_apply gradSlotCurv_spec)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricLmodel)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -201,14 +201,23 @@ theorem phiMet_symm_zero
   rw [hswapA, hswapB]
   ring
 
-/-- A fixed background-curvature coefficient realizing the antisymmetric part
-of the first two slots of the second covariant derivative. -/
+/-- The canonical background-curvature coefficient realizing the antisymmetric
+part of the first two slots of the second covariant derivative. -/
 noncomputable def gradSwapCurvCoeff (g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 :=
-  Classical.choose
-    (gradSlot_sub_eq_curv (I := I) (M := M) g₀)
+  gradSlotCurvCoeff (I := I) (M := M) g₀
 
-/-- The chosen background-curvature coefficient realizes covariant-derivative
+/-- The public gradient-swap coefficient has the explicit slotwise-curvature
+fibre value supplied by `gradSlotCurvCoeff`. -/
+@[simp] theorem gradSwapCurv_apply
+    (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    (gradSwapCurvCoeff (I := I) (M := M) g₀).toSection x =
+      (show TensorRSSpace 2 4 I x from
+        TensorRSSpace.ofCLM
+          (slotFreeCurvOpFib (I := I) (M := M) g₀ 2 x)) := by
+  exact gradSlotCurv_apply (I := I) (M := M) g₀ x
+
+/-- The canonical background-curvature coefficient realizes covariant-derivative
 commutation in the first two derivative slots. -/
 theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
@@ -216,8 +225,7 @@ theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
         - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongrSection (I := I)
             g₀ (Equiv.swap (0 : Fin 4) 1) (iteratedCovGrad (I := I) g₀ 0 2 2 S) =
       appCcRS (I := I) (M := M) g₀ 0 2 4 (gradSwapCurvCoeff (I := I) g₀) S :=
-  Classical.choose_spec
-    (gradSlot_sub_eq_curv (I := I) (M := M) g₀) S
+  gradSlotCurv_spec (I := I) (M := M) g₀ S
 
 /-- The curvature coefficient left after symmetrizing the Ricci--DeTurck top
 coefficient in its two derivative slots. -/

@@ -94,3 +94,26 @@ helpers, `metric_self_sum`, `revJetOneC`, `revJetTwoC`, `reverseJetOne`,
 its order-three constant, reverse-order-three proof, and all downstream
 Ricci--DeTurck estimates remain here unchanged.  Verification of the extracted
 module and this consumer is pending.
+
+## Fixed-background connection packet (2026-08-06)
+
+The pointwise fixed-background connection estimates needed by the class-first
+`H2` producer are now public in this module:
+
+- `unifConnDiffZero` packages the reverse order-one metric jet with the
+  ungated order-zero Koszul estimate;
+- `unifConnDiffOne` packages the reverse order-one/order-two metric jets with
+  the ungated first connection-derivative estimate;
+- `unifConnDiffTwo` is the former private order-two result, now exposed without
+  changing its statement or proof.
+
+Their squared fibre-norm coefficients are respectively
+`connDiffZeroSqC`, `connDiffOneSqC`, and `connDiffTwoC`.  All are explicit in
+the class parameter and dimension, and none is selected after the class metric
+appears.  The public `ShortTime/UnifFixedConnH2.lean` wrapper integrates these
+three bounds and changes total volume back to the fixed background metric.
+
+Focused Lean verification passed after closing the order-zero definitional
+`iterCov` reduction with an explicit reflexivity step.  Axiom audits for all
+three public pointwise bounds contain only `propext`, `Classical.choice`, and
+`Quot.sound`.  The overall uniform-existence endpoint remains 0%.

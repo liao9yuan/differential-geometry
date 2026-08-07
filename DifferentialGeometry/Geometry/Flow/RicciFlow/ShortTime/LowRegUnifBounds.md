@@ -25,5 +25,46 @@ This separation is necessary: the rung-five H6 comparison in
 therefore cannot be a prerequisite for the common lifetime.  Higher
 regularity remains a separate qualitative bootstrap.
 
-Focused verification passed without warnings.  The actual class-envelope
-producer remains the next analytic frontier.
+At that checkpoint the interfaces were focused-check green, while the actual
+class-envelope producer remained the next analytic frontier.
+
+## 2026-08-06 — class-first producer closed in dimension three
+
+`exists_lowBounds` now constructs one literal `LowRegBoundData` before the
+class metric varies.  It combines `exists_lowRealize`, `exists_lowZero`, and
+`lowRegN_outer_unif`, freezes the affine coefficients at `lowregOuterRad`, and
+restricts the dense tame packet to `lowregStateRad`.  The DeTurck background
+remains the fixed `gBase`, and the class hypotheses stop at metric jets through
+order three.
+
+`lowreg_bounds_unif` projects the literal packet through
+`IsLowBoundsUnif.toCaps`, closing the previously requested common-envelope
+producer.  The focused file check and direct module export pass, and both new
+theorems use only `propext`, `Classical.choice`, and `Quot.sound`.
+
+Progress accounting: `exists_lowBounds` and `lowreg_bounds_unif` are 100%
+verified.  The downstream `lowreg_dt_unif` and
+`ricci_flow_unif_existence` endpoints remain unstated/unproved here (0%);
+whole HCG theorem closure remains approximately 3%.
+
+`lowreg_solve_unif` now performs the unconditional next composition: it chooses
+the common horizon packet and returns a background-aware low fixed-point solve
+for every class metric and every smaller positive time.  Its focused check,
+direct export, and axiom audit pass.  This theorem is 100%; it is deliberately
+not named `lowreg_dt_unif`, because converting `IsLowSolveBg` into a smooth
+geometric DeTurck solution on the same horizon remains a genuine bootstrap
+frontier.
+
+## 2026-08-06 — consumed by the smooth endpoint assembly
+
+`lowreg_solve_unif` now feeds `lowreg_dt_unif` through the new
+`BgSmoothPacket` interface.  The common horizon, fixed background, and
+order-three class quantifiers are unchanged.  The packet-to-DeTurck conversion
+and the final gauge-removal consumer are verified; their only inherited
+`sorryAx` is the single producer `bg_packet_of_solve`.
+
+Honest accounting: the class-first bounds and low solve are 100%.  The final
+consumer/gauge assembly is 100%.  The theorem-level uniform existence result
+remains 0% until `bg_packet_of_solve` is proved; that missing theorem is a
+substantial background-aware same-horizon regularity bootstrap, not another
+scalar-bound or fixed-point lemma.
