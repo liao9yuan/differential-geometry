@@ -1627,7 +1627,7 @@ private theorem elementaryCovector_assoc {d : ℕ} [FiniteDimensional 𝕜 M] [C
     elementaryCovector_basis_eval B b dual, elementaryCovector_basis_eval B b dual]
   exact Fin.multiKroneckerDelta_addCases_assoc I J K v
 
-theorem wedge_mul_assoc [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+private theorem wedge_mul_assoc [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
     (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (v : Fin (m + n + p) → M) :
       ContinuousAlternatingMap.domDomCongr
@@ -1691,7 +1691,7 @@ private theorem elementaryCovector_wedge_antisymm
   simp only [smul_eq_mul]
   rw [h_comm, ← mul_assoc, ← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow, one_mul]
 
-theorem wedge_antisymm [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+private theorem wedge_antisymm [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
     (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     (g ∧[𝕜] h) = ((-1 : 𝕜)^(m*n) • (h ∧[𝕜] g)).domDomCongr Fin.finAddCongr := by
   set d' := Module.finrank 𝕜 M
@@ -1858,7 +1858,7 @@ lemma domDomCongr_finAddFlip_wedge_self (g : M [⋀^Fin m]→L[ℝ] ℝ) :
     ContinuousLinearMap.mul_apply']
   simp [Function.comp_def, finAddFlip, mul_comm]
 
-theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
+private theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
     (g ∧[ℝ] g) = 0 := by
   let h := wedge_antisymm g g
   rw[Odd.neg_one_pow (Odd.mul m_odd m_odd)] at h
