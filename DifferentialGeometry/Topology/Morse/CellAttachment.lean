@@ -957,6 +957,107 @@ theorem norm_cellMap_le {n k : ℕ} (hk : k ≤ n) (ε R : ℝ) (hR : Real.sqrt 
       _ = Real.sqrt (2 * ε) := abs_of_nonneg (Real.sqrt_nonneg (2 * ε))
   exact le_trans hnorm hR
 
+theorem morseNorm_sq_eq_negPart_add_posPart {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+  have h1 : morseNorm n y ^ 2 = ∑ i : Fin n, (y i) ^ 2 := by
+    dsimp [morseNorm]
+    simpa using (EuclideanSpace.real_norm_sq_eq (WithLp.toLp 2 y : EuclideanSpace ℝ (Fin n)))
+  have h2 : ‖negPart hk y‖ ^ 2 = ∑ i : Fin k, (negPart hk y i) ^ 2 := by
+    simpa using (EuclideanSpace.real_norm_sq_eq (negPart hk y))
+  have h3 : ‖posPart hk y‖ ^ 2 = ∑ j : Fin (n - k), (posPart hk y j) ^ 2 := by
+    simpa using (EuclideanSpace.real_norm_sq_eq (posPart hk y))
+  rw [h1, h2, h3]
+  rw [sum_split_fin hk (fun i : Fin n => (y i) ^ 2)]
+  have hk_eq : (∑ i : Fin k, (y (negIdx hk i)) ^ 2) = ∑ i : Fin k, (negPart hk y i) ^ 2 := by
+    apply Finset.sum_congr rfl
+    intro i hi
+    rfl
+  have hp_eq : (∑ j : Fin (n - k), (y (posIdx hk j)) ^ 2) =
+      ∑ j : Fin (n - k), (posPart hk y j) ^ 2 := by
+    apply Finset.sum_congr rfl
+    intro j hj
+    rfl
+  rw [hk_eq, hp_eq]
+
+theorem norm_negPart_cellMap {n k : ℕ} (hk : k ≤ n) (r : ℝ)
+    (u : EuclideanSpace ℝ (Fin k)) :
+    ‖negPart hk (cellMap r u)‖ ^ 2 = r ^ 2 * ‖u‖ ^ 2 := by
+  have hsum : (∑ i : Fin k, (negPart hk (cellMap r u) i) ^ 2) = r ^ 2 * ∑ i : Fin k, (u i) ^ 2 := by
+    calc
+      (∑ i : Fin k, (negPart hk (cellMap r u) i) ^ 2)
+          = ∑ i : Fin k, ((cellMap r u) (negIdx hk i)) ^ 2 := by
+            apply Finset.sum_congr rfl
+            intro i hi
+            rfl
+      _ = ∑ i : Fin k, (r * u i) ^ 2 := by
+            apply Finset.sum_congr rfl
+            intro i hi
+            rw [cellMap_negIdx]
+      _ = r ^ 2 * ∑ i : Fin k, (u i) ^ 2 := by
+            rw [Finset.mul_sum]
+            apply Finset.sum_congr rfl
+            intro i hi
+            rw [mul_pow]
+  calc
+    ‖negPart hk (cellMap r u)‖ ^ 2 = ∑ i : Fin k, (negPart hk (cellMap r u) i) ^ 2 := by
+      simpa using (EuclideanSpace.real_norm_sq_eq (negPart hk (cellMap r u)))
+    _ = r ^ 2 * ∑ i : Fin k, (u i) ^ 2 := hsum
+    _ = r ^ 2 * ‖u‖ ^ 2 := by
+      rw [EuclideanSpace.real_norm_sq_eq u]
+
+theorem negPart_recombine {n k : ℕ} (hk : k ≤ n) (a : EuclideanSpace ℝ (Fin k))
+    (b : EuclideanSpace ℝ (Fin (n - k))) :
+    negPart hk (recombine hk a b) = a := by
+  ext i
+  simpa using (recombine_negPart hk a b i)
+
+theorem posPart_recombine {n k : ℕ} (hk : k ≤ n) (a : EuclideanSpace ℝ (Fin k))
+    (b : EuclideanSpace ℝ (Fin (n - k))) :
+    posPart hk (recombine hk a b) = b := by
+  ext j
+  simpa using (recombine_posPart hk a b j)
+
+theorem morseNorm_recombine_sq {n k : ℕ} (hk : k ≤ n) (a : EuclideanSpace ℝ (Fin k))
+    (b : EuclideanSpace ℝ (Fin (n - k))) :
+    morseNorm n (recombine hk a b) ^ 2 = ‖a‖ ^ 2 + ‖b‖ ^ 2 := by
+  rw [morseNorm_sq_eq_negPart_add_posPart hk (recombine hk a b)]
+  rw [negPart_recombine, posPart_recombine]
+
+theorem morseNorm_recombine_cellMap_bound {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 ≤ ε)
+    (u : EuclideanSpace ℝ (Fin k)) (hu : ‖u‖ = 1)
+    (v : EuclideanSpace ℝ (Fin (n - k))) (hv : ‖v‖ ≤ 1) :
+    morseNorm n (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) (r • v)) ≤
+      Real.sqrt (2 * ε + r ^ 2) := by
+  have hsq : morseNorm n (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) (r • v)) ^ 2 ≤
+      2 * ε + r ^ 2 := by
+    rw [morseNorm_recombine_sq hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) (r • v)]
+    have h1 : ‖negPart hk (cellMap (Real.sqrt (2 * ε)) u)‖ ^ 2 ≤ 2 * ε := by
+      have hnorm := norm_negPart_cellMap hk (Real.sqrt (2 * ε)) u
+      rw [hnorm, hu]
+      have hsq : (Real.sqrt (2 * ε)) ^ 2 = 2 * ε := by
+        rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε)]
+      rw [hsq]
+      nlinarith [sq_nonneg ε]
+    have h2 : ‖r • v‖ ^ 2 ≤ r ^ 2 := by
+      have hnorm : ‖r • v‖ ^ 2 = r ^ 2 * ‖v‖ ^ 2 := by
+        rw [norm_smul]
+        rw [Real.norm_eq_abs]
+        rw [mul_pow]
+        rw [sq_abs]
+      rw [hnorm]
+      have hv2 : ‖v‖ ^ 2 ≤ 1 := by
+        have hneg : -1 ≤ ‖v‖ := by linarith [norm_nonneg v]
+        exact (sq_le_sq' hneg hv).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+      nlinarith [hv2, sq_nonneg r]
+    nlinarith
+  have hnn : 0 ≤ morseNorm n (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) (r • v)) :=
+    norm_nonneg _
+  have hns : 0 ≤ Real.sqrt (2 * ε + r ^ 2) := Real.sqrt_nonneg _
+  have hsq' : morseNorm n (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) (r • v)) ^ 2 ≤
+      (Real.sqrt (2 * ε + r ^ 2)) ^ 2 := by
+    rwa [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + r ^ 2)]
+  exact le_of_sq_le_sq hsq' hns
+
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
 

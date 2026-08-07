@@ -1918,28 +1918,6 @@ theorem modifiedNormalForm_eq_of_modulation_zero {n k : ℕ} (hk : k ≤ n) (c �
   rw [hy]
   ring
 
-theorem morseNorm_sq_eq_negPart_add_posPart {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
-    morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
-  have h1 : morseNorm n y ^ 2 = ∑ i : Fin n, (y i) ^ 2 := by
-    dsimp [morseNorm]
-    simpa using (EuclideanSpace.real_norm_sq_eq (WithLp.toLp 2 y : EuclideanSpace ℝ (Fin n)))
-  have h2 : ‖negPart hk y‖ ^ 2 = ∑ i : Fin k, (negPart hk y i) ^ 2 := by
-    simpa using (EuclideanSpace.real_norm_sq_eq (negPart hk y))
-  have h3 : ‖posPart hk y‖ ^ 2 = ∑ j : Fin (n - k), (posPart hk y j) ^ 2 := by
-    simpa using (EuclideanSpace.real_norm_sq_eq (posPart hk y))
-  rw [h1, h2, h3]
-  rw [sum_split_fin hk (fun i : Fin n => (y i) ^ 2)]
-  have hk_eq : (∑ i : Fin k, (y (negIdx hk i)) ^ 2) = ∑ i : Fin k, (negPart hk y i) ^ 2 := by
-    apply Finset.sum_congr rfl
-    intro i hi
-    rfl
-  have hp_eq : (∑ j : Fin (n - k), (y (posIdx hk j)) ^ 2) =
-      ∑ j : Fin (n - k), (posPart hk y j) ^ 2 := by
-    apply Finset.sum_congr rfl
-    intro j hj
-    rfl
-  rw [hk_eq, hp_eq]
-
 theorem modMu_mul_modGamma_eq_zero_of_norm_gt {n k : ℕ} (hk : k ≤ n) (ε δ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) {y : MorseModel n}
     (hy : 4 * ε + 9 * δ ^ 2 / 4 < morseNorm n y ^ 2) :
