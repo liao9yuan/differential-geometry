@@ -31,17 +31,17 @@ instance : CoeFun (DifferentialForm IM M k) (fun _ => (x : M) →
     Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) where
   coe := DifferentialForm.toFun
 
-instance fiberNeg (x : M) : Neg
+private instance fiberNeg (x : M) : Neg
     (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) := by
   dsimp [Bundle.continuousAlternatingMap]
   exact inferInstance
 
-instance fiberSub (x : M) : Sub
+private instance fiberSub (x : M) : Sub
     (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) := by
   dsimp [Bundle.continuousAlternatingMap]
   exact inferInstance
 
-instance fiberZSMul (x : M) : SMul ℤ
+private instance fiberZSMul (x : M) : SMul ℤ
     (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) := by
   dsimp [Bundle.continuousAlternatingMap]
   exact inferInstance

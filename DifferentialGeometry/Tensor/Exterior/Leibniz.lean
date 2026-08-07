@@ -19,7 +19,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
   {m n : ℕ}
 
-def flipAddCongr (m n : ℕ) : Fin (n + m) ≃ Fin (m + n) :=
+private def flipAddCongr (m n : ℕ) : Fin (n + m) ≃ Fin (m + n) :=
   Equiv.trans ((finSumFinEquiv (m := n) (n := m)).symm : Fin (n + m) ≃ Fin n ⊕ Fin m)
     (Equiv.trans (Fin.finSumCongr.symm : Fin n ⊕ Fin m ≃ Fin m ⊕ Fin n)
       (finSumFinEquiv : Fin m ⊕ Fin n ≃ Fin (m + n)))
@@ -132,7 +132,7 @@ private lemma flipAddCongr_eq_addCasesSwapPerm (m n : ℕ) :
         finSumFinEquiv_symm_apply_natAdd, Fin.finSumCongr, Equiv.permCongr_def, finCongr,
         Fin.val_cast]
 
-theorem wedge_flip (h : M [⋀^Fin n]→L[𝕜] N') (g : M [⋀^Fin m]→L[𝕜] N)
+private theorem wedge_flip (h : M [⋀^Fin n]→L[𝕜] N') (g : M [⋀^Fin m]→L[𝕜] N)
     (f : N →L[𝕜] N' →L[𝕜] N'') :
     wedge_product h g f.flip = (wedge_product g h f).domDomCongr (flipAddCongr n m) := by
   ext v
@@ -248,7 +248,7 @@ private lemma units_neg_pow_smul (k₁ k₂ : ℕ) (x : N'') :
     have hz𝕜 : (-1 : 𝕜) ^ (k₁ + k₂) = -1 := h.neg_one_pow
     simp [hz, hz𝕜]
 
-theorem uncurryFin_precompR_eq (f : N →L[𝕜] N' →L[𝕜] N'')
+private theorem uncurryFin_precompR_eq (f : N →L[𝕜] N' →L[𝕜] N'')
     (a : M [⋀^Fin m]→L[𝕜] N) (L : M →L[𝕜] (M [⋀^Fin n]→L[𝕜] N')) :
     uncurryFin ((wedge_productL f).precompR M a L) =
       (-1 : 𝕜) ^ m • wedge_product a (uncurryFin L) f := by
@@ -360,7 +360,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {n k l : ℕ} {x : E}
 
-theorem extDeriv_eq_uncurryFin (eta : E → E [⋀^Fin n]→L[ℝ] F)
+private theorem extDeriv_eq_uncurryFin (eta : E → E [⋀^Fin n]→L[ℝ] F)
     (hω : DifferentiableAt ℝ eta x) :
     extDeriv eta x = ContinuousAlternatingMap.uncurryFin (fderiv ℝ eta x) := by
   ext v
@@ -385,7 +385,7 @@ theorem extDeriv_eq_uncurryFin (eta : E → E [⋀^Fin n]→L[ℝ] F)
   rw [hmain]
   rfl
 
-theorem fderiv_wedge_apply (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^Fin l]→L[ℝ] ℝ)
+private theorem fderiv_wedge_apply (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^Fin l]→L[ℝ] ℝ)
     (ha : DifferentiableAt ℝ a x) (hb : DifferentiableAt ℝ b x) :
     fderiv ℝ (fun y : E => a y ∧[ℝ] b y) x =
       (wedge_productL (ContinuousLinearMap.mul ℝ ℝ)).precompR E (a x) (fderiv ℝ b x) +

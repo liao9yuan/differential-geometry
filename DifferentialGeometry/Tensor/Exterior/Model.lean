@@ -21,7 +21,7 @@ theorem contDiffOn_extDeriv {s : Set E} (ω : E → E [⋀^Fin n]→L[ℝ] F)
     (alternatizeUncurryFinCLM ℝ E F).contDiff
   exact hc.comp_contDiffOn hf
 
-theorem contDiffOn_wedge_product {s : Set E} (a : E → E [⋀^Fin k]→L[ℝ] ℝ)
+private theorem contDiffOn_wedge_product {s : Set E} (a : E → E [⋀^Fin k]→L[ℝ] ℝ)
     (b : E → E [⋀^Fin l]→L[ℝ] ℝ) (ha : ContDiffOn ℝ ⊤ a s) (hb : ContDiffOn ℝ ⊤ b s) :
     ContDiffOn ℝ ⊤ (fun x => a x ∧[ℝ] b x) s := by
   let B : (E [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (E [⋀^Fin l]→L[ℝ] ℝ) →L[ℝ]
@@ -31,14 +31,14 @@ theorem contDiffOn_wedge_product {s : Set E} (a : E → E [⋀^Fin k]→L[ℝ] �
     exact (contDiffOn_const (c := B)).clm_apply ha
   exact h₁.clm_apply hb
 
-theorem contDiff_compContinuousLinearMapCLM :
+private theorem contDiff_compContinuousLinearMapCLM :
     ContDiff ℝ ⊤ (fun p : E →L[ℝ] E =>
       (compContinuousLinearMapCLM p : (E [⋀^Fin n]→L[ℝ] ℝ) →L[ℝ]
         (E [⋀^Fin n]→L[ℝ] ℝ))) := by
   exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff (𝕜 := ℝ) (ι := Fin n)
     (F₁ := E) (F₂ := ℝ)
 
-theorem contDiffOn_pullback {s t : Set E} (f : E → E)
+private theorem contDiffOn_pullback {s t : Set E} (f : E → E)
     (ω : E → E [⋀^Fin n]→L[ℝ] ℝ) (hf : ContDiffOn ℝ ⊤ f s) (hω : ContDiffOn ℝ ⊤ ω t)
     (hst : Set.MapsTo f s t) (hs : IsOpen s) :
     ContDiffOn ℝ ⊤ (fun x => (ω (f x)).compContinuousLinearMap (fderiv ℝ f x)) s := by
@@ -89,7 +89,7 @@ theorem constOfIsEmpty_compContinuousLinearMap {E' : Type*} [NormedAddCommGroup 
   ext v
   rfl
 
-theorem ofSubsingleton_compContinuousLinearMap {E' : Type*} [NormedAddCommGroup E']
+private theorem ofSubsingleton_compContinuousLinearMap {E' : Type*} [NormedAddCommGroup E']
     [NormedSpace ℝ E'] (g : E →L[ℝ] F) (A : E' →L[ℝ] E) :
     (ofSubsingleton ℝ E F (0 : Fin 1) g).compContinuousLinearMap A =
       ofSubsingleton ℝ E' F (0 : Fin 1) (g.comp A) := by
