@@ -1565,6 +1565,314 @@ theorem closedCellBoundaryChart_symm_val {m : ℕ} (i : Fin (m + 1)) (σ : Bool)
       dsimp [closedCellSign]
       exact closedCellSign_sq σ) y.1 hy.2 y.2)]
 
+theorem modelWithCornersEuclideanHalfSpace_symm_range {m : ℕ}
+    (z : EuclideanSpace ℝ (Fin (m + 1)))
+    (hz : z ∈ Set.range (modelWithCornersEuclideanHalfSpace (m + 1))) :
+    (modelWithCornersEuclideanHalfSpace (m + 1)).symm z =
+      (⟨z, by
+        rcases hz with ⟨w, hw⟩
+        rw [← hw]
+        exact w.2⟩ : EuclideanHalfSpace (m + 1)) := by
+  apply Subtype.ext
+  rcases hz with ⟨w, hw⟩
+  have hz' : z = (modelWithCornersEuclideanHalfSpace (m + 1)) w := hw.symm
+  subst hz'
+  exact congrArg (fun t : EuclideanHalfSpace (m + 1) => t.1)
+    ((modelWithCornersEuclideanHalfSpace (m + 1)).left_inv w)
+
+theorem closedCellInteriorChart_symm_smooth {m : ℕ} :
+    ContMDiffOn (modelWithCornersEuclideanHalfSpace (m + 1))
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin (m + 1)))) (⊤ : ℕ∞)
+      (fun y : EuclideanHalfSpace (m + 1) =>
+        ((closedCellInteriorChart m).symm y : EuclideanSpace ℝ (Fin (m + 1))))
+      (closedCellInteriorChart m).target := by
+  classical
+  intro y hy
+  let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+    modelWithCornersEuclideanHalfSpace (m + 1)
+  have hlin : ContDiff ℝ (⊤ : ℕ∞) (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellShiftSucc m (-1) z) := closedCellShiftSucc_contDiff (-1)
+  have hcont : Continuous I.symm := (modelWithCornersEuclideanHalfSpace (m + 1)).continuous_invFun
+  have hmemT : I.symm (I y) ∈ (closedCellInteriorChart m).target := by
+    simpa [I, (modelWithCornersEuclideanHalfSpace (m + 1)).left_inv y] using hy
+  have hopen : IsOpen (I.symm ⁻¹' (closedCellInteriorChart m).target) :=
+    Continuous.isOpen_preimage hcont (closedCellInteriorChart m).target (closedCellInteriorChart m).open_target
+  have hmem : (I y) ∈ I.symm ⁻¹' (closedCellInteriorChart m).target := hmemT
+  let S : Set (EuclideanSpace ℝ (Fin (m + 1))) :=
+    (I.symm ⁻¹' (closedCellInteriorChart m).target) ∩ Set.range I
+  have hS : S ∈ nhdsWithin (I y) (Set.range I) := by
+    have hTopen : I.symm ⁻¹' (closedCellInteriorChart m).target ∈ nhds (I y) := hopen.mem_nhds hmem
+    have hTuniv : I.symm ⁻¹' (closedCellInteriorChart m).target ∈ nhdsWithin (I y) Set.univ := by
+      simpa [nhdsWithin_univ] using hTopen
+    have hT' : I.symm ⁻¹' (closedCellInteriorChart m).target ∈ nhdsWithin (I y) (Set.range I) :=
+      nhdsWithin_mono (I y) (Set.subset_univ (Set.range I)) hTuniv
+    exact Filter.inter_mem hT' self_mem_nhdsWithin
+  have hagree : (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+      ((closedCellInteriorChart m).symm (I.symm z) : EuclideanSpace ℝ (Fin (m + 1)))) =ᶠ[nhdsWithin (I y) (Set.range I)]
+      (fun z : EuclideanSpace ℝ (Fin (m + 1)) => closedCellShiftSucc m (-1) z) := by
+    refine Filter.eventuallyEq_of_mem hS ?_
+    intro z hz
+    have hzmem : z ∈ (I.symm ⁻¹' (closedCellInteriorChart m).target) ∩ Set.range I := hz
+    have hzt : I.symm z ∈ (closedCellInteriorChart m).target := hzmem.1
+    have hzrange : z ∈ Set.range I := hzmem.2
+    have hI := modelWithCornersEuclideanHalfSpace_symm_range z hzrange
+    have hcoord : (I.symm z).1 = z := by
+      rw [hI]
+    have hsymm := closedCellInteriorChart_symm_val (m := m) (I.symm z) hzt
+    simpa [hcoord] using hsymm
+  have hpoint : ((closedCellInteriorChart m).symm (I.symm (I y)) : EuclideanSpace ℝ (Fin (m + 1))) =
+      closedCellShiftSucc m (-1) (I y) := by
+    have hcoord : (I.symm (I y)).1 = I y := by
+      change (I.symm (I y)).1 = y.1
+      rw [(modelWithCornersEuclideanHalfSpace (m + 1)).left_inv y]
+    have hsymm := closedCellInteriorChart_symm_val (m := m) (I.symm (I y)) hmemT
+    rw [hcoord] at hsymm
+    exact hsymm
+  have hrep : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        ((closedCellInteriorChart m).symm (I.symm z) : EuclideanSpace ℝ (Fin (m + 1))))
+      (Set.range I) (I y) := by
+    have hlin' : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+        (fun z : EuclideanSpace ℝ (Fin (m + 1)) => closedCellShiftSucc m (-1) z)
+        (Set.range I) (I y) := hlin.contDiffWithinAt
+    exact ContDiffWithinAt.congr_of_eventuallyEq hlin' hagree hpoint
+  rw [contMDiffWithinAt_iff]
+  constructor
+  · have h1 : ContinuousAt (closedCellInteriorChart m).symm y :=
+      (closedCellInteriorChart m).continuousAt_symm hy
+    exact (continuous_subtype_val.continuousAt.comp h1).continuousWithinAt
+  · have hext : (extChartAt (modelWithCornersEuclideanHalfSpace (m + 1)) y) =
+        (modelWithCornersEuclideanHalfSpace (m + 1)).toPartialEquiv := by
+      dsimp [extChartAt, OpenPartialHomeomorph.extend]
+      simp
+    have hdom : (I.symm ⁻¹' (closedCellInteriorChart m).target ∩ Set.range I) ⊆ Set.range I := by
+      intro z hz
+      exact hz.2
+    rw [show (extChartAt (modelWithCornersEuclideanHalfSpace (m + 1)) y).symm =
+        (modelWithCornersEuclideanHalfSpace (m + 1)).symm from congrArg PartialEquiv.symm hext]
+    dsimp [I] at hrep hdom ⊢
+    change ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        ((closedCellInteriorChart m).symm ((modelWithCornersEuclideanHalfSpace (m + 1)).symm z) :
+          EuclideanSpace ℝ (Fin (m + 1))))
+      ((modelWithCornersEuclideanHalfSpace (m + 1)).symm ⁻¹' (closedCellInteriorChart m).target ∩
+        Set.range (modelWithCornersEuclideanHalfSpace (m + 1)))
+      ((modelWithCornersEuclideanHalfSpace (m + 1)) y)
+    simpa using (hrep.mono hdom)
+
+theorem closedCellBoundaryChart_symm_smooth {m : ℕ} (i : Fin (m + 1)) (σ : Bool) :
+    ContMDiffOn (modelWithCornersEuclideanHalfSpace (m + 1))
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin (m + 1)))) (⊤ : ℕ∞)
+      (fun y : EuclideanHalfSpace (m + 1) =>
+        ((closedCellBoundaryChart m i σ).symm y : EuclideanSpace ℝ (Fin (m + 1))))
+      (closedCellBoundaryChart m i σ).target := by
+  classical
+  intro y hy
+  let I : ModelWithCorners ℝ (EuclideanSpace ℝ (Fin (m + 1))) (EuclideanHalfSpace (m + 1)) :=
+    modelWithCornersEuclideanHalfSpace (m + 1)
+  let e : Fin (m + 1) ≃ Fin (m + 1) := Equiv.swap i (0 : Fin (m + 1))
+  let s : ℝ := closedCellSign σ
+  have hargAll : ContDiff ℝ (⊤ : ℕ∞) (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+      1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2) := by
+    have h1 : ContDiff ℝ (⊤ : ℕ∞) (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        1 - z (0 : Fin (m + 1))) := by
+      exact (contDiff_const.sub (by fun_prop))
+    have h2 : ContDiff ℝ (⊤ : ℕ∞) (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        ‖closedCellTail m z‖ ^ 2) :=
+      (contDiff_norm_sq ℝ).comp (closedCellTail_contDiff (m := m))
+    exact h1.sub h2
+  have hDopen : IsOpen {z : EuclideanSpace ℝ (Fin (m + 1)) |
+      0 < 1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2} := by
+    exact IsOpen.preimage hargAll.continuous isOpen_Ioi
+  have hiv : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        (closedCellBoundaryInvValue m e s z : EuclideanSpace ℝ (Fin (m + 1))))
+      {z : EuclideanSpace ℝ (Fin (m + 1)) |
+        0 < 1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2} := by
+    simpa [e, s] using (closedCellBoundaryInvValue_contDiffOn (m := m) e s)
+  have hcont : Continuous I.symm := (modelWithCornersEuclideanHalfSpace (m + 1)).continuous_invFun
+  have hmemT : I.symm (I y) ∈ (closedCellBoundaryChart m i σ).target := by
+    simpa [I, (modelWithCornersEuclideanHalfSpace (m + 1)).left_inv y] using hy
+  have hmem : (I y) ∈ I.symm ⁻¹' (closedCellBoundaryChart m i σ).target := hmemT
+  have hz0inD : (I y) ∈ {z : EuclideanSpace ℝ (Fin (m + 1)) |
+      0 < 1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2} := by
+    simpa [I] using hy.2
+  have hf : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        (closedCellBoundaryInvValue m e s z : EuclideanSpace ℝ (Fin (m + 1))))
+      (Set.range I) (I y) := by
+    have hbase : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+        (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+          (closedCellBoundaryInvValue m e s z : EuclideanSpace ℝ (Fin (m + 1))))
+        {z : EuclideanSpace ℝ (Fin (m + 1)) |
+          0 < 1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2} (I y) :=
+      hiv (I y) hz0inD
+    have hDnhds : {z : EuclideanSpace ℝ (Fin (m + 1)) |
+        0 < 1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2} ∈ nhds (I y) :=
+      hDopen.mem_nhds hz0inD
+    have hDuniv : {z : EuclideanSpace ℝ (Fin (m + 1)) |
+        0 < 1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2} ∈
+        nhdsWithin (I y) Set.univ := by
+      simpa [nhdsWithin_univ] using hDnhds
+    have hDrange : {z : EuclideanSpace ℝ (Fin (m + 1)) |
+        0 < 1 - z (0 : Fin (m + 1)) - ‖closedCellTail m z‖ ^ 2} ∈
+        nhdsWithin (I y) (Set.range I) :=
+      nhdsWithin_mono (I y) (Set.subset_univ (Set.range I)) hDuniv
+    exact hbase.mono_of_mem_nhdsWithin hDrange
+  have hopen : IsOpen (I.symm ⁻¹' (closedCellBoundaryChart m i σ).target) :=
+    Continuous.isOpen_preimage hcont (closedCellBoundaryChart m i σ).target
+      (closedCellBoundaryChart m i σ).open_target
+  let S : Set (EuclideanSpace ℝ (Fin (m + 1))) :=
+    (I.symm ⁻¹' (closedCellBoundaryChart m i σ).target) ∩ Set.range I
+  have hS : S ∈ nhdsWithin (I y) (Set.range I) := by
+    have hTopen : I.symm ⁻¹' (closedCellBoundaryChart m i σ).target ∈ nhds (I y) :=
+      hopen.mem_nhds hmem
+    have hTuniv : I.symm ⁻¹' (closedCellBoundaryChart m i σ).target ∈
+        nhdsWithin (I y) Set.univ := by
+      simpa [nhdsWithin_univ] using hTopen
+    have hT' : I.symm ⁻¹' (closedCellBoundaryChart m i σ).target ∈
+        nhdsWithin (I y) (Set.range I) :=
+      nhdsWithin_mono (I y) (Set.subset_univ (Set.range I)) hTuniv
+    exact Filter.inter_mem hT' self_mem_nhdsWithin
+  have hagree : (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+      ((closedCellBoundaryChart m i σ).symm (I.symm z) : EuclideanSpace ℝ (Fin (m + 1)))) =ᶠ[nhdsWithin (I y) (Set.range I)]
+      (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        (closedCellBoundaryInvValue m e s z : EuclideanSpace ℝ (Fin (m + 1)))) := by
+    refine Filter.eventuallyEq_of_mem hS ?_
+    intro z hz
+    have hzt : I.symm z ∈ (closedCellBoundaryChart m i σ).target := hz.1
+    have hzrange : z ∈ Set.range I := hz.2
+    have hI := modelWithCornersEuclideanHalfSpace_symm_range z hzrange
+    have hcoord : (I.symm z).1 = z := by
+      rw [hI]
+    have hsymm := closedCellBoundaryChart_symm_val (m := m) i σ (I.symm z) hzt
+    simpa [e, s, hcoord] using hsymm
+  have hpoint : ((closedCellBoundaryChart m i σ).symm (I.symm (I y)) :
+        EuclideanSpace ℝ (Fin (m + 1))) = closedCellBoundaryInvValue m e s (I y) := by
+    have hcoord : (I.symm (I y)).1 = I y := by
+      change (I.symm (I y)).1 = y.1
+      rw [(modelWithCornersEuclideanHalfSpace (m + 1)).left_inv y]
+    have hsymm := closedCellBoundaryChart_symm_val (m := m) i σ (I.symm (I y)) hmemT
+    rw [hcoord] at hsymm
+    simpa [e, s] using hsymm
+  have hrep : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        ((closedCellBoundaryChart m i σ).symm (I.symm z) : EuclideanSpace ℝ (Fin (m + 1))))
+      (Set.range I) (I y) := by
+    exact ContDiffWithinAt.congr_of_eventuallyEq hf hagree hpoint
+  rw [contMDiffWithinAt_iff]
+  constructor
+  · have h1 : ContinuousAt (closedCellBoundaryChart m i σ).symm y :=
+      (closedCellBoundaryChart m i σ).continuousAt_symm hy
+    exact (continuous_subtype_val.continuousAt.comp h1).continuousWithinAt
+  · have hext : (extChartAt (modelWithCornersEuclideanHalfSpace (m + 1)) y) =
+        (modelWithCornersEuclideanHalfSpace (m + 1)).toPartialEquiv := by
+      dsimp [extChartAt, OpenPartialHomeomorph.extend]
+      simp
+    have hdom : (I.symm ⁻¹' (closedCellBoundaryChart m i σ).target ∩ Set.range I) ⊆
+        Set.range I := by
+      intro z hz
+      exact hz.2
+    rw [show (extChartAt (modelWithCornersEuclideanHalfSpace (m + 1)) y).symm =
+        (modelWithCornersEuclideanHalfSpace (m + 1)).symm from congrArg PartialEquiv.symm hext]
+    dsimp [I] at hrep hdom ⊢
+    change ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun z : EuclideanSpace ℝ (Fin (m + 1)) =>
+        ((closedCellBoundaryChart m i σ).symm ((modelWithCornersEuclideanHalfSpace (m + 1)).symm z) :
+          EuclideanSpace ℝ (Fin (m + 1))))
+      ((modelWithCornersEuclideanHalfSpace (m + 1)).symm ⁻¹' (closedCellBoundaryChart m i σ).target ∩
+        Set.range (modelWithCornersEuclideanHalfSpace (m + 1)))
+      ((modelWithCornersEuclideanHalfSpace (m + 1)) y)
+    simpa using (hrep.mono hdom)
+
+theorem closedCellInclusion_contMDiff (m : ℕ) :
+    @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin (m + 1))) _ _
+      (EuclideanHalfSpace (m + 1)) _ (modelWithCornersEuclideanHalfSpace (m + 1))
+      (ClosedCell (m + 1)) _ (closedCellChartedSpaceSucc m)
+      (EuclideanSpace ℝ (Fin (m + 1))) _ _ (EuclideanSpace ℝ (Fin (m + 1))) _
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin (m + 1)))) (EuclideanSpace ℝ (Fin (m + 1))) _ _
+      (⊤ : ℕ∞) (fun v : ClosedCell (m + 1) => (v : EuclideanSpace ℝ (Fin (m + 1)))) := by
+  classical
+  letI : ChartedSpace (EuclideanHalfSpace (m + 1)) (ClosedCell (m + 1)) :=
+    closedCellChartedSpaceSucc m
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace (m + 1)) (⊤ : ℕ∞)
+      (ClosedCell (m + 1)) :=
+    closedCellIsManifold m
+  intro x
+  by_cases hx : ‖x.1‖ < 1
+  · have hchart : chartAt (H := EuclideanHalfSpace (m + 1)) (M := ClosedCell (m + 1)) x =
+        closedCellInteriorChart m := by
+      change closedCellChartAt x = closedCellInteriorChart m
+      rw [closedCellChartAt, dif_pos hx]
+    have hc : ContMDiffOn (modelWithCornersEuclideanHalfSpace (m + 1))
+        (modelWithCornersEuclideanHalfSpace (m + 1)) (⊤ : ℕ∞)
+        (closedCellInteriorChart m) (closedCellInteriorChart m).source := by
+      have h := contMDiffOn_chart (I := modelWithCornersEuclideanHalfSpace (m + 1))
+        (H := EuclideanHalfSpace (m + 1)) (M := ClosedCell (m + 1)) (n := (⊤ : ℕ∞)) (x := x)
+      simpa [hchart] using h
+    have hst : (closedCellInteriorChart m).source ⊆
+        (closedCellInteriorChart m) ⁻¹' (closedCellInteriorChart m).target := by
+      intro y hy
+      exact (closedCellInteriorChart m).mapsTo hy
+    have hcomp : ContMDiffOn (modelWithCornersEuclideanHalfSpace (m + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin (m + 1)))) (⊤ : ℕ∞)
+        (fun v : ClosedCell (m + 1) =>
+          ((closedCellInteriorChart m).symm ((closedCellInteriorChart m) v) :
+            EuclideanSpace ℝ (Fin (m + 1))))
+        (closedCellInteriorChart m).source :=
+      (closedCellInteriorChart_symm_smooth (m := m)).comp hc hst
+    have hcong : ContMDiffOn (modelWithCornersEuclideanHalfSpace (m + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin (m + 1)))) (⊤ : ℕ∞)
+        (fun v : ClosedCell (m + 1) => (v : EuclideanSpace ℝ (Fin (m + 1))))
+        (closedCellInteriorChart m).source := by
+      refine hcomp.congr ?_
+      intro y hy
+      change (y : EuclideanSpace ℝ (Fin (m + 1))) =
+        ((closedCellInteriorChart m).symm ((closedCellInteriorChart m) y) :
+          EuclideanSpace ℝ (Fin (m + 1)))
+      rw [(closedCellInteriorChart m).left_inv hy]
+    exact hcong.contMDiffAt ((closedCellInteriorChart m).open_source.mem_nhds hx)
+  · let i : Fin (m + 1) := Classical.choose (closedCell_exists_coord_ne_zero x.1 (by
+      have hle : ‖x.1‖ ≤ 1 := x.2
+      have hnot : ¬ ‖x.1‖ < 1 := hx
+      linarith))
+    let σ : Bool := 0 < x.1 i
+    have hchart : chartAt (H := EuclideanHalfSpace (m + 1)) (M := ClosedCell (m + 1)) x =
+        closedCellBoundaryChart m i σ := by
+      change closedCellChartAt x = closedCellBoundaryChart m i σ
+      rw [closedCellChartAt, dif_neg hx]
+    have hxsrc : x ∈ (closedCellBoundaryChart m i σ).source := by
+      simpa [hchart] using (mem_chart_source (H := EuclideanHalfSpace (m + 1))
+        (M := ClosedCell (m + 1)) x)
+    have hc : ContMDiffOn (modelWithCornersEuclideanHalfSpace (m + 1))
+        (modelWithCornersEuclideanHalfSpace (m + 1)) (⊤ : ℕ∞)
+        (closedCellBoundaryChart m i σ) (closedCellBoundaryChart m i σ).source := by
+      have h := contMDiffOn_chart (I := modelWithCornersEuclideanHalfSpace (m + 1))
+        (H := EuclideanHalfSpace (m + 1)) (M := ClosedCell (m + 1)) (n := (⊤ : ℕ∞)) (x := x)
+      simpa [hchart] using h
+    have hst : (closedCellBoundaryChart m i σ).source ⊆
+        (closedCellBoundaryChart m i σ) ⁻¹' (closedCellBoundaryChart m i σ).target := by
+      intro y hy
+      exact (closedCellBoundaryChart m i σ).mapsTo hy
+    have hcomp : ContMDiffOn (modelWithCornersEuclideanHalfSpace (m + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin (m + 1)))) (⊤ : ℕ∞)
+        (fun v : ClosedCell (m + 1) =>
+          ((closedCellBoundaryChart m i σ).symm ((closedCellBoundaryChart m i σ) v) :
+            EuclideanSpace ℝ (Fin (m + 1))))
+        (closedCellBoundaryChart m i σ).source :=
+      (closedCellBoundaryChart_symm_smooth (m := m) i σ).comp hc hst
+    have hcong : ContMDiffOn (modelWithCornersEuclideanHalfSpace (m + 1))
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin (m + 1)))) (⊤ : ℕ∞)
+        (fun v : ClosedCell (m + 1) => (v : EuclideanSpace ℝ (Fin (m + 1))))
+        (closedCellBoundaryChart m i σ).source := by
+      refine hcomp.congr ?_
+      intro y hy
+      change (y : EuclideanSpace ℝ (Fin (m + 1))) =
+        ((closedCellBoundaryChart m i σ).symm ((closedCellBoundaryChart m i σ) y) :
+          EuclideanSpace ℝ (Fin (m + 1)))
+      rw [(closedCellBoundaryChart m i σ).left_inv hy]
+    exact hcong.contMDiffAt ((closedCellBoundaryChart m i σ).open_source.mem_nhds hxsrc)
+
 theorem hasGroupoid_prod {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*}
     [NormedAddCommGroup E] [NormedSpace 𝕜 E] {H : Type*} [TopologicalSpace H]
     {I : ModelWithCorners 𝕜 E H} {E' : Type*} [NormedAddCommGroup E'] [NormedSpace 𝕜 E']
