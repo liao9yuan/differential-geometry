@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseTimeA2
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseTimeA1
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseA1Comm
 import DifferentialGeometry.Analysis.DenseExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgA1Pair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgH2
@@ -1245,6 +1246,65 @@ theorem lowA1Bg_comm
   rw [lowA1HiBg_core (I := I) (M := M) g g hHi T,
     lowA1LoBg_core (I := I) (M := M) g g hLo T]
   simpa only [lowCoreDataBg, lowCoreData] using (hcoreComm T).2.2
+
+/-- On an ARBITRARY DeTurck background, the completed high and low
+first-order actions are the two adjacent-scale realizations of one
+smooth-core formula.  The smooth-core square is the bundle-generic
+`a1_comm`; the completed square follows by density. -/
+theorem lowA1Bg_comm_bg
+    (hDim : Module.finrank ℝ E = 3)
+    (g gB : SmoothRiemannianMetric I M)
+    {ρ δ : ℝ} (hρ : 0 < ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+    (hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ)
+    (hHi : BgA1HiCorePair (I := I) (M := M)
+      g gB hρ.le hδ0 hδ_le hreal)
+    (hLo : BgA1CorePair (I := I) (M := M)
+      g gB hρ.le hδ0 hδ_le hreal)
+    (v : metricH3 (I := I) (M := M) g) :
+    (tensorHsInclusion (I := I) (M := M) (g := g)
+        (r := 0) (s := 2) (show (1 : ℝ) ≤ 2 by norm_num)).comp
+        (lowA1HiBg (I := I) (M := M)
+          g gB hρ.le hδ0 hδ_le hreal v) =
+      (lowA1LoBg (I := I) (M := M)
+          g gB hρ.le hδ0 hδ_le hreal v).comp
+        (tensorHsInclusion (I := I) (M := M) (g := g)
+          (r := 0) (s := 2) (show (2 : ℝ) ≤ 3 by norm_num)) := by
+  let J12 :=
+    tensorHsInclusion (I := I) (M := M) (g := g)
+      (r := 0) (s := 2) (show (1 : ℝ) ≤ 2 by norm_num)
+  let J23 :=
+    tensorHsInclusion (I := I) (M := M) (g := g)
+      (r := 0) (s := 2) (show (2 : ℝ) ≤ 3 by norm_num)
+  let AHi := lowA1HiBg (I := I) (M := M)
+    g gB hρ.le hδ0 hδ_le hreal
+  let ALo := lowA1LoBg (I := I) (M := M)
+    g gB hρ.le hδ0 hδ_le hreal
+  have hleft : Continuous (fun w => J12.comp (AHi w)) :=
+    (ContinuousLinearMap.compL ℝ
+      (tensorHs (I := I) (M := M) g 0 2 (3 : ℝ))
+      (tensorHs (I := I) (M := M) g 0 2 (2 : ℝ))
+      (tensorHs (I := I) (M := M) g 0 2 (1 : ℝ))).continuous₂.comp
+        (continuous_const.prodMk
+          (lowA1HiBg_cont (I := I) (M := M) g gB hHi))
+  have hright : Continuous (fun w => (ALo w).comp J23) :=
+    (ContinuousLinearMap.compL ℝ
+      (tensorHs (I := I) (M := M) g 0 2 (3 : ℝ))
+      (tensorHs (I := I) (M := M) g 0 2 (2 : ℝ))
+      (tensorHs (I := I) (M := M) g 0 2 (1 : ℝ))).continuous₂.comp
+        ((lowA1LoBg_cont (I := I) (M := M) g gB hLo).prodMk
+          continuous_const)
+  have hdense : DenseRange
+      (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ)) :=
+    ccToHsLin_dense (I := I) (M := M) g 2 (by positivity)
+  refine hdense.induction_on v (isClosed_eq hleft hright) ?_
+  intro T
+  rw [lowA1HiBg_core (I := I) (M := M) g gB hHi T,
+    lowA1LoBg_core (I := I) (M := M) g gB hLo T]
+  exact a1_comm (I := I) (M := M) hDim g
+    (lowCoreDataBg (I := I) (M := M) g gB hρ.le hδ0 hδ_le hreal T)
 
 /-- The fixed-background radial second-order coefficient as an `H4 → H2`
 operator-valued map on the completed `H2` state space. -/

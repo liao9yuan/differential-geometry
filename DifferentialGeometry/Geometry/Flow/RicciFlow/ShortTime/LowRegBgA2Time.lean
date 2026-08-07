@@ -1,12 +1,18 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgTime
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC2Small
 
 /-!
-# Time packets for the same-background complete second-order action
+# Time packets for the fixed-background complete second-order action
 
 This module turns the complete low-base `C₂` coefficient into the compatible
 measurable `H4 → H2` and `H3 → H1` families used by the adjacent-scale lift.
 The coefficient already includes the full principal deviation after subtraction
 of the fixed rough Laplacian; no separate principal arm is added here.
+
+The DeTurck background `gB` is independent of the class metric `g` throughout:
+the completed maps come from `lowCoreDataBg g gB`, and the smallness input is
+the fixed-background `c2Bg_h2_small`.  Only the realization data (`hreal`, the
+threshold bounds) is tied to `g`.
 -/
 
 noncomputable section
@@ -75,32 +81,32 @@ private noncomputable abbrev incl34
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 private theorem a2HiBg_total_le
-    (g : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
+    (g gB : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
         gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g S) δ)
     (hcont : Continuous
-      (lowA2HiBg (I := I) (M := M) g g hρ hδ0 hδ_le hreal))
+      (lowA2HiBg (I := I) (M := M) g gB hρ hδ0 hδ_le hreal))
     (hcore : ∀ S : SmoothCcTensor g 0 2,
-      lowA2HiBg (I := I) (M := M) g g hρ hδ0 hδ_le hreal
+      lowA2HiBg (I := I) (M := M) g gB hρ hδ0 hδ_le hreal
           (ccToHsLin (I := I) (M := M) g 2 (2 : ℝ) S) =
         (lowCoreDataBg (I := I) (M := M)
-          g g hρ hδ0 hδ_le hreal S).a2Hi (I := I) (M := M))
+          g gB hρ hδ0 hδ_le hreal S).a2Hi (I := I) (M := M))
     (hbd : ∀ S : SmoothCcTensor g 0 2,
       ‖(lowCoreDataBg (I := I) (M := M)
-          g g hρ hδ0 hδ_le hreal S).a2Hi (I := I) (M := M)‖ ≤ c)
+          g gB hρ hδ0 hδ_le hreal S).a2Hi (I := I) (M := M)‖ ≤ c)
     (v : metricH2 (I := I) (M := M) g) :
     ‖show a2HiOp (I := I) (M := M) g from
-      lowA2HiBg (I := I) (M := M) g g hρ hδ0 hδ_le hreal v‖ ≤ c := by
+      lowA2HiBg (I := I) (M := M) g gB hρ hδ0 hδ_le hreal v‖ ≤ c := by
   have hdense : DenseRange
       (ccToHsLin (I := I) (M := M) g 2 (2 : ℝ)) :=
     ccToHsLin_dense (I := I) (M := M) g 2 (by norm_num)
   have hclosed : IsClosed {w : metricH2 (I := I) (M := M) g |
       ‖show a2HiOp (I := I) (M := M) g from
         lowA2HiBg (I := I) (M := M)
-          g g hρ hδ0 hδ_le hreal w‖ ≤ c} :=
+          g gB hρ hδ0 hδ_le hreal w‖ ≤ c} :=
     isClosed_le
       (Continuous.comp
         (continuous_norm (E := a2HiOp (I := I) (M := M) g)) hcont)
@@ -114,32 +120,32 @@ private theorem a2HiBg_total_le
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 private theorem a2LoBg_total_le
-    (g : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
+    (g gB : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
         gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g S) δ)
     (hcont : Continuous
-      (lowA2LoBg (I := I) (M := M) g g hρ hδ0 hδ_le hreal))
+      (lowA2LoBg (I := I) (M := M) g gB hρ hδ0 hδ_le hreal))
     (hcore : ∀ S : SmoothCcTensor g 0 2,
-      lowA2LoBg (I := I) (M := M) g g hρ hδ0 hδ_le hreal
+      lowA2LoBg (I := I) (M := M) g gB hρ hδ0 hδ_le hreal
           (ccToHsLin (I := I) (M := M) g 2 (2 : ℝ) S) =
         (lowCoreDataBg (I := I) (M := M)
-          g g hρ hδ0 hδ_le hreal S).a2Lo (I := I) (M := M))
+          g gB hρ hδ0 hδ_le hreal S).a2Lo (I := I) (M := M))
     (hbd : ∀ S : SmoothCcTensor g 0 2,
       ‖(lowCoreDataBg (I := I) (M := M)
-          g g hρ hδ0 hδ_le hreal S).a2Lo (I := I) (M := M)‖ ≤ c)
+          g gB hρ hδ0 hδ_le hreal S).a2Lo (I := I) (M := M)‖ ≤ c)
     (v : metricH2 (I := I) (M := M) g) :
     ‖show a2LoOp (I := I) (M := M) g from
-      lowA2LoBg (I := I) (M := M) g g hρ hδ0 hδ_le hreal v‖ ≤ c := by
+      lowA2LoBg (I := I) (M := M) g gB hρ hδ0 hδ_le hreal v‖ ≤ c := by
   have hdense : DenseRange
       (ccToHsLin (I := I) (M := M) g 2 (2 : ℝ)) :=
     ccToHsLin_dense (I := I) (M := M) g 2 (by norm_num)
   have hclosed : IsClosed {w : metricH2 (I := I) (M := M) g |
       ‖show a2LoOp (I := I) (M := M) g from
         lowA2LoBg (I := I) (M := M)
-          g g hρ hδ0 hδ_le hreal w‖ ≤ c} :=
+          g gB hρ hδ0 hδ_le hreal w‖ ≤ c} :=
     isClosed_le
       (Continuous.comp
         (continuous_norm (E := a2LoOp (I := I) (M := M) g)) hcont)
@@ -150,14 +156,96 @@ private theorem a2LoBg_total_le
   rw [← hcore S] at h
   exact h
 
+/-- After shrinking any realized spectral `H2` ball, the canonical radial
+second-order coefficient at an arbitrary fixed DeTurck background `gB` gives
+uniformly bounded compatible `H4 → H2` and `H3 → H1` operators.
+
+The fixed-background mirror of `radialA2_pair`, stated in the free-cutoff binder
+shape of `radialA2_pairR`: the constant `C` is chosen before `r`, which is what
+lets a consumer shrink the coefficient radius after seeing `C`.  That radius is
+the only contraction knob available here — the deviation threshold `δ` is capped
+by the realization certificate and cannot be shrunk independently.
+
+Only the smallness input changes with the background: `c2Bg_h2_small` replaces
+`c2_h2_small`, while the completion transfer `a2_pair` is background-blind,
+quantifying over every `LowBaseActionData g`. -/
+theorem radialA2Bg_pair
+    (hDim : Module.finrank ℝ E = 3)
+    (g gB : SmoothRiemannianMetric I M)
+    {ρ₀ δ : ℝ} (hρ₀ : 0 < ρ₀) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+    (hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ₀ →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ) :
+    ∃ (ρ C : ℝ) (hρ_le : ρ ≤ ρ₀), 0 < ρ ∧ 0 ≤ C ∧
+      ∀ {r : ℝ} (hr0 : 0 ≤ r) (hr_le : r ≤ ρ)
+        (T : SmoothCcTensor g 0 2),
+      let hreal' : ∀ S : SmoothCcTensor g 0 2,
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ r →
+            gFibreOpBound (I := I) (M := M) g
+              (ccTensorBilinSymm (I := I) g S) δ :=
+        fun S hS => hreal S (hS.trans (hr_le.trans hρ_le))
+      let A := lowCoreDataBg (I := I) (M := M)
+        g gB hr0 hδ0 hδ_le hreal' T
+      ‖A.a2Hi (I := I) (M := M)‖ ≤ C * r ∧
+        ‖A.a2Lo (I := I) (M := M)‖ ≤ C * r ∧
+        (tensorHsInclusion (I := I) (M := M) (g := g)
+            (r := 0) (s := 2) (show (1 : ℝ) ≤ 2 by norm_num)).comp
+              (A.a2Hi (I := I) (M := M)) =
+          (A.a2Lo (I := I) (M := M)).comp
+            (tensorHsInclusion (I := I) (M := M) (g := g)
+              (r := 0) (s := 2) (show (3 : ℝ) ≤ 4 by norm_num)) := by
+  obtain ⟨ρ₂, C₂, hρ₂, hC₂, hc₂⟩ :=
+    c2Bg_h2_small (I := I) (M := M) hDim g gB
+  obtain ⟨Cₐ, hCₐ, hpair⟩ :=
+    a2_pair (I := I) (M := M) hDim g
+  refine ⟨min ρ₀ ρ₂, Cₐ * C₂, min_le_left _ _, lt_min hρ₀ hρ₂,
+    mul_nonneg hCₐ hC₂, ?_⟩
+  intro r hr0 hr_le T
+  dsimp only
+  let S : SmoothCcTensor g 0 2 :=
+    lowRadial (I := I) (M := M) g r T
+  have hSr :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ r :=
+    lowRadial_norm (I := I) (M := M) g hr0 T
+  have hSδ :
+      gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g S) δ :=
+    hreal S (hSr.trans (hr_le.trans (min_le_left _ _)))
+  have hzeroHs :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (0 : SmoothCcTensor g 0 2)‖ ≤ ρ₀ := by
+    rw [show (0 : SmoothCcTensor g 0 2) =
+        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) by simp,
+      ccTensorToHs_smul, zero_smul, norm_zero]
+    exact hρ₀.le
+  have hZδ :
+      gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g
+          (0 : SmoothCcTensor g 0 2)) δ :=
+    hreal _ hzeroHs
+  let A : LowBaseActionData g :=
+    lowCoreDataBg (I := I) (M := M) g gB hr0 hδ0 hδ_le
+      (fun P hP => hreal P (hP.trans (hr_le.trans (min_le_left _ _)))) T
+  obtain ⟨hpoint, hjet⟩ :=
+    hc₂ S
+      (lowRadial_symm (I := I) (M := M) g r T)
+      hδ_le hδ0 hSδ hZδ hr0 (hr_le.trans (min_le_right _ _)) hSr
+  have hB : 0 ≤ C₂ * r := mul_nonneg hC₂ hr0
+  obtain ⟨hHi, hLo, -, -, hcompat⟩ :=
+    hpair A (C₂ * r) hB (by
+      simpa only [A, lowCoreDataBg, S] using hpoint) (by
+      simpa only [A, lowCoreDataBg, S] using hjet)
+  exact ⟨hHi.trans_eq (by ring), hLo.trans_eq (by ring), hcompat⟩
+
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- On every sufficiently small same-background cutoff, the complete radial
+/-- On every sufficiently small fixed-background cutoff, the complete radial
 second-order coefficient gives continuous compatible completed maps whose
 operator norms are linear in the chosen cutoff radius. -/
 theorem lowA2Bg_small
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}
+    (g gB : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}
     (hρ₀ : 0 < ρ₀) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ₀ →
@@ -171,37 +259,34 @@ theorem lowA2Bg_small
                 (ccTensorBilinSymm (I := I) g S) δ :=
           fun S hS => hreal S (hS.trans (hr_le.trans hρ_le))
         Continuous (lowA2HiBg (I := I) (M := M)
-            g g hr0 hδ0 hδ_le hreal') ∧
+            g gB hr0 hδ0 hδ_le hreal') ∧
           Continuous (lowA2LoBg (I := I) (M := M)
-            g g hr0 hδ0 hδ_le hreal') ∧
+            g gB hr0 hδ0 hδ_le hreal') ∧
           (∀ v : metricH2 (I := I) (M := M) g,
             ‖show a2HiOp (I := I) (M := M) g from
               lowA2HiBg (I := I) (M := M)
-                g g hr0 hδ0 hδ_le hreal' v‖ ≤ C * r) ∧
+                g gB hr0 hδ0 hδ_le hreal' v‖ ≤ C * r) ∧
           (∀ v : metricH2 (I := I) (M := M) g,
             ‖show a2LoOp (I := I) (M := M) g from
               lowA2LoBg (I := I) (M := M)
-                g g hr0 hδ0 hδ_le hreal' v‖ ≤ C * r) ∧
+                g gB hr0 hδ0 hδ_le hreal' v‖ ≤ C * r) ∧
           ∀ v : metricH2 (I := I) (M := M) g,
             (incl12 (I := I) (M := M) g).comp
                 (lowA2HiBg (I := I) (M := M)
-                  g g hr0 hδ0 hδ_le hreal' v) =
+                  g gB hr0 hδ0 hδ_le hreal' v) =
               (lowA2LoBg (I := I) (M := M)
-                  g g hr0 hδ0 hδ_le hreal' v).comp
+                  g gB hr0 hδ0 hδ_le hreal' v).comp
                 (incl34 (I := I) (M := M) g) := by
   obtain ⟨ρL, CL, hρL, hρL_le, hlipdata⟩ :=
     radialA2Bg_lip (I := I) (M := M)
-      hDim g g hρ₀ hδ0 hδ_le hreal
-  obtain ⟨ρ₂, C₂, hρ₂, hC₂, hc₂⟩ :=
-    c2_h2_small (I := I) (M := M) hDim g
-  obtain ⟨Cₐ, hCₐ, hpair⟩ :=
-    a2_pair (I := I) (M := M) hDim g
-  let ρ : ℝ := min ρL ρ₂
-  let C : ℝ := Cₐ * C₂
-  have hρ : 0 < ρ := lt_min hρL hρ₂
+      hDim g gB hρ₀ hδ0 hδ_le hreal
+  obtain ⟨ρP, CP, hρP_le, hρP, hCP, hpair⟩ :=
+    radialA2Bg_pair (I := I) (M := M)
+      hDim g gB hρ₀ hδ0 hδ_le hreal
+  let ρ : ℝ := min ρL ρP
+  have hρ : 0 < ρ := lt_min hρL hρP
   have hρ_le : ρ ≤ ρ₀ := (min_le_left _ _).trans hρL_le
-  have hC : 0 ≤ C := mul_nonneg hCₐ hC₂
-  refine ⟨ρ, C, hρ, hρ_le, hC, ?_⟩
+  refine ⟨ρ, CP, hρ, hρ_le, hCP, ?_⟩
   intro r hr0 hr_le
   dsimp only
   let hreal' : ∀ S : SmoothCcTensor g 0 2,
@@ -210,61 +295,25 @@ theorem lowA2Bg_small
           (ccTensorBilinSymm (I := I) g S) δ :=
     fun S hS => hreal S (hS.trans (hr_le.trans hρ_le))
   have hrL : r ≤ ρL := hr_le.trans (min_le_left _ _)
-  have hr₂ : r ≤ ρ₂ := hr_le.trans (min_le_right _ _)
+  have hrP : r ≤ ρP := hr_le.trans (min_le_right _ _)
   obtain ⟨hlipHi, hlipLo, hcoreHi, hcoreLo, hsq⟩ :=
     hlipdata (r := r) hr0 hrL
-  have hzeroHs :
-      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
-        (0 : SmoothCcTensor g 0 2)‖ ≤ ρ₀ := by
-    rw [show (0 : SmoothCcTensor g 0 2) =
-        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) by simp,
-      ccTensorToHs_smul, zero_smul, norm_zero]
-    exact hρ₀.le
-  have hZδ :
-      gFibreOpBound (I := I) (M := M) g
-        (ccTensorBilinSymm (I := I) g
-          (0 : SmoothCcTensor g 0 2)) δ :=
-    hreal _ hzeroHs
   have hcoreBd : ∀ T : SmoothCcTensor g 0 2,
       ‖(lowCoreDataBg (I := I) (M := M)
-          g g hr0 hδ0 hδ_le hreal' T).a2Hi (I := I) (M := M)‖ ≤ C * r ∧
+          g gB hr0 hδ0 hδ_le hreal' T).a2Hi (I := I) (M := M)‖ ≤ CP * r ∧
         ‖(lowCoreDataBg (I := I) (M := M)
-          g g hr0 hδ0 hδ_le hreal' T).a2Lo (I := I) (M := M)‖ ≤ C * r := by
+          g gB hr0 hδ0 hδ_le hreal' T).a2Lo (I := I) (M := M)‖ ≤ CP * r := by
     intro T
-    let S : SmoothCcTensor g 0 2 :=
-      lowRadial (I := I) (M := M) g r T
-    have hSr :
-        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ r :=
-      lowRadial_norm (I := I) (M := M) g hr0 T
-    have hSδ :
-        gFibreOpBound (I := I) (M := M) g
-          (ccTensorBilinSymm (I := I) g S) δ :=
-      hreal S (hSr.trans (hr_le.trans hρ_le))
-    let A : LowBaseActionData g :=
-      lowCoreDataBg (I := I) (M := M)
-        g g hr0 hδ0 hδ_le hreal' T
-    obtain ⟨hpoint, hjet⟩ :=
-      hc₂ S
-        (lowRadial_symm (I := I) (M := M) g r T)
-        hδ_le hδ0 hSδ hZδ hr0 hr₂ hSr
-    have hB : 0 ≤ C₂ * r := mul_nonneg hC₂ hr0
-    obtain ⟨hHi, hLo, -, -, -⟩ :=
-      hpair A (C₂ * r) hB (by
-        simpa only [A, lowCoreDataBg, lowCoreData, S] using hpoint) (by
-        simpa only [A, lowCoreDataBg, lowCoreData, S] using hjet)
-    refine ⟨hHi.trans_eq ?_, hLo.trans_eq ?_⟩
-    · simp only [C]
-      ring
-    · simp only [C]
-      ring
+    obtain ⟨hHi, hLo, -⟩ := hpair hr0 hrP T
+    exact ⟨hHi, hLo⟩
   refine ⟨hlipHi.continuous, hlipLo.continuous, ?_, ?_, hsq⟩
   · intro v
     exact a2HiBg_total_le (I := I) (M := M)
-      g hr0 hδ0 hδ_le hreal' hlipHi.continuous hcoreHi
+      g gB hr0 hδ0 hδ_le hreal' hlipHi.continuous hcoreHi
         (fun T => (hcoreBd T).1) v
   · intro v
     exact a2LoBg_total_le (I := I) (M := M)
-      g hr0 hδ0 hδ_le hreal' hlipLo.continuous hcoreLo
+      g gB hr0 hδ0 hδ_le hreal' hlipLo.continuous hcoreLo
         (fun T => (hcoreBd T).2) v
 
 /-- The high complete second-order family freezes the radial passenger at the

@@ -5,6 +5,30 @@ verified conditionally.  One intentional proof-body `sorry` remains in
 `bg_packet_of_solve`, and the present same-horizon statement is stronger than
 the adjacent-scale lift interface currently proved in the repository.
 
+**ROUTE STATUS (2026-08-07, user ruling — supersedes §"The remaining
+producer and interface correction" below):** `bg_packet_of_solve` will be
+discharged by **route (c), direct smoothing** (ledger
+`UNIF_EXISTENCE_PLAN7.md` №225–227): widen the diagonal
+adapted-solve/rung/gate chain (`IsLowSolveAt`/`IsAdaptedLowSolve` → rungs →
+`lowreg_loMass`) from `(g, g)` to `(g, g_bg)`, then synthesize the order-two
+carrier directly from the all-order mass (no `IsRealizedTwo`, no
+adjacent-scale lift, no lift-horizon certificate).  The ladder adds no
+horizon constraint, so `T` and `lowreg_dt_unif` stay untouched — but the
+statement is still expected to need ONE mild correction: an
+absorption-gate certificate.  The hypotheses `hK : IsLowBoundsAt` +
+`hsol : IsLowSolveBg` realize only the order-one solve constants; the rung
+ladder additionally needs the gate inequality
+`A·(δ/(1−δ)²) + B·stateRad + ε < 1` relating `g`'s rung envelopes `A, B`
+to `K`'s fixed `δ`/state radius, which is not derivable for arbitrary `K`.
+The honest discharge adds that certificate as a hypothesis (or a K-side
+calibration field); the class-uniform gate constants of (c-B) prove it at
+the `lowreg_dt_unif` call site.  This replaces the much heavier lift-data
+interface correction described below (which also demanded a shortened
+horizon).  The lift layer stays in place, unused, until the (c) synthesis
+lands (rollback point).  The lower section is kept as the historical
+record of the superseded lift route; its analysis of WHY the lift cannot
+serve the current statement remains correct.
+
 ## Verified interface
 
 `BgSmoothPacket g g_bg K T` records exactly the order-two closed-slab data

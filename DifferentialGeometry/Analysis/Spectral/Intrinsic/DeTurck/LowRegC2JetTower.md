@@ -190,3 +190,33 @@ STOP-signal from the dispatch (a consumer needing more than one weakening line)
 did **not** fire: `topKer_jet`'s only Lean consumer was `c2JetTowerQ`, and that
 one is itself now a wrapper of a sharp sibling.  Census unchanged (three standard
 axioms) for both the sharp theorem and the compatibility wrapper.
+
+## 2026-08-07 — R2-s1 item 1: integrand linearity extracted, `armConst` un-privatized
+
+`path_add_sub_jet`'s inline `heq` block (35 lines) is now the public theorem
+`path_add_sub_eq`, and its sibling `path_sub_eq` was written the same way.  Both
+sit immediately above `path_add_sub_jet`, whose public statement is **unchanged
+byte for byte**; its body lost the block and gained one line.
+
+```
+path_sub_eq      : ∫Φ − ∫Ψ = ∫(Φ − Ψ)
+path_add_sub_eq  : ∫Φ + ∫Ψ − C = ∫(Φ + Ψ − C)      (C constant ⇒ ∫C = C)
+```
+
+Both take the joint-smoothness certificate of the combined integrand as an
+explicit hypothesis rather than assembling it internally, so a caller that
+already built it (as the `Bg` lane does, to name the two path integrals before
+subtracting) can pass its own.  `armConst` — the certificate for a *constant*
+family — is now public for the same reason; it was `private` and the caller had
+no other way to name it.  (The monolith's `arm_const`, `:1739`, stays private and
+is now redundant with it; not touched, the file is read-only.)
+
+`path_add_sub_cap` (`LowRegPathSplit.lean:337`) carries a **verbatim duplicate**
+of the same `heq` block.  It was left alone on purpose: `LowRegPathSplit` is
+upstream of the 13.8k-line `DeTurckRemainderLowBaseAction` monolith, so editing
+it re-elaborates the monolith (№194).  Whoever next has a reason to rebuild that
+chain should move `path_add_sub_eq` down to `LowRegPathSplit` and let both
+consumers share it.
+
+First consumer: `ShortTime/LowRegBgC2Small.lean` (`c2Bg_h2_small`).  Verified by
+targeted build; all four declarations axiom-clean.

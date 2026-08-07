@@ -55,13 +55,115 @@ variable
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- A constant coefficient family is jointly smooth along the realized
-segment. -/
-private theorem armConst
+segment.  This is the joint-smoothness certificate that the fixed coefficient
+of a cancellation-preserving path integrand needs. -/
+theorem armConst
     (g : SmoothRiemannianMetric I M) {r : ℕ}
     (A : SmoothCcTensor g r 2) {δ δ' : ℝ} :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g r
       (fun _ => A) (δ := δ) (δ' := δ') :=
   (A.toSection.contMDiff.comp_contMDiffOn contMDiffOn_fst).mono (Set.subset_univ _)
+
+/-- **Integrand linearity of the radial coefficient path integral, on a
+difference.**
+
+Two path integrals over the same realized segment differ by the path integral
+of the difference of their integrands.  The joint smoothness of the difference
+is taken as an input so that the caller may supply whichever assembly it
+already has. -/
+theorem path_sub_eq
+    (g : SmoothRiemannianMetric I M) (r : ℕ)
+    {δ δ' : ℝ}
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ'))
+    (Φ Ψ : ℝ → SmoothCcTensor g r 2)
+    (hΦ : linearizedRicciThreeArmHjoint (I := I) (M := M) g r Φ
+      (δ := δ) (δ' := δ'))
+    (hΨ : linearizedRicciThreeArmHjoint (I := I) (M := M) g r Ψ
+      (δ := δ) (δ' := δ'))
+    (hD : linearizedRicciThreeArmHjoint (I := I) (M := M) g r
+      (fun t => Φ t - Ψ t) (δ := δ) (δ' := δ')) :
+    pathIntegralCoeffField (I := I) (M := M) g r 2 Φ
+          (realizedSmallSet (δ := δ) (δ' := δ'))
+          realizedSmallSet_isOpen hSI hΦ -
+        pathIntegralCoeffField (I := I) (M := M) g r 2 Ψ
+          (realizedSmallSet (δ := δ) (δ' := δ'))
+          realizedSmallSet_isOpen hSI hΨ =
+      pathIntegralCoeffField (I := I) (M := M) g r 2
+        (fun t => Φ t - Ψ t)
+        (realizedSmallSet (δ := δ) (δ' := δ'))
+        realizedSmallSet_isOpen hSI hD := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro y
+  apply TensorRSSpace.toModel_injective
+  have hcΦ := jointContMDiff_toModel_continuous_slice
+    (I := I) g r 2 Φ (realizedSmallSet (δ := δ) (δ' := δ')) hΦ y
+  have hcΨ := jointContMDiff_toModel_continuous_slice
+    (I := I) g r 2 Ψ (realizedSmallSet (δ := δ) (δ' := δ')) hΨ y
+  have hIΦ : IntervalIntegrable (fun t : ℝ =>
+      TensorRSSpace.toModel ((Φ t).toSection y))
+      MeasureTheory.volume 0 1 :=
+    (hcΦ.mono hSI).intervalIntegrable
+  have hIΨ : IntervalIntegrable (fun t : ℝ =>
+      TensorRSSpace.toModel ((Ψ t).toSection y))
+      MeasureTheory.volume 0 1 :=
+    (hcΨ.mono hSI).intervalIntegrable
+  simp only [pathIntegralCoeffField_toModel, SmoothCcTensor.toSection_sub,
+    ContMDiffSection.coe_sub, Pi.sub_apply, TensorRSSpace.toModel_sub]
+  rw [intervalIntegral.integral_sub hIΦ hIΨ]
+
+/-- **Integrand linearity of the radial coefficient path integral, on the
+cancellation-preserving combination.**
+
+The sum of two path integrals minus a fixed coefficient is the single path
+integral of `t ↦ Φ t + Ψ t - C`: the constant integrates to itself over the
+unit segment.  This is the algebraic content that lets `path_add_sub_jet` and
+`path_add_sub_cap` transport an integrand cap through one path integral. -/
+theorem path_add_sub_eq
+    (g : SmoothRiemannianMetric I M) (r : ℕ)
+    {δ δ' : ℝ}
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ'))
+    (Φ Ψ : ℝ → SmoothCcTensor g r 2) (C : SmoothCcTensor g r 2)
+    (hΦ : linearizedRicciThreeArmHjoint (I := I) (M := M) g r Φ
+      (δ := δ) (δ' := δ'))
+    (hΨ : linearizedRicciThreeArmHjoint (I := I) (M := M) g r Ψ
+      (δ := δ) (δ' := δ'))
+    (hK : linearizedRicciThreeArmHjoint (I := I) (M := M) g r
+      (fun t => Φ t + Ψ t - C) (δ := δ) (δ' := δ')) :
+    pathIntegralCoeffField (I := I) (M := M) g r 2 Φ
+          (realizedSmallSet (δ := δ) (δ' := δ'))
+          realizedSmallSet_isOpen hSI hΦ +
+        pathIntegralCoeffField (I := I) (M := M) g r 2 Ψ
+          (realizedSmallSet (δ := δ) (δ' := δ'))
+          realizedSmallSet_isOpen hSI hΨ -
+        C =
+      pathIntegralCoeffField (I := I) (M := M) g r 2
+        (fun t => Φ t + Ψ t - C)
+        (realizedSmallSet (δ := δ) (δ' := δ'))
+        realizedSmallSet_isOpen hSI hK := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro y
+  apply TensorRSSpace.toModel_injective
+  have hcΦ := jointContMDiff_toModel_continuous_slice
+    (I := I) g r 2 Φ (realizedSmallSet (δ := δ) (δ' := δ')) hΦ y
+  have hcΨ := jointContMDiff_toModel_continuous_slice
+    (I := I) g r 2 Ψ (realizedSmallSet (δ := δ) (δ' := δ')) hΨ y
+  have hIΦ : IntervalIntegrable (fun t : ℝ =>
+      TensorRSSpace.toModel ((Φ t).toSection y))
+      MeasureTheory.volume 0 1 :=
+    (hcΦ.mono hSI).intervalIntegrable
+  have hIΨ : IntervalIntegrable (fun t : ℝ =>
+      TensorRSSpace.toModel ((Ψ t).toSection y))
+      MeasureTheory.volume 0 1 :=
+    (hcΨ.mono hSI).intervalIntegrable
+  simp only [pathIntegralCoeffField_toModel, SmoothCcTensor.toSection_add,
+    SmoothCcTensor.toSection_sub, ContMDiffSection.coe_add,
+    ContMDiffSection.coe_sub, Pi.add_apply, Pi.sub_apply,
+    TensorRSSpace.toModel_add, TensorRSSpace.toModel_sub]
+  rw [intervalIntegral.integral_sub (hIΦ.add hIΨ) intervalIntegrable_const,
+    intervalIntegral.integral_add hIΦ hIΨ, intervalIntegral.integral_const]
+  norm_num
 
 set_option maxHeartbeats 800000 in
 /-- **Differentiation under the path integral, at every order.**
@@ -101,41 +203,7 @@ theorem path_add_sub_jet
     threeArmJoint_sub (I := I) (M := M) g _ _
       (threeArmJoint_add (I := I) (M := M) g _ _ hΦ hΨ)
       (armConst (I := I) (M := M) g C)
-  have heq :
-      pathIntegralCoeffField (I := I) (M := M) g r 2 Φ
-            (realizedSmallSet (δ := δ) (δ' := δ'))
-            realizedSmallSet_isOpen hSI hΦ +
-          pathIntegralCoeffField (I := I) (M := M) g r 2 Ψ
-            (realizedSmallSet (δ := δ) (δ' := δ'))
-            realizedSmallSet_isOpen hSI hΨ -
-          C =
-        pathIntegralCoeffField (I := I) (M := M) g r 2
-          (fun t => Φ t + Ψ t - C)
-          (realizedSmallSet (δ := δ) (δ' := δ'))
-          realizedSmallSet_isOpen hSI hK := by
-    apply SmoothCcTensor.ext
-    apply ContMDiffSection.ext
-    intro y
-    apply TensorRSSpace.toModel_injective
-    have hcΦ := jointContMDiff_toModel_continuous_slice
-      (I := I) g r 2 Φ (realizedSmallSet (δ := δ) (δ' := δ')) hΦ y
-    have hcΨ := jointContMDiff_toModel_continuous_slice
-      (I := I) g r 2 Ψ (realizedSmallSet (δ := δ) (δ' := δ')) hΨ y
-    have hIΦ : IntervalIntegrable (fun t : ℝ =>
-        TensorRSSpace.toModel ((Φ t).toSection y))
-        MeasureTheory.volume 0 1 :=
-      (hcΦ.mono hSI).intervalIntegrable
-    have hIΨ : IntervalIntegrable (fun t : ℝ =>
-        TensorRSSpace.toModel ((Ψ t).toSection y))
-        MeasureTheory.volume 0 1 :=
-      (hcΨ.mono hSI).intervalIntegrable
-    simp only [pathIntegralCoeffField_toModel, SmoothCcTensor.toSection_add,
-      SmoothCcTensor.toSection_sub, ContMDiffSection.coe_add,
-      ContMDiffSection.coe_sub, Pi.add_apply, Pi.sub_apply,
-      TensorRSSpace.toModel_add, TensorRSSpace.toModel_sub]
-    rw [intervalIntegral.integral_sub (hIΦ.add hIΨ) intervalIntegrable_const,
-      intervalIntegral.integral_add hIΦ hIΨ, intervalIntegral.integral_const]
-    norm_num
+  have heq := path_add_sub_eq (I := I) (M := M) g r hSI Φ Ψ C hΦ hΨ hK
   have hsq : Real.sqrt Λ ^ 2 = Λ := Real.sq_sqrt hΛ
   have hcap' : ∀ t ∈ Set.Icc (0 : ℝ) 1,
       (∑ q ∈ Finset.range (n + 1),
