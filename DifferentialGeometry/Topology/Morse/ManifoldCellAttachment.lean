@@ -1103,6 +1103,107 @@ theorem handleCollarMap_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : �
   · apply Subtype.ext
     exact hq
 
+theorem handleCollarMap_attachingRegion {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (v : (x : M) → TangentSpace I x)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (p : AttachingRegion k (m + 1 - k)) :
+    handleCollarMap hk c ε r data hε hεr v hcomplete (p, (⟨1, by norm_num⟩ : Set.Icc (0 : ℝ) 1)) =
+      (cocoreAttachingEmbedding hk c ε r data hε hεr p).1 := by
+  simp [handleCollarMap, curveAt_zero v hcomplete]
+
+theorem handleCollarMap_mem_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hδ : r ^ 2 / 2 < δ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1)
+    (hρ : (q.2 : ℝ) < 1) :
+    handleCollarMap hk c ε r data hε hεr v hcomplete q ∉ sublevel f (c - ε) := by
+  intro hq
+  have hval := handleCollarMap_value hk c ε r δ data hε hεr hδ hf v hdfOn hrate hcomplete q
+  change f (handleCollarMap hk c ε r data hε hεr v hcomplete q) ≤ c - ε at hq
+  rw [hval] at hq
+  have hpos : 0 < r ^ 2 * (1 - (q.2 : ℝ)) / 2 := by
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    have h1 : 0 < 1 - (q.2 : ℝ) := sub_pos.mpr hρ
+    positivity
+  nlinarith
+
+theorem handleCollarMap_mem_sublevel {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hδ : r ^ 2 / 2 < δ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (b : ℝ) (hb : c - ε + r ^ 2 / 2 ≤ b)
+    (q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1) :
+    handleCollarMap hk c ε r data hε hεr v hcomplete q ∈ sublevel f b := by
+  have hval := handleCollarMap_value hk c ε r δ data hε hεr hδ hf v hdfOn hrate hcomplete q
+  change f (handleCollarMap hk c ε r data hε hεr v hcomplete q) ≤ b
+  rw [hval]
+  have hs : r ^ 2 * (1 - (q.2 : ℝ)) / 2 ≤ r ^ 2 / 2 := by
+    have h1 : 0 ≤ 1 - (q.2 : ℝ) := sub_nonneg.mpr q.2.property.2
+    have h1' : 0 ≤ (q.2 : ℝ) := q.2.property.1
+    nlinarith [sq_nonneg r, h1, h1']
+  nlinarith [hb, hs]
+
+theorem handleCollarMap_mem_lower_iff {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hδ : r ^ 2 / 2 < δ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1) :
+    handleCollarMap hk c ε r data hε hεr v hcomplete q ∈ sublevel f (c - ε) ↔
+      (q.2 : ℝ) = 1 := by
+  constructor
+  · intro hq
+    have hval := handleCollarMap_value hk c ε r δ data hε hεr hδ hf v hdfOn hrate hcomplete q
+    change f (handleCollarMap hk c ε r data hε hεr v hcomplete q) ≤ c - ε at hq
+    rw [hval] at hq
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    have hle : 1 - (q.2 : ℝ) ≤ 0 := by
+      have h0 : r ^ 2 * (1 - (q.2 : ℝ)) / 2 ≤ 0 := by nlinarith
+      nlinarith
+    have hge : 1 ≤ (q.2 : ℝ) := by nlinarith
+    exact le_antisymm q.2.property.2 hge
+  · intro hρ
+    have hval := handleCollarMap_value hk c ε r δ data hε hεr hδ hf v hdfOn hrate hcomplete q
+    change f (handleCollarMap hk c ε r data hε hεr v hcomplete q) ≤ c - ε
+    rw [hval]
+    rw [hρ]
+    norm_num
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
