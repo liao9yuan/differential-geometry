@@ -2108,6 +2108,12 @@ theorem modifiedCollarHomotopy_fix_cell {n k : ℕ} (hk : k ≤ n) (c ε : ℝ)
     rw [← hpos]
     exact recombine_decompose hk y
 
+theorem modifiedCollarHomotopy_eq_self_of_lower {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) {t : ℝ}
+    {y : MorseModel n} (hy : morseNormalForm hk c y ≤ c - ε) :
+    modifiedCollarHomotopy hk c ε t y = y := by
+  dsimp [modifiedCollarHomotopy]
+  rw [if_pos hy]
+
 end
 
 end DifferentialGeometry.Topology.Morse.CellAttachment

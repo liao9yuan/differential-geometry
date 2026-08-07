@@ -20,10 +20,12 @@ theorem no_critical_value_transport [I.Boundaryless] [IsManifold I (⊤ : WithTo
     (hcompact : IsCompact (f ⁻¹' Set.Icc a b))
     (hregular : ∀ x ∈ f ⁻¹' Set.Icc a b, ¬ IsCriticalPointAt I f x) :
     ∃ v : (x : M) → TangentSpace I x,
-      ∃ Φ : Diffeomorph I I M M ∞,
+    ∃ Φ : Diffeomorph I I M M ∞,
         ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
           (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) ∧
         IsCompact (tsupport v) ∧
+        (∀ x ∈ f ⁻¹' Set.Icc a b,
+          (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1) ∧
         (∀ x,
           -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
           (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0) ∧
@@ -68,7 +70,7 @@ theorem no_critical_value_transport [I.Boundaryless] [IsManifold I (⊤ : WithTo
               _ = x := hflow0 x }
       contMDiff_toFun := hflowSmooth (a - b)
       contMDiff_invFun := hflowSmooth (b - a) }
-  refine ⟨v, Φ, hv, hsupp, hrate, hcomplete, ?_, ?_⟩
+  refine ⟨v, Φ, hv, hsupp, hdfOn, hrate, hcomplete, ?_, ?_⟩
   · change (fun x : M => flow (a - b) x) '' sublevel f a = sublevel f b
     simpa [flow] using htransport
   · intro x
@@ -81,7 +83,7 @@ theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞)
     (hregular : ∀ x ∈ f ⁻¹' Set.Icc a b, ¬ IsCriticalPointAt I f x) :
     ∃ Φ : Diffeomorph I I M M ∞, Φ.toEquiv '' sublevel f a = sublevel f b := by
   rcases no_critical_value_transport (I := I) f hf hab hcompact hregular with
-    ⟨v, Φ, hv, hsupp, hrate, hcomplete, hflow, htie⟩
+    ⟨v, Φ, hv, hsupp, hdfOn, hrate, hcomplete, hflow, htie⟩
   exact ⟨Φ, hflow⟩
 
 end
