@@ -64,25 +64,33 @@ theorem hasDerivAt_inner_self_of_hasDerivAt
 
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem normGradSq_timeDeriv_of_log_heat
+    {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M)
     (u : ℝ → M → ℝ)
-    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
-    (hpos : ∀ t x, 0 < u t x)
-    {t : ℝ} (x : M) :
+    (hu : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2) (D.regular ×ˢ univ))
+    (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
+    {t : ℝ} (ht : t ∈ D.regular) (x : M) :
     HasDerivAt (fun s : ℝ =>
         g.inner x (gradientFun (I := I) g (fun y => Real.log (u s y)) x)
           (gradientFun (I := I) g (fun y => Real.log (u s y)) x))
       (2 * g.inner x
           (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
-          (gradientFun (I := I) g
+            (gradientFun (I := I) g
             (fun y => deriv (fun σ : ℝ => Real.log (u σ y)) t) x)) t := by
   classical
   let f : ℝ → M → ℝ := fun s y => Real.log (u s y)
-  let hf : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => f p.1 p.2) := by
-    simpa [f] using
-      DifferentialGeometry.Analysis.Parabolic.Moser.contMDiff_log_of_pos hu hpos
-  have hgrad := gradientFun_time_deriv g f hf (t := t) (x := x)
+  have hlog' : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2) (D.regular ×ˢ univ) := by
+    intro p hp
+    have hnh : D.regular ×ˢ univ ∈ 𝓝 p :=
+      (IsOpen.prod D.regular_isOpen isOpen_univ).mem_nhds ⟨hp.1, trivial⟩
+    have hlogAt : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => Real.log (u p.1 p.2)) p :=
+      (Real.contDiffAt_log.2 (hpos p.1 (D.regular_subset hp.1) p.2).ne').comp_contMDiffAt
+        (x := p) (hu.contMDiffAt hnh)
+    simpa [f] using hlogAt.contMDiffWithinAt
+  have hgrad := gradientFun_time_deriv (I := I) (M := M) (D := D) g f hlog' ht (x := x)
   have hmain := hasDerivAt_inner_self_of_hasDerivAt g x
     (G := fun s => gradientFun (I := I) g (f s) x)
     (G' := gradientFun (I := I) g (fun y => deriv (fun σ : ℝ => f σ y) t) x) hgrad
@@ -98,23 +106,27 @@ theorem gradientFun_add
 
 theorem normGradSq_log_heat_evolution_identity
     [NeZero (Module.finrank ℝ E)]
+    {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M)
     (u : ℝ → M → ℝ)
-    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
-    (hpos : ∀ t x, 0 < u t x)
-    (hpde : ∀ t x, deriv (fun s => u s x) t =
-      Δ_g g (smoothScalarSlice (I := I) g u hu t).smooth x)
-    {t : ℝ} (x : M)
-    (hN : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => g.inner p.2
-        (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
-        (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2))) :
+    (hu : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2) (D.regular ×ˢ univ))
+    (hslice : ∀ t : ℝ, t ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞ (u t))
+    (hlogslice : ∀ t : ℝ, t ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => Real.log (u t y)))
+    (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
+    (hpde : ∀ t : ℝ, (ht : t ∈ D.regular) → ∀ x : M,
+      HasDerivAt (fun s => u s x)
+        (Δ_g (I := I) g (hslice t (D.regular_subset ht)) x) t)
+    {t : ℝ} (ht : t ∈ D.regular) (x : M)
+    (hNslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => g.inner y
+        (gradientFun (I := I) g (fun z => Real.log (u t z)) y)
+        (gradientFun (I := I) g (fun z => Real.log (u t z)) y))) :
     deriv (fun s : ℝ =>
         g.inner x (gradientFun (I := I) g (fun y => Real.log (u s y)) x)
           (gradientFun (I := I) g (fun y => Real.log (u s y)) x)) t -
-      Δ_g g (smoothScalarSlice (I := I) g
-        (fun s y => g.inner y (gradientFun (I := I) g (fun z => Real.log (u s z)) y)
-          (gradientFun (I := I) g (fun z => Real.log (u s z)) y)) hN t).smooth x =
+      Δ_g g (hNslice t ht) x =
       2 * g.inner x (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
           (gradientFun (I := I) g (fun y => g.inner y
             (gradientFun (I := I) g (fun z => Real.log (u t z)) y)
@@ -124,72 +136,72 @@ theorem normGradSq_log_heat_evolution_identity
           (gradFun (I := I) g (fun y => Real.log (u t y)) x) := by
   classical
   let f : ℝ → M → ℝ := fun s y => Real.log (u s y)
-  let hlog : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => f p.1 p.2) := by
-    simpa [f] using
-      DifferentialGeometry.Analysis.Parabolic.Moser.contMDiff_log_of_pos hu hpos
-  have hslice : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => f t y) := by
-    have harg : ContMDiff I ((𝓘(ℝ, ℝ)).prod I) ∞ (fun y : M => (t, y)) :=
-      (contMDiff_const (c := t) : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => t)).prodMk
-        (contMDiff_id : ContMDiff I I ∞ (fun y : M => y))
-    simpa [f] using hlog.comp harg
+  have hlog' : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2) (D.regular ×ˢ univ) := by
+    intro p hp
+    have hnh : D.regular ×ˢ univ ∈ 𝓝 p :=
+      (IsOpen.prod D.regular_isOpen isOpen_univ).mem_nhds ⟨hp.1, trivial⟩
+    have hlogAt : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => Real.log (u p.1 p.2)) p :=
+      (Real.contDiffAt_log.2 (hpos p.1 (D.regular_subset hp.1) p.2).ne').comp_contMDiffAt
+        (x := p) (hu.contMDiffAt hnh)
+    simpa [f] using hlogAt.contMDiffWithinAt
+  have hslice_ft : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => f t y) := by
+    simpa [f] using hlogslice t (D.regular_subset ht)
   let N : ℝ → M → ℝ := fun s y => g.inner y
         (gradientFun (I := I) g (fun z => Real.log (u s z)) y)
         (gradientFun (I := I) g (fun z => Real.log (u s z)) y)
   have hNt := DifferentialGeometry.Analysis.Parabolic.Harnack.normGradSq_timeDeriv_of_log_heat
-    g u hu hpos (t := t) x
+    (D := D) g u hu hpos ht x
   have hder_N : deriv (fun s : ℝ => N s x) t =
       2 * g.inner x (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
         (gradientFun (I := I) g (fun y => deriv (fun σ : ℝ => Real.log (u σ y)) t) x) := by
     simpa [N] using hNt.deriv
-  have hlog_ev : ∀ s y,
+  have hlog_ev : ∀ s (hs : s ∈ D.regular) y,
       deriv (fun σ : ℝ => Real.log (u σ y)) s =
-        Δ_g g (smoothScalarSlice (I := I) g (fun σ z => Real.log (u σ z)) hlog s).smooth y +
-          N s y := by
-    intro s y
+        Δ_g g (hlogslice s (D.regular_subset hs)) y + N s y := by
+    intro s hs y
     have h := DifferentialGeometry.Analysis.Parabolic.Harnack.heatSolution_log_evolution
-      g u hu hpos (hpde s y)
+      (D := D) g u hslice hlogslice hpos hs (hpde s hs y)
     simpa [N, f] using h
   have hNslice_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) (N t) x :=
-    (hN.comp (contMDiff_const.prodMk (contMDiff_id : ContMDiff I I ∞ (fun y : M => y)))).mdifferentiableAt
-      (x := x) (by norm_num)
+    (hNslice t ht).mdifferentiableAt (x := x) (by norm_num)
   have hdel_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (fun y : M => Δ_g g (smoothScalarSlice (I := I) g (fun σ z => Real.log (u σ z)) hlog t).smooth y) := by
-    simpa using (Δ_g_contMDiff (I := I) g
-      (hlog.comp (contMDiff_const.prodMk (contMDiff_id : ContMDiff I I ∞ (fun y : M => y)))))
+      (fun y : M => Δ_g g (hlogslice t (D.regular_subset ht)) y) := by
+    simpa using (Δ_g_contMDiff (I := I) g (hlogslice t (D.regular_subset ht)))
   have hDel_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ)
-      (fun y : M => Δ_g g (smoothScalarSlice (I := I) g (fun σ z => Real.log (u σ z)) hlog t).smooth y) x :=
+      (fun y : M => Δ_g g (hlogslice t (D.regular_subset ht)) y) x :=
     hdel_cd.mdifferentiableAt (x := x) (by norm_num)
   have hgrad_ft : gradientFun (I := I) g
         (fun y => deriv (fun σ : ℝ => Real.log (u σ y)) t) x =
       gradientFun (I := I) g
-          (fun y : M => Δ_g g (smoothScalarSlice (I := I) g (fun σ z => Real.log (u σ z)) hlog t).smooth y) x +
+          (fun y : M => Δ_g g (hlogslice t (D.regular_subset ht)) y) x +
         gradientFun (I := I) g (N t) x := by
     have hfun : (fun y : M => deriv (fun σ : ℝ => Real.log (u σ y)) t) =
-        (fun y : M => Δ_g g (smoothScalarSlice (I := I) g (fun σ z => Real.log (u σ z)) hlog t).smooth y +
+        (fun y : M => Δ_g g (hlogslice t (D.regular_subset ht)) y +
           N t y) := by
       funext y
-      exact hlog_ev t y
+      exact hlog_ev t ht y
     rw [hfun]
     exact gradientFun_add g x hDel_mdiff hNslice_mdiff
   have hbochner := DifferentialGeometry.Integral.Connection.bochner_pointwise_grad_normSq_of_boundaryless
-    (I := I) g hslice x
-  have hbochner' : Δ_g g (smoothScalarSlice (I := I) g N hN t).smooth x =
+    (I := I) g hslice_ft x
+  have hbochner' : Δ_g g (hNslice t ht) x =
       2 * frobeniusSq_grad_vector (I := I) g (fun b => gradFun (I := I) g (fun y => f t y) b) x +
         2 * ricciTensor (I := I) g x (gradFun (I := I) g (fun y => f t y) x) (gradFun (I := I) g (fun y => f t y) x) +
-        2 * g.inner x (gradFun (I := I) g (fun y => f t y) x) (gradFun (I := I) g (Δ_g (I := I) g hslice) x) := by
-    have hcongr : Δ_g g (smoothScalarSlice (I := I) g N hN t).smooth x =
-        Δ_g g (normGradSqFun_contMDiff (I := I) g hslice) x := by
-      refine Δ_g_congr_of_eventuallyEq (I := I) g (smoothScalarSlice (I := I) g N hN t).smooth
-        (normGradSqFun_contMDiff (I := I) g hslice) ?_
+        2 * g.inner x (gradFun (I := I) g (fun y => f t y) x) (gradFun (I := I) g (Δ_g (I := I) g hslice_ft) x) := by
+    have hcongr : Δ_g g (hNslice t ht) x =
+        Δ_g g (normGradSqFun_contMDiff (I := I) g hslice_ft) x := by
+      refine Δ_g_congr_of_eventuallyEq (I := I) g (hNslice t ht)
+        (normGradSqFun_contMDiff (I := I) g hslice_ft) ?_
       rw [Filter.eventuallyEq_iff_exists_mem]
       refine ⟨Set.univ, Filter.univ_mem, ?_⟩
       intro y hy
-      simp [N, f, normGradSqFun]
+      simp [f, normGradSqFun]
       rfl
     exact hcongr.trans hbochner
   have hmain : deriv (fun s : ℝ => N s x) t -
-        Δ_g g (smoothScalarSlice (I := I) g N hN t).smooth x =
+        Δ_g g (hNslice t ht) x =
       2 * g.inner x (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
           (gradientFun (I := I) g (N t) x) -
         2 * frobeniusSq_grad_vector (I := I) g (fun b => gradFun (I := I) g (fun y => f t y) b) x -
@@ -200,56 +212,48 @@ theorem normGradSq_log_heat_evolution_identity
     rw [hbochner']
     rw [map_add]
     have hΔf_eq : g.inner x (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
-          (gradientFun (I := I) g (fun y => Δ_g g (smoothScalarSlice (I := I) g (fun σ z => Real.log (u σ z)) hlog t).smooth y) x) =
-        g.inner x (gradFun (I := I) g (fun y => f t y) x) (gradFun (I := I) g (Δ_g (I := I) g hslice) x) := by
+          (gradientFun (I := I) g (fun y => Δ_g g (hlogslice t (D.regular_subset ht)) y) x) =
+        g.inner x (gradFun (I := I) g (fun y => f t y) x) (gradFun (I := I) g (Δ_g (I := I) g hslice_ft) x) := by
       rfl
     rw [hΔf_eq]
     ring
   have hfrob : frobeniusSq_grad_vector (I := I) g (fun b => gradFun (I := I) g (fun y => f t y) b) x =
       chartHessFrobeniusSq (I := I) g (fun y => Real.log (u t y)) x := by
-    simpa [f] using (frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hslice x)
+    simpa [f] using (frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hslice_ft x)
   rw [hfrob] at hmain
   simpa [f, N] using hmain
 
 theorem liYauQuantity_sq_div_n_le_chartHessFrobeniusSq
     [NeZero (Module.finrank ℝ E)]
+    {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M)
     (u : ℝ → M → ℝ)
-    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => u p.1 p.2))
-    (hpos : ∀ t x, 0 < u t x)
-    {t : ℝ} {x : M}
-    (hpde : deriv (fun s => u s x) t =
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+    (hslice : ∀ t : ℝ, t ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞ (u t))
+    (hlogslice : ∀ t : ℝ, t ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => Real.log (u t y)))
+    (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
+    {t : ℝ} (ht : t ∈ D.regular) {x : M}
+    (hpde : HasDerivAt (fun s => u s x)
+      (Δ_g (I := I) g (hslice t (D.regular_subset ht)) x) t) :
     (liYauQuantity g (fun τ y => Real.log (u τ y)) t x)^2 /
         (Module.finrank ℝ E : ℝ) ≤
       chartHessFrobeniusSq (I := I) g (fun y => Real.log (u t y)) x := by
   classical
-  let hlog : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => Real.log (u p.1 p.2)) := Moser.contMDiff_log_of_pos hu hpos
   have hn : (0 : ℝ) < (Module.finrank ℝ E : ℝ) := by
     exact_mod_cast (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
   have htrace0 := laplacian_sq_le_dim_mul_hessianFrobeniusSq_of_boundaryless (I := I) g
-    (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x
-  have hle0 : (Δ_g (I := I) g (smoothScalarSlice (I := I) g
-        (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 ≤
-      chartHessFrobeniusSq (I := I) g
-        (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).toFun x *
+    (hlogslice t (D.regular_subset ht)) x
+  have hle0 : (Δ_g (I := I) g (hlogslice t (D.regular_subset ht)) x)^2 ≤
+      chartHessFrobeniusSq (I := I) g (fun y : M => Real.log (u t y)) x *
         (Module.finrank ℝ E : ℝ) := by
     rw [mul_comm] at htrace0
     exact htrace0
-  have hdiv : (Δ_g (I := I) g (smoothScalarSlice (I := I) g
-        (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 /
+  have hdiv : (Δ_g (I := I) g (hlogslice t (D.regular_subset ht)) x)^2 /
         (Module.finrank ℝ E : ℝ) ≤ chartHessFrobeniusSq (I := I) g (fun y => Real.log (u t y)) x := by
-    change (Δ_g (I := I) g (smoothScalarSlice (I := I) g
-          (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 /
-        (Module.finrank ℝ E : ℝ) ≤ chartHessFrobeniusSq (I := I) g
-          (smoothScalarSlice (I := I) g (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).toFun x
     exact (div_le_iff₀ hn).2 hle0
-  have hqid := liYauQuantity_eq_neg_laplacian (I := I) (M := M) g u hu hpos hpde
+  have hqid := liYauQuantity_eq_neg_laplacian (I := I) (M := M) (D := D) g u hslice hlogslice hpos ht hpde
   have hqsq : (liYauQuantity g (fun τ y => Real.log (u τ y)) t x)^2 =
-      (Δ_g (I := I) g (smoothScalarSlice (I := I) g
-        (fun s : ℝ => fun y : M => Real.log (u s y)) hlog t).smooth x)^2 := by
+      (Δ_g (I := I) g (hlogslice t (D.regular_subset ht)) x)^2 := by
     rw [hqid]
     ring
   rwa [hqsq]
@@ -307,27 +311,40 @@ theorem hamiltonF_ricci_dissipation_of_ricci_lower_bound
 
 theorem hamiltonF_evolution_inequality_of_ricci_lower_bound
     [NeZero (Module.finrank ℝ E)]
+    {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M) {K : ℝ}
     (hRic : ∀ x v, -K * g.inner x v v ≤ ricciTensor (I := I) g x v v)
     (u : ℝ → M → ℝ)
-    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => u p.1 p.2))
-    (hpos : ∀ t x, 0 < u t x)
-    (hpde : ∀ t x, deriv (fun s => u s x) t =
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
-    (hq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2))
-    (hN : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    (hu : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2) (D.regular ×ˢ univ))
+    (hslice : ∀ t : ℝ, t ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞ (u t))
+    (hlogslice : ∀ t : ℝ, t ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => Real.log (u t y)))
+    (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
+    (hpde : ∀ t : ℝ, (ht : t ∈ D.regular) → ∀ x : M,
+      HasDerivAt (fun s => u s x)
+        (Δ_g (I := I) g (hslice t (D.regular_subset ht)) x) t)
+    (hqOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2)
+      (D.regular ×ˢ univ))
+    (hqslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => liYauQuantity g (fun σ z => Real.log (u σ z)) t y))
+    (hNOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M => g.inner p.2
         (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
-        (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)))
-    (hF : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M =>
-        Real.exp ((-(2 * K)) * p.1) *
-          g.inner p.2 (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
-            (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2) -
-        deriv (fun σ : ℝ => Real.log (u σ p.2)) p.1))
-    {s : ℝ} (x : M)
+        (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2))
+      (D.regular ×ˢ univ))
+    (hNslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => g.inner y
+        (gradientFun (I := I) g (fun z => Real.log (u t z)) y)
+        (gradientFun (I := I) g (fun z => Real.log (u t z)) y)))
+    (hFslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M =>
+        Real.exp ((-(2 * K)) * t) *
+          g.inner y (gradientFun (I := I) g (fun z => Real.log (u t z)) y)
+            (gradientFun (I := I) g (fun z => Real.log (u t z)) y) -
+        deriv (fun σ : ℝ => Real.log (u σ y)) t))
+    {s : ℝ} (hs : s ∈ D.regular) (x : M)
     (hgradF : gradientFun (I := I) g
       (fun y : M =>
         Real.exp ((-(2 * K)) * s) *
@@ -339,12 +356,7 @@ theorem hamiltonF_evolution_inequality_of_ricci_lower_bound
           g.inner x (gradientFun (I := I) g (fun z => Real.log (u τ z)) x)
             (gradientFun (I := I) g (fun z => Real.log (u τ z)) x) -
         deriv (fun σ : ℝ => Real.log (u σ x)) τ) s -
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g
-        (fun τ y =>
-          Real.exp ((-(2 * K)) * τ) *
-            g.inner y (gradientFun (I := I) g (fun z => Real.log (u τ z)) y)
-              (gradientFun (I := I) g (fun z => Real.log (u τ z)) y) -
-          deriv (fun σ : ℝ => Real.log (u σ y)) τ) hF s).smooth x ≤
+      Δ_g (I := I) g (hFslice s hs) x ≤
       -(2 / (Module.finrank ℝ E : ℝ)) * Real.exp ((-(2 * K)) * s) *
         (liYauQuantity g (fun τ y => Real.log (u τ y)) s x)^2 := by
   classical
@@ -364,16 +376,38 @@ theorem hamiltonF_evolution_inequality_of_ricci_lower_bound
   have hconn : Gfam.connection s = LeviCivita (Gfam.metric s) := by
     simp [Gfam]
   have hq_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (q s) := by
-    exact hq.comp (contMDiff_const.prodMk contMDiff_id)
+    exact hqslice s hs
   have hN_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (N s) := by
-    exact hN.comp (contMDiff_const.prodMk contMDiff_id)
+    exact hNslice s hs
   have hF_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (F s) := by
-    exact hF.comp (contMDiff_const.prodMk contMDiff_id)
+    exact hFslice s hs
   have hgradF' : gradientFun (I := I) g (F s) x = 0 := by
     exact hgradF
-  have hqid_raw := liYauQuantity_evolution_identity (I := I) (M := M) g u hu hpos hpde hq s x
-  have hNid_raw := normGradSq_log_heat_evolution_identity (I := I) (M := M) g u hu hpos hpde
-    (t := s) x hN
+  have hqTimeDiff : ∀ τ : ℝ, τ ∈ D.regular →
+      DifferentiableAt ℝ (fun τ' : ℝ => q τ' x) τ := by
+    intro τ hτ
+    have hnh : D.regular ×ˢ univ ∈ 𝓝 (τ, x) :=
+      (IsOpen.prod D.regular_isOpen isOpen_univ).mem_nhds ⟨hτ, trivial⟩
+    have hqat : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => q p.1 p.2) (τ, x) := hqOn.contMDiffAt hnh
+    have hsliceAt : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => q τ' x) τ :=
+      hqat.comp (x := τ) (contMDiffAt_id.prodMk contMDiffAt_const)
+    exact MDifferentiableAt.differentiableAt
+      (ContMDiffAt.mdifferentiableAt (n := ∞) hsliceAt (by norm_num))
+  have hNTimeDiff : ∀ τ : ℝ, τ ∈ D.regular →
+      DifferentiableAt ℝ (fun τ' : ℝ => N τ' x) τ := by
+    intro τ hτ
+    have hnh : D.regular ×ˢ univ ∈ 𝓝 (τ, x) :=
+      (IsOpen.prod D.regular_isOpen isOpen_univ).mem_nhds ⟨hτ, trivial⟩
+    have hNat : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => N p.1 p.2) (τ, x) := hNOn.contMDiffAt hnh
+    have hsliceAt : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => N τ' x) τ :=
+      hNat.comp (x := τ) (contMDiffAt_id.prodMk contMDiffAt_const)
+    exact MDifferentiableAt.differentiableAt
+      (ContMDiffAt.mdifferentiableAt (n := ∞) hsliceAt (by norm_num))
+  have hqid_raw := liYauQuantity_evolution_identity (I := I) (M := M) (D := D) g u hu hslice hlogslice hpos hpde hqslice hs x
+  have hNid_raw := normGradSq_log_heat_evolution_identity (I := I) (M := M) (D := D) g u hu hslice hlogslice hpos hpde
+    hs x hNslice
   have hqid' : deriv (fun τ' : ℝ => liYauQuantity g f τ' x) s - Δ_g (I := I) g hq_slice_cd x =
       2 * g.inner x (gradientFun (I := I) g (f s) x) (gradientFun (I := I) g (q s) x) -
         2 * chartHessFrobeniusSq (I := I) g (f s) x -
@@ -428,18 +462,6 @@ theorem hamiltonF_evolution_inequality_of_ricci_lower_bound
       intro τ'
       simp [F, N, liYauQuantity, c2]
       ring
-    have hq_t : ContDiff ℝ ∞ (fun τ' : ℝ => liYauQuantity g f τ' x) := by
-      have hc : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun τ' : ℝ => (τ', x)) :=
-        contMDiff_id.prodMk contMDiff_const
-      have hqτ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => liYauQuantity g f τ' x) :=
-        hq.comp hc
-      exact contMDiff_iff_contDiff.mp hqτ
-    have hN_t : ContDiff ℝ ∞ (fun τ' : ℝ => N τ' x) := by
-      have hc : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun τ' : ℝ => (τ', x)) :=
-        contMDiff_id.prodMk contMDiff_const
-      have hNτ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => N τ' x) :=
-        hN.comp hc
-      exact contMDiff_iff_contDiff.mp hNτ
     have hprod : HasDerivAt (fun τ' : ℝ => (1 - Real.exp (c2 * τ')) * N τ' x)
           ((-(c2 * Real.exp (c2 * s))) * N s x +
             (1 - Real.exp (c2 * s)) * deriv (fun τ' : ℝ => N τ' x) s) s := by
@@ -457,14 +479,14 @@ theorem hamiltonF_evolution_inequality_of_ricci_lower_bound
             (1 - Real.exp (c2 * s)) * deriv (fun τ' : ℝ => N τ' x) s := by
         ring_nf
       rw [hval]
-      exact hcoefd.mul (ContDiff.differentiable hN_t (by norm_num) s).hasDerivAt
+      exact hcoefd.mul (hNTimeDiff s hs).hasDerivAt
     have hF_deriv : HasDerivAt (fun τ' : ℝ => F τ' x)
           (deriv (fun τ' : ℝ => liYauQuantity g f τ' x) s -
             ((-(c2 * Real.exp (c2 * s))) * N s x +
               (1 - Real.exp (c2 * s)) * deriv (fun τ' : ℝ => N τ' x) s)) s := by
       have hq_d : HasDerivAt (fun τ' : ℝ => liYauQuantity g f τ' x)
           (deriv (fun τ' : ℝ => liYauQuantity g f τ' x) s) s :=
-        (ContDiff.differentiable hq_t (by norm_num) s).hasDerivAt
+        (hqTimeDiff s hs).hasDerivAt
       have hfun_eq : (fun τ' : ℝ => F τ' x) =
           (fun τ' : ℝ => liYauQuantity g f τ' x - (1 - Real.exp (c2 * τ')) * N τ' x) := by
         funext τ'
@@ -536,8 +558,8 @@ theorem hamiltonF_evolution_inequality_of_ricci_lower_bound
     rw [hqid', hNid']
     have he : 0 ≤ Real.exp (c2 * s) := le_of_lt (Real.exp_pos _)
     have hHess : chartHessFrobeniusSq (I := I) g (f s) x ≥ (q s x)^2 / n := by
-      have h := liYauQuantity_sq_div_n_le_chartHessFrobeniusSq (I := I) (M := M) g u hu hpos
-        (hpde s x)
+      have h := liYauQuantity_sq_div_n_le_chartHessFrobeniusSq (I := I) (M := M) (D := D) g u
+        hslice hlogslice hpos hs (hpde s hs x)
       exact h
     have hHess' : -2 * Real.exp (c2 * s) * chartHessFrobeniusSq (I := I) g (f s) x ≤
         -2 * Real.exp (c2 * s) * ((q s x)^2 / n) := by
@@ -560,25 +582,8 @@ theorem hamiltonF_evolution_inequality_of_ricci_lower_bound
     rw [hFsplit]
     exact hsubst
   have hF_delta : laplacianAt (I := I) Gfam s (F s) x =
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g
-        (fun τ y =>
-          Real.exp ((-(2 * K)) * τ) *
-            g.inner y (gradientFun (I := I) g (fun z => Real.log (u τ z)) y)
-              (gradientFun (I := I) g (fun z => Real.log (u τ z)) y) -
-          deriv (fun σ : ℝ => Real.log (u σ y)) τ) hF s).smooth x := by
+      Δ_g (I := I) g (hFslice s hs) x := by
     rw [laplacianAt_eq_delta (I := I) Gfam s hF_slice_cd hconn]
-    refine (Δ_g_congr_of_eventuallyEq (I := I) g
-      (smoothScalarSlice (I := I) g
-        (fun τ y =>
-          Real.exp ((-(2 * K)) * τ) *
-            g.inner y (gradientFun (I := I) g (fun z => Real.log (u τ z)) y)
-              (gradientFun (I := I) g (fun z => Real.log (u τ z)) y) -
-          deriv (fun σ : ℝ => Real.log (u σ y)) τ) hF s).smooth
-      hF_slice_cd ?_).symm
-    rw [Filter.eventuallyEq_iff_exists_mem]
-    refine ⟨Set.univ, Filter.univ_mem, ?_⟩
-    intro y hy
-    rfl
   rw [hF_delta] at hFle_at
   exact hFle_at
 
@@ -636,20 +641,63 @@ theorem hamilton_strict_neg_of_slab_positivity
     linarith [hFcF, heps]
   linarith
 
+omit [SigmaCompactSpace M] in
 theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
+    {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
     (hRic : ∀ x v, -K * g.inner x v v ≤ ricciTensor (I := I) g x v v)
     (u : ℝ → M → ℝ)
-    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
-    (hpos : ∀ t x, 0 < u t x)
-    (hpde : ∀ t x, deriv (fun s => u s x) t =
-      Δ_g g (smoothScalarSlice (I := I) g u hu t).smooth x)
-    {eps : ℝ} (heps : 0 < eps) {τ : ℝ} (hτ : 0 < τ) (y : M) :
+    (hu : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2) (D.regular ×ˢ univ))
+    (hslice : ∀ t : ℝ, t ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞ (u t))
+    (hlogslice : ∀ t : ℝ, t ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => Real.log (u t y)))
+    (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
+    (hpde : ∀ t : ℝ, (ht : t ∈ D.regular) → ∀ x : M,
+      HasDerivAt (fun s => u s x)
+        (Δ_g (I := I) g (hslice t (D.regular_subset ht)) x) t)
+    (hqOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2)
+      (D.regular ×ˢ univ))
+    (hqslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => liYauQuantity g (fun σ z => Real.log (u σ z)) t y))
+    (hNOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => g.inner p.2
+        (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
+        (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2))
+      (D.regular ×ˢ univ))
+    (hNslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => g.inner y
+        (gradientFun (I := I) g (fun z => Real.log (u t z)) y)
+        (gradientFun (I := I) g (fun z => Real.log (u t z)) y)))
+    (hFOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        Real.exp ((-(2 * K)) * p.1) *
+          g.inner p.2 (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
+            (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2) -
+        deriv (fun σ : ℝ => Real.log (u σ p.2)) p.1)
+      (D.regular ×ˢ univ))
+    (hFslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M =>
+        Real.exp ((-(2 * K)) * t) *
+          g.inner y (gradientFun (I := I) g (fun z => Real.log (u t z)) y)
+            (gradientFun (I := I) g (fun z => Real.log (u t z)) y) -
+        deriv (fun σ : ℝ => Real.log (u σ y)) t))
+    (hFCont : ContinuousOn (fun p : ℝ × M =>
+        Real.exp ((-(2 * K)) * p.1) *
+          g.inner p.2 (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
+            (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2) -
+        deriv (fun σ : ℝ => Real.log (u σ p.2)) p.1) (D.carrier ×ˢ univ))
+    {eps : ℝ} (heps : 0 < eps) {τ : ℝ} (hτ : 0 < τ)
+    (hτreg : τ ∈ D.regular)
+    (hslabCarrier : Icc 0 τ ⊆ D.carrier)
+    (hslabRegular : Ioo 0 τ ⊆ D.regular)
+    (y : M) :
     τ * (Real.exp ((-(2 * K)) * τ) *
           g.inner y (gradientFun (I := I) g (fun z => Real.log (u τ z)) y)
             (gradientFun (I := I) g (fun z => Real.log (u τ z)) y) -
@@ -657,86 +705,87 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
       Real.exp (2 * K * τ) * ((Module.finrank ℝ E : ℝ) / 2) - eps * τ ≤ 0 := by
   classical
   let f : ℝ → M → ℝ := fun s y => Real.log (u s y)
-  let hlog : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => f p.1 p.2) := by
-    simpa [f] using DifferentialGeometry.Analysis.Parabolic.Moser.contMDiff_log_of_pos hu hpos
-  let hq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => liYauQuantity g f p.1 p.2) := by
-    simpa [f] using liYauQuantity_contMDiff (I := I) (M := M) g u hu hpos
-  let hft_cd : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => deriv (fun σ : ℝ => f σ p.2) p.1) := by
-    simpa [f] using (DifferentialGeometry.contMDiff_partial_deriv_fst I
-      ⟨fun p : ℝ × M => Real.log (u p.1 p.2),
-        DifferentialGeometry.Analysis.Parabolic.Moser.contMDiff_log_of_pos hu hpos⟩)
-  let N : ℝ → M → ℝ := fun s y => g.inner y (gradientFun (I := I) g (f s) y)
-        (gradientFun (I := I) g (f s) y)
-  let hN : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => N p.1 p.2) := by
-    have hfun : (fun p : ℝ × M => N p.1 p.2) =
-        (fun p : ℝ × M => liYauQuantity g f p.1 p.2 + deriv (fun σ : ℝ => f σ p.2) p.1) := by
-      funext p
-      simp [N, f, liYauQuantity]
-    rw [hfun]
-    exact hq.add hft_cd
+  let q : ℝ → M → ℝ := fun τ y => liYauQuantity g f τ y
+  let N : ℝ → M → ℝ := fun s y => g.inner y
+        (gradientFun (I := I) g (f s) y) (gradientFun (I := I) g (f s) y)
   let n : ℝ := (Module.finrank ℝ E : ℝ)
   have hn_pos : 0 < n := by
     dsimp [n]
     exact_mod_cast (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
   let F : ℝ → M → ℝ := fun s y => Real.exp ((-(2 * K)) * s) * N s y - deriv (fun σ : ℝ => f σ y) s
   let G : ℝ → ℝ → M → ℝ := fun eps s y => s * F s y - Real.exp (2 * K * s) * (n / 2) - eps * s
-  have hF_cd : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => F p.1 p.2) := by
-    have hlin : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => (-(2 * K)) * p.1) := by
-      have hc : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-          ((fun _ : ℝ × M => (-(2 * K))) * Prod.fst) :=
-        (contMDiff_const (c := (-(2 * K)))).mul contMDiff_fst
-      refine ContMDiff.congr hc ?_
-      intro p
-      rfl
-    have hexp : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1)) := by
-      simpa using ((Real.contDiff_exp.contMDiff : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ Real.exp).comp hlin)
-    have hterm1 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1) * N p.1 p.2) := hexp.mul hN
-    change ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1) * N p.1 p.2 - deriv (fun σ : ℝ => f σ p.2) p.1)
-    exact hterm1.sub hft_cd
-  have hG_cd : ∀ eps : ℝ, ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => G eps p.1 p.2) := by
-    intro eps
-    have hterm1 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => p.1 * F p.1 p.2) := contMDiff_fst.mul hF_cd
-    have hterm2 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => Real.exp (2 * K * p.1) * (n / 2)) := by
-      have hlin : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-          (fun p : ℝ × M => 2 * K * p.1) := by
-        have hc : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-            ((fun _ : ℝ × M => 2 * K) * Prod.fst) :=
-          (contMDiff_const (c := 2 * K)).mul contMDiff_fst
-        refine ContMDiff.congr hc ?_
-        intro p
-        rfl
-      have hexp : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-          (fun p : ℝ × M => Real.exp (2 * K * p.1)) := by
-        simpa using ((Real.contDiff_exp.contMDiff : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ Real.exp).comp hlin)
-      exact hexp.mul contMDiff_const
-    have hterm3 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => eps * p.1) := contMDiff_const.mul contMDiff_fst
-    simpa [G] using (hterm1.sub hterm2).sub hterm3
   let Gfam : RealizedMetricFamily (I := I) (M := M) ℝ :=
     { metric := fun _ => g
       connection := fun _ => LeviCivita (I := I) g
       metricCompatible := fun _ =>
         leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g }
-  have hG_nonpos : ∀ eps : ℝ, 0 < eps → ∀ τ : ℝ, 0 < τ → ∀ y : M, G eps τ y ≤ 0 := by
-    intro eps heps τ hτ y
+  have hqTimeDiff : ∀ (s : ℝ) (hs : s ∈ D.regular) (x₀ : M),
+      DifferentiableAt ℝ (fun τ' : ℝ => q τ' x₀) s := by
+    intro s hs x₀
+    have hnh : D.regular ×ˢ univ ∈ 𝓝 (s, x₀) :=
+      (IsOpen.prod D.regular_isOpen isOpen_univ).mem_nhds ⟨hs, trivial⟩
+    have hqat : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => q p.1 p.2) (s, x₀) := hqOn.contMDiffAt hnh
+    have hsliceAt : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => q τ' x₀) s :=
+      hqat.comp (x := s) (contMDiffAt_id.prodMk contMDiffAt_const)
+    exact MDifferentiableAt.differentiableAt
+      (ContMDiffAt.mdifferentiableAt (n := ∞) hsliceAt (by norm_num))
+  have hNTimeDiff : ∀ (s : ℝ) (hs : s ∈ D.regular) (x₀ : M),
+      DifferentiableAt ℝ (fun τ' : ℝ => N τ' x₀) s := by
+    intro s hs x₀
+    have hnh : D.regular ×ˢ univ ∈ 𝓝 (s, x₀) :=
+      (IsOpen.prod D.regular_isOpen isOpen_univ).mem_nhds ⟨hs, trivial⟩
+    have hNat : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => N p.1 p.2) (s, x₀) := hNOn.contMDiffAt hnh
+    have hsliceAt : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => N τ' x₀) s :=
+      hNat.comp (x := s) (contMDiffAt_id.prodMk contMDiffAt_const)
+    exact MDifferentiableAt.differentiableAt
+      (ContMDiffAt.mdifferentiableAt (n := ∞) hsliceAt (by norm_num))
+  have hFTimeDiff : ∀ (s : ℝ) (hs : s ∈ D.regular) (x₀ : M),
+      DifferentiableAt ℝ (fun τ' : ℝ => F τ' x₀) s := by
+    intro s hs x₀
+    have hnh : D.regular ×ˢ univ ∈ 𝓝 (s, x₀) :=
+      (IsOpen.prod D.regular_isOpen isOpen_univ).mem_nhds ⟨hs, trivial⟩
+    have hFat : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => F p.1 p.2) (s, x₀) := hFOn.contMDiffAt hnh
+    have hsliceAt : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => F τ' x₀) s :=
+      hFat.comp (x := s) (contMDiffAt_id.prodMk contMDiffAt_const)
+    exact MDifferentiableAt.differentiableAt
+      (ContMDiffAt.mdifferentiableAt (n := ∞) hsliceAt (by norm_num))
+  have hG_nonpos : ∀ eps : ℝ, 0 < eps → G eps τ y ≤ 0 := by
+    intro eps heps
     by_contra hG
     have hGpos : 0 < G eps τ y := lt_of_not_ge hG
     have hslab : IsCompact (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) :=
       (isCompact_Icc : IsCompact (Set.Icc 0 τ)).prod isCompact_univ
     have hcont : ContinuousOn (fun p : ℝ × M => G eps p.1 p.2)
-        (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) :=
-      Continuous.continuousOn (hG_cd eps).continuous
+        (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := by
+      have hFcont0 : ContinuousOn (fun p : ℝ × M => F p.1 p.2)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := by
+        exact hFCont.mono (by
+          intro p hp
+          exact ⟨hslabCarrier ⟨hp.1.1, hp.1.2⟩, hp.2⟩)
+      have hfst : ContinuousOn (fun p : ℝ × M => p.1)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := continuousOn_fst
+      have hmult : ContinuousOn (fun p : ℝ × M => p.1 * F p.1 p.2)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := hfst.mul hFcont0
+      have hterm2 : ContinuousOn (fun p : ℝ × M => Real.exp (2 * K * p.1) * (n / 2))
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := by
+        have hlin : ContinuousOn (fun p : ℝ × M => 2 * K * p.1)
+            (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := continuousOn_const.mul continuousOn_fst
+        have hexp : ContinuousOn (fun p : ℝ × M => Real.exp (2 * K * p.1))
+            (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) :=
+          Real.continuous_exp.continuousOn.comp hlin (by intro p hp; exact Set.mem_univ _)
+        exact hexp.mul continuousOn_const
+      have hsub1 : ContinuousOn (fun p : ℝ × M =>
+          p.1 * F p.1 p.2 - Real.exp (2 * K * p.1) * (n / 2))
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := hmult.sub hterm2
+      have hterm3 : ContinuousOn (fun p : ℝ × M => eps * p.1)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := continuousOn_const.mul hfst
+      have hsub : ContinuousOn (fun p : ℝ × M =>
+          p.1 * F p.1 p.2 - Real.exp (2 * K * p.1) * (n / 2) - eps * p.1)
+          (Set.Icc 0 τ ×ˢ (Set.univ : Set M)) := hsub1.sub hterm3
+      exact hsub.congr (by intro p hp; simp [G])
     have hnonempty : (Set.Icc 0 τ ×ˢ (Set.univ : Set M)).Nonempty :=
       ⟨(τ, y), ⟨⟨le_of_lt hτ, le_rfl⟩, trivial⟩⟩
     obtain ⟨sx, hsx, hmax⟩ := hslab.exists_isMaxOn hnonempty hcont
@@ -757,19 +806,21 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
           simpa [hs0] using h0
         exact (not_lt_of_ge this) hmpos
       exact lt_of_le_of_ne hsx0 (Ne.symm hs_ne0)
+    have hsreg : s ∈ D.regular := by
+      by_cases hst : s = τ
+      · subst s
+        exact hτreg
+      · exact hslabRegular ⟨hspos, lt_of_le_of_ne hsx.1.2 hst⟩
     have hzmax : IsMaxOn (fun τ' : ℝ => G eps τ' x₀) (Set.Icc 0 s) s := by
       intro τ' hτ'
       exact hmax' (τ', x₀) ⟨⟨hτ'.1, hτ'.2.trans hsx.1.2⟩, trivial⟩
-    have hFsmooth : ContDiff ℝ ∞ (fun τ' : ℝ => F τ' x₀) := by
-      have hc : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => F τ' x₀) :=
-        hF_cd.comp (contMDiff_id.prodMk contMDiff_const)
-      exact contMDiff_iff_contDiff.mp hc
+    have hFsmooth : DifferentiableAt ℝ (fun τ' : ℝ => F τ' x₀) s := hFTimeDiff s hsreg x₀
     have hval : deriv (fun τ' : ℝ => G eps τ' x₀) s =
         F s x₀ + s * deriv (fun τ' : ℝ => F τ' x₀) s -
           2 * K * Real.exp (2 * K * s) * (n / 2) - eps := by
       have hlin : HasDerivAt (fun τ' : ℝ => τ' * F τ' x₀)
           (F s x₀ + s * deriv (fun τ' : ℝ => F τ' x₀) s) s := by
-        simpa using (hasDerivAt_id s).mul (ContDiff.differentiable hFsmooth (by norm_num) s).hasDerivAt
+        simpa using (hasDerivAt_id s).mul hFsmooth.hasDerivAt
       have hexp : HasDerivAt (fun τ' : ℝ => Real.exp (2 * K * τ') * (n / 2))
           (2 * K * Real.exp (2 * K * s) * (n / 2)) s := by
         have hdexp : HasDerivAt (fun τ' : ℝ => Real.exp (2 * K * τ')) (Real.exp (2 * K * s) * (2 * K)) s := by
@@ -788,7 +839,7 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
         (deriv (fun τ' : ℝ => G eps τ' x₀) s) s := by
       have hlin : HasDerivAt (fun τ' : ℝ => τ' * F τ' x₀)
           (F s x₀ + s * deriv (fun τ' : ℝ => F τ' x₀) s) s := by
-        simpa using (hasDerivAt_id s).mul (ContDiff.differentiable hFsmooth (by norm_num) s).hasDerivAt
+        simpa using (hasDerivAt_id s).mul hFsmooth.hasDerivAt
       have hexp : HasDerivAt (fun τ' : ℝ => Real.exp (2 * K * τ') * (n / 2))
           (2 * K * Real.exp (2 * K * s) * (n / 2)) s := by
         have hdexp : HasDerivAt (fun τ' : ℝ => Real.exp (2 * K * τ')) (Real.exp (2 * K * s) * (2 * K)) s := by
@@ -807,16 +858,20 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
       deriv_nonneg_at_right_endpoint_of_isMaxOn_Icc hspos hzmax hder
     have hxmax : IsLocalMax (G eps s) x₀ := by
       exact Filter.Eventually.of_forall (fun y => hmax' (s, y) ⟨⟨hsx.1.1, hsx.1.2⟩, trivial⟩)
-    have hslice_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (G eps s) :=
-      (hG_cd eps).comp (contMDiff_const.prodMk contMDiff_id)
+    have hF_s : ContMDiff I 𝓘(ℝ, ℝ) ∞ (F s) := hFslice s hsreg
+    have hslice_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (G eps s) := by
+      have hmain : ContMDiff I 𝓘(ℝ, ℝ) ∞
+          (fun y : M => s * F s y - Real.exp (2 * K * s) * (n / 2) - eps * s) := by
+        exact ((contMDiff_const.mul hF_s).sub contMDiff_const).sub
+          (contMDiff_const.mul contMDiff_const)
+      simpa [G] using hmain
     have hlap : laplacianAt (I := I) Gfam s (G eps s) x₀ ≤ 0 := by
       exact laplacianAt_nonpos_at_spatial_max (I := I) Gfam s hxmax hslice_smooth
     have hgrad : gradientFun (I := I) g (G eps s) x₀ = 0 :=
       gradientFun_eq_zero_of_isLocalMax (I := I) g hxmax
         (hslice_smooth.mdifferentiableAt (x := x₀) (by simp))
     have hgradF : gradientFun (I := I) g (F s) x₀ = 0 := by
-      have hFslice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (F s) :=
-        hF_cd.comp (contMDiff_const.prodMk contMDiff_id)
+      have hFslice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (F s) := hF_s
       have hFslice_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) (F s) x₀ :=
         hFslice_cd.mdifferentiableAt (x := x₀) (by norm_num)
       have hsmul : gradientFun (I := I) g (fun y : M => s * F s y) x₀ =
@@ -842,12 +897,9 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
       have hsmul0 : s • gradientFun (I := I) g (F s) x₀ = 0 := by
         exact sub_eq_zero.mp hgrad'
       exact (smul_eq_zero.mp hsmul0).resolve_left (ne_of_gt hspos)
-    have hF_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (F s) :=
-      hF_cd.comp (contMDiff_const.prodMk contMDiff_id)
-    have hN_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (N s) :=
-      hN.comp (contMDiff_const.prodMk contMDiff_id)
-    have hq_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => liYauQuantity g f s y) :=
-      hq.comp (contMDiff_const.prodMk contMDiff_id)
+    have hF_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (F s) := hF_s
+    have hN_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (N s) := hNslice s hsreg
+    have hq_slice_cd : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => liYauQuantity g f s y) := hqslice s hsreg
     have hgradq : gradientFun (I := I) g (fun y : M => liYauQuantity g f s y) x₀ =
         (1 - Real.exp (-(2 * K) * s)) • gradientFun (I := I) g (N s) x₀ := by
       have hqN : (fun y : M => liYauQuantity g f s y) =
@@ -887,14 +939,10 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
         deriv (fun τ' : ℝ => liYauQuantity g f τ' x₀) s -
           (1 - Real.exp (c2 * s)) * deriv (fun τ' : ℝ => N τ' x₀) s +
           c2 * Real.exp (c2 * s) * N s x₀ := by
-      have hq_t : ContDiff ℝ ∞ (fun τ' : ℝ => liYauQuantity g f τ' x₀) := by
-        have hc : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => liYauQuantity g f τ' x₀) :=
-          hq.comp (contMDiff_id.prodMk contMDiff_const)
-        exact contMDiff_iff_contDiff.mp hc
-      have hN_t : ContDiff ℝ ∞ (fun τ' : ℝ => N τ' x₀) := by
-        have hc : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ (fun τ' : ℝ => N τ' x₀) :=
-          hN.comp (contMDiff_id.prodMk contMDiff_const)
-        exact contMDiff_iff_contDiff.mp hc
+      have hq_t : DifferentiableAt ℝ (fun τ' : ℝ => liYauQuantity g f τ' x₀) s :=
+        hqTimeDiff s hsreg x₀
+      have hN_t : DifferentiableAt ℝ (fun τ' : ℝ => N τ' x₀) s :=
+        hNTimeDiff s hsreg x₀
       have hprod : HasDerivAt (fun τ' : ℝ => (1 - Real.exp (c2 * τ')) * N τ' x₀)
           ((-(c2 * Real.exp (c2 * s))) * N s x₀ +
             (1 - Real.exp (c2 * s)) * deriv (fun τ' : ℝ => N τ' x₀) s) s := by
@@ -912,14 +960,13 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
               (1 - Real.exp (c2 * s)) * deriv (fun τ' : ℝ => N τ' x₀) s := by
           ring_nf
         rw [hval]
-        exact hcoefd.mul (ContDiff.differentiable hN_t (by norm_num) s).hasDerivAt
+        exact hcoefd.mul hN_t.hasDerivAt
       have hF_deriv : HasDerivAt (fun τ' : ℝ => F τ' x₀)
           (deriv (fun τ' : ℝ => liYauQuantity g f τ' x₀) s -
             ((-(c2 * Real.exp (c2 * s))) * N s x₀ +
               (1 - Real.exp (c2 * s)) * deriv (fun τ' : ℝ => N τ' x₀) s)) s := by
         have hq_d : HasDerivAt (fun τ' : ℝ => liYauQuantity g f τ' x₀)
-            (deriv (fun τ' : ℝ => liYauQuantity g f τ' x₀) s) s :=
-          (ContDiff.differentiable hq_t (by norm_num) s).hasDerivAt
+            (deriv (fun τ' : ℝ => liYauQuantity g f τ' x₀) s) s := hq_t.hasDerivAt
         have hfun_eq : (fun τ' : ℝ => F τ' x₀) =
             (fun τ' : ℝ => liYauQuantity g f τ' x₀ - (1 - Real.exp (c2 * τ')) * N τ' x₀) := by
           funext τ'
@@ -966,16 +1013,10 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
       have hconn : Gfam.connection s = LeviCivita (Gfam.metric s) := by
         simp [Gfam]
       have hlapF_slice : laplacianAt (I := I) Gfam s (F s) x₀ =
-          Δ_g (I := I) g (smoothScalarSlice (I := I) g F hF_cd s).smooth x₀ := by
+          Δ_g (I := I) g (hF_s_cd) x₀ := by
         rw [laplacianAt_eq_delta (I := I) Gfam s hF_s_cd hconn]
-        refine (Δ_g_congr_of_eventuallyEq (I := I) g
-          (smoothScalarSlice (I := I) g F hF_cd s).smooth hF_s_cd ?_).symm
-        rw [Filter.eventuallyEq_iff_exists_mem]
-        refine ⟨Set.univ, Filter.univ_mem, ?_⟩
-        intro y hy
-        rfl
-      have h := hamiltonF_evolution_inequality_of_ricci_lower_bound (I := I) (M := M) g hRic u hu hpos
-        hpde hq hN hF_cd (s := s) x₀ hgradF
+      have h := hamiltonF_evolution_inequality_of_ricci_lower_bound (I := I) (M := M) (D := D) g
+        hRic u hu hslice hlogslice hpos hpde hqOn hqslice hNOn hNslice hFslice (s := s) hsreg x₀ hgradF
       rw [hlapF_slice]
       exact h
     have hlapG : laplacianAt (I := I) Gfam s (G eps s) x₀ =
@@ -1050,139 +1091,135 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
       exact hamilton_strict_neg_of_slab_positivity heps hspos hn_pos hK (by rfl) hGpos' hFq
     exact (lt_irrefl (0 : ℝ))
       (lt_of_le_of_lt (le_trans hnonneg hineq) hneg)
-  simpa [G, F, N, f, n] using hG_nonpos eps heps τ hτ y
+  simpa [G, F, N, f, n] using hG_nonpos eps heps
 
-theorem heat_solution_hamilton_differential_harnack_of_ricci_lower_bound
+
+omit [SigmaCompactSpace M] in
+theorem heat_solution_hamilton_differential_harnack_of_ricci_lower_bound_on
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
+    {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
     (hRic : ∀ x v, -K * g.inner x v v ≤ ricciTensor (I := I) g x v v)
+    (G : RealizedMetricFamily (I := I) (M := M) ℝ)
+    (hGmetric : ∀ t : ℝ, t ∈ D.carrier → G.metric t = g)
+    (hGconn : ∀ t : ℝ, t ∈ D.carrier → G.connection t = LeviCivita (G.metric t))
     (u : ℝ → M → ℝ)
-    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
-    (hpos : ∀ t x, 0 < u t x)
-    (hpde : ∀ t x, deriv (fun s => u s x) t =
-      Δ_g g (smoothScalarSlice (I := I) g u hu t).smooth x)
-    {t : ℝ} (ht : 0 < t) (x : M) :
+    (hu : IsHeatOn D G u)
+    (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
+    {t : ℝ} (ht : t ∈ D.regular) (ht0 : 0 < t)
+    (hslabCarrier : Icc 0 t ⊆ D.carrier)
+    (hslabRegular : Ioo 0 t ⊆ D.regular)
+    (hNOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => g.inner p.2
+        (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
+        (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2))
+      (D.regular ×ˢ univ))
+    (hNslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => g.inner y
+        (gradientFun (I := I) g (fun z => Real.log (u t z)) y)
+        (gradientFun (I := I) g (fun z => Real.log (u t z)) y)))
+    (hFOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M =>
+        Real.exp ((-(2 * K)) * p.1) *
+          g.inner p.2 (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
+            (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2) -
+        deriv (fun σ : ℝ => Real.log (u σ p.2)) p.1)
+      (D.regular ×ˢ univ))
+    (hFslice : ∀ t : ℝ, t ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M =>
+        Real.exp ((-(2 * K)) * t) *
+          g.inner y (gradientFun (I := I) g (fun z => Real.log (u t z)) y)
+            (gradientFun (I := I) g (fun z => Real.log (u t z)) y) -
+        deriv (fun σ : ℝ => Real.log (u σ y)) t))
+    (hFCont : ContinuousOn (fun p : ℝ × M =>
+        Real.exp ((-(2 * K)) * p.1) *
+          g.inner p.2 (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2)
+            (gradientFun (I := I) g (fun y => Real.log (u p.1 y)) p.2) -
+        deriv (fun σ : ℝ => Real.log (u σ p.2)) p.1) (D.carrier ×ˢ univ))
+    (x : M) :
     g.inner x (gradientFun (I := I) g (u t) x) (gradientFun (I := I) g (u t) x) / (u t x ^ 2) -
       Real.exp (2 * K * t) * (deriv (fun s => u s x) t / u t x) ≤
         Real.exp (4 * K * t) * (Module.finrank ℝ E : ℝ) / (2 * t) := by
   classical
   let f : ℝ → M → ℝ := fun s y => Real.log (u s y)
-  let hlog : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => f p.1 p.2) := by
-    simpa [f] using DifferentialGeometry.Analysis.Parabolic.Moser.contMDiff_log_of_pos hu hpos
-  let hq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => liYauQuantity g f p.1 p.2) := by
-    simpa [f] using liYauQuantity_contMDiff (I := I) (M := M) g u hu hpos
-  let hft_cd : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => deriv (fun σ : ℝ => f σ p.2) p.1) := by
-    simpa [f] using (DifferentialGeometry.contMDiff_partial_deriv_fst I
-      ⟨fun p : ℝ × M => Real.log (u p.1 p.2),
-        DifferentialGeometry.Analysis.Parabolic.Moser.contMDiff_log_of_pos hu hpos⟩)
+  let hlogslice : ∀ τ : ℝ, τ ∈ D.carrier → ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => f τ y) :=
+    fun τ hτ => Moser.contMDiff_log_of_pos_slice (hu.sliceSmooth τ hτ) (hpos τ hτ)
+  let q : ℝ → M → ℝ := fun τ y => liYauQuantity g f τ y
+  have hqOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => q p.1 p.2) (D.regular ×ˢ univ) := by
+    simpa [f, q] using liYauQuantity_contMDiff (I := I) (M := M) (D := D) g u
+      hu.jointSmooth hu.sliceSmooth hpos
+  have hqslice : ∀ τ : ℝ, τ ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞ (q τ) := by
+    intro τ hτ x
+    have hnh : D.regular ×ˢ univ ∈ 𝓝 (τ, x) :=
+      (IsOpen.prod D.regular_isOpen isOpen_univ).mem_nhds ⟨hτ, trivial⟩
+    have hqat : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => q p.1 p.2) (τ, x) := hqOn.contMDiffAt hnh
+    exact (hqat.comp (x := x) (contMDiffAt_const.prodMk contMDiffAt_id))
+  have hpd_all : ∀ (τ : ℝ) (hτ : τ ∈ D.regular) (x : M),
+      HasDerivAt (fun s => u s x)
+        (Δ_g (I := I) g (hu.sliceSmooth τ (D.regular_subset hτ)) x) τ := by
+    intro τ hτ x
+    have heq := hu.equation τ hτ x
+    have hbridge : laplacianAt (I := I) G τ (u τ) x =
+        Δ_g (I := I) g (hu.sliceSmooth τ (D.regular_subset hτ)) x := by
+      have hconn : G.connection τ = LeviCivita (G.metric τ) :=
+        hGconn τ (D.regular_subset hτ)
+      rw [laplacianAt_eq_delta (I := I) G τ (hu.sliceSmooth τ (D.regular_subset hτ)) hconn x]
+      rw [hGmetric τ (D.regular_subset hτ)]
+    have heq0 : HasDerivAt (fun s => u s x) (laplacianAt (I := I) G τ (u τ) x) τ := by
+      simpa using heq
+    exact heq0.congr_deriv hbridge
   let N : ℝ → M → ℝ := fun s y => g.inner y (gradientFun (I := I) g (f s) y)
         (gradientFun (I := I) g (f s) y)
-  let hN : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => N p.1 p.2) := by
-    have hfun : (fun p : ℝ × M => N p.1 p.2) =
-        (fun p : ℝ × M => liYauQuantity g f p.1 p.2 + deriv (fun σ : ℝ => f σ p.2) p.1) := by
-      funext p
-      simp [N, f, liYauQuantity]
-    rw [hfun]
-    exact hq.add hft_cd
   let n : ℝ := (Module.finrank ℝ E : ℝ)
   have hn_pos : 0 < n := by
     dsimp [n]
     exact_mod_cast (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
   let F : ℝ → M → ℝ := fun s y => Real.exp ((-(2 * K)) * s) * N s y - deriv (fun σ : ℝ => f σ y) s
   let G : ℝ → ℝ → M → ℝ := fun eps s y => s * F s y - Real.exp (2 * K * s) * (n / 2) - eps * s
-  have hF_cd : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => F p.1 p.2) := by
-    have hlin : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => (-(2 * K)) * p.1) := by
-      have hc : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-          ((fun _ : ℝ × M => (-(2 * K))) * Prod.fst) :=
-        (contMDiff_const (c := (-(2 * K)))).mul contMDiff_fst
-      refine ContMDiff.congr hc ?_
-      intro p
-      rfl
-    have hexp : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1)) := by
-      simpa using ((Real.contDiff_exp.contMDiff : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ Real.exp).comp hlin)
-    have hterm1 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1) * N p.1 p.2) := hexp.mul hN
-    change ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1) * N p.1 p.2 - deriv (fun σ : ℝ => f σ p.2) p.1)
-    exact hterm1.sub hft_cd
-  have hG_cd : ∀ eps : ℝ, ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => G eps p.1 p.2) := by
-    intro eps
-    have hterm1 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => p.1 * F p.1 p.2) := contMDiff_fst.mul hF_cd
-    have hterm2 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => Real.exp (2 * K * p.1) * (n / 2)) := by
-      have hlin : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-          (fun p : ℝ × M => 2 * K * p.1) := by
-        have hc : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-            ((fun _ : ℝ × M => 2 * K) * Prod.fst) :=
-          (contMDiff_const (c := 2 * K)).mul contMDiff_fst
-        refine ContMDiff.congr hc ?_
-        intro p
-        rfl
-      have hexp : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-          (fun p : ℝ × M => Real.exp (2 * K * p.1)) := by
-        simpa using ((Real.contDiff_exp.contMDiff : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ Real.exp).comp hlin)
-      exact hexp.mul contMDiff_const
-    have hterm3 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-        (fun p : ℝ × M => eps * p.1) := contMDiff_const.mul contMDiff_fst
-    simpa [G] using (hterm1.sub hterm2).sub hterm3
-  let Gfam : RealizedMetricFamily (I := I) (M := M) ℝ :=
-    { metric := fun _ => g
-      connection := fun _ => LeviCivita (I := I) g
-      metricCompatible := fun _ =>
-        leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g }
-  have hG_nonpos : ∀ eps : ℝ, 0 < eps → ∀ τ : ℝ, 0 < τ → ∀ y : M, G eps τ y ≤ 0 := by
-    intro eps heps τ hτ y
-    have h := hamilton_quantity_slab_bound_of_ricci_lower_bound (I := I) (M := M) g (hK := hK) hRic u hu hpos
-      hpde heps hτ y
+  have hG_nonpos : ∀ eps : ℝ, 0 < eps → G eps t x ≤ 0 := by
+    intro eps heps
+    have h := hamilton_quantity_slab_bound_of_ricci_lower_bound (I := I) (M := M) (D := D) g
+      (hK := hK) hRic u hu.jointSmooth hu.sliceSmooth hlogslice hpos hpd_all
+      hqOn hqslice hNOn hNslice hFOn hFslice hFCont heps ht0 ht hslabCarrier hslabRegular x
     simpa [G, F, N, f, n] using h
-  have hfin : ∀ eps : ℝ, 0 < eps → G eps t x ≤ 0 :=
-    fun eps heps => hG_nonpos eps heps t ht x
+  have hfin : ∀ eps : ℝ, 0 < eps → G eps t x ≤ 0 := hG_nonpos
   have hFt : F t x ≤ Real.exp (2 * K * t) * (n / 2) / t := by
     have hle0 : t * F t x - Real.exp (2 * K * t) * (n / 2) ≤ 0 := by
       by_contra hnot
       have hpos : 0 < t * F t x - Real.exp (2 * K * t) * (n / 2) := lt_of_not_ge hnot
       let eps : ℝ := (t * F t x - Real.exp (2 * K * t) * (n / 2)) / (2 * t)
-      have heps_pos : 0 < eps := div_pos hpos (mul_pos zero_lt_two ht)
+      have heps_pos : 0 < eps := div_pos hpos (mul_pos zero_lt_two ht0)
       have hfin_eps : G eps t x ≤ 0 := hfin eps heps_pos
       have hle : t * F t x - Real.exp (2 * K * t) * (n / 2) ≤ eps * t := by
         simpa [G, eps] using hfin_eps
       have hrewrite : eps * t = (t * F t x - Real.exp (2 * K * t) * (n / 2)) / 2 := by
         dsimp [eps]
-        field_simp [ht.ne']
+        field_simp [ht0.ne']
       have heps_lt : eps * t < t * F t x - Real.exp (2 * K * t) * (n / 2) := by
         rw [hrewrite]
         linarith
       exact (not_le_of_gt heps_lt) hle
     have htle : t * F t x ≤ Real.exp (2 * K * t) * (n / 2) := by linarith
-    exact (le_div_iff₀ ht).mpr (by simpa [mul_comm] using htle)
+    exact (le_div_iff₀ ht0).mpr (by simpa [mul_comm] using htle)
   have hlogderiv : deriv (fun s => Real.log (u s x)) t = deriv (fun s => u s x) t / u t x := by
-    have hu_slice : ContDiff ℝ ∞ (fun s => u s x) := by
-      have hc : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun s : ℝ => (s, x)) :=
-        contMDiff_id.prodMk contMDiff_const
-      exact contMDiff_iff_contDiff.mp (hu.comp hc)
-    have hder : HasDerivAt (fun s => u s x) (deriv (fun s => u s x) t) t :=
-      (ContDiff.differentiable hu_slice (by norm_num) t).hasDerivAt
-    exact (hder.log (hpos t x).ne').deriv
+    have hder : HasDerivAt (fun s => u s x) (deriv (fun s => u s x) t) t := by
+      exact (hu.equation t ht x).congr_deriv (hu.equation t ht x).deriv.symm
+    exact (hder.log (hpos t (D.regular_subset ht) x).ne').deriv
   have hloggrad : g.inner x (gradientFun (I := I) g (fun y => Real.log (u t y)) x)
         (gradientFun (I := I) g (fun y => Real.log (u t y)) x) =
       (u t x ^ 2)⁻¹ * g.inner x (gradientFun (I := I) g (u t) x)
         (gradientFun (I := I) g (u t) x) := by
     have hu_slice_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) (u t) x :=
-      (hu.comp (contMDiff_const.prodMk contMDiff_id)).mdifferentiableAt (x := x) (by simp)
+      (hu.sliceSmooth t (D.regular_subset ht)).mdifferentiableAt (x := x) (by simp)
     exact DifferentialGeometry.Analysis.Parabolic.Moser.inner_gradientFun_log_self (I := I) g
-      hu_slice_mdiff (hpos t x)
+      hu_slice_mdiff (hpos t (D.regular_subset ht) x)
   have hFrewrite : F t x =
       Real.exp ((-(2 * K)) * t) * (u t x ^ 2)⁻¹ *
           g.inner x (gradientFun (I := I) g (u t) x) (gradientFun (I := I) g (u t) x) -
@@ -1218,7 +1255,7 @@ theorem heat_solution_hamilton_differential_harnack_of_ricci_lower_bound
               (Real.exp ((-(2 * K)) * t) * (u t x ^ 2)⁻¹ *
                   g.inner x (gradientFun (I := I) g (u t) x) (gradientFun (I := I) g (u t) x) -
                 deriv (fun s => u s x) t / u t x) := by
-            have hu_ne : u t x ≠ 0 := ne_of_gt (hpos t x)
+            have hu_ne : u t x ≠ 0 := ne_of_gt (hpos t (D.regular_subset ht) x)
             have hexp : Real.exp (2 * K * t) * Real.exp ((-(2 * K)) * t) = 1 := by
               rw [show (-(2 * K)) * t = -(2 * K * t) by ring]
               rw [Real.exp_neg]
@@ -1252,8 +1289,126 @@ theorem heat_solution_hamilton_differential_harnack_of_ricci_lower_bound
           Real.exp (2 * K * t) * (Real.exp (2 * K * t) * ((Module.finrank ℝ E : ℝ) / 2) / t)
               = Real.exp (2 * K * t) ^ 2 * ((Module.finrank ℝ E : ℝ) / 2) / t := by ring
           _ = Real.exp (4 * K * t) * ((Module.finrank ℝ E : ℝ) / 2) / t := by rw [hexp2]
-          _ = Real.exp (4 * K * t) * (Module.finrank ℝ E : ℝ) / (2 * t) := by field_simp [ht.ne']
+          _ = Real.exp (4 * K * t) * (Module.finrank ℝ E : ℝ) / (2 * t) := by field_simp [ht0.ne']
   exact hgoal
+
+omit [SigmaCompactSpace M] in
+theorem heat_solution_hamilton_differential_harnack_of_ricci_lower_bound
+    [CompactSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
+    (hRic : ∀ x v, -K * g.inner x v v ≤ ricciTensor (I := I) g x v v)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
+    (hpos : ∀ t x, 0 < u t x)
+    (hpde : ∀ t x, deriv (fun s => u s x) t =
+      Δ_g g (smoothScalarSlice (I := I) g u hu t).smooth x)
+    {t : ℝ} (ht : 0 < t) (x : M) :
+    g.inner x (gradientFun (I := I) g (u t) x) (gradientFun (I := I) g (u t) x) / (u t x ^ 2) -
+      Real.exp (2 * K * t) * (deriv (fun s => u s x) t / u t x) ≤
+        Real.exp (4 * K * t) * (Module.finrank ℝ E : ℝ) / (2 * t) := by
+  classical
+  let D : RealTimeInterval := RealTimeInterval.univ 0
+  let Gfam : RealizedMetricFamily (I := I) (M := M) ℝ :=
+    { metric := fun _ => g
+      connection := fun _ => LeviCivita (I := I) g
+      metricCompatible := fun _ =>
+        leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g }
+  have hGmetric : ∀ τ : ℝ, τ ∈ D.carrier → Gfam.metric τ = g := by
+    intro τ hτ
+    rfl
+  have hGconn : ∀ τ : ℝ, τ ∈ D.carrier → Gfam.connection τ = LeviCivita (Gfam.metric τ) := by
+    intro τ hτ
+    rfl
+  have huOn : IsHeatOn D Gfam u := by
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · simpa [D] using hu.contMDiffOn
+    · exact hu.continuous.continuousOn
+    · intro τ hτ
+      exact hu.comp (contMDiff_const.prodMk contMDiff_id)
+    · intro τ hτ x
+      have hslice_cd : ContDiff ℝ ∞ (fun s => u s x) :=
+        contMDiff_iff_contDiff.mp (hu.comp (contMDiff_id.prodMk contMDiff_const))
+      have hder : HasDerivAt (fun s => u s x) (deriv (fun s => u s x) τ) τ :=
+        (ContDiff.differentiable hslice_cd (by norm_num) τ).hasDerivAt
+      have hlap : laplacianAt (I := I) Gfam τ (u τ) x =
+          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x := by
+        change laplacianAt (I := I) Gfam τ (smoothScalarSlice (I := I) g u hu τ).toFun x =
+          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x
+        rw [laplacianAt_eq_delta (I := I) Gfam τ (smoothScalarSlice (I := I) g u hu τ).smooth (by rfl) x]
+      have hderiv : deriv (fun s => u s x) τ = laplacianAt (I := I) Gfam τ (u τ) x := by
+        rw [hpde τ x, ← hlap]
+      convert hder.congr_deriv hderiv using 1
+      simp
+  let f : ℝ → M → ℝ := fun s y => Real.log (u s y)
+  let hlog : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => f p.1 p.2) := by
+    simpa [f] using DifferentialGeometry.Analysis.Parabolic.Moser.contMDiff_log_of_pos hu hpos
+  let hq : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => liYauQuantity g f p.1 p.2) := by
+    have hqOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => liYauQuantity g f p.1 p.2) univ := by
+      simpa [f, D, RealTimeInterval.univ] using liYauQuantity_contMDiff (I := I) (M := M) (D := D) g u hu.contMDiffOn
+        (fun τ hτ => hu.comp (contMDiff_const.prodMk contMDiff_id)) (fun τ hτ x => hpos τ x)
+    simpa [f] using contMDiffOn_univ.mp hqOn
+  let hft_cd : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => deriv (fun σ : ℝ => f σ p.2) p.1) := by
+    simpa [f] using (DifferentialGeometry.contMDiff_partial_deriv_fst I
+      ⟨fun p : ℝ × M => Real.log (u p.1 p.2),
+        DifferentialGeometry.Analysis.Parabolic.Moser.contMDiff_log_of_pos hu hpos⟩)
+  let N : ℝ → M → ℝ := fun s y => g.inner y (gradientFun (I := I) g (f s) y)
+        (gradientFun (I := I) g (f s) y)
+  let hN : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => N p.1 p.2) := by
+    have hfun : (fun p : ℝ × M => N p.1 p.2) =
+        (fun p : ℝ × M => liYauQuantity g f p.1 p.2 + deriv (fun σ : ℝ => f σ p.2) p.1) := by
+      funext p
+      simp [N, f, liYauQuantity]
+    rw [hfun]
+    exact hq.add hft_cd
+  let F : ℝ → M → ℝ := fun s y => Real.exp ((-(2 * K)) * s) * N s y - deriv (fun σ : ℝ => f σ y) s
+  let hF : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => F p.1 p.2) := by
+    have hlin : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => (-(2 * K)) * p.1) := by
+      have hc : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+          ((fun _ : ℝ × M => (-(2 * K))) * Prod.fst) :=
+        (contMDiff_const (c := (-(2 * K)))).mul contMDiff_fst
+      refine ContMDiff.congr hc ?_
+      intro p
+      rfl
+    have hexp : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1)) := by
+      simpa using ((Real.contDiff_exp.contMDiff : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ Real.exp).comp hlin)
+    have hterm1 : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+        (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1) * N p.1 p.2) := hexp.mul hN
+    change ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => Real.exp ((-(2 * K)) * p.1) * N p.1 p.2 - deriv (fun σ : ℝ => f σ p.2) p.1)
+    exact hterm1.sub hft_cd
+  have hNOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => N p.1 p.2) (D.regular ×ˢ univ) := by
+    simpa [D] using hN.contMDiffOn
+  have hNslice : ∀ τ : ℝ, τ ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞ (N τ) := by
+    intro τ hτ
+    exact hN.comp (contMDiff_const.prodMk contMDiff_id)
+  have hFOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => F p.1 p.2) (D.regular ×ˢ univ) := by
+    simpa [D] using hF.contMDiffOn
+  have hFslice : ∀ τ : ℝ, τ ∈ D.regular → ContMDiff I 𝓘(ℝ, ℝ) ∞ (F τ) := by
+    intro τ hτ
+    exact hF.comp (contMDiff_const.prodMk contMDiff_id)
+  have hFCont : ContinuousOn (fun p : ℝ × M => F p.1 p.2) (D.carrier ×ˢ univ) := by
+    change ContinuousOn (fun p : ℝ × M => F p.1 p.2) (univ ×ˢ univ)
+    exact hF.continuous.continuousOn
+  simpa [D] using heat_solution_hamilton_differential_harnack_of_ricci_lower_bound_on
+    (I := I) (M := M) (D := D) g (K := K) hK hRic Gfam hGmetric hGconn u huOn
+    (fun τ hτ x => hpos τ x) (t := t) (by change t ∈ (Set.univ : Set ℝ); trivial)
+    ht (by intro τ hτ; trivial) (by intro τ hτ; trivial)
+    hNOn hNslice hFOn hFslice hFCont x
+
 
 end DifferentialGeometry.Analysis.Parabolic.Harnack
 

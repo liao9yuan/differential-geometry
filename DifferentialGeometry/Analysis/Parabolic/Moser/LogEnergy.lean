@@ -37,6 +37,16 @@ theorem contMDiff_log_of_pos
   exact (Real.contDiffAt_log.2 (hpos p.1 p.2).ne').comp_contMDiffAt
     (x := p) (hu p)
 
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] in
+theorem contMDiff_log_of_pos_slice
+    {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    (hpos : ∀ x : M, 0 < f x) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => Real.log (f x)) := by
+  intro x
+  exact (Real.contDiffAt_log.2 (hpos x).ne').comp_contMDiffAt
+    (x := x) (hf x)
+
 omit [I.Boundaryless] [T2Space M] in
 theorem inner_gradientFun_log_self
     (g : SmoothRiemannianMetric I M)
