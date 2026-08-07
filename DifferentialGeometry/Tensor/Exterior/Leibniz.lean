@@ -1,10 +1,14 @@
 import DifferentialGeometry.Tensor.Alternating.Wedge
 import DifferentialGeometry.Tensor.Auxiliary.Perm
+import DifferentialGeometry.Tensor.Exterior.Basic
+import DifferentialGeometry.Tensor.Exterior.Defs
 import Mathlib.Analysis.Calculus.DifferentialForm.Basic
 
 noncomputable section
 
 open ContinuousAlternatingMap
+open scoped Topology Manifold ContDiff Bundle
+open Filter
 
 namespace ContinuousAlternatingMap
 
@@ -152,9 +156,9 @@ theorem wedge_flip (h : M [⋀^Fin n]→L[𝕜] N') (g : M [⋀^Fin m]→L[𝕜]
     exact uncurrySum_summand_flip' h g f v σ
 
 private lemma map_perm_sign {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (A : M [⋀^ι]→L[𝕜] N'') (w : ι → M) (π : Equiv.Perm ι) :
-    A (w ∘ π) = Equiv.Perm.sign π • A w := by
-  exact A.toAlternatingMap.map_perm w π
+    (A : M [⋀^ι]→L[𝕜] N'') (w : ι → M) (sigma : Equiv.Perm ι) :
+    A (w ∘ sigma) = Equiv.Perm.sign sigma • A w := by
+  exact A.toAlternatingMap.map_perm w sigma
 
 private lemma uncurryFin_reindex (P : M →L[𝕜] (M [⋀^Fin (n + m)]→L[𝕜] N''))
     (v : Fin (m + n + 1) → M) :
@@ -252,20 +256,21 @@ theorem uncurryFin_precompR_eq (f : N →L[𝕜] N' →L[𝕜] N'')
   let C : Fin (m + n + 1) ≃ Fin (n + m + 1) := derivFinCast m n
   let P : M →L[𝕜] (M [⋀^Fin (n + m)]→L[𝕜] N'') :=
     (wedge_productL f.flip).precompL M L a
-  let π : Equiv.Perm (Fin (n + m)) :=
+  let sigmaPerm : Equiv.Perm (Fin (n + m)) :=
     (flipAddCongr m n).trans (Fin.finAddCongr (m := n) (n := m)).symm
-  have hπ : Equiv.Perm.sign π = (-1 : ℤˣ) ^ (m * n) := sign_flipAddCongr_composite m n
+  have hπ : Equiv.Perm.sign sigmaPerm = (-1 : ℤˣ) ^ (m * n) :=
+    sign_flipAddCongr_composite m n
   have hflip (k : Fin (m + n + 1)) :
       wedge_product a (L (v k)) f =
         (wedge_product (L (v k)) a f.flip).domDomCongr (flipAddCongr m n) := by
     exact wedge_flip (m := n) (n := m) (h := a) (g := L (v k)) (f := f.flip)
   have hbridge (k : Fin (m + n + 1)) :
       (k.removeNth v) ∘ (flipAddCongr m n) =
-        ((C k).removeNth (v ∘ C.symm)) ∘ π := by
+        ((C k).removeNth (v ∘ C.symm)) ∘ sigmaPerm := by
     rw [removeNth_cast m n v k]
     apply congrArg ((k.removeNth v) ∘ ·)
     ext x
-    simp [π, flipAddCongr, Fin.finAddCongr, finCongr]
+    simp [sigmaPerm, flipAddCongr, Fin.finAddCongr, finCongr]
   calc
     uncurryFin ((wedge_productL f).precompR M a L) v
         = ∑ k : Fin (m + n + 1), (-1 : ℤ) ^ k.val •
@@ -286,11 +291,11 @@ theorem uncurryFin_precompR_eq (f : N →L[𝕜] N' →L[𝕜] N'')
           intro k hk
           rw [ContinuousAlternatingMap.domDomCongr_apply]
     _ = ∑ k : Fin (m + n + 1), (-1 : ℤ) ^ k.val •
-            wedge_product (L (v k)) a f.flip (((C k).removeNth (v ∘ C.symm)) ∘ π) := by
+            wedge_product (L (v k)) a f.flip (((C k).removeNth (v ∘ C.symm)) ∘ sigmaPerm) := by
           refine Finset.sum_congr rfl ?_
           intro k hk
           rw [hbridge k]
-    _ = Equiv.Perm.sign π • ∑ k : Fin (m + n + 1), (-1 : ℤ) ^ k.val •
+    _ = Equiv.Perm.sign sigmaPerm • ∑ k : Fin (m + n + 1), (-1 : ℤ) ^ k.val •
             wedge_product (L (v k)) a f.flip ((C k).removeNth (v ∘ C.symm)) := by
           rw [Finset.smul_sum]
           refine Finset.sum_congr rfl ?_
@@ -298,33 +303,33 @@ theorem uncurryFin_precompR_eq (f : N →L[𝕜] N' →L[𝕜] N'')
           rw [smul_comm]
           congr 1
           exact map_perm_sign (wedge_product (L (v k)) a f.flip)
-            ((C k).removeNth (v ∘ C.symm)) π
-    _ = Equiv.Perm.sign π • uncurryFin P (v ∘ C.symm) := by
+            ((C k).removeNth (v ∘ C.symm)) sigmaPerm
+    _ = Equiv.Perm.sign sigmaPerm • uncurryFin P (v ∘ C.symm) := by
           congr 1
           simpa [P] using uncurryFin_reindex P v
-    _ = Equiv.Perm.sign π •
+    _ = Equiv.Perm.sign sigmaPerm •
           (domDomCongr Fin.finAddFlipAssoc (wedge_product (uncurryFin L) a f.flip)) (v ∘ C.symm) := by
           congr 1
           change (uncurryFin P) (v ∘ C.symm) =
             (domDomCongr Fin.finAddFlipAssoc (wedge_product (uncurryFin L) a f.flip)) (v ∘ C.symm)
           simpa [P] using DFunLike.congr_fun
             (uncurryFin_wedge_productL_precompL_eq_domDomCongr f.flip L a) (v ∘ C.symm)
-    _ = Equiv.Perm.sign π •
+    _ = Equiv.Perm.sign sigmaPerm •
           wedge_product (uncurryFin L) a f.flip ((v ∘ C.symm) ∘ Fin.finAddFlipAssoc) := by
           rw [ContinuousAlternatingMap.domDomCongr_apply]
-    _ = Equiv.Perm.sign π •
+    _ = Equiv.Perm.sign sigmaPerm •
           (wedge_product a (uncurryFin L) f).domDomCongr (flipAddCongr (n + 1) m)
             ((v ∘ C.symm) ∘ Fin.finAddFlipAssoc) := by
           congr 1
           simpa using DFunLike.congr_fun
             (wedge_flip (m := m) (n := n + 1) (h := uncurryFin L) (g := a) (f := f))
             ((v ∘ C.symm) ∘ Fin.finAddFlipAssoc (m := n) (p := 1) (n := m))
-    _ = Equiv.Perm.sign π •
+    _ = Equiv.Perm.sign sigmaPerm •
           wedge_product a (uncurryFin L) f
             (((v ∘ C.symm) ∘ Fin.finAddFlipAssoc (m := n) (p := 1) (n := m)) ∘
               (flipAddCongr (n + 1) m)) := by
           rw [ContinuousAlternatingMap.domDomCongr_apply]
-    _ = Equiv.Perm.sign π •
+    _ = Equiv.Perm.sign sigmaPerm •
           wedge_product a (uncurryFin L) f
             (v ∘ (((finCongr (show m + n + 1 = (n + 1) + m by omega)).trans
               (Equiv.Perm.addCasesSwapPerm (n + 1) m)).trans
@@ -355,9 +360,9 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {n k l : ℕ} {x : E}
 
-theorem extDeriv_eq_uncurryFin (ω : E → E [⋀^Fin n]→L[ℝ] F)
-    (hω : DifferentiableAt ℝ ω x) :
-    extDeriv ω x = ContinuousAlternatingMap.uncurryFin (fderiv ℝ ω x) := by
+theorem extDeriv_eq_uncurryFin (eta : E → E [⋀^Fin n]→L[ℝ] F)
+    (hω : DifferentiableAt ℝ eta x) :
+    extDeriv eta x = ContinuousAlternatingMap.uncurryFin (fderiv ℝ eta x) := by
   ext v
   rw [extDeriv_apply hω, ContinuousAlternatingMap.uncurryFin_apply]
   refine Finset.sum_congr rfl ?_
@@ -367,14 +372,15 @@ theorem extDeriv_eq_uncurryFin (ω : E → E [⋀^Fin n]→L[ℝ] F)
     { toFun := fun L => L (i.removeNth v)
       map_add' := by intro a b; rfl
       map_smul' := by intro c a; rfl }
-  have hEval : fderiv ℝ (fun L : E [⋀^Fin n]→L[ℝ] F => L (i.removeNth v)) (ω x) = Eval := by
-    simpa [Eval] using (Eval.fderiv : fderiv ℝ (⇑Eval) (ω x) = Eval)
-  have hcomp : HasFDerivAt (fun y : E => (ω y) (i.removeNth v))
-      (Eval.comp (fderiv ℝ ω x)) x := by
-    have hg : HasFDerivAt (fun L : E [⋀^Fin n]→L[ℝ] F => L (i.removeNth v)) Eval (ω x) := by
+  have hEval : fderiv ℝ (fun L : E [⋀^Fin n]→L[ℝ] F => L (i.removeNth v)) (eta x) = Eval := by
+    simpa [Eval] using (Eval.fderiv : fderiv ℝ (⇑Eval) (eta x) = Eval)
+  have hcomp : HasFDerivAt (fun y : E => (eta y) (i.removeNth v))
+      (Eval.comp (fderiv ℝ eta x)) x := by
+    have hg : HasFDerivAt (fun L : E [⋀^Fin n]→L[ℝ] F => L (i.removeNth v)) Eval (eta x) := by
       simpa [Eval] using Eval.hasFDerivAt
     exact HasFDerivAt.comp x hg hω.hasFDerivAt
-  have hmain : fderiv ℝ (fun y : E => (ω y) (i.removeNth v)) x = Eval.comp (fderiv ℝ ω x) := by
+  have hmain : fderiv ℝ (fun y : E => (eta y) (i.removeNth v)) x =
+      Eval.comp (fderiv ℝ eta x) := by
     simpa using hcomp.fderiv
   rw [hmain]
   rfl
@@ -420,6 +426,340 @@ theorem extDeriv_wedge (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^
   rw [← extDeriv_eq_uncurryFin a hda, ← extDeriv_eq_uncurryFin b hdb]
   exact add_comm _ _
 
+theorem extDeriv_wedge_at (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^Fin l]→L[ℝ] ℝ)
+    (ha : ContDiffAt ℝ ⊤ a x) (hb : ContDiffAt ℝ ⊤ b x) :
+    extDeriv (fun y : E => a y ∧[ℝ] b y) x =
+      domDomCongr Fin.finAddFlipAssoc ((extDeriv a x) ∧[ℝ] (b x)) +
+        (-1 : ℝ) ^ k • (a x ∧[ℝ] (extDeriv b x)) := by
+  let W : (E [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (E [⋀^Fin l]→L[ℝ] ℝ) →L[ℝ]
+      (E [⋀^Fin (k + l)]→L[ℝ] ℝ) := wedge_productL (ContinuousLinearMap.mul ℝ ℝ)
+  have hda : DifferentiableAt ℝ a x := ha.differentiableAt (by simp)
+  have hdb : DifferentiableAt ℝ b x := hb.differentiableAt (by simp)
+  have hdab : DifferentiableAt ℝ (fun y : E => a y ∧[ℝ] b y) x := by
+    have hW : ContDiffAt ℝ ⊤ (fun _ : E => W) x := contDiffAt_const
+    exact ((hW.clm_apply ha).clm_apply hb).differentiableAt (by simp)
+  rw [extDeriv_eq_uncurryFin (fun y : E => a y ∧[ℝ] b y) hdab]
+  rw [fderiv_wedge_apply a b hda hdb]
+  rw [ContinuousAlternatingMap.uncurryFin_add]
+  rw [ContinuousAlternatingMap.uncurryFin_precompR_eq]
+  rw [ContinuousAlternatingMap.uncurryFin_wedge_productL_precompL_eq_domDomCongr]
+  rw [← extDeriv_eq_uncurryFin a hda, ← extDeriv_eq_uncurryFin b hdb]
+  exact add_comm _ _
+
 end DifferentialForm
+
+namespace DifferentialGeometry
+namespace DifferentialForm
+
+variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
+  {HM : Type*} [TopologicalSpace HM]
+  {IM : ModelWithCorners ℝ EM HM}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
+  {k l : ℕ}
+
+private def domDomCongrL (e : Fin k ≃ Fin l) :
+    (EM [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (EM [⋀^Fin l]→L[ℝ] ℝ) :=
+  LinearMap.mkContinuous
+    { toFun := fun f => ContinuousAlternatingMap.domDomCongr e f
+      map_add' := fun f g => ContinuousAlternatingMap.domDomCongr_add e f g
+      map_smul' := fun c f => by
+        ext v
+        simp [ContinuousAlternatingMap.domDomCongr_apply] }
+    1 (fun f => by
+      have hnorm : ‖ContinuousAlternatingMap.domDomCongr e f‖ = ‖f‖ := by
+        change ‖(ContinuousAlternatingMap.domDomCongr e f).toContinuousMultilinearMap‖ = ‖f‖
+        change ‖(f.toContinuousMultilinearMap.domDomCongr e : ContinuousMultilinearMap ℝ
+          (fun _ : Fin l => EM) ℝ)‖ = ‖f‖
+        rw [ContinuousMultilinearMap.norm_domDomCongr]
+        rw [ContinuousAlternatingMap.norm_toContinuousMultilinearMap]
+      simp [hnorm])
+
+noncomputable def reindex (e : Fin k ≃ Fin l) (α : DifferentialForm IM M k) :
+    DifferentialForm IM M l :=
+  ⟨fun x => ContinuousAlternatingMap.domDomCongr e (α x), by
+    intro x₀
+    let e' := trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x₀
+    rw [Bundle.Trivialization.contMDiffAt_section_iff e'
+      (mem_baseSet_trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x₀)]
+    have hα : ContMDiffAt IM 𝓘(ℝ, EM [⋀^Fin k]→L[ℝ] ℝ) ⊤ (fun x =>
+        (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x₀ ⟨x, α x⟩).2) x₀ := by
+      exact (Bundle.Trivialization.contMDiffAt_section_iff
+        (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x₀)
+        (mem_baseSet_trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x₀)).mp (α.contMDiff_toFun x₀)
+    have hL : ContMDiffAt IM 𝓘(ℝ, EM [⋀^Fin l]→L[ℝ] ℝ) ⊤ (fun x =>
+        (domDomCongrL e) ((trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x₀ ⟨x, α x⟩).2)) x₀ := by
+      exact (contMDiffAt_const (c := domDomCongrL e)).clm_apply hα
+    refine hL.congr_of_eventuallyEq ?_
+    exact eventually_of_mem (e'.open_baseSet.mem_nhds (mem_baseSet_trivializationAt
+      (EM [⋀^Fin l]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x₀))
+      (fun x hx => by
+        change (trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
+            (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
+              (Bundle.Trivial M ℝ)) x₀
+            ⟨x, ContinuousAlternatingMap.domDomCongr e (α x)⟩).2 =
+          (domDomCongrL e) ((trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+            (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+              (Bundle.Trivial M ℝ)) x₀ ⟨x, α x⟩).2)
+        rw [altTriv_apply (m := l) (IM := IM) (M := M) (x₀ := x₀) (x := x)
+          (L := ContinuousAlternatingMap.domDomCongr e (α x)),
+          altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := α x)]
+        change (ContinuousAlternatingMap.domDomCongr e (α x)).compContinuousLinearMap
+            ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) =
+          ContinuousAlternatingMap.domDomCongr e ((α x).compContinuousLinearMap
+            ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x))
+        exact (domDomCongr_compContinuousLinearMap
+          (E := TangentSpace IM x) (E' := TangentSpace IM x) (σ := e)
+          (L := α x) (A := (trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)).symm)⟩
+
+@[simp] theorem reindex_apply (e : Fin k ≃ Fin l) (α : DifferentialForm IM M k) (x : M) :
+    (reindex e α) x = ContinuousAlternatingMap.domDomCongr e (α x) := rfl
+
+private lemma triv_samePoint (m : ℕ) (x : M)
+    (L : (TangentSpace IM x) [⋀^Fin m]→L[ℝ] ℝ) :
+    (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨x, L⟩).2 = L := by
+  rw [altTriv_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
+  have hid : (trivializationAt EM (TangentSpace IM) x).symmL ℝ x =
+      ContinuousLinearMap.id ℝ EM := by
+    apply ContinuousLinearMap.ext
+    intro v
+    rw [TangentBundle.symmL_trivializationAt_eq_core (𝕜 := ℝ) (I := IM) (M := M) (by simp)]
+    exact tangentCoordChange_self (I := IM) (x := x) (z := x) (by simp)
+  rw [hid]
+  ext v
+  rfl
+
+private lemma symmL_id (m : ℕ) (x : M)
+    (L : (TangentSpace IM x) [⋀^Fin m]→L[ℝ] ℝ) :
+    (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x).symmL ℝ x L = L := by
+  let e := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+    (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x
+  have hcl : e.continuousLinearMapAt ℝ x (e.symmL ℝ x L) = e.continuousLinearMapAt ℝ x L := by
+    rw [Bundle.Trivialization.continuousLinearMapAt_symmL (e)
+      (mem_baseSet_trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x) L]
+    rw [Bundle.Trivialization.continuousLinearMapAt_apply, Bundle.Trivialization.linearMapAt_apply]
+    rw [if_pos (mem_baseSet_trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x)]
+    change L = (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x ⟨x, L⟩).2
+    rw [altTriv_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
+    change L = L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x).symmL ℝ x)
+    rw [show (trivializationAt EM (TangentSpace IM) x).symmL ℝ x = ContinuousLinearMap.id ℝ EM from by
+      apply ContinuousLinearMap.ext
+      intro v
+      rw [TangentBundle.symmL_trivializationAt_eq_core (𝕜 := ℝ) (I := IM) (M := M) (by simp)]
+      exact tangentCoordChange_self (I := IM) (x := x) (z := x) (by simp)]
+    rfl
+  have hlin : Function.Injective (e.continuousLinearMapAt ℝ x) := by
+    convert (e.continuousLinearEquivAt ℝ x (mem_baseSet_trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x)).injective
+    ext y
+    rw [Bundle.Trivialization.coe_continuousLinearEquivAt_eq]
+  exact hlin hcl
+
+private lemma dalpha_eq_extDeriv [BoundarylessManifold IM M] (α : DifferentialForm IM M k)
+    (x : M) :
+    exteriorDerivativeAt α x =
+      extDeriv (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
+        ((extChartAt IM x) x) := by
+  have h : exteriorDerivativeAt α x =
+      (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨x, exteriorDerivativeAt α x⟩).2 := by
+    exact (triv_samePoint (k + 1) x (exteriorDerivativeAt α x)).symm
+  rw [h]
+  exact exteriorDerivative_localRepresentation (IM := IM) (M := M) (α := α) (x₀ := x) (x := x)
+    (by simp) (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))
+
+private lemma repα_eq (α : DifferentialForm IM M k) (x : M) :
+    (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
+      ((extChartAt IM x) x) = α x := by
+  change (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x
+      ⟨(extChartAt IM x).symm ((extChartAt IM x) x),
+        α ((extChartAt IM x).symm ((extChartAt IM x) x))⟩).2 = α x
+  rw [(extChartAt IM x).left_inv (by simp)]
+  exact triv_samePoint k x (α x)
+
+private lemma repβ_eq (β : DifferentialForm IM M l) (x : M) :
+    (fun y : EM => (trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, β ((extChartAt IM x).symm y)⟩).2)
+      ((extChartAt IM x) x) = β x := by
+  change (trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x
+      ⟨(extChartAt IM x).symm ((extChartAt IM x) x),
+        β ((extChartAt IM x).symm ((extChartAt IM x) x))⟩).2 = β x
+  rw [(extChartAt IM x).left_inv (by simp)]
+  exact triv_samePoint l x (β x)
+
+theorem exteriorDerivative_wedge [BoundarylessManifold IM M]
+    (α : DifferentialForm IM M k) (β : DifferentialForm IM M l) :
+    exteriorDerivative (α ∧ β) =
+      reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l)) (exteriorDerivative α ∧ β) +
+        (-1 : ℝ) ^ k • (α ∧ exteriorDerivative β) := by
+  apply DifferentialForm.ext
+  intro x
+  change exteriorDerivativeAt (α ∧ β) x =
+      reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l)) (exteriorDerivative α ∧ β) x +
+        (-1 : ℝ) ^ k • (α ∧ exteriorDerivative β) x
+  let c₀ := extChartAt IM x
+  let eKL1 := trivializationAt (EM [⋀^Fin (k + l + 1)]→L[ℝ] ℝ)
+    (Bundle.continuousAlternatingMap ℝ (Fin (k + l + 1)) EM (TangentSpace IM) ℝ
+      (Bundle.Trivial M ℝ)) x
+  let repα : EM → EM [⋀^Fin k]→L[ℝ] ℝ := fun y =>
+    (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2
+  let repβ : EM → EM [⋀^Fin l]→L[ℝ] ℝ := fun y =>
+    (trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, β ((extChartAt IM x).symm y)⟩).2
+  have hLHS : eKL1.symm x (exteriorDerivativeAt (α ∧ β) x) =
+      extDeriv (fun y : EM => repα y ∧[ℝ] repβ y) (c₀ x) := by
+    change eKL1.symmL ℝ x (exteriorDerivativeAt (α ∧ β) x) =
+      extDeriv (fun y : EM => repα y ∧[ℝ] repβ y) (c₀ x)
+    rw [symmL_id (k + l + 1) x]
+    dsimp [c₀, eKL1, repα, repβ]
+    rw [← (triv_samePoint (k + l + 1) x (exteriorDerivativeAt (α ∧ β) x))]
+    rw [exteriorDerivative_localRepresentation (IM := IM) (M := M) (α := α ∧ β) (x₀ := x)
+      (x := x) (by simp) (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))]
+    congr 1
+    funext y
+    change (trivializationAt (EM [⋀^Fin (k + l)]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin (k + l)) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y,
+            α ((extChartAt IM x).symm y) ∧[ℝ] β ((extChartAt IM x).symm y)⟩).2 =
+      (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2 ∧[ℝ]
+        (trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, β ((extChartAt IM x).symm y)⟩).2
+    rw [altTriv_apply (m := k + l) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
+        (L := α ((extChartAt IM x).symm y) ∧[ℝ] β ((extChartAt IM x).symm y)),
+      altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
+        (L := α ((extChartAt IM x).symm y)),
+      altTriv_apply (m := l) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
+        (L := β ((extChartAt IM x).symm y))]
+    exact wedge_product_compContinuousLinearMap (E := TangentSpace IM ((extChartAt IM x).symm y))
+      (E' := EM) (g := α ((extChartAt IM x).symm y)) (h := β ((extChartAt IM x).symm y))
+      (A := (trivializationAt EM (TangentSpace IM) x).symmL ℝ ((extChartAt IM x).symm y))
+  have hRHS : eKL1.symm x (reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+        (exteriorDerivative α ∧ β) x + (-1 : ℝ) ^ k • (α ∧ exteriorDerivative β) x) =
+      ContinuousAlternatingMap.domDomCongr (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+        (extDeriv repα (c₀ x) ∧[ℝ] repβ (c₀ x)) +
+        (-1 : ℝ) ^ k • (repα (c₀ x) ∧[ℝ] extDeriv repβ (c₀ x)) := by
+    change eKL1.symmL ℝ x (reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+        (exteriorDerivative α ∧ β) x + (-1 : ℝ) ^ k • (α ∧ exteriorDerivative β) x) =
+      ContinuousAlternatingMap.domDomCongr (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+        (extDeriv repα (c₀ x) ∧[ℝ] repβ (c₀ x)) +
+        (-1 : ℝ) ^ k • (repα (c₀ x) ∧[ℝ] extDeriv repβ (c₀ x))
+    rw [symmL_id (k + l + 1) x]
+    have hsum : reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+        (exteriorDerivative α ∧ β) x + (-1 : ℝ) ^ k • (α ∧ exteriorDerivative β) x =
+        ContinuousAlternatingMap.domDomCongr (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+          (extDeriv repα (c₀ x) ∧[ℝ] repβ (c₀ x)) +
+        (-1 : ℝ) ^ k • (repα (c₀ x) ∧[ℝ] extDeriv repβ (c₀ x)) := by
+      rw [reindex_apply]
+      change ContinuousAlternatingMap.domDomCongr (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+            ((exteriorDerivativeAt α x) ∧[ℝ] β x) + (-1 : ℝ) ^ k • (α x ∧[ℝ] exteriorDerivativeAt β x) =
+        ContinuousAlternatingMap.domDomCongr (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+          (extDeriv repα (c₀ x) ∧[ℝ] repβ (c₀ x)) +
+        (-1 : ℝ) ^ k • (repα (c₀ x) ∧[ℝ] extDeriv repβ (c₀ x))
+      rw [dalpha_eq_extDeriv α x, dalpha_eq_extDeriv β x]
+      rw [show β x = repβ (c₀ x) from (repβ_eq β x).symm]
+      rw [show α x = repα (c₀ x) from (repα_eq α x).symm]
+      rfl
+    rw [hsum]
+  have hm : extDeriv (fun y : EM => repα y ∧[ℝ] repβ y) (c₀ x) =
+      ContinuousAlternatingMap.domDomCongr (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+          (extDeriv repα (c₀ x) ∧[ℝ] repβ (c₀ x)) +
+        (-1 : ℝ) ^ k • (repα (c₀ x) ∧[ℝ] extDeriv repβ (c₀ x)) := by
+    have hmem : c₀ x ∈ interior ((extChartAt IM x).target) :=
+      (ModelWithCorners.isInteriorPoint_iff (I := IM)).1
+        (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))
+    have hcontα : ContDiffAt ℝ ⊤ repα (c₀ x) := by
+      exact (localRep_contDiffOn α x).contDiffAt (mem_interior_iff_mem_nhds.mp hmem)
+    have hcontβ : ContDiffAt ℝ ⊤ repβ (c₀ x) := by
+      exact (localRep_contDiffOn β x).contDiffAt (mem_interior_iff_mem_nhds.mp hmem)
+    simpa [c₀, repα, repβ] using
+      (DifferentialForm.extDeriv_wedge_at (a := repα) (b := repβ) hcontα hcontβ)
+  have heq : exteriorDerivativeAt (α ∧ β) x =
+      reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l)) (exteriorDerivative α ∧ β) x +
+        (-1 : ℝ) ^ k • (α ∧ exteriorDerivative β) x := by
+    haveI : eKL1.IsLinear ℝ := by
+      letI : VectorBundle ℝ (EM [⋀^Fin (k + l + 1)]→L[ℝ] ℝ)
+        (Bundle.continuousAlternatingMap ℝ (Fin (k + l + 1)) EM (TangentSpace IM) ℝ
+          (Bundle.Trivial M ℝ)) := inferInstance
+      exact trivialization_linear (R := ℝ) (e := eKL1)
+    have hlin : Function.Injective (eKL1.continuousLinearMapAt ℝ x) := by
+      intro a b hab
+      apply (eKL1.continuousLinearEquivAt ℝ x
+        (mem_baseSet_trivializationAt (EM [⋀^Fin (k + l + 1)]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin (k + l + 1)) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x)).injective
+      change (eKL1 ⟨x, a⟩).2 = (eKL1 ⟨x, b⟩).2
+      rw [show (eKL1 ⟨x, a⟩).2 = eKL1.continuousLinearMapAt ℝ x a by
+        rw [← eKL1.coe_continuousLinearEquivAt_eq (mem_baseSet_trivializationAt
+          (EM [⋀^Fin (k + l + 1)]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin (k + l + 1)) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x)]
+        rfl,
+        show (eKL1 ⟨x, b⟩).2 = eKL1.continuousLinearMapAt ℝ x b by
+        rw [← eKL1.coe_continuousLinearEquivAt_eq (mem_baseSet_trivializationAt
+          (EM [⋀^Fin (k + l + 1)]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin (k + l + 1)) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x)]
+        rfl]
+      exact hab
+    have hle : eKL1.symmL ℝ x (exteriorDerivativeAt (α ∧ β) x) =
+        eKL1.symmL ℝ x (reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l))
+          (exteriorDerivative α ∧ β) x + (-1 : ℝ) ^ k • (α ∧ exteriorDerivative β) x) := by
+      rw [Bundle.Trivialization.symmL_apply (R := ℝ)]
+      rw [hLHS, hRHS, hm]
+    have hs_inj : Function.Injective (eKL1.symmL ℝ x) := by
+      intro a b hab
+      apply hlin
+      rw [← Bundle.Trivialization.continuousLinearMapAt_symmL (R := ℝ) (e := eKL1)
+        (mem_baseSet_trivializationAt (EM [⋀^Fin (k + l + 1)]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin (k + l + 1)) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x) a,
+        ← Bundle.Trivialization.continuousLinearMapAt_symmL (R := ℝ) (e := eKL1)
+        (mem_baseSet_trivializationAt (EM [⋀^Fin (k + l + 1)]→L[ℝ] ℝ)
+          (Bundle.continuousAlternatingMap ℝ (Fin (k + l + 1)) EM (TangentSpace IM) ℝ
+            (Bundle.Trivial M ℝ)) x) b]
+      rw [hab]
+    apply hs_inj
+    exact hle
+  exact heq
+
+end DifferentialForm
+end DifferentialGeometry
 
 end

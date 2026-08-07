@@ -58,7 +58,7 @@ private lemma localRep_eq_pullback {x₀ x z : M}
     (by simpa [extChartAt_source] using hx₀)
     ((trivializationAt EM (TangentSpace IM) x).symmL ℝ z (v i))).symm
 
-private lemma localRep_contDiffOn (α : DifferentialForm IM M k) (x₀ : M) :
+lemma localRep_contDiffOn (α : DifferentialForm IM M k) (x₀ : M) :
     ContDiffOn ℝ ⊤ (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
           (Bundle.Trivial M ℝ)) x₀ ⟨(extChartAt IM x₀).symm y, α ((extChartAt IM x₀).symm y)⟩).2)

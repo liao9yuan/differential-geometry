@@ -2937,6 +2937,7 @@ import DifferentialGeometry.Tensor.Exterior.Basic
 import DifferentialGeometry.Tensor.Exterior.Cochain
 import DifferentialGeometry.Tensor.Exterior.Defs
 import DifferentialGeometry.Tensor.Exterior.Exact
+import DifferentialGeometry.Tensor.Exterior.Leibniz
 import DifferentialGeometry.Tensor.Exterior.Model
 import DifferentialGeometry.Tensor.Exterior.Pullback
 import DifferentialGeometry.Tensor.Exterior.ZeroForm
