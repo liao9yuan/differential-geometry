@@ -1,4 +1,5 @@
 import DifferentialGeometry.Topology.Attachment.Defs
+import Mathlib.Analysis.InnerProductSpace.Calculus
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Geometry.Manifold.Instances.Real
@@ -730,6 +731,104 @@ noncomputable def closedCellChartedSpaceSucc (m : ℕ) :
           linarith)))
       exact mem_closedCellBoundaryChart_source x hne
   chart_mem_atlas := fun x => ⟨x, rfl⟩
+
+theorem closedCellCons_contDiff {m : ℕ} :
+    ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × EuclideanSpace ℝ (Fin m) =>
+      closedCellCons m p.1 p.2) := by
+  rw [show (fun p : ℝ × EuclideanSpace ℝ (Fin m) => closedCellCons m p.1 p.2) =
+      WithLp.toLp 2 ∘ (fun p : ℝ × EuclideanSpace ℝ (Fin m) =>
+        Fin.cons p.1 (WithLp.ofLp p.2)) from by
+    funext p
+    exact closedCellCons_eq_cons m p.1 p.2]
+  have hfin : ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × EuclideanSpace ℝ (Fin m) =>
+      (Fin.cons p.1 (WithLp.ofLp p.2) : Fin (m + 1) → ℝ)) := by
+    rw [show (fun p : ℝ × EuclideanSpace ℝ (Fin m) => Fin.cons p.1 (WithLp.ofLp p.2)) =
+        fun p j => (Fin.cases p.1 (fun j' : Fin m => (WithLp.ofLp p.2 : Fin m → ℝ) j') j : ℝ) from by
+      funext p
+      ext j
+      by_cases hj : j = (0 : Fin (m + 1))
+      · subst j
+        rfl
+      · have hsucc : ∃ j' : Fin m, Fin.succ j' = j := Fin.exists_succ_eq.mpr hj
+        rcases hsucc with ⟨j', rfl⟩
+        rfl]
+    exact contDiff_pi' (fun j => by
+      by_cases hj : j = (0 : Fin (m + 1))
+      · subst j
+        change ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × EuclideanSpace ℝ (Fin m) => p.1)
+        exact contDiff_fst
+      · have hsucc : ∃ j' : Fin m, Fin.succ j' = j := Fin.exists_succ_eq.mpr hj
+        rcases hsucc with ⟨j', rfl⟩
+        change ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × EuclideanSpace ℝ (Fin m) => (WithLp.ofLp p.2) j')
+        fun_prop)
+  let htoLp : (Fin (m + 1) → ℝ) →L[ℝ] EuclideanSpace ℝ (Fin (m + 1)) :=
+    { toLinearMap := (WithLp.linearEquiv 2 ℝ (Fin (m + 1) → ℝ)).symm.toLinearMap
+      cont := PiLp.continuous_toLp (p := 2) (β := fun _ : Fin (m + 1) => ℝ) }
+  have hfun : ⇑htoLp = (WithLp.toLp 2 : (Fin (m + 1) → ℝ) → EuclideanSpace ℝ (Fin (m + 1))) := by
+    dsimp [htoLp]
+    change ⇑(WithLp.linearEquiv 2 ℝ (Fin (m + 1) → ℝ)).symm = WithLp.toLp 2
+    exact WithLp.coe_symm_linearEquiv 2 ℝ (Fin (m + 1) → ℝ)
+  simpa [hfun] using htoLp.contDiff.comp hfin
+
+theorem closedCellShiftSucc_contDiff {m : ℕ} (c : ℝ) :
+    ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) => closedCellShiftSucc m c x) := by
+  have hlin : ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) =>
+      x + c • (EuclideanSpace.basisFun (Fin (m + 1)) ℝ (0 : Fin (m + 1)))) :=
+    contDiff_id.add contDiff_const
+  simpa [closedCellShiftSucc_eq_add] using hlin
+
+theorem closedCellPermute_contDiff {m : ℕ} (e : Fin (m + 1) ≃ Fin (m + 1)) :
+    ContDiff ℝ (⊤ : ℕ∞) (closedCellPermute e) := by
+  exact (closedCellPermute e).toContinuousLinearEquiv.contDiff
+
+theorem closedCellTail_contDiff {m : ℕ} :
+    ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) => closedCellTail m x) := by
+  unfold closedCellTail
+  fun_prop
+
+theorem closedCellCons_contDiffOn_left {m : ℕ} :
+    ContDiffOn ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellCons m (1 - ‖x‖ ^ 2) (closedCellTail m x)) Set.univ := by
+  have hcons : ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellCons m (1 - ‖x‖ ^ 2) (closedCellTail m x)) := by
+    -- (1 - ‖x‖^2, tail x) ↦ cons
+    have hpair : ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) =>
+        (1 - ‖x‖ ^ 2, closedCellTail m x)) := by
+      have hnorm : ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) => 1 - ‖x‖ ^ 2) := by
+        exact (contDiff_const.sub (contDiff_norm_sq ℝ))
+      exact hnorm.prodMk (closedCellTail_contDiff (m := m))
+    have hcons' : ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × EuclideanSpace ℝ (Fin m) =>
+        closedCellCons m p.1 p.2) := closedCellCons_contDiff
+    -- compose hcons' with hpair
+    have hcomp : ContDiff ℝ (⊤ : ℕ∞)
+        (fun x : EuclideanSpace ℝ (Fin (m + 1)) =>
+          closedCellCons m (1 - ‖x‖ ^ 2) (closedCellTail m x)) := by
+      simpa using hcons'.comp hpair
+    exact hcomp
+  exact hcons.contDiffOn
+
+theorem closedCellInteriorBoundaryTransition_contDiff {m : ℕ} (i : Fin (m + 1)) :
+    ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellCons m (1 - ‖closedCellShiftSucc m (-1) y‖ ^ 2)
+        (closedCellTail m (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))
+          (closedCellShiftSucc m (-1) y)))) := by
+  have hshift : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellShiftSucc m (-1) y) := closedCellShiftSucc_contDiff (-1)
+  have hperm : ContDiff ℝ (⊤ : ℕ∞) (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))) :=
+    closedCellPermute_contDiff (Equiv.swap i (0 : Fin (m + 1)))
+  have hnorm : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      1 - ‖closedCellShiftSucc m (-1) y‖ ^ 2) := by
+    exact (contDiff_const.sub ((contDiff_norm_sq ℝ).comp hshift))
+  have htail : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      closedCellTail m (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))
+        (closedCellShiftSucc m (-1) y))) := by
+    exact (closedCellTail_contDiff (m := m)).comp (hperm.comp hshift)
+  have hpair : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (m + 1)) =>
+      (1 - ‖closedCellShiftSucc m (-1) y‖ ^ 2,
+        closedCellTail m (closedCellPermute (Equiv.swap i (0 : Fin (m + 1)))
+          (closedCellShiftSucc m (-1) y)))) :=
+    hnorm.prodMk htail
+  simpa using (closedCellCons_contDiff (m := m)).comp hpair
 
 end
 
