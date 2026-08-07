@@ -227,7 +227,8 @@ private lemma rep_eqOn_pullback (α : DifferentialForm IM M k) {x₀ x : M}
   exact (localRep_eq_pullback (IM := IM) (M := M) (x₀ := x) (x := x₀) (z := z)
     (hx := hy₀s) (hx₀ := hy₀s₁) (m := k) (L := α z))
 
-noncomputable def exteriorDerivativeAt (α : DifferentialForm IM M k) (x : M) :
+noncomputable def exteriorDerivativeAt [BoundarylessManifold IM M]
+    (α : DifferentialForm IM M k) (x : M) :
     Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
       (Bundle.Trivial M ℝ) x :=
   (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
@@ -238,7 +239,8 @@ noncomputable def exteriorDerivativeAt (α : DifferentialForm IM M k) (x : M) :
           (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
       ((extChartAt IM x) x))
 
-theorem exteriorDerivative_localRepresentation (α : DifferentialForm IM M k) {x₀ x : M}
+theorem exteriorDerivative_localRepresentation [BoundarylessManifold IM M]
+    (α : DifferentialForm IM M k) {x₀ x : M}
     (hx : x ∈ (extChartAt IM x₀).source) (hxi : ModelWithCorners.IsInteriorPoint IM x) :
     (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
@@ -360,7 +362,8 @@ theorem exteriorDerivative_localRepresentation (α : DifferentialForm IM M k) {x
     exact h1.trans (h2.trans h3)
   exact hR.trans hS.symm
 
-private lemma exteriorDerivative_localRepresentation_contDiff (α : DifferentialForm IM M k) (x₀ : M) :
+private lemma exteriorDerivative_localRepresentation_contDiff [BoundarylessManifold IM M]
+    (α : DifferentialForm IM M k) (x₀ : M) :
     ContDiffOn ℝ ⊤ (fun y : EM => (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
           (Bundle.Trivial M ℝ)) x₀ ⟨(extChartAt IM x₀).symm y, exteriorDerivativeAt α ((extChartAt IM x₀).symm y)⟩).2)
@@ -575,7 +578,7 @@ theorem exteriorDerivative_smul [BoundarylessManifold IM M] (c : ℝ) (α : Diff
     rfl
   rw [hsmul, extDeriv_smul, map_smul]
 
-theorem exteriorDerivative_extDeriv [BoundarylessManifold IM M] (α : DifferentialForm IM M k) :
+theorem exteriorDerivative_sq [BoundarylessManifold IM M] (α : DifferentialForm IM M k) :
     exteriorDerivative (exteriorDerivative α) = 0 := by
   ext x
   let e := trivializationAt (EM [⋀^Fin (k + 2)]→L[ℝ] ℝ)

@@ -407,17 +407,19 @@ private theorem fderiv_wedge_apply (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E
     ContinuousLinearMap.flip_apply]
 
 theorem extDeriv_wedge (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^Fin l]→L[ℝ] ℝ)
-    (ha : ContDiff ℝ ⊤ a) (hb : ContDiff ℝ ⊤ b) :
+    (ha : Differentiable ℝ a) (hb : Differentiable ℝ b) :
     extDeriv (fun x => a x ∧[ℝ] b x) =
       fun x => domDomCongr Fin.finAddFlipAssoc ((extDeriv a x) ∧[ℝ] (b x)) +
         (-1 : ℝ) ^ k • (a x ∧[ℝ] (extDeriv b x)) := by
   funext x
   let W : (E [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (E [⋀^Fin l]→L[ℝ] ℝ) →L[ℝ]
       (E [⋀^Fin (k + l)]→L[ℝ] ℝ) := wedge_productL (ContinuousLinearMap.mul ℝ ℝ)
-  have hda : DifferentiableAt ℝ a x := (ha.differentiable (by simp)).differentiableAt
-  have hdb : DifferentiableAt ℝ b x := (hb.differentiable (by simp)).differentiableAt
+  have hda : DifferentiableAt ℝ a x := ha.differentiableAt
+  have hdb : DifferentiableAt ℝ b x := hb.differentiableAt
   have hdab : DifferentiableAt ℝ (fun y : E => a y ∧[ℝ] b y) x := by
-    exact ((W.contDiff.comp ha).clm_apply hb).differentiable (by simp) |>.differentiableAt
+    have hW : Differentiable ℝ (fun y : E => W) := by
+      exact differentiable_const W
+    exact ((hW.clm_apply ha).clm_apply hb).differentiableAt
   rw [extDeriv_eq_uncurryFin (fun y : E => a y ∧[ℝ] b y) hdab]
   rw [fderiv_wedge_apply a b hda hdb]
   rw [ContinuousAlternatingMap.uncurryFin_add]
@@ -427,17 +429,18 @@ theorem extDeriv_wedge (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^
   exact add_comm _ _
 
 theorem extDeriv_wedge_at (a : E → E [⋀^Fin k]→L[ℝ] ℝ) (b : E → E [⋀^Fin l]→L[ℝ] ℝ)
-    (ha : ContDiffAt ℝ ⊤ a x) (hb : ContDiffAt ℝ ⊤ b x) :
+    (ha : DifferentiableAt ℝ a x) (hb : DifferentiableAt ℝ b x) :
     extDeriv (fun y : E => a y ∧[ℝ] b y) x =
       domDomCongr Fin.finAddFlipAssoc ((extDeriv a x) ∧[ℝ] (b x)) +
         (-1 : ℝ) ^ k • (a x ∧[ℝ] (extDeriv b x)) := by
   let W : (E [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (E [⋀^Fin l]→L[ℝ] ℝ) →L[ℝ]
       (E [⋀^Fin (k + l)]→L[ℝ] ℝ) := wedge_productL (ContinuousLinearMap.mul ℝ ℝ)
-  have hda : DifferentiableAt ℝ a x := ha.differentiableAt (by simp)
-  have hdb : DifferentiableAt ℝ b x := hb.differentiableAt (by simp)
+  have hda : DifferentiableAt ℝ a x := ha
+  have hdb : DifferentiableAt ℝ b x := hb
   have hdab : DifferentiableAt ℝ (fun y : E => a y ∧[ℝ] b y) x := by
-    have hW : ContDiffAt ℝ ⊤ (fun _ : E => W) x := contDiffAt_const
-    exact ((hW.clm_apply ha).clm_apply hb).differentiableAt (by simp)
+    have hW : Differentiable ℝ (fun y : E => W) := by
+      exact differentiable_const W
+    exact hW.differentiableAt.clm_apply ha |>.clm_apply hb
   rw [extDeriv_eq_uncurryFin (fun y : E => a y ∧[ℝ] b y) hdab]
   rw [fderiv_wedge_apply a b hda hdb]
   rw [ContinuousAlternatingMap.uncurryFin_add]
@@ -457,76 +460,6 @@ variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
   {k l : ℕ}
 
-private def domDomCongrL (e : Fin k ≃ Fin l) :
-    (EM [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (EM [⋀^Fin l]→L[ℝ] ℝ) :=
-  LinearMap.mkContinuous
-    { toFun := fun f => ContinuousAlternatingMap.domDomCongr e f
-      map_add' := fun f g => ContinuousAlternatingMap.domDomCongr_add e f g
-      map_smul' := fun c f => by
-        ext v
-        simp [ContinuousAlternatingMap.domDomCongr_apply] }
-    1 (fun f => by
-      have hnorm : ‖ContinuousAlternatingMap.domDomCongr e f‖ = ‖f‖ := by
-        change ‖(ContinuousAlternatingMap.domDomCongr e f).toContinuousMultilinearMap‖ = ‖f‖
-        change ‖(f.toContinuousMultilinearMap.domDomCongr e : ContinuousMultilinearMap ℝ
-          (fun _ : Fin l => EM) ℝ)‖ = ‖f‖
-        rw [ContinuousMultilinearMap.norm_domDomCongr]
-        rw [ContinuousAlternatingMap.norm_toContinuousMultilinearMap]
-      simp [hnorm])
-
-noncomputable def reindex (e : Fin k ≃ Fin l) (α : DifferentialForm IM M k) :
-    DifferentialForm IM M l :=
-  ⟨fun x => ContinuousAlternatingMap.domDomCongr e (α x), by
-    intro x₀
-    let e' := trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
-      (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
-        (Bundle.Trivial M ℝ)) x₀
-    rw [Bundle.Trivialization.contMDiffAt_section_iff e'
-      (mem_baseSet_trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
-        (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
-          (Bundle.Trivial M ℝ)) x₀)]
-    have hα : ContMDiffAt IM 𝓘(ℝ, EM [⋀^Fin k]→L[ℝ] ℝ) ⊤ (fun x =>
-        (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
-          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
-            (Bundle.Trivial M ℝ)) x₀ ⟨x, α x⟩).2) x₀ := by
-      exact (Bundle.Trivialization.contMDiffAt_section_iff
-        (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
-          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
-            (Bundle.Trivial M ℝ)) x₀)
-        (mem_baseSet_trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
-          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
-            (Bundle.Trivial M ℝ)) x₀)).mp (α.contMDiff_toFun x₀)
-    have hL : ContMDiffAt IM 𝓘(ℝ, EM [⋀^Fin l]→L[ℝ] ℝ) ⊤ (fun x =>
-        (domDomCongrL e) ((trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
-          (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
-            (Bundle.Trivial M ℝ)) x₀ ⟨x, α x⟩).2)) x₀ := by
-      exact (contMDiffAt_const (c := domDomCongrL e)).clm_apply hα
-    refine hL.congr_of_eventuallyEq ?_
-    exact eventually_of_mem (e'.open_baseSet.mem_nhds (mem_baseSet_trivializationAt
-      (EM [⋀^Fin l]→L[ℝ] ℝ)
-      (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
-        (Bundle.Trivial M ℝ)) x₀))
-      (fun x hx => by
-        change (trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
-            (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
-              (Bundle.Trivial M ℝ)) x₀
-            ⟨x, ContinuousAlternatingMap.domDomCongr e (α x)⟩).2 =
-          (domDomCongrL e) ((trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
-            (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
-              (Bundle.Trivial M ℝ)) x₀ ⟨x, α x⟩).2)
-        rw [altTriv_apply (m := l) (IM := IM) (M := M) (x₀ := x₀) (x := x)
-          (L := ContinuousAlternatingMap.domDomCongr e (α x)),
-          altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := α x)]
-        change (ContinuousAlternatingMap.domDomCongr e (α x)).compContinuousLinearMap
-            ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) =
-          ContinuousAlternatingMap.domDomCongr e ((α x).compContinuousLinearMap
-            ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x))
-        exact (domDomCongr_compContinuousLinearMap
-          (E := TangentSpace IM x) (E' := TangentSpace IM x) (σ := e)
-          (L := α x) (A := (trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)).symm)⟩
-
-@[simp] theorem reindex_apply (e : Fin k ≃ Fin l) (α : DifferentialForm IM M k) (x : M) :
-    (reindex e α) x = ContinuousAlternatingMap.domDomCongr e (α x) := rfl
 
 private lemma triv_samePoint (m : ℕ) (x : M)
     (L : (TangentSpace IM x) [⋀^Fin m]→L[ℝ] ℝ) :
@@ -704,10 +637,12 @@ theorem exteriorDerivative_wedge [BoundarylessManifold IM M]
     have hmem : c₀ x ∈ interior ((extChartAt IM x).target) :=
       (ModelWithCorners.isInteriorPoint_iff (I := IM)).1
         (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))
-    have hcontα : ContDiffAt ℝ ⊤ repα (c₀ x) := by
-      exact (localRep_contDiffOn α x).contDiffAt (mem_interior_iff_mem_nhds.mp hmem)
-    have hcontβ : ContDiffAt ℝ ⊤ repβ (c₀ x) := by
-      exact (localRep_contDiffOn β x).contDiffAt (mem_interior_iff_mem_nhds.mp hmem)
+    have hcontα : DifferentiableAt ℝ repα (c₀ x) := by
+      exact ((localRep_contDiffOn α x).contDiffAt (mem_interior_iff_mem_nhds.mp hmem)).differentiableAt
+        (by simp)
+    have hcontβ : DifferentiableAt ℝ repβ (c₀ x) := by
+      exact ((localRep_contDiffOn β x).contDiffAt (mem_interior_iff_mem_nhds.mp hmem)).differentiableAt
+        (by simp)
     simpa [c₀, repα, repβ] using
       (DifferentialForm.extDeriv_wedge_at (a := repα) (b := repβ) hcontα hcontβ)
   have heq : exteriorDerivativeAt (α ∧ β) x =

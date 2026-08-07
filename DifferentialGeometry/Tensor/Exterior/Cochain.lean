@@ -25,7 +25,7 @@ noncomputable def deRhamCochainComplex [BoundarylessManifold IM M] :
       apply LinearMap.ext
       intro x
       simp [ModuleCat.ofHom, exteriorDerivativeLinearMap]
-      simpa using (exteriorDerivative_extDeriv x))
+      simpa using (exteriorDerivative_sq x))
 
 @[simp] theorem deRhamCochainComplex_X [BoundarylessManifold IM M] (n : ℕ) :
     (deRhamCochainComplex (IM := IM) (M := M)).X n = ModuleCat.of ℝ (DifferentialForm IM M n) := by
@@ -36,7 +36,7 @@ noncomputable def deRhamCochainComplex [BoundarylessManifold IM M] :
       apply LinearMap.ext
       intro x
       simp [ModuleCat.ofHom, exteriorDerivativeLinearMap]
-      simpa using (exteriorDerivative_extDeriv x))).X n = ModuleCat.of ℝ (DifferentialForm IM M n)
+      simpa using (exteriorDerivative_sq x))).X n = ModuleCat.of ℝ (DifferentialForm IM M n)
   exact CochainComplex.of_x (X := fun n : ℕ => ModuleCat.of ℝ (DifferentialForm IM M n))
     (d := fun n : ℕ => ModuleCat.ofHom (exteriorDerivativeLinearMap (IM := IM) (M := M) n))
     (sq := fun n : ℕ => by
@@ -44,7 +44,7 @@ noncomputable def deRhamCochainComplex [BoundarylessManifold IM M] :
       apply LinearMap.ext
       intro x
       simp [ModuleCat.ofHom, exteriorDerivativeLinearMap]
-      simpa using (exteriorDerivative_extDeriv x)) n
+      simpa using (exteriorDerivative_sq x)) n
 
 @[simp] theorem deRhamCochainComplex_d [BoundarylessManifold IM M] (n : ℕ) :
     (deRhamCochainComplex (IM := IM) (M := M)).d n (n + 1) =
@@ -56,7 +56,7 @@ noncomputable def deRhamCochainComplex [BoundarylessManifold IM M] :
       apply LinearMap.ext
       intro x
       simp [ModuleCat.ofHom, exteriorDerivativeLinearMap]
-      simpa using (exteriorDerivative_extDeriv x))).d n (n + 1) =
+      simpa using (exteriorDerivative_sq x))).d n (n + 1) =
       ModuleCat.ofHom (exteriorDerivativeLinearMap (IM := IM) (M := M) n)
   exact CochainComplex.of_d (X := fun n : ℕ => ModuleCat.of ℝ (DifferentialForm IM M n))
     (d := fun n : ℕ => ModuleCat.ofHom (exteriorDerivativeLinearMap (IM := IM) (M := M) n))
@@ -65,7 +65,7 @@ noncomputable def deRhamCochainComplex [BoundarylessManifold IM M] :
       apply LinearMap.ext
       intro x
       simp [ModuleCat.ofHom, exteriorDerivativeLinearMap]
-      simpa using (exteriorDerivative_extDeriv x)) n
+      simpa using (exteriorDerivative_sq x)) n
 
 end DifferentialForm
 end DifferentialGeometry

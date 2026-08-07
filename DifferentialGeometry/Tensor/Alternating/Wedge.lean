@@ -577,7 +577,7 @@ private lemma coset_mul_sumCongr (τ₀ ρ : Equiv.Perm (Fin (m + 1) ⊕ Fin n))
       rw [mul_assoc, hprod, mul_one]
     _ = τ₀ * Equiv.Perm.sumCongr τl⁻¹ τr⁻¹ := by
       rw [h₁]
-def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) : Fin m :=
+private def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) : Fin m :=
   if h : x < p then
     ⟨x.val, by
       have hxmp : x.val < p.val := h
@@ -591,7 +591,7 @@ def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) : Fi
       have hxm : x.val ≤ m := Nat.lt_succ_iff.mp (by simpa using x.isLt)
       omega⟩
 
-@[simp] theorem succAbove_removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) :
+@[simp] private theorem succAbove_removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) :
     p.succAbove (removeHole p x hx) = x := by
   by_cases h : x < p
   · let i : Fin m := ⟨x.val, by
@@ -631,7 +631,7 @@ def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) : Fi
     apply Fin.ext
     simp [i, hxsub]
 
-@[simp] theorem removeHole_succAbove {m : ℕ} (p : Fin (m + 1)) (i : Fin m) :
+@[simp] private theorem removeHole_succAbove {m : ℕ} (p : Fin (m + 1)) (i : Fin m) :
     removeHole p (p.succAbove i) (Fin.succAbove_ne p i) = i := by
   apply Fin.ext
   by_cases h : (Fin.castSucc i : Fin (m + 1)) < p
@@ -649,7 +649,7 @@ def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) : Fi
       omega
     simp [removeHole, hsucc, hnot]
 
-def inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) : Equiv.Perm (Fin m) where
+private def inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) : Equiv.Perm (Fin m) where
   toFun i := removeHole (τl j) (τl (j.succAbove i)) (by
     intro h
     exact Fin.succAbove_ne j i (Equiv.injective τl h))
@@ -663,30 +663,30 @@ def inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) : E
   right_inv i := by
     simp [removeHole_succAbove]
 
-theorem inducedPerm_succAbove {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) (i : Fin m) :
+private theorem inducedPerm_succAbove {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) (i : Fin m) :
     (τl j).succAbove (inducedPerm τl j i) = τl (j.succAbove i) := by
   unfold inducedPerm
   exact succAbove_removeHole (τl j) (τl (j.succAbove i)) (by
     intro h
     exact Fin.succAbove_ne j i (Equiv.injective τl h))
 
-theorem inducedPerm_mul {m : ℕ} (τ₁ τ₂ : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
+private theorem inducedPerm_mul {m : ℕ} (τ₁ τ₂ : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
     inducedPerm (τ₁ * τ₂) j = inducedPerm τ₁ (τ₂ j) * inducedPerm τ₂ j := by
   ext i
   simp [inducedPerm]
 
-theorem inducedPerm_one {m : ℕ} (j : Fin (m + 1)) :
+private theorem inducedPerm_one {m : ℕ} (j : Fin (m + 1)) :
     inducedPerm (1 : Equiv.Perm (Fin (m + 1))) j = 1 := by
   ext i
   simp [inducedPerm]
 
-theorem succAbove_val_of_lt {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : i.val < j.val) :
+private theorem succAbove_val_of_lt {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : i.val < j.val) :
     (j.succAbove i).val = i.val := by
   rw [Fin.succAbove]
   rw [if_pos (by simpa using h)]
   rfl
 
-theorem succAbove_val_of_ge {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : j.val ≤ i.val) :
+private theorem succAbove_val_of_ge {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : j.val ≤ i.val) :
     (j.succAbove i).val = i.val + 1 := by
   rw [Fin.succAbove]
   rw [if_neg]
@@ -695,7 +695,7 @@ theorem succAbove_val_of_ge {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : j.val �
     have hcv : (Fin.castSucc i : Fin (m + 1)).val = i.val := rfl
     omega
 
-theorem removeHole_val_of_lt {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p)
+private theorem removeHole_val_of_lt {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p)
     (h : x.val < p.val) : (removeHole p x hx).val = x.val := by
   rw [removeHole]
   by_cases hx' : x < p
@@ -705,14 +705,14 @@ theorem removeHole_val_of_lt {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx :
       exact hx' hc
     omega
 
-theorem removeHole_val_of_ge {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p)
+private theorem removeHole_val_of_ge {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p)
     (h : p.val < x.val) : (removeHole p x hx).val = x.val - 1 := by
   rw [removeHole]
   by_cases hx' : x < p
   · have hc : x.val < p.val := hx'
     omega
   · simp [hx']
-theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
+private theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
     inducedPerm (Equiv.swap j b) j =
       Fin.cycleIcc (⟨j.val, by omega⟩ : Fin m) ⟨b.val - 1, by omega⟩ := by
   ext i
@@ -830,7 +830,7 @@ theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
         simpa [hswapel, hrm] using hcyc.symm
 
 
-theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
+private theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
     inducedPerm ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹)
       (Fin.rev j) =
       (Fin.revPerm : Equiv.Perm (Fin m)) * inducedPerm τl j * (Fin.revPerm : Equiv.Perm (Fin m))⁻¹ := by
@@ -878,7 +878,7 @@ theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin 
   simp [Fin.rev_rev]
 
 
-theorem sign_swap_ne {m : ℕ} (j b : Fin (m + 1)) (h : j ≠ b) :
+private theorem sign_swap_ne {m : ℕ} (j b : Fin (m + 1)) (h : j ≠ b) :
     Equiv.Perm.sign (Equiv.swap j b) = (-1 : ℤˣ) := by
   simp [h]
 
@@ -914,7 +914,7 @@ theorem neg_one_pow_add (n m : ℕ) : (-1 : ℤˣ) ^ (n + m) = (-1 : ℤˣ) ^ n 
   rcases Nat.mod_two_eq_zero_or_one n with hn | hn <;> rcases Nat.mod_two_eq_zero_or_one m with hm | hm <;>
     simp [Nat.even_iff, hn, hm, hmod]
 
-theorem inducedPerm_swap_sign_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
+private theorem inducedPerm_swap_sign_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
     Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) =
       Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ (j.val + b.val) := by
   rw [inducedPerm_swap_left j b hjb]
@@ -964,7 +964,7 @@ theorem inducedPerm_swap_sign_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
   simp [hpow_ite, Nat.even_iff, hmod]
 
 
-theorem inducedPerm_swap_sign_right {m : ℕ} (j b : Fin (m + 1)) (hbj : b < j) :
+private theorem inducedPerm_swap_sign_right {m : ℕ} (j b : Fin (m + 1)) (hbj : b < j) :
     Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) =
       Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ (j.val + b.val) := by
   have hrev := inducedPerm_revPerm (τl := Equiv.swap j b) (j := j)
@@ -1030,7 +1030,7 @@ theorem inducedPerm_swap_sign_right {m : ℕ} (j b : Fin (m + 1)) (hbj : b < j) 
   change (-1 : ℤˣ) ^ ((Fin.rev j).val + (Fin.rev b).val) = (-1 : ℤˣ) ^ (j.val + b.val)
   simp [neg_one_pow_ite, Nat.even_iff, hmod]
 
-theorem inducedPerm_swap_sign {m : ℕ} (j b : Fin (m + 1)) :
+private theorem inducedPerm_swap_sign {m : ℕ} (j b : Fin (m + 1)) :
     Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) =
       Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ (j.val + b.val) := by
   by_cases h : j = b
@@ -1051,7 +1051,7 @@ theorem inducedPerm_swap_sign {m : ℕ} (j b : Fin (m + 1)) :
 
 
 
-theorem removeHole_congr {m : ℕ} (p : Fin (m + 1)) {x y : Fin (m + 1)} (hxy : x = y)
+private theorem removeHole_congr {m : ℕ} (p : Fin (m + 1)) {x y : Fin (m + 1)} (hxy : x = y)
     (hx : x ≠ p) (hy : y ≠ p) : removeHole p x hx = removeHole p y hy := by
   subst y
   apply Fin.ext
@@ -1066,7 +1066,7 @@ theorem removeHole_congr {m : ℕ} (p : Fin (m + 1)) {x y : Fin (m + 1)} (hxy : 
     have hge : p.val < x.val := lt_of_le_of_ne (le_of_not_gt hlt) hvne
     rw [removeHole_val_of_ge p x hx hge]
 
-theorem inducedPerm_swap_away {m : ℕ} (a b j' : Fin (m + 1)) (haj : j' ≠ a) (hbj : j' ≠ b) :
+private theorem inducedPerm_swap_away {m : ℕ} (a b j' : Fin (m + 1)) (haj : j' ≠ a) (hbj : j' ≠ b) :
     inducedPerm (Equiv.swap a b) j' =
       Equiv.swap (removeHole j' a (Ne.symm haj)) (removeHole j' b (Ne.symm hbj)) := by
   ext i
@@ -1132,7 +1132,7 @@ theorem inducedPerm_swap_away {m : ℕ} (a b j' : Fin (m + 1)) (haj : j' ≠ a) 
         exact hib this
       simp [Equiv.swap_apply_def, hne_a, hne_b, haj, hbj, hia, hib]
 
-theorem inducedPerm_swap_sign' {m : ℕ} (a b j' : Fin (m + 1)) :
+private theorem inducedPerm_swap_sign' {m : ℕ} (a b j' : Fin (m + 1)) :
     Equiv.Perm.sign (inducedPerm (Equiv.swap a b) j') =
       Equiv.Perm.sign (Equiv.swap a b) * (-1 : ℤˣ) ^ (j'.val + (Equiv.swap a b j').val) := by
   by_cases hab : a = b
@@ -1177,7 +1177,7 @@ theorem inducedPerm_swap_sign' {m : ℕ} (a b j' : Fin (m + 1)) :
           simp [hjj]]
 
 
-theorem sign_inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
+private theorem sign_inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
     Equiv.Perm.sign (inducedPerm τl j) =
       Equiv.Perm.sign τl * (-1 : ℤˣ) ^ (j.val + (τl j).val) := by
   refine Trunc.induction_on (Equiv.Perm.truncSwapFactors τl) ?_
@@ -1240,14 +1240,14 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {m n : ℕ}
 
 omit [NormedAddCommGroup M] in
-theorem removeNth_comp_perm' (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1))
+private theorem removeNth_comp_perm' (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1))
     (a : Fin (m + 1) → M) :
     j.removeNth (a ∘ τl) = (τl j).removeNth a ∘ inducedPerm τl j := by
   ext i
   change a (τl (j.succAbove i)) = a ((τl j).succAbove (inducedPerm τl j i))
   rw [inducedPerm_succAbove]
 
-theorem uncurryFinLeftExpandedSummand_mul_sumCongr
+private theorem uncurryFinLeftExpandedSummand_mul_sumCongr
     (f : N →L[𝕜] N' →L[𝕜] N'')
     (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
     (w : Fin (m + 1) ⊕ Fin n → M)

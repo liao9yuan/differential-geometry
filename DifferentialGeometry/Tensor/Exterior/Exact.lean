@@ -24,7 +24,7 @@ theorem exact_closed [BoundarylessManifold IM M] {α : DifferentialForm IM M (k 
     (h : Exact α) : Closed α := by
   rcases h with ⟨β, hβ⟩
   rw [Closed, ← hβ]
-  exact exteriorDerivative_extDeriv β
+  exact exteriorDerivative_sq β
 
 noncomputable def exteriorDerivativeLinearMap [BoundarylessManifold IM M] (k : ℕ) :
     DifferentialForm IM M k →ₗ[ℝ] DifferentialForm IM M (k + 1) :=
