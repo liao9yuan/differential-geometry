@@ -174,6 +174,28 @@ theorem trans_invFun (e₁ : HomotopyEquivUnder toBase fromBase) {W : Type*} [To
     (h : fromBase = toBase₂) :
     (e₁.trans e₂ h).invFun = e₁.invFun.comp e₂.invFun := rfl
 
+@[simp]
+theorem toHomotopyEquiv_symm (e : HomotopyEquivUnder toBase fromBase) :
+    e.symm.toHomotopyEquiv = e.toHomotopyEquiv.symm := by
+  cases e with
+  | mk toFun invFun map_toBase map_fromBase left_inv right_inv =>
+    rfl
+
+@[simp]
+theorem toHomotopyEquiv_refl {toBase fromBase : C(X, Y)} (h : toBase = fromBase) :
+    (refl h).toHomotopyEquiv = ContinuousMap.HomotopyEquiv.refl Y := by
+  rfl
+
+@[simp]
+theorem toHomotopyEquiv_trans {X₁ Y₁ Z₁ W : Type*} [TopologicalSpace X₁] [TopologicalSpace Y₁]
+    [TopologicalSpace Z₁] [TopologicalSpace W]
+    {toBase₁ : C(X₁, Y₁)} {fromBase₁ : C(X₁, Z₁)}
+    {toBase₂ : C(X₁, Z₁)} {fromBase₂ : C(X₁, W)}
+    (e₁ : HomotopyEquivUnder toBase₁ fromBase₁) (e₂ : HomotopyEquivUnder toBase₂ fromBase₂)
+    (h : fromBase₁ = toBase₂) :
+    (e₁.trans e₂ h).toHomotopyEquiv = e₁.toHomotopyEquiv.trans e₂.toHomotopyEquiv := by
+  rfl
+
 end HomotopyEquivUnder
 
 end DifferentialGeometry.Topology.Homotopy

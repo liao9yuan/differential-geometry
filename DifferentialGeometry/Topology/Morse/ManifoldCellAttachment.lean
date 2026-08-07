@@ -837,6 +837,24 @@ theorem cocoreAttachingEmbedding_injective {n k : ℕ} (hk : k ≤ n) (c ε r : 
     data.χ.injOn hsrc_p hsrc_q hχ
   exact (recombine_cellMap_cocore_injective hk ε r hε hr) hy
 
+theorem isClosedEmbedding_cocoreAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hRltR' : data.R < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero k] [NeZero (m + 1 - k)]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    Topology.IsClosedEmbedding (cocoreAttachingEmbedding hk c ε r data hε hεr) := by
+  letI : ChartedSpace (MorseModel m) (LevelSetSpace f (c - ε)) :=
+    manifoldLevelSetChartedSpace I f (c - ε) hf hreg
+  exact (contMDiff_cocoreAttachingEmbedding hk c ε r data hε hεr hRltR' hf hreg).continuous.isClosedEmbedding
+    (cocoreAttachingEmbedding_injective hk c ε r data hε hr hεr)
+
 noncomputable def handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
