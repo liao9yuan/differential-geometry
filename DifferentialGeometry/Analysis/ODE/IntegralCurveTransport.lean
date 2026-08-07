@@ -225,4 +225,19 @@ theorem integralCurve_eq_of_agree_zero [IsManifold I (⊤ : WithTop ℕ∞) M] [
     (h : γ 0 = γ' 0) : γ = γ' :=
   integralCurve_eq_of_agree v hv hγ hγ' h
 
+theorem curveAt_hcomplete_irrel {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (h₁ h₂ : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (x : M) (t : ℝ) :
+    curveAt v h₁ x t = curveAt v h₂ x t := by
+  have hEq := integralCurve_eq_of_agree_zero v hv
+    (curveAt_integralCurve v h₁ x) (curveAt_integralCurve v h₂ x) (by
+      simp [curveAt_zero v h₁ x])
+  exact congrFun hEq t
+
 end DifferentialGeometry.Analysis.ODE

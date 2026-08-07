@@ -1981,16 +1981,18 @@ theorem contMDiff_levelSetInclusion [I.Boundaryless] [IsManifold I (⊤ : WithTo
 theorem contMDiff_levelSet_factor [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
     (f : M → ℝ) (a : ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = a → ¬ IsCriticalPointAt I f x)
-    {X : Type} [TopologicalSpace X] [ChartedSpace (MorseModel m) X]
-    [IsManifold (𝓘(ℝ, MorseModel m)) (⊤ : WithTop ℕ∞) X]
-    (F : X → M) (hF : ContMDiff (𝓘(ℝ, MorseModel m)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) F)
+    {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {HX : Type} [TopologicalSpace HX] {IX : ModelWithCorners ℝ E HX}
+    {X : Type} [TopologicalSpace X] [ChartedSpace HX X]
+    [IsManifold IX (⊤ : ℕ∞) X]
+    (F : X → M) (hF : ContMDiff IX I (↑(⊤ : ℕ∞) : WithTop ℕ∞) F)
     (hFa : ∀ p : X, f (F p) = a)
     (hcs : ChartedSpace (MorseModel m) (LevelSetSpace f a) :=
       manifoldLevelSetChartedSpace I f a hf hreg)
     (hchart : ∀ x : LevelSetSpace f a, hcs.chartAt x = manifoldLevelSetChart I f a hf hreg x := by
       intro x
       rfl) :
-    ContMDiff (𝓘(ℝ, MorseModel m)) (𝓘(ℝ, MorseModel m)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+    ContMDiff IX (𝓘(ℝ, MorseModel m)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
       (fun p : X => (⟨F p, hFa p⟩ : LevelSetSpace f a)) := by
   classical
   letI := hcs
@@ -2007,176 +2009,183 @@ theorem contMDiff_levelSet_factor [I.Boundaryless] [IsManifold I (⊤ : WithTop 
     let hg : ContDiff ℝ (⊤ : ℕ∞) g := contDiff_sublevelPullbackCutoff I f hf x0.1 b hb
     let hr : fderiv ℝ g p.1 ≠ 0 := fderiv_levelSetPullbackCutoffPoint_ne_zero I f hf a hreg x0 b
     let V : MorseModel (m + 1) → MorseModel m := levelSetChartValue g a p hg hr
-    let Fhat : MorseModel m → MorseModel m :=
-      fun z => V ((extChartAt I x0.1) (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z)))
-    let z0 : MorseModel m := (extChartAt (𝓘(ℝ, MorseModel m)) p0) p0
-    have hz0 : z0 ∈ (extChartAt (𝓘(ℝ, MorseModel m)) p0).target :=
-      (extChartAt (𝓘(ℝ, MorseModel m)) p0).map_source (mem_extChartAt_source (I := 𝓘(ℝ, MorseModel m)) p0)
-    have hchartAtZ0 : ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
-        (fun z : MorseModel m => (extChartAt I x0.1) (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z))) z0 := by
+    let Fhat : E → MorseModel m :=
+      fun z => V ((extChartAt I x0.1) (F ((extChartAt IX p0).symm z)))
+    let z0 : E := (extChartAt IX p0) p0
+    have hz0 : z0 ∈ (extChartAt IX p0).target :=
+      (extChartAt IX p0).map_source (mem_extChartAt_source (I := IX) p0)
+    have hchartAtZ0 : ContDiffWithinAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun z : E => (extChartAt I x0.1) (F ((extChartAt IX p0).symm z))) (Set.range IX) z0 := by
       have hz0src : x0.1 ∈ (chartAt H x0.1).source := by
         exact mem_chart_source (H := H) (M := M) x0.1
-      have hFmd : ContMDiffAt (𝓘(ℝ, MorseModel m)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) F p0 := hF p0
-      have hsymmAt : ContMDiffAt 𝓘(ℝ, MorseModel m) 𝓘(ℝ, MorseModel m) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
-          (extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0 := by
-        rw [contMDiffAt_iff_source]
-        simpa [z0] using contMDiffWithinAt_extChartAt_symm_range
+      have hFmd : ContMDiffAt IX I (↑(⊤ : ℕ∞) : WithTop ℕ∞) F p0 := hF p0
+      have hsymmAt : ContMDiffWithinAt (𝓘(ℝ, E)) IX (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (extChartAt IX p0).symm (Set.range IX) z0 :=
+        contMDiffWithinAt_extChartAt_symm_range (I := IX) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))
           (x := p0) (y := z0) hz0
-      have hsymmVal : (extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0 = p0 := by
+      have hsymmVal : (extChartAt IX p0).symm z0 = p0 := by
         dsimp [z0]
-        exact (extChartAt (𝓘(ℝ, MorseModel m)) p0).left_inv (mem_extChartAt_source (I := 𝓘(ℝ, MorseModel m)) p0)
-      have hFcompAt : ContMDiffAt 𝓘(ℝ, MorseModel m) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
-          (fun w : MorseModel m => F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm w)) z0 := by
-        have hF' : ContMDiffAt (𝓘(ℝ, MorseModel m)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) F
-            ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0) := by
+        exact (extChartAt IX p0).left_inv (mem_extChartAt_source (I := IX) p0)
+      have hFcompAt : ContMDiffWithinAt (𝓘(ℝ, E)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun w : E => F ((extChartAt IX p0).symm w)) (Set.range IX) z0 := by
+        have hF' : ContMDiffAt IX I (↑(⊤ : ℕ∞) : WithTop ℕ∞) F
+            ((extChartAt IX p0).symm z0) := by
           rw [hsymmVal]
           exact hFmd
-        exact ContMDiffAt.comp (x := z0) (g := F) (f := (extChartAt (𝓘(ℝ, MorseModel m)) p0).symm)
-          (hg := hF') (hf := hsymmAt)
+        exact ContMDiffWithinAt.comp (x := z0) (g := F) (f := (extChartAt IX p0).symm)
+          (hg := hF') (hf := hsymmAt) (by intro y hy; trivial)
       have hceAt : ContMDiffAt I 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
           (extChartAt I x0.1) x0.1 := by
         exact contMDiffAt_extChartAt' (I := I) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞)) (x := x0.1) hz0src
-      have hval : (fun w : MorseModel m => F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm w)) z0 = x0.1 := by
-        change F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0) = x0.1
+      have hval : (fun w : E => F ((extChartAt IX p0).symm w)) z0 = x0.1 := by
+        change F ((extChartAt IX p0).symm z0) = x0.1
         rw [hsymmVal]
       have hceAt' : ContMDiffAt I 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
-          (extChartAt I x0.1) ((fun w : MorseModel m => F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm w)) z0) := by
+          (extChartAt I x0.1) ((fun w : E => F ((extChartAt IX p0).symm w)) z0) := by
         rw [hval]
         exact hceAt
-      have hfullAt : ContMDiffAt 𝓘(ℝ, MorseModel m) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
-          (fun w : MorseModel m => (extChartAt I x0.1) (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm w))) z0 := by
-        exact ContMDiffAt.comp (x := z0) (g := extChartAt I x0.1)
-          (f := fun w : MorseModel m => F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm w))
-          (hg := hceAt') (hf := hFcompAt)
-      exact (contMDiffAt_iff_contDiffAt (𝕜 := ℝ) (E := MorseModel m) (E' := MorseModel (m + 1))).mp hfullAt
+      have hfullAt : ContMDiffWithinAt (𝓘(ℝ, E)) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun w : E => (extChartAt I x0.1) (F ((extChartAt IX p0).symm w))) (Set.range IX) z0 := by
+        exact ContMDiffWithinAt.comp (x := z0) (g := extChartAt I x0.1)
+          (f := fun w : E => F ((extChartAt IX p0).symm w))
+          (hg := hceAt') (hf := hFcompAt) (by intro y hy; trivial)
+      exact (contMDiffWithinAt_iff_contDiffWithinAt (𝕜 := ℝ) (E := E)
+        (E' := MorseModel (m + 1))).mp hfullAt
     have hV : ContDiff ℝ (⊤ : ℕ∞) V := by
       dsimp [V]
       exact contDiff_levelSetChartValue g a p hg hr
-    have hFhatAt : ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) Fhat z0 := by
+    have hFhatAt : ContDiffWithinAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞) Fhat (Set.range IX) z0 := by
       dsimp [Fhat]
-      exact ContDiffAt.comp z0 hV.contDiffAt hchartAtZ0
-    have hchartRep : ContDiffAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
-        (fun z : MorseModel m => (extChartAt (𝓘(ℝ, MorseModel m)) x0) ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩) z0 := by
-      have hFhateq : (fun z : MorseModel m =>
-          (extChartAt (𝓘(ℝ, MorseModel m)) x0) ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩) =ᶠ[nhds z0] Fhat := by
+      exact ContDiffWithinAt.comp (g := V) (f := fun z : E =>
+          (extChartAt I x0.1) (F ((extChartAt IX p0).symm z)))
+        (s := Set.range IX) (t := Set.univ) (x := z0)
+        hV.contDiffAt.contDiffWithinAt hchartAtZ0 (by
+          intro y hy
+          trivial)
+    have hchartRep : ContDiffWithinAt ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun z : E => (extChartAt (𝓘(ℝ, MorseModel m)) x0) ⟨F ((extChartAt IX p0).symm z), hFa _⟩)
+        (Set.range IX) z0 := by
+      have hFhateq : (fun z : E =>
+          (extChartAt (𝓘(ℝ, MorseModel m)) x0) ⟨F ((extChartAt IX p0).symm z), hFa _⟩) =ᶠ[nhdsWithin z0 (Set.range IX)] Fhat := by
         have hsrcNhd : (extChartAt I x0.1) x0.1 ∈ Metric.ball ((extChartAt I x0.1) x0.1) b.rIn :=
           Metric.mem_ball_self b.rIn_pos
-        have hsymmVal' : (extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0 = p0 := by
+        have hsymmVal' : (extChartAt IX p0).symm z0 = p0 := by
           dsimp [z0]
-          exact (extChartAt (𝓘(ℝ, MorseModel m)) p0).left_inv (mem_extChartAt_source (I := 𝓘(ℝ, MorseModel m)) p0)
-        have hchartSymmVal : (chartAt (MorseModel m) p0).symm z0 = p0 := by
-          dsimp [z0]
-          exact (chartAt (MorseModel m) p0).left_inv (mem_chart_source (H := MorseModel m) (M := X) p0)
-        have hqNhd : {z : MorseModel m |
-            (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩ : LevelSetSpace f a) ∈
+          exact (extChartAt IX p0).left_inv (mem_extChartAt_source (I := IX) p0)
+        have hqNhd : {z : E |
+            (⟨F ((extChartAt IX p0).symm z), hFa _⟩ : LevelSetSpace f a) ∈
               (manifoldLevelSetChart I f a hf hreg x0).source ∧
-            F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z) ∈ (extChartAt I x0.1).source ∧
-            (extChartAt I x0.1) (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z)) ∈
-              Metric.ball ((extChartAt I x0.1) x0.1) b.rIn} ∈ nhds z0 := by
+            F ((extChartAt IX p0).symm z) ∈ (extChartAt I x0.1).source ∧
+            (extChartAt I x0.1) (F ((extChartAt IX p0).symm z)) ∈
+              Metric.ball ((extChartAt I x0.1) x0.1) b.rIn} ∈ nhdsWithin z0 (Set.range IX) := by
           have hsrcMem0 : F p0 ∈ (extChartAt I x0.1).source := by
             change F p0 ∈ (chartAt H x0.1).source ∩ (chartAt H x0.1) ⁻¹' I.source
             exact mem_extChartAt_source (I := I) (F p0)
-          have hsymmCont : ContinuousAt (extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0 :=
-            (contMDiffWithinAt_extChartAt_symm_target (I := 𝓘(ℝ, MorseModel m))
-              (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞)) p0 hz0).continuousWithinAt.continuousAt
-              ((isOpen_extChartAt_target (I := 𝓘(ℝ, MorseModel m)) p0).mem_nhds hz0)
-          have hcont : ContinuousAt (fun z : MorseModel m =>
-              F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z)) z0 :=
-            hF.continuous.continuousAt.comp hsymmCont
-          have hcontQ : ContinuousAt (fun z : MorseModel m =>
-              (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩ : LevelSetSpace f a)) z0 :=
-            (Continuous.subtype_mk hF.continuous (fun _ => hFa _)).continuousAt.comp hsymmCont
-          have hsrcPreim : (fun z : MorseModel m =>
-              F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z)) ⁻¹' (extChartAt I x0.1).source ∈ nhds z0 := by
-            have hsrcMem : F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0) ∈ (extChartAt I x0.1).source := by
+          have hsymmCont : ContinuousWithinAt (extChartAt IX p0).symm (Set.range IX) z0 :=
+            (contMDiffWithinAt_extChartAt_symm_range (I := IX)
+              (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞)) p0 hz0).continuousWithinAt
+          have hcont : ContinuousWithinAt (fun z : E =>
+              F ((extChartAt IX p0).symm z)) (Set.range IX) z0 :=
+            hF.continuous.continuousWithinAt.comp hsymmCont (t := Set.univ) (by
+              intro y hy
+              trivial)
+          have hcontQ : ContinuousWithinAt (fun z : E =>
+              (⟨F ((extChartAt IX p0).symm z), hFa _⟩ : LevelSetSpace f a)) (Set.range IX) z0 :=
+            (Continuous.subtype_mk hF.continuous (fun _ => hFa _)).continuousWithinAt.comp
+              hsymmCont (t := Set.univ) (by
+              intro y hy
+              trivial)
+          have hsrcPreim : (fun z : E =>
+              F ((extChartAt IX p0).symm z)) ⁻¹' (extChartAt I x0.1).source ∈ nhdsWithin z0 (Set.range IX) := by
+            have hsrcMem : F ((extChartAt IX p0).symm z0) ∈ (extChartAt I x0.1).source := by
               rw [hsymmVal']
               exact hsrcMem0
             have hsnhd : (extChartAt I x0.1).source ∈ nhds
-                (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0)) := by
+                (F ((extChartAt IX p0).symm z0)) := by
               exact (isOpen_extChartAt_source (I := I) x0.1).mem_nhds hsrcMem
             exact Filter.tendsto_def.mp hcont (extChartAt I x0.1).source hsnhd
           have hsrcNhd' : (extChartAt I x0.1)
-              (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0)) ∈ Metric.ball ((extChartAt I x0.1) x0.1) b.rIn := by
+              (F ((extChartAt IX p0).symm z0)) ∈ Metric.ball ((extChartAt I x0.1) x0.1) b.rIn := by
             rw [hsymmVal']
             exact hsrcNhd
-          have hpreim : (fun z : MorseModel m => (extChartAt I x0.1)
-              (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z))) ⁻¹' Metric.ball ((extChartAt I x0.1) x0.1) b.rIn ∈ nhds z0 := by
-            exact ContinuousAt.preimage_mem_nhds (hchartAtZ0.continuousAt)
+          have hpreim : (fun z : E => (extChartAt I x0.1)
+              (F ((extChartAt IX p0).symm z))) ⁻¹' Metric.ball ((extChartAt I x0.1) x0.1) b.rIn ∈ nhdsWithin z0 (Set.range IX) := by
+            exact ContinuousWithinAt.preimage_mem_nhdsWithin (hchartAtZ0.continuousWithinAt)
               ((Metric.isOpen_ball).mem_nhds hsrcNhd')
           have hsrcChartNhd : (manifoldLevelSetChart I f a hf hreg x0).source ∈ nhds
               (⟨F p0, hFa p0⟩ : LevelSetSpace f a) := by
             exact (manifoldLevelSetChart I f a hf hreg x0).open_source.mem_nhds
               (mem_manifoldLevelSetChart_source I f a hf hreg x0)
-          have hq0eq : (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0), hFa _⟩ : LevelSetSpace f a) =
+          have hq0eq : (⟨F ((extChartAt IX p0).symm z0), hFa _⟩ : LevelSetSpace f a) =
               ⟨F p0, hFa p0⟩ := by
             congr 1
-            rw [show (extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0 = p0 by
+            rw [show (extChartAt IX p0).symm z0 = p0 by
               dsimp [z0]
-              exact (extChartAt (𝓘(ℝ, MorseModel m)) p0).left_inv (mem_extChartAt_source (I := 𝓘(ℝ, MorseModel m)) p0)]
-          have hsrcChartPreim : (fun z : MorseModel m =>
-              (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩ : LevelSetSpace f a)) ⁻¹'
-                (manifoldLevelSetChart I f a hf hreg x0).source ∈ nhds z0 := by
+              exact (extChartAt IX p0).left_inv (mem_extChartAt_source (I := IX) p0)]
+          have hsrcChartPreim : (fun z : E =>
+              (⟨F ((extChartAt IX p0).symm z), hFa _⟩ : LevelSetSpace f a)) ⁻¹'
+                (manifoldLevelSetChart I f a hf hreg x0).source ∈ nhdsWithin z0 (Set.range IX) := by
             exact Filter.tendsto_def.mp hcontQ (manifoldLevelSetChart I f a hf hreg x0).source
               (by
                 change (manifoldLevelSetChart I f a hf hreg x0).source ∈
-                  nhds (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z0), hFa _⟩ : LevelSetSpace f a)
+                  nhds (⟨F ((extChartAt IX p0).symm z0), hFa _⟩ : LevelSetSpace f a)
                 rw [hq0eq]
                 exact hsrcChartNhd)
-          have hA : (fun z : MorseModel m =>
-              (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩ : LevelSetSpace f a)) ⁻¹'
-                (manifoldLevelSetChart I f a hf hreg x0).source ∈ nhds z0 := hsrcChartPreim
-          have hB : (fun z : MorseModel m =>
-              F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z)) ⁻¹' (extChartAt I x0.1).source ∈ nhds z0 := hsrcPreim
-          have hC : (fun z : MorseModel m =>
-              (extChartAt I x0.1) (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z))) ⁻¹'
-                Metric.ball ((extChartAt I x0.1) x0.1) b.rIn ∈ nhds z0 := hpreim
-          have hall : {z : MorseModel m |
-              (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩ : LevelSetSpace f a) ∈
+          have hA : (fun z : E =>
+              (⟨F ((extChartAt IX p0).symm z), hFa _⟩ : LevelSetSpace f a)) ⁻¹'
+                (manifoldLevelSetChart I f a hf hreg x0).source ∈ nhdsWithin z0 (Set.range IX) := hsrcChartPreim
+          have hB : (fun z : E =>
+              F ((extChartAt IX p0).symm z)) ⁻¹' (extChartAt I x0.1).source ∈ nhdsWithin z0 (Set.range IX) := hsrcPreim
+          have hC : (fun z : E =>
+              (extChartAt I x0.1) (F ((extChartAt IX p0).symm z))) ⁻¹'
+                Metric.ball ((extChartAt I x0.1) x0.1) b.rIn ∈ nhdsWithin z0 (Set.range IX) := hpreim
+          have hall : {z : E |
+              (⟨F ((extChartAt IX p0).symm z), hFa _⟩ : LevelSetSpace f a) ∈
                 (manifoldLevelSetChart I f a hf hreg x0).source ∧
-              F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z) ∈ (extChartAt I x0.1).source ∧
-              (extChartAt I x0.1) (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z)) ∈
-                Metric.ball ((extChartAt I x0.1) x0.1) b.rIn} ∈ nhds z0 := by
+              F ((extChartAt IX p0).symm z) ∈ (extChartAt I x0.1).source ∧
+              (extChartAt I x0.1) (F ((extChartAt IX p0).symm z)) ∈
+                Metric.ball ((extChartAt I x0.1) x0.1) b.rIn} ∈ nhdsWithin z0 (Set.range IX) := by
             exact Filter.mem_of_superset (Filter.inter_mem (Filter.inter_mem hA hB) hC) (by
               intro z hz
               exact ⟨hz.1.1, hz.1.2, hz.2⟩)
           simpa using hall
         refine Filter.eventuallyEq_of_mem hqNhd ?_
         intro z hz
-        change (extChartAt (𝓘(ℝ, MorseModel m)) x0) ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩ = Fhat z
+        change (extChartAt (𝓘(ℝ, MorseModel m)) x0) ⟨F ((extChartAt IX p0).symm z), hFa _⟩ = Fhat z
         have hchartX0' : (extChartAt (𝓘(ℝ, MorseModel m)) x0) =
             (manifoldLevelSetChart I f a hf hreg x0 : OpenPartialHomeomorph (LevelSetSpace f a) (MorseModel m)).toPartialEquiv := by
           simpa [extChartAt, OpenPartialHomeomorph.extend] using
             congrArg OpenPartialHomeomorph.toPartialEquiv (hchart x0)
         rw [hchartX0']
         dsimp [Fhat, V]
-        change (manifoldLevelSetChart I f a hf hreg x0 ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩) =
-          levelSetChartValue g a p hg hr ((extChartAt I x0.1) (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z)))
+        change (manifoldLevelSetChart I f a hf hreg x0 ⟨F ((extChartAt IX p0).symm z), hFa _⟩) =
+          levelSetChartValue g a p hg hr ((extChartAt I x0.1) (F ((extChartAt IX p0).symm z)))
         let e : OpenPartialHomeomorph (LevelSetSpace f a) (LevelSetSpace g a) :=
           levelSetPullbackChart I f a x0 b hb
         let mc : OpenPartialHomeomorph (LevelSetSpace g a) (MorseModel m) :=
           levelSetChart g a p hg hr
         have hmanifold : (manifoldLevelSetChart I f a hf hreg x0) = e ≫ₕ mc := rfl
         rw [hmanifold]
-        have hq : (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩ : LevelSetSpace f a) ∈ e.source := by
+        have hq : (⟨F ((extChartAt IX p0).symm z), hFa _⟩ : LevelSetSpace f a) ∈ e.source := by
           dsimp [e, levelSetPullbackChart]
           exact hz.2
-        have heval : (e ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩).1 =
-            (extChartAt I x0.1) (F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z)) := by
+        have heval : (e ⟨F ((extChartAt IX p0).symm z), hFa _⟩).1 =
+            (extChartAt I x0.1) (F ((extChartAt IX p0).symm z)) := by
           exact levelSetPullbackChart_apply_of_mem I f a x0 b hb hq
-        have hmc : (e ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩) ∈ mc.source := by
-          -- hz.1 gives membership in the manifold level-set chart source at x0, which is
-          -- exactly the conjunction of membership in e.source and e q ∈ mc.source.
-          have hsrcFull : (⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩ : LevelSetSpace f a) ∈
+        have hmc : (e ⟨F ((extChartAt IX p0).symm z), hFa _⟩) ∈ mc.source := by
+          have hsrcFull : (⟨F ((extChartAt IX p0).symm z), hFa _⟩ : LevelSetSpace f a) ∈
               (manifoldLevelSetChart I f a hf hreg x0).source := hz.1
           exact hsrcFull.2
-        have hmcval : ((mc (e ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩)) : MorseModel m) =
+        have hmcval : ((mc (e ⟨F ((extChartAt IX p0).symm z), hFa _⟩)) : MorseModel m) =
             levelSetChartValue g a p hg hr
-              ((e ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩).1) := by
-          exact levelSetChart_apply_value' g a p hg hr (e ⟨F ((extChartAt (𝓘(ℝ, MorseModel m)) p0).symm z), hFa _⟩)
+              ((e ⟨F ((extChartAt IX p0).symm z), hFa _⟩).1) := by
+          exact levelSetChart_apply_value' g a p hg hr (e ⟨F ((extChartAt IX p0).symm z), hFa _⟩)
         rw [heval] at hmcval
         exact hmcval
-      exact ContDiffAt.congr_of_eventuallyEq hFhatAt hFhateq
-    simpa [Fhat, z0, x0, modelWithCornersSelf, ModelWithCorners.ofTargetUniv] using hchartRep.contDiffWithinAt
+      have hz0mem : z0 ∈ Set.range IX := by
+        simpa [ModelWithCorners.range_eq_target] using hz0.1
+      exact ContDiffWithinAt.congr_of_eventuallyEq_of_mem hFhatAt hFhateq hz0mem
+    simpa [Fhat, z0, x0, modelWithCornersSelf, ModelWithCorners.ofTargetUniv] using hchartRep
 
 noncomputable def levelSetCollarMap [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (f : M → ℝ) {a b : ℝ}

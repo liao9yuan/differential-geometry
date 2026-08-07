@@ -397,6 +397,192 @@ theorem attachingRegionRecombine_contMDiff {n k : ℕ} (hk : k ≤ n) (r ε : �
   rw [hfun]
   exact hF.comp hprod
 
+theorem contMDiff_cocoreAttachingMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 ≤ ε) (hδ : r ^ 2 / 2 < δ) (hεr : Real.sqrt (2 * ε + r ^ 2) ≤ data.R)
+    (hRltR' : data.R < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    [NeZero k] [NeZero (m + 1 - k)]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+      (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+      ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+      (MorseModel m) _ _ (MorseModel m) _
+      (𝓘(ℝ, MorseModel m)) (LevelSetSpace f (c - ε)) _
+      (manifoldLevelSetChartedSpace I f (c - ε) hf hreg)
+      (⊤ : ℕ∞)
+      (cocoreAttachingMap hk c ε r δ data hε hδ hεr hf v hdfOn hrate hcomplete) := by
+  classical
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) :=
+    cellBoundaryChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((m + 1 - k - 1) + 1)) (ClosedCell (m + 1 - k)) :=
+    closedCellChartedSpace (m + 1 - k)
+  letI : ChartedSpace (EuclideanHalfSpace ((m + 1 - k - 1) + 1)) (ClosedCell ((m + 1 - k - 1) + 1)) :=
+    closedCellChartedSpaceSucc (m + 1 - k - 1)
+  letI : IsManifold (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) := cellBoundaryIsManifold k
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell ((m + 1 - k - 1) + 1)) := closedCellIsManifold (m + 1 - k - 1)
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell (m + 1 - k)) :=
+    isManifoldOfHomeomorph (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+      (closedCellReindexHomeo (m + 1 - k))
+  letI : ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin (k - 1)))
+      (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) (AttachingRegion k (m + 1 - k)) :=
+    attachingRegionChartedSpace k (m + 1 - k)
+  letI : ChartedSpace (MorseModel m) (LevelSetSpace f (c - ε)) :=
+    manifoldLevelSetChartedSpace I f (c - ε) hf hreg
+  let Iatt : ModelWithCorners ℝ
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1)))
+      (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) :=
+    (𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+  letI : IsManifold Iatt (⊤ : ℕ∞) (AttachingRegion k (m + 1 - k)) :=
+    attachingRegionIsManifold k (m + 1 - k)
+  have hrecomb : ContMDiff Iatt (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+          (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))) := by
+    simpa [Iatt] using (attachingRegionRecombine_contMDiff hk r ε)
+  have hrecombOn : ContMDiffOn Iatt (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+          (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))) Set.univ := by
+    rw [contMDiffOn_univ]
+    exact hrecomb
+  have hball : ∀ p : AttachingRegion k (m + 1 - k),
+      recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+          (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))) ∈
+        Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+    intro p
+    have hnormb : morseNorm (m + 1)
+        (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+          (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))) ≤ data.R := by
+      exact le_trans (morseNorm_recombine_cellMap_bound hk ε r hε (p.1 : EuclideanSpace ℝ (Fin k))
+        p.1.2 (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))) p.2.2) hεr
+    have hlt : ‖(recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+          (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))))‖ < data.R' :=
+      lt_of_le_of_lt (morseNorm_piNorm_le (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε))
+        (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+        (lt_of_le_of_lt hnormb hRltR')
+    simpa [Metric.mem_ball, dist_eq_norm] using hlt
+  have hχ : ContMDiffOn Iatt I (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+          (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))))) Set.univ := by
+    refine data.hχon.comp hrecombOn ?_
+    intro p hp
+    exact hball p
+  have hT : ContMDiff Iatt (𝓘(ℝ, ℝ)) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2) := by
+    have hT' : ContMDiff (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+        (𝓘(ℝ, ℝ)) (⊤ : ℕ∞)
+        (fun v : ClosedCell (m + 1 - k) =>
+          r ^ 2 * ‖(v : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2) := by
+      have hinc : ContMDiff (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+          (𝓘(ℝ, EuclideanSpace ℝ (Fin (m + 1 - k)))) (⊤ : ℕ∞)
+          (fun v : ClosedCell (m + 1 - k) => (v : EuclideanSpace ℝ (Fin (m + 1 - k)))) :=
+        closedCellInclusion_contMDiff_of (m + 1 - k)
+      have hnorm : ContDiff ℝ (⊤ : ℕ∞) (fun w : EuclideanSpace ℝ (Fin (m + 1 - k)) =>
+          r ^ 2 * ‖w‖ ^ 2 / 2) := by
+        have hnorm2 : ContDiff ℝ (⊤ : ℕ∞) (fun w : EuclideanSpace ℝ (Fin (m + 1 - k)) =>
+            ‖w‖ ^ 2) := contDiff_norm_sq ℝ
+        simpa [div_eq_mul_inv] using (contDiff_const.mul hnorm2).mul contDiff_const
+      exact (contMDiff_iff_contDiff.mpr hnorm).comp hinc
+    have hsnd : ContMDiff Iatt (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+        (⊤ : ℕ∞)
+        (fun p : AttachingRegion k (m + 1 - k) => p.2) := by
+      simpa [Iatt] using (contMDiff_snd (I := 𝓡 (k - 1))
+        (J := modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+        (n := (⊤ : ℕ∞)))
+    exact hT'.comp hsnd
+  have hpair : ContMDiff Iatt ((𝓘(ℝ, ℝ)).prod I) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2,
+          data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+            (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))) := by
+    have hχ' : ContMDiff Iatt I (⊤ : ℕ∞)
+        (fun p : AttachingRegion k (m + 1 - k) =>
+          data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+            (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))))) := by
+      rw [← contMDiffOn_univ]
+      exact hχ
+    exact ContMDiff.prodMk hT hχ'
+  have hflow : ContMDiff ((𝓘(ℝ, ℝ)).prod I) I (⊤ : ℕ∞)
+      (fun q : ℝ × M =>
+        curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) q.2 q.1) :=
+    contMDiff_globalFlow_joint_of_compactSupport (E := MorseModel (m + 1)) (I := I)
+      (v := v) (hv := hv) (hsupp := hsupp)
+  have hflowComp : ContMDiff Iatt I (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp)
+          (data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) (p.1 : EuclideanSpace ℝ (Fin k))))
+            (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+          (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2)) :=
+    hflow.comp hpair
+  have hwitness : ∀ p : AttachingRegion k (m + 1 - k),
+      curveAt v hcomplete (data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε))
+            (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+          (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2) =
+      curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp)
+          (data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε))
+            (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+          (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2) := by
+    intro p
+    exact curveAt_hcomplete_irrel (E := MorseModel (m + 1)) (I := I) v
+      (hv := (hv.of_le (show (1 : WithTop ℕ∞) ≤ (⊤ : ℕ∞) by
+        exact_mod_cast (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞))))) hcomplete
+      (exists_globalIntegralCurve_of_compactSupport v hv hsupp)
+      (data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε))
+        (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+      (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2)
+  have hflowComp' : ContMDiff Iatt I (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        curveAt v hcomplete (data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε))
+              (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+          (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2)) := by
+    refine hflowComp.congr ?_
+    intro p
+    exact (hwitness p).symm
+  have hFa : ∀ p : AttachingRegion k (m + 1 - k),
+      f (curveAt v hcomplete (data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε))
+              (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+          (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2)) = c - ε := by
+    intro p
+    simpa [cocoreAttachingMap] using (cocoreAttachingMap_value hk c ε r δ data hε hδ hεr hf v
+      hdfOn hrate hcomplete p)
+  have hfac : ContMDiff Iatt (𝓘(ℝ, MorseModel m)) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        (⟨curveAt v hcomplete (data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε))
+                (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+            (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2), hFa p⟩ :
+          LevelSetSpace f (c - ε))) :=
+    contMDiff_levelSet_factor I f (c - ε) hf hreg
+      (IX := Iatt) (F := fun p : AttachingRegion k (m + 1 - k) =>
+        curveAt v hcomplete (data.χ (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε))
+            (p.1 : EuclideanSpace ℝ (Fin k)))) (r • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))))
+          (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 / 2))
+      (hF := hflowComp') (hFa := hFa)
+  refine hfac.congr ?_
+  intro p
+  apply Subtype.ext
+  rfl
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
