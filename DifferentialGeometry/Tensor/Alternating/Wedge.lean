@@ -462,8 +462,121 @@ private theorem uncurryFinLeftExpandedSummand_sum_coset
   rw [← uncurrySum_summand_uncurryFin_left_expand_mk f g' h w τ₁,
     ← uncurrySum_summand_uncurryFin_left_expand_mk f g' h w τ₂, hcoset]
 
+private lemma card_filter_comp_perm_local {n : ℕ} (e : Equiv.Perm (Fin n))
+    (P : Fin n → Prop) [DecidablePred P] :
+    (Finset.univ.filter (P ∘ ⇑e)).card = (Finset.univ.filter P).card := by
+  have : Finset.univ.filter (P ∘ ⇑e) = (Finset.univ.filter P).map e.symm.toEmbedding := by
+    ext i
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map,
+      Equiv.toEmbedding_apply, Function.comp_apply]
+    exact ⟨fun h => ⟨e i, h, by simp⟩, fun ⟨j, hj, hji⟩ => by simpa [← hji]⟩
+  rw [this, Finset.card_map]
 
-/-- Remove the element `p` from `Fin (m+1)`, giving `Fin m`. -/
+private lemma derivShuffleRank_of_coset
+    (k : Fin (m + n + 1)) (σ₁ σ₂ : Equiv.Perm (Fin m ⊕ Fin n))
+    (h : (Quotient.mk'' (derivShuffleLeftFwd k σ₁) :
+        Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
+      Quotient.mk'' (derivShuffleLeftFwd k σ₂)) :
+    derivShuffleRank k σ₁ = derivShuffleRank k σ₂ := by
+  have hrel : QuotientGroup.leftRel (Equiv.Perm.sumCongrHom (Fin (m + 1)) (Fin n)).range
+      (derivShuffleLeftFwd k σ₁) (derivShuffleLeftFwd k σ₂) := by
+    rwa [← Quotient.eq]
+  have hσrel : QuotientGroup.leftRel (Equiv.Perm.sumCongrHom (Fin m) (Fin n)).range σ₁ σ₂ :=
+    derivShuffleLeftFwd_coset_injective k σ₁ σ₂ hrel
+  rw [QuotientGroup.leftRel_apply] at hσrel
+  obtain ⟨⟨τl, τr⟩, hblock⟩ := hσrel
+  have hσ₂ : σ₂ = σ₁ * Equiv.Perm.sumCongr τl τr := by
+    simpa [Equiv.Perm.sumCongrHom_apply, mul_assoc, mul_left_cancel] using
+      (inv_mul_eq_iff_eq_mul.mp hblock.symm)
+  apply Fin.ext
+  simp only [derivShuffleRank, permFinOfSum, Equiv.permCongr_apply,
+    finSumFinEquiv_symm_apply_castAdd]
+  have hmap : (fun i : Fin m => (finSumFinEquiv (σ₂ (Sum.inl i))).val < k.val) =
+      (fun i : Fin m => (finSumFinEquiv (σ₁ (Sum.inl i))).val < k.val) ∘ τl := by
+    funext i
+    have hel : finSumFinEquiv (σ₂ (Sum.inl i)) = finSumFinEquiv (σ₁ (Sum.inl (τl i))) := by
+      congr 1
+      erw [hσ₂]
+      simp only [Equiv.Perm.coe_mul, Function.comp_apply]
+      congr 1
+    rw [hel]
+    rfl
+  have hfilter : (Finset.univ.filter (fun i : Fin m =>
+        (finSumFinEquiv (σ₂ (Sum.inl i))).val < k.val)) =
+      Finset.univ.filter ((fun i : Fin m =>
+        (finSumFinEquiv (σ₁ (Sum.inl i))).val < k.val) ∘ τl) := by
+    ext i
+    simp [hmap]
+  rw [hfilter]
+  exact (card_filter_comp_perm_local τl (fun i : Fin m =>
+    (finSumFinEquiv (σ₁ (Sum.inl i))).val < k.val)).symm
+
+private lemma preimage_k_injective (τ' : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n))
+    (j₁ j₂ : Fin (m + 1))
+    (h : (derivShuffleEquivLeft.symm (τ', j₁)).1 = (derivShuffleEquivLeft.symm (τ', j₂)).1) :
+    j₁ = j₂ := by
+  let k : Fin (m + n + 1) := (derivShuffleEquivLeft.symm (τ', j₁)).1
+  let σ₁ : Equiv.Perm (Fin m ⊕ Fin n) := Quot.out (derivShuffleEquivLeft.symm (τ', j₁)).2
+  let σ₂ : Equiv.Perm (Fin m ⊕ Fin n) := Quot.out (derivShuffleEquivLeft.symm (τ', j₂)).2
+  have hk₂ : (derivShuffleEquivLeft.symm (τ', j₂)).1 = k := by
+    simpa [k] using h.symm
+  have hσ₁ : (derivShuffleEquivLeft.symm (τ', j₁)).2 = Quotient.mk'' σ₁ := by
+    exact (Quot.out_eq (q := (derivShuffleEquivLeft.symm (τ', j₁)).2)).symm
+  have hσ₂ : (derivShuffleEquivLeft.symm (τ', j₂)).2 = Quotient.mk'' σ₂ := by
+    exact (Quot.out_eq (q := (derivShuffleEquivLeft.symm (τ', j₂)).2)).symm
+  have hpre₁ : derivShuffleEquivLeft (k, Quotient.mk'' σ₁) = (τ', j₁) := by
+    have h₁ := derivShuffleEquivLeft.apply_symm_apply (τ', j₁)
+    convert h₁ using 1
+    congr 1
+    apply Prod.ext
+    · rfl
+    · exact hσ₁.symm
+  have hpre₂ : derivShuffleEquivLeft (k, Quotient.mk'' σ₂) = (τ', j₂) := by
+    have h₂ := derivShuffleEquivLeft.apply_symm_apply (τ', j₂)
+    convert h₂ using 1
+    congr 1
+    apply Prod.ext
+    · simp [k, hk₂]
+    · exact hσ₂.symm
+  have hrank₁ : derivShuffleRank k σ₁ = j₁ := by
+    have h₁ := congrArg Prod.snd hpre₁
+    simpa using h₁
+  have hrank₂ : derivShuffleRank k σ₂ = j₂ := by
+    have h₂ := congrArg Prod.snd hpre₂
+    simpa using h₂
+  have hcoset₁ : (Quotient.mk'' (derivShuffleLeftFwd k σ₁) :
+      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) = τ' := by
+    have h₁ := congrArg Prod.fst hpre₁
+    simpa using h₁
+  have hcoset₂ : (Quotient.mk'' (derivShuffleLeftFwd k σ₂) :
+      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) = τ' := by
+    have h₂ := congrArg Prod.fst hpre₂
+    simpa using h₂
+  have hrank : derivShuffleRank k σ₁ = derivShuffleRank k σ₂ :=
+    derivShuffleRank_of_coset k σ₁ σ₂ (hcoset₁.trans hcoset₂.symm)
+  rw [← hrank₁, hrank, hrank₂]
+
+
+private lemma coset_mul_sumCongr (τ₀ ρ : Equiv.Perm (Fin (m + 1) ⊕ Fin n))
+    (h : (Quotient.mk'' ρ : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
+      Quotient.mk'' τ₀) :
+    ∃ τl : Equiv.Perm (Fin (m + 1)), ∃ τr : Equiv.Perm (Fin n),
+      ρ = τ₀ * Equiv.Perm.sumCongr τl τr := by
+  have hrel : QuotientGroup.leftRel (Equiv.Perm.sumCongrHom (Fin (m + 1)) (Fin n)).range ρ τ₀ := by
+    rwa [← Quotient.eq]
+  rw [QuotientGroup.leftRel_apply] at hrel
+  obtain ⟨⟨τl, τr⟩, hblock⟩ := hrel
+  refine ⟨τl⁻¹, τr⁻¹, ?_⟩
+  have h₁ : ρ * Equiv.Perm.sumCongr τl τr = τ₀ :=
+    (inv_mul_eq_iff_eq_mul.mp hblock.symm).symm
+  calc
+    ρ = ρ * Equiv.Perm.sumCongr τl τr * Equiv.Perm.sumCongr τl⁻¹ τr⁻¹ := by
+      have hprod : Equiv.Perm.sumCongr τl τr * Equiv.Perm.sumCongr τl⁻¹ τr⁻¹ = 1 := by
+        ext x
+        cases x <;> simp
+      rw [mul_assoc, hprod, mul_one]
+    _ = τ₀ * Equiv.Perm.sumCongr τl⁻¹ τr⁻¹ := by
+      rw [h₁]
 def removeHole {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx : x ≠ p) : Fin m :=
   if h : x < p then
     ⟨x.val, by
@@ -565,7 +678,7 @@ theorem inducedPerm_mul {m : ℕ} (τ₁ τ₂ : Equiv.Perm (Fin (m + 1))) (j : 
 theorem inducedPerm_one {m : ℕ} (j : Fin (m + 1)) :
     inducedPerm (1 : Equiv.Perm (Fin (m + 1))) j = 1 := by
   ext i
-  simpa [inducedPerm] using removeHole_succAbove j i
+  simp [inducedPerm]
 
 theorem succAbove_val_of_lt {m : ℕ} (j : Fin (m + 1)) (i : Fin m) (h : i.val < j.val) :
     (j.succAbove i).val = i.val := by
@@ -599,8 +712,6 @@ theorem removeHole_val_of_ge {m : ℕ} (p : Fin (m + 1)) (x : Fin (m + 1)) (hx :
   · have hc : x.val < p.val := hx'
     omega
   · simp [hx']
-
--- transposition case: j < b, inducedPerm (swap j b) j = cycleIcc j (b-1)
 theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
     inducedPerm (Equiv.swap j b) j =
       Fin.cycleIcc (⟨j.val, by omega⟩ : Fin m) ⟨b.val - 1, by omega⟩ := by
@@ -632,9 +743,7 @@ theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
       exact congrArg Fin.val (Fin.cycleIcc_of_lt hlt)
     have hswapel : Equiv.swap j b (j.succAbove i) = j.succAbove i := by
       simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2]
-    simp [Equiv.swap_apply_def, hne2, Fin.succAbove_ne]
-    rw [hrm]
-    simpa using hcyc.symm
+    simpa [hswapel, hrm] using hcyc.symm
   · have hge : j.val ≤ i.val := le_of_not_gt h1
     by_cases h2 : i.val < b.val - 1
     · have hsucc : (j.succAbove i).val = i.val + 1 := succAbove_val_of_ge j i hge
@@ -658,9 +767,9 @@ theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
         have hstep := congrArg Fin.val (Fin.cycleIcc_of_ge_of_lt hle hlt2)
         rw [hstep]
         exact Fin.val_add_one_of_lt' (by omega)
-      simp [Equiv.swap_apply_def, hne2, Fin.succAbove_ne]
-      rw [hrm]
-      simpa using hcyc.symm
+      have hswapel : Equiv.swap j b (j.succAbove i) = j.succAbove i := by
+        simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2]
+      simpa [hswapel, hrm] using hcyc.symm
     · have hge2 : b.val - 1 ≤ i.val := le_of_not_gt h2
       by_cases h3 : i.val = b.val - 1
       · have hsucc : (j.succAbove i).val = i.val + 1 := succAbove_val_of_ge j i hge
@@ -672,7 +781,7 @@ theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
           omega
         have hsa : Equiv.swap j b (j.succAbove i) = j := by
           rw [hb]
-          simp [Equiv.swap_apply_def]
+          simp
         have hrm' : (Equiv.swap j b (j.succAbove i)) ≠ (Equiv.swap j b) j := by
           intro hne
           have : j = b := by
@@ -718,8 +827,7 @@ theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b) :
           exact congrArg Fin.val (Fin.cycleIcc_of_gt hgt)
         have hswapel : Equiv.swap j b (j.succAbove i) = j.succAbove i := by
           simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2]
-        simp [Equiv.swap_apply_def, hne2, Fin.succAbove_ne]
-        exact hrm.trans hcyc.symm
+        simpa [hswapel, hrm] using hcyc.symm
 
 
 theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
@@ -735,7 +843,7 @@ theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin 
     have hsa := inducedPerm_succAbove τl j x
     have hL : (Fin.rev (τl j)).succAbove (Fin.rev (inducedPerm τl j x)) =
         Fin.rev ((τl j).succAbove (inducedPerm τl j x)) := by
-      simpa [Fin.succAbove_rev_left]
+      simp [Fin.succAbove_rev_left]
     have hR : ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹)
           ((Fin.rev j).succAbove (Fin.rev x)) =
         Fin.rev (τl (j.succAbove x)) := by
@@ -745,7 +853,7 @@ theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin 
         rfl
       rw [hstep1]
       have hsj : Fin.rev (j.succAbove x) = (Fin.rev j).succAbove (Fin.rev x) := by
-        simpa [Fin.succAbove_rev_left, Fin.succAbove_rev_right, Fin.rev_rev]
+        simp [Fin.succAbove_rev_right, Fin.rev_rev]
       have hsj' : Fin.revPerm⁻¹ ((Fin.rev j).succAbove (Fin.rev x)) = j.succAbove x := by
         rw [← hsj]
         simp [Fin.rev_rev]
@@ -772,7 +880,7 @@ theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin 
 
 theorem sign_swap_ne {m : ℕ} (j b : Fin (m + 1)) (h : j ≠ b) :
     Equiv.Perm.sign (Equiv.swap j b) = (-1 : ℤˣ) := by
-  simp [Equiv.swap_apply_def, h]
+  simp [h]
 
 private theorem neg_one_pow_ite (n : ℕ) : (-1 : ℤˣ) ^ n = if Even n then 1 else -1 := by
   induction n with
@@ -901,9 +1009,10 @@ theorem inducedPerm_swap_sign_right {m : ℕ} (j b : Fin (m + 1)) (hbj : b < j) 
       rw [← mul_assoc]
       have hs : Equiv.Perm.sign (Fin.revPerm : Equiv.Perm (Fin m)) * Equiv.Perm.sign (Fin.revPerm : Equiv.Perm (Fin m)) = 1 := by
         rw [← Equiv.Perm.sign_mul]
-        congr 1
-        ext x
-        simp [Fin.rev_rev]
+        have hsq : (Fin.revPerm : Equiv.Perm (Fin m)) * (Fin.revPerm : Equiv.Perm (Fin m)) = 1 := by
+          ext x
+          simp
+        rw [hsq, Equiv.Perm.sign_one]
       rw [hs, one_mul]
     simpa [mul_assoc, mul_comm, mul_left_comm] using h1
   have hmain : Equiv.Perm.sign (inducedPerm ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * Equiv.swap j b * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹) (Fin.rev j)) =
@@ -929,7 +1038,7 @@ theorem inducedPerm_swap_sign {m : ℕ} (j b : Fin (m + 1)) :
     have h1 : inducedPerm (Equiv.swap j j) j = (1 : Equiv.Perm (Fin m)) := by
       simpa using inducedPerm_one j
     rw [h1]
-    simp
+    simp only [Equiv.Perm.sign_one, Equiv.swap_self, Equiv.Perm.sign_refl, one_mul]
     have hjj : Even (j.val + j.val) := by
       rw [Nat.even_iff]
       omega
@@ -972,13 +1081,13 @@ theorem inducedPerm_swap_away {m : ℕ} (a b j' : Fin (m + 1)) (haj : j' ≠ a) 
     have hrm : (removeHole j' (Equiv.swap a b (j'.succAbove i)) hne).val = (removeHole j' b (Ne.symm hbj)).val := by
       have harg : Equiv.swap a b (j'.succAbove i) = b := by
         rw [hia]
-        simp [Equiv.swap_apply_def]
+        simp
       exact congrArg Fin.val (removeHole_congr j' harg hne (Ne.symm hbj))
     have hi : i = removeHole j' a (Ne.symm haj) := by
       have hsa1 : j'.succAbove (removeHole j' a (Ne.symm haj)) = a := succAbove_removeHole j' a (Ne.symm haj)
       exact ((Fin.succAbove_right_injective (p := j')).eq_iff.mp (hsa1.trans hia.symm)).symm
     rw [hi]
-    simp [Equiv.swap_apply_def, hrm, haj, hbj]
+    simp [Equiv.swap_apply_def, haj, hbj]
   · by_cases hib : j'.succAbove i = b
     · have hne : Equiv.swap a b (j'.succAbove i) ≠ j' := by
         rw [hib]
@@ -989,13 +1098,13 @@ theorem inducedPerm_swap_away {m : ℕ} (a b j' : Fin (m + 1)) (haj : j' ≠ a) 
       have hrm : (removeHole j' (Equiv.swap a b (j'.succAbove i)) hne).val = (removeHole j' a (Ne.symm haj)).val := by
         have harg : Equiv.swap a b (j'.succAbove i) = a := by
           rw [hib]
-          simp [Equiv.swap_apply_def]
+          simp
         exact congrArg Fin.val (removeHole_congr j' harg hne (Ne.symm haj))
       have hi : i = removeHole j' b (Ne.symm hbj) := by
         have hsa1 : j'.succAbove (removeHole j' b (Ne.symm hbj)) = b := succAbove_removeHole j' b (Ne.symm hbj)
         exact ((Fin.succAbove_right_injective (p := j')).eq_iff.mp (hsa1.trans hib.symm)).symm
       rw [hi]
-      simp [Equiv.swap_apply_def, hrm, haj, hbj]
+      simp [Equiv.swap_apply_def, haj, hbj]
     · have hfix : Equiv.swap a b (j'.succAbove i) = j'.succAbove i := by
         simp [Equiv.swap_apply_def, hia, hib]
       have hne : Equiv.swap a b (j'.succAbove i) ≠ j' := by
@@ -1021,18 +1130,18 @@ theorem inducedPerm_swap_away {m : ℕ} (a b j' : Fin (m + 1)) (haj : j' ≠ a) 
           rw [succAbove_removeHole] at this
           exact this.symm
         exact hib this
-      simp [Equiv.swap_apply_def, hne_a, hne_b, hrm, haj, hbj, hia, hib]
+      simp [Equiv.swap_apply_def, hne_a, hne_b, haj, hbj, hia, hib]
 
 theorem inducedPerm_swap_sign' {m : ℕ} (a b j' : Fin (m + 1)) :
     Equiv.Perm.sign (inducedPerm (Equiv.swap a b) j') =
       Equiv.Perm.sign (Equiv.swap a b) * (-1 : ℤˣ) ^ (j'.val + (Equiv.swap a b j').val) := by
   by_cases hab : a = b
   · rw [hab]
-    simp [inducedPerm_one]
+    simp only [Equiv.swap_self, Equiv.Perm.sign_refl, Equiv.refl_apply, one_mul]
     have hrefl : inducedPerm (Equiv.refl (Fin (m + 1))) j' = 1 := by
       simpa using inducedPerm_one j'
     rw [hrefl]
-    simp
+    simp only [Equiv.Perm.sign_one]
     have hjj : Even (j'.val + j'.val) := by
       rw [Nat.even_iff]
       omega
@@ -1057,9 +1166,9 @@ theorem inducedPerm_swap_sign' {m : ℕ} (a b j' : Fin (m + 1)) :
             exact congrArg (fun z => j'.succAbove z) h
           exact hab (h1.symm.trans (hcong.trans h2))
         have hsig1 : Equiv.Perm.sign (Equiv.swap (removeHole j' a (Ne.symm haj)) (removeHole j' b (Ne.symm hbj))) = (-1 : ℤˣ) := by
-          simp [Equiv.Perm.sign_swap, hne]
+          simp [hne]
         rw [hsig1]
-        simp [Equiv.Perm.sign_swap, hab]
+        simp only [hab, Equiv.Perm.sign_swap', one_mul, neg_mul, if_false]
         have hjj : Even (j'.val + j'.val) := by
           rw [Nat.even_iff]
           omega
@@ -1083,7 +1192,8 @@ theorem sign_inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m 
         have hjj : Even (j.val + j.val) := by
           rw [Nat.even_iff]
           omega
-        simp [List.prod_nil, inducedPerm_one]
+        simp only [List.prod_nil, inducedPerm_one, Equiv.Perm.sign_one, Equiv.Perm.coe_one,
+          id_eq, one_mul]
         rw [show (-1 : ℤˣ) ^ (j.val + j.val) = 1 from by
           rw [neg_one_pow_ite (n := j.val + j.val)]
           simp [hjj]]
@@ -1129,6 +1239,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
   {m n : ℕ}
 
+omit [NormedAddCommGroup M] in
 theorem removeNth_comp_perm' (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1))
     (a : Fin (m + 1) → M) :
     j.removeNth (a ∘ τl) = (τl j).removeNth a ∘ inducedPerm τl j := by
@@ -1167,24 +1278,16 @@ theorem uncurryFinLeftExpandedSummand_mul_sumCongr
     rw [removeNth_comp_perm' τl j (fun i : Fin (m + 1) => w (τ₀ (Sum.inl i)))]
     exact (g' (w (τ₀ (Sum.inl (τl j))))).map_perm
       ((τl j).removeNth (fun i : Fin (m + 1) => w (τ₀ (Sum.inl i)))) (inducedPerm τl j)
-  -- now combine the smuls:
-  -- goal: sign τ₀ · sign τl · sign τr • f (((-1)^j) • g' ...) (h ...)
-  --     = sign τ₀ • f (((-1)^(τl j)) • g' ...) (h ...)
-  -- with hg and hh applied:
   rw [hh, hg]
-  -- now the algebra: sign τ₀ · sign τl · sign τr • f (a • (sign ip • g' x t)) (sign τr • h u)
-  -- = sign τ₀ • f (b • g' x t) (h u) — via bilinearity and sign_inducedPerm
   have hsig : Equiv.Perm.sign (inducedPerm τl j) = Equiv.Perm.sign τl * (-1 : ℤˣ) ^ (j.val + (τl j).val) :=
     sign_inducedPerm τl j
-  -- use smul algebra: f (s • x) (t • y) = (s * t) • f x y for the bilinear f
   have hsig : Equiv.Perm.sign (inducedPerm τl j) = Equiv.Perm.sign τl * (-1 : ℤˣ) ^ (j.val + (τl j).val) :=
     sign_inducedPerm τl j
-  simp only [Units.smul_def, smul_smul, mul_assoc]
+  simp only [Units.smul_def, smul_smul]
   simp only [Int.reduceNeg, Units.val_mul, map_zsmul, ContinuousLinearMap.coe_smul',
     Pi.smul_apply, smul_smul, mul_assoc]
   rw [hsig]
   congr 1
-  -- scalar algebra: the coefficients in ℤ
   have hjj : Even (j.val + j.val) := by
     rw [Nat.even_iff]
     omega
@@ -1192,9 +1295,6 @@ theorem uncurryFinLeftExpandedSummand_mul_sumCongr
     rw [show j.val + j.val = 2 * j.val from by omega]
     rw [pow_mul]
     simp
-  -- the coefficient equality — after all simplifications it should be:
-  -- sign τl · sign τl · sign τr · sign τr · (-1)^{j + j + τl j} = (-1)^{τl j} — all the sign² cancel
-  -- let me try omega-free: norm_num-like with the ℤˣ signs:
   have hsgn (x : ℤˣ) : (x : ℤ) * (x : ℤ) = 1 := by
     rcases Int.units_eq_one_or x with rfl | rfl <;> simp
   have hunitpow (k : ℕ) : (↑((-1 : ℤˣ) ^ k) : ℤ) = (-1 : ℤ) ^ k := by
@@ -1211,6 +1311,251 @@ theorem uncurryFinLeftExpandedSummand_mul_sumCongr
         simp [hτl, hτr, hτ₀, hpowj, hunitpow]
 
 end Transport
+
+private theorem uncurryFin_wedge_productL_precompL_fiber
+    (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
+    (w : Fin (m + 1) ⊕ Fin n → M)
+    (τ' : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) :
+    (∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w
+        (derivShuffleLeftFwdRanked (derivShuffleEquivLeft.symm (τ', j)).1
+          (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2)) j) =
+      ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w (Quot.out τ') j := by
+  let τ₀ : Equiv.Perm (Fin (m + 1) ⊕ Fin n) := Quot.out τ'
+  let ρ : Fin (m + 1) → Equiv.Perm (Fin (m + 1) ⊕ Fin n) := fun j =>
+    derivShuffleLeftFwdRanked (derivShuffleEquivLeft.symm (τ', j)).1
+      (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2)
+  let k : Fin (m + 1) → Fin (m + n + 1) := fun j =>
+    (derivShuffleEquivLeft.symm (τ', j)).1
+  have hρ_coset : ∀ j : Fin (m + 1),
+      (Quotient.mk'' (derivShuffleLeftFwdRanked (derivShuffleEquivLeft.symm (τ', j)).1
+        (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2)) :
+          Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) = τ' := by
+    intro j
+    have hpre : derivShuffleEquivLeft ((derivShuffleEquivLeft.symm (τ', j)).1,
+        Quotient.mk'' (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2)) = (τ', j) := by
+      have h₁ := derivShuffleEquivLeft.apply_symm_apply (τ', j)
+      convert h₁ using 1
+      congr 1
+      apply Prod.ext
+      · rfl
+      · exact Quot.out_eq (q := (derivShuffleEquivLeft.symm (τ', j)).2)
+    have h₁ := congrArg Prod.fst (hpre.symm.trans (derivShuffleEquivLeft_apply_mk_ranked
+      (derivShuffleEquivLeft.symm (τ', j)).1 (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2)))
+    simpa [ρ] using h₁.symm
+  have hρ_inl : ∀ j : Fin (m + 1),
+      ρ j (Sum.inl j) = finSuccSumEquiv.symm (k j) := by
+    intro j
+    have hrank : derivShuffleRank (k j) (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2) = j := by
+      let σ : Equiv.Perm (Fin m ⊕ Fin n) := Quot.out (derivShuffleEquivLeft.symm (τ', j)).2
+      have hσ : (derivShuffleEquivLeft.symm (τ', j)).2 = Quotient.mk'' σ := by
+        exact (Quot.out_eq (q := (derivShuffleEquivLeft.symm (τ', j)).2)).symm
+      have hpre : derivShuffleEquivLeft (k j, Quotient.mk'' σ) = (τ', j) := by
+        have h₁ := derivShuffleEquivLeft.apply_symm_apply (τ', j)
+        convert h₁ using 1
+        congr 1
+        apply Prod.ext
+        · rfl
+        · exact hσ.symm
+      have h₁ := congrArg Prod.snd hpre
+      simpa [k, σ] using h₁
+    have h₁ : ρ j (Sum.inl (derivShuffleRank (k j) (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2))) =
+        finSuccSumEquiv.symm (k j) := by
+      simp [ρ, k, derivShuffleLeftFwdRanked_inl_j]
+    have hslot : (Sum.inl j : Fin (m + 1) ⊕ Fin n) = Sum.inl (derivShuffleRank (k j) (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2)) := by
+      exact congrArg (Sum.inl : Fin (m + 1) → Fin (m + 1) ⊕ Fin n) hrank.symm
+    rw [hslot]
+    exact h₁
+  let ψ : Fin (m + 1) → Fin (m + 1) := fun j =>
+    match τ₀⁻¹ (finSuccSumEquiv.symm (k j)) with
+    | Sum.inl ℓ => ℓ
+    | Sum.inr _ => 0
+  have hψ_val : ∀ j : Fin (m + 1),
+      uncurryFinLeftExpandedSummand f g' h w (ρ j) j =
+        uncurryFinLeftExpandedSummand f g' h w τ₀ (ψ j) := by
+    intro j
+    have hcoset : (Quotient.mk'' (ρ j) : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
+        Quotient.mk'' τ₀ := by
+      exact (hρ_coset j).trans (Quot.out_eq (q := τ')).symm
+    obtain ⟨τl, τr, hdecomp⟩ := coset_mul_sumCongr τ₀ (ρ j) hcoset
+    have htrans : uncurryFinLeftExpandedSummand f g' h w (ρ j) j =
+        uncurryFinLeftExpandedSummand f g' h w τ₀ (τl j) := by
+      rw [hdecomp]
+      exact uncurryFinLeftExpandedSummand_mul_sumCongr f g' h w τ₀ τl τr j
+    have hψj : Sum.inl (τl j) = τ₀⁻¹ (finSuccSumEquiv.symm (k j)) := by
+      have h₂ : ρ j (Sum.inl j) = τ₀ (Sum.inl (τl j)) := by
+        rw [hdecomp]
+        simp [Equiv.Perm.coe_mul]
+      rw [← hρ_inl j]
+      simp [h₂]
+    have hψj' : τl j = ψ j := by
+      unfold ψ
+      rw [← hψj]
+    rw [htrans, hψj']
+  have hψ_inl : ∀ j : Fin (m + 1), ∃ τl_j : Fin (m + 1),
+      τ₀⁻¹ (finSuccSumEquiv.symm (k j)) = Sum.inl τl_j := by
+    intro j
+    have hcoset : (Quotient.mk'' (ρ j) : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
+        Quotient.mk'' τ₀ := by
+      exact (hρ_coset j).trans (Quot.out_eq (q := τ')).symm
+    obtain ⟨τl, τr, hdecomp⟩ := coset_mul_sumCongr τ₀ (ρ j) hcoset
+    have h₂ : ρ j (Sum.inl j) = τ₀ (Sum.inl (τl j)) := by
+      rw [hdecomp]
+      simp [Equiv.Perm.coe_mul]
+    have h₃ : τ₀⁻¹ (finSuccSumEquiv.symm (k j)) = Sum.inl (τl j) := by
+      rw [← hρ_inl j]
+      rw [h₂]
+      simp
+    exact ⟨τl j, h₃⟩
+  have hψ_inj : Function.Injective ψ := by
+    intro j₁ j₂ h
+    have hk : k j₁ = k j₂ := by
+      obtain ⟨τl₁, h₁⟩ := hψ_inl j₁
+      obtain ⟨τl₂, h₂⟩ := hψ_inl j₂
+      have hψ₁ : ψ j₁ = τl₁ := by
+        unfold ψ
+        rw [h₁]
+      have hψ₂ : ψ j₂ = τl₂ := by
+        unfold ψ
+        rw [h₂]
+      have hτl : τl₁ = τl₂ := by
+        rw [← hψ₁, ← hψ₂, h]
+      have hpre : τ₀⁻¹ (finSuccSumEquiv.symm (k j₁)) = τ₀⁻¹ (finSuccSumEquiv.symm (k j₂)) := by
+        rw [h₁, h₂, hτl]
+      have hk' : finSuccSumEquiv.symm (k j₁) = finSuccSumEquiv.symm (k j₂) :=
+        (Equiv.injective τ₀⁻¹) hpre
+      exact Equiv.injective finSuccSumEquiv.symm hk'
+    exact preimage_k_injective τ' j₁ j₂ hk
+  have hψ_surj : Function.Surjective ψ := by
+    intro ℓ
+    exact (Fintype.bijective_iff_injective_and_card ψ).2 ⟨hψ_inj, by simp⟩ |>.2 ℓ
+  calc
+    (∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w (ρ j) j)
+        = ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w τ₀ (ψ j) := by
+          refine Finset.sum_congr rfl ?_
+          intro j hj
+          exact hψ_val j
+    _ = ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w τ₀ j := by
+          refine Finset.sum_bij (fun j _ => ψ j) ?_ ?_ ?_ ?_
+          · intro j hj
+            simp
+          · intro j₁ hj₁ j₂ hj₂ h
+            exact hψ_inj h
+          · intro ℓ hℓ
+            obtain ⟨j, hj⟩ := hψ_surj ℓ
+            exact ⟨j, by simp, hj⟩
+          · intro j hj
+            rfl
+    _ = ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w (Quot.out τ') j := rfl
+
+
+private theorem uncurryFin_wedge_productL_precompL_eq_domDomCongr
+    (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N') :
+    uncurryFin ((wedge_productL f).precompL M g' h) =
+      domDomCongr Fin.finAddFlipAssoc (wedge_product (uncurryFin g') h f) := by
+  ext v
+  let w : Fin (m + 1) ⊕ Fin n → M := (v ∘ ⇑Fin.finAddFlipAssoc) ∘ ⇑finSumFinEquiv
+  calc
+    uncurryFin ((wedge_productL f).precompL M g' h) v
+        = ∑ k : Fin (m + n + 1), (-1 : ℤ) ^ k.val •
+            wedge_product (g' (v k)) h f (k.removeNth v) := by
+          exact uncurryFin_wedge_productL_precompL_apply f g' h v
+    _ = ∑ k : Fin (m + n + 1), (-1 : ℤ) ^ k.val •
+            uncurrySum (f.compContinuousAlternatingMap₂ (g' (v k)) h) ((k.removeNth v) ∘ ⇑finSumFinEquiv) := by
+          refine Finset.sum_congr rfl ?_
+          intro k hk
+          rw [wedge_product_def]
+          simp [uncurryFinAdd, ContinuousAlternatingMap.domDomCongr_apply]
+    _ = ∑ k : Fin (m + n + 1), ∑ σ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+            (-1 : ℤ) ^ k.val •
+              uncurrySum.summand (f.compContinuousAlternatingMap₂ (g' (v k)) h) σ ((k.removeNth v) ∘ ⇑finSumFinEquiv) := by
+          refine Finset.sum_congr rfl ?_
+          intro k hk
+          rw [uncurrySum_apply]
+          simp [Finset.smul_sum]
+    _ = ∑ k : Fin (m + n + 1), ∑ σ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+            uncurryFinLeftExpandedSummand f g' h w (derivShuffleLeftFwdRanked k (Quot.out σ))
+              (derivShuffleRank k (Quot.out σ)) := by
+          refine Finset.sum_congr rfl ?_
+          intro k hk
+          refine Finset.sum_congr rfl ?_
+          intro σ hσ
+          have hstep := derivShuffleLeft_expanded_summand_eq f g' h v k (Quot.out σ)
+          have hcong :
+              uncurrySum.summand (f.compContinuousAlternatingMap₂ (g' (v k)) h) σ
+                  ((k.removeNth v) ∘ ⇑finSumFinEquiv) =
+                uncurrySum.summand (f.compContinuousAlternatingMap₂ (g' (v k)) h)
+                  (Quotient.mk'' (Quot.out σ)) ((k.removeNth v) ∘ ⇑finSumFinEquiv) :=
+            congrArg (fun q : Equiv.Perm.ModSumCongr (Fin m) (Fin n) =>
+              uncurrySum.summand (f.compContinuousAlternatingMap₂ (g' (v k)) h) q
+                ((k.removeNth v) ∘ ⇑finSumFinEquiv)) (Quot.out_eq (q := σ)).symm
+          rw [hcong]
+          exact hstep
+    _ = ∑ q : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n) × Fin (m + 1),
+            uncurryFinLeftExpandedSummand f g' h w (derivShuffleLeftFwdRanked (derivShuffleEquivLeft.symm q).1
+              (Quot.out (derivShuffleEquivLeft.symm q).2)) q.2 := by
+          have hconv : (∑ k : Fin (m + n + 1), ∑ σ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+                uncurryFinLeftExpandedSummand f g' h w (derivShuffleLeftFwdRanked k (Quot.out σ))
+                  (derivShuffleRank k (Quot.out σ))) =
+              ∑ p : (Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n)),
+                uncurryFinLeftExpandedSummand f g' h w (derivShuffleLeftFwdRanked p.1 (Quot.out p.2))
+                  (derivShuffleRank p.1 (Quot.out p.2)) := by
+            simpa [Finset.univ_product_univ] using
+              (Finset.sum_product (s := (Finset.univ : Finset (Fin (m + n + 1))))
+                (t := (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin m) (Fin n))))
+                (f := fun p : (Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n)) =>
+                  uncurryFinLeftExpandedSummand f g' h w (derivShuffleLeftFwdRanked p.1 (Quot.out p.2))
+                    (derivShuffleRank p.1 (Quot.out p.2)))).symm
+          rw [hconv]
+          refine Finset.sum_bij (fun p _ => derivShuffleEquivLeft p) ?_ ?_ ?_ ?_
+          · intro p hp
+            simp
+          · intro p₁ hp₁ p₂ hp₂ h
+            exact Equiv.injective derivShuffleEquivLeft h
+          · intro q hq
+            exact ⟨derivShuffleEquivLeft.symm q, by simp, by simp⟩
+          · intro p hp
+            rw [show (derivShuffleEquivLeft.symm (derivShuffleEquivLeft p)).1 = p.1 from by simp,
+              show (derivShuffleEquivLeft.symm (derivShuffleEquivLeft p)).2 = p.2 from by simp]
+            have hpair : p = (p.1, Quotient.mk'' (Quot.out p.2)) := by
+              apply Prod.ext
+              · rfl
+              · exact (Quot.out_eq (q := p.2)).symm
+            have h2 : (derivShuffleEquivLeft p).2 = derivShuffleRank p.1 (Quot.out p.2) := by
+              have h := derivShuffleEquivLeft_apply_mk_ranked p.1 (Quot.out p.2)
+              conv_lhs =>
+                rw [hpair]
+              rw [h]
+            rw [h2]
+    _ = ∑ τ' : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n), ∑ j : Fin (m + 1),
+            uncurryFinLeftExpandedSummand f g' h w (derivShuffleLeftFwdRanked (derivShuffleEquivLeft.symm (τ', j)).1
+              (Quot.out (derivShuffleEquivLeft.symm (τ', j)).2)) j := by
+          simpa [Finset.univ_product_univ] using
+            (Finset.sum_product (s := (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n))))
+              (t := (Finset.univ : Finset (Fin (m + 1))))
+              (f := fun p : (Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n) × Fin (m + 1)) =>
+                uncurryFinLeftExpandedSummand f g' h w (derivShuffleLeftFwdRanked (derivShuffleEquivLeft.symm p).1
+                  (Quot.out (derivShuffleEquivLeft.symm p).2)) p.2))
+    _ = ∑ τ' : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n), ∑ j : Fin (m + 1),
+            uncurryFinLeftExpandedSummand f g' h w (Quot.out τ') j := by
+          refine Finset.sum_congr rfl ?_
+          intro τ' hτ'
+          exact uncurryFin_wedge_productL_precompL_fiber f g' h w τ'
+    _ = ∑ τ' : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n),
+            uncurrySum.summand (f.compContinuousAlternatingMap₂ (uncurryFin g') h) τ' w := by
+          refine Finset.sum_congr rfl ?_
+          intro τ' hτ'
+          exact (uncurrySum_summand_uncurryFin_left_expand_mk f g' h w (Quot.out τ')).symm.trans
+            (congrArg (fun q : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n) =>
+              uncurrySum.summand (f.compContinuousAlternatingMap₂ (uncurryFin g') h) q w)
+              (Quot.out_eq (q := τ')))
+    _ = uncurrySum (f.compContinuousAlternatingMap₂ (uncurryFin g') h) w := by
+          rw [uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
+    _ = (wedge_product (uncurryFin g') h f) (v ∘ ⇑Fin.finAddFlipAssoc) := by
+          rw [wedge_product_def, uncurryFinAdd, ContinuousAlternatingMap.domDomCongr_apply]
+    _ = domDomCongr Fin.finAddFlipAssoc (wedge_product (uncurryFin g') h f) v := by
+          rw [wedge_product_uncurryFin_apply]
 
 private theorem zero_wedge' (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     wedge_product (0 : M [⋀^Fin m]→L[𝕜] 𝕜) h (ContinuousLinearMap.mul 𝕜 𝕜) = 0 := by
