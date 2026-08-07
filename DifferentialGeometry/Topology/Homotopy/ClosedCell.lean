@@ -38,6 +38,26 @@ theorem radialStep_norm (n : ℕ) (t : I) (x : ClosedCell n) :
       (1 - (t : ℝ)) * ‖(x : EuclideanSpace ℝ (Fin n))‖ := by
   simp [radialStep, norm_smul, Real.norm_eq_abs, unitInterval.one_minus_nonneg t]
 
+noncomputable def boundaryNormalize {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (hx : x ≠ 0) :
+    CellBoundary n :=
+  ⟨‖x‖⁻¹ • x, by
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (norm_nonneg x))]
+    exact inv_mul_cancel₀ (norm_ne_zero_iff.mpr hx)⟩
+
+@[simp]
+theorem boundaryNormalize_apply {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (hx : x ≠ 0) :
+    ‖(boundaryNormalize x hx : EuclideanSpace ℝ (Fin n))‖ = 1 := by
+  rw [boundaryNormalize]
+  rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (norm_nonneg x))]
+  exact inv_mul_cancel₀ (norm_ne_zero_iff.mpr hx)
+
+theorem smul_boundaryNormalize {n : ℕ} (x : EuclideanSpace ℝ (Fin n)) (hx : x ≠ 0) :
+    ‖x‖ • (boundaryNormalize x hx : EuclideanSpace ℝ (Fin n)) = x := by
+  rw [boundaryNormalize]
+  rw [smul_smul]
+  rw [mul_inv_cancel₀ (norm_ne_zero_iff.mpr hx)]
+  simp
+
 theorem continuous_radialStep (n : ℕ) :
     Continuous (fun p : I × ClosedCell n => radialStep n p.1 p.2) := by
   exact Continuous.subtype_mk
