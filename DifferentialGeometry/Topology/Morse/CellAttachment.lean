@@ -233,6 +233,18 @@ theorem morseNormalForm_cocoreMap_boundary {n k : ℕ} (hk : k ≤ n) (c ε : �
   rw [hval, hu]
   ring
 
+theorem morseNormalForm_recombine_scaled {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 ≤ ε)
+    (u : EuclideanSpace ℝ (Fin k)) (v : EuclideanSpace ℝ (Fin (n - k))) :
+    morseNormalForm hk c (recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε)) u)) (r • v)) =
+      c + (1 / 2) * (-(2 * ε) * ‖u‖ ^ 2 + r ^ 2 * ‖v‖ ^ 2) := by
+  rw [morseNormalForm_recombine_cellMap hk c ε hε u (r • v)]
+  have hnorm : ‖(r • v : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = r ^ 2 * ‖v‖ ^ 2 := by
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    rw [mul_pow]
+    rw [sq_abs]
+  rw [hnorm]
+
 theorem morseNormalForm_split {n k : ℕ} (hk : k ≤ n) (c : ℝ) (y : MorseModel n) :
     morseNormalForm hk c y =
       c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) := by

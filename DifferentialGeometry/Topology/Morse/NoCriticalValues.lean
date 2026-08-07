@@ -111,7 +111,9 @@ theorem reverseFlow_value_on_levelSet {n : ℕ} {H : Type} [TopologicalSpace H] 
       (NormedSpace.fromTangentSpace (-f y)) ((mfderiv I 𝓘(ℝ, ℝ) (-f) y) ((-v) y)) =
         (NormedSpace.fromTangentSpace (f y)) ((mfderiv I 𝓘(ℝ, ℝ) f y) (v y)) := by
     intro y
-    simp [NormedSpace.fromTangentSpace, mfderiv_neg]
+    rw [mfderiv_neg]
+    simp only [NormedSpace.fromTangentSpace, Pi.neg_apply, map_neg,
+      ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk]
     exact neg_neg ((mfderiv I 𝓘(ℝ, ℝ) f y) (v y))
   have hdfneg : ∀ y ∈ (-f) ⁻¹' Set.Icc (-b) (-a),
       (NormedSpace.fromTangentSpace (-f y)) ((mfderiv I 𝓘(ℝ, ℝ) (-f) y) ((-v) y)) = -1 := by
@@ -338,7 +340,7 @@ theorem frontier_sublevel_eq_levelSet {n : ℕ} {H : Type} [TopologicalSpace H] 
         rw [mem_interior]
         exact ⟨{y : M | f y < a}, by
           intro y hy
-          simp [sublevel]
+          change f y ≤ a
           exact le_of_lt hy, isOpen_lt hf.continuous continuous_const, hlt⟩
       exact hx.2 hmem
     · have hmem : x ∉ closure (sublevel f a) := by
@@ -352,7 +354,9 @@ theorem frontier_sublevel_eq_levelSet {n : ℕ} {H : Type} [TopologicalSpace H] 
       exact hmem hx.1
   · intro x hx
     constructor
-    · exact subset_closure (by simp [sublevel]; exact le_of_eq hx)
+    · exact subset_closure (by
+        change f x ≤ a
+        exact le_of_eq hx)
     · have hiff : x ∈ closure (sublevel f a)ᶜ ↔ x ∈ (interior (sublevel f a))ᶜ := by
         calc
           x ∈ closure (sublevel f a)ᶜ ↔ x ∈ (interior ((sublevel f a)ᶜ)ᶜ)ᶜ := by
@@ -392,8 +396,8 @@ theorem frontier_sublevel_eq_levelSet {n : ℕ} {H : Type} [TopologicalSpace H] 
         have hball : curveAt v hcomplete x (-t) ∈ U := by
           exact hδmem (by simpa [dist_eq_norm, Real.norm_eq_abs] using htltδ)
         exact ⟨curveAt v hcomplete x (-t), ⟨hball, by
-          simp [sublevel]
-          exact hgt⟩⟩
+          change ¬ f (curveAt v hcomplete x (-t)) ≤ a
+          exact not_le_of_gt hgt⟩⟩
       exact hiff.mp hxcompl
 
 noncomputable def levelSetCollarHomeomorph {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
