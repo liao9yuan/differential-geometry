@@ -11,6 +11,7 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothDenseLp
 import Mathlib.MeasureTheory.Function.L2Space
 import DifferentialGeometry.Geometry.Connection.Laplacian.RankZero
+import DifferentialGeometry.Geometry.Connection.Realization.Tensor0SBridge
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric
@@ -241,6 +242,19 @@ lemma laplacian_scalar0_smooth (g : SmoothRiemannianMetric I M)
   refine (Δ_g_contMDiff (I := I) g hf).congr ?_
   intro x
   exact laplacian_levi_eq (I := I) g hf x
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [CompactSpace M] in
+/-- The fiber-model equivalence recovers the scalar value of a scalar field. -/
+lemma tensor0Iso_fromScalarField
+    (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :
+    Tensor0SNabla.tensor0Iso I M y (Tensor0SField.fromScalarField ∞ f hf y) = f y := by
+  unfold Tensor0SField.fromScalarField Tensor0SNabla.tensor0Iso
+  change (continuousMultilinearCurryFin0 ℝ E ℝ)
+      (Tensor0SSpace.toModel (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I y) (f y))) = f y
+  rfl
 
 end HeatEquation
 end Analysis
