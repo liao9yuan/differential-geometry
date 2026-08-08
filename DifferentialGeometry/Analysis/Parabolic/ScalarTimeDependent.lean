@@ -73,6 +73,55 @@ abbrev IsHeatOnStationary
     (u : Real → M → Real) : Prop :=
   IsHeatOn D (stationaryMetricFamily (I := I) (M := M) g) u
 
+/-- A classical solution of the additively forced heat equation
+`∂ₜu = Δu + f` on a time interval. -/
+structure IsHeatForcedOn
+    (D : RealTimeInterval)
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (f u : Real → M → Real) : Prop where
+
+  jointSmooth :
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+      (fun q : Real × M => u q.1 q.2) (D.regular ×ˢ univ)
+
+  jointCont :
+    ContinuousOn (fun q : Real × M => u q.1 q.2)
+      (D.carrier ×ˢ univ)
+
+  sliceSmooth :
+    ∀ t : Real, t ∈ D.carrier →
+      ContMDiff I 𝓘(Real, Real) ∞ (u t)
+
+  equation :
+    ∀ t : Real, t ∈ D.regular → ∀ x : M,
+      HasDerivAt (fun s : Real => u s x)
+        (laplacianAt (I := I) G t (u t) x + f t x) t
+
+abbrev IsHeatForcedOnStationary
+    (D : RealTimeInterval)
+    (g : SmoothRiemannianMetric I M)
+    (f u : Real → M → Real) : Prop :=
+  IsHeatForcedOn D (stationaryMetricFamily (I := I) (M := M) g) f u
+
+namespace IsHeatForcedOn
+
+theorem mono
+    {D D' : RealTimeInterval}
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    {f u : Real → M → Real}
+    (h : IsHeatForcedOn D G f u)
+    (hcarrier : D'.carrier ⊆ D.carrier)
+    (hregular : D'.regular ⊆ D.regular) :
+    IsHeatForcedOn D' G f u where
+  jointSmooth := h.jointSmooth.mono
+    (Set.prod_mono hregular Set.Subset.rfl)
+  jointCont := h.jointCont.mono
+    (Set.prod_mono hcarrier Set.Subset.rfl)
+  sliceSmooth t ht := h.sliceSmooth t (hcarrier ht)
+  equation t ht x := h.equation t (hregular ht) x
+
+end IsHeatForcedOn
+
 structure IsHeatPotSubsolutionOn
     (D : RealTimeInterval)
     (G : RealizedMetricFamily (I := I) (M := M) Real)
