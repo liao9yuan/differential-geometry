@@ -2341,6 +2341,56 @@ noncomputable def standardHandleChartedSpace (k l : ℕ) [NeZero k] [NeZero l]
   exact prodChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k)
     (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l)
 
+noncomputable def closedCellZeroHomeo : ClosedCell 0 ≃ₜ EuclideanSpace ℝ (Fin 0) where
+  toFun := fun _ => 0
+  invFun := fun _ => ⟨0, by simp⟩
+  left_inv := by
+    intro x
+    apply Subtype.ext
+    exact Subsingleton.elim _ _
+  right_inv := by
+    intro y
+    exact Subsingleton.elim _ _
+  continuous_toFun := continuous_const
+  continuous_invFun := continuous_const
+
+@[reducible]
+noncomputable def closedCellZeroChartedSpace : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0) :=
+  chartedSpaceOfHomeomorph closedCellZeroHomeo
+
+theorem closedCellZeroInclusion_contMDiff :
+    @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin 0)) _ _
+      (EuclideanSpace ℝ (Fin 0)) _ (𝓘(ℝ, EuclideanSpace ℝ (Fin 0)))
+      (ClosedCell 0) _ (closedCellZeroChartedSpace)
+      (EuclideanSpace ℝ (Fin 0)) _ _ (EuclideanSpace ℝ (Fin 0)) _
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (EuclideanSpace ℝ (Fin 0)) _ _
+      (⊤ : ℕ∞)
+      (fun x : ClosedCell 0 => (x : EuclideanSpace ℝ (Fin 0))) := by
+  classical
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0) :=
+    closedCellZeroChartedSpace
+  letI : IsManifold (𝓡 0) (⊤ : ℕ∞) (ClosedCell 0) :=
+    isManifoldOfHomeomorph (𝓡 0) closedCellZeroHomeo
+  rw [contMDiff_iff]
+  constructor
+  · exact continuous_subtype_val
+  · intro x y
+    apply (contDiffOn_const (𝕜 := ℝ) (n := (⊤ : ℕ∞))
+      (c := (0 : EuclideanSpace ℝ (Fin 0)))).congr
+    intro z hz
+    exact Subsingleton.elim _ _
+
+@[reducible]
+noncomputable def standardHandleZeroChartedSpace (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
+    ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((l - 1) + 1)))
+      (StandardHandle 0 l) := by
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0) :=
+    closedCellZeroChartedSpace
+  letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l) :=
+    closedCellChartedSpace l
+  exact prodChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0)
+    (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l)
+
 theorem closedCellInclusion_contMDiff_of (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
     @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin ((l - 1) + 1))) _ _
       (EuclideanHalfSpace ((l - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))

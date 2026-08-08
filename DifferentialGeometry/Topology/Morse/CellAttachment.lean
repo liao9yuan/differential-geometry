@@ -105,6 +105,28 @@ def negPart {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) : EuclideanSpace ℝ (
 def posPart {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) : EuclideanSpace ℝ (Fin (n - k)) :=
   WithLp.toLp 2 (fun j : Fin (n - k) => y (posIdx hk j))
 
+theorem negPart_top {n : ℕ} (y : MorseModel n) :
+    (negPart (le_rfl : n ≤ n) y : EuclideanSpace ℝ (Fin n)) = y := by
+  funext i
+  rfl
+
+theorem posPart_top {n : ℕ} (y : MorseModel n) :
+    posPart (le_rfl : n ≤ n) y = (0 : EuclideanSpace ℝ (Fin (n - n))) := by
+  ext i
+  have hn : n - n = 0 := Nat.sub_self n
+  have hi : i.1 < 0 := by simpa [hn] using i.isLt
+  exact False.elim (Nat.not_lt_zero i.1 hi)
+
+theorem negPart_bot {n : ℕ} (y : MorseModel n) :
+    negPart (zero_le n) y = (0 : EuclideanSpace ℝ (Fin 0)) := by
+  ext i
+  exact False.elim (Nat.not_lt_zero i.1 i.isLt)
+
+theorem posPart_bot {n : ℕ} (y : MorseModel n) :
+    (posPart (zero_le n) y : EuclideanSpace ℝ (Fin n)) = y := by
+  ext i
+  simp [posPart, posIdx]
+
 def recombine {n k : ℕ} (hk : k ≤ n) (a : EuclideanSpace ℝ (Fin k))
     (b : EuclideanSpace ℝ (Fin (n - k))) : MorseModel n :=
   fun i => if h : i.val < k then a ⟨i.val, h⟩ else b ⟨i.val - k, by
@@ -126,6 +148,19 @@ theorem recombine_posPart {n k : ℕ} (hk : k ≤ n) (a : EuclideanSpace ℝ (Fi
   apply congrArg b.ofLp
   apply Fin.ext
   simp
+
+theorem recombine_top {n : ℕ} (a : EuclideanSpace ℝ (Fin n))
+    (b : EuclideanSpace ℝ (Fin (n - n))) :
+    recombine (le_rfl : n ≤ n) a b = a := by
+  funext i
+  dsimp [recombine]
+  rw [dif_pos i.isLt]
+
+theorem recombine_bot {n : ℕ} (a : EuclideanSpace ℝ (Fin 0))
+    (b : EuclideanSpace ℝ (Fin n)) :
+    recombine (zero_le n) a b = b := by
+  funext i
+  dsimp [recombine]
 
 theorem recombine_decompose {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
     recombine hk (negPart hk y) (posPart hk y) = y := by
