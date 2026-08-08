@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDomain
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopBall
+import DifferentialGeometry.Analysis.Integration.Measure.PolarEvaluation
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentArea
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentPole
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentGauss
@@ -91,7 +92,7 @@ volume comparison built on `riemVol_exp_image_le`.  See `SegmentPolar.md` and
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold MeasureTheory
+open Set Function Filter Bundle Manifold MeasureTheory Metric
 open scoped Topology Manifold ContDiff ENNReal
 
 namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
@@ -921,6 +922,193 @@ theorem expJacDensity_le
     exact Real.sqrt_nonneg _
   rw [hfac]
   exact mul_le_mul_of_nonneg_left hT hncd
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma hypSn_scale_one (q r : ℝ) : r * hypSn (q * r) 1 = hypSn q r := by
+  by_cases hq : q = 0
+  · subst q
+    simp [hypSn]
+  · by_cases hr : r = 0
+    · subst r
+      simp [hypSn]
+    · rw [hypSn, hypSn]
+      have hqr : q * r ≠ 0 := mul_ne_zero hq hr
+      rw [if_neg hq, if_neg hqr]
+      field_simp
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma hypDensity_scale_one (q r : ℝ) (d : ℕ) :
+    r ^ d * hypDensity (q * r) d 1 = hypDensity q d r := by
+  simp only [hypDensity]
+  rw [← mul_pow, hypSn_scale_one]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma hypDensity_scaled_nonneg {q r : ℝ} (hq : 0 ≤ q) (hr : 0 < r) (d : ℕ) :
+    0 ≤ hypDensity (q * r) d 1 := by
+  have hqr : 0 ≤ q * r := mul_nonneg hq hr.le
+  have hsn : 0 ≤ hypSn (q * r) 1 := by
+    by_cases h0 : q * r = 0
+    · simp [hypSn, h0]
+    · exact (hypSn_pos hqr (by norm_num : (0 : ℝ) < 1)).le
+  exact pow_nonneg hsn d
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma radial_model_lintegral
+    (q : ℝ) {d : ℕ} (hq : 0 ≤ q) {R : ℝ} (hR : 0 < R) :
+    (∫⁻ r : Ioi (0 : ℝ) in Iic (⟨R, hR⟩ : Ioi (0 : ℝ)),
+        ENNReal.ofReal (hypDensity (q * r.1) d 1) ∂Measure.volumeIoiPow d)
+      = ENNReal.ofReal (hypRadVol q d R) := by
+  have hpowMeas : Measurable (fun r : Ioi (0 : ℝ) => ENNReal.ofReal (r.1 ^ d)) :=
+    ENNReal.measurable_ofReal.comp (measurable_subtype_coe.pow_const d)
+  rw [Measure.volumeIoiPow]
+  rw [setLIntegral_withDensity_eq_setLIntegral_mul_non_measurable
+    _ hpowMeas _ measurableSet_Iic]
+  · have hmul :
+        (∫⁻ r : Ioi (0 : ℝ) in Iic (⟨R, hR⟩ : Ioi (0 : ℝ)),
+            ((fun s : Ioi (0 : ℝ) => ENNReal.ofReal (s.1 ^ d)) *
+              (fun s : Ioi (0 : ℝ) => ENNReal.ofReal (hypDensity (q * s.1) d 1))) r
+            ∂Measure.comap Subtype.val volume)
+      = ∫⁻ r : Ioi (0 : ℝ) in Iic (⟨R, hR⟩ : Ioi (0 : ℝ)),
+          ENNReal.ofReal (hypDensity q d r.1) ∂Measure.comap Subtype.val volume := by
+      apply setLIntegral_congr_fun measurableSet_Iic
+      intro r _hr
+      rw [Pi.mul_apply,
+        ← ENNReal.ofReal_mul (pow_nonneg r.2.le d)]
+      congr 1
+      exact hypDensity_scale_one q r.1 d
+    rw [hmul]
+    rw [setLIntegral_subtype measurableSet_Ioi (Iic (⟨R, hR⟩ : Ioi (0 : ℝ)))
+      (fun t : Real => ENNReal.ofReal (hypDensity q d t))]
+    rw [image_subtype_val_Ioi_Iic]
+    rw [← ofReal_integral_eq_lintegral_ofReal]
+    · rw [← intervalIntegral.integral_of_le hR.le]
+      rfl
+    · exact (hypDen_continuous q d).continuousOn.intervalIntegrable_of_Icc hR.le |>.1
+    · filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht
+      exact (hypDensity_pos hq ht.1).le
+  · filter_upwards [] with r
+    exact ENNReal.ofReal_lt_top
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma hypSn_one_continuous : Continuous (fun q' : ℝ => hypSn q' 1) := by
+  rw [continuous_iff_continuousAt]
+  intro q₀
+  by_cases hq₀ : q₀ = 0
+  · subst q₀
+    have hsinc : Tendsto (fun x : ℝ => Real.sinh x / x) (𝓝[≠] (0 : ℝ)) (𝓝 1) := by
+      have hsinh' : Asymptotics.IsEquivalent (𝓝[≠] (0 : ℝ)) Real.sinh id :=
+        (Real.isEquivalent_sinh).mono
+          (nhdsWithin_le_nhds : nhdsWithin (0 : ℝ) ({0}ᶜ : Set ℝ) ≤ nhds (0 : ℝ))
+      have hz : ∀ᶠ x in 𝓝[≠] (0 : ℝ), id x ≠ 0 := by
+        filter_upwards [self_mem_nhdsWithin] with x hx
+        exact hx
+      have ht := (Asymptotics.isEquivalent_iff_tendsto_one hz).mp hsinh'
+      simpa using ht
+    have hg : ContinuousAt (fun x : ℝ => if x = 0 then 1 else Real.sinh x / x) 0 := by
+      have hg0 : ContinuousAt (Function.update (fun x : ℝ => Real.sinh x / x) 0 1) 0 :=
+        (continuousAt_update_same (f := fun x : ℝ => Real.sinh x / x)
+          (x := (0 : ℝ)) (y := (1 : ℝ))).mpr hsinc
+      have hfeq : (fun x : ℝ => if x = 0 then 1 else Real.sinh x / x) =
+          Function.update (fun x : ℝ => Real.sinh x / x) 0 1 := by
+        funext x
+        by_cases hx : x = 0 <;> simp [Function.update, hx]
+      rw [hfeq]
+      exact hg0
+    have hfun : (fun x : ℝ => if x = 0 then 1 else Real.sinh x / x) =ᶠ[𝓝 (0 : ℝ)]
+        (fun x : ℝ => hypSn x 1) := by
+      filter_upwards with x
+      by_cases hx : x = 0
+      · simp [hypSn, hx]
+      · simp [hypSn, hx]
+    exact ContinuousAt.congr hg hfun
+  · have hc_quot : ContinuousAt (fun q' : ℝ => Real.sinh q' / q') q₀ := by
+      exact (Real.continuous_sinh.continuousAt.div continuousAt_id hq₀)
+    have hfun : (fun q' : ℝ => hypSn q' 1) =ᶠ[𝓝 q₀] (fun q' : ℝ => Real.sinh q' / q') := by
+      filter_upwards [isOpen_ne.mem_nhds hq₀] with q' hq'ne
+      simp [hypSn, hq'ne]
+    exact ContinuousAt.congr hc_quot hfun.symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma hypDensity_scale_continuous (q : ℝ) (d : ℕ) :
+    Continuous (fun r : ℝ => hypDensity (q * r) d 1) := by
+  have h1 : Continuous (fun q' : ℝ => hypDensity q' d 1) := by
+    simpa [hypDensity] using hypSn_one_continuous.pow d
+  exact h1.comp (continuous_const.mul continuous_id)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma ball_model_lintegral
+    (q R : ℝ) (hq : 0 ≤ q) (hR : 0 < R) :
+    ∫⁻ w in Metric.closedBall (0 : E) R,
+        ENNReal.ofReal (hypDensity (q * ‖w‖) (Module.finrank ℝ E - 1) 1) ∂(modelHaar (E := E))
+      = ((modelHaar (E := E)).toSphere Set.univ) *
+          ENNReal.ofReal (hypRadVol q (Module.finrank ℝ E - 1) R) := by
+  classical
+  letI : Nontrivial E := Module.nontrivial_of_finrank_pos
+    (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
+  let d : ℕ := Module.finrank ℝ E - 1
+  let F : E → ℝ≥0∞ := fun w => ENNReal.ofReal (hypDensity (q * ‖w‖) d 1)
+  have hFmeas : AEMeasurable F (modelHaar (E := E)) := by
+    have hcont : Continuous (fun w : E => hypDensity (q * ‖w‖) d 1) :=
+      (hypDensity_scale_continuous q d).comp continuous_norm
+    exact ENNReal.continuous_ofReal.comp hcont |>.aemeasurable
+  have hball_meas : MeasurableSet (Metric.closedBall (0 : E) R) :=
+    (Metric.isClosed_closedBall : IsClosed (Metric.closedBall (0 : E) R)).measurableSet
+  calc
+    ∫⁻ w in Metric.closedBall (0 : E) R, F w ∂(modelHaar (E := E))
+        = ∫⁻ w, (Metric.closedBall (0 : E) R).indicator F w ∂(modelHaar (E := E)) := by
+          rw [lintegral_indicator hball_meas]
+    _ = ∫⁻ u : sphere (0 : E) 1,
+          ∫⁻ r : Ioi (0 : ℝ), (Metric.closedBall (0 : E) R).indicator F (r.1 • u.1)
+            ∂(Measure.volumeIoiPow d) ∂(modelHaar (E := E)).toSphere := by
+          simpa [d] using
+            (lintegral_polar (modelHaar (E := E)) ((Metric.closedBall (0 : E) R).indicator F)
+              (hFmeas.indicator hball_meas))
+    _ = ∫⁻ u : sphere (0 : E) 1, ENNReal.ofReal (hypRadVol q d R)
+          ∂(modelHaar (E := E)).toSphere := by
+          apply lintegral_congr
+          intro u
+          have hu : ‖u.1‖ = 1 := by
+            simpa only [mem_sphere_zero_iff_norm] using u.2
+          have hinner : (∫⁻ r : Ioi (0 : ℝ),
+              (Metric.closedBall (0 : E) R).indicator F (r.1 • u.1)
+                ∂(Measure.volumeIoiPow d))
+              = ENNReal.ofReal (hypRadVol q d R) := by
+            have hEq : (fun r : Ioi (0 : ℝ) =>
+                  (Metric.closedBall (0 : E) R).indicator F (r.1 • u.1))
+                = fun r : Ioi (0 : ℝ) => (Iic (⟨R, hR⟩ : Ioi (0 : ℝ))).indicator
+                    (fun r : Ioi (0 : ℝ) => ENNReal.ofReal (hypDensity (q * r.1) d 1)) r := by
+              funext r
+              by_cases hr : r.1 ≤ R
+              · have hmem : r ∈ Iic (⟨R, hR⟩ : Ioi (0 : ℝ)) := hr
+                have hb : r.1 • u.1 ∈ Metric.closedBall (0 : E) R := by
+                  rw [Metric.mem_closedBall, dist_zero_right, norm_smul,
+                    Real.norm_of_nonneg r.2.le, hu, mul_one]
+                  exact hr
+                simp only [F, Set.indicator_of_mem hmem, Set.indicator_of_mem hb]
+                congr 2
+                rw [norm_smul, Real.norm_of_nonneg r.2.le, hu, mul_one]
+              · have hmem : r ∉ Iic (⟨R, hR⟩ : Ioi (0 : ℝ)) := fun h => hr h
+                have hb : r.1 • u.1 ∉ Metric.closedBall (0 : E) R := by
+                  intro hmem_ball
+                  have hrle : r.1 ≤ R := by
+                    rw [Metric.mem_closedBall, dist_zero_right, norm_smul,
+                      Real.norm_of_nonneg r.2.le, hu, mul_one] at hmem_ball
+                    exact hmem_ball
+                  exact hr hrle
+                simp only [F, Set.indicator_of_notMem hmem, Set.indicator_of_notMem hb]
+            rw [hEq]
+            rw [lintegral_indicator measurableSet_Iic]
+            exact radial_model_lintegral q hq hR
+          exact hinner
+    _ = ((modelHaar (E := E)).toSphere Set.univ) * ENNReal.ofReal (hypRadVol q d R) := by
+          rw [lintegral_const, mul_comm]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
