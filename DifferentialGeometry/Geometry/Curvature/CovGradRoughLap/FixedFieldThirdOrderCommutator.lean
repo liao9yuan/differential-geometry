@@ -37,6 +37,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma secondCovDeriv_section_contMDiff' (g : SmoothRiemannianMetric I M) (k : ℕ)
     {T : Π b : M, TensorRSSpace 0 k I b}
     (hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 k ℝ E)) ∞
@@ -70,7 +71,7 @@ def secondCovDerivCc (g : SmoothRiemannianMetric I M) (k : ℕ)
 
 
 omit [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 @[simp] lemma secondCovDerivCc_toSection_apply (g : SmoothRiemannianMetric I M) (k : ℕ)
     {V : Π b : M, TangentSpace I b}
     (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -181,6 +182,7 @@ private lemma rs_add_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma tensorCov_toFun_sub (g : SmoothRiemannianMetric I M) (k : ℕ)
     {P Q : Π y : M, TensorRSSpace 0 k I y} {x : M}
     (hP : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 k ℝ E)) ∞
@@ -585,7 +587,7 @@ private lemma secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_expansion
   rw [hT1, hT3, hq2, hq4]
   rw [hL2a, hL2b, ContinuousLinearMap.sub_apply, rs_sub_apply']
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_curvature
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {V X : Π b : M, TangentSpace I b}

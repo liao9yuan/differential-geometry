@@ -338,6 +338,7 @@ private theorem homBundleCovariantDerivativeGenFun_isCovOn
     rw [smul_sub]
     abel
 
+omit [SigmaCompactSpace M] in
 noncomputable def homBundleCovariantDerivativeGen
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V) :

@@ -34,7 +34,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem chartPushedRaw_eqOn_covDerivComponentEuclid_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))
@@ -283,7 +283,7 @@ private lemma covDerivComponentEuclid_T₀_eqOn
   covDerivComponentEuclid_eqOn (I := I) (M := M) g r s α T₀ k Idx Jdx
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem covDerivComponentEuclid_S_k_ext_eq_iteratedFDeriv_T₀_add_lowerOrder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

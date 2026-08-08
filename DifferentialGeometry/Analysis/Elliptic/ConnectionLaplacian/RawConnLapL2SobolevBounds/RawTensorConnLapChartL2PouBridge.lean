@@ -287,6 +287,7 @@ private lemma manifold_lintegral_pou_sq_normSq_eq_chartTarget
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma normSq_apply_eq_pushedNormSq
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T₀ : Π b : M, TensorRSSpace r s I b)

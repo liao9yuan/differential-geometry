@@ -56,6 +56,7 @@ lemma toModel_liftedTensorSection_zero_eq_apply_unit_reindex
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
     (g : SmoothRiemannianMetric I M)
     (W S : SmoothCcTensor g 0 2) (x : M) (a b : TangentSpace I x) :
@@ -83,7 +84,7 @@ theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
         (loweredCovDerivAt (I := I) (M := M) g 0 2 S.toSection x b) from
     (loweredCovDerivAt_eq_lower_tensorCovDerivAt (I := I) (M := M) g S.toSection x b).symm]
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 theorem tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (b : M)

@@ -95,7 +95,7 @@ theorem rawTensorConnLap_covGrad_unit_eval_eq_abstract_roughLap
   exact tensorSecondCovDeriv_covGrad_unit_eval (I := I) (M := M) g T₀ hB x
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem abstract_succ_covDeriv_unfold_at
     (g : SmoothRiemannianMetric I M)
     (W : Π y : M, Tensor0SSpace 3 I y)

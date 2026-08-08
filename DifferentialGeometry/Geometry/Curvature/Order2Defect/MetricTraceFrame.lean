@@ -63,6 +63,7 @@ noncomputable def metricTraceHessian
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma metricTraceHessian_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -72,7 +73,7 @@ lemma metricTraceHessian_def
           (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem rawTensorConnLap_eq_metricTraceHessian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -89,6 +90,7 @@ noncomputable def firstSlotHessMap
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma firstSlotHessMap_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M)
@@ -100,7 +102,7 @@ omit [NeZero (Module.finrank ℝ E)] in
   simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorSecondCovDeriv_eq_firstSlotHessMap
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -108,7 +110,7 @@ theorem tensorSecondCovDeriv_eq_firstSlotHessMap
       firstSlotHessMap (I := I) g r s Y T x (X x) := by
   rw [tensorSecondCovDeriv_def, firstSlotHessMap_apply]
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem metricTraceHessian_eq_gWeighted_firstSlot
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :

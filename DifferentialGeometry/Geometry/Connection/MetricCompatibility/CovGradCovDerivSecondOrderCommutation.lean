@@ -192,7 +192,7 @@ end AbstractThirdOrder
 section Reductions
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}

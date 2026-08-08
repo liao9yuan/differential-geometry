@@ -38,6 +38,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 lemma tensor0SCovariantDerivative_natCast_transport
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -90,7 +91,7 @@ lemma liftedTensorSection_zero_eq_natCast_unit
   exact (Fin.ext (by simp)).symm
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -157,7 +158,7 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
   rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma loweringIntertwiner_gen (g : SmoothRiemannianMetric I M) (s : ℕ) :
     LoweringIntertwiner (I := I) (M := M) g s :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen (I := I) (M := M) g s S x v

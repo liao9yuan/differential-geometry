@@ -91,6 +91,7 @@ noncomputable def rawChartFrameDataSq
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma rawChartFrameDataSq_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Π b : M, TensorRSSpace r s I b) (b : M) :

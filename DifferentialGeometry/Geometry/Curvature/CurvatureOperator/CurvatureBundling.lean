@@ -802,6 +802,7 @@ private def riemannOp_Xslot
     change riemannOpFun cov x (c • v) w u = c • riemannOpFun cov x v w u
     exact riemannOpFun_smul_left (cov := cov) x c v w u
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 noncomputable def riemannOp
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞] (x : M) :

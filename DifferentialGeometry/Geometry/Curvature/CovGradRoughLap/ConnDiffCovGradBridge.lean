@@ -87,6 +87,7 @@ private lemma tensor0SOne_apply_sub (x : M) (om : Tensor0SSpace 1 I x)
     funext _; rw [sub_eq_add_neg]]
   rw [tensor0SOne_apply_add (I := I) x om, tensor0SOne_apply_neg (I := I) x om, sub_eq_add_neg]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 def connDiffPairing (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) : Tensor0SSpace 2 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ from
@@ -149,6 +150,7 @@ lemma connDiffPairing_smul (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
   intro YZ
   exact ContinuousMultilinearMap.smul_apply om c _
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 def connDiffFib (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) :
     TensorRSSpace 1 2 I x :=
   TensorRSSpace.ofCLM

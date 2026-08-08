@@ -22,14 +22,13 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor0SNabla
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
-    [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
 private lemma tensor0Iso_symm_apply_empty (x : M) (a : ℝ) :
     (show ContinuousMultilinearMap ℝ (fun _ : Fin 0 => TangentSpace I x) ℝ from
         ((tensor0Iso (I := I) (M := M) x).symm a))
@@ -56,15 +55,14 @@ private lemma tensor0Iso_symm_apply_empty (x : M) (a : ℝ) :
   rw [hscalarFn, hscalar]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
-    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+    [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
   simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
   rfl
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
-    [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
 private lemma mfderiv_section_zero_eq_scalarFn
     (T : Π b : M, Tensor0SSpace 0 I b) (b : M) (v : TangentSpace I b) :
     mfderiv I 𝓘(ℝ, ℝ)

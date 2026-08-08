@@ -218,7 +218,7 @@ noncomputable def tensor3rdCurvBracket
           (smoothOrthoFrame (I := I) g x i x))
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem Tensor3rdCurv_eq_genuine_add_bracket
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -231,7 +231,7 @@ theorem Tensor3rdCurv_eq_genuine_add_bracket
   refine Finset.sum_congr rfl (fun i _ => ?_)
   abel
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {W : Π b : M, TangentSpace I b} {T : Π b : M, TensorRSSpace r s I b} {x : M}
@@ -256,7 +256,7 @@ theorem frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket
   abel
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_tensor3rdCurvGenuine_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M)
@@ -327,7 +327,7 @@ theorem riemannianFiberNormSq_tensor3rdCurvGenuine_le
         mul_le_mul_of_nonneg_left hsum_le hn_nn
     _ = (2 * (n : ℝ)) * (n : ℝ) * (cR + cdR) := by ring
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem tensor3rdCurv_pure_R_eq_riemannOp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {W : Π b : M, TangentSpace I b} {T : Π b : M, TensorRSSpace r s I b} {x : M}

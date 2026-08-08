@@ -169,6 +169,7 @@ private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlot
 
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :

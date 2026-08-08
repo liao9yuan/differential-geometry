@@ -53,6 +53,7 @@ lemma tensorInnerScalar_apply
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
+omit [SigmaCompactSpace M] in
 lemma tangentSectionAction_tensorInnerScalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

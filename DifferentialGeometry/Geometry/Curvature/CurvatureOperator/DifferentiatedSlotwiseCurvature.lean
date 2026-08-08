@@ -24,7 +24,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [∀ x, AddCommGroup (V x)] [∀ x, Module ℝ (V x)]
@@ -40,7 +40,7 @@ def nablaRiemannSec (covT : CovariantDerivative I E (TangentSpace I : M → Type
     - riemannSec covV Y (covApply covT X Z) A x
     - riemannSec covV Y Z (covApply covV X A) x
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [T2Space M]
   [BoundarylessManifold I M] [VectorBundle ℝ F V] in
 lemma nablaRiemannSec_def (covT : CovariantDerivative I E (TangentSpace I : M → Type _))
     (covV : CovariantDerivative I F V)
@@ -59,9 +59,9 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
 
-omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [T2Space M]
   [BoundarylessManifold I M] in
 lemma nablaCurvSec_eq_nablaRiemannSec
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -76,7 +76,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
   [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
 variable {E_U : Type*} [NormedAddCommGroup E_U] [NormedSpace ℝ E_U]
   [FiniteDimensional ℝ E_U] [CompleteSpace E_U]
 variable {U : M → Type*} [∀ x, AddCommGroup (U x)] [∀ x, Module ℝ (U x)]
@@ -93,7 +93,7 @@ variable {V : M → Type*} [∀ x, AddCommGroup (V x)] [∀ x, Module ℝ (V x)]
   [ContMDiffVectorBundle ∞ F V I]
 
 omit [BoundarylessManifold I M] in
-omit [SigmaCompactSpace M] [CompleteSpace E_U] [CompleteSpace F] in
+omit [CompleteSpace E_U] [CompleteSpace F] in
 lemma nablaRiemannSec_homBundleGen_apply_eq
     (cov_U : CovariantDerivative I E_U U) [ContMDiffCovariantDerivative cov_U ∞]
     (cov_V : CovariantDerivative I F V) [ContMDiffCovariantDerivative cov_V ∞]
@@ -301,7 +301,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
+  [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
 private abbrev TensorSmooth (s : ℕ) (A : Π b : M, Tensor0SSpace s I b) : Prop :=
   ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
@@ -631,7 +631,6 @@ theorem nablaTensorCov_baseSlot_eval
 
 omit [CompleteSpace E] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-omit [SigmaCompactSpace M] in
 lemma nablaBaseSlotCurv_eq_nablaCurvSec
     (g : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -641,7 +640,6 @@ lemma nablaBaseSlotCurv_eq_nablaCurvSec
 
 omit [CompleteSpace E] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 private lemma nablaBaseSlotCurv_cyclic_eq_zero
     (g : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -692,7 +690,6 @@ theorem nablaTensor0SCurv_cyclic_eq_zero
   rw [Finset.sum_eq_zero (fun k _ => hkey k), neg_zero]
 
 omit [CompleteSpace E] [I.Boundaryless] in
-omit [SigmaCompactSpace M] in
 theorem nablaTensorCurv_frame_trace_eq_nablaRicci
     (g : SmoothRiemannianMetric I M)
     {X V : Π b : M, TangentSpace I b} {x : M}
@@ -732,7 +729,6 @@ theorem frame_sum_nablaTensor0SCurv_baseSlot_eval
   rw [Finset.sum_neg_distrib, Finset.sum_comm]
 
 omit [CompleteSpace E] [I.Boundaryless] in
-omit [SigmaCompactSpace M] in
 theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
     (g : SmoothRiemannianMetric I M)
     {Y W U : Π b : M, TangentSpace I b} {x : M}

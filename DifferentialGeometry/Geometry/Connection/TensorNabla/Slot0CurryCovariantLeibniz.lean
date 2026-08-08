@@ -158,6 +158,7 @@ private lemma contMDiff_slot0Read (g : SmoothRiemannianMetric I M) (s : ℕ)
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tensor0S_curry_covApply_slot0_leibniz_fib
     (g : SmoothRiemannianMetric I M) (s : ℕ) (Z : SmoothCcTensor g 0 (s + 1))
     {V X : Π b : M, TangentSpace I b}
@@ -273,7 +274,7 @@ theorem tensor0S_curry_covApply_slot0_leibniz_fib
   rw [hfinal, ← hC2]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensor0S_curry_covApply_slot0_leibniz
     (g : SmoothRiemannianMetric I M) (s : ℕ) (Z : SmoothCcTensor g 0 (s + 1))
     {V X : Π b : M, TangentSpace I b}

@@ -44,6 +44,7 @@ def loweredCovDerivAlongVFraw
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma loweredCovDerivAlongVFraw_eq_covApply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -57,7 +58,7 @@ lemma loweredCovDerivAlongVFraw_eq_covApply
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma loweredCovDerivAlongVFraw_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -92,6 +93,7 @@ lemma loweredCovDerivAlongVFraw_contMDiff
 omit [CompactSpace M] [I.Boundaryless] in
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -182,7 +184,7 @@ def loweredCovDerivAlongVF
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 @[simp] lemma loweredCovDerivAlongVF_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

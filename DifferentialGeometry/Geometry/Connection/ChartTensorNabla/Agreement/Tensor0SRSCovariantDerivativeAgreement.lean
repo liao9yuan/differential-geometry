@@ -38,6 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem tensorRSCovariantDerivative_zeroS_unit_eval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯)
@@ -169,7 +170,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
       unitScalarRSLiftSection (I := I) (M := M) (fun z => S z) y := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensor0SCovariantDerivative_eq_tensorRSCovariantDerivative
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; Tensor0SModel s ℝ E, (fun y : M => Tensor0SSpace s I y)⟯)

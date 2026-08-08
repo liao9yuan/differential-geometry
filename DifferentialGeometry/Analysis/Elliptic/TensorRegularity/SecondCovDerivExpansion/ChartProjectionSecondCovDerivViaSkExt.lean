@@ -49,7 +49,7 @@ private lemma packageAsCc_toSection
     (packageAsCc (I := I) (M := M) g r s S).toSection = S := rfl
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem chartα_proj_secondCovDeriv_eq_chartCoord_first_deriv_of_Sk_ext
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

@@ -23,7 +23,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
+  [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
 omit [I.Boundaryless] in
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in

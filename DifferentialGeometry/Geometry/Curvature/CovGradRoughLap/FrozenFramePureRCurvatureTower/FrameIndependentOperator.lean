@@ -58,6 +58,7 @@ private noncomputable def pureRSlot0BilinAt
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma pureRSlot0BilinAt_apply
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (W : Π b : M, TensorRSSpace 0 (m + 1) I b) (y : M) (v X Y : TangentSpace I y) :
@@ -67,6 +68,7 @@ private lemma pureRSlot0BilinAt_apply
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma pureRSlot0BilinAt_frame_summand
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (W : SmoothCcTensor g 0 (m + 1))
@@ -78,7 +80,7 @@ private lemma pureRSlot0BilinAt_frame_summand
         rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem pureRFrozenDirCLM_frame_independent
     (g : SmoothRiemannianMetric I M) (m : ℕ) (W : SmoothCcTensor g 0 (m + 1))
     {B C : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b} (y : M)
@@ -180,7 +182,7 @@ noncomputable def pureRGenuineEndoFib
     TensorRSSpace 0 (m + 1) I x :=
   pureRFrozenEndoFib (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) W x
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma pureRGenuineEndoFib_eq_frozen_on_nbhd
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (W : SmoothCcTensor g 0 (m + 1)) (x₀ : M) {y : M}
@@ -259,7 +261,7 @@ theorem covGrad_pureRGenuineDiffOp_eq
   rw [sub_add_cancel]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma pureRGenuineEndoFib_linear
     (g : SmoothRiemannianMetric I M) (m : ℕ) (c₁ c₂ : ℝ)
     (W₁ W₂ : SmoothCcTensor g 0 (m + 1)) (x : M) :
@@ -290,7 +292,7 @@ private lemma pureRGenuineEndoFib_linear
     ContinuousLinearMap.smul_apply, map_add, map_smul, map_smul]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma pureRGenuineEndoFib_local
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (W₁ W₂ : SmoothCcTensor g 0 (m + 1)) (x : M)

@@ -26,14 +26,14 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
 
 noncomputable def tensor00Scalar (x : M) :
     Tensor0SSpace 0 I x →L[ℝ] ℝ :=
   (continuousMultilinearCurryFin0 ℝ E ℝ).toContinuousLinearMap.comp
     (Tensor0SSpace.toModelL (I := I) 0 x)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
     [BoundarylessManifold I M] in
 lemma tensor00Scalar_apply (x : M) (τ : Tensor0SSpace 0 I x)
     (m : Fin 0 → TangentSpace I x) :
@@ -55,8 +55,7 @@ noncomputable def coframePair
   (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 2) ℝ).compContinuousLinearMap
     (fun k : Fin 2 => g.inner x (e ((![a, b] : Fin 2 → Fin n) k)))
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
-    [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
 lemma coframe2_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (a b : Fin n)
@@ -76,7 +75,7 @@ noncomputable def dualTensorFrame
   (tensor00Scalar (I := I) (M := M) x).smulRight
     (coframePair (I := I) (M := M) g x e a b)
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
     [BoundarylessManifold I M] in
 lemma dualTensorFrame_apply
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -88,7 +87,7 @@ lemma dualTensorFrame_apply
   unfold dualTensorFrame
   rw [ContinuousLinearMap.smulRight_apply]
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
     [BoundarylessManifold I M] in
 lemma fiberNormSqComponent_dualTensorFrame
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -120,8 +119,7 @@ lemma fiberNormSqComponent_dualTensorFrame
   rw [coframe2_apply (I := I) (M := M) g x e a b (fun k : Fin 2 => e (J k))]
   rw [horth a (J 0), horth b (J 1)]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
-    [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
 lemma tensor02_coframe_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -193,7 +191,7 @@ lemma tensor02_coframe_expansion
     rw [if_neg hb, mul_zero, mul_zero]
   · intro h; exact absurd (Finset.mem_univ (v 1)) h
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
     [BoundarylessManifold I M] in
 lemma tangent_orthonormalBasis_witness
     (g : SmoothRiemannianMetric I M) (x : M) :
@@ -256,7 +254,7 @@ lemma tangent_orthonormalBasis_witness
   · intro S
     rfl
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
     [BoundarylessManifold I M] in
 lemma tensor_dualFrame_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -324,7 +322,7 @@ lemma tensor_dualFrame_expansion
       dualTensorFrame_apply (I := I) (M := M) g x e a b τ, ← hc_def]
   rw [hLHS', hRHS']
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
     [BoundarylessManifold I M] in
 lemma riemannianFiberNormSq_eq_sum_component_sq
     (g : SmoothRiemannianMetric I M) (x : M)

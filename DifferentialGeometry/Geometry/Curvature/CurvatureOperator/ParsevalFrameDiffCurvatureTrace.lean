@@ -787,6 +787,7 @@ lemma nablaBaseSlotCurv_eq_of_leftMid
         (smoothExtensionTangent_contMDiff (I := I) x u)) x hYY')
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaTensor0SCurv_eq_of_pointwise_eq_leftMid
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X X' Y Y' Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -803,6 +804,7 @@ theorem nablaTensor0SCurv_eq_of_pointwise_eq_leftMid
   rw [nablaBaseSlotCurv_eq_of_leftMid (I := I) g X X' Y Y' Z x hX_eq hY_eq (u k)]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaTensor0SCurv_add_left
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X X' Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -828,6 +830,7 @@ theorem nablaTensor0SCurv_add_left
     (nablaBaseSlotCurv (I := I) g X' Y Z x (u k))
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaTensor0SCurv_smul_left
     (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -851,6 +854,7 @@ theorem nablaTensor0SCurv_smul_left
     (nablaBaseSlotCurv (I := I) g X Y Z x (u k))
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaTensor0SCurv_add_mid
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X Y Y' Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -876,6 +880,7 @@ theorem nablaTensor0SCurv_add_mid
     (nablaBaseSlotCurv (I := I) g X Y' Z x (u k))
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem nablaTensor0SCurv_smul_mid
     (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -990,7 +995,7 @@ def nablaTensor0SCurvBilin
             (smoothExtensionTangent_contMDiff (I := I) x w)) Z A hA x rfl hsmul]
       exact nablaTensor0SCurv_smul_mid (I := I) g s c _ _ Z A hA x)
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem nablaTensor0SCurvBilin_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1003,7 +1008,7 @@ theorem nablaTensor0SCurvBilin_apply
         (ContMDiffSection.mk (smoothExtensionTangent (I := I) x w)
           (smoothExtensionTangent_contMDiff (I := I) x w)) Z A x := rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem nablaTensor0SCurvBilin_apply_smooth
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1020,7 +1025,7 @@ theorem nablaTensor0SCurvBilin_apply_smooth
     Y Z A hA x ?_ ?_
   · simp only [ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq]
   · simp only [ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq]
-
+omit [SigmaCompactSpace M] in
 theorem parsevalFrame_eq_orthoFrame_diag_nablaTensor0SCurv
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

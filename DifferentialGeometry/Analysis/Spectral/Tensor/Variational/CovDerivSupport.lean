@@ -54,6 +54,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M)
@@ -85,7 +86,7 @@ private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
   rfl
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma tensorCovDerivAt_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) (v : E) :
@@ -114,7 +115,7 @@ lemma tensorCovDerivAt_eq_zero_off_tsupport
     (I := I) (M := M) g r s S x hev v
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) :
@@ -132,7 +133,7 @@ private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
   ring
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivPointwiseInner_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -146,7 +147,7 @@ theorem tensorCovDerivPointwiseInner_hasCompactSupport
     (I := I) (M := M) g r s S T hx_notsupp)
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivPointwiseInner_tsupport_subset_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -159,7 +160,7 @@ theorem tensorCovDerivPointwiseInner_tsupport_subset_left
     (I := I) (M := M) g r s S T hx_notsupp)
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivPointwiseInner_tsupport_subset_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :

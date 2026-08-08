@@ -95,7 +95,7 @@ lemma covLowerOrderIntegrand_def
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivPointwiseInner_chart_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -378,7 +378,7 @@ theorem covLowerOrderIntegrand_contDiffOn
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem covLowerOrderIntegrand_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M) :

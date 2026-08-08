@@ -53,6 +53,7 @@ noncomputable def genuineCurvTraceFixedFrameCovDeriv
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma genuineCurvTraceFixedFramePureR_def
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : Π b : M, TangentSpace I b)
@@ -65,6 +66,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 @[simp] lemma genuineCurvTraceFixedFrameCovDeriv_def
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : Π b : M, TangentSpace I b)
@@ -77,6 +79,7 @@ omit [NeZero (Module.finrank ℝ E)] in
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma genuineCurvTraceFixedFramePureR_smoothOrthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : Π b : M, TangentSpace I b)
@@ -88,6 +91,7 @@ lemma genuineCurvTraceFixedFramePureR_smoothOrthoFrame
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma genuineCurvTraceFixedFrameCovDeriv_smoothOrthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : Π b : M, TangentSpace I b)
@@ -101,6 +105,7 @@ lemma genuineCurvTraceFixedFrameCovDeriv_smoothOrthoFrame
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma genuineCurvTraceFixedFramePureR_summand_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {W : Π b : M, TangentSpace I b}
@@ -126,7 +131,7 @@ private lemma genuineCurvTraceFixedFramePureR_summand_contMDiff
   exact riemannSec_contMDiff (cov := tensorCov (I := I) g 0 s) (hB i) hW hcovBS
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem genuineCurvTraceFixedFramePureR_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {W : Π b : M, TangentSpace I b}
@@ -147,6 +152,7 @@ theorem genuineCurvTraceFixedFramePureR_contMDiff
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma genuineCurvTraceFixedFrameCovDeriv_summand_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {W : Π b : M, TangentSpace I b}
@@ -172,7 +178,7 @@ private lemma genuineCurvTraceFixedFrameCovDeriv_summand_contMDiff
   exact covApplyRS_contMDiff (I := I) g 0 s hcurvSec (hB i)
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem genuineCurvTraceFixedFrameCovDeriv_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {W : Π b : M, TangentSpace I b}
@@ -216,6 +222,7 @@ noncomputable def genuineThirdCurvFieldFibCovDeriv
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem genuineThirdCurvFieldFib_eq_pureR_add_covDeriv
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (w : TangentSpace I x)
@@ -287,6 +294,7 @@ noncomputable def genuineCurvatureOnlyDirectionalCLM
   ∑ i : Fin (Module.finrank ℝ E), genuinePureRDirCLMSummand (I := I) (M := M) g s S x i
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma genuinePureRDirCLM_apply_extend
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (v : TangentSpace I x) :
@@ -365,7 +373,7 @@ noncomputable def genuineCurvPureRFib
   covGradBundleEquiv (I := I) (M := M) 0 s x
     (genuineCurvatureOnlyDirectionalCLM (I := I) (M := M) g s S x)
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma tensor0S_curry_genuineCurvPureRFib_unit
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (v : TangentSpace I x) :
@@ -413,6 +421,7 @@ noncomputable def pureRDirCLMFixedFrame
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma pureRDirCLMFixedFrame_apply_smooth
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {W : Π b : M, TangentSpace I b}
@@ -443,6 +452,7 @@ lemma pureRDirCLMFixedFrame_apply_smooth
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma pureRDirCLMFixedFrame_smoothOrthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
     pureRDirCLMFixedFrame (I := I) (M := M) g s S (smoothOrthoFrame (I := I) g x) x =
@@ -480,6 +490,7 @@ noncomputable def genuineCurvPureRFibFixedFrame
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma genuineCurvPureRFibFixedFrame_smoothOrthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
     genuineCurvPureRFibFixedFrame (I := I) (M := M) g s S (smoothOrthoFrame (I := I) g x) x =
@@ -543,6 +554,7 @@ private noncomputable def pureRValuedBilinAt
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma pureRValuedBilinAt_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (W : Π b : M, TangentSpace I b) (y : M) (X Y : TangentSpace I y) :
@@ -551,7 +563,7 @@ private lemma pureRValuedBilinAt_apply
         ((tensorCov (I := I) g 0 s).toFun (fun b : M => S.toSection b) y Y) := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma pureRValuedBilinAt_frame_summand
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {W : Π b : M, TangentSpace I b}
@@ -580,7 +592,7 @@ private lemma pureRValuedBilinAt_frame_summand
   exact happly
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem genuineCurvTraceFixedFramePureR_frame_independent
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {W : Π b : M, TangentSpace I b}
@@ -673,7 +685,7 @@ private theorem genuineCurvTraceFixedFramePureR_frame_independent
   rw [orthonormal_basis_bilin_trace (I := I) (M := M) g (x := y) Hb (fun i => B i y) hB_orth,
     orthonormal_basis_bilin_trace (I := I) (M := M) g (x := y) Hb (fun i => C i y) hC_orth]
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma genuineCurvPureRFib_eq_fixedFrame_smoothOrthoFrame_on_nbhd
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :

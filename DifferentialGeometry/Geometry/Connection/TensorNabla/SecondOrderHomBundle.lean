@@ -118,7 +118,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
     [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M]
+  [T2Space M]
 
 open scoped ContDiff
 open CovariantDerivative

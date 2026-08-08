@@ -41,6 +41,7 @@ private lemma smoothOrthoFrameAsSection_toFun
       smoothOrthoFrame (I := I) g y i := rfl
 
 omit [CompleteSpace E] in
+omit [SigmaCompactSpace M] in
 theorem rawTensorConnLap_eq_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :

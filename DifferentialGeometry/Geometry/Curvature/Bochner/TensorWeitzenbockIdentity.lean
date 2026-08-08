@@ -30,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem riemannSec_tensorCov_baseSlot_eval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

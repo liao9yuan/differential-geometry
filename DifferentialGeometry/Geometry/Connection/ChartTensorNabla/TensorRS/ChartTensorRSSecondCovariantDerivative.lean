@@ -21,7 +21,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem

@@ -17,7 +17,7 @@ variable
   {H : Type*} [TopologicalSpace H]
   (I : ModelWithCorners ℝ E H)
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M]
+  [T2Space M]
 
 noncomputable def tensorRSCovariantDerivative (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))

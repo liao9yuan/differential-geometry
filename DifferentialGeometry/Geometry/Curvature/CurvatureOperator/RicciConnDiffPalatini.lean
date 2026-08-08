@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ConnectionDifferenceCurvature
-import DifferentialGeometry.Geometry.Flow.ConnectionDifference
+import DifferentialGeometry.Geometry.Connection.ConnectionDifference
 open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection

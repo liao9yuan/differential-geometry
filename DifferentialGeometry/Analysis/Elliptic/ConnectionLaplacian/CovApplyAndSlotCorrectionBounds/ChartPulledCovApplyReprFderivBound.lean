@@ -347,7 +347,7 @@ private lemma outputSlotPiece_differentiableAt
   exact (h_evt.differentiableAt_iff).mpr h_clm_diff
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma chart_pulled_covApply_repr_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)

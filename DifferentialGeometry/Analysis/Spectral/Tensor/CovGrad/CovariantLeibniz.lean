@@ -130,6 +130,7 @@ noncomputable def tensorCovDerivCrossRight
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma tensorCovDerivCrossLeft_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -145,6 +146,7 @@ lemma tensorCovDerivCrossLeft_def
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma tensorCovDerivCrossRight_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -235,7 +237,7 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_right_summand
   ring
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma smul_const_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :

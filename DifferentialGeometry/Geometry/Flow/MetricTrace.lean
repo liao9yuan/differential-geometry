@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.ConnectionDifference
+import DifferentialGeometry.Geometry.Connection.ConnectionDifference
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 open DifferentialGeometry.Geometry.Curvature

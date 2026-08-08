@@ -178,7 +178,7 @@ noncomputable def homTensorRSCovGradSec (g : SmoothRiemannianMetric I M) (r a c 
 set_option backward.isDefEq.respectTransparency false in
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 @[simp] lemma homTensorRSCovGradSec_apply (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (x : M) :
     (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r (c + 1) I x from

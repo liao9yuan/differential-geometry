@@ -241,7 +241,7 @@ theorem appCcRS_sub_left (g : SmoothRiemannianMetric I M) (a b c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivAt_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (x : M) (v : E) :
     (show TensorRSSpace a c I x from

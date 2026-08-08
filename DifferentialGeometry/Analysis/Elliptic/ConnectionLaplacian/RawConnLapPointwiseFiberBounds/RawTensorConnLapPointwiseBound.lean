@@ -48,6 +48,7 @@ noncomputable def chartFrameData
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma chartFrameData_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)

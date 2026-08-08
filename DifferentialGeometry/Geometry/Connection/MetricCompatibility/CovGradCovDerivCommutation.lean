@@ -98,7 +98,7 @@ lemma curriedSection_unitGradFieldGen_eq_covApply_abstract
   rw [curriedSection_unitGradFieldGen_apply (I := I) (M := M) g s S y (Z y), covApply_apply]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma tensorSecondCovDeriv_unit_eval_genVal
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B : Π b : M, TangentSpace I b}
@@ -192,7 +192,7 @@ lemma covGrad_covDeriv_leadingSlot_eq_abstractHess
     ((LeviCivita (I := I) g).toFun Z x (Y x))]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma covGrad_covDeriv_inner_leadingSlot_eq_abstractIter
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {Y : Π b : M, TangentSpace I b}

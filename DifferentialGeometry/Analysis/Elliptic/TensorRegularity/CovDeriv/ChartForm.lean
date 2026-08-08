@@ -327,7 +327,7 @@ private lemma chartTensorRSCovariantDerivative_locality
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -440,7 +440,7 @@ theorem covPrincipalIntegrand_symm
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)

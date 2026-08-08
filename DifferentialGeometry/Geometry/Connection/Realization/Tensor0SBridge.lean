@@ -26,6 +26,7 @@ noncomputable def tensor0Iso (x : M) :
   (tensor0SSpace_continuousLinearEquiv (I := I) 0 x).trans
     (continuousMultilinearCurryFin0 ℝ E ℝ).toContinuousLinearEquiv
 
+omit [SigmaCompactSpace M] [T2Space M] in
 noncomputable def scalarFn (T : Π x : M, Tensor0SSpace 0 I x) : M → ℝ :=
   fun x => tensor0Iso I M x (T x)
 

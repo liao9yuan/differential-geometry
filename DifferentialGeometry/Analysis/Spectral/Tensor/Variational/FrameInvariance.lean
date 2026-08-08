@@ -258,6 +258,7 @@ lemma tensorInnerPointwise_sum_right
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma chartTensorCovDeriv_innerMatrix_eq_transition
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M)
@@ -341,7 +342,7 @@ private lemma chartTensorCovDeriv_innerMatrix_eq_transition
   ring
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) {b : M}
@@ -525,6 +526,7 @@ private lemma frameGram_eq_transition
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma frameInnerMatrix_eq_transition
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M)
@@ -602,7 +604,7 @@ private lemma frameInnerMatrix_eq_transition
   ring
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma tensorCovDerivPointwiseInner_eq_frameGram_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M)
@@ -710,7 +712,7 @@ lemma tensorCovDerivPointwiseInner_eq_frameGram_sum
   exact trace_invariance_under_change_of_basis Tmat hT_unit Gmat hG_unit Bmat
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma tensorCovDerivPointwiseInner_eq_orthoFrame_diag_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M)

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
-import DifferentialGeometry.Geometry.Flow.ConnectionDifference
+import DifferentialGeometry.Geometry.Connection.ConnectionDifference
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 

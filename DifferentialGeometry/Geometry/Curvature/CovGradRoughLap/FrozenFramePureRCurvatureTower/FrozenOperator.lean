@@ -76,6 +76,7 @@ noncomputable def pureRFrozenDirCLM
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 lemma pureRFrozenDirCLM_apply
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -394,6 +395,7 @@ private lemma exists_uniform_riemannOp_tensorCov_proportional
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 private lemma pureRFrozenEndoFib_slot0Curry_rfns_eq
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)

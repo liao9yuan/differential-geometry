@@ -55,7 +55,7 @@ lemma covGrad_rawConnLap_unit_eval_curry
     (rawTensorConnLapSmooth g 0 2 T₀) x w
   exact this
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma rawConnLapSection_eq_frame_trace_secondCovDeriv_section
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     (rawTensorConnLapSmooth g 0 2 T₀).toSection x =
@@ -68,6 +68,7 @@ lemma rawConnLapSection_eq_frame_trace_secondCovDeriv_section
     (fun y : M => T₀.toSection y) x
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 lemma frame_trace_third_eq_swap_unit
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (w : TangentSpace I x) :
@@ -198,7 +199,7 @@ lemma curry_unitGradAbstractRoughLap_along
   rw [curry_abstract_covDeriv_unitGrad_unfold' (I := I) (M := M) g T₀ hC hW]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma covDeriv_unit_eval_eq_two
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun y : M => TensorRSSpace 0 2 I y)⟯)

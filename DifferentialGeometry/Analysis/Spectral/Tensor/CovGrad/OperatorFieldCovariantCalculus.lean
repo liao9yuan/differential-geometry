@@ -435,7 +435,7 @@ theorem appCc_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (x : M) (v : E) :
     (show TensorRSSpace 0 s I x from

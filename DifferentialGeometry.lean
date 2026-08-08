@@ -2237,7 +2237,7 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.MfderivZero
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.Smoothness.UniformChartFlowBridge
 import DifferentialGeometry.Geometry.Exponential.Smoothness.ZeroSectionConstancy
-import DifferentialGeometry.Geometry.Flow.ConnectionDifference
+import DifferentialGeometry.Geometry.Connection.ConnectionDifference
 import DifferentialGeometry.Geometry.Flow.DeTurckOperator
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation

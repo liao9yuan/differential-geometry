@@ -50,6 +50,7 @@ private lemma good_set_mem_baseSet_rs
 
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 theorem chart_pulled_covApply_explicit_formula
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :
@@ -148,7 +149,7 @@ theorem chart_pulled_covApply_explicit_formula
       (R := ℝ) hb_baseRS]
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem chart_pulled_covApply_explicit_formula_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :
@@ -195,7 +196,7 @@ theorem chart_pulled_covApply_explicit_formula_target
   exact h
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem chart_pulled_covApply_explicit_formula_target_smoothCc
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)

@@ -21,15 +21,14 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Tensor0SBundle
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
-    [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma exists_bump_tsupport_in_goodSet
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ chartLeviCivitaGoodSet (I := I) α) :
     ∃ χ : SmoothBumpFunction I b₀,
@@ -42,8 +41,7 @@ private lemma exists_bump_tsupport_in_goodSet
     (SmoothBumpFunction.nhds_basis_tsupport (I := I) b₀).mem_iff.mp hnhds
   exact ⟨χ, hχ⟩
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
-    [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma bumpedChartBasis_contMDiff
     (α : M) {b₀ : M}
     (k : Fin (Module.finrank ℝ E))

@@ -57,7 +57,7 @@ lemma metricTrace2_def
         H (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem metricTrace2_secondCovDeriv_eq_metricTraceHessian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -66,7 +66,7 @@ theorem metricTrace2_secondCovDeriv_eq_metricTraceHessian
   rw [metricTrace2_def, metricTraceHessian_def]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem rawTensorConnLap_eq_metricTrace2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -75,7 +75,7 @@ theorem rawTensorConnLap_eq_metricTrace2
   rw [metricTrace2_secondCovDeriv_eq_metricTraceHessian]
   exact rawTensorConnLap_eq_metricTraceHessian (I := I) g r s T x
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem metricTrace2_eq_gWeighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
