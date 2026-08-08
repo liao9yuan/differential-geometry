@@ -598,11 +598,10 @@ section MinimiserExistence
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M]
-    [T2Space M] [SigmaCompactSpace M]
-    [RiemannianBundle (fun x : M => TangentSpace I x)] [PseudoEMetricSpace M]
-    [IsRiemannianManifold I M] [CompleteSpace M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 private theorem path_length_minimising_sequence
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (p q : M) (hd : riemannianEDist I p q ≠ ⊤) :
     ∃ γ : ℕ → ℝ → M,
       (∀ n, γ n 0 = p) ∧ (∀ n, γ n 1 = q) ∧
@@ -637,13 +636,73 @@ end MinimiserExistence
 section ExpMapSurjectivity
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private theorem riemannianEDist_ne_top_of_connected
+    [ConnectedSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (p q : M) : riemannianEDist I p q ≠ (⊤ : ℝ≥0∞) := by
+  set S : Set M := {z : M | riemannianEDist I p z ≠ ⊤} with hS
+  have hpS : p ∈ S := by
+    simp only [hS, Set.mem_setOf_eq, riemannianEDist_self]
+    exact ENNReal.zero_ne_top
+  have hSopen : IsOpen S := by
+    rw [isOpen_iff_mem_nhds]
+    intro z₀ hz₀
+    have hfin : riemannianEDist I p z₀ ≠ ⊤ := hz₀
+    have hloc : ∀ᶠ z in nhds z₀, riemannianEDist I z₀ z < (1 : ℝ≥0∞) :=
+      eventually_riemannianEDist_lt I z₀ one_pos
+    filter_upwards [hloc] with z hz
+    simp only [hS, Set.mem_setOf_eq]
+    have htri : riemannianEDist I p z ≤
+        riemannianEDist I p z₀ + riemannianEDist I z₀ z :=
+      Manifold.riemannianEDist_triangle (I := I) (x := p) (y := z₀) (z := z)
+    have hlt : riemannianEDist I p z < ⊤ :=
+      lt_of_le_of_lt htri
+        (ENNReal.add_lt_top.mpr ⟨lt_of_le_of_ne le_top hfin,
+          lt_of_lt_of_le hz (by norm_num)⟩)
+    exact hlt.ne
+  have hScompl_open : IsOpen Sᶜ := by
+    rw [isOpen_iff_mem_nhds]
+    intro z₀ hz₀
+    have hinf : riemannianEDist I p z₀ = ⊤ := by
+      simpa only [hS, Set.mem_compl_iff, Set.mem_setOf_eq, not_not] using hz₀
+    have hloc : ∀ᶠ z in nhds z₀, riemannianEDist I z₀ z < (1 : ℝ≥0∞) :=
+      eventually_riemannianEDist_lt I z₀ one_pos
+    filter_upwards [hloc] with z hz
+    simp only [hS, Set.mem_compl_iff, Set.mem_setOf_eq, not_not]
+    by_contra hpz
+    have hpz' : riemannianEDist I p z ≠ ⊤ := hpz
+    have htri : riemannianEDist I p z₀ ≤
+        riemannianEDist I p z + riemannianEDist I z z₀ :=
+      Manifold.riemannianEDist_triangle (I := I) (x := p) (y := z) (z := z₀)
+    have hzz0 : riemannianEDist I z z₀ < ⊤ := by
+      rw [riemannianEDist_comm]
+      exact lt_of_lt_of_le hz (by norm_num)
+    have hfin' : riemannianEDist I p z₀ < ⊤ :=
+      lt_of_le_of_lt htri
+        (ENNReal.add_lt_top.mpr ⟨lt_of_le_of_ne le_top hpz', hzz0⟩)
+    exact hfin'.ne hinf
+  have hSclopen : IsClopen S := ⟨⟨hScompl_open⟩, hSopen⟩
+  have hSuniv : S = Set.univ := by
+    rcases isClopen_iff.mp hSclopen with hempty | huniv
+    · exact absurd (hempty ▸ hpS) (by simp)
+    · exact huniv
+  exact (hSuniv ▸ Set.mem_univ q : q ∈ S)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem exists_continuous_path_realizing_riemannianEDist
-    [ConnectedSpace M] (g : SmoothRiemannianMetric I M) (p q : M) :
+    [ConnectedSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ γ : ℝ → M,
       Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
         pathELength I γ 0 1 = riemannianEDist I p q := by
   by_cases hd : riemannianEDist I p q = ⊤
-  · sorry
+  · have hne : riemannianEDist I p q ≠ ⊤ :=
+      riemannianEDist_ne_top_of_connected (I := I) (M := M) p q
+    exact False.elim (hne hd)
   · obtain ⟨γseq, hγ0, hγ1, hγ_smooth, hγ_lb, hγ_ub⟩ :=
       path_length_minimising_sequence (I := I) p q hd
     set d : ℝ≥0∞ := riemannianEDist I p q with hd_def
@@ -668,7 +727,10 @@ theorem exists_continuous_path_realizing_riemannianEDist
     clear hLen_tendsto
     sorry
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem minimizing_path_is_smooth_geodesic
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
     (hab : a ≤ b) (hγ : Continuous γ)
     (hmin : pathELength I γ a b = riemannianEDist I (γ a) (γ b)) :
@@ -694,7 +756,10 @@ private theorem isGeodesicOn_affineReparam
       {s : ℝ | c * s + d ∈ Set.Icc a b} :=
   isGeodesicOn_comp_affine (I := I) hγ_geod
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem unit_speed_rescale
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b L : ℝ}
     (hab : a ≤ b) (hL : 0 < L)
     (hγ_geod : IsGeodesicOn (I := I) g γ (Set.Icc a b))
@@ -772,8 +837,12 @@ theorem unit_speed_rescale
   · intro t _ht
     sorry
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem exists_unit_speed_minimizing_geodesic_between_points
-    [ConnectedSpace M] (g : SmoothRiemannianMetric I M) (p q : M) :
+    [ConnectedSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M) (p q : M) :
     ∃ (γ : ℝ → M) (L : ℝ),
       0 ≤ L ∧ γ 0 = p ∧ γ L = q ∧
         ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L) ∧
