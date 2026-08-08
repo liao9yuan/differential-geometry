@@ -340,7 +340,7 @@ lemma eLpNorm_iterWeakPartial_le_of_norm_le
 
 omit [NeZero d] in
 lemma exists_diagonal_extraction_lp
-    {ι : Type*} [Fintype ι] {Ω : Set E}
+    {ι : Type*} [Finite ι] {Ω : Set E}
     {s : ι → ℕ → E → ℝ}
     (h : ∀ t : ι, ∀ ψ : ℕ → ℕ, StrictMono ψ →
       ∃ σ : ℕ → ℕ, StrictMono σ ∧ ∃ a : E → ℝ, MemLp a 2 (volume.restrict Ω) ∧
@@ -351,6 +351,7 @@ lemma exists_diagonal_extraction_lp
         Tendsto (fun n => eLpNorm (fun x => s t (ψ n) x - a x) 2
           (volume.restrict Ω)) atTop (𝓝 0) := by
   classical
+  letI : Fintype ι := Fintype.ofFinite ι
   have hmain : ∃ ψ : ℕ → ℕ, StrictMono ψ ∧
       ∀ t ∈ (Finset.univ : Finset ι), ∃ a : E → ℝ, MemLp a 2 (volume.restrict Ω) ∧
         Tendsto (fun n => eLpNorm (fun x => s t (ψ n) x - a x) 2

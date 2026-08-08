@@ -1,11 +1,14 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.POUFDerivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapL2WtwokTwoBoundChartPouEuclFderiv
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponentRawNorm
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.RellichHigher
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
 noncomputable section
 
@@ -242,6 +245,56 @@ lemma chartAtlasPOU_sum_eq_one_on_chartTarget
       have hzero : ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 :=
         chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hγ x
       exact hγ_supp (by simpa [Function.support] using hzero))).symm
+
+omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] in
+lemma eLpNorm_iterWeakPartial_le_basis
+    {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
+    {u : EuclN → ℝ} (hu_smooth : ContDiff ℝ (⊤ : WithTop ℕ∞) u)
+    (hu_supp : HasCompactSupport u) (hu_sub : tsupport u ⊆ Ω)
+    {m : ℕ} (β : Fin m → Fin (Module.finrank ℝ E)) :
+    eLpNorm (iterWeakPartial (d := Module.finrank ℝ E) 2 m β u Ω) 2
+        (volume.restrict Ω) ≤
+      eLpNorm (fun y => Real.sqrt (m + 1 : ℝ) * ‖iteratedFDeriv ℝ m u y‖) 2
+        (volume.restrict Ω) := by
+  classical
+  have hae := iterWeakPartial_ae_eq_iteratedFDeriv_of_smooth
+    (d := Module.finrank ℝ E) hΩ_open hu_smooth hu_supp hu_sub m β
+  rw [eLpNorm_congr_ae (p := 2) hae]
+  have hpt : ∀ᵐ y ∂(volume.restrict Ω),
+      ‖(iteratedFDeriv ℝ m u y)
+          (fun i : Fin m => EuclideanSpace.single (β i) (1 : ℝ))‖ ≤
+        Real.sqrt (m + 1 : ℝ) * ‖iteratedFDeriv ℝ m u y‖ := by
+    filter_upwards with y
+    have hone : ∀ i : Fin m,
+        ‖EuclideanSpace.single (β i) (1 : ℝ)‖ = 1 := by
+      intro i
+      simp [EuclideanSpace.single, PiLp.norm_single]
+    calc
+      ‖(iteratedFDeriv ℝ m u y)
+          (fun i : Fin m => EuclideanSpace.single (β i) (1 : ℝ))‖
+          ≤ ‖iteratedFDeriv ℝ m u y‖ *
+              (∏ i : Fin m, ‖EuclideanSpace.single (β i) (1 : ℝ)‖) :=
+            ContinuousMultilinearMap.le_opNorm _ _
+      _ = ‖iteratedFDeriv ℝ m u y‖ * 1 := by
+            rw [show (∏ i : Fin m, ‖EuclideanSpace.single (β i) (1 : ℝ)‖) = 1 by
+              simp [hone]]
+      _ ≤ ‖iteratedFDeriv ℝ m u y‖ * Real.sqrt (m + 1 : ℝ) := by
+            have hsqrt : (1 : ℝ) ≤ Real.sqrt (m + 1 : ℝ) := by
+              have hle : (1 : ℝ) ^ 2 ≤ (m + 1 : ℝ) := by
+                nlinarith [Nat.cast_nonneg (α := ℝ) m]
+              exact (Real.le_sqrt (by positivity : 0 ≤ (1 : ℝ))
+                (by positivity : 0 ≤ (m + 1 : ℝ))).2 hle
+            exact mul_le_mul_of_nonneg_left hsqrt (norm_nonneg _)
+      _ = Real.sqrt (m + 1 : ℝ) * ‖iteratedFDeriv ℝ m u y‖ := by ring
+  have hpt' : ∀ᵐ y ∂(volume.restrict Ω),
+      ‖(iteratedFDeriv ℝ m u y)
+          (fun i : Fin m => EuclideanSpace.single (β i) (1 : ℝ))‖ ≤
+        ‖(Real.sqrt (m + 1 : ℝ) * ‖iteratedFDeriv ℝ m u y‖ : ℝ)‖ := by
+    filter_upwards [hpt] with y hy
+    simpa [Real.norm_eq_abs, abs_mul,
+      abs_of_nonneg (Real.sqrt_nonneg _), abs_of_nonneg (norm_nonneg _)] using hy
+  exact eLpNorm_mono_ae hpt'
 end Tensor
 end Sobolev
 end Analysis
