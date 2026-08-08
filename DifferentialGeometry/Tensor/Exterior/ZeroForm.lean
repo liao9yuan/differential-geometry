@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.Exterior.Basic
 import Mathlib.Geometry.Manifold.ContMDiffMap
+import Mathlib.Geometry.Manifold.Algebra.SmoothFunctions
 
 noncomputable section
 
@@ -112,6 +113,51 @@ theorem ofFunction_toFunction (α : DifferentialForm IM M 0) :
   ext x
   dsimp [ofFunction, toFunction]
   exact (ContinuousAlternatingMap.constOfIsEmptyLIE ℝ (TangentSpace IM x) ℝ (Fin 0)).right_inv (α x)
+
+noncomputable def toFunctionMap (α : DifferentialForm IM M 0) : C^⊤⟮IM, M; ℝ⟯ :=
+  ⟨toFunction α, contMDiff_toFunction α⟩
+
+@[simp]
+theorem toFunctionMap_apply (α : DifferentialForm IM M 0) (x : M) :
+    (toFunctionMap α) x = toFunction α x := rfl
+
+theorem toFunctionMap_ofFunctionMap (f : C^⊤⟮IM, M; ℝ⟯) :
+    toFunctionMap (ofFunctionMap f) = f := by
+  ext x
+  simp [toFunctionMap, ofFunctionMap]
+
+theorem ofFunctionMap_toFunctionMap (α : DifferentialForm IM M 0) :
+    ofFunctionMap (toFunctionMap α) = α := by
+  ext x
+  simp [toFunctionMap, ofFunctionMap, ofFunction_toFunction]
+
+theorem toFunction_add (α β : DifferentialForm IM M 0) :
+    toFunction (α + β) = toFunction α + toFunction β := by
+  funext x
+  change (α x + β x).toFun (0 : Fin 0 → TangentSpace IM x) =
+    (α x).toFun (0 : Fin 0 → TangentSpace IM x) + (β x).toFun (0 : Fin 0 → TangentSpace IM x)
+  rfl
+
+theorem toFunction_smul (c : ℝ) (α : DifferentialForm IM M 0) :
+    toFunction (c • α) = c • toFunction α := by
+  funext x
+  change (c • α x).toFun (0 : Fin 0 → TangentSpace IM x) =
+    c • (α x).toFun (0 : Fin 0 → TangentSpace IM x)
+  rfl
+
+noncomputable def zeroFormLinearEquiv : DifferentialForm IM M 0 ≃ₗ[ℝ] C^⊤⟮IM, M; ℝ⟯ where
+  toFun := toFunctionMap
+  invFun := ofFunctionMap
+  left_inv := ofFunctionMap_toFunctionMap
+  right_inv := toFunctionMap_ofFunctionMap
+  map_add' := by
+    intro α β
+    ext x
+    simp [toFunctionMap, toFunction_add]
+  map_smul' := by
+    intro c α
+    ext x
+    simp [toFunctionMap, toFunction_smul]
 
 private theorem exteriorDerivativeAt_ofFunction_apply [BoundarylessManifold IM M]
     (f : M → ℝ) (hf : ContMDiff IM 𝓘(ℝ, ℝ) ⊤ f) (x : M) (v : TangentSpace IM x) :
