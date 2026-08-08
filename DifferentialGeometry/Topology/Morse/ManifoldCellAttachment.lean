@@ -4415,6 +4415,149 @@ theorem morseModifiedRetractionHomotopy_eq_self_of_mem_lowerUnion {n k : ℕ} (h
     rw [hsymm, hfix]
     exact hxy
 
+theorem modifiedCollarHomotopy_fix_handle {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    (hε : 0 < ε) {t : ℝ} {y : MorseModel n}
+    (hy : y ∈ Set.range (fun p : CellBoundary k × ClosedCell (n - k) =>
+      cocoreModelPoint hk ε r p)) :
+    modifiedCollarHomotopy hk c ε t y = y := by
+  rcases hy with ⟨p, hp⟩
+  have hfy : morseNormalForm hk c y ≤ c - ε := by
+    rw [← hp]
+    exact le_of_eq (morseNormalForm_cocoreModelPoint hk c ε r (le_of_lt hε) p)
+  dsimp [modifiedCollarHomotopy]
+  rw [if_pos hfy]
+
+theorem modifiedNormalForm_cocoreModelPoint_mem_lower {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hε : 0 < ε) (p : CellBoundary k × ClosedCell (n - k)) :
+    modifiedNormalForm hk c ε δ (cocoreModelPoint hk ε r p) ≤ c - ε := by
+  rw [modifiedNormalForm_eq_sub_dip]
+  have hnf : morseNormalForm hk c (cocoreModelPoint hk ε r p) = c - ε :=
+    morseNormalForm_cocoreModelPoint hk c ε r (le_of_lt hε) p
+  rw [hnf]
+  have hd : 0 ≤ modelModifiedDip hk ε δ (cocoreModelPoint hk ε r p) :=
+    modelModifiedDip_nonneg hk ε δ (le_of_lt hε) _
+  linarith
+
+theorem lowerHandleUnion_subset_modifiedSublevel {n k : ℕ} (hk : k ≤ n) (c ε r δ R : ℝ)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ R)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
+    (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) :
+    {x : M | x ∈ sublevel f (c - ε) ∪ χ '' (Set.range (fun p : CellBoundary k × ClosedCell (n - k) =>
+      cocoreModelPoint hk ε r p))} ⊆
+    {x : M | morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f x ≤ c - ε} := by
+  let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f
+  intro x hx
+  change g x ≤ c - ε
+  rcases hx with hflow | hhandle
+  · have hle : g x ≤ f x := morseModifiedFunction_le_f (H := H) (M := M) hk c ε δ R hε χ f hnorm x
+    exact le_trans hle hflow
+  · rcases hhandle with ⟨y, hy, hxy⟩
+    rcases hy with ⟨p, hp⟩
+    have hyb : morseNorm n y ≤ R := by
+      rw [← hp]
+      exact le_trans (cocoreModelPoint_norm_le hk ε r (le_of_lt hε) p) hεr
+    have hysrc : y ∈ χ.source := hχsrc y hyb
+    have hgx : g x = modifiedNormalForm hk c ε δ y := by
+      dsimp [g, morseModifiedFunction]
+      rw [← hxy, if_pos (χ.map_source hysrc), χ.left_inv hysrc, if_pos hyb]
+    rw [hgx]
+    rw [← hp]
+    exact modifiedNormalForm_cocoreModelPoint_mem_lower hk c ε r δ hε p
+
+theorem morseModifiedRetraction_eq_self_of_mem_lowerHandleUnion {n k : ℕ} (hk : k ≤ n)
+    (c ε r R : ℝ) (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ R)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
+    (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source)
+    {x : M}
+    (hx : x ∈ sublevel f (c - ε) ∪ χ '' (Set.range (fun p : CellBoundary k × ClosedCell (n - k) =>
+      cocoreModelPoint hk ε r p))) :
+    morseModifiedRetraction (H := H) (M := M) hk c ε R χ x = x := by
+  let ball : Set (MorseModel n) := {y : MorseModel n | morseNorm n y ≤ R}
+  rcases hx with hflow | hhandle
+  · by_cases hC : x ∈ χ '' ball
+    · rcases hC with ⟨y, hy, hxy⟩
+      have hfy : morseNormalForm hk c y ≤ c - ε := by
+        have hfx : f (χ y) ≤ c - ε := by
+          simpa [hxy] using hflow
+        rwa [hnorm y hy] at hfx
+      have hsymm : χ.symm x = y := by
+        rw [← hxy]
+        exact χ.left_inv (hχsrc y hy)
+      dsimp [morseModifiedRetraction]
+      rw [if_pos ⟨y, hy, hxy⟩]
+      dsimp [modifiedCollarRetraction]
+      rw [if_pos (by simpa [hsymm] using hfy)]
+      exact χ.right_inv (by
+        rw [← hxy]
+        exact χ.map_source (hχsrc y hy))
+    · dsimp [morseModifiedRetraction]
+      rw [if_neg hC]
+  · rcases hhandle with ⟨y, hy, hxy⟩
+    have hyHandle : y ∈ Set.range (fun p : CellBoundary k × ClosedCell (n - k) =>
+        cocoreModelPoint hk ε r p) := hy
+    rcases hy with ⟨p, hp⟩
+    have hyb : morseNorm n y ≤ R := by
+      rw [← hp]
+      exact le_trans (cocoreModelPoint_norm_le hk ε r (le_of_lt hε) p) hεr
+    have hfix : modifiedCollarRetraction hk c ε y = y := by
+      have h1 := modifiedCollarHomotopy_fix_handle hk c ε r hε (t := 1) hyHandle
+      simpa [modifiedCollarHomotopy_one hk c ε y] using h1
+    have hsymm : χ.symm x = y := by
+      rw [← hxy]
+      exact χ.left_inv (hχsrc y hyb)
+    dsimp [morseModifiedRetraction]
+    rw [if_pos ⟨y, hyb, hxy⟩]
+    rw [hsymm, hfix]
+    exact hxy
+
+theorem morseModifiedRetractionHomotopy_eq_self_of_mem_lowerHandleUnion {n k : ℕ} (hk : k ≤ n)
+    (c ε r R : ℝ) (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ R)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
+    (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source)
+    {t : ℝ} {x : M}
+    (hx : x ∈ sublevel f (c - ε) ∪ χ '' (Set.range (fun p : CellBoundary k × ClosedCell (n - k) =>
+      cocoreModelPoint hk ε r p))) :
+    morseModifiedRetractionHomotopy (H := H) (M := M) hk c ε R χ t x = x := by
+  let ball : Set (MorseModel n) := {y : MorseModel n | morseNorm n y ≤ R}
+  rcases hx with hflow | hhandle
+  · by_cases hC : x ∈ χ '' ball
+    · rcases hC with ⟨y, hy, hxy⟩
+      have hfy : morseNormalForm hk c y ≤ c - ε := by
+        have hfx : f (χ y) ≤ c - ε := by
+          simpa [hxy] using hflow
+        rwa [hnorm y hy] at hfx
+      have hsymm : χ.symm x = y := by
+        rw [← hxy]
+        exact χ.left_inv (hχsrc y hy)
+      dsimp [morseModifiedRetractionHomotopy]
+      rw [if_pos ⟨y, hy, hxy⟩]
+      rw [modifiedCollarHomotopy_eq_self_of_lower hk c ε (by simpa [hsymm] using hfy)]
+      exact χ.right_inv (by
+        rw [← hxy]
+        exact χ.map_source (hχsrc y hy))
+    · dsimp [morseModifiedRetractionHomotopy]
+      rw [if_neg hC]
+  · rcases hhandle with ⟨y, hy, hxy⟩
+    have hyb : morseNorm n y ≤ R := by
+      rcases hy with ⟨p, hp⟩
+      rw [← hp]
+      exact le_trans (cocoreModelPoint_norm_le hk ε r (le_of_lt hε) p) hεr
+    have hfix : modifiedCollarHomotopy hk c ε t y = y :=
+      modifiedCollarHomotopy_fix_handle hk c ε r hε hy
+    have hsymm : χ.symm x = y := by
+      rw [← hxy]
+      exact χ.left_inv (hχsrc y hyb)
+    dsimp [morseModifiedRetractionHomotopy]
+    rw [if_pos ⟨y, hyb, hxy⟩]
+    rw [hsymm, hfix]
+    exact hxy
+
 noncomputable def morseModifiedLowerSublevelHomotopyEquiv {n k : ℕ} (hk : k ≤ n) (c ε δ R : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hR : 4 * ε + 9 * δ ^ 2 / 4 < R ^ 2) (hRpos : 0 < R)
     (hεR : Real.sqrt (2 * ε) ≤ R)
