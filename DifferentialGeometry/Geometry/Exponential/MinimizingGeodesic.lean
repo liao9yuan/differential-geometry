@@ -2510,6 +2510,178 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
   minExp_of_ne_top
     (I := I) g hEnorm p q (riemannianEDist_ne_top (I := I) p q)
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem exists_continuous_path_realizing_riemannianEDist
+    [ConnectedSpace M]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p q : M) :
+    ∃ γ : ℝ → M,
+      Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
+        pathELength I γ 0 1 = riemannianEDist I p q := by
+  classical
+  have hfin : riemannianEDist I p q ≠ ⊤ :=
+    riemannianEDist_ne_top (I := I) p q
+  obtain ⟨v, hv_exp, hv_speed⟩ :=
+    minExp_of_ne_top (I := I) g hEnorm p q hfin
+  let γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p v
+  refine ⟨γ, ?_, ?_, ?_, ?_⟩
+  · change Continuous (intrinsicGeodesic (I := I) g hEnorm p v)
+    exact intrinsicGeodesic_continuous (I := I) g hEnorm p v
+  · simp [γ, intrinsicGeodesic_zero]
+  · change intrinsicGeodesic (I := I) g hEnorm p v 1 = q
+    rw [← expMapIntrinsic_def]
+    exact hv_exp
+  · change pathELength I (intrinsicGeodesic (I := I) g hEnorm p v) 0 1 =
+      riemannianEDist I p q
+    have hc_eq : ENNReal.ofReal (Real.sqrt (g.inner p v v)) = riemannianEDist I p q := by
+      rw [hv_speed]
+      exact ENNReal.ofReal_toReal hfin
+    have hpath_le : pathELength I (intrinsicGeodesic (I := I) g hEnorm p v) 0 1 ≤
+        ENNReal.ofReal (Real.sqrt (g.inner p v v)) := by
+      letI : MeasurableSpace M := borel M
+      haveI : BorelSpace M := ⟨rfl⟩
+      have hγ_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 (intrinsicGeodesic (I := I) g hEnorm p v) (Set.Icc (0 : ℝ) (1 : ℝ)) :=
+        (intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p v).mono (Set.subset_univ _)
+      rw [Manifold.pathELength_eq_lintegral_mfderiv_Icc]
+      have hc_nn : (0 : ℝ) ≤ Real.sqrt (g.inner p v v) := Real.sqrt_nonneg _
+      have h_le :
+          ∫⁻ τ in Set.Icc (0 : ℝ) (1 : ℝ), ‖mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) τ 1‖ₑ
+            ≤ ∫⁻ _ in Set.Icc (0 : ℝ) (1 : ℝ), ENNReal.ofReal (Real.sqrt (g.inner p v v)) := by
+        refine MeasureTheory.setLIntegral_mono' measurableSet_Icc (fun τ _ => ?_)
+        exact intrinsicGeodesic_velocity_enorm_le (I := I) g hEnorm p v τ
+      have h_const :
+          (∫⁻ _ in Set.Icc (0 : ℝ) (1 : ℝ), ENNReal.ofReal (Real.sqrt (g.inner p v v)))
+            = ENNReal.ofReal (Real.sqrt (g.inner p v v)) * MeasureTheory.volume (Set.Icc (0 : ℝ) (1 : ℝ)) :=
+        MeasureTheory.setLIntegral_const (Set.Icc (0 : ℝ) (1 : ℝ)) (ENNReal.ofReal (Real.sqrt (g.inner p v v)))
+      have h_vol : MeasureTheory.volume (Set.Icc (0 : ℝ) (1 : ℝ)) = ENNReal.ofReal (1 - 0) :=
+        Real.volume_Icc
+      have h_mul :
+          ENNReal.ofReal (Real.sqrt (g.inner p v v)) * ENNReal.ofReal (1 - 0)
+            = ENNReal.ofReal (Real.sqrt (g.inner p v v) * (1 - 0)) :=
+        (ENNReal.ofReal_mul hc_nn).symm
+      calc
+        ∫⁻ τ in Set.Icc (0 : ℝ) (1 : ℝ), ‖mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) τ 1‖ₑ
+            ≤ ∫⁻ _ in Set.Icc (0 : ℝ) (1 : ℝ), ENNReal.ofReal (Real.sqrt (g.inner p v v)) := h_le
+        _ = ENNReal.ofReal (Real.sqrt (g.inner p v v)) * MeasureTheory.volume (Set.Icc (0 : ℝ) (1 : ℝ)) := h_const
+        _ = ENNReal.ofReal (Real.sqrt (g.inner p v v)) * ENNReal.ofReal (1 - 0) := by rw [h_vol]
+        _ = ENNReal.ofReal (Real.sqrt (g.inner p v v) * (1 - 0)) := h_mul
+        _ = ENNReal.ofReal (Real.sqrt (g.inner p v v)) := by norm_num
+    have hpath_ge : ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
+        pathELength I (intrinsicGeodesic (I := I) g hEnorm p v) 0 1 := by
+      have hγ0 : intrinsicGeodesic (I := I) g hEnorm p v 0 = p :=
+        intrinsicGeodesic_zero (I := I) g hEnorm p v
+      have hγ1 : intrinsicGeodesic (I := I) g hEnorm p v 1 = q := by
+        rw [← expMapIntrinsic_def]
+        exact hv_exp
+      have hγ_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 (intrinsicGeodesic (I := I) g hEnorm p v) (Set.Icc (0 : ℝ) (1 : ℝ)) :=
+        (intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p v).mono (Set.subset_univ _)
+      have hdist_le := riemannianEDist_le_pathELength (I := I) (γ := intrinsicGeodesic (I := I) g hEnorm p v)
+        (a := (0 : ℝ)) (b := (1 : ℝ)) hγ_C1 hγ0 hγ1 zero_le_one
+      rw [← hc_eq] at hdist_le
+      exact hdist_le
+    have hpath_eq : pathELength I (intrinsicGeodesic (I := I) g hEnorm p v) 0 1 =
+        ENNReal.ofReal (Real.sqrt (g.inner p v v)) :=
+      le_antisymm hpath_le hpath_ge
+    exact hpath_eq.trans hc_eq
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **A unit-speed minimizing geodesic between any two points.**  On a
+connected complete Riemannian manifold, any two points are joined by a smooth
+geodesic whose parameter interval length realises the Riemannian distance and
+whose `g`-speed is constantly one on the open parameter interval. -/
+theorem exists_unit_speed_minimizing_geodesic_between_points
+    [ConnectedSpace M]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p q : M) :
+    ∃ (γ : ℝ → M) (L : ℝ),
+      0 ≤ L ∧ γ 0 = p ∧ γ L = q ∧
+        ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L) ∧
+        IsGeodesicOn (I := I) g γ (Set.Icc 0 L) ∧
+        (∀ t ∈ Set.Ioo (0 : ℝ) L,
+          (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
+              (mfderiv 𝓘(ℝ, ℝ) I γ t 1) = 1) ∧
+        riemannianEDist I p q = ENNReal.ofReal L := by
+  classical
+  have hfin : riemannianEDist I p q ≠ ⊤ := riemannianEDist_ne_top (I := I) p q
+  obtain ⟨v, hv_exp, hv_speed⟩ := minExp_of_ne_top (I := I) g hEnorm p q hfin
+  set d : ℝ := (riemannianEDist I p q).toReal with hd_def
+  have hd_nonneg : 0 ≤ d := ENNReal.toReal_nonneg
+  by_cases hd0 : d = 0
+  · have hxy : riemannianEDist I p q = 0 ∨ riemannianEDist I p q = ⊤ :=
+      (ENNReal.toReal_eq_zero_iff (riemannianEDist I p q)).mp hd0
+    have hd_eq : riemannianEDist I p q = 0 := hxy.resolve_right hfin
+    have hpq : p = q := riemannianEDist_eq_zero_imp_eq (I := I) p q hd_eq
+    let η : ℝ → M := fun _ => p
+    refine ⟨η, 0, le_rfl, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    · rfl
+    · change η 0 = q
+      simp [η, hpq]
+    · exact contMDiffOn_const
+    · exact (isGeodesic_const g p).isGeodesicOn (Set.Icc (0 : ℝ) 0)
+    · intro t ht
+      rcases ht with ⟨ht0, ht1⟩
+      linarith
+    · rw [hd_eq, ENNReal.ofReal_zero]
+  · have hL_pos : 0 < d := lt_of_le_of_ne hd_nonneg (Ne.symm hd0)
+    let L : ℝ := d
+    let w : TangentSpace I p := d⁻¹ • v
+    let η : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p w
+    have hinner_v : g.inner p v v = d ^ 2 := by
+      rw [← Real.sq_sqrt (gInner_self_nonneg (I := I) g p v)]
+      rw [hv_speed]
+    have hinner_w : g.inner p w w = 1 := by
+      dsimp [w]
+      rw [gInner_smul_self (I := I) g p d⁻¹ v, hinner_v]
+      have hpow : (d⁻¹) ^ 2 * d ^ 2 = 1 := by
+        rw [← mul_pow, inv_mul_cancel₀ hd0, one_pow]
+      exact hpow
+    have hsmul : L • w = v := by
+      dsimp [w]
+      rw [smul_smul]
+      have hmul : L * d⁻¹ = 1 := by
+        dsimp [L]
+        exact mul_inv_cancel₀ hd0
+      rw [hmul, one_smul]
+    have hη0_eq : η 0 = p := by
+      simp [η, w]
+    have hηL_eq : η L = q := by
+      change intrinsicGeodesic (I := I) g hEnorm p w L = q
+      have hηL' : intrinsicGeodesic (I := I) g hEnorm p w L =
+          expMapIntrinsic (I := I) g hEnorm p (L • w) := by
+        rw [expMapIntrinsic_def]
+        exact (intrinsicGeodesic_smul (I := I) g hEnorm p w L).symm
+      rw [hηL', hsmul]
+      exact hv_exp
+    have hspeed : ∀ t, g.inner (η t) (mfderiv 𝓘(ℝ, ℝ) I η t 1)
+        (mfderiv 𝓘(ℝ, ℝ) I η t 1) = 1 := by
+      intro t
+      change g.inner (intrinsicGeodesic (I := I) g hEnorm p w t)
+          (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p w) t 1)
+          (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p w) t 1) = 1
+      exact (intrinsicGeodesic_speedSq_eq (I := I) g hEnorm p w t).trans hinner_w
+    have hC1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc (0 : ℝ) L) := by
+      simpa [η] using
+        (intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p w).mono (Set.subset_univ _)
+    have hgeod : IsGeodesicOn (I := I) g η (Set.Icc (0 : ℝ) L) :=
+      (intrinsicGeodesic_isGeodesic (I := I) g hEnorm p w).isGeodesicOn
+        (Set.Icc (0 : ℝ) L)
+    have hdist_eq : riemannianEDist I p q = ENNReal.ofReal L := by
+      dsimp [L]
+      exact (ENNReal.ofReal_toReal hfin).symm
+    refine ⟨η, L, le_of_lt hL_pos, hη0_eq, hηL_eq, hC1, hgeod, ?_, hdist_eq⟩
+    · intro t ht
+      exact hspeed t
+
 end Exponential
 end Riemannian
 end Geometry
