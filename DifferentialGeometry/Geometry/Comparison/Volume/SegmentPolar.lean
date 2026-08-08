@@ -1,6 +1,11 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDomain
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopBall
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentArea
+import DifferentialGeometry.Geometry.Comparison.Variation.MinimalGeodesicNoConjugate
+import DifferentialGeometry.Geometry.Comparison.DistanceCalabi
+import DifferentialGeometry.Geometry.Comparison.HalfSqDistGrad
+import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradMain
+import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -91,6 +96,7 @@ namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.BonnetMyers
+open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -263,6 +269,117 @@ private theorem segBall_vol_le_density
           SegDom (I := I) g hEnorm x} ∩ closedGBall (I := I) g x R)) :=
     (hK.image hFcont).measurableSet
   exact (measure_mono hcov).trans himg
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A segment-domain launch vector has no conjugate vectors on the open radial
+interval: the radial geodesic realizes the distance to its endpoint, so its
+unit-speed reparametrization minimizes arc length, and a length-minimizing
+geodesic has no interior conjugate vectors. -/
+theorem segDom_not_conj
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {v : TangentSpace I x}
+    (hv : v ∈ SegDom (I := I) g hEnorm x) {t : ℝ} (ht : t ∈ Set.Ioo (0 : ℝ) 1) :
+    ¬ IsConjVec (I := I) g hEnorm x ((t • v : TangentSpace I x) : E) := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  set ℓ : ℝ := Real.sqrt (g.inner x v v) with hℓ_def
+  by_cases hv0 : v = 0
+  · have htz : ((t • v : TangentSpace I x) : E) = 0 := by simp [hv0]
+    rw [htz]
+    unfold IsConjVec
+    simp only [not_not]
+    have hz := mfderiv_expMapIntrinsic_at_zero (I := I) g hEnorm x
+    change Function.Injective (fun w : E =>
+      mfderiv 𝓘(ℝ, E) I (fun b : E =>
+        (expMapIntrinsic (I := I) g hEnorm x (show TangentSpace I x from b) : M))
+        (0 : E) w)
+    rw [hz]
+    simpa using (Function.injective_id : Function.Injective (id : E → E))
+  · have hℓ_pos : 0 < ℓ := by
+      rw [hℓ_def]
+      exact Real.sqrt_pos.mpr (g.pos x v hv0)
+    have hinner : g.inner x v v = ℓ ^ 2 := by
+      rw [hℓ_def]
+      exact (Real.sq_sqrt (gInner_self_nonneg (I := I) g x v)).symm
+    let u : E := (ℓ⁻¹ • v : E)
+    have hunit : g.inner x u u = 1 := by
+      dsimp [u]
+      rw [gInner_smul_self (I := I) g x ℓ⁻¹ v, hinner]
+      have hpow : (ℓ⁻¹) ^ 2 * ℓ ^ 2 = 1 := by
+        rw [← mul_pow, inv_mul_cancel₀ (ne_of_gt hℓ_pos), one_pow]
+      exact hpow
+    have hsmul : (ℓ : ℝ) • u = (v : E) := by
+      change (ℓ : ℝ) • ((ℓ⁻¹ : ℝ) • (v : E)) = (v : E)
+      rw [smul_smul, mul_inv_cancel₀ (ne_of_gt hℓ_pos), one_smul]
+    have hlu : (ℓ • (show TangentSpace I x from u) : TangentSpace I x) = v := by
+      simpa using hsmul
+    have hmin : ∀ η : ℝ → M,
+        ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 ℓ) →
+        η 0 = x →
+        η ℓ = intrinsicGeodesic (I := I) g hEnorm x
+            (show TangentSpace I x from u) ℓ →
+        arcLength (I := I) g
+            (intrinsicGeodesic (I := I) g hEnorm x
+              (show TangentSpace I x from u)) 0 ℓ ≤
+          arcLength (I := I) g η 0 ℓ := by
+      intro η hη hη0 hηL
+      have hγ_len : arcLength (I := I) g
+            (intrinsicGeodesic (I := I) g hEnorm x
+              (show TangentSpace I x from u)) 0 ℓ = ℓ := by
+        rw [arcLength_radial (I := I) g hEnorm x
+          (show TangentSpace I x from u) 0 ℓ, hunit]
+        simp
+      have hηL' : η ℓ = expMapIntrinsic (I := I) g hEnorm x v := by
+        rw [hηL]
+        rw [expMapIntrinsic_def]
+        rw [← hlu]
+        exact (intrinsicGeodesic_smul (I := I) g hEnorm x
+          (show TangentSpace I x from u) ℓ).symm
+      have hseg : riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x v) =
+          ENNReal.ofReal ℓ := by
+        have hfin : riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x v) ≠ ⊤ :=
+          riemannianEDist_ne_top (I := I) x _
+        rw [← (ENNReal.ofReal_toReal hfin)]
+        congr 1
+        exact hv.symm.trans hℓ_def.symm
+      have hd := DifferentialGeometry.edistOf_le_arcLength (I := I) g
+        (a := 0) (b := ℓ) hℓ_pos.le hη
+      have hdist_le' : riemannianEDist I x (η ℓ) ≤
+          ENNReal.ofReal (arcLength (I := I) g η 0 ℓ) := by
+        have hbridge := DifferentialGeometry.riemannianEDistOf_eq_riemannianEDist
+          (I := I) g hEnorm x (η ℓ)
+        rw [hη0] at hd
+        rwa [hbridge] at hd
+      have hof : ENNReal.ofReal ℓ ≤ ENNReal.ofReal (arcLength (I := I) g η 0 ℓ) := by
+        have hd1 : riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x v) ≤
+            ENNReal.ofReal (arcLength (I := I) g η 0 ℓ) := by
+          simpa [hηL'] using hdist_le'
+        have hd2 : riemannianEDist I x (intrinsicGeodesic (I := I) g hEnorm x v 1) ≤
+            ENNReal.ofReal (arcLength (I := I) g η 0 ℓ) := by
+          simpa [expMapIntrinsic_def] using hd1
+        have hseg' : riemannianEDist I x (intrinsicGeodesic (I := I) g hEnorm x v 1) =
+            ENNReal.ofReal ℓ := by
+          simpa [expMapIntrinsic_def] using hseg
+        rwa [hseg'] at hd2
+      have hle : ℓ ≤ arcLength (I := I) g η 0 ℓ := by
+        exact (ENNReal.ofReal_le_ofReal_iff
+          (arcLength_nonneg (I := I) g hℓ_pos.le)).mp hof
+      rw [hγ_len]
+      exact hle
+    have hc : t * ℓ ∈ Set.Ioo (0 : ℝ) ℓ := by
+      constructor
+      · exact mul_pos ht.1 hℓ_pos
+      · simpa using (mul_lt_mul_of_pos_right ht.2 hℓ_pos)
+    have hn := not_conj_of_min_len (I := I) g hEnorm x u hunit ℓ hℓ_pos hmin hc
+    have htv : ((t • v : TangentSpace I x) : E) = (t * ℓ) • u := by
+      rw [← hlu, smul_smul]
+      rfl
+    rwa [← htv] at hn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
