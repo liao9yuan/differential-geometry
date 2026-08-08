@@ -1744,6 +1744,71 @@ theorem isClosedEmbedding_handleEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r
   exact (contMDiff_handleEmbedding hk c ε r data hε hεr hRltR').continuous.isClosedEmbedding
     (handleEmbedding_injective hk c ε r data hε hr hεr)
 
+theorem morse_smooth_handle_attachment {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hδ : r ^ 2 / 2 < δ)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hRltR' : data.R < data.R')
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε) (c + δ),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    [NeZero k] [NeZero (m + 1 - k)]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (k = (k - 1) + 1)]
+    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    ∃ φ : StandardHandle k (m + 1 - k) → M,
+      Topology.IsClosedEmbedding φ ∧
+      (∀ p : StandardHandle k (m + 1 - k),
+        f (φ p) = morseNormalForm hk c (modelHandleMap hk ε r p)) ∧
+      (∀ p : AttachingRegion k (m + 1 - k),
+        φ (attachingInclusion k (m + 1 - k) p) =
+          (cocoreAttachingEmbedding hk c ε r data hε hεr p).1) ∧
+      (∀ p : StandardHandle k (m + 1 - k), φ p ∈ sublevel f (c + r ^ 2 / 2)) ∧
+      (∀ p : StandardHandle k (m + 1 - k),
+        φ p ∈ sublevel f (c - ε) ↔ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1) ∧
+      Topology.IsClosedEmbedding (handleCollarMap hk c ε r data hε hεr v hcomplete) ∧
+      (∀ q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1,
+        f (handleCollarMap hk c ε r data hε hεr v hcomplete q) =
+          c - ε + r ^ 2 * (1 - (q.2 : ℝ)) / 2) ∧
+      (∀ q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1,
+        handleCollarMap hk c ε r data hε hεr v hcomplete q ∈ sublevel f (c - ε) ↔
+          (q.2 : ℝ) = 1) := by
+  refine ⟨handleEmbedding hk c ε r data, ?_⟩
+  constructor
+  · exact isClosedEmbedding_handleEmbedding hk c ε r data hε hr hεr hRltR'
+  constructor
+  · intro p
+    exact handleEmbedding_f_value hk c ε r data (le_of_lt hε) hεr p
+  constructor
+  · intro p
+    exact handleEmbedding_attachingRegion hk c ε r data hε hεr p
+  constructor
+  · intro p
+    exact handleEmbedding_mem_sublevel hk c ε r (c + r ^ 2 / 2) data (le_of_lt hε) hεr
+      (le_rfl : c + r ^ 2 / 2 ≤ c + r ^ 2 / 2) p
+  constructor
+  · intro p
+    exact handleEmbedding_mem_lower_iff hk c ε r data hε hεr p
+  constructor
+  · exact isClosedEmbedding_handleCollarMap hk c ε r δ data hε hr hεr hRltR' hδ hf hreg
+      v hv hsupp hdfOn hrate hcomplete
+  constructor
+  · intro q
+    exact handleCollarMap_value hk c ε r δ data hε hεr hδ hf v hdfOn hrate hcomplete q
+  · intro q
+    exact handleCollarMap_mem_lower_iff hk c ε r δ data hε hr hεr hδ hf v hdfOn hrate hcomplete q
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
