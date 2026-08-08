@@ -2989,6 +2989,64 @@ theorem contMDiff_manifoldSublevelMap [I.Boundaryless] [IsManifold I (⊤ : With
     exact contMDiffAt_manifoldSublevelInteriorMap (I := I) g₁ g₂ a₁ a₂ hg₁ hg₂ hreg₁ hreg₂ x hxlt Φ hΦ hmap hstrict
       (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
 
+theorem manifoldSublevelDiffeomorphOfDiffeomorph [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (g f : M → ℝ) (a b : ℝ)
+    (hg : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg_g : ∀ x : M, g x = a → ¬ IsCriticalPointAt I g x)
+    (hreg_f : ∀ x : M, f x = b → ¬ IsCriticalPointAt I f x)
+    (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+    (hmap : ∀ x : M, g x ≤ a → f (Φ x) ≤ b)
+    (hbnd : ∀ x : M, g x = a → f (Φ x) = b)
+    (hstrict : ∀ x : M, g x < a → f (Φ x) < b)
+    (hmap' : ∀ x : M, f x ≤ b → g (Φ.symm x) ≤ a)
+    (hbnd' : ∀ x : M, f x = b → g (Φ.symm x) = a)
+    (hstrict' : ∀ x : M, f x < b → g (Φ.symm x) < a)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m) (SublevelSpace g a) :=
+      manifoldSublevelChartedSpace I g a hg hreg_g)
+    (hcs₂ : ChartedSpace (MorseHalfSpace m) (SublevelSpace f b) :=
+      manifoldSublevelChartedSpace I f b hf hreg_f)
+    (hchart₁ : ∀ y : SublevelSpace g a, hcs₁.chartAt y =
+      (if h : g y.1 = a then manifoldSublevelBoundaryChart I g a y h hg hreg_g
+        else manifoldSublevelInteriorChart I g a y (lt_of_le_of_ne (show g y.1 ≤ a from y.2) h) hg) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace f b, hcs₂.chartAt y =
+      (if h : f y.1 = b then manifoldSublevelBoundaryChart I f b y h hf hreg_f
+        else manifoldSublevelInteriorChart I f b y (lt_of_le_of_ne (show f y.1 ≤ b from y.2) h) hf) := by
+      intro y
+      rfl) :
+    Nonempty (@Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace g a) _ hcs₁ (SublevelSpace f b) _ hcs₂ (⊤ : ℕ∞)) := by
+  classical
+  letI := hcs₁
+  letI := hcs₂
+  let toFun : SublevelSpace g a → SublevelSpace f b := fun x => ⟨Φ x.1, hmap x.1 x.2⟩
+  let invFun : SublevelSpace f b → SublevelSpace g a := fun y => ⟨Φ.symm y.1, hmap' y.1 y.2⟩
+  let e : SublevelSpace g a ≃ SublevelSpace f b := by
+    refine { toFun := toFun, invFun := invFun, left_inv := ?_, right_inv := ?_ }
+    · intro x
+      apply Subtype.ext
+      exact Φ.toEquiv.left_inv x.1
+    · intro y
+      apply Subtype.ext
+      exact Φ.toEquiv.right_inv y.1
+  let d : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace g a) _ hcs₁ (SublevelSpace f b) _ hcs₂ (⊤ : ℕ∞) := by
+    refine { toEquiv := e, contMDiff_toFun := ?_, contMDiff_invFun := ?_ }
+    · simpa [toFun] using contMDiff_manifoldSublevelMap (I := I) g f a b hg hf hreg_g hreg_f
+        Φ Φ.contMDiff hmap hbnd hstrict (hcs₁ := hcs₁) (hcs₂ := hcs₂)
+        (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+    · simpa [invFun] using contMDiff_manifoldSublevelMap (I := I) f g b a hf hg hreg_f hreg_g
+        Φ.symm Φ.symm.contMDiff hmap' hbnd' hstrict' (hcs₁ := hcs₂) (hcs₂ := hcs₁)
+        (hchart₁ := hchart₂) (hchart₂ := hchart₁)
+  exact ⟨d⟩
+
 end
 
 end DifferentialGeometry.Topology.Morse
