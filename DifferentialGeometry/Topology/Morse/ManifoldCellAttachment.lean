@@ -4985,6 +4985,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
           ∃ φ : AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε),
             (∀ p : AttachingRegion k (m + 1 - k), f (φ p).1 = c - ε) ∧
             Function.Injective φ ∧
+            Topology.IsClosedEmbedding φ ∧
             (∃ _ : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
               (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
               (morseAttachedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) _
@@ -5135,6 +5136,50 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
       exact congrArg Subtype.val h
     exact cocoreAttachingEmbedding_injective hk c ε₀ r₀ data hε₀ hr₀ hεr₀
       (Subtype.ext h')
+  have hcontModel : Continuous (fun p : AttachingRegion k (m + 1 - k) =>
+      (cocoreModelPoint hk ε₀ r₀ p : MorseModel (m + 1))) := by
+    have hrew : (fun p : AttachingRegion k (m + 1 - k) =>
+        (cocoreModelPoint hk ε₀ r₀ p : MorseModel (m + 1))) =
+        fun p : AttachingRegion k (m + 1 - k) =>
+          recombine hk
+            ((Real.sqrt (2 * ε₀ + r₀ ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2)) •
+              (p.1 : EuclideanSpace ℝ (Fin k)))
+            (r₀ • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))) := by
+      funext p
+      dsimp [cocoreModelPoint]
+      rw [negPart_cellMap_smul hk]
+    rw [hrew]
+    have hpair : Continuous (fun p : AttachingRegion k (m + 1 - k) =>
+        ((Real.sqrt (2 * ε₀ + r₀ ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2)) •
+          (p.1 : EuclideanSpace ℝ (Fin k)),
+         r₀ • (p.2 : EuclideanSpace ℝ (Fin (m + 1 - k))))) := by
+      fun_prop
+    exact continuous_recombine hk |>.comp hpair
+  have hφ_cont : Continuous φ := by
+    have hχon : ContinuousOn χ (Set.range (fun p : AttachingRegion k (m + 1 - k) =>
+        cocoreModelPoint hk ε₀ r₀ p)) := by
+      refine χ.continuousOn_toFun.mono ?_
+      intro y hy
+      rcases hy with ⟨p, hp⟩
+      rw [← hp]
+      exact data.hχsrc (cocoreModelPoint hk ε₀ r₀ p)
+        (le_trans (cocoreModelPoint_norm_le hk ε₀ r₀ (le_of_lt hε₀) p) hεr₀)
+    have hmap : Set.MapsTo (fun p : AttachingRegion k (m + 1 - k) =>
+        cocoreModelPoint hk ε₀ r₀ p) Set.univ
+        (Set.range (fun p : AttachingRegion k (m + 1 - k) => cocoreModelPoint hk ε₀ r₀ p)) := by
+      intro p hp
+      exact Set.mem_range_self p
+    have hmain : Continuous (fun p : AttachingRegion k (m + 1 - k) =>
+        data.χ (cocoreModelPoint hk ε₀ r₀ p)) := by
+      have hstep := ContinuousOn.comp' hχon hcontModel.continuousOn hmap
+      exact (continuousOn_univ.mp hstep)
+    exact Continuous.subtype_mk hmain (by
+      intro p
+      exact le_of_eq (cocoreAttachingEmbedding_value hk c ε₀ r₀ data hε₀ hεr₀ p))
+  have hφ_closed : Topology.IsClosedEmbedding φ := by
+    letI : CompactSpace (AttachingRegion k (m + 1 - k)) := inferInstance
+    letI : T2Space (SublevelSpace f (c - ε₀)) := inferInstance
+    exact hφ_cont.isClosedEmbedding hφ_inj
   let Ψ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
       (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
       (morseModelWithCornersHalfSpace m)
@@ -5163,7 +5208,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
           morseUpperSublevel hk c r₀)
       exact morseAttachedToUpper_handleEmbedding hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀ p
   refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_, ?_,
-    r₀, hr₀, hr₀sq, δ₁, hδ₁₀, hδ₁r, φ, hφ_boundary, hφ_inj,
+    r₀, hr₀, hr₀sq, δ₁, hδ₁₀, hδ₁r, φ, hφ_boundary, hφ_inj, hφ_closed,
     ⟨morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀, trivial⟩, Ψ, hrelative⟩
   · exact hgup
   · intro x hx
