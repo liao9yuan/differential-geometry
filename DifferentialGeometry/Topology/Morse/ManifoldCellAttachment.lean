@@ -335,9 +335,7 @@ theorem cocoreAttachingMap_value {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
 theorem attachingRegionContMDiff_of {n k : ℕ}
     (F : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) → MorseModel n)
     (hF : ContDiff ℝ (⊤ : ℕ∞) F)
-    [NeZero k] [NeZero (n - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (n - k = (n - k - 1) + 1)] :
+    [NeZero k] [NeZero (n - k)] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((n - k - 1) + 1))) _ _
       (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((n - k - 1) + 1))) _
@@ -397,9 +395,7 @@ theorem attachingRegionContMDiff_of {n k : ℕ}
   exact hF'.comp hprod
 
 theorem attachingRegionRecombine_contMDiff {n k : ℕ} (hk : k ≤ n) (r ε : ℝ)
-    [NeZero k] [NeZero (n - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (n - k = (n - k - 1) + 1)] :
+    [NeZero k] [NeZero (n - k)] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((n - k - 1) + 1))) _ _
       (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((n - k - 1) + 1))) _
@@ -480,9 +476,7 @@ theorem contMDiff_cocoreAttachingMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ :
     (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
     (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
       (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
@@ -1016,9 +1010,7 @@ theorem contMDiff_cocoreAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε 
     (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
       (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
@@ -1128,9 +1120,7 @@ theorem isClosedEmbedding_cocoreAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1
     (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     Topology.IsClosedEmbedding (cocoreAttachingEmbedding hk c ε r data hε hεr) := by
   letI : ChartedSpace (MorseModel m) (LevelSetSpace f (c - ε)) :=
     manifoldLevelSetChartedSpace I f (c - ε) hf hreg
@@ -1216,9 +1206,7 @@ theorem contMDiff_handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v))
     (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     @ContMDiff ℝ _
       ((EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) ×
         EuclideanSpace ℝ (Fin 1)) _ _
@@ -1523,9 +1511,7 @@ theorem isClosedEmbedding_handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r
     (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
     (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     Topology.IsClosedEmbedding (handleCollarMap hk c ε r data hε hεr v hcomplete) := by
   exact (contMDiff_handleCollarMap hk c ε r data hε hεr hRltR' hf hreg v hv hsupp hcomplete).continuous.isClosedEmbedding
     (handleCollarMap_injective hk c ε r δ data hε hr hεr hδ hf v hv hdfOn hrate hcomplete)
@@ -1533,9 +1519,7 @@ theorem isClosedEmbedding_handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r
 theorem standardHandleContMDiff_of {n k : ℕ}
     (F : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) → MorseModel n)
     (hF : ContDiff ℝ (⊤ : ℕ∞) F)
-    [NeZero k] [NeZero (n - k)]
-    [Fact (k = (k - 1) + 1)]
-    [Fact (n - k = (n - k - 1) + 1)] :
+    [NeZero k] [NeZero (n - k)] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin ((k - 1) + 1)) × EuclideanSpace ℝ (Fin (((n - k - 1) + 1)))) _ _
       (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((n - k - 1) + 1))) _
@@ -1747,9 +1731,7 @@ theorem contMDiff_handleEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hRltR' : data.R < data.R')
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (k = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin ((k - 1) + 1)) × EuclideanSpace ℝ (Fin (((m + 1 - k - 1) + 1)))) _ _
       (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
@@ -1868,9 +1850,7 @@ theorem isClosedEmbedding_handleEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hRltR' : data.R < data.R')
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (k = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     Topology.IsClosedEmbedding (handleEmbedding hk c ε r data) := by
   letI : ChartedSpace (ModelProd (EuclideanHalfSpace ((k - 1) + 1))
       (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) (StandardHandle k (m + 1 - k)) :=
@@ -2174,10 +2154,7 @@ theorem morse_smooth_handle_attachment {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
     (hrate : ∀ x, -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (k = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     ∃ φ : StandardHandle k (m + 1 - k) → M,
       φ = handleEmbedding hk c ε r data ∧
       @ContMDiff ℝ _
@@ -3139,9 +3116,7 @@ theorem morse_smooth_handle_attachment_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε
     (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
-    [NeZero k] [NeZero (m + 1 - k)]
-    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     ∃ φ : AttachingRegion k (m + 1 - k) → LevelSetSpace f (c - ε),
       @ContMDiff ℝ _
         (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
