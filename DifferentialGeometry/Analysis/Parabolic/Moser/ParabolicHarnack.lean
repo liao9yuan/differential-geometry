@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.BombieriGiustiCrossover
 import DifferentialGeometry.Analysis.Parabolic.Moser.SmallExponentLocalBoundedness
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
+import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothDenseLp
 
 set_option autoImplicit false
 
@@ -457,6 +458,61 @@ theorem harnack_on_standard_separated_cylinders_of_global_volume_normalization
       (by norm_num : (1 / 4 : ℝ) ≤ (1 / 2 : ℝ))
       (by norm_num : (1 / 2 : ℝ) < 1)
       hrho hrhoGrad hB houter hmass hcyl hpde
+
+theorem harnack_on_standard_separated_cylinders_of_poincare_inequality
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (C : ℝ) (hC : 0 < C)
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      (SmoothScalar.one g) (SmoothScalar.one g) C)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M ↦ u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {A D : ℝ} (hAD : A < D)
+    (hvol : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ∧
+      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
+    (hpde : ∀ t ∈ Icc A D, ∀ x : M,
+      deriv (fun q ↦ u q x) t =
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+    ∀ t ∈ Icc (A + (D - A) / 8) (A + (D - A) / 4), ∀ x : M,
+      ∀ q ∈ Icc (A + 3 * (D - A) / 4) (A + 7 * (D - A) / 8), ∀ y : M,
+        u t x ≤
+          separatedCylinderHarnackFactor (I := I) (M := M)
+              g hdim (SmoothScalar.one g) (SmoothScalar.one g) C (1 / 2)
+                A (A + (D - A) / 8) (A + (D - A) / 4) (A + 3 * (D - A) / 8)
+                ((A + 3 * (D - A) / 8 + (A + 5 * (D - A) / 8)) / 2)
+                (A + 5 * (D - A) / 8) (A + 3 * (D - A) / 4) (A + 7 * (D - A) / 8)
+                (A + 15 * (D - A) / 16) D 0 0 (1 / 4) (1 / 2) 1 *
+            u q y := by
+  classical
+  have hgrad_one : ∀ x : M, gradFun (I := I) g (SmoothScalar.one g).toFun x = 0 := by
+    intro x
+    unfold gradFun
+    rw [SmoothScalar.one_toFun]
+    rw [mfderiv_const]
+    simp
+    rfl
+  have hrhoGrad : ∀ x : M,
+      g.inner x (gradFun (I := I) g (SmoothScalar.one g).toFun x)
+        (gradFun (I := I) g (SmoothScalar.one g).toFun x) ≤ 0 := by
+    intro x
+    rw [hgrad_one x]
+    simp
+  have hcutoffMass_one : cutoffMass (I := I) (M := M) (SmoothScalar.one g) =
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+    simp [cutoffMass, SmoothScalar.one]
+  have hmass : 0 < cutoffMass (I := I) (M := M) (SmoothScalar.one g) := by
+    rw [hcutoffMass_one]
+    have hDA : 0 < D - A := sub_pos.mpr hAD
+    exact pos_of_mul_pos_right hvol.1 (le_of_lt hDA)
+  simpa using
+    harnack_on_standard_separated_cylinders_of_global_volume_normalization
+      (I := I) (M := M) g hdim (SmoothScalar.one g) (SmoothScalar.one g) (SmoothScalar.one g)
+      C hC hP u hu hpos (B := (0 : ℝ)) hAD
+      (by norm_num : 0 ≤ (0 : ℝ))
+      (by intro x; simp) hrhoGrad (by intro x; simp) hmass hvol hpde
 
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
