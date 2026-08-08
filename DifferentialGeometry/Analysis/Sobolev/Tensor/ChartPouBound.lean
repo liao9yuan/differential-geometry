@@ -6,6 +6,8 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.CompChainRuleK
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBoundChartPushedPartialDeriv
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpBoundK
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPullCutoff
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
@@ -799,6 +801,93 @@ lemma iteratedWeakSobolevNorm_tensorChartComp_le_rawClassical
             congr 1
             ring
           rw [hsum_eq]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+lemma chartPushedRaw_raw_eq_sum_transCoeffE_raw_on_pou_tsupport
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
+    (γ α : M) (P₀ : TensorCompIdx (E := E) r s)
+    {x : M} (hx : x ∈ tsupport
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) ∩
+      tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :
+    chartPushedRaw (I := I) (M := M) α
+        (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
+        ((toEuclidean (E := E)) (extChartAt I α x)) =
+      ∑ Q : TensorCompIdx (E := E) r s,
+        transCoeffE (I := I) (M := M) g r s γ α P₀ Q
+            ((toEuclidean (E := E)) (extChartAt I γ x)) *
+          chartPushedRaw (I := I) (M := M) γ
+            (tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2)
+            ((toEuclidean (E := E)) (extChartAt I γ x)) := by
+  classical
+  have hxγ : x ∈ (chartAt H γ).source :=
+    chartAtlasPOU_isSubordinate (I := I) (M := M) γ hx.1
+  have hxα : x ∈ (chartAt H α).source :=
+    chartAtlasPOU_isSubordinate (I := I) (M := M) α hx.2
+  have hx_ext_γ : x ∈ (extChartAt I γ).source := by
+    rw [extChartAt_source (I := I)]; exact hxγ
+  have hx_ext_α : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source (I := I)]; exact hxα
+  have hL :
+      chartPushedRaw (I := I) (M := M) α
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
+          ((toEuclidean (E := E)) (extChartAt I α x)) =
+        tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2 x := by
+    rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
+      (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
+      (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) α hxα)]
+    congr 1
+    rw [(toEuclidean (E := E)).symm_apply_apply, (extChartAt I α).left_inv hx_ext_α]
+  have hsum := tensorChartComponentRaw_eq_transitionCoeff_sum
+    (I := I) (M := M) g r s T γ α P₀ ⟨hxγ, hxα⟩
+  have hQ : ∀ Q : TensorCompIdx (E := E) r s,
+      transCoeffE (I := I) (M := M) g r s γ α P₀ Q
+          ((toEuclidean (E := E)) (extChartAt I γ x)) *
+        chartPushedRaw (I := I) (M := M) γ
+          (tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2)
+          ((toEuclidean (E := E)) (extChartAt I γ x)) =
+        transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q x *
+          tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2 x := by
+    intro Q
+    have hR :
+        chartPushedRaw (I := I) (M := M) γ
+            (tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2)
+            ((toEuclidean (E := E)) (extChartAt I γ x)) =
+          tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2 x := by
+      rw [chartPushedRaw_apply_of_mem (I := I) (M := M) γ
+        (tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2)
+        (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) γ hxγ)]
+      congr 1
+      rw [(toEuclidean (E := E)).symm_apply_apply, (extChartAt I γ).left_inv hx_ext_γ]
+    have htrans := transCoeffE_apply (I := I) (M := M) g r s γ α P₀ Q hxγ
+    have hcutα : ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 1 :=
+      chartKernelCutoff_eqOn_one (I := I) (M := M) α hx.2
+    have hcutγ : ((chartKernelCutoff (I := I) (M := M) γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 1 :=
+      chartKernelCutoff_eqOn_one (I := I) (M := M) γ hx.1
+    have htrans_eq : transCoeffE (I := I) (M := M) g r s γ α P₀ Q
+          ((toEuclidean (E := E)) (extChartAt I γ x)) =
+        transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q x := by
+      rw [htrans]
+      rw [transportCoeffManifold_apply]
+      rw [hcutα, hcutγ]
+      ring
+    rw [htrans_eq, hR]
+  calc
+    chartPushedRaw (I := I) (M := M) α
+        (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
+        ((toEuclidean (E := E)) (extChartAt I α x))
+        = tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2 x := hL
+    _ = ∑ Q : TensorCompIdx (E := E) r s,
+          transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q x *
+            tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2 x := hsum
+    _ = ∑ Q : TensorCompIdx (E := E) r s,
+          transCoeffE (I := I) (M := M) g r s γ α P₀ Q
+              ((toEuclidean (E := E)) (extChartAt I γ x)) *
+            chartPushedRaw (I := I) (M := M) γ
+              (tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2)
+              ((toEuclidean (E := E)) (extChartAt I γ x)) := by
+      refine Finset.sum_congr rfl ?_
+      intro Q _
+      exact (hQ Q).symm
 end Tensor
 end Sobolev
 end Analysis
