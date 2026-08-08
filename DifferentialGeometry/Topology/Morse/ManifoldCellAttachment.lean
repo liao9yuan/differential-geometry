@@ -1575,7 +1575,7 @@ theorem standardHandleContMDiff_of {n k : ℕ}
 theorem standardHandleZeroContMDiff_of {n : ℕ}
     (F : EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin n) → MorseModel n)
     (hF : ContDiff ℝ (⊤ : ℕ∞) F)
-    [NeZero n] [Fact (n = (n - 1) + 1)] :
+    [NeZero n] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin ((n - 1) + 1))) _ _
       (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((n - 1) + 1))) _
@@ -1790,7 +1790,7 @@ theorem contMDiff_zeroHandleEmbedding {m : ℕ} (c ε r : ℝ)
     (data : MorseChart (m + 1) 0 (zero_le (m + 1)) c I f)
     (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hRltR' : data.R < data.R')
-    [NeZero (m + 1)] [Fact (m + 1 = (m + 1 - 1) + 1)] :
+    [NeZero (m + 1)] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1)))) _ _
       (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((m + 1 - 1) + 1))) _
@@ -1865,7 +1865,7 @@ theorem isClosedEmbedding_zeroHandleEmbedding {m : ℕ} (c ε r : ℝ)
     (data : MorseChart (m + 1) 0 (zero_le (m + 1)) c I f)
     (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hRltR' : data.R < data.R')
-    [NeZero (m + 1)] [Fact (m + 1 = (m + 1 - 1) + 1)] :
+    [NeZero (m + 1)] :
     Topology.IsClosedEmbedding (handleEmbedding (zero_le (m + 1)) c ε r data) := by
   letI : ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin 0))
       (EuclideanHalfSpace ((m + 1 - 1) + 1))) (StandardHandle 0 (m + 1)) :=
@@ -1876,7 +1876,7 @@ theorem isClosedEmbedding_zeroHandleEmbedding {m : ℕ} (c ε r : ℝ)
 theorem closedCellContMDiff_of {n : ℕ}
     (F : EuclideanSpace ℝ (Fin n) → MorseModel n)
     (hF : ContDiff ℝ (⊤ : ℕ∞) F)
-    [NeZero n] [Fact (n = (n - 1) + 1)] :
+    [NeZero n] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin ((n - 1) + 1))) _ _
       (EuclideanHalfSpace ((n - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((n - 1) + 1))
@@ -2068,7 +2068,7 @@ theorem contMDiff_topHandleEmbedding {m : ℕ} (c ε : ℝ)
     (data : MorseChart (m + 1) (m + 1) (le_rfl : m + 1 ≤ m + 1) c I f)
     (hεr : Real.sqrt (2 * ε) ≤ data.R)
     (hRltR' : data.R < data.R')
-    [NeZero (m + 1)] [Fact (m + 1 = (m + 1 - 1) + 1)] :
+    [NeZero (m + 1)] :
     @ContMDiff ℝ _
       (EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1)))) _ _
       (EuclideanHalfSpace ((m + 1 - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((m + 1 - 1) + 1))
@@ -2128,7 +2128,7 @@ theorem isClosedEmbedding_topHandleEmbedding {m : ℕ} (c ε : ℝ)
     (data : MorseChart (m + 1) (m + 1) (le_rfl : m + 1 ≤ m + 1) c I f)
     (hε : 0 < ε) (hεr : Real.sqrt (2 * ε) ≤ data.R)
     (hRltR' : data.R < data.R')
-    [NeZero (m + 1)] [Fact (m + 1 = (m + 1 - 1) + 1)] :
+    [NeZero (m + 1)] :
     Topology.IsClosedEmbedding (topHandleEmbedding c ε data) := by
   letI : ChartedSpace (EuclideanHalfSpace ((m + 1 - 1) + 1)) (ClosedCell (m + 1)) :=
     closedCellChartedSpace (m + 1)
@@ -2216,7 +2216,7 @@ theorem morse_smooth_handle_attachment_zero {m : ℕ} (c ε r : ℝ)
     (hε : 0 < ε) (hr : r ≠ 0)
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hRltR' : data.R < data.R')
-    [NeZero (m + 1)] [Fact (m + 1 = (m + 1 - 1) + 1)] :
+    [NeZero (m + 1)] :
     ∃ φ : StandardHandle 0 (m + 1) → M,
       φ = handleEmbedding (zero_le (m + 1)) c ε r data ∧
       @ContMDiff ℝ _
@@ -2265,7 +2265,7 @@ theorem morse_smooth_handle_attachment_top {m : ℕ} (c ε r : ℝ)
     (hε : 0 < ε)
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hRltR' : data.R < data.R')
-    [NeZero (m + 1)] [Fact (m + 1 = (m + 1 - 1) + 1)] :
+    [NeZero (m + 1)] :
     ∃ φ : ClosedCell (m + 1) → M,
       φ = topHandleEmbedding c ε data ∧
       @ContMDiff ℝ _
