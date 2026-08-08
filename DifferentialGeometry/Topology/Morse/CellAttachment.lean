@@ -2496,6 +2496,114 @@ theorem modelAttachedStretch_equiv {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
   · exact contDiff_modelAttachedStretch hk ε r δ hδ0 hδr hr
   · exact contDiff_modelAttachedUnstretch hk ε r δ hδ0 hδr hr
 
+noncomputable def coordClm {n : ℕ} (i : Fin n) : MorseModel n →L[ℝ] ℝ :=
+  { toFun := fun y => y i
+    map_add' := by intro x y; rfl
+    map_smul' := by intro a x; rfl
+    cont := continuous_apply i }
+
+theorem coordClm_apply {n : ℕ} (i : Fin n) (y : MorseModel n) :
+    coordClm i y = y i := rfl
+
+theorem fderiv_coord_sq {n : ℕ} (i : Fin n) (y w : MorseModel n) :
+    fderiv ℝ (fun y : MorseModel n => (y i) ^ 2) y w =
+      2 * (y i) * (w i) := by
+  let L : MorseModel n →L[ℝ] ℝ := coordClm i
+  have hL : fderiv ℝ (fun y : MorseModel n => L y) y = L := L.fderiv
+  have hproj : fderiv ℝ (fun y : MorseModel n => y i) y = L := by
+    change fderiv ℝ (fun y : MorseModel n => L y) y = L
+    exact hL
+  have hpow : fderiv ℝ (fun z : ℝ => z ^ 2) (y i) =
+      (2 * y i) • (1 : ℝ →L[ℝ] ℝ) := by
+    simpa using (fderiv_pow (𝕜 := ℝ) (f := fun z : ℝ => z) (n := 2) (x := y i)
+      differentiableAt_id)
+  have hfun : (fun y : MorseModel n => (y i) ^ 2) =
+      (fun z : ℝ => z ^ 2) ∘ (fun y : MorseModel n => L y) := by
+    funext y
+    change (y i) ^ 2 = (fun z : ℝ => z ^ 2) (L y)
+    rfl
+  calc
+    fderiv ℝ (fun y : MorseModel n => (y i) ^ 2) y w
+        = fderiv ℝ ((fun z : ℝ => z ^ 2) ∘ (fun y : MorseModel n => L y)) y w := by
+          rw [hfun]
+    _ = (fderiv ℝ (fun z : ℝ => z ^ 2) (L y) ∘ₗ fderiv ℝ (fun y : MorseModel n => L y) y) w := by
+          exact congrArg (fun φ : MorseModel n →L[ℝ] ℝ => φ w)
+            (fderiv_comp (x := y) (hg := (differentiableAt_id (x := L y)).pow 2)
+              (hf := L.differentiableAt))
+    _ = 2 * (y i) * (w i) := by
+          simp [coordClm, L, hproj]
+          ring
+
+theorem fderiv_posPart_normSq {n k : ℕ} (hk : k ≤ n) (y w : MorseModel n) :
+    fderiv ℝ (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) y w =
+      2 * ∑ j : Fin (n - k), (posPart hk y j) * (posPart hk w j) := by
+  have hfun : (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) =
+      ∑ j ∈ (Finset.univ : Finset (Fin (n - k))),
+        (fun y : MorseModel n => (posPart hk y j) ^ 2) := by
+    funext y
+    rw [EuclideanSpace.real_norm_sq_eq (posPart hk y)]
+    rw [Finset.sum_apply]
+  rw [hfun]
+  rw [fderiv_sum]
+  · rw [ContinuousLinearMap.coe_sum']
+    rw [Finset.sum_apply]
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (by
+      intro j hj
+      have hcoord := fderiv_coord_sq (posIdx hk j) y w
+      simpa [posPart, mul_assoc] using hcoord)
+  · intro j hj
+    exact ((coordClm (posIdx hk j)).differentiableAt.pow 2)
+
+theorem fderiv_negPart_normSq {n k : ℕ} (hk : k ≤ n) (y w : MorseModel n) :
+    fderiv ℝ (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) y w =
+      2 * ∑ i : Fin k, (negPart hk y i) * (negPart hk w i) := by
+  have hfun : (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) =
+      ∑ i ∈ (Finset.univ : Finset (Fin k)),
+        (fun y : MorseModel n => (negPart hk y i) ^ 2) := by
+    funext y
+    rw [EuclideanSpace.real_norm_sq_eq (negPart hk y)]
+    rw [Finset.sum_apply]
+  rw [hfun]
+  rw [fderiv_sum]
+  · rw [ContinuousLinearMap.coe_sum']
+    rw [Finset.sum_apply]
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (by
+      intro i hi
+      have hcoord : fderiv ℝ (fun y : MorseModel n => (y (negIdx hk i)) ^ 2) y w =
+          2 * (y (negIdx hk i)) * (w (negIdx hk i)) := fderiv_coord_sq (negIdx hk i) y w
+      simpa [negPart, mul_assoc] using hcoord)
+  · intro i hi
+    exact ((coordClm (negIdx hk i)).differentiableAt.pow 2)
+
+theorem fderiv_posPart_normSq_self {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    fderiv ℝ (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) y
+      (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) = 2 * ‖posPart hk y‖ ^ 2 := by
+  rw [fderiv_posPart_normSq]
+  have hw : posPart hk (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) =
+      posPart hk y :=
+    posPart_recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)
+  rw [hw]
+  have hsum : ∑ j : Fin (n - k), (posPart hk y j) * (posPart hk y j) =
+      ‖posPart hk y‖ ^ 2 := by
+    have hn := EuclideanSpace.real_norm_sq_eq (posPart hk y)
+    rw [hn]
+    apply Finset.sum_congr rfl
+    intro j hj
+    ring
+  rw [hsum]
+
+theorem fderiv_negPart_normSq_zero_direction {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    fderiv ℝ (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) y
+      (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) = 0 := by
+  rw [fderiv_negPart_normSq]
+  have hw : negPart hk (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) =
+      (0 : EuclideanSpace ℝ (Fin k)) :=
+    negPart_recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)
+  rw [hw]
+  simp
+
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
 
