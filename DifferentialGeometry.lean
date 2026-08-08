@@ -989,6 +989,7 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.WeakSolution
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponentRawNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartPouBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkp
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpBoundK
