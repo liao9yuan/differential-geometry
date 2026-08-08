@@ -95,7 +95,9 @@ private lemma gnGridCoeff_le
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
-private lemma gridRsConst_le
+/-- The metricwise mixed-grid coefficient is bounded by the fixed
+background-class coefficient. -/
+theorem grid_rs_const_le
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
     (g : SmoothRiemannianMetric I M)
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ) (k : ℕ) :
@@ -187,7 +189,7 @@ theorem grid_rs_unif
   refine ⟨hgridInt, le_trans hgridBd ?_⟩
   apply grid_two_mul_le
   · exact gridRSClassC_nonneg (E := E) (I := I) (M := M) gBase Λ 2
-  · exact gridRsConst_le (I := I) (M := M) gBase g hEq 2
+  · exact grid_rs_const_le (I := I) (M := M) gBase g hEq 2
   · exact Finset.sum_nonneg (fun j _ => sq_nonneg
       ‖iteratedCovGrad (I := I) g r₁ s₁ j S‖)
   · exact Finset.sum_nonneg (fun j _ => sq_nonneg

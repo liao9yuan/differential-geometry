@@ -1,6 +1,6 @@
 # Route-(c) full-slope Rung-3 Gårding consult
 
-## Result: CONTINUE-WITH-CORRECTIONS at the complete-edge peel
+## Result: CONTINUE-WITH-CORRECTIONS at the sharp post-peel estimates
 
 The 2026-08-08 source audit refuted the prompt's proposed arbitrary-acted-field
 pointwise extension.  `ricciDA_refold`, `ricciConn_refold`, and the public
@@ -79,25 +79,29 @@ two.  Its complete coefficient vanishes at `T=0`; paired with `L^2 T` it has the
 `C_g * H2(T) * H4(T)`), which Young absorbs into
 `eta * H4^2 + G_g * H3^2` without changing `delta2` or `R2`.
 
-The smallest honest next producer is therefore a non-Green exact normal form,
-tentatively `edge_center_peel`.  It must expose the explicit `2+0` and `1+1`
-Leibniz corners, the existing Cross term, and the curvature defect; it must not
-hide them in an opaque remainder or differentiate the test.  The subsequent
-substantive estimates are the sharp `P20`, `P11L/P11R`, and self-low carrier
-pairing bounds.  The Cross term in the peel cancels exactly with the Cross
-added by `b02_center_nf`; it must not be charged twice.  The route stops only
-if those estimates leave a naked or metricwise coefficient in front of
-`H4^2`, require an `H4/H5` state radius, or force a cap to be chosen after `g`.
+The exact non-Green normal form `edge_center_peel` is now focused-verified and
+directly refreshed.  It exposes the explicit `2+0` and `1+1` Leibniz corners,
+the existing Cross term, and the curvature defect without hiding them in an
+opaque remainder or differentiating the test.  The class-first top-kernel
+fibre bound, principal-face pairing, and nonzero curvature-defect pairing are
+now focused-verified and directly refreshed.  The next substantive estimates
+are the sharp `P20`, `P11L/P11R`, and self-low carrier pairing bounds.  The Cross term in the
+peel cancels exactly with the Cross added by `b02_center_nf`; it must not be
+charged twice.  The route stops only if those estimates leave a naked or
+metricwise coefficient in front of `H4^2`, require an `H4/H5` state radius, or
+force a cap to be chosen after `g`.
 
 ## Fixed audit boundary
 
 The original supplied consult was written against remote commit
-`94a94eeebe4b6cb24963423761b2d1a43627cdfe`.  The later Pro response verified
-remote commit `cda17d2ecb951945c9f0a6bfb60faf6b3ca36d11`, which is also the
-current live branch head for this audit.  The false arbitrary-passenger refold
-remains rejected.  The correction here concerns the derivative ledger and the
-quantifier order of the lower Gårding constant; it does not claim the final
-analytic theorem is proved.
+`94a94eeebe4b6cb24963423761b2d1a43627cdfe`.  The later Pro response audited
+remote snapshot `cda17d2ecb951945c9f0a6bfb60faf6b3ca36d11`; the current live
+branch head is `70cbba6385ec0a70804236e7731c71ce116971a4`, which contains the
+public diagonal self-refold and the documentation correction.  The untracked
+peel source is therefore not attributed to either remote snapshot.  The false
+arbitrary-passenger refold remains rejected.  The correction here concerns the
+derivative ledger and the quantifier order of the lower Gårding constant; it
+does not claim the final analytic theorem is proved.
 
 ## Historical consult prompt (refuted at Gate A)
 
@@ -185,9 +189,12 @@ dependency order, smallest new lemmas, and focused verification evidence.
 - Exact diagonal path normal form: **100% verified**.
 - Class-first principal-form absorption: **100% verified**.
 - Exact centered path/refold algebra and raw Cross estimates: **100% verified**.
-- Exact complete-edge peel `edge_center_peel`: unstated, **0%**.
-- Dedicated fixed-background Route-(c) machinery: approximately **94%**; the
-  remaining denominator is the complete-edge peel, its sharp lower pairing
-  estimates, and the diagonal residual Gårding theorem.
+- Exact complete-edge peel `edge_center_peel`: **100% verified**.
+- Class-first centred top-kernel fibre bound and principal-face pairing:
+  **100% verified**.
+- Nonzero `B * G` curvature-defect pairing: **100% verified**.
+- Dedicated fixed-background Route-(c) machinery: approximately **96%**; the
+  remaining denominator is the sharp post-peel corner/carrier
+  estimates and the diagonal residual Gårding theorem.
 - `ricci_flow_unif_existence`: **0%**.
 - Whole HCG project: approximately **3%**.

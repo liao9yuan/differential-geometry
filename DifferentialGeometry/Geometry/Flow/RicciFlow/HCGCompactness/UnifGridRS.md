@@ -7,6 +7,8 @@ the dimension-three uniform-existence route.
 
 - `gridRSClassC` replaces every per-metric `gridRsConst` coefficient by a
   finite expression in the fixed background-class `gnClassC` coefficients.
+- `grid_rs_const_le` exposes the reusable comparison between those two
+  coefficients for arbitrary finite grid order.
 - `grid_rs_unif` fixes the order-two window and combines that coefficient cap
   with the two mixed `morreyRS_unif` pointwise bounds.  It chooses one constant
   before the class metric and tensor fields vary, and returns both integrability
@@ -18,6 +20,10 @@ repair replacing a misoriented additive-monotonicity tactic.  A temporary
 axiom census for `grid_rs_unif` reported only `propext`, `Classical.choice`, and
 `Quot.sound`, with no `sorryAx`.  The module artifact was exported directly
 after its two previously stale dependencies were refreshed.
+
+The later public comparison `grid_rs_const_le` also passes focused
+verification and direct refresh; its direct axiom audit reports the same three
+standard axioms.
 
 Progress accounting: `grid_rs_unif` and its dedicated source are 100%
 complete.  This closes the class-first order-two mixed product-grid leaf, but

@@ -141,8 +141,8 @@ The binding producer chain is now:
    fixed-background `C2/C0` action but uses the self-background `C1` action;
    `galArmVecBg_split` and `galArmPair3_split` isolate exactly the complete C1
    correction.
-6. **Rest-only Rung-3 bound — CONTINUE-WITH-CORRECTIONS at the complete-edge
-   peel and sharp lower estimates.**  The arbitrary-passenger frozen adapter
+6. **Rest-only Rung-3 bound — CONTINUE-WITH-CORRECTIONS at the sharp post-peel
+   estimates.**  The arbitrary-passenger frozen adapter
    is permanently rejected.  The source orientation is
 
    ```text
@@ -249,9 +249,10 @@ The binding producer chain is now:
    `eps * H4^2 + G_g * H3^2` using `H2 <= 1` and `H2 <= H3`, without making
    either cap depend on `g`.
 
-   The binding next exact producer is therefore a principal-head-isolating,
-   non-Green peel, tentatively `edge_center_peel`, not a false zero theorem
-   `edge_qk_comm`.  It must expose the centered block as the sum of:
+   The principal-head-isolating non-Green peel `edge_center_peel` is now
+   focused-verified and directly refreshed; the false zero theorem
+   `edge_qk_comm` remains rejected.  The verified peel exposes the centered
+   block as the sum of:
 
    ```text
    L(A_s T)
@@ -265,13 +266,17 @@ The binding producer chain is now:
    `B_s = lieRefold2_s + C_s - 2s * ricciTop_s`,
    `G_T = nabla(pointwiseTensorCurv g 2 T)
      + pointwiseTensorCurv g 3 (nabla T)`, and the three `P` terms are the
-   explicit `2+0` and `1+1` Leibniz corners, not an opaque remainder.  The
-   only routine representation adapter still needed is a public diagonal
-   projection of the already verified private `rhsSelf_refold`; an
-   arbitrary-passenger version remains forbidden.
+   explicit `2+0` and `1+1` Leibniz corners, not an opaque remainder.  Its
+   supporting public diagonal projection `LowBaseInternal.self_refold` is also
+   focused-verified and exactly refreshed.  An arbitrary-passenger version
+   remains forbidden.
 
-   After that peel, the substantive inequalities are the sharp paired bounds
-   for `P20`, `P11L/P11R`, and `L(A_s T)`.  Their class-uniform `H4^2` heads
+   The class-first top-kernel fibre bound and the principal-face pairing are
+   now focused-verified and directly refreshed.  The nonzero `B_s G_T`
+   curvature-defect pairing is also focused-verified and directly refreshed.
+   The next substantive inequalities are the sharp paired bounds for `P20`,
+   `P11L/P11R`, and `L(A_s T)`.
+   Their class-uniform `H4^2` heads
    must have shapes `C(R+R^2) H4^2` and `C R H4^2`; fixed-metric derivative
    corners may additionally contribute only lower terms such as
    `C_g(H3*H4 + r^2*H4)`, where `r = H2(T)` is the actual homogeneous state
@@ -354,9 +359,9 @@ principal form absorption, polarized raw-pair estimates, and the exact
 fixed-path centered normal form are
 theorem-level 100%; the
 unstated rest-only theorem is 0%; the dedicated fixed-background
-direct-smoothing machinery is approximately 94%; the remaining denominator is
-the complete-edge `q/K` curvature-commutator theorem and the ensuing diagonal
-residual Gårding estimate;
+direct-smoothing machinery is approximately 96%; the remaining denominator is
+the post-peel corner and carrier estimates
+and the ensuing diagonal residual Gårding estimate;
 `ricci_flow_unif_existence` remains 0%; whole HCG remains approximately 3%.
 
 ## Phase (c-C0) result + (c-C): synthesis and endpoint
@@ -640,10 +645,23 @@ the in-place DT widenings of bricks 2a–2e.
   factor and at least one actual lower state norm, and is absorbed into
   `G_g * H3^2`.  A full symbol screen indicates that the transparent curvature
   block is generally nonzero; the historical
-  `edge_qk_comm = 0` target is therefore superseded.  The new exact frontier
-  is the non-Green principal-head-isolating `edge_center_peel`, followed by
-  sharp `P20/P11` and self-low carrier pairing estimates.
+  `edge_qk_comm = 0` target is therefore superseded.  The non-Green
+  principal-head-isolating `edge_center_peel` and its diagonal self-refold
+  projection are now focused-green and directly refreshed.  The live frontier
+  has passed the class-first top-kernel/principal-face and curvature-defect
+  estimates.  The live frontier is the sharp `P20/P11` estimate, followed by
+  the self-low carrier pairing estimate.
   `edge_center_h4_unif`, `lowbase_full3_unif`, the rest-only theorem, and
   headline `(N)` all remain
-  unstated at 0%; dedicated machinery remains approximately 94%; whole HCG
+  unstated at 0%; dedicated machinery is approximately 96%; whole HCG
   remains approximately 3%.
+
+- 2026-08-08 (post-peel analytic faces): `dagTop_cap_unif`,
+  `ricciTop_cap_unif`, and `topKer_cap_unif` now give the class-first
+  homogeneous fibre packet.  `bcD2_pair_h4_unif` and
+  `bcD2_pair_abs_unif` close the explicit principal face, while
+  `bg_pair_abs_unif` closes the nonzero curvature defect without an `H5`
+  state norm.  All of these declarations are focused-green and directly
+  refreshed.  The sharp `P20/P11` corner theorem, self-low carrier theorem,
+  `edge_center_h4_unif`, `lowbase_full3_unif`, rest-only theorem, and headline
+  `(N)` remain 0%.

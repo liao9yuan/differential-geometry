@@ -79,9 +79,10 @@ deleted.  Its right-hand side contained `covGrad V`; at the intended
 specialization `V = L^2 T` this is an `H^5` demand, so it cannot be a producer
 for the binding `H^4` route.
 
-The exact remaining gate is a **complete-edge non-Green peel**, not a zero
-identity, a norm wrapper, or a separate estimate of the order-zero and top
-blocks.  At fixed `s`, it must expand the joint high block
+The exact complete-edge gate is now closed by the sibling
+`EdgeCenterCommutator.edge_center_peel`.  It is a **complete-edge non-Green
+peel**, not a zero identity, a norm wrapper, or a separate estimate of the
+order-zero and top blocks.  At fixed `s`, it expands the joint high block
 
 `L(edgeQuad0_s T) + (L(Ds T) - Ds (L T)) - (Ks - K0)(L T)`
 
@@ -108,11 +109,12 @@ The first two representation gaps on the route from
 cell are now closed: public `appCcPsi_diag` identifies the top Leibniz corner,
 and public `cometricTrace_appCcRS` transports its double trace at arbitrary
 contravariant valence.  Exact raw-Laplacian naturality for the remaining
-`slotExtend` and `rsDomDomCongrSection` terms is still missing.  More
-importantly, no existing theorem packages the exact centered expression as a
-principal-head-isolating explicit peel suitable for the sharp product
-estimates.  The intended first theorem is `edge_center_peel`; it should retain
-the nonzero curvature defect rather than assert that it vanishes.
+`slotExtend` and `rsDomDomCongrSection` terms is still absent as a reusable
+generic API, but it is no longer a frontier on the selected route.  This file
+alone does not package the exact centered expression as a
+principal-head-isolating explicit peel; the sibling
+`EdgeCenterCommutator.edge_center_peel` supplies that verified package while
+retaining the nonzero curvature defect rather than asserting that it vanishes.
 
 ## Honest progress
 
@@ -123,9 +125,8 @@ the nonzero curvature defect rather than assert that it vanishes.
   stated; they expose, but do not cancel, the full curvature counterterm.
 - `edgeTopG_apply`: 100% complete and focused-verified as an orientation/action
   theorem; no zero cancellation is claimed.
-- Complete-edge non-Green peel `edge_center_peel`: not yet stated or proved,
-  therefore 0% as a theorem.  The existing refold and directed-Cross APIs are
-  supporting infrastructure only.
+- Complete-edge non-Green peel `edge_center_peel`: 100% complete,
+  focused-verified, and directly refreshed in `EdgeCenterCommutator`.
 - `edge_center_h4_unif`: not yet stated or proved, therefore 0%.
 - The downstream full low-base uniform estimate and the final uniform
   short-time existence endpoint remain unstated/unproved on this route,

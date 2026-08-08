@@ -44,6 +44,9 @@ coefficient on the symmetric realized segment, and canonical `C0`/`C1`
 read-offs.  These are implementation bridges for the canonical producer, not
 a second user-facing action hierarchy.  In particular, the `C0` read-off no
 longer strands the pairwise telescope behind inaccessible private constants.
+The public diagonal `self_refold` projection and `daTrans_cap` fibre bridge
+reuse the verified private diagonal calculations; neither is generalized to
+an independent acted field.
 
 The diagonal estimate is radius-free in the high norm: `D` depends only on
 the lower `H2` radius.  Its proof treats the complete `C0` self-action before

@@ -3489,6 +3489,29 @@ noncomputable def daTrans
   daTransMono (I := I) (M := M) g gm W daPermA -
     daTransMono (I := I) (M := M) g gm W daPermB
 
+/-- The Palatini transfer coefficient has the explicit fibre bound supplied by
+the metric perturbation radius.  The statement is restricted to the diagonal
+realized path used by the low-base split. -/
+theorem daTrans_cap
+    (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    (hT : ∀ (x : M) (u v : TangentSpace I x),
+      ccTensorBilin (I := I) g T x u v =
+        ccTensorBilin (I := I) g T x v u)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : 0 ≤ δ)
+    (hTδ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ)
+    (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 4 2 x
+        ((daTrans (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hTδ hδZ s) T).toSection x) ≤
+      (2 * deTurckArmFibreConst (Module.finrank ℝ E) *
+        (δ / (1 - δ))) ^ 2 := by
+  exact IntrinsicSpectral.daTrans_cap
+    (I := I) (M := M) g T hT hδ_lt hδ hTδ hδZ s hs x
+
 private theorem daMono_swap
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g 0 2) :
