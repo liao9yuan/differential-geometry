@@ -16,39 +16,6 @@ variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   (IM : ModelWithCorners ℝ EM HM)
   (M : Type*) [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
 
-set_option backward.isDefEq.respectTransparency false in
-@[instance_reducible]
-def seminormedAddCommGroupTangentSpace (x : M) : SeminormedAddCommGroup (TangentSpace IM x) :=
-  inferInstanceAs (SeminormedAddCommGroup EM)
-
-attribute [local instance] seminormedAddCommGroupTangentSpace
-
-set_option backward.isDefEq.respectTransparency false in
-@[instance_reducible]
-def normedAddCommGroupTangentSpace (x : M) : NormedAddCommGroup (TangentSpace IM x) :=
-  inferInstanceAs (NormedAddCommGroup EM)
-
-attribute [local instance] normedAddCommGroupTangentSpace
-
-set_option backward.isDefEq.respectTransparency false in
-@[instance_reducible]
-def normedSpaceTangentSpace (x : M) : NormedSpace ℝ (TangentSpace IM x) :=
-  inferInstanceAs (NormedSpace ℝ EM)
-
-attribute [local instance] normedSpaceTangentSpace
-
-lemma continuousAlternatingMap_trivializationAt_apply (m : ℕ) (x₀ x : M)
-    (L : Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) :
-    (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
-      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀ ⟨x, L⟩).2 =
-      L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) := by
-  change (Pretrivialization.continuousAlternatingMap ℝ (Fin m)
-      (trivializationAt EM (TangentSpace IM) x₀) (trivializationAt ℝ (Bundle.Trivial M ℝ) x₀)
-      ⟨x, L⟩).2 = L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)
-  rw [Pretrivialization.continuousAlternatingMap_apply]
-  ext v
-  simp
-
 abbrev DifferentialForm (k : ℕ) :=
   ContMDiffSection IM (EM [⋀^Fin k]→L[ℝ] ℝ) ⊤
     (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ))
@@ -400,6 +367,21 @@ theorem wedge_self_odd_zero {k : ℕ} (α : DifferentialForm IM M k) (hk : Odd k
   ext x
   exact ContinuousAlternatingMap.wedge_self_odd_zero (M := TangentSpace IM x) (m := k)
     (α x) hk
+
+theorem wedge_assoc {k l r : ℕ} (α : DifferentialForm IM M k) (β : DifferentialForm IM M l)
+    (γ : DifferentialForm IM M r) :
+    reindex Fin.finAssoc.symm (DifferentialForm.wedge α (DifferentialForm.wedge β γ)) =
+      DifferentialForm.wedge (DifferentialForm.wedge α β) γ := by
+  ext x
+  change ContinuousAlternatingMap.domDomCongr Fin.finAssoc.symm
+      (ContinuousAlternatingMap.wedge_product (α x)
+        (ContinuousAlternatingMap.wedge_product (β x) (γ x) (ContinuousLinearMap.mul ℝ ℝ))
+        (ContinuousLinearMap.mul ℝ ℝ)) =
+    ContinuousAlternatingMap.wedge_product
+      (ContinuousAlternatingMap.wedge_product (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ))
+      (γ x) (ContinuousLinearMap.mul ℝ ℝ)
+  exact ContinuousAlternatingMap.wedge_mul_assoc (M := TangentSpace IM x) (m := k) (n := l)
+    (p := r) (α x) (β x) (γ x)
 
 end DifferentialForm
 

@@ -1701,6 +1701,7 @@ import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmooth
 import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Bundle.SectionRealized
 import DifferentialGeometry.Bundle.SmoothScalarGerm
+import DifferentialGeometry.Bundle.TangentCoordChange
 import DifferentialGeometry.Bundle.TensorBundles
 import DifferentialGeometry.Bundle.TensorBundlesRealized
 import DifferentialGeometry.Bundle.VectorField

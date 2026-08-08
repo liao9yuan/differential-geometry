@@ -414,6 +414,43 @@ variable
 open Bundle Set Function Filter
 open scoped Topology Manifold ContDiff
 
+namespace DifferentialGeometry
+
+set_option backward.isDefEq.respectTransparency false in
+@[instance_reducible]
+def seminormedAddCommGroupTangentSpace (x : M) : SeminormedAddCommGroup (TangentSpace IM x) :=
+  inferInstanceAs (SeminormedAddCommGroup EM)
+
+attribute [local instance] seminormedAddCommGroupTangentSpace
+
+set_option backward.isDefEq.respectTransparency false in
+@[instance_reducible]
+def normedAddCommGroupTangentSpace (x : M) : NormedAddCommGroup (TangentSpace IM x) :=
+  inferInstanceAs (NormedAddCommGroup EM)
+
+attribute [local instance] normedAddCommGroupTangentSpace
+
+set_option backward.isDefEq.respectTransparency false in
+@[instance_reducible]
+def normedSpaceTangentSpace (x : M) : NormedSpace ℝ (TangentSpace IM x) :=
+  inferInstanceAs (NormedSpace ℝ EM)
+
+attribute [local instance] normedSpaceTangentSpace
+
+lemma continuousAlternatingMap_trivializationAt_apply (m : ℕ) (x₀ x : M)
+    (L : Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) :
+    (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀ ⟨x, L⟩).2 =
+      L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) := by
+  change (Pretrivialization.continuousAlternatingMap ℝ (Fin m)
+      (trivializationAt EM (TangentSpace IM) x₀) (trivializationAt ℝ (Bundle.Trivial M ℝ) x₀)
+      ⟨x, L⟩).2 = L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)
+  rw [Pretrivialization.continuousAlternatingMap_apply]
+  ext v
+  simp
+
+end DifferentialGeometry
+
 instance ChartedSpace.alternatingBundle : ChartedSpace (ModelProd HM (EM [⋀^Fin m]→L[ℝ] ℝ))
     𝒜⟮ℝ,Fin m;EM,TangentSpace IM;ℝ,Bundle.Trivial M ℝ⟯ := inferInstance
 

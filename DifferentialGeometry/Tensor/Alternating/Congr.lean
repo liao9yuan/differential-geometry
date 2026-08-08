@@ -38,6 +38,12 @@ theorem domDomCongr_add (e : Fin m ≃ Fin n)
     domDomCongr e (f + g) = domDomCongr e f + domDomCongr e g := by
   ext x; simp [domDomCongr_apply, add_apply]
 
+theorem domDomCongr_smul {ι ι' : Type*} (c : 𝕜) (e : ι ≃ ι')
+    (f : M [⋀^ι]→L[𝕜] N) :
+    domDomCongr e (c • f) = c • domDomCongr e f := by
+  ext v
+  simp [domDomCongr_apply]
+
 theorem domDomCongr_sum {ι : Type*}
     (e : Fin m ≃ Fin n) (s : Finset ι) (f : ι → M [⋀^Fin m]→L[𝕜] N) :
     domDomCongr e (∑ i ∈ s, f i) = ∑ i ∈ s, domDomCongr e (f i) := by
