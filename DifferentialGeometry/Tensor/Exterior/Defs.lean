@@ -329,6 +329,28 @@ noncomputable def reindex {k l : ℕ} (e : Fin k ≃ Fin l) (α : DifferentialFo
 @[simp] theorem reindex_apply {k l : ℕ} (e : Fin k ≃ Fin l) (α : DifferentialForm IM M k) (x : M) :
     (reindex e α) x = ContinuousAlternatingMap.domDomCongr e (α x) := rfl
 
+@[simp] theorem reindex_refl (α : DifferentialForm IM M k) :
+    reindex (Equiv.refl (Fin k)) α = α := by
+  ext x
+  simp [reindex_apply]
+
+theorem reindex_comp {k l m : ℕ} (e : Fin k ≃ Fin l) (f : Fin l ≃ Fin m)
+    (α : DifferentialForm IM M k) :
+    reindex f (reindex e α) = reindex (e.trans f) α := by
+  ext x
+  change ContinuousAlternatingMap.domDomCongr f (ContinuousAlternatingMap.domDomCongr e (α x)) =
+    ContinuousAlternatingMap.domDomCongr (e.trans f) (α x)
+  ext v
+  rfl
+
+@[simp] theorem reindex_symm {k l : ℕ} (e : Fin k ≃ Fin l) (α : DifferentialForm IM M l) :
+    reindex e (reindex e.symm α) = α := by
+  rw [reindex_comp e.symm e α, Equiv.symm_trans_self, reindex_refl]
+
+@[simp] theorem reindex_symm' {k l : ℕ} (e : Fin k ≃ Fin l) (α : DifferentialForm IM M k) :
+    reindex e.symm (reindex e α) = α := by
+  rw [reindex_comp e e.symm α, Equiv.self_trans_symm, reindex_refl]
+
 notation α " ∧ " β => DifferentialForm.wedge α β
 
 end DifferentialForm

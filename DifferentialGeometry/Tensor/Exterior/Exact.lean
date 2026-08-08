@@ -18,31 +18,25 @@ variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
   {k : ℕ}
 
-def Closed [BoundarylessManifold IM M] (α : DifferentialForm IM M k) : Prop :=
+def isClosed [BoundarylessManifold IM M] (α : DifferentialForm IM M k) : Prop :=
   exteriorDerivative α = 0
 
-def Exact [BoundarylessManifold IM M] (α : DifferentialForm IM M (k + 1)) : Prop :=
+def isExact [BoundarylessManifold IM M] (α : DifferentialForm IM M (k + 1)) : Prop :=
   ∃ β : DifferentialForm IM M k, exteriorDerivative β = α
 
 theorem exact_closed [BoundarylessManifold IM M] {α : DifferentialForm IM M (k + 1)}
-    (h : Exact α) : Closed α := by
+    (h : isExact α) : isClosed α := by
   rcases h with ⟨β, hβ⟩
-  rw [Closed, ← hβ]
+  rw [isClosed, ← hβ]
   exact exteriorDerivative_sq β
 
-noncomputable def exteriorDerivativeLinearMap [BoundarylessManifold IM M] (k : ℕ) :
-    DifferentialForm IM M k →ₗ[ℝ] DifferentialForm IM M (k + 1) :=
-  { toFun := exteriorDerivative
-    map_add' := exteriorDerivative_add
-    map_smul' := exteriorDerivative_smul }
+theorem isClosed_iff_mem_ker [BoundarylessManifold IM M] (α : DifferentialForm IM M k) :
+    isClosed α ↔ α ∈ LinearMap.ker (exteriorDerivativeLinearMap (IM := IM) (M := M) k) := by
+  simp [isClosed, exteriorDerivativeLinearMap]
 
-theorem closed_iff_mem_ker [BoundarylessManifold IM M] (α : DifferentialForm IM M k) :
-    Closed α ↔ α ∈ LinearMap.ker (exteriorDerivativeLinearMap (IM := IM) (M := M) k) := by
-  simp [Closed, exteriorDerivativeLinearMap]
-
-theorem exact_iff_mem_range [BoundarylessManifold IM M] (α : DifferentialForm IM M (k + 1)) :
-    Exact α ↔ α ∈ LinearMap.range (exteriorDerivativeLinearMap (IM := IM) (M := M) k) := by
-  simp [Exact, exteriorDerivativeLinearMap]
+theorem isExact_iff_mem_range [BoundarylessManifold IM M] (α : DifferentialForm IM M (k + 1)) :
+    isExact α ↔ α ∈ LinearMap.range (exteriorDerivativeLinearMap (IM := IM) (M := M) k) := by
+  simp [isExact, exteriorDerivativeLinearMap]
 
 end DifferentialForm
 end DifferentialGeometry

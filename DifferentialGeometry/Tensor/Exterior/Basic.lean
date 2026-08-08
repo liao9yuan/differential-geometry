@@ -582,6 +582,12 @@ theorem exteriorDerivative_smul [BoundarylessManifold IM M] (c : ℝ) (α : Diff
     rfl
   rw [hsmul, extDeriv_smul, map_smul]
 
+noncomputable def exteriorDerivativeLinearMap [BoundarylessManifold IM M] (k : ℕ) :
+    DifferentialForm IM M k →ₗ[ℝ] DifferentialForm IM M (k + 1) :=
+  { toFun := exteriorDerivative
+    map_add' := exteriorDerivative_add
+    map_smul' := exteriorDerivative_smul }
+
 theorem exteriorDerivative_sq [BoundarylessManifold IM M] (α : DifferentialForm IM M k) :
     exteriorDerivative (exteriorDerivative α) = 0 := by
   ext x

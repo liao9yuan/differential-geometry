@@ -1,4 +1,4 @@
-import DifferentialGeometry.Tensor.Exterior.Exact
+import DifferentialGeometry.Tensor.Exterior.Basic
 import Mathlib.Algebra.Homology.HomologicalComplex
 import Mathlib.Algebra.Category.ModuleCat.Basic
 
