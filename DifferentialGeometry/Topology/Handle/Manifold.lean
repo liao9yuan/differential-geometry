@@ -856,7 +856,6 @@ theorem closedCellCons_contDiffOn_left {m : ℕ} :
       closedCellCons m (1 - ‖x‖ ^ 2) (closedCellTail m x)) Set.univ := by
   have hcons : ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) =>
       closedCellCons m (1 - ‖x‖ ^ 2) (closedCellTail m x)) := by
-    -- (1 - ‖x‖^2, tail x) ↦ cons
     have hpair : ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) =>
         (1 - ‖x‖ ^ 2, closedCellTail m x)) := by
       have hnorm : ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin (m + 1)) => 1 - ‖x‖ ^ 2) := by
@@ -864,7 +863,6 @@ theorem closedCellCons_contDiffOn_left {m : ℕ} :
       exact hnorm.prodMk (closedCellTail_contDiff (m := m))
     have hcons' : ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × EuclideanSpace ℝ (Fin m) =>
         closedCellCons m p.1 p.2) := closedCellCons_contDiff
-    -- compose hcons' with hpair
     have hcomp : ContDiff ℝ (⊤ : ℕ∞)
         (fun x : EuclideanSpace ℝ (Fin (m + 1)) =>
           closedCellCons m (1 - ‖x‖ ^ 2) (closedCellTail m x)) := by

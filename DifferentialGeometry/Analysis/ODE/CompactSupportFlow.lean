@@ -128,6 +128,43 @@ theorem isMIntegralCurveOn_const_of_eq_zero (x : M) (hvx : v x = 0) :
   simpa [hvx] using
     (hasMFDerivAt_const (c := x) (x := t) (I := 𝓘(ℝ, ℝ)) (I' := I))
 
+theorem curveAt_eq_self_of_not_mem_tsupport [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v)
+    {x : M} (hx : x ∉ tsupport v) (t : ℝ) :
+    curveAt v hcomplete x t = x := by
+  have hxnot : x ∉ Function.support v := fun hs => hx (subset_closure hs)
+  have hvx : v x = 0 := by
+    by_contra h
+    exact hxnot (by simpa [Function.support] using h)
+  have hconstOn : IsMIntegralCurveOn (fun _ : ℝ => x) v Set.univ :=
+    isMIntegralCurveOn_const_of_eq_zero x hvx
+  have hconst : IsMIntegralCurve (fun _ : ℝ => x) v := by
+    rw [isMIntegralCurve_iff_isMIntegralCurveAt]
+    intro t
+    rw [isMIntegralCurveAt_iff']
+    refine ⟨1, by norm_num, ?_⟩
+    intro s hs
+    simpa [hvx] using
+      (hasMFDerivAt_const (c := x) (x := s) (I := 𝓘(ℝ, ℝ)) (I' := I)).hasMFDerivWithinAt
+  have hv1 : ContMDiff I (I.prod 𝓘(ℝ, E)) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
+    hv.of_le (show (1 : WithTop ℕ∞) ≤ (↑(⊤ : ℕ∞) : WithTop ℕ∞) by
+      exact_mod_cast (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞)))
+  have hIsM1 : IsManifold I (1 : WithTop ℕ∞) M :=
+    IsManifold.of_le (show (1 : WithTop ℕ∞) ≤ (↑(⊤ : ℕ∞) : WithTop ℕ∞) by
+      exact_mod_cast (le_top : (1 : ℕ∞) ≤ (⊤ : ℕ∞)))
+  have hγt : ∀ t : ℝ, I.IsInteriorPoint (curveAt v hcomplete x t) := by
+    intro t
+    exact BoundarylessManifold.isInteriorPoint (x := curveAt v hcomplete x t)
+  have heq : curveAt v hcomplete x = (fun _ : ℝ => x) :=
+    isMIntegralCurve_eq_of_contMDiff (t₀ := 0) hγt hv1
+      (curveAt_integralCurve v hcomplete x) hconst (curveAt_zero v hcomplete x)
+  exact congrFun heq t
+
 theorem exists_uniform_localIntegralCurveOn_of_compactSupport [FiniteDimensional ℝ E]
     [CompleteSpace E] [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]

@@ -2160,6 +2160,16 @@ theorem morse_smooth_handle_attachment {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ
     [Fact (k = (k - 1) + 1)]
     [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
     ∃ φ : StandardHandle k (m + 1 - k) → M,
+      φ = handleEmbedding hk c ε r data ∧
+      @ContMDiff ℝ _
+        (EuclideanSpace ℝ (Fin ((k - 1) + 1)) × EuclideanSpace ℝ (Fin (((m + 1 - k - 1) + 1)))) _ _
+        (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+        ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+          (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+        (StandardHandle k (m + 1 - k)) _ (standardHandleChartedSpace k (m + 1 - k))
+        (MorseModel (m + 1)) _ _ H _ I M _ _
+        (⊤ : ℕ∞)
+        φ ∧
       Topology.IsClosedEmbedding φ ∧
       (∀ p : StandardHandle k (m + 1 - k),
         f (φ p) = morseNormalForm hk c (modelHandleMap hk ε r p)) ∧
@@ -2176,7 +2186,8 @@ theorem morse_smooth_handle_attachment {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ
       (∀ q : AttachingRegion k (m + 1 - k) × Set.Icc (0 : ℝ) 1,
         handleCollarMap hk c ε r data hε hεr v hcomplete q ∈ sublevel f (c - ε) ↔
           (q.2 : ℝ) = 1) := by
-  refine ⟨handleEmbedding hk c ε r data, ?_⟩
+  refine ⟨handleEmbedding hk c ε r data, rfl, ?_, ?_⟩
+  · exact contMDiff_handleEmbedding hk c ε r data hε hεr hRltR'
   constructor
   · exact isClosedEmbedding_handleEmbedding hk c ε r data hε hr hεr hRltR'
   constructor
@@ -2211,6 +2222,15 @@ theorem morse_smooth_handle_attachment_zero {m : ℕ} (c ε r : ℝ)
     (hRltR' : data.R < data.R')
     [NeZero (m + 1)] [Fact (m + 1 = (m + 1 - 1) + 1)] :
     ∃ φ : StandardHandle 0 (m + 1) → M,
+      φ = handleEmbedding (zero_le (m + 1)) c ε r data ∧
+      @ContMDiff ℝ _
+        (EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1)))) _ _
+        (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((m + 1 - 1) + 1))) _
+        ((𝓘(ℝ, EuclideanSpace ℝ (Fin 0))).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - 1) + 1)))
+        (StandardHandle 0 (m + 1)) _ (standardHandleZeroChartedSpace (m + 1))
+        (MorseModel (m + 1)) _ _ H _ I M _ _
+        (⊤ : ℕ∞)
+        φ ∧
       Topology.IsClosedEmbedding φ ∧
       (∀ p : StandardHandle 0 (m + 1),
         f (φ p) = morseNormalForm (zero_le (m + 1)) c (modelHandleMap (zero_le (m + 1)) ε r p)) ∧
@@ -2220,7 +2240,8 @@ theorem morse_smooth_handle_attachment_zero {m : ℕ} (c ε r : ℝ)
       (∀ p : StandardHandle 0 (m + 1), φ p ∈ sublevel f (c + r ^ 2 / 2)) ∧
       (∀ p : StandardHandle 0 (m + 1),
         φ p ∈ sublevel f (c - ε) ↔ ‖(p.1 : EuclideanSpace ℝ (Fin 0))‖ = 1) := by
-  refine ⟨handleEmbedding (zero_le (m + 1)) c ε r data, ?_⟩
+  refine ⟨handleEmbedding (zero_le (m + 1)) c ε r data, rfl, ?_, ?_⟩
+  · exact contMDiff_zeroHandleEmbedding c ε r data hε hεr hRltR'
   constructor
   · exact isClosedEmbedding_zeroHandleEmbedding c ε r data hε hr hεr hRltR'
   constructor
@@ -2250,6 +2271,14 @@ theorem morse_smooth_handle_attachment_top {m : ℕ} (c ε r : ℝ)
     (hRltR' : data.R < data.R')
     [NeZero (m + 1)] [Fact (m + 1 = (m + 1 - 1) + 1)] :
     ∃ φ : ClosedCell (m + 1) → M,
+      φ = topHandleEmbedding c ε data ∧
+      @ContMDiff ℝ _
+        (EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1)))) _ _
+        (EuclideanHalfSpace ((m + 1 - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((m + 1 - 1) + 1))
+        (ClosedCell (m + 1)) _ (closedCellChartedSpace (m + 1))
+        (MorseModel (m + 1)) _ _ H _ I M _ _
+        (⊤ : ℕ∞)
+        φ ∧
       Topology.IsClosedEmbedding φ ∧
       (∀ x : ClosedCell (m + 1),
         f (φ x) = c - ε * ‖(x : EuclideanSpace ℝ (Fin (m + 1)))‖ ^ 2) ∧
@@ -2262,7 +2291,8 @@ theorem morse_smooth_handle_attachment_top {m : ℕ} (c ε r : ℝ)
         φ x ∈ sublevel f (c - ε) ↔ ‖(x : EuclideanSpace ℝ (Fin (m + 1)))‖ = 1) := by
   have hεr' : Real.sqrt (2 * ε) ≤ data.R := by
     exact le_trans (Real.sqrt_le_sqrt (by nlinarith [sq_nonneg r])) hεr
-  refine ⟨topHandleEmbedding c ε data, ?_⟩
+  refine ⟨topHandleEmbedding c ε data, rfl, ?_, ?_⟩
+  · exact contMDiff_topHandleEmbedding c ε data hεr' hRltR'
   constructor
   · exact isClosedEmbedding_topHandleEmbedding c ε data hε hεr' hRltR'
   constructor
@@ -4303,7 +4333,8 @@ theorem morse_smooth_handle_attachment_relative {n : ℕ} {H : Type} [Topologica
         (∀ x ∈ g ⁻¹' Set.Icc (c - ε) (c + ε),
           (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) = -1) ∧
         ∃ Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞),
-          Φ.toEquiv '' sublevel g (c - ε) = sublevel f (c + ε) := by
+          Φ.toEquiv '' sublevel g (c - ε) = sublevel f (c + ε) ∧
+          (∀ x : M, x ∉ tsupport v → Φ.toEquiv x = x) := by
   rcases morse_lemma I f hf p k hk hnd hindex with
     ⟨R, hRpos, χ, hχ0src, hχ0tgt, hχ0val, hχsrc, hnorm0, hχmd, hχsmd,
       R', hR'pos, hχon, hχsymmOn⟩
@@ -4402,7 +4433,12 @@ theorem morse_smooth_handle_attachment_relative {n : ℕ} {H : Type} [Topologica
     exact le_trans (hg_le x) hx
   · intro x hx
     exact hdfOn x hx
-  · exact htransport.trans hgup
+  · constructor
+    · exact htransport.trans hgup
+    · intro x hx
+      have hflow : curveAt v hcomplete x ((c - ε₀) - (c + ε₀)) = x := by
+        exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hx _
+      exact (htie x).trans hflow
 
 theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
