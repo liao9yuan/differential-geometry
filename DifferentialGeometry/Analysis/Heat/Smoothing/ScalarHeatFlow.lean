@@ -27,6 +27,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open Tensor0SBundle
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
@@ -42,6 +43,253 @@ noncomputable def scalarHeatFlow
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g) : ℝ → M → ℝ :=
   fun t x => scalarSpecSum (I := I) (M := M) g
     (fun i s => scalarHeatCoeff (I := I) (M := M) g u₀ i s) t x
+
+noncomputable def scalar0Cc
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) : SmoothScalar g :=
+  ⟨TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection,
+    TensorRSField.scalar0_smooth (n := (∞ : WithTop ℕ∞)) S.toSection⟩
+
+noncomputable def scalar0CcLinear
+    (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 0 →ₗ[ℝ] SmoothScalar g where
+  toFun := scalar0Cc g
+  map_add' := by
+    intro S T
+    apply SmoothScalar.ext
+    funext x
+    simp [scalar0Cc]
+  map_smul' := by
+    intro c S
+    apply SmoothScalar.ext
+    funext x
+    simp [scalar0Cc]
+
+noncomputable def scalar0ToLpLin
+    (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 0 →ₗ[ℝ]
+      Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
+  (smoothToLp (I := I) (M := M) g).toLinearMap.comp (scalar0CcLinear g)
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem scalar0ToLpLin_inner_eq_toL2_inner
+    (g : SmoothRiemannianMetric I M) (S T : SmoothCcTensor g 0 0) :
+    ⟪scalar0ToLpLin (I := I) (M := M) g S, scalar0ToLpLin (I := I) (M := M) g T⟫_ℝ =
+      ⟪SmoothCcTensor.toL2 S, SmoothCcTensor.toL2 T⟫_ℝ := by
+  calc
+    ⟪scalar0ToLpLin (I := I) (M := M) g S, scalar0ToLpLin (I := I) (M := M) g T⟫_ℝ
+        = ⟪smoothToLp (I := I) (M := M) g (scalar0Cc g S),
+            smoothToLp (I := I) (M := M) g (scalar0Cc g T)⟫_ℝ := rfl
+    _ = ∫ x, (scalar0Cc g S).toFun x * (scalar0Cc g T).toFun x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+        smoothToLp_inner_eq_integral_mul (I := I) (M := M) g (scalar0Cc g S) (scalar0Cc g T)
+    _ = ∫ x,
+          TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection x *
+            TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) T.toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := rfl
+    _ = tensorL2Inner (I := I) (M := M) g 0 0 S.toFun T.toFun :=
+        (tensorL2Inner_zero_zero_eq_integral_scalar0_mul (I := I) (M := M) g S T).symm
+    _ = ⟪S, T⟫_ℝ := rfl
+    _ = ⟪SmoothCcTensor.toL2 S, SmoothCcTensor.toL2 T⟫_ℝ :=
+        (Integral.L2.SmoothCcTensor.inner_toL2 S T).symm
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem scalar0ToLpLin_norm_eq
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) :
+    ‖scalar0ToLpLin (I := I) (M := M) g S‖ = ‖S‖ := by
+  have hsq : ‖scalar0ToLpLin (I := I) (M := M) g S‖ ^ 2 = ‖S‖ ^ 2 := by
+    rw [← real_inner_self_eq_norm_sq (scalar0ToLpLin (I := I) (M := M) g S),
+      ← real_inner_self_eq_norm_sq S]
+    rw [← (Integral.L2.SmoothCcTensor.inner_toL2 S S)]
+    exact scalar0ToLpLin_inner_eq_toL2_inner (I := I) (M := M) g S S
+  have hnorm : |‖scalar0ToLpLin (I := I) (M := M) g S‖| = |‖S‖| :=
+    (sq_eq_sq_iff_abs_eq_abs ‖scalar0ToLpLin (I := I) (M := M) g S‖ ‖S‖).mp hsq
+  rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)] at hnorm
+  exact hnorm
+
+noncomputable def scalar0ToLp
+    (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 0 →L[ℝ]
+      Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
+  (scalar0ToLpLin (I := I) (M := M) g).mkContinuous 1 (fun S => by
+    rw [scalar0ToLpLin_norm_eq (I := I) (M := M) g S]
+    simp)
+
+noncomputable def tensor00ToScalarL2
+    (g : SmoothRiemannianMetric I M) : TensorL2 0 0 g →
+      Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
+  UniformSpace.Completion.extension
+    (fun S : SmoothCcTensor g 0 0 => scalar0ToLp (I := I) (M := M) g S)
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensor00ToScalarL2_toL2
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) :
+    tensor00ToScalarL2 g (SmoothCcTensor.toL2 S) =
+      scalar0ToLp (I := I) (M := M) g S := by
+  unfold tensor00ToScalarL2
+  exact UniformSpace.Completion.extension_coe
+    (f := fun S : SmoothCcTensor g 0 0 => scalar0ToLp (I := I) (M := M) g S)
+    (scalar0ToLp (I := I) (M := M) g).uniformContinuous S
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensor00ToScalarL2_add
+    (g : SmoothRiemannianMetric I M) (x y : TensorL2 0 0 g) :
+    tensor00ToScalarL2 g (x + y) =
+      tensor00ToScalarL2 g x + tensor00ToScalarL2 g y := by
+  have hcont : Continuous (tensor00ToScalarL2 g) :=
+    UniformSpace.Completion.continuous_extension
+      (f := fun S : SmoothCcTensor g 0 0 => scalar0ToLp (I := I) (M := M) g S)
+  refine UniformSpace.Completion.induction_on (α := SmoothCcTensor g 0 0)
+    (p := fun z : TensorL2 0 0 g =>
+      tensor00ToScalarL2 g (z + y) = tensor00ToScalarL2 g z + tensor00ToScalarL2 g y)
+    x ?_ ?_
+  · have hcont_lhs : Continuous (fun x : TensorL2 0 0 g =>
+        tensor00ToScalarL2 g (x + y)) :=
+      hcont.comp (continuous_add_const y)
+    have hcont_rhs : Continuous (fun x : TensorL2 0 0 g =>
+        tensor00ToScalarL2 g x + tensor00ToScalarL2 g y) :=
+      hcont.add continuous_const
+    exact isClosed_eq hcont_lhs hcont_rhs
+  · intro S
+    refine UniformSpace.Completion.induction_on (α := SmoothCcTensor g 0 0)
+      (p := fun w : TensorL2 0 0 g =>
+        tensor00ToScalarL2 g (SmoothCcTensor.toL2 S + w) =
+          tensor00ToScalarL2 g (SmoothCcTensor.toL2 S) + tensor00ToScalarL2 g w)
+      y ?_ ?_
+    · have hcont_lhs : Continuous (fun y : TensorL2 0 0 g =>
+          tensor00ToScalarL2 g (SmoothCcTensor.toL2 S + y)) :=
+        hcont.comp ((continuous_const : Continuous
+          fun _ : TensorL2 0 0 g => SmoothCcTensor.toL2 S).add continuous_id)
+      have hcont_rhs : Continuous (fun y : TensorL2 0 0 g =>
+          tensor00ToScalarL2 g (SmoothCcTensor.toL2 S) + tensor00ToScalarL2 g y) :=
+        hcont.const_add (tensor00ToScalarL2 g (SmoothCcTensor.toL2 S))
+      exact isClosed_eq hcont_lhs hcont_rhs
+    · intro T
+      change tensor00ToScalarL2 g (SmoothCcTensor.toL2 S + SmoothCcTensor.toL2 T) =
+        tensor00ToScalarL2 g (SmoothCcTensor.toL2 S) + tensor00ToScalarL2 g (SmoothCcTensor.toL2 T)
+      rw [← (SmoothCcTensor.toL2 : SmoothCcTensor g 0 0 →L[ℝ] TensorL2 0 0 g).map_add S T]
+      rw [tensor00ToScalarL2_toL2, tensor00ToScalarL2_toL2, tensor00ToScalarL2_toL2]
+      exact (scalar0ToLp (I := I) (M := M) g).map_add S T
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensor00ToScalarL2_smul
+    (g : SmoothRiemannianMetric I M) (c : ℝ) (x : TensorL2 0 0 g) :
+    tensor00ToScalarL2 g (c • x) = c • tensor00ToScalarL2 g x := by
+  have hcont : Continuous (tensor00ToScalarL2 g) :=
+    UniformSpace.Completion.continuous_extension
+      (f := fun S : SmoothCcTensor g 0 0 => scalar0ToLp (I := I) (M := M) g S)
+  refine UniformSpace.Completion.induction_on (α := SmoothCcTensor g 0 0)
+    (p := fun z : TensorL2 0 0 g =>
+      tensor00ToScalarL2 g (c • z) = c • tensor00ToScalarL2 g z)
+    x ?_ ?_
+  · have hcont_lhs : Continuous (fun x : TensorL2 0 0 g =>
+        tensor00ToScalarL2 g (c • x)) :=
+      hcont.comp (continuous_const_smul c)
+    have hcont_rhs : Continuous (fun x : TensorL2 0 0 g =>
+        c • tensor00ToScalarL2 g x) :=
+      hcont.const_smul c
+    exact isClosed_eq hcont_lhs hcont_rhs
+  · intro S
+    change tensor00ToScalarL2 g (c • SmoothCcTensor.toL2 S) =
+      c • tensor00ToScalarL2 g (SmoothCcTensor.toL2 S)
+    rw [← (SmoothCcTensor.toL2 : SmoothCcTensor g 0 0 →L[ℝ] TensorL2 0 0 g).map_smul c S]
+    rw [tensor00ToScalarL2_toL2, tensor00ToScalarL2_toL2]
+    exact (scalar0ToLp (I := I) (M := M) g).map_smul c S
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensor00ToScalarL2_norm
+    (g : SmoothRiemannianMetric I M) (x : TensorL2 0 0 g) :
+    ‖tensor00ToScalarL2 g x‖ = ‖x‖ := by
+  have hcont : Continuous (tensor00ToScalarL2 g) :=
+    UniformSpace.Completion.continuous_extension
+      (f := fun S : SmoothCcTensor g 0 0 => scalar0ToLp (I := I) (M := M) g S)
+  refine UniformSpace.Completion.induction_on (α := SmoothCcTensor g 0 0)
+    (p := fun z : TensorL2 0 0 g => ‖tensor00ToScalarL2 g z‖ = ‖z‖)
+    x ?_ ?_
+  · have hcont_lhs : Continuous (fun x : TensorL2 0 0 g =>
+        ‖tensor00ToScalarL2 g x‖) :=
+      hcont.norm
+    have hcont_rhs : Continuous (fun x : TensorL2 0 0 g => ‖x‖) := continuous_norm
+    exact isClosed_eq hcont_lhs hcont_rhs
+  · intro S
+    change ‖tensor00ToScalarL2 g (SmoothCcTensor.toL2 S)‖ = ‖SmoothCcTensor.toL2 S‖
+    rw [tensor00ToScalarL2_toL2]
+    simpa [Integral.L2.SmoothCcTensor.norm_toL2]
+      using (scalar0ToLpLin_norm_eq (I := I) (M := M) g S)
+
+noncomputable def tensor00ToScalarL2LI
+    (g : SmoothRiemannianMetric I M) : TensorL2 0 0 g →ₗᵢ[ℝ]
+      Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) where
+  toFun := tensor00ToScalarL2 g
+  map_add' := tensor00ToScalarL2_add g
+  map_smul' := tensor00ToScalarL2_smul g
+  norm_map' := tensor00ToScalarL2_norm g
+
+noncomputable def scalarCcLift
+    (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) : SmoothCcTensor g 0 0 where
+  toSection := (Tensor0SField.fromScalarField (∞ : WithTop ℕ∞) f.toFun f.smooth).toTensorRSField ∞
+  hasCompactSupport := IsCompact.of_isClosed_subset isCompact_univ (isClosed_tsupport _) (subset_univ _)
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+theorem scalar0Cc_scalarCcLift
+    (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) :
+    scalar0Cc g (scalarCcLift g f) = f := by
+  apply SmoothScalar.ext
+  funext x
+  have h : TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+      ((Tensor0SField.fromScalarField ∞ f.toFun f.smooth).toTensorRSField ∞) =
+      f.toFun := by
+    unfold TensorRSField.scalar0
+    rw [TensorRSField.rs0_toRS0]
+    exact Tensor0SField.toScalarField_fromScalarField ∞ f.toFun f.smooth
+  exact congrFun h x
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem scalar0ToLp_scalarCcLift
+    (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) :
+    scalar0ToLp (I := I) (M := M) g (scalarCcLift g f) =
+      smoothToLp (I := I) (M := M) g f := by
+  change scalar0ToLpLin (I := I) (M := M) g (scalarCcLift g f) =
+    smoothToLp (I := I) (M := M) g f
+  change smoothToLp (I := I) (M := M) g (scalar0Cc g (scalarCcLift g f)) =
+    smoothToLp (I := I) (M := M) g f
+  rw [scalar0Cc_scalarCcLift]
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensor00ToScalarL2_denseRange
+    (g : SmoothRiemannianMetric I M) :
+    DenseRange (tensor00ToScalarL2 g) := by
+  have hsub : Set.range (smoothToLp (I := I) (M := M) g) ⊆
+      Set.range (tensor00ToScalarL2 g) := by
+    rintro y ⟨f, rfl⟩
+    refine ⟨SmoothCcTensor.toL2 (scalarCcLift g f), ?_⟩
+    rw [tensor00ToScalarL2_toL2]
+    exact scalar0ToLp_scalarCcLift (I := I) (M := M) g f
+  exact Dense.mono hsub (denseRange_smoothToLp (I := I) (M := M) g)
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem tensor00ToScalarL2_surjective
+    (g : SmoothRiemannianMetric I M) :
+    Function.Surjective (tensor00ToScalarL2 g) := by
+  have hclosed : IsClosed (Set.range (tensor00ToScalarL2 g)) :=
+    (tensor00ToScalarL2LI g).isometry.isUniformInducing.isComplete_range.isClosed
+  have hrange : Set.range (tensor00ToScalarL2 g) = Set.univ := by
+    apply subset_antisymm (subset_univ _)
+    intro y hy
+    have hcl : closure (Set.range (tensor00ToScalarL2 g)) = Set.univ :=
+      (tensor00ToScalarL2_denseRange (I := I) (M := M) g).closure_eq
+    have hycl : y ∈ closure (Set.range (tensor00ToScalarL2 g)) := by
+      rw [hcl]
+      trivial
+    rwa [hclosed.closure_eq] at hycl
+  intro y
+  have hy : y ∈ Set.range (tensor00ToScalarL2 g) := by
+    rw [hrange]
+    trivial
+  exact hy
+
+noncomputable def tensor00ScalarL2Equiv
+    (g : SmoothRiemannianMetric I M) :
+    TensorL2 0 0 g ≃ₗᵢ[ℝ]
+      Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
+  LinearIsometryEquiv.ofSurjective (tensor00ToScalarL2LI g)
+    (tensor00ToScalarL2_surjective g)
 
 theorem scalarHeatCoeff_iteratedDeriv
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
