@@ -467,8 +467,8 @@ theorem expJacDensity_eq_ncd0_mul_transverse
     have hV' : velJacFrame (I := I) g hEnorm x v w o 1 =
         intrinsicJacobi (I := I) g hEnorm x v (show TangentSpace I x from a o) 1 := by
       rcases o with - | i
-      · simp [velJacFrame, a, hBnone]
-        exact (radialJac_eq_vel (I := I) g hEnorm x v).symm
+      · simpa [velJacFrame, a, hBnone] using
+          (radialJac_eq_vel (I := I) g hEnorm x v).symm
       · simp [velJacFrame, a, hBsome]
     have h1' : velJacFrame (I := I) g hEnorm x v w o 1 =
         (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
@@ -534,6 +534,57 @@ theorem expJacDensity_eq_ncd0_mul_transverse
   rw [hExp, hV1]
   rw [hncd]
   rw [← hdetC]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The transverse orthonormal-frame curve density along a segment-domain
+geodesic is bounded by the speed-scaled hyperbolic model density on the open
+radial interval (sharp constant 1, for a fixed `gₓ`-orthonormal perpendicular
+frame). -/
+theorem transverseDensity_le_hyp
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {v : TangentSpace I x}
+    (hv : v ∈ SegDom (I := I) g hEnorm x) (hvne : v ≠ 0)
+    (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
+    (hON : ∀ i j, g.inner x (w i) (w j) = if i = j then 1 else 0)
+    (hperp : ∀ i, g.inner x v (w i) = 0)
+    (q : ℝ) (hq : 0 ≤ q) (hd : 0 < Module.finrank ℝ E - 1)
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank ℝ E - 1 : ℕ) : ℝ) * q ^ 2))) :
+    ∀ t ∈ Set.Ioo (0 : ℝ) 1,
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t ≤
+        hypDensity (q * Real.sqrt (g.inner x v v)) (Module.finrank ℝ E - 1) t := by
+  have hno : ∀ t ∈ Set.Ioo (0 : ℝ) 1,
+      ¬ IsConjVec (I := I) g hEnorm x ((t • v : TangentSpace I x) : E) :=
+    fun t ht => segDom_not_conj (I := I) g hEnorm x hv ht
+  have hanti := intrRatioOfFrame (I := I) g hEnorm x v q 1 hq hd (g.pos x v hvne)
+    w hON hperp hno hRic
+  have hlim := poleLimit (I := I) g hEnorm x v q hq (g.pos x v hvne) w hON hperp
+  intro t ht
+  have hpos : 0 < hypDensity (q * Real.sqrt (g.inner x v v))
+      (Module.finrank ℝ E - 1) t :=
+    hypDensity_pos (mul_nonneg hq (Real.sqrt_nonneg _)) ht.1
+  have hRatioLE :
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t /
+        hypDensity (q * Real.sqrt (g.inner x v v)) (Module.finrank ℝ E - 1) t ≤ 1 := by
+    have hev : ∀ᶠ s in 𝓝[>] (0 : ℝ),
+        curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+            (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t /
+          hypDensity (q * Real.sqrt (g.inner x v v)) (Module.finrank ℝ E - 1) t ≤
+          curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+              (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) s /
+            hypDensity (q * Real.sqrt (g.inner x v v)) (Module.finrank ℝ E - 1) s := by
+      filter_upwards [Ioo_mem_nhdsGT ht.1] with s hs
+      have hsb : s ∈ Set.Ioo (0 : ℝ) 1 := ⟨hs.1, hs.2.trans ht.2⟩
+      exact hanti hsb ht hs.2.le
+    exact ge_of_tendsto hlim hev
+  rwa [div_le_one hpos] at hRatioLE
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
