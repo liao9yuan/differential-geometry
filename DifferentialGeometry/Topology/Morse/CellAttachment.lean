@@ -2483,6 +2483,134 @@ theorem modelHandleMap_mem_lower_iff {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (
       (modelHandleMap_f_eq_lower_iff hk c ε r hε p).2 hx
     exact le_of_eq heq
 
+theorem morseNormalForm_split_ge {n k : ℕ} (hk : k ≤ n) (c ε : ℝ) (y : MorseModel n) :
+    c - ε ≤ morseNormalForm hk c y ↔
+      ‖negPart hk y‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 + 2 * ε := by
+  rw [morseNormalForm_split]
+  constructor <;> intro h <;> nlinarith
+
+theorem modelHandle_eq_inter {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hr : 0 ≤ r) :
+    modelHandle hk ε r =
+      {y : MorseModel n | ‖posPart hk y‖ ≤ r} ∩
+        {y : MorseModel n | c - ε ≤ morseNormalForm hk c y} := by
+  ext y
+  constructor
+  · intro hy
+    constructor
+    · have hy1 := hy.1
+      have hsq := (sq_le_sq).1 hy1
+      simpa [abs_of_nonneg (norm_nonneg (posPart hk y)), abs_of_nonneg hr] using hsq
+    · change c - ε ≤ morseNormalForm hk c y
+      rw [morseNormalForm_split_ge]
+      exact hy.2
+  · intro hy
+    constructor
+    · exact (sq_le_sq).2 (by
+        simpa [abs_of_nonneg (norm_nonneg (posPart hk y)), abs_of_nonneg hr] using hy.1)
+    · have hy2 : c - ε ≤ morseNormalForm hk c y := by
+        change c - ε ≤ morseNormalForm hk c y
+        exact hy.2
+      rw [morseNormalForm_split_ge] at hy2
+      exact hy2
+
+theorem modelHandleMap_range {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 < ε) (hr : 0 < r) :
+    Set.range (modelHandleMap hk ε r) = modelHandle hk ε r := by
+  ext y
+  constructor
+  · intro hy
+    rcases hy with ⟨p, hp⟩
+    rw [← hp]
+    exact modelHandleMap_mem hk ε r (le_of_lt hε) p
+  · intro hy
+    let w : EuclideanSpace ℝ (Fin (n - k)) := (r⁻¹) • (posPart hk y)
+    let s : ℝ := Real.sqrt (2 * ε + r ^ 2 * ‖w‖ ^ 2)
+    let u : EuclideanSpace ℝ (Fin k) := s⁻¹ • (negPart hk y)
+    have hwle : ‖w‖ ≤ 1 := by
+      dsimp [w]
+      rw [norm_smul, Real.norm_eq_abs]
+      have hpos : 0 ≤ r⁻¹ := inv_nonneg.mpr (le_of_lt hr)
+      rw [abs_of_nonneg hpos]
+      have hle : ‖posPart hk y‖ ≤ r := by
+        have hsq := (sq_le_sq).1 hy.1
+        have hnr : 0 ≤ r := le_of_lt hr
+        simpa [abs_of_nonneg (norm_nonneg (posPart hk y)), abs_of_nonneg hnr] using hsq
+      have hmul : r⁻¹ * ‖posPart hk y‖ ≤ r⁻¹ * r :=
+        mul_le_mul_of_nonneg_left hle hpos
+      have hc : r⁻¹ * r = 1 := by
+        exact inv_mul_cancel₀ (ne_of_gt hr)
+      nlinarith
+    have hule : ‖u‖ ≤ 1 := by
+      dsimp [u, s]
+      have hs0 : 0 < Real.sqrt (2 * ε + r ^ 2 * ‖w‖ ^ 2) := by
+        positivity
+      rw [norm_smul, Real.norm_eq_abs]
+      have hpos : 0 ≤ (Real.sqrt (2 * ε + r ^ 2 * ‖w‖ ^ 2))⁻¹ :=
+        inv_nonneg.mpr (le_of_lt hs0)
+      rw [abs_of_nonneg hpos]
+      have hw2 : r ^ 2 * ‖w‖ ^ 2 = ‖posPart hk y‖ ^ 2 := by
+        have hrw : r • w = posPart hk y := by
+          dsimp [w]
+          rw [smul_smul]
+          have hrr : r * r⁻¹ = 1 := mul_inv_cancel₀ (ne_of_gt hr)
+          rw [hrr]
+          simp
+        have hnorm : ‖r • w‖ ^ 2 = ‖posPart hk y‖ ^ 2 := by rw [hrw]
+        rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (le_of_lt hr)] at hnorm
+        simpa [mul_pow] using hnorm
+      have hneg2 : ‖negPart hk y‖ ^ 2 ≤ 2 * ε + ‖posPart hk y‖ ^ 2 := by
+        nlinarith [hy.2]
+      have hsq2 : ‖negPart hk y‖ ^ 2 ≤ (Real.sqrt (2 * ε + r ^ 2 * ‖w‖ ^ 2)) ^ 2 := by
+        rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + r ^ 2 * ‖w‖ ^ 2)]
+        nlinarith [hw2, hneg2]
+      have hsq3 : ‖negPart hk y‖ ≤ Real.sqrt (2 * ε + r ^ 2 * ‖w‖ ^ 2) := by
+        simpa [abs_of_nonneg (norm_nonneg (negPart hk y)),
+          abs_of_nonneg (Real.sqrt_nonneg (2 * ε + r ^ 2 * ‖w‖ ^ 2))] using (sq_le_sq).1 hsq2
+      have hs : (Real.sqrt (2 * ε + r ^ 2 * ‖w‖ ^ 2))⁻¹ * ‖negPart hk y‖ ≤ 1 := by
+        rw [mul_comm]
+        rw [← div_eq_mul_inv]
+        exact (div_le_one hs0).2 (by simpa using hsq3)
+      exact hs
+    refine ⟨((⟨u, hule⟩ : ClosedCell k), (⟨w, hwle⟩ : ClosedCell (n - k))), ?_⟩
+    dsimp [modelHandleMap]
+    rw [← recombine_decompose hk y]
+    congr 1
+    · dsimp [u, s]
+      rw [smul_smul]
+      have hsc : Real.sqrt (2 * ε + r ^ 2 * ‖w‖ ^ 2) ≠ 0 := by
+        positivity
+      field_simp [hsc]
+      simp
+    · dsimp [w]
+      rw [smul_smul]
+      have hrr : r * r⁻¹ = 1 := mul_inv_cancel₀ (ne_of_gt hr)
+      rw [hrr]
+      simp
+
+theorem lowerUnion_modelHandle {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ) (hr : 0 ≤ r) :
+    (sublevel (morseNormalForm hk c) (c - ε) : Set (MorseModel (m + 1))) ∪ modelHandle hk ε r =
+      (sublevel (morseNormalForm hk c) (c - ε) : Set (MorseModel (m + 1))) ∪
+        {y : MorseModel (m + 1) | ‖posPart hk y‖ ≤ r} := by
+  rw [modelHandle_eq_inter hk c ε r hr]
+  ext y
+  constructor <;> intro hy
+  · rcases hy with hy | hy
+    · exact Or.inl hy
+    · exact Or.inr hy.1
+  · rcases hy with hy | hy
+    · exact Or.inl hy
+    · by_cases hl : y ∈ sublevel (morseNormalForm hk c) (c - ε)
+      · exact Or.inl hl
+      · right
+        constructor
+        · exact hy
+        · change c - ε ≤ morseNormalForm hk c y
+          rw [morseNormalForm_split_ge]
+          have hnot : c - ε < morseNormalForm hk c y := lt_of_not_ge hl
+          have hineq : ‖negPart hk y‖ ^ 2 < ‖posPart hk y‖ ^ 2 + 2 * ε := by
+            rw [morseNormalForm_split] at hnot
+            nlinarith
+          exact le_of_lt hineq
+
 theorem modelAttachedStretch_equiv {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
     (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
     (∀ y : MorseModel n,

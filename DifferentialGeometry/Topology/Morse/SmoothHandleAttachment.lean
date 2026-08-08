@@ -474,10 +474,10 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
                     φ₀ ∧
                   Topology.IsClosedEmbedding φ₀ ∧
                   ∀ p : AttachingRegion k (m + 1 - k), (φ₀ p).1 = (φ p).1) ∧
-            (∃ _ : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+            @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
               (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
               (morseAttachedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) _
-              (morseAttachedChartedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr), True) ∧
+              (morseAttachedChartedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) ∧
             ∃ Ψ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
               (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
               (morseModelWithCornersHalfSpace m)
@@ -836,7 +836,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
         have hrel := hφ₀rel p
         change (φ₀ p).1 = (φ p).1
         rw [hrel]⟩),
-    ⟨morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀, trivial⟩, Ψ, hrelative,
+    (morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀), Ψ, hrelative,
     hreg_low, hreg_up, Θ, ⟨cellAttachingMap hk c data, hcelladj⟩⟩
   · exact hgup
   · intro x hx
@@ -873,7 +873,7 @@ theorem one_critical_point_cell_attachment {m : ℕ} {H : Type} [TopologicalSpac
   rcases morse_smooth_handle_attachment_relative (m := m) (H := H) (M := M) I f hf p c k hk hnd hindex
     hfp a ha hcompact hunique with
     ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
-      hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, ⟨hmani, hmaniTrue⟩, Ψ, hrel, hreg_low, hreg_up, Θ,
+      hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, hreg_low, hreg_up, Θ,
       ⟨φc, hcelladj⟩⟩
   exact ⟨ε, hε, hεa, φc, hcelladj⟩
 

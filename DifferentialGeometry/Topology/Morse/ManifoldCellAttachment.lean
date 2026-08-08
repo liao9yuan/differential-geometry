@@ -2753,6 +2753,16 @@ noncomputable def morseStandardHandleHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (
     (disjoint_modelHandleMap_lower hk c ε r hε)
     (isClosed_morseLowerSublevel hk c ε)
 
+noncomputable def morseStandardHandleHomeoBounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    (hε : 0 < ε) (hr : 0 < r) :
+    morseStandardHandleSpace hk c ε r hε ≃ₜ
+      {y : MorseModel (m + 1) //
+        y ∈ sublevel (morseNormalForm hk c) (c - ε) ∪
+          {y : MorseModel (m + 1) | ‖posPart hk y‖ ≤ r}} :=
+  (morseStandardHandleHomeoUnion hk c ε r hε (ne_of_gt hr)).trans (subtypeSetHomeomorph (by
+    rw [modelHandleMap_range hk ε r hε hr]
+    exact lowerUnion_modelHandle hk c ε r (le_of_lt hr)))
+
 noncomputable def morseAttachedToUpperFun {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
     morseLowerSublevel hk c ε ⊕ morseHandleSublevel hk c ε r δ → morseUpperSublevel hk c r :=
