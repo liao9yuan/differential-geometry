@@ -22,6 +22,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
@@ -290,6 +291,132 @@ noncomputable def tensor00ScalarL2Equiv
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   LinearIsometryEquiv.ofSurjective (tensor00ToScalarL2LI g)
     (tensor00ToScalarL2_surjective g)
+
+noncomputable def scalarEigenFunction
+    (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) : SmoothScalar g :=
+  scalar0Cc g (eigenvectorSmooth g 0 0 i)
+
+noncomputable def scalarEigenFunctionLp
+    (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) :
+    Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
+  smoothToLp (I := I) (M := M) g (scalarEigenFunction g i)
+
+theorem scalarEigenFunction_laplacian_eq
+    (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) :
+    (scalarEigenFunction g i).laplacian =
+      (-TensorEigenIdx.lambda (I := I) (M := M) i) • scalarEigenFunction g i := by
+  apply SmoothScalar.ext
+  funext x
+  rw [SmoothScalar.laplacian_toFun]
+  rw [← laplacian_levi_eq (I := I) g (scalarEigenFunction g i).smooth x]
+  exact scalarEigen00_laplacian_eq (I := I) (M := M) g i x
+
+theorem laplacianOp_scalarEigenFunctionLp
+    (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) :
+    laplacianOp (I := I) (M := M) g
+        ⟨smoothToH1Compl (I := I) (M := M) g (scalarEigenFunction g i),
+          smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (scalarEigenFunction g i)⟩ =
+      (-TensorEigenIdx.lambda (I := I) (M := M) i) • scalarEigenFunctionLp g i := by
+  rw [laplacianOp_smoothToH1Compl_eq_smoothToLp_laplacian]
+  rw [scalarEigenFunction_laplacian_eq]
+  rfl
+
+theorem scalarEigenFunctionLp_eq_tensorBasis
+    (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) :
+    scalarEigenFunctionLp g i =
+      tensor00ScalarL2Equiv g (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) := by
+  unfold scalarEigenFunctionLp scalarEigenFunction
+  change smoothToLp (I := I) (M := M) g (scalar0Cc g (eigenvectorSmooth g 0 0 i)) =
+    tensor00ToScalarL2 g (SmoothCcTensor.toL2 (eigenvectorSmooth g 0 0 i))
+  rw [tensor00ToScalarL2_toL2]
+  rfl
+
+theorem heatSemigroup_apply_scalarEigenFunctionLp
+    (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g)
+    {t : ℝ} (ht : 0 ≤ t) :
+    heatSemigroup (I := I) (M := M) g t (scalarEigenFunctionLp g i) =
+      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+        scalarEigenFunctionLp g i := by
+  classical
+  set w := scalarEigenFunctionLp g i
+  set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
+  let hw_h : laplacianDomain (I := I) (M := M) g :=
+    ⟨smoothToH1Compl (I := I) (M := M) g (scalarEigenFunction g i),
+      smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (scalarEigenFunction g i)⟩
+  have hH1 : H1ComplToLp (I := I) (M := M) g (hw_h : H1Compl g) = w := by
+    change H1ComplToLp (I := I) (M := M) g
+        (smoothToH1Compl (I := I) (M := M) g (scalarEigenFunction g i)) = w
+    rw [H1ComplToLp_smoothToH1Compl]
+    rfl
+  have hcoeff (j : EigenIdx (I := I) (M := M) g) :
+      Real.exp (-(EigenIdx.lambda (I := I) (M := M) j) * t) * ⟪b j, w⟫_ℝ =
+        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) * ⟪b j, w⟫_ℝ := by
+    by_cases hj : EigenIdx.lambda (I := I) (M := M) j =
+        TensorEigenIdx.lambda (I := I) (M := M) i
+    · rw [hj]
+    · have hzero : ⟪b j, w⟫_ℝ = 0 := by
+        have hinner_lap := laplacianOp_inner_eigenbasis (I := I) (M := M) g hw_h j
+        have h1 : ⟪b j, laplacianOp (I := I) (M := M) g hw_h⟫_ℝ =
+            -EigenIdx.lambda (I := I) (M := M) j * ⟪b j, w⟫_ℝ := by
+          rw [hinner_lap, hH1]
+        have h2 : ⟪b j, laplacianOp (I := I) (M := M) g hw_h⟫_ℝ =
+            -TensorEigenIdx.lambda (I := I) (M := M) i * ⟪b j, w⟫_ℝ := by
+          change ⟪b j, laplacianOp (I := I) (M := M) g
+              ⟨smoothToH1Compl (I := I) (M := M) g (scalarEigenFunction g i),
+                smoothToH1Compl_mem_laplacianDomain (I := I) (M := M)
+                  (scalarEigenFunction g i)⟩⟫_ℝ =
+            -TensorEigenIdx.lambda (I := I) (M := M) i * ⟪b j, w⟫_ℝ
+          rw [laplacianOp_scalarEigenFunctionLp (I := I) (M := M) g i]
+          simp [inner_smul_right, w]
+        have hsub : (EigenIdx.lambda (I := I) (M := M) j -
+            TensorEigenIdx.lambda (I := I) (M := M) i) * ⟪b j, w⟫_ℝ = 0 := by
+          nlinarith [h1, h2]
+        exact (mul_eq_zero.mp hsub).resolve_left (sub_ne_zero.mpr hj)
+      simp [hzero]
+  calc
+    heatSemigroup (I := I) (M := M) g t w
+        = ∑' j, Real.exp (-(EigenIdx.lambda (I := I) (M := M) j) * t) •
+            ⟪b j, w⟫_ℝ • b j :=
+          heatSemigroup_apply_of_nonneg (I := I) (M := M) g ht w
+    _ = ∑' j, Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+            ⟪b j, w⟫_ℝ • b j := by
+          apply tsum_congr
+          intro j
+          rw [smul_smul, smul_smul]
+          congr 1
+          exact hcoeff j
+    _ = Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+          ∑' j, ⟪b j, w⟫_ℝ • b j := by
+          have hsum_repr :
+              (∑' j, Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+                  (b.repr w j • b j)) =
+                Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+                  (∑' j, b.repr w j • b j) :=
+                Summable.tsum_const_smul
+                  (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t))
+                  (b.hasSum_repr w).summable
+          calc
+            (∑' j, Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+                (⟪b j, w⟫_ℝ • b j))
+                = (∑' j, Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+                    (b.repr w j • b j)) := by
+                  apply tsum_congr
+                  intro j
+                  congr 1
+                  congr 1
+                  exact (HilbertBasis.repr_apply_apply b w j).symm
+            _ = Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+                  (∑' j, b.repr w j • b j) := hsum_repr
+            _ = Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
+                  (∑' j, ⟪b j, w⟫_ℝ • b j) := by
+                  congr 1
+                  apply tsum_congr
+                  intro j
+                  congr 1
+                  exact HilbertBasis.repr_apply_apply b w j
+    _ = Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) • w := by
+          rw [show (∑' j, ⟪b j, w⟫_ℝ • b j) = w from
+            by simpa [HilbertBasis.repr_apply_apply] using (b.hasSum_repr w).tsum_eq]
 
 theorem scalarHeatCoeff_iteratedDeriv
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
