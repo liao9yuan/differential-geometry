@@ -457,6 +457,23 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
             (∀ p : AttachingRegion k (m + 1 - k), f (φ p).1 = c - ε) ∧
             Function.Injective φ ∧
             Topology.IsClosedEmbedding φ ∧
+            (∀ hk0 : NeZero k, ∀ hl0 : NeZero (m + 1 - k),
+              ∃ hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x,
+                ∃ φ₀ : AttachingRegion k (m + 1 - k) → LevelSetSpace f (c - ε),
+                  @ContMDiff ℝ _
+                    (EuclideanSpace ℝ (Fin (k - 1)) ×
+                      EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+                    (ModelProd (EuclideanSpace ℝ (Fin (k - 1)))
+                      (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+                    ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+                    (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+                    (MorseModel m) _ _ (MorseModel m) _
+                    (𝓘(ℝ, MorseModel m)) (LevelSetSpace f (c - ε)) _
+                    (manifoldLevelSetChartedSpace I f (c - ε) (hf.of_le le_top) hreg_f)
+                    (⊤ : ℕ∞)
+                    φ₀ ∧
+                  Topology.IsClosedEmbedding φ₀ ∧
+                  ∀ p : AttachingRegion k (m + 1 - k), (φ₀ p).1 = (φ p).1) ∧
             (∃ _ : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
               (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
               (morseAttachedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) _
@@ -785,6 +802,40 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
       hlow_invFun_val hgup v hv hsupp hdfOn hrate⟩
   refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_, ?_, ⟨η, hηpos, hηmain⟩,
     r₀, hr₀, hr₀sq, δ₁, hδ₁₀, hδ₁r, φ, hφ_boundary, hφ_inj, hφ_closed,
+    (by
+      intro hk0 hl0
+      letI := hk0
+      letI := hl0
+      have hεr₀' : Real.sqrt (2 * ε₀ + 2 * r₀ ^ 2) < data.R' := by
+        rw [hr₀sq]
+        have hsix : 2 * ε₀ + 2 * (2 * ε₀) = 6 * ε₀ := by ring
+        rw [hsix]
+        have hsq : (Real.sqrt (6 * ε₀)) ^ 2 < data.R' ^ 2 := by
+          rw [Real.sq_sqrt (by positivity : 0 ≤ 6 * ε₀)]
+          have h1 : ε₀ ≤ R' ^ 2 / 16 := le_trans hεmin (by
+            have hle' := min_le_right (R ^ 2) (R' ^ 2)
+            nlinarith)
+          nlinarith [h1, sq_pos_of_pos hR'pos]
+        have hlt : |Real.sqrt (6 * ε₀)| < data.R' :=
+          abs_lt_of_sq_lt_sq hsq (le_of_lt hR'pos)
+        have hnonneg : 0 ≤ Real.sqrt (6 * ε₀) := Real.sqrt_nonneg _
+        rwa [abs_of_nonneg hnonneg] at hlt
+      have hreg_f : ∀ x : M, f x = c - ε₀ → ¬ IsCriticalPointAt I f x := by
+        intro x hx
+        rcases hunique x (by
+          rw [hx]
+          constructor <;> linarith [hεa]) with hxp | hcrit
+        · exfalso
+          have hc' : f x = c := by rw [hxp, hfp]
+          linarith
+        · exact hcrit
+      rcases morse_smooth_handle_attachment_cell hk c ε₀ r₀ I f data hε₀ hr₀ hεr₀ hεr₀'
+        (hf.of_le le_top) hreg_f with
+        ⟨φ₀, hφ₀md, hφ₀cl, hφ₀rel⟩
+      exact ⟨hreg_f, φ₀, hφ₀md, hφ₀cl, fun p => by
+        have hrel := hφ₀rel p
+        change (φ₀ p).1 = (φ p).1
+        rw [hrel]⟩),
     ⟨morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀, trivial⟩, Ψ, hrelative,
     hreg_low, hreg_up, Θ, ⟨cellAttachingMap hk c data, hcelladj⟩⟩
   · exact hgup
@@ -822,7 +873,7 @@ theorem one_critical_point_cell_attachment {m : ℕ} {H : Type} [TopologicalSpac
   rcases morse_smooth_handle_attachment_relative (m := m) (H := H) (M := M) I f hf p c k hk hnd hindex
     hfp a ha hcompact hunique with
     ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
-      hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, ⟨hmani, hmaniTrue⟩, Ψ, hrel, hreg_low, hreg_up, Θ,
+      hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, ⟨hmani, hmaniTrue⟩, Ψ, hrel, hreg_low, hreg_up, Θ,
       ⟨φc, hcelladj⟩⟩
   exact ⟨ε, hε, hεa, φc, hcelladj⟩
 
