@@ -68,7 +68,7 @@ private noncomputable def secondCovDeriv_GlobalCorr0
         (I := I) (M := M) g r s α Idx Jdx k l)) I' J'
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma secondCovDeriv_GlobalCorr_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -86,7 +86,7 @@ private lemma secondCovDeriv_GlobalCorr_contDiffOn
           (I := I) (M := M) g r s α Idx Jdx k l))).1 I' J' m
 
 omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma secondCovDeriv_GlobalCorr0_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -102,7 +102,7 @@ private lemma secondCovDeriv_GlobalCorr0_contDiffOn
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).2.1 I' J'
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma secondCovDeriv_GlobalCorr_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

@@ -105,7 +105,7 @@ lemma curry_slotInsertEndoFib_zero (s : ℕ) (x : M)
   rw [Fin.cons_zero, Fin.update_cons_zero]
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) (v : E) (D : Tensor0SSpace (s + 1) I x) (v0 : E) :
@@ -193,7 +193,7 @@ private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (
   abel
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivAt_slotInsertEndoCc_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) (v : E) :

@@ -113,7 +113,7 @@ lemma curried_tsmdiffAt (n : ℕ)
     (v := fun y : M => Y y) hCurried hY
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma deriv0_eq_extDeriv (g : SmoothRiemannianMetric I M)
     (sc : Π y : M, Tensor0SBundle.Tensor0SSpace 0 I y) (x : M) (v : TangentSpace I x) :
     Tensor0SNabla.tensor0Iso I M x
@@ -181,7 +181,7 @@ lemma curried3_toModel_eval
   exact congrArg _ (funext fun i => by fin_cases i <;> rfl)
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma peel2_core (g : SmoothRiemannianMetric I M)
     (W : Π y : M, Tensor0SBundle.Tensor0SSpace 2 I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) 2 W x)
@@ -241,7 +241,7 @@ lemma peel2_core (g : SmoothRiemannianMetric I M)
   ring
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma peel3_core (g : SmoothRiemannianMetric I M)
     (W : Π y : M, Tensor0SBundle.Tensor0SSpace 3 I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) 3 W x)
@@ -297,7 +297,7 @@ lemma peel3_core (g : SmoothRiemannianMetric I M)
   ring
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma bridge02_eval (gA gB : SmoothRiemannianMetric I M)
     (W : Π y : M, Tensor0SBundle.Tensor0SSpace 2 I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) 2 W x)

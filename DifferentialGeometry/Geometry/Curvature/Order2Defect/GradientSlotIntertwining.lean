@@ -73,7 +73,7 @@ theorem tensor0S_curry_covGradBundleEquiv_unit
   rw [hzero, htail]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem covGradBundleEquiv_tensorCov_unit_curry_eq_abstractCovDeriv
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun y : M => TensorRSSpace 0 2 I y)⟯)

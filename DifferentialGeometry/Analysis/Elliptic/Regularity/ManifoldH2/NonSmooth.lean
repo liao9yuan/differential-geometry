@@ -198,7 +198,7 @@ namespace ChartH2NonSmoothBridgeData
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem loc_chart_of_chartH2NonSmoothBridgeData
     {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH2NonSmoothBridgeData (I := I) (M := M) g u α) :

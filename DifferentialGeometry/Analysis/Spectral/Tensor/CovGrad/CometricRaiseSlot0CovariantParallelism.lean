@@ -60,7 +60,7 @@ private lemma interior_product_eq_tensor0S_curry (s : ℕ) (x : M) (v : TangentS
     (T := D) (v0 := (show E from v)) (vs := fun k => (show E from w k))]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covDeriv_one_eq_dualToCotangent_cotangentCov
     (g₀ : SmoothRiemannianMetric I M)
     (w : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun y : M => Tensor0SSpace 1 I y))
@@ -105,7 +105,7 @@ private lemma covDeriv_one_eq_dualToCotangent_cotangentCov
   simp only [add_sub_cancel_right, ContinuousLinearMap.coe_coe]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covDeriv_sharp_field_eq (g₀ : SmoothRiemannianMetric I M)
     (w : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun y : M => Tensor0SSpace 1 I y))
     {x : M} (v0 : TangentSpace I x)
@@ -120,7 +120,7 @@ private lemma covDeriv_sharp_field_eq (g₀ : SmoothRiemannianMetric I M)
   rw [inverseMetricSharpField_covGrad_eq_zero (I := I) g₀ (fun y : M => w y) hsharp v0]
   rw [covDeriv_one_eq_dualToCotangent_cotangentCov (I := I) (M := M) g₀ w x v0]
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivAt_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g₀ 0 (s + 2)) (x : M) (v : E) :
     tensorCovDerivAt (I := I) (M := M) g₀ 1 (s + 1)

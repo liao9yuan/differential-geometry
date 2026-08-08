@@ -209,7 +209,7 @@ noncomputable def hmfPrincipal
       connLaplacianMixed (I := I) (M := M) g₀ 0 1 S.toSection x)
       (unitZeroSec (I := I) (M := M) x))
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 /-- The mixed-tensor principal operator is exactly the vector connection Laplacian of the
 represented HMF unknown. -/
 theorem hmfPrincipal_eq
@@ -1742,7 +1742,7 @@ theorem hmfEdge_coercive
     (fun y v w => by rw [metricDiff_symVal]; ring)
     (δ := (1 / 4 : ℝ)) (by norm_num) (by norm_num) (hop t ht) u
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- In local-addition coordinates, the zero-section target derivative leaves the frozen HMF
 principal vector unchanged.  This combines the local-addition and mixed maximal-regularity
 realizations without making a claim about the curvature lower-order part of the Jacobi

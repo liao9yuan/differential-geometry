@@ -371,7 +371,7 @@ private lemma thickening_mono_of_lt
   exact lt_of_lt_of_le (Metric.mem_thickening_iff_infEDist_lt.mp hy)
     (ENNReal.ofReal_le_ofReal hρ_lt.le)
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 private lemma tensorChartBilinear_uniform_diffQuot_bound_of_data
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
@@ -468,7 +468,7 @@ private lemma tensorChartBilinear_uniform_diffQuot_bound_of_data
   refine ⟨M_bound, hM_nn, fun j k h hh_pos hh_le => ?_⟩
   exact h_bd j k h hh_pos (by rw [hε_def] at *; linarith)
 
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 lemma tensorChartBilinear_chartComponent_regularity_of_data
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}

@@ -53,7 +53,7 @@ private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace
   rfl
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma tensorCovDerivAt_zero_dir
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :
@@ -154,7 +154,7 @@ private noncomputable def covDerivHomSection
     (fun y : M => S.toSection y) x
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covDerivHomSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -162,7 +162,7 @@ private lemma covDerivHomSection_apply
       tensorCovDerivAt (I := I) (M := M) g r s S x v := rfl
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covDerivHomSection_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -186,7 +186,7 @@ private lemma covDerivHomSection_contMDiff
   exact hop
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covDerivAlong_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -231,7 +231,7 @@ private noncomputable def covDerivAlongSection
       (fun x : M => TensorRSSpace r s I x)⟯)
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covDerivAlongSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -240,7 +240,7 @@ private lemma covDerivAlongSection_apply
       tensorCovDerivAt (I := I) (M := M) g r s S x (V x) := rfl
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covDerivAlongSection_toModel_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)

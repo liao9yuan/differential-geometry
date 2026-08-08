@@ -20,6 +20,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M]
+omit [SigmaCompactSpace M] in
 
 theorem deTurckRicci_shortTime_existence_of_closed
     (g₀ g_bg : SmoothRiemannianMetric I M) :

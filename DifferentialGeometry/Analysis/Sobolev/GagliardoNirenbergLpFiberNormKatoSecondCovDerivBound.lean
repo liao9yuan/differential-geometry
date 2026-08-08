@@ -294,7 +294,7 @@ theorem rawConnLap_innerWith_sqrt_finrank_bound_rs
         exact mul_le_mul_of_nonneg_right hsqrt_bound (Real.sqrt_nonneg _)
     _ = Real.sqrt (Module.finrank ℝ E : ℝ) * Real.sqrt aw * Real.sqrt cw := by ring
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
     (g : SmoothRiemannianMetric I M) (r p : ℕ)
     (Q : Integral.L2.SmoothCcTensor g r p) (x : M) (v : TangentSpace I x) :

@@ -124,7 +124,7 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

@@ -37,7 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
+omit [SigmaCompactSpace M] in
 theorem nablaRS_toRS0
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -128,6 +128,7 @@ private noncomputable def cov0SAlong
   have hOn := covApply_contMDiffOn (cov := cov0) X.contMDiff hA
   rwa [contMDiffOn_univ] at hOn
 
+omit [SigmaCompactSpace M] in
 @[simp]
 private theorem cov0SAlong_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -186,7 +187,7 @@ private theorem orthoBasis_apply
   unfold orthoFrameBasis
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-
+omit [SigmaCompactSpace M] in
 theorem rawLap_toRS0
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (A : Tensor0SField ∞ s (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M))
@@ -251,7 +252,7 @@ theorem rawLap_toRS0
 
 
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem cov0_diag_hess
     (g : SmoothRiemannianMetric I M)
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
@@ -318,7 +319,7 @@ private theorem cov0_diag_hess
 
 
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem secondRS_scalar
     (g : SmoothRiemannianMetric I M)
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
@@ -393,9 +394,7 @@ theorem secondRS_scalar
   rw [ContinuousLinearMap.sub_apply, Tensor0SSpace.toRS0_apply,
     Tensor0SSpace.toRS0_apply, Tensor0SSpace.toRS0_apply, smul_sub]
 
-
-
-
+omit [SigmaCompactSpace M] in
 theorem rawLap_scalar
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :

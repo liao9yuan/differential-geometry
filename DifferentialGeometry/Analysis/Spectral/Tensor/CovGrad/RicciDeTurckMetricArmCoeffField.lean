@@ -114,7 +114,7 @@ theorem covGrad_gInvDiffSlotCoeff_toSection_eq
 set_option backward.isDefEq.respectTransparency false in
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem covGrad_gInvDiffSlotCoeff_leibniz
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (w : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, (fun x : M => Tensor0SSpace 2 I x)⟯)
@@ -133,7 +133,7 @@ theorem covGrad_gInvDiffSlotCoeff_leibniz
 set_option backward.isDefEq.respectTransparency false in
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem covGrad_gInvDiffSlotCoeff_leibniz_value
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace 2 I x) :

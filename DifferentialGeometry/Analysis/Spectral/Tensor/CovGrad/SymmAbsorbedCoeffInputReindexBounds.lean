@@ -129,7 +129,7 @@ private lemma section_tensorSectionMDiffAt {n : ℕ}
     DifferentialGeometry.Geometry.Connection.TensorSectionMDiffAt (I := I) n (fun y => w y) x :=
   (w.contMDiff.contMDiffAt).mdifferentiableAt (by simp)
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma tensorCovDerivAt_reindexCoeffGen (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g r s) (σ' : Equiv.Perm (Fin r)) (x : M) (v0 : E) :
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from

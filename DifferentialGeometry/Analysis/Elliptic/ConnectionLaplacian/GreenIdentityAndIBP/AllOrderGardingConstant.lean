@@ -319,7 +319,7 @@ theorem exists_iteratedRoughLapGrad_commutator_l2Norm_le
   have h := hbound 0 S
   simpa only [iteratedCovGrad_zero, Nat.add_zero, Nat.add_zero] using h
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem rawTensorConnLapIter_rawTensorConnLapSmooth
     (g : SmoothRiemannianMetric I M) (s : ℕ) (i : ℕ) (S : SmoothCcTensor g 0 s) :
     rawTensorConnLapIter (I := I) g 0 s i (rawTensorConnLapSmooth (I := I) g 0 s S) =

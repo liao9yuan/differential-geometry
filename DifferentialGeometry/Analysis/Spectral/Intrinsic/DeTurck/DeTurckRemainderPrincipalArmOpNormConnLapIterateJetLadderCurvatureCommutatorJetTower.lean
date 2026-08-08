@@ -552,7 +552,7 @@ lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (g : SmoothRiemann
       ≤ (1 + 2 * cG b) * Sb + KT b 0 * Sb := add_le_add hpiece1 hpiece2
     _ = (1 + 2 * cG b + KT b 0) * Sb := by ring
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma bal_iter_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s 1 S =

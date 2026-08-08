@@ -44,7 +44,7 @@ noncomputable def oneMinusConnLapSmooth
     SmoothCcTensor g r s :=
   T - rawTensorConnLapSmooth (I := I) g r s T
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] lemma oneMinusConnLapSmooth_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (x : M) :
@@ -62,12 +62,12 @@ noncomputable def oneMinusConnLapSmoothIter
   | k + 1, T => oneMinusConnLapSmooth (I := I) g r s
                   (oneMinusConnLapSmoothIter g r s k T)
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] theorem oneMinusConnLapSmoothIter_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s 0 T = T := rfl
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] theorem oneMinusConnLapSmoothIter_succ
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s (k + 1) T =

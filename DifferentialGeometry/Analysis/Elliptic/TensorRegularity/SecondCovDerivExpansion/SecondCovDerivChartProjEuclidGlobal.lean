@@ -154,7 +154,7 @@ private lemma packageAsCcG_toSection
     (packageAsCcG (I := I) (M := M) g r s S).toSection = S := rfl
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_S_k_packed_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))
@@ -344,7 +344,7 @@ private lemma chartPushedRaw_S_k_packed_eqOn
     exact hcov_loc
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma LHS_eq_covDerivComponentEuclid_S_k_packed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -444,7 +444,7 @@ private lemma euclidPartial_eqOn_of_eqOn_openG
   rw [euclidPartial_def, euclidPartial_def, hfderiv]
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

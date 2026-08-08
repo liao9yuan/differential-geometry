@@ -43,7 +43,7 @@ private local instance tensorRSModelNormedSpace_local (r s : ℕ) :
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem covApply_chartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -273,7 +273,7 @@ private theorem covApply_chartRepr_euclid_jointContDiffWithinAt
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem covApply_chartRepr_manifold_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -336,7 +336,7 @@ private theorem covApply_chartRepr_manifold_jointContMDiffOn
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem covApply_section_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)

@@ -75,7 +75,7 @@ private def unitEvalSection (g : SmoothRiemannianMetric I M) (s : ℕ)
       (unitTensor (I := I) (M := M) y)
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covDerivUnitModel_eq_tensor0SCovariantDerivative
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) (v : TangentSpace I x) :
@@ -335,7 +335,7 @@ private lemma domDomCongr_finsum_smul
     ContinuousMultilinearMap.domDomCongr_apply]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma tensor0SCovariantDerivative_succ_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin (s + 1)))
     (ŝ ŝ' : Π y : M, Tensor0SSpace (s + 1) I y) (x : M) (v : TangentSpace I x)
@@ -396,7 +396,7 @@ lemma tensor0SCovariantDerivative_succ_domDomCongr
   rw [hframe i]
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivAt_unit_toModel_domDomCongr_of_section
     (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
     (S S' : SmoothCcTensor g 0 s)
@@ -523,7 +523,7 @@ private lemma applySection_tensorSectionMDiffAt
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHom hv
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivAt_rs_toModel_domDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Φ Φ' : SmoothCcTensor g r s)

@@ -118,7 +118,7 @@ private lemma curried_covGrad_apply_eq_tensorCovDerivAt_apply (r t : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 private lemma covApply_covDeriv_apply_eq_add (r t : ℕ) (W : SmoothCcTensor g r t)
     {X Y : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))

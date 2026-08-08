@@ -183,7 +183,7 @@ noncomputable def covDivergenceBilinear
         exact contract_covariant_add_left s y (Y y) (Y' y) _)
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem codiffPsi_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) (y : M)
     {X Y : Π b : M, TangentSpace I b}
@@ -215,7 +215,7 @@ def covDivergenceFixedFrame
       (tensorCovDerivAt (I := I) (M := M) g 0 (s + 1) V b (B i b))
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma covDivergenceFixedFrame_eq_sum_section
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1))
     (B : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
@@ -226,7 +226,7 @@ lemma covDivergenceFixedFrame_eq_sum_section
   rfl
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma covDivergenceFixedFrame_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1))
     (B : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -270,7 +270,7 @@ omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactS
     smoothOrthoFrameSection (I := I) (M := M) g x₀ i b =
       smoothOrthoFrame (I := I) g x₀ i b := rfl
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma covDivergenceRaw_eq_codiffPsi_smoothOrthoFrame_trace
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) (b : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I b)
@@ -294,7 +294,7 @@ lemma covDivergenceRaw_eq_codiffPsi_smoothOrthoFrame_trace
       hB_orth
   rw [covDivergenceRaw, hcentral_trace, ← hB_trace]
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 lemma covDivergenceRaw_eq_fixedFrame_on_nbhd
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) (x₀ : M)
     {b : M} (hb : b ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
@@ -316,7 +316,7 @@ lemma covDivergenceRaw_eq_fixedFrame_on_nbhd
   rw [codiffPsi_apply (I := I) (M := M) g s V b hSmooth_at hSmooth_at]
   rfl
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 theorem covDivergenceRaw_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
@@ -347,7 +347,7 @@ theorem covDivergenceRaw_contMDiff
       (covDivergenceRaw_eq_fixedFrame_on_nbhd (I := I) (M := M) g s V x₀ hb)
   exact h_fixed_at.congr_of_eventuallyEq h_eventuallyEq
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 lemma covDivergenceRaw_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1))
     {b : M} (hb : b ∉ tsupport V.toFun) :
@@ -746,7 +746,7 @@ private lemma tensor0SAsRS_add (s : ℕ) (x : M) (C D : Tensor0SSpace s I x) :
   rw [tensor0SAsRS_apply, tensor0SAsRS_apply, smul_add]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma contract_covariant_leibniz
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1))
     {W X : Π b:M, TangentSpace I b}
@@ -886,7 +886,7 @@ private lemma contractFrameSection_apply
     contractFrameSection (I := I) (M := M) g s V b i y =
       contract_covariant 0 s y (smoothOrthoFrame (I := I) g b i y) (V.toSection y) := rfl
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 private lemma divergence_oneSidedVF_summand_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : SmoothCcTensor g 0 s) (V : SmoothCcTensor g 0 (s + 1)) (b : M)

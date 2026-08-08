@@ -89,7 +89,7 @@ private lemma tensorRS_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
 
 omit [CompleteSpace E] in
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -123,7 +123,7 @@ private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
 
 omit [CompleteSpace E] in
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma cutoffCovNormSqSum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :

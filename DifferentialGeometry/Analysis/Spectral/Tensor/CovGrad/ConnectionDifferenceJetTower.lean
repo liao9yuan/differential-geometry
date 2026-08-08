@@ -1171,7 +1171,7 @@ theorem raisedKoszulVec_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [raisedKoszulVec_apply]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma raisedKoszul_tensorCovDerivAt_homSplit
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1300,7 +1300,7 @@ private lemma cotangentToCLM_eq_metricFlat_g0Flat_sharp
     cotangentToDual_g0FlatCLM, DifferentialGeometry.Geometry.Connection.metricFlat_apply]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma tensor0SDeriv_one_D_eq_dualToCotangent_cotangentCov
     (g₀ : SmoothRiemannianMetric I M)
     (Dsec : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun x : M => Tensor0SSpace 1 I x))
@@ -1343,7 +1343,7 @@ private lemma tensor0SDeriv_one_D_eq_dualToCotangent_cotangentCov
   rw [hbridge, hpair]
   simp only [add_sub_cancel_right, ContinuousLinearMap.coe_coe]
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma cotangentToCLM_tensorCovDerivAt_sharpFlatEndoCc_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 1 I x) (v0 w : TangentSpace I x) :
@@ -1534,7 +1534,7 @@ private lemma toModel_tensor0SOne_eq_cotangentToCLM (x : M)
   congr 1
   funext i; fin_cases i; rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma raisedKoszulPairing_covariantDerivative02_eval
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1637,7 +1637,7 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
   rw [hpeel2, hbase, hcorr2, hcorr1]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 private lemma raisedKoszulPairing_covariantDerivative01_eval
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)

@@ -266,7 +266,7 @@ omit [SigmaCompactSpace M] in
       connDiffFib (I := I) g₁ g₀ x := rfl
 
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma connDiffSection_tensorCovDerivAt_homSplit
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -345,7 +345,7 @@ private lemma tensorSectionMDiffAt_connDiffPairing
 
 
 omit [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma connDiffPairing_covariantDerivative02_eval
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -442,7 +442,7 @@ private lemma connDiffPairing_covariantDerivative02_eval
 
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma connDiffPairing_covariantDerivative01_eval
     (g₁ g₀ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)

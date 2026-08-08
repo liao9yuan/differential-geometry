@@ -115,7 +115,7 @@ noncomputable def rawConnLapLin
     exact hsmul
 
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] theorem rawConnLapLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     rawConnLapLin (I := I) g r s T =

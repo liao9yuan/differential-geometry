@@ -29,7 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma gradArmFib_moving_section_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {Y : Π b : M, TensorRSSpace 0 (s + 1) I b}
@@ -71,7 +71,7 @@ noncomputable def curvatureGradContractionSection
         gradArmFib_moving_section_contMDiff (I := I) (M := M) g s W.toSection.contMDiff_toFun }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] lemma gradArmSection_toSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 (s + 1)) (x : M) :
     (curvatureGradContractionSection (I := I) (M := M) g s W).toSection x =
@@ -250,7 +250,7 @@ lemma diffArmSection_value_local
       unitEvalSection (I := I) (M := M) g s S₂ x from by
     rw [unitEvalSection_apply, unitEvalSection_apply, hx]]
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 lemma gradArmSection_toSection_add
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W₁ W₂ : SmoothCcTensor g 0 (s + 1)) (x : M) :
     (curvatureGradContractionSection (I := I) (M := M) g s (W₁ + W₂)).toSection x =
@@ -261,7 +261,7 @@ lemma gradArmSection_toSection_add
     rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]]
   rw [map_add]
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 lemma gradArmSection_toSection_smul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ) (W : SmoothCcTensor g 0 (s + 1)) (x : M) :
     (curvatureGradContractionSection (I := I) (M := M) g s (c • W)).toSection x =
@@ -271,7 +271,7 @@ lemma gradArmSection_toSection_smul
     rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]]
   rw [map_smul]
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 lemma gradArmSection_value_local
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W₁ W₂ : SmoothCcTensor g 0 (s + 1)) (x : M)
     (hx : W₁.toSection x = W₂.toSection x) :
@@ -279,7 +279,7 @@ lemma gradArmSection_value_local
       (curvatureGradContractionSection (I := I) (M := M) g s W₂).toSection x := by
   rw [gradArmSection_toSection, gradArmSection_toSection, hx]
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 theorem exists_gradArmSection_appFullSec (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ H_R : HomTensorRSField (E := E) (M := M) 0 (s + 1) (s + 1) I,
       ∀ W : SmoothCcTensor g 0 (s + 1),

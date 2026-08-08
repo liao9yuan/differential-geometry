@@ -805,7 +805,7 @@ theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M
 
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem tensor0SCovDeriv_finset_sum (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     {ι : Type*} (fs : Finset ι)
     (σ : ι → Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel s ℝ E,
@@ -1052,7 +1052,7 @@ private theorem orthoFrame_corrections_sum_eq_zero (g₀ : SmoothRiemannianMetri
 
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [CompleteSpace E] in
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 private theorem covDeriv_doubleInsert_leibniz (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
     (w : ∀ y : M, Tensor0SBundle.Tensor0SSpace (p + 2) I y)
     (hw : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (p + 2) ℝ E)) ∞

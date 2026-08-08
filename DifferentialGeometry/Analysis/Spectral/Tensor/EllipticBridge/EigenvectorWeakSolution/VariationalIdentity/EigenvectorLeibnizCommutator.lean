@@ -808,7 +808,7 @@ def tensorDiffVariationalSource
     (l : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   diffVariationalSource (I := I) (M := M) g α D.toChartData l
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorChartComponent_diff_variational_identity
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}

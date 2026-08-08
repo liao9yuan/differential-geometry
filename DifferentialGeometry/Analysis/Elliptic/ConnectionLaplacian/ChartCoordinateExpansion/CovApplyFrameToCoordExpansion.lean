@@ -237,7 +237,7 @@ private lemma chartBasisVecFiber_mdiffAt
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma covApply_chartBasisVecFiber_T₀_mdiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -344,7 +344,7 @@ private lemma finsum_smul_section_mdiffAt
     exact mdifferentiableAt_add_section hf_k₀_σ hrest
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma cov_RS_finsum_smul_section_leibniz_apply
     {ι : Type*} (s_finset : Finset ι)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

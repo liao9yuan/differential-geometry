@@ -699,7 +699,7 @@ theorem bochner_step_hcurv
   exact ⟨Cbase + Fc 0, add_nonneg hCbase_nn (hFc 0),
     bochner_step_unif (I := I) (M := M) g₀ s k Fc hFc hcurv Cbase hbase⟩
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **Reindex of the iterated rough Laplacian under one extra `Δ_∇`:**
 `Δ_∇^i(Δ_∇ S) = Δ_∇^{i+1} S`.  Local inline of the `private`
 `AllOrderGardingConstant.rawTensorConnLapIter_rawTensorConnLapSmooth` (that declaration is not

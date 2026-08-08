@@ -361,7 +361,7 @@ private theorem prependCovGradSlot_fiberNormSq_frame_sum
   rw [he_def]
   ring
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner
     (g : SmoothRiemannianMetric I M) (p : ℕ)
     (Q : Integral.L2.SmoothCcTensor g 0 p) (x : M) (v : TangentSpace I x) :

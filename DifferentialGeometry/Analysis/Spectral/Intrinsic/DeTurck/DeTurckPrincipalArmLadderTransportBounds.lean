@@ -193,7 +193,7 @@ private theorem armLadder_covGrad_oneMinusConnLapSmooth (g : SmoothRiemannianMet
   rw [hcomm]
   abel
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem armLadder_iterL_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s 1 S = oneMinusConnLapSmooth (I := I) g r s S := by

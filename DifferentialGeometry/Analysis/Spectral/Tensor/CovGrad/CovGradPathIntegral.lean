@@ -593,7 +593,7 @@ private theorem outputSlotCorrection_pathIntegral_comm
     DifferentialGeometry.Geometry.Connection.tensorRSChartE_section_repr_apply]
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem covApply_chartE_pathIntegral_comm
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -803,7 +803,7 @@ private theorem covApply_chartE_pathIntegral_comm
   rw [hRHS_eq t]
 
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem tensorCovDerivAt_pathIntegralCoeffField_eq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -938,7 +938,7 @@ private theorem tensorCovDerivAt_pathIntegralCoeffField_eq
 
 omit [CompactSpace M] in
 omit [CompleteSpace E] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem covGradParametric_tcd_toModel_continuousOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)

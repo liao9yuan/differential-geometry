@@ -194,7 +194,7 @@ private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial
     (ζ : M → ℝ) α m hy
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma tensorCovDerivAt_sum_smul_dir
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (b : M)

@@ -261,7 +261,7 @@ private lemma unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma tensor0SCovariantDerivative01_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 1 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 1 V x)

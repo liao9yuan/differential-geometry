@@ -42,7 +42,7 @@ def connLaplacianMixed (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 @[simp] lemma connLaplacianMixed_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -59,7 +59,7 @@ def connLaplacianMixedSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem connLaplacianMixed_scalar_eq_function
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 0 ℝ E,

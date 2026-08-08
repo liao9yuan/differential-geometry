@@ -87,7 +87,7 @@ private theorem add_sub_sub_cancel_right {A : Type*} [AddCommGroup A]
   abel
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 private theorem tensorCovDerivAt_apply_section (g : SmoothRiemannianMetric I M)
     (r q : ℕ) (S : SmoothCcTensor g r q)
     (W : ∀ y : M, Tensor0SSpace r I y)
@@ -113,7 +113,7 @@ private theorem tensorCovDerivAt_apply_section (g : SmoothRiemannianMetric I M)
     (LeviCivita (I := I) g) S.toSection w x v
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 private theorem tensorCovDerivAt_section_apply_add
     (g : SmoothRiemannianMetric I M) (r q : ℕ) (S : SmoothCcTensor g r q)
     (W : ∀ y : M, Tensor0SSpace r I y)
@@ -135,7 +135,7 @@ private theorem tensorCovDerivAt_section_apply_add
   exact h.symm
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 private theorem tensorCovDerivAt_curried_apply_section
     (g : SmoothRiemannianMetric I M) (r q : ℕ)
     (S : SmoothCcTensor g r (q + 1))
@@ -214,7 +214,7 @@ private theorem armSlotEndoCc_curriedSection_eq
   exact armSlotEndoCc_curry_apply (I := I) (M := M) g s Arm y (W y) (Y y)
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem tensorCovDerivAt_armSlotEndoCc_curry_curve
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -260,7 +260,7 @@ private theorem tensorCovDerivAt_armSlotEndoCc_curry_curve
     (slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x ((Arm x) (Y x)) Lw)
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem tensorCovDerivAt_armSlotEndoCc_curry_apply_sections
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -293,7 +293,7 @@ private theorem tensorCovDerivAt_armSlotEndoCc_curry_apply_sections
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem tensorCovDerivAt_armSlotEndoCc_curry_eq_slotInsertEndoFib
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -314,7 +314,7 @@ private theorem tensorCovDerivAt_armSlotEndoCc_curry_eq_slotInsertEndoFib
   exact tensorCovDerivAt_armSlotEndoCc_curry_apply_sections (I := I) (M := M)
     g s Arm (fun y => w y) w.contMDiff Y x v
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem tensorCovDerivAt_armSlotEndoCc_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Arm : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M => TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))

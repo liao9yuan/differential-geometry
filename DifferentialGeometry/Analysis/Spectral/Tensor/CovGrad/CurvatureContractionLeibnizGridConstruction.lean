@@ -176,7 +176,7 @@ noncomputable def diffCurvPhi0Fib (g : SmoothRiemannianMetric I M)
 set_option backward.isDefEq.respectTransparency false in
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem diffCurvPhi0Fib_contMDiff (g : SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))

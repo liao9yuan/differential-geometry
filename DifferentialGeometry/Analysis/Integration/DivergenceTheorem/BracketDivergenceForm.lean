@@ -72,7 +72,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
   rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem loweredCovDerivAlongVF_firstSlot_eq_lower_covApply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W' Z : SmoothCcTensor g r s)
@@ -115,7 +115,7 @@ theorem loweredCovDeriv_leibniz_combined_integral_eq_zero
   integral_tensorInner_covDeriv_combined_eq_zero (I := I) (M := M) g r s
     W'.toSection Z.toSection V
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 theorem loweredCovDeriv_bracketChannel_combined_eq_divergence_smoothSmul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W' Z : SmoothCcTensor g r s)
@@ -161,7 +161,7 @@ theorem divergence_g_finset_sum
     rw [divergence_g_add (I := I) (M := M) g (V a) (∑ i ∈ t, V i) x]
     rw [ih]
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 theorem frameSummed_covDerivAlongVF_leibniz_combined_eq_divergence
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {ι : Type*} [Fintype ι]
     (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

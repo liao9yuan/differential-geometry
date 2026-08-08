@@ -535,7 +535,7 @@ private lemma riemannianFiberNormSq_contract_le_succ_local
       (Tensor0SBundle.contract_covariant 0 s x (e a) A))
     (fun a _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 s x _) (Finset.mem_univ i)
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 private lemma covDivergenceRaw_eq_sum_contract_covDeriv_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g₀ 0 (s + 1)) (b : M) :
     covDivergenceRaw (I := I) (M := M) g₀ s V b =

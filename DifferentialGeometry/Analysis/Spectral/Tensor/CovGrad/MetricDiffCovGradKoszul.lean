@@ -88,7 +88,7 @@ private lemma scalarFn_bilinCurriedSec
   congr 1
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem tensor0SCovariantDerivative02_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 2 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 2 V x)

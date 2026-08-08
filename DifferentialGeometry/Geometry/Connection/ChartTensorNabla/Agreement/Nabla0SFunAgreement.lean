@@ -156,7 +156,7 @@ private lemma cmlm_cons_eq_curry (s : ℕ) {x : M}
   exact (TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := T x) (v0 := v0) (vs := m)).symm
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- **Tensor-derivation (Leibniz) rule for the abstract `(0, s)` covariant
 derivative, closed intrinsic form.**  Induction on `s`; the step uses the
 Hom-bundle product rule and the rank-`s` inductive hypothesis on the partial
@@ -338,7 +338,7 @@ theorem abstractDerivEval_aux
     simp only [hcons0, hconsSucc]
     ring
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- **Headline agreement.**  The chart/model derivative `nabla0SFun s (LeviCivita g)`
 of a smooth `(0, s)`-tensor field agrees, as a fibre `(0, s)`-tensor, with the
 abstract bundled covariant derivative built from the Levi-Civita connection. -/

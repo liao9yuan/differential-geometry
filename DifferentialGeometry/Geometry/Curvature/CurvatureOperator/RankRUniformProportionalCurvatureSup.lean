@@ -95,7 +95,7 @@ private lemma exists_smooth_tensor0S_section_eq2 (r : ℕ) (x : M) (Y₀ : Tenso
       (V := fun b => Tensor0SSpace r I b) x Y₀⟩
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem riemannOp_tensorCovRS_apply_eval
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (v w : TangentSpace I x)
     (T : TensorRSSpace r s I x) (Y₀ : Tensor0SSpace r I x) (u : Fin s → TangentSpace I x) :

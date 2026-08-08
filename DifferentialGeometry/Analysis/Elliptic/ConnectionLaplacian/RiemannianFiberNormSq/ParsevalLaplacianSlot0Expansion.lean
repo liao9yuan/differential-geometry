@@ -34,7 +34,7 @@ private local instance : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
 private local instance : Module.Finite ℝ E := inferInstance
 
 
-omit [CompactSpace M] [I.Boundaryless] in
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem rawTensorConnLapSmooth_toSection_eq_parseval_secondCovDeriv_sum
     (g : SmoothRiemannianMetric I M) {N : ℕ}
     (V : Fin N → Π b : M, TangentSpace I b)

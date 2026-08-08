@@ -292,7 +292,7 @@ private lemma outputSlotPiece_contDiffAt_two
   exact h_kernel_F_at.congr_of_eventuallyEq h_evt
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma chart_pulled_covApply_repr_eventuallyEq'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
