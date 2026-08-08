@@ -383,7 +383,7 @@ theorem segBall_card [ConnectedSpace M] [PseudoEMetricSpace M]
         exact ENNReal.ofReal_pos.mpr hbigR_pos⟩
     have hbig_pos : 0 < μ big := hbig_open.measure_pos μ hbig_ne
     have hbig_fin : μ big ≠ ⊤ := by
-      rw [hbig]; exact (segBall_vol_fin (I := I) g hEnorm z hq hbigR_pos hRic).ne
+      rw [hbig]; exact (segBall_vol_fin (I := I) g hEnorm z).ne
     have hU_pos : 0 < (μ big).toReal := ENNReal.toReal_pos hbig_pos.ne' hbig_fin
     -- The uniform per-ball lower mass.
     set L : ℝ :=
@@ -422,7 +422,7 @@ theorem segBall_card [ConnectedSpace M] [PseudoEMetricSpace M]
                 * μ (small j) := by simp only [hsmall]; exact hrel
       have hfin_small : μ (small j) ≠ ⊤ := by
         rw [hsmall]
-        exact (segBall_vol_fin (I := I) g hEnorm (centers j) hq hs_pos hRic).ne
+        exact (segBall_vol_fin (I := I) g hEnorm (centers j)).ne
       have hreal := (ENNReal.toReal_le_toReal
         (ENNReal.mul_ne_top hbig_fin ENNReal.ofReal_ne_top)
         (ENNReal.mul_ne_top ENNReal.ofReal_ne_top hfin_small)).mpr hcomb
