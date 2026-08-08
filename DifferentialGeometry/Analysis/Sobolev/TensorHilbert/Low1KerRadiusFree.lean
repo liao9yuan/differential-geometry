@@ -511,6 +511,84 @@ theorem psiBAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ 
   exact hfold
 
 set_option linter.unusedSectionVars false in
+/-- The fixed connection-difference offset is controlled by every positive
+state grid window. -/
+theorem fixCdAtgw (g₀ g_bg : SmoothRiemannianMetric I M) :
+    ∃ Kfx : ℕ → ℝ, (∀ n, 0 ≤ Kfx n) ∧
+      ∀ (P : SmoothCcTensor g₀ 0 2) (n : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 n
+              (lieArm1FixCd (I := I) (M := M) g₀ g_bg)).toSection x) ≤
+          Kfx n * Combinatorics.antidiagonalTupleGridWindow
+            (gridBase (I := I) (M := M) g₀ P x) (n + 2) := by
+  classical
+  choose Kfx hKfx_nn hKfx using fun n =>
+    exists_bound_riemannianFiberNormSq_smoothCcTensor
+      (I := I) (M := M) g₀ 1 (2 + n)
+        (iteratedCovGrad (I := I) g₀ 1 2 n
+          (lieArm1FixCd (I := I) (M := M) g₀ g_bg))
+  refine ⟨Kfx, hKfx_nn, ?_⟩
+  intro P n x
+  have hb : ∀ j, 0 ≤ gridBase (I := I) (M := M) g₀ P x j :=
+    gridBase_nn (I := I) (M := M) g₀ P x
+  have hW1 : (1 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow
+      (gridBase (I := I) (M := M) g₀ P x) (n + 2) :=
+    Combinatorics.one_le_antidiagonalTupleGridWindow _ hb (by omega)
+  exact (hKfx n x).trans (by
+    have := hKfx_nn n
+    nlinarith)
+
+set_option linter.unusedVariables false in
+/-- The moving-background connection factor has the same offset-two grid
+window as the ordinary connection difference. -/
+theorem bgCcAtgw (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Kbg : ℕ → ℝ, (∀ n, 0 ≤ Kbg n) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (n : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 n
+              (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
+          Kbg n * Combinatorics.antidiagonalTupleGridWindow
+            (gridBase (I := I) (M := M) g₀ P x) (n + 2) := by
+  classical
+  obtain ⟨Kcd, hKcd_nn, hcd⟩ :=
+    rfns_iCG_connDiffSection_atgw_rf (I := I) (M := M) g₀ hδ₀
+  obtain ⟨Kfx, hKfx_nn, hfx⟩ := fixCdAtgw (I := I) (M := M) g₀ g_bg
+  refine ⟨fun n => 2 * Kcd n + 2 * Kfx n,
+    fun n => by have := hKcd_nn n; have := hKfx_nn n; linarith, ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ n x
+  set W : ℝ := Combinatorics.antidiagonalTupleGridWindow
+    (gridBase (I := I) (M := M) g₀ P x) (n + 2) with hW_def
+  have hcd' : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+      ((iteratedCovGrad (I := I) g₀ 1 2 n
+        (connDiffSection (I := I) g₁ g₀)).toSection x) ≤ Kcd n * W := by
+    have h := hcd g₁ P htie hδ_le hδ0 hδ n x
+    simpa only [W, gridBase] using h
+  have hfx' : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+      ((iteratedCovGrad (I := I) g₀ 1 2 n
+        (lieArm1FixCd (I := I) (M := M) g₀ g_bg)).toSection x) ≤ Kfx n * W := by
+    simpa only [W] using hfx P n x
+  rw [lieArm1_connDiffBg_decomp (I := I) (M := M) g₀ g₁ g_bg,
+    iteratedCovGrad_add, SmoothCcTensor.toSection_add, ContMDiffSection.coe_add,
+    Pi.add_apply]
+  refine le_trans
+    (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 1 (2 + n) x _ _) ?_
+  calc
+    2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 n
+            (connDiffSection (I := I) g₁ g₀)).toSection x) +
+        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + n) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 n
+            (lieArm1FixCd (I := I) (M := M) g₀ g_bg)).toSection x)
+        ≤ 2 * (Kcd n * W) + 2 * (Kfx n * W) := by linarith
+    _ = (2 * Kcd n + 2 * Kfx n) * W := by ring
+
+set_option linter.unusedSectionVars false in
 /-- At the frozen background the `lieArm1` background arm is the plain connection
 difference. -/
 theorem bgCcEqConn (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -606,15 +684,16 @@ theorem pieceAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
 
 set_option linter.unusedVariables false in
 /-- **Radius-free pointwise grid window for the order-one DeTurck Lie
-coefficient at the frozen background.**
+coefficient at an arbitrary fixed background.**
 
 `|∇ⁿ(deTurckLieArm1Coeff g₀ g₁ g₀)|²(x) ≤ K n · atgw(bP)(n + 2)`.
 
 `deTurckLieArm1Coeff_eq_lieArm1Piece_sum` writes the coefficient as fourteen
-`lieArm1Piece`s over three `Ψ` factors.  At `g_bg = g₀` two of them collapse to
-`connDiffSection g₁ g₀`; the third is `lieArm1PsiB`.  All three carry offset-`+2`
-windows, so the whole arm does. -/
-theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+`lieArm1Piece`s over three `Ψ` factors.  The independent background contributes
+only the fixed offset `lieArm1FixCd g₀ g_bg`; positive grid windows absorb its
+state-free jets. -/
+theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kl : ℕ → ℝ, (∀ n, 0 ≤ Kl n) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -627,15 +706,20 @@ theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
         (n : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + n) x
             ((iteratedCovGrad (I := I) g₀ 3 2 n
-              (deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g₀)).toSection x) ≤
+              (deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
           Kl n * Combinatorics.antidiagonalTupleGridWindow
             (gridBase (I := I) (M := M) g₀ P x) (n + 2) := by
   classical
   obtain ⟨Kcd, hKcd_nn, hcd⟩ := rfns_iCG_connDiffSection_atgw_rf (I := I) (M := M) g₀ hδ₀
-  obtain ⟨Kψ, hKψ_nn, hψ⟩ := psiBAtgw (I := I) (M := M) g₀ g₀ hδ₀ hΛ₀0
-  set KΨ : ℕ → ℝ := fun l => Kcd l + Kψ l with hKΨ_def
+  obtain ⟨Kbg, hKbg_nn, hbg⟩ := bgCcAtgw (I := I) (M := M) g₀ g_bg hδ₀
+  obtain ⟨Kψ, hKψ_nn, hψ⟩ := psiBAtgw (I := I) (M := M) g₀ g_bg hδ₀ hΛ₀0
+  set KΨ : ℕ → ℝ := fun l => Kcd l + Kbg l + Kψ l with hKΨ_def
   have hKΨ_nn : ∀ l, 0 ≤ KΨ l := fun l => by
-    have := hKcd_nn l; have := hKψ_nn l; simp only [hKΨ_def]; linarith
+    have := hKcd_nn l
+    have := hKbg_nn l
+    have := hKψ_nn l
+    simp only [hKΨ_def]
+    linarith
   obtain ⟨Kpc, hKpc_nn, hpc⟩ := pieceAtgw (I := I) (M := M) g₀ hδ₀ KΨ hKΨ_nn
   refine ⟨fun n => 1138 * Kpc n, fun n => by have := hKpc_nn n; linarith, ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hsup n x
@@ -660,12 +744,14 @@ theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
     refine mul_le_mul_of_nonneg_right ?_
       (Combinatorics.antidiagonalTupleGridWindow_nonneg _
         (gridBase_nn (I := I) (M := M) g₀ P y) _)
+    have := hKbg_nn l
     have := hKψ_nn l
-    simp only [hKΨ_def]; linarith
+    simp only [hKΨ_def]
+    linarith
   have hΨpsi : ∀ (l : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) y
           ((iteratedCovGrad (I := I) g₀ 1 2 l
-            (lieArm1PsiB (I := I) (M := M) g₀ g₁ g₀)).toSection y) ≤
+            (lieArm1PsiB (I := I) (M := M) g₀ g₁ g_bg)).toSection y) ≤
         KΨ l * Combinatorics.antidiagonalTupleGridWindow
           (gridBase (I := I) (M := M) g₀ P y) (l + 2) := by
     intro l y
@@ -674,16 +760,24 @@ theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
       (Combinatorics.antidiagonalTupleGridWindow_nonneg _
         (gridBase_nn (I := I) (M := M) g₀ P y) _)
     have := hKcd_nn l
-    simp only [hKΨ_def]; linarith
+    have := hKbg_nn l
+    simp only [hKΨ_def]
+    linarith
   have hΨbg : ∀ (l : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) y
           ((iteratedCovGrad (I := I) g₀ 1 2 l
-            (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g₀)).toSection y) ≤
+            (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g_bg)).toSection y) ≤
         KΨ l * Combinatorics.antidiagonalTupleGridWindow
           (gridBase (I := I) (M := M) g₀ P y) (l + 2) := by
     intro l y
-    rw [bgCcEqConn (I := I) (M := M) g₀ g₁]
-    exact hΨcd l y
+    refine le_trans (hbg g₁ P htie hδ_le hδ0 hδ l y) ?_
+    refine mul_le_mul_of_nonneg_right ?_
+      (Combinatorics.antidiagonalTupleGridWindow_nonneg _
+        (gridBase_nn (I := I) (M := M) g₀ P y) _)
+    have := hKcd_nn l
+    have := hKψ_nn l
+    simp only [hKΨ_def]
+    linarith
   -- the fibre jet functional at order `n`, and its two-subadditivity
   set F : SmoothCcTensor g₀ 3 2 → ℝ := fun X =>
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + n) x
@@ -716,13 +810,13 @@ theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
     exact hpc g₁ P htie hδ_le hδ0 hδ Ψ hΨ σ' ρ n x
   set A : SmoothCcTensor g₀ 3 2 :=
     lieArm1Piece (I := I) (M := M) g₀ g₁ lieArm1SigmaC lieArm1RhoSlot0
-      (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g₀) with hA_def
+      (lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g_bg) with hA_def
   set B1 : SmoothCcTensor g₀ 3 2 :=
     lieArm1Piece (I := I) (M := M) g₀ g₁ lieArm1SigmaA (Equiv.refl (Fin 3))
       (connDiffSection (I := I) g₁ g₀) with hB1_def
   set B2 : SmoothCcTensor g₀ 3 2 :=
     lieArm1Piece (I := I) (M := M) g₀ g₁ lieArm1SigmaA (Equiv.refl (Fin 3))
-      (lieArm1PsiB (I := I) (M := M) g₀ g₁ g₀) with hB2_def
+      (lieArm1PsiB (I := I) (M := M) g₀ g₁ g_bg) with hB2_def
   set B3 : SmoothCcTensor g₀ 3 2 :=
     lieArm1Piece (I := I) (M := M) g₀ g₁ lieArm1SigmaC (Equiv.refl (Fin 3))
       (connDiffSection (I := I) g₁ g₀) with hB3_def
@@ -740,7 +834,7 @@ theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
       (connDiffSection (I := I) g₁ g₀) with hC1_def
   set C2 : SmoothCcTensor g₀ 3 2 :=
     lieArm1Piece (I := I) (M := M) g₀ g₁ lieArm1SigmaASwap (Equiv.refl (Fin 3))
-      (lieArm1PsiB (I := I) (M := M) g₀ g₁ g₀) with hC2_def
+      (lieArm1PsiB (I := I) (M := M) g₀ g₁ g_bg) with hC2_def
   set C3 : SmoothCcTensor g₀ 3 2 :=
     lieArm1Piece (I := I) (M := M) g₀ g₁ lieArm1SigmaCSwap (Equiv.refl (Fin 3))
       (connDiffSection (I := I) g₁ g₀) with hC3_def
@@ -790,14 +884,34 @@ theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
       (C1 + C2 - C3 - C4 - C5 - C6) + D) ≤ 1138 * (Kpc n * bW) := by
     linarith [hAb, hB1b, hB2b, hB3b, hB4b, hB5b, hB6b,
       hC1b, hC2b, hC3b, hC4b, hC5b, hC6b, hDb]
-  have hexp : deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g₀ =
+  have hexp : deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg =
       A + (B1 + B2 - B3 - B4 - B5 - B6) + (C1 + C2 - C3 - C4 - C5 - C6) + D :=
-    deTurckLieArm1Coeff_eq_lieArm1Piece_sum (I := I) (M := M) g₀ g₁ g₀
-  show F (deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g₀) ≤ _
+    deTurckLieArm1Coeff_eq_lieArm1Piece_sum (I := I) (M := M) g₀ g₁ g_bg
+  change F (deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg) ≤ _
   rw [hexp]
   refine hsum.trans ?_
   rw [hbW_def]
   exact le_of_eq (by ring)
+
+set_option linter.unusedVariables false in
+/-- Diagonal-background compatibility wrapper for `lieA1AtgwBg`. -/
+theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
+    ∃ Kl : ℕ → ℝ, (∀ n, 0 ≤ Kl n) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hsup : ∀ y : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 y
+          (P.toSection y) ≤ Λ₀ ^ 2)
+        (n : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + n) x
+            ((iteratedCovGrad (I := I) g₀ 3 2 n
+              (deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g₀)).toSection x) ≤
+          Kl n * Combinatorics.antidiagonalTupleGridWindow
+            (gridBase (I := I) (M := M) g₀ P x) (n + 2) :=
+  lieA1AtgwBg (I := I) (M := M) g₀ g₀ hδ₀ hΛ₀0
 
 /-! ### The full order-one integrand -/
 
@@ -808,7 +922,8 @@ set_option linter.unusedVariables false in
 in the connection difference, so the whole integrand costs exactly one derivative
 of the state.  Integrating this against `atgwToJet` at offset `w = 2` is the
 `range (i + 2)` budget of `c1_jet_tower`. -/
-theorem low1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+theorem low1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ n, 0 ≤ K n) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -822,19 +937,19 @@ theorem low1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + n) x
             ((iteratedCovGrad (I := I) g₀ 3 2 n
               ((-2 : ℝ) • linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g₀ g₁ +
-                deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g₀)).toSection x) ≤
+                deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
           K n * Combinatorics.antidiagonalTupleGridWindow
             (gridBase (I := I) (M := M) g₀ P x) (n + 2) := by
   classical
   obtain ⟨Kr, hKr_nn, hr⟩ := ricci1Atgw (I := I) (M := M) g₀ hδ₀
-  obtain ⟨Kl, hKl_nn, hl⟩ := lieA1Atgw (I := I) (M := M) g₀ hδ₀ hΛ₀0
+  obtain ⟨Kl, hKl_nn, hl⟩ := lieA1AtgwBg (I := I) (M := M) g₀ g_bg hδ₀ hΛ₀0
   refine ⟨fun n => 8 * Kr n + 2 * Kl n,
     fun n => by have := hKr_nn n; have := hKl_nn n; linarith, ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hsup n x
   set R : SmoothCcTensor g₀ 3 2 :=
     linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g₀ g₁ with hR_def
   set L : SmoothCcTensor g₀ 3 2 :=
-    deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g₀ with hL_def
+    deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg with hL_def
   set W : ℝ := Combinatorics.antidiagonalTupleGridWindow
     (gridBase (I := I) (M := M) g₀ P x) (n + 2) with hW_def
   have hRb : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + n) x
@@ -860,6 +975,27 @@ theorem low1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
           ((iteratedCovGrad (I := I) g₀ 3 2 n L).toSection x)
       ≤ 2 * (4 * (Kr n * W)) + 2 * (Kl n * W) := by linarith [hRb, hLb]
     _ = (8 * Kr n + 2 * Kl n) * W := by ring
+
+set_option linter.unusedVariables false in
+/-- Diagonal-background compatibility wrapper for `low1AtgwBg`. -/
+theorem low1Atgw (g₀ : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
+    ∃ K : ℕ → ℝ, (∀ n, 0 ≤ K n) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hsup : ∀ y : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 y
+          (P.toSection y) ≤ Λ₀ ^ 2)
+        (n : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + n) x
+            ((iteratedCovGrad (I := I) g₀ 3 2 n
+              ((-2 : ℝ) • linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g₀ g₁ +
+                deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g₀)).toSection x) ≤
+          K n * Combinatorics.antidiagonalTupleGridWindow
+            (gridBase (I := I) (M := M) g₀ P x) (n + 2) :=
+  low1AtgwBg (I := I) (M := M) g₀ g₀ hδ₀ hΛ₀0
 
 end DifferentialGeometry.Integral.Connection
 

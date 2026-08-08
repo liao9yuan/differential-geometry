@@ -1,5 +1,34 @@
 # `LowRegA2PerIndex.lean` — the ball-free per-index `appCc` assembly
 
+Update (2026-08-07, route (c) brick 2c): **widened in place `(g, g) → (g,
+g_bg)`** — `c2SupJet` (:185), `a2PerIdxJet` (:278), `a2PerIdxLin` (:411): a
+`g_bg` parameter added right after `g`, every `lowBaseData g g` in the
+statements/bodies became `lowBaseData g g_bg`, and the internal chain
+re-instantiated (`c2JetTowerSharp hDim g g_bg` at :206, `c2SupJet … g g_bg`
+at :310, `a2PerIdxJet … g g_bg` at :443).  Slot semantics: slot 1 = state
+metric (all `SmoothCcTensor g`, `gFibreOpBound g`, `iteratedCovGrad g`,
+embedding constants stay at `g`); slot 2 enters only through `lowBaseData`.
+Zero class-C surprises: `LowBaseActionData g` is slot-1-typed, so the
+`hshape : A.a2 T = appCc g 4 2 A.C2 (∇²T)` rfl and the whole square-root /
+window algebra are untouched by the widening.  The helpers
+(`appCcPerIdxL2`, `icgWinShift`, `sqrtAdd2`, `sqrtFinSum`) are slot-1-only
+and were NOT widened.  One docstring word fixed in `a2PerIdxLin`
+("background metric" → "metrics" for what fixes `Cq`).  Pre-existing
+consumers keep the explicit diagonal: `LowRegRungThree.lean:311`,
+`LowRegRungFour.lean:88`, `LowRegRungFive.lean:85` (each `a2PerIdxLin …
+hDim g` → `… hDim g g`; the `a1PerIdxLin` calls stay single-metric until
+brick 2d).  Verification passed: focused checks green on all four files,
+targeted builds green (`+…LowRegA2PerIndex`, `+…LowRegRungFive` incl.
+transparent rebuild of RungThree/RungFour), warning-free on the touched
+files; axiom probe on `a2PerIdxJet`/`a2PerIdxLin` = exactly `propext`,
+`Classical.choice`, `Quot.sound`.
+
+Update (2026-08-07, route (c) brick 2a): one diagonal call-site fixup only —
+`c2SupJet`'s proof now consumes the widened `c2JetTowerSharp … hDim g g`
+(extra explicit `g` as the freed DeTurck-background slot).  No statement in
+this file changed; widening `c2SupJet`/`a2PerIdxJet/Lin` themselves is brick
+2c.  Focused check green.
+
 Created 2026-08-05 by the J4-PREP part-(3) brick (PLAN5 No. 150-recon-§6.4,
 ordered redispatch step 3).  Status: **landed, sorry-free, census-clean**
 (`propext`, `Classical.choice`, `Quot.sound` only, for all three public

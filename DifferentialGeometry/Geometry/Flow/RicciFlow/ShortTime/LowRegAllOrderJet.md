@@ -438,7 +438,7 @@ New declarations in `LowRegAllOrderJet.lean` (cite by NAME, line numbers move):
 * `lowreg_forceDriver` (private) — **F3b**, the induction on `k`; the `a = 2`
   analogue of `deTurckForcing_finiteOrderSmoothDriverSymm`, **with both horizon
   shrinks deleted**.
-* `carrier_coeff_pmConv` (private) — the carrier's per-mode Duhamel identity on the
+* `carrier_coeff_pmConv` — the carrier's per-mode Duhamel identity on the
   closed slab, factored out of `lowreg_allOrderJet` (now used twice: for
   `hball_full` inside `lowreg_forceJetMass`, and for `hf_id` in `lowreg_allOrderJet`).
 * `lowreg_spatialMass` — the FRONTIER (`sorry`).
@@ -1037,3 +1037,10 @@ endpoint is complete for each fixed metric (with the representation identity as
 its explicit geometric input).  It is not `(N)`: the horizon is selected after
 the metric, while `ricci_flow_unif_existence` requires one positive horizon
 chosen before the whole metric class.
+
+## 2026-08-07: direct-jet consumer export
+
+`carrier_coeff_pmConv` is now public so the split direct-smoothing module can
+reuse the carrier's per-mode Duhamel identity without duplicating its proof.
+The statement and proof body are unchanged.  Focused verification and the
+axiom audit passed; the new consumer is `LowRegDirectJet.lowreg_directJet`.

@@ -3,9 +3,12 @@
 Session 3 of the tame C0 bottom.  Sibling of `TameArmJets.lean` (the Ricci `A·A`
 arm); this file does the three `lieCorr0` summands of `selfLow_split`.
 
-Status: **all three closed end-to-end at the deliverable shape.**  Sorry-free
-except through the single declared frontier `gridIntHigh`, and `lc0Riem` not even
-through that.
+Status: **all three diagonal arms are closed end-to-end at the deliverable
+shape, and the full arbitrary-background `lc0AMix` arm is closed at the same
+tame deliverable shape.**  The arbitrary-background difference is sharp at
+offset `n+2`; its new pointwise producers are sorry-free.  The integrated
+deliverables still inherit the single declared frontier `gridIntHigh`, while
+`lc0Riem` does not.
 
 ## The pre-check (planner-mandated, №140) — RESULT: the `g_bg` term VANISHES
 
@@ -37,11 +40,14 @@ sharpest form — the producer proves more than it exports.
 | name | mark | content |
 | --- | --- | --- |
 | `wXiMark` | `u = 1` | `wXi g₀ g₁ g₀`, constants state-free — the brick this session was dispatched for |
+| `mcdBgAtgw` | `u = 0`, offset `n+1` | `mcd(gB) - mcd(g₀)`; constants depend only on `g₀,gB`, with no `δ` hypothesis |
+| `amixBgAtgw` | `u = 1`, offset `n+2` | exact arbitrary-background `lc0AMix` difference, using one fixed-background `mcd` difference and one diagonal marked `mcd` factor |
 | `mcdMark` | `u = 1` | `metricConnDiffLoweredCc g₀ g₁ g₀`, via `b4_mcd_eq` + `b4_phi_atgw` |
 | `wOmegaMark` | `u = 1` | `wOmega g₀ g₁ g₀ = cometricCastG0 ⋆ wXi` |
 | `ipLowMark` | preserves `u` | the interior product; `rfns_icg_ipLow_le` + `markGrid_mono` |
 | `lc0VBMark` / `lc0VBJet` | `u = 2` | the vector-bilinear summand, and its tame `L²` jet bound |
 | `lc0AMixMark` / `lc0AMixJet` | `u = 2` | the five-factor mixed summand at `g_bg = g₀` |
+| `lc0AMixJetBg` | affine tame jet | the full five-factor mixed summand at arbitrary fixed `gB`; the background difference contributes only to `K₀` |
 | `lc0RiemMark` / `lc0RiemJet` | `u = 0` | the fixed-curvature summand; **axiom-clean, `K₂ = 0`** |
 
 Deliverable shape (identical to `ricciAAJet`):
@@ -75,21 +81,31 @@ lc0RiemPass (state-free)                       u = 0   mkOfBnd
   lc0Riem = −(lc0RiemLive ⋆ lc0RiemPass)       u = 0   lc0Riem_eq_app        ✓
 ```
 
-## `lc0AMix` is stated at `g_bg = g₀`, and that is SHARP
+## The sharp arbitrary-background `lc0AMix` extension
 
 At a general DeTurck background,
 `wXi g₀ g₁ g_bg = connDiffLoweredCc g₀ g₁ − connDiffLoweredCc g₀ g_bg` keeps a
 state-free summand, so `mcd(g₀, g₁, g_bg)` is only `u = 0` and the five-factor
-product is `u = 1`: `lc0AMix` is then **affine, not quadratic**, in `∇P`.  Two
-consequences for the planner:
+product is `u = 1`: `lc0AMix` is then **affine, not quadratic**, in `∇P`.
+The exact arbitrary-background refold makes this loss explicit and recoverable:
 
-* the general-`g_bg` statement is not a `markJet` consumer — it would need a
-  `markJet1` (a `u = 1` bridge).  A `u = 1` window is still inside the
-  `range (n + 2)` budget (its worst monomial is a lone `|∇^{n+1}P|²`), so such a
-  bridge is mathematically available; it is just not built, and nothing on the
-  current path needs it;
-* the consumer `ShortTime/LowRegBgH2.lean` (lines 653, 710, 803) uses
-  `lc0AMix g₀ g₁ g₀`, so `g_bg = g₀` is the honest call site.
+* `mcdBgAtgw` now isolates the exact background change and proves the sharp
+  radius-free bound
+  `|∇ⁿ(mcd(gB) - mcd(g₀))|² ≤ K n · atgw(bP, n+1)`.  The moving part cancels,
+  leaving the fixed tensor
+  `connDiffLoweredCc g₀ g₀ - connDiffLoweredCc g₀ gB`, acted on by the two
+  order-zero `b4Phi(P)` arms.  Bounding the two full `mcd` terms separately
+  would leak the larger general-background offset and must not replace this
+  cancellation;
+* `amix_bg_refold_rf` rewrites the full difference as four once-marked products.
+  Each product contains exactly one `mcdBgAtgw` factor (`u = 0`, offset `n+1`),
+  one diagonal `mcdMark` factor (`u = 1`), and three moving traces (`u = 0`).
+  The local `mark_one_atgw` window calculation closes the result at sharp
+  offset `n+2`, without any new `δ` or fibre-operator hypothesis;
+* `lc0AMixJetBg` sends that difference through `atgwToJet` with `w = 2` and
+  combines it with `lc0AMixJet`.  Consequently the arbitrary-background term
+  adds only to `K₀`; the quadratic `K₂` coefficient is exactly inherited from
+  the diagonal theorem.  This is the consumer-ready full-background packet.
 
 ## Upstream edits made (surgical)
 
@@ -114,6 +130,23 @@ Focused check of the new file: passed, no errors, no warnings.  Targeted builds
 of `+…LieCorr0CoeffDiffRadiusFree`, `+…TameMarkWin`, `+…TameLieCorrJets`: all
 passed.  Axiom census of every new public declaration:
 
+The later `mcdBgAtgw` extension also passes a focused check at four Lean threads
+under the 6144 MB cap.  Its first proof attempt failed only at elaboration:
+constructing the anonymous `mkAdd` chain before rewriting the target left the
+private `b4Phi` permutation metavariables undetermined.  The checked proof uses
+the single local algebra identity `mcd_corr_sub`, rewrites the target first, and
+then lets the target determine both private arms.  No new analytic assumption or
+frontier was introduced.  The earlier axiom census below was not rerun for this
+extension.
+
+The subsequent `amixBgAtgw` and `lc0AMixJetBg` extensions pass the same focused
+check.  The exact-algebra dependency `LieCorr0AMixRefold` and this module both
+pass targeted refreshes; the final `TameLieCorrJets.olean` is newer than its
+source.  The new proof is an adapter over the exact refold, marked-window
+calculus, `atgwToJet`, and the existing diagonal theorem; it introduces no new
+analytic frontier.  The axiom census below predates these two declarations and
+was not rerun for them.
+
 * **clean** (`[propext, Classical.choice, Quot.sound]`): `mkIter`, `markJet0`,
   `wXiMark`, `mcdMark`, `wOmegaMark`, `ipLowMark`, `lc0VBMark`, `lc0AMixMark`,
   `lc0RiemMark`, `lc0RiemJet`, and the two newly-public `b4_mcd_eq`,
@@ -137,6 +170,11 @@ passed.  Axiom census of every new public declaration:
   though the perm is unnameable.  Fold the σ-dependence away with a
   `∑ σ : Equiv.Perm (Fin 5), Kphi σ i` constant plus a `hsingle` helper
   (`Finset.single_le_sum`), the `ricciAAMark` `SP4` pattern.
+* For a difference of two `b4_mcd_eq` expansions, do not build an anonymous
+  `mkAdd` proof before the target fixes the private permutations: Lean then
+  reports unsolved `X`, `Y`, `Φ`, and `σ` metavariables.  First rewrite with the
+  generic local identity `mcd_corr_sub` (proved from `appCcRS_sub_right` and
+  module algebra), then refine the `mkAdd` chain against the rewritten goal.
 * **Do not put an undetermined constant behind `mkMono`.**
   `refine mkMono g₀ P (fun i => le_of_eq (by norm_num)) (mkSmul g₀ P 2 ?_)` fails:
   when the `by norm_num` runs, `mkSmul`'s constant is still a metavariable.  Fix:

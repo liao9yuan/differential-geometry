@@ -1,4 +1,5 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegAllOrderJet
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegDirectJet
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgAllMass
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegUnifBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSRepresentation
 
@@ -12,8 +13,10 @@ closed-slab forcing regularity consumed by the existing, background-generic
 joint-smoothness endpoint.
 
 The conversion from such a packet to a smooth Ricci--DeTurck metric family is
-proved here.  The only frontier is `bg_packet_of_solve`: it must bootstrap the
-already constructed fixed-background low solution on the same horizon.
+proved here.  The production metricwise route is `bg_packet_of_adapt`, which
+consumes the adapted solve and its all-order mass.  The older
+`bg_packet_of_solve` frontier remains visible because a bare solve does not
+contain the absorption data needed to construct that adapted package.
 -/
 
 noncomputable section
@@ -102,6 +105,63 @@ structure BgSmoothPacket (g g_bg : SmoothRiemannianMetric I M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
         (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2)
           (lowregNsecBg (I := I) (M := M) g g_bg (F t) hδ_lt (hδ t))) i
+
+/-- A fixed-background order-one solve with all spatial spectral masses
+directly supplies the same-horizon smoothness packet.  The dimension-dependent
+work is isolated in the producer of `hmass`. -/
+theorem bg_packet_of_mass
+    (g g_bg : SmoothRiemannianMetric I M) (K : LowRegBoundData)
+    (hK : IsLowBoundsAt (I := I) (M := M) g g_bg K)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (uLo : MaxRegSolutionSpace (I := I) (M := M) ((1 : ℕ) : ℝ) T)
+    (gforce : timeL2
+      (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (hsol : IsLowSolveBg (I := I) (M := M)
+      g g_bg K hK hT hT1 uLo gforce)
+    (hmass : ∀ σ : ℝ, ∃ Cσ : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
+          (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2) ∧
+        ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
+            (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2 ≤ Cσ) :
+    Nonempty (BgSmoothPacket (I := I) (M := M) g g_bg K T) := by
+  let R := lowregStateRad K.top K.slope K.outer K.realize
+  have hR : 0 < R :=
+    lowregStateRad_pos K.top_nonneg K.slope_nonneg K.outer_pos K.realize_pos
+  let hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g (((1 : ℕ) : ℝ) + 1) S‖ ≤ R →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) K.threshold :=
+    lowregRealRad (I := I) (M := M) g K.realize_pos.le hK.hreal
+  have hforce : gforce =ᵐ[timeMeasure T]
+      fun t => lowRegN (I := I) (M := M) g g_bg hR K.threshold_lt hreal
+        (aeSetLift (zero_mem_lowerState (I := I) (M := M) g 1 hR.le)
+          (maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g 0 2 (((1 : ℕ) : ℝ) + 2))
+            gforce) t) := by
+    simpa only [R, hreal, lowregNfun] using hsol.force_eq
+  obtain ⟨carrier, _fHi, modePath, radius, htrace, _hmap, _hpin,
+      hsmooth, hjet, hmode, hradius, hrealize, hforceCoeff, hstate⟩ :=
+    direct_jet_of_mass (I := I) (M := M) g g_bg hR K.threshold_lt hreal
+      hK.core_cont hT hT1 gforce (by simpa only [R] using hsol.field_mem)
+      hforce hmass
+  refine ⟨{
+    carrier := carrier
+    modePath := modePath
+    radius := radius
+    trace_zero := htrace
+    mode_smooth := hsmooth
+    mode_mass := hjet
+    mode_eq := hmode
+    state_bound := ?_
+    radius_pos := hradius
+    realize_bound := hrealize
+    force_coeff := ?_ }⟩
+  · intro t ht
+    simpa only [R] using hstate t ht
+  · intro F δ hδ_lt hδ hpin _hball
+    simpa only [lowregNsecBg] using hforceCoeff F hδ_lt hδ hpin
 
 /-- A fixed-background regularity packet realizes a smooth Ricci--DeTurck
 solution on exactly the packet's horizon. -/
@@ -208,6 +268,25 @@ theorem lowSolve_cross
   · exact crossRepr_ball (I := I) (M := M) v hT
       (lowregStateRad_pos K.top_nonneg K.slope_nonneg K.outer_pos
         K.realize_pos).le hfield
+
+/-- An adapted fixed-background solve supplies the same-horizon smoothness
+packet through its all-order spatial mass.  This is a metricwise consumer; it
+does not choose an adapted packet or assert class-first uniformity. -/
+theorem bg_packet_of_adapt (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) (K : LowRegBoundData)
+    {T Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
+    (hT : 0 < T) (hT1 : T ≤ 1)
+    (uLo : MaxRegSolutionSpace (I := I) (M := M) ((1 : ℕ) : ℝ) T)
+    (gforce : timeL2
+      (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (hlo : IsAdaptedLowSolveBg (I := I) (M := M) g g_bg K hT hT1
+      uLo gforce Rcap Ctop₂ Kr2 Kr1 Kcap) :
+    Nonempty (BgSmoothPacket (I := I) (M := M) g g_bg K T) := by
+  have hsolve := hlo.toIsBgSolveAt
+  exact bg_packet_of_mass (I := I) (M := M) g g_bg K hsolve.bounds
+    hT hT1 uLo gforce hsolve.solve
+      (fun σ => lowreg_loMassBg (I := I) (M := M) hDim g g_bg K
+        hT hT1 uLo gforce hlo σ)
 
 /-- **The remaining analytic frontier.**  Bootstrap the class-first order-one
 fixed-background solve to the order-two closed-slab packet without shortening

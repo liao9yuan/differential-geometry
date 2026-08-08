@@ -225,11 +225,11 @@ the path parameter.**
 For every order `i` and every `s ∈ [0,1]`, the covariant `L²` jet of order `i`
 of the integrand
 
-`rhsRefoldTop g g T s + rhsSelfTop g T s - deTurckPhiMetTotal g g g`
+`rhsRefoldTop g g_bg T s + rhsSelfTop g T s - deTurckPhiMetTotal g g_bg g`
 
 is controlled by the state's own jets through order `i` — the **sharp** window
 `∑_{j < i+1}`, i.e. `lowJetSq g i T` itself — with a constant depending only on
-the background metric and `i`, in particular on neither the state nor the path
+the background metrics and `i`, in particular on neither the state nor the path
 parameter.
 
 The wider `range (i + 2)` form is kept as `topKer_jet` below, for consumers
@@ -269,7 +269,7 @@ hypothesis is a pointwise jet window rather than an `L^∞` bound.  The Moser
 route reaches the same conclusion ball-free and gate-free. -/
 theorem topKerJetSharp
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Kk : ℕ → ℝ, (∀ i, 0 ≤ Kk i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -283,9 +283,9 @@ theorem topKerJetSharp
             (0 : SmoothCcTensor g 0 2)) δ)
         (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
         lowJetSq (I := I) (M := M) g i
-            (rhsRefoldTop (I := I) (M := M) g g T hδg hδZ s +
+            (rhsRefoldTop (I := I) (M := M) g g_bg T hδg hδZ s +
               LowBaseInternal.rhsSelfTop (I := I) (M := M) g T hδg hδZ s -
-              deTurckPhiMetTotal (I := I) (M := M) g g g) ≤
+              deTurckPhiMetTotal (I := I) (M := M) g g_bg g) ≤
           Kk i * (1 + ∑ j ∈ Finset.range (i + 1),
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
   classical
@@ -293,7 +293,7 @@ theorem topKerJetSharp
   have h31 : (1 / 3 : ℝ) < 1 := by norm_num
   obtain ⟨AL, SL, hL⟩ := moserWin_lieRef2 (I := I) (M := M) g (δ₀ := 1 / 3) h30 h31
   obtain ⟨AP, SP, hP⟩ :=
-    moserWin_phiDev (I := I) (M := M) g g (δ₀ := 1 / 3) h30 h31
+    moserWin_phiDev (I := I) (M := M) g g_bg (δ₀ := 1 / 3) h30 h31
   obtain ⟨AR, SR, hR⟩ :=
     moserWin_ricciTop (I := I) (M := M) g (δ₀ := 1 / 3) h30 h31
   refine ⟨fun i => |2 * (2 * (AL i + AP i) + 4 * AR i)|,
@@ -330,7 +330,7 @@ theorem topKerJetSharp
       nlinarith [hSR]
   have hfin := moserWin_add (I := I) (M := M)
     (moserWin_add (I := I) (M := M) hLw hPw) hRs
-  rw [LowBaseInternal.topKernel_eq (I := I) (M := M) g g T hδg hδZ s]
+  rw [LowBaseInternal.topKernel_eq (I := I) (M := M) g g_bg T hδg hδZ s]
   refine (hfin.2.2 i).trans ?_
   have hjetT : (0 : ℝ) ≤ lowJetSq (I := I) (M := M) g i T :=
     jetNn (I := I) (M := M) (m := i) g T
@@ -367,7 +367,7 @@ theorem topKer_jet
               deTurckPhiMetTotal (I := I) (M := M) g g g) ≤
           Kk i * (1 + ∑ j ∈ Finset.range (i + 2),
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
-  obtain ⟨Kk, hKk_nn, hker⟩ := topKerJetSharp (I := I) (M := M) hDim g
+  obtain ⟨Kk, hKk_nn, hker⟩ := topKerJetSharp (I := I) (M := M) hDim g g
   refine ⟨Kk, hKk_nn, ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ i s hs
   refine (hker T hT hδ0 hδ_le hδg hδZ i s hs).trans ?_

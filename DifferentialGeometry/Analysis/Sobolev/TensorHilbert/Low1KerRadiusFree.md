@@ -99,3 +99,17 @@ target (which rebuilds `LieCorr0CoeffDiffRadiusFree`,
 `DeTurckRemainderLowBaseAction`, `LowRegOpJetWindows`, `LowRegC01JetTower`):
 completed successfully, 0 errors.  Every public declaration of this module is
 `[propext, Classical.choice, Quot.sound]`.
+
+## 2026-08-07: arbitrary fixed background
+
+The order-one window is now available for an independent DeTurck background.
+`fixCdAtgw` bounds each jet of the fixed cocycle offset
+`lieArm1FixCd g₀ g_bg` and absorbs it using `1 ≤ atgw` at positive window
+order.  `bgCcAtgw` combines this with the moving connection-difference window
+through `lieArm1_connDiffBg_decomp`.
+
+`lieA1AtgwBg` and `low1AtgwBg` then reuse the existing fourteen-piece fold and
+Ricci/Lie assembly with `g_bg` in the actual coefficient.  The old
+`lieA1Atgw` and `low1Atgw` declarations remain diagonal compatibility
+wrappers.  Focused verification and the targeted module refresh passed; no
+new smallness, Sobolev-ball, or lift hypothesis was introduced.

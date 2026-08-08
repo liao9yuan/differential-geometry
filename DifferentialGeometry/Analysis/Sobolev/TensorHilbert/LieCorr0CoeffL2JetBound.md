@@ -338,7 +338,7 @@ committed per-order wAlphaB bound.  This collapses "layers 2–4" into two small
 6. **(1,1) endo-diff producer** (producer, PUBLIC): via `slotInsertEndoCc_sub` + hoist ×2 +
    isometry ×2 + triangle: `‖∇^i slotInsertEndoCc g₀ 0 (connDiffDVF(g₀) − connDiffDVF(g_bg))‖² ≤
    2 F₀ i + 2 F_bg i` at `g₁ = realizedFam` (clone lc0Riem htie/hδP/hPball plumbing).
-7. **Leaf**: (a) `lc0InsertDiff_eq_slotInsert_sum` — mirror `deTurckLieDLbCoeffField_eq_slotInsert_sum`
+7. **Leaf**: (a) `lc0InsDiff_eq` — mirror `deTurckLieDLbCoeffField_eq_slotInsert_sum`
    (:47) but for the `lc0Insert`-difference, giving the connDiffDVF-difference endo (fold in
    `nEndo_diff`); (b) mirror `normSq_iCG_dlbField_le` (:358) → `‖∇^i LC‖² ≤ 4·finrank·‖∇^i(1,1)‖²`
    via `rfns_iteratedCovGrad_slotInsertEndoCc_le_endo` (generic, MetricArmCoeffJetTower:2863) +
@@ -370,7 +370,7 @@ triangle `wAlphaB(g₀) − wAlphaB(g_bg)` suffices for a `ballUniform` bound).
 **Leaf `LieCorr0CoeffL2JetBound.lean`**:
 - `sq_le_two_add`, `normSq_iCG_le_scaled` — copies of the (private) `DeTurckLieCoeffL2JetBound` helpers.
 - `endoDiffSection` + `endoDiffSection_apply` (= `lieCorr0NEndo g_bg − g₀` via `nEndo_diff`).
-- `lc0InsertDiff_eq_slotInsert_sum` — the `(2,2)` field identity, transcribed from
+- `lc0InsDiff_eq` — the public `(2,2)` field identity, transcribed from
   `deTurckLieDLbCoeffField_eq_slotInsert_sum` with the LHS being the `lieCorr0InsertFib` DIFFERENCE
   (reconciled to the endo-difference via `nEndo_diff` + `ContinuousMultilinearMap.map_update_sub`).
 - `normSq_iCG_lc0InsertDiff_le` — the `×4·finrank` `(2,2)→(1,1)` reduction (mirror `normSq_iCG_dlbField_le`).

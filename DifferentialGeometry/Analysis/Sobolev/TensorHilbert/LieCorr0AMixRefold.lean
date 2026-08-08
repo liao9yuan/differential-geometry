@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffL2JetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SlotPermJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Split
 
 /-!
@@ -390,5 +391,76 @@ theorem amix_refold_rf (g₀ g₁ gB : SmoothRiemannianMetric I M) :
   intro D
   change lieCorr0AMixFib (I := I) g₀ g₁ gB x D = _
   exact (amixForm_fiber (I := I) (M := M) g₀ g₁ gB x D).symm
+
+/-! ## Fixed-background difference -/
+
+/-- The lowered connection-difference factor that remains after changing only
+the fixed DeTurck background. -/
+def lc0BgKappaRF (g₀ g₁ gB : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 0 3 :=
+  metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gB -
+    metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀
+
+/-- One unsymmetrized half of the mixed correction after the fixed-background
+difference has been moved into its lowered connection factor. -/
+def lc0AMixBgHalfRF (g₀ g₁ gB : SmoothRiemannianMetric I M)
+    (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 2 2 :=
+  appCcRS (I := I) (M := M) g₀ 2 4 2
+    (lc0TraceRF (I := I) (M := M) g₀ g₁ 2 σ)
+    (appCcRS (I := I) (M := M) g₀ 2 6 4
+      (lc0TraceRF (I := I) (M := M) g₀ g₁ 4 lieCorr0AMixPerm1)
+      (appCcRS (I := I) (M := M) g₀ 2 3 6
+        (slotExtendIter (I := I) (M := M) g₀ 0 3 3
+          (lc0BgKappaRF (I := I) (M := M) g₀ g₁ gB))
+        (appCcRS (I := I) (M := M) g₀ 2 5 3
+          (lc0TraceRF (I := I) (M := M) g₀ g₁ 3 lieCorr0AMixPermQ)
+          (slotExtendIter (I := I) (M := M) g₀ 0 3 2
+            (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)))))
+
+/-- Changing the fixed background in one mixed half changes only its first
+lowered connection factor. -/
+theorem amix_half_bg_rf
+    (g₀ g₁ gB : SmoothRiemannianMetric I M)
+    (σ : Equiv.Perm (Fin 4)) :
+    lc0AMixHalfRF (I := I) (M := M) g₀ g₁ gB σ -
+        lc0AMixHalfRF (I := I) (M := M) g₀ g₁ g₀ σ =
+      lc0AMixBgHalfRF (I := I) (M := M) g₀ g₁ gB σ := by
+  unfold lc0AMixHalfRF lc0AMixBgHalfRF lc0BgKappaRF
+  rw [← appCcRS_sub_right, ← appCcRS_sub_right,
+    ← appCcRS_sub_left, ← slotIterSub]
+
+/-- Exact fixed-background-difference factorization of the mixed zeroth-order
+Lie correction. -/
+theorem amix_bg_refold_rf
+    (g₀ g₁ gB : SmoothRiemannianMetric I M) :
+    lc0AMix (I := I) (M := M) g₀ g₁ gB -
+        lc0AMix (I := I) (M := M) g₀ g₁ g₀ =
+      (2 : ℝ) •
+        (lc0AMixBgHalfRF (I := I) (M := M) g₀ g₁ gB lieCorr0AMixPerm2 +
+          lc0AMixBgHalfRF (I := I) (M := M) g₀ g₁ gB
+            (lc0SwapPermRF * lieCorr0AMixPerm2)) := by
+  rw [amix_refold_rf (I := I) (M := M) g₀ g₁ gB,
+    amix_refold_rf (I := I) (M := M) g₀ g₁ g₀]
+  have h0 := amix_half_bg_rf (I := I) (M := M) g₀ g₁ gB lieCorr0AMixPerm2
+  have h1 := amix_half_bg_rf (I := I) (M := M) g₀ g₁ gB
+    (lc0SwapPermRF * lieCorr0AMixPerm2)
+  simp only [lc0AMixFormRF]
+  rw [show
+      (2 : ℝ) •
+          (lc0AMixHalfRF (I := I) (M := M) g₀ g₁ gB lieCorr0AMixPerm2 +
+            lc0AMixHalfRF (I := I) (M := M) g₀ g₁ gB
+              (lc0SwapPermRF * lieCorr0AMixPerm2)) -
+        (2 : ℝ) •
+          (lc0AMixHalfRF (I := I) (M := M) g₀ g₁ g₀ lieCorr0AMixPerm2 +
+            lc0AMixHalfRF (I := I) (M := M) g₀ g₁ g₀
+              (lc0SwapPermRF * lieCorr0AMixPerm2)) =
+        (2 : ℝ) •
+          ((lc0AMixHalfRF (I := I) (M := M) g₀ g₁ gB lieCorr0AMixPerm2 -
+              lc0AMixHalfRF (I := I) (M := M) g₀ g₁ g₀ lieCorr0AMixPerm2) +
+            (lc0AMixHalfRF (I := I) (M := M) g₀ g₁ gB
+                (lc0SwapPermRF * lieCorr0AMixPerm2) -
+              lc0AMixHalfRF (I := I) (M := M) g₀ g₁ g₀
+                (lc0SwapPermRF * lieCorr0AMixPerm2))) by module,
+    h0, h1]
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

@@ -1,5 +1,19 @@
 # LowRegC2JetTower.lean — the two layers under `c2_jet_tower`
 
+Status (2026-08-07, route (c) brick 2a): **GREEN — `topKerJetSharp` widened in
+place from the diagonal `(g, g)` to `(g, g_bg)`** (slot 1 = state/spectral
+metric, slot 2 = DeTurck background, per `ShortTime/ROUTE_C_PLAN.md` slot
+semantics).  Same name, added `g_bg` parameter after `g`; statement second
+slots now `rhsRefoldTop g g_bg` and `deTurckPhiMetTotal g g_bg g`; proof
+re-instantiations `moserWin_phiDev g g_bg` and `topKernel_eq g g_bg` — nothing
+else moved (the `moserWin_lieRef2 g` / `moserWin_ricciTop g` /
+`pathPert_rad g` legs are slot-1-only).  `topKer_jet` deliberately stays
+diagonal (it is the `range (i + 2)` compatibility form for C0/C1-shaped
+consumers); its proof now instantiates `topKerJetSharp … g g`.  No
+class-C surprise: no proof step needed `g_bg = g`.  Focused check, targeted
+module build, and the axiom probe (`propext, Classical.choice, Quot.sound`)
+all passed; downstream `LowRegC01JetTower`/`SelfLowArmCaps` rebuilt clean.
+
 Status: **GREEN, sorry-free** (2026-08-03, TK3).  Focused check clean, no
 warnings; targeted module builds of this module and of `…LowRegLadderRung`
 clean.  No `maxHeartbeats` above 800 000; no `set_option` beyond the sibling

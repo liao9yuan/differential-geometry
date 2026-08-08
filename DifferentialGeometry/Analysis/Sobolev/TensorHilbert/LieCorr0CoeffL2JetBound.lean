@@ -768,7 +768,7 @@ slot-`0` `(1, 1)` insertion is `cometricRaiseSlot0Field g₀ 0 (wAlphaB g₀ g�
 `connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform` (crude triangle
 `wAlphaB g₀ − wAlphaB g_bg`; the `wOmegaDiff_eq` cancellation is NOT needed for a `ballUniform`
 bound).  Here we (a) prove the `(2, 2)` insert-difference is the slotInsert-sum of `endoDiffSection`
-(`lc0InsertDiff_eq_slotInsert_sum`, mirroring `deTurckLieDLbCoeffField_eq_slotInsert_sum`), (b)
+(`lc0InsDiff_eq`, mirroring `deTurckLieDLbCoeffField_eq_slotInsert_sum`), (b)
 reduce it to the `(1, 1)` object `×4·finrank` (mirroring `normSq_iCG_dlbField_le`), and (c) chain the
 producer bound to discharge the atom. -/
 
@@ -827,7 +827,7 @@ private lemma endoDiffSection_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M
 set_option linter.unusedSectionVars false in
 /-- **Field identity.**  The `lc0Insert`-difference is the slotInsert-sum of the endo-difference
 section (mirrors `deTurckLieDLbCoeffField_eq_slotInsert_sum`). -/
-private theorem lc0InsertDiff_eq_slotInsert_sum (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+theorem lc0InsDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lc0Insert (I := I) (M := M) g₀ g₁ g_bg - lc0Insert (I := I) (M := M) g₀ g₁ g₀ =
       slotInsertEndoCc (I := I) (M := M) g₀ 1 (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)
         + reindexCoeffGen (I := I) (M := M) g₀ 2 2
@@ -1030,7 +1030,7 @@ theorem normSq_iCG_lc0InsertDiff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M
                 (slotInsertEndoCc (I := I) (M := M) g₀ 1
                   (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)))
               (Equiv.swap (0 : Fin 2) 1)) := by
-    rw [lc0InsertDiff_eq_slotInsert_sum (I := I) (M := M) g₀ g₁ g_bg, iteratedCovGrad_add]
+    rw [lc0InsDiff_eq (I := I) (M := M) g₀ g₁ g_bg, iteratedCovGrad_add]
   rw [hgrad]
   refine le_trans (sq_le_two_add _ _ _ _ _ (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))

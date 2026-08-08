@@ -57,10 +57,12 @@ The engine implementing the mixed choice is `app_jet_sq_split`
 
 ## Main results
 
-* `a1PerIdxJet` — the squared per-index `H^q` bound for `A.a1 T`, split into its
-  two `appCc` summands, ball-free, all constants fixed before `T` and `δ`.
-* `a1PerIdxLin` — its linear (square-root) form, the shape the rung pairing
+* `a1PerIdxJetBg` — the squared per-index `H^q` bound for `A.a1 T` with an
+  arbitrary fixed DeTurck background, split into its two `appCc` summands,
+  ball-free, all constants fixed before `T` and `δ`.
+* `a1PerIdxLinBg` — its linear (square-root) form, the shape the rung pairing
   consumes.
+* `a1PerIdxJet` and `a1PerIdxLin` — diagonal-background compatibility wrappers.
 
 ## The order budget
 
@@ -156,8 +158,8 @@ The `i = q-1` coefficient window is written `range (q-1+2)`, which is
 `range (q+1)` for every `q ≥ 1`; that shape also keeps the statement true at the
 degenerate `q = 0`, where `range (q-1) = ∅` and the arm is entirely state-side.
 -/
-private theorem a1Arm0 (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ C K : ℕ → ℝ, (∀ q, 0 ≤ C q) ∧ (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -172,7 +174,7 @@ private theorem a1Arm0 (hDim : Module.finrank ℝ E = 3)
         (q : ℕ),
         ‖iteratedCovGrad (I := I) g 0 2 q
             (appCc (I := I) (M := M) g 2 2
-              (lowBaseData (I := I) (M := M) g g T
+              (lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C0 T)‖ ^ 2 ≤
           C q * (∑ i ∈ Finset.range (q - 1), K i *
                 (1 + ∑ j ∈ Finset.range 4,
@@ -197,7 +199,7 @@ private theorem a1Arm0 (hDim : Module.finrank ℝ E = 3)
                   ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) := by
   classical
   obtain ⟨K0t, K2t, hK0_nn, hK2_nn, htow⟩ :=
-    c0_jet_tower_quad (I := I) (M := M) hDim g
+    c0JetTowerQBg (I := I) (M := M) hDim g g_bg
   choose Cs hCs_nn hCs using fun i : ℕ =>
     exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 2 (2 + i)
@@ -223,7 +225,7 @@ private theorem a1Arm0 (hDim : Module.finrank ℝ E = 3)
       have h3 := hK2_nn i
       linarith only [h1, h2, h3], ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ q
-  set A := lowBaseData (I := I) (M := M) g g T
+  set A := lowBaseData (I := I) (M := M) g g_bg T
     (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ with hA
   set J : ℕ → ℝ := fun n => ∑ j ∈ Finset.range n,
     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 with hJ
@@ -477,8 +479,8 @@ Same mixed Hölder choice as `a1Arm0`: the coefficient sup at the indices
 window `l ≤ n` here reads the state through order `n+1`; at the top index the
 single data term is capped by `|∇T|_∞ ≲ ‖T‖_{H³}`, the second of §6.4's two
 named `L^∞` factors. -/
-private theorem a1Arm1 (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+private theorem a1Arm1Bg (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ C K : ℕ → ℝ, (∀ q, 0 ≤ C q) ∧ (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -493,7 +495,7 @@ private theorem a1Arm1 (hDim : Module.finrank ℝ E = 3)
         (q : ℕ),
         ‖iteratedCovGrad (I := I) g 0 2 q
             (appCc (I := I) (M := M) g 3 2
-              (lowBaseData (I := I) (M := M) g g T
+              (lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C1
               (iteratedCovGrad (I := I) g 0 2 1 T))‖ ^ 2 ≤
           C q * (∑ i ∈ Finset.range q, K i *
@@ -507,7 +509,7 @@ private theorem a1Arm1 (hDim : Module.finrank ℝ E = 3)
                 (∑ j ∈ Finset.range 4,
                   ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) := by
   classical
-  obtain ⟨Kc, hKc_nn, htow⟩ := c1JetTowerQ (I := I) (M := M) hDim g
+  obtain ⟨Kc, hKc_nn, htow⟩ := c1JetTowerQBg (I := I) (M := M) hDim g g_bg
   choose Cs hCs_nn hCs using fun i : ℕ =>
     exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g 3 (2 + i)
@@ -525,7 +527,7 @@ private theorem a1Arm1 (hDim : Module.finrank ℝ E = 3)
         mul_nonneg (sq_nonneg _) (hSp_nn i)
       linarith only [h1, hKc_nn i], ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ q
-  set A := lowBaseData (I := I) (M := M) g g T
+  set A := lowBaseData (I := I) (M := M) g g_bg T
     (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ with hA
   set J : ℕ → ℝ := fun n => ∑ j ∈ Finset.range n,
     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 with hJ
@@ -686,7 +688,7 @@ private theorem combine2 {a b c d u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v)
   nlinarith [mul_nonneg hc hv, mul_nonneg hd hu]
 
 set_option linter.unusedSectionVars false in
-/-- **The ball-free per-index `H^q`-jet assembly of the low-base `a₁` arm.**
+/-- **The ball-free per-index `H^q`-jet assembly of the fixed-background `a₁` arm.**
 
 With `J n = ∑_{j < n} ‖∇ʲT‖²`,
 
@@ -724,6 +726,93 @@ which the `C₀` re-split leaves unchanged.  The `C₀` tower is quadratic in `T
 so every `C₀` slot carries the extra factor `1 + J 4`, an `H³` rather than a
 class quantity; after the re-split those factors multiply class and same-scale
 windows only, and their destination is the `L¹_t` Grönwall coefficient. -/
+theorem a1PerIdxJetBg (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) :
+    ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        (q : ℕ),
+        ‖iteratedCovGrad (I := I) g 0 2 q
+            ((lowBaseData (I := I) (M := M) g g_bg T
+              (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
+                (I := I) (M := M) T)‖ ^ 2 ≤
+          Cq q * ((∑ i ∈ Finset.range (q - 1), K0 i *
+                  (1 + ∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
+                  (1 + ∑ j ∈ Finset.range (i + 4),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
+                  (∑ j ∈ Finset.range (q - i + 1),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) +
+                K0 (q - 1) *
+                  (1 + ∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
+                  (1 + ∑ j ∈ Finset.range (q - 1 + 2),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
+                  (∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) +
+                K0 q *
+                  (1 + ∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
+                  (1 + ∑ j ∈ Finset.range (q + 2),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
+                  (∑ j ∈ Finset.range 3,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) +
+            (∑ i ∈ Finset.range q, K1 i *
+                  (1 + ∑ j ∈ Finset.range (i + 4),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
+                  (∑ j ∈ Finset.range (q - i + 2),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) +
+                K1 q *
+                  (1 + ∑ j ∈ Finset.range (q + 2),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
+                  (∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2))) := by
+  classical
+  obtain ⟨C0, K0, hC0_nn, hK0_nn, harm0⟩ :=
+    a1Arm0Bg (I := I) (M := M) hDim g g_bg
+  obtain ⟨C1, K1, hC1_nn, hK1_nn, harm1⟩ :=
+    a1Arm1Bg (I := I) (M := M) hDim g g_bg
+  refine ⟨fun q => 2 * (C0 q + C1 q), K0, K1,
+    fun q => by linarith only [hC0_nn q, hC1_nn q], hK0_nn, hK1_nn, ?_⟩
+  intro T hT δ hδ0 hδ_le hδg hδZ q
+  set A := lowBaseData (I := I) (M := M) g g_bg T
+    (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ with hA
+  have hJ_nn : ∀ n : ℕ, (0 : ℝ) ≤ ∑ j ∈ Finset.range n,
+      ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 := fun n =>
+    Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have hshape : A.a1 (I := I) (M := M) T =
+      appCc (I := I) (M := M) g 2 2 A.C0 T +
+        appCc (I := I) (M := M) g 3 2 A.C1
+          (iteratedCovGrad (I := I) g 0 2 1 T) := rfl
+  rw [hshape, iteratedCovGrad_add]
+  refine le_trans (sqAddLe (norm_nonneg _) (norm_add_le _ _)) ?_
+  refine combine2 ?_ ?_ (hC0_nn q) (hC1_nn q)
+    (harm0 T hT hδ0 hδ_le hδg hδZ q) (harm1 T hT hδ0 hδ_le hδg hδZ q)
+  · refine add_nonneg (add_nonneg (Finset.sum_nonneg (fun i _ => ?_)) ?_) ?_
+    · exact mul_nonneg (mul_nonneg (mul_nonneg (hK0_nn i)
+        (by linarith only [hJ_nn 4])) (by linarith only [hJ_nn (i + 4)]))
+        (hJ_nn _)
+    · exact mul_nonneg (mul_nonneg (mul_nonneg (hK0_nn (q - 1))
+        (by linarith only [hJ_nn 4])) (by linarith only [hJ_nn (q - 1 + 2)]))
+        (hJ_nn _)
+    · exact mul_nonneg (mul_nonneg (mul_nonneg (hK0_nn q)
+        (by linarith only [hJ_nn 4])) (by linarith only [hJ_nn (q + 2)]))
+        (hJ_nn _)
+  · refine add_nonneg (Finset.sum_nonneg (fun i _ => ?_)) ?_
+    · exact mul_nonneg (mul_nonneg (hK1_nn i)
+        (by linarith only [hJ_nn (i + 4)])) (hJ_nn _)
+    · exact mul_nonneg (mul_nonneg (hK1_nn q)
+        (by linarith only [hJ_nn (q + 2)])) (hJ_nn _)
+
+/-- Diagonal-background compatibility wrapper for `a1PerIdxJetBg`. -/
 theorem a1PerIdxJet (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧
@@ -772,41 +861,8 @@ theorem a1PerIdxJet (hDim : Module.finrank ℝ E = 3)
                   (1 + ∑ j ∈ Finset.range (q + 2),
                     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) *
                   (∑ j ∈ Finset.range 4,
-                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2))) := by
-  classical
-  obtain ⟨C0, K0, hC0_nn, hK0_nn, harm0⟩ := a1Arm0 (I := I) (M := M) hDim g
-  obtain ⟨C1, K1, hC1_nn, hK1_nn, harm1⟩ := a1Arm1 (I := I) (M := M) hDim g
-  refine ⟨fun q => 2 * (C0 q + C1 q), K0, K1,
-    fun q => by linarith only [hC0_nn q, hC1_nn q], hK0_nn, hK1_nn, ?_⟩
-  intro T hT δ hδ0 hδ_le hδg hδZ q
-  set A := lowBaseData (I := I) (M := M) g g T
-    (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ with hA
-  have hJ_nn : ∀ n : ℕ, (0 : ℝ) ≤ ∑ j ∈ Finset.range n,
-      ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 := fun n =>
-    Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  have hshape : A.a1 (I := I) (M := M) T =
-      appCc (I := I) (M := M) g 2 2 A.C0 T +
-        appCc (I := I) (M := M) g 3 2 A.C1
-          (iteratedCovGrad (I := I) g 0 2 1 T) := rfl
-  rw [hshape, iteratedCovGrad_add]
-  refine le_trans (sqAddLe (norm_nonneg _) (norm_add_le _ _)) ?_
-  refine combine2 ?_ ?_ (hC0_nn q) (hC1_nn q)
-    (harm0 T hT hδ0 hδ_le hδg hδZ q) (harm1 T hT hδ0 hδ_le hδg hδZ q)
-  · refine add_nonneg (add_nonneg (Finset.sum_nonneg (fun i _ => ?_)) ?_) ?_
-    · exact mul_nonneg (mul_nonneg (mul_nonneg (hK0_nn i)
-        (by linarith only [hJ_nn 4])) (by linarith only [hJ_nn (i + 4)]))
-        (hJ_nn _)
-    · exact mul_nonneg (mul_nonneg (mul_nonneg (hK0_nn (q - 1))
-        (by linarith only [hJ_nn 4])) (by linarith only [hJ_nn (q - 1 + 2)]))
-        (hJ_nn _)
-    · exact mul_nonneg (mul_nonneg (mul_nonneg (hK0_nn q)
-        (by linarith only [hJ_nn 4])) (by linarith only [hJ_nn (q + 2)]))
-        (hJ_nn _)
-  · refine add_nonneg (Finset.sum_nonneg (fun i _ => ?_)) ?_
-    · exact mul_nonneg (mul_nonneg (hK1_nn i)
-        (by linarith only [hJ_nn (i + 4)])) (hJ_nn _)
-    · exact mul_nonneg (mul_nonneg (hK1_nn q)
-        (by linarith only [hJ_nn (q + 2)])) (hJ_nn _)
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2))) :=
+  a1PerIdxJetBg (I := I) (M := M) hDim g g
 
 /-! ## The linear form the rung pairing consumes -/
 
@@ -822,7 +878,7 @@ private theorem sqrtOnePlus (x : ℝ) (hx : 0 ≤ x) :
     _ = 1 + Real.sqrt x := Real.sqrt_sq (by positivity)
 
 set_option linter.unusedSectionVars false in
-/-- **The per-index `a₁` assembly in the linear form the pairing consumes.**
+/-- **The fixed-background per-index `a₁` assembly in the linear pairing form.**
 
 With `jetₙ = (∑_{j < n} ‖∇ʲT‖²)^{1/2}`, the square root of `a1PerIdxJet`'s
 windows:
@@ -844,8 +900,8 @@ PSTOP's adapter H in its widened form
 unchanged by the `C₀` re-split.  The `C₀` slots also carry `1 + jet₄`, an `H³`
 rather than a class factor; they now multiply class and same-scale windows only,
 so they belong in the `L¹_t` Grönwall coefficient. -/
-theorem a1PerIdxLin (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -859,7 +915,7 @@ theorem a1PerIdxLin (hDim : Module.finrank ℝ E = 3)
             (0 : SmoothCcTensor g 0 2)) δ)
         (q : ℕ),
         ‖iteratedCovGrad (I := I) g 0 2 q
-            ((lowBaseData (I := I) (M := M) g g T
+            ((lowBaseData (I := I) (M := M) g g_bg T
               (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
                 (I := I) (M := M) T)‖ ≤
           Cq q * ((∑ i ∈ Finset.range (q - 1), K0 i *
@@ -895,7 +951,7 @@ theorem a1PerIdxLin (hDim : Module.finrank ℝ E = 3)
                     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2))) := by
   classical
   obtain ⟨Cq, K0, K1, hCq_nn, hK0_nn, hK1_nn, hsq⟩ :=
-    a1PerIdxJet (I := I) (M := M) hDim g
+    a1PerIdxJetBg (I := I) (M := M) hDim g g_bg
   refine ⟨fun q => Real.sqrt (Cq q), fun i => Real.sqrt (K0 i),
     fun i => Real.sqrt (K1 i), fun q => Real.sqrt_nonneg _,
     fun i => Real.sqrt_nonneg _, fun i => Real.sqrt_nonneg _, ?_⟩
@@ -945,7 +1001,7 @@ theorem a1PerIdxLin (hDim : Module.finrank ℝ E = 3)
   have h := hsq T hT hδ0 hδ_le hδg hδZ q
   -- take the square root of the squared bound
   have hroot : ‖iteratedCovGrad (I := I) g 0 2 q
-      ((lowBaseData (I := I) (M := M) g g T
+      ((lowBaseData (I := I) (M := M) g g_bg T
         (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
           (I := I) (M := M) T)‖ ≤
       Real.sqrt (Cq q) * Real.sqrt
@@ -1043,6 +1099,58 @@ theorem a1PerIdxLin (hDim : Module.finrank ℝ E = 3)
       refine mul_le_mul_of_nonneg_right ?_ (Real.sqrt_nonneg _)
       exact mul_le_mul_of_nonneg_left (sqrtOnePlus _ (hJ_nn (q + 2)))
         (Real.sqrt_nonneg _)
+
+/-- Diagonal-background compatibility wrapper for `a1PerIdxLinBg`. -/
+theorem a1PerIdxLin (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        (q : ℕ),
+        ‖iteratedCovGrad (I := I) g 0 2 q
+            ((lowBaseData (I := I) (M := M) g g T
+              (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
+                (I := I) (M := M) T)‖ ≤
+          Cq q * ((∑ i ∈ Finset.range (q - 1), K0 i *
+                  (1 + Real.sqrt (∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) *
+                  (1 + Real.sqrt (∑ j ∈ Finset.range (i + 4),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) *
+                  Real.sqrt (∑ j ∈ Finset.range (q - i + 1),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) +
+                K0 (q - 1) *
+                  (1 + Real.sqrt (∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) *
+                  (1 + Real.sqrt (∑ j ∈ Finset.range (q - 1 + 2),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) *
+                  Real.sqrt (∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) +
+                K0 q *
+                  (1 + Real.sqrt (∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) *
+                  (1 + Real.sqrt (∑ j ∈ Finset.range (q + 2),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) *
+                  Real.sqrt (∑ j ∈ Finset.range 3,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) +
+            (∑ i ∈ Finset.range q, K1 i *
+                  (1 + Real.sqrt (∑ j ∈ Finset.range (i + 4),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) *
+                  Real.sqrt (∑ j ∈ Finset.range (q - i + 2),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) +
+                K1 q *
+                  (1 + Real.sqrt (∑ j ∈ Finset.range (q + 2),
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) *
+                  Real.sqrt (∑ j ∈ Finset.range 4,
+                    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2))) :=
+  a1PerIdxLinBg (I := I) (M := M) hDim g g
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

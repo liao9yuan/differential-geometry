@@ -1,5 +1,46 @@
 # LowRegLadderRung.lean — E0a′/A1c/A1d, the `k`-uniform ladders of the low-base arms
 
+Status (2026-08-07, route (c) brick 2e): **GREEN — the complete ball and
+ball-free ladder package now accepts an arbitrary fixed DeTurck background.**
+The new producer chain is `a2LadderQBg` → `a1_ladder_bg` → `a1LadderQBg` →
+`nDiffHmQBg` → `IsHmRungOrdBg` → `lowregHmPackBg`.  The second-order arm uses
+the already two-metric `lowData_split`/`c2JetTowerQ`; the first-order arm uses
+the canonical `c0_jet_tower_bg` and `c1_jet_tower_bg`.  No new analytic engine
+or hypothesis was introduced.  The per-index `a1PerIdxLinBg` remains the
+separate tower-direct rung input and is intentionally not folded into this
+collapsed high-rung ladder.
+
+The old diagonal declarations `a2LadderQ`, `a1_ladder`, `a1LadderQ`,
+`nDiffHmQ`, `IsHmRungOrd`, and `lowregHmPack` remain compatibility wrappers;
+the four theorem signatures were checked textually against the pre-port source
+and are exact after specializing `g_bg := g`.  Focused verification and the
+targeted export refresh passed.  The six new background declarations have the
+standard axiom set `[propext, Classical.choice, Quot.sound]` only.  No
+`sorry`, `maxHeartbeats`, or new warning was added.
+
+Progress accounting: brick 2e is 100%; the route-(c) fixed-background
+adapted/mass lane is approximately 55% (rung-3/4/5, gate/adaptation, and the
+mass composition remain); `ricci_flow_unif_existence` itself remains 0% while
+its endpoint proof is not closed; dedicated uniform-existence infrastructure
+remains approximately 80%; the whole HCG program remains approximately 3%.
+
+Status (2026-08-07, route (c) brick 2a): **GREEN — the C2 tower spine widened
+in place `(g, g) → (g, g_bg)`**: `c2JetTowerSharp`, `c2JetTowerQ` and
+`c2_jet_tower` now take `(g g_bg : SmoothRiemannianMetric I M)` and state the
+tower for `(lowBaseData g g_bg T …).C2` (slot 2 = DeTurck background; see
+`ShortTime/ROUTE_C_PLAN.md`).  Proof deltas are pure re-instantiations:
+`topKerJetSharp … g g_bg` (also widened, `LowRegC2JetTower.lean`), the opaque
+witness `rhsRefoldTopInt g g_bg + selfTopInt g − deTurckPhiMetTotal g g_bg g`
+with `rhsRefoldTop g g_bg` / `rhsRefoldTop_joint g g_bg`
+(`selfTop_joint g` is slot-1-only and untouched).  Everything below the C2
+section is untouched except one diagonal call-site fixup: `a2LadderQ` now
+consumes `c2JetTowerQ … hDim g₀ g₀` (its own statement stays diagonal — brick
+2e will widen the ladder assembly).  The other external consumer fixed the
+same way: `c2SupJet` (`LowRegA2PerIndex.lean`).  No class-C surprise (no step
+needed `g_bg = g`).  Focused checks, targeted builds, and the axiom probe on
+all four widened declarations (`propext, Classical.choice, Quot.sound`)
+passed.
+
 Status (2026-08-04): **GREEN and complete — the ladder layer of F6 is closed.**
 `a2_ladder` (`a₂` arm), `a1_ladder` (`a₁` arm, A1c) and `n_diff_hm_rung` (the
 assembled `N T − N 0` ladder at every rung, A1d) are all proved and

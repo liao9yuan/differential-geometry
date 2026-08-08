@@ -819,6 +819,27 @@ Verification: focused check green; targeted module build green; census clean
 (`c1JetTowerQ` and `c1_jet_tower` both `[propext, Classical.choice,
 Quot.sound]`).
 
+## 2026-08-07: background C1 tower and exact C0 split
+
+The complete first-order tower now accepts an arbitrary fixed background:
+`low1Ker_jet_bg`, `c1JetTowerQBg`, and `c1_jet_tower_bg` pass `g_bg` through
+the path coefficient, joint-smoothness theorem, and `lowBaseData`.  Their old
+diagonal declarations remain compatibility wrappers.  Focused verification is
+green.
+
+`selfLow_split_bg` records the honest seven-term zeroth-order decomposition.
+Besides Ricci, VB, AMix, and Riem, it retains both background corrections:
+the DeTurck endomorphism-arm difference and the `lc0Insert` difference.  Its
+proof is only `selfLow_good`, the Lie arm split, `tail_base_split`, and abelian
+algebra; focused verification is green.
+
+The remaining C0 frontier is analytic rather than algebraic.  The background
+versions of the combined Lie residual, `lc0AMixJet`, and the sharp
+`lc0Insert` difference window must preserve the `range (i + 2)` budget before
+`selfLow_jet_quad` and the C0 tower can be backgroundized.  The older
+high-order ball-uniform insertion estimates are not substitutes for this
+sharp window.
+
 ## 2026-08-05: operator-window add-lemma rename
 
 The four local sum estimates now call `opJetAdd`, and the local scaling estimate
@@ -827,3 +848,37 @@ algebra.  This removes the import collision with the canonical H²-lane
 declarations; the proof statements and constants are unchanged.  Focused
 verification passed after both renames, and the module rebuilt successfully as
 part of the adapted-package dependency refresh.
+
+## 2026-08-07: arbitrary fixed-background quadratic C0 tower
+
+Status: **GREEN**.
+
+The diagonal quadratic proof was generalized once and the old public endpoint
+was retained as a compatibility wrapper:
+
+- `lieBgJet` combines the covariant and endomorphism DeTurck background
+  corrections without losing the `range (i + 2)` currency;
+- `insBgJet` imports the sharp insertion-background window as a state-free
+  `K0` arm;
+- `selfLowJetQBg` assembles the six honest fixed-background summands using
+  `selfLow_split_bg`;
+- `c0JetTowerQBg` integrates that path and keeps
+  `phiMetCurvCoeff g g_bg g` in the state-free arm;
+- `c0_jet_tower_bg` converts the quadratic H³ currency into the existing
+  H^(a+2)-ball currency, so background ladder consumers do not need to repeat
+  the finite three-jet comparison;
+- `selfLow_jet_quad` and `c0_jet_tower_quad` are diagonal wrappers.
+
+The ordinary sharp insertion window is sufficient here: after `atgwToJet` it
+is already a `K0 · (1 + jet)` estimate, so no marked companion is needed by
+this consumer.
+
+Focused verification and the targeted module refresh passed after the ball
+adapter was added.  The new background tower theorems contain no `sorry` and
+add no axiom or heartbeat override.
+
+Project accounting: this C0 background-tower brick is 100%; the conditional
+background `lowreg_loMassBg` theorem is still unstated (0%), while its dedicated
+backgroundized coefficient/mass machinery is now about 70%.  The route-(c)
+background endpoint lane is about 50%; `ricci_flow_unif_existence` itself
+remains 0% until the adapted-solve calibration and final composition are proved.

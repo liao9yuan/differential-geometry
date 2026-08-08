@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegOpJetWindows
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Low1KerRadiusFree
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SelfLowCapWindows
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Lc0InsertDiffWindow
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SelfLowArmCaps
 
 /-!
@@ -70,9 +71,9 @@ antidiagonal-grid window of `Low1KerRadiusFree.lean`: `low1Atgw` bounds the
 integrand's fibre jets pointwise at offset `+2`, and `atgwToJet` integrates that
 into the `range (i + 2)` budget.  `pathPert_rad` supplies the perturbation data
 uniformly in `s`, which is why no constant here sees the path parameter. -/
-theorem low1Ker_jet
+theorem low1Ker_jet_bg
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Kk : ℕ → ℝ, (∀ i, 0 ≤ Kk i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -86,7 +87,7 @@ theorem low1Ker_jet
             (0 : SmoothCcTensor g 0 2)) δ)
         (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
         lowJetSq (I := I) (M := M) g i
-            (rhsLow1Coeff (I := I) (M := M) g g T
+            (rhsLow1Coeff (I := I) (M := M) g g_bg T
               (0 : SmoothCcTensor g 0 2) hδg hδZ s) ≤
           Kk i * (1 + ∑ j ∈ Finset.range (i + 2),
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
@@ -95,7 +96,7 @@ theorem low1Ker_jet
   have h31 : (1 / 3 : ℝ) < 1 := by norm_num
   have hΛ₀0 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) * (1 / 3) :=
     mul_nonneg (Nat.cast_nonneg _) h30
-  obtain ⟨Kw, hKw_nn, hw⟩ := low1Atgw (I := I) (M := M) g h31 hΛ₀0
+  obtain ⟨Kw, hKw_nn, hw⟩ := low1AtgwBg (I := I) (M := M) g g_bg h31 hΛ₀0
   obtain ⟨Kint, hKint_nn, hint⟩ := atgwToJet (I := I) (M := M) g hΛ₀0
   refine ⟨fun i => ∑ q ∈ Finset.range (i + 1),
       Kw q * (∑ k ∈ Finset.range (q + 2), Kint k),
@@ -113,15 +114,15 @@ theorem low1Ker_jet
   obtain ⟨⟨δ', hδ'0, hδ'_le, hP⟩, htie, hPsup, hPjet⟩ :=
     pathPert_rad (I := I) (M := M) g T hδ0 hδ_le hδ_lt hδg hδZ hTsup hs
   -- the integrand, in the shape the radius-free window covers
-  have heq : rhsLow1Coeff (I := I) (M := M) g g T
+  have heq : rhsLow1Coeff (I := I) (M := M) g g_bg T
         (0 : SmoothCcTensor g 0 2) hδg hδZ s =
       (-2 : ℝ) • linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g
           (realizedFam (I := I) g T 0 hδg hδZ s) +
         deTurckLieArm1Coeff (I := I) (M := M) g
-          (realizedFam (I := I) g T 0 hδg hδZ s) g := rfl
+          (realizedFam (I := I) g T 0 hδg hδZ s) g_bg := rfl
   -- the per-order jet bound, uniformly in `s`
   have hq : ∀ q : ℕ, ‖iteratedCovGrad (I := I) g 3 2 q
-        (rhsLow1Coeff (I := I) (M := M) g g T
+        (rhsLow1Coeff (I := I) (M := M) g g_bg T
           (0 : SmoothCcTensor g 0 2) hδg hδZ s)‖ ^ 2 ≤
       Kw q * (∑ k ∈ Finset.range (q + 2), Kint k) *
         (1 + ∑ j ∈ Finset.range (q + 2),
@@ -152,7 +153,7 @@ theorem low1Ker_jet
     Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   unfold lowJetSq
   calc ∑ q ∈ Finset.range (i + 1), ‖iteratedCovGrad (I := I) g 3 2 q
-          (rhsLow1Coeff (I := I) (M := M) g g T
+          (rhsLow1Coeff (I := I) (M := M) g g_bg T
             (0 : SmoothCcTensor g 0 2) hδg hδZ s)‖ ^ 2
       ≤ ∑ q ∈ Finset.range (i + 1),
           Kw q * (∑ k ∈ Finset.range (q + 2), Kint k) *
@@ -170,21 +171,85 @@ theorem low1Ker_jet
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
         rw [Finset.sum_mul]
 
-/-- **Cancellation-preserving normal form of the zero-arm self-action
-integrand.**
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+/-- Diagonal-background compatibility wrapper for `low1Ker_jet_bg`. -/
+theorem low1Ker_jet
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Kk : ℕ → ℝ, (∀ i, 0 ≤ Kk i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        lowJetSq (I := I) (M := M) g i
+            (rhsLow1Coeff (I := I) (M := M) g g T
+              (0 : SmoothCcTensor g 0 2) hδg hδZ s) ≤
+          Kk i * (1 + ∑ j ∈ Finset.range (i + 2),
+            ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
+  low1Ker_jet_bg (I := I) (M := M) hDim g g
 
-At the frozen background the second-derivative heads of the DeTurck Lie
-coefficient and of the `lieCorr0` insertion arm cancel pairwise
-(`insert_base`), leaving the Palatini covariant-derivative arm against the
-subtracted edge pairing, plus the three residual `lieCorr0` pieces:
+/-- Cancellation-preserving zero-arm split at an arbitrary fixed background.
 
-`rhsSelfLow = (-2)•ricciGoodLow + (deTurckLieCovDerivArmField − edgeLiePairFam)
-  + lc0VB + lc0AMix + lc0Riem`.
+The two background corrections are retained explicitly: the difference of the
+DeTurck endomorphism arms and the difference of the `lc0Insert` arms. -/
+theorem selfLow_split_bg
+    (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    (hT : ∀ (x : M) (u v : TangentSpace I x),
+      ccTensorBilin (I := I) g T x u v =
+        ccTensorBilin (I := I) g T x v u)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ)
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    rhsSelfLow (I := I) (M := M) g g_bg T hδ hδZ s =
+      let gm := realizedFam (I := I) g T 0 hδ hδZ s
+      (-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm (s • T) +
+          (deTurckLieCovDerivArmField (I := I) (M := M) g gm g_bg -
+            edgeLiePairFam (I := I) (M := M) g T hδ hδZ
+              lieRefoldQ lieRefoldEps s) +
+          (deTurckLieEndoArmField (I := I) (M := M) g gm g_bg -
+            deTurckLieEndoArmField (I := I) (M := M) g gm g) +
+          (lc0Insert (I := I) (M := M) g gm g_bg -
+            lc0Insert (I := I) (M := M) g gm g) +
+          lc0VB (I := I) (M := M) g gm +
+          lc0AMix (I := I) (M := M) g gm g_bg +
+          lc0Riem (I := I) (M := M) g gm := by
+  rw [selfLow_good (I := I) (M := M) g g_bg T hT hδ_lt hδ hδZ hs]
+  dsimp only
+  have h := tail_base_split (I := I) (M := M) g
+    (realizedFam (I := I) g T 0 hδ hδZ s) g_bg
+  have h' : lieCorr0Field (I := I) (M := M) g
+        (realizedFam (I := I) g T 0 hδ hδZ s) g_bg =
+      (((lc0Insert (I := I) (M := M) g
+              (realizedFam (I := I) g T 0 hδ hδZ s) g_bg -
+            lc0Insert (I := I) (M := M) g
+              (realizedFam (I := I) g T 0 hδ hδZ s) g) +
+          lc0VB (I := I) (M := M) g
+            (realizedFam (I := I) g T 0 hδ hδZ s)) +
+        lc0AMix (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hδ hδZ s) g_bg) +
+        lc0Riem (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hδ hδZ s) -
+        deTurckLieEndoArmField (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hδ hδZ s) g := by
+    rw [← h]
+    abel
+  rw [deTurckLieCoeffField_eq_covDerivArm_add_endoArm]
+  rw [h']
+  abel
 
-This is the grouping in which every summand costs only **one** derivative of the
-state — the individual summands `deTurckLieCoeffField` and `lieCorr0Field` cost
-two — so it is the only grouping in which `c0_jet_tower`'s `range (i + 2)`
-budget is honest. -/
+/-- Diagonal-background cancellation-preserving zero-arm split. -/
 theorem selfLow_split
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -586,6 +651,304 @@ private lemma jetTrans (g : SmoothRiemannianMetric I M) {r c : ℕ}
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
+/-- The cancellation-preserving DeTurck Lie residual at an arbitrary fixed
+background has the same quadratic all-order jet currency as its diagonal
+counterpart.  Both background corrections are included: the covariant-derivative
+arm and the endomorphism arm. -/
+theorem lieBgJet
+    (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g T x v w =
+            ccTensorBilin (I := I) g T x w v)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1)
+        (hP0 : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+          ((convexPerturbation (I := I) g T 0 s).toSection x) ≤ 1)
+        (i : ℕ),
+        lowJetSq (I := I) (M := M) g i
+            ((deTurckLieCovDerivArmField (I := I) (M := M) g
+                (realizedFam (I := I) g T 0 hδg hδZ s) g_bg -
+              edgeLiePairFam (I := I) (M := M) g T hδg hδZ
+                lieRefoldQ lieRefoldEps s) +
+              (deTurckLieEndoArmField (I := I) (M := M) g
+                  (realizedFam (I := I) g T 0 hδg hδZ s) g_bg -
+                deTurckLieEndoArmField (I := I) (M := M) g
+                  (realizedFam (I := I) g T 0 hδg hδZ s) g)) ≤
+          (K0 i + K2 i * ∑ j ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
+            (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+  classical
+  obtain ⟨Ac, Bc, hAc_nn, hBc_nn, hcov⟩ :=
+    lieCovJet (I := I) (M := M) hDim g hδ₀
+  obtain ⟨Ca, hCa_nn, hCa⟩ := dlaBg_grid (I := I) (M := M) g g_bg hδ₀
+  obtain ⟨Cb, hCb_nn, hCb⟩ := dlbDiff_grid (I := I) (M := M) g g_bg hδ₀
+  obtain ⟨Kint, hKint_nn, hint⟩ :=
+    atgwToJet (I := I) (M := M) g (Λ₀ := 1) zero_le_one
+  set Aa : ℕ → ℝ := fun q => Ca q * ∑ k ∈ Finset.range (q + 2), Kint k with hAa_def
+  set Ab : ℕ → ℝ := fun q => Cb q * ∑ k ∈ Finset.range (q + 2), Kint k with hAb_def
+  have hAa_nn : ∀ q, 0 ≤ Aa q := fun q =>
+    mul_nonneg (hCa_nn q) (Finset.sum_nonneg fun k _ => hKint_nn k)
+  have hAb_nn : ∀ q, 0 ≤ Ab q := fun q =>
+    mul_nonneg (hCb_nn q) (Finset.sum_nonneg fun k _ => hKint_nn k)
+  refine ⟨fun i => 4 * (∑ q ∈ Finset.range (i + 1), Ac q) +
+      4 * (∑ q ∈ Finset.range (i + 1), Aa q) +
+      2 * (∑ q ∈ Finset.range (i + 1), Ab q),
+    fun i => 4 * (∑ q ∈ Finset.range (i + 1), Bc q),
+    fun i => by
+      have h1 : 0 ≤ ∑ q ∈ Finset.range (i + 1), Ac q :=
+        Finset.sum_nonneg fun q _ => hAc_nn q
+      have h2 : 0 ≤ ∑ q ∈ Finset.range (i + 1), Aa q :=
+        Finset.sum_nonneg fun q _ => hAa_nn q
+      have h3 : 0 ≤ ∑ q ∈ Finset.range (i + 1), Ab q :=
+        Finset.sum_nonneg fun q _ => hAb_nn q
+      linarith,
+    fun i => mul_nonneg (by norm_num)
+      (Finset.sum_nonneg fun q _ => hBc_nn q), ?_⟩
+  intro T hT δ hδ_le hδ0 hδg hδZ s hs hP0 i
+  set gm : SmoothRiemannianMetric I M :=
+    realizedFam (I := I) g T 0 hδg hδZ s with hgm_def
+  set P : SmoothCcTensor g 0 2 := convexPerturbation (I := I) g T 0 s with hP_def
+  have hPeq : P = s • T := by
+    rw [hP_def, convexPerturbation, smul_zero, zero_add]
+  have hs0 : (0 : ℝ) ≤ s := hs.1
+  have hs1 : s ≤ 1 := hs.2
+  have hsmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+    Icc_subset_realizedSmallSet (lt_of_le_of_lt hδ_le hδ₀)
+      (lt_of_le_of_lt hδ_le hδ₀) hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      gm.inner y v w = g.inner y v w + ccTensorBilinSymm (I := I) g P y v w := by
+    intro y v w
+    rw [hgm_def, hP_def]
+    exact realizedFam_inner_of_mem (I := I) g T 0 hδg hδZ hsmem y v w
+  have hδP : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g P) δ := by
+    intro y v w
+    have hraw := convexPerturbation_gFibreOpBound_abs
+      (I := I) g T 0 hδg hδZ s y v w
+    have heq : |1 - s| * δ + |s| * δ = δ := by
+      rw [abs_of_nonneg (by linarith : 0 ≤ 1 - s), abs_of_nonneg hs0]
+      ring
+    rw [hP_def]
+    rwa [heq] at hraw
+  have hPk : ∀ k : ℕ, ‖iteratedCovGrad (I := I) g 0 2 k P‖ ^ 2 ≤
+      ‖iteratedCovGrad (I := I) g 0 2 k T‖ ^ 2 := by
+    intro k
+    rw [hPeq, iteratedCovGrad_smul_real (I := I) (M := M) g 0 2 k s T, norm_smul,
+      Real.norm_eq_abs, mul_pow, sq_abs]
+    have hsq : s ^ 2 ≤ 1 := by nlinarith
+    nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 k T‖, hsq]
+  have hP0' : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+      (P.toSection x) ≤ (1 : ℝ) ^ 2 := by
+    intro x
+    simpa only [one_pow, hP_def] using hP0 x
+  let Xc : SmoothCcTensor g 2 2 :=
+    deTurckLieCovDerivArmField (I := I) (M := M) g gm g -
+      edgeLiePairFam (I := I) (M := M) g T hδg hδZ lieRefoldQ lieRefoldEps s
+  let Xa : SmoothCcTensor g 2 2 :=
+    deTurckLieCovDerivArmField (I := I) (M := M) g gm g_bg -
+      deTurckLieCovDerivArmField (I := I) (M := M) g gm g
+  let Xb : SmoothCcTensor g 2 2 :=
+    deTurckLieEndoArmField (I := I) (M := M) g gm g_bg -
+      deTurckLieEndoArmField (I := I) (M := M) g gm g
+  have hcovL : lowJetSq (I := I) (M := M) g i Xc ≤
+      ((∑ q ∈ Finset.range (i + 1), Ac q) +
+          (∑ q ∈ Finset.range (i + 1), Bc q) *
+            ∑ j ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+    apply jetTrans (I := I) (M := M) g Xc i Ac Bc hAc_nn hBc_nn P T hPk
+    intro q
+    simpa only [Xc, gm] using
+      hcov T hT hδ_le hδ0 hδg hδZ hs hP0 q
+  have haStep : ∀ q : ℕ,
+      ‖iteratedCovGrad (I := I) g 2 2 q Xa‖ ^ 2 ≤
+        (Aa q + 0 * ∑ j ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g 0 2 (1 + j) P‖ ^ 2) *
+          (1 + ∑ j ∈ Finset.range (q + 2),
+            ‖iteratedCovGrad (I := I) g 0 2 j P‖ ^ 2) := by
+    intro q
+    have hpt := hCa gm P htie hδ_le hδ0 hδP q
+    have hraw := hint P hP0' 2 2 q 2
+      (deTurckLieDLaCoeffField (I := I) (M := M) g gm g_bg -
+        deTurckLieDLaCoeffField (I := I) (M := M) g gm g)
+      (Ca q) (hCa_nn q) hpt
+    have hxa : Xa =
+        deTurckLieDLaCoeffField (I := I) (M := M) g gm g_bg -
+          deTurckLieDLaCoeffField (I := I) (M := M) g gm g := by
+      dsimp only [Xa]
+      congr 1
+    rw [hxa]
+    simpa only [hAa_def, zero_mul, add_zero] using hraw
+  have hbStep : ∀ q : ℕ,
+      ‖iteratedCovGrad (I := I) g 2 2 q Xb‖ ^ 2 ≤
+        (Ab q + 0 * ∑ j ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g 0 2 (1 + j) P‖ ^ 2) *
+          (1 + ∑ j ∈ Finset.range (q + 2),
+            ‖iteratedCovGrad (I := I) g 0 2 j P‖ ^ 2) := by
+    intro q
+    have hpt := hCb gm P htie hδ_le hδ0 hδP q
+    have hraw := hint P hP0' 2 2 q 2
+      (deTurckLieDLbCoeffField (I := I) (M := M) g gm g_bg -
+        deTurckLieDLbCoeffField (I := I) (M := M) g gm g)
+      (Cb q) (hCb_nn q) hpt
+    have hxb : Xb =
+        deTurckLieDLbCoeffField (I := I) (M := M) g gm g_bg -
+          deTurckLieDLbCoeffField (I := I) (M := M) g gm g := by
+      simp only [Xb, endo_eq_dlb]
+    rw [hxb]
+    simpa only [hAb_def, zero_mul, add_zero] using hraw
+  have haL : lowJetSq (I := I) (M := M) g i Xa ≤
+      (∑ q ∈ Finset.range (i + 1), Aa q) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+    simpa only [Finset.sum_const_zero, zero_mul, add_zero] using
+      (jetTrans (I := I) (M := M) g Xa i Aa (fun _ => 0) hAa_nn
+        (fun _ => le_rfl) P T hPk haStep)
+  have hbL : lowJetSq (I := I) (M := M) g i Xb ≤
+      (∑ q ∈ Finset.range (i + 1), Ab q) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+    simpa only [Finset.sum_const_zero, zero_mul, add_zero] using
+      (jetTrans (I := I) (M := M) g Xb i Ab (fun _ => 0) hAb_nn
+        (fun _ => le_rfl) P T hPk hbStep)
+  have hrw :
+      (deTurckLieCovDerivArmField (I := I) (M := M) g gm g_bg -
+          edgeLiePairFam (I := I) (M := M) g T hδg hδZ lieRefoldQ lieRefoldEps s) +
+        (deTurckLieEndoArmField (I := I) (M := M) g gm g_bg -
+          deTurckLieEndoArmField (I := I) (M := M) g gm g) =
+      (Xc + Xa) + Xb := by
+    dsimp only [Xc, Xa, Xb]
+    abel
+  rw [hrw]
+  have j1 := opJetAdd (I := I) (M := M) g i Xc Xa
+  have j2 := opJetAdd (I := I) (M := M) g i (Xc + Xa) Xb
+  have hfin :
+      ((4 * (∑ q ∈ Finset.range (i + 1), Ac q) +
+          4 * (∑ q ∈ Finset.range (i + 1), Aa q) +
+          2 * (∑ q ∈ Finset.range (i + 1), Ab q)) +
+        (4 * (∑ q ∈ Finset.range (i + 1), Bc q)) *
+          ∑ j ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) =
+      4 * (((∑ q ∈ Finset.range (i + 1), Ac q) +
+          (∑ q ∈ Finset.range (i + 1), Bc q) *
+            ∑ j ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) +
+      4 * ((∑ q ∈ Finset.range (i + 1), Aa q) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) +
+      2 * ((∑ q ∈ Finset.range (i + 1), Ab q) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) := by
+    ring
+  rw [hfin]
+  linarith [j1, j2, hcovL, haL, hbL]
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+/-- The fixed-background change in the zeroth-order insertion arm has a
+state-free `range (i + 2)` jet bound along the radial path. -/
+theorem insBgJet
+    (g g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K0 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1)
+        (hP0 : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+          ((convexPerturbation (I := I) g T 0 s).toSection x) ≤ 1)
+        (i : ℕ),
+        lowJetSq (I := I) (M := M) g i
+            (lc0Insert (I := I) (M := M) g
+                (realizedFam (I := I) g T 0 hδg hδZ s) g_bg -
+              lc0Insert (I := I) (M := M) g
+                (realizedFam (I := I) g T 0 hδg hδZ s) g) ≤
+          K0 i * (1 + ∑ j ∈ Finset.range (i + 2),
+            ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ := lc0InsDiffAtgw (I := I) (M := M) g g_bg hδ₀
+  obtain ⟨Kint, hKint_nn, hint⟩ :=
+    atgwToJet (I := I) (M := M) g (Λ₀ := 1) zero_le_one
+  set A : ℕ → ℝ := fun q =>
+    C q * ∑ k ∈ Finset.range (q + 2), Kint k with hA_def
+  have hA_nn : ∀ q, 0 ≤ A q := fun q =>
+    mul_nonneg (hC_nn q) (Finset.sum_nonneg fun k _ => hKint_nn k)
+  refine ⟨fun i => ∑ q ∈ Finset.range (i + 1), A q,
+    fun i => Finset.sum_nonneg (fun q _ => hA_nn q), ?_⟩
+  intro T δ hδ_le hδ0 hδg hδZ s hs hP0 i
+  set gm : SmoothRiemannianMetric I M :=
+    realizedFam (I := I) g T 0 hδg hδZ s with hgm_def
+  set P : SmoothCcTensor g 0 2 :=
+    convexPerturbation (I := I) g T 0 s with hP_def
+  have hPeq : P = s • T := by
+    rw [hP_def, convexPerturbation, smul_zero, zero_add]
+  have hs0 : (0 : ℝ) ≤ s := hs.1
+  have hs1 : s ≤ 1 := hs.2
+  have hsmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+    Icc_subset_realizedSmallSet (lt_of_le_of_lt hδ_le hδ₀)
+      (lt_of_le_of_lt hδ_le hδ₀) hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      gm.inner y v w = g.inner y v w + ccTensorBilinSymm (I := I) g P y v w := by
+    intro y v w
+    rw [hgm_def, hP_def]
+    exact realizedFam_inner_of_mem (I := I) g T 0 hδg hδZ hsmem y v w
+  have hδP : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g P) δ := by
+    intro y v w
+    have hraw := convexPerturbation_gFibreOpBound_abs
+      (I := I) g T 0 hδg hδZ s y v w
+    have heq : |1 - s| * δ + |s| * δ = δ := by
+      rw [abs_of_nonneg (by linarith : 0 ≤ 1 - s), abs_of_nonneg hs0]
+      ring
+    rw [hP_def]
+    rwa [heq] at hraw
+  have hPk : ∀ k : ℕ, ‖iteratedCovGrad (I := I) g 0 2 k P‖ ^ 2 ≤
+      ‖iteratedCovGrad (I := I) g 0 2 k T‖ ^ 2 := by
+    intro k
+    rw [hPeq, iteratedCovGrad_smul_real (I := I) (M := M) g 0 2 k s T,
+      norm_smul, Real.norm_eq_abs, mul_pow, sq_abs]
+    have hsq : s ^ 2 ≤ 1 := by nlinarith
+    nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 k T‖, hsq]
+  have hP0' : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
+      (P.toSection x) ≤ (1 : ℝ) ^ 2 := by
+    intro x
+    simpa only [one_pow, hP_def] using hP0 x
+  let X : SmoothCcTensor g 2 2 :=
+    lc0Insert (I := I) (M := M) g gm g_bg -
+      lc0Insert (I := I) (M := M) g gm g
+  have hstep : ∀ q : ℕ,
+      ‖iteratedCovGrad (I := I) g 2 2 q X‖ ^ 2 ≤
+        (A q + 0 * ∑ j ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g 0 2 (1 + j) P‖ ^ 2) *
+          (1 + ∑ j ∈ Finset.range (q + 2),
+            ‖iteratedCovGrad (I := I) g 0 2 j P‖ ^ 2) := by
+    intro q
+    have hpt := hC gm P htie hδ_le hδ0 hδP q
+    have hraw := hint P hP0' 2 2 q 2 X (C q) (hC_nn q) hpt
+    simpa only [hA_def, zero_mul, add_zero] using hraw
+  simpa only [X, Finset.sum_const_zero, zero_mul, add_zero] using
+    (jetTrans (I := I) (M := M) g X i A (fun _ => 0) hA_nn
+      (fun _ => le_rfl) P T hPk hstep)
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
 /-- **Tame `L²` jet bound of the symmetrized first-order Ricci coefficient.**
 
 `ricciGoodMark` integrated by `markJet`; the sibling of `ricciAAJet` for the
@@ -653,17 +1016,17 @@ with `K₀, K₂` chosen before the state — background metric and order only �
 `selfLow_jet`, which buys the same left-hand side with an `H^{a+2}` ball and a
 constant of `Λ`-degree growing with `i`.
 
-The six per-arm tame jets it consumes are `TameArmJets.lean`'s `ricciAAMark`,
-`SelfLowArmCaps.lean`'s `ricciDAMark` (through `ricciGoodMark`) and `lieCovJet`,
-and `TameLieCorrJets.lean`'s `lc0VBJet`, `lc0AMixJet`, `lc0RiemJet`.  The δ-anchor
+The six tame summands are the Ricci-good arm, the combined background Lie
+residual, the insertion-background correction, `lc0VB`, full-background
+`lc0AMix`, and `lc0Riem`.  The δ-anchor
 `|P|²_∞ ≤ 1` that each of them spends is supplied by `hDim` together with
 `δ ≤ 1/3`: `(dim · 1/3)² = 1` in dimension three.
 
 Class-3 residuals of the marked integration flow through the single declared
 frontier `gridIntHigh`; nothing else in the chain is conditional. -/
-theorem selfLow_jet_quad
+theorem selfLowJetQBg
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -677,7 +1040,7 @@ theorem selfLow_jet_quad
             (0 : SmoothCcTensor g 0 2)) δ)
         (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
         lowJetSq (I := I) (M := M) g i
-            (rhsSelfLow (I := I) (M := M) g g T hδg hδZ s) ≤
+            (rhsSelfLow (I := I) (M := M) g g_bg T hδg hδZ s) ≤
           (K0 i + K2 i * ∑ j ∈ Finset.range 3,
               ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
             (1 + ∑ j ∈ Finset.range (i + 2),
@@ -686,40 +1049,41 @@ theorem selfLow_jet_quad
   have h30 : (0 : ℝ) ≤ 1 / 3 := by norm_num
   have h31 : (1 / 3 : ℝ) < 1 := by norm_num
   obtain ⟨A1, B1, hA1_nn, hB1_nn, w1⟩ := ricciGoodJet (I := I) (M := M) hDim g h31
-  obtain ⟨A2, B2, hA2_nn, hB2_nn, w2⟩ := lieCovJet (I := I) (M := M) hDim g h31
-  obtain ⟨A3, B3, hA3_nn, hB3_nn, w3⟩ := lc0VBJet (I := I) (M := M) hDim g h31
-  obtain ⟨A4, B4, hA4_nn, hB4_nn, w4⟩ := lc0AMixJet (I := I) (M := M) hDim g h31
-  obtain ⟨A5, hA5_nn, w5⟩ := lc0RiemJet (I := I) (M := M) g h31
-  refine ⟨fun i => 64 * (∑ q ∈ Finset.range (i + 1), A1 q) +
-      16 * (∑ q ∈ Finset.range (i + 1), A2 q) +
-      8 * (∑ q ∈ Finset.range (i + 1), A3 q) +
-      4 * (∑ q ∈ Finset.range (i + 1), A4 q) +
-      2 * (∑ q ∈ Finset.range (i + 1), A5 q),
-    fun i => 64 * (∑ q ∈ Finset.range (i + 1), B1 q) +
-      16 * (∑ q ∈ Finset.range (i + 1), B2 q) +
-      8 * (∑ q ∈ Finset.range (i + 1), B3 q) +
-      4 * (∑ q ∈ Finset.range (i + 1), B4 q),
+  obtain ⟨A2, B2, hA2_nn, hB2_nn, w2⟩ := lieBgJet (I := I) (M := M) hDim g g_bg h31
+  obtain ⟨A3, hA3_nn, w3⟩ := insBgJet (I := I) (M := M) g g_bg h31
+  obtain ⟨A4, B4, hA4_nn, hB4_nn, w4⟩ := lc0VBJet (I := I) (M := M) hDim g h31
+  obtain ⟨A5, B5, hA5_nn, hB5_nn, w5⟩ :=
+    lc0AMixJetBg (I := I) (M := M) hDim g g_bg h31
+  obtain ⟨A6, hA6_nn, w6⟩ := lc0RiemJet (I := I) (M := M) g h31
+  refine ⟨fun i => 128 * (∑ q ∈ Finset.range (i + 1), A1 q) +
+      32 * A2 i + 16 * A3 i +
+      8 * (∑ q ∈ Finset.range (i + 1), A4 q) +
+      4 * (∑ q ∈ Finset.range (i + 1), A5 q) +
+      2 * (∑ q ∈ Finset.range (i + 1), A6 q),
+    fun i => 128 * (∑ q ∈ Finset.range (i + 1), B1 q) +
+      32 * B2 i +
+      8 * (∑ q ∈ Finset.range (i + 1), B4 q) +
+      4 * (∑ q ∈ Finset.range (i + 1), B5 q),
     fun i => by
       have s1 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), A1 q :=
         Finset.sum_nonneg (fun q _ => hA1_nn q)
-      have s2 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), A2 q :=
-        Finset.sum_nonneg (fun q _ => hA2_nn q)
-      have s3 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), A3 q :=
-        Finset.sum_nonneg (fun q _ => hA3_nn q)
+      have s2 : (0 : ℝ) ≤ A2 i := hA2_nn i
+      have s3 : (0 : ℝ) ≤ A3 i := hA3_nn i
       have s4 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), A4 q :=
         Finset.sum_nonneg (fun q _ => hA4_nn q)
       have s5 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), A5 q :=
         Finset.sum_nonneg (fun q _ => hA5_nn q)
+      have s6 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), A6 q :=
+        Finset.sum_nonneg (fun q _ => hA6_nn q)
       linarith,
     fun i => by
       have s1 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), B1 q :=
         Finset.sum_nonneg (fun q _ => hB1_nn q)
-      have s2 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), B2 q :=
-        Finset.sum_nonneg (fun q _ => hB2_nn q)
-      have s3 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), B3 q :=
-        Finset.sum_nonneg (fun q _ => hB3_nn q)
+      have s2 : (0 : ℝ) ≤ B2 i := hB2_nn i
       have s4 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), B4 q :=
         Finset.sum_nonneg (fun q _ => hB4_nn q)
+      have s5 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), B5 q :=
+        Finset.sum_nonneg (fun q _ => hB5_nn q)
       linarith, ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ i s hs
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le h31
@@ -768,86 +1132,118 @@ theorem selfLow_jet_quad
       (fun q => w1 gm P htie hδ'_le hδ'0 hP hP0 q)
     have hnn : (0 : ℝ) ≤ (4 : ℝ) := by norm_num
     nlinarith [h, hnn]
+  let L : SmoothCcTensor g 2 2 :=
+    (deTurckLieCovDerivArmField (I := I) (M := M) g gm g_bg -
+        edgeLiePairFam (I := I) (M := M) g T hδg hδZ
+          lieRefoldQ lieRefoldEps s) +
+      (deTurckLieEndoArmField (I := I) (M := M) g gm g_bg -
+        deTurckLieEndoArmField (I := I) (M := M) g gm g)
+  let X : SmoothCcTensor g 2 2 :=
+    lc0Insert (I := I) (M := M) g gm g_bg -
+      lc0Insert (I := I) (M := M) g gm g
   have e2 : lowJetSq (I := I) (M := M) g i
-      (deTurckLieCovDerivArmField (I := I) (M := M) g gm g -
-        edgeLiePairFam (I := I) (M := M) g T hδg hδZ lieRefoldQ lieRefoldEps s) ≤
-      ((∑ q ∈ Finset.range (i + 1), A2 q) +
-        (∑ q ∈ Finset.range (i + 1), B2 q) * H3) * JS :=
-    jetTrans (I := I) (M := M) g _ i A2 B2 hA2_nn hB2_nn P T hPk
-      (fun q => w2 T hT hδ_le hδ0 hδg hδZ hs hP0 q)
-  have e3 : lowJetSq (I := I) (M := M) g i (lc0VB (I := I) (M := M) g gm) ≤
-      ((∑ q ∈ Finset.range (i + 1), A3 q) +
-        (∑ q ∈ Finset.range (i + 1), B3 q) * H3) * JS :=
-    jetTrans (I := I) (M := M) g _ i A3 B3 hA3_nn hB3_nn P T hPk
-      (fun q => w3 gm P htie hδ'_le hδ'0 hP hP0 q)
-  have e4 : lowJetSq (I := I) (M := M) g i (lc0AMix (I := I) (M := M) g gm g) ≤
+      L ≤
+      (A2 i + B2 i * H3) * JS := by
+    simpa only [L, hgm_def, hH3_def, hJS_def] using
+      w2 T hT hδ_le hδ0 hδg hδZ hs hP0 i
+  have e3 : lowJetSq (I := I) (M := M) g i
+      X ≤ A3 i * JS := by
+    simpa only [X, hgm_def, hJS_def] using
+      w3 T hδ_le hδ0 hδg hδZ hs hP0 i
+  have e4 : lowJetSq (I := I) (M := M) g i (lc0VB (I := I) (M := M) g gm) ≤
       ((∑ q ∈ Finset.range (i + 1), A4 q) +
         (∑ q ∈ Finset.range (i + 1), B4 q) * H3) * JS :=
     jetTrans (I := I) (M := M) g _ i A4 B4 hA4_nn hB4_nn P T hPk
       (fun q => w4 gm P htie hδ'_le hδ'0 hP hP0 q)
-  have e5 : lowJetSq (I := I) (M := M) g i (lc0Riem (I := I) (M := M) g gm) ≤
+  have e5 : lowJetSq (I := I) (M := M) g i
+      (lc0AMix (I := I) (M := M) g gm g_bg) ≤
       ((∑ q ∈ Finset.range (i + 1), A5 q) +
+        (∑ q ∈ Finset.range (i + 1), B5 q) * H3) * JS :=
+    jetTrans (I := I) (M := M) g _ i A5 B5 hA5_nn hB5_nn P T hPk
+      (fun q => w5 gm P htie hδ'_le hδ'0 hP hP0 q)
+  have e6 : lowJetSq (I := I) (M := M) g i (lc0Riem (I := I) (M := M) g gm) ≤
+      ((∑ q ∈ Finset.range (i + 1), A6 q) +
         (∑ q ∈ Finset.range (i + 1), (0 : ℝ)) * H3) * JS := by
-    refine jetTrans (I := I) (M := M) g _ i A5 (fun _ => 0) hA5_nn
+    refine jetTrans (I := I) (M := M) g _ i A6 (fun _ => 0) hA6_nn
       (fun _ => le_refl 0) P T hPk (fun q => ?_)
-    have h := w5 gm P htie hδ'_le hδ'0 hP hP0 q
+    have h := w6 gm P htie hδ'_le hδ'0 hP hP0 q
     refine h.trans (le_of_eq ?_)
     ring
-  -- assemble along `selfLow_split`
-  have hrw : rhsSelfLow (I := I) (M := M) g g T hδg hδZ s =
-      ((((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P +
-        (deTurckLieCovDerivArmField (I := I) (M := M) g gm g -
-          edgeLiePairFam (I := I) (M := M) g T hδg hδZ lieRefoldQ lieRefoldEps s)) +
+  -- assemble along the cancellation-preserving fixed-background split
+  have hrw : rhsSelfLow (I := I) (M := M) g g_bg T hδg hδZ s =
+      ((((((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P + L) + X) +
         lc0VB (I := I) (M := M) g gm) +
-        lc0AMix (I := I) (M := M) g gm g) +
-        lc0Riem (I := I) (M := M) g gm := by
-    rw [selfLow_split (I := I) (M := M) g T hT hδ_lt hδg hδZ hs, hPeq]
+        lc0AMix (I := I) (M := M) g gm g_bg) +
+        lc0Riem (I := I) (M := M) g gm) := by
+    rw [selfLow_split_bg (I := I) (M := M) g g_bg T hT hδ_lt hδg hδZ hs, hPeq]
+    dsimp only [L, X]
+    abel
   rw [hrw]
-  have j4 := opJetAdd (I := I) (M := M) g i
-    ((((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P +
-      (deTurckLieCovDerivArmField (I := I) (M := M) g gm g -
-        edgeLiePairFam (I := I) (M := M) g T hδg hδZ lieRefoldQ lieRefoldEps s)) +
+  have j5 := opJetAdd (I := I) (M := M) g i
+    (((((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P + L) + X) +
       lc0VB (I := I) (M := M) g gm) +
-      lc0AMix (I := I) (M := M) g gm g)
+      lc0AMix (I := I) (M := M) g gm g_bg)
     (lc0Riem (I := I) (M := M) g gm)
-  have j3 := opJetAdd (I := I) (M := M) g i
-    (((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P +
-      (deTurckLieCovDerivArmField (I := I) (M := M) g gm g -
-        edgeLiePairFam (I := I) (M := M) g T hδg hδZ lieRefoldQ lieRefoldEps s)) +
+  have j4 := opJetAdd (I := I) (M := M) g i
+    ((((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P + L) + X) +
       lc0VB (I := I) (M := M) g gm)
-    (lc0AMix (I := I) (M := M) g gm g)
-  have j2 := opJetAdd (I := I) (M := M) g i
-    ((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P +
-      (deTurckLieCovDerivArmField (I := I) (M := M) g gm g -
-        edgeLiePairFam (I := I) (M := M) g T hδg hδZ lieRefoldQ lieRefoldEps s))
+    (lc0AMix (I := I) (M := M) g gm g_bg)
+  have j3 := opJetAdd (I := I) (M := M) g i
+    (((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P + L) + X)
     (lc0VB (I := I) (M := M) g gm)
+  have j2 := opJetAdd (I := I) (M := M) g i
+    ((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P + L) X
   have j1 := opJetAdd (I := I) (M := M) g i
     ((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P)
-    (deTurckLieCovDerivArmField (I := I) (M := M) g gm g -
-      edgeLiePairFam (I := I) (M := M) g T hδg hδZ lieRefoldQ lieRefoldEps s)
-  have hfin : (64 * (∑ q ∈ Finset.range (i + 1), A1 q) +
-      16 * (∑ q ∈ Finset.range (i + 1), A2 q) +
-      8 * (∑ q ∈ Finset.range (i + 1), A3 q) +
-      4 * (∑ q ∈ Finset.range (i + 1), A4 q) +
-      2 * (∑ q ∈ Finset.range (i + 1), A5 q) +
-      (64 * (∑ q ∈ Finset.range (i + 1), B1 q) +
-        16 * (∑ q ∈ Finset.range (i + 1), B2 q) +
-        8 * (∑ q ∈ Finset.range (i + 1), B3 q) +
-        4 * (∑ q ∈ Finset.range (i + 1), B4 q)) * H3) * JS =
-      16 * (4 * (((∑ q ∈ Finset.range (i + 1), A1 q) +
+    L
+  have hfin : (128 * (∑ q ∈ Finset.range (i + 1), A1 q) +
+      32 * A2 i + 16 * A3 i +
+      8 * (∑ q ∈ Finset.range (i + 1), A4 q) +
+      4 * (∑ q ∈ Finset.range (i + 1), A5 q) +
+      2 * (∑ q ∈ Finset.range (i + 1), A6 q) +
+      (128 * (∑ q ∈ Finset.range (i + 1), B1 q) +
+        32 * B2 i +
+        8 * (∑ q ∈ Finset.range (i + 1), B4 q) +
+        4 * (∑ q ∈ Finset.range (i + 1), B5 q)) * H3) * JS =
+      32 * (4 * (((∑ q ∈ Finset.range (i + 1), A1 q) +
           (∑ q ∈ Finset.range (i + 1), B1 q) * H3) * JS)) +
-        16 * (((∑ q ∈ Finset.range (i + 1), A2 q) +
-          (∑ q ∈ Finset.range (i + 1), B2 q) * H3) * JS) +
-        8 * (((∑ q ∈ Finset.range (i + 1), A3 q) +
-          (∑ q ∈ Finset.range (i + 1), B3 q) * H3) * JS) +
-        4 * (((∑ q ∈ Finset.range (i + 1), A4 q) +
+        32 * ((A2 i + B2 i * H3) * JS) +
+        16 * (A3 i * JS) +
+        8 * (((∑ q ∈ Finset.range (i + 1), A4 q) +
           (∑ q ∈ Finset.range (i + 1), B4 q) * H3) * JS) +
-        2 * (((∑ q ∈ Finset.range (i + 1), A5 q) +
+        4 * (((∑ q ∈ Finset.range (i + 1), A5 q) +
+          (∑ q ∈ Finset.range (i + 1), B5 q) * H3) * JS) +
+        2 * (((∑ q ∈ Finset.range (i + 1), A6 q) +
           (∑ q ∈ Finset.range (i + 1), (0 : ℝ)) * H3) * JS) := by
     simp only [Finset.sum_const_zero]
     ring
   rw [hfin]
-  linarith [j1, j2, j3, j4, e1, e2, e3, e4, e5]
+  linarith [j1, j2, j3, j4, j5, e1, e2, e3, e4, e5, e6]
+
+set_option linter.unusedVariables false in
+/-- Diagonal-background compatibility wrapper for `selfLowJetQBg`. -/
+theorem selfLow_jet_quad
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        lowJetSq (I := I) (M := M) g i
+            (rhsSelfLow (I := I) (M := M) g g T hδg hδZ s) ≤
+          (K0 i + K2 i * ∑ j ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
+            (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
+  selfLowJetQBg (I := I) (M := M) hDim g g
 
 end Integrand
 
@@ -863,6 +1259,67 @@ needed here (unlike `c0_jet_tower_quad`): the `H^{a+2}` ball binder of
 `c1_jet_tower` was **vestigial**, because the whole first-order integrand
 window `low1Ker_jet` is driven by `hδ_le : δ ≤ 1/3` alone.  `c1_jet_tower` is
 now the ball-carrying wrapper of this statement. -/
+theorem c1JetTowerQBg
+    (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) :
+    ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        (i : ℕ),
+          ‖iteratedCovGrad (I := I) g 3 2 i
+              (lowBaseData (I := I) (M := M) g g_bg T
+                (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C1‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+  classical
+  obtain ⟨Kk, hKk_nn, hker⟩ := low1Ker_jet_bg (I := I) (M := M) hDim g g_bg
+  refine ⟨Kk, hKk_nn, ?_⟩
+  intro T hT δ hδ0 hδ_le hδg hδZ i
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
+  set Λ : ℝ := Kk i * (1 + ∑ j ∈ Finset.range (i + 2),
+    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) with hΛdef
+  have hsum : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 :=
+    Finset.sum_nonneg fun _ _ => sq_nonneg _
+  have hΛ : 0 ≤ Λ := mul_nonneg (hKk_nn i) (by linarith only [hsum])
+  have hsΛ : Real.sqrt Λ ^ 2 = Λ := Real.sq_sqrt hΛ
+  have hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ) := by
+    rw [Set.uIcc_of_le zero_le_one]
+    exact Icc_subset_realizedSmallSet hδ_lt hδ_lt
+  have hpath := path_jetL2_le (I := I) (M := M) g 3 2 i
+    (fun s => rhsLow1Coeff (I := I) (M := M) g g_bg T
+      (0 : SmoothCcTensor g 0 2) hδg hδZ s)
+    (realizedSmallSet (δ := δ) (δ' := δ))
+    realizedSmallSet_isOpen hSI
+    (rhsLow1_path_joint (I := I) (M := M) g g_bg T
+      (0 : SmoothCcTensor g 0 2) hδg hδZ)
+    (Real.sqrt_nonneg Λ)
+    (fun s hs => by
+      rw [hsΛ, hΛdef]
+      simpa only [lowJetSq] using
+        hker T hT hδ0 hδ_le hδg hδZ i s hs)
+  rw [hsΛ] at hpath
+  have hjet : lowJetSq (I := I) (M := M) g i
+      (lowBaseData (I := I) (M := M) g g_bg T hδ_lt hδg hδZ).C1 ≤ Λ := by
+    rw [c1_eq (I := I) (M := M) g g_bg T hδ_lt hδg hδZ]
+    simpa only [rhsLow1PathIntegral, lowJetSq] using hpath
+  refine le_trans ?_ hjet
+  unfold lowJetSq
+  exact Finset.single_le_sum
+    (fun q _ => sq_nonneg ‖iteratedCovGrad (I := I) g 3 2 q
+      (lowBaseData (I := I) (M := M) g g_bg T hδ_lt hδg hδZ).C1‖)
+    (Finset.mem_range.mpr (Nat.lt_succ_self i))
+
+set_option linter.unusedVariables false in
+/-- Diagonal-background compatibility wrapper for `c1JetTowerQBg`. -/
 theorem c1JetTowerQ
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -882,45 +1339,8 @@ theorem c1JetTowerQ
               (lowBaseData (I := I) (M := M) g g T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C1‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
-  classical
-  obtain ⟨Kk, hKk_nn, hker⟩ := low1Ker_jet (I := I) (M := M) hDim g
-  refine ⟨Kk, hKk_nn, ?_⟩
-  intro T hT δ hδ0 hδ_le hδg hδZ i
-  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
-  set Λ : ℝ := Kk i * (1 + ∑ j ∈ Finset.range (i + 2),
-    ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) with hΛdef
-  have hsum : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 2),
-      ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 :=
-    Finset.sum_nonneg fun _ _ => sq_nonneg _
-  have hΛ : 0 ≤ Λ := mul_nonneg (hKk_nn i) (by linarith only [hsum])
-  have hsΛ : Real.sqrt Λ ^ 2 = Λ := Real.sq_sqrt hΛ
-  have hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ) := by
-    rw [Set.uIcc_of_le zero_le_one]
-    exact Icc_subset_realizedSmallSet hδ_lt hδ_lt
-  have hpath := path_jetL2_le (I := I) (M := M) g 3 2 i
-    (fun s => rhsLow1Coeff (I := I) (M := M) g g T
-      (0 : SmoothCcTensor g 0 2) hδg hδZ s)
-    (realizedSmallSet (δ := δ) (δ' := δ))
-    realizedSmallSet_isOpen hSI
-    (rhsLow1_path_joint (I := I) (M := M) g g T
-      (0 : SmoothCcTensor g 0 2) hδg hδZ)
-    (Real.sqrt_nonneg Λ)
-    (fun s hs => by
-      rw [hsΛ, hΛdef]
-      simpa only [lowJetSq] using
-        hker T hT hδ0 hδ_le hδg hδZ i s hs)
-  rw [hsΛ] at hpath
-  have hjet : lowJetSq (I := I) (M := M) g i
-      (lowBaseData (I := I) (M := M) g g T hδ_lt hδg hδZ).C1 ≤ Λ := by
-    rw [c1_eq (I := I) (M := M) g g T hδ_lt hδg hδZ]
-    simpa only [rhsLow1PathIntegral, lowJetSq] using hpath
-  refine le_trans ?_ hjet
-  unfold lowJetSq
-  exact Finset.single_le_sum
-    (fun q _ => sq_nonneg ‖iteratedCovGrad (I := I) g 3 2 q
-      (lowBaseData (I := I) (M := M) g g T hδ_lt hδg hδZ).C1‖)
-    (Finset.mem_range.mpr (Nat.lt_succ_self i))
+              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
+  c1JetTowerQBg (I := I) (M := M) hDim g g
 
 set_option linter.unusedVariables false in
 /-- **The all-order `L²` jet tower of the low-base first-order coefficient
@@ -937,6 +1357,35 @@ The `H^{a+2}` ball hypothesis is inert — the statement quantifies over an
 arbitrary `a` — and is kept only because `a1_ladder` and the operator-norm
 engine carry it.  The ball-free content is `c1JetTowerQ`, of which this is the
 compatibility wrapper. -/
+theorem c1_jet_tower_bg
+    (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ),
+        ‖smoothCcToTensorHs (I := I) (M := M) g ((a : ℝ) + 2) T‖ ≤ R₀ →
+        ∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g 3 2 i
+              (lowBaseData (I := I) (M := M) g g_bg T
+                (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C1‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+  obtain ⟨Kc, hKc_nn, h⟩ := c1JetTowerQBg (I := I) (M := M) hDim g g_bg
+  refine ⟨Kc, hKc_nn, ?_⟩
+  intro T hT δ hδ0 hδ_le hδg hδZ _ i
+  exact h T hT hδ0 hδ_le hδg hδZ i
+
+set_option linter.unusedVariables false in
+/-- Diagonal-background compatibility wrapper for `c1_jet_tower_bg`. -/
 theorem c1_jet_tower
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
@@ -957,11 +1406,8 @@ theorem c1_jet_tower
               (lowBaseData (I := I) (M := M) g g T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C1‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
-  obtain ⟨Kc, hKc_nn, h⟩ := c1JetTowerQ (I := I) (M := M) hDim g
-  refine ⟨Kc, hKc_nn, ?_⟩
-  intro T hT δ hδ0 hδ_le hδg hδZ _ i
-  exact h T hT hδ0 hδ_le hδg hδZ i
+              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
+  c1_jet_tower_bg (I := I) (M := M) hDim g g a hR₀
 
 set_option linter.unusedVariables false in
 /-- **The all-order `L²` jet tower of the low-base zeroth-order coefficient
@@ -1070,7 +1516,7 @@ set_option linter.unusedVariables false in
 /-- **The all-order `L²` jet tower of `A.C0` at quadratic cost, with no ball.**
 
 ```
-‖∇ⁱ (lowBaseData g g T …).C0‖² ≤
+‖∇ⁱ (lowBaseData g g_bg T …).C0‖² ≤
   (K0 i + K2 i · ‖T‖²_{H³}) · (1 + ∑_{j < i+2} ‖∇ʲT‖²)
 ```
 
@@ -1082,12 +1528,12 @@ by an explicit quadratic dependence on the state's own `H³` norm.  The ball
 entered `c0_jet_tower` only through the integrand window `selfLow_jet`; the
 ball-free `selfLow_jet_quad` buys the same left-hand side, so the passage
 through the radial parameter integral (`path_jetL2_le`) and the treatment of
-the state-free curvature summand `phiMetCurvCoeff g g g` — which still
+the state-free curvature summand `phiMetCurvCoeff g g_bg g` — which still
 contributes to `K0` alone — are unchanged.  This is the shape the low-mass
 consumer reads: no `a`, no `R₀`, no `Λ`-degree growth in `i`. -/
-theorem c0_jet_tower_quad
+theorem c0JetTowerQBg
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -1101,7 +1547,7 @@ theorem c0_jet_tower_quad
             (0 : SmoothCcTensor g 0 2)) δ)
         (i : ℕ),
           ‖iteratedCovGrad (I := I) g 2 2 i
-              (lowBaseData (I := I) (M := M) g g T
+              (lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C0‖ ^ 2 ≤
             (K0 i + K2 i * ∑ j ∈ Finset.range 3,
                 ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
@@ -1109,13 +1555,13 @@ theorem c0_jet_tower_quad
                 ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
   classical
   obtain ⟨Kk0, Kk2, hKk0_nn, hKk2_nn, hker⟩ :=
-    selfLow_jet_quad (I := I) (M := M) hDim g
+    selfLowJetQBg (I := I) (M := M) hDim g g_bg
   refine ⟨fun i => 2 * (Kk0 i +
-      lowJetSq (I := I) (M := M) g i (-phiMetCurvCoeff (I := I) g g g)),
+      lowJetSq (I := I) (M := M) g i (-phiMetCurvCoeff (I := I) g g_bg g)),
     fun i => 2 * Kk2 i,
     fun i => by
       have := jetNn (I := I) (M := M) (m := i) g
-        (-phiMetCurvCoeff (I := I) g g g)
+        (-phiMetCurvCoeff (I := I) g g_bg g)
       have := hKk0_nn i
       linarith,
     fun i => by have := hKk2_nn i; linarith, ?_⟩
@@ -1140,10 +1586,10 @@ theorem c0_jet_tower_quad
     rw [Set.uIcc_of_le zero_le_one]
     exact Icc_subset_realizedSmallSet hδ_lt hδ_lt
   have hpath := path_jetL2_le (I := I) (M := M) g 2 2 i
-    (rhsSelfLow (I := I) (M := M) g g T hδg hδZ)
+    (rhsSelfLow (I := I) (M := M) g g_bg T hδg hδZ)
     (realizedSmallSet (δ := δ) (δ' := δ))
     realizedSmallSet_isOpen hSI
-    (selfLow_joint (I := I) (M := M) g g T hδg hδZ)
+    (selfLow_joint (I := I) (M := M) g g_bg T hδg hδZ)
     (Real.sqrt_nonneg Λ)
     (fun s hs => by
       rw [hsΛ, hΛdef]
@@ -1151,29 +1597,29 @@ theorem c0_jet_tower_quad
         hker T hT hδ0 hδ_le hδg hδZ i s hs)
   rw [hsΛ] at hpath
   have hint : lowJetSq (I := I) (M := M) g i
-      (selfLowInt (I := I) (M := M) g g T hδ_lt hδg hδZ) ≤ Λ := by
+      (selfLowInt (I := I) (M := M) g g_bg T hδ_lt hδg hδZ) ≤ Λ := by
     simpa only [selfLowInt, lowJetSq] using hpath
   have hfix : (0 : ℝ) ≤ lowJetSq (I := I) (M := M) g i
-      (-phiMetCurvCoeff (I := I) g g g) :=
-    jetNn (I := I) (M := M) (m := i) g (-phiMetCurvCoeff (I := I) g g g)
+      (-phiMetCurvCoeff (I := I) g g_bg g) :=
+    jetNn (I := I) (M := M) (m := i) g (-phiMetCurvCoeff (I := I) g g_bg g)
   have hjet : lowJetSq (I := I) (M := M) g i
-      (lowBaseData (I := I) (M := M) g g T hδ_lt hδg hδZ).C0 ≤
+      (lowBaseData (I := I) (M := M) g g_bg T hδ_lt hδg hδZ).C0 ≤
       (2 * (Kk0 i + lowJetSq (I := I) (M := M) g i
-            (-phiMetCurvCoeff (I := I) g g g)) +
+            (-phiMetCurvCoeff (I := I) g g_bg g)) +
           2 * Kk2 i * ∑ j ∈ Finset.range 3,
             ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
         (1 + ∑ j ∈ Finset.range (i + 2),
           ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
     have hsplit := jetSub (I := I) (M := M) g i
-      (selfLowInt (I := I) (M := M) g g T hδ_lt hδg hδZ)
-      (-phiMetCurvCoeff (I := I) g g g)
+      (selfLowInt (I := I) (M := M) g g_bg T hδ_lt hδg hδZ)
+      (-phiMetCurvCoeff (I := I) g g_bg g)
     rw [sub_neg_eq_add] at hsplit
-    rw [c0_eq (I := I) (M := M) g g T hδ_lt hδg hδZ]
+    rw [c0_eq (I := I) (M := M) g g_bg T hδ_lt hδg hδZ]
     refine hsplit.trans ?_
     have hstep : 2 * (Λ + lowJetSq (I := I) (M := M) g i
-          (-phiMetCurvCoeff (I := I) g g g)) ≤
+          (-phiMetCurvCoeff (I := I) g g_bg g)) ≤
         (2 * (Kk0 i + lowJetSq (I := I) (M := M) g i
-              (-phiMetCurvCoeff (I := I) g g g)) +
+              (-phiMetCurvCoeff (I := I) g g_bg g)) +
             2 * Kk2 i * ∑ j ∈ Finset.range 3,
               ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
           (1 + ∑ j ∈ Finset.range (i + 2),
@@ -1186,8 +1632,110 @@ theorem c0_jet_tower_quad
   unfold lowJetSq
   exact Finset.single_le_sum
     (fun q _ => sq_nonneg ‖iteratedCovGrad (I := I) g 2 2 q
-      (lowBaseData (I := I) (M := M) g g T hδ_lt hδg hδZ).C0‖)
+      (lowBaseData (I := I) (M := M) g g_bg T hδ_lt hδg hδZ).C0‖)
     (Finset.mem_range.mpr (Nat.lt_succ_self i))
+
+set_option linter.unusedVariables false in
+/-- Ball-form arbitrary-background wrapper of `c0JetTowerQBg`. -/
+theorem c0_jet_tower_bg
+    (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)
+    {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ),
+        ‖smoothCcToTensorHs (I := I) (M := M) g ((a : ℝ) + 2) T‖ ≤ R₀ →
+        ∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g 2 2 i
+              (lowBaseData (I := I) (M := M) g g_bg T
+                (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C0‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
+  classical
+  obtain ⟨K0, K2, hK0_nn, hK2_nn, hQ⟩ :=
+    c0JetTowerQBg (I := I) (M := M) hDim g g_bg
+  obtain ⟨C, hC_nn, hC⟩ :=
+    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general
+      (I := I) (M := M) g (a + 2)
+  refine ⟨fun i => K0 i + K2 i * (3 * (C * R₀) ^ 2),
+    fun i => add_nonneg (hK0_nn i)
+      (mul_nonneg (hK2_nn i) (mul_nonneg (by norm_num) (sq_nonneg _))), ?_⟩
+  intro T hT δ hδ0 hδ_le hδg hδZ hball i
+  have hsum := hC T
+  have hcast :
+      ‖smoothCcToTensorHs (I := I) (M := M) g ((a + 2 : ℕ) : ℝ) T‖ =
+        ‖smoothCcToTensorHs (I := I) (M := M) g ((a : ℝ) + 2) T‖ :=
+    smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g
+      (by push_cast; ring) T
+  rw [hcast] at hsum
+  have hsumB : ∑ l ∈ Finset.range (a + 2 + 1),
+      ‖iteratedCovGrad (I := I) g 0 2 l T‖ ≤ C * R₀ :=
+    le_trans hsum (mul_le_mul_of_nonneg_left hball hC_nn)
+  have hCR_nn : 0 ≤ C * R₀ := mul_nonneg hC_nn hR₀
+  have hjet3 : ∀ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ≤ C * R₀ := by
+    intro j hjmem
+    refine le_trans (Finset.single_le_sum
+      (fun l _ => norm_nonneg
+        (iteratedCovGrad (I := I) g 0 2 l T))
+      (Finset.mem_range.mpr ?_)) hsumB
+    have hj3 : j < 3 := Finset.mem_range.mp hjmem
+    omega
+  have hH3 : ∑ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 ≤
+        3 * (C * R₀) ^ 2 := by
+    calc
+      ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 ≤
+          ∑ j ∈ Finset.range 3, (C * R₀) ^ 2 :=
+        Finset.sum_le_sum (fun j hjmem =>
+          pow_le_pow_left₀ (norm_nonneg _) (hjet3 j hjmem) 2)
+      _ = 3 * (C * R₀) ^ 2 := by
+        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+        norm_num
+  have hJS : 0 ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 := by
+    have : 0 ≤ ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 :=
+      Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+    linarith
+  refine (hQ T hT hδ0 hδ_le hδg hδZ i).trans ?_
+  exact mul_le_mul_of_nonneg_right
+    (add_le_add (le_refl (K0 i))
+      (mul_le_mul_of_nonneg_left hH3 (hK2_nn i))) hJS
+
+/-- Diagonal-background compatibility wrapper for `c0JetTowerQBg`. -/
+theorem c0_jet_tower_quad
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        (i : ℕ),
+          ‖iteratedCovGrad (I := I) g 2 2 i
+              (lowBaseData (I := I) (M := M) g g T
+                (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C0‖ ^ 2 ≤
+            (K0 i + K2 i * ∑ j ∈ Finset.range 3,
+                ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) *
+              (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
+  c0JetTowerQBg (I := I) (M := M) hDim g g
 
 end Towers
 

@@ -136,8 +136,8 @@ private lemma hsMono (g₀ : SmoothRiemannianMetric I M)
 
 /-- **The all-order `L²` jet tower of `A.C2`, sharp window, no a-priori ball.**
 
-`‖∇ⁱ (lowBaseData g g T …).C2‖² ≤ Kc i * (1 + ∑_{j < i+1} ‖∇ʲ T‖²)`,
-with `Kc` chosen before the state — background metric and order only.
+`‖∇ⁱ (lowBaseData g g_bg T …).C2‖² ≤ Kc i * (1 + ∑_{j < i+1} ‖∇ʲ T‖²)`,
+with `Kc` chosen before the state — background metrics and order only.
 
 The window is the **sharp** one: order `i` of the coefficient costs order `i`
 of the state, not `i + 1`.  This is what the tower-direct rung-`k` pairing
@@ -150,12 +150,12 @@ pairing factor (PSTOP §6.4 adapter G / (B-WIN)).
 `c2_jet_tower` its ball-carrying wrapper.  Like `c1JetTowerQ` and unlike
 `c0_jet_tower_quad`, no quadratic correction term is needed: the `H^{a+2}`
 ball binder of `c2_jet_tower` was **vestigial**, since the whole proof runs
-through `topKerJetSharp`, which takes only `hDim` and the background metric,
+through `topKerJetSharp`, which takes only `hDim` and the background metrics,
 and the estimate is driven by `hδ_le : δ ≤ 1/3` alone (which bounds `T` in
 `L^∞`). -/
 theorem c2JetTowerSharp
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -169,12 +169,12 @@ theorem c2JetTowerSharp
             (0 : SmoothCcTensor g 0 2)) δ)
         (i : ℕ),
           ‖iteratedCovGrad (I := I) g 4 2 i
-              (lowBaseData (I := I) (M := M) g g T
+              (lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C2‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 1),
               ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
   classical
-  obtain ⟨Kk, hKk_nn, hker⟩ := topKerJetSharp (I := I) (M := M) hDim g
+  obtain ⟨Kk, hKk_nn, hker⟩ := topKerJetSharp (I := I) (M := M) hDim g g_bg
   refine ⟨Kk, hKk_nn, ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ i
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
@@ -191,19 +191,19 @@ theorem c2JetTowerSharp
   -- witness opaquely and pass the order-`i` jet bound through the integral
   obtain ⟨X, hXdef, hXjet⟩ :
       ∃ X : SmoothCcTensor g 4 2,
-        (lowBaseData (I := I) (M := M) g g T
+        (lowBaseData (I := I) (M := M) g g_bg T
             (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C2 = X ∧
           lowJetSq (I := I) (M := M) g i X ≤
             Kk i * (1 + ∑ j ∈ Finset.range (i + 1),
               ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
-    ⟨rhsRefoldTopInt (I := I) (M := M) g g T hδ_lt hδg hδZ +
+    ⟨rhsRefoldTopInt (I := I) (M := M) g g_bg T hδ_lt hδg hδZ +
         LowBaseInternal.selfTopInt (I := I) (M := M) g T hδ_lt hδg hδZ -
-        deTurckPhiMetTotal (I := I) (M := M) g g g, rfl,
+        deTurckPhiMetTotal (I := I) (M := M) g g_bg g, rfl,
       path_add_sub_jet (I := I) (M := M) g 4 i hSI
-        (rhsRefoldTop (I := I) (M := M) g g T hδg hδZ)
+        (rhsRefoldTop (I := I) (M := M) g g_bg T hδg hδZ)
         (LowBaseInternal.rhsSelfTop (I := I) (M := M) g T hδg hδZ)
-        (deTurckPhiMetTotal (I := I) (M := M) g g g)
-        (rhsRefoldTop_joint (I := I) (M := M) g g T hδ_lt hδg hδZ)
+        (deTurckPhiMetTotal (I := I) (M := M) g g_bg g)
+        (rhsRefoldTop_joint (I := I) (M := M) g g_bg T hδ_lt hδg hδZ)
         (LowBaseInternal.selfTop_joint (I := I) (M := M) g T hδg hδZ)
         hΛ (hker T hT hδ0 hδ_le hδg hδZ i)⟩
   rw [hXdef]
@@ -225,7 +225,7 @@ tower as a hypothesis) keeps working unchanged.  The mathematical content is
 `Finset.sum_le_sum_of_subset_of_nonneg`. -/
 theorem c2JetTowerQ
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -239,11 +239,11 @@ theorem c2JetTowerQ
             (0 : SmoothCcTensor g 0 2)) δ)
         (i : ℕ),
           ‖iteratedCovGrad (I := I) g 4 2 i
-              (lowBaseData (I := I) (M := M) g g T
+              (lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C2‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
-  obtain ⟨Kc, hKc_nn, htower⟩ := c2JetTowerSharp (I := I) (M := M) hDim g
+  obtain ⟨Kc, hKc_nn, htower⟩ := c2JetTowerSharp (I := I) (M := M) hDim g g_bg
   refine ⟨Kc, hKc_nn, ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ i
   refine (htower T hT hδ0 hδ_le hδg hδZ i).trans ?_
@@ -266,7 +266,7 @@ The `i`-th covariant jet of the canonical top coefficient is controlled, with a
 constant depending only on the background metric and the order `i`, by the
 state's own jets through order `i + 1`:
 
-`‖∇ⁱ (lowBaseData g g T …).C2‖² ≤ Kc i * (1 + ∑_{j < i+2} ‖∇ʲ T‖²)`.
+`‖∇ⁱ (lowBaseData g g_bg T …).C2‖² ≤ Kc i * (1 + ∑_{j < i+2} ‖∇ʲ T‖²)`.
 
 This is exactly hypothesis (b) of the order-generic operator-norm engine
 `exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le`, and it is the last
@@ -288,7 +288,7 @@ The ball-free content is `c2JetTowerQ`, of which this is the compatibility
 wrapper. -/
 theorem c2_jet_tower
     (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    (g g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
     ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -303,11 +303,11 @@ theorem c2_jet_tower
         ‖smoothCcToTensorHs (I := I) (M := M) g ((a : ℝ) + 2) T‖ ≤ R₀ →
         ∀ i : ℕ,
           ‖iteratedCovGrad (I := I) g 4 2 i
-              (lowBaseData (I := I) (M := M) g g T
+              (lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C2‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
-  obtain ⟨Kc, hKc_nn, h⟩ := c2JetTowerQ (I := I) (M := M) hDim g
+  obtain ⟨Kc, hKc_nn, h⟩ := c2JetTowerQ (I := I) (M := M) hDim g g_bg
   refine ⟨Kc, hKc_nn, ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ _ i
   exact h T hT hδ0 hδ_le hδg hδZ i
@@ -329,6 +329,9 @@ unconditional tame estimate.  `Clower` is still chosen before the state
 (TK3), now as a function of the radius; `κ` is still produced before `δ`
 (A2-ABS), and is `lowData_split`'s own `δ`-free constant `K`.
 
+The DeTurck background `g_bg` is arbitrary and fixed throughout; all Sobolev
+norms and covariant derivatives remain based at the initial metric `g`.
+
 **The `H⁵` radius is structural, not an artefact.**  Unlike the `c1`/`c2`
 towers, whose ball binders were vestigial, the `H⁵` order is what the tame
 commutator engine
@@ -340,73 +343,102 @@ a data jet of order `q - i + (finrank/2 + 1) + dd`, and the log-convexity swap
 `(dc, dd) ∈ {(3,2), (2,3)}` forced by the two commutator derivatives, that is
 `A ≥ 4`, realized here as `A = a + 2 = 5`.  So the lower constant cannot be
 made to depend on `H²` or `H³` data alone; see `LowRegLadderRung.md`. -/
-theorem a2LadderQ
+theorem a2LadderQBg
     (hDim : Module.finrank ℝ E = 3)
-    (g₀ : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ κ : ℝ, 0 ≤ κ ∧
       ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3),
       ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
-      ∀ (T : SmoothCcTensor g₀ 0 2)
+      ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T x u v =
-            ccTensorBilin (I := I) g₀ T x v u)
-        (hδg : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀
-            (0 : SmoothCcTensor g₀ 0 2)) δ)
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
         {R : ℝ}
-        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (5 : ℝ) T‖ ≤ R)
+        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g (5 : ℝ) T‖ ≤ R)
         (m : ℕ),
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
-              ((lowBaseData (I := I) (M := M) g₀ g₀ T
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              ((lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a2
                   (I := I) (M := M) T)‖ ≤
             κ * (δ / (1 - δ) ^ 2) *
-                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T‖ +
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 2) T‖ +
               Clower R m *
-                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T‖ := by
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ := by
   classical
-  obtain ⟨K, hK, hsplit⟩ := lowData_split (I := I) (M := M) g₀ g₀
-  obtain ⟨Kc, hKc_nn, htower⟩ := c2JetTowerQ (I := I) (M := M) hDim g₀
+  obtain ⟨K, hK, hsplit⟩ := lowData_split (I := I) (M := M) g g_bg
+  obtain ⟨Kc, hKc_nn, htower⟩ := c2JetTowerQ (I := I) (M := M) hDim g g_bg
   refine ⟨K, hK, ?_⟩
   intro δ hδ0 hδ_le
   have hεC_nn : (0 : ℝ) ≤ K * (δ / (1 - δ) ^ 2) :=
     mul_nonneg hK (div_nonneg hδ0 (sq_nonneg _))
   -- the engine's lower constants, one family per admissible radius
   choose Cop hCop_nn hop using fun R : ℝ =>
-    appCc_cap_hs_le (I := I) (M := M) g₀ 3 (by omega) (abs_nonneg R)
+    appCc_cap_hs_le (I := I) (M := M) g 3 (by omega) (abs_nonneg R)
       (K * (δ / (1 - δ) ^ 2)) hεC_nn Kc hKc_nn
   refine ⟨Cop, hCop_nn, ?_⟩
   intro T hT hδg hδZ R hR m
-  have hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((3 : ℕ) : ℝ) + 2) T‖ ≤ |R| := by
+  have hball : ‖smoothCcToTensorHs (I := I) (M := M) g (((3 : ℕ) : ℝ) + 2) T‖ ≤ |R| := by
     refine le_trans (le_of_eq ?_) (le_trans hR (le_abs_self R))
-    exact smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+    exact smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g
       (by push_cast; norm_num) T
   -- the low-base coefficient bundle, bound opaquely so that no later step
   -- unfolds the path-integral witnesses
   obtain ⟨A, hAdef, hc2pt, hc2jet⟩ :
-      ∃ A : LowBaseActionData g₀,
-        lowBaseData (I := I) (M := M) g₀ g₀ T
+      ∃ A : LowBaseActionData g,
+        lowBaseData (I := I) (M := M) g g_bg T
             (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ = A ∧
           (∀ x : M,
-            riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+            riemannianFiberNormSq (I := I) (M := M) g 4 2 x
               (A.C2.toSection x) ≤ (K * (δ / (1 - δ) ^ 2)) ^ 2) ∧
           (∀ i : ℕ,
-            ‖iteratedCovGrad (I := I) g₀ 4 2 i A.C2‖ ^ 2 ≤
+            ‖iteratedCovGrad (I := I) g 4 2 i A.C2‖ ^ 2 ≤
               Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-    ⟨lowBaseData (I := I) (M := M) g₀ g₀ T
+                ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) :=
+    ⟨lowBaseData (I := I) (M := M) g g_bg T
         (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ, rfl,
       (hsplit T hT hδ_le hδ0 hδg hδZ).2,
       htower T hT hδ0 hδ_le hδg hδZ⟩
   rw [hAdef]
   clear hAdef
   have hshape : A.a2 (I := I) (M := M) T =
-      appCc (I := I) (M := M) g₀ (2 + 2) 2 A.C2
-        (iteratedCovGrad (I := I) g₀ 0 2 2 T) := rfl
+      appCc (I := I) (M := M) g (2 + 2) 2 A.C2
+        (iteratedCovGrad (I := I) g 0 2 2 T) := rfl
   rw [hshape]
   exact le_trans (hop R A.C2 T hball hc2pt hc2jet m) (le_of_eq (by ring))
+
+/-- Diagonal-background compatibility wrapper for `a2LadderQBg`. -/
+theorem a2LadderQ
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ κ : ℝ, 0 ≤ κ ∧
+      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3),
+      ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        {R : ℝ}
+        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g (5 : ℝ) T‖ ≤ R)
+        (m : ℕ),
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              ((lowBaseData (I := I) (M := M) g g T
+                (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a2
+                  (I := I) (M := M) T)‖ ≤
+            κ * (δ / (1 - δ) ^ 2) *
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 2) T‖ +
+              Clower R m *
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ :=
+  a2LadderQBg (I := I) (M := M) hDim g g
 
 set_option linter.unusedVariables false in
 /-- **The `k`-uniform ladder for the low-base second-order arm.**
@@ -578,8 +610,8 @@ rung `m`,
 
 `‖a₁ T‖_{H^m} ≤ Clower m · ‖T‖_{H^{m+1}}`,
 
-where `a₁` is the genuinely first-order action of the zero-based low-base split
-`lowData_split`.
+where `a₁` is the genuinely first-order action of the fixed-background
+low-base split `lowData_split g g_bg`.
 
 This is the `a₁` sibling of `a2_ladder`, and its shape differs in two ways that
 are forced by the arm itself.  The norm pair drops from `a₂`'s `+2 / +1` to
@@ -601,47 +633,48 @@ coefficients' Sobolev jet window inside the a-priori ball, and it is one below
 is bound, and is `δ`-free: the first-order arm's inputs (the `C0`/`C1` jet
 towers, their fibre caps, and the coefficient-abstract engine) never see the
 fibre deviation. -/
-theorem a1_ladder
+theorem a1_ladder_bg
     (hDim : Module.finrank ℝ E = 3)
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (g g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
     ∃ Clower : ℕ → ℝ, (∀ m, 0 ≤ Clower m) ∧
       ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
-        (T : SmoothCcTensor g₀ 0 2)
+        (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T x u v =
-            ccTensorBilin (I := I) g₀ T x v u)
-        (hδg : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀
-            (0 : SmoothCcTensor g₀ 0 2)) δ),
-        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R₀ →
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ),
+        ‖smoothCcToTensorHs (I := I) (M := M) g ((a : ℝ) + 2) T‖ ≤ R₀ →
         ∀ m : ℕ,
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
-              ((lowBaseData (I := I) (M := M) g₀ g₀ T
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              ((lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
                   (I := I) (M := M) T)‖ ≤
             Clower m *
-              ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T‖ := by
+              ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ := by
   classical
   obtain ⟨Kc0, hKc0_nn, htow0⟩ :=
-    c0_jet_tower (I := I) (M := M) hDim g₀ a (by omega) hR₀
-  obtain ⟨Kc1, hKc1_nn, htow1⟩ := c1_jet_tower (I := I) (M := M) hDim g₀ a hR₀
+    c0_jet_tower_bg (I := I) (M := M) hDim g g_bg a (by omega) hR₀
+  obtain ⟨Kc1, hKc1_nn, htow1⟩ :=
+    c1_jet_tower_bg (I := I) (M := M) hDim g g_bg a hR₀
   obtain ⟨Λ0, hΛ0_nn, hcap0⟩ :=
-    coeffCap (I := I) (M := M) g₀ 2 a (by omega) (R₀ := R₀) Kc0 hKc0_nn
+    coeffCap (I := I) (M := M) g 2 a (by omega) (R₀ := R₀) Kc0 hKc0_nn
   obtain ⟨Λ1, hΛ1_nn, hcap1⟩ :=
-    coeffCap (I := I) (M := M) g₀ 3 a (by omega) (R₀ := R₀) Kc1 hKc1_nn
+    coeffCap (I := I) (M := M) g 3 a (by omega) (R₀ := R₀) Kc1 hKc1_nn
   obtain ⟨Cm0, hCm0_nn, heng0⟩ :=
     exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
-      (I := I) (M := M) g₀ a (by omega) hR₀ Kc0 hKc0_nn Λ0 hΛ0_nn
+      (I := I) (M := M) g a (by omega) hR₀ Kc0 hKc0_nn Λ0 hΛ0_nn
   obtain ⟨Cm1, hCm1_nn, heng1⟩ :=
     exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
-      (I := I) (M := M) g₀ a (by omega) hR₀ Kc1 hKc1_nn Λ1 hΛ1_nn
+      (I := I) (M := M) g a (by omega) hR₀ Kc1 hKc1_nn Λ1 hΛ1_nn
   choose Chs hChs_nn hhs using fun n : ℕ =>
-    exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general (I := I) (M := M) g₀ n
+    exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general (I := I) (M := M) g n
   choose Cjet hCjet_nn hjet using fun n : ℕ =>
-    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general (I := I) (M := M) g₀ n
+    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general (I := I) (M := M) g n
   refine ⟨fun m => Chs m * (∑ q ∈ Finset.range (m + 1), (Cm0 q + Cm1 q)) *
       Cjet (m + 1),
     fun m => mul_nonneg (mul_nonneg (hChs_nn m)
@@ -651,18 +684,18 @@ theorem a1_ladder
   -- the low-base coefficient bundle, bound opaquely so that no later step
   -- unfolds the path-integral witnesses
   obtain ⟨A, hAdef, hc0jet, hc1jet⟩ :
-      ∃ A : LowBaseActionData g₀,
-        lowBaseData (I := I) (M := M) g₀ g₀ T
+      ∃ A : LowBaseActionData g,
+        lowBaseData (I := I) (M := M) g g_bg T
             (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ = A ∧
           (∀ i : ℕ,
-            ‖iteratedCovGrad (I := I) g₀ 2 2 i A.C0‖ ^ 2 ≤
+            ‖iteratedCovGrad (I := I) g 2 2 i A.C0‖ ^ 2 ≤
               Kc0 i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) ∧
+                ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) ∧
           (∀ i : ℕ,
-            ‖iteratedCovGrad (I := I) g₀ 3 2 i A.C1‖ ^ 2 ≤
+            ‖iteratedCovGrad (I := I) g 3 2 i A.C1‖ ^ 2 ≤
               Kc1 i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-    ⟨lowBaseData (I := I) (M := M) g₀ g₀ T
+                ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) :=
+    ⟨lowBaseData (I := I) (M := M) g g_bg T
         (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ, rfl,
       htow0 T hT hδ0 hδ_le hδg hδZ hball,
       htow1 T hT hδ0 hδ_le hδg hδZ hball⟩
@@ -670,25 +703,25 @@ theorem a1_ladder
   clear hAdef
   -- every covariant jet of the first-order arm costs one derivative of `T`
   have hq : ∀ q : ℕ,
-      ‖iteratedCovGrad (I := I) g₀ 0 2 q (A.a1 (I := I) (M := M) T)‖ ≤
+      ‖iteratedCovGrad (I := I) g 0 2 q (A.a1 (I := I) (M := M) T)‖ ≤
         (Cm0 q + Cm1 q) * Real.sqrt (∑ i ∈ Finset.range (q + 1 + 1),
-          ‖iteratedCovGrad (I := I) g₀ 0 2 i T‖ ^ 2) := by
+          ‖iteratedCovGrad (I := I) g 0 2 i T‖ ^ 2) := by
     intro q
     have h0 := heng0 0 (by norm_num) A.C0 T hball
       (hcap0 A.C0 T hball hc0jet) hc0jet q
     have h1 := heng1 1 (by norm_num) A.C1 T hball
       (hcap1 A.C1 T hball hc1jet) hc1jet q
     have hsplitArm : A.a1 (I := I) (M := M) T =
-        appCc (I := I) (M := M) g₀ 2 2 A.C0 T +
-          appCc (I := I) (M := M) g₀ 3 2 A.C1
-            (iteratedCovGrad (I := I) g₀ 0 2 1 T) := rfl
+        appCc (I := I) (M := M) g 2 2 A.C0 T +
+          appCc (I := I) (M := M) g 3 2 A.C1
+            (iteratedCovGrad (I := I) g 0 2 1 T) := rfl
     rw [hsplitArm, iteratedCovGrad_add, add_mul]
     exact le_trans (norm_add_le _ _) (add_le_add h0 h1)
   -- the `H^{m+1}` ball controls every jet window that the rungs `q ≤ m` see
   have hwin : ∀ q ∈ Finset.range (m + 1),
       Real.sqrt (∑ i ∈ Finset.range (q + 1 + 1),
-          ‖iteratedCovGrad (I := I) g₀ 0 2 i T‖ ^ 2) ≤
-        Cjet (m + 1) * ‖smoothCcToTensorHs (I := I) (M := M) g₀
+          ‖iteratedCovGrad (I := I) g 0 2 i T‖ ^ 2) ≤
+        Cjet (m + 1) * ‖smoothCcToTensorHs (I := I) (M := M) g
           ((m + 1 : ℕ) : ℝ) T‖ := by
     intro q hq'
     have hqm : q ≤ m := Nat.lt_succ_iff.mp (Finset.mem_range.mp hq')
@@ -700,20 +733,47 @@ theorem a1_ladder
   -- assemble the rungs `q ≤ m` into the spectral `H^m` norm
   refine le_trans (hhs m (A.a1 (I := I) (M := M) T)) ?_
   have hsum : ∑ q ∈ Finset.range (m + 1),
-      ‖iteratedCovGrad (I := I) g₀ 0 2 q (A.a1 (I := I) (M := M) T)‖ ≤
+      ‖iteratedCovGrad (I := I) g 0 2 q (A.a1 (I := I) (M := M) T)‖ ≤
       (∑ q ∈ Finset.range (m + 1), (Cm0 q + Cm1 q)) *
-        (Cjet (m + 1) * ‖smoothCcToTensorHs (I := I) (M := M) g₀
+        (Cjet (m + 1) * ‖smoothCcToTensorHs (I := I) (M := M) g
           ((m + 1 : ℕ) : ℝ) T‖) := by
     refine le_trans (Finset.sum_le_sum (fun q hq' =>
       le_trans (hq q) (mul_le_mul_of_nonneg_left (hwin q hq')
         (add_nonneg (hCm0_nn q) (hCm1_nn q))))) (le_of_eq ?_)
     rw [Finset.sum_mul]
-  have hcast : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m + 1 : ℕ) : ℝ) T‖ =
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T‖ :=
-    smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+  have hcast : ‖smoothCcToTensorHs (I := I) (M := M) g ((m + 1 : ℕ) : ℝ) T‖ =
+      ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ :=
+    smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g
       (by push_cast; ring) T
   rw [← hcast]
   refine le_trans (mul_le_mul_of_nonneg_left hsum (hChs_nn m)) (le_of_eq (by ring))
+
+set_option linter.unusedVariables false in
+/-- Diagonal-background compatibility wrapper for `a1_ladder_bg`. -/
+theorem a1_ladder
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    ∃ Clower : ℕ → ℝ, (∀ m, 0 ≤ Clower m) ∧
+      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ),
+        ‖smoothCcToTensorHs (I := I) (M := M) g ((a : ℝ) + 2) T‖ ≤ R₀ →
+        ∀ m : ℕ,
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              ((lowBaseData (I := I) (M := M) g g T
+                (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
+                  (I := I) (M := M) T)‖ ≤
+            Clower m *
+              ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ :=
+  a1_ladder_bg (I := I) (M := M) hDim g g a ha hR₀
 
 set_option linter.unusedVariables false in
 /-- **The `k`-uniform ladder for the low-base first-order arm, ball-free.**
@@ -724,7 +784,7 @@ For **every** symmetric state `T` with fibre deviation `δ ≤ 1/3`, every rung
 `‖a₁ T‖_{H^m} ≤ Clower R m · ‖T‖_{H^{m+1}}`,
 
 with the radius-indexed family `Clower : ℝ → ℕ → ℝ` chosen before the state
-and, as in `a1_ladder`, before `δ` — the first-order arm never sees the fibre
+and, as in `a1_ladder_bg`, before `δ` — the first-order arm never sees the fibre
 deviation.  This is `a1_ladder` with the a-priori-ball binder removed; the
 consumer may take `R := ‖T‖_{H⁴}`.
 
@@ -735,38 +795,66 @@ gate `2 * (finrank ℝ E / 2) ≤ a` is sharp in dimension three: the band split
 at `finrank ℝ E / 2 + m` leaves `q ≤ 1` to the low band, which needs the
 coefficient's Sobolev window `∇^{i+j} C`, `i ≤ q`, `j ≤ finrank ℝ E / 2 + 1`,
 inside the ball.  So it too cannot be lowered to `H³`. -/
-theorem a1LadderQ
+theorem a1LadderQBg
     (hDim : Module.finrank ℝ E = 3)
-    (g₀ : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
       ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
-        (T : SmoothCcTensor g₀ 0 2)
+        (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T x u v =
-            ccTensorBilin (I := I) g₀ T x v u)
-        (hδg : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀
-            (0 : SmoothCcTensor g₀ 0 2)) δ)
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
         {R : ℝ}
-        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (4 : ℝ) T‖ ≤ R)
+        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) T‖ ≤ R)
         (m : ℕ),
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
-              ((lowBaseData (I := I) (M := M) g₀ g₀ T
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              ((lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
                   (I := I) (M := M) T)‖ ≤
             Clower R m *
-              ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T‖ := by
+              ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ := by
   classical
   choose C hC_nn hC using fun R : ℝ =>
-    a1_ladder (I := I) (M := M) hDim g₀ 2 le_rfl (R₀ := |R|) (abs_nonneg R)
+    a1_ladder_bg (I := I) (M := M) hDim g g_bg 2 le_rfl
+      (R₀ := |R|) (abs_nonneg R)
   refine ⟨C, hC_nn, ?_⟩
   intro δ hδ0 hδ_le T hT hδg hδZ R hR m
   refine hC R hδ0 hδ_le T hT hδg hδZ ?_ m
   refine le_trans (le_of_eq ?_) (le_trans hR (le_abs_self R))
-  exact smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+  exact smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g
     (by push_cast; norm_num) T
+
+set_option linter.unusedVariables false in
+/-- Diagonal-background compatibility wrapper for `a1LadderQBg`. -/
+theorem a1LadderQ
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
+      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        {R : ℝ}
+        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) T‖ ≤ R)
+        (m : ℕ),
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              ((lowBaseData (I := I) (M := M) g g T
+                (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
+                  (I := I) (M := M) T)‖ ≤
+            Clower R m *
+              ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ :=
+  a1LadderQBg (I := I) (M := M) hDim g g
 
 set_option linter.unusedVariables false in
 /-- **The full low-regularity dissipation ladder of the zero-based
@@ -848,7 +936,8 @@ For **every** symmetric state `T` with fibre deviation `δ ≤ 1/3`, every rung
 
 `‖N T - N 0‖_{H^m} ≤ κ · δ/(1-δ)² · ‖T‖_{H^{m+2}} + Clower R m · ‖T‖_{H^{m+1}}`,
 
-where `N` is the zero-based smooth Ricci--DeTurck remainder over `g₀`.  This is
+where `N` is the zero-based smooth Ricci--DeTurck remainder over the arbitrary
+fixed background `g_bg`.  This is the fixed-background analogue of
 `n_diff_hm_rung` with the a-priori-ball binder removed: no `a`, no `R₀` fixed
 before the state, no admissibility hypothesis on `T`.  The proof is the same
 single triangle inequality over `lowData_split`'s two-arm split, now with
@@ -865,46 +954,46 @@ the ladder now applies to every state, and the consumer supplies the radius
 Galerkin trajectory the coefficient `Clower ‖U_N(t)‖_{H⁵} m` is not a priori
 `N`-uniform.  That is the residual obstruction recorded in
 `LowRegLadderRung.md`. -/
-theorem nDiffHmQ
+theorem nDiffHmQBg
     (hDim : Module.finrank ℝ E = 3)
-    (g₀ : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ κ : ℝ, 0 ≤ κ ∧
       ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3),
       ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
-      ∀ (T : SmoothCcTensor g₀ 0 2)
+      ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T x u v =
-            ccTensorBilin (I := I) g₀ T x v u)
-        (hδg : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀
-            (0 : SmoothCcTensor g₀ 0 2)) δ)
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
         {R : ℝ}
-        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (5 : ℝ) T‖ ≤ R)
+        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g (5 : ℝ) T‖ ≤ R)
         (m : ℕ),
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
-              (deTurckSmoothRemainder (I := I) g₀ g₀ T
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              (deTurckSmoothRemainder (I := I) g g_bg T
                   (lt_of_le_of_lt hδ_le (by norm_num)) hδg -
-                deTurckSmoothRemainder (I := I) g₀ g₀
-                  (0 : SmoothCcTensor g₀ 0 2)
+                deTurckSmoothRemainder (I := I) g g_bg
+                  (0 : SmoothCcTensor g 0 2)
                   (lt_of_le_of_lt hδ_le (by norm_num)) hδZ)‖ ≤
             κ * (δ / (1 - δ) ^ 2) *
-                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T‖ +
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 2) T‖ +
               Clower R m *
-                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T‖ := by
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ := by
   classical
-  obtain ⟨κ, hκ, h2⟩ := a2LadderQ (I := I) (M := M) hDim g₀
-  obtain ⟨C1low, hC1low_nn, h1⟩ := a1LadderQ (I := I) (M := M) hDim g₀
-  obtain ⟨_, _, hsplit⟩ := lowData_split (I := I) (M := M) g₀ g₀
+  obtain ⟨κ, hκ, h2⟩ := a2LadderQBg (I := I) (M := M) hDim g g_bg
+  obtain ⟨C1low, hC1low_nn, h1⟩ := a1LadderQBg (I := I) (M := M) hDim g g_bg
+  obtain ⟨_, _, hsplit⟩ := lowData_split (I := I) (M := M) g g_bg
   refine ⟨κ, hκ, ?_⟩
   intro δ hδ0 hδ_le
   obtain ⟨C2low, hC2low_nn, h2δ⟩ := h2 hδ0 hδ_le
   refine ⟨fun R m => C2low R m + C1low R m,
     fun R m => add_nonneg (hC2low_nn R m) (hC1low_nn R m), ?_⟩
   intro T hT hδg hδZ R hR m
-  have hR4 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (4 : ℝ) T‖ ≤ R :=
-    le_trans (hsMono (I := I) (M := M) g₀ (by norm_num) T) hR
+  have hR4 : ‖smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) T‖ ≤ R :=
+    le_trans (hsMono (I := I) (M := M) g (by norm_num) T) hR
   rw [(hsplit T hT hδ_le hδ0 hδg hδZ).1, smoothCcToTensorHs_add]
   refine le_trans (norm_add_le _ _) ?_
   exact le_trans
@@ -912,12 +1001,12 @@ theorem nDiffHmQ
       (h1 hδ0 hδ_le T hT hδg hδZ hR4 m))
     (le_of_eq (by ring))
 
-/-- A fixed top coefficient for the all-order low-regularity DeTurck remainder
-ladder.  The coefficient is selected before the fibre threshold, state, `H⁵`
-radius, and rung. -/
-def IsHmRungOrd (g : SmoothRiemannianMetric I M) (κ : ℝ) : Prop :=
-  0 ≤ κ ∧
-    ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3),
+/-- Diagonal-background compatibility wrapper for `nDiffHmQBg`. -/
+theorem nDiffHmQ
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ κ : ℝ, 0 ≤ κ ∧
+      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3),
       ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -938,19 +1027,65 @@ def IsHmRungOrd (g : SmoothRiemannianMetric I M) (κ : ℝ) : Prop :=
                   (0 : SmoothCcTensor g 0 2)
                   (lt_of_le_of_lt hδ_le (by norm_num)) hδZ)‖ ≤
             κ * (δ / (1 - δ) ^ 2) *
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 2) T‖ +
+              Clower R m *
+                ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ :=
+  nDiffHmQBg (I := I) (M := M) hDim g g
+
+/-- A fixed top coefficient for the all-order low-regularity DeTurck remainder
+ladder at an arbitrary fixed DeTurck background.  The coefficient is selected
+before the fibre threshold, state, `H⁵` radius, and rung. -/
+def IsHmRungOrdBg (g g_bg : SmoothRiemannianMetric I M) (κ : ℝ) : Prop :=
+  0 ≤ κ ∧
+    ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3),
+      ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
+      ∀ (T : SmoothCcTensor g 0 2)
+        (hT : ∀ (x : M) (u v : TangentSpace I x),
+          ccTensorBilin (I := I) g T x u v =
+            ccTensorBilin (I := I) g T x v u)
+        (hδg : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g
+            (0 : SmoothCcTensor g 0 2)) δ)
+        {R : ℝ}
+        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g (5 : ℝ) T‖ ≤ R)
+        (m : ℕ),
+          ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
+              (deTurckSmoothRemainder (I := I) g g_bg T
+                  (lt_of_le_of_lt hδ_le (by norm_num)) hδg -
+                deTurckSmoothRemainder (I := I) g g_bg
+                  (0 : SmoothCcTensor g 0 2)
+                  (lt_of_le_of_lt hδ_le (by norm_num)) hδZ)‖ ≤
+            κ * (δ / (1 - δ) ^ 2) *
                 ‖smoothCcToTensorHs (I := I) (M := M) g
                   ((m : ℝ) + 2) T‖ +
               Clower R m *
                 ‖smoothCcToTensorHs (I := I) (M := M) g
                   ((m : ℝ) + 1) T‖
 
-/-- Package the ordered all-rung coefficient supplied by `nDiffHmQ`. -/
+/-- A fixed top coefficient for the all-order low-regularity DeTurck remainder
+ladder.  The coefficient is selected before the fibre threshold, state, `H⁵`
+radius, and rung. -/
+def IsHmRungOrd (g : SmoothRiemannianMetric I M) (κ : ℝ) : Prop :=
+  IsHmRungOrdBg (I := I) (M := M) g g κ
+
+/-- Package the arbitrary-background ordered coefficient supplied by
+`nDiffHmQBg`. -/
+theorem lowregHmPackBg
+    (hDim : Module.finrank ℝ E = 3)
+    (g g_bg : SmoothRiemannianMetric I M) :
+    ∃ κ : ℝ, IsHmRungOrdBg (I := I) (M := M) g g_bg κ := by
+  obtain ⟨κ, hκ, hord⟩ := nDiffHmQBg (I := I) (M := M) hDim g g_bg
+  exact ⟨κ, hκ, hord⟩
+
+/-- Diagonal-background compatibility wrapper for `lowregHmPackBg`. -/
 theorem lowregHmPack
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ κ : ℝ, IsHmRungOrd (I := I) (M := M) g κ := by
-  obtain ⟨κ, hκ, hord⟩ := nDiffHmQ (I := I) (M := M) hDim g
-  exact ⟨κ, hκ, hord⟩
+  simpa only [IsHmRungOrd] using
+    (lowregHmPackBg (I := I) (M := M) hDim g g)
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

@@ -183,7 +183,7 @@ sum through order `i + 2`.  The `+2` is the sup embedding's cost; the fact that
 it stops at `i + 2` rather than `i + 3` is exactly the sharp window of
 `c2JetTowerSharp`. -/
 private theorem c2SupJet (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Ks : ℕ → ℝ, (∀ i, 0 ≤ Ks i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -198,12 +198,12 @@ private theorem c2SupJet (hDim : Module.finrank ℝ E = 3)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g (2 + 2) (2 + i) x
             ((iteratedCovGrad (I := I) g (2 + 2) 2 i
-              (lowBaseData (I := I) (M := M) g g T
+              (lowBaseData (I := I) (M := M) g g_bg T
                 (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C2).toSection x) ≤
           Ks i * (1 + ∑ j ∈ Finset.range (i + 3),
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
   classical
-  obtain ⟨Kc, hKc_nn, htower⟩ := c2JetTowerSharp (I := I) (M := M) hDim g
+  obtain ⟨Kc, hKc_nn, htower⟩ := c2JetTowerSharp (I := I) (M := M) hDim g g_bg
   choose Csh hCsh_nn hCsh using fun i : ℕ =>
     exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g (2 + 2) (2 + i)
@@ -211,7 +211,7 @@ private theorem c2SupJet (hDim : Module.finrank ℝ E = 3)
     fun i => mul_nonneg (sq_nonneg _)
       (Finset.sum_nonneg (fun j _ => hKc_nn (i + j))), ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ i x
-  set C₂ := (lowBaseData (I := I) (M := M) g g T
+  set C₂ := (lowBaseData (I := I) (M := M) g g_bg T
     (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C2 with hC₂
   set J : ℕ → ℝ := fun n => ∑ j ∈ Finset.range (n + 1),
     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 with hJ
@@ -276,7 +276,7 @@ the estimate that keeps the coefficient's cost at `‖T‖_{H^{k+1}}` instead of
 (`J 2 ≤ R²`), which is where PSTOP's adapter H (`Cδ* + K_R·R + 2ε < 1`) enters
 the consumer. -/
 theorem a2PerIdxJet (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -291,12 +291,12 @@ theorem a2PerIdxJet (hDim : Module.finrank ℝ E = 3)
         {Cδ : ℝ}
         (hfib : ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g (2 + 2) 2 x
-            ((lowBaseData (I := I) (M := M) g g T
+            ((lowBaseData (I := I) (M := M) g g_bg T
               (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C2.toSection x) ≤
             Cδ ^ 2)
         (q : ℕ),
         ‖iteratedCovGrad (I := I) g 0 2 q
-            ((lowBaseData (I := I) (M := M) g g T
+            ((lowBaseData (I := I) (M := M) g g_bg T
               (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a2
                 (I := I) (M := M) T)‖ ^ 2 ≤
           Cq q * (Cδ ^ 2 * ∑ j ∈ Finset.range (q + 3),
@@ -307,11 +307,11 @@ theorem a2PerIdxJet (hDim : Module.finrank ℝ E = 3)
               ∑ j ∈ Finset.range (q - i + 3),
                 ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
   classical
-  obtain ⟨Ks, hKs_nn, hsup⟩ := c2SupJet (I := I) (M := M) hDim g
+  obtain ⟨Ks, hKs_nn, hsup⟩ := c2SupJet (I := I) (M := M) hDim g g_bg
   choose Cq hCq_nn hCq using fun q : ℕ => appCcPerIdxL2 (I := I) (M := M) g (2 + 2) 2 q
   refine ⟨Cq, Ks, hCq_nn, hKs_nn, ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ Cδ hfib q
-  set A := lowBaseData (I := I) (M := M) g g T
+  set A := lowBaseData (I := I) (M := M) g g_bg T
     (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ with hA
   set J : ℕ → ℝ := fun n => ∑ j ∈ Finset.range (n + 1),
     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 with hJ
@@ -405,11 +405,11 @@ are products of two strictly lower jets, i.e. the `L¹_t`-Grönwall coefficients
 root of `appCcGdiag q`) multiplies the small constant as well, so a consumer
 absorbing the top slot must assume `Cq q · Cδ + K_R·R + 2ε < 1` rather than
 `Cδ + K_R·R + 2ε < 1`.  The ordering is still legal — `Cq` depends only on the
-background metric and `q`, hence is fixed before `δ` and before `R` — but it is
+metrics and `q`, hence is fixed before `δ` and before `R` — but it is
 a genuine (small) strengthening of PSTOP adapter H, and it is *not* discharged
 here: the consumer threads it as an explicit hypothesis. -/
 theorem a2PerIdxLin (hDim : Module.finrank ℝ E = 3)
-    (g : SmoothRiemannianMetric I M) :
+    (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -424,12 +424,12 @@ theorem a2PerIdxLin (hDim : Module.finrank ℝ E = 3)
         {Cδ : ℝ} (hCδ : 0 ≤ Cδ)
         (hfib : ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g (2 + 2) 2 x
-            ((lowBaseData (I := I) (M := M) g g T
+            ((lowBaseData (I := I) (M := M) g g_bg T
               (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).C2.toSection x) ≤
             Cδ ^ 2)
         (q : ℕ),
         ‖iteratedCovGrad (I := I) g 0 2 q
-            ((lowBaseData (I := I) (M := M) g g T
+            ((lowBaseData (I := I) (M := M) g g_bg T
               (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a2
                 (I := I) (M := M) T)‖ ≤
           Cq q * (Cδ * Real.sqrt (∑ j ∈ Finset.range (q + 3),
@@ -440,7 +440,7 @@ theorem a2PerIdxLin (hDim : Module.finrank ℝ E = 3)
               Real.sqrt (∑ j ∈ Finset.range (q - i + 3),
                 ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2)) := by
   classical
-  obtain ⟨Cq, K, hCq_nn, hK_nn, hsq⟩ := a2PerIdxJet (I := I) (M := M) hDim g
+  obtain ⟨Cq, K, hCq_nn, hK_nn, hsq⟩ := a2PerIdxJet (I := I) (M := M) hDim g g_bg
   refine ⟨fun q => Real.sqrt (Cq q), fun i => Real.sqrt (K i),
     fun q => Real.sqrt_nonneg _, fun i => Real.sqrt_nonneg _, ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ Cδ hCδ hfib q
@@ -454,7 +454,7 @@ theorem a2PerIdxLin (hDim : Module.finrank ℝ E = 3)
     Finset.sum_nonneg (fun i _ => hterm_nn i)
   have hbase_nn : (0 : ℝ) ≤ Cδ ^ 2 * J q := mul_nonneg (sq_nonneg _) (hJ_nn q)
   have h : ‖iteratedCovGrad (I := I) g 0 2 q
-      ((lowBaseData (I := I) (M := M) g g T
+      ((lowBaseData (I := I) (M := M) g g_bg T
         (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a2
           (I := I) (M := M) T)‖ ^ 2 ≤
       Cq q * (Cδ ^ 2 * J q +
@@ -462,7 +462,7 @@ theorem a2PerIdxLin (hDim : Module.finrank ℝ E = 3)
     hsq T hT hδ0 hδ_le hδg hδZ hfib q
   -- take the square root of the squared per-index bound
   have hroot : ‖iteratedCovGrad (I := I) g 0 2 q
-      ((lowBaseData (I := I) (M := M) g g T
+      ((lowBaseData (I := I) (M := M) g g_bg T
         (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a2 (I := I) (M := M) T)‖ ≤
       Real.sqrt (Cq q) * Real.sqrt (Cδ ^ 2 * J q +
         ∑ i ∈ Finset.Icc 1 q, K i * (1 + J i) * J (q - i)) := by

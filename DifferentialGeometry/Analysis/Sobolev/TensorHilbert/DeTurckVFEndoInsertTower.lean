@@ -104,7 +104,7 @@ private theorem appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
 `wOmega g₀ g₁ g₀ − wOmega g₀ g₁ g_bg = appCc (cometricCastG0 g₀ g₁) (wXi g₀ g_bg g₀)`.
 This is what turns the `lc0Insert`-difference endomorphism's interior-product contraction
 into a moving-cometric-on-fixed-passenger `appCc` (the `lc0Riem` pattern). -/
-private theorem wOmegaDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+theorem wOmegaDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₁ g₀ - wOmega (I := I) (M := M) g₀ g₁ g_bg =
       appCc (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)
         (wXi (I := I) (M := M) g₀ g_bg g₀) := by

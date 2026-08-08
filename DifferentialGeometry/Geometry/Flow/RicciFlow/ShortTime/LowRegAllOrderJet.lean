@@ -934,7 +934,7 @@ coordinate, the zero-datum Duhamel carrier of `fHi` has `L²` coordinates
 
 The everywhere-representative built from the majorant is what upgrades the a.e. pin to
 the closed slab, through `carrier_toFun_coeff_eq_perModeConv_IccExtend_restrict`. -/
-private theorem carrier_coeff_pmConv
+theorem carrier_coeff_pmConv
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (fHi : timeL2 (tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)) T)
     (fc : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)

@@ -1730,3 +1730,610 @@ the route change is internal to this lane and recorded here).
 Counter unchanged **2/3**.
 
 ---
+
+## 228 (planner, 2026-08-07). SCOPE-SCOUT DOSSIER ADOPTED: zero verified
+## class-C, zero monolith edits, universal slot convention; (c-A) = 8
+## bricks ≈13–17 sessions; `ROUTE_C_PLAN.md` created; brick 1 dispatched
+
+**Dossier adopted in full** (details now canonical in
+`ShortTime/ROUTE_C_PLAN.md`; the ledger records the decisions):
+- **Slot semantics ground truth**: slot 1 = state/spectral metric,
+  slot 2 = DeTurck background, at EVERY definition site
+  (`deTurckSmoothN` :109, `coreN` DenseN:152, `lowRegN` DenseSolve:75,
+  `lowregNfun` UnifClassBounds:326, `lowBaseData` :3346,
+  `lowregGalSol` :91).  No definitional identity forces the diagonal —
+  it is pinned only in theorem STATEMENTS, and `IsLowSolve`'s own
+  docstring records the pinning as a design choice already superseded
+  by `IsLowSolveBg` on the Bg lane.
+- **ZERO verified class-C items** — every suspected diagonal-use
+  dissolved on inspection (the C2 kernel already calls two-metric
+  `moserWin_phiDev g g`; the c0 tower PRICES `phiMetCurvCoeff g g g`
+  as a jet constant rather than cancelling it; no `sub_self` anywhere
+  in the read windows).  Residual B? = five unread proof bodies
+  (probe at brick start; substrate verified two-metric, so a hidden
+  diagonal helper would be a local restatement, not a wall).
+- **ZERO monolith edits — VERIFIED**: all needed monolith producers
+  (`lowBaseData`, `lowData_split`, `topKernel_eq`, `c0/c1/c2_eq`,
+  `selfTopInt`/`selfLowInt`/`rhsSelfTop`) public and two-metric;
+  private `c2_cap` reached only through public `lowData_split`.
+- **Consumption map at the top**: in `lowreg_allOrderJet`'s proof,
+  `hlo` is consumed at EXACTLY ONE point (`lowreg_forceJetMass` :1563);
+  the only diagonal item beyond `hlo`/`hre` is `lowregNsec` (:1490),
+  whose Bg analog `lowregNsecBg` exists and `BgSmoothPacket.force_coeff`
+  is ALREADY stated against it ⟹ `bgreg_allOrderJet` is a
+  (B)-restatement.
+- **Brick plan** (ROUTE_C_PLAN.md table): 1 `IsBgSolveAt` bundle
+  (beachhead) → 2a–2e DT tower/per-index/ladder in-place widenings →
+  3/4 rung-3/4/5 Bg siblings (NEW files; diagonal lane byte-stable) →
+  5 gate pack → 6 `IsAdaptedLowSolveBg` (carries the absorption-budget
+  design flag) → 7 HigherRung Bg → 8 AllOrderJet mirror ending in
+  `bgreg_allOrderJet`.  ≈13–17 sessions.  ONE executor at a time
+  (DT checks import the 13.8k monolith).
+- **Planner design ruling for brick 1** (Mathlib-discipline check): the
+  bundle's fields are the CANONICAL Bg pieces
+  (`IsLowBoundsAt` + `IsLowSolveBg` + `hTτ` + `hcap`) with
+  IsLowSolveAt-shaped projection LEMMAS — not a 17-field parallel
+  restatement of `IsLowSolveAt` (no fourth solve predicate).
+- Dispatched: **brick 1 executor** (new `ST/LowRegBgSolveAt.lean`).
+  Denominators: (N) **0%**; machinery (c)-based ≈**35–45%**; (c-A)
+  0/8 bricks; HCG ≈**3%**.
+
+---
+
+## 229 (planner, 2026-08-07). CODEX REVIEW received (compressed-G3
+## main + timeboxed T/2-smoothing bypass + Shi/Simon-no + calibration
+## correction); reconciliation: written PRE-№225/№226 — the pivot and
+## the gate probe invert its ranking; recommendation to user = stay (c)
+
+**The review** (user-forwarded): (1) main route = compressed G3 —
+prove only the uniform `ρ₀ C Z L` that `bgLift_of_radial` consumes,
+middles private, endpoint `∃ K D, IsLowBoundsUnif ∧ ∀ g hclass, ∃ F,
+IsBgLiftAt …`, next node `lieRefold_pair_lip_unif`; (2) ONE timeboxed
+bypass test `bg_packet_half_of_solve : IsLowSolveBg … T →
+Nonempty (BgSmoothPacket … (T/2))` via metricwise high/low
+identification near t=0 + interior parabolic smoothing, strict stop
+condition (any new background-aware all-order coupling / restart /
+uniqueness base layer ⟹ abandon); (3) Shi/Simon curvature-first: not
+chosen; (4) plan correction: G3 alone does not yield `BgLiftData` —
+a small `exists_lowBounds_below`/scalar-calibration producer is also
+needed.
+
+**Reconciliation (planner, against the post-review evidence):**
+- The review's (1) IS the №220/№222 architecture, already adopted
+  once and then measured: №223 found the 109-node radius provenance
+  with the `∃ρ` one-way door — "middles private" does not dissolve it
+  (privacy is irrelevant to the door; the 103 restatements remain),
+  and the ready frontier's monolith question stands.  Its next node
+  `lieRefold_pair_lip_unif` belongs to that cancelled lane.
+- The PIVOT (№225, planner-verified in the Lean text): the all-order
+  step is diagonal-hardcoded ⟹ compressed G3 ALSO pays the whole
+  ladder widening (it is №221 step 4–5's prerequisite).  The review
+  prices compressed G3 without this block.  With it: compressed G3 =
+  shared block + packet + lift ports ≈25–40+, vs (c) = shared block +
+  synthesis ≈17–38.
+- The review's (2) has route (c)'s INTENT (per-`g` high-order
+  constants, class horizon kept) but the WRONG mechanism: interior
+  parabolic smoothing is the documented in-tree stall
+  (`ForcingTimeBootstrap.lean`: +2 gain vs +2 loss; the high-`a`
+  variant rests on two open sorries), and the near-t=0 "high/low
+  identification" is a weak–strong uniqueness layer the repo lacks —
+  the review's OWN stop condition fires on inspection.  Route (c)
+  achieves the same goal through the PROVED mechanism (the Galerkin
+  rung ladder, `lowreg_loMass`), on the FULL horizon `T` (no `T/2`),
+  riding the SAME solution (no identification layer).  The honest
+  answer to the stop condition — "does it require background-aware
+  all-order coupling?" — is yes, the ladder widening; but the pivot
+  makes that block route-independent, so it cannot discriminate.
+  Verdict: the timeboxed T/2 gate is unnecessary — its purpose is
+  already secured, stronger, by the ruled route.
+- The review's (3): agreement (Shi/Simon was never on the table).
+- The review's (4): agreement, ALREADY RECORDED — under (c) the
+  calibration producer appears as the gate-certificate/K-calibration
+  seam (`ROUTE_C_PLAN.md` design flag 1; `LowRegBgBootstrap.md`
+  ROUTE STATUS): the endpoint gains a gate hypothesis, discharged at
+  the `lowreg_dt_unif` call site with `lowregGateAbsorb`-shaped
+  calibration of `K`.  The review's work discipline (compose into
+  the endpoint as you go; middles private) is adopted as (c)'s brick
+  style regardless.
+- **Brick 1 (`IsBgSolveAt`, in flight) is inside the SHARED block** —
+  it is spent correctly under BOTH the ruled route and the review's
+  ranking; nothing in flight is route-contingent.
+
+**Standing**: the №227 ruling ((c)) remains in force; recommendation
+communicated to the user = stay (c); if the user re-rules toward
+compressed G3, the shared-block work transfers loss-free.  Counter
+unchanged **2/3**.
+
+---
+
+## 230 (planner, 2026-08-07). USER CONFIRMED (c) after the №229
+## reconciliation; a GPT Pro OVERALL RULING is incoming (reconcile on
+## arrival); B?-bodies probe dispatched while brick 1 runs
+
+- User: "ok 那还是坚持 c 继续,我又问了 pro 整体裁决,之后会发给你."
+  The №227 ruling stands CONFIRMED post-Codex-review; execution
+  continues.  When the Pro overall ruling arrives, reconcile it
+  point-by-point against the ledger evidence (№225–№229 pattern)
+  before changing anything; the shared block stays route-independent
+  regardless.
+- Dispatched (read-only, zero file overlap with brick 1): the
+  **B?-bodies probe** — the five unread proof bodies of
+  `ROUTE_C_PLAN.md` design flag 3 (C01JetTower Integrand section +
+  `low1Ker_jet`; A1PerIndex engine sources :204–207;
+  `lowregRung5PathAt` RungClosure:79; `lowregHighRungs`
+  HigherRung:110; `lowreg_forceDriver`/`lowreg_spatialMass`
+  AllOrderJet:761/:1099).  Verdict per body: B (restate-verbatim) or
+  C (genuine diagonal use, exact step cited).  De-risks bricks
+  2b/2d/7/8 before they are priced into sessions (the honest-input
+  discipline: audit inputs BEFORE consumers).
+- In flight: brick 1 executor (`IsBgSolveAt`).  Denominators
+  unchanged: (N) **0%**; machinery ≈**35–45%** ((c)-based); (c-A)
+  0/8; HCG ≈**3%**.
+
+---
+
+## 231 (planner, 2026-08-07). BRICK 1 LANDED AND ACCEPTED —
+## `IsBgSolveAt` green/axiom-clean, zero statement-level deltas;
+## brick 2a (DT C2 tower spine) dispatched
+
+- **Brick 1 ACCEPTED** (planner spot-read: structure fields, the
+  `hTτ` shape = `lowreg_sol_of_data`'s hypothesis verbatim, the
+  dependent `solve : IsLowSolveBg … bounds …` field accepted by Lean
+  directly).  `ST/LowRegBgSolveAt.lean` (231 lines):
+  `IsBgSolveAt g₀ g_bg K hT hT1 u gforce Rcap` with fields
+  `bounds`/`solve`/`hTτ`/`hcap`, plus 15 projections named exactly
+  like `IsLowSolveAt`'s fields (`hδ hCtop hB1 hρ hP hreal hδ0 hδ3
+  hcore hB0 hcont htame hzero hball hforce`) delivering the diagonal
+  statements with the DeTurck slot freed.  Executor: fresh-file
+  focused check GREEN warning-free (no stale-olean risk on a
+  never-built file); axiom probe on the five substantive projections
+  = the three standard axioms; claim released; field map in
+  `LowRegBgSolveAt.md`.  Deltas: none at statement level (α-rename
+  in `htame` to avoid shadowing `u`; `bounds.hreal` vs `h.hreal`
+  bridged by proof irrelevance).  One report nit not propagated: the
+  executor cited (N) at the stale `:98` (real site `:83`).
+- **(c-A): 1/8 bricks done.**  Brick 2a dispatched: in-place widen
+  of `topKerJetSharp` (C2JetTower:270) and `c2JetTowerSharp/Q` +
+  `c2_jet_tower` (LadderRung C2 part), with repo-wide diagonal
+  call-site fixups (known: `c2SupJet` A2PerIndex:206) and the
+  targeted-olean-refresh sequence between upstream and downstream
+  focused checks.  B?-bodies probe still in flight.
+- Denominators: (N) **0%**; `bg_packet_of_solve` machinery ≈**36–46%**
+  ((c)-based; brick 1 is a small step of the (c-A) block); HCG
+  ≈**3%**.
+
+---
+
+## 232 (planner, 2026-08-07). B?-PROBE ADOPTED: four bodies clean B;
+## ONE genuine class-C cluster found (the C01 towers, brick 2b) with
+## repairs identified — the widened difference term is the ΔC0-passenger
+## phenomenon again; 2b split and re-priced; execution order updated
+
+**Verdicts adopted** (evidence lines in the probe report):
+- **B**: A1PerIndex engines (all slot-1 or metric-free; `a1Arm0/1`
+  statements pin `lowBaseData g g` = restatement only);
+  `lowregRung5PathAt` (RungClosure:79 — field access + slot-1
+  mode/Fatou engines; `lowregForceCont` is stated two-metric and
+  applied diagonally); `lowregHighRungs` (HigherRung:110 — but see
+  work-list: `galArmVec` is a diagonal-BAKED def);
+  `lowreg_forceDriver`/`lowreg_spatialMass` (AllOrderJet:761/:1099 —
+  mode-coordinate arguments, force abstract; the only two-slot object
+  in `lowreg_forceJetStep` is ALREADY two-metric
+  (`deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass`), applied
+  diagonally; neither body touches `lowregNsec`/`coreN`/`lowregNfun`).
+- **C — the C01-tower cluster** (brick 2b), three points, all with
+  identified repairs and shelf originals:
+  (a) `selfLow_split` (C01JetTower:188–224) kills the insertion
+  difference `lc0Insert g gm g_bg − lc0Insert g gm g₀` by
+  `sub_self` (:211) — widened, it SURVIVES as a sixth summand.  This
+  is the ΔC0-passenger phenomenon of route error #2 in new clothing;
+  repair = restate from the EXISTING three-metric `tail_base_split`
+  keeping the difference term + one window pricing the insertion
+  difference for `selfLow_jet(_quad)`.
+  (b) `lieA1Atgw`/`low1Atgw` (Low1KerRadiusFree:617/:811): bg-pinned
+  windows with NO two-metric original — proof exploits the bg=g₀
+  collapse of 2 of 14 Ψ piece-factors.  Repair = free-bg restatement
+  on the EXISTING three-metric piece expansion + `psiBAtgw (g₀ g_bg)`,
+  plus a NEW grid-window cap for the non-collapsed factors via
+  `connDiffSection g₁ g_bg = connDiff(g₁,g₀) + A(g₀,g_bg)` — the
+  offset is STATE-FREE (the Bg-tame campaign's pattern).
+  (c) C0 caps `lieCovCap`/`lieCovJet` (SelfLowArmCaps:927/:1238, bg
+  pinned in the Palatini-residual statement) and `lc0AMixJet`
+  (TameLieCorrJets:518, single-metric) — the two-metric template
+  `lc0AMixCap (g₀ g_bg)` already exists.
+- **Work-list additions** (diagonal-stated helpers the scope scout
+  missed; folded into ROUTE_C_PLAN.md rows): `galArmVec` def BODY
+  bakes `lowBaseData g₀ g₀` (RungThree:583/:590 — needs a bg-slotted
+  analog def, brick 3), `galArmMassHm` (HigherRung:40), `galForceArm`
+  (ForceArms:368), `IsRung5Path` (RungClosure:42, pins
+  `lowregNfun g₀ g₀` :65), `lowregFatouE3At` (FatouIdent:385),
+  `lowreg_projMode_at` (GalerkinIdent:308) — all pure restatements
+  (brick 3/7 scope).
+- **Consequences**: brick 2b re-scoped into 2b-i (window-layer
+  repairs in Low1KerRadiusFree/SelfLowArmCaps/TameLieCorrJets) +
+  2b-ii (tower assembly in C01JetTower incl. the sixth-summand
+  restatement), priced 2–4 sessions total (was 1–2); (c-A) total
+  ≈**14–19** (was 13–17).  Execution order updated to
+  2a → 2c → 2b-i → 2b-ii → 2d → 2e (clean B bricks first; 2c depends
+  only on 2a).  Design flag 3 RESOLVED.  Brick 2a (in flight) is
+  unaffected — its files were scope-scout-read directly.
+- Denominators unchanged: (N) **0%**; machinery ≈**36–46%**; (c-A)
+  1/8 done; HCG ≈**3%**.
+
+---
+
+## 233 (planner, 2026-08-07). BRICK 2a LANDED AND ACCEPTED — the DT C2
+## tower spine is two-metric, zero class-C surprises; brick 2c
+## dispatched; one tooling lesson recorded
+
+- **Brick 2a ACCEPTED**: `topKerJetSharp` (C2JetTower:270),
+  `c2JetTowerSharp` (:156), `c2JetTowerQ` (:226), `c2_jet_tower`
+  (:289, LadderRung) all widened IN PLACE to `(g, g_bg)` — statement
+  slots freed (`rhsRefoldTop g g_bg`, `deTurckPhiMetTotal g g_bg g`,
+  `(lowBaseData g g_bg T …).C2`), proof deltas pure re-instantiations
+  (`moserWin_phiDev g g_bg`, `topKernel_eq g g_bg`,
+  `rhsRefoldTop_joint g g_bg`); slot-1 legs untouched.  THREE diagonal
+  call sites fixed explicitly (`topKer_jet` C2JetTower:370 — kept
+  deliberately diagonal as the compat form; `a2LadderQ` LadderRung:371
+  — brick-2e territory; `c2SupJet` A2PerIndex:206); exhaustive grep
+  found no other term-level consumer.  Focused checks + targeted
+  module builds green on all three files, with the LadderRung build
+  transparently rebuilding downstream `SelfLowArmCaps` and
+  `LowRegC01JetTower` clean; axiom probes on all four = the three
+  standard axioms; claims released; same-name notes updated.  ZERO
+  class-C steps — the scope scout's class-B prediction scores TRUE.
+- **TOOLING LESSON** (for all future executor briefs):
+  `lake-locked.ps1 claim -Files` requires COMMA-separated paths —
+  space-separated silently binds only the FIRST file, and `.md` paths
+  are silently ignored.
+- **(c-A): 2/8 bricks done.**  Brick 2c dispatched (A2 per-index:
+  `c2SupJet`, `a2PerIdxJet`, `a2PerIdxLin` in `DT/LowRegA2PerIndex.lean`;
+  known downstream diagonal consumers to fix: `armLadder3`
+  RungThree:311–313, `armOrder3/4` RungFour/Five).  Denominators:
+  (N) **0%**; machinery ≈**37–47%**; HCG ≈**3%**.
+
+---
+
+## 234 (planner, 2026-08-07). BRICK 2c LANDED AND ACCEPTED — the A2
+## per-index family (`Cqa`/`Ka` host) is two-metric; first C-repair
+## brick 2b-i dispatched
+
+- **Brick 2c ACCEPTED**: `c2SupJet` (:185), `a2PerIdxJet` (:278),
+  `a2PerIdxLin` (:411) widened in place to `lowBaseData g g_bg`
+  statements; slot-1 helpers (`appCcPerIdxL2`, `icgWinShift`,
+  `sqrtAdd2`, `sqrtFinSum`) deliberately untouched.  Three diagonal
+  consumer sites fixed (`armLadder3` RungThree:311, `armOrder3`
+  RungFour:88, `armOrder4` RungFive:85 — their own statements
+  untouched, brick-3/4 territory; adjacent `a1PerIdxLin` calls stay
+  single-metric until 2d).  Focused checks + targeted builds GREEN
+  (incl. an extra `+RungFive` build leaving the rung olean state
+  consistent for other agents); axiom probes clean; claims released.
+  ZERO class-C steps.  Durable pattern confirmed: `hshape` rfl
+  survives because `LowBaseActionData g` is slot-1-TYPED — widening
+  is value-level only, exactly the scout's slot-semantics claim.
+- **(c-A): 3/8 rows done (1, 2a, 2c).**  Dispatched **brick 2b-i** —
+  the first C-repair brick (№232 points (b)+(c)): free-bg restatement
+  of `lieA1Atgw`/`low1Atgw` (Low1KerRadiusFree:617/:811) on the
+  three-metric piece expansion (`deTurckLieArm1Coeff_eq_lieArm1Piece_sum`
+  :4238) + `psiBAtgw (g₀ g_bg)` (:451), with the NEW state-free
+  offset cap for the two non-collapsed Ψ factors
+  (`connDiffSection g₁ g_bg = connDiffSection g₁ g₀ + A(g₀,g_bg)`);
+  widen `lieCovCap`/`lieCovJet` (SelfLowArmCaps:927/:1238, incl.
+  their bg-pinned Palatini-residual upstream if needed); two-metric
+  `lc0AMixJet` from the `lc0AMixCap` template (TameLieCorrJets:518).
+  Consumer fallout lands in C01JetTower (2b-ii's file) — diagonal
+  fixups only.  Denominators: (N) **0%**; machinery ≈**38–48%**;
+  HCG ≈**3%**.
+
+---
+
+## 235 (planner, 2026-08-07). PRO OVERALL RULING received (sections
+## 一.5/二/三/四 readable; 五–七 GARBLED, re-paste requested) — C1
+## adopted; (c-B) RE-SCOPED to absorptive-only (№226's 7-family scope
+## REFUTED by Pro's counterexample); phase order REARRANGED c-C0-first;
+## STOP-condition discipline recorded
+
+**Adopted point-by-point** (reconciled against №225–№234 evidence):
+- **一.5**: `lowreg_loMass`'s `∑' weight·(perModeConv)² ≤ Cσ` with no
+  T-shortening is the right mass foundation; `lowreg_allOrderJet` is
+  a hybrid — route (c) must write a NEW producer NOT through
+  `IsRealizedTwo`, not a `g g → g g_bg` edit of the hybrid.  Aligned
+  with brick 8's parameterized design; confirmed.
+- **二 (C1) ADOPTED**: the frontier is RESTATED as
+  `bg_packet_of_adapt (ha : IsAdaptedLowBg g g_bg K hK hT hT1 u
+  gforce) : Nonempty (BgSmoothPacket g g_bg K T)`, replacing
+  `bg_packet_of_solve` (which quantifies over ALL `IsLowBoundsAt` K —
+  the absorption inequality is NOT derivable there; `lowreg_adapt_open`
+  calibrates BEFORE solving, so adaptation is not a free
+  post-certificate).  Class-first producer `lowreg_adapt_unif`
+  chooses uniform gate bounds/threshold/state cap + a literal common
+  `K` BEFORE `g`.  (N)'s statement unchanged; `lowreg_dt_unif`'s
+  STATEMENT unchanged; its PROOF BODY rethreads (uniform solve →
+  uniform adapted solve).  **Plan-language correction (honest)**: my
+  "`lowreg_dt_unif` stays untouched" (№225/№227, ROUTE_C_PLAN) was
+  interface-level only — corrected everywhere this entry.
+- **三 (jet budget) ADOPTED — №226's (c-B) scope REFUTED**: Pro's
+  counterexample (`g_n = e^{2f_n} gBase`, `f_n = n⁻³ sin(n x₁)`:
+  in the C³ class uniformly, 4th derivative ~ n) proves NO constant
+  truly reading ≥4th-order jets of the VARYING metric can be
+  class-uniformized from `a ≤ 3` data.  Correct layering: uniformize
+  ONLY what enters absorption smallness (Ā, B̄, δ, state-radius cap)
+  and PROVE those read only 0–3 jets of the varying `g`
+  (coefficient fields sit at `gBase` after widening — free); leave
+  metricwise (chosen after `g`): high-order Grönwall constants,
+  per-σ mass bounds `Cσ` (existentially selected after `g`, σ —
+  never class-first), high-order Sobolev/jet bridges,
+  smooth-reconstruction majorants.  Do NOT copy `IsLowGateOrd` into
+  a uniform-everything `IsLowGateBg`; FIRST split the gate into
+  absorptive small coefficients vs metricwise high-rung bookkeeping
+  (audit where the Grönwall closure actually uses the smallness —
+  rung-4/5 bridge factors in B are the suspect bookkeeping part).
+  **STOP CONDITION (verbatim discipline)**: if the absorptive
+  coefficients themselves need ≥4th jets of `g`, that is a STOP for
+  the current (N) statement — changing `a ≤ 3` is a separate
+  theorem-level USER ruling, never a mid-implementation edit.
+  Honest scoring: №226's flag had the right locus (bridges/embedding)
+  but ranked "widen (N)" as first remedy — wrong; the split comes
+  first.  (c-B) SHRINKS (absorptive slice + audit), likely cheaper
+  than the 6–14 estimate.
+- **四 (reorder) ADOPTED**: route (c)'s route-specific risk is the
+  escape from `IsRealizedTwo`, so it is tested FIRST: new phase order
+  **c-C0 (fixed-metric direct-synthesis feasibility gate — the
+  diagonal `bg_packet_of_adapt` prototype on the PROVED diagonal
+  ladder, zero widening) → c-A (MINIMAL widening, defined by c-C0's
+  consumption map) → c-B (absorptive gate) → c-C (final assembly)**.
+  `lowreg_loMass` gives state spatial mass; the packet also needs
+  `mode_smooth`/`mode_mass`/`mode_eq`/H²-forcing/carrier — c-C0
+  determines whether those come from `hlo` alone.  Brick 2b-i (in
+  flight) CONTINUES — the window layer is in every minimal set (the
+  per-`g` Bg rung ladder consumes it under C1 regardless).
+- **五–七 GARBLED** in transmission (fragments consistent with the
+  above; the concrete `IsAdaptedLowBg` interface sketch and the final
+  ordering appear to match 二+四).  Re-paste requested; nothing from
+  the garbled text was acted on.
+- Dispatched: **c-C0 SCOUT** (read-only, parallel-safe with 2b-i).
+  Denominators: (N) **0%**; machinery ≈**38–48%** (unchanged — the
+  reorder moves risk forward, not progress); HCG ≈**3%**.
+
+---
+
+## 236 (planner, 2026-08-07). c-C0 DOSSIER ADOPTED: verdict (ii) —
+## the escape from `IsRealizedTwo` is provable from shelf + TWO new
+## lemmas + ONE signature amendment (≈3–4 sessions); the identification
+## risk DISSOLVES; the calibration amendment converges exactly with C1
+
+**Adopted findings** (full dossier in the task output; sites verified
+by the scout against source):
+- **`hre`-inventory closes**: of everything `IsRealizedTwo` supplies,
+  the continuity/cap certs are R1 (verbatim from `hlo` fields —
+  `lowregNfun` IS `lowRegN g g …` by delta); the coefficient bundles
+  `FHi/FLo` + A2 certs are R2 via the existing producer recipe
+  (`lowreg_solve_open` :645–689; `refold_aff` is ALREADY the diagonal
+  of the 206-arc's `refold_aff_bg` — the refold sublayer of the
+  retired lift RE-ENTERS as live shelf); the order-2 carrier is
+  `maxRegDuhamelMap 2 hT hT1 0 fHi` with `duhamelCross`/
+  `solField_toFun_ae` replacing `ucs`.  Conjuncts existing only to
+  run the hybrid's contraction are simply dropped.
+- **The KEY identification is a SHELF THEOREM**: `force_hi_id`
+  (`LowRegForceHi.lean:373–456`) + `hiN_lowreg` (:299) +
+  `tensorHsInclusion_injective`, fed by `hlo.hforce`, with
+  mode-blindness from `timeL2Inclusion_maxRegDuhamelSolField`.
+- **`fHi` via Nemytskii EVALUATION, not forcing-mass summation**
+  (the feared route is an honest-sorry deep leaf and provably the
+  wrong way): `w4 := solFieldAtOrder hT.le fLo 4` needs only
+  SOLUTION mass at σ=4 (`lowreg_loMass` + Tonelli); then
+  `fHi := MemLp.toLp (liftHiN … FHi (w4 t))` — affine growth from
+  radial truncation ⟹ `L²ₜ`.
+- **Signature amendment = C1 convergence**: `IsAdaptedLowSolve`
+  lacks the refold-radius calibration (`hRρ` is solve-PRE); the
+  prototype adds `(ρ, hρ, hreal', hcal : stateRad ≤ ρ)` — exactly
+  what brick 6's `IsAdaptedLowBg` absorbs per №235.
+- **No horizon/slab gap**: same `T` throughout, closed-slab chain,
+  t=0 corner free — the entire gain over the hybrid confirmed at
+  implementation grain.
+- **Work plan (after 2b-i frees the Lean slot)**: c-C0-1
+  `duhamel_mode_pin` (generic a.e. cross-scale coefficient pin,
+  ~0.5–1); c-C0-2 `lowreg_forceHi2` (fHi + hincl/hfix/hballU,
+  ~1–1.5; risk carrier = the `liftHiN` affine/memLp assembly, the
+  scout's one unverified step); c-C0-3 the prototype assembly
+  (mirror AOJ:1492–1590 + packet packaging, ~1–1.5) — prototype
+  lives IN `LowRegAllOrderJet.lean` (1931 lines) for private access
+  to `carrier_coeff_pmConv`/`coord_eq_smoothN`.  Minimal-(c-A) list
+  banked in the plan (§4 of the dossier).
+- Remaining (c-A) bricks (2b-ii, 2d, 2e, 3–8) PAUSE until c-C0
+  lands and its consumption map fixes the minimal set (№235 order).
+  Denominators: (N) **0%**; machinery ≈**40–50%** (identification
+  risk retired); HCG ≈**3%**.
+
+---
+
+## 237 (Codex, 2026-08-07). c-C0 / BRICK 0 PROVED BY DIRECT ORDER-ONE
+## FORCING SYNTHESIS; THE №236 `liftHiN` DESIGN IS SUPERSEDED
+
+- New public theorem `lowreg_directJet` in `LowRegDirectJet.lean` is
+  proved, focused-green, and axiom-clean with exactly
+  `[propext, Classical.choice, Quot.sound]`.
+- The checked proof starts from diagonal `IsAdaptedLowSolve`, obtains
+  all-order solution mass from `lowreg_loMass`, runs the forcing
+  driver directly at order one using `lowReg_force_smooth`, promotes
+  the resulting coordinate family spectrally to an H² forcing, and
+  constructs the order-two Duhamel carrier, mode pin, state bound,
+  exact smooth forcing identity, and realization radius.
+- The proof contains no `IsRealizedTwo`, `liftForceHi`, `liftHiN`,
+  `lowregLiftHorizon'`, `hbridge`, `hFComm`, or `hA2sq`.  Therefore
+  the Brick-0 stop condition did not fire, and the calibration tuple
+  predicted in №236 is unnecessary.
+- `carrier_coeff_pmConv` was made public in `LowRegAllOrderJet.lean`;
+  its statement and proof body are unchanged.
+- The next route-(c) task is now determined by the actual consumption
+  map: parameterize only the adapted-solve/low-mass/rung chain needed
+  by `lowreg_directJet`, then assemble `bg_packet_of_adapt`.  Do not
+  resume the old adjacent-scale A1/A2 completion lane or mechanically
+  continue the broad 2b-i queue.
+- Honest denominators: theorem `lowreg_directJet` **100%**; Brick 0
+  **100%**; route-(c) background/adapted endpoint lane ≈**35%**;
+  headline `(N)` **0%** until its endpoint no longer transitively
+  depends on `sorryAx`; broader dedicated machinery ≈**80%**; HCG
+  ≈**3%**.
+
+---
+
+## 238 (Codex, 2026-08-07). EXACT TWO-METRIC ENDPOINT SEAM PROVED;
+## BACKGROUND MASS IS NOW THE ONLY INPUT MISSING FROM THE PACKET
+
+- `LowRegDirectJet.lean` now exports `direct_jet_of_mass`.  It takes
+  primitive fixed-background solve data at `(g,g_bg)` and the exact
+  all-order spatial-mass conclusion, and returns the full order-two
+  carrier/forcing packet data on the same horizon.  It has no
+  dimension-three hypothesis; dimension enters only in the mass
+  producer.  The old `lowreg_directJet` statement remains intact as
+  a thin diagonal wrapper.
+- `LowRegBgBootstrap.bg_packet_of_mass` is proved.  It combines
+  `IsLowBoundsAt`, `IsLowSolveBg`, and the mass input with
+  `direct_jet_of_mass`, producing `BgSmoothPacket` on the original
+  `T`.  The existing `dt_of_bg_packet` and gauge endpoint therefore
+  need no redesign.
+- The first fixed-background Galerkin leaf `galN_evalBg` is proved in
+  new `LowRegBgForceArms.lean`.  It is a direct use of the already
+  two-metric `lowRegN_on_smooth`; no new estimate or lift certificate
+  is involved.
+- This isolates the remaining analytic dependency exactly as
+  `lowreg_loMassBg`.  The force-arm and scalar wrappers are initially
+  mechanical; the first genuine obstruction occurs when
+  `armLadder3Bg` reaches diagonal `a1PerIdxLin`, whose C01 tower
+  currently cancels a background insertion difference by `sub_self`.
+- Verification: the direct core, its refreshed module, the new packet
+  adapter, and `galN_evalBg` all pass focused checks.  The only warning
+  in `LowRegBgBootstrap` is its pre-existing
+  `bg_packet_of_solve` `sorry`; the new adapter is complete.
+- Honest denominators: `direct_jet_of_mass` **100%**;
+  `bg_packet_of_mass` **100%**; fixed-background mass chain ≈**3%**;
+  route-(c) background/adapted endpoint lane ≈**40%**; headline `(N)`
+  **0%** until the superseded bare-solve frontier is removed from the
+  endpoint dependency; broader dedicated machinery ≈**80%**; HCG
+  ≈**3%**.
+
+---
+
+## 239 (Codex, 2026-08-07). BACKGROUND FORCE-ARM FRONT COMPLETE;
+## NEXT FRONTIER IS THE A1/C01 FIXED-OFFSET INSERTION DIFFERENCE
+
+- `LowRegBgForceArms.lean` now proves `galN_evalBg`, `galArmIdBg`,
+  `galArmCapBg`, and `galForceArmBg`.  All four are direct two-metric ports of
+  established identities/caps and introduce no new analytic assumption.
+- Focused verification is green with four threads and a 6144 MB cap; the new
+  module is warning-free and contains no `sorry`.
+- `bg_packet_of_mass` is independently axiom-audited with exactly
+  `[propext, Classical.choice, Quot.sound]`.  `LowRegDirectJet.lean` and
+  `LowRegBgBootstrap.lean` pass their final focused checks after the temporary
+  audit commands were removed.
+- The next honest producer is not another force-arm wrapper.  `armLadder3Bg`
+  reaches diagonal `a1PerIdxLin`; below it, `selfLow_split` removes the sixth
+  insertion-difference summand using `sub_self`.  For an independent
+  background this summand survives.  Brick 2b-i must first prove the
+  fixed-offset background A1/window estimates, and brick 2b-ii must retain and
+  price that summand in the C01 tower.
+- Honest denominators: the four force-arm producers **100%**; fixed-background
+  mass chain approximately **8%**; route-(c) background/adapted endpoint lane
+  approximately **42%**; headline `(N)` **0%** while the endpoint still
+  transitively uses the superseded `bg_packet_of_solve` `sorry`; broader
+  dedicated machinery approximately **80%**; HCG approximately **3%**.
+
+---
+
+## 240 (Codex, 2026-08-07). THE ARBITRARY-BACKGROUND C01 SEAM IS CLOSED
+
+- The fixed-offset A1 window is proved through `bgCcAtgw`,
+  `lieA1AtgwBg`, and `low1AtgwBg`; the diagonal declarations remain wrappers.
+- The AMix correction is now sharp: `mcdBgAtgw` has offset `n+1`,
+  `amixBgAtgw` has offset `n+2`, and `lc0AMixJetBg` gives the full
+  arbitrary-background `K0/K2` tame bound.
+- The insertion correction is isolated in new `Lc0InsertDiffWindow.lean` as
+  `lc0InsDiffAtgw`, also at offset `i+2`.  It uses the exact public field
+  identity `lc0InsDiff_eq` and does not depend on the broken/oversized
+  `LieCorr0LowJet` route.
+- `LowRegC01JetTower.lean` now proves `lieBgJet`, `insBgJet`,
+  `selfLowJetQBg`, and `c0JetTowerQBg`.  The last two were implemented by
+  generalizing the existing diagonal proof once and retaining the former
+  theorem names as compatibility wrappers.
+- Focused checks and all direct targeted refreshes are green.  No new `sorry`,
+  axiom, or heartbeat override was introduced.
+- Brick 2d (`a1PerIdxJetBg`/`a1PerIdxLinBg`) has been source-ported and is the
+  current verification target; after that, the remaining conditional mass
+  chain is background threading through ladder/rung consumers.
+- Honest denominators: the C01 background brick **100%**; the conditional
+  theorem `lowreg_loMassBg` remains unstated (**0%**) with about **70%** of its
+  dedicated backgroundized machinery available; route-(c) background/adapted
+  endpoint lane ≈**50%**; headline `(N)` **0%**; broader dedicated machinery
+  ≈**80%**; HCG ≈**3%**.
+
+---
+
+## 241 (Codex, 2026-08-07). A1 AND LADDER BACKGROUND PORTS ARE EXPORTED
+
+- `LowRegA1PerIndex.lean` now provides `a1PerIdxJetBg` and
+  `a1PerIdxLinBg`; its focused check is warning-free, its direct targeted
+  refresh is green, and the exported `.olean` is fresh.  The old diagonal
+  declarations retain their exact original types as compatibility wrappers.
+- `LowRegLadderRung.lean` now provides `a2LadderQBg`, `a1_ladder_bg`,
+  `a1LadderQBg`, `nDiffHmQBg`, `IsHmRungOrdBg`, and `lowregHmPackBg`.
+  Focused verification and the targeted refresh are green; the six new
+  declarations have only the standard axioms `[propext, Classical.choice,
+  Quot.sound]`.
+- The next conditional mass layer is now a mechanical fixed-background port:
+  Rung 3/4/5 source work is split into new `LowRegBgRung*.lean` siblings and
+  will be verified serially.  The first genuine remaining seam is the later
+  class-first absorptive/gate audit, not another C01 coefficient estimate.
+- Honest denominators: bricks 2d and 2e **100%**; `lowreg_loMassBg` remains
+  unstated (**0%**); its dedicated backgroundized machinery is approximately
+  **75%**; route-(c) background/adapted endpoint lane ≈**55%**; headline
+  `(N)` **0%**; broader dedicated uniform-existence machinery ≈**80%**;
+  HCG ≈**3%**.
+
+---
+
+## 242 (Codex, 2026-08-07). CONDITIONAL BACKGROUND MASS AND PACKET CHAIN CLOSED
+
+- New fixed-background siblings now prove the complete metricwise chain:
+  Rung 3/4/5, coherent gate bookkeeping, adapted-solve packaging, Galerkin
+  identification, primitive Fatou closure, the common rung-five path, generic
+  higher rungs, all-real spatial mass, and the final packet adapter.
+- In particular, `lowreg_loMassBg` is now a proved every-real-exponent producer,
+  and `bg_packet_of_adapt` combines it with `bg_packet_of_mass` on the same
+  horizon.  All new direct modules pass focused checks and targeted refreshes;
+  single-worker refreshes were used after one broad stale-dependency refresh
+  exposed a high memory peak.
+- This closes the conditional implication
+  `IsAdaptedLowSolveBg -> Nonempty (BgSmoothPacket ...)`.  It does not choose
+  the adapted certificate before the class metric varies.
+- Honest denominators: `lowreg_loMassBg` **100%**;
+  `bg_packet_of_adapt` **100%**; the metricwise background direct-smoothing
+  chain **100%**; class-first `lowreg_adapt_unif` **0%**; headline `(N)` **0%**;
+  dedicated uniform-existence machinery approximately **82%**; HCG **3%**.
+
+---
+
+## 243 (Codex, 2026-08-07). CLASS-FIRST ABSORPTION STOP CONDITION FIRED
+
+- The current `IsLowGateOrdBg` cannot be uniformized from the C3 metric class.
+  At rung three, its radius coefficient follows
+  `Kr1 -> Kb1 1 -> Kc 3 -> fixCdAtgw 3`, hence contains
+  `nabla^3 (connDiff g gBase)`.  Since `connDiff` already differentiates `g`,
+  this reads the fourth metric jet of the varying metric.  Rungs four and five
+  read still higher towers and high-order spectral bridges.
+- These quantities are not dead bookkeeping: `lowregRung5PathAtBg` uses the
+  common `A,B` budget to absorb each fixed rung.  Neither shrinking the time nor
+  merely rebuilding `LowRegBoundData` removes the unbounded coefficient.
+- Therefore the route plan's explicit C3 stop condition has fired.  Do not
+  prove `lowreg_adapt_unif` from the current gate, do not swap quantifiers, and
+  do not silently strengthen `(N)` to four or more jets.
+- The smallest honest next design is an absorption-only gate that moves the
+  fixed-offset and high-jet terms out of the small top/radius coefficient and
+  into metricwise Gronwall terms.  Only after that producer exists does a scalar
+  shrink theorem for one common `LowRegBoundData` become meaningful.
+- Honest denominators: redesigned absorption-only producer **0%**;
+  `lowreg_adapt_unif` **0%**; headline `(N)` **0%**; conditional metricwise
+  direct-smoothing chain **100%**; dedicated uniform-existence machinery
+  approximately **82%**; HCG **3%**.
+
+---

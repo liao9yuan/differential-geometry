@@ -220,3 +220,26 @@ JOINT-NEMYTSKII, JOINT-REP, JOINT-IDENT (Fatou stage only), JOINT-RETR.
 JOINT-BESSEL is CLOSED as an over-count — `cc_partial_le_norm` and
 `weight_sum_le_normSq` already exist; see `ShortTime/LowRegSmoothBridge.md`.
 The `C₀` quadratic-factor rider is CLOSED by this v3 re-split.
+
+## 2026-08-07: arbitrary fixed background
+
+The per-index producer now accepts a separately chosen fixed DeTurck background:
+
+* private `a1Arm0Bg` consumes `c0JetTowerQBg g g_bg`;
+* private `a1Arm1Bg` consumes `c1JetTowerQBg g g_bg`;
+* public `a1PerIdxJetBg` and `a1PerIdxLinBg` assemble the exact
+  `lowBaseData g g_bg` first-order arm;
+* `a1PerIdxJet` and `a1PerIdxLin` remain diagonal-background compatibility
+  wrappers, with their original public statements unchanged.
+
+No estimate or order window was weakened: only the two coefficient-tower
+producers and the `lowBaseData` background parameter changed. The focused
+check passed without file-local warnings, and the targeted module refresh
+passed. No new `sorry`, axiom, or heartbeat override was introduced.
+
+Progress accounting: this arbitrary-background per-index A1 brick is 100%.
+The fixed-background mass chain is still only about 25%, because the ladder,
+rung/gate, projected-path/Fatou, and high-rung mass consumers remain. The
+route-(c) background endpoint lane is about 50%; `ricci_flow_unif_existence`
+itself remains 0% until its inherited `sorry` is replaced (dedicated uniform
+existence machinery remains about 80%; whole HCG compactness remains about 3%).
