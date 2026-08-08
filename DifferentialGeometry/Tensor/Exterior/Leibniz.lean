@@ -470,7 +470,7 @@ private lemma triv_samePoint (m : ℕ) (x : M)
     (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ
           (Bundle.Trivial M ℝ)) x ⟨x, L⟩).2 = L := by
-  rw [altTriv_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
+  rw [continuousAlternatingMap_trivializationAt_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
   have hid : (trivializationAt EM (TangentSpace IM) x).symmL ℝ x =
       ContinuousLinearMap.id ℝ EM := by
     apply ContinuousLinearMap.ext
@@ -498,7 +498,7 @@ private lemma symmL_id (m : ℕ) (x : M)
     change L = (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
       (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ
         (Bundle.Trivial M ℝ)) x ⟨x, L⟩).2
-    rw [altTriv_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
+    rw [continuousAlternatingMap_trivializationAt_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
     change L = L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x).symmL ℝ x)
     rw [show (trivializationAt EM (TangentSpace IM) x).symmL ℝ x = ContinuousLinearMap.id ℝ EM from by
       apply ContinuousLinearMap.ext
@@ -598,11 +598,11 @@ theorem exteriorDerivative_wedge [BoundarylessManifold IM M]
         (trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
           (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
             (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, β ((extChartAt IM x).symm y)⟩).2
-    rw [altTriv_apply (m := k + l) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
+    rw [continuousAlternatingMap_trivializationAt_apply (m := k + l) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
         (L := α ((extChartAt IM x).symm y) ∧[ℝ] β ((extChartAt IM x).symm y)),
-      altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
+      continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
         (L := α ((extChartAt IM x).symm y)),
-      altTriv_apply (m := l) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
+      continuousAlternatingMap_trivializationAt_apply (m := l) (IM := IM) (M := M) (x₀ := x) (x := (extChartAt IM x).symm y)
         (L := β ((extChartAt IM x).symm y))]
     exact wedge_product_compContinuousLinearMap (E := TangentSpace IM ((extChartAt IM x).symm y))
       (E' := EM) (g := α ((extChartAt IM x).symm y)) (h := β ((extChartAt IM x).symm y))

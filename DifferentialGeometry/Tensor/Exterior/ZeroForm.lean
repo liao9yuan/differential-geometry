@@ -51,7 +51,7 @@ noncomputable def ofFunction (f : M → ℝ) (hf : ContMDiff IM 𝓘(ℝ, ℝ) �
           (Bundle.Trivial M ℝ)) x₀
         ⟨x, constOfIsEmpty ℝ (TangentSpace IM x) (Fin 0) (f x)⟩).2 =
         constOfIsEmpty ℝ EM (Fin 0) (f x)
-      rw [DifferentialForm.altTriv_apply (m := 0) (IM := IM) (M := M) (x₀ := x₀) (x := x)
+      rw [continuousAlternatingMap_trivializationAt_apply (m := 0) (IM := IM) (M := M) (x₀ := x₀) (x := x)
         (L := constOfIsEmpty ℝ (TangentSpace IM x) (Fin 0) (f x))]
       exact (DifferentialGeometry.DifferentialForm.constOfIsEmpty_compContinuousLinearMap
         (E := TangentSpace IM x) (E' := EM) (y := f x)
@@ -101,7 +101,7 @@ theorem contMDiff_toFunction (α : DifferentialForm IM M 0) :
       (trivializationAt (EM [⋀^Fin 0]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin 0) EM (TangentSpace IM) ℝ
           (Bundle.Trivial M ℝ)) x₀ ⟨x, α x⟩).2 (0 : Fin 0 → EM)
-    rw [DifferentialForm.altTriv_apply (m := 0) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := α x)]
+    rw [continuousAlternatingMap_trivializationAt_apply (m := 0) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := α x)]
     change (α x).toFun (0 : Fin 0 → TangentSpace IM x) =
       (α x).toFun (((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) ∘ (0 : Fin 0 → EM))
     apply congrArg (α x).toFun
@@ -178,7 +178,7 @@ private theorem exteriorDerivativeAt_ofFunction_apply [BoundarylessManifold IM M
         constOfIsEmpty ℝ (TangentSpace IM ((extChartAt IM x).symm y)) (Fin 0)
           (f ((extChartAt IM x).symm y))⟩).2 =
       constOfIsEmpty ℝ EM (Fin 0) (f ((extChartAt IM x).symm y))
-    rw [DifferentialForm.altTriv_apply (m := 0) (IM := IM) (M := M) (x₀ := x)
+    rw [continuousAlternatingMap_trivializationAt_apply (m := 0) (IM := IM) (M := M) (x₀ := x)
       (x := (extChartAt IM x).symm y)
       (L := constOfIsEmpty ℝ (TangentSpace IM ((extChartAt IM x).symm y)) (Fin 0)
         (f ((extChartAt IM x).symm y)))]
@@ -211,7 +211,7 @@ private theorem exteriorDerivativeAt_ofFunction_apply [BoundarylessManifold IM M
       (mem_baseSet_trivializationAt EM (TangentSpace IM) x) v).symm
   have hfwd : (e₁' ⟨x, exteriorDerivativeAt (ofFunction f hf) x⟩).2 =
       (exteriorDerivativeAt (ofFunction f hf) x).compContinuousLinearMap (e₁.symmL ℝ x) := by
-    exact DifferentialForm.altTriv_apply (m := 1) (IM := IM) (M := M) (x₀ := x) (x := x)
+    exact continuousAlternatingMap_trivializationAt_apply (m := 1) (IM := IM) (M := M) (x₀ := x) (x := x)
       (L := exteriorDerivativeAt (ofFunction f hf) x)
   have hmain : (exteriorDerivativeAt (ofFunction f hf) x).toFun (fun _ : Fin 1 => v) =
       fderiv ℝ (fun y : EM => f ((extChartAt IM x).symm y)) ((extChartAt IM x) x)

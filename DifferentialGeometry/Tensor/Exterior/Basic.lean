@@ -47,8 +47,8 @@ private lemma localRep_eq_pullback {x₀ x z : M}
     (trivializationAt ((EM [⋀^Fin m]→L[ℝ] ℝ)) ((Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ))) x ⟨z, L⟩).2 =
       ((trivializationAt ((EM [⋀^Fin m]→L[ℝ] ℝ)) ((Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ))) x₀ ⟨z, L⟩).2).compContinuousLinearMap
         (tangentCoordChange IM x x₀ z) := by
-  rw [DifferentialGeometry.DifferentialForm.altTriv_apply (m := m) (x₀ := x) (x := z) (L := L),
-    DifferentialGeometry.DifferentialForm.altTriv_apply (m := m) (x₀ := x₀) (x := z) (L := L)]
+  rw [DifferentialGeometry.continuousAlternatingMap_trivializationAt_apply (m := m) (x₀ := x) (x := z) (L := L),
+    DifferentialGeometry.continuousAlternatingMap_trivializationAt_apply (m := m) (x₀ := x₀) (x := z) (L := L)]
   ext v
   change L ((trivializationAt EM (TangentSpace IM) x).symmL ℝ z ∘ v) =
     L (((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ z ∘ tangentCoordChange IM x x₀ z) ∘ v)
@@ -545,11 +545,11 @@ theorem exteriorDerivative_add [BoundarylessManifold IM M] (α β : Differential
         (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
           (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
             (Bundle.Trivial M ℝ)) x ⟨z, β z⟩).2
-    rw [DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+    rw [continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
       (L := α z + β z),
-      DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+      continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
       (L := α z),
-      DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+      continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
       (L := β z)]
     rfl
   rw [hsum, extDeriv_add hα hβ]
@@ -575,9 +575,9 @@ theorem exteriorDerivative_smul [BoundarylessManifold IM M] (c : ℝ) (α : Diff
       c • (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
           (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
             (Bundle.Trivial M ℝ)) x ⟨z, α z⟩).2
-    rw [DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+    rw [continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
       (L := c • α z),
-      DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
+      continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x) (x := z)
       (L := α z)]
     rfl
   rw [hsmul, extDeriv_smul, map_smul]

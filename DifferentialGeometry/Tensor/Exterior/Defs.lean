@@ -16,14 +16,6 @@ variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   (IM : ModelWithCorners ℝ EM HM)
   (M : Type*) [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
 
-abbrev DifferentialForm (k : ℕ) :=
-  ContMDiffSection IM (EM [⋀^Fin k]→L[ℝ] ℝ) ⊤
-    (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ))
-
-namespace DifferentialForm
-
-variable {IM M k}
-
 set_option backward.isDefEq.respectTransparency false in
 @[instance_reducible]
 def seminormedAddCommGroupTangentSpace (x : M) : SeminormedAddCommGroup (TangentSpace IM x) :=
@@ -44,6 +36,26 @@ def normedSpaceTangentSpace (x : M) : NormedSpace ℝ (TangentSpace IM x) :=
   inferInstanceAs (NormedSpace ℝ EM)
 
 attribute [local instance] normedSpaceTangentSpace
+
+lemma continuousAlternatingMap_trivializationAt_apply (m : ℕ) (x₀ x : M)
+    (L : Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) :
+    (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
+      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀ ⟨x, L⟩).2 =
+      L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) := by
+  change (Pretrivialization.continuousAlternatingMap ℝ (Fin m)
+      (trivializationAt EM (TangentSpace IM) x₀) (trivializationAt ℝ (Bundle.Trivial M ℝ) x₀)
+      ⟨x, L⟩).2 = L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)
+  rw [Pretrivialization.continuousAlternatingMap_apply]
+  ext v
+  simp
+
+abbrev DifferentialForm (k : ℕ) :=
+  ContMDiffSection IM (EM [⋀^Fin k]→L[ℝ] ℝ) ⊤
+    (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ))
+
+namespace DifferentialForm
+
+variable {IM M k}
 
 private lemma contMDiff_add_section {s t : (x : M) →
     Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x}
@@ -176,18 +188,6 @@ instance instModule : Module ℝ (DifferentialForm IM M k) :=
     mul_smul := by intro c d a; ext x; simp [mul_smul]
     one_smul := by intro a; ext x; simp }
 
-lemma altTriv_apply (m : ℕ) (x₀ x : M)
-    (L : Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) :
-    (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
-      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀ ⟨x, L⟩).2 =
-      L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) := by
-  change (Pretrivialization.continuousAlternatingMap ℝ (Fin m)
-      (trivializationAt EM (TangentSpace IM) x₀) (trivializationAt ℝ (Bundle.Trivial M ℝ) x₀)
-      ⟨x, L⟩).2 = L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)
-  rw [Pretrivialization.continuousAlternatingMap_apply]
-  ext v
-  simp
-
 noncomputable def wedge {k l : ℕ} (α : DifferentialForm IM M k)
     (β : DifferentialForm IM M l) : DifferentialForm IM M (k + l) :=
   ⟨fun x => ContinuousAlternatingMap.wedge_product (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ), by
@@ -243,10 +243,10 @@ noncomputable def wedge {k l : ℕ} (α : DifferentialForm IM M k)
             ((trivializationAt (EM [⋀^Fin l]→L[ℝ] ℝ)
               (Bundle.continuousAlternatingMap ℝ (Fin l) EM (TangentSpace IM) ℝ
                 (Bundle.Trivial M ℝ)) x₀) ⟨x, β x⟩).2
-        rw [altTriv_apply (m := k + l) (IM := IM) (M := M) (x₀ := x₀) (x := x)
+        rw [continuousAlternatingMap_trivializationAt_apply (m := k + l) (IM := IM) (M := M) (x₀ := x₀) (x := x)
           (L := ContinuousAlternatingMap.wedge_product (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ)),
-          altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := α x),
-          altTriv_apply (m := l) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := β x)]
+          continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := α x),
+          continuousAlternatingMap_trivializationAt_apply (m := l) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := β x)]
         rw [show W ((α x).compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x))
               ((β x).compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)) =
               ContinuousAlternatingMap.wedge_product ((α x).compContinuousLinearMap
@@ -315,9 +315,9 @@ noncomputable def reindex {k l : ℕ} (e : Fin k ≃ Fin l) (α : DifferentialFo
           (domDomCongrL e) ((trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
             (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
               (Bundle.Trivial M ℝ)) x₀ ⟨x, α x⟩).2)
-        rw [altTriv_apply (m := l) (IM := IM) (M := M) (x₀ := x₀) (x := x)
+        rw [continuousAlternatingMap_trivializationAt_apply (m := l) (IM := IM) (M := M) (x₀ := x₀) (x := x)
           (L := ContinuousAlternatingMap.domDomCongr e (α x)),
-          altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := α x)]
+          continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x) (L := α x)]
         change (ContinuousAlternatingMap.domDomCongr e (α x)).compContinuousLinearMap
             ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) =
           ContinuousAlternatingMap.domDomCongr e ((α x).compContinuousLinearMap

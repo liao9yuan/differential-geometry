@@ -5,6 +5,7 @@
 
 
 import DifferentialGeometry.Tensor.Multilinear.Comp
+import DifferentialGeometry.Analysis.Calculus.AnalyticTransfer
 import DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff
 import Mathlib.Analysis.Normed.Module.Alternating.Basic
 import Mathlib.Analysis.Calculus.ContDiff.CPolynomial

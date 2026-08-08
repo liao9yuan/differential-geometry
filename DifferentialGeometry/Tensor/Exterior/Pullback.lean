@@ -34,9 +34,9 @@ private lemma pullback_localRep_eq {f : M → N} (η : DifferentialForm IN N k) 
         (Bundle.continuousAlternatingMap ℝ (Fin k) EN (TangentSpace IN) ℝ
           (Bundle.Trivial N ℝ)) (f x₀) ⟨f x, η (f x)⟩).2).compContinuousLinearMap
           (inTangentCoordinates IM IN id f (fun x : M => mfderiv IM IN f x) x₀ x) := by
-  rw [DifferentialForm.altTriv_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x)
+  rw [continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x)
       (L := (η (f x)).compContinuousLinearMap (mfderiv IM IN f x)),
-    DifferentialForm.altTriv_apply (m := k) (IM := IN) (M := N) (x₀ := f x₀) (x := f x)
+    continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IN) (M := N) (x₀ := f x₀) (x := f x)
       (L := η (f x))]
   rw [ContinuousAlternatingMap.compContinuousLinearMap_compContinuousLinearMap,
     ContinuousAlternatingMap.compContinuousLinearMap_compContinuousLinearMap]
@@ -358,7 +358,7 @@ private lemma triv_samePoint_fiber_eq_id (m : ℕ) (x : M)
     (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ
           (Bundle.Trivial M ℝ)) x ⟨x, L⟩).2 = L := by
-  rw [DifferentialForm.altTriv_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
+  rw [continuousAlternatingMap_trivializationAt_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
   have hid : (trivializationAt EM (TangentSpace IM) x).symmL ℝ x =
       ContinuousLinearMap.id ℝ EM := by
     apply ContinuousLinearMap.ext
