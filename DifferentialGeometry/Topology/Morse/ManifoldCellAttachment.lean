@@ -3561,6 +3561,16 @@ theorem isOpen_morseBeltCellSet {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     (isOpen_lt hnorm continuous_const).preimage (continuous_modelHandleMap hk ε r)
   exact hpre
 
+noncomputable def morseBeltOpenSet {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    Set (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)) :=
+  (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) '' morseBeltLowerSet hk c ε data ∪
+    (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)) ''
+      {d : StandardHandle k (m + 1 - k) | morseNorm (m + 1) (modelHandleMap hk ε r d) < data.R}
+
 noncomputable def morseBeltMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
