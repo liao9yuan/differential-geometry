@@ -444,6 +444,349 @@ theorem modelModifiedUnstretchMap_mem_modified {n k : ℕ} (hk : k ≤ n) (c ε 
     exact huleD)
 
 
+
+theorem modifiedNormalForm_eq_iff {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ) (y : MorseModel n) :
+    modifiedNormalForm hk c ε δ y = c - ε ↔
+      ‖posPart hk y‖ ^ 2 = ‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε := by
+  rw [modifiedNormalForm_eq_sub_dip]
+  rw [morseNormalForm_split]
+  dsimp [modelModifiedDip]
+  constructor <;> intro h <;> nlinarith
+
+theorem modifiedNormalForm_lt_iff {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ) (y : MorseModel n) :
+    modifiedNormalForm hk c ε δ y < c - ε ↔
+      ‖posPart hk y‖ ^ 2 < ‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε := by
+  rw [modifiedNormalForm_eq_sub_dip]
+  rw [morseNormalForm_split]
+  dsimp [modelModifiedDip]
+  constructor <;> intro h <;> nlinarith
+
+theorem modelModifiedFiberDenom_root_pos {ε δ r s w2 : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ≠ 0) (hs : 0 ≤ s) (hw : 0 ≤ w2) :
+    0 < s + 2 * modelModifiedFiberDip ε δ s (modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw)
+      - 2 * ε := by
+  have hroot_nonneg := modelModifiedFiberRoot_nonneg hε hδ hr hs hw
+  by_cases hu : modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw = 0
+  · rw [hu]
+    have hg0 : modGammaSqrt δ 0 = 1 := by
+      dsimp [modGammaSqrt]
+      have hz : Real.sqrt (0 : ℝ) = 0 := by simp
+      rw [hz]
+      exact modGamma_one hδ (le_of_lt (half_pos hδ))
+    have hmain : 0 < s + 2 * modMu ε s - 2 * ε := by
+      by_cases hs2 : s ≤ 2 * ε
+      · have hmu : modMu ε s = 3 / 2 * ε := modMu_const hε hs2
+        rw [hmu]
+        nlinarith [hs]
+      · have hgt : 2 * ε < s := lt_of_not_ge hs2
+        have hmu : 0 ≤ modMu ε s := modMu_nonneg (le_of_lt hε)
+        nlinarith [hmu]
+    dsimp [modelModifiedFiberDip]
+    rw [hg0]
+    nlinarith [hmain]
+  · have hpos : 0 < modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw :=
+      lt_of_le_of_ne hroot_nonneg (Ne.symm hu)
+    have hroot' := modelModifiedFiberRoot_eq hε hδ hr hs hw
+    have hsr : 0 < s + r ^ 2 := by
+      have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+      nlinarith [hs, hr2]
+    have hden_nonneg : 0 ≤ s + 2 * modelModifiedFiberDip ε δ s (modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw) - 2 * ε :=
+      modelModifiedFiberDenom_root_nonneg hε hδ hr hs hw
+    have hw2pos : 0 < w2 := by
+      by_contra hw0
+      have hw2le : w2 ≤ 0 := le_of_not_gt hw0
+      have hz : w2 * (s + 2 * modelModifiedFiberDip ε δ s (modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw) - 2 * ε) = 0 := by
+        have hmul : w2 * (s + 2 * modelModifiedFiberDip ε δ s (modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw) - 2 * ε) ≤ 0 := by
+          exact mul_nonpos_of_nonpos_of_nonneg hw2le hden_nonneg
+        have hge : 0 ≤ w2 * (s + 2 * modelModifiedFiberDip ε δ s (modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw) - 2 * ε) := by
+          exact mul_nonneg hw hden_nonneg
+        exact le_antisymm hmul hge
+      have hz' : modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw * (s + r ^ 2) = 0 := by
+        rw [hroot']
+        exact hz
+      have hz'' : modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw = 0 := by
+        exact (mul_eq_zero.mp hz').resolve_right (ne_of_gt hsr)
+      exact hu hz''
+    have hden : 0 < s + 2 * modelModifiedFiberDip ε δ s (modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw) - 2 * ε := by
+      have heq : modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw * (s + r ^ 2) =
+          w2 * (s + 2 * modelModifiedFiberDip ε δ s (modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw) - 2 * ε) := hroot'
+      have hmul : 0 < modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw * (s + r ^ 2) :=
+        mul_pos hpos hsr
+      rw [heq] at hmul
+      exact (pos_of_mul_pos_right hmul (le_of_lt hw2pos))
+    exact hden
+
+theorem modelModifiedUnstretchMap_boundary {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0)
+    {y : MorseModel n} (hy : morseNormalForm hk c y = c + r ^ 2 / 2) :
+    modifiedNormalForm hk c ε δ (modelModifiedUnstretchMap hk ε r δ hε hδ hr y) = c - ε := by
+  set s : ℝ := ‖negPart hk y‖ ^ 2 with hs_def
+  set w2 : ℝ := ‖posPart hk y‖ ^ 2 with hw2_def
+  set u : ℝ := modelModifiedFiberRoot ε δ r hε hδ hr s w2 (by rw [hs_def]; exact sq_nonneg _)
+    (by rw [hw2_def]; exact sq_nonneg _) with hu_def
+  set D : ℝ := s + 2 * modelModifiedFiberDip ε δ s u - 2 * ε with hD_def
+  have hsr : 0 < s + r ^ 2 := by
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    rw [hs_def]
+    nlinarith [hr2]
+  have hroot' : u * (s + r ^ 2) = w2 * D := by
+    rw [hu_def, hD_def]
+    simpa using (modelModifiedFiberRoot_eq hε hδ hr (by rw [hs_def]; exact sq_nonneg _)
+      (by rw [hw2_def]; exact sq_nonneg _))
+  have hw2eq : w2 = s + r ^ 2 := by
+    rw [hs_def, hw2_def]
+    rw [morseNormalForm_split] at hy
+    nlinarith
+  have hEqD : u = D := by
+    have hmul : u * (s + r ^ 2) = D * (s + r ^ 2) := by
+      rw [hroot', hw2eq]
+      ring
+    exact (mul_right_cancel₀ (ne_of_gt hsr)) hmul
+  have hsq' : ‖posPart hk (modelModifiedUnstretchMap hk ε r δ hε hδ hr y)‖ ^ 2 = u := by
+    rw [modelModifiedUnstretchMap_posPart_norm_sq]
+    have hdiv : w2 * D / (s + r ^ 2) = u := by
+      rw [← hroot']
+      field_simp [ne_of_gt hsr]
+    simpa [hs_def, hw2_def, hD_def, hu_def] using hdiv
+  exact (modifiedNormalForm_eq_iff hk c ε δ (modelModifiedUnstretchMap hk ε r δ hε hδ hr y)).2 (by
+    rw [modelModifiedDip_eq_fiber]
+    rw [modelModifiedUnstretchMap_negPart]
+    rw [hsq']
+    rw [← hs_def]
+    exact hEqD)
+
+theorem modelModifiedUnstretchMap_strict {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0)
+    {y : MorseModel n} (hy : morseNormalForm hk c y < c + r ^ 2 / 2) :
+    modifiedNormalForm hk c ε δ (modelModifiedUnstretchMap hk ε r δ hε hδ hr y) < c - ε := by
+  set s : ℝ := ‖negPart hk y‖ ^ 2 with hs_def
+  set w2 : ℝ := ‖posPart hk y‖ ^ 2 with hw2_def
+  set u : ℝ := modelModifiedFiberRoot ε δ r hε hδ hr s w2 (by rw [hs_def]; exact sq_nonneg _)
+    (by rw [hw2_def]; exact sq_nonneg _) with hu_def
+  set D : ℝ := s + 2 * modelModifiedFiberDip ε δ s u - 2 * ε with hD_def
+  have hsr : 0 < s + r ^ 2 := by
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    rw [hs_def]
+    nlinarith [hr2]
+  have hroot' : u * (s + r ^ 2) = w2 * D := by
+    rw [hu_def, hD_def]
+    simpa using (modelModifiedFiberRoot_eq hε hδ hr (by rw [hs_def]; exact sq_nonneg _)
+      (by rw [hw2_def]; exact sq_nonneg _))
+  have hw2lt : w2 < s + r ^ 2 := by
+    rw [hs_def, hw2_def]
+    rw [morseNormalForm_split] at hy
+    nlinarith
+  have hDpos : 0 < D := by
+    rw [hD_def]
+    simpa using (modelModifiedFiberDenom_root_pos hε hδ hr (by rw [hs_def]; exact sq_nonneg _)
+      (by rw [hw2_def]; exact sq_nonneg _))
+  have hltD : u < D := by
+    have hmul : u * (s + r ^ 2) < D * (s + r ^ 2) := by
+      rw [hroot']
+      calc
+        w2 * D < (s + r ^ 2) * D := mul_lt_mul_of_pos_right hw2lt hDpos
+        _ = D * (s + r ^ 2) := by ring
+    exact (mul_lt_mul_iff_of_pos_right hsr).mp hmul
+  have hsq' : ‖posPart hk (modelModifiedUnstretchMap hk ε r δ hε hδ hr y)‖ ^ 2 = u := by
+    rw [modelModifiedUnstretchMap_posPart_norm_sq]
+    have hdiv : w2 * D / (s + r ^ 2) = u := by
+      rw [← hroot']
+      field_simp [ne_of_gt hsr]
+    simpa [hs_def, hw2_def, hD_def, hu_def] using hdiv
+  exact (modifiedNormalForm_lt_iff hk c ε δ (modelModifiedUnstretchMap hk ε r δ hε hδ hr y)).2 (by
+    rw [modelModifiedDip_eq_fiber]
+    rw [modelModifiedUnstretchMap_negPart]
+    rw [hsq']
+    rw [← hs_def]
+    exact hltD)
+
+
+
+
+theorem sqrt_div_mul_sqrt_rev {a b : ℝ} (ha : 0 < a) (hb : 0 < b) :
+    Real.sqrt (a / b) * Real.sqrt (b / a) = 1 := by
+  have h1 : 0 ≤ a / b := div_nonneg (le_of_lt ha) (le_of_lt hb)
+  rw [← Real.sqrt_mul h1]
+  have hprod : (a / b) * (b / a) = 1 := by field_simp [ne_of_gt ha, ne_of_gt hb]
+  rw [hprod, Real.sqrt_one]
+
+theorem modelModifiedUnstretchFactor_of_root {ε δ r s w2 u : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ≠ 0) (hs : 0 ≤ s) (hw2 : 0 ≤ w2)
+    (hroot : modelModifiedFiberRoot ε δ r hε hδ hr s w2 hs hw2 = u) :
+    modelModifiedUnstretchFactor ε δ r hε hδ hr s w2 hs hw2 =
+      Real.sqrt ((s + 2 * modelModifiedFiberDip ε δ s u - 2 * ε) / (s + r ^ 2)) := by
+  dsimp [modelModifiedUnstretchFactor]
+  rw [hroot]
+
+theorem modelModifiedUnstretchMap_stretchMap {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0)
+    {y : MorseModel n} (hy : modifiedNormalForm hk c ε δ y ≤ c - ε) :
+    modelModifiedUnstretchMap hk ε r δ hε hδ hr (modelModifiedStretchMap hk ε r δ y) = y := by
+  let z : MorseModel n := modelModifiedStretchMap hk ε r δ y
+  have hzneg : negPart hk z = negPart hk y := modelModifiedStretchMap_negPart hk ε r δ y
+  have hd : 0 < ‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε :=
+    modelModifiedDip_sublevel_denom_pos hk c ε δ hε hδ hy
+  have hsr : 0 < ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    nlinarith [hr2, sq_nonneg ‖negPart hk y‖]
+  have hdeq : ‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε =
+      ‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+        - 2 * ε := by
+    rw [modelModifiedDip_eq_fiber]
+  have hroot : modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2)
+      (‖posPart hk z‖ ^ 2) (sq_nonneg _) (sq_nonneg _) = ‖posPart hk y‖ ^ 2 := by
+    have hsqz := modelModifiedStretchMap_posPart_norm_sq hk c ε r δ hε hδ y hy
+    have hrootEq2 : ‖posPart hk y‖ ^ 2 * (‖negPart hk y‖ ^ 2 + r ^ 2) =
+        ‖posPart hk z‖ ^ 2 * (‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ
+          (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2) - 2 * ε) := by
+      calc
+        ‖posPart hk y‖ ^ 2 * (‖negPart hk y‖ ^ 2 + r ^ 2)
+            = (‖posPart hk y‖ ^ 2 * (‖negPart hk y‖ ^ 2 + r ^ 2) /
+                (‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε)) *
+                (‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε) := by
+              field_simp [ne_of_gt hd]
+        _ = ‖posPart hk z‖ ^ 2 * (‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε) := by
+              rw [hsqz]
+        _ = ‖posPart hk z‖ ^ 2 * (‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ
+              (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2) - 2 * ε) := by
+              rw [hdeq]
+    exact modelModifiedFiberRoot_unique ε δ r (‖negPart hk y‖ ^ 2) (‖posPart hk z‖ ^ 2)
+      hε hδ hr (sq_nonneg _) (sq_nonneg _)
+      (modelModifiedFiberRoot_nonneg hε hδ hr (sq_nonneg _) (sq_nonneg _)) (sq_nonneg _)
+      (modelModifiedFiberRoot_eq (ε := ε) (δ := δ) (r := r) (s := ‖negPart hk y‖ ^ 2)
+        (w2 := ‖posPart hk z‖ ^ 2) hε hδ hr (sq_nonneg _) (sq_nonneg _))
+      hrootEq2
+  calc
+    modelModifiedUnstretchMap hk ε r δ hε hδ hr z
+        = recombine hk (negPart hk (modelModifiedUnstretchMap hk ε r δ hε hδ hr z))
+            (posPart hk (modelModifiedUnstretchMap hk ε r δ hε hδ hr z)) :=
+      (recombine_decompose hk (modelModifiedUnstretchMap hk ε r δ hε hδ hr z)).symm
+    _ = recombine hk (negPart hk y) (posPart hk y) := by
+      congr 1
+      · rw [modelModifiedUnstretchMap_negPart, hzneg]
+      · rw [modelModifiedUnstretchMap_posPart]
+        rw [hzneg]
+        have hfactor : modelModifiedUnstretchFactor ε δ r hε hδ hr (‖negPart hk y‖ ^ 2)
+            (‖posPart hk z‖ ^ 2) (sq_nonneg _) (sq_nonneg _) =
+            Real.sqrt ((‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ
+              (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2) - 2 * ε) / (‖negPart hk y‖ ^ 2 + r ^ 2)) := by
+          exact modelModifiedUnstretchFactor_of_root hε hδ hr (sq_nonneg _) (sq_nonneg _) hroot
+        rw [hfactor]
+        rw [modelModifiedStretchMap_posPart]
+        rw [hdeq]
+        rw [smul_smul]
+        have hDpos' : 0 < ‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ
+            (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2) - 2 * ε := by
+          simpa [hdeq] using hd
+        have hscalar : Real.sqrt ((‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ
+              (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2) - 2 * ε) / (‖negPart hk y‖ ^ 2 + r ^ 2)) *
+            Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) / (‖negPart hk y‖ ^ 2 + 2 *
+              modelModifiedFiberDip ε δ (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2) - 2 * ε)) = 1 :=
+          sqrt_div_mul_sqrt_rev hDpos' hsr
+        calc
+          (Real.sqrt ((‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ (‖negPart hk y‖ ^ 2)
+                (‖posPart hk y‖ ^ 2) - 2 * ε) / (‖negPart hk y‖ ^ 2 + r ^ 2)) *
+            Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) / (‖negPart hk y‖ ^ 2 + 2 *
+                modelModifiedFiberDip ε δ (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2) - 2 * ε))) •
+              posPart hk y
+              = (1 : ℝ) • posPart hk y := congrArg (fun t : ℝ => t • posPart hk y) hscalar
+          _ = posPart hk y := by simp
+    _ = y := recombine_decompose hk y
+
+
+theorem modelModifiedStretchMap_unstretchMap {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0)
+    (y : MorseModel n) :
+    modelModifiedStretchMap hk ε r δ (modelModifiedUnstretchMap hk ε r δ hε hδ hr y) = y := by
+  let z : MorseModel n := modelModifiedUnstretchMap hk ε r δ hε hδ hr y
+  have hzneg : negPart hk z = negPart hk y := modelModifiedUnstretchMap_negPart hk ε r δ hε hδ hr y
+  have hsr : 0 < ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    nlinarith [hr2, sq_nonneg ‖negPart hk y‖]
+  have hroot' : modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+        (sq_nonneg _) (sq_nonneg _) * (‖negPart hk y‖ ^ 2 + r ^ 2) =
+      ‖posPart hk y‖ ^ 2 * (‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ
+        (‖negPart hk y‖ ^ 2)
+        (modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+          (sq_nonneg _) (sq_nonneg _)) - 2 * ε) :=
+    modelModifiedFiberRoot_eq (ε := ε) (δ := δ) (r := r) (s := ‖negPart hk y‖ ^ 2)
+      (w2 := ‖posPart hk y‖ ^ 2) hε hδ hr (sq_nonneg ‖negPart hk y‖)
+      (sq_nonneg ‖posPart hk y‖)
+  have hDpos : 0 < ‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ (‖negPart hk y‖ ^ 2)
+      (modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+        (sq_nonneg _) (sq_nonneg _)) - 2 * ε :=
+    modelModifiedFiberDenom_root_pos hε hδ hr (sq_nonneg ‖negPart hk y‖)
+      (sq_nonneg ‖posPart hk y‖)
+  have hsqz : ‖posPart hk z‖ ^ 2 =
+      modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+        (sq_nonneg _) (sq_nonneg _) := by
+    dsimp [z]
+    rw [modelModifiedUnstretchMap_posPart_norm_sq]
+    have hdiv : ‖posPart hk y‖ ^ 2 * (‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ
+          (‖negPart hk y‖ ^ 2)
+          (modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+            (sq_nonneg _) (sq_nonneg _)) - 2 * ε) /
+          (‖negPart hk y‖ ^ 2 + r ^ 2) =
+        modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+          (sq_nonneg _) (sq_nonneg _) := by
+      rw [← hroot']
+      field_simp [ne_of_gt hsr]
+    exact hdiv
+  have hDpos : 0 < ‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ (‖negPart hk y‖ ^ 2)
+      (modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+        (sq_nonneg _) (sq_nonneg _)) - 2 * ε :=
+    modelModifiedFiberDenom_root_pos hε hδ hr (sq_nonneg ‖negPart hk y‖)
+      (sq_nonneg ‖posPart hk y‖)
+  have hsqz : ‖posPart hk z‖ ^ 2 =
+      modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+        (sq_nonneg _) (sq_nonneg _) := by
+    dsimp [z]
+    rw [modelModifiedUnstretchMap_posPart_norm_sq]
+    have hdiv : ‖posPart hk y‖ ^ 2 * (‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ
+          (‖negPart hk y‖ ^ 2)
+          (modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+            (sq_nonneg _) (sq_nonneg _)) - 2 * ε) /
+          (‖negPart hk y‖ ^ 2 + r ^ 2) =
+        modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+          (sq_nonneg _) (sq_nonneg _) := by
+      rw [← hroot']
+      field_simp [ne_of_gt hsr]
+    exact hdiv
+  calc
+    modelModifiedStretchMap hk ε r δ z
+        = recombine hk (negPart hk (modelModifiedStretchMap hk ε r δ z))
+            (posPart hk (modelModifiedStretchMap hk ε r δ z)) :=
+      (recombine_decompose hk (modelModifiedStretchMap hk ε r δ z)).symm
+    _ = recombine hk (negPart hk y) (posPart hk y) := by
+      congr 1
+      · rw [modelModifiedStretchMap_negPart, hzneg]
+      · rw [modelModifiedStretchMap_posPart]
+        rw [modelModifiedUnstretchMap_posPart]
+        rw [hzneg]
+        rw [modelModifiedDip_eq_fiber]
+        rw [hzneg]
+        rw [hsqz]
+        rw [smul_smul]
+        dsimp [modelModifiedUnstretchFactor]
+        set D : ℝ := ‖negPart hk y‖ ^ 2 + 2 * modelModifiedFiberDip ε δ (‖negPart hk y‖ ^ 2)
+            (modelModifiedFiberRoot ε δ r hε hδ hr (‖negPart hk y‖ ^ 2) (‖posPart hk y‖ ^ 2)
+              (sq_nonneg _) (sq_nonneg _)) - 2 * ε with hD_def
+        have hDpos' : 0 < D := by
+          rw [hD_def]
+          exact hDpos
+        have hscalar2 : Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) / D) *
+            Real.sqrt (D / (‖negPart hk y‖ ^ 2 + r ^ 2)) = 1 :=
+          sqrt_div_mul_sqrt_rev hsr hDpos'
+        calc
+          (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) / D) *
+            Real.sqrt (D / (‖negPart hk y‖ ^ 2 + r ^ 2))) • posPart hk y
+              = (1 : ℝ) • posPart hk y := congrArg (fun t : ℝ => t • posPart hk y) hscalar2
+          _ = posPart hk y := by simp
+    _ = y := recombine_decompose hk y
+
+
+
+
 end
 
 end DifferentialGeometry.Topology.Morse.CellAttachment
