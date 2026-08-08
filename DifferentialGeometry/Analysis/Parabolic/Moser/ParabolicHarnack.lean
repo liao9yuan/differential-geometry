@@ -377,6 +377,87 @@ theorem harnack_on_separated_cylinders_of_global_volume_normalization
   exact h t ht x (by rw [hcutoff_target_one x]; norm_num) q hq y
     (by rw [hcutoff_target_one y]; norm_num)
 
+theorem harnack_on_standard_separated_cylinders_of_global_volume_normalization
+    (g : SmoothRiemannianMetric I M)
+    (hdim : 2 < (Module.finrank ℝ E : ℝ))
+    (rho outer averagingCutoff : SmoothScalar g)
+    (C : ℝ) (hC : 0 < C)
+    (hP : HasLocalizedPoincareAtAverage (I := I) (M := M) g
+      outer averagingCutoff C)
+    (u : ℝ → M → ℝ)
+    (hu : ContMDiff ((modelWithCornersSelf ℝ ℝ).prod I)
+      (modelWithCornersSelf ℝ ℝ) ∞
+      (fun z : ℝ × M ↦ u z.1 z.2))
+    (hpos : ∀ t x, 0 < u t x)
+    {A D : ℝ} (hAD : A < D)
+    {B : ℝ} (hB : 0 ≤ B)
+    (hrho : ∀ x : M, 1 ≤ rho.toFun x)
+    (hrhoGrad : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g rho.toFun x)
+          (gradFun (I := I) g rho.toFun x) ≤ B)
+    (houter : ∀ x : M, 1 ≤ outer.toFun x)
+    (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
+    (hcyl : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ∧
+      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
+    (hpde : ∀ t ∈ Icc A D, ∀ x : M,
+      deriv (fun q ↦ u q x) t =
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+    ∀ t ∈ Icc (A + (D - A) / 8) (A + (D - A) / 4), ∀ x : M,
+      ∀ q ∈ Icc (A + 3 * (D - A) / 4) (A + 7 * (D - A) / 8), ∀ y : M,
+        u t x ≤
+          separatedCylinderHarnackFactor (I := I) (M := M)
+              g hdim rho averagingCutoff C (1 / 2)
+                A (A + (D - A) / 8) (A + (D - A) / 4) (A + 3 * (D - A) / 8)
+                ((A + 3 * (D - A) / 8 + (A + 5 * (D - A) / 8)) / 2)
+                (A + 5 * (D - A) / 8) (A + 3 * (D - A) / 4) (A + 7 * (D - A) / 8)
+                (A + 15 * (D - A) / 16) D B 0 (1 / 4) (1 / 2) 1 *
+            u q y := by
+  classical
+  let α : ℝ := A + (D - A) / 8
+  let β : ℝ := A + (D - A) / 4
+  let b : ℝ := A + 3 * (D - A) / 8
+  let c : ℝ := A + 5 * (D - A) / 8
+  let γ : ℝ := A + 3 * (D - A) / 4
+  let δ : ℝ := A + 7 * (D - A) / 8
+  let d : ℝ := A + 15 * (D - A) / 16
+  have hAα : A < α := by
+    dsimp [α]
+    linarith
+  have hαβ : α < β := by
+    dsimp [α, β]
+    linarith
+  have hβb : β < b := by
+    dsimp [β, b]
+    linarith
+  have hbc : b < c := by
+    dsimp [b, c]
+    linarith
+  have hcγ : c < γ := by
+    dsimp [c, γ]
+    linarith
+  have hγδ : γ < δ := by
+    dsimp [γ, δ]
+    linarith
+  have hδd : δ < d := by
+    dsimp [δ, d]
+    linarith
+  have hdD : d < D := by
+    dsimp [d]
+    linarith
+  simpa [α, β, b, c, γ, δ, d] using
+    harnack_on_separated_cylinders_of_global_volume_normalization
+      (I := I) (M := M) g hdim rho outer averagingCutoff C hC hP u hu hpos
+      (A := A) (α := α) (β := β) (b := b) (c := c) (γ := γ) (δ := δ) (d := d) (D := D)
+      (p := (1 / 2 : ℝ)) (lower := (0 : ℝ)) (upper := (1 / 4 : ℝ))
+      (innerLower := (1 / 2 : ℝ)) (innerUpper := (1 : ℝ)) (B := B)
+      hAα hαβ hβb hbc hcγ hγδ hδd hdD
+      (by norm_num : 0 < (1 / 2 : ℝ)) (by norm_num : (1 / 2 : ℝ) < 1)
+      (by norm_num : (0 : ℝ) < (1 / 4 : ℝ))
+      (by norm_num : (1 / 4 : ℝ) ≤ (1 / 2 : ℝ))
+      (by norm_num : (1 / 2 : ℝ) < 1)
+      hrho hrhoGrad hB houter hmass hcyl hpde
+
 end DifferentialGeometry.Analysis.Parabolic.Moser
 
 end
