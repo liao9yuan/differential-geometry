@@ -6,8 +6,9 @@ import Mathlib.Topology.Order.IntermediateValue
 namespace DifferentialGeometry.Topology.Morse.CellAttachment
 
 open Set
+open Filter
 
-open scoped BigOperators
+open scoped BigOperators Topology ContDiff
 
 noncomputable section
 
@@ -957,6 +958,60 @@ theorem contMDiff_modelModifiedStretchMap_sublevel {m k : ℕ} (hk : k ≤ m + 1
     (fun y hy => modelModifiedStretchMap_boundary hk c ε r δ hε hδ hy)
     (fun y hy => modelModifiedStretchMap_strict hk c ε r δ hε hδ (sq_pos_of_ne_zero hr) hy)
     (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+
+
+
+theorem contDiff_modGammaSqrt {δ : ℝ} (hδ : 0 < δ) : ContDiff ℝ (⊤ : ℕ∞) (modGammaSqrt δ) := by
+  let s : Set ℝ := {u | u < δ ^ 2 / 4}
+  let t : Set ℝ := {u | 0 < u}
+  have hconstOn : ContDiffOn ℝ (⊤ : ℕ∞) (modGammaSqrt δ) s := by
+    rintro u hu
+    have hconst : (fun z : ℝ => modGammaSqrt δ z) =ᶠ[nhds u] fun _ => (1 : ℝ) := by
+      filter_upwards [isOpen_lt continuous_id (continuous_const : Continuous fun _ : ℝ => δ ^ 2 / 4) |>.mem_nhds hu] with z hz
+      dsimp [modGammaSqrt]
+      have hz' : Real.sqrt z ≤ δ / 2 := by
+        have hsq : (Real.sqrt z) ^ 2 ≤ (δ / 2) ^ 2 := by
+          have hz2 : z ≤ δ ^ 2 / 4 := le_of_lt hz
+          by_cases hz3 : 0 ≤ z
+          · rw [Real.sq_sqrt hz3]
+            nlinarith
+          · have hsqrt0 : Real.sqrt z = 0 := Real.sqrt_eq_zero_of_nonpos (le_of_not_ge hz3)
+            rw [hsqrt0]
+            simpa using (sq_nonneg (δ / 2))
+        have hnn : 0 ≤ Real.sqrt z := Real.sqrt_nonneg z
+        exact le_of_sq_le_sq hsq (le_of_lt (half_pos hδ))
+      exact modGamma_one hδ hz'
+    exact (ContDiffAt.contDiffWithinAt (n := (⊤ : ℕ∞)) (x := u)
+      (contDiffAt_const.congr_of_eventuallyEq hconst))
+  have hsmOn : ContDiffOn ℝ (⊤ : ℕ∞) (modGammaSqrt δ) t := by
+    rintro u hu
+    have hsq : ContDiffAt ℝ (⊤ : ℕ∞) (fun x : ℝ => Real.sqrt x) u :=
+      (Real.deriv_sqrt_aux (ne_of_gt hu)).2 (⊤ : ℕ∞)
+    have hgamma : ContDiffAt ℝ (⊤ : ℕ∞) (modGamma δ) (Real.sqrt u) :=
+      (contDiff_modGamma (δ := δ)).contDiffAt
+    exact (ContDiffAt.comp u hgamma hsq).contDiffWithinAt
+  have hs : IsOpen s := isOpen_lt continuous_id (continuous_const : Continuous fun _ : ℝ => δ ^ 2 / 4)
+  have ht : IsOpen t := isOpen_lt (continuous_const : Continuous fun _ : ℝ => (0 : ℝ)) continuous_id
+  have hcov : s ∪ t = Set.univ := by
+    ext x
+    constructor <;> intro hx
+    · trivial
+    · by_cases hx' : 0 < x
+      · exact Or.inr hx'
+      · have hle : x ≤ 0 := le_of_not_gt hx'
+        have hmain : x < δ ^ 2 / 4 := by
+          have hδ2 : 0 < δ ^ 2 / 4 := div_pos (sq_pos_of_pos hδ) (by norm_num)
+          linarith
+        exact Or.inl hmain
+  exact contDiff_of_contDiffOn_union_of_isOpen hconstOn hsmOn hcov hs ht
+
+theorem contDiff_modelModifiedFiberDip {ε δ : ℝ} (hδ : 0 < δ) :
+    ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelModifiedFiberDip ε δ p.1 p.2) := by
+  have hmu : ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modMu ε p.1) :=
+    (contDiff_modMu (ε := ε)).comp contDiff_fst
+  have hga : ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modGammaSqrt δ p.2) :=
+    (contDiff_modGammaSqrt hδ).comp contDiff_snd
+  simpa [modelModifiedFiberDip, Function.comp_def] using hmu.mul hga
 
 
 end
