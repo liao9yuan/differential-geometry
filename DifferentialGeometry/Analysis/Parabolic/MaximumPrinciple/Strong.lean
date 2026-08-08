@@ -255,7 +255,7 @@ private theorem strongBarrier_parabolicOperator
       (fun _ : Real => Real.exp (-alpha * R)) (Set.Icc 0 T) t :=
     differentiableWithinAt_const _
   have hsub := parabolic_sub_time_curve_identity (I := I)
-    G T X e (fun _ => Real.exp (-alpha * R)) t ht
+    G T X e (fun _ => Real.exp (-alpha * R)) t
     he_space x he_time hc_time
   have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
     (uniqueDiffOn_Icc hT).uniqueDiffWithinAt ht
@@ -1168,7 +1168,7 @@ theorem scalar_strong_maximum_principle_of_barrier
     rw [hsub]
     linarith [hu_super t ht htpos x]
   have hw_nonneg := strict_barrier_positive_region (I := I)
-    G T hT.le X w hw_cont hw0 hw_time hw_mdiff hw_grad hnegative
+    G T X w hw_cont hw0 hw_time hw_mdiff hw_grad hnegative
     T ⟨hT.le, le_rfl⟩ y
   have hphaseT : strongBarrierPhase rho kappa T T y = rho y := by
     simp [strongBarrierPhase]
@@ -1532,7 +1532,7 @@ theorem scalar_strong_maximum_principle_with_potential_of_barrier
     have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
       (uniqueDiffOn_Icc hT).uniqueDiffWithinAt ht
     have hident := parabolic_exp_rescale_identity (I := I)
-      G T L X u t ht huniq (hu_mdiff t ht htpos) x
+      G T L X u t huniq (hu_mdiff t ht htpos) x
       (hu_grad t ht htpos x) (hu_time t ht htpos x) (hscale_time t)
     have hVu : 0 ≤ (V t x - L) * u t x :=
       mul_nonneg (sub_nonneg.mpr (hV_lower t ht x)) (hu_nonneg t ht x)

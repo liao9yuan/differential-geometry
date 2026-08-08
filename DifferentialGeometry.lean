@@ -2362,6 +2362,7 @@ import DifferentialGeometry.Geometry.Curvature.Realized.CurvatureTensor
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyPair
+import DifferentialGeometry.Geometry.Curvature.Realized.Stationary
 import DifferentialGeometry.Geometry.Curvature.Realized.Operators
 import DifferentialGeometry.Geometry.Curvature.Realized.TimeInterval
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04

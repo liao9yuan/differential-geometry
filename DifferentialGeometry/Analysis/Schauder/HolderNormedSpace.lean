@@ -34,11 +34,6 @@ instance {alpha : NNReal} :
       (fun _ ↦ X → F) where
   coe := boundedHolderSpaceFun
 
-theorem boundedHolderSpaceFun_apply {alpha : NNReal}
-    (f : BoundedHolderSpace (X := X) (F := F) alpha) (x : X) :
-    boundedHolderSpaceFun f x = f x :=
-  rfl
-
 @[simp]
 theorem boundedHolderSpace_zero_apply {alpha : NNReal} (x : X) :
     (0 : BoundedHolderSpace (X := X) (F := F) alpha) x = 0 :=
@@ -271,11 +266,6 @@ instance {k : Nat} {alpha : NNReal} :
       (fun _ ↦ V → F) where
   coe := contDiffHolderSpaceFun
 
-theorem contDiffHolderSpaceFun_apply {k : Nat} {alpha : NNReal}
-    (f : ContDiffHolderSpace (V := V) (F := F) k alpha) (x : V) :
-    contDiffHolderSpaceFun f x = f x :=
-  rfl
-
 @[simp]
 theorem contDiffHolderSpace_zero_apply {k : Nat} {alpha : NNReal} (x : V) :
     (0 : ContDiffHolderSpace (V := V) (F := F) k alpha) x = 0 :=
@@ -453,12 +443,6 @@ instance {alpha : NNReal} :
     CoeFun (ParabolicC2HolderSpace (V := V) (F := F) alpha)
       (fun _ ↦ Real → V → F) where
   coe := parabolicC2HolderSpaceFun
-
-theorem parabolicC2HolderSpaceFun_apply {alpha : NNReal}
-    (u : ParabolicC2HolderSpace (V := V) (F := F) alpha)
-    (t : Real) (x : V) :
-    parabolicC2HolderSpaceFun u t x = u t x :=
-  rfl
 
 @[simp]
 theorem parabolicC2HolderSpace_zero_apply {alpha : NNReal}

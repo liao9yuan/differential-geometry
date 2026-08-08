@@ -712,7 +712,7 @@ private theorem chartParabolicBarrier_parabolicOperator
     differentiableWithinAt_const _
   have hsub := parabolic_sub_time_curve_identity (I := I)
     (fixedMetricFamily (I := I) g) T (fun _ _ => 0) e
-    (fun _ => Real.exp (-alpha * R)) t ht he_space x he_time hc_time
+    (fun _ => Real.exp (-alpha * R)) t he_space x he_time hc_time
   have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
     (uniqueDiffOn_Icc hT).uniqueDiffWithinAt ht
   have hc_deriv : derivWithin (fun _ : Real => Real.exp (-alpha * R))
@@ -1031,7 +1031,7 @@ private theorem fixed_metric_local_positivity
     rw [hsub]
     linarith [hu_super t ht htpos x]
   have hw_nonneg := strict_barrier_positive_region (I := I)
-    (fixedMetricFamily (I := I) g) T hT.le (fun _ _ => 0) w
+    (fixedMetricFamily (I := I) g) T (fun _ _ => 0) w
     hw_cont hw0 hw_time hw_mdiff
     (by simpa using hw_grad) hnegative T ⟨hT.le, le_rfl⟩ y
   have hy_dist : dist (extChartAt I c y) (extChartAt I c c) < Rdist :=

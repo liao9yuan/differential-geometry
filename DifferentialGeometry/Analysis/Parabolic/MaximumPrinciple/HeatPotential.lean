@@ -123,7 +123,7 @@ private theorem heat_pot_supersolution_nonneg_on_strict_subinterval
       rw [heatOperatorWithDrift_zero_drift, heatOperator_eq_laplacianAt]
       linarith [hsol.equation_ge t htreg x]
     rw [show J = (fun s y => Real.exp (-C * s) * u s y) from rfl]
-    rw [parabolic_exp_rescale_identity (I := I) G T' C X u t ht huniq
+    rw [parabolic_exp_rescale_identity (I := I) G T' C X u t huniq
       hu_space x hu_grad hu_time hscale]
     have hu_neg : u t x < 0 :=
       lt_of_mul_lt_mul_left (by simpa [J] using hJneg) (Real.exp_pos (-C * t)).le
@@ -134,7 +134,7 @@ private theorem heat_pot_supersolution_nonneg_on_strict_subinterval
     linarith
   have hJ_nonneg : forall t : Real, t ∈ Set.Icc 0 T' ->
       forall x : M, 0 <= J t x :=
-    strict_barrier_positive_region (I := I) G T' hT' X J hJ_cont hJ0
+    strict_barrier_positive_region (I := I) G T' X J hJ_cont hJ0
       hJ_time hJ_mdiff hJ_grad hnegative
   intro t ht x
   have hprod : 0 <= Real.exp (-C * t) * u t x := by
@@ -286,7 +286,7 @@ private theorem heat_pot_exp_rescale_barrier_operator_nonneg
           derivWithin (fun _s : Real => c) (Set.Icc 0 T') t := by
     simpa only [w] using
       parabolic_sub_time_curve_identity (I := I) G T' X z
-        (fun _s : Real => c) t ht hz_space x hz_time
+        (fun _s : Real => c) t hz_space x hz_time
         (differentiableWithinAt_const c)
   have hconst :
       derivWithin (fun _s : Real => c) (Set.Icc 0 T') t = 0 :=
@@ -306,7 +306,7 @@ private theorem heat_pot_exp_rescale_barrier_operator_nonneg
         Real.exp (C * t) *
           (parabolicOperatorWithDrift (I := I) G T' X u t x + C * u t x) := by
     simpa only [z, neg_neg, neg_mul, sub_neg_eq_add] using
-      parabolic_exp_rescale_identity (I := I) G T' (-C) X u t ht huniq
+      parabolic_exp_rescale_identity (I := I) G T' (-C) X u t huniq
         hu_space x hu_grad hu_time hscale
   have hlow : 0 <= V t x + C := by
     have := neg_le_of_abs_le
@@ -394,7 +394,7 @@ private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
         (I := I) G hT V u hsol C c hV hu_nonneg T' hT'lt t ht htpos x
   have hw_nonneg : forall t : Real, t ∈ Set.Icc 0 T' ->
       forall x : M, 0 <= w t x :=
-    strict_barrier_positive_region (I := I) G T' hT' X w hw_cont hw0
+    strict_barrier_positive_region (I := I) G T' X w hw_cont hw0
       hw_time hw_mdiff hw_grad hnegative
   intro t ht x
   exact sub_nonneg.mp (by simpa only [w, z] using hw_nonneg t ht x)

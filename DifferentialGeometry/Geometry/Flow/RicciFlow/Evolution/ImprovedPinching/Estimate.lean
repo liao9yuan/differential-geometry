@@ -988,7 +988,7 @@ theorem pinchQuot_slab_bound
       ((uniqueDiffOn_Icc hTpos).uniqueDiffWithinAt ht)
       hu_time hu_space hu_grad
   exact DifferentialGeometry.Analysis.Parabolic.scalar_sub_const_positive_region (I := I)
-    (flowG (I := I) S) T hT
+    (flowG (I := I) S) T
     (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
     (pinchQuotient (I := I) S epsilon) C
     hw_cont hw_time hw_mdiff hw_grad hinit hsub hoperator_neg

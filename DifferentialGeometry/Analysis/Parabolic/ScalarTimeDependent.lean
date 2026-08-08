@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.Operators
-import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
+import DifferentialGeometry.Geometry.Curvature.Realized.Stationary
 
 set_option autoImplicit false
 

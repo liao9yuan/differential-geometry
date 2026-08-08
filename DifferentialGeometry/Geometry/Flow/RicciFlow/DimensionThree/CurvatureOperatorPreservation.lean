@@ -63,17 +63,15 @@ theorem ricciUpperBoundSec_at_point
 
 
 
+@[simp]
 theorem ricciUpperBoundSec_apply
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) (v w : TangentSpace I x) :
-    twoTensorSecToFamily (I := I) (M := M) (ricciUpperBoundSec S) t x v w =
+    ((ricciUpperBoundSec S) t x) (vec2 (I := I) v w) =
       (1 / 2) * S.scalar t x * (S.base.metric t).inner x v w -
         S.ricciAt t x (vec2 (I := I) v w) := by
-  change ((ricciUpperBoundSec S) t x) (vec2 (I := I) v w) =
-      (1 / 2) * S.scalar t x * (S.base.metric t).inner x v w -
-        S.ricciAt t x (vec2 (I := I) v w)
   rw [ricciUpperBoundSec_at_point (I := I) S t x]
   calc
     ((1 / 2 * S.scalar t x) • metricTensorField (I := I) (S.base.metric t) x - S.ricci t x)
@@ -110,6 +108,8 @@ theorem ricciUpperBoundSec_symm
   intro t _ht x v w
   have hRic := ricciAt_symm (I := I) S t x v w
   have hg := (S.base.metric t).symm x v w
+  change (ricciUpperBoundSec S) t x (vec2 (I := I) v w) =
+    (ricciUpperBoundSec S) t x (vec2 (I := I) w v)
   rw [ricciUpperBoundSec_apply (I := I) S t x v w,
     ricciUpperBoundSec_apply (I := I) S t x w v, hRic, hg]
 
@@ -382,8 +382,9 @@ private theorem ricciUpperBoundQuadDeriv_coord
         fun s : Real =>
           twoTensorSecToFamily (I := I) (M := M) (ricciUpperBoundSec S) s x v v := by
     funext s
+    change -(pinchSec (I := I) S (1 / 2) s x (vec2 (I := I) v v)) =
+      (ricciUpperBoundSec S) s x (vec2 (I := I) v v)
     rw [ricciUpperBoundSec_apply (I := I) S s x v v]
-    simp only [twoTensorSecToFamily]
     rw [pinchSec_at_trace (I := I) (M := M) S (1 / 2) s x]
     have hsc :
         S.scalar s x =
@@ -939,7 +940,7 @@ private theorem ricciUpperBoundSec_neg_pinch_eval
     (t : Real) (x : M) (v w : TangentSpace I x) :
     twoTensorSecToFamily (I := I) (M := M) (ricciUpperBoundSec S) t x v w =
       -(twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S (1 / 2)) t x v w) := by
-  rw [ricciUpperBoundSec_apply (I := I) S t x v w]
+  rw [twoTensorSecToFamily_apply, ricciUpperBoundSec_apply (I := I) S t x v w]
   simp only [twoTensorSecToFamily]
   rw [pinchSec_at_trace (I := I) (M := M) S (1 / 2) t x]
   have hsc :
@@ -1225,7 +1226,7 @@ theorem metricCurvatureOperatorNonnegative_preserved
       TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
         (twoTensorSecToFamily (I := I) (M := M) (ricciUpperBoundSec S)) 0 := by
     intro x v
-    rw [ricciUpperBoundSec_apply (I := I) S 0 x v v]
+    rw [twoTensorSecToFamily_apply, ricciUpperBoundSec_apply (I := I) S 0 x v v]
     have hb := ricci_upper_bound_of_metricCurvatureOperatorNonnegative (I := I) S (hdim x)
       (t := 0) (x := x) (hinit x) v
     linarith
@@ -1235,6 +1236,6 @@ theorem metricCurvatureOperatorNonnegative_preserved
     (t := t) (x := x) (by
       intro v
       have hTv := hnonneg t ht x v
-      rw [ricciUpperBoundSec_apply (I := I) S t x v v] at hTv
+      rw [twoTensorSecToFamily_apply, ricciUpperBoundSec_apply (I := I) S t x v v] at hTv
       linarith)
 end DifferentialGeometry.PDE.RicciFlow

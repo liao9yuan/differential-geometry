@@ -121,7 +121,7 @@ theorem scalar_curvature_positive_of_nonnegative_initial
   have hnonnegative : ∀ t ∈ Set.Icc 0 T, ∀ x : M,
       0 ≤ S.scalar t x := by
     exact strict_barrier_nonnegative_of_positive_time
-      (I := I) G T hT.le X S.scalar hscalarContinuous hinit
+      (I := I) G T X S.scalar hscalarContinuous hinit
       (fun t ht htpos x => hscalarTime t ht x)
       (fun t ht htpos x => hscalarSpace t ht x)
       (fun t ht htpos x => hscalarGrad t ht x)

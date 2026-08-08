@@ -684,7 +684,7 @@ private theorem fixed_metric_lower_bound_from_positive_time
     unfold heatOperatorWithDrift driftTerm
     rw [hlapAt]
     simpa [G] using hu_super (a + s) hq hqpos x
-  have hv_nonneg := strict_barrier_positive_region (I := I) G S hS (fun _ _ => 0) v
+  have hv_nonneg := strict_barrier_positive_region (I := I) G S (fun _ _ => 0) v
     hv_cont hv0 hv_time hv_mdiff hv_grad
     (fun s hs hspos x _ => hv_super s hs hspos x)
   intro t ht x
@@ -1254,7 +1254,7 @@ private theorem fixed_metric_with_drift_lower_bound_from_positive_time
     unfold heatOperatorWithDrift driftTerm gradientAt
     rw [hlapAt]
     simpa [G, X'] using hu_super (a + s) hq hqpos x
-  have hv_nonneg := strict_barrier_positive_region (I := I) G S hS X' v
+  have hv_nonneg := strict_barrier_positive_region (I := I) G S X' v
     hv_cont hv0 hv_time hv_mdiff hv_grad
     (fun s hs hspos x _ => hv_super s hs hspos x)
   intro t ht x
@@ -1989,7 +1989,7 @@ private theorem time_dependent_metric_with_drift_lower_bound_from_positive_time
     simpa [G', X', shiftedStrongMetricFamily, heatOperatorWithDrift, driftTerm,
       gradientAt, parabolicOperatorWithDrift] using
         hu_super (a + s) hq hqpos x
-  have hv_nonneg := strict_barrier_positive_region (I := I) G' S hS X' v
+  have hv_nonneg := strict_barrier_positive_region (I := I) G' S X' v
     hv_cont hv0 hv_time hv_mdiff hv_grad
     (fun s hs hspos x _ => hv_super s hs hspos x)
   intro t ht x
@@ -2419,7 +2419,7 @@ private theorem time_dependent_potential_exp_rescale_super
       (fun s => Real.exp (-L * s)) (Set.Icc 0 T) t := by
     fun_prop
   have hident := parabolic_exp_rescale_identity (I := I)
-    G T L X u t ht huniq (hu_mdiff t ht htpos) x
+    G T L X u t huniq (hu_mdiff t ht htpos) x
     (hu_grad t ht htpos x) (hu_time t ht htpos x) hscale
   have hVu : 0 ≤ (V t x - L) * u t x :=
     mul_nonneg (sub_nonneg.mpr (hV t ht x)) (hu_nonneg t ht x)
@@ -2840,7 +2840,7 @@ private theorem potential_exp_rescale_super
   have huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t :=
     (uniqueDiffOn_Icc hT).uniqueDiffWithinAt ht
   have hident := parabolic_exp_rescale_identity (I := I)
-    G T L X u t ht huniq hu_mdiff x (by simpa [G] using hu_grad)
+    G T L X u t huniq hu_mdiff x (by simpa [G] using hu_grad)
     (hu_time t ht htpos x) hscale_time
   have hbase : 0 ≤
       derivWithin (fun s => u s x) (Set.Icc 0 T) t -

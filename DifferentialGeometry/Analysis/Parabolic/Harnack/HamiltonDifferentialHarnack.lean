@@ -646,7 +646,6 @@ theorem hamilton_quantity_slab_bound_of_ricci_lower_bound
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
     {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
@@ -1099,7 +1098,6 @@ theorem heat_solution_hamilton_differential_harnack_of_ricci_lower_bound_on_of_h
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
     {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
@@ -1343,7 +1341,6 @@ theorem heat_solution_hamilton_differential_harnack_of_ricci_lower_bound_on
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
     {D : RealTimeInterval}
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
@@ -1437,7 +1434,6 @@ theorem heat_solution_hamilton_differential_harnack_of_ricci_lower_bound
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [ContMDiffVectorBundle (⊤ : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
     (hRic : ∀ x v, -K * g.inner x v v ≤ ricciTensor (I := I) g x v v)

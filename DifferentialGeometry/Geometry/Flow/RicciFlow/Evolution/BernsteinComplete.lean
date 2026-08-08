@@ -2496,7 +2496,7 @@ theorem estimate_cutoff_at
             simpa only [F, bBar, bCore, bErr] using hsub
           rw [hop]
           linarith
-        have hw_nonneg := strict_barrier_cpt (I := I) G B.T (le_of_lt B.hT)
+        have hw_nonneg := strict_barrier_cpt (I := I) G B.T
           (fun _ z ↦ (0 : TangentSpace I z)) w (cut.support n)
           (cut.support_compact n) hw_out hw_cont hw0 hw_time hw_mdiff hw_grad
           hw_negative
@@ -2811,7 +2811,7 @@ theorem estimate_barrier_at
             dsimp only [bBar, bErr]
             linarith [hrec.2.2.2]
         have hw_nonneg := strict_barrier_cpt_of_upperSupport
-          (I := I) G B.T (le_of_lt B.hT)
+          (I := I) G B.T
           (fun _ z ↦ (0 : TangentSpace I z)) w (cut.support n)
           (cut.support_compact n) hw_out hw_cont hw0 hsupport
         intro s hs y
