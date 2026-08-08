@@ -30,12 +30,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M]
+  [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
-    [SigmaCompactSpace M] in
+    in
 lemma smoothOrthoFrame_parsevalExpand
     (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x) :
     u = ∑ a : Fin (Module.finrank ℝ E),
@@ -83,7 +83,7 @@ lemma smoothOrthoFrame_parsevalExpand
   · intro h; exact absurd (Finset.mem_univ a) h
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+    [T2Space M] in
 private lemma tensor0SAsRS_add_loc {t : ℕ} (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SToTensorRS (I := I) (M := M) x (C + D) =
       tensor0SToTensorRS (I := I) (M := M) x C + tensor0SToTensorRS (I := I) (M := M) x D := by
@@ -101,7 +101,7 @@ private lemma tensor0SAsRS_add_loc {t : ℕ} (x : M) (C D : Tensor0SSpace t I x)
     smul_add]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+    [T2Space M] in
 private lemma tensor0SAsRS_smul_loc {t : ℕ} (x : M) (c : ℝ) (C : Tensor0SSpace t I x) :
     tensor0SToTensorRS (I := I) (M := M) x (c • C) =
       c • tensor0SToTensorRS (I := I) (M := M) x C := by
@@ -156,7 +156,7 @@ noncomputable def tensorSlotZeroEvalFib (x : M) (s : ℕ)
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+    [T2Space M] in
 lemma slot0SliceFib_apply (x : M) (s : ℕ) (v : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
     tensorSlotZeroEvalFib (I := I) (M := M) x s v Wx =
@@ -172,7 +172,7 @@ lemma slot0SliceFib_apply (x : M) (s : ℕ) (v : TangentSpace I x)
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [BoundarylessManifold I M] [T2Space M] in
 lemma slot0SliceFib_eq_covGradBundleEquiv_symm (x : M) (s : ℕ) (v : TangentSpace I x)
     (T : TensorRSSpace 0 (s + 1) I x) :
     tensorSlotZeroEvalFib (I := I) (M := M) x s v T =
@@ -211,7 +211,7 @@ lemma slot0SliceFib_covGrad_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (S : S
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+    [T2Space M] in
 lemma slot0SliceFib_dir_add (x : M) (s : ℕ) (v v' : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
     tensorSlotZeroEvalFib (I := I) (M := M) x s (v + v') Wx =
@@ -225,7 +225,7 @@ lemma slot0SliceFib_dir_add (x : M) (s : ℕ) (v v' : TangentSpace I x)
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+    [T2Space M] in
 lemma slot0SliceFib_dir_smul (x : M) (s : ℕ) (c : ℝ) (v : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
     tensorSlotZeroEvalFib (I := I) (M := M) x s (c • v) Wx =
@@ -264,7 +264,6 @@ noncomputable def curvatureGradContractionDirLM
     rw [smul_sub]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [SigmaCompactSpace M] in
 @[simp] lemma gradArmDirLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -286,7 +285,6 @@ noncomputable def curvatureGradContractionDirCLM
   LinearMap.toContinuousLinearMap (curvatureGradContractionDirLM (I := I) (M := M) g s B x Wx)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [SigmaCompactSpace M] in
 @[simp] lemma gradArmDirCLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -300,7 +298,7 @@ omit [SigmaCompactSpace M] in
   rw [curvatureGradContractionDirCLM, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma gradArmDirCLM_value_add
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -319,7 +317,7 @@ lemma gradArmDirCLM_value_add
       (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x))) W₁ W₂]
   abel
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma gradArmDirCLM_value_smul
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -356,7 +354,7 @@ noncomputable def curvatureGradContractionFib
         rfl }
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma gradArmFib_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -415,7 +413,7 @@ lemma gradArmFib_covGrad_slice_eq
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [BoundarylessManifold I M] [T2Space M] in
 lemma slot0SliceFib_section_contMDiff
     (_g : SmoothRiemannianMetric I M) (s : ℕ)
     {Y : Π b : M, TensorRSSpace 0 (s + 1) I b}
@@ -447,7 +445,7 @@ lemma slot0SliceFib_section_contMDiff
     (ϕ := fun b => (covGradBundleEquiv (I := I) (M := M) 0 s b).symm (Y b))
     (v := fun b => V b) hHom hV
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma gradArmDirCLM_homSection_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -521,7 +519,7 @@ lemma gradArmDirCLM_homSection_contMDiff
     exact slot0SliceFib_section_contMDiff (I := I) (M := M) g s hY hdir
   exact hRarm.sub_section hC5arm
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma gradArmFib_frozen_section_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -549,7 +547,6 @@ lemma gradArmFib_frozen_section_contMDiff
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 lemma frameSum_riemannOp_LeviCivita_eq_neg_ricEndoRaised
     (g : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -635,7 +632,6 @@ private noncomputable def curvatureGradContractionBilin
         exact evalCLM.map_smul c _ }
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [SigmaCompactSpace M] in
 @[simp] private lemma rArmBilin_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (w : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) (m : Fin s → E) (a b : TangentSpace I x) :
@@ -649,7 +645,7 @@ omit [SigmaCompactSpace M] in
   simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
     ContinuousLinearMap.comp_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma gradArmDirCLM_summand_toModel
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -686,7 +682,7 @@ private lemma gradArmDirCLM_summand_toModel
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [BoundarylessManifold I M] [T2Space M] in
 lemma toModel_unit_finsum {ι : Type*} (s : ℕ) (x : M) (fs : Finset ι)
     (T : ι → TensorRSSpace 0 s I x) (m : Fin s → E) :
     Tensor0SSpace.toModel
@@ -718,7 +714,7 @@ lemma toModel_unit_finsum {ι : Type*} (s : ℕ) (x : M) (fs : Finset ι)
       rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply, ih]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradArmDirCLM_frame_independent
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (B C : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
