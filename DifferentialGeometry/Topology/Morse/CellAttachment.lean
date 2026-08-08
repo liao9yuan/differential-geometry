@@ -2461,6 +2461,28 @@ theorem modelAttachedRegion_upperBelt_eq_lower {n k : ℕ} (hk : k ≤ n) (ε r 
   dsimp [modelAttachedRegion]
   rw [smoothCap_upper hδ0 hy]
 
+theorem modelHandleMap_mem_upper {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 ≤ ε)
+    (p : StandardHandle k (n - k)) :
+    modelHandleMap hk ε r p ∈ sublevel (morseNormalForm hk c) (c + r ^ 2 / 2) := by
+  change morseNormalForm hk c (modelHandleMap hk ε r p) ≤ c + r ^ 2 / 2
+  exact modelHandleMap_f_le hk c ε r hε p
+
+theorem modelHandleMap_mem_lower_iff {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 < ε)
+    (p : StandardHandle k (n - k)) :
+    modelHandleMap hk ε r p ∈ sublevel (morseNormalForm hk c) (c - ε) ↔
+      ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 := by
+  change morseNormalForm hk c (modelHandleMap hk ε r p) ≤ c - ε ↔
+    ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1
+  constructor
+  · intro hle
+    have heq : morseNormalForm hk c (modelHandleMap hk ε r p) = c - ε :=
+      le_antisymm hle (modelHandleMap_f_ge hk c ε r (le_of_lt hε) p)
+    exact (modelHandleMap_f_eq_lower_iff hk c ε r hε p).1 heq
+  · intro hx
+    have heq : morseNormalForm hk c (modelHandleMap hk ε r p) = c - ε :=
+      (modelHandleMap_f_eq_lower_iff hk c ε r hε p).2 hx
+    exact le_of_eq heq
+
 theorem modelAttachedStretch_equiv {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
     (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
     (∀ y : MorseModel n,
