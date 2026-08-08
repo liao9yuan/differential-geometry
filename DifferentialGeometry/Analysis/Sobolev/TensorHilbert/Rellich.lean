@@ -11,8 +11,6 @@ import Mathlib.Analysis.Normed.Operator.Compact
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
-set_option warningAsError false
 
 open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
