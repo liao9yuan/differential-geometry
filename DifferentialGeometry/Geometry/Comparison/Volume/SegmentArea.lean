@@ -67,7 +67,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- The intrinsic Jacobi endpoint density along the radial geodesic in direction
 `v` — the RHS integrand of the area inequality `L5`, equal to the pointwise
 Riemannian Jacobian of `expMapIntrinsic x` at `v` (`exp_density_curve`). -/
-private def expJacDensity
+def expJacDensity
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -87,7 +87,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 Local consequence of the density identity `exp_density_curve` (`= chartDensity ·
 |det (chart ∘ exp)|`) together with continuity of the chart density and of the
 Euclidean differential of the globally-`C^∞` chart-composed exponential. -/
-private theorem expJacDensity_continuous
+theorem expJacDensity_continuous
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)

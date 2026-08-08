@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDomain
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopBall
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentArea
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
@@ -103,6 +104,165 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The closed `g`-length ball in the tangent space at `x`. -/
+def closedGBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) : Set E :=
+  {v : E | Real.sqrt (g.inner x (show TangentSpace I x from v)
+    (show TangentSpace I x from v)) ≤ R}
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+theorem isClosed_closedGBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) :
+    IsClosed (closedGBall (I := I) g x R) :=
+  by
+    have hcont : Continuous (fun v : E => g.inner x (show TangentSpace I x from v)
+        (show TangentSpace I x from v)) := by
+      simpa using (continuous_gInner_self (I := I) g x)
+    exact isClosed_le (Real.continuous_sqrt.comp hcont) continuous_const
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space (TangentBundle I M)] in
+theorem isCompact_closedGBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) :
+    IsCompact (closedGBall (I := I) g x R) := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  refine Metric.isCompact_iff_isClosed_bounded.mpr
+    ⟨isClosed_closedGBall (I := I) g x R, ?_⟩
+  rw [Metric.isBounded_iff_subset_ball (0 : E)]
+  refine ⟨R / Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+    (I := I) g x) + 1, ?_⟩
+  intro v hv
+  have hc_pos : 0 < DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+      (I := I) g x :=
+    DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst_pos (I := I) g x
+  have hsc_pos : 0 < Real.sqrt
+      (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst (I := I) g x) :=
+    Real.sqrt_pos.mpr hc_pos
+  have hcoerc : DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+      (I := I) g x * ‖v‖ ^ 2 ≤ g.inner x (show TangentSpace I x from v)
+        (show TangentSpace I x from v) :=
+    DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst_le (I := I) g x v
+  have hgnn : 0 ≤ g.inner x v v := le_trans (by positivity) hcoerc
+  have hkey : Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+      (I := I) g x) * ‖v‖ ≤ Real.sqrt (g.inner x v v) := by
+    have hlhs_eq : Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+          (I := I) g x) * ‖v‖
+        = Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+            (I := I) g x * ‖v‖ ^ 2) := by
+      rw [Real.sqrt_mul hc_pos.le, Real.sqrt_sq (norm_nonneg v)]
+    rw [hlhs_eq]
+    exact Real.sqrt_le_sqrt hcoerc
+  have hnorm : ‖v‖ ≤ Real.sqrt (g.inner x v v) / Real.sqrt
+      (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst (I := I) g x) := by
+    rw [le_div_iff₀ hsc_pos, mul_comm]
+    exact hkey
+  have hle : Real.sqrt (g.inner x v v) / Real.sqrt
+        (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst (I := I) g x) ≤
+      R / Real.sqrt (DifferentialGeometry.Geometry.Riemannian.gpCoerciveConst
+        (I := I) g x) :=
+    div_le_div_of_nonneg_right hv (Real.sqrt_nonneg _)
+  simpa [Metric.mem_ball, dist_eq_norm, sub_zero] using
+    lt_of_le_of_lt (hnorm.trans hle) (lt_add_one _)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Hopf–Rinow surjectivity onto the metric ball, closed-launch version.**
+Every point of the open `edist`-ball of radius `R` is the intrinsic exponential
+of a segment-domain vector of `g`-length `≤ R`.  Same content as
+`ball_sub_image_segDom` with the `g`-length ball closed — this is the compact
+launch set used by the image-measure upper bound. -/
+theorem ball_sub_image_segDom_closed [ConnectedSpace M] [PseudoEMetricSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) (R : ℝ) :
+    {y : M | riemannianEDist I x y < ENNReal.ofReal R} ⊆
+      (fun b : E => expMapIntrinsic (I := I) g hEnorm x
+        (show TangentSpace I x from b)) ''
+        ({v : E | (show TangentSpace I x from v) ∈ SegDom (I := I) g hEnorm x}
+          ∩ closedGBall (I := I) g x R) := by
+  have hcov := ball_sub_image_segDom (I := I) g hEnorm x R
+  have hcovE : {y : M | riemannianEDist I x y < ENNReal.ofReal R} ⊆
+      (fun b : E => expMapIntrinsic (I := I) g hEnorm x
+        (show TangentSpace I x from b)) ''
+        {v : E | (show TangentSpace I x from v) ∈
+          SegDom (I := I) g hEnorm x ∩ gBall (I := I) g x R} := by
+    simpa using hcov
+  have hgBallE : {v : E | (show TangentSpace I x from v) ∈
+        gBall (I := I) g x R} ⊆ closedGBall (I := I) g x R := by
+    intro v hv
+    change Real.sqrt (g.inner x (show TangentSpace I x from v)
+      (show TangentSpace I x from v)) ≤ R
+    exact le_of_lt hv
+  have hsub : {v : E | (show TangentSpace I x from v) ∈
+        SegDom (I := I) g hEnorm x ∩ gBall (I := I) g x R} ⊆
+      {v : E | (show TangentSpace I x from v) ∈ SegDom (I := I) g hEnorm x}
+        ∩ closedGBall (I := I) g x R := by
+    intro v hv
+    exact ⟨hv.1, hgBallE hv.2⟩
+  exact hcovE.trans (Set.image_mono hsub)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The metric ball volume is bounded by the intrinsic-Jacobi density integral
+over the compact segment-domain launch ball (the image-measure reduction behind
+`segBall_vol_le`). -/
+private theorem segBall_vol_le_density
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) (R : ℝ) :
+    riemannianVolumeMeasure (I := I) (M := M) g
+        {y : M | riemannianEDist I x y < ENNReal.ofReal R}
+      ≤ ∫⁻ v in {v : E | (show TangentSpace I x from v) ∈
+            SegDom (I := I) g hEnorm x} ∩ closedGBall (I := I) g x R,
+          ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v)
+          ∂(modelHaar (E := E)) := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  have hcov := ball_sub_image_segDom_closed (I := I) g hEnorm x R
+  have hK : IsCompact
+      ({v : E | (show TangentSpace I x from v) ∈
+          SegDom (I := I) g hEnorm x} ∩ closedGBall (I := I) g x R) := by
+    have hclosed : IsClosed {v : E | (show TangentSpace I x from v) ∈
+        SegDom (I := I) g hEnorm x} := by
+      simpa using (isClosed_segDom (I := I) g hEnorm x).preimage
+        (continuous_id : Continuous (fun v : E => v))
+    exact (isCompact_closedGBall (I := I) g x R).of_isClosed_subset
+      (hclosed.inter (isClosed_closedGBall (I := I) g x R))
+      (Set.inter_subset_right : {v : E | (show TangentSpace I x from v) ∈
+          SegDom (I := I) g hEnorm x} ∩ closedGBall (I := I) g x R ⊆
+          closedGBall (I := I) g x R)
+  have himg := riemVol_exp_image_le (I := I) g hEnorm x hK
+  have hFcont : Continuous
+      (fun v : E => expMapIntrinsic (I := I) g hEnorm x
+        (show TangentSpace I x from v)) :=
+    (intrinsicFiber_smooth (I := I) g hEnorm x).continuous
+  have hball : MeasurableSet
+      {y : M | riemannianEDist I x y < ENNReal.ofReal R} := by
+    have hcont : Continuous (fun y : M => riemannianEDist I x y) := by
+      simpa [Manifold.riemannianEDist_comm] using
+        (continuous_riemannianEDist_to (I := I) x)
+    exact (isOpen_lt hcont continuous_const).measurableSet
+  have himg_meas : MeasurableSet
+      ((fun v : E => expMapIntrinsic (I := I) g hEnorm x
+        (show TangentSpace I x from v)) ''
+        ({v : E | (show TangentSpace I x from v) ∈
+          SegDom (I := I) g hEnorm x} ∩ closedGBall (I := I) g x R)) :=
+    (hK.image hFcont).measurableSet
+  exact (measure_mono hcov).trans himg
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
