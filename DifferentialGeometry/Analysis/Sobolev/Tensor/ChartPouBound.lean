@@ -888,6 +888,73 @@ lemma chartPushedRaw_raw_eq_sum_transCoeffE_raw_on_pou_tsupport
       refine Finset.sum_congr rfl ?_
       intro Q _
       exact (hQ Q).symm
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+lemma tsupport_chartSmoothExt_pou_subset_chartImage
+    (α : M) :
+    tsupport (chartSmoothExt (I := I) (M := M) α
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) ⊆
+      (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
+        (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) := by
+  classical
+  set KP : Set EuclN := (toEuclidean (E := E)) ''
+      ((extChartAt I α) '' (tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
+    with hKP_def
+  have hPOU_tsupp : tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
+      (chartAt H α).source :=
+    chartAtlasPOU_isSubordinate (I := I) (M := M) α
+  have hη_supp_KP : Function.support (chartSmoothExt (I := I) (M := M) α
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) ⊆ KP := by
+    intro y hy
+    by_contra hyK
+    apply hy
+    by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α
+    · obtain ⟨z, hz_target, hzy⟩ := hy_target
+      have hy_symm : (toEuclidean (E := E)).symm y = z := by
+        rw [← hzy]; exact (toEuclidean (E := E)).symm_apply_apply z
+      have hval : chartSmoothExt (I := I) (M := M) α
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y =
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
+        change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+          else 0) = _
+        rw [if_pos (by rw [hy_symm]; exact hz_target)]
+      rw [hval]
+      rw [hy_symm]
+      by_contra hne
+      apply hyK
+      have hsymm_in_supp : (extChartAt I α).symm z ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
+        subset_tsupport _ (Function.mem_support.mpr hne)
+      have hz_eq : (extChartAt I α) ((extChartAt I α).symm z) = z :=
+        (extChartAt I α).right_inv hz_target
+      refine ⟨z, ⟨(extChartAt I α).symm z, hsymm_in_supp, hz_eq⟩, hzy⟩
+    · change (if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+        else 0) = 0
+      rw [if_neg]
+      rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy_target
+      exact hy_target
+  have hKP_compact : IsCompact KP := by
+    have hts_compact : IsCompact (tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
+      (isClosed_tsupport _).isCompact
+    have hcont_ext : ContinuousOn (extChartAt I α) (tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) := by
+      refine (continuousOn_extChartAt (I := I) α).mono ?_
+      intro x hx
+      have hxsrc : x ∈ (chartAt H α).source := hPOU_tsupp hx
+      rw [← extChartAt_source_eq_chartAt_source (I := I) (M := M)] at hxsrc
+      exact hxsrc
+    exact (hts_compact.image_of_continuousOn hcont_ext).image
+      (toEuclidean (E := E)).continuous
+  have hKP_closed : IsClosed KP := hKP_compact.isClosed
+  rw [tsupport]
+  rw [← Set.image_image]
+  exact hKP_closed.closure_subset_iff.mpr hη_supp_KP
 end Tensor
 end Sobolev
 end Analysis
