@@ -2604,6 +2604,100 @@ theorem fderiv_negPart_normSq_zero_direction {n k : ℕ} (hk : k ≤ n) (y : Mor
   rw [hw]
   simp
 
+theorem contDiff_negPart_normSq {n k : ℕ} (hk : k ≤ n) :
+    ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) := by
+  rw [show (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) =
+      fun y : MorseModel n => ∑ i : Fin k, (negPart hk y i) ^ 2 by
+    funext y
+    exact EuclideanSpace.real_norm_sq_eq (negPart hk y)]
+  fun_prop
+
+theorem contDiff_posPart_normSq {n k : ℕ} (hk : k ≤ n) :
+    ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) := by
+  rw [show (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) =
+      fun y : MorseModel n => ∑ j : Fin (n - k), (posPart hk y j) ^ 2 by
+    funext y
+    exact EuclideanSpace.real_norm_sq_eq (posPart hk y)]
+  fun_prop
+
+theorem fderiv_cap_negPart_zero_direction {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (y : MorseModel n) :
+    fderiv ℝ (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) y
+      (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) = 0 := by
+  have hcapDiff : DifferentiableAt ℝ (smoothCap ε r δ) (‖negPart hk y‖ ^ 2) :=
+    (smoothCap_contDiff ε r δ).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt
+  have hinnerDiff : DifferentiableAt ℝ (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) y :=
+    (contDiff_negPart_normSq hk).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt
+  have hcomp : fderiv ℝ (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) y =
+      (fderiv ℝ (smoothCap ε r δ) (‖negPart hk y‖ ^ 2)).comp
+        (fderiv ℝ (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) y) :=
+    fderiv_comp (x := y) (f := fun y : MorseModel n => ‖negPart hk y‖ ^ 2)
+      (g := smoothCap ε r δ) (hg := hcapDiff) (hf := hinnerDiff)
+  calc
+    fderiv ℝ (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) y
+        (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y))
+        = ((fderiv ℝ (smoothCap ε r δ) (‖negPart hk y‖ ^ 2)).comp
+            (fderiv ℝ (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) y))
+            (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) := by
+          rw [hcomp]
+    _ = 0 := by
+          simp [fderiv_negPart_normSq_zero_direction hk y]
+
+theorem fderiv_modelAttachedFunction_direction {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (y : MorseModel n) :
+    fderiv ℝ (modelAttachedFunction hk c ε r δ) y
+      (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) = ‖posPart hk y‖ ^ 2 := by
+  have hdiffPos : DifferentiableAt ℝ (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) y :=
+    (contDiff_posPart_normSq hk).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt
+  have hdiffCap : DifferentiableAt ℝ (fun y : MorseModel n =>
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2)) y :=
+    ((smoothCap_contDiff ε r δ).comp (contDiff_negPart_normSq hk)).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt
+  have hderiv : fderiv ℝ (modelAttachedFunction hk c ε r δ) y =
+      (1 / 2 : ℝ) • (fderiv ℝ (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) y -
+        fderiv ℝ (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) y) := by
+    unfold modelAttachedFunction
+    rw [fderiv_const_add]
+    rw [fderiv_const_mul]
+    · exact congrArg (fun L : MorseModel n →L[ℝ] ℝ => (1 / 2 : ℝ) • L)
+        (fderiv_sub (f := fun y : MorseModel n => ‖posPart hk y‖ ^ 2)
+          (g := fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2))
+          (hf := hdiffPos) (hg := hdiffCap))
+    · exact hdiffPos.sub hdiffCap
+  calc
+    fderiv ℝ (modelAttachedFunction hk c ε r δ) y
+        (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y))
+        = ((1 / 2 : ℝ) • (fderiv ℝ (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) y -
+            fderiv ℝ (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) y))
+            (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) := by
+          rw [hderiv]
+    _ = ‖posPart hk y‖ ^ 2 := by
+          simp [fderiv_posPart_normSq_self hk y, fderiv_cap_negPart_zero_direction hk ε r δ y]
+
+theorem fderiv_modelAttachedFunction_ne_zero {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) {y : MorseModel n}
+    (hy : modelAttachedFunction hk c ε r δ y = c) :
+    fderiv ℝ (modelAttachedFunction hk c ε r δ) y ≠ 0 := by
+  have hpos : 0 < ‖posPart hk y‖ ^ 2 := by
+    have hcap : 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) :=
+      smoothCap_pos (ε := ε) (r := r) (δ := δ) (t := ‖negPart hk y‖ ^ 2) hδ0 hδr
+    have hmain : ‖posPart hk y‖ ^ 2 = smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+      have hf : modelAttachedFunction hk c ε r δ y = c + (1 / 2) *
+          (‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) := rfl
+      nlinarith [hy, hf]
+    rw [hmain]
+    exact hcap
+  intro h
+  have hw : fderiv ℝ (modelAttachedFunction hk c ε r δ) y
+      (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) = 0 := by
+    exact congrArg (fun L : MorseModel n →L[ℝ] ℝ =>
+      L (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y))) h
+  rw [fderiv_modelAttachedFunction_direction hk c ε r δ y] at hw
+  nlinarith [hw, hpos]
+
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
 
