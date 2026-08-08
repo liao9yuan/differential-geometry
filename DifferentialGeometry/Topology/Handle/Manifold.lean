@@ -76,6 +76,105 @@ noncomputable def isManifoldOfHomeomorph {𝕜 : Type*} [NontriviallyNormedField
   change IsManifold I n M'
   exact { toHasGroupoid := hgr }
 
+theorem contMDiff_homeomorph_of_chartedSpaceOfHomeomorph {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E H : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [TopologicalSpace H]
+    {X : Type*} [TopologicalSpace X] [ChartedSpace H X] {X' : Type*} [TopologicalSpace X']
+    (h : X' ≃ₜ X) (I : ModelWithCorners 𝕜 E H) (n : WithTop ℕ∞) [IsManifold I n X] :
+    @ContMDiff 𝕜 _ E _ _ H _ I X' _ (chartedSpaceOfHomeomorph h) E _ _ H _ I X _ _ n h := by
+  classical
+  letI : ChartedSpace H X' := chartedSpaceOfHomeomorph h
+  letI : IsManifold I n X' := isManifoldOfHomeomorph I h
+  intro x
+  have hchart : chartAt (H := H) (M := X') x =
+      h.toOpenPartialHomeomorph ≫ₕ (chartAt (H := H) (M := X) (h x)) := rfl
+  let c : OpenPartialHomeomorph X' H := chartAt (H := H) (M := X') x
+  let c0 : OpenPartialHomeomorph X H := chartAt (H := H) (M := X) (h x)
+  have hsource : c.source = h.toOpenPartialHomeomorph ⁻¹' c0.source := by
+    change (chartAt (H := H) (M := X') x).source =
+      h.toOpenPartialHomeomorph ⁻¹' c0.source
+    rw [hchart]
+    simp [c0]
+  have hcomp : ContMDiffOn I I n (fun y : X' => c0.symm (c y)) c.source := by
+    have hf : ContMDiffOn I I n c c.source :=
+      contMDiffOn_chart (I := I) (H := H) (M := X') (n := n) (x := x)
+    have hg : ContMDiffOn I I n c0.symm c0.target :=
+      contMDiffOn_chart_symm (I := I) (H := H) (M := X) (n := n) (x := h x)
+    refine hg.comp hf ?_
+    intro y hy
+    have hy' : h y ∈ c0.source := by
+      rw [hsource] at hy
+      exact hy
+    have hyc : c y = c0 (h y) := by
+      change (chartAt (H := H) (M := X') x) y = c0 (h y)
+      rw [hchart]
+      rfl
+    simpa [hyc] using c0.mapsTo hy'
+  have heq : ∀ y ∈ c.source, h y = c0.symm (c y) := by
+    intro y hy
+    have hy' : h y ∈ c0.source := by
+      rw [hsource] at hy
+      exact hy
+    have hyc : c y = c0 (h y) := by
+      change (chartAt (H := H) (M := X') x) y = c0 (h y)
+      rw [hchart]
+      rfl
+    calc
+      h y = c0.symm (c0 (h y)) := (c0.left_inv hy').symm
+      _ = c0.symm (c y) := by rw [hyc]
+  have hmd : ContMDiffOn I I n h c.source := hcomp.congr (by intro y hy; exact heq y hy)
+  exact hmd.contMDiffAt (c.open_source.mem_nhds (mem_chart_source (H := H) (M := X') x))
+
+theorem contMDiff_homeomorph_symm_of_chartedSpaceOfHomeomorph {𝕜 : Type*}
+    [NontriviallyNormedField 𝕜]
+    {E H : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [TopologicalSpace H]
+    {X : Type*} [TopologicalSpace X] [ChartedSpace H X] {X' : Type*} [TopologicalSpace X']
+    (h : X' ≃ₜ X) (I : ModelWithCorners 𝕜 E H) (n : WithTop ℕ∞) [IsManifold I n X] :
+    @ContMDiff 𝕜 _ E _ _ H _ I X _ _ E _ _ H _ I X' _ (chartedSpaceOfHomeomorph h) n h.symm := by
+  classical
+  letI : ChartedSpace H X' := chartedSpaceOfHomeomorph h
+  letI : IsManifold I n X' := isManifoldOfHomeomorph I h
+  intro y
+  have hchart : chartAt (H := H) (M := X') (h.symm y) =
+      h.toOpenPartialHomeomorph ≫ₕ (chartAt (H := H) (M := X) y) := by
+    change h.toOpenPartialHomeomorph ≫ₕ (chartAt (H := H) (M := X) (h (h.symm y))) =
+      h.toOpenPartialHomeomorph ≫ₕ (chartAt (H := H) (M := X) y)
+    exact congrArg (fun z : X => h.toOpenPartialHomeomorph ≫ₕ (chartAt (H := H) (M := X) z))
+      (h.right_inv y)
+  let c : OpenPartialHomeomorph X' H := chartAt (H := H) (M := X') (h.symm y)
+  let c0 : OpenPartialHomeomorph X H := chartAt (H := H) (M := X) y
+  have htarget : c.target = c0.target := by
+    change (chartAt (H := H) (M := X') (h.symm y)).target = c0.target
+    rw [hchart, OpenPartialHomeomorph.trans_target]
+    simp [c0]
+  have hcomp : ContMDiffOn I I n (fun z : X => c.symm (c0 z)) c0.source := by
+    have hf : ContMDiffOn I I n c0 c0.source :=
+      contMDiffOn_chart (I := I) (H := H) (M := X) (n := n) (x := y)
+    have hg : ContMDiffOn I I n c.symm c.target :=
+      contMDiffOn_chart_symm (I := I) (H := H) (M := X') (n := n) (x := h.symm y)
+    refine hg.comp hf ?_
+    intro z hz
+    rw [htarget]
+    exact c0.mapsTo hz
+  have heq : ∀ z ∈ c0.source, h.symm z = c.symm (c0 z) := by
+    intro z hz
+    have hmem : h.symm z ∈ c.source := by
+      change h.symm z ∈ (chartAt (H := H) (M := X') (h.symm y)).source
+      rw [hchart, OpenPartialHomeomorph.trans_source]
+      constructor
+      · trivial
+      · change h (h.symm z) ∈ (chartAt (H := H) (M := X) y).source
+        simpa [h.right_inv z] using hz
+    have hc : c (h.symm z) = c0 z := by
+      change (chartAt (H := H) (M := X') (h.symm y)) (h.symm z) = c0 z
+      rw [hchart]
+      change (chartAt (H := H) (M := X) y) (h (h.symm z)) = c0 z
+      simp [c0]
+    calc
+      h.symm z = c.symm (c (h.symm z)) := (c.left_inv hmem).symm
+      _ = c.symm (c0 z) := by rw [hc]
+  have hmd : ContMDiffOn I I n h.symm c0.source := hcomp.congr (by intro z hz; exact heq z hz)
+  exact hmd.contMDiffAt (c0.open_source.mem_nhds (mem_chart_source (H := H) (M := X) y))
+
 noncomputable def closedCellPermute {n : ℕ} (e : Fin n ≃ Fin n) :
     EuclideanSpace ℝ (Fin n) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin n) :=
   (EuclideanSpace.basisFun (Fin n) ℝ).reindex e |>.repr
