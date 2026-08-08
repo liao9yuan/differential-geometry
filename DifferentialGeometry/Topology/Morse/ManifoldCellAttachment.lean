@@ -2946,14 +2946,132 @@ theorem morseUpperIsManifold {m k : ℕ} (hk : k ≤ m + 1) (c r : ℝ) (hr : r 
     (CellAttachment.contDiff_morseNormalForm hk c)
     (fun y hy => CellAttachment.fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy)
 
+noncomputable def morseAttachedHomeoRounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    morseAttachedSpace hk c ε r δ hε hδ0 hδr hr ≃ₜ
+      SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
+    morseUpperChartedSpace hk c r hr
+  letI : ChartedSpace (MorseHalfSpace m)
+      (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) :=
+    sublevelChartedSpace (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+      (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+      (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+  exact (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr).trans
+    (modelAttachedSublevelDiffeomorph hk c ε r δ hδ0 hδr hr).toHomeomorph
+
 @[reducible]
 noncomputable def morseAttachedChartedSpace {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
     ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) :=
   by
-    letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
-      morseUpperChartedSpace hk c r hr
-    exact chartedSpaceOfHomeomorph (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr)
+    letI : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) :=
+      sublevelChartedSpace (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+        (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+        (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+    exact chartedSpaceOfHomeomorph (morseAttachedHomeoRounded hk c ε r δ hε hδ0 hδr hr)
+
+theorem morseAttachedIsManifoldNatural {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) _
+      (morseAttachedChartedSpace hk c ε r δ hε hδ0 hδr hr) := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m)
+      (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) :=
+    sublevelChartedSpace (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+      (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+      (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+  have hmani : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) _ _ :=
+    sublevelIsManifold (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+      (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+      (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+  letI := hmani
+  exact isManifoldOfHomeomorph (morseModelWithCornersHalfSpace m)
+    (morseAttachedHomeoRounded hk c ε r δ hε hδ0 hδr hr)
+
+noncomputable def morseAttachedDiffeomorphUpperNatural {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) _
+      (morseAttachedChartedSpace hk c ε r δ hε hδ0 hδr hr)
+      (morseUpperSublevel hk c r) _ (morseUpperChartedSpace hk c r hr)
+      (⊤ : ℕ∞) := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) :=
+    morseAttachedChartedSpace hk c ε r δ hε hδ0 hδr hr
+  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
+    morseUpperChartedSpace hk c r hr
+  letI : ChartedSpace (MorseHalfSpace m)
+      (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) :=
+    sublevelChartedSpace (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+      (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+      (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+  have hmani : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) _ _ :=
+    sublevelIsManifold (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+      (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+      (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+  letI := hmani
+  let H : morseAttachedSpace hk c ε r δ hε hδ0 hδr hr ≃ₜ
+      SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c :=
+    morseAttachedHomeoRounded hk c ε r δ hε hδ0 hδr hr
+  have hH : ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun z : morseAttachedSpace hk c ε r δ hε hδ0 hδr hr => H z) :=
+    contMDiff_homeomorph_of_chartedSpaceOfHomeomorph H (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+  have hHs : ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun r : SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c => H.symm r) :=
+    contMDiff_homeomorph_symm_of_chartedSpaceOfHomeomorph H (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+  let D0 : SublevelSpace (CellAttachment.morseNormalForm hk c) (c + r ^ 2 / 2) ≃ₘ⟮
+      morseModelWithCornersHalfSpace m, morseModelWithCornersHalfSpace m⟯
+      SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c :=
+    modelAttachedSublevelDiffeomorph hk c ε r δ hδ0 hδr hr
+  have hD0 : ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun y : morseUpperSublevel hk c r => D0 y) :=
+    D0.contMDiff_toFun
+  have hD0s : ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun r : SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c => D0.symm r) :=
+    D0.contMDiff_invFun
+  refine
+    { toEquiv := (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr).toEquiv
+      contMDiff_toFun := ?_
+      contMDiff_invFun := ?_ }
+  · have hcomp : ContMDiff (morseModelWithCornersHalfSpace m)
+        (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+        (fun z : morseAttachedSpace hk c ε r δ hε hδ0 hδr hr => D0.symm (H z)) :=
+      hD0s.comp hH
+    refine hcomp.congr ?_
+    intro z
+    apply Subtype.ext
+    have hrel : D0.symm (H z) = morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr z := by
+      dsimp [H]
+      change D0.toEquiv.symm (D0.toEquiv (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr z)) =
+        morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr z
+      exact D0.toEquiv.symm_apply_apply (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr z)
+    exact congrArg Subtype.val hrel.symm
+  · have hcomp : ContMDiff (morseModelWithCornersHalfSpace m)
+        (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+        (fun y : morseUpperSublevel hk c r => H.symm (D0 y)) :=
+      hHs.comp hD0
+    refine hcomp.congr ?_
+    intro y
+    have hrel : H.symm (D0 y) = (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr).symm y := by
+      dsimp [H]
+      have hz : D0.toHomeomorph.symm (D0 y) = y := by
+        change D0.toEquiv.symm (D0.toEquiv y) = y
+        exact D0.toEquiv.symm_apply_apply y
+      change (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr).symm
+        (D0.toHomeomorph.symm (D0 y)) = (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr).symm y
+      rw [hz]
+    exact hrel.symm
 
 @[reducible]
 noncomputable def morseLowerChartedSpace {m k : ℕ} (hk : k ≤ m + 1) (c ε : ℝ) (hε : 0 < ε) :
@@ -3002,9 +3120,50 @@ theorem contMDiff_morseLowerInclusion {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ 
   have hsymm : ContMDiff (morseModelWithCornersHalfSpace m)
       (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
       ((morseAttachedHomeoUpper hk c ε r δ (le_of_lt hε) hδ0 hδr hr).symm) :=
-    contMDiff_homeomorph_symm_of_chartedSpaceOfHomeomorph
-      (morseAttachedHomeoUpper hk c ε r δ (le_of_lt hε) hδ0 hδr hr)
-      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+    by
+      letI : ChartedSpace (MorseHalfSpace m)
+          (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) :=
+        sublevelChartedSpace (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+          (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+          (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+      have hmani : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+          (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+          (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) _ _ :=
+        sublevelIsManifold (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+          (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+          (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+      letI := hmani
+      let H : morseAttachedSpace hk c ε r δ (le_of_lt hε) hδ0 hδr hr ≃ₜ
+          SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c :=
+        morseAttachedHomeoRounded hk c ε r δ (le_of_lt hε) hδ0 hδr hr
+      have hHs : ContMDiff (morseModelWithCornersHalfSpace m)
+          (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+          (fun r : SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c => H.symm r) :=
+        contMDiff_homeomorph_symm_of_chartedSpaceOfHomeomorph H
+          (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      let D0 : SublevelSpace (CellAttachment.morseNormalForm hk c) (c + r ^ 2 / 2) ≃ₘ⟮
+          morseModelWithCornersHalfSpace m, morseModelWithCornersHalfSpace m⟯
+          SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c :=
+        modelAttachedSublevelDiffeomorph hk c ε r δ hδ0 hδr hr
+      have hD0 : ContMDiff (morseModelWithCornersHalfSpace m)
+          (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+          (fun y : morseUpperSublevel hk c r => D0 y) :=
+        D0.contMDiff_toFun
+      have hcomp' : ContMDiff (morseModelWithCornersHalfSpace m)
+          (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+          (fun y : morseUpperSublevel hk c r => H.symm (D0 y)) :=
+        hHs.comp hD0
+      refine hcomp'.congr ?_
+      intro y
+      have hrel : H.symm (D0 y) = (morseAttachedHomeoUpper hk c ε r δ (le_of_lt hε) hδ0 hδr hr).symm y := by
+        dsimp [H]
+        have hz : D0.toHomeomorph.symm (D0 y) = y := by
+          change D0.toEquiv.symm (D0.toEquiv y) = y
+          exact D0.toEquiv.symm_apply_apply y
+        change (morseAttachedHomeoUpper hk c ε r δ (le_of_lt hε) hδ0 hδr hr).symm
+          (D0.toHomeomorph.symm (D0 y)) = (morseAttachedHomeoUpper hk c ε r δ (le_of_lt hε) hδ0 hδr hr).symm y
+        rw [hz]
+      exact hrel.symm
   have hcomp : ContMDiff (morseModelWithCornersHalfSpace m)
       (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
       (fun a : morseLowerSublevel hk c ε =>
@@ -3024,13 +3183,7 @@ theorem morseAttachedIsManifold {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
       (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
       (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) _
       (morseAttachedChartedSpace hk c ε r δ hε hδ0 hδr hr) := by
-  classical
-  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
-    morseUpperChartedSpace hk c r hr
-  letI : IsManifold (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞) (morseUpperSublevel hk c r) :=
-    morseUpperIsManifold hk c r hr
-  exact isManifoldOfHomeomorph (morseModelWithCornersHalfSpace m)
-    (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr)
+  exact morseAttachedIsManifoldNatural hk c ε r δ hε hδ0 hδr hr
 
 noncomputable def morseAttachedDiffeomorphUpper {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
@@ -3040,24 +3193,8 @@ noncomputable def morseAttachedDiffeomorphUpper {m k : ℕ} (hk : k ≤ m + 1) (
       (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) _
       (morseAttachedChartedSpace hk c ε r δ hε hδ0 hδr hr)
       (morseUpperSublevel hk c r) _ (morseUpperChartedSpace hk c r hr)
-      (⊤ : ℕ∞) := by
-  classical
-  letI : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) :=
-    morseAttachedChartedSpace hk c ε r δ hε hδ0 hδr hr
-  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
-    morseUpperChartedSpace hk c r hr
-  letI : IsManifold (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞) (morseUpperSublevel hk c r) :=
-    morseUpperIsManifold hk c r hr
-  refine
-    { toEquiv := (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr).toEquiv
-      contMDiff_toFun := ?_
-      contMDiff_invFun := ?_ }
-  · exact contMDiff_homeomorph_of_chartedSpaceOfHomeomorph
-      (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr)
-      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
-  · exact contMDiff_homeomorph_symm_of_chartedSpaceOfHomeomorph
-      (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr)
-      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (⊤ : ℕ∞) :=
+  morseAttachedDiffeomorphUpperNatural hk c ε r δ hε hδ0 hδr hr
 
 noncomputable def morseAttachedDiffeomorphModifiedSublevel {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
