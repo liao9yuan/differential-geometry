@@ -163,7 +163,7 @@ omit [NeZero (Module.finrank ℝ E)]
 family assembles into an `Option`-indexed basis of `E`, with `none ↦ u` and
 `some i ↦ v i`.  (Weaker input than `exists_scaled_basis`: only `u ⊥ vᵢ` and
 `LinearIndependent v`, not orthonormality.) -/
-private theorem exists_perp_basis
+theorem exists_perp_basis
     (g : SmoothRiemannianMetric I M) (p : M) (u : TangentSpace I p)
     (v : Fin (Module.finrank Real E - 1) → TangentSpace I p)
     (hv : LinearIndependent Real v)
@@ -272,7 +272,7 @@ private theorem intrPoleCap
     intro i
     rw [hBsome i]
     exact hperp i
-  obtain ⟨c, hc, hdensity⟩ :=
+  obtain ⟨c, hc, _hcval, hdensity⟩ :=
     normalDensity_curve (I := I) g p ue B hBnone hBperp hsrc hrad
   -- near-pole bound on the chart density
   have hcontAt : ContinuousAt (normalChartDensity (I := I) g p) 0 := by

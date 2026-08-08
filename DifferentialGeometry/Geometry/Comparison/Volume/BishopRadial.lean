@@ -832,7 +832,7 @@ theorem normalRatio_anti
         r ^ Fintype.card ι * normalChartDensity (I := I) g p (r • u) /
           hypDensity q (Fintype.card ι) r)
       (Ioo (0 : ℝ) b) := by
-  obtain ⟨c, hc, hdensity⟩ :=
+  obtain ⟨c, hc, _hcval, hdensity⟩ :=
     normalDensity_curve (I := I) g p u B hBu hperp hsrc hrad
   intro r hr s hs hrs
   calc
