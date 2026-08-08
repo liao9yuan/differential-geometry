@@ -3450,6 +3450,200 @@ theorem morseHandleAdjunctionHomeoUnion_lower {m k : ℕ} (hk : k ≤ m + 1) (c 
     (by
       exact isClosed_Iic.preimage hcont) x
 
+noncomputable def morseBeltLowerSet {m k : ℕ} (hk : k ≤ m + 1) (c ε : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) : Set (SublevelSpace f (c - ε)) :=
+  {x | x.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R}}
+
+noncomputable def morseBeltSumSet {m k : ℕ} (hk : k ≤ m + 1) (c ε : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) :
+    Set (StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε)) :=
+  (Sum.inl '' Set.univ : Set (StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε))) ∪
+    Sum.inr '' morseBeltLowerSet hk c ε data
+
+noncomputable def morseBeltSet {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    Set (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)) :=
+  (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) '' morseBeltLowerSet hk c ε data ∪
+    (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)) '' Set.univ
+
+private theorem morseAttachingEmbedding_mem_lowerBelt {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (p : AttachingRegion k (m + 1 - k)) :
+    morseAttachingEmbedding hk c ε r data hε hεr p ∈ morseBeltLowerSet hk c ε data := by
+  dsimp [morseBeltLowerSet]
+  refine ⟨cocoreModelPoint hk ε r p, ?_, ?_⟩
+  · exact le_trans (cocoreModelPoint_norm_le hk ε r (le_of_lt hε) p) hεr
+  · change data.χ (cocoreModelPoint hk ε r p) = (morseAttachingEmbedding hk c ε r data hε hεr p).1
+    rfl
+
+private theorem morseBeltLowerMap_mem {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε)
+    (x : SublevelSpace f (c - ε)) (hx : x ∈ morseBeltLowerSet hk c ε data) :
+    morseNormalForm hk c (data.χ.symm x.1) ≤ c + r ^ 2 / 2 := by
+  rcases hx with ⟨y, hy, hxy⟩
+  have hsrc : y ∈ data.χ.source := data.hχsrc y hy
+  have hsymm : data.χ.symm x.1 = y := by
+    rw [← hxy]
+    exact data.χ.left_inv hsrc
+  rw [hsymm]
+  have hf : f (data.χ y) = morseNormalForm hk c y := data.hnorm y hy
+  have hle : morseNormalForm hk c y ≤ c - ε := by
+    rw [← hf]
+    rw [hxy]
+    exact x.2
+  have hr2 : 0 ≤ r ^ 2 := sq_nonneg r
+  nlinarith
+
+noncomputable def morseBeltMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (z : {z' : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε hεr) // z' ∈ morseBeltSet hk c ε r data hε hεr}) :
+    morseUpperSublevel hk c r :=
+  by
+  classical
+  exact Quot.liftOn z.1
+    (fun s : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
+      match s with
+      | Sum.inl d =>
+          (⟨modelHandleMap hk ε r d, modelHandleMap_mem_upper hk c ε r (le_of_lt hε) d⟩ :
+            morseUpperSublevel hk c r)
+      | Sum.inr x =>
+          if hx : x ∈ morseBeltLowerSet hk c ε data then
+            (⟨data.χ.symm x.1, morseBeltLowerMap_mem hk c ε r data hε x hx⟩ :
+              morseUpperSublevel hk c r)
+          else
+            (⟨0, by
+              change morseNormalForm hk c 0 ≤ c + r ^ 2 / 2
+              have h0 : morseNormalForm hk c 0 = c := by
+                dsimp [morseNormalForm]
+                simp
+              rw [h0]
+              have hr2 : 0 ≤ r ^ 2 := sq_nonneg r
+              nlinarith⟩ : morseUpperSublevel hk c r))
+    (by
+      intro a b hab
+      rcases hab with ⟨p, hp | hp⟩
+      · rcases hp with ⟨ha, hb⟩
+        subst a
+        subst b
+        have hsymm : data.χ.symm (morseAttachingEmbedding hk c ε r data hε hεr p).1 =
+            modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p) := by
+          have hb' : (morseAttachingEmbedding hk c ε r data hε hεr p).1 ∈
+              data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} := by
+            refine ⟨cocoreModelPoint hk ε r p, ?_, ?_⟩
+            · exact le_trans (cocoreModelPoint_norm_le hk ε r (le_of_lt hε) p) hεr
+            · change data.χ (cocoreModelPoint hk ε r p) =
+                (morseAttachingEmbedding hk c ε r data hε hεr p).1
+              rfl
+          rcases hb' with ⟨y, hy, hxy⟩
+          have hsrc : y ∈ data.χ.source := data.hχsrc y hy
+          have hsymm' : data.χ.symm (morseAttachingEmbedding hk c ε r data hε hεr p).1 = y := by
+            calc
+              data.χ.symm (morseAttachingEmbedding hk c ε r data hε hεr p).1 =
+                  data.χ.symm (data.χ y) := by
+                congr 1
+                exact hxy.symm
+              _ = y := data.χ.left_inv hsrc
+          have hmain : y = modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p) := by
+            apply data.χ.injOn hsrc
+            · exact data.hχsrc (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p))
+                (le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε)
+                  (attachingInclusion k (m + 1 - k) p)) hεr)
+            · calc
+                data.χ y = (morseAttachingEmbedding hk c ε r data hε hεr p).1 := by
+                  exact hxy
+                _ = data.χ (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p)) := by
+                  exact morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε hεr p
+          rw [hsymm', hmain]
+        apply Subtype.ext
+        dsimp
+        have hpφ : morseAttachingEmbedding hk c ε r data hε hεr p ∈
+            morseBeltLowerSet hk c ε data :=
+          morseAttachingEmbedding_mem_lowerBelt hk c ε r data hε hεr p
+        simp [hpφ]
+        simpa using hsymm.symm
+      · rcases hp with ⟨hb, ha⟩
+        subst a
+        subst b
+        have hsymm : data.χ.symm (morseAttachingEmbedding hk c ε r data hε hεr p).1 =
+            modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p) := by
+          have hb' : (morseAttachingEmbedding hk c ε r data hε hεr p).1 ∈
+              data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} := by
+            refine ⟨cocoreModelPoint hk ε r p, ?_, ?_⟩
+            · exact le_trans (cocoreModelPoint_norm_le hk ε r (le_of_lt hε) p) hεr
+            · change data.χ (cocoreModelPoint hk ε r p) =
+                (morseAttachingEmbedding hk c ε r data hε hεr p).1
+              rfl
+          rcases hb' with ⟨y, hy, hxy⟩
+          have hsrc : y ∈ data.χ.source := data.hχsrc y hy
+          have hsymm' : data.χ.symm (morseAttachingEmbedding hk c ε r data hε hεr p).1 = y := by
+            calc
+              data.χ.symm (morseAttachingEmbedding hk c ε r data hε hεr p).1 =
+                  data.χ.symm (data.χ y) := by
+                congr 1
+                exact hxy.symm
+              _ = y := data.χ.left_inv hsrc
+          have hmain : y = modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p) := by
+            apply data.χ.injOn hsrc
+            · exact data.hχsrc (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p))
+                (le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε)
+                  (attachingInclusion k (m + 1 - k) p)) hεr)
+            · calc
+                data.χ y = (morseAttachingEmbedding hk c ε r data hε hεr p).1 := by
+                  exact hxy
+                _ = data.χ (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p)) := by
+                  exact morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε hεr p
+          rw [hsymm', hmain]
+        apply Subtype.ext
+        dsimp
+        have hpφ : morseAttachingEmbedding hk c ε r data hε hεr p ∈
+            morseBeltLowerSet hk c ε data :=
+          morseAttachingEmbedding_mem_lowerBelt hk c ε r data hε hεr p
+        simp [hpφ]
+        simpa using hsymm)
+
+theorem morseBeltMap_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (d : StandardHandle k (m + 1 - k)) :
+    (morseBeltMap hk c ε r data hε hεr
+      ⟨Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d,
+        Or.inr ⟨d, trivial, rfl⟩⟩ : MorseModel (m + 1)) =
+      modelHandleMap hk ε r d := by
+  dsimp [morseBeltMap]
+  rfl
+
+theorem morseBeltMap_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (x : SublevelSpace f (c - ε)) (hx : x ∈ morseBeltLowerSet hk c ε data) :
+    (morseBeltMap hk c ε r data hε hεr
+      ⟨Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x,
+        Or.inl ⟨x, hx, rfl⟩⟩ : MorseModel (m + 1)) =
+      data.χ.symm x.1 := by
+  dsimp [morseBeltMap, Handle.lower, adjunctionLower, adjunctionMk, Quot.liftOn]
+  simp [hx]
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
