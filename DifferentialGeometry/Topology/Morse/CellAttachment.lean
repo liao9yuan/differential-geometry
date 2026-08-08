@@ -2109,6 +2109,14 @@ theorem modelAttachedUnstretch_negPart {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ
   dsimp [modelAttachedUnstretch]
   rw [negPart_recombine]
 
+theorem modelAttachedUnstretch_negPart_norm_sq {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (y : MorseModel n) :
+    ‖negPart hk (modelAttachedUnstretch hk ε r δ y)‖ ^ (2 : ℕ) = ‖negPart hk y‖ ^ (2 : ℕ) := by
+  have hne : ‖negPart hk (modelAttachedUnstretch hk ε r δ y)‖ = ‖negPart hk y‖ := by
+    exact congrArg (norm : EuclideanSpace ℝ (Fin k) → ℝ)
+      (modelAttachedUnstretch_negPart hk ε r δ y)
+  simp [hne]
+
 theorem modelAttachedUnstretch_posPart {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ) (y : MorseModel n) :
     posPart hk (modelAttachedUnstretch hk ε r δ y) =
       (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) / smoothCap ε r δ (‖negPart hk y‖ ^ 2))) •
@@ -2188,6 +2196,223 @@ theorem modelAttachedUnstretch_mem {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ) (h
       mul_le_mul_of_nonneg_left hy hnonneg
     rwa [div_mul_cancel₀ (‖negPart hk y‖ ^ 2 + r ^ 2) (ne_of_gt hs)] at hle'
   exact hmain
+
+theorem modelAttachedUnstretch_stretch {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) (y : MorseModel n) :
+    modelAttachedUnstretch hk ε r δ (modelAttachedStretch hk ε r δ y) = y := by
+  let s : ℝ := smoothCap ε r δ (‖negPart hk y‖ ^ 2)
+  let t : ℝ := ‖negPart hk y‖ ^ 2
+  have hs : 0 < s := by
+    dsimp [s]
+    exact smoothCap_pos (ε := ε) (r := r) (δ := δ) (t := ‖negPart hk y‖ ^ 2) hδ0 hδr
+  have ht : 0 < t + r ^ 2 := by
+    dsimp [t]
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    nlinarith [sq_nonneg (‖negPart hk y‖ : ℝ)]
+  have hnonneg1 : 0 ≤ s / (t + r ^ 2) := div_nonneg (le_of_lt hs) (le_of_lt ht)
+  have hnonneg2 : 0 ≤ (t + r ^ 2) / s := div_nonneg (le_of_lt ht) (le_of_lt hs)
+  have hsq : (Real.sqrt (s / (t + r ^ 2)) * Real.sqrt ((t + r ^ 2) / s)) ^ 2 = 1 := by
+    rw [mul_pow]
+    rw [Real.sq_sqrt hnonneg1]
+    rw [Real.sq_sqrt hnonneg2]
+    field_simp [ne_of_gt hs, ne_of_gt ht]
+  have hnonneg' : 0 ≤ Real.sqrt (s / (t + r ^ 2)) * Real.sqrt ((t + r ^ 2) / s) := by positivity
+  have hscalar : Real.sqrt (s / (t + r ^ 2)) * Real.sqrt ((t + r ^ 2) / s) = 1 := by
+    have hsq' : (Real.sqrt (s / (t + r ^ 2)) * Real.sqrt ((t + r ^ 2) / s)) ^ 2 = (1 : ℝ) ^ 2 := by
+      simpa using hsq
+    exact (sq_eq_sq_iff_eq_or_eq_neg.mp hsq').resolve_right (by nlinarith [hnonneg'])
+  calc
+    modelAttachedUnstretch hk ε r δ (modelAttachedStretch hk ε r δ y) =
+        recombine hk (negPart hk (modelAttachedUnstretch hk ε r δ (modelAttachedStretch hk ε r δ y)))
+          (posPart hk (modelAttachedUnstretch hk ε r δ (modelAttachedStretch hk ε r δ y))) :=
+      (recombine_decompose hk (modelAttachedUnstretch hk ε r δ (modelAttachedStretch hk ε r δ y))).symm
+    _ = recombine hk (negPart hk y) (posPart hk y) := by
+      congr 1
+      · simp [modelAttachedUnstretch_negPart, modelAttachedStretch_negPart]
+      · have hneg : ‖negPart hk (modelAttachedStretch hk ε r δ y)‖ ^ 2 = t := by
+          dsimp [t]
+          exact modelAttachedStretch_negPart_norm_sq hk ε r δ y
+        have hpos1 : posPart hk (modelAttachedStretch hk ε r δ y) =
+            Real.sqrt (s / (t + r ^ 2)) • posPart hk y := by
+          dsimp [s, t]
+          exact modelAttachedStretch_posPart hk ε r δ y
+        have hpos2 : posPart hk (modelAttachedUnstretch hk ε r δ (modelAttachedStretch hk ε r δ y)) =
+            Real.sqrt ((t + r ^ 2) / s) • posPart hk (modelAttachedStretch hk ε r δ y) := by
+          dsimp [s, t]
+          rw [modelAttachedUnstretch_posPart]
+          rw [hneg]
+        rw [hpos2, hpos1, smul_smul, mul_comm, hscalar, one_smul]
+    _ = y := recombine_decompose hk y
+
+theorem modelAttachedStretch_unstretch {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) (y : MorseModel n) :
+    modelAttachedStretch hk ε r δ (modelAttachedUnstretch hk ε r δ y) = y := by
+  let s : ℝ := smoothCap ε r δ (‖negPart hk y‖ ^ 2)
+  let t : ℝ := ‖negPart hk y‖ ^ 2
+  have hs : 0 < s := by
+    dsimp [s]
+    exact smoothCap_pos (ε := ε) (r := r) (δ := δ) (t := ‖negPart hk y‖ ^ 2) hδ0 hδr
+  have ht : 0 < t + r ^ 2 := by
+    dsimp [t]
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    nlinarith [sq_nonneg (‖negPart hk y‖ : ℝ)]
+  have hnonneg1 : 0 ≤ s / (t + r ^ 2) := div_nonneg (le_of_lt hs) (le_of_lt ht)
+  have hnonneg2 : 0 ≤ (t + r ^ 2) / s := div_nonneg (le_of_lt ht) (le_of_lt hs)
+  have hsq : (Real.sqrt (s / (t + r ^ 2)) * Real.sqrt ((t + r ^ 2) / s)) ^ 2 = 1 := by
+    rw [mul_pow]
+    rw [Real.sq_sqrt hnonneg1]
+    rw [Real.sq_sqrt hnonneg2]
+    field_simp [ne_of_gt hs, ne_of_gt ht]
+  have hnonneg' : 0 ≤ Real.sqrt (s / (t + r ^ 2)) * Real.sqrt ((t + r ^ 2) / s) := by positivity
+  have hscalar : Real.sqrt (s / (t + r ^ 2)) * Real.sqrt ((t + r ^ 2) / s) = 1 := by
+    have hsq' : (Real.sqrt (s / (t + r ^ 2)) * Real.sqrt ((t + r ^ 2) / s)) ^ 2 = (1 : ℝ) ^ 2 := by
+      simpa using hsq
+    exact (sq_eq_sq_iff_eq_or_eq_neg.mp hsq').resolve_right (by nlinarith [hnonneg'])
+  calc
+    modelAttachedStretch hk ε r δ (modelAttachedUnstretch hk ε r δ y) =
+        recombine hk (negPart hk (modelAttachedStretch hk ε r δ (modelAttachedUnstretch hk ε r δ y)))
+          (posPart hk (modelAttachedStretch hk ε r δ (modelAttachedUnstretch hk ε r δ y))) :=
+      (recombine_decompose hk (modelAttachedStretch hk ε r δ (modelAttachedUnstretch hk ε r δ y))).symm
+    _ = recombine hk (negPart hk y) (posPart hk y) := by
+      congr 1
+      · simp [modelAttachedStretch_negPart, modelAttachedUnstretch_negPart]
+      · have hneg : ‖negPart hk (modelAttachedUnstretch hk ε r δ y)‖ ^ 2 = t := by
+          dsimp [t]
+          exact modelAttachedUnstretch_negPart_norm_sq hk ε r δ y
+        have hpos1 : posPart hk (modelAttachedUnstretch hk ε r δ y) =
+            Real.sqrt ((t + r ^ 2) / s) • posPart hk y := by
+          dsimp [s, t]
+          exact modelAttachedUnstretch_posPart hk ε r δ y
+        have hpos2 : posPart hk (modelAttachedStretch hk ε r δ (modelAttachedUnstretch hk ε r δ y)) =
+            Real.sqrt (s / (t + r ^ 2)) • posPart hk (modelAttachedUnstretch hk ε r δ y) := by
+          dsimp [s, t]
+          rw [modelAttachedStretch_posPart]
+          rw [hneg]
+        rw [hpos2, hpos1, smul_smul, hscalar, one_smul]
+    _ = y := recombine_decompose hk y
+
+theorem contDiff_modelAttachedStretch {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelAttachedStretch hk ε r δ) := by
+  have hnormNeg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) := by
+    rw [show (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) =
+        fun y : MorseModel n => ∑ i : Fin k, (negPart hk y i) ^ 2 by
+      funext y
+      exact EuclideanSpace.real_norm_sq_eq (negPart hk y)]
+    fun_prop
+  have hcap : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) :=
+    (smoothCap_contDiff ε r δ).comp hnormNeg
+  have hden : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => ‖negPart hk y‖ ^ 2 + r ^ 2) := by
+    exact hnormNeg.add (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => r ^ 2))
+  have hden_pos : ∀ y : MorseModel n, 0 < ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+    intro y
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    nlinarith [sq_nonneg (‖negPart hk y‖ : ℝ)]
+  have harg : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2) / (‖negPart hk y‖ ^ 2 + r ^ 2)) :=
+    hcap.div hden (by intro y; exact ne_of_gt (hden_pos y))
+  have hsqrt : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => Real.sqrt (smoothCap ε r δ (‖negPart hk y‖ ^ 2) /
+        (‖negPart hk y‖ ^ 2 + r ^ 2))) :=
+    harg.sqrt (by
+      intro y
+      exact ne_of_gt (div_pos (smoothCap_pos (ε := ε) (r := r) (δ := δ)
+        (t := ‖negPart hk y‖ ^ 2) hδ0 hδr) (hden_pos y)))
+  rw [contDiff_pi]
+  intro i
+  by_cases hi : i.val < k
+  · have hcomp : (fun y : MorseModel n => modelAttachedStretch hk ε r δ y i) =
+        fun y : MorseModel n => y (negIdx hk ⟨i.val, hi⟩) := by
+      funext y
+      dsimp [modelAttachedStretch]
+      rw [recombine, dif_pos hi]
+      rfl
+    rw [hcomp]
+    fun_prop
+  · have hcomp : (fun y : MorseModel n => modelAttachedStretch hk ε r δ y i) =
+        fun y : MorseModel n =>
+          Real.sqrt (smoothCap ε r δ (‖negPart hk y‖ ^ 2) / (‖negPart hk y‖ ^ 2 + r ^ 2)) *
+            y (posIdx hk ⟨i.val - k, by
+              have hkle : k ≤ i.val := le_of_not_gt hi
+              have hi' : i.val < n := i.isLt
+              omega⟩) := by
+      funext y
+      dsimp [modelAttachedStretch]
+      rw [recombine, dif_neg hi]
+      rfl
+    rw [hcomp]
+    have hcoord : ContDiff ℝ (⊤ : ℕ∞)
+        (fun y : MorseModel n => y (posIdx hk ⟨i.val - k, by
+          have hkle : k ≤ i.val := le_of_not_gt hi
+          have hi' : i.val < n := i.isLt
+          omega⟩)) := by
+      fun_prop
+    exact hsqrt.mul hcoord
+
+theorem contDiff_modelAttachedUnstretch {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelAttachedUnstretch hk ε r δ) := by
+  have hnormNeg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) := by
+    rw [show (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) =
+        fun y : MorseModel n => ∑ i : Fin k, (negPart hk y i) ^ 2 by
+      funext y
+      exact EuclideanSpace.real_norm_sq_eq (negPart hk y)]
+    fun_prop
+  have hcap : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) :=
+    (smoothCap_contDiff ε r δ).comp hnormNeg
+  have hden : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => ‖negPart hk y‖ ^ 2 + r ^ 2) := by
+    exact hnormNeg.add (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => r ^ 2))
+  have hden_pos : ∀ y : MorseModel n, 0 < ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+    intro y
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    nlinarith [sq_nonneg (‖negPart hk y‖ : ℝ)]
+  have hcap_pos : ∀ y : MorseModel n, 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+    intro y
+    exact smoothCap_pos (ε := ε) (r := r) (δ := δ) (t := ‖negPart hk y‖ ^ 2) hδ0 hδr
+  have harg : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => (‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) :=
+    hden.div hcap (by intro y; exact ne_of_gt (hcap_pos y))
+  have hsqrt : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2))) :=
+    harg.sqrt (by
+      intro y
+      exact ne_of_gt (div_pos (hden_pos y) (hcap_pos y)))
+  rw [contDiff_pi]
+  intro i
+  by_cases hi : i.val < k
+  · have hcomp : (fun y : MorseModel n => modelAttachedUnstretch hk ε r δ y i) =
+        fun y : MorseModel n => y (negIdx hk ⟨i.val, hi⟩) := by
+      funext y
+      dsimp [modelAttachedUnstretch]
+      rw [recombine, dif_pos hi]
+      rfl
+    rw [hcomp]
+    fun_prop
+  · have hcomp : (fun y : MorseModel n => modelAttachedUnstretch hk ε r δ y i) =
+        fun y : MorseModel n =>
+          Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) / smoothCap ε r δ (‖negPart hk y‖ ^ 2)) *
+            y (posIdx hk ⟨i.val - k, by
+              have hkle : k ≤ i.val := le_of_not_gt hi
+              have hi' : i.val < n := i.isLt
+              omega⟩) := by
+      funext y
+      dsimp [modelAttachedUnstretch]
+      rw [recombine, dif_neg hi]
+      rfl
+    rw [hcomp]
+    have hcoord : ContDiff ℝ (⊤ : ℕ∞)
+        (fun y : MorseModel n => y (posIdx hk ⟨i.val - k, by
+          have hkle : k ≤ i.val := le_of_not_gt hi
+          have hi' : i.val < n := i.isLt
+          omega⟩)) := by
+      fun_prop
+    exact hsqrt.mul hcoord
 
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
