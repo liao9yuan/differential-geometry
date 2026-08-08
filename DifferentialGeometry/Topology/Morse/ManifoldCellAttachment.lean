@@ -2923,6 +2923,103 @@ noncomputable def morseAttachedDiffeomorphUpper {m k : ℕ} (hk : k ≤ m + 1) (
       (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr)
       (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
 
+noncomputable def morseHandleEmbeddingAttached {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    StandardHandle k (m + 1 - k) → morseAttachedSpace hk c ε r δ hε hδ0 hδr hr :=
+  fun p => DifferentialGeometry.Topology.adjunctionLower
+    (morseHandleGlueMap hk c ε r δ hε hδ0 hδr hr)
+    ⟨CellAttachment.modelAttachedStretch hk ε r δ (CellAttachment.modelHandleMap hk ε r p),
+      morseUpperSublevel_mem_stretch_handle hk c ε r δ hδ0 hδr hr
+        ⟨CellAttachment.modelHandleMap hk ε r p,
+          CellAttachment.modelHandleMap_mem_upper hk c ε r hε p⟩⟩
+
+theorem morseAttachedToUpper_handleEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0)
+    (p : StandardHandle k (m + 1 - k)) :
+    morseAttachedToUpper hk c ε r δ hε hδ0 hδr hr
+      (morseHandleEmbeddingAttached hk c ε r δ hε hδ0 hδr hr p) =
+      (⟨CellAttachment.modelHandleMap hk ε r p,
+        CellAttachment.modelHandleMap_mem_upper hk c ε r hε p⟩ : morseUpperSublevel hk c r) := by
+  dsimp [morseHandleEmbeddingAttached]
+  rw [morseAttachedToUpper_handle hk c ε r δ hε hδ0 hδr hr]
+  apply Subtype.ext
+  exact CellAttachment.modelAttachedUnstretch_stretch hk ε r δ hδ0 hδr hr
+    (CellAttachment.modelHandleMap hk ε r p)
+
+theorem sq_sqrt_two_mul (ε : ℝ) (hε : 0 ≤ ε) : (Real.sqrt (2 * ε)) ^ 2 = 2 * ε := by
+  rw [Real.sq_sqrt (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hε)]
+
+theorem morseAttachedHomotopyEquivCellAdjunction {m k : ℕ} (hk : k ≤ m + 1) (c ε δ : ℝ)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < 2 * ε) :
+    Nonempty (ContinuousMap.HomotopyEquiv
+      (morseAttachedSpace hk c ε (Real.sqrt (2 * ε)) δ (le_of_lt hε) hδ0
+        ((sq_sqrt_two_mul ε (le_of_lt hε)).symm ▸ hδr)
+        (ne_of_gt (Real.sqrt_pos.2 (mul_pos zero_lt_two hε))))
+      (CellAdjunctionSpace k (CellAttachment.attachMap hk c ε (le_of_lt hε)))) := by
+  let r : ℝ := Real.sqrt (2 * ε)
+  let hr : r ≠ 0 := ne_of_gt (Real.sqrt_pos.2 (mul_pos zero_lt_two hε))
+  have hr₀sq : r ^ 2 = 2 * ε := by
+    dsimp [r]
+    rw [Real.sq_sqrt (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) (le_of_lt hε))]
+  have hδr' : δ < r ^ 2 := by
+    rw [hr₀sq]
+    exact hδr
+  let hUpper : morseUpperSublevel hk c r ≃ₜ upperSublevel hk c ε :=
+    subtypeSetHomeo (by
+      have hlevel : c + r ^ 2 / 2 = c + ε := by
+        rw [hr₀sq]
+        ring
+      exact congrArg (sublevel (CellAttachment.morseNormalForm hk c)) hlevel)
+  refine ⟨(morseAttachedHomeoUpper hk c ε r δ (le_of_lt hε) hδ0 hδr' hr).toHomotopyEquiv.trans ?_⟩
+  exact (hUpper.toHomotopyEquiv.trans (CellAttachment.cellAttachmentModel hk c ε hε))
+
+def morseAttachedDiffeomorphRelative {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) :=
+      morseAttachedChartedSpace hk c ε r δ hε hδ0 hδr hr)
+    (hcs₂ : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
+      morseUpperChartedSpace hk c r hr)
+    (Ψ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) _ hcs₁
+      (morseUpperSublevel hk c r) _ hcs₂ (⊤ : ℕ∞)) : Prop := by
+  letI : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) := hcs₁
+  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) := hcs₂
+  exact
+    (∀ a : morseLowerSublevel hk c ε,
+      Ψ.toEquiv (DifferentialGeometry.Topology.adjunctionCell
+        (i := fun a : morseLowerSublevel hk c ε => a)
+        (morseHandleGlueMap hk c ε r δ hε hδ0 hδr hr) a) =
+      (⟨a.1, morseLowerSublevel_mem_upper hk c ε r hε a⟩ : morseUpperSublevel hk c r)) ∧
+    (∀ p : StandardHandle k (m + 1 - k),
+      Ψ.toEquiv (morseHandleEmbeddingAttached hk c ε r δ hε hδ0 hδr hr p) =
+      (⟨CellAttachment.modelHandleMap hk ε r p,
+        CellAttachment.modelHandleMap_mem_upper hk c ε r hε p⟩ :
+        morseUpperSublevel hk c r))
+
+theorem morseHandleEmbeddingAttached_attaching {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0)
+    (p : AttachingRegion k (m + 1 - k)) :
+    morseHandleEmbeddingAttached hk c ε r δ hε hδ0 hδr hr
+        (attachingInclusion k (m + 1 - k) p) =
+      DifferentialGeometry.Topology.adjunctionCell
+        (i := fun a : morseLowerSublevel hk c ε => a)
+        (morseHandleGlueMap hk c ε r δ hε hδ0 hδr hr)
+        ⟨CellAttachment.modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p),
+          by
+            change CellAttachment.morseNormalForm hk c
+              (CellAttachment.modelHandleMap hk ε r (cellBoundaryInclusion k p.1, p.2)) ≤ c - ε
+            rw [CellAttachment.modelHandleMap_f_boundary hk c ε r hε p.1 p.2]⟩ := by
+  dsimp [morseHandleEmbeddingAttached]
+  apply Quot.sound
+  refine ⟨(⟨CellAttachment.modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p), by
+    change CellAttachment.morseNormalForm hk c
+      (CellAttachment.modelHandleMap hk ε r (cellBoundaryInclusion k p.1, p.2)) ≤ c - ε
+    rw [CellAttachment.modelHandleMap_f_boundary hk c ε r hε p.1 p.2]⟩ :
+      morseLowerSublevel hk c ε), Or.inr ?_⟩
+  constructor <;> rfl
+
 theorem morse_smooth_handle_attachment_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
@@ -4855,12 +4952,12 @@ noncomputable def sublevelCellAdjunctionHomotopyEquivUnderOfMorseChart {n : ℕ}
       left_inv := L.cast h₀.symm rfl
       right_inv := H₃ }
 
-theorem morse_smooth_handle_attachment_relative {n : ℕ} {H : Type} [TopologicalSpace H]
+theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [TopologicalSpace H]
     {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
-    (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
-    (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ n)
+    (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ m + 1)
     (hnd : IsNondegenerateCriticalPointAt I f p)
     (hindex : sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) = k)
     (hfp : f p = c)
@@ -4868,25 +4965,43 @@ theorem morse_smooth_handle_attachment_relative {n : ℕ} {H : Type} [Topologica
     (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
     (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
       x = p ∨ ¬ IsCriticalPointAt I f x) :
-    ∃ ε : ℝ, 0 < ε ∧ ε ≤ a ∧
+    ∃ ε : ℝ, ∃ hε : 0 < ε, ∃ _ : ε ≤ a,
     ∃ g : M → ℝ,
       ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g ∧
       (∀ x : M, g x ≤ f x) ∧
       ({x : M | g x ≤ c + ε} = sublevel f (c + ε)) ∧
       (∀ x : M, f x ≤ c - ε → g x ≤ c - ε) ∧
       ∃ v : (x : M) → TangentSpace I x,
-        ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
           (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) ∧
         IsCompact (tsupport v) ∧
         (∀ x ∈ g ⁻¹' Set.Icc (c - ε) (c + ε),
           (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) = -1) ∧
         ∃ Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞),
           Φ.toEquiv '' sublevel g (c - ε) = sublevel f (c + ε) ∧
-          (∀ x : M, x ∉ tsupport v → Φ.toEquiv x = x) := by
+          (∀ x : M, x ∉ tsupport v → Φ.toEquiv x = x) ∧
+          ∃ r : ℝ, ∃ hr : r ≠ 0, ∃ _ : r ^ 2 = 2 * ε,
+          ∃ δ₁ : ℝ, ∃ hδ₁₀ : 0 < δ₁, ∃ hδ₁r : δ₁ < r ^ 2,
+          ∃ φ : AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε),
+            (∀ p : AttachingRegion k (m + 1 - k), f (φ p).1 = c - ε) ∧
+            Function.Injective φ ∧
+            (∃ _ : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+              (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+              (morseAttachedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) _
+              (morseAttachedChartedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr), True) ∧
+            ∃ Ψ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+              (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+              (morseModelWithCornersHalfSpace m)
+              (morseAttachedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) _
+              (morseAttachedChartedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr)
+              (morseUpperSublevel hk c r) _ (morseUpperChartedSpace hk c r hr)
+              (⊤ : ℕ∞),
+              morseAttachedDiffeomorphRelative hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr
+                (Ψ := Ψ) := by
   rcases morse_lemma I f hf p k hk hnd hindex with
     ⟨R, hRpos, χ, hχ0src, hχ0tgt, hχ0val, hχsrc, hnorm0, hχmd, hχsmd,
       R', hR'pos, hχon, hχsymmOn⟩
-  have hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y := by
+  have hnorm : ∀ y : MorseModel (m + 1), morseNorm (m + 1) y ≤ R → f (χ y) = morseNormalForm hk c y := by
     intro y hy
     rw [← hfp]
     exact hnorm0 y hy
@@ -4975,18 +5090,91 @@ theorem morse_smooth_handle_attachment_relative {n : ℕ} {H : Type} [Topologica
   rcases no_critical_value_transport (I := I) (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀)
       hcompactG hregularG with
     ⟨v, Φ, hv, hsupp, hdfOn, hrate, hcomplete, htransport, htie⟩
-  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_⟩
+  let r₀ : ℝ := Real.sqrt (2 * ε₀)
+  let δ₁ : ℝ := 3 * ε₀ / 2
+  have hr₀ : r₀ ≠ 0 := by
+    dsimp [r₀]
+    exact ne_of_gt (Real.sqrt_pos.2 (by positivity : 0 < 2 * ε₀))
+  have hr₀sq : r₀ ^ 2 = 2 * ε₀ := by
+    dsimp [r₀]
+    rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε₀)]
+  have hδ₁₀ : 0 < δ₁ := by
+    dsimp [δ₁]
+    positivity
+  have hδ₁r : δ₁ < r₀ ^ 2 := by
+    rw [hr₀sq]
+    dsimp [δ₁]
+    nlinarith [hε₀]
+  have hεr₀ : Real.sqrt (2 * ε₀ + 2 * r₀ ^ 2) ≤ R := by
+    rw [hr₀sq]
+    have hsix : 2 * ε₀ + 2 * (2 * ε₀) = 6 * ε₀ := by ring
+    rw [hsix]
+    have hsq : (Real.sqrt (6 * ε₀)) ^ 2 ≤ R ^ 2 := by
+      rw [Real.sq_sqrt (by positivity : 0 ≤ 6 * ε₀)]
+      have h1 : ε₀ ≤ R ^ 2 / 16 := le_trans hεmin (by
+        have hle' := min_le_left (R ^ 2) (R' ^ 2)
+        nlinarith)
+      nlinarith [h1]
+    exact le_of_sq_le_sq hsq (le_of_lt hRpos)
+  let data : MorseChart (m + 1) k hk c I f :=
+    { p := p, R := R, R' := R', ε := ε₀, χ := χ, hχ0 := hχ0val, hRpos := hRpos,
+      hR'pos := hR'pos, hεpos := hε₀, hεR := hεR, hnorm := hnorm, hχsrc := hχsrc,
+      hχon := hχon, hχsymmOn := hχsymmOn }
+  let φ : AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε₀) :=
+    fun p => ⟨(cocoreAttachingEmbedding hk c ε₀ r₀ data hε₀ hεr₀ p).1,
+      le_of_eq (cocoreAttachingEmbedding_value hk c ε₀ r₀ data hε₀ hεr₀ p)⟩
+  have hφ_boundary : ∀ p : AttachingRegion k (m + 1 - k), f (φ p).1 = c - ε₀ := by
+    intro p
+    dsimp [φ]
+    exact cocoreAttachingEmbedding_value hk c ε₀ r₀ data hε₀ hεr₀ p
+  have hφ_inj : Function.Injective φ := by
+    intro p q h
+    have h' : (cocoreAttachingEmbedding hk c ε₀ r₀ data hε₀ hεr₀ p).1 =
+        (cocoreAttachingEmbedding hk c ε₀ r₀ data hε₀ hεr₀ q).1 := by
+      change (φ p).1 = (φ q).1
+      exact congrArg Subtype.val h
+    exact cocoreAttachingEmbedding_injective hk c ε₀ r₀ data hε₀ hr₀ hεr₀
+      (Subtype.ext h')
+  let Ψ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (morseAttachedSpace hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀) _
+      (morseAttachedChartedSpace hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀)
+      (morseUpperSublevel hk c r₀) _ (morseUpperChartedSpace hk c r₀ hr₀)
+      (⊤ : ℕ∞) :=
+    morseAttachedDiffeomorphUpper hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀
+  have hrelative : morseAttachedDiffeomorphRelative hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀
+      (Ψ := Ψ) := by
+    dsimp [morseAttachedDiffeomorphRelative]
+    constructor
+    · intro a
+      change morseAttachedToUpper hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀
+        (DifferentialGeometry.Topology.adjunctionCell
+          (i := fun a : morseLowerSublevel hk c ε₀ => a)
+          (morseHandleGlueMap hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀) a) =
+        (⟨a.1, morseLowerSublevel_mem_upper hk c ε₀ r₀ (le_of_lt hε₀) a⟩ :
+          morseUpperSublevel hk c r₀)
+      exact morseAttachedToUpper_lower hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀ a
+    · intro p
+      change morseAttachedToUpper hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀
+        (morseHandleEmbeddingAttached hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀ p) =
+        (⟨CellAttachment.modelHandleMap hk ε₀ r₀ p,
+          CellAttachment.modelHandleMap_mem_upper hk c ε₀ r₀ (le_of_lt hε₀) p⟩ :
+          morseUpperSublevel hk c r₀)
+      exact morseAttachedToUpper_handleEmbedding hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀ p
+  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_, ?_,
+    r₀, hr₀, hr₀sq, δ₁, hδ₁₀, hδ₁r, φ, hφ_boundary, hφ_inj,
+    ⟨morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀, trivial⟩, Ψ, hrelative⟩
   · exact hgup
   · intro x hx
     exact le_trans (hg_le x) hx
   · intro x hx
     exact hdfOn x hx
-  · constructor
-    · exact htransport.trans hgup
-    · intro x hx
-      have hflow : curveAt v hcomplete x ((c - ε₀) - (c + ε₀)) = x := by
-        exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hx _
-      exact (htie x).trans hflow
+  · exact htransport.trans hgup
+  · intro x hx
+    have hflow : curveAt v hcomplete x ((c - ε₀) - (c + ε₀)) = x := by
+      exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hx _
+    exact (htie x).trans hflow
 
 theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
