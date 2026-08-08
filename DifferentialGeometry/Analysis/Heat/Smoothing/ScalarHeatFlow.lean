@@ -418,6 +418,153 @@ theorem heatSemigroup_apply_scalarEigenFunctionLp
           rw [show (∑' j, ⟪b j, w⟫_ℝ • b j) = w from
             by simpa [HilbertBasis.repr_apply_apply] using (b.hasSum_repr w).tsum_eq]
 
+theorem hasSum_scalarEigenFunctionLp_repr
+    (g : SmoothRiemannianMetric I M)
+    (v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
+    HasSum (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, v⟫_ℝ • scalarEigenFunctionLp g i) v := by
+  classical
+  set L := tensor00ScalarL2Equiv g
+  set b' := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+  have hb' : HasSum (fun i : TensorEigenIdx00 g =>
+      (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)).repr (L.symm v) i •
+        (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i)
+      (L.symm v) :=
+    (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)).hasSum_repr (L.symm v)
+  have hmap : HasSum (fun i : TensorEigenIdx00 g =>
+      L ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)).repr (L.symm v) i •
+          (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i))
+      (L (L.symm v)) :=
+    (L : TensorL2 0 0 g →L[ℝ] Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)).hasSum
+      hb'
+  have hL : L (L.symm v) = v := by simp
+  have hLb (i : TensorEigenIdx00 g) :
+      L ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i) =
+          scalarEigenFunctionLp g i := by
+    apply (tensor00ScalarL2Equiv g).symm.injective
+    calc
+      (tensor00ScalarL2Equiv g).symm
+          (L ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i))
+          = (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i := by
+            simp [L]
+      _ = (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) :=
+            (eigenvectorSmooth00_eq_basis (I := I) (M := M) g i).symm
+      _ = (tensor00ScalarL2Equiv g).symm (scalarEigenFunctionLp g i) := by
+            have hφ := scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i
+            rw [hφ]
+            simp
+  have hsummand (i : TensorEigenIdx00 g) :
+      L ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)).repr (L.symm v) i •
+          (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i) =
+        ⟪scalarEigenFunctionLp g i, v⟫_ℝ • scalarEigenFunctionLp g i := by
+    rw [L.map_smul]
+    have hc : (tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)).repr (L.symm v) i =
+        ⟪scalarEigenFunctionLp g i, v⟫_ℝ := by
+      rw [HilbertBasis.repr_apply_apply]
+      have hbv : ⟪(tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i, L.symm v⟫_ℝ =
+          ⟪L ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i), v⟫_ℝ := by
+        have h := (L.toLinearIsometry).inner_map_map
+          ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)) i) (L.symm v)
+        exact h.symm.trans (by simp [L.apply_symm_apply])
+      rw [hbv, hLb i]
+    rw [hc]
+    congr 2
+    exact hLb i
+  simpa [hL] using (HasSum.congr_fun hmap (fun i => (hsummand i).symm))
+
+theorem tensor00ScalarL2Equiv_tensorHeatSemigroup
+    (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 ≤ t) (U : TensorL2 0 0 g) :
+    tensor00ScalarL2Equiv g (tensorHeatSemigroup g 0 0 t U) =
+      heatSemigroup (I := I) (M := M) g t (tensor00ScalarL2Equiv g U) := by
+  classical
+  set L := tensor00ScalarL2Equiv g
+  set v := L U
+  have hadj (x : TensorL2 0 0 g) (y : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
+      ⟪L x, y⟫_ℝ = ⟪x, L.symm y⟫_ℝ := by
+    have h := (L.toLinearIsometry).inner_map_map x (L.symm y)
+    simpa [L.apply_symm_apply] using h
+  have hcoeff (i : TensorEigenIdx00 g) :
+      ⟪scalarEigenFunctionLp g i, L (tensorHeatSemigroup g 0 0 t U)⟫_ℝ =
+        ⟪scalarEigenFunctionLp g i, heatSemigroup (I := I) (M := M) g t v⟫_ℝ := by
+    have hφ : scalarEigenFunctionLp g i =
+        L (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) :=
+      scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i
+    calc
+      ⟪scalarEigenFunctionLp g i, L (tensorHeatSemigroup g 0 0 t U)⟫_ℝ
+          = ⟪(eigenvectorSmooth g 0 0 i : TensorL2 0 0 g),
+              tensorHeatSemigroup g 0 0 t U⟫_ℝ := by
+              rw [hφ]
+              exact (hadj (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g)
+                  (L (tensorHeatSemigroup g 0 0 t U))).trans (by simp [L])
+      _ = Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+            ⟪(eigenvectorSmooth g 0 0 i : TensorL2 0 0 g), U⟫_ℝ := by
+              have hc1 : ⟪(eigenvectorSmooth g 0 0 i : TensorL2 0 0 g),
+                    tensorHeatSemigroup g 0 0 t U⟫_ℝ =
+                  tensorL2Coeff (I := I) (M := M)
+                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+                    (tensorHeatSemigroup g 0 0 t U) i := by
+                rw [tensorL2Coeff_eq_inner]
+                congr 1
+                exact eigenvectorSmooth00_eq_basis (I := I) (M := M) g i
+              rw [hc1]
+              rw [tensorHeatSemigroup_intrinsic_tensorL2Coeff_ofCompact (I := I) (M := M) g 0 0 ht U i]
+              have hc2 : tensorL2Coeff (I := I) (M := M)
+                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) U i =
+                  ⟪(eigenvectorSmooth g 0 0 i : TensorL2 0 0 g), U⟫_ℝ := by
+                rw [tensorL2Coeff_eq_inner]
+                congr 1
+                exact (eigenvectorSmooth00_eq_basis (I := I) (M := M) g i).symm
+              rw [← hc2]
+      _ = ⟪scalarEigenFunctionLp g i, heatSemigroup (I := I) (M := M) g t v⟫_ℝ := by
+              have hcv : ⟪scalarEigenFunctionLp g i, v⟫_ℝ =
+                  ⟪(eigenvectorSmooth g 0 0 i : TensorL2 0 0 g), U⟫_ℝ := by
+                rw [hφ]
+                dsimp [v]
+                exact (hadj (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) (L U)).trans
+                  (by simp [L])
+              rw [← hcv]
+              have hself := heatSemigroup_isSelfAdjoint (I := I) (M := M) g ht
+              have hsymm := IsSelfAdjoint.isSymmetric hself
+              have hadj' : ⟪scalarEigenFunctionLp g i, heatSemigroup (I := I) (M := M) g t v⟫_ℝ =
+                  ⟪heatSemigroup (I := I) (M := M) g t (scalarEigenFunctionLp g i), v⟫_ℝ := by
+                exact (hsymm (scalarEigenFunctionLp g i) v).symm
+              rw [hadj']
+              rw [heatSemigroup_apply_scalarEigenFunctionLp (I := I) (M := M) g i ht]
+              simp [real_inner_smul_left]
+  have hw1 : HasSum (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, L (tensorHeatSemigroup g 0 0 t U)⟫_ℝ •
+        scalarEigenFunctionLp g i) (L (tensorHeatSemigroup g 0 0 t U)) :=
+    hasSum_scalarEigenFunctionLp_repr (I := I) (M := M) g (L (tensorHeatSemigroup g 0 0 t U))
+  have hw2 : HasSum (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, heatSemigroup (I := I) (M := M) g t v⟫_ℝ •
+        scalarEigenFunctionLp g i) (heatSemigroup (I := I) (M := M) g t v) :=
+    hasSum_scalarEigenFunctionLp_repr (I := I) (M := M) g (heatSemigroup (I := I) (M := M) g t v)
+  have hsame : (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, L (tensorHeatSemigroup g 0 0 t U)⟫_ℝ •
+        scalarEigenFunctionLp g i) =
+      (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, heatSemigroup (I := I) (M := M) g t v⟫_ℝ •
+        scalarEigenFunctionLp g i) := by
+    funext i
+    rw [hcoeff i]
+  exact hw1.unique (by simpa [hsame] using hw2)
+
+
 theorem scalarHeatCoeff_iteratedDeriv
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (i : TensorEigenIdx00 g) (t : ℝ) (j : ℕ) :
