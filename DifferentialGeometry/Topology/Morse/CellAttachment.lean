@@ -2414,6 +2414,88 @@ theorem contDiff_modelAttachedUnstretch {n k : ℕ} (hk : k ≤ n) (ε r δ : �
       fun_prop
     exact hsqrt.mul hcoord
 
+theorem modelAttachedRegion_contains_handleBelt {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (y : MorseModel n)
+    (hy₁ : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε - δ)
+    (hy₂ : ‖posPart hk y‖ ^ 2 ≤ r ^ 2) :
+    y ∈ modelAttachedRegion hk ε r δ := by
+  dsimp [modelAttachedRegion]
+  rw [smoothCap_lower hδ0 hy₁]
+  exact hy₂
+
+theorem modelAttachedRegion_contains_lowerBelt {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (y : MorseModel n)
+    (hy₁ : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε)
+    (hy₂ : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε) :
+    y ∈ modelAttachedRegion hk ε r δ := by
+  dsimp [modelAttachedRegion]
+  have hs : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≥ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    dsimp [smoothCap]
+    have hτ : Real.smoothTransition
+        ((‖negPart hk y‖ ^ 2 - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ≤ 1 :=
+      Real.smoothTransition.le_one _
+    have hcoef : ‖negPart hk y‖ ^ 2 - 2 * ε - r ^ 2 ≤ 0 := by nlinarith [hy₁]
+    have hτsub : Real.smoothTransition
+        ((‖negPart hk y‖ ^ 2 - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) - 1 ≤ 0 := by
+      linarith [hτ]
+    have hmul : 0 ≤ (‖negPart hk y‖ ^ 2 - 2 * ε - r ^ 2) *
+        (Real.smoothTransition ((‖negPart hk y‖ ^ 2 - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) - 1) :=
+      mul_nonneg_of_nonpos_of_nonpos hcoef hτsub
+    nlinarith [hmul]
+  nlinarith [hy₂, hs]
+
+theorem modelAttachedRegion_upperBelt_eq_lower {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (y : MorseModel n)
+    (hy : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    y ∈ modelAttachedRegion hk ε r δ ↔ ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+  dsimp [modelAttachedRegion]
+  rw [smoothCap_upper hδ0 hy]
+
+theorem modelAttachedStretch_equiv {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    (∀ y : MorseModel n,
+        morseNormalForm hk c y ≤ c + r ^ 2 / 2 →
+          modelAttachedStretch hk ε r δ y ∈ modelAttachedRegion hk ε r δ) ∧
+    (∀ y : MorseModel n,
+        y ∈ modelAttachedRegion hk ε r δ →
+          morseNormalForm hk c (modelAttachedUnstretch hk ε r δ y) ≤ c + r ^ 2 / 2) ∧
+    (∀ y : MorseModel n,
+        morseNormalForm hk c y ≤ c + r ^ 2 / 2 →
+          modelAttachedUnstretch hk ε r δ (modelAttachedStretch hk ε r δ y) = y) ∧
+    (∀ y : MorseModel n,
+        y ∈ modelAttachedRegion hk ε r δ →
+          modelAttachedStretch hk ε r δ (modelAttachedUnstretch hk ε r δ y) = y) ∧
+    ContDiff ℝ (⊤ : ℕ∞) (modelAttachedStretch hk ε r δ) ∧
+    ContDiff ℝ (⊤ : ℕ∞) (modelAttachedUnstretch hk ε r δ) := by
+  constructor
+  · intro y hy
+    have hle : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+      have hf : morseNormalForm hk c y = c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) := by
+        exact morseNormalForm_split hk c y
+      nlinarith [hy, hf]
+    exact modelAttachedStretch_mem hk ε r δ hδ0 hδr hr y hle
+  constructor
+  · intro y hy
+    have hnorm : ‖posPart hk (modelAttachedUnstretch hk ε r δ y)‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 :=
+      modelAttachedUnstretch_mem hk ε r δ hδ0 hδr y hy
+    have hf : morseNormalForm hk c (modelAttachedUnstretch hk ε r δ y) =
+        c + (1 / 2) * (‖posPart hk (modelAttachedUnstretch hk ε r δ y)‖ ^ 2 -
+          ‖negPart hk (modelAttachedUnstretch hk ε r δ y)‖ ^ 2) :=
+      morseNormalForm_split hk c (modelAttachedUnstretch hk ε r δ y)
+    have hneg : ‖negPart hk (modelAttachedUnstretch hk ε r δ y)‖ ^ 2 = ‖negPart hk y‖ ^ 2 :=
+      modelAttachedUnstretch_negPart_norm_sq hk ε r δ y
+    rw [hf, hneg]
+    nlinarith [hnorm]
+  constructor
+  · intro y hy
+    exact modelAttachedUnstretch_stretch hk ε r δ hδ0 hδr hr y
+  constructor
+  · intro y hy
+    exact modelAttachedStretch_unstretch hk ε r δ hδ0 hδr hr y
+  constructor
+  · exact contDiff_modelAttachedStretch hk ε r δ hδ0 hδr hr
+  · exact contDiff_modelAttachedUnstretch hk ε r δ hδ0 hδr hr
+
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
 
