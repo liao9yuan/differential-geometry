@@ -311,7 +311,9 @@ private theorem symm_norm_le
   rw [perm_norm_eq (I := I) (M := M) g (Equiv.swap (0 : Fin 2) 1) T j]
   linarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 j T)]
 
-private theorem lieFix_h2_unif
+/-- The fixed background connection passenger in the order-one DeTurck Lie
+coefficient has one class-first intrinsic `H2` bound. -/
+theorem lieFix_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ F : ℝ, 0 ≤ F ∧
@@ -331,7 +333,9 @@ private theorem lieFix_h2_unif
   simpa only [iteratedCovGrad_neg, norm_neg] using
     hfix g₀ hEq hjet1 hjet2 hjet3
 
-private theorem pbLow_h2_unif
+/-- The fixed-background lower pullback correction has a class-first intrinsic
+`H2` bound depending only on the perturbation's `H2` radius. -/
+theorem pbLow_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ B : ℝ → ℝ,
@@ -1134,7 +1138,10 @@ private theorem piece_h2_const
         (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 2) * Q)) ^ 2 := by
       rfl
 
-private theorem piece_h2_unif
+/-- A moving trace coefficient and an order-one passenger with class-first
+intrinsic `H2` bounds produce the corresponding Lie piece with a class-first
+intrinsic `H2` bound. -/
+theorem piece_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ C : ℝ, 0 ≤ C ∧

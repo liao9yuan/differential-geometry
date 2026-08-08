@@ -95,45 +95,83 @@ chain.  The remaining lane is the class-first production of an adapted solve
 and rethreading the uniform consumer through it; no completed A1/A2 lift maps
 or high-scale realization certificate are endpoint inputs.
 
-## Phase (c-B): the ABSORPTIVE gate only (re-scoped by №235; est. drops)
+## Phase (c-B): energy-pairing-first Rung 3 (current binding redesign)
 
-Pro's counterexample (`g_n = e^{2f_n} gBase`, `f_n = n⁻³ sin(n x₁)`)
-proves constants reading ≥4th jets of the VARYING `g` cannot be
-uniformized from the C³ class — and they need not be.  Steps:
-1. **Gate split audit**: where does the Grönwall closure actually use
-   the smallness `A·(δ/(1−δ)²) + B·stateRad + ε < 1`?  Separate the
-   absorptive small coefficients from metricwise high-rung
-   bookkeeping (rung-4/5 bridge factors inside B are the suspect
-   bookkeeping).  Do NOT build a uniform-everything `IsLowGateBg`.
-2. **≤3-jet audit of the absorptive slice**: after widening,
-   coefficient fields sit at `gBase` (free); the varying-`g` readers
-   left in Ā/B̄/δ/state-cap are the rung-3-level spectral bridges
-   (`hs_le_jet` n=2, `galRepJet_*`) and the supercritical embedding —
-   verify they read ≤3 jets of `g`.  **STOP CONDITION: if any
-   absorptive coefficient needs ≥4th jets of `g`, halt — changing
-   (N)'s `a ≤ 3` is a separate theorem-level USER ruling, never a
-   silent implementation edit.**
-3. Uniformize the absorptive slice only; keep metricwise: high-order
-   Grönwall constants, per-σ `Cσ` (existentially selected after
-   `g`, σ), high-order bridges, reconstruction majorants.
-4. `lowreg_adapt_unif`: class-first producer choosing uniform gate
-   bounds/threshold/state cap + a literal common `K` before `g`,
-   emitting `IsAdaptedLowBg` per `g` (the C1 architecture).
-Useful precedents: `UnifPhiDevH2`/`UnifPhiCurv`/`UnifRicci0`
-(order-0 caps), `inv_coeff_h2_unif`, explicit `Cqa` dimension witness.
+The former closed-slab all-rung `IsLowGateOrdBg` uniformization is superseded.
+Its stop audit remains valid as a refutation of that architecture, but it is not
+a stop condition for the new route.  Keep the class-first low fixed point,
+background Galerkin identification, Rung-3 Fatou framework, metricwise direct
+smoothing, gauge removal, and the checked adapted-to-mass-to-packet consumers.
+Do not resume G3/adjacent-scale lifting or put Rungs 4/5 into the class-first
+gate.
 
-**STOP CONDITION FIRED (2026-08-07).**  The current metricwise gate is not an
-absorption-only package.  Already at rung three its `Kr1` path contains
-`Kb1 1 -> Kc 3 -> fixCdAtgw 3`, hence `nabla^3 (connDiff g gBase)`.  Since
-`connDiff` already differentiates `g`, this reads the fourth metric jet of the
-varying metric.  Rungs four and five read still higher towers.  These constants
-are genuinely used in the common absorption budget, and shortening `T` does
-not change that budget.  Therefore the C3 class cannot produce the current
-`IsLowGateOrdBg` class-first.  Do not state `lowreg_adapt_unif` from this gate
-and do not strengthen `(N)` silently.  The next design decision is a sharper
-absorption-only decomposition that moves the fixed-offset/high-jet terms into
-metricwise Gronwall coefficients, or an explicit user-approved change of
-theorem hypotheses.
+The binding producer chain is now:
+
+1. **Full Lie background correction — DONE.**  `lieBgCorr_unif` in
+   `LowRegBgC1Pair.lean` is proved and focused-check green.  It controls all
+   three exact `lieBgCorr_eq` pieces on every preselected intrinsic `H2` radius;
+   its function bound is selected before `g` and reads varying-metric jets only
+   through order three.  It has no metricwise small radius, `H3` cap, or
+   fourth-jet coefficient.
+2. **Actual C1 path correction — DONE.**  `lowC1CorrBg` is the low-base
+   coefficient difference
+   `lowC1CorrBg := (lowBaseData g gBase ...).C1 -
+   (lowBaseData g g ...).C1`.  `lowC1Corr_unif` proves its `H2` bound by the
+   existing radial
+   path integral (`LowBaseInternal.c1_eq`, `rhsLow1PathIntegral`,
+   `exists_convex_jets`, `path_jetL2_le`, and
+   `convexPerturbation_gFibreOpBound_abs`).  The path integrand is the full
+   background-self `rhsLow1Coeff` difference; its Ricci arm cancels and the
+   remaining Lie arm is discharged by `lieBgCorr_unif`.  The producer is
+   focused-check green with its function bound selected before `g`.
+3. **Complete Galerkin correction — DONE.**  In the new ShortTime module
+   `LowRegA1FixedPairBg.lean`, `galA1FixVecBg` and `galA1FixPairBg` are complete
+   public definitions; both carry the realization hypothesis `hreal` required
+   by `galRepFib`/`lowregFibZero`.
+4. **Direct Rung-3 pairing — DONE.**  `galA1FixPair3_le` is proved and
+   focused-check green with the class-first order
+   `eta -> g -> G`.  Pair using `appCc_h2_h3_h2`, `galRepHs_le g 3`,
+   `cc_partial_le_norm`, and `two_abs_cross_le_eps`, obtaining
+   `eta * E4 + G * E3`.  Preserve the mandated scalar order by quantifying the
+   actual state radius after `G` together with `0 <= R` and `R <= 1`; apply
+   `lowC1Corr_unif` at radius `1`.  The solver supplies this cap through
+   `lowregStateRad_le_cap`, so `G` depends on `g` but not on the inner `R`.
+   An uncapped arbitrary-radius variant would instead have to return `G R`.
+5. **Signed C1 consumer split — DONE.**  `galA1RestVecBg` retains the
+   fixed-background `C2/C0` action but uses the self-background `C1` action;
+   `galArmVecBg_split` and `galArmPair3_split` isolate exactly the complete C1
+   correction.
+6. **Rest-only Rung-3 bound — STOP at the C2 signed pairing API.**  The `C0`,
+   self-background `C1`, and static-seed pieces are routine from
+   `c0JetTowerQBg`, `c1JetTowerQ`, `appCc_h2_h2_h2`,
+   `appCc_h2_h3_h2`, `galRepHs_le g 3`, Young's inequality, and
+   `lowRegSeedMass`.  The missing theorem is the C2-only signed Rung-3 estimate,
+   under the `C3` metric class and capped `H2` state radius, with order
+   `eta -> g -> exists G` and conclusion
+   `2 * |sum w3*c_i*(Hs1 (AB.a2 T)).coeff_i| <=
+   eta * E4 + G * (1 + E3)^2` (possibly `G * E3` for C2 alone).
+   Its consumer should live in a future `LowRegA1RestPairBg.lean`; the
+   structural spectral/Garding theorem belongs in the lower DeTurck layer.
+   Do not add a partial rest theorem or new assumptions.
+   Rungs 4+ are deferred until after the solution exists, where metricwise
+   interior/corner smoothing may use metricwise high-rung constants.
+
+Current stop conditions are only: failure of the complete correction bound on
+arbitrary radii; unavoidable fourth-jet dependence in the `E4` coefficient;
+failure of the `eta * E4 + G * E3` estimate uniformly in Galerkin dimension; a
+precise missing lower API after three routes; or a genuine verification/memory
+wall.  The precise-missing-API condition has fired for the C2-only signed
+spectral/Garding pairing.  The three failed routes are: (1)
+`top_path_dev_unif` gives class-first `H2`-small `C2`, but
+`appCc_h2_h4_h2`/`appD2Hs_norm` requires a metricwise high state jet; (2)
+`top_path_h1_unif`/`appCc_h23_unif` is one derivative short of the raw
+weight-three pairing, while naive duality requires `H5`; and (3)
+`EdgeRefoldPairing.edgeTop_green` has no energy consumer because the structural
+`covDivergence edgeTopPartner` bound is missing.  The completed
+`lieBgCorr_unif`, `lowC1Corr_unif`, `galA1FixPair3_le`, and signed C1 split are
+theorem-level 100%; the unstated rest-only theorem is 0%; the dedicated
+fixed-background direct-smoothing machinery is approximately 92%;
+`ricci_flow_unif_existence` remains 0%; whole HCG remains approximately 3%.
 
 ## Phase (c-C0) result + (c-C): synthesis and endpoint
 
@@ -335,4 +373,20 @@ the in-place DT widenings of bricks 2a–2e.
   `IsLowGateOrdBg`.  The next honest frontier is a redesigned
   absorption-only gate, not scalar shrinkage, time shrinkage, or another
   wrapper.  `lowreg_adapt_unif` and headline `(N)` remain 0%.
+- 2026-08-07 (Route-(c) energy-pairing redesign): the preceding STOP applies
+  only to the abandoned all-rung gate architecture.  The user adopted the
+  energy-pairing-first Rung-3 replacement recorded in the current phase-(c-B)
+  section.  Its first producer `lieBgCorr_unif` is stated, proved, and
+  focused-check green in `LowRegBgC1Pair.lean`: arbitrary preselected `H2`
+  radius, bound-before-`g`, complete three-piece correction, and no varying
+  fourth metric jet.  The path-integrated actual `lowC1CorrBg` bound is now
+  also stated, proved, and focused-check green as `lowC1Corr_unif`.  The next
+  complete Galerkin vector/pair module, `galA1FixPair3_le`, and the signed
+  forcing-level C1 split are now stated, proved, and focused-check green.  A
+  second STOP has now fired at the C2-only signed Rung-3 spectral/Garding API:
+  the top-deviation route needs the forbidden high state jet, the H1 top-path
+  action is one derivative short (naive duality needs H5), and the edge-refold
+  route lacks the structural `covDivergence edgeTopPartner` bound.  The exact
+  missing theorem is recorded in step 6; no partial rest theorem or new
+  assumption was added.  Headline `(N)` remains 0%.
   The review prompt is recorded in `ROUTE_C_ABSORB_CONSULT.md`.

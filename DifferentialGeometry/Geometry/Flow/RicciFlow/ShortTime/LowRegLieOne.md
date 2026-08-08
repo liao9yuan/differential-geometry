@@ -41,6 +41,11 @@ no `sorry`, `admit`, or new axiom.  The previously established
 exact module export, and audits to only `propext`, `Classical.choice`, and
 `Quot.sound`.
 
+For the Route-(c) Rung-3 correction redesign, the already proved helpers
+`lieFix_h2_unif`, `pbLow_h2_unif`, and `piece_h2_unif` are now public with
+docstrings.  Their proof bodies are unchanged, and the source passes focused
+verification after the visibility change.
+
 Progress accounting: `lie1_h2_unif` itself is proved and verified (100%); the
 joint class-first RHS tame producer that consumes it is still unstated (0%);
 `lowreg_bounds_unif` and `ricci_flow_unif_existence` remain unproved (0% each).

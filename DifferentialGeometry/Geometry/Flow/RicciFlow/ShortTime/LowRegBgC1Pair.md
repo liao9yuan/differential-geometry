@@ -7,6 +7,25 @@ DeTurck Lie coefficient.  The Ricci order-one term is background-independent.
 
 ## Current state
 
+The public theorem `lieBgCorr_unif` is now proved and focused-check green.  It
+bounds the complete three-component fixed-background correction to
+`deTurckLieArm1Coeff` on every preselected intrinsic `H2` radius.  Its bound is
+chosen before the varying metric and uses uniform metric equivalence plus
+background-covariant metric derivatives only through order three.  It has no
+metricwise small-radius assumption, no `H3` state cap, and no fourth-jet
+constant.  The proof reuses the class-first trace, sharp, fixed-connection,
+pullback, mixed-application, and Lie-piece producers; the only new internal
+adapter identifies the covariant fixed correction with the already controlled
+connection-difference norm.
+
+The public theorem `lowC1Corr_unif` is also proved and focused-check green.
+It controls the actual coefficient-layer difference
+`lowBaseData.C1(gBase) - lowBaseData.C1(g)` by integrating the complete Lie
+background correction along the convex metric path.  Its bound is selected
+before `g`, depends on a preselected spectral `H2` radius, and still needs only
+the C3 metric class.  The path identity is private because its integral field
+is an implementation detail.
+
 The exact lowered-connection and `PsiB` background factorizations are checked.
 The public theorem `psiBg_pair_h2` is focused-check green: on a sufficiently
 small spectral `H2` ball it gives both a static `H2` bound and an `H2` pair
@@ -32,6 +51,9 @@ Palatini pair, beginning with `dlaBg_pair_h1`.  Its proof must preserve the
 `DLb + insert` cancellation before estimating; a separate bound of those two
 arms would reintroduce the forbidden high derivative.
 
-`ricci_flow_unif_existence` itself remains unproved (0%).  Its dedicated
-low-base machinery is approximately 77%; this module closes the
-arbitrary-background `C1` pair lane rather than the existence theorem itself.
+`lieBgCorr_unif` and `lowC1Corr_unif` are proved (100%).  The downstream
+`galA1FixPair3_le` theorem is still unstated/unproved (0%); its dedicated
+energy-pairing machinery is only partial.  `ricci_flow_unif_existence` remains
+unproved (0%).  The dedicated fixed-background direct-smoothing machinery is
+approximately 86% at this coarse scale, while the whole HCG project
+remains approximately 3%.

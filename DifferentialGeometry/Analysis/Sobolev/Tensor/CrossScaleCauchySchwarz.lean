@@ -133,6 +133,43 @@ theorem two_mul_sum_crossScale_le_eps
     nlinarith [hkey, hsqA, hsqB, hsqε, hsqεinv, hcross]
   nlinarith [hle, hyoung]
 
+/-- Absolute-value form of the cross-scale Young estimate.  It controls the
+signed Galerkin energy pairing without choosing the sign of the forcing. -/
+theorem two_abs_cross_le_eps
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
+    (f h : TensorEigenIdx (I := I) (M := M) g r s → ℝ) {ε : ℝ} (hε : 0 < ε) :
+    2 * |∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (f i * h i)| ≤
+      ε * (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (f i) ^ 2) +
+        ε⁻¹ * ∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i (σ - 1) * (h i) ^ 2 := by
+  let X : ℝ :=
+    ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (f i * h i)
+  let Q : ℝ :=
+    ε * (∑ i ∈ S,
+      tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (f i) ^ 2) +
+      ε⁻¹ * ∑ i ∈ S,
+        tensorSobolevWeight (I := I) (M := M) i (σ - 1) * (h i) ^ 2
+  have hpos : 2 * X ≤ Q := by
+    simpa only [X, Q] using
+      two_mul_sum_crossScale_le_eps (I := I) (M := M) S σ f h hε
+  have hnegRaw :=
+    two_mul_sum_crossScale_le_eps (I := I) (M := M) S σ f
+      (fun i => -h i) hε
+  have hneg : -(2 * X) ≤ Q := by
+    simpa only [X, Q, mul_neg, Finset.sum_neg_distrib, neg_sq] using hnegRaw
+  have hneg' : -Q ≤ 2 * X := by linarith
+  have habs : |2 * X| ≤ Q := (abs_le).2 ⟨hneg', hpos⟩
+  calc
+    2 * |∑ i ∈ S,
+        tensorSobolevWeight (I := I) (M := M) i σ * (f i * h i)| =
+        |2 * X| := by
+          rw [abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2)]
+    _ ≤ Q := habs
+    _ = ε * (∑ i ∈ S,
+        tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (f i) ^ 2) +
+        ε⁻¹ * ∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i (σ - 1) * (h i) ^ 2 := rfl
+
 lemma sq_sum_sameScale_le
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
     (f h : TensorEigenIdx (I := I) (M := M) g r s → ℝ) :

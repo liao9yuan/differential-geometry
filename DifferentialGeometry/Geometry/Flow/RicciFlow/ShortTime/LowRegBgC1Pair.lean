@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoeffJets
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLieOne
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseC1Lip
 
 /-!
@@ -20,12 +22,14 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -316,6 +320,26 @@ private theorem raiseDom_h2
             (domDomCongrSection (I := I) g ρ S) q]
     _ = lowJetSq (I := I) (M := M) g 2 S :=
       dom_h2 (I := I) (M := M) g ρ S
+
+private theorem kappa_fix_h2
+    (g gB : SmoothRiemannianMetric I M) :
+    lowJetSq (I := I) (M := M) g 2
+        (-lc0Kappa (I := I) (M := M) g g gB) =
+      lowJetSq (I := I) (M := M) g 2
+        (connDiffSection (I := I) gB g) := by
+  rw [kappa_base_neg (I := I) (M := M) g gB]
+  simp only [neg_neg]
+  unfold lowJetSq
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [SmoothCcTensor.norm_def, SmoothCcTensor.norm_def,
+    tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+      (I := I) (M := M) g 0 (3 + i),
+    tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
+      (I := I) (M := M) g 1 (2 + i)]
+  exact MeasureTheory.integral_congr_ae
+    (Filter.Eventually.of_forall fun x =>
+      connLow_rfns (I := I) (M := M) g gB i x)
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
@@ -677,6 +701,423 @@ private theorem lieTrace_eq1
   intro D
   rw [reindexCoeffFibGen_apply, deTurckLieTraceFib,
     ContinuousLinearMap.comp_apply, domDomCongrFibPerm_apply]
+
+set_option maxHeartbeats 2400000 in
+set_option synthInstance.maxHeartbeats 2400000 in
+/-- The complete fixed-background correction to the order-one DeTurck Lie
+coefficient has a class-first intrinsic `H2` bound on every prescribed state
+radius.  The bound uses varying-metric derivatives only through order three. -/
+theorem lieBgCorr_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ B : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
+      ∀ g : SmoothRiemannianMetric I M,
+        MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+        MetricCovDerivOrderBoundOn (I := I) Set.univ 1 g gBase Λ →
+        MetricCovDerivOrderBoundOn (I := I) Set.univ 2 g gBase Λ →
+        MetricCovDerivOrderBoundOn (I := I) Set.univ 3 g gBase Λ →
+        ∀ (gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2),
+          (∀ (x : M) (u v : TangentSpace I x),
+            gm.inner x u v = g.inner x u v +
+              ccTensorBilinSymm (I := I) g P x u v) →
+          ∀ {δ : ℝ}, δ ≤ δ₀ → 0 ≤ δ →
+          gFibreOpBound (I := I) (M := M) g
+            (ccTensorBilinSymm (I := I) g P) δ →
+          ∀ R : ℝ, 0 ≤ R →
+          lowJetSq (I := I) (M := M) g 2 P ≤ R ^ 2 →
+          lowJetSq (I := I) (M := M) g 2
+            (deTurckLieArm1Coeff (I := I) (M := M) g gm gBase -
+              deTurckLieArm1Coeff (I := I) (M := M) g gm g) ≤
+            (B R) ^ 2 := by
+  have hΛ0 : 0 ≤ Λ := le_trans (by norm_num) hΛ
+  obtain ⟨Bt, hBt, htrace⟩ :=
+    trace2_h2_unif (I := I) (M := M) hDim gBase hΛ0 hδ₀
+  obtain ⟨Bs, hBs, hsharp⟩ :=
+    sharp_h2_unif (I := I) (M := M) hDim gBase hΛ0 hδ₀
+  obtain ⟨Fm, hFm, hfix⟩ :=
+    lieFix_h2_unif (I := I) (M := M) hDim gBase hΛ
+  obtain ⟨Fc, hFc, hconn⟩ :=
+    connFix_h2_unif (I := I) (M := M) hDim gBase hΛ
+  obtain ⟨Bp, hBp, hpb⟩ :=
+    pbLow_h2_unif (I := I) (M := M) hDim gBase hΛ
+  obtain ⟨Ca, hCa, happ⟩ :=
+    appRS_h22_unif (I := I) (M := M) hDim gBase hΛ 1 1 2
+  obtain ⟨Cp, hCp, hpiece⟩ :=
+    piece_h2_unif (I := I) (M := M) hDim gBase hΛ
+  let S : ℝ := Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 2)
+  let L : ℝ → ℝ := fun R => 2 * (Fc + Bp R)
+  let Ppsi : ℝ → ℝ := fun R => Ca * L R * Bs R
+  let Qfix : ℝ → ℝ := fun R => Cp * Bt R * (S * Fm)
+  let Qpsi : ℝ → ℝ := fun R => Cp * Bt R * (S * Ppsi R)
+  let B : ℝ → ℝ := fun R => 2 * (Qfix R + Qpsi R + Qpsi R)
+  have hS : 0 ≤ S := Real.sqrt_nonneg _
+  have hL : ∀ R : ℝ, 0 ≤ R → 0 ≤ L R := by
+    intro R hR
+    exact mul_nonneg (by norm_num) (add_nonneg hFc (hBp R hR))
+  have hPpsi : ∀ R : ℝ, 0 ≤ R → 0 ≤ Ppsi R := by
+    intro R hR
+    exact mul_nonneg (mul_nonneg hCa (hL R hR)) (hBs R hR)
+  have hQfix : ∀ R : ℝ, 0 ≤ R → 0 ≤ Qfix R := by
+    intro R hR
+    exact mul_nonneg (mul_nonneg hCp (hBt R hR)) (mul_nonneg hS hFm)
+  have hQpsi : ∀ R : ℝ, 0 ≤ R → 0 ≤ Qpsi R := by
+    intro R hR
+    exact mul_nonneg (mul_nonneg hCp (hBt R hR))
+      (mul_nonneg hS (hPpsi R hR))
+  refine ⟨B, fun R hR =>
+    mul_nonneg (by norm_num)
+      (add_nonneg (add_nonneg (hQfix R hR) (hQpsi R hR))
+        (hQpsi R hR)), ?_⟩
+  intro g hEq hjet1 hjet2 hjet3 gm P htie δ hδ_le hδ_nonneg hbound
+    R hR hP
+  let Fix : SmoothCcTensor g 1 2 :=
+    lieArm1FixCd (I := I) (M := M) g gBase
+  let CovFix : SmoothCcTensor g 0 3 :=
+    -lc0Kappa (I := I) (M := M) g g gBase
+  let Pb : SmoothCcTensor g 0 3 :=
+    lc0PbLow (I := I) (M := M) g P g gBase
+  let Left : SmoothCcTensor g 1 2 :=
+    psiBgLeft (I := I) (M := M) g gm gBase -
+      psiBgLeft (I := I) (M := M) g gm g
+  let Sharp : SmoothCcTensor g 1 1 :=
+    sharpFlatEndoCc (I := I) g gm
+  let Psi : SmoothCcTensor g 1 2 :=
+    psiBgCorr (I := I) (M := M) g gm gBase
+  have hTrace : ∀ σ : Equiv.Perm (Fin 4),
+      lowJetSq (I := I) (M := M) g 2
+          (deTurckLieTraceCoeff (I := I) (M := M) g gm σ) ≤
+        (Bt R) ^ 2 := by
+    intro σ
+    rw [lieTrace_eq1 (I := I) (M := M) g gm σ]
+    simpa only [lowJetSq, lc0TraceRF, Nat.reduceAdd] using
+      htrace g hEq hjet1 hjet2 gm P htie hδ_le hδ_nonneg hbound σ R hR hP
+  have hSharp : lowJetSq (I := I) (M := M) g 2 Sharp ≤
+      (Bs R) ^ 2 := by
+    simpa only [Sharp, lowJetSq, Nat.reduceAdd] using
+      hsharp g hEq hjet1 hjet2 gm P htie hδ_le hδ_nonneg hbound R hR hP
+  have hFix : lowJetSq (I := I) (M := M) g 2 Fix ≤ Fm ^ 2 := by
+    simpa only [Fix, lowJetSq, Nat.reduceAdd] using
+      hfix g hEq hjet1 hjet2 hjet3
+  have hCovFix : lowJetSq (I := I) (M := M) g 2 CovFix ≤ Fc ^ 2 := by
+    rw [show lowJetSq (I := I) (M := M) g 2 CovFix =
+        lowJetSq (I := I) (M := M) g 2
+          (connDiffSection (I := I) gBase g) by
+      simpa only [CovFix] using
+        kappa_fix_h2 (I := I) (M := M) g gBase]
+    simpa only [lowJetSq, Nat.reduceAdd] using
+      hconn g hEq hjet1 hjet2 hjet3
+  have hPb : lowJetSq (I := I) (M := M) g 2 Pb ≤ (Bp R) ^ 2 := by
+    simpa only [Pb, lowJetSq, Nat.reduceAdd] using
+      hpb g hEq hjet1 hjet2 hjet3 P R hR hP
+  have hLeft : lowJetSq (I := I) (M := M) g 2 Left ≤
+      (L R) ^ 2 := by
+    rw [show Left =
+        cometricRaiseSlot0Field (I := I) (M := M) g 1
+          (domDomCongrSection (I := I) g lieArm1RhoSlot0
+            (CovFix - Pb)) by
+      simpa only [Left, CovFix, Pb] using
+        psiBgLeft_corr (I := I) (M := M) g gm gBase P htie]
+    rw [raiseDom_h2 (I := I) (M := M) g lieArm1RhoSlot0 (CovFix - Pb)]
+    calc
+      lowJetSq (I := I) (M := M) g 2 (CovFix - Pb) =
+          lowJetSq (I := I) (M := M) g 2 (CovFix + -Pb) := by
+        rw [sub_eq_add_neg]
+      _ ≤ 2 * (lowJetSq (I := I) (M := M) g 2 CovFix +
+          lowJetSq (I := I) (M := M) g 2 (-Pb)) :=
+        jet_add1 (I := I) (M := M) g 2 CovFix (-Pb)
+      _ = 2 * (lowJetSq (I := I) (M := M) g 2 CovFix +
+          lowJetSq (I := I) (M := M) g 2 Pb) := by
+        rw [jet_neg1 (I := I) (M := M) g 2 Pb]
+      _ ≤ 2 * (Fc ^ 2 + (Bp R) ^ 2) :=
+        mul_le_mul_of_nonneg_left (add_le_add hCovFix hPb) (by norm_num)
+      _ ≤ (L R) ^ 2 := by
+        simp only [L]
+        nlinarith [mul_nonneg hFc (hBp R hR)]
+  have hPsi : lowJetSq (I := I) (M := M) g 2 Psi ≤
+      (Ppsi R) ^ 2 := by
+    change lowJetSq (I := I) (M := M) g 2
+      (psiBgCorr (I := I) (M := M) g gm gBase) ≤ (Ppsi R) ^ 2
+    rw [psiBgCorr_eq (I := I) (M := M) g gm gBase]
+    simpa only [Left, Sharp, Ppsi, lowJetSq, Nat.reduceAdd] using
+      happ g hEq hjet1 hjet2 Left Sharp (L R) (Bs R)
+        (hL R hR) (hBs R hR)
+        (by simpa only [lowJetSq, Nat.reduceAdd] using hLeft)
+        (by simpa only [lowJetSq, Nat.reduceAdd] using hSharp)
+  let V0 : SmoothCcTensor g 3 2 :=
+    lieArm1Piece (I := I) (M := M) g gm lieArm1SigmaC
+      lieArm1RhoSlot0 Fix
+  let V1 : SmoothCcTensor g 3 2 :=
+    lieArm1Piece (I := I) (M := M) g gm lieArm1SigmaA
+      (Equiv.refl (Fin 3)) Psi
+  let V2 : SmoothCcTensor g 3 2 :=
+    lieArm1Piece (I := I) (M := M) g gm lieArm1SigmaASwap
+      (Equiv.refl (Fin 3)) Psi
+  have hV0 : lowJetSq (I := I) (M := M) g 2 V0 ≤ (Qfix R) ^ 2 := by
+    simpa only [V0, Qfix, S, lowJetSq, Nat.reduceAdd] using
+      hpiece g hEq hjet1 hjet2 gm lieArm1SigmaC lieArm1RhoSlot0 Fix
+        (Bt R) Fm (hBt R hR) hFm
+        (by simpa only [lowJetSq, Nat.reduceAdd] using hTrace lieArm1SigmaC)
+        (by simpa only [lowJetSq, Nat.reduceAdd] using hFix)
+  have hV1 : lowJetSq (I := I) (M := M) g 2 V1 ≤ (Qpsi R) ^ 2 := by
+    simpa only [V1, Qpsi, S, lowJetSq, Nat.reduceAdd] using
+      hpiece g hEq hjet1 hjet2 gm lieArm1SigmaA (Equiv.refl (Fin 3)) Psi
+        (Bt R) (Ppsi R) (hBt R hR) (hPpsi R hR)
+        (by simpa only [lowJetSq, Nat.reduceAdd] using hTrace lieArm1SigmaA)
+        (by simpa only [lowJetSq, Nat.reduceAdd] using hPsi)
+  have hV2 : lowJetSq (I := I) (M := M) g 2 V2 ≤ (Qpsi R) ^ 2 := by
+    simpa only [V2, Qpsi, S, lowJetSq, Nat.reduceAdd] using
+      hpiece g hEq hjet1 hjet2 gm lieArm1SigmaASwap
+        (Equiv.refl (Fin 3)) Psi (Bt R) (Ppsi R)
+        (hBt R hR) (hPpsi R hR)
+        (by simpa only [lowJetSq, Nat.reduceAdd] using
+          hTrace lieArm1SigmaASwap)
+        (by simpa only [lowJetSq, Nat.reduceAdd] using hPsi)
+  have hcorr :
+      deTurckLieArm1Coeff (I := I) (M := M) g gm gBase -
+          deTurckLieArm1Coeff (I := I) (M := M) g gm g =
+        V0 + V1 + V2 := by
+    simpa only [V0, V1, V2, Fix, Psi] using
+      lieBgCorr_eq (I := I) (M := M) g gm gBase
+  rw [hcorr]
+  change lowJetSq (I := I) (M := M) g 2 (V0 + V1 + V2) ≤ (B R) ^ 2
+  calc
+    lowJetSq (I := I) (M := M) g 2 (V0 + V1 + V2) ≤
+        2 * (lowJetSq (I := I) (M := M) g 2 (V0 + V1) +
+          lowJetSq (I := I) (M := M) g 2 V2) :=
+      jet_add1 (I := I) (M := M) g 2 (V0 + V1) V2
+    _ ≤ 2 * (2 * (lowJetSq (I := I) (M := M) g 2 V0 +
+          lowJetSq (I := I) (M := M) g 2 V1) +
+        lowJetSq (I := I) (M := M) g 2 V2) := by
+      exact mul_le_mul_of_nonneg_left
+        (add_le_add (jet_add1 (I := I) (M := M) g 2 V0 V1) le_rfl)
+        (by norm_num)
+    _ ≤ 2 * (2 * ((Qfix R) ^ 2 + (Qpsi R) ^ 2) +
+        (Qpsi R) ^ 2) := by
+      exact mul_le_mul_of_nonneg_left
+        (add_le_add
+          (mul_le_mul_of_nonneg_left (add_le_add hV0 hV1) (by norm_num))
+          hV2) (by norm_num)
+    _ ≤ 4 * ((Qfix R) ^ 2 + (Qpsi R) ^ 2 + (Qpsi R) ^ 2) := by
+      nlinarith [sq_nonneg (Qpsi R)]
+    _ ≤ (2 * (Qfix R + Qpsi R + Qpsi R)) ^ 2 := by
+      nlinarith [sq_nonneg (Qfix R), sq_nonneg (Qpsi R),
+        mul_nonneg (hQfix R hR) (hQpsi R hR)]
+    _ = (B R) ^ 2 := rfl
+
+/-- The actual order-one low-base coefficient correction obtained by replacing
+the self background by one fixed background. -/
+noncomputable def lowC1CorrBg
+    (g gBase : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδT : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ) :
+    SmoothCcTensor g 3 2 :=
+  (lowBaseData (I := I) (M := M) g gBase T hδ_lt hδT hδZ).C1 -
+    (lowBaseData (I := I) (M := M) g g T hδ_lt hδT hδZ).C1
+
+private noncomputable def lowC1CorrInt
+    (g gBase : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδT : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ) :
+    SmoothCcTensor g 3 2 :=
+  pathIntegralCoeffField (I := I) (M := M) g 3 2
+    (fun s =>
+      rhsLow1Coeff (I := I) (M := M) g gBase T 0 hδT hδZ s -
+        rhsLow1Coeff (I := I) (M := M) g g T 0 hδT hδZ s)
+    (realizedSmallSet (δ := δ) (δ' := δ))
+    realizedSmallSet_isOpen
+    (by
+      rw [Set.uIcc_of_le zero_le_one]
+      exact Icc_subset_realizedSmallSet hδ_lt hδ_lt)
+    (threeArmJoint_sub (I := I) (M := M) g _ _
+      (rhsLow1_path_joint (I := I) (M := M) g gBase T 0 hδT hδZ)
+      (rhsLow1_path_joint (I := I) (M := M) g g T 0 hδT hδZ))
+
+/-- The actual low-base background correction is the interval integral of the
+background-self order-one coefficient difference. -/
+private theorem lowC1Corr_eq
+    (g gBase : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδT : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ) :
+    lowC1CorrBg (I := I) (M := M) g gBase T hδ_lt hδT hδZ =
+      lowC1CorrInt (I := I) (M := M) g gBase T hδ_lt hδT hδZ := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply TensorRSSpace.toModel_injective
+  have hSI : Set.uIcc (0 : ℝ) 1 ⊆
+      realizedSmallSet (δ := δ) (δ' := δ) := by
+    rw [Set.uIcc_of_le zero_le_one]
+    exact Icc_subset_realizedSmallSet hδ_lt hδ_lt
+  have hBcont :=
+    jointContMDiff_toModel_continuous_slice
+      (I := I) g 3 2
+      (fun s => rhsLow1Coeff (I := I) (M := M) g gBase
+        T 0 hδT hδZ s)
+      (realizedSmallSet (δ := δ) (δ' := δ))
+      (rhsLow1_path_joint (I := I) (M := M) g gBase T 0 hδT hδZ) x
+  have hScont :=
+    jointContMDiff_toModel_continuous_slice
+      (I := I) g 3 2
+      (fun s => rhsLow1Coeff (I := I) (M := M) g g
+        T 0 hδT hδZ s)
+      (realizedSmallSet (δ := δ) (δ' := δ))
+      (rhsLow1_path_joint (I := I) (M := M) g g T 0 hδT hδZ) x
+  have hBint : IntervalIntegrable
+      (fun s : ℝ => TensorRSSpace.toModel
+        ((rhsLow1Coeff (I := I) (M := M) g gBase
+          T 0 hδT hδZ s).toSection x))
+      MeasureTheory.volume 0 1 :=
+    (hBcont.mono hSI).intervalIntegrable
+  have hSint : IntervalIntegrable
+      (fun s : ℝ => TensorRSSpace.toModel
+        ((rhsLow1Coeff (I := I) (M := M) g g
+          T 0 hδT hδZ s).toSection x))
+      MeasureTheory.volume 0 1 :=
+    (hScont.mono hSI).intervalIntegrable
+  simp only [lowC1CorrBg, lowBaseData, rhsLow1PathIntegral, lowC1CorrInt,
+    pathIntegralCoeffField_toModel, SmoothCcTensor.toSection_sub,
+    ContMDiffSection.coe_sub, Pi.sub_apply, TensorRSSpace.toModel_sub]
+  rw [intervalIntegral.integral_sub hBint hSint]
+
+private theorem rhs1_corr_eq
+    (g gBase : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    {δ : ℝ}
+    (hδT : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ)
+    (s : ℝ) :
+    rhsLow1Coeff (I := I) (M := M) g gBase T 0 hδT hδZ s -
+        rhsLow1Coeff (I := I) (M := M) g g T 0 hδT hδZ s =
+      deTurckLieArm1Coeff (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hδT hδZ s) gBase -
+        deTurckLieArm1Coeff (I := I) (M := M) g
+          (realizedFam (I := I) g T 0 hδT hδZ s) g := by
+  simp only [rhsLow1Coeff]
+  abel
+
+set_option maxHeartbeats 2400000 in
+set_option synthInstance.maxHeartbeats 2400000 in
+/-- The actual low-base order-one background correction has a class-first
+intrinsic `H2` bound depending only on a preselected spectral `H2` radius. -/
+theorem lowC1Corr_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ B : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
+      ∀ g : SmoothRiemannianMetric I M,
+        MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+        (∀ a : ℕ, a ≤ 3 →
+          MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+        ∀ (T : SmoothCcTensor g 0 2) {δ : ℝ},
+          (hδ_le : δ ≤ δ₀) → 0 ≤ δ →
+          (hδT : gFibreOpBound (I := I) (M := M) g
+            (ccTensorBilinSymm (I := I) g T) δ) →
+          (hδZ : gFibreOpBound (I := I) (M := M) g
+            (ccTensorBilinSymm (I := I) g
+              (0 : SmoothCcTensor g 0 2)) δ) →
+          ∀ R : ℝ, 0 ≤ R →
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R →
+          lowJetSq (I := I) (M := M) g 2
+            (lowC1CorrBg (I := I) (M := M) g gBase T
+              (lt_of_le_of_lt hδ_le hδ₀) hδT hδZ) ≤
+            (B R) ^ 2 := by
+  obtain ⟨C, hC⟩ := exists_convex_jets (I := I) (M := M) gBase hΛ
+  obtain ⟨Bc, hBc, hcorr⟩ :=
+    lieBgCorr_unif (I := I) (M := M) hDim gBase hΛ hδ₀
+  let B : ℝ → ℝ := fun R => Bc (C.h2C * R)
+  have hB : ∀ R : ℝ, 0 ≤ R → 0 ≤ B R := by
+    intro R hR
+    exact hBc (C.h2C * R) (mul_nonneg hC.h2_nonneg hR)
+  refine ⟨B, hB, ?_⟩
+  intro g hEq hjet T δ hδ_le hδ_nonneg hδT hδZ R hR hTHs
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  rw [lowC1Corr_eq (I := I) (M := M) g gBase T hδ_lt hδT hδZ]
+  let Φ : ℝ → SmoothCcTensor g 3 2 := fun s =>
+    rhsLow1Coeff (I := I) (M := M) g gBase T 0 hδT hδZ s -
+      rhsLow1Coeff (I := I) (M := M) g g T 0 hδT hδZ s
+  let S : Set ℝ := realizedSmallSet (δ := δ) (δ' := δ)
+  have hSI : Set.uIcc (0 : ℝ) 1 ⊆ S := by
+    dsimp only [S]
+    rw [Set.uIcc_of_le zero_le_one]
+    exact Icc_subset_realizedSmallSet hδ_lt hδ_lt
+  have hjoint :
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g 3 Φ
+        (δ := δ) (δ' := δ) := by
+    dsimp only [Φ]
+    exact threeArmJoint_sub (I := I) (M := M) g _ _
+      (rhsLow1_path_joint (I := I) (M := M) g gBase T 0 hδT hδZ)
+      (rhsLow1_path_joint (I := I) (M := M) g g T 0 hδT hδZ)
+  obtain ⟨hpath2, _hpath3⟩ := hC.bounds g hEq hjet
+  have hZero : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+      (0 : SmoothCcTensor g 0 2)‖ ≤ R := by
+    have hz := ccTensorToHs_smul (I := I) (M := M) g 2 (2 : ℝ) 0
+      (0 : SmoothCcTensor g 0 2)
+    have hz' : ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (0 : SmoothCcTensor g 0 2) = 0 := by
+      simpa only [zero_smul] using hz
+    rw [hz', norm_zero]
+    exact hR
+  have hCR : 0 ≤ C.h2C * R := mul_nonneg hC.h2_nonneg hR
+  have hpoint : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+      lowJetSq (I := I) (M := M) g 2 (Φ s) ≤ (B R) ^ 2 := by
+    intro s hs
+    let P : SmoothCcTensor g 0 2 :=
+      convexPerturbation (I := I) g T 0 s
+    let gm : SmoothRiemannianMetric I M :=
+      realizedFam (I := I) g T 0 hδT hδZ s
+    have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+      Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+    have hPtie : ∀ (x : M) (u v : TangentSpace I x),
+        gm.inner x u v = g.inner x u v +
+          ccTensorBilinSymm (I := I) g P x u v := by
+      intro x u v
+      simpa only [gm, P] using
+        realizedFam_inner_of_mem (I := I) g T 0 hδT hδZ hs_mem x u v
+    have hδP : gFibreOpBound (I := I) (M := M) g
+        (ccTensorBilinSymm (I := I) g P) δ := by
+      intro x u v
+      have hraw := convexPerturbation_gFibreOpBound_abs
+        (I := I) g T 0 hδT hδZ s x u v
+      have heq : |1 - s| * δ + |s| * δ = δ := by
+        rw [abs_of_nonneg (by linarith [hs.2] : (0 : ℝ) ≤ 1 - s),
+          abs_of_nonneg hs.1]
+        ring
+      simpa only [P, convexPerturbation, smul_zero, zero_add, heq] using hraw
+    have hP2 : lowJetSq (I := I) (M := M) g 2 P ≤
+        (C.h2C * R) ^ 2 := by
+      simpa only [P, lowJetSq, Nat.reduceAdd] using
+        hpath2 T 0 R hR hTHs hZero s hs
+    have hraw := hcorr g hEq (hjet 1 (by norm_num))
+      (hjet 2 (by norm_num)) (hjet 3 (by norm_num)) gm P hPtie
+      hδ_le hδ_nonneg hδP (C.h2C * R) hCR hP2
+    rw [show Φ s =
+        deTurckLieArm1Coeff (I := I) (M := M) g gm gBase -
+          deTurckLieArm1Coeff (I := I) (M := M) g gm g by
+      dsimp only [Φ, gm]
+      exact rhs1_corr_eq (I := I) (M := M) g gBase T hδT hδZ s]
+    simpa only [B] using hraw
+  have hpath := path_jetL2_le (I := I) (M := M) g 3 2 2
+    Φ S realizedSmallSet_isOpen hSI hjoint
+    (B := B R) (hB R hR) hpoint
+  simpa only [lowC1CorrInt, Φ, S, lowJetSq, Nat.reduceAdd] using hpath
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in

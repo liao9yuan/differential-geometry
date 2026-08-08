@@ -9,7 +9,9 @@ pairing inequalities the parabolic energy hierarchy consumes.
   `w^σ = √(w^{σ+1}) · √(w^{σ-1})` that moves one derivative from the forcing
   onto the state.
 * `sq_sum_crossScale_le` / `abs_sum_crossScale_le` — Cauchy–Schwarz in that
-  split; `two_mul_sum_crossScale_le_eps` — its `ε`-Young form.
+  split; `two_mul_sum_crossScale_le_eps` — its `ε`-Young form;
+  `two_abs_cross_le_eps` — the corresponding absolute-value estimate used by
+  signed Galerkin pairings.
 * `sq_sum_sameScale_le` / `two_mul_sum_sameScale_le_sqrt` — the same-scale
   pairing that produces the `√`-seed term.
 * `two_mul_sum_ladder_le` (2026-08-04, E1′ lane) — the composition: the
@@ -70,3 +72,9 @@ The extra Young is proved from `ε·(ε·A + γ²/ε − 2γ√A) = (ε√A − 
 `nlinarith`, rather than by the `√ε` change of variables used for the mixed
 term — shorter, and it avoids a second `field_simp` on `Real.sqrt ε`.
 Verification: focused check + targeted build green; census clean.
+
+## 2026-08-07 — absolute-value cross-scale estimate
+
+`two_abs_cross_le_eps` applies the existing signed Young estimate to both `h`
+and `-h`, then combines the two inequalities with `abs_le`.  It is now
+focused-check green.  No new analytic input or scale loss is introduced.
