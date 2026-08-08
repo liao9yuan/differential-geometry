@@ -3508,6 +3508,37 @@ private theorem morseBeltLowerMap_mem {m k : ℕ} (hk : k ≤ m + 1) (c ε r : �
   have hr2 : 0 ≤ r ^ 2 := sq_nonneg r
   nlinarith
 
+theorem isOpen_morseBeltLowerSet {m k : ℕ} (hk : k ≤ m + 1) (c ε : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) :
+    IsOpen (morseBeltLowerSet hk c ε data) := by
+  have hnorm : Continuous (fun y : MorseModel (m + 1) => morseNorm (m + 1) y) := by
+    dsimp [morseNorm]
+    exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
+  let U : Set (MorseModel (m + 1)) := {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
+  have hU : IsOpen U := isOpen_lt hnorm continuous_const
+  have hUopen : IsOpen (data.χ '' U) := by
+    rw [isOpen_iff_mem_nhds]
+    intro y hy
+    rcases hy with ⟨x, hx, rfl⟩
+    have hsrc : x ∈ data.χ.source := data.hχsrc x (le_of_lt hx)
+    have hmem : data.χ.symm (data.χ x) ∈ U := by
+      have hl := data.χ.left_inv hsrc
+      simpa [U, hl] using hx
+    have hcontAt : ContinuousAt data.χ.symm (data.χ x) := by
+      have hw : ContinuousWithinAt data.χ.symm data.χ.target (data.χ x) :=
+        data.χ.continuousOn_invFun (data.χ x) (data.χ.map_source hsrc)
+      exact hw.continuousAt (IsOpen.mem_nhds data.χ.open_target (data.χ.map_source hsrc))
+    have hpre : data.χ.symm ⁻¹' U ∈ nhds (data.χ x) :=
+      hcontAt.preimage_mem_nhds (IsOpen.mem_nhds hU hmem)
+    refine Filter.mem_of_superset (Filter.inter_mem hpre (IsOpen.mem_nhds data.χ.open_target (data.χ.map_source hsrc))) ?_
+    intro w hw
+    rcases hw with ⟨hwsymm, hwtgt⟩
+    exact ⟨data.χ.symm w, hwsymm, data.χ.right_inv hwtgt⟩
+  change IsOpen {x : SublevelSpace f (c - ε) | x.1 ∈ data.χ '' U}
+  exact continuous_subtype_val.isOpen_preimage (data.χ '' U) hUopen
+
 noncomputable def morseBeltMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
