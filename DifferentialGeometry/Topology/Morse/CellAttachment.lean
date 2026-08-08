@@ -1481,6 +1481,67 @@ theorem modelFlow_f_add {n k : ℕ} (hk : k ≤ n) (c t : ℝ) (y : MorseModel n
   rw [hval, hfy]
   ring
 
+theorem modelFlow_rev {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (ht0 : 0 ≤ t) (ht : 2 * t < ‖posPart hk y‖ ^ 2) :
+    modelFlow hk (-t) (modelFlow hk t y) = y := by
+  let b : EuclideanSpace ℝ (Fin (n - k)) := posPart hk y
+  have hBpos : 0 < ‖b‖ ^ 2 := by
+    nlinarith [ht0, ht, sq_nonneg ‖b‖]
+  have hBsubPos : 0 < ‖b‖ ^ 2 - 2 * t := by
+    nlinarith [ht]
+  have hnonneg : 0 ≤ 1 - 2 * t / ‖b‖ ^ 2 := by
+    have hdiv : 2 * t / ‖b‖ ^ 2 ≤ 1 := by
+      rw [div_le_one hBpos]
+      nlinarith [ht]
+    nlinarith [hdiv, ht0]
+  have hplus : 0 ≤ 1 + 2 * t / (‖b‖ ^ 2 - 2 * t) := by positivity
+  have hsq : (Real.sqrt (1 + 2 * t / (‖b‖ ^ 2 - 2 * t)) *
+      Real.sqrt (1 - 2 * t / ‖b‖ ^ 2)) ^ 2 = 1 := by
+    rw [mul_pow]
+    rw [Real.sq_sqrt hplus]
+    rw [Real.sq_sqrt hnonneg]
+    have h1 : 1 + 2 * t / (‖b‖ ^ 2 - 2 * t) = ‖b‖ ^ 2 / (‖b‖ ^ 2 - 2 * t) := by
+      have hmain : (1 + 2 * t / (‖b‖ ^ 2 - 2 * t)) * (‖b‖ ^ 2 - 2 * t) = ‖b‖ ^ 2 := by
+        rw [add_mul, one_mul]
+        rw [div_mul_cancel₀ (2 * t) (ne_of_gt hBsubPos)]
+        ring
+      exact ((div_eq_iff (ne_of_gt hBsubPos)).mpr hmain.symm).symm
+    have h2 : 1 - 2 * t / ‖b‖ ^ 2 = (‖b‖ ^ 2 - 2 * t) / ‖b‖ ^ 2 := by
+      have hmain : (1 - 2 * t / ‖b‖ ^ 2) * ‖b‖ ^ 2 = ‖b‖ ^ 2 - 2 * t := by
+        rw [sub_mul, one_mul]
+        rw [div_mul_cancel₀ (2 * t) (ne_of_gt hBpos)]
+      exact ((div_eq_iff (ne_of_gt hBpos)).mpr hmain.symm).symm
+    rw [h1, h2]
+    field_simp [ne_of_gt hBsubPos, ne_of_gt hBpos]
+    have hBnorm : 0 < ‖b‖ :=
+      lt_of_le_of_ne (norm_nonneg b) (Ne.symm (sq_pos_iff.mp hBpos))
+    exact div_self (ne_of_gt hBnorm)
+  have hnonneg' : 0 ≤ Real.sqrt (1 + 2 * t / (‖b‖ ^ 2 - 2 * t)) *
+      Real.sqrt (1 - 2 * t / ‖b‖ ^ 2) := by positivity
+  have hscalar : Real.sqrt (1 + 2 * t / (‖b‖ ^ 2 - 2 * t)) *
+      Real.sqrt (1 - 2 * t / ‖b‖ ^ 2) = 1 := by
+    have hsq' : (Real.sqrt (1 + 2 * t / (‖b‖ ^ 2 - 2 * t)) *
+        Real.sqrt (1 - 2 * t / ‖b‖ ^ 2)) ^ 2 = (1 : ℝ) ^ 2 := by
+      simpa using hsq
+    exact (sq_eq_sq_iff_eq_or_eq_neg.mp hsq').resolve_right (by nlinarith [hnonneg'])
+  calc
+    modelFlow hk (-t) (modelFlow hk t y) =
+        recombine hk (negPart hk (modelFlow hk (-t) (modelFlow hk t y)))
+          (posPart hk (modelFlow hk (-t) (modelFlow hk t y))) :=
+      (recombine_decompose hk (modelFlow hk (-t) (modelFlow hk t y))).symm
+    _ = recombine hk (negPart hk y) (posPart hk y) := by
+      congr 1
+      · rw [modelFlow_negPart, modelFlow_negPart]
+      · change posPart hk (modelFlow hk (-t) (modelFlow hk t y)) = b
+        rw [modelFlow_posPart]
+        rw [modelFlow_posPart_norm_sq hk t y ht0 (by nlinarith [ht])]
+        rw [modelFlow_posPart]
+        rw [smul_smul]
+        have hrew : 1 - 2 * (-t) / (‖b‖ ^ 2 - 2 * t) =
+            1 + 2 * t / (‖b‖ ^ 2 - 2 * t) := by ring
+        rw [hrew, hscalar, one_smul]
+    _ = y := recombine_decompose hk y
+
 def modelHandleMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     (p : StandardHandle k (n - k)) : MorseModel n :=
   recombine hk

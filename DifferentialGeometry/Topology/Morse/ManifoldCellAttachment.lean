@@ -825,6 +825,130 @@ theorem modelHandle_meets_sublevel_eq_cocoreAttachingRange {n k : ℕ} (hk : k �
     rcases hy with ⟨p, hp⟩
     exact ⟨p, by simpa [cocoreModelPoint, modelHandleMap_attachingRegion] using hp⟩
 
+theorem negPart_cocoreModelPoint {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) :
+    negPart hk (cocoreModelPoint hk ε r p) =
+      negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+        (p.1 : EuclideanSpace ℝ (Fin k))) := by
+  dsimp [cocoreModelPoint]
+  rw [negPart_recombine]
+
+theorem posPart_cocoreModelPoint {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) :
+    posPart hk (cocoreModelPoint hk ε r p) = r • (p.2 : EuclideanSpace ℝ (Fin (n - k))) := by
+  dsimp [cocoreModelPoint]
+  rw [posPart_recombine]
+
+theorem morseNormalForm_cocoreModelPoint {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    (hε : 0 ≤ ε) (p : CellBoundary k × ClosedCell (n - k)) :
+    morseNormalForm hk c (cocoreModelPoint hk ε r p) = c - ε := by
+  dsimp [cocoreModelPoint]
+  rw [← modelHandleMap_attachingRegion hk ε r p.1 p.2]
+  exact modelHandleMap_f_boundary hk c ε r hε p.1 p.2
+
+theorem modelFlow_levelSet_collar_cover {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
+    (hε : 0 < ε) (hR : 0 ≤ R) (hRε : 2 * ε < R ^ 2)
+    (z : MorseModel n)
+    (hz : c - ε ≤ morseNormalForm hk c z)
+    (hτ : 2 * (morseNormalForm hk c z - (c - ε)) < ‖posPart hk z‖ ^ 2)
+    (hnorm : morseNorm n z ≤ R) :
+    ∃ p : CellBoundary k × ClosedCell (n - k),
+      z = modelFlow hk (-(morseNormalForm hk c z - (c - ε)))
+        (cocoreModelPoint hk ε (Real.sqrt ((R ^ 2 - 2 * ε) / 2)) p) := by
+  let τ : ℝ := morseNormalForm hk c z - (c - ε)
+  have hτ0 : 0 ≤ τ := by
+    dsimp [τ]
+    linarith
+  have hτle : 2 * (morseNormalForm hk c z - (c - ε)) ≤ ‖posPart hk z‖ ^ 2 := by
+    nlinarith [hτ]
+  rcases modelFlow_levelSet_cover hk c ε R hε hR hRε z hz hτle hnorm with ⟨p, hp⟩
+  refine ⟨p, ?_⟩
+  have hrev : modelFlow hk (-τ) (modelFlow hk τ z) = z := modelFlow_rev hk τ z hτ0 hτ
+  have hflow : modelFlow hk (-τ) (modelFlow hk τ z) =
+      modelFlow hk (-τ) (cocoreModelPoint hk ε (Real.sqrt ((R ^ 2 - 2 * ε) / 2)) p) := by
+    exact congrArg (fun w : MorseModel n => modelFlow hk (-τ) w) hp
+  simpa [τ] using (hflow.symm.trans hrev).symm
+
+noncomputable def modelHandleCollarMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) (s : ℝ) : MorseModel n :=
+  modelFlow hk (-s) (cocoreModelPoint hk ε r p)
+
+theorem modelHandleCollarMap_negPart {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) (s : ℝ) :
+    negPart hk (modelHandleCollarMap hk ε r p s) = negPart hk (cocoreModelPoint hk ε r p) := by
+  dsimp [modelHandleCollarMap]
+  rw [modelFlow_negPart]
+
+theorem modelHandleCollarMap_posPart {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) (s : ℝ) :
+    posPart hk (modelHandleCollarMap hk ε r p s) =
+      (Real.sqrt (1 + 2 * s / ‖posPart hk (cocoreModelPoint hk ε r p)‖ ^ 2)) •
+        posPart hk (cocoreModelPoint hk ε r p) := by
+  dsimp [modelHandleCollarMap]
+  rw [modelFlow_posPart]
+  congr 1
+  ring_nf
+
+theorem modelHandleCollarMap_f_value {n k : ℕ} (hk : k ≤ n) (c ε r s : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) (hε : 0 ≤ ε) (hs0 : 0 ≤ s) (hr : r ≠ 0)
+    (hw : 0 < ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) :
+    morseNormalForm hk c (modelHandleCollarMap hk ε r p s) = c - ε + s := by
+  dsimp [modelHandleCollarMap]
+  rw [modelFlow_f_add hk c s (cocoreModelPoint hk ε r p) hs0]
+  · rw [morseNormalForm_cocoreModelPoint hk c ε r hε p]
+  · rw [posPart_cocoreModelPoint]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    exact mul_pos (abs_pos.mpr hr) (by positivity)
+
+theorem modelHandleCollarMap_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (ε r s : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) (hs0 : 0 ≤ s) (hr : r ≠ 0)
+    (hw : 0 < ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) :
+    ‖posPart hk (modelHandleCollarMap hk ε r p s)‖ ^ 2 =
+      r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 + 2 * s := by
+  dsimp [modelHandleCollarMap]
+  rw [modelFlow_up_posPart_norm_sq hk s (cocoreModelPoint hk ε r p) hs0]
+  · rw [posPart_cocoreModelPoint]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    rw [mul_pow]
+    rw [sq_abs]
+  · rw [posPart_cocoreModelPoint]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    exact mul_pos (abs_pos.mpr hr) (by positivity)
+
+theorem modelHandleCollarMap_mem_sublevel {n k : ℕ} (hk : k ≤ n) (c ε r s b : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) (hε : 0 ≤ ε) (hs0 : 0 ≤ s) (hs1 : s ≤ r ^ 2 / 2)
+    (hb : c - ε + r ^ 2 / 2 ≤ b) (hr : r ≠ 0)
+    (hw : 0 < ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) :
+    modelHandleCollarMap hk ε r p s ∈ sublevel (morseNormalForm hk c) b := by
+  change morseNormalForm hk c (modelHandleCollarMap hk ε r p s) ≤ b
+  rw [modelHandleCollarMap_f_value hk c ε r s p hε hs0 hr hw]
+  nlinarith [hs1, hb]
+
+theorem modelHandleCollarMap_mem_lower_iff {n k : ℕ} (hk : k ≤ n) (c ε r s : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) (hε : 0 ≤ ε) (hs0 : 0 ≤ s)
+    (hr : r ≠ 0) (hw : 0 < ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) :
+    modelHandleCollarMap hk ε r p s ∈ sublevel (morseNormalForm hk c) (c - ε) ↔ s = 0 := by
+  constructor
+  · intro hq
+    have hval := modelHandleCollarMap_f_value hk c ε r s p hε hs0 hr hw
+    change morseNormalForm hk c (modelHandleCollarMap hk ε r p s) ≤ c - ε at hq
+    rw [hval] at hq
+    nlinarith [hs0, hq]
+  · intro hs
+    change morseNormalForm hk c (modelHandleCollarMap hk ε r p s) ≤ c - ε
+    rw [modelHandleCollarMap_f_value hk c ε r s p hε hs0 hr hw, hs]
+    norm_num
+
+theorem modelHandleCollarMap_attachingRegion {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (p : CellBoundary k × ClosedCell (n - k)) :
+    modelHandleCollarMap hk ε r p 0 = cocoreModelPoint hk ε r p := by
+  dsimp [modelHandleCollarMap]
+  norm_num
+  rw [modelFlow_zero]
+
 noncomputable def cocoreAttachingEmbedding {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
