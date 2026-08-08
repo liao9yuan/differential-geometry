@@ -3,6 +3,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Scalar
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.HeatOutputRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralWeylCounting
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothToL2
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.EigenBasis
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothDenseLp
@@ -31,6 +34,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Integral.Connection
 open Tensor0SBundle
 
 private local instance : MeasurableSpace M := borel M
@@ -120,6 +127,90 @@ theorem tensorL2Inner_zero_zero_eq_integral_scalar0_mul
   apply integral_congr_ae
   filter_upwards with x
   exact tensorInnerPointwise_smooth_zero_zero (I := I) (M := M) g S T x
+
+abbrev TensorEigenIdx00 (g : SmoothRiemannianMetric I M) :=
+  Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 0
+
+/-- The rank-(0,0) smooth eigenvector is the corresponding Hilbert basis
+element of the tensor `L²` space. -/
+theorem eigenvectorSmooth00_eq_basis
+    (g : SmoothRiemannianMetric I M) (j : TensorEigenIdx00 g) :
+    (eigenvectorSmooth g 0 0 j : TensorL2 0 0 g) =
+      tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) j := by
+  calc
+    (eigenvectorSmooth g 0 0 j : TensorL2 0 0 g)
+        = tensorResolventEigenbasisVec (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) j :=
+      eigenvectorSmooth_toL2 (I := I) (M := M) g 0 0 j
+    _ = tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) j :=
+      (tensorResolventHilbertEigenbasisSigma_apply (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) j).symm
+
+/-- The tensor `L²` coefficient of the rank-(0,0) smooth eigenvector is the
+Kronecker delta. -/
+theorem tensorL2Coeff_eigenvectorSmooth00
+    (g : SmoothRiemannianMetric I M) [DecidableEq (TensorEigenIdx00 g)]
+    (i j : TensorEigenIdx00 g) :
+    tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+        ((eigenvectorSmooth g 0 0 j : TensorL2 0 0 g)) i =
+      (if i = j then (1 : ℝ) else 0) := by
+  classical
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0 with hc_def
+  set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hc with hb_def
+  change (b.repr (eigenvectorSmooth g 0 0 j : TensorL2 0 0 g) i) =
+    if i = j then (1 : ℝ) else 0
+  have hbj : (eigenvectorSmooth g 0 0 j : TensorL2 0 0 g) = b j := by
+    calc
+      (eigenvectorSmooth g 0 0 j : TensorL2 0 0 g)
+          = tensorResolventEigenbasisVec (I := I) (M := M) hc j :=
+        eigenvectorSmooth_toL2 (I := I) (M := M) g 0 0 j
+      _ = b j := by
+        rw [hb_def]
+        exact (tensorResolventHilbertEigenbasisSigma_apply (I := I) (M := M) hc j).symm
+  rw [hbj]
+  rw [HilbertBasis.repr_apply_apply]
+  rw [real_inner_comm]
+  have horth := orthonormal_iff_ite.mp b.orthonormal
+  by_cases hji : j = i
+  · subst hji
+    rw [if_pos rfl]
+    simpa using horth j j
+  · have hne : i ≠ j := fun hij => hji hij.symm
+    rw [if_neg hne]
+    exact Orthonormal.inner_eq_zero b.orthonormal hji
+
+/-- The rank-(0,0) rough Laplacian of a smooth eigenvector is the eigenvalue
+times the eigenvector. -/
+theorem tensorEigen00_rawLap_eq
+    (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) :
+    SmoothCcTensor.toL2 (rawTensorConnLapSmooth g 0 0 (eigenvectorSmooth g 0 0 i)) =
+      (- TensorEigenIdx.lambda (I := I) (M := M) i) •
+        SmoothCcTensor.toL2 (eigenvectorSmooth g 0 0 i) := by
+  classical
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0 with hc_def
+  set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hc with hb_def
+  apply b.repr.injective
+  ext j
+  change tensorL2Coeff (I := I) (M := M) hc
+      (SmoothCcTensor.toL2 (rawTensorConnLapSmooth g 0 0 (eigenvectorSmooth g 0 0 i))) j =
+    tensorL2Coeff (I := I) (M := M) hc
+      ((- TensorEigenIdx.lambda (I := I) (M := M) i) •
+        SmoothCcTensor.toL2 (eigenvectorSmooth g 0 0 i)) j
+  rw [rawLap_coeff (I := I) (M := M) g 0 hc (eigenvectorSmooth g 0 0 i) j]
+  rw [tensorL2Coeff_smul (I := I) (M := M) hc
+    (- TensorEigenIdx.lambda (I := I) (M := M) i)
+    (SmoothCcTensor.toL2 (eigenvectorSmooth g 0 0 i)) j]
+  haveI : DecidableEq (TensorEigenIdx00 g) := Classical.decEq _
+  have hcoeff := tensorL2Coeff_eigenvectorSmooth00 (I := I) (M := M) g j i
+  rw [← SmoothCcTensor.toL2_apply] at hcoeff
+  rw [hcoeff]
+  by_cases hji : j = i
+  · subst hji
+    simp
+  · simp [hji]
 
 end HeatEquation
 end Analysis
