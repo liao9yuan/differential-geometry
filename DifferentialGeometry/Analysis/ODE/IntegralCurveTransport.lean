@@ -229,6 +229,49 @@ theorem f_eq_sub_of_integralCurve_on_strip [IsManifold I (⊤ : WithTop ℕ∞) 
   dsimp [h, g] at hc
   linarith
 
+set_option backward.isDefEq.respectTransparency false in
+theorem f_eq_sub_of_integralCurve_on_set [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (s : Set M)
+    (hdf : ∀ x ∈ s, (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) {t : ℝ} (ht : 0 ≤ t)
+    (hstay : ∀ u ∈ Set.Icc (0 : ℝ) t, γ u ∈ s) :
+    f (γ t) = f (γ 0) - t := by
+  let g : ℝ → ℝ := f ∘ γ
+  let h : ℝ → ℝ := fun s => g s + s
+  have hderiv : ∀ s : ℝ, HasDerivAt g ((mfderiv I 𝓘(ℝ, ℝ) f (γ s)) (v (γ s))) s :=
+    fun s => hasDerivAt_df_comp_integralCurve f hf v hγ s
+  have hhderiv : ∀ s : ℝ, HasDerivAt h
+      ((NormedSpace.fromTangentSpace (f (γ s))) ((mfderiv I 𝓘(ℝ, ℝ) f (γ s)) (v (γ s))) + 1) s :=
+    fun s => (hderiv s).add (hasDerivAt_id s)
+  have hhdiff : DifferentiableOn ℝ h (Set.Icc (0 : ℝ) t) := by
+    intro x hx
+    exact (hhderiv x).differentiableAt.differentiableWithinAt
+  have hzeroderiv : ∀ x ∈ interior (Set.Icc (0 : ℝ) t), deriv h x = 0 := by
+    intro x hx
+    have hxcc : x ∈ Set.Icc (0 : ℝ) t := interior_subset hx
+    rw [(hhderiv x).deriv]
+    have hval : (NormedSpace.fromTangentSpace (f (γ x))) ((mfderiv I 𝓘(ℝ, ℝ) f (γ x)) (v (γ x))) = -1 :=
+      hdf (γ x) (hstay x hxcc)
+    linarith
+  have hmono : MonotoneOn h (Set.Icc (0 : ℝ) t) :=
+    monotoneOn_of_deriv_nonneg (convex_Icc (0 : ℝ) t) hhdiff.continuousOn
+      (hhdiff.mono interior_subset) (by
+      intro x hx
+      exact ge_of_eq (hzeroderiv x hx))
+  have hanti : AntitoneOn h (Set.Icc (0 : ℝ) t) :=
+    antitoneOn_of_deriv_nonpos (convex_Icc (0 : ℝ) t) hhdiff.continuousOn
+      (hhdiff.mono interior_subset) (by
+      intro x hx
+      exact le_of_eq (hzeroderiv x hx))
+  have hc : h 0 = h t := by
+    exact le_antisymm
+      (hmono (a := 0) (b := t) (by exact ⟨le_rfl, ht⟩) (by exact ⟨ht, le_rfl⟩) ht)
+      (hanti (a := 0) (b := t) (by exact ⟨le_rfl, ht⟩) (by exact ⟨ht, le_rfl⟩) ht)
+  dsimp [h, g] at hc
+  linarith
+
 noncomputable def curveAt (v : (x : M) → TangentSpace I x)
     (hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v) (x : M) : ℝ → M :=
   Classical.choose (hcomplete x)
