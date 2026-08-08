@@ -5043,6 +5043,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
         ∃ Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞),
           Φ.toEquiv '' sublevel g (c - ε) = sublevel f (c + ε) ∧
           (∀ x : M, x ∉ tsupport v → Φ.toEquiv x = x) ∧
+          (∃ η : ℝ, 0 < η ∧ ∀ x : M, g x ≤ c - ε - η → Φ.toEquiv x = x) ∧
           ∃ r : ℝ, ∃ hr : r ≠ 0, ∃ _ : r ^ 2 = 2 * ε,
           ∃ δ₁ : ℝ, ∃ hδ₁₀ : 0 < δ₁, ∃ hδ₁r : δ₁ < r ^ 2,
           ∃ φ : AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε),
@@ -5270,7 +5271,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
           CellAttachment.modelHandleMap_mem_upper hk c ε₀ r₀ (le_of_lt hε₀) p⟩ :
           morseUpperSublevel hk c r₀)
       exact morseAttachedToUpper_handleEmbedding hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀ p
-  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_, ?_,
+  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_, ?_, ?_,
     r₀, hr₀, hr₀sq, δ₁, hδ₁₀, hδ₁r, φ, hφ_boundary, hφ_inj, hφ_closed,
     ⟨morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀, trivial⟩, Ψ, hrelative⟩
   · exact hgup
@@ -5283,6 +5284,38 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
     have hflow : curveAt v hcomplete x ((c - ε₀) - (c + ε₀)) = x := by
       exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hx _
     exact (htie x).trans hflow
+  · have hmin : ∃ m : ℝ, ∀ x ∈ tsupport v, m ≤ g x := by
+      by_cases hS : (tsupport v).Nonempty
+      · rcases hsupp.exists_isMinOn hS hg.continuousOn with ⟨x₀, hx₀, hmin⟩
+        exact ⟨g x₀, hmin⟩
+      · exact ⟨c - ε₀, by intro x hx; exact False.elim (hS ⟨x, hx⟩)⟩
+    rcases hmin with ⟨m, hgm⟩
+    let η : ℝ := max (c - ε₀ - m) 0 + 1
+    have hηpos : 0 < η := by
+      have h : 0 ≤ max (c - ε₀ - m) 0 := le_max_right (c - ε₀ - m) 0
+      dsimp [η]
+      linarith
+    have hηmain : ∀ x : M, g x ≤ c - ε₀ - η → Φ.toEquiv x = x := by
+      intro x hx
+      have hnot : x ∉ tsupport v := by
+        intro hxv
+        have hle : m ≤ g x := hgm x hxv
+        have hlt : c - ε₀ - η < m := by
+          dsimp [η]
+          by_cases hm : c - ε₀ - m ≤ 0
+          · have hmax : max (c - ε₀ - m) 0 = 0 := by
+              rw [max_eq_right hm]
+            rw [hmax]
+            linarith
+          · have hmax : max (c - ε₀ - m) 0 = c - ε₀ - m := by
+              rw [max_eq_left (le_of_not_ge hm)]
+            rw [hmax]
+            linarith
+        exact (not_lt_of_ge hle) (lt_of_le_of_lt hx hlt)
+      have hflow : curveAt v hcomplete x ((c - ε₀) - (c + ε₀)) = x := by
+        exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hnot _
+      exact (htie x).trans hflow
+    exact ⟨η, hηpos, hηmain⟩
 
 theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
