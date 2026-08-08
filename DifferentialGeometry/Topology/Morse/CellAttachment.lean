@@ -1381,6 +1381,50 @@ theorem modelFlow_norm_le {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n
     exact hmain
   · exact norm_nonneg _
 
+theorem modelFlow_negPart {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n) :
+    negPart hk (modelFlow hk t y) = negPart hk y := by
+  dsimp [modelFlow]
+  rw [negPart_recombine]
+
+theorem modelFlow_posPart {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n) :
+    posPart hk (modelFlow hk t y) =
+      (Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)) • posPart hk y := by
+  dsimp [modelFlow]
+  rw [posPart_recombine]
+
+theorem modelFlow_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (ht0 : 0 ≤ t) (ht : t ≤ ‖posPart hk y‖ ^ 2 / 2) :
+    ‖posPart hk (modelFlow hk t y)‖ ^ 2 = ‖posPart hk y‖ ^ 2 - 2 * t := by
+  rw [modelFlow_posPart]
+  rw [norm_smul]
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+  rw [mul_pow]
+  have hsq : 0 ≤ 1 - 2 * t / ‖posPart hk y‖ ^ 2 := by
+    have hdiv : 2 * t / ‖posPart hk y‖ ^ 2 ≤ 1 := by
+      by_cases hb : ‖posPart hk y‖ = 0
+      · have ht' : t = 0 := by
+          rw [hb] at ht
+          exact le_antisymm (by simpa using ht) ht0
+        rw [ht', hb]
+        norm_num
+      · have hbpos : 0 < ‖posPart hk y‖ := lt_of_le_of_ne (norm_nonneg _) (Ne.symm hb)
+        have hb2pos : 0 < ‖posPart hk y‖ ^ 2 := sq_pos_of_pos hbpos
+        rw [div_le_one hb2pos]
+        nlinarith [ht, hb2pos, ht0]
+    nlinarith [hdiv, ht0]
+  rw [Real.sq_sqrt hsq]
+  by_cases hb2 : ‖posPart hk y‖ ^ 2 = 0
+  · have ht0' : t = 0 := by
+      have hle : t ≤ 0 := by
+        rw [hb2] at ht
+        simpa using ht
+      linarith
+    have hb0 : posPart hk y = 0 := norm_eq_zero.mp (sq_eq_zero_iff.mp hb2)
+    rw [ht0', hb0]
+    simp
+  · rw [sub_mul, one_mul]
+    rw [div_mul_cancel₀ (2 * t) hb2]
+
 def modelHandleMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     (p : StandardHandle k (n - k)) : MorseModel n :=
   recombine hk
@@ -1724,6 +1768,45 @@ theorem modelHandle_meets_lower_sublevel {n k : ℕ} (hk : k ≤ n) (c ε r : �
     · rw [← hp]
       change morseNormalForm hk c (modelHandleMap hk ε r (cellBoundaryInclusion k p.1, p.2)) ≤ c - ε
       rw [modelHandleMap_f_boundary hk c ε r (le_of_lt hε) p.1 p.2]
+
+theorem modelFlow_modelHandle_mem_attachingRegion {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    (hε : 0 < ε) (hr : r ≠ 0) (y : MorseModel n) (hy : y ∈ modelHandle hk ε r)
+    (hflow : morseNormalForm hk c y - (c - ε) ≤ ‖posPart hk y‖ ^ 2 / 2) :
+    modelFlow hk (morseNormalForm hk c y - (c - ε)) y ∈
+      modelHandle hk ε r ∩ sublevel (morseNormalForm hk c) (c - ε) := by
+  let t : ℝ := morseNormalForm hk c y - (c - ε)
+  have ht0 : 0 ≤ t := by
+    dsimp [t]
+    rcases (mem_modelHandle hk ε r hε hr y).1 hy with ⟨p, hp⟩
+    rw [← hp]
+    rw [← sub_nonneg]
+    rw [modelHandleMap_f_sub hk c ε r (le_of_lt hε) p]
+    have hnonneg : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by positivity
+    have hle : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤ 1 := by
+      have hneg : -1 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := by
+        linarith [norm_nonneg (p.1 : EuclideanSpace ℝ (Fin k))]
+      exact (sq_le_sq' hneg p.1.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+    nlinarith [hnonneg, hle]
+  have hf : morseNormalForm hk c (modelFlow hk t y) = c - ε := by
+    rw [modelFlow_f_sub hk c t y ht0 hflow]
+    dsimp [t]
+    ring
+  constructor
+  · rcases hy with ⟨hb, ha⟩
+    dsimp [modelHandle]
+    rw [modelFlow_negPart]
+    have hpos := modelFlow_posPart_norm_sq hk t y ht0 hflow
+    rw [hpos]
+    constructor
+    · nlinarith [hb, ht0]
+    · have hmain : ‖negPart hk y‖ ^ 2 = ‖posPart hk y‖ ^ 2 - 2 * t + 2 * ε := by
+        dsimp [t]
+        have hsplit := morseNormalForm_split hk c y
+        rw [hsplit]
+        ring
+      rw [hmain]
+  · change morseNormalForm hk c (modelFlow hk t y) ≤ c - ε
+    rw [hf]
 
 abbrev ballUpperSublevel {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ) : Type :=
   {y : MorseModel n // y ∈ sublevel (morseNormalForm hk c) (c + ε) ∧ morseNorm n y ≤ R}
