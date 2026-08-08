@@ -93,7 +93,7 @@ noncomputable def pullback (f : M → N) (hf : ContMDiff IM IN ⊤ f)
       ContinuousAlternatingMap.compContinuousLinearMapCLM
         (inTangentCoordinates IM IN id f (fun x : M => mfderiv IM IN f x) x₀ x)
     have hg : ContMDiffAt IM 𝓘(ℝ, (EN [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (EM [⋀^Fin k]→L[ℝ] ℝ)) ⊤ g x₀ := by
-      exact (ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_of_space
+      exact (ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_of_space_real
         (F₁ := EM) (F₁' := EN) (F₂ := ℝ) (ι := Fin k)).contMDiffAt.comp x₀ htc
     have hgf : ContMDiffAt IM 𝓘(ℝ, EM [⋀^Fin k]→L[ℝ] ℝ) ⊤
         (fun x : M => g x ((trivializationAt (EN [⋀^Fin k]→L[ℝ] ℝ)

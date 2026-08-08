@@ -35,7 +35,7 @@ private theorem contDiff_compContinuousLinearMapCLM :
     ContDiff ℝ ⊤ (fun p : E →L[ℝ] E =>
       (compContinuousLinearMapCLM p : (E [⋀^Fin n]→L[ℝ] ℝ) →L[ℝ]
         (E [⋀^Fin n]→L[ℝ] ℝ))) := by
-  exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff (ι := Fin n)
+  exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_real (ι := Fin n)
     (F₁ := E) (F₂ := ℝ)
 
 private theorem contDiffOn_pullback {s t : Set E} (f : E → E)

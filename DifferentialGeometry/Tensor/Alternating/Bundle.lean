@@ -320,41 +320,42 @@ open scoped Bundle Manifold
 
 open Bundle Pretrivialization
 
-variable {ι B F₁ F₂ M : Type*} {E₁ : B → Type*} {E₂ : B → Type*}
+variable {𝕜 ι B F₁ F₂ M : Type*} {E₁ : B → Type*} {E₂ : B → Type*}
+  [NontriviallyNormedField 𝕜] [CharZero 𝕜]
   [Fintype ι]
-  {EB : Type*} [NormedAddCommGroup EB] [NormedSpace ℝ EB]
+  {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
   {HB : Type*} [TopologicalSpace HB]
-  (IB : ModelWithCorners ℝ EB HB)
+  (IB : ModelWithCorners 𝕜 EB HB)
   [TopologicalSpace B] [ChartedSpace HB B]
-  [∀ x, AddCommGroup (E₁ x)] [∀ x, Module ℝ (E₁ x)]
-  [NormedAddCommGroup F₁] [NormedSpace ℝ F₁]
+  [∀ x, AddCommGroup (E₁ x)] [∀ x, Module 𝕜 (E₁ x)]
+  [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [TopologicalSpace (Bundle.TotalSpace F₁ E₁)] [∀ x, TopologicalSpace (E₁ x)]
-  [∀ x, AddCommGroup (E₂ x)] [∀ x, Module ℝ (E₂ x)]
-  [NormedAddCommGroup F₂] [NormedSpace ℝ F₂]
+  [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
+  [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
   [TopologicalSpace (Bundle.TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
-  [∀ x, IsTopologicalAddGroup (E₂ x)] [∀ x, ContinuousSMul ℝ (E₂ x)]
-  {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
+  [∀ x, IsTopologicalAddGroup (E₂ x)] [∀ x, ContinuousSMul 𝕜 (E₂ x)]
+  {EM : Type*} [NormedAddCommGroup EM] [NormedSpace 𝕜 EM]
   {HM : Type*} [TopologicalSpace HM]
-  {IM : ModelWithCorners ℝ EM HM}
+  {IM : ModelWithCorners 𝕜 EM HM}
   [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M] {n : ℕ∞}
-  [FiberBundle F₁ E₁] [VectorBundle ℝ F₁ E₁]
-  [FiberBundle F₂ E₂] [VectorBundle ℝ F₂ E₂]
+  [FiberBundle F₁ E₁] [VectorBundle 𝕜 F₁ E₁]
+  [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
   {e₁ e₁' : Trivialization F₁ (π F₁ E₁)}
   {e₂ e₂' : Trivialization F₂ (π F₂ E₂)}
 
 variable {F₃ F₄ : Type*}
-  [NormedAddCommGroup F₃] [NormedSpace ℝ F₃]
-  [NormedAddCommGroup F₄] [NormedSpace ℝ F₄]
+  [NormedAddCommGroup F₃] [NormedSpace 𝕜 F₃]
+  [NormedAddCommGroup F₄] [NormedSpace 𝕜 F₄]
 
-local notation "AE₁E₂" => Bundle.TotalSpace (F₁ [⋀^ι]→L[ℝ] F₂) ⋀^ι⟮ℝ; F₁, E₁; F₂, E₂⟯
+local notation "AE₁E₂" => Bundle.TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯
 
-omit [∀ (x : B), IsTopologicalAddGroup (E₂ x)] [∀ (x : B), ContinuousSMul ℝ (E₂ x)] in
+omit [∀ (x : B), IsTopologicalAddGroup (E₂ x)] [∀ (x : B), ContinuousSMul 𝕜 (E₂ x)] in
 theorem contMDiffOn_continuousAlternatingMapCoordChange
     [ContMDiffVectorBundle ⊤ F₁ E₁ IB] [ContMDiffVectorBundle ⊤ F₂ E₂ IB]
     [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']
     [MemTrivializationAtlas e₂] [MemTrivializationAtlas e₂'] :
-    ContMDiffOn IB 𝓘(ℝ, (F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] F₁ [⋀^ι]→L[ℝ] F₂) ⊤
-      (continuousAlternatingMapCoordChange ℝ ι e₁ e₁' e₂ e₂')
+    ContMDiffOn IB 𝓘(𝕜, (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] F₁ [⋀^ι]→L[𝕜] F₂) ⊤
+      (continuousAlternatingMapCoordChange 𝕜 ι e₁ e₁' e₂ e₂')
       (e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet)) := by
   have h₁ := contMDiffOn_coordChangeL (IB := IB) e₁' e₁ (n := ⊤)
   have h₂ := contMDiffOn_coordChangeL (IB := IB) e₂ e₂' (n := ⊤)
@@ -362,42 +363,43 @@ theorem contMDiffOn_continuousAlternatingMapCoordChange
     (s := e₁'.baseSet ∩ e₁.baseSet) (by mfld_set_tac)).prodMk
       (h₂.mono (t := e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet))
       (s := e₂.baseSet ∩ e₂'.baseSet) (by mfld_set_tac))
-  let s (q : (F₁ →L[ℝ] F₁) × (F₂ →L[ℝ] F₂)) :
-      (F₁ →L[ℝ] F₁) × ((F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] (F₁ [⋀^ι]→L[ℝ] F₂)) :=
-    (q.1, ContinuousLinearMap.compContinuousAlternatingMapCLM ℝ F₁ F₂ F₂ ι q.2)
-  have hs : ContMDiff (𝓘(ℝ, (F₁ →L[ℝ] F₁)).prod 𝓘(ℝ, (F₂ →L[ℝ] F₂)))
-      (𝓘(ℝ, (F₁ →L[ℝ] F₁)).prod 𝓘(ℝ, ((F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] (F₁ [⋀^ι]→L[ℝ] F₂)))) ⊤ s := by
-    let t (p : (F₁ →L[ℝ] F₁) × (F₂ →L[ℝ] F₂)) :
-        ((F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] (F₁ [⋀^ι]→L[ℝ] F₂)) :=
-      ContinuousLinearMap.compContinuousAlternatingMapCLM ℝ F₁ F₂ F₂ ι p.2
-    have ht : ContMDiff (𝓘(ℝ, (F₁ →L[ℝ] F₁)).prod 𝓘(ℝ, (F₂ →L[ℝ] F₂)))
-        𝓘(ℝ, ((F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] (F₁ [⋀^ι]→L[ℝ] F₂))) ⊤ t := by
+  let s (q : (F₁ →L[𝕜] F₁) × (F₂ →L[𝕜] F₂)) :
+      (F₁ →L[𝕜] F₁) × ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)) :=
+    (q.1, ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ ι q.2)
+  have hs : ContMDiff (𝓘(𝕜, (F₁ →L[𝕜] F₁)).prod 𝓘(𝕜, (F₂ →L[𝕜] F₂)))
+      (𝓘(𝕜, (F₁ →L[𝕜] F₁)).prod 𝓘(𝕜, ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)))) ⊤ s := by
+    let t (p : (F₁ →L[𝕜] F₁) × (F₂ →L[𝕜] F₂)) :
+        ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)) :=
+      ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ ι p.2
+    have ht : ContMDiff (𝓘(𝕜, (F₁ →L[𝕜] F₁)).prod 𝓘(𝕜, (F₂ →L[𝕜] F₂)))
+        𝓘(𝕜, ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂))) ⊤ t := by
           refine ContMDiff.clm_apply ?hg ?hf
           · exact contMDiff_const
           · exact contMDiff_snd
     exact ContMDiff.prodMk contMDiff_fst ht
   exact ((contMDiff_snd.clm_comp ((ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff
-    (ι := ι) (F₁ := F₁) (F₂ := F₂)).comp contMDiff_fst)).comp hs).comp_contMDiffOn
+    (𝕜 := 𝕜) (ι := ι) (F₁ := F₁) (F₂ := F₂)).comp contMDiff_fst)).comp hs).comp_contMDiffOn
     (s := (e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet))) h₁_prod_h₂
 
 variable [ContMDiffVectorBundle ⊤ F₁ E₁ IB] [ContMDiffVectorBundle ⊤ F₂ E₂ IB]
 
 instance Bundle.continuousAlternatingMap.vectorPrebundle.isSmooth :
-   (Bundle.continuousAlternatingMap.vectorPrebundle ℝ ι F₁ E₁ F₂ E₂).IsContMDiff IB ⊤ where
+   (Bundle.continuousAlternatingMap.vectorPrebundle 𝕜 ι F₁ E₁ F₂ E₂).IsContMDiff IB ⊤ where
   exists_contMDiffCoordChange := by
     rintro _ ⟨e₁, e₂, he₁, he₂, rfl⟩ _ ⟨e₁', e₂', he₁', he₂', rfl⟩
-    refine ⟨continuousAlternatingMapCoordChange ℝ ι e₁ e₁' e₂ e₂',
+    refine ⟨continuousAlternatingMapCoordChange 𝕜 ι e₁ e₁' e₂ e₂',
       contMDiffOn_continuousAlternatingMapCoordChange IB, ?_⟩
     · rintro b hb v
       apply continuousAlternatingMapCoordChange_apply
       exact hb
 
 instance SmoothVectorBundle.continuousAlternatingMap :
-    ContMDiffVectorBundle ⊤ (F₁ [⋀^ι]→L[ℝ] F₂) (Bundle.continuousAlternatingMap ℝ ι F₁ E₁ F₂ E₂) IB
-  := (Bundle.continuousAlternatingMap.vectorPrebundle ℝ ι F₁ E₁ F₂ E₂).contMDiffVectorBundle IB
+    ContMDiffVectorBundle ⊤ (F₁ [⋀^ι]→L[𝕜] F₂) (Bundle.continuousAlternatingMap 𝕜 ι F₁ E₁ F₂ E₂) IB
+  := (Bundle.continuousAlternatingMap.vectorPrebundle 𝕜 ι F₁ E₁ F₂ E₂).contMDiffVectorBundle IB
 
 notation "𝒜⟮" 𝕜 "," ι ";"  F₁ "," E₁ ";"  F₂ "," E₂ "⟯" =>
   Bundle.TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯
+
 
 end smooth
 
