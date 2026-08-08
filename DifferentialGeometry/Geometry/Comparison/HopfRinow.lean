@@ -600,6 +600,8 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private theorem path_length_minimising_sequence
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (p q : M) (hd : riemannianEDist I p q ≠ ⊤) :
@@ -638,6 +640,8 @@ section ExpMapSurjectivity
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [SigmaCompactSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private theorem riemannianEDist_ne_top_of_connected
     [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
