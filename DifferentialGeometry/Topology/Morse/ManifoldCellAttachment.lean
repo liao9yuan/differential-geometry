@@ -5015,6 +5015,45 @@ noncomputable def sublevelCellAdjunctionHomotopyEquivUnderOfMorseChart {n : ℕ}
       left_inv := L.cast h₀.symm rfl
       right_inv := H₃ }
 
+theorem sublevelTransport_diffeomorph_of_setImage {m : ℕ} {H : Type} [TopologicalSpace H]
+    {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (g f : M → ℝ) (a b : ℝ)
+    (hg : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg_g : ∀ x : M, g x = a → ¬ IsCriticalPointAt I g x)
+    (hreg_f : ∀ x : M, f x = b → ¬ IsCriticalPointAt I f x)
+    (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+    (htransport : Φ.toEquiv '' sublevel g a = sublevel f b)
+    (hbnd : ∀ x : M, g x = a → f (Φ x) = b)
+    (hstrict : ∀ x : M, g x < a → f (Φ x) < b)
+    (hbnd' : ∀ x : M, f x = b → g (Φ.symm x) = a)
+    (hstrict' : ∀ x : M, f x < b → g (Φ.symm x) < a) :
+    Nonempty (@Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace g a) _ (manifoldSublevelChartedSpace I g a hg hreg_g)
+      (SublevelSpace f b) _ (manifoldSublevelChartedSpace I f b hf hreg_f)
+      (⊤ : ℕ∞)) := by
+  have hmap : ∀ x : M, g x ≤ a → f (Φ x) ≤ b := by
+    intro x hx
+    have hmem : Φ x ∈ sublevel f b := by
+      rw [← htransport]
+      exact ⟨x, hx, rfl⟩
+    exact hmem
+  have hmap' : ∀ x : M, f x ≤ b → g (Φ.symm x) ≤ a := by
+    intro x hx
+    have himg : Φ.symm '' sublevel f b = sublevel g a := by
+      have h := congrArg (fun s : Set M => Φ.toEquiv.symm '' s) htransport
+      simpa using h.symm
+    have hmem : Φ.symm x ∈ sublevel g a := by
+      rw [← himg]
+      exact ⟨x, hx, rfl⟩
+    exact hmem
+  exact manifoldSublevelDiffeomorphOfDiffeomorph (I := I) g f a b hg hf hreg_g hreg_f Φ
+    hmap hbnd hstrict hmap' hbnd' hstrict'
+
 theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [TopologicalSpace H]
     {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
@@ -5030,7 +5069,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
       x = p ∨ ¬ IsCriticalPointAt I f x) :
     ∃ ε : ℝ, ∃ hε : 0 < ε, ∃ _ : ε ≤ a,
     ∃ g : M → ℝ,
-      ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g ∧
+      ∃ hg : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g,
       (∀ x : M, g x ≤ f x) ∧
       ({x : M | g x ≤ c + ε} = sublevel f (c + ε)) ∧
       (∀ x : M, f x ≤ c - ε → g x ≤ c - ε) ∧
@@ -5062,7 +5101,16 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
               (morseUpperSublevel hk c r) _ (morseUpperChartedSpace hk c r hr)
               (⊤ : ℕ∞),
               morseAttachedDiffeomorphRelative hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr
-                (Ψ := Ψ) := by
+                (Ψ := Ψ) ∧
+            ∃ hreg_low : ∀ x : M, g x = c - ε → ¬ IsCriticalPointAt I g x,
+            ∃ hreg_up : ∀ x : M, g x = c + ε → ¬ IsCriticalPointAt I g x,
+            ∃ _Θ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+              (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+              (morseModelWithCornersHalfSpace m)
+              (SublevelSpace g (c - ε)) _ (manifoldSublevelChartedSpace I g (c - ε) hg hreg_low)
+              (SublevelSpace g (c + ε)) _ (manifoldSublevelChartedSpace I g (c + ε) hg hreg_up)
+              (⊤ : ℕ∞),
+              True := by
   rcases morse_lemma I f hf p k hk hnd hindex with
     ⟨R, hRpos, χ, hχ0src, hχ0tgt, hχ0val, hχsrc, hnorm0, hχmd, hχsmd,
       R', hR'pos, hχon, hχsymmOn⟩
@@ -5152,10 +5200,29 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
     dsimp [g] at hx ⊢
     exact no_critical_point_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R R' a hε₀ hδ₀ hδε
       hR' hΦr hRpos hR'pos hεa I f p χ hχ0val hnorm hχsrc hχsymmOn hχon hunique hx
+  have hreg_low : ∀ x : M, g x = c - ε₀ → ¬ IsCriticalPointAt I g x := by
+    intro x hx
+    exact hregularG x (by
+      change g x ∈ Set.Icc (c - ε₀) (c + ε₀)
+      exact ⟨le_of_eq hx.symm, by linarith⟩)
+  have hreg_up : ∀ x : M, g x = c + ε₀ → ¬ IsCriticalPointAt I g x := by
+    intro x hx
+    exact hregularG x (by
+      change g x ∈ Set.Icc (c - ε₀) (c + ε₀)
+      exact ⟨by linarith, le_of_eq hx⟩)
   rcases no_critical_value_transport (I := I) (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀)
       hcompactG hregularG with
     ⟨v, Φ, hv, hsupp, hdfOn, hrate, ⟨hcomplete, htransport, htie⟩,
       hbnd, hstrict, hbnd', hstrict'⟩
+  have hdiff : Nonempty (@Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace g (c - ε₀)) _ (manifoldSublevelChartedSpace I g (c - ε₀) hgmd hreg_low)
+      (SublevelSpace g (c + ε₀)) _ (manifoldSublevelChartedSpace I g (c + ε₀) hgmd hreg_up)
+      (⊤ : ℕ∞)) :=
+    sublevelTransport_diffeomorph_of_setImage (I := I) g g (c - ε₀) (c + ε₀) hgmd hgmd
+      hreg_low hreg_up Φ htransport hbnd hstrict hbnd' hstrict'
+  rcases hdiff with ⟨Θ⟩
   let r₀ : ℝ := Real.sqrt (2 * ε₀)
   let δ₁ : ℝ := 3 * ε₀ / 2
   have hr₀ : r₀ ≠ 0 := by
@@ -5272,9 +5339,41 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
           CellAttachment.modelHandleMap_mem_upper hk c ε₀ r₀ (le_of_lt hε₀) p⟩ :
           morseUpperSublevel hk c r₀)
       exact morseAttachedToUpper_handleEmbedding hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀ p
-  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_, ?_, ?_,
+  have hmin : ∃ m : ℝ, ∀ x ∈ tsupport v, m ≤ g x := by
+    by_cases hS : (tsupport v).Nonempty
+    · rcases hsupp.exists_isMinOn hS hg.continuousOn with ⟨x₀, hx₀, hmin⟩
+      exact ⟨g x₀, hmin⟩
+    · exact ⟨c - ε₀, by intro x hx; exact False.elim (hS ⟨x, hx⟩)⟩
+  rcases hmin with ⟨m, hgm⟩
+  let η : ℝ := max (c - ε₀ - m) 0 + 1
+  have hηpos : 0 < η := by
+    have h : 0 ≤ max (c - ε₀ - m) 0 := le_max_right (c - ε₀ - m) 0
+    dsimp [η]
+    linarith
+  have hηmain : ∀ x : M, g x ≤ c - ε₀ - η → Φ.toEquiv x = x := by
+    intro x hx
+    have hnot : x ∉ tsupport v := by
+      intro hxv
+      have hle : m ≤ g x := hgm x hxv
+      have hlt : c - ε₀ - η < m := by
+        dsimp [η]
+        by_cases hm : c - ε₀ - m ≤ 0
+        · have hmax : max (c - ε₀ - m) 0 = 0 := by
+            rw [max_eq_right hm]
+          rw [hmax]
+          linarith
+        · have hmax : max (c - ε₀ - m) 0 = c - ε₀ - m := by
+            rw [max_eq_left (le_of_not_ge hm)]
+          rw [hmax]
+          linarith
+      exact (not_lt_of_ge hle) (lt_of_le_of_lt hx hlt)
+    have hflow : curveAt v hcomplete x ((c - ε₀) - (c + ε₀)) = x := by
+      exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hnot _
+    exact (htie x).trans hflow
+  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_, ?_, ⟨η, hηpos, hηmain⟩,
     r₀, hr₀, hr₀sq, δ₁, hδ₁₀, hδ₁r, φ, hφ_boundary, hφ_inj, hφ_closed,
-    ⟨morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀, trivial⟩, Ψ, hrelative⟩
+    ⟨morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀, trivial⟩, Ψ, hrelative,
+    hreg_low, hreg_up, Θ, trivial⟩
   · exact hgup
   · intro x hx
     exact le_trans (hg_le x) hx
@@ -5285,38 +5384,6 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
     have hflow : curveAt v hcomplete x ((c - ε₀) - (c + ε₀)) = x := by
       exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hx _
     exact (htie x).trans hflow
-  · have hmin : ∃ m : ℝ, ∀ x ∈ tsupport v, m ≤ g x := by
-      by_cases hS : (tsupport v).Nonempty
-      · rcases hsupp.exists_isMinOn hS hg.continuousOn with ⟨x₀, hx₀, hmin⟩
-        exact ⟨g x₀, hmin⟩
-      · exact ⟨c - ε₀, by intro x hx; exact False.elim (hS ⟨x, hx⟩)⟩
-    rcases hmin with ⟨m, hgm⟩
-    let η : ℝ := max (c - ε₀ - m) 0 + 1
-    have hηpos : 0 < η := by
-      have h : 0 ≤ max (c - ε₀ - m) 0 := le_max_right (c - ε₀ - m) 0
-      dsimp [η]
-      linarith
-    have hηmain : ∀ x : M, g x ≤ c - ε₀ - η → Φ.toEquiv x = x := by
-      intro x hx
-      have hnot : x ∉ tsupport v := by
-        intro hxv
-        have hle : m ≤ g x := hgm x hxv
-        have hlt : c - ε₀ - η < m := by
-          dsimp [η]
-          by_cases hm : c - ε₀ - m ≤ 0
-          · have hmax : max (c - ε₀ - m) 0 = 0 := by
-              rw [max_eq_right hm]
-            rw [hmax]
-            linarith
-          · have hmax : max (c - ε₀ - m) 0 = c - ε₀ - m := by
-              rw [max_eq_left (le_of_not_ge hm)]
-            rw [hmax]
-            linarith
-        exact (not_lt_of_ge hle) (lt_of_le_of_lt hx hlt)
-      have hflow : curveAt v hcomplete x ((c - ε₀) - (c + ε₀)) = x := by
-        exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hnot _
-      exact (htie x).trans hflow
-    exact ⟨η, hηpos, hηmain⟩
 
 theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
@@ -5467,45 +5534,6 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
   exact sublevelCellAdjunctionHomotopyEquivUnderOfMorseChart (I := I) (hf := hf)
     (f := f) (c := c) (k := k) (hk := hk) (data := data) (g := g) hgmd hg_le hlow0 hcell hunion_sub
     hlow_inv_val hgup v hv hsupp hdfOn hrate
-
-theorem sublevelTransport_diffeomorph_of_setImage {m : ℕ} {H : Type} [TopologicalSpace H]
-    {M : Type} [TopologicalSpace M] [ChartedSpace H M]
-    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M]
-    (g f : M → ℝ) (a b : ℝ)
-    (hg : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g)
-    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
-    (hreg_g : ∀ x : M, g x = a → ¬ IsCriticalPointAt I g x)
-    (hreg_f : ∀ x : M, f x = b → ¬ IsCriticalPointAt I f x)
-    (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
-    (htransport : Φ.toEquiv '' sublevel g a = sublevel f b)
-    (hbnd : ∀ x : M, g x = a → f (Φ x) = b)
-    (hstrict : ∀ x : M, g x < a → f (Φ x) < b)
-    (hbnd' : ∀ x : M, f x = b → g (Φ.symm x) = a)
-    (hstrict' : ∀ x : M, f x < b → g (Φ.symm x) < a) :
-    Nonempty (@Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
-      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
-      (morseModelWithCornersHalfSpace m)
-      (SublevelSpace g a) _ (manifoldSublevelChartedSpace I g a hg hreg_g)
-      (SublevelSpace f b) _ (manifoldSublevelChartedSpace I f b hf hreg_f)
-      (⊤ : ℕ∞)) := by
-  have hmap : ∀ x : M, g x ≤ a → f (Φ x) ≤ b := by
-    intro x hx
-    have hmem : Φ x ∈ sublevel f b := by
-      rw [← htransport]
-      exact ⟨x, hx, rfl⟩
-    exact hmem
-  have hmap' : ∀ x : M, f x ≤ b → g (Φ.symm x) ≤ a := by
-    intro x hx
-    have himg : Φ.symm '' sublevel f b = sublevel g a := by
-      have h := congrArg (fun s : Set M => Φ.toEquiv.symm '' s) htransport
-      simpa using h.symm
-    have hmem : Φ.symm x ∈ sublevel g a := by
-      rw [← himg]
-      exact ⟨x, hx, rfl⟩
-    exact hmem
-  exact manifoldSublevelDiffeomorphOfDiffeomorph (I := I) g f a b hg hf hreg_g hreg_f Φ
-    hmap hbnd hstrict hmap' hbnd' hstrict'
 
 end ManifoldCellAttachment
 
