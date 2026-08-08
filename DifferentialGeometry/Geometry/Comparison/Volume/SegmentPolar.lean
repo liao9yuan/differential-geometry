@@ -898,7 +898,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- **Endpoint Jacobi density bound** (L6 step (A)).  For a segment-domain launch
 vector, the full-frame intrinsic Jacobi endpoint density is at most the base
 chart density times the speed-scaled hyperbolic model density at radius 1. -/
-theorem expJacDensity_le
+theorem expJacDensity_le_of_perpOrthonormalFrame
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -922,6 +922,36 @@ theorem expJacDensity_le
     exact Real.sqrt_nonneg _
   rw [hfac]
   exact mul_le_mul_of_nonneg_left hT hncd
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Endpoint Jacobi density bound** (L6 step (A)), frame-free form.  For a
+segment-domain launch vector, the full-frame intrinsic Jacobi endpoint density
+is at most the base chart density times the speed-scaled hyperbolic model
+density at radius 1.  The perpendicular orthonormal frame is constructed by
+Gram-Schmidt (`exists_perp_pos`), so no frame input is exposed. -/
+theorem expJacDensity_le
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {v : TangentSpace I x}
+    (hv : v ∈ SegDom (I := I) g hEnorm x) (hvne : v ≠ 0)
+    (q : ℝ) (hq : 0 ≤ q) (hd : 0 < Module.finrank ℝ E - 1)
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank ℝ E - 1 : ℕ) : ℝ) * q ^ 2))) :
+    expJacDensity (I := I) g hEnorm x (v : E) ≤
+      normalChartDensity (I := I) g x 0 *
+        hypDensity (q * Real.sqrt (g.inner x v v)) (Module.finrank ℝ E - 1) 1 := by
+  obtain ⟨w, hON, hperp'⟩ :=
+    exists_perp_pos (I := I) g x v (g.pos x v hvne)
+  have hperp : ∀ i, g.inner x v (w i) = 0 := by
+    intro i
+    rw [← g.symm x (w i) v]
+    exact hperp' i
+  exact expJacDensity_le_of_perpOrthonormalFrame (I := I) g hEnorm x hv hvne w hON hperp
+    q hq hd hRic
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1437,6 +1467,98 @@ private lemma gBall_modelIntegral_eq
           ∂(modelHaar (E := E)).toSphere)
       * ENNReal.ofReal (hypRadVol q (Module.finrank ℝ E - 1) R) := by
           rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Absolute Bishop upper bound with the explicit sphere constant.**  For a
+complete member with `Ric ≥ -(n-1)q²`, the Riemannian volume of the open
+`edist`-ball of radius `R` is at most
+`ncd₀ · (∫_{S_E} c(θ)^{-n} dσ_E) · hypRadVol q (n-1) R` with
+`c(θ) = √(gₓ(θ,θ))` and `ncd₀ = normalChartDensity g x 0`.  Under the
+Euclidean-compatibility of the model norm this equals the standard
+`σ_E · hypRadVol` form (deliverable B2(α)(1)); the explicit-constant form is
+valid in full generality. -/
+private lemma segBall_vol_le_explicit
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {q R : ℝ} (hq : 0 ≤ q) (hR : 0 < R)
+    (hd : 0 < Module.finrank ℝ E - 1)
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank ℝ E - 1 : ℕ) : ℝ) * q ^ 2))) :
+    riemannianVolumeMeasure (I := I) (M := M) g
+        {y : M | riemannianEDist I x y < ENNReal.ofReal R}
+      ≤ (∫⁻ θ : sphere (0 : E) 1,
+          ENNReal.ofReal (normalChartDensity (I := I) g x 0 *
+            (Real.sqrt (g.inner x θ.1 θ.1) ^ (Module.finrank ℝ E))⁻¹)
+          ∂(modelHaar (E := E)).toSphere)
+        * ENNReal.ofReal (hypRadVol q (Module.finrank ℝ E - 1) R) := by
+  classical
+  letI : Nontrivial E := Module.nontrivial_of_finrank_pos
+    (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
+  let K : Set E := {v : E | (show TangentSpace I x from v) ∈ SegDom (I := I) g hEnorm x} ∩
+    closedGBall g x R
+  let F : E → ℝ := fun v => normalChartDensity (I := I) g x 0 *
+    hypDensity (q * Real.sqrt (g.inner x (show TangentSpace I x from v)
+      (show TangentSpace I x from v))) (Module.finrank ℝ E - 1) 1
+  have hV := segBall_vol_le_density (I := I) g hEnorm x R
+  have hpoint : ∀ v : E, v ∈ K → v ≠ 0 →
+      expJacDensity (I := I) g hEnorm x v ≤ F v := by
+    intro v hv hvne
+    exact expJacDensity_le (I := I) g hEnorm x hv.1 hvne q hq hd hRic
+  have hcontG : Continuous (fun v : E => ENNReal.ofReal (F v)) := by
+    have hcont1 : Continuous (fun v : E => Real.sqrt (g.inner x
+        (show TangentSpace I x from v) (show TangentSpace I x from v))) := by
+      exact (continuous_sqrt_gInner_self (I := I) g x).comp continuous_id
+    have hcont : Continuous (fun v : E => hypDensity (q *
+        Real.sqrt (g.inner x (show TangentSpace I x from v)
+          (show TangentSpace I x from v))) (Module.finrank ℝ E - 1) 1) :=
+      (hypDensity_scale_continuous q (Module.finrank ℝ E - 1)).comp hcont1
+    exact ENNReal.continuous_ofReal.comp (continuous_const.mul hcont)
+  have hcontF : Continuous (fun v : E => ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v)) :=
+    ENNReal.continuous_ofReal.comp (expJacDensity_continuous (I := I) g hEnorm x)
+  have hKmeas : MeasurableSet K := by
+    have h1 : MeasurableSet {v : E | (show TangentSpace I x from v) ∈ SegDom (I := I) g hEnorm x} := by
+      exact (isClosed_segDom (I := I) g hEnorm x).measurableSet.preimage
+        (by fun_prop : Measurable (fun v : E => (show TangentSpace I x from v)))
+    exact h1.inter (isClosed_closedGBall (I := I) g x R).measurableSet
+  have hle_meas : MeasurableSet {v : E | ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v) ≤
+        ENNReal.ofReal (F v)} :=
+    (isClosed_le hcontF hcontG).measurableSet
+  have hmono : (∫⁻ v in K, ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v) ∂(modelHaar (E := E)))
+      ≤ ∫⁻ v in K, ENNReal.ofReal (F v) ∂(modelHaar (E := E)) := by
+    refine lintegral_mono_ae ?_
+    rw [ae_restrict_iff hle_meas]
+    rw [ae_iff]
+    have hnull : {a : E | ¬ (a ∈ K → ENNReal.ofReal (expJacDensity (I := I) g hEnorm x a) ≤
+          ENNReal.ofReal (F a))} ⊆ ({0} : Set E) := by
+      intro v hv
+      have hv' : v ∈ K ∧ ¬ (ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v) ≤
+          ENNReal.ofReal (F v)) := Classical.not_imp.mp hv
+      by_contra hv0
+      have hb : expJacDensity (I := I) g hEnorm x v ≤ F v := hpoint v hv'.1 hv0
+      exact hv'.2 (ENNReal.ofReal_le_ofReal hb)
+    exact measure_mono_null hnull (measure_singleton (μ := (modelHaar (E := E))) (0 : E))
+  have hstep3 : (∫⁻ v in K, ENNReal.ofReal (F v) ∂(modelHaar (E := E)))
+      ≤ ∫⁻ v in closedGBall g x R, ENNReal.ofReal (F v) ∂(modelHaar (E := E)) :=
+    lintegral_mono_set (Set.inter_subset_right : K ⊆ closedGBall g x R)
+  have hstep4 := gBall_modelIntegral_eq (I := I) g x q R hq hR
+  calc
+    riemannianVolumeMeasure (I := I) (M := M) g
+        {y : M | riemannianEDist I x y < ENNReal.ofReal R}
+        ≤ ∫⁻ v in K, ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v)
+            ∂(modelHaar (E := E)) := by
+          simpa [K] using hV
+    _ ≤ ∫⁻ v in K, ENNReal.ofReal (F v) ∂(modelHaar (E := E)) := hmono
+    _ ≤ ∫⁻ v in closedGBall g x R, ENNReal.ofReal (F v) ∂(modelHaar (E := E)) := hstep3
+    _ = (∫⁻ θ : sphere (0 : E) 1,
+          ENNReal.ofReal (normalChartDensity (I := I) g x 0 *
+            (Real.sqrt (g.inner x θ.1 θ.1) ^ (Module.finrank ℝ E))⁻¹)
+          ∂(modelHaar (E := E)).toSphere)
+        * ENNReal.ofReal (hypRadVol q (Module.finrank ℝ E - 1) R) := by
+          simpa [F] using hstep4
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
