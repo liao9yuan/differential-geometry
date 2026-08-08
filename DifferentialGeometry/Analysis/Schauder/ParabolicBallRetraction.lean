@@ -58,6 +58,7 @@ theorem parabolicTimeCenteredBallRetractionExtension_apply
       f (parabolicTimeCenteredBallRetraction tau R p) :=
   rfl
 
+@[simp]
 theorem parabolicBallRetraction_apply
     (R : Real) (p : ParabolicPoint V) :
     parabolicBallRetraction R p =
