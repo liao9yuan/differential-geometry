@@ -1,4 +1,5 @@
 import DifferentialGeometry.Topology.Morse.CellAttachment
+import DifferentialGeometry.Topology.Morse.LevelSet
 import DifferentialGeometry.Topology.Morse.ModifiedFunction
 import Mathlib.Topology.Order.IntermediateValue
 
@@ -785,6 +786,187 @@ theorem modelModifiedStretchMap_unstretchMap {n k : ℕ} (hk : k ≤ n) (ε r δ
     _ = y := recombine_decompose hk y
 
 
+
+
+
+theorem recombine_contDiff_generic {n k : ℕ} (hk : k ≤ n) :
+    ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk p.1 p.2) := by
+  rw [contDiff_pi]
+  intro i
+  by_cases hi : i.val < k
+  · have hcomp : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk p.1 p.2 i) = fun p => p.1 ⟨i.val, hi⟩ := by
+      funext p
+      dsimp [recombine]
+      rw [dif_pos hi]
+    rw [hcomp]
+    fun_prop
+  · have hcomp : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk p.1 p.2 i) = fun p => p.2 ⟨i.val - k, by
+          have hkle : k ≤ i.val := le_of_not_gt hi
+          have hi' : i.val < n := i.isLt
+          omega⟩ := by
+      funext p
+      dsimp [recombine]
+      rw [dif_neg hi]
+    rw [hcomp]
+    fun_prop
+
+theorem contDiffAt_modelModifiedStretchMap {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ) (hδ : 0 < δ) (hr : r ≠ 0)
+    {y : MorseModel n} (hy : 0 < ‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε) :
+    ContDiffAt ℝ (⊤ : ℕ∞) (modelModifiedStretchMap hk ε r δ) y := by
+  change ContDiffAt ℝ (⊤ : ℕ∞)
+    (fun z : MorseModel n => recombine hk (negPart hk z)
+      ((Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+        (‖negPart hk z‖ ^ 2 + 2 * modelModifiedDip hk ε δ z - 2 * ε))) • posPart hk z)) y
+  have hnum : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => ‖negPart hk z‖ ^ 2 + r ^ 2) y := by
+    have hns : ContDiff ℝ (⊤ : ℕ∞) (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) :=
+      ContDiff.norm_sq ℝ (negPartCLM hk).contDiff
+    exact (hns.contDiffAt.add (contDiffAt_const : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun _ : MorseModel n => r ^ 2) y))
+  have hdipG : ContDiff ℝ (⊤ : ℕ∞) (fun z : MorseModel n => modelModifiedDip hk ε δ z) := by
+    have hmu : ContDiff ℝ (⊤ : ℕ∞)
+        (fun z : MorseModel n => modMu ε (‖negPart hk z‖ ^ 2)) := by
+      have hns : ContDiff ℝ (⊤ : ℕ∞) (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) :=
+        ContDiff.norm_sq ℝ (negPartCLM hk).contDiff
+      simpa [Function.comp_def] using (ContDiff.comp (contDiff_modMu (ε := ε)) hns)
+    have hga : ContDiff ℝ (⊤ : ℕ∞) (fun z : MorseModel n => modGamma δ ‖posPart hk z‖) :=
+      contDiff_modGamma_norm hk δ hδ
+    simpa [modelModifiedDip] using hmu.mul hga
+  have hden : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => ‖negPart hk z‖ ^ 2 + 2 * modelModifiedDip hk ε δ z - 2 * ε) y := by
+    have hns : ContDiff ℝ (⊤ : ℕ∞) (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) :=
+      ContDiff.norm_sq ℝ (negPartCLM hk).contDiff
+    have hdenG : ContDiff ℝ (⊤ : ℕ∞)
+        (fun z : MorseModel n => ‖negPart hk z‖ ^ 2 + 2 * modelModifiedDip hk ε δ z - 2 * ε) := by
+      exact (hns.add ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (2 : ℝ))).mul hdipG)).sub
+        (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => 2 * ε))
+    exact hdenG.contDiffAt
+  have hden0 : (‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε) ≠ 0 := ne_of_gt hy
+  have hratio : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => (‖negPart hk z‖ ^ 2 + r ^ 2) /
+        (‖negPart hk z‖ ^ 2 + 2 * modelModifiedDip hk ε δ z - 2 * ε)) y :=
+    ContDiffAt.div hnum hden hden0
+  have hratio0 : 0 < (‖negPart hk y‖ ^ 2 + r ^ 2) /
+      (‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε) := by
+    have hnum0 : 0 < ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+      have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+      nlinarith [sq_nonneg ‖negPart hk y‖, hr2]
+    exact div_pos hnum0 hy
+  have hsqrtAt : ContDiffAt ℝ (⊤ : ℕ∞) (fun t : ℝ => Real.sqrt t)
+      ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        (‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε)) :=
+    (Real.deriv_sqrt_aux (ne_of_gt hratio0)).2 (⊤ : ℕ∞)
+  have hfactor : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+        (‖negPart hk z‖ ^ 2 + 2 * modelModifiedDip hk ε δ z - 2 * ε))) y :=
+    ContDiffAt.comp y hsqrtAt hratio
+  have hneg : ContDiffAt ℝ (⊤ : ℕ∞) (negPart hk) y :=
+    (negPartCLM hk).contDiff.contDiffAt
+  have hpos : ContDiffAt ℝ (⊤ : ℕ∞) (posPart hk) y :=
+    (posPartCLM hk).contDiff.contDiffAt
+  have hsmul : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => (Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+        (‖negPart hk z‖ ^ 2 + 2 * modelModifiedDip hk ε δ z - 2 * ε))) • posPart hk z) y :=
+    ContDiffAt.smul hfactor hpos
+  have hrec : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk p.1 p.2) := recombine_contDiff_generic hk
+  have hpair2 : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => (negPart hk z, (Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+        (‖negPart hk z‖ ^ 2 + 2 * modelModifiedDip hk ε δ z - 2 * ε))) • posPart hk z)) y :=
+    hneg.prodMk hsmul
+  exact ContDiffAt.comp y (ContDiff.contDiffAt hrec) hpair2
+
+theorem contDiffOn_modelModifiedStretchMap {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ) (hδ : 0 < δ) (hr : r ≠ 0) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (modelModifiedStretchMap hk ε r δ)
+      {y : MorseModel n | 0 < ‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε} := by
+  intro y hy
+  exact (contDiffAt_modelModifiedStretchMap hk ε r δ hδ hr hy).contDiffWithinAt
+
+
+
+theorem contMDiff_modelModifiedStretchMap_sublevel {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε)) :=
+      sublevelChartedSpace (m := m) (modifiedNormalForm hk c ε δ) (c - ε)
+        (contDiff_modifiedNormalForm hk c ε δ hδ)
+        (fun y hy => modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+          ⟨le_of_eq hy.symm, by linarith⟩))
+    (hcs₂ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+      sublevelChartedSpace (m := m) (morseNormalForm hk c) (c + r ^ 2 / 2)
+        (contDiff_morseNormalForm hk c)
+        (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy))
+    (hchart₁ : ∀ y : SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε),
+      hcs₁.chartAt y =
+        (if h : modifiedNormalForm hk c ε δ y.1 = c - ε then
+          sublevelBoundaryChart (modifiedNormalForm hk c ε δ) (c - ε) y h
+            (contDiff_modifiedNormalForm hk c ε δ hδ)
+            (modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+              ⟨le_of_eq h.symm, by linarith⟩)
+        else sublevelInteriorChart (modifiedNormalForm hk c ε δ) (c - ε) y
+          (lt_of_le_of_ne (show modifiedNormalForm hk c ε δ y.1 ≤ c - ε from y.2) h)
+          (contDiff_modifiedNormalForm hk c ε δ hδ)) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2),
+      hcs₂.chartAt y =
+        (if h : morseNormalForm hk c y.1 = c + r ^ 2 / 2 then
+          sublevelBoundaryChart (morseNormalForm hk c) (c + r ^ 2 / 2) y h
+            (contDiff_morseNormalForm hk c)
+            (fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y.1 h)
+        else sublevelInteriorChart (morseNormalForm hk c) (c + r ^ 2 / 2) y
+          (lt_of_le_of_ne (show morseNormalForm hk c y.1 ≤ c + r ^ 2 / 2 from y.2) h)
+          (contDiff_morseNormalForm hk c)) := by
+      intro y
+      rfl) :
+    ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun y : SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε) =>
+        (⟨modelModifiedStretchMap hk ε r δ y.1,
+          modelModifiedStretchMap_mem_upper hk c ε r δ hε hδ y.2⟩ :
+          SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2))) := by
+  let denomFun : MorseModel (m + 1) → ℝ :=
+    fun y => ‖negPart hk y‖ ^ 2 + 2 * modelModifiedDip hk ε δ y - 2 * ε
+  let U : Set (MorseModel (m + 1)) := {y | 0 < denomFun y}
+  have hUopen : IsOpen U := by
+    have hden : ContDiff ℝ (⊤ : ℕ∞) denomFun := by
+      have hns : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => ‖negPart hk y‖ ^ 2) :=
+        ContDiff.norm_sq ℝ (negPartCLM hk).contDiff
+      have hdipG : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => modelModifiedDip hk ε δ y) := by
+        have hmu : ContDiff ℝ (⊤ : ℕ∞)
+            (fun y : MorseModel (m + 1) => modMu ε (‖negPart hk y‖ ^ 2)) := by
+          have hns' : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => ‖negPart hk y‖ ^ 2) :=
+            ContDiff.norm_sq ℝ (negPartCLM hk).contDiff
+          simpa [Function.comp_def] using (ContDiff.comp (contDiff_modMu (ε := ε)) hns')
+        have hga : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => modGamma δ ‖posPart hk y‖) :=
+          contDiff_modGamma_norm hk δ hδ
+        simpa [modelModifiedDip] using hmu.mul hga
+      exact (hns.add ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel (m + 1) => (2 : ℝ))).mul hdipG)).sub
+        (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel (m + 1) => 2 * ε))
+    change IsOpen {y : MorseModel (m + 1) | 0 < denomFun y}
+    exact isOpen_lt continuous_const hden.continuous
+  have hUsub : ∀ y : MorseModel (m + 1), modifiedNormalForm hk c ε δ y ≤ c - ε → y ∈ U := by
+    intro y hy
+    dsimp [U]
+    exact modelModifiedDip_sublevel_denom_pos hk c ε δ hε hδ hy
+  have hΦ : ContDiffOn ℝ (⊤ : ℕ∞) (modelModifiedStretchMap hk ε r δ) U := by
+    exact contDiffOn_modelModifiedStretchMap hk ε r δ hδ hr
+  exact contMDiff_sublevelMap_on (m := m) (modifiedNormalForm hk c ε δ) (morseNormalForm hk c)
+    (c - ε) (c + r ^ 2 / 2)
+    (contDiff_modifiedNormalForm hk c ε δ hδ) (contDiff_morseNormalForm hk c)
+    (fun y hy => modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+      ⟨le_of_eq hy.symm, by linarith⟩)
+    (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy)
+    (modelModifiedStretchMap hk ε r δ) U hUopen hUsub hΦ
+    (fun y hy => modelModifiedStretchMap_mem_upper hk c ε r δ hε hδ hy)
+    (fun y hy => modelModifiedStretchMap_boundary hk c ε r δ hε hδ hy)
+    (fun y hy => modelModifiedStretchMap_strict hk c ε r δ hε hδ (sq_pos_of_ne_zero hr) hy)
+    (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
 
 
 end
