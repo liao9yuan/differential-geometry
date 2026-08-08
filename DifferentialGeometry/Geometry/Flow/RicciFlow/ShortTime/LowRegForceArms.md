@@ -135,3 +135,16 @@ realization norm.
 The higher-rung consumer has landed in `LowRegHigherRung.lean`.  Focused
 verification and the direct module refresh passed.  The bridge is per metric;
 it does not assert uniformity over the `(N)` metric class.
+
+## 2026-08-08 — radial-scale Sobolev bridge
+
+`galRepHs_scale` retains the exact radial factor
+`min 1 (R / ‖galLowView ...‖)` instead of dropping it as `galRepHs_le` does.
+For every real Sobolev order it bounds the symmetrized retracted state by that
+factor times the square root of the finite weighted coefficient energy.  This
+zero-safe form is the bridge needed by the diagonal Rung-3 pairing: the
+positive branch cancels a common factor, while the zero branch proves the
+acted arm vanishes.  No inverse of the radial factor is introduced.
+
+Focused verification passed at the shared resource cap; no placeholder or
+public-definition rewrite was introduced.

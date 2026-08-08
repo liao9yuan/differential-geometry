@@ -121,6 +121,186 @@ private theorem fiber_lp2_eq_l2
     Real.sqrt_sq (tensorL2Norm_nonneg (I := I) (M := M) g r s S.toFun),
     ← SmoothCcTensor.norm_def (I := I) (M := M) S]
 
+/-- Three-factor fibre Hölder in the `L6 × L3 × L2 → L1` form.
+
+The tensor valences are independent.  The third `L2` factor is returned in
+the canonical `SmoothCcTensor` norm, so downstream tensor pairings do not
+need to reopen the scalar `lpNorm`/tensor-`L2` bridge. -/
+theorem fiber_mul3_l632
+    (g : SmoothRiemannianMetric I M)
+    (r6 s6 r3 s3 r2 s2 : ℕ)
+    (A : SmoothCcTensor g r6 s6)
+    (B : SmoothCcTensor g r3 s3)
+    (C : SmoothCcTensor g r2 s2) :
+    ∫ x, fiberLpFun g r6 s6 A x * fiberLpFun g r3 s3 B x *
+          fiberLpFun g r2 s2 C x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
+      lpNorm (fiberLpFun g r6 s6 A) 6
+          (riemannianVolumeMeasure (I := I) (M := M) g) *
+        lpNorm (fiberLpFun g r3 s3 B) 3
+          (riemannianVolumeMeasure (I := I) (M := M) g) * ‖C‖ := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  let f6 : M → ℝ := fiberLpFun g r6 s6 A
+  let f3 : M → ℝ := fiberLpFun g r3 s3 B
+  let f2 : M → ℝ := fiberLpFun g r2 s2 C
+  have hf6c : Continuous f6 :=
+    fiberLpFun_continuous (I := I) (M := M) g r6 s6 A
+  have hf3c : Continuous f3 :=
+    fiberLpFun_continuous (I := I) (M := M) g r3 s3 B
+  have hf2c : Continuous f2 :=
+    fiberLpFun_continuous (I := I) (M := M) g r2 s2 C
+  have hf6mem : MemLp f6 6 μ :=
+    hf6c.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hf3mem : MemLp f3 3 μ :=
+    hf3c.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hf2mem : MemLp f2 2 μ :=
+    hf2c.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hfc : Continuous (fun x => f6 x * f3 x * f2 x) :=
+    (hf6c.mul hf3c).mul hf2c
+  haveI : ENNReal.HolderTriple (6 : ENNReal) 3 2 := by
+    exact ENNReal.HolderTriple.of_toReal (by
+      rw [Real.holderTriple_iff]
+      norm_num)
+  haveI : ENNReal.HolderTriple (2 : ENNReal) 2 1 := by
+    exact ENNReal.HolderTriple.of_toReal (by
+      rw [Real.holderTriple_iff]
+      norm_num)
+  have h63 :
+      eLpNorm (fun x => f6 x * f3 x) 2 μ ≤
+        eLpNorm f6 6 μ * eLpNorm f3 3 μ := by
+    simpa using
+      (eLpNorm_le_eLpNorm_mul_eLpNorm'_of_norm
+        (p := (6 : ENNReal)) (q := 3) (r := 2) (μ := μ)
+        hf6c.aestronglyMeasurable hf3c.aestronglyMeasurable
+        (fun a b : ℝ => a * b) 1
+        (Filter.Eventually.of_forall (fun _ => by
+          rw [Real.norm_eq_abs, abs_mul]
+          norm_num)))
+  have h221 :
+      eLpNorm (fun x => (f6 x * f3 x) * f2 x) 1 μ ≤
+        eLpNorm (fun x => f6 x * f3 x) 2 μ * eLpNorm f2 2 μ := by
+    simpa using
+      (eLpNorm_le_eLpNorm_mul_eLpNorm'_of_norm
+        (p := (2 : ENNReal)) (q := 2) (r := 1) (μ := μ)
+        (hf6c.mul hf3c).aestronglyMeasurable hf2c.aestronglyMeasurable
+        (fun a b : ℝ => a * b) 1
+        (Filter.Eventually.of_forall (fun _ => by
+          rw [Real.norm_eq_abs, abs_mul]
+          norm_num)))
+  have hENN :
+      eLpNorm (fun x => f6 x * f3 x * f2 x) 1 μ ≤
+        (eLpNorm f6 6 μ * eLpNorm f3 3 μ) * eLpNorm f2 2 μ :=
+    h221.trans (mul_le_mul_left h63 _)
+  have hfinite :
+      (eLpNorm f6 6 μ * eLpNorm f3 3 μ) * eLpNorm f2 2 μ ≠ ⊤ :=
+    ENNReal.mul_ne_top
+      (ENNReal.mul_ne_top hf6mem.eLpNorm_ne_top hf3mem.eLpNorm_ne_top)
+      hf2mem.eLpNorm_ne_top
+  have hreal := ENNReal.toReal_mono hfinite hENN
+  rw [toReal_eLpNorm hfc.aestronglyMeasurable,
+    ENNReal.toReal_mul, ENNReal.toReal_mul,
+    toReal_eLpNorm hf6mem.aestronglyMeasurable,
+    toReal_eLpNorm hf3mem.aestronglyMeasurable,
+    toReal_eLpNorm hf2mem.aestronglyMeasurable] at hreal
+  rw [lpNorm_one_eq_integral_norm hfc.aestronglyMeasurable] at hreal
+  have hnonneg : ∀ x : M, 0 ≤ f6 x * f3 x * f2 x := fun x =>
+    mul_nonneg
+      (mul_nonneg (fiberLpFun_nonneg g r6 s6 A x)
+        (fiberLpFun_nonneg g r3 s3 B x))
+      (fiberLpFun_nonneg g r2 s2 C x)
+  simp_rw [Real.norm_eq_abs, abs_of_nonneg (hnonneg _)] at hreal
+  rw [fiber_lp2_eq_l2 (I := I) (M := M) g r2 s2 C] at hreal
+  simpa only [μ, f6, f3, f2, mul_assoc] using hreal
+
+/-- Three-factor fibre Hölder in the `L∞ × L2 × L2 → L1` form.
+
+The first tensor enters only through a supplied pointwise fibre-norm cap.  The
+other two factors are returned in their canonical `SmoothCcTensor` `L2`
+norms, and all three tensor valences are independent. -/
+theorem fiber_mul3_linf22
+    (g : SmoothRiemannianMetric I M)
+    (rInf sInf r2a s2a r2b s2b : ℕ)
+    (A : SmoothCcTensor g rInf sInf)
+    (B : SmoothCcTensor g r2a s2a)
+    (C : SmoothCcTensor g r2b s2b)
+    (K : ℝ) (hK : 0 ≤ K)
+    (hA : ∀ x : M, fiberLpFun g rInf sInf A x ≤ K) :
+    ∫ x, fiberLpFun g rInf sInf A x * fiberLpFun g r2a s2a B x *
+          fiberLpFun g r2b s2b C x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
+      K * ‖B‖ * ‖C‖ := by
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  letI : IsFiniteMeasure μ := by
+    dsimp [μ]
+    exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  let fInf : M → ℝ := fiberLpFun g rInf sInf A
+  let f2a : M → ℝ := fiberLpFun g r2a s2a B
+  let f2b : M → ℝ := fiberLpFun g r2b s2b C
+  have hfInfc : Continuous fInf :=
+    fiberLpFun_continuous (I := I) (M := M) g rInf sInf A
+  have hf2ac : Continuous f2a :=
+    fiberLpFun_continuous (I := I) (M := M) g r2a s2a B
+  have hf2bc : Continuous f2b :=
+    fiberLpFun_continuous (I := I) (M := M) g r2b s2b C
+  have hf2amem : MemLp f2a 2 μ :=
+    hf2ac.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hf2bmem : MemLp f2b 2 μ :=
+    hf2bc.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hfc : Continuous (fun x => f2a x * f2b x) := hf2ac.mul hf2bc
+  haveI : ENNReal.HolderTriple (2 : ENNReal) 2 1 := by
+    exact ENNReal.HolderTriple.of_toReal (by
+      rw [Real.holderTriple_iff]
+      norm_num)
+  have h22 :
+      eLpNorm (fun x => f2a x * f2b x) 1 μ ≤
+        eLpNorm f2a 2 μ * eLpNorm f2b 2 μ := by
+    simpa using
+      (eLpNorm_le_eLpNorm_mul_eLpNorm'_of_norm
+        (p := (2 : ENNReal)) (q := 2) (r := 1) (μ := μ)
+        hf2ac.aestronglyMeasurable hf2bc.aestronglyMeasurable
+        (fun a b : ℝ => a * b) 1
+        (Filter.Eventually.of_forall (fun _ => by
+          rw [Real.norm_eq_abs, abs_mul]
+          norm_num)))
+  have hfinite : eLpNorm f2a 2 μ * eLpNorm f2b 2 μ ≠ ⊤ :=
+    ENNReal.mul_ne_top hf2amem.eLpNorm_ne_top hf2bmem.eLpNorm_ne_top
+  have hreal := ENNReal.toReal_mono hfinite h22
+  rw [toReal_eLpNorm hfc.aestronglyMeasurable,
+    ENNReal.toReal_mul,
+    toReal_eLpNorm hf2amem.aestronglyMeasurable,
+    toReal_eLpNorm hf2bmem.aestronglyMeasurable] at hreal
+  rw [lpNorm_one_eq_integral_norm hfc.aestronglyMeasurable] at hreal
+  have hprod_nonneg : ∀ x : M, 0 ≤ f2a x * f2b x := fun x =>
+    mul_nonneg (fiberLpFun_nonneg g r2a s2a B x)
+      (fiberLpFun_nonneg g r2b s2b C x)
+  simp_rw [Real.norm_eq_abs, abs_of_nonneg (hprod_nonneg _)] at hreal
+  rw [fiber_lp2_eq_l2 (I := I) (M := M) g r2a s2a B,
+    fiber_lp2_eq_l2 (I := I) (M := M) g r2b s2b C] at hreal
+  have hleft : Integrable (fun x => fInf x * f2a x * f2b x) μ :=
+    ((hfInfc.mul hf2ac).mul hf2bc).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have hright : Integrable (fun x => K * (f2a x * f2b x)) μ :=
+    (continuous_const.mul (hf2ac.mul hf2bc)).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  calc
+    ∫ x, fiberLpFun g rInf sInf A x * fiberLpFun g r2a s2a B x *
+          fiberLpFun g r2b s2b C x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+        ∫ x, fInf x * f2a x * f2b x ∂μ := by rfl
+    _ ≤ ∫ x, K * (f2a x * f2b x) ∂μ := by
+      exact integral_mono hleft hright (fun x => by
+        rw [mul_assoc]
+        exact mul_le_mul_of_nonneg_right (hA x) (hprod_nonneg x))
+    _ = K * ∫ x, f2a x * f2b x ∂μ := by
+      rw [integral_const_mul]
+    _ ≤ K * (‖B‖ * ‖C‖) := mul_le_mul_of_nonneg_left hreal hK
+    _ = K * ‖B‖ * ‖C‖ := by ring
+
 /-- Slot extension scales every intrinsic fibre `lpNorm` by the square root of
 the manifold dimension. -/
 theorem fiberLp_slotExtend

@@ -942,7 +942,9 @@ private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
+/-- Exact polarized pointwise formal-partner identity for one moving
+Palatini pair-trace monomial. -/
+theorem edgePair_point_bi (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (x : M) :
     tensorInnerPointwise (I := I) (M := M) g 0 2 x (V.toFun x)
@@ -1154,7 +1156,7 @@ theorem edgePair_l2_bi (g gm : SmoothRiemannianMetric I M)
   unfold tensorL2Inner
   refine MeasureTheory.integral_congr_ae
     (Filter.Eventually.of_forall fun x => ?_)
-  exact edgePair_point (I := I) (M := M) g gm P V G σ x
+  exact edgePair_point_bi (I := I) (M := M) g gm P V G σ x
 
 /-- Exact global formal-partner identity for one moving Palatini pair-trace
 monomial. This is the diagonal specialization of `edgePair_l2_bi`. -/
@@ -1374,6 +1376,132 @@ def edgeTopPartner (g : SmoothRiemannianMetric I M)
       edgeRiemPartner (I := I) (M := M) g T hdelta hdeltaZ qA qB s +
     edgeLiePartner (I := I) (M := M) g T hdelta hdeltaZ q epsilon s
 
+/-- Complete polarized raw top pair with an arbitrary rank-four Hessian-slot
+field.  The realized metric path is controlled by `T`; no assumption that `G`
+is itself a Hessian is built into this coefficient API. -/
+def edgeTopPairG (g : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4) {delta : Real}
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) delta)
+    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
+    (s : Real) : SmoothCcTensor g 2 2 :=
+  let gm := realizedFam (I := I) g T 0 hdelta hdeltaZ s
+  (2 : Real) • (s • ((1 / 2 : Real) •
+      (edgeKernelPair (I := I) (M := M) g gm G qA +
+        edgeKernelPair (I := I) (M := M) g gm G qB))) +
+    s • ∑ i : Fin 3, epsilon i • ((1 / 2 : Real) •
+      (edgePairMono (I := I) (M := M) g gm G (q i) +
+        edgePairMono (I := I) (M := M) g gm G
+          ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
+
+/-- Complete polarized raw top pair.  The realized metric path is controlled
+by `T`, the Hessian slot by `U`, and the eventual coefficient application by
+an independent passenger. -/
+def edgeTopPairBi (g : SmoothRiemannianMetric I M)
+    (T U : SmoothCcTensor g 0 2) {delta : Real}
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) delta)
+    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
+    (s : Real) : SmoothCcTensor g 2 2 :=
+  edgeTopPairG (I := I) (M := M) g T
+    (iteratedCovGrad (I := I) g 0 2 2 U) hdelta hdeltaZ qA qB q epsilon s
+
+/-- The Hessian-parameterized complete top pair is the arbitrary-rank-four
+coefficient API evaluated on the Hessian of its second tensor argument. -/
+theorem edgeTopPairBi_eq_G (g : SmoothRiemannianMetric I M)
+    (T U : SmoothCcTensor g 0 2) {delta : Real}
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) delta)
+    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
+    (s : Real) :
+    edgeTopPairBi (I := I) (M := M) g T U hdelta hdeltaZ qA qB q epsilon s =
+      edgeTopPairG (I := I) (M := M) g T
+        (iteratedCovGrad (I := I) g 0 2 2 U)
+        hdelta hdeltaZ qA qB q epsilon s := rfl
+
+/-- Applying the complete top pair with an arbitrary rank-four argument to
+the path state reproduces the corresponding raw refold coefficient acting on
+that argument. -/
+theorem edgeTopG_apply
+    (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    (G : SmoothCcTensor g 0 4) {delta : Real}
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) delta)
+    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
+    (s : Real) :
+    appCc (I := I) (M := M) g 2 2
+        (edgeTopPairG (I := I) (M := M) g T G hdelta hdeltaZ
+          qA qB q epsilon s) T =
+      appCc (I := I) (M := M) g 4 2
+        ((2 : Real) • riemannPalatiniRefoldC2Family
+            (I := I) (M := M) g T hdelta hdeltaZ qA qB s +
+          deTurckLieCovDerivRefoldC2Family
+            (I := I) (M := M) g T hdelta hdeltaZ q epsilon s) G := by
+  rw [edgeTopPairG, riemannPalatiniRefoldC2Family,
+    deTurckLieCovDerivRefoldC2Family,
+    Fin.sum_univ_three, Fin.sum_univ_three]
+  simp only [appCc_add_left, appCc_smul_left]
+  rw [edgeKernel_apply (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T G qA,
+    edgeKernel_apply (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T G qB,
+    edgeMonoRefold (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T G (q 0),
+    edgeMonoRefold (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T G
+      ((q 0).trans (Equiv.swap (0 : Fin 4) 1)),
+    edgeMonoRefold (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T G (q 1),
+    edgeMonoRefold (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T G
+      ((q 1).trans (Equiv.swap (0 : Fin 4) 1)),
+    edgeMonoRefold (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T G (q 2),
+    edgeMonoRefold (I := I) (M := M) g
+      (realizedFam (I := I) g T 0 hdelta hdeltaZ s) T G
+      ((q 2).trans (Equiv.swap (0 : Fin 4) 1))]
+
+/-- Complete polarized formal partner of `edgeTopPairBi`.  The raised pair
+contains the passenger `P`, while the unraised pair contains the test tensor
+`V`. -/
+def edgeTopPartnerBi (g : SmoothRiemannianMetric I M)
+    (T P V : SmoothCcTensor g 0 2) {delta : Real}
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) delta)
+    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
+    (s : Real) : SmoothCcTensor g 0 4 :=
+  let gm := realizedFam (I := I) g T 0 hdelta hdeltaZ s
+  (2 : Real) • (s • ((1 / 2 : Real) •
+      ((1 / 2 : Real) •
+          (edgePairPartnerBi (I := I) (M := M) g gm P V (qA 0) +
+            edgePairPartnerBi (I := I) (M := M) g gm P V (qA 1) -
+            edgePairPartnerBi (I := I) (M := M) g gm P V (qA 2) -
+            edgePairPartnerBi (I := I) (M := M) g gm P V (qA 3)) +
+        (1 / 2 : Real) •
+          (edgePairPartnerBi (I := I) (M := M) g gm P V (qB 0) +
+            edgePairPartnerBi (I := I) (M := M) g gm P V (qB 1) -
+            edgePairPartnerBi (I := I) (M := M) g gm P V (qB 2) -
+            edgePairPartnerBi (I := I) (M := M) g gm P V (qB 3))))) +
+    s • ∑ i : Fin 3, epsilon i • ((1 / 2 : Real) •
+      (edgePairPartnerBi (I := I) (M := M) g gm P V (q i) +
+        edgePairPartnerBi (I := I) (M := M) g gm P V
+          ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
+
 /-- Exact action identity for the complete top refold coefficient. -/
 theorem edgeTopPair_apply
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
@@ -1397,6 +1525,84 @@ theorem edgeTopPair_apply
   simp only [appCc_add_left, appCc_smul_left]
   rw [edgeRiemPair_apply (I := I) (M := M) g T hdelta hdeltaZ qA qB s,
     edgeLiePair_apply (I := I) (M := M) g T hdelta hdeltaZ q epsilon s]
+
+set_option maxHeartbeats 12800000 in
+/-- Pointwise polarized formal-partner identity for the complete raw
+Riemann--Lie top pair. -/
+theorem edgeTop_point_bi
+    (g : SmoothRiemannianMetric I M) (T P U V : SmoothCcTensor g 0 2)
+    {delta : Real}
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) delta)
+    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
+    (s : Real) (x : M) :
+    tensorInnerPointwise (I := I) (M := M) g 0 2 x (V.toFun x)
+        ((appCc (I := I) (M := M) g 2 2
+          (edgeTopPairBi (I := I) (M := M) g T U hdelta hdeltaZ
+            qA qB q epsilon s) P).toFun x) =
+      tensorInnerPointwise (I := I) (M := M) g 0 4 x
+        ((edgeTopPartnerBi (I := I) (M := M) g T P V hdelta hdeltaZ
+          qA qB q epsilon s).toFun x)
+        ((iteratedCovGrad (I := I) g 0 2 2 U).toFun x) := by
+  have hsub_left : ∀ (r t : ℕ) (A B C : TensorRSModel r t Real E),
+      tensorInnerPointwise (I := I) (M := M) g r t x (A - B) C =
+        tensorInnerPointwise (I := I) (M := M) g r t x A C -
+          tensorInnerPointwise (I := I) (M := M) g r t x B C := by
+    intro r t A B C
+    rw [sub_eq_add_neg, tensorInnerPointwise_add_left,
+      ← neg_one_smul Real B, tensorInnerPointwise_smul_left]
+    ring
+  have hsub_right : ∀ (r t : ℕ) (A B C : TensorRSModel r t Real E),
+      tensorInnerPointwise (I := I) (M := M) g r t x A (B - C) =
+        tensorInnerPointwise (I := I) (M := M) g r t x A B -
+          tensorInnerPointwise (I := I) (M := M) g r t x A C := by
+    intro r t A B C
+    rw [sub_eq_add_neg, tensorInnerPointwise_add_right,
+      ← neg_one_smul Real C, tensorInnerPointwise_smul_right]
+    ring
+  rw [edgeTopPairBi, edgeTopPairG, edgeTopPartnerBi]
+  rw [Fin.sum_univ_three, Fin.sum_univ_three]
+  simp only [edgeKernelPair,
+    appCc_add_left, appCc_sub_left, appCc_smul_left,
+    SmoothCcTensor.toFun_add, SmoothCcTensor.toFun_sub,
+    SmoothCcTensor.toFun_smul, Pi.add_apply, Pi.sub_apply, Pi.smul_apply,
+    tensorInnerPointwise_add_left, tensorInnerPointwise_add_right,
+    tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
+  simp_rw [hsub_left, hsub_right]
+  simp_rw [tensorInnerPointwise_add_left, tensorInnerPointwise_add_right]
+  simp_rw [edgePair_point_bi (I := I) (M := M) g]
+
+set_option maxHeartbeats 12800000 in
+/-- Exact polarized formal-partner identity for the complete raw Riemann--Lie
+top pair. -/
+theorem edgeTop_inner_bi
+    (g : SmoothRiemannianMetric I M) (T P U V : SmoothCcTensor g 0 2)
+    {delta : Real}
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) delta)
+    (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) delta)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real)
+    (s : Real) :
+    Inner.inner Real V
+        (appCc (I := I) (M := M) g 2 2
+          (edgeTopPairBi (I := I) (M := M) g T U hdelta hdeltaZ
+            qA qB q epsilon s) P) =
+      Inner.inner Real
+        (edgeTopPartnerBi (I := I) (M := M) g T P V hdelta hdeltaZ
+          qA qB q epsilon s)
+        (iteratedCovGrad (I := I) g 0 2 2 U) := by
+  rw [edgeTopPairBi, edgeTopPairG, edgeTopPartnerBi]
+  rw [Fin.sum_univ_three, Fin.sum_univ_three]
+  simp only [edgeKernelPair,
+    appCc_add_left, appCc_sub_left, appCc_smul_left,
+    inner_add_left, inner_add_right, inner_sub_left, inner_sub_right,
+    real_inner_smul_left, real_inner_smul_right]
+  simp_rw [edgePair_inner_bi (I := I) (M := M) g]
 
 set_option maxHeartbeats 12800000 in
 /-- Exact formal-partner identity for the complete top coefficient returned by

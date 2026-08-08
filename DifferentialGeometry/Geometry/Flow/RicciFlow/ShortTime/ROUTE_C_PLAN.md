@@ -141,14 +141,121 @@ The binding producer chain is now:
    fixed-background `C2/C0` action but uses the self-background `C1` action;
    `galArmVecBg_split` and `galArmPair3_split` isolate exactly the complete C1
    correction.
-6. **Rest-only Rung-3 bound — LIVE at the diagonal full-slope
-   commutator/Gårding estimate.**  The earlier attempt to estimate the
-   fixed-background `C2` action in absolute value is superseded.  The binding
-   route is the **C0+C2 whole-slope recombination**: keep the `C0` and `C2`
-   contributions together through the diagonal Rung-3 pairing, use their
-   principal cancellation/coercivity, and seek only the one-sided upper bound
-   required by the energy inequality.  The first theorem is the homogeneous
-   analytic producer, tentatively `lowbase_full3_unif`:
+6. **Rest-only Rung-3 bound — STOP at the complete-edge curvature
+   commutator.**  The arbitrary-passenger frozen adapter is permanently
+   rejected.  The source orientation is
+
+   ```text
+   ricciTop(..., U) applied to nabla^2 P
+   curvatureKernel(U) applied to nabla^2 P,
+   ```
+
+   where `P` is the path/coefficient state.  The proposed frozen operator used
+   the opposite orientation `ricciTop(..., P) (nabla^2 U)` and
+   `curvatureKernel(P) (nabla^2 U)`.  These agree on the diagonal `P = U`, but
+   are not equal for arbitrary independent jets.  Existing `edgeRiem_cancel`
+   already accepts an arbitrary acted field **provided** the correctly
+   oriented `hrefold` is supplied; the diagonal Palatini producer cannot
+   supply the proposed reversed `hrefold`.  Therefore no duplicate
+   `edgeRiem_cancel_bi` wrapper and no false `rhsSelf_refold_bi` theorem is to
+   be added.
+
+   The corrected route now keeps state=acted=`T` throughout.  It has the
+   following focused-green exact and analytic producers:
+
+   - `lowBase_path_nf` rewrites the actual `AB.a2 T + AB.a1 T` as the complete
+     diagonal path action with order-zero, order-one, and top-deviation
+     coefficients.  It uses `lowData_split`, `rhsArm_sub_eq_paths`, and
+     `edgeTop_split`; it asserts no off-diagonal operator identity.
+   - `appD2_pair_h2` and `appD2_pair_h4` prove the finite rank-two principal
+     form estimate directly, without converting an `H4` tensor into a uniform
+     covariant four-jet.
+   - `top_pair_h2_unif`, `top_pair_h4_unif`, and `top_pair_abs_unif` specialize
+     this estimate to the path-top deviation.  The last theorem selects the
+     `H2` cap before `g` and absorbs
+     `2 * |<L^2 T, Phi(T) nabla^2(LT)>|` into `eta * H4^2` using only the `C3`
+     metric class.
+   - `exists_edgeLieJoint`, public `edgeLiePair_joint`, and
+     `threeArmJoint_const`/`threeArmJoint_comp` retain the joint-smooth exact
+     data needed by a subsequent directed-Green expansion.
+   - `low0_path_refold`, `b02_raw_nf`, and `b02_center_nf` perform the honest
+     diagonal raw refold and center the complete order-zero/top block.  The
+     off-diagonal raw-pair values enter only by algebra; no false
+     arbitrary-passenger low-base identity is asserted.
+   - `edgeTopPairInt`, `edgeTopPartnerInt`, and `edgePath_inner_bi` provide the
+     path-integrated formal-partner layer.  `edge_swap_h4_unif` and
+     `edge_diag_h4_unif` give class-first cross-sum and diagonal estimates with
+     only the `C3` metric class and the `H2` state cap.
+   - `edgeLow0_split` and `edge_center_s_nf` give the focused-green fixed-path
+     centered normal form
+
+     ```text
+     J_s = L(E0_s T) + (L(D_s T) - D_s(LT))
+             - (K_s-K_0)(LT) - Cross_s.
+     ```
+
+     After composition with `b02_center_nf`, the explicit Cross sum cancels
+     exactly; it must not be estimated a second time.
+
+   The principal-symbol calculation is positive: the canonical raw top pair
+   reduces to six surviving monomials, and its two literal fourth-order
+   orientations are exactly those carried by `Cross_s`.  Covariantly, however,
+   the exact argument-corner theorem stops at `Delta(nabla^2 T)`.  Replacing
+   that by `nabla^2(Delta T)` produces
+
+   ```text
+   edgeTopPairG_s (
+     nabla(pointwiseTensorCurv g 2 T)
+       + pointwiseTensorCurv g 3 (nabla T)),
+   ```
+
+   whose first summand contains `(nabla^2 Rm(g)) * T`.  No current theorem
+   cancels this complete `qA/qB/q/epsilon` counterterm against the second
+   derivative corner of `K_s-K_0`.  Generic commutation exposes metric jet
+   four; Green differentiates the test `L^2 T` and demands `H5`; the existing
+   tame and slot-transport routes require either a metricwise small radius or
+   an `H4/H5` state ball.  These are three distinct failed routes.
+
+   The representation/orientation audit is now closed rather than assumed:
+   focused-green `appCcPsi_diag` and `cometricTrace_appCcRS` expose the mixed
+   Leibniz/trace corner, while focused-green `edgeTopPairG`, `edge_arg2_nf`,
+   `phiMet_fold_comm`, and `edgeTopG_apply` show exactly what survives.  With
+   the canonical arrays, `edgeTopG_apply` turns the q block into
+   `rhsRefold2` acting on an arbitrary rank-four argument while keeping the
+   passenger equal to `T`.  Combining the coefficient definitions leaves
+
+   ```text
+   (lieRefold2 + (Phi_s - Phi_0) - 2s * ricciTop)
+     (nabla(pointwiseTensorCurv g 2 T)
+       + pointwiseTensorCurv g 3 (nabla T)).
+   ```
+
+   This block is not definitionally zero and still contains the forbidden
+   `(nabla^2 Rm(g)) * T` cell.  Thus the STOP is now grounded after the full
+   arbitrary-Hessian orientation bridge, not in a missing coercion or stale
+   import.
+
+   Therefore the binding gate is now **STOP-AND-REDESIGN** at the missing
+   complete-edge curvature-commutator identity.  The smallest honest next
+   producer is an exact `edge_qk_comm`/`edge_center_comm_nf` theorem rewriting
+   the joint `q/K` counterterm using only `Rm`, `nabla Rm`, and state jets
+   through order three.  It is unstated and 0%; a normal-frame
+   principal-symbol calculation is not a Lean proof of it.
+
+   Consequently the homogeneous diagonal residual estimate
+
+   ```text
+   2 * (
+     <L^2 T, L (AB.a2 T + AB.a1 T)>
+       - <L^2 T, Phi(T) nabla^2 (L T)>)
+     <= eps * H4^2 + G(g,eps) * H3^2.
+   ```
+
+   remains unavailable.  Its stop condition has fired because every currently
+   implementable expansion either asks for `nabla^2 Rm(g)`, an `H4/H5` state
+   radius, or a derivative of the Rung-3 test.  `lowbase_full3_unif` itself is
+   still unstated and remains 0%; its
+   required eventual statement remains:
 
    ```text
    eta > 0
@@ -170,42 +277,43 @@ The binding producer chain is now:
    `galA1FixPair3_le`, whose correct order remains `eta -> g -> G` and whose
    solver radius is capped afterward by `R <= 1`.
 
-   The spectral diagonalization is no longer a frontier:
-   `finite_pair_split` is complete, and `a = 1`, `b = 2` gives the required
-   Rung-3 `L2` split.  `finite_symm_scale` carries the Galerkin retraction
-   scalar and slot symmetrization into that pairing by exact linearity; it does
-   not divide by `theta` or introduce `1 / theta`, so the `theta = 0` case
-   needs no branch.  The polarized monomial
-   formal-adjoint/Green step is also
-   complete as `edgePair_l2_bi`, `edgePair_inner_bi`, and
-   `edgePair_green_bi`.  These do **not** identify the complete low-base `C2`
-   kernel with `edgeTopPair`: the latter is the closed-edge top family and the
-   full low-base kernel is not definitionally that object.  The remaining
-   analytic brick is therefore the exact diagonal full-slope low-base adapter
-   and its C0+C2 commutator/Gårding bound, not a raw
-   `oneMinus_appCc2_comm` estimate and not a standalone absolute-value C2
-   theorem.  The canonical ShortTime home for the homogeneous producer is the
-   future `LowRegBgC2Pair.lean`; a later final rest consumer may live in
-   `LowRegA1RestPairBg.lean`.  No canonical reusable lower-DeTurck theorem has
-   yet been identified; extract one only if the actual proof exposes a stable
-   generic statement.  Rungs 4+ remain deferred until after solution
+   The spectral/Galerkin transport is also closed at the exact level.
+   `finite_pair_split` gives the Rung-3 split and `finite_symm_scale` carries
+   the radial scalar.  `galArmPair3_diag` states the resulting
+   `theta * rawPair = diagonalPair` identity, while `galRepHs_scale` retains
+   the exact `theta` factor in every Sobolev norm.  No inverse of `theta` is
+   introduced, but the eventual inequality proof must still split
+   `theta = 0` from `0 < theta`: the zero branch proves the acted arm is zero;
+   the positive branch cancels the common factor with
+   `mul_le_mul_left`.  The polarized monomial APIs `edgePair_l2_bi`,
+   `edgePair_inner_bi`, and `edgePair_green_bi` remain valid lower-level tools,
+   but they do not identify the whole low-base kernel with `edgeTopPair`.
+
+   The exact diagonal theorem now lives in the Analysis-layer
+   `LowBaseFullSlopePairing.lean`; the eventual class-first cap theorem still
+   belongs in `LowRegBgC2Pair.lean`, and the final rest consumer may live in
+   `LowRegA1RestPairBg.lean`.  Rungs 4+ remain deferred until after solution
    construction, where metricwise interior/corner smoothing may use metricwise
    high-rung constants.
 
-Current stop conditions are only: failure of the complete correction bound on
-arbitrary radii; unavoidable fourth-jet dependence in the `E4` coefficient;
-failure of the one-sided full-slope estimate uniformly in Galerkin dimension;
-a precise missing lower API after three routes; or a genuine
-verification/memory wall.  The old three-route audit still rules out (1) a
-direct high-state-jet `C2` action bound, (2) the derivative-short raw
-weight-three duality route, and (3) treating the closed-edge `edgeTopPair` as
-the complete low-base C2 kernel.  It does not establish an obstruction to the
-binding C0+C2 whole-slope route.  The completed `lieBgCorr_unif`,
+The arbitrary-acted-field stop condition has now fired: the proposed
+pointwise frozen C0+C2 refold reverses the actual derivative orientation and is
+false off the diagonal.  This is a wrong-statement/design obstruction, not a
+verification failure.  The old three-route audit still rules out (1) a direct
+high-state-jet `C2` action bound, (2) the derivative-short raw weight-three
+duality route, and (3) treating the closed-edge `edgeTopPair` as the complete
+low-base C2 kernel.  A corrected diagonal form-level route has now been adopted
+and its exact path normal form and principal absorption are proved.  The
+completed `lieBgCorr_unif`,
 `lowC1Corr_unif`, `galA1FixPair3_le`, signed C1 split, complementary spectral
-split, `finite_symm_scale`, and polarized monomial Green identity are
+split, `finite_symm_scale`, diagonal Galerkin pairing, radial scale bound,
+principal form absorption, polarized raw-pair estimates, and the exact
+fixed-path centered normal form are
 theorem-level 100%; the
 unstated rest-only theorem is 0%; the dedicated fixed-background
-direct-smoothing machinery remains approximately 92%;
+direct-smoothing machinery is approximately 94%; the remaining denominator is
+the complete-edge `q/K` curvature-commutator theorem and the ensuing diagonal
+residual Gårding estimate;
 `ricci_flow_unif_existence` remains 0%; whole HCG remains approximately 3%.
 
 ## Phase (c-C0) result + (c-C): synthesis and endpoint
@@ -428,3 +536,54 @@ the in-place DT widenings of bricks 2a–2e.
   remains 0%.
   The superseded absorption review remains in `ROUTE_C_ABSORB_CONSULT.md`;
   the current full-slope Gårding handoff is `ROUTE_C_GARDING_CONSULT.md`.
+- 2026-08-08 (arbitrary-passenger whole-slope audit):
+  **STOP-AND-REDESIGN.**  Existing `edgeRiem_cancel` already accepts an
+  arbitrary acted tensor once supplied a correctly oriented refold, but its
+  available producer is diagonal.  The true off-diagonal terms have orientation
+  `ricciTop(..., U) (nabla^2 P)` and `curvatureKernel(U) (nabla^2 P)`; the
+  proposed frozen operator reverses the roles to coefficient `P` acting on
+  `nabla^2 U` and is false for independent jets.  No Lean declaration, wrapper,
+  stronger hypothesis, or new frontier file was added, and no Lean check was
+  run because the obstruction was established before elaboration.  The next
+  theorem-level choice is a paired cross-oriented directed-Green normal form or
+  a genuinely diagonal form-level proof.  `lowbase_full3_unif`, the rest-only
+  Rung-3 theorem, and headline `(N)` remain 0%; dedicated fixed-background
+  machinery is revised from approximately 92% to approximately 90%; whole HCG
+  remains approximately 3%.
+- 2026-08-08 (diagonal form-level correction): the route no longer waits on a
+  design choice.  Focused-green `lowBase_path_nf` connects the actual low-base
+  action to its three path coefficients; `appD2_pair_h2`/`appD2_pair_h4` and
+  `top_pair_h2_unif`/`top_pair_h4_unif`/`top_pair_abs_unif` prove and absorb the
+  class-first principal form with only `C3` metric data.  Focused-green
+  `galArmPair3_diag` and `galRepHs_scale` retain the Galerkin radial factor;
+  the downstream proof uses an explicit zero/positive `theta` split but no
+  inverse.  Joint-smooth exact support is public through
+  `exists_edgeLieJoint`, `edgeLiePair_joint`, and
+  `threeArmJoint_const`/`threeArmJoint_comp`.  The sole remaining analytic
+  frontier is the homogeneous diagonal residual estimate after subtracting
+  `<L^2 T, Phi(T) nabla^2(LT)>`.  `lowbase_full3_unif`, the rest-only theorem,
+  and `(N)` remain 0%; dedicated machinery is approximately 92%; whole HCG
+  remains approximately 3%.
+- 2026-08-08 (centered complete-edge gate): the diagonal route was advanced
+  through focused-green `low0_path_refold`, `b02_raw_nf`, `b02_center_nf`,
+  `edgePath_inner_bi`, `edge_swap_h4_unif`, `edge_diag_h4_unif`,
+  `edgeLow0_split`, and `edge_center_s_nf`.  The canonical fourth-order
+  principal orientations cancel exactly against the two raw Cross terms.
+  Nevertheless the exact covariant corner differs by a `q`-shaped Hessian /
+  rough-Laplacian curvature commutator containing `nabla^2 Rm`; the tree has
+  no identity canceling it with the `K_s-K_0` curvature fold.  Separate tame
+  bounds require a radius chosen after `g`, generic commutation reads metric
+  jet four, and Green reads `H5`.  The binding STOP condition is therefore
+  fired at the missing complete-edge `edge_qk_comm` identity.  The target
+  `lowbase_full3_unif`, rest-only Rung-3 theorem, and headline `(N)` remain 0%;
+  dedicated Route-(c) machinery is approximately 94%; whole HCG remains
+  approximately 3%.
+- 2026-08-08 (arbitrary-Hessian audit closed): focused-green
+  `appCcPsi_diag`, `cometricTrace_appCcRS`, `edgeTopPairG`, `edge_arg2_nf`,
+  `phiMet_fold_comm`, and `edgeTopG_apply` close the remaining representation
+  and orientation questions.  They expose the exact surviving complete
+  q/K curvature block rather than canceling it.  The missing
+  `edge_qk_comm`/complete-edge component identity remains unstated (0%);
+  `edge_center_h4_unif`, `lowbase_full3_unif`, the rest-only Rung-3 theorem,
+  and headline uniform existence all remain 0%.  Dedicated machinery stays
+  approximately 94%; whole HCG stays approximately 3%.

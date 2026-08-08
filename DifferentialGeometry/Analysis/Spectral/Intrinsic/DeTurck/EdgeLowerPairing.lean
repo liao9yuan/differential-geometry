@@ -145,6 +145,23 @@ def edgeQuadArm (g g1 g_bg : SmoothRiemannianMetric I M)
     (edgeQuad0 (I := I) (M := M) g g1 g_bg)
     (edgeQuad1 (I := I) (M := M) g g1 g_bg) W
 
+/-- The complete order-zero coefficient at an arbitrary realized metric,
+including its folded curvature reaction, is exactly the carrier coefficient
+plus the nonlinear residual coefficient. -/
+theorem edgeLow0_split
+    (g g1 g_bg : SmoothRiemannianMetric I M) :
+    let A0 :=
+      (-2 : Real) •
+          linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g g1 +
+        (deTurckLieCoeffField (I := I) (M := M) g g1 g_bg +
+          lieCorr0Field (I := I) (M := M) g g1 g_bg)
+    A0 + phiMetCurvCoeff (I := I) g g_bg g1 =
+      edgeCarry0 (I := I) (M := M) g g_bg +
+        edgeQuad0 (I := I) (M := M) g g1 g_bg := by
+  dsimp only
+  simp only [edgeCarry0, edgeQuad0]
+  abel
+
 /-- At an arbitrary realized metric the complete top coefficient is exactly
 the fixed carrier connection Laplacian, the cometric deviation arm, and a
 zeroth-order curvature reaction. -/
@@ -232,9 +249,9 @@ theorem edgeSlope_split
   have hlow0 : R0 + phiMetCurvCoeff (I := I) g g_bg gs =
       edgeCarry0 (I := I) (M := M) g g_bg +
         edgeQuad0 (I := I) (M := M) g gs g_bg := by
-    simp only [R0, gs, edgeMetric, DeTurckCoefficients.rhsLow0Coeff,
-      linearizedRicciConnDiffOrder0Coeff, edgeCarry0, edgeQuad0]
-    abel
+    simpa only [R0, gs, edgeMetric, DeTurckCoefficients.rhsLow0Coeff,
+      linearizedRicciConnDiffOrder0Coeff] using
+        edgeLow0_split (I := I) (M := M) g gs g_bg
   have hlow1 : R1 =
       edgeCarry1 (I := I) (M := M) g g_bg +
         edgeQuad1 (I := I) (M := M) g gs g_bg := by

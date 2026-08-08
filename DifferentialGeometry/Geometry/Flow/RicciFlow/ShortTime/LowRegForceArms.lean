@@ -101,6 +101,42 @@ theorem galCoreRep_eq (g₀ : SmoothRiemannianMetric I M) (R : ℝ)
       galTameStateC (I := I) (M := M) g₀ 1 R S c := by
   rw [galCoreRep, smoothCcToTensorHs_smul, ← finiteEigenComboHs_eq, galTameStateC]
 
+/-- The retracted, symmetrized Galerkin representative retains its exact
+radial scale in every spectral Sobolev norm.  This zero-safe form is used when
+a homogeneous tensor estimate is transferred back to the unretracted modal
+coefficients. -/
+theorem galRepHs_scale (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
+    {R : ℝ} (hR : 0 ≤ R)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
+    (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
+    let θ : ℝ := min 1 (R / ‖galLowView (I := I) (M := M) g₀ 1
+      (finiteEigenComboHs (I := I) (M := M) g₀ F c (((1 : ℕ) : ℝ) + 2))‖)
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+        (symmS (I := I) (M := M) g₀
+          (galCoreRep (I := I) (M := M) g₀ R F c))‖ ≤
+      θ * Real.sqrt (∑ i ∈ F,
+        tensorSobolevWeight (I := I) (M := M) i σ * (c i) ^ 2) := by
+  let θ : ℝ := min 1 (R / ‖galLowView (I := I) (M := M) g₀ 1
+    (finiteEigenComboHs (I := I) (M := M) g₀ F c (((1 : ℕ) : ℝ) + 2))‖)
+  have hθ0 : 0 ≤ θ := by
+    dsimp only [θ]
+    exact le_min zero_le_one (div_nonneg hR (norm_nonneg _))
+  refine (norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ σ _).trans ?_
+  have hrep : galCoreRep (I := I) (M := M) g₀ R F c =
+      θ • finiteEigenCombo (I := I) (M := M) g₀ F c := rfl
+  rw [hrep, smoothCcToTensorHs_smul, norm_smul, Real.norm_eq_abs,
+    abs_of_nonneg hθ0]
+  have hnorm :
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+          (finiteEigenCombo (I := I) (M := M) g₀ F c)‖ =
+        Real.sqrt (∑ i ∈ F,
+          tensorSobolevWeight (I := I) (M := M) i σ * (c i) ^ 2) := by
+    rw [← finiteEigenComboHs_eq]
+    rw [← Real.sqrt_sq (norm_nonneg _),
+      finiteEigenCombo_spectral_normSq (I := I) (M := M)]
+    rfl
+  rw [hnorm]
+
 /-- The retracted, symmetrized Galerkin representative is a contraction at
 every spectral Sobolev order.  In particular, the coefficient of a highest
 derivative term is not enlarged by an order-dependent comparison constant. -/

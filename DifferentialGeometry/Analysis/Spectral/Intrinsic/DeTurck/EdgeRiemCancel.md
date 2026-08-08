@@ -3,8 +3,8 @@
 ## Current source state
 
 `EdgeRiemCancel.lean` contains a placeholder-free exact Riemann-cancellation
-producer.  Its post-merge source is focused-green.  The public statements are
-unchanged.
+producer.  Its post-merge source is focused-green.  The original public
+statements are preserved and one stronger producer is exported.
 
 The file exports:
 
@@ -17,6 +17,17 @@ The file exports:
   containing only the genuine Ricci connection-difference coefficient, a
   uniformly bounded order-zero family, the already visible lower arms, and
   the Lie pair family.
+- `exists_edgeLieJoint`, which retains the same exact normal form together
+  with the joint-smooth order-zero family needed before path integration;
+  `exists_edgeLieRef` is now its compatibility projection.
+
+`edgeRiem_cancel` is already polymorphic in its acted tensor `W`, but it is a
+consumer of a supplied, correctly oriented refold identity.  It does not
+produce that identity.  In particular, the diagonal Palatini producer cannot
+be frozen by replacing only the acted state: the true off-diagonal refold has
+the independent passenger in the top coefficient and keeps `nabla^2` on the
+path state.  A conditional `edgeRiem_cancel_bi` alias would therefore add no
+content, while a reversed `C2(P) (nabla^2 U)` producer would be false.
 
 The producer adds no hypothesis.  Its internal finite jet radius is used only
 to instantiate the already proved exact refold identities for the fixed smooth
@@ -47,6 +58,8 @@ uniqueness is completed.
 
 - Source placeholders (`sorry`, `admit`, axiom): none.
 - Focused Lean check: passed.
+- The stronger `exists_edgeLieJoint` producer passed focused verification at
+  the shared resource cap.
 - Exact artifact refresh: the pre-repair attempt failed on the API drift above;
   the repaired source then passed its coordinated exact refresh.
 - `extends_of_rmBounded`: unchanged.

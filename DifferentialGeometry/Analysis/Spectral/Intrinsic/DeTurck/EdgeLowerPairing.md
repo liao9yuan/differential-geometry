@@ -21,13 +21,16 @@
 - `edgeCarry0` / `edgeCarry1` contain only fixed carrier/background
   coefficients. `edgeQuad0` / `edgeQuad1` contain the nonlinear residuals;
   crucially `edgeQuad0` is not mislabeled as a bounded reaction coefficient.
+- `edgeLow0_split` exposes the reusable order-zero identity used by the
+  centered fixed-parameter normal form: the raw lower coefficient plus the
+  realized curvature fold equals `edgeCarry0 + edgeQuad0`.
 - `edgeSlope_split` specializes `rhsSlope_eq_arms` to the closed initial-edge
   pair `(W, 0)` and proves the exact pointwise decomposition
   `principal + edgeCarryArm + edgeQuadArm`.  It assumes no spatial derivative
   bound on the arbitrary endpoint metric.
 
-The source contains no `sorry`, `admit`, or new axiom.  A focused Lean check is
-pending the coordinated named dependency build in the shared worktree.
+The source contains no `sorry`, `admit`, or new axiom.  Its focused check and
+direct export refresh passed after adding `edgeLow0_split`.
 
 ## Exact role and remaining frontier
 
@@ -57,9 +60,8 @@ therefore the exact coefficient split feeding the scalar estimate
 
 ## Honest status
 
-- Generic fixed-time lower pairing: 85% (source complete; check pending).
+- Generic fixed-time lower pairing: 100% complete and verified.
 - Concrete Ricci--DeTurck exact RHS realization: 70% machinery (exact source
-  split added; coordinated focused check and the joint residual estimate are
-  still pending).
+  split verified; the joint residual estimate is still pending).
 - `ricci_flow_forward_unique`: 0% until the public theorem is proved and
   verified.

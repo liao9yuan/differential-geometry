@@ -2,15 +2,18 @@
 
 ## Status (2026-08-07)
 
-`exists_max_flow` is implemented without `sorry`.  The constructor takes a
-three-dimensional compact boundaryless initial metric with positive Ricci
-curvature and returns a positive endpoint, a `SolutionOn [0, omega)`, its
+`exists_max_flow` is implemented without `sorry`.  The constructor now takes a
+three-dimensional compact boundaryless initial metric with pointwise positive
+scalar curvature and returns a positive endpoint, a `SolutionOn [0, omega)`, its
 `IsSolutionOn` proof, the initial-value equality, and actual
 `IsMaximalAtEndpoint`.
 
-Focused verification passed.  The exact producer refresh was started after the
-focused check; record its final result here once the downstream Hamilton
-assembly is checked.
+The previous positive-Ricci interface was focused-green.  After weakening the
+interface, the direct scalar producer is focused/exact-green.  Rechecking this
+module is currently blocked only by the missing
+`DeTurckRemainderLowBaseH2Pair.olean` imported through `MaximalTime`; the source
+proof itself has not produced a Lean diagnostic.  Exact refresh and axiom audit
+therefore remain pending.
 
 ## Construction
 
@@ -28,10 +31,12 @@ assembly is checked.
 
 ## Progress accounting
 
-- `exists_max_flow`: 100% implemented and focused-verified.
+- `exists_max_flow`: 100% source-implemented; current weaker interface
+  verification and axiom audit pending on the missing imported artifact.
 - Dedicated maximal-compatible-flow machinery: 100% implemented.
-- `ham3_flow_exists_normalized`: assembly patch written; verification pending.
+- `ham3_flow_exists_normalized`: source assembly written; trusted/axiom-clean
+  completion remains 0% until downstream verification and audit.
 - Hamilton positive-Ricci theorem program: this closes the maximal-flow
   existence producer, but later pinching, blow-up compactness, and spherical
-  classification phases remain separate; whole program remains approximately
-  80% complete pending the live project-map reconciliation.
+  classification phases remain separate; whole HCG machinery remains
+  conservatively approximately 87%.

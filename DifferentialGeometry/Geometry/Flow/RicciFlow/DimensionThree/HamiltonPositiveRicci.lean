@@ -648,7 +648,10 @@ theorem ham3_flow_exists_normalized
   letI : ConnectedSpace M := hM.2.1
   letI : I.Boundaryless := hM.2.2.1
   have hdim : Module.finrank Real E = 3 := hM.2.2.2
-  rcases exists_max_flow (I := I) (M := M) g0 hdim hpos with
+  have hscalar_pos : ∀ x : M,
+      0 < metricScalarAt (I := I) (M := M) g0 x :=
+    scalar_pos_of_ricci (I := I) (M := M) g0 hdim hpos
+  rcases exists_max_flow (I := I) (M := M) g0 hdim hscalar_pos with
     ⟨omega, h0ω, Smax, hSmax, hstart, hmax⟩
   have hcurv : Rm04NormSqUnboundedAt (I := I) Smax Smax.base.rm04 :=
     rmUnbounded_of_maximal (I := I) hdim hSmax hmax

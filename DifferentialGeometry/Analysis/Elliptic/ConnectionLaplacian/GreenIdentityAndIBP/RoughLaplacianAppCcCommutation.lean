@@ -151,6 +151,25 @@ theorem cometricDoubleTrace_appCc_slotExtend_two_comm (g₀ : SmoothRiemannianMe
   rw [← ContinuousLinearMap.comp_assoc, ← ContinuousLinearMap.comp_assoc,
     cometricDoubleTraceFib_comp_slotExtend_two_eq (I := I) g₀ b s Φ x]
 
+/-- Double trace commutes with two slot extensions in an `appCcRS` action,
+at arbitrary contravariant valence. -/
+theorem cometricTrace_appCcRS (g₀ : SmoothRiemannianMetric I M) (r b s : ℕ)
+    (Φ : SmoothCcTensor g₀ b s) (V : SmoothCcTensor g₀ r (b + 2)) :
+    appCcRS (I := I) (M := M) g₀ r (s + 2) s
+        (cometricDoubleTraceField (I := I) g₀ s)
+        (appCcRS (I := I) (M := M) g₀ r (b + 2) (s + 2)
+          (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g₀ b s Φ)) V) =
+      appCcRS (I := I) (M := M) g₀ r b s Φ
+        (appCcRS (I := I) (M := M) g₀ r (b + 2) b
+          (cometricDoubleTraceField (I := I) g₀ b) V) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  simp only [appCcRS_toSection]
+  rw [← ContinuousLinearMap.comp_assoc, ← ContinuousLinearMap.comp_assoc,
+    cometricDoubleTraceFib_comp_slotExtend_two_eq (I := I) g₀ b s Φ x]
+
 theorem rawTensorConnLap_appCc_comm_of_rank (g₀ : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g₀ b s) (W : SmoothCcTensor g₀ 0 b) :
     rawTensorConnLapSmooth (I := I) g₀ 0 s (appCc (I := I) (M := M) g₀ b s Φ W) =

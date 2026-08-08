@@ -178,14 +178,14 @@ theorem flow_to_extend
           ⟨le_of_lt ht_pos, ht.2⟩ x v w
   refine ⟨eps, heps, ⟨⟨hwide, Shat, hShat, hstart, hjoint, hpde⟩⟩⟩
 
-/-- A positive-Ricci three-dimensional initial metric has a Ricci flow whose
+/-- A positive-scalar three-dimensional initial metric has a Ricci flow whose
 closed-open lifetime is maximal among all smooth extensions. -/
 theorem exists_max_flow
     [Nonempty M]
     (g0 : SmoothRiemannianMetric I M)
     (hdim : Module.finrank Real E = 3)
-    (hpos : ∀ x : M, ∀ v : TangentSpace I x, v ≠ 0 →
-      0 < metricRicciAt (I := I) (M := M) g0 x (vec2 (I := I) v v)) :
+    (hscalar_pos : ∀ x : M,
+      0 < metricScalarAt (I := I) (M := M) g0 x) :
     ∃ omega : Real, ∃ h0omega : 0 < omega,
       ∃ Smax : SolutionOn (I := I) (M := M)
           (RealTimeInterval.closedOpen 0 omega h0omega),
@@ -213,7 +213,7 @@ theorem exists_max_flow
     intro T hT
     change Nonempty (FlowTo (I := I) (M := M) g0 T) at hT
     let P : FlowTo (I := I) (M := M) g0 T := Classical.choice hT
-    exact flow_end_le (I := I) (M := M) g0 hdim hpos P.hT hc0
+    exact flow_end_le (I := I) (M := M) g0 hdim hscalar_pos P.hT hc0
       P.S P.isSol P.start
   let omega : Real := sSup ends
   have hT0_le : T0 ≤ omega := by

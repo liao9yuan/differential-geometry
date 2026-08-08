@@ -150,10 +150,10 @@ theorem edgeLie_green
 /-! ## Consumer-shaped Lie-only refold -/
 
 /-- The complete closed-edge nonlinear arm has a refold in which the whole
-Riemann--Palatini block has cancelled.  The only second-order piece left is
-the explicit DeTurck Lie pair family, with uniformly bounded signs and a
-uniformly bounded order-zero refold coefficient. -/
-theorem exists_edgeLieRef
+Riemann--Palatini block has cancelled.  In addition to the pointwise identity
+and bounds, this form retains the joint-smooth order-zero coefficient family
+needed before taking its path integral. -/
+theorem exists_edgeLieJoint
     (g g_bg : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
       ccTensorBilin (I := I) g W x v w = ccTensorBilin (I := I) g W x w v)
@@ -164,6 +164,8 @@ theorem exists_edgeLieRef
       ∃ (C₀ : Real → SmoothCcTensor g 2 2)
         (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real),
         (∀ i, |epsilon i| ≤ 1) ∧
+        linearizedRicciThreeArmHjoint (I := I) (M := M) g 2 C₀
+          (δ := delta) (δ' := delta) ∧
         (∀ s ∈ Set.Icc (0 : Real) 1,
           edgeQuadArm (I := I) (M := M) g
               (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W =
@@ -331,8 +333,47 @@ theorem exists_edgeLieRef
       A + (B + C) + L₀ + L₁ + (D + L₂) =
           (A + (B + D)) + C + L₀ + L₁ + L₂ := by module
       _ = K + C + L₀ + L₁ + L₂ := by rw [hcancel']
-  refine ⟨LambdaD, hLambdaD, C0D, q, epsilon, hepsilon, hnormal, ?_⟩
-  exact hsupD
+  exact ⟨LambdaD, hLambdaD, C0D, q, epsilon, hepsilon, hjD, hnormal, hsupD⟩
+
+/-- Consumer-shaped projection of `exists_edgeLieJoint` when only the
+pointwise closed-edge refold and its order-zero bound are needed. -/
+theorem exists_edgeLieRef
+    (g g_bg : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
+    (hWsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g W x v w = ccTensorBilin (I := I) g W x w v)
+    {delta : Real} (hdelta_nn : 0 ≤ delta) (hdelta_half : delta ≤ 1 / 2)
+    (hdelta : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g W) delta) :
+    ∃ B₀ : Real, 0 ≤ B₀ ∧
+      ∃ (C₀ : Real → SmoothCcTensor g 2 2)
+        (q : Fin 3 → Equiv.Perm (Fin 4)) (epsilon : Fin 3 → Real),
+        (∀ i, |epsilon i| ≤ 1) ∧
+        (∀ s ∈ Set.Icc (0 : Real) 1,
+          edgeQuadArm (I := I) (M := M) g
+              (edgeMetric (I := I) (M := M) g W hdelta s) g_bg W =
+            (-2 : Real) • appCc (I := I) (M := M) g 2 2
+                (linearizedRicciConnDiffOrder0CoeffField
+                  (I := I) (M := M) g
+                  (edgeMetric (I := I) (M := M) g W hdelta s)) W +
+              appCc (I := I) (M := M) g 2 2 (C₀ s) W +
+              appCc (I := I) (M := M) g 2 2
+                (edgeFold0 (I := I) (M := M) g
+                  (edgeMetric (I := I) (M := M) g W hdelta s) g_bg) W +
+              appCc (I := I) (M := M) g 3 2
+                (edgeQuad1 (I := I) (M := M) g
+                  (edgeMetric (I := I) (M := M) g W hdelta s) g_bg)
+                (iteratedCovGrad (I := I) g 0 2 1 W) +
+              appCc (I := I) (M := M) g 2 2
+                (edgeLiePairFam (I := I) (M := M) g W hdelta
+                  (edgeZeroBoundAt (I := I) (M := M) g hdelta_nn)
+                  q epsilon s) W) ∧
+        (∀ s ∈ Set.Icc (0 : Real) 1, ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g 2 2 x
+            ((C₀ s).toSection x) ≤ B₀ ^ 2) := by
+  obtain ⟨B₀, hB₀, C₀, q, epsilon, hepsilon, _, hrefold, hbound⟩ :=
+    exists_edgeLieJoint (I := I) (M := M) g g_bg W hWsymm
+      hdelta_nn hdelta_half hdelta
+  exact ⟨B₀, hB₀, C₀, q, epsilon, hepsilon, hrefold, hbound⟩
 
 end IntrinsicSpectral
 end RicciFlow

@@ -87,6 +87,29 @@ private theorem appCcLeibnizPsi_succ_succ (g : SmoothRiemannianMetric I M) (b c 
 
 set_option linter.unusedSectionVars false in
 
+/-- The top argument corner in the iterated `appCcRS` Leibniz expansion is
+the iterated slot extension of the coefficient field. -/
+theorem appCcPsi_diag (g : SmoothRiemannianMetric I M) (b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (i : ℕ) :
+    appCcLeibnizPsi (I := I) (M := M) g b c Φ i i =
+      slotExtendIter (I := I) (M := M) g b c i Φ := by
+  induction i with
+  | zero => rfl
+  | succ i ih =>
+      rw [appCcLeibnizPsi_succ_succ, if_neg (by omega), zero_add]
+      rw [show castSrcCc g (c + (i + 1)) (by omega : (b + i) + 1 = b + (i + 1))
+            (castRankCc_db g ((b + i) + 1) (by omega : (c + i) + 1 = c + (i + 1))
+              (slotExtend (I := I) (M := M) g (b + i) (c + i)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i i))) =
+          slotExtend (I := I) (M := M) g (b + i) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i i) from by
+        rw [castRankCc_db, castSrcCc]]
+      rw [show slotExtendIter (I := I) (M := M) g b c (i + 1) Φ =
+            slotExtend (I := I) (M := M) g (b + i) (c + i)
+              (slotExtendIter (I := I) (M := M) g b c i Φ) from rfl, ih]
+
+set_option linter.unusedSectionVars false in
+
 theorem iteratedCovGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (i : ℕ) :
     iteratedCovGrad (I := I) g a c i (appCcRS (I := I) (M := M) g a b c Φ W) =

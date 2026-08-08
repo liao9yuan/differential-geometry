@@ -24,6 +24,11 @@ DeTurck coefficient, and `lieCorr0` APIs.  `rhsRefold0Int` and
 Finally, `rhs_sub_zero_refold` integrates the exact public
 `rhsSlope_refold` identity along the realized segment.
 
+The previously internal `edgePairMono_joint` and `edgeLiePair_joint` closures
+are now public.  They expose the joint smoothness of the exact Palatini
+monomial and Lie pair families without exporting a high-jet radius, allowing
+the polarized raw path-pairing layer to assemble its coefficient integral.
+
 The old large remainder file was not extended and no new facade was added
 there.  The temporary elaboration failures were local syntax, model-wrapper,
 and private-helper visibility issues; they did not expose a different
@@ -33,8 +38,12 @@ mathematical route failure.
 
 The source passes focused verification without a local warning.  It contains
 no `sorry`, `admit`, axiom declaration, or `whnf`.  The direct upstream
-`RHSRefoldArms` artifact was refreshed and passed its named target build; this
-new module itself has not been target-refreshed.
+`RHSRefoldArms` artifact was refreshed and passed its named target build.  This
+module has now also passed its exact named target refresh.
+
+The visibility-only promotions of `edgePairMono_joint` and
+`edgeLiePair_joint` also passed focused verification at the shared resource
+cap.
 
 ## Remaining frontier
 
@@ -53,4 +62,3 @@ assembly remain separate frontiers.
 - The same-horizon order-two bootstrap theorem: **0%** until stated and proved.
 - `(N) ricci_flow_unif_existence`: **0% as a theorem**.
 - Dedicated `(N)` machinery: conservatively **85--88%**.
-

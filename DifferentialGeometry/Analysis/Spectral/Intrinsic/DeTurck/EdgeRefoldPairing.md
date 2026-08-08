@@ -33,6 +33,19 @@ producers are:
   rank-two pair-trace field acting on `W`; and
 - `edgeSlot2`, `edgeRaise2`, `edgeProd4`, and `edgePairPartner`, the explicit
   smooth rank-four formal-partner carrier for one moving monomial;
+- `edgeTopPairBi` and `edgeTopPartnerBi`, the complete raw Riemann--Lie top
+  family with independent path state `T`, Hessian state `U`, coefficient
+  passenger `P`, and test tensor `V`; and
+- `edgeTopPairG`, the same complete raw top family with an arbitrary rank-four
+  Hessian-slot field `G`; `edgeTopPairBi` is now its definitionally exact
+  Hessian specialization, exposed by `edgeTopPairBi_eq_G`; and
+- `edgeTopG_apply`, the arbitrary-`G` action theorem.  It keeps the path state
+  and coefficient passenger equal to `T` and identifies the complete pair with
+  the corresponding Ricci--Palatini plus DeTurck refold coefficient acting on
+  `G`; it does not assert the rejected arbitrary-passenger low-base identity;
+  and
+- `edgeTop_point_bi` and `edgeTop_inner_bi`, the pointwise and global exact
+  formal-partner identities for that complete polarized family.
 - `edgePairPartnerBi`, whose raised pair contains the coefficient state `P`
   while its unraised pair contains the independent test tensor `V`, together
   with `edgePartnerBi_self` and `edgePartnerBi_eval`;
@@ -135,12 +148,29 @@ and `edgePair_green_bi`. The Green theorem itself introduces no second term:
 all dependence on acted tensor `U` is confined to `nabla² U` before Green and
 `nabla U` afterward.
 
-No top-level polarized wrapper was added here. The existing `edgeTopPair`
-bakes the same tensor into both its path state and its acted second derivative,
-so a genuine `P`/acted-`U`/test-`V` theorem first needs a separately polarized
-top family. Moreover the full low-base `C2` kernel is not definitionally just
-the closed-edge `edgeTopPair`, so that bridge must be designed at its actual
-consumer layer rather than hidden behind a misleading wrapper in this file.
+A top-level polarized *raw* family is now present as `edgeTopPairBi`, with the
+corresponding explicit partner `edgeTopPartnerBi`.  This is deliberately not an
+arbitrary-passenger identity for the whole low-base operator: it only polarizes
+the canonical raw Riemann--Lie pair before path integration.  The full low-base
+`C2` kernel is still not definitionally just the old diagonal `edgeTopPair`, so
+the bridge to the combined `C0+C2` residual remains at the actual consumer
+layer.
+
+The subsequent arbitrary-passenger audit shows that a pointwise frozen wrapper
+would be mathematically false, not merely absent.  The exact Ricci and
+Palatini identities have cross orientation: the independent passenger enters
+the rank-four coefficient while `nabla^2` remains on the path state.  Reversing
+those roles is valid only on the diagonal or after a paired integration by
+parts with additional first-order terms.  Existing `edgeRiem_cancel` already
+handles arbitrary passengers once given a correctly oriented refold, so a
+conditional `_bi` alias would add no content.
+
+The arbitrary-Hessian definition and specialization are focused-verified and
+their direct export was refreshed.  The subsequent `edgeTopG_apply` action
+theorem is also focused-verified; no new downstream consumer yet required an
+export refresh for that declaration.  It does not assert that the raw Laplacian of the complete pair
+has already been decomposed into its Leibniz argument corner: that separate
+mixed-rank trace/permutation naturality bridge remains outside this file.
 
 The exact algebraic declarations `edgeRicciHalf`, `edgePairMono`,
 `edgeMonoRefold`, `edgeLiePairFam`, and `edgeLiePair_apply` live in
@@ -153,24 +183,25 @@ energy module.
 
 - Exact endpoint `ricci_flow_unif_existence`: **0%**; its theorem has not been
   proved.  Dedicated fixed-background Route-(c) machinery is approximately
-  **92%** under the binding `ROUTE_C_PLAN.md` denominator.  The refold artifact
+  **94%** under the revised binding `ROUTE_C_PLAN.md` denominator: the
+  arbitrary-passenger audit replaced a presumed routine frozen adapter by a
+  genuine paired cross-orientation redesign.  The refold artifact
   is exact-current and axiom-clean; the homogeneous Rung-3 Gårding producer and
   final contraction/existence assembly remain outstanding.
 - `exists_edgeRefold` and `exists_edgeSlopeRef`: **100% as stated**,
   focused-GREEN, exact-current, and axiom-clean.  This does not by itself prove
   the closed-edge contraction or the uniform existence endpoint.
 - Polarized monomial partner machinery: **100% as stated and focused-GREEN**.
-  The formal-partner identity is routine algebraic reuse and its monomial Green
-  corollary is one exact integration by parts; the polarized top-family bridge
-  and cross divergence/Sobolev estimate have not been implemented.
+  The complete raw polarized top family and its pointwise/global formal-partner
+  identities are also focused-GREEN and target-refreshed.  No complete-top
+  Green wrapper was retained: the intended test is `L² T`, and applying Green
+  there would introduce an inadmissible `H5` charge.
 - The monomial `P`/acted-`U`/test-`V` API remains reusable, but exact source
-  audit shows that the binding Route-(c) consumer should first recombine the
-  `C0+C2` whole slope: the full low-base `C2` is not `edgeTopPair`.  The next
-  mathematical producer is therefore the homogeneous diagonal full-slope
-  Rung-3 Gårding theorem, not a claim that this monomial API already supplies
-  the complete top family.  A future genuinely polarized route would still
-  require the cross partner
-  bound and its spectral pairing. The uniform contraction, solution
+  audit still requires the binding Route-(c) consumer to recombine the
+  `C0+C2` whole slope without asserting a false arbitrary-`U` low-base
+  identity.  `EdgePathPairing` integrates the raw Q/Z pair in formal-partner
+  form; the remaining producer is the quantitative combined B02 estimate.
+  The uniform contraction, solution
   construction, and lifetime-uniformization theorem remain separate endpoint
   work.
 - The Hamilton positive-Ricci endpoint is unchanged until the independent

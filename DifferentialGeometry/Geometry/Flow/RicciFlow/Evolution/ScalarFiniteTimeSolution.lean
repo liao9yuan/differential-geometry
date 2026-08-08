@@ -30,14 +30,16 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-private theorem staticScalar_pos
+/-- Positive Ricci curvature on a three-dimensional metric implies positive
+scalar curvature pointwise. -/
+theorem scalar_pos_of_ricci
     (g0 : SmoothRiemannianMetric I M)
     (hdim : Module.finrank Real E = 3)
     (hpos : ∀ x : M, ∀ v : TangentSpace I x, v ≠ 0 →
       0 < metricRicciAt (I := I) (M := M) g0 x
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
-    (x : M) :
-    0 < metricScalarAt (I := I) (M := M) g0 x := by
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)) :
+    ∀ x : M, 0 < metricScalarAt (I := I) (M := M) g0 x := by
+  intro x
   have hdimx : Module.finrank Real (TangentSpace I x) = 3 := by
     simpa using hdim
   simpa [metricScalarAt, DifferentialGeometry.Integral.Connection.metricScalarAt] using
@@ -102,15 +104,14 @@ private theorem scalar_sq_le_ric
     DifferentialGeometry.Tensor.Coordinates.CoordinateIdx, hcard, hcoef] using h
 
 /-- Every three-dimensional Ricci-flow segment starting at the same
-positive-Ricci metric ends before the pole determined by that metric's fixed
+positive-scalar metric ends before the pole determined by that metric's fixed
 scalar minimum. -/
 theorem flow_end_le
     [CompactSpace M] [Nonempty M] [I.Boundaryless]
     (g0 : SmoothRiemannianMetric I M)
     (hdim : Module.finrank Real E = 3)
-    (hpos : ∀ x : M, ∀ v : TangentSpace I x, v ≠ 0 →
-      0 < metricRicciAt (I := I) (M := M) g0 x
-        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
+    (hscalar_pos : ∀ x : M,
+      0 < metricScalarAt (I := I) (M := M) g0 x)
     {c0 T : Real} (hT : 0 < T)
     (hmin : InitialScalarMinimum (M := M)
       (fun _t x => metricScalarAt (I := I) (M := M) g0 x) c0)
@@ -132,7 +133,7 @@ theorem flow_end_le
   have hinit_pos : ∀ x : M, 0 < S.scalar 0 x := by
     intro x
     simpa [SolutionOn.scalar, SolutionFamily.scalar, hstart_base] using
-      staticScalar_pos (I := I) (M := M) g0 hdim hpos x
+      hscalar_pos x
   have hc0 : 0 < c0 :=
     InitialScalarMinimum.pos_of_forall_pos (M := M) hinit_min hinit_pos
   have hscalar_cont : ∀ U : Real, 0 ≤ U → U < T →

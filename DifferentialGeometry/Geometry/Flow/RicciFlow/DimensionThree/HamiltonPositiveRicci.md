@@ -1,5 +1,23 @@
 # HamiltonPositiveRicci live frontier audit
 
+## Maximal-flow source assembly — 2026-08-08
+
+`ham3_flow_exists_normalized` now has a complete source proof body with no
+local `sorry`.  The assembly installs the `Closed3Manifold` instances, derives
+pointwise initial scalar positivity explicitly via `scalar_pos_of_ricci`, calls
+the weaker `exists_max_flow` constructor, obtains curvature blow-up from
+`rmUnbounded_of_maximal`, and packages the result as `Ham3FlowPackage`.
+
+The scalar producer and its exported weak interface are focused- and
+exact-green.  Verification of `exists_max_flow`, this Hamilton assembly, and
+their axiom audits remains pending because the imported artifact
+`DeTurckRemainderLowBaseH2Pair.olean` is absent.  Its 9,570-line source is a
+separate DeTurck lane and is not edited here.  Thus source implementation is
+100%, while trusted/axiom-clean completion of `ham3_flow_exists_normalized` and
+`ham3_main_hcg` remains 0% until the exact refresh and direct audits pass.
+
+Whole HCG supporting machinery remains conservatively approximately 87%.
+
 ## Fixed-time improved-pinching producers — 2026-07-24
 
 The source and scale sides of the fixed-time Hamilton pinching argument now

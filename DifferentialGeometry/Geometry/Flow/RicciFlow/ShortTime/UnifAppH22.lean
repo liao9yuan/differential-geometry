@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.HsTwoJet
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGridRS
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 
 /-!
 # Class-first mixed H2 application estimate
@@ -170,6 +172,133 @@ theorem appRS_h22_unif
     _ = (C * A * B) ^ 2 := by
       rw [mul_pow, mul_pow, show C ^ 2 = K by
         simp only [C, Real.sq_sqrt hK]]
+
+/-- **Dimension-three class-first first-order `H3 → H2` application estimate.**
+
+An intrinsic order-two jet of a rank-`(3,2)` coefficient acts on one
+covariant derivative of a rank-two tensor from spectral `H3` to spectral
+`H2`.  The constant is selected before the metric varies over the order-three
+class. -/
+theorem appCc_h23_h2_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ g : SmoothRiemannianMetric I M,
+        MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+        (∀ a : ℕ, a ≤ 3 →
+          MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+        ∀ (Φ : SmoothCcTensor g 3 2) (U : SmoothCcTensor g 0 2) (A : ℝ),
+          0 ≤ A →
+          (∑ j ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g 3 2 j Φ‖ ^ 2) ≤ A ^ 2 →
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+              (appCc (I := I) (M := M) g 3 2 Φ
+                (iteratedCovGrad (I := I) g 0 2 1 U))‖ ≤
+            C * A *
+              ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖ := by
+  classical
+  obtain ⟨K, hK⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.exists_curv_actions
+      (I := I) (M := M) gBase hΛ
+  obtain ⟨Capp, hCapp, happ⟩ :=
+    appRS_h22_unif (I := I) (M := M) hDim gBase hΛ 0 3 2
+  let Csp : ℝ := hsTwoJetC (Module.finrank ℝ E)
+  let Ch : ℝ := h3CovsumC K.rankTwo K.rankThree
+  let C : ℝ := Csp * 3 * Capp * Ch
+  have hCsp : 0 ≤ Csp := by
+    simpa only [Csp] using hsTwoJetC_nonneg (Module.finrank ℝ E)
+  have hCh : 0 ≤ Ch := by
+    simpa only [Ch] using h3CovsumC_nonneg K.rankTwo K.rankThree
+  refine ⟨C, by
+    dsimp only [C]
+    positivity, ?_⟩
+  intro g hEq hjet Φ U A hA hΦ
+  obtain ⟨hact2, hact3⟩ := hK.bounds g hEq hjet
+  let N : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) U‖
+  let B : ℝ := Ch * N
+  let W : SmoothCcTensor g 0 3 :=
+    iteratedCovGrad (I := I) g 0 2 1 U
+  let Y : SmoothCcTensor g 0 2 :=
+    appCc (I := I) (M := M) g 3 2 Φ W
+  let Q : ℝ := Capp * A * B
+  have hN : 0 ≤ N := norm_nonneg _
+  have hB : 0 ≤ B := mul_nonneg hCh hN
+  have hQ : 0 ≤ Q := mul_nonneg (mul_nonneg hCapp hA) hB
+  have hJ :
+      ∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 2 j U‖ ≤ B := by
+    simpa only [B, Ch, N] using
+      covsum_hs_three (I := I) (M := M) g 2 hact2 hact3 U
+  have hWsum :
+      ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 3 j W‖ ≤ B := by
+    calc
+      ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 3 j W‖ =
+          ∑ j ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g 0 2 (1 + j) U‖ := by
+              refine Finset.sum_congr rfl (fun j _ => ?_)
+              simpa only [W] using
+                icg_comp_norm (I := I) (M := M) g 2 1 j U
+      _ ≤ ∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 2 j U‖ := by
+            simp only [Finset.sum_range_succ, Finset.sum_range_zero,
+              zero_add, Nat.reduceAdd]
+            nlinarith [
+              norm_nonneg (iteratedCovGrad (I := I) g 0 2 0 U)]
+      _ ≤ B := hJ
+  have hWsq :
+      (∑ j ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g 0 3 j W‖ ^ 2) ≤ B ^ 2 := by
+    calc
+      _ ≤ (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 3 j W‖) ^ 2 :=
+        Finset.sum_sq_le_sq_sum_of_nonneg
+          (fun j _ => norm_nonneg
+            (iteratedCovGrad (I := I) g 0 3 j W))
+      _ ≤ B ^ 2 := pow_le_pow_left₀
+        (Finset.sum_nonneg (fun j _ => norm_nonneg
+          (iteratedCovGrad (I := I) g 0 3 j W))) hWsum 2
+  have hYsq :
+      (∑ j ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g 0 2 j Y‖ ^ 2) ≤ Q ^ 2 := by
+    have hmix := happ g hEq (hjet 1 (by norm_num)) (hjet 2 (by norm_num))
+      Φ W A B hA hB hΦ hWsq
+    simpa only [Y, Q, appCcRS_zero_eq_appCc] using hmix
+  have hterm : ∀ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g 0 2 j Y‖ ≤ Q := by
+    intro j hj
+    have hsingle :
+        ‖iteratedCovGrad (I := I) g 0 2 j Y‖ ^ 2 ≤
+          ∑ i ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g 0 2 i Y‖ ^ 2 :=
+      Finset.single_le_sum
+        (f := fun i => ‖iteratedCovGrad (I := I) g 0 2 i Y‖ ^ 2)
+        (fun i _ => sq_nonneg _) hj
+    nlinarith [hsingle.trans hYsq,
+      norm_nonneg (iteratedCovGrad (I := I) g 0 2 j Y)]
+  have hYsum :
+      ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 2 j Y‖ ≤ 3 * Q := by
+    calc
+      _ ≤ ∑ _j ∈ Finset.range 3, Q :=
+        Finset.sum_le_sum fun j hj => hterm j hj
+      _ = 3 * Q := by norm_num
+  have hspY :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Y‖ ≤
+        Csp * ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 2 j Y‖ := by
+    simpa only [Csp] using hs_two_le_jet (I := I) (M := M) g 2 Y
+  change ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Y‖ ≤
+    C * A * N
+  calc
+    _ ≤ Csp * ∑ j ∈ Finset.range 3,
+        ‖iteratedCovGrad (I := I) g 0 2 j Y‖ := hspY
+    _ ≤ Csp * (3 * Q) := mul_le_mul_of_nonneg_left hYsum hCsp
+    _ = C * A * N := by
+      dsimp only [C, Q, B, Ch]
+      ring
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

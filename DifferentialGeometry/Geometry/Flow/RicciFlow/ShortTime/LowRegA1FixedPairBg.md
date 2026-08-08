@@ -31,8 +31,9 @@ the C1 correction.
 The theorem `galA1FixPair3_le` and the signed C1 split are complete (100%).
 The rest-only Rung-3 theorem is not stated (0%), and the headline
 `ricci_flow_unif_existence` theorem remains unproved (0%).  Dedicated
-fixed-background direct-smoothing machinery is approximately 92%, the
-verified conditional metricwise adapted-to-mass-to-packet chain remains 100%,
+fixed-background direct-smoothing machinery is approximately 92% under the
+revised denominator; the verified conditional metricwise
+adapted-to-mass-to-packet chain remains 100%,
 and the whole HCG project remains approximately 3%.
 
 ## Current frontier: one-sided full-slope Rung-3 Gårding
@@ -68,27 +69,36 @@ Two lower pieces of the corrected route are already complete:
 1. `finite_pair_split`, specialized to `a = 1`, `b = 2`, converts the finite
    weight-three Galerkin sum to the complementary `L2` pairing with two
    state-side and one arm-side iterates of `1 - Δ∇`.  `finite_symm_scale`
-   transports the retraction scalar and slot symmetrization by exact linearity,
-   with no division by `theta` and hence no
-   separate `theta = 0` branch.
+   transports the retraction scalar and slot symmetrization by exact linearity.
+   The public `galArmPair3_diag` packages the exact
+   `theta * rawPair = diagonalPair` identity.  There is no division by
+   `theta`, but the eventual inequality proof still needs a zero/positive
+   branch: at `theta = 0` the acted arm vanishes, while for `0 < theta` the
+   common factor is canceled by order reasoning.  `galRepHs_scale` retains the
+   matching `theta` factor in the Sobolev norms.
 2. `edgePair_l2_bi`, `edgePair_inner_bi`, and `edgePair_green_bi` provide the
    polarized monomial formal-adjoint identity and exact one-derivative Green
    movement.
 
-The exact caveat is that the complete low-base `C2` kernel in
-`galA1RestVecBg` is **not definitionally `edgeTopPair`**.  `edgeTopPair` is a
-closed-edge top family with the same state baked into its coefficient and
-acted slots.  A genuine low-base full-slope adapter must preserve the actual
-coefficient state, acted state, and test tensor and must recombine `C0+C2` at
-the consumer layer.  Consequently neither a raw `oneMinus_appCc2_comm`
-estimate nor the old diagonal closed-edge theorem is the binding result.
+The complete low-base `C2` kernel in `galA1RestVecBg` is **not definitionally
+`edgeTopPair`**.  More strongly, the 2026-08-08 arbitrary-passenger audit
+refuted the proposed pointwise frozen adapter.  The true Ricci refold has
+orientation `ricciTop(..., U) (nabla^2 P)`, with derivatives on the
+coefficient/path state `P`; freezing `C2(P)` and applying it to `U` instead
+produces `ricciTop(..., P) (nabla^2 U)`.  The private diagonal theorem closes
+only when `P = U`.  Existing `edgeRiem_cancel` consumes a correctly oriented
+refold but does not manufacture this false role swap.
 
-The live analytic brick is the diagonal full-slope low-base
-commutator/Gårding estimate after that C0+C2 recombination.  The earlier three
-failed routes remain evidence only against a standalone high-jet C2 action,
-naive raw duality, and a false `lowBase C2 = edgeTopPair` identification; they
-do not block the corrected route.  The canonical ShortTime home for
-`lowbase_full3_unif` is the future `LowRegBgC2Pair.lean`; a later final rest
-consumer may live in `LowRegA1RestPairBg.lean`.  No canonical reusable theorem
-below ShortTime has yet been identified.  The rest-only theorem remains
-unstated (0%); no partial theorem or stronger assumption has been added.
+The diagonal route is now active.  Focused-green `lowBase_path_nf` supplies the
+exact Analysis-layer path normal form, and the focused-green
+`top_pair_abs_unif` chain absorbs its principal top form class-first with only
+`C3` metric data.  The sole remaining analytic theorem is the homogeneous
+diagonal residual commutator/Gårding bound.  Neither a raw
+`oneMinus_appCc2_comm` estimate nor a conditional `_bi` wrapper is the missing
+mathematics.  The rest-only theorem remains unstated (0%); its dedicated
+machinery is approximately 92%.
+
+## 2026-08-08 verification update
+
+`galArmPair3_diag` passed focused verification at the shared resource cap.  It
+contains no new placeholder and does not change the already verified C1 split.

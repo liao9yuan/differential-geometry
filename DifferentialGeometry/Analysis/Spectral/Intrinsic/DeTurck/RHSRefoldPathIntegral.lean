@@ -215,7 +215,9 @@ private theorem mvPairTrace_joint
     (E := fun z : M => TensorRSSpace 6 2 I z) p.1 t) ?_
   rfl
 
-private theorem edgePairMono_joint
+/-- A fixed Hessian-state Palatini pair monomial varies jointly smoothly along
+the realized radial metric path. -/
+theorem edgePairMono_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
     (hdelta : gFibreOpBound (I := I) (M := M) g
@@ -238,7 +240,9 @@ private theorem edgePairMono_joint
     (mvPairTrace_joint (I := I) (M := M) g T hdelta hdeltaZ)
   simpa only [edgePairMono] using h
 
-private theorem edgeLiePair_joint
+/-- The closed-edge Lie formal-pair coefficient varies jointly smoothly in
+space and along the realized radial path. -/
+theorem edgeLiePair_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
     (hdelta : gFibreOpBound (I := I) (M := M) g

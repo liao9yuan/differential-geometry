@@ -1,5 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PhiMetSelfBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PhiMetSymmetry
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PointwiseUnif
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralNormLIterateLadder
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGagliardoNirenberg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGradSlot
@@ -11,7 +14,8 @@ This module packages the zeroth-order curvature coefficient left by the
 Ricci--DeTurck top-order symmetrization.  In dimension three, its first two
 intrinsic jets have one class-first bound depending only on the fixed
 background and the metric-class parameter.  The resulting coefficient acts
-uniformly from spectral `H2` to spectral `H1`.
+uniformly from spectral `H2` to spectral `H1`, and its diagonal pairing with
+two connection-Laplacian factors has the homogeneous `H4`/`H3` energy form.
 -/
 
 set_option autoImplicit false
@@ -20,7 +24,7 @@ set_option backward.isDefEq.respectTransparency false
 noncomputable section
 
 open Bundle Manifold Set Tensor0SBundle
-open scoped Manifold Topology ContDiff BigOperators
+open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -185,6 +189,157 @@ theorem fixed_curv_h1_unif
   intro g hEq hjet U
   exact happ g hEq hjet (phiMetCurvCoeff (I := I) g gBase g) U
     Aφ hAφ (hφ g hEq hjet)
+
+/-- **Class-first diagonal fixed-curvature pairing bound.**
+
+For every positive top-energy coefficient, one constant chosen before the
+order-three class metric varies controls the zeroth-order curvature term in
+the diagonal low-base normal form by `η * H4² + G * H3²`. -/
+theorem curv_pair_abs_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∀ {η : ℝ}, 0 < η →
+      ∃ G : ℝ, 0 ≤ G ∧
+        ∀ g : SmoothRiemannianMetric I M,
+          MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+          (∀ a : ℕ, a ≤ 3 →
+            MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+          ∀ T : SmoothCcTensor g 0 2,
+            let K0 := phiMetCurvCoeff (I := I) g gBase g
+            let LT := oneMinusConnLapSmooth (I := I) g 0 2 T
+            2 * |tensorL2Inner (I := I) (M := M) g 0 2
+                (oneMinusConnLapSmooth (I := I) g 0 2 LT).toFun
+                (appCc (I := I) (M := M) g 2 2 K0 LT).toFun| ≤
+              η * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+                G * ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 := by
+  intro η hη
+  obtain ⟨C, hC, hact⟩ :=
+    fixed_curv_h1_unif (I := I) (M := M) hDim gBase hΛ
+  let G : ℝ := η⁻¹ * C ^ 2
+  have hG : 0 ≤ G := by
+    dsimp only [G]
+    exact mul_nonneg (inv_nonneg.mpr hη.le) (sq_nonneg C)
+  refine ⟨G, hG, ?_⟩
+  intro g hEq hjet T
+  let K0 : SmoothCcTensor g 2 2 := phiMetCurvCoeff (I := I) g gBase g
+  let LT : SmoothCcTensor g 0 2 := oneMinusConnLapSmooth (I := I) g 0 2 T
+  let Y : SmoothCcTensor g 0 2 := appCc (I := I) (M := M) g 2 2 K0 LT
+  let y : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+  let z : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖
+  have hy : 0 ≤ y := norm_nonneg _
+  have hz : 0 ≤ z := norm_nonneg _
+  have hshift1 :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) LT‖ = y := by
+    dsimp only [LT, y]
+    rw [norm_ccHs_eq_smoothHs, norm_ccHs_eq_smoothHs]
+    calc
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g ((1 : ℕ) : ℝ)
+            (oneMinusConnLapSmooth (I := I) g 0 2 T)‖ :=
+        congrArg (fun σ : ℝ => ‖smoothCcToTensorHs (I := I) (M := M) g σ
+          (oneMinusConnLapSmooth (I := I) g 0 2 T)‖) (by norm_num)
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g ((1 + 2 : ℕ) : ℝ) T‖ :=
+        (smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap
+          (I := I) (M := M) g 1 T).symm
+      _ = _ :=
+        congrArg (fun σ : ℝ =>
+          ‖smoothCcToTensorHs (I := I) (M := M) g σ T‖) (by norm_num)
+  have hshift2 :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) LT‖ = z := by
+    dsimp only [LT, z]
+    rw [norm_ccHs_eq_smoothHs, norm_ccHs_eq_smoothHs]
+    calc
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g ((2 : ℕ) : ℝ)
+            (oneMinusConnLapSmooth (I := I) g 0 2 T)‖ :=
+        congrArg (fun σ : ℝ => ‖smoothCcToTensorHs (I := I) (M := M) g σ
+          (oneMinusConnLapSmooth (I := I) g 0 2 T)‖) (by norm_num)
+      _ = ‖smoothCcToTensorHs (I := I) (M := M) g ((2 + 2 : ℕ) : ℝ) T‖ :=
+        (smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap
+          (I := I) (M := M) g 2 T).symm
+      _ = _ :=
+        congrArg (fun σ : ℝ =>
+          ‖smoothCcToTensorHs (I := I) (M := M) g σ T‖) (by norm_num)
+  have hY :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) Y‖ ≤ C * z := by
+    calc
+      _ ≤ C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) LT‖ := by
+        simpa only [Y, K0] using hact g hEq hjet LT
+      _ = C * z := by rw [hshift2]
+  have hspec (W : SmoothCcTensor g 0 2) :
+      ‖smoothToTensorH1Compl (I := I) (M := M) g 0 2
+          (⟨W⟩ : SmoothCcTensorH1 g 0 2)‖ =
+        ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) W‖ := by
+    rw [smoothToTensorH1Compl_apply, UniformSpace.Completion.norm_coe]
+    have hspectral := cc_h1_jet_sq (I := I) (M := M) g W
+    have hintrinsic := h1_jet_sq (I := I) (M := M) g 0 2 W
+    nlinarith [
+      norm_nonneg (ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) W),
+      norm_nonneg (⟨W⟩ : SmoothCcTensorH1 g 0 2)]
+  let u : TensorH1Compl g 0 2 :=
+    smoothToTensorH1Compl (I := I) (M := M) g 0 2
+      (⟨LT⟩ : SmoothCcTensorH1 g 0 2)
+  let v : TensorH1Compl g 0 2 :=
+    smoothToTensorH1Compl (I := I) (M := M) g 0 2
+      (⟨Y⟩ : SmoothCcTensorH1 g 0 2)
+  let Au : TensorL2 0 2 g :=
+    ((oneMinusConnLapSmooth (I := I) g 0 2 LT : SmoothCcTensor g 0 2) :
+      TensorL2 0 2 g)
+  let Av : TensorL2 0 2 g := (Y : TensorL2 0 2 g)
+  have hgreen :
+      (inner ℝ Au Av : ℝ) = (inner ℝ u v : ℝ) := by
+    simpa only [Au, Av, u, v] using
+      (oneMinusConnLapSmooth_toL2_inner_eq_h1_general
+        (I := I) (M := M) g 2
+        (loweringIntertwiner_two (I := I) (M := M) g) LT Y)
+  have hgreen' :
+      tensorL2Inner (I := I) (M := M) g 0 2
+          (oneMinusConnLapSmooth (I := I) g 0 2 LT).toFun Y.toFun =
+        (inner ℝ u v : ℝ) := by
+    calc
+      _ = (inner ℝ (SmoothCcTensor.toL2
+              (oneMinusConnLapSmooth (I := I) g 0 2 LT))
+            (SmoothCcTensor.toL2 Y) : ℝ) := by
+        rw [SmoothCcTensor.inner_toL2]
+        exact (SmoothCcTensor.inner_def (I := I) (M := M)
+          (oneMinusConnLapSmooth (I := I) g 0 2 LT) Y).symm
+      _ = _ := by
+        simpa only [SmoothCcTensor.toL2_apply] using hgreen
+  have hpair :
+      |tensorL2Inner (I := I) (M := M) g 0 2
+          (oneMinusConnLapSmooth (I := I) g 0 2 LT).toFun Y.toFun| ≤
+        y * (C * z) := by
+    calc
+      _ = |(inner ℝ u v : ℝ)| := by
+        rw [hgreen']
+      _ ≤ ‖u‖ * ‖v‖ := abs_real_inner_le_norm _ _
+      _ = ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) LT‖ *
+            ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) Y‖ := by
+        dsimp only [u, v]
+        rw [hspec LT, hspec Y]
+      _ ≤ y * (C * z) := by
+        rw [hshift1]
+        exact mul_le_mul_of_nonneg_left hY hy
+  have hyoung : 2 * z * (C * y) ≤ η * z ^ 2 + η⁻¹ * (C * y) ^ 2 := by
+    have hinv : 0 ≤ η⁻¹ := inv_nonneg.mpr hη.le
+    have hs := mul_nonneg hinv (sq_nonneg (η * z - C * y))
+    have hexpand :
+        η⁻¹ * (η * z - C * y) ^ 2 =
+          η * z ^ 2 - 2 * z * (C * y) + η⁻¹ * (C * y) ^ 2 := by
+      field_simp [ne_of_gt hη]
+      ring
+    rw [hexpand] at hs
+    linarith
+  change
+    2 * |tensorL2Inner (I := I) (M := M) g 0 2
+        (oneMinusConnLapSmooth (I := I) g 0 2 LT).toFun Y.toFun| ≤
+      η * z ^ 2 + G * y ^ 2
+  calc
+    _ ≤ 2 * (y * (C * z)) :=
+      mul_le_mul_of_nonneg_left hpair (by norm_num)
+    _ = 2 * z * (C * y) := by ring
+    _ ≤ η * z ^ 2 + η⁻¹ * (C * y) ^ 2 := hyoung
+    _ = η * z ^ 2 + G * y ^ 2 := by
+      dsimp only [G]
+      ring
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

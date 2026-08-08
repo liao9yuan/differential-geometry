@@ -2,7 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC1Pair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgForceArms
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3FirstOrder
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PointwiseUnif
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FiniteSpectralPairing
 import DifferentialGeometry.Analysis.Sobolev.Tensor.CrossScaleCauchySchwarz
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRHSSymm
 
 /-!
 # Fixed-background first-order Galerkin pairing
@@ -165,6 +167,89 @@ theorem galArmPair3_split
   rw [galArmVecBg_split (I := I) (M := M) g gBase hR hδ hreal F c]
   simp only [tensorHs.add_coeff, mul_add, Finset.sum_add_distrib,
     galA1RestPairBg, galA1FixPairBg]
+
+private theorem lowArm_symm
+    (g gBase : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    (hTsymm : symmS (I := I) (M := M) g T = T)
+    {δ : ℝ} (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
+    (hT : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) δ) :
+    let A := lowBaseData (I := I) (M := M) g gBase T hδ hT hZ
+    symmS (I := I) (M := M) g
+        (A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T) =
+      A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T := by
+  dsimp only
+  obtain ⟨_, _, hsplit⟩ := lowData_split (I := I) (M := M) g gBase
+  have hsplitT := (hsplit T
+    (bilin_symm_of_symmS (I := I) (M := M) g hTsymm)
+    hδ3 hδ0 hT hZ).1
+  have hzero : symmS (I := I) (M := M) g
+      (0 : SmoothCcTensor g 0 2) = 0 := by
+    simpa only [zero_smul] using
+      (symmS_smul (I := I) (M := M) g (0 : ℝ)
+        (0 : SmoothCcTensor g 0 2))
+  rw [← hsplitT, symmS_sub,
+    symmS_smoothRem (I := I) (M := M) g gBase T hδ hT hTsymm,
+    symmS_smoothRem (I := I) (M := M) g gBase
+      (0 : SmoothCcTensor g 0 2) hδ hZ hzero]
+
+/-- The signed Rung-3 Galerkin pairing of the complete fixed-background arm is
+exactly the diagonal complementary-iterate pairing of the retracted state with
+that arm, after multiplying by the radial retraction scalar. -/
+theorem galArmPair3_diag
+    (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
+    (hR : 0 ≤ R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
+    (hreal : ∀ T : SmoothCcTensor g 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g
+        (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
+    (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
+    let θ : ℝ := min 1 (R / ‖galLowView (I := I) (M := M) g 1
+      (finiteEigenComboHs (I := I) (M := M) g F c (((1 : ℕ) : ℝ) + 2))‖)
+    let T : SmoothCcTensor g 0 2 :=
+      symmS (I := I) (M := M) g
+        (galCoreRep (I := I) (M := M) g R F c)
+    let hT := galRepFib (I := I) (M := M) g hR hreal F c
+    let hZ := lowregFibZero (I := I) (M := M) g hR hreal
+    let A := lowBaseData (I := I) (M := M) g gBase T hδ hT hZ
+    θ * (∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
+        (c i * (galArmVecBg (I := I) (M := M) g gBase
+          hR hδ hreal F c).coeff i)) =
+      tensorL2Inner (I := I) (M := M) g 0 2
+        (oneMinusConnLapSmoothIter (I := I) g 0 2 2 T).toFun
+        (oneMinusConnLapSmoothIter (I := I) g 0 2 1
+          (A.a2 (I := I) (M := M) T +
+            A.a1 (I := I) (M := M) T)).toFun := by
+  classical
+  let θ : ℝ := min 1 (R / ‖galLowView (I := I) (M := M) g 1
+    (finiteEigenComboHs (I := I) (M := M) g F c (((1 : ℕ) : ℝ) + 2))‖)
+  let T : SmoothCcTensor g 0 2 :=
+    symmS (I := I) (M := M) g
+      (galCoreRep (I := I) (M := M) g R F c)
+  let hT := galRepFib (I := I) (M := M) g hR hreal F c
+  let hZ := lowregFibZero (I := I) (M := M) g hR hreal
+  let A := lowBaseData (I := I) (M := M) g gBase T hδ hT hZ
+  have hTfix : symmS (I := I) (M := M) g T = T := by
+    dsimp only [T]
+    exact symmS_idem (I := I) (M := M) g _
+  have hA : symmS (I := I) (M := M) g
+      (A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T) =
+        A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T := by
+    exact lowArm_symm (I := I) (M := M) g gBase T hTfix hδ hδ0 hδ3 hT hZ
+  have hrep : T = θ • symmS (I := I) (M := M) g
+      (finiteEigenCombo (I := I) (M := M) g F c) := by
+    dsimp only [T, θ]
+    rw [galCoreRep, symmS_smul]
+  have hpair := finite_symm_scale (I := I) (M := M) g F c
+    (A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T)
+    1 2 θ hA
+  rw [← hrep] at hpair
+  simpa only [galArmVecBg, smoothCcToTensorHs_coeff, Nat.reduceAdd,
+    T, hT, hZ, A] using hpair
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in

@@ -4,8 +4,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegr
 /-!
 # Algebra of jointly smooth three-arm coefficient families
 
-This module records the additive and scalar closure properties of
-`linearizedRicciThreeArmHjoint`.
+This module records the constant-family, additive, scalar, and fixed-composition
+closure properties of `linearizedRicciThreeArmHjoint`.
 -/
 
 noncomputable section
@@ -18,6 +18,7 @@ open scoped Manifold Topology ContDiff
 namespace DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 
@@ -27,6 +28,18 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M]
+    [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+/-- A constant coefficient family is jointly smooth on every realized
+parameter slab. -/
+theorem threeArmJoint_const
+    (g : SmoothRiemannianMetric I M) {r : ℕ}
+    (A : SmoothCcTensor g r 2) {δ δ' : ℝ} :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g r
+      (fun _ => A) (δ := δ) (δ' := δ') :=
+  (A.toSection.contMDiff.comp_contMDiffOn contMDiffOn_fst).mono
+    (Set.subset_univ _)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M]
     [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
@@ -112,6 +125,49 @@ theorem threeArmJoint_smul
   · exact (e.linear ℝ
       (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
         c ((A p₀.2).toSection p₀.1)
+
+/-- Postcomposition by a fixed smooth coefficient preserves joint smoothness
+of a three-arm coefficient family. -/
+theorem threeArmJoint_comp
+    (g : SmoothRiemannianMetric I M) {a b : ℕ}
+    (A : ℝ → SmoothCcTensor g b 2) (B : SmoothCcTensor g a b)
+    {δ δ' : ℝ}
+    (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g b A
+      (δ := δ) (δ' := δ')) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g a
+      (fun t => appCcRS (I := I) (M := M) g a b 2 (A t) B)
+      (δ := δ) (δ' := δ') := by
+  rw [linearizedRicciThreeArmHjoint] at hA ⊢
+  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SModel a ℝ E)
+    (V₁ := fun x : M => Tensor0SSpace a I x)
+    (F₂ := Tensor0SModel 2 ℝ E)
+    (V₂ := fun x : M => Tensor0SSpace 2 I x)
+    (φ := fun p : M × ℝ =>
+      (show Tensor0SSpace a I p.1 →L[ℝ] Tensor0SSpace 2 I p.1 from
+        (appCcRS (I := I) (M := M) g a b 2 (A p.2) B).toSection p.1))
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+  intro Y
+  have hBY₀ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel b ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel b ℝ E)
+        (E := fun z : M => Tensor0SSpace b I z) x
+        ((show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from
+          B.toSection x) (Y x))) :=
+    ContMDiff.clm_bundle_apply (b := id) B.toSection.contMDiff Y.contMDiff
+  have hBY : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SModel b ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel b ℝ E)
+        (E := fun z : M => Tensor0SSpace b I z) p.1
+        ((show Tensor0SSpace a I p.1 →L[ℝ] Tensor0SSpace b I p.1 from
+          B.toSection p.1) (Y p.1)))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+    (hBY₀.comp_contMDiffOn contMDiffOn_fst).mono (Set.subset_univ _)
+  have happ := ContMDiffOn.clm_bundle_apply (b := Prod.fst) hA hBY
+  refine happ.congr (fun p _ => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SSpace 2 I z) p.1 t) ?_
+  rw [appCcRS_toSection]
+  rfl
 
 end DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
