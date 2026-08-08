@@ -571,12 +571,6 @@ theorem normalDensity_curve
   simpa only [mul_assoc, mul_left_comm, mul_comm] using hroot
 
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
-/-- The normal-coordinate chart density at the centre is the exact ratio
-`√(g_p(u,u)) / |det(modelBasisFor B)|` exposed by `normalDensity_curve`, for a
-perpendicular orthonormal transverse frame: the exponential differential at the
-origin is the identity, the Gram matrix of the orthonormal frame is the
-identity on the transverse block, and the basis change to the model basis
-squares out. -/
 theorem normalChartDensity_zero_of_perpOrthonormal
     (g : SmoothRiemannianMetric I M) (p : M) (u : E)
     (B : Module.Basis (Option ι) ℝ E)

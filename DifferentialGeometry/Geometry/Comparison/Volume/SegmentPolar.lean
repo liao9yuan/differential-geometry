@@ -119,7 +119,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The closed `g`-length ball in the tangent space at `x`. -/
 def closedGBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ) : Set E :=
   {v : E | Real.sqrt (g.inner x (show TangentSpace I x from v)
     (show TangentSpace I x from v)) ≤ R}
@@ -184,11 +183,6 @@ theorem isCompact_closedGBall (g : SmoothRiemannianMetric I M) (x : M) (R : ℝ)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Hopf–Rinow surjectivity onto the metric ball, closed-launch version.**
-Every point of the open `edist`-ball of radius `R` is the intrinsic exponential
-of a segment-domain vector of `g`-length `≤ R`.  Same content as
-`ball_sub_image_segDom` with the `g`-length ball closed — this is the compact
-launch set used by the image-measure upper bound. -/
 theorem ball_sub_image_segDom_closed [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -224,9 +218,6 @@ theorem ball_sub_image_segDom_closed [ConnectedSpace M] [PseudoEMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The metric ball volume is bounded by the intrinsic-Jacobi density integral
-over the compact segment-domain launch ball (the image-measure reduction behind
-`segBall_vol_le`). -/
 private theorem segBall_vol_le_density
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -276,10 +267,6 @@ private theorem segBall_vol_le_density
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A segment-domain launch vector has no conjugate vectors on the open radial
-interval: the radial geodesic realizes the distance to its endpoint, so its
-unit-speed reparametrization minimizes arc length, and a length-minimizing
-geodesic has no interior conjugate vectors. -/
 theorem segDom_not_conj
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -387,11 +374,6 @@ theorem segDom_not_conj
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Gauss factorization of the intrinsic Jacobi endpoint density.**  For a
-`gₓ`-orthonormal transverse frame perpendicular to `v`, the full-frame density
-`expJacDensity x v` factors as the fixed base chart density
-`normalChartDensity g x 0` (= `√det gₓ` in the model basis) times the
-transverse-frame curve density at the endpoint. -/
 theorem expJacDensity_eq_ncd0_mul_transverse
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -539,10 +521,6 @@ theorem expJacDensity_eq_ncd0_mul_transverse
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The transverse orthonormal-frame curve density along a segment-domain
-geodesic is bounded by the speed-scaled hyperbolic model density on the open
-radial interval (sharp constant 1, for a fixed `gₓ`-orthonormal perpendicular
-frame). -/
 theorem transverseDensity_le_hyp
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -660,8 +638,6 @@ private lemma chartRep_inner_eq
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space (TangentBundle I M)] in
-/-- The intrinsic Jacobi field chart representation is differentiable in the
-time parameter, at a fixed chart center. -/
 theorem intrinsicJacobi_chartRep_differentiableAt
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -729,8 +705,6 @@ private lemma continuousAt_double_sum {ι κ : Type*} [Fintype ι] [Fintype κ]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space (TangentBundle I M)] in
-/-- The transverse Jacobi-frame curve density along an intrinsic radial geodesic
-is continuous in the time parameter. -/
 theorem curveDensity_jacobiFrame_continuousAt
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -895,9 +869,6 @@ private lemma transverseDensity_le_hyp_at_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Endpoint Jacobi density bound** (L6 step (A)).  For a segment-domain launch
-vector, the full-frame intrinsic Jacobi endpoint density is at most the base
-chart density times the speed-scaled hyperbolic model density at radius 1. -/
 theorem expJacDensity_le_of_perpOrthonormalFrame
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -925,11 +896,6 @@ theorem expJacDensity_le_of_perpOrthonormalFrame
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Endpoint Jacobi density bound** (L6 step (A)), frame-free form.  For a
-segment-domain launch vector, the full-frame intrinsic Jacobi endpoint density
-is at most the base chart density times the speed-scaled hyperbolic model
-density at radius 1.  The perpendicular orthonormal frame is constructed by
-Gram-Schmidt (`exists_perp_pos`), so no frame input is exposed. -/
 theorem expJacDensity_le
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1470,14 +1436,6 @@ private lemma gBall_modelIntegral_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Absolute Bishop upper bound with the explicit sphere constant.**  For a
-complete member with `Ric ≥ -(n-1)q²`, the Riemannian volume of the open
-`edist`-ball of radius `R` is at most
-`ncd₀ · (∫_{S_E} c(θ)^{-n} dσ_E) · hypRadVol q (n-1) R` with
-`c(θ) = √(gₓ(θ,θ))` and `ncd₀ = normalChartDensity g x 0`.  Under the
-Euclidean-compatibility of the model norm this equals the standard
-`σ_E · hypRadVol` form (deliverable B2(α)(1)); the explicit-constant form is
-valid in full generality. -/
 private lemma segBall_vol_le_explicit
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1597,10 +1555,6 @@ theorem segBall_vol_le [ConnectedSpace M] [PseudoEMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Finiteness of the ball volume** (B6-facing finiteness input).
-
-In a complete member every open `edist`-ball has finite Riemannian volume: its
-volume is bounded by the compact segment-domain launch-ball density integral. -/
 theorem segBall_vol_fin [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

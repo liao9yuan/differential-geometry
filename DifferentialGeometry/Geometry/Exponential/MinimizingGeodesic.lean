@@ -351,12 +351,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
-/-- **Finiteness of the Riemannian distance** on a connected manifold: any two
-points have `riemannianEDist I p q ≠ ⊤`.  The finite-distance locus from `p` is
-clopen (open: a finite point has a neighbourhood of finite points by the local
-bound `eventually_riemannianEDist_lt` and the triangle inequality; closed: the
-infinite locus is open by the same bound) and contains `p`, so by connectedness it
-is everything. -/
 theorem riemannianEDist_ne_top
     [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

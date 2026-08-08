@@ -67,8 +67,6 @@ theorem edistOf_iInf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Under the enorm-from-metric hypothesis `hEnorm`, the metric-explicit
-extended distance `riemannianEDistOf g` is the ambient `riemannianEDist I`. -/
 theorem riemannianEDistOf_eq_riemannianEDist
     [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
