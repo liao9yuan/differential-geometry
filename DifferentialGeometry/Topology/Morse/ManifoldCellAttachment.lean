@@ -2278,6 +2278,88 @@ theorem morse_smooth_handle_attachment_top {m : ℕ} (c ε r : ℝ)
   · intro x
     exact topHandleEmbedding_mem_lower_iff c ε data hε hεr' x
 
+theorem handleEmbedding_continuous {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    Continuous (handleEmbedding hk c ε r data) := by
+  have hproj : Continuous (fun p : StandardHandle k (n - k) =>
+      ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+    fun_prop
+  have hmmap : Continuous (fun p : StandardHandle k (n - k) =>
+      (modelHandleMap hk ε r p : MorseModel n)) := by
+    have h := (modelHandleMap_contDiff hk r ε hε).continuous.comp hproj
+    simpa [modelHandleMap] using h
+  have hmap : Set.MapsTo (fun p : StandardHandle k (n - k) =>
+      (modelHandleMap hk ε r p : MorseModel n)) Set.univ data.χ.source := by
+    intro p hp
+    exact data.hχsrc (modelHandleMap hk ε r p)
+      (le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) p) hεr)
+  have hcontOn : ContinuousOn (fun p : StandardHandle k (n - k) =>
+      data.χ (modelHandleMap hk ε r p)) Set.univ :=
+    data.χ.continuousOn_toFun.comp hmmap.continuousOn hmap
+  change Continuous (fun p : StandardHandle k (n - k) => data.χ (modelHandleMap hk ε r p))
+  exact (continuousOn_univ.mp hcontOn)
+
+noncomputable def handleAttachingMap {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    C(CellBoundary k, SublevelSpace f (c - ε)) :=
+  ContinuousMap.mk
+    (fun u : CellBoundary k =>
+      ⟨handleEmbedding hk c ε r data
+        (attachingInclusion k (n - k) (attachingSphereInclusionAttachingRegion k (n - k) u)), by
+        exact (handleEmbedding_mem_lower_iff hk c ε r data hε hεr
+          (attachingInclusion k (n - k) (attachingSphereInclusionAttachingRegion k (n - k) u))).2 u.2⟩)
+    (by
+      have hcont : Continuous (fun u : CellBoundary k =>
+          handleEmbedding hk c ε r data
+            (attachingInclusion k (n - k) (attachingSphereInclusionAttachingRegion k (n - k) u))) := by
+        have hinc : Continuous (fun u : CellBoundary k =>
+            (attachingInclusion k (n - k) (attachingSphereInclusionAttachingRegion k (n - k) u) :
+              StandardHandle k (n - k))) := by
+          dsimp [attachingInclusion, attachingSphereInclusionAttachingRegion]
+          have hb : Continuous (cellBoundaryInclusion k) := by
+            exact Continuous.subtype_mk continuous_subtype_val (by intro x; exact le_of_eq x.2)
+          exact hb.prodMk continuous_const
+        exact (handleEmbedding_continuous hk c ε r data hε hεr).comp hinc
+      exact Continuous.subtype_mk hcont (by
+        intro u
+        exact (handleEmbedding_mem_lower_iff hk c ε r data hε hεr
+          (attachingInclusion k (n - k) (attachingSphereInclusionAttachingRegion k (n - k) u))).2 u.2))
+
+theorem handleAttachingMap_spine {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (u : CellBoundary k) :
+    (handleAttachingMap hk c ε r data hε hεr u).1 =
+      (cocoreAttachingEmbedding hk c ε r data hε hεr (u, closedCellCenter (n - k))).1 := by
+  change handleEmbedding hk c ε r data
+    (attachingInclusion k (n - k) (attachingSphereInclusionAttachingRegion k (n - k) u)) =
+    (cocoreAttachingEmbedding hk c ε r data hε hεr (u, closedCellCenter (n - k))).1
+  simpa [attachingSphereInclusionAttachingRegion, attachingInclusion] using
+    (handleEmbedding_attachingRegion hk c ε r data hε hεr (u, closedCellCenter (n - k)))
+
+theorem morse_smooth_handle_attachment_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    ∃ φ : C(CellBoundary k, SublevelSpace f (c - ε)),
+      ∀ u : CellBoundary k,
+        (φ u).1 =
+          (cocoreAttachingEmbedding hk c ε r data hε hεr
+            (u, closedCellCenter (m + 1 - k))).1 := by
+  refine ⟨handleAttachingMap hk c ε r data hε hεr, ?_⟩
+  intro u
+  exact handleAttachingMap_spine hk c ε r data hε hεr u
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
