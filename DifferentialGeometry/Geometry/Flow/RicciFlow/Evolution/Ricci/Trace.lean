@@ -149,7 +149,6 @@ theorem metricInverseInBasis_of_local
 
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
@@ -442,7 +441,6 @@ theorem rm04InputSkew_regular
 
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem ricciSymm_regular
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}

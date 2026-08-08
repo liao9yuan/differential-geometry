@@ -544,7 +544,6 @@ theorem ricciLichnerowiczSpecializesInFrame_regular
 
 
 
-@[deprecated "use a local or pointwise Lichnerowicz specialization instead" (since := "2026-05-22")]
 theorem ricciLichnerowiczSpecializesInFrame_lc
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -644,7 +643,6 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
 
 
 
-@[deprecated "use a local or pointwise Lichnerowicz equation route instead" (since := "2026-05-22")]
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

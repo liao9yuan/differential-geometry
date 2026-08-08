@@ -164,7 +164,6 @@ theorem coordMetricContOn
 
 
 
-@[deprecated "use InvMetricLocal on the actual local frame domain" (since := "2026-05-22")]
 def InverseMetricComponentsInFrameOn [DecidableEq Idx]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -198,8 +197,6 @@ def InvMetricLocal [DecidableEq Idx]
 
 
 
-@[deprecated "use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen"
-    (since := "2026-05-22")]
 def SymmetricInverseMetricComponentsInFrameOn
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx) :
       Prop :=
@@ -210,8 +207,6 @@ def SymmetricInverseMetricComponentsInFrameOn
 
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[deprecated "derive pointwise symmetry from MetricInverseInBasis_gen or InvMetricLocal"
-    (since := "2026-05-22")]
 theorem gInv_symm [DecidableEq Idx]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

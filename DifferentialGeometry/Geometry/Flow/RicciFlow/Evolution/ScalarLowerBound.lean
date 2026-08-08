@@ -533,7 +533,6 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes
 
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -784,7 +783,6 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
 
 
 
-@[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -880,7 +878,6 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
 
 
 
-@[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

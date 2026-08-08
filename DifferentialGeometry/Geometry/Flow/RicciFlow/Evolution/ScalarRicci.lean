@@ -97,7 +97,6 @@ theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
 
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[deprecated "use a local or pointwise scalar trace statement instead" (since := "2026-05-22")]
 theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}

@@ -105,8 +105,6 @@ def RicciEvolutionEquationInFrameOnLocal
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
-@[deprecated "use the OnLocal predicate or a pointwise frame statement instead"
-    (since := "2026-05-22")]
 theorem ricciVariationFormulaInFrameOn_of_local_cover
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}

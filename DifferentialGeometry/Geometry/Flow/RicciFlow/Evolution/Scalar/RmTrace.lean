@@ -47,7 +47,6 @@ def ScalarRmRicciTraceInFrame
 
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
     [DecidableEq Idx]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -113,7 +112,6 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
 
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
     [DecidableEq Idx]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
