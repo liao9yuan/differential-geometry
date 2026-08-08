@@ -2824,6 +2824,91 @@ theorem contDiff_posPart_normSq {n k : ℕ} (hk : k ≤ n) :
     exact EuclideanSpace.real_norm_sq_eq (posPart hk y)]
   fun_prop
 
+theorem fderiv_negPart_normSq_self {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    fderiv ℝ (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) y
+      (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) =
+      2 * ‖negPart hk y‖ ^ 2 := by
+  rw [fderiv_negPart_normSq]
+  have hw : negPart hk (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) =
+      negPart hk y :=
+    negPart_recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))
+  rw [hw]
+  have hsum : ∑ i : Fin k, (negPart hk y i) * (negPart hk y i) =
+      ‖negPart hk y‖ ^ 2 := by
+    have hn := EuclideanSpace.real_norm_sq_eq (negPart hk y)
+    rw [hn]
+    apply Finset.sum_congr rfl
+    intro i hi
+    ring
+  rw [hsum]
+
+theorem fderiv_posPart_normSq_zero_direction {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    fderiv ℝ (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) y
+      (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) = 0 := by
+  rw [fderiv_posPart_normSq]
+  have hw : posPart hk (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) =
+      (0 : EuclideanSpace ℝ (Fin (n - k))) :=
+    posPart_recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))
+  rw [hw]
+  simp
+
+theorem fderiv_morseNormalForm_ne_zero_lower {n k : ℕ} (hk : k ≤ n) (c a : ℝ) (ha : 0 < a)
+    (y : MorseModel n) (hy : morseNormalForm hk c y = c - a) :
+    fderiv ℝ (morseNormalForm hk c) y ≠ 0 := by
+  have hsplit : morseNormalForm hk c y = c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) :=
+    morseNormalForm_split hk c y
+  have hneg : 0 < ‖negPart hk y‖ ^ 2 := by
+    have hmain : ‖negPart hk y‖ ^ 2 = ‖posPart hk y‖ ^ 2 + 2 * a := by
+      nlinarith [hy, hsplit, ha]
+    nlinarith [hmain, ha, sq_nonneg (‖posPart hk y‖ : ℝ)]
+  have hdiff : DifferentiableAt ℝ (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y := by
+    exact (contDiff_posPart_normSq hk).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt
+  have hdiffNeg : DifferentiableAt ℝ (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) y := by
+    exact (contDiff_negPart_normSq hk).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt
+  have hfderiv : fderiv ℝ (morseNormalForm hk c) y =
+      (1 / 2 : ℝ) • (fderiv ℝ (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y -
+        fderiv ℝ (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) y) := by
+    have hmain : (fun z : MorseModel n =>
+        c + (1 / 2) * (‖posPart hk z‖ ^ 2 - ‖negPart hk z‖ ^ 2)) =
+        morseNormalForm hk c := by
+      funext z
+      exact (morseNormalForm_split hk c z).symm
+    rw [← hmain]
+    rw [fderiv_const_add]
+    have hsub : DifferentiableAt ℝ (fun z : MorseModel n =>
+        ‖posPart hk z‖ ^ 2 - ‖negPart hk z‖ ^ 2) y := hdiff.sub hdiffNeg
+    have hmul : fderiv ℝ (fun z : MorseModel n =>
+        (1 / 2 : ℝ) * (‖posPart hk z‖ ^ 2 - ‖negPart hk z‖ ^ 2)) y =
+        (1 / 2 : ℝ) • fderiv ℝ (fun z : MorseModel n =>
+          ‖posPart hk z‖ ^ 2 - ‖negPart hk z‖ ^ 2) y :=
+      fderiv_const_mul hsub (1 / 2 : ℝ)
+    rw [hmul]
+    congr 1
+    exact fderiv_sub (f := fun z : MorseModel n => ‖posPart hk z‖ ^ 2)
+      (g := fun z : MorseModel n => ‖negPart hk z‖ ^ 2)
+      (hf := hdiff) (hg := hdiffNeg)
+  intro hzero
+  have hw : fderiv ℝ (morseNormalForm hk c) y
+      (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) = 0 := by
+    exact congrArg (fun L : MorseModel n →L[ℝ] ℝ =>
+      L (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k))))) hzero
+  rw [hfderiv] at hw
+  have hd : (fderiv ℝ (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y)
+      (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) = 0 :=
+    fderiv_posPart_normSq_zero_direction hk y
+  have hdNeg : (fderiv ℝ (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) y)
+      (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) =
+      2 * ‖negPart hk y‖ ^ 2 :=
+    fderiv_negPart_normSq_self hk y
+  rw [ContinuousLinearMap.smul_apply] at hw
+  rw [ContinuousLinearMap.sub_apply] at hw
+  rw [hd, hdNeg] at hw
+  have hw' : (1 / 2 : ℝ) * (0 - 2 * ‖negPart hk y‖ ^ 2) = 0 := by
+    simpa using hw
+  nlinarith
+
 theorem fderiv_morseNormalForm_ne_zero {n k : ℕ} (hk : k ≤ n) (c a : ℝ) (ha : 0 < a)
     (y : MorseModel n) (hy : morseNormalForm hk c y = c + a) :
     fderiv ℝ (morseNormalForm hk c) y ≠ 0 := by

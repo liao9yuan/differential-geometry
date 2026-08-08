@@ -2971,8 +2971,7 @@ theorem contMDiffAt_sublevelBoundaryMap {m : ℕ} (g₁ g₂ : MorseModel (m + 1
       simp [extChartAt, hchart₁']
     have hz₀range : (extChartAt (morseModelWithCornersHalfSpace m) x x) ∈
         Set.range (morseModelWithCornersHalfSpace m) := by
-      simpa [extChartAt, hchart₁'] using
-        (Set.mem_range_self (morseModelWithCornersHalfSpace m) (c₁ x))
+      simp [extChartAt, hchart₁']
     have hz₀D₁ : (extChartAt (morseModelWithCornersHalfSpace m) x x) ∈ D₁ := by
       have hsrc : x ∈ c₁.source := hc₁src
       have htgt : (c₁ x : MorseHalfSpace m) ∈ c₁.target := c₁.map_source hsrc
@@ -3250,6 +3249,197 @@ theorem contMDiffAt_sublevelInteriorMap {m : ℕ} (g₁ g₂ : MorseModel (m + 1
       rfl
     · exact (by simpa [extChartAt, hchart₁'] using hred.self_of_nhdsWithin hz₀)
 
+theorem contMDiffAt_sublevelBoundaryInteriorMap {m : ℕ} (g : MorseModel (m + 1) → ℝ)
+    (a₁ a₂ : ℝ) (ha : a₁ < a₂) (hg : ContDiff ℝ (⊤ : ℕ∞) g)
+    (hreg₁ : ∀ x : MorseModel (m + 1), g x = a₁ → fderiv ℝ g x ≠ 0)
+    (hreg₂ : ∀ x : MorseModel (m + 1), g x = a₂ → fderiv ℝ g x ≠ 0)
+    (x : SublevelSpace g a₁) (hx : g x.1 = a₁)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m) (SublevelSpace g a₁) :=
+      sublevelChartedSpace g a₁ hg hreg₁)
+    (hcs₂ : ChartedSpace (MorseHalfSpace m) (SublevelSpace g a₂) :=
+      sublevelChartedSpace g a₂ hg hreg₂)
+    (hchart₁ : ∀ y : SublevelSpace g a₁, hcs₁.chartAt y =
+      (if h : g y.1 = a₁ then sublevelBoundaryChart g a₁ y h hg (hreg₁ y.1 h)
+        else sublevelInteriorChart g a₁ y (lt_of_le_of_ne (show g y.1 ≤ a₁ from y.2) h) hg) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace g a₂, hcs₂.chartAt y =
+      (if h : g y.1 = a₂ then sublevelBoundaryChart g a₂ y h hg (hreg₂ y.1 h)
+        else sublevelInteriorChart g a₂ y (lt_of_le_of_ne (show g y.1 ≤ a₂ from y.2) h) hg) := by
+      intro y
+      rfl) :
+    ContMDiffAt (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun y : SublevelSpace g a₁ => (⟨y.1, by
+        change g y.1 ≤ a₂
+        exact le_trans (by change g y.1 ≤ a₁; exact y.2) (le_of_lt ha)⟩ :
+          SublevelSpace g a₂)) x := by
+  letI := hcs₁
+  letI := hcs₂
+  let incl : SublevelSpace g a₁ → SublevelSpace g a₂ :=
+    fun y => ⟨y.1, by
+      change g y.1 ≤ a₂
+      exact le_trans (by change g y.1 ≤ a₁; exact y.2) (le_of_lt ha)⟩
+  rw [contMDiffAt_iff]
+  constructor
+  · have hcont : Continuous (fun y : SublevelSpace g a₁ => (y.1 : MorseModel (m + 1))) :=
+      continuous_subtype_val
+    exact (Continuous.subtype_mk hcont (fun y => by
+      change g y.1 ≤ a₂
+      exact le_trans (by change g y.1 ≤ a₁; exact y.2) (le_of_lt ha))).continuousAt
+  · let c₁ : OpenPartialHomeomorph (SublevelSpace g a₁) (MorseHalfSpace m) :=
+      sublevelBoundaryChart g a₁ x hx hg (hreg₁ x.1 hx)
+    have hxlt : g x.1 < a₂ := lt_of_le_of_lt (le_of_eq hx) ha
+    let c₂ : OpenPartialHomeomorph (SublevelSpace g a₂) (MorseHalfSpace m) :=
+      sublevelInteriorChart g a₂ ⟨x.1, le_of_lt hxlt⟩ hxlt hg
+    have hchart₁' : hcs₁.chartAt x = c₁ := by
+      rw [hchart₁ x, dif_pos hx]
+    have hchart₂' : hcs₂.chartAt (incl x) = c₂ := by
+      rw [hchart₂ (incl x)]
+      rw [dif_neg (ne_of_lt hxlt)]
+    let ψ₁ : MorseModel (m + 1) → MorseModel (m + 1) :=
+      sublevelBoundaryChartInvValueRaw g a₁ x hx hg (hreg₁ x.1 hx)
+    let c₂' : ℝ := sublevelInteriorShift g a₂ ⟨x.1, le_of_lt hxlt⟩ hxlt hg
+    let F : MorseModel (m + 1) → MorseModel (m + 1) := fun z => morseHalfSpaceShift c₂' (ψ₁ z)
+    have hψ₁cd : ContDiffOn ℝ (⊤ : ℕ∞) ψ₁ (sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx)) :=
+      contDiffOn_sublevelBoundaryChartInvValueRaw g a₁ x hx hg (hreg₁ x.1 hx)
+    have hF : ContDiffOn ℝ (⊤ : ℕ∞) F (sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx)) := by
+      have hshift : ContDiff ℝ (⊤ : ℕ∞) (morseHalfSpaceShift c₂') :=
+        contDiff_morseHalfSpaceShift (m := m) c₂'
+      have hcomp : ContDiffOn ℝ (⊤ : ℕ∞) (fun z : MorseModel (m + 1) => morseHalfSpaceShift c₂' (ψ₁ z))
+          (sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx)) :=
+        hshift.contDiffOn.comp hψ₁cd (by intro z hz; exact Set.mem_univ (ψ₁ z))
+      exact hcomp
+    have hD₁open : IsOpen (sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx)) :=
+      isOpen_sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx)
+    have hc₁src : x ∈ c₁.source := mem_sublevelBoundaryChart_source g a₁ x hx hg (hreg₁ x.1 hx)
+    have hz₀I : (extChartAt (morseModelWithCornersHalfSpace m) x x) =
+        (morseModelWithCornersHalfSpace m) (c₁ x) := by
+      simp [extChartAt, hchart₁']
+    have hz₀range : (extChartAt (morseModelWithCornersHalfSpace m) x x) ∈
+        Set.range (morseModelWithCornersHalfSpace m) := by
+      simp [extChartAt, hchart₁']
+    have hz₀D₁ : (extChartAt (morseModelWithCornersHalfSpace m) x x) ∈
+        sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx) := by
+      have hsrc : x ∈ c₁.source := hc₁src
+      have htgt : (c₁ x : MorseHalfSpace m) ∈ c₁.target := c₁.map_source hsrc
+      simpa [extChartAt, hchart₁', sublevelBoundaryChartDomain] using htgt
+    have hρ₂ : 0 < sublevelInteriorRadius g a₂ ⟨x.1, le_of_lt hxlt⟩ hxlt hg := by
+      exact (Classical.choose_spec (Metric.mem_nhds_iff.mp
+        ((isOpen_Iio.preimage hg.continuous).mem_nhds hxlt))).1
+    have hz₀ball : dist (ψ₁ (extChartAt (morseModelWithCornersHalfSpace m) x x)) x.1 <
+        sublevelInteriorRadius g a₂ ⟨x.1, le_of_lt hxlt⟩ hxlt hg := by
+      have hz : (c₁ x : MorseHalfSpace m) ∈ c₁.target := c₁.map_source hc₁src
+      have hsymm : c₁.symm (c₁ x) = x := c₁.left_inv hc₁src
+      have hval := sublevelBoundaryChart_symm_value g a₁ x hx hg (hreg₁ x.1 hx)
+        (hz : (c₁ x : MorseHalfSpace m) ∈ (sublevelBoundaryChart g a₁ x hx hg (hreg₁ x.1 hx)).target)
+      have hval' : (c₁.symm (c₁ x)).1 = ψ₁ ((morseModelWithCornersHalfSpace m) (c₁ x)) := by
+        rw [hval]
+        rfl
+      have hmain : (c₁.symm (c₁ x)).1 = x.1 := congrArg Subtype.val hsymm
+      have hψ₁₀ : ψ₁ (extChartAt (morseModelWithCornersHalfSpace m) x x) = x.1 := by
+        simpa [extChartAt, hchart₁'] using hval'.symm.trans hmain
+      rw [hψ₁₀]
+      rw [dist_self]
+      exact hρ₂
+    have hnhd₁ : sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx) ∈
+        nhdsWithin (extChartAt (morseModelWithCornersHalfSpace m) x x)
+          (Set.range (morseModelWithCornersHalfSpace m)) := by
+      exact nhdsWithin_le_nhds (hD₁open.mem_nhds hz₀D₁)
+    let B : Set (MorseModel (m + 1)) := {z : MorseModel (m + 1) | dist (ψ₁ z) x.1 <
+      sublevelInteriorRadius g a₂ ⟨x.1, le_of_lt hxlt⟩ hxlt hg}
+    have hnhdB : B ∈
+        nhdsWithin (extChartAt (morseModelWithCornersHalfSpace m) x x)
+          (Set.range (morseModelWithCornersHalfSpace m)) := by
+      have hψ₁at : ContinuousAt ψ₁ (extChartAt (morseModelWithCornersHalfSpace m) x x) :=
+        (hψ₁cd.continuousOn (extChartAt (morseModelWithCornersHalfSpace m) x x) hz₀D₁).continuousAt
+          (hD₁open.mem_nhds hz₀D₁)
+      have hcontAt : ContinuousAt (fun z : MorseModel (m + 1) => dist (ψ₁ z) x.1)
+          (extChartAt (morseModelWithCornersHalfSpace m) x x) :=
+        continuous_dist.continuousAt.comp (hψ₁at.prodMk continuousAt_const)
+      have hev : ∀ᶠ z in 𝓝 (extChartAt (morseModelWithCornersHalfSpace m) x x),
+          dist (ψ₁ z) x.1 < sublevelInteriorRadius g a₂ ⟨x.1, le_of_lt hxlt⟩ hxlt hg :=
+        hcontAt.eventually (isOpen_lt continuous_id continuous_const |>.mem_nhds hz₀ball)
+      exact nhdsWithin_le_nhds hev
+    have hred : (morseModelWithCornersHalfSpace m ∘ c₂ ∘ incl ∘ c₁.symm ∘
+        (morseModelWithCornersHalfSpace m).symm) =ᶠ[
+          nhdsWithin (extChartAt (morseModelWithCornersHalfSpace m) x x)
+            (Set.range (morseModelWithCornersHalfSpace m))] F := by
+      refine Filter.eventuallyEq_of_mem (s := sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx) ∩
+          Set.range (morseModelWithCornersHalfSpace m) ∩ B) ?_ ?_
+      · exact Filter.inter_mem (Filter.inter_mem hnhd₁ self_mem_nhdsWithin) hnhdB
+      · intro z hz
+        have hzD₁ : z ∈ sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx) := hz.1.1
+        have hzrange : z ∈ Set.range (morseModelWithCornersHalfSpace m) := hz.1.2
+        have hzB : z ∈ B := hz.2
+        have hzmem : 0 ≤ z (Fin.last m) := by
+          rw [range_morseModelWithCornersHalfSpace] at hzrange
+          exact hzrange
+        have hz₁ : (⟨z, hzmem⟩ : MorseHalfSpace m) ∈ c₁.target := hzD₁
+        have hmem₁ : g (ψ₁ z) ≤ a₁ := by
+          change g (levelSetReindex (levelSetChartData.mk g a₁ ⟨x.1, hx⟩ hg (hreg₁ x.1 hx)).e
+              ((levelSetChartData.mk g a₁ ⟨x.1, hx⟩ hg (hreg₁ x.1 hx)).ψ.symm
+                (a₁ - ((⟨z, hzmem⟩ : MorseHalfSpace m) : MorseModel (m + 1)) (Fin.last m),
+                  levelSetSplitFst m ((⟨z, hzmem⟩ : MorseHalfSpace m) : MorseModel (m + 1))))) ≤ a₁
+          exact sublevelBoundaryChart_invFun_mem g
+            (levelSetChartData.mk g a₁ ⟨x.1, hx⟩ hg (hreg₁ x.1 hx)).e a₁
+            (levelSetChartData.mk g a₁ ⟨x.1, hx⟩ hg (hreg₁ x.1 hx)).ψ
+            (levelSetChartData.mk g a₁ ⟨x.1, hx⟩ hg (hreg₁ x.1 hx)).hψ
+            (by
+              simpa [sublevelBoundaryChartDomain] using hzD₁)
+        have hsymm₁ : c₁.symm (⟨z, hzmem⟩ : MorseHalfSpace m) =
+            (⟨ψ₁ z, hmem₁⟩ : SublevelSpace g a₁) := by
+          rw [sublevelBoundaryChart_symm_value g a₁ x hx hg (hreg₁ x.1 hx) hz₁]
+          apply Subtype.ext
+          rfl
+        have hmem₂ : g (ψ₁ z) ≤ a₂ :=
+          le_trans hmem₁ (le_of_lt ha)
+        have hval₂ : (morseModelWithCornersHalfSpace m)
+            (c₂ (incl (⟨ψ₁ z, hmem₁⟩ : SublevelSpace g a₁))) =
+            morseHalfSpaceShift c₂' (ψ₁ z) := by
+          have hdist : dist (ψ₁ z) x.1 < sublevelInteriorRadius g a₂ ⟨x.1, le_of_lt hxlt⟩ hxlt hg := hzB
+          have hval := sublevelInteriorChart_apply_value g a₂ ⟨x.1, le_of_lt hxlt⟩ hxlt hg
+            (⟨ψ₁ z, hmem₂⟩ : SublevelSpace g a₂) hdist
+          have hincl : incl (⟨ψ₁ z, hmem₁⟩ : SublevelSpace g a₁) =
+              (⟨ψ₁ z, hmem₂⟩ : SublevelSpace g a₂) := by
+            apply Subtype.ext
+            rfl
+          rw [hincl]
+          simpa [morseModelWithCornersHalfSpace] using hval
+        have hsymmz : (morseModelWithCornersHalfSpace m).symm z =
+            (⟨z, hzmem⟩ : MorseHalfSpace m) := by
+          apply Subtype.ext
+          exact morseHalfSpaceClamp_of_mem m hzmem
+        change (morseModelWithCornersHalfSpace m)
+            (c₂ (incl (c₁.symm ((morseModelWithCornersHalfSpace m).symm z)))) = F z
+        rw [hsymmz]
+        rw [hsymm₁]
+        rw [hval₂]
+    have hFAt : ContDiffWithinAt ℝ (⊤ : ℕ∞) F
+        (Set.range (morseModelWithCornersHalfSpace m))
+        (extChartAt (morseModelWithCornersHalfSpace m) x x) := by
+      have hnhd₁' : sublevelBoundaryChartDomain g a₁ x hx hg (hreg₁ x.1 hx) ∈
+          nhdsWithin (extChartAt (morseModelWithCornersHalfSpace m) x x)
+            (Set.range (morseModelWithCornersHalfSpace m)) := by
+        exact nhdsWithin_le_nhds (hD₁open.mem_nhds hz₀D₁)
+      exact hF.contDiffWithinAt hz₀D₁ |>.mono_of_mem_nhdsWithin hnhd₁'
+    refine hFAt.congr_of_eventuallyEq_of_mem ?_ hz₀range
+    change ((extChartAt (morseModelWithCornersHalfSpace m) (incl x)) ∘ incl ∘
+      (extChartAt (morseModelWithCornersHalfSpace m) x).symm) =ᶠ[
+        nhdsWithin (extChartAt (morseModelWithCornersHalfSpace m) x x)
+          (Set.range (morseModelWithCornersHalfSpace m))]
+      (fun z : MorseModel (m + 1) => F z)
+    change (((hcs₂.chartAt (incl x)).extend (morseModelWithCornersHalfSpace m)) ∘ incl ∘
+      ((hcs₁.chartAt x).extend (morseModelWithCornersHalfSpace m)).symm) =ᶠ[
+        nhdsWithin (extChartAt (morseModelWithCornersHalfSpace m) x x)
+          (Set.range (morseModelWithCornersHalfSpace m))]
+      (fun z : MorseModel (m + 1) => F z)
+    rw [hchart₂']
+    rw [hchart₁']
+    rw [OpenPartialHomeomorph.extend_coe]
+    rw [OpenPartialHomeomorph.extend_coe_symm]
+    simpa using hred
+
+
 theorem contMDiff_sublevelMap {m : ℕ} (g₁ g₂ : MorseModel (m + 1) → ℝ)
     (a₁ a₂ : ℝ) (hg₁ : ContDiff ℝ (⊤ : ℕ∞) g₁) (hg₂ : ContDiff ℝ (⊤ : ℕ∞) g₂)
     (hreg₁ : ∀ x : MorseModel (m + 1), g₁ x = a₁ → fderiv ℝ g₁ x ≠ 0)
@@ -3280,6 +3470,43 @@ theorem contMDiff_sublevelMap {m : ℕ} (g₁ g₂ : MorseModel (m + 1) → ℝ)
       (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
   · have hxlt : g₁ x.1 < a₁ := lt_of_le_of_ne (show g₁ x.1 ≤ a₁ from x.2) hx
     exact contMDiffAt_sublevelInteriorMap g₁ g₂ a₁ a₂ hg₁ hg₂ hreg₁ hreg₂ x hxlt Φ hΦ hmap hstrict
+      (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+
+theorem contMDiff_sublevelInclusion {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a₁ a₂ : ℝ)
+    (ha : a₁ < a₂) (hg : ContDiff ℝ (⊤ : ℕ∞) g)
+    (hreg₁ : ∀ x : MorseModel (m + 1), g x = a₁ → fderiv ℝ g x ≠ 0)
+    (hreg₂ : ∀ x : MorseModel (m + 1), g x = a₂ → fderiv ℝ g x ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m) (SublevelSpace g a₁) :=
+      sublevelChartedSpace g a₁ hg hreg₁)
+    (hcs₂ : ChartedSpace (MorseHalfSpace m) (SublevelSpace g a₂) :=
+      sublevelChartedSpace g a₂ hg hreg₂)
+    (hchart₁ : ∀ y : SublevelSpace g a₁, hcs₁.chartAt y =
+      (if h : g y.1 = a₁ then sublevelBoundaryChart g a₁ y h hg (hreg₁ y.1 h)
+        else sublevelInteriorChart g a₁ y (lt_of_le_of_ne (show g y.1 ≤ a₁ from y.2) h) hg) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace g a₂, hcs₂.chartAt y =
+      (if h : g y.1 = a₂ then sublevelBoundaryChart g a₂ y h hg (hreg₂ y.1 h)
+        else sublevelInteriorChart g a₂ y (lt_of_le_of_ne (show g y.1 ≤ a₂ from y.2) h) hg) := by
+      intro y
+      rfl) :
+    ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun y : SublevelSpace g a₁ => (⟨y.1, by
+        change g y.1 ≤ a₂
+        exact le_trans (by change g y.1 ≤ a₁; exact y.2) (le_of_lt ha)⟩ :
+          SublevelSpace g a₂)) := by
+  intro x
+  by_cases hx : g x.1 = a₁
+  · exact contMDiffAt_sublevelBoundaryInteriorMap g a₁ a₂ ha hg hreg₁ hreg₂ x hx
+      (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+  · have hxlt : g x.1 < a₁ := lt_of_le_of_ne (show g x.1 ≤ a₁ from x.2) hx
+    exact contMDiffAt_sublevelInteriorMap g g a₁ a₂ hg hg hreg₁ hreg₂ x hxlt id contDiff_id
+      (fun y hy => by
+        change g y ≤ a₂
+        exact le_trans hy (le_of_lt ha))
+      (fun y hy => by
+        change g y < a₂
+        exact lt_of_lt_of_le hy (le_of_lt ha))
       (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
 
 end DifferentialGeometry.Topology.Morse
