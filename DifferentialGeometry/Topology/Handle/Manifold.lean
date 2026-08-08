@@ -2329,6 +2329,18 @@ noncomputable def closedCellChartedSpace (l : ℕ) [NeZero l]
     closedCellChartedSpaceSucc (l - 1)
   exact chartedSpaceOfHomeomorph (closedCellReindexHomeo l)
 
+@[reducible]
+noncomputable def standardHandleChartedSpace (k l : ℕ) [NeZero k] [NeZero l]
+    [Fact (k = (k - 1) + 1)] [Fact (l = (l - 1) + 1)] :
+    ChartedSpace (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((l - 1) + 1)))
+      (StandardHandle k l) := by
+  letI : ChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k) :=
+    closedCellChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l) :=
+    closedCellChartedSpace l
+  exact prodChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k)
+    (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l)
+
 theorem closedCellInclusion_contMDiff_of (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
     @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin ((l - 1) + 1))) _ _
       (EuclideanHalfSpace ((l - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))

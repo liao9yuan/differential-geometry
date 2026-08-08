@@ -1617,6 +1617,21 @@ theorem modelHandleMap_f_ge {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 �
     exact (sq_le_sq' hneg p.1.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
   nlinarith [hnonneg, hle]
 
+theorem modelHandleMap_f_le {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 ≤ ε)
+    (p : StandardHandle k (n - k)) :
+    morseNormalForm hk c (modelHandleMap hk ε r p) ≤ c + r ^ 2 / 2 := by
+  rw [modelHandleMap_f_value hk c ε r hε p]
+  have hx : 0 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 := sq_nonneg _
+  have hw : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ 1 := by
+    have hneg : -1 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := by
+      linarith [norm_nonneg (p.2 : EuclideanSpace ℝ (Fin (n - k)))]
+    exact (sq_le_sq' hneg p.2.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+  have hnonneg : 0 ≤ (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+      ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 := by positivity
+  have hwle : r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ r ^ 2 := by
+    simpa using (mul_le_mul_of_nonneg_left hw (sq_nonneg r))
+  nlinarith [hnonneg, hwle]
+
 theorem modelHandleMap_f_eq_lower_iff {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 < ε)
     (p : StandardHandle k (n - k)) :
     morseNormalForm hk c (modelHandleMap hk ε r p) = c - ε ↔

@@ -1511,6 +1511,239 @@ theorem isClosedEmbedding_handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r
   exact (contMDiff_handleCollarMap hk c ε r data hε hεr hRltR' hf hreg v hv hsupp hcomplete).continuous.isClosedEmbedding
     (handleCollarMap_injective hk c ε r δ data hε hr hεr hδ hf v hv hdfOn hrate hcomplete)
 
+theorem standardHandleContMDiff_of {n k : ℕ}
+    (F : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) → MorseModel n)
+    (hF : ContDiff ℝ (⊤ : ℕ∞) F)
+    [NeZero k] [NeZero (n - k)]
+    [Fact (k = (k - 1) + 1)]
+    [Fact (n - k = (n - k - 1) + 1)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin ((k - 1) + 1)) × EuclideanSpace ℝ (Fin (((n - k - 1) + 1)))) _ _
+      (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((n - k - 1) + 1))) _
+      ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+        (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1)))
+      (StandardHandle k (n - k)) _ (standardHandleChartedSpace k (n - k))
+      (MorseModel n) _ _ (MorseModel n) _
+      (𝓘(ℝ, MorseModel n)) (MorseModel n) _ _
+      (⊤ : ℕ∞)
+      (fun p : StandardHandle k (n - k) =>
+        F ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+  classical
+  letI : ChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k) :=
+    closedCellChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((n - k - 1) + 1)) (ClosedCell (n - k)) :=
+    closedCellChartedSpace (n - k)
+  have h1 : ContMDiff (modelWithCornersEuclideanHalfSpace ((k - 1) + 1))
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin k))) (⊤ : ℕ∞)
+      (fun u : ClosedCell k => (u : EuclideanSpace ℝ (Fin k))) :=
+    closedCellInclusion_contMDiff_of k
+  have h2 : ContMDiff (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1))
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - k)))) (⊤ : ℕ∞)
+      (fun v : ClosedCell (n - k) => (v : EuclideanSpace ℝ (Fin (n - k)))) :=
+    closedCellInclusion_contMDiff_of (n - k)
+  have hprod : ContMDiff ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+        (modelWithCornersEuclideanHalfSpace ((n - k - 1) + 1)))
+      ((𝓘(ℝ, EuclideanSpace ℝ (Fin k))).prod (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - k))))) (⊤ : ℕ∞)
+      (fun p : StandardHandle k (n - k) =>
+        ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+    exact ContMDiff.prodMap h1 h2
+  have hF' : ContMDiff ((𝓘(ℝ, EuclideanSpace ℝ (Fin k))).prod
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - k)))))
+      (𝓘(ℝ, MorseModel n)) (⊤ : ℕ∞)
+      (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => F q) := by
+    rw [contMDiff_iff]
+    constructor
+    · exact hF.continuous
+    · intro x y
+      apply hF.contDiffOn.congr
+      intro q hq
+      simp [extChartAt, Function.comp_def, OpenPartialHomeomorph.refl_prod_refl]
+      rfl
+  have hfun : (fun p : StandardHandle k (n - k) =>
+        F ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) =
+      (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => F q) ∘
+        (fun p : StandardHandle k (n - k) =>
+          ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+    funext p
+    rfl
+  rw [hfun]
+  exact hF'.comp hprod
+
+theorem modelHandleMap_contDiff {n k : ℕ} (hk : k ≤ n) (r ε : ℝ) (hε : 0 < ε) :
+    ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk ((Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) • p.1) (r • p.2)) := by
+  have hrew : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk ((Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) • p.1) (r • p.2)) =
+      fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) p.1)) (r • p.2) := by
+    funext p
+    rw [negPart_cellMap_smul hk]
+  rw [hrew]
+  exact recombine_contDiff_cocore hk r ε hε
+
+noncomputable def handleEmbedding {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f) :
+    StandardHandle k (n - k) → M :=
+  fun p => data.χ (modelHandleMap hk ε r p)
+
+theorem handleEmbedding_f_value {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 ≤ ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (p : StandardHandle k (n - k)) :
+    f (handleEmbedding hk c ε r data p) = morseNormalForm hk c (modelHandleMap hk ε r p) := by
+  change f (data.χ (modelHandleMap hk ε r p)) = morseNormalForm hk c (modelHandleMap hk ε r p)
+  rw [data.hnorm (modelHandleMap hk ε r p) (le_trans (modelHandleMap_norm_le hk ε r hε p) hεr)]
+
+theorem handleEmbedding_attachingRegion {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (p : AttachingRegion k (n - k)) :
+    handleEmbedding hk c ε r data (attachingInclusion k (n - k) p) =
+      (cocoreAttachingEmbedding hk c ε r data hε hεr p).1 := by
+  dsimp [handleEmbedding, cocoreAttachingEmbedding, attachingInclusion]
+  change data.χ (modelHandleMap hk ε r (cellBoundaryInclusion k p.1, p.2)) =
+    data.χ (cocoreModelPoint hk ε r p)
+  rw [modelHandleMap_attachingRegion]
+  rfl
+
+theorem handleEmbedding_mem_lower_iff {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (p : StandardHandle k (n - k)) :
+    handleEmbedding hk c ε r data p ∈ sublevel f (c - ε) ↔
+      ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 := by
+  change f (handleEmbedding hk c ε r data p) ≤ c - ε ↔
+    ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1
+  rw [handleEmbedding_f_value hk c ε r data (le_of_lt hε) hεr p]
+  constructor
+  · intro hle
+    have heq : morseNormalForm hk c (modelHandleMap hk ε r p) = c - ε :=
+      le_antisymm hle (modelHandleMap_f_ge hk c ε r (le_of_lt hε) p)
+    exact (modelHandleMap_f_eq_lower_iff hk c ε r hε p).1 heq
+  · intro hx
+    have heq : morseNormalForm hk c (modelHandleMap hk ε r p) = c - ε :=
+      (modelHandleMap_f_eq_lower_iff hk c ε r hε p).2 hx
+    exact le_of_eq heq
+
+theorem handleEmbedding_mem_sublevel {n k : ℕ} (hk : k ≤ n) (c ε r b : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 ≤ ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hb : c + r ^ 2 / 2 ≤ b) (p : StandardHandle k (n - k)) :
+    handleEmbedding hk c ε r data p ∈ sublevel f b := by
+  change f (handleEmbedding hk c ε r data p) ≤ b
+  rw [handleEmbedding_f_value hk c ε r data hε hεr p]
+  exact le_trans (modelHandleMap_f_le hk c ε r hε p) hb
+
+theorem handleEmbedding_injective {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    Function.Injective (handleEmbedding hk c ε r data) := by
+  intro p q h
+  have hχ : data.χ (modelHandleMap hk ε r p) = data.χ (modelHandleMap hk ε r q) := by
+    simpa [handleEmbedding] using h
+  have hnormb : ∀ x : StandardHandle k (n - k),
+      morseNorm n (modelHandleMap hk ε r x) ≤ data.R := by
+    intro x
+    exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) x) hεr
+  have hsrc_p : modelHandleMap hk ε r p ∈ data.χ.source :=
+    data.hχsrc (modelHandleMap hk ε r p) (hnormb p)
+  have hsrc_q : modelHandleMap hk ε r q ∈ data.χ.source :=
+    data.hχsrc (modelHandleMap hk ε r q) (hnormb q)
+  have hy : modelHandleMap hk ε r p = modelHandleMap hk ε r q :=
+    data.χ.injOn hsrc_p hsrc_q hχ
+  exact modelHandleMap_injective hk ε r hε hr hy
+
+theorem contMDiff_handleEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hRltR' : data.R < data.R')
+    [NeZero k] [NeZero (m + 1 - k)]
+    [Fact (k = (k - 1) + 1)]
+    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin ((k - 1) + 1)) × EuclideanSpace ℝ (Fin (((m + 1 - k - 1) + 1)))) _ _
+      (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+      ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+        (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      (StandardHandle k (m + 1 - k)) _ (standardHandleChartedSpace k (m + 1 - k))
+      (MorseModel (m + 1)) _ _ H _ I M _ _
+      (⊤ : ℕ∞)
+      (handleEmbedding hk c ε r data) := by
+  classical
+  letI : ChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k) :=
+    closedCellChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((m + 1 - k - 1) + 1)) (ClosedCell (m + 1 - k)) :=
+    closedCellChartedSpace (m + 1 - k)
+  have hrecomb : ContMDiff ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+        (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun p : StandardHandle k (m + 1 - k) => modelHandleMap hk ε r p) := by
+    exact standardHandleContMDiff_of
+      (F := fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (m + 1 - k)) =>
+        recombine hk ((Real.sqrt (2 * ε + r ^ 2 * ‖q.2‖ ^ 2)) • q.1) (r • q.2))
+      (modelHandleMap_contDiff hk r ε hε)
+  have hrecombOn : ContMDiffOn ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+        (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun p : StandardHandle k (m + 1 - k) => modelHandleMap hk ε r p) Set.univ := by
+    rw [contMDiffOn_univ]
+    exact hrecomb
+  have hball : ∀ p : StandardHandle k (m + 1 - k),
+      modelHandleMap hk ε r p ∈ Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+    intro p
+    have hnormb : morseNorm (m + 1) (modelHandleMap hk ε r p) ≤ data.R := by
+      exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) p) hεr
+    have hlt : ‖modelHandleMap hk ε r p‖ < data.R' :=
+      lt_of_le_of_lt (morseNorm_piNorm_le (modelHandleMap hk ε r p)) (lt_of_le_of_lt hnormb hRltR')
+    simpa [Metric.mem_ball, dist_eq_norm] using hlt
+  have hχ : ContMDiffOn ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+        (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      I (⊤ : ℕ∞)
+      (fun p : StandardHandle k (m + 1 - k) => data.χ (modelHandleMap hk ε r p)) Set.univ := by
+    refine data.hχon.comp hrecombOn ?_
+    intro p hp
+    exact hball p
+  have hχ' : ContMDiff ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+        (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      I (⊤ : ℕ∞)
+      (fun p : StandardHandle k (m + 1 - k) => data.χ (modelHandleMap hk ε r p)) := by
+    rw [← contMDiffOn_univ]
+    exact hχ
+  exact hχ'.congr (by intro p; rfl)
+
+theorem isClosedEmbedding_handleEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hRltR' : data.R < data.R')
+    [NeZero k] [NeZero (m + 1 - k)]
+    [Fact (k = (k - 1) + 1)]
+    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    Topology.IsClosedEmbedding (handleEmbedding hk c ε r data) := by
+  letI : ChartedSpace (ModelProd (EuclideanHalfSpace ((k - 1) + 1))
+      (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) (StandardHandle k (m + 1 - k)) :=
+    standardHandleChartedSpace k (m + 1 - k)
+  exact (contMDiff_handleEmbedding hk c ε r data hε hεr hRltR').continuous.isClosedEmbedding
+    (handleEmbedding_injective hk c ε r data hε hr hεr)
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
