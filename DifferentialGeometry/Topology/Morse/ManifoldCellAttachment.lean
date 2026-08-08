@@ -1,4 +1,5 @@
 import DifferentialGeometry.Topology.Morse.CellAttachment
+import DifferentialGeometry.Topology.Morse.HandleAttachment
 import DifferentialGeometry.Topology.Handle.Manifold
 import DifferentialGeometry.Topology.Homotopy.EquivUnder
 import DifferentialGeometry.Topology.Morse.Flow
@@ -2985,6 +2986,34 @@ noncomputable def morseAttachedDiffeomorphUpper {m k : ℕ} (hk : k ≤ m + 1) (
   · exact contMDiff_homeomorph_symm_of_chartedSpaceOfHomeomorph
       (morseAttachedHomeoUpper hk c ε r δ hε hδ0 hδr hr)
       (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+
+noncomputable def morseAttachedDiffeomorphModifiedSublevel {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (morseAttachedSpace hk c ε r δ (le_of_lt hε) hδ hδr hr) _
+      (morseAttachedChartedSpace hk c ε r δ (le_of_lt hε) hδ hδr hr)
+      (SublevelSpace (CellAttachment.modifiedNormalForm hk c ε δ) (c - ε)) _
+      (sublevelChartedSpace (m := m) (CellAttachment.modifiedNormalForm hk c ε δ) (c - ε)
+        (CellAttachment.contDiff_modifiedNormalForm hk c ε δ hδ)
+        (fun y hy => CellAttachment.modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+          ⟨le_of_eq hy.symm, by linarith⟩))
+      (⊤ : ℕ∞) := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ (le_of_lt hε) hδ hδr hr) :=
+    morseAttachedChartedSpace hk c ε r δ (le_of_lt hε) hδ hδr hr
+  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
+    morseUpperChartedSpace hk c r hr
+  letI : ChartedSpace (MorseHalfSpace m)
+      (SublevelSpace (CellAttachment.modifiedNormalForm hk c ε δ) (c - ε)) :=
+    sublevelChartedSpace (m := m) (CellAttachment.modifiedNormalForm hk c ε δ) (c - ε)
+      (CellAttachment.contDiff_modifiedNormalForm hk c ε δ hδ)
+      (fun y hy => CellAttachment.modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+        ⟨le_of_eq hy.symm, by linarith⟩)
+  exact Diffeomorph.trans
+    (morseAttachedDiffeomorphUpper hk c ε r δ (le_of_lt hε) hδ hδr hr)
+    (CellAttachment.modelModifiedSublevelDiffeomorph hk c ε r δ hε hδ hr).symm
 
 noncomputable def morseHandleEmbeddingAttached {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
