@@ -1112,6 +1112,334 @@ private lemma ball_model_lintegral
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+private lemma radial_model_lintegral_scaled
+    (q : ℝ) {d : ℕ} (hq : 0 ≤ q) {R c : ℝ} (hR : 0 < R) (hc : 0 < c) :
+    (∫⁻ r : Ioi (0 : ℝ) in Iic (⟨R / c, div_pos hR hc⟩ : Ioi (0 : ℝ)),
+        ENNReal.ofReal (hypDensity (q * (r.1 * c)) d 1) ∂Measure.volumeIoiPow d)
+      = ENNReal.ofReal ((c ^ (d + 1))⁻¹ * hypRadVol q d R) := by
+  have hpowMeas : Measurable (fun r : Ioi (0 : ℝ) => ENNReal.ofReal (r.1 ^ d)) :=
+    ENNReal.measurable_ofReal.comp (measurable_subtype_coe.pow_const d)
+  rw [Measure.volumeIoiPow]
+  rw [setLIntegral_withDensity_eq_setLIntegral_mul_non_measurable _ hpowMeas _
+    measurableSet_Iic (by filter_upwards [] with r; exact ENNReal.ofReal_lt_top)]
+  · have hmul :
+        (∫⁻ r : Ioi (0 : ℝ) in Iic (⟨R / c, div_pos hR hc⟩ : Ioi (0 : ℝ)),
+            ((fun s : Ioi (0 : ℝ) => ENNReal.ofReal (s.1 ^ d)) *
+              (fun s : Ioi (0 : ℝ) => ENNReal.ofReal (hypDensity (q * (s.1 * c)) d 1))) r
+            ∂Measure.comap Subtype.val volume)
+      = ∫⁻ r : Ioi (0 : ℝ) in Iic (⟨R / c, div_pos hR hc⟩ : Ioi (0 : ℝ)),
+          ENNReal.ofReal (r.1 ^ d * hypDensity (q * (r.1 * c)) d 1)
+            ∂Measure.comap Subtype.val volume := by
+      apply setLIntegral_congr_fun measurableSet_Iic
+      intro r _hr
+      rw [Pi.mul_apply]
+      rw [← ENNReal.ofReal_mul (pow_nonneg r.2.le d)]
+    rw [hmul]
+    rw [setLIntegral_subtype measurableSet_Ioi (Iic (⟨R / c, div_pos hR hc⟩ : Ioi (0 : ℝ)))
+      (fun t : Real => ENNReal.ofReal (t ^ d * hypDensity (q * (t * c)) d 1))]
+    rw [image_subtype_val_Ioi_Iic]
+    have hfi : Integrable (fun x : ℝ => x ^ d * hypDensity (q * (x * c)) d 1)
+        (volume.restrict (Ioc (0 : ℝ) (R / c))) := by
+      simpa [mul_assoc, mul_comm, mul_left_comm] using
+        (((continuous_pow d).mul (hypDensity_scale_continuous (q * c) d)).continuousOn
+          |>.intervalIntegrable_of_Icc (div_pos hR hc).le |>.1)
+    have hnn : 0 ≤ᶠ[ae (volume.restrict (Ioc (0 : ℝ) (R / c)))]
+        (fun x : ℝ => x ^ d * hypDensity (q * (x * c)) d 1) := by
+      filter_upwards [ae_restrict_mem measurableSet_Ioc] with t ht
+      exact mul_nonneg (pow_nonneg ht.1.le d)
+        (hypDensity_scaled_nonneg hq (mul_pos ht.1 hc) d)
+    have hbridge :
+        ENNReal.ofReal (∫ x in Ioc (0 : ℝ) (R / c), x ^ d * hypDensity (q * (x * c)) d 1 ∂volume)
+          = ∫⁻ x in Ioc (0 : ℝ) (R / c), ENNReal.ofReal (x ^ d * hypDensity (q * (x * c)) d 1) ∂volume := by
+      exact (ofReal_integral_eq_lintegral_ofReal hfi hnn)
+    rw [← hbridge]
+    · have hsub : ∫ t in (0 : ℝ)..(R / c), t ^ d * hypDensity (q * (t * c)) d 1
+          = (c ^ (d + 1))⁻¹ * ∫ s in (0 : ℝ)..R, s ^ d * hypDensity (q * s) d 1 := by
+        let g : ℝ → ℝ := fun s => s ^ d * hypDensity (q * s) d 1 * (c ^ (d + 1))⁻¹
+        have hcomp : ∀ t ∈ Set.uIcc (0 : ℝ) (R / c),
+            (g ∘ fun x : ℝ => c * x) t * c = t ^ d * hypDensity (q * (t * c)) d 1 := by
+          intro t ht
+          dsimp [g]
+          have hpow : (c * t) ^ d * (c ^ (d + 1))⁻¹ * c = t ^ d := by
+            rw [mul_pow]
+            field_simp [hc.ne']
+            ring
+          calc
+            (c * t) ^ d * hypDensity (q * (c * t)) d 1 * (c ^ (d + 1))⁻¹ * c
+                = ((c * t) ^ d * (c ^ (d + 1))⁻¹ * c) * hypDensity (q * (c * t)) d 1 := by ring
+            _ = t ^ d * hypDensity (q * (t * c)) d 1 := by
+                rw [hpow]
+                congr 1
+                congr 1
+                ring
+        have hderiv : ∀ x ∈ Set.uIcc (0 : ℝ) (R / c),
+            HasDerivAt (fun t : ℝ => c * t) c x := fun x hx => by
+          have hd : HasDerivAt (fun y : ℝ => c * y) (c * 1) x := (hasDerivAt_id x).const_mul c
+          convert hd using 1
+          ring
+        have hgcont : Continuous g := by
+          dsimp [g]
+          exact (((continuous_pow d).mul (hypDensity_scale_continuous q d)).mul
+            continuous_const)
+        have hsubst := intervalIntegral.integral_comp_mul_deriv hderiv
+          (continuous_const.continuousOn : ContinuousOn (fun _ : ℝ => c)
+            (Set.uIcc (0 : ℝ) (R / c))) hgcont
+        -- hsubst : ∫ x in 0..R/c, (g ∘ (c·)) x * c = ∫ x in 0..R, g x
+        calc
+          ∫ t in (0 : ℝ)..(R / c), t ^ d * hypDensity (q * (t * c)) d 1
+              = ∫ t in (0 : ℝ)..(R / c), (g ∘ fun x : ℝ => c * x) t * c := by
+                refine intervalIntegral.integral_congr ?_
+                intro t ht
+                exact (hcomp t ht).symm
+          _ = ∫ s in (0 : ℝ)..R, g s := by
+                simpa [mul_div_cancel₀ R hc.ne'] using hsubst
+          _ = (c ^ (d + 1))⁻¹ * ∫ s in (0 : ℝ)..R, s ^ d * hypDensity (q * s) d 1 := by
+                dsimp [g]
+                rw [← intervalIntegral.integral_const_mul (r := (c ^ (d + 1))⁻¹)
+                  (f := fun s : ℝ => s ^ d * hypDensity (q * s) d 1)]
+                refine intervalIntegral.integral_congr ?_
+                intro s hs
+                ring
+      rw [← intervalIntegral.integral_of_le (div_pos hR hc).le]
+      rw [hsub]
+      congr 1
+      have hrad : ∫ s in (0 : ℝ)..R, s ^ d * hypDensity (q * s) d 1 = hypRadVol q d R := by
+        change ∫ s in (0 : ℝ)..R, s ^ d * hypDensity (q * s) d 1 =
+          ∫ s in (0 : ℝ)..R, hypDensity q d s
+        refine intervalIntegral.integral_congr ?_
+        intro s hs
+        exact hypDensity_scale_one q s d
+      rw [hrad]
+
+
+
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma radial_model_lintegral_scaled_mul
+    (q : ℝ) {d : ℕ} (hq : 0 ≤ q) {R c : ℝ} (hR : 0 < R) (hc : 0 < c) {A : ℝ} (hA : 0 ≤ A) :
+    (∫⁻ r : Ioi (0 : ℝ) in Iic (⟨R / c, div_pos hR hc⟩ : Ioi (0 : ℝ)),
+        ENNReal.ofReal (A * hypDensity (q * (r.1 * c)) d 1) ∂Measure.volumeIoiPow d)
+      = ENNReal.ofReal (A * (c ^ (d + 1))⁻¹ * hypRadVol q d R) := by
+  have hmeas : Measurable (fun r : Ioi (0 : ℝ) => ENNReal.ofReal
+      (hypDensity (q * (r.1 * c)) d 1)) := by
+    have hc0 : Continuous (fun t : ℝ => hypDensity (q * (t * c)) d 1) := by
+      have hf : Continuous (fun t : ℝ => hypDensity ((q * c) * t) d 1) :=
+        hypDensity_scale_continuous (q * c) d
+      simpa [mul_assoc, mul_comm, mul_left_comm] using hf
+    exact ENNReal.measurable_ofReal.comp ((hc0.measurable).comp measurable_subtype_coe)
+  calc
+    ∫⁻ r in Iic (⟨R / c, div_pos hR hc⟩ : Ioi (0 : ℝ)),
+        ENNReal.ofReal (A * hypDensity (q * (r.1 * c)) d 1)
+        ∂(Measure.volumeIoiPow d)
+        = ENNReal.ofReal A *
+          ∫⁻ r in Iic (⟨R / c, div_pos hR hc⟩ : Ioi (0 : ℝ)),
+            ENNReal.ofReal (hypDensity (q * (r.1 * c)) d 1)
+            ∂(Measure.volumeIoiPow d) := by
+          rw [← lintegral_const_mul (ENNReal.ofReal A) hmeas]
+          apply lintegral_congr
+          intro r
+          rw [← ENNReal.ofReal_mul hA]
+    _ = ENNReal.ofReal A *
+        ENNReal.ofReal ((c ^ (d + 1))⁻¹ * hypRadVol q d R) := by
+          rw [radial_model_lintegral_scaled (d := d) q hq hR hc]
+    _ = ENNReal.ofReal (A * (c ^ (d + 1))⁻¹ * hypRadVol q d R) := by
+          rw [← ENNReal.ofReal_mul hA]
+          rw [← mul_assoc]
+
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space M] [SigmaCompactSpace M] in
+private lemma gBall_modelIntegral_eq
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (x : M) (q R : ℝ) (hq : 0 ≤ q) (hR : 0 < R) :
+    ∫⁻ v in closedGBall g x R,
+        ENNReal.ofReal (normalChartDensity g x 0 *
+          hypDensity (q * Real.sqrt (g.inner x (show TangentSpace I x from v)
+            (show TangentSpace I x from v))) (Module.finrank ℝ E - 1) 1)
+      ∂(modelHaar (E := E))
+    = (∫⁻ θ : sphere (0 : E) 1,
+          ENNReal.ofReal (normalChartDensity g x 0 *
+            (Real.sqrt (g.inner x θ.1 θ.1) ^ (Module.finrank ℝ E))⁻¹)
+          ∂(modelHaar (E := E)).toSphere)
+      * ENNReal.ofReal (hypRadVol q (Module.finrank ℝ E - 1) R) := by
+  classical
+  letI : Nontrivial E := Module.nontrivial_of_finrank_pos
+    (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E)))
+  let d : ℕ := Module.finrank ℝ E - 1
+  let F : E → ℝ≥0∞ := fun v => ENNReal.ofReal (normalChartDensity g x 0 *
+    hypDensity (q * Real.sqrt (g.inner x (show TangentSpace I x from v)
+      (show TangentSpace I x from v))) d 1)
+  have hFmeas : AEMeasurable F (modelHaar (E := E)) := by
+    have hcont1 : Continuous (fun v : E => Real.sqrt (g.inner x
+        (show TangentSpace I x from v) (show TangentSpace I x from v))) := by
+      exact (continuous_sqrt_gInner_self (I := I) g x).comp continuous_id
+    have hcont : Continuous (fun v : E => hypDensity (q *
+        Real.sqrt (g.inner x (show TangentSpace I x from v) (show TangentSpace I x from v))) d 1) :=
+      (hypDensity_scale_continuous q d).comp hcont1
+    have hcd : Continuous (fun v : E => normalChartDensity g x 0 *
+        hypDensity (q * Real.sqrt (g.inner x (show TangentSpace I x from v)
+          (show TangentSpace I x from v))) d 1) :=
+      continuous_const.mul hcont
+    exact ENNReal.continuous_ofReal.comp hcd |>.aemeasurable
+  have hball_meas : MeasurableSet (closedGBall g x R) :=
+    (isClosed_closedGBall (I := I) g x R).measurableSet
+  calc
+    ∫⁻ v in closedGBall g x R, F v ∂(modelHaar (E := E))
+        = ∫⁻ v, (closedGBall g x R).indicator F v ∂(modelHaar (E := E)) := by
+          rw [lintegral_indicator hball_meas]
+    _ = ∫⁻ u : sphere (0 : E) 1,
+          ∫⁻ r : Ioi (0 : ℝ), (closedGBall g x R).indicator F (r.1 • u.1)
+            ∂(Measure.volumeIoiPow d) ∂(modelHaar (E := E)).toSphere := by
+          simpa [d] using
+            (lintegral_polar (modelHaar (E := E)) ((closedGBall g x R).indicator F)
+              (hFmeas.indicator hball_meas))
+    _ = (∫⁻ u : sphere (0 : E) 1,
+          ENNReal.ofReal (normalChartDensity g x 0 *
+            (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹)
+          ∂(modelHaar (E := E)).toSphere)
+      * ENNReal.ofReal (hypRadVol q d R) := by
+          have hd1 : d + 1 = Module.finrank ℝ E := by
+            dsimp [d]
+            exact Nat.sub_add_cancel (Nat.succ_le_of_lt
+              (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))))
+          have hcd0 : 0 ≤ normalChartDensity g x 0 := by
+            rw [normalChartDensity, paramDensity_apply]
+            exact Real.sqrt_nonneg _
+          have hinner (u : sphere (0 : E) 1) :
+              (∫⁻ r : Ioi (0 : ℝ), (closedGBall g x R).indicator F (r.1 • u.1)
+                ∂(Measure.volumeIoiPow d))
+              = ENNReal.ofReal (normalChartDensity g x 0 *
+                  (Real.sqrt (g.inner x u.1 u.1) ^ (d + 1))⁻¹ * hypRadVol q d R) := by
+            have hne : u.1 ≠ 0 := by
+              intro h
+              have hu := u.2
+              rw [h] at hu
+              simp at hu
+            have hc : 0 < Real.sqrt (g.inner x u.1 u.1) :=
+              Real.sqrt_pos.mpr (g.pos x u.1 hne)
+            have hEq : (fun r : Ioi (0 : ℝ) => (closedGBall g x R).indicator F (r.1 • u.1))
+                = fun r : Ioi (0 : ℝ) => (Iic (⟨R / Real.sqrt (g.inner x u.1 u.1),
+                    div_pos hR hc⟩ : Ioi (0 : ℝ))).indicator
+                      (fun r : Ioi (0 : ℝ) => ENNReal.ofReal (normalChartDensity g x 0 *
+                        hypDensity (q * (r.1 * Real.sqrt (g.inner x u.1 u.1))) d 1)) r := by
+              funext r
+              by_cases hr : r.1 * Real.sqrt (g.inner x u.1 u.1) ≤ R
+              · have hmem : r ∈ Iic (⟨R / Real.sqrt (g.inner x u.1 u.1), div_pos hR hc⟩ : Ioi (0 : ℝ)) :=
+                  (le_div_iff₀ hc).mpr hr
+                have hb : r.1 • u.1 ∈ closedGBall g x R := by
+                  change Real.sqrt (g.inner x (show TangentSpace I x from (r.1 • u.1))
+                      (show TangentSpace I x from (r.1 • u.1))) ≤ R
+                  have hbval : g.inner x u.1 u.1 =
+                      (Real.sqrt (g.inner x u.1 u.1)) ^ 2 :=
+                    (Real.sq_sqrt (gInner_self_nonneg (I := I) g x u.1)).symm
+                  have hsq : g.inner x (show TangentSpace I x from (r.1 • u.1))
+                        (show TangentSpace I x from (r.1 • u.1))
+                      = (r.1 * Real.sqrt (g.inner x u.1 u.1)) ^ 2 := by
+                    change g.inner x (r.1 • (u.1 : TangentSpace I x)) (r.1 • (u.1 : TangentSpace I x))
+                        = (r.1 * Real.sqrt (g.inner x u.1 u.1)) ^ 2
+                    calc
+                      g.inner x (r.1 • (u.1 : TangentSpace I x)) (r.1 • (u.1 : TangentSpace I x))
+                          = r.1 ^ 2 * g.inner x u.1 u.1 := gInner_smul_self (I := I) g x r.1 u.1
+                      _ = (r.1 * Real.sqrt (g.inner x u.1 u.1)) ^ 2 := by
+                            rw [mul_pow]
+                            conv_lhs => rw [← Real.sq_sqrt (gInner_self_nonneg (I := I) g x u.1)]
+                  rw [hsq]
+                  rw [Real.sqrt_sq_eq_abs]
+                  rw [abs_of_nonneg (mul_nonneg r.2.le hc.le)]
+                  exact hr
+                simp only [F, Set.indicator_of_mem hmem, Set.indicator_of_mem hb]
+                congr 5
+                change Real.sqrt (g.inner x (r.1 • (u.1 : TangentSpace I x))
+                    (r.1 • (u.1 : TangentSpace I x)))
+                    = r.1 * Real.sqrt (g.inner x u.1 u.1)
+                exact sqrt_gInner_smul_self (I := I) g x r.2.le u.1
+              · have hmem : r ∉ Iic (⟨R / Real.sqrt (g.inner x u.1 u.1), div_pos hR hc⟩ : Ioi (0 : ℝ)) :=
+                  fun h => hr ((le_div_iff₀ hc).mp h)
+                have hb : r.1 • u.1 ∉ closedGBall g x R := by
+                  intro hmem_ball
+                  have hbval : g.inner x u.1 u.1 =
+                      (Real.sqrt (g.inner x u.1 u.1)) ^ 2 :=
+                    (Real.sq_sqrt (gInner_self_nonneg (I := I) g x u.1)).symm
+                  have hsq : Real.sqrt (g.inner x (show TangentSpace I x from (r.1 • u.1))
+                        (show TangentSpace I x from (r.1 • u.1)))
+                      = r.1 * Real.sqrt (g.inner x u.1 u.1) := by
+                    change Real.sqrt (g.inner x (r.1 • (u.1 : TangentSpace I x))
+                        (r.1 • (u.1 : TangentSpace I x)))
+                        = r.1 * Real.sqrt (g.inner x u.1 u.1)
+                    exact sqrt_gInner_smul_self (I := I) g x r.2.le u.1
+                  have hrle : r.1 * Real.sqrt (g.inner x u.1 u.1) ≤ R := by
+                    rw [← hsq]
+                    exact hmem_ball
+                  exact hr hrle
+                simp only [F, Set.indicator_of_notMem hmem, Set.indicator_of_notMem hb]
+            rw [hEq]
+            rw [lintegral_indicator measurableSet_Iic]
+            exact (radial_model_lintegral_scaled_mul (d := d)
+              (A := normalChartDensity g x 0) q hq hR hc hcd0)
+          have hfmeas : Measurable (fun u : sphere (0 : E) 1 => ENNReal.ofReal
+                (normalChartDensity g x 0 *
+                  (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹)) := by
+              have hc1 : Continuous (fun u : sphere (0 : E) 1 => Real.sqrt (g.inner x u.1 u.1)) :=
+                (continuous_sqrt_gInner_self (I := I) g x).comp continuous_subtype_val
+              have hc2 : Continuous (fun u : sphere (0 : E) 1 =>
+                  (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹) := by
+                have hne : ∀ u : sphere (0 : E) 1, Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E) ≠ 0 := by
+                  intro u
+                  have hu : u.1 ≠ 0 := by
+                    intro h
+                    have hu2 := u.2
+                    rw [h] at hu2
+                    simp at hu2
+                  exact pow_ne_zero _ (Real.sqrt_pos.mpr (g.pos x u.1 hu)).ne'
+                exact (hc1.pow (Module.finrank ℝ E)).inv₀ hne
+              exact ENNReal.measurable_ofReal.comp
+                (continuous_const.mul hc2 |>.measurable)
+          calc
+            ∫⁻ u : sphere (0 : E) 1,
+                ∫⁻ r : Ioi (0 : ℝ), (closedGBall g x R).indicator F (r.1 • u.1)
+                  ∂(Measure.volumeIoiPow d) ∂(modelHaar (E := E)).toSphere
+                = ∫⁻ u : sphere (0 : E) 1,
+                    ENNReal.ofReal (normalChartDensity g x 0 *
+                      (Real.sqrt (g.inner x u.1 u.1) ^ (d + 1))⁻¹ * hypRadVol q d R)
+                    ∂(modelHaar (E := E)).toSphere := by
+                  apply lintegral_congr
+                  intro u
+                  exact hinner u
+            _ = ∫⁻ u : sphere (0 : E) 1,
+                  ENNReal.ofReal (normalChartDensity g x 0 *
+                    (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹ * hypRadVol q d R)
+                  ∂(modelHaar (E := E)).toSphere := by
+                  apply lintegral_congr
+                  intro u
+                  rw [hd1]
+            _ = (∫⁻ u : sphere (0 : E) 1,
+                    ENNReal.ofReal (normalChartDensity g x 0 *
+                      (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹)
+                    ∂(modelHaar (E := E)).toSphere)
+                  * ENNReal.ofReal (hypRadVol q d R) := by
+                  have hsplit : (fun u : sphere (0 : E) 1 => ENNReal.ofReal (normalChartDensity g x 0 *
+                        (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹ * hypRadVol q d R))
+                      = fun u => ENNReal.ofReal (normalChartDensity g x 0 *
+                        (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹) *
+                          ENNReal.ofReal (hypRadVol q d R) := by
+                    funext u
+                    rw [← ENNReal.ofReal_mul (mul_nonneg hcd0
+                      (inv_nonneg.mpr (pow_nonneg (Real.sqrt_nonneg _) _))) ]
+                  rw [hsplit]
+                  simpa using (lintegral_mul_const (r := ENNReal.ofReal (hypRadVol q d R)) hfmeas)
+    _ = (∫⁻ θ : sphere (0 : E) 1,
+          ENNReal.ofReal (normalChartDensity g x 0 *
+            (Real.sqrt (g.inner x θ.1 θ.1) ^ (Module.finrank ℝ E))⁻¹)
+          ∂(modelHaar (E := E)).toSphere)
+      * ENNReal.ofReal (hypRadVol q (Module.finrank ℝ E - 1) R) := by
+          rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Absolute Bishop volume upper bound** (deliverable B2(α)(1)).
 
 For a complete member with `Ric ≥ -(n-1)q²`, the Riemannian volume of the open
