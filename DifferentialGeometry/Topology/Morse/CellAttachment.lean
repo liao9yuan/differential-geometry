@@ -2678,7 +2678,7 @@ theorem fderiv_modelAttachedFunction_direction {n k : ℕ} (hk : k ≤ n) (c ε 
           simp [fderiv_posPart_normSq_self hk y, fderiv_cap_negPart_zero_direction hk ε r δ y]
 
 theorem fderiv_modelAttachedFunction_ne_zero {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
-    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) {y : MorseModel n}
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (y : MorseModel n)
     (hy : modelAttachedFunction hk c ε r δ y = c) :
     fderiv ℝ (modelAttachedFunction hk c ε r δ) y ≠ 0 := by
   have hpos : 0 < ‖posPart hk y‖ ^ 2 := by

@@ -2375,6 +2375,18 @@ theorem handleAttachingMap_spine {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
   simpa [attachingSphereInclusionAttachingRegion, attachingInclusion] using
     (handleEmbedding_attachingRegion hk c ε r data hε hεr (u, closedCellCenter (n - k)))
 
+theorem modelAttachedSublevelIsManifold {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) :
+    @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) _
+      (sublevelChartedSpace (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+        (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+        (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)) :=
+  sublevelIsManifold (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+    (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+    (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+
 theorem morse_smooth_handle_attachment_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
