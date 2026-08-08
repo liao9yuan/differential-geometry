@@ -1013,6 +1013,483 @@ theorem contDiff_modelModifiedFiberDip {ε δ : ℝ} (hδ : 0 < δ) :
     (contDiff_modGammaSqrt hδ).comp contDiff_snd
   simpa [modelModifiedFiberDip, Function.comp_def] using hmu.mul hga
 
+noncomputable def modelModifiedFiberEquation (ε δ r : ℝ) (p : (ℝ × ℝ) × ℝ) : ℝ :=
+  p.2 * (p.1.1 + r ^ 2) - p.1.2 * (p.1.1 + 2 * modelModifiedFiberDip ε δ p.1.1 p.2 - 2 * ε)
+
+theorem contDiff_modelModifiedFiberEquation (ε δ r : ℝ) (hδ : 0 < δ) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelModifiedFiberEquation ε δ r) := by
+  have hdip : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : (ℝ × ℝ) × ℝ => modelModifiedFiberDip ε δ p.1.1 p.2) := by
+    have hd : ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelModifiedFiberDip ε δ p.1 p.2) :=
+      contDiff_modelModifiedFiberDip hδ
+    have hmap : ContDiff ℝ (⊤ : ℕ∞) (fun p : (ℝ × ℝ) × ℝ => (p.1.1, p.2)) := by
+      fun_prop
+    simpa [Function.comp_def] using hd.comp hmap
+  have hterm1 : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : (ℝ × ℝ) × ℝ => p.2 * (p.1.1 + r ^ 2)) := by
+    fun_prop
+  have hterm2 : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : (ℝ × ℝ) × ℝ => p.1.2 * (p.1.1 + 2 * modelModifiedFiberDip ε δ p.1.1 p.2 - 2 * ε)) := by
+    have hinner : ContDiff ℝ (⊤ : ℕ∞)
+        (fun p : (ℝ × ℝ) × ℝ => p.1.1 + 2 * modelModifiedFiberDip ε δ p.1.1 p.2 - 2 * ε) := by
+      fun_prop
+    have hproj : ContDiff ℝ (⊤ : ℕ∞) (fun p : (ℝ × ℝ) × ℝ => p.1.2) := by
+      fun_prop
+    exact hproj.mul hinner
+  simpa [modelModifiedFiberEquation] using hterm1.sub hterm2
+
+theorem differentiableAt_modelModifiedFiberDip_fiber {ε δ : ℝ} (hδ : 0 < δ) (s u : ℝ) :
+    DifferentiableAt ℝ (fun t : ℝ => modelModifiedFiberDip ε δ s t) u := by
+  have hga : DifferentiableAt ℝ (modGammaSqrt δ) u :=
+    ((contDiff_modGammaSqrt hδ).differentiable (by norm_num)).differentiableAt
+  have hmuC : DifferentiableAt ℝ (fun t : ℝ => modMu ε s) u := by fun_prop
+  have hmul := hmuC.mul hga
+  dsimp [modelModifiedFiberDip]
+  exact hmul
+
+theorem deriv_modelModifiedFiberEquation_fiber {ε δ : ℝ} (hδ : 0 < δ) (s u : ℝ) :
+    deriv (fun t : ℝ => modelModifiedFiberDip ε δ s t) u =
+      modMu ε s * deriv (modGammaSqrt δ) u := by
+  have hga : DifferentiableAt ℝ (modGammaSqrt δ) u :=
+    ((contDiff_modGammaSqrt hδ).differentiable (by norm_num)).differentiableAt
+  dsimp [modelModifiedFiberDip]
+  exact deriv_const_mul (modMu ε s) hga
+
+theorem deriv_modelModifiedFiberEquation {ε δ r : ℝ} (hδ : 0 < δ) (s w2 u : ℝ) :
+    deriv (fun t : ℝ => modelModifiedFiberEquation ε δ r ((s, w2), t)) u =
+      (s + r ^ 2) - 2 * w2 * modMu ε s * deriv (modGammaSqrt δ) u := by
+  have hdipDeriv : deriv (fun t : ℝ => modelModifiedFiberDip ε δ s t) u =
+      modMu ε s * deriv (modGammaSqrt δ) u := deriv_modelModifiedFiberEquation_fiber hδ s u
+  have hDipDiff : DifferentiableAt ℝ (fun t : ℝ => modelModifiedFiberDip ε δ s t) u :=
+    differentiableAt_modelModifiedFiberDip_fiber hδ s u
+  have hF1 : deriv (fun t : ℝ => t * (s + r ^ 2)) u = s + r ^ 2 := by
+    have hc : DifferentiableAt ℝ (fun t : ℝ => t) u := by fun_prop
+    rw [deriv_mul_const hc]
+    simp
+  have htwo : deriv (fun t : ℝ => 2 * modelModifiedFiberDip ε δ s t) u =
+      2 * (modMu ε s * deriv (modGammaSqrt δ) u) := by
+    rw [deriv_const_mul (2 : ℝ) hDipDiff]
+    rw [hdipDeriv]
+  have hinner : deriv (fun t : ℝ => s + 2 * modelModifiedFiberDip ε δ s t - 2 * ε) u =
+      2 * (modMu ε s * deriv (modGammaSqrt δ) u) := by
+    have h2 : deriv (fun t : ℝ => s + 2 * modelModifiedFiberDip ε δ s t) u =
+        2 * (modMu ε s * deriv (modGammaSqrt δ) u) := by
+      rw [deriv_const_add]
+      rw [htwo]
+    rw [deriv_sub_const]
+    exact h2
+  have hF2 : deriv (fun t : ℝ => w2 * (s + 2 * modelModifiedFiberDip ε δ s t - 2 * ε)) u =
+      w2 * (2 * (modMu ε s * deriv (modGammaSqrt δ) u)) := by
+    have hinnerDiff : DifferentiableAt ℝ (fun t : ℝ =>
+        s + 2 * modelModifiedFiberDip ε δ s t - 2 * ε) u := by
+      fun_prop
+    rw [deriv_const_mul w2 hinnerDiff]
+    rw [hinner]
+  have hF : deriv (fun t : ℝ => modelModifiedFiberEquation ε δ r ((s, w2), t)) u =
+      deriv (fun t : ℝ => t * (s + r ^ 2)) u -
+        deriv (fun t : ℝ => w2 * (s + 2 * modelModifiedFiberDip ε δ s t - 2 * ε)) u := by
+    have h1 : DifferentiableAt ℝ (fun t : ℝ => t * (s + r ^ 2)) u := by fun_prop
+    have h2 : DifferentiableAt ℝ (fun t : ℝ =>
+        w2 * (s + 2 * modelModifiedFiberDip ε δ s t - 2 * ε)) u := by
+      fun_prop
+    dsimp [modelModifiedFiberEquation]
+    exact deriv_sub h1 h2
+  rw [hF, hF1, hF2]
+  ring
+
+theorem modGammaSqrt_antitone_global {δ : ℝ} (hδ : 0 < δ) : Antitone (modGammaSqrt δ) := by
+  intro a b hab
+  dsimp [modGammaSqrt]
+  exact modGamma_antitone_global hδ (Real.sqrt_monotone hab)
+
+theorem deriv_modGammaSqrt_nonpos {δ : ℝ} (hδ : 0 < δ) (u : ℝ) :
+    deriv (modGammaSqrt δ) u ≤ 0 :=
+  Antitone.deriv_nonpos (modGammaSqrt_antitone_global hδ)
+
+theorem fderiv_modelModifiedFiberEquation_inr (ε δ r : ℝ) (hδ : 0 < δ) (s w2 u : ℝ) :
+    fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u) (((0, 0), 1) : (ℝ × ℝ) × ℝ) =
+      (s + r ^ 2) - 2 * w2 * modMu ε s * deriv (modGammaSqrt δ) u := by
+  have hdiff : DifferentiableAt ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u) :=
+    (contDiff_modelModifiedFiberEquation ε δ r hδ).differentiable (by norm_num) ((s, w2), u)
+  have hFder : HasFDerivAt (modelModifiedFiberEquation ε δ r)
+      (fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u)) ((s, w2), u) :=
+    hdiff.hasFDerivAt
+  have hline : HasDerivAt (fun t : ℝ => ((s, w2), t)) (((0, 0), 1) : (ℝ × ℝ) × ℝ) u := by
+    have h1 : HasDerivAt (fun t : ℝ => t • (((0, 0), 1) : (ℝ × ℝ) × ℝ))
+        (((0, 0), 1) : (ℝ × ℝ) × ℝ) u := by
+      simpa using (hasDerivAt_id u).smul_const (((0, 0), 1) : (ℝ × ℝ) × ℝ)
+    have h2 : HasDerivAt (fun t : ℝ => ((s, w2), 0) + t • (((0, 0), 1) : (ℝ × ℝ) × ℝ))
+        (((0, 0), 1) : (ℝ × ℝ) × ℝ) u :=
+      HasDerivAt.const_add (c := ((s, w2), 0)) h1
+    simpa using h2
+  have hcomp' : HasDerivAt (fun t : ℝ => modelModifiedFiberEquation ε δ r ((s, w2), t))
+      (fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u) (((0, 0), 1) : (ℝ × ℝ) × ℝ)) u :=
+    HasFDerivAt.comp_hasDerivAt_of_eq (hl := hFder) (hf := hline) (hy := rfl)
+  have hd1 : deriv (fun τ : ℝ => modelModifiedFiberEquation ε δ r ((s, w2), τ)) u =
+      fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u) (((0, 0), 1) : (ℝ × ℝ) × ℝ) := by
+    simpa using hcomp'.deriv
+  calc
+    fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u) (((0, 0), 1) : (ℝ × ℝ) × ℝ)
+        = deriv (fun τ : ℝ => modelModifiedFiberEquation ε δ r ((s, w2), τ)) u := hd1.symm
+    _ = (s + r ^ 2) - 2 * w2 * modMu ε s * deriv (modGammaSqrt δ) u :=
+          deriv_modelModifiedFiberEquation hδ s w2 u
+
+theorem modelModifiedFiberEquation_fiber_deriv_pos (ε δ r : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ≠ 0) (s w2 u : ℝ) (hs : 0 ≤ s) (hw : 0 ≤ w2) :
+    0 < deriv (fun t : ℝ => modelModifiedFiberEquation ε δ r ((s, w2), t)) u := by
+  rw [deriv_modelModifiedFiberEquation hδ]
+  have hga : deriv (modGammaSqrt δ) u ≤ 0 := deriv_modGammaSqrt_nonpos hδ u
+  have hmu : 0 ≤ modMu ε s := modMu_nonneg (le_of_lt hε)
+  have hterm : 2 * w2 * modMu ε s * deriv (modGammaSqrt δ) u ≤ 0 := by
+    exact mul_nonpos_of_nonneg_of_nonpos (mul_nonneg (mul_nonneg (by positivity) hw) hmu) hga
+  have hsr : 0 < s + r ^ 2 := by
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    nlinarith [hs, hr2]
+  nlinarith
+
+theorem modelModifiedFiberEquation_strictMono (ε δ r : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ≠ 0) (s w2 : ℝ) (hs : 0 ≤ s) (hw : 0 ≤ w2) :
+    StrictMono (fun u : ℝ => modelModifiedFiberEquation ε δ r ((s, w2), u)) :=
+  strictMono_of_deriv_pos (fun u =>
+    modelModifiedFiberEquation_fiber_deriv_pos ε δ r hε hδ hr s w2 u hs hw)
+
+theorem modelModifiedFiberRoot_eq_of_modelModifiedFiberEquation {ε δ r : ℝ} (hε : 0 < ε)
+    (hδ : 0 < δ) (hr : r ≠ 0) (s w2 u : ℝ) (hs : 0 ≤ s) (hw : 0 ≤ w2)
+    (hu : modelModifiedFiberEquation ε δ r ((s, w2), u) = 0) :
+    u = modelModifiedFiberRoot ε δ r hε hδ hr s w2 := by
+  have hroot' : modelModifiedFiberEquation ε δ r
+      ((s, w2), modelModifiedFiberRoot ε δ r hε hδ hr s w2) = 0 := by
+    dsimp [modelModifiedFiberEquation]
+    rw [modelModifiedFiberRoot_eq (ε := ε) (δ := δ) (r := r) (s := s) (w2 := w2) hε hδ hr hs hw]
+    ring
+  exact (modelModifiedFiberEquation_strictMono ε δ r hε hδ hr s w2 hs hw).injective
+    (by rw [hu, hroot'])
+
+theorem contDiffWithinAt_modelModifiedFiberRoot (ε δ r : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ≠ 0) {s w2 : ℝ} (hs : 0 ≤ s) (hw : 0 ≤ w2) :
+    ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => modelModifiedFiberRoot ε δ r hε hδ hr p.1 p.2)
+      {p : ℝ × ℝ | 0 ≤ p.1 ∧ 0 ≤ p.2} (s, w2) := by
+  let Q : Set (ℝ × ℝ) := {p : ℝ × ℝ | 0 ≤ p.1 ∧ 0 ≤ p.2}
+  let u₀ : ℝ := modelModifiedFiberRoot ε δ r hε hδ hr s w2
+  have hFdiff : ContDiffAt ℝ (⊤ : ℕ∞) (modelModifiedFiberEquation ε δ r) ((s, w2), u₀) :=
+    (contDiff_modelModifiedFiberEquation ε δ r hδ).contDiffAt
+  have hroot : modelModifiedFiberEquation ε δ r ((s, w2), u₀) = 0 := by
+    dsimp [u₀, modelModifiedFiberEquation]
+    rw [modelModifiedFiberRoot_eq (ε := ε) (δ := δ) (r := r) (s := s) (w2 := w2) hε hδ hr hs hw]
+    ring
+  have hpos : 0 < fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u₀)
+      (((0, 0), 1) : (ℝ × ℝ) × ℝ) := by
+    rw [fderiv_modelModifiedFiberEquation_inr ε δ r hδ s w2 u₀]
+    have hd : 0 < deriv (fun t : ℝ => modelModifiedFiberEquation ε δ r ((s, w2), t)) u₀ :=
+      modelModifiedFiberEquation_fiber_deriv_pos ε δ r hε hδ hr s w2 u₀ hs hw
+    rw [deriv_modelModifiedFiberEquation hδ s w2 u₀] at hd
+    exact hd
+  have hinv : (fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u₀) ∘L
+      ContinuousLinearMap.inr ℝ (ℝ × ℝ) ℝ).IsInvertible := by
+    let c : ℝ := fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u₀)
+      (((0, 0), 1) : (ℝ × ℝ) × ℝ)
+    have hc : c ≠ 0 := ne_of_gt hpos
+    let e : ℝ ≃L[ℝ] ℝ :=
+      { toFun := fun y => c * y
+        invFun := fun y => c⁻¹ * y
+        left_inv := fun y => by field_simp [hc]
+        right_inv := fun y => by field_simp [hc]
+        map_add' := by intro x y; ring
+        map_smul' := by
+          intro a y
+          simp only [smul_eq_mul, RingHom.id_apply]
+          ring }
+    refine ⟨e, ?_⟩
+    apply ContinuousLinearMap.ext
+    intro y
+    change c * y = (fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u₀) ∘L
+      ContinuousLinearMap.inr ℝ (ℝ × ℝ) ℝ) y
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply, ContinuousLinearMap.inr_apply]
+    have harg : ((0, y) : (ℝ × ℝ) × ℝ) = y • (((0, 0), 1) : (ℝ × ℝ) × ℝ) := by
+      rw [Prod.smul_mk]
+      rw [Prod.smul_mk]
+      congr 1
+      · rw [smul_eq_mul]
+        rw [mul_zero]
+        rfl
+      · rw [smul_eq_mul]
+        rw [mul_one]
+    have hlin : (fderiv ℝ (modelModifiedFiberEquation ε δ r) ((s, w2), u₀))
+        (y • (((0, 0), 1) : (ℝ × ℝ) × ℝ)) = y * c := by
+      rw [map_smul]
+      simp only [smul_eq_mul, c]
+    rw [harg, hlin]
+    rw [mul_comm]
+  let ψ : (ℝ × ℝ) → ℝ :=
+    hFdiff.implicitFunction (n := (⊤ : ℕ∞)) (by norm_num) hinv
+  have hψdiff : ContDiffAt ℝ (⊤ : ℕ∞) ψ (s, w2) := by
+    simpa [ψ] using hFdiff.contDiffAt_implicitFunction (n := (⊤ : ℕ∞)) (by norm_num) hinv
+  have hψeq : ψ (s, w2) = u₀ := by
+    simpa [ψ] using (hFdiff.implicitFunction_apply_self (n := (⊤ : ℕ∞)) (by norm_num) hinv)
+  have heq : ∀ᶠ p in nhdsWithin (s, w2) Q,
+      modelModifiedFiberRoot ε δ r hε hδ hr p.1 p.2 = ψ p := by
+    rw [eventually_nhdsWithin_iff]
+    filter_upwards [hFdiff.eventually_apply_implicitFunction (n := (⊤ : ℕ∞)) (by norm_num) hinv]
+      with p hp
+    intro hpq
+    have hp' : modelModifiedFiberEquation ε δ r (p, ψ p) = 0 := by
+      simpa [hroot] using hp
+    exact (modelModifiedFiberRoot_eq_of_modelModifiedFiberEquation hε hδ hr p.1 p.2 (ψ p)
+      hpq.1 hpq.2 hp').symm
+  exact hψdiff.contDiffWithinAt.congr_of_eventuallyEq heq (by
+    rw [hψeq])
+
+theorem contDiffOn_modelModifiedFiberRoot (ε δ r : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ≠ 0) :
+    ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => modelModifiedFiberRoot ε δ r hε hδ hr p.1 p.2)
+      {p : ℝ × ℝ | 0 ≤ p.1 ∧ 0 ≤ p.2} := by
+  intro p hp
+  exact contDiffWithinAt_modelModifiedFiberRoot ε δ r hε hδ hr hp.1 hp.2
+
+theorem contDiffOn_modelModifiedUnstretchFactor (ε δ r : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ≠ 0) :
+    ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => modelModifiedUnstretchFactor ε δ r hε hδ hr p.1 p.2)
+      {p : ℝ × ℝ | 0 ≤ p.1 ∧ 0 ≤ p.2} := by
+  intro p hp
+  let Q : Set (ℝ × ℝ) := {p : ℝ × ℝ | 0 ≤ p.1 ∧ 0 ≤ p.2}
+  change ContDiffWithinAt ℝ (⊤ : ℕ∞)
+    (fun q : ℝ × ℝ => Real.sqrt
+      ((q.1 + 2 * modelModifiedFiberDip ε δ q.1
+          (modelModifiedFiberRoot ε δ r hε hδ hr q.1 q.2) - 2 * ε) / (q.1 + r ^ 2))) Q p
+  have hrootW : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun q : ℝ × ℝ => modelModifiedFiberRoot ε δ r hε hδ hr q.1 q.2) Q p :=
+    contDiffWithinAt_modelModifiedFiberRoot ε δ r hε hδ hr hp.1 hp.2
+  have hfstW : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun q : ℝ × ℝ => q.1) Q p :=
+    (contDiff_fst : ContDiff ℝ (⊤ : ℕ∞) (fun q : ℝ × ℝ => q.1)).contDiffAt.contDiffWithinAt
+  have hpairW : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun q : ℝ × ℝ => (q.1, modelModifiedFiberRoot ε δ r hε hδ hr q.1 q.2)) Q p :=
+    hfstW.prodMk hrootW
+  have hdipC : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun q : ℝ × ℝ => modelModifiedFiberDip ε δ q.1
+        (modelModifiedFiberRoot ε δ r hε hδ hr q.1 q.2)) Q p := by
+    have hdipW : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+        (fun z : ℝ × ℝ => modelModifiedFiberDip ε δ z.1 z.2) Set.univ
+        (p.1, modelModifiedFiberRoot ε δ r hε hδ hr p.1 p.2) :=
+      (contDiff_modelModifiedFiberDip hδ).contDiffAt.contDiffWithinAt
+    exact ContDiffWithinAt.comp p hdipW hpairW (by intro q hq; trivial)
+  have hnumW : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun q : ℝ × ℝ => q.1 + 2 * modelModifiedFiberDip ε δ q.1
+        (modelModifiedFiberRoot ε δ r hε hδ hr q.1 q.2) - 2 * ε) Q p := by
+    have hc2 : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun _ : ℝ × ℝ => (2 : ℝ)) Q p :=
+      (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : ℝ × ℝ => (2 : ℝ))).contDiffAt.contDiffWithinAt
+    have hcε : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun _ : ℝ × ℝ => 2 * ε) Q p :=
+      (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : ℝ × ℝ => 2 * ε)).contDiffAt.contDiffWithinAt
+    exact (hfstW.add (hc2.mul hdipC)).sub hcε
+  have hdenW : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun q : ℝ × ℝ => q.1 + r ^ 2) Q p := by
+    have hc : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun _ : ℝ × ℝ => r ^ 2) Q p :=
+      (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : ℝ × ℝ => r ^ 2)).contDiffAt.contDiffWithinAt
+    exact hfstW.add hc
+  have hden0 : p.1 + r ^ 2 ≠ 0 := by
+    have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+    have hpos : 0 < p.1 + r ^ 2 := by nlinarith [hp.1, hr2]
+    exact ne_of_gt hpos
+  have hratioW : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun q : ℝ × ℝ => (q.1 + 2 * modelModifiedFiberDip ε δ q.1
+        (modelModifiedFiberRoot ε δ r hε hδ hr q.1 q.2) - 2 * ε) / (q.1 + r ^ 2)) Q p :=
+    ContDiffWithinAt.div hnumW hdenW hden0
+  have hratio0 : 0 < (p.1 + 2 * modelModifiedFiberDip ε δ p.1
+      (modelModifiedFiberRoot ε δ r hε hδ hr p.1 p.2) - 2 * ε) / (p.1 + r ^ 2) := by
+    have hnum0 : 0 < p.1 + 2 * modelModifiedFiberDip ε δ p.1
+        (modelModifiedFiberRoot ε δ r hε hδ hr p.1 p.2) - 2 * ε :=
+      modelModifiedFiberDenom_root_pos hε hδ hr hp.1 hp.2
+    have hdenpos : 0 < p.1 + r ^ 2 := by
+      have hr2 : 0 < r ^ 2 := sq_pos_of_ne_zero hr
+      nlinarith [hp.1, hr2]
+    exact div_pos hnum0 hdenpos
+  have hsqrtAt : ContDiffAt ℝ (⊤ : ℕ∞) (fun t : ℝ => Real.sqrt t)
+      ((p.1 + 2 * modelModifiedFiberDip ε δ p.1
+        (modelModifiedFiberRoot ε δ r hε hδ hr p.1 p.2) - 2 * ε) / (p.1 + r ^ 2)) :=
+    (Real.deriv_sqrt_aux (ne_of_gt hratio0)).2 (⊤ : ℕ∞)
+  have hfactorW : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+      (fun q : ℝ × ℝ => Real.sqrt ((q.1 + 2 * modelModifiedFiberDip ε δ q.1
+        (modelModifiedFiberRoot ε δ r hε hδ hr q.1 q.2) - 2 * ε) / (q.1 + r ^ 2))) Q p := by
+    have hsqrtW : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun t : ℝ => Real.sqrt t) Set.univ
+        ((p.1 + 2 * modelModifiedFiberDip ε δ p.1
+          (modelModifiedFiberRoot ε δ r hε hδ hr p.1 p.2) - 2 * ε) / (p.1 + r ^ 2)) :=
+      hsqrtAt.contDiffWithinAt
+    exact ContDiffWithinAt.comp p hsqrtW hratioW (by intro q hq; trivial)
+  exact hfactorW
+
+theorem contDiffAt_modelModifiedUnstretchMap {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0) (y : MorseModel n) :
+    ContDiffAt ℝ (⊤ : ℕ∞) (modelModifiedUnstretchMap hk ε r δ hε hδ hr) y := by
+  let Q : Set (ℝ × ℝ) := {p : ℝ × ℝ | 0 ≤ p.1 ∧ 0 ≤ p.2}
+  change ContDiffAt ℝ (⊤ : ℕ∞)
+    (fun z : MorseModel n => recombine hk (negPart hk z)
+      ((modelModifiedUnstretchFactor ε δ r hε hδ hr (‖negPart hk z‖ ^ 2) (‖posPart hk z‖ ^ 2)) •
+        posPart hk z)) y
+  have hns : ContDiff ℝ (⊤ : ℕ∞) (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) :=
+    ContDiff.norm_sq ℝ (negPartCLM hk).contDiff
+  have hps : ContDiff ℝ (⊤ : ℕ∞) (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) :=
+    ContDiff.norm_sq ℝ (posPartCLM hk).contDiff
+  have hfacOn : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => modelModifiedUnstretchFactor ε δ r hε hδ hr
+        (‖negPart hk z‖ ^ 2) (‖posPart hk z‖ ^ 2)) Set.univ := by
+    refine ContDiffOn.comp
+      (g := fun p : ℝ × ℝ => modelModifiedUnstretchFactor ε δ r hε hδ hr p.1 p.2)
+      (f := fun z : MorseModel n => (‖negPart hk z‖ ^ 2, ‖posPart hk z‖ ^ 2))
+      (s := Set.univ) (t := {p : ℝ × ℝ | 0 ≤ p.1 ∧ 0 ≤ p.2}) ?hg ?hf ?st
+    · exact contDiffOn_modelModifiedUnstretchFactor ε δ r hε hδ hr
+    · exact (hns.prodMk hps).contDiffOn
+    · intro z hz
+      exact ⟨sq_nonneg _, sq_nonneg _⟩
+  have hfacAt : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => modelModifiedUnstretchFactor ε δ r hε hδ hr
+        (‖negPart hk z‖ ^ 2) (‖posPart hk z‖ ^ 2)) y :=
+    contDiffWithinAt_univ.mp (hfacOn y trivial)
+  have hneg : ContDiffAt ℝ (⊤ : ℕ∞) (negPart hk) y :=
+    (negPartCLM hk).contDiff.contDiffAt
+  have hpos : ContDiffAt ℝ (⊤ : ℕ∞) (posPart hk) y :=
+    (posPartCLM hk).contDiff.contDiffAt
+  have hsmul : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n =>
+        (modelModifiedUnstretchFactor ε δ r hε hδ hr (‖negPart hk z‖ ^ 2) (‖posPart hk z‖ ^ 2)) •
+          posPart hk z) y :=
+    ContDiffAt.smul hfacAt hpos
+  have hrec : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk p.1 p.2) := recombine_contDiff_generic hk
+  have hpair2 : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => (negPart hk z,
+        (modelModifiedUnstretchFactor ε δ r hε hδ hr (‖negPart hk z‖ ^ 2) (‖posPart hk z‖ ^ 2)) •
+          posPart hk z)) y :=
+    hneg.prodMk hsmul
+  exact ContDiffAt.comp y (ContDiff.contDiffAt hrec) hpair2
+
+theorem contDiffOn_modelModifiedUnstretchMap {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (modelModifiedUnstretchMap hk ε r δ hε hδ hr) Set.univ := by
+  intro y hy
+  exact (contDiffAt_modelModifiedUnstretchMap hk ε r δ hε hδ hr y).contDiffWithinAt
+
+theorem contMDiff_modelModifiedUnstretchMap_sublevel {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+      sublevelChartedSpace (m := m) (morseNormalForm hk c) (c + r ^ 2 / 2)
+        (contDiff_morseNormalForm hk c)
+        (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy))
+    (hcs₂ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε)) :=
+      sublevelChartedSpace (m := m) (modifiedNormalForm hk c ε δ) (c - ε)
+        (contDiff_modifiedNormalForm hk c ε δ hδ)
+        (fun y hy => modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+          ⟨le_of_eq hy.symm, by linarith⟩))
+    (hchart₁ : ∀ y : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2),
+      hcs₁.chartAt y =
+        (if h : morseNormalForm hk c y.1 = c + r ^ 2 / 2 then
+          sublevelBoundaryChart (morseNormalForm hk c) (c + r ^ 2 / 2) y h
+            (contDiff_morseNormalForm hk c)
+            (fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y.1 h)
+        else sublevelInteriorChart (morseNormalForm hk c) (c + r ^ 2 / 2) y
+          (lt_of_le_of_ne (show morseNormalForm hk c y.1 ≤ c + r ^ 2 / 2 from y.2) h)
+          (contDiff_morseNormalForm hk c)) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε),
+      hcs₂.chartAt y =
+        (if h : modifiedNormalForm hk c ε δ y.1 = c - ε then
+          sublevelBoundaryChart (modifiedNormalForm hk c ε δ) (c - ε) y h
+            (contDiff_modifiedNormalForm hk c ε δ hδ)
+            (modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+              ⟨le_of_eq h.symm, by linarith⟩)
+        else sublevelInteriorChart (modifiedNormalForm hk c ε δ) (c - ε) y
+          (lt_of_le_of_ne (show modifiedNormalForm hk c ε δ y.1 ≤ c - ε from y.2) h)
+          (contDiff_modifiedNormalForm hk c ε δ hδ)) := by
+      intro y
+      rfl) :
+    ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun y : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2) =>
+        (⟨modelModifiedUnstretchMap hk ε r δ hε hδ hr y.1,
+          modelModifiedUnstretchMap_mem_modified hk c ε r δ hε hδ hr y.2⟩ :
+          SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε))) := by
+  exact contMDiff_sublevelMap_on (m := m) (morseNormalForm hk c) (modifiedNormalForm hk c ε δ)
+    (c + r ^ 2 / 2) (c - ε)
+    (contDiff_morseNormalForm hk c) (contDiff_modifiedNormalForm hk c ε δ hδ)
+    (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy)
+    (fun y hy => modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+      ⟨le_of_eq hy.symm, by linarith⟩)
+    (modelModifiedUnstretchMap hk ε r δ hε hδ hr) Set.univ isOpen_univ (by intro y hy; trivial)
+    (contDiffOn_modelModifiedUnstretchMap hk ε r δ hε hδ hr)
+    (fun y hy => modelModifiedUnstretchMap_mem_modified hk c ε r δ hε hδ hr hy)
+    (fun y hy => modelModifiedUnstretchMap_boundary hk c ε r δ hε hδ hr hy)
+    (fun y hy => modelModifiedUnstretchMap_strict hk c ε r δ hε hδ hr hy)
+    (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+
+noncomputable def modelModifiedSublevelDiffeomorph {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε)) :=
+      sublevelChartedSpace (m := m) (modifiedNormalForm hk c ε δ) (c - ε)
+        (contDiff_modifiedNormalForm hk c ε δ hδ)
+        (fun y hy => modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+          ⟨le_of_eq hy.symm, by linarith⟩))
+    (hcs₂ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+      sublevelChartedSpace (m := m) (morseNormalForm hk c) (c + r ^ 2 / 2)
+        (contDiff_morseNormalForm hk c)
+        (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy))
+    (hchart₁ : ∀ y : SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε),
+      hcs₁.chartAt y =
+        (if h : modifiedNormalForm hk c ε δ y.1 = c - ε then
+          sublevelBoundaryChart (modifiedNormalForm hk c ε δ) (c - ε) y h
+            (contDiff_modifiedNormalForm hk c ε δ hδ)
+            (modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+              ⟨le_of_eq h.symm, by linarith⟩)
+        else sublevelInteriorChart (modifiedNormalForm hk c ε δ) (c - ε) y
+          (lt_of_le_of_ne (show modifiedNormalForm hk c ε δ y.1 ≤ c - ε from y.2) h)
+          (contDiff_modifiedNormalForm hk c ε δ hδ)) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2),
+      hcs₂.chartAt y =
+        (if h : morseNormalForm hk c y.1 = c + r ^ 2 / 2 then
+          sublevelBoundaryChart (morseNormalForm hk c) (c + r ^ 2 / 2) y h
+            (contDiff_morseNormalForm hk c)
+            (fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y.1 h)
+        else sublevelInteriorChart (morseNormalForm hk c) (c + r ^ 2 / 2) y
+          (lt_of_le_of_ne (show morseNormalForm hk c y.1 ≤ c + r ^ 2 / 2 from y.2) h)
+          (contDiff_morseNormalForm hk c)) := by
+      intro y
+      rfl) :
+    @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε)) _ hcs₁
+      (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) _ hcs₂
+      (⊤ : ℕ∞) where
+  toEquiv :=
+    { toFun := fun y => (⟨modelModifiedStretchMap hk ε r δ y.1,
+        modelModifiedStretchMap_mem_upper hk c ε r δ hε hδ y.2⟩ :
+        SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2))
+      invFun := fun y => (⟨modelModifiedUnstretchMap hk ε r δ hε hδ hr y.1,
+        modelModifiedUnstretchMap_mem_modified hk c ε r δ hε hδ hr y.2⟩ :
+        SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε))
+      left_inv := by
+        intro y
+        apply Subtype.ext
+        exact modelModifiedUnstretchMap_stretchMap hk c ε r δ hε hδ hr y.2
+      right_inv := by
+        intro y
+        apply Subtype.ext
+        exact modelModifiedStretchMap_unstretchMap hk ε r δ hε hδ hr y.1 }
+  contMDiff_toFun := by
+    simpa using (contMDiff_modelModifiedStretchMap_sublevel (hk := hk) (c := c) (ε := ε) (r := r)
+      (δ := δ) (hε := hε) (hδ := hδ) (hr := hr) (hcs₁ := hcs₁) (hcs₂ := hcs₂)
+      (hchart₁ := hchart₁) (hchart₂ := hchart₂))
+  contMDiff_invFun := by
+    simpa using (contMDiff_modelModifiedUnstretchMap_sublevel (hk := hk) (c := c) (ε := ε) (r := r)
+      (δ := δ) (hε := hε) (hδ := hδ) (hr := hr) (hcs₁ := hcs₂) (hcs₂ := hcs₁)
+      (hchart₁ := hchart₂) (hchart₂ := hchart₁))
+
 
 end
 
