@@ -994,7 +994,7 @@ theorem contMDiff_cocoreAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε 
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
-    (hRltR' : data.R < data.R')
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
     [NeZero k] [NeZero (m + 1 - k)]
@@ -1049,10 +1049,9 @@ theorem contMDiff_cocoreAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε 
   have hball : ∀ p : AttachingRegion k (m + 1 - k),
       cocoreModelPoint hk ε r p ∈ Metric.ball (0 : MorseModel (m + 1)) data.R' := by
     intro p
-    have hnormb : morseNorm (m + 1) (cocoreModelPoint hk ε r p) ≤ data.R := by
-      exact le_trans (cocoreModelPoint_norm_le hk ε r (le_of_lt hε) p) hεr
     have hlt : ‖cocoreModelPoint hk ε r p‖ < data.R' :=
-      lt_of_le_of_lt (morseNorm_piNorm_le (cocoreModelPoint hk ε r p)) (lt_of_le_of_lt hnormb hRltR')
+      lt_of_le_of_lt (morseNorm_piNorm_le (cocoreModelPoint hk ε r p))
+        (lt_of_le_of_lt (cocoreModelPoint_norm_le hk ε r (le_of_lt hε) p) hεr')
     simpa [Metric.mem_ball, dist_eq_norm] using hlt
   have hχ : ContMDiffOn Iatt I (⊤ : ℕ∞)
       (fun p : AttachingRegion k (m + 1 - k) => data.χ (cocoreModelPoint hk ε r p)) Set.univ := by
@@ -1107,7 +1106,7 @@ theorem isClosedEmbedding_cocoreAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
-    (hRltR' : data.R < data.R')
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
     [NeZero k] [NeZero (m + 1 - k)]
@@ -1116,7 +1115,7 @@ theorem isClosedEmbedding_cocoreAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1
     Topology.IsClosedEmbedding (cocoreAttachingEmbedding hk c ε r data hε hεr) := by
   letI : ChartedSpace (MorseModel m) (LevelSetSpace f (c - ε)) :=
     manifoldLevelSetChartedSpace I f (c - ε) hf hreg
-  exact (contMDiff_cocoreAttachingEmbedding hk c ε r data hε hεr hRltR' hf hreg).continuous.isClosedEmbedding
+  exact (contMDiff_cocoreAttachingEmbedding hk c ε r data hε hεr hεr' hf hreg).continuous.isClosedEmbedding
     (cocoreAttachingEmbedding_injective hk c ε r data hε hr hεr)
 
 noncomputable def handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
@@ -1242,7 +1241,8 @@ theorem contMDiff_handleCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
       (cocoreAttachingEmbedding hk c ε r data hε hεr p).1) := by
     have hφ' : ContMDiff Iatt (𝓘(ℝ, MorseModel m)) (⊤ : ℕ∞)
         (cocoreAttachingEmbedding hk c ε r data hε hεr) := by
-      simpa [Iatt] using (contMDiff_cocoreAttachingEmbedding hk c ε r data hε hεr hRltR' hf hreg)
+      simpa [Iatt] using (contMDiff_cocoreAttachingEmbedding hk c ε r data hε hεr
+        (lt_of_le_of_lt hεr hRltR') hf hreg)
     have hinc : ContMDiff (𝓘(ℝ, MorseModel m)) I (⊤ : ℕ∞)
         (fun x : LevelSetSpace f (c - ε) => x.1) :=
       contMDiff_levelSetInclusion I f (c - ε) hf hreg
@@ -3088,15 +3088,32 @@ theorem morse_smooth_handle_attachment_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
     (data : MorseChart (m + 1) k hk c I f)
-    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
-    ∃ φ : C(CellBoundary k, SublevelSpace f (c - ε)),
-      ∀ u : CellBoundary k,
-        (φ u).1 =
-          (cocoreAttachingEmbedding hk c ε r data hε hεr
-            (u, closedCellCenter (m + 1 - k))).1 := by
-  refine ⟨handleAttachingMap hk c ε r data hε hεr, ?_⟩
-  intro u
-  exact handleAttachingMap_spine hk c ε r data hε hεr u
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero k] [NeZero (m + 1 - k)]
+    [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
+    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    ∃ φ : AttachingRegion k (m + 1 - k) → LevelSetSpace f (c - ε),
+      @ContMDiff ℝ _
+        (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+        (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+        ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+        (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+        (MorseModel m) _ _ (MorseModel m) _
+        (𝓘(ℝ, MorseModel m)) (LevelSetSpace f (c - ε)) _
+        (manifoldLevelSetChartedSpace I f (c - ε) hf hreg)
+        (⊤ : ℕ∞)
+        φ ∧
+      Topology.IsClosedEmbedding φ ∧
+      ∀ p : AttachingRegion k (m + 1 - k),
+        (φ p).1 = (cocoreAttachingEmbedding hk c ε r data hε hεr p).1 := by
+  refine ⟨cocoreAttachingEmbedding hk c ε r data hε hεr, ?_, ?_, ?_⟩
+  · exact contMDiff_cocoreAttachingEmbedding hk c ε r data hε hεr hεr' hf hreg
+  · exact isClosedEmbedding_cocoreAttachingEmbedding hk c ε r data hε hr hεr hεr' hf hreg
+  · intro p
+    rfl
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
