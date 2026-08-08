@@ -11,6 +11,8 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothDenseLp
 import Mathlib.MeasureTheory.Function.L2Space
 import DifferentialGeometry.Geometry.Connection.Laplacian.RankZero
+import DifferentialGeometry.Geometry.Operator.Laplacian
+import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric
 import DifferentialGeometry.Tensor.RSTensor.RankZero
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
@@ -38,6 +40,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SBundle
 
 private local instance : MeasurableSpace M := borel M
@@ -211,6 +214,33 @@ theorem tensorEigen00_rawLap_eq
   · subst hji
     simp
   · simp [hji]
+
+omit [CompactSpace M] in
+/-- The rank-(0,0) rough Laplacian of a smooth tensor section equals the
+`toRS0` lift of the scalar Laplacian of its scalar evaluation. -/
+lemma rawLapSection_eq_toRS0 (g : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g 0 0) (x : M) :
+    rawTensorConnLap g 0 0 (fun y : M => S.toSection y) x =
+      ((Tensor0SNabla.tensor0Iso I M x).symm (laplacian (LeviCivita g) g
+        (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection) x)).toRS0 := by
+  have hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection) :=
+    TensorRSField.scalar0_smooth (n := (∞ : WithTop ℕ∞)) S.toSection
+  have hraw := rawLap_scalar (I := I) (M := M) g hf x
+  have hlift := TensorRSField.lift_scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection
+  rw [hlift] at hraw
+  exact hraw
+
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] in
+/-- The scalar Laplacian of the scalar evaluation is smooth. -/
+lemma laplacian_scalar0_smooth (g : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g 0 0) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞ (laplacian (I := I) (LeviCivita (I := I) g) g
+      (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection)) := by
+  have hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection) :=
+    TensorRSField.scalar0_smooth (n := (∞ : WithTop ℕ∞)) S.toSection
+  refine (Δ_g_contMDiff (I := I) g hf).congr ?_
+  intro x
+  exact laplacian_levi_eq (I := I) g hf x
 
 end HeatEquation
 end Analysis
