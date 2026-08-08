@@ -487,15 +487,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
               (⊤ : ℕ∞),
               morseAttachedDiffeomorphRelative hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr
                 (Ψ := Ψ) ∧
-            ∃ hreg_low : ∀ x : M, g x = c - ε → ¬ IsCriticalPointAt I g x,
-            ∃ hreg_up : ∀ x : M, g x = c + ε → ¬ IsCriticalPointAt I g x,
-            ∃ _Θ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
-              (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
-              (morseModelWithCornersHalfSpace m)
-              (SublevelSpace g (c - ε)) _ (manifoldSublevelChartedSpace I g (c - ε) hg hreg_low)
-              (SublevelSpace g (c + ε)) _ (manifoldSublevelChartedSpace I g (c + ε) hg hreg_up)
-              (⊤ : ℕ∞),
-              ∃ φc : C(CellBoundary k, SublevelSpace f (c - ε)),
+            ∃ φc : C(CellBoundary k, SublevelSpace f (c - ε)),
                 Nonempty (HomotopyEquivUnder
                   (X := SublevelSpace f (c - ε)) (Y := SublevelSpace f (c + ε))
                   (Z := CellAdjunctionSpace k φc)
@@ -837,7 +829,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
         change (φ₀ p).1 = (φ p).1
         rw [hrel]⟩),
     (morseAttachedIsManifold hk c ε₀ r₀ δ₁ (le_of_lt hε₀) hδ₁₀ hδ₁r hr₀), Ψ, hrelative,
-    hreg_low, hreg_up, Θ, ⟨cellAttachingMap hk c data, hcelladj⟩⟩
+    ⟨cellAttachingMap hk c data, hcelladj⟩⟩
   · exact hgup
   · intro x hx
     exact le_trans (hg_le x) hx
@@ -873,8 +865,7 @@ theorem one_critical_point_cell_attachment {m : ℕ} {H : Type} [TopologicalSpac
   rcases morse_smooth_handle_attachment_relative (m := m) (H := H) (M := M) I f hf p c k hk hnd hindex
     hfp a ha hcompact hunique with
     ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
-      hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, hreg_low, hreg_up, Θ,
-      ⟨φc, hcelladj⟩⟩
+      hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, ⟨φc, hcelladj⟩⟩
   exact ⟨ε, hε, hεa, φc, hcelladj⟩
 
 set_option linter.unusedVariables false in
@@ -916,8 +907,7 @@ theorem morse_smooth_attaching_embedding {m : ℕ} {H : Type} [TopologicalSpace 
   rcases morse_smooth_handle_attachment_relative (m := m) (H := H) (M := M) I f hf p c k hk hnd hindex
     hfp a ha hcompact hunique with
     ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
-      hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, hreg_low, hreg_up, Θ,
-      ⟨φc, hcelladj⟩⟩
+      hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, ⟨φc, hcelladj⟩⟩
   exact ⟨ε, hε, hεa, φ, hφb, hφinj, hφcl, hsmooth⟩
 
 end ManifoldCellAttachment
