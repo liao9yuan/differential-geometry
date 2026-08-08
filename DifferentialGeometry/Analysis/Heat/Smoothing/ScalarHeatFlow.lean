@@ -1037,6 +1037,107 @@ noncomputable def scalarHeatFlowSlice
   ⟨fun x => scalarHeatFlow g u₀ t x,
     scalarHeatFlow_slice_contMDiff (I := I) (M := M) g u₀ htail hab ha ht⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
+lemma nat_add_neg_self (N q : ℕ) : (((N + q : ℕ) : ℝ) + (-(q : ℝ))) = (N : ℝ) := by
+  push_cast
+  ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+lemma summable_exp_mul_pow
+    (g : SmoothRiemannianMetric I M) (htail : EigenvalueTailSummable g 0 0) (N : ℕ)
+    {a t : ℝ} (ha : 0 < a) (hat : a ≤ t) :
+    Summable (fun i : TensorEigenIdx00 g =>
+      Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) *
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ N) := by
+  classical
+  obtain ⟨p, hp, htail_s⟩ := htail
+  set q : ℕ := Nat.ceil p
+  have hp_le : p ≤ (q : ℝ) := by
+    dsimp [q]
+    exact_mod_cast Nat.le_ceil p
+  have htail_q : Summable (fun i : TensorEigenIdx00 g =>
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ))) := by
+    refine Summable.of_nonneg_of_le
+      (fun i => Real.rpow_nonneg
+        (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (-(q : ℝ))) ?_ htail_s
+    intro i
+    exact Real.rpow_le_rpow_of_exponent_le
+      (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (neg_le_neg hp_le)
+  obtain ⟨C, hC0, hbdd⟩ := exists_pow_add_mul_exp_neg_mul_bddAbove a ha (N + q)
+  have hnonneg : ∀ i : TensorEigenIdx00 g,
+      0 ≤ Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) *
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ N :=
+    fun i => mul_nonneg (Real.exp_pos _).le
+      (pow_nonneg (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) N)
+  have hle : ∀ i : TensorEigenIdx00 g,
+      Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) *
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ N ≤
+        C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) := by
+    intro i
+    have hlam0 : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i :=
+      tensor_lambda_nonneg (I := I) (M := M) i
+    have hb := hbdd (TensorEigenIdx.lambda (I := I) (M := M) i) hlam0
+    have hpos1 : 0 < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+      linarith
+    have hexp_le : Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) ≤
+        Real.exp (-(2 * a * TensorEigenIdx.lambda (I := I) (M := M) i)) := by
+      exact Real.exp_le_exp.mpr (by nlinarith)
+    have hpow : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (N + q) *
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) =
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ N := by
+      have hExp : (-(q : ℝ) + ((N + q : ℕ) : ℝ)) = (N : ℝ) := by
+        push_cast
+        ring
+      calc
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (N + q) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) =
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (N + q) := by
+          rw [mul_comm]
+        _ = (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+              (-(q : ℝ) + ((N + q : ℕ) : ℝ)) := by
+          rw [← Real.rpow_add_natCast (ne_of_gt hpos1) (-(q : ℝ)) (N + q)]
+        _ = (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (N : ℝ) := by
+          rw [hExp]
+        _ = (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ N := by
+          rw [Real.rpow_natCast]
+    have hstep1 :
+        Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ N ≤
+          Real.exp (-(2 * a * TensorEigenIdx.lambda (I := I) (M := M) i)) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ N := by
+      exact mul_le_mul_of_nonneg_right hexp_le (pow_nonneg (by linarith) N)
+    have hstep2 :
+        Real.exp (-(2 * a * TensorEigenIdx.lambda (I := I) (M := M) i)) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ N =
+          Real.exp (-(2 * a * TensorEigenIdx.lambda (I := I) (M := M) i)) *
+            ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (N + q) *
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ))) := by
+      rw [hpow]
+    have hstep3 :
+        Real.exp (-(2 * a * TensorEigenIdx.lambda (I := I) (M := M) i)) *
+            ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (N + q) *
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ))) =
+          ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (N + q) *
+            Real.exp (-(2 * a * TensorEigenIdx.lambda (I := I) (M := M) i))) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) := by
+      ring
+    have hstep4 :
+        ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (N + q) *
+            Real.exp (-(2 * a * TensorEigenIdx.lambda (I := I) (M := M) i))) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) ≤
+          C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) := by
+      exact mul_le_mul_of_nonneg_right hb
+        (Real.rpow_nonneg (by linarith) (-(q : ℝ)))
+    exact le_trans hstep1 (le_trans hstep2.le (le_trans hstep3.le hstep4))
+  have hsum_maj : Summable (fun i : TensorEigenIdx00 g =>
+      C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ))) :=
+    htail_q.mul_left C
+  exact Summable.of_norm_bounded hsum_maj (fun i => by
+      rw [Real.norm_eq_abs]
+      rw [abs_of_nonneg (hnonneg i)]
+      exact hle i)
+
 end HeatEquation
 end Analysis
 end DifferentialGeometry
