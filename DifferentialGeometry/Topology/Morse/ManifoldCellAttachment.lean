@@ -3571,6 +3571,42 @@ noncomputable def morseBeltOpenSet {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)) ''
       {d : StandardHandle k (m + 1 - k) | morseNorm (m + 1) (modelHandleMap hk ε r d) < data.R}
 
+private theorem morseBeltAtt_in_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (a : AttachingRegion k (m + 1 - k))
+    (ha : morseAttachingEmbedding hk c ε r data hε hεr a ∈ morseBeltLowerSet hk c ε data) :
+    morseNorm (m + 1) (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) a)) < data.R := by
+  dsimp [morseBeltLowerSet] at ha
+  rcases ha with ⟨y, hy, hxy⟩
+  have hφ : (morseAttachingEmbedding hk c ε r data hε hεr a).1 =
+      data.χ (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) a)) := by
+    exact morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε hεr a
+  have hχ : data.χ y = data.χ (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) a)) := by
+    rw [hxy, hφ]
+  have hy' : y = modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) a) := by
+    apply data.χ.injOn
+    · exact data.hχsrc y (le_of_lt hy)
+    · exact data.hχsrc (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) a))
+        (le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) (attachingInclusion k (m + 1 - k) a)) hεr)
+    · exact hχ
+  rw [← hy']
+  exact hy
+
+private theorem morseBeltCell_in_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (a : AttachingRegion k (m + 1 - k))
+    (ha : morseNorm (m + 1) (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) a)) < data.R) :
+    morseAttachingEmbedding hk c ε r data hε hεr a ∈ morseBeltLowerSet hk c ε data := by
+  dsimp [morseBeltLowerSet]
+  refine ⟨modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) a), ha, ?_⟩
+  exact (morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε hεr a).symm
+
 noncomputable def morseBeltMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
