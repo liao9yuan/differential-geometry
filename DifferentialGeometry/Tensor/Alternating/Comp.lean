@@ -253,8 +253,8 @@ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_real :
       ContinuousMultilinearMap ℝ (fun _ : ι => F₁) F₂)) := by
     exact (isClosedEmbedding_toContinuousMultilinearMap (𝕜 := ℝ) (E := F₁) (F := F₂)).isClosed_range
   have heΦ : IsClosed (Set.range Φ) := by
-    simpa [Φ] using isClosed_range_comp ψ heψ
-  exact contDiff_of_comp_linearIsometry_omega Φ heΦ hh
+    simpa [Φ] using DifferentialGeometry.AnalyticTransfer.isClosed_range_comp ψ heψ
+  exact DifferentialGeometry.AnalyticTransfer.contDiff_of_comp_linearIsometry_omega Φ heΦ hh
 
 theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_real :
     let F : (F₁ →L[ℝ] F₁) → (F₁ [⋀^ι]→L[ℝ] F₂) →L[ℝ] (F₁ [⋀^ι]→L[ℝ] F₂)
@@ -297,8 +297,8 @@ theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_of_space_re
       ContinuousMultilinearMap ℝ (fun _ : ι => F₁) F₂)) := by
     exact (isClosedEmbedding_toContinuousMultilinearMap (𝕜 := ℝ) (E := F₁) (F := F₂)).isClosed_range
   have heΦ : IsClosed (Set.range Φ) := by
-    simpa [Φ] using isClosed_range_comp ψ₀ heψ₀
-  exact contDiff_of_comp_linearIsometry_omega Φ heΦ hh
+    simpa [Φ] using DifferentialGeometry.AnalyticTransfer.isClosed_range_comp ψ₀ heψ₀
+  exact DifferentialGeometry.AnalyticTransfer.contDiff_of_comp_linearIsometry_omega Φ heΦ hh
 
 theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff_of_space_real
     {F₁' : Type*} [NormedAddCommGroup F₁'] [NormedSpace ℝ F₁'] :
@@ -317,7 +317,7 @@ variable {𝕜 ι F₁ F₂} [NontriviallyNormedField 𝕜] [CharZero 𝕜] [Fin
 open scoped Bundle Manifold
 
 omit [CharZero 𝕜] in
-theorem norm_alternatization_le (f : ContinuousMultilinearMap 𝕜 (fun _ : ι => F₁) F₂) :
+private theorem norm_alternatization_le (f : ContinuousMultilinearMap 𝕜 (fun _ : ι => F₁) F₂) :
     ‖ContinuousMultilinearMap.alternatization f‖ ≤
       (Fintype.card (Equiv.Perm ι) : ℝ) * ‖f‖ := by
   refine ContinuousAlternatingMap.opNorm_le_bound _ (by positivity) fun v => ?_
@@ -342,7 +342,7 @@ theorem norm_alternatization_le (f : ContinuousMultilinearMap 𝕜 (fun _ : ι =
       rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
     _ = (Fintype.card (Equiv.Perm ι) : ℝ) * ‖f‖ * ∏ i, ‖v i‖ := by ring
 
-noncomputable def alternatizationCLM : (ContinuousMultilinearMap 𝕜 (fun _ : ι => F₁) F₂) →L[𝕜]
+private noncomputable def alternatizationCLM : (ContinuousMultilinearMap 𝕜 (fun _ : ι => F₁) F₂) →L[𝕜]
     (F₁ [⋀^ι]→L[𝕜] F₂) :=
   LinearMap.mkContinuous
     { toFun := fun f => (↑(Fintype.card (Equiv.Perm ι)) : 𝕜)⁻¹ •
@@ -385,7 +385,7 @@ noncomputable def alternatizationCLM : (ContinuousMultilinearMap 𝕜 (fun _ : �
         _ = (‖(↑(Fintype.card (Equiv.Perm ι)) : 𝕜)⁻¹‖ * Fintype.card (Equiv.Perm ι)) * ‖f‖ := by
           ring)
 
-theorem alternatizationCLM_left_inverse (L : F₁ [⋀^ι]→L[𝕜] F₂) :
+private theorem alternatizationCLM_left_inverse (L : F₁ [⋀^ι]→L[𝕜] F₂) :
     alternatizationCLM (ContinuousAlternatingMap.toContinuousMultilinearMap L) = L := by
   ext v
   simp only [alternatizationCLM, LinearMap.mkContinuous_apply, LinearMap.coe_mk,

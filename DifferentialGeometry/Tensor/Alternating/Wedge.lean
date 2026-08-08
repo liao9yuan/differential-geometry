@@ -1971,7 +1971,7 @@ private lemma finAddFlip_trans_finAddCongr_sign :
   rw [finAddFlip_trans_finAddCongr_eq, Equiv.Perm.sign_permCongr, Equiv.Perm.addCasesSwapPerm_sign]
   exact congrArg (fun k : ℕ => (-1 : ℤˣ) ^ k) (Nat.mul_comm n m)
 
-private lemma units_neg_one_pow_smul (k : ℕ) (x : 𝕜) :
+private lemma units_neg_one_pow_smul {A : Type*} [AddCommGroup A] [Module 𝕜 A] (k : ℕ) (x : A) :
     ((-1 : ℤˣ) ^ k) • x = (-1 : 𝕜) ^ k • x := by
   rw [Units.smul_def]
   rw [← Int.cast_smul_eq_zsmul (R := 𝕜) ((((-1 : ℤˣ) ^ k : ℤˣ) : ℤ)) x]
@@ -1984,37 +1984,95 @@ private lemma units_neg_one_pow_smul (k : ℕ) (x : 𝕜) :
       norm_num
   rw [hcast]
 
-theorem wedge_antisymm [CharZero 𝕜]
+private theorem uncurrySum_summand_swap (g : M [⋀^Fin m]→L[𝕜] 𝕜)
+    (h : M [⋀^Fin n]→L[𝕜] 𝕜) (v : Fin (n + m) → M)
+    (σ : Equiv.Perm.ModSumCongr (Fin n) (Fin m)) :
+    uncurrySum.summand (ContinuousLinearMap.mul 𝕜 𝕜 |>.compContinuousAlternatingMap₂ h g)
+        σ (v ∘ finSumFinEquiv) =
+      uncurrySum.summand (ContinuousLinearMap.mul 𝕜 𝕜 |>.compContinuousAlternatingMap₂ g h)
+        (Equiv.Perm.finAddFlip_equiv (m := n) (n := m) σ)
+        ((v ∘ finAddFlip) ∘ finSumFinEquiv) := by
+  refine Quotient.inductionOn' σ ?_
+  intro σ'
+  change uncurrySum.summand (ContinuousLinearMap.mul 𝕜 𝕜 |>.compContinuousAlternatingMap₂ h g)
+      (Quotient.mk'' σ') (v ∘ finSumFinEquiv) =
+    uncurrySum.summand (ContinuousLinearMap.mul 𝕜 𝕜 |>.compContinuousAlternatingMap₂ g h)
+      (Quotient.mk'' (Equiv.Perm.sumCommPerm σ'))
+      ((v ∘ finAddFlip) ∘ finSumFinEquiv)
+  rw [uncurrySum_summand_eval, uncurrySum_summand_eval]
+  rw [Equiv.Perm.sign_sumCommPerm]
+  congr 1
+  simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  change (h (fun i => (v ∘ finSumFinEquiv) (σ' (Sum.inl i)))) *
+      (g (fun i => (v ∘ finSumFinEquiv) (σ' (Sum.inr i)))) =
+    (g (fun i => ((v ∘ finAddFlip) ∘ finSumFinEquiv) ((Equiv.Perm.sumCommPerm σ') (Sum.inl i)))) *
+      (h (fun i => ((v ∘ finAddFlip) ∘ finSumFinEquiv) ((Equiv.Perm.sumCommPerm σ') (Sum.inr i))))
+  rw [mul_comm]
+  congr 1
+  · apply congrArg g
+    funext j
+    change v (finSumFinEquiv (σ' (Sum.inr j))) =
+      v (finAddFlip (finSumFinEquiv (Equiv.sumComm (Fin n) (Fin m) (σ' (Sum.inr j)))))
+    congr 1
+    simpa [Equiv.sumComm] using (Fin.finAddFlip_finSumFinEquiv (m := m) (n := n)
+      (Equiv.sumComm (Fin n) (Fin m) (σ' (Sum.inr j)))).symm
+  · apply congrArg h
+    funext i
+    change v (finSumFinEquiv (σ' (Sum.inl i))) =
+      v (finAddFlip (finSumFinEquiv (Equiv.sumComm (Fin n) (Fin m) (σ' (Sum.inl i)))))
+    congr 1
+    simpa [Equiv.sumComm] using (Fin.finAddFlip_finSumFinEquiv (m := m) (n := n)
+      (Equiv.sumComm (Fin n) (Fin m) (σ' (Sum.inl i)))).symm
+
+private theorem wedge_product_swap (g : M [⋀^Fin m]→L[𝕜] 𝕜)
+    (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
+    (h ∧[𝕜] g) = (g ∧[𝕜] h).domDomCongr finAddFlip := by
+  ext v
+  rw [wedge_product_def]
+  rw [ContinuousAlternatingMap.domDomCongr_apply]
+  rw [wedge_product_def]
+  rw [uncurryFinAdd, uncurryFinAdd, ContinuousAlternatingMap.domDomCongr_apply,
+    ContinuousAlternatingMap.domDomCongr_apply, uncurrySum_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_bij
+    (fun (σ : Equiv.Perm.ModSumCongr (Fin n) (Fin m)) _ =>
+      Equiv.Perm.finAddFlip_equiv (m := n) (n := m) σ) ?_ ?_ ?_ ?_
+  · intro σ hσ
+    simp
+  · intro σ₁ hσ₁ σ₂ hσ₂ h
+    exact Equiv.injective (Equiv.Perm.finAddFlip_equiv (m := n) (n := m)) h
+  · intro τ hτ
+    exact ⟨(Equiv.Perm.finAddFlip_equiv (m := n) (n := m)).symm τ, by simp,
+      Equiv.apply_symm_apply _ τ⟩
+  · intro σ hσ
+    exact uncurrySum_summand_swap g h v σ
+
+private lemma domDomCongr_perm {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (σ : Equiv.Perm ι) (f : M [⋀^ι]→L[𝕜] 𝕜) :
+    domDomCongr σ f = Equiv.Perm.sign σ • f := by
+  apply ContinuousAlternatingMap.toAlternatingMap_injective
+  exact AlternatingMap.domDomCongr_perm (R := 𝕜) (M := M) (N' := 𝕜) (ι := ι)
+    (g := f.toAlternatingMap) σ
+
+theorem wedge_antisymm
     (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     (g ∧[𝕜] h) = ((-1 : 𝕜)^(m*n) • (h ∧[𝕜] g)).domDomCongr Fin.finAddCongr := by
+  have hswap : (h ∧[𝕜] g) = (g ∧[𝕜] h).domDomCongr finAddFlip := wedge_product_swap g h
+  have h₁ : (h ∧[𝕜] g).domDomCongr Fin.finAddCongr = (-1 : 𝕜) ^ (m * n) • (g ∧[𝕜] h) := by
+    rw [hswap]
+    rw [domDomCongr_trans (e₁ := finAddFlip) (e₂ := Fin.finAddCongr)
+      (f := g ∧[𝕜] h)]
+    rw [domDomCongr_perm (finAddFlip.trans (Fin.finAddCongr (m := n) (n := m)))]
+    rw [finAddFlip_trans_finAddCongr_sign]
+    exact units_neg_one_pow_smul (m * n) (g ∧[𝕜] h)
+  rw [ContinuousAlternatingMap.domDomCongr_smul]
+  rw [h₁]
   ext v
-  rw [ContinuousAlternatingMap.domDomCongr_apply, ContinuousAlternatingMap.smul_apply]
-  rw [wedge_product_eq_alternatization (m := m) (n := n) g h (ContinuousLinearMap.mul 𝕜 𝕜) v]
-  rw [wedge_product_eq_alternatization (m := n) (n := m) h g (ContinuousLinearMap.mul 𝕜 𝕜)
-    (v ∘ Fin.finAddCongr)]
-  rw [tensorProductMap_mul_swap g h]
-  rw [ContinuousAlternatingMap.alternatization_domDomCongr finAddFlip]
-  rw [AlternatingMap.domDomCongr_apply]
-  have h_comp : (v ∘ Fin.finAddCongr) ∘ finAddFlip =
-      v ∘ (finAddFlip.trans (Fin.finAddCongr (m := n) (n := m))) := by
-    funext x
-    rfl
-  rw [h_comp]
-  rw [AlternatingMap.map_perm (g := MultilinearMap.alternatization
-      (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap)
-      v (finAddFlip.trans (Fin.finAddCongr (m := n) (n := m)))]
-  rw [finAddFlip_trans_finAddCongr_sign]
-  have hc : (↑(n.factorial * m.factorial) : 𝕜)⁻¹ = (↑(m.factorial * n.factorial) : 𝕜)⁻¹ := by
-    congr 1
-    rw [Nat.mul_comm]
-  rw [hc]
-  rw [units_neg_one_pow_smul (m * n)]
-  rw [smul_smul, smul_smul]
-  apply congrArg (fun s : 𝕜 => s • MultilinearMap.alternatization
-      (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap v)
+  simp only [ContinuousAlternatingMap.smul_apply]
+  rw [smul_smul]
   have hsq : (-1 : 𝕜) ^ (m * n) * (-1 : 𝕜) ^ (m * n) = 1 := by
     rw [← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow]
-  rw [mul_comm ((-1 : 𝕜) ^ (m * n)) (↑(m.factorial * n.factorial))⁻¹, mul_assoc, hsq, mul_one]
+  rw [hsq, one_smul]
 
 theorem elementaryCovector_iprod_wedge_product
     [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]

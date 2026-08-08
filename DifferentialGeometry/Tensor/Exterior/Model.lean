@@ -31,22 +31,17 @@ theorem contDiffOn_wedge_product {s : Set E} (a : E → E [⋀^Fin k]→L[ℝ] �
     exact (contDiffOn_const (c := B)).clm_apply ha
   exact h₁.clm_apply hb
 
-private theorem contDiff_compContinuousLinearMapCLM :
-    ContDiff ℝ ⊤ (fun p : E →L[ℝ] E =>
-      (compContinuousLinearMapCLM p : (E [⋀^Fin n]→L[ℝ] ℝ) →L[ℝ]
-        (E [⋀^Fin n]→L[ℝ] ℝ))) := by
-  exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_real (ι := Fin n)
-    (F₁ := E) (F₂ := ℝ)
-
-theorem contDiffOn_pullback {s t : Set E} (f : E → E)
-    (ω : E → E [⋀^Fin n]→L[ℝ] ℝ) (hf : ContDiffOn ℝ ⊤ f s) (hω : ContDiffOn ℝ ⊤ ω t)
+theorem contDiffOn_pullback {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
+    {s : Set E} {t : Set E'} (f : E → E')
+    (ω : E' → E' [⋀^Fin n]→L[ℝ] F) (hf : ContDiffOn ℝ ⊤ f s) (hω : ContDiffOn ℝ ⊤ ω t)
     (hst : Set.MapsTo f s t) (hs : IsOpen s) :
     ContDiffOn ℝ ⊤ (fun x => (ω (f x)).compContinuousLinearMap (fderiv ℝ f x)) s := by
   have hfd : ContDiffOn ℝ ⊤ (fderiv ℝ f) s := hf.fderiv_of_isOpen hs le_top
   have h₁ : ContDiffOn ℝ ⊤ (fun x =>
-      (compContinuousLinearMapCLM (fderiv ℝ f x) : (E [⋀^Fin n]→L[ℝ] ℝ) →L[ℝ]
-        (E [⋀^Fin n]→L[ℝ] ℝ))) s :=
-    contDiff_compContinuousLinearMapCLM.comp_contDiffOn hfd
+      (compContinuousLinearMapCLM (fderiv ℝ f x) : (E' [⋀^Fin n]→L[ℝ] F) →L[ℝ]
+        (E [⋀^Fin n]→L[ℝ] F))) s :=
+    (ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_of_space_real
+      (F₁ := E) (F₁' := E') (F₂ := F) (ι := Fin n)).comp_contDiffOn hfd
   have h₂ : ContDiffOn ℝ ⊤ (fun x => ω (f x)) s := hω.comp hf hst
   change ContDiffOn ℝ ⊤ (fun x => (compContinuousLinearMapCLM (fderiv ℝ f x)) (ω (f x))) s
   exact h₁.clm_apply h₂

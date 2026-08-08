@@ -203,8 +203,7 @@ private lemma rep_eqOn_pullback (α : DifferentialForm IM M k) {x₀ x : M}
   exact (localRep_eq_pullback (IM := IM) (M := M) (x₀ := x) (x := x₀) (z := z)
     (hx := hy₀s) (hx₀ := hy₀s₁) (m := k) (L := α z))
 
-noncomputable def exteriorDerivativeAt [BoundarylessManifold IM M]
-    (α : DifferentialForm IM M k) (x : M) :
+noncomputable def exteriorDerivativeAt (α : DifferentialForm IM M k) (x : M) :
     Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
       (Bundle.Trivial M ℝ) x :=
   (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)

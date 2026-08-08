@@ -4,11 +4,14 @@ import Mathlib.Analysis.Analytic.IteratedFDeriv
 import Mathlib.Analysis.Normed.Group.Real
 import Mathlib.Analysis.Normed.Operator.LinearIsometry
 
-noncomputable section AnalyticTransfer
+noncomputable section
 
 
 open Filter
 open scoped Topology ContDiff ENNReal
+
+namespace DifferentialGeometry
+namespace AnalyticTransfer
 
 variable {𝕜 X F : Type*} [NontriviallyNormedField 𝕜] [NormedAddCommGroup X] [NormedSpace 𝕜 X]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F]
@@ -334,3 +337,7 @@ end real
 
 
 end AnalyticTransfer
+
+end DifferentialGeometry
+
+end

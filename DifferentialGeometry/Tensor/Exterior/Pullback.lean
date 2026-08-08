@@ -608,6 +608,36 @@ noncomputable def pullbackLinearMap (f : M → N) (hf : ContMDiff IM IN ⊤ f) (
     map_add' := pullback_add f hf
     map_smul' := fun c α => pullback_smul c f hf α }
 
+theorem pullbackMap_id (α : DifferentialForm IM M k) :
+    pullbackMap (ContMDiffMap.id (I := IM) (M := M) : C^⊤⟮IM, M; IM, M⟯) α = α := by
+  simpa [pullbackMap] using pullback_id α
+
+theorem pullbackMap_comp (f : C^⊤⟮IM, M; IN, N⟯) (g : C^⊤⟮IN, N; IP, P⟯)
+    (η : DifferentialForm IP P k) :
+    pullbackMap (ContMDiffMap.comp g f) η = pullbackMap f (pullbackMap g η) := by
+  simpa [pullbackMap] using pullback_comp f.1 f.2 g.1 g.2 η
+
+theorem pullbackMap_wedge (f : C^⊤⟮IM, M; IN, N⟯)
+    (α : DifferentialForm IN N k) (β : DifferentialForm IN N l) :
+    pullbackMap f (DifferentialForm.wedge α β) =
+      DifferentialForm.wedge (pullbackMap f α) (pullbackMap f β) := by
+  simpa [pullbackMap] using pullback_wedge f.1 f.2 α β
+
+theorem pullbackMap_add (f : C^⊤⟮IM, M; IN, N⟯) (α β : DifferentialForm IN N k) :
+    pullbackMap f (α + β) = pullbackMap f α + pullbackMap f β := by
+  simpa [pullbackMap] using pullback_add f.1 f.2 α β
+
+theorem pullbackMap_smul (c : ℝ) (f : C^⊤⟮IM, M; IN, N⟯)
+    (α : DifferentialForm IN N k) :
+    pullbackMap f (c • α) = c • pullbackMap f α := by
+  simpa [pullbackMap] using pullback_smul c f.1 f.2 α
+
+noncomputable def pullbackMapLinear (f : C^⊤⟮IM, M; IN, N⟯) (k : ℕ) :
+    DifferentialForm IN N k →ₗ[ℝ] DifferentialForm IM M k :=
+  { toFun := pullbackMap f
+    map_add' := pullbackMap_add f
+    map_smul' := fun c α => pullbackMap_smul c f α }
+
 end DifferentialForm
 end DifferentialGeometry
 

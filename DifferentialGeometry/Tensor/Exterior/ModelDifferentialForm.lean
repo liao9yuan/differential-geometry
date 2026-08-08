@@ -151,8 +151,9 @@ noncomputable def reindex (e : Fin k ≃ Fin l) (ω : Ω^k⟮E, F⟯) : Ω^l⟮E
 theorem reindex_apply (e : Fin k ≃ Fin l) (ω : Ω^k⟮E, F⟯) (x : E) :
     (reindex e ω) x = ContinuousAlternatingMap.domDomCongr e (ω x) := rfl
 
-noncomputable def pullback (f : E → E) (hf : ContDiff ℝ ⊤ f) (ω : Ω^n⟮E, ℝ⟯) :
-    Ω^n⟮E, ℝ⟯ :=
+noncomputable def pullback {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
+    (f : E → E') (hf : ContDiff ℝ ⊤ f) (ω : Ω^n⟮E', F⟯) :
+    Ω^n⟮E, F⟯ :=
   ⟨fun x => (ω (f x)).compContinuousLinearMap (fderiv ℝ f x), by
     rw [← contDiffOn_univ]
     exact DifferentialGeometry.DifferentialForm.contDiffOn_pullback (s := univ) (t := univ) f ω.toFun
@@ -161,16 +162,18 @@ noncomputable def pullback (f : E → E) (hf : ContDiff ℝ ⊤ f) (ω : Ω^n⟮
       (by intro x hx; exact hx) isOpen_univ⟩
 
 @[simp]
-theorem pullback_apply (f : E → E) (hf : ContDiff ℝ ⊤ f) (ω : Ω^n⟮E, ℝ⟯) (x : E) :
+theorem pullback_apply {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
+    (f : E → E') (hf : ContDiff ℝ ⊤ f) (ω : Ω^n⟮E', F⟯) (x : E) :
     (pullback f hf ω) x = (ω (f x)).compContinuousLinearMap (fderiv ℝ f x) := rfl
 
-theorem extDeriv_pullback (f : E → E) (hf : ContDiff ℝ ⊤ f) (ω : Ω^n⟮E, ℝ⟯) :
+theorem extDeriv_pullback {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
+    (f : E → E') (hf : ContDiff ℝ ⊤ f) (ω : Ω^n⟮E', F⟯) :
     pullback f hf (extDeriv ω) = extDeriv (pullback f hf ω) := by
   apply ModelDifferentialForm.ext
   intro x
   change (extDeriv ω (f x)).compContinuousLinearMap (fderiv ℝ f x) =
     _root_.extDeriv (fun y => (ω (f y)).compContinuousLinearMap (fderiv ℝ f y)) x
-  exact (_root_.extDeriv_pullback (𝕜 := ℝ) (E := E) (F := E) (G := ℝ) (n := n)
+  exact (_root_.extDeriv_pullback (𝕜 := ℝ) (E := E) (F := E') (G := F) (n := n)
     (ω := ω.toFun) (f := f) (x := x)
     (hω := (ω.smooth.differentiable (by norm_num)).differentiableAt)
     (hf := hf.contDiffAt)

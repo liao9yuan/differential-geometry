@@ -44,6 +44,12 @@ theorem domDomCongr_smul {ι ι' : Type*} (c : 𝕜) (e : ι ≃ ι')
   ext v
   simp [domDomCongr_apply]
 
+theorem domDomCongr_trans {ι ι' ι'' : Type*} (e₁ : ι ≃ ι') (e₂ : ι' ≃ ι'')
+    (f : M [⋀^ι]→L[𝕜] N) :
+    (f.domDomCongr e₁).domDomCongr e₂ = f.domDomCongr (e₁.trans e₂) := by
+  ext v
+  rfl
+
 theorem domDomCongr_sum {ι : Type*}
     (e : Fin m ≃ Fin n) (s : Finset ι) (f : ι → M [⋀^Fin m]→L[𝕜] N) :
     domDomCongr e (∑ i ∈ s, f i) = ∑ i ∈ s, domDomCongr e (f i) := by
