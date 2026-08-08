@@ -2562,6 +2562,76 @@ theorem contMDiff_modelAttachedUnstretch_sublevel {m k : ℕ} (hk : k ≤ m + 1)
     (hchart₁ := hchart₁)
     (hchart₂ := hchart₂)
 
+noncomputable def modelAttachedSublevelDiffeomorph {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (CellAttachment.morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+      sublevelChartedSpace (m := m) (CellAttachment.morseNormalForm hk c)
+        (c + r ^ 2 / 2) (CellAttachment.contDiff_morseNormalForm hk c)
+        (fun y hy => CellAttachment.fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy))
+    (hcs₂ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c) :=
+      sublevelChartedSpace (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+        (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+        (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr))
+    (hchart₁ : ∀ y : SublevelSpace (CellAttachment.morseNormalForm hk c) (c + r ^ 2 / 2),
+      hcs₁.chartAt y =
+        (if h : CellAttachment.morseNormalForm hk c y.1 = c + r ^ 2 / 2 then
+          sublevelBoundaryChart (CellAttachment.morseNormalForm hk c) (c + r ^ 2 / 2) y h
+            (CellAttachment.contDiff_morseNormalForm hk c)
+            (CellAttachment.fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y.1 h)
+        else sublevelInteriorChart (CellAttachment.morseNormalForm hk c) (c + r ^ 2 / 2) y
+          (lt_of_le_of_ne (show CellAttachment.morseNormalForm hk c y.1 ≤ c + r ^ 2 / 2 from y.2) h)
+          (CellAttachment.contDiff_morseNormalForm hk c)) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c,
+      hcs₂.chartAt y =
+        (if h : CellAttachment.modelAttachedFunction hk c ε r δ y.1 = c then
+          sublevelBoundaryChart (CellAttachment.modelAttachedFunction hk c ε r δ) c y h
+            (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+            (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr y.1 h)
+        else sublevelInteriorChart (CellAttachment.modelAttachedFunction hk c ε r δ) c y
+          (lt_of_le_of_ne (show CellAttachment.modelAttachedFunction hk c ε r δ y.1 ≤ c from y.2) h)
+          (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)) := by
+      intro y
+      rfl) :
+    SublevelSpace (CellAttachment.morseNormalForm hk c) (c + r ^ 2 / 2) ≃ₘ⟮
+      morseModelWithCornersHalfSpace m, morseModelWithCornersHalfSpace m⟯
+      SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c where
+  toEquiv :=
+    { toFun := fun y => (⟨CellAttachment.modelAttachedStretch hk ε r δ y.1,
+        (by
+          have hm : CellAttachment.modelAttachedStretch hk ε r δ y.1 ∈
+              CellAttachment.modelAttachedRegion hk ε r δ :=
+            (CellAttachment.modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).1 y.1 y.2
+          have hsub : CellAttachment.modelAttachedStretch hk ε r δ y.1 ∈
+              sublevel (CellAttachment.modelAttachedFunction hk c ε r δ) c := by
+            rw [← CellAttachment.modelAttachedRegion_eq_sublevel hk c ε r δ]
+            exact hm
+          exact hsub)⟩ :
+        SublevelSpace (CellAttachment.modelAttachedFunction hk c ε r δ) c)
+      invFun := fun y => (⟨CellAttachment.modelAttachedUnstretch hk ε r δ y.1,
+        (CellAttachment.modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).2.1 y.1
+          ((CellAttachment.modelAttachedRegion_iff_sublevel hk c ε r δ y.1).mpr y.2)⟩ :
+        SublevelSpace (CellAttachment.morseNormalForm hk c) (c + r ^ 2 / 2))
+      left_inv := by
+        intro y
+        apply Subtype.ext
+        exact CellAttachment.modelAttachedUnstretch_stretch hk ε r δ hδ0 hδr hr y.1
+      right_inv := by
+        intro y
+        apply Subtype.ext
+        exact CellAttachment.modelAttachedStretch_unstretch hk ε r δ hδ0 hδr hr y.1 }
+  contMDiff_toFun := by
+    simpa using (contMDiff_modelAttachedStretch_sublevel (hk := hk) (c := c) (ε := ε) (r := r)
+      (δ := δ) (hδ0 := hδ0) (hδr := hδr) (hr := hr) (hcs₁ := hcs₁) (hcs₂ := hcs₂)
+      (hchart₁ := hchart₁) (hchart₂ := hchart₂))
+  contMDiff_invFun := by
+    simpa using (contMDiff_modelAttachedUnstretch_sublevel (hk := hk) (c := c) (ε := ε) (r := r)
+      (δ := δ) (hδ0 := hδ0) (hδr := hδr) (hcs₁ := hcs₂) (hcs₂ := hcs₁)
+      (hchart₁ := hchart₂) (hchart₂ := hchart₁))
+
 theorem modelAttachedSublevelIsManifold {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hδ0 : 0 < δ) (hδr : δ < r ^ 2) :
     @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _

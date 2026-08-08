@@ -2851,12 +2851,12 @@ theorem fderiv_morseNormalForm_ne_zero {n k : ℕ} (hk : k ≤ n) (c a : ℝ) (h
   have hdNeg : (fderiv ℝ (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) y)
       (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) = 0 :=
     fderiv_negPart_normSq_zero_direction hk y
-  simp [hd, hdNeg] at hw
-  have hzero : ‖posPart hk y‖ ^ 2 = 0 := by
-    have : (1 / 2 : ℝ) * ‖posPart hk y‖ ^ 2 = 0 := by
-      simpa using hw
-    nlinarith
-  exact (ne_of_gt hpos) hzero
+  rw [ContinuousLinearMap.smul_apply] at hw
+  rw [ContinuousLinearMap.sub_apply] at hw
+  rw [hd, hdNeg] at hw
+  have hw' : (1 / 2 : ℝ) * (2 * ‖posPart hk y‖ ^ 2) = 0 := by
+    simpa using hw
+  nlinarith
 
 theorem fderiv_cap_negPart_zero_direction {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
     (y : MorseModel n) :
