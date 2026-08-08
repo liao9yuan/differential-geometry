@@ -11,6 +11,10 @@ open scoped Topology Manifold ContDiff Bundle
 namespace DifferentialGeometry
 namespace DifferentialForm
 
+attribute [local instance] seminormedAddCommGroupTangentSpace
+attribute [local instance] normedAddCommGroupTangentSpace
+attribute [local instance] normedSpaceTangentSpace
+
 variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   {HM : Type*} [TopologicalSpace HM]
   {IM : ModelWithCorners ℝ EM HM}

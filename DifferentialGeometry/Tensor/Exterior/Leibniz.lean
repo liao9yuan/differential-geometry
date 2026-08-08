@@ -454,6 +454,10 @@ end DifferentialForm
 namespace DifferentialGeometry
 namespace DifferentialForm
 
+attribute [local instance] seminormedAddCommGroupTangentSpace
+attribute [local instance] normedAddCommGroupTangentSpace
+attribute [local instance] normedSpaceTangentSpace
+
 variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   {HM : Type*} [TopologicalSpace HM]
   {IM : ModelWithCorners ℝ EM HM}
@@ -556,7 +560,7 @@ theorem exteriorDerivative_wedge [BoundarylessManifold IM M]
     exteriorDerivative (α ∧ β) =
       reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l)) (exteriorDerivative α ∧ β) +
         (-1 : ℝ) ^ k • (α ∧ exteriorDerivative β) := by
-  apply DifferentialForm.ext
+  apply ContMDiffSection.ext
   intro x
   change exteriorDerivativeAt (α ∧ β) x =
       reindex (Fin.finAddFlipAssoc (m := k) (p := 1) (n := l)) (exteriorDerivative α ∧ β) x +

@@ -15,36 +15,14 @@ variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   {HM : Type*} [TopologicalSpace HM]
   (IM : ModelWithCorners ℝ EM HM)
   (M : Type*) [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
-  (k l : ℕ)
 
-structure DifferentialForm where
-  toFun : (x : M) →
-    Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x
-  contMDiff_toFun : ContMDiff IM (IM.prod 𝓘(ℝ, EM [⋀^Fin k]→L[ℝ] ℝ)) ⊤
-    (fun x => TotalSpace.mk' (EM [⋀^Fin k]→L[ℝ] ℝ) x (toFun x))
+abbrev DifferentialForm (k : ℕ) :=
+  ContMDiffSection IM (EM [⋀^Fin k]→L[ℝ] ℝ) ⊤
+    (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ))
 
 namespace DifferentialForm
 
 variable {IM M k}
-
-instance : CoeFun (DifferentialForm IM M k) (fun _ => (x : M) →
-    Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) where
-  coe := DifferentialForm.toFun
-
-private instance fiberNeg (x : M) : Neg
-    (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) := by
-  dsimp [Bundle.continuousAlternatingMap]
-  exact inferInstance
-
-private instance fiberSub (x : M) : Sub
-    (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) := by
-  dsimp [Bundle.continuousAlternatingMap]
-  exact inferInstance
-
-private instance fiberZSMul (x : M) : SMul ℤ
-    (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) := by
-  dsimp [Bundle.continuousAlternatingMap]
-  exact inferInstance
 
 set_option backward.isDefEq.respectTransparency false in
 @[instance_reducible]
@@ -66,14 +44,6 @@ def normedSpaceTangentSpace (x : M) : NormedSpace ℝ (TangentSpace IM x) :=
   inferInstanceAs (NormedSpace ℝ EM)
 
 attribute [local instance] normedSpaceTangentSpace
-
-@[ext]
-theorem ext {α β : DifferentialForm IM M k} (h : ∀ x, α x = β x) : α = β := by
-  cases α
-  cases β
-  congr
-  funext x
-  exact h x
 
 private lemma contMDiff_add_section {s t : (x : M) →
     Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x}
@@ -140,7 +110,6 @@ private lemma contMDiff_zero_section :
   exact eventually_of_mem (e.open_baseSet.mem_nhds (mem_baseSet_trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
       (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀))
     (fun x hx => (e.linear ℝ hx).map_zero)
-
 
 instance instZero : Zero (DifferentialForm IM M k) :=
   ⟨⟨fun _ => 0, contMDiff_zero_section (IM := IM) (M := M) (k := k)⟩⟩
