@@ -1138,6 +1138,77 @@ lemma summable_exp_mul_pow
       rw [abs_of_nonneg (hnonneg i)]
       exact hle i)
 
+lemma summable_abs_scalarHeatCoeff_mul_hsWeight
+    (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {a t : ℝ} (ha : 0 < a) (hat : a ≤ t) :
+    Summable (fun i : TensorEigenIdx00 g =>
+      |scalarHeatCoeff (I := I) (M := M) g u₀ i t| *
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+          (((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) / 2)) := by
+  classical
+  let N₀ : ℕ := Module.finrank ℝ E / 2 + 1
+  let σ : ℝ := (N₀ : ℝ)
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0
+  let d : TensorEigenIdx00 g → ℝ := fun i =>
+    tensorL2Coeff (I := I) (M := M) hc u₀ i
+  let w : TensorEigenIdx00 g → ℝ := fun i =>
+    (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)
+  have hw2_sq (i : TensorEigenIdx00 g) : (w i) ^ 2 =
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ σ := by
+    dsimp [w]
+    rw [rpow_sq_eq (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (σ / 2)]
+    congr 1
+    ring
+  have hd2 : Summable (fun i : TensorEigenIdx00 g => (d i) ^ 2) := by
+    change Summable (fun i : TensorEigenIdx00 g =>
+      (tensorL2Coeff (I := I) (M := M) hc u₀ i) ^ 2)
+    exact tensorL2Coeff_summable_sq (I := I) (M := M) hc u₀
+  have hw2 : Summable (fun i : TensorEigenIdx00 g =>
+      Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) * (w i) ^ 2) := by
+    have hsum := summable_exp_mul_pow (I := I) (M := M) g htail N₀ ha hat
+    exact Summable.congr hsum (fun i => by
+      rw [hw2_sq i]
+      congr 1
+      dsimp [σ]
+      rw [Real.rpow_natCast])
+  have hsum2 : Summable (fun i : TensorEigenIdx00 g =>
+      ((d i) ^ 2 + Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) *
+        (w i) ^ 2) / 2) :=
+    (hd2.add hw2).div_const 2
+  have hAMGM (a b : ℝ) : a * b ≤ (a ^ 2 + b ^ 2) / 2 := by
+    nlinarith [sq_nonneg (a - b)]
+  have hc_abs (i : TensorEigenIdx00 g) :
+      |scalarHeatCoeff (I := I) (M := M) g u₀ i t| =
+        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) * |d i| := by
+    unfold scalarHeatCoeff
+    rw [abs_mul]
+    rw [abs_of_nonneg (Real.exp_pos _).le]
+  have hmain (i : TensorEigenIdx00 g) :
+      |scalarHeatCoeff (I := I) (M := M) g u₀ i t| * w i ≤
+        ((d i) ^ 2 + Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) *
+          (w i) ^ 2) / 2 := by
+    calc
+      |scalarHeatCoeff (I := I) (M := M) g u₀ i t| * w i
+          = (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) * |d i|) * w i := by
+            rw [hc_abs]
+      _ = |d i| * (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) * w i) := by
+            ring
+      _ ≤ (|d i| ^ 2 +
+            (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) * w i) ^ 2) / 2 := by
+            exact hAMGM |d i| (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) * w i)
+      _ = ((d i) ^ 2 + Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) *
+            (w i) ^ 2) / 2 := by
+            congr 1
+            rw [sq_abs]
+            rw [mul_pow, exp_sq_eq]
+            congr 1
+            ring_nf
+  exact Summable.of_nonneg_of_le
+    (fun i => mul_nonneg (abs_nonneg _) (Real.rpow_nonneg
+      (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (σ / 2)))
+    hmain hsum2
+
 end HeatEquation
 end Analysis
 end DifferentialGeometry
