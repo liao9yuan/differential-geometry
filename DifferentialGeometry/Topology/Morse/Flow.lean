@@ -188,6 +188,26 @@ theorem UnitSpeedFlow.flow_sublevel_back (Φ : UnitSpeedFlow f a b)
       _ ≤ b := by linarith
 
 omit [TopologicalSpace M] in
+theorem UnitSpeedFlow.flow_sub_back_le_add (Φ : UnitSpeedFlow f a b)
+    {t : ℝ} (ht : 0 ≤ t) (y : M) :
+    f (Φ.flow (-t) y) ≤ f y + t := by
+  let z : M := Φ.flow (-t) y
+  have hmain : f z - t ≤ f y := by
+    have hle := (Φ.rate_bound z t ht).1
+    have hzy : Φ.flow t z = y := by
+      dsimp [z]
+      have h := congrFun (Φ.flow_add t (-t)) y
+      change Φ.flow (t + -t) y = Φ.flow t (Φ.flow (-t) y) at h
+      rw [add_neg_cancel] at h
+      simpa [Φ.flow_zero] using h.symm
+    calc
+      f z - t ≤ f (Φ.flow t z) := hle
+      _ = f y := by rw [hzy]
+  calc
+    f (Φ.flow (-t) y) = f z := by rfl
+    _ ≤ f y + t := by linarith
+
+omit [TopologicalSpace M] in
 noncomputable def UnitSpeedFlow.sublevelEquiv (Φ : UnitSpeedFlow f a b)
     {t : ℝ} (ht : t ∈ Set.Icc 0 (b - a)) :
     SublevelSpace f b ≃ SublevelSpace f (b - t) where
