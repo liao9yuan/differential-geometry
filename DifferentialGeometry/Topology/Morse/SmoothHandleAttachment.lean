@@ -447,6 +447,9 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
         IsCompact (tsupport v) ∧
         (∀ x ∈ g ⁻¹' Set.Icc (c - ε) (c + ε),
           (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) = -1) ∧
+        (∀ x,
+          -1 ≤ (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) ∧
+          (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) ≤ 0) ∧
         ∃ Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞),
           Φ.toEquiv '' sublevel g (c - ε) = sublevel f (c + ε) ∧
           (∀ x : M, x ∉ tsupport v → Φ.toEquiv x = x) ∧
@@ -792,7 +795,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
     ⟨sublevelCellAdjunctionHomotopyEquivUnderOfMorseChart (I := I) (hf := hf)
       (f := f) (c := c) (k := k) (hk := hk) (data := data) (g := g) hgmd hg_le hlow0 hcell hunion_sub
       hlow_invFun_val hgup v hv hsupp hdfOn hrate⟩
-  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_, ?_, ⟨η, hηpos, hηmain⟩,
+  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, hrate, Φ, ?_, ?_, ⟨η, hηpos, hηmain⟩,
     r₀, hr₀, hr₀sq, δ₁, hδ₁₀, hδ₁r, φ, hφ_boundary, hφ_inj, hφ_closed,
     (by
       intro hk0 hl0
@@ -864,7 +867,7 @@ theorem one_critical_point_cell_attachment {m : ℕ} {H : Type} [TopologicalSpac
           (continuous_adjunctionLower (i := cellBoundaryInclusion k) φ))) := by
   rcases morse_smooth_handle_attachment_relative (m := m) (H := H) (M := M) I f hf p c k hk hnd hindex
     hfp a ha hcompact hunique with
-    ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
+    ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, hrate, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
       hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, ⟨φc, hcelladj⟩⟩
   exact ⟨ε, hε, hεa, φc, hcelladj⟩
 
@@ -906,7 +909,7 @@ theorem morse_smooth_attaching_embedding {m : ℕ} {H : Type} [TopologicalSpace 
             ∀ p : AttachingRegion k (m + 1 - k), (φ₀ p).1 = (φ p).1) := by
   rcases morse_smooth_handle_attachment_relative (m := m) (H := H) (M := M) I f hf p c k hk hnd hindex
     hfp a ha hcompact hunique with
-    ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
+    ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, hrate, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
       hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, ⟨φc, hcelladj⟩⟩
   exact ⟨ε, hε, hεa, φ, hφb, hφinj, hφcl, hsmooth⟩
 
