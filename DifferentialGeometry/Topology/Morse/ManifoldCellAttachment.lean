@@ -811,6 +811,20 @@ theorem modelFlow_levelSet_cover {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
   refine ⟨p, ?_⟩
   simpa [w] using hp.symm
 
+theorem modelHandle_meets_sublevel_eq_cocoreAttachingRange {n k : ℕ} (hk : k ≤ n)
+    (c ε r : ℝ) (hε : 0 < ε) (hr : r ≠ 0) :
+    modelHandle hk ε r ∩ sublevel (morseNormalForm hk c) (c - ε) =
+      Set.range (fun p : CellBoundary k × ClosedCell (n - k) => cocoreModelPoint hk ε r p) := by
+  rw [modelHandle_meets_lower_sublevel hk c ε r hε hr]
+  ext y
+  constructor
+  · intro hy
+    rcases hy with ⟨p, hp⟩
+    exact ⟨p, by simpa [cocoreModelPoint, modelHandleMap_attachingRegion] using hp⟩
+  · intro hy
+    rcases hy with ⟨p, hp⟩
+    exact ⟨p, by simpa [cocoreModelPoint, modelHandleMap_attachingRegion] using hp⟩
+
 noncomputable def cocoreAttachingEmbedding {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
