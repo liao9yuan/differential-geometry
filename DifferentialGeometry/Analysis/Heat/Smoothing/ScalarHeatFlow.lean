@@ -2250,6 +2250,163 @@ theorem heatPower_one_inner_eq_lambda_coeff
           unfold scalarHeatCoeff
           ring_nf
 
+theorem scalarHeatFlowTimeDerivSlice_toL2_eq_neg_heatPower
+    (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {a b : ℝ} (hab : a < b) (ha : 0 < a)
+    {t : ℝ} (ht : t ∈ Set.Icc a b) :
+    smoothToLp (I := I) (M := M) g
+        (scalarHeatFlowTimeDerivSlice g u₀ htail hab ha ht) =
+      -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) := by
+  classical
+  have ht0 : 0 < t := lt_of_lt_of_le ha (Set.mem_Icc.mp ht).1
+  have hw1 : HasSum (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i,
+          smoothToLp (I := I) (M := M) g
+            (scalarHeatFlowTimeDerivSlice g u₀ htail hab ha ht)⟫_ℝ •
+        scalarEigenFunctionLp g i)
+      (smoothToLp (I := I) (M := M) g
+        (scalarHeatFlowTimeDerivSlice g u₀ htail hab ha ht)) :=
+    hasSum_scalarEigenFunctionLp_repr (I := I) (M := M) g
+      (smoothToLp (I := I) (M := M) g
+        (scalarHeatFlowTimeDerivSlice g u₀ htail hab ha ht))
+  have hw2 : HasSum (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i,
+          -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀))⟫_ℝ •
+        scalarEigenFunctionLp g i)
+      (-(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀))) :=
+    hasSum_scalarEigenFunctionLp_repr (I := I) (M := M) g
+      (-(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)))
+  have hsame : (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i,
+          smoothToLp (I := I) (M := M) g
+            (scalarHeatFlowTimeDerivSlice g u₀ htail hab ha ht)⟫_ℝ •
+        scalarEigenFunctionLp g i) =
+      (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i,
+          -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀))⟫_ℝ •
+        scalarEigenFunctionLp g i) := by
+    funext i
+    rw [scalarHeatCoeff_lambda_eq_inner_slice (I := I) (M := M) g u₀ htail hab ha ht i]
+    rw [inner_neg_right]
+    rw [heatPower_one_inner_eq_lambda_coeff (I := I) (M := M) g u₀ ht0 i]
+    ring_nf
+  exact hw1.unique (by
+    rw [hsame]
+    exact hw2)
+
+theorem scalarHeatFlowSlice_laplacian_toL2_eq_neg_heatPower
+    (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {a b : ℝ} (hab : a < b) (ha : 0 < a)
+    {t : ℝ} (ht : t ∈ Set.Icc a b) :
+    smoothToLp (I := I) (M := M) g
+        (scalarHeatFlowSlice g u₀ htail hab ha ht).laplacian =
+      -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) := by
+  classical
+  have ht0 : 0 < t := lt_of_lt_of_le ha (Set.mem_Icc.mp ht).1
+  let slice : SmoothScalar g := scalarHeatFlowSlice g u₀ htail hab ha ht
+  let u_dom : laplacianDomain (I := I) (M := M) g :=
+    ⟨smoothToH1Compl (I := I) (M := M) g slice,
+      smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) slice⟩
+  let heat_dom : laplacianDomain (I := I) (M := M) g :=
+    ⟨heatSemigroupExplicitLift (I := I) (M := M) g 0 t (tensor00ScalarL2Equiv g u₀),
+      heatSemigroupExplicitLift_zero_mem_laplacianDomain
+        (I := I) (M := M) g t (tensor00ScalarL2Equiv g u₀)⟩
+  have hu_dom_lp : H1ComplToLp (I := I) (M := M) g (u_dom : H1Compl g) =
+      heatSemigroup (I := I) (M := M) g t (tensor00ScalarL2Equiv g u₀) := by
+    change H1ComplToLp (I := I) (M := M) g
+        (smoothToH1Compl (I := I) (M := M) g slice) = _
+    rw [H1ComplToLp_smoothToH1Compl]
+    exact scalarHeatFlowSlice_toL2_eq_heatSemigroup
+      (I := I) (M := M) g u₀ htail hab ha ht
+  have hheat_dom_lp : H1ComplToLp (I := I) (M := M) g (heat_dom : H1Compl g) =
+      heatSemigroup (I := I) (M := M) g t (tensor00ScalarL2Equiv g u₀) := by
+    exact H1ComplToLp_heatSemigroupExplicitLift
+      (I := I) (M := M) g 0 ht0 (tensor00ScalarL2Equiv g u₀)
+  have hdom : u_dom = heat_dom := by
+    apply Subtype.ext
+    exact H1ComplToLp_injective_on_laplacianDomain (I := I) (M := M) g
+      (hu_dom_lp.trans hheat_dom_lp.symm)
+  have hu_laplacian : laplacianOp (I := I) (M := M) g u_dom =
+      -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) := by
+    rw [hdom]
+    exact laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one
+      (I := I) (M := M) g ht0 (tensor00ScalarL2Equiv g u₀)
+  rw [← laplacianOp_smoothToH1Compl_eq_smoothToLp_laplacian (I := I) (M := M) slice]
+  exact hu_laplacian
+
+theorem scalarHeatFlow_laplacian_eq_time_deriv
+    (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {a b : ℝ} (hab : a < b) (ha : 0 < a)
+    {t : ℝ} (ht : t ∈ Set.Icc a b) (x : M) :
+    laplacian (I := I) (LeviCivita (I := I) g) g (fun x => scalarHeatFlow g u₀ t x) x =
+      scalarSpecSum (I := I) (M := M) g
+        (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+          scalarHeatCoeff (I := I) (M := M) g u₀ i s) t x := by
+  classical
+  let slice : SmoothScalar g := scalarHeatFlowSlice g u₀ htail hab ha ht
+  let dslice : SmoothScalar g := scalarHeatFlowTimeDerivSlice g u₀ htail hab ha ht
+  have hlp : smoothToLp (I := I) (M := M) g slice.laplacian =
+      -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) :=
+    scalarHeatFlowSlice_laplacian_toL2_eq_neg_heatPower
+      (I := I) (M := M) g u₀ htail hab ha ht
+  have hd : smoothToLp (I := I) (M := M) g dslice =
+      -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) :=
+    scalarHeatFlowTimeDerivSlice_toL2_eq_neg_heatPower
+      (I := I) (M := M) g u₀ htail hab ha ht
+  have hle : slice.laplacian = dslice :=
+    smoothToLp_injective (I := I) (M := M) g (hlp.trans hd.symm)
+  have hx : (slice.laplacian).toFun x = dslice.toFun x :=
+    congrFun (congrArg SmoothScalar.toFun hle) x
+  calc
+    laplacian (I := I) (LeviCivita (I := I) g) g (fun x => scalarHeatFlow g u₀ t x) x
+        = (slice.laplacian).toFun x := by
+          change laplacian (I := I) (LeviCivita (I := I) g) g slice.toFun x =
+            (slice.laplacian).toFun x
+          rw [laplacian_levi_eq (I := I) g
+            slice.smooth x]
+          rw [← SmoothScalar.laplacian_toFun]
+    _ = dslice.toFun x := hx
+    _ = scalarSpecSum (I := I) (M := M) g
+          (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarHeatCoeff (I := I) (M := M) g u₀ i s) t x := rfl
+
+theorem scalarHeatFlow_isHeatOnStationary
+    (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {a b : ℝ} (hab : a < b) (ha : 0 < a) :
+    DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+      (RealTimeInterval.closed a b hab.le) g (scalarHeatFlow g u₀) := by
+  change DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn
+    (RealTimeInterval.closed a b hab.le)
+    (stationaryMetricFamily g) (fun _ _ => (0 : ℝ)) (scalarHeatFlow g u₀)
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · exact (scalarHeatFlow_contMDiffOn_top (I := I) (M := M) g u₀ htail hab ha).mono
+      (Set.prod_mono Set.Ioo_subset_Icc_self Set.Subset.rfl)
+  · exact (scalarHeatFlow_contMDiffOn_top (I := I) (M := M) g u₀ htail hab ha).continuousOn
+  · intro t ht
+    exact scalarHeatFlow_slice_contMDiff (I := I) (M := M) g u₀ htail hab ha ht
+  · intro t ht x
+    have htIcc : t ∈ Set.Icc a b :=
+      Set.mem_Icc.mpr ⟨(Set.mem_Ioo.mp ht).1.le, (Set.mem_Ioo.mp ht).2.le⟩
+    have hderiv := scalarHeatFlow_hasDerivAt (I := I) (M := M) g u₀ htail hab ha ht x
+    have hlap := scalarHeatFlow_laplacian_eq_time_deriv
+      (I := I) (M := M) g u₀ htail hab ha htIcc x
+    refine hderiv.congr_deriv ?_
+    calc
+      scalarSpecSum (I := I) (M := M) g
+          (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarHeatCoeff (I := I) (M := M) g u₀ i s) t x
+          = laplacian (I := I) (LeviCivita (I := I) g) g
+              (fun x => scalarHeatFlow g u₀ t x) x := hlap.symm
+      _ = laplacianAt (I := I) (stationaryMetricFamily g) t (scalarHeatFlow g u₀ t) x +
+            0 * scalarHeatFlow g u₀ t x := by
+            unfold laplacianAt stationaryMetricFamily
+            simp [zero_mul, add_zero]
+            rfl
+
 end HeatEquation
 end Analysis
 end DifferentialGeometry
