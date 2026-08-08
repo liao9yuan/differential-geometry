@@ -256,6 +256,82 @@ lemma tensor0Iso_fromScalarField
         (fun _ : Fin 0 => TangentSpace I y) (f y))) = f y
   rfl
 
+omit [CompactSpace M] in
+theorem scalar0_rawLap_eq_scalarLap
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
+    TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+        (rawTensorConnLapSmooth g 0 0 S).toSection x =
+      laplacian (I := I) (LeviCivita (I := I) g) g
+        (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection) x := by
+  change Tensor0SField.toScalarField ∞ (TensorRSField.rs0 (n := (∞ : WithTop ℕ∞))
+        (rawTensorConnLapSmooth g 0 0 S).toSection) x =
+    laplacian (I := I) (LeviCivita (I := I) g) g
+      (Tensor0SField.toScalarField ∞ (TensorRSField.rs0 (n := (∞ : WithTop ℕ∞)) S.toSection)) x
+  have hpt : (TensorRSField.rs0 (n := (∞ : WithTop ℕ∞))
+        (rawTensorConnLapSmooth g 0 0 S).toSection) x =
+      Tensor0SField.fromScalarField ∞
+        (laplacian (I := I) (LeviCivita (I := I) g) g
+          (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection))
+        (laplacian_scalar0_smooth (I := I) (M := M) g S) x := by
+    rw [TensorRSField.rs0_apply]
+    rw [rawTensorConnLapSmooth_toSection_apply]
+    rw [rawLapSection_eq_toRS0 (I := I) (M := M) g S x]
+    rw [Tensor0SSpace.toRS0_apply]
+    have hone : tensor0SSpace_evalScalar x
+        (Tensor0SField.one0 (n := (∞ : WithTop ℕ∞))
+          (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) x) = 1 := by
+      change Tensor0SSpace.toModel (Tensor0SField.one0 (n := (∞ : WithTop ℕ∞))
+        (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) x) Fin.elim0 = 1
+      rw [Tensor0SField.one0_apply]
+    rw [hone, one_smul]
+    symm
+    apply (Tensor0SNabla.tensor0Iso I M x).injective
+    rw [ContinuousLinearEquiv.apply_symm_apply]
+    exact tensor0Iso_fromScalarField
+      (laplacian (I := I) (LeviCivita (I := I) g) g
+        (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection))
+      (laplacian_scalar0_smooth (I := I) (M := M) g S) x
+  rw [show Tensor0SField.toScalarField ∞ (TensorRSField.rs0 (n := (∞ : WithTop ℕ∞))
+        (rawTensorConnLapSmooth g 0 0 S).toSection) x =
+      Tensor0SField.toScalarField ∞ (Tensor0SField.fromScalarField ∞
+        (laplacian (I := I) (LeviCivita (I := I) g) g
+          (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection))
+        (laplacian_scalar0_smooth (I := I) (M := M) g S)) x by
+    unfold Tensor0SField.toScalarField
+    rw [hpt]]
+  rw [Tensor0SField.toScalarField_fromScalarField]
+  rfl
+
+theorem scalarEigen00_laplacian_eq
+    (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) (x : M) :
+    laplacian (I := I) (LeviCivita (I := I) g) g
+        (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+          (eigenvectorSmooth g 0 0 i).toSection) x =
+      - TensorEigenIdx.lambda (I := I) (M := M) i *
+        TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+          (eigenvectorSmooth g 0 0 i).toSection x := by
+  rw [← scalar0_rawLap_eq_scalarLap g (eigenvectorSmooth g 0 0 i) x]
+  have hcc : rawTensorConnLapSmooth g 0 0 (eigenvectorSmooth g 0 0 i) =
+      (- TensorEigenIdx.lambda (I := I) (M := M) i) •
+        eigenvectorSmooth g 0 0 i := by
+    exact Integral.L2.SmoothCcTensor.smoothCcTensor_eq_of_toL2_eq
+      (rawTensorConnLapSmooth g 0 0 (eigenvectorSmooth g 0 0 i))
+      ((- TensorEigenIdx.lambda (I := I) (M := M) i) • eigenvectorSmooth g 0 0 i)
+      (by
+        rw [map_smul]
+        exact tensorEigen00_rawLap_eq (I := I) (M := M) g i)
+  calc
+    TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+        (rawTensorConnLapSmooth g 0 0 (eigenvectorSmooth g 0 0 i)).toSection x
+        = TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+            ((- TensorEigenIdx.lambda (I := I) (M := M) i) •
+              eigenvectorSmooth g 0 0 i).toSection x := by
+          rw [hcc]
+    _ = - TensorEigenIdx.lambda (I := I) (M := M) i *
+        TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+          (eigenvectorSmooth g 0 0 i).toSection x := by
+          simp
+
 end HeatEquation
 end Analysis
 end DifferentialGeometry
