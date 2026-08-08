@@ -543,6 +543,71 @@ theorem exteriorDerivative_pullbackMap [BoundarylessManifold IM M] [Boundaryless
       exteriorDerivative (pullbackMap f η) := by
   simpa [pullbackMap] using exteriorDerivative_pullback f.1 f.2 η
 
+variable {EP : Type*} [NormedAddCommGroup EP] [NormedSpace ℝ EP]
+  {HP : Type*} [TopologicalSpace HP]
+  {IP : ModelWithCorners ℝ EP HP}
+  {P : Type*} [TopologicalSpace P] [ChartedSpace HP P] [IsManifold IP ⊤ P]
+  {l : ℕ}
+
+theorem pullback_id (α : DifferentialForm IM M k) :
+    pullback (id : M → M) (contMDiff_id (I := IM) (M := M)) α = α := by
+  ext x
+  rw [pullback_apply]
+  change (α x).compContinuousLinearMap (mfderiv IM IM (id : M → M) x) = α x
+  rw [mfderiv_id]
+  rw [ContinuousAlternatingMap.compContinuousLinearMap_id]
+
+theorem pullback_comp (f : M → N) (hf : ContMDiff IM IN ⊤ f) (g : N → P)
+    (hg : ContMDiff IN IP ⊤ g) (η : DifferentialForm IP P k) :
+    pullback (g ∘ f) (hg.comp hf) η = pullback f hf (pullback g hg η) := by
+  ext x
+  rw [pullback_apply, pullback_apply, pullback_apply]
+  change (η (g (f x))).compContinuousLinearMap (mfderiv IM IP (g ∘ f) x) =
+    ((η (g (f x))).compContinuousLinearMap (mfderiv IN IP g (f x))).compContinuousLinearMap
+      (mfderiv IM IN f x)
+  rw [show mfderiv IM IP (g ∘ f) x =
+      (mfderiv IN IP g (f x)).comp (mfderiv IM IN f x) from
+    mfderiv_comp (g := g) (f := f) (x := x)
+      (hg := hg.mdifferentiableAt (by norm_num)) (hf := hf.mdifferentiableAt (by norm_num))]
+  rw [ContinuousAlternatingMap.compContinuousLinearMap_compContinuousLinearMap]
+
+theorem pullback_wedge (f : M → N) (hf : ContMDiff IM IN ⊤ f)
+    (α : DifferentialForm IN N k) (β : DifferentialForm IN N l) :
+    pullback f hf (DifferentialForm.wedge α β) =
+      DifferentialForm.wedge (pullback f hf α) (pullback f hf β) := by
+  ext x
+  change ((α (f x)) ∧[ℝ] (β (f x))).compContinuousLinearMap (mfderiv IM IN f x) =
+    ((α (f x)).compContinuousLinearMap (mfderiv IM IN f x)) ∧[ℝ]
+      ((β (f x)).compContinuousLinearMap (mfderiv IM IN f x))
+  exact (wedge_product_compContinuousLinearMap
+    (E := TangentSpace IN (f x)) (E' := TangentSpace IM x)
+    (g := α (f x)) (h := β (f x)) (A := mfderiv IM IN f x))
+
+theorem pullback_add (f : M → N) (hf : ContMDiff IM IN ⊤ f)
+    (α β : DifferentialForm IN N k) :
+    pullback f hf (α + β) = pullback f hf α + pullback f hf β := by
+  ext x
+  change (α (f x) + β (f x)).compContinuousLinearMap (mfderiv IM IN f x) =
+    (α (f x)).compContinuousLinearMap (mfderiv IM IN f x) +
+    (β (f x)).compContinuousLinearMap (mfderiv IM IN f x)
+  exact ContinuousAlternatingMap.compContinuousLinearMap_add (α (f x)) (β (f x))
+    (mfderiv IM IN f x)
+
+theorem pullback_smul (c : ℝ) (f : M → N) (hf : ContMDiff IM IN ⊤ f)
+    (α : DifferentialForm IN N k) :
+    pullback f hf (c • α) = c • pullback f hf α := by
+  ext x
+  change (c • α (f x)).compContinuousLinearMap (mfderiv IM IN f x) =
+    c • (α (f x)).compContinuousLinearMap (mfderiv IM IN f x)
+  exact ContinuousAlternatingMap.compContinuousLinearMap_smul c (α (f x))
+    (mfderiv IM IN f x)
+
+noncomputable def pullbackLinearMap (f : M → N) (hf : ContMDiff IM IN ⊤ f) (k : ℕ) :
+    DifferentialForm IN N k →ₗ[ℝ] DifferentialForm IM M k :=
+  { toFun := pullback f hf
+    map_add' := pullback_add f hf
+    map_smul' := fun c α => pullback_smul c f hf α }
+
 end DifferentialForm
 end DifferentialGeometry
 

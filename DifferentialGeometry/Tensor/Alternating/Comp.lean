@@ -160,6 +160,37 @@ theorem compContinuousLinearMap_compContinuousLinearMap
   ext v
   rfl
 
+omit [Fintype ι] in
+theorem compContinuousLinearMap_id {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    (L : E [⋀^ι]→L[𝕜] N) :
+    L.compContinuousLinearMap (ContinuousLinearMap.id 𝕜 E) = L := by
+  ext v
+  rfl
+
+omit [Fintype ι] in
+theorem compContinuousLinearMap_add {E E' : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [NormedAddCommGroup E'] [NormedSpace 𝕜 E'] (L₁ L₂ : E [⋀^ι]→L[𝕜] N)
+    (A : E' →L[𝕜] E) :
+    (L₁ + L₂).compContinuousLinearMap A =
+      L₁.compContinuousLinearMap A + L₂.compContinuousLinearMap A := by
+  ext v
+  rfl
+
+omit [Fintype ι] in
+theorem compContinuousLinearMap_smul {E E' : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [NormedAddCommGroup E'] [NormedSpace 𝕜 E'] (c : 𝕜) (L : E [⋀^ι]→L[𝕜] N)
+    (A : E' →L[𝕜] E) :
+    (c • L).compContinuousLinearMap A = c • L.compContinuousLinearMap A := by
+  ext v
+  rfl
+
+omit [Fintype ι] in
+theorem compContinuousLinearMap_zero {E E' : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [NormedAddCommGroup E'] [NormedSpace 𝕜 E'] (A : E' →L[𝕜] E) :
+    (0 : E [⋀^ι]→L[𝕜] N).compContinuousLinearMap A = 0 := by
+  ext v
+  rfl
+
 end ContinuousAlternatingMap
 
 section Continuous
