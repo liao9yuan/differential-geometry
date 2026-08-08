@@ -2197,6 +2197,19 @@ noncomputable def cellBoundarySphereHomeomorph (k : ℕ) :
 instance (k : ℕ) : Neg (CellBoundary k) :=
   ⟨fun x => ⟨-x.1, by simp [x.2]⟩⟩
 
+instance (k : ℕ) [NeZero k] :
+    Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1) := by
+  exact ⟨by
+    have hfin : Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = k := by simp
+    rw [hfin]
+    have hk : 0 < k := NeZero.pos k
+    omega⟩
+
+instance (k : ℕ) [NeZero k] : Fact (k = (k - 1) + 1) := by
+  exact ⟨by
+    have hk : 0 < k := NeZero.pos k
+    omega⟩
+
 noncomputable def cellBoundaryChart (k : ℕ) [NeZero k]
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
     (v : CellBoundary k) :
