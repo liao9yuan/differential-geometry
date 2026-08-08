@@ -865,6 +865,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyRieszKern
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreySmoothHolderBound
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreySmoothInequality
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.Rellich
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.RellichHigher
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedL2
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
