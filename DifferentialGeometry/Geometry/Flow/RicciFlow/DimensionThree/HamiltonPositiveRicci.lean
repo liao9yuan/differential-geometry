@@ -605,7 +605,7 @@ theorem ham3_short_solution_candidate
     exact hpde t ht x v w
 
 
-
+omit [SigmaCompactSpace M] in
 theorem ham3_short_isSolution
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M) :
