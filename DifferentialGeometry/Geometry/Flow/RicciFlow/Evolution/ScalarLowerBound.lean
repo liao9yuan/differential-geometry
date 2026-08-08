@@ -130,6 +130,7 @@ theorem exists_scalarLowerReaction_lipschitzOn_valueSet
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_curvature_lower_bound_of_parabolic_inequality
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -579,6 +580,7 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
     hscalar hlap hricci
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_curvature_lower_bound_of_scalarEvolution
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -644,6 +646,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
     hdiff_grad hparabolic hinit hF_lip
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -679,6 +682,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -724,6 +728,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -784,7 +789,7 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
 
 
 
-@[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
+omit [SigmaCompactSpace M] in
 theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -878,8 +883,13 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
     hw_cont hw_mdiff hw_grad hscalar_time hscalar_space hdiff_space
     hdiff_grad hevol hlap hricci hinit hF_lip
 
+omit [CompleteSpace E] in
+attribute [deprecated "use a local or intrinsic scalar lower-bound route instead"
+  (since := "2026-05-22")]
+scalar_curvature_lower_bound_of_scalarEvolution_inFrame
 
 
+omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
     [I.Boundaryless] [CompactSpace M]

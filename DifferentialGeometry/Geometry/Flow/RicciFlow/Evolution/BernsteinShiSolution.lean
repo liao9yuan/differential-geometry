@@ -133,6 +133,7 @@ theorem towerLevelConst_mono {k m : ℕ} (hkm : k <= m) :
 
 
 omit [DecidableEq Idx] in
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem bernsteinShi_solution_estimate
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)

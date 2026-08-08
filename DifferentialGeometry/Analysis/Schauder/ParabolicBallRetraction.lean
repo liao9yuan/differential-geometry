@@ -66,7 +66,6 @@ theorem parabolicBallRetraction_apply
   simp only [parabolicBallRetraction,
     parabolicTimeCenteredBallRetraction_apply, sub_zero]
 
-@[simp]
 theorem parabolicBallRetraction_time
     (R : Real) (p : ParabolicPoint V) :
     (parabolicBallRetraction R p).time = p.time :=

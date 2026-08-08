@@ -1189,6 +1189,7 @@ theorem Gfun_dissipative (B : BernsteinTower (I := I) G)
   rw [hforce]
   linarith [hmid_le, htop_le, hWnonpos]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 /-- **Bernstein–Bando–Shi higher derivative estimate (parametric core).**
 
 For a uniform derivative tower on a closed manifold, every level satisfies the
@@ -1293,7 +1294,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
           · exact B.hw_cont i
       have hPartA : ∀ s : Real, s ∈ Set.Icc 0 B.T -> ∀ y : M,
           Gfun (I := I) B m s y <= aBar + bBar * s := by
-        apply scalar_subsolution_affine_bound (I := I) G B.T (le_of_lt B.hT)
+        apply scalar_subsolution_affine_bound (I := I) G B.T
           (fun _t x => (0 : TangentSpace I x)) (Gfun (I := I) B m) aBar bBar hGcont
           (fun s hs hsp y => hGtime s hs hsp y)
           (fun s hs hsp y => hGspace s hs hsp y)
@@ -1357,6 +1358,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
       have hGle : Gfun (I := I) B m t x <= aBar + bBar * t := hPartA t htmem x
       rw [towerConst_sq B.hc B.hα]
       linarith [hwm_le_G, hGle, hfinal]
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 /-- The on-diagonal bound in the textbook shape
 `w m (t,x) ≤ (towerConst c α m)² K²/tᵐ` for `t ∈ (0,T]`, an immediate corollary of `estimate`. -/
 theorem estimate_div [CompactSpace M] (B : BernsteinTower (I := I) G)

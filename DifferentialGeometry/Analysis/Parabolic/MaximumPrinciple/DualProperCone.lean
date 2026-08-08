@@ -43,6 +43,7 @@ abbrev IsDualHeatSupersolutionOn
     (u : Real → M → F) : Prop :=
   IsDualHeatPotSupersolutionOn D G (fun _ _ ↦ 0) C u
 
+omit [CompleteSpace E] in
 theorem properCone_mem_of_dual_heat_pot_supersolution_of_potential_le
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -70,6 +71,7 @@ theorem properCone_mem_of_dual_heat_pot_supersolution_of_potential_le
     exact hphi (u 0 y) (hinit y)
   exact (not_lt_of_ge (hnonnegative t ht x)) hnegative
 
+omit [CompleteSpace E] in
 theorem properCone_mem_of_dual_heat_supersolution
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]

@@ -163,7 +163,7 @@ theorem dist_parabolicDilation {V : Type*} [NormedAddCommGroup V]
     ← mul_max_of_nonneg _ _ r.coe_nonneg]
 
 theorem dist_parabolicTranslation {V : Type*} [NormedAddCommGroup V]
-    [NormedSpace Real V] (p0 p q : ParabolicPoint V) :
+    (p0 p q : ParabolicPoint V) :
     dist (parabolicTranslation p0 p) (parabolicTranslation p0 q) =
       dist p q := by
   rcases p0 with ⟨⟨t0⟩, x0⟩
@@ -428,7 +428,7 @@ namespace BoundedContinuousFunction
 
 def parabolicRescaleAt
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    [NormedAddCommGroup F] [NormedSpace Real F]
+    [NormedAddCommGroup F]
     (r : NNReal) (p0 : ParabolicPoint V)
     (u : Real → BoundedContinuousFunction V F) :
     Real → BoundedContinuousFunction V F :=
@@ -466,7 +466,7 @@ def parabolicSpatialSecondDerivativeRescaleAt
 
 def parabolicTimeCenteredRescaleAt
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    [NormedAddCommGroup F] [NormedSpace Real F]
+    [NormedAddCommGroup F]
     (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
     (u : Real → BoundedContinuousFunction V F) :
     Real → BoundedContinuousFunction V F :=
@@ -500,7 +500,7 @@ def parabolicTimeCenteredSpatialSecondDerivativeRescaleAt
 @[simp]
 theorem parabolicRescaleAt_apply
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    [NormedAddCommGroup F] [NormedSpace Real F]
+    [NormedAddCommGroup F]
     (r : NNReal) (p0 : ParabolicPoint V)
     (u : Real → BoundedContinuousFunction V F) (t : Real) (x : V) :
     parabolicRescaleAt r p0 u t x =
@@ -510,7 +510,7 @@ theorem parabolicRescaleAt_apply
 
 theorem coe_parabolicRescaleAt
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    [NormedAddCommGroup F] [NormedSpace Real F]
+    [NormedAddCommGroup F]
     (r : NNReal) (p0 : ParabolicPoint V)
     (u : Real → BoundedContinuousFunction V F) :
     (fun t x ↦ parabolicRescaleAt r p0 u t x) =
@@ -520,7 +520,7 @@ theorem coe_parabolicRescaleAt
 
 theorem coe_parabolicTimeCenteredRescaleAt
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    [NormedAddCommGroup F] [NormedSpace Real F]
+    [NormedAddCommGroup F]
     (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
     (u : Real → BoundedContinuousFunction V F) :
     (fun t x ↦ parabolicTimeCenteredRescaleAt tau r p0 u t x) =
@@ -574,7 +574,7 @@ theorem parabolicSpatialSecondDerivativeRescaleAt_apply
 @[simp]
 theorem parabolicTimeCenteredRescaleAt_apply
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    [NormedAddCommGroup F] [NormedSpace Real F]
+    [NormedAddCommGroup F]
     (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
     (u : Real → BoundedContinuousFunction V F) (t : Real) (x : V) :
     parabolicTimeCenteredRescaleAt tau r p0 u t x =
@@ -1058,7 +1058,7 @@ namespace BoundedContinuousFunction
 
 theorem parabolicTimeCenteredRescaleAt_holderWith
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    [NormedAddCommGroup F] [NormedSpace Real F]
+    [NormedAddCommGroup F]
     {alpha K : NNReal} {P Q : Set (ParabolicPoint V)}
     (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
     (u : Real → BoundedContinuousFunction V F)
@@ -1154,7 +1154,7 @@ theorem parabolicTimeCenteredSpatialSecondDerivativeRescaleAt_holderWith
 
 theorem norm_parabolicTimeCenteredRescaleAt_le
     {V F : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
-    [NormedAddCommGroup F] [NormedSpace Real F]
+    [NormedAddCommGroup F]
     {P Q : Set (ParabolicPoint V)}
     (tau : Real) (r : NNReal) (p0 : ParabolicPoint V)
     (u : Real → BoundedContinuousFunction V F) (M : NNReal)

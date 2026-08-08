@@ -30,6 +30,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
+omit [CompleteSpace E] in
 private theorem heat_pot_supersolution_nonneg_on_strict_subinterval
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -39,7 +40,7 @@ private theorem heat_pot_supersolution_nonneg_on_strict_subinterval
     (C : Real)
     (hV : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, V t x <= C)
     (hinit : forall x : M, 0 <= u 0 x)
-    (T' : Real) (hT' : 0 <= T') (hT'lt : T' < T) :
+    (T' : Real) (hT'lt : T' < T) :
     forall t : Real, t ∈ Set.Icc 0 T' -> forall x : M, 0 <= u t x := by
   let X : Real -> (x : M) -> TangentSpace I x :=
     fun _ x => (0 : TangentSpace I x)
@@ -141,6 +142,7 @@ private theorem heat_pot_supersolution_nonneg_on_strict_subinterval
     simpa only [J] using hJ_nonneg t ht x
   exact (mul_nonneg_iff_of_pos_left (Real.exp_pos (-C * t))).mp hprod
 
+omit [CompleteSpace E] in
 theorem heat_pot_supersolution_nonneg
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -157,9 +159,10 @@ theorem heat_pot_supersolution_nonneg
     simpa [htzero] using hinit x
   have hTpos : 0 < T := lt_of_le_of_ne hT (Ne.symm hTzero)
   have hshort : forall T' : Real, 0 <= T' -> T' < T ->
-      forall t : Real, t ∈ Set.Icc 0 T' -> forall x : M, 0 <= u t x :=
-    heat_pot_supersolution_nonneg_on_strict_subinterval
-      (I := I) G hT V u hsol C hV hinit
+      forall t : Real, t ∈ Set.Icc 0 T' -> forall x : M, 0 <= u t x := by
+    intro T' hT'nonneg hT'lt
+    exact heat_pot_supersolution_nonneg_on_strict_subinterval
+      (I := I) G hT V u hsol C hV hinit T' hT'lt
   have hIco : forall t : Real, t ∈ Set.Ico 0 T -> forall x : M, 0 <= u t x := by
     intro t ht x
     let T' : Real := (t + T) / 2
@@ -212,6 +215,7 @@ theorem heat_pot_supersolution_nonneg
     exact neg_nonpos.mp (le_of_tendsto h_tend_neg h_evt_nonpos)
   · exact hIco t ⟨ht.1, htT⟩ x
 
+omit [CompleteSpace E] in
 theorem heat_pot_nonneg
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -320,6 +324,7 @@ private theorem heat_pot_exp_rescale_barrier_operator_nonneg
       mul_nonneg (Real.exp_pos (C * t)).le hinside
     _ = Real.exp (C * t) * (V t x * u t x + C * u t x) - 0 := by ring
 
+omit [CompleteSpace E] in
 private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -330,7 +335,7 @@ private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
     (hV : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, |V t x| <= C)
     (hc_le : forall x : M, c <= u 0 x)
     (hu_nonneg : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= u t x)
-    (T' : Real) (hT' : 0 <= T') (hT'lt : T' < T) :
+    (T' : Real) (hT'lt : T' < T) :
     forall t : Real, t ∈ Set.Icc 0 T' -> forall x : M,
       c <= Real.exp (C * t) * u t x := by
   let X : Real -> (x : M) -> TangentSpace I x :=
@@ -399,6 +404,7 @@ private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
   intro t ht x
   exact sub_nonneg.mp (by simpa only [w, z] using hw_nonneg t ht x)
 
+omit [CompleteSpace E] in
 theorem heat_pot_pos
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -445,7 +451,7 @@ theorem heat_pot_pos
     intro T' hT' hT'lt
     simpa only [z] using
       heat_pot_exp_rescale_lower_bound_on_strict_subinterval
-        (I := I) G hT V u hsol C c hV hc_le hu_nonneg T' hT' hT'lt
+        (I := I) G hT V u hsol C c hV hc_le hu_nonneg T' hT'lt
   have hIco : forall t : Real, t ∈ Set.Ico 0 T -> forall x : M, c <= z t x := by
     intro t ht x
     let T' : Real := (t + T) / 2
@@ -508,6 +514,7 @@ theorem heat_pot_pos
     exact hpos_of_lower T x hlower
   · exact hpos_of_lower t x (hIco t ⟨ht.1, htT⟩ x)
 
+omit [CompleteSpace E] in
 theorem heat_nonneg
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -519,6 +526,7 @@ theorem heat_nonneg
   exact heat_pot_nonneg (I := I) G hT (fun _ _ => 0) u hsol 0
     (by intro t ht x; rfl) hinit
 
+omit [CompleteSpace E] in
 theorem heat_pos
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]

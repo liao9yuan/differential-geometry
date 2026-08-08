@@ -2193,7 +2193,7 @@ private theorem GfunCut_space_diff
 
 namespace BernsteinTower
 
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 /-- **Fixed-order complete-noncompact Bernstein estimate from quantitative cutoffs.**
 
 The cutoff family localizes the graded Bernstein polynomial to one compact
@@ -2562,7 +2562,7 @@ theorem estimate_cutoff_at
       rw [towerConst_sq B.hc B.hα]
       exact hlimit.trans hfinal
 
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 /-- **Point-centered complete Bernstein estimate from barrier cutoffs.**
 
 The cutoff family may depend on the point being estimated.  The family
@@ -2892,7 +2892,7 @@ theorem estimate_barrier_at
       rw [towerConst_sq B.hc B.hα]
       exact hlimit.trans hfinal
 
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 /-- All-order compatibility wrapper for `estimate_cutoff_at`. -/
 theorem estimate_of_cutoff
     {G : RealizedMetricFamily (I := I) (M := M) Real}

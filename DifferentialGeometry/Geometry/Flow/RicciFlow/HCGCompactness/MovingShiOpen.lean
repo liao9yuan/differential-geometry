@@ -528,6 +528,7 @@ omit [NeZero (Module.finrank ℝ E)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [SigmaCompactSpace M] [T2Space M] in
 /-- Fixed-order complete Bernstein adapter from a generated cutoff family and
 Kato control through the requested order. -/
 private theorem complete_of_cutoff
@@ -599,6 +600,7 @@ omit [NeZero (Module.finrank ℝ E)]
   [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [SigmaCompactSpace M] [T2Space M] in
 /-- Fixed-order complete Bernstein adapter from a point-centered barrier-cutoff
 family and Kato control through the requested order. -/
 private theorem complete_of_barrier

@@ -43,6 +43,7 @@ abbrev IsInnerDualHeatSupersolutionOn
     (u : Real → M → F) : Prop :=
   IsInnerDualHeatPotSupersolutionOn D G (fun _ _ ↦ 0) C u
 
+omit [CompleteSpace E] in
 theorem properCone_heat_pot_supersolution_mem_of_potential_le
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -71,6 +72,7 @@ theorem properCone_heat_pot_supersolution_mem_of_potential_le
   intro y hy
   simpa [innerScalarization, real_inner_comm] using hscalar y hy t ht x
 
+omit [CompleteSpace E] in
 theorem properCone_heat_supersolution_mem
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]

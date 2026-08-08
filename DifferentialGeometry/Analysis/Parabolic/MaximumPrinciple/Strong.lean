@@ -342,7 +342,6 @@ private theorem strong_derivWithin_add_eps_mul_time
   rw [derivWithin_fun_add hw hlinear, hderiv_linear]
 
 theorem strict_barrier_on_compact_set_of_isInteriorPoint
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 ≤ T)
@@ -470,7 +469,6 @@ theorem strict_barrier_on_compact_set_of_isInteriorPoint
 
 theorem strict_barrier_on_compact_set
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 ≤ T)
@@ -524,7 +522,7 @@ private theorem deriv_nonneg_at_right_endpoint
   exact nonneg_of_mul_nonneg_left (by simpa [mul_comm] using hnonneg) ha
 
 theorem scalar_hopf_boundary_point_of_barrier_of_isInteriorPoint
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [T2Space M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 ≤ T)
@@ -588,7 +586,7 @@ theorem scalar_hopf_boundary_point_of_barrier_of_isInteriorPoint
 
 theorem scalar_hopf_boundary_point_of_barrier
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [T2Space M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 ≤ T)
@@ -670,7 +668,7 @@ private theorem hasDerivAt_comp_neg_gradient
 
 theorem scalar_hopf_boundary_point_of_defining_function
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    [T2Space M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
@@ -947,7 +945,7 @@ theorem scalar_hopf_boundary_point_of_defining_function
 
 theorem scalar_strong_maximum_principle_of_barrier
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
@@ -1185,7 +1183,7 @@ theorem scalar_strong_maximum_principle_of_barrier
 
 theorem scalar_strong_maximum_principle_time_dependent_metric_of_barrier
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
@@ -1241,7 +1239,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_of_barrier
 
 theorem scalar_strong_maximum_principle_fixed_metric_of_barrier
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (g : SmoothRiemannianMetric I M)
     {T : Real} (hT : 0 < T)
@@ -1371,7 +1369,7 @@ theorem scalar_strong_maximum_principle_fixed_metric_of_barrier
 
 theorem scalar_strong_maximum_principle_fixed_metric_with_drift_of_barrier
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (g : SmoothRiemannianMetric I M)
     {T : Real} (hT : 0 < T)
@@ -1446,7 +1444,7 @@ theorem scalar_strong_maximum_principle_fixed_metric_with_drift_of_barrier
 
 theorem scalar_strong_maximum_principle_with_potential_of_barrier
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)

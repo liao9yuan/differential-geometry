@@ -56,6 +56,7 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [CompleteSpace E] in
 theorem parallelProperCone_heat_pot_supersolution_mem_of_potential_le
     [∀ x, CompleteSpace (F x)]
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -86,6 +87,7 @@ theorem parallelProperCone_heat_pot_supersolution_mem_of_potential_le
   apply (hC.transport_mem_iff F x x₀ (u t x)).1
   simpa using hfixed t ht x
 
+omit [CompleteSpace E] in
 theorem parallelProperCone_heat_supersolution_mem
     [∀ x, CompleteSpace (F x)]
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]

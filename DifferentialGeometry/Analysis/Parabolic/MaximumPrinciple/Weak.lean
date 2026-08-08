@@ -611,7 +611,6 @@ theorem negative_region_parabolic_lower_bound
 
 
 theorem parabolic_sub_time_curve_identity
-    [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -805,7 +804,7 @@ private theorem derivWithin_add_eps_mul_time
 
 theorem strict_barrier_nonnegative_of_positive_time
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -923,7 +922,7 @@ theorem strict_barrier_nonnegative_of_positive_time
 
 theorem strict_barrier_positive_region
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1035,7 +1034,6 @@ theorem strict_barrier_positive_region
 
 theorem strict_barrier_cpt
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1157,7 +1155,6 @@ theorem strict_barrier_cpt
 
 theorem strict_barrier_cpt_of_upperSupport
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1317,7 +1314,7 @@ theorem strict_barrier_cpt_of_upperSupport
 
 theorem strict_barrier_nonnegative
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1351,7 +1348,7 @@ theorem strict_barrier_nonnegative
 
 theorem scalar_weak_maximum_principle_sub_const_of_parabolic_nonpos
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1404,7 +1401,7 @@ theorem scalar_weak_maximum_principle_sub_const_of_parabolic_nonpos
 
 theorem scalar_sub_const_positive_region
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1463,7 +1460,7 @@ theorem scalar_sub_const_positive_region
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1559,7 +1556,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_positive_time
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1661,7 +1658,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
 
 theorem scalar_weak_maximum_principle_supersolution_lower_bound
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1709,7 +1706,7 @@ theorem scalar_weak_maximum_principle_supersolution_lower_bound
 
 theorem scalar_weak_maximum_principle_pointwise_bounds
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1775,7 +1772,7 @@ theorem scalar_weak_maximum_principle_pointwise_bounds
 
 theorem scalar_weak_maximum_principle_linear_reaction_nonneg
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -1823,7 +1820,7 @@ theorem scalar_weak_maximum_principle_linear_reaction_nonneg
 
 theorem linear_reaction_nonneg
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
@@ -1904,7 +1901,7 @@ theorem linear_reaction_nonneg
 
 theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_values
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
@@ -2020,7 +2017,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_va
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_regular
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
@@ -2109,7 +2106,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_r
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_regular_positive_time
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
@@ -2379,7 +2376,7 @@ theorem scalarWeakMaximumPrincipleLipschitzOnValueSetBound
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
@@ -2427,7 +2424,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_o
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
@@ -2483,7 +2480,7 @@ end
 
 theorem scalar_weak_maximum_principle_ode_compare_supersolution
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
@@ -2527,7 +2524,7 @@ theorem scalar_weak_maximum_principle_ode_compare_supersolution
 
 theorem scalar_weak_maximum_principle_ode_compare_subsolution
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
@@ -2587,7 +2584,7 @@ theorem scalar_weak_maximum_principle_ode_compare_subsolution
 
 theorem scalar_weak_maximum_principle_ode_compare_supersolution_autonomous
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)

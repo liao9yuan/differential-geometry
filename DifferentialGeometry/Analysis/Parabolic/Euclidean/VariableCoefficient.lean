@@ -83,7 +83,6 @@ theorem parabolicMatrixCoefficientRescale_apply
       a i j (parabolicDilationAt r p0 p) := rfl
 
 omit [DecidableEq n] [Nonempty n] in
-@[simp]
 theorem parabolicMatrixCoefficientRescale_origin
     (r : NNReal) (p0 : ParabolicPoint (Euc n))
     (a : n → n → ParabolicPoint (Euc n) → Real) (i j : n) :

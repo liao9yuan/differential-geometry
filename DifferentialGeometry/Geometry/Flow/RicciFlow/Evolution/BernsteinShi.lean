@@ -271,11 +271,12 @@ theorem heatOperator_linear_combo
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_subsolution_affine_bound
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
-    (T : Real) (hT : 0 <= T)
+    (T : Real)
     (X : Real -> (x : M) -> TangentSpace I x)
     (F : Real -> M -> Real) (a b : Real)
     (hw_cont : ContinuousOn
@@ -428,6 +429,7 @@ def bernsteinConstant (cReact alpha : Real) : Real :=
 
 
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem bernstein_first_derivative_estimate
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -642,7 +644,7 @@ theorem bernstein_first_derivative_estimate
     exact hbv
   have hPartA :
       ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M, F t x <= a + b * t := by
-    apply scalar_subsolution_affine_bound (I := I) G T (le_of_lt hT) X F a b
+    apply scalar_subsolution_affine_bound (I := I) G T X F a b
     · simpa only [hadef, hbdef, F] using hF_cont
     · intro t ht htpos x; simpa only [F] using hF_time t ht htpos x
     · intro t ht htpos y; simpa only [F] using hF_space t ht htpos y

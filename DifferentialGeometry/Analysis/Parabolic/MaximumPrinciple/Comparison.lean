@@ -20,6 +20,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
+omit [CompleteSpace E] in
 theorem heat_pot_comparison
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -40,6 +41,7 @@ theorem heat_pot_comparison
   intro t ht x
   exact sub_nonneg.mp (hnonneg t ht x)
 
+omit [CompleteSpace E] in
 theorem heat_pot_eq_of_initial_eq
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -60,6 +62,7 @@ theorem heat_pot_eq_of_initial_eq
   intro t ht x
   exact le_antisymm (huv t ht x) (hvu t ht x)
 
+omit [CompleteSpace E] in
 theorem heat_comparison
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -73,6 +76,7 @@ theorem heat_comparison
     hu.toSubsolution hv.toSupersolution 0
     (by simp) hinit
 
+omit [CompleteSpace E] in
 theorem heat_subsolution_comparison
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -85,6 +89,7 @@ theorem heat_subsolution_comparison
   exact heat_pot_comparison (I := I) G hT (fun _ _ ↦ 0) u v hu hv 0
     (by simp) hinit
 
+omit [CompleteSpace E] in
 theorem heat_eq_of_initial_eq
     [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
