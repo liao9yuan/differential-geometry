@@ -43,12 +43,12 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+variable [CompleteSpace E] [T2Space M]
 
 
 
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M]
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E]
     [T2Space M] in
 theorem mdifferentiableAt_finset_sum_smul
     {ι : Type*} (s : Finset ι) (f : ι -> M -> Real) (c : ι -> Real) (y : M)
@@ -68,7 +68,7 @@ theorem mdifferentiableAt_finset_sum_smul
       exact ((hfa.const_smul (c a)).congr_of_eventuallyEq
         (Filter.Eventually.of_forall fun z => by simp [smul_eq_mul])).add htail
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 /-- The gradient of a finite scalar linear combination is the same linear
 combination of the gradients. -/
 theorem gradientFun_sum
@@ -107,7 +107,7 @@ theorem gradientFun_sum
       rw [ih (fun i hi => hf i (by simp [hi]))]
       rw [Finset.sum_insert has]
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 /-- Differentiability of the gradient section of a finite scalar sum
 `Σ_{i ∈ s} c i · f i`, given the per-summand gradient-section data. -/
 theorem mdiffAt_gradientFun_finset_sum_smul
@@ -187,7 +187,7 @@ theorem mdiffAt_gradientFun_finset_sum_smul
         exact congrArg (fun z => (⟨y, z⟩ : TotalSpace E (TangentSpace I))) (congrFun hsplit y)
       rw [hgoal_eq]
       exact mdifferentiableAt_add_section (hgradfa.smul_const_section (a := c a)) htail
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 theorem laplacianAt_linear_combo_finset
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
@@ -238,7 +238,7 @@ theorem laplacianAt_linear_combo_finset
       rw [Finset.sum_insert has]
       ring
 omit [CompleteSpace E] in
-omit [SigmaCompactSpace M]
+omit
   [T2Space M] in
 theorem heatOperator_linear_combo_finset
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -481,7 +481,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+variable [CompleteSpace E] [T2Space M]
 
 
 
@@ -504,7 +504,7 @@ def TowerHeatBoundOn
       d ≤ wLap k (t : Real) x +
         (-2 * w (k + 1) (t : Real) x + towerReactionSum (M := M) w c k (t : Real) x)
 
-omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+omit [TopologicalSpace M] [T2Space M] in
 /-- The schematic reaction sum is monotone in its coefficient. -/
 theorem towerReactionSum_mono
     {w : ℕ -> Real -> M -> Real} {c₀ c₁ : Real} {k : ℕ} {t : Real} {x : M}
@@ -519,7 +519,7 @@ theorem towerReactionSum_mono
       (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+omit [TopologicalSpace M] [T2Space M] in
 /-- A tower heat bound remains valid after increasing the reaction cost. -/
 theorem TowerHeatBoundOn.mono_cost
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -595,7 +595,7 @@ namespace BernsteinTower
 variable [I.Boundaryless]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable {G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real}
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 theorem sqrt_pow_mul_w_le (B : BernsteinTower (I := I) G) (j : ℕ)
     {t : Real} {x : M}
     (hbound : t ^ j * B.w j t x <= (towerConst B.c B.α j) ^ 2 * B.K ^ 2) :
@@ -629,7 +629,7 @@ theorem tpow_mul_sqrt_triple {t : Real} (ht : 0 <= t) (k j : ℕ) (hj : j <= k)
           (Real.sqrt a * Real.sqrt b * Real.sqrt d) := by rw [hsplit]
     _ = Real.sqrt (t ^ j) * Real.sqrt a * (Real.sqrt (t ^ (k - j)) * Real.sqrt b) *
           (Real.sqrt (t ^ k) * Real.sqrt d) := by ring
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 theorem tpow_mul_reactionSum_le (B : BernsteinTower (I := I) G) (k : ℕ)
     {t : Real} (htpos : 0 < t) {x : M}
     (hIH : ∀ j, j <= k -> t ^ j * B.w j t x <= (towerConst B.c B.α j) ^ 2 * B.K ^ 2) :
@@ -692,7 +692,7 @@ theorem sum_range_succ_split {α : Type*} [AddCommMonoid α] (f : ℕ -> α) {m 
   rw [Finset.sum_range_succ]
   congr 1
   rw [Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (by omega : 0 < m)]
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
     {t : Real} (htpos : 0 < t) {x : M}
     (hmem : t ∈ Set.Icc 0 B.T)
@@ -823,7 +823,7 @@ theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= 
 
 def Gcoef (B : BernsteinTower (I := I) G) (m i : ℕ) : Real :=
   if i = m then 1 else towerBeta B.c B.α (towerConst B.c B.α) m * towerFactCoeff m i
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 theorem Gcoef_nonneg (B : BernsteinTower (I := I) G) (m i : ℕ) :
     0 ≤ Gcoef (I := I) B m i := by
   rw [Gcoef]
@@ -837,7 +837,7 @@ written as a single `Finset.range (m+1)` sum. -/
 def Gfun (B : BernsteinTower (I := I) G) (m : ℕ) (s : Real) (y : M) : Real :=
   ∑ i ∈ Finset.range (m + 1), Gcoef (I := I) B m i * s ^ i * B.w i s y
 omit [CompleteSpace E]
-  [SigmaCompactSpace M]
+
   [T2Space M] in
 theorem Gfun_heatOp (B : BernsteinTower (I := I) G) (m : ℕ)
     {t : Real} (hmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M) :
@@ -857,7 +857,7 @@ theorem Gfun_heatOp (B : BernsteinTower (I := I) G) (m : ℕ)
     (fun i => B.w i t) (fun i => Gcoef (I := I) B m i * t ^ i) x
     (fun i _ y => B.hw_space i t hmem htpos y)
     (fun i _ => B.hw_grad i t hmem htpos x)
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 theorem Gfun_hasDerivWithin (B : BernsteinTower (I := I) G) (m : ℕ)
     {t : Real} (_htmem : t ∈ Set.Icc 0 B.T) (_htpos : 0 < t) (x : M)
     (dvec : ℕ -> Real)
@@ -886,7 +886,7 @@ theorem Gfun_hasDerivWithin (B : BernsteinTower (I := I) G) (m : ℕ)
   · filter_upwards with s using by simp [mul_assoc]
   · simp [mul_assoc]
 omit [CompleteSpace E]
-  [SigmaCompactSpace M]
+
   [T2Space M] in
 theorem Gfun_parabolic_eq (B : BernsteinTower (I := I) G) (m : ℕ)
     {t : Real} (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
@@ -913,7 +913,7 @@ theorem Gfun_parabolic_eq (B : BernsteinTower (I := I) G) (m : ℕ)
   intro i _
   rw [B.hLap i t htmem htpos x]
   ring
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [CompleteSpace E] [T2Space M] in
 theorem Wterms_nonpos (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
     {t : Real} (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (htK : t * B.K <= B.α) (x : M) :
     (∑ i ∈ Finset.range (m + 1),
@@ -1026,7 +1026,7 @@ theorem Wterms_nonpos (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
   linarith [hmidsum, htop]
 
 omit [CompleteSpace E]
-  [SigmaCompactSpace M]
+
   [T2Space M] in
 /-- The Bernstein combination retains the top-order dissipation before the
 maximum-principle step.  Lower-level negative terms telescope against the time

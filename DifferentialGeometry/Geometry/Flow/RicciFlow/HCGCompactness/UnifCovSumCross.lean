@@ -290,9 +290,9 @@ section DiffStepNorm
 -- manifold/compactness instances the weakest-hypothesis fibre block above deliberately dropped.
 -- Session-10 also gave `MetricCovDerivLinear`'s `covStep`/`diffStep`/`diffStep_eval` a
 -- `[NeZero (finrank)]` + `[BoundarylessManifold]` requirement, so the whole tower re-adds them here.
-variable [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+variable [T2Space M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- `covStep` of the zero field vanishes (`R`-linearity, via `covStep_add`). -/
 private theorem covStep_zero' (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
     covStep (I := I) gRef s 0 = 0 := by
@@ -302,7 +302,7 @@ private theorem covStep_zero' (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
       covStep (I := I) gRef s 0 + 0 := by rw [add_zero]; exact h.symm
   exact add_left_cancel hc
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- The order-1 case of the telescoping identity: `∇^{g₁} T − ∇^{g₂} T` is exactly the
 single-step connection difference `diffStep g₁ g₂ r T`. -/
 private theorem iterCov_one_eq
@@ -318,7 +318,7 @@ private theorem iterCov_one_eq
   rw [covStep_zero', zero_add]
   rfl
 
-omit [SigmaCompactSpace M]
+omit
   [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M] in
 /-- **Fibre norm of the single-step connection difference** (brick T-A, the `(0,s)` analogue of
@@ -527,7 +527,7 @@ Two grep-confirmed-absent micro-bridges fold `diffStep_norm_le`'s output
 the class jet bound to the explicit constant `C(Λ,Λ') = (3/2)·√(Λ³)·Λ'` (confirming the
 Session-6 estimate). -/
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- **The `CovariantDerivative.difference` argument-swap antisymmetry**:
 `D(cov,cov')(w)(u) = −D(cov',cov)(w)(u)`.  Since `D(cov,cov')(σ x) = ∇^{cov}σ − ∇^{cov'}σ`, swapping
 the two connections negates it (each vector is the value at `x` of a smooth section). -/
@@ -562,7 +562,7 @@ private theorem diff_swap
     rw [← hσ]; simpa using h
   rw [h1, h2]; abel
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- **Bridge 1**: swapping the two connection arguments of `connectionDifferenceTensorAt` leaves the
 `g₀`-Hilbert–Schmidt fibre norm unchanged (the connection-argument-swap antisymmetry of
 `normSqRS(connectionDifferenceTensorAt …)`).  Proved componentwise at a `g₀`-orthonormal basis
@@ -608,7 +608,7 @@ private theorem connDiffTensor_normSqRS_swap
   rw [hc1, hc2, diff_swap cov cov' x (basis (low 1)) (basis (low 0)), map_neg]
   ring
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- The reference metric's own first covariant derivative vanishes (metric compatibility):
 `metricCovDeriv g g 1 x = 0`.  Reduces through `metricCovDeriv_one_apply_section` to
 `nabla0SFun (LC g) (metricTensorField g) = 0` (`nabla_metric_zero`). -/
@@ -628,7 +628,7 @@ private theorem metricCovDeriv_self_one_zero (g : SmoothRiemannianMetric I M) (x
       (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g) X x]
   rfl
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- **Bridge 2**: at order `1` the metric-difference seminorm against the reference metric equals the
 metric covariant-derivative seminorm, `metricDerivNorm 1 g₂ g₁ g₁ x = metricCovDerivNorm 1 g₂ g₁ x`. -/
 private theorem metricDeriv_eq_covDeriv_norm (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
@@ -639,7 +639,7 @@ private theorem metricDeriv_eq_covDeriv_norm (g₁ g₂ : SmoothRiemannianMetric
     rw [metricCovDeriv_self_one_zero (I := I) g₁ x]; abel
   rw [h0]
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- **The jet-composed `j = 1` endpoint** (brick T, order-1 boundary).  Under Λ-comparability of
 `g₁, g₂` and a first-order metric covariant-derivative bound `Λ'` (both on `K`), the single-step
 connection-difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S` is bounded fibre-wise at `x ∈ K` by the
@@ -712,7 +712,7 @@ the `D_N`-recursion shape `C(CA,Λ,Λ',s,n)·(‖S‖ + ‖∇₂S‖)`.  This i
 lower-order `iterCov g₂` currency); the three T-B consumers (S0 `j ≥ 2`, 2a-tel comp (b), S1 `hcurv`)
 close once B2 discharges `hA1`. -/
 
-omit [SigmaCompactSpace M]
+omit
   [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M] in
 /-- **Base-Leibniz norm atom for the mixed connection-difference derivative** (brick T-B, the `∇₂A`
@@ -923,7 +923,7 @@ theorem covStepDiff_norm_le
     _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) * (CA * NS + NA * NcovS) := by
         rw [hB]; ring
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- **Base-Leibniz jet-composed norm bound for the mixed connection-difference derivative** (brick
 T-B, the `D_N`-recursion endpoint).  Folds the a=0 connection-difference atom `NA` of
 `covStepDiff_norm_le` into the class jet currency via `NA ≤ (3/2)·√(Λ³)·Λ'` (Koszul, as in
@@ -1087,7 +1087,7 @@ section VolumeMeasure
 open MeasureTheory
 open scoped ENNReal
 
-variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [T2Space M] [CompactSpace M]
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩

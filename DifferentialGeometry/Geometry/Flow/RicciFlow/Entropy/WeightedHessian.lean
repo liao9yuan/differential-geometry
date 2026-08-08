@@ -40,7 +40,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I 1 M]
-variable [SigmaCompactSpace M] [T2Space M]
+variable [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
@@ -156,7 +156,7 @@ private theorem int7_zero
       hg012345 hg6
   simpa only [g0, g1, g2, g3, g4, g5, g6, Pi.add_apply] using hall
 
-omit [SigmaCompactSpace M] [T2Space M] in
+omit [T2Space M] in
 private theorem norm_sq_shift
     (g : SmoothRiemannianMetric I M) {x : M}
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)

@@ -30,14 +30,13 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M]
+  [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 private lemma secondCovDeriv_section_contMDiff' (g : SmoothRiemannianMetric I M) (k : ℕ)
     {T : Π b : M, TensorRSSpace 0 k I b}
     (hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 k ℝ E)) ∞
@@ -71,7 +70,7 @@ def secondCovDerivCc (g : SmoothRiemannianMetric I M) (k : ℕ)
 
 
 omit [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma secondCovDerivCc_toSection_apply (g : SmoothRiemannianMetric I M) (k : ℕ)
     {V : Π b : M, TangentSpace I b}
     (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -82,7 +81,7 @@ omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [BoundarylessManifold I M] [T2Space M] in
 private lemma tensor00Scalar_unitZeroSec (x : M) :
     tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
   rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0)]
@@ -93,14 +92,14 @@ private lemma tensor00Scalar_unitZeroSec (x : M) :
 
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
-    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+    [BoundarylessManifold I M] [T2Space M] in
 private lemma tensor0S_eq_of_toModel_eq {t : ℕ} {x : M} {T T' : Tensor0SSpace t I x}
     (h : ∀ v : Fin t → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' :=
   Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [BoundarylessManifold I M] [T2Space M] in
 private lemma tensor0S_zero_span (x : M) (τ : Tensor0SSpace 0 I x) :
     τ = tensor00Scalar (I := I) (M := M) x τ • unitZeroSec (I := I) (M := M) x := by
   apply tensor0S_eq_of_toModel_eq (I := I) (M := M)
@@ -118,7 +117,7 @@ private lemma tensor0S_zero_span (x : M) (τ : Tensor0SSpace 0 I x) :
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [BoundarylessManifold I M] [T2Space M] in
 private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
     tensor0SToTensorRS (I := I) (M := M) x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from W)
@@ -138,7 +137,7 @@ private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x)
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+    [T2Space M] in
 private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SToTensorRS (I := I) (M := M) x (C - D) =
       tensor0SToTensorRS (I := I) (M := M) x C - tensor0SToTensorRS (I := I) (M := M) x D := by
@@ -163,7 +162,7 @@ private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-    [T2Space M] [SigmaCompactSpace M] in
+    [T2Space M] in
 private lemma rs_sub_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
     (τ : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A - B) τ =
@@ -172,7 +171,7 @@ private lemma rs_sub_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
 
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
-    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+    [BoundarylessManifold I M] [T2Space M] in
 private lemma rs_add_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
     (τ : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A + B) τ =
@@ -182,7 +181,6 @@ private lemma rs_add_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 private lemma tensorCov_toFun_sub (g : SmoothRiemannianMetric I M) (k : ℕ)
     {P Q : Π y : M, TensorRSSpace 0 k I y} {x : M}
     (hP : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 k ℝ E)) ∞
@@ -419,7 +417,7 @@ private lemma covApplyCovGradCc_connection_slot_read
         (V x))]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
-  [SigmaCompactSpace M] in
+  in
 private lemma riemannOp_self_eq_connection_covApply
     (g : SmoothRiemannianMetric I M) {V X : Π b : M, TangentSpace I b}
     (hVs : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -587,7 +585,7 @@ private lemma secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_expansion
   rw [hT1, hT3, hq2, hq4]
   rw [hL2a, hL2b, ContinuousLinearMap.sub_apply, rs_sub_apply']
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_curvature
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {V X : Π b : M, TangentSpace I b}

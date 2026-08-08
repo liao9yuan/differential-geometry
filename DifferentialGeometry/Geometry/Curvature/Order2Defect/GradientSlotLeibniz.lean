@@ -30,7 +30,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M]
+  [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -41,7 +41,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 theorem covApply_covApply_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -61,7 +60,6 @@ theorem covApply_covApply_section_contMDiff
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 theorem covApply_christoffel_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -86,7 +84,7 @@ theorem covApply_christoffel_section_contMDiff
   exact covApplyRS_contMDiff (I := I) g r s hT hChristoffel
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorSecondCovDeriv_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -115,7 +113,7 @@ theorem tensorSecondCovDeriv_section_contMDiff
   rw [hpt]
   exact hSub
 
-omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] in
 theorem frozenFrameTrace_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -155,7 +153,6 @@ theorem frozenFrameTrace_section_contMDiff
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 theorem tensorCov_toFun_finset_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {ι : Type*} (t : Finset ι) (σ : ι → Π b : M, TensorRSSpace r s I b) {x : M}
@@ -190,7 +187,7 @@ theorem tensorCov_toFun_finset_sum
     rw [hsection, hadd, Finset.sum_insert ha]
     rw [ih]
 
-omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] in
 theorem covDeriv_frozenFrameTrace_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -224,7 +221,7 @@ theorem covDeriv_frozenFrameTrace_eq_sum
       (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y) hσ]
   rw [ContinuousLinearMap.sum_apply]
 
-omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] in
 theorem covDeriv_rawConnLap_eq_frozenFrameTrace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -261,7 +258,7 @@ theorem covDeriv_rawConnLap_eq_frozenFrameTrace_sum
   rw [hcongr]
   exact covDeriv_frozenFrameTrace_eq_sum (I := I) g r s hT x v
 
-omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] in
 theorem covDerivMap_rawConnLap_eq_frozenFrameTrace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -279,7 +276,7 @@ theorem covDerivMap_rawConnLap_eq_frozenFrameTrace_sum
   rw [ContinuousLinearMap.sum_apply]
   exact covDeriv_rawConnLap_eq_frozenFrameTrace_sum (I := I) g r s hT x v
 
-omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] in
 theorem covGradBundleEquiv_covDeriv_rawConnLap_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}

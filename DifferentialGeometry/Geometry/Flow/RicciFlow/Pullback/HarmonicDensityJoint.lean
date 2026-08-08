@@ -56,7 +56,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M]
 
 /-! ## A jointly regular spatial pushforward -/
 
@@ -177,7 +177,7 @@ private theorem hmfSpecPush_cd
 
 /-! ## Frozen-frame density -/
 
-omit [CompactSpace M] [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
+omit [CompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Applying the inverse-cometric endomorphism to a frozen smooth
 orthonormal-frame vector gives a smooth tangent section, jointly with an
 unused finite-spectral parameter. -/
@@ -287,7 +287,7 @@ private theorem hmfSpecFrozen_cd
     contMDiffWithinAt_const
   exact hc.mul (ContMDiffWithinAt.sum (fun i _ ↦ hterm i p hp))
 
-omit [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+omit [I.Boundaryless] [CompactSpace M] [T2Space M]
   [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The pointwise density computed in the moving-centre orthonormal frame is
 equal, on the frozen frame's orthonormality neighbourhood, to the expression
@@ -595,7 +595,7 @@ represented by that tensor. -/
 /-! ### The rank-one mass bridge -/
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Every upper-rank-zero mixed tensor is the canonical rank-zero lift of
 its value on the unit scalar tensor. -/
 private theorem hmfUnitLift
@@ -636,7 +636,7 @@ private theorem hmfUnitLift
     _ = (S.toSection x) c := congrArg (S.toSection x) hc.symm
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- The inverse Gram matrix on the fixed model basis is a genuine inverse
 metric in that basis. -/
 private theorem hmfChartInv
@@ -659,7 +659,7 @@ private theorem hmfChartInv
     simpa only [Matrix.mul_apply, gramMatrixAt_apply, Matrix.one_apply] using hij
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- For one-forms, the recursively defined Gram-matrix tensor pairing is the
 target-metric pairing of their musical sharps. -/
 private theorem hmfCovInner
@@ -737,7 +737,7 @@ private theorem hmfCovInner
           (Tensor0SSpace.toModel α) (Tensor0SSpace.toModel β) := htensor.symm
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Pointwise, the target pairing of the raised HMF one-forms is exactly the
 mixed-tensor pairing used by `hmfMass`. -/
 private theorem hmfMassPt

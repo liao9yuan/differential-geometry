@@ -53,7 +53,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M]
 
 /-! ## The global intrinsic local addition on a connected component -/
 
@@ -88,7 +88,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [CompactSpace M]
-  [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
   [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -146,7 +146,7 @@ noncomputable def hmfAdd
       (⟨x, hmfUnknown (I := I) q S x⟩ : TangentBundle I M)).2
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+  [CompactSpace M] [T2Space M]
   [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfUnknown_zero
     (q : SmoothRiemannianMetric I M) (x : M) :

@@ -74,7 +74,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+variable [CompleteSpace E] [T2Space M]
 variable [I.Boundaryless] [CompactSpace M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -85,7 +85,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 
-omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [CompactSpace M] in
+omit [TopologicalSpace M] [T2Space M] [CompactSpace M] in
 theorem towerReactionSum_mono_const
     (w : ℕ -> Real -> M -> Real) {c c' : Real} (hcc : c <= c')
     (k : ℕ) (t : Real) (x : M) :

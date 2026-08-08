@@ -38,7 +38,7 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-      [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+      [BoundarylessManifold I M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -292,7 +292,7 @@ theorem kappaDiff_h2
     simp only [B, Real.sq_sqrt (hQ R)]]
   simpa only [Q, AF, Real.sq_sqrt hSF] using hle
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
 private theorem normSq_scaled
     (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ : ℕ)

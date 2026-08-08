@@ -68,10 +68,10 @@ theorem edist_vol_pos
       (I := I) (M := M) g
   exact ENNReal.toReal_pos (hUopen.measure_pos μ hUne).ne' (measure_ne_top μ U)
 
-variable [I.Boundaryless] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M]
+variable [I.Boundaryless] [CompleteSpace E] [T2Space M]
   [T2Space (TangentBundle I M)]
 
-omit [T2Space M] [SigmaCompactSpace M] in
+omit [T2Space M] in
 omit [NeZero (Module.finrank ℝ E)] in
 /-- Around the centre of a normal chart, its scalar volume density has a
 strictly positive lower bound on one model ball. -/
@@ -121,7 +121,7 @@ private theorem normal_dens_lower
 
 omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
-  [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+  [T2Space M] [T2Space (TangentBundle I M)] in
 private lemma sqrt_inner_le_norm
     (g : SmoothRiemannianMetric I M) (p : M) (w : E) :
     Real.sqrt (g.inner p w w) ≤ (Real.sqrt ‖g.inner p‖ + 1) * ‖w‖ := by
@@ -139,7 +139,7 @@ private lemma sqrt_inner_le_norm
 
 omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
-  [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+  [T2Space M] [T2Space (TangentBundle I M)] in
 private lemma exists_inner_bound
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ w : E,

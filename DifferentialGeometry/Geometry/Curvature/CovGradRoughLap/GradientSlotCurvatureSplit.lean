@@ -33,13 +33,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M]
+  [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 theorem baseSlotCurv_eq_riemannOp
     (g : SmoothRiemannianMetric I M)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -89,7 +88,7 @@ def orthoFrameSec (g : SmoothRiemannianMetric I M) (x : M)
   ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
     (smoothOrthoFrame_smooth (I := I) g x i)
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 @[simp] lemma orthoFrameSec_apply (g : SmoothRiemannianMetric I M) (x : M)
     (i : Fin (Module.finrank ℝ E)) (b : M) :
     orthoFrameSec (I := I) (M := M) g x i b = smoothOrthoFrame (I := I) g x i b := rfl
@@ -115,7 +114,6 @@ theorem gradSlotCurv_frameSum_toModel_eq
     baseSlotCurv_eq_riemannOp, orthoFrameSec_apply]
 
 omit [CompactSpace M] [I.Boundaryless] in
-omit [SigmaCompactSpace M] in
 theorem ricEndoRaisedFib_inner_eq_frame_trace
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     g.inner x (ricEndoRaisedFib (I := I) g x v) w =
@@ -196,7 +194,7 @@ private lemma slot_skew_cancel {n s : ℕ} (k : Fin (s + 1)) (Rmat : Fin n → F
   rw [hrw, hs, zero_mul]
 
 omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma curv_inner_left_reduce
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -301,7 +299,7 @@ private lemma curv_inner_left_reduce
   rw [neg_inj]
   rw [Finset.sum_comm]
 
-omit [CompactSpace M] [SigmaCompactSpace M] in
+omit [CompactSpace M] in
 theorem tensor0SCov_riemannSec_metric_skew_section
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -399,7 +397,7 @@ theorem tensor0SCov_riemannSec_metric_skew_section
     exact hcore
   exact hgoal_eq
 
-omit [CompactSpace M] [SigmaCompactSpace M] in
+omit [CompactSpace M] in
 theorem tensor0SCov_riemannOp_metric_skew
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (v w : TangentSpace I x) (T U : Tensor0SSpace (s + 1) I x) :

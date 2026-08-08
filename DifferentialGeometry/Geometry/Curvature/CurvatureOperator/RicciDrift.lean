@@ -42,7 +42,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I 1 M]
-variable [SigmaCompactSpace M] [T2Space M]
+variable [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
@@ -55,7 +55,6 @@ noncomputable def ricGradForm [I.Boundaryless]
   partialEval0SField (I := I) (metricRicci (I := I) (M := M) g)
     (grad_g (I := I) g ⟨_, hf⟩)
 
-omit [SigmaCompactSpace M] in
 @[simp] theorem ricGradForm_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -78,7 +77,6 @@ noncomputable def ricGradVec [I.Boundaryless]
           cotangentSection_chartComponent_contMDiffOn
             (I := I) (ricGradForm (I := I) g hf) a j))
 
-omit [SigmaCompactSpace M] in
 @[simp] theorem ricGradVec_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -99,7 +97,6 @@ noncomputable def ricDriftVec [I.Boundaryless]
       ((contMDiff_const.mul (metricScalar_smooth (I := I) (M := M) g)).smul_section
         (grad_g (I := I) g ⟨_, hf⟩).contMDiff))
 
-omit [SigmaCompactSpace M] in
 @[simp] theorem ricDriftVec_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -108,7 +105,7 @@ omit [SigmaCompactSpace M] in
         grad_g (I := I) g ⟨_, hf⟩ x :=
   rfl
 
-private theorem div_ricGrad [I.Boundaryless]
+private theorem div_ricGrad [I.Boundaryless] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
     divergence (I := I) (metricCov (I := I) (M := M) g)
@@ -366,7 +363,6 @@ theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
 
 
 
-omit [SigmaCompactSpace M] in
 theorem ricDriftAct [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :

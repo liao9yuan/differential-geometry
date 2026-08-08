@@ -27,7 +27,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+variable [CompleteSpace E] [T2Space M]
 
 
 
@@ -113,7 +113,7 @@ theorem exists_lt_scalarLowerBarrier_before_blowup
     field_simp [ne_of_gt hc0, ne_of_gt hC_pos]
   exact ⟨T, hT_pos, hT_lt, by simpa [hbar_eq] using hB_lt_C⟩
 
-omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+omit [TopologicalSpace M] [T2Space M] in
 theorem scalar_endpoint_le_blowupTime_of_lower_barrier_bound
     [Nonempty M]
     {scalar : Real -> M -> Real} {n c0 omega : Real}
@@ -138,7 +138,7 @@ theorem scalar_endpoint_le_blowupTime_of_lower_barrier_bound
 
 namespace InitialScalarMinimum
 
-omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+omit [TopologicalSpace M] [T2Space M] in
 theorem pos_of_forall_pos
     {scalar : Real -> M -> Real} {c0 : Real}
     (hmin : InitialScalarMinimum (M := M) scalar c0)
@@ -151,7 +151,7 @@ end InitialScalarMinimum
 
 namespace ScalarBoundedAboveOnSlab
 
-omit [SigmaCompactSpace M] [T2Space M] in
+omit [T2Space M] in
 theorem of_continuousOn
     [CompactSpace M]
     {scalar : Real -> M -> Real} {T : Real}
