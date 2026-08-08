@@ -1668,62 +1668,88 @@ private theorem wedge_mul_assoc [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] 
   rw [sum_smul_wedge_right (m := m + n) (n := p)]
   simp_rw [elementaryCovector_assoc b I J]
 
-private theorem elementaryCovector_wedge_antisymm
-    [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
-    {d : ℕ} (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
-    (I : Fin m → Fin d) (J : Fin n → Fin d) :
-    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
-      ((-1 : 𝕜)^(m*n) •
-        ((elementaryCovector b J) ∧[𝕜]
-          (elementaryCovector b I))).domDomCongr Fin.finAddCongr := by
-  rw [elementaryCovector_wedge b I J, elementaryCovector_wedge b J I]
-  obtain ⟨B, dual⟩ := exists_predual_basis b
-  apply toAlternatingMap_injective
-  apply B.ext_alternating
-  intro v hv
-  simp only [coe_toAlternatingMap, domDomCongr_apply, smul_apply]
-  change (elementaryCovector b (Fin.addCases I J)) (B ∘ v) =
-    (-1 : 𝕜)^(m*n) • (elementaryCovector b (Fin.addCases J I)) (B ∘ (v ∘ Fin.finAddCongr))
-  rw [elementaryCovector_basis_eval B b dual (Fin.addCases I J) v,
-    elementaryCovector_basis_eval B b dual (Fin.addCases J I)
-      (v ∘ Fin.finAddCongr)]
-  have h_comm := Fin.multiKroneckerDelta_addCases_comm (R := 𝕜) I J v
-  simp only [smul_eq_mul]
-  rw [h_comm, ← mul_assoc, ← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow, one_mul]
+private lemma tensorProductMap_mul_swap (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
+    (tensorProductMap h g (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
+      (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap.domDomCongr finAddFlip := by
+  ext w
+  simp only [ContinuousMultilinearMap.coe_coe, tensorProductMap_apply,
+    ContinuousLinearMap.mul_apply', MultilinearMap.domDomCongr_apply]
+  conv_lhs => rw [mul_comm]
+  congr 1
+  · apply congrArg g
+    funext x
+    change w (Fin.natAdd n x) = w (finAddFlip (Fin.castAdd n x))
+    rw [← finAddFlip_apply_castAdd]
+  · apply congrArg h
+    funext x
+    change w (Fin.castAdd m x) = w (finAddFlip (Fin.natAdd m x))
+    rw [finAddFlip_apply_natAdd]
 
-private theorem wedge_antisymm [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+private lemma finAddCongr_val (i : Fin (m + n)) : (Fin.finAddCongr i).val = i.val := rfl
+
+private lemma finAddFlip_trans_finAddCongr_eq :
+    (finAddFlip.trans (Fin.finAddCongr (m := n) (n := m)) : Equiv.Perm (Fin (m + n))) =
+      (_root_.finCongr (add_comm m n)).symm.permCongr (Equiv.Perm.addCasesSwapPerm n m) := by
+  ext i
+  by_cases h : i.val < m
+  · simp [Equiv.permCongr_apply, Equiv.Perm.addCasesSwapPerm, _root_.finCongr,
+      finAddFlip_apply_mk_left h, finAddCongr_val]
+    simp [h]
+  · have hge : m ≤ i.val := le_of_not_gt h
+    simp [Equiv.permCongr_apply, Equiv.Perm.addCasesSwapPerm, _root_.finCongr,
+      finAddFlip_apply_mk_right hge, finAddCongr_val]
+    simp [h]
+
+private lemma finAddFlip_trans_finAddCongr_sign :
+    Equiv.Perm.sign (finAddFlip.trans (Fin.finAddCongr (m := n) (n := m)) :
+      Equiv.Perm (Fin (m + n))) = (-1 : ℤˣ) ^ (m * n) := by
+  rw [finAddFlip_trans_finAddCongr_eq, Equiv.Perm.sign_permCongr, Equiv.Perm.addCasesSwapPerm_sign]
+  exact congrArg (fun k : ℕ => (-1 : ℤˣ) ^ k) (Nat.mul_comm n m)
+
+private lemma units_neg_one_pow_smul (k : ℕ) (x : 𝕜) :
+    ((-1 : ℤˣ) ^ k) • x = (-1 : 𝕜) ^ k • x := by
+  rw [Units.smul_def]
+  rw [← Int.cast_smul_eq_zsmul (R := 𝕜) ((((-1 : ℤˣ) ^ k : ℤˣ) : ℤ)) x]
+  have hcast : ((((-1 : ℤˣ) ^ k : ℤˣ) : ℤ) : 𝕜) = (-1 : 𝕜) ^ k := by
+    induction k with
+    | zero => norm_num
+    | succ k ih =>
+      rw [show (-1 : ℤˣ) ^ (k + 1) = (-1 : ℤˣ) ^ k * (-1 : ℤˣ) from pow_succ (-1 : ℤˣ) k]
+      rw [pow_succ, Units.val_mul, Int.cast_mul, ih]
+      norm_num
+  rw [hcast]
+
+theorem wedge_antisymm [CharZero 𝕜]
     (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     (g ∧[𝕜] h) = ((-1 : 𝕜)^(m*n) • (h ∧[𝕜] g)).domDomCongr Fin.finAddCongr := by
-  set d' := Module.finrank 𝕜 M
-  let B : Module.Basis (Fin d') 𝕜 M := Module.finBasis 𝕜 M
-  let b : Module.Basis (Fin d') 𝕜 (M →L[𝕜] 𝕜) := B.cDualBasis
-  let bm := elementaryCovectorBasis (k := m) B
-  let bn := elementaryCovectorBasis (k := n) B
-  have hbm : ∀ I : Fin m ↪o Fin d', bm I = elementaryCovector b ↑I :=
-    fun I => elementaryCovectorBasis_apply B I
-  have hbn : ∀ J : Fin n ↪o Fin d', bn J = elementaryCovector b ↑J :=
-    fun J => elementaryCovectorBasis_apply B J
-  nth_rw 1 [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]
-  nth_rw 2 [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]
-  nth_rw 1 [show h = ∑ J, bn.repr h J • bn J from (bn.sum_repr h).symm]
-  nth_rw 2 [show h = ∑ J, bn.repr h J • bn J from (bn.sum_repr h).symm]
-  simp only [hbm, hbn]
-  simp_rw [sum_smul_wedge_left, sum_smul_wedge_right]
   ext v
-  simp only [ContinuousAlternatingMap.sum_apply, ContinuousAlternatingMap.smul_apply,
-    ContinuousAlternatingMap.domDomCongr_apply, smul_eq_mul]
-  rw [Finset.mul_sum]
-  simp_rw [Finset.mul_sum]
-  conv_lhs => rw [Finset.sum_comm]
-  apply Finset.sum_congr rfl
-  intro J _
-  apply Finset.sum_congr rfl
-  intro I _
-  have h_anti := DFunLike.congr_fun (elementaryCovector_wedge_antisymm b I J) v
-  simp only [ContinuousAlternatingMap.domDomCongr_apply, ContinuousAlternatingMap.smul_apply,
-    smul_eq_mul] at h_anti
-  rw [h_anti]
-  ring
+  rw [ContinuousAlternatingMap.domDomCongr_apply, ContinuousAlternatingMap.smul_apply]
+  rw [wedge_product_eq_alternatization (m := m) (n := n) g h (ContinuousLinearMap.mul 𝕜 𝕜) v]
+  rw [wedge_product_eq_alternatization (m := n) (n := m) h g (ContinuousLinearMap.mul 𝕜 𝕜)
+    (v ∘ Fin.finAddCongr)]
+  rw [tensorProductMap_mul_swap g h]
+  rw [ContinuousAlternatingMap.alternatization_domDomCongr finAddFlip]
+  rw [AlternatingMap.domDomCongr_apply]
+  have h_comp : (v ∘ Fin.finAddCongr) ∘ finAddFlip =
+      v ∘ (finAddFlip.trans (Fin.finAddCongr (m := n) (n := m))) := by
+    funext x
+    rfl
+  rw [h_comp]
+  rw [AlternatingMap.map_perm (g := MultilinearMap.alternatization
+      (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap)
+      v (finAddFlip.trans (Fin.finAddCongr (m := n) (n := m)))]
+  rw [finAddFlip_trans_finAddCongr_sign]
+  have hc : (↑(n.factorial * m.factorial) : 𝕜)⁻¹ = (↑(m.factorial * n.factorial) : 𝕜)⁻¹ := by
+    congr 1
+    rw [Nat.mul_comm]
+  rw [hc]
+  rw [units_neg_one_pow_smul (m * n)]
+  rw [smul_smul, smul_smul]
+  apply congrArg (fun s : 𝕜 => s • MultilinearMap.alternatization
+      (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap v)
+  have hsq : (-1 : 𝕜) ^ (m * n) * (-1 : 𝕜) ^ (m * n) = 1 := by
+    rw [← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow]
+  rw [mul_comm ((-1 : 𝕜) ^ (m * n)) (↑(m.factorial * n.factorial))⁻¹, mul_assoc, hsq, mul_one]
 
 theorem elementaryCovector_iprod_wedge_product
     [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
@@ -1858,7 +1884,8 @@ lemma domDomCongr_finAddFlip_wedge_self (g : M [⋀^Fin m]→L[ℝ] ℝ) :
     ContinuousLinearMap.mul_apply']
   simp [Function.comp_def, finAddFlip, mul_comm]
 
-private theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
+omit [FiniteDimensional ℝ M] in
+theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
     (g ∧[ℝ] g) = 0 := by
   let h := wedge_antisymm g g
   rw[Odd.neg_one_pow (Odd.mul m_odd m_odd)] at h

@@ -351,7 +351,55 @@ theorem reindex_comp {k l m : ℕ} (e : Fin k ≃ Fin l) (f : Fin l ≃ Fin m)
     reindex e.symm (reindex e α) = α := by
   rw [reindex_comp e e.symm α, Equiv.self_trans_symm, reindex_refl]
 
-notation α " ∧ " β => DifferentialForm.wedge α β
+notation:70 α " ∧ " β => DifferentialForm.wedge α β
+
+theorem add_wedge {k l : ℕ} (α β : DifferentialForm IM M k)
+    (γ : DifferentialForm IM M l) :
+    DifferentialForm.wedge (α + β) γ = DifferentialForm.wedge α γ + DifferentialForm.wedge β γ := by
+  ext x
+  change ContinuousAlternatingMap.wedge_product (α x + β x) (γ x) (ContinuousLinearMap.mul ℝ ℝ) =
+    ContinuousAlternatingMap.wedge_product (α x) (γ x) (ContinuousLinearMap.mul ℝ ℝ) +
+    ContinuousAlternatingMap.wedge_product (β x) (γ x) (ContinuousLinearMap.mul ℝ ℝ)
+  exact ContinuousAlternatingMap.add_wedge (α x) (β x) (γ x) (ContinuousLinearMap.mul ℝ ℝ)
+
+theorem wedge_add {k l : ℕ} (α : DifferentialForm IM M k)
+    (β γ : DifferentialForm IM M l) :
+    DifferentialForm.wedge α (β + γ) = DifferentialForm.wedge α β + DifferentialForm.wedge α γ := by
+  ext x
+  change ContinuousAlternatingMap.wedge_product (α x) (β x + γ x) (ContinuousLinearMap.mul ℝ ℝ) =
+    ContinuousAlternatingMap.wedge_product (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ) +
+    ContinuousAlternatingMap.wedge_product (α x) (γ x) (ContinuousLinearMap.mul ℝ ℝ)
+  exact ContinuousAlternatingMap.wedge_add (α x) (β x) (γ x) (ContinuousLinearMap.mul ℝ ℝ)
+
+theorem smul_wedge {k l : ℕ} (c : ℝ) (α : DifferentialForm IM M k)
+    (β : DifferentialForm IM M l) :
+    DifferentialForm.wedge (c • α) β = c • DifferentialForm.wedge α β := by
+  ext x
+  change ContinuousAlternatingMap.wedge_product (c • α x) (β x) (ContinuousLinearMap.mul ℝ ℝ) =
+    c • ContinuousAlternatingMap.wedge_product (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ)
+  exact ContinuousAlternatingMap.smul_wedge c (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ)
+
+theorem wedge_smul {k l : ℕ} (c : ℝ) (α : DifferentialForm IM M k)
+    (β : DifferentialForm IM M l) :
+    DifferentialForm.wedge α (c • β) = c • DifferentialForm.wedge α β := by
+  ext x
+  change ContinuousAlternatingMap.wedge_product (α x) (c • β x) (ContinuousLinearMap.mul ℝ ℝ) =
+    c • ContinuousAlternatingMap.wedge_product (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ)
+  exact ContinuousAlternatingMap.wedge_smul c (α x) (β x) (ContinuousLinearMap.mul ℝ ℝ)
+
+theorem wedge_comm {k l : ℕ} (α : DifferentialForm IM M k) (β : DifferentialForm IM M l) :
+    DifferentialForm.wedge α β = reindex (Fin.finAddCongr (m := l) (n := k))
+      ((-1 : ℝ)^(k*l) • DifferentialForm.wedge β α) := by
+  ext x
+  simp only [DifferentialForm.wedge, reindex_apply, smul_apply]
+  exact ContinuousAlternatingMap.wedge_antisymm (𝕜 := ℝ) (M := TangentSpace IM x)
+    (m := k) (n := l) (α x) (β x)
+
+theorem wedge_self_odd_zero {k : ℕ} (α : DifferentialForm IM M k) (hk : Odd k) :
+    DifferentialForm.wedge α α = 0 := by
+  ext x
+  exact ContinuousAlternatingMap.wedge_self_odd_zero (M := TangentSpace IM x) (m := k)
+    (α x) hk
 
 end DifferentialForm
 
