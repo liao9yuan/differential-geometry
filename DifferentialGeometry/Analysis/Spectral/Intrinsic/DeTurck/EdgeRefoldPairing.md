@@ -2,12 +2,15 @@
 
 ## Current state
 
-`EdgeRefoldPairing.lean` is source focused-GREEN with no local warning and its
-exact target is GREEN.  The checked artifact contains the complete pointwise
-pair-trace calculation, the global formal-adjoint identity, the Green step, and
-both existential assembly theorems.  A direct axiom audit of `edgePair_l2`,
-`edgePair_inner`, `edgeTop_inner`, `edgeTop_green`, `exists_edgeRefold`, and
-`exists_edgeSlopeRef` reports exactly
+`EdgeRefoldPairing.lean` is focused-GREEN with no local warning. On 2026-08-08
+the checked source was extended with the polarized monomial API separating
+coefficient state `P`, acted tensor `U`, and test tensor `V`. The complete
+checked artifact contains the diagonal and polarized pointwise pair-trace
+calculation, the global formal-adjoint identities, the Green steps, and both
+existential assembly theorems. A prior direct axiom audit of `edgePair_l2`,
+`edgePair_inner`,
+`edgeTop_inner`, `edgeTop_green`, `exists_edgeRefold`, and `exists_edgeSlopeRef`
+reported exactly
 `[propext, Classical.choice, Quot.sound]`, with no `sorryAx`.
 
 The file contains no proof placeholder or new axiom.  Its public source-level
@@ -30,11 +33,20 @@ producers are:
   rank-two pair-trace field acting on `W`; and
 - `edgeSlot2`, `edgeRaise2`, `edgeProd4`, and `edgePairPartner`, the explicit
   smooth rank-four formal-partner carrier for one moving monomial;
+- `edgePairPartnerBi`, whose raised pair contains the coefficient state `P`
+  while its unraised pair contains the independent test tensor `V`, together
+  with `edgePartnerBi_self` and `edgePartnerBi_eval`;
 - `edgeSlot2_eval`, `edgeRaise2_eval`, `edgeProd4_eval`, and
   `edgePartner_eval`, which expose that carrier componentwise;
 - `edgeMono_eval`, `edgePair_l2`, and `edgePair_inner`, which source-assemble
   the exact pointwise and global formal-adjoint identity for one public
   moving pair-trace monomial;
+- `edgePair_l2_bi`, `edgePair_inner_bi`, and `edgePair_green_bi`, the
+  corresponding polarized monomial identities; `edgePair_green_bi` specializes
+  the acted rank-four tensor to `nabla² U` and moves exactly one derivative to
+  give the single term `-<covDivergence partner(P,V), nabla U>`. The original
+  diagonal declarations are now specializations of the first two declarations
+  in source;
 - `edgeLiePartner`, `edgeKernelPartner`, `edgeRiemPartner`, and
   `edgeTopPartner`, culminating in `edgeTop_inner`, the corresponding exact
   formal-partner identity for the complete top coefficient;
@@ -86,12 +98,14 @@ the closed-edge argument.  Likewise, separately bounding `edgeRicciHalf` as a
 generic order-zero coefficient would reintroduce an inadmissible dependence on
 spatial derivatives of the arbitrary edge solution.
 
-The pair-trace obstruction and its algebraic formal-adjoint step are now
-focused-verified without editing the claimed coefficient-refold file:
-`edgeMonoRefold` is the public reconstruction, `edgePair_l2` moves one monomial
-onto its rank-four partner, and `edgeTop_inner` reaches the complete `C2`
-returned by `exists_edgeRefold`.  The pair-trace implementation lives in the
-small `MovingPairTrace.lean` module; that module and its generic output-slot
+The diagonal pair-trace obstruction and its algebraic formal-adjoint step are
+focused-verified: `edgeMonoRefold` is the public reconstruction, `edgePair_l2`
+moves one monomial onto its rank-four partner, and `edgeTop_inner` reaches the
+complete diagonal `C2` returned by `exists_edgeRefold`. The new polarized
+monomial identity reuses that same component proof with inner coefficient
+occurrences changed to `P` and outer test occurrences changed to `V`; it has
+now been focused-verified. The pair-trace implementation lives in the small
+`MovingPairTrace.lean` module; that module and its generic output-slot
 permutation dependency are exact-current.
 
 The covariant Green step is now present at source level as `edgeTop_green`; it
@@ -108,14 +122,25 @@ containing one undifferentiated `W`, hence the required
 `nabla C2` as a generic coefficient jet, which would destroy the sharp zero at
 `W = 0` and introduce an inadmissible additive source.
 
-Thus the exact remaining producer in this file is the structural divergence
-bound for `edgeTopPartner`: pointwise, its squared fibre norm must be bounded
-by a background constant times `delta^2` times the squared fibre norm of
-`nabla W` (for `delta <= 1/2`).  The existing inverse-metric raised-endomorphism
-jet grid and the operator-field diagonal product grid are the canonical APIs
-for this step: order one of the former is linear in `nabla W`, while every
-order-one product term retains one undifferentiated `W`, which supplies the
-small `delta` factor.  A generic coefficient-jet envelope is not sharp enough.
+The older claim that the diagonal structural divergence bound was still the
+remaining producer is stale. `EdgePartnerBound.lean` now proves
+`edgeTop_zero` and `edgeTop_one`, and `EdgeRateBound.lean` consumes them in
+`edgeTop_pair_le` via
+`exists_iteratedCovGrad_covDivergence_l2_le`. The live Route (c) gap is instead
+polarized: differentiating `edgePairPartnerBi P V` naturally produces both
+`|nabla P| |V|` and `|P| |nabla V|` contributions. Controlling those terms in
+the required spectral pairing is a new structural estimate, not merely the
+routine algebra and one exact integration by parts proved by `edgePair_l2_bi`
+and `edgePair_green_bi`. The Green theorem itself introduces no second term:
+all dependence on acted tensor `U` is confined to `nabla² U` before Green and
+`nabla U` afterward.
+
+No top-level polarized wrapper was added here. The existing `edgeTopPair`
+bakes the same tensor into both its path state and its acted second derivative,
+so a genuine `P`/acted-`U`/test-`V` theorem first needs a separately polarized
+top family. Moreover the full low-base `C2` kernel is not definitionally just
+the closed-edge `edgeTopPair`, so that bridge must be designed at its actual
+consumer layer rather than hidden behind a misleading wrapper in this file.
 
 The exact algebraic declarations `edgeRicciHalf`, `edgePairMono`,
 `edgeMonoRefold`, `edgeLiePairFam`, and `edgeLiePair_apply` live in
@@ -127,16 +152,26 @@ energy module.
 ## Progress accounting
 
 - Exact endpoint `ricci_flow_unif_existence`: **0%**; its theorem has not been
-  proved.  Dedicated uniform low-regularity machinery across the current lane
-  is about **84--87%**.  The refold artifact is now exact-current and
-  axiom-clean; the final contraction/existence assembly remains outstanding.
+  proved.  Dedicated fixed-background Route-(c) machinery is approximately
+  **92%** under the binding `ROUTE_C_PLAN.md` denominator.  The refold artifact
+  is exact-current and axiom-clean; the homogeneous Rung-3 Gårding producer and
+  final contraction/existence assembly remain outstanding.
 - `exists_edgeRefold` and `exists_edgeSlopeRef`: **100% as stated**,
   focused-GREEN, exact-current, and axiom-clean.  This does not by itself prove
   the closed-edge contraction or the uniform existence endpoint.
-- The next mathematical producer is the sharp structural bound for
-  `covDivergence edgeTopPartner`, followed by its combination with the already
-  verified principal/lower pairing estimates.  The uniform contraction,
-  solution construction, and lifetime-uniformization theorem remain separate
-  endpoint work.
+- Polarized monomial partner machinery: **100% as stated and focused-GREEN**.
+  The formal-partner identity is routine algebraic reuse and its monomial Green
+  corollary is one exact integration by parts; the polarized top-family bridge
+  and cross divergence/Sobolev estimate have not been implemented.
+- The monomial `P`/acted-`U`/test-`V` API remains reusable, but exact source
+  audit shows that the binding Route-(c) consumer should first recombine the
+  `C0+C2` whole slope: the full low-base `C2` is not `edgeTopPair`.  The next
+  mathematical producer is therefore the homogeneous diagonal full-slope
+  Rung-3 Gårding theorem, not a claim that this monomial API already supplies
+  the complete top family.  A future genuinely polarized route would still
+  require the cross partner
+  bound and its spectral pairing. The uniform contraction, solution
+  construction, and lifetime-uniformization theorem remain separate endpoint
+  work.
 - The Hamilton positive-Ricci endpoint is unchanged until the independent
   uniform-existence and maximal-flow inputs are genuinely proved.

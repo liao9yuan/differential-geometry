@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.LocalPinching
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MaximalFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarFiniteTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
@@ -634,9 +635,8 @@ theorem ham3_short_smooth_solution
 
 The source-level theorem records the endpoint needed by Section 12: a normalized
 maximal interval starting at `0`, the initial metric, smooth Ricci-flow data, and
-the blow-up package.  The short-time stage is cited through
-`ham3_short_smooth_solution`; the maximal-continuation status is tracked in the
-same-name markdown note. -/
+the blow-up package.  It assembles the supremal compatible-flow constructor
+`exists_max_flow` with `rmUnbounded_of_maximal`. -/
 theorem ham3_flow_exists_normalized
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -644,9 +644,25 @@ theorem ham3_flow_exists_normalized
     exists omega : Real, exists h0ω : 0 < omega,
       exists P : Ham3FlowPackage (I := I) (M := M) g0,
         P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω := by
-  -- Keep the short-time dependency explicit for the eventual maximal package.
-  have _hshort := ham3_short_smooth_solution (I := I) (M := M) hM g0
-  sorry
+  letI : CompactSpace M := hM.1
+  letI : ConnectedSpace M := hM.2.1
+  letI : I.Boundaryless := hM.2.2.1
+  have hdim : Module.finrank Real E = 3 := hM.2.2.2
+  rcases exists_max_flow (I := I) (M := M) g0 hdim hpos with
+    ⟨omega, h0ω, Smax, hSmax, hstart, hmax⟩
+  have hcurv : Rm04NormSqUnboundedAt (I := I) Smax Smax.base.rm04 :=
+    rmUnbounded_of_maximal (I := I) hdim hSmax hmax
+      (rm04Realizes_metric (I := I) Smax)
+  let P : Ham3FlowPackage (I := I) (M := M) g0 :=
+    { D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω
+      S := Smax
+      isSmooth := smoothOfSol (I := I) Smax hSmax
+      startsAt := by simpa using hstart
+      curvUnbounded := by
+        intro K
+        rcases hcurv K with ⟨t, x, ht0, htω, hK⟩
+        exact ⟨t, x, ⟨ht0, htω⟩, by simpa [curvatureNormSq] using hK⟩ }
+  exact ⟨omega, h0ω, P, rfl⟩
 
 /-- Compatibility nonempty form of the normalized maximal-flow setup. -/
 theorem ham3_flow_exists

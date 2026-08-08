@@ -572,6 +572,22 @@ def edgePairPartner (g gm : SmoothRiemannianMetric I M)
     (edgeProd4 (I := I) (M := M) g
       (edgeRaise2 (I := I) (M := M) g gm S) S)
 
+/-- Polarized formal partner of one moving Palatini pair-trace monomial.
+The coefficient state `P` occupies the raised pair, while `V` is the test
+tensor in the unraised pair. -/
+def edgePairPartnerBi (g gm : SmoothRiemannianMetric I M)
+    (P V : SmoothCcTensor g 0 2) (sigma : Equiv.Perm (Fin 4)) :
+    SmoothCcTensor g 0 4 :=
+  domDomCongrSection (I := I) g sigma.symm
+    (edgeProd4 (I := I) (M := M) g
+      (edgeRaise2 (I := I) (M := M) g gm P) V)
+
+/-- The diagonal polarized partner is the original formal partner. -/
+theorem edgePartnerBi_self (g gm : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g 0 2) (sigma : Equiv.Perm (Fin 4)) :
+    edgePairPartnerBi (I := I) (M := M) g gm S S sigma =
+      edgePairPartner (I := I) (M := M) g gm S sigma := rfl
+
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 /-- Evaluation of `edgeSlot2`: the chosen covariant slot is read through the
@@ -732,6 +748,25 @@ theorem edgePartner_eval (g gm : SmoothRiemannianMetric I M)
         unitModel (I := I) (M := M) g 2 S x
           ![v (σ.symm 2), v (σ.symm 3)] := by
   rw [edgePairPartner, domDomCongrSection_unitModel,
+    ContinuousMultilinearMap.domDomCongr_apply, edgeProd4_eval,
+    edgeRaise2_eval]
+  congr 2
+  all_goals
+    funext k
+    fin_cases k <;> rfl
+
+/-- Component formula for the polarized formal partner of one monomial. -/
+theorem edgePartnerBi_eval (g gm : SmoothRiemannianMetric I M)
+    (P V : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4))
+    (x : M) (v : Fin 4 → E) :
+    unitModel (I := I) (M := M) g 4
+        (edgePairPartnerBi (I := I) (M := M) g gm P V σ) x v =
+      unitModel (I := I) (M := M) g 2 P x
+          ![fullRaisedEndoField (I := I) (M := M) g gm x (v (σ.symm 0)),
+            fullRaisedEndoField (I := I) (M := M) g gm x (v (σ.symm 1))] *
+        unitModel (I := I) (M := M) g 2 V x
+          ![v (σ.symm 2), v (σ.symm 3)] := by
+  rw [edgePairPartnerBi, domDomCongrSection_unitModel,
     ContinuousMultilinearMap.domDomCongr_apply, edgeProd4_eval,
     edgeRaise2_eval]
   congr 2
@@ -908,21 +943,22 @@ set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
-    (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
+    (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (x : M) :
-    tensorInnerPointwise (I := I) (M := M) g 0 2 x (S.toFun x)
+    tensorInnerPointwise (I := I) (M := M) g 0 2 x (V.toFun x)
         ((appCc (I := I) (M := M) g 2 2
-          (edgePairMono (I := I) (M := M) g gm G σ) S).toFun x) =
+          (edgePairMono (I := I) (M := M) g gm G σ) P).toFun x) =
       tensorInnerPointwise (I := I) (M := M) g 0 4 x
-        ((edgePairPartner (I := I) (M := M) g gm S σ).toFun x) (G.toFun x) := by
+        ((edgePairPartnerBi (I := I) (M := M) g gm P V σ).toFun x)
+        (G.toFun x) := by
   classical
   obtain ⟨e, bse, hbse, horth⟩ :=
     exists_orthoFrame_basis_E (I := I) (M := M) g x
-  rw [edge_inner0 (I := I) (M := M) g 2 S
+  rw [edge_inner0 (I := I) (M := M) g 2 V
       (appCc (I := I) (M := M) g 2 2
-        (edgePairMono (I := I) (M := M) g gm G σ) S) x e bse hbse horth,
+        (edgePairMono (I := I) (M := M) g gm G σ) P) x e bse hbse horth,
     edge_inner0 (I := I) (M := M) g 4
-      (edgePairPartner (I := I) (M := M) g gm S σ) G x e bse hbse horth,
+      (edgePairPartnerBi (I := I) (M := M) g gm P V σ) G x e bse hbse horth,
     edge_sum2]
   have hvec2 : ∀ i j : Fin (Module.finrank Real E),
       (fun k => (e (![i, j] k) : E)) = ![(e i : E), (e j : E)] := by
@@ -940,7 +976,7 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
   have hmove : ∀ i j : Fin (Module.finrank Real E),
       (∑ a : Fin (Module.finrank Real E),
         ∑ b : Fin (Module.finrank Real E),
-          unitModel (I := I) (M := M) g 2 S x
+          unitModel (I := I) (M := M) g 2 P x
               ![(smoothOrthoFrame (I := I) gm x a x : E),
                 (smoothOrthoFrame (I := I) gm x b x : E)] *
             unitModel (I := I) (M := M) g 4 G x
@@ -950,7 +986,7 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
                   ![(e i : E), (e j : E)]) : Fin 4 → E) (σ k))) =
         ∑ a : Fin (Module.finrank Real E),
         ∑ b : Fin (Module.finrank Real E),
-          unitModel (I := I) (M := M) g 2 S x
+          unitModel (I := I) (M := M) g 2 P x
               ![gInvRaisedEndo (I := I) g gm x (e a),
                 gInvRaisedEndo (I := I) g gm x (e b)] *
             unitModel (I := I) (M := M) g 4 G x
@@ -958,30 +994,30 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
                 (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
                 (σ k)) := by
     intro i j
-    let Sx : Tensor0SSpace 2 I x :=
-      (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from S.toSection x)
+    let Px : Tensor0SSpace 2 I x :=
+      (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 2 I x from P.toSection x)
         (unitTensor (I := I) (M := M) x)
     let Gx : Tensor0SSpace 4 I x :=
       (show Tensor0SSpace 0 I x →L[Real] Tensor0SSpace 4 I x from G.toSection x)
         (unitTensor (I := I) (M := M) x)
     have hm := edge_bitrace_move (I := I) (M := M) g gm x
-      (edgeFeedCLM (I := I) (M := M) 0 x Sx ![])
+      (edgeFeedCLM (I := I) (M := M) 0 x Px ![])
       (edgeFeedCLM (I := I) (M := M) 2 x
         (slotPerm4Fib (I := I) (M := M) x σ Gx) ![(e i : E), (e j : E)])
       e horth
     simpa only [edgeFeedCLM_apply, slotPerm4Fib_toModel,
-      ContinuousMultilinearMap.domDomCongr_apply, Sx, Gx, unitModel] using hm
+      ContinuousMultilinearMap.domDomCongr_apply, Px, Gx, unitModel] using hm
   calc
     (∑ i, ∑ j,
-        unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
+        unitModel (I := I) (M := M) g 2 V x ![(e i : E), (e j : E)] *
           unitModel (I := I) (M := M) g 2
             (appCc (I := I) (M := M) g 2 2
-              (edgePairMono (I := I) (M := M) g gm G σ) S) x
+              (edgePairMono (I := I) (M := M) g gm G σ) P) x
             ![(e i : E), (e j : E)]) =
       ∑ i, ∑ j,
-        unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
+        unitModel (I := I) (M := M) g 2 V x ![(e i : E), (e j : E)] *
           (∑ a, ∑ b,
-            unitModel (I := I) (M := M) g 2 S x
+            unitModel (I := I) (M := M) g 2 P x
                 ![(smoothOrthoFrame (I := I) gm x a x : E),
                   (smoothOrthoFrame (I := I) gm x b x : E)] *
               unitModel (I := I) (M := M) g 4 G x
@@ -991,11 +1027,11 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
                     ![(e i : E), (e j : E)]) : Fin 4 → E) (σ k))) := by
         refine Finset.sum_congr rfl fun i _ => ?_
         refine Finset.sum_congr rfl fun j _ => ?_
-        rw [edgeMono_eval (I := I) (M := M) g gm S G σ x]
+        rw [edgeMono_eval (I := I) (M := M) g gm P G σ x]
     _ = ∑ i, ∑ j,
-        unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
+        unitModel (I := I) (M := M) g 2 V x ![(e i : E), (e j : E)] *
           (∑ a, ∑ b,
-            unitModel (I := I) (M := M) g 2 S x
+            unitModel (I := I) (M := M) g 2 P x
                 ![gInvRaisedEndo (I := I) g gm x (e a),
                   gInvRaisedEndo (I := I) g gm x (e b)] *
               unitModel (I := I) (M := M) g 4 G x
@@ -1006,18 +1042,18 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [hmove i j]
     _ = ∑ a, ∑ b, ∑ i, ∑ j,
-        (unitModel (I := I) (M := M) g 2 S x
+        (unitModel (I := I) (M := M) g 2 P x
               ![gInvRaisedEndo (I := I) g gm x (e a),
                 gInvRaisedEndo (I := I) g gm x (e b)] *
-            unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)]) *
+            unitModel (I := I) (M := M) g 2 V x ![(e i : E), (e j : E)]) *
           unitModel (I := I) (M := M) g 4 G x
             (fun k => (Fin.cons (e a : E)
               (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
               (σ k)) := by
         rw [show (∑ i, ∑ j,
-            unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
+            unitModel (I := I) (M := M) g 2 V x ![(e i : E), (e j : E)] *
               (∑ a, ∑ b,
-                unitModel (I := I) (M := M) g 2 S x
+                unitModel (I := I) (M := M) g 2 P x
                     ![gInvRaisedEndo (I := I) g gm x (e a),
                       gInvRaisedEndo (I := I) g gm x (e b)] *
                   unitModel (I := I) (M := M) g 4 G x
@@ -1025,8 +1061,8 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
                       (Fin.cons (e b : E) ![(e i : E), (e j : E)]) : Fin 4 → E)
                       (σ k)))) =
             ∑ i, ∑ j, ∑ a, ∑ b,
-              unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
-                (unitModel (I := I) (M := M) g 2 S x
+              unitModel (I := I) (M := M) g 2 V x ![(e i : E), (e j : E)] *
+                (unitModel (I := I) (M := M) g 2 P x
                     ![gInvRaisedEndo (I := I) g gm x (e a),
                       gInvRaisedEndo (I := I) g gm x (e b)] *
                   unitModel (I := I) (M := M) g 4 G x
@@ -1039,8 +1075,8 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
               refine Finset.sum_congr rfl fun a _ => ?_
               rw [Finset.mul_sum]]
         rw [edge_sum4_comm (fun i j a b =>
-          unitModel (I := I) (M := M) g 2 S x ![(e i : E), (e j : E)] *
-            (unitModel (I := I) (M := M) g 2 S x
+          unitModel (I := I) (M := M) g 2 V x ![(e i : E), (e j : E)] *
+            (unitModel (I := I) (M := M) g 2 P x
                 ![gInvRaisedEndo (I := I) g gm x (e a),
                   gInvRaisedEndo (I := I) g gm x (e b)] *
               unitModel (I := I) (M := M) g 4 G x
@@ -1053,10 +1089,10 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
         refine Finset.sum_congr rfl fun j _ => ?_
         ring
     _ = ∑ K : Fin 4 → Fin (Module.finrank Real E),
-        (unitModel (I := I) (M := M) g 2 S x
+        (unitModel (I := I) (M := M) g 2 P x
               ![gInvRaisedEndo (I := I) g gm x (e (K 0)),
                 gInvRaisedEndo (I := I) g gm x (e (K 1))] *
-            unitModel (I := I) (M := M) g 2 S x
+            unitModel (I := I) (M := M) g 2 V x
               ![(e (K 2) : E), (e (K 3) : E)]) *
           unitModel (I := I) (M := M) g 4 G x
             (fun k => (e (K (σ k)) : E)) := by
@@ -1071,7 +1107,7 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
           Matrix.head_cons, Matrix.tail_cons]
     _ = ∑ J : Fin 4 → Fin (Module.finrank Real E),
         unitModel (I := I) (M := M) g 4
-            (edgePairPartner (I := I) (M := M) g gm S σ) x
+            (edgePairPartnerBi (I := I) (M := M) g gm P V σ) x
             (fun k => (e (J k) : E)) *
           unitModel (I := I) (M := M) g 4 G x
             (fun k => (e (J k) : E)) := by
@@ -1079,16 +1115,16 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
           (Equiv.arrowCongr σ.symm
             (Equiv.refl (Fin (Module.finrank Real E))))
           (fun K =>
-            (unitModel (I := I) (M := M) g 2 S x
+            (unitModel (I := I) (M := M) g 2 P x
                   ![gInvRaisedEndo (I := I) g gm x (e (K 0)),
                     gInvRaisedEndo (I := I) g gm x (e (K 1))] *
-                unitModel (I := I) (M := M) g 2 S x
+                unitModel (I := I) (M := M) g 2 V x
                   ![(e (K 2) : E), (e (K 3) : E)]) *
               unitModel (I := I) (M := M) g 4 G x
                 (fun k => (e (K (σ k)) : E)))
           (fun J =>
             unitModel (I := I) (M := M) g 4
-                (edgePairPartner (I := I) (M := M) g gm S σ) x
+                (edgePairPartnerBi (I := I) (M := M) g gm P V σ) x
                 (fun k => (e (J k) : E)) *
               unitModel (I := I) (M := M) g 4 G x
                 (fun k => (e (J k) : E)))
@@ -1100,13 +1136,28 @@ private theorem edgePair_point (g gm : SmoothRiemannianMetric I M)
           funext k
           simp [Equiv.arrowCongr]
         rw [heqv]
-        simp only [edgePartner_eval, fullRaisedEndoField_apply,
+        simp only [edgePartnerBi_eval, fullRaisedEndoField_apply,
           Equiv.apply_symm_apply]
 
 set_option linter.unusedSectionVars false in
+/-- Exact polarized global formal-partner identity for one moving Palatini
+pair-trace monomial. -/
+theorem edgePair_l2_bi (g gm : SmoothRiemannianMetric I M)
+    (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
+    (σ : Equiv.Perm (Fin 4)) :
+    tensorL2Inner (I := I) (M := M) g 0 2 V.toFun
+        (appCc (I := I) (M := M) g 2 2
+          (edgePairMono (I := I) (M := M) g gm G σ) P).toFun =
+      tensorL2Inner (I := I) (M := M) g 0 4
+        (edgePairPartnerBi (I := I) (M := M) g gm P V σ).toFun G.toFun := by
+  classical
+  unfold tensorL2Inner
+  refine MeasureTheory.integral_congr_ae
+    (Filter.Eventually.of_forall fun x => ?_)
+  exact edgePair_point (I := I) (M := M) g gm P V G σ x
+
 /-- Exact global formal-partner identity for one moving Palatini pair-trace
-monomial.  This is the Green-ready replacement for estimating the rank-four
-coefficient and `nabla² S` separately. -/
+monomial. This is the diagonal specialization of `edgePair_l2_bi`. -/
 theorem edgePair_l2 (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) :
@@ -1115,11 +1166,60 @@ theorem edgePair_l2 (g gm : SmoothRiemannianMetric I M)
           (edgePairMono (I := I) (M := M) g gm G σ) S).toFun =
       tensorL2Inner (I := I) (M := M) g 0 4
         (edgePairPartner (I := I) (M := M) g gm S σ).toFun G.toFun := by
-  classical
-  unfold tensorL2Inner
-  refine MeasureTheory.integral_congr_ae
-    (Filter.Eventually.of_forall fun x => ?_)
-  exact edgePair_point (I := I) (M := M) g gm S G σ x
+  rw [← edgePartnerBi_self (I := I) (M := M) g gm S σ]
+  exact edgePair_l2_bi (I := I) (M := M) g gm S S G σ
+
+/-- Inner-product form of the polarized monomial identity. -/
+theorem edgePair_inner_bi (g gm : SmoothRiemannianMetric I M)
+    (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
+    (σ : Equiv.Perm (Fin 4)) :
+    Inner.inner Real V
+        (appCc (I := I) (M := M) g 2 2
+          (edgePairMono (I := I) (M := M) g gm G σ) P) =
+      Inner.inner Real
+        (edgePairPartnerBi (I := I) (M := M) g gm P V σ) G := by
+  rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
+  exact edgePair_l2_bi (I := I) (M := M) g gm P V G σ
+
+/-- Polarized Green identity for one moving Palatini pair-trace monomial. -/
+theorem edgePair_green_bi (g gm : SmoothRiemannianMetric I M)
+    (P U V : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4)) :
+    Inner.inner Real V
+        (appCc (I := I) (M := M) g 2 2
+          (edgePairMono (I := I) (M := M) g gm
+            (iteratedCovGrad (I := I) g 0 2 2 U) σ) P) =
+      -Inner.inner Real
+        (covDivergence (I := I) (M := M) g 3
+          (edgePairPartnerBi (I := I) (M := M) g gm P V σ))
+        (iteratedCovGrad (I := I) g 0 2 1 U) := by
+  let Q : SmoothCcTensor g 0 4 :=
+    edgePairPartnerBi (I := I) (M := M) g gm P V σ
+  let U₁ : SmoothCcTensor g 0 3 := iteratedCovGrad (I := I) g 0 2 1 U
+  have hjet : iteratedCovGrad (I := I) g 0 2 2 U =
+      covGrad (I := I) (M := M) g 0 3 U₁ := by
+    simpa only [U₁] using (iteratedCovGrad_succ g 0 2 1 U).symm
+  have hgreen :
+      Inner.inner Real (covGrad (I := I) (M := M) g 0 3 U₁) Q =
+        -Inner.inner Real U₁
+          (covDivergence (I := I) (M := M) g 3 Q) := by
+    rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
+    exact tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence
+      (I := I) (M := M) g 3 U₁ Q
+  calc
+    Inner.inner Real V
+        (appCc (I := I) (M := M) g 2 2
+          (edgePairMono (I := I) (M := M) g gm
+            (iteratedCovGrad (I := I) g 0 2 2 U) σ) P) =
+        Inner.inner Real Q (iteratedCovGrad (I := I) g 0 2 2 U) := by
+      exact edgePair_inner_bi (I := I) (M := M) g gm P V
+        (iteratedCovGrad (I := I) g 0 2 2 U) σ
+    _ = Inner.inner Real (covGrad (I := I) (M := M) g 0 3 U₁) Q := by
+      rw [hjet, real_inner_comm]
+    _ = -Inner.inner Real U₁
+        (covDivergence (I := I) (M := M) g 3 Q) := hgreen
+    _ = -Inner.inner Real
+        (covDivergence (I := I) (M := M) g 3 Q) U₁ := by
+      rw [real_inner_comm]
 
 /-- Inner-product form of `edgePair_l2`, convenient for finite linear
 combinations of refold monomials. -/
@@ -1131,8 +1231,8 @@ theorem edgePair_inner (g gm : SmoothRiemannianMetric I M)
           (edgePairMono (I := I) (M := M) g gm G σ) S) =
       Inner.inner Real
         (edgePairPartner (I := I) (M := M) g gm S σ) G := by
-  rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
-  exact edgePair_l2 (I := I) (M := M) g gm S G σ
+  rw [← edgePartnerBi_self (I := I) (M := M) g gm S σ]
+  exact edgePair_inner_bi (I := I) (M := M) g gm S S G σ
 
 /-- Rank-four formal partner of the DeTurck second-order pair family. -/
 def edgeLiePartner (g : SmoothRiemannianMetric I M)

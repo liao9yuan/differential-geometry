@@ -4,6 +4,20 @@ Planned 2026-07-19 (Fable, planner) on branch `codex/analytic-producers-e87b`
 @ `922dbc4ac` (worktree `C:/Users/liao9/.codex/worktrees/e87b/...`).  Executor:
 Opus 4.8 session; acceptance loop stays with the planner/user.
 
+> **HISTORICAL / SUPERSEDED PLAN.**  This ledger preserves the pre-Route-(c)
+> R1τ and early low-regularity campaign through update No. 69.  It is not the
+> current frontier or progress source.  The authoritative live design is
+> `ROUTE_C_PLAN.md`: energy-pairing-first Rung 3, completed C1 correction,
+> completed complementary spectral split and polarized monomial Green step,
+> followed by the homogeneous one-sided diagonal full-slope C0+C2
+> commutator/Gårding producer `lowbase_full3_unif`, with order
+> `eta -> exists delta2, R2 -> g in the class -> exists G`, public caps
+> `0 < delta2 < 1/3`, `0 < R2 <= 1`, and target
+> `eta * H4^2 + G * H3^2`.  The later raw/rest consumer may use
+> `G * (1 + E3)^2`; the retraction adapter must never introduce `1 / theta`.
+> Do not resume any old absolute-value C2-only, high-jet common-gate, or R1τ
+> block below.
+
 ## Target
 
 The single `sorry` of
@@ -28,7 +42,7 @@ bootstrap).  (N)'s ONLY new content is UNIFORMITY of the time over the
 `Λ`-class — i.e. uniform convergence of the engine's fixed-point iteration
 with constants depending only on class data.
 
-## Route decision (Stage 0 ratifies; do not skip)
+## Historical route decision (superseded; do not execute)
 
 **R1 (primary): quantitative uniformization of the existing engine.**
 The engine's `T` arises from a maximal-regularity fixed point; its inputs

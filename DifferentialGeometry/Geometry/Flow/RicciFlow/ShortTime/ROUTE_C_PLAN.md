@@ -141,36 +141,71 @@ The binding producer chain is now:
    fixed-background `C2/C0` action but uses the self-background `C1` action;
    `galArmVecBg_split` and `galArmPair3_split` isolate exactly the complete C1
    correction.
-6. **Rest-only Rung-3 bound — STOP at the C2 signed pairing API.**  The `C0`,
-   self-background `C1`, and static-seed pieces are routine from
-   `c0JetTowerQBg`, `c1JetTowerQ`, `appCc_h2_h2_h2`,
-   `appCc_h2_h3_h2`, `galRepHs_le g 3`, Young's inequality, and
-   `lowRegSeedMass`.  The missing theorem is the C2-only signed Rung-3 estimate,
-   under the `C3` metric class and capped `H2` state radius, with order
-   `eta -> g -> exists G` and conclusion
-   `2 * |sum w3*c_i*(Hs1 (AB.a2 T)).coeff_i| <=
-   eta * E4 + G * (1 + E3)^2` (possibly `G * E3` for C2 alone).
-   Its consumer should live in a future `LowRegA1RestPairBg.lean`; the
-   structural spectral/Garding theorem belongs in the lower DeTurck layer.
-   Do not add a partial rest theorem or new assumptions.
-   Rungs 4+ are deferred until after the solution exists, where metricwise
-   interior/corner smoothing may use metricwise high-rung constants.
+6. **Rest-only Rung-3 bound — LIVE at the diagonal full-slope
+   commutator/Gårding estimate.**  The earlier attempt to estimate the
+   fixed-background `C2` action in absolute value is superseded.  The binding
+   route is the **C0+C2 whole-slope recombination**: keep the `C0` and `C2`
+   contributions together through the diagonal Rung-3 pairing, use their
+   principal cancellation/coercivity, and seek only the one-sided upper bound
+   required by the energy inequality.  The first theorem is the homogeneous
+   analytic producer, tentatively `lowbase_full3_unif`:
+
+   ```text
+   eta > 0
+     -> exists delta2 R2,
+        0 < delta2 < 1/3 and 0 < R2 <= 1,
+        forall g in the C3 class, exists G >= 0,
+        forall 0 <= delta <= delta2, 0 <= R <= R2, ...,
+          2 * fullSlopePair3 g gBase ...
+            <= eta * H4^2 + G * H3^2.
+   ```
+
+   The later raw/rest consumer adds the static seed and routine lower pieces,
+   and only there weakens the lower term to
+   `G * (1 + E3)^2` in the bound for `galA1RestPairBg`.  Thus the
+   cap/constant order is
+   `eta -> exists delta2, R2 -> g -> exists G`; both small caps are selected
+   uniformly before the varying metric, while the lower-energy Gårding
+   constant may depend on `g`.  This is distinct from the completed C1 theorem
+   `galA1FixPair3_le`, whose correct order remains `eta -> g -> G` and whose
+   solver radius is capped afterward by `R <= 1`.
+
+   The spectral diagonalization is no longer a frontier:
+   `finite_pair_split` is complete, and `a = 1`, `b = 2` gives the required
+   Rung-3 `L2` split.  `finite_symm_scale` carries the Galerkin retraction
+   scalar and slot symmetrization into that pairing by exact linearity; it does
+   not divide by `theta` or introduce `1 / theta`, so the `theta = 0` case
+   needs no branch.  The polarized monomial
+   formal-adjoint/Green step is also
+   complete as `edgePair_l2_bi`, `edgePair_inner_bi`, and
+   `edgePair_green_bi`.  These do **not** identify the complete low-base `C2`
+   kernel with `edgeTopPair`: the latter is the closed-edge top family and the
+   full low-base kernel is not definitionally that object.  The remaining
+   analytic brick is therefore the exact diagonal full-slope low-base adapter
+   and its C0+C2 commutator/Gårding bound, not a raw
+   `oneMinus_appCc2_comm` estimate and not a standalone absolute-value C2
+   theorem.  The canonical ShortTime home for the homogeneous producer is the
+   future `LowRegBgC2Pair.lean`; a later final rest consumer may live in
+   `LowRegA1RestPairBg.lean`.  No canonical reusable lower-DeTurck theorem has
+   yet been identified; extract one only if the actual proof exposes a stable
+   generic statement.  Rungs 4+ remain deferred until after solution
+   construction, where metricwise interior/corner smoothing may use metricwise
+   high-rung constants.
 
 Current stop conditions are only: failure of the complete correction bound on
 arbitrary radii; unavoidable fourth-jet dependence in the `E4` coefficient;
-failure of the `eta * E4 + G * E3` estimate uniformly in Galerkin dimension; a
-precise missing lower API after three routes; or a genuine verification/memory
-wall.  The precise-missing-API condition has fired for the C2-only signed
-spectral/Garding pairing.  The three failed routes are: (1)
-`top_path_dev_unif` gives class-first `H2`-small `C2`, but
-`appCc_h2_h4_h2`/`appD2Hs_norm` requires a metricwise high state jet; (2)
-`top_path_h1_unif`/`appCc_h23_unif` is one derivative short of the raw
-weight-three pairing, while naive duality requires `H5`; and (3)
-`EdgeRefoldPairing.edgeTop_green` has no energy consumer because the structural
-`covDivergence edgeTopPartner` bound is missing.  The completed
-`lieBgCorr_unif`, `lowC1Corr_unif`, `galA1FixPair3_le`, and signed C1 split are
-theorem-level 100%; the unstated rest-only theorem is 0%; the dedicated
-fixed-background direct-smoothing machinery is approximately 92%;
+failure of the one-sided full-slope estimate uniformly in Galerkin dimension;
+a precise missing lower API after three routes; or a genuine
+verification/memory wall.  The old three-route audit still rules out (1) a
+direct high-state-jet `C2` action bound, (2) the derivative-short raw
+weight-three duality route, and (3) treating the closed-edge `edgeTopPair` as
+the complete low-base C2 kernel.  It does not establish an obstruction to the
+binding C0+C2 whole-slope route.  The completed `lieBgCorr_unif`,
+`lowC1Corr_unif`, `galA1FixPair3_le`, signed C1 split, complementary spectral
+split, `finite_symm_scale`, and polarized monomial Green identity are
+theorem-level 100%; the
+unstated rest-only theorem is 0%; the dedicated fixed-background
+direct-smoothing machinery remains approximately 92%;
 `ricci_flow_unif_existence` remains 0%; whole HCG remains approximately 3%.
 
 ## Phase (c-C0) result + (c-C): synthesis and endpoint
@@ -382,11 +417,14 @@ the in-place DT widenings of bricks 2a–2e.
   fourth metric jet.  The path-integrated actual `lowC1CorrBg` bound is now
   also stated, proved, and focused-check green as `lowC1Corr_unif`.  The next
   complete Galerkin vector/pair module, `galA1FixPair3_le`, and the signed
-  forcing-level C1 split are now stated, proved, and focused-check green.  A
-  second STOP has now fired at the C2-only signed Rung-3 spectral/Garding API:
-  the top-deviation route needs the forbidden high state jet, the H1 top-path
-  action is one derivative short (naive duality needs H5), and the edge-refold
-  route lacks the structural `covDivergence edgeTopPartner` bound.  The exact
-  missing theorem is recorded in step 6; no partial rest theorem or new
-  assumption was added.  Headline `(N)` remains 0%.
-  The review prompt is recorded in `ROUTE_C_ABSORB_CONSULT.md`.
+  forcing-level C1 split are now stated, proved, and focused-check green.  The
+  then-recorded second STOP at an absolute-value C2-only pairing is
+  **historical and superseded** by the corrected step 6.  The failed
+  top-deviation and raw-duality attempts remain useful negative results, but
+  the live route recombines C0+C2 and asks for a one-sided full-slope
+  commutator/Gårding estimate.  The complementary spectral split and
+  polarized monomial Green identity are complete; the exact low-base
+  full-slope adapter and analytic estimate remain unstated.  Headline `(N)`
+  remains 0%.
+  The superseded absorption review remains in `ROUTE_C_ABSORB_CONSULT.md`;
+  the current full-slope Gårding handoff is `ROUTE_C_GARDING_CONSULT.md`.
