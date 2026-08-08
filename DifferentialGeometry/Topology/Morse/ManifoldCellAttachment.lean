@@ -3351,6 +3351,105 @@ theorem morse_smooth_handle_attachment_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε
   · intro p
     rfl
 
+noncomputable def morseAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε) :=
+  fun p => ⟨(cocoreAttachingEmbedding hk c ε r data hε hεr p).1,
+    le_of_eq (cocoreAttachingEmbedding_value hk c ε r data hε hεr p)⟩
+
+theorem morseAttachingEmbedding_value {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (p : AttachingRegion k (m + 1 - k)) :
+    f (morseAttachingEmbedding hk c ε r data hε hεr p).1 = c - ε := by
+  dsimp [morseAttachingEmbedding]
+  exact cocoreAttachingEmbedding_value hk c ε r data hε hεr p
+
+theorem morseAttachingEmbedding_eq_handleEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (a : AttachingRegion k (m + 1 - k)) :
+    (morseAttachingEmbedding hk c ε r data hε hεr a : M) =
+      handleEmbedding hk c ε r data (attachingInclusion k (m + 1 - k) a) := by
+  dsimp [morseAttachingEmbedding]
+  exact (handleEmbedding_attachingRegion hk c ε r data hε hεr a).symm
+
+theorem morseAttachingEmbedding_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    Function.Injective (morseAttachingEmbedding hk c ε r data hε hεr) := by
+  intro p q h
+  have h' : (cocoreAttachingEmbedding hk c ε r data hε hεr p).1 =
+      (cocoreAttachingEmbedding hk c ε r data hε hεr q).1 := by
+    change (morseAttachingEmbedding hk c ε r data hε hεr p).1 =
+      (morseAttachingEmbedding hk c ε r data hε hεr q).1
+    exact congrArg Subtype.val h
+  exact cocoreAttachingEmbedding_injective hk c ε r data hε hr hεr (Subtype.ext h')
+
+noncomputable def morseHandleAdjunctionHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hcont : Continuous f) :
+    Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr) ≃ₜ
+      {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
+  Handle.adjunctionHomeomorphUnionImage
+    (φ := morseAttachingEmbedding hk c ε r data hε hεr)
+    (c := handleEmbedding hk c ε r data)
+    (morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε hεr)
+    (handleEmbedding_injective hk c ε r data hε hr hεr)
+    (handleEmbedding_continuous hk c ε r data hε hεr)
+    (by
+      rw [Set.disjoint_left]
+      intro y hys hyt
+      rcases hys with ⟨p, hp, hpy⟩
+      have hiff := (handleEmbedding_mem_lower_iff hk c ε r data hε hεr p).mp (by
+        simpa [hpy] using hyt)
+      have hreg : p ∈ attachingRegion k (m + 1 - k) := by
+        dsimp [attachingRegion]
+        exact hiff
+      exact hp.2 hreg)
+    (by
+      exact isClosed_Iic.preimage hcont)
+
+theorem morseHandleAdjunctionHomeoUnion_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hcont : Continuous f) (x : SublevelSpace f (c - ε)) :
+    morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x) =
+      ⟨x.1, Or.inl x.2⟩ := by
+  exact Handle.adjunctionHomeomorphUnionImage_lower
+    (φ := morseAttachingEmbedding hk c ε r data hε hεr)
+    (c := handleEmbedding hk c ε r data)
+    (morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε hεr)
+    (handleEmbedding_injective hk c ε r data hε hr hεr)
+    (handleEmbedding_continuous hk c ε r data hε hεr)
+    (by
+      rw [Set.disjoint_left]
+      intro y hys hyt
+      rcases hys with ⟨p, hp, hpy⟩
+      have hiff := (handleEmbedding_mem_lower_iff hk c ε r data hε hεr p).mp (by
+        simpa [hpy] using hyt)
+      have hreg : p ∈ attachingRegion k (m + 1 - k) := by
+        dsimp [attachingRegion]
+        exact hiff
+      exact hp.2 hreg)
+    (by
+      exact isClosed_Iic.preimage hcont) x
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
