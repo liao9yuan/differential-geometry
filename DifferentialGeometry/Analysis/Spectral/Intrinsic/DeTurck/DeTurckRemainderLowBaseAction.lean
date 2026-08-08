@@ -3671,6 +3671,30 @@ noncomputable def rhsSelfLow
     edgeLiePairFam (I := I) (M := M) g T hδ hδZ
       lieRefoldQ lieRefoldEps s
 
+/-- The raw refolded zero arm splits into its transparent lower and top
+self-action pieces on the diagonal realized path. -/
+theorem self_refold
+    (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    (hT : ∀ (x : M) (u v : TangentSpace I x),
+      ccTensorBilin (I := I) g T x u v =
+        ccTensorBilin (I := I) g T x v u)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g
+      (ccTensorBilinSymm (I := I) g
+        (0 : SmoothCcTensor g 0 2)) δ)
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    appCc (I := I) (M := M) g 2 2
+        (rhsRefold0 (I := I) (M := M) g g_bg T hδ hδZ s) T =
+      appCc (I := I) (M := M) g 2 2
+          (rhsSelfLow (I := I) (M := M) g g_bg T hδ hδZ s) T +
+        appCc (I := I) (M := M) g 4 2
+          (rhsSelfTop (I := I) (M := M) g T hδ hδZ s)
+          (iteratedCovGrad (I := I) g 0 2 2 T) := by
+  exact IntrinsicSpectral.rhsSelf_refold
+    (I := I) (M := M) g g_bg T hT hδ_lt hδ hδZ hs
+
 /-- On the symmetric realized segment, the transparent zero-arm integrand
 uses only the first-order Ricci coefficient. -/
 theorem selfLow_good

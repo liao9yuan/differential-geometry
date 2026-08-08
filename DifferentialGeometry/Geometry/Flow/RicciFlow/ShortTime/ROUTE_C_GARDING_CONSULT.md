@@ -1,6 +1,6 @@
 # Route-(c) full-slope Rung-3 Gårding consult
 
-## Result: STOP at the complete-edge curvature commutator
+## Result: CONTINUE-WITH-CORRECTIONS at the complete-edge peel
 
 The 2026-08-08 source audit refuted the prompt's proposed arbitrary-acted-field
 pointwise extension.  `ricciDA_refold`, `ricciConn_refold`, and the public
@@ -57,29 +57,47 @@ nabla(pointwiseTensorCurv g 2 T)
   + pointwiseTensorCurv g 3 (nabla T),
 ```
 
-and hence an `(nabla^2 Rm(g)) * T` cell.  No current complete
-`qA/qB/q/epsilon` identity cancels this term against the differentiated
-`phiMetCurvCoeff` fold `K_s-K_0`.  Generic commutation therefore reads a
-fourth varying-metric jet; Green differentiates the test `L^2 T` and requires
-`H5`; existing tame and slot-transport estimates require a high state ball or
-a small cap chosen after `g`.  These failures trigger the binding STOP
-condition.
+and hence an `(nabla^2 Rm(g)) * T` cell.  The externally supplied Pro response
+incorrectly simplified this derivative to `(nabla Rm) * T`; the first-order
+commutator already contains one curvature derivative.  A complete
+normal-frame symbol check also indicates that the transparent
+`q/Phi/ricciTop` action on this cell is generally nonzero.  Thus a pointwise
+zero theorem is the wrong target.
 
-The smallest honest next producer is an exact `edge_qk_comm` (equivalently
-`edge_center_comm_nf`) theorem rewriting this joint curvature counterterm
-using only `Rm`, `nabla Rm`, and state jets through order three.  It is a
-substantial component/structural identity, not a wrapper; it is currently
-unstated and 0%.
+This does not trigger the binding STOP condition.  The target order is
+
+```text
+eta -> exists delta2,R2 -> forall g in C3 -> exists G_g.
+```
+
+Only the small caps and coefficients of `H4^2` must be class-uniform.  A
+fourth jet of the already fixed smooth `g` may enter the lower constant `G_g`.
+The dangerous `(nabla^2 Rm(g)) * T` cell is zeroth order in state derivatives;
+the full curvature defect is linear in `T` and uses state jets through order
+two.  Its complete coefficient vanishes at `T=0`; paired with `L^2 T` it has the lower shape
+`C_g * H2(T)^2 * H4(T)` (or at worst
+`C_g * H2(T) * H4(T)`), which Young absorbs into
+`eta * H4^2 + G_g * H3^2` without changing `delta2` or `R2`.
+
+The smallest honest next producer is therefore a non-Green exact normal form,
+tentatively `edge_center_peel`.  It must expose the explicit `2+0` and `1+1`
+Leibniz corners, the existing Cross term, and the curvature defect; it must not
+hide them in an opaque remainder or differentiate the test.  The subsequent
+substantive estimates are the sharp `P20`, `P11L/P11R`, and self-low carrier
+pairing bounds.  The Cross term in the peel cancels exactly with the Cross
+added by `b02_center_nf`; it must not be charged twice.  The route stops only
+if those estimates leave a naked or metricwise coefficient in front of
+`H4^2`, require an `H4/H5` state radius, or force a cap to be chosen after `g`.
 
 ## Fixed audit boundary
 
-The supplied consult was written against remote commit
-`94a94eeebe4b6cb24963423761b2d1a43627cdfe`.  At the 2026-08-08 audit the live
-branch and its remote had advanced to
-`314e7a8cd80e6a255b8922a59e8ae9599ab365f8`; the target refold/cancellation
-source blobs were unchanged, while the focused-verified spectral and monomial
-pairing adapters were now included in that newer commit.  Their availability
-does not close the analytic theorem or repair the false frozen identity.
+The original supplied consult was written against remote commit
+`94a94eeebe4b6cb24963423761b2d1a43627cdfe`.  The later Pro response verified
+remote commit `cda17d2ecb951945c9f0a6bfb60faf6b3ca36d11`, which is also the
+current live branch head for this audit.  The false arbitrary-passenger refold
+remains rejected.  The correction here concerns the derivative ledger and the
+quantifier order of the lower Gårding constant; it does not claim the final
+analytic theorem is proved.
 
 ## Historical consult prompt (refuted at Gate A)
 
@@ -144,15 +162,18 @@ class-first caps `delta2,R2`.  Existing `edgePair_pair_le` is only the Rung-0
 diagonal estimate and cannot be quoted as Rung 3.  Existing high-order tame
 commutator estimates that require an `H4/H5` state ball are not admissible.
 
-Forbidden dependencies are: `galRepJet_le g 4`, a fourth varying-metric jet,
-an `H4/H5` state radius, a cap chosen after `g`, or any metricwise coefficient
-in front of `H4^2`.  `H4` may occur only as the energy absorbed by `eta`.
+Forbidden dependencies are: `galRepJet_le g 4`, an `H4/H5` state radius, a cap
+chosen after `g`, or any metricwise non-small coefficient in front of `H4^2`.
+A fourth jet of the fixed smooth `g` is permitted only inside the lower
+constant `G_g`, where it multiplies at most one `H4` factor and at least one
+actual lower state norm before Young.
 
 Return `STOP-AND-REDESIGN` with the exact failed identity and smallest genuine
 obstruction if any of the following is unavoidable: the C0+C2 refold fails;
 the test/state scaling fails; a common cap must depend on `g`; a fourth metric
-jet or high state radius is required; or a metricwise non-small coefficient
-remains in front of `H4^2`.  Otherwise give the exact Lean statement,
+jet is required in a class-uniform cap or `H4^2` coefficient; a high state
+radius is required; or a metricwise non-small coefficient remains in front of
+`H4^2`.  Otherwise give the exact Lean statement,
 dependency order, smallest new lemmas, and focused verification evidence.
 
 ## Current accounting
@@ -164,9 +185,9 @@ dependency order, smallest new lemmas, and focused verification evidence.
 - Exact diagonal path normal form: **100% verified**.
 - Class-first principal-form absorption: **100% verified**.
 - Exact centered path/refold algebra and raw Cross estimates: **100% verified**.
-- Complete-edge `q/K` curvature-commutator theorem: unstated, **0%**.
+- Exact complete-edge peel `edge_center_peel`: unstated, **0%**.
 - Dedicated fixed-background Route-(c) machinery: approximately **94%**; the
-  remaining denominator is the complete-edge curvature identity and diagonal
-  residual Gårding theorem.
+  remaining denominator is the complete-edge peel, its sharp lower pairing
+  estimates, and the diagonal residual Gårding theorem.
 - `ricci_flow_unif_existence`: **0%**.
 - Whole HCG project: approximately **3%**.

@@ -141,9 +141,9 @@ The binding producer chain is now:
    fixed-background `C2/C0` action but uses the self-background `C1` action;
    `galArmVecBg_split` and `galArmPair3_split` isolate exactly the complete C1
    correction.
-6. **Rest-only Rung-3 bound — STOP at the complete-edge curvature
-   commutator.**  The arbitrary-passenger frozen adapter is permanently
-   rejected.  The source orientation is
+6. **Rest-only Rung-3 bound — CONTINUE-WITH-CORRECTIONS at the complete-edge
+   peel and sharp lower estimates.**  The arbitrary-passenger frozen adapter
+   is permanently rejected.  The source orientation is
 
    ```text
    ricciTop(..., U) applied to nabla^2 P
@@ -209,12 +209,12 @@ The binding producer chain is now:
        + pointwiseTensorCurv g 3 (nabla T)),
    ```
 
-   whose first summand contains `(nabla^2 Rm(g)) * T`.  No current theorem
-   cancels this complete `qA/qB/q/epsilon` counterterm against the second
-   derivative corner of `K_s-K_0`.  Generic commutation exposes metric jet
-   four; Green differentiates the test `L^2 T` and demands `H5`; the existing
-   tame and slot-transport routes require either a metricwise small radius or
-   an `H4/H5` state ball.  These are three distinct failed routes.
+   whose first summand contains `(nabla^2 Rm(g)) * T`: the first-order
+   curvature commutator already contains `(nabla Rm) * T`, so the outer
+   derivative cannot be dropped from the ledger.  A complete normal-frame
+   symbol check shows that the resulting transparent `q/Phi/ricciTop` block
+   is generally nonzero.  Cancellation to zero is therefore neither available
+   nor required.
 
    The representation/orientation audit is now closed rather than assumed:
    focused-green `appCcPsi_diag` and `cometricTrace_appCcRS` expose the mixed
@@ -230,17 +230,61 @@ The binding producer chain is now:
        + pointwiseTensorCurv g 3 (nabla T)).
    ```
 
-   This block is not definitionally zero and still contains the forbidden
-   `(nabla^2 Rm(g)) * T` cell.  Thus the STOP is now grounded after the full
-   arbitrary-Hessian orientation bridge, not in a missing coercion or stale
-   import.
+   The prior STOP inference confused two different quantifier requirements.
+   The caps `delta2,R2` are chosen before `g`, but the lower Gårding constant
+   is chosen afterward:
 
-   Therefore the binding gate is now **STOP-AND-REDESIGN** at the missing
-   complete-edge curvature-commutator identity.  The smallest honest next
-   producer is an exact `edge_qk_comm`/`edge_center_comm_nf` theorem rewriting
-   the joint `q/K` counterterm using only `Rm`, `nabla Rm`, and state jets
-   through order three.  It is unstated and 0%; a normal-frame
-   principal-symbol calculation is not a Lean proof of it.
+   ```text
+   eta -> exists delta2,R2 -> forall g in C3 -> exists G_g.
+   ```
+
+   Consequently a fourth jet of the fixed smooth `g` may enter `G_g` provided
+   it multiplies a genuinely lower state term.  Only the dangerous
+   `(nabla^2 Rm(g)) * T` cell is zeroth order in state derivatives; the full
+   curvature defect is linear in `T` and uses state jets through order two.
+   The complete coefficient vanishes at `T = 0`; paired with `L^2 T` the block
+   has size `C_g * H2(T)^2 * H4(T)` (or,
+   under a coarser bound, at worst `C_g * H2(T) * H4(T)`), not
+   `C_g * H4(T)^2`.  Young's inequality sends it to
+   `eps * H4^2 + G_g * H3^2` using `H2 <= 1` and `H2 <= H3`, without making
+   either cap depend on `g`.
+
+   The binding next exact producer is therefore a principal-head-isolating,
+   non-Green peel, tentatively `edge_center_peel`, not a false zero theorem
+   `edge_qk_comm`.  It must expose the centered block as the sum of:
+
+   ```text
+   L(A_s T)
+     + (B_s-C_s) nabla^2(LT)
+     - B_s G_T
+     - P20_s - P11L_s - P11R_s
+     - Cross_s,
+   ```
+
+   where `A_s = rhsSelfLow_s + K_0`,
+   `B_s = lieRefold2_s + C_s - 2s * ricciTop_s`,
+   `G_T = nabla(pointwiseTensorCurv g 2 T)
+     + pointwiseTensorCurv g 3 (nabla T)`, and the three `P` terms are the
+   explicit `2+0` and `1+1` Leibniz corners, not an opaque remainder.  The
+   only routine representation adapter still needed is a public diagonal
+   projection of the already verified private `rhsSelf_refold`; an
+   arbitrary-passenger version remains forbidden.
+
+   After that peel, the substantive inequalities are the sharp paired bounds
+   for `P20`, `P11L/P11R`, and `L(A_s T)`.  Their class-uniform `H4^2` heads
+   must have shapes `C(R+R^2) H4^2` and `C R H4^2`; fixed-metric derivative
+   corners may additionally contribute only lower terms such as
+   `C_g(H3*H4 + r^2*H4)`, where `r = H2(T)` is the actual homogeneous state
+   norm, not merely its radius cap `R`.  The curvature-defect term has the
+   latter shape.  `Cross_s` is retained in the peel only to align the exact
+   identities: it
+   cancels against the Cross added by `b02_center_nf` and is not charged a
+   second time in the final bound.  The already verified Cross estimate remains
+   a valid independent fallback, not a required loss in the final assembly.
+   The route must STOP only if the peel leaves a naked or
+   metricwise `C_g * H4^2` coefficient, an uncapped fourth state derivative,
+   a cap that must be chosen after `g`, or a derivative of the test requiring
+   `H5`.
 
    Consequently the homogeneous diagonal residual estimate
 
@@ -251,9 +295,8 @@ The binding producer chain is now:
      <= eps * H4^2 + G(g,eps) * H3^2.
    ```
 
-   remains unavailable.  Its stop condition has fired because every currently
-   implementable expansion either asks for `nabla^2 Rm(g)`, an `H4/H5` state
-   radius, or a derivative of the Rung-3 test.  `lowbase_full3_unif` itself is
+   remains unavailable, but its stop condition has not fired merely because
+   `nabla^2 Rm(g)` occurs in a lower coefficient.  `lowbase_full3_unif` itself is
    still unstated and remains 0%; its
    required eventual statement remains:
 
@@ -587,3 +630,20 @@ the in-place DT widenings of bricks 2a–2e.
   `edge_center_h4_unif`, `lowbase_full3_unif`, the rest-only Rung-3 theorem,
   and headline uniform existence all remain 0%.  Dedicated machinery stays
   approximately 94%; whole HCG stays approximately 3%.
+- 2026-08-08 (Pro response audited; quantifier correction):
+  **CONTINUE-WITH-CORRECTIONS.**  The response correctly declined to infer a
+  complete cancellation from the q-six symbol, but it undercounted
+  `nabla(pointwiseTensorCurv g 2 T)`: the exact term does contain
+  `(nabla^2 Rm(g)) * T`.  It then incorrectly required the lower constant to
+  be uniform over the C3 class.  The target selects `G_g` after `g`, so this
+  fixed-metric fourth jet is admissible when it occurs with only one `H4`
+  factor and at least one actual lower state norm, and is absorbed into
+  `G_g * H3^2`.  A full symbol screen indicates that the transparent curvature
+  block is generally nonzero; the historical
+  `edge_qk_comm = 0` target is therefore superseded.  The new exact frontier
+  is the non-Green principal-head-isolating `edge_center_peel`, followed by
+  sharp `P20/P11` and self-low carrier pairing estimates.
+  `edge_center_h4_unif`, `lowbase_full3_unif`, the rest-only theorem, and
+  headline `(N)` all remain
+  unstated at 0%; dedicated machinery remains approximately 94%; whole HCG
+  remains approximately 3%.

@@ -53,13 +53,15 @@ no separate order-four state term or `H3` smallness enters.
 
 ## Current frontier
 
-The private `rhsSelf_refold` theorem is intrinsically diagonal.  Its lower
-Ricci refold accepts independent coefficient and passenger tensors internally,
+The public `LowBaseInternal.self_refold` projection is intrinsically diagonal.
+It reuses the already verified private `rhsSelf_refold` proof without changing
+its mathematical content.  Its lower Ricci refold accepts independent
+coefficient and passenger tensors internally,
 but the resulting top term has the cross orientation
 `ricciTop(..., U) (nabla^2 P)`; the public kernel identity likewise gives
 `curvatureKernel(U) (nabla^2 P)`.  The proof specializes `P` and `U` to the
-same state before rewriting scalar factors.  It therefore must not be exported
-or restated as the false pointwise identity with
+same state before rewriting scalar factors.  It therefore must not be
+generalized or restated as the false pointwise identity with
 `ricciTop(..., P) (nabla^2 U)`.  Moving between those orientations requires a
 pairing-level integration by parts and produces first-order cross terms.
 

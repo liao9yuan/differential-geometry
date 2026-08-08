@@ -62,8 +62,9 @@ the complete coefficient algebra instead leaves the transparent block
 
 `(lieRefold2 + (Phi_s - Phi_0) - 2s * ricciTop) G`.
 
-It is not zero, and no current theorem rewrites it using only `Rm`,
-`nabla Rm`, and state derivatives through order three.
+It is generally not zero.  This is no longer expected to be a cancellation
+theorem: its `(nabla^2 Rm(g)) * T` part is a fixed-metric lower coefficient,
+not automatically a forbidden principal coefficient.
 
 `phiMet_fold_comm` is also focused-verified.  It applies the exact
 `phiMet_curv_fold` to both `S` and `L S`, replacing the whole commutator of the
@@ -78,22 +79,29 @@ deleted.  Its right-hand side contained `covGrad V`; at the intended
 specialization `V = L^2 T` this is an `H^5` demand, so it cannot be a producer
 for the binding `H^4` route.
 
-The exact remaining gate is a **complete-edge second-order polarized
-identity**, not a norm wrapper and not an estimate of the order-zero and top
-blocks separately.  At fixed `s`, it must expand the joint high block
+The exact remaining gate is a **complete-edge non-Green peel**, not a zero
+identity, a norm wrapper, or a separate estimate of the order-zero and top
+blocks.  At fixed `s`, it must expand the joint high block
 
 `L(edgeQuad0_s T) + (L(Ds T) - Ds (L T)) - (Ks - K0)(L T)`
 
-as the two directed raw Cross orientations plus terms containing no standalone
-fourth derivative and no derivative of the test tensor.  In the equivalent
-transparent self-refold currency, the joint second-order coefficient is
+as the two directed raw Cross orientations plus explicit `2+0` and `1+1`
+Leibniz corners, the curvature-defect argument, and lower carrier terms.  The
+only fourth-order state input allowed is the explicit uniformly-small
+principal head `nabla^2(LT)`; all other literal D4 orientations must cancel
+against the exact Cross assembly.  No derivative may land on the test tensor.
+In the equivalent transparent self-refold currency, the joint second-order
+coefficient is
 
 `lieRefold2 + (deTurckPhiMetTotal_s - deTurckPhiMetTotal_0) - 2s * ricciTop`.
 
-The existing generic Hessian/Laplacian commutator is not an admissible
-substitute: its differentiated curvature term asks for a second derivative of
-background curvature.  The existing Green identities are also inadmissible
-because they differentiate the test tensor.
+The existing generic Hessian/Laplacian commutator is not by itself the final
+estimate, but its differentiated-curvature term is not a STOP condition merely
+because it reads `nabla^2 Rm(g)`.  Since `G_g` is selected after the fixed
+smooth `g`, this jet may enter the lower coefficient when the term contains at
+most one `H4` factor and at least one actual lower state norm.  The existing
+Green identities remain inadmissible because they differentiate the test
+tensor and demand `H5`.
 
 The first two representation gaps on the route from
 `iteratedCovGrad_appCcRS_eq_argCorner_add_lower` to the isolated complete-edge
@@ -101,9 +109,10 @@ cell are now closed: public `appCcPsi_diag` identifies the top Leibniz corner,
 and public `cometricTrace_appCcRS` transports its double trace at arbitrary
 contravariant valence.  Exact raw-Laplacian naturality for the remaining
 `slotExtend` and `rsDomDomCongrSection` terms is still missing.  More
-importantly, no existing theorem identifies the canonical raw `q` commutator
-with the non-pure top commutator plus an explicit remainder containing only
-`Rm`, `nabla Rm`, and state jets through order three.
+importantly, no existing theorem packages the exact centered expression as a
+principal-head-isolating explicit peel suitable for the sharp product
+estimates.  The intended first theorem is `edge_center_peel`; it should retain
+the nonzero curvature defect rather than assert that it vanishes.
 
 ## Honest progress
 
@@ -113,9 +122,8 @@ with the non-pure top commutator plus an explicit remainder containing only
 - `edgeTopPairG` and `edge_arg2_nf`: 100% complete and focused-verified as
   stated; they expose, but do not cancel, the full curvature counterterm.
 - `edgeTopG_apply`: 100% complete and focused-verified as an orientation/action
-  theorem; the complete q/K curvature cancellation remains a separate 0%
-  theorem.
-- Complete-edge second-order polarized identity: not yet stated or proved,
+  theorem; no zero cancellation is claimed.
+- Complete-edge non-Green peel `edge_center_peel`: not yet stated or proved,
   therefore 0% as a theorem.  The existing refold and directed-Cross APIs are
   supporting infrastructure only.
 - `edge_center_h4_unif`: not yet stated or proved, therefore 0%.
