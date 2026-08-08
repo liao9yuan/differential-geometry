@@ -33,6 +33,22 @@ theorem continuous_cell {k l : ℕ} {X : Type u} [TopologicalSpace X] (φ : Atta
     Continuous (cell φ) :=
   continuous_adjunctionCell (attachingInclusion k l) φ
 
+theorem cell_lower_cover {k l : ℕ} {X : Type u} (φ : AttachingRegion k l → X)
+    (z : AdjunctionSpace k l φ) :
+    z ∈ Set.range (cell φ) ∪ Set.range (lower φ) := by
+  refine Quot.induction_on z ?_
+  intro s
+  rcases s with d | x
+  · exact Or.inl ⟨d, rfl⟩
+  · exact Or.inr ⟨x, rfl⟩
+
+theorem cell_lower_coverage {k l : ℕ} {X : Type u} (φ : AttachingRegion k l → X) :
+    (Set.range (cell φ) ∪ Set.range (lower φ)) = Set.univ := by
+  ext z
+  constructor <;> intro hz
+  · trivial
+  · exact cell_lower_cover φ z
+
 section UnionRealization
 
 variable {k l : ℕ} {Y : Type v} [TopologicalSpace Y] {X₀ : Set Y}

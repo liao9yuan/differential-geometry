@@ -1,5 +1,6 @@
 import DifferentialGeometry.Topology.Morse.CellAttachment
 import DifferentialGeometry.Topology.Morse.HandleAttachment
+import DifferentialGeometry.Topology.Handle.Attachment
 import DifferentialGeometry.Topology.Handle.Manifold
 import DifferentialGeometry.Topology.Homotopy.EquivUnder
 import DifferentialGeometry.Topology.Morse.Flow
@@ -2685,6 +2686,72 @@ abbrev morseAttachedSpace {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
   DifferentialGeometry.Topology.AdjunctionSpace
     (i := fun a : morseLowerSublevel hk c ε => a)
     (φ := morseHandleGlueMap hk c ε r δ hε hδ0 hδr hr)
+
+theorem cocoreModelPoint_eq_modelHandleMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (u : CellBoundary k) (w : ClosedCell (n - k)) :
+    cocoreModelPoint hk ε r (u, w) =
+      modelHandleMap hk ε r (cellBoundaryInclusion k u, w) := by
+  dsimp [cocoreModelPoint]
+  rw [modelHandleMap_attachingRegion]
+
+noncomputable def morseAttachingMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    (hε : 0 < ε) : AttachingRegion k (m + 1 - k) → morseLowerSublevel hk c ε :=
+  fun p => ⟨cocoreModelPoint hk ε r p, le_of_eq (morseNormalForm_cocoreModelPoint hk c ε r (le_of_lt hε) p)⟩
+
+abbrev morseStandardHandleSpace {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    (hε : 0 < ε) : Type :=
+  Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingMap hk c ε r hε)
+
+theorem morseAttachingMap_eq_modelHandleMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    (hε : 0 < ε) (a : AttachingRegion k (m + 1 - k)) :
+    (morseAttachingMap hk c ε r hε a : MorseModel (m + 1)) =
+      modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) a) := by
+  rcases a with ⟨u, w⟩
+  dsimp [morseAttachingMap, attachingInclusion]
+  exact cocoreModelPoint_eq_modelHandleMap hk ε r u w
+
+theorem isClosed_morseLowerSublevel {m k : ℕ} (hk : k ≤ m + 1) (c ε : ℝ) :
+    IsClosed (sublevel (morseNormalForm hk c) (c - ε) : Set (MorseModel (m + 1))) := by
+  have hcont : Continuous (morseNormalForm hk c) := (contDiff_morseNormalForm hk c).continuous
+  change IsClosed ((morseNormalForm hk c) ⁻¹' Set.Iic (c - ε))
+  exact isClosed_Iic.preimage hcont
+
+theorem disjoint_modelHandleMap_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ) (hε : 0 < ε) :
+    Disjoint (modelHandleMap hk ε r '' (Set.univ \ attachingRegion k (m + 1 - k)))
+      (sublevel (morseNormalForm hk c) (c - ε) : Set (MorseModel (m + 1))) := by
+  rw [Set.disjoint_left]
+  intro y hys hyt
+  rcases hys with ⟨p, hp, hpy⟩
+  have hiff := (modelHandleMap_mem_lower_iff hk c ε r hε p).mp (by simpa [hpy] using hyt)
+  have hreg : p ∈ attachingRegion k (m + 1 - k) := by
+    dsimp [attachingRegion]
+    exact hiff
+  exact hp.2 hreg
+
+theorem continuous_modelHandleMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) :
+    Continuous (modelHandleMap hk ε r) := by
+  have hpair : Continuous (fun p : StandardHandle k (n - k) =>
+      ((Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) •
+        (p.1 : EuclideanSpace ℝ (Fin k)),
+       r • (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+    fun_prop
+  have hrec : Continuous (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+      recombine hk p.1 p.2) := continuous_recombine hk
+  have hstep := hrec.comp hpair
+  simpa [modelHandleMap, Function.comp_def] using hstep
+
+noncomputable def morseStandardHandleHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    (hε : 0 < ε) (hr : r ≠ 0) :
+    morseStandardHandleSpace hk c ε r hε ≃ₜ
+      {y : MorseModel (m + 1) //
+        y ∈ sublevel (morseNormalForm hk c) (c - ε) ∪ Set.range (modelHandleMap hk ε r)} :=
+  Handle.adjunctionHomeomorphUnionImage (φ := morseAttachingMap hk c ε r hε)
+    (c := modelHandleMap hk ε r)
+    (morseAttachingMap_eq_modelHandleMap hk c ε r hε)
+    (modelHandleMap_injective hk ε r hε hr)
+    (continuous_modelHandleMap hk ε r)
+    (disjoint_modelHandleMap_lower hk c ε r hε)
+    (isClosed_morseLowerSublevel hk c ε)
 
 noncomputable def morseAttachedToUpperFun {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
