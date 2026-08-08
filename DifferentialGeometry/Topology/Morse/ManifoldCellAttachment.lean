@@ -5466,6 +5466,46 @@ theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpac
   exact sublevelCellAdjunctionHomotopyEquivUnderOfMorseChart (I := I) (hf := hf)
     (f := f) (c := c) (k := k) (hk := hk) (data := data) (g := g) hgmd hg_le hlow0 hcell hunion_sub
     hlow_inv_val hgup v hv hsupp hdfOn hrate
+
+theorem sublevelTransport_diffeomorph_of_setImage {m : ℕ} {H : Type} [TopologicalSpace H]
+    {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M]
+    (g f : M → ℝ) (a b : ℝ)
+    (hg : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg_g : ∀ x : M, g x = a → ¬ IsCriticalPointAt I g x)
+    (hreg_f : ∀ x : M, f x = b → ¬ IsCriticalPointAt I f x)
+    (Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+    (htransport : Φ.toEquiv '' sublevel g a = sublevel f b)
+    (hbnd : ∀ x : M, g x = a → f (Φ x) = b)
+    (hstrict : ∀ x : M, g x < a → f (Φ x) < b)
+    (hbnd' : ∀ x : M, f x = b → g (Φ.symm x) = a)
+    (hstrict' : ∀ x : M, f x < b → g (Φ.symm x) < a) :
+    Nonempty (@Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace g a) _ (manifoldSublevelChartedSpace I g a hg hreg_g)
+      (SublevelSpace f b) _ (manifoldSublevelChartedSpace I f b hf hreg_f)
+      (⊤ : ℕ∞)) := by
+  have hmap : ∀ x : M, g x ≤ a → f (Φ x) ≤ b := by
+    intro x hx
+    have hmem : Φ x ∈ sublevel f b := by
+      rw [← htransport]
+      exact ⟨x, hx, rfl⟩
+    exact hmem
+  have hmap' : ∀ x : M, f x ≤ b → g (Φ.symm x) ≤ a := by
+    intro x hx
+    have himg : Φ.symm '' sublevel f b = sublevel g a := by
+      have h := congrArg (fun s : Set M => Φ.toEquiv.symm '' s) htransport
+      simpa using h.symm
+    have hmem : Φ.symm x ∈ sublevel g a := by
+      rw [← himg]
+      exact ⟨x, hx, rfl⟩
+    exact hmem
+  exact manifoldSublevelDiffeomorphOfDiffeomorph (I := I) g f a b hg hf hreg_g hreg_f Φ
+    hmap hbnd hstrict hmap' hbnd' hstrict'
+
 end ManifoldCellAttachment
 
 end
