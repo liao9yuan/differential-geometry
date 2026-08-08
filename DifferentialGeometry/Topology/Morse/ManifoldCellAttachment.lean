@@ -4276,6 +4276,134 @@ noncomputable def sublevelCellAdjunctionHomotopyEquivUnderOfMorseChart {n : ℕ}
               exact Subtype.ext (by rfl))
       left_inv := L.cast h₀.symm rfl
       right_inv := H₃ }
+
+theorem morse_smooth_handle_attachment_relative {n : ℕ} {H : Type} [TopologicalSpace H]
+    {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
+    (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ n)
+    (hnd : IsNondegenerateCriticalPointAt I f p)
+    (hindex : sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) = k)
+    (hfp : f p = c)
+    (a : ℝ) (ha : 0 < a)
+    (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
+    (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
+      x = p ∨ ¬ IsCriticalPointAt I f x) :
+    ∃ ε : ℝ, 0 < ε ∧ ε ≤ a ∧
+    ∃ g : M → ℝ,
+      ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g ∧
+      (∀ x : M, g x ≤ f x) ∧
+      ({x : M | g x ≤ c + ε} = sublevel f (c + ε)) ∧
+      (∀ x : M, f x ≤ c - ε → g x ≤ c - ε) ∧
+      ∃ v : (x : M) → TangentSpace I x,
+        ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) ∧
+        IsCompact (tsupport v) ∧
+        (∀ x ∈ g ⁻¹' Set.Icc (c - ε) (c + ε),
+          (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) = -1) ∧
+        ∃ Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞),
+          Φ.toEquiv '' sublevel g (c - ε) = sublevel f (c + ε) := by
+  rcases morse_lemma I f hf p k hk hnd hindex with
+    ⟨R, hRpos, χ, hχ0src, hχ0tgt, hχ0val, hχsrc, hnorm0, hχmd, hχsmd,
+      R', hR'pos, hχon, hχsymmOn⟩
+  have hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y := by
+    intro y hy
+    rw [← hfp]
+    exact hnorm0 y hy
+  let ε₀ : ℝ := min a (min (R ^ 2) (R' ^ 2)) / 16
+  let δ₀ : ℝ := Real.sqrt ε₀ / 4
+  have hminpos : 0 < min a (min (R ^ 2) (R' ^ 2)) := by
+    exact lt_min ha (lt_min (sq_pos_of_pos hRpos) (sq_pos_of_pos hR'pos))
+  have hε₀ : 0 < ε₀ := by
+    dsimp [ε₀]
+    positivity
+  have hδ₀ : 0 < δ₀ := by
+    dsimp [δ₀]
+    have hsqrt : 0 < Real.sqrt ε₀ := Real.sqrt_pos.2 hε₀
+    nlinarith
+  have hεa : ε₀ ≤ a := by
+    dsimp [ε₀]
+    have h1 : min a (min (R ^ 2) (R' ^ 2)) / 16 ≤ min a (min (R ^ 2) (R' ^ 2)) := by
+      exact div_le_self (le_of_lt hminpos) (by norm_num : (1 : ℝ) ≤ 16)
+    exact le_trans h1 (min_le_left a (min (R ^ 2) (R' ^ 2)))
+  have hεmin : ε₀ ≤ min (R ^ 2) (R' ^ 2) / 16 := by
+    dsimp [ε₀]
+    have hle := min_le_right a (min (R ^ 2) (R' ^ 2))
+    have hdiv : min a (min (R ^ 2) (R' ^ 2)) / 16 ≤ min (R ^ 2) (R' ^ 2) / 16 := by
+      exact div_le_div_of_nonneg_right hle (by norm_num : (0 : ℝ) ≤ 16)
+    exact hdiv
+  have hsqδ : δ₀ ^ 2 = ε₀ / 16 := by
+    dsimp [δ₀]
+    rw [div_pow]
+    rw [Real.sq_sqrt (le_of_lt hε₀)]
+    ring
+  have hR' : 4 * ε₀ + 9 * δ₀ ^ 2 / 4 < R ^ 2 := by
+    rw [hsqδ]
+    have hbound : 4 * ε₀ + 9 * (ε₀ / 16) / 4 ≤ 265 * (min (R ^ 2) (R' ^ 2) / 16) / 64 := by
+      nlinarith [hεmin]
+    have h265 : 265 * (min (R ^ 2) (R' ^ 2) / 16) / 64 < R ^ 2 := by
+      have h1 : min (R ^ 2) (R' ^ 2) ≤ R ^ 2 := min_le_left (R ^ 2) (R' ^ 2)
+      nlinarith [h1, sq_pos_of_pos hRpos]
+    exact lt_of_le_of_lt hbound h265
+  have hΦr : 4 * ε₀ + 9 * δ₀ ^ 2 / 4 < R' ^ 2 := by
+    rw [hsqδ]
+    have hbound : 4 * ε₀ + 9 * (ε₀ / 16) / 4 ≤ 265 * (min (R ^ 2) (R' ^ 2) / 16) / 64 := by
+      nlinarith [hεmin]
+    have h265 : 265 * (min (R ^ 2) (R' ^ 2) / 16) / 64 < R' ^ 2 := by
+      have h1 : min (R ^ 2) (R' ^ 2) ≤ R' ^ 2 := min_le_right (R ^ 2) (R' ^ 2)
+      nlinarith [h1, sq_pos_of_pos hR'pos]
+    exact lt_of_le_of_lt hbound h265
+  have hδε : 9 * δ₀ ^ 2 < 4 * ε₀ := by
+    rw [hsqδ]
+    nlinarith [hε₀]
+  have hεR : Real.sqrt (2 * ε₀) ≤ R := by
+    have hsq : (Real.sqrt (2 * ε₀)) ^ 2 ≤ R ^ 2 := by
+      rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε₀)]
+      have hle : 2 * ε₀ ≤ R ^ 2 := by
+        have h1 : ε₀ ≤ R ^ 2 / 16 := le_trans hεmin (by
+          have hle' := min_le_left (R ^ 2) (R' ^ 2)
+          nlinarith)
+        nlinarith [h1]
+      nlinarith [hle]
+    have hnonneg : 0 ≤ Real.sqrt (2 * ε₀) := Real.sqrt_nonneg _
+    have habs := sq_le_sq.mp hsq
+    rwa [abs_of_nonneg hnonneg, abs_of_nonneg (le_of_lt hRpos)] at habs
+  let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R χ f
+  have hgmd : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g := by
+    dsimp [g]
+    exact contMDiff_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R R' hε₀ hδ₀
+      hR' hΦr hRpos hR'pos I f hf χ hnorm hχsrc hχsymmOn
+  have hg : Continuous g := hgmd.continuous
+  have hg_le : ∀ x : M, g x ≤ f x := by
+    intro x
+    dsimp [g]
+    exact morseModifiedFunction_le_f (H := H) (M := M) hk c ε₀ δ₀ R hε₀ χ f hnorm x
+  have hgup : {x : M | g x ≤ c + ε₀} = sublevel f (c + ε₀) := by
+    dsimp [g]
+    exact sublevel_upper_identity_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R hε₀ hδ₀
+      hδε χ f hnorm
+  have hcompactG : IsCompact (g ⁻¹' Set.Icc (c - ε₀) (c + ε₀)) := by
+    dsimp [g]
+    exact isCompact_strip_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R a hε₀ hδ₀ hδε hεa
+      χ f hf.continuous hnorm hg hcompact
+  have hregularG : ∀ x : M, x ∈ g ⁻¹' Set.Icc (c - ε₀) (c + ε₀) →
+      ¬ IsCriticalPointAt I g x := by
+    intro x hx
+    dsimp [g] at hx ⊢
+    exact no_critical_point_morseModifiedFunction (H := H) (M := M) hk c ε₀ δ₀ R R' a hε₀ hδ₀ hδε
+      hR' hΦr hRpos hR'pos hεa I f p χ hχ0val hnorm hχsrc hχsymmOn hχon hunique hx
+  rcases no_critical_value_transport (I := I) (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀)
+      hcompactG hregularG with
+    ⟨v, Φ, hv, hsupp, hdfOn, hrate, hcomplete, htransport, htie⟩
+  refine ⟨ε₀, hε₀, hεa, g, hgmd, hg_le, ?_, ?_, v, hv, hsupp, ?_, Φ, ?_⟩
+  · exact hgup
+  · intro x hx
+    exact le_trans (hg_le x) hx
+  · intro x hx
+    exact hdfOn x hx
+  · exact htransport.trans hgup
+
 theorem one_critical_point_cell_attachment {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
     (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
