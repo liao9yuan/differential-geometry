@@ -31,7 +31,11 @@ theorem no_critical_value_transport [I.Boundaryless] [IsManifold I (⊤ : WithTo
           (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0) ∧
         (∃ hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v,
           (Φ.toEquiv '' sublevel f a) = sublevel f b ∧
-          ∀ x : M, Φ.toEquiv x = curveAt v hcomplete x (a - b)) := by
+          ∀ x : M, Φ.toEquiv x = curveAt v hcomplete x (a - b)) ∧
+        (∀ x : M, f x = a → f (Φ x) = b) ∧
+        (∀ x : M, f x < a → f (Φ x) < b) ∧
+        (∀ x : M, f x = b → f (Φ.symm x) = a) ∧
+        (∀ x : M, f x < b → f (Φ.symm x) < a) := by
   rcases exists_unitSpeedVectorField_on_strip I f hf a b hcompact hregular with
     ⟨v, hv, hsupp, hdfOn, hrate⟩
   have hcomplete := exists_globalIntegralCurve_of_compactSupport v hv hsupp
@@ -41,6 +45,9 @@ theorem no_critical_value_transport [I.Boundaryless] [IsManifold I (⊤ : WithTo
   have htransport := sublevel_transport_of_stripUnitSpeedVectorField (I := I) f hf hab v hv1
     hdfOn hrate hcomplete
   let flow : ℝ → M → M := fun t x => curveAt v hcomplete x t
+  let t : ℝ := b - a
+  have ht : 0 ≤ t := by dsimp [t]; linarith
+  have htdef : t = b - a := rfl
   have hflowSmooth : ∀ t : ℝ, ContMDiff I I ∞ (fun x : M => flow t x) := by
     intro t x
     exact contMDiffAt_globalFlow_of_compactSupport v hv hsupp t x
@@ -70,11 +77,111 @@ theorem no_critical_value_transport [I.Boundaryless] [IsManifold I (⊤ : WithTo
               _ = x := hflow0 x }
       contMDiff_toFun := hflowSmooth (a - b)
       contMDiff_invFun := hflowSmooth (b - a) }
-  refine ⟨v, Φ, hv, hsupp, hdfOn, hrate, hcomplete, ?_, ?_⟩
+  have htie : ∀ x : M, Φ.toEquiv x = curveAt v hcomplete x (a - b) := by
+    intro x
+    dsimp [Φ, flow]
+  have hbnd : ∀ x : M, f x = a → f (Φ x) = b := by
+    intro x hx
+    change f (Φ.toEquiv x) = b
+    rw [htie x]
+    have hstay : ∀ s ∈ Set.Icc (0 : ℝ) t, flow (-s) x ∈ f ⁻¹' Set.Icc a b := by
+      intro s hs
+      have hrb := f_rate_bounds_of_integralCurve f hf v hrate
+        (hγ := IsMIntegralCurve.comp_add (curveAt_integralCurve v hcomplete x) (-s)) (t := s) hs.1
+      have h1 : f (flow (-s) x) - s ≤ f x := by
+        have hh := hrb.1
+        change f (curveAt v hcomplete x (-s)) - s ≤ f x
+        simpa [Function.comp_def, curveAt_zero] using hh
+      have h2 : f x ≤ f (flow (-s) x) := by
+        have hrb' := f_rate_bounds_of_integralCurve f hf v hrate
+          (hγ := curveAt_integralCurve v hcomplete (flow (-s) x)) (t := s) hs.1
+        have hh : f (flow s (flow (-s) x)) ≤ f (flow (-s) x) := by
+          simpa [flow, curveAt_zero] using hrb'.2
+        have hzz : flow s (flow (-s) x) = x := by
+          have h := hflowAdd (-s) s x
+          change flow ((-s) + s) x = flow s (flow (-s) x) at h
+          rw [show (-s) + s = 0 by ring] at h
+          simpa [hflow0] using h.symm
+        rwa [hzz] at hh
+      constructor <;> linarith [h1, h2, hx, hs.2, htdef]
+    have hval := f_add_of_integralCurve_back f hf v hdfOn
+      (hγ := curveAt_integralCurve v hcomplete x) (t := t) ht hstay
+    have htneg : a - b = -t := by dsimp [t]; ring
+    rw [htneg]
+    change f (curveAt v hcomplete x (-t)) = b
+    rw [hval, curveAt_zero]
+    calc
+      f x + t = a + t := by rw [hx]
+      _ = a + (b - a) := by rw [htdef]
+      _ = b := by ring
+  have hstrict : ∀ x : M, f x < a → f (Φ x) < b := by
+    intro x hx
+    change f (Φ.toEquiv x) < b
+    rw [htie x]
+    have htneg : a - b = -t := by dsimp [t]; ring
+    rw [htneg]
+    have hrb := f_rate_bounds_of_integralCurve f hf v hrate
+      (hγ := IsMIntegralCurve.comp_add (curveAt_integralCurve v hcomplete x) (-t)) (t := t) ht
+    have h1 : f (curveAt v hcomplete x (-t)) - t ≤ f x := by
+      have hh := hrb.1
+      simpa [Function.comp_def, curveAt_zero] using hh
+    have h2 : f (curveAt v hcomplete x (-t)) ≤ f x + t := by linarith
+    linarith [hx, htdef]
+  have hbnd' : ∀ x : M, f x = b → f (Φ.symm x) = a := by
+    intro x hx
+    change f (Φ.toEquiv.symm x) = a
+    dsimp [Φ]
+    change f (curveAt v hcomplete x (b - a)) = a
+    rw [← htdef]
+    have hstay : ∀ s ∈ Set.Icc (0 : ℝ) t, flow s x ∈ f ⁻¹' Set.Icc a b := by
+      intro s hs
+      have hrb := f_rate_bounds_of_integralCurve f hf v hrate
+        (hγ := curveAt_integralCurve v hcomplete x) (t := s) hs.1
+      have h1 : f (flow s x) ≤ f x := by simpa [flow, curveAt_zero] using hrb.2
+      have h2 : f x - s ≤ f (flow s x) := by simpa [flow, curveAt_zero] using hrb.1
+      constructor <;> linarith [h1, h2, hx, hs.2, htdef]
+    have hval := f_eq_sub_of_integralCurve_on_strip f hf v hdfOn
+      (hγ := curveAt_integralCurve v hcomplete x) (t := t) ht hstay
+    rw [hval, curveAt_zero]
+    calc
+      f x - t = b - t := by rw [hx]
+      _ = b - (b - a) := by rw [htdef]
+      _ = a := by ring
+  have hstrict' : ∀ x : M, f x < b → f (Φ.symm x) < a := by
+    intro x hx
+    change f (Φ.toEquiv.symm x) < a
+    have hle : f (Φ.toEquiv.symm x) ≤ a := by
+      have himg : Φ.toEquiv.symm '' sublevel f b = sublevel f a := by
+        have h := congrArg (fun s : Set M => Φ.toEquiv.symm '' s) htransport
+        have hL : Φ.toEquiv.symm '' (Φ.toEquiv '' sublevel f a) = sublevel f a := by
+          rw [Set.image_image]
+          have hleft : (fun y : M => Φ.toEquiv.symm (Φ.toEquiv y)) = id := by
+            funext y
+            exact Φ.toEquiv.symm_apply_apply y
+          rw [hleft, Set.image_id]
+        exact (hL.symm.trans h).symm
+      have hmem : Φ.toEquiv.symm x ∈ sublevel f a := by
+        rw [← himg]
+        exact ⟨x, le_of_lt hx, rfl⟩
+      exact hmem
+    have hnot : ¬ f (Φ.toEquiv.symm x) = a := by
+      intro heq
+      have h1 : f (Φ (Φ.symm x)) = b := by
+        change f (Φ.toEquiv (Φ.toEquiv.symm x)) = b
+        exact hbnd (Φ.toEquiv.symm x) heq
+      have h2 : Φ (Φ.symm x) = x := by
+        dsimp [Φ, flow]
+        have h := hflowAdd (b - a) (a - b) x
+        change flow ((b - a) + (a - b)) x = flow (a - b) (flow (b - a) x) at h
+        rw [show (b - a) + (a - b) = 0 by ring] at h
+        simp
+      have hx' : f x = b := by rwa [h2] at h1
+      exact (ne_of_lt hx) hx'
+    exact lt_of_le_of_ne hle hnot
+  refine ⟨v, Φ, hv, hsupp, hdfOn, hrate, ⟨hcomplete, ?_, ?_⟩, hbnd, hstrict, hbnd', hstrict'⟩
   · change (fun x : M => flow (a - b) x) '' sublevel f a = sublevel f b
     simpa [flow] using htransport
-  · intro x
-    rfl
+  · exact htie
 
 theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M]
     [T2Space M] [SigmaCompactSpace M]
@@ -83,7 +190,7 @@ theorem no_critical_values [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞)
     (hregular : ∀ x ∈ f ⁻¹' Set.Icc a b, ¬ IsCriticalPointAt I f x) :
     ∃ Φ : Diffeomorph I I M M ∞, Φ.toEquiv '' sublevel f a = sublevel f b := by
   rcases no_critical_value_transport (I := I) f hf hab hcompact hregular with
-    ⟨v, Φ, hv, hsupp, hdfOn, hrate, hcomplete, hflow, htie⟩
+    ⟨v, Φ, hv, hsupp, hdfOn, hrate, ⟨hcomplete, hflow, htie⟩, _hbnd, _hstrict, _hbnd', _hstrict'⟩
   exact ⟨Φ, hflow⟩
 
 theorem reverseFlow_value_on_levelSet {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}

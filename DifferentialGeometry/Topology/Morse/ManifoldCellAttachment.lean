@@ -5154,7 +5154,8 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
       hR' hΦr hRpos hR'pos hεa I f p χ hχ0val hnorm hχsrc hχsymmOn hχon hunique hx
   rcases no_critical_value_transport (I := I) (f := g) hgmd (by linarith : c - ε₀ ≤ c + ε₀)
       hcompactG hregularG with
-    ⟨v, Φ, hv, hsupp, hdfOn, hrate, hcomplete, htransport, htie⟩
+    ⟨v, Φ, hv, hsupp, hdfOn, hrate, ⟨hcomplete, htransport, htie⟩,
+      hbnd, hstrict, hbnd', hstrict'⟩
   let r₀ : ℝ := Real.sqrt (2 * ε₀)
   let δ₁ : ℝ := 3 * ε₀ / 2
   have hr₀ : r₀ ≠ 0 := by
