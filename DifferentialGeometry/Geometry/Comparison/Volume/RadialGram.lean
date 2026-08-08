@@ -207,7 +207,7 @@ private lemma gram_det_change
     Matrix.det_transpose, Module.Basis.det_apply]
   ring
 
-private noncomputable def basisIndexEquiv
+noncomputable def basisIndexEquiv
     (B : Module.Basis (Option ι) ℝ E) :
     Option ι ≃ Fin (Module.finrank ℝ E) :=
   Fintype.equivOfCardEq (by

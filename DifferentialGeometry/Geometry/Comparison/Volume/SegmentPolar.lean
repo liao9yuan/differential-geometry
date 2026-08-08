@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentDomain
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopBall
 import DifferentialGeometry.Geometry.Comparison.Volume.SegmentArea
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentPole
+import DifferentialGeometry.Geometry.Comparison.Volume.SegmentGauss
 import DifferentialGeometry.Geometry.Comparison.Variation.MinimalGeodesicNoConjugate
 import DifferentialGeometry.Geometry.Comparison.DistanceCalabi
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGrad
@@ -380,6 +382,158 @@ theorem segDom_not_conj
       rw [← hlu, smul_smul]
       rfl
     rwa [← htv] at hn
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Gauss factorization of the intrinsic Jacobi endpoint density.**  For a
+`gₓ`-orthonormal transverse frame perpendicular to `v`, the full-frame density
+`expJacDensity x v` factors as the fixed base chart density
+`normalChartDensity g x 0` (= `√det gₓ` in the model basis) times the
+transverse-frame curve density at the endpoint. -/
+theorem expJacDensity_eq_ncd0_mul_transverse
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {v : TangentSpace I x} (hvne : v ≠ 0)
+    (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
+    (hON : ∀ i j, g.inner x (w i) (w j) = if i = j then 1 else 0)
+    (hperp : ∀ i, g.inner x v (w i) = 0) :
+    expJacDensity (I := I) g hEnorm x (v : E) =
+      normalChartDensity (I := I) g x 0 *
+        curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) 1 := by
+  classical
+  let d : ℕ := Module.finrank ℝ E - 1
+  have hv_li : LinearIndependent ℝ w := by
+    simpa using linIndep_of_ortho (I := I) g x w hON
+  obtain ⟨B, hBnone, hBsome⟩ :=
+    exists_perp_basis (I := I) g x v w hv_li hperp (g.pos x v hvne)
+  let a : Option (Fin d) → E := fun o => (B o : E)
+  let e : Option (Fin d) ≃ Fin (Module.finrank ℝ E) := basisIndexEquiv B
+  let V : Option (Fin d) → ∀ t : ℝ, TangentSpace I
+      (intrinsicGeodesic (I := I) g hEnorm x v t) :=
+    fun o t => intrinsicJacobi (I := I) g hEnorm x v (chartModelBasis E (e o)) t
+  let C : Matrix (Option (Fin d)) (Option (Fin d)) ℝ := (modelBasisFor B).toMatrix a
+  have hC : ∀ o o', C o o' = (modelBasisFor B).repr (a o') o := by
+    intro o o'
+    rfl
+  have hb : ∀ o, (modelBasisFor B) o = chartModelBasis E (e o) := by
+    intro o
+    simp [modelBasisFor, e, Module.Basis.reindex_apply]
+  have hjac : ∀ (u : E),
+      intrinsicJacobi (I := I) g hEnorm x v (show TangentSpace I x from u) 1 =
+        (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+          (show TangentSpace I x from z)) (v : E)) u := by
+    intro u
+    simpa [intrinsicJacobi, expMapIntrinsic_def] using
+      (intrinsic_jacobi_one (I := I) g hEnorm x (v : E) u)
+  have hlin : ∀ o : Option (Fin d),
+      (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+        (show TangentSpace I x from z)) (v : E)) (a o)
+        = ∑ o', C o' o •
+            (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+              (show TangentSpace I x from z)) (v : E)) (chartModelBasis E (e o')) := by
+    intro o
+    have hsum := (modelBasisFor B).sum_repr (a o)
+    calc
+      (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+            (show TangentSpace I x from z)) (v : E)) (a o)
+          = (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+              (show TangentSpace I x from z)) (v : E))
+              (∑ o', (modelBasisFor B).repr (a o) o' • (modelBasisFor B) o') := by
+            exact congrArg (fun z : E =>
+              (mfderiv 𝓘(ℝ, E) I (fun u : E =>
+                (expMapIntrinsic (I := I) g hEnorm x (show TangentSpace I x from u) : M))
+                (v : E)) z) hsum.symm
+      _ = ∑ o', (modelBasisFor B).repr (a o) o' •
+            (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+              (show TangentSpace I x from z)) (v : E)) ((modelBasisFor B) o') := by
+          rw [map_sum]
+          refine Finset.sum_congr rfl (fun o' _ => ?_)
+          exact (ContinuousLinearMap.map_smul
+            (mfderiv 𝓘(ℝ, E) I (fun z : E =>
+              (expMapIntrinsic (I := I) g hEnorm x (show TangentSpace I x from z) : M))
+              (v : E)) ((modelBasisFor B).repr (a o) o') ((modelBasisFor B) o'))
+      _ = ∑ o', C o' o •
+            (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+              (show TangentSpace I x from z)) (v : E)) (chartModelBasis E (e o')) := by
+          refine Finset.sum_congr rfl (fun o' _ => ?_)
+          rw [hC o' o, hb o']
+  have hrecomb : ∀ o : Option (Fin d),
+      velJacFrame (I := I) g hEnorm x v w o 1 = ∑ o', C o' o • V o' 1 := by
+    intro o
+    have hV' : velJacFrame (I := I) g hEnorm x v w o 1 =
+        intrinsicJacobi (I := I) g hEnorm x v (show TangentSpace I x from a o) 1 := by
+      rcases o with - | i
+      · simp [velJacFrame, a, hBnone]
+        exact (radialJac_eq_vel (I := I) g hEnorm x v).symm
+      · simp [velJacFrame, a, hBsome]
+    have h1' : velJacFrame (I := I) g hEnorm x v w o 1 =
+        (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+          (show TangentSpace I x from z)) (v : E)) (a o) :=
+      hV'.trans (hjac (a o))
+    have h2' : (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+          (show TangentSpace I x from z)) (v : E)) (a o)
+        = ∑ o', C o' o •
+            (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+              (show TangentSpace I x from z)) (v : E)) (chartModelBasis E (e o')) :=
+      hlin o
+    have h3' : ∑ o', C o' o •
+            (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+              (show TangentSpace I x from z)) (v : E)) (chartModelBasis E (e o'))
+        = ∑ o', C o' o • V o' 1 := by
+      refine Finset.sum_congr rfl (fun o' _ => ?_)
+      change C o' o • (mfderiv 𝓘(ℝ, E) I (fun z : E => expMapIntrinsic (I := I) g hEnorm x
+            (show TangentSpace I x from z)) (v : E)) (chartModelBasis E (e o')) =
+        C o' o • V o' 1
+      rw [← hjac (chartModelBasis E (e o'))]
+      rfl
+    exact h1'.trans (h2'.trans h3')
+  have hrecomb' := curveDensity_recomb (I := I) g
+    (intrinsicGeodesic (I := I) g hEnorm x v) V
+    (velJacFrame (I := I) g hEnorm x v w) 1 C hrecomb
+  have hsplit := velJac_density_split (I := I) g hEnorm x v w hperp
+  have hExp : expJacDensity (I := I) g hEnorm x (v : E) =
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v) V 1 := by
+    rw [expJacDensity]
+    exact (curveDensity_reindex (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+      (fun i : Fin (Module.finrank ℝ E) =>
+        intrinsicJacobi (I := I) g hEnorm x v (chartModelBasis E i)) 1 e).symm
+  have hBperp : ∀ i, g.inner x (v : E) (B (some i)) = 0 := by
+    intro i
+    rw [hBsome i]
+    exact hperp i
+  have hONB : ∀ i j, g.inner x (B (some i)) (B (some j)) = if i = j then 1 else 0 := by
+    intro i j
+    rw [hBsome i, hBsome j]
+    exact hON i j
+  have hncd := normalChartDensity_zero_of_perpOrthonormal (I := I) g x (v : E) B
+    hBnone hBperp hONB
+  have hdetC : |C.det| = |(modelBasisFor B).det B| := by
+    change |((modelBasisFor B).toMatrix a).det| = |(modelBasisFor B).det B|
+    rw [Module.Basis.det_apply]
+  have hV1 : curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v) V 1 =
+      (Real.sqrt (g.inner x v v) / |C.det|) *
+        curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) 1 := by
+    have hdet_ne : |C.det| ≠ 0 := by
+      rw [hdetC]
+      exact abs_ne_zero.mpr ((modelBasisFor B).isUnit_det B).ne_zero
+    have hV : curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v) V 1 =
+        curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+            (velJacFrame (I := I) g hEnorm x v w) 1 / |C.det| := by
+      have hA : curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+            (velJacFrame (I := I) g hEnorm x v w) 1 =
+          |C.det| * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v) V 1 := by
+        simpa [mul_comm] using hrecomb'
+      exact (eq_div_iff hdet_ne).mpr (by rw [mul_comm]; exact hA.symm)
+    rw [hV, hsplit]
+    field_simp [hdet_ne]
+  rw [hExp, hV1]
+  rw [hncd]
+  rw [← hdetC]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

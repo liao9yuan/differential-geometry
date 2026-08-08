@@ -112,7 +112,7 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
     [T2Space (TangentBundle I M)] in
 omit [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] in
-private lemma linIndep_of_ortho
+lemma linIndep_of_ortho
     (g : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank Real E - 1) → E)
     (hON : ∀ i j, g.inner x (e i) (e j) = if i = j then 1 else 0) :
