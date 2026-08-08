@@ -21,7 +21,7 @@ theorem contDiffOn_extDeriv {s : Set E} (ω : E → E [⋀^Fin n]→L[ℝ] F)
     (alternatizeUncurryFinCLM ℝ E F).contDiff
   exact hc.comp_contDiffOn hf
 
-private theorem contDiffOn_wedge_product {s : Set E} (a : E → E [⋀^Fin k]→L[ℝ] ℝ)
+theorem contDiffOn_wedge_product {s : Set E} (a : E → E [⋀^Fin k]→L[ℝ] ℝ)
     (b : E → E [⋀^Fin l]→L[ℝ] ℝ) (ha : ContDiffOn ℝ ⊤ a s) (hb : ContDiffOn ℝ ⊤ b s) :
     ContDiffOn ℝ ⊤ (fun x => a x ∧[ℝ] b x) s := by
   let B : (E [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (E [⋀^Fin l]→L[ℝ] ℝ) →L[ℝ]
@@ -38,7 +38,7 @@ private theorem contDiff_compContinuousLinearMapCLM :
   exact ContinuousAlternatingMap.compContinuousLinearMapCLM_contDiff_real (ι := Fin n)
     (F₁ := E) (F₂ := ℝ)
 
-private theorem contDiffOn_pullback {s t : Set E} (f : E → E)
+theorem contDiffOn_pullback {s t : Set E} (f : E → E)
     (ω : E → E [⋀^Fin n]→L[ℝ] ℝ) (hf : ContDiffOn ℝ ⊤ f s) (hω : ContDiffOn ℝ ⊤ ω t)
     (hst : Set.MapsTo f s t) (hs : IsOpen s) :
     ContDiffOn ℝ ⊤ (fun x => (ω (f x)).compContinuousLinearMap (fderiv ℝ f x)) s := by
