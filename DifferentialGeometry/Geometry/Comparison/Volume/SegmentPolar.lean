@@ -99,6 +99,7 @@ namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.BonnetMyers
 open DifferentialGeometry.Geometry.Riemannian.Variation
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -585,6 +586,341 @@ theorem transverseDensity_le_hyp
       exact hanti hsb ht hs.2.le
     exact ge_of_tendsto hlim hev
   rwa [div_le_one hpos] at hRatioLE
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+private lemma symmL_eq_sum_chartBasis (α : M) (y : M) (c : E) :
+    (trivializationAt E (TangentSpace I) α).symmL ℝ y c =
+      ∑ k, (chartModelBasis E).repr c k • chartBasisVecFiber (I := I) α k y := by
+  calc
+    (trivializationAt E (TangentSpace I) α).symmL ℝ y c
+        = (trivializationAt E (TangentSpace I) α).symmL ℝ y
+            (∑ k, (chartModelBasis E).repr c k • (chartModelBasis E) k) := by
+            congr 1
+            exact ((chartModelBasis E).sum_repr c).symm
+    _ = ∑ k, (chartModelBasis E).repr c k •
+          (trivializationAt E (TangentSpace I) α).symmL ℝ y ((chartModelBasis E) k) := by
+          rw [map_sum]
+          refine Finset.sum_congr rfl (fun k _ => ?_)
+          rw [ContinuousLinearMap.map_smul]
+    _ = ∑ k, (chartModelBasis E).repr c k • chartBasisVecFiber (I := I) α k y := by
+          rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+private lemma chartRep_inner_eq
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V W : ∀ t, TangentSpace I (γ t)) (t₀ t : ℝ)
+    (ht : γ t ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet) :
+    g.inner (γ t) (V t) (W t) =
+      ∑ k, ∑ l,
+        (chartModelBasis E).repr (chartRepAt (I := I) γ V t₀ t) k *
+          (chartModelBasis E).repr (chartRepAt (I := I) γ W t₀ t) l *
+            chartGramMatrix g (γ t₀) (γ t) k l := by
+  set T := trivializationAt E (TangentSpace I) (γ t₀) with hT
+  have hV : V t = T.symmL ℝ (γ t) (chartRepAt (I := I) γ V t₀ t) := by
+    simpa [hT, chartRepAt] using
+      (T.symmL_continuousLinearMapAt (R := ℝ) ht (V t)).symm
+  have hW : W t = T.symmL ℝ (γ t) (chartRepAt (I := I) γ W t₀ t) := by
+    simpa [hT, chartRepAt] using
+      (T.symmL_continuousLinearMapAt (R := ℝ) ht (W t)).symm
+  rw [hV, hW]
+  rw [symmL_eq_sum_chartBasis (γ t₀) (γ t) (chartRepAt (I := I) γ V t₀ t)]
+  rw [symmL_eq_sum_chartBasis (γ t₀) (γ t) (chartRepAt (I := I) γ W t₀ t)]
+  have hL : g.inner (γ t)
+        (∑ k, (chartModelBasis E).repr (chartRepAt (I := I) γ V t₀ t) k •
+          chartBasisVecFiber (I := I) (γ t₀) k (γ t))
+      = ∑ k, (chartModelBasis E).repr (chartRepAt (I := I) γ V t₀ t) k •
+          g.inner (γ t) (chartBasisVecFiber (I := I) (γ t₀) k (γ t)) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [ContinuousLinearMap.map_smul]
+  rw [hL, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [ContinuousLinearMap.smul_apply]
+  have hR : g.inner (γ t) (chartBasisVecFiber (I := I) (γ t₀) k (γ t))
+        (∑ l, (chartModelBasis E).repr (chartRepAt (I := I) γ W t₀ t) l •
+          chartBasisVecFiber (I := I) (γ t₀) l (γ t))
+      = ∑ l, (chartModelBasis E).repr (chartRepAt (I := I) γ W t₀ t) l *
+          g.inner (γ t) (chartBasisVecFiber (I := I) (γ t₀) k (γ t))
+            (chartBasisVecFiber (I := I) (γ t₀) l (γ t)) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [ContinuousLinearMap.map_smul, smul_eq_mul]
+  rw [hR, smul_eq_mul, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [chartGramMatrix_apply]
+  ring
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
+/-- The intrinsic Jacobi field chart representation is differentiable in the
+time parameter, at a fixed chart center. -/
+theorem intrinsicJacobi_chartRep_differentiableAt
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) (v w : TangentSpace I x) (t₀ : ℝ) :
+    DifferentiableAt ℝ
+      (chartRepAt (I := I) (intrinsicGeodesic (I := I) g hEnorm x v)
+        (fun t => intrinsicJacobi (I := I) g hEnorm x v w t) t₀) t₀ := by
+  have hf : IsSmoothVariation (I := I)
+      (fun s t : ℝ => intrinsicGeodesic (I := I) g hEnorm x (v + s • w) t) := by
+    simpa using (intrinsicVar_smooth (I := I) g hEnorm x (v : E) (w : E)).of_le
+      ENat.LEInfty.out
+  have hγ : (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm x (v + (0 : ℝ) • w) s) =
+      intrinsicGeodesic (I := I) g hEnorm x v := by
+    funext s
+    congr 1
+    simp
+  have h := variationField_chartRep_differentiableAt (I := I) g
+    (fun s t : ℝ => intrinsicGeodesic (I := I) g hEnorm x (v + s • w) t) hf t₀
+  have h' : DifferentiableAt ℝ
+      (chartRepAt (I := I) (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm x (v + (0 : ℝ) • w) s)
+        (fun t => intrinsicJacobi (I := I) g hEnorm x v w t) t₀) t₀ := by
+    simpa [intrinsicJacobi] using h
+  rw [hγ] at h'
+  exact h'
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma continuousAt_sum {ι : Type*} [Fintype ι]
+    (F : ℝ → ι → ℝ) (t₀ : ℝ)
+    (hF : ∀ i, ContinuousAt (fun t => F t i) t₀) :
+    ContinuousAt (fun t => ∑ i, F t i) t₀ := by
+  classical
+  refine Finset.induction_on Finset.univ ?_ ?_
+  · simpa using continuousAt_const
+  · intro a s has ih
+    simpa only [Finset.sum_insert has] using (hF a).add ih
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma continuousAt_prod {ι : Type*} [Fintype ι]
+    (F : ℝ → ι → ℝ) (t₀ : ℝ)
+    (hF : ∀ i, ContinuousAt (fun t => F t i) t₀) :
+    ContinuousAt (fun t => ∏ i, F t i) t₀ := by
+  classical
+  refine Finset.induction_on Finset.univ ?_ ?_
+  · simpa using continuousAt_const
+  · intro a s has ih
+    simpa only [Finset.prod_insert has] using (hF a).mul ih
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma continuousAt_double_sum {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (F : ℝ → ι → κ → ℝ) (t₀ : ℝ)
+    (hF : ∀ i j, ContinuousAt (fun t => F t i j) t₀) :
+    ContinuousAt (fun t => ∑ i, ∑ j, F t i j) t₀ := by
+  refine continuousAt_sum (fun t i => ∑ j, F t i j) t₀ ?_
+  intro i
+  refine continuousAt_sum (fun t j => F t i j) t₀ ?_
+  intro j
+  exact hF i j
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
+/-- The transverse Jacobi-frame curve density along an intrinsic radial geodesic
+is continuous in the time parameter. -/
+theorem curveDensity_jacobiFrame_continuousAt
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) (v : TangentSpace I x)
+    (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
+    (t₀ : ℝ) :
+    ContinuousAt (fun t : ℝ =>
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+        (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t) t₀ := by
+  set γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm x v
+  set V : Fin (Module.finrank ℝ E - 1) → ∀ t, TangentSpace I (γ t) :=
+    fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)
+  have hγc : ContinuousAt γ t₀ :=
+    (intrinsicGeodesic_contMDiff (I := I) g hEnorm x v).continuous.continuousAt
+  have hb₀ : γ t₀ ∈ (trivializationAt E (TangentSpace I) (γ t₀)).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) (γ t₀)
+  have hpre : γ ⁻¹' (trivializationAt E (TangentSpace I) (γ t₀)).baseSet ∈ 𝓝 t₀ :=
+    hγc.preimage_mem_nhds ((trivializationAt E (TangentSpace I) (γ t₀)).open_baseSet.mem_nhds hb₀)
+  have hcoord_cont : ∀ k, Continuous (fun c : E => (chartModelBasis E).repr c k) := by
+    intro k
+    refine LinearMap.continuous_of_finiteDimensional
+      { toFun := fun c : E => (chartModelBasis E).repr c k,
+        map_add' := fun x y => by simp [Finsupp.add_apply],
+        map_smul' := fun a x => by
+          calc
+            ((chartModelBasis E).repr (a • x)) k = (a • (chartModelBasis E).repr x) k := by
+              rw [map_smul]
+            _ = a • ((chartModelBasis E).repr x) k := by rw [Finsupp.smul_apply] }
+  have hjac_diff : ∀ i, DifferentiableAt ℝ (chartRepAt (I := I) γ (V i) t₀) t₀ := by
+    intro i
+    simpa [γ, V] using intrinsicJacobi_chartRep_differentiableAt (I := I) g hEnorm x v (w i) t₀
+  have hEntry : ∀ i j, ContinuousAt
+      (fun t : ℝ => g.inner (γ t) (V i t) (V j t)) t₀ := by
+    intro i j
+    have hcontA : ContinuousAt (fun t : ℝ => chartRepAt (I := I) γ (V i) t₀ t) t₀ :=
+      (hjac_diff i).continuousAt
+    have hcontB : ContinuousAt (fun t : ℝ => chartRepAt (I := I) γ (V j) t₀ t) t₀ :=
+      (hjac_diff j).continuousAt
+    have hcoordA : ∀ k, ContinuousAt
+        (fun t : ℝ => (chartModelBasis E).repr (chartRepAt (I := I) γ (V i) t₀ t) k) t₀ := by
+      intro k
+      exact (hcoord_cont k).continuousAt.comp hcontA
+    have hcoordB : ∀ l, ContinuousAt
+        (fun t : ℝ => (chartModelBasis E).repr (chartRepAt (I := I) γ (V j) t₀ t) l) t₀ := by
+      intro l
+      exact (hcoord_cont l).continuousAt.comp hcontB
+    have hgram : ∀ k l, ContinuousAt
+        (fun t : ℝ => chartGramMatrix g (γ t₀) (γ t) k l) t₀ := by
+      intro k l
+      have hc := (chartGramMatrix_entry_contMDiffOn (I := I) g (γ t₀) k l).continuousOn
+      have hcat : ContinuousAt (fun x : M => chartGramMatrix g (γ t₀) x k l) (γ t₀) :=
+        hc.continuousAt ((trivializationAt E (TangentSpace I) (γ t₀)).open_baseSet.mem_nhds hb₀)
+      exact hcat.comp hγc
+    have hR : ContinuousAt (fun t : ℝ =>
+        ∑ k, ∑ l,
+          (chartModelBasis E).repr (chartRepAt (I := I) γ (V i) t₀ t) k *
+            (chartModelBasis E).repr (chartRepAt (I := I) γ (V j) t₀ t) l *
+              chartGramMatrix g (γ t₀) (γ t) k l) t₀ := by
+      refine continuousAt_double_sum
+        (fun t (k : Fin (Module.finrank ℝ E)) (l : Fin (Module.finrank ℝ E)) =>
+          (chartModelBasis E).repr (chartRepAt (I := I) γ (V i) t₀ t) k *
+            (chartModelBasis E).repr (chartRepAt (I := I) γ (V j) t₀ t) l *
+              chartGramMatrix g (γ t₀) (γ t) k l) t₀ ?_
+      intro k l
+      exact ((hcoordA k).mul (hcoordB l)).mul (hgram k l)
+    have heq : (fun t : ℝ => g.inner (γ t) (V i t) (V j t)) =ᶠ[𝓝 t₀]
+        (fun t : ℝ => ∑ k, ∑ l,
+          (chartModelBasis E).repr (chartRepAt (I := I) γ (V i) t₀ t) k *
+            (chartModelBasis E).repr (chartRepAt (I := I) γ (V j) t₀ t) l *
+              chartGramMatrix g (γ t₀) (γ t) k l) := by
+      filter_upwards [hpre] with t ht
+      exact chartRep_inner_eq (I := I) g γ (V i) (V j) t₀ t ht
+    exact hR.congr heq.symm
+  have hdet : ContinuousAt (fun t : ℝ => (curveGram (I := I) g γ V t).det) t₀ := by
+    simp only [Matrix.det_apply]
+    refine Finset.induction_on Finset.univ ?_ ?_
+    · simpa using continuousAt_const
+    · intro σ s hσs ih
+      have hprod : ContinuousAt (fun t : ℝ =>
+          ∏ i : Fin (Module.finrank ℝ E - 1), (curveGram (I := I) g γ V t) (σ i) i) t₀ := by
+        refine continuousAt_prod
+          (fun t (i : Fin (Module.finrank ℝ E - 1)) => (curveGram (I := I) g γ V t) (σ i) i) t₀ ?_
+        intro i
+        simpa [curveGram] using hEntry (σ i) i
+      have hterm : ContinuousAt (fun t : ℝ =>
+          Equiv.Perm.sign σ • ∏ i : Fin (Module.finrank ℝ E - 1),
+            (curveGram (I := I) g γ V t) (σ i) i) t₀ := by
+        simpa using hprod.const_smul (Equiv.Perm.sign σ)
+      simpa only [Finset.sum_insert hσs] using hterm.add ih
+  have hsqrt : ContinuousAt (fun t : ℝ =>
+      Real.sqrt ((curveGram (I := I) g γ V t).det)) t₀ :=
+    Real.continuous_sqrt.continuousAt.comp hdet
+  simpa [γ, V] using hsqrt
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma transverseDensity_le_hyp_at_one
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {v : TangentSpace I x}
+    (hv : v ∈ SegDom (I := I) g hEnorm x) (hvne : v ≠ 0)
+    (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
+    (hON : ∀ i j, g.inner x (w i) (w j) = if i = j then 1 else 0)
+    (hperp : ∀ i, g.inner x v (w i) = 0)
+    (q : ℝ) (hq : 0 ≤ q) (hd : 0 < Module.finrank ℝ E - 1)
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank ℝ E - 1 : ℕ) : ℝ) * q ^ 2))) :
+    curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) 1 ≤
+        hypDensity (q * Real.sqrt (g.inner x v v)) (Module.finrank ℝ E - 1) 1 := by
+  have hwin : ∀ t ∈ Set.Ioo (0 : ℝ) 1,
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t ≤
+        hypDensity (q * Real.sqrt (g.inner x v v)) (Module.finrank ℝ E - 1) t :=
+    transverseDensity_le_hyp (I := I) g hEnorm x hv hvne w hON hperp q hq hd hRic
+  set ℓ : ℝ := Real.sqrt (g.inner x v v) with hℓ
+  have hqℓ : 0 ≤ q * ℓ := mul_nonneg hq (Real.sqrt_nonneg _)
+  have hpos : 0 < hypDensity (q * ℓ) (Module.finrank ℝ E - 1) 1 :=
+    hypDensity_pos hqℓ (by norm_num)
+  have hcontNum : ContinuousAt (fun t : ℝ =>
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t) 1 :=
+    curveDensity_jacobiFrame_continuousAt (I := I) g hEnorm x v w 1
+  have hcontDen : ContinuousAt (fun t : ℝ =>
+      hypDensity (q * ℓ) (Module.finrank ℝ E - 1) t) 1 :=
+    (hypDen_continuous (q * ℓ) (Module.finrank ℝ E - 1)).continuousAt
+  have hratio_cont : ContinuousAt (fun t : ℝ =>
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t /
+        hypDensity (q * ℓ) (Module.finrank ℝ E - 1) t) 1 := by
+    exact hcontNum.div hcontDen hpos.ne'
+  have hlim : Tendsto
+      (fun t : ℝ => curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t /
+        hypDensity (q * ℓ) (Module.finrank ℝ E - 1) t)
+      (𝓝[<] (1 : ℝ))
+      (𝓝 (curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) 1 /
+        hypDensity (q * ℓ) (Module.finrank ℝ E - 1) 1)) := by
+    simpa [hℓ] using hratio_cont.continuousWithinAt.tendsto
+  have hev : ∀ᶠ t in 𝓝[<] (1 : ℝ),
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t /
+        hypDensity (q * ℓ) (Module.finrank ℝ E - 1) t ≤ 1 := by
+    filter_upwards [Ioo_mem_nhdsLT (by norm_num : (0 : ℝ) < 1)] with t ht
+    have htwin : t ∈ Set.Ioo (0 : ℝ) 1 := ht
+    have h1 : curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x v)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x v (w i)) t ≤
+        hypDensity (q * ℓ) (Module.finrank ℝ E - 1) t := by
+      simpa [hℓ] using hwin t htwin
+    have hpt : 0 < hypDensity (q * ℓ) (Module.finrank ℝ E - 1) t :=
+      hypDensity_pos hqℓ ht.1
+    exact (div_le_one hpt).mpr h1
+  have hc := le_of_tendsto hlim hev
+  rwa [div_le_one hpos] at hc
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Endpoint Jacobi density bound** (L6 step (A)).  For a segment-domain launch
+vector, the full-frame intrinsic Jacobi endpoint density is at most the base
+chart density times the speed-scaled hyperbolic model density at radius 1. -/
+theorem expJacDensity_le
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {v : TangentSpace I x}
+    (hv : v ∈ SegDom (I := I) g hEnorm x) (hvne : v ≠ 0)
+    (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
+    (hON : ∀ i j, g.inner x (w i) (w j) = if i = j then 1 else 0)
+    (hperp : ∀ i, g.inner x v (w i) = 0)
+    (q : ℝ) (hq : 0 ≤ q) (hd : 0 < Module.finrank ℝ E - 1)
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank ℝ E - 1 : ℕ) : ℝ) * q ^ 2))) :
+    expJacDensity (I := I) g hEnorm x (v : E) ≤
+      normalChartDensity (I := I) g x 0 *
+        hypDensity (q * Real.sqrt (g.inner x v v)) (Module.finrank ℝ E - 1) 1 := by
+  have hfac := expJacDensity_eq_ncd0_mul_transverse (I := I) g hEnorm x hvne w hON hperp
+  have hT := transverseDensity_le_hyp_at_one (I := I) g hEnorm x hv hvne w hON hperp q hq hd hRic
+  have hncd : 0 ≤ normalChartDensity (I := I) g x 0 := by
+    rw [normalChartDensity, paramDensity_apply]
+    exact Real.sqrt_nonneg _
+  rw [hfac]
+  exact mul_le_mul_of_nonneg_left hT hncd
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
