@@ -1425,6 +1425,62 @@ theorem modelFlow_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : Mors
   · rw [sub_mul, one_mul]
     rw [div_mul_cancel₀ (2 * t) hb2]
 
+theorem modelFlow_up_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (ht0 : 0 ≤ t) (hy : 0 < ‖posPart hk y‖) :
+    ‖posPart hk (modelFlow hk (-t) y)‖ ^ 2 = ‖posPart hk y‖ ^ 2 + 2 * t := by
+  rw [modelFlow_posPart]
+  rw [norm_smul]
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+  rw [mul_pow]
+  have hsq : 0 ≤ 1 - 2 * (-t) / ‖posPart hk y‖ ^ 2 := by
+    have hb2pos : 0 < ‖posPart hk y‖ ^ 2 := sq_pos_of_pos hy
+    have h2t : 0 ≤ 2 * t := by positivity
+    have hdiv : 0 ≤ 2 * t / ‖posPart hk y‖ ^ 2 := div_nonneg h2t (le_of_lt hb2pos)
+    rw [show 1 - 2 * (-t) / ‖posPart hk y‖ ^ 2 = 1 + 2 * t / ‖posPart hk y‖ ^ 2 by ring]
+    linarith
+  rw [Real.sq_sqrt hsq]
+  have hb2 : ‖posPart hk y‖ ^ 2 ≠ 0 := by
+    exact ne_of_gt (sq_pos_of_pos hy)
+  rw [show 1 - 2 * (-t) / ‖posPart hk y‖ ^ 2 =
+      1 + 2 * t / ‖posPart hk y‖ ^ 2 by ring]
+  rw [add_mul, one_mul]
+  rw [div_mul_cancel₀ (2 * t) hb2]
+
+theorem modelFlow_f_add {n k : ℕ} (hk : k ≤ n) (c t : ℝ) (y : MorseModel n)
+    (ht0 : 0 ≤ t) (hy : 0 < ‖posPart hk y‖) :
+    morseNormalForm hk c (modelFlow hk (-t) y) = morseNormalForm hk c y + t := by
+  let a : EuclideanSpace ℝ (Fin k) := negPart hk y
+  let b : EuclideanSpace ℝ (Fin (n - k)) := posPart hk y
+  have hnorm : ‖(Real.sqrt (1 - 2 * (-t) / ‖b‖ ^ 2) • b)‖ ^ 2 = ‖b‖ ^ 2 + 2 * t := by
+    rw [norm_smul]
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+    rw [mul_pow]
+    have hsq : 0 ≤ 1 - 2 * (-t) / ‖b‖ ^ 2 := by
+      have hb2pos : 0 < ‖b‖ ^ 2 := sq_pos_of_pos hy
+      have h2t : 0 ≤ 2 * t := by positivity
+      have hdiv : 0 ≤ 2 * t / ‖b‖ ^ 2 := div_nonneg h2t (le_of_lt hb2pos)
+      rw [show 1 - 2 * (-t) / ‖b‖ ^ 2 = 1 + 2 * t / ‖b‖ ^ 2 by ring]
+      linarith
+    rw [Real.sq_sqrt hsq]
+    rw [show 1 - 2 * (-t) / ‖b‖ ^ 2 = 1 + 2 * t / ‖b‖ ^ 2 by ring]
+    have hb2 : ‖b‖ ^ 2 ≠ 0 := by
+      exact ne_of_gt (sq_pos_of_pos hy)
+    rw [add_mul, one_mul]
+    rw [div_mul_cancel₀ (2 * t) hb2]
+  have hval : morseNormalForm hk c (modelFlow hk (-t) y) =
+      c + (1 / 2) * (-‖a‖ ^ 2 + (‖b‖ ^ 2 + 2 * t)) := by
+    have hsplit := morseNormalForm_split hk c (modelFlow hk (-t) y)
+    rw [hsplit]
+    rw [modelFlow_negPart]
+    rw [modelFlow_posPart]
+    rw [hnorm]
+    ring
+  have hfy : morseNormalForm hk c y = c + (1 / 2) * (‖b‖ ^ 2 - ‖a‖ ^ 2) := by
+    have hsplit := morseNormalForm_split hk c y
+    rw [hsplit]
+  rw [hval, hfy]
+  ring
+
 def modelHandleMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     (p : StandardHandle k (n - k)) : MorseModel n :=
   recombine hk
