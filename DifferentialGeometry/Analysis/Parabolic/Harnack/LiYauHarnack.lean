@@ -218,21 +218,20 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci_on
     (g : SmoothRiemannianMetric I M)
     (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
     (D : RealTimeInterval)
-    (G : RealizedMetricFamily (I := I) (M := M) ℝ)
-    (hGmetric : ∀ t : ℝ, t ∈ D.carrier → G.metric t = g)
-    (hGconn : ∀ t : ℝ, t ∈ D.carrier → G.connection t = LeviCivita (G.metric t))
     (u : ℝ → M → ℝ)
-    (hu : IsHeatOn D G u)
+    (hu : IsHeatOnStationary D g u)
+    (huClosed : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2) (D.carrier ×ˢ univ))
     (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
     {a b : ℝ} (ha : 0 < a) (hab : a ≤ b)
     (hreg : Icc a b ⊆ D.regular)
     (hcarrier : Icc 0 b ⊆ D.carrier)
     (hslabRegular : Ioo 0 b ⊆ D.regular)
-    (hqCont : ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (D.carrier ×ˢ univ))
     (x : M) :
     u a x ≤ (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) * u b x := by
   classical
+  let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
+    stationaryMetricFamily (I := I) (M := M) g
   let n : ℝ := (Module.finrank ℝ E : ℝ)
   have hly_all : ∀ t : ℝ, t ∈ Set.Icc a b → 0 < t →
       liYauQuantity g (fun τ y => Real.log (u τ y)) t x ≤ n / (2 * t) :=
@@ -244,8 +243,10 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci_on
       have hreg_t : Ioo 0 t ⊆ D.regular := by
         intro s hs
         exact hslabRegular ⟨hs.1, hs.2.trans_le ht.2⟩
-      simpa [n] using liYau_estimate_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
-        (I := I) (M := M) g hRic D G hGmetric hGconn u hu hpos htreg htpos hcar_t hreg_t hqCont x
+      simpa [n] using liYau_estimate_of_nonnegative_ricci_on_of_metric_family
+        (I := I) (M := M) g hRic D (stationaryMetricFamily (I := I) (M := M) g)
+        (by intro τ hτ; rfl) (by intro τ hτ; rfl)
+        u hu huClosed hpos htreg htpos hcar_t hreg_t x
   have hliYau_bound : ∀ t ∈ Set.Icc a b,
       -(n / 2 / t) ≤ deriv (fun s => u s x) t / u t x := by
     intro t ht
@@ -294,7 +295,9 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci_on
     have hlapCont : ∀ t : ℝ, t ∈ D.regular →
         ContinuousAt (fun s : ℝ => laplacianAt (I := I) G s (u s) x) t := by
       intro t ht
-      exact (laplacianAt_time_contDiffAt_on (I := I) (M := M) (D := D) g G hGmetric hGconn u
+      exact (laplacianAt_time_contDiffAt_on (I := I) (M := M) (D := D) g
+        (stationaryMetricFamily (I := I) (M := M) g)
+        (by intro τ hτ; rfl) (by intro τ hτ; rfl) u
         hu.jointSmooth hu.sliceSmooth ht x).continuousAt
     have hderiv_eq : ∀ t : ℝ, t ∈ D.regular →
         deriv (fun s : ℝ => u s x) t = laplacianAt (I := I) G t (u t) x := by
@@ -348,16 +351,7 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci
   classical
   let D : RealTimeInterval := RealTimeInterval.univ 0
   let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
-    { metric := fun _ => g
-      connection := fun _ => LeviCivita (I := I) g
-      metricCompatible := fun _ =>
-        leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g }
-  have hGmetric : ∀ τ : ℝ, τ ∈ D.carrier → G.metric τ = g := by
-    intro τ hτ
-    rfl
-  have hGconn : ∀ τ : ℝ, τ ∈ D.carrier → G.connection τ = LeviCivita (G.metric τ) := by
-    intro τ hτ
-    rfl
+    stationaryMetricFamily (I := I) (M := M) g
   have huOn : IsHeatOn D G u := by
     refine ⟨?_, ?_, ?_, ?_⟩
     · simpa [D] using hu.contMDiffOn
@@ -374,23 +368,15 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci
         change laplacianAt (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).toFun x =
           Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x
         rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth (by rfl) x]
+        rfl
       have hderiv : deriv (fun s => u s x) τ = laplacianAt (I := I) G τ (u τ) x := by
         rw [hpde τ x, ← hlap]
       convert hder.congr_deriv hderiv using 1
       simp
-  have hqcd : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2)
-      (univ ×ˢ univ) := by
-    simpa [D, RealTimeInterval.univ] using liYauQuantity_contMDiff (I := I) (M := M) (D := D) g u hu.contMDiffOn
-      (fun τ hτ => hu.comp (contMDiff_const.prodMk contMDiff_id)) (fun τ hτ x => hpos τ x)
-  have hqCont : ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (D.carrier ×ˢ univ) := by
-    change ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (univ ×ˢ univ)
-    exact hqcd.continuousOn
   simpa [D] using heat_solution_one_point_harnack_of_nonnegative_ricci_on
-    (I := I) (M := M) g hRic D G hGmetric hGconn u huOn (fun τ hτ x => hpos τ x)
-    ha hab (by intro τ hτ; trivial) (by intro τ hτ; trivial) (by intro τ hτ; trivial) hqCont x
+    (I := I) (M := M) g hRic D u huOn (by simpa [D] using hu.contMDiffOn)
+    (fun τ hτ x => hpos τ x)
+    ha hab (by intro τ hτ; trivial) (by intro τ hτ; trivial) (by intro τ hτ; trivial) x
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M] in
 theorem metric_inner_nonneg
@@ -457,22 +443,21 @@ theorem heat_solution_harnack_of_nonnegative_ricci_on
       ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
     (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
     (D : RealTimeInterval)
-    (G : RealizedMetricFamily (I := I) (M := M) ℝ)
-    (hGmetric : ∀ t : ℝ, t ∈ D.carrier → G.metric t = g)
-    (hGconn : ∀ t : ℝ, t ∈ D.carrier → G.connection t = LeviCivita (G.metric t))
     (u : ℝ → M → ℝ)
-    (hu : IsHeatOn D G u)
+    (hu : IsHeatOnStationary D g u)
+    (huClosed : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2) (D.carrier ×ˢ univ))
     (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
     {a b : ℝ} (ha : 0 < a) (hab : a < b)
     (hreg : Icc a b ⊆ D.regular)
     (hcarrier : Icc 0 b ⊆ D.carrier)
     (hslabRegular : Ioo 0 b ⊆ D.regular)
-    (hqCont : ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (D.carrier ×ˢ univ))
     (x y : M) :
     u a x ≤ (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
       Real.exp ((riemannianEDist I x y).toReal ^ 2 / (4 * (b - a))) * u b y := by
   classical
+  let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
+    stationaryMetricFamily (I := I) (M := M) g
   let n : ℝ := (Module.finrank ℝ E : ℝ)
   let d : ℝ := (riemannianEDist I x y).toReal
   have hne_top : riemannianEDist I x y ≠ ⊤ := riemannianEDist_ne_top (I := I) x y
@@ -486,8 +471,8 @@ theorem heat_solution_harnack_of_nonnegative_ricci_on
       exact riemannianEDist_eq_zero_imp_eq (I := I) x y hd0'
     subst hx_eq_y
     simpa [n, riemannianEDist_self] using heat_solution_one_point_harnack_of_nonnegative_ricci_on
-      (I := I) (M := M) g hRic D G hGmetric hGconn u hu hpos ha (le_of_lt hab)
-      hreg hcarrier hslabRegular hqCont x
+      (I := I) (M := M) g hRic D u hu huClosed hpos ha (le_of_lt hab)
+      hreg hcarrier hslabRegular x
   · have hd_pos : 0 < d := lt_of_le_of_ne hd_nn (Ne.symm hd0)
     obtain ⟨v, hv_exp, hv_len⟩ :=
       hopf_rinow_expMapIntrinsic_surjective_minimizing (I := I) g hEnorm x y
@@ -649,8 +634,10 @@ theorem heat_solution_harnack_of_nonnegative_ricci_on
       have hreg_t : Ioo 0 t ⊆ D.regular := by
         intro s hs
         exact hslabRegular ⟨hs.1, hs.2.trans_le ht.2⟩
-      simpa [n] using liYau_estimate_of_nonnegative_ricci_on_of_liYauQuantity_continuousOn
-        (I := I) (M := M) g hRic D G hGmetric hGconn u hu hpos htreg htpos hcar_t hreg_t hqCont z
+      simpa [n] using liYau_estimate_of_nonnegative_ricci_on_of_metric_family
+        (I := I) (M := M) g hRic D (stationaryMetricFamily (I := I) (M := M) g)
+        (by intro τ hτ; rfl) (by intro τ hτ; rfl)
+        u hu huClosed hpos htreg htpos hcar_t hreg_t z
     let τ' : ℝ → (p : M) → TangentSpace I p :=
       fun t _ => mfderiv 𝓘(ℝ, ℝ) I τ t (1 : ℝ)
     have hτ'_def : ∀ t : ℝ, τ' t (τ t) = mfderiv 𝓘(ℝ, ℝ) I τ t (1 : ℝ) := by
@@ -783,16 +770,7 @@ theorem heat_solution_harnack_of_nonnegative_ricci
   classical
   let D : RealTimeInterval := RealTimeInterval.univ 0
   let G : RealizedMetricFamily (I := I) (M := M) ℝ :=
-    { metric := fun _ => g
-      connection := fun _ => LeviCivita (I := I) g
-      metricCompatible := fun _ =>
-        leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g }
-  have hGmetric : ∀ τ : ℝ, τ ∈ D.carrier → G.metric τ = g := by
-    intro τ hτ
-    rfl
-  have hGconn : ∀ τ : ℝ, τ ∈ D.carrier → G.connection τ = LeviCivita (G.metric τ) := by
-    intro τ hτ
-    rfl
+    stationaryMetricFamily (I := I) (M := M) g
   have huOn : IsHeatOn D G u := by
     refine ⟨?_, ?_, ?_, ?_⟩
     · simpa [D] using hu.contMDiffOn
@@ -809,23 +787,15 @@ theorem heat_solution_harnack_of_nonnegative_ricci
         change laplacianAt (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).toFun x =
           Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x
         rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth (by rfl) x]
+        rfl
       have hderiv : deriv (fun s => u s x) τ = laplacianAt (I := I) G τ (u τ) x := by
         rw [hpde τ x, ← hlap]
       convert hder.congr_deriv hderiv using 1
       simp
-  have hqcd : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
-      (fun p : ℝ × M => liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2)
-      (univ ×ˢ univ) := by
-    simpa [D, RealTimeInterval.univ] using liYauQuantity_contMDiff (I := I) (M := M) (D := D) g u hu.contMDiffOn
-      (fun τ hτ => hu.comp (contMDiff_const.prodMk contMDiff_id)) (fun τ hτ x => hpos τ x)
-  have hqCont : ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (D.carrier ×ˢ univ) := by
-    change ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (univ ×ˢ univ)
-    exact hqcd.continuousOn
   simpa [D] using heat_solution_harnack_of_nonnegative_ricci_on
-    (I := I) (M := M) g hEnorm hRic D G hGmetric hGconn u huOn (fun τ hτ x => hpos τ x)
-    ha hab (by intro τ hτ; trivial) (by intro τ hτ; trivial) (by intro τ hτ; trivial) hqCont x y
+    (I := I) (M := M) g hEnorm hRic D u huOn (by simpa [D] using hu.contMDiffOn)
+    (fun τ hτ x => hpos τ x)
+    ha hab (by intro τ hτ; trivial) (by intro τ hτ; trivial) (by intro τ hτ; trivial) x y
 
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -844,18 +814,15 @@ theorem heat_solution_harnack_uniform_upper_bound_of_nonnegative_ricci_on
       ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
     (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
     (D : RealTimeInterval)
-    (G : RealizedMetricFamily (I := I) (M := M) ℝ)
-    (hGmetric : ∀ t : ℝ, t ∈ D.carrier → G.metric t = g)
-    (hGconn : ∀ t : ℝ, t ∈ D.carrier → G.connection t = LeviCivita (G.metric t))
     (u : ℝ → M → ℝ)
-    (hu : IsHeatOn D G u)
+    (hu : IsHeatOnStationary D g u)
+    (huClosed : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => u p.1 p.2) (D.carrier ×ˢ univ))
     (hpos : ∀ t : ℝ, t ∈ D.carrier → ∀ x : M, 0 < u t x)
     {a b : ℝ} (ha : 0 < a) (hab : a < b)
     (hreg : Icc a b ⊆ D.regular)
     (hcarrier : Icc 0 b ⊆ D.carrier)
     (hslabRegular : Ioo 0 b ⊆ D.regular)
-    (hqCont : ContinuousOn (fun p : ℝ × M =>
-      liYauQuantity g (fun τ y => Real.log (u τ y)) p.1 p.2) (D.carrier ×ˢ univ))
     (y₀ : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ x : M, u a x ≤ C * u b y₀ := by
   classical
@@ -885,8 +852,8 @@ theorem heat_solution_harnack_uniform_upper_bound_of_nonnegative_ricci_on
   refine ⟨C, hC_pos, ?_⟩
   intro x
   have hxy := heat_solution_harnack_of_nonnegative_ricci_on
-    (I := I) (M := M) g hEnorm hRic D G hGmetric hGconn u hu hpos ha hab
-    hreg hcarrier hslabRegular hqCont x y₀
+    (I := I) (M := M) g hEnorm hRic D u hu huClosed hpos ha hab
+    hreg hcarrier hslabRegular x y₀
   have hdD : (riemannianEDist I x y₀).toReal ^ 2 ≤ Dv ^ 2 := by
     have hd : 0 ≤ (riemannianEDist I x y₀).toReal := ENNReal.toReal_nonneg
     have hmul := mul_self_le_mul_self hd (hbound x)
