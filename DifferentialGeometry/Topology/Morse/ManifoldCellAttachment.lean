@@ -8196,7 +8196,7 @@ theorem morseFarExpandTime_antiMonotone {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 
 theorem morseFarExpandLevel_mono {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
     {t₁ t₂ ρ₁ ρ₂ : ℝ} (ht : t₁ ≤ t₂) (hρ0 : 0 ≤ ρ₁) (hρle : ρ₁ ≤ ρ₂)
     (he2 : morseFarExpandTime c ε δ t₂ ≤ 0) :
-    t₂ - ρ₂ * morseFarExpandTime c ε δ t₂ ≥ t₁ - ρ₁ * morseFarExpandTime c ε δ t₁ := by
+    (t₂ - ρ₂ * morseFarExpandTime c ε δ t₂) - (t₁ - ρ₁ * morseFarExpandTime c ε δ t₁) ≥ t₂ - t₁ := by
   have hem := morseFarExpandTime_antiMonotone (c := c) (ε := ε) (δ := δ) hδ hε ht
   have he1 : morseFarExpandTime c ε δ t₁ ≤ 0 :=
     (morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ hε : morseFarExpandTime c ε δ t₁ ≤ 0)
