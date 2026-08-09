@@ -8209,6 +8209,39 @@ theorem morseFarExpandLevel_mono {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
   nlinarith [hdiff, ht]
 
 
+theorem morseFarCutoffModel_mono {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ) (r ε' R₀ R₁ : ℝ)
+    (hε' : 0 < ε') (hR : R₀ < R₁)
+    {y₁ y₂ : MorseModel (m + 1)} (hneg : ‖negPart hk y₂‖ = ‖negPart hk y₁‖)
+    (hlev : morseNormalForm hk c y₁ ≤ morseNormalForm hk c y₂) :
+    max (morseFarCutoffPos r ε' (‖posPart hk y₁‖)) (morseFarCutoffNorm R₀ R₁ (morseNorm (m + 1) y₁))
+      ≤ max (morseFarCutoffPos r ε' (‖posPart hk y₂‖)) (morseFarCutoffNorm R₀ R₁ (morseNorm (m + 1) y₂)) := by
+  have hneg2 : ‖negPart hk y₂‖ ^ 2 = ‖negPart hk y₁‖ ^ 2 := by rw [hneg]
+  have hpos2 : ‖posPart hk y₂‖ ^ 2 ≥ ‖posPart hk y₁‖ ^ 2 := by
+    have h1 := morseNormalForm_split hk c y₁
+    have h2 := morseNormalForm_split hk c y₂
+    nlinarith [hlev, h1, h2, hneg2]
+  have hpos : ‖posPart hk y₁‖ ≤ ‖posPart hk y₂‖ := by
+    exact le_of_sq_le_sq hpos2 (norm_nonneg _)
+  have hnorm2 : morseNorm (m + 1) y₂ ^ 2 ≥ morseNorm (m + 1) y₁ ^ 2 := by
+    have h1 : morseNorm (m + 1) y₁ ^ 2 = ‖negPart hk y₁‖ ^ 2 + ‖posPart hk y₁‖ ^ 2 :=
+      morseNorm_sq_eq_negPart_add_posPart hk y₁
+    have h2 : morseNorm (m + 1) y₂ ^ 2 = ‖negPart hk y₂‖ ^ 2 + ‖posPart hk y₂‖ ^ 2 :=
+      morseNorm_sq_eq_negPart_add_posPart hk y₂
+    nlinarith [h1, h2, hpos2, hneg2]
+  have hnorm : morseNorm (m + 1) y₁ ≤ morseNorm (m + 1) y₂ := by
+    exact le_of_sq_le_sq hnorm2 (norm_nonneg _)
+  have hp : morseFarCutoffPos r ε' (‖posPart hk y₁‖) ≤ morseFarCutoffPos r ε' (‖posPart hk y₂‖) := by
+    dsimp [morseFarCutoffPos]
+    exact Real.smoothTransition.monotone ((div_le_div_iff₀ hε' hε').mpr (by nlinarith [hpos]))
+  have hn : morseFarCutoffNorm R₀ R₁ (morseNorm (m + 1) y₁) ≤ morseFarCutoffNorm R₀ R₁ (morseNorm (m + 1) y₂) := by
+    dsimp [morseFarCutoffNorm]
+    exact Real.smoothTransition.monotone
+      ((div_le_div_iff₀ (by nlinarith : 0 < R₁ - R₀) (by nlinarith : 0 < R₁ - R₀)).mpr (by nlinarith [hnorm]))
+  exact max_le
+    (le_trans hp (le_max_left _ _))
+    (le_trans hn (le_max_right _ _))
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
