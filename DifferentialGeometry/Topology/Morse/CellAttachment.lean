@@ -1707,6 +1707,53 @@ theorem hasDerivAt_modelFlow {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseMode
       hasDerivAt_modelFlow_posPart_apply hk t y j hz
     simpa [hconst, hfield] using hder
 
+theorem modelFlow_norm_sq_le_add {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 ≤ ε)
+    {t : ℝ} (ht : |t| ≤ 2 * ε) (y : MorseModel n) :
+    morseNorm n (modelFlow hk t y) ^ 2 ≤ morseNorm n y ^ 2 + 4 * ε := by
+  have hnm := morseNorm_sq_eq_negPart_add_posPart hk (modelFlow hk t y)
+  have hnm1 := morseNorm_sq_eq_negPart_add_posPart hk y
+  have hneg : ‖negPart hk (modelFlow hk t y)‖ ^ 2 = ‖negPart hk y‖ ^ 2 := by
+    rw [modelFlow_negPart]
+  have hpos : ‖posPart hk (modelFlow hk t y)‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 + 4 * ε := by
+    by_cases ht0 : 0 ≤ t
+    · have hposle : ‖posPart hk (modelFlow hk t y)‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 := by
+        rw [modelFlow_posPart]
+        rw [norm_smul]
+        rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+        rw [mul_pow]
+        have hsqrt : Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) ^ 2 ≤ 1 := by
+          by_cases harg : 0 ≤ 1 - 2 * t / ‖posPart hk y‖ ^ 2
+          · rw [Real.sq_sqrt harg]
+            have hle : 1 - 2 * t / ‖posPart hk y‖ ^ 2 ≤ 1 := by
+              have h2 : 0 ≤ 2 * t / ‖posPart hk y‖ ^ 2 := by positivity
+              nlinarith
+            exact hle
+          · have hsqrt0 : Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) = 0 :=
+              Real.sqrt_eq_zero_of_nonpos (lt_of_not_ge harg).le
+            rw [hsqrt0]
+            simp
+        nlinarith [hsqrt, sq_nonneg (‖posPart hk y‖ : ℝ)]
+      nlinarith [hposle, hε]
+    · have htneg : t < 0 := lt_of_not_ge ht0
+      have hposle : ‖posPart hk (modelFlow hk t y)‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 + 4 * ε := by
+        by_cases hpos0 : posPart hk y = 0
+        · have hpos' : ‖posPart hk (modelFlow hk t y)‖ ^ 2 = 0 := by
+            rw [modelFlow_posPart, hpos0]
+            simp
+          nlinarith [hpos', hε]
+        · have hpospos : 0 < ‖posPart hk y‖ := norm_pos_iff.mpr hpos0
+          have hs : 0 ≤ -t := by linarith
+          have hsq : ‖posPart hk (modelFlow hk t y)‖ ^ 2 = ‖posPart hk y‖ ^ 2 + 2 * (-t) := by
+            simpa using (modelFlow_up_posPart_norm_sq hk (-t) y hs hpospos)
+          have ht' : -t ≤ 2 * ε := by
+            have habs : |t| = -t := abs_of_neg htneg
+            rw [← habs]
+            exact ht
+          nlinarith [hsq, ht']
+      exact hposle
+  nlinarith [hnm, hnm1, hpos, hneg]
+
+
 def modelHandleMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     (p : StandardHandle k (n - k)) : MorseModel n :=
   recombine hk
