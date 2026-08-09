@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRem
 import DifferentialGeometry.Analysis.Heat.Semigroup.Mass
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
+import DifferentialGeometry.Analysis.Parabolic.AbstractSemigroup.AbstractSpectralSemigroup
 import DifferentialGeometry.Analysis.Spectral.Scalar.EigenIdx
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Comparison
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotentialStrong
@@ -3788,6 +3789,476 @@ theorem scalarForcingCoeff_iteratedDeriv
     iteratedDeriv r (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t =
       scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t := by
   exact congrFun (scalarForcingCoeff_iteratedDeriv_fun (I := I) (M := M) g hf i r) t
+
+private lemma summable_scalarEigen_coeff_sq
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
+    Summable (fun i : TensorEigenIdx00 g => (⟪scalarEigenFunctionLp g i, u₀⟫_ℝ) ^ 2) := by
+  classical
+  set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+  have hsum := DifferentialGeometry.Analysis.Parabolic.summable_basis_coeff_sq' b
+    ((tensor00ScalarL2Equiv g).symm u₀)
+  refine Summable.congr hsum (fun i => ?_)
+  have hφ : scalarEigenFunctionLp g i =
+      tensor00ScalarL2Equiv g (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) :=
+    scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i
+  have hb : (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) = b i :=
+    eigenvectorSmooth00_eq_basis (I := I) (M := M) g i
+  have hinner : ⟪scalarEigenFunctionLp g i, u₀⟫_ℝ =
+      ⟪b i, (tensor00ScalarL2Equiv g).symm u₀⟫_ℝ := by
+    calc
+      ⟪scalarEigenFunctionLp g i, u₀⟫_ℝ
+          = ⟪tensor00ScalarL2Equiv g (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g), u₀⟫_ℝ := by
+            rw [hφ]
+      _ = ⟪tensor00ScalarL2Equiv g (b i), u₀⟫_ℝ := by rw [hb]
+      _ = ⟪b i, (tensor00ScalarL2Equiv g).symm u₀⟫_ℝ := by
+            simpa using ((tensor00ScalarL2Equiv g).toLinearIsometry.inner_map_map (b i)
+              ((tensor00ScalarL2Equiv g).symm u₀))
+  exact congrArg (fun x : ℝ => x ^ 2) hinner.symm
+
+private lemma iteratedDeriv_scalarForcedCoeff_rec
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f) (i : TensorEigenIdx00 g) (j : ℕ)
+    {t : ℝ} (ht : 0 < t) :
+    iteratedDeriv (j + 1) (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t =
+      -TensorEigenIdx.lambda (I := I) (M := M) i *
+          iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t +
+        iteratedDeriv j (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t := by
+  classical
+  set lam_i : ℝ := TensorEigenIdx.lambda (I := I) (M := M) i
+  set c : ℝ → ℝ := fun s => scalarForcedCoeff (I := I) (M := M) g u₀ f i s
+  set cf : ℝ → ℝ := fun s => scalarForcingCoeff (I := I) (M := M) g f i s
+  have hdc_eq : (fun s : ℝ => deriv c s) =ᶠ[𝓝 t] (fun s : ℝ => -lam_i * c s + cf s) := by
+    filter_upwards [isOpen_Ioi.mem_nhds ht] with s hs
+    have hder := scalarForcedCoeff_hasDerivAt (I := I) (M := M) g u₀ hf.continuous hs i
+    dsimp [c, cf, lam_i]
+    rw [hder.deriv]
+  have hcd : ContDiffAt ℝ (j : ℕ∞) c t := by
+    dsimp [c]
+    exact (scalarForcedCoeff_contDiffOn (I := I) (M := M) g u₀ hf i j).contDiffAt
+      (isOpen_Ioi.mem_nhds ht)
+  have hcfd : ContDiffAt ℝ (j : ℕ∞) cf t := by
+    dsimp [cf]
+    have hle : ((j : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) :=
+      WithTop.coe_le_coe.mpr (le_top : (j : ℕ∞) ≤ (⊤ : ℕ∞))
+    exact (scalarForcingCoeff_contDiff (I := I) (M := M) g (hf.of_le hle) i).contDiffAt
+  calc
+    iteratedDeriv (j + 1) c t = iteratedDeriv j (deriv c) t := by
+      rw [iteratedDeriv_succ']
+    _ = iteratedDeriv j (fun s : ℝ => -lam_i * c s + cf s) t :=
+      (Filter.EventuallyEq.iteratedDeriv_eq j hdc_eq)
+    _ = iteratedDeriv j (fun s : ℝ => -lam_i * c s) t + iteratedDeriv j cf t := by
+          have hcsmul : ContDiffAt ℝ (j : ℕ∞) (fun s : ℝ => -lam_i * c s) t := by
+            exact (contDiffAt_const.mul hcd)
+          rw [iteratedDeriv_fun_add hcsmul hcfd]
+    _ = -lam_i * iteratedDeriv j c t + iteratedDeriv j cf t := by
+          rw [iteratedDeriv_const_mul (c := -lam_i) hcd]
+
+private lemma scalarForcedCoeff_weighted_sq_le_of_hspace
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hspace0 : ∀ m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc (0 : ℝ) T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g f i t) ^ 2 ≤ Cm i)
+    (m : ℕ) :
+    ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcedCoeff (I := I) (M := M) g u₀ f i t) ^ 2 ≤ Cm i := by
+  classical
+  obtain ⟨p, _hp, htail_s⟩ := scalar_eigen_tail (I := I) (M := M) g
+  set q : ℕ := Nat.ceil p
+  have hp_le : p ≤ (q : ℝ) := by
+    dsimp [q]
+    exact_mod_cast Nat.le_ceil p
+  have htail_q : Summable (fun i : TensorEigenIdx00 g =>
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ))) := by
+    refine Summable.of_nonneg_of_le
+      (fun i => Real.rpow_nonneg
+        (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (-(q : ℝ))) ?_ htail_s
+    intro i
+    exact Real.rpow_le_rpow_of_exponent_le
+      (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (neg_le_neg hp_le)
+  obtain ⟨CmF, hCmF, hbmF⟩ := hspace0 m
+  obtain ⟨Cdec, hCdec0, hdec⟩ := exists_pow_add_mul_exp_neg_mul_bddAbove ε hε (m + q)
+  have hsum_c0 : Summable (fun i : TensorEigenIdx00 g =>
+      Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) *
+        (⟪scalarEigenFunctionLp g i, u₀⟫_ℝ) ^ 2) := by
+    have hd2 := summable_scalarEigen_coeff_sq (I := I) (M := M) g u₀
+    refine Summable.of_nonneg_of_le
+      (fun i => mul_nonneg (mul_nonneg hCdec0
+        (Real.rpow_nonneg (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (-(q : ℝ))))
+        (sq_nonneg _)) ?_ (hd2.mul_left Cdec)
+    intro i
+    have hx1 : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+      linarith [tensor_lambda_nonneg (I := I) (M := M) i]
+    have hle : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) ≤ 1 :=
+      Real.rpow_le_one_of_one_le_of_nonpos hx1 (by linarith)
+    let di : ℝ := ⟪scalarEigenFunctionLp g i, u₀⟫_ℝ
+    change Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) * di ^ 2 ≤
+      Cdec * di ^ 2
+    calc
+      Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) *
+            di ^ 2
+          = Cdec * ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) * di ^ 2) := by ring
+      _ ≤ Cdec * ((1 : ℝ) * di ^ 2) := by
+            have hle' : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) * di ^ 2 ≤
+                (1 : ℝ) * di ^ 2 :=
+              mul_le_mul_of_nonneg_right hle (sq_nonneg _)
+            exact mul_le_mul_of_nonneg_left hle' hCdec0
+      _ = Cdec * di ^ 2 := by ring
+  have hT0 : 0 ≤ T := le_of_lt (lt_trans hε hεT)
+  let Cm : TensorEigenIdx00 g → ℝ := fun i =>
+    2 * (Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) *
+        (⟪scalarEigenFunctionLp g i, u₀⟫_ℝ) ^ 2) + 2 * T ^ 2 * CmF i
+  have hCm_sum : Summable Cm := by
+    refine (hsum_c0.mul_left 2).add (hCmF.mul_left (2 * T ^ 2))
+  refine ⟨Cm, hCm_sum, ?_⟩
+  intro i t ht
+  have ht0 : 0 ≤ t := le_trans (le_of_lt hε) (Set.mem_Icc.mp ht).1
+  have htT : t ≤ T := (Set.mem_Icc.mp ht).2
+  have hεle : ε ≤ t := (Set.mem_Icc.mp ht).1
+  set lam_i : ℝ := TensorEigenIdx.lambda (I := I) (M := M) i
+  set c0 : ℝ := ⟪scalarEigenFunctionLp g i, u₀⟫_ℝ
+  set cf : ℝ → ℝ := fun s => scalarForcingCoeff (I := I) (M := M) g f i s
+  have hcf_cont : Continuous cf := by
+    dsimp [cf]
+    change Continuous (fun s : ℝ => ⟪scalarEigenFunctionLp g i, f s⟫_ℝ)
+    exact (innerSL (𝕜 := ℝ)
+      (E := Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+      (scalarEigenFunctionLp g i)).continuous.comp hf.continuous
+  have hcf2_cont : Continuous (fun s : ℝ => cf s ^ 2) := hcf_cont.pow 2
+  have hsplit : scalarForcedCoeff (I := I) (M := M) g u₀ f i t =
+      Real.exp (-lam_i * t) * c0 +
+        ∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s := by
+    have hF := scalarForcedCoeff_eq_exp_integral (I := I) (M := M) g u₀ hf.continuous ht0 i
+    dsimp [c0, cf, lam_i] at hF ⊢
+    rw [hF]
+    congr 1
+    rw [← intervalIntegral.integral_const_mul]
+    apply intervalIntegral.integral_congr
+    intro s hs
+    have hexp : Real.exp (-lam_i * t) * Real.exp (lam_i * s) =
+        Real.exp (-lam_i * (t - s)) := by
+      rw [← Real.exp_add]
+      congr 1
+      ring
+    dsimp
+    rw [← mul_assoc, hexp]
+  have hcs : (∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2 ≤
+      T * ∫ s in (0 : ℝ)..T, cf s ^ 2 := by
+    have harg : Continuous (fun s : ℝ => -lam_i * (t - s)) := by fun_prop
+    have hgcont : Continuous (fun s : ℝ => Real.exp (-lam_i * (t - s)) * cf s) := by
+      exact (Real.continuous_exp.comp harg).mul hcf_cont
+    have hg2b : Continuous (fun s : ℝ => (Real.exp (-lam_i * (t - s)) * cf s) ^ 2) :=
+      hgcont.pow 2
+    have hCS := DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.weighted_cauchy_schwarz
+      (a := (0 : ℝ)) (b := t) ht0
+      (continuous_const : Continuous (fun _ : ℝ => (1 : ℝ))) hgcont (by intro x hx; simp)
+    have hb3 : (∫ s in (0 : ℝ)..t, (Real.exp (-lam_i * (t - s)) * cf s) ^ 2) ≤
+        ∫ s in (0 : ℝ)..t, cf s ^ 2 := by
+      refine intervalIntegral.integral_mono_on (by linarith) ?_ ?_ ?_
+      · exact hg2b.intervalIntegrable (0 : ℝ) t
+      · exact hcf2_cont.intervalIntegrable (0 : ℝ) t
+      · intro s hs
+        have hsI : s ∈ Set.Icc (0 : ℝ) t := by simpa [Set.uIcc_of_le ht0] using hs
+        have hle : Real.exp (-lam_i * (t - s)) ≤ 1 :=
+          Real.exp_le_one_iff.mpr (by
+            have hlam : 0 ≤ lam_i := by dsimp [lam_i]; exact tensor_lambda_nonneg (I := I) (M := M) i
+            have hs_le : s ≤ t := (Set.mem_Icc.mp hsI).2
+            have hneg : -lam_i * (t - s) ≤ 0 := by nlinarith
+            linarith)
+        have hle2 : (Real.exp (-lam_i * (t - s)) * cf s) ^ 2 ≤ cf s ^ 2 := by
+          calc
+            (Real.exp (-lam_i * (t - s)) * cf s) ^ 2
+                = Real.exp (-lam_i * (t - s)) ^ 2 * cf s ^ 2 := by ring
+            _ ≤ (1 : ℝ) * cf s ^ 2 := by
+                  exact mul_le_mul_of_nonneg_right
+                    (by simpa using (pow_le_pow_left₀ (Real.exp_pos _).le hle 2)) (sq_nonneg _)
+            _ = cf s ^ 2 := by ring
+        exact hle2
+    calc
+      (∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2
+          ≤ (∫ s in (0 : ℝ)..t, (1 : ℝ)) *
+              ∫ s in (0 : ℝ)..t, (Real.exp (-lam_i * (t - s)) * cf s) ^ 2 := by
+            simpa using hCS
+      _ = t * ∫ s in (0 : ℝ)..t, (Real.exp (-lam_i * (t - s)) * cf s) ^ 2 := by
+            have hone : (∫ s in (0 : ℝ)..t, (1 : ℝ)) = t := by
+              simp [intervalIntegral.integral_const]
+            rw [hone]
+      _ ≤ t * ∫ s in (0 : ℝ)..t, cf s ^ 2 := by
+            exact mul_le_mul_of_nonneg_left hb3 (by positivity)
+      _ ≤ T * ∫ s in (0 : ℝ)..t, cf s ^ 2 := by
+            exact mul_le_mul_of_nonneg_right htT
+              (intervalIntegral.integral_nonneg ht0 (fun x hx => sq_nonneg _))
+      _ ≤ T * ∫ s in (0 : ℝ)..T, cf s ^ 2 := by
+            have hmono : (∫ s in (0 : ℝ)..t, cf s ^ 2) ≤ (∫ s in (0 : ℝ)..T, cf s ^ 2) :=
+              intervalIntegral.integral_mono_interval (c := (0 : ℝ)) (d := T) (a := (0 : ℝ)) (b := t)
+                (by norm_num) ht0 htT
+                (by filter_upwards with x; exact sq_nonneg _)
+                (hcf2_cont.intervalIntegrable (0 : ℝ) T)
+            exact mul_le_mul_of_nonneg_left hmono (by positivity)
+  have hA : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (Real.exp (-lam_i * t) * c0) ^ 2 ≤
+      Cdec * (1 + lam_i) ^ (-(q : ℝ)) * c0 ^ 2 := by
+    have hw : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) = (1 + lam_i) ^ (m : ℝ) := by
+      unfold tensorSobolevWeight
+      rw [Real.rpow_natCast]
+    have hdec' : (1 + lam_i) ^ (m + q : ℕ) * Real.exp (-(2 * ε * lam_i)) ≤ Cdec := by
+      exact hdec lam_i (tensor_lambda_nonneg (I := I) (M := M) i)
+    have hE : Real.exp (-(2 * lam_i * t)) ≤ Real.exp (-(2 * ε * lam_i)) :=
+      Real.exp_le_exp.mpr (by
+        have hlam : 0 ≤ lam_i := tensor_lambda_nonneg (I := I) (M := M) i
+        nlinarith)
+    have hxpos : 0 < 1 + lam_i := by linarith [tensor_lambda_nonneg (I := I) (M := M) i]
+    have hwq : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) =
+        tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+          (1 + lam_i) ^ (-(q : ℝ)) := by
+      unfold tensorSobolevWeight
+      rw [← Real.rpow_add hxpos]
+      congr 1
+      push_cast
+      ring
+    have hexp2 : Real.exp (-lam_i * t) ^ 2 = Real.exp (-(2 * lam_i * t)) := by
+      rw [← Real.exp_nat_mul (x := -lam_i * t) (n := 2)]
+      congr 1
+      ring
+    calc
+      tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (Real.exp (-lam_i * t) * c0) ^ 2
+          = tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+              (1 + lam_i) ^ (-(q : ℝ)) * (Real.exp (-lam_i * t) ^ 2 * c0 ^ 2) := by
+            rw [hwq, mul_pow]
+      _ = tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+              (1 + lam_i) ^ (-(q : ℝ)) * (Real.exp (-(2 * lam_i * t)) * c0 ^ 2) := by
+            rw [hexp2]
+      _ ≤ tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+              (1 + lam_i) ^ (-(q : ℝ)) * (Real.exp (-(2 * ε * lam_i)) * c0 ^ 2) := by
+            have hE' : Real.exp (-(2 * lam_i * t)) * c0 ^ 2 ≤
+                Real.exp (-(2 * ε * lam_i)) * c0 ^ 2 :=
+              mul_le_mul_of_nonneg_right hE (sq_nonneg c0)
+            have hnn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+                (1 + lam_i) ^ (-(q : ℝ)) :=
+              mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i ((m + q : ℕ) : ℝ))
+                (Real.rpow_nonneg (by linarith) (-(q : ℝ)))
+            exact mul_le_mul_of_nonneg_left hE' hnn
+      _ = tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+            (1 + lam_i) ^ (-(q : ℝ)) * Real.exp (-(2 * ε * lam_i)) * c0 ^ 2 := by ring
+      _ ≤ Cdec * (1 + lam_i) ^ (-(q : ℝ)) * c0 ^ 2 := by
+            have hnn : 0 ≤ (1 + lam_i) ^ (-(q : ℝ)) * c0 ^ 2 :=
+              mul_nonneg (Real.rpow_nonneg (by linarith) (-(q : ℝ))) (sq_nonneg c0)
+            have hdec'' : tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+                Real.exp (-(2 * ε * lam_i)) ≤ Cdec := by
+              unfold tensorSobolevWeight
+              rw [Real.rpow_natCast]
+              exact hdec'
+            calc
+              tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+                  (1 + lam_i) ^ (-(q : ℝ)) * Real.exp (-(2 * ε * lam_i)) * c0 ^ 2
+                  = (tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+                      Real.exp (-(2 * ε * lam_i))) * ((1 + lam_i) ^ (-(q : ℝ)) * c0 ^ 2) := by ring
+              _ ≤ Cdec * ((1 + lam_i) ^ (-(q : ℝ)) * c0 ^ 2) :=
+                    mul_le_mul_of_nonneg_right hdec'' hnn
+              _ = Cdec * (1 + lam_i) ^ (-(q : ℝ)) * c0 ^ 2 := by ring
+  have hB : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2 ≤ T ^ 2 * CmF i := by
+    have hw : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) = (1 + lam_i) ^ (m : ℝ) := by
+      unfold tensorSobolevWeight
+      rw [Real.rpow_natCast]
+    have hw1 : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (m : ℝ) := by
+      exact tensorSobolevWeight_nonneg (I := I) (M := M) i (m : ℝ)
+    calc
+      tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2
+          ≤ tensorSobolevWeight (I := I) (M := M) i (m : ℝ) * (T * ∫ s in (0 : ℝ)..T, cf s ^ 2) := by
+            exact mul_le_mul_of_nonneg_left hcs hw1
+      _ = T * (tensorSobolevWeight (I := I) (M := M) i (m : ℝ) * ∫ s in (0 : ℝ)..T, cf s ^ 2) := by ring
+      _ ≤ T * (T * CmF i) := by
+            have hle : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) * ∫ s in (0 : ℝ)..T, cf s ^ 2 ≤
+                T * CmF i := by
+              -- cf s ^ 2 ≤ CmF i / w? No — use hbm directly: cf s ^ 2 ≤ CmF i (since w ≥ 1)
+              have hbm : ∀ s ∈ Set.Icc (0 : ℝ) T, tensorSobolevWeight (I := I) (M := M) i (m : ℝ) * cf s ^ 2 ≤ CmF i := by
+                intro s hs
+                exact hbmF i s hs
+              calc
+                tensorSobolevWeight (I := I) (M := M) i (m : ℝ) * ∫ s in (0 : ℝ)..T, cf s ^ 2
+                    = ∫ s in (0 : ℝ)..T, tensorSobolevWeight (I := I) (M := M) i (m : ℝ) * cf s ^ 2 := by
+                      rw [intervalIntegral.integral_const_mul]
+                _ ≤ ∫ s in (0 : ℝ)..T, CmF i := by
+                      refine intervalIntegral.integral_mono_on hT0 ?_ ?_ ?_
+                      · exact ((continuous_const : Continuous fun _ : ℝ => tensorSobolevWeight (I := I) (M := M) i (m : ℝ)).mul
+                          hcf2_cont).intervalIntegrable (0 : ℝ) T
+                      · exact continuous_const.intervalIntegrable (0 : ℝ) T
+                      · intro s hs
+                        exact hbm s (by simpa [Set.uIcc_of_le hT0] using hs)
+                _ = T * CmF i := by
+                      simp [intervalIntegral.integral_const]
+            exact mul_le_mul_of_nonneg_left hle (by positivity)
+      _ = T ^ 2 * CmF i := by ring
+  have hsq : (Real.exp (-lam_i * t) * c0 +
+        ∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2 ≤
+      2 * ((Real.exp (-lam_i * t) * c0) ^ 2 +
+        (∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2) := by
+    nlinarith [sq_nonneg (Real.exp (-lam_i * t) * c0 -
+      ∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s)]
+  have hw1 : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (m : ℝ) :=
+    tensorSobolevWeight_nonneg (I := I) (M := M) i (m : ℝ)
+  calc
+    tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (scalarForcedCoeff (I := I) (M := M) g u₀ f i t) ^ 2
+        = tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (Real.exp (-lam_i * t) * c0 +
+              ∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2 := by
+          rw [hsplit]
+    _ ≤ tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (2 * ((Real.exp (-lam_i * t) * c0) ^ 2 +
+            (∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2)) := by
+          exact mul_le_mul_of_nonneg_left hsq hw1
+    _ = 2 * (tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (Real.exp (-lam_i * t) * c0) ^ 2 +
+          tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (∫ s in (0 : ℝ)..t, Real.exp (-lam_i * (t - s)) * cf s) ^ 2) := by ring
+    _ ≤ 2 * (Cdec * (1 + lam_i) ^ (-(q : ℝ)) * c0 ^ 2 + T ^ 2 * CmF i) := by
+          exact mul_le_mul_of_nonneg_left (add_le_add hA hB) (by norm_num)
+    _ = Cm i := by
+          dsimp [Cm]
+          ring
+
+private lemma scalarForcedCoeff_weighted_deriv_sq_le_of_hspace
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (_hεT : ε < T)
+    (hspace : ∀ r m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc (0 : ℝ) T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t) ^ 2 ≤ Cm i)
+    {j : ℕ} (hj : 0 < j)
+    (hprev : ∀ m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv (j - 1) (fun s : ℝ =>
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    (m : ℕ) :
+    ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ =>
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i := by
+  classical
+  obtain ⟨Cm1, hCm1, hbm1⟩ := hprev (m + 2)
+  obtain ⟨Cm2, hCm2, hbm2⟩ := hspace (j - 1) m
+  let Cm : TensorEigenIdx00 g → ℝ := fun i => 2 * Cm1 i + 2 * Cm2 i
+  have hCm_sum : Summable Cm := (hCm1.mul_left 2).add (hCm2.mul_left 2)
+  refine ⟨Cm, hCm_sum, ?_⟩
+  intro i t ht
+  set lam_i : ℝ := TensorEigenIdx.lambda (I := I) (M := M) i
+  set c : ℝ → ℝ := fun s => scalarForcedCoeff (I := I) (M := M) g u₀ f i s
+  set cf : ℝ → ℝ := fun s => scalarForcingCoeff (I := I) (M := M) g f i s
+  have ht_pos : 0 < t := lt_of_lt_of_le hε (Set.mem_Icc.mp ht).1
+  have hrec := iteratedDeriv_scalarForcedCoeff_rec (I := I) (M := M) g u₀ hf i (j - 1) ht_pos
+  have hj1 : j - 1 + 1 = j := by omega
+  have hrec' : iteratedDeriv j c t =
+      -lam_i * iteratedDeriv (j - 1) c t + iteratedDeriv (j - 1) cf t := by
+    simpa [c, cf, lam_i, hj1] using hrec
+  have hsq : (-lam_i * iteratedDeriv (j - 1) c t + iteratedDeriv (j - 1) cf t) ^ 2 ≤
+      2 * (lam_i ^ 2 * (iteratedDeriv (j - 1) c t) ^ 2) +
+        2 * (iteratedDeriv (j - 1) cf t) ^ 2 := by
+    nlinarith [sq_nonneg (lam_i * iteratedDeriv (j - 1) c t +
+      iteratedDeriv (j - 1) cf t)]
+  have hw : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) * lam_i ^ 2 ≤
+      tensorSobolevWeight (I := I) (M := M) i (m + 2 : ℕ) := by
+    have hlam : lam_i ^ 2 ≤ (1 + lam_i) ^ 2 := by
+      have h0 : 0 ≤ lam_i := tensor_lambda_nonneg (I := I) (M := M) i
+      exact pow_le_pow_left₀ h0 (by linarith) 2
+    have hw' : tensorSobolevWeight (I := I) (M := M) i (m + 2 : ℕ) =
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) * (1 + lam_i) ^ 2 := by
+      unfold tensorSobolevWeight
+      rw [Real.rpow_natCast]
+      rw [pow_add]
+      rw [Real.rpow_natCast]
+    rw [hw']
+    exact mul_le_mul_of_nonneg_left hlam
+      (tensorSobolevWeight_nonneg (I := I) (M := M) i (m : ℝ))
+  have h1 : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (2 * (lam_i ^ 2 * (iteratedDeriv (j - 1) c t) ^ 2)) ≤
+      2 * (tensorSobolevWeight (I := I) (M := M) i (m + 2 : ℕ) *
+        (iteratedDeriv (j - 1) c t) ^ 2) := by
+    have hle : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (lam_i ^ 2 * (iteratedDeriv (j - 1) c t) ^ 2) ≤
+        tensorSobolevWeight (I := I) (M := M) i (m + 2 : ℕ) *
+          (iteratedDeriv (j - 1) c t) ^ 2 := by
+      simpa [mul_assoc] using (mul_le_mul_of_nonneg_right hw (sq_nonneg _))
+    nlinarith [hle]
+  have hcf_eq : iteratedDeriv (j - 1) cf t =
+      scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv (j - 1) f) i t := by
+    simpa [cf] using scalarForcingCoeff_iteratedDeriv (I := I) (M := M) g hf i (j - 1) t
+  have h2 : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (2 * (iteratedDeriv (j - 1) cf t) ^ 2) ≤ 2 * Cm2 i := by
+    have ht0T : t ∈ Set.Icc (0 : ℝ) T :=
+      Set.mem_Icc.mpr ⟨le_trans (le_of_lt hε) (Set.mem_Icc.mp ht).1, (Set.mem_Icc.mp ht).2⟩
+    have hb := hbm2 i t ht0T
+    have hb' : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (iteratedDeriv (j - 1) cf t) ^ 2 ≤ Cm2 i := by
+      simpa [hcf_eq] using hb
+    nlinarith [hb']
+  calc
+    tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2
+        = tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (iteratedDeriv j c t) ^ 2 := by rfl
+    _ = tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (-lam_i * iteratedDeriv (j - 1) c t + iteratedDeriv (j - 1) cf t) ^ 2 := by
+          rw [hrec']
+    _ ≤ tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (2 * (lam_i ^ 2 * (iteratedDeriv (j - 1) c t) ^ 2) +
+            2 * (iteratedDeriv (j - 1) cf t) ^ 2) := by
+          exact mul_le_mul_of_nonneg_left hsq
+            (tensorSobolevWeight_nonneg (I := I) (M := M) i (m : ℝ))
+    _ ≤ 2 * (tensorSobolevWeight (I := I) (M := M) i (m + 2 : ℕ) *
+            (iteratedDeriv (j - 1) c t) ^ 2) + 2 * Cm2 i := by
+          nlinarith [h1, h2]
+    _ ≤ 2 * Cm1 i + 2 * Cm2 i := by
+          have hb := hbm1 i t ht
+          have hb' : tensorSobolevWeight (I := I) (M := M) i (m + 2 : ℕ) *
+              (iteratedDeriv (j - 1) c t) ^ 2 ≤ Cm1 i := by
+            simpa [c] using hb
+          nlinarith [hb']
+    _ = Cm i := by
+          rfl
+
+private lemma hderiv_of_hspace
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hspace : ∀ r m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc (0 : ℝ) T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t) ^ 2 ≤ Cm i) :
+    ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i := by
+  intro j
+  induction j with
+  | zero =>
+      intro m
+      exact scalarForcedCoeff_weighted_sq_le_of_hspace (I := I) (M := M) g u₀ hf hε hεT
+        (fun m => hspace 0 m) m
+  | succ j ih =>
+      intro m
+      exact scalarForcedCoeff_weighted_deriv_sq_le_of_hspace (I := I) (M := M) g u₀ hf hε hεT hspace
+        (by omega : 0 < j + 1) (fun m => ih m) m
 
 private lemma enat_coe_le_top (r : ℕ) :
     ((r : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) :=
