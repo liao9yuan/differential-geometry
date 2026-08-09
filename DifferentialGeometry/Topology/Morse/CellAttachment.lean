@@ -3832,6 +3832,38 @@ theorem modelSharpUnionUnround_round {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
           simp
     _ = y := recombine_decompose hk y
 
+theorem modelSharpUnionRound_eq_self_of_negPart_large {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    {y : MorseModel n} (ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    modelSharpUnionRound hk ε r δ y = y := by
+  have hsc : smoothCap ε r δ (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    exact smoothCap_upper hδ0 ht
+  have hB : modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    dsimp [modelSharpUnionBound]
+    exact max_eq_right (by nlinarith [ht, hδ0])
+  calc
+    modelSharpUnionRound hk ε r δ y = recombine hk (negPart hk y) (posPart hk y) := by
+      dsimp [modelSharpUnionRound]
+      rw [hsc, hB]
+      congr 1
+      have hne : ‖negPart hk y‖ ^ 2 - 2 * ε ≠ 0 := by nlinarith [ht, hδ0]
+      have hratio : (‖negPart hk y‖ ^ 2 - 2 * ε) / (‖negPart hk y‖ ^ 2 - 2 * ε) = 1 := by
+        field_simp [hne]
+      rw [hratio, Real.sqrt_one]
+      simp
+    _ = y := recombine_decompose hk y
+
+theorem modelSharpUnionRound_eq_self_of_deep {n k : ℕ} (hk : k ≤ n) (c ε r δ η : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    {y : MorseModel n} (hη : r ^ 2 + δ ≤ 2 * η)
+    (hy : morseNormalForm hk c y ≤ c - ε - η) :
+    modelSharpUnionRound hk ε r δ y = y := by
+  have ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+    rw [morseNormalForm_split] at hy
+    have h : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε - 2 * η := by nlinarith
+    nlinarith [h, hη]
+  exact modelSharpUnionRound_eq_self_of_negPart_large hk ε r δ hδ0 hδr ht
+
 theorem continuous_modelSharpUnionRound {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
     (hδ0 : 0 < δ) (hδr : δ < r ^ 2) :
     Continuous (modelSharpUnionRound hk ε r δ) := by
