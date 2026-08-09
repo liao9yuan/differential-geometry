@@ -10323,6 +10323,42 @@ theorem modifiedSublevel_union_modelHandle_eq {n k : ℕ} (hk : k ≤ n) (c ε �
     · exact Or.inr hh
 
 
+theorem modifiedNormalForm_eq_of_norm_large {n k : ℕ} (hk : k ≤ n) (c ε δ r : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : r ^ 2 ≥ ε + 9 * δ ^ 2 / 8) (y : MorseModel n)
+    (hy : 2 * ε + 2 * r ^ 2 ≤ morseNorm n y ^ 2) :
+    modifiedNormalForm hk c ε δ y = morseNormalForm hk c y := by
+  have hsplit := modifiedNormalForm_split hk c ε δ y
+  rw [hsplit, morseNormalForm_split]
+  have hnorm : morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+    simpa [add_comm] using (morseNorm_sq_eq_negPart_add_posPart hk y)
+  by_cases hpos : 3 * δ / 2 ≤ ‖posPart hk y‖
+  · have hg : modGamma δ ‖posPart hk y‖ = 0 := modGamma_zero hδ hpos
+    simp [hg]
+  · have hpos_lt : ‖posPart hk y‖ < 3 * δ / 2 := lt_of_not_ge hpos
+    have hpos_lt_sq : ‖posPart hk y‖ ^ 2 ≤ (3 * δ / 2) ^ 2 := by
+      have hlt : ‖posPart hk y‖ ^ 2 < (3 * δ / 2) ^ 2 := by
+        rw [sq_lt_sq]
+        rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (by positivity : 0 ≤ 3 * δ / 2)]
+        exact hpos_lt
+      exact le_of_lt hlt
+    have hB : (3 * δ / 2) ^ 2 = 9 * δ ^ 2 / 4 := by ring
+    have hpos_lt_sq' : ‖posPart hk y‖ ^ 2 ≤ 9 * δ ^ 2 / 4 := by
+      rw [hB] at hpos_lt_sq
+      exact hpos_lt_sq
+    have hle : 2 * ε + 2 * r ^ 2 ≤ ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+      rw [hnorm] at hy
+      exact hy
+    have hneg : 4 * ε ≤ ‖negPart hk y‖ ^ 2 := by
+      have h1 : 2 * ε + 2 * r ^ 2 - 9 * δ ^ 2 / 4 ≤ ‖negPart hk y‖ ^ 2 := by
+        nlinarith [hle, hpos_lt_sq']
+      have h2 : 4 * ε ≤ 2 * ε + 2 * r ^ 2 - 9 * δ ^ 2 / 4 := by
+        have h4 : 2 * r ^ 2 ≥ 2 * ε + 9 * δ ^ 2 / 4 := by
+          nlinarith [hr]
+        nlinarith
+      nlinarith [h1, h2]
+    have hmu : modMu ε (‖negPart hk y‖ ^ 2) = 0 := modMu_zero hε hneg
+    simp [hmu]
+
 theorem morseModifiedSublevel_union_handleImage_eq {n k : ℕ} (hk : k ≤ n) (c ε δ r R : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hr : 3 * δ / 2 ≤ r)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
