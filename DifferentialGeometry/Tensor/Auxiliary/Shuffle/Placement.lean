@@ -86,7 +86,7 @@ theorem ofPerm_toPerm (S : TwoShuffle k n) : TwoShuffle.ofPerm (S.toPerm) = S :=
     rw [Equiv.apply_symm_apply]
     exact hi
 
-theorem mem_ofPerm_left (σ : Perm (Fin k ⊕ Fin n)) (i : Fin k) :
+private theorem mem_ofPerm_left (σ : Perm (Fin k ⊕ Fin n)) (i : Fin k) :
     finSumFinEquiv (σ (Sum.inl i)) ∈ (TwoShuffle.ofPerm σ).1 := by
   exact Finset.mem_image.mpr ⟨i, by simp, rfl⟩
 
@@ -101,7 +101,7 @@ theorem toPerm_inr (S : TwoShuffle k n) (j : Fin n) :
       (S.1ᶜ : Finset (Fin (k + n))).orderEmbOfFin (card_compl S.1 S.2) j := by
   simp [TwoShuffle.toPerm, TwoShuffle.toEquiv]
 
-theorem mem_ofPerm_right {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private theorem mem_ofPerm_right {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) (j : Fin n) :
     finSumFinEquiv (σ (Sum.inr j)) ∈ S.1ᶜ := by
   rw [Finset.mem_compl]
@@ -114,19 +114,19 @@ theorem mem_ofPerm_right {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
   have h2 := congrArg (fun x : Fin k ⊕ Fin n => σ⁻¹ x) hσ
   simp at h2
 
-def leftIndex {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private def leftIndex {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) (i : Fin k) : Fin k :=
   (S.1.orderIsoOfFin S.2).symm ⟨finSumFinEquiv (σ (Sum.inl i)),
     by
       have hmem := TwoShuffle.mem_ofPerm_left σ i
       simpa [h] using hmem⟩
 
-def rightIndex {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private def rightIndex {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) (j : Fin n) : Fin n :=
   ((S.1ᶜ : Finset (Fin (k + n))).orderIsoOfFin (card_compl S.1 S.2)).symm
     ⟨finSumFinEquiv (σ (Sum.inr j)), TwoShuffle.mem_ofPerm_right S h j⟩
 
-theorem leftIndex_val {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private theorem leftIndex_val {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) (i : Fin k) :
     S.1.orderEmbOfFin S.2 (leftIndex S h i) = finSumFinEquiv (σ (Sum.inl i)) := by
   have hmem : finSumFinEquiv (σ (Sum.inl i)) ∈ S.1 := by
@@ -135,7 +135,7 @@ theorem leftIndex_val {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
   exact congrArg Subtype.val ((S.1.orderIsoOfFin S.2).apply_symm_apply
     (⟨finSumFinEquiv (σ (Sum.inl i)), hmem⟩ : S.1))
 
-theorem rightIndex_val {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private theorem rightIndex_val {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) (j : Fin n) :
     (S.1ᶜ : Finset (Fin (k + n))).orderEmbOfFin (card_compl S.1 S.2)
       (rightIndex S h j) = finSumFinEquiv (σ (Sum.inr j)) := by
@@ -143,17 +143,17 @@ theorem rightIndex_val {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
   exact congrArg Subtype.val ((Sc.orderIsoOfFin (card_compl S.1 S.2)).apply_symm_apply
     (⟨finSumFinEquiv (σ (Sum.inr j)), TwoShuffle.mem_ofPerm_right S h j⟩ : Sc))
 
-theorem leftIndex_toPerm {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private theorem leftIndex_toPerm {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) (i : Fin k) :
     S.toPerm (Sum.inl (leftIndex S h i)) = σ (Sum.inl i) := by
   simp [TwoShuffle.toPerm, TwoShuffle.toEquiv, leftIndex_val S h i]
 
-theorem rightIndex_toPerm {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private theorem rightIndex_toPerm {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) (j : Fin n) :
     S.toPerm (Sum.inr (rightIndex S h j)) = σ (Sum.inr j) := by
   simp [TwoShuffle.toPerm, TwoShuffle.toEquiv, rightIndex_val S h j]
 
-theorem leftIndex_bijective {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private theorem leftIndex_bijective {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) : Function.Bijective (leftIndex S h) := by
   refine ⟨?_, ?_⟩
   · intro a b hab
@@ -177,7 +177,7 @@ theorem leftIndex_bijective {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     change S.1.orderEmbOfFin S.2 (leftIndex S h i) = S.1.orderEmbOfFin S.2 x
     rw [leftIndex_val S h i, hiy]
 
-theorem rightIndex_bijective {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private theorem rightIndex_bijective {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) : Function.Bijective (rightIndex S h) := by
   refine ⟨?_, ?_⟩
   · intro a b hab
@@ -238,7 +238,7 @@ theorem rightIndex_bijective {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     rw [rightIndex_val S h j]
     exact hj
 
-theorem eq_toPerm_mul {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
+private theorem eq_toPerm_mul {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffle k n)
     (h : TwoShuffle.ofPerm σ = S) :
     σ = S.toPerm * Equiv.sumCongr (Equiv.ofBijective (leftIndex S h) (leftIndex_bijective S h))
       (Equiv.ofBijective (rightIndex S h) (rightIndex_bijective S h)) := by
@@ -370,7 +370,7 @@ def pBlock (P : ThreeShuffle m n p) : {S : Finset (Fin (m + n + p)) // S.card = 
     rw [Finset.card_compl, P.mnBlock.2, Fintype.card_fin]
     omega⟩
 
-def mBlock_compl_card (P : ThreeShuffle m n p) :
+theorem mBlock_compl_card (P : ThreeShuffle m n p) :
     ((P.mBlock.1)ᶜ : Finset (Fin (m + n + p))).card = n + p := by
   rw [Finset.card_compl, P.mBlock.2, Fintype.card_fin]
   omega
@@ -378,14 +378,12 @@ def mBlock_compl_card (P : ThreeShuffle m n p) :
 def finAssocOrder (m n p : ℕ) : Fin (m + n + p) ≃o Fin (m + (n + p)) :=
   Fin.castOrderIso (Nat.add_assoc m n p)
 
-@[simp]
 theorem finAssoc_finAssocOrder (m n p : ℕ) : Fin.finAssoc = (finAssocOrder m n p).toEquiv := by
   apply Equiv.ext
   intro x
   apply Fin.ext
   rfl
 
-@[simp]
 theorem finAssoc_symm_finAssocOrder (m n p : ℕ) :
     Fin.finAssoc.symm = (finAssocOrder m n p).symm.toEquiv := by
   apply Equiv.ext
@@ -446,27 +444,6 @@ def rightInner (P : ThreeShuffle m n p) : TwoShuffle m n :=
       exact P.mBlock_subset hx
     exact (filter_map_image_card e.toEmbedding P.mBlock.1 (by
       simpa [RelEmbedding.coe_toEmbedding] using hsub)).trans P.mBlock.2⟩
-
-def assocSum (m n p : ℕ) : (Fin m ⊕ Fin n) ⊕ Fin p ≃ Fin m ⊕ (Fin n ⊕ Fin p) where
-  toFun := fun x => match x with
-    | Sum.inl (Sum.inl i) => Sum.inl i
-    | Sum.inl (Sum.inr j) => Sum.inr (Sum.inl j)
-    | Sum.inr k => Sum.inr (Sum.inr k)
-  invFun := fun x => match x with
-    | Sum.inl i => Sum.inl (Sum.inl i)
-    | Sum.inr (Sum.inl j) => Sum.inl (Sum.inr j)
-    | Sum.inr (Sum.inr k) => Sum.inr k
-  left_inv := by intro x; rcases x with ((i | j) | k) <;> rfl
-  right_inv := by intro x; rcases x with (i | (j | k)) <;> rfl
-
-def leftPosEquiv (m n p : ℕ) : Fin m ⊕ (Fin n ⊕ Fin p) ≃ Fin (m + n + p) :=
-  (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv : Fin n ⊕ Fin p ≃ Fin (n + p))).trans
-    ((finSumFinEquiv : Fin m ⊕ Fin (n + p) ≃ Fin (m + (n + p))).trans
-      (finAssocOrder m n p).symm.toEquiv)
-
-def rightPosEquiv (m n p : ℕ) : (Fin m ⊕ Fin n) ⊕ Fin p ≃ Fin (m + n + p) :=
-  (Equiv.sumCongr (finSumFinEquiv : Fin m ⊕ Fin n ≃ Fin (m + n)) (Equiv.refl (Fin p))).trans
-    (finSumFinEquiv : Fin (m + n) ⊕ Fin p ≃ Fin (m + n + p))
 
 def mergeRight {m n p : ℕ} (σ : Perm (Fin (m + n) ⊕ Fin p)) (τ : Perm (Fin m ⊕ Fin n)) :
     Perm ((Fin m ⊕ Fin n) ⊕ Fin p) :=
@@ -588,16 +565,6 @@ theorem leftInner_emb (P : ThreeShuffle m n p) (j : Fin n) :
     (leftInner P).2 e j
   simp [himg] at hmap
   simpa [leftInner] using hmap.symm
-
-private theorem rightPosEquiv_sumCongr_symm (m n p : ℕ) (y : Fin (m + n) ⊕ Fin p) :
-    rightPosEquiv m n p (Equiv.sumCongr (finSumFinEquiv.symm : Fin (m + n) ≃ Fin m ⊕ Fin n)
-      (Equiv.refl (Fin p)) y) = finSumFinEquiv y := by
-  simp [rightPosEquiv, Equiv.sumCongr_apply]
-
-private theorem leftPosEquiv_sumCongr_symm (m n p : ℕ) (y : Fin m ⊕ Fin (n + p)) :
-    leftPosEquiv m n p (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv.symm : Fin (n + p) ≃ Fin n ⊕ Fin p) y) =
-      (finAssocOrder m n p).symm (finSumFinEquiv y) := by
-  simp [leftPosEquiv, Equiv.sumCongr_apply]
 
 theorem leftOuter_emb (P : ThreeShuffle m n p) (i : Fin m) :
     (finAssocOrder m n p).symm ((leftOuter P).1.orderEmbOfFin (leftOuter P).2 i) =
@@ -794,7 +761,43 @@ theorem leftInner_compl_emb (P : ThreeShuffle m n p) (k : Fin p) :
   rw [← hmap]
   simp [himg']
 
-theorem canonR_m (P : ThreeShuffle m n p) (i : Fin m) :
+private def assocSum (m n p : ℕ) : (Fin m ⊕ Fin n) ⊕ Fin p ≃ Fin m ⊕ (Fin n ⊕ Fin p) where
+  toFun := fun x => match x with
+    | Sum.inl (Sum.inl i) => Sum.inl i
+    | Sum.inl (Sum.inr j) => Sum.inr (Sum.inl j)
+    | Sum.inr k => Sum.inr (Sum.inr k)
+  invFun := fun x => match x with
+    | Sum.inl i => Sum.inl (Sum.inl i)
+    | Sum.inr (Sum.inl j) => Sum.inl (Sum.inr j)
+    | Sum.inr (Sum.inr k) => Sum.inr k
+  left_inv := by intro x; rcases x with ((i | j) | k) <;> rfl
+  right_inv := by intro x; rcases x with (i | (j | k)) <;> rfl
+
+
+private def leftPosEquiv (m n p : ℕ) : Fin m ⊕ (Fin n ⊕ Fin p) ≃ Fin (m + n + p) :=
+  (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv : Fin n ⊕ Fin p ≃ Fin (n + p))).trans
+    ((finSumFinEquiv : Fin m ⊕ Fin (n + p) ≃ Fin (m + (n + p))).trans
+      (finAssocOrder m n p).symm.toEquiv)
+
+
+private def rightPosEquiv (m n p : ℕ) : (Fin m ⊕ Fin n) ⊕ Fin p ≃ Fin (m + n + p) :=
+  (Equiv.sumCongr (finSumFinEquiv : Fin m ⊕ Fin n ≃ Fin (m + n)) (Equiv.refl (Fin p))).trans
+    (finSumFinEquiv : Fin (m + n) ⊕ Fin p ≃ Fin (m + n + p))
+
+
+private theorem rightPosEquiv_sumCongr_symm (m n p : ℕ) (y : Fin (m + n) ⊕ Fin p) :
+    rightPosEquiv m n p (Equiv.sumCongr (finSumFinEquiv.symm : Fin (m + n) ≃ Fin m ⊕ Fin n)
+      (Equiv.refl (Fin p)) y) = finSumFinEquiv y := by
+  simp [rightPosEquiv, Equiv.sumCongr_apply]
+
+
+private theorem leftPosEquiv_sumCongr_symm (m n p : ℕ) (y : Fin m ⊕ Fin (n + p)) :
+    leftPosEquiv m n p (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv.symm : Fin (n + p) ≃ Fin n ⊕ Fin p) y) =
+      (finAssocOrder m n p).symm (finSumFinEquiv y) := by
+  simp [leftPosEquiv, Equiv.sumCongr_apply]
+
+
+private theorem canonR_m (P : ThreeShuffle m n p) (i : Fin m) :
     rightPosEquiv m n p (canonR P (Sum.inl (Sum.inl i))) =
       P.mBlock.1.orderEmbOfFin P.mBlock.2 i := by
   rw [canonR, mergeRight_inl_inl]
@@ -805,7 +808,8 @@ theorem canonR_m (P : ThreeShuffle m n p) (i : Fin m) :
   rw [TwoShuffle.toPerm_inl]
   exact rightInner_emb P i
 
-theorem canonR_n (P : ThreeShuffle m n p) (j : Fin n) :
+
+private theorem canonR_n (P : ThreeShuffle m n p) (j : Fin n) :
     rightPosEquiv m n p (canonR P (Sum.inl (Sum.inr j))) =
       (nBlock P).1.orderEmbOfFin (nBlock P).2 j := by
   rw [canonR, mergeRight_inl_inr]
@@ -816,7 +820,8 @@ theorem canonR_n (P : ThreeShuffle m n p) (j : Fin n) :
   rw [TwoShuffle.toPerm_inr]
   exact rightInner_compl_emb P j
 
-theorem canonR_p (P : ThreeShuffle m n p) (k : Fin p) :
+
+private theorem canonR_p (P : ThreeShuffle m n p) (k : Fin p) :
     rightPosEquiv m n p (canonR P (Sum.inr k)) =
       (pBlock P).1.orderEmbOfFin (pBlock P).2 k := by
   rw [canonR, mergeRight_inr]
@@ -824,14 +829,16 @@ theorem canonR_p (P : ThreeShuffle m n p) (k : Fin p) :
   rw [TwoShuffle.toPerm_inr]
   rfl
 
-theorem canonL_m (P : ThreeShuffle m n p) (i : Fin m) :
+
+private theorem canonL_m (P : ThreeShuffle m n p) (i : Fin m) :
     leftPosEquiv m n p (canonL P (Sum.inl i)) = P.mBlock.1.orderEmbOfFin P.mBlock.2 i := by
   rw [canonL, mergeLeft_inl]
   rw [leftPosEquiv_sumCongr_symm]
   rw [TwoShuffle.toPerm_inl]
   exact leftOuter_emb P i
 
-theorem canonL_n (P : ThreeShuffle m n p) (j : Fin n) :
+
+private theorem canonL_n (P : ThreeShuffle m n p) (j : Fin n) :
     leftPosEquiv m n p (canonL P (Sum.inr (Sum.inl j))) =
       (nBlock P).1.orderEmbOfFin (nBlock P).2 j := by
   rw [canonL, mergeLeft_inr_inl]
@@ -841,7 +848,8 @@ theorem canonL_n (P : ThreeShuffle m n p) (j : Fin n) :
   exact (leftOuter_compl_emb P ((leftInner P).1.orderEmbOfFin (leftInner P).2 j)).trans
     (leftInner_emb P j)
 
-theorem canonL_p (P : ThreeShuffle m n p) (k : Fin p) :
+
+private theorem canonL_p (P : ThreeShuffle m n p) (k : Fin p) :
     leftPosEquiv m n p (canonL P (Sum.inr (Sum.inr k))) =
       (pBlock P).1.orderEmbOfFin (pBlock P).2 k := by
   rw [canonL, mergeLeft_inr_inr]
@@ -852,7 +860,8 @@ theorem canonL_p (P : ThreeShuffle m n p) (k : Fin p) :
     (by rw [Finset.card_compl, (leftInner P).2, Fintype.card_fin]; omega) k)).trans
     (leftInner_compl_emb P k)
 
-theorem leftPosEquiv_assocSum (m n p : ℕ) (x : (Fin m ⊕ Fin n) ⊕ Fin p) :
+
+private theorem leftPosEquiv_assocSum (m n p : ℕ) (x : (Fin m ⊕ Fin n) ⊕ Fin p) :
     leftPosEquiv m n p (assocSum m n p x) = rightPosEquiv m n p x := by
   cases x with
   | inl x => cases x with
@@ -863,7 +872,8 @@ theorem leftPosEquiv_assocSum (m n p : ℕ) (x : (Fin m ⊕ Fin n) ⊕ Fin p) :
     simp only [leftPosEquiv, rightPosEquiv, assocSum]
     exact (Nat.add_assoc m n ↑k).symm
 
-theorem canonL_canonR_pos (P : ThreeShuffle m n p) (x : (Fin m ⊕ Fin n) ⊕ Fin p) :
+
+private theorem canonL_canonR_pos (P : ThreeShuffle m n p) (x : (Fin m ⊕ Fin n) ⊕ Fin p) :
     leftPosEquiv m n p (canonL P (assocSum m n p x)) = rightPosEquiv m n p (canonR P x) := by
   cases x with
   | inl x => cases x with
@@ -874,7 +884,8 @@ theorem canonL_canonR_pos (P : ThreeShuffle m n p) (x : (Fin m ⊕ Fin n) ⊕ Fi
   | inr k =>
     exact (canonL_p P k).trans (canonR_p P k).symm
 
-theorem canonL_permCongr (P : ThreeShuffle m n p) :
+
+private theorem canonL_permCongr (P : ThreeShuffle m n p) :
     canonL P = (assocSum m n p).permCongr (canonR P) := by
   apply Equiv.ext
   intro x
@@ -883,6 +894,7 @@ theorem canonL_permCongr (P : ThreeShuffle m n p) :
   rw [← leftPosEquiv_assocSum m n p (canonR P ((assocSum m n p).symm x))] at h
   have hx := (leftPosEquiv m n p).injective h
   simpa [Equiv.permCongr_def] using hx
+
 
 theorem sign_canonL_canonR (P : ThreeShuffle m n p) :
     Equiv.Perm.sign (canonL P) = Equiv.Perm.sign (canonR P) := by

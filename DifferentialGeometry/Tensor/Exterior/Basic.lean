@@ -203,23 +203,38 @@ private lemma rep_eqOn_pullback (α : DifferentialForm IM M k) {x₀ x : M}
   exact (localRep_eq_pullback (IM := IM) (M := M) (x₀ := x) (x := x₀) (z := z)
     (hx := hy₀s) (hx₀ := hy₀s₁) (m := k) (L := α z))
 
-noncomputable def exteriorDerivativeAt (α : DifferentialForm IM M k) (x : M) :
+private noncomputable def exteriorDerivativeAtRaw (α : DifferentialForm IM M k)
+    (x : {x : M // ModelWithCorners.IsInteriorPoint IM x}) :
     Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
-      (Bundle.Trivial M ℝ) x :=
+      (Bundle.Trivial M ℝ) x.1 :=
   (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
       (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
-        (Bundle.Trivial M ℝ)) x).symmL ℝ x
+        (Bundle.Trivial M ℝ)) x.1).symmL ℝ x.1
     (extDeriv (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
-          (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, α ((extChartAt IM x).symm y)⟩).2)
-      ((extChartAt IM x) x))
+          (Bundle.Trivial M ℝ)) x.1
+          ⟨(extChartAt IM x.1).symm y, α ((extChartAt IM x.1).symm y)⟩).2)
+      ((extChartAt IM x.1) x.1))
 
-theorem exteriorDerivative_localRepresentation [BoundarylessManifold IM M]
+noncomputable def exteriorDerivativeAtInterior (α : DifferentialForm IM M k) (x : M)
+    (hxi : ModelWithCorners.IsInteriorPoint IM x) :
+    Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
+      (Bundle.Trivial M ℝ) x :=
+  exteriorDerivativeAtRaw α ⟨x, hxi⟩
+
+noncomputable def exteriorDerivativeAt [BoundarylessManifold IM M]
+    (α : DifferentialForm IM M k) (x : M) :
+    Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
+      (Bundle.Trivial M ℝ) x :=
+  exteriorDerivativeAtInterior α x
+    (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))
+
+theorem exteriorDerivative_localRepresentation
     (α : DifferentialForm IM M k) {x₀ x : M}
     (hx : x ∈ (extChartAt IM x₀).source) (hxi : ModelWithCorners.IsInteriorPoint IM x) :
     (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
-          (Bundle.Trivial M ℝ)) x₀ ⟨x, exteriorDerivativeAt α x⟩).2 =
+          (Bundle.Trivial M ℝ)) x₀ ⟨x, exteriorDerivativeAtInterior α x hxi⟩).2 =
       extDeriv (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
           (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
             (Bundle.Trivial M ℝ)) x₀ ⟨(extChartAt IM x₀).symm y, α ((extChartAt IM x₀).symm y)⟩).2)
@@ -238,7 +253,7 @@ theorem exteriorDerivative_localRepresentation [BoundarylessManifold IM M]
   let R : EM [⋀^Fin (k + 1)]→L[ℝ] ℝ :=
     (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
       (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
-        (Bundle.Trivial M ℝ)) x₀ ⟨x, exteriorDerivativeAt α x⟩).2
+        (Bundle.Trivial M ℝ)) x₀ ⟨x, exteriorDerivativeAtInterior α x hxi⟩).2
   let S : EM [⋀^Fin (k + 1)]→L[ℝ] ℝ := extDeriv rep₀ (c₀ x)
   let Z := extDeriv rep₁ (c₁ x)
   let C := tangentCoordChange IM x x₀ x
@@ -270,12 +285,12 @@ theorem exteriorDerivative_localRepresentation [BoundarylessManifold IM M]
       _ = Z := Trivialization.linearMapAt_symmₗ (R := ℝ) e hb Z
   have hpb : (trivializationAt (EM [⋀^Fin (k + 1)]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin (k + 1)) EM (TangentSpace IM) ℝ
-          (Bundle.Trivial M ℝ)) x ⟨x, exteriorDerivativeAt α x⟩).2 =
+          (Bundle.Trivial M ℝ)) x ⟨x, exteriorDerivativeAtInterior α x hxi⟩).2 =
       R.compContinuousLinearMap C := by
     simpa [R, C] using localRep_eq_pullback (IM := IM) (M := M) (x₀ := x₀) (x := x) (z := x)
-      (m := k + 1) (L := exteriorDerivativeAt α x) hxsrc₁ hx
+      (m := k + 1) (L := exteriorDerivativeAtInterior α x hxi) hxsrc₁ hx
   have hZ : Z = R.compContinuousLinearMap C := by
-    dsimp [Z, exteriorDerivativeAt]
+    dsimp [Z, exteriorDerivativeAtInterior, exteriorDerivativeAtRaw]
     exact hX.symm.trans hpb
   have hR : R = Z.compContinuousLinearMap D := by
     calc
@@ -494,7 +509,9 @@ theorem exteriorDerivative_add [BoundarylessManifold IM M] (α β : Differential
     exact ((localRep_contDiffOn β x).contDiffAt
       (mem_interior_iff_mem_nhds.mp hmem)).differentiableAt (by norm_num)
   change exteriorDerivativeAt (α + β) x = exteriorDerivativeAt α x + exteriorDerivativeAt β x
-  rw [exteriorDerivativeAt, exteriorDerivativeAt, exteriorDerivativeAt]
+  rw [exteriorDerivativeAt, exteriorDerivativeAtInterior, exteriorDerivativeAtRaw,
+    exteriorDerivativeAt, exteriorDerivativeAtInterior, exteriorDerivativeAtRaw,
+    exteriorDerivativeAt, exteriorDerivativeAtInterior, exteriorDerivativeAtRaw]
   have hsum : (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
           (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, (α + β) ((extChartAt IM x).symm y)⟩).2) =
@@ -530,7 +547,8 @@ theorem exteriorDerivative_smul [BoundarylessManifold IM M] (c : ℝ) (α : Diff
     exteriorDerivative (c • α) = c • exteriorDerivative α := by
   ext x
   change exteriorDerivativeAt (c • α) x = c • exteriorDerivativeAt α x
-  rw [exteriorDerivativeAt, exteriorDerivativeAt]
+  rw [exteriorDerivativeAt, exteriorDerivativeAtInterior, exteriorDerivativeAtRaw,
+    exteriorDerivativeAt, exteriorDerivativeAtInterior, exteriorDerivativeAtRaw]
   have hsmul : (fun y : EM => (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
           (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, (c • α) ((extChartAt IM x).symm y)⟩).2) =

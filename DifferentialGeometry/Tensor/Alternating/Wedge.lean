@@ -52,68 +52,6 @@ theorem wedge_product_def {g : M [⋀^Fin m]→L[𝕜] N} {h : M [⋀^Fin n]→L
   rfl
 
 open scoped TensorProduct
-
-theorem factorial_nsmul_wedge_product_eq_alternatization
-    (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
-    (f : N →L[𝕜] N' →L[𝕜] N'') (v : Fin (m + n) → M) :
-    (m.factorial * n.factorial) • (g ∧[f] h) v =
-      MultilinearMap.alternatization (tensorProductMap g h f).toMultilinearMap v := by
-  let φ : N ⊗[𝕜] N' →ₗ[𝕜] N'' := TensorProduct.lift
-    { toFun := fun n => (f n).toLinearMap
-      map_add' := by intro x y; ext; simp [map_add]
-      map_smul' := by intro c x; ext; simp [map_smul] }
-  have hφ : ∀ a b, φ (a ⊗ₜ[𝕜] b) = f a b := fun _ _ => rfl
-  have h_factor : (tensorProductMap g h f).toMultilinearMap =
-      (φ.compMultilinearMap (MultilinearMap.domCoprod
-        ↑g.toAlternatingMap ↑h.toAlternatingMap)).domDomCongr finSumFinEquiv := by
-    ext x; simp [tensorProductMap, MultilinearMap.domDomCongr_apply,
-      LinearMap.compMultilinearMap_apply, MultilinearMap.domCoprod_apply, hφ]; rfl
-  rw [h_factor, ContinuousAlternatingMap.alternatization_domDomCongr,
-    LinearMap.compMultilinearMap_alternatization,
-    MultilinearMap.domCoprod_alternization_eq, Fintype.card_fin, Fintype.card_fin]
-  simp only [AlternatingMap.domDomCongr_apply, LinearMap.compAlternatingMap_apply,
-    AlternatingMap.smul_apply, map_nsmul]
-  change _ = _ • φ ((g.toAlternatingMap.domCoprod h.toAlternatingMap) (v ∘ ⇑finSumFinEquiv))
-  rw [show φ ((g.toAlternatingMap.domCoprod h.toAlternatingMap) (v ∘ ⇑finSumFinEquiv)) =
-    (uncurrySum (f.compContinuousAlternatingMap₂ g h)) (v ∘ ⇑finSumFinEquiv) from
-    congr_fun (congr_arg DFunLike.coe
-      (lift_comp_domCoprod_eq_uncurrySum g h f φ hφ)) _]; rfl
-
-theorem wedge_product_eq_alternatization [CharZero 𝕜]
-    (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
-    (f : N →L[𝕜] N' →L[𝕜] N'') (v : Fin (m + n) → M) :
-    (g ∧[f] h) v = ((↑(m.factorial * n.factorial) : 𝕜))⁻¹ •
-      MultilinearMap.alternatization (tensorProductMap g h f).toMultilinearMap v := by
-  have h_ne : (↑(m.factorial * n.factorial) : 𝕜) ≠ 0 :=
-    Nat.cast_ne_zero.mpr (Nat.mul_pos (Nat.factorial_pos m) (Nat.factorial_pos n)).ne'
-  have h_eq := factorial_nsmul_wedge_product_eq_alternatization g h f v
-  rw [← h_eq, ← Nat.cast_smul_eq_nsmul 𝕜, inv_smul_smul₀ h_ne]
-
-theorem elementaryCovector_wedge [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
-    (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
-    (I : Fin m' → Fin d) (J : Fin p → Fin d) :
-    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
-      (elementaryCovector b (Fin.addCases I J) :
-        M [⋀^Fin (m' + p)]→L[𝕜] 𝕜) := by
-  obtain ⟨B, dual⟩ := exists_predual_basis b
-  apply ContinuousAlternatingMap.toAlternatingMap_injective
-  apply B.ext_alternating
-  intro v hv
-  change ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ v) =
-    elementaryCovector b (Fin.addCases I J) (B ∘ v)
-  rw [elementaryCovector_basis_eval B b dual (Fin.addCases I J) v]
-  have lhs_eq := wedge_product_eq_alternatization (elementaryCovector b I)
-    (elementaryCovector b J) (ContinuousLinearMap.mul 𝕜 𝕜) (⇑B ∘ v)
-  rw [lhs_eq, MultilinearMap.alternatization_apply]
-  simp_rw [MultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.coe_coe,
-    tensorProductMap_apply, ContinuousLinearMap.mul_apply']
-  simp_rw [show ∀ (σ : Equiv.Perm (Fin (m' + p))),
-    (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.castAdd p = ⇑B ∘ (v ∘ σ ∘ Fin.castAdd p) from fun _ => rfl,
-    show ∀ (σ : Equiv.Perm (Fin (m' + p))),
-    (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.natAdd m' = ⇑B ∘ (v ∘ σ ∘ Fin.natAdd m') from fun _ => rfl,
-    elementaryCovector_basis_eval B b dual]
-  exact Fin.multiKroneckerDelta_cauchyBinet I J v
-
 theorem uncurryFin_smulRight_elementaryCovector
     (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
     (a : Fin d) (I : Fin m → Fin d) :
@@ -1558,257 +1496,6 @@ theorem uncurryFin_wedge_productL_precompL_eq_domDomCongr
     _ = domDomCongr Fin.finAddFlipAssoc (wedge_product (uncurryFin g') h f) v := by
           rw [wedge_product_uncurryFin_apply]
 
-private theorem zero_wedge' (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
-    wedge_product (0 : M [⋀^Fin m]→L[𝕜] 𝕜) h (ContinuousLinearMap.mul 𝕜 𝕜) = 0 := by
-  have := add_wedge (0 : M [⋀^Fin m]→L[𝕜] 𝕜) 0 h (ContinuousLinearMap.mul 𝕜 𝕜)
-  simpa using this
-
-private theorem wedge_zero' (g : M [⋀^Fin m]→L[𝕜] 𝕜) :
-    wedge_product g (0 : M [⋀^Fin n]→L[𝕜] 𝕜) (ContinuousLinearMap.mul 𝕜 𝕜) = 0 := by
-  have := wedge_add g (0 : M [⋀^Fin n]→L[𝕜] 𝕜) 0 (ContinuousLinearMap.mul 𝕜 𝕜)
-  simpa using this
-
-private theorem sum_wedge_left {ι : Type*} (s : Finset ι)
-    (g : ι → M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
-    wedge_product (∑ i ∈ s, g i) h (ContinuousLinearMap.mul 𝕜 𝕜) =
-    ∑ i ∈ s, wedge_product (g i) h (ContinuousLinearMap.mul 𝕜 𝕜) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [zero_wedge']
-  | insert _ _ hni ih =>
-    rw [Finset.sum_insert hni, add_wedge, ih, Finset.sum_insert hni]
-
-private theorem sum_wedge_right {ι : Type*} (s : Finset ι)
-    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : ι → M [⋀^Fin n]→L[𝕜] 𝕜) :
-    wedge_product g (∑ i ∈ s, h i) (ContinuousLinearMap.mul 𝕜 𝕜) =
-    ∑ i ∈ s, wedge_product g (h i) (ContinuousLinearMap.mul 𝕜 𝕜) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [wedge_zero']
-  | insert _ _ hni ih =>
-    rw [Finset.sum_insert hni, wedge_add, ih, Finset.sum_insert hni]
-
-private theorem sum_smul_wedge_left {ι : Type*} (s : Finset ι)
-    (c : ι → 𝕜) (g : ι → M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
-    wedge_product (∑ i ∈ s, c i • g i) h (ContinuousLinearMap.mul 𝕜 𝕜) =
-    ∑ i ∈ s, c i • wedge_product (g i) h (ContinuousLinearMap.mul 𝕜 𝕜) := by
-  rw [sum_wedge_left]; congr 1; ext i; rw [← smul_wedge]
-
-private theorem sum_smul_wedge_right {ι : Type*} (s : Finset ι)
-    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (c : ι → 𝕜) (h : ι → M [⋀^Fin n]→L[𝕜] 𝕜) :
-    wedge_product g (∑ i ∈ s, c i • h i) (ContinuousLinearMap.mul 𝕜 𝕜) =
-    ∑ i ∈ s, c i • wedge_product g (h i) (ContinuousLinearMap.mul 𝕜 𝕜) := by
-  rw [sum_wedge_right]; congr 1; ext i; rw [← wedge_smul]
-
-private theorem domDomCongr_sum_smul {ι : Type*} {m' n' : ℕ}
-    (e : Fin m' ≃ Fin n') (s : Finset ι) (c : ι → 𝕜) (f : ι → M [⋀^Fin m']→L[𝕜] 𝕜) :
-    domDomCongr e (∑ i ∈ s, c i • f i) = ∑ i ∈ s, c i • domDomCongr e (f i) := by
-  rw [domDomCongr_sum]; congr 1
-
-private def tensorMulML {m n : ℕ} (A : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜)
-    (B : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜) :
-    MultilinearMap 𝕜 (fun _ : Fin (m + n) => M) 𝕜 :=
-  ((LinearMap.mul' 𝕜 𝕜).compMultilinearMap (A.domCoprod B)).domDomCongr finSumFinEquiv
-
-private theorem tensorMulML_apply {m n : ℕ} (A : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜)
-    (B : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜) (v : Fin (m + n) → M) :
-    tensorMulML A B v = A (v ∘ Fin.castAdd n) * B (v ∘ Fin.natAdd m) := by
-  simp [tensorMulML, LinearMap.mul'_apply]
-  rfl
-
-private theorem tensorMulML_smul_right {m n : ℕ} (c : 𝕜)
-    (A : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜)
-    (B : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜) :
-    tensorMulML A (c • B) = c • tensorMulML A B := by
-  ext v
-  simp [tensorMulML_apply]
-  ring
-
-private theorem tensorMulML_smul_left {m n : ℕ} (c : 𝕜)
-    (A : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜)
-    (B : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜) :
-    tensorMulML (c • A) B = c • tensorMulML A B := by
-  ext v
-  simp [tensorMulML_apply]
-  ring
-
-private theorem tensorMulML_eq_tensorProductMap {m n : ℕ}
-    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
-    (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
-      tensorMulML g.toAlternatingMap h.toAlternatingMap := by
-  ext v
-  simp [tensorMulML_apply, tensorProductMap_apply]
-
-private theorem nsmul_eq_smul_cast {A : Type*} [AddCommMonoid A] [Module 𝕜 A] (k : ℕ) (x : A) :
-    k • x = (k : 𝕜) • x := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [succ_nsmul, ih]
-    rw [Nat.cast_succ, add_smul, one_smul]
-
-private theorem tensorMulML_alt_alt {m n : ℕ} (a : M [⋀^Fin m]→L[𝕜] 𝕜)
-    (F : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜) :
-    MultilinearMap.alternatization (tensorMulML a.toAlternatingMap
-        ↑(MultilinearMap.alternatization F)) =
-      (n.factorial : 𝕜) • MultilinearMap.alternatization
-        (tensorMulML (a.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜) F) := by
-  unfold tensorMulML
-  rw [ContinuousAlternatingMap.alternatization_domDomCongr]
-  rw [LinearMap.compMultilinearMap_alternatization]
-  rw [MultilinearMap.domCoprod_alternization]
-  rw [AlternatingMap.coe_alternatization]
-  rw [AlternatingMap.coe_alternatization]
-  rw [show (Fintype.card (Fin m)).factorial = m.factorial from by rw [Fintype.card_fin]]
-  rw [show (Fintype.card (Fin n)).factorial = n.factorial from by rw [Fintype.card_fin]]
-  rw [show m.factorial • a.toAlternatingMap = (m.factorial : 𝕜) • a.toAlternatingMap from
-    nsmul_eq_smul_cast m.factorial a.toAlternatingMap]
-  rw [show n.factorial • MultilinearMap.alternatization F =
-      (n.factorial : 𝕜) • MultilinearMap.alternatization F from
-    nsmul_eq_smul_cast n.factorial (MultilinearMap.alternatization F)]
-  have hdom : ∀ (c₁ c₂ : 𝕜), (c₁ • a.toAlternatingMap).domCoprod
-        (c₂ • MultilinearMap.alternatization F) =
-      (c₁ * c₂) •
-        (a.toAlternatingMap.domCoprod (MultilinearMap.alternatization F)) := by
-    intro c₁ c₂
-    change AlternatingMap.domCoprod' ((c₁ • a.toAlternatingMap) ⊗ₜ[𝕜]
-        (c₂ • MultilinearMap.alternatization F)) =
-      (c₁ * c₂) •
-        (AlternatingMap.domCoprod' (a.toAlternatingMap ⊗ₜ[𝕜] MultilinearMap.alternatization F))
-    rw [TensorProduct.smul_tmul_smul]
-    exact map_smul (f := AlternatingMap.domCoprod' (R' := 𝕜) (Mᵢ := M) (N₁ := 𝕜) (N₂ := 𝕜)
-      (ιa := Fin m) (ιb := Fin n)) (c₁ * c₂)
-      (a.toAlternatingMap ⊗ₜ[𝕜] MultilinearMap.alternatization F)
-  have hsmul : (LinearMap.mul' 𝕜 𝕜).compAlternatingMap
-      (((m.factorial : 𝕜) • a.toAlternatingMap).domCoprod
-        ((n.factorial : 𝕜) • MultilinearMap.alternatization F)) =
-      ((m.factorial * n.factorial : ℕ) : 𝕜) •
-        (LinearMap.mul' 𝕜 𝕜).compAlternatingMap
-          (a.toAlternatingMap.domCoprod (MultilinearMap.alternatization F)) := by
-    rw [hdom (m.factorial : 𝕜) (n.factorial : 𝕜)]
-    norm_cast
-    ext v
-    simp [LinearMap.compAlternatingMap_apply]
-  rw [hsmul]
-  rw [AlternatingMap.domDomCongr_smul]
-  rw [ContinuousAlternatingMap.alternatization_domDomCongr]
-  rw [LinearMap.compMultilinearMap_alternatization]
-  rw [MultilinearMap.domCoprod_alternization]
-  rw [AlternatingMap.coe_alternatization]
-  rw [show (Fintype.card (Fin m)).factorial = m.factorial from by rw [Fintype.card_fin]]
-  rw [show m.factorial • a.toAlternatingMap = (m.factorial : 𝕜) • a.toAlternatingMap from
-    nsmul_eq_smul_cast m.factorial a.toAlternatingMap]
-  rw [show ((m.factorial : 𝕜) • a.toAlternatingMap).domCoprod
-        (MultilinearMap.alternatization F) =
-      (m.factorial : 𝕜) • (a.toAlternatingMap.domCoprod (MultilinearMap.alternatization F)) from by
-    simpa [one_smul] using hdom (m.factorial : 𝕜) 1]
-  rw [LinearMap.compAlternatingMap_smul]
-  rw [AlternatingMap.domDomCongr_smul]
-  ext v
-  simp only [AlternatingMap.smul_apply, smul_eq_mul]
-  rw [Nat.cast_mul]
-  ring
-
-private theorem tensorMulML_alt_alt_left {m n : ℕ} (F : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜)
-    (b : M [⋀^Fin n]→L[𝕜] 𝕜) :
-    MultilinearMap.alternatization (tensorMulML ↑(MultilinearMap.alternatization F)
-        b.toAlternatingMap) =
-      (m.factorial : 𝕜) • MultilinearMap.alternatization
-        (tensorMulML F (b.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜)) := by
-  unfold tensorMulML
-  rw [ContinuousAlternatingMap.alternatization_domDomCongr]
-  rw [LinearMap.compMultilinearMap_alternatization]
-  rw [MultilinearMap.domCoprod_alternization]
-  rw [AlternatingMap.coe_alternatization]
-  rw [AlternatingMap.coe_alternatization]
-  rw [show (Fintype.card (Fin m)).factorial = m.factorial from by rw [Fintype.card_fin]]
-  rw [show (Fintype.card (Fin n)).factorial = n.factorial from by rw [Fintype.card_fin]]
-  rw [show m.factorial • MultilinearMap.alternatization F =
-      (m.factorial : 𝕜) • MultilinearMap.alternatization F from
-    nsmul_eq_smul_cast m.factorial (MultilinearMap.alternatization F)]
-  rw [show n.factorial • b.toAlternatingMap = (n.factorial : 𝕜) • b.toAlternatingMap from
-    nsmul_eq_smul_cast n.factorial b.toAlternatingMap]
-  have hdom : ∀ (c₁ c₂ : 𝕜), (c₁ • MultilinearMap.alternatization F).domCoprod
-        (c₂ • b.toAlternatingMap) =
-      (c₁ * c₂) •
-        ((MultilinearMap.alternatization F).domCoprod b.toAlternatingMap) := by
-    intro c₁ c₂
-    change AlternatingMap.domCoprod' ((c₁ • MultilinearMap.alternatization F) ⊗ₜ[𝕜]
-        (c₂ • b.toAlternatingMap)) =
-      (c₁ * c₂) •
-        (AlternatingMap.domCoprod' (MultilinearMap.alternatization F ⊗ₜ[𝕜] b.toAlternatingMap))
-    rw [TensorProduct.smul_tmul_smul]
-    exact map_smul (f := AlternatingMap.domCoprod' (R' := 𝕜) (Mᵢ := M) (N₁ := 𝕜) (N₂ := 𝕜)
-      (ιa := Fin m) (ιb := Fin n)) (c₁ * c₂)
-      (MultilinearMap.alternatization F ⊗ₜ[𝕜] b.toAlternatingMap)
-  have hsmul : (LinearMap.mul' 𝕜 𝕜).compAlternatingMap
-      (((m.factorial : 𝕜) • MultilinearMap.alternatization F).domCoprod
-        ((n.factorial : 𝕜) • b.toAlternatingMap)) =
-      ((m.factorial * n.factorial : ℕ) : 𝕜) •
-        (LinearMap.mul' 𝕜 𝕜).compAlternatingMap
-          ((MultilinearMap.alternatization F).domCoprod b.toAlternatingMap) := by
-    rw [hdom (m.factorial : 𝕜) (n.factorial : 𝕜)]
-    norm_cast
-    ext v
-    simp [LinearMap.compAlternatingMap_apply]
-  rw [hsmul]
-  rw [AlternatingMap.domDomCongr_smul]
-  rw [ContinuousAlternatingMap.alternatization_domDomCongr]
-  rw [LinearMap.compMultilinearMap_alternatization]
-  rw [MultilinearMap.domCoprod_alternization]
-  rw [AlternatingMap.coe_alternatization]
-  rw [show (Fintype.card (Fin n)).factorial = n.factorial from by rw [Fintype.card_fin]]
-  rw [show n.factorial • b.toAlternatingMap = (n.factorial : 𝕜) • b.toAlternatingMap from
-    nsmul_eq_smul_cast n.factorial b.toAlternatingMap]
-  rw [show (MultilinearMap.alternatization F).domCoprod ((n.factorial : 𝕜) • b.toAlternatingMap) =
-      (n.factorial : 𝕜) • ((MultilinearMap.alternatization F).domCoprod b.toAlternatingMap) from by
-    simpa [one_smul] using hdom 1 (n.factorial : 𝕜)]
-  rw [LinearMap.compAlternatingMap_smul]
-  rw [AlternatingMap.domDomCongr_smul]
-  ext v
-  simp only [AlternatingMap.smul_apply, smul_eq_mul]
-  rw [Nat.cast_mul]
-  ring
-
-private theorem tensorMulML_assoc {m n p : ℕ} (A : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜)
-    (B : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜) (C : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜) :
-    (tensorMulML (tensorMulML A B) C).domDomCongr Fin.finAssoc =
-      tensorMulML A (tensorMulML B C) := by
-  ext v
-  simp only [MultilinearMap.domDomCongr_apply, tensorMulML_apply]
-  have hA : ((fun i => v (Fin.finAssoc i)) ∘ Fin.castAdd p) ∘ Fin.castAdd n =
-      v ∘ Fin.castAdd (n + p) := by
-    funext i
-    change v (Fin.finAssoc (Fin.castAdd p (Fin.castAdd n i))) = v (Fin.castAdd (n + p) i)
-    congr 1
-  have hB : ((fun i => v (Fin.finAssoc i)) ∘ Fin.castAdd p) ∘ Fin.natAdd m =
-      (v ∘ Fin.natAdd m) ∘ Fin.castAdd p := by
-    funext j
-    change v (Fin.finAssoc (Fin.castAdd p (Fin.natAdd m j))) = v (Fin.natAdd m (Fin.castAdd p j))
-    congr 1
-  have hC : (fun i => v (Fin.finAssoc i)) ∘ Fin.natAdd (m + n) =
-      (v ∘ Fin.natAdd m) ∘ Fin.natAdd n := by
-    funext k
-    change v (Fin.finAssoc (Fin.natAdd (m + n) k)) = v (Fin.natAdd m (Fin.natAdd n k))
-    congr 1
-    simp [Fin.finAssoc, Fin.ext_iff]
-    omega
-  rw [hA, hB, hC]
-  simp [mul_assoc]
-
-private theorem wedge_toAlternatingMap [CharZero 𝕜] {m n : ℕ}
-    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
-    (g ∧[𝕜] h).toAlternatingMap =
-      ((↑(m.factorial * n.factorial) : 𝕜))⁻¹ •
-        MultilinearMap.alternatization (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap := by
-  apply AlternatingMap.ext
-  intro v
-  exact wedge_product_eq_alternatization g h (ContinuousLinearMap.mul 𝕜 𝕜) v
-
-private theorem toAlternatingMap_domDomCongr {ι ι' : Type*} (e : ι ≃ ι')
-    (f : M [⋀^ι]→L[𝕜] 𝕜) :
-    (domDomCongr e f).toAlternatingMap = f.toAlternatingMap.domDomCongr e := by
-  rfl
 
 noncomputable local instance threeShuffleFintype (m n p : ℕ) :
     Fintype (Equiv.Perm.ThreeShuffle m n p) :=
@@ -2467,13 +2154,13 @@ theorem wedge_antisymm
     rw [← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow]
   rw [hsq, one_smul]
 
-variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M] [FiniteDimensional ℝ M]
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {M : Type*} [NormedAddCommGroup M] [NormedSpace 𝕜 M]
 
 open Fin
 
-omit [FiniteDimensional ℝ M] in
-lemma domDomCongr_finAddFlip_wedge_self (g : M [⋀^Fin m]→L[ℝ] ℝ) :
-    domDomCongr finAddFlip (g∧[ℝ]g) = (g∧[ℝ]g) := by
+lemma domDomCongr_finAddFlip_wedge_self (g : M [⋀^Fin m]→L[𝕜] 𝕜) :
+    domDomCongr finAddFlip (g∧[𝕜]g) = (g∧[𝕜]g) := by
   ext x
   rw[wedge_product_mul, uncurryFinAdd, domDomCongr_apply, domDomCongr_apply, uncurrySum_apply,
     ContinuousMultilinearMap.sum_apply, wedge_product_mul, uncurryFinAdd, domDomCongr_apply,
@@ -2497,15 +2184,17 @@ lemma domDomCongr_finAddFlip_wedge_self (g : M [⋀^Fin m]→L[ℝ] ℝ) :
     ContinuousLinearMap.mul_apply']
   simp [Function.comp_def, finAddFlip, mul_comm]
 
-omit [FiniteDimensional ℝ M] in
-theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
-    (g ∧[ℝ] g) = 0 := by
+theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[𝕜] 𝕜) (m_odd : Odd m) (h2 : (2 : 𝕜) ≠ 0) :
+    (g ∧[𝕜] g) = 0 := by
   let h := wedge_antisymm g g
   rw[Odd.neg_one_pow (Odd.mul m_odd m_odd)] at h
-  suffices (g ∧[ℝ] g) = -(g ∧[ℝ] g) by
+  suffices (g ∧[𝕜] g) = -(g ∧[𝕜] g) by
     rw[← sub_eq_zero, sub_neg_eq_add, DFunLike.ext_iff] at this
     ext x
-    simpa using this x
+    have hx : (g ∧[𝕜] g) x + (g ∧[𝕜] g) x = 0 := by
+      simpa using this x
+    rw [← two_mul] at hx
+    exact (mul_eq_zero.mp hx).resolve_left h2
   simp only [finAddCongr, finCongr_refl, neg_smul, one_smul, domDomCongr_refl] at h
   exact h
 

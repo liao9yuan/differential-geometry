@@ -366,7 +366,7 @@ theorem wedge_self_odd_zero {k : ℕ} (α : DifferentialForm IM M k) (hk : Odd k
     DifferentialForm.wedge α α = 0 := by
   ext x
   exact ContinuousAlternatingMap.wedge_self_odd_zero (M := TangentSpace IM x) (m := k)
-    (α x) hk
+    (α x) hk (by norm_num)
 
 theorem wedge_assoc {k l r : ℕ} (α : DifferentialForm IM M k) (β : DifferentialForm IM M l)
     (γ : DifferentialForm IM M r) :

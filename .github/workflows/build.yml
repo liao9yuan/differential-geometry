@@ -27,3 +27,7 @@ jobs:
         run: |
           lake exe cache get
           lake build
+
+      - name: Run audit suite
+        run: |
+          bash Scripts/audit.sh

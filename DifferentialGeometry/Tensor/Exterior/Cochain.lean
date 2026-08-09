@@ -184,6 +184,17 @@ noncomputable def pullbackMapCohomologyMap [BoundarylessManifold IM M] [Boundary
     deRhamCohomology (IM := IN) (M := N) k ⟶ deRhamCohomology (IM := IM) (M := M) k :=
   pullbackCohomologyMap f.1 f.2 k
 
+theorem pullbackMapCohomologyMap_id [BoundarylessManifold IM M] (k : ℕ) :
+    pullbackMapCohomologyMap (ContMDiffMap.id (I := IM) (M := M) : C^⊤⟮IM, M; IM, M⟯) k =
+      CategoryTheory.CategoryStruct.id (deRhamCohomology (IM := IM) (M := M) k) := by
+  simpa [pullbackMapCohomologyMap] using pullbackCohomologyMap_id (k := k)
+
+theorem pullbackMapCohomologyMap_comp [BoundarylessManifold IM M] [BoundarylessManifold IN N]
+    [BoundarylessManifold IP P] (f : C^⊤⟮IM, M; IN, N⟯) (g : C^⊤⟮IN, N; IP, P⟯) (k : ℕ) :
+    pullbackMapCohomologyMap (ContMDiffMap.comp g f) k =
+      CategoryTheory.CategoryStruct.comp (pullbackMapCohomologyMap g k) (pullbackMapCohomologyMap f k) := by
+  simpa [pullbackMapCohomologyMap] using pullbackCohomologyMap_comp f.1 f.2 g.1 g.2 (k := k)
+
 end DifferentialForm
 end DifferentialGeometry
 

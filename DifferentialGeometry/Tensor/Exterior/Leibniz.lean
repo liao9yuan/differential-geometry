@@ -581,9 +581,12 @@ theorem exteriorDerivative_wedge [BoundarylessManifold IM M]
       extDeriv (fun y : EM => repα y ∧[ℝ] repβ y) (c₀ x) := by
     change eKL1.symmL ℝ x (exteriorDerivativeAt (α ∧ β) x) =
       extDeriv (fun y : EM => repα y ∧[ℝ] repβ y) (c₀ x)
+    rw [exteriorDerivativeAt]
     rw [symmL_id (k + l + 1) x]
     dsimp [c₀, eKL1, repα, repβ]
-    rw [← (triv_samePoint (k + l + 1) x (exteriorDerivativeAt (α ∧ β) x))]
+    rw [← triv_samePoint (k + l + 1) x
+      (exteriorDerivativeAtInterior (α ∧ β) x
+        (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x)))]
     rw [exteriorDerivative_localRepresentation (IM := IM) (M := M) (α := α ∧ β) (x₀ := x)
       (x := x) (by simp) (BoundarylessManifold.isInteriorPoint (I := IM) (M := M) (x := x))]
     congr 1
