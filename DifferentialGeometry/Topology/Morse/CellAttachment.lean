@@ -4,6 +4,7 @@ import DifferentialGeometry.Topology.Attachment.Union
 import DifferentialGeometry.Topology.Handle.Defs
 import Mathlib.Topology.Homotopy.Basic
 import Mathlib.Topology.Homotopy.Equiv
+import Mathlib.Analysis.SpecialFunctions.Sqrt
 
 namespace DifferentialGeometry.Topology.Morse
 
@@ -1576,6 +1577,135 @@ theorem modelFlow_rev {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
             1 + 2 * t / (‖b‖ ^ 2 - 2 * t) := by ring
         rw [hrew, hscalar, one_smul]
     _ = y := recombine_decompose hk y
+
+noncomputable def modelFlowField {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) : MorseModel n :=
+  recombine hk 0 (-(‖posPart hk y‖ ^ 2)⁻¹ • posPart hk y)
+
+theorem negPart_modelFlowField {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    negPart hk (modelFlowField hk y) = 0 := by
+  dsimp [modelFlowField]
+  rw [negPart_recombine]
+
+theorem posPart_modelFlowField {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    posPart hk (modelFlowField hk y) = -(‖posPart hk y‖ ^ 2)⁻¹ • posPart hk y := by
+  dsimp [modelFlowField]
+  rw [posPart_recombine]
+
+private lemma scalar_aux {x b : ℝ} (hx : 0 < x) (hb : b ≠ 0) (hs : Real.sqrt x ≠ 0) :
+    (1 / (2 * Real.sqrt x) * (-(2 / b))) = -(b * x)⁻¹ * Real.sqrt x := by
+  calc
+    (1 / (2 * Real.sqrt x) * (-(2 / b))) = -(1 / (Real.sqrt x * b)) := by
+      field_simp [hb, hs]
+    _ = -(b * x)⁻¹ * Real.sqrt x := by
+      field_simp [hb, hs, hx.ne']
+      try rw [Real.sq_sqrt hx.le]
+      try ring
+
+theorem hasDerivAt_modelFlow_posPart_apply {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (j : Fin (n - k)) (hz : posPart hk (modelFlow hk t y) ≠ 0) :
+    HasDerivAt (fun s : ℝ => (Real.sqrt (1 - 2 * s / ‖posPart hk y‖ ^ 2)) • posPart hk y j)
+      ((-(‖posPart hk (modelFlow hk t y)‖ ^ 2)⁻¹ • posPart hk (modelFlow hk t y)) j) t := by
+  have hzpos : posPart hk y ≠ 0 := by
+    intro hp
+    apply hz
+    rw [modelFlow_posPart, hp]
+    simp
+  have hsmul : Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) • posPart hk y ≠ 0 := by
+    simpa [modelFlow_posPart] using hz
+  have hsqrt_ne : Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) ≠ 0 := by
+    intro h
+    apply hsmul
+    rw [h]
+    simp
+  have hsqrt_pos : 0 < Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) :=
+    lt_of_le_of_ne (Real.sqrt_nonneg _) (Ne.symm hsqrt_ne)
+  have harg_pos : 0 < 1 - 2 * t / ‖posPart hk y‖ ^ 2 := Real.sqrt_pos.mp hsqrt_pos
+  have harg_ne : 1 - 2 * t / ‖posPart hk y‖ ^ 2 ≠ 0 := ne_of_gt harg_pos
+  have hpnz : ‖posPart hk y‖ ^ 2 ≠ 0 := ne_of_gt (sq_pos_of_pos (norm_pos_iff.mpr hzpos))
+  have hlin : HasDerivAt (fun s : ℝ => 2 * s / ‖posPart hk y‖ ^ 2) (2 / ‖posPart hk y‖ ^ 2) t := by
+    have hmul : HasDerivAt (fun s : ℝ => 2 * s) 2 t := by
+      simpa using ((hasDerivAt_const (c := (2 : ℝ)) t).mul (hasDerivAt_id t))
+    simpa using (hmul.div_const (‖posPart hk y‖ ^ 2))
+  have hinner : HasDerivAt (fun s : ℝ => 1 - 2 * s / ‖posPart hk y‖ ^ 2)
+      (-(2 / ‖posPart hk y‖ ^ 2)) t := by
+    simpa [Pi.sub_apply] using ((hasDerivAt_const (c := (1 : ℝ)) t).sub hlin)
+  have hderiv_sqrt : HasDerivAt (fun s : ℝ => Real.sqrt (1 - 2 * s / ‖posPart hk y‖ ^ 2))
+      (1 / (2 * Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)) * (-(2 / ‖posPart hk y‖ ^ 2))) t := by
+    simpa [div_eq_mul_inv] using (Real.hasDerivAt_sqrt harg_ne).comp t hinner
+  have hnorm_flow_sq : ‖posPart hk (modelFlow hk t y)‖ ^ 2 =
+      ‖posPart hk y‖ ^ 2 * (1 - 2 * t / ‖posPart hk y‖ ^ 2) := by
+    rw [modelFlow_posPart]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+    rw [mul_pow]
+    rw [Real.sq_sqrt harg_pos.le]
+    ring
+  have hscalar : (1 / (2 * Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)) *
+        (-(2 / ‖posPart hk y‖ ^ 2))) =
+      -(‖posPart hk (modelFlow hk t y)‖ ^ 2)⁻¹ *
+        Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) := by
+    rw [hnorm_flow_sq]
+    exact scalar_aux harg_pos hpnz hsqrt_ne
+  have hmain0 : HasDerivAt (fun s : ℝ =>
+      (Real.sqrt (1 - 2 * s / ‖posPart hk y‖ ^ 2)) • posPart hk y j)
+      ((1 / (2 * Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)) * (-(2 / ‖posPart hk y‖ ^ 2))) •
+        posPart hk y j) t := by
+    simpa using (hderiv_sqrt.smul_const (posPart hk y j))
+  have hder_eq : (1 / (2 * Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)) *
+        (-(2 / ‖posPart hk y‖ ^ 2))) • posPart hk y j =
+      (-(‖posPart hk (modelFlow hk t y)‖ ^ 2)⁻¹ • posPart hk (modelFlow hk t y)) j := by
+    rw [modelFlow_posPart]
+    rw [show (1 / (2 * Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)) * (-(2 / ‖posPart hk y‖ ^ 2))) =
+        -(‖posPart hk (modelFlow hk t y)‖ ^ 2)⁻¹ * Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) by
+          exact hscalar]
+    rw [modelFlow_posPart]
+    simp
+    ring
+  exact hmain0.congr_deriv hder_eq
+
+theorem hasDerivAt_modelFlow {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (hz : posPart hk (modelFlow hk t y) ≠ 0) :
+    HasDerivAt (fun s : ℝ => modelFlow hk s y) (modelFlowField hk (modelFlow hk t y)) t := by
+  rw [hasDerivAt_pi]
+  intro i
+  by_cases hi : i.val < k
+  · let i' : Fin k := ⟨i.val, hi⟩
+    have hi' : i = negIdx hk i' := by
+      apply Fin.ext
+      rfl
+    rw [hi']
+    have hconst : ∀ s : ℝ, modelFlow hk s y (negIdx hk i') = negPart hk y i' := by
+      intro s
+      dsimp [modelFlow]
+      exact recombine_negPart hk (negPart hk y)
+        ((Real.sqrt (1 - 2 * s / ‖posPart hk y‖ ^ 2)) • posPart hk y) i'
+    have hfield : modelFlowField hk (modelFlow hk t y) (negIdx hk i') = 0 := by
+      change negPart hk (modelFlowField hk (modelFlow hk t y)) i' = 0
+      rw [negPart_modelFlowField]
+      rfl
+    simpa [hconst, hfield] using (hasDerivAt_const (c := negPart hk y i') t)
+  · have hge : k ≤ i.val := le_of_not_gt hi
+    let j : Fin (n - k) := ⟨i.val - k, by omega⟩
+    have hji : i = posIdx hk j := by
+      apply Fin.ext
+      dsimp [posIdx, j]
+      omega
+    rw [hji]
+    have hconst : ∀ s : ℝ, modelFlow hk s y (posIdx hk j) =
+        (Real.sqrt (1 - 2 * s / ‖posPart hk y‖ ^ 2)) • posPart hk y j := by
+      intro s
+      dsimp [modelFlow]
+      exact recombine_posPart hk (negPart hk y)
+        ((Real.sqrt (1 - 2 * s / ‖posPart hk y‖ ^ 2)) • posPart hk y) j
+    have hfield : modelFlowField hk (modelFlow hk t y) (posIdx hk j) =
+        (-(‖posPart hk (modelFlow hk t y)‖ ^ 2)⁻¹ • posPart hk (modelFlow hk t y)) j := by
+      change posPart hk (modelFlowField hk (modelFlow hk t y)) j = _
+      rw [posPart_modelFlowField]
+    have hder : HasDerivAt (fun s : ℝ =>
+        (Real.sqrt (1 - 2 * s / ‖posPart hk y‖ ^ 2)) • posPart hk y j)
+        ((-(‖posPart hk (modelFlow hk t y)‖ ^ 2)⁻¹ • posPart hk (modelFlow hk t y)) j) t :=
+      hasDerivAt_modelFlow_posPart_apply hk t y j hz
+    simpa [hconst, hfield] using hder
 
 def modelHandleMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     (p : StandardHandle k (n - k)) : MorseModel n :=

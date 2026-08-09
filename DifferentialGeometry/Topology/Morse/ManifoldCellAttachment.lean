@@ -7686,6 +7686,84 @@ theorem morseCollarMap_mem_sharpUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r η 
         rw [hrange]
         exact Or.inr (by exact hxhandle)
 
+theorem modelFlow_isMIntegralCurveOn {n k : ℕ} (hk : k ≤ n) (y : MorseModel n) :
+    IsMIntegralCurveOn (I := 𝓘(ℝ, MorseModel n)) (fun t : ℝ => modelFlow hk t y)
+      (modelFlowField hk) {t : ℝ | posPart hk (modelFlow hk t y) ≠ 0} := by
+  intro t ht
+  have hder := hasDerivAt_modelFlow hk t y ht
+  rw [hasDerivAt_iff_hasFDerivAt, ← hasMFDerivAt_iff_hasFDerivAt] at hder
+  exact hder.hasMFDerivWithinAt
+
+theorem morseFlowInChart {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hchartField : ∀ z : MorseModel (m + 1), ‖z‖ < data.R' →
+      v (data.χ z) = mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ z (modelFlowField hk z))
+    (y : MorseModel (m + 1))
+    {a b : ℝ} (ha : a < 0) (hb : 0 < b)
+    (hstay : ∀ t ∈ Set.Ioo a b, ‖modelFlow hk t y‖ < data.R')
+    (hpos : ∀ t ∈ Set.Ioo a b, posPart hk (modelFlow hk t y) ≠ 0) :
+    ∀ t ∈ Set.Ioo a b,
+      curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) (data.χ y) t =
+        data.χ (modelFlow hk t y) := by
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  let γ : ℝ → M := curveAt v hcomplete (data.χ y)
+  let β : ℝ → M := fun t => data.χ (modelFlow hk t y)
+  have hγcur : IsMIntegralCurve γ v := curveAt_integralCurve v hcomplete (data.χ y)
+  have hγOn : IsMIntegralCurveOn γ v (Set.Ioo a b) := hγcur.isMIntegralCurveOn _
+  have hβOn : IsMIntegralCurveOn β v (Set.Ioo a b) := by
+    intro t ht
+    have hα : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, MorseModel (m + 1))
+        (fun s : ℝ => modelFlow hk s y) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (modelFlowField hk (modelFlow hk t y))) := by
+      have hder := hasDerivAt_modelFlow hk t y (hpos t ht)
+      rw [hasDerivAt_iff_hasFDerivAt, ← hasMFDerivAt_iff_hasFDerivAt] at hder
+      exact hder
+    have hball : modelFlow hk t y ∈ Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+      exact Metric.mem_ball.mpr (by
+        simpa [dist_zero_right] using (hstay t ht))
+    have hχat : ContMDiffAt 𝓘(ℝ, MorseModel (m + 1)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) data.χ
+        (modelFlow hk t y) :=
+      data.hχon.contMDiffAt (Metric.isOpen_ball.mem_nhds hball)
+    have hχder : HasMFDerivAt 𝓘(ℝ, MorseModel (m + 1)) I data.χ (modelFlow hk t y)
+        (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (modelFlow hk t y)) := by
+      have hmd := hχat.mdifferentiableAt (by simp)
+      exact hmd.hasMFDerivAt
+    have hcomp := hχder.comp t hα
+    have hlineq : (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (modelFlow hk t y)).comp
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (modelFlowField hk (modelFlow hk t y))) =
+        (1 : ℝ →L[ℝ] ℝ).smulRight (v (data.χ (modelFlow hk t y))) := by
+      apply ContinuousLinearMap.ext
+      intro s
+      rw [ContinuousLinearMap.comp_apply]
+      simp only [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, map_smul]
+      rw [← hchartField (modelFlow hk t y) (hstay t ht)]
+    have hβder : HasMFDerivAt 𝓘(ℝ, ℝ) I β t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (v (β t))) := by
+      dsimp [β]
+      exact hcomp.congr_mfderiv hlineq
+    exact hβder.hasMFDerivWithinAt
+  have hzero : γ 0 = β 0 := by
+    dsimp [γ, β]
+    rw [curveAt_zero v hcomplete (data.χ y)]
+    rw [modelFlow_zero]
+  have hv1 : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
+    hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+  have ht₀ : (0 : ℝ) ∈ Set.Ioo a b := by constructor <;> linarith
+  have hEq := isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless (t₀ := 0)
+    (a := a) (b := b) ht₀ hv1 hγOn hβOn hzero
+  intro t ht
+  exact hEq ht
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
