@@ -2934,6 +2934,67 @@ noncomputable def scalarForcingCoeff
     (i : TensorEigenIdx00 g) (t : ℝ) : ℝ :=
   ⟪scalarEigenFunctionLp g i, f t⟫_ℝ
 
+private lemma scalarForcingCoeff_eq_tensorL2Coeff_of_smoothRep
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (F : ℝ → SmoothScalar g) (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    (i : TensorEigenIdx00 g) (t : ℝ) :
+    scalarForcingCoeff (I := I) (M := M) g f i t =
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+        (SmoothCcTensor.toL2 (scalarCcLift g (F t))) i := by
+  have hU0 : (tensor00ScalarL2Equiv g) (SmoothCcTensor.toL2 (scalarCcLift g (F t))) =
+      smoothToLp (I := I) (M := M) g (F t) := by
+    change tensor00ToScalarL2 g (SmoothCcTensor.toL2 (scalarCcLift g (F t))) =
+      smoothToLp (I := I) (M := M) g (F t)
+    rw [tensor00ToScalarL2_toL2]
+    exact scalar0ToLp_scalarCcLift (I := I) (M := M) g (F t)
+  have hU : (tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g (F t)) =
+      SmoothCcTensor.toL2 (scalarCcLift g (F t)) := by
+    simpa using congrArg (tensor00ScalarL2Equiv g).symm hU0.symm
+  have hmm : ⟪(tensor00ScalarL2Equiv g) (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g),
+        (tensor00ScalarL2Equiv g)
+          ((tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g (F t)))⟫_ℝ =
+      ⟪(eigenvectorSmooth g 0 0 i : TensorL2 0 0 g),
+        (tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g (F t))⟫_ℝ :=
+    (tensor00ScalarL2Equiv g).toLinearIsometry.inner_map_map
+      (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g)
+      ((tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g (F t)))
+  rw [← scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i] at hmm
+  unfold scalarForcingCoeff
+  rw [show f t = smoothToLp (I := I) (M := M) g (F t) from (hfF t).symm]
+  rw [show tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+        (SmoothCcTensor.toL2 (scalarCcLift g (F t))) i =
+      ⟪(eigenvectorSmooth g 0 0 i : TensorL2 0 0 g),
+        SmoothCcTensor.toL2 (scalarCcLift g (F t))⟫_ℝ from by
+        rw [tensorL2Coeff_eq_inner]
+        rw [eigenvectorSmooth00_eq_basis (I := I) (M := M) g i]]
+  rw [show SmoothCcTensor.toL2 (scalarCcLift g (F t)) =
+      (tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g (F t)) from hU.symm]
+  have hmm' : ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g (F t)⟫_ℝ =
+      ⟪(eigenvectorSmooth g 0 0 i : TensorL2 0 0 g),
+        (tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g (F t))⟫_ℝ := by
+    simpa using hmm
+  exact hmm'
+
+private lemma summable_forcingCoeff_sq_of_smoothRep
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (F : ℝ → SmoothScalar g) (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    (σ : ℝ) (t : ℝ) :
+    Summable (fun i : TensorEigenIdx00 g =>
+      tensorSobolevWeight (I := I) (M := M) i σ *
+        (scalarForcingCoeff (I := I) (M := M) g f i t) ^ 2) := by
+  let V : tensorHs (I := I) (M := M) g 0 0 σ :=
+    ccTensorToHs (I := I) (M := M) g 0 σ (scalarCcLift g (F t))
+  have hbridge (i : TensorEigenIdx00 g) :
+      scalarForcingCoeff (I := I) (M := M) g f i t = V.coeff i := by
+    rw [scalarForcingCoeff_eq_tensorL2Coeff_of_smoothRep (I := I) (M := M) g F hfF i t]
+    dsimp [V]
+  exact Summable.congr V.weighted_summable (fun i => by
+    rw [hbridge i])
+
 noncomputable def scalarForcedCoeff
     (g : SmoothRiemannianMetric I M)
     (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
