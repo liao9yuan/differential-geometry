@@ -390,6 +390,7 @@ import DifferentialGeometry.Analysis.Heat.Semigroup.SpectralBounds
 import DifferentialGeometry.Analysis.Heat.Semigroup.Mass
 import DifferentialGeometry.Analysis.Heat.Smoothing.HeatSemigroupIteratedDomain
 import DifferentialGeometry.Analysis.Heat.Smoothing.MildSolution
+import DifferentialGeometry.Analysis.Heat.Smoothing.ScalarHeatFlow
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothRepresentative
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingFromChartBridges
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingOfClosed

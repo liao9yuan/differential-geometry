@@ -765,7 +765,7 @@ lemma scalarHeatCoeff_deriv_sq
 
 lemma scalarHeatCoeff_weighted_deriv_sq_le
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
-    {a : ℝ} (ha : 0 < a) (j m : ℕ) :
+    {a b : ℝ} (ha : 0 < a) (j m : ℕ) :
     ∃ C : TensorEigenIdx00 g → ℝ, Summable C ∧
       ∀ i t, t ∈ Set.Icc a b →
         tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
