@@ -377,7 +377,7 @@ def pBlock (P : ThreeShuffle m n p) : {S : Finset (Fin (m + n + p)) // S.card = 
     rw [Finset.card_compl, P.mnBlock.2, Fintype.card_fin]
     omega⟩
 
-theorem mBlock_compl_card (P : ThreeShuffle m n p) :
+private theorem mBlock_compl_card (P : ThreeShuffle m n p) :
     ((P.mBlock.1)ᶜ : Finset (Fin (m + n + p))).card = n + p := by
   rw [Finset.card_compl, P.mBlock.2, Fintype.card_fin]
   omega
@@ -907,12 +907,6 @@ theorem sign_canonicalLeft_canonicalRight (P : ThreeShuffle m n p) :
     Equiv.Perm.sign (canonicalLeft P) = Equiv.Perm.sign (canonicalRight P) := by
   rw [canonicalLeft_permCongr P]
   exact Equiv.Perm.sign_permCongr (assocSum m n p) (canonicalRight P)
-
-private theorem card_sdiff_of_subset {α : Type*} [DecidableEq α] {s t : Finset α}
-    (hts : t ⊆ s) (hs : s.card = m + n) (ht : t.card = m) : (s \ t).card = n := by
-  have hST : t ∩ s = t := Finset.inter_eq_left.mpr hts
-  rw [Finset.card_sdiff, hST, ht, hs]
-  omega
 
 private theorem map_map_round_trip {α β : Type*} (e : α ≃ β)
     (h : ∀ x, e (e.symm x) = x) (s : Finset β) :

@@ -451,18 +451,6 @@ private theorem derivShuffleLeft_expanded_summand_eq
     have hjz : (-1 : ℤ) ^ (derivShuffleRank k σ).val = -1 := hj.neg_one_pow
     simp [hqu, hqz, hju, hjz]
 
-private theorem uncurryFinLeftExpandedSummand_sum_coset
-    (f : N →L[𝕜] N' →L[𝕜] N'')
-    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
-    (w : Fin (m + 1) ⊕ Fin n → M)
-    {τ₁ τ₂ : Equiv.Perm (Fin (m + 1) ⊕ Fin n)}
-    (hcoset : (Quotient.mk'' τ₁ : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
-      Quotient.mk'' τ₂) :
-    (∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w τ₁ j) =
-      ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w τ₂ j := by
-  rw [← uncurrySum_summand_uncurryFin_left_expand_mk f g' h w τ₁,
-    ← uncurrySum_summand_uncurryFin_left_expand_mk f g' h w τ₂, hcoset]
-
 private lemma card_filter_comp_perm_local {n : ℕ} (e : Equiv.Perm (Fin n))
     (P : Fin n → Prop) [DecidablePred P] :
     (Finset.univ.filter (P ∘ ⇑e)).card = (Finset.univ.filter P).card := by
@@ -1565,16 +1553,6 @@ private def placementSummand (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin 
     h (w ∘ (Equiv.Perm.ThreeShuffle.nBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.nBlock P).2) *
       l (w ∘ (Equiv.Perm.ThreeShuffle.pBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.pBlock P).2)
 
-private theorem uncurrySum_summand_quot_eval {ι ι' : Type*} [Fintype ι] [Fintype ι'] [DecidableEq ι] [DecidableEq ι']
-    (f : M [⋀^ι]→L[𝕜] M [⋀^ι']→L[𝕜] 𝕜) (q : Equiv.Perm.ModSumCongr ι ι')
-    (v : ι ⊕ ι' → M) :
-    uncurrySum.summand f q v =
-      Equiv.Perm.sign (Quot.out q) • f (fun i => v ((Quot.out q) (Sum.inl i)))
-        (fun i => v ((Quot.out q) (Sum.inr i))) := by
-  conv_lhs =>
-    rw [← Quotient.out_eq q]
-  exact uncurrySum_summand_eval f (Quot.out q) v
-
 private theorem wedge_mul_assoc_rhs_expand (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
     ((g ∧[𝕜] h) ∧[𝕜] l) w =
@@ -2070,23 +2048,6 @@ theorem wedge_mul_assoc (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→
   rw [Finset.sum_congr rfl]
   intro P _
   rw [Equiv.Perm.ThreeShuffle.sign_canonicalLeft_canonicalRight P]
-private lemma tensorProductMap_mul_swap (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
-    (tensorProductMap h g (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
-      (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap.domDomCongr finAddFlip := by
-  ext w
-  simp only [ContinuousMultilinearMap.coe_coe, tensorProductMap_apply,
-    ContinuousLinearMap.mul_apply', MultilinearMap.domDomCongr_apply]
-  conv_lhs => rw [mul_comm]
-  congr 1
-  · apply congrArg g
-    funext x
-    change w (Fin.natAdd n x) = w (finAddFlip (Fin.castAdd n x))
-    rw [← finAddFlip_apply_castAdd]
-  · apply congrArg h
-    funext x
-    change w (Fin.castAdd m x) = w (finAddFlip (Fin.natAdd m x))
-    rw [finAddFlip_apply_natAdd]
-
 private lemma finAddCongr_val (i : Fin (m + n)) : (Fin.finAddCongr i).val = i.val := rfl
 
 private lemma finAddFlip_trans_finAddCongr_eq :

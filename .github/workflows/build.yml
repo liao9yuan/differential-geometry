@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build Project
+  audit:
+    name: Audit Project
     runs-on: 
       - self-hosted
       - macOS
@@ -23,21 +23,8 @@ jobs:
           chmod +x elan-init.sh
           ./elan-init.sh -y --default-toolchain leanprover/lean4:v4.29.0
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
-
-      - name: Build with Lake
+      - name: Run the single audit command
         run: |
           lake exe cache get
-          lake build
-
-      - name: Run audit suite
-        run: |
-          bash Scripts/audit.sh
-
-      - name: Check build warnings against allowlist
-        run: |
-          lake build DifferentialGeometry > /tmp/build.log 2>&1 || { cat /tmp/build.log; exit 1; }
-          grep "warning" /tmp/build.log | sed -E 's/^warning: //' | sort > /tmp/warnings.txt
-          if ! diff -u Scripts/warnings.allowlist /tmp/warnings.txt; then
-            echo "FAIL: build warnings differ from the allowlist (add new warnings only with owner approval)"
-            exit 1
-          fi
+          BASE_REF="${{ github.event.pull_request.base.sha }}"
+          bash Scripts/audit.sh "$BASE_REF"

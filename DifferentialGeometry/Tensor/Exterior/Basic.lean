@@ -22,11 +22,6 @@ variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
   {k : ℕ}
 
-private lemma tangentCoordChange_eq_fderivWithin {x₀ x z : M} :
-    tangentCoordChange IM x x₀ z =
-      fderivWithin ℝ (extChartAt IM x₀ ∘ (extChartAt IM x).symm) (range IM) (extChartAt IM x z) := by
-  rfl
-
 private lemma linearMapAt_symmL_eq_tangentCoordChange {x₀ x z : M}
     (hx : z ∈ (extChartAt IM x).source) (hx₀ : z ∈ (extChartAt IM x₀).source) :
     (trivializationAt EM (TangentSpace IM) x₀).continuousLinearMapAt ℝ z ∘L
@@ -91,14 +86,6 @@ lemma localRep_contDiffOn (α : DifferentialForm IM M k) (x₀ : M) :
     exact hsec.comp (contMDiffOn_extChartAt_symm x₀) (fun y hy => (extChartAt IM x₀).map_target hy)
   exact hcomp.contDiffOn
 
-private lemma compContinuousLinearMap_compContinuousLinearMap {m n : ℕ}
-    (L : EM [⋀^Fin m]→L[ℝ] (EM [⋀^Fin n]→L[ℝ] ℝ))
-    (A : EM →L[ℝ] EM) (B : EM →L[ℝ] EM) :
-    (L.compContinuousLinearMap A).compContinuousLinearMap B =
-      L.compContinuousLinearMap (A ∘L B) := by
-  ext v
-  rfl
-
 private lemma tangentCoordChange_comp_self {x₀ x : M} (hx : x ∈ (extChartAt IM x₀).source) :
     (tangentCoordChange IM x x₀ x) ∘L (tangentCoordChange IM x₀ x x) =
       ContinuousLinearMap.id ℝ EM := by
@@ -109,17 +96,6 @@ private lemma tangentCoordChange_comp_self {x₀ x : M} (hx : x ∈ (extChartAt 
     exact ⟨⟨hx, by simp⟩, hx⟩
   rw [tangentCoordChange_comp (I := IM) (w := x₀) (x := x) (y := x₀) (z := x) hw]
   exact tangentCoordChange_self (I := IM) (x := x₀) (z := x) hx
-
-private lemma chartChange_contDiffAt {x₀ x : M} (hx : x ∈ (extChartAt IM x₀).source)
-    (hxi : ModelWithCorners.IsInteriorPoint IM x) :
-    ContDiffAt ℝ ⊤ ((extChartAt IM x₀) ∘ (extChartAt IM x).symm : EM → EM)
-      ((extChartAt IM x) x) := by
-  have hy : (extChartAt IM x) x ∈ ((extChartAt IM x).symm ≫ (extChartAt IM x₀)).source := by
-    rw [PartialEquiv.trans_source, PartialEquiv.symm_source]
-    exact ⟨(extChartAt IM x).map_source (by rw [extChartAt_source]; exact mem_chart_source (H := HM) x),
-      by simpa [extChartAt_source] using hx⟩
-  exact (contDiffWithinAt_ext_coord_change (I := IM) x₀ x hy).contDiffAt
-    (range_mem_nhds_isInteriorPoint hxi)
 
 private lemma chartTarget_interior_of {x₀ x : M} (hx : x ∈ (extChartAt IM x₀).source)
     (hxi : ModelWithCorners.IsInteriorPoint IM x) :
