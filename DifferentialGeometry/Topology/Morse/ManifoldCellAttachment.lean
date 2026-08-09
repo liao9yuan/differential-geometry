@@ -4003,6 +4003,18 @@ noncomputable def morseBeltMapExt {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
       have hr2 : 0 ≤ r ^ 2 := sq_nonneg r
       nlinarith⟩ : morseUpperSublevel hk c r)
 
+theorem morseBeltMapExt_on_open {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (z : {z' : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) //
+        z' ∈ morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')}) :
+    morseBeltMapExt hk c ε r data hε hεr' z.1 = morseBeltMapOnOpen hk c ε r data hε hεr' z := by
+  dsimp [morseBeltMapExt]
+  rw [dif_pos z.2]
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
