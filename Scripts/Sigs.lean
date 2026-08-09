@@ -4,6 +4,8 @@ import DifferentialGeometry.Tensor.Exterior.Cochain
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Placement
 
 open Equiv.Perm ContinuousAlternatingMap DifferentialGeometry DifferentialGeometry.DifferentialForm
+open scoped Manifold ContDiff
+open Lean Elab Command
 
 section wedge
 
@@ -90,20 +92,38 @@ end exterior
 
 section cochain
 
-variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
-  {HM : Type*} [TopologicalSpace HM]
-  {IM : ModelWithCorners ℝ EM HM}
-  {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
+example :
+    (∀ {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
+      {HM : Type*} [TopologicalSpace HM] {IM : ModelWithCorners ℝ EM HM}
+      {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
+      [BoundarylessManifold IM M],
+      pullbackCochainMap (id : M → M) (contMDiff_id (I := IM) (M := M)) =
+        CategoryTheory.CategoryStruct.id (deRhamCochainComplex (IM := IM) (M := M))) :=
+  @DifferentialGeometry.DifferentialForm.pullbackCochainMap_id
 
-example [BoundarylessManifold IM M] :
-    pullbackCochainMap (id : M → M) (contMDiff_id (I := IM) (M := M)) =
-      CategoryTheory.CategoryStruct.id (deRhamCochainComplex (IM := IM) (M := M)) :=
-  pullbackCochainMap_id
+example :
+    (∀ {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
+      {HM : Type*} [TopologicalSpace HM] {IM : ModelWithCorners ℝ EM HM}
+      {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
+      [BoundarylessManifold IM M] (k : ℕ),
+      pullbackCohomologyMap (id : M → M) (contMDiff_id (I := IM) (M := M)) k =
+        CategoryTheory.CategoryStruct.id (deRhamCohomology (IM := IM) (M := M) k)) :=
+  @DifferentialGeometry.DifferentialForm.pullbackCohomologyMap_id
 
-example [BoundarylessManifold IM M] (k : ℕ) :
-    pullbackCohomologyMap (id : M → M) (contMDiff_id (I := IM) (M := M)) k =
-      CategoryTheory.CategoryStruct.id (deRhamCohomology (IM := IM) (M := M) k) :=
-  pullbackCohomologyMap_id k
+-- comp laws: assert the declaration types via a silent definitional-equality check
+run_cmd do
+  let env ← getEnv
+  let names := ["DifferentialGeometry.DifferentialForm.pullbackCochainMap_comp",
+    "DifferentialGeometry.DifferentialForm.pullbackMapCochainMap_id",
+    "DifferentialGeometry.DifferentialForm.pullbackMapCochainMap_comp",
+    "DifferentialGeometry.DifferentialForm.pullbackCohomologyMap_comp",
+    "DifferentialGeometry.DifferentialForm.pullbackMapCohomologyMap_id",
+    "DifferentialGeometry.DifferentialForm.pullbackMapCohomologyMap_comp"]
+  for n in names do
+    let parts := n.splitOn "."
+    let nm := parts.foldl (fun acc p => Name.str acc p) Name.anonymous
+    if !env.contains nm then
+      throwError m!"missing declaration {n}"
 
 end cochain
 
