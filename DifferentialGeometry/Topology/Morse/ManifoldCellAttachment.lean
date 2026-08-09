@@ -7844,6 +7844,43 @@ theorem morseCompressLevel_uncompressLevel {c ε δ s : ℝ} (hδ : 0 < δ) (hε
     ring
 
 
+theorem morseUncompressLevel_fixed {c ε δ s : ℝ} (hs : s ≤ c - ε - δ) :
+    morseUncompressLevel c ε δ s = s := by
+  dsimp [morseUncompressLevel]
+  rw [if_pos hs]
+
+theorem morseUncompressLevel_top {c ε δ : ℝ} (hδ : 0 < δ) :
+    morseUncompressLevel c ε δ (c - ε) = c + ε := by
+  dsimp [morseUncompressLevel]
+  rw [if_neg]
+  · field_simp [hδ.ne']
+    ring
+  · nlinarith
+
+theorem morseUncompressLevel_strictMono {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    {s₁ s₂ : ℝ} (hs₁ : c - ε - δ < s₁) (hlt : s₁ < s₂) :
+    morseUncompressLevel c ε δ s₁ < morseUncompressLevel c ε δ s₂ := by
+  dsimp [morseUncompressLevel]
+  rw [if_neg (not_le_of_gt hs₁)]
+  have hs₂ : c - ε - δ < s₂ := lt_of_le_of_lt (le_of_lt hs₁) hlt
+  rw [if_neg (not_le_of_gt hs₂)]
+  have hden : 0 < δ := hδ
+  have hmain : (s₁ - c + ε + δ) * (2 * ε + δ) / δ < (s₂ - c + ε + δ) * (2 * ε + δ) / δ := by
+    have hmul : (s₁ - c + ε + δ) * (2 * ε + δ) * δ < (s₂ - c + ε + δ) * (2 * ε + δ) * δ := by
+      exact mul_lt_mul_of_pos_right
+        (mul_lt_mul_of_pos_right (by nlinarith) (by nlinarith [hε, hδ])) hden
+    exact (div_lt_div_iff₀ hden hden).mpr hmul
+  nlinarith
+
+theorem morseExpandTime {c ε δ : ℝ} (hδ : 0 < δ) {t : ℝ}
+    (ht : c - ε - δ < t) :
+    t - morseUncompressLevel c ε δ t = -(t - c + ε + δ) * (2 * ε) / δ := by
+  dsimp [morseUncompressLevel]
+  rw [if_neg (not_le_of_gt ht)]
+  field_simp [hδ.ne']
+  ring
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
