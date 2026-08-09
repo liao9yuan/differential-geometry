@@ -6573,7 +6573,7 @@ noncomputable def morseCollarLevelMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η 
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (x : LevelSetSpace f (c - ε)) (σ : ℝ) : ℝ :=
-  -η + (morseCollarTopLevel hk c ε r data x + η) * (σ + η) / (r ^ 2 / 2 + η)
+  -η + (morseCollarTopLevel hk c ε r data x + η) * (σ + η) / (r ^ 2 / 2 + ε + η)
 
 theorem morseCollarLevelMap_boundary {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
@@ -6588,13 +6588,13 @@ theorem morseCollarLevelMap_top {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
-    (hη : 0 < η) (x : LevelSetSpace f (c - ε)) :
-    morseCollarLevelMap hk c ε r η data x (r ^ 2 / 2) =
+    (hε : 0 < ε) (hη : 0 < η) (x : LevelSetSpace f (c - ε)) :
+    morseCollarLevelMap hk c ε r η data x (r ^ 2 / 2 + ε) =
       morseCollarTopLevel hk c ε r data x := by
   dsimp [morseCollarLevelMap]
-  have hden : r ^ 2 / 2 + η ≠ 0 := by positivity
+  have hden : r ^ 2 / 2 + ε + η ≠ 0 := by positivity
   calc
-    -η + (morseCollarTopLevel hk c ε r data x + η) * (r ^ 2 / 2 + η) / (r ^ 2 / 2 + η)
+    -η + (morseCollarTopLevel hk c ε r data x + η) * (r ^ 2 / 2 + ε + η) / (r ^ 2 / 2 + ε + η)
         = -η + (morseCollarTopLevel hk c ε r data x + η) := by
           rw [div_eq_mul_inv, mul_assoc, mul_inv_cancel₀ hden, mul_one]
     _ = morseCollarTopLevel hk c ε r data x := by ring
@@ -6612,16 +6612,127 @@ theorem continuous_morseCollarLevelMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η
       morseCollarTopLevel hk c ε r data p.1) :=
     (continuous_morseCollarTopLevel hk c ε r data hε hεr).comp continuous_fst
   have hσ : Continuous (fun p : LevelSetSpace f (c - ε) × ℝ => p.2) := continuous_snd
-  have hden : Continuous (fun _ : LevelSetSpace f (c - ε) × ℝ => r ^ 2 / 2 + η) := continuous_const
+  have hden : Continuous (fun _ : LevelSetSpace f (c - ε) × ℝ => r ^ 2 / 2 + ε + η) := continuous_const
   have hconstη : Continuous (fun _ : LevelSetSpace f (c - ε) × ℝ => η) := continuous_const
   have hconstnegη : Continuous (fun _ : LevelSetSpace f (c - ε) × ℝ => -η) := continuous_const
-  have hden0 : ∀ p : LevelSetSpace f (c - ε) × ℝ, r ^ 2 / 2 + η ≠ 0 := by
+  have hden0 : ∀ p : LevelSetSpace f (c - ε) × ℝ, r ^ 2 / 2 + ε + η ≠ 0 := by
     intro p
     positivity
   have hmain : Continuous (fun p : LevelSetSpace f (c - ε) × ℝ =>
-      (morseCollarTopLevel hk c ε r data p.1 + η) * (p.2 + η) / (r ^ 2 / 2 + η)) := by
+      (morseCollarTopLevel hk c ε r data p.1 + η) * (p.2 + η) / (r ^ 2 / 2 + ε + η)) := by
     exact (((htop.add hconstη).mul (hσ.add hconstη)).div hden hden0)
   exact hconstnegη.add hmain
+
+theorem morseCollarFlow_levelValue {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
+    [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (c ε r η : ℝ)
+    (hε : 0 < ε)
+    (hη : 0 ≤ η)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    {y : M} (hy : f y ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2)) :
+    f (curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) y (f y - c + ε)) = c - ε := by
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  let σ : ℝ := f y - c + ε
+  have hσ : σ ∈ Set.Icc (-η) (r ^ 2 / 2 + ε) := by
+    dsimp [σ]
+    constructor <;> linarith [hy.1, hy.2]
+  by_cases hσ0 : 0 ≤ σ
+  · have hstay : ∀ s ∈ Set.Icc (0 : ℝ) σ, curveAt v hcomplete y s ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2) := by
+      intro s hs
+      have hrb := f_rate_bounds_of_integralCurve f hf v hrate
+        (hγ := curveAt_integralCurve v hcomplete y) (t := s) hs.1
+      have hlo : c - ε - η ≤ f (curveAt v hcomplete y s) := by
+        have hle : c - ε - η ≤ f y - s := by
+          have hsle : s ≤ σ := hs.2
+          have hσeq : σ = f y - c + ε := rfl
+          nlinarith [hy.1, hsle, hσeq, hη]
+        exact le_trans hle (by simpa [curveAt_zero v hcomplete y] using hrb.1)
+      have hhi : f (curveAt v hcomplete y s) ≤ c + r ^ 2 / 2 := by
+        exact le_trans (by simpa [curveAt_zero v hcomplete y] using hrb.2) hy.2
+      change c - ε - η ≤ f (curveAt v hcomplete y s) ∧ f (curveAt v hcomplete y s) ≤ c + r ^ 2 / 2
+      exact ⟨hlo, hhi⟩
+    have heq := f_eq_sub_of_integralCurve_on_strip (I := I) f hf v hdfOn
+      (hγ := curveAt_integralCurve v hcomplete y) (t := σ) hσ0 hstay
+    have hmain : f (curveAt v hcomplete y σ) = f y - σ := by
+      simpa [curveAt_zero v hcomplete y] using heq
+    dsimp [σ] at hmain ⊢
+    linarith
+  · have hback : f (curveAt v hcomplete y σ) = f y - σ := by
+      let s : ℝ := -σ
+      have hs0 : 0 ≤ s := by dsimp [s]; linarith
+      have hstay : ∀ t ∈ Set.Icc (0 : ℝ) s,
+          curveAt v hcomplete y (-t) ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2) := by
+        intro t ht
+        have hrb := f_rate_bounds_of_integralCurve_back f hf v hrate
+          (hγ := curveAt_integralCurve v hcomplete y) (t := t) ht.1
+        have hlo : c - ε - η ≤ f (curveAt v hcomplete y (-t)) := by
+          exact le_trans hy.1 (by simpa [curveAt_zero v hcomplete y] using hrb.1)
+        have hhi : f (curveAt v hcomplete y (-t)) ≤ c + r ^ 2 / 2 := by
+          have htle : t ≤ -σ := ht.2
+          have hσeq : σ = f y - c + ε := rfl
+          have hσeq' : -σ = c - ε - f y := by rw [hσeq]; ring
+          have hle : f y + t ≤ c - ε := by
+            have htle' : t ≤ c - ε - f y := by
+              rw [← hσeq']
+              exact htle
+            linarith [htle']
+          exact le_trans (le_trans (by simpa [curveAt_zero v hcomplete y] using hrb.2) hle)
+            (by nlinarith [hε, sq_nonneg r])
+        change c - ε - η ≤ f (curveAt v hcomplete y (-t)) ∧ f (curveAt v hcomplete y (-t)) ≤ c + r ^ 2 / 2
+        exact ⟨hlo, hhi⟩
+      have heq := f_add_of_integralCurve_back (I := I) f hf v hdfOn
+        (hγ := curveAt_integralCurve v hcomplete y) (t := s) hs0 hstay
+      have hmain : f (curveAt v hcomplete y (-s)) = f y + s := by
+        simpa [curveAt_zero v hcomplete y] using heq
+      have hneg : -s = σ := by dsimp [s]; ring
+      have hmain' : f (curveAt v hcomplete y σ) = f y - σ := by
+        simpa [hneg] using hmain
+      have hσeq : σ = f y - c + ε := rfl
+      nlinarith [hmain', hσeq]
+    have hσeq : σ = f y - c + ε := rfl
+    nlinarith [hback, hσeq]
+
+noncomputable def morseCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hη : 0 ≤ η)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (y : SublevelSpace f (c + r ^ 2 / 2)) : M :=
+  by
+  classical
+  exact if hlow : f y.1 ≤ c - ε - η then y.1 else
+    let σ : ℝ := f y.1 - c + ε
+    let x : LevelSetSpace f (c - ε) := ⟨curveAt v
+      (exists_globalIntegralCurve_of_compactSupport v hv hsupp) y.1 σ, by
+      simpa [σ] using (morseCollarFlow_levelValue (I := I) f c ε r η hε hη hf v hv hsupp
+        hdfOn hrate (by
+          constructor
+          · exact le_of_not_ge hlow
+          · exact y.2) )⟩
+    curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) x.1
+      (-morseCollarLevelMap hk c ε r η data x σ)
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
