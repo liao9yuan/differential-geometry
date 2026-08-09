@@ -10857,6 +10857,12 @@ def morseChartBallImage {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
     (data : MorseChart (m + 1) k hk c I f) : Set M :=
   data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
 
+def morseChartBallImageHalf {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) : Set M :=
+  data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R / 2}
+
 noncomputable def morseSharpUnionRound {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
@@ -10873,7 +10879,7 @@ noncomputable def morseSharpUnionUnround {m k : ℕ} (hk : k ≤ m + 1) (c ε r 
     (data : MorseChart (m + 1) k hk c I f)
     (x : M) : M := by
   classical
-  exact if hx : x ∈ morseChartBallImage hk c data then
+  exact if hx : x ∈ morseChartBallImageHalf hk c data then
     data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x))
   else x
 
@@ -10881,20 +10887,20 @@ noncomputable def morseRoundedAttachment {m k : ℕ} (hk : k ≤ m + 1) (c ε r 
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f) : Set M :=
-  data.χ '' (modelAttachedRegion hk ε r δ ∩ {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}) ∪
-    (sublevel f (c - ε) ∩ (morseChartBallImage hk c data)ᶜ)
+  data.χ '' (modelAttachedRegion hk ε r δ ∩ {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R / 2}) ∪
+    (sublevel f (c - ε) ∩ (morseChartBallImageHalf hk c data)ᶜ)
 
 theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε)
-    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) :
-    Set.range (handleEmbedding hk c ε r data) ⊆ morseChartBallImage hk c data := by
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2) :
+    Set.range (handleEmbedding hk c ε r data) ⊆ morseChartBallImageHalf hk c data := by
   intro x hx
   rcases hx with ⟨d, hd⟩
   rw [← hd]
-  dsimp [morseChartBallImage]
+  dsimp [morseChartBallImageHalf]
   refine ⟨modelHandleMap hk ε r d, ?_, ?_⟩
   · have hle : morseNorm (m + 1) (modelHandleMap hk ε r d) ≤ Real.sqrt (2 * ε + 2 * r ^ 2) :=
       modelHandleMap_norm_le hk ε r (le_of_lt hε) d
@@ -10906,7 +10912,7 @@ theorem chartSymm_mem_sharpUnion_model {m k : ℕ} (hk : k ≤ m + 1) (c ε r : 
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε)
-    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
     {x : M} (hx : x ∈ morseChartBallImage hk c data)
     (hxU : x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)) :
     data.χ.symm x ∈
@@ -10933,37 +10939,133 @@ theorem chartSymm_mem_sharpUnion_model {m k : ℕ} (hk : k ≤ m + 1) (c ε r : 
       rw [← hd]
       have hsrc' : modelHandleMap hk ε r d ∈ data.χ.source :=
         data.hχsrc (modelHandleMap hk ε r d)
-          (le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr'))
+          (le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d)
+            (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
       exact data.χ.left_inv hsrc'
     rw [hd']
     exact modelHandleMap_mem hk ε r (le_of_lt hε) d
+
+theorem negPart_norm_sq_ge_of_lower_not_mem_halfBall {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    {x : M} (hx : x ∈ sublevel f (c - ε))
+    (hxball : x ∉ morseChartBallImageHalf hk c data)
+    {y : MorseModel (m + 1)} (hxy : data.χ y = x)
+    (hynorm : morseNorm (m + 1) y ≤ data.R) :
+    r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+  have hyfar : data.R / 2 ≤ morseNorm (m + 1) y := by
+    have hxmem : ¬ x ∈ morseChartBallImageHalf hk c data := hxball
+    dsimp [morseChartBallImageHalf] at hxmem
+    have hynot : ¬ morseNorm (m + 1) y < data.R / 2 := by
+      intro hylt
+      exact hxmem (by refine ⟨y, hylt, hxy⟩)
+    nlinarith [hynot]
+  have hlower : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    have hf' : morseNormalForm hk c y ≤ c - ε := by
+      rw [← data.hnorm y hynorm]
+      rw [hxy]
+      exact (by simpa [sublevel] using hx : f x ≤ c - ε)
+    rw [morseNormalForm_split] at hf'
+    nlinarith
+  have hnorm_sq : ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 ≥ (data.R / 2) ^ 2 := by
+    have hsqy : (data.R / 2) ^ 2 ≤ morseNorm (m + 1) y ^ 2 := by
+      have hR2nonneg : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+      exact sq_le_sq.mpr (by
+        rw [abs_of_nonneg hR2nonneg, abs_of_nonneg (norm_nonneg _)]
+        exact hyfar)
+    have hnorm_sq' : morseNorm (m + 1) y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+      calc
+        morseNorm (m + 1) y ^ 2 =
+            morseNorm (m + 1) (recombine hk (negPart hk y) (posPart hk y)) ^ 2 := by
+          rw [recombine_decompose hk y]
+        _ = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 :=
+          morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)
+    nlinarith [hsqy, hnorm_sq']
+  nlinarith [hbig, hlower, hnorm_sq]
+
+theorem morseSharpUnionRound_eq_self_of_not_mem_halfBall {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    {x : M} (hx : x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data))
+    (hxball : x ∉ morseChartBallImageHalf hk c data) :
+    morseSharpUnionRound hk c ε r δ data x = x := by
+  by_cases hb : x ∈ morseChartBallImage hk c data
+  · have hxlow : x ∈ sublevel f (c - ε) := by
+      rcases hx with hf | hh
+      · exact hf
+      · exact False.elim (hxball (range_handleEmbedding_subset_ballImage hk c ε r data hε hεr' hh))
+    dsimp [morseChartBallImage] at hb
+    rcases hb with ⟨y, hy, hxy⟩
+    have hsrc0 : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+    have hsymm : data.χ.symm x = y := by
+      rw [← hxy]
+      exact data.χ.left_inv hsrc0
+    have hneg : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 :=
+      negPart_norm_sq_ge_of_lower_not_mem_halfBall hk c ε r δ data hbig hxlow hxball hxy
+        (le_of_lt hy)
+    have hmap : modelSharpUnionRound hk ε r δ (data.χ.symm x) = data.χ.symm x := by
+      rw [hsymm]
+      exact modelSharpUnionRound_eq_self_of_negPart_large hk ε r δ hδ0 hδr hneg
+    calc
+      morseSharpUnionRound hk c ε r δ data x = data.χ (modelSharpUnionRound hk ε r δ (data.χ.symm x)) := by
+        dsimp [morseSharpUnionRound]
+        rw [if_pos (by exact ⟨y, hy, hxy⟩)]
+      _ = data.χ (data.χ.symm x) := by rw [hmap]
+      _ = x := by
+        rw [← hxy]
+        exact data.χ.right_inv (data.χ.map_source hsrc0)
+  · dsimp [morseSharpUnionRound]
+    rw [if_neg hb]
 
 theorem morseSharpUnionRound_mem_rounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
-    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
     {x : M} (hx : x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)) :
     morseSharpUnionRound hk c ε r δ data x ∈ morseRoundedAttachment hk c ε r δ data := by
   by_cases hb : x ∈ morseChartBallImage hk c data
-  · left
-    refine ⟨modelSharpUnionRound hk ε r δ (data.χ.symm x), ?_, ?_⟩
-    · constructor
-      · exact modelSharpUnionRound_mem_attached hk c ε r δ hδ0 hδr
-          (chartSymm_mem_sharpUnion_model hk c ε r data hε hεr' hb hx)
-      · dsimp [morseChartBallImage] at hb
-        rcases hb with ⟨y, hy, hxy⟩
-        have hsrc0 : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
-        have hsymm : data.χ.symm x = y := by
-          rw [← hxy]
-          exact data.χ.left_inv hsrc0
-        rw [hsymm]
-        have hle : morseNorm (m + 1) (modelSharpUnionRound hk ε r δ y) ≤ morseNorm (m + 1) y := by
-          exact modelSharpUnionRound_morseNorm_le hk ε r δ hδ0 hδr y
-        exact lt_of_le_of_lt hle hy
-    · dsimp [morseSharpUnionRound]
-      rw [if_pos hb]
+  · by_cases hb2 : x ∈ morseChartBallImageHalf hk c data
+    · left
+      refine ⟨modelSharpUnionRound hk ε r δ (data.χ.symm x), ?_, ?_⟩
+      · constructor
+        · exact modelSharpUnionRound_mem_attached hk c ε r δ hδ0 hδr
+            (chartSymm_mem_sharpUnion_model hk c ε r data hε hεr' hb hx)
+        · dsimp [morseChartBallImageHalf] at hb2
+          rcases hb2 with ⟨y, hy, hxy⟩
+          have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+            (le_trans (le_of_lt hy) (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+          have hsymm : data.χ.symm x = y := by
+            rw [← hxy]
+            exact data.χ.left_inv hsrc0
+          rw [hsymm]
+          have hle : morseNorm (m + 1) (modelSharpUnionRound hk ε r δ y) ≤ morseNorm (m + 1) y := by
+            exact modelSharpUnionRound_morseNorm_le hk ε r δ hδ0 hδr y
+          exact lt_of_le_of_lt hle hy
+      · dsimp [morseSharpUnionRound]
+        rw [if_pos hb]
+    · right
+      have hxlow : x ∈ sublevel f (c - ε) := by
+        rcases hx with hf | hh
+        · exact hf
+        · exact False.elim (hb2 (range_handleEmbedding_subset_ballImage hk c ε r data hε hεr' hh))
+      have hfix : morseSharpUnionRound hk c ε r δ data x = x :=
+        morseSharpUnionRound_eq_self_of_not_mem_halfBall hk c ε r δ data hε hδ0 hδr hεr' hbig hx hb2
+      constructor
+      · change morseSharpUnionRound hk c ε r δ data x ∈ sublevel f (c - ε)
+        rw [hfix]
+        exact hxlow
+      · change morseSharpUnionRound hk c ε r δ data x ∈ (morseChartBallImageHalf hk c data)ᶜ
+        rw [hfix]
+        exact hb2
   · right
     constructor
     · change morseSharpUnionRound hk c ε r δ data x ∈ sublevel f (c - ε)
@@ -10971,14 +11073,619 @@ theorem morseSharpUnionRound_mem_rounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r 
       rw [if_neg hb]
       have hnot : x ∉ Set.range (handleEmbedding hk c ε r data) := by
         intro hh
-        exact hb (range_handleEmbedding_subset_ballImage hk c ε r data hε hεr' hh)
+        exact hb (by
+          have hhalf : x ∈ morseChartBallImageHalf hk c data :=
+            range_handleEmbedding_subset_ballImage hk c ε r data hε hεr' hh
+          dsimp [morseChartBallImageHalf] at hhalf
+          rcases hhalf with ⟨y, hy, hxy⟩
+          have hy' : morseNorm (m + 1) y < data.R / 2 := by simpa using hy
+          exact ⟨y, (lt_trans hy' (by nlinarith [data.hRpos] : data.R / 2 < data.R)), hxy⟩)
       rcases hx with hf | hh
       · exact hf
       · exact False.elim (hnot hh)
-    · change morseSharpUnionRound hk c ε r δ data x ∈ (morseChartBallImage hk c data)ᶜ
+    · change morseSharpUnionRound hk c ε r δ data x ∈ (morseChartBallImageHalf hk c data)ᶜ
       dsimp [morseSharpUnionRound]
       rw [if_neg hb]
-      exact hb
+      intro hx'
+      dsimp [morseChartBallImageHalf] at hx'
+      rcases hx' with ⟨y, hy, hxy⟩
+      have hy' : morseNorm (m + 1) y < data.R / 2 := by simpa using hy
+      exact hb (by refine ⟨y, (lt_trans hy' (by nlinarith [data.hRpos] : data.R / 2 < data.R)), hxy⟩)
+
+theorem chart_mem_sharpUnion_ambient {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : 0 < r)
+    {y : MorseModel (m + 1)}
+    (hy : y ∈ (sublevel (morseNormalForm hk c) (c - ε) : Set (MorseModel (m + 1))) ∪ modelHandle hk ε r)
+    (hnorm : morseNorm (m + 1) y ≤ data.R) :
+    data.χ y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data) := by
+  rcases hy with hy | hy
+  · left
+    change f (data.χ y) ≤ c - ε
+    rw [data.hnorm y hnorm]
+    exact (by simpa [sublevel] using hy : morseNormalForm hk c y ≤ c - ε)
+  · right
+    have hrange : y ∈ Set.range (modelHandleMap hk ε r) := by
+      simpa [← modelHandleMap_range hk ε r hε hr] using hy
+    rcases hrange with ⟨d, hd⟩
+    refine ⟨d, ?_⟩
+    rw [← hd]
+    rfl
+
+theorem morseSharpUnionUnround_mem_sharpUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    {x : M} (hx : x ∈ morseRoundedAttachment hk c ε r δ data) :
+    morseSharpUnionUnround hk c ε r δ data x ∈
+      sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data) := by
+  by_cases hb : x ∈ morseChartBallImageHalf hk c data
+  · rcases hx with hx' | hx'
+    · rcases hx' with ⟨y, hy, hxy⟩
+      have hyU : modelSharpUnionUnround hk ε r δ y ∈
+          (sublevel (morseNormalForm hk c) (c - ε) : Set (MorseModel (m + 1))) ∪ modelHandle hk ε r :=
+        modelSharpUnionUnround_mem_sharpUnion hk c ε r δ hδ0 hδr hy.1
+      have hnorm_le : morseNorm (m + 1) (modelSharpUnionUnround hk ε r δ y) ≤ data.R := by
+        have hsq := modelSharpUnionUnround_norm_sq_le hk ε r δ hδ0 hδr (ne_of_gt hr) hy.1
+        have ht : ‖negPart hk y‖ ^ 2 < (data.R / 2) ^ 2 := by
+          have hnormy : morseNorm (m + 1) y < data.R / 2 := hy.2
+          have hneg : ‖negPart hk y‖ ≤ morseNorm (m + 1) y := by
+            exact norm_negPart_le_morseNorm hk y
+          have hlt : ‖negPart hk y‖ < data.R / 2 := lt_of_le_of_lt hneg hnormy
+          have habs : |‖negPart hk y‖| < |data.R / 2| := by
+            rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (by nlinarith [data.hRpos] : 0 ≤ data.R / 2)]
+            exact hlt
+          exact sq_lt_sq.mpr habs
+        have hB : modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) ≤ (data.R / 2) ^ 2 := by
+          change max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) ≤ (data.R / 2) ^ 2
+          have hle1 : r ^ 2 ≤ (data.R / 2) ^ 2 := by
+            have h1 : 2 * ε + 2 * r ^ 2 < (data.R / 2) ^ 2 := by
+              have hsc : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 < (data.R / 2) ^ 2 := by
+                have habs : |Real.sqrt (2 * ε + 2 * r ^ 2)| < |data.R / 2| := by
+                  rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+                  rw [abs_of_nonneg (div_nonneg (le_of_lt data.hRpos) (by norm_num))]
+                  exact hεr'
+                exact sq_lt_sq.mpr habs
+              simpa [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + 2 * r ^ 2)] using hsc
+            nlinarith [hε, h1]
+          have hle2 : ‖negPart hk y‖ ^ 2 - 2 * ε ≤ (data.R / 2) ^ 2 := by nlinarith [ht]
+          exact max_le hle1 hle2
+        have hsum : ‖negPart hk y‖ ^ 2 + modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) ≤ data.R ^ 2 := by
+          nlinarith [ht, hB]
+        have hsq' : morseNorm (m + 1) (modelSharpUnionUnround hk ε r δ y) ^ 2 ≤ data.R ^ 2 := by
+          nlinarith [hsq, hsum]
+        have habs := sq_le_sq.mp hsq'
+        rwa [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (le_of_lt data.hRpos)] at habs
+      have hχ : data.χ (modelSharpUnionUnround hk ε r δ y) ∈
+          sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data) :=
+        chart_mem_sharpUnion_ambient hk c ε r data hε hr hyU hnorm_le
+      have hval : morseSharpUnionUnround hk c ε r δ data x = data.χ (modelSharpUnionUnround hk ε r δ y) := by
+        dsimp [morseSharpUnionUnround]
+        rw [if_pos hb]
+        congr 1
+        rw [← hxy]
+        have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+          (le_trans (le_of_lt hy.2) (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+        exact congrArg (modelSharpUnionUnround hk ε r δ) (data.χ.left_inv hsrc0)
+      rw [hval]
+      exact hχ
+    · exact False.elim (hx'.2 hb)
+  · have hx' : x ∈ sublevel f (c - ε) := by
+      rcases hx with hx' | hx'
+      · exact False.elim (hb (by
+          rcases hx' with ⟨y, hy, hxy⟩
+          refine ⟨y, hy.2, hxy⟩))
+      · exact hx'.1
+    have hval : morseSharpUnionUnround hk c ε r δ data x = x := by
+      dsimp [morseSharpUnionUnround]
+      rw [if_neg hb]
+    rw [hval]
+    exact Or.inl hx'
+
+theorem morseSharpUnionUnround_round {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    {x : M} (hx : x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)) :
+    morseSharpUnionUnround hk c ε r δ data (morseSharpUnionRound hk c ε r δ data x) = x := by
+  by_cases hb : x ∈ morseChartBallImageHalf hk c data
+  · have hbFull : x ∈ morseChartBallImage hk c data := by
+      dsimp [morseChartBallImageHalf, morseChartBallImage] at hb ⊢
+      have hb' : x ∈ morseChartBallImageHalf hk c data := hb
+      rcases hb' with ⟨y, hy, hxy⟩
+      have hy' : morseNorm (m + 1) y < data.R / 2 := by simpa using hy
+      exact ⟨y, (by nlinarith [hy', data.hRpos] : morseNorm (m + 1) y < data.R), hxy⟩
+    have hboundRound : morseNorm (m + 1) (modelSharpUnionRound hk ε r δ (data.χ.symm x)) <
+        data.R / 2 := by
+      have hb' : x ∈ morseChartBallImageHalf hk c data := hb
+      rcases hb' with ⟨y, hy, hxy⟩
+      have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+        (le_trans (le_of_lt (by simpa using hy : morseNorm (m + 1) y < data.R / 2))
+          (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv hsrc0
+      rw [hsymm]
+      exact lt_of_le_of_lt (modelSharpUnionRound_morseNorm_le hk ε r δ hδ0 hδr y)
+        (by simpa using hy)
+    have hmemHalf : data.χ (modelSharpUnionRound hk ε r δ (data.χ.symm x)) ∈
+        morseChartBallImageHalf hk c data := by
+      dsimp [morseChartBallImageHalf]
+      refine ⟨modelSharpUnionRound hk ε r δ (data.χ.symm x), hboundRound, rfl⟩
+    have hpreRound : data.χ.symm (data.χ (modelSharpUnionRound hk ε r δ (data.χ.symm x))) =
+        modelSharpUnionRound hk ε r δ (data.χ.symm x) := by
+      exact data.χ.left_inv (data.hχsrc (modelSharpUnionRound hk ε r δ (data.χ.symm x))
+        (le_trans (le_of_lt hboundRound) (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+    have hround : morseSharpUnionRound hk c ε r δ data x =
+        data.χ (modelSharpUnionRound hk ε r δ (data.χ.symm x)) := by
+      dsimp [morseSharpUnionRound]
+      rw [if_pos hbFull]
+    rw [hround]
+    have hunround : morseSharpUnionUnround hk c ε r δ data
+        (data.χ (modelSharpUnionRound hk ε r δ (data.χ.symm x))) =
+        data.χ (modelSharpUnionUnround hk ε r δ (modelSharpUnionRound hk ε r δ (data.χ.symm x))) := by
+      dsimp [morseSharpUnionUnround]
+      rw [if_pos hmemHalf]
+      rw [hpreRound]
+    rw [hunround]
+    rw [modelSharpUnionUnround_round hk ε r δ hδ0 hδr (y := data.χ.symm x)]
+    have hb' : x ∈ morseChartBallImageHalf hk c data := hb
+    rcases hb' with ⟨y, hy, hxy⟩
+    have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+      (le_trans (le_of_lt (by simpa using hy : morseNorm (m + 1) y < data.R / 2))
+        (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+    rw [← hxy]
+    exact data.χ.right_inv (data.χ.map_source hsrc0)
+  · have hfix : morseSharpUnionRound hk c ε r δ data x = x :=
+      morseSharpUnionRound_eq_self_of_not_mem_halfBall hk c ε r δ data hε hδ0 hδr hεr' hbig hx hb
+    rw [hfix]
+    dsimp [morseSharpUnionUnround]
+    rw [if_neg hb]
+
+theorem morseSharpUnionRound_unround {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    {x : M} (hx : x ∈ morseRoundedAttachment hk c ε r δ data) :
+    morseSharpUnionRound hk c ε r δ data (morseSharpUnionUnround hk c ε r δ data x) = x := by
+  by_cases hb : x ∈ morseChartBallImageHalf hk c data
+  · have hunround : morseSharpUnionUnround hk c ε r δ data x =
+        data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x)) := by
+      dsimp [morseSharpUnionUnround]
+      rw [if_pos hb]
+    rw [hunround]
+    have hbound : morseNorm (m + 1) (modelSharpUnionUnround hk ε r δ (data.χ.symm x)) < data.R := by
+      have hb' : x ∈ morseChartBallImageHalf hk c data := hb
+      rcases hb' with ⟨y, hy, hxy⟩
+      have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+        (le_trans (le_of_lt (by simpa using hy : morseNorm (m + 1) y < data.R / 2))
+          (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv hsrc0
+      have hyatt : y ∈ modelAttachedRegion hk ε r δ := by
+        rcases hx with hx' | hx'
+        · rcases hx' with ⟨z, hz, hzy⟩
+          have hsrcz : z ∈ data.χ.source := data.hχsrc z
+            (le_trans (le_of_lt (by simpa using hz.2 : morseNorm (m + 1) z < data.R / 2))
+              (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+          have hz' : z = y := by
+            calc
+              z = data.χ.symm (data.χ z) := (data.χ.left_inv hsrcz).symm
+              _ = data.χ.symm x := by rw [← hzy]
+              _ = y := hsymm
+          rw [← hz']
+          exact hz.1
+        · exact False.elim (hx'.2 hb)
+      rw [hsymm]
+      have hsq := modelSharpUnionUnround_norm_sq_le hk ε r δ hδ0 hδr (ne_of_gt hr) hyatt
+      have ht : ‖negPart hk y‖ ^ 2 < (data.R / 2) ^ 2 := by
+        have hneg : ‖negPart hk y‖ ≤ morseNorm (m + 1) y := norm_negPart_le_morseNorm hk y
+        have hlt : ‖negPart hk y‖ < data.R / 2 := lt_of_le_of_lt hneg (by simpa using hy)
+        have habs : |‖negPart hk y‖| < |data.R / 2| := by
+          rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (by nlinarith [data.hRpos] : 0 ≤ data.R / 2)]
+          exact hlt
+        exact sq_lt_sq.mpr habs
+      have hB : modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) ≤ (data.R / 2) ^ 2 := by
+        change max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) ≤ (data.R / 2) ^ 2
+        have hle1 : r ^ 2 ≤ (data.R / 2) ^ 2 := by
+          have h1 : 2 * ε + 2 * r ^ 2 < (data.R / 2) ^ 2 := by
+            have hsc : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 < (data.R / 2) ^ 2 := by
+              have habs : |Real.sqrt (2 * ε + 2 * r ^ 2)| < |data.R / 2| := by
+                rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+                rw [abs_of_nonneg (div_nonneg (le_of_lt data.hRpos) (by norm_num))]
+                exact hεr'
+              exact sq_lt_sq.mpr habs
+            simpa [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + 2 * r ^ 2)] using hsc
+          nlinarith [hε, h1]
+        have hle2 : ‖negPart hk y‖ ^ 2 - 2 * ε ≤ (data.R / 2) ^ 2 := by nlinarith [ht]
+        exact max_le hle1 hle2
+      have hsum : ‖negPart hk y‖ ^ 2 + modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) < data.R ^ 2 := by
+        nlinarith [ht, hB, data.hRpos]
+      have hsq' : morseNorm (m + 1) (modelSharpUnionUnround hk ε r δ y) ^ 2 < data.R ^ 2 := by
+        nlinarith [hsq, hsum]
+      have habs := sq_lt_sq.mp hsq'
+      rwa [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (le_of_lt data.hRpos)] at habs
+    have hmemFull : data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x)) ∈
+        morseChartBallImage hk c data := by
+      dsimp [morseChartBallImage]
+      refine ⟨modelSharpUnionUnround hk ε r δ (data.χ.symm x), hbound, rfl⟩
+    have hpreUnround : data.χ.symm (data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x))) =
+        modelSharpUnionUnround hk ε r δ (data.χ.symm x) := by
+      exact data.χ.left_inv (data.hχsrc (modelSharpUnionUnround hk ε r δ (data.χ.symm x)) (le_of_lt hbound))
+    have hround : morseSharpUnionRound hk c ε r δ data
+        (data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x))) =
+        data.χ (modelSharpUnionRound hk ε r δ (modelSharpUnionUnround hk ε r δ (data.χ.symm x))) := by
+      dsimp [morseSharpUnionRound]
+      rw [if_pos hmemFull]
+      congr 1
+      rw [hpreUnround]
+    rw [hround]
+    rw [modelSharpUnionRound_unround hk ε r δ hδ0 hδr (z := data.χ.symm x)]
+    have hb' : x ∈ morseChartBallImageHalf hk c data := hb
+    rcases hb' with ⟨y, hy, hxy⟩
+    have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+      (le_trans (le_of_lt (by simpa using hy : morseNorm (m + 1) y < data.R / 2))
+        (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+    rw [← hxy]
+    exact data.χ.right_inv (data.χ.map_source hsrc0)
+  · have hunround : morseSharpUnionUnround hk c ε r δ data x = x := by
+      dsimp [morseSharpUnionUnround]
+      rw [if_neg hb]
+    rw [hunround]
+    have hxlow : x ∈ sublevel f (c - ε) := by
+      rcases hx with hx' | hx'
+      · exact False.elim (hb (by
+          rcases hx' with ⟨y, hy, hxy⟩
+          refine ⟨y, hy.2, hxy⟩))
+      · exact hx'.1
+    exact morseSharpUnionRound_eq_self_of_not_mem_halfBall hk c ε r δ data hε hδ0 hδr hεr' hbig
+      (Or.inl hxlow) hb
+
+private lemma continuousAt_piecewise_open_compl {X : Type} [TopologicalSpace X]
+    (f g : X → X) (U : Set X) (x : X) (hxU : x ∉ U)
+    (hU : ∀ y ∈ U, f y = g y)
+    (hcompl : ∀ y ∈ Uᶜ, f y = y)
+    (hg : Filter.Tendsto g (nhdsWithin x U) (nhds x)) :
+    ContinuousAt f x := by
+  rw [ContinuousAt, hcompl x hxU]
+  have hI : Set.univ = U ∪ Uᶜ := by
+    ext y
+    simp
+  have h1 : Filter.Tendsto f (nhdsWithin x U) (nhds x) := by
+    have hEq : f =ᶠ[nhdsWithin x U] g :=
+      Filter.eventually_inf_principal.mpr (Filter.Eventually.of_forall (fun y => hU y))
+    exact Filter.Tendsto.congr' hEq.symm hg
+  have h2 : Filter.Tendsto f (nhdsWithin x Uᶜ) (nhds x) := by
+    have hid : Filter.Tendsto (fun y : X => y) (nhdsWithin x Uᶜ) (nhds x) :=
+      (continuousAt_id.tendsto).mono_left nhdsWithin_le_nhds
+    have hEq : (fun y : X => y) =ᶠ[nhdsWithin x Uᶜ] f :=
+      Filter.eventually_inf_principal.mpr
+        (Filter.Eventually.of_forall (fun y => fun hyUc => (hcompl y hyUc).symm))
+    exact Filter.Tendsto.congr' hEq hid
+  have hgoal : Filter.Tendsto f (nhdsWithin x U ⊔ nhdsWithin x Uᶜ) (nhds x) :=
+    Filter.tendsto_sup.mpr ⟨h1, h2⟩
+  rwa [← nhds_eq_nhdsWithin_sup_nhdsWithin x hI] at hgoal
+
+theorem continuousOn_morseSharpUnionRound {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    (hcont : Continuous f) :
+    ContinuousOn (morseSharpUnionRound hk c ε r δ data)
+      (sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)) := by
+  let S : Set M := sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)
+  let U : Set M := morseChartBallImageHalf hk c data
+  let A : Set M := data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R / 2}
+  let C : Set M := sublevel f (c - ε) ∩ Uᶜ
+  have hUopen : IsOpen U := by
+    dsimp [U]
+    exact isOpen_chiBallImage data.χ (data.R / 2)
+      (fun y hy => data.hχsrc y (le_trans (le_of_lt hy) (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+  have hAclosed : IsClosed A := by
+    dsimp [A]
+    exact isClosed_chartBallImage (H := H) data.χ (data.R / 2)
+      (fun y hy => data.hχsrc y (le_trans hy (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+  have hCclosed : IsClosed C := by
+    dsimp [C]
+    exact IsClosed.inter (isClosed_Iic.preimage hcont) (isClosed_compl_iff.mpr hUopen)
+  have hA : ContinuousOn (morseSharpUnionRound hk c ε r δ data) A := by
+    have hχsymm : ContinuousOn data.χ.symm data.χ.target := data.χ.continuousOn_invFun
+    have hχ : ContinuousOn data.χ data.χ.source := data.χ.continuousOn_toFun
+    have hmodel : ContinuousOn (modelSharpUnionRound hk ε r δ) Set.univ :=
+      (continuous_modelSharpUnionRound hk ε r δ hδ0 hδr).continuousOn
+    have h1 : ContinuousOn (fun x : M => modelSharpUnionRound hk ε r δ (data.χ.symm x)) A := by
+      refine hmodel.comp (hχsymm.mono ?_) ?_
+      · intro x hx
+        rcases hx with ⟨y, hy, hxy⟩
+        have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+          (le_trans hy (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+        rw [← hxy]
+        exact data.χ.map_source hsrc0
+      · intro x hx
+        trivial
+    have h2 : ContinuousOn (fun x : M => data.χ (modelSharpUnionRound hk ε r δ (data.χ.symm x))) A := by
+      refine hχ.comp h1 ?_
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+        (le_trans hy (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv hsrc0
+      change modelSharpUnionRound hk ε r δ (data.χ.symm x) ∈ data.χ.source
+      rw [hsymm]
+      exact data.hχsrc (modelSharpUnionRound hk ε r δ y)
+        (le_trans (modelSharpUnionRound_morseNorm_le hk ε r δ hδ0 hδr y)
+          (le_trans hy (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+    exact h2.congr (s := A) (g := morseSharpUnionRound hk c ε r δ data) (fun x hx => by
+      dsimp [morseSharpUnionRound]
+      rw [if_pos (by
+        rcases hx with ⟨y, hy, hxy⟩
+        have hy' : morseNorm (m + 1) y ≤ data.R / 2 := by simpa using hy
+        exact ⟨y, (by nlinarith [hy', data.hRpos] : morseNorm (m + 1) y < data.R), hxy⟩)])
+  have hC : ContinuousOn (morseSharpUnionRound hk c ε r δ data) C := by
+    refine continuousOn_id.congr (s := C) (g := morseSharpUnionRound hk c ε r δ data) ?_
+    intro x hx
+    exact morseSharpUnionRound_eq_self_of_not_mem_halfBall hk c ε r δ data hε hδ0 hδr hεr' hbig
+      (Or.inl hx.1) hx.2
+  have hunion : ContinuousOn (morseSharpUnionRound hk c ε r δ data) (A ∪ C) :=
+    hA.union_of_isClosed hC hAclosed hCclosed
+  exact hunion.mono (by
+    intro x hx
+    by_cases hxA : x ∈ A
+    · exact Or.inl hxA
+    · rcases hx with hflow | hcell
+      · exact Or.inr ⟨hflow, by
+          intro hxU
+          rcases hxU with ⟨y, hy, hxy⟩
+          exact hxA (by refine ⟨y, (le_of_lt (by simpa using hy)), hxy⟩)⟩
+      · exact False.elim (hxA (by
+          rcases hcell with ⟨d, hd⟩
+          have hmem := range_handleEmbedding_subset_ballImage hk c ε r data hε hεr' ⟨d, hd⟩
+          rcases hmem with ⟨y, hy, hxy⟩
+          refine ⟨y, (le_of_lt (by simpa using hy)), hxy⟩)))
+
+theorem continuousOn_morseSharpUnionUnround {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8) :
+    ContinuousOn (morseSharpUnionUnround hk c ε r δ data)
+      (morseRoundedAttachment hk c ε r δ data) := by
+  let R : Set M := morseRoundedAttachment hk c ε r δ data
+  let U : Set M := morseChartBallImageHalf hk c data
+  let A : Set M := data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R / 2}
+  let C : Set M := sublevel f (c - ε) ∩ Uᶜ
+  have hUopen : IsOpen U := by
+    dsimp [U]
+    exact isOpen_chiBallImage data.χ (data.R / 2)
+      (fun y hy => data.hχsrc y (le_trans (le_of_lt hy) (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+  have hAclosed : IsClosed A := by
+    dsimp [A]
+    exact isClosed_chartBallImage (H := H) data.χ (data.R / 2)
+      (fun y hy => data.hχsrc y (le_trans hy (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+  have hUsubA : U ⊆ A := by
+    intro y hy
+    rcases hy with ⟨w, hw, hwy⟩
+    refine ⟨w, (le_of_lt (by simpa using hw)), hwy⟩
+  have hUR : ContinuousOn (morseSharpUnionUnround hk c ε r δ data) (U ∩ R) := by
+    have hχsymm : ContinuousOn data.χ.symm data.χ.target := data.χ.continuousOn_invFun
+    have hχ : ContinuousOn data.χ data.χ.source := data.χ.continuousOn_toFun
+    have hmodel : ContinuousOn (modelSharpUnionUnround hk ε r δ) Set.univ :=
+      (continuous_modelSharpUnionUnround hk ε r δ hδ0 hδr).continuousOn
+    have h1 : ContinuousOn (fun x : M => modelSharpUnionUnround hk ε r δ (data.χ.symm x)) (U ∩ R) := by
+      refine hmodel.comp (hχsymm.mono ?_) ?_
+      · intro x hx
+        rcases hx.1 with ⟨y, hy, hxy⟩
+        have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+          (le_trans (le_of_lt (by simpa using hy : morseNorm (m + 1) y < data.R / 2))
+            (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+        rw [← hxy]
+        exact data.χ.map_source hsrc0
+      · intro x hx
+        trivial
+    have h2 : ContinuousOn (fun x : M => data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x))) (U ∩ R) := by
+      refine hχ.comp h1 ?_
+      intro x hx
+      have hxU : x ∈ U := hx.1
+      rcases hxU with ⟨y, hy, hxy⟩
+      have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+        (le_trans (le_of_lt (by simpa using hy : morseNorm (m + 1) y < data.R / 2))
+          (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv hsrc0
+      have hyatt : y ∈ modelAttachedRegion hk ε r δ := by
+        rcases hx.2 with hx' | hx'
+        · rcases hx' with ⟨z, hz, hzy⟩
+          have hsrcz : z ∈ data.χ.source := data.hχsrc z
+            (le_trans (le_of_lt (by simpa using hz.2 : morseNorm (m + 1) z < data.R / 2))
+              (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+          have hz' : z = y := by
+            calc
+              z = data.χ.symm (data.χ z) := (data.χ.left_inv hsrcz).symm
+              _ = data.χ.symm x := by rw [← hzy]
+              _ = y := hsymm
+          rw [← hz']
+          exact hz.1
+        · exact False.elim (hx'.2 hx.1)
+      change modelSharpUnionUnround hk ε r δ (data.χ.symm x) ∈ data.χ.source
+      rw [hsymm]
+      have hbounded : morseNorm (m + 1) (modelSharpUnionUnround hk ε r δ y) ≤ data.R := by
+        have hsq := modelSharpUnionUnround_norm_sq_le hk ε r δ hδ0 hδr hr hyatt
+        have ht : ‖negPart hk y‖ ^ 2 < (data.R / 2) ^ 2 := by
+          have hneg : ‖negPart hk y‖ ≤ morseNorm (m + 1) y := norm_negPart_le_morseNorm hk y
+          have hlt : ‖negPart hk y‖ < data.R / 2 := lt_of_le_of_lt hneg (by simpa using hy)
+          have habs : |‖negPart hk y‖| < |data.R / 2| := by
+            rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (by nlinarith [data.hRpos] : 0 ≤ data.R / 2)]
+            exact hlt
+          exact sq_lt_sq.mpr habs
+        have hB : modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) ≤ (data.R / 2) ^ 2 := by
+          change max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) ≤ (data.R / 2) ^ 2
+          have hle1 : r ^ 2 ≤ (data.R / 2) ^ 2 := by
+            have h1 : 2 * ε + 2 * r ^ 2 < (data.R / 2) ^ 2 := by
+              have hsc : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 < (data.R / 2) ^ 2 := by
+                have habs : |Real.sqrt (2 * ε + 2 * r ^ 2)| < |data.R / 2| := by
+                  rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+                  rw [abs_of_nonneg (div_nonneg (le_of_lt data.hRpos) (by norm_num))]
+                  exact hεr'
+                exact sq_lt_sq.mpr habs
+              simpa [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + 2 * r ^ 2)] using hsc
+            nlinarith [hε, h1]
+          have hle2 : ‖negPart hk y‖ ^ 2 - 2 * ε ≤ (data.R / 2) ^ 2 := by nlinarith [ht]
+          exact max_le hle1 hle2
+        have hsum : ‖negPart hk y‖ ^ 2 + modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) ≤ data.R ^ 2 := by
+          nlinarith [ht, hB, data.hRpos]
+        have hsq' : morseNorm (m + 1) (modelSharpUnionUnround hk ε r δ y) ^ 2 ≤ data.R ^ 2 := by
+          nlinarith [hsq, hsum]
+        have habs := sq_le_sq.mp hsq'
+        rwa [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (le_of_lt data.hRpos)] at habs
+      exact data.hχsrc (modelSharpUnionUnround hk ε r δ y) hbounded
+    exact h2.congr (s := U ∩ R) (g := morseSharpUnionUnround hk c ε r δ data) (fun x hx => by
+      dsimp [morseSharpUnionUnround]
+      rw [if_pos hx.1])
+  have hC : ContinuousOn (morseSharpUnionUnround hk c ε r δ data) C := by
+    refine continuousOn_id.congr (s := C) (g := morseSharpUnionUnround hk c ε r δ data) ?_
+    intro x hx
+    dsimp [morseSharpUnionUnround]
+    rw [if_neg hx.2]
+  have hboundary : ∀ x ∈ C, ContinuousAt (morseSharpUnionUnround hk c ε r δ data) x := by
+    intro x hx
+    by_cases hclose : x ∈ closure U
+    · have hxA : x ∈ A := ((closure_mono hUsubA).trans hAclosed.closure_subset) hclose
+      rcases hxA with ⟨y, hy, hxy⟩
+      have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+        (le_trans hy (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+      have hxtgt : x ∈ data.χ.target := by
+        rw [← hxy]
+        exact data.χ.map_source hsrc0
+      have hdeep : modelSharpUnionUnround hk ε r δ (data.χ.symm x) = data.χ.symm x := by
+        have hsymm : data.χ.symm x = y := by
+          rw [← hxy]
+          exact data.χ.left_inv hsrc0
+        rw [hsymm]
+        have hneg : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 :=
+          negPart_norm_sq_ge_of_lower_not_mem_halfBall hk c ε r δ data hbig hx.1 hx.2 hxy
+            (le_trans hy (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+        exact modelSharpUnionUnround_eq_self_of_negPart_large hk ε r δ hδ0 hδr hneg
+      have hsrcModel : modelSharpUnionUnround hk ε r δ (data.χ.symm x) ∈ data.χ.source := by
+        rw [hdeep]
+        rw [← hxy]
+        rw [data.χ.left_inv hsrc0]
+        exact hsrc0
+      have hchart : ContinuousAt (fun z : M => data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm z))) x := by
+        have hcontSymm : ContinuousAt data.χ.symm x := by
+          exact (data.χ.continuousOn_invFun x hxtgt).continuousAt (IsOpen.mem_nhds data.χ.open_target hxtgt)
+        have hcontModel : ContinuousAt (modelSharpUnionUnround hk ε r δ) (data.χ.symm x) :=
+          (continuous_modelSharpUnionUnround hk ε r δ hδ0 hδr).continuousAt
+        have hcontχ : ContinuousAt data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x)) := by
+          exact (data.χ.continuousOn_toFun (modelSharpUnionUnround hk ε r δ (data.χ.symm x)) hsrcModel).continuousAt
+            (IsOpen.mem_nhds data.χ.open_source hsrcModel)
+        exact (hcontχ.comp hcontModel).comp hcontSymm
+      have hchartx : data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x)) = x := by
+        rw [hdeep]
+        exact data.χ.right_inv hxtgt
+      have hg : Filter.Tendsto (fun z : M => data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm z)))
+          (nhdsWithin x U) (nhds x) := by
+        have hT : Filter.Tendsto (fun z : M => data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm z)))
+            (nhdsWithin x U) (nhds (data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x)))) :=
+          hchart.tendsto.mono_left nhdsWithin_le_nhds
+        simpa [hchartx] using hT
+      exact continuousAt_piecewise_open_compl (morseSharpUnionUnround hk c ε r δ data)
+        (fun z : M => data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm z))) U x hx.2
+        (fun z hzU => by
+          dsimp [morseSharpUnionUnround]
+          rw [if_pos hzU])
+        (fun z hzUc => by
+          dsimp [morseSharpUnionUnround]
+          rw [if_neg hzUc])
+        hg
+    · have hEq : morseSharpUnionUnround hk c ε r δ data =ᶠ[nhds x] (fun z : M => z) := by
+        rw [Filter.EventuallyEq]
+        exact Filter.eventually_of_mem (IsOpen.mem_nhds (isOpen_compl_iff.mpr isClosed_closure) hclose) (fun z hz => by
+          dsimp [morseSharpUnionUnround]
+          rw [if_neg (by
+            intro hzU
+            exact hz (subset_closure hzU))])
+      exact (continuousAt_id.congr_of_eventuallyEq hEq)
+  intro x hx
+  by_cases hxU : x ∈ U
+  · have hcontUR : ContinuousWithinAt (morseSharpUnionUnround hk c ε r δ data) (U ∩ R) x :=
+      hUR.continuousWithinAt ⟨hxU, hx⟩
+    have hUev : ∀ᶠ y in nhds x, y ∈ U := IsOpen.mem_nhds hUopen hxU
+    have hEq : nhdsWithin x R = nhdsWithin x (U ∩ R) := by
+      rw [nhdsWithin_eq_iff_eventuallyEq]
+      refine hUev.mono ?_
+      intro y hyU
+      exact propext (by
+        constructor
+        · intro hy
+          exact ⟨hyU, hy⟩
+        · intro hy
+          exact hy.2)
+    rw [ContinuousWithinAt, hEq]
+    exact hcontUR
+  · have hxlow : x ∈ sublevel f (c - ε) := by
+      rcases hx with hx' | hx'
+      · exact False.elim (hxU (by
+          rcases hx' with ⟨y, hy, hxy⟩
+          refine ⟨y, hy.2, hxy⟩))
+      · exact hx'.1
+    exact (hboundary x ⟨hxlow, hxU⟩).continuousWithinAt
+
+noncomputable def morseSharpUnionRoundingHomeo {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    (hcont : Continuous f) :
+    {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} ≃ₜ
+      {x : M // x ∈ morseRoundedAttachment hk c ε r δ data} where
+  toFun := fun x => ⟨morseSharpUnionRound hk c ε r δ data x.1,
+    morseSharpUnionRound_mem_rounded hk c ε r δ data hε hδ0 hδr hεr' hbig x.2⟩
+  invFun := fun x => ⟨morseSharpUnionUnround hk c ε r δ data x.1,
+    morseSharpUnionUnround_mem_sharpUnion hk c ε r δ data hε hδ0 hδr hr hεr' x.2⟩
+  left_inv := by
+    intro x
+    apply Subtype.ext
+    exact morseSharpUnionUnround_round hk c ε r δ data hε hδ0 hδr hεr' hbig x.2
+  right_inv := by
+    intro x
+    apply Subtype.ext
+    exact morseSharpUnionRound_unround hk c ε r δ data hε hδ0 hδr hr hεr' hbig x.2
+  continuous_toFun := by
+    have hrest : Continuous (fun x : {x : M // x ∈ sublevel f (c - ε) ∪
+        Set.range (handleEmbedding hk c ε r data)} =>
+        morseSharpUnionRound hk c ε r δ data x.1) :=
+      continuousOn_iff_continuous_restrict.mp
+        (continuousOn_morseSharpUnionRound hk c ε r δ data hε hδ0 hδr hεr' hbig hcont)
+    exact Continuous.subtype_mk hrest (fun x =>
+      morseSharpUnionRound_mem_rounded hk c ε r δ data hε hδ0 hδr hεr' hbig x.2)
+  continuous_invFun := by
+    have hrest : Continuous (fun x : {x : M // x ∈ morseRoundedAttachment hk c ε r δ data} =>
+        morseSharpUnionUnround hk c ε r δ data x.1) :=
+      continuousOn_iff_continuous_restrict.mp
+        (continuousOn_morseSharpUnionUnround hk c ε r δ data hε hδ0 hδr (ne_of_gt hr) hεr' hbig)
+    exact Continuous.subtype_mk hrest (fun x =>
+      morseSharpUnionUnround_mem_sharpUnion hk c ε r δ data hε hδ0 hδr hr hεr' x.2)
 
 theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hεR : Real.sqrt (2 * ε) ≤ R)
