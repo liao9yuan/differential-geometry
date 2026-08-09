@@ -52,6 +52,68 @@ theorem wedge_product_def {g : M [⋀^Fin m]→L[𝕜] N} {h : M [⋀^Fin n]→L
   rfl
 
 open scoped TensorProduct
+
+theorem factorial_nsmul_wedge_product_eq_alternatization
+    (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') (v : Fin (m + n) → M) :
+    (m.factorial * n.factorial) • (g ∧[f] h) v =
+      MultilinearMap.alternatization (tensorProductMap g h f).toMultilinearMap v := by
+  let φ : N ⊗[𝕜] N' →ₗ[𝕜] N'' := TensorProduct.lift
+    { toFun := fun n => (f n).toLinearMap
+      map_add' := by intro x y; ext; simp [map_add]
+      map_smul' := by intro c x; ext; simp [map_smul] }
+  have hφ : ∀ a b, φ (a ⊗ₜ[𝕜] b) = f a b := fun _ _ => rfl
+  have h_factor : (tensorProductMap g h f).toMultilinearMap =
+      (φ.compMultilinearMap (MultilinearMap.domCoprod
+        ↑g.toAlternatingMap ↑h.toAlternatingMap)).domDomCongr finSumFinEquiv := by
+    ext x; simp [tensorProductMap, MultilinearMap.domDomCongr_apply,
+      LinearMap.compMultilinearMap_apply, MultilinearMap.domCoprod_apply, hφ]; rfl
+  rw [h_factor, ContinuousAlternatingMap.alternatization_domDomCongr,
+    LinearMap.compMultilinearMap_alternatization,
+    MultilinearMap.domCoprod_alternization_eq, Fintype.card_fin, Fintype.card_fin]
+  simp only [AlternatingMap.domDomCongr_apply, LinearMap.compAlternatingMap_apply,
+    AlternatingMap.smul_apply, map_nsmul]
+  change _ = _ • φ ((g.toAlternatingMap.domCoprod h.toAlternatingMap) (v ∘ ⇑finSumFinEquiv))
+  rw [show φ ((g.toAlternatingMap.domCoprod h.toAlternatingMap) (v ∘ ⇑finSumFinEquiv)) =
+    (uncurrySum (f.compContinuousAlternatingMap₂ g h)) (v ∘ ⇑finSumFinEquiv) from
+    congr_fun (congr_arg DFunLike.coe
+      (lift_comp_domCoprod_eq_uncurrySum g h f φ hφ)) _]; rfl
+
+theorem wedge_product_eq_alternatization [CharZero 𝕜]
+    (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') (v : Fin (m + n) → M) :
+    (g ∧[f] h) v = ((↑(m.factorial * n.factorial) : 𝕜))⁻¹ •
+      MultilinearMap.alternatization (tensorProductMap g h f).toMultilinearMap v := by
+  have h_ne : (↑(m.factorial * n.factorial) : 𝕜) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.mul_pos (Nat.factorial_pos m) (Nat.factorial_pos n)).ne'
+  have h_eq := factorial_nsmul_wedge_product_eq_alternatization g h f v
+  rw [← h_eq, ← Nat.cast_smul_eq_nsmul 𝕜, inv_smul_smul₀ h_ne]
+
+theorem elementaryCovector_wedge [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+    (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
+    (I : Fin m' → Fin d) (J : Fin p → Fin d) :
+    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
+      (elementaryCovector b (Fin.addCases I J) :
+        M [⋀^Fin (m' + p)]→L[𝕜] 𝕜) := by
+  obtain ⟨B, dual⟩ := exists_predual_basis b
+  apply ContinuousAlternatingMap.toAlternatingMap_injective
+  apply B.ext_alternating
+  intro v hv
+  change ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ v) =
+    elementaryCovector b (Fin.addCases I J) (B ∘ v)
+  rw [elementaryCovector_basis_eval B b dual (Fin.addCases I J) v]
+  have lhs_eq := wedge_product_eq_alternatization (elementaryCovector b I)
+    (elementaryCovector b J) (ContinuousLinearMap.mul 𝕜 𝕜) (⇑B ∘ v)
+  rw [lhs_eq, MultilinearMap.alternatization_apply]
+  simp_rw [MultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.coe_coe,
+    tensorProductMap_apply, ContinuousLinearMap.mul_apply']
+  simp_rw [show ∀ (σ : Equiv.Perm (Fin (m' + p))),
+    (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.castAdd p = ⇑B ∘ (v ∘ σ ∘ Fin.castAdd p) from fun _ => rfl,
+    show ∀ (σ : Equiv.Perm (Fin (m' + p))),
+    (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.natAdd m' = ⇑B ∘ (v ∘ σ ∘ Fin.natAdd m') from fun _ => rfl,
+    elementaryCovector_basis_eval B b dual]
+  exact Fin.multiKroneckerDelta_cauchyBinet I J v
+
 theorem uncurryFin_smulRight_elementaryCovector
     (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
     (a : Fin d) (I : Fin m → Fin d) :
@@ -1497,11 +1559,6 @@ theorem uncurryFin_wedge_productL_precompL_eq_domDomCongr
           rw [wedge_product_uncurryFin_apply]
 
 
-noncomputable local instance threeShuffleFintype (m n p : ℕ) :
-    Fintype (Equiv.Perm.ThreeShuffle m n p) :=
-  Fintype.ofEquiv (Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p) × Equiv.Perm.ModSumCongr (Fin m) (Fin n))
-    (Equiv.Perm.ThreeShuffle.leftShuffle m n p)
-
 private def placementSummand (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (P : Equiv.Perm.ThreeShuffle m n p) (w : Fin (m + n + p) → M) : 𝕜 :=
   g (w ∘ P.mBlock.1.orderEmbOfFin P.mBlock.2) *
@@ -1627,23 +1684,23 @@ private theorem wedge_mul_assoc_rhs_can_point (g : M [⋀^Fin m]→L[𝕜] 𝕜)
         ((((w ∘ finSumFinEquiv) ∘ (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm ∘ Sum.inl) ∘
           finSumFinEquiv)) *
         l ((w ∘ finSumFinEquiv) ∘ (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm ∘ Sum.inr) =
-      (Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).canonR) : 𝕜) •
+      (Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).canonicalRight) : 𝕜) •
           placementSummand g h l (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)) w := by
   let P : Equiv.Perm.ThreeShuffle m n p := Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)
   let σ₂ : Equiv.Perm (Fin (m + n) ⊕ Fin p) := P.rightOuter.toPerm
   let τ₂ : Equiv.Perm (Fin m ⊕ Fin n) := P.rightInner.toPerm
   have hτ : Quotient.mk'' τ₂ = q₄ := by
     dsimp [τ₂, P, Equiv.Perm.ThreeShuffle.leftShuffle]
-    rw [show (Equiv.Perm.ThreeShuffle.twoShuffleThreeShuffle m n p
+    rw [show (Equiv.Perm.ThreeShuffle.leftAssocShuffle m n p
         ((Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle (m + n) p) q₂,
           (Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle m n) q₄)).rightInner =
         (Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle m n) q₄ from by
-          simp [Equiv.Perm.ThreeShuffle.twoShuffleThreeShuffle_rightInner]]
+          simp [Equiv.Perm.ThreeShuffle.leftAssocShuffle_rightInner]]
     exact (Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle m n).left_inv q₄
   change Equiv.Perm.sign σ₂ •
     uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄
       ((((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) ∘ finSumFinEquiv)) * l ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr) =
-    (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonR P) : 𝕜) • placementSummand g h l P w
+    (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonicalRight P) : 𝕜) • placementSummand g h l P w
   have hg : (fun i => (((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) ∘ finSumFinEquiv) (τ₂ (Sum.inl i))) =
       w ∘ P.mBlock.1.orderEmbOfFin P.mBlock.2 := by
     funext i
@@ -1670,7 +1727,7 @@ private theorem wedge_mul_assoc_rhs_can_point (g : M [⋀^Fin m]→L[𝕜] 𝕜)
   simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
   rw [hg, hh, hl]
   rw [placementSummand]
-  have hsign : Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonR P) =
+  have hsign : Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonicalRight P) =
       Equiv.Perm.sign σ₂ * Equiv.Perm.sign τ₂ := by
     change Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.mergeRight (P.rightOuter.toPerm) (P.rightInner.toPerm)) =
       Equiv.Perm.sign (P.rightOuter.toPerm) * Equiv.Perm.sign (P.rightInner.toPerm)
@@ -1713,7 +1770,7 @@ private theorem wedge_mul_assoc_rhs_sum (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : 
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
     ((g ∧[𝕜] h) ∧[𝕜] l) w =
       ∑ P : Equiv.Perm.ThreeShuffle m n p,
-        (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonR P) : 𝕜) • placementSummand g h l P w := by
+        (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonicalRight P) : 𝕜) • placementSummand g h l P w := by
   rw [wedge_mul_assoc_rhs_can]
   rw [← Finset.sum_product (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p)))
     (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin m) (Fin n)))
@@ -1840,7 +1897,7 @@ private theorem wedge_mul_assoc_lhs_can_point (g : M [⋀^Fin m]→L[𝕜] 𝕜)
         l (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
           (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm ∘ Sum.inr ∘
             finSumFinEquiv ∘ (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm ∘ Sum.inr)) =
-      (Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).canonL) : 𝕜) •
+      (Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).canonicalLeft) : 𝕜) •
           placementSummand g h l (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)) w := by
   let P : Equiv.Perm.ThreeShuffle m n p := Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)
   let σ₁ : Equiv.Perm (Fin m ⊕ Fin (n + p)) := P.leftOuter.toPerm
@@ -1849,7 +1906,7 @@ private theorem wedge_mul_assoc_lhs_can_point (g : M [⋀^Fin m]→L[𝕜] 𝕜)
     g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl) *
     h (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr ∘ finSumFinEquiv) ∘ τ₁ ∘ Sum.inl) *
     l (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr ∘ finSumFinEquiv) ∘ τ₁ ∘ Sum.inr) =
-    (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonL P) : 𝕜) • placementSummand g h l P w
+    (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonicalLeft P) : 𝕜) • placementSummand g h l P w
   have hg : (w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl =
       w ∘ P.mBlock.1.orderEmbOfFin P.mBlock.2 := by
     funext i
@@ -1881,7 +1938,7 @@ private theorem wedge_mul_assoc_lhs_can_point (g : M [⋀^Fin m]→L[𝕜] 𝕜)
       (Equiv.Perm.ThreeShuffle.leftInner_compl_emb P k))
   rw [hg, hh, hl]
   rw [placementSummand]
-  have hsign : Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonL P) =
+  have hsign : Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonicalLeft P) =
       Equiv.Perm.sign σ₁ * Equiv.Perm.sign τ₁ := by
     change Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.mergeLeft (P.leftOuter.toPerm) (P.leftInner.toPerm)) =
       Equiv.Perm.sign (P.leftOuter.toPerm) * Equiv.Perm.sign (P.leftInner.toPerm)
@@ -1916,14 +1973,14 @@ private theorem wedge_mul_assoc_lhs_can (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : 
       (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm = σ₀ := by
     intro q₃
     dsimp [σ₀, Equiv.Perm.ThreeShuffle.rightShuffle]
-    simp [Equiv.Perm.ThreeShuffle.rightShuffleTwoShuffle_leftOuter,
+    simp [Equiv.Perm.ThreeShuffle.rightAssocShuffle_leftOuter,
       Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle]
   have hτ₀' : ∀ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
       (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm =
         (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm := by
     intro q₃
     dsimp [Equiv.Perm.ThreeShuffle.rightShuffle]
-    simp [Equiv.Perm.ThreeShuffle.rightShuffleTwoShuffle_leftInner,
+    simp [Equiv.Perm.ThreeShuffle.rightAssocShuffle_leftInner,
       Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle]
   rw [wedge_mul_assoc_lhs_cosets g h l w (Quot.out q₁) σ₀ hσ₀.symm]
   rw [← wedge_mul_assoc_lhs_inner g h l w σ₀]
@@ -1975,7 +2032,7 @@ private theorem wedge_mul_assoc_lhs_sum (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : 
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
     (g ∧[𝕜] (h ∧[𝕜] l)) (w ∘ Fin.finAssoc.symm) =
       ∑ P : Equiv.Perm.ThreeShuffle m n p,
-        (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonL P) : 𝕜) • placementSummand g h l P w := by
+        (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonicalLeft P) : 𝕜) • placementSummand g h l P w := by
   rw [wedge_mul_assoc_lhs_can]
   rw [← Finset.sum_product (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin m) (Fin (n + p))))
     (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin n) (Fin p)))
@@ -2012,7 +2069,7 @@ theorem wedge_mul_assoc (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→
   rw [wedge_mul_assoc_rhs_sum g h l w]
   rw [Finset.sum_congr rfl]
   intro P _
-  rw [Equiv.Perm.ThreeShuffle.sign_canonL_canonR P]
+  rw [Equiv.Perm.ThreeShuffle.sign_canonicalLeft_canonicalRight P]
 private lemma tensorProductMap_mul_swap (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     (tensorProductMap h g (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
       (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap.domDomCongr finAddFlip := by

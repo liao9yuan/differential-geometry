@@ -3,6 +3,7 @@ name: Lean Build CI
 on:
   push:
     branches: [ "main" ]
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -31,3 +32,12 @@ jobs:
       - name: Run audit suite
         run: |
           bash Scripts/audit.sh
+
+      - name: Check build warnings against allowlist
+        run: |
+          lake build DifferentialGeometry > /tmp/build.log 2>&1 || { cat /tmp/build.log; exit 1; }
+          grep "warning" /tmp/build.log | sed -E 's/^warning: //' | sort > /tmp/warnings.txt
+          if ! diff -u Scripts/warnings.allowlist /tmp/warnings.txt; then
+            echo "FAIL: build warnings differ from the allowlist (add new warnings only with owner approval)"
+            exit 1
+          fi

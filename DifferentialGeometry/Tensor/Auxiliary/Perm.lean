@@ -15,7 +15,6 @@ variable {m n p k : ℕ}
 def addAssocPerm : Equiv.Perm ((Fin m ⊕ Fin n) ⊕ Fin p) ≃ Equiv.Perm (Fin m ⊕ Fin n ⊕ Fin p) :=
     Equiv.permCongr (Equiv.sumAssoc (Fin m) (Fin n) (Fin p))
 
-@[simp]
 lemma addAssocPerm_symm_addAssocPerm (σ₁ : Equiv.Perm ((Fin m ⊕ Fin n) ⊕ Fin p)) :
     addAssocPerm.symm (addAssocPerm σ₁) = σ₁ := by
   exact Equiv.symm_apply_apply addAssocPerm σ₁

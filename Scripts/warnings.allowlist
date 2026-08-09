@@ -1,0 +1,41 @@
+DifferentialGeometry/Analysis/Sobolev/TensorHilbert/Rellich.lean:57:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Comparison/HopfRinow.lean:637:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Comparison/HopfRinow.lean:668:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Comparison/HopfRinow.lean:694:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Comparison/Volume/SegmentPolar.lean:121:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Comparison/Volume/SegmentPolar.lean:175:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Comparison/Volume/SegmentPole.lean:97:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/DimensionThree/HamiltonPositiveRicci.lean:2771:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/DimensionThree/HamiltonPositiveRicci.lean:650:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/BernsteinComplete.lean:2916:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/ExtendViaUniqueness.lean:168:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/ExtendViaUniqueness.lean:72:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Metric/Basic.lean:217:12: `DifferentialGeometry.PDE.RicciFlow.InverseMetricComponentsInFrameOn` has been deprecated: use InvMetricLocal on the actual local frame domain
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Metric/Basic.lean:218:4: `DifferentialGeometry.PDE.RicciFlow.SymmetricInverseMetricComponentsInFrameOn` has been deprecated: use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Metric/InverseSmooth.lean:251:12: `DifferentialGeometry.PDE.RicciFlow.InverseMetricComponentsInFrameOn` has been deprecated: use InvMetricLocal on the actual local frame domain
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Metric/InverseSmooth.lean:271:12: `DifferentialGeometry.PDE.RicciFlow.InverseMetricComponentsInFrameOn` has been deprecated: use InvMetricLocal on the actual local frame domain
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Metric/InverseSmooth.lean:291:12: `DifferentialGeometry.PDE.RicciFlow.InverseMetricComponentsInFrameOn` has been deprecated: use InvMetricLocal on the actual local frame domain
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Metric/InverseSmooth.lean:305:12: `DifferentialGeometry.PDE.RicciFlow.InverseMetricComponentsInFrameOn` has been deprecated: use InvMetricLocal on the actual local frame domain
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Commutator.lean:1064:4: `DifferentialGeometry.PDE.RicciFlow.ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Commutator.lean:1071:4: `DifferentialGeometry.PDE.RicciFlow.ricciSymm_regular` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Commutator.lean:1075:4: `DifferentialGeometry.PDE.RicciFlow.RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_ricciIdentity` has been deprecated: use the local contracted-commutator route instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Commutator.lean:263:4: `DifferentialGeometry.PDE.RicciFlow.ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Commutator.lean:999:7: `DifferentialGeometry.PDE.RicciFlow.ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity` has been deprecated: use a local or pointwise commutator producer instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Lichnerowicz.lean:305:12: `DifferentialGeometry.PDE.RicciFlow.SymmetricInverseMetricComponentsInFrameOn` has been deprecated: use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Lichnerowicz.lean:504:12: `DifferentialGeometry.PDE.RicciFlow.SymmetricInverseMetricComponentsInFrameOn` has been deprecated: use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Lichnerowicz.lean:529:12: `DifferentialGeometry.PDE.RicciFlow.SymmetricInverseMetricComponentsInFrameOn` has been deprecated: use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Lichnerowicz.lean:582:4: `DifferentialGeometry.PDE.RicciFlow.ricciSymm_regular` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Lichnerowicz.lean:585:14: `DifferentialGeometry.PDE.RicciFlow.SymmetricInverseMetricComponentsInFrameOn` has been deprecated: use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Lichnerowicz.lean:634:12: `DifferentialGeometry.PDE.RicciFlow.SymmetricInverseMetricComponentsInFrameOn` has been deprecated: use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Ricci/Lichnerowicz.lean:679:5: `DifferentialGeometry.PDE.RicciFlow.ricciLichnerowiczSpecializesInFrame_lc` has been deprecated: use a local or pointwise Lichnerowicz specialization instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Scalar/Assembly.lean:125:4: `DifferentialGeometry.PDE.RicciFlow.scalarRmRicciTraceInFrame_of_rm04_first_trace` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Scalar/Assembly.lean:183:4: `DifferentialGeometry.PDE.RicciFlow.scalarRmRicciTraceInFrame_of_rm04_first_trace_regular` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Scalar/Assembly.lean:250:4: `DifferentialGeometry.PDE.RicciFlow.ricciSymm_regular` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/Scalar/Assembly.lean:252:8: `DifferentialGeometry.PDE.RicciFlow.scalarEvolutionEquationOn_of_ricciEvolution_regular` has been deprecated: use a local or intrinsic scalar-evolution route instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/ScalarLowerBound.lean:565:6: `DifferentialGeometry.PDE.RicciFlow.RicciTraceNormCauchySchwarzInFrame.of_metric_inverse_frame` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/ScalarLowerBound.lean:864:6: `DifferentialGeometry.PDE.RicciFlow.RicciTraceNormCauchySchwarzInFrame.of_metric_inverse_frame` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/ScalarLowerBound.lean:939:6: `DifferentialGeometry.PDE.RicciFlow.RicciTraceNormCauchySchwarzInFrame.of_metric_inverse_frame` has been deprecated: use a local or pointwise frame statement instead
+DifferentialGeometry/Geometry/Flow/RicciFlow/HCGCompactness/HamiltonCompactness.lean:53:8: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/HCGCompactness/MetricCompactness.lean:1392:4: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/HCGCompactness/NoncollapseInjectivity.lean:116:18: declaration uses `sorry`
+DifferentialGeometry/Geometry/Flow/RicciFlow/ShortTime/WeylEigenvalueCountingBound.lean:88:8: declaration uses `sorry`
