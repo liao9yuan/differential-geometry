@@ -2933,6 +2933,7 @@ import DifferentialGeometry.Tensor.Auxiliary.Perm
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Decomposition
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
+import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Placement
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
 import DifferentialGeometry.Tensor.Auxiliary.SlotAlgebra
 import DifferentialGeometry.Tensor.Exterior.Basic

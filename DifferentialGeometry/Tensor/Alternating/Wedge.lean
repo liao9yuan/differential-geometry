@@ -14,6 +14,7 @@ import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
+import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Placement
 
 
 noncomputable section
@@ -1809,130 +1810,522 @@ private theorem toAlternatingMap_domDomCongr {ι ι' : Type*} (e : ι ≃ ι')
     (domDomCongr e f).toAlternatingMap = f.toAlternatingMap.domDomCongr e := by
   rfl
 
-theorem wedge_mul_assoc [CharZero 𝕜]
-    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+noncomputable local instance threeShuffleFintype (m n p : ℕ) :
+    Fintype (Equiv.Perm.ThreeShuffle m n p) :=
+  Fintype.ofEquiv (Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p) × Equiv.Perm.ModSumCongr (Fin m) (Fin n))
+    (Equiv.Perm.ThreeShuffle.leftShuffle m n p)
+
+private def placementSummand (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (P : Equiv.Perm.ThreeShuffle m n p) (w : Fin (m + n + p) → M) : 𝕜 :=
+  g (w ∘ P.mBlock.1.orderEmbOfFin P.mBlock.2) *
+    h (w ∘ (Equiv.Perm.ThreeShuffle.nBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.nBlock P).2) *
+      l (w ∘ (Equiv.Perm.ThreeShuffle.pBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.pBlock P).2)
+
+private theorem uncurrySum_summand_quot_eval {ι ι' : Type*} [Fintype ι] [Fintype ι'] [DecidableEq ι] [DecidableEq ι']
+    (f : M [⋀^ι]→L[𝕜] M [⋀^ι']→L[𝕜] 𝕜) (q : Equiv.Perm.ModSumCongr ι ι')
+    (v : ι ⊕ ι' → M) :
+    uncurrySum.summand f q v =
+      Equiv.Perm.sign (Quot.out q) • f (fun i => v ((Quot.out q) (Sum.inl i)))
+        (fun i => v ((Quot.out q) (Sum.inr i))) := by
+  conv_lhs =>
+    rw [← Quotient.out_eq q]
+  exact uncurrySum_summand_eval f (Quot.out q) v
+
+private theorem wedge_mul_assoc_rhs_expand (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
+    ((g ∧[𝕜] h) ∧[𝕜] l) w =
+      ∑ q₂ : Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p),
+        Equiv.Perm.sign (Quot.out q₂ : Equiv.Perm (Fin (m + n) ⊕ Fin p)) •
+          ((g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ (Quot.out q₂ : Equiv.Perm (Fin (m + n) ⊕ Fin p)) ∘ Sum.inl) *
+            l ((w ∘ finSumFinEquiv) ∘ (Quot.out q₂ : Equiv.Perm (Fin (m + n) ⊕ Fin p)) ∘ Sum.inr)) := by
+  rw [wedge_product_def, uncurryFinAdd]
+  rw [ContinuousAlternatingMap.domDomCongr_apply]
+  rw [uncurrySum_apply]
+  simp only [ContinuousMultilinearMap.sum_apply]
+  rw [Finset.sum_congr rfl]
+  intro q₂ _
+  let σ₂ : Equiv.Perm (Fin (m + n) ⊕ Fin p) := Quot.out q₂
+  change uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ (g ∧[𝕜] h) l)
+      q₂ (w ∘ finSumFinEquiv) =
+    Equiv.Perm.sign σ₂ • ((g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) *
+      l ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr))
+  conv_lhs =>
+    rw [← Quotient.out_eq q₂]
+  rw [uncurrySum_summand_eval]
+  simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  calc
+    Equiv.Perm.sign σ₂ •
+        (((g ∧[𝕜] h) fun i => (w ∘ finSumFinEquiv) (σ₂ (Sum.inl i))) *
+          l fun i => (w ∘ finSumFinEquiv) (σ₂ (Sum.inr i))) =
+        Equiv.Perm.sign σ₂ •
+          ((g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) *
+            l fun i => (w ∘ finSumFinEquiv) (σ₂ (Sum.inr i))) := by
+      apply congrArg (fun s : 𝕜 => Equiv.Perm.sign σ₂ • s)
+      apply congrArg (fun x : 𝕜 => x * l (fun i => (w ∘ finSumFinEquiv) (σ₂ (Sum.inr i))))
+      apply congrArg (g ∧[𝕜] h)
+      funext i
+      rfl
+    _ = Equiv.Perm.sign σ₂ •
+          ((g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) *
+            l ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr)) := by
+      apply congrArg (fun s : 𝕜 => Equiv.Perm.sign σ₂ • s)
+      apply congrArg (fun y : 𝕜 => (g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) * y)
+      apply congrArg l
+      funext i
+      rfl
+
+private theorem wedge_mul_assoc_rhs_inner (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M)
+    (σ₂ : Equiv.Perm (Fin (m + n) ⊕ Fin p)) :
+    ∑ q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+      Equiv.Perm.sign σ₂ •
+        uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄
+          ((((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) ∘ finSumFinEquiv)) *
+          l ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr) =
+      Equiv.Perm.sign σ₂ • ((g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) *
+          l ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr)) := by
+  let v₁ : Fin (m + n) → M := (w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl
+  let v₂ : Fin p → M := (w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr
+  change ∑ q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+      Equiv.Perm.sign σ₂ • uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄ (v₁ ∘ finSumFinEquiv) * l v₂ =
+    Equiv.Perm.sign σ₂ • ((g ∧[𝕜] h) v₁ * l v₂)
+  have hgh : (g ∧[𝕜] h) v₁ =
+      ∑ q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+        uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄ (v₁ ∘ finSumFinEquiv) := by
+    rw [wedge_product_def, uncurryFinAdd]
+    rw [ContinuousAlternatingMap.domDomCongr_apply]
+    rw [uncurrySum_apply]
+    simp only [ContinuousMultilinearMap.sum_apply]
+  calc
+    (∑ q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+        (Equiv.Perm.sign σ₂ • uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄ (v₁ ∘ finSumFinEquiv)) * l v₂)
+        = (Equiv.Perm.sign σ₂ • (∑ q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+            uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄ (v₁ ∘ finSumFinEquiv))) * l v₂ := by
+      simp [Units.smul_def, Finset.mul_sum, Finset.sum_mul, mul_assoc]
+    _ = Equiv.Perm.sign σ₂ • ((∑ q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+          uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄ (v₁ ∘ finSumFinEquiv)) * l v₂) := by
+      simp [Units.smul_def, mul_assoc]
+    _ = Equiv.Perm.sign σ₂ • ((g ∧[𝕜] h) v₁ * l v₂) := by
+      simp [hgh, Units.smul_def]
+
+private theorem wedge_mul_assoc_rhs_quot (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M)
+    (σ₂ : Equiv.Perm (Fin (m + n) ⊕ Fin p)) :
+    Equiv.Perm.sign σ₂ •
+      ((g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) * l ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr)) =
+      uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ (g ∧[𝕜] h) l) (Quotient.mk'' σ₂) (w ∘ finSumFinEquiv) := by
+  rw [uncurrySum_summand_eval]
+  simp [ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply']
+  rfl
+
+private theorem wedge_mul_assoc_rhs_cosets (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M)
+    (σ₂ σ₂' : Equiv.Perm (Fin (m + n) ⊕ Fin p))
+    (hσ : Equiv.Perm.TwoShuffle.ofPerm σ₂ = Equiv.Perm.TwoShuffle.ofPerm σ₂') :
+    Equiv.Perm.sign σ₂ •
+      ((g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) * l ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr)) =
+      Equiv.Perm.sign σ₂' •
+        ((g ∧[𝕜] h) ((w ∘ finSumFinEquiv) ∘ σ₂' ∘ Sum.inl) *
+          l ((w ∘ finSumFinEquiv) ∘ σ₂' ∘ Sum.inr)) := by
+  rw [wedge_mul_assoc_rhs_quot g h l w σ₂]
+  rw [wedge_mul_assoc_rhs_quot g h l w σ₂']
+  rw [Equiv.Perm.TwoShuffle.quotient_eq_of_ofPerm_eq hσ]
+
+private theorem wedge_mul_assoc_rhs_can_point (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M)
+    (q₂ : Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p))
+    (q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n)) :
+    Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm) •
+      uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄
+        ((((w ∘ finSumFinEquiv) ∘ (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm ∘ Sum.inl) ∘
+          finSumFinEquiv)) *
+        l ((w ∘ finSumFinEquiv) ∘ (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm ∘ Sum.inr) =
+      (Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).canonR) : 𝕜) •
+          placementSummand g h l (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)) w := by
+  let P : Equiv.Perm.ThreeShuffle m n p := Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)
+  let σ₂ : Equiv.Perm (Fin (m + n) ⊕ Fin p) := P.rightOuter.toPerm
+  let τ₂ : Equiv.Perm (Fin m ⊕ Fin n) := P.rightInner.toPerm
+  have hτ : Quotient.mk'' τ₂ = q₄ := by
+    dsimp [τ₂, P, Equiv.Perm.ThreeShuffle.leftShuffle]
+    rw [show (Equiv.Perm.ThreeShuffle.twoShuffleThreeShuffle m n p
+        ((Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle (m + n) p) q₂,
+          (Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle m n) q₄)).rightInner =
+        (Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle m n) q₄ from by
+          simp [Equiv.Perm.ThreeShuffle.twoShuffleThreeShuffle_rightInner]]
+    exact (Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle m n).left_inv q₄
+  change Equiv.Perm.sign σ₂ •
+    uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄
+      ((((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) ∘ finSumFinEquiv)) * l ((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr) =
+    (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonR P) : 𝕜) • placementSummand g h l P w
+  have hg : (fun i => (((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) ∘ finSumFinEquiv) (τ₂ (Sum.inl i))) =
+      w ∘ P.mBlock.1.orderEmbOfFin P.mBlock.2 := by
+    funext i
+    change w (finSumFinEquiv (σ₂ (Sum.inl (finSumFinEquiv (τ₂ (Sum.inl i)))))) =
+      w (P.mBlock.1.orderEmbOfFin P.mBlock.2 i)
+    rw [Equiv.Perm.TwoShuffle.toPerm_inl, Equiv.Perm.TwoShuffle.toPerm_inl]
+    exact congrArg w (Equiv.Perm.ThreeShuffle.rightInner_emb P i)
+  have hh : (fun j => (((w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inl) ∘ finSumFinEquiv) (τ₂ (Sum.inr j))) =
+      w ∘ (Equiv.Perm.ThreeShuffle.nBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.nBlock P).2 := by
+    funext j
+    change w (finSumFinEquiv (σ₂ (Sum.inl (finSumFinEquiv (τ₂ (Sum.inr j)))))) =
+      w ((Equiv.Perm.ThreeShuffle.nBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.nBlock P).2 j)
+    rw [Equiv.Perm.TwoShuffle.toPerm_inl, Equiv.Perm.TwoShuffle.toPerm_inr]
+    exact congrArg w (Equiv.Perm.ThreeShuffle.rightInner_compl_emb P j)
+  have hl : (w ∘ finSumFinEquiv) ∘ σ₂ ∘ Sum.inr =
+      w ∘ (Equiv.Perm.ThreeShuffle.pBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.pBlock P).2 := by
+    funext k
+    change w (finSumFinEquiv (σ₂ (Sum.inr k))) =
+      w ((Equiv.Perm.ThreeShuffle.pBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.pBlock P).2 k)
+    rw [Equiv.Perm.TwoShuffle.toPerm_inr]
+    rfl
+  rw [← hτ]
+  rw [uncurrySum_summand_eval]
+  simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rw [hg, hh, hl]
+  rw [placementSummand]
+  have hsign : Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonR P) =
+      Equiv.Perm.sign σ₂ * Equiv.Perm.sign τ₂ := by
+    change Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.mergeRight (P.rightOuter.toPerm) (P.rightInner.toPerm)) =
+      Equiv.Perm.sign (P.rightOuter.toPerm) * Equiv.Perm.sign (P.rightInner.toPerm)
+    exact Equiv.Perm.ThreeShuffle.sign_mergeRight (P.rightOuter.toPerm) (P.rightInner.toPerm)
+  rw [hsign]
+  simp [Units.smul_def, smul_eq_mul, Units.val_mul, mul_assoc]
+
+private theorem wedge_mul_assoc_rhs_can (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
+    ((g ∧[𝕜] h) ∧[𝕜] l) w =
+      ∑ q₂ : Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p),
+        ∑ q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+          Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm) •
+            uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) q₄
+              ((((w ∘ finSumFinEquiv) ∘
+                (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm ∘ Sum.inl) ∘
+                finSumFinEquiv)) *
+              l ((w ∘ finSumFinEquiv) ∘
+                (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm ∘ Sum.inr) := by
+  rw [wedge_mul_assoc_rhs_expand]
+  rw [Finset.sum_congr rfl]
+  intro q₂ _
+  let σ₀ : Equiv.Perm (Fin (m + n) ⊕ Fin p) :=
+    (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₂)).toPerm
+  have hσ₀ : Equiv.Perm.TwoShuffle.ofPerm σ₀ = Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₂) := by
+    dsimp [σ₀]
+    rw [Equiv.Perm.TwoShuffle.ofPerm_toPerm]
+  have hσ₀' : ∀ q₄ : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+      (Equiv.Perm.ThreeShuffle.leftShuffle m n p (q₂, q₄)).rightOuter.toPerm = σ₀ := by
+    intro q₄
+    dsimp [σ₀, Equiv.Perm.ThreeShuffle.leftShuffle]
+    simp [Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle]
+  rw [wedge_mul_assoc_rhs_cosets g h l w (Quot.out q₂) σ₀ hσ₀.symm]
+  rw [← wedge_mul_assoc_rhs_inner g h l w σ₀]
+  rw [Finset.sum_congr rfl]
+  intro q₄ _
+  rw [← hσ₀' q₄]
+
+private theorem wedge_mul_assoc_rhs_sum (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
+    ((g ∧[𝕜] h) ∧[𝕜] l) w =
+      ∑ P : Equiv.Perm.ThreeShuffle m n p,
+        (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonR P) : 𝕜) • placementSummand g h l P w := by
+  rw [wedge_mul_assoc_rhs_can]
+  rw [← Finset.sum_product (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p)))
+    (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin m) (Fin n)))
+    (fun x : Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p) × Equiv.Perm.ModSumCongr (Fin m) (Fin n) =>
+      Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.leftShuffle m n p x).rightOuter.toPerm) •
+        uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) x.2
+          ((((w ∘ finSumFinEquiv) ∘ (Equiv.Perm.ThreeShuffle.leftShuffle m n p x).rightOuter.toPerm ∘ Sum.inl) ∘
+            finSumFinEquiv)) *
+          l ((w ∘ finSumFinEquiv) ∘ (Equiv.Perm.ThreeShuffle.leftShuffle m n p x).rightOuter.toPerm ∘ Sum.inr))]
+  simp only [Finset.univ_product_univ]
+  rw [← Finset.sum_bij (fun x : Equiv.Perm.ModSumCongr (Fin (m + n)) (Fin p) ×
+        Equiv.Perm.ModSumCongr (Fin m) (Fin n) => fun _ => Equiv.Perm.ThreeShuffle.leftShuffle m n p x)
+    (fun x _ => Finset.mem_univ _) (by
+      intro a₁ _ a₂ _ h
+      exact (Equiv.Perm.ThreeShuffle.leftShuffle m n p).injective h) (by
+      intro b _
+      refine ⟨(Equiv.Perm.ThreeShuffle.leftShuffle m n p).symm b, Finset.mem_univ _, ?_⟩
+      exact (Equiv.Perm.ThreeShuffle.leftShuffle m n p).apply_symm_apply b) (by
+      intro a _
+      exact wedge_mul_assoc_rhs_can_point g h l w a.1 a.2)]
+
+private theorem wedge_mul_assoc_lhs_expand (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
+    (g ∧[𝕜] (h ∧[𝕜] l)) (w ∘ Fin.finAssoc.symm) =
+      ∑ q₁ : Equiv.Perm.ModSumCongr (Fin m) (Fin (n + p)),
+        Equiv.Perm.sign (Quot.out q₁ : Equiv.Perm (Fin m ⊕ Fin (n + p))) •
+          (g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ (Quot.out q₁ : Equiv.Perm (Fin m ⊕ Fin (n + p))) ∘ Sum.inl) *
+            (h ∧[𝕜] l) ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ (Quot.out q₁ : Equiv.Perm (Fin m ⊕ Fin (n + p))) ∘ Sum.inr)) := by
+  rw [wedge_product_def, uncurryFinAdd]
+  rw [ContinuousAlternatingMap.domDomCongr_apply]
+  rw [uncurrySum_apply]
+  simp only [ContinuousMultilinearMap.sum_apply]
+  rw [Finset.sum_congr rfl]
+  intro q₁ _
+  let σ₁ : Equiv.Perm (Fin m ⊕ Fin (n + p)) := Quot.out q₁
+  change uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g (h ∧[𝕜] l))
+      q₁ ((w ∘ Fin.finAssoc.symm) ∘ finSumFinEquiv) =
+    Equiv.Perm.sign σ₁ • (g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl) *
+      (h ∧[𝕜] l) ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr))
+  conv_lhs =>
+    rw [← Quotient.out_eq q₁]
+  rw [uncurrySum_summand_eval]
+  simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rfl
+
+private theorem wedge_mul_assoc_lhs_inner (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M)
+    (σ₁ : Equiv.Perm (Fin m ⊕ Fin (n + p))) :
+    ∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+      Equiv.Perm.sign σ₁ •
+        uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ h l) q₃
+          ((((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr) ∘ finSumFinEquiv)) *
+          g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl) =
+      Equiv.Perm.sign σ₁ • (g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl) *
+          (h ∧[𝕜] l) ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr)) := by
+  let v₁ : Fin (n + p) → M := (w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr
+  let v₂ : Fin m → M := (w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl
+  change ∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+      Equiv.Perm.sign σ₁ • uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ h l) q₃ (v₁ ∘ finSumFinEquiv) * g v₂ =
+    Equiv.Perm.sign σ₁ • (g v₂ * (h ∧[𝕜] l) v₁)
+  have hhl : (h ∧[𝕜] l) v₁ =
+      ∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+        uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ h l) q₃ (v₁ ∘ finSumFinEquiv) := by
+    rw [wedge_product_def, uncurryFinAdd]
+    rw [ContinuousAlternatingMap.domDomCongr_apply]
+    rw [uncurrySum_apply]
+    simp only [ContinuousMultilinearMap.sum_apply]
+  calc
+    (∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+        (Equiv.Perm.sign σ₁ • uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ h l) q₃ (v₁ ∘ finSumFinEquiv)) * g v₂)
+        = (Equiv.Perm.sign σ₁ • (∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+            uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ h l) q₃ (v₁ ∘ finSumFinEquiv))) * g v₂ := by
+      simp [Units.smul_def, Finset.mul_sum, Finset.sum_mul, mul_assoc]
+    _ = Equiv.Perm.sign σ₁ • ((∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+          uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ h l) q₃ (v₁ ∘ finSumFinEquiv)) * g v₂) := by
+      simp [Units.smul_def, mul_assoc]
+    _ = Equiv.Perm.sign σ₁ • (g v₂ * (h ∧[𝕜] l) v₁) := by
+      rw [show (∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+            uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ h l) q₃
+              (v₁ ∘ finSumFinEquiv)) * g v₂ =
+          g v₂ * (∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+            uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ h l) q₃
+              (v₁ ∘ finSumFinEquiv)) from by
+        rw [mul_comm]]
+      simp [hhl, Units.smul_def]
+
+private theorem wedge_mul_assoc_lhs_quot (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M)
+    (σ₁ : Equiv.Perm (Fin m ⊕ Fin (n + p))) :
+    Equiv.Perm.sign σ₁ •
+      ((g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl) *
+        (h ∧[𝕜] l) ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr))) =
+      uncurrySum.summand ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g (h ∧[𝕜] l))
+        (Quotient.mk'' σ₁) ((w ∘ Fin.finAssoc.symm) ∘ finSumFinEquiv) := by
+  rw [uncurrySum_summand_eval]
+  simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rfl
+
+private theorem wedge_mul_assoc_lhs_cosets (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M)
+    (σ₁ σ₁' : Equiv.Perm (Fin m ⊕ Fin (n + p)))
+    (hσ : Equiv.Perm.TwoShuffle.ofPerm σ₁ = Equiv.Perm.TwoShuffle.ofPerm σ₁') :
+    Equiv.Perm.sign σ₁ •
+      ((g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl) *
+        (h ∧[𝕜] l) ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr))) =
+      Equiv.Perm.sign σ₁' •
+        ((g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁' ∘ Sum.inl) *
+          (h ∧[𝕜] l) ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁' ∘ Sum.inr))) := by
+  rw [wedge_mul_assoc_lhs_quot g h l w σ₁]
+  rw [wedge_mul_assoc_lhs_quot g h l w σ₁']
+  rw [Equiv.Perm.TwoShuffle.quotient_eq_of_ofPerm_eq hσ]
+
+private theorem wedge_mul_assoc_lhs_can_point (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M)
+    (q₁ : Equiv.Perm.ModSumCongr (Fin m) (Fin (n + p)))
+    (q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p)) :
+    Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm) •
+      Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm) •
+        g (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+          (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm ∘ Sum.inl)) *
+        h (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+          (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm ∘ Sum.inr ∘
+            finSumFinEquiv ∘ (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm ∘ Sum.inl)) *
+        l (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+          (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm ∘ Sum.inr ∘
+            finSumFinEquiv ∘ (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm ∘ Sum.inr)) =
+      (Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).canonL) : 𝕜) •
+          placementSummand g h l (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)) w := by
+  let P : Equiv.Perm.ThreeShuffle m n p := Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)
+  let σ₁ : Equiv.Perm (Fin m ⊕ Fin (n + p)) := P.leftOuter.toPerm
+  let τ₁ : Equiv.Perm (Fin n ⊕ Fin p) := P.leftInner.toPerm
+  change Equiv.Perm.sign σ₁ • Equiv.Perm.sign τ₁ •
+    g ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl) *
+    h (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr ∘ finSumFinEquiv) ∘ τ₁ ∘ Sum.inl) *
+    l (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr ∘ finSumFinEquiv) ∘ τ₁ ∘ Sum.inr) =
+    (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonL P) : 𝕜) • placementSummand g h l P w
+  have hg : (w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inl =
+      w ∘ P.mBlock.1.orderEmbOfFin P.mBlock.2 := by
+    funext i
+    change w (Fin.finAssoc.symm (finSumFinEquiv (σ₁ (Sum.inl i)))) =
+      w (P.mBlock.1.orderEmbOfFin P.mBlock.2 i)
+    rw [Equiv.Perm.TwoShuffle.toPerm_inl]
+    rw [Equiv.Perm.ThreeShuffle.finAssoc_symm_finAssocOrder]
+    exact congrArg w (Equiv.Perm.ThreeShuffle.leftOuter_emb P i)
+  have hh : ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr ∘ finSumFinEquiv) ∘ τ₁ ∘ Sum.inl =
+      w ∘ (Equiv.Perm.ThreeShuffle.nBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.nBlock P).2 := by
+    funext j
+    change w (Fin.finAssoc.symm (finSumFinEquiv (σ₁ (Sum.inr (finSumFinEquiv (τ₁ (Sum.inl j))))))) =
+      w ((Equiv.Perm.ThreeShuffle.nBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.nBlock P).2 j)
+    rw [Equiv.Perm.TwoShuffle.toPerm_inr, Equiv.Perm.TwoShuffle.toPerm_inl]
+    rw [Equiv.Perm.ThreeShuffle.finAssoc_symm_finAssocOrder]
+    exact congrArg w ((Equiv.Perm.ThreeShuffle.leftOuter_compl_emb P
+      ((Equiv.Perm.ThreeShuffle.leftInner P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.leftInner P).2 j)).trans
+      (Equiv.Perm.ThreeShuffle.leftInner_emb P j))
+  have hl : ((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₁ ∘ Sum.inr ∘ finSumFinEquiv) ∘ τ₁ ∘ Sum.inr =
+      w ∘ (Equiv.Perm.ThreeShuffle.pBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.pBlock P).2 := by
+    funext k
+    change w (Fin.finAssoc.symm (finSumFinEquiv (σ₁ (Sum.inr (finSumFinEquiv (τ₁ (Sum.inr k))))))) =
+      w ((Equiv.Perm.ThreeShuffle.pBlock P).1.orderEmbOfFin (Equiv.Perm.ThreeShuffle.pBlock P).2 k)
+    rw [Equiv.Perm.TwoShuffle.toPerm_inr, Equiv.Perm.TwoShuffle.toPerm_inr]
+    rw [Equiv.Perm.ThreeShuffle.finAssoc_symm_finAssocOrder]
+    exact congrArg w ((Equiv.Perm.ThreeShuffle.leftOuter_compl_emb P
+      (((Equiv.Perm.ThreeShuffle.leftInner P).1ᶜ : Finset (Fin (n + p))).orderEmbOfFin
+        (by rw [Finset.card_compl, (Equiv.Perm.ThreeShuffle.leftInner P).2, Fintype.card_fin]; omega) k)).trans
+      (Equiv.Perm.ThreeShuffle.leftInner_compl_emb P k))
+  rw [hg, hh, hl]
+  rw [placementSummand]
+  have hsign : Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonL P) =
+      Equiv.Perm.sign σ₁ * Equiv.Perm.sign τ₁ := by
+    change Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.mergeLeft (P.leftOuter.toPerm) (P.leftInner.toPerm)) =
+      Equiv.Perm.sign (P.leftOuter.toPerm) * Equiv.Perm.sign (P.leftInner.toPerm)
+    exact Equiv.Perm.ThreeShuffle.sign_mergeLeft (P.leftOuter.toPerm) (P.leftInner.toPerm)
+  rw [hsign]
+  simp [Units.smul_def, Units.val_mul, mul_assoc]
+
+private theorem wedge_mul_assoc_lhs_can (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
+    (g ∧[𝕜] (h ∧[𝕜] l)) (w ∘ Fin.finAssoc.symm) =
+      ∑ q₁ : Equiv.Perm.ModSumCongr (Fin m) (Fin (n + p)),
+        ∑ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+          Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm) •
+            Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm) •
+              g (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+                (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm ∘ Sum.inl)) *
+              h (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+                (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm ∘ Sum.inr ∘
+                  finSumFinEquiv ∘ (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm ∘ Sum.inl)) *
+              l (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+                (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm ∘ Sum.inr ∘
+                  finSumFinEquiv ∘ (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm ∘ Sum.inr)) := by
+  rw [wedge_mul_assoc_lhs_expand]
+  rw [Finset.sum_congr rfl]
+  intro q₁ _
+  let σ₀ : Equiv.Perm (Fin m ⊕ Fin (n + p)) :=
+    (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₁)).toPerm
+  have hσ₀ : Equiv.Perm.TwoShuffle.ofPerm σ₀ = Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₁) := by
+    dsimp [σ₀]
+    rw [Equiv.Perm.TwoShuffle.ofPerm_toPerm]
+  have hσ₀' : ∀ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+      (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftOuter.toPerm = σ₀ := by
+    intro q₃
+    dsimp [σ₀, Equiv.Perm.ThreeShuffle.rightShuffle]
+    simp [Equiv.Perm.ThreeShuffle.rightShuffleTwoShuffle_leftOuter,
+      Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle]
+  have hτ₀' : ∀ q₃ : Equiv.Perm.ModSumCongr (Fin n) (Fin p),
+      (Equiv.Perm.ThreeShuffle.rightShuffle m n p (q₁, q₃)).leftInner.toPerm =
+        (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm := by
+    intro q₃
+    dsimp [Equiv.Perm.ThreeShuffle.rightShuffle]
+    simp [Equiv.Perm.ThreeShuffle.rightShuffleTwoShuffle_leftInner,
+      Equiv.Perm.TwoShuffle.modSumCongrTwoShuffle]
+  rw [wedge_mul_assoc_lhs_cosets g h l w (Quot.out q₁) σ₀ hσ₀.symm]
+  rw [← wedge_mul_assoc_lhs_inner g h l w σ₀]
+  rw [Finset.sum_congr rfl]
+  intro q₃ _
+  rw [hσ₀' q₃, hτ₀' q₃]
+  have hτ : Quotient.mk''
+      ((Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm : Equiv.Perm (Fin n ⊕ Fin p)) = q₃ := by
+    exact (Equiv.Perm.TwoShuffle.quotient_eq_of_ofPerm_eq (by
+      change Equiv.Perm.TwoShuffle.ofPerm ((Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm) =
+        Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)
+      rw [Equiv.Perm.TwoShuffle.ofPerm_toPerm])).trans (Quotient.out_eq q₃)
+  conv_lhs =>
+    rw [← hτ]
+  rw [uncurrySum_summand_eval]
+  simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply',
+    Units.smul_def]
+  have hh' : (fun i : Fin n =>
+        (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₀ ∘ Sum.inr) ∘ finSumFinEquiv)
+          (((Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm : Equiv.Perm (Fin n ⊕ Fin p)) (Sum.inl i))) =
+      (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₀ ∘ Sum.inr ∘ finSumFinEquiv) ∘
+        ((Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm : Equiv.Perm (Fin n ⊕ Fin p)) ∘ Sum.inl) := by
+    funext i
+    rfl
+  have hl' : (fun i : Fin p =>
+        (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₀ ∘ Sum.inr) ∘ finSumFinEquiv)
+          (((Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm : Equiv.Perm (Fin n ⊕ Fin p)) (Sum.inr i))) =
+      (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘ σ₀ ∘ Sum.inr ∘ finSumFinEquiv) ∘
+        ((Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm : Equiv.Perm (Fin n ⊕ Fin p)) ∘ Sum.inr) := by
+    funext i
+    rfl
+  rw [hh', hl']
+  simp
+  rw [show h (((w ∘ (Equiv.Perm.ThreeShuffle.finAssocOrder m n p).symm ∘ finSumFinEquiv) ∘
+        σ₀ ∘ Sum.inr ∘ finSumFinEquiv) ∘
+        (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm ∘ Sum.inl) =
+      h ((w ∘ (Equiv.Perm.ThreeShuffle.finAssocOrder m n p).symm ∘ finSumFinEquiv) ∘
+        σ₀ ∘ Sum.inr ∘ finSumFinEquiv ∘
+        (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm ∘ Sum.inl) from rfl]
+  rw [show l (((w ∘ (Equiv.Perm.ThreeShuffle.finAssocOrder m n p).symm ∘ finSumFinEquiv) ∘
+        σ₀ ∘ Sum.inr ∘ finSumFinEquiv) ∘
+        (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm ∘ Sum.inr) =
+      l ((w ∘ (Equiv.Perm.ThreeShuffle.finAssocOrder m n p).symm ∘ finSumFinEquiv) ∘
+        σ₀ ∘ Sum.inr ∘ finSumFinEquiv ∘
+        (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm ∘ Sum.inr) from rfl]
+  ring
+
+private theorem wedge_mul_assoc_lhs_sum (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (w : Fin (m + n + p) → M) :
+    (g ∧[𝕜] (h ∧[𝕜] l)) (w ∘ Fin.finAssoc.symm) =
+      ∑ P : Equiv.Perm.ThreeShuffle m n p,
+        (Equiv.Perm.sign (Equiv.Perm.ThreeShuffle.canonL P) : 𝕜) • placementSummand g h l P w := by
+  rw [wedge_mul_assoc_lhs_can]
+  rw [← Finset.sum_product (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin m) (Fin (n + p))))
+    (Finset.univ : Finset (Equiv.Perm.ModSumCongr (Fin n) (Fin p)))
+    (fun x : Equiv.Perm.ModSumCongr (Fin m) (Fin (n + p)) × Equiv.Perm.ModSumCongr (Fin n) (Fin p) =>
+      Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p x).leftOuter.toPerm) •
+        Equiv.Perm.sign ((Equiv.Perm.ThreeShuffle.rightShuffle m n p x).leftInner.toPerm) •
+          g (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+            (Equiv.Perm.ThreeShuffle.rightShuffle m n p x).leftOuter.toPerm ∘ Sum.inl)) *
+          h (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+            (Equiv.Perm.ThreeShuffle.rightShuffle m n p x).leftOuter.toPerm ∘ Sum.inr ∘
+              finSumFinEquiv ∘ (Equiv.Perm.ThreeShuffle.rightShuffle m n p x).leftInner.toPerm ∘ Sum.inl)) *
+          l (((w ∘ Fin.finAssoc.symm ∘ finSumFinEquiv) ∘
+            (Equiv.Perm.ThreeShuffle.rightShuffle m n p x).leftOuter.toPerm ∘ Sum.inr ∘
+              finSumFinEquiv ∘ (Equiv.Perm.ThreeShuffle.rightShuffle m n p x).leftInner.toPerm ∘ Sum.inr)))]
+  simp only [Finset.univ_product_univ]
+  rw [← Finset.sum_bij (fun x : Equiv.Perm.ModSumCongr (Fin m) (Fin (n + p)) ×
+        Equiv.Perm.ModSumCongr (Fin n) (Fin p) => fun _ => Equiv.Perm.ThreeShuffle.rightShuffle m n p x)
+    (fun x _ => Finset.mem_univ _) (by
+      intro a₁ _ a₂ _ h
+      exact (Equiv.Perm.ThreeShuffle.rightShuffle m n p).injective h) (by
+      intro b _
+      refine ⟨(Equiv.Perm.ThreeShuffle.rightShuffle m n p).symm b, Finset.mem_univ _, ?_⟩
+      exact (Equiv.Perm.ThreeShuffle.rightShuffle m n p).apply_symm_apply b) (by
+      intro a _
+      exact wedge_mul_assoc_lhs_can_point g h l w a.1 a.2)]
+
+theorem wedge_mul_assoc (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) :
     domDomCongr Fin.finAssoc.symm (g ∧[𝕜] (h ∧[𝕜] l)) = ((g ∧[𝕜] h) ∧[𝕜] l) := by
-  apply ContinuousAlternatingMap.toAlternatingMap_injective
-  rw [toAlternatingMap_domDomCongr]
-  rw [wedge_toAlternatingMap (g := g) (h := h ∧[𝕜] l)]
-  rw [wedge_toAlternatingMap (g := g ∧[𝕜] h) (h := l)]
-  have hTgl : (tensorProductMap g (h ∧[𝕜] l) (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
-      ((↑(n.factorial * p.factorial) : 𝕜))⁻¹ •
-        tensorMulML g.toAlternatingMap ↑(MultilinearMap.alternatization
-          (tensorProductMap h l (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap) := by
-    rw [tensorMulML_eq_tensorProductMap (g := g) (h := h ∧[𝕜] l)]
-    rw [show ((h ∧[𝕜] l).toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin (n + p) => M) 𝕜) =
-        ((↑(n.factorial * p.factorial) : 𝕜))⁻¹ • ↑(MultilinearMap.alternatization
-          (tensorProductMap h l (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap) from by
-      simpa using congrArg (fun x : M [⋀^Fin (n + p)]→ₗ[𝕜] 𝕜 =>
-        (x : MultilinearMap 𝕜 (fun _ : Fin (n + p) => M) 𝕜))
-          (wedge_toAlternatingMap (g := h) (h := l))]
-    rw [tensorMulML_smul_right]
-  have hAlt_smul : ∀ (c : 𝕜) {n : ℕ} (X : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜),
-      MultilinearMap.alternatization (c • X) = c • MultilinearMap.alternatization X := by
-    intro c n X
-    ext v
-    simp only [MultilinearMap.alternatization_apply, AlternatingMap.smul_apply, smul_eq_mul]
-    rw [Finset.mul_sum]
-    congr 1
-    ext σ
-    change Equiv.Perm.sign σ • (c • X (v ∘ σ)) = c • (Equiv.Perm.sign σ • X (v ∘ σ))
-    exact smul_comm (Equiv.Perm.sign σ) c (X (v ∘ σ))
-  have hL : MultilinearMap.alternatization (tensorProductMap g (h ∧[𝕜] l)
-        (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
-      ((↑(n.factorial * p.factorial) : 𝕜))⁻¹ • (↑(n + p).factorial : 𝕜) •
-        MultilinearMap.alternatization (tensorMulML g.toAlternatingMap
-          (tensorProductMap h l (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap) := by
-    rw [hTgl, hAlt_smul]
-    rw [tensorMulML_alt_alt (a := g)
-      (F := (tensorProductMap h l (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap)]
-  have hTgh : (tensorProductMap (g ∧[𝕜] h) l (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
-      ((↑(m.factorial * n.factorial) : 𝕜))⁻¹ •
-        tensorMulML ↑(MultilinearMap.alternatization
-          (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap)
-          (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜) := by
-    rw [tensorMulML_eq_tensorProductMap (g := g ∧[𝕜] h) (h := l)]
-    rw [show ((g ∧[𝕜] h).toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin (m + n) => M) 𝕜) =
-        ((↑(m.factorial * n.factorial) : 𝕜))⁻¹ • ↑(MultilinearMap.alternatization
-          (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap) from by
-      simpa using congrArg (fun x : M [⋀^Fin (m + n)]→ₗ[𝕜] 𝕜 =>
-        (x : MultilinearMap 𝕜 (fun _ : Fin (m + n) => M) 𝕜))
-          (wedge_toAlternatingMap (g := g) (h := h))]
-    rw [tensorMulML_smul_left]
-  have hR : MultilinearMap.alternatization (tensorProductMap (g ∧[𝕜] h) l
-        (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
-      ((↑(m.factorial * n.factorial) : 𝕜))⁻¹ • (↑(m + n).factorial : 𝕜) •
-        MultilinearMap.alternatization (tensorMulML
-          (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap
-          (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜)) := by
-    rw [hTgh, hAlt_smul]
-    rw [tensorMulML_alt_alt_left (F := (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap)
-      (b := l)]
-  rw [hL]
-  rw [hR]
-  have hZ : MultilinearMap.alternatization (tensorMulML
-        (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap
-          (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜)) =
-      (MultilinearMap.alternatization (tensorMulML (g.toAlternatingMap : MultilinearMap 𝕜
-        (fun _ : Fin m => M) 𝕜)
-        (tensorProductMap h l (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap)).domDomCongr
-          Fin.finAssoc.symm := by
-    have hta := tensorMulML_assoc (A := (g.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜))
-      (B := (h.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜))
-      (C := (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜))
-    have hAlt := congrArg MultilinearMap.alternatization hta
-    rw [ContinuousAlternatingMap.alternatization_domDomCongr] at hAlt
-    have hconv : tensorMulML (tensorMulML (g.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜)
-        (h.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜))
-        (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜) =
-        tensorMulML (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap
-          (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜) := by
-      rw [tensorMulML_eq_tensorProductMap (g := g) (h := h)]
-    rw [hconv] at hAlt
-    have hconv' : tensorMulML (g.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜) (tensorMulML
-        (h.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin n => M) 𝕜)
-        (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜)) =
-        tensorMulML (g.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin m => M) 𝕜)
-          (tensorProductMap h l (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap := by
-      rw [tensorMulML_eq_tensorProductMap (g := h) (h := l)]
-    rw [hconv'] at hAlt
-    have hsymm : (MultilinearMap.alternatization (tensorMulML
-        (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap
-          (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜))).domDomCongr
-          Fin.finAssoc =
-        MultilinearMap.alternatization (tensorMulML (g.toAlternatingMap : MultilinearMap 𝕜
-          (fun _ : Fin m => M) 𝕜)
-          (tensorProductMap h l (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap) := hAlt
-    rw [← hsymm]
-    rw [← AlternatingMap.domDomCongr_trans (σ₁ := Fin.finAssoc) (σ₂ := Fin.finAssoc.symm)
-      (f := MultilinearMap.alternatization (tensorMulML
-        (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap
-          (l.toAlternatingMap : MultilinearMap 𝕜 (fun _ : Fin p => M) 𝕜)))]
-    simp
-  rw [hZ]
-  rw [AlternatingMap.domDomCongr_smul]
-  rw [AlternatingMap.domDomCongr_smul]
-  rw [AlternatingMap.domDomCongr_smul]
-  simp only [smul_smul]
-  have hscalar : (↑(m.factorial * (n + p).factorial) : 𝕜)⁻¹ * (↑(n.factorial * p.factorial) : 𝕜)⁻¹ *
-        (↑(n + p).factorial : 𝕜) =
-      (↑(p.factorial * (m + n).factorial) : 𝕜)⁻¹ * (↑(m.factorial * n.factorial) : 𝕜)⁻¹ *
-        (↑(m + n).factorial : 𝕜) := by
-    rw [Nat.cast_mul, Nat.cast_mul, Nat.cast_mul, Nat.cast_mul]
-    rw [mul_inv_rev, mul_inv_rev, mul_inv_rev, mul_inv_rev]
-    have hm : (↑m.factorial : 𝕜) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero m)
-    have hn : (↑n.factorial : 𝕜) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
-    have hp : (↑p.factorial : 𝕜) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero p)
-    have hnp : (↑(n + p).factorial : 𝕜) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n + p))
-    have hmn : (↑(n + m).factorial : 𝕜) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n + m))
-    have hnm : (↑(m + n).factorial : 𝕜) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (m + n))
-    field_simp [hm, hn, hp, hnp, hmn, hnm]
-  rw [← mul_assoc, ← mul_assoc, hscalar]
-  rw [show (↑(p.factorial * (m + n).factorial) : 𝕜)⁻¹ =
-      (↑((m + n).factorial * p.factorial) : 𝕜)⁻¹ from by
-    simp [Nat.mul_comm]]
-
+  apply ContinuousAlternatingMap.ext
+  intro w
+  rw [ContinuousAlternatingMap.domDomCongr_apply]
+  rw [wedge_mul_assoc_lhs_sum g h l w]
+  rw [wedge_mul_assoc_rhs_sum g h l w]
+  rw [Finset.sum_congr rfl]
+  intro P _
+  rw [Equiv.Perm.ThreeShuffle.sign_canonL_canonR P]
 private lemma tensorProductMap_mul_swap (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     (tensorProductMap h g (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap =
       (tensorProductMap g h (ContinuousLinearMap.mul 𝕜 𝕜)).toMultilinearMap.domDomCongr finAddFlip := by
