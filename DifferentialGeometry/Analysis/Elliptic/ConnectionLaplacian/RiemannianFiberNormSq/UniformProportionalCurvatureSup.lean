@@ -41,6 +41,7 @@ private lemma metric_inner_self_nonneg
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
+omit [SigmaCompactSpace M] in
 theorem exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional
     (g : SmoothRiemannianMetric I M) (t : ℕ) :
     ∃ Ccurv : M → ℝ, Continuous Ccurv ∧ (∀ x : M, 0 ≤ Ccurv x) ∧

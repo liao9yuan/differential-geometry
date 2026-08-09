@@ -350,6 +350,7 @@ private lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
   · intro K _ hK; exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
   · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
 
+omit [SigmaCompactSpace M] in
 private lemma exists_uniform_riemannOp_tensorCov_proportional
     (g : SmoothRiemannianMetric I M) (m : ℕ) :
     ∃ Csup : ℝ, 0 ≤ Csup ∧

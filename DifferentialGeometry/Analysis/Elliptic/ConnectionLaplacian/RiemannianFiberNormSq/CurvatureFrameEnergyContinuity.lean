@@ -164,6 +164,7 @@ private lemma orthonormal_rfns_exists_basis
   intro i
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
+omit [SigmaCompactSpace M] in
 theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound
     (g : SmoothRiemannianMetric I M) (t : ℕ) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -176,6 +177,7 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound
   exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound_of_leviCivitaGNormBound
     (I := I) (M := M) g t
 
+omit [SigmaCompactSpace M] in
 theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const
     (g : SmoothRiemannianMetric I M) (t : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -233,6 +235,7 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const
   refine mul_le_mul_of_nonneg_right ?_ hK_nonneg
   exact pow_le_pow_left₀ (Nat.cast_nonneg n) (by exact_mod_cast hn_le_d) (t + 2)
 
+omit [SigmaCompactSpace M] in
 theorem exists_continuous_riemannOp_tensorCovS_frameEnergy_bound
     (g : SmoothRiemannianMetric I M) (t : ℕ) :
     ∃ Ccurv : M → ℝ, Continuous Ccurv ∧ (∀ x : M, 0 ≤ Ccurv x) ∧

@@ -467,6 +467,7 @@ theorem ric_quad_le_of_soln
 
 
 
+omit [SigmaCompactSpace M] in
 theorem movingShi_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -483,6 +484,7 @@ theorem movingShi_of_soln
 
 
 
+omit [SigmaCompactSpace M] in
 theorem shiCovBound_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -587,6 +589,7 @@ theorem shiCovBound_of_soln
 
 
 
+omit [SigmaCompactSpace M] in
 theorem extendInputs_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}

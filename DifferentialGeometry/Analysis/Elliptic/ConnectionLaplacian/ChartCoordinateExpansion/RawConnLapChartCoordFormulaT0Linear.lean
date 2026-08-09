@@ -298,6 +298,7 @@ private lemma invGramPull_at_b_eq
   rw [hsymm, hleft_inv]
 
 omit [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private lemma chartFrameCoordPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -317,6 +318,7 @@ private lemma chartFrameCoordPull_at_b_eq
   rw [hsymm, hleft_inv]
 
 omit [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] in
 private lemma chartFrameCoordDirDerivPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k l : Fin (Module.finrank ℝ E))
