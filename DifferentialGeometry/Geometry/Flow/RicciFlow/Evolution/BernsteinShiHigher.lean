@@ -837,7 +837,6 @@ written as a single `Finset.range (m+1)` sum. -/
 def Gfun (B : BernsteinTower (I := I) G) (m : ℕ) (s : Real) (y : M) : Real :=
   ∑ i ∈ Finset.range (m + 1), Gcoef (I := I) B m i * s ^ i * B.w i s y
 omit [CompleteSpace E]
-
   [T2Space M] in
 theorem Gfun_heatOp (B : BernsteinTower (I := I) G) (m : ℕ)
     {t : Real} (hmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M) :
@@ -886,7 +885,6 @@ theorem Gfun_hasDerivWithin (B : BernsteinTower (I := I) G) (m : ℕ)
   · filter_upwards with s using by simp [mul_assoc]
   · simp [mul_assoc]
 omit [CompleteSpace E]
-
   [T2Space M] in
 theorem Gfun_parabolic_eq (B : BernsteinTower (I := I) G) (m : ℕ)
     {t : Real} (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
@@ -1026,7 +1024,6 @@ theorem Wterms_nonpos (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
   linarith [hmidsum, htop]
 
 omit [CompleteSpace E]
-
   [T2Space M] in
 /-- The Bernstein combination retains the top-order dissipation before the
 maximum-principle step.  Lower-level negative terms telescope against the time

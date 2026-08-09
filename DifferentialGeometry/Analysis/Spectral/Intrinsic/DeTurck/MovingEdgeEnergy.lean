@@ -178,6 +178,7 @@ theorem deTurckRHS_cont
     (I := I) (g q.1.1) g_bg α (idx 0) (idx 1) hq
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] in
 /-- The canonical carrier half-speed is bounded in one fibre-operator norm on
 the whole closed time slab.  The constant is extracted from compactness of the
 moving unit tangent slab, so it is uniform down to `t = 0`. -/
