@@ -3388,89 +3388,6 @@ theorem scalarForcingCoeff_iteratedDeriv
       scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t := by
   exact congrFun (scalarForcingCoeff_iteratedDeriv_fun (I := I) (M := M) g hf i r) t
 
-omit [NeZero (Module.finrank ℝ E)] in
-private lemma tensorSymm_smoothToLp_duhamel
-    (g : SmoothRiemannianMetric I M) (F : SmoothScalar g) :
-    (tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g F) =
-      SmoothCcTensor.toL2 (scalarCcLift g F) := by
-  have hU0 : (tensor00ScalarL2Equiv g) (SmoothCcTensor.toL2 (scalarCcLift g F)) =
-      smoothToLp (I := I) (M := M) g F := by
-    change tensor00ToScalarL2 g (SmoothCcTensor.toL2 (scalarCcLift g F)) =
-      smoothToLp (I := I) (M := M) g F
-    rw [tensor00ToScalarL2_toL2]
-    exact scalar0ToLp_scalarCcLift (I := I) (M := M) g F
-  simpa using congrArg (tensor00ScalarL2Equiv g).symm hU0.symm
-
-private lemma scalarEigenCoeff_eq_tensorCoeff
-    (g : SmoothRiemannianMetric I M) (F : SmoothScalar g) (i : TensorEigenIdx00 g) :
-    ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g F⟫_ℝ =
-      tensorL2Coeff (I := I) (M := M)
-        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
-        (SmoothCcTensor.toL2 (scalarCcLift g F)) i := by
-  classical
-  set L := tensor00ScalarL2Equiv g
-  set b' := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
-    (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
-  have hb : L (b' i) = scalarEigenFunctionLp g i := by
-    rw [show b' i = (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) by
-      simp [b', eigenvectorSmooth_toL2]]
-    exact (scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i).symm
-  calc
-    ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g F⟫_ℝ
-        = ⟪L (b' i), L (L.symm (smoothToLp (I := I) (M := M) g F))⟫_ℝ := by
-          rw [hb]
-          simp [LinearIsometry.inner_map_map L.toLinearIsometry (b' i)
-            (L.symm (smoothToLp (I := I) (M := M) g F))).symm
-    _ = ⟪b' i, L.symm (smoothToLp (I := I) (M := M) g F)⟫_ℝ := by
-          simp [LinearIsometry.inner_map_map L.toLinearIsometry (b' i)
-            (L.symm (smoothToLp (I := I) (M := M) g F))]
-    _ = (b'.repr (L.symm (smoothToLp (I := I) (M := M) g F))) i := by
-          simp [HilbertBasis.repr_apply_apply]
-    _ = tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
-          (SmoothCcTensor.toL2 (scalarCcLift g F)) i := by
-          rw [tensorSymm_smoothToLp_duhamel (I := I) (M := M) g F]
-          rfl
-
-private lemma scalarCoeff_sq_summable
-    (g : SmoothRiemannianMetric I M)
-    (v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
-    Summable (fun i : TensorEigenIdx00 g =>
-      ⟪scalarEigenFunctionLp g i, v⟫_ℝ ^ 2) := by
-  classical
-  set b' := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
-    (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
-  set L := tensor00ScalarL2Equiv g
-  have hsum : Summable (fun i : TensorEigenIdx00 g =>
-      ‖⟪b' i, L.symm v⟫_ℝ‖ ^ 2) :=
-    b'.orthonormal.inner_products_summable (L.symm v)
-  refine Summable.congr hsum ?_
-  intro i
-  have hb : L (b' i) = scalarEigenFunctionLp g i := by
-    rw [show b' i = (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) by
-      simp [b', eigenvectorSmooth_toL2]]
-    exact (scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i).symm
-  have hinner : ⟪b' i, L.symm v⟫_ℝ = ⟪scalarEigenFunctionLp g i, v⟫_ℝ := by
-    calc
-      ⟪b' i, L.symm v⟫_ℝ = ⟪L (b' i), L (L.symm v)⟫_ℝ := by
-            simpa using (LinearIsometry.inner_map_map L.toLinearIsometry (b' i) (L.symm v)).symm
-      _ = ⟪scalarEigenFunctionLp g i, v⟫_ℝ := by
-            rw [hb, LinearIsometryEquiv.apply_symm_apply]
-  simp [hinner, Real.norm_eq_abs, sq_abs]
-
-private lemma scalarForcingCoeff_deriv_eq
-    (g : SmoothRiemannianMetric I M)
-    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
-    (hf : ContDiff ℝ ∞ f) (i : TensorEigenIdx00 g) (t : ℝ) :
-    deriv (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t =
-      scalarForcingCoeff (I := I) (M := M) g (deriv f) i t := by
-  have h := scalarForcingCoeff_iteratedDeriv (I := I) (M := M) g hf i 1 t
-  have h1 : iteratedDeriv 1 (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t =
-      deriv (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t :=
-    congrFun (iteratedDeriv_one (f := fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s)) t
-  rw [← h1, h]
-  rw [iteratedDeriv_one]
-
 private lemma enat_coe_le_top (r : ℕ) :
     ((r : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) :=
   WithTop.coe_le_coe.mpr (le_top : (r : ℕ∞) ≤ (⊤ : ℕ∞))
@@ -3488,43 +3405,72 @@ private lemma iteratedDeriv_eq_iterate
       rw [Function.iterate_succ_apply]]
     exact ih (deriv f)
 
-theorem scalarForcedCoeff_iteratedDeriv_succ
+theorem scalarForcedFlow_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
-    (hf : ContDiff ℝ ∞ f) {t : ℝ} (ht : 0 < t) (i : TensorEigenIdx00 g) (r : ℕ) :
-    iteratedDeriv (r + 1) (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t =
-      -(TensorEigenIdx.lambda (I := I) (M := M) i) *
-        iteratedDeriv r (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t +
-        iteratedDeriv r (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t := by
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    (N : ℕ) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) (N : ℕ)
+      (fun q : ℝ × M => scalarForcedFlow g u₀ f q.1 q.2)
+      (Set.Icc ε T ×ˢ Set.univ) := by
   classical
-  set lam : ℝ := TensorEigenIdx.lambda (I := I) (M := M) i
-  set c : ℝ → ℝ := fun s => scalarForcedCoeff (I := I) (M := M) g u₀ f i s
-  set cf : ℝ → ℝ := fun s => scalarForcingCoeff (I := I) (M := M) g f i s
-  have hc_eq : ∀ s ∈ Set.Ioi (0 : ℝ), deriv c s = -TensorEigenIdx.lambda (I := I) (M := M) i * c s + cf s := by
-    intro s hs
-    have hder := scalarForcedCoeff_hasDerivAt (I := I) (M := M) g u₀ hf.continuous hs i
-    rw [hder.deriv]
-  have hloc : (fun s : ℝ => deriv c s) =ᶠ[𝓝 t] fun s : ℝ =>
-      -lam * c s + cf s := by
-    filter_upwards [Ioi_mem_nhds ht] with s hs
-    simpa [lam] using hc_eq s hs
-  rw [iteratedDeriv_succ']
-  rw [Filter.EventuallyEq.iteratedDeriv_eq r hloc]
-  have hcd : ContDiffAt ℝ (r : ℕ∞) c t :=
-    (scalarForcedCoeff_contDiffOn (I := I) (M := M) g u₀ hf i r).contDiffAt
-      (isOpen_Ioi.mem_nhds ht)
-  have hcf : ContDiffAt ℝ (r : ℕ∞) cf t :=
-    (scalarForcingCoeff_contDiff (I := I) (M := M) g (hf.of_le (enat_coe_le_top r)) i).contDiffAt
-  have h1 : ContDiffAt ℝ (r : ℕ∞) (fun s : ℝ => -lam * c s) t :=
-    (contDiffAt_const : ContDiffAt ℝ (r : ℕ∞) (fun _ : ℝ => -lam) t).mul hcd
-  have hsum : iteratedDeriv r (fun s : ℝ => -lam * c s + cf s) t =
-      -lam * iteratedDeriv r c t + iteratedDeriv r cf t := by
-    change iteratedDeriv r ((fun s : ℝ => -lam * c s) + cf) t =
-      -lam * iteratedDeriv r c t + iteratedDeriv r cf t
-    rw [iteratedDeriv_add h1 hcf]
-    rw [iteratedDeriv_const_mul (-lam) hcd]
-  simpa [c, cf, lam] using hsum
+  simpa [scalarForcedFlow] using (scalar_path_recon (I := I) (M := M) g
+    (scalar_eigen_tail (I := I) (M := M) g) hεT N
+    (fun i s => scalarForcedCoeff (I := I) (M := M) g u₀ f i s)
+    (U := Set.Ioi (0 : ℝ)) (isOpen_Ioi : IsOpen (Set.Ioi (0 : ℝ)))
+    (by intro t ht; exact lt_of_lt_of_le hε (Set.mem_Icc.mp ht).1)
+    (fun i => scalarForcedCoeff_contDiffOn (I := I) (M := M) g u₀ hf i N)
+    (fun j hj m => hderiv j m))
+
+theorem scalarForcedFlow_contMDiffOn_top
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => scalarForcedFlow g u₀ f q.1 q.2)
+      (Set.Icc ε T ×ˢ Set.univ) := by
+  rw [contMDiffOn_infty]
+  intro N
+  exact scalarForcedFlow_contMDiffOn (I := I) (M := M) g u₀ hf hε hεT hderiv N
+
+noncomputable def scalarForcedSlice
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    (f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) : SmoothScalar g :=
+  ⟨fun x => scalarForcedFlow g u₀ f t x,
+    by
+      have hjoint := scalarForcedFlow_contMDiffOn_top (I := I) (M := M) g u₀ hf hε hεT hderiv
+      have hsliceOn : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+          (fun x : M => scalarForcedFlow g u₀ f t x) Set.univ := by
+        have hcomp := hjoint.comp
+          ((contMDiffOn_const : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun _ : M => t) Set.univ).prodMk
+            (contMDiffOn_id : ContMDiffOn I I ∞ id Set.univ))
+          (by intro p hp; exact ⟨⟨ht.1, ht.2⟩, Set.mem_univ p⟩)
+        refine (contMDiffOn_univ.mpr ?_)
+        have hc : ContMDiff I 𝓘(ℝ, ℝ) ∞
+            (fun x : M => scalarForcedFlow g u₀ f (t, x).1 (t, x).2) := by
+          simpa using (contMDiffOn_univ.mp hcomp)
+        convert hc using 1
+      exact (contMDiffOn_univ.mp hsliceOn)⟩
 
 private lemma summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g) (σ : ℝ) :
