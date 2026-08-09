@@ -2,6 +2,8 @@ import DifferentialGeometry.Topology.Morse.CellAttachment
 import DifferentialGeometry.Topology.Morse.HandleAttachment
 import DifferentialGeometry.Topology.Handle.Attachment
 import DifferentialGeometry.Topology.Handle.Manifold
+import DifferentialGeometry.Topology.Handle.Retraction
+import DifferentialGeometry.Topology.Homotopy.DeformationRetract
 import DifferentialGeometry.Topology.Homotopy.EquivUnder
 import DifferentialGeometry.Topology.Morse.Flow
 import DifferentialGeometry.Topology.Morse.Manifold
@@ -4840,6 +4842,28 @@ noncomputable def modelHandleMapRawSymm {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
   (closedCellClamp k ((Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹ • negPart hk y),
     closedCellClamp (n - k) (r⁻¹ • posPart hk y))
 
+theorem continuous_modelHandleMapRawSymm {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 < ε) :
+    Continuous (modelHandleMapRawSymm hk ε r) := by
+  change Continuous (fun y : MorseModel n =>
+    (closedCellClamp k ((Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹ • negPart hk y),
+      closedCellClamp (n - k) (r⁻¹ • posPart hk y)))
+  refine Continuous.prodMk ?_ ?_
+  · exact (continuous_closedCellClamp k).comp (by
+      have hsqrt : Continuous (fun y : MorseModel n =>
+          (Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹) := by
+        refine Continuous.inv₀ ?_ (fun y => ?_)
+        · exact Real.continuous_sqrt.comp (by
+            have hnorm : Continuous (fun y : MorseModel n => ‖posPart hk y‖) :=
+              continuous_norm.comp (continuous_posPart hk)
+            have hpow : Continuous (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) := hnorm.pow 2
+            exact (continuous_const.add hpow : Continuous (fun y : MorseModel n =>
+              2 * ε + ‖posPart hk y‖ ^ 2)))
+        · exact ne_of_gt (by positivity : 0 < Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))
+      exact hsqrt.smul (continuous_negPart hk))
+  · exact (continuous_closedCellClamp (n - k)).comp (by
+      have hscalar : Continuous (fun _ : MorseModel n => (r⁻¹ : ℝ)) := continuous_const
+      exact hscalar.smul (continuous_posPart hk))
+
 theorem modelHandleMapRawSymm_map {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     (hε : 0 < ε) (hr : 0 < r) (y : MorseModel n) (hy : y ∈ modelHandle hk ε r) :
     modelHandleMap hk ε r (modelHandleMapRawSymm hk ε r y) = y := by
@@ -4894,6 +4918,152 @@ theorem modelHandleMapRawSymm_map {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     rw [smul_smul, mul_inv_cancel₀ (ne_of_gt hr), one_smul]
   rw [hscalar₁, hscalar₂]
   exact recombine_decompose hk y
+
+noncomputable def modelHandleCoreSet {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) :
+    Set {y : MorseModel n // y ∈ modelHandle hk ε r} :=
+  {y : {y : MorseModel n // y ∈ modelHandle hk ε r} |
+    y.1 ∈ modelHandleMap hk ε r '' (coreDisk k (n - k) : Set (StandardHandle k (n - k)))}
+
+noncomputable def modelHandleCoreMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (y : MorseModel n) : MorseModel n :=
+  modelHandleMap hk ε r ((coreRetract k (n - k)).retraction (modelHandleMapRawSymm hk ε r y))
+
+noncomputable def modelHandleCoreHomotopyValue {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (q : unitInterval × MorseModel n) : MorseModel n :=
+  modelHandleMap hk ε r ((coreRetract k (n - k)).homotopy (q.1, modelHandleMapRawSymm hk ε r q.2))
+
+theorem modelHandleCoreHomotopyValue_zero {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) (hr : 0 < r) (y : MorseModel n) (hy : y ∈ modelHandle hk ε r) :
+    modelHandleCoreHomotopyValue hk ε r (0, y) = y := by
+  have hh : modelHandleCoreHomotopyValue hk ε r (0, y) =
+      modelHandleMap hk ε r (modelHandleMapRawSymm hk ε r y) := by
+    dsimp [modelHandleCoreHomotopyValue]
+    exact congrArg (modelHandleMap hk ε r)
+      ((coreRetract k (n - k)).homotopy.map_zero_left (modelHandleMapRawSymm hk ε r y))
+  rw [hh]
+  exact modelHandleMapRawSymm_map hk ε r hε hr y hy
+
+theorem modelHandleCoreHomotopyValue_one {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (y : MorseModel n) :
+    modelHandleCoreHomotopyValue hk ε r (1, y) = modelHandleCoreMap hk ε r y := by
+  have hh : modelHandleCoreHomotopyValue hk ε r (1, y) =
+      modelHandleMap hk ε r ((coreRetract k (n - k)).retraction (modelHandleMapRawSymm hk ε r y) : StandardHandle k (n - k)) := by
+    dsimp [modelHandleCoreHomotopyValue]
+    exact congrArg (modelHandleMap hk ε r)
+      ((coreRetract k (n - k)).homotopy.map_one_left (modelHandleMapRawSymm hk ε r y))
+  dsimp [modelHandleCoreMap]
+  rw [hh]
+
+theorem continuous_modelHandleCoreHomotopyValue {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) :
+    Continuous (modelHandleCoreHomotopyValue hk ε r) := by
+  change Continuous (fun q : unitInterval × MorseModel n =>
+    modelHandleMap hk ε r ((coreRetract k (n - k)).homotopy (q.1, modelHandleMapRawSymm hk ε r q.2)))
+  have hsnd : Continuous (fun q : unitInterval × MorseModel n => modelHandleMapRawSymm hk ε r q.2) :=
+    (continuous_modelHandleMapRawSymm hk ε r hε).comp continuous_snd
+  have hpair : Continuous (fun q : unitInterval × MorseModel n =>
+      (q.1, modelHandleMapRawSymm hk ε r q.2)) :=
+    continuous_fst.prodMk hsnd
+  have hstep : Continuous (fun q : unitInterval × MorseModel n =>
+      ((coreRetract k (n - k)).homotopy (q.1, modelHandleMapRawSymm hk ε r q.2) : StandardHandle k (n - k))) := by
+    have hcoerce : Continuous (fun d : StandardHandle k (n - k) => d) := continuous_id
+    exact hcoerce.comp ((coreRetract k (n - k)).homotopy.continuous.comp hpair)
+  exact (continuous_modelHandleMap hk ε r).comp hstep
+
+theorem modelHandleCoreMapRawSymm_eq {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) (hr : 0 < r) (d : StandardHandle k (n - k)) :
+    modelHandleMapRawSymm hk ε r (modelHandleMap hk ε r d) = d := by
+  have hmem : modelHandleMap hk ε r d ∈ modelHandle hk ε r :=
+    modelHandleMap_mem hk ε r (le_of_lt hε) d
+  have hback : modelHandleMap hk ε r (modelHandleMapRawSymm hk ε r (modelHandleMap hk ε r d)) =
+      modelHandleMap hk ε r d :=
+    modelHandleMapRawSymm_map hk ε r hε hr (modelHandleMap hk ε r d) hmem
+  exact modelHandleMap_injective hk ε r hε (ne_of_gt hr) (by
+    exact hback)
+
+theorem modelHandleCoreHomotopyValue_fixed {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) (hr : 0 < r) (t : unitInterval) (y : MorseModel n)
+    (hy : y ∈ modelHandleMap hk ε r '' (coreDisk k (n - k) : Set (StandardHandle k (n - k)))) :
+    modelHandleCoreHomotopyValue hk ε r (t, y) = y := by
+  rcases hy with ⟨d, hd, hdy⟩
+  have hraw : modelHandleMapRawSymm hk ε r y = d := by
+    rw [← hdy]
+    exact modelHandleCoreMapRawSymm_eq hk ε r hε hr d
+  have hfix : (coreRetract k (n - k)).homotopy (t, d) = d := by
+    exact (coreRetract k (n - k)).homotopy.eq_fst t (by
+      exact hd)
+  dsimp [modelHandleCoreHomotopyValue]
+  rw [hraw, hfix, hdy]
+
+noncomputable def modelHandleCoreRetraction {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) :
+    C({y : MorseModel n // y ∈ modelHandle hk ε r},
+      {y : {y : MorseModel n // y ∈ modelHandle hk ε r} // y ∈ modelHandleCoreSet hk ε r}) := by
+  let X : Type := {y : MorseModel n // y ∈ modelHandle hk ε r}
+  have hmem : ∀ y : X, modelHandleCoreMap hk ε r y.1 ∈ modelHandle hk ε r := by
+    intro y
+    dsimp [modelHandleCoreMap]
+    exact modelHandleMap_mem hk ε r (le_of_lt hε)
+      ((coreRetract k (n - k)).retraction (modelHandleMapRawSymm hk ε r y.1))
+  have hcore : ∀ y : X, modelHandleCoreMap hk ε r y.1 ∈
+      modelHandleMap hk ε r '' (coreDisk k (n - k) : Set (StandardHandle k (n - k))) := by
+    intro y
+    dsimp [modelHandleCoreMap]
+    refine ⟨(coreRetract k (n - k)).retraction (modelHandleMapRawSymm hk ε r y.1), ?_, rfl⟩
+    exact ((coreRetract k (n - k)).retraction (modelHandleMapRawSymm hk ε r y.1)).2
+  have hcont : Continuous (fun y : X => modelHandleCoreMap hk ε r y.1) := by
+    have hinner : Continuous (fun y : X =>
+        ((coreRetract k (n - k)).retraction (modelHandleMapRawSymm hk ε r y.1) : StandardHandle k (n - k))) := by
+      have hcoerce : Continuous (fun d : coreDisk k (n - k) => (d : StandardHandle k (n - k))) :=
+        continuous_subtype_val
+      exact hcoerce.comp (((coreRetract k (n - k)).retraction.continuous.comp
+        (continuous_modelHandleMapRawSymm hk ε r hε)).comp continuous_subtype_val)
+    exact (continuous_modelHandleMap hk ε r).comp hinner
+  exact ContinuousMap.mk (fun y : X => ⟨⟨modelHandleCoreMap hk ε r y.1, hmem y⟩, hcore y⟩)
+    (Continuous.subtype_mk (Continuous.subtype_mk hcont hmem) hcore)
+
+noncomputable def modelHandleCoreHomotopy {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) (hr : 0 < r) :
+    ContinuousMap.HomotopyRel (ContinuousMap.id {y : MorseModel n // y ∈ modelHandle hk ε r})
+      (((ContinuousMap.id {y : MorseModel n // y ∈ modelHandle hk ε r}).restrict (modelHandleCoreSet hk ε r)).comp
+        (modelHandleCoreRetraction hk ε r hε)) (modelHandleCoreSet hk ε r) := by
+  let X : Type := {y : MorseModel n // y ∈ modelHandle hk ε r}
+  let A : Set X := modelHandleCoreSet hk ε r
+  let H : C(unitInterval × X, X) := by
+    refine ⟨fun q => ⟨modelHandleCoreHomotopyValue hk ε r (q.1, q.2.1), ?_⟩, ?_⟩
+    · dsimp [modelHandleCoreHomotopyValue]
+      exact modelHandleMap_mem hk ε r (le_of_lt hε)
+        ((coreRetract k (n - k)).homotopy (q.1, modelHandleMapRawSymm hk ε r q.2.1))
+    · have hcont : Continuous (fun q : unitInterval × X => modelHandleCoreHomotopyValue hk ε r (q.1, q.2.1)) := by
+        have hstep := continuous_modelHandleCoreHomotopyValue hk ε r hε
+        have hpair : Continuous (fun q : unitInterval × X => (q.1, q.2.1)) :=
+          continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)
+        exact hstep.comp hpair
+      exact Continuous.subtype_mk hcont (fun q => by
+        dsimp [modelHandleCoreHomotopyValue]
+        exact modelHandleMap_mem hk ε r (le_of_lt hε)
+          ((coreRetract k (n - k)).homotopy (q.1, modelHandleMapRawSymm hk ε r q.2.1)))
+  refine ⟨⟨H, ?_, ?_⟩, ?_⟩
+  · intro x
+    apply Subtype.ext
+    change modelHandleCoreHomotopyValue hk ε r (0, x.1) = x.1
+    exact modelHandleCoreHomotopyValue_zero hk ε r hε hr x.1 x.2
+  · intro x
+    apply Subtype.ext
+    change modelHandleCoreHomotopyValue hk ε r (1, x.1) = (modelHandleCoreRetraction hk ε r hε x : X).1
+    dsimp [modelHandleCoreRetraction, modelHandleCoreMap]
+    exact modelHandleCoreHomotopyValue_one hk ε r x.1
+  · intro t x hx
+    apply Subtype.ext
+    change modelHandleCoreHomotopyValue hk ε r (t, x.1) = x.1
+    exact modelHandleCoreHomotopyValue_fixed hk ε r hε hr t x.1 (by
+      exact hx)
+
+noncomputable def modelHandleCoreRetract {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) (hr : 0 < r) :
+    StrongDeformationRetract (modelHandleCoreSet hk ε r) where
+  retraction := modelHandleCoreRetraction hk ε r hε
+  homotopy := modelHandleCoreHomotopy hk ε r hε hr
 
 theorem modelHandleMapRawSymm_eq_symm {m k : ℕ} (hk : k ≤ m + 1) (ε r : ℝ)
     (hε : 0 < ε) (hr : 0 < r) (y : MorseModel (m + 1)) (hy : y ∈ modelHandle hk ε r) :
