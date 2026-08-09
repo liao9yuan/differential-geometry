@@ -1,0 +1,102 @@
+# EndpointShape
+
+## 2026-07-23 fixed-first endpoint shape
+
+This file is the branch-selected, second-order endpoint layer for the canonical
+intrinsic exponential.  The source now contains:
+
+- `intrinsicJacobi`, the affine initial-velocity variation field;
+- `intrinsicJacobi_perp`, the endpoint Gauss identity
+  `g(γ'(1),J_w(1)) = g_p(u,w)`;
+- `endpointJacobi_eq`, the branch-free derivative formula for the normalized
+  terminal radial velocity;
+- `branchHess_jacobi`, the selected-branch Hessian formula including its
+  rank-one normalization correction;
+- `branchHess_shape`, the perpendicular shape-operator specialization;
+- `intrinsicJacobi_li`, injectivity of the endpoint Jacobi family on a selected
+  fixed-first inverse branch.
+
+The Hessian proof uses the canonical `BranchRadius.branchRadius_open` producer,
+the local chart-Hessian/covariant-gradient bridge, mixed variation
+commutation, and `IntrinsicGauss.intrinsic_gauss`.  It does not use a raw
+exponential radius, global minimality, or a `ConnectedSpace` hypothesis.
+
+Focused verification is green with no diagnostics.  The formerly fragile
+dependent rewrite in `branchHess_jacobi` is now factored through one
+tangent-vector identity and then paired with the endpoint Jacobi vector; the
+remaining normalization is ordinary real-field algebra.  The private launch
+derivative also carries only the section assumptions it uses.
+
+The Layer-B endpoint theorem and its dedicated machinery are therefore 100%:
+focused verification and the exact module refresh are both green.  The
+comparison-facing `radialLap_eq_mean` theorem remains 0% until the downstream
+radial module is checked; whole HCG supporting machinery remains roughly 60%,
+and unconditional `compactnessSol` remains 0%.
+
+## 2026-07-24 canonical fixed-first branch
+
+`branchHess_jacobi`, `branchHess_shape`, and `intrinsicJacobi_li` now consume
+`ExpInvBranch` directly. Their source neighborhoods live in the fixed model
+tangent space, and the inverse readout is `B.inv`; the old tangent-bundle
+pair packaging was inherited from `DiagInvBranch` and is no longer part of
+the proof-owning API.
+
+The migration is focused green and placeholder-free. The underlying endpoint
+Hessian theorem and its dedicated machinery remain 100%; the later
+`calabiDist_support` theorem is still unstated (0%). Route B-prime remains
+about 45%, whole HCG supporting machinery about 60%, and unconditional
+`compactnessSol` theorem-level 0%.
+
+## 2026-07-27 intrinsic Gronwall inputs
+
+Added the canonical initial-value and regularity API for the named intrinsic
+Jacobi field:
+
+- `intrinsicJacobi_zero` proves `J(0) = 0`;
+- `intrJacobi_diff` proves differentiability of the chart representatives of
+  `J` and `D_t J` at every time.
+
+Both declarations are focused- and exact-green with zero local diagnostics.
+They move existing private comparison-layer proofs to the definition-owning
+module and introduce no radius or compactness hypothesis. The H6 relative
+profile theorem remains 0%; these declarations close its intrinsic Gronwall
+regularity sub-brick only.
+
+## 2026-07-27 all-time perpendicularity API
+
+The two fixed-first intrinsic Jacobi perpendicularity facts formerly available
+only as private `BishopIntrinsic` helpers now have canonical public declarations
+in the definition-owning endpoint layer:
+
+- `intrJacobi_perp_ne` says that `g(γ', J_w) = 0` at every nonzero time when
+  `g_p(u,w) = 0`;
+- `intrJacobi_dperp` says that `g(γ', D_t J_w) = 0` under the same hypotheses.
+
+The public derivative theorem consumes the existing `intrJacobi_diff`
+internally, so its statement no longer exposes the old technical chart-
+differentiability witness.  The proof retains the intrinsic rescaling and
+geodesic-equation route and introduces no radius, nonconjugacy, or connectedness
+hypothesis.
+
+Focused verification is green with zero diagnostics.  No exact module refresh
+was run in this source-only handoff.  These two helper theorems and their
+dedicated machinery are 100%; the geometric endpoint-positivity theorem that
+will consume them remains unstated (0%), with its dedicated machinery roughly
+80%.  `intrLoop_ge_cgt` and the `InjRadiusDecayInput` producer remain theorem-
+level 0%; whole HCG supporting machinery remains roughly 61%, and the
+unconditional Theorem 3.9 remains theorem-level 0%.
+
+## 2026-07-28 branch Hessian identification
+
+Added `intrJacobi_self`, identifying the radial launch variation with terminal
+geodesic velocity, and `branchEnergy_hess`, identifying the Hessian of selected
+branch energy with the terminal Jacobi derivative pairing.  The latter works
+with a local smooth germ of branch energy and uses the existing variation
+commutation theorem; it does not assume the selected branch is globally
+minimizing.
+
+Focused verification and the exact targeted refresh passed.  These endpoint
+shape theorems and their dedicated machinery are 100%.  True-distance
+identification is supplied separately by the now-proved `intrCore_dist_germ`;
+`intrCore_jensen` itself remains theorem-level 0% with about 93% dedicated
+machinery.  Whole HCG supporting machinery is about 62%.

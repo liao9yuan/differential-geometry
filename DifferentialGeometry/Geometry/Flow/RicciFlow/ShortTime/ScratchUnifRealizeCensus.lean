@@ -1,0 +1,15 @@
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifRealizeRadius
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifNZeroClass
+
+#print axioms DifferentialGeometry.PDE.RicciFlow.reverseJetPack
+#print axioms DifferentialGeometry.PDE.RicciFlow.morreyTwoC_spec
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.IsCurvAction0
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.covsum_hs_two
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.realize_at_action
+#print axioms DifferentialGeometry.Integral.Connection.ptCurv_zero_of
+#print axioms DifferentialGeometry.PDE.RicciFlow.unifCurvAction0_of
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.lowRealize_unif_of
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.exists_lowRealize
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.lowZero_unif_of
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.exists_lowZero
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.lowZero_nfun

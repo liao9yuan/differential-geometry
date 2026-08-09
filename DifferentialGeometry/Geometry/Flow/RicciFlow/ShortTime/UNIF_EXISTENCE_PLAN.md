@@ -1,0 +1,3016 @@
+# UNIF_EXISTENCE_PLAN — filling black box (N) `ricci_flow_unif_existence`
+
+Planned 2026-07-19 (Fable, planner) on branch `codex/analytic-producers-e87b`
+@ `922dbc4ac` (worktree `C:/Users/liao9/.codex/worktrees/e87b/...`).  Executor:
+Opus 4.8 session; acceptance loop stays with the planner/user.
+
+> **HISTORICAL / SUPERSEDED PLAN.**  This ledger preserves the pre-Route-(c)
+> R1τ and early low-regularity campaign through update No. 69.  It is not the
+> current frontier or progress source.  The authoritative live design is
+> `ROUTE_C_PLAN.md`: energy-pairing-first Rung 3, completed C1 correction,
+> completed complementary spectral split and polarized monomial Green step,
+> followed by the homogeneous one-sided diagonal full-slope C0+C2
+> commutator/Gårding producer `lowbase_full3_unif`, with order
+> `eta -> exists delta2, R2 -> g in the class -> exists G`, public caps
+> `0 < delta2 < 1/3`, `0 < R2 <= 1`, and target
+> `eta * H4^2 + G * H3^2`.  The later raw/rest consumer may use
+> `G * (1 + E3)^2`; the retraction adapter must never introduce `1 / theta`.
+> Do not resume any old absolute-value C2-only, high-jet common-gate, or R1τ
+> block below.
+
+## Target
+
+The single `sorry` of
+`Geometry/Flow/RicciFlow/Evolution/ExtendViaUniqueness.lean`, theorem
+`ricci_flow_unif_existence` (black box (N)): for fixed `gBase`, for every
+`Λ ≥ 1` a UNIFORM existence time `τ₀(gBase, Λ, S) > 0` such that every `g₀`
+that is `Λ`-comparable to `gBase` with `MetricCovDerivOrderBoundOn` jets
+`a ≤ 3` bounded by `Λ` flows on `[0, τ₀)` with the stated regularity fields.
+This is the last `sorryAx` source of the `extends_of_rmBounded` route
+(brick board in `ExtendViaUniqueness.md`; (A)/V and Y wiring are DONE).
+
+## Mathematical position (verified before planning)
+
+The PER-DATUM short-time existence is already PROVED sorry-free:
+`deturck_ricci_flow_parabolic_short_time_existence`
+(`ShortTime/DeTurckInitialDataExistence.lean`) assembles the quasilinear
+engine `quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence`
+(`ShortTime/QuasilinearAbstractShortTimeExistence.lean`, sorry-free) with
+concrete DeTurck producers (Sobolev scale `N₀ := 4·finrank + 10`,
+`deTurckSobolevNHa2Symm`, parabolicity at `g₀`, Lipschitz + forcing
+bootstrap).  (N)'s ONLY new content is UNIFORMITY of the time over the
+`Λ`-class — i.e. uniform convergence of the engine's fixed-point iteration
+with constants depending only on class data.
+
+## Historical route decision (superseded; do not execute)
+
+**R1 (primary): quantitative uniformization of the existing engine.**
+The engine's `T` arises from a maximal-regularity fixed point; its inputs
+are (e1) the strict-parabolicity constant at `g₀`, (e2) the order-`N₀`
+Sobolev data norm of `g₀`, (e3) the RHS Lipschitz/quasilinearity constants
+near `g₀`, (e4) the forcing-bootstrap constants.  Each is to be bounded by
+`F(gBase, Λ, S)` on the class.  **Known caveat (statement risk):** (e2)
+needs `g₀`-jets of order ≈ `N₀ + 2`, while (N) currently supplies `a ≤ 3`.
+Expected resolution: raise (N)'s hypothesis to `a ≤ A(n)` (A(n) ≈ 4n + 12).
+The upstream producers (`metricCovOrderWindow_of_*`, Lemma 3.11 / Shi
+`AllTimesBounds` layer) are order-parameterized, so brick-Y's discharge is
+expected to lift verbatim; the (A)-from-(N) proof consumes (N) as a box and
+is unaffected.  THIS STATEMENT CHANGE REQUIRES EXPLICIT PLANNER/USER
+ACCEPTANCE after the Stage-0 audit — do not edit (N) before that.
+
+**R2 (fallback, long lane, do NOT start here):** honest-`C³` low-regularity
+Koch–Lamm existence via this branch's Euclidean heat/Duhamel machinery
+(`Analysis/Parabolic/Euclidean/`, `heatD2Past_l2` ≈ 45%).  Months of
+producer work; stays the branch's separate long game.
+
+## Stages
+
+**Stage 0 — engine-constant audit (NO Lean edits).**
+Trace `T` through `QuasilinearAbstractShortTimeExistence` into the
+`Analysis/Parabolic/{MaximalRegularity,QuasiLinear,TimeSobolev}` stack.
+Deliverable: a table in `ShortTime/UnifClassBounds.md` listing every
+`g₀`-dependent quantity the existence time consumes — file, lemma,
+constant, and the class datum that must bound it — plus the minimal jet
+order `A(n)` for (e2) and a check that Lemma 3.11-side producers exist at
+every `a ≤ A(n)`.  STOP and report for acceptance.
+
+**Stage 1 — uniform class-bound producers (new leaf file
+`ShortTime/UnifClassBounds.lean`; additive only).**
+One lemma per engine input, each stated over
+`{g₀ | Λ-comparable ∧ jets ≤ A(n) bounded by Λ}`:
+(e1) parabolicity constant from `Λ`-comparability (bilinear coercivity
+transfer); (e2) order-`N₀` Sobolev norm from chart jets over the finite
+atlas `S` (finite-cover summation; compact `M`); (e3) RHS Lipschitz
+constants on the fixed `gBase`-scale ball; (e4) bootstrap constants.
+Reuse the existing per-`g₀` producer proofs — the work is threading `Λ`
+through them, not new analysis.
+
+**Stage 2 — quantitative engine wrapper (additive; do NOT rewrite the
+sorry-free engine).**  A sibling theorem
+`quasilinear_..._shortTimeExistence_ge` returning `T ≥ φ(constants)` with
+`φ` explicit, by re-running the same fixed-point with the supplied uniform
+constants (or threading a lower bound through the existing proof if the
+stack already exposes one).
+
+**Stage 3 — (N) assembly.**  Choose the canonical finite atlas `S`; apply
+Stage 2 + Stage 1 to produce `τ₀`; the (N) regularity fields are the plain
+theorem's fields restricted to `[0, τ₀)`.  If the `a ≤ A(n)` change was
+accepted, edit (N)'s statement and lift brick-Y's discharge (small,
+coordinated with the Evolution lane; separate report).
+
+## Planner acceptance of the route test (2026-07-22)
+
+The item-(2) route test returned **verdict (a): R1τ FEASIBLE** — both
+high–low orientations close with R-independent constants; the forbidden
+shapes do not arise (details + provenance in
+`Analysis/Spectral/Intrinsic/DeTurck/SobolevNonlinearityExistence.md`).
+**R1τ is hereby RATIFIED as the route.**  Scope finding accepted: the
+smooth-core tame lemma is a multi-lemma assembly, not one-lemma; its deepest
+generic producer (`CurvatureCoefficientDifferenceJetTower.lean`) is
+IN-FLIGHT Codex work (dirty), so assembly against it is deferred.  Next
+brick (dispatched with guardrails): in a NEW leaf file of the tame-envelope
+layer, sum the per-order
+`linearizedRicciArm{0,1}BaseCoeff_..._topSeparated` bounds
+(`RemainderCoeffL2JetMoser.lean:1398` etc., all committed-clean) into a
+single R-independent data-weighted jet-L2 bound per field — consuming ONLY
+committed clean-file lemmas; STOP (do not repair) if the dirty JetTower
+file breaks the build or its committed exports have drifted.
+
+## Planner acceptance №2 (2026-07-22, after the summation brick)
+
+Accepted: `ArmBaseCoeffJetL2Summed.lean` (arm0 + arm1 summed top-separated
+bounds, R-independent constants, axiom-print-clean; helper
+`jetL2_sum_of_perOrder` reusable).  Caveat accepted and recorded: the
+authoritative `lake build` of the new module is blocked by a PRE-EXISTING
+worktree build-cache inconsistency (missing `.olean.hash` for
+`…EigenvectorChartRHSDiffNumeratorWkpNormSharp` in the worktree
+`.lake/build` while present in the redirected tree `C:/dgbuild/e87b`);
+verification was a direct `lean` typecheck against that redirected olean
+tree with the lakefile's correctness options replicated in-file —
+ENVIRONMENT REPAIR ITEM for the worktree owner (reconcile the build-dir /
+hash split, then re-run the targeted build).  Next dispatched brick: the
+remaining ~3 per-field summed bounds (trace-Hessian, connection-difference,
+Lie fields; same `jetL2_sum_of_perOrder` pattern, same guardrails).  The
+threeArm combination stays DEFERRED until the Codex lane lands
+`CurvatureCoefficientDifferenceJetTower` (its decomposition lives in the
+frozen `DeTurckRemainderTameLipschitz.lean`).
+
+## Planner acceptance №3 (2026-07-22) — lane parked WAIT-ON-CODEX
+
+Accepted the third executor's finding: the remaining 3 constituent fields
+(trace-Hessian, connection-difference, Lie) CANNOT be built from
+committed-clean inputs — their only clean per-order producers are
+R-DEPENDENT (via `antidiagonalTupleGrid_integral_ballUniform_tameWindow`,
+constant ~ `R^{7k}`), and summing them would inject the ruling's forbidden
+`C(R₂)`-shape.  The four R-independent `_topSeparated_le` engines they need
+exist ONLY in the dirty in-flight `CurvatureCoefficientDifferenceJetTower.lean`
+(≈ lines 1823 / 10570 / 11141 / 11695).  The route-test note's claim that
+the connDiff/Lie tame-envelope producers were R-independent was WRONG and
+has been corrected in both notes.
+
+**Lane state:** everything buildable from committed-clean inputs is DONE
+(route ratified R1τ; `jetL2_sum_of_perOrder` engine; arm0+arm1 summed
+bounds green/axiom-clean).
+
+**CORRECTION (2026-07-22, planner verification):** the №3 "wait-on-Codex"
+call was OVER-CONSERVATIVE.  Verified against HEAD: all FOUR R-independent
+`_topSeparated_le` engines are ALREADY COMMITTED
+(`CurvatureCoefficientDifferenceJetTower.lean` HEAD:1823/10543/11114/11668);
+the file's dirty state is 64 UNRELATED inserted lines (`pureTrace` +
+`koszul_l2_succ`, hunks at ~6455/~15078) that do not touch the engines.
+What is genuinely missing — and in NOBODY's queue — is the intermediate
+layer: per-field `_perOrder_topSeparated` (∃`Hd`, realizedFam,
+R-independent) producers for trace-Hessian / connDiff / Lie, mirroring the
+arm0/arm1 construction (`RemainderCoeffL2JetMoser.lean:1398/1532`) on top
+of the four committed engines.  That layer is OURS TO BUILD NOW (dispatched;
+new leaf files only; the only real coupling is that any build compiles the
+64 dirty lines — if THEY fail to elaborate, stop and report, that alone is
+the wait-on-Codex condition).  The actual asks to the Codex lane shrink to:
+(i) commit the 64 lines at convenience (de-dirties the file, unblocks
+authoritative builds); (ii) repair the worktree `.lake` hash split vs
+`C:/dgbuild/e87b` (outstanding environment item).
+Then: 3 summed bounds (~40 lines each, connDiff/Lie at offset `p = 1`) →
+data-weighted threeArm decomposition (frozen
+`DeTurckRemainderTameLipschitz.lean` assembly) → smooth-core tame lemma
+(ruling item 2 proper) → ruling items 3–6.
+
+## Planner acceptance №4 (2026-07-22) — constant-discipline CALIBRATED; roadmap ready
+
+Accepted the fourth executor's verified refinement: the №3 "R-dependent ⇒
+forbidden" reasoning was itself the error.  Verified against arm0's own
+ACCEPTED L2 generic (`CurvatureCoefficientDifferenceJetTower.lean:14447`):
+its lumped low constant `Kc` IS R-dependent — the ruling's stop-signal
+discipline protects only the **top-split coefficient `Ktop`** (the factor
+multiplying the `‖U−V‖_{a+2}`-type top difference), which the four
+committed engines keep `(g₀,hδ₀)`-only.  R in `Kc`-lumped low terms is the
+accepted house pattern.  Full verified per-field construction roadmap now
+in `Analysis/Sobolev/TensorHilbert/RemainderCoeffTopSeparated.md`
+(field→engine map; a cheaper DIRECT-summed route skipping the field-level
+`∃Hd` construction; environment recipe).  Two consecutive sessions produced
+verification-not-Lean: the brick is at single-session intricacy ceiling, so
+scope narrows to ONE FIELD per dispatch.  Next: connDiff DIRECT summed
+bound (~180–220 lines, roadmap claims no uncertain step) → Lie (reuses
+connDiff) → traceHessian (hardest; three curvature engines).
+
+## Planner acceptance №5 (2026-07-22) — connDiff constituent LANDED
+
+Accepted: `ConnDiffJetL2Summed.lean` (548 lines, three public theorems —
+generic per-order, realizedFam per-order, and the summed deliverable
+`connDiffContrInsertionField_realizedFam_jetL2_summed_topSeparated`), green
+via the redirected-olean typecheck, axiom-print-clean.  `Ktop = 2·finrank²·
+Kt0` with `Kt0` = the committed engine head (`10·S 0`, `(g₀,hδ₀)`-only); `R`
+only in `Kc` — calibrated discipline satisfied, no stop-signal.  New
+reusable helper `jetL2_sum_lowShift` (two-offset generalization of
+`jetL2_sum_of_perOrder`).  Elaboration trap recorded in the same-name note
+(`toSection_sub` folding needs `simp only [...]; abel`, not `rw [←
+toSection_add]`).  Constituents now 3-of-5 (arm0/arm1/connDiff).  Next
+dispatched: the Lie field (cheap — reuses the connDiff producer via
+`kernelField_eq_neg_arm_combination` + a `5·`-triangle assembly), then
+traceHessian (hardest; three `(0,4)` curvature engines) as its own
+dispatch.
+
+## Planner acceptance №6 (2026-07-22) — Lie constituent LANDED
+
+Accepted: `LieFieldJetL2Summed.lean` (summed + per-order + private bridge
+`lie_normSq_le_25`), green/axiom-clean via the redirected-olean typecheck.
+`Ktop_Lie = 25 · Ktop_connDiff` — combinatorial `5·`-triangle squared times
+the `(g₀,hδ₀)`-only connDiff head; `R` only in `Kc` (house pattern); no
+stop-signal.  The private arm-combination stack was copied verbatim with a
+provenance comment; the `rfl`-identity reproduction succeeded.  Practical
+note for downstream: the `ConnDiffJetL2Summed.olean` is CO-LOCATED in the
+redirected tree (`C:/dgbuild/e87b/lib/lean/...`) — a second `LEAN_PATH`
+root does NOT work; co-locate new oleans the same way.  Constituents now
+4-of-5; dispatched: traceHessian (the hardest — assemble the R-independent
+split from the three committed `(0,4)` curvature engines
+`riemannLoweredBackgroundDifference` / `ricEndoBackgroundDifferenceField` /
+`riemannG1LoweringDifference`; NOT a `slotExtend` of `connDiffSection`).
+
+## Planner acceptance №7 (2026-07-22) — traceHessian LANDED; constituent set COMPLETE (5/5)
+
+Accepted: `TraceHessJetL2Summed.lean` (per-order + summed, sibling-compatible
+shape, green/axiom-clean; imports only committed-clean
+`RemainderCoeffL2JetMoser`).  LOAD-BEARING CORRECTION accepted and recorded:
+the roadmap's "three curvature engines" route for traceHessian was a
+MISCLASSIFICATION — `traceHessianCoeff` is a purely algebraic cometric
+(`g₁⁻¹`) coefficient with NO covariant-derivative gain (the gain lives in
+the kernelField/Lie), its jet is order-preserving, so it reaches nothing at
+the protected top window and **`Ktop = 0` is structural, not a mask**; the
+discipline is satisfied vacuously at the top.  Honest limitation recorded:
+the delivered `Kc` is a uniform ball-uniform constant, not yet genuinely
+data-weighted; upgrade path identified (metric-inverse tame machinery —
+either the ~660-line private copy or the public Hs-norm lemma + Hs→jet-L2
+bridge).  `RemainderCoeffTopSeparated.md`'s falsified traceHessian section
+corrected.
+
+**Constituent set COMPLETE: arm0, arm1, connDiff, Lie, traceHessian — all
+five carry uniform-shape summed top-separated producers, green and
+axiom-clean.**  Next brick = the data-weighted threeArm decomposition
+itself (the `C₀/C₁/C₂` assembly mirroring the frozen
+`DeTurckRemainderTameLipschitz.lean:36054` shape with the five new
+producers in place of the ballUniform ones).  OPEN PLANNING QUESTION for
+that dispatch: whether the threeArm sum needs true data-weighting from the
+traceHessian term (then the `Kc` upgrade goes first) or absorbs the
+constant `Kc` (shape-compatible since `Ktop = 0`) — resolve by reading the
+threeArm consumption shape in `SobolevNonlinearityExistence.md` before
+dispatching.
+
+## Planner acceptance №8 (2026-07-23) — Step-0 ABSORBED; assembly premise CORRECTED
+
+Accepted both findings of the eighth executor (no Lean written — correctly):
+(1) Step-0 verdict ABSORBED — traceHessian's constant `Kc` needs no upgrade
+(`Ktop = 0` ⟹ nothing in orientation 2; its low part lands in the allowed
+tame factor).  (2) The dispatch's "five producers converge into `C₀`"
+premise was WRONG at HEAD.  CORRECTED CONSTITUENT MAP (forensics in
+`ThreeArmTopSeparated.md`):
+- `C₀ = pathIntegralCoeffField Ψ₀ + K₀`, `Ψ₀ = −2·arm0Field
+  + deTurckLieCoeffField + lieCorr0Field` (all (2,2);
+  `DeTurckRemainderTameLipschitz.lean:34827/36054`).  Landed producers cover
+  only arm0Base; **`deTurckLieCoeffField` (`RicciDeTurckSectionDifference
+  .lean:7716`) and `lieCorr0Field` (`LieCorr0Core.lean:583`) — both
+  `g_bg`-dependent — have NO top-separated producer anywhere and genuinely
+  carry the top window** (cannot be absorbed like traceHess).
+- `C₁` analogously needs `deTurckLieArm1Coeff`-side producers beyond
+  arm1Base.  `C₂` is covered (deviation head + traceHess).
+- The landed connDiff/kernelField producers are (3,4), `g_bg`-independent,
+  and belong to the `b3_`/`b4_` correction-engine family — valuable there,
+  NOT `C₀` constituents.
+**RATIFIED continuation: option (a)** — stay on the COMMITTED decomposition
+and extend the producer set to the DeTurck-Lie fields (per-field bricks,
+established pattern); option (b) (a new connDiff-routed `C₀` identity)
+is REJECTED as statement-risk/orphan-API.  Next dispatch:
+`deTurckLieCoeffField` first — reconnoiter its committed decomposition and
+which committed topSeparated engine (if any) covers its top window; build
+the summed producer if covered; report the exact missing engine if not.
+
+## Planner acceptance №9 (2026-07-23) — deTurckLie Phase A accepted; MULTI-SESSION brick ratified
+
+Accepted the ninth executor's Phase-A findings (forensics in
+`DeTurckLieJetL2Summed.md`): the covering engine IS the committed
+`rfns_iteratedCovGrad_connDiffSection_topSeparated_le` applied at order
+`j = i+1`; all routing identities exist (`deTurckLieCoeffField = DLa + DLb`,
+the `dLaLoweredCovec` covGrad identity, the DeTurck-VF ↔ connDiffSection
+identities, the cocycles; `g_bg` parts are T-independent ⟹ `Kc`).  NO
+missing mathematical frontier — the gap is the field-level bridge: the
+committed reductions are fully grid-collapsed, and top-separating the
+`g₁`-dependent `dLaBiContrFib` bicontraction (DLa) and the
+`deTurckLieWEndoInsert` insertion (DLb) through the Leibniz with the
+`Hd`-head kept separate is ~300–500 lines PER HALF.  **RATIFIED as an
+explicit multi-session brick: DLa `Hd`-head per-order reduction → DLb →
+`DLa+DLb` triangle.**  WINDOW NOTE recorded: deTurckLie's top window is
+`a+2` (matches arm0Base, one order above connDiff/Lie) — the C₀ top window
+is `a+2`, set jointly by arm0 and deTurckLie; sibling-compatibility for
+this field means arm0-compatible.  Dispatched: the DLa sub-brick alone.
+
+## DLa sub-brick recon snapshot (2026-07-23, preserved at user reboot)
+
+The DLa executor was stopped cleanly for a machine reboot (no `.lean`
+created; stall cause = cross-lane Lean concurrency with the Codex
+processes — quiet-window protocol now mandatory for all dispatches).  Its
+completed reconnaissance, preserved verbatim:
+- Engine head: `10·S 0·rfns(∇^{j+1}T)` (R-independent); remainder
+  `Kc j·∑_{k<j} b(j-k)·antidiagTupleGrid b (k+1)`.
+- `rfns_iteratedCovGrad_covGrad_comm_rs` gives
+  `rfns(∇^i(covGrad(connDiffSection))) = rfns(∇^{i+1}(connDiffSection))`
+  — so the engine at `j = i+1` yields the `∇^{i+2}T` head.
+- `dLaKernelRaisedCc` (`DeTurckLieKernelL2JetBound.lean:1589`) splits into
+  8 summands with `A1 = covGrad(connDiffSection g₁ g₀)` the isolated top;
+  the other 7 (the `g_bg` part + 6 quad terms) reach only product-order
+  `i+2` with single factors `≤ ∇^{i+1}T`.
+- **Scoping win:** the head atom (`covGrad(connDiffSection)`
+  top-separation) is PURE connDiffSection — no DLa-specific def needed;
+  it imports only committed-clean modules (same import cone as
+  `ConnDiffJetL2Summed`), avoiding every dirty tracked file.
+Next dispatch resumes from exactly here: prove the head-atom lemma first
+(`∇^i(covGrad connDiffSection)` top-separated via the comm identity +
+engine), then the 8-summand triangle.
+
+### DLa STEP 1 (head atom) IMPLEMENTED — pending first typecheck (2026-07-23)
+
+New leaf `Analysis/Sobolev/TensorHilbert/DLaTopSeparated.lean` (+`.md`), namespace
+`DifferentialGeometry.Integral.Connection`, imports only committed-clean
+`RemainderCoeffL2JetMoser` + `RicciConnDiffOrder1TameEnvelope` (same cone as
+`ConnDiffJetL2Summed`; no `deTurckLie*` / dirty-file import — the head atom is pure
+`connDiffSection`, so elaboration never enters `DeTurckLieKernelL2JetBound.lean` or the dirty
+`CurvatureCoefficientDifferenceJetTower.lean`).  Three theorems for the DLa top factor
+`covGrad (connDiffSection g₁ g₀)`:
+`covGradConnDiffSection_perOrder_l2_topSeparated_generic` (generic `(g₁,P,htie)`;
+`‖∇^i(covGrad(connDiffSection))‖² ≤ Ktop·‖∇^{i+2}P‖² + Kc i·(1+∑_{j<i+2}‖∇^jP‖²)`,
+`Ktop = 2·Kt0` R-independent, `Kc i = 2·Kc0(i+1)·(i+1)·KI i` house R-pattern) →
+`…_realizedFam_jetL2_perOrder_topSeparated` (top point `i+2`) →
+`…_realizedFam_jetL2_summed_topSeparated` (top window `a+3` = `∑_{j≤a+2}`, matching arm0's `a+2`).
+Route = recon snapshot's two-liner: comm identity `rfns_iteratedCovGrad_covGrad_comm_rs`
+(`OperatorFieldFibreNormJet.lean:514`, same namespace ⇒ in scope) as an EQUALITY (no `finrank²`,
+unlike connDiff's slotExtend transfer), then the committed engine
+`rfns_iteratedCovGrad_connDiffSection_topSeparated_le` at order `j=i+1`; remainder reshaped by copied
+private `tsResSum_le_boundedWindow` at `(i+1)` → window `(i+1)(i+3)` = converter window (NO
+`boundedFactorGridWindow_mono` widen needed, unlike ConnDiff at order `i`); integrated by
+`boundedFactorGridWindow_integral_ballUniform_tameWindow`.  Summed via copied `jetL2_sum_lowShift a 2 2`
+(top offset `p=2`).  VERIFICATION: quiet-window waiter + direct `lean` vs `C:/dgbuild/e87b/lib/lean`
+armed (Codex lane held the Lean lock continuously through the session); `#print axioms` audit pending.
+(N) still **0%**; this is sub-brick 1 of 3 (DLa head → DLa 8-summand triangle → DLb → `DLa+DLb`) of
+the 1st of 2 genuinely-missing C₀ constituents.  Step 2 plan (8-summand `dLaKernelRaisedCc` bridge,
+`DeTurckLieKernelL2JetBound.lean:1589`; DLa = `dLaBiContrFib` bicontraction, `:44`) in
+`DLaTopSeparated.md`.
+
+## Planner acceptance №10 (2026-07-23) — DLa HEAD ATOM VERIFIED GREEN
+
+The planner ran the verification directly in the post-reboot quiet window:
+`DLaTopSeparated.lean` EXIT=0, zero errors/warnings, and all three theorems
+(`covGradConnDiffSection_perOrder_l2_topSeparated_generic`,
+`…_realizedFam_jetL2_perOrder_topSeparated`,
+`…_realizedFam_jetL2_summed_topSeparated`) audit to exactly
+`[propext, Classical.choice, Quot.sound]`.  Temporary `#print axioms` lines
+stripped post-verification (pure commands; no proof content touched; file
+now 514 lines).  Constant note confirmed: `Ktop = 2·Kt0` with NO `finrank²`
+factor (the covGrad comm identity is an equality, not a slotExtend
+transfer).  Next dispatched: DLa Step 2 — the 8-summand
+`dLaKernelRaisedCc` triangle (A1 = the verified head atom; the 7 non-top
+summands' committed ball-uniform bounds go wholly to `Kc`), yielding the
+DLa per-order + summed top-separated bound.
+
+## Planner acceptance №11 (2026-07-23) — DLa field bound STRUCTURALLY WAIT-ON-CODEX; head cell delivered
+
+Accepted the twelfth executor's findings: (1) `DLaHeadCellRfns.lean` written
+(pointwise `rfns` top-separated bound for the A1 head cell, committed-clean
+imports only) — VERIFICATION PENDING on a quiet window (Codex lean active
+again at check time; planner verified the file exists; will verify at next
+quiet window).  (2) STRUCTURAL BLOCK confirmed by planner git-status check:
+`DeTurckLieKernelL2JetBound.lean` is DIRTY (Codex in-flight), and the entire
+DLa bridge (`deTurckLieDLaCoeffField_eq_pairTrace`, `dLaKernelRaisedCc`,
+`dLaSymCc`, `pairTraceOpDla`, all `_tgrid` bounds) is PRIVATE inside it — a
+leaf cannot reference privates, copying ≈1300–2500 lines would be forbidden
+parallel API, and editing the dirty file is barred.  The correct home for
+the DLa (and likely DLb) field bounds is INSIDE that file next to its
+private deps.  **The deTurckLie constituent is therefore parked
+WAIT-ON-CODEX** (release/land `DeTurckLieKernelL2JetBound.lean`, or expose
+the bridge pieces as public).  ASKS TO THE CODEX LANE now three: (i) commit
+the 64 JetTower lines; (ii) repair the worktree `.lake` hash split; (iii)
+land/release `DeTurckLieKernelL2JetBound.lean` (or publicize its DLa/DLb
+bridge).  Meanwhile dispatched: ruling item 1 — the generic `timeH1`
+√t-modulus lemma (`‖u(t) − u(0)‖ ≤ √t · ‖∂ₜu‖_{L²([0,T];·)}`) — fully
+independent of the Codex coupling; it also replaces the qualitative
+`ContinuousWithinAt` δ in the eventual fixed-horizon representative
+(ruling item 5).
+
+## Planner acceptance №12 (2026-07-23) — ruling item 1 DONE; DLa head cell verified
+
+Accepted: (1) **Ruling item 1 COMPLETE, verified green/axiom-clean** —
+`timeH1.norm_toFun_sub_init_le` (the √t-modulus
+`‖u.toFun t − u.init‖ ≤ √t·‖u.deriv‖`) + supporting sharp-horizon engine
+`integral_norm_Icc_le` (`TimeSobolev/TimeH1Modulus.lean`); genuinely new
+(no pre-existing modulus; `norm_toFun_le` was √T and not the difference);
+consumed later by ruling item 5.  (2) `DLaHeadCellRfns.lean` VERIFIED by
+the planner (EXIT=0, axioms exactly the standard three; audit line
+stripped).  (3) `LieCorr0Core.lean` confirmed committed-clean — the
+lieCorr0 constituent MAY be dispatchable, but C₀ remains blocked on the
+DLa/Codex wait regardless, so priority goes to ruling item 3.  Next
+dispatched: **ruling item 3** — the `H^{a+1}`-controlled scalar cutoff
+acting on `H^{a+2}` (`U ↦ χ(‖ιU‖_{H^{a+1}})·U`), with its four lemmas
+(maps into the ball, identity on the ball, `H^{a+1}`-Lipschitz, mixed
+`H^{a+2}/H^{a+1}` difference estimate) — pure spectral-space construction,
+Codex-independent, and the gateway to items 4–5 (the actual lifetime fix).
+
+## Planner acceptance №12 (2026-07-23) — items 1 & 3 VERIFIED; head cell VERIFIED; item 4 dispatched ABSTRACT
+
+Verified by the planner in the quiet window (all EXIT=0, axiom audits
+exactly `[propext, Classical.choice, Quot.sound]`, audit lines stripped
+after green):
+- `DLaHeadCellRfns.lean` (`covGradConnDiffSection_perOrder_rfns_topSeparated`)
+  — the DLa A1 head cell, pointwise form.
+- `LowScaleCutoff.lean` (ruling item 3) — all five declarations
+  (`incl_lowScaleCutoff`, `lowScaleCutoff_mem_ball`, `_eq_self`,
+  `_incl_lip`, `_sub_le`); the mixed difference estimate carries the tame
+  cross term with NO pointwise `H^{a+2}`-ball hypothesis.
+- Ruling item 1 (`TimeH1Modulus.lean`: `timeH1.norm_toFun_sub_init_le` +
+  `integral_norm_Icc_le`) was self-verified green by its executor earlier.
+SCOREBOARD: ruling items 1 ✓, 3 ✓; item 2 = five summed constituents green
++ head cells green, field-level DLa/DLb assembly WAIT-ON-CODEX
+(`DeTurckLieKernelL2JetBound.lean` private deps); items 4–6 open.
+DESIGN DECISION for item 4 (dispatched): build it ABSTRACTLY — take the
+two-orientation tame difference bound as a HYPOTHESIS (the shape item 2
+will eventually instantiate), consume the verified cutoff API + the
+`timeL2/timeH1` currencies, and conclude the `timeL2` contraction estimate
+parallel to `nemytskiiMixedForcingMap_dist_le`.  This decouples item 4 from
+the Codex-blocked concrete instantiation, mirroring the
+`forward_ode2_of_bound` abstraction pattern.
+
+## Planner acceptance №13 (2026-07-23) — tree COMMITTED CLEAN; authoritative build 7/8 pending one upstream rebuild
+
+- User clarified nobody owns this branch; the orphaned Codex leftovers were
+  committed by the user: `f55a993d6` (JetTower pureTrace/koszul lines +
+  DeTurckLie `symmC0_rfns_le` wrapper) and `126aaebda` "update" (sweeps in
+  the eight new modules and notes).  `git status --short` is now EMPTY.
+- User ran the authoritative 8-target `lake build`: 9432/9433 jobs; single
+  failure = `...EllipticBridge...EigenvectorChartRHSDiffNumeratorWkpNormSharp`
+  (the previously hash-split heavy spectral module; its `.lake` artifacts
+  are stale at 07-20 00:49 and its cached `.trace` log holds no error, so
+  the job genuinely re-ran and failed — exact error text not yet captured).
+  `LowScaleCutoff` IS lake-green (artifacts 07-23 21:14).  The six
+  TensorHilbert engines + `TimeH1Modulus` sit downstream of the failed
+  module and were skipped — still pending authoritative verification.
+- ROOT CAUSE FOUND (deterministic, not a race / not thread exhaustion):
+  Windows MAX_PATH.  With the 63-char worktree prefix, exactly two modules
+  have build artifacts over the ~260-char C-runtime limit:
+  `EigenvectorChartRHSDiffNumeratorWkpNormSharp` (`.olean.hash` = 261;
+  its `.trace` = 256 is readable, so Lake starts the replay and then dies
+  ENOENT on the hash — the exact observed error) and
+  `EigenvectorChartRHSDiffWkpNormSharpBoundedExplicit` (`.olean.hash` =
+  267, `.trace` = 262; not in today's closure, latent).  The 07-20 sidecar
+  files were written by long-path-capable `cp` mirroring, which is why
+  they exist yet Lake cannot open them.  This also retro-explains the
+  original "missing hash" split that first broke `lake build`.
+- Diagnosis nailed by minimal repro: Lean's own runtime on the 261-char
+  path gives `pathExists: false` + `IO.FS.readFile` ENOENT, while bash and
+  .NET read the same file fine.  A `C:\w87` junction did NOT help — Lake
+  canonicalizes the workspace root back to the real long prefix.
+- FIX (zero recompile, adopted): `lakefile.toml` on this branch sets
+  `buildDir = "C:/dgb2/e87b"` (short absolute path; comment in the file
+  explains why; REVERT before merging to a normally-located checkout).
+  The old `.lake/build` (9.4 GB) was preseeded into `C:/dgb2/e87b` via
+  hardlinks (`cp -al`, ~2 min, zero extra disk).  Trace keys survive:
+  probes report "All targets up-to-date" for LowScaleCutoff (1902 jobs)
+  AND for the previously-fatal Numerator module (8954 jobs) — the killer
+  replay now passes.  No special cwd is needed anymore; plain `lake build`
+  / `lake env lean` in the worktree just work.  The old
+  `.lake/build` tree is abandoned (do not delete yet; it backs the
+  hardlinks' provenance history).  The 8-target authoritative build was
+  relaunched under the new buildDir; result recorded below.
+- RESULT (2026-07-23 ~23:20): `lake build` of all eight targets GREEN —
+  "Build completed successfully (9433 jobs)", EXIT=0.  The six
+  TensorHilbert engines compiled fresh (23:19–23:20); `TimeH1Modulus` and
+  `LowScaleCutoff` had already built in the user's run (21:14) and
+  replayed.  ALL Stage/ruling machinery modules of this plan are now
+  authoritatively lake-verified (not just focused-check green).  Scoreboard
+  unchanged otherwise: (N) itself still 0% (its `sorry` untouched); next
+  brick = DLa/DLb field-level assembly inside
+  `DeTurckLieKernelL2JetBound.lean` (dispatched).
+- NOTE (superseded same night): the №12 item-4 executor was STOPPED BY THE
+  USER before reporting — but recon found it HAD delivered
+  `Analysis/Parabolic/QuasiLinear/TensorMaximalRegularity/TameNemytskii.lean`
+  (mtime 07-23 21:09, swept unverified into `126aaebda`): the abstract
+  two-orientation tame `timeL2` contraction, exactly the №12 design
+  (three declarations; see `TameNemytskii.md`).  Planner statement-level
+  acceptance PASSED (constant discipline clean: leading coefficient
+  `K(1+Minf)` radius-free; top norms only against the low-scale `Dinf`).
+  User said "item 4 继续" → verification queued (lake build + axiom
+  audit) behind the running DLa executor; result recorded below when it
+  lands.  Also note: the 07-19 Codex lane files in the same directory
+  (`TimeLocalNemytskii`, `TimeTameFixedPoint`, `MovingMass`,
+  `RadialMixedBound`) are UNVERIFIED source-only drafts per their own
+  `.md`s — separate concern, not item 4.
+  Ruling scoreboard: items 1 ✓, 3 ✓; item 2 in flight (DLa brick);
+  item 4 delivered pending verification; items 5, 6 open.
+- ITEM 4 VERIFIED GREEN (2026-07-24): after one mechanical repair
+  (`TameNemytskii.lean:116`, `add_le_add_right` → `add_le_add … le_rfl` on
+  the ENNReal goal), `lake build +...TameNemytskii` succeeded (2500 jobs)
+  and the axiom audit returned exactly `[propext, Classical.choice,
+  Quot.sound]` for all three declarations.  Scoreboard now: items 1 ✓,
+  3 ✓, 4 ✓; item 2 in flight (DLa multi-session brick, session 1 interim:
+  `engineRem_le_dLaGridWin` + `exists_rfns_connDiffSection_topsep_dla`
+  green, `exists_rfns_dLaKernelRaised_topsep` in re-check, field lift
+  drafted); items 5, 6 open.
+
+## Planner acceptance №14 (2026-07-24) — DLa session 1 ACCEPTED; item 4 DONE
+
+- DLa brick session 1 (kernel top-separation) ACCEPTED: spot-checks pass
+  (three lemmas present in `DeTurckLieKernelL2JetBound.lean`
+  `section DLaGridBrick` at :4753/:4789/:4873; audit lines stripped; diff
+  scope = the brick's own files only).  Discipline check PASSED: Ktop =
+  `2·Kt0` (connDiffSection) and `256·Kt0` (8-summand kernel twin), both
+  `(g₀,g_bg,hδ₀)`-level and R-free; R only in Kc (house pattern); the
+  `A1 = covGrad(connDiffSection g₁ g₀)` head stays separate.  Axiom audit
+  verbatim `[propext, Classical.choice, Quot.sound]` on all three.
+- Ruling item 4 DONE the same night (`TameNemytskii.lean`, commit
+  `3bd9a72f0`).  Scoreboard: items 1 ✓, 3 ✓, 4 ✓; item 2 = DLa piece 4
+  (field lift, designed, next session) then DLb
+  (`DeTurckVectorFieldL2JetBound.lean`) then assembly; items 5, 6 open.
+- Next dispatch: DLa session 2 = piece 4 field lift per
+  `DeTurckLieKernelL2JetBound.md` §"Remaining field assembly" (route
+  4.1–4.7; `appCcGdiag i ≤ appCcGdiag a` monotone bound resolves the
+  i-dependent top coefficient; `jetL2_sum_lowShift a 2 3` at the summed
+  layer).
+
+## Planner acceptance №15 (2026-07-24) — DLa HALF COMPLETE (field lift verified)
+
+- DLa session 2 (piece 4, +971 lines) ACCEPTED.  Spot-checks pass: both
+  public endpoints present
+  (`deTurckLieDLaCoeffField_realizedFam_jetL2_perOrder_topSeparated` :5680,
+  `..._summed_topSeparated` :5966), zero `sorry`, audit lines stripped,
+  diff scope = the four permitted files.  Executor evidence: whole-file
+  focused check EXIT 0 with EMPTY log (zero errors/warnings, real — the
+  identical command surfaced errors before the fixes), axiom audit exactly
+  `[propext, Classical.choice, Quot.sound]` on both endpoints.
+- Discipline PASSED: `Ktop = CPT0·fr²·8·256·Kt0·(1+fr⁵δ₀²)·(appCcGdiag a)²`
+  — `(g₀,g_bg,hδ₀)`-level only, R-free, no top-norm products; R only in
+  the lumped `Kc` via the tame-window integrator.  Summed endpoint uses
+  `jetL2_sum_lowShift a 2 3` (both windows `a+3`), shape-matching the
+  connDiff sibling.
+- With session 1, the ENTIRE DLa half of `deTurckLieCoeffField` is done.
+  Remaining for the constituent: DLb sibling producer
+  (`DeTurckVectorFieldL2JetBound.lean`, near
+  `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform` :3041),
+  then the combined assembly via
+  `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` (2·DLa²+2·DLb²).
+- Maintenance note: `DeTurckLieKernelL2JetBound.lean` is now 6007 lines
+  (over the 3000 cap, grandfathered mid-brick).  Split by abstraction
+  boundary AFTER the deTurckLie constituent closes; do not churn now.
+- (N) still 0%.  DLb session dispatched next.
+
+## Planner acceptance №16 (2026-07-24) — DLb session 1 accepted; TWO RULINGS
+
+- DLb session 1 ACCEPTED: three verified layers in
+  `DeTurckVectorFieldL2JetBound.lean` `section DLbTopSeparated` (:3147) —
+  `exists_rfns_connDiff_topsep` (:3245, public-grid-currency mirror of the
+  DLa pointwise top-sep), `connDiff_L2_topsep` (:3337, retires the
+  L2-integration route risk), `wXi_L2_topsep` (:3462).  Whole-file focused
+  check EXIT=0 live (pre-existing warnings still emitted ⟹ not
+  cached-stale); zero `sorry`; diff scope = the three permitted files.
+  Intermediate helpers — axiom audit deferred to the endpoints.
+- RULING 1 (structural, accepted): the named field endpoints CANNOT live
+  in `DeTurckVectorFieldL2JetBound.lean` (`deTurckLieDLbCoeffField` is
+  defined in `DeTurckLieKernelL2JetBound.lean:60`; the slotInsert bridge
+  in `DeTurckLieCoeffL2JetBound.lean:47`).  Split per the canonical-home
+  rule: insert-level endpoints
+  `deTurckLieWEndoInsert_realizedFam_jetL2_{perOrder,summed}_topSeparated`
+  in the vector-field file (the analytic heart), plus a THIN `×4·finrank`
+  R-free field wrapper `deTurckLieDLbCoeffField_realizedFam_jetL2_*` in
+  `DeTurckLieCoeffL2JetBound.lean` mirroring its ballUniform wrapper
+  (:244).  Session 2's editable set extends to that file.
+- RULING 2 (mathematical): GENUINE positive Ktop; the `Ktop = 0`
+  shortcut is REJECTED for DLb.  DLb's top content is real
+  (`wAlphaA = ∇^{i+1}wOmega` reaches `∇^{i+2}T`); lumping it under the
+  R-carrying `Kc` loses the R-freeness of the top coefficient
+  irrecoverably at this layer and would poison the combined
+  `2·DLa² + 2·DLb²` assembly (DLa's R-free `256·Kt0` wasted).  `Ktop = 0`
+  remains legitimate ONLY for constituents with no genuine top content
+  (the traceHess pattern).
+- Remaining insert tower (session 2, recipe in
+  `DeTurckVectorFieldL2JetBound.md`): wOmega corner peel via
+  `iteratedCovGrad_appCcRS_eq_argCorner_add_lower`
+  (`OperatorFieldFibreNormJet.lean:1410`) + lower sum ball-uniform
+  (:1372); wAlpha triangle; realizedFam wrapper with
+  `appCcGdiag n ≤ appCcGdiag (a+1)`; summed via `jetL2_sum_lowShift a 2 3`;
+  then the downstream field wrapper.  DLb insert producer ~40%;
+  deTurckLie constituent ~65%; (N) 0%.
+
+## Planner acceptance №17 (2026-07-24) — DLb HALF COMPLETE (all four endpoints)
+
+- DLb session 2 ACCEPTED.  Spot-checks pass: insert endpoints
+  `deTurckLieWEndoInsert_realizedFam_jetL2_{perOrder,summed}_topSeparated`
+  (`DeTurckVectorFieldL2JetBound.lean` :3956/:4123) and field wrappers
+  `deTurckLieDLbCoeffField_realizedFam_jetL2_{perOrder,summed}_topSeparated`
+  (`DeTurckLieCoeffL2JetBound.lean` :432/:483); zero `sorry`, audit lines
+  stripped, diff scope exactly the permitted set.  Executor evidence:
+  whole-file checks clean; full closure `lake build
+  +…DeTurckLieCoeffL2JetBound` "Build completed successfully (9427
+  jobs)"; axiom audit exactly `[propext, Classical.choice, Quot.sound]`
+  on all four.
+- Discipline PASSED per RULING 2: insert `Ktop = 2·ΛClow 0·Ktop_xi`
+  (R-free, no `appCcGdiag` — the corner peel used the PUBLIC unconditional
+  `rfns_appCcRS_appCcLeibnizPsi_diag_le`, `OperatorFieldFibreNormJet.lean
+  :1728`); field `Ktop = 4·finrank·Ktop_insert`, R-free.  RECIPE
+  CORRECTION recorded: the argCorner lower sum is bounded by
+  `rfns_appCcRS_argLower_le` (:1426), NOT the coeff-corner engine
+  (:1372) named in the session-1 recipe; and the summed field wrapper
+  sums the per-order `×4·finrank` helper against the insert-summed bound
+  (no `jetL2_sum_lowShift` needed downstream — it is private upstream).
+- BOTH HALVES of `deTurckLieCoeffField` are now built and
+  shape-compatible.  Remaining for the constituent: the combined
+  assembly via `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`
+  (`2·DLa² + 2·DLb²`, per-order + summed) in
+  `DeTurckLieCoeffL2JetBound.lean` (the lowest file seeing both halves)
+  — dispatched to the warm session-2 executor.  Then `lieCorr0Field`
+  (2nd missing constituent), then the threeArm/C₀ assembly.  (N) 0%.
+
+## Planner acceptance №18 (2026-07-24) — deTurckLieCoeffField CLOSED
+
+- Session 3 (combined assembly) ACCEPTED.  Endpoints
+  `deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated` (:739)
+  and `..._summed_topSeparated` (:799) in
+  `DeTurckLieCoeffL2JetBound.lean` (858 lines), via the pointwise
+  triangle helper `normSq_iCG_deTurckLieCoeff_le` and the committed split
+  `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`.  Spot-checks:
+  zero `sorry`, audit lines stripped, diff scope exactly the four
+  permitted files.  Executor evidence: whole-file check clean; direct-lean
+  full re-elaboration with axiom audit exactly
+  `[propext, Classical.choice, Quot.sound]` on both endpoints.
+- Combined constants: `Ktop = 2·(Ktop_DLa + Ktop_DLb)` R-free;
+  `Kc = 2·(Kc_DLa + Kc_DLb)`, R only there.  Discipline PASSED.
+- THE FIRST genuinely-missing C₀ constituent (`deTurckLieCoeffField`) is
+  now fully produced at the top-separated realizedFam jetL2 layer
+  (perOrder + summed).  Post-commit `lake build` olean refresh recorded
+  below.  Remaining on the №8 constituent map: `lieCorr0Field`
+  (`LieCorr0Core.lean:583`, 2nd missing constituent — dispatched next),
+  then the Ψ₀/threeArm C₀ assembly, then the smooth-core tame lemma
+  (ruling item 2 proper).  (N) still 0%.
+
+## Planner acceptance №19 (2026-07-24) — lieCorr0 recon accepted; TWO RULINGS
+
+- lieCorr0 recon session ACCEPTED (disciplined stop, no Lean written;
+  only the three authorized `.md`s touched).  KTOP VERDICT ACCEPTED:
+  positive R-free Ktop REQUIRED — bare `∇²T` is carried solely by
+  `lc0Insert` via `−deTurckLieWEndo g₁ g₀` (`lc0_decomp`,
+  `LieCorr0Split.lean:154`); the other three summands (`lc0VB`,
+  `lc0AMix`, `lc0Riem`) are order-1·order-1 / algebraic → Kc.  KEY
+  DISCOVERY: `lc0Insert g₀ g₁ g₀ = −deTurckLieDLbCoeffField g₀ g₁ g₀`
+  (via `insert_base` :103 + the endo-arm defeq), so the just-closed DLb
+  field producer at `g_bg := g₀` supplies lieCorr0's ENTIRE top
+  verbatim: `Ktop = Ktop_DLb`, R-free.  Low machinery pre-built in
+  `LieCorr0LowJet.lean` (refolds :1408/:1581/:1628/:1810, :1243).
+- RULING 1 (canonical home, accepted): endpoints go in a NEW leaf
+  `Analysis/Sobolev/TensorHilbert/LieCorr0CoeffL2JetBound.lean`
+  (imports `DeTurckLieCoeffL2JetBound` + `LieCorr0Split` +
+  `LieCorr0LowJet`; namespace `Integral.Connection`).  `LieCorr0Core.lean`
+  sits upstream of the jetL2 layer — hosting there would cycle imports;
+  re-deriving the DLb engine upstream is forbidden parallel API.
+- RULING 2 (assembly shape): OPTION A — standalone positive-R-free-Ktop
+  producer, triangle into Ψ₀.  Rationale recorded: R1τ requires top
+  R-FREENESS, not top-freeness; the item-2 smooth-core machinery
+  (TameNemytskii two-orientation form) is built to absorb genuine
+  second-order content; the `LieCorr0Split.md` "not small at H3" warning
+  is the low-regularity Koch–Lamm lane's smallness concern and does not
+  bind the high-order R1τ lane; option B would also churn the
+  just-closed deTurckLie constituent against the ratified №8 map.  The
+  committed cancellation lemma `tail_base_split` (:171) remains available
+  as a refinement if the smooth-core assembly ever demands literal
+  `∇²T`-freeness.
+- Session-2 entry plan (executor's, ratified): new leaf; `lc0_decomp` →
+  5 summands (split `lc0Insert g_bg = lc0Insert g₀ g₁ g₀ +
+  (lc0Insert g_bg − lc0Insert g₀)`); 5-way pointwise triangle
+  (generalize `normSq_iCG_deTurckLieCoeff_le` from 2-way); top via DLb
+  producer @`g_bg := g₀`; 4 Kc summands via LowJet refolds through the
+  tame-window integrator; `Ktop = 5·Ktop_DLb` R-free, single Kc; summed
+  windows `a+3`.  Shape = deTurckLie siblings verbatim.
+
+## Planner ruling №20 (2026-07-24) — upstream FALSE-GREEN repair authorized
+
+- The executor found `LieCorr0Split.lean` and `LieCorr0LowJet.lean` are
+  `lake env lean` FALSE-GREENs (committed Codex-lane drafts that never
+  passed a real `lake build`; their own `.md`s admit unverified status) —
+  this CORRECTS №19's "low machinery pre-built" premise, which rested on
+  source reads + note claims, not builds.  Known-lesson recurrence
+  (lake-env-lean false-green).
+- RULING: repair AUTHORIZED, scope-limited — Split: add the missing
+  `open DifferentialGeometry.Integral.L2` (all 8 build errors are
+  `Unknown identifier SmoothCcTensor` from it); LowJet: mechanical
+  hygiene only (opens, autoImplicit-false binders, implicit plumbing).
+  HARD GUARDRAIL: any repair needing a theorem-STATEMENT change, or a
+  genuine proof failure, must STOP for a planner decision (that would
+  mean the refolds are unsound drafts).  Verify Split then LowJet by
+  targeted `lake build` before resuming the leaf.
+- WIP already in the new leaf (unverifiable until deps build):
+  `endoArm_eq_dlb`, `lc0Insert_base_eq_neg_dlb`,
+  `lc0InsertBase_realizedFam_perOrder_topSeparated` (top piece,
+  `Ktop = Ktop_DLb`), `sq_le_five_add`.
+
+## Parallel lanes (2026-07-24, user-authorized)
+
+Three executor lanes run concurrently (user: “可以平行工作,多安排几个
+opus session”).  Disjoint file sets; every lane keeps the one-Lean-process
++ wait-poll protocol, so checks serialize on the machine while
+editing/recon overlaps:
+
+- LANE A (item 2 supply): lieCorr0 producer — LieCorr0Split/LowJet repair
+  (№20) + the new leaf `LieCorr0CoeffL2JetBound.lean`.
+- LANE B (item 5): fixed-horizon representative —
+  `HeatSemigroup/MaxRegSolutionJointlySmooth.lean` recon + additive
+  fixed-horizon variant (timeH1 modulus replaces the qualitative t=0 δ);
+  status in `MaxRegSolutionJointlySmooth.md` ONLY.
+- LANE C (item 6): class-uniform packet RECON-ONLY — deliverable
+  `ShortTime/UNIF_ITEM6_RECON.md` (inventory, narrow 3-order statement
+  list, per-statement route/risk/effort, canonical home).  No Lean.
+
+Parallel-mode recording rule: lanes B/C do NOT edit this plan (planner
+consolidates); lane A retains its status-log permission.  After lanes
+close: item-2 threeArm assembly (needs lane A), item-6 build (needs lane
+C ratified), final (N) assembly last.
+
+## Planner ruling №21 (2026-07-24) — LieCorr0 upstream repair: PROBE ROUTE
+
+- Lane A's guardrail stop ACCEPTED: the `LieCorr0Split`/`LieCorr0LowJet`
+  breakage exceeds hygiene — every `.ext` proof fails
+  `FiberBundle (TensorRSModel 2 2 ℝ E) …` instance synthesis; three
+  bare-instance routes failed; the working TensorHilbert files instead
+  install the metric-dependent
+  `letI : Bundle.RiemannianBundle … := tensorRS_riemannianBundle g r s`
+  setup.  The drafts are genuinely uncompiled Codex infra debt (second
+  false-green recurrence).  Split currently holds the correct hygiene
+  portion (full open set + the statement-sound `← insert_base` direction
+  fix) and still does not build.
+- RULING (probe route, bounded): (P1) apply the RiemannianBundle-letI
+  setup pattern (copied from a working TensorHilbert file) to Split's
+  four `.ext` proofs ONLY, target = `lake build` green for Split (186
+  lines — small, decisive pattern test).  (P2) if Split goes green, run
+  `lake build` on LowJet and CAPTURE THE FULL ERROR LIST without fixing
+  — classify (instance-pattern vs other) and report the inventory; the
+  planner then decides full repair vs escalation (GPT Pro consult or
+  Codex handback).  (P3) if Split still fails after the pattern on one
+  `.ext`, stop with exact goal/error for a Pro consult.  Statement
+  changes remain forbidden; letI/instance setup is authorized as setup
+  code, not proof content.
+- Lane A's leaf (top piece via DLb@`g_bg:=g₀`) stays written and parked
+  until the deps build.
+
+## Planner consolidation №22 (2026-07-24) — parallel-lane outcomes
+
+- LANE A (lieCorr0 / item 2): band-aid disproved (T1) — the winning
+  TotalSpace topology has no paired FiberBundle instance and the topology
+  is baked at the `SmoothCcTensor` definition sites, so per-site pins are
+  impossible.  Only fix = bundle-definition-layer instance dedup.  CONSULT
+  READY: `ShortTime/UNIF_DIAMOND_PRO_PROMPT.md` (+ evidence in
+  `TensorHilbert/LieCorr0CoeffL2JetBound.md`); branch pushed to origin.
+  BLOCKED on browser access for the GPT Pro submission (Chrome extension
+  not connected) — user action needed, or manual paste.  lieCorr0 parked.
+- LANE B (item 5 → item 6/2a): item 5's fixed-horizon layer DELIVERED
+  (`maxreg_solution_jointly_smooth_representative_of_tame_nemytskii`,
+  `d95dc134b`).  2a chain: composition core (`447463644`) + tie API
+  (`75673d4f1`) + discharger D1 (`7a79aea50`) + D2 linearity reduction
+  (`a77c7ffdc`) all green; D2's crux `normBridge` statement pinned with
+  ONE documented frontier `sorry` (`5edeae3a7`, sorryAx marker
+  intentional) — gated on the missing formalism agreement
+  `nabla0SFun ↔ tensor0SCovariantDerivative` (flagged-missing ×5 in the
+  tree).  Agreement-bridge executor dispatched
+  (`Agreement/Nabla0SFunAgreement.lean`, sibling-induction template).
+  `B(Λ) = n·(Λ−1) + 2Λ` pinned.
+- LANE C (item 6/S1): **S1-ABSTRACT COMPLETE.**  Chain: `bochner_step_unif`
+  (`3d0d6847c`) → `roughLapComm_unif` (`515cba063`) → hbase discharge
+  (`f5812c014`, + the one-token covDivergence publicize, no downstream
+  breakage) → `elliptic_lapSum_unif` (`d2854d87c`, tight ⌈a/2⌉ budget) →
+  both endpoints `covsum_hs_unif`/`hsCovsum_unif` (`4458fb6f1`, + the
+  four-token spectral-bridge publicize) → consumer verdict `49fe8ae04`:
+  STEP 2.2/2.3 UNNECESSARY (route-2 internals).  All constants
+  Fc-explicit; only dimension chooses remain.  Two downstream deltas
+  recorded in `UnifBochnerGap.md`: the thin rank-2 face wrapper and a
+  possible expose-aggregate-constant refinement when 2a/2c compose.
+- Scoreboard: ruling items 1 ✓, 3 ✓, 4 ✓, 5 ✓ (fixed-horizon layer;
+  deepest cutoff rework deferred, post-item-2); item 6: S1-abstract ✓,
+  2a ~45% (gated on the agreement bridge), S0/S1b/S2–S4 unstarted;
+  item 2: 6/7 constituents + lieCorr0 parked on the diamond consult +
+  threeArm assembly unstarted.  (N) `ricci_flow_unif_existence`: **0%**
+  (its `sorry` untouched).  Known intentional machinery `sorry`: exactly
+  one (`normBridge`), documented, expected to clear with the agreement
+  bridge.
+
+## Planner consolidation №23 (2026-07-25) — USER PAUSE POINT (authoritative resume state)
+
+User ordered a full pause; new dispatches FROZEN; the two in-flight
+executors were stand-down-ordered (record state in their `.md`s, no new
+proof work).  This section is the authoritative resume point.
+
+STATE AT PAUSE (all committed & pushed through `509238f03`+):
+- Ruling items 1 ✓, 3 ✓, 4 ✓, 5 ✓ (focused layer; deepest cutoff rework
+  deferred post-item-2).
+- Item 2: constituents 6/7 closed (deTurckLie fully: DLa+DLb+combined).
+  lieCorr0: diamond FIXED (Pro-ruled dedup `55efbcbd7`; Split builds;
+  LowJet quarantined as abandoned deep-WIP); the leaf's top piece
+  committed; the Kc-assembly session was mid-flight at the pause (see its
+  `LieCorr0CoeffL2JetBound.md` stand-down note).  Ψ₀/threeArm assembly
+  and the smooth-core tame lemma (item 2 PROPER — the decisive route
+  test, and the main remaining mathematical risk): NOT started, 0%.
+- Item 6: S1-abstract COMPLETE (`covsum_hs_unif`/`hsCovsum_unif`,
+  hcurv/Fc interface).  Curvature-jet discharge (2a): Λ<2 single link
+  CLOSED (`unifCurvatureSup_singleLink`, F = Λ²(Cd+√Kbase)); telescoping
+  link lemmas (a) done; composition (b) + 2a-hi/pkg blocked on the
+  connection-difference-derivative bound B2.  B2 = P1 ✓ ∘ P2:
+  P2.a (differentiated Koszul `connDiff_koszul_deriv`) DONE `509238f03`;
+  P2.b/c/d session was mid-flight at the pause (see
+  `ConnDiffDerivBound.md`/`ChristoffelDiffKoszulDeriv.md` stand-down
+  notes).  T-B norm layer: identity (B1 `diffStep_leibniz_eval`) +
+  conditional bound (B3 `covStepDiff_norm_le`/`covStepDiff_jet_le`) done
+  — unconditional once B2 closes; then the D_N recursion.  S0: fiber +
+  volume + telescoping identity + eval gate + j=1 endpoint all done;
+  j≥2 waits on B2+D_N.  S2–S4/S1b: unstarted.
+- Machinery sorries in tree: ZERO (normBridge discharged `46a7133ba`).
+  Theorem-level sorries: exactly the two black boxes
+  (`ExtendViaUniqueness.lean` :92 (N) and :201 forward-uniqueness).
+- Forward uniqueness: chartered to a second Fable session
+  (`ShortTime/FORWARD_UNIQUE_CHARTER.md`), not started.
+- Honest numbers: (N) theorem 0%; its machinery ≈ 50%; est. 15–25
+  executor sessions to (N) discharge absent surprises in item-2 proper.
+
+RESUME ORDER (when the user unfreezes): (1) accept & commit the two
+stand-down notes; (2) B2 close (P2.b/c/d per the recipe) → hA1 discharge
+→ D_N; (3) lieCorr0 Kc close → constituent 7/7; (4) threeArm/Ψ₀
+assembly; (5) item-2 smooth-core lemma; (6) 2a-hi/pkg + S0 endpoint +
+S2–S4/S1b; (7) Stage-3 (N) assembly (statement raise to jets ≤ A(n)+2
+per the №21-era order-budget flag).  Maintenance queue: split the 6007-
+line `DeTurckLieKernelL2JetBound.lean`; hoist `rfns_eq_normSq0S_unit`
+and drop the local copies; decide LowJet deletion.
+
+## Executor constraints (multi-agent; STRICT)
+
+- Work ONLY in this worktree/branch.  The tree is committed clean as of
+  №13 (`126aaebda`); the old "uncommitted Codex work — do not commit" rule
+  is obsolete.  Keep commits surgical, never sweep unrelated files.  New
+  leaf files + this plan's named files only; the Stage-3 statement edit
+  only after acceptance.
+- Verification: focused `lake env lean <file>` per edit; `lake build
+  +<Module>` only for final verification of NEW modules.  Build artifacts
+  live in `C:/dgb2/e87b` (branch-local `buildDir` in `lakefile.toml`; see
+  №13 — MAX_PATH.  Do NOT change `buildDir` back or build with a stripped
+  lakefile: the default `.lake/build` prefix deterministically fails on
+  two deep spectral modules).  Never run two Lean processes at once.  Put `set_option autoImplicit false` at the top
+  of every new file (`lake env lean` does NOT apply lakefile leanOptions —
+  a focused check does not verify binder hygiene).
+- Honest accounting: (N) remains 0% until its exact `sorry` is gone;
+  stage completions are machinery.  Record per-file notes in same-name
+  `.md`s and update THIS plan's status log.
+
+## Status log
+
+- 2026-07-19: plan created; Stage 0 not started.
+- 2026-07-20: **Stage 0 COMPLETE — audit in `ShortTime/UnifClassBounds.md`. STOP for
+  acceptance; Stage 1 NOT started (blocked).** Two obstructions found, both fatal to the
+  stages as scoped:
+  (1) The explicit time `T₀ = min 1 (min (1/(64(C₂+1)²)) ((1/(16(C₁+1))/(2(‖Nfun 0‖+1)))²))`
+  (`DeTurckQuasilinearExistence.lean:701`; `L` does NOT enter) depends on three `g₀`-scalars
+  `C₁,C₂,‖Nfun 0‖` that are all `Classical.choose`s of `g₀`-intrinsic Sobolev-scale
+  constants (`Ca·Cb` norm-equiv, `R₀` embedding, `K` multiplication). There is NO explicit
+  formula to thread `Λ` through and NO pre-existing uniform cross-metric Sobolev layer —
+  so Stage 1's premise ("not new analysis") is false.
+  (2) The engine RETURNS `T₁ = min(T₀, d/2, d₂, d₂F)` (not `T₀`) from
+  `maxreg_solution_jointly_smooth_representative_of_nemytskii` (`MaxRegSolutionJointlySmooth.lean:957,1141`),
+  a bare `∃ T₁, 0<T₁`. `d` is a δ from a QUALITATIVE `ContinuousWithinAt` of the solution at
+  `t=0` (`:1138`); `d₂,d₂F` are existential bootstrap horizons — none has a quantitative
+  floor. So Stage 2 ("expose `T ≥ φ`") is also under-scoped.
+  `A(n) = 4·finrank+12` confirmed (needed in the `g₀`-spectral `H^a` norm, not just
+  pointwise). Lemma-3.11 producers (`AllTimesBounds.lean:691,773,793,4415`) ARE order-generic
+  (`a ≤ A(n)` fine); (N)'s `a ≤ 3` cap is the only input-side block. Statement change is
+  necessary but NOT sufficient.
+  **Planner decision needed:** ratify R1 as a multi-session analytic lane (build the uniform
+  cross-metric `H^{A(n)}` layer §5(i) + the quantitative time-floor layer §5(ii)), OR pivot
+  to a fixed-`gBase`-scale engine re-derivation (dissolves cross-metric, overlaps R2). See
+  `UnifClassBounds.md` §0/§5.
+- 2026-07-22: user ruled: **consult GPT Pro per protocol before choosing the route.**
+  Consult STAGED: branch pushed to origin (`codex/analytic-producers-e87b` @ `922dbc4ac`,
+  new remote branch) so Pro can read the cited files; the exact diagnostic prompt (with
+  distilled Stage-0 audit + blob links) is `ShortTime/UNIF_N_PRO_PROMPT.md` (everything
+  after its `---` separator is the message body).  Submission via the Chrome plugin is
+  BLOCKED — the Claude-in-Chrome extension is not connected in this session (not a content
+  blocker).  Next: submit the prompt in a fresh chat of the ChatGPT project "Lean Pro
+  Consult Handoff" (user-side or once Chrome is connected), then bring the answer back
+  here and record the ruling before any Stage-1 Lean is attempted.
+- 2026-07-22: **GPT Pro ruling received (user-submitted); recorded verbatim in
+  `ShortTime/UNIF_N_PRO_RULING.md`.  ROUTE = R1τ** (design issue: the
+  faithfulness/identity-region guard lives in a pointwise `H^{a+2}` ball —
+  the wrong topology; R1′ not literally, R1″ rejected, R2 parked).  The old
+  Stages 1–3 of this plan are SUPERSEDED by the ruling's six-item lemma
+  frontier (see the ruling file): (1) `timeH1` √t-modulus → (2) second-order
+  TAME smooth-core difference estimate WITHOUT endpoint `H^{a+2}`-ball
+  hypotheses (**decisive route test — implement first and alone**) →
+  (3) `H^{a+1}`-controlled cutoff on `H^{a+2}` → (4) time-level tame
+  Nemytskii → (5) fixed-horizon representative returning the input `T`
+  exactly → (6) NARROW class-uniform packet at orders `a, a+1, a+2` only.
+  Explicit stop signal for (2): unavoidable `C(R₂)·‖U−V‖_{H^{a+2}}` (pointwise
+  `R₂`) or `‖U‖_{H^{a+2}}·‖U−V‖_{H^{a+2}}` term ⟹ R1τ dead at `A(n)=a+2`,
+  reconsider formulation; do NOT mask with extra jets / reintroduced `d₂` /
+  cross-metric layer / new `Classical.choose`.  Item (2) dispatched to an
+  Opus executor with the ruling's own implementation prompt.
+- 2026-07-22: **Item (2) route test — VERDICT (a) FEASIBLE; stop signal NOT
+  hit.** Full analysis in
+  `Analysis/Spectral/Intrinsic/DeTurck/SobolevNonlinearityExistence.md`.
+  Both high–low orientations close with **R-INDEPENDENT** constants, so no
+  `‖T‖_{a+2}·‖T−T'‖_{a+2}` and no pointwise `H^{a+2}` radius:
+  (i) the top-order coefficient (of `∇²(T−T')`) is the path-integral deviation
+  `C₂ = deTurckPhiTotPathIntegral − deTurckPhiMetTotal(g₀)` with sup
+  `≤ c·max βT βT'`, `c = √(8·CTH 0+8·CR 0)·(dim/(1−δ₀))` **R-independent**
+  (`deTurckPhiTotPathIntegral_deviation_fibreWeighted_jetL2_ballUniform`,
+  `DeTurckRemainderTameLipschitz.lean:35645/35700`; `CTH,CR` from
+  `traceHessianCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns`,
+  `RemainderCoeffL2JetMoser.lean:345`, take only `g₀`) → orientation 1;
+  (ii) the low arms' `‖T‖_{a+2}` content is extractable **data-weighted** with
+  R-independent constants via the **top-separated / tame-envelope** layer
+  (`linearizedRicciArm{0,1}BaseCoeff_..._topSeparated` in
+  `RemainderCoeffL2JetMoser.lean:1398/1532`; generic producers in
+  `CurvatureCoefficientDifferenceJetTower.lean:14447` and
+  `RicciArmOrder1KoszulTameEnvelope.lean`/`RicciConnDiffOrder1TameEnvelope.lean`;
+  `Ktop,Kc` R-independent, from `..._backgroundDifference_topSeparated_le` on
+  only `g₀,hδ₀`) → orientation 2 (`Hd`) + orientation 1 (remainder).
+  The existing ball-Lipschitz proof HIDES both facts: it LUMPS the top-arm
+  tight `c` into `ΛC ~ R` (`36054:36161`, `1353:1414`) and uses only the
+  `ballUniform` (opaque-in-R) low-arm bounds
+  (`ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform`,
+  `RicciThreeArmAppCc.lean:3345`), so `1421` emits `Ccov ~ R` on BOTH `S₂` and
+  `S₁`. **No Lean lemma was added:** the smooth-core tame theorem is a
+  multi-lemma ASSEMBLY (data-weighted top-separated threeArm coeff bound —
+  re-deriving `canonicalTop`+`curvatureFold`+`deviation` of `36054` with the
+  top-separated per-field bounds instead of ballUniform — then covariant tame
+  (analogue of `1421`) then smooth-core lift (analogue of `1924/1810`)), most
+  of it landing in the frozen `DeTurckRemainderTameLipschitz.lean` on top of
+  the tame-envelope producers whose deepest generic layer
+  (`CurvatureCoefficientDifferenceJetTower.lean`) is in-flight Codex work
+  (`M`). This exceeds "one theorem + one precursor"; not attempted to avoid
+  orphan machinery / churn. Route is GREEN for R1τ; next brick = the
+  data-weighted threeArm coeff bound (see the `.md`).
+- 2026-07-22: **Ratified next brick DONE (2 of the ~5 constituent per-field
+  bounds).** New leaf file
+  `Analysis/Sobolev/TensorHilbert/ArmBaseCoeffJetL2Summed.lean` (+`.md`), namespace
+  `DifferentialGeometry.Integral.Connection`.  Sums the per-order
+  `linearizedRicciArm{0,1}BaseCoeff_realizedFam_jetL2_perOrder_topSeparated`
+  (`RemainderCoeffL2JetMoser.lean:1398/1532`, committed-clean) over `i ≤ a` into
+  `linearizedRicciArm{0,1}BaseCoeff_realizedFam_jetL2_summed_topSeparated`:
+  `∑_{i≤a}‖∇^i F‖² ≤ Ktop·(topWindow) + Kc·(1 + lowWindow)`, `Ktop=2·Ktop_pO`,
+  `Kc=2·∑Kc_pO` — built ONLY from the per-order `(g₀,hδ₀)`-level constants, **no
+  `R`, no pointwise `H^{a+2}`**; ruling stop-signal NOT hit.  Both **GREEN,
+  sorry-free** (`#print axioms` = `[propext, Classical.choice, Quot.sound]`;
+  no drift in the consumed exports).  arm0 windows top `a+2`/low `a+1`; arm1 at
+  its natural top `a+1`/low `a` (first-cov-deriv arm; weaken downstream if the
+  uniform shape is wanted).  A generic reusable `jetL2_sum_of_perOrder`
+  (offset-parameterized) does the summation for both arms.  **threeArm
+  combination NOT done — does not compose cleanly:** the threeArm `C₀:(2,2),
+  C₁:(3,2), C₂:(4,2)` (`DeTurckRemainderTameLipschitz.lean:36054`) are SUMS of
+  several fields (arm0/arm1 + traceHessian + connDiff + Lie) plus the top
+  deviation `C₂`; the `C₀=…+arm0+…` decomposition lives in the frozen
+  `DeTurckRemainderTameLipschitz.lean` on the dirty
+  `CurvatureCoefficientDifferenceJetTower.lean`, and 3 more per-field summed
+  bounds are still missing.  STOPPED at the two arm bounds per the note's
+  guidance.  **Verification caveat:** authoritative `lake build` is blocked by a
+  PRE-EXISTING worktree build-cache inconsistency (missing `.olean.hash` for an
+  unrelated `EllipticBridge…EigenvectorChartRHSDiffNumeratorWkpNormSharp` in
+  `.lake/build`, though present in the redirected `C:/dgbuild/e87b/lib/lean`);
+  `scripts/lake-locked.ps1` is absent from this worktree.  Verified instead via
+  direct `lean` against `C:/dgbuild/e87b/lib/lean` with the lakefile's
+  correctness options replicated in-file.  (N) still **0%**.
+- 2026-07-22: **Remaining 3 per-field summed bounds (trace-Hessian / connDiff /
+  Lie): WAIT-ON-CODEX — none buildable from committed-clean inputs; no Lean
+  added.**  Investigated all three; each has ONLY an `R`-DEPENDENT clean
+  per-order producer, so a discipline-compliant (no-`R`-in-constants) summed
+  bound cannot be built.  Root cause: their clean producers
+  (`connDiffContrInsertionField_..._tameEnvelope_generic`
+  `RicciConnDiffOrder1TameEnvelope.lean:982`;
+  `linearizedRicciConnDiffOrder1KernelField_..._tameEnvelope_generic` `:1240`,
+  built from the connDiff one; trace-Hessian
+  `traceHessianCoeff_realizedFam_jetL2_perOrder_ballUniform`
+  `RemainderCoeffL2JetMoser.lean:446` +
+  `ricciCometricFourTraceCastG0_..._tameEnvelope_generic`
+  `RicciConnDiffOrder1TameEnvelope.lean:226`) collapse a nonlinear jet product
+  (from the `g₁⁻¹=(g₀+P)⁻¹` Neumann expansion) via
+  `antidiagonalTupleGrid_integral_ballUniform_tameWindow`
+  (`CurvatureCoefficientDifferenceJetTower.lean:8556`, **DIRTY**), whose constant
+  `Gfun k = k·(max(Cemb·√(a+2)·R)…)^{7k}` grows like `R^{7k}`.  The `R`-independent
+  engines these fields need (`rfns_iteratedCovGrad_connDiffSection_topSeparated_le`
+  JetTower:1823; `…riemannLoweredBackgroundDifference…` :10570;
+  `…ricEndoBackgroundDifferenceField…` :11141; `…riemannG1LoweringDifference…`
+  :11695) exist ONLY in the DIRTY in-flight `CurvatureCoefficientDifferenceJetTower`.
+  Per the brick guardrail ("STOP if a needed export exists only there") and the
+  ruling stop-signal (`SobolevNonlinearityExistence.md:106–108` — do not hide the
+  low-arm `‖T‖_{a+2}` behind an `R`-ball), no R-dependent version was built.
+  **The route-test note over-claimed:** it listed these tame-envelope producers as
+  R-independent "analogues"; the actual Lean shows they are R-dependent (only
+  arm0/arm1 have the R-independent `_backgroundDifference_topSeparated_le`
+  engines committed clean).  Unblock = Codex lands the four `_topSeparated_le`
+  engines clean; then each summed bound is a ~40-line reuse of the existing
+  field-agnostic `jetL2_sum_of_perOrder` (connDiff/Lie at offset `p=1`).  Detail
+  in `Analysis/Sobolev/TensorHilbert/ArmBaseCoeffJetL2Summed.md`.  (N) still
+  **0%**; item (2) = 2 of ~5 constituent bounds done, 3 Codex-blocked.
+- 2026-07-22: **CORRECTION VERIFIED — the 3 fields are BUILDABLE, not
+  Codex-blocked; NO Lean landed (scope).**  Executor confirmed the planner
+  CORRECTION against HEAD `922dbc4ac`: (a) all FOUR `_topSeparated_le` engines are
+  committed-clean (`CurvatureCoefficientDifferenceJetTower.lean:1823/10570/11141/11695`;
+  the dirty state is the 64 unrelated `pureTrace`/`koszul_l2_succ` lines only);
+  (b) the "R-independent" discipline = the TOP-split `Ktop` from the engine head
+  is R-independent, exactly as arm0's own L2 generic (:14447) has `Kc` threaded
+  through `boundedFactorGridWindow_integral_ballUniform_tameWindow` — so the
+  previous "R-dependent ⇒ forbidden" reasoning was the error (it looked at the
+  fields' `tameEnvelope_generic`, which discards the top-split, not the engine);
+  (c) EVERY needed lemma exists committed-clean incl. the field↔section identity
+  `connDiffContrInsertionField_eq_reindex_slotExtend_two`, the transfer
+  (`rfns_iteratedCovGrad_slotExtend_le`, `iteratedCovGrad_reindexCoeffGen`,
+  `exists_iteratedCovGrad_slotExtend_rsDomDomCongr`), the remainder reshaper
+  `tsResSum_le_boundedWindow` (private but pure-combinatorial ⇒ copyable), and a
+  COMPLETE `∃Hd` template `rfns_iteratedCovGrad_riemannLoweredBackgroundDifference_topSeparated_le`
+  (:10570, ~250 lines).  No missing mathematical frontier.  **Environment
+  validated** (direct `lean` typecheck vs `C:/dgbuild/e87b/lib/lean`, EXIT 0;
+  LEAN_PATH recipe recorded).  Full verified construction roadmap (per-field
+  recipe + exact lemma/line refs + the cheaper DIRECT summed route that skips the
+  `∃Hd`/DDC assembly) in the new
+  `Analysis/Sobolev/TensorHilbert/RemainderCoeffTopSeparated.md`.  NOT LANDED:
+  each field is a ~180–350-line intricate tensor-transfer assembly with ~3-min
+  focused-check cycles; this exceeded one careful-iteration session.  Recommended
+  order connDiff → Lie (reuse) → traceHessian (hardest).  (N) still **0%**.
+- 2026-07-22: **connDiff DIRECT summed bound DONE (constituent 3-of-5).** New leaf
+  file `Analysis/Sobolev/TensorHilbert/ConnDiffJetL2Summed.lean` (+`.md`), namespace
+  `DifferentialGeometry.Integral.Connection`.  Built exactly per the
+  `RemainderCoeffTopSeparated.md` DIRECT route (skips the field-level `∃Hd`).  Three
+  GREEN sorry-free theorems: `connDiffContrInsertionField_perOrder_l2_topSeparated_generic`
+  (generic `(g₁,P,htie)`) → `…_realizedFam_jetL2_perOrder_topSeparated` →
+  `…_realizedFam_jetL2_summed_topSeparated`
+  (`∑_{i≤a}‖∇^i(connDiffContrInsertionField g₀ (realizedFam …))‖² ≤ Ktop·(∑_{j<a+2}(‖∇^jT‖²+‖∇^jT'‖²))
+  + Kc·(1+∑_{j<a+2}(…))`, both windows `a+2`).  `Ktop = 2·finrank²·Kt0` is
+  `(g₀,hδ₀)`-only (`Kt0` = engine head `10·S 0` of
+  `rfns_iteratedCovGrad_connDiffSection_topSeparated_le`), **R-independent**; `Kc`
+  carries the converter `KI` (`boundedFactorGridWindow_integral_ballUniform_tameWindow`),
+  accepted house R-pattern.  Stop-signal NOT hit (no R in `Ktop`, no
+  `‖T‖_{a+2}·‖T−T'‖_{a+2}` product).  `#print axioms` = `[propext, Classical.choice,
+  Quot.sound]` on all three.  Copied private helpers (all pure): `tsResSum_le_boundedWindow`
+  (from JetTower, provenance comment), `sum_shift_le`, `iteratedCovGrad_smul_real`; NEW
+  `jetL2_sum_lowShift` (two-offset generalization of `jetL2_sum_of_perOrder` — connDiff has
+  top point at order `i+1` but low window `i+2`).  Imports the committed-clean JetTower
+  engines only; the file's 64 dirty Codex lines were untouched.  Verified via direct `lean`
+  vs `C:/dgbuild/e87b/lib/lean` (0 errors, 0 warnings); authoritative `lake build` still
+  blocked by the pre-existing `.olean.hash` split.  **item (2) = 3 of ~5 constituent
+  per-field summed bounds done (arm0/arm1/connDiff); remaining = Lie + traceHessian.**
+  (N) still **0%**.  Next: Lie (`linearizedRicciConnDiffOrder1KernelField`, reuses this
+  connDiff producer via `kernelField_eq_neg_arm_combination` + `5·`-triangle).
+
+## Status log — Lie constituent LANDED (2026-07-22)
+
+`Analysis/Sobolev/TensorHilbert/LieFieldJetL2Summed.lean` (+`.md`), namespace
+`DifferentialGeometry.Analysis.Parabolic.TensorSpectral`, imports `ConnDiffJetL2Summed`.
+GREEN sorry-free, warning-free; `#print axioms` = `[propext, Classical.choice, Quot.sound]` on
+the private bridge and both public theorems.  Delivers:
+`linearizedRicciConnDiffOrder1KernelField_realizedFam_jetL2_summed_topSeparated` (the summed
+deliverable, both windows `a+2`) and `…_realizedFam_jetL2_perOrder_topSeparated`.  Route = the
+roadmap "Lie — combination of connDiff": the Lie field is `-(A+B+C+D+E)`, a negation of five
+slot-permuted/reindexed copies of `connDiffContrInsertionField`, each an isometry of the jet
+(`armFull_norm_eq`/`armOuter_norm_eq`); `c3_norm_five_le` gives the per-order bridge
+`‖∇^i Lie‖ ≤ 5·‖∇^i connDiff‖`, squared to the private `lie_normSq_le_25`
+(`‖∇^i Lie‖² ≤ 25·‖∇^i connDiff‖²`).  The connDiff SUMMED producer
+`connDiffContrInsertionField_realizedFam_jetL2_summed_topSeparated` is REUSED as a black box.
+`Ktop = 25·Ktop_connDiff` is `(g₀,hδ₀)`-only (25 = the pure `5·`-triangle squared, and
+`Ktop_connDiff = 2·finrank²·(10·S 0)` has no R); `Kc = 25·Kc_connDiff` is house R-pattern.
+Stop-signal NOT hit.  The private arm-combination stack (7 perms, `slotPermCc`,
+`kernelField_eq_neg_arm_combination` [`rfl`], `armOuter/Full_rfns_eq`, `armOuter/Full_norm_eq`,
+`c3_norm_five_le`) was COPIED verbatim from committed-clean `RicciConnDiffOrder1TameEnvelope.lean`
+(private there); the risky `rfl` decomposition with copied perms/`slotPermCc` reproduces
+(byte-identical defs + proof-irrelevant `decide` proofs).  Verified via direct `lean` vs the
+redirected olean tree (multi-file: emit `ConnDiffJetL2Summed.olean` then co-locate it in the
+redirected tree — a second `LEAN_PATH` root did not work; recipe in the same-name `.md`);
+authoritative `lake build` still blocked by the pre-existing `.olean.hash` split.  The 64 dirty
+lines of `CurvatureCoefficientDifferenceJetTower.lean` were untouched.
+**item (2) = 4 of ~5 constituent per-field summed bounds done (arm0/arm1/connDiff/Lie);
+remaining = traceHessian only.**  (N) still **0%**.  Next: traceHessian
+(`traceHessianCoeff`/`ricciCometricFourTraceCastG0`, `(4,2)`; hardest — assemble the R-independent
+split from the three curvature `(0,4)` engines, NOT a slotExtend of connDiffSection; see
+`RemainderCoeffTopSeparated.md`).
+- 2026-07-22: **traceHessian constituent 5-of-5 LANDED — but the "three curvature engines" route
+  was a MISCLASSIFICATION; delivered with `Ktop = 0`.**  New leaf `TraceHessJetL2Summed.lean`
+  (two public theorems: realizedFam per-order + summed `traceHessianCoeff_realizedFam_jetL2_summed_topSeparated`,
+  same window shape as connDiff/Lie), GREEN / sorry-free / axioms = standard three, via direct
+  `lean` vs the redirected olean tree (imports only committed-clean `RemainderCoeffL2JetMoser`, so
+  NO untracked-olean co-location needed).  **FINDING (verified HEAD `922dbc4ac`):** the roadmap /
+  №4–№6 premise that trace-Hessian assembles from the three `(0,4)` curvature engines is
+  mathematically WRONG for this field.  `traceHessianCoeff` is a purely algebraic coefficient in
+  `g₁⁻¹` (`traceHessianFib = cometricDoubleTraceFib ∘ domDomCongrFib`) — the low-order coefficient
+  in `appCcRS(traceHessianCoeff)(kernelField)`, carrying NO covariant-derivative gain; the derivative
+  gain is in the kernelField (= Lie).  Its committed decompositions route to the metric-inverse
+  difference (`deTurckPrincipalCometricCoeff`/`gInvDiffSlotCoeff` at `RemainderCoeffL2JetMoser.lean:328`,
+  or `ricciArmPrincipalCoeffPure`/`gInvDiffRaisedEndoField` at `RicciConnDiffOrder1TameEnvelope.lean:137/171`),
+  NEVER to the curvature engines — and there is NO `topSeparated` engine for any metric-inverse field.
+  So the field produces no term reaching the protected `a+1`/`a+2` top window: `Ktop = 0` is the
+  CORRECT value (not a mask), discipline satisfied vacuously at the top.  **Caveat:** the delivered
+  `Kc` is a uniform CONSTANT (from the ball-uniform `:446`), not yet data-weighted — genuine
+  data-weighting needs the metric-inverse tame machinery (private `gInvDiffSlotCoeff_perOrder_l2_tame`
+  + its `productGridTerm_integral_le_topOrderJetSq` dep, ~660-line copy; or the public Hs-norm
+  `deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic` with a fragile Hs→jet-L2 bridge).  Kept
+  the constant `Kc` for robustness (Ktop=0 either way; a constant is absorbed by the downstream sum).
+  Full detail in `TraceHessJetL2Summed.md`.  **All 5 constituents now have a uniform-shape summed
+  producer; next brick = the data-weighted threeArm decomposition (revisit the trace-Hessian `Kc`
+  upgrade if it needs true data-weighting from this term).**  (N) still **0%**.
+- 2026-07-22/23: **threeArm assembly brick — STEP 0 verdict = ABSORBED; assembly BLOCKED by a
+  structural mismatch (five producers are NOT `C₀`'s constituents).  No Lean written.**  Full
+  forensics in `Analysis/Sobolev/TensorHilbert/ThreeArmTopSeparated.md`.
+  - **STEP 0 (№7 open question): ABSORBED.**  traceHessian's `Ktop = 0` is structural, so it feeds
+    nothing into orientation-2 (`max‖T‖_{a+2}‖T'‖_{a+2}·‖T−T'‖_{a+1}`); its uniform-constant
+    `Kc·(1+low)` lands wholly in orientation-1's allowed low factor.  A traceHessian `Kc` upgrade is
+    NOT a prerequisite — the current constant `Kc` is shape-compatible and absorbed.
+  - **BLOCKER (verified HEAD `922dbc4ac`):** the committed reference `C₀`
+    (`deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_fibreWeighted_ballUniform_of_symm`,
+    `DeTurckRemainderTameLipschitz.lean:36054`) is `C₀ = C₀_arm + K₀` with
+    `C₀_arm = pathIntegralCoeffField Ψ₀` and `Ψ₀ = −2·linearizedRicciArm0Field + deTurckLieCoeffField
+    + lieCorr0Field` (`:34827`) — all **(2,2)** fields.  Of these only `arm0BaseCoeff`
+    (`arm0Field = arm0BaseCoeff + arm0CorrField`) has a landed data-weighted producer.  The two
+    DeTurck-Lie constituents `deTurckLieCoeffField`/`lieCorr0Field` (both `(2,2)`, `g_bg`-DEPENDENT;
+    `RicciDeTurckSectionDifference.lean:7716`, `DeTurckCoefficients/LieCorr0Core.lean:583`) have ONLY
+    ball-uniform bounds and **no top-separated producer anywhere**, yet they genuinely carry the
+    top-window `‖T‖_{a+2}` weight (order-`a` jet reaches `∇^{a+2}T`), so they cannot be absorbed like
+    traceHess.  The landed `connDiff`/`kernelField` producers are **(3,4)**, `g_bg`-INDEPENDENT, and
+    appear in the frozen file only inside the `b3_`/`b4_` engine helpers (`:40196–:42170`), NOT in
+    the `C₀` assembly — they belong to the linearized-Ricci-correction / LowReg / Edge family, a
+    different decomposition.  No committed identity bridges `deTurckLieCoeffField` ↔
+    `connDiff`/`kernelField` (only co-occurrence is the frozen file, disjoint regions).  So the
+    "five producers converge into `C₀` via a committed sum-of-fields decomposition" premise does not
+    hold: `arm1Base`→`C₁`, `traceHess`→`C₂`, `connDiff`/`kernelField`→correction-engines, and only
+    `arm0Base` is a genuine `C₀` constituent.
+  - **Smallest next step (the real frontier):** a data-weighted top-separated summed producer for
+    `deTurckLieCoeffField` (+`lieCorr0Field`, +`deTurckLieArm1Coeff` for `C₁`) — a per-field producer
+    task like the five already landed, derived from the DeTurck-Lie structure (does NOT factor
+    through the connDiff/kernelField engines).  ALTERNATIVELY, if a new connDiff-routed `C₀`
+    decomposition is intended, its algebraic identity (difference-level `g_bg`-cancellation) + a
+    (3,4)→(2,2) contraction must be built first.  **Planner: confirm which `C₀` decomposition the
+    assembly targets before re-dispatching.**  (N) still **0%**.
+- 2026-07-23: **`deTurckLieCoeffField` Phase-A reconnaissance DONE — covering engine FOUND, but the
+  field-level top-separated BRIDGE is grid-collapsed and a LARGE multi-lemma brick, not the ~40-line
+  engine-swap the §№4/§№5 roadmap assumed.  No Lean written.**  Full forensics in
+  `Analysis/Sobolev/TensorHilbert/DeTurckLieJetL2Summed.md`.  Verified at HEAD `922dbc4ac`:
+  - **Structure:** `deTurckLieCoeffField g₀ g₁ g_bg` (2,2) = `deTurckLieDLaCoeffField +
+    deTurckLieDLbCoeffField` (`DeTurckLieKernelL2JetBound.lean:77`).  DLa's lowered covector is
+    `dLaLoweredCovec = covGrad(connDiffSection g₁ g₀) − covGrad(connDiffSection g_bg g₀)` (`:1591`,
+    + `deTurckLieCovDerivA_backgroundSplit`:106 / `dLaCovKernel_backgroundSplit`:248 / `connDiff_cocycle`:91);
+    the (2,2) field is the **g₁-dependent `dLaBiContrFib` bicontraction** (g₁-orthoframe) of that
+    covector.  DLb routes through the DeTurck VF `deTurckLieWEndoInsert` with the cocycle
+    `wXi = connDiffLoweredCc g₀ g₁ − connDiffLoweredCc g₀ g_bg` (`DeTurckVectorFieldL2JetBound.lean:57`).
+  - **Covering engine = `rfns_iteratedCovGrad_connDiffSection_topSeparated_le`
+    (`CurvatureCoefficientDifferenceJetTower.lean:1823`, committed-clean)** — head `10·S 0·rfns(∇^{j+1}T)`,
+    R-independent; applied at order `j=i+1` it reaches the deTurckLie top window `∇^{i+2}T`.  All
+    routing identities present (`rfns_iCG_connDiffLoweredCc_eq_connDiffSection`:2192/2211,
+    `rfns_iCG_wCA_eq_connDiffSection`:2624; g_bg parts are T-independent ⇒ Kc).  The three (0,4)
+    curvature engines do NOT fit (deTurckLie's top factor is literally `covGrad(connDiffSection)`).
+  - **BLOCKER:** the committed field-level reduction is FULLY GRID-COLLAPSED —
+    `rfns_iteratedCovGrad_deTurckLieDLaCoeffField_diagonalProductGrid_le` (`:4397`) dissolves the
+    connDiffSection head into a raw `∏ rfns(∇^{e m}T)` grid (`k∈range(i+3)`) via `dLaGridWin`/
+    `dLaPairCount`, then integrates ball-uniformly; DLb (`deTurckLieWEndoInsert_..._ballUniform`,
+    `DeTurckVectorFieldL2JetBound.lean:3041`) consumes the ball-uniform `connDiffSection_lowOrder_
+    jetL2_succ_generic`.  NO committed head/topSeparated variant for any `deTurckLie*`/`wEndo*`/
+    `dLaBiContr*` field.  Unlike connDiff/Lie (single clean field↔section reindex), the deTurckLie
+    bridge is the whole g₁-nonlinear bicontraction (DLa) + VF-insertion (DLb) — building the
+    top-separated `Hd`-head reduction per half is a ~300–500-line intricate re-derivation each
+    (multi-session), not one careful-iteration session.  No missing MATH frontier (engine +
+    identities all exist); the missing piece is a large tensor-transfer bridge.
+  - **Window note for the assembly:** deTurckLie top window = `a+2` (max `∇^{a+2}T`), matching
+    **arm0Base**, NOT connDiff (`a+1`).  The C₀ top window is `a+2` (set by arm0 + deTurckLie); the
+    deTurckLie top sum is `∑_{j<a+3}` = `∑_{j≤a+2}`, one order above connDiff/Lie's `∑_{j<a+2}`.
+  - **Planner decision needed:** dispatch the DLa/DLb bicontraction top-separation as a multi-session
+    brick (DLa first — cleaner `dLaLoweredCovec` covGrad identity — then DLb, then `DLa+DLb`
+    triangle), or reconsider.  Recommended smallest sub-brick: the DLa `Hd`-head per-order reduction
+    (top factor `rfns(∇^{i+2}P)` via the engine at order `i+1`, remainder via
+    `boundedFactorGridWindow_integral_ballUniform_tameWindow`).  (N) still **0%**;
+    `deTurckLieCoeffField` = 1st of 2 genuinely-missing C₀ constituents.
+- 2026-07-23: **DLa Step 2 (8-summand triangle) — STRUCTURAL BLOCKER found; leaf route infeasible.**
+  Executor verified the private/public surface of `DeTurckLieKernelL2JetBound.lean` at HEAD
+  `922dbc4ac` (+10 dirty lines).  The dispatch premise ("import `DeTurckLieKernelL2JetBound` and the
+  DLa field's identities" from a new leaf) is **false**: the ENTIRE `(2,2)`-field top-separation
+  bridge is `private` — `deTurckLieDLaCoeffField_eq_pairTrace`, `dLaKernelRaisedCc`, `dLaLoweredCc`,
+  `dLaSymCc`, `pairTraceOpDla`, `dLaQuadCc`, `dLaConnArmPt`, `dLaGridWin`, `dLaPairCount`,
+  `exists_rfns_dLaKernelRaised_tgrid`, `exists_rfns_dLaSym_tgrid`, `exists_rfns_pairTraceOpDla_tgrid`,
+  `exists_rfns_iteratedCovGrad_connDiffSection_tgrid_dla`, `exists_fixedField_rfns_jet_dla`,
+  `dLaQuad_tower_of_factors`, `rfns_iCG_add/sub_le_dla` are all `private`.  The only public DLa
+  surface is the field defs, three fibre identities, order-0 ballUniform, `symmC0_rfns_le` (the +10
+  dirty lines), and the R-dependent grid-collapse/ballUniform — **no top-separated entry point.**  A
+  leaf cannot reference `private` decls; copying them would duplicate existing private defs (a
+  forbidden parallel API) at ~1300 lines (kernel) / ~2500+ (full field), unverifiable in one session;
+  editing the dirty (Codex-owned) file is barred by the executor constraints.  **The correct home is
+  IN `DeTurckLieKernelL2JetBound.lean` next to its private deps** — the +10 dirty lines
+  (`symmC0_rfns_le`, exporting the `symmS` order-0 rfns bound used by `exists_rfns_dLaSym_tgrid`)
+  indicate the Codex lane may already be building this in-file.  So this sub-brick is **blocked on the
+  Codex lane** (finish/release that file, or expose the needed private pieces as public: minimally
+  `dLaKernelRaisedCc`, `deTurckLieDLaCoeffField_eq_pairTrace`, and top-separated variants of
+  `exists_rfns_dLaSym_tgrid`/`exists_rfns_pairTraceOpDla_tgrid`).  DELIVERED (compiling prefix, new
+  leaf `Analysis/Sobolev/TensorHilbert/DLaHeadCellRfns.lean` + `.md`): the ONE public-API-buildable,
+  non-duplicative piece — `covGradConnDiffSection_perOrder_rfns_topSeparated`, the **pointwise**
+  (`rfns`, per-`x`) top-separated bound for the `A1` head cell `covGrad(connDiffSection g₁ g₀)`
+  (`Ktop = 2·Kt0` R-independent + `boundedFactorGridWindow` remainder).  This is the un-integrated
+  sibling of `DLaTopSeparated`'s head atom, in the shape the 8-summand triangle's `A1` slot consumes;
+  the other 7 summands + the pairTrace `(2,2)` bridge are private-blocked as above.  Full audit +
+  next-step recipe in `DLaHeadCellRfns.md`.  (N) still **0%**.  Verification: <pending — Codex lane
+  held the Lean lock continuously through the session; quiet-window waiter armed, typecheck pending>.
+- 2026-07-23: **R1τ ruling item 1 (generic `timeH1` √t-modulus) — IMPLEMENTED + VERIFIED (sorry-free).**
+  New leaf `Analysis/Parabolic/TimeSobolev/TimeH1Modulus.lean` (+ `.md`).  Two public theorems:
+  `TimeSobolev.timeH1.norm_toFun_sub_init_le` — the deliverable, `‖u.toFun t − u.init‖ ≤ √t·‖u.deriv‖`
+  on `Icc 0 T`, in the carrier's own currency (`u.init` = value-at-0 = `trace0`; `u.deriv` =
+  time-`L²([0,T];X)` field = `timeDeriv`) — the explicit ½-Hölder modulus replacing the naked
+  `ContinuousWithinAt` δ at `MaxRegSolutionJointlySmooth.lean:1138`; and its engine
+  `TimeSobolev.integral_norm_Icc_le` (`∫_{[0,t]} ‖f‖ ≤ √t·‖f‖`), the sharp-horizon √t companion of
+  `BochnerL2.integral_norm_le`'s √T.  Route: FTC increment (`toFun_apply`+`abel`) → `Ioc 0 t`
+  (`integral_of_le`) → `norm_integral_le_integral_norm` → `setIntegral_mono_set` → sub-measure `L¹⊆L²`
+  Hölder nesting on `timeMeasure t` (mass `t`) + `eLpNorm_mono_measure` back to the full `[0,T]` norm.
+  ZERO coupling to Codex-dirty files (imports ONLY committed-clean `TimeH1.lean`; `scripts/` absent in
+  this worktree ⟹ verification = direct `lake env lean` read-only, precedent №2).  Reuse audit clean:
+  no pre-existing √t modulus in TimeSobolev/ShortTime.  All Mathlib primitives signature-checked vs
+  `.lake/packages/mathlib` before writing.  (N) still **0%** — pure supporting infra; 1 of 6 R1τ
+  items, consumed later by item 5 (fixed-horizon representative).  Verification: **GREEN** — poll
+  waiter caught a window; `lake env lean` (read-only; `scripts/` absent here) exit 0, no errors/warnings;
+  `#print axioms` on both theorems = `[propext, Classical.choice, Quot.sound]` (no `sorryAx`).  (Both
+  checks ran with mild concurrency as 2–3 Codex `lean.exe` respawned — safe: concurrency risks only
+  false failures, not false passes; fresh file ⟹ no stale-olean false-green.)  Full audit in
+  `TimeH1Modulus.md`.
+- 2026-07-24: **DLa field bound — kernel top-separation (dispatched "Step 2") BUILT inside
+  `DeTurckLieKernelL2JetBound.lean`; field-level lift (Step 3) designed, not yet built.**  Three new
+  private lemmas added before `end DLaGridBrick`: (1) `engineRem_le_dLaGridWin` (reshape the
+  connDiffSection topSeparated engine remainder into `dLaGridWin` currency); (2)
+  `exists_rfns_connDiffSection_topsep_dla` (connDiffSection top-separated jet in `dLaGridWin`
+  currency, `Ktop = 2·Kt0` R-indep — consumes the committed engine
+  `rfns_iteratedCovGrad_connDiffSection_topSeparated_le`, already in the file's import cone via
+  `CurvatureCoefficientDifferenceJetTower`); (3) `exists_rfns_dLaKernelRaised_topsep` (the 8-summand
+  kernel triangle top-separated twin of `exists_rfns_dLaKernelRaised_tgrid` — `hA1` swapped for (2),
+  `Ktop = 128·(2·Kt0)` R-indep from the 2⁷ triangle doubling; the other 7 summands unchanged in the
+  `dLaGridWin` remainder).  **R-independence linchpin CONFIRMED**: `dLaGridWin b 1 = antidiagonalTupleGrid
+  b 0 = 1`, so both appCcRS frame operators (`pairTraceOpDla`, the perturb `slotInsert(perturbSharp)`)
+  have R-independent order-0 `rfns` ⟹ each field/perturb appCcRS `(i'=0,l=i)` cell carries the top
+  `∇^{i+2}T` with R-independent coefficient.  **KEY finding**: `dLaLoweredPerturbCc =
+  appCcRS(perturb)(dLaLoweredCc)` also carries A1 ⟹ the field needs TWO nested appCcRS `(0,i)`-cell
+  extractions (handled by a generic extractor `rfns_iCG_appCcRS_topsep_of`, drafted).  Full route + piece
+  status in `DeTurckLieKernelL2JetBound.md`; recon corrections in `DeTurckLieJetL2Summed.md`.  **All
+  three pieces VERIFIED GREEN** — focused `lake env lean` (whole file, `LEAN_NUM_THREADS=4`,
+  quiet-window waiter) EXIT=0, zero errors, zero warnings; `#print axioms` on all three ⇒
+  `[propext, Classical.choice, Quot.sound]` (audit lines stripped).  Two fixes were needed on the
+  kernel twin (a dropped `hW_ge1`, and a `mul_assoc` regroup hint so `linarith` relates the shared
+  `KtopA·τ` atom scaled by 128).  The `unusedVariables` lint on hypothesis binders is suppressed with
+  `set_option` matching the file's existing tgrid theorems.  Remaining Step 3 (field assembly ≈ 450
+  lines: generic extractor + perturb extraction + sym/X glue + two `hfull` re-derivations + integrate +
+  realizedFam sum) is genuinely multi-session as the recon estimated; fully designed in
+  `DeTurckLieKernelL2JetBound.md` §"Remaining field assembly".  (N) `ricci_flow_unif_existence` still
+  **0%** (kernel top-separation is machinery toward the field-level lift of `deTurckLieCoeffField`,
+  the 1st of 2 genuinely-missing C₀ constituents).
+
+## Status log — DLa field lift LANDED (session 2, 2026-07-24)
+
+- **Piece 4 (field-level lift) BUILT + VERIFIED** in `DeTurckLieKernelL2JetBound.lean`
+  `section DLaGridBrick` (+971 lines).  Public DLa ENDPOINT now exists:
+  `deTurckLieDLaCoeffField_realizedFam_jetL2_summed_topSeparated` (+ per-order sibling), landing
+  `∑_{i≤a}‖∇^i(deTurckLieDLaCoeffField g₀ (realizedFam …) g_bg)‖² ≤ Ktop·(∑_{j<a+3}(‖∇^jT‖²+‖∇^jT'‖²))
+  + Kc·(1+∑_{j<a+3}(‖∇^jT‖²+‖∇^jT'‖²))` via `jetL2_sum_lowShift a 2 3`.
+- Realized decls: `gridSplit_dla` (pure-real top-cell split), `appCcGrid_le_dla` (shared full-grid,
+  window `(i'+1)(l+3)→(i+3)` for BOTH extractions), `exists_rfns_dLaLowered_topsep` (4.2, raise-eq into
+  piece 3), `exists_rfns_dLaSym_topsep` (4.3+4.4), `rfns_iCG_dLaField_topsep` (4.5), `sum_shift_le` +
+  `jetL2_sum_lowShift`, and the two `…_realizedFam_jetL2_{perOrder,summed}_topSeparated` endpoints.
+- **Constant discipline PASSED**: `Ktop = CPT0·fr²·8·256·Kt0·(1+fr⁵δ₀²)·(appCcGdiag a)²` — only
+  `(CPT0, fr=finrank, Kt0, δ₀, appCcGdiag a)`, i.e. `(g₀,g_bg,hδ₀)`-level and R-FREE; NO `‖T‖_top`
+  products.  `R` lives ONLY in `Kc` (tame-window integrator `K`).  The two i-dependent `appCcGdiag i`
+  powers (from the two nested appCcRS extractions) stay EXPLICIT in the producer statements and
+  collapse to one fixed `Ktop` at the summed layer via `appCcGdiag i ≤ appCcGdiag a`
+  (`pow_le_pow_right₀`); a `1 ≤ appCcGdiag i` lift keeps each producer's top a single power.
+- Verification: focused `lake env lean` whole-file EXIT=0 zero-errors/zero-warnings after 3 fixes on the
+  two lowest helpers (gridSplit `hrest` nonneg witness; `one_le_appCcGdiag` PRIVATE upstream → inlined
+  `one_le_pow₀`; `dLaSym hG1` `add_le_add_right` arg-order → `add_le_add … (le_refl _)`).  Direct-lean
+  axiom audit on both endpoints ⇒ `[propext, Classical.choice, Quot.sound]` (audit lines stripped).
+  Diff scope = the brick's own files only.
+- **Next frontier (NOT this session): DLb + combined assembly.**  (a) DLb top-separated summed producer
+  in `DeTurckVectorFieldL2JetBound.lean` (`deTurckLieDLbCoeffField`); (b) combined-coefficient assembly
+  `‖∇^i deTurckLieCoeffField‖² ≤ 2‖∇^i DLa‖² + 2‖∇^i DLb‖²` summed via
+  `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`.  Then `deTurckLieCoeffField` (ruling item 2's
+  1st constituent) is DONE.  (N) `ricci_flow_unif_existence` still **0%** — this is a C₀-constituent
+  producer far below (N).
+- 2026-07-24: **DLb session — recon + head; two findings for planner ruling.**  Recon of the DLb
+  top-separation in `DeTurckVectorFieldL2JetBound.lean` (notes in `DeTurckVectorFieldL2JetBound.md`).
+  (1) **STRUCTURAL — endpoint location.**  `deTurckLieDLbCoeffField_realizedFam_jetL2_*_topSeparated`
+  CANNOT be stated in this file: `deTurckLieDLbCoeffField` is defined in the SIBLING
+  `DeTurckLieKernelL2JetBound.lean:60`, and the (2,2)↔(1,1) slotInsert bridge
+  `deTurckLieDLbCoeffField_eq_slotInsert_sum` lives further downstream in
+  `DeTurckLieCoeffL2JetBound.lean:47` (imports both).  So the DLb split is asymmetric to DLa: the
+  editable file hosts the INSERT-level producer `deTurckLieWEndoInsert_realizedFam_jetL2_*_
+  topSeparated` (upgrading the ball-uniform :3041); the FIELD endpoints are a THIN downstream wrapper
+  (× `4·finrank`, R-free), mirroring the ball-uniform field wrapper
+  `deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform` (`DeTurckLieCoeffL2JetBound.lean:244`).
+  №15 located the producer "near :3041" (insert level) but named it `deTurckLieDLbCoeffField_…`;
+  resolution = build insert-level here, dispatch the field wrapper against `DeTurckLieCoeffL2JetBound.lean`.
+  (2) **ROUTE SIMPLIFIED — no private arm1 machinery.**  The wOmega layer's appCc two-arm grid has a
+  metric-coefficient arm (cometricCastG0) that carries P-content; naively its remainder needs the
+  `boundedFactorGridWindow` currency + cometricCastG0 grid bound (`rfns_iteratedCovGrad_cometricCastG0_
+  gridWindow_le`, PRIVATE in `CurvatureArm1KoszulTopSeparation.lean:35`).  AVOIDED: since
+  `jetL2_sum_lowShift`'s per-order remainder is `Kc i·(1+∑low)`, the `Kc i·1` slot absorbs ANY
+  ball-uniform (R-dependent) constant, so the ENTIRE sub-top remainder integrates BALL-UNIFORMLY
+  (existing two-arm integrator + F_B) and only the single top `∇^{i+2}P` needs R-free separation.
+  Stays fully in-file/in existing machinery.  Route ≈300–500 lines (5 L2-chaining lemmas + wrapper +
+  summed), turnkey recipe in the `.md`.
+  Progress: BATCH 1 (`exists_rfns_connDiff_topsep` = connDiffSection pointwise top-sep in public
+  `antidiagonalTupleGridWindow` currency, + `engineRem_le_grid` reshape + `sum_shift_le` +
+  `jetL2_sum_lowShift`) WRITTEN in `section DLbTopSeparated`, desk-checked (mirrors the verified DLa
+  `exists_rfns_connDiffSection_topsep_dla`).  **Focused check + axiom audit PENDING** — foreign lean
+  lanes were near-continuous during the session (heavy builds contending; verify window not secured).
+  Kept the file at batch-1-only so the first window confirms the head clean.  Ktop plan R-free:
+  `2·appCcGdiag(a+1)·cΦ0·2·2Kt0`.  (N) still **0%**.
+- 2026-07-24 (cont.): **3 of ~6 DLb tower layers VERIFIED GREEN.**  Secured verify windows (foreign
+  lanes intermittent).  `section DLbTopSeparated` now has (all whole-file `lake env lean` EXIT=0,
+  zero errors, zero new warnings, live/not-cached): `exists_rfns_connDiff_topsep` (connDiffSection
+  pointwise top-sep, public grid currency), **`connDiff_L2_topsep`** (connDiffSection L2 top-sep —
+  the crux L2-integration idiom PROVEN: `normSq_le_integral_of_pointwise_fiberNormSq_le_rs` + the
+  tame-window integrator `antidiagonalTupleGrid_integral_ballUniform_tameWindow` + `hPball` (k+1)R²
+  conversion; the biggest route uncertainty is now retired), `wXi_L2_topsep`.  No axiom audit yet
+  (these are intermediate helpers, not endpoints; EXIT=0 confirms sorry-free).
+- **DECISION POINT for the planner (changes remaining effort a lot).**  Does the DLb endpoint need a
+  GENUINE positive `Ktop` on `‖∇^{i+2}T‖²` (like DLa, whose leading `wAlphaA = ∇^{i+1}wOmega ~
+  ∇^{i+2}T`), or may it use **`Ktop = 0`** — reusing the existing ball-uniform
+  `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_ballUniform` (:3041) via `P i ≤ 0·top + P i·(1+
+  low)` (`low ≥ 0`), exactly the **traceHessian** constituent's accepted route
+  (`TraceHessJetL2Summed.md`)?  The endpoint SHAPE and the R-free-`Ktop` discipline are satisfied by
+  BOTH; the combined `deTurckLie` top is then `2·Ktop_DLa` (R-free) with DLb folded into `Kc`.
+  - If `Ktop = 0` acceptable: the insert endpoint + field wrapper are ~40+40 lines reusing :3041 —
+    near-immediate.  The 3 genuine layers already built stay reusable if you later want it tight.
+  - If GENUINE required (DLa-sibling reading): remaining = wOmega_L2 corner peel (the crux; recipe in
+    `DeTurckVectorFieldL2JetBound.md` — `iteratedCovGrad_appCcRS_eq_argCorner_add_lower`
+    `OperatorFieldFibreNormJet.lean:1410` + `rfns_iteratedCovGrad_appCc_coeffLower_le` :1372), then
+    wAlpha_L2 + wrapper + `jetL2_sum_lowShift a 2 3`, then the downstream field wrapper in
+    `DeTurckLieCoeffL2JetBound.lean`.  ~300 lines, multi-session.
+  My default absent a ruling: GENUINE (sibling of DLa); the 3 verified layers are that foundation.
+- 2026-07-24 (DLb session 2): **DLb HALF COMPLETE — all four top-separated endpoints built + verified
+  + axiom-audited (both RULINGS satisfied).**  Continued session-1's verified base (batches 1/2/2b).
+  - **Insert level** (`DeTurckVectorFieldL2JetBound.lean`, `section DLbTopSeparated`): batch 3
+    `wOmega_L2_topsep` (the crux corner peel), batch 4 `wAlpha_L2_topsep`, batch 5
+    `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated`, batch 6 `..._summed_topSeparated`.
+    Whole-file `lake env lean` EXIT=0, zero errors, zero NEW warnings (my code all > line 3500;
+    verified live, not cached).
+  - **RULING 2 satisfied — GENUINE positive R-free Ktop.**  The `Ktop = 0` shortcut was NOT used.
+    The wOmega corner peel is genuine: argCorner Leibniz (`iteratedCovGrad_appCcRS_eq_argCorner_add_
+    lower`) + the PUBLIC unconditional `rfns_appCcRS_appCcLeibnizPsi_diag_le`
+    (`OperatorFieldFibreNormJet.lean:1728`) — so the corner coefficient bound carries NO `appCcGdiag`,
+    just the R-free order-0 `cometricCastG0` fiber norm `ΛClow 0`; the top-free lower sum
+    (`rfns_appCcRS_argLower_le` :1426, antidiagonal ≤ two-arm triangular grid) integrates ball-uniformly.
+    Insert `Ktop = 2·ΛClow 0·Ktop_xi` (R-free, cleaner than the planned `appCcGdiag(a+1)` collapse).
+    (Note: the `.md` recipe's mention of `rfns_iteratedCovGrad_appCc_coeffLower_le` :1372 was for the
+    wrong engine; the correct lower-sum lemma is `rfns_appCcRS_argLower_le` :1426.)
+  - **RULING 1 satisfied — endpoint locations.**  Insert endpoints in `DeTurckVectorFieldL2JetBound.lean`;
+    THIN field wrappers `deTurckLieDLbCoeffField_realizedFam_jetL2_{perOrder,summed}_topSeparated` in
+    `DeTurckLieCoeffL2JetBound.lean` via `normSq_iCG_dlbField_le` (generic-g₁ `×4·finrank` transport
+    through `deTurckLieDLbCoeffField_eq_slotInsert_sum`), `Ktop = 4·finrank·Ktop_insert` (R-free).  The
+    summed field wrapper avoids the private `jetL2_sum_lowShift` by summing the helper against the
+    insert-summed bound.  SHAPES match the DLa field siblings (:5680/5966); quantifier order s-before-i.
+  - **VERIFICATION:** full closure build `lake build +DeTurckLieCoeffL2JetBound` = 9427 jobs exit 0
+    (both modified modules Built clean, no warnings/errors in either).  **Axiom audit** via direct
+    `lean` (LEAN_PATH = `C:/dgb2/e87b/lib/lean` + the 9 package olean dirs): all four endpoints
+    (2 insert + 2 field) print exactly `[propext, Classical.choice, Quot.sound]`.  Audit lines stripped
+    after green.
+  - **Files touched:** `DeTurckVectorFieldL2JetBound.lean` (+.md), `DeTurckLieCoeffL2JetBound.lean`
+    (+.md new), `DeTurckLieJetL2Summed.md`.  Not committed (planner commits).
+  - **ASSEMBLY FRONTIER (NOT started, per dispatch scope):** the combined-coefficient assembly
+    `‖∇^i deTurckLieCoeffField‖² ≤ 2‖∇^i DLa‖² + 2‖∇^i DLb‖²` summed (via
+    `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField`).  Both DLa and DLb top-separated summed
+    producers now exist and are shape-compatible.  `(N)` `ricci_flow_unif_existence` still **0%**
+    (`deTurckLieCoeffField` is the 1st of two genuinely-missing C₀ constituents; its DLa+DLb halves are
+    now both built, assembly pending; `lieCorr0Field` is a separate later dispatch).
+- 2026-07-24 (session 3, combined assembly): **`deTurckLieCoeffField` CONSTITUENT CLOSED.**  Built +
+  verified + axiom-audited in `DeTurckLieCoeffL2JetBound.lean` (lowest file seeing both halves):
+  `deTurckLieCoeffField_realizedFam_jetL2_{perOrder,summed}_topSeparated`.  Route: private pointwise
+  triangle `normSq_iCG_deTurckLieCoeff_le` (`‖∇ⁱ coeff‖² ≤ 2‖∇ⁱ DLa‖² + 2‖∇ⁱ DLb‖²` via the committed
+  split `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` :77 + `sq_le_two_add`), consuming the DLa
+  field endpoints (`DeTurckLieKernelL2JetBound.lean:5680/5966` — confirmed imported/visible, no import
+  hacking) and the DLb field endpoints; perOrder via `add_le_add (2·ha)(2·hb)` + `ring`, summed via
+  `Finset.sum_le_sum` + `sum_add_distrib` + `← mul_sum` (avoids the private `jetL2_sum_lowShift`).
+  Combined `Ktop = 2·(Ktop_DLa + Ktop_DLb)` **R-free**, single combined `Kc = 2·(Kc_DLa + Kc_DLb)`.
+  SHAPES match the DLa/DLb field siblings (s-before-i, windows `a+3`).  **Verification:** whole-file
+  `lake env lean` clean (zero errors, zero new warnings, my code all > line 708); direct-`lean` axiom
+  audit (LEAN_PATH = `C:/dgb2/e87b/lib/lean` + 9 package olean dirs) — both endpoints print exactly
+  `[propext, Classical.choice, Quot.sound]`; audit lines stripped.  Olean refresh NOT needed (audit is
+  direct-lean on source; deps current at f32558d03; no downstream consumer this session).  Files:
+  `DeTurckLieCoeffL2JetBound.lean` (+.md), `DeTurckLieJetL2Summed.md`, plan.  Not committed (planner
+  commits).  **Next (planner's):** `lieCorr0Field` (`LieCorr0Core.lean:583`, the 2nd genuinely-missing
+  C₀ constituent) and the threeArm precursor assembly.  `(N)` still **0%**.
+- 2026-07-24 (lieCorr0 recon): **`lieCorr0Field` (2nd genuinely-missing C₀ constituent) RECON DONE;
+  STOPPED for TWO planner rulings — no Lean written.**  Full recon in
+  `Analysis/Spectral/Intrinsic/DeTurckCoefficients/LieCorr0Core.md` §"jetL2 top-separated producer
+  recon"; cross-constituent summary in `TensorHilbert/DeTurckLieJetL2Summed.md`.
+  - **KTOP VERDICT (the mission's decisive call): POSITIVE, R-FREE Ktop REQUIRED — Ktop=0 REJECTED
+    (DLb pattern, NOT traceHess).**  Kernel structure: `lieCorr0Field = lc0Insert + lc0VB + lc0AMix
+    + lc0Riem` (`LieCorr0Split.lean:154`).  `lc0VB`/`lc0AMix` = order-1·order-1 products of
+    `metricConnDiffLoweredFib`/`deTurckVF` (both order-1 ~∇T); `lc0Riem` = T-independent `riemannOp
+    (LeviCivita g₀)` traced against the g₁-cometric (algebraic in T) — all Kc.  But `lc0Insert` =
+    slotInsert of `lieCorr0NEndo`, whose `−deTurckLieWEndo g₁ g₀ = −∇^{g₁}(deTurckVF g₁ g₀)` is bare
+    ∇²T (order-2) — the two `connDiff(deTurckVF)` terms are quadratic (the section derivative cancels
+    in the CONNECTION difference, `connDiff_apply`), so the top is carried solely by `−deTurckLieWEndo`.
+    The "zeroth-order" name is the operator valence, not the T-order.  Lumping the top into R-carrying
+    Kc would poison the Psi0 assembly exactly as RULING 2 argues for DLb.
+  - **Top engine PRE-BUILT (no new engine):** `insert_base` (`LieCorr0Split.lean:103`) +
+    `deTurckLieEndoArmField ≡ deTurckLieDLbCoeffField` (both `ofCLM(deTurckLieDLbFib g₁ g_bg)`, defeq)
+    ⟹ `lc0Insert g₀ g₁ g₀ = −deTurckLieDLbCoeffField g₀ g₁ g₀`; the just-closed DLb field producer
+    (`DeTurckLieCoeffL2JetBound.lean:432/483`, g_bg free) at g_bg:=g₀ gives the top verbatim,
+    `Ktop = Ktop_DLb` R-free.  Low (Kc) machinery PRE-BUILT pointwise in `LieCorr0LowJet.lean`
+    (`vb_refold`/`amix_refold`/`riem_refold`/`trace2_grid`/`insert_diff`).
+  - **RULING NEEDED 1 (canonical home):** endpoints reference the DLb producer + tame-window
+    integrators (all `TensorHilbert/`); `LieCorr0Core.lean` is upstream (`DeTurckCoefficients/`, no
+    TensorHilbert/CovGrad file imports any `LieCorr0` module) so it CANNOT host them (cycle).  Per the
+    mission STOP rule, report the split: **propose NEW leaf
+    `TensorHilbert/LieCorr0CoeffL2JetBound.lean`** (per-constituent pattern), importing
+    `DeTurckLieCoeffL2JetBound` + `LieCorr0Split` + `LieCorr0LowJet`; extend the editable set.  (Alt:
+    extend `DeTurckLieCoeffL2JetBound.lean`.)
+  - **RULING NEEDED 2 (assembly shape):** lieCorr0's ∇²T is designed to CANCEL DLb's base arm
+    (`tail_base_split`:171 ⟹ `lieCorr0Field + deTurckLieEndoArmField(base)` is ∇²T-free; in Psi0 the DLb
+    `+grad(deTurckVF g₁ g_bg)` and lieCorr0 `−grad(deTurckVF g₁ g₀)` sum to order-1).  Option A (this
+    dispatch: standalone positive-R-free-Ktop producer, triangle into Psi0 — R-free but over-counts ∇²T;
+    fine for R1τ since RULING 2 accepts positive R-free per constituent) vs Option B
+    (cancellation-preserving combined bound; needed only if downstream requires literal ∇²T-freeness,
+    per the `LieCorr0Split.md` H3 warning).  **Confirm A vs B before session 2** — B would change the
+    deliverable.
+  - **Session-2 entry plan (Option A):** new leaf; `lc0_decomp` → 5 summands (split
+    `lc0Insert g_bg = base + diff`) → 5-way pointwise triangle (generalize `normSq_iCG_deTurckLieCoeff
+    _le`) → top summand via DLb producer @g_bg:=g₀ → 4 Kc summands via LowJet refolds + tame-window
+    integrator → `Ktop = 5·Ktop_DLb` R-free, single Kc; summed via `jetL2_sum_lowShift a 2 3`
+    (windows a+3), shape = deTurckLie siblings `:739/799`.  ~1-2 sessions (top engine + low machinery
+    both pre-built; work = jetL2 lift + realizedFam thread + triangle + summed).
+  - **Files touched:** `LieCorr0Core.md`, `DeTurckLieJetL2Summed.md`, this plan.  No `.lean`.  Not
+    committed (planner commits).  `(N)` `ricci_flow_unif_existence` still **0%**.
+- 2026-07-24 (lieCorr0 build, session 1): **BLOCKED on broken upstream deps;
+  scope ruling requested.**  Rulings 1+2 (№19) consumed: new leaf
+  `TensorHilbert/LieCorr0CoeffL2JetBound.lean` created (namespace
+  `Integral.Connection`); the decisive R-free-Ktop brick is WRITTEN — top piece
+  `lc0Insert g₀ g₁ g₀ = −deTurckLieDLbCoeffField g₀ g₁ g₀`
+  (`lc0Insert_base_eq_neg_dlb` from `insert_base`@g_bg:=g₀ + `endoArm_eq_dlb`),
+  its per-order top-separated bound inherited from the DLb producer @g_bg:=g₀
+  (`Ktop = Ktop_DLb`), plus the `sq_le_five_add` five-summand triangle helper.
+  **BLOCKER:** the leaf cannot be `lake build`-checked — imported
+  `LieCorr0Split` and `LieCorr0LowJet` FAIL `lake build` under the lakefile's
+  `autoImplicit false`; they are `lake env lean` FALSE-GREENs (never truly
+  built).  This CORRECTS the recon/№19 premise that the low machinery was
+  "pre-built".  `LieCorr0Split` fix = ONE line (`open …Integral.L2`; all 8
+  errors are `SmoothCcTensor`/`.ext` at :36/:47/:58/:69/:108/:160 + 2 cascades).
+  `LieCorr0LowJet` has the open already but is unbuilt (unknown residual
+  autoImplicit-false depth, behind Split).  Both are OUTSIDE the authorized
+  editable set (new leaf + notes).  **RULING NEEDED:** authorize editing
+  `LieCorr0Split.lean` (+`LieCorr0LowJet.lean` as needed) to add the missing
+  open(s)/autoImplicit-false fixes so the ratified plan can proceed, OR repair +
+  rebuild them upstream first.  No `.lean` edits outside the new leaf were made.
+  `(N)` still **0%**.
+- 2026-07-24 (lieCorr0 build, session 1 cont.): **REPAIR EXCEEDS HYGIENE — STOP
+  per guardrail; planner decision needed.**  Under the repair authorization,
+  `LieCorr0Split` needed: `open …Integral.L2` + Core's full open set (fixes
+  `SmoothCcTensor` + 4 record-construction instance failures) + `tail_base_split`
+  `rw [insert_base]`→`rw [← insert_base]` (statement-sound). But `insert_base`/
+  `lc0_decomp` `.ext` proofs then fail `FiberBundle (TensorRSModel 2 2 ℝ E)`
+  synthesis; THREE routes (providing-module import; wrapper letI; underlying
+  `Tensor0SBundle.tensorRSBundle_fiber` letI) all failed. Working TensorHilbert
+  files set up a metric-dependent `letI : Bundle.RiemannianBundle … :=
+  tensorRS_riemannianBundle g r s` — i.e. the fix is coherent bundle-instance
+  setup, NOT bare-FiberBundle, and is genuine instance plumbing past
+  opens/binders. `LieCorr0LowJet` (1832 lines) uses `.ext` pervasively across its
+  refolds → same setup × many + unknown further issues. Verdict: the drafts are
+  genuinely uncompiled (FALSE-GREEN hid real breakage). Left Split with the
+  correct hygiene portion (opens + `← insert_base`); still does NOT build; LowJet
+  untouched; reverted the non-working import/letI attempts. **DECISION:** (a)
+  authorize full bundle-setup repair of both drafts (extensive RiemannianBundle
+  letI plumbing — repairing unverified drafts, not the lieCorr0 math), OR (b)
+  rebuild+verify the two drafts upstream then I resume the leaf. `(N)` 0%.
+- 2026-07-24 (lieCorr0 build, ruling №21 probe): **P3 REACHED — RiemannianBundle
+  pattern did NOT fix `.ext`; escalate to GPT Pro.** Applied the working-file
+  `letI : Bundle.RiemannianBundle (fun y => TensorRSSpace 2 2 I y) :=
+  Tensor0SBundle.tensorRS_riemannianBundle g₀ 2 2` to Split's two `.ext` proofs
+  (`insert_base`, `lc0_decomp`); `lake build +LieCorr0Split` (wait-polled ~5 min
+  past lanes B/C): the letI elaborates but `apply ContMDiffSection.ext` STILL
+  fails `failed to synthesize FiberBundle (TensorRSModel 2 2 ℝ E) fun x ↦
+  TensorRSSpace 2 2 I x` at :119/:173. Root: RiemannianBundle equips a fiber
+  metric, does NOT provide `FiberBundle`. Working `DeTurckLieKernelL2JetBound`
+  resolves it AMBIENTLY (no letI, :82-83) via its rich CovGrad import cone; Split
+  (imports only LieCorr0Core + RiemannCoefficientPalatiniRefold) lacks it, and
+  the global `tensorRSSpace_fiberBundle` instance (from TensorRSContRiemannianBundle)
+  did NOT resolve when imported (likely eta/instance-form or competing-topology).
+  Full consult diagnostic (exact goal/error, 3 setups tried, key clue,
+  hypotheses) in `TensorHilbert/LieCorr0CoeffL2JetBound.md` §"P3 REACHED". Split
+  left with the reproducing setup (opens + `← insert_base` + 2 RiemannianBundle
+  letI); does NOT build; LowJet untouched; no commit. `(N)` 0%.
+- 2026-07-24 (lieCorr0, ruling №21 D-round): **ROOT CAUSE FOUND — TopologicalSpace-
+  instance DIAMOND, not eta; D2 ruled out, D3 failed+worsened; STOP for planner/
+  codebase decision.** synthInstance trace (split_trace.txt :6078-6093): the goal's
+  `TotalSpace (TensorRSModel 2 2 ℝ E) (fun x ↦ TensorRSSpace 2 2 I x)` topology
+  resolves to `tensorRSSpace_topologicalSpace`; both FiberBundle candidates then
+  fail `tryResolve` — `tensorRSSpace_fiberBundle` on the eta-contracted fiber,
+  `tensorRSBundle_fiber` (eta-expanded, fiber unifies) on the TOPOLOGY (it carries
+  `tensorRSBundle_topology` ≠ the goal's `tensorRSSpace_topologicalSpace`, and
+  FiberBundle bakes the TotalSpace topology). ≥3 competing TotalSpace-topology
+  instances are in scope (diamond). D2(eta) contraindicated (the eta-expanded
+  instance still fails on topology). D3(import TensorRSContRiemannianBundle) FAILED
+  and worsened it (adds more topology candidates; the 4 lc0* DEFS then also fail).
+  A topology `letI`-pin band-aids ONE .ext site but LowJet's 1832 lines use .ext
+  pervasively ⟹ dozens of pins, not bounded. **DECISION (planner/owner/Pro):**
+  (i) dedupe the competing TotalSpace-topology instances at the bundle-definition
+  layer so the FiberBundle instance's topology wins (clean, out of this lane), OR
+  (ii) accept pervasive per-.ext topology-pins across Split+LowJet. Split cleaned to
+  hygiene state (opens + `← insert_base`); does NOT build; LowJet untouched; no
+  commit. Full diagnostic in LieCorr0CoeffL2JetBound.md §"D-ROUND RESULT". `(N)` 0%.
+- 2026-07-24 (lieCorr0, ruling №21 T1): **band-aid (ii) TESTED and DEAD; T3 →
+  consult.** Paired pin (topology `tensorRSBundle_topology` first, then
+  `tensorRSBundle_fiber` FiberBundle letI, eta-expanded) at both `.ext` sites:
+  `lake build +Split` STILL fails FiberBundle at :79 (lc0Riem DEF toSection — the
+  diamond breaks defs too) and :122/:179 (the PINNED .ext proofs). Two reasons the
+  band-aid can't work: (a) the winning topology `tensorRSSpace_topologicalSpace`
+  has NO paired FiberBundle instance in scope (the 2 candidates pair with
+  `tensorRSBundle_topology` / `tensorRSSpace_totalSpace_topologicalSpace`);
+  (b) the topology is baked into SmoothCcTensor/ContMDiffSection UPSTREAM, so a
+  local letI arrives too late. ⟹ only the clean fix (i) works: dedupe/align the
+  competing TotalSpace-topology instances at the bundle-definition layer so the
+  FiberBundle instance's topology wins (codebase-owner change, out of this lane).
+  Split reverted to hygiene (opens + `← insert_base`); does NOT build; LowJet
+  untouched; no commit. Consult evidence = LieCorr0CoeffL2JetBound.md §"D-ROUND
+  RESULT" + §"T1". `(N)` 0%.
+
+## Planner dispatch №24 (2026-07-25) — CAMPAIGN UNFROZEN; two lanes running
+
+User unfroze the (N) route ("我们先继续N route好了") and handed the `qinz/reunion`
+merge to a collaborator (plan: `DifferentialGeometry/REUNION_MERGE_PLAN.md`), so
+the merge no longer competes for this session's attention.
+
+Precondition now satisfied that was not at №23: the merged ste-align tree is
+**verified GREEN** — `lake build` 10623/10623, exit 0, sorry count unchanged at
+248, endpoints `covOrderBound_of_soln` and
+`MetricCompactnessInputs.metricCompactness` axiom-clean.  Resume-order item (1)
+("accept & commit the two stand-down notes") is DONE: both notes came in with the
+e87b merge at `8a3ce03e8`.
+
+STANDING RULING added since №23 — read before touching any variable block:
+`InnerProductSpace ℝ E` on the MODEL space is the WRONG assumption; stay on
+`[NormedSpace ℝ E]`.  When a lemma newly demands an instance, fix the PRODUCER
+(usually: you reached for the legacy `LeviCivita` API instead of the canonical
+`leviCivitaConnectionOfMetric` one) or `omit` an unused section variable — never
+add the instance to consumers.  Doing the latter cost twelve full-build rounds.
+Details in `lessons.md` (2026-07-25) and `REUNION_MERGE_PLAN.md`.
+
+DISPATCHED (resume-order items 2 and 3, in parallel — disjoint files):
+- **Lane B2** → `HCGCompactness/ConnDiffDerivBound.lean`.  Close the dual core
+  (`covDerivConnDiff_g1_le`) and the endpoint (`covDerivConnDiff_gJet_le`) per that
+  file's note §"EXACT NEXT STEPS".  Endpoint must be literally dischargeable
+  against `covStepDiff_norm_le`'s `hA1` binder in `UnifCovSumCross.lean`.
+  Unblocks: hA1 discharge → D_N recursion → 2a-hi/pkg → S0 j≥2.
+- **Lane lieCorr0** → `Analysis/Sobolev/TensorHilbert/LieCorr0CoeffL2JetBound.lean`.
+  Drop the broken `LieCorr0LowJet` import, BANK the four drafted-but-never-built
+  theorems, then land the first Kc atom `lc0Riem`.  Scoped to stop there; the
+  endpoints wait for all four atoms.  Note: this leaf is not in the root import
+  graph, which is why the tree is green despite its broken import.
+
+Unchanged honest numbers: (N) theorem 0% (unstated); its machinery ≈ 50%.
+The main remaining mathematical risk is still item-2 PROPER (threeArm/Ψ₀ assembly
++ the smooth-core tame lemma), which is NOT started and is not in either dispatch.
+
+## Planner acceptance №25 (2026-07-25) — B2 CLOSED; lieCorr0 top piece + lc0Riem banked; wiring + atom 2 dispatched
+
+Both №24 lanes accepted and committed (`9fbd0fb0b`); axiom audits clean
+(planner-independent probe on the public `covDerivConnDiff_gJet_le`; the five
+lieCorr0 declarations are private, accepted on the executor's in-module audit +
+targeted build).
+
+- **B2 is 100%**: `covDerivConnDiff_g1_le` (dual-Koszul core) +
+  `covDerivConnDiff_gJet_le` (endpoint), constant exactly
+  `CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`.  hA1-dischargeability proved at the TERM level
+  against `covStepDiff_norm_le` (scratch composition compiled green, deleted).
+  Executor improvement over spec: the planned re-derivation of two private
+  lemmas replaced by the public `diff_le_covOne_basis_ref_lc`
+  (AllTimesBounds:3287) via a 4-line `lcDiff_covOne_le`; `metricDerivNorm`
+  never enters the file.  P1 (`covDerivConnDiff_fibreNorm_le`) is confirmed
+  UNUSED by this route — kept as the honest fibre-norm entry point.
+- **lieCorr0 1/4 atoms**: LowJet import dropped (nothing salvaged; recon verdict
+  held).  The four drafted theorems banked green AS WRITTEN.  `lc0Riem` green;
+  key reusable move: rank-2 cometric double trace = `reindexCoeffGen`(source
+  three-cycle) ∘ `slotExtend` of the rank-1 envelope — rfns-invariant, one
+  finrank factor; NO rank-2 re-derivation of the ~250-line envelope.
+- Design ruling (the one open question B2 left): nothing imports
+  `UnifCovSumCross`; the "three T-B consumers" are the unwritten D_N recursion.
+  Therefore the discharged variant TAKES the metric-jet input bundle
+  (`hEq/hJet1/hJet2/hx`) in its signature — honest-input-bundle style — with CA
+  instantiated; D_N will consume that variant directly.
+
+DISPATCHED (both as resumptions of the same executors, disjoint files):
+- Wiring: discharged `covStepDiff_jet_le` variant in `UnifCovSumCross.lean`
+  (+ the acyclic `ConnDiffDerivBound` import).
+- lieCorr0 atom 2: the `lc0Insert` difference via `nEndo_diff` (both arms live —
+  the template's passenger-shortcut does not apply; stop-at-honest-partial rule
+  restated).
+
+CONCURRENCY NOTE: the forward-uniqueness Fable session is working in THIS SAME
+checkout (its in-flight edits: `ExtendViaUniqueness.lean` (Ico-slab statement
+per the FU Pro ruling), `DistanceBarrier.lean`, `MetricTimeCompare.lean`, new
+`ForwardUniqueConnectionDiff.lean`, root `DifferentialGeometry.lean`,
+`HamiltonPositiveRicci.md`).  Planner commits ONLY (N)-lane files; the FU
+session owns and commits its own.  Full builds must not run concurrently —
+coordinate via lake-locked; focused checks with -NoLakeLock remain fine.
+
+Honest numbers unchanged: (N) theorem 0%; machinery ≈ 55% (B2 closed, item-6
+tail now = wiring + D_N + 2a-hi/pkg + S0 j≥2 + S2–S4/S1b; item-2 tail = 3 Kc
+atoms + endpoints + threeArm/smooth-core, the last being the main risk).
+
+### №25 addendum (same day) — wiring ACCEPTED (`771dbebd1`); D_N dispatched
+
+`covStepDiff_of_jets` (UnifCovSumCross, public, 17 letters) accepted: the
+D_N-facing fully-discharged T-B jet step; axiom line planner-probed clean.
+Substantive design finding recorded in the commit: the metric roles do NOT
+collapse — ∇g₂/g₁ (jet_le's NA-fold) and ∇g₁/g₂ (the hA1 discharge) are
+different quantities, so the signature honestly carries both first-order jets
+(`hJet1`, `hJet1'`, shared Λ') with one comparability via
+`metricUniformEquivalentOn_symm`.  Norm-variant deliberately omitted (jet
+variant is the API).
+
+DISPATCHED next (same executor, same file): **D_N state-before-prove** per
+UnifCovSumCross.md §T-B — (1) full statement with explicit constant recursion,
+(2) N=2 proof from existing pieces, (3) general step only as far as a=1
+carries; the ∇₂^a A (a ≥ 2) bound family is THE one allowed visible frontier,
+preferably as a single named conditional hypothesis (honest-input form), not a
+second machinery excursion.  Jet-order budget expectation: order-N telescoping
+needs metric jets to ≈ N+1.
+
+### №25 addendum 2 (same day) — atom 2 honest-partial ACCEPTED (`f852e8b90`); engine brick dispatched
+
+The `lc0Insert`-difference atom hit a GENUINE missing engine (executor's
+three-route search recorded in the leaf note): the contraction
+`connDiff g₁ g₀ (dVF-difference)` is an interior product with no
+contraction-Leibniz jet grid in the tree; the WEndo-difference route is
+provably circular; the natural home (`wCA`/`wOmega`/`wAlphaB` + the identity
+`slotInsert(connDiff·dVF) = cometricRaise(wAlphaB)`) is private inside
+`DeTurckVectorFieldL2JetBound.lean`.  Atom 2 is STATED with the correct
+signature, one flagged `sorry` (`lc0InsertDiff_ballUniform`).
+
+LEVERAGE RULING: lc0VB and lc0AMix are the same interior-product shape ⟹ ONE
+public engine unblocks three of four atoms.  Dispatched (same executor, claims
+`DeTurckVectorFieldL2JetBound.lean` + the leaf): expose the minimal public API
+(thin wrappers, hoist the buried identity), build the per-order ballUniform
+jet-L² producer for the endo difference, discharge the sorry, design for
+lc0VB/lc0AMix reuse but STOP after atom 2 is green.
+
+lieCorr0 honest fraction unchanged at ~33% sorry-free (top piece + lc0Riem);
+what advanced is the frontier's SHAPE: from "unstated atom" to "one named
+reusable producer".
+
+### №25 addendum 3 (same day) — wOmegaDiff cancellation ACCEPTED (`1a0d01c70`); lieCorr0 lane at a clean stop
+
+The interior-product frontier for atom 2 DISSOLVED by difference algebra:
+`wOmegaDiff_eq` telescopes the moving connDiff factor out, so the lc0Insert-diff
+endomorphism is lc0Riem-shaped (moving cometric, fixed passenger).  Keystones
+green + axiom-clean; the `slotInsert = cometricRaise(wAlphaB)` hoist honestly
+skipped (finish-or-don't-start rule).  Executor estimate: ~1–2 sessions to
+atom-2 green; remaining layers + their grids recorded in both same-name notes.
+CAUTION kept visible: lc0VB/lc0AMix get NO cancellation (single deTurckVF) —
+the contraction-Leibniz question is live for them; re-assess at their dispatch.
+
+lieCorr0 lane rests here pending the next dispatch; D_N lane still in flight.
+
+## Planner acceptance №26 (2026-07-25) — D_N SCHEME PROVED (conditional) + N=2 unconditional; day closes
+
+D_N brick accepted (`1a6c191ad`); both public theorems planner-probed
+axiom-clean.  The T-B telescoping is now a PROVED conditional theorem
+(`iterCovG1_le`, single named frontier `hAcc`) with its explicit constant
+(`Dtower`) and a verified unconditional base (`iterCovG1_two`, N=2), not a plan.
+Metric-role asymmetry threaded through (hjet ∇g₂/g₁ + hJet1/hJet2 ∇g₁/g₂).
+Durable Lean lesson: `set … with h` + `clear_value` to make heavy fibre values
+opaque (bare `set` keeps a whnf-unfoldable let-body); 1.6M-heartbeat walls
+dissolve.
+
+STATE OF THE DAY (all committed; lanes at clean stops):
+- item 6: B2 closed (`covDerivConnDiff_gJet_le`) → consumed
+  (`covStepDiff_of_jets`) → D_N scheme + N=2.  Remaining math = `hAcc` for
+  m ≥ 2 (the ∇₂^a A, a ≥ 2 schematic — THE item-6 frontier), then 2a-hi/pkg,
+  S0 j≥2, S2–S4/S1b.
+- item 2 (lieCorr0): top piece + lc0Riem green; atom 2 stated w/ one honest
+  sorry; wOmegaDiff cancellation makes it lc0Riem-shaped (~1–2 sessions);
+  lc0VB/lc0AMix keep the contraction-Leibniz question OPEN; then endpoints;
+  then threeArm/Ψ₀ + smooth-core (item 2 PROPER — still the main risk,
+  still unstarted).
+- (N) theorem: 0% (unstated).  Machinery ≈ 60%.
+
+NEXT DISPATCH QUEUE (in order): (a) hAcc m≥2 schematic (needs a
+state-before-prove recon of ∇₂^a A — the connDiff-as-tensor-field covariant
+derivative family); (b) lieCorr0 atom-2 finish per the recorded layer plan;
+(c) 2a-hi/pkg once (a) lands.  Do not open (a) and the atom-2 finish in the
+same file set — disjoint, can run parallel.
+
+### №26 addendum (same day) — hAcc recon ACCEPTED (`f1a7bda31`); koszul-deriv2 dispatched
+
+Queue item (a) delivered as specified: route (i) (iterated differentiated
+Koszul) ruled in with recorded eliminations of (ii)/(iii); the a=2 atom
+`covStepDiff2_exists_const` stated green in the new `ConnDiffDeriv2Bound.lean`
+(ONE flagged sorry = the single visible item-6 frontier); no false wall — the
+gate is the absent identity `connDiff_koszul_deriv2` (~150–300 lines, mirror of
+B2's `connDiff_koszul_deriv`).  Executor env lesson recorded: shell tools
+default to the STALE `E:\testdifferential-geometry`; lake-locked claim in the
+wrong tree silently succeeds — always Set-Location to ste-align first.
+
+DISPATCHED next (fresh executor): **koszul-deriv2 session 1** — state and prove
+`connDiff_koszul_deriv2` (the second base-connection differentiation of
+`connDiff_koszul_deriv`), the gate to a=2.  Honest-partial allowed; expected
+2–4 sessions to a=2 overall.  Parallel: atom-2 finisher still in flight
+(Sobolev/TensorHilbert files, disjoint).
+
+## Planner acceptance №27 (2026-07-25) — koszul-deriv2 PROVED (1 session); Kc atom 2 GREEN (2/4)
+
+Both lanes accepted and committed (`2b0f4af3a`, `a98ece56c`); koszul2
+planner-probed axiom-clean independently; leaf 0 sorryAx on targeted build.
+
+- **`connDiff_koszul_deriv2` closed sorry-free in ONE session** (recon estimate
+  was 1–2 of 2–4): master differentiated form via `congrArg (∂_V)` of the a=1
+  statement — the pattern that makes a ≥ 3 cheap (rank-generic Tensor engines,
+  quadratic reuses the a=1 combo engine unchanged).  Honest deviation on
+  record: the identity mirrors its a=1 sibling's IPS environment (confined;
+  engines NormedSpace-only; no new consumer demand).
+- **lieCorr0 atoms 2/4**: `lc0InsertDiff` green via a SIMPLER route than
+  spec'd (crude wAlphaB triangle; cancellation kept as sharp-bound seed);
+  producer gained the public HOIST + the (1,1) ballUniform producer.  Atom-3
+  honest read: HOIST does NOT route lc0VB/lc0AMix; their template is the
+  committed same-shape `deTurckLieArm1Coeff…ballUniform` (:4812) — i.e. the
+  contraction-Leibniz "engine question" may again be a recombination in
+  disguise; the atom-3 session decides.
+
+DISPATCHED (fresh executors, disjoint):
+- **a=2 session 2**: the dual core (`covDerivConnDiff2_g1_le`, mirror of B2's)
+  + the operator Leibniz `∇₂²(A⋆S) = (∇₂²A)⋆S + 2(∇₂A)⋆∇₂S + A⋆∇₂²S`; then
+  (if budget) the `covStepDiff2_exists_const` assembly.
+- **lieCorr0 atom 3 (`lc0VB`)** per the Arm1 template anchor.
+
+Honest numbers: (N) theorem 0%; machinery ≈ 65% (item-6: gate identity done,
+dual core + Leibniz + assembly + m=2 glue left; item-2: Kc 2/4 + endpoints +
+threeArm/smooth-core (main risk, unstarted)).
+
+### №27 addendum (same day) — lc0VB route-3 ACCEPTED (`4e3e1c320`); linchpin producer dispatched
+
+Atom-3 recon verdict: the contraction-engine gap is REAL for lc0VB (Arm1's
+kernel transfers, its fold does not; no generic interior-product-fold engine
+tree-wide).  Atom stated in the uniform shape, one honest sorryAx
+(`lc0VB_ballUniform`).  DECISIVE finding: lc0AMix has no interior product —
+both remaining atoms converge on ONE missing producer, the per-order jet-L²
+bound for `metricConnDiffLowered g₁ g₁ g₀`.  That linchpin is dispatched (same
+executor); the lc0VB fibre identity (~200-400 lines) is the brick after.
+Parallel: a=2 session 2 (dual core + operator Leibniz) still in flight.
+
+## Planner night charter №28 (2026-07-25 evening) — 10-hour autonomous window
+
+User mandate: run autonomously ~10 hours; GPT Pro consults authorized via the
+Chrome plugin path (CLAUDE.md protocol) if a lane hits a genuine wall.  The
+user is separately running the iteratedCovGrad_smul dedup task in another
+session — do NOT touch cross-file smul dedup; FU session still owns Evolution/*.
+
+QUEUE for the window (accept → commit → dispatch, two lanes saturated):
+1. [in flight] a=2 session 2 (dual core + operator Leibniz) → then session 3:
+   `covStepDiff2_exists_const` assembly + the hAcc m=2 glue in UnifCovSumCross
+   (glue may need a careful claim — coordinate with nothing; the file is free
+   between bricks).
+2. [in flight] linchpin producer (metricConnDiffLowered per-order) → then the
+   lc0VB fibre identity (~200-400 lines) → lc0AMix (traceStep-chain recipe) →
+   the 5-way Kc assembly → STATE the two lieCorr0 endpoints.
+3. [new tonight] item-2 PROPER recon: threeArm/Ψ₀ assembly + the smooth-core
+   tame lemma — state-before-prove, route options weighed, consult trigger
+   defined.  This is the campaign's main risk; a recon tonight buys the option
+   of a Pro consult before the user returns.
+4. [stretch] 2a-hi/pkg once hAcc m=2 lands; S0 j≥2 wiring after that.
+
+Standing rules restated for all night dispatches: model-space NormedSpace only;
+honest partials; ≤1 visible frontier per stop; targeted builds only; commit
+own-lane files only; plan + memory updated at each acceptance.
+
+### №28 log — a=2 session 2 ACCEPTED (`f1e1ce272`); session 3 (absorption) dispatched
+
+Session 2 delivered the mechanical layer sorry-free (operator Leibniz
+`covStepDiff2_opLeibniz` via double `diffStep_leibniz`; order-1/2/3 currency
+bridges incl. `nabla4_eq_mcd3`; the clean (1,4) object `covDerivConnDiff2`).
+The dual-core bound is deliberately NOT stated: the clean-form derivation is
+recorded term-by-term in `ConnDiffDeriv2Bound.md` §2.1 at ~85% hand-confidence
+and the wrong-statement rule keeps it prose until proved.  Sub-frontiers for
+session 3: de-privatize `sqrt_normSq0S_comp`; section-smoothness of the
+covDerivConnDiff section (reuse-check ordered before any build).  Session 3
+dispatched: absorption proof (§2.1 → Lean; trust Lean over hand where they
+disagree — a REAL term mismatch is planner-level), then the dual-core bound,
+then (budget) the exists_const discharge.  a=2 ≈ 45% machinery / 0% theorems.
+
+### №28 log 2 — linchpin ACCEPTED (`56e256d6d`); lc0VB fibre-identity session dispatched
+
+The metricConnDiffLowered producer landed as a short REUSE (sign identity to
+Arm1's kappa + jet-norm sign-invariance); the deTurckVF arm turned out ALREADY
+COMMITTED (`lieArm1_connDiff_feed` — the cometric-trace fold makes the arm pure
+connDiffSection).  lc0VB's engine gap is CLOSED; dispatched the fibre identity
+(~200-400 lines) + leaf discharge.  lc0AMix drops to ≈1 session after (reuses
+the linchpin twice, no interior product).  Lanes: a=2 absorption + lc0VB fibre
++ threeArm recon in flight.
+
+## Planner ruling №29 (2026-07-25 night) — threeArm recon ACCEPTED; Kc-currency fork → GPT Pro consult FIRED
+
+Recon (`838d4e5ea`, `THREEARM_RECON.md`) corrects the campaign premise: the
+"6/7 constituents closed" scoreboard hid a CURRENCY split — deTurckLie (and
+lieCorr0, same converter) carry R-DEPENDENT Kc on the a+2 window, which the
+R-free smooth-core target cannot consume (R ≈ ‖T‖_{a+2} lands on the forbidden
+‖T‖_{a+2}·‖T−T′‖_{a+2}).  Only arm0Base/arm1Base/deviation are route-compatible.
+Corr/Arm1 fields are Ktop=0-ABSORBABLE (no new topSeparated producers needed —
+ThreeArmTopSeparated's contrary claim is FALSE).
+
+STANDING CONSTRAINTS pending the consult: no lieCorr0 ENDPOINT dispatches (atom
+producers in flight stay valuable fork-agnostically); no layer-1 re-derivation;
+no Corr/Arm1 topSeparated producers.
+
+CONSULT: §8 prompt submitted via Chrome (branch pushed `838d4e5ea`; links
+corrected to codex/short-time-existence-align).  Question: is the R-dependent
+Kc absorbable into orientation 2 by the covariant tame lift (Fork A, ~10–18
+sessions) or is an R-free-Kc re-derivation forced (Fork B, ~18–30+, possibly
+route-dead)?  Answer to be recorded here as №30.
+
+### №29 log — consult SUBMITTED (fresh chat in "Lean Pro Consult Handoff")
+
+Prompt (THREEARM_RECON §8, links corrected to codex/short-time-existence-align)
+submitted via Chrome at ~00:15; chat id 6a65adf2-9cec-83e8-8548-2a2f4508fad7.
+Answer expected in 5–10 min; to be recorded as №30 with the Fork A/B ruling.
+
+## Planner ruling №30 (2026-07-26) — Pro answer received; the GATE brick defined
+
+Full distillation in THREEARM_RECON.md §11.  Operative consequences:
+
+1. The §29 fork DISSOLVES: orientation routing was never broken (recon §4/§6
+   error); arm0's R-independence claim was ALSO wrong (docstring > impl).
+   The single real defect is the ball-uniform grid converter creating
+   R^{7k}-type constants by setting Λ ∝ R.
+2. **THE GATE (item-2's new single frontier): the radius-free top-separated
+   `boundedFactorGridWindow` integrator** in
+   CurvatureCoefficientDifferenceJetTower.lean (sibling of :14417-14444,
+   opposite constant choice; fixed Λ₀(dim,δ₀); layers ≤ i+1 low, layer i+2 the
+   explicit top leak) + the fibre-small zero-order bridge.  Everything else
+   waits: NO DeTurckLie edits, NO lieCorr0 finishing (lane FROZEN at its clean
+   green state, one vbPass_jetL2 sorry), NO assembly, until it is exact-green.
+3. R1τ viability: CONFIRMED pending the gate (failure signal = superlinear-in-H
+   coefficient growth AFTER the fix; concrete high-frequency diagnostic given).
+4. The a=2 lane (item 6) is unaffected and continues in parallel.
+
+DISPATCHED: (a) the gate brick (fresh executor; CurvatureCoefficientDifference-
+JetTower.lean, 14k+ lines — surgical addition only); (b) a=2 session 4 (the
+drafted dual-core CS finish).
+
+## Planner acceptance №31 (2026-07-26 ~03:00) — THE GATE IS GREEN (`73b847a4d`)
+
+The radius-free top-separated integrator + fibre-small bridge landed exact-
+green, axiom-clean, zero deletions.  Empirical confirmation of №30: the
+top-layer subgrid argument has NO resisting term; R^{7k} was the wrapper's
+Λ ∝ R substitution and nothing else.  **R1τ survives its main risk test.**
+
+Pro's freeze condition ("until that generic lemma is exact-green") is MET.
+Reopened queue, in Pro's order:
+1. [dispatch next] **The consumer sibling** — the R-free DeTurck-Lie coefficient
+   theorem (∑‖∇ⁱC_DL‖² ≤ Ktop·(a+2 data window) + Klow·(1 + a+1 data window),
+   no R binder), instantiating the gate at Λ₀=(dim E)·δ₀ via the fibre bridge.
+   TWO design constraints on record: the §11-addendum pointwise-head caveat
+   (top terms go to the L² envelope, not a pointwise head; NEW sibling, do not
+   strengthen public top-head APIs) and the symmS point (run symmS-T grids —
+   fibre smallness controls the symmetric part; raw-T grids are the committed
+   R-dependent ones).  Wire-in point: wAlpha_L2_topsep
+   (DeTurckVectorFieldL2JetBound :4233-4256) — but per Pro, DeTurckLie edits
+   come AFTER this sibling exists.
+2. lieCorr0 stays FROZEN until the sibling defines the new currency (finishing
+   atoms in ballUniform currency risks rework).
+3. Then: DeTurckLie/lieCorr0 re-currency → assembly layer 1 → smooth-core
+   layers 2-3.
+
+Parallel item-6 lane: koszul2_clean PROVED (`621964cca`, planner-probed
+axiom-clean with the dual core); exists_const assembly in flight.
+
+## Planner night ledger №32 (2026-07-26 ~07:00) — the 10-hour window's outcome
+
+All lanes verified, committed, pushed through `505534bc6`.  Chronological
+acceptances: №25 (B2 closed + consumed; lc0Riem) → №26 (D_N conditional + N=2)
+→ №27 (koszul-deriv2 1-session; Kc 2/4) → №28 charter → №29 (threeArm recon:
+currency fork found) → №30 (Pro ruling: FALSE dichotomy; the gate defined) →
+№31 (THE GATE GREEN) → this ledger.
+
+**item 6 (the a=2 hAcc chain):** identity chain COMPLETE (`connDiff_koszul_deriv2`
++ corrected `koszul2_clean` + dual core `covDConnDiff2_g1_le`, all axiom-clean);
+`covStepDiff2_exists_const` proved conditional on the ONE remaining sorry
+(`covStepDiff2_mixedComm_le`); its `covStep2_diffStep_eval` core ~70% built
+(peel, both branches, linearity split, OC split — all green; clean-mixedComm
+shortcut DISPROVEN in Lean and route re-scoped honestly).  ~2 sessions left
+(assembly + norm CS), then the hAcc m=2 glue.
+**item 2 (the Pro-ruled repair):** bricks 1-2 GREEN (the radius-free gate
+integrator + the arm0 R-free sibling; §6 stop-signal never fired, three
+times); brick 3 stated with its summed reduction proved (one frontier sorry);
+brick 3b-prep DONE (the 4596-line VF monolith split; the 27 promotions =
+exactly the planned exposure); brick 3b session 1 (the R-free tower) IN FLIGHT.
+lieCorr0 stays frozen per №30 (its 2/4 green atoms + structural lc0VB stand).
+**Durable lessons banked:** respectTransparency cures IPS section-apply walls
+(supersedes the placement-refactor diagnosis); the mixedComm disproof residual;
+the split promotions list.
+
+Honest numbers, unchanged discipline: **(N) `ricci_flow_unif_existence` = 0%
+(unstated)**; item-6 machinery ≈ 85% (one sorry + glue); item-2 ≈ 3 of ~10-18
+bricks (gate + arm0 + the 3b scaffold); threeArm assembly + smooth-core layers
+2-3 untouched.  Machinery overall ≈ 70%.  Est. to (N) discharge: ~12-20
+executor sessions absent surprises.
+
+## Planner ruling №33 (2026-07-26) — mixedComm bridge statement corrected (order-2 RHS)
+
+Session-5's STOP fired correctly: the bridge as stated was FALSE (∇₂(mixedComm)
+is order-2 in S; decisive s=0 Lean witness `diffStep_rank0_eq_zero`).  Ruling:
+RHS gains |∇₂²S|.  Safety checked at both consumers (exists_const's nlinarith;
+the D_N jet budget).  Dispatched: the statement amendment + the strengthened
+assembly (keep the ∇₂²S-insertions, route them through the a=0 atom in the CS).
+The session-7 note's cancellation claim is superseded; sessions 8-11 machinery
+(peel/split/branches/OCsplit) remains valid PieceA route.
+
+## Planner acceptance №34 (2026-07-26 morning) — BRICK 3 DONE; brick 4 dispatched ON FABLE
+
+Brick 3 discharged (`9a7555886`): `deTurckLieCoeffField_{perOrder,summed}_l2_radiusFree`
+both unconditional, axiom-clean.  The full R-free stack (VF tower → DLa/DLb
+arm engines → frontier) is green; three minimal exposures in the home files;
+dLaGridWin turned out defeq to the leaf's atgw.
+
+RULING: the lieCorr0 freeze is LIFTED for brick 4 ONLY (the new currency is
+defined; the old ballUniform lc0* atom work stays read-only).  Brick 4 = the
+mechanical clone per brick 3's reuse spec; if a lieCorr0 piece lacks a
+pointwise top-separated engine (possible for the frozen-atom pieces), the
+executor stops at one flagged sorry naming the missing piece.
+
+USER DIRECTIVE (morning): remaining Fable quota to be used — executor
+dispatches now run on FABLE (brick 4 is the first).  Plans live at
+UNIF_EXISTENCE_PLAN.md (this file), THREEARM_RECON.md (item-2), PROJECT_MAP.md
+(HCG), REUNION_MERGE_PLAN.md (handed off).
+
+## Planner acceptance №35 (2026-07-26 afternoon) — a=2 DONE on Fable; day-2 state
+
+Fable executors have now closed, in sequence: brick 4's three arms + the mcd
+fibre identity + the ip-vector jet engine (vbPass_jetL2 discharged — the
+lieCorr0 ballUniform leaf is ZERO-sorry) + **the entire a=2 atom**
+(`covStepDiff2_exists_const` a THEOREM; `ConnDiffDeriv2Bound.lean` sorry-free;
+978436edb).  Notable Fable qualities observed: first-pass greens, honest
+partials at real walls, a dropped-unnecessary-hypothesis (hJet1'), the exact
+slot-correction cancellation refinement, and value-honest statements
+throughout.
+
+IN FLIGHT: brick-4 part A (atgw assembly, sorry → lc0AMix-only) — written,
+iterating on its focused check; ~~the hAcc m=2 glue (N=3 unconditional; new
+leaf likely, import direction reversed)~~ **hAcc m=2 glue LANDED (2026-07-26,
+Fable executor): new leaf `HCGCompactness/UnifCovSumN3.lean` (import direction
+indeed reversed + ConnDiffDeriv2Bound at the line cap) — `covStepAcc2_le` (m=2
+accumulator bound, sharp at range(m+1)) + `iterCovG1_three` (N=3 unconditional)
+both sorry-free, axioms = the standard triple; general-m frontier STATED as
+`hAcc_of_jets` (flagged sorry, jets through order m+1).  Ledger:
+`UnifCovSumN3.md`.**
+
+QUEUE after these: lc0AMix (brick 4 final) → threeArm/Ψ₀ topSeparated
+assembly (Fork-A, ~3-5 sessions) → smooth-core layers 2-3 (~4-8) [item 2];
+2a-hi/pkg → S0 j≥2 → S2-S4/S1b [item 6 tail]; then Stage-3 (N) assembly with
+the jet-order raise.  MAINTENANCE: split ConnDiffDeriv2Bound (3052 > 3000).
+(N) theorem: 0% (unstated), unchanged discipline.
+
+## Planner wrap-up №36 (2026-07-26) — SESSION CLOSED; HANDOFF TO CODEX
+
+User order: this planner session wraps up; Codex takes over.  Everything below
+is committed & pushed through `2bd13aaa1`.  The in-flight part-B session was
+stopped BEFORE editing (clean tree); its full dispatch spec is reproduced in
+the NEXT-BRICK entry below.
+
+### State at handoff (honest, theorem vs machinery separated)
+- **(N) `ricci_flow_unif_existence`: 0% — unstated.**  Everything below is its
+  machinery.  Overall machinery ≈ 72%.
+- **item 6**: D_N telescoping proved through N=3 UNCONDITIONAL
+  (`iterCovG1_three`, UnifCovSumN3.lean); general N conditional on the single
+  consumer-exact `hAcc_of_jets` (that file's only sorry; strong-induction
+  route in its docstring).  The whole a=2 atom chain is sorry-free
+  (`ConnDiffDeriv2Bound.lean`: koszul2 identity+clean form, dual core, both
+  gJet atoms, opLeibniz, eval core, the bridge, exists_const — all
+  [propext, Classical.choice, Quot.sound]).  Tail unstarted: 2a-hi/pkg,
+  S0 j≥2, S2-S4/S1b.
+- **item 2** (Pro-ruled repair, THREEARM_RECON.md is the authority): gate +
+  arm0 + deTurckLie DONE (R-free, axiom-clean); lieCorr0 ≈ 80% — the ONLY
+  sorry in `LieCorr0CoeffDiffRadiusFree.lean` is `lc0AMix_perOrder_rf`
+  (:1911).  After it: the threeArm/Ψ₀ topSeparated assembly (Fork-A, ~3-5
+  sessions), then smooth-core layers 2-3 (~4-8).  The lieCorr0 ballUniform
+  leaf is zero-sorry (vbPass discharged).
+- **Working sorries tree-wide (my lanes)**: exactly TWO — `lc0AMix_perOrder_rf`
+  and `hAcc_of_jets`.  Plus the two theorem-level black boxes
+  (ExtendViaUniqueness :92/:201, the FU session owns :201's lane).
+
+### NEXT BRICK (ready to dispatch, spec complete)
+`lc0AMix_perOrder_rf` (`LieCorr0CoeffDiffRadiusFree.lean:1911`): the 5-factor
+traceStep-chain fibre identity via the `lc0RiemLive`
+`reindexCoeffGen(slotExtendᵏ(cometricCastG0))` transport pattern (the stopped
+session's last finding: `lc0RiemLive_toSec` is exactly the transport at
+p=3/p=4 — clone its proof), + two mcd chains via the g_bg-generic
+`b4_mcd_atgw` at BOTH g_bg and g₀, + the banked `b4_trace_succ` + committed
+atgw producers.  Definition at `LieCorr0Core.lean:162` — statement-first.
+On success brick 4 is DONE and Ψ₀'s three constituents are all green.
+
+### Standing rules for Codex (do not relearn these)
+- Model-space NormedSpace only; never compensate a new instance demand
+  downstream — fix the producer or `omit` (lessons.md 2026-07-25).
+- `set_option backward.isDefEq.respectTransparency false` cures Tensor0SModel
+  synth walls incl. section-apply in IPS files; `set … with h` + `clear_value`
+  for heavy fibre values; corner-peel-split for heartbeat walls.
+- lake via scripts/lake-locked.ps1; shell defaults to the STALE
+  E:\testdifferential-geometry — cd to ste-align first; lake env lean SUCCESS
+  is untrustworthy (targeted builds are the verdict); axiom audits on every
+  endpoint ([propext, Classical.choice, Quot.sound] exactly).
+- The FU session works in Evolution/* in THIS checkout — commit only own-lane
+  files; never run two full builds concurrently.
+- Honest partials with ONE flagged sorry; verbatim escalation on real term
+  mismatches (two statement bugs were caught exactly this way: №29-30's
+  currency fork, №33's order-2 bridge).
+
+## Planner acceptance №37 (2026-07-26) — BRICK 4 CLOSED by Codex
+
+Codex resumed the exact №36 frontier in the post-merge `ste-align` worktree.
+The proposed dependency on `LieCorr0LowJet.lean` was rejected after a real
+targeted build showed that module remains RED with about 40 pre-existing
+errors.  The needed subset was instead extracted into two small public leaves:
+
+- `LieCorr0AMixRefold.lean`: exact canonical five-factor refold
+  `amix_refold_rf`;
+- `LieCorr0TraceRadiusFree.lean`: rank-generic moving-trace producer
+  `trace_grid_rf`.
+
+`LieCorr0CoeffDiffRadiusFree.lean` now proves `b4_amix_atgw` and
+`lc0AMix_perOrder_rf`, so both public lieCorr0 radius-free endpoints and the
+private AMix/pair engines replay with exactly
+`[propext, Classical.choice, Quot.sound]`.  Brick 4 is **100%** and contains no
+`sorry`.
+
+Honest accounting remains separated:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**; its black-box `sorry`
+  is untouched.
+- `(N)` dedicated machinery: conservatively about **74%**.
+- item-2 smooth-core theorem: **0% until stated and proved**; dedicated
+  machinery about **80%**.
+
+The next item-2 frontier is now the **threeArm/Ψ₀ topSeparated assembly
+(Fork-A)**, followed by smooth-core tame layers 2-3.  The other live frontier
+remains general-N `hAcc_of_jets`; N=3 is already unconditional.  Do not
+re-dispatch `lc0AMix_perOrder_rf`.
+
+## Planner update №38 (2026-07-27) — live low-regularity frontier
+
+The №37 next-work pointer is now stale.  Subsequent Codex work completed and
+focused-checked the fixed-background mixed low-regularity solve, its same-time
+H2 trace bootstrap, the raw principal A2 spatial/time family, and the mixed
+H3-to-H1 Ricci--DeTurck tame chain.  These are machinery results; they do not
+prove `(N)`.
+
+The remaining low-regularity gap was localized to the principal-subtracted
+order-zero coefficient in H2.  Estimating its raw C0 summands separately would
+require H4 metric control and is the wrong route.  The correct route refolds
+the complete Ricci plus DeTurck order-zero coefficient before estimating:
+
+- `RefoldPairingCore.lean` is the new exact-algebra module below the closed-edge
+  L2/Green layer.  It preserves the existing public pair-trace declarations.
+- `RHSZeroRefold.lean` states the actual no-high-jet identity
+  `rhsLow0Coeff(T) = rhsRefold0(T) + rhsRefold2(nabla^2 T)`.
+- the Ricci C2 coefficient is twice the Palatini family, and the Lie C2
+  coefficient is the DeTurck covariant-derivative refold family;
+  `rhsRefold0` has only genuine lower terms.
+
+This new theorem is **not yet verified**.  Its focused check is blocked before
+elaboration by missing shared build artifacts in several unrelated subtrees.
+Five isolated artifacts were restored successfully; refresh chasing stopped
+when the next missing artifact crossed again into
+`Analysis/Integration/DivergenceTheorem`.  No proof error has yet been
+observed, and the source contains no `sorry` or `whnf`.
+
+Resume order:
+
+1. after the shared cache is restored, focused-check
+   `RefoldPairingCore.lean`, then `RHSZeroRefold.lean`, then the refactored
+   `EdgeRefoldPairing.lean`;
+2. prove the H2 bound and time-L2 measurability for `rhsRefold0`, using only
+   the low C0/C1 coefficient arms and the H3 metric path;
+3. combine that A1 family with the already checked raw A2 time family and the
+   generic L2-time A1 solver;
+4. iterate the same-horizon bootstrap, perform geometric realization, and only
+   then assemble the uniform family constants and common existence time.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the unverified `rhsLow0_refold` theorem: **0% completed**, source body
+  written; its dedicated exact-refold machinery is about **90%** pending
+  elaboration and the H2 estimate;
+- `(N)` dedicated machinery overall: about **78--81%**;
+- order-two geometric bootstrap, all-order smoothing/realization, and uniform
+  common-horizon assembly remain genuine theorem-level frontiers.
+
+## Planner update №39 (2026-07-27) — pair-trace dependency split
+
+The order-zero refold route no longer depends at source level on the
+five-thousand-line Sobolev residual grid for its moving pair trace.
+
+- `OperatorFieldOutputSlotPermutation.lean` now owns the existing generic
+  mixed-tensor output-slot permutation API.  Its focused verification and
+  explicitly named refresh are green; the refresh compiled only the target.
+- `MovingPairTrace.lean` now owns `mvDoubleTraceField`, `mvPairTraceOp`, and
+  `mvPairTrace_apply`.  Metric retagging uses the canonical
+  `SmoothCcTensor.retagEquiv`, and the two passenger slots are extended
+  explicitly rather than importing the drop-grid recursion.
+- `OperatorFieldFibreNormJet.lean`,
+  `MetricArmCoeffJetTower.lean`, and
+  `RicciArmResidualFieldGridWindow.lean` retain their estimate layers and
+  import the new canonical lower modules; public declaration names are
+  preserved.
+
+Verification of `MovingPairTrace.lean` remains blocked before current-source
+elaboration by a shared cache chain.  Two isolated missing artifacts were
+restored with target-only builds; the third miss is
+`TensorRSChartFiberOpNorm.olean`, at which point cache chasing stopped.  Thus
+`mvPairTrace_apply`, `RefoldPairingCore`, and `rhsLow0_refold` are still
+unverified and count as theorem completion **0%**.
+
+Honest accounting is unchanged:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the verified generic output-slot permutation brick: **100%**;
+- the moving pair-trace theorem in its new home: **0% completed**, source body
+  written and dedicated machinery about **95%**;
+- `rhsLow0_refold`: **0% completed**, source body written;
+- `(N)` dedicated machinery overall remains about **78--81%**;
+- order-two geometric bootstrap, all-order smoothing/realization, and uniform
+  common-horizon assembly remain untouched theorem-level frontiers.
+
+## Planner update No. 40 (2026-07-27) - exact refold and edge pairing current
+
+The cache-blocked status in updates No. 38-39 is superseded.  The complete
+public refold chain is now current:
+
+- `MovingPairTrace.lean`: exact GREEN (`mvPairTrace_apply`);
+- `RefoldPairingCore.lean`: exact GREEN;
+- `RHSZeroRefold.lean`: exact GREEN, with the public refold theorems directly
+  audited free of `sorryAx`;
+- `EdgeLowerPairing.lean`: exact GREEN; and
+- `EdgeRefoldPairing.lean`: focused GREEN without local warnings and exact
+  GREEN.  Its six public pairing/refold theorems depend only on
+  `propext`, `Classical.choice`, and `Quot.sound`.
+
+This closes the algebraic Ricci plus DeTurck principal refold and the exact
+formal-adjoint/Green movement of the returned `C2` coefficient.  It does not
+close the contraction estimate: the next mathematical producer is the sharp
+structural bound for `covDivergence edgeTopPartner`.  Every differentiated
+product must retain one undifferentiated metric difference, yielding the small
+`delta * |nabla W|` factor without a high-regularity bound on the arbitrary
+edge metric.  After that bound, combine the exact refold identity with the
+already current principal and lower pairing estimates.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the public refold/pairing theorems just listed: **100% as stated**;
+- `(N)` dedicated machinery: conservatively about **84--87%**;
+- H2/time-L2 control of `rhsRefold0`, geometric bootstrap and realization,
+  and the uniform common-horizon assembly remain genuine frontiers.
+
+## Planner update No. 41 (2026-07-27) - closed-edge energy layer exact
+
+The auxiliary closed-edge energy layer is now exact-current:
+
+- `ClosedEdgeGronwall.lean` owns the scalar edge-continuity closure;
+- `FibreOpBoundUnit.lean` promotes unit quadratic bounds to fibre-operator
+  bounds; and
+- `MovingEdgeEnergy.lean` proves closed-slab energy continuity, the exact
+  moving-metric Ricci--DeTurck energy derivative, the carrier inverse-metric
+  and volume reactions, and `movingEnergy_zero`.
+
+`MovingEdgeEnergy.lean` is focused GREEN without a local diagnostic and exact
+GREEN.  Direct audits of its five key public declarations report exactly
+`[propext, Classical.choice, Quot.sound]`; the source contains no
+`sorry`/`admit`/axiom/`whnf`.
+
+This is an exact abstract implication: if the concrete nonlinear rate satisfies
+`movingRate t <= K * movingDiffEnergy t` uniformly to the closed edge, then the
+energy vanishes.  It does **not** construct the low-regularity
+Ricci--DeTurck solution and therefore does not discharge `(N)`.  The separate
+public endpoint `ricci_flow_forward_unique` is already complete in the
+post-merge tree, so this energy layer is supporting infrastructure rather than
+a new endpoint completion.
+
+The top formal-partner derivative obstruction named in update No. 40 is also
+closed by exact-current `EdgePartnerBound.lean`.  The remaining concrete rate
+frontier is the visible Ricci plus DeTurck lower-arm pairing and final
+space--slope packaging.  For `(N)` itself, the genuine remaining construction
+frontiers are still H2/time-L2 control of `rhsRefold0`, same-horizon
+order-two bootstrap, all-order smoothing/geometric realization, and the
+uniform common-horizon assembly.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the abstract closed-edge energy implication: **100% as stated**;
+- the concrete uniform nonlinear rate theorem: **0% until stated and proved**;
+- `(N)` dedicated machinery remains conservatively **84--87%**.
+
+## Planner update No. 42 (2026-07-27) - Ricci visible pairing producers exact
+
+The pointwise full-`edgeRate0/edgeRate1` route is superseded.  Its Ricci DA
+coefficient contains a derivative of the connection difference, so bounding
+the complete coefficient before pairing is not a low-regularity argument.
+The concrete Ricci contribution is now split and controlled at pairing level:
+
+- `EdgeRicciPairing.lean` gives the exact order-zero `AA + DA` split, the
+  single-moving-trace DA partner, and its Green identity;
+- `EdgeRicciBound.lean` gives `ricciDA_path_le`, absorbing the DA contribution
+  into one eighth of the Dirichlet energy plus a carrier-dependent `L2` term;
+- `EdgeRicciAABound.lean` gives `ricciAA_path_le` with an arbitrary positive
+  Dirichlet budget, obtained by shrinking the `C0` metric radius; and
+- `EdgeRicciOneBound.lean` gives `ricci1_path_le`, absorbing the signed
+  order-one Ricci contribution into one eighth of the Dirichlet energy.
+
+All four modules are focused GREEN without local diagnostics and exact-current;
+the three bound targets each completed GREEN.  The repair uses no `sorry`,
+`admit`, axiom, `whnf`, or trace option.  In particular, the order-one
+five-arm split now uses the public permutation coefficient and a pointwise
+definitional identity, avoiding the known TotalSpace topology diamond.
+
+The remaining concrete rate child is now narrower: prove the joint
+**non-Ricci DeTurck lower-arm pairing** after `exists_edgeLieRef`, then assemble
+it with the exact principal/top/Ricci estimates and package the spatial slope
+integral into `movingRate <= K * movingDiffEnergy`.  Do not return to a
+pointwise bound for the complete `edgeRate0`.
+
+Honest accounting remains:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- the three concrete Ricci pairing producers: **100% as stated**;
+- the concrete uniform nonlinear rate theorem: **0% until stated and proved**;
+- `(N)` dedicated machinery remains conservatively **84--87%** because the
+  independent H2/time-L2, same-horizon order-two bootstrap, smoothing,
+  realization, and common-horizon assembly frontiers remain.
+
+## Planner update No. 43 (2026-07-27) - refolded path identity source-green
+
+`RHSRefoldPathIntegral.lean` now supplies the smaller nonautonomous-solver
+route identified by the live interface audit:
+
+- `rhsRefold0_joint` proves joint smoothness of the complete order-zero
+  Ricci--DeTurck refold along the carrier-to-zero segment;
+- `rhsRefold0Int` and `rhsRefoldTopInt` integrate the complete refolded
+  zero- and second-order coefficient families; and
+- `rhs_sub_zero_refold` proves the exact realized RHS difference as the sum
+  of the refolded C0 arm, existing C1 arm, and refolded C2 arm.
+
+The Ricci and DeTurck principal pieces cancel/refold before integration.
+There is no high-jet theorem-facing assumption and no nonsmall `H3`
+coefficient.  This avoids forcing an identification with the older
+`lowRegPrincipal`: the generic nonautonomous solver accepts any measurable,
+uniformly bounded `H^{a+2} -> H^a` family, so the complete refolded top
+coefficient can serve directly as `A2`.
+
+The new module is source-focused GREEN without a local diagnostic and has no
+`sorry`, `admit`, axiom declaration, or `whnf`.  Its direct upstream
+`RHSRefoldArms` artifact is exact GREEN; the new module has not yet been
+target-refreshed.
+
+The next concrete producer is the quantitative bounded-factor-grid window
+for `rhsRefold0Int` and `rhsRefoldTopInt`.  Apply
+`H3BoundedGrid.h2_of_bfg5` to obtain uniform coefficient `H2` bounds from
+the metric `H3` ball, then package these coefficients as the same-horizon
+nonautonomous `A1/A2` families.  Measurability/uniform boundedness, the
+order-two bootstrap, all-order smoothing/geometric realization, and the
+uniform common-horizon assembly remain genuine independent frontiers.
+
+Honest accounting:
+
+- `rhs_sub_zero_refold`: **100% as a source-checked theorem**;
+- the same-horizon order-two bootstrap theorem: **0% until stated and proved**;
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- `(N)` dedicated machinery: conservatively **85--88%**.
+
+## Planner update No. 44 (2026-07-27) - low-regularity H2 coefficient split
+
+The blanket instruction in update No. 43 to apply `h2_of_bfg5` to every
+refolded coefficient was too coarse.  A complete order-zero coefficient has a
+genuine fourth metric jet, so an instantaneous `H3` radius alone cannot bound
+its `H2` norm.  The correct same-horizon tame shape is one explicit metric
+`H4` head plus a function of the metric `H3` radius; in time this becomes
+`L2_t H4` with `L-infinity_t H3`.
+
+The new `RHSRefoldTameH2.lean` source is focused GREEN and proves:
+
+- `ricciConn_h2_tame`, for the Ricci connection-difference coefficient;
+- `ricciBase_h2_tame`, for the Ricci base-curvature difference; and
+- `dLa_h2_tame`, for the DLa part of the DeTurck coefficient.
+
+For the last result, the already-proved lower theorem
+`dLaField_perOrder_rf` was made public in
+`DeTurckLieCoeffDiffRadiusFree.lean` and its genuinely unused supercritical
+parameters were removed.  That lower module is focused GREEN and exact GREEN
+(`9488/9488`).  Fibre smallness fixes the zeroth-order antidiagonal-grid
+radius, so the fourth jet remains explicit without any pointwise `H4` or
+high-`a` assumption.
+
+The false combinatorial shortcut
+`dLaGridWin b 5 = b 4 + boundedFactorGridWindow b 3 5` is permanently
+discarded: the raw fourth-order grid contains the fourth jet multiplied by
+zeroth-order factors.  Use the fixed-radius
+`antidiagonalTupleGrid_integral_radiusFree` theorem instead.
+
+Next frontier: isolate the finite order-two `DLb`/endomorphism estimate without
+the all-order `wAlpha_L2_topsep_rf` supercritical hypothesis, then handle
+`lieCorr0` and assemble the complete `rhsRefold0` H2/time-tame estimate.
+Measurability and uniform boundedness of the resulting nonautonomous A1/A2
+families, the same-horizon order-two bootstrap, all-order smoothing/geometric
+realization, and common-horizon assembly remain independent theorem
+frontiers.
+
+Honest accounting:
+
+- `ricci_flow_unif_existence`: **0% as a theorem**;
+- the same-horizon order-two bootstrap theorem: **0% until stated and proved**;
+- the three listed H2 coefficient bricks: **100% as source-checked theorems**;
+- `(N)` dedicated machinery remains conservatively **85--88%**.
+
+## Planner update No. 46 (2026-07-28) - complete H2 assembly source written
+
+The fixed-background solver status has been re-audited against the live tree:
+`LowRegDenseSolve.lowreg_partial_sol` is already a proved order-one
+Ricci--DeTurck fixed-point endpoint, and `LowRegBootstrapOne` preserves its
+intermediate trace on the same horizon.  The current refold work is not a
+duplicate solver route.  The same note proves that generic `L2_t H1` forcing
+cannot supply the order-two step; the missing geometric input is precisely
+the principal-subtracted `L2_t H2` lower family.
+
+The remaining static coefficient assembly has now been written:
+
+- `RHSRefoldField.rhsRefold_eq` expresses literal `rhsRefold0` as the Ricci
+  connection field, Ricci Palatini kernel, DLa, DLb, `lieCorr0`, and the
+  negative Lie pair.  The complete Ricci plus DeTurck principal cancellation
+  occurs before estimation.
+- `RHSRefoldTameH2.liePair_h2_tame` controls all six signed Palatini
+  monomials uniformly in the path parameter and permutations.
+- `RHSRefoldTameH2.rhs0_h2_tame` combines the six fields into the required
+  dimension-three H2 tame shape, retaining every fourth metric derivative in
+  an explicit head and using only the H3 radius in the lower envelope.
+
+All three new theorem bodies are **unverified and count as 0% completed**.
+Focused elaboration is blocked before the edited declarations by the absent
+`CurvatureCoefficientDifferenceJetTower.olean`.  The first targeted recovery
+ended after a long high-memory compile with Windows exit `3221225477`; the
+authorized one-thread recovery also stopped without producing the artifact.
+Neither emitted a Lean source diagnostic.  A proposed small-module workaround
+was deleted after dependency audit showed that the canonical Palatini field
+and its residual-window theorem still depend directly or transitively on that
+tower; retaining a duplicate would create a forbidden parallel API.
+
+Recovery order is now exact and small:
+
+1. obtain one exact-current tower artifact, or approve a canonical split of
+   the existing Palatini/residual declarations below that tower;
+2. focused-check `RHSRefoldField.lean`;
+3. focused-check `RHSRefoldTameH2.lean` and repair only local elaboration;
+4. package `rhs0_h2_tame` as the same-horizon `L2_t H2` A1 family beside
+   exact-current `lowRegA2_data`;
+5. run the order-two nonautonomous bootstrap, then smoothing/geometric
+   realization and family-uniform common-horizon assembly.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- fixed-background order-one solve: **100% as stated**;
+- the new complete static H2 theorem: **0% until elaborated and checked**;
+- same-horizon order-two bootstrap theorem: **0% until stated and proved**;
+- `(N)` dedicated machinery remains conservatively **85--88%**.
+
+## Planner update No. 45 (2026-07-27) - DLb and lieCorr H2 tame bricks
+
+The order-two DeTurck coefficient split has advanced without adding a
+theorem-facing high-index assumption:
+
+- `dLbField_perOrder_rf` is now public in its canonical lower module.  Its
+  all-order ceiling can be fixed internally at
+  `2 * Module.finrank Real E + 10`; it is not a Sobolev-ball hypothesis.
+  The lower source is focused GREEN and exact GREEN (`9488/9488`).
+- `dLb_h2_tame` consumes only coefficient orders zero through two and keeps
+  one fourth metric jet explicit.
+- `lieCorr_h2_tame` projects the existing radius-free `lieCorr0Field`
+  producer in the same way.  Its lower window is controlled entirely by the
+  metric `H3` radius; only the top term sees the explicit fourth jet.
+
+`RHSRefoldTameH2.lean` is source-focused GREEN after both additions.  The
+source contains no `sorry`, `admit`, axiom declaration, or `whnf`.
+
+The complete `rhsRefold0` estimate is not yet assembled.  The next task is an
+exact algebra audit against the literal `rhsRefold0` definition: connect the
+checked Ricci, DLa, DLb, and `lieCorr0` bounds through the public Ricci-refold
+and Lie pair-trace identities, identify any remaining raw refold field, and
+bound only that field.  This is still coefficient machinery, not the
+same-horizon bootstrap theorem.
+
+Honest accounting:
+
+- `ricci_flow_unif_existence`: **0% as a theorem**;
+- the same-horizon order-two bootstrap theorem: **0% until stated and proved**;
+- the five checked H2 constituent estimates in `RHSRefoldTameH2`: **100% as
+  stated**;
+- the complete `rhsRefold0` H2/time-tame theorem: **0% until stated and
+  proved**;
+- `(N)` dedicated machinery remains conservatively **85--88%**.
+
+## Planner update No. 47 (2026-07-28) - complete static H2 refold exact
+
+The artifact blocker in update No. 46 is closed:
+
+- `CurvatureCoefficientDifferenceJetTower` is exact GREEN (`9391/9391`);
+- `RHSRefoldField.rhsRefold_eq` is focused and exact GREEN
+  (`9472/9472`); and
+- `RHSRefoldTameH2.rhs0_h2_tame` is focused and exact GREEN
+  (`9523/9523`), with no local diagnostics.
+
+Thus the complete six-field static `H2` refold theorem is **100% complete as
+stated**.  The Ricci connection field, Ricci Palatini kernel, DLa, DLb,
+`lieCorr0`, and negative Lie pair are assembled only after the exact Ricci
+plus DeTurck principal cancellation.  The checked theorem has no high-`a`
+assumption and retains every fourth metric derivative in one explicit head;
+all lower envelopes depend only on the metric `H3` radius.
+
+The time-level audit prevents an invalid bookkeeping shortcut.  The existing
+order-one solution gives `L2_t H3` and a same-horizon `H2` trace, not
+`L2_t H4`.  Consequently `rhs0_h2_tame` cannot be declared to be the desired
+nonautonomous `A1(t)` datum merely by renaming its conclusion.  The remaining
+low-base regularity theorem must either:
+
+1. refold the explicit fourth-derivative head into the completed
+   `H4 -> H2` principal family before defining `A1`; or
+2. prove a same-horizon/interior parabolic regularity step that supplies the
+   needed time-integrability without assuming a uniform `H4` bound from the
+   C3 input class.
+
+The endpoint requires chart-Gram joint smoothness on the full `Ico` slab.
+Any interior-smoothing route must therefore also splice to the existing
+per-datum smooth solution near `t = 0` and prove agreement, rather than
+silently weakening the endpoint to `Ioo`.
+
+Next concrete task: audit the two alternatives against
+`lowRegPrincipal_core`, `NonautonomousL2`,
+`ParabolicInteriorSmoothing`, and the available fixed-point uniqueness API;
+then state the smallest consumer-shaped low-base regularity theorem.  Do not
+introduce an `H4` class assumption or count a conditional time-path wrapper
+as the theorem.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- fixed-background order-one solve: **100% as stated**;
+- complete static `rhsRefold0` `H2` theorem: **100% as stated**;
+- low-base same-horizon/interior regularity theorem: **0% until stated and
+  proved**;
+- `(N)` dedicated machinery: conservatively **88--90%**.
+
+## Planner update No. 48 (2026-07-28) - exact low-base operator frontier
+
+The post-`rhs0_h2_tame` audit rules out two bookkeeping shortcuts.
+
+First, the coefficient-only top constants are finite but are not small in the
+metric deviation.  In particular, the Ricci connection and Palatini-kernel
+top constants remain positive even at zero deviation.  Their fourth-jet heads
+become small only after the complete coefficient acts on the undifferentiated
+metric deviation.  Therefore no consequence of `rhs0_h2_tame` alone can be
+renamed as the required `A1(t) : H3 -> H2`.
+
+Second, `lowRegA2Time` packages only the endpoint
+`lowRegPrincipal : H4 -> H2`.  The remotely visible high-order theorem
+`exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_smallThirdArm_add_tame`
+shows the missing structure precisely: after the endpoint principal arm there
+remain a small second-order arm, an order-zero arm whose highest coefficient
+jet is small only after multiplication by the metric deviation, and a
+one-order-lower tame arm.  Its proof cannot be specialized directly because
+it assumes a supercritical `H^(a+2)` ball.
+
+The smallest faithful low-base producer must therefore construct, on a small
+three-dimensional `H2` metric ball:
+
+```text
+extraA2 : metricH2 -> (metricH4 ->L metricH2)
+lowerA1 : metricH3 -> (metricH3 ->L metricH2)
+```
+
+with a smooth-core identity for the complete Ricci--DeTurck action,
+`||extraA2 S|| <= c * ||S||H2`, local Lipschitz continuity of `extraA2`, and
+`||lowerA1 S|| <= C_R * (1 + ||S||H3)`.  The last bound must be linear in the
+`H3` norm so that the existing `L2_t H3` order-one solution supplies
+`MemLp lowerA1 2`.  The current `lowRegPrincipal` is then augmented by
+`extraA2`; the generic `NonautonomousL2` solver consumes that total `A2`
+together with `lowerA1`.
+
+A value-based rank-one factorization is not yet a substitute: before this
+bootstrap the rough solution is not known to lie in `L2_t H4`, so the full
+principal-subtracted residual is not defined as an `H2` value from which to
+build that rank-one map.  It becomes legitimate only after an action-level
+mixed estimate or an equivalent operator extension is already available.
+
+The architecture stop signal is now concrete: no live public theorem provides
+the complete low-base Ricci plus DeTurck operator split above, and choosing
+between extracting the high-order three-arm proof at finite order and using
+the local chart linearization requires a design ruling.  The canonical Pro
+prompt is `UNIF_LOWBASE_PRO_PROMPT.md`.  No Lean source was changed and no
+build was run for this audit.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- fixed-background order-one solve: **100% as stated**;
+- complete static `rhsRefold0` `H2` coefficient theorem: **100% as stated**;
+- low-base operator split / same-horizon order-two bootstrap theorem:
+  **0% until stated and proved**;
+- `(N)` dedicated machinery remains conservatively **88--90%**.
+
+## Planner update No. 49 (2026-07-29) - exact zero-path brick and three-route stop
+
+The first smooth-core action brick is now checked in
+`DeTurckRemainderLowBaseZero.lean`. Rather than duplicating the already public
+fixed-order algebra in `RHSZeroRefold`, `zeroPath_split` compares
+`rhsArm_sub_eq_paths` with `rhs_sub_zero_refold` and uses `refoldTopInt_eq` to
+cancel the common top arm. It writes the original zero-plus-one path action
+as `zeroA2Act + zeroLowAct` on the diagonal, with no high-order ball or
+supercritical differentiability assumption. Focused verification is GREEN.
+
+The canonical lower theorem `lrPointwise_bfgw` is now public. It has no
+high-`a` or high-ball assumption and exposes the exact pair-contraction
+residual grid-window estimate. Its radius-free integral still has a genuine
+`nabla^(i+2) T` top leak. Consequently it cannot by itself prove the final
+`H3 -> H2` lower action bound.
+
+The three ruled routes now have distinct concrete stop signals:
+
+1. the native fibre route lacks public evaluation/decomposition lemmas for
+   the complete order-zero action;
+2. the finite-order refold route requires the private `lc0w_*` exact
+   decomposition/feed chain to transfer the remaining top head, not merely a
+   coefficientwise estimate; and
+3. the chart route cannot adapt `realizedFam` to
+   `IsMetricPerturbationFamily`, whose component functions must be globally
+   smooth on the whole model space. The required chart-cutoff family
+   producer is not public.
+
+Honest accounting:
+
+- `(N) ricci_flow_unif_existence`: **0% as a theorem**;
+- `LowBaseActionSplit`: **0% until stated and proved**;
+- final `A1` high/low/compatibility: **0%**;
+- pair-reduced `A2` high/low/compatibility: **100% as stated**;
+- `(N)` dedicated machinery remains conservatively **88--90%**.
+
+## Planner update No. 50 (2026-07-30) - C0 uniqueness chain landed; R1tau convergence
+
+A parallel Fable lane completed the ENTIRE C0 H1 two-state coefficient
+chain in `DeTurckRemainderLowBaseLip.lean` (~11000 lines, zero sorry,
+full lake build green 9577 jobs).  New public/consumable endpoints:
+
+- five class moduli `good/lieCov/vb/amix/riem_pair_h1` (uniform
+  currency `B R * (1+A+A^2)^4 * (D2^2+N^2)`, D2 = H2 state difference,
+  N = spectral H2 difference; NO J3-of-difference in the C0 leg);
+- `selfLow_pair_h1` (five-way master telescope at fixed s);
+- `c0Diff_tame`: J1(lowC0Diff) bound, path-integral discharged;
+- `a1Sub_lo_tame` (endpoint): for the difference data
+  `lowBaseDiff g T U`, per-W operator bound
+  ||Hs1((lowBaseDiff).a1 W)|| <= C*sqrt(Bq R*(1+A+A^2)^4*(D2^2+N^2)
+  + (B0*D3+B1*N+B1*A*N)^2)*||Hs2 W|| on the common spectral H2 ball;
+- supporting publics: `mcd_pair_h1`, `fullSlot_bdd_h2/pair_h1`,
+  `connSec_self_h2` (C1Lip); `trace1/3_pair_h2`+`_h2_bdd` (C2Lip);
+  `a1_spec_lo` (Pair, was private); `dagLow_h2_rf`, `connLow_h3_rf`
+  (Action, privates dropped); Palatini `lieCovR4_eq` +
+  `bdConnDiffSection_eq_armSlotEndoCc_zero`.
+
+RELEVANCE TO R1tau: these are the coefficient-difference blocks of the
+item-2 decisive route test (the second-order tame smooth-core
+difference estimate WITHOUT endpoint high-ball hypotheses): via
+`lowData_split`, N(U)-N(V) telescopes into diagonal a2/a1 actions
+(pair-reduced A2 layer + `a1_pair`) plus coefficient-difference
+actions, whose operator bounds are exactly `a1Sub_lo_tame` (a1-part)
+and the C2Lip difference layer (a2-part).  No H4-ball enters anywhere
+in these bounds - the item-2 stop signal does NOT fire on this leg.
+A gap-recon pass is mapping the remaining bricks (items 1,3,4,5,6 +
+endpoint instantiation) as of this update.
+
+## Planner update No. 51 (2026-07-30) - (N) endgame fleet dispatched; rulings
+
+Gap recon (full report in session artifacts opus_ngap/) established:
+the geometric endgame is ALREADY sorry-free (`ricci_gauge_of_dt` +
+`deTurckRicci_solution_with_jointReg` deliver (N)'s three conclusion
+fields from a per-datum DT solution bundle); `lowreg_partial_sol`
+(LowRegDenseSolve:298) is a sorry-free a=1 solve with an EXPLICIT
+horizon floor; No. 49's three stop signals are resolved/bypassed/moot
+via `lowData_split`/`remainder_low_split`.  The live frontier is the
+CONSTANT SHAPE: `remainder_low_pair` gives degree-6 H3 growth where
+MemLp/arm-3 need LINEAR; repair = the C0-side H2-level pair with
+C1-shaped modulus (B0*D3+B1*D2+B1*A*D2)^2 (D3 allowed; only J4 is
+forbidden).  Lanes: A `selfLow_pair_h2`->`c0Diff_h2_tame`->
+`lowA1_pair_tame`->`a1Hi_lin` + `a2Hi_small`; B lowRegA1Time/memLp +
+lowRegA2Total_data; C lowRadial_eq_self_along_sol -> lowreg_lift_two
+-> realize -> lowreg_force_id; D smooth-rep (gated on decision 1);
+E narrow uniform packet s<=4; F wire the sorry.
+
+RULINGS (this planner):
+- Decision 2 RATIFIED per recon: ONE base solve.  The low-base split
+  layer is consumed as the split ALONG `lowreg_partial_sol`'s
+  solution; the duplicate lowBaseN/partial_sol_tame assembly lane is
+  demoted (no new three-arm estimate to be built for it).
+- Decision 1 (ha_eq at 4n+10 in the smooth representative): AUDIT
+  DISPATCHED (load-bearing or generalizable to a >= a_min?).
+- Decision 3 (uniformity strategy): item-6 risk-2 audit to run before
+  Lane E work (hidden lambda_1/inj-radius dependence hunt).
+- Decision 4 (dimension): all low-base bricks carry hDim = 3 while
+  (N) is stated dimension-general.  OPTIONS: amend (N) to dim 3
+  (coordinated statement change in Evolution lane) or generalize the
+  low-base layer later.  USER-VISIBLE statement change - flagged, not
+  silently applied.
+
+Fleet in flight: Lane-A builder (new file
+DeTurckRemainderLowBaseH2Pair.lean), Lane-C builder
+(LowRegLiftTwo), decision-1 auditor.  Parallel Fable lane's C0-H1
+chain (No. 50) feeds Lane A's pattern and the (T,0)-pair uses.
+
+## Planner update No. 52 (2026-07-30) - decision 1 RESOLVED: a=2 smooth rep is mechanical
+
+Audit verdict (full ledger: session artifact opus_ngap/ha_eq_audit.txt):
+the joint-smooth representative lives at
+MaxRegSolutionJointlySmooth.lean:958/:1306 (NOT TensorMaximalRegularity).
+- `ha_eq : a = 4n+10` is DEAD CODE in both theorems (only binders;
+  linter.unusedVariables silenced).  One call site passes it
+  (QuasilinearAbstractShortTimeExistence.lean:164).
+- `ha_super` is load-bearing at exactly ONE call (:227/:239 eigen
+  bound in the private realizedFamily_flowDeriv_of_repr) and the `a`
+  there is a FREE Cauchy-Schwarz split parameter decoupled from the
+  solution index: re-instantiate abs_eigenBilinScalar_le at
+  m := 2n+4 (le_rfl) and the hypothesis can be DROPPED for all a.
+  All weight-exponent partners are supplied by forall-quantified
+  all-order hypotheses (hphi_mass, weighted_summable).
+- The real a-constraint is hC (the sqrt-t smallness modulus), already
+  dischargeable at a=2, n=3 via hs2_op_bound (H2Pointwise:323) +
+  ccTensorToHs = smoothCcToTensorHs (ext i; rfl).
+- ALSO: the tame theorem is NOT the only JointChartGramSmooth
+  producer (jointChartGramSmooth_of_spectralSmooth_timeSmooth is
+  public, a-free); it is the sole producer of the full PACKAGE
+  (Gram-smooth + flow deriv + pin + F 0 = 0).
+- Splice alternative confirmed blocked (deTurckStrong_unique needs
+  global Lipschitz) but reducible to routine plumbing (ball-local
+  mixForce_unique sibling via nemytskiiOn) if ever needed.
+Lane-D builder dispatched with the exact recipe (delete ha_eq,
+decouple eigen-bound at m := 2n+4, hs2 adapter).  Zero new
+mathematics on this lane.
+
+## Planner update No. 53 (2026-07-30) - Lane A wall dissolved by ruling-shaped arms
+
+Lane A's first pass STOPPED on a genuine finding: three of five C0
+classes carry A^2 passengers (ricciAAKer Gamma*Gamma is sharp ~A^2 at
+H2; covX ~(A+A^2); vb inner ~A^2), so the planner-specified modulus
+class {D3, D2, A*D2, N} (A-linear, no H4) is NOT attainable, and
+a1Hi_lin cannot go through C0 in that shape (even at U=0 the
+single-state C0 H2 norm is ~A^2).  Delivered anyway: new file
+DeTurckRemainderLowBaseH2Pair.lean (867 lines, green + 4 sorries):
+telescope equation re-proved from publics, class 5 proved, master +
+c0Diff_h2_tame proved FROM the (sorried) class lemmas.
+
+PLANNER CORRECTION: the spec was stricter than the Pro ruling.  At
+the a=2 rung the ruling's arms are (1+H3-size)*D4 + H4-size*D3 - the
+H4 SIZE (A4) and H4 DIFFERENCE (D4) are each allowed LINEARLY (the
+fixed-point space L2_t H4 makes them integrable; only quadratic
+high-norm growth is fatal).  Under these arms the A^2 obstruction
+dissolves by re-pairing: A^2 <= R*A4 (spectral interpolation, CS on
+eigencoefficients / jet sums), so A^2*N -> C_R*A4*N and A*D3 <=
+(1+A)*D3 etc.  Lane A resumed with corrected target
+(every difference-slot coefficient at A-degree <= 1 OR A4-degree <= 1,
+never quadratic), new hypotheses J4 T/U <= A4^2, J4(T-U) <= D4^2, and
+authorization to publicize the minimal set of Lip/Action private
+helpers it needs (list to be recorded).
+
+## Planner update No. 54 (2026-07-30) - Lane D LANDED: index-free tame representative
+
+MaxRegSolutionJointlySmooth.lean edits verified (targeted builds 9601/
+9606 jobs, zero errors): dead ha_eq deleted from both public theorems
+(+ the forwarding QuasilinearAbstractShortTimeExistence + rfl-caller
+DeTurckInitialDataExistence:149); ha_super DROPPED from
+realizedFamily_flowDeriv_of_repr and the TAME theorem via the
+audit-verified decoupling (Cauchy-Schwarz split exponent
+re-instantiated at the true threshold 2n+4; 29 body casts rewritten).
+NOTE the asymmetry: ha_super is NOT decouplable in the shrinking
+_of_nemytskii sibling (there a is the genuine solution index in the
+heq/timeH1 chain) - kept there; this is exactly why the tame sibling
+exists.  NEW: hs2_opBound_at_two - concrete hC producer at a=2, n=3
+(H2Pointwise import added, no cycle), FIT-TESTED against the tame
+theorem at (a := 2) by elaboration.  Item 5 usability half: done.
+Remaining item-5 depth (H^{a+2}-ball -> item-3 cutoff via item-4 tame
+Nemytskii) gated on item 2 (Lane A, resumed under No. 53 arms).
+
+## Planner update No. 55 (2026-07-30) - Lane C bricks 1-2 LANDED
+
+New file ShortTime/LowRegLiftTwo.lean (sorry-free, axiom-clean,
+targeted builds green): `lowRadial_eq_self_along_sol` (CORRECTED
+understanding: lowRadialH3 = lowScaleCutoff o symmHs, NOT a
+retraction - identity needs ball membership AND spectral symmetry;
+generic bridges lowRadialHs_eq_self/lowRadialH3_eq_self + the
+a.e.-along-path version, one symmetry input via symmHs_incl) and
+`lowreg_lift_two` (nonautL2_lift instantiated at aLo=1, aHi=2, all
+coefficient-family inputs as explicit hypotheses, pointwise a.e.
+inclusion identities exported).  PLUS reusable transport layer
+Analysis/Spectral/Tensor/SobolevScale/ExponentCongr.lean
+(tensorHsCongr/tensorHsCongrL + inclusion naturality +
+liftCompat_congr): resolves the real-exponent defeq wall
+((2:R)+2 vs (4:R)) that blocked matching the literal-order Time
+families - validated on a real a2_pair-shaped square.
+NEW IDENTIFIED BRICK: symmetry preservation of the rough fixed point
+(symmHs commutes with the spectral heat semigroup hence with
+maxRegDuhamelSolField) - not in tree, needed before the lift's
+symmetry hypothesis can be discharged.
+Lane C remaining: nonautL2_realize instantiation + lowreg_force_id
+(the lane's genuine mathematics), gated on Lanes A/B for the MemLp
+discharge.  Naming deviation recorded: lowRadial_eq_self_along_sol
+is 23 letters (kept for cross-reference consistency).
+
+## Planner update No. 56 (2026-07-30) - Lane B LANDED; A2 lift bundle unconditional
+
+New file TensorMaximalRegularity/LowRegOperatorTime.lean (sorry-free,
+targeted build green): `lowRegA1Time` (H3->L H2 time field via
+tensorHsCongr transport), `lowRegA1_memLp` (MemLp 2 via
+memLp_clm_affine; takes hcont + LINEAR-growth hlin as deferred
+hypotheses - Lane A's debt; both collapse to one LipschitzWith),
+`lowRegA2Total`/`lowRegA2Total_data` UNCONDITIONAL (+ lowA2Hi_small
+from c2_h2_small -> radialA2_pair/lip with radius NESTING, not min).
+The A2 half of the nonautL2_lift input bundle is DONE.
+Planner actions taken: lowA1HiOp/lowA2HiOp private-abbrev poison
+FIXED (privates dropped in DeTurckRemainderLowBaseTime.lean, checked
+green 54.9s) - cross-module SeminormedAddGroup synthesis now works.
+Placement note recorded: LowRegOperatorTime.lean sits in
+TensorMaximalRegularity/ importing ShortTime/LowRegPrincipalTime (a
+layer inversion, no cycle today); natural home = ShortTime/ - move
+before anything in TensorMaximalRegularity imports it.
+Critical-path bookkeeping per Lane B: ~14 bricks
+A1a->A1b->A2->A3->A4->B1->C0..C3->D1..D3->F1 + E1..E3 parallel;
+landed so far: B-lane 3, C-lane 2, D-lane usability, class-5 H2 +
+H2 telescope skeleton; open hard math: A (selfLow_pair_h2 under
+No. 53 arms, resumed), E (uniform packet, audit in flight),
+C3/lowreg_force_id, symmHs commutation (agent in flight).
+
+## Planner update No. 57 (2026-07-30) - Lane E audit CLEAN; rulings; E8a/E1 dispatched
+
+Risk-2 audit verdict (artifacts opus_laneE/): lambda_1 NEVER enters
+(only lambda >= 0 is used anywhere in the scale; the one gap-shaped
+theorem has zero call sites); injectivity radius NEVER enters (the
+PoU is chartAtlasPOU - metric-free; chart Sobolev norm discards the
+metric; same atlas/covering for every metric on (I,M)); Weyl node
+unreachable at s <= 4 (weylSobolevExp = 8 > 4).  No cross-metric
+eigenvalue comparison needed (route: g0-spectral <-> g0-covariant
+(Garding) -> jets+volume -> gBase).  Recon risks 1/3 dissolve at
+k <= 2.  REAL GATE: covsum_hs_unif/hsCovsum_unif conclude
+per-metric exists-C (constant NOT exposed as F(Fc,n)) - mechanical
+~14-theorem refactor = brick E1.  tau_0 reduces to SIX numbers
+(Ctop, B0, B1, D upper; rho, P lower) through the explicit
+partial_sol_tame floor - brick E8a exposes this as
+lowreg_partial_sol_of_bounds in ShortTime/UnifClassBounds.lean.
+
+RULINGS:
+- E3 FALLBACK RATIFIED AS STAGING: prove the Lambda < 2 variant
+  (N-sub-2) FIRST (order-0 already proved there); general-Lambda
+  telescoping stays on the board as the known-hard brick (needs the
+  moving-base metric-jet + ungated nabla-connDiff bound).  The final
+  (N) needs general Lambda (its consumer takes Lambda = max of tail
+  producers) - do not silently weaken the endpoint.
+- E0 RATIFIED: amend (N) to `a <= 6` (the plan's long-anticipated
+  A(n)-raise; consumer's hcov is a hypothesis whose Shi-type
+  producers support all orders) AND `hDim : finrank = 3`
+  (No. 51 decision 4) - ONE coordinated edit of
+  ExtendViaUniqueness.lean (both (N) and ricci_flow_interior_restart's
+  hcov clause), to be executed together with Lane F wiring, not
+  before (avoid churning the Evolution lane twice).
+Dispatched: E8a (six-number refactor) + E1 (constant exposure).
+
+## Planner update No. 58 (2026-07-30) - Lane A pass 2: arms adopted, two gaps ruled
+
+H2Pair file restated in the No. 53 arms (890 lines green, 4 sorries):
+modulus (B0 R(1+A)(D4+D3+D2+N) + B1 R*A4*(D3+N))^2, hypotheses
+J3 U, J4 T/U, J4(T-U) added; telescope + class 5 + master + path
+integral proved; classes 1-4 sorried with correct statements.
+CORRECTION to No. 53's optimism: the four class proofs need genuinely
+NEW H2 pair lemmas (aaKer/covX/vb/amixHalf _pair_h2, ~2700 lines
+total) - the H1 privates are the PATTERN, not the producer.
+RULINGS: (gap 1) jet interpolation A^2 <= Ceq*R*A4 via SPECTRAL
+Cauchy-Schwarz on eigencoefficients + the public sorry-free
+jet<->spectral equivalences (hsJet_le/hs_le_jet) - the
+GagliardoNirenberg sorry-leaf is NOT to be imported; per-g0 Ceq fine
+(uniformity is Lane E's).  (gap 2) aaKer_bdd_h2's (1+A+A^2)^4
+envelope is lossy: rebuild sharp via H2-algebra products of the
+sharp (1+A)-factor bounds (mcd_h2_bdd shape) -> J2(aaKer) <=
+(B(1+A)^2)^2, then (1+A)^2 re-pairs through the interpolation into
+the A4-linear arm.  Execution order 4 -> 3 -> 2 -> 1 (class 4 needs
+no publicization).  Lane A resumed (pass 3).
+
+## Planner update No. 59 (2026-07-30) - symmetry sub-brick analytic half LANDED
+
+New file ShortTime/LowRegSymmPreserve.lean (559 lines, sorry-free,
+targeted build + #print axioms clean): KEY STRUCTURAL FACT - spectral
+symmetrization is BLOCK-DIAGONAL in the eigenbasis (slot-swap
+equivariance of the connection Laplacian; eigenblocks finite so the
+whole commutation is a finite coefficient identity, no tsum):
+`symmHs_coeff` (reusable), then symmHs_homField/solField/
+duhamel_comm, duhamel_symm_ae, `lowreg_sol_symm` (delivers exactly
+the hsymm shape lowRadial_eq_self_along_sol consumes; zero-initial
+half free).  Dead end recorded: source-density alone fails (heat flow
+leaves the smooth core); the coefficient formula is the fix.
+REMAINING INPUT (one brick, dispatched): tensor-level slot symmetry
+of deTurckSmoothRemainder (bridge from the bilinear-form
+deTurckRicciRHS_symm + slot-equivariance of the connection
+Laplacian; evaluation plumbing, not new math) -> discharge
+lowreg_sol_symm's forcing hypothesis.
+
+## Planner update No. 60 (2026-07-30) - E8a LANDED: closed tau0 formula
+
+New file ShortTime/UnifClassBounds.lean (451 lines, sorry-free,
+axiom-clean, 9670-job targeted build green):
+lowregOuterRad/lowregStateRad/lowregHorizon (the CLOSED tau0 in six
+numbers: Ctop, B0, B1, D upper; rho, P lower),
+`lowreg_partial_sol_of_bounds` (tau0 PINNED by rewriting the
+engine's exported equation, not merely bounded), positivity +
+monotonicity, AND `lowreg_bounds_exist` (satisfiability from the
+existing per-metric producer - the refactor provably recovers the
+original endpoint).  delta left free; hDim only in satisfiability.
+Planner action: realize_at_thr publicized in LowRegDenseSolve.lean
+(checked green 112.2s) - the natural site for Lane E's lower bound
+on P.  Lane E remainder is now literally: bound six numbers by
+F(gBase, Lambda) (E1 gate in flight).
+
+## Planner update No. 61 (2026-07-30) - jetInterp3 LANDED; class-4 handoff
+
+Lane A pass 3: the re-pairing device `jetInterp3` (J3 <= C*(R*A4))
+is PROVED sorry-free via the spectral route: wgtAmgm (termwise
+AM-GM on (1+lambda)-weights) -> specInterp3 (parametric) ->
+prodOfParam (Young: forall-t bound to product, via
+le_of_forall_pos_le_add, no limits) -> hsJet_le/hs_le_jet transport.
+NO GN leaf, no covariant IBP, no sorryAx.  Note for the record: the
+naive jet-sum Cauchy-Schwarz is genuinely FALSE (counterexample
+a0=eps,a3=1); the spectral weights are what make it a termwise AM-GM
+- interpolation must be done in the spectral currency.
+H2Pair file at 1253 lines, green, 4 class sorries each annotated
+with its exact remaining recipe.  Class-4 discharge dispatched to a
+fresh builder (all-public ingredients, no interpolation, H1 sibling
+as pattern).  Remaining after that: class 3 (re-pair via
+jetInterp3), class 2 (covX_bdd/pair_h2), class 1 (aaKer sharpening
++ pair + dagLow_pair_h2, needs minimal Lip publicization).
+
+## Planner update No. 62 (2026-07-30) - E1 LANDED (the Lane-E gate); E2/E5 + E4 dispatched
+
+UnifBochnerGap.lean refactor complete (1693 -> 2213 lines, sorry-free,
+9348-job build, axiom-clean): 15 closed constant defs
+(roughLapCommC ... covsumHsC) + 14 constant-exposed sibling theorems;
+endpoints `hsCovsum_unif_const` / `covsum_hs_unif_const` are rank- and
+order-generic (s <= 4 covered with room).  One new mathematical
+input: `rawLap_le_secGrad_dim` (explicit d constant, rebuilt locally
+from the public pointwise bound).  Deviation accepted: originals
+delegate to the const siblings (file not imported anywhere yet; no
+parallel hierarchy per CLAUDE.md).
+RULING (E6): g_bg := gBase RATIFIED - the (N) box fixes gBase and
+the low-base machinery's background parameter instantiates there;
+no third metric's jets enter N(0).
+Dispatched: E2+E5 (rank-(0,2) face + uniform hs2_op_bound + P-lower
+corollary into UnifClassBounds interface) and E4 (uniform
+fibre-Morrey; the metric-free-atlas structural fact makes it
+Gram-norms + jet conversions only).
+In flight elsewhere: H2Pair class-4 discharge, RHS tensor slot
+symmetry.  Still queued: E3 (Lambda<2 staging first), E6, E7 (gated
+on Lane A), C3/realize, Lane F wiring.
+
+## Planner update No. 63 (2026-07-30) - RHS slot symmetry LANDED; C3 dispatched
+
+New file ShortTime/LowRegRHSSymm.lean (486 lines, sorry-free,
+9693-job build, axiom-clean, 7 public endpoints): the Ricci-DeTurck
+smooth remainder is slot-symmetric - the ARM for every T (bilinear
+deTurckRicciRHS_symm transported to the SmoothCcTensor via a new
+ccTensorBilin-extensionality bridge), the LAPLACIAN only for
+symmetric T (slot-swap equivariance, same lemma as the eigenblock
+argument).  Chain lifted through symmHs_smoothCc_eq_self -> coreN
+(symmS idempotent) -> lowRegN (density + isClosed_symmFixed) ->
+forcing-symmetry hypothesis of lowreg_sol_symm DISCHARGED;
+`lowreg_sol_symm_h3` lands at literal exponent 3 = exactly
+lowRadial_eq_self_along_sol's hsymm shape.  The symmetry sub-brick
+is ~95% (residual = call-site witness destructuring).
+Dispatched: Lane C3 (nonautL2_realize instantiation +
+lowreg_force_id staging in ShortTime/LowRegRealize.lean, consuming
+the landed lift/symmetry/OperatorTime layers, hypothesis-
+parameterized where Lane A/B debts remain).
+
+## Planner update No. 64 (2026-07-30) - E2 + E5 LANDED; P uniformized
+
+New files Estimates/H2PointwiseUnif.lean + ShortTime/
+UnifRealizeRadius.lean (sorry-free, axiom-clean, targeted builds):
+E2 `ccHs_eq_smoothHs` (tensorHs.ext rfl) + E1 endpoints restated in
+the smoothCc currency with the SAME closed constants; E5 closed
+constants hs2FibreC/hs2OpC/unifRealizeRad (= theta(n)/hs2OpC) +
+endpoints hs2_op_bound_unif / realize_at_unif whose conclusion is
+VERBATIM lowreg_partial_sol_of_bounds' hreal at P := unifRealizeRad,
+delta := theta(n); unifRealizeRad_pos = its hP;
+lowregHorizon_unif_pos.  One Classical.choose eliminated (Garding);
+the remaining P-input is E4's fibre-Morrey Cpt (hypothesis in the
+supercritical shape, E4 drops in without restatement) + E3's hcurv.
+The horizon's metric dependence is now entirely in
+Ctop, B0, B1, D, rho.  Reusable extraction: gFibreOp_of_fiberSq.
+Dedup chip filed: four rfl-copies of the ccTensorToHs =
+smoothCcToTensorHs identification (canonical home
+IteratedCovGradHsJetBound, deferred to avoid mid-session olean
+invalidation).  Lane E ~25-30%.  E6 dispatched (g_bg := gBase per
+No. 62 ruling).
+
+## Planner update No. 65 (2026-07-30) - C2 LANDED; C3 structurally collapsed; 3 new B-gaps
+
+New file ShortTime/LowRegRealizeTwo.lean (554 lines, 13 decls,
+sorry-free, axiom-clean; name -Two because LowRegRealize was taken).
+STRUCTURAL FINDING: C3 is NOT the analytic problem
+NonautonomousL2Smooth.md feared - tensorHsInclusion is INJECTIVE, so
+the lower-scale identity determines the high-scale forcing:
+`lowreg_force_lo` (lifted forcing at H1 = genuine Ricci-DeTurck
+nonlinearity at genuine states) is UNCONDITIONAL; `lowreg_force_id`
+upgrades to any inclusion-lift N2 of lowRegN; the dense-core lift
+exhibited (spectral coordinates order-independent); completing N2 to
+the ball = the Lane-A frontier or the frozen split N u = N 0 +
+(A2 u + A1 u) u at H4 regularity.  C2 = pure composition
+(`lowreg_realize_two` via nonautL2_realize, no new hypotheses).
+C0's symmetry input DISCHARGED (`lowRadial_eq_self_sol`).
+THREE NEW LANE-B GAPS (located in source): (i) completed first-order
+commuting square (radialA1_pair is smooth-core only; no radialA1_lip
+analog for lowA1Hi/lowA1Lo); (ii) low sibling of the principal A2
+(lowRegA2_data packages only lowRegPrincipal H4->H2); (iii) horizon
+smallness producer C2(1+T) + 2 sqrt(1+T)||A1||_L2t < 1.
+Builder dispatched for (i)+(ii); (iii) queued with E7.
+
+## Planner update No. 66 (2026-07-30) - E4 LANDED (70%); Kjet discharge dispatched
+
+New file Analysis/Sobolev/Embedding/SobolevEmbeddingUnif.lean
+(sorry-free, axiom-clean, targeted build): morreyUnifConst closed def
++ `fibreMorrey_unif_base` (Lambda-comparable class, per-slot Lambda
+factor via the new generic-(0,s) `fibreNormSq_cross_le`; the
+metric-free-atlas claim held EXACTLY - no inj-radius, no lambda_1,
+no covering number).  New expressibility device:
+`SmoothCcTensor.recast` (the section is metric-free - makes
+cross-metric statements about one section stateable).  Scope
+discipline: the drafted spectral face was DELETED in favor of E5's
+landed endpoint; the E4->E5 seam verified verbatim (composite
+typechecks).  Remaining abstract inputs on the whole P-path: Kjet
+(this brick's residual) and Fc (E3's lane).  ORDER BUDGET FINDING:
+E4 needs cross-metric jets only to order 2, covered UNCONDITIONALLY
+by iterCovG1_two (UnifCovSumCross:1249) - hAcc_of_jets is NOT on
+this path and E0's order raise does not apply to E4.  Kjet's genuine
+gap is currency plumbing: the iterCov/Tensor0SField <->
+iteratedCovGrad/SmoothCcTensor tower match at generic rank
+(~200-400 lines, home HCGCompactness/) - dispatched.
+Lane E ~30% (E1/E2/E4-70/E5/E8a landed; E3 hard geometry + E7 bulk
++ E6 in flight + E8b remain).
+
+## Planner update No. 67 (2026-07-30) - H2Pair CLASS 4 DISCHARGED
+
+amixH2Pair proved sorry-free (file 1253 -> 2542 lines, 3 sorries
+left: classes 1/2/3).  RECIPE CORRECTION recorded: class 4 DID need
+jetInterp3 (two mcd factors -> (1+A)^2*N without it); the two
+devices that closed it: (a) instantiate both mcd producers at
+a := sqrt(Cip*R*A4) via jetInterp3, collapsing the envelope into an
+A4-linear arm; (b) feed mcd_pair_h2 with D2 := D3 (jet-mono
+legitimate) so its B1*A*D2 slot re-pairs to the ADMISSIBLE A4*D3
+instead of the forbidden A4*D2... i.e. the difference budget is
+u := D3^2+N^2 at H2 (vs D2^2+N^2 at H1).  No Lip publicization was
+needed: a local public-source helper layer (jetMono/slot/reindex/
+tr/appH2, ~180 lines) was re-derived and is now available to
+classes 1-3.  LEAN LESSON (crash-grade): linarith/nlinarith in an
+~80-hypothesis context of nested tensor jets caused 'deep recursion
+detected at interpreter' at 12.8M heartbeats - hoist ALL scalar
+endgames into standalone real-variable lemmas and close the big
+declaration with one exact.
+Dispatched: class 3 (vb, with the class-4 devices) + Kjet
+tower-match discharge (HCGCompactness/UnifJetTowerMatch.lean).
+CLASS 3 DONE 2026-07-30: vbH2Pair sorry-free in NEW sibling
+...H2VB.lean (H2 algebra moved there); H2Pair 2 sorries (cls 1-2).
+
+## Planner update No. 68 (2026-07-30) - E6 LANDED (70%); E3 is the convergence point
+
+New file ShortTime/UnifNZeroBound.lean (484 lines, 14 decls,
+sorry-free, axiom-clean): `nZero_eq_static` (N(0) = the STATIC
+Ricci-DeTurck field -2Ric + L_W g of g0 against gBase - no third
+metric under the g_bg := gBase ruling, no Laplacian);
+closed constant nZeroC = sqrt2 * 2 * Ksup * sqrt(sqrt(Lambda^n) *
+volBase); DISCOVERY: the easy-direction Garding constant at spectral
+order 1 evaluates to bare sqrt2 (no Fc, no dimension).
+`nZero_lowregNfun` fits the hzero slot of the six-number interface
+verbatim.  Reusables: smoothCc_norm_le_of_fibreSq (rank-generic
+L2-from-fibre-sup, no integrand continuity), volReal_cross_le, three
+zero-evaluation lemmas.  PARAMETERIZED INPUT: Ksup (pointwise fibre
+bound on the static field's jets j <= 1; = E3 restricted to order 1;
+metric jets <= 3 against gBase; NO producer in tree - the DeTurck
+VF term + j=1 derivative + fibre packaging are the missing pieces).
+Lane E ~35%.  E3 (Lambda<2 staging per No. 57) DISPATCHED - it now
+unblocks BOTH E5's hcurv (Fc) and E6's Ksup.
+
+## Planner update No. 69 (2026-07-30) - Lane-B gap squares CLOSED
+
+Gap (ii) UNCONDITIONAL: lowRegPrincipalLo + principal_comm +
+principal_pair_norm already existed in PrincipalLowRegPair.lean (the
+RealizeTwo note misplaced the hole); the missing TIME layer built in
+LowRegOperatorTime.lean (380 -> 1027 lines): lowRegA2TimeLo /
+lowRegA2Lo_data / lowRegA2TotalLo(_data) - the full hA2Lo + hC2Lo +
+hA2compat bundle of lowreg_lift_two, one radius, forall-t squares.
+New upstream: principalLo_cont (NormedRing.inverse_continuousAt on
+the unit ball - no invPerturbH1_lip port), norm_congr_comp
+(ExponentCongr codomain transport; ((1:N):R) vs (1:R) is NOT rfl).
+Gap (i) closed CONDITIONAL on exactly one estimate: lowA1_lip via
+the dense-extension idiom (dense_lipschitz + DenseRange.induction_on
++ isClosed_eq, mirroring radialA2_lip), consuming smooth-core
+Lipschitz hHiPair/hLoPair = the missing first-order sibling
+`c1_pair_lip` (unavoidable: Dense.extend of a discontinuous core is
+informationless).  Via a1_diff it reduces to a two-jet
+coefficient-difference bound at H3 modulus - CHECK whether the
+landed rhs1_pair_h2 / c1Diff_tame layer discharges it by packaging
+before treating it as a new grind (dispatched).  Remaining Lane-B
+packaging: horizon smallness hsmallHi/hsmallLo (dispatched).
+Machinery ~76%.
+
+CONTINUED IN UNIF_EXISTENCE_PLAN2.md (entries No. 70+).
