@@ -7804,6 +7804,108 @@ noncomputable def morseCollarFlowBase {m k : ℕ} (_hk : k ≤ m + 1) (c ε r η
     exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn
       hrate hz)⟩
 
+theorem morseCollarTopLevel_ge_flowTime_of_handlePoint {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hη : 0 < η) (hr : 0 < r) (hr2 : r ^ 2 = 2 * ε)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hflowChart : ∀ y : MorseModel (m + 1), y ∈ data.χ.source →
+      ∀ t : ℝ, curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) (data.χ y) t =
+        data.χ (modelFlow hk t y))
+    (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r)
+    (hwneg : 2 * ε ≤ ‖negPart hk w‖ ^ 2) :
+    morseCollarTopLevel hk c ε r data
+      (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
+        (by
+          have hmem := morseHandlePoint_f_mem hk c ε r data hε hr hεr' w hw
+          constructor
+          · nlinarith [hmem.1, hη]
+          · exact hmem.2)) ≥
+      f (data.χ w) - c + ε := by
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  let σ' : ℝ := f (data.χ w) - c + ε
+  have hmem : f (data.χ w) ∈ Set.Icc (c - ε) (c + r ^ 2 / 2) :=
+    morseHandlePoint_f_mem hk c ε r data hε hr hεr' w hw
+  have hσ0 : 0 ≤ σ' := by
+    dsimp [σ']
+    nlinarith [hmem.1]
+  have hrange : w ∈ Set.range (modelHandleMap hk ε r) := by
+    rw [← modelHandleMap_range hk ε r hε hr] at hw
+    exact hw
+  rcases hrange with ⟨d, hd⟩
+  have hwle : morseNorm (m + 1) w ≤ Real.sqrt (2 * ε + 2 * r ^ 2) := by
+    rw [← hd]
+    exact modelHandleMap_norm_le hk ε r (le_of_lt hε) d
+  have hsrcw : w ∈ data.χ.source := data.hχsrc w (le_trans hwle (le_of_lt hεr'))
+  have hfw : f (data.χ w) = morseNormalForm hk c w := data.hnorm w (le_trans hwle (le_of_lt hεr'))
+  have hσ'eq : σ' = ε + (‖posPart hk w‖ ^ 2 - ‖negPart hk w‖ ^ 2) / 2 := by
+    dsimp [σ']
+    rw [hfw]
+    rw [morseNormalForm_split hk c w]
+    ring
+  have hσposle : σ' ≤ ‖posPart hk w‖ ^ 2 / 2 := by
+    rw [hσ'eq]
+    nlinarith [hwneg]
+  let x : LevelSetSpace f (c - ε) :=
+    morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
+      (by
+        have hmem := morseHandlePoint_f_mem hk c ε r data hε hr hεr' w hw
+        constructor
+        · nlinarith [hmem.1, hη]
+        · exact hmem.2)
+  have hxeq : x.1 = data.χ (modelFlow hk σ' w) := by
+    dsimp [x, morseCollarFlowBase, σ']
+    exact hflowChart w hsrcw (f (data.χ w) - c + ε)
+  have hflowle : morseNorm (m + 1) (modelFlow hk σ' w) ≤ morseNorm (m + 1) w :=
+    modelFlow_norm_le hk σ' w hσ0 hσposle
+  have hsrcflow : modelFlow hk σ' w ∈ data.χ.source := data.hχsrc (modelFlow hk σ' w)
+    (le_trans hflowle (le_trans hwle (le_of_lt hεr')))
+  have hchart : x ∈ morseCollarChartSet hk c ε r data := by
+    dsimp [morseCollarChartSet]
+    refine ⟨modelFlow hk σ' w, ?_, hxeq.symm⟩
+    exact lt_of_le_of_lt hflowle (lt_of_le_of_lt hwle hεr')
+  have htop := morseCollarTopLevel_eq_on_chart hk c ε r data x hchart
+  have hz' : data.χ.symm x.1 = modelFlow hk σ' w := by
+    rw [hxeq]
+    exact data.χ.left_inv hsrcflow
+  have hpossq : ‖posPart hk (modelFlow hk σ' w)‖ ^ 2 = ‖posPart hk w‖ ^ 2 - 2 * σ' :=
+    modelFlow_posPart_norm_sq hk σ' w hσ0 hσposle
+  have hpossq' : ‖posPart hk (modelFlow hk σ' w)‖ ^ 2 = ‖negPart hk w‖ ^ 2 - 2 * ε := by
+    rw [hpossq]
+    rw [hσ'eq]
+    ring
+  have htopval : morseCollarTopLevel hk c ε r data x = 2 * ε - ‖negPart hk w‖ ^ 2 / 2 := by
+    rw [htop]
+    rw [hz']
+    rw [hpossq']
+    rw [hr2]
+    have harg : 0 ≤ (2 * ε - (‖negPart hk w‖ ^ 2 - 2 * ε)) / 2 := by
+      have hnegle : ‖negPart hk w‖ ^ 2 ≤ r ^ 2 + 2 * ε := by
+        have hposle : ‖posPart hk w‖ ^ 2 ≤ r ^ 2 := hw.1
+        nlinarith [hw.2, hposle]
+      nlinarith [hnegle, hr2]
+    rw [max_eq_right harg]
+    ring
+  rw [htopval]
+  change 2 * ε - ‖negPart hk w‖ ^ 2 / 2 ≥ σ'
+  rw [hσ'eq]
+  have hposle : ‖posPart hk w‖ ^ 2 ≤ r ^ 2 := hw.1
+  rw [hr2] at hposle
+  nlinarith
+
 theorem morseCollarMap_surj_on_image {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
