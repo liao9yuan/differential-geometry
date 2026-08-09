@@ -10117,6 +10117,65 @@ theorem modifiedSublevel_union_modelHandle_eq {n k : ℕ} (hk : k ≤ n) (c ε �
     · exact Or.inr hh
 
 
+theorem morseModifiedSublevel_union_handleImage_eq {n k : ℕ} (hk : k ≤ n) (c ε δ r R : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : 3 * δ / 2 ≤ r)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    (χ : OpenPartialHomeomorph (MorseModel n) M) (f : M → ℝ)
+    (hnorm : ∀ y : MorseModel n, morseNorm n y ≤ R → f (χ y) = morseNormalForm hk c y)
+    (hχsrc : ∀ y : MorseModel n, morseNorm n y ≤ R → y ∈ χ.source) :
+    {x : M | morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f x ≤ c - ε} ∪
+        χ '' (modelHandle hk ε r : Set (MorseModel n)) =
+      {x : M | f x ≤ c - ε} ∪ χ '' (modelHandle hk ε r : Set (MorseModel n)) := by
+  let g : M → ℝ := morseModifiedFunction (H := H) (M := M) hk c ε δ R χ f
+  ext x
+  constructor
+  · intro hx
+    rcases hx with hg | hh
+    · by_cases hC : x ∈ χ '' {y : MorseModel n | morseNorm n y ≤ R}
+      · rcases hC with ⟨y, hy, hxy⟩
+        have hsymm : χ.symm x = y := by
+          rw [← hxy]
+          exact χ.left_inv (hχsrc y hy)
+        have hgx : g x = modifiedNormalForm hk c ε δ y := by
+          dsimp [g, morseModifiedFunction]
+          rw [← hxy, if_pos (χ.map_source (hχsrc y hy)), χ.left_inv (hχsrc y hy)]
+          rw [if_pos (by simpa using hy)]
+        have hmod : modifiedNormalForm hk c ε δ y ≤ c - ε := by
+          rw [← hgx]
+          exact hg
+        have hmem : y ∈ {y : MorseModel n | morseNormalForm hk c y ≤ c - ε} ∪
+            (modelHandle hk ε r : Set (MorseModel n)) :=
+          modifiedSublevel_subset_lower_union_modelHandle hk c ε δ r hε hδ hr (by
+            exact hmod)
+        rcases hmem with hlow | hh
+        · have hfx : f x ≤ c - ε := by
+            rw [← hxy]
+            rw [hnorm y hy]
+            exact hlow
+          exact Or.inl hfx
+        · exact Or.inr (by
+            rw [← hxy]
+            exact ⟨y, hh, rfl⟩)
+      · have hgx : g x = f x := by
+          dsimp [g, morseModifiedFunction]
+          by_cases hxt : x ∈ χ.target
+          · rw [if_pos hxt]
+            have hnot : ¬ morseNorm n (χ.symm x) ≤ R := by
+              intro hle
+              apply hC
+              exact ⟨χ.symm x, hle, χ.right_inv hxt⟩
+            rw [if_neg hnot]
+          · rw [if_neg hxt]
+        exact Or.inl (by
+          change f x ≤ c - ε
+          rw [← hgx]
+          exact hg)
+    · exact Or.inr hh
+  · intro hx
+    rcases hx with hf | hh
+    · exact Or.inl (le_trans (morseModifiedFunction_le_f (H := H) (M := M) hk c ε δ R hε χ f hnorm x) hf)
+    · exact Or.inr hh
+
 theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hεR : Real.sqrt (2 * ε) ≤ R)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
