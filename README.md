@@ -34,22 +34,25 @@ Underlying these results is a substantial geometric-analysis backbone — the [`
 The scalar heat equation on a closed Riemannian manifold has a canonical
 end-to-end classical-solution API in
 [`Analysis/Heat/Smoothing/ScalarHeatFlow.lean`](DifferentialGeometry/Analysis/Heat/Smoothing/ScalarHeatFlow.lean).
-For `g` a smooth Riemannian metric, `u₀ : TensorL2 0 0 g` an `L²` initial datum
-and `0 < ε < T`, the canonical flow `scalarHeatFlow g u₀` is a smooth
+For `g` a smooth Riemannian metric, `u₀ : Lp ℝ 2 (riemannianVolumeMeasure g)` an
+`L²` initial datum and `0 < ε < T`, the canonical flow
+`scalarHeatFlow g u₀` is a smooth
 `IsHeatOnStationary (RealTimeInterval.closed ε T hεT.le) g (scalarHeatFlow g u₀)`
 solution whose time-`t` slice is the spectral heat semigroup in `L²`:
-`smoothToLp g (scalarHeatFlowSlice g u₀ htail hεT hε ht) = heatSemigroup g t (tensor00ScalarL2Equiv g u₀)`.
+`smoothToLp g (scalarHeatFlowSlice g u₀ hεT hε ht) = heatSemigroup g t u₀`.
 For a smooth initial datum `u₀ : SmoothScalar g`, the flow on the closed slab
 `[0,T]` is jointly smooth, satisfies
-`scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) 0 x = u₀.toFun x`
+`scalarHeatFlow g (smoothToLp g u₀) 0 x = u₀.toFun x`
 pointwise, restricts compatibly to every positive-time window, and is the unique
 `IsHeatOnStationary (RealTimeInterval.closed 0 T hT) g` solution with that
 initial datum. The same API supplies comparison, non-negativity and mass
-invariance, strict positivity of positive-time slices, and (under
-non-negative Ricci curvature and the metric-realization hypothesis
-`hEnorm` on the ambient norm) Li–Yau one-point and space-time Harnack
-inequalities. External consumer probes for these entry points live in `/tmp`
-(`probe_pde1_positivetime.lean` … `probe_pde4_duhamel.lean`).
+invariance, all-points strict positivity of positive-time slices from
+non-negative non-zero data, and (under non-negative Ricci curvature and the
+metric-realization hypothesis `hEnorm` on the ambient norm) Li–Yau one-point
+and space-time Harnack inequalities. External consumer probes for these entry
+points live in `/tmp` (`probe_pde1_positivetime.lean`,
+`probe_pde2_smoothinitial.lean`, `probe_pde3_geometric.lean`, and
+`probe_pde4_duhamel.lean`), compiled against only the leaf module.
 - [**ODE flows**](DifferentialGeometry/Analysis/ODE) — $C^\infty$ dependence of flows on their initial data, and time-dependent flows on closed manifolds jointly smooth up to the initial time (via Seeley-type time extension of the vector field).
 
 The classical De Giorgi–Nash–Moser regularity machinery is vendored under [`External/`](DifferentialGeometry/External) from [scottnarmstrong/DeGiorgi](https://github.com/scottnarmstrong/DeGiorgi) (Scott Armstrong and Julia Kempe, Apache-2.0).

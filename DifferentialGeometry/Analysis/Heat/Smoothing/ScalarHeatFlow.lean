@@ -629,7 +629,7 @@ theorem scalarHeatCoeff_hasDerivAt
     (scalarHeatCoeff_deriv (I := I) (M := M) g u₀ i t)
 
 omit [NeZero (Module.finrank ℝ E)] in
-lemma exists_pow_mul_exp_neg_bddAbove (n : ℕ) :
+private lemma exists_pow_mul_exp_neg_bddAbove (n : ℕ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x : ℝ, 0 ≤ x → x ^ n * Real.exp (-x) ≤ M := by
   classical
   let f : ℝ → ℝ := fun x => x ^ n * Real.exp (-x)
@@ -669,7 +669,7 @@ lemma exists_pow_mul_exp_neg_bddAbove (n : ℕ) :
     exact le_trans (hR x hRx) (le_max_right _ _)
 
 omit [NeZero (Module.finrank ℝ E)] in
-lemma exists_pow_mul_exp_neg_mul_bddAbove (a : ℝ) (ha : 0 < a) (n : ℕ) :
+private lemma exists_pow_mul_exp_neg_mul_bddAbove (a : ℝ) (ha : 0 < a) (n : ℕ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x : ℝ, 0 ≤ x → x ^ n * Real.exp (-(2 * a * x)) ≤ M := by
   classical
   obtain ⟨M₀, hM₀, hbdd⟩ := exists_pow_mul_exp_neg_bddAbove n
@@ -688,7 +688,7 @@ lemma exists_pow_mul_exp_neg_mul_bddAbove (a : ℝ) (ha : 0 < a) (n : ℕ) :
       exact mul_le_mul_of_nonneg_left hb (inv_nonneg.mpr (pow_nonneg h2a.le _))
 
 omit [NeZero (Module.finrank ℝ E)] in
-lemma exists_pow_add_mul_exp_neg_mul_bddAbove (a : ℝ) (ha : 0 < a) (n : ℕ) :
+private lemma exists_pow_add_mul_exp_neg_mul_bddAbove (a : ℝ) (ha : 0 < a) (n : ℕ) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x : ℝ, 0 ≤ x → (1 + x) ^ n * Real.exp (-(2 * a * x)) ≤ M := by
   classical
   obtain ⟨M₀, hM₀, hbdd⟩ := exists_pow_mul_exp_neg_mul_bddAbove a ha n
@@ -722,7 +722,7 @@ lemma exists_pow_add_mul_exp_neg_mul_bddAbove (a : ℝ) (ha : 0 < a) (n : ℕ) :
           _ ≤ (2 ^ n : ℝ) * M₀ := mul_le_mul_of_nonneg_left h hm
       _ ≤ max ((2 ^ n : ℝ) * M₀) (2 ^ n) := le_max_left _ _
 
-lemma scalarHeatCoeff_deriv_sq
+private lemma scalarHeatCoeff_deriv_sq
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (i : TensorEigenIdx00 g) (t : ℝ) (j : ℕ) :
     (iteratedDeriv j (fun s : ℝ => scalarHeatCoeff (I := I) (M := M) g u₀ i s) t) ^ 2 =
@@ -768,7 +768,7 @@ lemma scalarHeatCoeff_deriv_sq
               rw [hexp]
   simp [hmain]
 
-lemma scalarHeatCoeff_weighted_deriv_sq_le
+private lemma scalarHeatCoeff_weighted_deriv_sq_le
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     {a b : ℝ} (ha : 0 < a) (j m : ℕ) :
     ∃ C : TensorEigenIdx00 g → ℝ, Summable C ∧
@@ -935,7 +935,7 @@ theorem scalarHeatFlowTensor_contMDiffOn_top
   intro n
   exact scalarHeatFlowTensor_contMDiffOn (I := I) (M := M) g u₀ htail hab ha n
 
-lemma eigenvectorSmooth_hs_norm
+private lemma eigenvectorSmooth_hs_norm
     (g : SmoothRiemannianMetric I M) (σ : ℝ) (i : TensorEigenIdx00 g) :
     ‖ccTensorToHs (I := I) (M := M) g 0 σ (eigenvectorSmooth g 0 0 i)‖ =
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) := by
@@ -992,12 +992,12 @@ theorem scalarEigenFunction_abs_le
   simpa [hφ] using h1
 
 omit [NeZero (Module.finrank ℝ E)] in
-lemma exp_sq_eq (a : ℝ) : (Real.exp a) ^ 2 = Real.exp (2 * a) := by
+private lemma exp_sq_eq (a : ℝ) : (Real.exp a) ^ 2 = Real.exp (2 * a) := by
   rw [← Real.exp_nat_mul a 2]
   congr 1
 
 omit [NeZero (Module.finrank ℝ E)] in
-lemma rpow_sq_eq {x : ℝ} (hx : 0 ≤ x) (y : ℝ) : (x ^ y) ^ 2 = x ^ (2 * y) := by
+private lemma rpow_sq_eq {x : ℝ} (hx : 0 ≤ x) (y : ℝ) : (x ^ y) ^ 2 = x ^ (2 * y) := by
   rw [← Real.rpow_natCast (x ^ y) 2]
   exact (Real.rpow_mul hx y (2 : ℝ)).symm.trans (by
     congr 1
@@ -1059,12 +1059,12 @@ noncomputable def scalarHeatFlowSlice
     (scalar_eigen_tail (I := I) (M := M) g) hab ha ht
 
 omit [NeZero (Module.finrank ℝ E)] in
-lemma nat_add_neg_self (N q : ℕ) : (((N + q : ℕ) : ℝ) + (-(q : ℝ))) = (N : ℝ) := by
+private lemma nat_add_neg_self (N q : ℕ) : (((N + q : ℕ) : ℝ) + (-(q : ℝ))) = (N : ℝ) := by
   push_cast
   ring
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-lemma summable_exp_mul_pow
+private lemma summable_exp_mul_pow
     (g : SmoothRiemannianMetric I M) (htail : EigenvalueTailSummable g 0 0) (N : ℕ)
     {a t : ℝ} (ha : 0 < a) (hat : a ≤ t) :
     Summable (fun i : TensorEigenIdx00 g =>
@@ -1159,7 +1159,7 @@ lemma summable_exp_mul_pow
       rw [abs_of_nonneg (hnonneg i)]
       exact hle i)
 
-lemma summable_abs_scalarHeatCoeff_mul_hsWeight
+private lemma summable_abs_scalarHeatCoeff_mul_hsWeight
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (htail : EigenvalueTailSummable g 0 0)
     {a t : ℝ} (ha : 0 < a) (hat : a ≤ t) :
@@ -1548,7 +1548,7 @@ theorem scalarHeatFlowTensor_hasDerivAt
     simpa [hderiv_sum] using hd1'
   exact hd2.hasDerivAt (Icc_mem_nhds (Set.mem_Ioo.mp ht).1 (Set.mem_Ioo.mp ht).2)
 
-lemma summable_abs_scalarHeatCoeff_lambda_mul_hsWeight
+private lemma summable_abs_scalarHeatCoeff_lambda_mul_hsWeight
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (htail : EigenvalueTailSummable g 0 0)
     {a t : ℝ} (ha : 0 < a) (hat : a ≤ t) :
@@ -2476,7 +2476,7 @@ theorem scalarHeatFlowTensor_zero_apply
           exact congrFun (congrArg SmoothScalar.toFun
             (scalar0Cc_scalarCcLift (I := I) (M := M) g u₀)) x
 
-lemma summable_abs_tensorL2Coeff_mul_hsWeight_of_smooth
+private lemma summable_abs_tensorL2Coeff_mul_hsWeight_of_smooth
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0) :
     Summable (fun i : TensorEigenIdx00 g =>
@@ -2905,7 +2905,7 @@ theorem scalarHeatFlowTensor_smoothInitial_mass_invariant
             (μ := riemannianVolumeMeasure (I := I) (M := M) g) u₀.memLp_two] with x hx
           exact hx
 
-theorem mildSolution_slice_forced_equation_of_smooth_forcing
+theorem mildSolution_slice_classical_equation_of_smooth_forcing
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -2919,13 +2919,16 @@ theorem mildSolution_slice_forced_equation_of_smooth_forcing
     ∃ u_smooth du_smooth : SmoothScalar g,
       smoothToLp (I := I) (M := M) g u_smooth =
           mildSolution (I := I) (M := M) g u_0 f t ∧
+        smoothToLp (I := I) (M := M) g du_smooth =
+          -(heatPower (I := I) (M := M) g 1 t u_0) +
+            mildSolution (I := I) (M := M) g (f 0) (deriv f) t ∧
         du_smooth = u_smooth.laplacian + f_smooth :=
-  let ⟨u_smooth, du_smooth, hu, _hdu, heq⟩ :=
+  let ⟨u_smooth, du_smooth, hu, hdu, heq⟩ :=
     mildSolution_has_classical_representatives_of_forcingSpectralMass
       (I := I) (M := M) g u_0 hf ht hmass hmass_deriv f_smooth hf_smooth
-  ⟨u_smooth, du_smooth, hu, heq⟩
+  ⟨u_smooth, du_smooth, hu, hdu, heq⟩
 
-lemma summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
+private lemma summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g) (σ : ℝ) :
     Summable (fun i : TensorEigenIdx00 g =>
       tensorSobolevWeight (I := I) (M := M) i σ *

@@ -47,7 +47,7 @@ open Tensor0SBundle
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-lemma real_inner_eq_mul' (a b : ℝ) : ⟪a, b⟫_ℝ = a * b := by
+private lemma real_inner_eq_mul' (a b : ℝ) : ⟪a, b⟫_ℝ = a * b := by
   change RCLike.re ⟪a, b⟫_ℝ = a * b
   have h := RCLike.inner_apply a b
   have hrw : RCLike.re ⟪a, b⟫_ℝ = RCLike.re (b * (starRingEnd ℝ) a) := congrArg RCLike.re h
@@ -73,7 +73,7 @@ theorem smoothToLp_inner_eq_integral_mul
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [CompactSpace M] in
-lemma tensorEval_zero_zero_scalar0
+private lemma tensorEval_zero_zero_scalar0
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
     ((S.toFun x) (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) Fin.elim0 =
       TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection x := by
@@ -83,7 +83,7 @@ lemma tensorEval_zero_zero_scalar0
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [CompactSpace M] in
-lemma separableForm_zero_apply
+private lemma separableForm_zero_apply
     (g : SmoothRiemannianMetric I M) (x : M) (v : Fin 0 → E) (w : Fin 0 → E) :
     (separableFormAt (I := I) (M := M) g x 0) v w = 1 := by
   rw [separableFormAt_apply]
@@ -91,7 +91,7 @@ lemma separableForm_zero_apply
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [CompactSpace M] in
-lemma tensorInnerPointwise_smooth_zero_zero
+private lemma tensorInnerPointwise_smooth_zero_zero
     (g : SmoothRiemannianMetric I M) (S T : SmoothCcTensor g 0 0) (x : M) :
     tensorInnerPointwise (I := I) (M := M) g 0 0 x (S.toFun x) (T.toFun x) =
       TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection x *
@@ -206,7 +206,7 @@ theorem tensorEigen00_rawLap_eq
   · simp [hji]
 
 omit [CompactSpace M] in
-lemma rawLapSection_eq_toRS0 (g : SmoothRiemannianMetric I M)
+private lemma rawLapSection_eq_toRS0 (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 0) (x : M) :
     rawTensorConnLap g 0 0 (fun y : M => S.toSection y) x =
       ((Tensor0SNabla.tensor0Iso I M x).symm (laplacian (LeviCivita g) g
@@ -219,7 +219,7 @@ lemma rawLapSection_eq_toRS0 (g : SmoothRiemannianMetric I M)
   exact hraw
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] in
-lemma laplacian_scalar0_smooth (g : SmoothRiemannianMetric I M)
+private lemma laplacian_scalar0_smooth (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 0) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (laplacian (I := I) (LeviCivita (I := I) g) g
       (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection)) := by
@@ -231,7 +231,7 @@ lemma laplacian_scalar0_smooth (g : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [CompactSpace M] in
-lemma tensor0Iso_fromScalarField
+private lemma tensor0Iso_fromScalarField
     (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :
     Tensor0SNabla.tensor0Iso I M y (Tensor0SField.fromScalarField ∞ f hf y) = f y := by

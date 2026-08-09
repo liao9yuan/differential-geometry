@@ -334,7 +334,7 @@ theorem metric_inner_contMDiffAt
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem metric_inner_contMDiffOn_frame
     (g : SmoothRiemannianMetric I M)
-    {u : Set M} {Idx : Type*} [Finite Idx]
+    {u : Set M} {Idx : Type*}
     (frame : Idx → (x : M) → TangentSpace I x)
     (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun x : M => g.inner x (frame i x) (frame j x)) u := by
