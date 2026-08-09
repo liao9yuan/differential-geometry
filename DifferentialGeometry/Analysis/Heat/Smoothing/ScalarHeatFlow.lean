@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Heat.Smoothing.SpectralBridge
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.ScalarPathReconstruct
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJetFiniteOrderPairing
 import DifferentialGeometry.Analysis.Heat.Semigroup.Mass
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
@@ -35,9 +37,16 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open Tensor0SBundle
+open DifferentialGeometry.Tensor.TensorRSRiemannianBundle
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+private local instance completeSpaceE : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private local instance tensorRSModelNormedAddCommGroupLocal (r s : ℕ) :
+    NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup r s
 
 private local instance tensorRSModelNormedSpaceLocal (r s : ℕ) :
     NormedSpace ℝ (TensorRSModel r s ℝ E) :=
@@ -3310,6 +3319,186 @@ theorem scalarForcingCoeff_contDiff
   exact (innerSL (𝕜 := ℝ)
     (E := Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (scalarEigenFunctionLp g i)).contDiff.comp hf
+
+section jointSmoothness
+
+set_option backward.isDefEq.respectTransparency false
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [CompactSpace M] in
+private lemma fiberNormSq_jointContinuousOn_aux
+    (g : SmoothRiemannianMetric I M) (r sIdx : ℕ)
+    (Ψ : ℝ → SmoothCcTensor g r sIdx) (S : Set ℝ)
+    (hSI : Set.Icc (0 : ℝ) 1 ⊆ S)
+    (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r sIdx ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r sIdx ℝ E)
+        (E := fun z : M => TensorRSSpace r sIdx I z) q.1 ((Ψ q.2).toSection q.1))
+      ((Set.univ : Set M) ×ˢ S)) :
+    ContinuousOn (fun p : ℝ × M =>
+      riemannianFiberNormSq (I := I) (M := M) g r sIdx p.2 ((Ψ p.1).toSection p.2))
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+  have hIccprod : (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) ⊆
+      (fun p : ℝ × M => (p.2, p.1)) ⁻¹' ((Set.univ : Set M) ×ˢ S) := by
+    rintro ⟨t, x⟩ ⟨ht, -⟩
+    exact ⟨Set.mem_univ _, hSI ht⟩
+  have hswapCont : Continuous (fun p : ℝ × M => (p.2, p.1)) := by fun_prop
+  have hv : ContinuousOn
+      (fun p : ℝ × M => TotalSpace.mk' (TensorRSModel r sIdx ℝ E)
+        (E := fun z : M => TensorRSSpace r sIdx I z) p.2 ((Ψ p.1).toSection p.2))
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+    refine (hjoint.continuousOn.comp hswapCont.continuousOn hIccprod).congr ?_
+    rintro ⟨t, x⟩ -
+    rfl
+  have hψ : ContinuousOn
+      (fun p : ℝ × M => TotalSpace.mk'
+        (TensorRSModel r sIdx ℝ E →L[ℝ] TensorRSModel r sIdx ℝ E →L[ℝ] ℝ)
+        (E := fun x : M => TensorRSSpace r sIdx I x →L[ℝ] TensorRSSpace r sIdx I x →L[ℝ] ℝ)
+        p.2
+        (tensorRSRiemannianInnerCLM (I := I) (M := M) g r sIdx p.2))
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) :=
+    ((tensorRSRiemannianInnerCLM_continuous (I := I) (M := M) g r sIdx).comp continuous_snd).continuousOn
+  have happ : ContinuousOn
+      (fun p : ℝ × M => TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) p.2
+        (tensorRSRiemannianInnerCLM (I := I) (M := M) g r sIdx p.2
+          ((Ψ p.1).toSection p.2) ((Ψ p.1).toSection p.2)))
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) :=
+    ContinuousOn.clm_bundle_apply₂ (F₁ := TensorRSModel r sIdx ℝ E)
+      (F₂ := TensorRSModel r sIdx ℝ E) (F₃ := ℝ) (b := fun p : ℝ × M => p.2) hψ hv hv
+  have hscalar : ContinuousOn
+      (fun p : ℝ × M =>
+        tensorRSRiemannianInnerCLM (I := I) (M := M) g r sIdx p.2
+          ((Ψ p.1).toSection p.2) ((Ψ p.1).toSection p.2))
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+    intro p hp
+    have hp2 := ((FiberBundle.continuousWithinAt_totalSpace ℝ
+      (fun p : ℝ × M => TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) p.2
+        (tensorRSRiemannianInnerCLM (I := I) (M := M) g r sIdx p.2
+          ((Ψ p.1).toSection p.2) ((Ψ p.1).toSection p.2)))).mp (happ p hp)).2
+    exact hp2
+  refine hscalar.congr ?_
+  rintro ⟨t, x⟩ -
+  simp only
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r sIdx x
+      ((Ψ t).toSection x),
+    tensorRSRiemannianInnerCLM_apply]
+
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma lift_jets_jointContMDiffOn
+    (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g) (j : ℕ)
+    (hLift : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 0 ℝ E)
+        (E := fun z : M => TensorRSSpace 0 0 I z) q.1
+          ((scalarCcLift g (F q.2)).toSection q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 (0 + j) ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 (0 + j) ℝ E)
+        (E := fun z : M => TensorRSSpace 0 (0 + j) I z) q.1
+          ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F q.2))).toSection q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ) := by
+  induction j with
+  | zero =>
+      simpa using hLift
+  | succ j ih =>
+      exact covGrad_step_jointContMDiffOn (I := I) (M := M) g 0 (0 + j)
+        (fun t => PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t)))
+        Set.univ ih
+
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma jet_l2Norm_contDiff
+    (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g) (j : ℕ)
+    (hLift : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 0 ℝ E)
+        (E := fun z : M => TensorRSSpace 0 0 I z) q.1
+          ((scalarCcLift g (F q.2)).toSection q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ)) :
+    ContinuousOn (fun t : ℝ =>
+      ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ^ 2)
+      (Set.Icc (0 : ℝ) 1) := by
+  have hjet : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 (0 + j) ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 (0 + j) ℝ E)
+        (E := fun z : M => TensorRSSpace 0 (0 + j) I z) q.1
+          ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F q.2))).toSection q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ) := by
+    induction j with
+    | zero => simpa using hLift
+    | succ j ih =>
+        exact covGrad_step_jointContMDiffOn (I := I) (M := M) g 0 (0 + j)
+          (fun t => PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t)))
+          Set.univ ih
+  have hfib : ContinuousOn (fun p : ℝ × M =>
+      riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) p.2
+        ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F p.1))).toSection p.2))
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+    exact fiberNormSq_jointContinuousOn_aux (I := I) (M := M) g 0 (0 + j)
+      (fun t => PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))) Set.univ
+      (by intro x hx; trivial) hjet
+  have hbridge : (fun t : ℝ =>
+        ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ^ 2) =
+      (fun t : ℝ => ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) x
+          ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))).toSection x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+    funext t
+    rw [SmoothCcTensor.norm_def, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq]
+  rw [hbridge]
+  haveI : IsFiniteMeasureOnCompacts (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
+  have hk : IsCompact (Set.univ : Set M) := isCompact_univ
+  have hfs : ∀ p, ∀ x, p ∈ Set.Icc (0 : ℝ) 1 → x ∉ (Set.univ : Set M) →
+      riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) x
+        ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F p))).toSection x) = 0 := by
+    intro p x hp hx
+    exact False.elim (hx (Set.mem_univ x))
+  have hfib' : ContinuousOn (Function.uncurry (fun (t : ℝ) (x : M) =>
+      riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) x
+        ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))).toSection x)))
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+    simpa [Function.uncurry] using hfib
+  simpa using (continuousOn_integral_of_compact_support
+    (μ := riemannianVolumeMeasure (I := I) (M := M) g)
+    (s := Set.Icc (0 : ℝ) 1) (k := (Set.univ : Set M)) hk hfib' hfs)
+
+private lemma tensorHsNorm_uniform_bdd_of_liftJointSmooth
+    (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g) (m : ℕ)
+    (hLift : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 0 ℝ E)
+        (E := fun z : M => TensorRSSpace 0 0 I z) q.1
+          ((scalarCcLift g (F q.2)).toSection q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      ‖ccTensorToHs (I := I) (M := M) g 0 (m : ℝ) (scalarCcLift g (F t))‖ ≤ C := by
+  classical
+  have hjet_bdd (j : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ≤ C := by
+    have hcont := jet_l2Norm_contDiff (I := I) (M := M) g F j hLift
+    obtain ⟨x, hx, hmax⟩ := IsCompact.exists_isMaxOn isCompact_Icc
+      (show (Set.Icc (0 : ℝ) 1).Nonempty by exact ⟨(0 : ℝ), by simp⟩) hcont
+    refine ⟨‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F x))‖,
+      norm_nonneg _, fun t ht => ?_⟩
+    have hb := hmax ht
+    have hle : ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ≤
+        ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F x))‖ := by
+      exact le_of_sq_le_sq hb (norm_nonneg _)
+    simpa using hle
+  obtain ⟨K, hK, hle⟩ := hs_le_jet (I := I) (M := M) g 0 m
+  let B : ℕ → ℝ := fun j => (hjet_bdd j).choose
+  have hBnn (j : ℕ) : 0 ≤ B j := (hjet_bdd j).choose_spec.1
+  have hjets : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      (∑ j ∈ Finset.range (m + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖) ≤
+      ∑ j ∈ Finset.range (m + 1), B j := by
+    intro t ht
+    exact Finset.sum_le_sum (fun j hj => (hjet_bdd j).choose_spec.2 t ht)
+  refine ⟨K * ∑ j ∈ Finset.range (m + 1), B j, ?_, ?_⟩
+  · exact mul_nonneg hK (Finset.sum_nonneg (fun j hj => hBnn j))
+  · intro t ht
+    calc
+      ‖ccTensorToHs (I := I) (M := M) g 0 (m : ℝ) (scalarCcLift g (F t))‖
+          ≤ K * ∑ j ∈ Finset.range (m + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ := hle _
+      _ ≤ K * ∑ j ∈ Finset.range (m + 1), B j :=
+            mul_le_mul_of_nonneg_left (hjets t ht) hK
+
+end jointSmoothness
 
 theorem scalarForcedCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M)
