@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Scalar
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJetFiniteOrderPairing
+import DifferentialGeometry.Bundle.PartialMfderiv.Basic
+import DifferentialGeometry.Analysis.Integration.Measure.FiniteParametricIntegral
 import DifferentialGeometry.Analysis.Heat.Semigroup.Mass
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
@@ -3991,6 +3993,288 @@ theorem scalarForcingCoeff_iteratedDeriv
     iteratedDeriv r (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t =
       scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t := by
   exact congrFun (scalarForcingCoeff_iteratedDeriv_fun (I := I) (M := M) g hf i r) t
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+private lemma timeDerivField_jointSmooth
+    (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g)
+    (hF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => (F q.1).toFun q.2) (Set.univ ×ˢ Set.univ))
+    (r : ℕ) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => iteratedDeriv r (fun s : ℝ => (F s).toFun q.2) q.1)
+      (Set.univ ×ˢ Set.univ) := by
+  classical
+  have hFfull : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => (F q.1).toFun q.2) :=
+    contMDiffOn_univ.mp (by simpa using hF)
+  induction r with
+  | zero =>
+      simpa using hFfull.contMDiffOn
+  | succ r ih =>
+      have hG : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+          (fun q : ℝ × M => iteratedDeriv r (fun s : ℝ => (F s).toFun q.2) q.1)
+          (Set.univ ×ˢ Set.univ) := ih
+      have hGfull : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+          (fun q : ℝ × M => iteratedDeriv r (fun s : ℝ => (F s).toFun q.2) q.1) :=
+        contMDiffOn_univ.mp (by simpa using hG)
+      let Gb : C^∞⟮𝓘(ℝ, ℝ).prod I, ℝ × M; 𝓘(ℝ, ℝ), ℝ⟯ :=
+        ⟨fun q : ℝ × M => iteratedDeriv r (fun s : ℝ => (F s).toFun q.2) q.1, hGfull⟩
+      have hd : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+          (fun p : ℝ × M => deriv (fun t : ℝ => (Gb : ℝ × M → ℝ) (t, p.2)) p.1) :=
+        contMDiff_partial_deriv_fst_gen (I := I) Gb
+      have hrec : ∀ p : ℝ × M,
+          iteratedDeriv (r + 1) (fun s : ℝ => (F s).toFun p.2) p.1 =
+            deriv (fun t : ℝ => iteratedDeriv r (fun s : ℝ => (F s).toFun p.2) t) p.1 := by
+        intro p
+        rw [iteratedDeriv_succ]
+      refine hd.contMDiffOn.congr ?_
+      intro p hp
+      rw [hrec p]
+      dsimp [Gb]
+
+private noncomputable def scalarTimeDerivField
+    (g : SmoothRiemannianMetric I M)
+    (F : ℝ → SmoothScalar g)
+    (hF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => (F q.1).toFun q.2) (Set.univ ×ˢ Set.univ))
+    (r : ℕ) (t : ℝ) : SmoothScalar g :=
+  ⟨fun x => iteratedDeriv r (fun s : ℝ => (F s).toFun x) t,
+    by
+      show ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => iteratedDeriv r (fun s : ℝ => (F s).toFun x) t)
+      have hjoint := timeDerivField_jointSmooth (I := I) (M := M) g F hF r
+      have hsliceOn : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+          (fun x : M => iteratedDeriv r (fun s : ℝ => (F s).toFun x) t) Set.univ := by
+        have hcomp := hjoint.comp
+          ((contMDiffOn_const : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun _ : M => t) Set.univ).prodMk
+            (contMDiffOn_id : ContMDiffOn I I ∞ id Set.univ))
+          (by intro p hp; exact ⟨Set.mem_univ t, Set.mem_univ p⟩)
+        refine (contMDiffOn_univ.mpr ?_)
+        have hc : ContMDiff I 𝓘(ℝ, ℝ) ∞
+            (fun x : M => iteratedDeriv r (fun s : ℝ => (F s).toFun (t, x).2) (t, x).1) := by
+          simpa using (contMDiffOn_univ.mp hcomp)
+        convert hc using 1
+      exact (contMDiffOn_univ.mp hsliceOn)⟩
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+private lemma timeDerivField_next_deriv
+    (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g)
+    (hF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => (F q.1).toFun q.2) (Set.univ ×ˢ Set.univ))
+    (r : ℕ) (x : M) (t : ℝ) :
+    deriv (fun s : ℝ => (scalarTimeDerivField g F hF r s).toFun x) t =
+      (scalarTimeDerivField g F hF (r + 1) t).toFun x := by
+  unfold scalarTimeDerivField
+  change deriv (fun s : ℝ => iteratedDeriv r (fun u : ℝ => (F u).toFun x) s) t =
+    iteratedDeriv (r + 1) (fun s : ℝ => (F s).toFun x) t
+  rw [iteratedDeriv_succ]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private lemma deriv_integral_timeDerivField
+    (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g)
+    (hF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => (F q.1).toFun q.2) (Set.univ ×ˢ Set.univ))
+    (φ : SmoothScalar g) (r : ℕ) (t : ℝ) :
+    deriv (fun s : ℝ => ∫ x : M, φ.toFun x * (scalarTimeDerivField g F hF r s).toFun x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t =
+      ∫ x : M, φ.toFun x * deriv (fun s : ℝ => (scalarTimeDerivField g F hF r s).toFun x) t
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  let Fv : ℝ → M → ℝ := fun v x => φ.toFun x * (scalarTimeDerivField g F hF r v).toFun x
+  let F' : ℝ → M → (ℝ →L[ℝ] ℝ) := fun v x =>
+    (ContinuousLinearMap.smulRightL ℝ ℝ ℝ (1 : ℝ →L[ℝ] ℝ))
+      (φ.toFun x * (scalarTimeDerivField g F hF (r + 1) v).toFun x)
+  have hjointr : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => iteratedDeriv r (fun s : ℝ => (F s).toFun q.2) q.1)
+      (Set.univ ×ˢ Set.univ) :=
+    timeDerivField_jointSmooth (I := I) (M := M) g F hF r
+  have hjointr1 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => iteratedDeriv (r + 1) (fun s : ℝ => (F s).toFun q.2) q.1)
+      (Set.univ ×ˢ Set.univ) :=
+    timeDerivField_jointSmooth (I := I) (M := M) g F hF (r + 1)
+  have hFcont : Continuous (fun p : ℝ × M => Fv p.1 p.2) := by
+    have hc : Continuous (fun p : ℝ × M => (scalarTimeDerivField g F hF r p.1).toFun p.2) :=
+      (ContMDiff.continuous (contMDiffOn_univ.mp (by simpa using hjointr)))
+    have hφc : Continuous (fun p : ℝ × M => φ.toFun p.2) :=
+      (φ.smooth.continuous.comp continuous_snd)
+    simpa [Fv] using hφc.mul hc
+  have hF'cont : Continuous (fun p : ℝ × M => F' p.1 p.2) := by
+    have hc : Continuous (fun p : ℝ × M => (scalarTimeDerivField g F hF (r + 1) p.1).toFun p.2) :=
+      (ContMDiff.continuous (contMDiffOn_univ.mp (by simpa using hjointr1)))
+    have hφc : Continuous (fun p : ℝ × M => φ.toFun p.2) :=
+      (φ.smooth.continuous.comp continuous_snd)
+    have hts : Continuous (fun p : ℝ × M =>
+        (ContinuousLinearMap.smulRightL ℝ ℝ ℝ (1 : ℝ →L[ℝ] ℝ))
+          (φ.toFun p.2 * (scalarTimeDerivField g F hF (r + 1) p.1).toFun p.2)) :=
+      (ContinuousLinearMap.smulRightL ℝ ℝ ℝ (1 : ℝ →L[ℝ] ℝ)).continuous.comp (hφc.mul hc)
+    simpa [F'] using hts
+  have hdiff : ∀ u : ℝ, ∀ x : M,
+      HasFDerivAt (fun v : ℝ => Fv v x) (F' u x) u := by
+    intro u x
+    have hslice : ContDiffAt ℝ ∞
+        (fun v : ℝ => (scalarTimeDerivField g F hF r v).toFun x) u := by
+      have hjointAt : ContMDiffAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+          (fun q : ℝ × M => iteratedDeriv r (fun s : ℝ => (F s).toFun q.2) q.1) (u, x) :=
+        (contMDiffOn_univ.mp (by simpa using hjointr)).contMDiffAt
+      have hargAt : ContMDiffAt 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun v : ℝ => (v, x)) u :=
+        (contMDiffAt_id.prodMk contMDiffAt_const)
+      have hcomp := ContMDiffAt.comp (x := u) (f := fun v : ℝ => (v, x))
+        (g := fun q : ℝ × M => iteratedDeriv r (fun s : ℝ => (F s).toFun q.2) q.1)
+        (hg := hjointAt) (hf := hargAt)
+      have hcd : ContDiffAt ℝ ∞
+          (fun v : ℝ => iteratedDeriv r (fun s : ℝ => (F s).toFun x) v) u := by
+        simpa using (contMDiffAt_iff_contDiffAt.mp hcomp)
+      simpa using hcd
+    have hder : HasDerivAt (fun v : ℝ => (scalarTimeDerivField g F hF r v).toFun x)
+        ((scalarTimeDerivField g F hF (r + 1) u).toFun x) u := by
+      have hd := (hslice.differentiableAt (by norm_num : (∞ : WithTop ℕ∞) ≠ 0)).hasDerivAt
+      simpa [timeDerivField_next_deriv (I := I) (M := M) g F hF r x u] using hd
+    have hderφ : HasDerivAt (fun v : ℝ => φ.toFun x * (scalarTimeDerivField g F hF r v).toFun x)
+        (φ.toFun x * (scalarTimeDerivField g F hF (r + 1) u).toFun x) u :=
+      hder.const_mul (φ.toFun x)
+    have hfd := hderφ.hasFDerivAt
+    simpa [Fv, F', ContinuousLinearMap.smulRightL] using hfd
+  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  haveI : SecondCountableTopology H := I.secondCountableTopology
+  haveI : SecondCountableTopology M := ChartedSpace.secondCountable_of_sigmaCompact H M
+  have hmain := DifferentialGeometry.Integral.Measure.hasFDerivAt_integral_compact
+    (μ := riemannianVolumeMeasure (I := I) (M := M) g) (V := ℝ) (W := ℝ) Fv F' hFcont hF'cont hdiff t
+  have hfd : fderiv ℝ (fun s : ℝ => ∫ x : M, Fv s x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t =
+      ∫ x : M, F' t x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := hmain.fderiv
+  have hL : (fderiv ℝ (fun s : ℝ => ∫ x : M, Fv s x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t) 1 =
+      deriv (fun s : ℝ => ∫ x : M, Fv s x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t := by
+    exact fderiv_apply_one_eq_deriv
+  have hR : (∫ x : M, F' t x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) 1 =
+      ∫ x : M, F' t x 1 ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+    have hcont : Continuous (fun x : M => F' t x) :=
+      hF'cont.comp (continuous_const.prodMk continuous_id)
+    have hint : Integrable (fun x : M => F' t x) (riemannianVolumeMeasure (I := I) (M := M) g) :=
+      hcont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+    have hc := ContinuousLinearMap.integral_comp_comm
+      (E := ℝ →L[ℝ] ℝ) (Fₗ := ℝ) (ContinuousLinearMap.apply ℝ ℝ (1 : ℝ)) hint
+    simpa using hc.symm
+  calc
+    deriv (fun s : ℝ => ∫ x : M, Fv s x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t
+        = (fderiv ℝ (fun s : ℝ => ∫ x : M, Fv s x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t) 1 := hL.symm
+    _ = (∫ x : M, F' t x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) 1 := by rw [hfd]
+    _ = ∫ x : M, F' t x 1 ∂(riemannianVolumeMeasure (I := I) (M := M) g) := hR
+  simp [F', ContinuousLinearMap.smulRightL,
+    timeDerivField_next_deriv (I := I) (M := M) g F hF r]
+
+private lemma smoothToLp_timeDerivField_eq
+    (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g)
+    (hF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => (F q.1).toFun q.2) (Set.univ ×ˢ Set.univ))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f) (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    (r : ℕ) (t : ℝ) :
+    smoothToLp (I := I) (M := M) g (scalarTimeDerivField g F hF r t) = iteratedDeriv r f t := by
+  classical
+  revert t
+  induction r with
+  | zero =>
+      intro t
+      have hz : scalarTimeDerivField g F hF 0 t = F t := by
+        apply SmoothScalar.ext
+        rfl
+      calc
+        smoothToLp (I := I) (M := M) g (scalarTimeDerivField g F hF 0 t)
+            = smoothToLp (I := I) (M := M) g (F t) := by rw [hz]
+        _ = iteratedDeriv 0 f t := by
+              rw [hfF t]
+              rfl
+  | succ r ih =>
+      intro t
+      have hcoeff : ∀ i : TensorEigenIdx00 g,
+          ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g
+            (scalarTimeDerivField g F hF (r + 1) t)⟫_ℝ =
+          ⟪scalarEigenFunctionLp g i, iteratedDeriv (r + 1) f t⟫_ℝ := by
+        intro i
+        have hderiv_int := deriv_integral_timeDerivField (I := I) (M := M) g F hF
+          (scalarEigenFunction g i) r t
+        have hnext : ∀ x : M,
+            (scalarTimeDerivField g F hF (r + 1) t).toFun x =
+              deriv (fun s : ℝ => (scalarTimeDerivField g F hF r s).toFun x) t := by
+          intro x
+          exact (timeDerivField_next_deriv (I := I) (M := M) g F hF r x t).symm
+        have hL : ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g
+              (scalarTimeDerivField g F hF (r + 1) t)⟫_ℝ =
+            ∫ x : M, (scalarEigenFunction g i).toFun x *
+              deriv (fun s : ℝ => (scalarTimeDerivField g F hF r s).toFun x) t
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+          change ⟪smoothToLp (I := I) (M := M) g (scalarEigenFunction g i),
+              smoothToLp (I := I) (M := M) g (scalarTimeDerivField g F hF (r + 1) t)⟫_ℝ =
+            ∫ x : M, (scalarEigenFunction g i).toFun x *
+              deriv (fun s : ℝ => (scalarTimeDerivField g F hF r s).toFun x) t
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g)
+          rw [smoothToLp_inner_eq_integral_mul g (scalarEigenFunction g i)
+            (scalarTimeDerivField g F hF (r + 1) t)]
+          apply integral_congr_ae
+          filter_upwards with x
+          rw [hnext x]
+        have hmid : ∫ x : M, (scalarEigenFunction g i).toFun x *
+              deriv (fun s : ℝ => (scalarTimeDerivField g F hF r s).toFun x) t
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+            deriv (fun s : ℝ => ∫ x : M, (scalarEigenFunction g i).toFun x *
+                (scalarTimeDerivField g F hF r s).toFun x
+                  ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t := by
+          exact hderiv_int.symm
+        have hR1 : deriv (fun s : ℝ => ⟪scalarEigenFunctionLp g i, iteratedDeriv r f s⟫_ℝ) t =
+            iteratedDeriv (r + 1) (fun u : ℝ => ⟪scalarEigenFunctionLp g i, f u⟫_ℝ) t := by
+          have hfder : ∀ s : ℝ, ⟪scalarEigenFunctionLp g i, iteratedDeriv r f s⟫_ℝ =
+              iteratedDeriv r (fun u : ℝ => ⟪scalarEigenFunctionLp g i, f u⟫_ℝ) s := by
+            intro s
+            have := scalarForcingCoeff_iteratedDeriv (I := I) (M := M) g hf i r s
+            simpa [scalarForcingCoeff] using this.symm
+          simp_rw [hfder]
+          rw [iteratedDeriv_succ]
+        have hR2 : iteratedDeriv (r + 1) (fun u : ℝ => ⟪scalarEigenFunctionLp g i, f u⟫_ℝ) t =
+            ⟪scalarEigenFunctionLp g i, iteratedDeriv (r + 1) f t⟫_ℝ := by
+          have := scalarForcingCoeff_iteratedDeriv (I := I) (M := M) g hf i (r + 1) t
+          simpa [scalarForcingCoeff] using this
+        have hR : deriv (fun s : ℝ => ∫ x : M, (scalarEigenFunction g i).toFun x *
+                (scalarTimeDerivField g F hF r s).toFun x
+                  ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t =
+            ⟪scalarEigenFunctionLp g i, iteratedDeriv (r + 1) f t⟫_ℝ := by
+          calc
+            deriv (fun s : ℝ => ∫ x : M, (scalarEigenFunction g i).toFun x *
+                  (scalarTimeDerivField g F hF r s).toFun x
+                    ∂(riemannianVolumeMeasure (I := I) (M := M) g)) t
+                = deriv (fun s : ℝ => ⟪scalarEigenFunctionLp g i,
+                      smoothToLp (I := I) (M := M) g (scalarTimeDerivField g F hF r s)⟫_ℝ) t := by
+                  congr 1
+                  funext s
+                  change ∫ x : M, (scalarEigenFunction g i).toFun x *
+                      (scalarTimeDerivField g F hF r s).toFun x
+                        ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+                    ⟪smoothToLp (I := I) (M := M) g (scalarEigenFunction g i),
+                      smoothToLp (I := I) (M := M) g (scalarTimeDerivField g F hF r s)⟫_ℝ
+                  rw [smoothToLp_inner_eq_integral_mul g (scalarEigenFunction g i)
+                    (scalarTimeDerivField g F hF r s)]
+            _ = deriv (fun s : ℝ => ⟪scalarEigenFunctionLp g i, iteratedDeriv r f s⟫_ℝ) t := by
+                  congr 1
+                  funext s
+                  rw [ih s]
+            _ = ⟪scalarEigenFunctionLp g i, iteratedDeriv (r + 1) f t⟫_ℝ := hR1.trans hR2
+        exact hL.trans (hmid.trans hR)
+      have h1 := hasSum_scalarEigenFunctionLp_repr g
+        (smoothToLp (I := I) (M := M) g (scalarTimeDerivField g F hF (r + 1) t))
+      have h2 := hasSum_scalarEigenFunctionLp_repr g (iteratedDeriv (r + 1) f t)
+      have hsame : (fun i : TensorEigenIdx00 g =>
+            ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g
+              (scalarTimeDerivField g F hF (r + 1) t)⟫_ℝ • scalarEigenFunctionLp g i) =
+          (fun i : TensorEigenIdx00 g =>
+            ⟪scalarEigenFunctionLp g i, iteratedDeriv (r + 1) f t⟫_ℝ • scalarEigenFunctionLp g i) := by
+        funext i
+        rw [hcoeff i]
+      have h2' : HasSum (fun i : TensorEigenIdx00 g =>
+            ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g
+              (scalarTimeDerivField g F hF (r + 1) t)⟫_ℝ • scalarEigenFunctionLp g i)
+          (iteratedDeriv (r + 1) f t) := by
+        convert h2 using 1
+      exact h1.unique h2'
 
 private lemma summable_scalarEigen_coeff_sq
     (g : SmoothRiemannianMetric I M)
