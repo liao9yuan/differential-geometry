@@ -4798,6 +4798,58 @@ theorem modelHandleMapRawSymm_eq_symm {m k : ℕ} (hk : k ≤ m + 1) (ε r : ℝ
   rw [modelHandleMapRawSymm_map hk ε r hε hr y hy]
   exact (morseModelHandleMapHomeo_symm_apply hk ε r hε hr ⟨y, hy⟩).symm
 
+noncomputable def morseBeltCellMapClamped {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data}) :
+    {z : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) //
+        z ∈ morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')} := by
+  let d : StandardHandle k (m + 1 - k) := modelHandleMapRawSymm hk ε r (y.1 : MorseModel (m + 1))
+  have hd : morseNorm (m + 1) (modelHandleMap hk ε r d) < data.R := by
+    dsimp [d]
+    exact lt_of_le_of_lt (modelHandleMap_norm_le hk ε r (le_of_lt hε)
+      (modelHandleMapRawSymm hk ε r (y.1 : MorseModel (m + 1)))) hεr'
+  exact ⟨Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) d,
+    Or.inr ⟨d, hd, rfl⟩⟩
+
+theorem continuous_morseBeltCellMapClamped {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) :
+    Continuous (morseBeltCellMapClamped hk c ε r data hε hεr') := by
+  have hproj : Continuous (fun y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} =>
+      (y.1 : MorseModel (m + 1))) := by
+    exact continuous_subtype_val.comp continuous_subtype_val
+  have hraw : Continuous (modelHandleMapRawSymm hk ε r) := by
+    dsimp [modelHandleMapRawSymm]
+    refine Continuous.prodMk ?_ ?_
+    · exact (continuous_closedCellClamp k).comp (by
+        have hsqrt : Continuous (fun y : MorseModel (m + 1) =>
+            (Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹) := by
+          refine Continuous.inv₀ ?_ (fun y => ?_)
+          · exact Real.continuous_sqrt.comp (by
+              have hnorm : Continuous (fun y : MorseModel (m + 1) => ‖posPart hk y‖) :=
+                continuous_norm.comp (continuous_posPart hk)
+              have hpow : Continuous (fun y : MorseModel (m + 1) => ‖posPart hk y‖ ^ 2) := hnorm.pow 2
+              exact (continuous_const.add hpow : Continuous (fun y : MorseModel (m + 1) =>
+                2 * ε + ‖posPart hk y‖ ^ 2)))
+          · exact ne_of_gt (by positivity : 0 < Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))
+        exact hsqrt.smul (continuous_negPart hk))
+    · exact (continuous_closedCellClamp (m + 1 - k)).comp (by
+        have hscalar : Continuous (fun _ : MorseModel (m + 1) => (r⁻¹ : ℝ)) := continuous_const
+        exact hscalar.smul (continuous_posPart hk))
+  have hmain : Continuous (fun y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} =>
+      Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+        (modelHandleMapRawSymm hk ε r (y.1 : MorseModel (m + 1)))) := by
+    exact (continuous_cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))).comp (hraw.comp hproj)
+  exact Continuous.subtype_mk hmain (fun y => Or.inr ⟨modelHandleMapRawSymm hk ε r (y.1 : MorseModel (m + 1)), by
+    exact lt_of_le_of_lt (modelHandleMap_norm_le hk ε r (le_of_lt hε)
+      (modelHandleMapRawSymm hk ε r (y.1 : MorseModel (m + 1)))) hεr', rfl⟩)
+
 noncomputable def morseBeltMapOnOpen_inv {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
@@ -5119,6 +5171,46 @@ noncomputable def morseBeltCellMapExt {m k : ℕ} (hk : k ≤ m + 1) (c ε r : �
       · exact False.elim (hy hcell)
     exact morseBeltLowerMap hk c ε r data hε hεr' y hlow
 
+theorem morseBeltCellMapExt_eq_clamped {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data})
+    (hgt : c - ε < morseNormalForm hk c (y.1 : MorseModel (m + 1))) :
+    morseBeltCellMapExt hk c ε r data hε hεr' hr y =
+      morseBeltCellMapClamped hk c ε r data hε hεr' y := by
+  have hmem : (y.1 : MorseModel (m + 1)) ∈ modelHandle hk ε r := by
+    rcases y.2.2 with hlow | hcell
+    · exact False.elim ((not_le_of_gt hgt) hlow)
+    · exact hcell
+  dsimp [morseBeltCellMapExt, morseBeltCellMapClamped, morseBeltCellMap]
+  rw [dif_pos hmem]
+  apply Subtype.ext
+  change Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      ((morseModelHandleMapHomeo hk ε r hε hr).symm ⟨(y.1 : MorseModel (m + 1)), hmem⟩) =
+    Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      (modelHandleMapRawSymm hk ε r (y.1 : MorseModel (m + 1)))
+  rw [← modelHandleMapRawSymm_eq_symm hk ε r hε hr (y.1 : MorseModel (m + 1)) hmem]
+
+theorem morseBeltCellMapExt_eq_clamped_boundary {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data})
+    (hy : (y.1 : MorseModel (m + 1)) ∈ modelHandle hk ε r) :
+    morseBeltCellMapExt hk c ε r data hε hεr' hr y =
+      morseBeltCellMapClamped hk c ε r data hε hεr' y := by
+  dsimp [morseBeltCellMapExt, morseBeltCellMapClamped, morseBeltCellMap]
+  rw [dif_pos hy]
+  apply Subtype.ext
+  change Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      ((morseModelHandleMapHomeo hk ε r hε hr).symm ⟨(y.1 : MorseModel (m + 1)), hy⟩) =
+    Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      (modelHandleMapRawSymm hk ε r (y.1 : MorseModel (m + 1)))
+  rw [← modelHandleMapRawSymm_eq_symm hk ε r hε hr (y.1 : MorseModel (m + 1)) hy]
+
 theorem morseBeltCellMapExt_eq_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
@@ -5386,6 +5478,111 @@ theorem continuousOn_morseBeltCellMapExt_le {m k : ℕ} (hk : k ≤ m + 1) (c ε
       rw [dif_neg hy']
   rw [continuousOn_iff_continuous_restrict]
   simpa [S] using (continuousOn_univ.mp hmain3)
+
+theorem continuous_morseBeltCellMapExt {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r) :
+    Continuous (morseBeltCellMapExt hk c ε r data hε hεr' hr) := by
+  rw [continuous_iff_continuousAt]
+  intro y₀
+  have hunion : Set.univ =
+      ({y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} |
+        c - ε < morseNormalForm hk c (y.1 : MorseModel (m + 1))} : Set
+          {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data}) ∪
+        {y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} |
+          morseNormalForm hk c (y.1 : MorseModel (m + 1)) ≤ c - ε} := by
+    ext y
+    constructor
+    · intro hy
+      by_cases h : c - ε < morseNormalForm hk c (y.1 : MorseModel (m + 1))
+      · exact Or.inl h
+      · exact Or.inr (not_lt.mp h)
+    · intro hy
+      trivial
+  by_cases hb : morseNormalForm hk c (y₀.1 : MorseModel (m + 1)) = c - ε
+  · by_cases hy₀ : (y₀.1 : MorseModel (m + 1)) ∈ modelHandle hk ε r
+    · rw [← continuousWithinAt_univ, hunion, continuousWithinAt_union]
+      constructor
+      · have hcongr : (morseBeltCellMapExt hk c ε r data hε hεr' hr) =ᶠ[
+            nhdsWithin y₀ {y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} |
+              c - ε < morseNormalForm hk c (y.1 : MorseModel (m + 1))}]
+            (morseBeltCellMapClamped hk c ε r data hε hεr') := by
+          filter_upwards [self_mem_nhdsWithin] with y hy
+          exact morseBeltCellMapExt_eq_clamped hk c ε r data hε hεr' hr y hy
+        have hval : morseBeltCellMapExt hk c ε r data hε hεr' hr y₀ =
+            morseBeltCellMapClamped hk c ε r data hε hεr' y₀ := by
+          exact morseBeltCellMapExt_eq_clamped_boundary hk c ε r data hε hεr' hr y₀ hy₀
+        exact (Filter.EventuallyEq.congr_continuousWithinAt hcongr hval).mpr
+          (continuous_morseBeltCellMapClamped hk c ε r data hε hεr').continuousAt.continuousWithinAt
+      · exact (continuousOn_morseBeltCellMapExt_le hk c ε r data hε hεr' hr) y₀ (le_of_eq hb)
+    · rw [← continuousWithinAt_univ, hunion, continuousWithinAt_union]
+      constructor
+      · have hbot : nhdsWithin y₀ {y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} |
+            c - ε < morseNormalForm hk c (y.1 : MorseModel (m + 1))} = ⊥ := by
+          rw [← notMem_closure_iff_nhdsWithin_eq_bot]
+          intro hycl
+          have hsub : {y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} |
+                c - ε < morseNormalForm hk c (y.1 : MorseModel (m + 1))} ⊆
+              {y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} |
+                (y.1 : MorseModel (m + 1)) ∈ modelHandle hk ε r} := by
+            intro y hy
+            rcases y.2.2 with hlow | hcell
+            · exact False.elim ((not_le_of_gt hy) hlow)
+            · exact hcell
+          have hclosed : IsClosed {y : {y' : morseUpperSublevel hk c r // y' ∈ morseBeltImage hk c ε r data} |
+              (y.1 : MorseModel (m + 1)) ∈ modelHandle hk ε r} := by
+            have hcl : IsClosed (modelHandle hk ε r : Set (MorseModel (m + 1))) := by
+              rw [modelHandle_eq_inter hk c ε r (le_of_lt hr)]
+              exact IsClosed.inter (isClosed_le (continuous_norm.comp (continuous_posPart hk)) continuous_const)
+                (isClosed_le continuous_const (CellAttachment.contDiff_morseNormalForm hk c).continuous)
+            exact hcl.preimage (continuous_subtype_val.comp continuous_subtype_val)
+          exact hy₀ (hclosed.closure_subset_iff.mpr hsub hycl)
+        simp [ContinuousWithinAt, hbot]
+      · exact (continuousOn_morseBeltCellMapExt_le hk c ε r data hε hεr' hr) y₀ (le_of_eq hb)
+  · by_cases hgt : c - ε < morseNormalForm hk c (y₀.1 : MorseModel (m + 1))
+    · exact (continuousOn_morseBeltCellMapExt_cell hk c ε r data hε hεr' hr) y₀ hgt |>.continuousAt
+        (IsOpen.mem_nhds (isOpen_lt continuous_const
+          ((CellAttachment.contDiff_morseNormalForm hk c).continuous.comp
+            (continuous_subtype_val.comp continuous_subtype_val))) hgt)
+    · have hlt : morseNormalForm hk c (y₀.1 : MorseModel (m + 1)) < c - ε := by
+        exact lt_of_le_of_ne (not_lt.mp hgt) hb
+      exact (continuousOn_morseBeltCellMapExt_lower hk c ε r data hε hεr' hr) y₀ hlt |>.continuousAt
+        (IsOpen.mem_nhds (isOpen_lt
+          ((CellAttachment.contDiff_morseNormalForm hk c).continuous.comp
+            (continuous_subtype_val.comp continuous_subtype_val)) continuous_const) hlt)
+
+theorem continuous_morseBeltMapOnOpen_inv {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r) :
+    Continuous (morseBeltMapOnOpen_inv hk c ε r data hε hεr' hr) := by
+  refine continuous_morseBeltCellMapExt hk c ε r data hε hεr' hr |>.congr ?_
+  intro y
+  exact (morseBeltMapOnOpen_inv_eq_cellMapExt hk c ε r data hε hεr' hr y).symm
+
+noncomputable def morseBeltMapHomeoImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (hcont : Continuous f) :
+    {z : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) //
+        z ∈ morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')} ≃ₜ
+      {y : morseUpperSublevel hk c r // y ∈ morseBeltImage hk c ε r data} where
+  toFun := fun z => ⟨morseBeltMapOnOpen hk c ε r data hε hεr' z,
+    morseBeltMapOnOpen_mem_image hk c ε r data hε hεr' z⟩
+  invFun := morseBeltMapOnOpen_inv hk c ε r data hε hεr' hr
+  left_inv := fun z => morseBeltMapOnOpen_left_inv hk c ε r data hε hεr' hr hcont z
+  right_inv := fun y => by
+    apply Subtype.ext
+    simpa using (morseBeltMapOnOpen_right_inv hk c ε r data hε hεr' hr y)
+  continuous_toFun := Continuous.subtype_mk (continuous_morseBeltMapOnOpen hk c ε r data hε hεr')
+    (fun z => morseBeltMapOnOpen_mem_image hk c ε r data hε hεr' z)
+  continuous_invFun := continuous_morseBeltMapOnOpen_inv hk c ε r data hε hεr' hr
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
