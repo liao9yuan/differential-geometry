@@ -3388,6 +3388,89 @@ theorem scalarForcingCoeff_iteratedDeriv
       scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t := by
   exact congrFun (scalarForcingCoeff_iteratedDeriv_fun (I := I) (M := M) g hf i r) t
 
+omit [NeZero (Module.finrank ℝ E)] in
+private lemma tensorSymm_smoothToLp_duhamel
+    (g : SmoothRiemannianMetric I M) (F : SmoothScalar g) :
+    (tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g F) =
+      SmoothCcTensor.toL2 (scalarCcLift g F) := by
+  have hU0 : (tensor00ScalarL2Equiv g) (SmoothCcTensor.toL2 (scalarCcLift g F)) =
+      smoothToLp (I := I) (M := M) g F := by
+    change tensor00ToScalarL2 g (SmoothCcTensor.toL2 (scalarCcLift g F)) =
+      smoothToLp (I := I) (M := M) g F
+    rw [tensor00ToScalarL2_toL2]
+    exact scalar0ToLp_scalarCcLift (I := I) (M := M) g F
+  simpa using congrArg (tensor00ScalarL2Equiv g).symm hU0.symm
+
+private lemma scalarEigenCoeff_eq_tensorCoeff
+    (g : SmoothRiemannianMetric I M) (F : SmoothScalar g) (i : TensorEigenIdx00 g) :
+    ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g F⟫_ℝ =
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+        (SmoothCcTensor.toL2 (scalarCcLift g F)) i := by
+  classical
+  set L := tensor00ScalarL2Equiv g
+  set b' := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+  have hb : L (b' i) = scalarEigenFunctionLp g i := by
+    rw [show b' i = (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) by
+      simp [b', eigenvectorSmooth_toL2]]
+    exact (scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i).symm
+  calc
+    ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g F⟫_ℝ
+        = ⟪L (b' i), L (L.symm (smoothToLp (I := I) (M := M) g F))⟫_ℝ := by
+          rw [hb]
+          simp [LinearIsometry.inner_map_map L.toLinearIsometry (b' i)
+            (L.symm (smoothToLp (I := I) (M := M) g F))).symm
+    _ = ⟪b' i, L.symm (smoothToLp (I := I) (M := M) g F)⟫_ℝ := by
+          simp [LinearIsometry.inner_map_map L.toLinearIsometry (b' i)
+            (L.symm (smoothToLp (I := I) (M := M) g F))]
+    _ = (b'.repr (L.symm (smoothToLp (I := I) (M := M) g F))) i := by
+          simp [HilbertBasis.repr_apply_apply]
+    _ = tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+          (SmoothCcTensor.toL2 (scalarCcLift g F)) i := by
+          rw [tensorSymm_smoothToLp_duhamel (I := I) (M := M) g F]
+          rfl
+
+private lemma scalarCoeff_sq_summable
+    (g : SmoothRiemannianMetric I M)
+    (v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
+    Summable (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, v⟫_ℝ ^ 2) := by
+  classical
+  set b' := tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+  set L := tensor00ScalarL2Equiv g
+  have hsum : Summable (fun i : TensorEigenIdx00 g =>
+      ‖⟪b' i, L.symm v⟫_ℝ‖ ^ 2) :=
+    b'.orthonormal.inner_products_summable (L.symm v)
+  refine Summable.congr hsum ?_
+  intro i
+  have hb : L (b' i) = scalarEigenFunctionLp g i := by
+    rw [show b' i = (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g) by
+      simp [b', eigenvectorSmooth_toL2]]
+    exact (scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i).symm
+  have hinner : ⟪b' i, L.symm v⟫_ℝ = ⟪scalarEigenFunctionLp g i, v⟫_ℝ := by
+    calc
+      ⟪b' i, L.symm v⟫_ℝ = ⟪L (b' i), L (L.symm v)⟫_ℝ := by
+            simpa using (LinearIsometry.inner_map_map L.toLinearIsometry (b' i) (L.symm v)).symm
+      _ = ⟪scalarEigenFunctionLp g i, v⟫_ℝ := by
+            rw [hb, LinearIsometryEquiv.apply_symm_apply]
+  simp [hinner, Real.norm_eq_abs, sq_abs]
+
+private lemma scalarForcingCoeff_deriv_eq
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f) (i : TensorEigenIdx00 g) (t : ℝ) :
+    deriv (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t =
+      scalarForcingCoeff (I := I) (M := M) g (deriv f) i t := by
+  have h := scalarForcingCoeff_iteratedDeriv (I := I) (M := M) g hf i 1 t
+  have h1 : iteratedDeriv 1 (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t =
+      deriv (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t :=
+    congrFun (iteratedDeriv_one (f := fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s)) t
+  rw [← h1, h]
+  rw [iteratedDeriv_one]
+
 private lemma enat_coe_le_top (r : ℕ) :
     ((r : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) :=
   WithTop.coe_le_coe.mpr (le_top : (r : ℕ∞) ≤ (⊤ : ℕ∞))
