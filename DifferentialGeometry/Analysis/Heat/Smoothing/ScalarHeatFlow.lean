@@ -2707,7 +2707,6 @@ theorem scalarHeatFlowSmoothInitialSlice_toL2_eq_heatSemigroup
         smoothToLp (I := I) (M := M) g u₀
       rw [tensor00ToScalarL2_toL2]
       exact scalar0ToLp_scalarCcLift (I := I) (M := M) g u₀
-    -- the [0,T] slice equals the [ε,T] slice pointwise
     have hsame : scalarHeatFlowSmoothInitialSlice g u₀ htail ht =
         scalarHeatFlowSlice g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε ht' := by
       apply SmoothScalar.ext
