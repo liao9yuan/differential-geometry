@@ -5,6 +5,8 @@ import DifferentialGeometry.Analysis.Heat.Semigroup.Mass
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Spectral.Scalar.EigenIdx
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Comparison
+import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotentialStrong
 
 noncomputable section
 
@@ -2672,6 +2674,81 @@ theorem scalarHeatFlow_isHeatOnStationary_smoothInitial
             unfold laplacianAt stationaryMetricFamily
             simp [zero_mul, add_zero]
             rfl
+
+theorem scalarHeatFlowSmoothInitialSlice_toL2_eq_heatSemigroup
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
+    smoothToLp (I := I) (M := M) g
+        (scalarHeatFlowSmoothInitialSlice g u₀ htail ht) =
+      heatSemigroup (I := I) (M := M) g t (smoothToLp (I := I) (M := M) g u₀) := by
+  classical
+  by_cases ht0 : t = 0
+  · subst ht0
+    rw [show heatSemigroup (I := I) (M := M) g 0 (smoothToLp (I := I) (M := M) g u₀) =
+        smoothToLp (I := I) (M := M) g u₀ by simp]
+    exact congrArg (smoothToLp (I := I) (M := M) g) (by
+      apply SmoothScalar.ext
+      funext x
+      dsimp [scalarHeatFlowSmoothInitialSlice]
+      exact scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x)
+  · have htpos : 0 < t := lt_of_le_of_ne (Set.mem_Icc.mp ht).1 (Ne.symm ht0)
+    have hε : 0 < t / 2 := half_pos htpos
+    have hεT : t / 2 < T := lt_of_lt_of_le (half_lt_self htpos) (Set.mem_Icc.mp ht).2
+    have ht' : t ∈ Set.Icc (t / 2) T :=
+      Set.mem_Icc.mpr ⟨(half_lt_self htpos).le, (Set.mem_Icc.mp ht).2⟩
+    have hslice := scalarHeatFlowSlice_toL2_eq_heatSemigroup (I := I) (M := M) g
+      (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε ht'
+    have hU : tensor00ScalarL2Equiv g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) =
+        smoothToLp (I := I) (M := M) g u₀ := by
+      change tensor00ToScalarL2 g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) =
+        smoothToLp (I := I) (M := M) g u₀
+      rw [tensor00ToScalarL2_toL2]
+      exact scalar0ToLp_scalarCcLift (I := I) (M := M) g u₀
+    -- the [0,T] slice equals the [ε,T] slice pointwise
+    have hsame : scalarHeatFlowSmoothInitialSlice g u₀ htail ht =
+        scalarHeatFlowSlice g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε ht' := by
+      apply SmoothScalar.ext
+      rfl
+    rw [hsame, ← hU]
+    exact hslice
+
+theorem scalarHeatFlowSmoothInitial_restrict_eq
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} {ε : ℝ} (hε0 : 0 < ε) (hεT : ε < T)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) :
+    scalarHeatFlowSmoothInitialSlice g u₀ htail
+        (Set.mem_Icc.mpr ⟨le_trans hε0.le (Set.mem_Icc.mp ht).1, (Set.mem_Icc.mp ht).2⟩) =
+      scalarHeatFlowSlice g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε0 ht := by
+  apply SmoothScalar.ext
+  rfl
+
+theorem scalarHeatFlow_smoothInitial_unique
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} (hT : 0 ≤ T)
+    (v : ℝ → M → ℝ)
+    (hv : DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+      (RealTimeInterval.closed 0 T hT) g v)
+    (hinit : ∀ x : M, v 0 x = u₀.toFun x) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+      v t x = scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t x := by
+  classical
+  have hu : DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+      (RealTimeInterval.closed 0 T hT) g
+      (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀))) :=
+    scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g u₀ htail hT
+  have hinit' : ∀ x : M,
+      scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) 0 x = v 0 x := by
+    intro x
+    rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x]
+    exact (hinit x).symm
+  have hle := DifferentialGeometry.Analysis.Parabolic.heat_eq_of_initial_eq
+    (I := I) (stationaryMetricFamily g) hT
+    (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀))) v hu hv hinit'
+  intro t ht x
+  exact (hle t ht x).symm
 
 end HeatEquation
 end Analysis
