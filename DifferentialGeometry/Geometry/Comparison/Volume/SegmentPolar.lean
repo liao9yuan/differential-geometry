@@ -100,6 +100,7 @@ namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.BonnetMyers
 open DifferentialGeometry.Geometry.Riemannian.Variation
+open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Integral.Measure
 
@@ -1644,5 +1645,319 @@ theorem segBall_vol_rel [ConnectedSpace M] [PseudoEMetricSpace M]
         * riemannianVolumeMeasure (I := I) (M := M) g
             {y : M | riemannianEDist I x y < ENNReal.ofReal s} := by
   sorry
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
+private lemma expMapIntrinsic_eq_scaled
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) (v : TangentSpace I x) (hvne : v ≠ 0) :
+    expMapIntrinsic (I := I) g hEnorm x v =
+      intrinsicGeodesic (I := I) g hEnorm x
+        ((Real.sqrt (g.inner x v v))⁻¹ • v) (Real.sqrt (g.inner x v v)) := by
+  let ℓ : ℝ := Real.sqrt (g.inner x v v)
+  have hℓ0 : ℓ ≠ 0 := by
+    dsimp [ℓ]
+    exact ne_of_gt (Real.sqrt_pos.2 (g.pos x v hvne))
+  calc
+    expMapIntrinsic (I := I) g hEnorm x v =
+        intrinsicGeodesic (I := I) g hEnorm x v 1 := by
+          rw [expMapIntrinsic_def]
+    _ = intrinsicGeodesic (I := I) g hEnorm x (ℓ • (ℓ⁻¹ • v)) 1 := by
+          rw [smul_smul, mul_inv_cancel₀ hℓ0, one_smul]
+    _ = intrinsicGeodesic (I := I) g hEnorm x (ℓ⁻¹ • v) ℓ := by
+          rw [intrinsicGeodesic_smul (I := I) g hEnorm x (ℓ⁻¹ • v) ℓ]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+private lemma gUnit_speedSq_one
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (x : M) (v : TangentSpace I x) (hvne : v ≠ 0) :
+    g.inner x (((Real.sqrt (g.inner x v v))⁻¹ • v) : TangentSpace I x)
+      (((Real.sqrt (g.inner x v v))⁻¹ • v) : TangentSpace I x) = 1 := by
+  have hpos : 0 < g.inner x v v := g.pos x v hvne
+  have hℓ : Real.sqrt (g.inner x v v) ≠ 0 := ne_of_gt (Real.sqrt_pos.2 hpos)
+  rw [gInner_smul_self (I := I) g x (Real.sqrt (g.inner x v v))⁻¹ v]
+  calc
+    ((Real.sqrt (g.inner x v v))⁻¹) ^ 2 * g.inner x v v =
+        ((Real.sqrt (g.inner x v v))⁻¹) ^ 2 * (Real.sqrt (g.inner x v v)) ^ 2 := by
+          rw [Real.sq_sqrt (le_of_lt hpos)]
+    _ = (((Real.sqrt (g.inner x v v))⁻¹) * Real.sqrt (g.inner x v v)) ^ 2 := by
+          rw [← mul_pow]
+    _ = 1 := by
+          rw [inv_mul_cancel₀ hℓ, one_pow]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
+private lemma segDom_ext_dist
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) (v : TangentSpace I x) (hvne : v ≠ 0) (ε : ℝ) (hε : 0 < ε)
+    (hseg : (((Real.sqrt (g.inner x v v) + ε) •
+        ((Real.sqrt (g.inner x v v))⁻¹ • v) : TangentSpace I x)) ∈
+        SegDom (I := I) g hEnorm x) :
+    riemannianEDist I x (intrinsicGeodesic (I := I) g hEnorm x
+        ((Real.sqrt (g.inner x v v))⁻¹ • v) (Real.sqrt (g.inner x v v) + ε))
+      = ENNReal.ofReal (Real.sqrt (g.inner x v v) + ε) := by
+  let ℓ : ℝ := Real.sqrt (g.inner x v v)
+  let u : TangentSpace I x := ℓ⁻¹ • v
+  have hℓ0 : 0 ≤ ℓ := by
+    dsimp [ℓ]
+    exact Real.sqrt_nonneg _
+  have hseg' : ((ℓ + ε) • u : TangentSpace I x) ∈ SegDom (I := I) g hEnorm x := by
+    simpa [ℓ, u, smul_smul, mul_assoc] using hseg
+  have hmem : (riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x ((ℓ + ε) • u))).toReal
+      = Real.sqrt (g.inner x ((ℓ + ε) • u) ((ℓ + ε) • u)) := by
+    exact ((mem_segDom (I := I) (g := g) (hEnorm := hEnorm) (x := x)
+      (v := ((ℓ + ε) • u : TangentSpace I x))).mp hseg').symm
+  have hsqrt : Real.sqrt (g.inner x ((ℓ + ε) • u) ((ℓ + ε) • u)) = ℓ + ε := by
+    rw [gInner_smul_self (I := I) g x (ℓ + ε) u]
+    have hu : g.inner x u u = 1 := by
+      simpa [u, ℓ] using gUnit_speedSq_one (I := I) g x v hvne
+    rw [hu, mul_one]
+    have hℓε : 0 ≤ ℓ + ε := le_trans hℓ0 (le_of_lt (lt_add_of_pos_right ℓ hε))
+    exact Real.sqrt_sq hℓε
+  have heq : expMapIntrinsic (I := I) g hEnorm x ((ℓ + ε) • u) =
+      intrinsicGeodesic (I := I) g hEnorm x u (ℓ + ε) := by
+    rw [expMapIntrinsic_def, intrinsicGeodesic_smul (I := I) g hEnorm x u (ℓ + ε)]
+  rw [← heq]
+  have hfin : riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x ((ℓ + ε) • u)) ≠ ⊤ := by
+    have hto : (riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x ((ℓ + ε) • u))).toReal
+        = ℓ + ε := by
+      rw [hmem, hsqrt]
+    by_contra htop
+    rw [htop, ENNReal.toReal_top] at hto
+    linarith [hε, hℓ0]
+  rw [← ENNReal.ofReal_toReal hfin]
+  rw [hmem, hsqrt]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
+private lemma segDom_same_length
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {v w : TangentSpace I x}
+    (hvseg : v ∈ SegDom (I := I) g hEnorm x)
+    (hwseg : w ∈ SegDom (I := I) g hEnorm x)
+    (hvw : expMapIntrinsic (I := I) g hEnorm x v = expMapIntrinsic (I := I) g hEnorm x w) :
+    Real.sqrt (g.inner x v v) = Real.sqrt (g.inner x w w) := by
+  have h1 : Real.sqrt (g.inner x v v)
+      = (riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x v)).toReal :=
+    (mem_segDom (I := I) (g := g) (hEnorm := hEnorm) (x := x) (v := v)).mp hvseg
+  have h2 : Real.sqrt (g.inner x w w)
+      = (riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x w)).toReal :=
+    (mem_segDom (I := I) (g := g) (hEnorm := hEnorm) (x := x) (v := w)).mp hwseg
+  rw [h1, h2]
+  congr 1
+  rw [hvw]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+private lemma mfderiv_shift_apply
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I (∞ : WithTop ℕ∞) γ) (T a : ℝ) :
+    (mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => γ (s + T)) a (1 : ℝ) : E)
+      = (mfderiv 𝓘(ℝ, ℝ) I γ (a + T) (1 : ℝ) : E) := by
+  have hshift : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s : ℝ => s + T)
+      a (ContinuousLinearMap.id ℝ ℝ) := by
+    rw [hasMFDerivAt_iff_hasFDerivAt]
+    exact (hasFDerivAt_id a).add_const T
+  have hγ_at : HasMFDerivAt 𝓘(ℝ, ℝ) I γ (a + T) (mfderiv 𝓘(ℝ, ℝ) I γ (a + T)) := by
+    exact (hγ.contMDiffAt.mdifferentiableAt (by norm_num)).hasMFDerivAt
+  have hη_mfderiv : mfderiv 𝓘(ℝ, ℝ) I (γ ∘ (fun s : ℝ => s + T)) a
+      = (mfderiv 𝓘(ℝ, ℝ) I γ (a + T)).comp (ContinuousLinearMap.id ℝ ℝ) :=
+    (hγ_at.comp a hshift).mfderiv
+  change (mfderiv 𝓘(ℝ, ℝ) I (γ ∘ (fun s : ℝ => s + T)) a (1 : ℝ) : E)
+      = (mfderiv 𝓘(ℝ, ℝ) I γ (a + T) (1 : ℝ) : E)
+  rw [hη_mfderiv]
+  change (mfderiv 𝓘(ℝ, ℝ) I γ (a + T)) ((ContinuousLinearMap.id ℝ ℝ) (1 : ℝ))
+      = (mfderiv 𝓘(ℝ, ℝ) I γ (a + T)) (1 : ℝ)
+  simp
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
+private lemma expMapIntrinsic_injective_early
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {v w : TangentSpace I x}
+    (hvseg : v ∈ SegDom (I := I) g hEnorm x)
+    (hwseg : w ∈ SegDom (I := I) g hEnorm x)
+    (hvne : v ≠ 0) (hwne : w ≠ 0)
+    (hvw : expMapIntrinsic (I := I) g hEnorm x v = expMapIntrinsic (I := I) g hEnorm x w)
+    {ε : ℝ} (hε : 0 < ε)
+    (hext : (((Real.sqrt (g.inner x v v) + ε) •
+        ((Real.sqrt (g.inner x v v))⁻¹ • v) : TangentSpace I x)) ∈
+        SegDom (I := I) g hEnorm x) :
+    v = w := by
+  let ℓ : ℝ := Real.sqrt (g.inner x v v)
+  have hℓpos : 0 < ℓ := by
+    dsimp [ℓ]
+    exact Real.sqrt_pos.2 (g.pos x v hvne)
+  have hℓne : ℓ ≠ 0 := ne_of_gt hℓpos
+  have hℓnonneg : 0 ≤ ℓ := le_of_lt hℓpos
+  let u : TangentSpace I x := ℓ⁻¹ • v
+  have hu : g.inner x u u = 1 := by
+    simpa [u, ℓ] using gUnit_speedSq_one (I := I) g x v hvne
+  have hℓw : Real.sqrt (g.inner x w w) = ℓ := by
+    dsimp [ℓ]
+    exact (segDom_same_length (I := I) g hEnorm x (v := v) (w := w) hvseg hwseg hvw).symm
+  let uw : TangentSpace I x := ℓ⁻¹ • w
+  have huw : g.inner x uw uw = 1 := by
+    simpa [uw, ← hℓw] using gUnit_speedSq_one (I := I) g x w hwne
+  let γv : ℝ → M := intrinsicGeodesic (I := I) g hEnorm x u
+  let γw : ℝ → M := intrinsicGeodesic (I := I) g hEnorm x uw
+  have hγv_geo : IsGeodesic (I := I) g γv := by
+    simpa [γv] using intrinsicGeodesic_isGeodesic (I := I) g hEnorm x u
+  have hγw_geo : IsGeodesic (I := I) g γw := by
+    simpa [γw] using intrinsicGeodesic_isGeodesic (I := I) g hEnorm x uw
+  have hγv_cont : Continuous γv := by
+    simpa [γv] using intrinsicGeodesic_continuous (I := I) g hEnorm x u
+  have hγw_cont : Continuous γw := by
+    simpa [γw] using intrinsicGeodesic_continuous (I := I) g hEnorm x uw
+  have hγv_smooth : ContMDiff 𝓘(ℝ, ℝ) I (∞ : WithTop ℕ∞) γv := by
+    simpa [γv] using intrinsicGeodesic_contMDiff (I := I) g hEnorm x u
+  have hγw_smooth : ContMDiff 𝓘(ℝ, ℝ) I (∞ : WithTop ℕ∞) γw := by
+    simpa [γw] using intrinsicGeodesic_contMDiff (I := I) g hEnorm x uw
+  have hγv_unit : ∀ t ∈ Set.Icc 0 ℓ,
+      g.inner (γv t) (mfderiv 𝓘(ℝ, ℝ) I γv t (1 : ℝ))
+        (mfderiv 𝓘(ℝ, ℝ) I γv t (1 : ℝ)) = 1 := by
+    intro t ht
+    simpa [γv, hu] using intrinsicGeodesic_speedSq_eq (I := I) g hEnorm x u t
+  have hγw_unit : ∀ t ∈ Set.Icc 0 ℓ,
+      g.inner (γw t) (mfderiv 𝓘(ℝ, ℝ) I γw t (1 : ℝ))
+        (mfderiv 𝓘(ℝ, ℝ) I γw t (1 : ℝ)) = 1 := by
+    intro t ht
+    simpa [γw, huw] using intrinsicGeodesic_speedSq_eq (I := I) g hEnorm x uw t
+  have hγvℓ : γv ℓ = expMapIntrinsic (I := I) g hEnorm x v := by
+    symm
+    simpa [γv, u, ℓ] using expMapIntrinsic_eq_scaled (I := I) g hEnorm x v hvne
+  have hγwℓ : γw ℓ = expMapIntrinsic (I := I) g hEnorm x w := by
+    symm
+    simpa [γw, uw, hℓw, ℓ] using expMapIntrinsic_eq_scaled (I := I) g hEnorm x w hwne
+  have hγvγw : γv ℓ = γw ℓ := by
+    rw [hγvℓ, hγwℓ, hvw]
+  have hγv0 : γv 0 = x := by simp [γv]
+  have hγw0 : γw 0 = x := by simp [γw]
+  let σ : ℝ → M := fun s => γv (s + ℓ)
+  have hσgeo : IsGeodesicOn (I := I) g σ (Set.Icc 0 ε) := by
+    have hfull : IsGeodesicOn (I := I) g σ Set.univ := by
+      change IsGeodesicOn (I := I) g (fun s : ℝ => γv (s + ℓ)) Set.univ
+      exact (isGeodesic_comp_add hγv_geo ℓ).isGeodesicOn Set.univ
+    exact hfull.mono (Set.subset_univ _)
+  have hσsmooth : ContMDiff 𝓘(ℝ, ℝ) I (∞ : WithTop ℕ∞) σ := by
+    have hadd : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) (fun s : ℝ => s + ℓ) := by
+      exact (contMDiff_id : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
+        (fun s : ℝ => s)).add
+        (contMDiff_const : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
+          (fun _ : ℝ => ℓ))
+    exact hγv_smooth.comp hadd
+  have hσunit : ∀ t ∈ Set.Icc 0 ε,
+      g.inner (σ t) (mfderiv 𝓘(ℝ, ℝ) I σ t (1 : ℝ))
+        (mfderiv 𝓘(ℝ, ℝ) I σ t (1 : ℝ)) = 1 := by
+    intro t ht
+    have hspe := intrinsicGeodesic_speedSq_eq (I := I) g hEnorm x u (t + ℓ)
+    have hσ' : σ t = γv (t + ℓ) := rfl
+    have hmfd : (mfderiv 𝓘(ℝ, ℝ) I σ t (1 : ℝ) : E) = (mfderiv 𝓘(ℝ, ℝ) I γv (t + ℓ) (1 : ℝ) : E) := by
+      have h := mfderiv_shift_apply (I := I) (γ := γv) hγv_smooth ℓ t
+      simpa [σ] using h
+    rw [hσ', hmfd]
+    simpa [γv, hu] using hspe
+  have hmin : riemannianEDist I (γw 0) (σ ε) = ENNReal.ofReal (ℓ + ε) := by
+    have hd : riemannianEDist I x (intrinsicGeodesic (I := I) g hEnorm x u (ε + ℓ))
+        = ENNReal.ofReal (ℓ + ε) := by
+      simpa [ℓ, u, add_comm] using segDom_ext_dist (I := I) g hEnorm x v hvne ε hε hext
+    simpa [σ, hγw0, add_comm] using hd
+  have hvel : mfderiv 𝓘(ℝ, ℝ) I γw ℓ (1 : ℝ) = mfderiv 𝓘(ℝ, ℝ) I γv ℓ (1 : ℝ) := by
+    have hbm := broken_minimizer_velocity_match (I := I) g hEnorm
+      (ℓ₁ := ℓ) (ℓ₂ := ε) (γ := γw) (σ := σ)
+      hℓpos hε (hγw_geo.isGeodesicOn (Set.Icc 0 ℓ)) hσgeo hγw_smooth hσsmooth
+      hγw_unit hσunit (hjunc := by simpa [σ] using hγvγw.symm) hmin
+    have hσ0 : mfderiv 𝓘(ℝ, ℝ) I σ 0 (1 : ℝ) = mfderiv 𝓘(ℝ, ℝ) I γv ℓ (1 : ℝ) := by
+      have h := mfderiv_shift_apply (I := I) (γ := γv) hγv_smooth ℓ 0
+      rw [zero_add] at h
+      simpa [σ] using h
+    rw [← hσ0]
+    exact hbm
+  let η₁ : ℝ → M := fun s => γw (s + ℓ)
+  let η₂ : ℝ → M := fun s => γv (s + ℓ)
+  have hη₁_geo : IsGeodesic (I := I) g η₁ := by
+    simpa [η₁] using isGeodesic_comp_add hγw_geo ℓ
+  have hη₂_geo : IsGeodesic (I := I) g η₂ := by
+    simpa [η₂] using isGeodesic_comp_add hγv_geo ℓ
+  have hη₁_cont : Continuous η₁ := hγw_cont.comp (by fun_prop)
+  have hη₂_cont : Continuous η₂ := hγv_cont.comp (by fun_prop)
+  have hη0 : η₁ 0 = η₂ 0 := by
+    simpa [η₁, η₂] using hγvγw.symm
+  have hηvel : (mfderiv 𝓘(ℝ, ℝ) I η₁ 0 (1 : ℝ) : E) = (mfderiv 𝓘(ℝ, ℝ) I η₂ 0 (1 : ℝ) : E) := by
+    have h1 : (mfderiv 𝓘(ℝ, ℝ) I η₁ 0 (1 : ℝ) : E)
+        = (mfderiv 𝓘(ℝ, ℝ) I γw ℓ (1 : ℝ) : E) := by
+      have h := mfderiv_shift_apply (I := I) (γ := γw) hγw_smooth ℓ 0
+      rw [zero_add] at h
+      simpa [η₁] using h
+    have h2 : (mfderiv 𝓘(ℝ, ℝ) I η₂ 0 (1 : ℝ) : E)
+        = (mfderiv 𝓘(ℝ, ℝ) I γv ℓ (1 : ℝ) : E) := by
+      have h := mfderiv_shift_apply (I := I) (γ := γv) hγv_smooth ℓ 0
+      rw [zero_add] at h
+      simpa [η₂] using h
+    rw [h1, h2]
+    exact hvel
+  have hηeq : η₁ = η₂ :=
+    isGeodesic_eq_of_initial (I := I) g hη₁_geo hη₂_geo hη₁_cont hη₂_cont hη0 hηvel
+  have hu0 : (u : E) = (uw : E) := by
+    have h1 : (mfderiv 𝓘(ℝ, ℝ) I η₁ (-ℓ) (1 : ℝ) : E)
+        = (mfderiv 𝓘(ℝ, ℝ) I γw 0 (1 : ℝ) : E) := by
+      have h := mfderiv_shift_apply (I := I) (γ := γw) hγw_smooth ℓ (-ℓ)
+      have hneg : (-ℓ + ℓ : ℝ) = 0 := by ring
+      rw [hneg] at h
+      simpa [η₁] using h
+    have h2 : (mfderiv 𝓘(ℝ, ℝ) I η₂ (-ℓ) (1 : ℝ) : E)
+        = (mfderiv 𝓘(ℝ, ℝ) I γv 0 (1 : ℝ) : E) := by
+      have h := mfderiv_shift_apply (I := I) (γ := γv) hγv_smooth ℓ (-ℓ)
+      have hneg : (-ℓ + ℓ : ℝ) = 0 := by ring
+      rw [hneg] at h
+      simpa [η₂] using h
+    have hmf : (mfderiv 𝓘(ℝ, ℝ) I η₁ (-ℓ) (1 : ℝ) : E)
+        = (mfderiv 𝓘(ℝ, ℝ) I η₂ (-ℓ) (1 : ℝ) : E) := by
+      rw [hηeq]
+    rw [h1, h2] at hmf
+    have hγw0v : (mfderiv 𝓘(ℝ, ℝ) I γw 0 (1 : ℝ) : E) = (uw : E) := by
+      simpa [γw] using intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm x uw
+    have hγv0v : (mfderiv 𝓘(ℝ, ℝ) I γv 0 (1 : ℝ) : E) = (u : E) := by
+      simpa [γv] using intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm x u
+    rw [hγw0v, hγv0v] at hmf
+    exact hmf.symm
+  have hv : (v : E) = (w : E) := by
+    calc
+      (v : E) = (ℓ • u : E) := by
+        dsimp [u]
+        rw [smul_smul, mul_inv_cancel₀ hℓne, one_smul]
+      _ = (ℓ • uw : E) := by rw [hu0]
+      _ = (w : E) := by
+        dsimp [uw]
+        rw [smul_smul, mul_inv_cancel₀ hℓne, one_smul]
+  exact hv
 
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison
