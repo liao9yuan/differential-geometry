@@ -3913,6 +3913,44 @@ noncomputable def modelSharpUnionRoundingHomeo {n k : ℕ} (hk : k ≤ n) (c ε 
       intro z
       exact modelSharpUnionUnround_mem_sharpUnion hk c ε r δ hδ0 hδr z.2)
 
+noncomputable def modelAttachedRegionEquivUpper {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    {y : MorseModel n // y ∈ modelAttachedRegion hk ε r δ} ≃ₜ
+      {y : MorseModel n // morseNormalForm hk c y ≤ c + r ^ 2 / 2} where
+  toFun := fun y => ⟨modelAttachedUnstretch hk ε r δ y.1,
+    (modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).2.1 y.1 y.2⟩
+  invFun := fun z => ⟨modelAttachedStretch hk ε r δ z.1,
+    (modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).1 z.1 z.2⟩
+  left_inv := by
+    intro y
+    apply Subtype.ext
+    exact (modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).2.2.2.1 y.1 y.2
+  right_inv := by
+    intro z
+    apply Subtype.ext
+    exact (modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).2.2.1 z.1 z.2
+  continuous_toFun := Continuous.subtype_mk
+    ((modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).2.2.2.2.2.continuous.comp
+      continuous_subtype_val) (by
+        intro y
+        exact (modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).2.1 y.1 y.2)
+  continuous_invFun := Continuous.subtype_mk
+    ((modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).2.2.2.2.1.continuous.comp
+      continuous_subtype_val) (by
+        intro z
+        exact (modelAttachedStretch_equiv hk c ε r δ hδ0 hδr hr).1 z.1 z.2)
+
+noncomputable def modelSharpUnionToUpperHomeo {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) :
+    {y : MorseModel n // y ∈ (sublevel (morseNormalForm hk c) (c - ε) : Set (MorseModel n)) ∪
+      modelHandle hk ε r} ≃ₜ
+      {y : MorseModel n // morseNormalForm hk c y ≤ c + r ^ 2 / 2} :=
+  (modelSharpUnionRoundingHomeo hk c ε r δ hδ0 hδr).trans
+    (modelAttachedRegionEquivUpper hk c ε r δ hδ0 hδr (by
+      intro h
+      rw [h] at hδr
+      nlinarith [hδ0, hδr]))
+
 end CellAttachment
 
 end
