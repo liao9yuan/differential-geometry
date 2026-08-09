@@ -3080,6 +3080,46 @@ theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
     (fun t ht => ⟨ht.1, le_trans ht.2 (by linarith)⟩)
     (fun t ht => ⟨ht.1, lt_trans ht.2 (by linarith)⟩) x
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
+theorem scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+    [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (hpos0 : ∀ x : M, 0 < u₀.toFun x)
+    {a b : ℝ} (ha : 0 < a) (hab : a < b) (x y : M) :
+    scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) a x ≤
+      (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+        Real.exp ((riemannianEDist I x y).toReal ^ 2 / (4 * (b - a))) *
+        scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) b y := by
+  classical
+  have hb1 : 0 ≤ b + 1 := by linarith
+  have hb1pos : 0 < b + 1 := by linarith
+  have hu := scalarHeatFlow_isHeatOnStationary_smoothInitial
+    (I := I) (M := M) g u₀ htail hb1
+  have huClosed := scalarHeatFlow_smoothInitial_contMDiffOn_closed
+    (I := I) (M := M) g u₀ htail hb1pos
+  have hpos := scalarHeatFlow_smoothInitial_strict_pos
+    (I := I) (M := M) g u₀ htail hb1 hpos0
+  exact DifferentialGeometry.Analysis.Parabolic.Harnack.heat_solution_harnack_of_nonnegative_ricci_on
+    (I := I) (M := M) g hEnorm hRic (RealTimeInterval.closed 0 (b + 1) hb1)
+    (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
+    hu huClosed hpos ha hab
+    (fun t ht => ⟨lt_of_lt_of_le ha ht.1, lt_of_le_of_lt ht.2 (by linarith)⟩)
+    (fun t ht => ⟨ht.1, le_trans ht.2 (by linarith)⟩)
+    (fun t ht => ⟨ht.1, lt_trans ht.2 (by linarith)⟩) x y
+
 end HeatEquation
 end Analysis
 end DifferentialGeometry
