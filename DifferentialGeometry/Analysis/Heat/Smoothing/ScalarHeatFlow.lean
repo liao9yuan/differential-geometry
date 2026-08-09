@@ -298,6 +298,11 @@ noncomputable def tensor00ScalarL2Equiv
   LinearIsometryEquiv.ofSurjective (tensor00ToScalarL2LI g)
     (tensor00ToScalarL2_surjective g)
 
+noncomputable def scalarHeatFlow
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : ℝ → M → ℝ :=
+  scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm u₀)
+
 noncomputable def scalarEigenFunction
     (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) : SmoothScalar g :=
   scalar0Cc g (eigenvectorSmooth g 0 0 i)
@@ -1037,13 +1042,21 @@ theorem scalarHeatFlowTensor_slice_contMDiff
     (g := fun q : ℝ × M => scalarHeatFlowTensor g u₀ q.1 q.2)
     (hg := hat) (hf := hslice_map)
 
-noncomputable def scalarHeatFlowTensorSliceTensor
+noncomputable def scalarHeatFlowSliceTensor
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (htail : EigenvalueTailSummable g 0 0)
     {a b : ℝ} (hab : a < b) (ha : 0 < a)
     {t : ℝ} (ht : t ∈ Set.Icc a b) : SmoothScalar g :=
   ⟨fun x => scalarHeatFlowTensor g u₀ t x,
     scalarHeatFlowTensor_slice_contMDiff (I := I) (M := M) g u₀ htail hab ha ht⟩
+
+noncomputable def scalarHeatFlowSlice
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {a b : ℝ} (hab : a < b) (ha : 0 < a)
+    {t : ℝ} (ht : t ∈ Set.Icc a b) : SmoothScalar g :=
+  scalarHeatFlowSliceTensor g ((tensor00ScalarL2Equiv g).symm u₀)
+    (scalar_eigen_tail (I := I) (M := M) g) hab ha ht
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma nat_add_neg_self (N q : ℕ) : (((N + q : ℕ) : ℝ) + (-(q : ℝ))) = (N : ℝ) := by
@@ -1223,19 +1236,19 @@ theorem scalarHeatCoeff_eq_inner_slice
     {a b : ℝ} (hab : a < b) (ha : 0 < a)
     {t : ℝ} (ht : t ∈ Set.Icc a b) (j : TensorEigenIdx00 g) :
     ⟪scalarEigenFunctionLp g j,
-        smoothToLp (I := I) (M := M) g (scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht)⟫_ℝ =
+        smoothToLp (I := I) (M := M) g (scalarHeatFlowSliceTensor g u₀ htail hab ha ht)⟫_ℝ =
       scalarHeatCoeff (I := I) (M := M) g u₀ j t := by
   classical
   let c : TensorEigenIdx00 g → ℝ := fun i => scalarHeatCoeff (I := I) (M := M) g u₀ i t
   let σ : ℝ := ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ)
-  let slice : SmoothScalar g := scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht
+  let slice : SmoothScalar g := scalarHeatFlowSliceTensor g u₀ htail hab ha ht
   let φj : SmoothScalar g := scalarEigenFunction g j
   set μ := riemannianVolumeMeasure (I := I) (M := M) g
   haveI : MeasureTheory.IsFiniteMeasure μ :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   have hslice (x : M) : slice.toFun x =
       ∑' i : TensorEigenIdx00 g, c i * (scalarEigenFunction g i).toFun x := by
-    dsimp [slice, scalarHeatFlowTensorSliceTensor, scalarHeatFlowTensor, c]
+    dsimp [slice, scalarHeatFlowSliceTensor, scalarHeatFlowTensor, c]
     unfold scalarSpecSum
     rfl
   let F : TensorEigenIdx00 g → M → ℝ := fun i x =>
@@ -1402,7 +1415,7 @@ theorem scalarHeatCoeff_eq_inner_slice
                     exact tsum_ite_eq j (fun _ => c j)
   calc
     ⟪scalarEigenFunctionLp g j,
-        smoothToLp (I := I) (M := M) g (scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht)⟫_ℝ
+        smoothToLp (I := I) (M := M) g (scalarHeatFlowSliceTensor g u₀ htail hab ha ht)⟫_ℝ
         = ∫ x : M, φj.toFun x * slice.toFun x ∂μ := by
           rw [← smoothToLp_inner_eq_integral_mul (I := I) (M := M) g φj slice]
           rfl
@@ -1442,22 +1455,22 @@ theorem scalarHeatCoeff_eq_inner_heatSemigroup
             (I := I) (M := M) g 0 0 ht u₀ j
     _ = scalarHeatCoeff (I := I) (M := M) g u₀ j t := rfl
 
-theorem scalarHeatFlowTensorSliceTensor_toL2_eq_heatSemigroup
+theorem scalarHeatFlowSliceTensor_toL2_eq_heatSemigroup
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (htail : EigenvalueTailSummable g 0 0)
     {a b : ℝ} (hab : a < b) (ha : 0 < a)
     {t : ℝ} (ht : t ∈ Set.Icc a b) :
-    smoothToLp (I := I) (M := M) g (scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht) =
+    smoothToLp (I := I) (M := M) g (scalarHeatFlowSliceTensor g u₀ htail hab ha ht) =
       heatSemigroup (I := I) (M := M) g t (tensor00ScalarL2Equiv g u₀) := by
   classical
   have ht0 : 0 ≤ t := le_trans (le_of_lt ha) (Set.mem_Icc.mp ht).1
   have hw1 : HasSum (fun i : TensorEigenIdx00 g =>
       ⟪scalarEigenFunctionLp g i,
-          smoothToLp (I := I) (M := M) g (scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht)⟫_ℝ •
+          smoothToLp (I := I) (M := M) g (scalarHeatFlowSliceTensor g u₀ htail hab ha ht)⟫_ℝ •
         scalarEigenFunctionLp g i)
-      (smoothToLp (I := I) (M := M) g (scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht)) :=
+      (smoothToLp (I := I) (M := M) g (scalarHeatFlowSliceTensor g u₀ htail hab ha ht)) :=
     hasSum_scalarEigenFunctionLp_repr (I := I) (M := M) g
-      (smoothToLp (I := I) (M := M) g (scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht))
+      (smoothToLp (I := I) (M := M) g (scalarHeatFlowSliceTensor g u₀ htail hab ha ht))
   have hw2 : HasSum (fun i : TensorEigenIdx00 g =>
       ⟪scalarEigenFunctionLp g i,
           heatSemigroup (I := I) (M := M) g t (tensor00ScalarL2Equiv g u₀)⟫_ℝ •
@@ -1467,7 +1480,7 @@ theorem scalarHeatFlowTensorSliceTensor_toL2_eq_heatSemigroup
       (heatSemigroup (I := I) (M := M) g t (tensor00ScalarL2Equiv g u₀))
   have hsame : (fun i : TensorEigenIdx00 g =>
       ⟪scalarEigenFunctionLp g i,
-          smoothToLp (I := I) (M := M) g (scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht)⟫_ℝ •
+          smoothToLp (I := I) (M := M) g (scalarHeatFlowSliceTensor g u₀ htail hab ha ht)⟫_ℝ •
         scalarEigenFunctionLp g i) =
       (fun i : TensorEigenIdx00 g =>
       ⟪scalarEigenFunctionLp g i,
@@ -1792,7 +1805,7 @@ theorem scalarHeatFlowTensorTimeDeriv_slice_contMDiff
         scalarHeatCoeff (I := I) (M := M) g u₀ i s) q.1 q.2)
     (hg := hat) (hf := hslice_map)
 
-noncomputable def scalarHeatFlowTensorTimeDerivSliceTensor
+noncomputable def scalarHeatFlowTimeDerivSliceTensor
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (htail : EigenvalueTailSummable g 0 0)
     {a b : ℝ} (hab : a < b) (ha : 0 < a)
@@ -1809,7 +1822,7 @@ theorem scalarHeatCoeff_lambda_eq_inner_slice
     {t : ℝ} (ht : t ∈ Set.Icc a b) (j : TensorEigenIdx00 g) :
     ⟪scalarEigenFunctionLp g j,
         smoothToLp (I := I) (M := M) g
-          (scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht)⟫_ℝ =
+          (scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht)⟫_ℝ =
       -TensorEigenIdx.lambda (I := I) (M := M) j *
         scalarHeatCoeff (I := I) (M := M) g u₀ j t := by
   classical
@@ -1818,7 +1831,7 @@ theorem scalarHeatCoeff_lambda_eq_inner_slice
       scalarHeatCoeff (I := I) (M := M) g u₀ i t)
   let σ : ℝ := ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ)
   let slice : SmoothScalar g :=
-    scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht
+    scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht
   let φj : SmoothScalar g := scalarEigenFunction g j
   set μ := riemannianVolumeMeasure (I := I) (M := M) g
   haveI : MeasureTheory.IsFiniteMeasure μ :=
@@ -1826,7 +1839,7 @@ theorem scalarHeatCoeff_lambda_eq_inner_slice
   have hslice (x : M) : slice.toFun x =
       ∑' i : TensorEigenIdx00 g, c i * (scalarEigenFunction g i).toFun x := by
     dsimp [slice, c]
-    unfold scalarHeatFlowTensorTimeDerivSliceTensor scalarSpecSum
+    unfold scalarHeatFlowTimeDerivSliceTensor scalarSpecSum
     apply tsum_congr
     intro i
     congr 1
@@ -1994,7 +2007,7 @@ theorem scalarHeatCoeff_lambda_eq_inner_slice
   calc
     ⟪scalarEigenFunctionLp g j,
         smoothToLp (I := I) (M := M) g
-          (scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht)⟫_ℝ
+          (scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht)⟫_ℝ
         = ∫ x : M, φj.toFun x * slice.toFun x ∂μ := by
           rw [← smoothToLp_inner_eq_integral_mul (I := I) (M := M) g φj slice]
           rfl
@@ -2254,26 +2267,26 @@ theorem heatPower_one_inner_eq_lambda_coeff
           unfold scalarHeatCoeff
           ring_nf
 
-theorem scalarHeatFlowTensorTimeDerivSliceTensor_toL2_eq_neg_heatPower
+theorem scalarHeatFlowTimeDerivSliceTensor_toL2_eq_neg_heatPower
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (htail : EigenvalueTailSummable g 0 0)
     {a b : ℝ} (hab : a < b) (ha : 0 < a)
     {t : ℝ} (ht : t ∈ Set.Icc a b) :
     smoothToLp (I := I) (M := M) g
-        (scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht) =
+        (scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht) =
       -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) := by
   classical
   have ht0 : 0 < t := lt_of_lt_of_le ha (Set.mem_Icc.mp ht).1
   have hw1 : HasSum (fun i : TensorEigenIdx00 g =>
       ⟪scalarEigenFunctionLp g i,
           smoothToLp (I := I) (M := M) g
-            (scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht)⟫_ℝ •
+            (scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht)⟫_ℝ •
         scalarEigenFunctionLp g i)
       (smoothToLp (I := I) (M := M) g
-        (scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht)) :=
+        (scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht)) :=
     hasSum_scalarEigenFunctionLp_repr (I := I) (M := M) g
       (smoothToLp (I := I) (M := M) g
-        (scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht))
+        (scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht))
   have hw2 : HasSum (fun i : TensorEigenIdx00 g =>
       ⟪scalarEigenFunctionLp g i,
           -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀))⟫_ℝ •
@@ -2284,7 +2297,7 @@ theorem scalarHeatFlowTensorTimeDerivSliceTensor_toL2_eq_neg_heatPower
   have hsame : (fun i : TensorEigenIdx00 g =>
       ⟪scalarEigenFunctionLp g i,
           smoothToLp (I := I) (M := M) g
-            (scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht)⟫_ℝ •
+            (scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht)⟫_ℝ •
         scalarEigenFunctionLp g i) =
       (fun i : TensorEigenIdx00 g =>
       ⟪scalarEigenFunctionLp g i,
@@ -2299,17 +2312,17 @@ theorem scalarHeatFlowTensorTimeDerivSliceTensor_toL2_eq_neg_heatPower
     rw [hsame]
     exact hw2)
 
-theorem scalarHeatFlowTensorSliceTensor_laplacian_toL2_eq_neg_heatPower
+theorem scalarHeatFlowSliceTensor_laplacian_toL2_eq_neg_heatPower
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (htail : EigenvalueTailSummable g 0 0)
     {a b : ℝ} (hab : a < b) (ha : 0 < a)
     {t : ℝ} (ht : t ∈ Set.Icc a b) :
     smoothToLp (I := I) (M := M) g
-        (scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht).laplacian =
+        (scalarHeatFlowSliceTensor g u₀ htail hab ha ht).laplacian =
       -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) := by
   classical
   have ht0 : 0 < t := lt_of_lt_of_le ha (Set.mem_Icc.mp ht).1
-  let slice : SmoothScalar g := scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht
+  let slice : SmoothScalar g := scalarHeatFlowSliceTensor g u₀ htail hab ha ht
   let u_dom : laplacianDomain (I := I) (M := M) g :=
     ⟨smoothToH1Compl (I := I) (M := M) g slice,
       smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) slice⟩
@@ -2322,7 +2335,7 @@ theorem scalarHeatFlowTensorSliceTensor_laplacian_toL2_eq_neg_heatPower
     change H1ComplToLp (I := I) (M := M) g
         (smoothToH1Compl (I := I) (M := M) g slice) = _
     rw [H1ComplToLp_smoothToH1Compl]
-    exact scalarHeatFlowTensorSliceTensor_toL2_eq_heatSemigroup
+    exact scalarHeatFlowSliceTensor_toL2_eq_heatSemigroup
       (I := I) (M := M) g u₀ htail hab ha ht
   have hheat_dom_lp : H1ComplToLp (I := I) (M := M) g (heat_dom : H1Compl g) =
       heatSemigroup (I := I) (M := M) g t (tensor00ScalarL2Equiv g u₀) := by
@@ -2350,15 +2363,15 @@ theorem scalarHeatFlowTensor_laplacian_eq_time_deriv
         (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
           scalarHeatCoeff (I := I) (M := M) g u₀ i s) t x := by
   classical
-  let slice : SmoothScalar g := scalarHeatFlowTensorSliceTensor g u₀ htail hab ha ht
-  let dslice : SmoothScalar g := scalarHeatFlowTensorTimeDerivSliceTensor g u₀ htail hab ha ht
+  let slice : SmoothScalar g := scalarHeatFlowSliceTensor g u₀ htail hab ha ht
+  let dslice : SmoothScalar g := scalarHeatFlowTimeDerivSliceTensor g u₀ htail hab ha ht
   have hlp : smoothToLp (I := I) (M := M) g slice.laplacian =
       -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) :=
-    scalarHeatFlowTensorSliceTensor_laplacian_toL2_eq_neg_heatPower
+    scalarHeatFlowSliceTensor_laplacian_toL2_eq_neg_heatPower
       (I := I) (M := M) g u₀ htail hab ha ht
   have hd : smoothToLp (I := I) (M := M) g dslice =
       -(heatPower (I := I) (M := M) g 1 t (tensor00ScalarL2Equiv g u₀)) :=
-    scalarHeatFlowTensorTimeDerivSliceTensor_toL2_eq_neg_heatPower
+    scalarHeatFlowTimeDerivSliceTensor_toL2_eq_neg_heatPower
       (I := I) (M := M) g u₀ htail hab ha ht
   have hle : slice.laplacian = dslice :=
     smoothToLp_injective (I := I) (M := M) g (hlp.trans hd.symm)
@@ -2411,7 +2424,38 @@ theorem scalarHeatFlowTensor_isHeatOnStationary
             simp [zero_mul, add_zero]
             rfl
 
-theorem scalarHeatFlow_zero_apply
+theorem scalarHeatFlow_isHeatOnStationary
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {a b : ℝ} (hab : a < b) (ha : 0 < a) :
+    DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+      (RealTimeInterval.closed a b hab.le) g (scalarHeatFlow g u₀) := by
+  have h := scalarHeatFlowTensor_isHeatOnStationary (I := I) (M := M) g
+    ((tensor00ScalarL2Equiv g).symm u₀) (scalar_eigen_tail (I := I) (M := M) g) hab ha
+  simpa [scalarHeatFlow] using h
+
+theorem scalarHeatFlowSlice_toL2_eq_heatSemigroup
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {a b : ℝ} (hab : a < b) (ha : 0 < a)
+    {t : ℝ} (ht : t ∈ Set.Icc a b) :
+    smoothToLp (I := I) (M := M) g (scalarHeatFlowSlice g u₀ hab ha ht) =
+      heatSemigroup (I := I) (M := M) g t u₀ := by
+  have h := scalarHeatFlowSliceTensor_toL2_eq_heatSemigroup (I := I) (M := M) g
+    ((tensor00ScalarL2Equiv g).symm u₀) (scalar_eigen_tail (I := I) (M := M) g) hab ha ht
+  simpa [scalarHeatFlowSlice] using h
+
+theorem scalarHeatFlow_slice_contMDiff
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {a b : ℝ} (hab : a < b) (ha : 0 < a)
+    {t : ℝ} (ht : t ∈ Set.Icc a b) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => scalarHeatFlow g u₀ t x) := by
+  have h := scalarHeatFlowTensor_slice_contMDiff (I := I) (M := M) g
+    ((tensor00ScalarL2Equiv g).symm u₀) (scalar_eigen_tail (I := I) (M := M) g) hab ha ht
+  simpa [scalarHeatFlow] using h
+
+theorem scalarHeatFlowTensor_zero_apply
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g) (x : M) :
     scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) 0 x = u₀.toFun x := by
   classical
@@ -2496,7 +2540,7 @@ lemma summable_abs_tensorL2Coeff_mul_hsWeight_of_smooth
       (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (σ / 2)))
     hmain hb
 
-theorem scalarHeatFlow_smoothInitial_continuousOn_closed
+theorem scalarHeatFlowTensor_smoothInitial_continuousOn_closed
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0) {T : ℝ} :
     ContinuousOn (fun q : ℝ × M =>
@@ -2571,7 +2615,7 @@ theorem scalarHeatFlow_smoothInitial_continuousOn_closed
   dsimp [d]
   rfl
 
-theorem scalarHeatFlowSmoothInitial_slice_contMDiff
+theorem scalarHeatFlowTensorSmoothInitial_slice_contMDiff
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
@@ -2584,7 +2628,7 @@ theorem scalarHeatFlowSmoothInitial_slice_contMDiff
         scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) 0 x) =
         u₀.toFun := by
       funext x
-      exact scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x
+      exact scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ x
     rw [hf]
     exact u₀.smooth
   · have htpos : 0 < t := lt_of_le_of_ne (Set.mem_Icc.mp ht).1 (Ne.symm ht0)
@@ -2595,14 +2639,14 @@ theorem scalarHeatFlowSmoothInitial_slice_contMDiff
     exact scalarHeatFlowTensor_slice_contMDiff (I := I) (M := M) g
       (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε ht'
 
-noncomputable def scalarHeatFlowSmoothInitialSlice
+noncomputable def scalarHeatFlowTensorSmoothInitialSlice
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) : SmoothScalar g :=
   ⟨fun x => scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t x,
-    scalarHeatFlowSmoothInitial_slice_contMDiff (I := I) (M := M) g u₀ htail ht⟩
+    scalarHeatFlowTensorSmoothInitial_slice_contMDiff (I := I) (M := M) g u₀ htail ht⟩
 
-theorem scalarHeatFlow_isHeatOnStationary_smoothInitial
+theorem scalarHeatFlowTensor_isHeatOnStationary_smoothInitial
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} (hT : 0 ≤ T) :
@@ -2647,9 +2691,9 @@ theorem scalarHeatFlow_isHeatOnStationary_smoothInitial
       ((Set.Ioo 0 T ×ˢ (Set.univ : Set M)) ∩ (Set.Ioo ε T ×ˢ (Set.univ : Set M)))
     rw [hinter]
     exact hjoint.mono (Set.prod_mono Set.Ioo_subset_Icc_self Set.Subset.rfl)
-  · exact scalarHeatFlow_smoothInitial_continuousOn_closed (I := I) (M := M) g u₀ htail
+  · exact scalarHeatFlowTensor_smoothInitial_continuousOn_closed (I := I) (M := M) g u₀ htail
   · intro t ht
-    exact scalarHeatFlowSmoothInitial_slice_contMDiff (I := I) (M := M) g u₀ htail ht
+    exact scalarHeatFlowTensorSmoothInitial_slice_contMDiff (I := I) (M := M) g u₀ htail ht
   · intro t ht x
     have htpos : 0 < t := (Set.mem_Ioo.mp ht).1
     have htT : t < T := (Set.mem_Ioo.mp ht).2
@@ -2677,12 +2721,12 @@ theorem scalarHeatFlow_isHeatOnStationary_smoothInitial
             simp [zero_mul, add_zero]
             rfl
 
-theorem scalarHeatFlowSmoothInitialSlice_toL2_eq_heatSemigroup
+theorem scalarHeatFlowTensorSmoothInitialSlice_toL2_eq_heatSemigroup
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
     smoothToLp (I := I) (M := M) g
-        (scalarHeatFlowSmoothInitialSlice g u₀ htail ht) =
+        (scalarHeatFlowTensorSmoothInitialSlice g u₀ htail ht) =
       heatSemigroup (I := I) (M := M) g t (smoothToLp (I := I) (M := M) g u₀) := by
   classical
   by_cases ht0 : t = 0
@@ -2692,14 +2736,14 @@ theorem scalarHeatFlowSmoothInitialSlice_toL2_eq_heatSemigroup
     exact congrArg (smoothToLp (I := I) (M := M) g) (by
       apply SmoothScalar.ext
       funext x
-      dsimp [scalarHeatFlowSmoothInitialSlice]
-      exact scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x)
+      dsimp [scalarHeatFlowTensorSmoothInitialSlice]
+      exact scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ x)
   · have htpos : 0 < t := lt_of_le_of_ne (Set.mem_Icc.mp ht).1 (Ne.symm ht0)
     have hε : 0 < t / 2 := half_pos htpos
     have hεT : t / 2 < T := lt_of_lt_of_le (half_lt_self htpos) (Set.mem_Icc.mp ht).2
     have ht' : t ∈ Set.Icc (t / 2) T :=
       Set.mem_Icc.mpr ⟨(half_lt_self htpos).le, (Set.mem_Icc.mp ht).2⟩
-    have hslice := scalarHeatFlowTensorSliceTensor_toL2_eq_heatSemigroup (I := I) (M := M) g
+    have hslice := scalarHeatFlowSliceTensor_toL2_eq_heatSemigroup (I := I) (M := M) g
       (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε ht'
     have hU : tensor00ScalarL2Equiv g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) =
         smoothToLp (I := I) (M := M) g u₀ := by
@@ -2707,25 +2751,25 @@ theorem scalarHeatFlowSmoothInitialSlice_toL2_eq_heatSemigroup
         smoothToLp (I := I) (M := M) g u₀
       rw [tensor00ToScalarL2_toL2]
       exact scalar0ToLp_scalarCcLift (I := I) (M := M) g u₀
-    have hsame : scalarHeatFlowSmoothInitialSlice g u₀ htail ht =
-        scalarHeatFlowTensorSliceTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε ht' := by
+    have hsame : scalarHeatFlowTensorSmoothInitialSlice g u₀ htail ht =
+        scalarHeatFlowSliceTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε ht' := by
       apply SmoothScalar.ext
       rfl
     rw [hsame, ← hU]
     exact hslice
 
-theorem scalarHeatFlowSmoothInitial_restrict_eq
+theorem scalarHeatFlowTensorSmoothInitial_restrict_eq
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} {ε : ℝ} (hε0 : 0 < ε) (hεT : ε < T)
     {t : ℝ} (ht : t ∈ Set.Icc ε T) :
-    scalarHeatFlowSmoothInitialSlice g u₀ htail
+    scalarHeatFlowTensorSmoothInitialSlice g u₀ htail
         (Set.mem_Icc.mpr ⟨le_trans hε0.le (Set.mem_Icc.mp ht).1, (Set.mem_Icc.mp ht).2⟩) =
-      scalarHeatFlowTensorSliceTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε0 ht := by
+      scalarHeatFlowSliceTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε0 ht := by
   apply SmoothScalar.ext
   rfl
 
-theorem scalarHeatFlow_smoothInitial_unique
+theorem scalarHeatFlowTensor_smoothInitial_unique
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} (hT : 0 ≤ T)
@@ -2739,11 +2783,11 @@ theorem scalarHeatFlow_smoothInitial_unique
   have hu : DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
       (RealTimeInterval.closed 0 T hT) g
       (scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀))) :=
-    scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g u₀ htail hT
+    scalarHeatFlowTensor_isHeatOnStationary_smoothInitial (I := I) (M := M) g u₀ htail hT
   have hinit' : ∀ x : M,
       scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) 0 x = v 0 x := by
     intro x
-    rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x]
+    rw [scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ x]
     exact (hinit x).symm
   have hle := DifferentialGeometry.Analysis.Parabolic.heat_eq_of_initial_eq
     (I := I) (stationaryMetricFamily g) hT
@@ -2751,7 +2795,7 @@ theorem scalarHeatFlow_smoothInitial_unique
   intro t ht x
   exact (hle t ht x).symm
 
-theorem scalarHeatFlow_smoothInitial_comparison
+theorem scalarHeatFlowTensor_smoothInitial_comparison
     (g : SmoothRiemannianMetric I M) (u₀ v₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} (hT : 0 ≤ T)
@@ -2760,23 +2804,23 @@ theorem scalarHeatFlow_smoothInitial_comparison
       scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t x ≤
         scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g v₀)) t x := by
   classical
-  have hu := scalarHeatFlow_isHeatOnStationary_smoothInitial
+  have hu := scalarHeatFlowTensor_isHeatOnStationary_smoothInitial
     (I := I) (M := M) g u₀ htail hT
-  have hv := scalarHeatFlow_isHeatOnStationary_smoothInitial
+  have hv := scalarHeatFlowTensor_isHeatOnStationary_smoothInitial
     (I := I) (M := M) g v₀ htail hT
   have hinit' : ∀ x : M,
       scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) 0 x ≤
         scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g v₀)) 0 x := by
     intro x
-    rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x,
-      scalarHeatFlow_zero_apply (I := I) (M := M) g v₀ x]
+    rw [scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ x,
+      scalarHeatFlowTensor_zero_apply (I := I) (M := M) g v₀ x]
     exact hinit x
   exact DifferentialGeometry.Analysis.Parabolic.heat_comparison
     (I := I) (stationaryMetricFamily g) hT
     (scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
     (scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g v₀))) hu hv hinit'
 
-theorem scalarHeatFlow_smoothInitial_nonneg
+theorem scalarHeatFlowTensor_smoothInitial_nonneg
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} (hT : 0 ≤ T)
@@ -2814,12 +2858,12 @@ theorem scalarHeatFlow_smoothInitial_nonneg
   exact DifferentialGeometry.Analysis.Parabolic.heat_comparison
     (I := I) (stationaryMetricFamily g) hT (fun _ _ => (0 : ℝ))
     (scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
-    hzero (scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g u₀ htail hT)
+    hzero (scalarHeatFlowTensor_isHeatOnStationary_smoothInitial (I := I) (M := M) g u₀ htail hT)
     (fun x => by
-      rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x]
+      rw [scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ x]
       exact hinit x)
 
-theorem scalarHeatFlow_smoothInitial_mass_invariant
+theorem scalarHeatFlowTensor_smoothInitial_mass_invariant
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
@@ -2827,8 +2871,8 @@ theorem scalarHeatFlow_smoothInitial_mass_invariant
         ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
       ∫ x, u₀.toFun x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  let slice : SmoothScalar g := scalarHeatFlowSmoothInitialSlice g u₀ htail ht
-  have hslice := scalarHeatFlowSmoothInitialSlice_toL2_eq_heatSemigroup
+  let slice : SmoothScalar g := scalarHeatFlowTensorSmoothInitialSlice g u₀ htail ht
+  have hslice := scalarHeatFlowTensorSmoothInitialSlice_toL2_eq_heatSemigroup
     (I := I) (M := M) g u₀ htail ht
   have hmass := heatSemigroup_mass_invariant (I := I) (M := M) g
     (smoothToLp (I := I) (M := M) g u₀) (Set.mem_Icc.mp ht).1
@@ -2841,7 +2885,7 @@ theorem scalarHeatFlow_smoothInitial_mass_invariant
           have hae := MemLp.coeFn_toLp (f := slice.toFun) (p := (2 : ℝ≥0∞))
             (μ := riemannianVolumeMeasure (I := I) (M := M) g) slice.memLp_two
           filter_upwards [hae] with x hx
-          dsimp [slice, scalarHeatFlowSmoothInitialSlice]
+          dsimp [slice, scalarHeatFlowTensorSmoothInitialSlice]
           exact hx.symm
     _ = ∫ x, (heatSemigroup (I := I) (M := M) g t (smoothToLp (I := I) (M := M) g u₀) :
             M → ℝ) x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -2900,7 +2944,7 @@ lemma summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
   exact Summable.congr V.weighted_summable (fun i => by
     rw [hcoeff i])
 
-theorem scalarHeatFlow_smoothInitial_contMDiffOn_closed
+theorem scalarHeatFlowTensor_smoothInitial_contMDiffOn_closed
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} (hT : 0 < T) :
@@ -2996,7 +3040,7 @@ theorem scalarHeatFlow_smoothInitial_contMDiffOn_closed
       (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i s)
     (U := Set.univ) isOpen_univ hU hc hmass)
 
-theorem scalarHeatFlow_smoothInitial_strict_pos
+theorem scalarHeatFlowTensor_smoothInitial_strict_pos
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (htail : EigenvalueTailSummable g 0 0)
     {T : ℝ} (hT : 0 ≤ T)
@@ -3039,14 +3083,14 @@ theorem scalarHeatFlow_smoothInitial_strict_pos
   have hcomp := DifferentialGeometry.Analysis.Parabolic.heat_comparison
     (I := I) (stationaryMetricFamily g) hT (fun _ _ => c₀)
     (scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
-    hconst (scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g u₀ htail hT)
+    hconst (scalarHeatFlowTensor_isHeatOnStationary_smoothInitial (I := I) (M := M) g u₀ htail hT)
     (fun x => by
-      rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x]
+      rw [scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ x]
       exact hc₀_le x)
   intro t ht x
   exact lt_of_lt_of_le hc₀ (hcomp t ht x)
 
-theorem scalarHeatFlow_smoothInitial_strict_pos_of_nonzero
+theorem scalarHeatFlowTensor_smoothInitial_strict_pos_of_nonzero
     [ConnectedSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
@@ -3054,10 +3098,10 @@ theorem scalarHeatFlow_smoothInitial_strict_pos_of_nonzero
     {T : ℝ} (hT : 0 ≤ T)
     (hpos0 : ∀ x : M, 0 ≤ u₀.toFun x)
     {c : M} (hc : 0 < u₀.toFun c)
-    {t : ℝ} (ht : t ∈ Set.Ioo 0 T) :
-    0 < scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t c := by
+    {t : ℝ} (ht : t ∈ Set.Ioo 0 T) (y : M) :
+    0 < scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t y := by
   classical
-  have hu := scalarHeatFlow_isHeatOnStationary_smoothInitial
+  have hu := scalarHeatFlowTensor_isHeatOnStationary_smoothInitial
     (I := I) (M := M) g u₀ htail hT
   have ht0 : 0 < t := (Set.mem_Ioo.mp ht).1
   let D : RealTimeInterval := RealTimeInterval.closed (-1) (t + 1) (by linarith : -1 ≤ t + 1)
@@ -3077,15 +3121,15 @@ theorem scalarHeatFlow_smoothInitial_strict_pos_of_nonzero
     (scalarHeatFlowTensor g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
     hu
     (fun x => by
-      rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x]
+      rw [scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ x]
       exact hpos0 x)
     (by
-      rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ c]
+      rw [scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ c]
       exact hc)
-    ht hG hslab hconn c
+    ht hG hslab hconn y
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
+theorem scalarHeatFlowTensor_smoothInitial_one_point_harnack_of_nonnegative_ricci
     [CompactSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
@@ -3103,11 +3147,11 @@ theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
   have hbpos : 0 < b := lt_of_lt_of_le ha hab
   have hb1 : 0 ≤ b + 1 := by linarith
   have hb1pos : 0 < b + 1 := by linarith
-  have hu := scalarHeatFlow_isHeatOnStationary_smoothInitial
+  have hu := scalarHeatFlowTensor_isHeatOnStationary_smoothInitial
     (I := I) (M := M) g u₀ htail hb1
-  have huClosed := scalarHeatFlow_smoothInitial_contMDiffOn_closed
+  have huClosed := scalarHeatFlowTensor_smoothInitial_contMDiffOn_closed
     (I := I) (M := M) g u₀ htail hb1pos
-  have hpos := scalarHeatFlow_smoothInitial_strict_pos
+  have hpos := scalarHeatFlowTensor_smoothInitial_strict_pos
     (I := I) (M := M) g u₀ htail hb1 hpos0
   exact DifferentialGeometry.Analysis.Parabolic.Harnack.heat_solution_one_point_harnack_of_nonnegative_ricci_on
     (I := I) (M := M) g hRic (RealTimeInterval.closed 0 (b + 1) hb1)
@@ -3120,7 +3164,7 @@ theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
-theorem scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci
+theorem scalarHeatFlowTensor_smoothInitial_harnack_of_nonnegative_ricci
     [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
     [CompactSpace M] [ConnectedSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
@@ -3143,11 +3187,11 @@ theorem scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci
   classical
   have hb1 : 0 ≤ b + 1 := by linarith
   have hb1pos : 0 < b + 1 := by linarith
-  have hu := scalarHeatFlow_isHeatOnStationary_smoothInitial
+  have hu := scalarHeatFlowTensor_isHeatOnStationary_smoothInitial
     (I := I) (M := M) g u₀ htail hb1
-  have huClosed := scalarHeatFlow_smoothInitial_contMDiffOn_closed
+  have huClosed := scalarHeatFlowTensor_smoothInitial_contMDiffOn_closed
     (I := I) (M := M) g u₀ htail hb1pos
-  have hpos := scalarHeatFlow_smoothInitial_strict_pos
+  have hpos := scalarHeatFlowTensor_smoothInitial_strict_pos
     (I := I) (M := M) g u₀ htail hb1 hpos0
   exact DifferentialGeometry.Analysis.Parabolic.Harnack.heat_solution_harnack_of_nonnegative_ricci_on
     (I := I) (M := M) g hEnorm hRic (RealTimeInterval.closed 0 (b + 1) hb1)
@@ -3156,6 +3200,414 @@ theorem scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci
     (fun t ht => ⟨lt_of_lt_of_le ha ht.1, lt_of_le_of_lt ht.2 (by linarith)⟩)
     (fun t ht => ⟨ht.1, le_trans ht.2 (by linarith)⟩)
     (fun t ht => ⟨ht.1, lt_trans ht.2 (by linarith)⟩) x y
+
+private noncomputable def scalarConst
+    (g : SmoothRiemannianMetric I M) (δ : ℝ) : SmoothScalar g :=
+  ⟨fun _ => δ, contMDiff_const⟩
+
+private lemma tensor00ScalarL2Equiv_symm_smoothToLp
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g) :
+    (tensor00ScalarL2Equiv g).symm (smoothToLp (I := I) (M := M) g u₀) =
+      SmoothCcTensor.toL2 (scalarCcLift g u₀) := by
+  have hU0 : (tensor00ScalarL2Equiv g) (SmoothCcTensor.toL2 (scalarCcLift g u₀)) =
+      smoothToLp (I := I) (M := M) g u₀ := by
+    change tensor00ToScalarL2 g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) =
+      smoothToLp (I := I) (M := M) g u₀
+    rw [tensor00ToScalarL2_toL2]
+    exact scalar0ToLp_scalarCcLift (I := I) (M := M) g u₀
+  simpa using congrArg (tensor00ScalarL2Equiv g).symm hU0.symm
+
+theorem scalarHeatFlow_smoothInitial_zero_apply
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g) (x : M) :
+    scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) 0 x = u₀.toFun x := by
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  change scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+      (smoothToLp (I := I) (M := M) g u₀)) 0 x = u₀.toFun x
+  rw [hU]
+  exact scalarHeatFlowTensor_zero_apply (I := I) (M := M) g u₀ x
+
+theorem scalarHeatFlow_isHeatOnStationary_smoothInitial
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} (hT : 0 ≤ T) :
+    DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+      (RealTimeInterval.closed 0 T hT) g
+      (scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀)) := by
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  change DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+    (RealTimeInterval.closed 0 T hT) g
+    (scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+      (smoothToLp (I := I) (M := M) g u₀)))
+  rw [hU]
+  exact scalarHeatFlowTensor_isHeatOnStationary_smoothInitial
+    (I := I) (M := M) g u₀ (scalar_eigen_tail (I := I) (M := M) g) hT
+
+theorem scalarHeatFlow_smoothInitial_slice_contMDiff
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M =>
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t x) := by
+  classical
+  by_cases ht0 : t = 0
+  · subst ht0
+    have hf : (fun x : M =>
+        scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) 0 x) =
+        u₀.toFun := by
+      funext x
+      exact scalarHeatFlow_smoothInitial_zero_apply (I := I) (M := M) g u₀ x
+    rw [hf]
+    exact u₀.smooth
+  · have htpos : 0 < t := lt_of_le_of_ne (Set.mem_Icc.mp ht).1 (Ne.symm ht0)
+    have hε : 0 < t / 2 := half_pos htpos
+    have hεT : t / 2 < T := lt_of_lt_of_le (half_lt_self htpos) (Set.mem_Icc.mp ht).2
+    have ht' : t ∈ Set.Icc (t / 2) T :=
+      Set.mem_Icc.mpr ⟨(half_lt_self htpos).le, (Set.mem_Icc.mp ht).2⟩
+    exact scalarHeatFlow_slice_contMDiff (I := I) (M := M) g
+      (smoothToLp (I := I) (M := M) g u₀) hεT hε ht'
+
+noncomputable def scalarHeatFlowSmoothInitialSlice
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) : SmoothScalar g :=
+  ⟨fun x => scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t x,
+    scalarHeatFlow_smoothInitial_slice_contMDiff (I := I) (M := M) g u₀ ht⟩
+
+theorem scalarHeatFlowSmoothInitialSlice_toL2_eq_heatSemigroup
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
+    smoothToLp (I := I) (M := M) g (scalarHeatFlowSmoothInitialSlice g u₀ ht) =
+      heatSemigroup (I := I) (M := M) g t (smoothToLp (I := I) (M := M) g u₀) := by
+  classical
+  by_cases ht0 : t = 0
+  · subst ht0
+    rw [show heatSemigroup (I := I) (M := M) g 0 (smoothToLp (I := I) (M := M) g u₀) =
+        smoothToLp (I := I) (M := M) g u₀ by simp]
+    exact congrArg (smoothToLp (I := I) (M := M) g) (by
+      apply SmoothScalar.ext
+      funext x
+      dsimp [scalarHeatFlowSmoothInitialSlice]
+      exact scalarHeatFlow_smoothInitial_zero_apply (I := I) (M := M) g u₀ x)
+  · have htpos : 0 < t := lt_of_le_of_ne (Set.mem_Icc.mp ht).1 (Ne.symm ht0)
+    have hε : 0 < t / 2 := half_pos htpos
+    have hεT : t / 2 < T := lt_of_lt_of_le (half_lt_self htpos) (Set.mem_Icc.mp ht).2
+    have ht' : t ∈ Set.Icc (t / 2) T :=
+      Set.mem_Icc.mpr ⟨(half_lt_self htpos).le, (Set.mem_Icc.mp ht).2⟩
+    have hslice := scalarHeatFlowSlice_toL2_eq_heatSemigroup (I := I) (M := M) g
+      (smoothToLp (I := I) (M := M) g u₀) hεT hε ht'
+    have hsame : scalarHeatFlowSmoothInitialSlice g u₀ ht =
+        scalarHeatFlowSlice g (smoothToLp (I := I) (M := M) g u₀) hεT hε ht' := by
+      apply SmoothScalar.ext
+      rfl
+    rw [hsame]
+    exact hslice
+
+theorem scalarHeatFlow_smoothInitial_restrict_eq
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T ε : ℝ} (hε0 : 0 < ε) (hεT : ε < T)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) :
+    scalarHeatFlowSmoothInitialSlice g u₀
+        (Set.mem_Icc.mpr ⟨le_trans hε0.le (Set.mem_Icc.mp ht).1, (Set.mem_Icc.mp ht).2⟩) =
+      scalarHeatFlowSlice g (smoothToLp (I := I) (M := M) g u₀) hεT hε0 ht := by
+  apply SmoothScalar.ext
+  rfl
+
+theorem scalarHeatFlow_smoothInitial_unique
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} (hT : 0 ≤ T)
+    (v : ℝ → M → ℝ)
+    (hv : DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+      (RealTimeInterval.closed 0 T hT) g v)
+    (hinit : ∀ x : M, v 0 x = u₀.toFun x) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+      v t x = scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t x := by
+  have h := scalarHeatFlowTensor_smoothInitial_unique (I := I) (M := M) g u₀
+    (scalar_eigen_tail (I := I) (M := M) g) hT v hv hinit
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  intro t ht x
+  change v t x = scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+      (smoothToLp (I := I) (M := M) g u₀)) t x
+  rw [hU]
+  exact h t ht x
+
+theorem scalarHeatFlow_smoothInitial_comparison
+    (g : SmoothRiemannianMetric I M) (u₀ v₀ : SmoothScalar g)
+    {T : ℝ} (hT : 0 ≤ T)
+    (hinit : ∀ x : M, u₀.toFun x ≤ v₀.toFun x) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t x ≤
+        scalarHeatFlow g (smoothToLp (I := I) (M := M) g v₀) t x := by
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  have hV := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g v₀
+  change ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+    scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+        (smoothToLp (I := I) (M := M) g u₀)) t x ≤
+      scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+        (smoothToLp (I := I) (M := M) g v₀)) t x
+  rw [hU, hV]
+  exact scalarHeatFlowTensor_smoothInitial_comparison
+    (I := I) (M := M) g u₀ v₀ (scalar_eigen_tail (I := I) (M := M) g) hT hinit
+
+theorem scalarHeatFlow_smoothInitial_nonneg
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} (hT : 0 ≤ T)
+    (hinit : ∀ x : M, 0 ≤ u₀.toFun x) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+      0 ≤ scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t x := by
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  change ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+    0 ≤ scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+        (smoothToLp (I := I) (M := M) g u₀)) t x
+  rw [hU]
+  exact scalarHeatFlowTensor_smoothInitial_nonneg
+    (I := I) (M := M) g u₀ (scalar_eigen_tail (I := I) (M := M) g) hT hinit
+
+theorem scalarHeatFlow_smoothInitial_mass_invariant
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
+    (∫ x, scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      ∫ x, u₀.toFun x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  change (∫ x, scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+        (smoothToLp (I := I) (M := M) g u₀)) t x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      ∫ x, u₀.toFun x ∂(riemannianVolumeMeasure (I := I) (M := M) g)
+  rw [hU]
+  exact scalarHeatFlowTensor_smoothInitial_mass_invariant
+    (I := I) (M := M) g u₀ (scalar_eigen_tail (I := I) (M := M) g) ht
+
+theorem scalarHeatFlow_smoothInitial_contMDiffOn_closed
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} (hT : 0 < T) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) q.1 q.2)
+      (Set.Icc 0 T ×ˢ Set.univ) := by
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  change ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    (fun q : ℝ × M => scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+      (smoothToLp (I := I) (M := M) g u₀)) q.1 q.2)
+    (Set.Icc 0 T ×ˢ Set.univ)
+  rw [hU]
+  exact scalarHeatFlowTensor_smoothInitial_contMDiffOn_closed
+    (I := I) (M := M) g u₀ (scalar_eigen_tail (I := I) (M := M) g) hT
+
+theorem scalarHeatFlow_smoothInitial_strict_pos
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} (hT : 0 ≤ T)
+    (hpos0 : ∀ x : M, 0 < u₀.toFun x) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+      0 < scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t x := by
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  change ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+    0 < scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+        (smoothToLp (I := I) (M := M) g u₀)) t x
+  rw [hU]
+  exact scalarHeatFlowTensor_smoothInitial_strict_pos
+    (I := I) (M := M) g u₀ (scalar_eigen_tail (I := I) (M := M) g) hT hpos0
+
+theorem scalarHeatFlow_smoothInitial_strict_pos_of_nonzero
+    [ConnectedSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} (hT : 0 ≤ T)
+    (hpos0 : ∀ x : M, 0 ≤ u₀.toFun x)
+    {c : M} (hc : 0 < u₀.toFun c)
+    {t : ℝ} (ht : t ∈ Set.Ioo 0 T) (y : M) :
+    0 < scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t y := by
+  have hU := tensor00ScalarL2Equiv_symm_smoothToLp (I := I) (M := M) g u₀
+  change 0 < scalarHeatFlowTensor g ((tensor00ScalarL2Equiv g).symm
+      (smoothToLp (I := I) (M := M) g u₀)) t y
+  rw [hU]
+  exact scalarHeatFlowTensor_smoothInitial_strict_pos_of_nonzero
+    (I := I) (M := M) g u₀ (scalar_eigen_tail (I := I) (M := M) g) hT hpos0 hc ht y
+
+theorem scalarHeatFlow_smoothInitial_shift_const
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    {T : ℝ} (hT : 0 ≤ T) (δ : ℝ)
+    {t : ℝ} (ht : t ∈ Set.Icc 0 T) (x : M) :
+    scalarHeatFlow g (smoothToLp (I := I) (M := M) g (u₀ + scalarConst g δ)) t x =
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) t x + δ := by
+  classical
+  let D : RealTimeInterval := RealTimeInterval.closed 0 T hT
+  let u : ℝ → M → ℝ := scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀)
+  let v : ℝ → M → ℝ := fun s y => u s y + δ
+  have hu : DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary D g u := by
+    simpa [u, D] using scalarHeatFlow_isHeatOnStationary_smoothInitial
+      (I := I) (M := M) g u₀ hT
+  have hv : DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary D g v := by
+    change DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D (stationaryMetricFamily g)
+      (fun _ _ => (0 : ℝ)) v
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · have hjoint := hu.jointSmooth
+      simpa [v, D] using hjoint.add
+        (contMDiffOn_const : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+          (fun _ : ℝ × M => δ) (D.regular ×ˢ Set.univ))
+    · have hcont := hu.jointCont
+      simpa [v, D] using hcont.add
+        (continuousOn_const : ContinuousOn (fun _ : ℝ × M => δ) (D.carrier ×ˢ Set.univ))
+    · intro s hs
+      have hslicem := hu.sliceSmooth s hs
+      exact hslicem.add (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => δ))
+    · intro s hs x
+      have hder := (hu.equation s hs x).add (hasDerivAt_const (c := δ) (x := s))
+      refine hder.congr_deriv ?_
+      have hlap : laplacianAt (I := I) (stationaryMetricFamily g) s
+          (fun y : M => u s y + δ) x = laplacianAt (I := I) (stationaryMetricFamily g) s (u s) x := by
+        have hsub := heatOperatorWithDrift_sub_const (I := I)
+          (G := stationaryMetricFamily g) s (fun y : M => (0 : TangentSpace I y))
+          (f := u s) (-δ)
+          (fun y => (hu.sliceSmooth s (D.regular_subset hs)).mdifferentiable (by simp) y) x
+        have hfun : (fun y : M => u s y - (-δ)) = fun y : M => u s y + δ := by
+          funext y
+          ring
+        rw [hfun] at hsub
+        simpa [heatOperatorWithDrift, driftTerm_zero_drift] using hsub
+      change laplacianAt (I := I) (stationaryMetricFamily g) s (u s) x + 0 * u s x + 0 =
+        laplacianAt (I := I) (stationaryMetricFamily g) s (fun y : M => u s y + δ) x +
+          0 * (u s x + δ)
+      rw [hlap]
+      simp [zero_mul, add_zero]
+  have hinit : ∀ y : M, v 0 y = (u₀ + scalarConst g δ).toFun y := by
+    intro y
+    change scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) 0 y + δ =
+      (u₀ + scalarConst g δ).toFun y
+    rw [scalarHeatFlow_smoothInitial_zero_apply (I := I) (M := M) g u₀ y]
+    simp [scalarConst]
+  have heq := scalarHeatFlow_smoothInitial_unique (I := I) (M := M) g
+    (u₀ + scalarConst g δ) hT v hv hinit
+  have hmain := heq t ht x
+  simpa [v, u] using hmain.symm
+
+private lemma le_of_forall_pos_lt_add
+    {u v : ℝ} {C : ℝ}
+    (h : ∀ δ : ℝ, 0 < δ → u + δ ≤ C * (v + δ)) :
+    u ≤ C * v := by
+  by_contra hnot
+  have hpos : 0 < u - C * v := sub_pos.mpr (not_le.mp hnot)
+  rcases le_or_gt C 1 with hC1 | hC1
+  · have hle := h (u - C * v) hpos
+    nlinarith
+  · have hc1' : 0 < C - 1 := sub_pos.mpr hC1
+    let δ : ℝ := (u - C * v) / (2 * (C - 1))
+    have hδ0 : 0 < δ := by
+      dsimp [δ]
+      exact div_pos hpos (mul_pos (by norm_num) hc1')
+    have hle := h δ hδ0
+    have hd : u - C * v ≤ (C - 1) * δ := by
+      nlinarith [hle]
+    have hδeq : (C - 1) * δ = (u - C * v) / 2 := by
+      dsimp [δ]
+      field_simp [hc1'.ne']
+    have hd' : u - C * v ≤ (u - C * v) / 2 := by
+      rw [hδeq] at hd
+      exact hd
+    nlinarith
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
+    [CompactSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (hpos0 : ∀ x : M, 0 ≤ u₀.toFun x)
+    {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) (x : M) :
+    scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) a x ≤
+      (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+        scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) b x := by
+  classical
+  have hb1 : 0 ≤ b + 1 := by linarith
+  have hb1pos : 0 < b + 1 := by linarith
+  let C : ℝ := (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2)
+  have hle_all : ∀ δ : ℝ, 0 < δ →
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) a x + δ ≤
+        C * (scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) b x + δ) := by
+    intro δ hδ
+    let uδ : ℝ → M → ℝ :=
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g (u₀ + scalarConst g δ))
+    have hposδ0 : ∀ y : M, 0 < (u₀ + scalarConst g δ).toFun y := by
+      intro y
+      simp [scalarConst]
+      linarith [hpos0 y, hδ]
+    have huδ := scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1
+    have huδClosed := scalarHeatFlow_smoothInitial_contMDiffOn_closed (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1pos
+    have hposδ := scalarHeatFlow_smoothInitial_strict_pos (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1 hposδ0
+    have hharnack := DifferentialGeometry.Analysis.Parabolic.Harnack.heat_solution_one_point_harnack_of_nonnegative_ricci_on
+      (I := I) (M := M) g hRic (RealTimeInterval.closed 0 (b + 1) hb1) uδ
+      huδ huδClosed
+      (fun t ht x => hposδ t ht x)
+      ha hab
+      (fun t ht => ⟨lt_of_lt_of_le ha ht.1, lt_of_le_of_lt ht.2 (by linarith)⟩)
+      (fun t ht => ⟨ht.1, le_trans ht.2 (by linarith)⟩)
+      (fun t ht => ⟨ht.1, lt_trans ht.2 (by linarith)⟩) x
+    have hshift_a := scalarHeatFlow_smoothInitial_shift_const (I := I) (M := M) g u₀ hb1 δ
+      (Set.mem_Icc.mpr ⟨le_of_lt ha, by linarith⟩) x
+    have hshift_b := scalarHeatFlow_smoothInitial_shift_const (I := I) (M := M) g u₀ hb1 δ
+      (Set.mem_Icc.mpr ⟨le_trans ha.le hab, by linarith⟩) x
+    rw [← hshift_a, ← hshift_b]
+    simpa [uδ] using hharnack
+  simpa [C] using le_of_forall_pos_lt_add hle_all
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
+theorem scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+    [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (hpos0 : ∀ x : M, 0 ≤ u₀.toFun x)
+    {a b : ℝ} (ha : 0 < a) (hab : a < b) (x y : M) :
+    scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) a x ≤
+      (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+        Real.exp ((riemannianEDist I x y).toReal ^ 2 / (4 * (b - a))) *
+        scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) b y := by
+  classical
+  have hb1 : 0 ≤ b + 1 := by linarith
+  have hb1pos : 0 < b + 1 := by linarith
+  let C : ℝ := (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+    Real.exp ((riemannianEDist I x y).toReal ^ 2 / (4 * (b - a)))
+  have hle_all : ∀ δ : ℝ, 0 < δ →
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) a x + δ ≤
+        C * (scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) b y + δ) := by
+    intro δ hδ
+    let uδ : ℝ → M → ℝ :=
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g (u₀ + scalarConst g δ))
+    have hposδ0 : ∀ y : M, 0 < (u₀ + scalarConst g δ).toFun y := by
+      intro y
+      simp [scalarConst]
+      linarith [hpos0 y, hδ]
+    have huδ := scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1
+    have huδClosed := scalarHeatFlow_smoothInitial_contMDiffOn_closed (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1pos
+    have hposδ := scalarHeatFlow_smoothInitial_strict_pos (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1 hposδ0
+    have hharnack := DifferentialGeometry.Analysis.Parabolic.Harnack.heat_solution_harnack_of_nonnegative_ricci_on
+      (I := I) (M := M) g hEnorm hRic (RealTimeInterval.closed 0 (b + 1) hb1) uδ
+      huδ huδClosed
+      (fun t ht x => hposδ t ht x)
+      ha hab
+      (fun t ht => ⟨lt_of_lt_of_le ha ht.1, lt_of_le_of_lt ht.2 (by linarith)⟩)
+      (fun t ht => ⟨ht.1, le_trans ht.2 (by linarith)⟩)
+      (fun t ht => ⟨ht.1, lt_trans ht.2 (by linarith)⟩) x y
+    have hshift_a := scalarHeatFlow_smoothInitial_shift_const (I := I) (M := M) g u₀ hb1 δ
+      (Set.mem_Icc.mpr ⟨le_of_lt ha, by linarith⟩) x
+    have hshift_b := scalarHeatFlow_smoothInitial_shift_const (I := I) (M := M) g u₀ hb1 δ
+      (Set.mem_Icc.mpr ⟨le_trans ha.le (le_of_lt hab), by linarith⟩) y
+    rw [← hshift_a, ← hshift_b]
+    simpa [uδ] using hharnack
+  simpa [C] using le_of_forall_pos_lt_add hle_all
 
 end HeatEquation
 end Analysis
