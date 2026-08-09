@@ -7764,6 +7764,86 @@ theorem morseFlowInChart {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
   exact hEq ht
 
 
+noncomputable def morseCompressLevel (c ε δ : ℝ) (t : ℝ) : ℝ :=
+  if t ≤ c - ε - δ then t else c - ε - δ + (t - c + ε + δ) * δ / (2 * ε + δ)
+
+noncomputable def morseCompressTime (c ε δ : ℝ) (t : ℝ) : ℝ :=
+  t - morseCompressLevel c ε δ t
+
+noncomputable def morseUncompressLevel (c ε δ : ℝ) (s : ℝ) : ℝ :=
+  if s ≤ c - ε - δ then s else c - ε - δ + (s - c + ε + δ) * (2 * ε + δ) / δ
+
+theorem morseCompressLevel_fixed {c ε δ t : ℝ} (ht : t ≤ c - ε - δ) :
+    morseCompressLevel c ε δ t = t := by
+  dsimp [morseCompressLevel]
+  rw [if_pos ht]
+
+theorem morseCompressTime_zero {c ε δ t : ℝ} (ht : t ≤ c - ε - δ) :
+    morseCompressTime c ε δ t = 0 := by
+  dsimp [morseCompressTime]
+  rw [morseCompressLevel_fixed ht]
+  ring
+
+theorem morseCompressLevel_top {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε) :
+    morseCompressLevel c ε δ (c + ε) = c - ε := by
+  dsimp [morseCompressLevel]
+  rw [if_neg]
+  · field_simp [hδ.ne', hε.ne']
+    ring
+  · nlinarith
+
+theorem morseCompressLevel_strictMono {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    {t₁ t₂ : ℝ} (ht₁ : c - ε - δ < t₁) (hlt : t₁ < t₂) :
+    morseCompressLevel c ε δ t₁ < morseCompressLevel c ε δ t₂ := by
+  dsimp [morseCompressLevel]
+  rw [if_neg (not_le_of_gt ht₁)]
+  have ht₂' : c - ε - δ < t₂ := lt_of_le_of_lt (le_of_lt ht₁) hlt
+  rw [if_neg (not_le_of_gt ht₂')]
+  have hden : 0 < 2 * ε + δ := by nlinarith [hε, hδ]
+  have hmain : (t₁ - c + ε + δ) * δ / (2 * ε + δ) < (t₂ - c + ε + δ) * δ / (2 * ε + δ) := by
+    have hmul : (t₁ - c + ε + δ) * δ * (2 * ε + δ) < (t₂ - c + ε + δ) * δ * (2 * ε + δ) := by
+      exact mul_lt_mul_of_pos_right
+        (mul_lt_mul_of_pos_right (by nlinarith) hδ) hden
+    exact (div_lt_div_iff₀ hden hden).mpr hmul
+  nlinarith
+
+theorem morseUncompressLevel_compressLevel {c ε δ t : ℝ} (hδ : 0 < δ) (hε : 0 < ε) :
+    morseUncompressLevel c ε δ (morseCompressLevel c ε δ t) = t := by
+  by_cases htle : t ≤ c - ε - δ
+  · rw [morseCompressLevel_fixed htle]
+    dsimp [morseUncompressLevel]
+    rw [if_pos htle]
+  · have htgt : c - ε - δ < t := lt_of_not_ge htle
+    dsimp [morseCompressLevel, morseUncompressLevel]
+    rw [if_neg (not_le_of_gt htgt)]
+    have htop : c - ε - δ < c - ε - δ + (t - c + ε + δ) * δ / (2 * ε + δ) := by
+      have hden : 0 < 2 * ε + δ := by nlinarith [hε, hδ]
+      have hpos : 0 < (t - c + ε + δ) * δ / (2 * ε + δ) := by
+        have hnum : 0 < (t - c + ε + δ) * δ := by nlinarith [hδ, htgt]
+        exact div_pos hnum hden
+      nlinarith
+    rw [if_neg (not_le_of_gt htop)]
+    field_simp [hδ.ne', hε.ne']
+    ring
+
+theorem morseCompressLevel_uncompressLevel {c ε δ s : ℝ} (hδ : 0 < δ) (hε : 0 < ε) :
+    morseCompressLevel c ε δ (morseUncompressLevel c ε δ s) = s := by
+  by_cases hsle : s ≤ c - ε - δ
+  · dsimp [morseUncompressLevel]
+    rw [if_pos hsle]
+    rw [morseCompressLevel_fixed hsle]
+  · have hsgt : c - ε - δ < s := lt_of_not_ge hsle
+    dsimp [morseCompressLevel, morseUncompressLevel]
+    rw [if_neg (not_le_of_gt hsgt)]
+    have htop : c - ε - δ < c - ε - δ + (s - c + ε + δ) * (2 * ε + δ) / δ := by
+      have hnum : 0 < (s - c + ε + δ) * (2 * ε + δ) := by nlinarith [hsgt, hε, hδ]
+      have hpos : 0 < (s - c + ε + δ) * (2 * ε + δ) / δ := div_pos hnum hδ
+      nlinarith
+    rw [if_neg (not_le_of_gt htop)]
+    field_simp [hδ.ne', hε.ne']
+    ring
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
