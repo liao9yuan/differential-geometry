@@ -4709,6 +4709,95 @@ theorem morseModelHandleMapHomeo_symm_apply {m k : ℕ} (hk : k ≤ m + 1) (ε r
     modelHandleMap hk ε r ((morseModelHandleMapHomeo hk ε r hε hr).symm y) = y.1 := by
   exact congrArg Subtype.val ((morseModelHandleMapHomeo hk ε r hε hr).apply_symm_apply y)
 
+noncomputable def closedCellClamp (n : ℕ) (x : EuclideanSpace ℝ (Fin n)) : ClosedCell n :=
+  ⟨(max ‖x‖ 1)⁻¹ • x, by
+    have hpos : 0 < max ‖x‖ 1 := lt_of_lt_of_le zero_lt_one (le_max_right ‖x‖ 1)
+    have hle : ‖x‖ ≤ max ‖x‖ 1 := le_max_left ‖x‖ 1
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (le_of_lt hpos))]
+    rw [mul_comm, ← div_eq_mul_inv]
+    exact (div_le_one hpos).mpr hle⟩
+
+theorem continuous_closedCellClamp (n : ℕ) : Continuous (closedCellClamp n) := by
+  refine Continuous.subtype_mk ?_ (fun x => by
+    have hpos : 0 < max ‖x‖ 1 := lt_of_lt_of_le zero_lt_one (le_max_right ‖x‖ 1)
+    have hle : ‖x‖ ≤ max ‖x‖ 1 := le_max_left ‖x‖ 1
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (le_of_lt hpos))]
+    rw [mul_comm, ← div_eq_mul_inv]
+    exact (div_le_one hpos).mpr hle)
+  have hf : Continuous (fun x : EuclideanSpace ℝ (Fin n) => (max ‖x‖ 1)⁻¹) := by
+    refine Continuous.inv₀ ?_ (fun x => ?_)
+    · exact continuous_norm.max continuous_const
+    · exact ne_of_gt (lt_of_lt_of_le zero_lt_one (le_max_right ‖x‖ 1))
+  exact hf.smul continuous_id
+
+noncomputable def modelHandleMapRawSymm {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (y : MorseModel n) : StandardHandle k (n - k) :=
+  (closedCellClamp k ((Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹ • negPart hk y),
+    closedCellClamp (n - k) (r⁻¹ • posPart hk y))
+
+theorem modelHandleMapRawSymm_map {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) (hr : 0 < r) (y : MorseModel n) (hy : y ∈ modelHandle hk ε r) :
+    modelHandleMap hk ε r (modelHandleMapRawSymm hk ε r y) = y := by
+  have hbnd₀ : ‖posPart hk y‖ ≤ r := by
+    have h := (sq_le_sq.mp hy.1)
+    simpa [abs_of_nonneg (norm_nonneg (posPart hk y)), abs_of_nonneg (le_of_lt hr)] using h
+  have hbnd₁ : ‖(r⁻¹ • posPart hk y : EuclideanSpace ℝ (Fin (n - k)))‖ ≤ 1 := by
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (le_of_lt hr))]
+    rw [mul_comm, ← div_eq_mul_inv]
+    exact (div_le_one hr).mpr hbnd₀
+  have hbnd₂ : ‖negPart hk y‖ ≤ Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2) := by
+    have h : |‖negPart hk y‖| ≤ |Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2)| := by
+      exact sq_le_sq.mp (by
+        rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + ‖posPart hk y‖ ^ 2)]
+        nlinarith [hy.2])
+    simpa [abs_of_nonneg (norm_nonneg (negPart hk y)), abs_of_nonneg (Real.sqrt_nonneg _)] using h
+  have hbnd₂' : ‖(Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹ • negPart hk y‖ ≤ 1 := by
+    rw [norm_smul, Real.norm_eq_abs,
+      abs_of_nonneg (inv_nonneg.mpr (by positivity : 0 ≤ Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2)))]
+    rw [mul_comm, ← div_eq_mul_inv]
+    exact (div_le_one (by positivity : 0 < Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))).mpr hbnd₂
+  have hb : closedCellClamp (n - k) (r⁻¹ • posPart hk y) =
+      (⟨r⁻¹ • posPart hk y, by exact hbnd₁⟩ : ClosedCell (n - k)) := by
+    apply Subtype.ext
+    dsimp [closedCellClamp]
+    have hmax : max ‖(r⁻¹ • posPart hk y : EuclideanSpace ℝ (Fin (n - k)))‖ 1 = 1 := by
+      rw [max_eq_right hbnd₁]
+    rw [hmax, inv_one, one_smul]
+  have ha : closedCellClamp k ((Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹ • negPart hk y) =
+      (⟨(Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹ • negPart hk y, by exact hbnd₂'⟩ : ClosedCell k) := by
+    apply Subtype.ext
+    dsimp [closedCellClamp]
+    have hmax : max ‖((Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹ • negPart hk y :
+        EuclideanSpace ℝ (Fin k))‖ 1 = 1 := by
+      rw [max_eq_right hbnd₂']
+    rw [hmax, inv_one, one_smul]
+  dsimp [modelHandleMapRawSymm]
+  rw [hb, ha]
+  dsimp [modelHandleMap]
+  have hsqrt : Real.sqrt (2 * ε + r ^ 2 * ‖(r⁻¹ • posPart hk y : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) =
+      Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2) := by
+    congr 1
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (inv_nonneg.mpr (le_of_lt hr))]
+    field_simp [ne_of_gt hr]
+  rw [hsqrt]
+  have hscalar₁ : Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2) •
+        ((Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹ • negPart hk y) = negPart hk y := by
+    rw [smul_smul]
+    rw [mul_inv_cancel₀ (ne_of_gt (by positivity : 0 < Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2)))]
+    rw [one_smul]
+  have hscalar₂ : r • (r⁻¹ • posPart hk y) = posPart hk y := by
+    rw [smul_smul, mul_inv_cancel₀ (ne_of_gt hr), one_smul]
+  rw [hscalar₁, hscalar₂]
+  exact recombine_decompose hk y
+
+theorem modelHandleMapRawSymm_eq_symm {m k : ℕ} (hk : k ≤ m + 1) (ε r : ℝ)
+    (hε : 0 < ε) (hr : 0 < r) (y : MorseModel (m + 1)) (hy : y ∈ modelHandle hk ε r) :
+    modelHandleMapRawSymm hk ε r y =
+      (morseModelHandleMapHomeo hk ε r hε hr).symm ⟨y, hy⟩ := by
+  apply modelHandleMap_injective hk ε r hε (ne_of_gt hr)
+  rw [modelHandleMapRawSymm_map hk ε r hε hr y hy]
+  exact (morseModelHandleMapHomeo_symm_apply hk ε r hε hr ⟨y, hy⟩).symm
+
 noncomputable def morseBeltMapOnOpen_inv {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
