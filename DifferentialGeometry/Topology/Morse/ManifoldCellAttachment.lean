@@ -4014,6 +4014,56 @@ theorem morseBeltMapExt_on_open {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
   dsimp [morseBeltMapExt]
   rw [dif_pos z.2]
 
+theorem morseBeltOpenSet_preimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) :
+    (fun s : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
+      DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+        (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) s) ⁻¹'
+      morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') =
+    (Sum.inr '' morseBeltLowerSet hk c ε data : Set
+      (StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε))) ∪
+      Sum.inl '' {d : StandardHandle k (m + 1 - k) |
+        morseNorm (m + 1) (modelHandleMap hk ε r d) < data.R} := by
+  let A : Set (StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε)) :=
+    (Sum.inr '' morseBeltLowerSet hk c ε data : Set
+      (StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε))) ∪
+      Sum.inl '' {d : StandardHandle k (m + 1 - k) |
+        morseNorm (m + 1) (modelHandleMap hk ε r d) < data.R}
+  change (fun s : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
+      DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+        (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) s) ⁻¹'
+      morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') = A
+  have hS : morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') =
+      (fun z : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
+        DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) z) '' A := by
+    dsimp [A, morseBeltOpenSet, Handle.lower, adjunctionLower, Handle.cell, adjunctionCell]
+    rw [Set.image_union, Set.image_image, Set.image_image]
+    rfl
+  ext s
+  constructor
+  · intro hs
+    rcases (by simpa [hS] using hs : ∃ z ∈ A,
+      DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+        (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) z =
+        DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) s) with ⟨z, hz, hsz⟩
+    have hgen : Relation.EqvGen (DifferentialGeometry.Topology.adjunctionRel
+        (attachingInclusion k (m + 1 - k))
+        (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))) s z := Quot.eq.mp hsz.symm
+    exact (morseBeltEqvGen_mem hk c ε r data hε (le_of_lt hεr') s z hgen).mpr hz
+  · intro hs
+    rcases hs with hs | hs
+    · rcases hs with ⟨x, hx, rfl⟩
+      dsimp [morseBeltOpenSet]
+      exact Or.inl ⟨x, hx, rfl⟩
+    · rcases hs with ⟨d, hd, rfl⟩
+      dsimp [morseBeltOpenSet]
+      exact Or.inr ⟨d, hd, rfl⟩
+
 private lemma continuous_codRestrict_iff {X Y : Type} [TopologicalSpace X] [TopologicalSpace Y]
     {p : Y → Prop} (f : X → Y) (h : ∀ x, p (f x)) :
     Continuous (fun x : X => (⟨f x, h x⟩ : Subtype p)) ↔ Continuous f := by
@@ -4113,33 +4163,7 @@ theorem continuous_morseBeltMapOnOpen {m k : ℕ} (hk : k ≤ m + 1) (c ε r : �
       (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
   have hpre : q ⁻¹' B = A := by
     dsimp [q, B, A]
-    have hS : morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') =
-        (fun z : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
-          DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
-            (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) z) '' A := by
-      dsimp [A, morseBeltOpenSet, Handle.lower, adjunctionLower, Handle.cell, adjunctionCell]
-      rw [Set.image_union, Set.image_image, Set.image_image]
-      rfl
-    ext s
-    constructor
-    · intro hs
-      rcases (by simpa [hS] using hs : ∃ z ∈ A,
-        DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
-          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) z =
-          DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
-            (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) s) with ⟨z, hz, hsz⟩
-      have hgen : Relation.EqvGen (DifferentialGeometry.Topology.adjunctionRel
-          (attachingInclusion k (m + 1 - k))
-          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))) s z := Quot.eq.mp hsz.symm
-      exact (morseBeltEqvGen_mem hk c ε r data hε (le_of_lt hεr') s z hgen).mpr hz
-    · intro hs
-      rcases hs with hs | hs
-      · rcases hs with ⟨x, hx, rfl⟩
-        dsimp [morseBeltOpenSet]
-        exact Or.inl ⟨x, hx, rfl⟩
-      · rcases hs with ⟨d, hd, rfl⟩
-        dsimp [morseBeltOpenSet]
-        exact Or.inr ⟨d, hd, rfl⟩
+    exact morseBeltOpenSet_preimage hk c ε r data hε hεr'
   have hcoord₁ : Continuous (fun s : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
       Sum.elim (fun _ : StandardHandle k (m + 1 - k) => (data.χ 0 : M))
         (fun x : SublevelSpace f (c - ε) => (x.1 : M)) s) := by
@@ -4281,6 +4305,213 @@ theorem continuous_morseBeltMapOnOpen {m k : ℕ} (hk : k ≤ m + 1) (c ε r : �
       (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) // z' ∈ B} =>
       (morseBeltMapOnOpen hk c ε r data hε hεr' z : MorseModel (m + 1)))
     (fun z => (morseBeltMapOnOpen hk c ε r data hε hεr' z).2)).mpr hcont
+
+theorem morseBeltMapOnOpen_inr {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (x : SublevelSpace f (c - ε))
+    (hz : DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inr x) ∈
+      morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')) :
+    (morseBeltMapOnOpen hk c ε r data hε hεr'
+      ⟨DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+        (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inr x), hz⟩ :
+        MorseModel (m + 1)) = data.χ.symm x.1 := by
+  have hx : x ∈ morseBeltLowerSet hk c ε data := by
+    have hmem : Sum.inr x ∈ (fun s : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
+        DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) s) ⁻¹'
+        morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') := by
+      exact hz
+    rw [morseBeltOpenSet_preimage hk c ε r data hε hεr'] at hmem
+    rcases hmem with hmem | hmem
+    · rcases hmem with ⟨x', hx', hxx'⟩
+      have hx'eq : x' = x := Sum.inr.inj hxx'
+      simpa [hx'eq] using hx'
+    · rcases hmem with ⟨d, hd, hdi⟩
+      cases hdi
+  have heq : (⟨DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+        (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inr x), hz⟩ :
+        {z' : Handle.AdjunctionSpace k (m + 1 - k)
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) //
+            z' ∈ morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')}) =
+      ⟨Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) x,
+        Or.inl ⟨x, hx, rfl⟩⟩ := by
+    apply Subtype.ext
+    rfl
+  simpa [heq] using (morseBeltMapOnOpen_lower hk c ε r data hε hεr' x hx)
+
+theorem morseBeltMapOnOpen_inl {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (d : StandardHandle k (m + 1 - k))
+    (hz : DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inl d) ∈
+      morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')) :
+    (morseBeltMapOnOpen hk c ε r data hε hεr'
+      ⟨DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+        (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inl d), hz⟩ :
+        MorseModel (m + 1)) = modelHandleMap hk ε r d := by
+  have hd : morseNorm (m + 1) (modelHandleMap hk ε r d) < data.R := by
+    have hmem : Sum.inl d ∈ (fun s : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
+        DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) s) ⁻¹'
+        morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') := by
+      exact hz
+    rw [morseBeltOpenSet_preimage hk c ε r data hε hεr'] at hmem
+    rcases hmem with hmem | hmem
+    · rcases hmem with ⟨x, hx, hxi⟩
+      cases hxi
+    · rcases hmem with ⟨d', hd', hdd'⟩
+      have hd'eq : d' = d := Sum.inl.inj hdd'
+      simpa [hd'eq] using hd'
+  have heq : (⟨DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+        (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inl d), hz⟩ :
+        {z' : Handle.AdjunctionSpace k (m + 1 - k)
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) //
+            z' ∈ morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')}) =
+      ⟨Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) d,
+        Or.inr ⟨d, hd, rfl⟩⟩ := by
+    apply Subtype.ext
+    rfl
+  simpa [heq] using (morseBeltMapOnOpen_cell hk c ε r data hε hεr' d hd)
+
+theorem morseHandleAdjunctionHomeoUnion_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hcont : Continuous f) (d : StandardHandle k (m + 1 - k)) :
+    morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont
+      (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d) =
+      ⟨handleEmbedding hk c ε r data d, Or.inr ⟨d, rfl⟩⟩ := by
+  exact Handle.adjunctionHomeomorphUnionImage_cell
+    (φ := morseAttachingEmbedding hk c ε r data hε hεr)
+    (c := handleEmbedding hk c ε r data)
+    (morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε hεr)
+    (handleEmbedding_injective hk c ε r data hε hr hεr)
+    (handleEmbedding_continuous hk c ε r data hε hεr)
+    (by
+      rw [Set.disjoint_left]
+      intro y hys hyt
+      rcases hys with ⟨p, hp, hpy⟩
+      have hiff := (handleEmbedding_mem_lower_iff hk c ε r data hε hεr p).mp (by
+        simpa [hpy] using hyt)
+      have hreg : p ∈ attachingRegion k (m + 1 - k) := by
+        dsimp [attachingRegion]
+        exact hiff
+      exact hp.2 hreg)
+    (by
+      exact isClosed_Iic.preimage hcont) d
+
+theorem morseHandleAdjunctionHomeoUnion_beltMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (hcont : Continuous f)
+    (z : {z' : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) //
+        z' ∈ morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')}) :
+    (morseHandleAdjunctionHomeoUnion hk c ε r data hε hr (le_of_lt hεr') hcont z.1).1 =
+      data.χ (morseBeltMapOnOpen hk c ε r data hε hεr' z) := by
+  rcases Quot.exists_rep z.1 with ⟨s, hs⟩
+  cases s with
+  | inl d =>
+      have hz' : DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inl d) ∈
+          morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') := by
+        simpa [← hs] using z.2
+      have hzeq : z = ⟨DifferentialGeometry.Topology.adjunctionMk
+          (attachingInclusion k (m + 1 - k))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inl d), hz'⟩ := by
+        apply Subtype.ext
+        simpa using hs.symm
+      rw [hzeq]
+      change (morseHandleAdjunctionHomeoUnion hk c ε r data hε hr (le_of_lt hεr') hcont
+          (Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) d)).1 =
+        data.χ (morseBeltMapOnOpen hk c ε r data hε hεr'
+          ⟨DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+            (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inl d), hz'⟩)
+      rw [morseHandleAdjunctionHomeoUnion_cell hk c ε r data hε hr (le_of_lt hεr') hcont d]
+      change handleEmbedding hk c ε r data d =
+        data.χ (morseBeltMapOnOpen hk c ε r data hε hεr'
+          ⟨DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+            (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inl d), hz'⟩)
+      rw [morseBeltMapOnOpen_inl hk c ε r data hε hεr' d hz']
+      rfl
+  | inr x =>
+      have hz' : DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inr x) ∈
+          morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') := by
+        simpa [← hs] using z.2
+      have hzeq : z = ⟨DifferentialGeometry.Topology.adjunctionMk
+          (attachingInclusion k (m + 1 - k))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inr x), hz'⟩ := by
+        apply Subtype.ext
+        simpa using hs.symm
+      rw [hzeq]
+      change (morseHandleAdjunctionHomeoUnion hk c ε r data hε hr (le_of_lt hεr') hcont
+          (Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) x)).1 =
+        data.χ (morseBeltMapOnOpen hk c ε r data hε hεr'
+          ⟨DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+            (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inr x), hz'⟩)
+      rw [morseHandleAdjunctionHomeoUnion_lower hk c ε r data hε hr (le_of_lt hεr') hcont x]
+      change x.1 =
+        data.χ (morseBeltMapOnOpen hk c ε r data hε hεr'
+          ⟨DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+            (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) (Sum.inr x), hz'⟩)
+      rw [morseBeltMapOnOpen_inr hk c ε r data hε hεr' x hz']
+      have hx : x ∈ morseBeltLowerSet hk c ε data := by
+        have hmem : Sum.inr x ∈ (fun s : StandardHandle k (m + 1 - k) ⊕ SublevelSpace f (c - ε) =>
+            DifferentialGeometry.Topology.adjunctionMk (attachingInclusion k (m + 1 - k))
+              (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) s) ⁻¹'
+            morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') := by
+          exact hz'
+        rw [morseBeltOpenSet_preimage hk c ε r data hε hεr'] at hmem
+        rcases hmem with hmem | hmem
+        · rcases hmem with ⟨x', hx', hxx'⟩
+          have hx'eq : x' = x := Sum.inr.inj hxx'
+          simpa [hx'eq] using hx'
+        · rcases hmem with ⟨d, hd, hdi⟩
+          cases hdi
+      have hxtgt : x.1 ∈ data.χ.target := by
+        rcases hx with ⟨y, hy, hxy⟩
+        simpa [hxy] using data.χ.map_source (data.hχsrc y (le_of_lt hy))
+      exact (data.χ.right_inv hxtgt).symm
+
+theorem morseBeltMapOnOpen_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (hcont : Continuous f) :
+    Function.Injective (morseBeltMapOnOpen hk c ε r data hε hεr') := by
+  intro z w h
+  let H : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) ≃ₜ
+      {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
+    morseHandleAdjunctionHomeoUnion hk c ε r data hε hr (le_of_lt hεr') hcont
+  have hval : (morseBeltMapOnOpen hk c ε r data hε hεr' z : MorseModel (m + 1)) =
+      (morseBeltMapOnOpen hk c ε r data hε hεr' w : MorseModel (m + 1)) := by
+    exact congrArg Subtype.val h
+  have hχ : data.χ (morseBeltMapOnOpen hk c ε r data hε hεr' z) =
+      data.χ (morseBeltMapOnOpen hk c ε r data hε hεr' w) := by
+    exact congrArg data.χ hval
+  have hu : (H z.1).1 = (H w.1).1 := by
+    dsimp [H]
+    rw [morseHandleAdjunctionHomeoUnion_beltMap hk c ε r data hε hr hεr' hcont z,
+      morseHandleAdjunctionHomeoUnion_beltMap hk c ε r data hε hr hεr' hcont w]
+    exact hχ
+  have hH : H z.1 = H w.1 := by
+    apply Subtype.ext
+    exact hu
+  have hzw : z.1 = w.1 := H.injective hH
+  exact Subtype.ext hzw
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
