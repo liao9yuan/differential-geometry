@@ -2082,4 +2082,54 @@ private lemma intrinsicJacobi_smul
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.id_apply]
   exact ContinuousLinearMap.map_smul (mfderiv 𝓘(ℝ, ℝ) I G 0) c⁻¹ (1 : ℝ)
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+private lemma curveDensity_smul
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    {γ : ℝ → M} {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (V : ι → ∀ t, TangentSpace I (γ t)) (t c : ℝ) (hc : 0 ≤ c)
+    (hLI : LinearIndependent ℝ fun i => V i t) :
+    curveDensity (I := I) g γ (fun i => c • V i) t
+      = c ^ (Fintype.card ι) * curveDensity (I := I) g γ V t := by
+  classical
+  unfold curveDensity curveGram
+  have hmat : Matrix.of (fun i j => g.inner (γ t) (c • V i t) (c • V j t))
+      = (c ^ 2 : ℝ) • Matrix.of (fun i j => g.inner (γ t) (V i t) (V j t)) := by
+    ext i j
+    have h1 := map_smul (g.inner (γ t)) c (V i t)
+    have h2 := map_smul (g.inner (γ t) (c • V i t)) c (V j t)
+    calc
+      g.inner (γ t) (c • V i t) (c • V j t)
+          = (g.inner (γ t) (c • V i t)) (c • V j t) := rfl
+      _ = c • ((g.inner (γ t) (c • V i t)) (V j t)) := h2
+      _ = c • (c • (g.inner (γ t) (V i t)) (V j t)) := by
+            rw [h1]
+            simp [Pi.smul_apply]
+      _ = (c ^ 2 : ℝ) • g.inner (γ t) (V i t) (V j t) := by
+            rw [smul_smul]
+            ring
+  change Real.sqrt ((Matrix.of (fun i j => g.inner (γ t) (c • V i t) (c • V j t))).det)
+      = c ^ Fintype.card ι * Real.sqrt ((Matrix.of (fun i j => g.inner (γ t) (V i t) (V j t))).det)
+  rw [hmat]
+  rw [Matrix.det_smul]
+  have hdet : 0 ≤ (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det := by
+    exact le_of_lt (curveGram_det_pos (I := I) g γ V t hLI)
+  have hpow : 0 ≤ c ^ Fintype.card ι := pow_nonneg hc _
+  calc
+    Real.sqrt ((c ^ 2) ^ Fintype.card ι • (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det)
+        = Real.sqrt ((c ^ Fintype.card ι) ^ 2 * (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det) := by
+          rw [← pow_mul, mul_comm, pow_mul, smul_eq_mul]
+    _ = c ^ Fintype.card ι * Real.sqrt (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det := by
+          have hsq2 : (c ^ Fintype.card ι) ^ 2 * (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det
+              = (c ^ Fintype.card ι * Real.sqrt (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det) ^ 2 := by
+            rw [mul_pow, Real.sq_sqrt hdet]
+          rw [hsq2]
+          rw [Real.sqrt_sq (mul_nonneg hpow (Real.sqrt_nonneg _))]
+    _ = c ^ Fintype.card ι * curveDensity (I := I) g γ V t := by
+          simp [curveDensity, curveGram]
+
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison
