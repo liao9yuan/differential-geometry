@@ -348,6 +348,24 @@ theorem modelModifiedDip_eq_fiber {n k : ℕ} (hk : k ≤ n) (ε δ : ℝ) (y : 
   rw [Real.sqrt_sq_eq_abs]
   rw [abs_of_nonneg (norm_nonneg _)]
 
+
+theorem modifiedSublevel_norm_sq_le {n k : ℕ} (hk : k ≤ n) (c ε δ : ℝ)
+    (hε : 0 ≤ ε) {z : MorseModel n} (hz : modifiedNormalForm hk c ε δ z ≤ c - ε) :
+    morseNorm n z ^ 2 ≤ 2 * ‖negPart hk z‖ ^ 2 + ε := by
+  have hpos : ‖posPart hk z‖ ^ 2 ≤ ‖negPart hk z‖ ^ 2 + 2 * modelModifiedDip hk ε δ z - 2 * ε :=
+    (modifiedNormalForm_sublevel_iff hk c ε δ z).1 hz
+  have hdip : modelModifiedDip hk ε δ z ≤ 3 / 2 * ε := by
+    rw [modelModifiedDip_eq_fiber]
+    exact modelModifiedFiberDip_le hε
+  have hnorm : morseNorm n z ^ 2 = ‖negPart hk z‖ ^ 2 + ‖posPart hk z‖ ^ 2 := by
+    calc
+      morseNorm n z ^ 2 = morseNorm n (recombine hk (negPart hk z) (posPart hk z)) ^ 2 := by
+        rw [recombine_decompose hk z]
+      _ = ‖negPart hk z‖ ^ 2 + ‖posPart hk z‖ ^ 2 :=
+        morseNorm_recombine_sq hk (negPart hk z) (posPart hk z)
+  nlinarith [hpos, hdip, hnorm]
+
+
 theorem modelModifiedFiberDenom_root_nonneg {ε δ r s w2 : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
     (hr : r ≠ 0) (hs : 0 ≤ s) (hw : 0 ≤ w2) :
     0 ≤ s + 2 * modelModifiedFiberDip ε δ s (modelModifiedFiberRoot ε δ r hε hδ hr s w2)
