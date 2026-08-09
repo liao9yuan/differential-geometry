@@ -7063,6 +7063,238 @@ theorem morseCollarLevelMap_surjective {m k : ℕ} (hk : k ≤ m + 1) (c ε r η
       ring
     exact hmain
 
+theorem morseHandlePoint_f_mem {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r) :
+    f (data.χ w) ∈ Set.Icc (c - ε) (c + r ^ 2 / 2) := by
+  have hrange : w ∈ Set.range (modelHandleMap hk ε r) := by
+    rw [← modelHandleMap_range hk ε r hε hr] at hw
+    exact hw
+  rcases hrange with ⟨d, hd⟩
+  have hsrc : w ∈ data.χ.source := data.hχsrc w (by
+    rw [← hd]
+    exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr))
+  rw [data.hnorm w (by
+    rw [← hd]
+    exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr))]
+  rw [← hd]
+  constructor
+  · have hmem : c - ε ≤ morseNormalForm hk c w := by
+      rw [modelHandle_eq_inter hk c ε r (le_of_lt hr)] at hw
+      exact hw.2
+    rw [← hd] at hmem
+    exact hmem
+  · exact modelHandleMap_f_le hk c ε r (le_of_lt hε) d
+
+theorem morseHandlePoint_f_interval {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hη : 0 ≤ η)
+    (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r) :
+    f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2) := by
+  have hfw := morseHandlePoint_f_mem hk c ε r data hε hr hεr w hw
+  constructor
+  · nlinarith [hfw.1, hη]
+  · exact hfw.2
+
+noncomputable def morseCollarFlowBase {m k : ℕ} (_hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hη : 0 < η)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (z : M) (hz : f z ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2)) : LevelSetSpace f (c - ε) :=
+  ⟨curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z (f z - c + ε), by
+    exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn
+      hrate hz)⟩
+
+theorem morseHandlePoint_norm_le {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r) :
+    morseNorm (m + 1) w ≤ data.R := by
+  have hrange : w ∈ Set.range (modelHandleMap hk ε r) := by
+    rw [← modelHandleMap_range hk ε r hε hr] at hw
+    exact hw
+  rcases hrange with ⟨d, hd⟩
+  rw [← hd]
+  exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr)
+
+theorem morseCollarMap_surj_on_image {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hr : 0 < r) (hη : 0 < η)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
+      morseCollarTopLevel hk c ε r data
+        (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
+          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+        morseNormalForm hk c w - c + ε) :
+    ∀ z : M, (f z ≤ c - ε ∨ z ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))) →
+      ∃ y : SublevelSpace f (c + r ^ 2 / 2),
+        morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y = z := by
+  intro z hz
+  by_cases hzlow : f z ≤ c - ε - η
+  · refine ⟨⟨z, ?_⟩, ?_⟩
+    · change f z ≤ c + r ^ 2 / 2
+      nlinarith [hzlow, hε, hη]
+    · exact morseCollarMap_of_low hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate ⟨z, by
+        change f z ≤ c + r ^ 2 / 2
+        nlinarith [hzlow, hε, hη]⟩ hzlow
+  · have hzgt : c - ε - η < f z := lt_of_not_ge hzlow
+    have hzsub : f z ≤ c + r ^ 2 / 2 := by
+      rcases hz with hzlow' | hzh
+      · nlinarith [hzlow', hε, hη]
+      · rcases hzh with ⟨w, hw, hwz⟩
+        have hfw := morseHandlePoint_f_mem hk c ε r data hε hr hεr w hw
+        rw [← hwz]
+        exact hfw.2
+    let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+      exists_globalIntegralCurve_of_compactSupport v hv hsupp
+    have hv1 : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (1 : WithTop ℕ∞)
+        (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
+      hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+    let σ' : ℝ := f z - c + ε
+    let x : LevelSetSpace f (c - ε) := morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate z (by
+      constructor
+      · exact le_of_lt hzgt
+      · exact hzsub)
+    have hT : morseCollarTopLevel hk c ε r data x ≥ σ' := by
+      rcases hz with hzlow' | hzh
+      · have hσ'le : σ' ≤ 0 := by dsimp [σ']; linarith [hzlow']
+        exact le_trans hσ'le (morseCollarTopLevel_nonneg hk c ε r data x)
+      · rcases hzh with ⟨w, hw, hwz⟩
+        have hxeq : x = morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
+            (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw) := by
+          apply Subtype.ext
+          dsimp [x, morseCollarFlowBase]
+          rw [← hwz]
+        have hw' : σ' = morseNormalForm hk c w - c + ε := by
+          dsimp [σ']
+          rw [← hwz]
+          exact congrArg (fun t : ℝ => t - c + ε)
+            (data.hnorm w (morseHandlePoint_norm_le hk c ε r data hε hr hεr w hw))
+        rw [hxeq, hw']
+        exact hflowTop w hw
+    have hσexists := morseCollarLevelMap_surjective hk c ε r η data hε hη x σ' (by
+      constructor
+      · dsimp [σ']
+        linarith [hzgt]
+      · exact hT)
+    rcases hσexists with ⟨σ, hσmem, hσeq⟩
+    have hx : f x.1 = c - ε := x.2
+    have hx' : f x.1 ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2) := by
+      constructor
+      · nlinarith [hx, hη]
+      · nlinarith [hx, hε, hη]
+    have hval : f (curveAt v hcomplete x.1 (-σ)) = c - ε + σ := by
+      have hval0 : f (curveAt v hcomplete x.1 (-σ)) = f x.1 - (-σ) :=
+        morseCollarFlow_valueOnStrip (I := I) f c ε r η hf v hv hsupp hdfOn hrate hx'
+          (by linarith [hx, hσmem.2]) (by linarith [hx, hσmem.1])
+      rw [hx] at hval0
+      simpa [sub_neg_eq_add] using hval0
+    let y : SublevelSpace f (c + r ^ 2 / 2) := ⟨curveAt v hcomplete x.1 (-σ), by
+      change f (curveAt v hcomplete x.1 (-σ)) ≤ c + r ^ 2 / 2
+      nlinarith [hval, hσmem.2]⟩
+    refine ⟨y, ?_⟩
+    have hy : c - ε - η ≤ f y.1 := by
+      change c - ε - η ≤ f (curveAt v hcomplete x.1 (-σ))
+      nlinarith [hval, hσmem.1]
+    have hmap' := morseCollarMap_of_strip hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y hy
+    have hfval : f y.1 = c - ε + σ := by
+      change f (curveAt v hcomplete x.1 (-σ)) = c - ε + σ
+      exact hval
+    have hxeq : ⟨curveAt v hcomplete y.1 (f y.1 - c + ε), by
+        exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+          constructor
+          · exact hy
+          · exact y.2))⟩ = x := by
+      apply Subtype.ext
+      change curveAt v hcomplete y.1 (f y.1 - c + ε) = x.1
+      have hy1 : y.1 = curveAt v hcomplete x.1 (-σ) := rfl
+      have hstep : curveAt v hcomplete (curveAt v hcomplete x.1 (-σ)) σ = curveAt v hcomplete x.1 0 := by
+        have hh := curveAt_add v hv1 hcomplete x.1 (-σ) σ
+        have hsum : -σ + σ = 0 := by ring
+        rw [hsum] at hh
+        exact hh.symm
+      rw [hy1, hfval]
+      have htime_arg : c - ε + σ - c + ε = σ := by ring
+      rw [htime_arg, hstep]
+      exact curveAt_zero v hcomplete x.1
+    have hfσ : f y.1 - c + ε = σ := by
+      rw [hfval]
+      ring
+    have hL : morseCollarLevelMap hk c ε r η data
+        (⟨curveAt v hcomplete y.1 (f y.1 - c + ε), by
+          exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+            constructor
+            · exact hy
+            · exact y.2))⟩) (f y.1 - c + ε) = σ' := by
+      rw [hxeq]
+      rw [hfσ]
+      exact hσeq
+    have htime : f y.1 - c + ε - morseCollarLevelMap hk c ε r η data
+        (⟨curveAt v hcomplete y.1 (f y.1 - c + ε), by
+          exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+            constructor
+            · exact hy
+            · exact y.2))⟩) (f y.1 - c + ε) = σ - σ' := by
+      conv_lhs =>
+        congr
+        · rw [hfσ]
+        · rw [hL]
+    have hz' : curveAt v hcomplete x.1 (-σ') = z := by
+      have hh := curveAt_add v hv1 hcomplete z σ' (-σ')
+      have hsum : σ' + (-σ') = 0 := by ring
+      rw [hsum] at hh
+      have hx' : curveAt v hcomplete z σ' = x.1 := rfl
+      rw [hx'] at hh
+      simpa [curveAt_zero v hcomplete z] using hh.symm
+    rw [hmap']
+    have hflow : curveAt v hcomplete y.1 (σ - σ') = z := by
+      have hy1 : y.1 = curveAt v hcomplete x.1 (-σ) := rfl
+      rw [hy1]
+      have hh := curveAt_add v hv1 hcomplete x.1 (-σ) (σ - σ')
+      have hsum : -σ + (σ - σ') = -σ' := by ring
+      rw [hsum] at hh
+      rw [← hh]
+      exact hz'
+    change curveAt v hcomplete y.1 (f y.1 - c + ε - morseCollarLevelMap hk c ε r η data
+      (⟨curveAt v hcomplete y.1 (f y.1 - c + ε), by
+        exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+          constructor
+          · exact hy
+          · exact y.2))⟩) (f y.1 - c + ε)) = z
+    rw [htime]
+    exact hflow
+
 theorem morseCollarMap_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
