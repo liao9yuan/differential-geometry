@@ -50,18 +50,16 @@ invariance, all-points strict positivity of positive-time slices from
 non-negative non-zero data, and (under non-negative Ricci curvature and the
 metric-realization hypothesis `hEnorm` on the ambient norm) Li–Yau one-point
 and space-time Harnack inequalities. For a jointly smooth additive forcing
-field `F : ℝ → SmoothScalar g` with `f t = smoothToLp g (F t)` and
-`ContDiff ℝ ∞ f`, the Duhamel flow satisfies the classical forced heat
-equation
-`IsHeatForcedOnStationary (RealTimeInterval.closed ε T hεT.le) g (fun t x => (F t).toFun x) (scalarForcedFlow g u₀ f)`
+field `F : ℝ → SmoothScalar g` with joint smoothness of
+`(t, x) ↦ (F t).toFun x` on `U × M` for an open neighborhood `U` of `[0,T]`,
+the Duhamel flow satisfies the classical forced heat equation
+`IsHeatForcedOnStationary (RealTimeInterval.closed ε T hεT.le) g (fun t x => (F t).toFun x) (scalarForcedFlow g u₀ (fun t => smoothToLp g (F t)))`
 via `scalarForcedFlow_isHeatForcedOnStationary_of_jointSmoothForcing`, with
 all spectral coefficient bounds derived internally, and its time-`t` slice is
-bound to `mildSolution g u₀ f t` in `L²` via
+bound to `mildSolution g u₀ (fun t => smoothToLp g (F t)) t` in `L²` via
 `scalarForcedFlow_slice_toL2_eq_mildSolution_of_jointSmoothForcing`. External
-consumer probes for these entry points live in `/tmp`
-(`probe_pde1_positivetime.lean`, `probe_pde2_smoothinitial.lean`,
-`probe_pde3_geometric.lean`, and `probe_pde4_duhamel.lean`), compiled against
-only the leaf module.
+consumer probes for these entry points are compiled against only the leaf
+module.
 - [**ODE flows**](DifferentialGeometry/Analysis/ODE) — $C^\infty$ dependence of flows on their initial data, and time-dependent flows on closed manifolds jointly smooth up to the initial time (via Seeley-type time extension of the vector field).
 
 The classical De Giorgi–Nash–Moser regularity machinery is vendored under [`External/`](DifferentialGeometry/External) from [scottnarmstrong/DeGiorgi](https://github.com/scottnarmstrong/DeGiorgi) (Scott Armstrong and Julia Kempe, Apache-2.0).
