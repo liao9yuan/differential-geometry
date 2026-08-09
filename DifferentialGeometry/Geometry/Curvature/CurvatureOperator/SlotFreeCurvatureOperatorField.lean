@@ -485,6 +485,12 @@ def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x :
         rw [hU, ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm).map_smul]
         rfl }
 
+/-- Compatibility name for the two-free-slot curvature operator used by the
+covariant-derivative and low-regularity refold modules. -/
+abbrev slotFreeCurvOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
+    Tensor0SSpace s I x →L[ℝ] Tensor0SSpace (s + 2) I x :=
+  curvatureOperatorOnTensorFib (I := I) (M := M) g s x
+
 set_option backward.isDefEq.respectTransparency false in
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in

@@ -751,6 +751,49 @@ theorem curvatureRefoldKernelCoeffField_toSection_eq_kernelFib_sum
       Finset.sum_sub_distrib, Finset.sum_add_distrib]
   rw [hker, hsplit, hdist]
 
+/-- Compatibility name for the curvature-action monomial on one fibre. -/
+abbrev curvatureRefoldMonomialFib (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
+    (p q : TangentSpace I x) :
+    Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  curvatureActionMonomialCLM (I := I) (M := M) x tw σ p q
+
+/-- Compatibility name for the four-term curvature-action kernel on one fibre. -/
+abbrev curvatureRefoldKernelFib (x : M) (tw : ℝ)
+    (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (p q : TangentSpace I x) :
+    Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  curvatureActionKernelCLM (I := I) (M := M) x tw σ₁ σ₂ σ₃ σ₄ p q
+
+/-- Compatibility name for the fixed-frame contraction of a curvature-action monomial. -/
+abbrev curvatureRefoldMonomialFibFixedFrame
+    (W : Π b : M, Tensor0SSpace 2 I b) (σ : Equiv.Perm (Fin 4))
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
+    Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  curvatureActionMonomialFrameTrace (I := I) (M := M) W σ B x
+
+/-- Compatibility name for the moving-frame contraction of a curvature-action monomial. -/
+abbrev curvatureRefoldMonomialBiContrFib (g₁ : SmoothRiemannianMetric I M)
+    (W : Π b : M, Tensor0SSpace 2 I b) (σ : Equiv.Perm (Fin 4)) (x : M) :
+    Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x
+
+/-- Compatibility name for the smooth curvature-action monomial coefficient field. -/
+abbrev curvatureRefoldMonomialCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
+    (W : Π b : M, Tensor0SSpace 2 I b)
+    (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) b (W b)))
+    (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 4 2 :=
+  curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ
+
+/-- Compatibility name for the smooth four-term curvature-action kernel field. -/
+abbrev curvatureRefoldKernelCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
+    (W : Π b : M, Tensor0SSpace 2 I b)
+    (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) b (W b)))
+    (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 4 2 :=
+  curvatureActionKernelCoeffField (I := I) (M := M) g₀ g₁ W hW σ₁ σ₂ σ₃ σ₄
+
 end FrameSum
 
 end Connection

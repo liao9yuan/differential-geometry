@@ -26,7 +26,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -34,7 +34,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem normalBrHat
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -75,8 +74,10 @@ def HasNormalBrFull
   letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
   exact ∃ hq : 0 < q,
     ∃ e : OpenPartialHomeomorph (E × E) (E × E),
-      ∃ he : IsNormalDiag (I := I) Y hcomplete hconn x q δ e,
-        NormalDiagFence (I := I) Y x q e ∧
+      ∃ he : IsNormalDiag (I := I) Y hcomplete hconn x q δ e
+          (c := legacyBallChart (I := I) Y x),
+        NormalDiagFence (I := I) Y x q e
+          (c := legacyBallChart (I := I) Y x) ∧
         (∀ w ∈ Metric.closedBall (0 : E × E) ρ,
           normalPair (I := I) Y x w ∈
             (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he).dom) ∧
@@ -150,8 +151,10 @@ theorem toDom
   letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
   change ∃ hq : 0 < q,
     ∃ e : OpenPartialHomeomorph (E × E) (E × E),
-      ∃ he : IsNormalDiag (I := I) Y hcomplete hconn x q δ e,
-        NormalDiagFence (I := I) Y x q e ∧
+      ∃ he : IsNormalDiag (I := I) Y hcomplete hconn x q δ e
+          (c := legacyBallChart (I := I) Y x),
+        NormalDiagFence (I := I) Y x q e
+          (c := legacyBallChart (I := I) Y x) ∧
         (∀ w ∈ Metric.closedBall (0 : E × E) ρ,
           normalPair (I := I) Y x w ∈
             (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he).dom) ∧
@@ -323,8 +326,9 @@ theorem normalBrAccept
   change ∃ hq' : 0 < q,
     ∃ e : OpenPartialHomeomorph (E × E) (E × E),
       ∃ he : IsNormalDiag (I := I) (X.obj k) (hcomplete.complete k) (hconn k)
-          x q δ e,
-        NormalDiagFence (I := I) (X.obj k) x q e ∧
+          x q δ e (c := legacyBallChart (I := I) (X.obj k) x),
+        NormalDiagFence (I := I) (X.obj k) x q e
+          (c := legacyBallChart (I := I) (X.obj k) x) ∧
         (∀ w ∈ Metric.closedBall (0 : E × E) (aρ * hd.mu R),
           normalPair (I := I) (X.obj k) x w ∈
             (IsNormalDiag.toBranch (I := I) (X.obj k) (hcomplete.complete k)

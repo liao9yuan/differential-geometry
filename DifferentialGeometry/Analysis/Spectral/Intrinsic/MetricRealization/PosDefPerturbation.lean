@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.Basic
-import DifferentialGeometry.Geometry.Metric.MetricBounds
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
@@ -33,6 +33,13 @@ def metricCauchySchwarzBound
     (δ : ℝ) : Prop :=
   ∀ (x : M) (v w : TangentSpace I x),
     |h x v w| ≤ δ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)
+
+/-- Compatibility name for the intrinsic metric Cauchy--Schwarz bound. -/
+abbrev gFibreOpBound
+    (g : SmoothRiemannianMetric I M)
+    (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (δ : ℝ) : Prop :=
+  metricCauchySchwarzBound g h δ
 
 noncomputable def perturbedInner
     (g : SmoothRiemannianMetric I M)
@@ -99,6 +106,15 @@ theorem perturbedInner_pos_of_metricCauchySchwarzBound
   have hlb := perturbedInner_self_lower_bound (I := I) (M := M) g h hδ x v
   have : 0 < (1 - δ) * g.inner x v v := mul_pos hcoeff hg_pos
   linarith
+
+/-- Compatibility form of `perturbedInner_pos_of_metricCauchySchwarzBound`. -/
+theorem perturbedInner_pos_of_gOpBound
+    (g : SmoothRiemannianMetric I M)
+    (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ)
+    (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :
+    0 < perturbedInner g h x v v :=
+  perturbedInner_pos_of_metricCauchySchwarzBound g h hδ_lt hδ x v hv
 
 omit [Module.Finite ℝ E] in
 private lemma gSublevel_isVonNBounded

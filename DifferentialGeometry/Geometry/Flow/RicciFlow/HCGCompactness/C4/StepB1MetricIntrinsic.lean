@@ -36,7 +36,7 @@ open DifferentialGeometry.PDE.RicciFlow
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -80,7 +80,7 @@ private theorem constBasis_isLocalFrame_open
       constTangentSection] using hsec
 
 omit [NeZero (Module.finrank Real E)] in
-private theorem metric_norm_le_comp
+private theorem metricNorm_le_basis_comp
     (V : TopologicalSpace.Opens E) [SigmaCompactSpace V] [T2Space V]
     (G g : SmoothRiemannianMetric 𝓘(Real, E) V) (a : Nat) (z : V)
     (e : Module.Basis (Fin (Module.finrank Real E)) Real E)
@@ -547,7 +547,7 @@ private theorem local_norm_le
     rw [hgv, SmoothRiemannianMetric.restrictOpen_inner,
       normalTotal_inner (I := I) Y x (z : E) (hVQ z.2) v v]
     exact hlow v
-  apply metric_norm_le_comp V Gv gv a z e hbnd hlowV
+  apply metricNorm_le_basis_comp V Gv gv a z e hbnd hlowV
   intro slots
   let frame : Fin (Module.finrank Real E) →
       (w : V) → TangentSpace 𝓘(Real, E) w := fun i _ ↦ e i
@@ -2013,6 +2013,166 @@ theorem HasStageJetData.inv_norm_tail
     _ ≤ eps := by
       let afin : Fin (p + 1) := ⟨a, Nat.lt_succ_iff.mpr ha⟩
       simpa only [fac, afin, mul_assoc] using hbudget afin
+
+/-- The constant smooth tangent field on a real model space. -/
+noncomputable def constTangentField (v : E) :
+    ContMDiffSection 𝓘(Real, E) E (∞ : WithTop ℕ∞)
+      (TangentSpace 𝓘(Real, E) : E → Type _) :=
+  constTangentSection v
+
+omit [NeZero (Module.finrank Real E)] [FiniteDimensional Real E] in
+/-- A fixed basis gives a smooth local frame on every open subtype of the
+model space. -/
+theorem constBasis_frame
+    {Idx : Type*}
+    (U : TopologicalSpace.Opens E) [SigmaCompactSpace U] [T2Space U]
+    (e : Module.Basis Idx Real E) :
+    IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
+      (fun i (x : U) => (show TangentSpace 𝓘(Real, E) x from e i)) Set.univ :=
+  constBasis_isLocalFrame_open U e
+
+/-- The fixed Euclidean metric used to read orthonormal constant-frame
+components on model-space open subtypes. -/
+private noncomputable def flatModelMetricB1 :
+    SmoothRiemannianMetric 𝓘(Real, E) E where
+  inner := (riemannianMetricVectorSpace E).inner
+  symm := (riemannianMetricVectorSpace E).symm
+  pos := (riemannianMetricVectorSpace E).pos
+  isVonNBounded := (riemannianMetricVectorSpace E).isVonNBounded
+  contMDiff := (riemannianMetricVectorSpace E).contMDiff.of_le le_top
+
+omit [NeZero (Module.finrank Real E)] in
+/-- Uniform bounds for all constant orthonormal-frame components control the
+intrinsic norm of a metric-difference covariant derivative. -/
+theorem metric_norm_le_comp
+    (V : TopologicalSpace.Opens E) [SigmaCompactSpace V] [T2Space V]
+    (G g : SmoothRiemannianMetric 𝓘(Real, E) V) (a : Nat) (z : V)
+    {B : Real} (hB : 0 ≤ B)
+    (hequiv : ∀ v : E,
+      (1 / 2 : Real) * ‖v‖ ^ 2 ≤ g.inner z v v ∧
+        g.inner z v v ≤ 2 * ‖v‖ ^ 2)
+    (hcomp : ∀ slots : Fin (2 + a) → Fin (Module.finrank Real E),
+      |iterCovComp (I := 𝓘(Real, E)) (M := V)
+          (fun i _ ↦ (stdOrthonormalBasis Real E).toBasis i)
+          (fun y ↦ Tensor.Coordinates.christoffelSymbolInFrame
+            (Integral.Connection.leviCivitaConnectionOfMetric
+              (I := 𝓘(Real, E)) g)
+            (fun i (_ : V) ↦ (stdOrthonormalBasis Real E).toBasis i)
+            (constBasis_frame V
+              (stdOrthonormalBasis Real E).toBasis) y)
+          (frameComp0S (I := 𝓘(Real, E))
+            (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
+              Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) g)
+            (fun i (_ : V) ↦ (stdOrthonormalBasis Real E).toBasis i))
+          a z slots| ≤ B) :
+    metricDerivNorm (I := 𝓘(Real, E)) a G g g z ≤
+      Real.sqrt (2 ^ (2 + a)) *
+        (Real.sqrt
+          (Fintype.card
+            (Fin (2 + a) → Fin (Module.finrank Real E)) : Real) * B) := by
+  classical
+  let e : Module.Basis (Fin (Module.finrank Real E)) Real E :=
+    (stdOrthonormalBasis Real E).toBasis
+  let frame : Fin (Module.finrank Real E) →
+      (y : V) → TangentSpace 𝓘(Real, E) y := fun i _ ↦ e i
+  let hframe : IsLocalFrameOn 𝓘(Real, E) E (1 : WithTop ℕ∞)
+      frame Set.univ := constBasis_frame V e
+  let g0 := (flatModelMetricB1 (E := E)).restrictOpen (I := 𝓘(Real, E)) V
+  have hON0 : ∀ i j : Fin (Module.finrank Real E),
+      g0.inner z (e i) (e j) = if i = j then (1 : Real) else 0 := by
+    intro i j
+    simpa only [g0, SmoothRiemannianMetric.restrictOpen_inner,
+      flatModelMetricB1, riemannianMetricVectorSpace] using
+        (stdOrthonormalBasis Real E).inner_eq_ite i j
+  have hinv0 : Tensor0SBundle.MetricInverseInBasis_gen
+      (I := 𝓘(Real, E)) g0 z e
+      (Tensor0SBundle.identityInvMetric
+        (Idx := Fin (Module.finrank Real E))) := by
+    have h := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      (I := 𝓘(Real, E)) g0 e hON0
+    simpa [Tensor0SBundle.identityInvMetric,
+      Tensor0SBundle.diagonalInvMetric] using h
+  have hequiv' : ∀ v : TangentSpace 𝓘(Real, E) z,
+      (2 : Real)⁻¹ * g0.inner z v v ≤ g.inner z v v ∧
+        g.inner z v v ≤ 2 * g0.inner z v v := by
+    intro v
+    change E at v
+    have hg0 : g0.inner z v v = ‖v‖ ^ 2 := by
+      simpa only [g0, SmoothRiemannianMetric.restrictOpen_inner,
+        flatModelMetricB1, riemannianMetricVectorSpace] using
+          real_inner_self_eq_norm_sq v
+    rw [hg0]
+    simpa only [one_div] using hequiv v
+  obtain ⟨b, hbON⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+      (I := 𝓘(Real, E)) g z
+  have hbinv : Tensor0SBundle.MetricInverseInBasis_gen
+      (I := 𝓘(Real, E)) g z b
+      (Tensor0SBundle.identityInvMetric
+        (Idx := Fin (Module.finrank Real (TangentSpace 𝓘(Real, E) z)))) := by
+    have h := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+      (I := 𝓘(Real, E)) g b hbON
+    simpa [Tensor0SBundle.identityInvMetric,
+      Tensor0SBundle.diagonalInvMetric] using h
+  rw [metricDerivNorm_eq_iterCov (I := 𝓘(Real, E)) G g g a b hbinv]
+  apply sqrt_norm_le_comp (I := 𝓘(Real, E)) g0 g z (2 + a) e hinv0
+    (C := 2) (B := B) (by norm_num) hequiv' _ hB
+  intro slots
+  rw [Tensor0SBundle.component0S_apply]
+  have ht := iterCovComp_eq_iterCov (I := 𝓘(Real, E)) g
+    (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
+      Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) g)
+    frame hframe isOpen_univ a (Set.mem_univ z) slots
+  have ht' :
+      iterCovComp (I := 𝓘(Real, E)) frame
+          (fun y ↦ Tensor.Coordinates.christoffelSymbolInFrame
+            (Integral.Connection.leviCivitaConnectionOfMetric
+              (I := 𝓘(Real, E)) g) frame hframe y)
+          (frameComp0S (I := 𝓘(Real, E))
+            (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
+              Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) g) frame)
+          a z slots =
+        iterCov (I := 𝓘(Real, E)) g 2
+          (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
+            Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) g)
+          a z (fun q ↦ e (slots q)) := by
+    simpa only [frameTuple, frame] using ht
+  calc
+    |iterCov (I := 𝓘(Real, E)) g 2
+        (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
+          Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) g)
+        a z (fun q ↦ e (slots q))| =
+        |iterCovComp (I := 𝓘(Real, E)) frame
+          (fun y ↦ Tensor.Coordinates.christoffelSymbolInFrame
+            (Integral.Connection.leviCivitaConnectionOfMetric
+              (I := 𝓘(Real, E)) g) frame hframe y)
+          (frameComp0S (I := 𝓘(Real, E))
+            (Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) G -
+              Tensor0SBundle.metricTensorField (I := 𝓘(Real, E)) g) frame)
+          a z slots| := congrArg abs ht'.symm
+    _ ≤ B := by simpa only [e, frame, hframe] using hcomp slots
+
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] in
+/-- Smooth coefficient fields make every level of their metric covariant
+component tower differentiable on the same coordinate buffer. -/
+theorem metric_tower_mdiff
+    (V : TopologicalSpace.Opens E)
+    (e : Module.Basis (Fin (Module.finrank Real E)) Real E)
+    (B Q : E → (E →L[Real] E →L[Real] Real))
+    (hBcd : ContDiffOn Real (∞ : WithTop ℕ∞) B V)
+    (hQcd : ContDiffOn Real (∞ : WithTop ℕ∞) Q V)
+    (hBco : ∀ z : E, z ∈ V → IsCoercive (B z)) :
+    let Gamma := fun z i j m ↦ e.coord m
+      (MetricKoszul.raisedKoszulOp (B z) (fderiv Real B z)
+        (e i) (e j))
+    let base := fun z (slots : Fin 2 → Fin (Module.finrank Real E)) ↦
+      (Q z - B z) (e (slots 0)) (e (slots 1))
+    ∀ q : Nat, ∀ z : V,
+      ∀ slots : Fin (2 + q) → Fin (Module.finrank Real E),
+        MDifferentiableAt 𝓘(Real, E) 𝓘(Real, Real)
+          (fun y : E ↦ iterCovComp (I := 𝓘(Real, E))
+            (fun i _ ↦ e i) Gamma base q y slots) (z : E) :=
+  metricTower_mdiff V e B Q hBcd hQcd hBco
 
 end HCGCompactness
 end DifferentialGeometry

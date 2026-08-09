@@ -187,7 +187,6 @@ private def backgroundRiemannCommWeightKernel (g₀ : SmoothRiemannianMetric I M
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 private lemma bdBgRArmWeight_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (m : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -299,7 +298,7 @@ private theorem bdBgRComm_eq_refold (g₀ g : SmoothRiemannianMetric I M) :
         (backgroundRiemannCommWeightKernel (I := I) (M := M) g₀).toSection x) D))
     (fun j => (v j : E))]
   refine Finset.sum_congr rfl fun c _ => ?_
-  rw [bdBgRArmWeight_toModel (I := I) (M := M) g₀ x D]
+  rw [bdBgRArmWeight_toModel g₀ x D]
   change Tensor0SSpace.toModel D
       (Fin.cons (show E from riemannOp (LeviCivita (I := I) g₀) x
           (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
@@ -464,7 +463,6 @@ def palatiniRicciFoldWeightB (g₀ : SmoothRiemannianMetric I M)
           (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S))
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 private lemma bdRicciFoldWeight_unitModel_gen (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
     unitModel (I := I) (M := M) g₀ 4
@@ -568,7 +566,6 @@ private lemma bdRicciFoldWeight_unitModel_gen (g₀ : SmoothRiemannianMetric I M
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 private lemma bdRicciFoldWeights_unitModel_eq_kernel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4
@@ -817,13 +814,12 @@ lemma bdRicciFold_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
         smoothCcTensorBilinForm (I := I) g₀ S x (smoothOrthoFrame (I := I) g₁ x b x)
           (riemannOp (LeviCivita (I := I) g₀) x (v 0) (smoothOrthoFrame (I := I) g₁ x a x)
             (v 1)) from
-    bdRicciFoldWeights_unitModel_eq_kernel (I := I) (M := M) g₀ S x
+    bdRicciFoldWeights_unitModel_eq_kernel g₀ S x
       (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
       (v 0) (v 1)]
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
     palatiniRicciFoldWeightA (I := I) (M := M) g₀ (c • T) +
@@ -865,7 +861,7 @@ private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
           (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 3)) (m 1) +
         smoothCcTensorBilinForm (I := I) g₀ (c • T) x (m 3)
           (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 1)) from
-    bdRicciFoldWeights_unitModel_eq_kernel (I := I) (M := M) g₀ (c • T) x
+    bdRicciFoldWeights_unitModel_eq_kernel g₀ (c • T) x
       (m 2) (m 3) (m 0) (m 1)]
   rw [show unitModel (I := I) (M := M) g₀ 4
       (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
@@ -874,13 +870,12 @@ private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
           (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 3)) (m 1) +
         smoothCcTensorBilinForm (I := I) g₀ T x (m 3)
           (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 1)) from
-    bdRicciFoldWeights_unitModel_eq_kernel (I := I) (M := M) g₀ T x
+    bdRicciFoldWeights_unitModel_eq_kernel g₀ T x
       (m 2) (m 3) (m 0) (m 1)]
   rw [ccTensorBilin_smul_local, ccTensorBilin_smul_local]
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 lemma bdRicciFoldXi_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
     rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6

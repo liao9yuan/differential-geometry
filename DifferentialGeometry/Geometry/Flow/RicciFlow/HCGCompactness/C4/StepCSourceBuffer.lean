@@ -29,7 +29,7 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -220,7 +220,6 @@ private theorem NormalCoordMetricEquivOn.chart_join_le
     have hetaDiff : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, E) eta s := by
       simpa only [eta] using hchiDiff.comp s hgammaDiff
     have hetaSrc : eta s ∈ e.source := by
-      rw [← normalChartAt_target_eq (I := I)]
       exact chi.map_source (hjoin hs).1
     have heDiff : MDifferentiableAt 𝓘(Real, E) I e (eta s) :=
       (e.contMDiffOn_toFun.mdifferentiableOn one_ne_zero _ hetaSrc).mdifferentiableAt
@@ -654,10 +653,10 @@ theorem HasSuppConvData.metric_buffer
     exact inp.normalBounds.metric_equiv (Lphi.φ k) c w (hUmetric hw) v
   have hUtgt : U alpha ⊆ chi.target := by
     intro w hw
-    have hnorm : ‖w‖ < expMapC2Radius (I := I) Y.metric c := by
-      simpa only [Metric.mem_ball, dist_zero_right] using hUexp hw
-    simpa only [chi] using
-      ball_subset_normalChartAt_target (I := I) Y.metric c hnorm
+    have hwBall := hUexp hw
+    rw [Metric.mem_ball, dist_zero_right] at hwBall
+    change w ∈ (expMapDiffeo (I := I) Y.metric c).source
+    exact mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric c hwBall
   letI : RiemannianBundle (fun q : Y.M ↦ TangentSpace I q) := Y.riemBundle (I := I)
   have hcore := NormalCoordMetricEquivOn.ball_core_dist Y
     (hcomplete (Lphi.φ k)) (hconn (Lphi.φ k))

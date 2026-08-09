@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import DifferentialGeometry.Geometry.Exponential.NormalBallGeodesic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricLocal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseInverse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseRealization
@@ -34,7 +35,7 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -135,7 +136,8 @@ theorem normal_enorm
 
 noncomputable def normalTangent
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
-    (z : E × E) :
+    (z : E × E)
+    (c : NormalChartAt (I := I) Y x := legacyBallChart (I := I) Y x) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -145,15 +147,14 @@ noncomputable def normalTangent
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact ⟨expMapDiffeo (I := I) Y.metric x z.1,
-    mfderiv 𝓘(Real, E) I
-      (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) z.1 z.2⟩
+  exact c.tangent z
 
-
-
+/-- A pair of normal coordinates interpreted as a pair of ambient manifold
+points. -/
 noncomputable def normalPair
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
-    (z : E × E) :
+    (z : E × E)
+    (c : NormalChartAt (I := I) Y x := legacyBallChart (I := I) Y x) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -163,18 +164,15 @@ noncomputable def normalPair
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact (expMapDiffeo (I := I) Y.metric x z.1,
-    expMapDiffeo (I := I) Y.metric x z.2)
-
-
-
+  exact c.pair z
 
 def IsNormalDiag
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
     (x : Y.M) (q : NNReal) (δ : Real)
-    (e : OpenPartialHomeomorph (E × E) (E × E)) :
+    (e : OpenPartialHomeomorph (E × E) (E × E))
+    (c : NormalChartAt (I := I) Y x := legacyBallChart (I := I) Y x) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -223,15 +221,14 @@ def IsNormalDiag
     Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
     ContDiffOn Real ∞ e.symm e.target ∧
     ∀ z ∈ Metric.closedBall (0 : E × E) q,
-      normalPair (I := I) Y x (e z) =
+      normalPair (I := I) Y x (e z) (c := c) =
         diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
-          (normalTangent (I := I) Y x z)
-
-
+          (normalTangent (I := I) Y x z (c := c))
 
 def NormalDiagFence
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
-    (q : NNReal) (e : OpenPartialHomeomorph (E × E) (E × E)) :
+    (q : NNReal) (e : OpenPartialHomeomorph (E × E) (E × E))
+    (c : NormalChartAt (I := I) Y x := legacyBallChart (I := I) Y x) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
     letI : IsManifold I ∞ Y.M := Y.smooth
@@ -242,11 +239,9 @@ def NormalDiagFence
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact ∀ z ∈ Metric.closedBall (0 : E × E) q,
-    z.1 ∈ normalBall (I := I) Y x ∧
-    (e z).1 ∈ normalBall (I := I) Y x ∧
-    (e z).2 ∈ normalBall (I := I) Y x
-
-
+    z.1 ∈ Metric.ball (0 : E) c.radius ∧
+    (e z).1 ∈ Metric.ball (0 : E) c.radius ∧
+    (e z).2 ∈ Metric.ball (0 : E) c.radius
 
 theorem normal_launch_mfd
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
@@ -997,6 +992,608 @@ theorem normal_inv_eq
   rw [hTanExp] at hTanChart
   refine TotalSpace.ext (hproj.trans hbase) ?_
   exact heq_of_eq (hInvChart.symm.trans hTanChart)
+
+theorem chart_launch_mfd
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) {x : Y.M}
+    (c : NormalChartAt (I := I) Y x) {Z : Real → E × E}
+    (hZat :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      HasDerivAt Z (PhaseFlow.phaseField (c.accel Y.metric) (Z 0)) 0)
+    (hpos :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      (Z 0).1 ∈ Metric.ball (0 : E) c.radius) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    mfderiv 𝓘(Real, Real) I
+        (fun t : Real ↦ c.hom (Z t).1) 0 1 =
+      mfderiv 𝓘(Real, E) I c.hom (Z 0).1 (Z 0).2 := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  let gamma : Real → E := fun t ↦ (Z t).1
+  have hgammaDeriv : HasDerivAt gamma (Z 0).2 0 := by
+    have hfst := (hZat.hasFDerivAt.fst).hasDerivAt
+    simpa only [gamma, PhaseFlow.phaseField, ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.coe_fst', ContinuousLinearMap.toSpanSingleton_apply,
+      one_smul] using hfst
+  have hgammaMd : MDifferentiableAt 𝓘(Real, Real) 𝓘(Real, E) gamma 0 := by
+    rw [mdifferentiableAt_iff_differentiableAt]
+    exact hgammaDeriv.differentiableAt
+  have hExpMd : MDifferentiableAt 𝓘(Real, E) I c.hom (Z 0).1 :=
+    ((c.smooth_to (Z 0).1 hpos).contMDiffAt
+      (Metric.isOpen_ball.mem_nhds hpos)).mdifferentiableAt (by simp)
+  have hgammaMfd :
+      mfderiv 𝓘(Real, Real) 𝓘(Real, E) gamma 0 1 = (Z 0).2 := by
+    rw [mfderiv_eq_fderiv]
+    exact (fderiv_apply_one_eq_deriv (f := gamma) (x := (0 : Real))).trans
+      hgammaDeriv.deriv
+  have hcomp := mfderiv_comp_apply
+    (I := 𝓘(Real, Real)) (I' := 𝓘(Real, E)) (I'' := I)
+    (g := c.hom) (f := gamma) (x := (0 : Real)) hExpMd hgammaMd (1 : Real)
+  calc
+    mfderiv 𝓘(Real, Real) I
+        (fun t : Real ↦ c.hom (Z t).1) 0 1 =
+      mfderiv 𝓘(Real, E) I c.hom (gamma 0)
+        (mfderiv 𝓘(Real, Real) 𝓘(Real, E) gamma 0 1) := by
+      simpa only [gamma, Function.comp_apply] using hcomp
+    _ = mfderiv 𝓘(Real, E) I c.hom (Z 0).1 (Z 0).2 := by
+      rw [hgammaMfd]
+
+/-- A fenced provider-phase trajectory reaches the intrinsic moving
+exponential of its actual launch tangent at time one. -/
+
+theorem chart_end_eq_intr
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) (c : NormalChartAt (I := I) Y x)
+    {r : Real} {R : NNReal} {Z : Real → E × E}
+    (hrQuarter :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) (c.radius / 4))
+    (hZcont : ContinuousOn Z (Icc (-1) 1))
+    (hZwithin :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      ∀ t ∈ Icc (-1) 1, HasDerivWithinAt Z
+        (PhaseFlow.phaseField (c.accel Y.metric) (Z t))
+        (Icc (-1) 1) t)
+    (hZmem : ∀ t ∈ Icc (-1) 1, Z t ∈ normalPhaseBox r R) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    c.hom (Z 1).1 =
+      expMapIntrinsic (I := I) Y.metric (normal_enorm (I := I) Y)
+        (c.hom (Z 0).1)
+        (mfderiv 𝓘(Real, Real) I
+          (fun t : Real ↦ c.hom (Z t).1) 0 1) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  let gamma : Real → E := fun t ↦ (Z t).1
+  let Gamma : Real → Y.M := fun t ↦ c.hom (gamma t)
+  have hright : ∀ t ∈ Ico (-1) 1, HasDerivWithinAt Z
+      (PhaseFlow.phaseField (c.accel Y.metric) (Z t)) (Ici t) t := by
+    intro t ht
+    exact Analysis.ODE.Flow.hasDerivWithinAt_Ici_of_Icc
+      (hZwithin t ⟨ht.1, ht.2.le⟩) ht
+  have hZsmooth : ContDiffOn Real ∞ Z (Ioo (-1) 1) :=
+    chartFlow_contDiff (I := I) Y.metric c (by norm_num) hZcont hright
+  have hgamma : ContMDiffOn 𝓘(Real, Real) 𝓘(Real, E) ∞ gamma
+      (Ioo (-1) 1) := by
+    rw [contMDiffOn_iff_contDiffOn]
+    exact hZsmooth.fst
+  have hZat : ∀ t ∈ Ioo (-1) 1, HasDerivAt Z
+      (PhaseFlow.phaseField (c.accel Y.metric) (Z t)) t := by
+    intro t ht
+    exact (hZwithin t (Ioo_subset_Icc_self ht)).hasDerivAt
+      (Icc_mem_nhds ht.1 ht.2)
+  have hgeo : Geodesic.IsGeodesicOn (I := 𝓘(Real, E))
+      (c.totalMetric Y.metric) gamma (Ioo (-1) 1) := by
+    simpa only [gamma] using
+      chartGeoOn_of_phase (I := I) Y.metric c isOpen_Ioo hZat
+  have hmem : ∀ t ∈ Ioo (-1) 1, gamma t ∈ (c.inner : Set E) := by
+    intro t ht
+    exact hrQuarter (hZmem t (Ioo_subset_Icc_self ht)).1
+  have hGammaGeo : Geodesic.IsGeodesicOn (I := I) Y.metric Gamma
+      (Ioo (-1) 1) := by
+    simpa only [Gamma, gamma] using
+      c.geo_map Y.metric gamma (Ioo (-1) 1) isOpen_Ioo hmem hgamma hgeo
+  have hGammaCont : ContinuousOn Gamma (Icc (-1) 1) := by
+    apply c.smooth_to.continuousOn.comp hZcont.fst
+    intro t ht
+    exact c.inner_subset (hrQuarter (hZmem t ht).1)
+  simpa only [Gamma, gamma] using
+    (geo_end_eq_intr (I := I) Y.metric (normal_enorm (I := I) Y)
+      (Gamma 0)
+      (mfderiv 𝓘(Real, Real) I Gamma 0 1)
+      hGammaCont hGammaGeo rfl rfl)
+
+/-- The retained endpoint of a provider-phase trajectory is the intrinsic
+diagonal exponential after interpreting source and target through the same
+provider chart. -/
+
+theorem chart_end_eq_diag
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) (c : NormalChartAt (I := I) Y x)
+    {r : Real} {R : NNReal} {Z : Real → E × E}
+    (hrQuarter :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) (c.radius / 4))
+    (hZcont : ContinuousOn Z (Icc (-1) 1))
+    (hZwithin :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      ∀ t ∈ Icc (-1) 1, HasDerivWithinAt Z
+        (PhaseFlow.phaseField (c.accel Y.metric) (Z t))
+        (Icc (-1) 1) t)
+    (hZmem : ∀ t ∈ Icc (-1) 1, Z t ∈ normalPhaseBox r R) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    normalPair (I := I) Y x ((Z 0).1, (Z 1).1) (c := c) =
+      diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+        (normalTangent (I := I) Y x (Z 0) (c := c)) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  have h0 : (0 : Real) ∈ Icc (-1) 1 := by norm_num
+  have hZat : HasDerivAt Z
+      (PhaseFlow.phaseField (c.accel Y.metric) (Z 0)) 0 :=
+    (hZwithin 0 h0).hasDerivAt (Icc_mem_nhds (by norm_num) (by norm_num))
+  have hpos : (Z 0).1 ∈ Metric.ball (0 : E) c.radius :=
+    c.inner_subset (hrQuarter (hZmem 0 h0).1)
+  have hlaunch := chart_launch_mfd (I := I) Y c hZat hpos
+  have hend := chart_end_eq_intr (I := I) Y hcomplete hconn x c
+    hrQuarter hZcont hZwithin hZmem
+  rw [hlaunch] at hend
+  rw [normalPair, normalTangent, diagExp_apply]
+  exact Prod.ext rfl hend
+
+/-- The launch tangent of the pushed normal phase curve is the differential of
+the normal exponential applied to the phase velocity. -/
+
+theorem exists_chart_diag
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) (c : NormalChartAt (I := I) Y x)
+    (b :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      c.MetricBounds Y.metric)
+    {r : Real} (hr : 0 < r)
+    (hrMetric :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) b.radius)
+    (hrQuarter :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) (c.radius / 4)) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    ∃ (q : NNReal) (Φ : (E × E) → Real → E × E)
+        (e : OpenPartialHomeomorph (E × E) (E × E)) (δ : Real),
+      0 < q ∧
+      4 * (q : Real) < r ∧
+      (∀ z ∈ Metric.closedBall (0 : E × E) q, Φ z 0 = z) ∧
+      (∀ z ∈ Metric.closedBall (0 : E × E) q,
+        ContinuousOn (Φ z) (Icc (-1) 1)) ∧
+      (∀ z ∈ Metric.closedBall (0 : E × E) q, ∀ t ∈ Icc (-1) 1,
+        HasDerivWithinAt (Φ z)
+          (PhaseFlow.phaseField (c.accel Y.metric) (Φ z t))
+          (Icc (-1) 1) t) ∧
+      (∀ z ∈ Metric.closedBall (0 : E × E) q, ∀ t ∈ Ioo (-1) 1,
+        HasDerivAt (Φ z)
+          (PhaseFlow.phaseField (c.accel Y.metric) (Φ z t)) t) ∧
+      (∀ z ∈ Metric.closedBall (0 : E × E) q, ∀ t ∈ Icc (-1) 1,
+        Φ z t ∈ normalPhaseBox r (2 * q)) ∧
+      Φ 0 1 = 0 ∧
+      ApproximatesLinearOn (fun z ↦ (z.1, (Φ z 1).1)) PhaseFlow.freeDiag
+        (Metric.closedBall (0 : E × E) q)
+        (PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q))) ∧
+      ContDiffOn Real ∞ (fun z ↦ (z.1, (Φ z 1).1))
+        (Metric.ball (0 : E × E) q) ∧
+      0 < δ ∧
+      e.source = Metric.ball (0 : E × E) q ∧
+      (e : E × E → E × E) = (fun z ↦ (z.1, (Φ z 1).1)) ∧
+      Metric.closedBall ((fun z ↦ (z.1, (Φ z 1).1)) 0) δ ⊆ e.target ∧
+      δ = ((‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊⁻¹ -
+          PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q)) : NNReal) : Real) *
+        ((q : Real) / 2) ∧
+      ContDiffOn Real ∞ e.symm e.target ∧
+      ∀ z ∈ Metric.closedBall (0 : E × E) q,
+        normalPair (I := I) Y x (e z) (c := c) =
+          diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+            (normalTangent (I := I) Y x z (c := c)) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  obtain ⟨q, hq, hqWide, hqAccel, herr⟩ :=
+    exists_chart_biq (I := I) Y.metric b hr
+  have hqRadius : 4 * (q : Real) < r := by nlinarith [hqWide]
+  obtain ⟨Φ, hΦ0, hΦcont, hΦwithin, hΦat, hΦbox, hΦzero,
+      happrox, hΦsmooth⟩ :=
+    exists_chartBiflow (I := I) Y.metric c b hrMetric hrQuarter q hq
+      hqWide hqAccel
+  obtain ⟨e, δ, hδ, hsource, hcoe, htarget, hδeq⟩ :=
+    PhaseFlow.exists_quant_inv hq happrox herr
+  have happroxOpen : ApproximatesLinearOn
+      (fun z ↦ (z.1, (Φ z 1).1))
+      (PhaseFlow.freeDiagCLE (E := E) : (E × E) →L[Real] (E × E))
+      (Metric.ball (0 : E × E) q)
+      (PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q))) := by
+    simpa only [PhaseFlow.freeDiagCLE_coe] using
+      happrox.mono_set Metric.ball_subset_closedBall
+  have hinvSmooth : ContDiffOn Real ∞ e.symm e.target :=
+    PhaseFlow.inv_smooth_of_approx happroxOpen (Or.inr herr)
+      Metric.isOpen_ball hΦsmooth e hsource hcoe
+  refine ⟨q, Φ, e, δ, hq, hqRadius, hΦ0, hΦcont, hΦwithin, hΦat,
+    hΦbox, hΦzero, happrox, hΦsmooth, hδ, hsource, hcoe, htarget, hδeq,
+    hinvSmooth, ?_⟩
+  intro z hz
+  have hdiag := chart_end_eq_diag (I := I) Y hcomplete hconn x c
+    hrQuarter (hΦcont z hz) (hΦwithin z hz) (hΦbox z hz)
+  rw [hcoe]
+  simpa only [hΦ0 z hz] using hdiag
+
+/-- Prescribed bilateral phase budgets produce one provider-parametric
+quantitative diagonal branch and retain its coordinate fence. -/
+
+theorem exists_chart_diag_of
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) (c : NormalChartAt (I := I) Y x)
+    (b :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      c.MetricBounds Y.metric)
+    {r : Real}
+    (hrMetric :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) b.radius)
+    (hrQuarter :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) (c.radius / 4))
+    (q : NNReal) (hq : 0 < q) (hqWide : 6 * (q : Real) < r)
+    (hqAccel :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      3 * b.C 1 * (2 * (q : Real)) ^ 2 ≤
+        (2 / 3 : Real) * (q : Real))
+    (herr :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q)) <
+        ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))‖₊⁻¹) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ∃ (δ : Real) (e : OpenPartialHomeomorph (E × E) (E × E)),
+      0 < δ ∧
+      δ = ((‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊⁻¹ -
+          PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q)) : NNReal) : Real) *
+        ((q : Real) / 2) ∧
+      IsNormalDiag (I := I) Y hcomplete hconn x q δ e (c := c) ∧
+      NormalDiagFence (I := I) Y x q e (c := c) ∧
+      ApproximatesLinearOn
+        (e.symm : E × E → E × E)
+        ((PhaseFlow.freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))
+        e.target
+        (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊ *
+          (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊⁻¹ -
+              PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q)))⁻¹ *
+          PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q))) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  obtain ⟨Φ, hΦ0, hΦcont, hΦwithin, _hΦat, hΦbox, hΦzero,
+      happrox, hΦsmooth⟩ :=
+    exists_chartBiflow (I := I) Y.metric c b hrMetric hrQuarter q hq
+      hqWide hqAccel
+  obtain ⟨e, δ, hδ, hsource, hcoe, htarget, hδeq, hinvApprox⟩ :=
+    PhaseFlow.exists_quant_inv_bi hq happrox herr
+  have happroxOpen : ApproximatesLinearOn
+      (fun z ↦ (z.1, (Φ z 1).1))
+      (PhaseFlow.freeDiagCLE (E := E) : (E × E) →L[Real] (E × E))
+      (Metric.ball (0 : E × E) q)
+      (PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q))) := by
+    simpa only [PhaseFlow.freeDiagCLE_coe] using
+      happrox.mono_set Metric.ball_subset_closedBall
+  have hinvSmooth : ContDiffOn Real ∞ e.symm e.target :=
+    PhaseFlow.inv_smooth_of_approx happroxOpen (Or.inr herr)
+      Metric.isOpen_ball hΦsmooth e hsource hcoe
+  have heZero : e 0 = 0 := by
+    rw [hcoe]
+    simp only [Prod.fst_zero, hΦzero]
+    rfl
+  have heSmooth : ContDiffOn Real ∞ (e : E × E → E × E) e.source := by
+    rw [hsource, hcoe]
+    exact hΦsmooth
+  have htargetE : Metric.closedBall (e 0) δ ⊆ e.target := by
+    simpa only [hcoe] using htarget
+  have htarget' : Metric.closedBall (0 : E × E) δ ⊆ e.target := by
+    simpa only [heZero] using htargetE
+  have hdiag : ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) Y x (e z) (c := c) =
+        diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+          (normalTangent (I := I) Y x z (c := c)) := by
+    intro z hz
+    have hzdiag := chart_end_eq_diag (I := I) Y hcomplete hconn x c
+      hrQuarter (hΦcont z hz) (hΦwithin z hz) (hΦbox z hz)
+    rw [hcoe]
+    simpa only [hΦ0 z hz] using hzdiag
+  have hIsDiag :
+      IsNormalDiag (I := I) Y hcomplete hconn x q δ e (c := c) := by
+    change e.source = Metric.ball (0 : E × E) q ∧
+      e 0 = 0 ∧
+      ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
+      Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
+      ContDiffOn Real ∞ e.symm e.target ∧
+      ∀ z ∈ Metric.closedBall (0 : E × E) q,
+        normalPair (I := I) Y x (e z) (c := c) =
+          diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+            (normalTangent (I := I) Y x z (c := c))
+    exact ⟨hsource, heZero, heSmooth, htarget', hinvSmooth, hdiag⟩
+  have hrChart : Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) c.radius := by
+    intro z hz
+    exact Metric.ball_subset_ball (by nlinarith [c.radius_pos]) (hrQuarter hz)
+  have hfence : NormalDiagFence (I := I) Y x q e (c := c) := by
+    intro z hz
+    have hzNorm : ‖z‖ ≤ (q : Real) := by
+      simpa only [Metric.mem_closedBall, dist_zero_right] using hz
+    have hqr : (q : Real) < r := by nlinarith [hqWide]
+    have hzFirst : z.1 ∈ Metric.ball (0 : E) r := by
+      rw [Metric.mem_ball, dist_zero_right]
+      exact (norm_fst_le z).trans_lt (hzNorm.trans_lt hqr)
+    have htime : (1 : Real) ∈ Set.Icc (-1) 1 := by norm_num
+    have hzEnd : (Φ z 1).1 ∈ Metric.ball (0 : E) r :=
+      (hΦbox z hz 1 htime).1
+    rw [hcoe]
+    exact ⟨hrChart hzFirst, hrChart hzFirst, hrChart hzEnd⟩
+  exact ⟨δ, e, hδ, hδeq, hIsDiag, hfence, hinvApprox⟩
+
+/-- A controlled chart admits one quantitative endpoint branch satisfying the
+provider-parametric intrinsic diagonal predicate. -/
+
+theorem exists_chart_diag_at
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) (c : NormalChartAt (I := I) Y x)
+    (b :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      c.MetricBounds Y.metric)
+    {r : Real} (hr : 0 < r)
+    (hrMetric :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) b.radius)
+    (hrQuarter :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Metric.ball (0 : E) r ⊆ Metric.ball (0 : E) (c.radius / 4)) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ∃ (q : NNReal) (δ : Real)
+        (e : OpenPartialHomeomorph (E × E) (E × E)),
+      0 < q ∧
+      4 * (q : Real) < r ∧
+      0 < δ ∧
+      δ = ((‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊⁻¹ -
+          PhaseFlow.phaseErr (chartPhaseK Y.metric b (2 * q)) : NNReal) : Real) *
+        ((q : Real) / 2) ∧
+      IsNormalDiag (I := I) Y hcomplete hconn x q δ e (c := c) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  obtain ⟨q, hq, hqWide, hqAccel, herr⟩ :=
+    exists_chart_biq (I := I) Y.metric b hr
+  obtain ⟨δ, e, hδ, hδeq, hdiag, _hfence, _hinvApprox⟩ :=
+    exists_chart_diag_of (I := I) Y hcomplete hconn x c b hrMetric
+      hrQuarter q hq hqWide hqAccel herr
+  exact ⟨q, δ, e, hq, by nlinarith [hqWide], hδ, hδeq, hdiag⟩
 
 end HCGCompactness
 end DifferentialGeometry

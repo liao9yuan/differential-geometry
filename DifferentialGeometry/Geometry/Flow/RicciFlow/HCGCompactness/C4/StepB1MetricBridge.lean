@@ -98,7 +98,7 @@ theorem pullback_sub_norm
     Real.norm_eq_abs, mul_assoc] using
       (bilinPerturbTri (B₀ := B₀) (B₁ := B₁) (A := A) v w)
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]

@@ -381,7 +381,6 @@ def riemannCometricDoubleTraceFold : SmoothCcTensor g₀ 2 4 :=
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 lemma bgRArmWeight_toModel (x : M) (D : Tensor0SSpace 2 I x)
     (m : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel

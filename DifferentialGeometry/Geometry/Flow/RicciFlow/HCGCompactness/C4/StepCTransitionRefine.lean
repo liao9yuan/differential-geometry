@@ -592,3 +592,4 @@ end HCGNormalTransition
 
 end HCGCompactness
 end DifferentialGeometry
+

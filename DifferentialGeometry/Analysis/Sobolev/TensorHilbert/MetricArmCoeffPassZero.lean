@@ -113,6 +113,62 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     (rsDomDomCongrSection (I := I) (M := M) g r s σ R).toSection x =
       tensorRS_domDomCongr σ (R.toSection x) := rfl
 
+lemma rsDomDomCongr_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (σ : Equiv.Perm (Fin s)) (X Y : SmoothCcTensor g r s) :
+    rsDomDomCongrSection (I := I) (M := M) g r s σ (X - Y) =
+      rsDomDomCongrSection (I := I) (M := M) g r s σ X -
+        rsDomDomCongrSection (I := I) (M := M) g r s σ Y := by
+  letI := tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
+  letI := tensorRSBundle_fiber (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
+  letI := tensorRSBundle_vector (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
+  letI := tensorRSBundle_smooth (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) r s
+  apply SmoothCcTensor.ext
+  apply DFunLike.ext _ _
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  have hsub : (X - Y).toSection x = X.toSection x - Y.toSection x := by
+    rw [SmoothCcTensor.toSection_sub]
+    rfl
+  have hsub2 :
+      (rsDomDomCongrSection (I := I) (M := M) g r s σ X -
+          rsDomDomCongrSection (I := I) (M := M) g r s σ Y).toSection x =
+        (rsDomDomCongrSection (I := I) (M := M) g r s σ X).toSection x -
+          (rsDomDomCongrSection (I := I) (M := M) g r s σ Y).toSection x := by
+    rw [SmoothCcTensor.toSection_sub]
+    rfl
+  rw [rsDomDomCongrSection_toSection, hsub, hsub2,
+    rsDomDomCongrSection_toSection, rsDomDomCongrSection_toSection]
+  have hfib : ∀ (y : Tensor0SSpace s I x) (w : Fin s → TangentSpace I x),
+      Tensor0SSpace.toModel y w = (y : Tensor0SSpace s I x) w := fun _ _ => rfl
+  rw [hfib, hfib]
+  rw [rsDomDomCongr_apply_eval (I := I) (M := M) σ
+    (X.toSection x - Y.toSection x) D m]
+  rw [show ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+      rsDomDomCongr σ (X.toSection x) - rsDomDomCongr σ (Y.toSection x)) D) =
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        rsDomDomCongr σ (X.toSection x)) D -
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        rsDomDomCongr σ (Y.toSection x)) D from rfl]
+  rw [show ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+      (X.toSection x - Y.toSection x : TensorRSSpace r s I x)) D) =
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from X.toSection x) D -
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Y.toSection x) D from rfl]
+  rw [show ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        rsDomDomCongr σ (X.toSection x)) D -
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        rsDomDomCongr σ (Y.toSection x)) D : Tensor0SSpace s I x) m =
+      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        rsDomDomCongr σ (X.toSection x)) D : Tensor0SSpace s I x) m -
+      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        rsDomDomCongr σ (Y.toSection x)) D : Tensor0SSpace s I x) m from rfl]
+  rw [rsDomDomCongr_apply_eval (I := I) (M := M) σ (X.toSection x) D m]
+  rw [rsDomDomCongr_apply_eval (I := I) (M := M) σ (Y.toSection x) D m]
+  rfl
+
 end NormedDomReindexing
 
 def armSlotEndoPassZeroCc (g : SmoothRiemannianMetric I M)

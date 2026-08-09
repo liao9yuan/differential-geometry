@@ -47,7 +47,7 @@ private theorem mapDerivNorm_tri
     ((hh.sub hg).of_le (by exact_mod_cast le_top))]
   exact norm_sub_le _ _
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]

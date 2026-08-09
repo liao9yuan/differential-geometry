@@ -24,10 +24,16 @@ open scoped Manifold ContDiff NNReal Topology
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
-variable [NeZero (Module.finrank Real E)]
+open DifferentialGeometry.Geometry.Riemannian
+open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
+
+variable {E : Type uE} [NormedAddCommGroup E]
 variable {H : Type uH} [TopologicalSpace H]
+
+section RawPhaseSmallness
+
+variable [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace NormalRadiusProfile
@@ -422,6 +428,330 @@ theorem exists_phase_scale
   exact ⟨q, rfl, hqRadius, hqAcc, herrOut, hinvErr, hδlower⟩
 
 end NormalRadiusProfile
+
+end RawPhaseSmallness
+
+section ControlledPhaseSmallness
+
+variable [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
+variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless] in
+/-- The acceleration Lipschitz coefficient of a controlled chart vanishes at
+zero velocity radius. -/
+@[simp] theorem chartPhaseK_zero
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g) :
+    chartPhaseK g b 0 = 0 := by
+  apply NNReal.eq
+  simp [chartPhaseK]
+  rfl
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless] in
+/-- The acceleration Lipschitz coefficient of a controlled chart is continuous
+in the velocity radius. -/
+theorem chartPhaseK_cont
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g) :
+    Continuous (chartPhaseK g b) := by
+  unfold chartPhaseK
+  apply Continuous.subtype_mk
+  fun_prop
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless] in
+/-- The acceleration Lipschitz coefficient of a controlled chart tends to zero
+with the velocity radius. -/
+theorem chartPhaseK_lim
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g) :
+    Tendsto (chartPhaseK g b) (nhds 0) (nhds 0) := by
+  have hcont : Tendsto (chartPhaseK g b) (nhds (0 : NNReal))
+      (nhds (chartPhaseK g b 0)) := (chartPhaseK_cont g b).continuousAt
+  simpa using hcont
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless] in
+/-- The time-one phase error of a controlled chart tends to zero with the
+velocity radius. -/
+theorem chartPhaseErr_lim
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g) :
+    Tendsto (fun R ↦ PhaseFlow.phaseErr (chartPhaseK g b R))
+      (nhds 0) (nhds 0) :=
+  PhaseFlow.phaseErr_tendsto.comp (chartPhaseK_lim g b)
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless] in
+/-- Every positive inverse-function threshold eventually dominates the phase
+endpoint error of a controlled chart. -/
+theorem chartPhaseErr_lt_ev
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g)
+    {eps : NNReal} (heps : 0 < eps) :
+    ∀ᶠ R in nhds 0, PhaseFlow.phaseErr (chartPhaseK g b R) < eps :=
+  chartPhaseErr_lim g b (Iio_mem_nhds heps)
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless] in
+/-- A controlled chart admits a positive phase radius satisfying the flow
+fences and any prescribed positive endpoint-error threshold. -/
+theorem exists_chart_q_lt
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g)
+    {r : Real} (hr : 0 < r) {eps : NNReal} (heps : 0 < eps) :
+    ∃ q : NNReal, 0 < q ∧
+      4 * (q : Real) < r ∧
+      3 * b.C 1 * (2 * (q : Real)) ^ 2 ≤ (q : Real) ∧
+      PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < eps := by
+  have htwo : Tendsto (fun q : NNReal ↦ 2 * q) (nhds 0) (nhds 0) := by
+    have hcont : Continuous (fun q : NNReal ↦ 2 * q) :=
+      continuous_const.mul continuous_id
+    have hAt : Tendsto (fun q : NNReal ↦ 2 * q) (nhds (0 : NNReal))
+        (nhds ((fun q : NNReal ↦ 2 * q) 0)) := hcont.continuousAt
+    simpa using hAt
+  have herrEv : ∀ᶠ q : NNReal in nhds 0,
+      PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < eps :=
+    htwo (chartPhaseErr_lt_ev g b heps)
+  obtain ⟨δ, hδ, herr⟩ := Metric.eventually_nhds_iff_ball.mp herrEv
+  let C : Real := b.C 1
+  have hC : 0 ≤ C := b.C_nonneg 1
+  let accelBound : Real := 1 / (24 * (C + 1))
+  have hden : 0 < 24 * (C + 1) := mul_pos (by norm_num) (by linarith)
+  have haccelBound : 0 < accelBound := one_div_pos.mpr hden
+  let qReal : Real := min (δ / 4) (min (r / 8) accelBound)
+  have hqReal : 0 < qReal := by
+    dsimp only [qReal]
+    exact lt_min (div_pos hδ (by norm_num))
+      (lt_min (div_pos hr (by norm_num)) haccelBound)
+  let q : NNReal := ⟨qReal, hqReal.le⟩
+  have hqδ : qReal ≤ δ / 4 := min_le_left _ _
+  have hqRadius : qReal ≤ r / 8 :=
+    (min_le_right _ _).trans (min_le_left _ _)
+  have hqAccel : qReal ≤ accelBound :=
+    (min_le_right _ _).trans (min_le_right _ _)
+  have hqBall : q ∈ Metric.ball (0 : NNReal) δ := by
+    rw [Metric.mem_ball, NNReal.dist_eq]
+    change |qReal - 0| < δ
+    rw [sub_zero, abs_of_pos hqReal]
+    exact hqδ.trans_lt (div_lt_self hδ (by norm_num))
+  have herrQ : PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < eps :=
+    herr q hqBall
+  have hqRadius' : 4 * qReal < r := by
+    nlinarith
+  have hqProd : qReal * (24 * (C + 1)) ≤ 1 := by
+    apply (le_div_iff₀ hden).mp
+    simpa only [accelBound, one_div] using hqAccel
+  have hlinear : 12 * C * qReal ≤ 1 := by
+    nlinarith
+  have hmul : 0 ≤ qReal * (1 - 12 * C * qReal) :=
+    mul_nonneg hqReal.le (sub_nonneg.mpr hlinear)
+  refine ⟨q, ?_, ?_, ?_, herrQ⟩
+  · exact_mod_cast hqReal
+  · simpa only [q, NNReal.coe_mk] using hqRadius'
+  · change 3 * C * (2 * qReal) ^ 2 ≤ qReal
+    nlinarith
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+  [NeZero (Module.finrank Real E)] [I.Boundaryless] in
+/-- A controlled chart admits a positive radius satisfying the wider bilateral
+phase fence and any prescribed positive endpoint-error threshold. -/
+theorem exists_chart_biq_lt
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g)
+    {r : Real} (hr : 0 < r) {eps : NNReal} (heps : 0 < eps) :
+    ∃ q : NNReal, 0 < q ∧
+      6 * (q : Real) < r ∧
+      3 * b.C 1 * (2 * (q : Real)) ^ 2 ≤
+        (2 / 3 : Real) * (q : Real) ∧
+      PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < eps := by
+  have htwo : Tendsto (fun q : NNReal ↦ 2 * q) (nhds 0) (nhds 0) := by
+    have hcont : Continuous (fun q : NNReal ↦ 2 * q) :=
+      continuous_const.mul continuous_id
+    have hAt : Tendsto (fun q : NNReal ↦ 2 * q) (nhds (0 : NNReal))
+        (nhds ((fun q : NNReal ↦ 2 * q) 0)) := hcont.continuousAt
+    simpa using hAt
+  have herrEv : ∀ᶠ q : NNReal in nhds 0,
+      PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < eps :=
+    htwo (chartPhaseErr_lt_ev g b heps)
+  obtain ⟨epsBall, hepsBall, herr⟩ :=
+    Metric.eventually_nhds_iff_ball.mp herrEv
+  let C : Real := b.C 1
+  have hC : 0 ≤ C := b.C_nonneg 1
+  let accelBound : Real := 1 / (18 * (C + 1))
+  have hden : 0 < 18 * (C + 1) := mul_pos (by norm_num) (by linarith)
+  have haccelBound : 0 < accelBound := one_div_pos.mpr hden
+  let qReal : Real := min (epsBall / 4) (min (r / 12) accelBound)
+  have hqReal : 0 < qReal := by
+    dsimp only [qReal]
+    exact lt_min (div_pos hepsBall (by norm_num))
+      (lt_min (div_pos hr (by norm_num)) haccelBound)
+  let q : NNReal := ⟨qReal, hqReal.le⟩
+  have hqEps : qReal ≤ epsBall / 4 := min_le_left _ _
+  have hqRadius : qReal ≤ r / 12 :=
+    (min_le_right _ _).trans (min_le_left _ _)
+  have hqAccel : qReal ≤ accelBound :=
+    (min_le_right _ _).trans (min_le_right _ _)
+  have hqBall : q ∈ Metric.ball (0 : NNReal) epsBall := by
+    rw [Metric.mem_ball, NNReal.dist_eq]
+    change |qReal - 0| < epsBall
+    rw [sub_zero, abs_of_pos hqReal]
+    exact hqEps.trans_lt (div_lt_self hepsBall (by norm_num))
+  have herrQ : PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < eps :=
+    herr q hqBall
+  have hqRadius' : 6 * qReal < r := by
+    nlinarith
+  have hqProd : qReal * (18 * (C + 1)) ≤ 1 := by
+    apply (le_div_iff₀ hden).mp
+    simpa only [accelBound, one_div] using hqAccel
+  have hlinear : 18 * C * qReal ≤ 1 := by
+    nlinarith
+  have hcoef : 12 * C * qReal ≤ (2 / 3 : Real) := by
+    nlinarith
+  have hmul : 0 ≤ qReal * ((2 / 3 : Real) - 12 * C * qReal) :=
+    mul_nonneg hqReal.le (sub_nonneg.mpr hcoef)
+  refine ⟨q, ?_, ?_, ?_, ?_⟩
+  · exact_mod_cast hqReal
+  · simpa only [q, NNReal.coe_mk] using hqRadius'
+  · change 3 * C * (2 * qReal) ^ 2 ≤ (2 / 3 : Real) * qReal
+    nlinarith
+  · exact herrQ
+
+omit [FiniteDimensional Real E] [CompleteSpace E] [I.Boundaryless] in
+/-- A controlled chart admits a positive radius satisfying the wider bilateral
+phase fence and the inverse-function threshold. -/
+theorem exists_chart_biq
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g)
+    {r : Real} (hr : 0 < r) :
+    ∃ q : NNReal, 0 < q ∧
+      6 * (q : Real) < r ∧
+      3 * b.C 1 * (2 * (q : Real)) ^ 2 ≤
+        (2 / 3 : Real) * (q : Real) ∧
+      PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) <
+        ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))‖₊⁻¹ := by
+  letI : Nontrivial E := Module.nontrivial_of_finrank_pos
+    (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank Real E)))
+  exact exists_chart_biq_lt (I := I) g b hr
+    (PhaseFlow.freeDiagInv_pos (E := E))
+
+omit [FiniteDimensional Real E] [CompleteSpace E] [I.Boundaryless] in
+/-- A controlled chart admits a bilateral phase radius whose quantitative
+inverse branch has approximation error strictly below `1 / 24`. -/
+theorem exists_chart_biq_inv
+    {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M) {p : M}
+    {c : NormalBallChart (I := I) p} (b : c.MetricBounds g)
+    {r : Real} (hr : 0 < r) :
+    let N : NNReal :=
+      ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊
+    let T : NNReal := N⁻¹
+    ∃ q : NNReal, 0 < q ∧
+      6 * (q : Real) < r ∧
+      3 * b.C 1 * (2 * (q : Real)) ^ 2 ≤
+        (2 / 3 : Real) * (q : Real) ∧
+      PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < T ∧
+      N * (T - PhaseFlow.phaseErr (chartPhaseK g b (2 * q)))⁻¹ *
+          PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < 1 / 24 := by
+  letI : Nontrivial E := Module.nontrivial_of_finrank_pos
+    (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank Real E)))
+  let N : NNReal :=
+    ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+      (E × E) →L[Real] (E × E))‖₊
+  let T : NNReal := N⁻¹
+  have hT : 0 < T := PhaseFlow.freeDiagInv_pos (E := E)
+  let epsInv : NNReal := T / (48 * (N + 1))
+  have hepsInv : 0 < epsInv := by
+    dsimp only [epsInv]
+    exact div_pos hT (mul_pos (by norm_num) (by positivity))
+  obtain ⟨q, hq, hqWide, hqAccel, herrQ⟩ :=
+    exists_chart_biq_lt (I := I) g b hr hepsInv
+  have hN1 : (1 : NNReal) ≤ N + 1 := by
+    exact le_add_of_nonneg_left N.2
+  have hden_ge : (2 : NNReal) ≤ 48 * (N + 1) := by
+    calc
+      (2 : NNReal) = 2 * 1 := by norm_num
+      _ ≤ 2 * (N + 1) := mul_le_mul_of_nonneg_left hN1 (by norm_num)
+      _ ≤ 48 * (N + 1) :=
+        mul_le_mul_of_nonneg_right (by norm_num) (N + 1).2
+  have heps_le : epsInv ≤ T / 2 := by
+    dsimp only [epsInv]
+    exact div_le_div_of_nonneg_left T.2 (by norm_num) hden_ge
+  have herrHalf :
+      PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < T / 2 :=
+    herrQ.trans_le heps_le
+  have herr :
+      PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < T :=
+    herrHalf.trans (half_lt_self hT)
+  have hinvErr :
+      N * (T - PhaseFlow.phaseErr (chartPhaseK g b (2 * q)))⁻¹ *
+          PhaseFlow.phaseErr (chartPhaseK g b (2 * q)) < 1 / 24 := by
+    let cErr : NNReal := PhaseFlow.phaseErr (chartPhaseK g b (2 * q))
+    have hdenInv : 0 < 48 * (N + 1) :=
+      mul_pos (by norm_num) (by positivity)
+    have hsmall : cErr * (48 * (N + 1)) < T := by
+      apply (lt_div_iff₀ hdenInv).mp
+      simpa only [cErr, epsInv] using herrQ
+    have hfac : 24 * N + 1 ≤ 48 * (N + 1) := by
+      nlinarith [N.2]
+    have hcFac : cErr * (24 * N + 1) < T :=
+      (mul_le_mul_of_nonneg_left hfac cErr.2).trans_lt hsmall
+    have honeFac : (1 : NNReal) ≤ 24 * N + 1 := by
+      exact le_add_of_nonneg_left (mul_nonneg (by norm_num) N.2)
+    have hct : cErr < T := by
+      calc
+        cErr = cErr * 1 := by rw [mul_one]
+        _ ≤ cErr * (24 * N + 1) :=
+          mul_le_mul_of_nonneg_left honeFac cErr.2
+        _ < T := hcFac
+    have hdiff : 0 < T - cErr := tsub_pos_iff_lt.mpr hct
+    have hnum : 24 * (N * cErr) < T - cErr := by
+      rw [lt_tsub_iff_right]
+      calc
+        24 * (N * cErr) + cErr = cErr * (24 * N + 1) := by ring
+        _ < T := hcFac
+    rw [show N * (T - cErr)⁻¹ * cErr = (N * cErr) / (T - cErr) by
+      rw [div_eq_mul_inv]
+      ring]
+    rw [div_lt_iff₀ hdiff]
+    rw [show (1 / 24 : NNReal) * (T - cErr) = (T - cErr) / 24 by ring]
+    exact (lt_div_iff₀ (by norm_num : (0 : NNReal) < 24)).2 <| by
+      simpa only [mul_comm] using hnum
+  exact ⟨q, hq, hqWide, hqAccel, herr, hinvErr⟩
+
+
+end ControlledPhaseSmallness
 
 end HCGCompactness
 end DifferentialGeometry

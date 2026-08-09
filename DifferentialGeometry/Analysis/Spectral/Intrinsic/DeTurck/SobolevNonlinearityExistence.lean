@@ -2031,6 +2031,27 @@ theorem deTurckSobolevNonlinearitySymm_mixed_lipschitz_pointwise
   rw [Set.mem_setOf_eq, hlhs_def, hrhs_def] at this
   simpa only [hJ_def] using this
 
+/-- Symmetrizing a covariant two-tensor does not change the symmetric bilinear
+form used by the metric-realization bounds. -/
+theorem ccTensorBilinSymm_symmS_apply (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
+    ccTensorBilinSymm (I := I) g₀ (symmS (I := I) (M := M) g₀ T) x v w =
+      ccTensorBilinSymm (I := I) g₀ T x v w := by
+  rw [ccTensorBilinSymm_apply, ccTensorBilin_symmS, ccTensorBilin_symmS,
+    ccTensorBilinSymm_symm (I := I) g₀ T x w v, ccTensorBilinSymm_apply]
+  ring
+
+/-- The fibre operator bound is invariant under the tensor symmetrization
+used by the Ricci--DeTurck nonlinear map. -/
+theorem gFibreOpBound_symmS (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (symmS (I := I) (M := M) g₀ T)) δ := by
+  intro x v w
+  rw [ccTensorBilinSymm_symmS_apply (I := I) (M := M) g₀ T x v w]
+  exact hδ x v w
+
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieThreeArmCancel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0JointSmooth
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSLowCoeff
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
 
 
@@ -296,21 +297,6 @@ theorem lieSum_eq_arms
 
 
 
-def rhsLow0Coeff
-    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
-    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
-    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
-  (-2 : ℝ) • linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s +
-    (deTurckLieCoeffField (I := I) (M := M) g₀
-        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg +
-      lieCorr0Field (I := I) (M := M) g₀
-        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
-
-
-
 def rhsLow1Coeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -324,6 +310,7 @@ def rhsLow1Coeff
 
 
 
+set_option maxHeartbeats 1600000 in
 theorem rhsLow0_path_joint
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -360,6 +347,7 @@ theorem rhsLow1_path_joint
   have hR' := hjoint_smul (I := I) (M := M) g₀ 3 _ (-2 : ℝ) hR
   simpa only [rhsLow1Coeff] using hjoint_add (I := I) (M := M) g₀ 3 _ _ hR' hL
 
+set_option maxHeartbeats 1600000 in
 theorem rhsLow_eq_arms
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -429,6 +417,7 @@ theorem rhsLow_eq_arms
   simp only [appCc_add_left, appCc_smul_left, unitModel_add_app, unitModel_smul_app]
   linear_combination hLower
 
+set_option maxHeartbeats 1600000 in
 theorem rhsSlope_eq_arms
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),

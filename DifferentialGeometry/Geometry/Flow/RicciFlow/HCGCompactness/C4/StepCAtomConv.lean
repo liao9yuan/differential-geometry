@@ -1,14 +1,15 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1Producers
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBLocalMetrics
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtoms
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.LiveCenterScale
 
+/-!
+# C-infinity convergence of quadratic Step-C atom readouts
 
-
-
-
-
-
-
+This file supplies the reusable calculus bridge from simultaneous convergence
+of bilinear-form fields and coordinate maps to convergence of their quadratic
+readouts.  It is the analytic core needed for the intrinsic Step-C atoms.
+-/
 
 noncomputable section
 
@@ -25,9 +26,9 @@ section QuadraticReadout
 variable {X : Type uX} [NormedAddCommGroup X] [NormedSpace Real X]
 variable {V : Type uV} [NormedAddCommGroup V] [NormedSpace Real V]
 
-
-
-
+/-- Composition preserves `C^infty` convergence when the intermediate space
+is finite-dimensional.  This is the finite-dimensional interface to the
+proper-space composition engine. -/
 theorem mapCInf_comp_fd {Y Z : Type*}
     [NormedAddCommGroup Y] [NormedSpace Real Y] [FiniteDimensional Real Y]
     [NormedAddCommGroup Z] [NormedSpace Real Z]
@@ -46,8 +47,8 @@ theorem mapCInf_comp_fd {Y Z : Type*}
   letI : ProperSpace Y := FiniteDimensional.proper Real Y
   exact MapCInfConvOnCompacts.comp hU hW hB hA hBc hBinfc hAc hAinfc hmap hmapk
 
-
-
+/-- Restrict a convergent family to a fixed argument, viewed as a family of
+constant maps on any other open source domain. -/
 theorem mapCInf_constArg {Y F : Type*}
     [NormedAddCommGroup Y] [NormedSpace Real Y] [ProperSpace Y]
     [NormedAddCommGroup F] [NormedSpace Real F]
@@ -64,20 +65,20 @@ theorem mapCInf_constArg {Y F : Type*}
     (fun _ => contDiffOn_const) contDiffOn_const hAc hAinfc
     (fun _ _ => hy0) (fun _ _ _ => hy0)
 
-
+/-- Evaluate a bilinear-form field twice on the same vector field. -/
 def quadRead (B : X -> (V →L[Real] V →L[Real] Real))
     (v : X -> V) (x : X) : Real :=
   B x (v x) (v x)
 
-
+/-- Smooth bilinear-form and vector fields have a smooth quadratic readout. -/
 theorem quadRead_contDiff {B : X -> (V →L[Real] V →L[Real] Real)}
     {v : X -> V} {n : WithTop ℕ∞}
     (hB : ContDiff Real n B) (hv : ContDiff Real n v) :
     ContDiff Real n (quadRead B v) := by
   exact (hB.clm_apply hv).clm_apply hv
 
-
-
+/-- Simultaneous `C^infty` convergence of bilinear-form fields and vector
+fields passes to the quadratic readout `B(x)(v(x), v(x))`. -/
 theorem quadRead_conv
     [FiniteDimensional Real V]
     {U : Set X} (hU : IsOpen U)
@@ -105,8 +106,8 @@ theorem quadRead_conv
     (Set.mapsTo_univ _ _) (fun _ => Set.mapsTo_univ _ _)
   exact hcomp
 
-
-
+/-- Postcomposing a convergent quadratic readout with a fixed smooth scalar
+function preserves `C^infty` convergence. -/
 theorem quadBump_conv
     [FiniteDimensional Real V]
     {U : Set X} (hU : IsOpen U)
@@ -135,37 +136,9 @@ theorem quadBump_conv
     hqc hqinfc (fun _ => hf.contDiffOn) hf.contDiffOn
     (Set.mapsTo_univ _ _) (fun _ => Set.mapsTo_univ _ _)
 
-
-
-theorem mapCInf_apply {ι Q : Type*} [Fintype ι]
-    [NormedAddCommGroup Q] [NormedSpace Real Q]
-    {U : Set X} (hU : IsOpen U)
-    {u : Nat -> X -> (ι -> Q)} {uinf : X -> (ι -> Q)}
-    (hu : MapCInfConvOnCompacts U u uinf)
-    (huc : forall k, ContDiffOn Real (∞ : WithTop ℕ∞) (u k) U)
-    (huinfc : ContDiffOn Real (∞ : WithTop ℕ∞) uinf U) (i : ι) :
-    MapCInfConvOnCompacts U (fun k x => u k x i) (fun x => uinf x i) := by
-  intro K hK hKU p epsilon hepsilon
-  obtain ⟨k0, hk0⟩ := hu K hK hKU p epsilon hepsilon
-  refine ⟨k0, fun k hk r hr x hx => ?_⟩
-  have hxU : x ∈ U := hKU hx
-  have hle : ((r : ℕ∞) : WithTop ℕ∞) <= (∞ : WithTop ℕ∞) := by
-    exact_mod_cast le_top
-  have hcd : forall j : ι, ContDiffAt Real (r : ℕ∞)
-      (fun y => u k y j - uinf y j) x := by
-    intro j
-    exact (((contDiffOn_pi.mp (huc k) j).sub (contDiffOn_pi.mp huinfc j)).contDiffAt
-      (hU.mem_nhds hxU)).of_le hle
-  have hbase := hk0 k hk r hr x hx
-  simp only [mapDerivNorm] at hbase ⊢
-  change ‖iteratedFDeriv Real r (fun y j => u k y j - uinf y j) x‖ <= epsilon at hbase
-  rw [iteratedFDeriv_pi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi] at hbase
-  exact (norm_le_pi_norm (fun j =>
-    iteratedFDeriv Real r (fun y => u k y j - uinf y j) x) i).trans hbase
-
-
-
-
+/-- Finite-family variant of `quadBump_conv`: select one bilinear coefficient
+from a convergent Pi-valued metric family and evaluate it twice on a convergent
+vector field before applying a fixed smooth scalar function. -/
 theorem quadPiBump_conv {ι : Type*} [Fintype ι]
     [FiniteDimensional Real V]
     {U : Set X} (hU : IsOpen U)
@@ -191,6 +164,7 @@ section WeightConvergence
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 omit [Fintype ι] in
+/-- Smooth atom families give smooth base-killed raw numerators. -/
 theorem cutRaw_contDiffOn {U : Set X} {a : ι -> X -> Real}
     (ha : forall i, ContDiffOn Real (∞ : WithTop ℕ∞) (a i) U)
     (i0 i : ι) :
@@ -210,6 +184,7 @@ theorem cutRaw_contDiffOn {U : Set X} {a : ι -> X -> Real}
     exact cutRaw_of_ne (a i0) a i0 i x hi
 
 omit [Fintype ι] in
+/-- Base killing preserves per-slot `C^infty` convergence of atom families. -/
 theorem cutRaw_conv {U : Set X} (hU : IsOpen U)
     {a : Nat -> ι -> X -> Real} {ainf : ι -> X -> Real}
     (hconv : forall i, MapCInfConvOnCompacts U (fun k => a k i) (ainf i))
@@ -247,6 +222,8 @@ theorem cutRaw_conv {U : Set X} (hU : IsOpen U)
       exact cutRaw_of_ne (ainf i0) ainf i0 i x hi
 
 omit [DecidableEq ι] in
+/-- The arbitrary-base normalized weights specialize to the existing
+model-space quotient convergence theorem. -/
 theorem rawWeights_conv {U : Set X} (hU : IsOpen U)
     {num : Nat -> ι -> X -> Real} {numinf : ι -> X -> Real}
     {delta : Real} (hdelta : 0 < delta)
@@ -261,6 +238,8 @@ theorem rawWeights_conv {U : Set X} (hU : IsOpen U)
     (normWeightsConv hU hdelta hconv hc hcinf hlow hlowinf i)
 
 omit [NormedAddCommGroup X] [NormedSpace Real X] in
+/-- If some atom is one and the base atom lies in `[0,1]`, the sum of the
+base-killed raw numerators is at least one half. -/
 theorem cutRaw_sum_half {a : ι -> X -> Real} {i0 : ι} {x : X}
     (hbase : a i0 x ∈ Set.Icc (0 : Real) 1)
     (hnn : forall i, 0 <= a i x) (hcover : exists i, a i x = 1) :
@@ -282,9 +261,9 @@ theorem cutRaw_sum_half {a : ι -> X -> Real} {i0 : ι} {x : X}
     exact hjraw.trans
       (Finset.single_le_sum (fun q _ => hrawnn q) (Finset.mem_univ j))
 
-
-
-
+/-- Covered atom families yield convergent normalized base-killed weights.
+The uniform denominator bound is intrinsic: one raw numerator is always at
+least one half, and the same lower bound passes to the limit. -/
 theorem cutWeights_conv {U : Set X} (hU : IsOpen U)
     {a : Nat -> ι -> X -> Real} {ainf : ι -> X -> Real}
     (hconv : forall i, MapCInfConvOnCompacts U (fun k => a k i) (ainf i))
@@ -339,7 +318,7 @@ open scoped Manifold
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -402,122 +381,31 @@ theorem stepCAtom_readout
           (normalTransition (I := I) Y beta gamma z)) := by
   exact quadNormal_readout (I := I) Y beta gamma (stepCBump lam hlam) hsrc
 
-/-- Pull one Step-C atom back by the exponential-side chart at `beta`. -/
-noncomputable def stepCAtomChart
+/-- Pull one Step-C atom back through a controlled normal chart at `beta`. -/
+noncomputable def stepCAtomOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
-    (lam : Real) (hlam : 0 < lam) (z : E) : Real :=
+    (lam : Real) (hlam : 0 < lam) (c : NormalChartAt (I := I) Y beta)
+    (z : E) : Real :=
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space Y.M := Y.t2
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  stepCAtom Y gamma lam hlam (expMapDiffeo (I := I) Y.metric beta z)
+  stepCAtom Y gamma lam hlam (c.hom z)
 
+/-- Pull one Step-C atom back by the selected legacy framed chart at `beta`. -/
+noncomputable def stepCAtomChart
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (beta gamma : Y.M)
+    (lam : Real) (hlam : 0 < lam) (z : E) : Real :=
+  stepCAtomOn (I := I) Y beta gamma lam hlam
+    (legacyBallChart (I := I) Y beta) z
 
-
-
-
-
-noncomputable def seqCenterD
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat) : (X.obj (L.φ k)).M :=
-  (seqCenter hd D P (L.φ k) gamma).getD (X.obj (L.φ k)).basepoint
-
-
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-theorem seqCenterD_dist_eq
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat) :
-    letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-    seqRadius hd D P (L.φ k) gamma =
-      dist (seqCenterD hd P L k gamma) (X.obj (L.φ k)).basepoint := by
-  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-  haveI : ProperSpace (X.obj (L.φ k)).M := (P (L.φ k)).proper
-  unfold seqRadius seqCenterD seqCenter OrderedNet.netRadius
-  cases OrderedNet.netCenter (X.obj (L.φ k)).basepoint (hd.lambda D)
-      (hd.lambda_continuous D) gamma <;> simp
-
-
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-@[simp] theorem seqCenterD_subseq
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ)
-    (k gamma : Nat) :
-    seqCenterD hd P (L.subseq hψ) k gamma = seqCenterD hd P L (ψ k) gamma := rfl
-
-
-
-def LiveSlot
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
-    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) :=
-  {gamma : Fin (pb.A r) // L.alive (gamma : Nat) = true}
-
-
-noncomputable instance liveSlotFintype
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
-    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) :
-    Fintype (LiveSlot L pb r) := by
-  letI : Finite (LiveSlot L pb r) :=
-    Finite.of_injective (fun gamma : LiveSlot L pb r => gamma.1) Subtype.val_injective
-  exact Fintype.ofFinite (LiveSlot L pb r)
-
-
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-theorem seqCenterD_some
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (k gamma : Nat)
-    (h : (seqCenter hd D P (L.φ k) gamma).isSome = true) :
-    seqCenter hd D P (L.φ k) gamma = some (seqCenterD hd P L k gamma) := by
-  cases hc : seqCenter hd D P (L.φ k) gamma with
-  | none => simp [hc] at h
-  | some c => simp [seqCenterD, hc]
-
-
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-theorem seqCenterD_live
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (gamma : Nat) (hgamma : L.alive gamma = true) :
-    ∀ᶠ k in Filter.atTop,
-      seqCenter hd D P (L.φ k) gamma = some (seqCenterD hd P L k gamma) :=
-  (L.alive_eventually gamma).mono fun k hk =>
-    seqCenterD_some hd P L k gamma (hk.trans hgamma)
-
-
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
-theorem seqCenter_dead
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
-    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (gamma : Nat) (hgamma : L.alive gamma = false) :
-    ∀ᶠ k in Filter.atTop, seqCenter hd D P (L.φ k) gamma = none :=
-  (L.alive_eventually gamma).mono fun k hk => by
-    cases hc : seqCenter hd D P (L.φ k) gamma with
-    | none => rfl
-    | some c => simp [hc, hgamma] at hk
-
-/-- Pull one ordered-net atom back by the exponential-side chart at
-`beta`. The wrapper installs the bundled manifold instances hidden in the
+/-- Pull one ordered-net atom back through a stagewise controlled normal-chart
+family. The wrapper installs the bundled manifold instances hidden in the
 sequence. -/
-noncomputable def seqAtomChart
+noncomputable def seqAtomOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
@@ -530,10 +418,38 @@ noncomputable def seqAtomChart
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
   seqAtom hd hD P L pb r k gamma
-    (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+    ((chart (L.φ k) (beta k)).hom z)
 
+/-- Pull one ordered-net atom back by the selected legacy framed chart at
+`beta`. -/
+noncomputable def seqAtomChart
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    (k : Nat) (z : E) : Real :=
+  seqAtomOn (I := I) (legacyChartFamily (I := I) X)
+    hd hD P L pb r beta gamma k z
 
-omit [NeZero (Module.finrank ℝ E)] in
+/-- Provider-parametric chart-pulled atoms commute with strict refinement of
+the net-limit data. -/
+@[simp] theorem seqAtomOn_subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    {ψ : Nat -> Nat} (hψ : StrictMono ψ) (k : Nat) :
+    seqAtomOn (I := I) chart hd hD P (L.subseq hψ) pb r
+        (fun j => beta (ψ j)) gamma k =
+      seqAtomOn (I := I) chart hd hD P L pb r beta gamma (ψ k) := by
+  unfold seqAtomOn
+  simp only [seqAtom_subseq]
+  rfl
+
+/-- Chart-pulled atoms commute with strict refinement of the net-limit data. -/
 @[simp] theorem seqAtomChart_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -544,16 +460,41 @@ omit [NeZero (Module.finrank ℝ E)] in
     seqAtomChart (I := I) hd hD P (L.subseq hψ) pb r
         (fun j => beta (ψ j)) gamma k =
       seqAtomChart (I := I) hd hD P L pb r beta gamma (ψ k) := by
-  unfold seqAtomChart seqAtom
-  simp only [NetLimitData.subseq, NetLimitData.lamInf, Function.comp_apply]
-  funext z
-  cases hcenter : seqCenter hd D P (L.φ (ψ k)) (gamma : Nat) with
-  | none =>
-      change (0 : Real) = 0
-      rfl
-  | some c => congr
+  exact seqAtomOn_subseq (I := I) (legacyChartFamily (I := I) X)
+    hd hD P L pb r beta gamma hψ k
 
-/-- Pulling a globally smooth ordered-net atom back by an exponential-side
+/-- Pulling a globally smooth ordered-net atom back through a controlled chart
+is smooth on every subset of the chart's named source-radius ball. -/
+theorem seqAtomOn_smooth
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
+    {U : Set E}
+    (hUx :
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      U ⊆ Metric.ball (0 : E) (chart (L.φ k) (beta k)).radius) :
+    ContDiffOn Real (∞ : WithTop ℕ∞)
+      (seqAtomOn (I := I) chart hd hD P L pb r beta gamma k) U := by
+  letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+  letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+    (X.obj (L.φ k)).t2TangentBundle
+  rw [← contMDiffOn_iff_contDiffOn]
+  simpa only [seqAtomOn] using
+    (seqAtom_contMDiff (I := I) hd hD P L pb r k hgp gamma).comp_contMDiffOn
+      ((chart (L.φ k) (beta k)).smooth_to.mono hUx)
+
+/-- Pulling a globally smooth ordered-net atom back by a framed exponential-side
 chart is smooth on every set contained in its intrinsic source-radius ball. -/
 theorem seqAtomChart_smooth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -580,18 +521,18 @@ theorem seqAtomChart_smooth
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
   rw [← contMDiffOn_iff_contDiffOn]
-  simpa only [seqAtomChart] using
+  simpa only [seqAtomChart, seqAtomOn, legacyChart_apply] using
     (seqAtom_contMDiff (I := I) hd hD P L pb r k hgp gamma).comp_contMDiffOn
       ((expMapDiffeo_contMDiffOn_expBall (I := I) (X.obj (L.φ k)) (beta k)).mono hUx)
 
-
-
-omit [NeZero (Module.finrank ℝ E)] in
+/-- A stabilized live atom inherits `C^infty` convergence from the corresponding
+intrinsic atom built at the totalized moving centre. -/
 theorem seqAtom_live_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
     (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
     {U : Set E} (hU : IsOpen U) {ainf : E -> Real}
     (hgamma : L.alive (gamma : Nat) = true)
@@ -610,13 +551,23 @@ theorem seqAtom_live_conv
   letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
   letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
     (X.obj (L.φ k)).t2TangentBundle
-  simpa only [seqAtomChart, stepCAtomChart] using congrFun
-    (seqAtom_some hd hD P L pb r k gamma hk)
-    (expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  let q := expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z
+  have hR : 4 * L.lamInf (gamma : Nat) <
+      expRadiusGp (I := I) (X.obj (L.φ k)).metric
+        (seqCenterD hd P L k (gamma : Nat)) :=
+    hgp k gamma (seqCenterD hd P L k (gamma : Nat)) hk
+  change seqAtom hd hD P L pb r k gamma q =
+    stepCAtom (X.obj (L.φ k)) (seqCenterD hd P L k (gamma : Nat))
+      (L.lamInf (gamma : Nat))
+      (hd.lambda_pos hD (L.rInf (gamma : Nat))) q
+  rw [seqAtom_some hd hD P L pb r k gamma hk]
+  exact (stepCAtom_eq_dist (I := I) (X.obj (L.φ k)) (P (L.φ k))
+    (L.lamInf (gamma : Nat))
+    (hd.lambda_pos hD (L.rInf (gamma : Nat))) hR).symm
 
-
-
-omit [NeZero (Module.finrank ℝ E)] in
+/-- A stabilized dead atom converges in `C^infty` to the zero function without
+requiring metric or transition-map extraction for that slot. -/
 theorem seqAtom_dead_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -633,10 +584,11 @@ theorem seqAtom_dead_conv
   refine hzero.congr_eventually hU ?_ fun _ _ => rfl
   filter_upwards [seqCenter_dead hd P L (gamma : Nat) hgamma] with k hk
   intro z _hz
-  simp [seqAtomChart, seqAtom_none hd hD P L pb r k gamma hk]
+  simp [seqAtomChart, seqAtomOn, legacyChart_apply,
+    seqAtom_none hd hD P L pb r k gamma hk]
 
-
-
+/-- A slot whose five-lambda ball is eventually disjoint from the source hat
+has zero chart-pulled atom limit on the source domain. -/
 theorem atom_disjoint_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -669,18 +621,18 @@ theorem atom_disjoint_conv
   apply hdisjointK
   exact L.binter_of_mem_hat hd hD P pb r k (hsourceK hz)
     (seqAtom_mem_hat hd hD P L pb r k hgpK gamma (by
-      simpa only [seqAtomChart] using hne))
+      simpa only [seqAtomChart, seqAtomOn, legacyChart_apply] using hne))
 
-
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
+/-- Assemble all finite slots without imposing geometric extraction inputs on
+dead ones.  Live slots use their supplied intrinsic-atom limits; dead slots
+are overwritten by the genuine zero limit rather than by the artificial
+basepoint fallback. -/
 theorem seqAtoms_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
     (beta : ∀ k : Nat, (X.obj (L.φ k)).M) {U : Set E} (hU : IsOpen U)
     (ainf : Fin (pb.A r) -> E -> Real)
     (hlive : ∀ gamma : Fin (pb.A r), L.alive (gamma : Nat) = true ->
@@ -699,13 +651,12 @@ theorem seqAtoms_conv
         seqAtom_dead_conv (I := I) hd hD P L pb r beta gamma hU hgamma
   | true =>
       simpa only [hgamma, ↓reduceIte] using
-        seqAtom_live_conv (I := I) hd hD P L pb r beta gamma hU hgamma
+        seqAtom_live_conv (I := I) hd hD P L pb r hgp beta gamma hU hgamma
           (hlive gamma hgamma)
 
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
+/-- Concrete chart-pulled Step-C atoms converge once the finite family of
+origin metric coefficients and the beta-to-gamma normal transitions converge
+on one shared subsequence. -/
 theorem stepCAtom_conv {ι : Type*} [Fintype ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (center : ι -> forall k : Nat, (X.obj k).M)
@@ -741,15 +692,14 @@ theorem stepCAtom_conv {ι : Type*} [Fintype ι]
     (fun _ => contDiffOn_const) hginf (hJc i) (hJinfc i)
     i (stepCBump (lam i) (hlam i)) (stepCBump (lam i) (hlam i)).contDiff
   refine hraw.congr hU (fun k z hz => ?_) (fun _ _ => rfl)
-  simpa only [stepCAtomChart] using
+  simpa only [stepCAtomChart, stepCAtomOn, legacyChart_apply] using
     (stepCAtom_readout (I := I) (X.obj k) (beta k) (center i k)
       (lam i) (hlam i) (hsrc i k z hz))
 
-
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
+/-- Extract a `C^infty` limit of the metric coefficients at a moving sequence
+of normal-chart centres.  The maps are made constant in the auxiliary model
+variable, so only the already uniform order-zero bound at the chart origin is
+needed; no common positive normal-coordinate radius is assumed. -/
 theorem existsOriginMetric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
@@ -790,10 +740,9 @@ theorem existsOriginMetric
   simpa only [g0, Set.mem_univ, forall_const] using
     (exists_metricLimit_on (E := E) isOpen_univ g0 hsmooth hbdd hequiv)
 
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
+/-- Extract one shared subsequence for the origin metric coefficients of a
+finite family of moving normal-chart centres.  Bundling all slots in a finite
+Pi-space lets Arzela--Ascoli perform the finite diagonal in one step. -/
 theorem existsMetric0Univ {ι : Type*} [Fintype ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
@@ -831,10 +780,9 @@ theorem existsMetric0Univ {ι : Type*} [Fintype ι]
     exists_cInf_subseq_on isOpen_univ g0 hsmooth hbdd
   simpa only [g0] using ⟨phi, gInf, hphi, hginf, hconv⟩
 
-
-
-
-omit [NeZero (Module.finrank ℝ E)] in
+/-- Extract one common origin-metric subsequence for exactly the live slots of
+a frozen finite cage.  The returned sequence is expressed on top of `L.phi`,
+so it can be installed as `L.subseq hpsi` by the next producer. -/
 theorem existsLiveMetric0
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
@@ -858,9 +806,8 @@ theorem existsLiveMetric0
   refine ⟨psi, gInf, hpsi, hginf, ?_⟩
   simpa only [X', c, PointedRiemannianSeq.subseq] using hconv
 
-
-
-omit [NeZero (Module.finrank ℝ E)] in
+/-- The common live-slot origin-metric limit retains the uniform Euclidean
+metric equivalence of the finite-stage normal-coordinate metrics. -/
 theorem liveMetric0_equiv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
@@ -913,3 +860,4 @@ end OriginMetric
 
 end HCGCompactness
 end DifferentialGeometry
+

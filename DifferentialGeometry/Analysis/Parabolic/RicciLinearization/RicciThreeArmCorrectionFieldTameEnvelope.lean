@@ -1057,7 +1057,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_linRicciOrder0RiemannHalfCombInput
     riemannianFiberNormSq_iteratedCovGrad_linearizedRicciConnDiffOrder0Coeff_diagGrid_le
       (I := I) (M := M) g₀ hδ₀
   obtain ⟨CD, hCD_nn, hCD⟩ :=
-    riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0RiemannCoeff_bgDiff_diagGrid_le
+    rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le
       (I := I) (M := M) g₀ hδ₀
   obtain ⟨cbg, hcbg_nn, hcbg⟩ :=
     exists_rfns_iteratedCovGrad_fixedCoeffField_bound (I := I) (M := M) g₀

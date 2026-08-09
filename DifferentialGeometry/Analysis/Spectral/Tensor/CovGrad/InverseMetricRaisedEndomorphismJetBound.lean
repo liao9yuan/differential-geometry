@@ -1183,9 +1183,9 @@ private lemma rfns_slotInsertE_zero_le
 
 private theorem
     rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_convolution_recursion
-    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (A : ℝ) (B : ℕ → ℝ), 0 ≤ A ∧ (∀ m, 0 ≤ B m) ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
         (_htie : ∀ y v w, g₁.inner y v w =
           g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
@@ -1212,7 +1212,7 @@ private theorem
       ((Module.finrank ℝ E : ℝ) ^ 2 * (1 / (1 - δ₀)) ^ 2) *
       ((m : ℝ) + 1) * 4 ^ (m + 1) * (Module.finrank ℝ E : ℝ) ^ m,
     by positivity, fun m => by positivity, ?_⟩
-  intro g₁ T htie δ hδ_le hδ0 hbound x
+  intro g₀ g₁ T htie δ hδ_le hδ0 hbound x
   have hδ₀0 : 0 ≤ δ₀ := le_trans hδ0 hδ_le
   refine ⟨?_, ?_⟩
   · rw [iteratedCovGrad_zero]
@@ -1340,10 +1340,12 @@ private theorem
     refine le_trans hStep (le_of_eq ?_)
     rw [hSdef]
 
-theorem riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
-    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+/-- A single ceiling below one fixes the slot-zero inverse-difference grid
+coefficient before either metric varies. -/
+theorem invDiff_zero_unif
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
         (_htie : ∀ y v w, g₁.inner y v w =
           g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
         {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
@@ -1360,13 +1362,13 @@ theorem riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRais
                   ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := by
   obtain ⟨A, B, hA, hB, hrec⟩ :=
     rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_convolution_recursion
-      (I := I) (M := M) g₀ hδ₀
+      (I := I) (M := M) hδ₀
   refine ⟨fun i => (DifferentialGeometry.Combinatorics.recGridCS A B i).1 +
       (Module.finrank ℝ E : ℝ) ^ 2 * (1 / (1 - δ₀)) ^ 2,
     fun i => add_nonneg (DifferentialGeometry.Combinatorics.recGridCS_nonneg A B hA hB i).1
       (by positivity), ?_⟩
-  intro g₁ T htie δ hδ_le hδ0 hbound i x
-  obtain ⟨hbaseF, hstepF⟩ := hrec g₁ T htie hδ_le hδ0 hbound x
+  intro g₀ g₁ T htie δ hδ_le hδ0 hbound i x
+  obtain ⟨hbaseF, hstepF⟩ := hrec g₀ g₁ T htie hδ_le hδ0 hbound x
   have hδ₀0 : 0 ≤ δ₀ := le_trans hδ0 hδ_le
   have hD₀nn : 0 ≤ (Module.finrank ℝ E : ℝ) ^ 2 * (1 / (1 - δ₀)) ^ 2 := by positivity
   have hfullgrid := DifferentialGeometry.Combinatorics.antidiagonalTupleGrid_convolution_bound
@@ -1442,6 +1444,84 @@ theorem riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRais
         (fun j => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x _) (i' + 1))
     linarith
 
+/-- Fixed-background wrapper for `invDiff_zero_unif`. -/
+theorem riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (_htie : ∀ y v w, g₁.inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + i) x
+            ((iteratedCovGrad (I := I) g₀ 1 1 i
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
+                (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) ≤
+          C i * ∑ n ∈ Finset.range (i + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := by
+  obtain ⟨C, hC, hbnd⟩ := invDiff_zero_unif (I := I) (M := M) hδ₀
+  exact ⟨C, hC, hbnd g₀⟩
+
+/-- Compatibility wrapper for the former slot-zero theorem name. -/
+theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (_htie : ∀ y v w, g₁.inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + i) x
+            ((iteratedCovGrad (I := I) g₀ 1 1 i
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
+                (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) ≤
+          C i * ∑ n ∈ Finset.range (i + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) :=
+  riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
+    (E := E) (I := I) (M := M) g₀ hδ₀
+
+/-- A single ceiling below one fixes the slot-one inverse-difference grid
+coefficient before either metric varies. -/
+theorem invDiff_slot_unif
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (_htie : ∀ y v w, g₁.inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
+                (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) ≤
+          C i * ∑ n ∈ Finset.range (i + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := by
+  obtain ⟨C, hC, hbnd⟩ :=
+    invDiff_zero_unif (I := I) (M := M) hδ₀
+  refine ⟨fun i => (Module.finrank ℝ E : ℝ) * C i,
+    fun i => mul_nonneg (Nat.cast_nonneg _) (hC i), ?_⟩
+  intro g₀ g₁ T htie δ hδ_le hδ0 hbound i x
+  have h2862 := rfns_iteratedCovGrad_slotInsertEndoCc_le_endo (E := E) (I := I) (M := M) g₀ 1
+    (gInvDiffRaisedEndoField (I := I) g₀ g₁) i x
+  rw [pow_one] at h2862
+  refine le_trans h2862 ?_
+  have hchild := hbnd g₀ g₁ T htie hδ_le hδ0 hbound i x
+  rw [mul_assoc]
+  exact mul_le_mul_of_nonneg_left hchild (Nat.cast_nonneg _)
+
+/-- Fixed-background wrapper for `invDiff_slot_unif`. -/
 theorem rfns_iteratedCovGrad_slotInsertEndoCc_gInvDiffRaisedEndoField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1460,20 +1540,34 @@ theorem rfns_iteratedCovGrad_slotInsertEndoCc_gInvDiffRaisedEndoField_diagonalPr
               ∏ m : Fin n,
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
                   ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := by
-  obtain ⟨C, hC, hbnd⟩ :=
-    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
-      (I := I) (M := M) g₀ hδ₀
-  refine ⟨fun i => (Module.finrank ℝ E : ℝ) * C i,
-    fun i => mul_nonneg (Nat.cast_nonneg _) (hC i), ?_⟩
-  intro g₁ T htie δ hδ_le hδ0 hbound i x
-  have h2862 := rfns_iteratedCovGrad_slotInsertEndoCc_le_endo (E := E) (I := I) (M := M) g₀ 1
-    (gInvDiffRaisedEndoField (I := I) g₀ g₁) i x
-  rw [pow_one] at h2862
-  refine le_trans h2862 ?_
-  have hchild := hbnd g₁ T htie hδ_le hδ0 hbound i x
-  rw [mul_assoc]
-  exact mul_le_mul_of_nonneg_left hchild (Nat.cast_nonneg _)
+  obtain ⟨C, hC, hbnd⟩ := invDiff_slot_unif (I := I) (M := M) hδ₀
+  exact ⟨C, hC, hbnd g₀⟩
 
+/-- A single ceiling below one fixes the full inverse-difference coefficient
+grid before either metric varies. -/
+theorem invDiff_grid_unif
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (_htie : ∀ y v w, g₁.inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+          C i * ∑ n ∈ Finset.range (i + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := by
+  obtain ⟨C, hC, hbnd⟩ := invDiff_slot_unif (I := I) (M := M) hδ₀
+  refine ⟨C, hC, fun g₀ g₁ T htie δ hδ_le hδ0 hbound i x => ?_⟩
+  rw [gInvDiffSlotCoeff_eq_slotInsertEndoCc (E := E) (I := I) g₀ g₁]
+  exact hbnd g₀ g₁ T htie hδ_le hδ0 hbound i x
+
+/-- Fixed-background wrapper for `invDiff_grid_unif`. -/
 theorem riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1491,12 +1585,29 @@ theorem riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductG
               ∏ m : Fin n,
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
                   ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := by
-  obtain ⟨C, hC, hbnd⟩ :=
-    rfns_iteratedCovGrad_slotInsertEndoCc_gInvDiffRaisedEndoField_diagonalProductGrid_le
-      (I := I) (M := M) g₀ hδ₀
-  refine ⟨C, hC, fun g₁ T htie δ hδ_le hδ0 hbound i x => ?_⟩
-  rw [gInvDiffSlotCoeff_eq_slotInsertEndoCc (E := E) (I := I) g₀ g₁]
-  exact hbnd g₁ T htie hδ_le hδ0 hbound i x
+  obtain ⟨C, hC, hbnd⟩ := invDiff_grid_unif (I := I) (M := M) hδ₀
+  exact ⟨C, hC, hbnd g₀⟩
+
+/-- Compatibility wrapper for the former full-grid theorem name. -/
+theorem rfns_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (_htie : ∀ y v w, g₁.inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+          C i * ∑ n ∈ Finset.range (i + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) :=
+  riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le
+    (E := E) (I := I) (M := M) g₀ hδ₀
 
 end Connection
 end Integral

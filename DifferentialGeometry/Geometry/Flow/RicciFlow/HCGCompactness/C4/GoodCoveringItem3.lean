@@ -33,7 +33,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 section GeneralItem3
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -81,7 +81,6 @@ def item3RadiusFactor (hd : InjRadiusDecayInput (I := I) X) (D : Real) : Real :=
   205 * Real.exp (hd.C * (20 * hd.lambda D 0))
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem item3Factor_pos (hd : InjRadiusDecayInput (I := I) X) (D : Real) :
     0 < item3RadiusFactor hd D := by
   exact mul_pos (by norm_num) (Real.exp_pos _)
@@ -119,8 +118,7 @@ def Item3RadiusAt (hd : InjRadiusDecayInput (I := I) X) (D : Real)
       letI := (X.obj (L.φ n)).sigmaCompact
       letI := (X.obj (L.φ n)).t2
       letI := (X.obj (L.φ n)).t2TangentBundle
-      ENNReal.ofReal (a * L.lamInf (γ : Nat)) <
-          injRadius (I := I) (X.obj (L.φ n)).metric c ∧
+      0 < a * L.lamInf (γ : Nat) ∧
         a * L.lamInf (γ : Nat) ≤
           expMapC2Radius (I := I) (X.obj (L.φ n)).metric c
 
@@ -200,18 +198,20 @@ theorem exists_item3Diffeo
     letI := (X.obj (L.φ n)).sigmaCompact
     letI := (X.obj (L.φ n)).t2
     letI := (X.obj (L.φ n)).t2TangentBundle
-      ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E (X.obj (L.φ n)).M 1,
-        Φ.source = Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
-        Φ.target = (fun v : E =>
-          (expMap (I := I) (X.obj (L.φ n)).metric c
-            (show TangentSpace I c from v) : (X.obj (L.φ n)).M)) ''
-              Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
-        Set.EqOn Φ (fun v : E =>
-          (expMap (I := I) (X.obj (L.φ n)).metric c
-            (show TangentSpace I c from v) : (X.obj (L.φ n)).M))
-          (Metric.ball (0 : E) (a * L.lamInf (γ : Nat))) :=
-  (X.obj (L.φ n)).exists_expBall_diffeo c
-    (hrad γ c hc).1 (hrad γ c hc).2
+    ENNReal.ofReal (a * L.lamInf (γ : Nat)) <
+      injRadius (I := I) (X.obj (L.φ n)).metric c →
+    ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E (X.obj (L.φ n)).M 1,
+      Φ.source = Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
+      Φ.target = (fun v : E =>
+        (expMap (I := I) (X.obj (L.φ n)).metric c
+          (show TangentSpace I c from v) : (X.obj (L.φ n)).M)) ''
+            Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
+      Set.EqOn Φ (fun v : E =>
+        (expMap (I := I) (X.obj (L.φ n)).metric c
+          (show TangentSpace I c from v) : (X.obj (L.φ n)).M))
+        (Metric.ball (0 : E) (a * L.lamInf (γ : Nat))) :=
+  fun hinj => (X.obj (L.φ n)).exists_expBall_diffeo c
+    hinj (hrad γ c hc).2
 
 
 

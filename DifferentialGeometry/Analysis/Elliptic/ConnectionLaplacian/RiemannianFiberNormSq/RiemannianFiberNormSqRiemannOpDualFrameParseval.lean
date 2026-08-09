@@ -52,6 +52,13 @@ noncomputable def coframePair
   (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 2) ℝ).compContinuousLinearMap
     (fun k : Fin 2 => g.inner x (e ((![a, b] : Fin 2 → Fin n) k)))
 
+/-- Compatibility name for the rank-two orthonormal coframe tensor. -/
+abbrev coframe2
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (a b : Fin n) :
+    Tensor0SSpace 2 I x :=
+  coframePair g x e a b
+
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
     [T2Space M] [BoundarylessManifold I M] in
 lemma coframe2_apply

@@ -3,13 +3,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalCoor
 
 set_option autoImplicit false
 
+/-!
+# Moving Step-C center branches
 
-
-
-
-
-
-
+This file assembles the source-local weight, nested-core, and selected normal
+branch data into the two buffered inverse domains used by the moving center
+equation.  It does not identify weights from different source charts.
+-/
 
 noncomputable section
 
@@ -21,16 +21,103 @@ namespace HCGCompactness
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
+/-- A retained support package and selected convergent normal branch produce
+an outer exact-inverse convergence domain and a compactly nested inner domain
+carrying the limiting inverse-velocity root tube. -/
+theorem HasSuppConvDataOn.exists_invVel_core
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (chart : NormalChartFamily (I := I) X)
+    (U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (hdata : HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r)
+    {Y : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hcompletePair : SeqMetricComplete (I := I) Y}
+    {hconnPair : ∀ k,
+      letI : TopologicalSpace (Y.obj k).M := (Y.obj k).topology
+      ConnectedSpace (Y.obj k).M}
+    {c : ∀ n : Nat, (Y.obj n).M}
+    {qStage qInf : NNReal} {deltaStage deltaInf : Real}
+    {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
+    {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chartPair : NormalChartFamily (I := I) Y}
+    (hpair : HasDiagPairConv (I := I) hcompletePair hconnPair c
+      qStage qInf deltaStage deltaInf e eInf (chart := chartPair))
+    (hC1q : C1 alpha ⊆ Metric.ball (0 : E) qInf) :
+    let i0 := baseIndex inp.decay inp.realizes inp.pack hr
+    let mu : E → Fin (inp.pack.A r) → Real := fun z gamma =>
+      rawWeights (cutRaw (aInf alpha i0) (aInf alpha) i0) z gamma
+    let swap : E × E → E × E := fun q => (q.2, q.1)
+    ∃ (V V0 : Set (E × E)) (W0 : Set E) (PhiInf : E → E),
+      IsOpen V ∧ IsCompact (closure V) ∧
+      closure V ⊆ eInf.target ∧
+      eInf.symm '' closure V ⊆ Metric.ball (0 : E × E) qInf ∧
+      Filter.Eventually
+        (fun n : Nat ↦ closure V ⊆ (e n).target ∧
+          Set.MapsTo (e n).symm (closure V)
+            (Metric.ball (0 : E × E) qInf)) Filter.atTop ∧
+      MapCInfConvOnCompacts V
+        (fun n ↦ ((e n).symm : E × E → E × E)) eInf.symm ∧
+      IsOpen V0 ∧ IsCompact (closure V0) ∧
+      (fun z : E ↦ (z, z)) '' C1 alpha ⊆ V0 ∧
+      closure V0 ⊆ V ∧ closure V0 ⊆ U alpha ×ˢ U alpha ∧
+      Set.EqOn PhiInf id (C1 alpha) ∧
+      Nonempty
+        (Analysis.CompactRootTube
+          ((U alpha ×ˢ Set.univ) ∩ swap ⁻¹' V0)
+          W0 (C1 alpha)
+          (fun q => invVelSum eInf (mu q.1)
+            (fun _ : Fin (inp.pack.A r) => q.1) q.2)
+          PhiInf) := by
+  classical
+  dsimp only
+  obtain ⟨hU, _hC0, hC1, _hC01, hC1U⟩ :=
+    hdata.core_on inp P L r hr chart U C0 C1 aInf Jinf Jbarinf alpha
+  obtain ⟨hmuC, hmu⟩ :=
+    hdata.weight_on inp P L r hr chart U C0 C1 aInf Jinf Jbarinf alpha
+  obtain ⟨V, hV, hVcpt, _hdiagV, hVtarget, hVsource, hVstage, hVconv⟩ :=
+    hpair.exists_diag_inv hC1 hC1q
+  let diag : E → E × E := fun z ↦ (z, z)
+  let Kdiag : Set (E × E) := diag '' C1 alpha
+  let G : Set (E × E) := V ∩ (U alpha ×ˢ U alpha)
+  have hKdiag : IsCompact Kdiag :=
+    hC1.image_of_continuousOn
+      (continuous_id.prodMk continuous_id).continuousOn
+  have hG : IsOpen G := hV.inter (hU.prod hU)
+  have hKdiagG : Kdiag ⊆ G := by
+    rintro _ ⟨z, hz, rfl⟩
+    exact ⟨_hdiagV ⟨z, hz, rfl⟩, hC1U hz, hC1U hz⟩
+  obtain ⟨V0, hV0, hdiagV0, hV0G, hV0cpt⟩ :=
+    exists_open_between_and_isCompact_closure hKdiag hG hKdiagG
+  have hV0target : V0 ⊆ eInf.target := by
+    intro w hw
+    exact hVtarget (subset_closure (hV0G (subset_closure hw)).1)
+  obtain ⟨W0, PhiInf, hPhiInf, hroot⟩ :=
+    hpair.exists_invVel_on hU hC1 hV0 hmuC hmu hC1U hC1q
+      hV0target (by simpa only [diag, Kdiag] using hdiagV0)
+  refine ⟨V, V0, W0, PhiInf, hV, hVcpt, hVtarget, hVsource,
+    hVstage, hVconv, hV0, hV0cpt, ?_, ?_, ?_, hPhiInf, ?_⟩
+  · simpa only [diag, Kdiag] using hdiagV0
+  · exact fun w hw => (hV0G hw).1
+  · exact fun w hw => (hV0G hw).2
+  · simpa only using hroot
 
-
-
+/-- Compatibility projection of `HasSuppConvDataOn.exists_invVel_core` to the
+established framed normal-chart family. -/
 theorem HasSuppConvData.exists_invVel_core
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -74,48 +161,24 @@ theorem HasSuppConvData.exists_invVel_core
       (fun z : E ↦ (z, z)) '' C1 alpha ⊆ V0 ∧
       closure V0 ⊆ V ∧ closure V0 ⊆ U alpha ×ˢ U alpha ∧
       Set.EqOn PhiInf id (C1 alpha) ∧
-      Nonempty
-        (Analysis.CompactRootTube
+       Nonempty
+         (Analysis.CompactRootTube
           ((U alpha ×ˢ Set.univ) ∩ swap ⁻¹' V0)
           W0 (C1 alpha)
-          (fun q => invVelSum eInf (mu q.1)
+          (fun q => invVelSum eInf
+            (mu q.1)
             (fun _ : Fin (inp.pack.A r) => q.1) q.2)
           PhiInf) := by
-  classical
-  dsimp only
-  obtain ⟨hU, _hC0, hC1, _hC01, hC1U⟩ :=
-    hdata.core_on inp P L r hr U C0 C1 aInf Jinf Jbarinf alpha
-  obtain ⟨hmuC, hmu⟩ :=
-    hdata.weight_on inp P L r hr U C0 C1 aInf Jinf Jbarinf alpha
-  obtain ⟨V, hV, hVcpt, _hdiagV, hVtarget, hVsource, hVstage, hVconv⟩ :=
-    hpair.exists_diag_inv hC1 hC1q
-  let diag : E → E × E := fun z ↦ (z, z)
-  let Kdiag : Set (E × E) := diag '' C1 alpha
-  let G : Set (E × E) := V ∩ (U alpha ×ˢ U alpha)
-  have hKdiag : IsCompact Kdiag :=
-    hC1.image_of_continuousOn
-      (continuous_id.prodMk continuous_id).continuousOn
-  have hG : IsOpen G := hV.inter (hU.prod hU)
-  have hKdiagG : Kdiag ⊆ G := by
-    rintro _ ⟨z, hz, rfl⟩
-    exact ⟨_hdiagV ⟨z, hz, rfl⟩, hC1U hz, hC1U hz⟩
-  obtain ⟨V0, hV0, hdiagV0, hV0G, hV0cpt⟩ :=
-    exists_open_between_and_isCompact_closure hKdiag hG hKdiagG
-  have hV0target : V0 ⊆ eInf.target := by
-    intro w hw
-    exact hVtarget (subset_closure (hV0G (subset_closure hw)).1)
-  obtain ⟨W0, PhiInf, hPhiInf, hroot⟩ :=
-    hpair.exists_invVel_on hU hC1 hV0 hmuC hmu hC1U hC1q
-      hV0target (by simpa only [diag, Kdiag] using hdiagV0)
-  refine ⟨V, V0, W0, PhiInf, hV, hVcpt, hVtarget, hVsource,
-    hVstage, hVconv, hV0, hV0cpt, ?_, ?_, ?_, hPhiInf, ?_⟩
-  · simpa only [diag, Kdiag] using hdiagV0
-  · exact fun w hw => (hV0G hw).1
-  · exact fun w hw => (hV0G hw).2
-  · simpa only using hroot
+  exact
+    (hdata.toOnLegacy inp P L r hr U C0 C1 aInf Jinf Jbarinf).exists_invVel_core
+      inp P L hr phi hphi (legacyChartFamily (I := I) X)
+      U C0 C1 aInf Jinf Jbarinf alpha hpair hC1q
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
     [NeZero (Module.finrank Real E)] in
+/-- On a compact parameter set whose limiting center-target pairs lie in an
+open inverse domain, every finite-stage target pair lies in that domain on one
+common tail. -/
 theorem cfg_pairs_tail
     {ι : Type} [Fintype ι] {S : Set E}
     {pts : Nat → E → ι → E}
@@ -157,6 +220,8 @@ theorem cfg_pairs_tail
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
     [NeZero (Module.finrank Real E)] in
+/-- Projection of smoothly convergent paired configurations to their target
+tuple. -/
 theorem cfg_snd_conv
     {ι : Type} [Fintype ι] {S : Set E} (hS : IsOpen S)
     {cfg : Nat → E → (ι → Real) × (ι → E)}
@@ -170,53 +235,63 @@ theorem cfg_snd_conv
     (ContinuousLinearMap.snd Real (ι → Real) (ι → E))
     hcfg hcfgC hcfgInfC
 
-
-
+/-- The actual refined finite-stage inverse-velocity equation in one source
+chart. -/
 noncomputable def stageInvVelSub
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
-    (n k l : Nat) (q : E × E) : E :=
+    (n k l : Nat) (q : E × E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : E :=
   invVelSum (e n)
-    (stageCfgSub inp P L hr phi hphi alpha k l q.1).1
-    (stageCfgSub inp P L hr phi hphi alpha k l q.1).2 q.2
+    (stageCfgSub inp P L hr phi hphi alpha k l q.1
+      (chart := chart)).1
+    (stageCfgSub inp P L hr phi hphi alpha k l q.1
+      (chart := chart)).2 q.2
 
-
-
+/-- Canonical source-chart root: choose the unique root in the prescribed
+limiting tube when it exists, and use the limiting branch as a total filler. -/
 noncomputable def stageRootSub
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
-    (PhiInf : E → E) (rho : Real) (n k l : Nat) (z : E) : E := by
+    (PhiInf : E → E) (rho : Real) (n k l : Nat) (z : E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : E := by
   classical
   exact if h : ∃ x : E, dist x (PhiInf z) < rho ∧
-        stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x) = 0
+        stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x)
+          (chart := chart) = 0
     then Classical.choose h
     else PhiInf z
 
-
-
+/-- On a tube where the finite-stage root is unique, the canonical totalized
+root is that root. -/
 theorem stageRootSub_eq
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (alpha : LiveSlot L inp.pack r)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (PhiInf : E → E) (rho : Real) (n k l : Nat) (z x : E)
+    {chart : NormalChartFamily (I := I) X}
     (hx : dist x (PhiInf z) < rho)
     (hroot : stageInvVelSub inp P L hr phi hphi alpha e n k l
-      (z, x) = 0)
+      (z, x) (chart := chart) = 0)
     (huniq : ∀ y, dist y (PhiInf z) < rho →
-      (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, y) = 0 ↔
+      (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, y)
+        (chart := chart) = 0 ↔
         y = x)) :
-    stageRootSub inp P L hr phi hphi alpha e PhiInf rho n k l z = x := by
+    stageRootSub inp P L hr phi hphi alpha e PhiInf rho n k l z
+      (chart := chart) = x := by
   rw [stageRootSub]
   split
   next h =>
@@ -224,10 +299,10 @@ theorem stageRootSub_eq
       (Classical.choose_spec h).2
   next h => exact False.elim (h ⟨x, hx, hroot⟩)
 
-
-
+/-- A fixed source-chart core carrying one canonical all-stage root cube, with
+sequential `C^∞` convergence and one uniform three-index root tail. -/
 def HasStageRootCube
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -235,7 +310,9 @@ def HasStageRootCube
     (alpha : LiveSlot L inp.pack r)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (W : Set E) (PhiInf : E → E) (rho : Real)
-    (Phi3 : Nat → Nat → Nat → E → E) : Prop :=
+    (Phi3 : Nat → Nat → Nat → E → E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : Prop :=
   IsOpen W ∧ IsCompact (closure W) ∧ C1 alpha ⊆ W ∧
   0 < rho ∧ Set.EqOn PhiInf id (C1 alpha) ∧
   (∀ (nn kn ln : Nat → Nat), Tendsto nn atTop atTop →
@@ -246,21 +323,192 @@ def HasStageRootCube
     ContDiffOn Real ∞ (Phi3 n k l) W ∧ ∀ z ∈ closure W,
     dist (Phi3 n k l z) (PhiInf z) < rho / 2 ∧
     stageInvVelSub inp P L hr phi hphi alpha e n k l
-      (z, Phi3 n k l z) = 0 ∧
+      (z, Phi3 n k l z) (chart := chart) = 0 ∧
     (Analysis.partialFDeriv₂
-      (stageInvVelSub inp P L hr phi hphi alpha e n k l)
+      (stageInvVelSub inp P L hr phi hphi alpha e n k l
+        (chart := chart))
       z (Phi3 n k l z)).IsInvertible ∧
     (∀ gamma : Fin (inp.pack.A r),
       (Phi3 n k l z,
-        (stageCfgSub inp P L hr phi hphi alpha k l z).2 gamma) ∈
+        (stageCfgSub inp P L hr phi hphi alpha k l z
+          (chart := chart)).2 gamma) ∈
           (e n).target) ∧
     ∀ x, dist x (PhiInf z) < rho →
-      (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x) = 0 ↔
+      (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x)
+        (chart := chart) = 0 ↔
         x = Phi3 n k l z)
 
+/-- The retained support data and one selected diagonal branch give a single
+limiting center tube, chosen before the three moving stage indices, and a
+`C^∞`-convergent selected root family along every cofinal triple. -/
+theorem HasSuppConvDataOn.exists_stage_root
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (chart : NormalChartFamily (I := I) X)
+    (U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (hdata : HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r)
+    {Y : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hcompletePair : SeqMetricComplete (I := I) Y}
+    {hconnPair : ∀ k,
+      letI : TopologicalSpace (Y.obj k).M := (Y.obj k).topology
+      ConnectedSpace (Y.obj k).M}
+    {c : ∀ n : Nat, (Y.obj n).M}
+    {qStage qInf : NNReal} {deltaStage deltaInf : Real}
+    {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
+    {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chartPair : NormalChartFamily (I := I) Y}
+    (hpair : HasDiagPairConv (I := I) hcompletePair hconnPair c
+      qStage qInf deltaStage deltaInf e eInf (chart := chartPair))
+    (hC1q : C1 alpha ⊆ Metric.ball (0 : E) qInf) :
+    ∃ (W : Set E) (PhiInf : E → E) (rho : Real),
+      IsOpen W ∧ IsCompact (closure W) ∧ C1 alpha ⊆ W ∧
+      0 < rho ∧ Set.EqOn PhiInf id (C1 alpha) ∧
+      ∀ (nn kn ln : Nat → Nat), Tendsto nn atTop atTop →
+        Tendsto kn atTop atTop → Tendsto ln atTop atTop →
+        let F : Nat → E × E → E := fun m q =>
+          stageInvVelSub inp P L hr phi hphi alpha e
+            (nn m) (kn m) (ln m) q (chart := chart)
+        ∃ N : Nat, ∃ Phi : Nat → E → E,
+          MapCInfConvOnCompacts W Phi PhiInf ∧
+          (∀ m, ContDiffOn Real ∞ (Phi m) W) ∧
+          (∀ m ≥ N, ∀ z ∈ closure W,
+            dist (Phi m z) (PhiInf z) < rho / 2 ∧
+             F m (z, Phi m z) = 0 ∧
+             (Analysis.partialFDeriv₂ (F m) z (Phi m z)).IsInvertible ∧
+             ∀ gamma : Fin (inp.pack.A r),
+               (Phi m z,
+                 (stageCfgSub inp P L hr phi hphi alpha
+                   (kn m) (ln m) z (chart := chart)).2 gamma) ∈
+                     (e (nn m)).target) ∧
+          ∀ m ≥ N, ∀ z ∈ closure W, ∀ x,
+            dist x (PhiInf z) < rho →
+              (F m (z, x) = 0 ↔ x = Phi m z) := by
+  classical
+  let i0 := baseIndex inp.decay inp.realizes inp.pack hr
+  let mu : E → Fin (inp.pack.A r) → Real := fun z gamma =>
+    rawWeights (cutRaw (aInf alpha i0) (aInf alpha) i0) z gamma
+  obtain ⟨V, V0, W0, PhiInf, hV, _hVcpt, hVtarget, _hVsource,
+      hVstage, hVconv, _hV0, _hV0cpt, _hdiagV0, hV0V, _hV0UU,
+      hPhiInf, hT⟩ :=
+    hdata.exists_invVel_core inp P L hr phi hphi chart U C0 C1 aInf
+      Jinf Jbarinf alpha hpair hC1q
+  let swap : E × E → E × E := fun q => (q.2, q.1)
+  let D0 : Set (E × E) :=
+    ((U alpha ×ˢ Set.univ) ∩ swap ⁻¹' V0)
+  let FInf : E × E → E := fun q =>
+    invVelSum eInf (mu q.1)
+      (fun _ : Fin (inp.pack.A r) => q.1) q.2
+  obtain ⟨T⟩ : Nonempty
+      (Analysis.CompactRootTube D0 W0 (C1 alpha) FInf PhiInf) := by
+    simpa only [D0, swap, FInf, mu, i0] using hT
+  obtain ⟨D, T', hDcpt, hDD0, _hTW, _hTrho⟩ :=
+    T.exists_domain_buffer
+  refine ⟨T'.W, PhiInf, T'.rho, T'.isOpen_W,
+    T'.isCompact_closure_W, T'.K_subset_W, T'.rho_pos, hPhiInf, ?_⟩
+  intro nn kn ln hnn hkn hln
+  obtain ⟨hU, _hC0, _hC1, _hC01, _hC1U⟩ :=
+    hdata.core_on inp P L r hr chart U C0 C1 aInf Jinf Jbarinf alpha
+  have hcfgData := hdata.cfgSub_data inp P L hr phi hphi chart U C0 C1
+    aInf Jinf Jbarinf kn ln hkn hln alpha
+  dsimp only at hcfgData
+  obtain ⟨hcfgC, hcfgInfC, hcfg⟩ := hcfgData
+  have hpts : MapCInfConvOnCompacts (U alpha)
+      (fun m z => (stageCfgSub inp P L hr phi hphi alpha
+        (kn m) (ln m) z (chart := chart)).2)
+      (fun z => fun _ : Fin (inp.pack.A r) => z) := by
+    simpa only using cfg_snd_conv hU hcfgC hcfgInfC hcfg
+  have hDfstC : Set.MapsTo (fun q : E × E => q.1) (closure D) (U alpha) := by
+    intro q hq
+    exact (hDD0 hq).1.1
+  have hlimPairs : Set.MapsTo (fun q : E × E => (q.2, q.1))
+      (closure D) V := by
+    intro q hq
+    exact hV0V (subset_closure (hDD0 hq).2)
+  have hmapC := cfg_pairs_tail hpts hDcpt hDfstC hV hlimPairs
+  have hmap : ∀ᶠ m in atTop, ∀ q, q ∈ D →
+      ∀ gamma : Fin (inp.pack.A r),
+        (q.2, (stageCfgSub inp P L hr phi hphi alpha
+          (kn m) (ln m) q.1 (chart := chart)).2 gamma) ∈ V := by
+    filter_upwards [hmapC] with m hm
+    intro q hq gamma
+    exact hm q (subset_closure hq) gamma
+  have hDfst : Set.MapsTo (fun q : E × E => q.1) D (U alpha) :=
+    fun q hq => hDfstC (subset_closure hq)
+  have hmapInf : ∀ q, q ∈ D → (q.2, q.1) ∈ V :=
+    fun q hq => hlimPairs (subset_closure hq)
+  have hVstageN := hnn.eventually hVstage
+  have hnormal : ∀ n, IsNormalDiag (I := I) (Y.obj n)
+      (hcompletePair.complete n) (hconnPair n) (c n)
+        qStage deltaStage (e n) (c := chartPair n (c n)) := by
+    exact hpair.2.2.2.2.2.1
+  have heC : ∀ᶠ m in atTop, ContDiffOn Real ∞
+      ((e (nn m)).symm : E × E → E × E) V := by
+    filter_upwards [hVstageN] with m hm
+    exact (hnormal (nn m)).2.2.2.2.1.mono fun z hz =>
+      hm.1 (subset_closure hz)
+  have heInfC : ContDiffOn Real ∞
+      (eInf.symm : E × E → E × E) V :=
+    (hpair.2.2.2.2.2.2.2.2.2.2.1).mono fun z hz =>
+      hVtarget (subset_closure hz)
+  have hFconv : MapCInfConvOnCompacts D
+      (fun m => stageInvVelSub inp P L hr phi hphi alpha e
+        (nn m) (kn m) (ln m) (chart := chart)) FInf := by
+    simpa only [stageInvVelSub, FInf] using
+      invVelSub_conv_on inp P L hr phi hphi alpha kn ln
+        (chart := chart)
+        hU mu hcfgC hcfgInfC hcfg (fun m => e (nn m)) eInf hV heC
+        heInfC (hVconv.comp_tendsto_atTop hnn) T'.isOpen_domain
+        hDfst hmap hmapInf
+  have hFcd : ∀ᶠ m in atTop, ContDiffOn Real ∞
+      (stageInvVelSub inp P L hr phi hphi alpha e
+        (nn m) (kn m) (ln m) (chart := chart)) D := by
+    filter_upwards [heC, hmap] with m hem hmm
+    have hcfgD : ContDiffOn Real (∞ : WithTop ℕ∞)
+        (fun q : E × E => stageCfgSub inp P L hr phi hphi alpha
+          (kn m) (ln m) q.1 (chart := chart)) D :=
+      (hcfgC m).comp contDiff_fst.contDiffOn hDfst
+    simpa only [stageInvVelSub] using
+      NormalBranchHessian.invVelSum_contDiff hem hcfgD.fst hcfgD.snd
+        contDiff_snd.contDiffOn hmm
+  obtain ⟨Nroot, Phi, hPhi, hPhiC, hspec, huniq⟩ :=
+    T'.exists_cInf_tail hFcd hFconv
+  obtain ⟨Nmap, hNmap⟩ := eventually_atTop.mp hmap
+  obtain ⟨Nstage, hNstage⟩ := eventually_atTop.mp hVstageN
+  let N := max Nroot (max Nmap Nstage)
+  refine ⟨N, Phi, hPhi, hPhiC, ?_, ?_⟩
+  · intro m hm z hz
+    have hmRoot : Nroot ≤ m :=
+      (Nat.le_max_left Nroot (max Nmap Nstage)).trans hm
+    have hmMap : Nmap ≤ m :=
+      (Nat.le_max_left Nmap Nstage).trans
+        ((Nat.le_max_right Nroot (max Nmap Nstage)).trans hm)
+    have hmStage : Nstage ≤ m :=
+      (Nat.le_max_right Nmap Nstage).trans
+        ((Nat.le_max_right Nroot (max Nmap Nstage)).trans hm)
+    have hs := hspec m hmRoot z hz
+    refine ⟨hs.1, hs.2.1, hs.2.2, ?_⟩
+    intro gamma
+    have hrootD : (z, Phi m z) ∈ D := by
+      apply T'.tube_subset z hz
+      rw [Metric.mem_closedBall]
+      exact hs.1.le.trans (by linarith [T'.rho_pos])
+    have hpairV := hNmap m hmMap (z, Phi m z) hrootD gamma
+    exact (hNstage m hmStage).1 (subset_closure hpairV)
+  · intro m hm z hz x hx
+    have hmRoot : Nroot ≤ m :=
+      (Nat.le_max_left Nroot (max Nmap Nstage)).trans hm
+    exact huniq m hmRoot z hz x hx
 
-
-
+/-- Compatibility projection of `HasSuppConvDataOn.exists_stage_root` to the
+established framed normal-chart family. -/
 theorem HasSuppConvData.exists_stage_root
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -308,123 +556,116 @@ theorem HasSuppConvData.exists_stage_root
           ∀ m ≥ N, ∀ z ∈ closure W, ∀ x,
             dist x (PhiInf z) < rho →
               (F m (z, x) = 0 ↔ x = Phi m z) := by
+  exact
+    (hdata.toOnLegacy inp P L r hr U C0 C1 aInf Jinf Jbarinf).exists_stage_root
+      inp P L hr phi hphi (legacyChartFamily (I := I) X)
+      U C0 C1 aInf Jinf Jbarinf alpha hpair hC1q
+
+/-- Canonicalize the sequential moving roots and extract one common
+three-index tail on the fixed source-chart core. -/
+theorem HasSuppConvDataOn.exists_stage_cube
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (chart : NormalChartFamily (I := I) X)
+    (U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (hdata : HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r)
+    {Y : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hcompletePair : SeqMetricComplete (I := I) Y}
+    {hconnPair : ∀ k,
+      letI : TopologicalSpace (Y.obj k).M := (Y.obj k).topology
+      ConnectedSpace (Y.obj k).M}
+    {c : ∀ n : Nat, (Y.obj n).M}
+    {qStage qInf : NNReal} {deltaStage deltaInf : Real}
+    {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
+    {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chartPair : NormalChartFamily (I := I) Y}
+    (hpair : HasDiagPairConv (I := I) hcompletePair hconnPair c
+      qStage qInf deltaStage deltaInf e eInf (chart := chartPair))
+    (hC1q : C1 alpha ⊆ Metric.ball (0 : E) qInf) :
+    ∃ (W : Set E) (PhiInf : E → E) (rho : Real)
+        (Phi3 : Nat → Nat → Nat → E → E),
+      HasStageRootCube inp P L hr phi hphi C1 alpha e
+        W PhiInf rho Phi3 (chart := chart) := by
   classical
-  let i0 := baseIndex inp.decay inp.realizes inp.pack hr
-  let mu : E → Fin (inp.pack.A r) → Real := fun z gamma =>
-    rawWeights (cutRaw (aInf alpha i0) (aInf alpha) i0) z gamma
-  obtain ⟨V, V0, W0, PhiInf, hV, _hVcpt, hVtarget, _hVsource,
-      hVstage, hVconv, _hV0, _hV0cpt, _hdiagV0, hV0V, _hV0UU,
-      hPhiInf, hT⟩ :=
-    hdata.exists_invVel_core inp P L hr phi hphi U C0 C1 aInf
+  obtain ⟨W, PhiInf, rho, hW, hWcpt, hC1W, hrho, hPhiInf, hseq⟩ :=
+    hdata.exists_stage_root inp P L hr phi hphi chart U C0 C1 aInf
       Jinf Jbarinf alpha hpair hC1q
-  let swap : E × E → E × E := fun q => (q.2, q.1)
-  let D0 : Set (E × E) :=
-    ((U alpha ×ˢ Set.univ) ∩ swap ⁻¹' V0)
-  let FInf : E × E → E := fun q =>
-    invVelSum eInf (mu q.1)
-      (fun _ : Fin (inp.pack.A r) => q.1) q.2
-  obtain ⟨T⟩ : Nonempty
-      (Analysis.CompactRootTube D0 W0 (C1 alpha) FInf PhiInf) := by
-    simpa only [D0, swap, FInf, mu, i0] using hT
-  obtain ⟨D, T', hDcpt, hDD0, _hTW, _hTrho⟩ :=
-    T.exists_domain_buffer
-  refine ⟨T'.W, PhiInf, T'.rho, T'.isOpen_W,
-    T'.isCompact_closure_W, T'.K_subset_W, T'.rho_pos, hPhiInf, ?_⟩
-  intro nn kn ln hnn hkn hln
-  obtain ⟨hU, _hC0, _hC1, _hC01, _hC1U⟩ :=
-    hdata.core_on inp P L r hr U C0 C1 aInf Jinf Jbarinf alpha
-  have hcfgData := hdata.cfgSub_data inp P L hr phi hphi U C0 C1
-    aInf Jinf Jbarinf kn ln hkn hln alpha
-  dsimp only at hcfgData
-  obtain ⟨hcfgC, hcfgInfC, hcfg⟩ := hcfgData
-  have hpts : MapCInfConvOnCompacts (U alpha)
-      (fun m z => (stageCfgSub inp P L hr phi hphi alpha
-        (kn m) (ln m) z).2)
-      (fun z => fun _ : Fin (inp.pack.A r) => z) := by
-    simpa only using cfg_snd_conv hU hcfgC hcfgInfC hcfg
-  have hDfstC : Set.MapsTo (fun q : E × E => q.1) (closure D) (U alpha) := by
-    intro q hq
-    exact (hDD0 hq).1.1
-  have hlimPairs : Set.MapsTo (fun q : E × E => (q.2, q.1))
-      (closure D) V := by
-    intro q hq
-    exact hV0V (subset_closure (hDD0 hq).2)
-  have hmapC := cfg_pairs_tail hpts hDcpt hDfstC hV hlimPairs
-  have hmap : ∀ᶠ m in atTop, ∀ q, q ∈ D →
-      ∀ gamma : Fin (inp.pack.A r),
-        (q.2, (stageCfgSub inp P L hr phi hphi alpha
-          (kn m) (ln m) q.1).2 gamma) ∈ V := by
-    filter_upwards [hmapC] with m hm
-    intro q hq gamma
-    exact hm q (subset_closure hq) gamma
-  have hDfst : Set.MapsTo (fun q : E × E => q.1) D (U alpha) :=
-    fun q hq => hDfstC (subset_closure hq)
-  have hmapInf : ∀ q, q ∈ D → (q.2, q.1) ∈ V :=
-    fun q hq => hlimPairs (subset_closure hq)
-  have hVstageN := hnn.eventually hVstage
-  have hnormal : ∀ n, IsNormalDiag (I := I) (Y.obj n)
-      (hcompletePair.complete n) (hconnPair n) (c n)
-        qStage deltaStage (e n) := by
-    exact hpair.2.2.2.2.2.1
-  have heC : ∀ᶠ m in atTop, ContDiffOn Real ∞
-      ((e (nn m)).symm : E × E → E × E) V := by
-    filter_upwards [hVstageN] with m hm
-    exact (hnormal (nn m)).2.2.2.2.1.mono fun z hz =>
-      hm.1 (subset_closure hz)
-  have heInfC : ContDiffOn Real ∞
-      (eInf.symm : E × E → E × E) V :=
-    (hpair.2.2.2.2.2.2.2.2.2.2.1).mono fun z hz =>
-      hVtarget (subset_closure hz)
-  have hFconv : MapCInfConvOnCompacts D
-      (fun m => stageInvVelSub inp P L hr phi hphi alpha e
-        (nn m) (kn m) (ln m)) FInf := by
-    simpa only [stageInvVelSub, FInf] using
-      invVelSub_conv_on inp P L hr phi hphi alpha kn ln
-        hU mu hcfgC hcfgInfC hcfg (fun m => e (nn m)) eInf hV heC
-        heInfC (hVconv.comp_tendsto_atTop hnn) T'.isOpen_domain
-        hDfst hmap hmapInf
-  have hFcd : ∀ᶠ m in atTop, ContDiffOn Real ∞
-      (stageInvVelSub inp P L hr phi hphi alpha e
-        (nn m) (kn m) (ln m)) D := by
-    filter_upwards [heC, hmap] with m hem hmm
-    have hcfgD : ContDiffOn Real (∞ : WithTop ℕ∞)
-        (fun q : E × E => stageCfgSub inp P L hr phi hphi alpha
-          (kn m) (ln m) q.1) D :=
-      (hcfgC m).comp contDiff_fst.contDiffOn hDfst
-    simpa only [stageInvVelSub] using
-      NormalBranchHessian.invVelSum_contDiff hem hcfgD.fst hcfgD.snd
-        contDiff_snd.contDiffOn hmm
-  obtain ⟨Nroot, Phi, hPhi, hPhiC, hspec, huniq⟩ :=
-    T'.exists_cInf_tail hFcd hFconv
-  obtain ⟨Nmap, hNmap⟩ := eventually_atTop.mp hmap
-  obtain ⟨Nstage, hNstage⟩ := eventually_atTop.mp hVstageN
-  let N := max Nroot (max Nmap Nstage)
-  refine ⟨N, Phi, hPhi, hPhiC, ?_, ?_⟩
-  · intro m hm z hz
-    have hmRoot : Nroot ≤ m :=
-      (Nat.le_max_left Nroot (max Nmap Nstage)).trans hm
-    have hmMap : Nmap ≤ m :=
-      (Nat.le_max_left Nmap Nstage).trans
-        ((Nat.le_max_right Nroot (max Nmap Nstage)).trans hm)
-    have hmStage : Nstage ≤ m :=
-      (Nat.le_max_right Nmap Nstage).trans
-        ((Nat.le_max_right Nroot (max Nmap Nstage)).trans hm)
-    have hs := hspec m hmRoot z hz
-    refine ⟨hs.1, hs.2.1, hs.2.2, ?_⟩
-    intro gamma
-    have hrootD : (z, Phi m z) ∈ D := by
-      apply T'.tube_subset z hz
-      rw [Metric.mem_closedBall]
-      exact hs.1.le.trans (by linarith [T'.rho_pos])
-    have hpairV := hNmap m hmMap (z, Phi m z) hrootD gamma
-    exact (hNstage m hmStage).1 (subset_closure hpairV)
-  · intro m hm z hz x hx
-    have hmRoot : Nroot ≤ m :=
-      (Nat.le_max_left Nroot (max Nmap Nstage)).trans hm
-    exact huniq m hmRoot z hz x hx
+  let Phi3 : Nat → Nat → Nat → E → E := fun n k l =>
+    stageRootSub inp P L hr phi hphi alpha e PhiInf rho n k l
+      (chart := chart)
+  have htriple : ∀ (nn kn ln : Nat → Nat), Tendsto nn atTop atTop →
+      Tendsto kn atTop atTop → Tendsto ln atTop atTop →
+      MapCInfConvOnCompacts W
+        (fun m => Phi3 (nn m) (kn m) (ln m)) PhiInf := by
+    intro nn kn ln hnn hkn hln
+    obtain ⟨N, Phi, hPhi, _hPhiC, hspec, huniq⟩ :=
+      hseq nn kn ln hnn hkn hln
+    apply hPhi.congr_eventually hW
+    · filter_upwards [eventually_ge_atTop N] with m hm
+      intro z hz
+      have hs := hspec m hm z (subset_closure hz)
+      dsimp only [Phi3]
+      exact stageRootSub_eq inp P L hr phi hphi alpha e PhiInf rho
+        (nn m) (kn m) (ln m) z (Phi m z)
+        (by linarith [hs.1, hrho]) hs.2.1
+        (huniq m hm z (subset_closure hz)) (chart := chart)
+    · intro z hz
+      rfl
+  let Q : Nat → Nat → Nat → Prop := fun n k l =>
+    ContDiffOn Real ∞ (Phi3 n k l) W ∧ ∀ z ∈ closure W,
+      dist (Phi3 n k l z) (PhiInf z) < rho / 2 ∧
+      stageInvVelSub inp P L hr phi hphi alpha e n k l
+        (z, Phi3 n k l z) (chart := chart) = 0 ∧
+      (Analysis.partialFDeriv₂
+        (stageInvVelSub inp P L hr phi hphi alpha e n k l
+          (chart := chart))
+        z (Phi3 n k l z)).IsInvertible ∧
+      (∀ gamma : Fin (inp.pack.A r),
+        (Phi3 n k l z,
+          (stageCfgSub inp P L hr phi hphi alpha k l z
+            (chart := chart)).2 gamma) ∈
+            (e n).target) ∧
+      ∀ x, dist x (PhiInf z) < rho →
+        (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x)
+            (chart := chart) = 0 ↔
+          x = Phi3 n k l z)
+  have hQ : ∀ (nn kn ln : Nat → Nat), Tendsto nn atTop atTop →
+      Tendsto kn atTop atTop → Tendsto ln atTop atTop →
+      ∀ᶠ m in atTop, Q (nn m) (kn m) (ln m) := by
+    intro nn kn ln hnn hkn hln
+    obtain ⟨N, Phi, _hPhi, hPhiC, hspec, huniq⟩ :=
+      hseq nn kn ln hnn hkn hln
+    filter_upwards [eventually_ge_atTop N] with m hm
+    have heq : Set.EqOn (Phi3 (nn m) (kn m) (ln m)) (Phi m)
+        (closure W) := by
+      intro z hz
+      have hs := hspec m hm z hz
+      dsimp only [Phi3]
+      exact stageRootSub_eq inp P L hr phi hphi alpha e PhiInf rho
+        (nn m) (kn m) (ln m) z (Phi m z)
+        (by linarith [hs.1, hrho]) hs.2.1
+        (huniq m hm z hz) (chart := chart)
+    refine ⟨ContDiffOn.congr (hPhiC m) (heq.mono subset_closure), ?_⟩
+    intro z hz
+    have hs := hspec m hm z hz
+    have heqz : Phi3 (nn m) (kn m) (ln m) z = Phi m z :=
+      heq hz
+    rw [heqz]
+    exact ⟨hs.1, hs.2.1, hs.2.2.1, hs.2.2.2, huniq m hm z hz⟩
+  obtain ⟨N, hN⟩ := exists_three_tail hQ
+  refine ⟨W, PhiInf, rho, Phi3, ?_⟩
+  exact ⟨hW, hWcpt, hC1W, hrho, hPhiInf, htriple, N, hN⟩
 
-
-
+/-- Compatibility projection of `HasSuppConvDataOn.exists_stage_cube` to the
+established framed normal-chart family. -/
 theorem HasSuppConvData.exists_stage_cube
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -454,77 +695,16 @@ theorem HasSuppConvData.exists_stage_cube
         (Phi3 : Nat → Nat → Nat → E → E),
       HasStageRootCube inp P L hr phi hphi C1 alpha e
         W PhiInf rho Phi3 := by
-  classical
-  obtain ⟨W, PhiInf, rho, hW, hWcpt, hC1W, hrho, hPhiInf, hseq⟩ :=
-    hdata.exists_stage_root inp P L hr phi hphi U C0 C1 aInf
-      Jinf Jbarinf alpha hpair hC1q
-  let Phi3 : Nat → Nat → Nat → E → E := fun n k l =>
-    stageRootSub inp P L hr phi hphi alpha e PhiInf rho n k l
-  have htriple : ∀ (nn kn ln : Nat → Nat), Tendsto nn atTop atTop →
-      Tendsto kn atTop atTop → Tendsto ln atTop atTop →
-      MapCInfConvOnCompacts W
-        (fun m => Phi3 (nn m) (kn m) (ln m)) PhiInf := by
-    intro nn kn ln hnn hkn hln
-    obtain ⟨N, Phi, hPhi, _hPhiC, hspec, huniq⟩ :=
-      hseq nn kn ln hnn hkn hln
-    apply hPhi.congr_eventually hW
-    · filter_upwards [eventually_ge_atTop N] with m hm
-      intro z hz
-      have hs := hspec m hm z (subset_closure hz)
-      dsimp only [Phi3]
-      exact stageRootSub_eq inp P L hr phi hphi alpha e PhiInf rho
-        (nn m) (kn m) (ln m) z (Phi m z)
-        (by linarith [hs.1, hrho]) hs.2.1
-        (huniq m hm z (subset_closure hz))
-    · intro z hz
-      rfl
-  let Q : Nat → Nat → Nat → Prop := fun n k l =>
-    ContDiffOn Real ∞ (Phi3 n k l) W ∧ ∀ z ∈ closure W,
-      dist (Phi3 n k l z) (PhiInf z) < rho / 2 ∧
-      stageInvVelSub inp P L hr phi hphi alpha e n k l
-        (z, Phi3 n k l z) = 0 ∧
-      (Analysis.partialFDeriv₂
-        (stageInvVelSub inp P L hr phi hphi alpha e n k l)
-        z (Phi3 n k l z)).IsInvertible ∧
-      (∀ gamma : Fin (inp.pack.A r),
-        (Phi3 n k l z,
-          (stageCfgSub inp P L hr phi hphi alpha k l z).2 gamma) ∈
-            (e n).target) ∧
-      ∀ x, dist x (PhiInf z) < rho →
-        (stageInvVelSub inp P L hr phi hphi alpha e n k l (z, x) = 0 ↔
-          x = Phi3 n k l z)
-  have hQ : ∀ (nn kn ln : Nat → Nat), Tendsto nn atTop atTop →
-      Tendsto kn atTop atTop → Tendsto ln atTop atTop →
-      ∀ᶠ m in atTop, Q (nn m) (kn m) (ln m) := by
-    intro nn kn ln hnn hkn hln
-    obtain ⟨N, Phi, _hPhi, hPhiC, hspec, huniq⟩ :=
-      hseq nn kn ln hnn hkn hln
-    filter_upwards [eventually_ge_atTop N] with m hm
-    have heq : Set.EqOn (Phi3 (nn m) (kn m) (ln m)) (Phi m)
-        (closure W) := by
-      intro z hz
-      have hs := hspec m hm z hz
-      dsimp only [Phi3]
-      exact stageRootSub_eq inp P L hr phi hphi alpha e PhiInf rho
-        (nn m) (kn m) (ln m) z (Phi m z)
-        (by linarith [hs.1, hrho]) hs.2.1
-        (huniq m hm z hz)
-    refine ⟨ContDiffOn.congr (hPhiC m) (heq.mono subset_closure), ?_⟩
-    intro z hz
-    have hs := hspec m hm z hz
-    have heqz : Phi3 (nn m) (kn m) (ln m) z = Phi m z :=
-      heq hz
-    rw [heqz]
-    exact ⟨hs.1, hs.2.1, hs.2.2.1, hs.2.2.2, huniq m hm z hz⟩
-  obtain ⟨N, hN⟩ := exists_three_tail hQ
-  refine ⟨W, PhiInf, rho, Phi3, ?_⟩
-  exact ⟨hW, hWcpt, hC1W, hrho, hPhiInf, htriple, N, hN⟩
+  exact
+    (hdata.toOnLegacy inp P L r hr U C0 C1 aInf Jinf Jbarinf).exists_stage_cube
+      inp P L hr phi hphi (legacyChartFamily (I := I) X)
+      U C0 C1 aInf Jinf Jbarinf alpha hpair hC1q
 
-
-
-
+/-- On a compact core strictly inside the diagonal identity region, the
+canonical root cube has one all-pairs finite-order tail converging to the
+identity. -/
 theorem HasStageRootCube.map_tail
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -533,8 +713,9 @@ theorem HasStageRootCube.map_tail
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (W : Set E) (PhiInf : E → E) (rho : Real)
     (Phi3 : Nat → Nat → Nat → E → E)
+    {chart : NormalChartFamily (I := I) X}
     (hroot : HasStageRootCube inp P L hr phi hphi C1 alpha e
-      W PhiInf rho Phi3)
+      W PhiInf rho Phi3 (chart := chart))
     {K : Set E} (hK : IsCompact K) (hKC1 : K ⊆ interior (C1 alpha))
     (p : Nat) (eps : Real) (heps : 0 < eps) :
     ∃ N : Nat, ∀ n ≥ N, ∀ k ≥ N, ∀ l ≥ N,
@@ -559,10 +740,10 @@ theorem HasStageRootCube.map_tail
     · exact (hPhiInf.mono interior_subset).symm
   exact MapCInfConvOnCompacts.three_tail hconvId hK hKC1 p eps heps
 
-
-
+/-- A pointwise germ identification with the canonical root cube transfers
+both smoothness and every prescribed finite jet tail to the identified maps. -/
 theorem HasStageRootCube.at_tail
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -571,8 +752,9 @@ theorem HasStageRootCube.at_tail
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
     (W : Set E) (PhiInf : E → E) (rho : Real)
     (Phi3 : Nat → Nat → Nat → E → E)
+    {chart : NormalChartFamily (I := I) X}
     (hroot : HasStageRootCube inp P L hr phi hphi C1 alpha e
-      W PhiInf rho Phi3)
+      W PhiInf rho Phi3 (chart := chart))
     {K : Set E} (hK : IsCompact K) (hKC1 : K ⊆ interior (C1 alpha))
     (Psi : Nat → Nat → E → E) (S : Nat → E → Prop)
     (hEq : ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N, ∀ z ∈ K, S k z →
@@ -613,8 +795,8 @@ theorem HasStageRootCube.at_tail
       rw [(Filter.EventuallyEq.iteratedFDeriv Real hsub j).eq_of_nhds]
     _ ≤ eps := hmap l hlMap k hkMap l hlMap j hj z hz
 
-
-
+/-- The order-zero root tail becomes a uniform distance tail in every moving
+target manifold after applying the H6 inverse-chart distance bound. -/
 theorem HasStageRootCube.symm_dist_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -827,6 +1009,92 @@ theorem HasSuppConvData.pts_dist_tail
       _ ≤ 2 * (eps / 4) := mul_le_mul_of_nonneg_left hdeltaEps (by norm_num)
       _ < eps := by linarith
   exact hman.trans_lt hscaled
+theorem H6NormalData.pts_dist_tail
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (hdata : HasSuppConvDataOn (I := I) inp P L r hr phi hphi d.chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r)
+    (eps : Real) (heps : 0 < eps) :
+    ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N, ∀ z ∈ C0 alpha,
+      ∀ gamma : Fin (inp.pack.A r),
+        let Lphi := L.subseq hphi
+        let Y := X.obj (Lphi.φ l)
+        let c := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
+        letI : TopologicalSpace Y.M := Y.topology
+        letI : ChartedSpace H Y.M := Y.charted
+        letI : IsManifold I ∞ Y.M := Y.smooth
+        letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+        letI : MetricSpace Y.M := (P (Lphi.φ l)).ms
+        dist ((d.chart (Lphi.φ l) c).hom z)
+          ((d.chart (Lphi.φ l) c).hom
+            (stagePtsSub inp P L phi hphi alpha k l z gamma
+              (chart := d.chart))) < eps := by
+  obtain ⟨_hU, hC0, _hC1, hC01, hC1U⟩ :=
+    hdata.core_on inp P L r hr d.chart U C0 C1 aInf Jinf Jbarinf alpha
+  obtain ⟨eta, heta, hetaSub⟩ :=
+    hC0.exists_cthickening_subset_open isOpen_interior hC01
+  let delta : Real := min eta (eps / 2)
+  have hdelta : 0 < delta := by
+    dsimp only [delta]
+    exact lt_min heta (by positivity)
+  obtain ⟨N, hpts⟩ := hdata.pts_coord_tail inp P L hr phi hphi d.chart
+    U C0 C1 aInf Jinf Jbarinf alpha delta hdelta
+  refine ⟨N, ?_⟩
+  intro k hk l hl z hz gamma
+  dsimp only
+  let Lphi := L.subseq hphi
+  let Y := X.obj (Lphi.φ l)
+  let c := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : MetricSpace Y.M := (P (Lphi.φ l)).ms
+  let target :=
+    stagePtsSub inp P L phi hphi alpha k l z gamma (chart := d.chart)
+  have hcoord : dist z target < delta := by
+    simpa only [target] using hpts k hk l hl z hz gamma
+  have hdeltaEta : delta ≤ eta := min_le_left _ _
+  have hseg : segment Real z target ⊆ U alpha := by
+    refine (segment_subset_closedBall_left _ _).trans ?_
+    refine (Metric.closedBall_subset_closedBall
+      (hcoord.le.trans hdeltaEta)).trans ?_
+    exact (Metric.closedBall_subset_cthickening hz eta).trans
+      (hetaSub.trans (interior_subset.trans hC1U))
+  obtain ⟨hRad, _hMaps⟩ :=
+    hdata.geom_on inp P L r hr d.chart U C0 C1 aInf Jinf Jbarinf l alpha
+  have hEquiv :=
+    d.metric_equiv (Lphi.φ l) c
+  have hEquivU : (d.chart (Lphi.φ l) c).MetricEquivOn Y.metric (U alpha) := by
+    intro w hw
+    exact hEquiv w (hRad hw)
+  have hUsrc : U alpha ⊆ (d.chart (Lphi.φ l) c).hom.source := by
+    intro w hw
+    exact (d.chart (Lphi.φ l) c).ball_subset (hRad hw)
+  have hman :=
+    NormalBallChart.MetricEquivOn.hom_dist_le
+      (J := I) Y (P (Lphi.φ l)) (d.chart (Lphi.φ l) c)
+        hEquivU hUsrc hseg
+  have hsqrt : Real.sqrt 2 ≤ 2 := by
+    linarith [Real.sqrt_two_lt_three_halves]
+  have hscaled : Real.sqrt 2 * dist z target < eps := by
+    calc
+      Real.sqrt 2 * dist z target ≤ 2 * dist z target :=
+        mul_le_mul_of_nonneg_right hsqrt dist_nonneg
+      _ < 2 * delta := mul_lt_mul_of_pos_left hcoord (by norm_num)
+      _ ≤ 2 * (eps / 2) :=
+        mul_le_mul_of_nonneg_left (min_le_right eta (eps / 2)) (by norm_num)
+      _ = eps := by ring
+  simpa only [target] using hman.trans_lt hscaled
 
 end HCGCompactness
 end DifferentialGeometry

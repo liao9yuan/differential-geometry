@@ -176,7 +176,7 @@ theorem localFrameTimeReg
   metricSmooth := hmetric
   nondegenerateGram := localFrameInv_real (I := I) S frame hframe
   inverseMetricDerivative := by
-    intro t x i j
+    intro t x _hx i j
     have hdiff :=
       (localFrameInv_time (I := I) S frame hframe hmetric x i j).differentiableOn
         (by simp) (t : Real) (D.regular_subset t.2)

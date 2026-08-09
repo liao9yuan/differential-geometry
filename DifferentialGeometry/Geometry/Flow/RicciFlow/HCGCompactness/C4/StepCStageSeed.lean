@@ -27,7 +27,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -36,7 +36,7 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 
 def IsStableNet
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) : Prop :=
   ∀ a b : Nat,
@@ -66,6 +66,28 @@ def HasStageRefine
     HasStageJetData inp P L hr phi hphi hconn U C0 C1
       aInf Jinf Jbarinf gInf
 
+/-- The full actual stage-map package extracted at one construction radius
+through one coherent normal-chart provider. -/
+def HasStageRefineOn
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (chart : NormalChartFamily (I := I) X)
+    (r : Real) (hr : 0 ≤ r) : Prop :=
+  ∃ (phi : Nat → Nat) (hphi : StrictMono phi)
+      (V U C0 C1 : LiveSlot L inp.pack r → Set E)
+      (aInf : (alpha : LiveSlot L inp.pack r) →
+        Fin (inp.pack.A r) → E → Real)
+      (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+        InterSlot L inp.pack r alpha → E → E)
+      (gInf : LiveSlot L inp.pack r →
+        E → (E →L[Real] E →L[Real] Real)),
+    HasStageJetDataOn inp P L hr phi hphi hconn chart
+      V U C0 C1 aInf Jinf Jbarinf gInf
+
 
 
 def HasStageSeed
@@ -79,6 +101,21 @@ def HasStageSeed
     ∀ (L : NetLimitData inp.decay inp.D P), IsStableNet inp P L →
       ∀ (r : Real) (hr : 0 ≤ r),
         HasStageRefine inp P L hconn r hr
+
+/-- One stable net and a radius-independent provider-native refinement
+procedure for every stable net over the same metric compactness input. -/
+def HasStageSeedOn
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L0 : NetLimitData inp.decay inp.D P)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (chart : NormalChartFamily (I := I) X) : Prop :=
+  IsStableNet inp P L0 ∧
+    ∀ (L : NetLimitData inp.decay inp.D P), IsStableNet inp P L →
+      ∀ (r : Real) (hr : 0 ≤ r),
+        HasStageRefineOn inp P L hconn chart r hr
 
 
 theorem HasStageSeed.refine
@@ -107,6 +144,37 @@ theorem HasStageSeed.subseq
     {ψ : Nat → Nat} (hψ : StrictMono ψ) (r : Real) (hr : 0 ≤ r) :
     HasStageRefine inp P (L0.subseq hψ) hconn r hr := by
   apply hseed.refine inp P L0 hconn (L0.subseq hψ) _ r hr
+  exact NetLimitData.stable_subseq inp.decay P L0 hψ hseed.1
+
+/-- Project the provider-native radius refinement from a stage seed. -/
+theorem HasStageSeedOn.refine
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L0 : NetLimitData inp.decay inp.D P)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (chart : NormalChartFamily (I := I) X)
+    (hseed : HasStageSeedOn inp P L0 hconn chart)
+    (L : NetLimitData inp.decay inp.D P) (hstable : IsStableNet inp P L)
+    (r : Real) (hr : 0 ≤ r) :
+    HasStageRefineOn inp P L hconn chart r hr :=
+  hseed.2 L hstable r hr
+
+/-- Every strict refinement of a provider-native seed net remains eligible
+for the same chart family's radius-dependent stage-map producer. -/
+theorem HasStageSeedOn.subseq
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L0 : NetLimitData inp.decay inp.D P)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (chart : NormalChartFamily (I := I) X)
+    (hseed : HasStageSeedOn inp P L0 hconn chart)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) (r : Real) (hr : 0 ≤ r) :
+    HasStageRefineOn inp P (L0.subseq hψ) hconn chart r hr := by
+  apply hseed.refine inp P L0 hconn chart (L0.subseq hψ) _ r hr
   exact NetLimitData.stable_subseq inp.decay P L0 hψ hseed.1
 
 

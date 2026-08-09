@@ -46,6 +46,11 @@ noncomputable def ccTensor02Symm (g₀ : SmoothRiemannianMetric I M) (T : Smooth
     SmoothCcTensor g₀ 0 2 :=
   (1 / 2 : ℝ) • (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)
 
+/-- Compatibility name for the symmetric part of a covariant two-tensor section. -/
+abbrev symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
+    SmoothCcTensor g₀ 0 2 :=
+  ccTensor02Symm (I := I) (M := M) g₀ T
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_add2 (g₀ : SmoothRiemannianMetric I M)

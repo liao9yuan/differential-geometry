@@ -876,7 +876,7 @@ section SeqInstantiation
 universe u' uE' uH'
 
 variable {E : Type uE'} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH'} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -895,7 +895,6 @@ noncomputable def orderedNet (hd : InjRadiusDecayInput (I := I) X) (D : Real)
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (k : Nat) (x y : (X.obj k).M) :
@@ -910,7 +909,6 @@ theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem packingBound_pack (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) {D : Real} (pb : hd.PackingBound D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :

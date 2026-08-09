@@ -24,13 +24,223 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open scoped Manifold ContDiff Topology
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 
 
+
+
+/-- Packages per-slot distance-atom limits into the finite Pi-valued atom and
+normalized-weight limits.  The only geometric normalization premise is the
+direct stagewise inner-ball cover of the chart domain. -/
+theorem atomWeightOn_raw
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (hre : hd.RealizesEdist)
+    (pb : hd.PackingBound D) (r : Real) (hr : 0 ≤ r)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M)
+    (U : Set E) (hU : IsOpen U)
+    (hcoverU : ∀ k,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => (chart (L.φ k) (beta k)).hom z)
+        U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma))
+    (aInf : Fin (pb.A r) → E → Real)
+    (hdead : ∀ gamma : Fin (pb.A r),
+      L.alive (gamma : Nat) = false → aInf gamma = 0)
+    (hatom : ∀ gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts U
+        (fun k => seqAtomOn (I := I) chart hd hD P L pb r beta gamma k)
+        (aInf gamma))
+    (hatomSmooth : ∀ k (gamma : Fin (pb.A r)),
+      ContDiffOn Real (∞ : WithTop ℕ∞)
+        (seqAtomOn (I := I) chart hd hD P L pb r beta gamma k) U)
+    (hatomInfSmooth : ∀ gamma : Fin (pb.A r),
+      ContDiffOn Real (∞ : WithTop ℕ∞) (aInf gamma) U) :
+    let atom : Nat → Fin (pb.A r) → E → Real := fun k gamma =>
+      seqAtomOn (I := I) chart hd hD P L pb r beta gamma k
+    let atomPi : Nat → E → (Fin (pb.A r) → Real) := fun k z gamma => atom k gamma z
+    let atomInf : E → (Fin (pb.A r) → Real) := fun z gamma => aInf gamma z
+    let i0 := baseIndex hd hre pb hr
+    let weight : Nat → E → (Fin (pb.A r) → Real) := fun k z gamma =>
+      rawWeights (cutRaw (atom k i0) (atom k) i0) z gamma
+    let weightInf : E → (Fin (pb.A r) → Real) := fun z gamma =>
+      rawWeights (cutRaw (aInf i0) aInf i0) z gamma
+    (∀ gamma : Fin (pb.A r),
+      L.alive (gamma : Nat) = false → aInf gamma = 0) ∧
+    (∀ k, ContDiffOn Real (∞ : WithTop ℕ∞) (atomPi k) U) ∧
+    ContDiffOn Real (∞ : WithTop ℕ∞) atomInf U ∧
+    MapCInfConvOnCompacts U atomPi atomInf ∧
+    (∀ k, ContDiffOn Real (∞ : WithTop ℕ∞) (weight k) U) ∧
+    ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U ∧
+    MapCInfConvOnCompacts U weight weightInf := by
+  classical
+  let atom : Nat → Fin (pb.A r) → E → Real := fun k gamma =>
+    seqAtomOn (I := I) chart hd hD P L pb r beta gamma k
+  let atomPi : Nat → E → (Fin (pb.A r) → Real) := fun k z gamma => atom k gamma z
+  let atomInf : E → (Fin (pb.A r) → Real) := fun z gamma => aInf gamma z
+  have hatomPi : MapCInfConvOnCompacts U atomPi atomInf :=
+    mapCInfConv_pi (E' := E) (Q := Real) hU hatom
+      (fun gamma k => hatomSmooth k gamma) hatomInfSmooth
+  have hatomPiSmooth (k : Nat) :
+      ContDiffOn Real (∞ : WithTop ℕ∞) (atomPi k) U :=
+    contDiffOn_pi.mpr fun gamma => hatomSmooth k gamma
+  have hatomInfPiSmooth :
+      ContDiffOn Real (∞ : WithTop ℕ∞) atomInf U :=
+    contDiffOn_pi.mpr hatomInfSmooth
+  let i0 := baseIndex hd hre pb hr
+  have hcover (k : Nat) (z : E) (hz : z ∈ U) :
+      ∃ gamma, atom k gamma z = 1 := by
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    obtain ⟨gamma, hgamma⟩ := Set.mem_iUnion.mp (hcoverU k hz)
+    refine ⟨gamma, ?_⟩
+    change seqAtom hd hD P L pb r k gamma
+      ((chart (L.φ k) (beta k)).hom z) = 1
+    exact seqAtom_one_raw hd hD P L pb r k gamma hgamma
+  have hbase (k : Nat) (z : E) (_hz : z ∈ U) :
+      atom k i0 z ∈ Set.Icc (0 : Real) 1 := by
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    change seqAtom hd hD P L pb r k i0
+      ((chart (L.φ k) (beta k)).hom z) ∈
+        Set.Icc (0 : Real) 1
+    exact seqAtom_Icc hd hD P L pb r k i0 _
+  have hnn (k : Nat) (z : E) (_hz : z ∈ U) :
+      ∀ gamma, 0 ≤ atom k gamma z := by
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    intro gamma
+    change 0 ≤ seqAtom hd hD P L pb r k gamma
+      ((chart (L.φ k) (beta k)).hom z)
+    exact seqAtom_nonneg hd hD P L pb r k gamma _
+  have hweight (gamma : Fin (pb.A r)) :=
+    cutWeights_conv hU hatom (fun k gamma => hatomSmooth k gamma)
+      hatomInfSmooth i0 hbase hnn hcover gamma
+  have hraw (gamma : Fin (pb.A r)) :=
+    cutRaw_conv hU hatom (fun k gamma => hatomSmooth k gamma)
+      hatomInfSmooth i0 gamma
+  have hrawc (k : Nat) (gamma : Fin (pb.A r)) :=
+    cutRaw_contDiffOn (fun q => hatomSmooth k q) i0 gamma
+  have hrawcinf (gamma : Fin (pb.A r)) :=
+    cutRaw_contDiffOn hatomInfSmooth i0 gamma
+  have hden (k : Nat) (z : E) (hz : z ∈ U) :
+      (∑ gamma, cutRaw (atom k i0) (atom k) i0 gamma z) ≠ 0 := by
+    have hh := cutRaw_sum_half (hbase k z hz) (hnn k z hz) (hcover k z hz)
+    linarith
+  have hdenInf (z : E) (hz : z ∈ U) :
+      (∑ gamma, cutRaw (aInf i0) aInf i0 gamma z) ≠ 0 := by
+    have hsum : Filter.Tendsto
+        (fun k => ∑ gamma, cutRaw (atom k i0) (atom k) i0 gamma z)
+        Filter.atTop (nhds (∑ gamma, cutRaw (aInf i0) aInf i0 gamma z)) :=
+      tendsto_finset_sum Finset.univ fun gamma _ => tendsto_of_cInf (hraw gamma) hz
+    have hh : (1 / 2 : Real) ≤ ∑ gamma, cutRaw (aInf i0) aInf i0 gamma z :=
+      ge_of_tendsto hsum (Filter.Eventually.of_forall fun k =>
+        cutRaw_sum_half (hbase k z hz) (hnn k z hz) (hcover k z hz))
+    linarith
+  have hweightSmooth (k : Nat) (gamma : Fin (pb.A r)) :
+      ContDiffOn Real (∞ : WithTop ℕ∞)
+        (fun z => rawWeights (cutRaw (atom k i0) (atom k) i0) z gamma) U := by
+    simpa only [rawWeights, normWeights] using
+      normWeights_contDiffOn (fun q => hrawc k q) (fun z hz => hden k z hz) gamma
+  have hweightInfSmooth (gamma : Fin (pb.A r)) :
+      ContDiffOn Real (∞ : WithTop ℕ∞)
+        (fun z => rawWeights (cutRaw (aInf i0) aInf i0) z gamma) U := by
+    simpa only [rawWeights, normWeights] using
+      normWeights_contDiffOn hrawcinf hdenInf gamma
+  let weight : Nat → E → (Fin (pb.A r) → Real) := fun k z gamma =>
+    rawWeights (cutRaw (atom k i0) (atom k) i0) z gamma
+  let weightInf : E → (Fin (pb.A r) → Real) := fun z gamma =>
+    rawWeights (cutRaw (aInf i0) aInf i0) z gamma
+  have hweightPi : MapCInfConvOnCompacts U weight weightInf :=
+    mapCInfConv_pi (E' := E) (Q := Real) hU hweight
+      (fun gamma k => hweightSmooth k gamma) hweightInfSmooth
+  have hweightPiSmooth (k : Nat) :
+      ContDiffOn Real (∞ : WithTop ℕ∞) (weight k) U :=
+    contDiffOn_pi.mpr fun gamma => hweightSmooth k gamma
+  have hweightInfPiSmooth :
+      ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U :=
+    contDiffOn_pi.mpr hweightInfSmooth
+  dsimp only
+  exact ⟨hdead, hatomPiSmooth, hatomInfPiSmooth, hatomPi,
+    hweightPiSmooth, hweightInfPiSmooth, hweightPi⟩
+
+/-- Compatibility form of `atomWeightOn_raw` retaining the legacy
+normal-radius premise. -/
+theorem atomWeightOn_of_atoms
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X)
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (hre : hd.RealizesEdist)
+    (pb : hd.PackingBound D) (r : Real) (hr : 0 ≤ r)
+    (_hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M)
+    (U : Set E) (hU : IsOpen U)
+    (hcoverU : ∀ k,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => (chart (L.φ k) (beta k)).hom z)
+        U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma))
+    (aInf : Fin (pb.A r) → E → Real)
+    (hdead : ∀ gamma : Fin (pb.A r),
+      L.alive (gamma : Nat) = false → aInf gamma = 0)
+    (hatom : ∀ gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts U
+        (fun k => seqAtomOn (I := I) chart hd hD P L pb r beta gamma k)
+        (aInf gamma))
+    (hatomSmooth : ∀ k (gamma : Fin (pb.A r)),
+      ContDiffOn Real (∞ : WithTop ℕ∞)
+        (seqAtomOn (I := I) chart hd hD P L pb r beta gamma k) U)
+    (hatomInfSmooth : ∀ gamma : Fin (pb.A r),
+      ContDiffOn Real (∞ : WithTop ℕ∞) (aInf gamma) U) :
+    let atom : Nat → Fin (pb.A r) → E → Real := fun k gamma =>
+      seqAtomOn (I := I) chart hd hD P L pb r beta gamma k
+    let atomPi : Nat → E → (Fin (pb.A r) → Real) := fun k z gamma => atom k gamma z
+    let atomInf : E → (Fin (pb.A r) → Real) := fun z gamma => aInf gamma z
+    let i0 := baseIndex hd hre pb hr
+    let weight : Nat → E → (Fin (pb.A r) → Real) := fun k z gamma =>
+      rawWeights (cutRaw (atom k i0) (atom k) i0) z gamma
+    let weightInf : E → (Fin (pb.A r) → Real) := fun z gamma =>
+      rawWeights (cutRaw (aInf i0) aInf i0) z gamma
+    (∀ gamma : Fin (pb.A r),
+      L.alive (gamma : Nat) = false → aInf gamma = 0) ∧
+    (∀ k, ContDiffOn Real (∞ : WithTop ℕ∞) (atomPi k) U) ∧
+    ContDiffOn Real (∞ : WithTop ℕ∞) atomInf U ∧
+    MapCInfConvOnCompacts U atomPi atomInf ∧
+    (∀ k, ContDiffOn Real (∞ : WithTop ℕ∞) (weight k) U) ∧
+    ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U ∧
+    MapCInfConvOnCompacts U weight weightInf := by
+  exact atomWeightOn_raw (I := I) chart hD P L hre pb r hr beta U hU
+    hcoverU aInf hdead hatom hatomSmooth hatomInfSmooth
+
+/-- Compatibility form of `atomWeightOn_of_atoms` for the selected legacy
+framed normal charts. -/
 
 theorem atomWeight_of_atoms
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -380,8 +590,10 @@ private theorem existsAtomWeightCore
     have h := hliveAtom (⟨gamma, hgamma⟩ : LiveSlot L pb r)
     simpa only [Xpsi, center, PointedRiemannianSeq.subseq, aInf,
       dif_pos hgamma] using h
+  have hgpPsi (k : Nat) : Item3GpScaleAt (I := I) hd D P Lpsi pb r k := by
+    exact (htailAt k).2.2
   have hatom0 :=
-    seqAtoms_conv (I := I) hd hD P Lpsi pb r betapsi hU aInf hliveForSeq
+    seqAtoms_conv (I := I) hd hD P Lpsi pb r hgpPsi betapsi hU aInf hliveForSeq
   have hatom : ∀ gamma : Fin (pb.A r),
       MapCInfConvOnCompacts U
         (fun k => seqAtomChart (I := I) hd hD P Lpsi pb r betapsi gamma k)
@@ -396,8 +608,6 @@ private theorem existsAtomWeightCore
     simp only [aInf, hgamma, Bool.false_eq_true, ↓reduceDIte]
     funext x
     rfl
-  have hgpPsi (k : Nat) : Item3GpScaleAt (I := I) hd D P Lpsi pb r k := by
-    exact (htailAt k).2.2
   have hUxPsi (k : Nat) :
       letI : TopologicalSpace (X.obj (Lpsi.φ k)).M := (X.obj (Lpsi.φ k)).topology
       letI : ChartedSpace H (X.obj (Lpsi.φ k)).M := (X.obj (Lpsi.φ k)).charted

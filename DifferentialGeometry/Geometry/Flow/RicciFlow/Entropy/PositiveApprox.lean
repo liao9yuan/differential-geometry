@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
 import DifferentialGeometry.Analysis.Integration.EntropyMix
 import DifferentialGeometry.Analysis.Integration.L2.Basic
-import DifferentialGeometry.Geometry.Metric.MetricBounds
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import Mathlib.Analysis.SpecificLimits.Basic
 
 set_option autoImplicit false

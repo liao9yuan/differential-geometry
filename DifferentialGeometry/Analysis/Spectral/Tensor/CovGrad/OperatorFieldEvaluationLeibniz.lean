@@ -39,6 +39,12 @@ structure IsPointwiseLinearLocalOperator (g : SmoothRiemannianMetric I M)
   local' : ∀ (r : ℕ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
     W₁.toSection x = W₂.toSection x → (op 0 r W₁).toSection x = (op 0 r W₂).toSection x
 
+/-- Compatibility name for the order-zero curvature-operator fingerprint. -/
+abbrev IsOrderZeroCurvFactor
+    (g : SmoothRiemannianMetric I M)
+    (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)) : Prop :=
+  IsPointwiseLinearLocalOperator g op
+
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [CompleteSpace E] in
@@ -56,6 +62,9 @@ theorem order_zero_apply_smul_of_pointwise_smul
   rw [show (c • W₁) = c • W₁ + (0 : ℝ) • W₁ from by rw [zero_smul, add_zero]]
   rw [hlin]
   simp only [zero_smul, add_zero]
+
+/-- Compatibility name for order-zero value homogeneity. -/
+alias op_zero_value_homogeneous := order_zero_apply_smul_of_pointwise_smul
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in

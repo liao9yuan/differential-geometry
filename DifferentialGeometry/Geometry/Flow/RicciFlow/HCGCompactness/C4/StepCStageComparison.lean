@@ -3,21 +3,23 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStageCenter
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchConvexity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchCage
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchHessian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCHatReadout
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSupportCapstone
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricExtend
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6HatReadout
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
 
 set_option autoImplicit false
 
+/-!
+# Local identification of the finite-stage comparison map
 
-
-
-
-
-
-
-
+This file connects the chart-independent map from `StepCStageMap` to the
+source-local center branches.  Every local construction is identified through
+the same unique global energy minimizer; local limit weights are never compared
+across source charts.
+-/
 
 noncomputable section
 
@@ -34,18 +36,18 @@ open DifferentialGeometry.Geometry.Riemannian
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-
-
-
+/-- A center input for the active-filled direct targets proves uniqueness of
+the original finite-stage energy, hence supplies the proof branch used by the
+global stage comparison map. -/
 theorem uniqueStage_of_fill
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -58,6 +60,8 @@ theorem uniqueStage_of_fill
     (p : (X.obj (L.φ k)).M → (X.obj (L.φ l)).M)
     (rad : (X.obj (L.φ k)).M → Real)
     (x : (X.obj (L.φ k)).M)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X)
     (hcm :
       let Y := X.obj (L.φ l)
       letI : TopologicalSpace Y.M := Y.topology
@@ -78,9 +82,10 @@ theorem uniqueStage_of_fill
             (seqAtom inp.decay inp.hD P L inp.pack s k) i0)
           y gamma
       CenterInput (I := I) Y.metric (mu x)
-        (centerAverage.activeFill mu (stageTarget inp P L s k l) qstar x)
+        (centerAverage.activeFill mu
+          (stageTarget inp P L s k l (chart := chart)) qstar x)
         join (p x) (rad x)) :
-    HasUniqueStageCenter inp P L s hs hconn k l x := by
+    HasUniqueStageCenter inp P L s hs hconn k l x (chart := chart) := by
   let Y := X.obj (L.φ l)
   letI : TopologicalSpace Y.M := Y.topology
   letI : ChartedSpace H Y.M := Y.charted
@@ -100,13 +105,13 @@ theorem uniqueStage_of_fill
         (seqAtom inp.decay inp.hD P L inp.pack s k) i0)
       y gamma
   have huniq := centerAverage.uniqueMin_activeFill (I := I) Y.metric mu
-    (stageTarget inp P L s k l) qstar join p rad x hcm
+    (stageTarget inp P L s k l (chart := chart)) qstar join p rad x hcm
   simpa only [HasUniqueStageCenter, i0, mu] using huniq
 
-
-
+/-- On the controlled source ball, the global stage comparison map is exactly
+the center selected from any active-filled local `CenterInput`. -/
 theorem stageCompare_eq_cm
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
     (L : NetLimitData inp.decay inp.D P) (s : Real) (hs : 0 ≤ s)
     (hconn : ∀ j,
@@ -120,6 +125,8 @@ theorem stageCompare_eq_cm
     (rad : (X.obj (L.φ k)).M → Real)
     (x : (X.obj (L.φ k)).M)
     (hx : x ∈ L.hatSourceBall inp.decay P s k)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X)
     (hcm :
       let Y := X.obj (L.φ l)
       letI : TopologicalSpace Y.M := Y.topology
@@ -140,9 +147,10 @@ theorem stageCompare_eq_cm
             (seqAtom inp.decay inp.hD P L inp.pack s k) i0)
           y gamma
       CenterInput (I := I) Y.metric (mu x)
-        (centerAverage.activeFill mu (stageTarget inp P L s k l) qstar x)
+        (centerAverage.activeFill mu
+          (stageTarget inp P L s k l (chart := chart)) qstar x)
         join (p x) (rad x)) :
-    stageComparisonMap inp P L s hs hconn k l x =
+    stageComparisonMap inp P L s hs hconn k l x (chart := chart) =
       let Y := X.obj (L.φ l)
       letI : TopologicalSpace Y.M := Y.topology
       letI : ChartedSpace H Y.M := Y.charted
@@ -162,7 +170,8 @@ theorem stageCompare_eq_cm
             (seqAtom inp.decay inp.hD P L inp.pack s k) i0)
           y gamma
       centerOfMass (I := I) Y.metric (mu x)
-        (centerAverage.activeFill mu (stageTarget inp P L s k l) qstar x)
+        (centerAverage.activeFill mu
+          (stageTarget inp P L s k l (chart := chart)) qstar x)
         join (p x) (rad x) hcm := by
   let Y := X.obj (L.φ l)
   letI : TopologicalSpace Y.M := Y.topology
@@ -183,23 +192,24 @@ theorem stageCompare_eq_cm
         (seqAtom inp.decay inp.hD P L inp.pack s k) i0)
       y gamma
   let q := centerOfMass (I := I) Y.metric (mu x)
-    (centerAverage.activeFill mu (stageTarget inp P L s k l) qstar x)
+    (centerAverage.activeFill mu
+      (stageTarget inp P L s k l (chart := chart)) qstar x)
     join (p x) (rad x) hcm
-  change stageComparisonMap inp P L s hs hconn k l x = q
+  change stageComparisonMap inp P L s hs hconn k l x (chart := chart) = q
   have huniq := uniqueStage_of_fill (I := I) inp P L s hs hconn k l
-    qstar join p rad x hcm
+    qstar join p rad x (chart := chart) hcm
   rw [stageCompare_choose (I := I) inp P L s hs hconn k l x hx huniq]
   apply huniq.unique
   · exact Classical.choose_spec huniq.exists
   · intro z
     rw [← centerAverage.energy_activeFill (I := I) Y.metric mu
-      (stageTarget inp P L s k l) qstar x q,
+      (stageTarget inp P L s k l (chart := chart)) qstar x q,
       ← centerAverage.energy_activeFill (I := I) Y.metric mu
-        (stageTarget inp P L s k l) qstar x z]
+        (stageTarget inp P L s k l (chart := chart)) qstar x z]
     exact centerOfMass.min hcm z
 
-
-
+/-- On one common source/target-stage tail, every nonzero Route-A chart target
+decodes to the corresponding chart-independent direct stage target. -/
 theorem HasSuppConvData.pts_target_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
@@ -225,7 +235,7 @@ theorem HasSuppConvData.pts_target_tail
     ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N,
       ∀ (alpha : LiveSlot L inp.pack r) (z : E), z ∈ U alpha →
         ∀ gamma : Fin (inp.pack.A r),
-          stageWeightSub inp P L hr phi hphi alpha k z gamma ≠ 0 →
+          stageWeightSub inp.toCore P L hr phi hphi alpha k z gamma ≠ 0 →
             let Lphi := L.subseq hphi
             let Yk := X.obj (Lphi.φ k)
             let Yl := X.obj (Lphi.φ l)
@@ -243,10 +253,10 @@ theorem HasSuppConvData.pts_target_tail
               (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
             let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
               (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
-            chiL.symm (stagePtsSub inp P L phi hphi alpha k l z gamma) =
-                stageTarget inp P Lphi r k l (chiK.symm z) gamma ∧
-              chiL (stageTarget inp P Lphi r k l (chiK.symm z) gamma) =
-                stagePtsSub inp P L phi hphi alpha k l z gamma := by
+            chiL.symm (stagePtsSub inp.toCore P L phi hphi alpha k l z gamma) =
+                stageTarget inp.toCore P Lphi r k l (chiK.symm z) gamma ∧
+              chiL (stageTarget inp.toCore P Lphi r k l (chiK.symm z) gamma) =
+                stagePtsSub inp.toCore P L phi hphi alpha k l z gamma := by
   classical
   let Lphi := L.subseq hphi
   letI (alpha : LiveSlot L inp.pack r) :
@@ -327,7 +337,7 @@ theorem HasSuppConvData.pts_target_tail
   letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
   obtain ⟨target, htarget, hraw⟩ :=
     hptsK alpha l z hz gamma hweight
-  have hC2gamma : 8 * L.lamInf (target.1.1 : Nat) ≤
+  have hGpGamma : 8 * L.lamInf (target.1.1 : Nat) ≤
       expMapC2Radius (I := I) Yk.metric
         (seqCenterD inp.decay P Lphi k (target.1.1 : Nat)) := by
     have hscale : 8 * Lphi.lamInf (target.1.1 : Nat) ≤
@@ -350,7 +360,7 @@ theorem HasSuppConvData.pts_target_tail
       Metric.closedBall 0 (6 * L.lamInf (target.1.1 : Nat)) := by
     have hs := stageWeight_small inp P Lphi hr alphaPhi k hgpK
       target.1.1 (by
-        simpa only [Lphi, NetLimitData.subseq_lamInf] using hC2gamma) z (by
+        simpa only [Lphi, NetLimitData.subseq_lamInf] using hGpGamma) z (by
           simpa only [stageWeightSub, stageWeight, alphaPhi, Lphi,
             htarget] using hweight)
     simpa only [alphaPhi, Lphi, NetLimitData.subseq_lamInf] using hs
@@ -363,7 +373,7 @@ theorem HasSuppConvData.pts_target_tail
     have hlam : 0 < L.lamInf (target.1.1 : Nat) :=
       inp.decay.lambda_pos inp.hD (L.rInf (target.1.1 : Nat))
     nlinarith
-  have hsrc : stageTarget inp P Lphi r k l
+  have hsrc : stageTarget inp.toCore P Lphi r k l
         ((NormalCoordinates.normalChartAt (I := I) Yk.metric
           (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm z)
         target.1.1 ∈
@@ -373,14 +383,35 @@ theorem HasSuppConvData.pts_target_tail
     simpa only [stageTarget, normalTransition, Yk, Yl] using hov
   subst gamma
   rw [hraw]
-  exact ⟨stageTarget_local (I := I) inp P Lphi r k l
-      alpha.1 target.1.1 z hsrc,
-    stageTarget_chart (I := I) inp P Lphi r k l
-      alpha.1 target.1.1 z⟩
+  constructor
+  · have hchart :
+        NormalCoordinates.normalChartAt (I := I) Yl.metric
+            (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
+            (stageTarget inp.toCore P Lphi r k l
+              ((NormalCoordinates.normalChartAt (I := I) Yk.metric
+                (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).symm z)
+              target.1.1) =
+          normalTransition (I := I) Yl
+            (seqCenterD inp.decay P Lphi l (target.1.1 : Nat))
+            (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
+            (normalTransition (I := I) Yk
+              (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
+              (seqCenterD inp.decay P Lphi k (target.1.1 : Nat)) z) := by
+      simpa only [legacyChartFamily, legacyInv_eq, legacyTransition_eq,
+        legacyChart_apply] using
+        (stageTarget_chart (I := I) inp.toCore P Lphi r k l
+          alpha.1 target.1.1 z
+            (chart := legacyChartFamily (I := I) X))
+    rw [← hchart]
+    exact (NormalCoordinates.normalChartAt (I := I) Yl.metric
+      (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))).left_inv hsrc
+  · exact stageTarget_chart (I := I) inp.toCore P Lphi r k l
+      alpha.1 target.1.1 z
+        (chart := legacyChartFamily (I := I) X)
 
-
-
-
+/-- On one rectangular source/target-stage tail, every target with nonzero
+actual weight lies uniformly close to the source coordinate in the target
+manifold. -/
 theorem HasSuppConvData.pts_target_dist
     (inp : MetricCompactnessInputs (I := I) X)
     (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
@@ -448,9 +479,9 @@ theorem HasSuppConvData.pts_target_dist
   rw [← heq.1]
   exact hclose
 
-
-
-
+/-- Actual finite-stage weights and direct targets admit the selected strict
+center input on one rectangular all-pairs tail.  The radius can be chosen
+below any prescribed positive tolerance. -/
 theorem HasSuppConvData.actual_cm_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (aMin : Real) (haMin : 0 < aMin)
@@ -556,8 +587,12 @@ theorem HasSuppConvData.actual_cm_tail
         ∃ hcm : CenterInput (I := I) Yl.metric (mu z)
             (centerAverage.activeFill mu stagePts qstar z)
             join (qstar z) rad,
-          HasHatCmStrictAt (I := I) inp.decay P Lphi inp.pack r l
-            hcomplete hconn q δ alpha (mu z)
+          HasChartCmSol (I := I) Yl (hcomplete.complete (Lphi.φ l))
+            (hconn (Lphi.φ l))
+            (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
+            (legacyBallChart (I := I) Yl
+              (seqCenterD inp.decay P Lphi l (alpha.1 : Nat)))
+            (q := q alpha) (delta := δ alpha) (mu z)
             (centerAverage.activeFill mu stagePts qstar z)
             join (qstar z) rad hcm ∧
           dist
@@ -755,7 +790,7 @@ theorem HasSuppConvData.actual_cm_tail
     have hscaleGamma := hscale l hlS gamma
     dsimp only [Lphi] at hscaleGamma ⊢
     exact ⟨hfullGamma, hscaleGamma.2.1, hscaleGamma.2.2⟩
-  have hout := exists_hat_cm_sol_at (I := I) inp.decay P inp.realizes
+  have hout := exists_hat_cmC_at (I := I) inp.decay P inp.realizes
     Lphi inp.pack r l hcomplete hconn q δ hqdataPhi hbranchScale alpha
     (mu z) pts join p rad hcm (hmu.sum_one z hzU) hpHat hcage2
   let c := centerOfMass (I := I) Yl.metric (mu z) pts join p rad hcm
@@ -800,7 +835,7 @@ theorem HasSuppConvData.actual_cm_tail
           nlinarith [hrad]
         _ ≤ expRadiusGp (I := I) Yl.metric x0 := by
           simpa only [rho, rhoBase, Lphi, NetLimitData.subseq] using hρexp
-    have htControl := inp.normalBounds.chart_mem_norm_le (Lphi.φ l) x0
+    have htControl := inp.normalBounds.raw_chart_mem_norm_le (Lphi.φ l) x0
       (join p c t) ⟨Exponential.riemannianEDist_ne_top (I := I) _ _, htExp⟩
     refine ⟨htControl.1, ?_⟩
     change chiL (join p c t) ∈ Metric.ball (0 : E) rhoBase
@@ -827,10 +862,8 @@ theorem HasSuppConvData.actual_cm_tail
   have hzTarget : z ∈ chiL.target := by
     have hzBall := hExp hzU
     have hzNorm : ‖z‖ < expMapC2Radius (I := I) Yl.metric x0 := by
-      simpa only [Metric.mem_ball, dist_zero_right, Yl, x0, Lphi] using hzBall
-    simpa only [chiL, Yl, x0, Lphi] using
-      Geometry.Riemannian.ball_subset_normalChartAt_target
-        (I := I) Yl.metric x0 hzNorm
+      simpa only [Metric.mem_ball, dist_zero_right] using hzBall
+    exact ball_subset_normalChartAt_target (I := I) Yl.metric x0 hzNorm
   have hpDecode : chiL p = z := by
     simpa only [p, qstar] using chiL.right_inv hzTarget
   have hsqrt : Real.sqrt 2 ≤ 2 := by
@@ -848,10 +881,1206 @@ theorem HasSuppConvData.actual_cm_tail
   · simpa only [mu, stagePts, qstar, pts, p, join] using hout
   · simpa only [mu, stagePts, qstar, pts, p, join, c] using hcoord
 
+namespace H6NormalData
 
+/-- The two phase-scale inequalities force the H6 chart ratio to dominate
+`48 * aMin`. -/
+theorem ratio_gt_48
+    {hd : InjRadiusDecayInput (I := I) X}
+    (d : H6NormalData (I := I) X hd) {aMin R : Real} {q : NNReal}
+    (hρq : 2 * (aMin * hd.mu R) < (q : Real))
+    (hqRadius : 6 * (q : Real) < d.phaseRadius R) :
+    48 * aMin < d.ratio := by
+  have hmu : 0 < hd.mu R := hd.mu_pos R
+  dsimp only [phaseRadius] at hqRadius
+  nlinarith
 
+/-- H6 normalization makes the covering radii of every interacting pair differ
+by a factor strictly smaller than three. -/
+theorem pair_lam_lt_three
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (aMin : Real)
+    (hphys : 8 * Real.exp inp.decay.C < aMin * inp.D)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData inp.decay inp.D P)
+    {alpha gamma : Nat}
+    (hratio : 48 * aMin < d.ratio)
+    (hfreq : ∃ᶠ k in Filter.atTop,
+      BInter inp.decay inp.D P L.lamInf alpha gamma (L.φ k)) :
+    L.lamInf gamma < 3 * L.lamInf alpha := by
+  have hmu0 : 0 < inp.decay.mu 0 := inp.decay.mu_pos 0
+  have h384div :
+      384 * Real.exp inp.decay.C / inp.D < d.ratio := by
+    calc
+      384 * Real.exp inp.decay.C / inp.D =
+          48 * (8 * Real.exp inp.decay.C / inp.D) := by ring
+      _ < 48 * aMin := mul_lt_mul_of_pos_left
+        ((div_lt_iff₀ inp.hD).2 hphys) (by norm_num)
+      _ < d.ratio := hratio
+  have h384 :
+      384 * Real.exp inp.decay.C < d.ratio * inp.D :=
+    (div_lt_iff₀ inp.hD).1 h384div
+  have hright : d.ratio * inp.D * (2 * inp.decay.mu 0) ≤ inp.D := by
+    calc
+      d.ratio * inp.D * (2 * inp.decay.mu 0) =
+          inp.D * (2 * (d.ratio * inp.decay.mu 0)) := by ring
+      _ ≤ inp.D * 1 := mul_le_mul_of_nonneg_left
+        (by nlinarith [d.ratio_mu0_le]) inp.hD.le
+      _ = inp.D := by ring
+  have hsmallMu :
+      768 * Real.exp inp.decay.C * inp.decay.mu 0 < inp.D := by
+    calc
+      768 * Real.exp inp.decay.C * inp.decay.mu 0 =
+          (384 * Real.exp inp.decay.C) * (2 * inp.decay.mu 0) := by ring
+      _ < (d.ratio * inp.D) * (2 * inp.decay.mu 0) :=
+        mul_lt_mul_of_pos_right h384 (mul_pos (by norm_num) hmu0)
+      _ ≤ inp.D := hright
+  have hlambdaSmall :
+      (768 * Real.exp inp.decay.C) * inp.decay.lambda inp.D 0 < 1 := by
+    rw [InjRadiusDecayInput.lambda]
+    calc
+      (768 * Real.exp inp.decay.C) * (inp.decay.mu 0 / inp.D) =
+          (768 * Real.exp inp.decay.C * inp.decay.mu 0) / inp.D := by ring
+      _ < inp.D / inp.D := div_lt_div_of_pos_right hsmallMu inp.hD
+      _ = 1 := div_self (ne_of_gt inp.hD)
+  have hlambda0 : 0 < inp.decay.lambda inp.D 0 :=
+    inp.decay.lambda_pos inp.hD 0
+  have harg :
+      inp.decay.C * (10 * inp.decay.lambda inp.D 0) < 1 := by
+    calc
+      inp.decay.C * (10 * inp.decay.lambda inp.D 0) =
+          (10 * inp.decay.C) * inp.decay.lambda inp.D 0 := by ring
+      _ < (10 * Real.exp inp.decay.C) *
+          inp.decay.lambda inp.D 0 :=
+        mul_lt_mul_of_pos_right
+          (mul_lt_mul_of_pos_left
+            (lt_of_lt_of_le (lt_add_one inp.decay.C)
+              (Real.add_one_le_exp inp.decay.C)) (by norm_num)) hlambda0
+      _ < (768 * Real.exp inp.decay.C) *
+          inp.decay.lambda inp.D 0 := by
+        apply mul_lt_mul_of_pos_right _ hlambda0
+        exact mul_lt_mul_of_pos_right (by norm_num)
+          (Real.exp_pos inp.decay.C)
+      _ < 1 := hlambdaSmall
+  have hargNonneg :
+      0 ≤ inp.decay.C * (10 * inp.decay.lambda inp.D 0) :=
+    mul_nonneg inp.decay.C_nonneg
+      (mul_nonneg (by norm_num) hlambda0.le)
+  have hexpBound := Real.exp_bound' hargNonneg harg.le
+    (n := 2) (by norm_num)
+  have hargSq :
+      (inp.decay.C * (10 * inp.decay.lambda inp.D 0)) ^ 2 < 1 := by
+    nlinarith [sq_nonneg
+      (inp.decay.C * (10 * inp.decay.lambda inp.D 0))]
+  have hexp :
+      Real.exp (inp.decay.C * (10 * inp.decay.lambda inp.D 0)) < 3 := by
+    norm_num [Finset.sum_range_succ, Nat.factorial] at hexpBound
+    nlinarith
+  have hfreq' :
+      ∃ᶠ k : Nat in Filter.atTop,
+        BInter inp.decay inp.D P L.lamInf gamma alpha (L.φ k) :=
+    hfreq.mono fun k hk =>
+      BInter.symm inp.decay inp.D P L.lamInf hk
+  have hclose := L.rInf_close inp.decay P hfreq'
+  have halpha0 :
+      L.lamInf alpha ≤ inp.decay.lambda inp.D 0 :=
+    inp.decay.lambda_antitone inp.hD (L.rInf_mem alpha).1
+  have hgamma0 :
+      L.lamInf gamma ≤ inp.decay.lambda inp.D 0 :=
+    inp.decay.lambda_antitone inp.hD (L.rInf_mem gamma).1
+  have hgap :
+      L.rInf alpha - L.rInf gamma ≤
+        10 * inp.decay.lambda inp.D 0 := by
+    linarith
+  have hpair :
+      L.lamInf gamma ≤
+        Real.exp (inp.decay.C * (10 * inp.decay.lambda inp.D 0)) *
+          L.lamInf alpha := by
+    simpa only [NetLimitData.lamInf] using
+      inp.decay.lambda_exp_le inp.hD hgap
+  exact hpair.trans_lt
+    (mul_lt_mul_of_pos_right hexp
+      (inp.decay.lambda_pos inp.hD (L.rInf alpha)))
+
+/-- On the unit-enlarged center tail, the H6 stage chart contains the
+`384 * lamInf` ball. -/
+theorem stage_radius_gt
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (aMin : Real)
+    (hphys : 8 * Real.exp inp.decay.C < aMin * inp.D)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData inp.decay inp.D P)
+    {gamma k : Nat}
+    (hratio : 48 * aMin < d.ratio)
+    (hcenter :
+      inp.decay.dist (L.φ k)
+          (seqCenterD inp.decay P L k gamma)
+          (X.obj (L.φ k)).basepoint <
+        L.rInf gamma + 1) :
+    letI : TopologicalSpace (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).smooth
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    384 * L.lamInf gamma <
+      (d.chart (L.φ k) (seqCenterD inp.decay P L k gamma)).radius := by
+  letI : TopologicalSpace (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).smooth
+  letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+    (X.obj (L.φ k)).t2TangentBundle
+  have hmu :
+      inp.decay.mu (L.rInf gamma + 1) ≤
+        inp.decay.mu
+          (inp.decay.dist (L.φ k)
+            (seqCenterD inp.decay P L k gamma)
+            (X.obj (L.φ k)).basepoint) :=
+    inp.decay.mu_antitone hcenter.le
+  have hprod :
+      48 * aMin * inp.decay.mu (L.rInf gamma + 1) <
+        d.ratio *
+          inp.decay.mu
+            (inp.decay.dist (L.φ k)
+              (seqCenterD inp.decay P L k gamma)
+              (X.obj (L.φ k)).basepoint) := by
+    calc
+      48 * aMin * inp.decay.mu (L.rInf gamma + 1) <
+          d.ratio * inp.decay.mu (L.rInf gamma + 1) :=
+        mul_lt_mul_of_pos_right hratio
+          (inp.decay.mu_pos (L.rInf gamma + 1))
+      _ ≤ d.ratio *
+          inp.decay.mu
+            (inp.decay.dist (L.φ k)
+              (seqCenterD inp.decay P L k gamma)
+              (X.obj (L.φ k)).basepoint) :=
+        mul_le_mul_of_nonneg_left hmu d.ratio_pos.le
+  rw [d.radius_eq]
+  nlinarith [lamInf_lt_halfMin inp.decay inp.hD hphys P L gamma]
+
+/-- The H6 launch radius is contained in one quarter of the stage chart
+radius on the same unit-enlarged center tail. -/
+theorem stage_rho_le
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (aMin : Real) (haMin : 0 < aMin)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData inp.decay inp.D P)
+    {gamma k : Nat}
+    (hratio : 48 * aMin < d.ratio)
+    (hcenter :
+      inp.decay.dist (L.φ k)
+          (seqCenterD inp.decay P L k gamma)
+          (X.obj (L.φ k)).basepoint <
+        L.rInf gamma + 1) :
+    letI : TopologicalSpace (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).smooth
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    aMin * inp.decay.mu (L.rInf gamma + 1) ≤
+      (d.chart (L.φ k)
+        (seqCenterD inp.decay P L k gamma)).radius / 4 := by
+  letI : TopologicalSpace (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).smooth
+  letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+    (X.obj (L.φ k)).t2TangentBundle
+  have hmu :
+      inp.decay.mu (L.rInf gamma + 1) ≤
+        inp.decay.mu
+          (inp.decay.dist (L.φ k)
+            (seqCenterD inp.decay P L k gamma)
+            (X.obj (L.φ k)).basepoint) :=
+    inp.decay.mu_antitone hcenter.le
+  have hprod :
+      4 * aMin * inp.decay.mu (L.rInf gamma + 1) <
+        d.ratio *
+          inp.decay.mu
+            (inp.decay.dist (L.φ k)
+              (seqCenterD inp.decay P L k gamma)
+              (X.obj (L.φ k)).basepoint) := by
+    calc
+      4 * aMin * inp.decay.mu (L.rInf gamma + 1) <
+          d.ratio * inp.decay.mu (L.rInf gamma + 1) := by
+        apply mul_lt_mul_of_pos_right _ (inp.decay.mu_pos _)
+        nlinarith
+      _ ≤ d.ratio *
+          inp.decay.mu
+            (inp.decay.dist (L.φ k)
+              (seqCenterD inp.decay P L k gamma)
+              (X.obj (L.φ k)).basepoint) :=
+        mul_le_mul_of_nonneg_left hmu d.ratio_pos.le
+  rw [d.radius_eq]
+  nlinarith
+
+/-- A six-lambda target coordinate issued from an interacting stage slot lies
+in the H6 chart centered at the source slot. -/
+theorem target_mem
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (aMin : Real)
+    (hphys : 8 * Real.exp inp.decay.C < aMin * inp.D)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData inp.decay inp.D P)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    {alpha gamma k : Nat}
+    (hratio : 48 * aMin < d.ratio)
+    (hcenterAlpha :
+      inp.decay.dist (L.φ k)
+          (seqCenterD inp.decay P L k alpha)
+          (X.obj (L.φ k)).basepoint <
+        L.rInf alpha + 1)
+    (hcenterGamma :
+      inp.decay.dist (L.φ k)
+          (seqCenterD inp.decay P L k gamma)
+          (X.obj (L.φ k)).basepoint <
+        L.rInf gamma + 1)
+    (hfreq : ∃ᶠ n : Nat in Filter.atTop,
+      BInter inp.decay inp.D P L.lamInf alpha gamma (L.φ n))
+    (hinter :
+      BInter inp.decay inp.D P L.lamInf alpha gamma (L.φ k))
+    (w : E)
+    (hw : w ∈ Metric.closedBall 0 (6 * L.lamInf gamma)) :
+    let Y := X.obj (L.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (d.chart (L.φ k) (seqCenterD inp.decay P L k gamma)).hom w ∈
+      (d.chart (L.φ k)
+        (seqCenterD inp.decay P L k alpha)).hom.target := by
+  let Y := X.obj (L.φ k)
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M :=
+    MetricComplete.complete (I := I) Y (hcomplete.complete (L.φ k))
+  letI : ConnectedSpace Y.M := hconn (L.φ k)
+  letI : MetricSpace Y.M := (P (L.φ k)).ms
+  let cAlpha := seqCenterD inp.decay P L k alpha
+  let cGamma := seqCenterD inp.decay P L k gamma
+  let chiAlpha := d.chart (L.φ k) cAlpha
+  let chiGamma := d.chart (L.φ k) cGamma
+  let y := chiGamma.hom w
+  have hradAlpha :
+      384 * L.lamInf alpha < chiAlpha.radius := by
+    simpa only [chiAlpha, cAlpha, Y] using
+      d.stage_radius_gt inp aMin hphys P L hratio hcenterAlpha
+  have hradGamma :
+      384 * L.lamInf gamma < chiGamma.radius := by
+    simpa only [chiGamma, cGamma, Y] using
+      d.stage_radius_gt inp aMin hphys P L hratio hcenterGamma
+  have hlamGamma : 0 < L.lamInf gamma :=
+    inp.decay.lambda_pos inp.hD (L.rInf gamma)
+  have hwNorm : ‖w‖ ≤ 6 * L.lamInf gamma := by
+    simpa only [Metric.mem_closedBall, dist_zero_right] using hw
+  have hwBall : w ∈ Metric.ball 0 chiGamma.radius := by
+    rw [Metric.mem_ball, dist_zero_right]
+    exact hwNorm.trans_lt (by nlinarith)
+  have hseg :
+      segment Real 0 w ⊆ Metric.ball 0 chiGamma.radius :=
+    (convex_ball (0 : E) chiGamma.radius).segment_subset
+      (Metric.mem_ball_self chiGamma.radius_pos) hwBall
+  have hchart :
+      (letI : MetricSpace Y.M := (P (L.φ k)).ms
+       dist (chiGamma.hom 0) (chiGamma.hom w)) ≤
+        Real.sqrt 2 * dist 0 w := by
+    exact NormalBallChart.MetricEquivOn.hom_dist_le
+      Y (P (L.φ k)) chiGamma
+        (by simpa only [chiGamma, cGamma, Y] using
+          d.metric_equiv (L.φ k) cGamma)
+        chiGamma.ball_subset hseg
+  have hsqrt : Real.sqrt 2 ≤ 2 := by
+    linarith [Real.sqrt_two_lt_three_halves]
+  have hgammaTarget :
+      (letI : MetricSpace Y.M := (P (L.φ k)).ms
+       dist cGamma y) ≤ 12 * L.lamInf gamma := by
+    calc
+      (letI : MetricSpace Y.M := (P (L.φ k)).ms
+       dist cGamma y) =
+          dist (chiGamma.hom 0) (chiGamma.hom w) := by
+            rw [chiGamma.map_zero]
+      _ ≤ Real.sqrt 2 * dist 0 w := hchart
+      _ = Real.sqrt 2 * ‖w‖ := by rw [dist_zero_left]
+      _ ≤ Real.sqrt 2 * (6 * L.lamInf gamma) :=
+        mul_le_mul_of_nonneg_left hwNorm (Real.sqrt_nonneg 2)
+      _ ≤ 2 * (6 * L.lamInf gamma) :=
+        mul_le_mul_of_nonneg_right hsqrt
+          (mul_nonneg (by norm_num) hlamGamma.le)
+      _ = 12 * L.lamInf gamma := by ring
+  have hcenterDist :
+      (letI : MetricSpace Y.M := (P (L.φ k)).ms
+       dist cAlpha cGamma) <
+        5 * L.lamInf alpha + 5 * L.lamInf gamma := by
+    obtain ⟨x, z, hx, hz, hmeet⟩ := hinter
+    have hxc : x = cAlpha := by
+      dsimp only [cAlpha]
+      unfold seqCenterD
+      rw [hx]
+      simp only [Option.getD_some]
+    have hzc : z = cGamma := by
+      dsimp only [cGamma]
+      unfold seqCenterD
+      rw [hz]
+      simp only [Option.getD_some]
+    rw [hxc, hzc] at hmeet
+    obtain ⟨v, hvAlpha, hvGamma⟩ :=
+      Set.not_disjoint_iff.mp hmeet
+    rw [Metric.mem_ball] at hvAlpha hvGamma
+    have htri := dist_triangle cAlpha v cGamma
+    rw [dist_comm v cAlpha] at hvAlpha
+    linarith
+  have hpair :
+      L.lamInf gamma < 3 * L.lamInf alpha :=
+    d.pair_lam_lt_three inp aMin hphys P L hratio hfreq
+  have hproper :
+      (letI : MetricSpace Y.M := (P (L.φ k)).ms
+       dist cAlpha y) < 56 * L.lamInf alpha := by
+    have htri :
+        (letI : MetricSpace Y.M := (P (L.φ k)).ms
+         dist cAlpha y) ≤ dist cAlpha cGamma + dist cGamma y :=
+      dist_triangle _ _ _
+    nlinarith
+  have hdist :
+      inp.decay.dist (L.φ k) cAlpha y < chiAlpha.radius := by
+    rw [← ProperMetricOn.dist_eq inp.decay inp.realizes P
+      (L.φ k) cAlpha y]
+    exact hproper.trans (by nlinarith)
+  have hed : riemannianEDist I cAlpha y =
+      ENNReal.ofReal (inp.decay.dist (L.φ k) cAlpha y) := by
+    have hrealize := inp.realizes.edist_eq (L.φ k) cAlpha y
+    simpa [PointedRiemannianManifold.emetricSpace] using hrealize
+  have hedRad : riemannianEDist I cAlpha y <
+      ENNReal.ofReal chiAlpha.radius := by
+    rw [hed]
+    exact (ENNReal.ofReal_lt_ofReal_iff chiAlpha.radius_pos).2 hdist
+  have hread := d.toH6ChartData.readout_mem
+    (L.φ k) (hcomplete.complete (L.φ k)) (hconn (L.φ k))
+      cAlpha y hedRad
+  rcases hread.1 with ⟨v, hv, hvy⟩
+  change y ∈ chiAlpha.hom.target
+  rw [← hvy]
+  exact chiAlpha.hom.map_source (chiAlpha.ball_subset hv)
+
+/-- A nonzero refined provider weight places the source transition in the
+target slot's six-lambda ball once the H6 target chart has its branch radius.
+This is the source-side decode needed by the safety-totalized stage filler. -/
+theorem weight_trans_mem
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (aMin : Real)
+    (hphys : 8 * Real.exp inp.decay.C < aMin * inp.D)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData inp.decay inp.D P)
+    {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (k : Nat)
+    (alpha : LiveSlot L inp.pack r) (z : E)
+    (hinner :
+      let Lphi := L.subseq hphi
+      let Y := X.obj (Lphi.φ k)
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      (d.chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom z ∈
+        ⋃ gamma : Fin (inp.pack.A r),
+          Lphi.innerBall inp.decay inp.D P inp.pack r k gamma)
+    (target : InterSlot L inp.pack r alpha)
+    (hweight : stageWeightSub inp P L hr phi hphi alpha k z target.1.1
+      (chart := d.chart) ≠ 0)
+    (hradius :
+      let Lphi := L.subseq hphi
+      let Y := X.obj (Lphi.φ k)
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      let c := seqCenterD inp.decay P Lphi k (target.1.1 : Nat)
+      aMin * inp.decay.mu (L.rInf (target.1.1 : Nat) + 1) ≤
+        (d.chart (Lphi.φ k) c).radius / 4) :
+    let Lphi := L.subseq hphi
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (d.chart (Lphi.φ k)
+        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).transition
+      (d.chart (Lphi.φ k)
+        (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))) z ∈
+      Metric.closedBall 0 (6 * L.lamInf (target.1.1 : Nat)) := by
+  classical
+  let Lphi := L.subseq hphi
+  let Y := X.obj (Lphi.φ k)
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M :=
+    MetricComplete.complete (I := I) Y (hcomplete.complete (Lphi.φ k))
+  let x :=
+    (d.chart (Lphi.φ k)
+      (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom z
+  let c := seqCenterD inp.decay P Lphi k (target.1.1 : Nat)
+  let i0 := baseIndex inp.decay inp.realizes inp.pack hr
+  let s : Set Y.M := ⋃ gamma : Fin (inp.pack.A r),
+    Lphi.innerBall inp.decay inp.D P inp.pack r k gamma
+  have hweights := seqWeights_data_raw (I := I) inp.decay inp.hD P Lphi
+    inp.pack r k i0 (s := s) Set.Subset.rfl
+  have hxHat :
+      x ∈ Lphi.hatBall inp.decay inp.D P inp.pack r k target.1.1 := by
+    apply hweights.active_mem x
+    · simpa only [x, s, Lphi] using hinner
+    · simpa only [stageWeightSub, x, i0, Lphi] using hweight
+  have hproper :
+      (letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+       dist x c) < 4 * L.lamInf (target.1.1 : Nat) := by
+    have hhat := hat_dist_centerD inp.decay P Lphi inp.pack r hxHat
+    simpa only [c, Y, Lphi, NetLimitData.subseq_lamInf] using hhat
+  have hdist : inp.decay.dist (Lphi.φ k) c x <
+      4 * L.lamInf (target.1.1 : Nat) := by
+    rw [← ProperMetricOn.dist_eq inp.decay inp.realizes P (Lphi.φ k) c x]
+    simpa only [dist_comm] using hproper
+  have hhalf : 4 * L.lamInf (target.1.1 : Nat) <
+      (aMin * inp.decay.mu (L.rInf (target.1.1 : Nat) + 1)) / 2 :=
+    lamInf_lt_halfMin inp.decay inp.hD hphys P L (target.1.1 : Nat)
+  have haMin : 0 < aMin := by
+    have hprod : 0 < aMin * inp.D :=
+      (mul_pos (by norm_num) (Real.exp_pos inp.decay.C)).trans hphys
+    nlinarith [inp.hD]
+  have hrho : 0 <
+      aMin * inp.decay.mu (L.rInf (target.1.1 : Nat) + 1) :=
+    mul_pos haMin (inp.decay.mu_pos _)
+  have hdistRad : inp.decay.dist (Lphi.φ k) c x <
+      (d.chart (Lphi.φ k) c).radius := by
+    calc
+      inp.decay.dist (Lphi.φ k) c x <
+          4 * L.lamInf (target.1.1 : Nat) := hdist
+      _ < (aMin * inp.decay.mu
+          (L.rInf (target.1.1 : Nat) + 1)) / 2 := hhalf
+      _ < (d.chart (Lphi.φ k) c).radius := by
+        dsimp only [Lphi, Y, c] at hradius ⊢
+        nlinarith
+  have hed : riemannianEDist I c x =
+      ENNReal.ofReal (inp.decay.dist (Lphi.φ k) c x) := by
+    have hrealize := inp.realizes.edist_eq (Lphi.φ k) c x
+    simpa [PointedRiemannianManifold.emetricSpace] using hrealize
+  have hedRad : riemannianEDist I c x <
+      ENNReal.ofReal (d.chart (Lphi.φ k) c).radius := by
+    rw [hed]
+    exact (ENNReal.ofReal_lt_ofReal_iff
+      (d.chart (Lphi.φ k) c).radius_pos).2 hdistRad
+  have hread := d.toH6ChartData.readout_mem
+    (Lphi.φ k) (hcomplete.complete (Lphi.φ k)) (hconn (Lphi.φ k))
+    c x hedRad
+  have hnorm : ‖(d.chart (Lphi.φ k) c).inv x‖ <
+      4 * L.lamInf (target.1.1 : Nat) := by
+    rw [hread.2, hed,
+      ENNReal.toReal_ofReal (inp.realizes.dist_nonneg (Lphi.φ k) c x)]
+    exact hdist
+  rw [Metric.mem_closedBall, dist_zero_right]
+  change ‖(d.chart (Lphi.φ k) c).inv x‖ ≤
+    6 * L.lamInf (target.1.1 : Nat)
+  calc
+    ‖(d.chart (Lphi.φ k) c).inv x‖ ≤
+        4 * L.lamInf (target.1.1 : Nat) := hnorm.le
+    _ ≤ 6 * L.lamInf (target.1.1 : Nat) := by
+      have hlam := inp.decay.lambda_pos inp.hD
+        (L.rInf (target.1.1 : Nat))
+      dsimp only [NetLimitData.lamInf]
+      nlinarith
+
+/-- On one common H6 source/target-stage tail, every nonzero provider target
+decodes through the same chart family to the direct stage target. -/
+theorem pts_target_tail
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (aMin : Real) (haMin : 0 < aMin)
+    (hphys : 8 * Real.exp inp.decay.C < aMin * inp.D)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData inp.decay inp.D P)
+    (hstable : ∀ a b : Nat,
+      (∀ᶠ k in Filter.atTop,
+        BInter inp.decay inp.D P L.lamInf a b (L.φ k)) ∨
+      (∀ᶠ k in Filter.atTop,
+        ¬ BInter inp.decay inp.D P L.lamInf a b (L.φ k)))
+    {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (hdata : HasSuppConvDataOn (I := I) inp P L r hr phi hphi d.chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (q : LiveSlot L inp.pack r → NNReal)
+    (δ : LiveSlot L inp.pack r → Real)
+    (hqdata : ∀ gamma : LiveSlot L inp.pack r,
+      let Rgamma := L.rInf (gamma.1 : Nat) + 1
+      let rho := aMin * inp.decay.mu Rgamma
+      0 < q gamma ∧ 0 < δ gamma ∧ 0 < rho ∧
+        2 * rho < (q gamma : Real) ∧
+        6 * (q gamma : Real) < d.phaseRadius Rgamma ∧
+        3 * d.metricC 1 * (2 * (q gamma : Real)) ^ 2 ≤
+          (2 / 3 : Real) * (q gamma : Real) ∧
+        PhaseFlow.phaseErr (d.phaseK (2 * q gamma)) <
+          ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊⁻¹ ∧
+        ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))‖₊ *
+            (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+              (E × E) →L[Real] (E × E))‖₊⁻¹ -
+              PhaseFlow.phaseErr (d.phaseK (2 * q gamma)))⁻¹ *
+            PhaseFlow.phaseErr (d.phaseK (2 * q gamma)) < 1 / 24) :
+    ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N,
+      ∀ (alpha : LiveSlot L inp.pack r) (z : E), z ∈ U alpha →
+        ∀ gamma : Fin (inp.pack.A r),
+          stageWeightSub inp P L hr phi hphi alpha k z gamma
+              (chart := d.chart) ≠ 0 →
+            let Lphi := L.subseq hphi
+            let Yk := X.obj (Lphi.φ k)
+            let Yl := X.obj (Lphi.φ l)
+            letI : TopologicalSpace Yk.M := Yk.topology
+            letI : ChartedSpace H Yk.M := Yk.charted
+            letI : IsManifold I ∞ Yk.M := Yk.smooth
+            letI : T2Space Yk.M := Yk.t2
+            letI : T2Space (TangentBundle I Yk.M) :=
+              Yk.t2TangentBundle
+            letI : TopologicalSpace Yl.M := Yl.topology
+            letI : ChartedSpace H Yl.M := Yl.charted
+            letI : IsManifold I ∞ Yl.M := Yl.smooth
+            letI : T2Space Yl.M := Yl.t2
+            letI : T2Space (TangentBundle I Yl.M) :=
+              Yl.t2TangentBundle
+            (d.chart (Lphi.φ l)
+                (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))).hom
+                (stagePtsSub inp P L phi hphi alpha k l z gamma
+                  (chart := d.chart)) =
+              stageTarget inp P Lphi r k l
+                ((d.chart (Lphi.φ k)
+                  (seqCenterD inp.decay P Lphi k
+                    (alpha.1 : Nat))).hom z)
+                gamma (chart := d.chart) ∧
+            (d.chart (Lphi.φ l)
+                (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))).inv
+                (stageTarget inp P Lphi r k l
+                  ((d.chart (Lphi.φ k)
+                    (seqCenterD inp.decay P Lphi k
+                      (alpha.1 : Nat))).hom z)
+                  gamma (chart := d.chart)) =
+              stagePtsSub inp P L phi hphi alpha k l z gamma
+                (chart := d.chart) := by
+  classical
+  let Lphi := L.subseq hphi
+  letI (alpha : LiveSlot L inp.pack r) :
+      Finite (InterSlot L inp.pack r alpha) :=
+    Finite.of_injective
+      (fun target : InterSlot L inp.pack r alpha => target.1.1)
+      (by
+        intro a b hab
+        apply Subtype.ext
+        apply Subtype.ext
+        exact hab)
+  have hcenters :
+      ∀ᶠ k in Filter.atTop, ∀ beta : LiveSlot L inp.pack r,
+        inp.decay.dist (Lphi.φ k)
+            (seqCenterD inp.decay P Lphi k (beta.1 : Nat))
+            (X.obj (Lphi.φ k)).basepoint <
+          L.rInf (beta.1 : Nat) + 1 := by
+    have ht := liveCenters_rInf inp.decay P inp.realizes
+      Lphi inp.pack r
+    filter_upwards [ht] with k hk
+    intro beta
+    let betaPhi : LiveSlot Lphi inp.pack r :=
+      ⟨beta.1, by
+        simpa only [Lphi, NetLimitData.subseq] using beta.2⟩
+    simpa only [betaPhi, Lphi, NetLimitData.subseq,
+      Function.comp_apply] using hk betaPhi
+  have hslots : ∀ᶠ k in Filter.atTop,
+      ∀ (alpha : LiveSlot L inp.pack r)
+        (gamma : Fin (inp.pack.A r)),
+        BInter inp.decay inp.D P Lphi.lamInf
+            (alpha.1 : Nat) (gamma : Nat) (Lphi.φ k) →
+          ∃ target : InterSlot L inp.pack r alpha,
+            target.1.1 = gamma :=
+    Filter.eventually_all.mpr fun alpha =>
+      Filter.eventually_all.mpr fun gamma => by
+        rcases hstable (alpha.1 : Nat) (gamma : Nat) with
+          hinter | hdisjoint
+        · have hstatus := hphi.tendsto_atTop.eventually
+            (L.alive_eventually (gamma : Nat))
+          filter_upwards [hstatus] with k hstatusK
+          intro hcurrent
+          exact inter_slot_of_binter inp.decay P L inp.pack r alpha
+            hstatusK (by
+              simpa only [Lphi, NetLimitData.subseq,
+                NetLimitData.subseq_lamInf, Function.comp_apply] using
+                  hcurrent) hinter
+        · have hdisjointPhi :=
+            hphi.tendsto_atTop.eventually hdisjoint
+          filter_upwards [hdisjointPhi] with k hdisjointK
+          intro hcurrent
+          exact (hdisjointK (by
+            simpa only [Lphi, NetLimitData.subseq,
+              NetLimitData.subseq_lamInf, Function.comp_apply] using
+                hcurrent)).elim
+  have hinters : ∀ᶠ k in Filter.atTop,
+      ∀ (alpha : LiveSlot L inp.pack r)
+        (target : InterSlot L inp.pack r alpha),
+        BInter inp.decay inp.D P Lphi.lamInf
+          (alpha.1 : Nat) (target.1.1 : Nat) (Lphi.φ k) :=
+    Filter.eventually_all.mpr fun alpha =>
+      Filter.eventually_all.mpr fun target => by
+        have ht := hphi.tendsto_atTop.eventually target.2
+        exact ht.mono fun k hk => by
+          simpa only [Lphi, NetLimitData.subseq,
+            NetLimitData.subseq_lamInf, Function.comp_apply] using hk
+  have hall := hcenters.and (hslots.and hinters)
+  rw [Filter.eventually_atTop] at hall
+  rcases hall with ⟨N, hN⟩
+  refine ⟨N, ?_⟩
+  intro k hk l hl
+  rcases hN k hk with
+    ⟨hcentersK, hslotsK, _hintersK⟩
+  rcases hN l hl with
+    ⟨hcentersL, _hslotsL, hintersL⟩
+  intro alpha z hz gamma hweight
+  let Yk := X.obj (Lphi.φ k)
+  let Yl := X.obj (Lphi.φ l)
+  letI : TopologicalSpace Yk.M := Yk.topology
+  letI : ChartedSpace H Yk.M := Yk.charted
+  letI : IsManifold I ∞ Yk.M := Yk.smooth
+  letI : T2Space Yk.M := Yk.t2
+  letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
+  letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
+  letI : TopologicalSpace Yl.M := Yl.topology
+  letI : ChartedSpace H Yl.M := Yl.charted
+  letI : IsManifold I ∞ Yl.M := Yl.smooth
+  letI : T2Space Yl.M := Yl.t2
+  letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
+  let x :=
+    (d.chart (Lphi.φ k)
+      (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom z
+  let i0 := baseIndex inp.decay inp.realizes inp.pack hr
+  let s : Set Yk.M := ⋃ gamma : Fin (inp.pack.A r),
+    Lphi.innerBall inp.decay inp.D P inp.pack r k gamma
+  have hgeom := hdata.geom_on inp P L r hr d.chart
+    U C0 C1 aInf Jinf Jbarinf k alpha
+  have hxGeom := hgeom.2 hz
+  have hweights := seqWeights_data_raw (I := I) inp.decay inp.hD P Lphi
+    inp.pack r k i0 (s := s) Set.Subset.rfl
+  have hhatGamma :
+      x ∈ Lphi.hatBall inp.decay inp.D P inp.pack r k gamma := by
+    apply hweights.active_mem x
+    · simpa only [s] using hxGeom.2
+    · simpa only [stageWeightSub, x, i0, Lphi] using hweight
+  have hcurrent :=
+    Lphi.binter_of_mem_hat inp.decay inp.hD P inp.pack r k
+      (by simpa only [x] using hxGeom.1) hhatGamma
+  obtain ⟨target, htarget⟩ :=
+    hslotsK alpha gamma hcurrent
+  subst gamma
+  rcases hqdata alpha with
+    ⟨_hq, _hδ, _hrho, hrhoQ, hqWide, _hqAcc, _herr, _hinvErr⟩
+  have hratio : 48 * aMin < d.ratio :=
+    d.ratio_gt_48 hrhoQ hqWide
+  have hradiusPhi :=
+    d.stage_rho_le inp aMin haMin P Lphi hratio
+      (hcentersK target.1)
+  have hradius :
+      aMin * inp.decay.mu
+          (L.rInf (target.1.1 : Nat) + 1) ≤
+        (d.chart (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k
+            (target.1.1 : Nat))).radius / 4 := by
+    simpa only [Lphi, NetLimitData.subseq, Function.comp_apply] using
+      hradiusPhi
+  have hsmall :=
+    d.weight_trans_mem inp aMin hphys P L hr phi hphi
+      hcomplete hconn k alpha z hxGeom.2 target hweight hradius
+  let w :=
+    (d.chart (Lphi.φ k)
+      (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).transition
+      (d.chart (Lphi.φ k)
+        (seqCenterD inp.decay P Lphi k
+          (target.1.1 : Nat))) z
+  have hsmallW :
+      w ∈ Metric.closedBall 0
+        (6 * Lphi.lamInf (target.1.1 : Nat)) := by
+    simpa only [w, Lphi, NetLimitData.subseq_lamInf] using hsmall
+  have hfreqPhi : ∃ᶠ n : Nat in Filter.atTop,
+      BInter inp.decay inp.D P Lphi.lamInf
+        (alpha.1 : Nat) (target.1.1 : Nat) (Lphi.φ n) :=
+    (hinters.mono fun n hn => hn alpha target).frequently
+  have htargetMem :=
+    d.target_mem inp aMin hphys P Lphi hcomplete hconn hratio
+      (hcentersL alpha) (hcentersL target.1)
+      hfreqPhi (hintersL alpha target) w hsmallW
+  have hsrc :
+      stageTarget inp P Lphi r k l
+          ((d.chart (Lphi.φ k)
+            (seqCenterD inp.decay P Lphi k
+              (alpha.1 : Nat))).hom z)
+          target.1.1 (chart := d.chart) ∈
+        (d.chart (Lphi.φ l)
+          (seqCenterD inp.decay P Lphi l
+            (alpha.1 : Nat))).hom.target := by
+    simpa only [stageTarget, w,
+      Geometry.Riemannian.NormalCoordinates.NormalBallChart.transition,
+      Geometry.Riemannian.NormalCoordinates.NormalBallChart.inv] using
+        htargetMem
+  have hraw :=
+    stagePtsSub_eq_raw inp P L phi hphi alpha target k l z
+      (chart := d.chart) hsmall
+  constructor
+  · rw [hraw]
+    exact stageTarget_local (I := I) inp P Lphi r k l
+      alpha.1 target.1.1 z (chart := d.chart) hsrc
+  · rw [hraw]
+    exact stageTarget_chart (I := I) inp P Lphi r k l
+      alpha.1 target.1.1 z (chart := d.chart)
+
+/-- Actual provider-chart weights and targets admit the H6 strict center input
+on one rectangular all-pairs tail. The center readout uses the same H6 chart. -/
+theorem actual_cm_tail
+    (inp : MetricCompactCore (I := I) X)
+    (d : H6NormalData (I := I) X inp.decay)
+    (aMin : Real) (haMin : 0 < aMin)
+    (hphys : 8 * Real.exp inp.decay.C < aMin * inp.D)
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData inp.decay inp.D P)
+    {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (hdata : HasSuppConvDataOn (I := I) inp P L r hr phi hphi d.chart
+      U C0 C1 aInf Jinf Jbarinf)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (q : LiveSlot L inp.pack r → NNReal)
+    (δ : LiveSlot L inp.pack r → Real)
+    (hqdata : ∀ gamma : LiveSlot L inp.pack r,
+      let Rgamma := L.rInf (gamma.1 : Nat) + 1
+      let rho := aMin * inp.decay.mu Rgamma
+      0 < q gamma ∧ 0 < δ gamma ∧ 0 < rho ∧
+        2 * rho < (q gamma : Real) ∧
+        6 * (q gamma : Real) < d.phaseRadius Rgamma ∧
+        3 * d.metricC 1 * (2 * (q gamma : Real)) ^ 2 ≤
+          (2 / 3 : Real) * (q gamma : Real) ∧
+        PhaseFlow.phaseErr (d.phaseK (2 * q gamma)) <
+          ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊⁻¹ ∧
+        ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊ *
+            (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+              (E × E) →L[Real] (E × E))‖₊⁻¹ -
+              PhaseFlow.phaseErr (d.phaseK (2 * q gamma)))⁻¹ *
+            PhaseFlow.phaseErr (d.phaseK (2 * q gamma)) < 1 / 24)
+    (hbranch : ∀ᶠ n in Filter.atTop,
+      ∀ gamma : LiveSlot L inp.pack r,
+        let Rgamma := L.rInf (gamma.1 : Nat) + 1
+        let rho := aMin * inp.decay.mu Rgamma
+        let x0 := seqCenterD inp.decay P (L.subseq hphi) n
+          (gamma.1 : Nat)
+        letI : TopologicalSpace (X.obj ((L.subseq hphi).φ n)).M :=
+          (X.obj ((L.subseq hphi).φ n)).topology
+        letI : ChartedSpace H (X.obj ((L.subseq hphi).φ n)).M :=
+          (X.obj ((L.subseq hphi).φ n)).charted
+        letI : IsManifold I ∞ (X.obj ((L.subseq hphi).φ n)).M :=
+          (X.obj ((L.subseq hphi).φ n)).smooth
+        letI : T2Space
+            (TangentBundle I (X.obj ((L.subseq hphi).φ n)).M) :=
+          (X.obj ((L.subseq hphi).φ n)).t2TangentBundle
+        ∃ e : OpenPartialHomeomorph (E × E) (E × E),
+          IsNormalDiag (I := I) (X.obj ((L.subseq hphi).φ n))
+              (hcomplete.complete ((L.subseq hphi).φ n))
+              (hconn ((L.subseq hphi).φ n))
+              x0 (q gamma) (δ gamma) e
+              (c := d.chart ((L.subseq hphi).φ n) x0) ∧
+            NormalDiagFence (I := I) (X.obj ((L.subseq hphi).φ n))
+              x0 (q gamma) e
+                (c := d.chart ((L.subseq hphi).φ n) x0) ∧
+            ApproximatesLinearOn
+              (e.symm : E × E → E × E)
+              ((PhaseFlow.freeDiagCLE (E := E)).symm :
+                (E × E) →L[Real] (E × E))
+              e.target
+              (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+                  (E × E) →L[Real] (E × E))‖₊ *
+                (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+                    (E × E) →L[Real] (E × E))‖₊⁻¹ -
+                  PhaseFlow.phaseErr (d.phaseK (2 * q gamma)))⁻¹ *
+                PhaseFlow.phaseErr (d.phaseK (2 * q gamma))) ∧
+            rho ≤ (d.chart ((L.subseq hphi).φ n) x0).radius / 4)
+    (alpha : LiveSlot L inp.pack r)
+    (eps : Real) (heps : 0 < eps) :
+    ∃ rad : Real, 0 < rad ∧ rad < eps ∧
+      ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N, ∀ z ∈ C0 alpha,
+        let Lphi := L.subseq hphi
+        let Yl := X.obj (Lphi.φ l)
+        letI : TopologicalSpace Yl.M := Yl.topology
+        letI : ChartedSpace H Yl.M := Yl.charted
+        letI : IsManifold I ∞ Yl.M := Yl.smooth
+        letI : IsManifold I 1 Yl.M := IsManifold.of_le
+          (I := I) (M := Yl.M) (n := ∞) (by decide)
+        letI : SigmaCompactSpace Yl.M := Yl.sigmaCompact
+        letI : T2Space Yl.M := Yl.t2
+        letI : ConnectedSpace Yl.M := hconn (Lphi.φ l)
+        letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
+        letI : TopologicalSpace.MetrizableSpace Yl.M :=
+          Manifold.metrizableSpace I Yl.M
+        letI : T3Space Yl.M := inferInstance
+        letI : RiemannianBundle (fun y : Yl.M ↦ TangentSpace I y) :=
+          Yl.riemBundle (I := I)
+        letI : (y : Yl.M) → InnerProductSpace Real (TangentSpace I y) :=
+          Yl.riemInner (I := I)
+        letI : IsContinuousRiemannianBundle E
+            (fun y : Yl.M ↦ TangentSpace I y) := Yl.riemBundle_cont (I := I)
+        letI : EMetricSpace Yl.M := Yl.emetricSpace (I := I)
+        letI : CompleteSpace Yl.M :=
+          MetricComplete.complete (I := I) Yl
+            (hcomplete.complete (Lphi.φ l))
+        letI : MetricSpace Yl.M :=
+          HopfRinow.riemMetricSpace (I := I) (M := Yl.M)
+        let x0 := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
+        let chiL := d.chart (Lphi.φ l) x0
+        let mu := stageWeightSub inp P L hr phi hphi alpha k
+          (chart := d.chart)
+        let stagePts := fun w gamma =>
+          chiL.hom (stagePtsSub inp P L phi hphi alpha k l w gamma
+            (chart := d.chart))
+        let qstar := chiL.hom
+        let join := minJoin (I := I) Yl.metric (normal_enorm (I := I) Yl)
+        let p := qstar z
+        let pts := centerAverage.activeFill mu stagePts qstar z
+        ∃ hcm : CenterInput (I := I) Yl.metric (mu z) pts join p rad,
+          HasH6HatSol (I := I) d P L inp.pack r (phi l) hcomplete hconn
+            q δ alpha (mu z) pts join p rad hcm ∧
+          dist
+              (chiL.inv (centerOfMass (I := I) Yl.metric (mu z)
+                pts join p rad hcm))
+              z ≤ 4 * rad := by
+  classical
+  let Lphi := L.subseq hphi
+  let rhoBase := aMin * inp.decay.mu (L.rInf (alpha.1 : Nat) + 1)
+  let gap := rhoBase / 2 - 4 * L.lamInf (alpha.1 : Nat)
+  have hgap : 0 < gap := by
+    dsimp only [gap, rhoBase]
+    linarith [lamInf_lt_halfMin inp.decay inp.hD hphys P L
+      (alpha.1 : Nat)]
+  let rad := min (gap / 12) (eps / 2)
+  have hrad : 0 < rad := by
+    dsimp only [rad]
+    exact lt_min (div_pos hgap (by norm_num)) (div_pos heps (by norm_num))
+  have hradEps : rad < eps := by
+    have hle : rad ≤ eps / 2 := min_le_right _ _
+    linarith
+  have hcageReal : 4 * L.lamInf (alpha.1 : Nat) + 6 * rad <
+      rhoBase / 2 := by
+    have hradGap : rad ≤ gap / 12 := min_le_left _ _
+    dsimp only [gap] at hradGap
+    nlinarith
+  have hcage : ENNReal.ofReal
+        (4 * L.lamInf (alpha.1 : Nat) + 6 * rad) <
+      ENNReal.ofReal (rhoBase / 2) := by
+    exact (ENNReal.ofReal_lt_ofReal_iff
+      (div_pos (mul_pos haMin (inp.decay.mu_pos _)) (by norm_num))).2
+        hcageReal
+  have hweightEv := hdata.weightSub_ev_raw inp P L hr phi hphi d.chart
+    U C0 C1 aInf Jinf Jbarinf
+  rw [Filter.eventually_atTop] at hweightEv
+  rcases hweightEv with ⟨Nw, hweight⟩
+  obtain ⟨Np, hpts⟩ := d.pts_dist_tail inp P L hr phi hphi U C0 C1
+    aInf Jinf Jbarinf hdata alpha rad hrad
+  have hbranchPhi := hbranch
+  rw [Filter.eventually_atTop] at hbranchPhi
+  rcases hbranchPhi with ⟨Nb, hbranchPhi⟩
+  obtain ⟨_hU, _hC0, _hC1, hC01, hC1U⟩ :=
+    hdata.core_on inp P L r hr d.chart U C0 C1 aInf Jinf Jbarinf alpha
+  have hC0U : C0 alpha ⊆ U alpha :=
+    hC01.trans (interior_subset.trans hC1U)
+  refine ⟨rad, hrad, hradEps, max Nw (max Np Nb), ?_⟩
+  intro k hk l hl z hz
+  have hkW : Nw ≤ k := by omega
+  have hkP : Np ≤ k := by omega
+  have hlP : Np ≤ l := by omega
+  have hlB : Nb ≤ l := by omega
+  let Yl := X.obj (Lphi.φ l)
+  letI : TopologicalSpace Yl.M := Yl.topology
+  letI : ChartedSpace H Yl.M := Yl.charted
+  letI : IsManifold I ∞ Yl.M := Yl.smooth
+  letI : IsManifold I 1 Yl.M := IsManifold.of_le
+    (I := I) (M := Yl.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Yl.M := Yl.sigmaCompact
+  letI : T2Space Yl.M := Yl.t2
+  letI : ConnectedSpace Yl.M := hconn (Lphi.φ l)
+  letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Yl.M :=
+    Manifold.metrizableSpace I Yl.M
+  letI : T3Space Yl.M := inferInstance
+  letI : RiemannianBundle (fun y : Yl.M ↦ TangentSpace I y) :=
+    Yl.riemBundle (I := I)
+  letI : (y : Yl.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Yl.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Yl.M ↦ TangentSpace I y) := Yl.riemBundle_cont (I := I)
+  letI : EMetricSpace Yl.M := Yl.emetricSpace (I := I)
+  letI : CompleteSpace Yl.M :=
+    MetricComplete.complete (I := I) Yl (hcomplete.complete (Lphi.φ l))
+  letI : MetricSpace Yl.M :=
+    HopfRinow.riemMetricSpace (I := I) (M := Yl.M)
+  let x0 := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
+  let chiL := d.chart (Lphi.φ l) x0
+  let mu := stageWeightSub inp P L hr phi hphi alpha k (chart := d.chart)
+  let stagePts := fun w gamma =>
+    chiL.hom (stagePtsSub inp P L phi hphi alpha k l w gamma
+      (chart := d.chart))
+  let qstar := chiL.hom
+  let join := minJoin (I := I) Yl.metric (normal_enorm (I := I) Yl)
+  let p := qstar z
+  let pts := centerAverage.activeFill mu stagePts qstar z
+  have hmu := hweight k hkW alpha
+  have hzU : z ∈ U alpha := hC0U hz
+  have hactive : ∀ gamma, mu z gamma ≠ 0 →
+      dist p (stagePts z gamma) < rad := by
+    intro gamma _hne
+    have hclose := hpts k hkP l hlP z hz gamma
+    have hproper :
+        (letI : MetricSpace Yl.M := (P (Lphi.φ l)).ms
+         dist p (stagePts z gamma)) < rad := by
+      simpa only [p, qstar, stagePts, chiL] using hclose
+    have hhd : inp.decay.dist (Lphi.φ l) p (stagePts z gamma) < rad := by
+      rw [← ProperMetricOn.dist_eq inp.decay inp.realizes P (Lphi.φ l)
+        p (stagePts z gamma)]
+      exact hproper
+    have hed : riemannianEDist I p (stagePts z gamma) =
+        ENNReal.ofReal (inp.decay.dist (Lphi.φ l) p
+          (stagePts z gamma)) := by
+      have hrealize := inp.realizes.edist_eq (Lphi.φ l)
+        p (stagePts z gamma)
+      simpa [PointedRiemannianManifold.emetricSpace] using hrealize
+    rw [HopfRinow.riemMetric_dist_eq, hed,
+      ENNReal.toReal_ofReal (inp.realizes.dist_nonneg
+        (Lphi.φ l) p (stagePts z gamma))]
+    exact hhd
+  have hptsFilled : ∀ gamma, dist p (pts gamma) < rad := by
+    simpa only [pts, p] using
+      centerAverage.activeFill_close
+        (g := Yl.metric) (μ := mu) (pts := stagePts) (qstar := qstar)
+        (x := z) hrad hactive
+  have hpHat : p ∈
+      L.hatBall inp.decay inp.D P inp.pack r (phi l) alpha.1 := by
+    have hpGeom :=
+      ((hdata.geom_on inp P L r hr d.chart U C0 C1 aInf Jinf Jbarinf
+        l alpha).2 hzU).1
+    simpa only [p, qstar, chiL, x0, Lphi, NetLimitData.hatBall_subseq,
+      Function.comp_apply, seqCenterD_subseq] using hpGeom
+  have hproperCenter :
+      (letI : MetricSpace Yl.M := (P (Lphi.φ l)).ms
+       dist p x0) < 4 * L.lamInf (alpha.1 : Nat) := by
+    have hhat := hat_dist_centerD inp.decay P Lphi inp.pack r
+      (by
+        simpa only [Lphi, NetLimitData.hatBall_subseq] using hpHat)
+    simpa only [x0, Lphi, NetLimitData.subseq_lamInf] using hhat
+  have hhdCenter : inp.decay.dist (Lphi.φ l) p x0 <
+      4 * L.lamInf (alpha.1 : Nat) := by
+    rw [← ProperMetricOn.dist_eq inp.decay inp.realizes P (Lphi.φ l) p x0]
+    exact hproperCenter
+  have hedCenter : riemannianEDist I p x0 =
+      ENNReal.ofReal (inp.decay.dist (Lphi.φ l) p x0) := by
+    have hrealize := inp.realizes.edist_eq (Lphi.φ l) p x0
+    simpa [PointedRiemannianManifold.emetricSpace] using hrealize
+  have hpq : dist x0 p ≤ 4 * L.lamInf (alpha.1 : Nat) := by
+    rw [dist_comm, HopfRinow.riemMetric_dist_eq, hedCenter,
+      ENNReal.toReal_ofReal (inp.realizes.dist_nonneg (Lphi.φ l) p x0)]
+    exact hhdCenter.le
+  have hfull := hbranchPhi l hlB alpha
+  rcases hfull with ⟨e, he, hf, happrox, hρInner⟩
+  rcases hqdata alpha with
+    ⟨hq, _hδ, hρ, hρq, _hqWide, hqAcc, _herr, hinvErr⟩
+  have hρInner' : rhoBase ≤ chiL.radius / 4 := by
+    simpa only [rhoBase, chiL, x0, Lphi, NetLimitData.subseq,
+      Function.comp_apply, seqCenterD_subseq] using hρInner
+  have hstrict : StrictDistInput (I := I) Yl.metric pts join p rad := by
+    simpa only [Yl, x0, rhoBase, pts, join, Lphi, NetLimitData.subseq,
+      Function.comp_apply, seqCenterD_subseq] using
+      d.strict_dist (L.φ (phi l)) (hcomplete.complete (L.φ (phi l)))
+        (hconn (L.φ (phi l)))
+        (seqCenterD inp.decay P L (phi l) (alpha.1 : Nat))
+        hq he hf happrox hinvErr hqAcc pts p rad
+        (4 * L.lamInf (alpha.1 : Nat)) hρInner hρ hρq hrad hpq
+        hptsFilled hcage
+  have hcm : CenterInput (I := I) Yl.metric (mu z) pts join p rad := by
+    simpa only [pts, p] using
+      centerAverage.inputOfFillSelf (I := I)
+        (g := Yl.metric) (μ := mu) (pts := stagePts) (join := join)
+        (r := fun _ => rad) (qstar := qstar) z
+        (inferInstance : CompleteSpace Yl.M) hrad hactive
+        (hmu.nonneg z hzU) (hmu.pos z hzU) hstrict
+  have hcage2 : ENNReal.ofReal
+        (4 * L.lamInf (alpha.1 : Nat) + 2 * rad) <
+      ENNReal.ofReal (rhoBase / 2) := by
+    apply (ENNReal.ofReal_le_ofReal ?_).trans_lt hcage
+    nlinarith [hrad]
+  have hout := d.hat_sol_of_cage P inp.realizes L inp.pack r (phi l)
+    hcomplete hconn q δ hqdata (hbranchPhi l hlB) alpha
+    (mu z) pts join p rad hcm (hmu.sum_one z hzU) hpHat hcage2
+  let c := centerOfMass (I := I) Yl.metric (mu z) pts join p rad hcm
+  have hcMem : c ∈ Metric.closedBall p (2 * rad) := by
+    simpa only [c] using centerOfMass.mem hcm
+  have hpc : dist p c ≤ 2 * rad := by
+    simpa only [dist_comm] using Metric.mem_closedBall.mp hcMem
+  have hjoinDist {t : Real} (ht : 0 ≤ t) :
+      dist p (join p c t) ≤ dist p c * t := by
+    have hed := minJoin_edist_le (I := I) Yl.metric
+      (normal_enorm (I := I) Yl) p c ht
+    have hmono := ENNReal.toReal_mono ENNReal.ofReal_ne_top hed
+    have hmul : 0 ≤ (riemannianEDist I p c).toReal * t :=
+      mul_nonneg ENNReal.toReal_nonneg ht
+    rw [ENNReal.toReal_ofReal hmul] at hmono
+    simpa only [join, ← HopfRinow.riemMetric_dist_eq] using hmono
+  have hjoin : Set.MapsTo (join p c) (Set.Icc (0 : Real) 1)
+      (chiL.hom.target ∩ chiL.inv ⁻¹'
+        Metric.ball (0 : E) chiL.radius) := by
+    intro t ht
+    have hpt : dist p (join p c t) ≤ 2 * rad := by
+      calc
+        dist p (join p c t) ≤ dist p c * t := hjoinDist ht.1
+        _ ≤ dist p c * 1 :=
+          mul_le_mul_of_nonneg_left ht.2 dist_nonneg
+        _ ≤ 2 * rad := by simpa only [mul_one] using hpc
+    have hxt : dist x0 (join p c t) ≤
+        4 * L.lamInf (alpha.1 : Nat) + 2 * rad := by
+      calc
+        dist x0 (join p c t) ≤ dist x0 p + dist p (join p c t) :=
+          dist_triangle _ _ _
+        _ ≤ 4 * L.lamInf (alpha.1 : Nat) + 2 * rad :=
+          add_le_add hpq hpt
+    have hxtRho : dist x0 (join p c t) < rhoBase / 2 :=
+      hxt.trans_lt (by nlinarith [hcageReal, hrad])
+    have hriem : riemannianEDist I x0 (join p c t) =
+        ENNReal.ofReal (dist x0 (join p c t)) := by
+      rw [HopfRinow.riemMetric_dist_eq]
+      exact (ENNReal.ofReal_toReal
+        (Exponential.riemannianEDist_ne_top (I := I) _ _)).symm
+    have hradPos := chiL.radius_pos
+    have hhalfChart : rhoBase / 2 < chiL.radius := by
+      nlinarith [hρInner', hρ]
+    have hyRad : riemannianEDist I x0 (join p c t) <
+        ENNReal.ofReal chiL.radius := by
+      rw [hriem]
+      exact (ENNReal.ofReal_lt_ofReal_iff hradPos).2
+        (hxtRho.trans hhalfChart)
+    have hyControl := d.toH6ChartData.readout_mem
+      (Lphi.φ l) (hcomplete.complete (Lphi.φ l))
+        (hconn (Lphi.φ l)) x0 (join p c t) hyRad
+    obtain ⟨w, hw, hwy⟩ := hyControl.1
+    have hwsrc : w ∈ chiL.hom.source := chiL.ball_subset hw
+    have hytarget : join p c t ∈ chiL.hom.target := by
+      rw [← hwy]
+      exact chiL.hom.map_source hwsrc
+    have hinv : chiL.inv (join p c t) = w := by
+      rw [← hwy]
+      exact chiL.hom.left_inv hwsrc
+    refine ⟨hytarget, ?_⟩
+    change chiL.inv (join p c t) ∈ Metric.ball (0 : E) chiL.radius
+    rw [hinv]
+    exact hw
+  have hEquiv := d.metric_equiv (Lphi.φ l) x0
+  have hchart := NormalBallChart.MetricEquivOn.inv_dist_le
+    (J := I) Yl (hcomplete.complete (Lphi.φ l))
+      (hconn (Lphi.φ l)) (normal_enorm (I := I) Yl) chiL hEquiv hjoin
+  have hchart' : dist (chiL.inv p) (chiL.inv c) ≤
+      Real.sqrt 2 * dist p c := by
+    simpa only [← HopfRinow.riemMetric_dist_eq] using hchart
+  obtain ⟨hRad, _hMaps⟩ :=
+    hdata.geom_on inp P L r hr d.chart U C0 C1 aInf Jinf Jbarinf l alpha
+  have hpDecode : chiL.inv p = z := by
+    change chiL.hom.symm (chiL.hom z) = z
+    exact chiL.hom.left_inv (chiL.ball_subset (hRad hzU))
+  have hsqrt : Real.sqrt 2 ≤ 2 := by
+    linarith [Real.sqrt_two_lt_three_halves]
+  have hcoord : dist (chiL.inv c) z ≤ 4 * rad := by
+    rw [← hpDecode, dist_comm]
+    calc
+      dist (chiL.inv p) (chiL.inv c) ≤
+          Real.sqrt 2 * dist p c := hchart'
+      _ ≤ Real.sqrt 2 * (2 * rad) :=
+        mul_le_mul_of_nonneg_left hpc (Real.sqrt_nonneg 2)
+      _ ≤ 2 * (2 * rad) :=
+        mul_le_mul_of_nonneg_right hsqrt (mul_nonneg (by norm_num) hrad.le)
+      _ = 4 * rad := by ring
+  refine ⟨hcm, ?_, ?_⟩
+  · simpa only [mu, stagePts, qstar, pts, p, join, Lphi,
+      NetLimitData.subseq, Function.comp_apply, seqCenterD_subseq] using hout
+  · simpa only [mu, stagePts, qstar, pts, p, join, c] using hcoord
+
+end H6NormalData
+
+/-- The chart readout of the global stage comparison map agrees eventually,
+uniformly in both stage indices, with one canonical target-stage root cube. -/
 def HasStageRootReadout
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -860,7 +2089,9 @@ def HasStageRootReadout
       ConnectedSpace (X.obj j).M)
     (C0 : LiveSlot L inp.pack r → Set E)
     (alpha : LiveSlot L inp.pack r)
-    (Phi3 : Nat → Nat → Nat → E → E) : Prop :=
+    (Phi3 : Nat → Nat → Nat → E → E)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : Prop :=
   ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N, ∀ z ∈ C0 alpha,
     let Lphi := L.subseq hphi
     let Yk := X.obj (Lphi.φ k)
@@ -875,23 +2106,25 @@ def HasStageRootReadout
     letI : IsManifold I ∞ Yl.M := Yl.smooth
     letI : T2Space Yl.M := Yl.t2
     letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-    let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
+    let chiK := chart (Lphi.φ k)
       (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-    let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+    let chiL := chart (Lphi.φ l)
       (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
-    chiK.symm z ∈ Lphi.hatSourceBall inp.decay P r k →
-      chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z)) =
+    chiK.hom z ∈ Lphi.hatSourceBall inp.decay P r k →
+      chiL.inv
+          (stageComparisonMap inp P Lphi r hr hconn k l
+            (chiK.hom z) (chart := chart)) =
           Phi3 l k l z ∧
-        Phi3 l k l z ∈ normalBall (I := I) Yl
-          (seqCenterD inp.decay P Lphi l (alpha.1 : Nat)) ∧
-        stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z) =
-            chiL.symm (Phi3 l k l z) ∧
-        stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z) ∈
-          (normalExpPD (I := I) Yl
-            (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))).target
+        Phi3 l k l z ∈ Metric.ball 0 chiL.radius ∧
+        stageComparisonMap inp P Lphi r hr hconn k l
+            (chiK.hom z) (chart := chart) =
+          chiL.hom (Phi3 l k l z) ∧
+        stageComparisonMap inp P Lphi r hr hconn k l
+            (chiK.hom z) (chart := chart) ∈
+          chiL.hom.target
 
-
-
+/-- On one rectangular all-pairs tail, the chart readout of the global stage
+comparison map is the canonical root in the target-stage normal chart. -/
 theorem HasSuppConvData.stage_root_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (aMin : Real) (haMin : 0 < aMin)
@@ -964,9 +2197,9 @@ theorem HasSuppConvData.stage_root_tail
         (seqCenterD inp.decay P Lphi n (alpha.1 : Nat)) (q alpha) (e n))
     (W : Set E) (PhiInf : E → E) (rootRho : Real)
     (Phi3 : Nat → Nat → Nat → E → E)
-    (hroot : HasStageRootCube inp P L hr phi hphi C1 alpha e
+    (hroot : HasStageRootCube inp.toCore P L hr phi hphi C1 alpha e
       W PhiInf rootRho Phi3) :
-    HasStageRootReadout inp P L hr phi hphi hconn C0 alpha Phi3 := by
+    HasStageRootReadout inp.toCore P L hr phi hphi hconn C0 alpha Phi3 := by
   dsimp only [HasStageRootReadout]
   rcases hroot with
     ⟨_hW, _hWcpt, hC1W, hrootRho, hPhiInf, _htriple,
@@ -1023,9 +2256,9 @@ theorem HasSuppConvData.stage_root_tail
     (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
   let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
     (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
-  let mu := stageWeightSub inp P L hr phi hphi alpha k
+  let mu := stageWeightSub inp.toCore P L hr phi hphi alpha k
   let stagePts := fun w gamma =>
-    stageTarget inp P Lphi r k l (chiK.symm w) gamma
+    stageTarget inp.toCore P Lphi r k l (chiK.symm w) gamma
   let qstar := fun w => chiL.symm w
   let p := qstar z
   let x0 := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
@@ -1043,18 +2276,40 @@ theorem HasSuppConvData.stage_root_tail
       simpa only [zc, c, mu, pts, join, p, qstar, stagePts, chiL] using
         hcoord
     exact hcoordLe.trans_lt hfour
+  dsimp only [HasChartCmSol] at hstrict
   rcases hstrict with ⟨hqSel, eSel, heSel, hfSel, hread⟩
-  dsimp only at hread
-  rcases hread with ⟨hcSource, htgtSel, hzcBall, hchartSel, _hderiv⟩
-  have hselZero : invVelSum eSel (mu z) xi zc = 0 := by
-    apply (IsNormalDiag.chartCm_zero_iff (I := I) Yl
+  rcases hread with ⟨hcTarget, hsol⟩
+  have hsolSel : HasCmSolC (I := I) Yl.metric
+      (normal_enorm (I := I) Yl) x0
+      (legacyBallChart (I := I) Yl x0)
+      (IsNormalDiag.toBranch (I := I) Yl
+        (hcomplete.complete (Lphi.φ l)) (hconn (Lphi.φ l))
+        x0 hqSel heSel) zc (mu z, xi) := by
+    simpa only [zc, xi, c, x0, Yl, Lphi, mu, pts, join, p] using hsol
+  let chartSel := legacyBallChart (I := I) Yl x0
+  have htgtSel : ∀ i, (zc, xi i) ∈ eSel.target := by
+    intro i
+    have hzcTarget : chartSel.hom zc ∈ chartSel.restrictBall.target := by
+      have hmap := chartSel.restrictBall.map_source hsolSel.1
+      change chartSel.hom zc ∈ chartSel.restrictBall.target at hmap
+      exact hmap
+    have hxiTarget : chartSel.hom (xi i) ∈ chartSel.restrictBall.target := by
+      have hmap := chartSel.restrictBall.map_source (hsolSel.2.1 i)
+      change chartSel.hom (xi i) ∈ chartSel.restrictBall.target at hmap
+      exact hmap
+    have hout := IsNormalDiag.target_of_inv_dom (I := I) Yl
       (hcomplete.complete (Lphi.φ l)) (hconn (Lphi.φ l))
-      x0 hqSel heSel hfSel zc (mu z) xi ?_ ?_).mp
-    · simpa only [zc, xi, c, x0, Yl, Lphi, mu, pts, join, p] using
-        hchartSel
-    · simpa only [zc, xi, c, x0, Yl, Lphi, mu, pts, join, p] using
-        htgtSel
-    · simpa only [zc, c, x0, Yl, Lphi, mu, pts, join, p] using hzcBall
+      x0 hqSel heSel hzcTarget hxiTarget (hsolSel.2.2.1 i).1
+    have hzcDecode : chartSel.inv (chartSel.hom zc) = zc :=
+      chartSel.hom.left_inv (chartSel.ball_subset hsolSel.1)
+    have hxiDecode : chartSel.inv (chartSel.hom (xi i)) = xi i :=
+      chartSel.hom.left_inv (chartSel.ball_subset (hsolSel.2.1 i))
+    rwa [hzcDecode, hxiDecode] at hout
+  have hselZero : invVelSum eSel (mu z) xi zc = 0 := by
+    exact (IsNormalDiag.chartCmC_zero_iff (I := I) Yl
+      (hcomplete.complete (Lphi.φ l)) (hconn (Lphi.φ l))
+      x0 hqSel heSel hfSel zc (mu z) xi htgtSel).mp hsolSel.2.2.2.1
+  have hzcBall := hsolSel.1
   have heCanon : IsNormalDiag (I := I) Yl
       (hcomplete.complete (Lphi.φ l)) (hconn (Lphi.φ l)) x0
       (q alpha) (δ alpha) (e l) := by
@@ -1076,7 +2331,7 @@ theorem HasSuppConvData.stage_root_tail
     hdata.core_on inp P L r hr U C0 C1 aInf Jinf Jbarinf alpha
   have hzU : z ∈ U alpha := hC1U (interior_subset (hC01 hz))
   have hxi : ∀ i, mu z i ≠ 0 →
-      xi i = stagePtsSub inp P L phi hphi alpha k l z i := by
+      xi i = stagePtsSub inp.toCore P L phi hphi alpha k l z i := by
     intro i hi
     have hdecode := htgtTail k hkTgt l hlTgt alpha z hzU i hi
     dsimp only at hdecode
@@ -1084,13 +2339,13 @@ theorem HasSuppConvData.stage_root_tail
     simp only [centerAverage.activeFill, hi, ↓reduceIte]
     simpa only [stagePts, chiL, chiK, Lphi, Yk, Yl] using hdecode.2
   have hcanonPtsZero : invVelSum (e l) (mu z)
-      (stagePtsSub inp P L phi hphi alpha k l z) zc = 0 := by
+      (stagePtsSub inp.toCore P L phi hphi alpha k l z) zc = 0 := by
     calc
       invVelSum (e l) (mu z)
-          (stagePtsSub inp P L phi hphi alpha k l z) zc =
+          (stagePtsSub inp.toCore P L phi hphi alpha k l z) zc =
           invVelSum (e l) (mu z) xi zc :=
         (invVelSum_congr_ne (e l) (mu z) xi
-          (stagePtsSub inp P L phi hphi alpha k l z) zc hxi).symm
+          (stagePtsSub inp.toCore P L phi hphi alpha k l z) zc hxi).symm
       _ = 0 := hcanonXiZero
   have hstageZero : stageInvVelSub inp P L hr phi hphi alpha e
       l k l (z, zc) = 0 := by
@@ -1124,57 +2379,65 @@ theorem HasSuppConvData.stage_root_tail
     simpa only [muM, x, mu, i0, Lphi, Yk, chiK] using
       (stageWeightSub_eq (I := I) inp P L hr phi hphi alpha k z gamma).symm
   have hptsEq : centerAverage.activeFill muM
-      (stageTarget inp P Lphi r k l) qstarM x = pts := by
+      (stageTarget inp.toCore P Lphi r k l) qstarM x = pts := by
     funext gamma
     simp only [centerAverage.activeFill]
     rw [congrFun hmu gamma]
     rfl
   have hcmM : CenterInput (I := I) Yl.metric (muM x)
-      (centerAverage.activeFill muM (stageTarget inp P Lphi r k l)
+      (centerAverage.activeFill muM (stageTarget inp.toCore P Lphi r k l)
         qstarM x) join (pM x) (radM x) := by
     rw [hmu, hptsEq]
     simpa only [pM, radM] using hcm
   have hmap := stageCompare_eq_cm (I := I) inp P Lphi r hr hconn k l
-    qstarM join pM radM x hx hcmM
+    qstarM join pM radM x hx
+      (chart := legacyChartFamily (I := I) X) hcmM
   have hcGlobal : c = centerOfMass (I := I) Yl.metric (muM x)
-      (centerAverage.activeFill muM (stageTarget inp P Lphi r k l)
+      (centerAverage.activeFill muM (stageTarget inp.toCore P Lphi r k l)
         qstarM x) join (pM x) (radM x) hcmM := by
     apply centerOfMass.unique hcmM c
     intro y
     rw [hmu, hptsEq]
     simpa only [c] using centerOfMass.min hcm y
-  have hmapC : stageComparisonMap inp P Lphi r hr hconn k l x = c := by
+  have hmapC : stageComparisonMap inp.toCore P Lphi r hr hconn k l x = c := by
     exact hmap.trans hcGlobal.symm
   have hchartReadout :
-      chiL (stageComparisonMap inp P Lphi r hr hconn k l x) =
+      chiL (stageComparisonMap inp.toCore P Lphi r hr hconn k l x) =
         Phi3 l k l z := by
     rw [hmapC]
     exact hcenterRoot
   have hrootBall : Phi3 l k l z ∈ normalBall (I := I) Yl x0 := by
     rw [← hcenterRoot]
-    simpa only [zc, x0, Yl, Lphi, c, mu, pts, join, p] using hzcBall
+    simpa only [normalBall, legacyBallChart_radius, zc, x0, Yl, Lphi,
+      c, mu, pts, join, p] using hzcBall
   have hdecode : chiL.symm zc = c := by
-    apply chiL.left_inv
-    simpa only [chiL, x0, Yl, Lphi, c, mu, pts, join, p] using hcSource
+    have hright :=
+      (legacyBallChart (I := I) Yl x0).restrictBall.right_inv hcTarget
+    simpa only [NormalCoordinates.NormalBallChart.restrictBall_apply,
+      chiL, zc, c, x0, Yl, Lphi, mu, pts, join, p] using hright
   have hmapDecode :
-      stageComparisonMap inp P Lphi r hr hconn k l x =
+      stageComparisonMap inp.toCore P Lphi r hr hconn k l x =
         chiL.symm (Phi3 l k l z) := by
     calc
-      stageComparisonMap inp P Lphi r hr hconn k l x = c := hmapC
+      stageComparisonMap inp.toCore P Lphi r hr hconn k l x = c := hmapC
       _ = chiL.symm zc := hdecode.symm
       _ = chiL.symm (Phi3 l k l z) := congrArg chiL.symm hcenterRoot
   have htarget :
-      stageComparisonMap inp P Lphi r hr hconn k l x ∈
-        (normalExpPD (I := I) Yl x0).target := by
+      stageComparisonMap inp.toCore P Lphi r hr hconn k l x ∈
+        (legacyBallChart (I := I) Yl x0).hom.target := by
     rw [hmapDecode]
-    have hout := (normalExpPD (I := I) Yl x0).map_source
-      (by simpa only [normalExpPD_source] using hrootBall)
-    simpa only [normalExpPD, chiL, x0, Yl, Lphi] using hout
+    have hball :
+        Phi3 l k l z ∈
+          Metric.ball 0 (legacyBallChart (I := I) Yl x0).radius := by
+      simpa only [normalBall, legacyBallChart_radius] using hrootBall
+    have hout := (legacyBallChart (I := I) Yl x0).hom.map_source
+      ((legacyBallChart (I := I) Yl x0).ball_subset hball)
+    simpa only [legacyChart_apply, chiL, x0, Yl, Lphi] using hout
   exact ⟨hchartReadout, hrootBall, hmapDecode, htarget⟩
 
-
-
-
+/-- On a strictly smaller source ball, the canonical root readout gives the
+actual stage-map chart germ.  Hence the global stage map is smooth there and
+inherits the root cube's uniform finite-order jet tail. -/
 theorem HasSuppConvData.stage_jet_of_root
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1289,18 +2552,15 @@ theorem HasSuppConvData.stage_jet_of_root
     obtain ⟨_hRad, hExp, _hMaps⟩ :=
       hdata.geom_on inp P L r hr U C0 C1 aInf Jinf Jbarinf k alpha
     have hzBall := hExp hzU
-    have hzNorm : ‖z‖ < expMapC2Radius (I := I) Yk.metric
-        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) := by
-      simpa only [Metric.mem_ball, dist_zero_right, Yk, Lphi] using hzBall
     have hzTarget : z ∈ chiK.target := by
-      simpa only [chiK, Yk, Lphi] using
-        Geometry.Riemannian.ball_subset_normalChartAt_target
-          (I := I) Yk.metric
-          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) hzNorm
+      have hzNorm : ‖z‖ < expMapC2Radius (I := I) Yk.metric
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) := by
+        simpa only [Metric.mem_ball, dist_zero_right] using hzBall
+      exact ball_subset_normalChartAt_target (I := I) Yk.metric
+        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) hzNorm
     have hchi : ContinuousAt chiK.symm z :=
-      (NormalCoordinates.normalChartAt_symm_contMDiffOn (I := I) Yk.metric
-        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).continuousOn.continuousAt
-          (chiK.open_target.mem_nhds hzTarget)
+      chiK.contMDiffOn_invFun.continuousOn.continuousAt
+        (chiK.open_target.mem_nhds hzTarget)
     have hbigNhd : Lphi.hatSourceBall inp.decay P r k ∈ nhds (chiK.symm z) :=
       NetLimitData.hatSource_nhds (I := I) (X := X) inp.decay P Lphi
         (n := k) (R := R) (s := r) hRr hSz.2
@@ -1335,19 +2595,45 @@ theorem HasSuppConvData.stage_jet_of_root
   letI : T2Space (TangentBundle I Yk.M) := Yk.t2TangentBundle
   let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
     (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
+  let Yl := X.obj (Lphi.φ l)
+  letI : TopologicalSpace Yl.M := Yl.topology
+  letI : ChartedSpace H Yl.M := Yl.charted
+  letI : IsManifold I ∞ Yl.M := Yl.smooth
+  letI : T2Space Yl.M := Yl.t2
+  letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
+  let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+    (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
+  let x0 := seqCenterD inp.decay P Lphi l (alpha.1 : Nat)
   have hxBig : chiK.symm z ∈ Lphi.hatSourceBall inp.decay P r k :=
     mem_of_mem_nhds (NetLimitData.hatSource_nhds
       (I := I) (X := X) inp.decay P Lphi
       (n := k) (R := R) (s := r) hRr hxR)
-  have htarget := (hreadTail k hkRead l hlRead z hz hxBig).2.2.2
+  have hreadAt := hreadTail k hkRead l hlRead z hz hxBig
+  have hrootBall : Phi3 l k l z ∈ normalBall (I := I) Yl x0 := by
+    simpa only [normalBall, legacyChartFamily, legacyBallChart_radius,
+      x0, Yl, Lphi] using hreadAt.2.1
+  have htarget :
+      stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z) ∈
+        (normalExpPD (I := I) Yl x0).target := by
+    have hdecode := hreadAt.2.2.1
+    have hdecode' :
+        stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z) =
+          chiL.symm (Phi3 l k l z) := by
+      simpa only [legacyChartFamily, legacyChart_apply, chiK, chiL,
+        x0, Yk, Yl, Lphi] using hdecode
+    rw [hdecode']
+    have hout := (normalExpPD (I := I) Yl x0).map_source
+      (by simpa only [normalExpPD_source] using hrootBall)
+    simpa only [normalExpPD, legacyChartFamily, legacyChart_apply,
+      chiK, chiL, x0, Yk, Yl, Lphi] using hout
   refine ⟨?_, ?_⟩
   · simpa only [chiK, Yk, Lphi] using htarget
   · simpa only [Psi] using hout
 
-
-
+/-- One common pair-index tail on which every live source chart represents the
+actual global stage map smoothly and with the prescribed finite jet error. -/
 def HasStageJetTail
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
@@ -1355,7 +2641,9 @@ def HasStageJetTail
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
     (C0 : LiveSlot L inp.pack r → Set E)
-    (R : Real) (p : Nat) (eps : Real) : Prop :=
+    (R : Real) (p : Nat) (eps : Real)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : Prop :=
   ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N,
     ∀ alpha : LiveSlot L inp.pack r, ∀ z ∈ C0 alpha,
       let Lphi := L.subseq hphi
@@ -1371,24 +2659,25 @@ def HasStageJetTail
       letI : IsManifold I ∞ Yl.M := Yl.smooth
       letI : T2Space Yl.M := Yl.t2
       letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-      let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
+      let chiK := chart (Lphi.φ k)
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-      let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+      let chiL := chart (Lphi.φ l)
         (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
       let Fkl := fun w =>
-        chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm w))
+        chiL.inv
+          (stageComparisonMap inp P Lphi r hr hconn k l
+            (chiK.hom w) (chart := chart))
       z ∈ interior (C0 alpha) →
-      chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R k →
-        stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z) ∈
-            (normalExpPD (I := I) Yl
-              (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))).target ∧
+      chiK.hom z ∈ Lphi.hatSourceBall inp.decay P R k →
+        stageComparisonMap inp P Lphi r hr hconn k l
+            (chiK.hom z) (chart := chart) ∈ chiL.restrictBall.target ∧
           ContDiffAt Real ∞ Fkl z ∧
           ∀ j ≤ p, mapDerivNorm j Fkl id z ≤ eps
 
-
-
+/-- The rectangular actual-map jet tail persists under every further strict
+refinement of the stage subsequence. -/
 theorem HasStageJetTail.subseq
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     {phi : Nat → Nat} (hphi : StrictMono phi)
@@ -1397,30 +2686,39 @@ theorem HasStageJetTail.subseq
       ConnectedSpace (X.obj j).M)
     (C0 : LiveSlot L inp.pack r → Set E)
     (R : Real) (p : Nat) (eps : Real)
-    (h : HasStageJetTail inp P L hr phi hphi hconn C0 R p eps)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X)
+    (h : HasStageJetTail inp P L hr phi hphi hconn C0 R p eps
+      (chart := chart))
     {ψ : Nat → Nat} (hψ : StrictMono ψ) :
     HasStageJetTail inp P L hr (phi ∘ ψ) (hphi.comp hψ)
-      hconn C0 R p eps := by
+      hconn C0 R p eps (chart := chart) := by
   dsimp only [HasStageJetTail] at h ⊢
   obtain ⟨N, hN⟩ := h
   refine ⟨N, ?_⟩
   intro k hk l hl alpha z hz
   have hkψ : N ≤ ψ k := hk.trans (hψ.id_le k)
   have hlψ : N ≤ ψ l := hl.trans (hψ.id_le l)
-  have hmap :
-      stageComparisonMap inp P (L.subseq (hphi.comp hψ)) r hr hconn k l =
-        stageComparisonMap inp P (L.subseq hphi) r hr hconn (ψ k) (ψ l) := by
-    simpa only [NetLimitData.subseq, Function.comp_apply] using
-      (stageCompare_subseq (I := I) inp P (L.subseq hphi) r hr hconn hψ k l)
+  have hmap : ∀ x,
+      stageComparisonMap inp P (L.subseq (hphi.comp hψ)) r hr hconn k l x
+          (chart := chart) =
+        stageComparisonMap inp P (L.subseq hphi) r hr hconn
+          (ψ k) (ψ l) x (chart := chart) := by
+    intro x
+    exact congrFun (by
+      simpa only [NetLimitData.subseq, Function.comp_apply] using
+        (stageCompare_subseq (I := I) inp P (L.subseq hphi)
+          r hr hconn hψ k l (chart := chart))) x
   have hball :
       (L.subseq (hphi.comp hψ)).hatSourceBall inp.decay P R k =
         (L.subseq hphi).hatSourceBall inp.decay P R (ψ k) := rfl
-  rw [hmap, hball]
+  rw [hball]
+  simp_rw [hmap]
   simpa only [NetLimitData.subseq_phi, Function.comp_apply,
     seqCenterD_subseq] using hN (ψ k) hkψ (ψ l) hlψ alpha z hz
 
-
-
+/-- The finitely many live source-chart root cubes admit one common
+pair-index threshold for smoothness and all derivatives through order `p`. -/
 theorem HasSuppConvData.stage_jet_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1466,24 +2764,28 @@ theorem HasSuppConvData.stage_jet_tail
         letI : IsManifold I ∞ Yl.M := Yl.smooth
         letI : T2Space Yl.M := Yl.t2
         letI : T2Space (TangentBundle I Yl.M) := Yl.t2TangentBundle
-        let chiK := NormalCoordinates.normalChartAt (I := I) Yk.metric
+        let chiK := legacyChartFamily (I := I) X (Lphi.φ k)
           (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
-        let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric
+        let chiL := legacyChartFamily (I := I) X (Lphi.φ l)
           (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))
         let Fkl := fun w =>
-          chiL (stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm w))
+          chiL.inv
+            (stageComparisonMap inp P Lphi r hr hconn k l
+              (chiK.hom w) (chart := legacyChartFamily (I := I) X))
         z ∈ interior (C0 alpha) →
-        chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R k →
-          stageComparisonMap inp P Lphi r hr hconn k l (chiK.symm z) ∈
-              (normalExpPD (I := I) Yl
-                (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))).target ∧
+        chiK.hom z ∈ Lphi.hatSourceBall inp.decay P R k →
+          stageComparisonMap inp P Lphi r hr hconn k l
+              (chiK.hom z) (chart := legacyChartFamily (I := I) X) ∈
+              chiL.restrictBall.target ∧
             ContDiffAt Real ∞ Fkl z ∧
             ∀ j ≤ p, mapDerivNorm j Fkl id z ≤ eps := by
     intro alpha
-    exact hdata.stage_jet_of_root inp P L hr phi hphi U C0 C1 aInf
-      Jinf Jbarinf hconn alpha (e alpha) (W alpha) (PhiInf alpha)
-      (rootRho alpha) (Phi3 alpha) (hroot alpha) (hread alpha)
-      R hRr p eps heps
+    simpa only [legacyChartFamily, legacyInv_eq, legacyChart_apply,
+      legacyTarget_eq, normalExpPD] using
+      hdata.stage_jet_of_root inp P L hr phi hphi U C0 C1 aInf
+        Jinf Jbarinf hconn alpha (e alpha) (W alpha) (PhiInf alpha)
+        (rootRho alpha) (Phi3 alpha) (hroot alpha) (hread alpha)
+        R hRr p eps heps
   letI := Fintype.ofFinite (LiveSlot L inp.pack r)
   choose N hN using hlocal
   refine ⟨Finset.univ.sup N, ?_⟩
@@ -1492,9 +2794,9 @@ theorem HasSuppConvData.stage_jet_tail
     Finset.le_sup (f := N) (Finset.mem_univ alpha)
   exact hN alpha k (hAlpha.trans hk) l (hAlpha.trans hl) z hz
 
-
-
-
+/-- The selected finite family of diagonal branches produces one root cube per
+live source chart and, after a finite maximum, the all-chart stage-map jet
+tail on every strictly smaller source ball. -/
 theorem HasSuppConvData.exists_stage_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (aMin : Real) (haMin : 0 < aMin)
@@ -1567,7 +2869,8 @@ theorem HasSuppConvData.exists_stage_tail
       ∀ alpha, HasDiagPairConv (I := I) (hcomplete.subseq index)
         (PointedRiemannianSeq.connected_subseq hconn index)
         (c alpha) (q alpha) (q alpha / 2) (δ alpha) (deltaInf alpha)
-        (e alpha) (eInf alpha))
+        (e alpha) (eInf alpha)
+        (chart := legacyChartFamily (I := I) Xphi))
     (hfence :
       let Lphi := L.subseq hphi
       let index : Nat → Nat := fun n => Lphi.φ n
@@ -1575,7 +2878,8 @@ theorem HasSuppConvData.exists_stage_tail
       let c : LiveSlot L inp.pack r → ∀ n : Nat, (Xphi.obj n).M :=
         fun alpha n => seqCenterD inp.decay P Lphi n (alpha.1 : Nat)
       ∀ alpha n, NormalDiagFence (I := I) (Xphi.obj n)
-        (c alpha n) (q alpha) (e alpha n)) :
+        (c alpha n) (q alpha) (e alpha n)
+        (c := legacyBallChart (I := I) (Xphi.obj n) (c alpha n))) :
     ∃ (W : LiveSlot L inp.pack r → Set E)
         (PhiInf : LiveSlot L inp.pack r → E → E)
         (rootRho : LiveSlot L inp.pack r → Real)
@@ -1628,35 +2932,40 @@ theorem HasSuppConvData.exists_stage_tail
   exact hdata.stage_jet_tail inp P L hr phi hphi U C0 C1 aInf Jinf
     Jbarinf hconn e W PhiInf rootRho Phi3 hroot hread R hRr p eps heps
 
-
-
+/-- The actual stage comparison maps eventually preserve the pointed
+basepoint, uniformly in the target stage. -/
 def HasStageBaseTail
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
-      ConnectedSpace (X.obj j).M) : Prop :=
+      ConnectedSpace (X.obj j).M)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : Prop :=
   let Lphi := L.subseq hphi
   ∀ᶠ k in Filter.atTop, ∀ l,
-    stageComparisonMap inp P Lphi r hr hconn k l
+    stageComparisonMap inp P Lphi r hr hconn k l (chart := chart)
         (X.obj (Lphi.φ k)).basepoint =
       (X.obj (Lphi.φ l)).basepoint
 
-
-
+/-- Exact pointed preservation of the actual stage maps persists under every
+further strict refinement of the stage subsequence. -/
 theorem HasStageBaseTail.subseq
-    (inp : MetricCompactnessInputs (I := I) X)
+    (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
     {phi : Nat → Nat} (hphi : StrictMono phi)
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
-    (h : HasStageBaseTail inp P L hr phi hphi hconn)
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X)
+    (h : HasStageBaseTail inp P L hr phi hphi hconn (chart := chart))
     {ψ : Nat → Nat} (hψ : StrictMono ψ) :
-    HasStageBaseTail inp P L hr (phi ∘ ψ) (hphi.comp hψ) hconn := by
+    HasStageBaseTail inp P L hr (phi ∘ ψ) (hphi.comp hψ) hconn
+      (chart := chart) := by
   dsimp only [HasStageBaseTail] at h ⊢
   filter_upwards [hψ.tendsto_atTop.eventually h] with k hk
   intro l
@@ -1665,13 +2974,120 @@ theorem HasStageBaseTail.subseq
     rfl
   rw [hL]
   have hmap := stageCompare_subseq (I := I) inp P (L.subseq hphi)
-    r hr hconn hψ k l
-  rw [hmap]
+    r hr hconn hψ k l (chart := chart)
+  rw [congrFun hmap _]
   simpa only [NetLimitData.subseq_phi, Function.comp_apply] using hk (ψ l)
 
+/-- Provider-native convergence of the local chart metrics on one domain per
+live source slot. -/
+def HasStageMetricOn
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real}
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (chart : NormalChartFamily (I := I) X)
+    (V C1 : LiveSlot L inp.pack r → Set E)
+    (gInf : LiveSlot L inp.pack r →
+      E → (E →L[Real] E →L[Real] Real)) : Prop :=
+  ∀ alpha,
+    let Lphi := L.subseq hphi
+    C1 alpha ⊆ V alpha ∧
+    ContDiffOn Real (∞ : WithTop ℕ∞) (gInf alpha) (V alpha) ∧
+    MapCInfConvOnCompacts (V alpha)
+      (fun n => chart.metric (Lphi.φ n)
+        (seqCenterD inp.decay P Lphi n (alpha.1 : Nat)))
+      (gInf alpha) ∧
+    ∀ z ∈ V alpha, ∀ v : E,
+      (1 / 2 : Real) * ‖v‖ ^ 2 ≤ gInf alpha z v v ∧
+        gInf alpha z v v ≤ 2 * ‖v‖ ^ 2
 
+/-- Provider-native local metric convergence persists under every further
+strict refinement of the extracting subsequence. -/
+theorem HasStageMetricOn.subseq
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real}
+    {phi : Nat → Nat} (hphi : StrictMono phi)
+    (chart : NormalChartFamily (I := I) X)
+    (V C1 : LiveSlot L inp.pack r → Set E)
+    (gInf : LiveSlot L inp.pack r →
+      E → (E →L[Real] E →L[Real] Real))
+    (h : HasStageMetricOn inp P L phi hphi chart V C1 gInf)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) :
+    HasStageMetricOn inp P L (phi ∘ ψ) (hphi.comp hψ)
+      chart V C1 gInf := by
+  intro alpha
+  rcases h alpha with ⟨hC1, hgInf, hconv, hequiv⟩
+  refine ⟨hC1, hgInf, ?_, hequiv⟩
+  simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+    seqCenterD_subseq] using
+    hconv.comp_tendsto_atTop hψ.tendsto_atTop
 
+/-- Master-subsequence data for one coherent normal-chart provider: the finite
+source cover, local chart-metric limits, actual stage-map jets, and pointed
+base preservation all use the same family. -/
+def HasStageJetDataOn
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (chart : NormalChartFamily (I := I) X)
+    (V U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (gInf : LiveSlot L inp.pack r →
+      E → (E →L[Real] E →L[Real] Real)) : Prop :=
+  HasSuppConvDataOn (I := I) inp P L r hr phi hphi chart U C0 C1
+      aInf Jinf Jbarinf ∧
+  HasStageMetricOn inp P L phi hphi chart V C1 gInf ∧
+  (∀ R, R < r → ∀ p eps, 0 < eps →
+    HasStageJetTail inp P L hr phi hphi hconn C0 R p eps
+      (chart := chart)) ∧
+  HasStageBaseTail inp P L hr phi hphi hconn (chart := chart)
 
+/-- The provider-native master stage package persists under every further
+strict refinement of its extracting subsequence. -/
+theorem HasStageJetDataOn.subseq
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
+    {phi : Nat → Nat} (hphi : StrictMono phi)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (chart : NormalChartFamily (I := I) X)
+    (V U C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (gInf : LiveSlot L inp.pack r →
+      E → (E →L[Real] E →L[Real] Real))
+    (h : HasStageJetDataOn (I := I) inp P L hr phi hphi hconn chart
+      V U C0 C1 aInf Jinf Jbarinf gInf)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) :
+    HasStageJetDataOn (I := I) inp P L hr
+      (phi ∘ ψ) (hphi.comp hψ) hconn chart
+      V U C0 C1 aInf Jinf Jbarinf gInf := by
+  rcases h with ⟨hdata, hmetric, hjets, hbase⟩
+  refine ⟨hdata.subseq inp P L r hr hphi chart
+      U C0 C1 aInf Jinf Jbarinf hψ,
+    hmetric.subseq inp P L hphi chart V C1 gInf hψ,
+    ?_, hbase.subseq inp P L hr hphi hconn
+      (chart := chart) (hψ := hψ)⟩
+  intro R hR p eps heps
+  exact (hjets R hR p eps heps).subseq inp P L hr hphi hconn
+    C0 R p eps (chart := chart) (hψ := hψ)
+
+/-- Master-subsequence data needed by the remaining legacy Step-B1 geometry:
+the finite source cover, the limiting local metrics, the actual global
+stage-map jet tail on every smaller source ball, and exact basepoint
+preservation. -/
 def HasStageJetData
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1708,8 +3124,8 @@ def HasStageJetData
     HasStageJetTail inp P L hr phi hphi hconn C0 R p eps) ∧
   HasStageBaseTail inp P L hr phi hphi hconn
 
-
-
+/-- The full retained stage-map jet package persists under every further
+strict refinement of its extracting subsequence. -/
 theorem HasStageJetData.subseq
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1732,15 +3148,16 @@ theorem HasStageJetData.subseq
       hconn U C0 C1 aInf Jinf Jbarinf gInf := by
   rcases h with ⟨hdata, hmetric, hjets, hbase⟩
   refine ⟨hdata.subseq inp P L r hr hphi U C0 C1 aInf Jinf Jbarinf hψ,
-    ?_, ?_, hbase.subseq inp P L hr hphi hconn hψ⟩
+    ?_, ?_, hbase.subseq inp P L hr hphi hconn (hψ := hψ)⟩
   · intro alpha
     rcases hmetric alpha with ⟨hC1, hgInf, hconv, hequiv⟩
     exact ⟨hC1, hgInf, hconv.comp_tendsto_atTop hψ.tendsto_atTop, hequiv⟩
   · intro R hR p eps heps
-    exact (hjets R hR p eps heps).subseq inp P L hr hphi hconn C0 R p eps hψ
+    exact (hjets R hR p eps heps).subseq inp P L hr hphi hconn C0 R p eps
+      (hψ := hψ)
 
-
-
+/-- The actual global stage maps are eventually local diffeomorphisms on every
+strictly smaller retained source ball. -/
 theorem HasStageJetData.hloc_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1828,13 +3245,10 @@ theorem HasStageJetData.hloc_tail
   have hzBall := hExp hzU
   have hzNormal : z ∈ normalBall (I := I) Yk xk0 := by
     simpa only [normalBall, Yk, xk0, Lphi] using hzBall
-  have hzNorm : ‖z‖ < expMapC2Radius (I := I) Yk.metric xk0 := by
-    change z ∈ Metric.ball (0 : E) (expMapC2Radius (I := I) Yk.metric xk0) at hzNormal
-    simpa only [Metric.mem_ball, dist_zero_right] using hzNormal
   have hzTarget : z ∈ chiK.target := by
-    simpa only [chiK] using
-      Geometry.Riemannian.ball_subset_normalChartAt_target
-        (I := I) Yk.metric xk0 hzNorm
+    have hzNorm : ‖z‖ < expMapC2Radius (I := I) Yk.metric xk0 := by
+      simpa only [Metric.mem_ball, dist_zero_right] using hzBall
+    exact ball_subset_normalChartAt_target (I := I) Yk.metric xk0 hzNorm
   let c := (normalExpPD (I := I) Yk xk0).symm
   let d := (normalExpPD (I := I) Yl xl0).symm
   have hzSource : z ∈ (normalExpPD (I := I) Yk xk0).source := by
@@ -1894,7 +3308,8 @@ theorem HasStageJetData.hloc_tail
       letI : MetricSpace Yk.M := (P (Lphi.φ k)).ms
       exact Metric.ball_subset_closedBall
         (by simpa only [V, Bmid] using hw.2.2)
-    simpa only [Lphi, Yk, Yl, xk0, xl0, chiK, chiL] using
+    simpa only [legacyChartFamily, legacyInv_eq, legacyChart_apply,
+      legacyTarget_eq, normalExpPD, Lphi, Yk, Yl, xk0, xl0, chiK, chiL] using
       hN k hk l hl alpha w (interior_subset hw.1) hw.1 hwMid
   have hmap : Set.MapsTo (fun w => F (c.symm w)) V d.source := by
     intro w hw
@@ -1928,8 +3343,8 @@ theorem HasStageJetData.hloc_tail
       Lphi] using hout
   exact Coordinates.hlocAt_of_coord c d hV hxc hcxV hmap hG hinv
 
-
-
+/-- The support/diagonal capstone now produces the actual global stage-map
+jet data on its single master subsequence. -/
 theorem MetricCompactBase.exists_stage_data
     (b : MetricCompactBase (I := I) X)
     (hcomplete : SeqMetricComplete (I := I) X)

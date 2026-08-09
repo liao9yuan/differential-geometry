@@ -29,7 +29,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E]
-  [NormedSpace Real E] [FiniteDimensional Real E]
+[InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -451,31 +451,31 @@ theorem MetricCompactnessInputs.exists_live_cores
         (3 * L.lamInf (alpha.1 : Nat)) ^ 2 := by
       rw [abs_le] at herr
       nlinarith
+    rw [normalMetric_zero] at hstage
     have hzero : (0 : E) ∈ Metric.ball 0
         (inp.normalBounds.radius (L.φ (psi k)) c) := by
       rw [Metric.mem_ball, dist_self]
-      exact inp.normalBounds.radius_pos _ _
-    have hnonneg : 0 ≤ normalCoordMetric (I := I) Y c 0 v v :=
-      (inp.normalBounds.metric_equiv (L.φ (psi k)) c 0 hzero v).1.trans'
-        (mul_nonneg (by norm_num) (sq_nonneg ‖v‖))
+      exact inp.normalBounds.radius_pos (L.φ (psi k)) c
+    have hstageLower :=
+      (inp.normalBounds.metric_equiv (L.φ (psi k)) c 0 hzero v).1
+    rw [normalMetric_zero (I := I) Y c] at hstageLower
+    have hstageNonneg : 0 ≤ Y.metric.inner c v v :=
+      (mul_nonneg (by norm_num) (sq_nonneg ‖v‖)).trans hstageLower
     have hsqrt : Real.sqrt (Y.metric.inner c v v) <
         3 * L.lamInf (alpha.1 : Nat) := by
-      rw [← normalMetric_zero (I := I) Y c]
-      apply (sq_lt_sq₀ (Real.sqrt_nonneg _)
-        (mul_nonneg (by norm_num) hlambda.le)).mp
-      calc
-        Real.sqrt (normalCoordMetric (I := I) Y c 0 v v) ^ 2 =
-            normalCoordMetric (I := I) Y c 0 v v := Real.sq_sqrt hnonneg
-        _ < (3 * L.lamInf (alpha.1 : Nat)) ^ 2 := hstage
+      have hs := Real.sqrt_lt_sqrt hstageNonneg hstage
+      rw [Real.sqrt_sq (mul_nonneg (by norm_num) hlambda.le)] at hs
+      exact hs
     have hsmall : Real.sqrt (Y.metric.inner c v v) <
         expRadiusGp (I := I) Y.metric c :=
       hsqrt.trans <| (by
         have := hgpk alpha.1 c hcenterk
         nlinarith)
-    have hvnorm := norm_lt_expMapC2Radius_of_sqrt_inner_lt
-      (I := I) Y.metric c hsmall
-    have hvsrc := mem_expMapDiffeo_source_of_norm_lt_radius
-      (I := I) Y.metric c hvnorm
+    have hvnorm : ‖v‖ <
+        expMapC2Radius (I := I) Y.metric c :=
+      norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric c hsmall
+    have hvsrc : v ∈ (expMapDiffeo (I := I) Y.metric c).source :=
+      mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric c hvnorm
     have hdist := properExpDist (I := I) Y (P (L.φ (psi k))) c hsmall
     have hexp : expMapDiffeo (I := I) Y.metric c v =
         expMap (I := I) Y.metric c (show TangentSpace I c from v) :=
@@ -515,63 +515,67 @@ theorem MetricCompactnessInputs.exists_live_cores
         rw [Metric.mem_ball]
         exact hyc.trans <|
           mul_lt_mul_of_pos_right (by norm_num : (9 / 4 : Real) < 4) hlambda
-      obtain ⟨v, hvtgt, _hvdom, hvlen, hyexp⟩ :=
+      obtain ⟨w, hwtgt, _hwdom, hwlen, hyexp⟩ :=
         properBallNormal (I := I) Y (P (L.φ (psi k))) hgpC hyball
-      have hvsrc : v ∈ (expMapDiffeo (I := I) Y.metric c).source := by
-        simpa only [normalChartAt_target_eq] using hvtgt
+      have hwsrc : w ∈ (expMapDiffeo (I := I) Y.metric c).source := by
+        simpa only [normalChartAt_target_eq] using hwtgt
+      have herr := hclosek alpha w
+      rw [hcD, normalMetric_zero (I := I) Y c] at herr
+      rw [abs_le] at herr
       have hzero : (0 : E) ∈ Metric.ball 0
           (inp.normalBounds.radius (L.φ (psi k)) c) := by
         rw [Metric.mem_ball, dist_self]
-        exact inp.normalBounds.radius_pos _ _
-      have hstageLower : (1 / 2 : Real) * ‖v‖ ^ 2 ≤ Y.metric.inner c v v := by
-        rw [← normalMetric_zero (I := I) Y c]
-        exact (inp.normalBounds.metric_equiv (L.φ (psi k)) c 0 hzero v).1
-      have hmetricNonneg : 0 ≤ Y.metric.inner c v v :=
-        hstageLower.trans' (mul_nonneg (by norm_num) (sq_nonneg ‖v‖))
-      have hstageSq : Y.metric.inner c v v = dist c y ^ 2 := by
-        rw [← hvlen, Real.sq_sqrt hmetricNonneg]
-      have herr := hclosek alpha v
-      rw [hcD, normalMetric_zero (I := I) Y c, abs_le] at herr
+        exact inp.normalBounds.radius_pos (L.φ (psi k)) c
+      have hlowerMetric :=
+        (inp.normalBounds.metric_equiv (L.φ (psi k)) c 0 hzero w).1
+      rw [normalMetric_zero (I := I) Y c] at hlowerMetric
+      have hmetricNonneg : 0 ≤ Y.metric.inner c w w :=
+        (mul_nonneg (by norm_num) (sq_nonneg ‖w‖)).trans hlowerMetric
+      have hmetricSq : Y.metric.inner c w w = dist c y ^ 2 := by
+        have hsquare := congrArg (fun t : Real => t ^ 2) hwlen
+        change Real.sqrt (Y.metric.inner c w w) ^ 2 = dist c y ^ 2 at hsquare
+        rw [Real.sq_sqrt hmetricNonneg] at hsquare
+        exact hsquare
       have hdistLt : dist c y < (9 / 4 : Real) * L.lamInf gamma := by
         simpa only [dist_comm] using hyc
       have hdistSq : dist c y ^ 2 <
           ((9 / 4 : Real) * L.lamInf gamma) ^ 2 :=
         (sq_lt_sq₀ dist_nonneg
           (mul_nonneg (by norm_num) hlambda.le)).2 hdistLt
-      have hvdeep : v ∈ Cdeep alpha := by
-        have hnormStage : ‖v‖ ^ 2 ≤ 2 * Y.metric.inner c v v := by
-          nlinarith [hstageLower]
-        have hqInfBase : gInf 0 alpha v v ≤
-            Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := by
+      have hvdeep : w ∈ Cdeep alpha := by
+        have hnormSqLe : ‖w‖ ^ 2 ≤ 2 * dist c y ^ 2 := by
+          have hnormMetricRaw :
+              (2 : Real) * ((1 / 2 : Real) * ‖w‖ ^ 2) ≤
+                (2 : Real) * Y.metric.inner c w w :=
+            mul_le_mul_of_nonneg_left (a := (2 : Real)) hlowerMetric
+              (show 0 ≤ (2 : Real) by norm_num)
+          have hnormMetric : ‖w‖ ^ 2 ≤ 2 * Y.metric.inner c w w := by
+            convert hnormMetricRaw using 1 <;> ring
           calc
-            gInf 0 alpha v v = Y.metric.inner c v v -
-                (Y.metric.inner c v v - gInf 0 alpha v v) := by ring
-            _ ≤ Y.metric.inner c v v - (-(1 / 10 : Real) * ‖v‖ ^ 2) :=
-              by
-                simpa only [neg_mul] using
-                  sub_le_sub_left herr.1 (Y.metric.inner c v v)
-            _ = Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := by ring
-        have hqInfStage : gInf 0 alpha v v ≤
-            (6 / 5 : Real) * Y.metric.inner c v v := by
+            ‖w‖ ^ 2 ≤ 2 * Y.metric.inner c w w := hnormMetric
+            _ = 2 * dist c y ^ 2 :=
+              congrArg (fun t : Real => 2 * t) hmetricSq
+        have hgInfLe : gInf 0 alpha w w ≤
+            dist c y ^ 2 + (1 / 10 : Real) * ‖w‖ ^ 2 := by
           calc
-            _ ≤ Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := hqInfBase
-            _ ≤ Y.metric.inner c v v +
-                (1 / 10 : Real) * (2 * Y.metric.inner c v v) :=
-              by
-                gcongr
-            _ = (6 / 5 : Real) * Y.metric.inner c v v := by ring
-        have hqInfLe : gInf 0 alpha v v ≤ (6 / 5 : Real) * dist c y ^ 2 := by
-          rw [← hstageSq]
-          exact hqInfStage
+            gInf 0 alpha w w ≤
+                Y.metric.inner c w w + (1 / 10 : Real) * ‖w‖ ^ 2 := by
+              exact (neg_le_sub_iff_le_add).mp herr.1
+            _ = dist c y ^ 2 + (1 / 10 : Real) * ‖w‖ ^ 2 :=
+              congrArg (fun t : Real => t + (1 / 10 : Real) * ‖w‖ ^ 2)
+                hmetricSq
+        have hqInfLe : gInf 0 alpha w w ≤
+            (6 / 5 : Real) * dist c y ^ 2 := by
+          nlinarith [hgInfLe, hnormSqLe]
         have hscale0 : (6 / 5 : Real) * dist c y ^ 2 <
             (243 / 40 : Real) * L.lamInf gamma ^ 2 := by
           have hlamSq : 0 < L.lamInf gamma ^ 2 := sq_pos_of_pos hlambda
           nlinarith
         exact (hqInfLe.trans_lt hscale0).le
-      refine ⟨alpha, v, hvdeep, ?_⟩
+      refine ⟨alpha, w, hvdeep, ?_⟩
       simp only [alpha]
       rw [hcD]
-      rw [expMapDiffeo_apply_eq (I := I) Y.metric c hvsrc]
+      rw [expMapDiffeo_apply_eq (I := I) Y.metric c hwsrc]
       exact hyexp.symm
     constructor
     · intro y hy

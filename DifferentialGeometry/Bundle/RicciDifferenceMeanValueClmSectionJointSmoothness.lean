@@ -284,6 +284,10 @@ theorem contMDiffOn_clm_section_of_pointwise_joint_manifold_time
     rw [Trivialization.continuousLinearMapAt_apply]
     exact congrFun (Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e₂) hx₂) _
 
+/-- Compatibility name for joint manifold-time smoothness of a CLM section. -/
+alias contMDiffOn_clm_section_of_pointwise_jointMR :=
+  contMDiffOn_clm_section_of_pointwise_joint_manifold_time
+
 end RicciLinearization
 end DeTurck
 end PDE

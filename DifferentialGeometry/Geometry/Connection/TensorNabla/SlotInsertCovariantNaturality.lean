@@ -72,6 +72,13 @@ def endoSlotZeroCcTensor (g : SmoothRiemannianMetric I M) (s : ℕ)
         slotInsertEndoFib_contMDiff (I := I) (M := M) g (s + 1) 0 (fun x : M => Λ x) Λ.contMDiff }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+/-- Compatibility name for insertion of an endomorphism in the zeroth covariant slot. -/
+abbrev slotInsertEndoCc (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    SmoothCcTensor g (s + 1) (s + 1) :=
+  endoSlotZeroCcTensor g s Λ
+
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in

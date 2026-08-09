@@ -160,6 +160,7 @@ theorem curveDensity_pos
     0 < curveDensity (I := I) g γ V t := by
   exact Real.sqrt_pos.mpr (curveGram_det_pos (I := I) g γ V t hLI)
 
+
 omit [Fintype ι] [DecidableEq ι] in
 omit [NeZero (Module.finrank ℝ E)]
   [T2Space M]
@@ -178,6 +179,24 @@ theorem hasDerivAt_gram
   simpa only [curveGram, curveGramDeriv, Matrix.of_apply] using
     inner_deriv_at (I := I) hn g γ (V i) (V j) t hγ
       (hVdiff i) (hVdiff j)
+
+/-- The Gram density is continuous wherever the curve and every field have the
+first-order regularity needed by metric compatibility. -/
+theorem curveDensity_cont
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ)
+    (hγ : ContMDiffAt 𝓘(ℝ, ℝ) I n γ t)
+    (hVdiff : ∀ i,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ (V i) t) t) :
+    ContinuousAt (curveDensity (I := I) g γ V) t := by
+  apply Real.continuous_sqrt.continuousAt.comp
+  apply (continuous_id.matrix_det).continuousAt.comp
+  apply continuousAt_pi.mpr
+  intro i
+  apply continuousAt_pi.mpr
+  intro j
+  exact (hasDerivAt_gram (I := I) hn g γ V t hγ hVdiff i j).continuousAt
 
 omit [Fintype ι] [DecidableEq ι] in
 omit [NeZero (Module.finrank ℝ E)]

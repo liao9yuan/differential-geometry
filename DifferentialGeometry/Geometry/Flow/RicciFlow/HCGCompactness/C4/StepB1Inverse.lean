@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-private theorem exists_inv_seq
+theorem exists_inv_seq
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E]
     {A G : Nat → E → E} {Q W K : Set E}
@@ -156,7 +156,7 @@ private theorem exists_inv_seq
     exact hsymm.congr fun _w hw ↦ heqN hw
   exact ⟨V, hV, hVcompact, hKV, hGconv, hGcd⟩
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]

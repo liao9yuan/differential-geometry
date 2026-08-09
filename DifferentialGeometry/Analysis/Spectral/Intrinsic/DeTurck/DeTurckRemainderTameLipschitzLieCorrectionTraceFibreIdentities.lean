@@ -130,9 +130,6 @@ lemma lc0b_swapOut_traceStep (g₁ : SmoothRiemannianMetric I M)
   rw [hpt (σ i)]
   rfl
 
-omit [CompactSpace M] in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 private lemma lc0RiemRest_contMDiff (g₀ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 4 ℝ E)

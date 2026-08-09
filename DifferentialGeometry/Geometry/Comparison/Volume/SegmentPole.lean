@@ -191,6 +191,62 @@ theorem transDens_le_hyp
     exact ge_of_tendsto hlim hev
   rwa [div_le_one hpos] at hRatioLE
 
+/-- The sharp transverse density comparison extends to the endpoint of a
+conjugate-free open radial segment by continuity from the left. -/
+theorem transDens_le_one
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (p : M) (u : TangentSpace I p) (q : Real)
+    (hq : 0 ≤ q)
+    (hd : 0 < Module.finrank Real E - 1)
+    (hu : 0 < g.inner p u u)
+    (hno : ∀ t ∈ Set.Ioo (0 : Real) 1,
+      ¬ IsConjVec (I := I) g hEnorm p
+        ((t • u : TangentSpace I p) : E))
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2))) :
+    ∃ v : Fin (Module.finrank Real E - 1) → TangentSpace I p,
+      (∀ i j, g.inner p (v i) (v j) = if i = j then 1 else 0) ∧
+      (∀ i, g.inner p u (v i) = 0) ∧
+      curveDensity (I := I) g
+          (intrinsicGeodesic (I := I) g hEnorm p u)
+          (fun i => intrinsicJacobi (I := I) g hEnorm p u (v i)) 1 ≤
+        hypDensity (q * Real.sqrt (g.inner p u u))
+          (Module.finrank Real E - 1) 1 := by
+  obtain ⟨v, hON, hperp, hbound⟩ :=
+    transDens_le_hyp (I := I) g hEnorm p u q 1 hq hd hu hno hRic
+  refine ⟨v, hON, hperp, ?_⟩
+  let γ : Real → M := intrinsicGeodesic (I := I) g hEnorm p u
+  let V : Fin (Module.finrank Real E - 1) →
+      ∀ t, TangentSpace I (γ t) :=
+    fun i => intrinsicJacobi (I := I) g hEnorm p u (v i)
+  let ell : Real := Real.sqrt (g.inner p u u)
+  have hγ :
+      ContMDiffAt 𝓘(Real, Real) I (1 : WithTop ℕ∞) γ 1 := by
+    simpa only [γ] using
+      (intrinsicGeodesic_contMDiffOn (I := I) g hEnorm p u).contMDiffAt
+        Filter.univ_mem
+  have hVdiff : ∀ i,
+      DifferentiableAt Real (chartRepAt (I := I) γ (V i) 1) 1 := by
+    intro i
+    simpa only [γ, V] using
+      (intrJacobi_diff (I := I) g hEnorm p u (v i) 1).1
+  have hcurve :
+      Tendsto (curveDensity (I := I) g γ V) (𝓝[<] (1 : Real))
+        (𝓝 (curveDensity (I := I) g γ V 1)) :=
+    (curveDensity_cont (I := I) (n := (1 : WithTop ℕ∞)) le_rfl
+      g γ V 1 hγ hVdiff).tendsto.mono_left inf_le_left
+  have hmodel :
+      Tendsto (hypDensity (q * ell) (Module.finrank Real E - 1))
+        (𝓝[<] (1 : Real))
+        (𝓝 (hypDensity (q * ell) (Module.finrank Real E - 1) 1)) :=
+    (hypDen_continuous (q * ell) (Module.finrank Real E - 1)).continuousAt.tendsto
+      |>.mono_left inf_le_left
+  apply le_of_tendsto_of_tendsto hcurve hmodel
+  filter_upwards [Ioo_mem_nhdsLT (show (0 : Real) < 1 by norm_num)] with t ht
+  simpa only [γ, V, ell] using hbound t ht
+
 end VolumeComparison
 end Riemannian
 end Geometry

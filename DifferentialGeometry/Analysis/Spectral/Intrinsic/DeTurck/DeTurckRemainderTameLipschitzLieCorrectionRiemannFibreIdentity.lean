@@ -68,8 +68,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (modelDoubleTrace_apply
   cometricLmodel)
 
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
 lemma lc0b_riem_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -110,4 +108,3 @@ end LieCorr0BoundsAll
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end
-

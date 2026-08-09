@@ -103,6 +103,11 @@ def operatorFieldApply (g : SmoothRiemannianMetric I M) (r s : ℕ)
       contMDiff_toFun := appCcFib_contMDiff (I := I) (M := M) g r s Φ W }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+/-- Compatibility name for the rank-zero operator-field action. -/
+abbrev appCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) : SmoothCcTensor g 0 s :=
+  operatorFieldApply g r s Φ W
+
 set_option backward.isDefEq.respectTransparency false in
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
@@ -132,6 +137,12 @@ def slotExtendPointwise (_g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
           ContinuousLinearMap.comp_smul, map_smul
             (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm]
         rfl }
+
+/-- Compatibility name for the pointwise passenger-slot extension. -/
+abbrev slotExtendFib (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) :
+    Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
+  slotExtendPointwise g r s x A
 
 set_option backward.isDefEq.respectTransparency false in
 
@@ -607,6 +618,12 @@ theorem covGrad_operatorFieldApply_eq (g : SmoothRiemannianMetric I M) (r s : �
     tensorCovDerivAt_appCc_eq (I := I) (M := M) g r s Φ W x (v 0)]
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
+
+/-- Compatibility name for the covariant product rule of `appCc`. -/
+alias covGrad_appCc_eq := covGrad_operatorFieldApply_eq
+
+/-- Compatibility name for the fibre Cauchy--Schwarz estimate for `appCc`. -/
+alias riemannianFiberNormSq_appCLM_le := riemannianFiberNormSq_comp_clm_le
 
 end Connection
 end Integral

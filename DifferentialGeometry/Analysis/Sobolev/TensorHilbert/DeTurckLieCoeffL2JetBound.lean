@@ -353,7 +353,7 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform
 slotInsert/reindex decomposition (`deTurckLieDLbCoeffField_eq_slotInsert_sum`); each summand is
 `≤ finrank·‖∇ⁱ wEndoInsert‖²` (`rfns_iteratedCovGrad_dlbSlotZero_le`/`dlbSlotOne_le`), and
 `sq_le_two_add` yields the factor `4·finrank`.  `R`-free bounded factor. -/
-private theorem normSq_iCG_dlbField_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
+theorem normSq_iCG_dlbField_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 ≤
       4 * (Module.finrank ℝ E : ℝ) *
         ‖iteratedCovGrad (I := I) g₀ 1 1 i

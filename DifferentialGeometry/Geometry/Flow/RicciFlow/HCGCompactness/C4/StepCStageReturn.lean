@@ -26,12 +26,34 @@ open DifferentialGeometry.Geometry.Riemannian
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+
+private theorem legacy_hom_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) (z : E) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).hom z =
+      (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm z := by
+  rfl
+
+private theorem legacy_restrict_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).restrictBall.target =
+      (normalExpPD (I := I) Y x).target := by
+  rfl
 
 
 
@@ -172,6 +194,8 @@ theorem HasStageJetData.mapsTo_tail
   let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
   have hxEq : chiK.symm z = x := by
     simpa only [chiK, ck, Yk, Lphi] using hzx
+  have hxLegacy : (legacyBallChart (I := I) Yk ck).hom z = x := by
+    simpa only [legacy_hom_eq, chiK] using hxEq
   have hxCoord : chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R0 k := by
     rwa [hxEq]
   have hNjetMax : Njet alpha ≤ Njets :=
@@ -195,7 +219,9 @@ theorem HasStageJetData.mapsTo_tail
   let w := chiL (F x)
   have hcoord : dist w z ≤ epsA alpha := by
     simpa only [mapDerivNorm, norm_iteratedFDeriv_zero, id_eq, dist_eq_norm,
-      w, F, chiK, chiL, ck, cl, Yk, Yl, Lphi, hxEq] using
+      legacyChartFamily, legacyInv_eq, legacyTarget_eq,
+      normalExpPD, MetricCompactnessInputs.toCore, w, F, chiK, chiL, ck, cl,
+      Yk, Yl, Lphi, hxLegacy] using
         hjet.2.2 0 le_rfl
   have hepsEta : epsA alpha ≤ eta alpha := by
     have hhalf : eta alpha / 2 ≤ eta alpha := by linarith [heta alpha]
@@ -224,7 +250,9 @@ theorem HasStageJetData.mapsTo_tail
     (I := I) Yl (P (Lphi.φ l)) hEquiv hUtgt hseg
   have hFw : chiL.symm w = F x := by
     have htarget : F x ∈ (normalExpPD (I := I) Yl cl).target := by
-      simpa only [F, chiK, ck, cl, Yk, Yl, Lphi, hxEq] using hjet.1
+      simpa only [legacyChartFamily, legacy_restrict_eq,
+        MetricCompactnessInputs.toCore, F, ck, cl, Yk, Yl, Lphi,
+        hxLegacy] using hjet.1
     change (normalExpPD (I := I) Yl cl)
       ((normalExpPD (I := I) Yl cl).symm (F x)) = F x
     exact (normalExpPD (I := I) Yl cl).right_inv htarget
@@ -276,7 +304,8 @@ theorem HasStageJetData.mapsTo_tail
       _ = R0 + 4 * lam0 := by ring
   have hradPair := hrad k l hkRad hlRad alpha
   have hlCenter : dist cl Yl.basepoint < R0 + 4 * lam0 + gap / 4 := by
-    dsimp only [Lphi, Yk, Yl, ck, cl] at hradPair
+    dsimp only [MetricCompactnessInputs.toCore, Lphi, Yk, Yl, ck, cl]
+      at hradPair
     linarith
   have hfinal : dist (F x) Yl.basepoint < R1 := by
     calc
@@ -397,6 +426,8 @@ theorem HasStageJetData.return_tail
   let chiL := NormalCoordinates.normalChartAt (I := I) Yl.metric cl
   have hxEq : chiK.symm z = x := by
     simpa only [chiK, ck, Yk, Lphi] using hzx
+  have hxLegacy : (legacyBallChart (I := I) Yk ck).hom z = x := by
+    simpa only [legacy_hom_eq, chiK] using hxEq
   have hxCoord : chiK.symm z ∈ Lphi.hatSourceBall inp.decay P R0 k := by
     rwa [hxEq]
   have hNf : Nfwd alpha ≤ Nf :=
@@ -415,7 +446,9 @@ theorem HasStageJetData.return_tail
   let w := chiL (Fkl x)
   have hwz : dist w z ≤ delta alpha := by
     simpa only [mapDerivNorm, norm_iteratedFDeriv_zero, id_eq, dist_eq_norm,
-      w, Fkl, chiK, chiL, ck, cl, Yk, Yl, Lphi, hxEq] using
+      legacyChartFamily, legacyInv_eq, legacyTarget_eq,
+      normalExpPD, MetricCompactnessInputs.toCore, w, Fkl, chiK, chiL, ck, cl,
+      Yk, Yl, Lphi, hxLegacy] using
         hforward.2.2 0 le_rfl
   have hdeltaEta : delta alpha ≤ eta alpha / 4 := min_le_left _ _
   have hquarterEta : eta alpha / 4 ≤ eta alpha := by
@@ -427,18 +460,29 @@ theorem HasStageJetData.return_tail
   have hwC0 : w ∈ C0 alpha := interior_subset hwInt
   have hFw : chiL.symm w = Fkl x := by
     have htarget : Fkl x ∈ (normalExpPD (I := I) Yl cl).target := by
-      simpa only [Fkl, chiK, ck, cl, Yk, Yl, Lphi, hxEq] using hforward.1
+      simpa only [legacyChartFamily, legacy_restrict_eq,
+        MetricCompactnessInputs.toCore, Fkl, ck, cl, Yk, Yl, Lphi,
+        hxLegacy] using hforward.1
     change (normalExpPD (I := I) Yl cl)
       ((normalExpPD (I := I) Yl cl).symm (Fkl x)) = Fkl x
     exact (normalExpPD (I := I) Yl cl).right_inv htarget
+  have hFwLegacy : (legacyBallChart (I := I) Yl cl).hom w = Fkl x := by
+    simpa only [legacy_hom_eq, chiL] using hFw
   have hyCoord : chiL.symm w ∈ Lphi.hatSourceBall inp.decay P R1 l := by
     rwa [hFw]
   have hreverse := hNrev alpha l hlR k hkR alpha w hwC0 hwInt hyCoord
   let u := chiK (Flk (Fkl x))
+  have hInvK : (legacyBallChart (I := I) Yk ck).inv = chiK := by
+    simpa only [chiK] using legacyInv_eq (I := I) Yk ck
   have huw : dist u w ≤ delta alpha := by
-    simpa only [mapDerivNorm, norm_iteratedFDeriv_zero, id_eq, dist_eq_norm,
-      u, w, Fkl, Flk, chiK, chiL, ck, cl, Yk, Yl, Lphi, hFw] using
-        hreverse.2.2 0 le_rfl
+    have hrev0 := hreverse.2.2 0 le_rfl
+    simp only [mapDerivNorm, norm_iteratedFDeriv_zero, id_eq,
+      MetricCompactnessInputs.toCore, legacyChartFamily] at hrev0
+    change ‖(legacyBallChart (I := I) Yk ck).inv
+        (Flk ((legacyBallChart (I := I) Yl cl).hom w)) - w‖ ≤
+      delta alpha at hrev0
+    rw [hInvK, hFwLegacy] at hrev0
+    simpa only [dist_eq_norm, u, w, Fkl, Flk] using hrev0
   have huz : dist u z ≤ 2 * delta alpha := by
     calc
       dist u z ≤ dist u w + dist w z := dist_triangle _ _ _
@@ -475,7 +519,9 @@ theorem HasStageJetData.return_tail
     (I := I) Yk (P (Lphi.φ k)) hEquiv hUtgt hseg
   have hHu : chiK.symm u = Flk (Fkl x) := by
     have htarget : Flk (Fkl x) ∈ (normalExpPD (I := I) Yk ck).target := by
-      simpa only [Flk, chiL, ck, cl, Yk, Yl, Lphi, hFw] using hreverse.1
+      simpa only [legacyChartFamily, legacy_restrict_eq,
+        MetricCompactnessInputs.toCore, Flk, ck, cl, Yk, Yl, Lphi,
+        hFwLegacy] using hreverse.1
     change (normalExpPD (I := I) Yk ck)
       ((normalExpPD (I := I) Yk ck).symm (Flk (Fkl x))) = Flk (Fkl x)
     exact (normalExpPD (I := I) Yk ck).right_inv htarget

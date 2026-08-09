@@ -3,6 +3,26 @@ import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
+/-!
+# Pointwise and uniform bounds for the metric inner product
+
+This file collects pointwise and uniform bounds for the metric inner
+product `g.inner x : E →L[ℝ] E →L[ℝ] ℝ` of a smooth Riemannian metric
+`g` on a smooth manifold `(M, g)`.
+
+## Main results (pointwise)
+
+* `metric_inner_self_nonneg`: $g.inner\,x\,v\,v \ge 0$.
+* `abs_metric_inner_le_sqrt_metric_quadratic`: pointwise Cauchy–Schwarz
+  inequality, $|g.inner\,x\,v\,w| \le \sqrt{g.inner\,x\,v\,v} \sqrt{g.inner\,x\,w\,w}$.
+* `abs_metric_inner_le_metricInnerOpNorm`: pointwise operator-norm bound,
+  $|g.inner\,x\,v\,w| \le \|g.inner\,x\| \cdot \|v\| \cdot \|w\|$.
+
+The pointwise bounds suffice for many applications. Uniform bounds on a
+compact manifold (e.g., a uniform constant `C > 0` such that
+`‖g.inner b‖ ≤ C` for all `b ∈ M`) require additional chart-localization
+machinery and are deferred to dedicated downstream files when needed.
+-/
 
 noncomputable section
 
@@ -14,13 +34,12 @@ namespace Analysis
 namespace Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
 
-omit [Module.Finite ℝ E] in
+/-- Non-negativity of `g.inner x v v`. -/
 lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -29,7 +48,8 @@ lemma metric_inner_self_nonneg
     rw [heq]
   · exact (g.pos x v hv0).le
 
-omit [Module.Finite ℝ E] in
+/-- Scaling both slots of the metric quadratic form multiplies it by the
+square of the scalar. -/
 lemma metric_inner_smul_self
     (g : SmoothRiemannianMetric I M) (x : M) (c : Real)
     (v : TangentSpace I x) :
@@ -38,7 +58,8 @@ lemma metric_inner_smul_self
     (g.inner x v).map_smul, smul_eq_mul, smul_eq_mul]
   ring
 
-omit [Module.Finite ℝ E] in
+/-- Cauchy–Schwarz inequality for the metric inner product (squared form):
+$(g(v, w))^2 \le g(v, v) \cdot g(w, w)$. -/
 lemma metric_inner_cauchy_schwarz_sq
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     (g.inner x v w) ^ 2 ≤ g.inner x v v * g.inner x w w := by
@@ -108,7 +129,8 @@ lemma metric_inner_cauchy_schwarz_sq
     rw [hc_eq, ha_eq]
     simp
 
-omit [Module.Finite ℝ E] in
+/-- The pointwise Cauchy–Schwarz inequality (absolute value form): $|g(v, w)|
+\le \sqrt{g(v, v)} \sqrt{g(w, w)}$. -/
 lemma abs_metric_inner_le_sqrt_metric_quadratic
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     |g.inner x v w| ≤ Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
@@ -128,7 +150,7 @@ lemma abs_metric_inner_le_sqrt_metric_quadratic
   rw [hsqrt_mul] at h_le_sqrt
   exact h_le_sqrt
 
-omit [Module.Finite ℝ E] in
+set_option linter.unusedSectionVars false in
 /-- The square root of the metric quadratic form satisfies the triangle
 inequality on each tangent fibre. -/
 lemma gNorm_add_le
@@ -160,7 +182,8 @@ noncomputable def metricInnerOpNorm
     (g : SmoothRiemannianMetric I M) (x : M) : ℝ :=
   ‖g.inner x‖
 
-omit [Module.Finite ℝ E] in
+/-- The pointwise operator-norm bound: `|g.inner b v w| ≤ metricInnerOpNorm · ‖v‖ · ‖w‖`.
+This uses the bilinear-CLM operator norm `ContinuousLinearMap.le_opNorm₂`. -/
 lemma abs_metric_inner_le_metricInnerOpNorm
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     |g.inner x v w| ≤ metricInnerOpNorm (I := I) (M := M) g x * ‖v‖ * ‖w‖ := by

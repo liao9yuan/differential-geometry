@@ -720,6 +720,50 @@ theorem chartRepAtBase_differentiableAt [I.Boundaryless]
       (fun s => chartTransitionAt (I := I) α β (uα s) (repα s)) t :=
     hAcomp_diff.clm_apply hrepα_hd.differentiableAt
   exact hdiff.congr_of_eventuallyEq hrepβ_eq
+
+set_option linter.unusedVariables false in
+theorem chartRep_diff
+    (γ : ℝ → M) (V : ∀ s, TangentSpace I (γ s))
+    (hV : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞
+      (fun s : ℝ =>
+        (TotalSpace.mk' E (E := (TangentSpace I : M → Type _))
+          (γ s) (V s) : TangentBundle I M)))
+    (t : ℝ) :
+    DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t := by
+  let S : ℝ → TangentBundle I M := fun s =>
+    TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ s) (V s)
+  have hAt : ContMDiffAt 𝓘(ℝ, ℝ) I.tangent ∞ S t := by
+    simpa only [S] using hV.contMDiffAt
+  rw [Bundle.contMDiffAt_totalSpace] at hAt
+  have hbase := hAt.1
+  have hfiber := hAt.2
+  have hmem :
+      γ t ∈ (trivializationAt E (TangentSpace I) (γ t)).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) (γ t)
+  have hpre :
+      γ ⁻¹' (trivializationAt E (TangentSpace I) (γ t)).baseSet ∈ 𝓝 t :=
+    hbase.continuousAt.preimage_mem_nhds
+      ((trivializationAt E (TangentSpace I) (γ t)).open_baseSet.mem_nhds hmem)
+  have heq :
+      (fun s : ℝ => ((trivializationAt E (TangentSpace I) (γ t)) (S s)).2)
+        =ᶠ[𝓝 t]
+      fun s : ℝ =>
+        (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt
+          ℝ (γ s) (V s) := by
+    filter_upwards [hpre] with s hs
+    simp only [S, TotalSpace.mk']
+    rw [(trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt_apply
+      (R := ℝ)]
+    rw [(trivializationAt E (TangentSpace I) (γ t)).coe_linearMapAt_of_mem hs]
+  have hfiber' := hfiber.congr_of_eventuallyEq heq.symm
+  have hfiberDiff : ContDiffAt ℝ ∞
+      (fun s : ℝ =>
+        (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt
+          ℝ (γ s) (V s)) t := by
+    rw [← contMDiffAt_iff_contDiffAt]
+    exact hfiber'
+  simpa only [chartRepAt] using hfiberDiff.differentiableAt (by simp)
+
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartRepAt_sum {ι : Type*} (s : Finset ι) (γ : ℝ → M)
     (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ) :

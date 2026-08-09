@@ -67,6 +67,12 @@ def smoothCcTensorBilinForm (g : SmoothRiemannianMetric I M)
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   (bilinFormToModel E).symm (ccTensorModel (I := I) g T x)
 
+/-- Compatibility name for the continuous bilinear form underlying a covariant two-tensor. -/
+abbrev ccTensorBilin (g : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g 0 2) (x : M) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  smoothCcTensorBilinForm (I := I) g T x
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
 theorem ccTensorBilin_apply (g : SmoothRiemannianMetric I M)

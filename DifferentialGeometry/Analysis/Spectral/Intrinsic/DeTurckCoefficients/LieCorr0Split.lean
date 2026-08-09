@@ -175,7 +175,6 @@ theorem insert_base (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [e0, e1]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
 /-- Exact four-piece smooth-field realization of `lieCorr0Field`. -/
 theorem lc0_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg =
@@ -191,7 +190,6 @@ theorem lc0_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [lieCorr0TotalFib]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
 /-- In the base-background tail, keep the insertion field next to the
 endomorphism arm.  This is the cancellation-preserving normal form consumed by
 the low-regularity coefficient estimate. -/

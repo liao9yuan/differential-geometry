@@ -1853,6 +1853,10 @@ theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGri
     (I := I) (M := M) g₀ j 1 1 2
     (raisedKoszul (I := I) g₀ g₁) (sharpFlatEndoCc (I := I) g₀ g₁) x
 
+/-- Compatibility name for the connection-difference diagonal product-grid estimate. -/
+alias rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le :=
+  riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
+
 theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M)
     (B S : ℕ → ℝ)

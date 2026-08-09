@@ -256,7 +256,9 @@ private theorem intrVel_smul
   exact hvel
 
 omit [T2Space (TangentBundle I M)] in
-private theorem intrJacobi_perp_ne
+/-- A perpendicular intrinsic Jacobi field remains perpendicular to the radial
+velocity away from the launch time. -/
+theorem intrJacobi_perp_ne
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
       ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))

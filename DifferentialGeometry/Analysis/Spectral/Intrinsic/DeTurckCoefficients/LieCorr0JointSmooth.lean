@@ -625,7 +625,6 @@ private theorem lieCorr0AMixFib_apply_jointContMDiffOn
   rw [lieCorr0AMixFib]
   rfl
 
-omit [CompactSpace M] in
 private theorem lieCorr0RiemFib_apply_jointContMDiffOn
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')

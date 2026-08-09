@@ -495,6 +495,10 @@ lemma riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
   rw [rfns_domDomCongrSection_eq]
   rw [rfns_castRankCc_rk]
 
+/-- Compatibility name for the cometric-raised Koszul jet norm identity. -/
+alias rfns_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq :=
+  riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
+
 private lemma fiberNormSqComponent_sq_iteratedCovGrad_raisedKoszul_le_koszul_rfns
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

@@ -71,6 +71,10 @@ def inputSlotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x
         rw [Tensor0SSpace.toModel_smul, domDomCongr_swap_smul, ofModel_smul]
         rfl }
 
+/-- Compatibility name for the input-slot transposition operator. -/
+abbrev slotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  inputSlotSwapFib (I := I) (M := M) x
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma slotSwapFib_apply (x : M) (D : Tensor0SSpace 2 I x) :
@@ -138,6 +142,10 @@ def ccInputSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2
       contMDiff_toFun := ccSlotSwapFib_contMDiff (I := I) (M := M) }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+/-- Compatibility name for the smooth input-slot transposition field. -/
+abbrev ccSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2 :=
+  ccInputSlotSwapField (I := I) (M := M) g
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
 @[simp] lemma ccSlotSwapField_toSection (g : SmoothRiemannianMetric I M) (x : M) :
@@ -148,6 +156,11 @@ def ccInputSlotSymm (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2) 
     SmoothCcTensor g 2 2 :=
   (1 / 2 : ℝ) • (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
     (ccInputSlotSwapField (I := I) (M := M) g))
+
+/-- Compatibility name for symmetrization in the two input slots. -/
+abbrev ccInputSymm (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2) :
+    SmoothCcTensor g 2 2 :=
+  ccInputSlotSymm (I := I) (M := M) g C
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in

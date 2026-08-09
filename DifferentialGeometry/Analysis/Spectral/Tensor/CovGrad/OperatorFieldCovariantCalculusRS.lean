@@ -75,6 +75,11 @@ def ccOperatorFieldComp (g : SmoothRiemannianMetric I M) (a b c : ℕ)
       contMDiff_toFun := appCcRSFib_contMDiff (I := I) (M := M) g a b c Φ W }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+/-- Compatibility name for generic-valence operator-field composition. -/
+abbrev appCcRS (g : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) : SmoothCcTensor g a c :=
+  ccOperatorFieldComp g a b c Φ W
+
 set_option backward.isDefEq.respectTransparency false in
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]

@@ -22,7 +22,7 @@ namespace HCGCompactness
 
 universe u uE uH
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
@@ -39,11 +39,14 @@ def HasDiagPairConv
     (c : ∀ n : Nat, (X.obj n).M)
     (qStage qInf : NNReal) (deltaStage deltaInf : Real)
     (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
-    (eInf : OpenPartialHomeomorph (E × E) (E × E)) : Prop :=
+    (eInf : OpenPartialHomeomorph (E × E) (E × E))
+    (chart : NormalChartFamily (I := I) X :=
+      legacyChartFamily (I := I) X) : Prop :=
   0 < qStage ∧ 0 < qInf ∧ qInf < qStage ∧
   0 < deltaStage ∧ 0 < deltaInf ∧
   (∀ n, IsNormalDiag (I := I) (X.obj n)
-    (hcomplete.complete n) (hconn n) (c n) qStage deltaStage (e n)) ∧
+    (hcomplete.complete n) (hconn n) (c n) qStage deltaStage (e n)
+      (c := chart n (c n))) ∧
   eInf.source = Metric.ball (0 : E × E) qInf ∧
   eInf 0 = 0 ∧
   Metric.closedBall (0 : E × E) deltaInf ⊆ eInf.target ∧
@@ -81,13 +84,15 @@ theorem HasDiagPairConv.subseq
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chart : NormalChartFamily (I := I) X}
     (h : HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage deltaInf e eInf)
+      qStage qInf deltaStage deltaInf e eInf (chart := chart))
     (f : Nat → Nat) (hf : Tendsto f Filter.atTop Filter.atTop) :
     HasDiagPairConv (I := I) (hcomplete.subseq f)
       (PointedRiemannianSeq.connected_subseq hconn f)
       (fun n => c (f n)) qStage qInf deltaStage deltaInf
-      (fun n => e (f n)) eInf := by
+      (fun n => e (f n)) eInf
+      (chart := fun n x => chart (f n) x) := by
   rcases h with
     ⟨hqStage, hqInf, hqInfStage, hdeltaStage, hdeltaInf,
       hnormal, hInfSource, hInfZero, hInfTarget, hInfC,
@@ -113,17 +118,19 @@ theorem HasDiagPairConv.congr_stage
     {qStage qInf : NNReal} {deltaStage deltaStage' deltaInf : Real}
     {e e' : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chart : NormalChartFamily (I := I) X}
     (h : HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage deltaInf e eInf)
+      qStage qInf deltaStage deltaInf e eInf (chart := chart))
     (hfence : ∀ n, NormalDiagFence (I := I) (X.obj n) (c n)
-      qStage (e n))
+      qStage (e n) (c := chart n (c n)))
     (hdeltaStage' : 0 < deltaStage')
     (hnormal' : ∀ n, IsNormalDiag (I := I) (X.obj n)
-      (hcomplete.complete n) (hconn n) (c n) qStage deltaStage' (e' n))
+      (hcomplete.complete n) (hconn n) (c n) qStage deltaStage' (e' n)
+        (c := chart n (c n)))
     (hfence' : ∀ n, NormalDiagFence (I := I) (X.obj n) (c n)
-      qStage (e' n)) :
+      qStage (e' n) (c := chart n (c n))) :
     HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage' deltaInf e' eInf := by
+      qStage qInf deltaStage' deltaInf e' eInf (chart := chart) := by
   rcases h with
     ⟨hqStage, hqInf, hqInfStage, hdeltaStage, hdeltaInf,
       hnormal, hInfSource, hInfZero, hInfTarget, hInfC,
@@ -132,6 +139,7 @@ theorem HasDiagPairConv.congr_stage
   have heq : ∀ n, e n ≈ e' n := fun n ↦
     IsNormalDiag.eqOnSource (I := I) (X.obj n)
       (hcomplete.complete n) (hconn n) (c n)
+      (c := chart n (c n))
       (hnormal n) (hfence n) (hnormal' n) (hfence' n)
   have hqInfStageReal : (qInf : Real) < qStage := by
     exact_mod_cast hqInfStage
@@ -221,8 +229,9 @@ theorem HasDiagPairConv.inv_data
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chart : NormalChartFamily (I := I) X}
     (h : HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage deltaInf e eInf) :
+      qStage qInf deltaStage deltaInf e eInf (chart := chart)) :
     ∃ delta0 : Real, 0 < delta0 ∧
       (∀ n, ContDiffOn Real ∞
         ((e n).symm : E × E → E × E) (Metric.ball 0 delta0)) ∧
@@ -268,8 +277,9 @@ theorem HasDiagPairConv.exists_diag_inv
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
+    {chart : NormalChartFamily (I := I) X}
     (h : HasDiagPairConv (I := I) hcomplete hconn c
-      qStage qInf deltaStage deltaInf e eInf)
+      qStage qInf deltaStage deltaInf e eInf (chart := chart))
     {K : Set E} (hK : IsCompact K)
     (hKq : K ⊆ Metric.ball (0 : E) qInf) :
     ∃ V : Set (E × E),

@@ -16,6 +16,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturba
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChartBasisReadout
 
 
 
@@ -51,6 +52,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+namespace LegacyChartBasisReadout
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
@@ -199,6 +202,8 @@ theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
       refine Finset.sum_congr rfl (fun m _ => ?_)
       rw [map_smul, smul_eq_mul]
     · rfl
+
+end LegacyChartBasisReadout
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in

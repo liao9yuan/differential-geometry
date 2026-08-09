@@ -202,6 +202,64 @@ lemma lieArm1_connDiff_antisymm (gA gB : SmoothRiemannianMetric I M) (x : M)
   rw [lieArm1_connDiff_self_zero (I := I) (M := M) gA x u v] at h
   exact eq_neg_of_add_eq_zero_left h.symm
 
+private def metricConnDiffLoweredField (g₁ g_bg : SmoothRiemannianMetric I M) :
+    Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 3 :=
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 3
+  ⟨fun x => metricConnDiffLoweredFib (I := I) g₁ g₁ g_bg x,
+    metricConnDiffLoweredFib_contMDiff (I := I) g₁ g₁ g_bg⟩
+
+/-- The connection difference between the moving and background metrics,
+lowered by the moving metric and viewed as a tensor over the reference metric. -/
+def metricConnDiffLoweredCc (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 0 3 where
+  toSection :=
+    MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
+      (E := (TangentSpace I : M → Type _)) ∞ (metricConnDiffLoweredField (I := I) g₁ g_bg)
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+private lemma metricConnDiffLoweredCc_unitModel_apply
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (m : Fin 3 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 3
+        (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg) x m =
+      g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g_bg x (m 0) (m 1)) (m 2) := by
+  rw [unitModel]
+  rw [show (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg).toSection x
+      (unitTensor (I := I) (M := M) x) =
+      (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+        (metricConnDiffLoweredField (I := I) g₁ g_bg x)
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) from rfl]
+  rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+    ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+  exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g_bg x m
+
+set_option linter.unusedSectionVars false in
+/-- The moving-metric lowering is the negative of the Arm-1 background
+connection-difference tensor; the sign comes only from reversing the two
+connections in their difference. -/
+theorem metricConnDiffLoweredCc_eq_neg_kappa
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg =
+      -lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg := by
+  rw [show (-lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg :
+        SmoothCcTensor g₀ 0 3) =
+      lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg -
+        (lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg +
+          lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg) from by abel]
+  apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀
+  intro x
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [lieArm1_unitModel_sub (I := I) (M := M) g₀ 3 _ _ x m,
+    lieArm1_unitModel_add (I := I) (M := M) g₀ 3 _ _ x m]
+  rw [metricConnDiffLoweredCc_unitModel_apply (I := I) (M := M) g₀ g₁ g_bg x m,
+    lieArm1_kappa_unitModel_apply (I := I) (M := M) g₀ g₁ g_bg x m]
+  rw [lieArm1_connDiff_antisymm (I := I) (M := M) g₁ g_bg x (m 0) (m 1)]
+  rw [map_neg (g₁.inner x), ContinuousLinearMap.neg_apply]
+  ring
+
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieArm1_kappa_add_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
@@ -951,6 +1009,44 @@ private theorem lieArm1_kappa_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a :
         (hC2b_nn q) hΛfx_nn hnQ_nn hΛfx hWB0 le_rfl (hWBsum q hq_le)
         (hC2b q hq_le)
     linarith [hAsum, hCsum, hDsum, hBsum]
+
+/-- Uniform pointwise and per-order jet bounds for the moving-metric-lowered
+connection-difference tensor. -/
+theorem metricConnDiffLoweredCc_jetL2_ballUniform_generic
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ (Λ : ℝ) (F : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ F i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ P) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+            ((metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg).toSection x) ≤ Λ) ∧
+        (∀ i : ℕ, i ≤ a →
+          ∑ q ∈ Finset.range (i + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 3 q
+              (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤ F i) := by
+  obtain ⟨Λ, F, hΛ_nn, hF_nn, hker⟩ :=
+    lieArm1_kappa_feed (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨Λ, F, hΛ_nn, hF_nn, ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hδ hPball
+  obtain ⟨hker0, hkerL2⟩ := hker g₁ P htie hδ_le hδ0 hδ hPball
+  have hsign := metricConnDiffLoweredCc_eq_neg_kappa
+    (I := I) (M := M) g₀ g₁ g_bg
+  refine ⟨fun x => ?_, fun i hi => ?_⟩
+  · have hsec :
+        (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg).toSection x =
+          -((lieArm1LoweredBgKappa (I := I) (M := M) g₀ g₁ g_bg).toSection x) := by
+      rw [hsign, SmoothCcTensor.toSection_neg]
+      rfl
+    rw [hsec, lieArm1_rfns_neg (I := I) (M := M) g₀ 0 3 x]
+    exact hker0 x
+  · refine le_trans (le_of_eq (Finset.sum_congr rfl fun q _ => ?_)) (hkerL2 i hi)
+    rw [hsign, iteratedCovGrad_neg, norm_neg]
 
 theorem lieArm1_psiB_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

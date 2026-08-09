@@ -170,6 +170,71 @@ theorem minJoin_edist_le
       (I := I) g hEnorm a (minimizingVec (I := I) g hEnorm a b)
         (s := 0) (t := t) ht
 
+/-- The selected minimizing join has arc length equal to the real value of the
+Riemannian endpoint distance. -/
+theorem minJoin_arcLength
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) :
+    Variation.arcLength (I := I) g (minJoin (I := I) g hEnorm a b) 0 1 =
+      (riemannianEDist I a b).toReal := by
+  have harc :
+      Variation.arcLength (I := I) g
+          (intrinsicGeodesic (I := I) g hEnorm a
+            (minimizingVec (I := I) g hEnorm a b)) 0 1 =
+        Real.sqrt
+          (g.inner a (minimizingVec (I := I) g hEnorm a b)
+            (minimizingVec (I := I) g hEnorm a b)) := by
+    have hI :
+        Variation.arcLength (I := I) g
+            (intrinsicGeodesic (I := I) g hEnorm a
+              (minimizingVec (I := I) g hEnorm a b)) 0 1 =
+          ∫ _t in (0 : ℝ)..1,
+            Real.sqrt
+              (g.inner a (minimizingVec (I := I) g hEnorm a b)
+                (minimizingVec (I := I) g hEnorm a b)) := by
+      unfold Variation.arcLength
+      apply intervalIntegral.integral_congr
+      intro t _
+      dsimp only
+      congr 1
+      exact intrinsicGeodesic_speedSq_eq (I := I) g hEnorm a
+        (minimizingVec (I := I) g hEnorm a b) t
+    rw [hI, intervalIntegral.integral_const, smul_eq_mul]
+    norm_num
+  change Variation.arcLength (I := I) g
+      (intrinsicGeodesic (I := I) g hEnorm a
+        (minimizingVec (I := I) g hEnorm a b)) 0 1 =
+    (riemannianEDist I a b).toReal
+  rw [harc, minimizingVec_len]
+
+/-- The selected minimizing join has path length equal to the real value of
+the Riemannian endpoint distance. -/
+theorem minJoin_pathLen
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (a b : M) :
+    Manifold.pathELength I (minJoin (I := I) g hEnorm a b) 0 1 =
+      ENNReal.ofReal ((riemannianEDist I a b).toReal) := by
+  let γ : ℝ → M := minJoin (I := I) g hEnorm a b
+  have hγC1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 1) := by
+    exact
+      (intrinsicGeodesic_contMDiffOn (I := I) g hEnorm a
+        (minimizingVec (I := I) g hEnorm a b)).mono
+        (Set.subset_univ _)
+  rw [Geodesic.pathELength_eq_arcLength_riemannianBundle (I := I) g zero_le_one
+      (Geodesic.speedSqrt_integrableOn_Icc_of_C1
+        (I := I) g zero_le_one hγC1)
+      (fun t _ => hEnorm (γ t)
+        (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))]
+  change ENNReal.ofReal
+      (Variation.arcLength (I := I) g
+        (minJoin (I := I) g hEnorm a b) 0 1) =
+    ENNReal.ofReal ((riemannianEDist I a b).toReal)
+  rw [minJoin_arcLength (I := I) g hEnorm a b]
+
 omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 private lemma intrinsicGeodesic_speedSq_const

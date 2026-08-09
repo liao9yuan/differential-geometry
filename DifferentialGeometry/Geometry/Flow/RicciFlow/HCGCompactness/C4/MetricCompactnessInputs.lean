@@ -103,7 +103,7 @@ open Filter
 open scoped Manifold ContDiff Topology
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -513,7 +513,7 @@ theorem radiusScaleTail
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) {D a : Real} (hD : 0 < D) (ha : 0 < a)
-    (haD : 2 * a < D) (haRatio : 2 * a < h.ratio * D)
+    (haRatio : 2 * a < h.ratio * D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (hre : hd.RealizesEdist) (L : NetLimitData (I := I) hd D P)
     (pb : hd.PackingBound D) (r : Real) :
@@ -543,26 +543,6 @@ theorem radiusScaleTail
     (X.obj (L.φ n)).t2TangentBundle
   have hrad_pos : 0 < a * L.lamInf (γ : Nat) :=
     mul_pos ha (hd.lambda_pos hD (L.rInf (γ : Nat)))
-  have hrad_mu : a * L.lamInf (γ : Nat) <
-      hd.mu (seqRadius hd D P (L.φ n) (γ : Nat)) := by
-    calc
-      a * L.lamInf (γ : Nat) =
-          (2 * a) * (L.lamInf (γ : Nat) / 2) := by ring
-      _ ≤ (2 * a) * hd.lambda D
-          (seqRadius hd D P (L.φ n) (γ : Nat)) :=
-        mul_le_mul_of_nonneg_left
-          (hn (γ : Nat) (Finset.mem_range.mpr γ.isLt)) (by positivity)
-      _ < D * hd.lambda D (seqRadius hd D P (L.φ n) (γ : Nat)) :=
-        mul_lt_mul_of_pos_right haD
-          (hd.lambda_pos hD (seqRadius hd D P (L.φ n) (γ : Nat)))
-      _ = hd.mu (seqRadius hd D P (L.φ n) (γ : Nat)) := by
-        rw [InjRadiusDecayInput.lambda]
-        exact mul_div_cancel₀ _ hD.ne'
-  have hmu := hd.mu_hasInj_of_le hx
-  rw [hasInjRadiusAt_iff] at hmu
-  have hinj : ENNReal.ofReal (a * L.lamInf (γ : Nat)) <
-      Geometry.Riemannian.injRadius (I := I) (X.obj (L.φ n)).metric c :=
-    ((ENNReal.ofReal_lt_ofReal_iff_of_nonneg hrad_pos.le).2 hrad_mu).trans_le hmu.2
   have hrad_lambda : a * L.lamInf (γ : Nat) ≤
       (2 * a) * hd.lambda D (seqRadius hd D P (L.φ n) (γ : Nat)) := by
     calc
@@ -574,9 +554,167 @@ theorem radiusScaleTail
           (hn (γ : Nat) (Finset.mem_range.mpr γ.isLt)) (by positivity)
   have hexp := h.mul_lambda_lt_exp (D := D) (c := 2 * a)
     (R := seqRadius hd D P (L.φ n) (γ : Nat)) hD haRatio hx
-  exact ⟨hinj, hrad_lambda.trans hexp.le⟩
+  exact ⟨hrad_pos, hrad_lambda.trans hexp.le⟩
 
 end NormalRadiusProfile
+/-- The provider-neutral fixed-divisor input consumed by Step A and by the
+provider-native H6 route.  Normal-coordinate data is deliberately absent: a
+chart provider supplies it separately. -/
+structure MetricCompactCore
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
+  /-- A0 (`lbl384`): Cheeger--Gromov--Taylor injectivity-radius decay. -/
+  decay : InjRadiusDecayInput (I := I) X
+  /-- Total packing bounds, available before the divisor is selected. -/
+  packAll : ∀ D : Real, 0 < D → decay.PackingBound D
+  /-- The selected covering divisor. -/
+  D : Real
+  hD : 0 < D
+  /-- The packing bound at the selected divisor. -/
+  pack : decay.PackingBound D
+  /-- Bishop--Gromov intersection multiplicity at small scales. -/
+  volume : VolumeComparisonInput (I := I) X
+  /-- The volume and decay producers use the same supplied distance. -/
+  dist_eq : volume.dist = decay.dist
+  /-- The Step-A multiplicity scale fits inside the volume-comparison radius. -/
+  stepA_cap_le :
+    max 4 (50 * Real.exp (decay.C * (20 * decay.lambda D 0))) *
+      decay.lambda D 0 ≤ volume.r0
+  /-- The supplied distance realizes the Riemannian emetric. -/
+  realizes : decay.RealizesEdist
+
+/-- Divisor-independent provider-neutral data.  This is the geometric input
+from which one fixed `MetricCompactCore` is selected. -/
+structure MetricCompactSeed
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
+  decay : InjRadiusDecayInput (I := I) X
+  packAll : ∀ D : Real, 0 < D → decay.PackingBound D
+  volume : VolumeComparisonInput (I := I) X
+  dist_eq : volume.dist = decay.dist
+  realizes : decay.RealizesEdist
+
+namespace MetricCompactSeed
+
+/-- Install a selected divisor and its Step-A cap into provider-neutral
+geometric data. -/
+def withDivisor
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (s : MetricCompactSeed (I := I) X) (D : Real) (hD : 0 < D)
+    (hcap :
+      max 4 (50 * Real.exp (s.decay.C * (20 * s.decay.lambda D 0))) *
+        s.decay.lambda D 0 ≤ s.volume.r0) :
+    MetricCompactCore (I := I) X where
+  decay := s.decay
+  packAll := s.packAll
+  D := D
+  hD := hD
+  pack := s.packAll D hD
+  volume := s.volume
+  dist_eq := s.dist_eq
+  stepA_cap_le := hcap
+  realizes := s.realizes
+
+/-- Select one divisor above an arbitrary scalar budget while retaining the
+Step-A multiplicity cap. -/
+theorem exists_core
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (s : MetricCompactSeed (I := I) X) (c : Real) :
+    ∃ D : Real, 0 < D ∧
+      max 4 (50 * Real.exp (s.decay.C * (20 * s.decay.lambda D 0))) *
+          s.decay.lambda D 0 ≤ s.volume.r0 ∧
+        1 < D ∧ s.decay.mu 0 ≤ D ∧ c < D := by
+  let q : Real :=
+    s.decay.a * (min s.decay.baseInj.ρ 1) ^ (Module.finrank Real E)
+  let K : Real := max 4 (50 * Real.exp (s.decay.C * 20))
+  let B : Real := max 1 (max q (max (K * q / s.volume.r0) c))
+  let D : Real := B + 1
+  have hB_lt : B < D := by
+    dsimp only [D]
+    linarith
+  have honeB : (1 : Real) ≤ B := by
+    dsimp only [B]
+    exact le_max_left _ _
+  have hqB : q ≤ B := by
+    dsimp only [B]
+    exact (le_max_left q _).trans (le_max_right 1 _)
+  have hcapB : K * q / s.volume.r0 ≤ B := by
+    dsimp only [B]
+    exact ((le_max_left (K * q / s.volume.r0) _).trans
+      (le_max_right q _)).trans (le_max_right 1 _)
+  have hcB : c ≤ B := by
+    dsimp only [B]
+    exact (le_max_right (K * q / s.volume.r0) c).trans
+      ((le_max_right q _).trans (le_max_right 1 _))
+  have hD_one : (1 : Real) < D := honeB.trans_lt hB_lt
+  have hD : 0 < D := zero_lt_one.trans hD_one
+  have hqD : q ≤ D := hqB.trans hB_lt.le
+  have hmuD : s.decay.mu 0 ≤ D := by
+    simpa only [InjRadiusDecayInput.mu, q, mul_zero, Real.exp_zero, mul_one]
+      using hqD
+  have hlam_le : s.decay.lambda D 0 ≤ 1 :=
+    s.decay.lambda_le_one_at_zero (by simpa only [q] using hqD)
+  have hlam_nonneg : 0 ≤ s.decay.lambda D 0 :=
+    (s.decay.lambda_pos hD 0).le
+  have harg :
+      s.decay.C * (20 * s.decay.lambda D 0) ≤ s.decay.C * 20 := by
+    have h20 : 20 * s.decay.lambda D 0 ≤ (20 : Real) := by
+      simpa only [mul_one] using
+        mul_le_mul_of_nonneg_left hlam_le (by norm_num : (0 : Real) ≤ 20)
+    exact mul_le_mul_of_nonneg_left h20 s.decay.C_nonneg
+  have hfac :
+      max 4 (50 * Real.exp
+        (s.decay.C * (20 * s.decay.lambda D 0))) ≤ K := by
+    dsimp only [K]
+    exact max_le_max le_rfl (mul_le_mul_of_nonneg_left
+      (Real.exp_le_exp.mpr harg) (by norm_num))
+  have hKq : K * q < D * s.volume.r0 :=
+    (div_lt_iff₀ s.volume.r0_pos).1 (hcapB.trans_lt hB_lt)
+  have hKlam : K * s.decay.lambda D 0 < s.volume.r0 := by
+    calc
+      K * s.decay.lambda D 0 = K * q / D := by
+        dsimp only [InjRadiusDecayInput.lambda, InjRadiusDecayInput.mu, q]
+        simp only [mul_zero, Real.exp_zero, mul_one]
+        ring
+      _ < s.volume.r0 := (div_lt_iff₀ hD).2 (by
+        simpa only [mul_comm] using hKq)
+  have hcap :
+      max 4 (50 * Real.exp
+          (s.decay.C * (20 * s.decay.lambda D 0))) *
+        s.decay.lambda D 0 ≤ s.volume.r0 :=
+    (mul_le_mul_of_nonneg_right hfac hlam_nonneg).trans hKlam.le
+  exact ⟨D, hD, hcap, hD_one, hmuD, hcB.trans_lt hB_lt⟩
+
+end MetricCompactSeed
+
+namespace MetricCompactCore
+
+/-- A provider-neutral core supplies the stabilized Step-A net. -/
+theorem exists_stable_net
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (inp : MetricCompactCore (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) :
+    ∃ L : NetLimitData inp.decay inp.D P,
+      ∀ α β : Nat,
+        (∀ᶠ k in atTop,
+          BInter inp.decay inp.D P L.lamInf α β (L.φ k)) ∨
+        (∀ᶠ k in atTop,
+          ¬ BInter inp.decay inp.D P L.lamInf α β (L.φ k)) :=
+  exists_stableNetData inp.decay inp.hD P
+
+/-- Completeness and connectedness provide the proper metrics used by the
+provider-neutral Step-A net. -/
+noncomputable def properMetrics
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (_inp : MetricCompactCore (I := I) X)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M) :
+    ∀ k : Nat, ProperMetricOn (I := I) (X.obj k) :=
+  fun k => properMetricOn (I := I) (X.obj k)
+    (hcomplete.complete k) (hconn k)
+
+end MetricCompactCore
+
 
 
 
@@ -602,6 +740,22 @@ structure MetricCompactBase
   normalRadius : NormalRadiusProfile decay normalBounds
 
 namespace MetricCompactBase
+/-- Forget the legacy normal-coordinate fields and retain only the
+provider-neutral geometric producers. -/
+def toSeed
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : MetricCompactBase (I := I) X) :
+    MetricCompactSeed (I := I) X where
+  decay := b.decay
+  packAll := b.pack
+  volume := b.volume
+  dist_eq := b.dist_eq
+  realizes := b.realizes
+
+instance
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} :
+    Coe (MetricCompactBase (I := I) X) (MetricCompactSeed (I := I) X) :=
+  ⟨toSeed⟩
 
 
 
@@ -790,6 +944,26 @@ structure MetricCompactnessInputs
   normalRadius : NormalRadiusProfile decay normalBounds
 
 namespace MetricCompactnessInputs
+/-- Forget the legacy chart-specific normal-coordinate fields. -/
+def toCore
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (inp : MetricCompactnessInputs (I := I) X) :
+    MetricCompactCore (I := I) X where
+  decay := inp.decay
+  packAll := inp.packAll
+  D := inp.D
+  hD := inp.hD
+  pack := inp.pack
+  volume := inp.volume
+  dist_eq := inp.dist_eq
+  stepA_cap_le := inp.stepA_cap_le
+  realizes := inp.realizes
+
+instance
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} :
+    Coe (MetricCompactnessInputs (I := I) X)
+      (MetricCompactCore (I := I) X) :=
+  ⟨toCore⟩
 
 /-- Recover the divisor-independent geometric producer bundle from a
 conditional compactness input. -/
@@ -897,7 +1071,7 @@ theorem item3ScaleTails
         (item3RadiusFactor inp.decay inp.D) := by
   exact ⟨inp.normalRadius.gpScaleTail inp.hD h8 P inp.realizes L inp.pack r,
     inp.normalRadius.radiusScaleTail inp.hD
-      (item3Factor_pos inp.decay inp.D) hradD hradRatio
+      (item3Factor_pos inp.decay inp.D) hradRatio
       P inp.realizes L inp.pack r⟩
 
 

@@ -3,6 +3,8 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
+import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
+import DifferentialGeometry.Geometry.Exponential.NormalBallChart
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricKoszul
@@ -55,9 +57,12 @@ open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type uE} [NormedAddCommGroup E]
+variable {H : Type uH} [TopologicalSpace H]
+
+section RawNormalCoordinates
+
 variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
-variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
@@ -1146,6 +1151,301 @@ theorem normalChartAt_contMDiffOn_infty
   exact (normalChartAt_contMDiffAt_infty (I := I) g p hv₀ball).contMDiffWithinAt
 
 end NormalChartInftySmooth
+
+end RawNormalCoordinates
+
+section ControlledNormalCharts
+
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable {I : ModelWithCorners Real E H}
+variable [I.Boundaryless]
+
+/-- A controlled normal-ball chart at a point of a packaged pointed
+Riemannian manifold.  This abbreviation installs the manifold instances stored
+by `Y`, so downstream provider-parametric declarations do not repeat the same
+`letI` block in every chart argument. -/
+abbrev NormalChartAt
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) : Type (max u uE) :=
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  NormalBallChart (I := I) x
+
+/-- A coherent choice of controlled normal chart at every stage and center of
+a pointed Riemannian sequence. -/
+abbrev NormalChartFamily
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) :=
+  ∀ (k : Nat) (x : (X.obj k).M),
+    NormalChartAt (I := I) (X.obj k) x
+
+namespace NormalChartFamily
+
+/-- Restrict a normal-chart family along a sequence reindexing. -/
+def subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X) (f : Nat → Nat) :
+    NormalChartFamily (I := I) (X.subseq f) :=
+  fun k x => chart (f k) x
+
+/-- The coordinate transition between two members of one normal-chart family
+at the same sequence stage. -/
+def transition
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X) (k : Nat)
+    (x y : (X.obj k).M) : E → E :=
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  (chart k x).transition (chart k y)
+
+/-- The metric of a sequence member pulled back through one chart in a
+coherent normal-chart family. -/
+noncomputable def metric
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (chart : NormalChartFamily (I := I) X) (k : Nat)
+    (x : (X.obj k).M) : E → (E →L[Real] E →L[Real] Real) :=
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  (chart k x).metric (X.obj k).metric
+
+end NormalChartFamily
+
+/-- The existing selected raw normal-coordinate branch, packaged through
+the canonical branch-parametric normal-ball interface. -/
+noncomputable def legacyBallChart
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    NormalBallChart (I := I) x := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  let U := Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x)
+  have hsub : U ⊆ (expMapDiffeo (I := I) Y.metric x).source := by
+    intro z hz
+    apply mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x
+    simpa only [U, Metric.mem_ball, dist_zero_right] using hz
+  have himage :
+      (fun z => expMapDiffeo (I := I) Y.metric x z) '' U =
+        (fun z : E => (expMap (I := I) Y.metric x
+          (show TangentSpace I x from z) : Y.M)) '' U := by
+    apply Set.image_congr
+    intro z hz
+    exact expMapDiffeo_apply_eq (I := I) Y.metric x (hsub hz)
+  exact
+    { radius := expMapC2Radius (I := I) Y.metric x
+      radius_pos := expMapC2Radius_pos (I := I) Y.metric x
+      hom := expMapDiffeo (I := I) Y.metric x
+      ball_subset := hsub
+      map_zero := expMapDiffeo_zero (I := I) Y.metric x
+      smooth_to := expMapDiffeo_contMDiffOn_expBall (I := I) Y x
+      smooth_inv := by
+        rw [himage]
+        exact normalChartAt_contMDiffOn_infty (I := I) Y.metric x }
+
+/-- The legacy raw normal-coordinate charts, packaged as one stage-indexed family. -/
+noncomputable def legacyChartFamily
+    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) :
+    NormalChartFamily (I := I) X :=
+  fun k x => legacyBallChart (I := I) (X.obj k) x
+
+@[simp] theorem legacyBallChart_radius
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).radius =
+      expMapC2Radius (I := I) Y.metric x :=
+  rfl
+
+@[simp] theorem legacyChart_apply
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) (z : E) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).hom z =
+      expMapDiffeo (I := I) Y.metric x z := by
+  rfl
+
+/-- The inverse map carried by the legacy provider is the established raw normal-coordinate chart. -/
+@[simp] theorem legacyInv_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).inv =
+      normalChartAt (I := I) Y.metric x := by
+  rfl
+
+/-- The target of the legacy exponential branch is the source of its raw inverse chart. -/
+@[simp] theorem legacyTarget_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).hom.target =
+      (normalChartAt (I := I) Y.metric x).source := by
+  rfl
+
+/-- The controlled image of the legacy provider is the corresponding raw exponential image. -/
+theorem legacyImage_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).hom ''
+        Metric.ball (0 : E) (legacyBallChart (I := I) Y x).radius =
+      (fun z : E => (expMap (I := I) Y.metric x (show TangentSpace I x from z) : Y.M)) ''
+        Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  rw [legacyBallChart_radius]
+  apply Set.image_congr
+  intro z hz
+  rw [legacyChart_apply]
+  exact expMapDiffeo_apply_eq (I := I) Y.metric x
+    ((legacyBallChart (I := I) Y x).ball_subset hz)
+
+/-- The branch-parametric pullback metric of the legacy provider is the
+existing `normalCoordMetric`. -/
+theorem legacyMetric_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).metric Y.metric =
+    normalCoordMetric (I := I) Y x := by
+  rfl
+
+/-- The legacy sequence bounds presented through the common controlled-chart
+metric interface. -/
+def NormalCoordMetricBoundInput.metricBounds
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (h : NormalCoordMetricBoundInput (I := I) X)
+    (k : Nat) (x : (X.obj k).M) :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : T2Space (TangentBundle I (X.obj k).M) :=
+      (X.obj k).t2TangentBundle
+    (legacyBallChart (I := I) (X.obj k) x).MetricBounds
+      (X.obj k).metric := by
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  exact
+    { C := h.metricC
+      C_nonneg := h.metricC_nonneg
+      radius := h.radius k x
+      radius_pos := h.radius_pos k x
+      equiv := by
+        simpa only [legacyMetric_eq] using
+          h.metric_equiv k x
+      deriv := fun p => by
+        simpa only [legacyMetric_eq] using
+          h.metric_deriv k p x }
+
+/-- The transition of the legacy chart provider is the established
+`normalTransition`. -/
+theorem legacyTransition_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x y : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).transition
+        (legacyBallChart (I := I) Y y) =
+      normalTransition (I := I) Y x y := by
+  rfl
+
+/-- Controlled overlap for the legacy provider is exactly the raw ball-and-image condition. -/
+theorem legacyOverlap_iff
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x y : Y.M) (U : Set E) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).OverlapOn
+        (legacyBallChart (I := I) Y y) U ↔
+      ∀ z ∈ U,
+        z ∈ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x) ∧
+        expMapDiffeo (I := I) Y.metric x z ∈
+          (fun z : E => (expMap (I := I) Y.metric y (show TangentSpace I y from z) : Y.M)) ''
+            Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric y) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  rw [NormalBallChart.OverlapOn, legacyBallChart_radius,
+    legacyImage_eq]
+  simp only [legacyChart_apply]
+
+/-- The generic branch-metric equivalence predicate specializes exactly to
+the established legacy predicate. -/
+theorem legacyEquiv_iff
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) (U : Set E) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).MetricEquivOn Y.metric U ↔
+      NormalCoordMetricEquivOn (I := I) Y x U := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  rw [NormalBallChart.MetricEquivOn, NormalCoordMetricEquivOn,
+    legacyMetric_eq (I := I)]
+
+/-- The generic branch-metric derivative predicate specializes exactly to
+the established legacy predicate. -/
+theorem legacyDeriv_iff
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (x : Y.M) (U : Set E) (p : Nat) (C : Real) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (legacyBallChart (I := I) Y x).MetricDerivBound
+        Y.metric U p C ↔
+      NormalCoordMetricDerivBound (I := I) Y x U p C := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  rw [NormalBallChart.MetricDerivBound, NormalCoordMetricDerivBound,
+    legacyMetric_eq (I := I)]
+
+
+end ControlledNormalCharts
 
 end HCGCompactness
 end DifferentialGeometry

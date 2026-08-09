@@ -348,6 +348,9 @@ theorem covDerivConnDiff_diff_endpoint_graded
 def koszulDoubleTraceSlotPerm : Equiv.Perm (Fin 4) :=
   Equiv.Perm.decomposeFin.symm (0, finRotate 3)
 
+/-- Compatibility name for the Koszul double-trace slot permutation. -/
+abbrev koszulSlotPerm := koszulDoubleTraceSlotPerm
+
 
 private theorem koszulSlotPerm_apply :
     koszulDoubleTraceSlotPerm 0 = 0 ∧ koszulDoubleTraceSlotPerm 1 = 2 ∧ koszulDoubleTraceSlotPerm 2
@@ -368,6 +371,12 @@ noncomputable def ricciPrincipalCoeffDoubleTraceModel
             ((ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
               koszulDoubleTraceSlotPerm).toContinuousLinearEquiv.toContinuousLinearMap))
       - modelDoubleTrace (E := E) 2 L)
+
+/-- Compatibility name for the combined double-trace model. -/
+abbrev combinedTrace42Model
+    (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E) :
+    Tensor0SBundle.Tensor0SModel 4 ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel 2 ℝ E :=
+  ricciPrincipalCoeffDoubleTraceModel L
 
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -439,11 +448,19 @@ theorem ricciPrincipalCoeffDoubleTraceModel_apply
     rw [Equiv.swap_apply_left, Equiv.swap_apply_right]
   rw [htuple]
 
+/-- Compatibility form of the combined double-trace evaluation formula. -/
+alias combinedTrace42Model_apply := ricciPrincipalCoeffDoubleTraceModel_apply
+
 noncomputable def ricciDeTurckPrincipalCoeffAtPoint (g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 2 x).symm.toContinuousLinearMap.comp
     ((ricciPrincipalCoeffDoubleTraceModel (E := E) (cometricLmodel (I := I) g₁ x)).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
+
+/-- Compatibility name for the pointwise principal Ricci-arm coefficient. -/
+abbrev ricciArmPrincipalCoeffFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
+  ricciDeTurckPrincipalCoeffAtPoint g₁ x
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]

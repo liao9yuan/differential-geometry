@@ -27,7 +27,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E]
-  [NormedSpace Real E] [FiniteDimensional Real E]
+[InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -50,7 +50,6 @@ noncomputable def hatSourceBall (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   Metric.closedBall (X.obj (L.φ n)).basepoint r
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp] theorem hatSourceBall_subseq
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -63,7 +62,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hatSource_nhds
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -103,7 +101,6 @@ theorem hatSource_nhds
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hatSourceCompact
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -127,7 +124,6 @@ theorem hatSourceCompact
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem sourceComplete
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -163,7 +159,6 @@ theorem sourceComplete
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hatBallInCompact
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -214,7 +209,6 @@ noncomputable def hatSourceCage (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         Set (X.obj (L.φ n)).M))
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 @[simp] theorem hatSourceCage_subseq
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -229,7 +223,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hatCageData
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -264,7 +257,6 @@ theorem hatCageData
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hatCageCompact
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -281,7 +273,6 @@ theorem hatCageCompact
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hatCageSub
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -302,7 +293,6 @@ theorem hatCageSub
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem hatCageInClosed
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -347,7 +337,6 @@ theorem hatCageInClosed
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank Real E)] in
 theorem hatCageSrcOfBall
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -415,7 +404,7 @@ theorem hatCageSrcOfRad
       (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
         (center gamma)).source := by
   exact
-    NetLimitData.hatCageSrcOfBall (I := I) (X := X) hd P L pb r n center gamma
+    NetLimitData.hatCageSrcOfBall (X := X) hd P L pb r n center gamma
       hcenter
       (properBallSrcOfRad (I := I) (Y := X.obj (L.φ n)) (P := P (L.φ n)) hR)
 
@@ -464,7 +453,6 @@ theorem hatCageSrcCases
 
 
 omit [Module.Finite ℝ E] in
-omit [NeZero (Module.finrank Real E)] in
 theorem hatSuppCageData
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

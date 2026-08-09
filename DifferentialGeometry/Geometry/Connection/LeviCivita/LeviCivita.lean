@@ -27,4 +27,12 @@ theorem levi_civita_pullback_conjugation_symm
     pullback_connection_construct g Φ
       = LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+/-- Compatibility name for the symmetric pullback-conjugation identity. -/
+theorem levi_civita_pullback_conjugation_finalize
+    (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
+    pullback_connection_construct g Φ
+      = LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ) :=
+  levi_civita_pullback_conjugation_symm (I := I) g Φ
+
 end DifferentialGeometry.PDE.RicciFlow.Pullback

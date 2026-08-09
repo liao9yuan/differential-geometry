@@ -73,6 +73,11 @@ def castCcTensorRank (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h :
     (W : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
   h ▸ W
 
+/-- Compatibility name for covariant-rank transport of a smooth compactly supported tensor. -/
+abbrev castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+    (W : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
+  castCcTensorRank g r h W
+
 
 omit [BoundarylessManifold I M] [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in

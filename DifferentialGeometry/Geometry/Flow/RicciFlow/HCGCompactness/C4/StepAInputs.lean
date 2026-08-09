@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.InjectivityRadius
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 
 set_option autoImplicit false
 
@@ -32,7 +33,7 @@ open Bundle
 open scoped Manifold ContDiff Topology ENNReal Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -83,6 +84,57 @@ def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
   decay := by
     intro k x
     simpa [PointedRiemannianSeq.subseq] using hd.decay (f k) x
+
+/-- The Cheeger--Gromov--Taylor injectivity-radius profile appearing in
+`InjRadiusDecayInput.decay`. -/
+noncomputable def mu {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) (r : Real) : Real :=
+  hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) * Real.exp (-hd.C * r)
+
+/-- The injectivity-radius profile is positive at every real radius. -/
+theorem mu_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 < hd.mu r :=
+  mul_pos (mul_pos hd.a_pos (pow_pos (lt_min hd.baseInj.pos one_pos) _)) (Real.exp_pos _)
+
+/-- The injectivity-radius profile is nonnegative at every real radius. -/
+theorem mu_nonneg {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 ≤ hd.mu r :=
+  (hd.mu_pos r).le
+
+/-- The injectivity-radius profile decreases with the basepoint distance. -/
+theorem mu_antitone {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) : Antitone hd.mu := by
+  intro r₁ r₂ h
+  have hK : 0 ≤ hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) :=
+    (mul_pos hd.a_pos (pow_pos (lt_min hd.baseInj.pos one_pos) _)).le
+  have hexp : Real.exp (-hd.C * r₂) ≤ Real.exp (-hd.C * r₁) :=
+    Real.exp_le_exp.mpr (by nlinarith [mul_le_mul_of_nonneg_left h hd.C_nonneg])
+  exact mul_le_mul_of_nonneg_left hexp hK
+
+/-- The supplied distance realizes the Riemannian emetric of every sequence
+term and is therefore nonnegative. -/
+structure RealizesEdist {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) : Prop where
+  dist_nonneg : ∀ (k : Nat) (x y : (X.obj k).M), 0 ≤ hd.dist k x y
+  edist_eq : ∀ (k : Nat) (x y : (X.obj k).M),
+    (letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
+     edist x y) = ENNReal.ofReal (hd.dist k x y)
+
+namespace RealizesEdist
+
+/-- Reindex the realized-distance proof along a subsequence. -/
+theorem subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    (hre : hd.RealizesEdist) (f : Nat → Nat) :
+    (hd.subseq f).RealizesEdist := by
+  refine ⟨?_, ?_⟩
+  · intro k x y
+    exact hre.dist_nonneg (f k) x y
+  · intro k x y
+    simpa [InjRadiusDecayInput.subseq, PointedRiemannianSeq.subseq] using
+      hre.edist_eq (f k) x y
+
+end RealizesEdist
 
 end InjRadiusDecayInput
 

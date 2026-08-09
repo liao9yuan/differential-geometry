@@ -1022,7 +1022,6 @@ def riemannLoweredContractionB (g₀ : SmoothRiemannianMetric I M) : SmoothCcTen
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 private lemma lrRiemW1_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (m : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1106,7 +1105,6 @@ private lemma lrRiemW1_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 private lemma lrRiemW2_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (m : Fin 4 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1197,7 +1195,6 @@ def riemannCurvatureCoeffField (g₀ : SmoothRiemannianMetric I M) (T : SmoothCc
       (riemannLoweredContractionB (I := I) (M := M) g₀) T
 
 set_option backward.isDefEq.respectTransparency false in
-omit [SigmaCompactSpace M] in
 private lemma lrCurvF_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (riemannCurvatureCoeffField (I := I) (M := M) g₀ T) x m =
@@ -1831,7 +1828,7 @@ private theorem lrSummand (g₀ : SmoothRiemannianMetric I M)
       ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [hR4, lrQuadF_unitModel_apply (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T 0 hδ hδZ s) x ![v0, v1, pf, qf],
-    lrCurvF_unitModel_apply (I := I) (M := M) g₀ T x ![v0, v1, pf, qf]]
+    lrCurvF_unitModel_apply g₀ T x ![v0, v1, pf, qf]]
   rw [lrKernel_inner (I := I) (M := M) g₀ T hδ_lt hδ hδZ hTsymm hs x v0 v1 pf qf,
     lrKernel_inner (I := I) (M := M) g₀ T hδ_lt hδ hδZ hTsymm hs x v1 v0 pf qf]
   rw [lrCovGradKT_unitModel (I := I) (M := M) g₀ T x v0 v1 pf qf,

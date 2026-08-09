@@ -18,7 +18,7 @@ universe u uE uH
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]

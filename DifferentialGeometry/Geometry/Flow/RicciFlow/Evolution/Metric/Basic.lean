@@ -238,6 +238,32 @@ def InverseMetricDerivativeComponentsOn
       D.carrier
       (t : Real)
 
+/-- Componentwise time regularity of supplied inverse-metric components on a
+local frame domain. -/
+def InvMetricDerivLocal
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (u : Set M) : Prop :=
+  forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    x ∈ u -> forall i j : Idx,
+      HasDerivWithinAt
+        (fun s : Real => gInv s x i j)
+        (gInvDt (t : Real) x i j)
+        D.carrier
+        (t : Real)
+
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] in
+/-- Global inverse-component time regularity restricts to any frame domain. -/
+theorem InverseMetricDerivativeComponentsOn.toLocal
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx}
+    {gInvDt : Real -> M -> Idx -> Idx -> Real}
+    (hdt : InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt)
+    (u : Set M) :
+    InvMetricDerivLocal (D := D) gInv gInvDt u :=
+  fun t x _hx i j => hdt t x i j
+
 
 
 
@@ -265,7 +291,7 @@ structure MetricFrameTimeRegularityInFrameOnLocal
   nondegenerateGram :
     InvMetricLocal (I := I) S gInv frame u
   inverseMetricDerivative :
-    InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt
+    InvMetricDerivLocal (D := D) gInv gInvDt u
   uniqueTimeDerivatives :
     forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)
@@ -306,6 +332,30 @@ structure MetricFrameSpacetimeRegularityInFrameOnLocal
               x (frame d x))
           D.carrier
           (t : Real)
+
+omit [SigmaCompactSpace M] [T2Space M] in
+/-- Replace the inverse-component family in a spacetime metric-frame package,
+keeping all metric-side regularity fields unchanged. -/
+theorem MetricFrameSpacetimeRegularityInFrameOnLocal.congrInv
+    [DecidableEq Idx]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    {gInv gInv' : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx}
+    {gInvDt gInvDt' : Real -> M -> Idx -> Idx -> Real}
+    {frame : Idx -> (x : M) -> TangentSpace I x}
+    {u : Set M}
+    (h : MetricFrameSpacetimeRegularityInFrameOnLocal
+      (I := I) S gInv gInvDt frame u)
+    (hinv : InvMetricLocal (I := I) S gInv' frame u)
+    (hdt : InvMetricDerivLocal (D := D) gInv' gInvDt' u) :
+    MetricFrameSpacetimeRegularityInFrameOnLocal
+      (I := I) S gInv' gInvDt' frame u where
+  metricSmooth := h.metricSmooth
+  nondegenerateGram := hinv
+  inverseMetricDerivative := hdt
+  uniqueTimeDerivatives := h.uniqueTimeDerivatives
+  frameMetricSpacetimeSmooth := h.frameMetricSpacetimeSmooth
+  frameMetricExtDerivTimeDerivative := h.frameMetricExtDerivTimeDerivative
 
 
 end Components

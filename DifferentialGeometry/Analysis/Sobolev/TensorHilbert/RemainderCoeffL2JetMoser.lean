@@ -798,7 +798,6 @@ private lemma tsmNormSq_covGrad_shift (g : SmoothRiemannianMetric I M) (r s n : 
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
   exact rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g r s n Φ x
 
-omit [NeZero (Module.finrank ℝ E)] in
 private theorem ricciArmOrder1KoszulCoeff_topTerm_pointwise_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -855,7 +854,6 @@ private theorem ricciArmOrder1KoszulCoeff_topTerm_pointwise_le
           ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) P).toSection x) := by
       ring
 
-omit [NeZero (Module.finrank ℝ E)] in
 private theorem ricciArmOrder1KoszulCoeff_topTerm_normSq_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

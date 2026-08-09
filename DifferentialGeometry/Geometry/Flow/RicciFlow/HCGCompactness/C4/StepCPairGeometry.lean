@@ -20,7 +20,7 @@ namespace HCGCompactness
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -31,7 +31,6 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [I.Boundaryless] in
 theorem NetLimitData.sigmaBall_nesting
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -194,7 +193,7 @@ theorem NetLimitData.pair_exp_maps
             (I := I) (X.obj (L.φ k)).metric x := (hrad α x hx).2
   have hsource := exp_sigma_maps (I := I) (X.obj (L.φ k))
     (P (L.φ k)).ms (P (L.φ k)).realizes x hmetric hsourceC2
-  have hnest := L.sigmaBall_nesting hd hD P hfreq k hk hx hy
+  have hnest := NetLimitData.sigmaBall_nesting hd hD P L hfreq k hk hx hy
   have hApos : 0 < item3RadiusFactor hd D * L.lamInf (β : Nat) :=
     mul_pos (item3Factor_pos hd D) (hd.lambda_pos hD (L.rInf (β : Nat)))
   have hcoercPos :
