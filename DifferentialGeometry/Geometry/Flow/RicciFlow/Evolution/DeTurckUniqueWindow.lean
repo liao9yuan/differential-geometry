@@ -181,11 +181,11 @@ theorem chartRD_local
   let Sol₂ : SolutionOn (I := I) (M := M) D := { base := { metric := g₂ } }
   let G₁ : RealizedMetricFamilyOn (I := I) (M := M) D := Sol₁.family
   let G₂ : RealizedMetricFamilyOn (I := I) (M := M) D := Sol₂.family
-  have hG₁ : MetricFamilySmoothOn (I := I) (M := M) D G₁ := by
+  have hG₁ : MetricFamilySmoothOn (I := I) (M := M) D G₁.metric := by
     simpa only [D, G₁, Sol₁] using
       metricFamilySmoothOn_of_chartGram (I := I) (M := M)
         g₁ hab hsmooth₁ hcont₁
-  have hG₂ : MetricFamilySmoothOn (I := I) (M := M) D G₂ := by
+  have hG₂ : MetricFamilySmoothOn (I := I) (M := M) D G₂.metric := by
     simpa only [D, G₂, Sol₂] using
       metricFamilySmoothOn_of_chartGram (I := I) (M := M)
         g₂ hab hsmooth₂ hcont₂
@@ -212,7 +212,7 @@ theorem chartRD_local
     simpa only [G₂, Sol₂, SolutionOn.family, SolutionFamily.connection,
       add_comm] using hpde.comp_add_const t c
   obtain ⟨T, hT, huniq⟩ := metricRD_local (I := I) (M := M)
-    G₁ G₂ hG₁ hG₂ (g₁ c) g_bg c hS h0S hmap rfl (by
+    G₁.metric G₂.metric hG₁ hG₂ (g₁ c) g_bg c hS h0S hmap rfl (by
       simpa only [G₂, Sol₂, SolutionOn.family] using hagree.symm) hshift₁ hshift₂
   refine ⟨T, hT, ?_⟩
   intro t ht

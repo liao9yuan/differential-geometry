@@ -105,7 +105,7 @@ theorem isSolution
   have hgram := OpenConvOut.gramSmooth (I := I) (Φ := Φ) ht₀ hD co
   have hsmooth : MetricFamilySmoothOn (I := I) (M := P.M) X.D
       ({ base := { metric := co.gInf } } :
-        SolutionOn (I := I) (M := P.M) X.D).family := by
+        SolutionOn (I := I) (M := P.M) X.D).family.metric := by
     exact hD.symm ▸
       OpenConvOut.smoothMetric_of_conv (I := I) (Φ := Φ) ht₀ hD co
   have hpde : ∀ t ∈ X.D.regular, ∀ (x : P.M) (v w : TangentSpace I x),

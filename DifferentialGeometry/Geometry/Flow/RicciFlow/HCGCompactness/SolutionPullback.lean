@@ -179,7 +179,7 @@ theorem metricFamilySmoothOn_pullback
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := N) D) (hS : IsSolutionOn (I := I) S)
     (Φ : M ≃ₘ⟮I, I⟯ N) :
-    MetricFamilySmoothOn (I := I) D (solutionOn_pullback (I := I) S Φ).family where
+    MetricFamilySmoothOn (I := I) D (solutionOn_pullback (I := I) S Φ).family.metric where
   coeff x X Y := by
     rw [pullback_coeff_eq (I := I) S Φ x X Y]
     exact hS.smoothMetric.coeff (Φ x)

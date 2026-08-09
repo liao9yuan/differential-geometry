@@ -1021,7 +1021,7 @@ theorem flowLimit_of_reg
       hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG
     ∀ (_hsmooth : MetricFamilySmoothOn (I := I) (M := mc.limit.M) X.D
           ({ base := { metric := co.gInf } } :
-            SolutionOn (I := I) (M := mc.limit.M) X.D).family)
+            SolutionOn (I := I) (M := mc.limit.M) X.D).family.metric)
       (_hscalarCont : ContinuousOn
         (fun q : Real × mc.limit.M ↦ metricScalarAt (I := I) (co.gInf q.1) q.2)
         (X.D.carrier ×ˢ (Set.univ : Set mc.limit.M)))

@@ -53,18 +53,17 @@ no-local-collapsing theorem. -/
 theorem family_vol_low
     [T2Space (TangentBundle I M)]
     {omega : Real} (h0omega : 0 < omega)
-    (G : RealizedMetricFamilyOn (I := I) (M := M)
-      (RealTimeInterval.closedOpen 0 omega h0omega))
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
     (_hG : MetricFamilySmoothOn (I := I) (M := M)
-      (RealTimeInterval.closedOpen 0 omega h0omega) G)
+      (RealTimeInterval.closedOpen 0 omega h0omega) g_fam)
     {rho : Real} (_hrho : 0 < rho) :
     ∃ tau kappa : Real, 0 < tau ∧ tau < omega ∧ 0 < kappa ∧
       ∀ (t : RealTimeInterval.FlowTime (RealTimeInterval.closedOpen 0 omega h0omega)),
         (t : Real) ≤ tau →
         ∀ (p : M) {r : Real}, 0 < r → r ≤ rho → r ^ 2 ≤ (t : Real) →
           ENNReal.ofReal kappa * ENNReal.ofReal r ^ Module.finrank Real E ≤
-            riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real))
-              {x : M | riemannianEDistOf (I := I) (G.metric (t : Real)) p x <
+            riemannianVolumeMeasure (I := I) (M := M) (g_fam (t : Real))
+              {x : M | riemannianEDistOf (I := I) (g_fam (t : Real)) p x <
                 ENNReal.ofReal r} := by
   classical
   by_cases hM : IsEmpty M
@@ -73,7 +72,7 @@ theorem family_vol_low
     exact (hM.false p).elim
   rw [not_isEmpty_iff] at hM
   let Ψ : M → PartialDiffeomorph 𝓘(Real, E) I E M 1 :=
-    fun a => NormalCoordinates.expMapDiffeo (I := I) (G.metric 0) a
+    fun a => NormalCoordinates.expMapDiffeo (I := I) (g_fam 0) a
   have hlocal : ∀ a : M, ∃ tau R c L : Real,
       0 < tau ∧ tau < omega ∧ 0 < R ∧ 0 < c ∧ 1 ≤ L ∧
       Metric.closedBall (0 : E) (2 * R) ⊆ (Ψ a).source ∧
@@ -81,14 +80,14 @@ theorem family_vol_low
           (RealTimeInterval.closedOpen 0 omega h0omega)),
         (t : Real) ≤ tau →
         ∀ w ∈ Metric.closedBall (0 : E) (2 * R),
-          c ≤ paramDensity (I := I) (G.metric (t : Real)) (Ψ a) w ∧
+          c ≤ paramDensity (I := I) (g_fam (t : Real)) (Ψ a) w ∧
           ∀ v : E,
             Real.sqrt
-              ((G.metric (t : Real)).inner ((Ψ a) w)
+              ((g_fam (t : Real)).inner ((Ψ a) w)
                 (mfderiv 𝓘(Real, E) I (Ψ a) w v)
                 (mfderiv 𝓘(Real, E) I (Ψ a) w v)) ≤ L * ‖v‖ := by
     intro a
-    simpa only [Ψ] using exists_param_ctrl (I := I) h0omega G _hG a
+    simpa only [Ψ] using exists_param_ctrl (I := I) h0omega g_fam _hG a
   choose tauLoc RLoc cLoc LLoc htau_pos htau_lt hR_pos hc_pos hL_one hsource hctrl
     using hlocal
   let U : M → Set M := fun a => (Ψ a) '' Metric.ball (0 : E) (RLoc a)
@@ -109,7 +108,7 @@ theorem family_vol_low
     refine ⟨0, ?_, ?_⟩
     · simpa only [Metric.mem_ball, dist_self] using hR_pos a
     · simpa only [Ψ] using
-        NormalCoordinates.expMapDiffeo_zero (I := I) (G.metric 0) a
+        NormalCoordinates.expMapDiffeo_zero (I := I) (g_fam 0) a
   have hcover : (Set.univ : Set M) ⊆ ⋃ a : M, U a := by
     intro a _ha
     exact Set.mem_iUnion.mpr ⟨a, haU a⟩
@@ -197,7 +196,7 @@ theorem family_vol_low
     · exact hB_closed hz
   have hctrl_t := hctrl a t (ht.trans htau_a)
   letI : Bundle.RiemannianBundle (fun x : M => TangentSpace I x) :=
-    ⟨(G.metric (t : Real)).toRiemannianMetric⟩
+    ⟨(g_fam (t : Real)).toRiemannianMetric⟩
   have hspd : ∀ q ∈ Metric.closedBall (0 : E) (2 * RLoc a), ∀ ξ : E,
       ‖mfderiv 𝓘(Real, E) I (Ψ a) q ξ‖ₑ ≤
         ENNReal.ofReal (LLoc a * ‖ξ‖) := by
@@ -205,13 +204,13 @@ theorem family_vol_low
     rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
     change ENNReal.ofReal
       (Real.sqrt
-        ((G.metric (t : Real)).inner ((Ψ a) q)
+        ((g_fam (t : Real)).inner ((Ψ a) q)
           (mfderiv 𝓘(Real, E) I (Ψ a) q ξ)
           (mfderiv 𝓘(Real, E) I (Ψ a) q ξ))) ≤
         ENNReal.ofReal (LLoc a * ‖ξ‖)
     exact ENNReal.ofReal_le_ofReal ((hctrl_t q hq).2 ξ)
   have himage : (Ψ a) '' B ⊆
-      {x : M | riemannianEDistOf (I := I) (G.metric (t : Real)) p x <
+      {x : M | riemannianEDistOf (I := I) (g_fam (t : Real)) p x <
         ENNReal.ofReal r} := by
     intro x hx
     obtain ⟨z, hz, rfl⟩ := hx
@@ -229,17 +228,17 @@ theorem family_vol_low
     exact (ENNReal.ofReal_lt_ofReal_iff hr).2 hmul
   have hparam :
       ENNReal.ofReal (cLoc a) * (modelHaar (E := E)) B ≤
-        riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real))
+        riemannianVolumeMeasure (I := I) (M := M) (g_fam (t : Real))
           ((Ψ a) '' B) := by
-    apply param_vol_ge (I := I) (G.metric (t : Real)) (Ψ a)
+    apply param_vol_ge (I := I) (g_fam (t : Real)) (Ψ a)
       measurableSet_ball hB_source
     intro z hz
     exact (hctrl_t z (hB_closed hz)).1
   have hmono :
-      riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real))
+      riemannianVolumeMeasure (I := I) (M := M) (g_fam (t : Real))
           ((Ψ a) '' B) ≤
-        riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real))
-          {x : M | riemannianEDistOf (I := I) (G.metric (t : Real)) p x <
+        riemannianVolumeMeasure (I := I) (M := M) (g_fam (t : Real))
+          {x : M | riemannianEDistOf (I := I) (g_fam (t : Real)) p x <
             ENNReal.ofReal r} :=
     measure_mono himage
   have hball :
@@ -270,10 +269,10 @@ theorem family_vol_low
           ENNReal.ofReal_div_of_pos hL_pos]
       simp only [div_eq_mul_inv, mul_pow]
       ac_rfl
-    _ ≤ riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real))
+    _ ≤ riemannianVolumeMeasure (I := I) (M := M) (g_fam (t : Real))
           ((Ψ a) '' B) := hparam
-    _ ≤ riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real))
-          {x : M | riemannianEDistOf (I := I) (G.metric (t : Real)) p x <
+    _ ≤ riemannianVolumeMeasure (I := I) (M := M) (g_fam (t : Real))
+          {x : M | riemannianEDistOf (I := I) (g_fam (t : Real)) p x <
             ENNReal.ofReal r} := hmono
 
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison

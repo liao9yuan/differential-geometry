@@ -742,7 +742,7 @@ zero initial perturbation, and the realization identity are all derived from
 the metric-difference construction rather than supplied as extra inputs. -/
 theorem metricRD_unique
     {D : RealTimeInterval}
-    (G₁ G₂ : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G₁ G₂ : ℝ → SmoothRiemannianMetric I M)
     (hG₁ : MetricFamilySmoothOn (I := I) (M := M) D G₁)
     (hG₂ : MetricFamilySmoothOn (I := I) (M := M) D G₂)
     (q g_bg : SmoothRiemannianMetric I M) (c : ℝ)
@@ -770,53 +770,53 @@ theorem metricRD_unique
     {S : Set ℝ} (hS : IsOpen S) (hIcc : Icc (0 : ℝ) T ⊆ S)
     (hmap₁ : ∀ t ∈ S, c + t ∈ D.regular)
     (hmap₂ : ∀ t ∈ S, c + t ∈ D.regular)
-    (hG₁0 : G₁.metric c = q) (hG₂0 : G₂.metric c = q)
+    (hG₁0 : G₁ c = q) (hG₂0 : G₂ c = q)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hsmall₁ : ∀ t ∈ Icc (0 : ℝ) T,
       metricCauchySchwarzBound (I := I) (M := M) q
         (ccTensorBilinSymm (I := I) q
           (metricDifferenceCcTensor (I := I) (M := M) q
-            (G₁.metric (c + t)))) δ)
+            (G₁ (c + t)))) δ)
     (hsmall₂ : ∀ t ∈ Icc (0 : ℝ) T,
       metricCauchySchwarzBound (I := I) (M := M) q
         (ccTensorBilinSymm (I := I) q
           (metricDifferenceCcTensor (I := I) (M := M) q
-            (G₂.metric (c + t)))) δ)
+            (G₂ (c + t)))) δ)
     (hball₁ : ∀ t ∈ Icc (0 : ℝ) T,
       ‖smoothCcToTensorHs (I := I) (M := M) q ((a : ℝ) + 2)
         (metricDifferenceCcTensor (I := I) (M := M) q
-          (G₁.metric (c + t)))‖ ≤
+          (G₁ (c + t)))‖ ≤
         (Classical.choose
           (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) q a ha_super)).1)
     (hball₂ : ∀ t ∈ Icc (0 : ℝ) T,
       ‖smoothCcToTensorHs (I := I) (M := M) q ((a : ℝ) + 2)
         (metricDifferenceCcTensor (I := I) (M := M) q
-          (G₂.metric (c + t)))‖ ≤
+          (G₂ (c + t)))‖ ≤
         (Classical.choose
           (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) q a ha_super)).1)
     (hPDE₁ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
-        HasDerivAt (fun tau => (G₁.metric (c + tau)).inner x v w)
-          (deTurckRicciRHS (I := I) g_bg (G₁.metric (c + t)) x v w) t)
+        HasDerivAt (fun tau => (G₁ (c + tau)).inner x v w)
+          (deTurckRicciRHS (I := I) g_bg (G₁ (c + t)) x v w) t)
     (hPDE₂ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
-        HasDerivAt (fun tau => (G₂.metric (c + tau)).inner x v w)
-          (deTurckRicciRHS (I := I) g_bg (G₂.metric (c + t)) x v w) t)
+        HasDerivAt (fun tau => (G₂ (c + tau)).inner x v w)
+          (deTurckRicciRHS (I := I) g_bg (G₂ (c + t)) x v w) t)
     (hNbound₁ : ∀ t ∈ Icc (0 : ℝ) T,
       ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a
         (smoothCcToTensorHs (I := I) (M := M) q ((a : ℝ) + 2)
           (metricDifferenceCcTensor (I := I) (M := M) q
-            (G₁.metric (c + t))))‖ ≤ B)
+            (G₁ (c + t))))‖ ≤ B)
     (hNbound₂ : ∀ t ∈ Icc (0 : ℝ) T,
       ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) q g_bg a
         (smoothCcToTensorHs (I := I) (M := M) q ((a : ℝ) + 2)
           (metricDifferenceCcTensor (I := I) (M := M) q
-            (G₂.metric (c + t))))‖ ≤ B) :
-    ∀ t ∈ Icc (0 : ℝ) T, G₁.metric (c + t) = G₂.metric (c + t) := by
+            (G₂ (c + t))))‖ ≤ B) :
+    ∀ t ∈ Icc (0 : ℝ) T, G₁ (c + t) = G₂ (c + t) := by
   let Phi₁ : ℝ → SmoothCcTensor q 0 2 := fun t =>
-    metricDifferenceCcTensor (I := I) (M := M) q (G₁.metric (c + t))
+    metricDifferenceCcTensor (I := I) (M := M) q (G₁ (c + t))
   let Phi₂ : ℝ → SmoothCcTensor q 0 2 := fun t =>
-    metricDifferenceCcTensor (I := I) (M := M) q (G₂.metric (c + t))
+    metricDifferenceCcTensor (I := I) (M := M) q (G₂ (c + t))
   have hPhi₁ := metricDiff_shift (I := I) (M := M) G₁ hG₁ q c hmap₁
   have hPhi₂ := metricDiff_shift (I := I) (M := M) G₂ hG₂ q c hmap₂
   have hPhi₁0 : Phi₁ 0 = 0 := by
@@ -828,17 +828,17 @@ theorem metricRD_unique
         smoothCcTensorBilinForm (I := I) q (Phi₁ t) x v w =
           smoothCcTensorBilinForm (I := I) q (Phi₁ t) x w v := by
     intro t _ x v w
-    exact metricDiff_symm (I := I) (M := M) q (G₁.metric (c + t)) x v w
+    exact metricDiff_symm (I := I) (M := M) q (G₁ (c + t)) x v w
   have hsymm₂ : ∀ t ∈ Icc (0 : ℝ) T, ∀ x : M,
       ∀ v w : TangentSpace I x,
         smoothCcTensorBilinForm (I := I) q (Phi₂ t) x v w =
           smoothCcTensorBilinForm (I := I) q (Phi₂ t) x w v := by
     intro t _ x v w
-    exact metricDiff_symm (I := I) (M := M) q (G₂.metric (c + t)) x v w
+    exact metricDiff_symm (I := I) (M := M) q (G₂ (c + t)) x v w
   have hunit₁ := metricDiff_pde (I := I) (M := M) q g_bg
-    (fun t => G₁.metric (c + t)) hδ_lt hsmall₁ hPDE₁
+    (fun t => G₁ (c + t)) hδ_lt hsmall₁ hPDE₁
   have hunit₂ := metricDiff_pde (I := I) (M := M) q g_bg
-    (fun t => G₂.metric (c + t)) hδ_lt hsmall₂ hPDE₂
+    (fun t => G₂ (c + t)) hδ_lt hsmall₂ hPDE₂
   have hPhiEq := smoothGeom_unique (I := I) (M := M) q g_bg a ha_super
     hLip hsingle hT hT1 hρ hB hforceBudget hcontract Phi₁ Phi₂ hS hIcc
     hPhi₁ hPhi₂ hPhi₁0 hPhi₂0 hδ_lt hsmall₁ hsmall₂ hsymm₁ hsymm₂
@@ -855,28 +855,28 @@ theorem metricRD_unique
   linarith
 theorem metricRD_local
     {D : RealTimeInterval}
-    (G₁ G₂ : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G₁ G₂ : ℝ → SmoothRiemannianMetric I M)
     (hG₁ : MetricFamilySmoothOn (I := I) (M := M) D G₁)
     (hG₂ : MetricFamilySmoothOn (I := I) (M := M) D G₂)
     (q g_bg : SmoothRiemannianMetric I M) (c : ℝ)
     {S : Set ℝ} (hS : IsOpen S) (h0S : (0 : ℝ) ∈ S)
     (hmap : ∀ t ∈ S, c + t ∈ D.regular)
-    (hG₁0 : G₁.metric c = q) (hG₂0 : G₂.metric c = q)
+    (hG₁0 : G₁ c = q) (hG₂0 : G₂ c = q)
     (hPDE₁ : ∀ t ∈ S, ∀ x : M, ∀ v w : TangentSpace I x,
-      HasDerivAt (fun tau => (G₁.metric (c + tau)).inner x v w)
-        (deTurckRicciRHS (I := I) g_bg (G₁.metric (c + t)) x v w) t)
+      HasDerivAt (fun tau => (G₁ (c + tau)).inner x v w)
+        (deTurckRicciRHS (I := I) g_bg (G₁ (c + t)) x v w) t)
     (hPDE₂ : ∀ t ∈ S, ∀ x : M, ∀ v w : TangentSpace I x,
-      HasDerivAt (fun tau => (G₂.metric (c + tau)).inner x v w)
-        (deTurckRicciRHS (I := I) g_bg (G₂.metric (c + t)) x v w) t) :
+      HasDerivAt (fun tau => (G₂ (c + tau)).inner x v w)
+        (deTurckRicciRHS (I := I) g_bg (G₂ (c + t)) x v w) t) :
     ∃ T : ℝ, 0 < T ∧
-      ∀ t ∈ Icc (0 : ℝ) T, G₁.metric (c + t) = G₂.metric (c + t) := by
+      ∀ t ∈ Icc (0 : ℝ) T, G₁ (c + t) = G₂ (c + t) := by
   classical
   let a : ℕ := 2 * Module.finrank ℝ E + 10
   have ha : 2 * Module.finrank ℝ E + 10 ≤ a := le_rfl
   let Phi₁ : ℝ → SmoothCcTensor q 0 2 := fun t =>
-    metricDifferenceCcTensor (I := I) (M := M) q (G₁.metric (c + t))
+    metricDifferenceCcTensor (I := I) (M := M) q (G₁ (c + t))
   let Phi₂ : ℝ → SmoothCcTensor q 0 2 := fun t =>
-    metricDifferenceCcTensor (I := I) (M := M) q (G₂.metric (c + t))
+    metricDifferenceCcTensor (I := I) (M := M) q (G₂ (c + t))
   have hPhi₁ := metricDiff_shift (I := I) (M := M) G₁ hG₁ q c hmap
   have hPhi₂ := metricDiff_shift (I := I) (M := M) G₂ hG₂ q c hmap
   have hPhi₁0 : Phi₁ 0 = 0 := by

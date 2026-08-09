@@ -1555,10 +1555,10 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
     [SigmaCompactSpace M] in
 theorem genGram_of_family
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (α : M) :
-    ChartGramFamilyJointSmoothNondegenerate (I := I) (fun t => G.metric t) α D.regular := by
+    ChartGramFamilyJointSmoothNondegenerate (I := I) (fun t => g_fam t) α D.regular := by
   classical
   refine ⟨?_, ?_⟩
   · intro i j s₀ y₀ hs hy
@@ -1572,7 +1572,7 @@ theorem genGram_of_family
       rw [e.localFrame_apply_of_mem_baseSet (chartModelBasis E) hx]
       rfl
     have hsmooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
-        (fun p : ℝ × M => chartGramMatrix (I := I) (G.metric p.1) α p.2 i j)
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g_fam p.1) α p.2 i j)
         (D.regular ×ˢ e.baseSet) := by
       have hcomp := hG.frameCompSmooth (e.localFrame (chartModelBasis E)) hframe i j
       refine hcomp.congr ?_
@@ -1606,7 +1606,7 @@ theorem genGram_of_family
         (D.regular ×ˢ interior (extChartAt I α).target) :=
       hσ1.prodMk hσ2
     have hcomp : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ) ∞
-        (fun p : ℝ × E => chartGramOnE (I := I) (G.metric p.1) α i j p.2)
+        (fun p : ℝ × E => chartGramOnE (I := I) (g_fam p.1) α i j p.2)
         (D.regular ×ˢ interior (extChartAt I α).target) := by
       refine (hsmooth.comp hσ (fun p hp => ⟨hp.1, hsubset (interior_subset hp.2)⟩)).congr ?_
       intro p _
@@ -1614,18 +1614,18 @@ theorem genGram_of_family
     exact hcomp.contDiffOn.contDiffAt
       (prod_mem_nhds (D.regular_isOpen.mem_nhds hs) (isOpen_interior.mem_nhds hy))
   · intro s₀ _ x hx
-    exact chartGramMatrix_det_pos (I := I) (G.metric s₀) α hx
+    exact chartGramMatrix_det_pos (I := I) (g_fam s₀) α hx
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem invGram_of_family
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (α : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
-      (fun p : M × ℝ => chartInvGramMatrix (I := I) (G.metric p.2) α p.1 i j)
+      (fun p : M × ℝ => chartInvGramMatrix (I := I) (g_fam p.2) α p.1 i j)
       ((chartAt H α).source ×ˢ D.regular) := by
-  have hGram := genGram_of_family (I := I) G hG α
+  have hGram := genGram_of_family (I := I) g_fam hG α
   have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => (p.2, extChartAt I α p.1))
       ((chartAt H α).source ×ˢ D.regular) := by
@@ -1640,9 +1640,9 @@ theorem invGram_of_family
   have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
     extChartAt_target_subset_interior_of_boundaryless (I := I) α
       ((extChartAt I α).map_source hxsrc)
-  have hentry := chartInvGramOnE_contDiffAt_joint (I := I) (fun t => G.metric t) α hGram i j ht hy
+  have hentry := chartInvGramOnE_contDiffAt_joint (I := I) (fun t => g_fam t) α hGram i j ht hy
   have hentryM : ContMDiffAt 𝓘(ℝ, ℝ × E) 𝓘(ℝ) ∞
-      (fun r : ℝ × E => chartInvGramOnE (I := I) (G.metric r.1) α i j r.2)
+      (fun r : ℝ × E => chartInvGramOnE (I := I) (g_fam r.1) α i j r.2)
       (p.2, extChartAt I α p.1) :=
     hentry.contMDiffAt
   have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ × E) ∞
@@ -1663,14 +1663,14 @@ omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christ_of_family
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (α : M) (i j k : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
       (fun p : M × ℝ =>
-        chartChristoffel (I := I) (G.metric p.2) α i j k (extChartAt I α p.1))
+        chartChristoffel (I := I) (g_fam p.2) α i j k (extChartAt I α p.1))
       ((chartAt H α).source ×ˢ D.regular) := by
-  have hGram := genGram_of_family (I := I) G hG α
+  have hGram := genGram_of_family (I := I) g_fam hG α
   have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => (p.2, extChartAt I α p.1))
       ((chartAt H α).source ×ˢ D.regular) := by
@@ -1685,9 +1685,9 @@ theorem christ_of_family
   have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
     extChartAt_target_subset_interior_of_boundaryless (I := I) α
       ((extChartAt I α).map_source hxsrc)
-  have hentry := gen_joint_christoffel (I := I) (fun t => G.metric t) α hGram i j k ht hy
+  have hentry := gen_joint_christoffel (I := I) (fun t => g_fam t) α hGram i j k ht hy
   have hentryM : ContMDiffAt 𝓘(ℝ, ℝ × E) 𝓘(ℝ) ∞
-      (fun r : ℝ × E => chartChristoffel (I := I) (G.metric r.1) α i j k r.2)
+      (fun r : ℝ × E => chartChristoffel (I := I) (g_fam r.1) α i j k r.2)
       (p.2, extChartAt I α p.1) :=
     hentry.contMDiffAt
   have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ × E) ∞
@@ -1702,26 +1702,26 @@ open DifferentialGeometry.Integral.DivergenceTheorem in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem invSharp_of_family
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G) :
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E →L[ℝ] E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 1 ℝ E →L[ℝ] E)
         (E := fun z : M => Tensor0SSpace 1 I z →L[ℝ] TangentSpace I z) p.1
-        (inverseMetricSharpFib (I := I) (G.metric p.2) p.1))
+        (inverseMetricSharpFib (I := I) (g_fam p.2) p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
   apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SSpace 1 I x)
     (F₂ := E) (V₂ := fun x : M => TangentSpace I x)
-    (φ := fun p : M × ℝ => inverseMetricSharpFib (I := I) (G.metric p.2) p.1)
+    (φ := fun p : M × ℝ => inverseMetricSharpFib (I := I) (g_fam p.2) p.1)
     (S := D.regular)
   intro Y
   set cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ :=
     fun _ b => cotangentToDualLinear (I := I) (x := b) (Y b) with hcvdef
   have hinv : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
-        (fun p : M × ℝ => chartInvGramMatrix (I := I) (G.metric p.2) α p.1 i j)
+        (fun p : M × ℝ => chartInvGramMatrix (I := I) (g_fam p.2) α p.1 i j)
         ((chartAt H α).source ×ˢ D.regular) :=
-    fun α i j => invGram_of_family (I := I) G hG α i j
+    fun α i j => invGram_of_family (I := I) g_fam hG α i j
   have hcv : ∀ (α : M) (j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
         (fun p : M × ℝ => cv p.2 p.1 (chartBasisVecFiber (I := I) α j p.1))
@@ -1739,22 +1739,22 @@ theorem invSharp_of_family
     rw [heqfn]
     exact hbase.comp contMDiffOn_fst (fun p hp => hp.1)
   have hjoint := metricSharp_jointContMDiffOn (I := I)
-    (gfam := fun t => G.metric t) (cv := cv) (S := D.regular)
+    (gfam := fun t => g_fam t) (cv := cv) (S := D.regular)
     D.regular_isOpen hinv hcv
   refine hjoint.congr (fun p _ => ?_)
   change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (DifferentialGeometry.Geometry.Operator.metricSharp
-        (I := I) (G.metric p.2) p.1 (cv p.2 p.1)) =
+        (I := I) (g_fam p.2) p.1 (cv p.2 p.1)) =
     TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-      (inverseMetricSharpFib (I := I) (G.metric p.2) p.1 (Y p.1))
+      (inverseMetricSharpFib (I := I) (g_fam p.2) p.1 (Y p.1))
   rw [inverseMetricSharpFib_apply, hcvdef]
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem comRaise_of_family (s : ℕ)
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (Y : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace (s + 2) I p.1)
     (hY : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (s + 2) ℝ E)) ∞
@@ -1765,7 +1765,7 @@ theorem comRaise_of_family (s : ℕ)
       (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 1 (s + 1) ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 1 (s + 1) ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 1 (s + 1) I z) p.1
-        (cometricRaiseSlot0Fib (I := I) (G.metric p.2) s p.1 (Y p)))
+        (cometricRaiseSlot0Fib (I := I) (g_fam p.2) s p.1 (Y p)))
       ((Set.univ : Set M) ×ˢ D.regular) := by
   apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SBundle.Tensor0SModel 1 ℝ E)
@@ -1774,10 +1774,10 @@ theorem comRaise_of_family (s : ℕ)
     (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (s + 1) I x)
     (φ := fun p : M × ℝ => (show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ]
         Tensor0SBundle.Tensor0SSpace (s + 1) I p.1 from
-      cometricRaiseSlot0Fib (I := I) (G.metric p.2) s p.1 (Y p)))
+      cometricRaiseSlot0Fib (I := I) (g_fam p.2) s p.1 (Y p)))
     (S := D.regular)
   intro β
-  have hsharp := invSharp_of_family (I := I) G hG
+  have hsharp := invSharp_of_family (I := I) g_fam hG
   have hβjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
@@ -1789,11 +1789,11 @@ theorem comRaise_of_family (s : ℕ)
     exact hβM.comp_contMDiffOn contMDiffOn_fst
   have hsharpβ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-        (inverseMetricSharpFib (I := I) (G.metric p.2) p.1 (β p.1)))
+        (inverseMetricSharpFib (I := I) (g_fam p.2) p.1 (β p.1)))
       ((Set.univ : Set M) ×ˢ D.regular) :=
     ContMDiffOn.clm_bundle_apply (b := Prod.fst) hsharp hβjoint
   set sharpβ : ∀ p : M × ℝ, TangentSpace I p.1 :=
-    fun p => inverseMetricSharpFib (I := I) (G.metric p.2) p.1 (β p.1)
+    fun p => inverseMetricSharpFib (I := I) (g_fam p.2) p.1 (β p.1)
   have hraise := interiorProductField_jointContMDiffOn_vecJoint (I := I) (s := s + 1)
     (S := D.regular) (X := sharpβ) hsharpβ (α := fun p => Y p) hY
   refine hraise.congr (fun p _ => ?_)
@@ -1805,15 +1805,15 @@ theorem comRaise_of_family (s : ℕ)
       (E := fun z : M => Tensor0SBundle.Tensor0SSpace (s + 1) I z) p.1
       ((show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ]
           Tensor0SBundle.Tensor0SSpace (s + 1) I p.1 from
-        cometricRaiseSlot0Fib (I := I) (G.metric p.2) s p.1 (Y p)) (β p.1))
+        cometricRaiseSlot0Fib (I := I) (g_fam p.2) s p.1 (Y p)) (β p.1))
   congr 1
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem comTrace_of_family (p : ℕ)
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (Y : ∀ q : M × ℝ, Tensor0SBundle.Tensor0SSpace (p + 2) I q.1)
     (hY : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (p + 2) ℝ E)) ∞
@@ -1824,12 +1824,12 @@ theorem comTrace_of_family (p : ℕ)
       (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel p ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel p ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace p I z) q.1
-        (cometricDoubleTraceFib (I := I) (G.metric q.2) p q.1 (Y q)))
+        (cometricDoubleTraceFib (I := I) (g_fam q.2) p q.1 (Y q)))
       ((Set.univ : Set M) ×ˢ D.regular) := by
-  have hraise := comRaise_of_family (I := I) p G hG Y hY
+  have hraise := comRaise_of_family (I := I) p g_fam hG Y hY
   have htrace := contractTraceField_jointContMDiffOn (I := I) 0 p
     (S := D.regular)
-    (fun q : M × ℝ => cometricRaiseSlot0Fib (I := I) (G.metric q.2) p q.1 (Y q))
+    (fun q : M × ℝ => cometricRaiseSlot0Fib (I := I) (g_fam q.2) p q.1 (Y q))
     hraise
   have hunit : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 0 ℝ E)) ∞
@@ -1846,10 +1846,10 @@ theorem comTrace_of_family (p : ℕ)
   beta_reduce
   rw [cometricDoubleTraceFib_toModel]
   rw [← model_contract_trace_raiseSlot0ModelL (E := E) p
-    (cometricLmodel (I := I) (G.metric q.2) q.1)
+    (cometricLmodel (I := I) (g_fam q.2) q.1)
     (Tensor0SBundle.Tensor0SSpace.toModel (Y q))]
   rw [contract_trace_unitZero_toModel (I := I) p q.1
-    (cometricRaiseSlot0Fib (I := I) (G.metric q.2) p q.1 (Y q))]
+    (cometricRaiseSlot0Fib (I := I) (g_fam q.2) p q.1 (Y q))]
   congr 1
 
 end RicciLinearization

@@ -534,7 +534,7 @@ theorem log_integrable_of_sol
     have hev :=
       DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet.eval_continuous
       (hA := DifferentialGeometry.Geometry.Curvature.metricTensor_cont_of_metricFamilySmoothOn
-        S.family hS.smoothMetric)
+        S.family.metric hS.smoothMetric)
       (P := {s : Real // s ∈ Set.uIcc t0 t})
       (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
       (fun p => hsub p.2) continuous_const (v := fun _ _ => v) (fun _ => continuous_const)

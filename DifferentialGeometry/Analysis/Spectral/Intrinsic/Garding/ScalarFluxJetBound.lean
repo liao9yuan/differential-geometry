@@ -142,17 +142,17 @@ private theorem joint0S_sub {d : ℕ} {S : Set ℝ}
 omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff_small
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ t in 𝓝 (T : ℝ), ∀ i : ℕ, i ≤ p → ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 0 (2 + i) x
-        ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 2 i
+      riemannianFiberNormSq (I := I) (M := M) (g_fam (T : ℝ)) 0 (2 + i) x
+        ((iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 2 i
           (metricDifferenceCcTensor (I := I) (M := M)
-            (G.metric (T : ℝ)) (G.metric t))).toSection x) < ε := by
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+            (g_fam (T : ℝ)) (g_fam t))).toSection x) < ε := by
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
   let P : ℝ → SmoothCcTensor q 0 2 := fun t =>
-    metricDifferenceCcTensor (I := I) (M := M) q (G.metric t)
+    metricDifferenceCcTensor (I := I) (M := M) q (g_fam t)
   have hPzero : P (T : ℝ) = 0 := by
     simp only [P, q, metricDifferenceCcTensor_self]
   have hPjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -161,7 +161,7 @@ theorem metricDiff_small
         (E := fun y : M => TensorRSSpace 0 2 I y) z.1
         ((P z.2).toSection z.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
-    simpa only [P, q] using metricDiff_joint (I := I) (M := M) G hG q
+    simpa only [P, q] using metricDiff_joint (I := I) (M := M) g_fam hG q
   simpa only [P, q] using
     joint_jet_small (I := I) (M := M) q 0 2 p P
       (D.regular_isOpen.mem_nhds T.2) hPzero hPjoint hε
@@ -171,21 +171,21 @@ theorem metricDiff_small
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarTrace_joint
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
         (E := fun x : M => TensorRSSpace 2 0 I x) p.1
-        ((scalarTraceCoeff (I := I) (M := M) q (G.metric p.2)).toSection p.1))
+        ((scalarTraceCoeff (I := I) (M := M) q (g_fam p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
   apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
     (F₂ := Tensor0SModel 0 ℝ E) (V₂ := fun x : M => Tensor0SSpace 0 I x)
     (φ := fun p : M × ℝ =>
       (show Tensor0SSpace 2 I p.1 →L[ℝ] Tensor0SSpace 0 I p.1 from
-        (scalarTraceCoeff (I := I) (M := M) q (G.metric p.2)).toSection p.1))
+        (scalarTraceCoeff (I := I) (M := M) q (g_fam p.2)).toSection p.1))
     (S := D.regular)
   intro W
   have hW : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -194,7 +194,7 @@ theorem scalarTrace_joint
         (E := fun x : M => Tensor0SSpace 2 I x) p.1 (W p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
     exact W.contMDiff.comp_contMDiffOn contMDiffOn_fst
-  have hmove := comTrace_of_family (I := I) 0 G hG
+  have hmove := comTrace_of_family (I := I) 0 g_fam hG
     (fun p : M × ℝ => W p.1) hW
   have hfixedOp : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
@@ -207,7 +207,7 @@ theorem scalarTrace_joint
   have hfixed := ContMDiffOn.clm_bundle_apply (b := Prod.fst) hfixedOp hW
   have hsub := joint0S_sub (I := I) (M := M) (d := 0)
     (fun p : M × ℝ =>
-      cometricDoubleTraceFib (I := I) (G.metric p.2) 0 p.1 (W p.1))
+      cometricDoubleTraceFib (I := I) (g_fam p.2) 0 p.1 (W p.1))
     (fun p : M × ℝ => cometricDoubleTraceFib (I := I) q 0 p.1 (W p.1))
     hmove hfixed
   refine hsub.congr (fun p _ => ?_)
@@ -219,21 +219,21 @@ omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem connTrace_joint
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
         (E := fun x : M => TensorRSSpace 1 0 I x) p.1
-        ((connTraceCoeff (I := I) (M := M) q (G.metric p.2)).toSection p.1))
+        ((connTraceCoeff (I := I) (M := M) q (g_fam p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
   apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SSpace 1 I x)
     (F₂ := Tensor0SModel 0 ℝ E) (V₂ := fun x : M => Tensor0SSpace 0 I x)
     (φ := fun p : M × ℝ =>
       (show Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SSpace 0 I p.1 from
-        (connTraceCoeff (I := I) (M := M) q (G.metric p.2)).toSection p.1))
+        (connTraceCoeff (I := I) (M := M) q (g_fam p.2)).toSection p.1))
     (S := D.regular)
   intro W
   have hW : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -243,11 +243,11 @@ theorem connTrace_joint
       ((Set.univ : Set M) ×ˢ D.regular) := by
     exact W.contMDiff.comp_contMDiffOn contMDiffOn_fst
   have hconn := ContMDiffOn.clm_bundle_apply (b := Prod.fst)
-    (connDiff_joint (I := I) G hG q) hW
-  have htrace := comTrace_of_family (I := I) 0 G hG
+    (connDiff_joint (I := I) g_fam hG q) hW
+  have htrace := comTrace_of_family (I := I) 0 g_fam hG
     (fun p : M × ℝ =>
       (show Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SSpace 2 I p.1 from
-        connDiffFib (I := I) (G.metric p.2) q p.1) (W p.1)) hconn
+        connDiffFib (I := I) (g_fam p.2) q p.1) (W p.1)) hconn
   refine htrace.congr (fun p _ => ?_)
   congr 1
 
@@ -256,15 +256,15 @@ theorem connTrace_joint
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarTrace_rev
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M) (T : ℝ) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
         (E := fun x : M => TensorRSSpace 2 0 I x) p.1
         ((scalarTraceCoeff (I := I) (M := M) q
-          (G.metric (T - p.2))).toSection p.1))
+          (g_fam (T - p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ {s : ℝ | T - s ∈ D.regular}) := by
   have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
       (fun p : M × ℝ => (p.1, T - p.2))
@@ -272,7 +272,7 @@ theorem scalarTrace_rev
     exact ContMDiffOn.prodMk contMDiffOn_fst
       (ContMDiffOn.sub contMDiffOn_const contMDiffOn_snd)
   simpa only [Function.comp_apply] using
-    (scalarTrace_joint (I := I) (M := M) G hG q).comp hmove
+    (scalarTrace_joint (I := I) (M := M) g_fam hG q).comp hmove
       (fun p hp => ⟨Set.mem_univ p.1, hp.2⟩)
 
 
@@ -281,15 +281,15 @@ omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem connTrace_rev
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M) (T : ℝ) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
         (E := fun x : M => TensorRSSpace 1 0 I x) p.1
         ((connTraceCoeff (I := I) (M := M) q
-          (G.metric (T - p.2))).toSection p.1))
+          (g_fam (T - p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ {s : ℝ | T - s ∈ D.regular}) := by
   have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
       (fun p : M × ℝ => (p.1, T - p.2))
@@ -297,7 +297,7 @@ theorem connTrace_rev
     exact ContMDiffOn.prodMk contMDiffOn_fst
       (ContMDiffOn.sub contMDiffOn_const contMDiffOn_snd)
   simpa only [Function.comp_apply] using
-    (connTrace_joint (I := I) (M := M) G hG q).comp hmove
+    (connTrace_joint (I := I) (M := M) g_fam hG q).comp hmove
       (fun p hp => ⟨Set.mem_univ p.1, hp.2⟩)
 
 
@@ -305,8 +305,8 @@ theorem connTrace_rev
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarTrace_rev_on
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M) (T : ℝ) {S : Set ℝ}
     (hS : S ⊆ {s : ℝ | T - s ∈ D.regular}) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -314,9 +314,9 @@ theorem scalarTrace_rev_on
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
         (E := fun x : M => TensorRSSpace 2 0 I x) p.1
         ((scalarTraceCoeff (I := I) (M := M) q
-          (G.metric (T - p.2))).toSection p.1))
+          (g_fam (T - p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ S) :=
-  (scalarTrace_rev (I := I) (M := M) G hG q T).mono
+  (scalarTrace_rev (I := I) (M := M) g_fam hG q T).mono
     (Set.prod_mono (Set.Subset.rfl) hS)
 
 
@@ -325,8 +325,8 @@ omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem connTrace_rev_on
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M) (T : ℝ) {S : Set ℝ}
     (hS : S ⊆ {s : ℝ | T - s ∈ D.regular}) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -334,9 +334,9 @@ theorem connTrace_rev_on
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
         (E := fun x : M => TensorRSSpace 1 0 I x) p.1
         ((connTraceCoeff (I := I) (M := M) q
-          (G.metric (T - p.2))).toSection p.1))
+          (g_fam (T - p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ S) :=
-  (connTrace_rev (I := I) (M := M) G hG q T).mono
+  (connTrace_rev (I := I) (M := M) g_fam hG q T).mono
     (Set.prod_mono (Set.Subset.rfl) hS)
 
 
@@ -344,17 +344,17 @@ theorem connTrace_rev_on
 omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarTrace_small
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ t in 𝓝 (T : ℝ), ∀ i : ℕ, i ≤ p → ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 2 (0 + i) x
-        ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 2 0 i
-          (scalarTraceCoeff (I := I) (M := M) (G.metric (T : ℝ))
-            (G.metric t))).toSection x) < ε := by
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+      riemannianFiberNormSq (I := I) (M := M) (g_fam (T : ℝ)) 2 (0 + i) x
+        ((iteratedCovGrad (I := I) (g_fam (T : ℝ)) 2 0 i
+          (scalarTraceCoeff (I := I) (M := M) (g_fam (T : ℝ))
+            (g_fam t))).toSection x) < ε := by
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
   let P : ℝ → SmoothCcTensor q 2 0 := fun t =>
-    scalarTraceCoeff (I := I) (M := M) q (G.metric t)
+    scalarTraceCoeff (I := I) (M := M) q (g_fam t)
   have hPzero : P (T : ℝ) = 0 := by
     simp only [P, q, scalarTraceCoeff, traceCast_self, sub_self]
   have hPjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -363,7 +363,7 @@ theorem scalarTrace_small
         (E := fun y : M => TensorRSSpace 2 0 I y) z.1
         ((P z.2).toSection z.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
-    simpa only [P, q] using scalarTrace_joint (I := I) (M := M) G hG q
+    simpa only [P, q] using scalarTrace_joint (I := I) (M := M) g_fam hG q
   simpa only [P, q, Nat.zero_add] using
     joint_jet_small (I := I) (M := M) q 2 0 p P
       (D.regular_isOpen.mem_nhds T.2) hPzero hPjoint hε
@@ -386,17 +386,17 @@ private theorem connFib_self (q : SmoothRiemannianMetric I M) (x : M) :
 omit [NeZero (Module.finrank ℝ E)] in
 theorem connTrace_small
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
     ∀ᶠ t in 𝓝 (T : ℝ), ∀ i : ℕ, i ≤ p → ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 1 (0 + i) x
-        ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 1 0 i
-          (connTraceCoeff (I := I) (M := M) (G.metric (T : ℝ))
-            (G.metric t))).toSection x) < ε := by
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+      riemannianFiberNormSq (I := I) (M := M) (g_fam (T : ℝ)) 1 (0 + i) x
+        ((iteratedCovGrad (I := I) (g_fam (T : ℝ)) 1 0 i
+          (connTraceCoeff (I := I) (M := M) (g_fam (T : ℝ))
+            (g_fam t))).toSection x) < ε := by
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
   let P : ℝ → SmoothCcTensor q 1 0 := fun t =>
-    connTraceCoeff (I := I) (M := M) q (G.metric t)
+    connTraceCoeff (I := I) (M := M) q (g_fam t)
   have hPzero : P (T : ℝ) = 0 := by
     apply SmoothCcTensor.ext
     apply ContMDiffSection.ext
@@ -413,7 +413,7 @@ theorem connTrace_small
         (E := fun y : M => TensorRSSpace 1 0 I y) z.1
         ((P z.2).toSection z.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
-    simpa only [P, q] using connTrace_joint (I := I) (M := M) G hG q
+    simpa only [P, q] using connTrace_joint (I := I) (M := M) g_fam hG q
   simpa only [P, q, Nat.zero_add] using
     joint_jet_small (I := I) (M := M) q 1 0 p P
       (D.regular_isOpen.mem_nhds T.2) hPzero hPjoint hε
@@ -470,29 +470,29 @@ theorem scalarFlux_jet_grid
 omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff_slab
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) :
     ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
       ∃ B : ℕ → ℝ, (∀ i, 0 ≤ B i) ∧
         ∀ s ∈ Set.Icc (0 : ℝ) tau,
           ((T : ℝ) - s ∈ D.regular) ∧
-          metricCauchySchwarzBound (I := I) (G.metric (T : ℝ))
-            (ccTensorBilinSymm (I := I) (G.metric (T : ℝ))
+          metricCauchySchwarzBound (I := I) (g_fam (T : ℝ))
+            (ccTensorBilinSymm (I := I) (g_fam (T : ℝ))
               (metricDifferenceCcTensor (I := I) (M := M)
-                (G.metric (T : ℝ)) (G.metric ((T : ℝ) - s)))) (1 / 4 : ℝ) ∧
+                (g_fam (T : ℝ)) (g_fam ((T : ℝ) - s)))) (1 / 4 : ℝ) ∧
           ∀ i x,
-            riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 0 (2 + i) x
-              ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 2 i
+            riemannianFiberNormSq (I := I) (M := M) (g_fam (T : ℝ)) 0 (2 + i) x
+              ((iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 2 i
                 (metricDifferenceCcTensor (I := I) (M := M)
-                  (G.metric (T : ℝ)) (G.metric ((T : ℝ) - s)))).toSection x) ≤ B i := by
+                  (g_fam (T : ℝ)) (g_fam ((T : ℝ) - s)))).toSection x) ≤ B i := by
   classical
   obtain ⟨tau, htau, htau_one, hshort⟩ :=
-    lapDiff_short (I := I) (M := M) G hG T
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+    lapDiff_short (I := I) (M := M) g_fam hG T
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
   let K : Set ℝ := Set.Icc ((T : ℝ) - tau) (T : ℝ)
   let P : ℝ → SmoothCcTensor q 0 2 := fun t =>
-    metricDifferenceCcTensor (I := I) (M := M) q (G.metric t)
+    metricDifferenceCcTensor (I := I) (M := M) q (g_fam t)
   have hK : IsCompact K := by
     simpa only [K] using isCompact_Icc
   have hKreg : K ⊆ D.regular := by
@@ -508,7 +508,7 @@ theorem metricDiff_slab
         (E := fun z : M => TensorRSSpace 0 2 I z) p.1
         ((P p.2).toSection p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
-    simpa only [P, q] using metricDiff_joint (I := I) (M := M) G hG q
+    simpa only [P, q] using metricDiff_joint (I := I) (M := M) g_fam hG q
   obtain ⟨B, hB, hjet⟩ := joint_jet_bdd (I := I) (M := M) q 0 2 P
     hK hKreg hPjoint
   refine ⟨tau, htau, htau_one, B, hB, ?_⟩
@@ -530,24 +530,24 @@ theorem metricDiff_slab
 
 theorem scalarFlux_slab
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) :
     ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
       ∃ B : ℕ → ℝ, (∀ i, 0 ≤ B i) ∧
         ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ i x,
-          riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ))
+          riemannianFiberNormSq (I := I) (M := M) (g_fam (T : ℝ))
               1 (1 + i) x
-              ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 1 1 i
-                (scalarFluxCoeff (I := I) (M := M) (G.metric (T : ℝ))
-                  (G.metric ((T : ℝ) - s)))).toSection x) ≤
+              ((iteratedCovGrad (I := I) (g_fam (T : ℝ)) 1 1 i
+                (scalarFluxCoeff (I := I) (M := M) (g_fam (T : ℝ))
+                  (g_fam ((T : ℝ) - s)))).toSection x) ≤
             B i := by
   classical
   obtain ⟨tau, htau, htau_one, J, hJ, hdata⟩ :=
-    metricDiff_slab (I := I) (M := M) G hG T
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+    metricDiff_slab (I := I) (M := M) g_fam hG T
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
   let P : ℝ → SmoothCcTensor q 0 2 := fun t =>
-    metricDifferenceCcTensor (I := I) (M := M) q (G.metric t)
+    metricDifferenceCcTensor (I := I) (M := M) q (g_fam t)
   obtain ⟨C, hC, hflux⟩ :=
     scalarFlux_jet_grid (I := I) (M := M) q (by norm_num : (1 / 2 : ℝ) < 1)
   refine ⟨tau, htau, htau_one, fun i =>
@@ -557,7 +557,7 @@ theorem scalarFlux_slab
   intro s hs i x
   have hsdata := hdata s hs
   have htie : ∀ y v w,
-      (G.metric ((T : ℝ) - s)).inner y v w =
+      (g_fam ((T : ℝ) - s)).inner y v w =
         q.inner y v w + ccTensorBilinSymm (I := I) q (P ((T : ℝ) - s)) y v w := by
     intro y v w
     rw [metricDiff_bilin (I := I) (M := M)]
@@ -565,7 +565,7 @@ theorem scalarFlux_slab
   have hbound : metricCauchySchwarzBound (I := I) q
       (ccTensorBilinSymm (I := I) q (P ((T : ℝ) - s))) (1 / 4 : ℝ) := by
     simpa only [q, P] using hsdata.2.1
-  have hlocal := hflux (G.metric ((T : ℝ) - s)) (P ((T : ℝ) - s)) htie
+  have hlocal := hflux (g_fam ((T : ℝ) - s)) (P ((T : ℝ) - s)) htie
     (by norm_num : (1 / 4 : ℝ) ≤ 1 / 2) (by norm_num : (0 : ℝ) ≤ 1 / 4)
     hbound i x
   have hgrid :

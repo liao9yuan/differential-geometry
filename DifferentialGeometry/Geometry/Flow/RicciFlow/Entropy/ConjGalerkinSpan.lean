@@ -59,7 +59,7 @@ theorem gal_span
               IsConjGalSubseq (I := I) (M := M) S T h u0 V phi ulim := by
   classical
   obtain ⟨ρ2, hρ2, hρ2one, hA2⟩ :=
-    lapA20_span (I := I) (M := M) S.family hS.smoothMetric hab
+    lapA20_span (I := I) (M := M) S.family.metric hS.smoothMetric hab
   obtain ⟨ρc, hρc, hρcone, hcritSpan⟩ :=
     scalar_crit_span (I := I) (M := M) S hS hab
   let ρ : Real := min ρ2 ρc
@@ -126,7 +126,7 @@ theorem gallim_span
   obtain ⟨ρg, hρg, hρgone, hgal⟩ :=
     gal_span (I := I) (M := M) S hS hab
   obtain ⟨ρa, hρa, hρaone, hA20⟩ :=
-    lapA20_span (I := I) (M := M) S.family hS.smoothMetric hab
+    lapA20_span (I := I) (M := M) S.family.metric hS.smoothMetric hab
   let ρ : Real := min ρg ρa
   have hρ : 0 < ρ := lt_min hρg hρa
   have hρone : ρ ≤ 1 := (min_le_left ρg ρa).trans hρgone

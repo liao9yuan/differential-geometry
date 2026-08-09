@@ -547,16 +547,16 @@ theorem tensor0SFamily_quadCont
 
 structure MetricFamilySmoothOn
     (D : RealTimeInterval)
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop where
+    (g_fam : ℝ → SmoothRiemannianMetric I M) : Prop where
   coeff :
     forall (x : M) (X Y : TangentSpace I x),
-    ContDiffOn Real ∞ (fun t : Real => (G.metric t).inner x X Y) D.regular
+    ContDiffOn Real ∞ (fun t : Real => (g_fam t).inner x X Y) D.regular
   coeff_cont :
     forall (x : M) (X Y : TangentSpace I x),
-    ContinuousOn (fun t : Real => (G.metric t).inner x X Y) D.carrier
+    ContinuousOn (fun t : Real => (g_fam t).inner x X Y) D.carrier
   metricTensor_cont :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
-      (fun t x => metricTensorField (I := I) (G.metric t) x)
+      (fun t x => metricTensorField (I := I) (g_fam t) x)
 
 
 
@@ -569,89 +569,87 @@ structure MetricFamilySmoothOn
       forall i j : Idx,
         ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
           (fun p : Real × M =>
-            (G.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
+            (g_fam p.1).inner p.2 (frame i p.2) (frame j p.2))
           (D.regular ×ˢ u)
 
 
 theorem metric_smooth_coeff_of_metricFamilySmoothOn
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (x : M) (X Y : TangentSpace I x) :
-    ContDiffOn Real ∞ (fun t : Real => (G.metric t).inner x X Y) D.regular :=
+    ContDiffOn Real ∞ (fun t : Real => (g_fam t).inner x X Y) D.regular :=
   hG.coeff x X Y
 
 
 theorem metric_coeff_cont_of_metricFamilySmoothOn
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (x : M) (X Y : TangentSpace I x) :
-    ContinuousOn (fun t : Real => (G.metric t).inner x X Y) D.carrier :=
+    ContinuousOn (fun t : Real => (g_fam t).inner x X Y) D.carrier :=
   hG.coeff_cont x X Y
 
 
 theorem metricTensor_cont_of_metricFamilySmoothOn
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G) :
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam) :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
-      (fun t x => metricTensorField (I := I) (G.metric t) x) :=
+      (fun t x => metricTensorField (I := I) (g_fam t) x) :=
   hG.metricTensor_cont
 
 
 theorem metricTensor_cont_restrict_of_metricFamilySmoothOn
     {D : RealTimeInterval} {K : Set Real}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (hK : K ⊆ D.carrier) :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 K
-      (fun t x => metricTensorField (I := I) (G.metric t) x) :=
+      (fun t x => metricTensorField (I := I) (g_fam t) x) :=
   Tensor0SFamilyContinuousOnSet.mono (I := I) (M := M)
     hG.metricTensor_cont hK
 
 
 theorem metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
     {D : RealTimeInterval} {K : Set Real}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (hK : K ⊆ D.carrier) :
     Continuous (fun q : {t : Real // t ∈ K} × TangentBundle I M =>
       TotalSpace.mk' (Tensor0SModel 2 Real E)
         (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
-        (metricTensorField (I := I) (G.metric q.1.1) q.2.proj)) :=
+        (metricTensorField (I := I) (g_fam q.1.1) q.2.proj)) :=
   Tensor0SFamilyContinuousOnSet.tangentBundle (I := I) (M := M)
     (metricTensor_cont_restrict_of_metricFamilySmoothOn (I := I) (M := M)
-      G hG hK)
+      g_fam hG hK)
 
 
 
 theorem metricTimeBundleQuad_cont_of_metricFamilySmoothOn
     {D : RealTimeInterval} {K : Set Real}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (hK : K ⊆ D.carrier) :
     Continuous
-      (metricTimeBundleQuad (I := I) (M := M) (fun t => G.metric t) K) := by
+      (metricTimeBundleQuad (I := I) (M := M) g_fam K) := by
   have hquad :=
     tensor0SFamily_quadCont (I := I) (M := M)
       (metricTensor_cont_restrict_of_metricFamilySmoothOn (I := I) (M := M)
-        G hG hK)
+        g_fam hG hK)
   simpa [metricTimeBundleQuad, quad02, metricTensorField_apply] using hquad
 
 
 noncomputable def metricCoeff
-    {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
     (x : M) (X Y : TangentSpace I x) : Real -> Real :=
-  fun t => (G.metric t).inner x X Y
+  fun t => (g_fam t).inner x X Y
 
 omit [FiniteDimensional ℝ E] in
 @[simp] theorem metricCoeff_eq
-    {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
     (x : M) (X Y : TangentSpace I x) (t : Real) :
-    metricCoeff G x X Y t = (G.metric t).inner x X Y := by
+    metricCoeff g_fam x X Y t = (g_fam t).inner x X Y := by
   rfl
 
 end IntervalSmoothness

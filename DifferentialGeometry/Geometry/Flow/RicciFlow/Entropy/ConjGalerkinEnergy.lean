@@ -158,7 +158,7 @@ theorem gal_bound_on
           tensorHsZeroEquivL2 (I := I) (M := M)
               (tensorResolventL2_isCompactOperator
                 (I := I) (M := M) q 0 0)
-              (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+              (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
             lapDiffCore (I := I) (M := M) q
               (S.family.metric ((T : Real) - s)) v) →
       ∀ (u0 : SmoothCcTensor q 0 0)
@@ -339,7 +339,7 @@ theorem scalar_gal_bound
   have htauG : 0 < tauG := by simpa only [tauG] using hG.pos
   obtain ⟨tauC, htauC, _htauC_one, Cmid, hCmid, hcrit⟩ :=
     scalar_crit_tame (I := I) (M := M) S hS T
-  have hcore := lapDiffA20_core (I := I) (M := M) S.family hS.smoothMetric T
+  have hcore := lapDiffA20_core (I := I) (M := M) S.family.metric hS.smoothMetric T
   obtain ⟨delta, hdelta, hball⟩ := Metric.mem_nhds_iff.mp hcore
   let tau : Real := min (min tauG tauC) (delta / 2)
   have htau : 0 < tau := by

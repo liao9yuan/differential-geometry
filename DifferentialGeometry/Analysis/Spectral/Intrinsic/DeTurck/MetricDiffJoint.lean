@@ -140,14 +140,14 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem metricDiff_eval
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M)
     (Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ =>
-        (G.metric p.2).inner p.1 (Y p.1) (Z p.1) -
+        (g_fam p.2).inner p.1 (Y p.1) (Z p.1) -
           q.inner p.1 (Y p.1) (Z p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
   intro p hp
@@ -158,7 +158,7 @@ private theorem metricDiff_eval
     contMDiffAt_snd.prodMk contMDiffAt_fst
   have hmove : ContMDiffAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun r : M × ℝ =>
-        (G.metric r.2).inner r.1 (Y r.1) (Z r.1)) p :=
+        (g_fam r.2).inner r.1 (Y r.1) (Z r.1)) p :=
     hpair.comp p hswap
   have hfixedM :=
     DifferentialGeometry.Geometry.Operator.contMDiff_g_inner_of_smooth_sections
@@ -178,15 +178,15 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
 metric-difference tensors on its regular time set. -/
 theorem metricDiff_joint
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, TensorRSModel 0 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 0 2 ℝ E)
         (E := fun x : M => TensorRSSpace 0 2 I x) p.1
         ((metricDifferenceCcTensor (I := I) (M := M) q
-          (G.metric p.2)).toSection p.1))
+          (g_fam p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ D.regular) := by
   apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 0 ℝ E) (V₁ := fun x : M => Tensor0SSpace 0 I x)
@@ -194,7 +194,7 @@ theorem metricDiff_joint
     (φ := fun p : M × ℝ =>
       (show Tensor0SSpace 0 I p.1 →L[ℝ] Tensor0SSpace 2 I p.1 from
         (metricDifferenceCcTensor (I := I) (M := M) q
-          (G.metric p.2)).toSection p.1))
+          (g_fam p.2)).toSection p.1))
   intro Y
   have hscalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (Tensor0SNabla.scalarFn I M (fun x : M => Y x)) :=
@@ -210,40 +210,40 @@ theorem metricDiff_joint
       (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
         p.1 ((Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          ((G.metric p.2).inner p.1 - q.inner p.1)))
+          ((g_fam p.2).inner p.1 - q.inner p.1)))
       ((Set.univ : Set M) ×ˢ D.regular) := by
     apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
       (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
       (F₂ := E →L[ℝ] ℝ) (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
       (φ := fun p : M × ℝ =>
         (Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          ((G.metric p.2).inner p.1 - q.inner p.1))
+          ((g_fam p.2).inner p.1 - q.inner p.1))
     intro Z
     apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
       (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
       (F₂ := ℝ) (V₂ := fun _ : M => ℝ)
       (φ := fun p : M × ℝ =>
         ((Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          ((G.metric p.2).inner p.1 - q.inner p.1)) (Z p.1))
+          ((g_fam p.2).inner p.1 - q.inner p.1)) (Z p.1))
     intro W p hp
     rw [Bundle.contMDiffWithinAt_totalSpace]
     refine ⟨contMDiffWithinAt_fst, ?_⟩
     simpa only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.sub_apply,
       smul_eq_mul] using
         (hscalar' p hp).mul
-          (metricDiff_eval (I := I) (M := M) (D := D) G hG q Z W p hp)
+          (metricDiff_eval (I := I) (M := M) (D := D) g_fam hG q Z W p hp)
   have hscaled : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
         (E := fun x : M => Tensor0SSpace 2 I x) p.1
         ((Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          (metricCcTensorFib (I := I) (G.metric p.2) p.1 -
+          (metricCcTensorFib (I := I) (g_fam p.2) p.1 -
             metricCcTensorFib (I := I) q p.1)))
       ((Set.univ : Set M) ×ˢ D.regular) := by
     refine (joint_to02 (I := I) (M := M)
       (fun p : M × ℝ =>
         (Tensor0SNabla.scalarFn I M (fun x : M => Y x) p.1) •
-          ((G.metric p.2).inner p.1 - q.inner p.1)) hbilin).congr (fun p _ => ?_)
+          ((g_fam p.2).inner p.1 - q.inner p.1)) hbilin).congr (fun p _ => ?_)
     congr 1
   refine hscaled.congr (fun p _ => ?_)
   refine congrArg (fun z : Tensor0SSpace 2 I p.1 =>
@@ -261,8 +261,8 @@ explicit image hypothesis records that this is an interior restart and makes
 no assertion at a merely continuous endpoint of the original family. -/
 theorem metricDiff_shift
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (q : SmoothRiemannianMetric I M) (c : ℝ) {S : Set ℝ}
     (hmap : ∀ t ∈ S, c + t ∈ D.regular) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
@@ -270,12 +270,12 @@ theorem metricDiff_shift
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 0 2 ℝ E)
         (E := fun x : M => TensorRSSpace 0 2 I x) p.1
         ((metricDifferenceCcTensor (I := I) (M := M) q
-          (G.metric (c + p.2))).toSection p.1))
+          (g_fam (c + p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ S) := by
   have hshift : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
       (fun p : M × ℝ => (p.1, c + p.2)) ((Set.univ : Set M) ×ˢ S) :=
     (contMDiff_fst.prodMk (contMDiff_const.add contMDiff_snd)).contMDiffOn
-  exact (metricDiff_joint (I := I) (M := M) G hG q).comp hshift
+  exact (metricDiff_joint (I := I) (M := M) g_fam hG q).comp hshift
     (fun p hp => ⟨Set.mem_univ p.1, hmap p.2 hp.2⟩)
 
 end DifferentialGeometry.Analysis.Spectral

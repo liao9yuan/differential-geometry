@@ -807,7 +807,7 @@ theorem metricFamilySmoothOn_of_chartGram
     DifferentialGeometry.Geometry.Curvature.MetricFamilySmoothOn (I := I) (M := M)
       (RealTimeInterval.closedOpen a b hab)
       ({ base := { metric := g } } :
-        SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen a b hab)).family := by
+        SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen a b hab)).family.metric := by
   have hcontTensor :
       DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
         (Set.Ico a b) (fun t x => Tensor0SBundle.metricTensorField (I := I) (g t) x) := by

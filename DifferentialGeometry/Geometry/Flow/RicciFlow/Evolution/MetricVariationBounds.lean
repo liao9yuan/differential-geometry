@@ -436,7 +436,7 @@ theorem metricGainControl_of_metricVariationOn_closedOpen
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (hEq : MetricVariationEquationOnRaw (I := I) G Ric)
     (hSmooth : MetricFamilySmoothOn (I := I) (M := M)
-      (RealTimeInterval.closedOpen 0 omega h0ω) G)
+      (RealTimeInterval.closedOpen 0 omega h0ω) G.metric)
     (hA :
       ∀ t, t ∈ Set.Ioc 0 T ->
         ∀ x, ∀ v : TangentSpace I x,
@@ -493,7 +493,7 @@ theorem metricGainControl_of_metricVariationOn_closedOpen
       ⟨lt_of_le_of_lt ht0.1 ht.1, le_trans ht.2 hdeltaRawT⟩
     exact hA t ht_global x v
   · exact metricTimeBundleQuad_cont_of_metricFamilySmoothOn (I := I) (M := M)
-      G hSmooth (by
+      G.metric hSmooth (by
         intro s hs
         exact ⟨le_trans ht0.1 hs.1,
           lt_of_le_of_lt (le_trans hs.2 hdeltaRawT) hTω⟩)

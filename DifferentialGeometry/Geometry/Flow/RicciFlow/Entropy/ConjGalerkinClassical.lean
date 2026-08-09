@@ -1600,7 +1600,7 @@ theorem galLim_pde
   obtain ⟨tauJ, htauJ, htauJ_tau, hjet⟩ :=
     galLim_jet_mass (I := I) (M := M) hS hτ hlim
   obtain ⟨tauD, htauD, _htauD_one, _hreg, hcore⟩ :=
-    lapDiffHs_core (I := I) (M := M) S.family hS.smoothMetric T
+    lapDiffHs_core (I := I) (M := M) S.family.metric hS.smoothMetric T
   obtain ⟨tauV, htauV, _htauV_tau, hlift⟩ :=
     galLimVel_lift (I := I) (M := M) hS hτ hlim
   obtain ⟨w, _hwcont, hw0, hwcan⟩ := hlift 0

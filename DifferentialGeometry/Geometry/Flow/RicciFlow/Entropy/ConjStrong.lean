@@ -58,7 +58,7 @@ noncomputable def conjA2MR
     tensorHs (I := I) (M := M) (S.family.metric (T : Real))
         0 0 ((0 : Real) + 2) →L[Real]
       tensorHs (I := I) (M := M) (S.family.metric (T : Real)) 0 0 0 :=
-  (lapDiffA20 (I := I) (M := M) S.family T t).comp
+  (lapDiffA20 (I := I) (M := M) S.family.metric T t).comp
     (tensorHsInclusion (I := I) (M := M)
       (g := S.family.metric (T : Real)) (r := 0) (s := 0)
       (show (2 : Real) ≤ 0 + 2 by norm_num))
@@ -103,7 +103,7 @@ theorem conj_inputs
               tensorHsZeroEquivL2 (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator
                   (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-                (lapDiffA20 (I := I) (M := M) S.family T s u)) ∈
+                (lapDiffA20 (I := I) (M := M) S.family.metric T s u)) ∈
             closure
               (Set.range fun
                 v : ScalarH2Core (I := I) (M := M)
@@ -125,7 +125,7 @@ theorem conj_inputs
     ContinuousLinearMap.toSeminormedAddCommGroup
   let C2 : NNReal := ⟨(1 / 4 : Real), by norm_num⟩
   obtain ⟨tau2, htau2, htau2one, hcont2, _hmeas2, hbound2, _hboundAE2⟩ :=
-    lapDiffA20_short (I := I) (M := M) S.family hS.smoothMetric T
+    lapDiffA20_short (I := I) (M := M) S.family.metric hS.smoothMetric T
       (epsilon := (C2 : Real)) (by norm_num [C2])
   obtain ⟨tau1, htau1, htau1one, C1, hcont1, _hmeas1, hbound1, _hboundAE1⟩ :=
     conjA1_short (I := I) (M := M) S hS T
@@ -144,7 +144,7 @@ theorem conj_inputs
           tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s u)) ∈
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s u)) ∈
         closure
           (Set.range fun
             v : ScalarH2Core (I := I) (M := M)
@@ -156,7 +156,7 @@ theorem conj_inputs
                   (S.family.metric ((T : Real) - s)) v))}
   have hgraphNhds : graphGood ∈ 𝓝 (0 : Real) := by
     simpa only [graphGood] using
-      (lapDiffA20_graph (I := I) (M := M) S.family hS.smoothMetric T)
+      (lapDiffA20_graph (I := I) (M := M) S.family.metric hS.smoothMetric T)
   have hsafe : {t : Real | f t < 1} ∩ graphGood ∈ 𝓝 (0 : Real) :=
     inter_mem hfsmall hgraphNhds
   obtain ⟨delta, hdelta, hball⟩ := Metric.mem_nhds_iff.mp hsafe
@@ -223,15 +223,15 @@ theorem conj_inputs
     intro s hs
     calc
       ‖conjA2MR (I := I) (M := M) S T s‖
-          ≤ ‖lapDiffA20 (I := I) (M := M) S.family T s‖ * ‖inc2‖ :=
+          ≤ ‖lapDiffA20 (I := I) (M := M) S.family.metric T s‖ * ‖inc2‖ :=
         ContinuousLinearMap.opNorm_comp_le _ _
-      _ ≤ ‖lapDiffA20 (I := I) (M := M) S.family T s‖ * 1 :=
+      _ ≤ ‖lapDiffA20 (I := I) (M := M) S.family.metric T s‖ * 1 :=
         mul_le_mul_of_nonneg_left
           (tensorHsInclusion_opNorm_le_one (I := I) (M := M)
             (g := S.family.metric (T : Real)) (r := 0) (s := 0)
             (show (2 : Real) ≤ 0 + 2 by norm_num))
-          (norm_nonneg (lapDiffA20 (I := I) (M := M) S.family T s))
-      _ = ‖lapDiffA20 (I := I) (M := M) S.family T s‖ := mul_one _
+          (norm_nonneg (lapDiffA20 (I := I) (M := M) S.family.metric T s))
+      _ = ‖lapDiffA20 (I := I) (M := M) S.family.metric T s‖ := mul_one _
       _ ≤ (C2 : Real) := hbound2 s (hIcc2 hs)
   have hbound1' : ∀ᵐ s ∂timeMeasure tau,
       ‖conjA1MR (I := I) (M := M) S T s‖ ≤ (C1 : Real) := by
@@ -315,7 +315,7 @@ theorem conj_strong_exists
                 tensorHsZeroEquivL2 (I := I) (M := M)
                   (tensorResolventL2_isCompactOperator
                     (I := I) (M := M) q 0 0)
-                  (lapDiffA20 (I := I) (M := M) S.family T s w)) ∈
+                  (lapDiffA20 (I := I) (M := M) S.family.metric T s w)) ∈
               closure
                 (Set.range fun v : ScalarH2Core (I := I) (M := M) q =>
                   ((v.1 : tensorHs (I := I) (M := M) q 0 0 2),
@@ -540,14 +540,14 @@ theorem conj_weak_ae
     · have hres :
           u.deriv t - tensorScaleLaplacian (I := I) (M := M) 0 (U2 t) -
               conjA1MR (I := I) (M := M) S T t (U1 t) =
-            lapDiffA20 (I := I) (M := M) S.family T t V2 := by
+            lapDiffA20 (I := I) (M := M) S.family.metric T t V2 := by
         rw [htdu]
-        change _ + (lapDiffA20 (I := I) (M := M) S.family T t V2 + _) -
+        change _ + (lapDiffA20 (I := I) (M := M) S.family.metric T t V2 + _) -
             _ - _ = _
         abel
       rw [hres]
       simpa only [V2, U2] using
-        (lapDiffA20_test (I := I) (M := M) S.family T t V2 w
+        (lapDiffA20_test (I := I) (M := M) S.family.metric T t V2 w
           (htgraph V2))
   · intro v
     let V1 : tensorHs (I := I) (M := M)

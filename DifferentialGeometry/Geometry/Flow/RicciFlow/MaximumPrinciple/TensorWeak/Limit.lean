@@ -540,7 +540,7 @@ theorem ofSmoothMetric
     {N : TwoTensorReaction (I := I) (M := M)}
     {T : Real}
     (hTsub : Set.Icc 0 T ⊆ D.carrier)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hsym :
       TwoTensorFamilySymmetricOn (I := I) (M := M)
         (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
@@ -574,7 +574,7 @@ theorem ofSmoothMetric
     hsym hbar
     (fun _delta _t0 _hdelta hsub =>
       metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
-        (I := I) (M := M) G hG
+        (I := I) (M := M) G.metric hG
         (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed
 
@@ -786,7 +786,7 @@ theorem ofSmoothMetric
     {N : TwoTensorReaction (I := I) (M := M)}
     {T : Real}
     (hTsub : Set.Icc 0 T ⊆ D.carrier)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hsym :
       TwoTensorFamilySymmetricOn (I := I) (M := M)
         (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
@@ -836,7 +836,7 @@ theorem ofSmoothMetric
     hsym hbar
     (fun _delta _t0 _hdelta hsub =>
       metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
-        (I := I) (M := M) G hG
+        (I := I) (M := M) G.metric hG
         (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed hSigns
 

@@ -336,7 +336,7 @@ theorem pinchLip_bound_Icc
         (metricTimeBundleQuad (I := I) (M := M) G (Set.Icc t0 t1)) := by
     simpa [G, SolutionOn.family] using
       metricTimeBundleQuad_cont_of_metricFamilySmoothOn (I := I) (M := M)
-        S.family hS.smoothMetric hK
+        S.family.metric hS.smoothMetric hK
   have hcompact :
       IsCompact
         (Set.univ :
@@ -522,7 +522,7 @@ theorem pinchMetricGain
               (fun t => S.family.metric t)
               (Set.Icc t0 (t0 + deltaRaw))) := by
         exact metricTimeBundleQuad_cont_of_metricFamilySmoothOn
-          (I := I) (M := M) S.family hS.smoothMetric hcarrier
+          (I := I) (M := M) S.family.metric hS.smoothMetric hcarrier
       have hAcont :
           Continuous (fun q :
               {t : Real // t ∈ Set.Icc t0 (t0 + deltaRaw)} ×

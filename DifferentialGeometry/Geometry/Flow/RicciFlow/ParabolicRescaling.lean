@@ -454,7 +454,7 @@ theorem metricFamilySmooth_para
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     DifferentialGeometry.Geometry.Curvature.MetricFamilySmoothOn (I := I) (M := M)
       (paraInterval D τ R hR hτ)
-      (paraSolution (I := I) S τ R hR hτ).family := by
+      (paraSolution (I := I) S τ R hR hτ).family.metric := by
   refine ⟨?_, ?_, ?_, ?_⟩
   · intro x X Y
     have hOld := hS.smoothMetric.coeff x X Y

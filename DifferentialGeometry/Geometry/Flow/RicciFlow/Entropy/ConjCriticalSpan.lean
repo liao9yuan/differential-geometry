@@ -84,7 +84,7 @@ theorem scalar_crit_span
                             (v.coeff i) ^ 2) := by
   classical
   obtain ⟨ρ, hρ, hρone, hA2span⟩ :=
-    cc_a2_span (I := I) (M := M) S.family hS.smoothMetric hab
+    cc_a2_span (I := I) (M := M) S.family.metric hS.smoothMetric hab
   refine ⟨ρ, hρ, hρone, ?_⟩
   intro T hT h hh hhρ hleft
   obtain ⟨hreg, hA2⟩ := hA2span T hT h hh hhρ hleft

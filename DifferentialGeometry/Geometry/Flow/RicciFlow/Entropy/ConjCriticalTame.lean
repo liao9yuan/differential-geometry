@@ -80,7 +80,7 @@ theorem scalar_crit_tame
                         (v.coeff i) ^ 2) := by
   classical
   obtain ⟨tau, htau, htau_one, hreg, hA2⟩ :=
-    cc_a2_unif (I := I) (M := M) S.family hS.smoothMetric T
+    cc_a2_unif (I := I) (M := M) S.family.metric hS.smoothMetric T
   let K : Set Real := Set.Icc (0 : Real) tau
   let R : Set Real := {s : Real | (T : Real) - s ∈ D.regular}
   let zeta : Real → C^∞⟮I, M; Real⟯ := fun s =>

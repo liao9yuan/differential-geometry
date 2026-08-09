@@ -1450,7 +1450,7 @@ theorem smoothMetric
       (RealTimeInterval.openInterval a b t₀ ht₀)
       ({ base := { metric := co.gInf } } :
         SolutionOn (I := I) (M := P.M)
-          (RealTimeInterval.openInterval a b t₀ ht₀)).family := by
+          (RealTimeInterval.openInterval a b t₀ ht₀)).family.metric := by
   letI : TopologicalSpace P.M := P.topology
   letI : ChartedSpace H P.M := P.charted
   letI : T2Space P.M := P.t2
@@ -1582,7 +1582,7 @@ theorem smoothMetric_of_conv
       (RealTimeInterval.openInterval a b t₀ ht₀)
       ({ base := { metric := co.gInf } } :
         SolutionOn (I := I) (M := P.M)
-          (RealTimeInterval.openInterval a b t₀ ht₀)).family := by
+          (RealTimeInterval.openInterval a b t₀ ht₀)).family.metric := by
   apply OpenConvOut.smoothMetric (Φ := Φ) ht₀ co
   intro n
   apply ConvOut.gramSmooth (Φ := Φ) (co := OpenConvOut.at_window Φ co n)

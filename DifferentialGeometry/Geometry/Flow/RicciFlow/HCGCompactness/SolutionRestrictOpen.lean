@@ -363,7 +363,7 @@ theorem metricFamilySmoothOn_restrictOpen
     (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
     [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U] :
-    MetricFamilySmoothOn (I := I) D (solutionOn_restrictOpen (I := I) S U).family where
+    MetricFamilySmoothOn (I := I) D (solutionOn_restrictOpen (I := I) S U).family.metric where
   coeff x X Y := hS.smoothMetric.coeff (x : M) X Y
   coeff_cont x X Y := hS.smoothMetric.coeff_cont (x : M) X Y
   metricTensor_cont := by

@@ -77,7 +77,7 @@ theorem isSolutionOn_of_reg
     {D : RealTimeInterval}
     (g : Real -> SmoothRiemannianMetric I M)
     (hsmooth : MetricFamilySmoothOn (I := I) (M := M) D
-      ({ base := { metric := g } } : SolutionOn (I := I) (M := M) D).family)
+      ({ base := { metric := g } } : SolutionOn (I := I) (M := M) D).family.metric)
     (hpde : ∀ t ∈ D.regular, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivAt (fun s : Real => (g s).inner x v w)
         ((-2 : Real) * ricciTensor (I := I) (g t) x v w) t)

@@ -273,38 +273,38 @@ private theorem traceCast_jet_bdd
 
 theorem cc_comm_unif
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) :
     ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
       ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧
-        ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
-          |tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
-              (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
-              (operatorFieldApply (I := I) (M := M) (G.metric (T : ℝ)) 2 0
-                (scalarTraceCoeff (I := I) (G.metric (T : ℝ))
-                  (G.metric ((T : ℝ) - s)))
-                (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 2 U)).toFun +
-            tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 (1 + n)
-              (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 1 n
-                (covGrad (I := I) (M := M) (G.metric (T : ℝ)) 0 0 U)).toFun
-              (ccOperatorFieldComp (I := I) (M := M) (G.metric (T : ℝ)) 0 (1 + n) (1 + n)
-                (slotExtendIter (I := I) (M := M) (G.metric (T : ℝ)) 1 1 n
-                  (scalarFluxCoeff (I := I) (G.metric (T : ℝ))
-                    (G.metric ((T : ℝ) - s))))
-                (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 1 n
-                  (covGrad (I := I) (M := M) (G.metric (T : ℝ)) 0 0 U))).toFun| ≤
+        ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (g_fam (T : ℝ)) 0 0,
+          |tensorL2Inner (I := I) (M := M) (g_fam (T : ℝ)) 0 0
+              (oneMinusConnLapSmoothIter (I := I) (g_fam (T : ℝ)) 0 0 n U).toFun
+              (operatorFieldApply (I := I) (M := M) (g_fam (T : ℝ)) 2 0
+                (scalarTraceCoeff (I := I) (g_fam (T : ℝ))
+                  (g_fam ((T : ℝ) - s)))
+                (iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 2 U)).toFun +
+            tensorL2Inner (I := I) (M := M) (g_fam (T : ℝ)) 0 (1 + n)
+              (iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 1 n
+                (covGrad (I := I) (M := M) (g_fam (T : ℝ)) 0 0 U)).toFun
+              (ccOperatorFieldComp (I := I) (M := M) (g_fam (T : ℝ)) 0 (1 + n) (1 + n)
+                (slotExtendIter (I := I) (M := M) (g_fam (T : ℝ)) 1 1 n
+                  (scalarFluxCoeff (I := I) (g_fam (T : ℝ))
+                    (g_fam ((T : ℝ) - s))))
+                (iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 1 n
+                  (covGrad (I := I) (M := M) (g_fam (T : ℝ)) 0 0 U))).toFun| ≤
             C * ((∑ j ∈ Finset.range (n + 1),
-                ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖) *
+                ‖iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 j U‖) *
               (∑ j ∈ Finset.range (n + 2),
-                ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖)) := by
+                ‖iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 j U‖)) := by
   classical
   obtain ⟨tau, htau, htau_one, B, hB_nn, hB⟩ :=
-    scalarFlux_slab (I := I) (M := M) G hG T
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+    scalarFlux_slab (I := I) (M := M) g_fam hG T
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
   let A : Set ℝ := Set.Icc (0 : ℝ) tau
   let C₀ : ℝ → SmoothCcTensor q 1 1 := fun s =>
-    scalarFluxCoeff (I := I) q (G.metric ((T : ℝ) - s))
+    scalarFluxCoeff (I := I) q (g_fam ((T : ℝ) - s))
   let Φ : ℝ → SmoothCcTensor q 1 0 := fun s =>
     ccOperatorFieldComp (I := I) (M := M) q 1 2 0
       (cometricDoubleTraceField (I := I) q 0)
@@ -332,7 +332,7 @@ theorem cc_comm_unif
   let P : ℝ := tensorL2Inner (I := I) (M := M) q 0 0
     (oneMinusConnLapSmoothIter (I := I) q 0 0 n U).toFun
     (operatorFieldApply (I := I) (M := M) q 2 0
-      (scalarTraceCoeff (I := I) q (G.metric ((T : ℝ) - s)))
+      (scalarTraceCoeff (I := I) q (g_fam ((T : ℝ) - s)))
       (iteratedCovGrad (I := I) q 0 0 2 U)).toFun
   let G₀ : ℝ := tensorL2Inner (I := I) (M := M) q 0 1
     (covGrad (I := I) (M := M) q 0 0
@@ -363,7 +363,7 @@ theorem cc_comm_unif
   have hsplit : P = -G₀ - R := by
     simpa only [P, G₀, R, C₀, Φ, hgrad,
       scalarFlux_eq_slot (I := I) (M := M)] using
-      cc_pair_split (I := I) (M := M) q (G.metric ((T : ℝ) - s))
+      cc_pair_split (I := I) (M := M) q (g_fam ((T : ℝ) - s))
         (oneMinusConnLapSmoothIter (I := I) q 0 0 n U) U
   have hid : P + Htop = -(G₀ - Htop) - R := by
     linarith
@@ -380,8 +380,8 @@ theorem cc_comm_unif
 
 theorem lapCoeff_slab
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) :
     ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
       ∃ B₂ B₁ : ℕ → ℝ,
@@ -390,22 +390,22 @@ theorem lapCoeff_slab
           ((T : ℝ) - s ∈ D.regular) ∧
           (∀ i x,
             riemannianFiberNormSq (I := I) (M := M)
-                (G.metric (T : ℝ)) 2 (0 + i) x
-              ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 2 0 i
-                (scalarTraceCoeff (I := I) (G.metric (T : ℝ))
-                  (G.metric ((T : ℝ) - s)))).toSection x) ≤ B₂ i) ∧
+                (g_fam (T : ℝ)) 2 (0 + i) x
+              ((iteratedCovGrad (I := I) (g_fam (T : ℝ)) 2 0 i
+                (scalarTraceCoeff (I := I) (g_fam (T : ℝ))
+                  (g_fam ((T : ℝ) - s)))).toSection x) ≤ B₂ i) ∧
           ∀ i x,
             riemannianFiberNormSq (I := I) (M := M)
-                (G.metric (T : ℝ)) 1 (0 + i) x
-              ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 1 0 i
-                (connTraceCoeff (I := I) (G.metric (T : ℝ))
-                  (G.metric ((T : ℝ) - s)))).toSection x) ≤ B₁ i := by
+                (g_fam (T : ℝ)) 1 (0 + i) x
+              ((iteratedCovGrad (I := I) (g_fam (T : ℝ)) 1 0 i
+                (connTraceCoeff (I := I) (g_fam (T : ℝ))
+                  (g_fam ((T : ℝ) - s)))).toSection x) ≤ B₁ i := by
   classical
   obtain ⟨tau, htau, htau_one, J, hJ_nn, hdata⟩ :=
-    metricDiff_slab (I := I) (M := M) G hG T
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+    metricDiff_slab (I := I) (M := M) g_fam hG T
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
   let A : Set ℝ := Set.Icc (0 : ℝ) tau
-  let gm : ℝ → SmoothRiemannianMetric I M := fun s => G.metric ((T : ℝ) - s)
+  let gm : ℝ → SmoothRiemannianMetric I M := fun s => g_fam ((T : ℝ) - s)
   let P : ℝ → SmoothCcTensor q 0 2 := fun s =>
     metricDifferenceCcTensor (I := I) (M := M) q (gm s)
   have hreg : ∀ s ∈ A, (T : ℝ) - s ∈ D.regular := by
@@ -488,29 +488,29 @@ theorem lapCoeff_slab
 
 theorem cc_conn_unif
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) :
     ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
       (∀ s ∈ Set.Icc (0 : ℝ) tau, (T : ℝ) - s ∈ D.regular) ∧
       ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧
-        ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
-          |tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
-              (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
-              (operatorFieldApply (I := I) (M := M) (G.metric (T : ℝ)) 1 0
-                (connTraceCoeff (I := I) (G.metric (T : ℝ))
-                  (G.metric ((T : ℝ) - s)))
-                (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 1 U)).toFun| ≤
+        ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (g_fam (T : ℝ)) 0 0,
+          |tensorL2Inner (I := I) (M := M) (g_fam (T : ℝ)) 0 0
+              (oneMinusConnLapSmoothIter (I := I) (g_fam (T : ℝ)) 0 0 n U).toFun
+              (operatorFieldApply (I := I) (M := M) (g_fam (T : ℝ)) 1 0
+                (connTraceCoeff (I := I) (g_fam (T : ℝ))
+                  (g_fam ((T : ℝ) - s)))
+                (iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 1 U)).toFun| ≤
             C * ((∑ j ∈ Finset.range (n + 1),
-                ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖) *
+                ‖iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 j U‖) *
               (∑ j ∈ Finset.range (n + 2),
-                ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖)) := by
+                ‖iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 j U‖)) := by
   classical
   obtain ⟨tau, htau, htau_one, B₂, B₁, hB₂_nn, hB₁_nn, hcoeff⟩ :=
-    lapCoeff_slab (I := I) (M := M) G hG T
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+    lapCoeff_slab (I := I) (M := M) g_fam hG T
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
   let A : Set ℝ := Set.Icc (0 : ℝ) tau
-  let gm : ℝ → SmoothRiemannianMetric I M := fun s => G.metric ((T : ℝ) - s)
+  let gm : ℝ → SmoothRiemannianMetric I M := fun s => g_fam ((T : ℝ) - s)
   have hreg : ∀ s ∈ A, (T : ℝ) - s ∈ D.regular := by
     intro s hs
     exact (hcoeff s hs).1
@@ -537,32 +537,32 @@ theorem cc_conn_unif
 
 theorem cc_lap_unif
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) :
     ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
       (∀ s ∈ Set.Icc (0 : ℝ) tau, (T : ℝ) - s ∈ D.regular) ∧
       ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧
-        ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
-          tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
-              (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
-              (scalarLapDiffCc (I := I) (G.metric (T : ℝ))
-                (G.metric ((T : ℝ) - s)) U).toFun ≤
+        ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (g_fam (T : ℝ)) 0 0,
+          tensorL2Inner (I := I) (M := M) (g_fam (T : ℝ)) 0 0
+              (oneMinusConnLapSmoothIter (I := I) (g_fam (T : ℝ)) 0 0 n U).toFun
+              (scalarLapDiffCc (I := I) (g_fam (T : ℝ))
+                (g_fam ((T : ℝ) - s)) U).toFun ≤
             ((1 : ℝ) / 3) *
                 ‖SmoothCcTensor.toL2
-                  (castCcTensorRank (I := I) (M := M) (G.metric (T : ℝ)) 0
+                  (castCcTensorRank (I := I) (M := M) (g_fam (T : ℝ)) 0
                     (by omega : 0 + (n + 1) = 1 + n)
-                    (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 (n + 1) U))‖ ^ 2 +
+                    (iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 (n + 1) U))‖ ^ 2 +
               C * ((∑ j ∈ Finset.range (n + 1),
-                  ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖) *
+                  ‖iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 j U‖) *
                 (∑ j ∈ Finset.range (n + 2),
-                  ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖)) := by
+                  ‖iteratedCovGrad (I := I) (g_fam (T : ℝ)) 0 0 j U‖)) := by
   classical
-  obtain ⟨taup, htaup, htaup_one, hp⟩ := cc_comm_unif (I := I) (M := M) G hG T
+  obtain ⟨taup, htaup, htaup_one, hp⟩ := cc_comm_unif (I := I) (M := M) g_fam hG T
   obtain ⟨tauc, htauc, _, _, hc⟩ :=
-    cc_conn_unif (I := I) (M := M) G hG T
+    cc_conn_unif (I := I) (M := M) g_fam hG T
   obtain ⟨taum, htaum, _, _, _, hm⟩ :=
-    metricDiff_slab (I := I) (M := M) G hG T
+    metricDiff_slab (I := I) (M := M) g_fam hG T
   let tau : ℝ := min taup (min tauc taum)
   have htau : 0 < tau := by
     exact lt_min htaup (lt_min htauc htaum)
@@ -584,8 +584,8 @@ theorem cc_lap_unif
   have hsp : s ∈ Set.Icc (0 : ℝ) taup := ⟨hs.1, hs.2.trans htaup_le⟩
   have hsc : s ∈ Set.Icc (0 : ℝ) tauc := ⟨hs.1, hs.2.trans htauc_le⟩
   have hsm : s ∈ Set.Icc (0 : ℝ) taum := ⟨hs.1, hs.2.trans htaum_le⟩
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
-  let h : SmoothRiemannianMetric I M := G.metric ((T : ℝ) - s)
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
+  let h : SmoothRiemannianMetric I M := g_fam ((T : ℝ) - s)
   let K : SmoothCcTensor q 0 2 :=
     metricDifferenceCcTensor (I := I) (M := M) q h
   let k : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ :=
@@ -824,8 +824,8 @@ theorem finite_lap_unif
 
 theorem cc_a2_unif
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     (T : D.RegularTime) :
     ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
       (∀ s ∈ Set.Icc (0 : ℝ) tau, (T : ℝ) - s ∈ D.regular) ∧
@@ -833,8 +833,8 @@ theorem cc_a2_unif
         ∀ s ∈ Set.Icc (0 : ℝ) tau,
           ∀ (F : Finset
               (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-                (I := I) (M := M) (G.metric (T : ℝ)) 0 0))
-            (v : tensorHs (I := I) (M := M) (G.metric (T : ℝ)) 0 0 0)
+                (I := I) (M := M) (g_fam (T : ℝ)) 0 0))
+            (v : tensorHs (I := I) (M := M) (g_fam (T : ℝ)) 0 0 0)
             (hv : (Function.support v.coeff).Finite),
             hv.toFinset ⊆ F →
               2 * ∑ i ∈ F,
@@ -842,10 +842,10 @@ theorem cc_a2_unif
                     (v.coeff i *
                       tensorL2Coeff (I := I) (M := M)
                         (tensorResolventL2_isCompactOperator
-                          (I := I) (M := M) (G.metric (T : ℝ)) 0 0)
+                          (I := I) (M := M) (g_fam (T : ℝ)) 0 0)
                         (SmoothCcTensor.toL2
-                          (scalarLapDiffCc (I := I) (G.metric (T : ℝ))
-                            (G.metric ((T : ℝ) - s))
+                          (scalarLapDiffCc (I := I) (g_fam (T : ℝ))
+                            (g_fam ((T : ℝ) - s))
                             (tensorHsSmoothRepr (I := I) (M := M) v hv))) i) ≤
                 ((5 : ℝ) / 3) *
                     (∑ i ∈ F,
@@ -857,9 +857,9 @@ theorem cc_a2_unif
                         (v.coeff i) ^ 2) := by
   classical
   obtain ⟨tau, htau, htau_one, hreg, hlap⟩ :=
-    cc_lap_unif (I := I) (M := M) G hG T
-  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
-  let gm : ℝ → SmoothRiemannianMetric I M := fun s => G.metric ((T : ℝ) - s)
+    cc_lap_unif (I := I) (M := M) g_fam hG T
+  let q : SmoothRiemannianMetric I M := g_fam (T : ℝ)
+  let gm : ℝ → SmoothRiemannianMetric I M := fun s => g_fam ((T : ℝ) - s)
   let A : Set ℝ := Set.Icc (0 : ℝ) tau
   refine ⟨tau, htau, htau_one, hreg, fun n => ?_⟩
   obtain ⟨Clap, hClap_nn, hClap⟩ := hlap n

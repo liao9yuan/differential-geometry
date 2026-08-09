@@ -460,7 +460,7 @@ structure IsSolutionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
   smoothMetric : DifferentialGeometry.Geometry.Curvature.MetricFamilySmoothOn (I := I) (M := M) D
-    S.family
+    S.family.metric
   smoothConnection : DifferentialGeometry.Geometry.Connection.ConnectionFamilySmoothOn (I := I)
     (M := M) S.family
   equation : MetricVariationEquationOn (I := I) S

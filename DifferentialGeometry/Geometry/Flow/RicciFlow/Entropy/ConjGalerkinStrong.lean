@@ -255,13 +255,13 @@ theorem galLimVel_lift
           ∀ t, w t = galLimVelCan hτ.le hlim m (t : Real) := by
   classical
   obtain ⟨tauN, htauN, _, hregN, hnorm⟩ :=
-    lapDiffHs_norm (I := I) (M := M) S.family hS.smoothMetric T
+    lapDiffHs_norm (I := I) (M := M) S.family.metric hS.smoothMetric T
   obtain ⟨tauI, htauI, _, _, hinc⟩ :=
-    lapDiffHs_inc (I := I) (M := M) S.family hS.smoothMetric T
+    lapDiffHs_inc (I := I) (M := M) S.family.metric hS.smoothMetric T
   obtain ⟨tauE, htauE, hEq⟩ :=
     mem_nhdsGE_iff_exists_Icc_subset.mp
       (lapDiffHs_eq_A20 (I := I) (M := M)
-        S.family hS.smoothMetric T)
+        S.family.metric hS.smoothMetric T)
   let tau' : Real := min tau (min tauN (min tauI tauE))
   have htau' : 0 < tau' := by
     dsimp only [tau']
@@ -517,7 +517,7 @@ theorem galLimVel_lift
             (g := q) (r := 0) (s := 0) h0k
             (lapDiffHs (I := I) (M := M) q
               (S.family.metric ((T : Real) - t)) (m + 1) U) =
-          lapDiffA20 (I := I) (M := M) S.family T t U₂ := by
+          lapDiffA20 (I := I) (M := M) S.family.metric T t U₂ := by
       calc
         _ = tensorHs.castEquiv (I := I) (M := M)
             (g := q) (r := 0) (s := 0) hzero
@@ -531,7 +531,7 @@ theorem galLimVel_lift
               (S.family.metric ((T : Real) - t)) 0
               (tensorHs.castEquiv (I := I) (M := M)
                 (g := q) (r := 0) (s := 0) h20 U₂)) := by rw [hU0]
-        _ = lapDiffA20 (I := I) (M := M) S.family T t U₂ :=
+        _ = lapDiffA20 (I := I) (M := M) S.family.metric T t U₂ :=
           hEq (hsubE t.2) U₂
     have hPot :
         tensorHsInclusion (I := I) (M := M)
@@ -1212,7 +1212,7 @@ theorem galLimExt_smooth
   obtain ⟨tauO, htauO, htauO_tau, hode⟩ :=
     galLimExt_ode (I := I) (M := M) hS hτ hlim
   obtain ⟨tauA, htauA, _htauA_one, hregA, hLap⟩ :=
-    lapDiffHs_dyn_fin (I := I) (M := M) S.family hS.smoothMetric T
+    lapDiffHs_dyn_fin (I := I) (M := M) S.family.metric hS.smoothMetric T
   let tau' : Real := min tauO tauA
   have htau' : 0 < tau' := by
     simpa only [tau'] using lt_min htauO htauA

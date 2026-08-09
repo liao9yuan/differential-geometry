@@ -64,7 +64,7 @@ theorem early_vol_low
               {x : M | DifferentialGeometry.riemannianEDistOf
                 (I := I) (S.base.metric t) p x < ENNReal.ofReal r} := by
   simpa only [SolutionOn.family_metric] using
-    family_vol_low (I := I) (M := M) h0omega S.family hS.smoothMetric hrho
+    family_vol_low (I := I) (M := M) h0omega S.family.metric hS.smoothMetric hrho
 
 omit [ConnectedSpace M] [BoundarylessManifold I M] in
 /-- Flow-ball form of `early_vol_low`.  This is only the definitional adapter

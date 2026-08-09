@@ -283,7 +283,7 @@ noncomputable def scalarGalPert
     (T : D.RegularTime) (t : Real) :
     tensorHs (I := I) (M := M) (S.family.metric (T : Real)) 0 0 2 →L[Real]
       tensorHs (I := I) (M := M) (S.family.metric (T : Real)) 0 0 0 :=
-  lapDiffA20 (I := I) (M := M) S.family T t +
+  lapDiffA20 (I := I) (M := M) S.family.metric T t +
     (conjA1 (I := I) (M := M) S T t).comp
       (tensorHsInclusion (I := I) (M := M)
         (g := S.family.metric (T : Real)) (r := 0) (s := 0)
@@ -298,7 +298,7 @@ theorem galPert_fin_of
       tensorHsZeroEquivL2 (I := I) (M := M)
           (tensorResolventL2_isCompactOperator
             (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-          (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+          (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
         lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
           (S.family.metric ((T : Real) - s)) v) :
     let q := S.family.metric (T : Real)
@@ -337,7 +337,7 @@ theorem galPert_fin_of
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
       (I := I) (M := M) v0 hv0
   have hA2 :
-      (lapDiffA20 (I := I) (M := M) S.family T s v2).coeff i =
+      (lapDiffA20 (I := I) (M := M) S.family.metric T s v2).coeff i =
         tensorL2Coeff (I := I) (M := M) hc
           (SmoothCcTensor.toL2
             (scalarLapDiffCc (I := I) q
@@ -368,7 +368,7 @@ theorem galPert_fin_of
     rw [scalarPotCore_apply]
     rw [scalarGalRepr_eq (I := I) (M := M) q F c 1 0]
   change
-    (lapDiffA20 (I := I) (M := M) S.family T s v2).coeff i +
+    (lapDiffA20 (I := I) (M := M) S.family.metric T s v2).coeff i +
       ((conjA1 (I := I) (M := M) S T s).comp
         (tensorHsInclusion (I := I) (M := M)
           (g := q) (r := 0) (s := 0)
@@ -404,7 +404,7 @@ theorem scalarGalPert_fin
                   (conjCoeff (I := I) (M := M) S
                     ((T : Real) - s)) U)) i := by
   filter_upwards [lapDiffA20_core (I := I) (M := M)
-    S.family hS.smoothMetric T] with s hs
+    S.family.metric hS.smoothMetric T] with s hs
   exact galPert_fin_of (I := I) (M := M) S T s hs
 
 /-- The finite-dimensional non-autonomous scalar Galerkin vector field. -/
@@ -541,7 +541,7 @@ theorem scalarGalField_norm_le
     (T : D.RegularTime)
     (F : Finset (TensorEigenIdx (I := I) (M := M)
       (S.family.metric (T : Real)) 0 0)) (t : Real) (C : NNReal)
-    (hLap : ‖lapDiffA20 (I := I) (M := M) S.family T t‖ ≤ 1)
+    (hLap : ‖lapDiffA20 (I := I) (M := M) S.family.metric T t‖ ≤ 1)
     (hPot : ‖conjA1 (I := I) (M := M) S T t‖ ≤ (C : Real))
     (w : EuclideanSpace Real {i // i ∈ F}) :
     ‖scalarGalField (I := I) (M := M) S T F t w‖ ≤
@@ -568,7 +568,7 @@ theorem scalarGalField_norm_le
   let Lap :
       tensorHs (I := I) (M := M) q 0 0 2 →L[Real]
         tensorHs (I := I) (M := M) q 0 0 0 :=
-    lapDiffA20 (I := I) (M := M) S.family T t
+    lapDiffA20 (I := I) (M := M) S.family.metric T t
   let Pot :
       tensorHs (I := I) (M := M) q 0 0 1 →L[Real]
         tensorHs (I := I) (M := M) q 0 0 0 :=
@@ -873,7 +873,7 @@ theorem scalar_gal_exists
     ∃ G : ConjGalTime, IsConjGalTime (I := I) (M := M) S T G := by
   classical
   obtain ⟨tau2, htau2, htau2one, hcont2, _hmeas2, _hbound2, _hboundAE2⟩ :=
-    lapDiffA20_short (I := I) (M := M) S.family hS.smoothMetric T
+    lapDiffA20_short (I := I) (M := M) S.family.metric hS.smoothMetric T
       (epsilon := (1 : Real)) zero_lt_one
   obtain ⟨tau1, htau1, _htau1one, _C1, hcont1, _hmeas1, _hbound1,
       _hboundAE1⟩ :=
