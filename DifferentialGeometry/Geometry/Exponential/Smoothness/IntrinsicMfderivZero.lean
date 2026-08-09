@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.Smoothness.MfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 open DifferentialGeometry.Geometry.Curvature
@@ -46,8 +47,7 @@ theorem mfderiv_expMapIntrinsic_at_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [CompleteSpace E]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     mfderiv 𝓘(ℝ, E) I
       (fun v : E => (expMapIntrinsic (I := I) g hEnorm p (show TangentSpace I p from v) : M))

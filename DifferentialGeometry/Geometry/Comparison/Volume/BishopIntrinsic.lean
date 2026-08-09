@@ -52,8 +52,7 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 initial-velocity Jacobi field agree with the chart-fixed realizations. -/
 theorem intrJacobi_raw
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : E) :
     ∀ᶠ t in 𝓝[>] (0 : Real),
       intrinsicGeodesic (I := I) g hEnorm p
@@ -138,8 +137,7 @@ private theorem linIndep_of_ortho
 omit [T2Space (TangentBundle I M)] in
 private theorem intrVar_smooth
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : TangentSpace I p) :
     IsSmoothVariation (I := I) fun s t =>
       intrinsicGeodesic (I := I) g hEnorm p (u + s • w) t := by
@@ -152,8 +150,7 @@ private theorem intrVar_smooth
 omit [T2Space (TangentBundle I M)] in
 private theorem intrJacobi_diff
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : TangentSpace I p) (t : Real) :
     DifferentiableAt Real
         (chartRepAt (I := I)
@@ -223,8 +220,7 @@ private theorem curveVelocity_comp_mul
 omit [T2Space (TangentBundle I M)] in
 private theorem intrVel_smul
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (c : Real) :
     ((intrinsicVelocityLift (I := I) g hEnorm p (c • u) 1).snd : E) =
       c • ((intrinsicVelocityLift (I := I) g hEnorm p u c).snd : E) := by
@@ -260,8 +256,7 @@ private theorem intrVel_smul
 omit [T2Space (TangentBundle I M)] in
 private theorem intrJacobi_perp_ne
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : TangentSpace I p) {t : Real}
     (ht : t ≠ 0) (hperp : g.inner p u w = 0) :
     g.inner (intrinsicGeodesic (I := I) g hEnorm p u t)
@@ -324,8 +319,7 @@ private theorem intrJacobi_perp_ne
 omit [T2Space (TangentBundle I M)] in
 private theorem intrGeodesic_smooth
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) :
     ContMDiff 𝓘(Real, Real) I (8 : Nat)
       (intrinsicGeodesic (I := I) g hEnorm p u) := by
@@ -350,8 +344,7 @@ private theorem intrGeodesic_smooth
 omit [T2Space (TangentBundle I M)] in
 private theorem intrJacobi_dperp
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : TangentSpace I p) {t : Real}
     (ht : t ≠ 0) (hperp : g.inner p u w = 0)
     (hJdiff : DifferentiableAt Real
@@ -406,8 +399,7 @@ private theorem intrJacobi_dperp
 omit [T2Space (TangentBundle I M)] in
 private theorem intrWronsk_zero
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w₁ w₂ : TangentSpace I p) (b : Real) :
     ∀ t ∈ Set.Icc (0 : Real) b,
       jacobiWronskian (I := I) g
@@ -471,8 +463,7 @@ omit [T2Space (TangentBundle I M)] in
 private theorem intrJacobi_li
     {ι : Type*}
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (v : ι → TangentSpace I p)
     (hv : LinearIndependent Real v) {t : Real} (ht : t ≠ 0)
     (hno : ¬ IsConjVec (I := I) g hEnorm p (t • (u : E))) :
@@ -510,8 +501,7 @@ as a germ at the pole; nonconjugacy and the Riccati argument run along the
 complete intrinsic geodesic. -/
 theorem exists_intrMean
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (q b : Real)
     (hq : 0 ≤ q) (hb : 1 < b)
     (hu : 0 < g.inner p u u)
@@ -703,8 +693,7 @@ hyperbolic model is antitone along the complete intrinsic geodesic.  The speed
 degenerate `finrank = 1` case that `exists_intrMean` handles). -/
 theorem exists_intrRatio
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (q b : Real)
     (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
@@ -858,8 +847,7 @@ geodesic.  Exposing the frame lets a caller feed the SAME frame to the sharp
 pole-limit lemma, so the antitone bound and the pole limit refer to one frame. -/
 theorem intrRatioOfFrame
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (q b : Real)
     (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)

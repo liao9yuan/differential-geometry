@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.BranchRadius
 import DifferentialGeometry.Geometry.Exponential.CartanNorm
 import DifferentialGeometry.Geometry.Exponential.DiagInvFixed
@@ -117,8 +118,7 @@ omit [T2Space (TangentBundle I M)]
 quadratic form between curvature-one manifolds. -/
 theorem cartanMap_sq
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (g' : SmoothRiemannianMetric I' M')
     (hEnorm' : ∀ (x : M') (w : TangentSpace I' x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g'.inner x w w)))
@@ -232,8 +232,7 @@ omit [T2Space (TangentBundle I M)]
 Riemannian inner product between curvature-one manifolds. -/
 theorem cartanMap_inner
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (g' : SmoothRiemannianMetric I' M')
     (hEnorm' : ∀ (x : M') (w : TangentSpace I' x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g'.inner x w w)))
@@ -410,8 +409,7 @@ omit [T2Space (TangentBundle I M)]
 Riemannian inner product. -/
 theorem cartanPD_inner
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (g' : SmoothRiemannianMetric I' M')
     (hEnorm' : ∀ (x : M') (w : TangentSpace I' x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g'.inner x w w)))

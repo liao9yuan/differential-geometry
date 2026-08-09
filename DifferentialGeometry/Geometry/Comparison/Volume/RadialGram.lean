@@ -93,8 +93,7 @@ theorem radial_wronsk_zero
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w z : E,
       ‖x‖ < r → ‖w‖ < r → ‖z‖ < r →

@@ -230,9 +230,7 @@ variable
 /-- The intrinsic round exponential recovers every point other than the two
 poles from its radial logarithm. -/
 theorem round_exp_log
-    (hEnorm : ∀ (y : sphere (0 : E) 1) (w : TangentSpace (𝓡 n) y),
-      ‖w‖ₑ = ENNReal.ofReal
-        (Real.sqrt ((roundMetric (E := E) (n := n)).inner y w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := 𝓡 n) (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)))
     (p x : sphere (0 : E) 1) (hxp : x ≠ p) (hxnp : x ≠ -p) :
     expMapIntrinsic (I := 𝓡 n) (roundMetric (E := E) (n := n))
         hEnorm p (roundLog (n := n) p x) = x := by
@@ -267,9 +265,7 @@ theorem round_exp_log
 /-- The intrinsic round exponential and logarithm cancel everywhere away from
 the antipode, including at the base point. -/
 theorem round_exp_log_ne
-    (hEnorm : ∀ (y : sphere (0 : E) 1) (w : TangentSpace (𝓡 n) y),
-      ‖w‖ₑ = ENNReal.ofReal
-        (Real.sqrt ((roundMetric (E := E) (n := n)).inner y w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := 𝓡 n) (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)))
     (p x : sphere (0 : E) 1) (hxnp : x ≠ -p) :
     expMapIntrinsic (I := 𝓡 n) (roundMetric (E := E) (n := n))
         hEnorm p (roundLog (n := n) p x) = x := by
@@ -283,9 +279,7 @@ theorem round_exp_log_ne
   · exact round_exp_log hEnorm p x hxp hxnp
 
 private theorem log_eq_branch
-    (hEnorm : ∀ (y : sphere (0 : E) 1) (w : TangentSpace (𝓡 n) y),
-      ‖w‖ₑ = ENNReal.ofReal
-        (Real.sqrt ((roundMetric (E := E) (n := n)).inner y w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := 𝓡 n) (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)))
     (p : sphere (0 : E) 1) :
     roundLog (n := n) p =ᶠ[𝓝 p]
       (stdBranch (I := 𝓡 n) (roundMetric (E := E) (n := n))
@@ -320,9 +314,7 @@ private theorem log_eq_branch
 /-- The intrinsic round logarithm is smooth on the sphere with the antipode
 removed. -/
 theorem roundLog_smooth
-    (hEnorm : ∀ (y : sphere (0 : E) 1) (w : TangentSpace (𝓡 n) y),
-      ‖w‖ₑ = ENNReal.ofReal
-        (Real.sqrt ((roundMetric (E := E) (n := n)).inner y w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := 𝓡 n) (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)))
     (p : sphere (0 : E) 1) :
     ContMDiffOn (𝓡 n) 𝓘(ℝ, EuclideanSpace ℝ (Fin n)) ∞
       (roundLog (n := n) p) {x | x ≠ -p} := by
@@ -353,9 +345,7 @@ theorem roundLog_smooth
 /-- At its base point, the differential of the intrinsic round logarithm is
 the identity on the fixed round-sphere model space. -/
 theorem roundLog_mfd_self
-    (hEnorm : ∀ (y : sphere (0 : E) 1) (w : TangentSpace (𝓡 n) y),
-      ‖w‖ₑ = ENNReal.ofReal
-        (Real.sqrt ((roundMetric (E := E) (n := n)).inner y w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := 𝓡 n) (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)))
     (p : sphere (0 : E) 1) :
     mfderiv (𝓡 n) 𝓘(ℝ, EuclideanSpace ℝ (Fin n))
         (roundLog (n := n) p) p =

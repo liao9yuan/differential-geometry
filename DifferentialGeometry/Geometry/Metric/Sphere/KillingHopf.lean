@@ -121,8 +121,7 @@ theorem punctCartan_match
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
       (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
@@ -290,8 +289,7 @@ theorem sphere_diffeo_one
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
       (DifferentialGeometry.Geometry.Curvature.riemannOp
           (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)

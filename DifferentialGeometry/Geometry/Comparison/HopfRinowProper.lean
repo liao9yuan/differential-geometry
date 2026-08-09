@@ -183,8 +183,7 @@ theorem expImgClosedBall_compact
       letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
       CompleteSpace M)
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (R : ℝ) :
     letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
     IsCompact ((fun v => expMapIntrinsic (I := I) g hEnorm p v) ''
@@ -206,8 +205,7 @@ theorem closedBall_subset_expImg
       letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
       CompleteSpace M)
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {R : ℝ} :
     letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
     (letI : MetricSpace M := riemMetricSpace (I := I) (M := M)
@@ -240,8 +238,7 @@ theorem properSpace_riemMetric
       letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
       CompleteSpace M)
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v))) :
+    (hEnorm : IsMetricNorm (I := I) (M := M) g) :
     letI : MetricSpace M := riemMetricSpace (I := I) (M := M)
     ProperSpace M := by
   letI : MetricSpace M := riemMetricSpace (I := I) (M := M)
@@ -264,8 +261,7 @@ theorem intermediateDist_riemMetric
       letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
       CompleteSpace M)
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (O : M) :
     letI : MetricSpace M := riemMetricSpace (I := I) (M := M)
     ∀ p : M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p O →

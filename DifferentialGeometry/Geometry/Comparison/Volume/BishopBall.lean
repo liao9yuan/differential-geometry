@@ -293,8 +293,7 @@ theorem exists_framed_ratio
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (q : Real) (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
     (hRic : RicciBoundedBelow (I := I) g
@@ -514,8 +513,7 @@ theorem normalBall_cross
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (q : Real) (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
     (hRic : RicciBoundedBelow (I := I) g
@@ -626,8 +624,7 @@ theorem normalBall_ratio
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (q : Real) (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
     (hRic : RicciBoundedBelow (I := I) g

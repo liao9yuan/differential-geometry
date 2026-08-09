@@ -63,8 +63,7 @@ the `none` slot carries the geodesic velocity field `t ↦ γ̇(t)` and each `so
 slot carries the transverse intrinsic Jacobi field `Jᵢ = intrinsicJacobi x u wᵢ`. -/
 def velJacFrame
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (u : TangentSpace I x) {d : ℕ} (w : Fin d → TangentSpace I x) :
     Option (Fin d) →
       ∀ t : ℝ, TangentSpace I (intrinsicGeodesic (I := I) g hEnorm x u t)
@@ -73,8 +72,7 @@ def velJacFrame
 
 @[simp] theorem velJacFrame_none
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (u : TangentSpace I x) {d : ℕ} (w : Fin d → TangentSpace I x) :
     velJacFrame (I := I) g hEnorm x u w none =
       fun t => curveVelocity (I := I) (intrinsicGeodesic (I := I) g hEnorm x u) t :=
@@ -82,8 +80,7 @@ def velJacFrame
 
 @[simp] theorem velJacFrame_some
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (u : TangentSpace I x) {d : ℕ} (w : Fin d → TangentSpace I x)
     (i : Fin d) :
     velJacFrame (I := I) g hEnorm x u w (some i) =
@@ -98,8 +95,7 @@ frame `{γ̇(1)} ∪ {Jᵢ(1)}` factors as `g_x(u,u) · det(transverse Gram)`.  
 `intrinsicJacobi_perp` and the radial norm² is `intrinsicGeodesic_speedSq_eq`. -/
 theorem velJac_gram_split
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (u : TangentSpace I x) {d : ℕ} (w : Fin d → TangentSpace I x)
     (hperp : ∀ i, g.inner x u (w i) = 0) :
     (curveGram (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
@@ -175,8 +171,7 @@ theorem velJac_gram_split
 `curveDensity`.  Immediate from `velJac_gram_split` and `√(ab) = √a·√b`. -/
 theorem velJac_density_split
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (u : TangentSpace I x) {d : ℕ} (w : Fin d → TangentSpace I x)
     (hperp : ∀ i, g.inner x u (w i) = 0) :
     curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
@@ -289,8 +284,7 @@ manifold chain rule `HasMFDerivAt.comp` with the unit-shift differential (the
 identity). -/
 theorem radialJac_eq_vel
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (u : TangentSpace I x) :
     intrinsicJacobi (I := I) g hEnorm x u u 1
       = curveVelocity (I := I) (intrinsicGeodesic (I := I) g hEnorm x u) 1 := by

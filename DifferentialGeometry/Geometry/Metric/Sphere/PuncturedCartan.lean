@@ -66,8 +66,7 @@ variable [RiemannianBundle (fun x : N => TangentSpace J x)]
 on the whole sphere by the total round logarithm. -/
 def punctCartan
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p' : N) (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ]
       EuclideanSpace ℝ (Fin n))
     (p x : sphere (0 : A) 1) : N :=
@@ -87,8 +86,7 @@ omit [FiniteDimensional ℝ A]
 target-center value. -/
 @[simp] theorem punctCartan_self
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p' : N) (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ]
       EuclideanSpace ℝ (Fin n))
     (p : sphere (0 : A) 1) :
@@ -103,8 +101,7 @@ theorem punctCartan_smooth
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p' : N) (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ]
       EuclideanSpace ℝ (Fin n))
     (p : sphere (0 : A) 1) :
@@ -141,8 +138,7 @@ theorem punctCartan_mfd
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p' : N) (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ]
       EuclideanSpace ℝ (Fin n))
     (p : sphere (0 : A) 1) :
@@ -216,8 +212,7 @@ theorem punctCartan_sq
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p : sphere (0 : A) 1) (p' : N)
     (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ] EuclideanSpace ℝ (Fin n))
     (hi : ∀ a b : EuclideanSpace ℝ (Fin n),
@@ -367,8 +362,7 @@ theorem punctCartan_inner
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p : sphere (0 : A) 1) (p' : N)
     (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ] EuclideanSpace ℝ (Fin n))
     (hi : ∀ a b : EuclideanSpace ℝ (Fin n),
@@ -400,8 +394,7 @@ theorem punctCartan_local
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p : sphere (0 : A) 1) (p' : N)
     (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ] EuclideanSpace ℝ (Fin n))
     (hi : ∀ a b : EuclideanSpace ℝ (Fin n),

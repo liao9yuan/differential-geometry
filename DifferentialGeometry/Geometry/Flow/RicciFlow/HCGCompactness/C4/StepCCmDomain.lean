@@ -261,8 +261,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 theorem centerReadoutB_zero
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
     {ι : Type} [Fintype ι] (mu : ι -> Real) (xi : ι -> E)
     (join : M -> M -> Real -> M) (r : Real)
@@ -382,8 +381,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 theorem centerReadout_zero
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {ι : Type} [Fintype ι] (mu : ι -> Real) (xi : ι -> E)
     (join : M -> M -> Real -> M) (r : Real)
     (h : CenterInput (I := I) g mu
@@ -515,8 +513,7 @@ omit [ConnectedSpace M] in
 theorem existsCmExtensionB
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (D : DiagInvBranch (I := I) g hEnorm p)
     {ι : Type} [Fintype ι]
     {A B : Set ((ι -> Real) × (ι -> E))} (hA : IsCompact A) (hAB : A ⊆ B)
@@ -556,8 +553,7 @@ omit [ConnectedSpace M] in
 theorem existsCmExtension
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {ι : Type} [Fintype ι]
     {A B : Set ((ι -> Real) × (ι -> E))} (hA : IsCompact A) (hAB : A ⊆ B)
     (c : ((ι -> Real) × (ι -> E)) -> E) (hc : ContinuousOn c B)

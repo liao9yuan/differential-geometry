@@ -80,8 +80,7 @@ theorem arcLength_radial
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (a b : ℝ) :
     arcLength (I := I) g (intrinsicGeodesic (I := I) g hEnorm p v) a b
       = (b - a) * Real.sqrt (g.inner p v v) := by
@@ -101,8 +100,7 @@ theorem exists_dist_eq_sqrt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (q : M) :
     letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {v : TangentSpace I q},
@@ -123,8 +121,7 @@ theorem exists_expMapIntrinsic_normalChart
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (q : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {pt : M},
       pt ∈ (NormalCoordinates.normalChartAt (I := I) g q).source →
@@ -154,8 +151,7 @@ theorem exists_central_geodesic
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (q : M) :
     letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {pt : M},
@@ -207,8 +203,7 @@ theorem exists_halfSqDist_md
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (pt : M) :
     letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {q : M},

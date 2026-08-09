@@ -44,8 +44,7 @@ theorem framedBall_eq_small
     [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {R : Real} (hR : 0 < R)
     (hRexp : R < expDiffeoRadius (I := I) g hEnorm p) :
     framedExpDiffeo (I := I) g p '' ball (0 : E) R =
@@ -121,8 +120,7 @@ theorem localBall_eq_normal
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {R : Real} (hR : 0 < R)
     (hRexp : R < expDiffeoRadius (I := I) g hEnorm p) :
     localBallVolume (I := I) g p R = normalBallVolume (I := I) g p R := by
@@ -146,8 +144,7 @@ theorem localBall_cross
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (q : Real) (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
     (hRic : BonnetMyers.RicciBoundedBelow (I := I) g
@@ -208,8 +205,7 @@ theorem localBall_ratio
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (q : Real) (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
     (hRic : BonnetMyers.RicciBoundedBelow (I := I) g

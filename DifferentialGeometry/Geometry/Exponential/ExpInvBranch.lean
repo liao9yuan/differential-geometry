@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
 import DifferentialGeometry.Geometry.Exponential.ConjugatePoint
 open DifferentialGeometry.Geometry.Curvature
@@ -103,8 +104,7 @@ The forward map is stored as a `C∞` partial diffeomorphism and is required to
 agree with the intrinsic exponential on its open source. -/
 structure ExpInvBranch
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) where
   hom : PartialDiffeomorph 𝓘(Real, E) I E M ∞
   hom_eq :
@@ -181,8 +181,7 @@ end ExpInvBranch
 
 private theorem branch_of_inj
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {p : M} {u : E}
     (hu : Function.Injective
       (mfderiv 𝓘(Real, E) I
@@ -241,8 +240,7 @@ private theorem branch_of_inj
 branch of the intrinsic exponential. -/
 theorem branch_of_not_conj
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {p : M} {u : TangentSpace I p}
     (hu : ¬ IsConjVec (I := I) g hEnorm p (u : E)) :
     ∃ B : ExpInvBranch (I := I) g hEnorm p,

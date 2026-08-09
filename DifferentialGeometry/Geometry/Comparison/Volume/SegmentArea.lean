@@ -71,8 +71,7 @@ def expJacDensity
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (v : E) : ℝ :=
   curveDensity (I := I) g
     (intrinsicGeodesic (I := I) g hEnorm x (show TangentSpace I x from v))
@@ -91,8 +90,7 @@ theorem expJacDensity_continuous
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) :
     Continuous (fun v : E => expJacDensity (I := I) g hEnorm x v) := by
   rw [continuous_iff_continuousAt]
@@ -137,8 +135,7 @@ private theorem pou_term_exp_le
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {K : Set E} (hK : MeasurableSet K)
     (hKimg : MeasurableSet
       ((fun b : E => expMapIntrinsic (I := I) g hEnorm x (show TangentSpace I x from b)) '' K))
@@ -301,8 +298,7 @@ theorem riemVol_exp_image_le
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {K : Set E} (hK : IsCompact K) :
     riemannianVolumeMeasure (I := I) (M := M) g
         ((fun b : E => expMapIntrinsic (I := I) g hEnorm x (show TangentSpace I x from b)) '' K)

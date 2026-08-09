@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChainedFlowContinuity
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
@@ -39,8 +40,7 @@ theorem intrinsicGeodesic_compactArc
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) :
     IsCompact (intrinsicGeodesic (I := I) g hEnorm p v '' Set.Icc (0 : ℝ) 1) :=
   isCompact_Icc.image_of_continuousOn
@@ -52,8 +52,7 @@ theorem intrinsicGeodesic_arc_lebesgue_mesh
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) :
     ∃ δ > 0, ∀ t ∈ Set.Icc (0 : ℝ) 1, ∃ q : M,
       ∀ s ∈ Metric.ball t δ,
@@ -87,8 +86,7 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) :
     ∃ (δ : ℝ) (q : (Set.Icc (0 : ℝ) 1) → M) (s : Finset (Set.Icc (0 : ℝ) 1)),
       0 < δ ∧
@@ -299,8 +297,7 @@ private theorem perChart_jointContinuity_of_flowIdentifiedOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p)
     {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {z : TangentSpace I p → E × E}
     {tₖ ε r ρ T : ℝ}
@@ -792,8 +789,7 @@ private theorem perJunction_flowIdentification
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p)
     {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E}
     {z : TangentSpace I p → E × E}
@@ -903,8 +899,7 @@ private theorem perJunction_phaseIdentification
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p)
     {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E}
     {z : TangentSpace I p → E × E}
@@ -1015,8 +1010,7 @@ private theorem intrinsicGeodesic_window_of_junction_data
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p)
     (α : M) {x₀ w₀ : E}
     (hx₀ : x₀ ∈ interior (extChartAt I α).target)
@@ -1208,8 +1202,7 @@ private def intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (s : ℝ) : TangentBundle I M :=
   ⟨intrinsicGeodesic (I := I) g hEnorm p v s,
     (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) s : ℝ →L[ℝ] _) (1 : ℝ)⟩
@@ -1222,8 +1215,7 @@ private theorem intrinsicVelocityLift_proj
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (s : ℝ) :
     (intrinsicVelocityLift (I := I) g hEnorm p v s).proj =
       intrinsicGeodesic (I := I) g hEnorm p v s := rfl
@@ -1236,8 +1228,7 @@ private theorem chartFiberCoord_intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (α : M) (s : ℝ)
     (hs : intrinsicGeodesic (I := I) g hEnorm p v s ∈ (chartAt H α).source) :
     chartFiberCoord (I := I) α (intrinsicVelocityLift (I := I) g hEnorm p v s) =
@@ -1283,8 +1274,7 @@ private theorem phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (α : M) (s : ℝ)
     (hs : intrinsicGeodesic (I := I) g hEnorm p v s ∈ (chartAt H α).source) :
     ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
@@ -1317,8 +1307,7 @@ private theorem intrinsicVelocityLift_window_of_junction_data
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p)
     (α : M) {x₀ w₀ : E}
     (hx₀ : x₀ ∈ interior (extChartAt I α).target)
@@ -1645,8 +1634,7 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p) (t : ℝ)
     {α : M}
     (hα_src : intrinsicGeodesic (I := I) g hEnorm p v₀ t ∈ (chartAt H α).source)
@@ -1841,8 +1829,7 @@ private theorem intrinsicVelocityLift_continuousOn_step
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p) (τ : ℝ)
     {r₀ a c : ℝ} (hr₀ : 0 < r₀) (hτ_mem : τ ∈ Set.Ioo a c)
     (hlift_cont : ContinuousOn
@@ -1895,8 +1882,7 @@ private theorem intrinsicGeodesic_phasePoint_continuous_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     Continuous (fun v : TangentSpace I p =>
       ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) p
@@ -1939,8 +1925,7 @@ private theorem intrinsicGeodesic_window_of_flowData
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p)
     {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {z : TangentSpace I p → E × E}
     {tₖ r R T' ρ : ℝ}
@@ -2160,8 +2145,7 @@ private theorem intrinsicGeodesic_chart_confined_of_orbit
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) {α : M} {φ : ℝ → E × E} {tₖ T' : ℝ}
     (hφ_tgt : ∀ s ∈ Set.Ioo (-T') T',
       (φ s).1 ∈ interior (extChartAt I α).target)
@@ -2403,8 +2387,7 @@ private theorem intrinsicVelocityLift_window_of_flow
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p)
     (α : M) {z₀ : E × E} {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump z₀}
     {T' ρ : ℝ}
@@ -2554,8 +2537,7 @@ private theorem intrinsicGeodesic_window_of_zContinuousOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p) (tₖ : ℝ) {r₀ : ℝ} (hr₀ : 0 < r₀)
     (hz_cont : ContinuousOn
       (fun v : TangentSpace I p =>
@@ -2644,8 +2626,7 @@ private theorem intrinsicVelocityLift_window_base
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p) :
     ∃ r ε : ℝ, 0 < r ∧ 0 < ε ∧
       ContinuousOn (fun vs : TangentSpace I p × ℝ =>
@@ -2786,8 +2767,7 @@ private theorem intrinsicVelocityLift_step_uniformWidth
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p) (α : M) (τ : ℝ)
     {z₀ : E × E} {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump z₀}
     {T' ρ : ℝ}
@@ -2885,8 +2865,7 @@ theorem intrinsicGeodesic_jointContinuity
     [T2Space (TangentBundle I M)]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v₀ : TangentSpace I p) :
     ∃ ρ : ℝ, 0 < ρ ∧
       ContinuousOn
@@ -3111,8 +3090,7 @@ theorem expMapIntrinsic_continuous_of_jointContinuity
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M)
     (hjoint : ∀ v₀ : TangentSpace I p, ∃ ρ : ℝ, 0 < ρ ∧
       ContinuousOn
@@ -3153,8 +3131,7 @@ theorem expMapIntrinsic_continuous
     [T2Space (TangentBundle I M)]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     Continuous (fun v : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p v) :=
   expMapIntrinsic_continuous_of_jointContinuity (I := I) g hEnorm p

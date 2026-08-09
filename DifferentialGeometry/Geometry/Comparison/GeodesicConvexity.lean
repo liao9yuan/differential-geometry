@@ -92,8 +92,7 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 noncomputable def minimizingVec
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (a b : M) : TangentSpace I a :=
   Classical.choose
     (hopf_rinow_expMapIntrinsic_surjective_minimizing
@@ -102,8 +101,7 @@ noncomputable def minimizingVec
 
 theorem minimizingVec_exp
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (a b : M) :
     expMapIntrinsic (I := I) g hEnorm a (minimizingVec (I := I) g hEnorm a b) = b :=
   (Classical.choose_spec
@@ -113,8 +111,7 @@ theorem minimizingVec_exp
 
 theorem minimizingVec_len
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (a b : M) :
     Real.sqrt (g.inner a (minimizingVec (I := I) g hEnorm a b)
         (minimizingVec (I := I) g hEnorm a b)) =
@@ -126,8 +123,7 @@ theorem minimizingVec_len
 
 noncomputable def minJoin
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (a b : M) (t : ℝ) : M :=
   intrinsicGeodesic (I := I) g hEnorm a
     (minimizingVec (I := I) g hEnorm a b) t
@@ -135,8 +131,7 @@ noncomputable def minJoin
 
 @[simp] theorem minJoin_zero
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (a b : M) : minJoin (I := I) g hEnorm a b 0 = a := by
   exact intrinsicGeodesic_zero (I := I) g hEnorm a
     (minimizingVec (I := I) g hEnorm a b)
@@ -144,8 +139,7 @@ noncomputable def minJoin
 
 @[simp] theorem minJoin_one
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (a b : M) : minJoin (I := I) g hEnorm a b 1 = b := by
   change intrinsicGeodesic (I := I) g hEnorm a
     (minimizingVec (I := I) g hEnorm a b) 1 = b
@@ -154,8 +148,7 @@ noncomputable def minJoin
 
 theorem minJoin_cont
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (a b : M) : Continuous (minJoin (I := I) g hEnorm a b) :=
   intrinsicGeodesic_continuous (I := I) g hEnorm a
     (minimizingVec (I := I) g hEnorm a b)
@@ -163,8 +156,7 @@ theorem minJoin_cont
 
 theorem minJoin_edist_le
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (a b : M) {t : ℝ} (ht : 0 ≤ t) :
     riemannianEDist I a (minJoin (I := I) g hEnorm a b t) ≤
       ENNReal.ofReal ((riemannianEDist I a b).toReal * t) := by
@@ -177,8 +169,7 @@ omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 private lemma intrinsicGeodesic_speedSq_const
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (t : ℝ) :
     g.inner (intrinsicGeodesic (I := I) g hEnorm p v t)
         (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) t 1)
@@ -201,8 +192,7 @@ omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 private lemma intrinsicGeodesic_velocity_enorm_le'
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (t : ℝ) :
     ‖mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) t (1 : ℝ)‖ₑ
       ≤ ENNReal.ofReal (Real.sqrt (g.inner p v v)) := by
@@ -227,8 +217,7 @@ omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem intrinsicGeodesic_riemannianEDist_le_radius
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) {t : ℝ} (ht : 0 ≤ t) :
     riemannianEDist I p (intrinsicGeodesic (I := I) g hEnorm p v t)
       ≤ ENNReal.ofReal (Real.sqrt (g.inner p v v) * t) := by
@@ -273,8 +262,7 @@ omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem smallNormalBall_radial_confined
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) {ρ : ℝ}
     (hv : Real.sqrt (g.inner p v v) < ρ) {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) 1) :
     intrinsicGeodesic (I := I) g hEnorm p v t ∈ smallNormalBall (I := I) p ρ := by
@@ -294,8 +282,7 @@ omit [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
 theorem joinedIn_centre_smallNormalBall
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) {ρ : ℝ}
     (hv : Real.sqrt (g.inner p v v) < ρ) :
     JoinedIn (smallNormalBall (I := I) p ρ) p

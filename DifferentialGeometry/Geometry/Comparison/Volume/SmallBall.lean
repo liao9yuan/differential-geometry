@@ -158,8 +158,7 @@ theorem exists_ball_vol_low
     [T3Space M] [ConnectedSpace M] [CompactSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ε ρ : ℝ, 0 < ε ∧ 0 < ρ ∧ ∀ s : ℝ, 0 < s → s ≤ ρ →
       letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)

@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExpContinuity
 import DifferentialGeometry.Geometry.Exponential.GaussLemma
@@ -231,8 +232,7 @@ theorem intrinsicSphere_isCompact
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (δ : ℝ) :
     IsCompact
       ((fun w : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p (δ • w))
@@ -279,8 +279,7 @@ theorem exists_min_riemannianEDist_on_intrinsicSphere
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) (δ : ℝ) :
     ∃ u : TangentSpace I p, g.inner p u u = 1 ∧
       ∀ w : TangentSpace I p, g.inner p w w = 1 →
@@ -336,8 +335,7 @@ theorem radialRay_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) :
     Continuous (fun t : ℝ => expMapIntrinsic (I := I) g hEnorm p (t • u)) := by
   have heq : (fun t : ℝ => expMapIntrinsic (I := I) g hEnorm p (t • u))
@@ -409,8 +407,7 @@ theorem radialDistToReal_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) (u : TangentSpace I p) :
     Continuous (fun t : ℝ =>
       (riemannianEDist I (expMapIntrinsic (I := I) g hEnorm p (t • u)) q).toReal) := by
@@ -442,8 +439,7 @@ theorem propagationSet_isClosed
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) (u : TangentSpace I p) (r : ℝ) :
     IsClosed
       {t : ℝ | t ∈ Set.Icc (0 : ℝ) r ∧
@@ -507,8 +503,7 @@ theorem intrinsicGeodesic_speedSq_eq
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (t : ℝ) :
     g.inner (intrinsicGeodesic (I := I) g hEnorm p v t)
         (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) t 1)
@@ -540,8 +535,7 @@ theorem intrinsicGeodesic_velocity_enorm_le
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (t : ℝ) :
     ‖mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) t (1 : ℝ)‖ₑ
       ≤ ENNReal.ofReal (Real.sqrt (g.inner p v v)) := by
@@ -572,8 +566,7 @@ theorem intrinsicGeodesic_riemannianEDist_le
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) {s t : ℝ} (hst : s ≤ t) :
     riemannianEDist I (intrinsicGeodesic (I := I) g hEnorm p v s)
         (intrinsicGeodesic (I := I) g hEnorm p v t)
@@ -622,8 +615,7 @@ theorem radial_dist_ne_top
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) (u : TangentSpace I p)
     (hpq : riemannianEDist I p q ≠ ⊤) (t : ℝ) :
     riemannianEDist I
@@ -678,8 +670,7 @@ private theorem radialDist_cont_ne
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) (u : TangentSpace I p)
     (hpq : riemannianEDist I p q ≠ ⊤) :
     Continuous (fun t : ℝ =>
@@ -705,8 +696,7 @@ private theorem propSet_closed_ne
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) (u : TangentSpace I p) (r : ℝ)
     (hpq : riemannianEDist I p q ≠ ⊤) :
     IsClosed
@@ -749,8 +739,7 @@ theorem expMapIntrinsic_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     expMapIntrinsic (I := I) g hEnorm p 0 = p := by
   set γ : ℝ → M := intrinsicGeodesic (I := I) g hEnorm p (0 : TangentSpace I p)
@@ -779,8 +768,7 @@ theorem exists_expMapIntrinsic_eq_expMap_radius
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {v : TangentSpace I p},
       Real.sqrt (g.inner p (v : E) (v : E)) < ρ →
@@ -807,8 +795,7 @@ noncomputable def expDiffeoRadius
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) : ℝ :=
   min
     (Classical.choose
@@ -822,8 +809,7 @@ theorem expDiffeoRadius_pos
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     0 < expDiffeoRadius (I := I) g hEnorm p := by
   rw [expDiffeoRadius, lt_min_iff]
@@ -839,8 +825,7 @@ theorem expDiffeo_mem_of_lt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {v : TangentSpace I p}
     (hv : Real.sqrt (g.inner p (v : E) (v : E)) <
       expDiffeoRadius (I := I) g hEnorm p) :
@@ -860,8 +845,7 @@ theorem expDiffeo_eq_intr
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {v : TangentSpace I p}
     (hv : Real.sqrt (g.inner p (v : E) (v : E)) <
       expDiffeoRadius (I := I) g hEnorm p) :
@@ -889,8 +873,7 @@ theorem radial_riemannianEDist_eq_of_small
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {u : TangentSpace I p}, g.inner p u u = 1 →
       ∀ {δ : ℝ}, 0 ≤ δ → δ < ρ →
@@ -955,8 +938,7 @@ theorem radial_riemannianEDist_eq_of_small'
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {w : TangentSpace I p},
       Real.sqrt (g.inner p (w : E) (w : E)) < ρ →
@@ -1010,8 +992,7 @@ theorem expMapIntrinsic_local_surjective
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {q : M},
       q ∈ (NormalCoordinates.normalChartAt (I := I) g p).source →
@@ -1267,8 +1248,7 @@ theorem sphere_jump
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x q : M) {ρ : ℝ} (hρ_pos : 0 < ρ)
     (hxq : riemannianEDist I x q = ENNReal.ofReal ρ) :
     ∃ R : ℝ, 0 < R ∧ ∀ {δ : ℝ}, 0 < δ → δ < R → δ < ρ →
@@ -1466,8 +1446,7 @@ theorem exists_geodesicSphere_point_edist_eq_sub_delta
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x q : M) {ρ : ℝ} (hρ_pos : 0 < ρ)
     (hxq : riemannianEDist I x q = ENNReal.ofReal ρ) :
     ∃ R : ℝ, 0 < R ∧ ∀ {δ : ℝ}, 0 < δ → δ < R → δ < ρ →
@@ -1610,8 +1589,7 @@ each slice dominates the Riemannian edistance between its endpoints. -/
 private lemma broken_piece_firstVariation
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (c : M) (w : E) {ξ : ℝ → M} {len : ℝ} (hlen : 0 < len)
     (hξsmooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ ξ)
     (hξgeo : IsGeodesicOn (I := I) g ξ (Set.Icc 0 len))
@@ -1873,8 +1851,7 @@ theorem broken_minimizer_velocity_match
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {γ σ : ℝ → M} {ℓ₁ ℓ₂ : ℝ} (hℓ₁ : 0 < ℓ₁) (hℓ₂ : 0 < ℓ₂)
     (hγgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 ℓ₁))
     (hσgeo : IsGeodesicOn (I := I) g σ (Set.Icc 0 ℓ₂))
@@ -2194,8 +2171,7 @@ theorem intrinsicGeodesic_continuation
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (t₀ : ℝ) :
     (fun s => intrinsicGeodesic (I := I) g hEnorm p u (s + t₀))
       = intrinsicGeodesic (I := I) g hEnorm
@@ -2294,8 +2270,7 @@ theorem minExp_of_ne_top
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) (hfin : riemannianEDist I p q ≠ ⊤) :
     ∃ v : TangentSpace I p, expMapIntrinsic (I := I) g hEnorm p v = q ∧
       Real.sqrt (g.inner p v v) = (riemannianEDist I p q).toReal := by
@@ -2479,8 +2454,7 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing_of_ne_top
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) (hfin : riemannianEDist I p q ≠ ⊤) :
     ∃ v : TangentSpace I p, expMapIntrinsic (I := I) g hEnorm p v = q ∧
       Real.sqrt (g.inner p v v) = (riemannianEDist I p q).toReal :=
@@ -2496,8 +2470,7 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) :
     ∃ v : TangentSpace I p, expMapIntrinsic (I := I) g hEnorm p v = q ∧
       Real.sqrt (g.inner p v v) = (riemannianEDist I p q).toReal :=
@@ -2511,8 +2484,7 @@ theorem exists_continuous_path_realizing_riemannianEDist
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) :
     ∃ γ : ℝ → M,
       Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
@@ -2594,8 +2566,7 @@ theorem exists_unit_speed_minimizing_geodesic_between_points
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p q : M) :
     ∃ (γ : ℝ → M) (L : ℝ),
       0 ≤ L ∧ γ 0 = p ∧ γ L = q ∧

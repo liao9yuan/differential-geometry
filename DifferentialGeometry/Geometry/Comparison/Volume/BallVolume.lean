@@ -430,8 +430,7 @@ theorem coordBall_subset_smallNormalBall_of_agree
     [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {R s : ℝ}
     (hball_target : Metric.ball (0 : E) R ⊆ (normalChartAt (I := I) g p).target)
     (hagree : ∀ w ∈ Metric.ball (0 : E) R,
@@ -465,8 +464,7 @@ theorem exists_coordBall_subset_smallNormalBall
     [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {R s : ℝ},
       Metric.ball (0 : E) R ⊆ (normalChartAt (I := I) g p).target →
@@ -534,8 +532,7 @@ theorem exists_smallNormalBall_vol_ge_sc
     [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {c R s : ℝ},
       0 < R →
@@ -620,8 +617,7 @@ theorem exists_metricBall_vol_ge_sc_local
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {c R s : ℝ},
       0 < R →
@@ -813,8 +809,7 @@ theorem metricBall_chartCtrl
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {R s : ℝ},
       s < R →
@@ -974,8 +969,7 @@ theorem exists_metricBall_vol_scale_local
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {B R s : ℝ},
       0 ≤ B →
@@ -1013,8 +1007,7 @@ theorem exists_metricBall_vol_le_dens_local
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {C R s : ℝ},
       0 < R →
@@ -1044,8 +1037,7 @@ theorem exists_vol_two_dens
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {c C R s : ℝ},
       0 < R →
@@ -1091,8 +1083,7 @@ theorem exists_vol_two_dens_pairR
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {c C Rlo Rup s : ℝ},
       0 < Rlo →
@@ -2072,8 +2063,7 @@ theorem exists_vol_two_rm04_at
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {a K Rm Vb b A B R s : ℝ},
       0 ≤ B → 0 < a → 0 ≤ K → 0 ≤ Rm → 0 ≤ Vb → 0 ≤ b →
@@ -2188,8 +2178,7 @@ theorem exists_vol_pair_rm04_at
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {a K Rm Vb b A Blo Bhi R s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 < a → 0 ≤ K → 0 ≤ Rm → 0 ≤ Vb → 0 ≤ b →
@@ -2304,8 +2293,7 @@ theorem exists_pairR_rm04_at
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {a K Rm Vb b A Blo Bhi Rlo Rup s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 < a → 0 ≤ K → 0 ≤ Rm → 0 ≤ Vb → 0 ≤ b →
@@ -2440,8 +2428,7 @@ theorem exists_pairR_rglobal
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ C : ℝ, 0 < ρ ∧ 0 < C ∧ ∀ {Rm b A Blo Bhi Rlo Rup s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 ≤ Rm → 0 ≤ b → b ≤ 1 → (1 : ℝ) ≤ b →
@@ -2571,8 +2558,7 @@ theorem exists_pairR_rm1
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ C κ Blo : ℝ, 0 < ρ ∧ 0 < C ∧ 0 < κ ∧ 0 < Blo ∧
       ∀ {Rm A Rlo Rup s : ℝ},
@@ -2654,8 +2640,7 @@ theorem exists_pairR_small
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ C κ Blo : ℝ, 0 < ρ ∧ 0 < C ∧ 0 < κ ∧ 0 < Blo ∧
       ∀ {Rm A : ℝ},
@@ -2737,8 +2722,7 @@ theorem exists_pairR_scaled
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ C D Blo : ℝ, 0 < C ∧ 0 < D ∧ 0 < Blo ∧
       ∀ {Rm A : ℝ},
@@ -2882,8 +2866,7 @@ theorem exists_pairR_autoA
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ C D Blo A : ℝ, 0 < C ∧ 0 < D ∧ 0 < Blo ∧
       ∀ {Rm : ℝ},
@@ -2929,8 +2912,7 @@ theorem exists_pairR_bound
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ C D Blo A : ℝ, 0 < C ∧ 0 < D ∧ 0 < Blo ∧
       ∀ {Rm : ℝ},
@@ -2972,8 +2954,7 @@ theorem exists_vol_rm04_pair_pkg
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {a K Rm Vb b A Blo Bhi R s : ℝ},
       (D : Rm04FrameData (I := I) g p R b) →
@@ -3009,8 +2990,7 @@ theorem exists_vol_pair_scale
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {K Rm Vb b A Blo Bhi R s : ℝ},
       (D : Rm04FrameData (I := I) g p R b) →
@@ -3044,8 +3024,7 @@ theorem exists_vol_pair_scalar
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {K Rm Vb b A Blo Bhi R s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 ≤ K → 0 ≤ Rm → 0 ≤ Vb →
@@ -3108,8 +3087,7 @@ theorem exists_vol_pair_launch
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧ ∀ {K Rm b A Blo Bhi R s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 ≤ K → 0 ≤ Rm →
@@ -3174,8 +3152,7 @@ theorem exists_pair_rlaunch
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ C : ℝ, 0 < ρ ∧ 0 < C ∧ ∀ {K Rm b A Blo Bhi R s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 ≤ K → 0 ≤ Rm →
@@ -3244,8 +3221,7 @@ theorem exists_pair_rcoeff
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ C : ℝ, 0 < ρ ∧ 0 < C ∧ ∀ {Rm b A Blo Bhi R s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 ≤ Rm →
@@ -3318,8 +3294,7 @@ theorem exists_pair_rglobal
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ C : ℝ, 0 < ρ ∧ 0 < C ∧ ∀ {Rm b A Blo Bhi R s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 ≤ Rm →
@@ -3382,8 +3357,7 @@ theorem exists_pair_rglobal1
     [T3Space M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ x : M, ∀ w : TangentSpace I x,
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ ρ C : ℝ, 0 < ρ ∧ 0 < C ∧ ∀ {Rm A Blo Bhi R s : ℝ},
       0 ≤ Blo → 0 ≤ Bhi → 0 ≤ Rm →

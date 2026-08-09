@@ -188,8 +188,7 @@ theorem ball_sub_image_segDom_closed [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (R : ℝ) :
     {y : M | riemannianEDist I x y < ENNReal.ofReal R} ⊆
       (fun b : E => expMapIntrinsic (I := I) g hEnorm x
@@ -223,8 +222,7 @@ private theorem segBall_vol_le_density
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (R : ℝ) :
     riemannianVolumeMeasure (I := I) (M := M) g
         {y : M | riemannianEDist I x y < ENNReal.ofReal R}
@@ -272,8 +270,7 @@ theorem segDom_not_conj
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {v : TangentSpace I x}
     (hv : v ∈ SegDom (I := I) g hEnorm x) {t : ℝ} (ht : t ∈ Set.Ioo (0 : ℝ) 1) :
     ¬ IsConjVec (I := I) g hEnorm x ((t • v : TangentSpace I x) : E) := by
@@ -379,8 +376,7 @@ theorem expJacDensity_eq_ncd0_mul_transverse
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {v : TangentSpace I x} (hvne : v ≠ 0)
     (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
     (hON : ∀ i j, g.inner x (w i) (w j) = if i = j then 1 else 0)
@@ -526,8 +522,7 @@ theorem transverseDensity_le_hyp
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {v : TangentSpace I x}
     (hv : v ∈ SegDom (I := I) g hEnorm x) (hvne : v ≠ 0)
     (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
@@ -643,8 +638,7 @@ theorem intrinsicJacobi_chartRep_differentiableAt
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (v w : TangentSpace I x) (t₀ : ℝ) :
     DifferentiableAt ℝ
       (chartRepAt (I := I) (intrinsicGeodesic (I := I) g hEnorm x v)
@@ -710,8 +704,7 @@ theorem curveDensity_jacobiFrame_continuousAt
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (v : TangentSpace I x)
     (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
     (t₀ : ℝ) :
@@ -809,8 +802,7 @@ private lemma transverseDensity_le_hyp_at_one
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {v : TangentSpace I x}
     (hv : v ∈ SegDom (I := I) g hEnorm x) (hvne : v ≠ 0)
     (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
@@ -874,8 +866,7 @@ theorem expJacDensity_le_of_perpOrthonormalFrame
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {v : TangentSpace I x}
     (hv : v ∈ SegDom (I := I) g hEnorm x) (hvne : v ≠ 0)
     (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
@@ -901,8 +892,7 @@ theorem expJacDensity_le
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {v : TangentSpace I x}
     (hv : v ∈ SegDom (I := I) g hEnorm x) (hvne : v ≠ 0)
     (q : ℝ) (hq : 0 ≤ q) (hd : 0 < Module.finrank ℝ E - 1)
@@ -1441,8 +1431,7 @@ private lemma segBall_vol_le_explicit
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {q R : ℝ} (hq : 0 ≤ q) (hR : 0 < R)
     (hd : 0 < Module.finrank ℝ E - 1)
     (hRic : RicciBoundedBelow (I := I) g
@@ -1539,8 +1528,7 @@ theorem segBall_vol_le [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {q R : ℝ} (hq : 0 ≤ q) (hR : 0 < R)
     (hd : 0 < Module.finrank ℝ E - 1)
     (hRic : RicciBoundedBelow (I := I) g
@@ -1560,8 +1548,7 @@ theorem segBall_vol_fin [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {R : ℝ} :
     riemannianVolumeMeasure (I := I) (M := M) g
         {y : M | riemannianEDist I x y < ENNReal.ofReal R} < ⊤ := by
@@ -1633,8 +1620,7 @@ theorem segBall_vol_rel [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {q s R : ℝ} (hq : 0 ≤ q) (hs : 0 < s) (hsR : s ≤ R)
     (hRic : RicciBoundedBelow (I := I) g
       (-(((Module.finrank ℝ E - 1 : ℕ) : ℝ) * q ^ 2))) :
@@ -1653,8 +1639,7 @@ private lemma expMapIntrinsic_eq_scaled
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (v : TangentSpace I x) (hvne : v ≠ 0) :
     expMapIntrinsic (I := I) g hEnorm x v =
       intrinsicGeodesic (I := I) g hEnorm x
@@ -1702,8 +1687,7 @@ private lemma segDom_ext_dist
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (v : TangentSpace I x) (hvne : v ≠ 0) (ε : ℝ) (hε : 0 < ε)
     (hseg : (((Real.sqrt (g.inner x v v) + ε) •
         ((Real.sqrt (g.inner x v v))⁻¹ • v) : TangentSpace I x)) ∈
@@ -1750,8 +1734,7 @@ private lemma segDom_same_length
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {v w : TangentSpace I x}
     (hvseg : v ∈ SegDom (I := I) g hEnorm x)
     (hwseg : w ∈ SegDom (I := I) g hEnorm x)
@@ -1800,8 +1783,7 @@ private lemma expMapIntrinsic_injective_early
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {v w : TangentSpace I x}
     (hvseg : v ∈ SegDom (I := I) g hEnorm x)
     (hwseg : w ∈ SegDom (I := I) g hEnorm x)
@@ -1967,8 +1949,7 @@ private lemma intrinsicGeodesic_smul_general
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (c t : ℝ) :
     intrinsicGeodesic (I := I) g hEnorm p (c • v) t
       = intrinsicGeodesic (I := I) g hEnorm p v (c * t) := by
@@ -2031,8 +2012,7 @@ private lemma intrinsicJacobi_smul
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (u w : TangentSpace I x) (c : ℝ) (hc : c ≠ 0) :
     (intrinsicJacobi (I := I) g hEnorm x (c • u) w 1 : E)
       = ((c⁻¹ : ℝ) • (intrinsicJacobi (I := I) g hEnorm x u w c : E)) := by
@@ -2162,8 +2142,7 @@ private lemma expJacDensity_radial_scaled
     [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) {u : TangentSpace I x} (hu : u ≠ 0)
     (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
     (hON : ∀ i j, g.inner x (w i) (w j) = if i = j then 1 else 0)

@@ -1727,8 +1727,7 @@ theorem exists_ode_rm04
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
       ∀ {K R Vb b : Real}, 0 ≤ K → 0 ≤ Vb → b ≤ 1 →
@@ -1774,8 +1773,7 @@ theorem exists_rm04_data
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
       ∀ {K R Vb b : Real}, 0 ≤ K → 0 ≤ Vb → b ≤ 1 →
@@ -1826,8 +1824,7 @@ theorem exists_rm04_basis
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ r : Real, 0 < r ∧ ∀ x : E, ‖x‖ < r →
       ∀ {a K R Vb b : Real}, 0 ≤ K → 0 ≤ Vb → b ≤ 1 →
@@ -1882,8 +1879,7 @@ theorem exists_rm04_pack
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ r : Real, 0 < r ∧
       (∀ x : E, ‖x‖ < r →

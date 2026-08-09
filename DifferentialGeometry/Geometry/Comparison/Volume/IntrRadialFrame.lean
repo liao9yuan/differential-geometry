@@ -61,8 +61,7 @@ lemma exists_intrFrame
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) {b : ℝ} (hb : 0 < b) :
     ∃ F : Fin (Module.finrank ℝ
         (TangentSpace I (intrinsicGeodesic (I := I) g hEnorm p v 0))) →

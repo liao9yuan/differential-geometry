@@ -466,8 +466,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 structure CmHessianBoundInput
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E)) where
 
   Λ : ℝ
@@ -497,8 +496,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 def CmGDerivBound
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (pOrd : ℕ) (B : ℕ → ℝ) : Prop :=
   ∀ j : ℕ, j ≤ pOrd →
@@ -511,8 +509,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 structure CmHessianNbhdInput
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {ι : Type} [Fintype ι]
     (c : ((ι → ℝ) × (ι → E)) → M) (params₀ : (ι → ℝ) × (ι → E)) where
 
@@ -535,8 +532,7 @@ omit [ConnectedSpace M] in
 theorem cmChartFDerivLe
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (hbd : CmHessianBoundInput (I := I) g hEnorm p z₀ params₀)
     (Dj : (E × ((ι → ℝ) × (ι → E))) →L[ℝ] E) (B1 : ℝ)
@@ -566,8 +562,7 @@ omit [ConnectedSpace M] in
 theorem cmChartDerivLe2
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (hbd : CmHessianBoundInput (I := I) g hEnorm p z₀ params₀)
     (B : ℕ → ℝ)

@@ -2118,8 +2118,7 @@ theorem chartCm_contDiffOn
     [Module.Finite ℝ E]
     [IsContinuousRiemannianBundle E (fun x : M' => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M')
-    (hEnorm : ∀ (x : M') (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M') g)
     (p : M') {ι : Type} [Fintype ι] (join : M' → M' → ℝ → M') (r : ℝ)
     (H : ∀ params : (ι → ℝ) × (ι → E),
       CenterInput (I := I) g params.1

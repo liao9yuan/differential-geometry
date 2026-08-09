@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Exponential.ExpInvBranch
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
@@ -47,8 +48,7 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 structure DiagInvBranch
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) where
   hom : OpenPartialHomeomorph (TangentBundle I M) (M × M)
   zero_mem :

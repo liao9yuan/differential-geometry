@@ -145,8 +145,7 @@ launch speed. -/
 theorem branchLap_eq_mean
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {p : M}
     (B : ExpInvBranch (I := I) g hEnorm p)
     (u : TangentSpace I p)
@@ -297,8 +296,7 @@ private lemma metric_smul_right
 
 private theorem radialCurve_eq_intr
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x : E) {t : Real}
     (htx : ‖t • x‖ < expMapC2Radius (I := I) g p) :
     radialCurve (I := I) g p x =ᶠ[𝓝 t]
@@ -312,8 +310,7 @@ private theorem radialCurve_eq_intr
 
 private theorem radialJacobi_eq_intr
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E) {t : Real}
     (htx : ‖t • x‖ < expMapC2Radius (I := I) g p) :
     ∀ᶠ s in 𝓝 t,
@@ -364,8 +361,7 @@ private theorem radialJacobi_eq_intr
 
 private theorem intrJacobi_smul
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E) (t s : Real) :
     (intrinsicJacobi (I := I) g hEnorm p
         (show TangentSpace I p from t • x)
@@ -416,8 +412,7 @@ launch speed. -/
 theorem radialLap_eq_mean
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {p : M}
     (B : ExpInvBranch (I := I) g hEnorm p)
     (x : E) (v : ι → E) (t : Real)

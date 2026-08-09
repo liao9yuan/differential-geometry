@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.DiagInvBranch
 import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 

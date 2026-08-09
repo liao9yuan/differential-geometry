@@ -108,8 +108,7 @@ theorem rm04Data_jacobi
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     Rm04DataAt (I := I) g p (jacobiVarRadius (I := I) g p) := by
   classical
@@ -196,8 +195,7 @@ theorem rm04_one_le
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E)
     {a K R Vb b A B : ℝ}
     (ha : 0 < a) (hK : 0 ≤ K) (hVb : 0 ≤ Vb)
@@ -263,8 +261,7 @@ theorem rm04_one_ge
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E)
     {a K R Vb b B : ℝ}
     (ha : 0 < a) (hK : 0 ≤ K) (hVb : 0 ≤ Vb)

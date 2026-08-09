@@ -54,8 +54,7 @@ structure CalabiTailData
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (O x : M) (r : Real) where
   p : M
   u : TangentSpace I p
@@ -121,8 +120,7 @@ theorem exists_calabiTail
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {O x : M} {r : Real} (v : TangentSpace I O)
     (hexp : expMapIntrinsic (I := I) g hEnorm O v = x)
     (hlen : Real.sqrt (g.inner O v v) = r)
@@ -282,8 +280,7 @@ theorem exists_calabiData
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (q : Real) (hq : 0 ≤ q)
     (hRic : Geometry.Riemannian.BonnetMyers.RicciBoundedBelow (I := I) g
       (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2)))
@@ -535,8 +532,7 @@ theorem calabiDist_support
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (q : Real) (hq : 0 ≤ q)
     (hRic : Geometry.Riemannian.BonnetMyers.RicciBoundedBelow (I := I) g
       (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2)))
@@ -659,8 +655,7 @@ theorem calabi_tail_of
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (O x : M) (hOx : riemannianEDist I O x ≠ ⊤)
     (B : DiagInvBranch (I := I) g hEnorm x) :
     ∃ (v : TangentSpace I O) (s₀ : Real),
@@ -788,8 +783,7 @@ theorem exists_calabi_tail
     [T2Space (TangentBundle I M)]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (O x : M) (hOx : riemannianEDist I O x ≠ ⊤) :
     ∃ (v : TangentSpace I O) (s₀ : Real),
       expMapIntrinsic (I := I) g hEnorm O v = x ∧

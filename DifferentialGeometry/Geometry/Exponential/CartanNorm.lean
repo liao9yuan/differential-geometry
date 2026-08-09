@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Comparison.Variation.CartanTransfer
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
@@ -68,8 +69,7 @@ norm of the intrinsic exponential differential between curvature-one
 manifolds. -/
 theorem expDiff_sq_xfer
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (g' : SmoothRiemannianMetric I' M')
     (hEnorm' : ∀ (x : M') (v : TangentSpace I' x),
       ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g'.inner x v v)))

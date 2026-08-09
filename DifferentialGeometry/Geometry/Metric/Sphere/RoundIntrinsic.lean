@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Metric.Sphere.GreatCircle
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 open DifferentialGeometry.Geometry.Curvature
@@ -57,9 +58,7 @@ variable
 /-- The complete intrinsic geodesic of the round metric with unit launch
 velocity is the corresponding explicit great circle. -/
 theorem intrinsic_eq_gc
-    (hEnorm : ∀ (x : sphere (0 : E) 1) (w : TangentSpace (𝓡 n) x),
-      ‖w‖ₑ = ENNReal.ofReal
-        (Real.sqrt ((roundMetric (E := E) (n := n)).inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := 𝓡 n) (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)))
     (p : sphere (0 : E) 1) (v : TangentSpace (𝓡 n) p)
     (hv : ‖dIncl (n := n) p v‖ = 1) (t : ℝ) :
     intrinsicGeodesic (I := 𝓡 n) (roundMetric (E := E) (n := n))
@@ -102,9 +101,7 @@ theorem intrinsic_eq_gc
 /-- The intrinsic round exponential along a scalar multiple of a unit tangent
 vector is the corresponding point of its great circle. -/
 theorem round_exp_radial
-    (hEnorm : ∀ (x : sphere (0 : E) 1) (w : TangentSpace (𝓡 n) x),
-      ‖w‖ₑ = ENNReal.ofReal
-        (Real.sqrt ((roundMetric (E := E) (n := n)).inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := 𝓡 n) (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)))
     (p : sphere (0 : E) 1) (v : TangentSpace (𝓡 n) p)
     (hv : ‖dIncl (n := n) p v‖ = 1) (r : ℝ) :
     expMapIntrinsic (I := 𝓡 n) (roundMetric (E := E) (n := n))
@@ -115,9 +112,7 @@ theorem round_exp_radial
 
 /-- Ambient-coordinate formula for the radial intrinsic round exponential. -/
 theorem round_exp_val
-    (hEnorm : ∀ (x : sphere (0 : E) 1) (w : TangentSpace (𝓡 n) x),
-      ‖w‖ₑ = ENNReal.ofReal
-        (Real.sqrt ((roundMetric (E := E) (n := n)).inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := 𝓡 n) (M := sphere (0 : E) 1) (roundMetric (E := E) (n := n)))
     (p : sphere (0 : E) 1) (v : TangentSpace (𝓡 n) p)
     (hv : ‖dIncl (n := n) p v‖ = 1) (r : ℝ) :
     ((expMapIntrinsic (I := 𝓡 n) (roundMetric (E := E) (n := n))

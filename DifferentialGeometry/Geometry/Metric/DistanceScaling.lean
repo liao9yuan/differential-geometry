@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Metric.Scaling
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
@@ -72,8 +73,7 @@ theorem riemannianEDistOf_eq_riemannianEDist
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := I) (M := M) g)
     (x y : M) :
     riemannianEDistOf (I := I) g x y = riemannianEDist I x y := by
   rw [edistOf_iInf (I := I) g x y]

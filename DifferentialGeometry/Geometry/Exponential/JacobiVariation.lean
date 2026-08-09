@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Analysis.Calculus.SmoothClamp
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiField
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
@@ -164,8 +165,7 @@ theorem intrinsic_jacobi
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E) :
     IsJacobiAlong (I := I) g
       (fun t : ℝ => intrinsicGeodesic (I := I) g hEnorm p
@@ -270,8 +270,7 @@ theorem intrinsic_jacobi_one
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E) :
     mfderiv 𝓘(ℝ, ℝ) I
         (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
@@ -328,8 +327,7 @@ theorem intrinsic_jacobi_at
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E) (t : ℝ) :
     mfderiv 𝓘(ℝ, ℝ) I
         (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
@@ -368,8 +366,7 @@ theorem intrinsic_jacobi_d0
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E) :
     (covDerivAlong (I := I) g
       (fun t : ℝ => intrinsicGeodesic (I := I) g hEnorm p
@@ -522,8 +519,7 @@ private lemma clamped_slice_covDeriv_velocity_zero_at_zero
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (a : E)
     (ψ : ℝ → ℝ) (hψid : ∀ u ∈ Set.Icc (-1 : ℝ) 2, ψ u = u) :
     covDerivAlong (I := I) g
@@ -1271,8 +1267,7 @@ theorem jacobi_zero_of_lt
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {x w : E}
     (hx : ‖x‖ < jacobiVarRadius (I := I) g p)
     (hw : ‖w‖ < jacobiVarRadius (I := I) g p) :
@@ -1467,8 +1462,7 @@ theorem exists_jacobi_zero
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ∃ r : ℝ, 0 < r ∧ ∀ x w : E, ‖x‖ < r → ‖w‖ < r →
       IsJacobiAt (I := I) g

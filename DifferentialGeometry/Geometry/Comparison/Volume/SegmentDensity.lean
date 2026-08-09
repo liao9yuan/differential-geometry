@@ -238,8 +238,7 @@ theorem exp_density_curve
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (v : E) (y₀ : M)
     (hy : expMapIntrinsic (I := I) g hEnorm x (show TangentSpace I x from v)
       ∈ (chartAt H y₀).source) :

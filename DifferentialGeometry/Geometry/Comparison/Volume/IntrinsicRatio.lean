@@ -70,8 +70,7 @@ geodesic: for `s ≤ t` in the conjugate-free window,
 cross-multiplicative form consumed by the relative Bishop--Gromov comparison. -/
 theorem intrCross_anti
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (q b : Real)
     (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
@@ -231,8 +230,7 @@ yet available.  Route to discharge (see `IntrinsicRatio.md`): `normalDensity_cur
 intrinsic picture by `intrJacobi_raw`. -/
 private theorem intrPoleCap
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (q : Real) (hq : 0 ≤ q)
     (v : Fin (Module.finrank Real E - 1) → TangentSpace I p)
     (hv : LinearIndependent Real v)
@@ -369,8 +367,7 @@ polar-measure representation.  Reduces (via `densUB_of_pole`) to the near-pole
 frontier `intrPoleCap`. -/
 theorem intrDens_le_hyp
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (q b : Real)
     (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
@@ -404,8 +401,7 @@ nonconjugate.  Supplies the `hno` hypothesis of `intrCross_anti` /
 `intrDens_le_hyp` with base point `z.proj`, direction `uTail` and window `b = 1`. -/
 theorem intrNoConj_min
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {O x : M} (v : TangentSpace I O)
     (hexp : expMapIntrinsic (I := I) g hEnorm O v = x)
     (hlen : Real.sqrt (g.inner O v v) = (riemannianEDist I O x).toReal)

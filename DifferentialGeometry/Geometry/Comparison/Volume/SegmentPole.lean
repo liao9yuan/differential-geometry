@@ -145,8 +145,7 @@ frame `v`, the transverse intrinsic-Jacobi density along `γ = intrinsicGeodesic
 normalized by `t^(n-1)` tends to `1` at the pole. -/
 theorem curveDensity_pole
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (hu : 0 < g.inner p u u)
     (v : Fin (Module.finrank Real E - 1) → TangentSpace I p)
     (hON : ∀ i j, g.inner p (v i) (v j) = if i = j then 1 else 0)
@@ -265,8 +264,7 @@ speed-scaled hyperbolic model tends to `1` at the pole.  Sharpens `intrPoleCap`
 (constant `N = M₀/c`) to the exact constant `1`. -/
 theorem poleLimit
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (q : Real) (hq : 0 ≤ q)
     (hu : 0 < g.inner p u u)
     (v : Fin (Module.finrank Real E - 1) → TangentSpace I p)
@@ -300,8 +298,7 @@ ratio (`intrRatioOfFrame`) and the sharp pole limit `1` (`poleLimit`): an antito
 function whose limit at the pole is `1` is `≤ 1` throughout the window. -/
 theorem transDens_le_hyp
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) (q b : Real)
     (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)

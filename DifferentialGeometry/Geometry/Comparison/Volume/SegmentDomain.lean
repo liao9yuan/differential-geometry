@@ -80,8 +80,7 @@ star-shaped about the origin. -/
 def SegDom [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) : Set (TangentSpace I x) :=
   {v | Real.sqrt (g.inner x v v)
         = (riemannianEDist I x (expMapIntrinsic (I := I) g hEnorm x v)).toReal}
@@ -107,8 +106,7 @@ omit [T2Space (TangentBundle I M)] in
 theorem segDom_zero [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) : (0 : TangentSpace I x) ∈ SegDom (I := I) g hEnorm x := by
   rw [mem_segDom, expMapIntrinsic_zero (I := I) g hEnorm x,
     show g.inner x (0 : TangentSpace I x) (0 : TangentSpace I x) = 0 by simp,
@@ -125,8 +123,7 @@ inequality; no cut-locus / injectivity hypothesis is needed. -/
 theorem segDom_smul [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     [CompleteSpace M] [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {x : M} {v : TangentSpace I x} (hv : v ∈ SegDom (I := I) g hEnorm x)
     {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
     s • v ∈ SegDom (I := I) g hEnorm x := by
@@ -213,8 +210,7 @@ theorem ball_sub_image_segDom [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) (R : ℝ) :
     {y : M | riemannianEDist I x y < ENNReal.ofReal R} ⊆
       expMapIntrinsic (I := I) g hEnorm x ''
@@ -260,8 +256,7 @@ continuity of the intrinsic exponential and finiteness of the distance). -/
 theorem isClosed_segDom [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     [CompleteSpace M] [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) : IsClosed (SegDom (I := I) g hEnorm x) := by
   have hf₁ : Continuous fun v : TangentSpace I x => Real.sqrt (g.inner x v v) :=
     Real.continuous_sqrt.comp (continuous_gInner_self (I := I) g x)
@@ -286,8 +281,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 theorem measurableSet_segDom [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     [CompleteSpace M] [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x : M) : MeasurableSet (SegDom (I := I) g hEnorm x) :=
   (isClosed_segDom (I := I) g hEnorm x).measurableSet
 

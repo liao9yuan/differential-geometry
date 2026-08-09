@@ -95,8 +95,7 @@ theorem bonnet_myers_pairwise_edist_le_of_ricci_bound
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
-    (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
-        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (x y : M) :
     edist x y ≤ ENNReal.ofReal (Real.pi / Real.sqrt K) := by
   classical
@@ -563,8 +562,7 @@ theorem bonnet_myers_diameter_of_ricci_bound
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
-    (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
-        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
+    (hEnorm : IsMetricNorm (I := I) (M := M) g) :
     Metric.ediam (Set.univ : Set M) ≤
       ENNReal.ofReal (Real.pi / Real.sqrt K) := by
   refine Metric.ediam_le ?_
@@ -584,8 +582,7 @@ theorem isCompact_image_closedBall_under_expMapIntrinsic
     [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {R : ℝ} :
     IsCompact ((fun v => expMapIntrinsic (I := I) g hEnorm p v) ''
       Metric.closedBall (0 : TangentSpace I p) R) := by
@@ -607,8 +604,7 @@ theorem expMapIntrinsic_surjective_on_closedBall_of_ediam_le
     [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {R : ℝ} (hR : 0 ≤ R)
     (hdiam : Metric.ediam (Set.univ : Set M) ≤ ENNReal.ofReal R) :
     (Set.univ : Set M) ⊆ (fun v => expMapIntrinsic (I := I) g hEnorm p v) ''
@@ -646,8 +642,7 @@ theorem isCompact_univ
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
-    (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
-        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
+    (hEnorm : IsMetricNorm (I := I) (M := M) g) :
     IsCompact (Set.univ : Set M) := by
   let p : M := Classical.arbitrary M
   set R : ℝ := Real.pi / Real.sqrt K with hR_def
@@ -679,8 +674,7 @@ theorem bonnet_myers_compactSpace_of_ricci_bound
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
-    (hEnorm : ∀ (xb : M) (v : TangentSpace I xb),
-        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v))) :
+    (hEnorm : IsMetricNorm (I := I) (M := M) g) :
     CompactSpace M :=
   isCompact_univ_iff.mp (isCompact_univ (E := E) g _hdim _hK _hRic hEnorm)
 

@@ -311,8 +311,7 @@ theorem segBall_card [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     {q r0 : ℝ} (hq : 0 ≤ q) (_hr0 : 0 < r0)
     (hRic : RicciBoundedBelow (I := I) g
       (-(((Module.finrank ℝ E - 1 : ℕ) : ℝ) * q ^ 2)))

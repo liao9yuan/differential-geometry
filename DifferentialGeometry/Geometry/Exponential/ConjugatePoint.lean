@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
@@ -161,8 +162,7 @@ private theorem intrinsicGeodesic_smooth
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) :
     ContMDiff 𝓘(ℝ, ℝ) I ∞
       (intrinsicGeodesic (I := I) g hEnorm p u) := by
@@ -180,8 +180,7 @@ private theorem intrinsicGeodesic_reverse
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) :
     let z := intrinsicVelocityLift (I := I) g hEnorm p u 1
     intrinsicGeodesic (I := I) g hEnorm z.proj (-z.snd) =
@@ -254,8 +253,7 @@ private theorem exp_pair_reverse
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u a : TangentSpace I p)
     (b : E) :
     let z := intrinsicVelocityLift (I := I) g hEnorm p u 1
@@ -542,8 +540,7 @@ def IsConjVec
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x : E) : Prop :=
   ¬ Function.Injective fun w : E =>
       mfderiv 𝓘(ℝ, E) I
@@ -559,8 +556,7 @@ theorem isConjVec_iff
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x : E) :
     IsConjVec (I := I) g hEnorm p x ↔
       ∃ w : E, w ≠ 0 ∧
@@ -602,8 +598,7 @@ theorem conjVec_reverse
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : TangentSpace I p) :
     IsConjVec (I := I) g hEnorm p (u : E) ↔
       let z := intrinsicVelocityLift (I := I) g hEnorm p u 1
@@ -685,8 +680,7 @@ theorem isConjVec_iff_jacobi
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x : E) :
     IsConjVec (I := I) g hEnorm p x ↔
       ∃ w : E, w ≠ 0 ∧
@@ -710,8 +704,7 @@ theorem jacobiVar_zero
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E) :
     mfderiv 𝓘(ℝ, ℝ) I
       (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
@@ -734,8 +727,7 @@ theorem jacobiVar_smul
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : E) {c : ℝ} (hc : c ≠ 0) :
     mfderiv 𝓘(ℝ, ℝ) I
         (fun s : ℝ => intrinsicGeodesic (I := I) g hEnorm p
@@ -779,8 +771,7 @@ theorem conjVec_jacobi_at
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : E) {c : ℝ} (hc : c ≠ 0)
     (hconj : IsConjVec (I := I) g hEnorm p (c • u)) :
     ∃ z : E, z ≠ 0 ∧

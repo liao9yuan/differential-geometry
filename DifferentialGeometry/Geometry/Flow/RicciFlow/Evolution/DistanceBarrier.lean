@@ -413,8 +413,7 @@ private theorem intrGeo_vel_ne
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p)
     (hv : 0 < g.inner p v v) (u : Real) :
     mfderiv 𝓘(Real, Real) I
@@ -667,10 +666,7 @@ private theorem calabi_core_of_sol
     (x : M)
     (hfinite : Manifold.riemannianEDist I O x ≠ (⊤ : ENNReal))
     (hOx : O ≠ x)
-    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
-      ‖w‖ₑ =
-        ENNReal.ofReal
-          (Real.sqrt ((S.base.metric t).inner y w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) (S.base.metric t))
     (hq : 0 ≤ q)
     (hRicLower :
       Geometry.Riemannian.BonnetMyers.RicciBoundedBelow
