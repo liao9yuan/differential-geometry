@@ -7194,18 +7194,6 @@ theorem morseHandlePoint_f_mem {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     exact hmem
   · exact modelHandleMap_f_le hk c ε r (le_of_lt hε) d
 
-theorem morseHandlePoint_f_interval {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
-    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
-    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f)
-    (hε : 0 < ε) (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hη : 0 ≤ η)
-    (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r) :
-    f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2) := by
-  have hfw := morseHandlePoint_f_mem hk c ε r data hε hr hεr w hw
-  constructor
-  · nlinarith [hfw.1, hη]
-  · exact hfw.2
-
 noncomputable def morseCollarFlowBase {m k : ℕ} (_hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
@@ -7226,20 +7214,6 @@ noncomputable def morseCollarFlowBase {m k : ℕ} (_hk : k ≤ m + 1) (c ε r η
     exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn
       hrate hz)⟩
 
-theorem morseHandlePoint_norm_le {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
-    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
-    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f)
-    (hε : 0 < ε) (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
-    (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r) :
-    morseNorm (m + 1) w ≤ data.R := by
-  have hrange : w ∈ Set.range (modelHandleMap hk ε r) := by
-    rw [← modelHandleMap_range hk ε r hε hr] at hw
-    exact hw
-  rcases hrange with ⟨d, hd⟩
-  rw [← hd]
-  exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr)
-
 theorem morseCollarMap_surj_on_image {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
@@ -7257,10 +7231,11 @@ theorem morseCollarMap_surj_on_image {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε) :
     ∀ z : M, (f z ≤ c - ε ∨ z ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))) →
       ∃ y : SublevelSpace f (c + r ^ 2 / 2),
@@ -7297,7 +7272,7 @@ theorem morseCollarMap_surj_on_image {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
         exact le_trans hσ'le (morseCollarTopLevel_nonneg hk c ε r data x)
       · rcases hzh with ⟨w, hw, hwz⟩
         have hxeq : x = morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-            (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw) := by
+            (hHandleInterval w hw) := by
           apply Subtype.ext
           dsimp [x, morseCollarFlowBase]
           rw [← hwz]
@@ -8224,15 +8199,16 @@ theorem morseCollarMap_surj_on_union {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)}) :
     ∃ y : SublevelSpace f (c + r ^ 2 / 2),
       morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y = z.1 := by
-  exact morseCollarMap_surj_on_image hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop
+  exact morseCollarMap_surj_on_image hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop
     z.1 (by
       rcases z.2 with hlow | hcell
       · exact Or.inl hlow
@@ -8248,7 +8224,7 @@ noncomputable def morseCollarPreimageStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε 
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
-    (hε : 0 < ε) (hr : 0 < r) (hη : 0 < η)
+    (hε : 0 < ε) (hη : 0 < η)
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
     (v : (x : M) → TangentSpace I x)
     (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
@@ -8259,10 +8235,11 @@ noncomputable def morseCollarPreimageStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε 
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)})
     (hz : c - ε - η ≤ f z.1) : SublevelSpace f (c + r ^ 2 / 2) := by
@@ -8288,7 +8265,7 @@ noncomputable def morseCollarPreimageStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε 
     · rcases hcell with ⟨d, hd⟩
       have hxeq : x = morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate
           (data.χ (modelHandleMap hk ε r d))
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) (modelHandleMap hk ε r d)
+          (hHandleInterval (modelHandleMap hk ε r d)
             (modelHandleMap_mem hk ε r (le_of_lt hε) d)) := by
         apply Subtype.ext
         dsimp [x, morseCollarFlowBase]
@@ -8343,15 +8320,16 @@ noncomputable def morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η 
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)}) :
     SublevelSpace f (c + r ^ 2 / 2) :=
   Classical.choose (morseCollarMap_surj_on_union hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate
-    hflowTop z)
+    hHandleInterval hflowTop z)
 
 theorem morseCollarPreimage_collarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -8370,16 +8348,17 @@ theorem morseCollarPreimage_collarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η 
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)}) :
     morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate
-      (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z) = z.1 := by
+      (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z) = z.1 := by
   exact Classical.choose_spec (morseCollarMap_surj_on_union hk c ε r η data hf hε hr hη hεr v hv hsupp
-    hdfOn hrate hflowTop z)
+    hdfOn hrate hHandleInterval hflowTop z)
 
 theorem morseCollarPreimage_eq_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -8398,19 +8377,20 @@ theorem morseCollarPreimage_eq_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : �
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)})
     (hz : f z.1 ≤ c - ε - η) :
-    morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z = ⟨z.1, by
+    morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z = ⟨z.1, by
       change f z.1 ≤ c + r ^ 2 / 2
       nlinarith [hz, hε, hη]⟩ := by
   have hmap : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate
-      (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z) = z.1 :=
-    morseCollarPreimage_collarMap hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z
+      (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z) = z.1 :=
+    morseCollarPreimage_collarMap hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z
   have hlow : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate
       ⟨z.1, by
         change f z.1 ≤ c + r ^ 2 / 2
@@ -8439,20 +8419,21 @@ theorem morseCollarPreimage_eq_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)})
     (hz : c - ε - η ≤ f z.1) :
-    morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z =
-      morseCollarPreimageStrip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z hz := by
+    morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z =
+      morseCollarPreimageStrip hk c ε r η data hf hε hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z hz := by
   have hmap : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate
-      (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z) = z.1 :=
-    morseCollarPreimage_collarMap hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z
+      (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z) = z.1 :=
+    morseCollarPreimage_collarMap hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z
   have hstr : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate
-      (morseCollarPreimageStrip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z hz) =
+      (morseCollarPreimageStrip hk c ε r η data hf hε hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z hz) =
       z.1 := by
     let σ' : ℝ := f z.1 - c + ε
     have hsub : f z.1 ≤ c + r ^ 2 / 2 := by
@@ -8477,7 +8458,7 @@ theorem morseCollarPreimage_eq_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
       · rcases hcell with ⟨d, hd⟩
         have hxeq : x = morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate
             (data.χ (modelHandleMap hk ε r d))
-            (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) (modelHandleMap hk ε r d)
+            (hHandleInterval (modelHandleMap hk ε r d)
               (modelHandleMap_mem hk ε r (le_of_lt hε) d)) := by
           apply Subtype.ext
           dsimp [x, morseCollarFlowBase]
@@ -8511,13 +8492,13 @@ theorem morseCollarPreimage_eq_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
           (by linarith [hxval, hσmem.2]) (by linarith [hxval, hσmem.1])
       rw [hxval] at hval0
       simpa [sub_neg_eq_add] using hval0
-    have hy : c - ε - η ≤ f (morseCollarPreimageStrip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn
-        hrate hflowTop z hz).1 := by
+    have hy : c - ε - η ≤ f (morseCollarPreimageStrip hk c ε r η data hf hε hη hεr v hv hsupp hdfOn
+        hrate hHandleInterval hflowTop z hz).1 := by
       change c - ε - η ≤ f (curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) x.1 (-σ))
       dsimp [σ]
       nlinarith [hval, hσmem.1]
-    have hyx : (morseCollarPreimageStrip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate
-        hflowTop z hz).1 = curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) x.1 (-σ) := by
+    have hyx : (morseCollarPreimageStrip hk c ε r η data hf hε hη hεr v hv hsupp hdfOn hrate
+        hHandleInterval hflowTop z hz).1 = curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) x.1 (-σ) := by
       dsimp [morseCollarPreimageStrip, σ, x, σ']
     have hzx : curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) x.1 (-σ') = z.1 := by
       have hh := curveAt_add v (hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞))
@@ -8529,7 +8510,7 @@ theorem morseCollarPreimage_eq_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
       rw [hx'] at hh
       simpa [curveAt_zero v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z.1] using hh.symm
     exact morseCollarMap_flow_eq hk c ε r η data hf hε hη v hv hsupp hdfOn hrate x σ σ' hσmem hσeq
-      (morseCollarPreimageStrip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z hz)
+      (morseCollarPreimageStrip hk c ε r η data hf hε hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z hz)
       hy hyx z.1 hzx
   exact (morseCollarMap_injective hk c ε r η data hf hε hη v hv hsupp hdfOn hrate) (by
     rw [hmap, hstr])
@@ -8551,22 +8532,23 @@ theorem morseCollarPreimage_eq {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (hflowMem : ∀ y : SublevelSpace f (c + r ^ 2 / 2),
       morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y ∈
         sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data))
     (y : SublevelSpace f (c + r ^ 2 / 2)) :
-    morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop
+    morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop
       ⟨morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y, hflowMem y⟩ = y := by
   have hmap : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate
-      (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop
+      (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop
         ⟨morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y, hflowMem y⟩) =
       morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y := by
-    exact morseCollarPreimage_collarMap hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop
+    exact morseCollarPreimage_collarMap hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop
       ⟨morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y, hflowMem y⟩
   exact (morseCollarMap_injective hk c ε r η data hf hε hη v hv hsupp hdfOn hrate) hmap
 
@@ -8576,7 +8558,7 @@ noncomputable def morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c �
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
-    (hε : 0 < ε) (hr : 0 < r) (hη : 0 < η)
+    (hε : 0 < ε) (hη : 0 < η)
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
     (v : (x : M) → TangentSpace I x)
     (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
@@ -8587,14 +8569,15 @@ noncomputable def morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c �
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (z : {x : {y : M // y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} //
       c - ε - η ≤ f x.1}) : SublevelSpace f (c + r ^ 2 / 2) :=
-  morseCollarPreimageStrip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z.1 z.2
+  morseCollarPreimageStrip hk c ε r η data hf hε hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z.1 z.2
 
 theorem continuous_morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -8602,7 +8585,7 @@ theorem continuous_morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c 
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
-    (hε : 0 < ε) (hr : 0 < r) (hη : 0 < η)
+    (hε : 0 < ε) (hη : 0 < η)
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
     (v : (x : M) → TangentSpace I x)
     (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
@@ -8613,13 +8596,14 @@ theorem continuous_morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c 
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (hcont : Continuous f) :
-    Continuous (morseCollarPreimageOnStrip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop) := by
+    Continuous (morseCollarPreimageOnStrip hk c ε r η data hf hε hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop) := by
   let S : Type := {x : {y : M // y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} //
       c - ε - η ≤ f x.1}
   let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
@@ -8669,13 +8653,13 @@ theorem continuous_morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c 
         (-morseCollarLevelMapInv hk c ε r η data (base z) (f z.1.1 - c + ε), (base z).1)) :=
       hσ.neg.prodMk (continuous_subtype_val.comp hbaseCont)
     exact hflowCont.comp hpair
-  have hmain : Continuous (fun z : S => (morseCollarPreimageOnStrip hk c ε r η data hf hε hr hη hεr
-      v hv hsupp hdfOn hrate hflowTop z).1) := by
+  have hmain : Continuous (fun z : S => (morseCollarPreimageOnStrip hk c ε r η data hf hε hη hεr
+      v hv hsupp hdfOn hrate hHandleInterval hflowTop z).1) := by
     refine hval.congr ?_
     intro z
     dsimp [morseCollarPreimageOnStrip, morseCollarPreimageStrip, base, morseCollarFlowBase]
-  exact Continuous.subtype_mk hmain (fun z => (morseCollarPreimageOnStrip hk c ε r η data hf hε hr hη hεr
-    v hv hsupp hdfOn hrate hflowTop z).2)
+  exact Continuous.subtype_mk hmain (fun z => (morseCollarPreimageOnStrip hk c ε r η data hf hε hη hεr
+    v hv hsupp hdfOn hrate hHandleInterval hflowTop z).2)
 
 theorem continuousOn_morseCollarPreimage_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -8694,13 +8678,14 @@ theorem continuousOn_morseCollarPreimage_lower {m k : ℕ} (hk : k ≤ m + 1) (c
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε) :
     ContinuousOn (fun z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} =>
-      morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z)
+      morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z)
       {z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} |
         f z.1 ≤ c - ε - η} := by
   let S₁ : Set {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
@@ -8709,17 +8694,17 @@ theorem continuousOn_morseCollarPreimage_lower {m k : ℕ} (hk : k ≤ m + 1) (c
   rw [continuousOn_iff_continuous_restrict]
   change Continuous (fun z : {x : {y : M // y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} //
       f x.1 ≤ c - ε - η} => morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate
-        hflowTop z.1)
+        hHandleInterval hflowTop z.1)
   have hcongr : (fun z : {x : {y : M // y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} //
         f x.1 ≤ c - ε - η} => morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate
-        hflowTop z.1) =
+        hHandleInterval hflowTop z.1) =
       fun z : {x : {y : M // y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} //
         f x.1 ≤ c - ε - η} => (⟨z.1.1, by
           change f z.1.1 ≤ c + r ^ 2 / 2
           have hr2 : 0 ≤ r ^ 2 / 2 := div_nonneg (sq_nonneg r) (by norm_num)
           nlinarith [z.2, hε, hη, hr2]⟩ : SublevelSpace f (c + r ^ 2 / 2)) := by
     funext z
-    exact morseCollarPreimage_eq_low hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z.1 z.2
+    exact morseCollarPreimage_eq_low hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z.1 z.2
   rw [hcongr]
   exact Continuous.subtype_mk (continuous_subtype_val.comp continuous_subtype_val) (fun z => by
     change f z.1.1 ≤ c + r ^ 2 / 2
@@ -8743,32 +8728,33 @@ theorem continuousOn_morseCollarPreimage_strip {m k : ℕ} (hk : k ≤ m + 1) (c
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (hcont : Continuous f) :
     ContinuousOn (fun z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} =>
-      morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z)
+      morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z)
       {z : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} |
         c - ε - η ≤ f z.1} := by
   rw [continuousOn_iff_continuous_restrict]
   change Continuous (fun z : {x : {y : M // y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} //
       c - ε - η ≤ f x.1} => morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate
-        hflowTop z.1)
+        hHandleInterval hflowTop z.1)
   have hcongr : (fun z : {x : {y : M // y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} //
         c - ε - η ≤ f x.1} => morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate
-        hflowTop z.1) =
+        hHandleInterval hflowTop z.1) =
       fun z : {x : {y : M // y ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} //
-        c - ε - η ≤ f x.1} => morseCollarPreimageOnStrip hk c ε r η data hf hε hr hη hεr v hv hsupp
-          hdfOn hrate hflowTop ⟨z.1, z.2⟩ := by
+        c - ε - η ≤ f x.1} => morseCollarPreimageOnStrip hk c ε r η data hf hε hη hεr v hv hsupp
+          hdfOn hrate hHandleInterval hflowTop ⟨z.1, z.2⟩ := by
     funext z
-    exact morseCollarPreimage_eq_strip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop
+    exact morseCollarPreimage_eq_strip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop
       z.1 z.2
   rw [hcongr]
-  simpa using (continuous_morseCollarPreimageOnStrip hk c ε r η data hf hε hr hη hεr
-    v hv hsupp hdfOn hrate hflowTop hcont)
+  simpa using (continuous_morseCollarPreimageOnStrip hk c ε r η data hf hε hη hεr
+    v hv hsupp hdfOn hrate hHandleInterval hflowTop hcont)
 
 theorem continuous_morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -8787,13 +8773,14 @@ theorem continuous_morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (hcont : Continuous f) :
-    Continuous (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop) := by
+    Continuous (morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop) := by
   let S : Type := {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)}
   let S₁ : Set S := {z : S | f z.1 ≤ c - ε - η}
   let S₂ : Set S := {z : S | c - ε - η ≤ f z.1}
@@ -8815,9 +8802,9 @@ theorem continuous_morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η
   exact continuousOn_univ.mp (by
     rw [hunion]
     refine (continuousOn_morseCollarPreimage_lower hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn
-      hrate hflowTop).union_of_isClosed
+      hrate hHandleInterval hflowTop).union_of_isClosed
       (continuousOn_morseCollarPreimage_strip hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate
-        hflowTop hcont) hclosed₁ hclosed₂)
+        hHandleInterval hflowTop hcont) hclosed₁ hclosed₂)
 
 noncomputable def morseCollarHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -8836,10 +8823,11 @@ noncomputable def morseCollarHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r �
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (hflowMem : ∀ y : SublevelSpace f (c + r ^ 2 / 2),
       morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y ∈
@@ -8849,19 +8837,19 @@ noncomputable def morseCollarHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r �
       {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} where
   toFun := fun y => ⟨morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y,
     hflowMem y⟩
-  invFun := morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop
+  invFun := morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop
   left_inv := by
     intro y
-    exact morseCollarPreimage_eq hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop
+    exact morseCollarPreimage_eq hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop
       hflowMem y
   right_inv := by
     intro z
     apply Subtype.ext
-    exact morseCollarPreimage_collarMap hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop z
+    exact morseCollarPreimage_collarMap hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop z
   continuous_toFun := Continuous.subtype_mk
     (continuous_morseCollarMap hk c ε r η data hf hε hη hεr v hv hsupp hdfOn hrate) (fun y => hflowMem y)
   continuous_invFun := continuous_morseCollarPreimage hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn
-    hrate hflowTop hcont
+    hrate hHandleInterval hflowTop hcont
 
 theorem morseCollarHomeoUnion_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -8880,17 +8868,18 @@ theorem morseCollarHomeoUnion_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : �
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (hflowMem : ∀ y : SublevelSpace f (c + r ^ 2 / 2),
       morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y ∈
         sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data))
     (hcont : Continuous f)
     (x : {x : M // x ∈ sublevel f (c - ε - η)}) :
-    (morseCollarHomeoUnion hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop hflowMem hcont)
+    (morseCollarHomeoUnion hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop hflowMem hcont)
       ⟨x.1, by
         change f x.1 ≤ c + r ^ 2 / 2
         have hr2 : 0 ≤ r ^ 2 / 2 := div_nonneg (sq_nonneg r) (by norm_num)
@@ -8935,10 +8924,11 @@ noncomputable def morseHandleAdjunctionHomeoUpper {m k : ℕ} (hk : k ≤ m + 1)
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (hflowMem : ∀ y : SublevelSpace f (c + r ^ 2 / 2),
       morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y ∈
@@ -8947,7 +8937,7 @@ noncomputable def morseHandleAdjunctionHomeoUpper {m k : ℕ} (hk : k ≤ m + 1)
     Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr)) ≃ₜ
       SublevelSpace f (c + r ^ 2 / 2) :=
   (morseHandleAdjunctionHomeoUnion hk c ε r data hε (ne_of_gt hr) (le_of_lt hεr) hcont).trans
-    (morseCollarHomeoUnion hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop hflowMem hcont).symm
+    (morseCollarHomeoUnion hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop hflowMem hcont).symm
 
 theorem morseHandleAdjunctionHomeoUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
@@ -8966,17 +8956,18 @@ theorem morseHandleAdjunctionHomeoUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c 
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r → f (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
     (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
       morseCollarTopLevel hk c ε r data
         (morseCollarFlowBase hk c ε r η hf hε hη v hv hsupp hdfOn hrate (data.χ w)
-          (morseHandlePoint_f_interval hk c ε r η data hε hr hεr (le_of_lt hη) w hw)) ≥
+          (hHandleInterval w hw)) ≥
         f (data.χ w) - c + ε)
     (hflowMem : ∀ y : SublevelSpace f (c + r ^ 2 / 2),
       morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y ∈
         sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data))
     (hcont : Continuous f)
     (x : {x : M // x ∈ sublevel f (c - ε - η)}) :
-    (morseHandleAdjunctionHomeoUpper hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hflowTop
+    (morseHandleAdjunctionHomeoUpper hk c ε r η data hf hε hr hη hεr v hv hsupp hdfOn hrate hHandleInterval hflowTop
       hflowMem hcont) (Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr))
         ⟨x.1, by
           change f x.1 ≤ c - ε
@@ -8999,7 +8990,7 @@ theorem morseHandleAdjunctionHomeoUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c 
       change f x.1 ≤ c - ε
       exact le_trans hx' (by linarith)⟩]
   simpa [morseCollarHomeoUnion] using (morseCollarPreimage_eq_low hk c ε r η data hf hε hr hη hεr v hv
-    hsupp hdfOn hrate hflowTop ⟨x.1, Or.inl (by
+    hsupp hdfOn hrate hHandleInterval hflowTop ⟨x.1, Or.inl (by
       exact le_trans hx' (by linarith))⟩ hx')
 
 open Classical in
