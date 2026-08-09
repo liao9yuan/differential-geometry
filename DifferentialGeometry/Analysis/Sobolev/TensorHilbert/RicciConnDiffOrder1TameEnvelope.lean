@@ -138,6 +138,18 @@ def fourTraceSwap13Perm : Equiv.Perm (Fin 4) :=
 def fourTraceDoubleTranspositionPerm : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 
+/-- Compatibility name for the `0,2,3,1` four-trace permutation. -/
+abbrev fourTraceArgPerm0231 : Equiv.Perm (Fin 4) :=
+  fourTraceCyclePerm123
+
+/-- Compatibility name for the `0,3,2,1` four-trace permutation. -/
+abbrev fourTraceArgPerm0321 : Equiv.Perm (Fin 4) :=
+  fourTraceSwap13Perm
+
+/-- Compatibility name for the `2,3,0,1` four-trace permutation. -/
+abbrev fourTraceArgPerm2301 : Equiv.Perm (Fin 4) :=
+  fourTraceDoubleTranspositionPerm
+
 omit [NeZero (Module.finrank ℝ E)] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ricciCometricFourTraceCastG0_eq_reindex_combination

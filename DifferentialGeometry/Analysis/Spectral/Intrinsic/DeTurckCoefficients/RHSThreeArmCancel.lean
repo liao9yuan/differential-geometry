@@ -310,7 +310,8 @@ def rhsLow1Coeff
 
 
 
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 3200000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 theorem rhsLow0_path_joint
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -347,7 +348,8 @@ theorem rhsLow1_path_joint
   have hR' := hjoint_smul (I := I) (M := M) g₀ 3 _ (-2 : ℝ) hR
   simpa only [rhsLow1Coeff] using hjoint_add (I := I) (M := M) g₀ 3 _ _ hR' hL
 
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 3200000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 theorem rhsLow_eq_arms
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -417,7 +419,8 @@ theorem rhsLow_eq_arms
   simp only [appCc_add_left, appCc_smul_left, unitModel_add_app, unitModel_smul_app]
   linear_combination hLower
 
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 3200000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 theorem rhsSlope_eq_arms
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),

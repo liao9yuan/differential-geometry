@@ -302,7 +302,7 @@ private theorem ricciHalf_joint
         (realizedFam (I := I) g T 0 hdelta hdeltaZ t))
       (δ := delta) (δ' := delta) := by
   have hconn :=
-    linearizedRicciConnDiffOrder0Coeff_threeArmHjoint
+    linearizedRicciConnDiffOrder0Coeff_jointContMDiffOn_smallPerturbationSet
       (I := I) (M := M) g T 0 hdelta hdeltaZ
   have hriem : linearizedRicciThreeArmHjoint (I := I) (M := M) g 2
       (fun t => ricciArmOrder0RiemannCoeff (I := I) (M := M) g
@@ -336,10 +336,10 @@ private theorem ricciRefold0_joint
     ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint
       (I := I) (M := M) g T hdelta hdeltaZ
   have hBg0 := threeArm_const (I := I) (M := M) g
-    (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g g)
+    (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g g)
     (delta := delta) (delta' := delta)
   have hBgDiff := threeArmJoint_sub (I := I) (M := M) g _ _ hBg hBg0
-  have hSwap := threeArm_comp (I := I) (M := M) g 2 2 _ 
+  have hSwap := threeArm_comp (I := I) (M := M) g 2 2 _
     (ccSlotSwapField (I := I) (M := M) g) hBgDiff
   have hSharp :=
     ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint

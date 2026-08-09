@@ -65,7 +65,7 @@ private theorem zero_eq_unit (x : M) (D : Tensor0SSpace 0 I x) :
 private theorem permCoeff_app
     (g : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) (S : SmoothCcTensor g 0 d) :
-    appCcRS (I := I) (M := M) g 0 d d
+    ccOperatorFieldComp (I := I) (M := M) g 0 d d
         (permCoeff (I := I) (M := M) g ρ) S =
       domDomCongrSection (I := I) g ρ S := by
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g fun x => ?_
@@ -80,8 +80,8 @@ private theorem permCoeff_app
 private theorem app_smul_left
     (g : SmoothRiemannianMetric I M) (a b c : ℕ) (k : ℝ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c (k • Φ) W =
-      k • appCcRS (I := I) (M := M) g a b c Φ W := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c (k • Φ) W =
+      k • ccOperatorFieldComp (I := I) (M := M) g a b c Φ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -104,7 +104,7 @@ private theorem symm_eq_self
     (hS : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g S x u v =
         ccTensorBilin (I := I) g S x v u) :
-    symmS (I := I) (M := M) g S = S := by
+    ccTensor02Symm (I := I) (M := M) g S = S := by
   have hswap :
       domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S = S := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g fun x => ?_
@@ -129,14 +129,15 @@ private theorem symm_eq_self
     conv_rhs => rw [hveta']
     exact hv (v 1) (v 0)
   have htwo : S + S = (2 : ℝ) • S := (two_smul ℝ S).symm
-  rw [symmS, hswap, htwo, smul_smul,
+  unfold ccTensor02Symm
+  rw [hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 private theorem koszulOp_app
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g T x u v =
         ccTensorBilin (I := I) g T x v u) :
-    appCcRS (I := I) (M := M) g 0 3 3
+    ccOperatorFieldComp (I := I) (M := M) g 0 3 3
         (koszulOp (I := I) (M := M) g)
         (covGrad (I := I) (M := M) g 0 2 T) =
       koszulCovecCc (I := I) g T := by
@@ -190,9 +191,9 @@ private theorem connLowerK
     (htie : ∀ (x : M) (u v : TangentSpace I x),
       gm.inner x u v =
         g.inner x u v + ccTensorBilinSymm (I := I) g T x u v) :
-    appCc (I := I) (M := M) g 3 3
+    operatorFieldApply (I := I) (M := M) g 3 3
         (permCoeff (I := I) (M := M) g lowPerm)
-        (appCc (I := I) (M := M) g 3 3
+        (operatorFieldApply (I := I) (M := M) g 3 3
           (slotInsertEndoCc (I := I) (M := M) g 2
             (fullRaisedEndoField (I := I) (M := M) g gm))
           (koszulCovecCc (I := I) g T)) =
@@ -251,12 +252,12 @@ private theorem connLowOp_app
     (htie : ∀ (x : M) (u v : TangentSpace I x),
       gm.inner x u v =
         g.inner x u v + ccTensorBilinSymm (I := I) g T x u v) :
-    appCcRS (I := I) (M := M) g 0 3 3
+    ccOperatorFieldComp (I := I) (M := M) g 0 3 3
         (connLowOp (I := I) (M := M) g gm)
         (covGrad (I := I) (M := M) g 0 2 T) =
       connDiffLoweredCc (I := I) g gm := by
   rw [appCcRS_zero_eq_appCc, connLowOp, ← appCc_assoc, ← appCc_assoc]
-  rw [show appCc (I := I) (M := M) g 3 3
+  rw [show operatorFieldApply (I := I) (M := M) g 3 3
       (koszulOp (I := I) (M := M) g)
       (covGrad (I := I) (M := M) g 0 2 T) =
         koszulCovecCc (I := I) g T by
@@ -273,7 +274,7 @@ private def gradRotate : Equiv.Perm (Fin 4) :=
 private theorem ricciDAG_perm
     (g gm : SmoothRiemannianMetric I M) :
     ricciDAG (I := I) (M := M) g gm =
-      appCcRS (I := I) (M := M) g 0 4 4
+      ccOperatorFieldComp (I := I) (M := M) g 0 4 4
         (permCoeff (I := I) (M := M) g daPermA)
         (covGrad (I := I) (M := M) g 0 3
           (connDiffLoweredCc (I := I) g gm)) := by
@@ -365,10 +366,10 @@ private theorem ricciDAG_split
       gm.inner x u v =
         g.inner x u v + ccTensorBilinSymm (I := I) g T x u v) :
     ricciDAG (I := I) (M := M) g gm =
-      appCcRS (I := I) (M := M) g 0 3 4
+      ccOperatorFieldComp (I := I) (M := M) g 0 3 4
           (dagLowOp (I := I) (M := M) g gm)
           (covGrad (I := I) (M := M) g 0 2 T) +
-        appCcRS (I := I) (M := M) g 0 4 4
+        ccOperatorFieldComp (I := I) (M := M) g 0 4 4
           (dagTopOp (I := I) (M := M) g gm)
           (iteratedCovGrad (I := I) g 0 2 2 T) := by
   rw [ricciDAG_perm (I := I) (M := M) g gm]
@@ -760,7 +761,7 @@ private theorem mono_trans
   refine congrArg Tensor0SSpace.toModel ?_
   change
     (refoldKernelContractionMonomialBiContrFib (I := I) (M := M) g
-      (ccTensorFourUnitValueSection (I := I) (M := M) g G) σ x)
+      (ccTensorRank4EvalAtUnitZeroSec (I := I) (M := M) g G) σ x)
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
         W.toSection x) (unitTensor (I := I) (M := M) x)) =
     (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g
@@ -771,17 +772,19 @@ private theorem mono_trans
   apply ContinuousMultilinearMap.ext
   intro v
   rw [refoldKernelContractionMonomialBiContrFib,
+    curvatureRefoldMonomialOrthonormalFrameBiContraction,
     refoldKernelContractionMonomialFibFixedFrame_toModel,
     curvatureRefoldMonomialBiContrFib,
+    curvatureActionMonomialTrace,
     curvatureRefoldMonomialFibFixedFrame_toModel]
   rfl
 
 private theorem daMono_trans
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g 0 2) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (daMono (I := I) (M := M) g gm G σ) W =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
         (daTransMono (I := I) (M := M) g gm W σ) G := by
   rw [daMono, ← appCc_assoc]
   exact mono_trans (I := I) (M := M) g G σ
@@ -790,9 +793,9 @@ private theorem daMono_trans
 private theorem daContr_trans
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (W : SmoothCcTensor g 0 2) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (daContr (I := I) (M := M) g gm G) W =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
         (daTrans (I := I) (M := M) g gm W) G := by
   rw [daContr, daTrans, appCc_sub_left, appCc_sub_left,
     daMono_trans, daMono_trans]
@@ -818,13 +821,14 @@ private theorem daMono_eval
                     (v 0 : TangentSpace I x), (v 1 : TangentSpace I x)] :
                     Fin 4 → TangentSpace I x) (σ i)) := by
   classical
+  simp only [appCc]
   rw [daMono, ← appCc_assoc (I := I) (M := M) g 2 2 2]
   rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
     refoldKernelContractionMonomialField_toSection]
   change Tensor0SSpace.toModel
-      (refoldKernelContractionMonomialFibFixedFrame
+      (curvatureRefoldMonomialFrameContraction
         (I := I) (M := M)
-        (ccTensorFourUnitValueSection (I := I) (M := M) g G) σ
+        (ccTensorRank4EvalAtUnitZeroSec (I := I) (M := M) g G) σ
         (smoothOrthoFrame (I := I) g x) x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
           (appCc (I := I) (M := M) g 2 2
@@ -894,9 +898,9 @@ private theorem ricciDA_action
     (hW : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g W x u v =
         ccTensorBilin (I := I) g W x v u) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (ricciDAArm (I := I) (M := M) g gm) W =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
         (daContr (I := I) (M := M) g gm
           (ricciDAG (I := I) (M := M) g gm)) W := by
   classical
@@ -959,11 +963,11 @@ private theorem ricciDA_refold
     (htie : ∀ (x : M) (u v : TangentSpace I x),
       gm.inner x u v =
         g.inner x u v + ccTensorBilinSymm (I := I) g P x u v) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (ricciDAArm (I := I) (M := M) g gm) W =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (ricciDALow (I := I) (M := M) g gm P) W +
-        appCc (I := I) (M := M) g 4 2
+        operatorFieldApply (I := I) (M := M) g 4 2
           (ricciDATop (I := I) (M := M) g gm W)
           (iteratedCovGrad (I := I) g 0 2 2 P) := by
   rw [ricciDA_action (I := I) (M := M) g gm W hW]
@@ -1060,14 +1064,14 @@ private def ricciDanger
     (g gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
   daContr (I := I) (M := M) g gm
-    (appCcRS (I := I) (M := M) g 0 4 4
+    (ccOperatorFieldComp (I := I) (M := M) g 0 4 4
       (dagTopOp (I := I) (M := M) g gm)
       (iteratedCovGrad (I := I) g 0 2 2 P))
 
 private def ricciSafeLow
     (g gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
-  ccInputSymm (I := I) (M := M) g
+  ccInputSlotSymm (I := I) (M := M) g
     (linearizedRicciConnDiffOrder0CoeffField
         (I := I) (M := M) g gm -
       ricciDanger (I := I) (M := M) g gm P)
@@ -1078,12 +1082,12 @@ private theorem ccInputSymm_app
     (hW : ∀ (x : M) (u v : TangentSpace I x),
       ccTensorBilin (I := I) g W x u v =
         ccTensorBilin (I := I) g W x v u) :
-    appCc (I := I) (M := M) g 2 2
-        (ccInputSymm (I := I) (M := M) g C) W =
-      appCc (I := I) (M := M) g 2 2 C W := by
+    operatorFieldApply (I := I) (M := M) g 2 2
+        (ccInputSlotSymm (I := I) (M := M) g C) W =
+      operatorFieldApply (I := I) (M := M) g 2 2 C W := by
   have hswap :
-      appCc (I := I) (M := M) g 2 2
-          (ccSlotSwapField (I := I) (M := M) g) W = W := by
+      operatorFieldApply (I := I) (M := M) g 2 2
+          (ccInputSlotSwapField (I := I) (M := M) g) W = W := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g fun x => ?_
     refine ContinuousMultilinearMap.ext fun v => ?_
     rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
@@ -1114,7 +1118,8 @@ private theorem ccInputSymm_app
       unitModel_eq_ccTensorBilin_local (I := I) (M := M) g W x,
       unitModel_eq_ccTensorBilin_local (I := I) (M := M) g W x]
     exact hW x (v 1) (v 0)
-  rw [ccInputSymm, appCc_smul_left, appCc_add_left, ← appCc_assoc, hswap]
+  unfold ccInputSlotSymm
+  rw [appCc_smul_left, appCc_add_left, ← appCc_assoc, hswap]
   module
 
 private theorem ricciConn_refold
@@ -1128,12 +1133,12 @@ private theorem ricciConn_refold
     (htie : ∀ (x : M) (u v : TangentSpace I x),
       gm.inner x u v =
         g.inner x u v + ccTensorBilinSymm (I := I) g P x u v) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (linearizedRicciConnDiffOrder0CoeffField
           (I := I) (M := M) g gm) W =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (ricciLow (I := I) (M := M) g gm P) W +
-        appCc (I := I) (M := M) g 4 2
+        operatorFieldApply (I := I) (M := M) g 4 2
           (ricciTop (I := I) (M := M) g gm W)
           (iteratedCovGrad (I := I) g 0 2 2 P) := by
   rw [ricciCoeff_split, appCc_add_left]
@@ -1152,18 +1157,18 @@ private theorem safeLow_action
     (htie : ∀ (x : M) (u v : TangentSpace I x),
       gm.inner x u v =
         g.inner x u v + ccTensorBilinSymm (I := I) g P x u v) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (ricciSafeLow (I := I) (M := M) g gm P) W =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
         (ricciLow (I := I) (M := M) g gm P) W := by
   rw [ricciSafeLow, ccInputSymm_app (I := I) (M := M) g _ W hW,
     appCc_sub_left]
   have hconn := ricciConn_refold (I := I) (M := M)
     g gm P W hP hW htie
   have htop :
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (ricciDanger (I := I) (M := M) g gm P) W =
-        appCc (I := I) (M := M) g 4 2
+        operatorFieldApply (I := I) (M := M) g 4 2
           (ricciTop (I := I) (M := M) g gm W)
           (iteratedCovGrad (I := I) g 0 2 2 P) := by
     rw [ricciDanger, daContr_trans, appCcRS_zero_eq_appCc, appCc_assoc]
@@ -1173,8 +1178,8 @@ private theorem safeLow_action
 
 private theorem ccSwap_app
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
-    appCc (I := I) (M := M) g 2 2
-        (ccSlotSwapField (I := I) (M := M) g) W =
+    operatorFieldApply (I := I) (M := M) g 2 2
+        (ccInputSlotSwapField (I := I) (M := M) g) W =
       domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) W := by
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g fun x => ?_
   rw [domDomCongrSection_unitModel]
@@ -1195,19 +1200,21 @@ private theorem ccSwap_app
 private theorem ccInputSymm_action
     (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2)
     (W : SmoothCcTensor g 0 2) :
-    appCc (I := I) (M := M) g 2 2
-        (ccInputSymm (I := I) (M := M) g C) W =
-      appCc (I := I) (M := M) g 2 2 C
-        (symmS (I := I) (M := M) g W) := by
-  rw [ccInputSymm, appCc_smul_left, appCc_add_left, ← appCc_assoc,
+    operatorFieldApply (I := I) (M := M) g 2 2
+        (ccInputSlotSymm (I := I) (M := M) g C) W =
+      operatorFieldApply (I := I) (M := M) g 2 2 C
+        (ccTensor02Symm (I := I) (M := M) g W) := by
+  unfold ccInputSlotSymm
+  rw [appCc_smul_left, appCc_add_left, ← appCc_assoc,
     ccSwap_app (I := I) (M := M) g W]
-  rw [symmS, appCc_smul_right, appCc_add_right]
+  unfold ccTensor02Symm
+  rw [appCc_smul_right, appCc_add_right]
 
 private theorem cc22_ext
     (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2)
     (h : ∀ W : SmoothCcTensor g 0 2,
-      appCc (I := I) (M := M) g 2 2 C W =
-        appCc (I := I) (M := M) g 2 2 D W) :
+      operatorFieldApply (I := I) (M := M) g 2 2 C W =
+        operatorFieldApply (I := I) (M := M) g 2 2 D W) :
     C = D := by
   classical
   refine SmoothCcTensor.ext ?_
@@ -1223,8 +1230,8 @@ private theorem cc22_ext
   let W₀ : SmoothCcTensor g 0 2 :=
     { toSection := σW
       hasCompactSupport := HasCompactSupport.of_compactSpace _ }
-  have h1 : (appCc (I := I) (M := M) g 2 2 C W₀).toSection x =
-      (appCc (I := I) (M := M) g 2 2 D W₀).toSection x := by
+  have h1 : (operatorFieldApply (I := I) (M := M) g 2 2 C W₀).toSection x =
+      (operatorFieldApply (I := I) (M := M) g 2 2 D W₀).toSection x := by
     rw [h W₀]
   have h2 : (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
         C.toSection x)
@@ -1253,7 +1260,7 @@ private theorem cc22_ext
 private def ricciGoodLow
     (g gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
-  ccInputSymm (I := I) (M := M) g
+  ccInputSlotSymm (I := I) (M := M) g
     (ricciLow (I := I) (M := M) g gm P)
 
 private theorem ricciGood_eq_safe
@@ -2079,7 +2086,7 @@ private theorem inputSymm_joint
     (hC : linearizedRicciThreeArmHjoint (I := I) (M := M) g 2 C
       (δ := δ) (δ' := δ)) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g 2
-      (fun t => ccInputSymm (I := I) (M := M) g (C t))
+      (fun t => ccInputSlotSymm (I := I) (M := M) g (C t))
       (δ := δ) (δ' := δ) := by
   have hswap := joint_app (I := I) (M := M) g C
     (fun _ => ccSlotSwapField (I := I) (M := M) g) hC
@@ -2107,7 +2114,7 @@ private theorem safeLow_joint
         (realizedFam (I := I) g T 0 hδ hδZ t) (t • T))
       (δ := δ) (δ' := δ) := by
   have hraw :=
-    linearizedRicciConnDiffOrder0Coeff_threeArmHjoint
+    linearizedRicciConnDiffOrder0Coeff_jointContMDiffOn_smallPerturbationSet
       (I := I) (M := M) g T 0 hδ hδZ
   have hdanger := danger_joint (I := I) (M := M)
     g T hδ hδZ
@@ -2129,7 +2136,7 @@ private theorem half_joint
         (realizedFam (I := I) g T 0 hδ hδZ t))
       (δ := δ) (δ' := δ) := by
   have hconn :=
-    linearizedRicciConnDiffOrder0Coeff_threeArmHjoint
+    linearizedRicciConnDiffOrder0Coeff_jointContMDiffOn_smallPerturbationSet
       (I := I) (M := M) g T 0 hδ hδZ
   have hriem : linearizedRicciThreeArmHjoint
       (I := I) (M := M) g 2
@@ -2168,7 +2175,7 @@ private theorem refoldLow_joint
     ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint
       (I := I) (M := M) g T hδ hδZ
   have hBg0 := arm_const (I := I) (M := M) g
-    (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g g)
+    (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g g)
     (δ := δ) (δ' := δ)
   have hBgDiff := threeArmJoint_sub (I := I) (M := M)
     g _ _ hBg hBg0
@@ -2544,17 +2551,18 @@ private theorem rhsSelf_refold
             (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
             (Equiv.swap (0 : Fin 4) 2 *
               Equiv.swap (1 : Fin 4) 3) 1 +
-        deTurckLieDLaCoeffField (I := I) (M := M) g gm g_bg +
+        deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g gm g_bg +
         deTurckLieDLbCoeffField (I := I) (M := M) g gm g_bg +
         lieCorr0Field (I := I) (M := M) g gm g_bg -
         edgeLiePairFam (I := I) (M := M) g T hδ hδZ
           lieRefoldQ lieRefoldEps s) T = _
   simp only [appCc_add_left, appCc_sub_left, appCc_smul_left]
+  simp only [appCc] at hconn hsafe hkernel ⊢
   rw [hconn, ← hsafe, hkernel]
   simp only [P, iteratedCovGrad_smul, appCc_smul_right]
   have hLie :
       appCc (I := I) (M := M) g 2 2
-          (deTurckLieDLaCoeffField (I := I) (M := M) g gm g_bg) T +
+          (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g gm g_bg) T +
         appCc (I := I) (M := M) g 2 2
           (deTurckLieDLbCoeffField (I := I) (M := M) g gm g_bg) T =
       appCc (I := I) (M := M) g 2 2
@@ -2570,7 +2578,7 @@ private theorem rhsSelf_refold
   calc
     _ =
         (appCc (I := I) (M := M) g 2 2
-            (deTurckLieDLaCoeffField (I := I) (M := M) g gm g_bg) T +
+            (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g gm g_bg) T +
           appCc (I := I) (M := M) g 2 2
             (deTurckLieDLbCoeffField (I := I) (M := M) g gm g_bg) T) -
         appCc (I := I) (M := M) g 2 2
@@ -2862,6 +2870,7 @@ private theorem top_sub_lap
       (I := I) (M := M) g U x v
   have hcurv := phiMet_curv_fold
     (I := I) (M := M) g g_bg g U
+  simp only [appCc] at hcurv ⊢
   rw [appCc_sub_left] at hcurv
   simp only [iteratedCovGrad_zero] at hcurv
   rw [hlap, appCc_sub_left, ← hcurv]
@@ -3515,9 +3524,9 @@ theorem daTrans_cap
 private theorem daMono_swap
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g 0 2) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (daMono (I := I) (M := M) g gm G σ) W =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
         (daTransMono (I := I) (M := M) g gm W σ) G := by
   rw [daMono, ← appCc_assoc]
   exact mono_trans (I := I) (M := M) g G σ
@@ -3526,9 +3535,9 @@ private theorem daMono_swap
 private theorem daContr_swap
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (W : SmoothCcTensor g 0 2) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (daContr (I := I) (M := M) g gm G) W =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
         (daTrans (I := I) (M := M) g gm W) G := by
   rw [daContr, daTrans, appCc_sub_left, appCc_sub_left,
     daMono_swap, daMono_swap]
@@ -3564,9 +3573,9 @@ noncomputable def ricciDAOne
 action. -/
 theorem ricciDA_one
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (ricciDALow (I := I) (M := M) g gm P) W =
-      appCc (I := I) (M := M) g 3 2
+      operatorFieldApply (I := I) (M := M) g 3 2
         (ricciDAOne (I := I) (M := M) g gm W)
         (covGrad (I := I) (M := M) g 0 2 P) := by
   rw [ricciDALow, daContr_swap]
@@ -3639,7 +3648,7 @@ noncomputable def ricciLow
 noncomputable def ricciGoodLow
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
-  ccInputSymm (I := I) (M := M) g
+  ccInputSlotSymm (I := I) (M := M) g
     (ricciLow (I := I) (M := M) g gm T)
 
 /-- The explicit second-derivative coefficient removed from the raw Ricci
@@ -3648,7 +3657,7 @@ noncomputable def ricciDanger
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
   daContr (I := I) (M := M) g gm
-    (appCcRS (I := I) (M := M) g 0 4 4
+    (ccOperatorFieldComp (I := I) (M := M) g 0 4 4
       (dagTopOp (I := I) (M := M) g gm)
       (iteratedCovGrad (I := I) g 0 2 2 T))
 
@@ -3657,7 +3666,7 @@ removed. -/
 noncomputable def ricciSafeLow
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
-  ccInputSymm (I := I) (M := M) g
+  ccInputSlotSymm (I := I) (M := M) g
     (linearizedRicciConnDiffOrder0CoeffField
         (I := I) (M := M) g gm -
       ricciDanger (I := I) (M := M) g gm T)
@@ -3976,6 +3985,7 @@ theorem lowData_split
           (rhsLow1PathIntegral (I := I) (M := M)
             g g_bg T 0 hδ_lt hδ hδ_lt hδZ)
           (iteratedCovGrad (I := I) g 0 2 1 T)) by
+      simp only [appCc]
       rw [appCc_add_left]
       abel]
   rw [top_sub_lap (I := I) (M := M) g g_bg]
@@ -4617,7 +4627,7 @@ private theorem ricciAA_h2_rf
     have hs1 := hp_slot (I := I) (M := M) g P hc
     have hs2 := hp_slot (I := I) (M := M) g P hs1
     have hr := hp_reindex (I := I) (M := M) g P
-      coreInPerm201 hs2
+      connDiffContrInsertionReindexPerm hs2
     simpa only [Kouter, fr, mul_assoc,
       connDiffContrInsertionField_eq_reindex_slotExtend_two] using hr
   have hp102 :
@@ -4922,7 +4932,7 @@ private theorem aa_h2_of
     have hs1 := hp_slot (I := I) (M := M) g Z hc
     have hs2 := hp_slot (I := I) (M := M) g Z hs1
     have hr := hp_reindex (I := I) (M := M) g Z
-      coreInPerm201 hs2
+      connDiffContrInsertionReindexPerm hs2
     simpa only [fr,
       connDiffContrInsertionField_eq_reindex_slotExtend_two] using hr
   have hp102 :
@@ -7167,6 +7177,7 @@ private theorem ricciGood_act_tame
   have hZ0 : 0 ≤ Z R := by
     dsimp only [Z]
     positivity
+  simp only [appCc]
   rw [ricciGoodLow,
     ccInputSymm_app (I := I) (M := M) g _ W hW,
     ricciLow, appCc_add_left]
@@ -7205,7 +7216,7 @@ private theorem inputSymm_h2
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ C : SmoothCcTensor g 2 2,
         lowJetSq (I := I) (M := M) g 2
-            (ccInputSymm (I := I) (M := M) g C) ≤
+            (ccInputSlotSymm (I := I) (M := M) g C) ≤
           K * lowJetSq (I := I) (M := M) g 2 C := by
   obtain ⟨Ca, hCa, happ⟩ :=
     app_h2_mul (I := I) (M := M) hDim g 2 2 2
@@ -7231,7 +7242,8 @@ private theorem inputSymm_h2
         simpa only [Ks] using happ C
           (ccSlotSwapField (I := I) (M := M) g)
       _ = (Ca * Ks) * lowJetSq (I := I) (M := M) g 2 C := by ring
-  rw [ccInputSymm, jet_smul]
+  unfold ccInputSlotSymm
+  rw [jet_smul]
   have hsum0 := jet_nonneg (I := I) (M := M) (m := 2) g
     (C + appCcRS (I := I) (M := M) g 2 2 2 C
       (ccSlotSwapField (I := I) (M := M) g))
@@ -7308,7 +7320,7 @@ private theorem ricciGood_h2_rf
     lowJetSq (I := I) (M := M) g 2
         (ricciGoodLow (I := I) (M := M) g g₁ P) =
       lowJetSq (I := I) (M := M) g 2
-        (ccInputSymm (I := I) (M := M) g
+        (ccInputSlotSymm (I := I) (M := M) g
           (ricciLow (I := I) (M := M) g g₁ P)) := rfl
     _ ≤ Cs * lowJetSq (I := I) (M := M) g 2
         (ricciLow (I := I) (M := M) g g₁ P) :=
@@ -12363,7 +12375,7 @@ private theorem liePiece_h2
       H2Poly (I := I) (M := M) g P (n + m)
         (C * A * ((Module.finrank ℝ E : ℝ) *
           ((Module.finrank ℝ E : ℝ) * B)))
-        (lieArm1Piece (I := I) (M := M) g g₁ σ ρ Ψ) := by
+        (deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ σ ρ Ψ) := by
   obtain ⟨C, hC, happ⟩ :=
     app_h2_mul (I := I) (M := M) hDim g 3 4 2
   refine ⟨C, hC, ?_⟩
@@ -12377,7 +12389,7 @@ private theorem liePiece_h2
       hTrace hSlot
   have hReindex :=
     hp_reindex (I := I) (M := M) g P ρ hApp
-  simpa only [lieArm1Piece, slotExtendIter, Nat.reduceAdd] using hReindex
+  simpa only [deTurckLieTraceCoeffPiece, slotExtendIter, Nat.reduceAdd] using hReindex
 
 private def r1o0312 : Equiv.Perm (Fin 4) :=
   ⟨![0, 3, 1, 2], ![0, 2, 3, 1], by decide, by decide⟩
@@ -12491,7 +12503,7 @@ private theorem ricciKer_h2_rf
         (connDiffContrInsertionField (I := I) g g₁) := by
     have hs := hp_slot2 (I := I) (M := M) g P hc
     have hr := hp_reindex (I := I) (M := M) g P
-      coreInPerm201 hs
+      connDiffContrInsertionReindexPerm hs
     simpa only [Ko, fr, mul_assoc,
       connDiffContrInsertionField_eq_reindex_slotExtend_two] using hr
   let O : SmoothCcTensor g 3 4 :=
@@ -12841,7 +12853,7 @@ private theorem lieOne_h2_rf
     hbg g₁ P hP htie hδ_le hδ0 hδ
   have hPc : ∀ (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
       H2Poly (I := I) (M := M) g P 3 Kpc
-        (lieArm1Piece (I := I) (M := M) g g₁ σ ρ
+        (deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ σ ρ
           (connDiffSection (I := I) g₁ g)) := by
     intro σ ρ
     have hraw := hpiece g₁ P σ ρ
@@ -12851,7 +12863,7 @@ private theorem lieOne_h2_rf
     simpa only [Kpc, fr, Nat.reduceAdd] using hout
   have hPp : ∀ (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
       H2Poly (I := I) (M := M) g P 3 Kpp
-        (lieArm1Piece (I := I) (M := M) g g₁ σ ρ
+        (deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ σ ρ
           (lieArm1PsiB (I := I) (M := M) g g₁ g)) := by
     intro σ ρ
     have hout := hpiece g₁ P σ ρ
@@ -12859,7 +12871,7 @@ private theorem lieOne_h2_rf
     simpa only [Kpp, fr, Nat.reduceAdd] using hout
   have hPg : ∀ (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
       H2Poly (I := I) (M := M) g P 3 Kpg
-        (lieArm1Piece (I := I) (M := M) g g₁ σ ρ
+        (deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ σ ρ
           (lieArm1ConnDiffBgCc (I := I) (M := M) g g₁ g)) := by
     intro σ ρ
     have hraw := hpiece g₁ P σ ρ
@@ -12869,48 +12881,48 @@ private theorem lieOne_h2_rf
       (by omega : 1 + 1 ≤ 3) hraw
     simpa only [Kpg, fr, Nat.reduceAdd] using hout
   let Z0 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaC lieArm1RhoSlot0
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaC lieArm1RhoSlot0
       (lieArm1ConnDiffBgCc (I := I) (M := M) g g₁ g)
   let Z1 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaA
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaA
       (Equiv.refl (Fin 3)) (connDiffSection (I := I) g₁ g)
   let Z2 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaA
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaA
       (Equiv.refl (Fin 3))
       (lieArm1PsiB (I := I) (M := M) g g₁ g)
   let Z3 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaC
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaC
       (Equiv.refl (Fin 3)) (connDiffSection (I := I) g₁ g)
   let Z4 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaD lieArm1RhoSlot0
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaD lieArm1RhoSlot0
       (connDiffSection (I := I) g₁ g)
   let Z5 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ (Equiv.refl (Fin 4))
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ (Equiv.refl (Fin 4))
       lieArm1RhoSlot1 (connDiffSection (I := I) g₁ g)
   let Z6 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaF
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaF
       (Equiv.refl (Fin 3)) (connDiffSection (I := I) g₁ g)
   let Z7 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaASwap
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaASwap
       (Equiv.refl (Fin 3)) (connDiffSection (I := I) g₁ g)
   let Z8 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaASwap
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaASwap
       (Equiv.refl (Fin 3))
       (lieArm1PsiB (I := I) (M := M) g g₁ g)
   let Z9 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaCSwap
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaCSwap
       (Equiv.refl (Fin 3)) (connDiffSection (I := I) g₁ g)
   let Z10 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaDSwap lieArm1RhoSlot0
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaDSwap lieArm1RhoSlot0
       (connDiffSection (I := I) g₁ g)
   let Z11 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaESwap lieArm1RhoSlot1
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaESwap lieArm1RhoSlot1
       (connDiffSection (I := I) g₁ g)
   let Z12 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ lieArm1SigmaFSwap
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ lieArm1SigmaFSwap
       (Equiv.refl (Fin 3)) (connDiffSection (I := I) g₁ g)
   let Z13 : SmoothCcTensor g 3 2 :=
-    lieArm1Piece (I := I) (M := M) g g₁ (Equiv.refl (Fin 4))
+    deTurckLieTraceCoeffPiece (I := I) (M := M) g g₁ (Equiv.refl (Fin 4))
       lieArm1RhoSlot0 (connDiffSection (I := I) g₁ g)
   have hZ0 : H2Poly (I := I) (M := M) g P 3 Kpg Z0 :=
     hPg lieArm1SigmaC lieArm1RhoSlot0

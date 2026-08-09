@@ -939,6 +939,10 @@ def connDiffQuadraticCurvatureTerm (g₀ gm : SmoothRiemannianMetric I M) : Smoo
     + domDomCongrSection (I := I) g₀ lrPermC
       (connDiffQuadraticComposedTensor (I := I) (M := M) g₀ gm)
 
+/-- Compatibility name for the quadratic connection-difference curvature term. -/
+abbrev lrQuadF (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
+  connDiffQuadraticCurvatureTerm (I := I) (M := M) g₀ gm
+
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1193,6 +1197,11 @@ def riemannCurvatureCoeffField (g₀ : SmoothRiemannianMetric I M) (T : SmoothCc
   ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 (riemannLoweredContractionA (I := I) (M := M) g₀) T
     + ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4
       (riemannLoweredContractionB (I := I) (M := M) g₀) T
+
+/-- Compatibility name for the Riemann-curvature coefficient field. -/
+abbrev lrCurvF (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
+    SmoothCcTensor g₀ 0 4 :=
+  riemannCurvatureCoeffField (I := I) (M := M) g₀ T
 
 set_option backward.isDefEq.respectTransparency false in
 private lemma lrCurvF_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
@@ -1783,6 +1792,29 @@ def lrR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ :
     (s : ℝ) : SmoothCcTensor g₀ 0 4 :=
   (-(s / 2) : ℝ) • riemannCurvatureCoeffField (I := I) (M := M) g₀ T
     - connDiffQuadraticCurvatureTerm (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+
+/-- The fourth-covariant normal form remaining after the exact
+pair-contraction refold of the DeTurck covariant-derivative arm. -/
+abbrev lieCovR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (s : ℝ) : SmoothCcTensor g₀ 0 4 :=
+  lrR4 (I := I) (M := M) g₀ T hδ hδZ s
+
+/-- Decomposition of the fourth-covariant normal form into its curvature-linear
+and connection-difference-quadratic pieces. -/
+theorem lieCovR4_eq (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (s : ℝ) :
+    lieCovR4 (I := I) (M := M) g₀ T hδ hδZ s =
+      (-(s / 2) : ℝ) • lrCurvF (I := I) (M := M) g₀ T
+        - lrQuadF (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) :=
+  rfl
 
 
 private theorem lrSummand (g₀ : SmoothRiemannianMetric I M)
@@ -2402,6 +2434,37 @@ theorem lrArm_sub_family_eq_pairTrace (g₀ : SmoothRiemannianMetric I M)
     from Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun a _ => hpoint b a]
   simp only [Finset.sum_add_distrib, ← Finset.mul_sum]
   ring
+
+/-- Exact fixed-order normal form for the base-background covariant-derivative
+residual after the pair-contraction second-order refold. -/
+theorem lieCov_residual (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      smoothCcTensorBilinForm (I := I) g₀ T x v w =
+        smoothCcTensorBilinForm (I := I) g₀ T x w v)
+    {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
+    deTurckLieCovDerivArmField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀ -
+      deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M)
+        g₀ T hδ hδZ
+          ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+            Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 *
+              Equiv.swap (0 : Fin 4) 1,
+            Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
+          ![(-1 : ℝ), -1, 1] s =
+      (-1 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+        (lieCovPair (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lieCovSigma
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (lieCovR4 (I := I) (M := M) g₀ T hδ hδZ s))) := by
+  simpa only [lieCovPair, lieCovSigma, lieCovR4] using
+    lrArm_sub_family_eq_pairTrace (I := I) (M := M)
+      g₀ T hδ_lt hδ hδZ hTsymm hs
 
 
 end TensorSpectral

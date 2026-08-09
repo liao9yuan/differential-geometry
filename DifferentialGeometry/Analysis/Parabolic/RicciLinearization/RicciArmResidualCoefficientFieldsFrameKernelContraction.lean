@@ -418,6 +418,12 @@ def curvatureRefoldMonomialOrthonormalFrameBiContraction (g₁ : SmoothRiemannia
   curvatureRefoldMonomialFrameContraction (I := I) (M := M) Gs σ
     (smoothOrthoFrame (I := I) g₁ x) x
 
+/-- Compatibility name for the orthonormal-frame refold-kernel contraction. -/
+def refoldKernelContractionMonomialBiContrFib (g₁ : SmoothRiemannianMetric I M)
+    (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4)) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  curvatureRefoldMonomialOrthonormalFrameBiContraction (I := I) (M := M) g₁ Gs σ x
+
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     [SigmaCompactSpace M] in
 theorem refoldKernelContractionMonomialBiContrFib_eq_fixedFrame_on_nbhd

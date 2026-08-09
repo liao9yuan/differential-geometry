@@ -78,6 +78,10 @@ omit [SigmaCompactSpace M] in
 def innerContractionSwapPerm : Equiv.Perm (Fin 2) :=
   ⟨![1, 0], ![1, 0], by decide, by decide⟩
 
+/-- Compatibility name for the two-slot inner-contraction swap. -/
+abbrev innerCoreInPerm10 : Equiv.Perm (Fin 2) :=
+  innerContractionSwapPerm
+
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in

@@ -150,7 +150,7 @@ private theorem symmFun_core
     symmFun (I := I) (M := M) g hσ
         (ccToHsLin (I := I) (M := M) g 2 σ T) =
       ccToHsLin (I := I) (M := M) g 2 σ
-        (symmS (I := I) (M := M) g T) := by
+        (ccTensor02Symm (I := I) (M := M) g T) := by
   let x : symmCore (I := I) (M := M) g σ :=
     ⟨ccToHsLin (I := I) (M := M) g 2 σ T, ⟨T, rfl⟩⟩
   have hext :=
@@ -167,7 +167,7 @@ private theorem symmFun_zero
     (g : SmoothRiemannianMetric I M) {σ : ℝ} (hσ : 0 ≤ σ) :
     symmFun (I := I) (M := M) g hσ 0 = 0 := by
   have hsymm :
-      symmS (I := I) (M := M) g (0 : SmoothCcTensor g 0 2) = 0 := by
+      ccTensor02Symm (I := I) (M := M) g (0 : SmoothCcTensor g 0 2) = 0 := by
     rw [show (0 : SmoothCcTensor g 0 2) =
         (0 : ℝ) • (0 : SmoothCcTensor g 0 2) by simp,
       symmS_smul]
@@ -567,6 +567,7 @@ theorem lowRadial_lip
     _ =
         ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
           (symmS (I := I) (M := M) g (T - U))‖ := by
+      simp only [symmS]
       rw [symmS_sub, ccToHs_sub]
     _ ≤
         ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖ := by

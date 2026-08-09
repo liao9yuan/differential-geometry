@@ -83,6 +83,10 @@ def armPairTraceSlotPerm6 : Equiv.Perm (Fin 6) :=
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
+/-- Compatibility name for the fixed six-slot pair-trace permutation. -/
+abbrev lieCovSigma : Equiv.Perm (Fin 6) :=
+  armPairTraceSlotPerm6
+
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bdTensor0S_zero_rank_decomp (x : M) (t : Tensor0SSpace 0 I x) :
@@ -470,6 +474,10 @@ def armPairTraceOpCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g
     (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 2)
     (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
 
+/-- Compatibility name for the pair-cometric contraction operator. -/
+abbrev lieCovPair (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 6 2 :=
+  armPairTraceOpCc (I := I) (M := M) g₀ g₁
+
 set_option backward.isDefEq.respectTransparency false in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma bdPairTraceOp_apply_toModel (g₀ gm : SmoothRiemannianMetric I M)
@@ -797,6 +805,13 @@ lemma bdSlotInsertZero_fullRaisedRev_eq_omRecover
   rw [cotangentToDual_g0FlatCLM]
   rw [g₁.symm x w (inverseMetricSharpFib (I := I) g₀ x om)]
 
+/-- The reverse raised endomorphism in the leading slot is the metric-recovery endomorphism. -/
+theorem fullRev0_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
+    slotInsertEndoCc (I := I) (M := M) g₀ 0
+        (fullRaisedEndoField (I := I) (M := M) g₁ g₀) =
+      omRecoverEndoCc (I := I) g₀ g₁ :=
+  bdSlotInsertZero_fullRaisedRev_eq_omRecover (I := I) (M := M) g₀ g₁
+
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert (metricComparisonEndo gInvRaisedEndo_apply
   inverseMetricSharpFib_g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM) in
 set_option backward.isDefEq.respectTransparency false in
@@ -923,6 +938,18 @@ private lemma bdOmRecover_eq_idEndo_add_raise
       ccTensorBilinSymm (I := I) g₀ T x (inverseMetricSharpFib (I := I) g₀ x om) w from by
     rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
     ring]
+
+/-- Under an additive metric perturbation, recovery is identity plus the raised perturbation. -/
+theorem omRecover_add
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w) :
+    omRecoverEndoCc (I := I) g₀ g₁ =
+      slotInsertEndoCc (I := I) (M := M) g₀ 0
+          (fullRaisedEndoField (I := I) (M := M) g₀ g₀) +
+        cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+          (symmS (I := I) (M := M) g₀ T) := by
+  exact bdOmRecover_eq_idEndo_add_raise (I := I) (M := M) g₀ g₁ T htie
 
 omit [NeZero (Module.finrank ℝ E)] in
 lemma bdRfns_iCG_symmS_le (g₀ : SmoothRiemannianMetric I M)
@@ -1578,6 +1605,120 @@ lemma bdArmSlot2_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x :
     (armSlotEndoCc (I := I) (M := M) g₀ 0 (connDiffEndo (I := I) (M := M) g₀ g₁)) j x) ?_
   refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
   rw [← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₁]
+
+private lemma bdArmSlot_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
+      (fun x : M =>
+        TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))) :
+    armSlotEndoCc (I := I) (M := M) g₀ s (A - B) =
+      armSlotEndoCc (I := I) (M := M) g₀ s A -
+        armSlotEndoCc (I := I) (M := M) g₀ s B := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  change armSlotFib (I := I) (M := M) s x ((A - B) x) D =
+    armSlotFib (I := I) (M := M) s x (A x) D -
+      armSlotFib (I := I) (M := M) s x (B x) D
+  rw [show (A - B) x = A x - B x by
+    rw [ContMDiffSection.coe_sub]
+    rfl]
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [armSlotFib_apply_eval]
+  change _ =
+    Tensor0SSpace.toModel (armSlotFib (I := I) (M := M) s x (A x) D) v -
+      Tensor0SSpace.toModel (armSlotFib (I := I) (M := M) s x (B x) D) v
+  rw [armSlotFib_apply_eval, armSlotFib_apply_eval]
+  rw [ContinuousLinearMap.sub_apply, slotInsertEndoFib_sub_left,
+    ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
+    ContinuousMultilinearMap.sub_apply]
+
+set_option linter.unusedSectionVars false in
+private lemma bdArmSlot2_sub_le
+    (g₀ : SmoothRiemannianMetric I M)
+    (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
+      (fun x : M =>
+        TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)))
+    (S : SmoothCcTensor g₀ 1 2)
+    (hAS : armSlotEndoCc (I := I) (M := M) g₀ 0 A = S)
+    (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (armSlotEndoCc (I := I) (M := M) g₀ 2 A)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j S).toSection x) := by
+  rw [bdArmSlotEndoCc_two_eq_reindex_slotExtend (I := I) (M := M) g₀ A]
+  rw [rfns_iteratedCovGrad_rsDomDomCongr_both_eq
+    (I := I) (M := M) g₀ 3 4
+    (Equiv.swap (0 : Fin 3) 1) armSlotEndoCcReindexPerm4
+    (slotExtend (I := I) (M := M) g₀ 2 3
+      (armSlotEndoCc (I := I) (M := M) g₀ 1 A)) j x]
+  refine le_trans (rfns_iteratedCovGrad_slotExtend_le
+    (I := I) (M := M) g₀ 2 3
+    (armSlotEndoCc (I := I) (M := M) g₀ 1 A) j x) ?_
+  rw [pow_two, mul_assoc]
+  refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _)
+  rw [bdArmSlotEndoCc_one_eq_reindex_slotExtend (I := I) (M := M) g₀ A]
+  rw [rfns_iteratedCovGrad_rsDomDomCongr_both_eq
+    (I := I) (M := M) g₀ 2 3
+    (Equiv.swap (0 : Fin 2) 1) (finRotate 3).symm
+    (slotExtend (I := I) (M := M) g₀ 1 2
+      (armSlotEndoCc (I := I) (M := M) g₀ 0 A)) j x]
+  refine le_trans (rfns_iteratedCovGrad_slotExtend_le
+    (I := I) (M := M) g₀ 1 2
+    (armSlotEndoCc (I := I) (M := M) g₀ 0 A) j x) ?_
+  refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
+  rw [hAS]
+
+/-- Compatibility name for the lifted connection-difference operator in the quadratic arm. -/
+def lieCovArm2 (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 3 4 :=
+  armSlotEndoCc (I := I) (M := M) g₀ 2
+    (connDiffEndo (I := I) (M := M) g₀ g₁)
+
+/-- Fibre bound for each covariant jet of the lifted connection-difference arm. -/
+theorem lieCovArm2_l2 (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (lieCovArm2 (I := I) (M := M) g₀ g₁)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j
+            (connDiffSection (I := I) g₁ g₀)).toSection x) := by
+  simpa only [lieCovArm2] using
+    bdArmSlot2_rfns_le (I := I) (M := M) g₀ g₁ j x
+
+/-- Each covariant jet of a two-metric lifted-arm difference is controlled by the
+corresponding connection-difference jet. -/
+theorem lieCovArm2_sub_l2
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 3 4 j
+          (lieCovArm2 (I := I) (M := M) g₀ g₁ -
+            lieCovArm2 (I := I) (M := M) g₀ g₂)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j
+            (connDiffSection (I := I) g₁ g₀ -
+              connDiffSection (I := I) g₂ g₀)).toSection x) := by
+  let A := connDiffEndo (I := I) (M := M) g₀ g₁ -
+    connDiffEndo (I := I) (M := M) g₀ g₂
+  have hA :
+      armSlotEndoCc (I := I) (M := M) g₀ 0 A =
+        connDiffSection (I := I) g₁ g₀ - connDiffSection (I := I) g₂ g₀ := by
+    dsimp only [A]
+    rw [bdArmSlot_sub]
+    rw [← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₁,
+      ← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₂]
+  rw [show lieCovArm2 (I := I) (M := M) g₀ g₁ -
+      lieCovArm2 (I := I) (M := M) g₀ g₂ =
+        armSlotEndoCc (I := I) (M := M) g₀ 2 A by
+    dsimp only [A, lieCovArm2]
+    rw [bdArmSlot_sub]]
+  exact bdArmSlot2_sub_le (I := I) (M := M) g₀ A _ hA j x
 
 private noncomputable def bdKernelCLM (gA gB : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=

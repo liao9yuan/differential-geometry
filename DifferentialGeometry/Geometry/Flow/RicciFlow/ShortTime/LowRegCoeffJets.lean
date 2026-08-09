@@ -1174,7 +1174,6 @@ theorem connLow_tame
   simpa only [lowJetGrid, Combinatorics.antidiagonalTupleGrid] using
     hpt g₁ P htie hδ_le hδ_nonneg hbound i x
 
-omit [NeZero (Module.finrank ℝ E)] in
 /-- On the self-background arm, the lowered connection difference has an
 `H1` jet controlled only by the metric `H2` jet.  This is the low factor in
 the tame `VB` and `AMix` product allocations. -/
@@ -1218,7 +1217,6 @@ theorem kappaSelf_h1
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 1 P‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 2 P‖]
 
-omit [NeZero (Module.finrank ℝ E)] in
 /-- On the self-background arm, the lowered connection difference is bounded
 in `H2` directly by the perturbation `H3` jet.  No inverse-metric estimate is
 used: `lc0Kappa_self_eq_koszulCovecCc` first performs the exact Koszul cancellation. -/
@@ -2152,7 +2150,6 @@ theorem amix_h1
   rw [lc0AMix_eq_lc0AMixField (I := I) (M := M) g₀ g₁ gB]
   exact hform g₁ P htie hδ_le hδ_nonneg hbound R A hR hA hP2 hP3
 
-omit [NeZero (Module.finrank ℝ E)] in
 /-- The combined order-zero tail splits into a background-change term and the
 base-background pair in which the leading endomorphism contribution cancels
 against `lieCorr0`. -/
@@ -2167,7 +2164,6 @@ theorem tail0_split
   rw [endoArmField_eq_dLbCoeffField (I := I) (M := M) g₀ g₁ g₀]
   abel
 
-omit [NeZero (Module.finrank ℝ E)] in
 /-- Cancellation-preserving five-piece normal form of the complete order-zero
 tail.  The first summand records the change of DeTurck background; the second
 is the insertion difference left after cancelling the base-background
@@ -2186,7 +2182,6 @@ theorem tail0_decomp
   rw [tail0_split (I := I) (M := M) g₀ g₁ g_bg,
     tail_base_split (I := I) (M := M) g₀ g₁ g_bg]
 
-omit [NeZero (Module.finrank ℝ E)] in
 /-- Assemble the five cancellation-preserving order-zero pieces into the
 `H1` jet of the complete `DLb + lieCorr0` tail. -/
 theorem tail_h1_parts

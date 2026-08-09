@@ -557,7 +557,7 @@ private lemma master_isolation' (g₀ g₁ : SmoothRiemannianMetric I M) (w : �
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
-private lemma slotInsertEndoCc_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+private lemma slotInsertEndoCc_add_local (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     endoSlotZeroCcTensor (I := I) (M := M) g₀ s (A + B) =
@@ -744,7 +744,7 @@ private lemma slotInsert_recovery_decomp
           (fullRaisedEndoField (I := I) (M := M) g₀ g₀) +
         cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 (ccTensor02Symm (I := I) (M := M) g₀ T) := by
   rw [fullRaisedEndoField_recovery_decomp (I := I) (M := M) g₀ g₁]
-  rw [slotInsertEndoCc_add]
+  rw [slotInsertEndoCc_add_local]
   rw [slotInsertEndoCc_gInvDiffRaised_eq_cometricRaise (I := I) (M := M) g₀ g₁ T htie]
   exact add_comm _ _
 
@@ -1399,7 +1399,7 @@ theorem invDiff_zero_unif
           (gInvDiffRaisedEndoField (I := I) g₀ g₁) +
         endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
           (fullRaisedEndoField (I := I) (M := M) g₁ g₁) := by
-    rw [← slotInsertEndoCc_add]
+    rw [← slotInsertEndoCc_add_local]
     congr 1
     exact fullRaisedEndoField_recovery_decomp (I := I) (M := M) g₁ g₀
   have hE0 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 1 x

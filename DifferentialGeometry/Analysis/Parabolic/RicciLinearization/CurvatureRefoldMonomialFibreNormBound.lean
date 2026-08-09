@@ -565,6 +565,32 @@ theorem riemannianFiberNormSq_curvatureRefoldMonomialBiContrFib_le
         rw [mul_pow, sq_deTurckArmFibreConst, div_pow]
         ring
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+    [SigmaCompactSpace M] in
+/-- Compatibility form of the curvature-refold monomial fibre bound. -/
+theorem rfns_curvatureRefoldMonomialBiContrFib_le
+    (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+    {δ : ℝ} (hδ1 : δ < 1)
+    (hδP : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ P) δ)
+    (W : Π b : M, Tensor0SSpace 2 I b) {δW : ℝ} (hδW0 : 0 ≤ δW)
+    (hW : ∀ (y : M) (v w : TangentSpace I y),
+      |Tensor0SSpace.toModel (𝕜 := ℝ) (W y) ![(v : E), (w : E)]| ≤
+        δW * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w))
+    (σ : Equiv.Perm (Fin 4)) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+        (show TensorRSSpace 4 2 I x from
+          TensorRSSpace.ofCLM
+            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x)) ≤
+      (deTurckArmFibreConst (Module.finrank ℝ E) * (δW / (1 - δ) ^ 2)) ^ 2 := by
+  simpa only [curvatureRefoldMonomialBiContrFib] using
+    riemannianFiberNormSq_curvatureRefoldMonomialBiContrFib_le
+      (I := I) (M := M) g₀ g₁ P htie hδ1 hδP W hδW0 hW σ x
+
 end TensorSpectral
 end Parabolic
 end Analysis
