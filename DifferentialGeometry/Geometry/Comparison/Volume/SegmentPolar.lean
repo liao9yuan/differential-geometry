@@ -1960,4 +1960,126 @@ private lemma expMapIntrinsic_injective_early
         rw [smul_smul, mul_inv_cancel₀ hℓne, one_smul]
   exact hv
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
+private lemma intrinsicGeodesic_smul_general
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (p : M) (v : TangentSpace I p) (c t : ℝ) :
+    intrinsicGeodesic (I := I) g hEnorm p (c • v) t
+      = intrinsicGeodesic (I := I) g hEnorm p v (c * t) := by
+  by_cases hc : c = 0
+  · subst c
+    have hgeo1 : IsGeodesic (I := I) g
+        (intrinsicGeodesic (I := I) g hEnorm p (0 : TangentSpace I p)) :=
+      intrinsicGeodesic_isGeodesic (I := I) g hEnorm p (0 : TangentSpace I p)
+    have hgeo2 : IsGeodesic (I := I) g (fun _ : ℝ => p) := isGeodesic_const (I := I) g p
+    have hcont1 : Continuous (intrinsicGeodesic (I := I) g hEnorm p (0 : TangentSpace I p)) :=
+      intrinsicGeodesic_continuous (I := I) g hEnorm p (0 : TangentSpace I p)
+    have hcont2 : Continuous (fun _ : ℝ => p) := continuous_const
+    have h0 : intrinsicGeodesic (I := I) g hEnorm p (0 : TangentSpace I p) 0 = p :=
+      intrinsicGeodesic_zero (I := I) g hEnorm p (0 : TangentSpace I p)
+    have hvel : (mfderiv 𝓘(ℝ, ℝ) I
+        (intrinsicGeodesic (I := I) g hEnorm p (0 : TangentSpace I p)) 0 (1 : ℝ) : E)
+        = (mfderiv 𝓘(ℝ, ℝ) I (fun _ : ℝ => p) 0 (1 : ℝ) : E) := by
+      have hv := intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p (0 : TangentSpace I p)
+      simp [hv]
+    have heq := isGeodesic_eq_of_initial (I := I) g hgeo1 hgeo2 hcont1 hcont2 h0 hvel
+    simpa using congrFun heq t
+  · calc
+      intrinsicGeodesic (I := I) g hEnorm p (c • v) t =
+          intrinsicGeodesic (I := I) g hEnorm p (t • (c • v)) 1 := by
+            rw [← intrinsicGeodesic_smul (I := I) g hEnorm p (c • v) t]
+      _ = intrinsicGeodesic (I := I) g hEnorm p ((t * c) • v) 1 := by
+            rw [smul_smul, mul_comm]
+      _ = intrinsicGeodesic (I := I) g hEnorm p v (t * c) := by
+            rw [intrinsicGeodesic_smul (I := I) g hEnorm p v (t * c)]
+      _ = intrinsicGeodesic (I := I) g hEnorm p v (c * t) := by
+            rw [mul_comm]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+private lemma mfderiv_div_const
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (c : ℝ) :
+    mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun ρ : ℝ => ρ / c) 0
+      = (c⁻¹ • ContinuousLinearMap.id ℝ ℝ) := by
+  have hlin : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun ρ : ℝ => ρ / c)
+      0 (c⁻¹ • ContinuousLinearMap.id ℝ ℝ) := by
+    rw [hasMFDerivAt_iff_hasFDerivAt]
+    have hf : HasFDerivAt (fun ρ : ℝ => ρ / c) (c⁻¹ • ContinuousLinearMap.id ℝ ℝ) 0 := by
+      have hf' : HasFDerivAt (fun ρ : ℝ => c⁻¹ * ρ)
+          (c⁻¹ • ContinuousLinearMap.id ℝ ℝ) 0 :=
+        (hasFDerivAt_id (0 : ℝ)).const_mul c⁻¹
+      convert hf' using 1
+      funext ρ
+      ring
+    simpa [ContinuousLinearMap.smul_apply] using hf
+  exact hlin.mfderiv
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [T2Space (TangentBundle I M)] in
+private lemma intrinsicJacobi_smul
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) (u w : TangentSpace I x) (c : ℝ) (hc : c ≠ 0) :
+    (intrinsicJacobi (I := I) g hEnorm x (c • u) w 1 : E)
+      = ((c⁻¹ : ℝ) • (intrinsicJacobi (I := I) g hEnorm x u w c : E)) := by
+  unfold intrinsicJacobi
+  have hfun : (fun ρ : ℝ => intrinsicGeodesic (I := I) g hEnorm x (c • u + ρ • w) 1)
+      = fun ρ : ℝ => intrinsicGeodesic (I := I) g hEnorm x (u + (ρ / c) • w) c := by
+    funext ρ
+    have hscal := intrinsicGeodesic_smul_general (I := I) g hEnorm x
+      (u + (ρ / c) • w) c 1
+    have hinner : c • (u + (ρ / c) • w) = c • u + ρ • w := by
+      rw [smul_add, smul_smul, mul_div_cancel₀ ρ hc]
+    rw [← hinner]
+    rw [hscal]
+    simp
+  rw [hfun]
+  let G : ℝ → M := fun σ : ℝ => intrinsicGeodesic (I := I) g hEnorm x (u + σ • w) c
+  have hG_smooth : ContMDiff 𝓘(ℝ, ℝ) I (∞ : WithTop ℕ∞) G := by
+    have hvar := intrinsicVar_smooth (I := I) g hEnorm x (u : E) (w : E)
+    have hσ : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (∞ : WithTop ℕ∞)
+        (fun σ : ℝ => (σ, c)) := by
+      exact (contMDiff_id : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
+        (fun σ : ℝ => σ)).prodMk
+        (contMDiff_const : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
+          (fun _ : ℝ => c))
+    simpa [G] using hvar.comp hσ
+  have hγ0 : HasMFDerivAt 𝓘(ℝ, ℝ) I G (0 / c) (mfderiv 𝓘(ℝ, ℝ) I G (0 / c)) := by
+    exact (hG_smooth.contMDiffAt.mdifferentiableAt (by norm_num)).hasMFDerivAt
+  have hlin : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun ρ : ℝ => ρ / c)
+      0 (c⁻¹ • ContinuousLinearMap.id ℝ ℝ) := by
+    rw [hasMFDerivAt_iff_hasFDerivAt]
+    have hf : HasFDerivAt (fun ρ : ℝ => ρ / c) (c⁻¹ • ContinuousLinearMap.id ℝ ℝ) 0 := by
+      have hf' : HasFDerivAt (fun ρ : ℝ => c⁻¹ * ρ)
+          (c⁻¹ • ContinuousLinearMap.id ℝ ℝ) 0 :=
+        (hasFDerivAt_id (0 : ℝ)).const_mul c⁻¹
+      convert hf' using 1
+      funext ρ
+      ring
+    simpa [ContinuousLinearMap.smul_apply] using hf
+  have hcomp := (hγ0.comp 0 hlin).mfderiv
+  change (mfderiv 𝓘(ℝ, ℝ) I (G ∘ (fun ρ : ℝ => ρ / c)) 0 (1 : ℝ) : E)
+      = ((c⁻¹ : ℝ) • (mfderiv 𝓘(ℝ, ℝ) I G 0 (1 : ℝ) : E))
+  rw [hcomp]
+  have hzero : (0 / c : ℝ) = 0 := zero_div c
+  rw [hzero]
+  change (mfderiv 𝓘(ℝ, ℝ) I G 0) ((c⁻¹ • ContinuousLinearMap.id ℝ ℝ) 1)
+      = c⁻¹ • (mfderiv 𝓘(ℝ, ℝ) I G 0) 1
+  rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.id_apply]
+  exact ContinuousLinearMap.map_smul (mfderiv 𝓘(ℝ, ℝ) I G 0) c⁻¹ (1 : ℝ)
+
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison
