@@ -1970,6 +1970,24 @@ theorem sublevelBoundaryChart_apply_value' {m : ℕ} (g : MorseModel (m + 1) →
       sublevelBoundaryChartValue g a x hx hg hreg y.1 := by
   rfl
 
+theorem sublevelBoundaryChart_boundary_eq_levelSetSplit {m : ℕ} (g : MorseModel (m + 1) → ℝ)
+    (a : ℝ) (x : SublevelSpace g a) (hx : g x.1 = a) (hg : ContDiff ℝ (⊤ : ℕ∞) g)
+    (hreg : fderiv ℝ g x.1 ≠ 0) (y : SublevelSpace g a) (hy : g y.1 = a) :
+    ((sublevelBoundaryChart g a x hx hg hreg) y :
+        MorseModel (m + 1)) =
+      levelSetSplit m ((levelSetChart g a ⟨x.1, hx⟩ hg hreg ⟨y.1, hy⟩ : MorseModel m), 0) := by
+  classical
+  rw [sublevelBoundaryChart_apply_value' g a x hx hg hreg y]
+  rw [levelSetChart_apply_value' g a ⟨x.1, hx⟩ hg hreg ⟨y.1, hy⟩]
+  dsimp [sublevelBoundaryChartValue, levelSetChartValue]
+  let d := levelSetChartData.mk g a ⟨x.1, hx⟩ hg hreg
+  have hψ₁ : (d.ψ (levelSetReindex d.e y.1)).1 = g y.1 := by
+    rw [d.hψ]
+    rw [levelSetChartMap]
+    rw [d.he, levelSetReindex_swap_swap]
+  rw [hψ₁, hy]
+  simp
+
 theorem sublevelBoundaryChart_symm_value' {m : ℕ} (g : MorseModel (m + 1) → ℝ) (a : ℝ)
     (x : SublevelSpace g a) (hx : g x.1 = a) (hg : ContDiff ℝ (⊤ : ℕ∞) g)
     (hreg : fderiv ℝ g x.1 ≠ 0) {z : MorseHalfSpace m}

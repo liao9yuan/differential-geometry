@@ -3395,6 +3395,111 @@ theorem morseAttachingEmbedding_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r
     exact congrArg Subtype.val h
   exact cocoreAttachingEmbedding_injective hk c ε r data hε hr hεr (Subtype.ext h')
 
+theorem contMDiff_morseAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero k] [NeZero (m + 1 - k)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+      (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+      ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+      (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (SublevelSpace f (c - ε)) _
+      (manifoldSublevelChartedSpace I f (c - ε) hf hreg)
+      (⊤ : ℕ∞)
+      (morseAttachingEmbedding hk c ε r data hε hεr) := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m) (SublevelSpace f (c - ε)) :=
+    manifoldSublevelChartedSpace I f (c - ε) hf hreg
+  letI : ChartedSpace (MorseModel m) (LevelSetSpace f (c - ε)) :=
+    manifoldLevelSetChartedSpace I f (c - ε) hf hreg
+  have hφ₀ : @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+      (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+      ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+      (MorseModel m) _ _ (MorseModel m) _
+      (𝓘(ℝ, MorseModel m)) (LevelSetSpace f (c - ε)) _
+      (manifoldLevelSetChartedSpace I f (c - ε) hf hreg)
+      (⊤ : ℕ∞)
+      (cocoreAttachingEmbedding hk c ε r data hε hεr) :=
+    contMDiff_cocoreAttachingEmbedding hk c ε r data hε hεr hεr' hf hreg
+  have hinc : ContMDiff (𝓘(ℝ, MorseModel m)) (morseModelWithCornersHalfSpace m)
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : LevelSetSpace f (c - ε) =>
+        (⟨x.1, (le_of_eq x.2 : f x.1 ≤ c - ε)⟩ : SublevelSpace f (c - ε))) :=
+    contMDiff_levelSetSublevelInclusion (I := I) f (c - ε) hf hreg
+  have hcomp := hinc.comp hφ₀
+  refine hcomp.congr ?_
+  intro p
+  apply Subtype.ext
+  rfl
+
+theorem isClosedEmbedding_morseAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero k] [NeZero (m + 1 - k)] :
+    Topology.IsClosedEmbedding (morseAttachingEmbedding hk c ε r data hε hεr) := by
+  letI : ChartedSpace (MorseHalfSpace m) (SublevelSpace f (c - ε)) :=
+    manifoldSublevelChartedSpace I f (c - ε) hf hreg
+  exact (contMDiff_morseAttachingEmbedding hk c ε r data hε hεr hεr' hf hreg).continuous.isClosedEmbedding
+    (morseAttachingEmbedding_injective hk c ε r data hε hr hεr)
+
+structure MorseSmoothAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero k] [NeZero (m + 1 - k)] where
+  toFun : AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε)
+  contMDiff : @ContMDiff ℝ _
+    (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+    (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+    ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+    (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+    (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+    (morseModelWithCornersHalfSpace m) (SublevelSpace f (c - ε)) _
+    (manifoldSublevelChartedSpace I f (c - ε) hf hreg)
+    (⊤ : ℕ∞)
+    toFun
+  injective : Function.Injective toFun
+  closedEmbedding : Topology.IsClosedEmbedding toFun
+  boundary : ∀ p : AttachingRegion k (m + 1 - k), f (toFun p).1 = c - ε
+
+noncomputable def morseSmoothAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero k] [NeZero (m + 1 - k)] :
+    MorseSmoothAttachingEmbedding hk c ε r data hε hεr hεr' hf hreg :=
+  { toFun := morseAttachingEmbedding hk c ε r data hε hεr
+    contMDiff := contMDiff_morseAttachingEmbedding hk c ε r data hε hεr hεr' hf hreg
+    injective := morseAttachingEmbedding_injective hk c ε r data hε hr hεr
+    closedEmbedding := isClosedEmbedding_morseAttachingEmbedding hk c ε r data hε hr hεr hεr' hf hreg
+    boundary := morseAttachingEmbedding_value hk c ε r data hε hεr }
+
 noncomputable def morseHandleAdjunctionHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
