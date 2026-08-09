@@ -6991,6 +6991,402 @@ theorem morseCollarMap_value {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
   dsimp [σ, L]
   linarith
 
+theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hη : 0 < η)
+    (x : LevelSetSpace f (c - ε)) (σ₁ σ₂ : ℝ)
+    (_hσ₁ : σ₁ ∈ Set.Icc (-η) (r ^ 2 / 2 + ε))
+    (_hσ₂ : σ₂ ∈ Set.Icc (-η) (r ^ 2 / 2 + ε))
+    (h : morseCollarLevelMap hk c ε r η data x σ₁ = morseCollarLevelMap hk c ε r η data x σ₂) :
+    σ₁ = σ₂ := by
+  have hT : 0 ≤ morseCollarTopLevel hk c ε r data x :=
+    morseCollarTopLevel_nonneg hk c ε r data x
+  have hden : r ^ 2 / 2 + ε + η ≠ 0 := by positivity
+  have hTη : morseCollarTopLevel hk c ε r data x + η ≠ 0 := by
+    have : 0 < morseCollarTopLevel hk c ε r data x + η := by nlinarith [hT, hη]
+    exact ne_of_gt this
+  dsimp [morseCollarLevelMap] at h
+  have hstep : (morseCollarTopLevel hk c ε r data x + η) * (σ₁ + η) / (r ^ 2 / 2 + ε + η) =
+      (morseCollarTopLevel hk c ε r data x + η) * (σ₂ + η) / (r ^ 2 / 2 + ε + η) := by
+    linarith
+  have hcancel : σ₁ + η = σ₂ + η := by
+    have hstep' := (div_eq_iff hden).mp hstep
+    field_simp [hden] at hstep'
+    exact hstep'
+  linarith
+
+theorem morseCollarMap_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hη : 0 < η)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0) :
+    Function.Injective (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate) := by
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  have hv1 : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
+    hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+  intro y₁ y₂ h
+  by_cases h₁ : f y₁.1 ≤ c - ε - η
+  · by_cases h₂ : f y₂.1 ≤ c - ε - η
+    · apply Subtype.ext
+      have hy₁ : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ = y₁.1 :=
+        morseCollarMap_of_low hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ h₁
+      have hy₂ : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ = y₂.1 :=
+        morseCollarMap_of_low hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ h₂
+      exact hy₁.symm.trans (h.trans hy₂)
+    · have hz : f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂) =
+        f y₁.1 := by
+        rw [← h]
+        exact congrArg f (morseCollarMap_of_low hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ h₁)
+      have hzlow : f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂) ≤
+          c - ε - η := by
+        rw [hz]
+        exact h₁
+      have hznonlow : c - ε - η < f y₂.1 := by
+        exact lt_of_not_ge h₂
+      have hzval := morseCollarMap_value hk c ε r η data hf hε hη v hv hsupp hdfOn hrate y₂ (le_of_lt hznonlow)
+      have hL : morseCollarLevelMap hk c ε r η data
+          (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+            exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+              constructor
+              · exact le_of_lt hznonlow
+              · exact y₂.2))⟩) (f y₂.1 - c + ε) = -η := by
+        have hmem : morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₂.2))⟩) (f y₂.1 - c + ε) ∈ Set.Icc (-η) (r ^ 2 / 2) := by
+          exact morseCollarLevelMap_mem hk c ε r η data hε (le_of_lt hη) _ (f y₂.1 - c + ε) (by
+            have hy2 : f y₂.1 ≤ c + r ^ 2 / 2 := y₂.2
+            have hlo : -η ≤ f y₂.1 - c + ε := by linarith [hznonlow]
+            have hhi : f y₂.1 - c + ε ≤ r ^ 2 / 2 + ε := by linarith [hy2]
+            exact ⟨hlo, hhi⟩)
+        have hle : c - ε + morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₂.2))⟩) (f y₂.1 - c + ε) ≤ c - ε - η := by
+          rw [← hzval]
+          exact hzlow
+        have hLle : morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₂.2))⟩) (f y₂.1 - c + ε) ≤ -η := by
+          nlinarith [hle, hmem.1]
+        exact le_antisymm hLle hmem.1
+      have hσ : f y₂.1 - c + ε = -η := by
+        have hy2 : f y₂.1 ≤ c + r ^ 2 / 2 := y₂.2
+        have hσmem : f y₂.1 - c + ε ∈ Set.Icc (-η) (r ^ 2 / 2 + ε) := by
+          constructor
+          · linarith [hznonlow]
+          · linarith [hy2]
+        by_contra hnot
+        have hlt : -η < f y₂.1 - c + ε := lt_of_not_ge (by
+          intro hge
+          have hlow : -η ≤ f y₂.1 - c + ε := by linarith [hznonlow]
+          exact hnot (le_antisymm hge hlow))
+        have hmono := morseCollarLevelMap_injective_of_level hk c ε r η data hε hη
+          (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+            exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+              constructor
+              · exact le_of_lt hznonlow
+              · exact y₂.2))⟩) (f y₂.1 - c + ε) (-η)
+          hσmem (by
+            have hy2' : f y₂.1 ≤ c + r ^ 2 / 2 := y₂.2
+            constructor <;> linarith)
+        have hL' : morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₂.2))⟩) (f y₂.1 - c + ε) ≠ -η := by
+          intro heq
+          have hbnd : morseCollarLevelMap hk c ε r η data
+              (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+                exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                  constructor
+                  · exact le_of_lt hznonlow
+                  · exact y₂.2))⟩) (-η) = -η :=
+            morseCollarLevelMap_boundary hk c ε r η data _
+          have hσeq : f y₂.1 - c + ε = -η := hmono (heq.trans hbnd.symm)
+          exact hnot hσeq
+        exact hL' hL
+      have hy : y₂.1 = y₁.1 := by
+        have hmap₁ : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ = y₁.1 :=
+          morseCollarMap_of_low hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ h₁
+        have hmap₂ : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ =
+            curveAt v hcomplete y₂.1
+              (f y₂.1 - c + ε - morseCollarLevelMap hk c ε r η data
+                (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+                  exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                    constructor
+                    · exact le_of_lt hznonlow
+                    · exact y₂.2))⟩) (f y₂.1 - c + ε)) :=
+          morseCollarMap_of_strip hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ (le_of_lt hznonlow)
+        have hmain : y₁.1 = curveAt v hcomplete y₂.1
+            (f y₂.1 - c + ε - morseCollarLevelMap hk c ε r η data
+              (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+                exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                  constructor
+                  · exact le_of_lt hznonlow
+                  · exact y₂.2))⟩) (f y₂.1 - c + ε)) :=
+          hmap₁.symm.trans (h.trans hmap₂)
+        have htime : f y₂.1 - c + ε - morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₂.1 (f y₂.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₂.2))⟩) (f y₂.1 - c + ε) = 0 := by
+          dsimp [morseCollarLevelMap]
+          have hσ0 : f y₂.1 - c + ε + η = 0 := by linarith [hσ]
+          simp [hσ]
+        rw [htime] at hmain
+        rw [curveAt_zero] at hmain
+        exact hmain.symm
+      apply Subtype.ext
+      exact hy.symm
+  · by_cases h₂ : f y₂.1 ≤ c - ε - η
+    · have h' : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ =
+          morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ := h.symm
+      apply Subtype.ext
+      have hz : f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁) =
+          f y₂.1 := by
+        rw [← h']
+        exact congrArg f (morseCollarMap_of_low hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ h₂)
+      have hznonlow : c - ε - η < f y₁.1 := by
+        exact lt_of_not_ge h₁
+      have hzval := morseCollarMap_value hk c ε r η data hf hε hη v hv hsupp hdfOn hrate y₁ (le_of_lt hznonlow)
+      have hL : morseCollarLevelMap hk c ε r η data
+          (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+            exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+              constructor
+              · exact le_of_lt hznonlow
+              · exact y₁.2))⟩) (f y₁.1 - c + ε) = -η := by
+        have hmem : morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₁.2))⟩) (f y₁.1 - c + ε) ∈ Set.Icc (-η) (r ^ 2 / 2) := by
+          exact morseCollarLevelMap_mem hk c ε r η data hε (le_of_lt hη) _ (f y₁.1 - c + ε) (by
+            have hy2 : f y₁.1 ≤ c + r ^ 2 / 2 := y₁.2
+            have hlo : -η ≤ f y₁.1 - c + ε := by linarith [hznonlow]
+            have hhi : f y₁.1 - c + ε ≤ r ^ 2 / 2 + ε := by linarith [hy2]
+            exact ⟨hlo, hhi⟩)
+        have hzle : f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁) ≤
+            c - ε - η := by
+          rw [hz]
+          exact h₂
+        have hle : c - ε + morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₁.2))⟩) (f y₁.1 - c + ε) ≤ c - ε - η := by
+          rw [← hzval]
+          exact hzle
+        have hLle : morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₁.2))⟩) (f y₁.1 - c + ε) ≤ -η := by
+          nlinarith [hle, hmem.1]
+        exact le_antisymm hLle hmem.1
+      have hσ : f y₁.1 - c + ε = -η := by
+        have hy2 : f y₁.1 ≤ c + r ^ 2 / 2 := y₁.2
+        have hσmem : f y₁.1 - c + ε ∈ Set.Icc (-η) (r ^ 2 / 2 + ε) := by
+          constructor
+          · linarith [hznonlow]
+          · linarith [hy2]
+        by_contra hnot
+        have hlt : -η < f y₁.1 - c + ε := lt_of_not_ge (by
+          intro hge
+          have hlow : -η ≤ f y₁.1 - c + ε := by linarith [hznonlow]
+          exact hnot (le_antisymm hge hlow))
+        have hmono := morseCollarLevelMap_injective_of_level hk c ε r η data hε hη
+          (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+            exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+              constructor
+              · exact le_of_lt hznonlow
+              · exact y₁.2))⟩) (f y₁.1 - c + ε) (-η)
+          hσmem (by
+            have hy2' : f y₁.1 ≤ c + r ^ 2 / 2 := y₁.2
+            constructor <;> linarith)
+        have hL' : morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₁.2))⟩) (f y₁.1 - c + ε) ≠ -η := by
+          intro heq
+          have hbnd : morseCollarLevelMap hk c ε r η data
+              (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+                exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                  constructor
+                  · exact le_of_lt hznonlow
+                  · exact y₁.2))⟩) (-η) = -η :=
+            morseCollarLevelMap_boundary hk c ε r η data _
+          have hσeq : f y₁.1 - c + ε = -η := hmono (heq.trans hbnd.symm)
+          exact hnot hσeq
+        exact hL' hL
+      have hy : y₁.1 = y₂.1 := by
+        have hmap₁ : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ =
+            curveAt v hcomplete y₁.1
+              (f y₁.1 - c + ε - morseCollarLevelMap hk c ε r η data
+                (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+                  exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                    constructor
+                    · exact le_of_lt hznonlow
+                    · exact y₁.2))⟩) (f y₁.1 - c + ε)) :=
+          morseCollarMap_of_strip hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ (le_of_lt hznonlow)
+        have hmap₂ : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ = y₂.1 :=
+          morseCollarMap_of_low hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ h₂
+        have hmain : curveAt v hcomplete y₁.1
+            (f y₁.1 - c + ε - morseCollarLevelMap hk c ε r η data
+              (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+                exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                  constructor
+                  · exact le_of_lt hznonlow
+                  · exact y₁.2))⟩) (f y₁.1 - c + ε)) = y₂.1 :=
+          hmap₁.symm.trans (h'.symm.trans hmap₂)
+        have htime : f y₁.1 - c + ε - morseCollarLevelMap hk c ε r η data
+            (⟨curveAt v hcomplete y₁.1 (f y₁.1 - c + ε), by
+              exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+                constructor
+                · exact le_of_lt hznonlow
+                · exact y₁.2))⟩) (f y₁.1 - c + ε) = 0 := by
+          dsimp [morseCollarLevelMap]
+          have hσ0 : f y₁.1 - c + ε + η = 0 := by linarith [hσ]
+          simp [hσ]
+        rw [htime] at hmain
+        rw [curveAt_zero] at hmain
+        exact hmain
+      exact hy
+    · -- both strip: the orbit argument
+      have h₁' : c - ε - η < f y₁.1 := lt_of_not_ge h₁
+      have h₂' : c - ε - η < f y₂.1 := lt_of_not_ge h₂
+      let σ₁ : ℝ := f y₁.1 - c + ε
+      let σ₂ : ℝ := f y₂.1 - c + ε
+      let x₁ : LevelSetSpace f (c - ε) := ⟨curveAt v hcomplete y₁.1 σ₁, by
+        exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+          constructor
+          · exact le_of_lt h₁'
+          · exact y₁.2))⟩
+      let x₂ : LevelSetSpace f (c - ε) := ⟨curveAt v hcomplete y₂.1 σ₂, by
+        exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+          constructor
+          · exact le_of_lt h₂'
+          · exact y₂.2))⟩
+      let L₁ : ℝ := morseCollarLevelMap hk c ε r η data x₁ σ₁
+      let L₂ : ℝ := morseCollarLevelMap hk c ε r η data x₂ σ₂
+      have hz : f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁) =
+          c - ε + L₁ := by
+        simpa [σ₁, x₁, L₁] using (morseCollarMap_value hk c ε r η data hf hε hη v hv hsupp hdfOn hrate y₁ (le_of_lt h₁'))
+      have hz' : f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂) =
+          c - ε + L₂ := by
+        simpa [σ₂, x₂, L₂] using (morseCollarMap_value hk c ε r η data hf hε hη v hv hsupp hdfOn hrate y₂ (le_of_lt h₂'))
+      have hL : L₁ = L₂ := by
+        have hfz : f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁) =
+            f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂) := congrArg f h
+        nlinarith [hz, hz', hfz]
+      have hmap₁ : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ =
+          curveAt v hcomplete y₁.1 (σ₁ - L₁) := by
+        simpa [σ₁, x₁, L₁] using (morseCollarMap_of_strip hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁ (le_of_lt h₁'))
+      have hmap₂ : morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ =
+          curveAt v hcomplete y₂.1 (σ₂ - L₂) := by
+        simpa [σ₂, x₂, L₂] using (morseCollarMap_of_strip hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₂ (le_of_lt h₂'))
+      let z : M := morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y₁
+      have hz₁ : curveAt v hcomplete y₁.1 (σ₁ - L₁) = z := by
+        rw [← hmap₁]
+      have hz₂ : curveAt v hcomplete y₂.1 (σ₂ - L₂) = z := by
+        exact hmap₂.symm.trans h.symm
+      have hbase : x₁.1 = x₂.1 := by
+        have hy₁inv : y₁.1 = curveAt v hcomplete z (L₁ - σ₁) := by
+          have hh := curveAt_add v hv1 hcomplete y₁.1 (σ₁ - L₁) (L₁ - σ₁)
+          have hsum : (σ₁ - L₁) + (L₁ - σ₁) = 0 := by ring
+          rw [hsum] at hh
+          rw [hz₁] at hh
+          simpa [curveAt_zero v hcomplete y₁.1] using hh
+        have hy₂inv : y₂.1 = curveAt v hcomplete z (L₂ - σ₂) := by
+          have hh := curveAt_add v hv1 hcomplete y₂.1 (σ₂ - L₂) (L₂ - σ₂)
+          have hsum : (σ₂ - L₂) + (L₂ - σ₂) = 0 := by ring
+          rw [hsum] at hh
+          rw [hz₂] at hh
+          simpa [curveAt_zero v hcomplete y₂.1] using hh
+        have hx₁ : curveAt v hcomplete y₁.1 σ₁ = curveAt v hcomplete z L₁ := by
+          have hh := curveAt_add v hv1 hcomplete z (L₁ - σ₁) σ₁
+          have hsum : (L₁ - σ₁) + σ₁ = L₁ := by ring
+          rw [hsum] at hh
+          rw [← hy₁inv] at hh
+          exact hh.symm
+        have hx₂ : curveAt v hcomplete y₂.1 σ₂ = curveAt v hcomplete z L₂ := by
+          have hh := curveAt_add v hv1 hcomplete z (L₂ - σ₂) σ₂
+          have hsum : (L₂ - σ₂) + σ₂ = L₂ := by ring
+          rw [hsum] at hh
+          rw [← hy₂inv] at hh
+          exact hh.symm
+        have hx₁' : curveAt v hcomplete y₁.1 σ₁ = curveAt v hcomplete z L₂ := by
+          rw [hL] at hx₁
+          exact hx₁
+        change curveAt v hcomplete y₁.1 σ₁ = curveAt v hcomplete y₂.1 σ₂
+        exact hx₁'.trans hx₂.symm
+      have hx : x₁ = x₂ := by
+        apply Subtype.ext
+        exact hbase
+      have hσeq : σ₁ = σ₂ := by
+        have hσ₁mem : σ₁ ∈ Set.Icc (-η) (r ^ 2 / 2 + ε) := by
+          dsimp [σ₁]
+          have hy2₁ : f y₁.1 ≤ c + r ^ 2 / 2 := y₁.2
+          constructor
+          · linarith [h₁']
+          · linarith [hy2₁]
+        have hσ₂mem : σ₂ ∈ Set.Icc (-η) (r ^ 2 / 2 + ε) := by
+          dsimp [σ₂]
+          have hy2₂ : f y₂.1 ≤ c + r ^ 2 / 2 := y₂.2
+          constructor
+          · linarith [h₂']
+          · linarith [hy2₂]
+        have hLL : morseCollarLevelMap hk c ε r η data x₁ σ₁ = morseCollarLevelMap hk c ε r η data x₁ σ₂ := by
+          dsimp [L₁, L₂] at hL
+          rw [← hx] at hL
+          exact hL
+        exact morseCollarLevelMap_injective_of_level hk c ε r η data hε hη x₁ σ₁ σ₂ hσ₁mem hσ₂mem hLL
+      have hy : y₁.1 = y₂.1 := by
+        have hy₁inv : y₁.1 = curveAt v hcomplete z (L₁ - σ₁) := by
+          have hh := curveAt_add v hv1 hcomplete y₁.1 (σ₁ - L₁) (L₁ - σ₁)
+          have hsum : (σ₁ - L₁) + (L₁ - σ₁) = 0 := by ring
+          rw [hsum] at hh
+          rw [hz₁] at hh
+          simpa [curveAt_zero v hcomplete y₁.1] using hh
+        have hy₂inv : y₂.1 = curveAt v hcomplete z (L₂ - σ₂) := by
+          have hh := curveAt_add v hv1 hcomplete y₂.1 (σ₂ - L₂) (L₂ - σ₂)
+          have hsum : (σ₂ - L₂) + (L₂ - σ₂) = 0 := by ring
+          rw [hsum] at hh
+          rw [hz₂] at hh
+          simpa [curveAt_zero v hcomplete y₂.1] using hh
+        rw [hy₁inv, hy₂inv, hL, hσeq]
+      apply Subtype.ext
+      exact hy
+
 theorem continuous_morseCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
