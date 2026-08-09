@@ -6572,7 +6572,7 @@ theorem morseTopCapPushdown_mem_modelHandle {n k : ℕ} (hk : k ≤ n) (c ε r :
 noncomputable def morseCollarTopLevel {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f)
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
     (x : LevelSetSpace f (c - ε)) : ℝ :=
   by
   classical
@@ -6583,7 +6583,7 @@ noncomputable def morseCollarTopLevel {m k : ℕ} (hk : k ≤ m + 1) (c ε r : �
 def morseCollarChartSet {m k : ℕ} (hk : k ≤ m + 1) (c ε _r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f) :
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀) :
     Set (LevelSetSpace f (c - ε)) :=
   {x : LevelSetSpace f (c - ε) | x.1 ∈ data.χ '' {y : MorseModel (m + 1) |
     morseNorm (m + 1) y < data.R}}
@@ -6591,7 +6591,7 @@ def morseCollarChartSet {m k : ℕ} (hk : k ≤ m + 1) (c ε _r : ℝ)
 theorem morseCollarTopLevel_eq_on_chart {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f)
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
     (x : LevelSetSpace f (c - ε)) (hx : x ∈ morseCollarChartSet hk c ε r data) :
     morseCollarTopLevel hk c ε r data x =
       max 0 ((r ^ 2 - ‖posPart hk (data.χ.symm x.1)‖ ^ 2) / 2) := by
@@ -6601,7 +6601,7 @@ theorem morseCollarTopLevel_eq_on_chart {m k : ℕ} (hk : k ≤ m + 1) (c ε r :
 theorem morseCollarTopLevel_eq_zero {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f)
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
     (x : LevelSetSpace f (c - ε))
     (hx : x.1 ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}) :
     morseCollarTopLevel hk c ε r data x = 0 := by
@@ -6611,7 +6611,7 @@ theorem morseCollarTopLevel_eq_zero {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ
 theorem morseCollarTopLevel_nonneg {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f)
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
     (x : LevelSetSpace f (c - ε)) :
     0 ≤ morseCollarTopLevel hk c ε r data x := by
   by_cases hx : x.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
@@ -6622,7 +6622,7 @@ theorem morseCollarTopLevel_nonneg {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
 theorem morseCollarTopLevel_le {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f)
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
     (x : LevelSetSpace f (c - ε)) :
     morseCollarTopLevel hk c ε r data x ≤ r ^ 2 / 2 := by
   by_cases hx : x.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
@@ -6636,8 +6636,8 @@ theorem morseCollarTopLevel_le {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
 theorem isOpen_morseCollarChartSet {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f) :
-    IsOpen (morseCollarChartSet hk c ε r data) := by
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀) :
+    IsOpen (morseCollarChartSet hk c ε r data : Set (LevelSetSpace f (c - ε))) := by
   have hnorm : Continuous (fun y : MorseModel (m + 1) => morseNorm (m + 1) y) := by
     dsimp [morseNorm]
     exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal))
@@ -6652,7 +6652,7 @@ theorem isOpen_morseCollarChartSet {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
 theorem morseCollarTopLevel_eq_zero_of_posPart_norm {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f)
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
     (x : LevelSetSpace f (c - ε))
     (hx : x.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R})
     (hpos : r ^ 2 ≤ ‖posPart hk (data.χ.symm x.1)‖ ^ 2) :
@@ -6679,8 +6679,8 @@ theorem isCompact_morseCollarClosedBall (m : ℕ) (R : ℝ) :
 
 noncomputable def morseCollarChartBallHomeo {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
-    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
-    (data : MorseChart (m + 1) k hk c I f) :
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H}
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀) :
     {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} ≃ₜ
       (data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R}) := by
   letI : CompactSpace {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} :=
@@ -6829,7 +6829,7 @@ theorem continuous_morseCollarTopLevel {m k : ℕ} (hk : k ≤ m + 1) (c ε r : 
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε)
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) :
-    Continuous (morseCollarTopLevel hk c ε r data) := by
+    Continuous (morseCollarTopLevel hk c ε r data : LevelSetSpace f (c - ε) → ℝ) := by
   rw [continuous_iff_continuousAt]
   intro x
   by_cases hx : x.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
@@ -10358,6 +10358,130 @@ theorem modifiedNormalForm_eq_of_norm_large {n k : ℕ} (hk : k ≤ n) (c ε δ 
       nlinarith [h1, h2]
     have hmu : modMu ε (‖negPart hk y‖ ^ 2) = 0 := modMu_zero hε hneg
     simp [hmu]
+
+theorem eventually_morseCollarTopLevel_eq_zero_of_chartBoundary_modified {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε δ r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ^ 2 ≥ ε + 9 * δ ^ 2 / 8)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (x : LevelSetSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f) (c - ε))
+    (hx : x.1 ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R})
+    (hcl : x.1 ∈ closure (data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R})) :
+    ∀ᶠ y in nhds x, morseCollarTopLevel hk c ε r data y = 0 := by
+  let S : Set M := data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R}
+  have hmem : x.1 ∈ S := by
+    have hclosed : IsClosed S := by
+      have hcomp : IsCompact ({y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R}) :=
+        isCompact_morseCollarClosedBall (m := m) data.R
+      have hsrc : ∀ y ∈ ({y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} :
+          Set (MorseModel (m + 1))), y ∈ data.χ.source := by
+        intro y hy
+        exact data.hχsrc y hy
+      exact IsCompact.image_of_continuousOn hcomp (data.χ.continuousOn_toFun.mono
+        (fun y hy => hsrc y hy)) |>.isClosed
+    have hsub : data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R} ⊆ S := by
+      intro y hy
+      rcases hy with ⟨w, hw, hwy⟩
+      exact ⟨w, (show morseNorm (m + 1) w ≤ data.R from le_of_lt hw), hwy⟩
+    exact ((closure_mono hsub).trans hclosed.closure_subset) hcl
+  let φ : {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} ≃ₜ
+      (data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R}) :=
+    morseCollarChartBallHomeo (hk := hk) (c := c) (data := data)
+  let O : Set {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} :=
+    {y : {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} |
+      Real.sqrt (2 * ε + 2 * r ^ 2) < morseNorm (m + 1) y.1}
+  have hO : O ∈ nhds (φ.invFun ⟨x.1, hmem⟩) := by
+    have hlt : Real.sqrt (2 * ε + 2 * r ^ 2) < morseNorm (m + 1) (φ.invFun ⟨x.1, hmem⟩).1 := by
+      have hwR : data.R ≤ morseNorm (m + 1) (φ.invFun ⟨x.1, hmem⟩).1 := by
+        by_contra hnot
+        have hwlt : morseNorm (m + 1) (φ.invFun ⟨x.1, hmem⟩).1 < data.R := lt_of_not_ge hnot
+        have hwχ : data.χ ((φ.invFun ⟨x.1, hmem⟩).1) = x.1 := by
+          exact congrArg Subtype.val (φ.right_inv ⟨x.1, hmem⟩)
+        exact hx ⟨(φ.invFun ⟨x.1, hmem⟩).1, hwlt, hwχ⟩
+      have hle : morseNorm (m + 1) (φ.invFun ⟨x.1, hmem⟩).1 ≤ data.R :=
+        (φ.invFun ⟨x.1, hmem⟩).2
+      have hnorm : morseNorm (m + 1) (φ.invFun ⟨x.1, hmem⟩).1 = data.R :=
+        le_antisymm hle hwR
+      rw [hnorm]
+      exact hεr
+    exact IsOpen.mem_nhds (isOpen_lt continuous_const (by
+      dsimp [morseNorm]
+      exact (continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal))
+        (β := fun _ : Fin (m + 1) => ℝ))).comp continuous_subtype_val)) hlt
+  have hpre : φ.invFun ⁻¹' O ∈ nhds (⟨x.1, hmem⟩ : S) :=
+    φ.continuous_invFun.continuousAt.preimage_mem_nhds hO
+  rcases (mem_nhds_subtype S ⟨x.1, hmem⟩ (φ.invFun ⁻¹' O)).mp hpre with ⟨u, hu, husub⟩
+  refine Filter.mem_of_superset
+    (continuous_subtype_val.continuousAt.preimage_mem_nhds hu) (by
+      intro y hy
+      by_cases hychart : y.1 ∈ data.χ '' {z : MorseModel (m + 1) | morseNorm (m + 1) z < data.R}
+      · have hyimage : y.1 ∈ S := by
+          rcases hychart with ⟨w, hw, hwy⟩
+          exact ⟨w, (show morseNorm (m + 1) w ≤ data.R from le_of_lt hw), hwy⟩
+        have hO' : φ.invFun ⟨y.1, hyimage⟩ ∈ O := by
+          exact husub (by
+            change y.1 ∈ u
+            simpa using hy)
+        change morseCollarTopLevel hk c ε r data y = 0
+        rw [morseCollarTopLevel_eq_on_chart hk c ε r data y hychart]
+        have hwbig : Real.sqrt (2 * ε + 2 * r ^ 2) < morseNorm (m + 1) (data.χ.symm y.1) := by
+          have hφ : (φ.invFun ⟨y.1, hyimage⟩).1 = data.χ.symm y.1 := by
+            dsimp [φ]
+            rfl
+          change Real.sqrt (2 * ε + 2 * r ^ 2) < morseNorm (m + 1) (φ.invFun ⟨y.1, hyimage⟩).1 at hO'
+          rw [hφ] at hO'
+          exact hO'
+        have hpos : r ^ 2 ≤ ‖posPart hk (data.χ.symm y.1)‖ ^ 2 := by
+          rcases hychart with ⟨w, hw, hwy⟩
+          have hsrc : w ∈ data.χ.source := data.hχsrc w (le_of_lt hw)
+          have hsymm : data.χ.symm y.1 = w := by
+            rw [← hwy]
+            exact data.χ.left_inv hsrc
+          rw [hsymm]
+          have hlevel : morseNormalForm hk c w = c - ε := by
+            have hg : morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f (data.χ w) = c - ε := by
+              rw [hwy]
+              exact y.2
+            have hgmod : morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f (data.χ w) =
+                modifiedNormalForm hk c ε δ w := by
+              dsimp [morseModifiedFunction]
+              rw [if_pos (data.χ.map_source (data.hχsrc w (le_of_lt hw)))]
+              rw [data.χ.left_inv (data.hχsrc w (le_of_lt hw))]
+              rw [if_pos (le_of_lt hw)]
+            have hbig : 2 * ε + 2 * r ^ 2 ≤ morseNorm (m + 1) w ^ 2 := by
+              have habs : |Real.sqrt (2 * ε + 2 * r ^ 2)| < |morseNorm (m + 1) w| := by
+                rw [abs_of_nonneg (Real.sqrt_nonneg _), abs_of_nonneg (norm_nonneg _)]
+                simpa [hsymm] using hwbig
+              have hsq : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 < morseNorm (m + 1) w ^ 2 :=
+                (sq_lt_sq).mpr habs
+              rw [Real.sq_sqrt (by nlinarith [hε, sq_nonneg r])] at hsq
+              exact le_of_lt hsq
+            have hmod : modifiedNormalForm hk c ε δ w = morseNormalForm hk c w :=
+              modifiedNormalForm_eq_of_norm_large hk c ε δ r hε hδ hr w hbig
+            rw [hgmod, hmod] at hg
+            exact hg
+          have hsplit := morseNormalForm_split hk c w
+          have hnorm2 : morseNorm (m + 1) w ^ 2 = ‖posPart hk w‖ ^ 2 + ‖negPart hk w‖ ^ 2 := by
+            simpa [add_comm] using (morseNorm_sq_eq_negPart_add_posPart hk w)
+          have hle : ‖posPart hk w‖ ^ 2 - ‖negPart hk w‖ ^ 2 = -2 * ε := by
+            rw [hsplit] at hlevel
+            nlinarith [hlevel]
+          have hR2 : 2 * ε + 2 * r ^ 2 < morseNorm (m + 1) w ^ 2 := by
+            have habs : |Real.sqrt (2 * ε + 2 * r ^ 2)| < |morseNorm (m + 1) w| := by
+              rw [abs_of_nonneg (Real.sqrt_nonneg _), abs_of_nonneg (norm_nonneg _)]
+              simpa [hsymm] using hwbig
+            have hsq : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 < morseNorm (m + 1) w ^ 2 :=
+              (sq_lt_sq).mpr habs
+            rwa [Real.sq_sqrt (by nlinarith [hε, sq_nonneg r])] at hsq
+          nlinarith [hle, hnorm2, hR2]
+        have hle0 : (r ^ 2 - ‖posPart hk (data.χ.symm y.1)‖ ^ 2) / 2 ≤ 0 := by
+          nlinarith [hpos]
+        exact max_eq_left hle0
+      · change morseCollarTopLevel hk c ε r data y = 0
+        exact morseCollarTopLevel_eq_zero hk c ε r data y hychart)
 
 theorem morseModifiedSublevel_union_handleImage_eq {n k : ℕ} (hk : k ≤ n) (c ε δ r R : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hr : 3 * δ / 2 ≤ r)
