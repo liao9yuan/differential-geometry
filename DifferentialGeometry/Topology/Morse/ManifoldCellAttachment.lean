@@ -3981,6 +3981,28 @@ theorem morseBeltMapOnOpen_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
   dsimp [morseBeltMapOnOpen]
   exact morseBeltMap_lower hk c ε r data hε hεr' x hx
 
+noncomputable def morseBeltMapExt {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (z : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))) :
+    morseUpperSublevel hk c r :=
+  by
+  classical
+  exact if hz : z ∈ morseBeltOpenSet hk c ε r data hε (le_of_lt hεr') then
+    morseBeltMapOnOpen hk c ε r data hε hεr' ⟨z, hz⟩
+  else
+    (⟨0, by
+      change morseNormalForm hk c 0 ≤ c + r ^ 2 / 2
+      have h0 : morseNormalForm hk c 0 = c := by
+        dsimp [morseNormalForm]
+        simp
+      rw [h0]
+      have hr2 : 0 ≤ r ^ 2 := sq_nonneg r
+      nlinarith⟩ : morseUpperSublevel hk c r)
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
