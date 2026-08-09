@@ -3383,6 +3383,208 @@ private lemma fiberNormSq_jointContinuousOn_aux
       ((Ψ t).toSection x),
     tensorRSRiemannianInnerCLM_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+private lemma trivializationAt_tensor0SBundle_zero_fibre_smulRight
+    (α b : M) (c : ℝ)
+    (hb : b ∈ (trivializationAt (Tensor0SModel 0 ℝ E)
+      (fun x : M => Tensor0SSpace 0 I x) α).baseSet) :
+    (trivializationAt (TensorRSModel 0 0 ℝ E)
+      (fun y : M => TensorRSSpace 0 0 I y) α
+      ⟨b, (tensor0SSpace_evalScalar b).smulRight
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I b) c)⟩).2 =
+      c • (ContinuousLinearMap.id ℝ (Tensor0SModel 0 ℝ E) :
+        Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 0 ℝ E) := by
+  set e₀ : Trivialization (Tensor0SModel 0 ℝ E)
+      (π (Tensor0SModel 0 ℝ E) (fun x : M => Tensor0SSpace 0 I x)) :=
+    trivializationAt (Tensor0SModel 0 ℝ E) (fun x : M => Tensor0SSpace 0 I x) α
+  set T : TensorRSSpace 0 0 I b :=
+    (tensor0SSpace_evalScalar b).smulRight
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I b) c)
+  have htriv : (trivializationAt (TensorRSModel 0 0 ℝ E)
+      (fun y : M => TensorRSSpace 0 0 I y) α ⟨b, T⟩).2 =
+      (e₀.continuousLinearMapAt ℝ b).comp (T.comp (e₀.symmL ℝ b)) := by
+    dsimp [e₀, T]
+    rfl
+  rw [htriv]
+  apply ContinuousLinearMap.ext
+  intro z
+  change e₀.continuousLinearMapAt ℝ b
+      ((tensor0SSpace_evalScalar b).smulRight
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I b) c) (e₀.symmL ℝ b z)) =
+    c • z
+  change e₀.continuousLinearMapAt ℝ b
+      ((tensor0SSpace_evalScalar b (e₀.symmL ℝ b z)) •
+        ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I b) c) =
+    c • z
+  have hlmc : e₀.continuousLinearMapAt ℝ b
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I b) c) =
+      ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) c := by
+    rw [Trivialization.continuousLinearMapAt_apply]
+    rw [Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e₀) hb]
+    dsimp
+    rw [TensorMultilinear.trivializationAt_tensor0SBundle_zero_fibre
+      (fun _ : M => ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I b) c) α b]
+    rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+  have hscalar : tensor0SSpace_evalScalar b (e₀.symmL ℝ b z) = z Fin.elim0 := by
+    have hA (A : Tensor0SSpace 0 I b) :
+        (e₀.continuousLinearMapAt ℝ b A) Fin.elim0 = A Fin.elim0 := by
+      rw [Trivialization.continuousLinearMapAt_apply]
+      rw [Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e₀) hb]
+      dsimp
+      rw [TensorMultilinear.trivializationAt_tensor0SBundle_zero_fibre
+        (fun _ : M => A) α b]
+      rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+      congr 1
+      exact Subsingleton.elim _ _
+    calc
+      tensor0SSpace_evalScalar b (e₀.symmL ℝ b z)
+          = (e₀.symmL ℝ b z) Fin.elim0 := by
+            rw [Tensor0SSpace.evalScalar_apply]
+      _ = (e₀.continuousLinearMapAt ℝ b (e₀.symmL ℝ b z)) Fin.elim0 := by
+            rw [← hA (e₀.symmL ℝ b z)]
+      _ = z Fin.elim0 := by
+            congr 1
+            exact Trivialization.continuousLinearMapAt_symmL (e := e₀) hb z
+  have hsmul : (z Fin.elim0) •
+        ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) c =
+      c • z := by
+    apply ContinuousMultilinearMap.ext
+    intro v
+    have hv : v = Fin.elim0 := Subsingleton.elim _ _
+    subst hv
+    simp [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.constOfIsEmpty_apply]
+    ring
+  calc
+    e₀.continuousLinearMapAt ℝ b
+        ((tensor0SSpace_evalScalar b (e₀.symmL ℝ b z)) •
+          ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I b) c)
+        = (tensor0SSpace_evalScalar b (e₀.symmL ℝ b z)) •
+            (e₀.continuousLinearMapAt ℝ b
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I b) c)) := by
+          rw [map_smul]
+    _ = (z Fin.elim0) •
+          ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) c := by
+          rw [hscalar, hlmc]
+    _ = c • z := hsmul
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+private lemma scalarCcLift_jointContMDiffOn_of_jointSmooth
+    (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g)
+    (hF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => (F q.1).toFun q.2) (Set.univ ×ˢ Set.univ)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 0 ℝ E)
+        (E := fun z : M => TensorRSSpace 0 0 I z) q.1
+          ((scalarCcLift g (F q.2)).toSection q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ) := by
+  classical
+  let Φ : M × ℝ → TotalSpace (TensorRSModel 0 0 ℝ E) (fun z : M => TensorRSSpace 0 0 I z) :=
+    fun q => TotalSpace.mk' (TensorRSModel 0 0 ℝ E)
+      (E := fun z : M => TensorRSSpace 0 0 I z) q.1
+        ((tensor0SSpace_evalScalar q.1).smulRight
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I q.1) q.2))
+  have hsec (x : M) (t : ℝ) :
+      (scalarCcLift g (F t)).toSection x =
+        Tensor0SSpace.toRS0 (Tensor0SField.fromScalarField ∞ ((F t).toFun) ((F t).smooth) x) := by
+    unfold scalarCcLift
+    rfl
+  have hPhi : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞ Φ
+      ((Set.univ : Set M) ×ˢ Set.univ) := by
+    classical
+    refine contMDiffOn_of_locally_contMDiffOn ?_
+    rintro ⟨x₀, s₀⟩ ⟨-, -⟩
+    refine ⟨(chartAt H x₀).source ×ˢ (Set.univ : Set ℝ),
+      (chartAt H x₀).open_source.prod isOpen_univ,
+      ⟨mem_chart_source H x₀, Set.mem_univ _⟩, ?_⟩
+    set α : M := x₀ with hα
+    have hsub_eq : ((Set.univ : Set M) ×ˢ Set.univ) ∩
+        ((chartAt H α).source ×ˢ (Set.univ : Set ℝ)) =
+        (chartAt H α).source ×ˢ Set.univ := by
+      ext ⟨y, u⟩
+      simp
+    rw [hsub_eq]
+    intro p₀ hp₀
+    have hsource : Φ p₀ ∈ (trivializationAt (TensorRSModel 0 0 ℝ E)
+        (fun y : M => TensorRSSpace 0 0 I y) α).source := by
+      rw [Bundle.Trivialization.mem_source]
+      change p₀.1 ∈ (trivializationAt (Tensor0SModel 0 ℝ E)
+          (fun y : M => Tensor0SSpace 0 I y) α).baseSet ∩
+          (trivializationAt (Tensor0SModel 0 ℝ E)
+            (fun y : M => Tensor0SSpace 0 I y) α).baseSet
+      refine ⟨?_, ?_⟩ <;>
+        · change p₀.1 ∈ (trivializationAt E (TangentSpace I) α).baseSet
+          rw [show (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source from
+            TangentBundle.trivializationAt_baseSet (I := I) α]
+          exact hp₀.1
+    refine (Bundle.Trivialization.contMDiffWithinAt_iff
+      (IM := I.prod 𝓘(ℝ, ℝ)) (n := ∞)
+      (f := Φ) (s := (chartAt H α).source ×ˢ Set.univ) (x₀ := p₀)
+      (e := trivializationAt (TensorRSModel 0 0 ℝ E)
+        (fun y : M => TensorRSSpace 0 0 I y) α) hsource).mpr ?_
+    constructor
+    · exact contMDiffWithinAt_fst
+    · have hfib_val : ∀ x ∈ (chartAt H α).source ×ˢ Set.univ,
+          (trivializationAt (TensorRSModel 0 0 ℝ E)
+            (fun y : M => TensorRSSpace 0 0 I y) α (Φ x)).2 =
+          x.2 • (ContinuousLinearMap.id ℝ (Tensor0SModel 0 ℝ E) :
+            Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 0 ℝ E) := by
+        intro x hx
+        have hb : x.1 ∈ (trivializationAt (Tensor0SModel 0 ℝ E)
+            (fun y : M => Tensor0SSpace 0 I y) α).baseSet := by
+          change x.1 ∈ (trivializationAt E (TangentSpace I) α).baseSet
+          rw [show (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source from
+            TangentBundle.trivializationAt_baseSet (I := I) α]
+          exact hx.1
+        dsimp [Φ]
+        rw [trivializationAt_tensor0SBundle_zero_fibre_smulRight (α := α) (b := x.1)
+          x.2 hb]
+      have hfiber : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, TensorRSModel 0 0 ℝ E) ∞
+          (fun x : M × ℝ =>
+            x.2 • (ContinuousLinearMap.id ℝ (Tensor0SModel 0 ℝ E) :
+              Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 0 ℝ E))
+          ((chartAt H α).source ×ˢ Set.univ) p₀ := by
+        have hsmul : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 0 ℝ E) ∞
+            (fun c : ℝ => c • (ContinuousLinearMap.id ℝ (Tensor0SModel 0 ℝ E) :
+              Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 0 ℝ E)) :=
+          (ContinuousLinearMap.smulRight (ContinuousLinearMap.id ℝ ℝ)
+            (ContinuousLinearMap.id ℝ (Tensor0SModel 0 ℝ E))).contMDiff
+        exact (hsmul.contMDiffAt.comp_contMDiffWithinAt p₀ contMDiffWithinAt_snd)
+      refine hfiber.congr_of_eventuallyEq ?_ ?_
+      · filter_upwards [self_mem_nhdsWithin] with x hx
+        exact hfib_val x hx
+      · exact hfib_val p₀ hp₀
+  have harg : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
+      (fun q : M × ℝ => (q.1, (F q.2).toFun q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ) := by
+    have hswap : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod I) ∞
+        (fun q : M × ℝ => (q.2, q.1)) ((Set.univ : Set M) ×ˢ Set.univ) := by
+      simpa using (contMDiffOn_univ.mpr
+        (contMDiff_snd.prodMk contMDiff_fst : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod I) ∞
+          (fun q : M × ℝ => (q.2, q.1))))
+    have hF' : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+        (fun q : M × ℝ => (F q.2).toFun q.1) ((Set.univ : Set M) ×ˢ Set.univ) :=
+      hF.comp hswap (by intro p hp; exact ⟨hp.2, hp.1⟩)
+    exact (contMDiffOn_fst : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) I ∞
+      (fun q : M × ℝ => q.1) ((Set.univ : Set M) ×ˢ Set.univ)).prodMk hF'
+  have hcomp : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞
+      (fun q : M × ℝ => Φ (q.1, (F q.2).toFun q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ) :=
+    hPhi.comp harg (by intro p hp; exact ⟨Set.mem_univ p.1, Set.mem_univ p.2⟩)
+  refine hcomp.congr ?_
+  intro q hq
+  dsimp [Φ]
+  rw [hsec q.1 q.2]
+  rfl
+
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lift_jets_jointContMDiffOn
     (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g) (j : ℕ)
