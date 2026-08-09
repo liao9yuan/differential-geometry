@@ -49,10 +49,19 @@ initial datum. The same API supplies comparison, non-negativity and mass
 invariance, all-points strict positivity of positive-time slices from
 non-negative non-zero data, and (under non-negative Ricci curvature and the
 metric-realization hypothesis `hEnorm` on the ambient norm) Li–Yau one-point
-and space-time Harnack inequalities. External consumer probes for these entry
-points live in `/tmp` (`probe_pde1_positivetime.lean`,
-`probe_pde2_smoothinitial.lean`, `probe_pde3_geometric.lean`, and
-`probe_pde4_duhamel.lean`), compiled against only the leaf module.
+and space-time Harnack inequalities. For a jointly smooth additive forcing
+field `F : ℝ → SmoothScalar g` with `f t = smoothToLp g (F t)` and
+`ContDiff ℝ ∞ f`, the Duhamel flow satisfies the classical forced heat
+equation
+`IsHeatForcedOnStationary (RealTimeInterval.closed ε T hεT.le) g (fun t x => (F t).toFun x) (scalarForcedFlow g u₀ f)`
+via `scalarForcedFlow_isHeatForcedOnStationary_of_jointSmoothForcing`, with
+all spectral coefficient bounds derived internally, and its time-`t` slice is
+bound to `mildSolution g u₀ f t` in `L²` via
+`scalarForcedFlow_slice_toL2_eq_mildSolution_of_jointSmoothForcing`. External
+consumer probes for these entry points live in `/tmp`
+(`probe_pde1_positivetime.lean`, `probe_pde2_smoothinitial.lean`,
+`probe_pde3_geometric.lean`, and `probe_pde4_duhamel.lean`), compiled against
+only the leaf module.
 - [**ODE flows**](DifferentialGeometry/Analysis/ODE) — $C^\infty$ dependence of flows on their initial data, and time-dependent flows on closed manifolds jointly smooth up to the initial time (via Seeley-type time extension of the vector field).
 
 The classical De Giorgi–Nash–Moser regularity machinery is vendored under [`External/`](DifferentialGeometry/External) from [scottnarmstrong/DeGiorgi](https://github.com/scottnarmstrong/DeGiorgi) (Scott Armstrong and Julia Kempe, Apache-2.0).

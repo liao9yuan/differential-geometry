@@ -6092,7 +6092,7 @@ theorem scalarForcedFlow_isHeatForcedOnStationary_of_jointSmoothForcing
   exact scalarForcedFlow_isHeatForcedOnStationary_of_weightedCoeffBounds
     (I := I) (M := M) g u₀ hf F hfF hε hεT hderiv hspace
 
-theorem scalarForcedSlice_toL2_eq_mildSolution_of_jointSmoothForcing
+theorem scalarForcedFlow_slice_toL2_eq_mildSolution_of_jointSmoothForcing
     (g : SmoothRiemannianMetric I M)
     (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -6102,12 +6102,14 @@ theorem scalarForcedSlice_toL2_eq_mildSolution_of_jointSmoothForcing
     (hF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun q : ℝ × M => (F q.1).toFun q.2) (Set.univ ×ˢ Set.univ))
     {t : ℝ} (ht : t ∈ Set.Icc ε T) :
-    smoothToLp (I := I) (M := M) g
-        (scalarForcedSlice g u₀ f hf hε hεT
-          (forcedFlow_hderiv_of_jointSmoothForcing (I := I) (M := M) g u₀ F hF hf hfF hε hεT) ht) =
-      mildSolution (I := I) (M := M) g u₀ f t :=
-  scalarForcedSlice_toL2_eq_mildSolution (I := I) (M := M) g u₀ hf hε hεT
-    (forcedFlow_hderiv_of_jointSmoothForcing (I := I) (M := M) g u₀ F hF hf hfF hε hεT) ht
+    ∃ slice : SmoothScalar g,
+      (∀ x : M, slice.toFun x = scalarForcedFlow g u₀ f t x) ∧
+      smoothToLp (I := I) (M := M) g slice = mildSolution (I := I) (M := M) g u₀ f t := by
+  let hderiv := forcedFlow_hderiv_of_jointSmoothForcing (I := I) (M := M) g u₀ F hF hf hfF hε hεT
+  refine ⟨scalarForcedSlice g u₀ f hf hε hεT hderiv ht, ?_, ?_⟩
+  · intro x
+    rfl
+  · exact scalarForcedSlice_toL2_eq_mildSolution (I := I) (M := M) g u₀ hf hε hεT hderiv ht
 
 
 private lemma summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
