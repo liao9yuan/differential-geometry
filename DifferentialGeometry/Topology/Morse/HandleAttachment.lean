@@ -1490,6 +1490,24 @@ noncomputable def modelModifiedSublevelDiffeomorph {m k : ℕ} (hk : k ≤ m + 1
       (δ := δ) (hε := hε) (hδ := hδ) (hr := hr) (hcs₁ := hcs₂) (hcs₂ := hcs₁)
       (hchart₁ := hchart₂) (hchart₂ := hchart₁))
 
+noncomputable def modelAttachedRegionEquivModified {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    {y : MorseModel (m + 1) // y ∈ modelAttachedRegion hk ε r δ} ≃ₜ
+      {y : MorseModel (m + 1) // modifiedNormalForm hk c ε δ y ≤ c - ε} := by
+  letI : ChartedSpace (MorseHalfSpace m)
+      (SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε)) :=
+    sublevelChartedSpace (m := m) (modifiedNormalForm hk c ε δ) (c - ε)
+      (contDiff_modifiedNormalForm hk c ε δ hδ)
+      (fun y hy => modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+        ⟨le_of_eq hy.symm, by linarith⟩)
+  letI : ChartedSpace (MorseHalfSpace m)
+      (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+    sublevelChartedSpace (m := m) (morseNormalForm hk c) (c + r ^ 2 / 2)
+      (contDiff_morseNormalForm hk c)
+      (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy)
+  exact (modelAttachedRegionEquivUpper hk c ε r δ hδ hδr hr).trans
+    (modelModifiedSublevelDiffeomorph hk c ε r δ hε hδ hr).toHomeomorph.symm
+
 
 end
 
