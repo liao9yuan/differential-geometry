@@ -8272,6 +8272,213 @@ theorem morseFarCutoff_mono_on_orbit {m k : ℕ} (hk : k ≤ m + 1) (c r ε' R�
   simpa [hsymm1, hsymm2] using hmono
 
 
+theorem morseFarExpandTime_cut_bounds {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    {ρ t : ℝ} (hρ : ρ ∈ Set.Icc (0 : ℝ) 1) (ht : t ≤ c - ε) :
+    ρ * morseFarExpandTime c ε δ t ∈ Set.Icc (-(2 * ε)) 0 := by
+  have he0 : morseFarExpandTime c ε δ t ≤ 0 := morseFarExpandTime_le_zero hδ hε
+  have hge : -(2 * ε) ≤ morseFarExpandTime c ε δ t := morseFarExpandTime_ge hδ hε ht
+  have hne : -morseFarExpandTime c ε δ t ≤ 2 * ε := by nlinarith [hge]
+  have hρne : ρ * (-morseFarExpandTime c ε δ t) ≤ 2 * ε := by
+    exact le_trans (mul_le_mul_of_nonneg_left hne hρ.1)
+      (by
+        have hρ2 : (2 * ε) * ρ ≤ 2 * ε := mul_le_of_le_one_right (by nlinarith [hε]) hρ.2
+        nlinarith [hρ2])
+  constructor
+  · nlinarith [hρne]
+  · exact mul_nonpos_of_nonneg_of_nonpos hρ.1 he0
+
+theorem morseFarCutoff_mono_on_orbit_expand {m k : ℕ} (hk : k ≤ m + 1) (c ε r ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hε' : 0 < ε') (hR : R₀ < R₁) (hRle : data.R' ≤ data.R)
+    (hRbig : data.R' ^ 2 + 4 * ε ≤ data.R ^ 2)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hflowChart : ∀ y : MorseModel (m + 1), y ∈ data.χ.source →
+      ∀ t : ℝ, curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) (data.χ y) t =
+        data.χ (modelFlow hk t y))
+    (hstay : ∀ z : M, f z ≤ c - ε →
+      ∀ t ∈ Set.Icc (-(2 * ε)) 0,
+        curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z t ∈
+          data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R'})
+    {τ₁ τ₂ : ℝ} {z₁ z₂ : M} (hz₁ : f z₁ ≤ c - ε) (hz₂ : f z₂ ≤ c - ε)
+    (hle : f z₁ ≤ f z₂)
+    (horbit : z₂ = curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z₁ (τ₁ - τ₂))
+    (hτ1 : τ₁ ∈ Set.Icc (-(2 * ε)) 0) (hτ2 : τ₂ ∈ Set.Icc (-(2 * ε)) 0) :
+    morseFarCutoff hk c r ε' R₀ R₁ data z₁ ≤ morseFarCutoff hk c r ε' R₀ R₁ data z₂ := by
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  have hs1 : z₁ ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R'} := by
+    have hh := hstay z₁ hz₁ 0 (by constructor <;> nlinarith)
+    simpa [curveAt_zero] using hh
+  have hs2 : z₂ ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R'} := by
+    have hh := hstay z₂ hz₂ 0 (by constructor <;> nlinarith)
+    simpa [curveAt_zero] using hh
+  rcases hs1 with ⟨y₁, hy₁, hz₁eq⟩
+  rcases hs2 with ⟨y₂, hy₂, hz₂eq⟩
+  have hsrc1 : y₁ ∈ data.χ.source := data.hχsrc y₁ (le_trans (le_of_lt hy₁) hRle)
+  have hsrc2 : y₂ ∈ data.χ.source := data.hχsrc y₂ (le_trans (le_of_lt hy₂) hRle)
+  have hnormFlow : morseNorm (m + 1) (modelFlow hk (τ₁ - τ₂) y₁) ≤ data.R := by
+    have habs : |τ₁ - τ₂| ≤ 2 * ε := by
+      rw [abs_le]
+      constructor <;> nlinarith [hτ1.1, hτ1.2, hτ2.1, hτ2.2]
+    have hsq := modelFlow_norm_sq_le_add hk ε (by nlinarith) habs y₁
+    have hR' : morseNorm (m + 1) y₁ ^ 2 ≤ data.R' ^ 2 := by
+      have hnorm : morseNorm (m + 1) y₁ ≤ data.R' := le_of_lt hy₁
+      exact sq_le_sq.mpr (by
+        rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (le_of_lt data.hR'pos)]
+        exact hnorm)
+    have hmain : morseNorm (m + 1) (modelFlow hk (τ₁ - τ₂) y₁) ^ 2 ≤ data.R ^ 2 := by
+      nlinarith [hsq, hR', hRbig]
+    exact le_of_sq_le_sq hmain (le_of_lt data.hRpos)
+  have hsrcFlow : modelFlow hk (τ₁ - τ₂) y₁ ∈ data.χ.source :=
+    data.hχsrc (modelFlow hk (τ₁ - τ₂) y₁) hnormFlow
+  have hflow1 : curveAt v hcomplete (data.χ y₁) (τ₁ - τ₂) = data.χ (modelFlow hk (τ₁ - τ₂) y₁) :=
+    hflowChart y₁ hsrc1 (τ₁ - τ₂)
+  have hz₂' : data.χ y₂ = data.χ (modelFlow hk (τ₁ - τ₂) y₁) := by
+    rw [hz₂eq]
+    rw [hz₁eq] at hflow1
+    exact horbit.trans hflow1
+  have hy₂' : y₂ = modelFlow hk (τ₁ - τ₂) y₁ := data.χ.injOn hsrc2 hsrcFlow hz₂'
+  have hneg : ‖negPart hk y₂‖ = ‖negPart hk y₁‖ := by
+    rw [hy₂']
+    rw [modelFlow_negPart]
+  have hlev : f (data.χ y₁) ≤ f (data.χ y₂) := by
+    simpa [hz₁eq, hz₂eq] using hle
+  have hmono : morseFarCutoff hk c r ε' R₀ R₁ data (data.χ y₁) ≤
+      morseFarCutoff hk c r ε' R₀ R₁ data (data.χ y₂) :=
+    morseFarCutoff_mono_on_orbit hk c r ε' R₀ R₁ data hε' hR hRle (y₁ := y₁) (y₂ := y₂)
+      hsrc1 hsrc2 hneg hlev hy₁ hy₂
+  simpa [hz₁eq, hz₂eq] using hmono
+
+theorem morseFarExpandMap_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
+    (hε' : 0 < ε') (hR : R₀ < R₁) (hRle : data.R' ≤ data.R)
+    (hRbig : data.R' ^ 2 + 4 * ε ≤ data.R ^ 2)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (hflowChart : ∀ y : MorseModel (m + 1), y ∈ data.χ.source →
+      ∀ t : ℝ, curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) (data.χ y) t =
+        data.χ (modelFlow hk t y))
+    (hstay : ∀ z : M, f z ≤ c - ε →
+      ∀ t ∈ Set.Icc (-(2 * ε)) 0,
+        curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z t ∈
+          data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R'}) :
+    Function.Injective (morseFarExpandMap hk c ε r δ ε' R₀ R₁ data v hv hsupp) := by
+  intro z₁ z₂ h
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  let τ₁ : ℝ := morseFarCutoff hk c r ε' R₀ R₁ data z₁.1 * morseFarExpandTime c ε δ (f z₁.1)
+  let τ₂ : ℝ := morseFarCutoff hk c r ε' R₀ R₁ data z₂.1 * morseFarExpandTime c ε δ (f z₂.1)
+  have hz₁ : f z₁.1 ≤ c - ε := z₁.2
+  have hz₂ : f z₂.1 ≤ c - ε := z₂.2
+  have hv1 : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (1 : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
+    hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+  have horbit : z₂.1 = curveAt v hcomplete z₁.1 (τ₁ - τ₂) := by
+    have hh := curveAt_add v hv1 hcomplete z₁.1 τ₁ (-τ₂)
+    have hz : τ₁ + (-τ₂) = τ₁ - τ₂ := by ring
+    rw [hz] at hh
+    have hγ : curveAt v hcomplete (curveAt v hcomplete z₁.1 τ₁) (-τ₂) =
+        curveAt v hcomplete (curveAt v hcomplete z₂.1 τ₂) (-τ₂) := by
+      exact congrArg (fun x : M => curveAt v hcomplete x (-τ₂)) h
+    have hrev : curveAt v hcomplete (curveAt v hcomplete z₂.1 τ₂) (-τ₂) = z₂.1 := by
+      have hh2 := curveAt_add v hv1 hcomplete z₂.1 τ₂ (-τ₂)
+      have hz2 : τ₂ + (-τ₂) = 0 := by ring
+      rw [hz2] at hh2
+      simpa [curveAt_zero v hcomplete z₂.1] using hh2.symm
+    have hmain : curveAt v hcomplete z₁.1 (τ₁ - τ₂) = z₂.1 := by
+      calc
+        curveAt v hcomplete z₁.1 (τ₁ - τ₂) = curveAt v hcomplete (curveAt v hcomplete z₁.1 τ₁) (-τ₂) := hh
+        _ = curveAt v hcomplete (curveAt v hcomplete z₂.1 τ₂) (-τ₂) := hγ
+        _ = z₂.1 := hrev
+    exact hmain.symm
+  have hval1 := morseFarExpandMap_value hk c ε r δ ε' R₀ R₁ data hf hε hδ hr2 v hv hsupp hdfOn hrate z₁
+  have hval2 := morseFarExpandMap_value hk c ε r δ ε' R₀ R₁ data hf hε hδ hr2 v hv hsupp hdfOn hrate z₂
+  have hlevel : f z₁.1 - τ₁ = f z₂.1 - τ₂ := by
+    have hf1 : f (morseFarExpandMap hk c ε r δ ε' R₀ R₁ data v hv hsupp z₁) = f z₁.1 - τ₁ := by
+      simpa [τ₁] using hval1
+    have hf2 : f (morseFarExpandMap hk c ε r δ ε' R₀ R₁ data v hv hsupp z₂) = f z₂.1 - τ₂ := by
+      simpa [τ₂] using hval2
+    rw [← hf1, ← hf2]
+    exact congrArg f h
+  have hcut1 : morseFarCutoff hk c r ε' R₀ R₁ data z₁.1 ∈ Set.Icc (0 : ℝ) 1 :=
+    morseFarCutoff_mem hk c r ε' R₀ R₁ data z₁.1
+  have hcut2 : morseFarCutoff hk c r ε' R₀ R₁ data z₂.1 ∈ Set.Icc (0 : ℝ) 1 :=
+    morseFarCutoff_mem hk c r ε' R₀ R₁ data z₂.1
+  have hτ1 : τ₁ ∈ Set.Icc (-(2 * ε)) 0 := by
+    dsimp [τ₁]
+    exact morseFarExpandTime_cut_bounds hδ hε hcut1 hz₁
+  have hτ2 : τ₂ ∈ Set.Icc (-(2 * ε)) 0 := by
+    dsimp [τ₂]
+    exact morseFarExpandTime_cut_bounds hδ hε hcut2 hz₂
+  have hτeq : τ₁ = τ₂ := by
+    have hsum : f z₁.1 - τ₁ = f z₂.1 - τ₂ := hlevel
+    have hb : f z₁.1 = f z₂.1 := by
+      by_cases hle : f z₁.1 ≤ f z₂.1
+      · have hρ12 : morseFarCutoff hk c r ε' R₀ R₁ data z₁.1 ≤ morseFarCutoff hk c r ε' R₀ R₁ data z₂.1 :=
+          morseFarCutoff_mono_on_orbit_expand hk c ε r ε' R₀ R₁ data hε hε' hR hRle hRbig v hv hsupp
+            hflowChart hstay (τ₁ := τ₁) (τ₂ := τ₂) (z₁ := z₁.1) (z₂ := z₂.1) hz₁ hz₂ hle horbit hτ1 hτ2
+        have hmono := morseFarExpandLevel_mono (c := c) (ε := ε) (δ := δ) hδ hε
+          (t₁ := f z₁.1) (t₂ := f z₂.1) (ρ₁ := morseFarCutoff hk c r ε' R₀ R₁ data z₁.1)
+          (ρ₂ := morseFarCutoff hk c r ε' R₀ R₁ data z₂.1) hle hcut1.1 hρ12 (morseFarExpandTime_le_zero hδ hε)
+        have hmain : (f z₂.1 - τ₂) - (f z₁.1 - τ₁) ≥ f z₂.1 - f z₁.1 := by
+          dsimp [τ₁, τ₂]
+          exact hmono
+        nlinarith [hmain, hsum, hle]
+      · have hle' : f z₂.1 ≤ f z₁.1 := le_of_lt (lt_of_not_ge hle)
+        have horbit' : z₁.1 = curveAt v hcomplete z₂.1 (τ₂ - τ₁) := by
+          have hrev := curveAt_add v hv1 hcomplete z₂.1 τ₂ (τ₁ - τ₂)
+          have hz : τ₂ + (τ₁ - τ₂) = τ₁ := by ring
+          rw [hz] at hrev
+          have hz₂back : curveAt v hcomplete z₂.1 τ₂ = curveAt v hcomplete z₁.1 τ₁ := h.symm
+          have hmain2 : z₁.1 = curveAt v hcomplete z₂.1 (τ₂ - τ₁) := by
+            calc
+              z₁.1 = curveAt v hcomplete (curveAt v hcomplete z₁.1 τ₁) (-τ₁) := by
+                have hh := curveAt_add v hv1 hcomplete z₁.1 τ₁ (-τ₁)
+                have hz0 : τ₁ + (-τ₁) = 0 := by ring
+                rw [hz0] at hh
+                exact ((hh.symm).trans (curveAt_zero v hcomplete z₁.1)).symm
+              _ = curveAt v hcomplete (curveAt v hcomplete z₂.1 τ₂) (-τ₁) := by rw [hz₂back]
+              _ = curveAt v hcomplete z₂.1 (τ₂ - τ₁) := by
+                have hh := curveAt_add v hv1 hcomplete z₂.1 τ₂ (-τ₁)
+                have hz1 : τ₂ + (-τ₁) = τ₂ - τ₁ := by ring
+                rw [hz1] at hh
+                exact hh.symm
+          exact hmain2
+        have hρ21 : morseFarCutoff hk c r ε' R₀ R₁ data z₂.1 ≤ morseFarCutoff hk c r ε' R₀ R₁ data z₁.1 :=
+          morseFarCutoff_mono_on_orbit_expand hk c ε r ε' R₀ R₁ data hε hε' hR hRle hRbig v hv hsupp
+            hflowChart hstay (τ₁ := τ₂) (τ₂ := τ₁) (z₁ := z₂.1) (z₂ := z₁.1) hz₂ hz₁ hle' horbit' hτ2 hτ1
+        have hmono := morseFarExpandLevel_mono (c := c) (ε := ε) (δ := δ) hδ hε
+          (t₁ := f z₂.1) (t₂ := f z₁.1) (ρ₁ := morseFarCutoff hk c r ε' R₀ R₁ data z₂.1)
+          (ρ₂ := morseFarCutoff hk c r ε' R₀ R₁ data z₁.1) hle' hcut2.1 hρ21 (morseFarExpandTime_le_zero hδ hε)
+        have hmain : (f z₁.1 - τ₁) - (f z₂.1 - τ₂) ≥ f z₁.1 - f z₂.1 := by
+          dsimp [τ₁, τ₂]
+          exact hmono
+        nlinarith [hmain, hsum, hle']
+    nlinarith [hsum, hb]
+  apply Subtype.ext
+  rw [horbit]
+  rw [hτeq]
+  simp [curveAt_zero]
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
