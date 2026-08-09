@@ -4015,6 +4015,66 @@ theorem morseBeltMapExt_on_open {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
   dsimp [morseBeltMapExt]
   rw [dif_pos z.2]
 
+private lemma continuousOn_quotient_lift_open {X Y Z : Type} [TopologicalSpace X] [TopologicalSpace Y]
+    [TopologicalSpace Z] {q : X → Y} (hq : Topology.IsQuotientMap q) {f : X → Z} {g : Y → Z}
+    (hfg : ∀ x, g (q x) = f x) {A : Set X} {B : Set Y} (hA : A = q ⁻¹' B)
+    (hf : ContinuousOn f A) (hB : IsOpen B) : ContinuousOn g B := by
+  have hqcont : Continuous q := hq.continuous
+  have hAopen : IsOpen A := by
+    rw [hA]
+    exact IsOpen.preimage hqcont hB
+  rw [continuousOn_iff_continuous_restrict]
+  rw [continuous_def]
+  intro V hV
+  have hpre : IsOpen (g ⁻¹' V ∩ B) := by
+    have hqpre : IsOpen (q ⁻¹' (g ⁻¹' V ∩ B)) := by
+      have hset : q ⁻¹' (g ⁻¹' V ∩ B) = f ⁻¹' V ∩ A := by
+        ext x
+        constructor
+        · intro hx
+          change q x ∈ g ⁻¹' V ∩ B at hx
+          rcases hx with ⟨hxg, hxB⟩
+          constructor
+          · change f x ∈ V
+            rw [← hfg x]
+            exact hxg
+          · rw [hA]
+            change q x ∈ B
+            exact hxB
+        · intro hx
+          rcases hx with ⟨hxf, hxA⟩
+          constructor
+          · change g (q x) ∈ V
+            rw [hfg x]
+            exact hxf
+          · rwa [hA] at hxA
+      rw [hset]
+      have hpreV : IsOpen (f ⁻¹' V ∩ A) := by
+        rw [isOpen_iff_mem_nhds]
+        intro x hx
+        rcases hx with ⟨hxf, hxA⟩
+        have hcontAt : ContinuousAt f x :=
+          (hf x hxA).continuousAt (IsOpen.mem_nhds hAopen hxA)
+        have hpreV' : f ⁻¹' V ∈ nhds x :=
+          hcontAt.preimage_mem_nhds (IsOpen.mem_nhds hV hxf)
+        exact Filter.inter_mem hpreV' (IsOpen.mem_nhds hAopen hxA)
+      exact hpreV
+    exact (hq.isOpen_preimage).mp hqpre
+  -- the preimage under B.restrict g is open in the subspace B
+  have hsub : IsOpen {z : {y : Y // y ∈ B} | g z.1 ∈ V} := by
+    -- {z : B | g z ∈ V} = (inclusion)⁻¹ (g ⁻¹' V ∩ B) — open in B since g ⁻¹' V ∩ B open
+    have heq : {z : {y : Y // y ∈ B} | g z.1 ∈ V} = (Subtype.val : {y : Y // y ∈ B} → Y) ⁻¹' (g ⁻¹' V ∩ B) := by
+      ext z
+      constructor
+      · intro hz
+        exact ⟨hz, z.2⟩
+      · intro hz
+        rcases hz with ⟨hzg, hzB⟩
+        exact hzg
+    rw [heq]
+    exact IsOpen.preimage continuous_subtype_val hpre
+  exact hsub
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
