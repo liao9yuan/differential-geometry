@@ -8242,6 +8242,36 @@ theorem morseFarCutoffModel_mono {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ) (r ε'
     (le_trans hn (le_max_right _ _))
 
 
+theorem morseFarCutoff_mono_on_orbit {m k : ℕ} (hk : k ≤ m + 1) (c r ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε' : 0 < ε') (hR : R₀ < R₁) (hRle : data.R' ≤ data.R)
+    {y₁ y₂ : MorseModel (m + 1)} (hy₁ : y₁ ∈ data.χ.source) (hy₂ : y₂ ∈ data.χ.source)
+    (hneg : ‖negPart hk y₂‖ = ‖negPart hk y₁‖)
+    (hlev : f (data.χ y₁) ≤ f (data.χ y₂))
+    (hy1 : morseNorm (m + 1) y₁ < data.R') (hy2 : morseNorm (m + 1) y₂ < data.R') :
+    morseFarCutoff hk c r ε' R₀ R₁ data (data.χ y₁) ≤
+      morseFarCutoff hk c r ε' R₀ R₁ data (data.χ y₂) := by
+  have hchart1 : data.χ y₁ ∈ data.χ.target := data.χ.map_source (by
+    exact data.hχsrc y₁ (le_trans (le_of_lt hy1) hRle))
+  have hchart2 : data.χ y₂ ∈ data.χ.target := data.χ.map_source (by
+    exact data.hχsrc y₂ (le_trans (le_of_lt hy2) hRle))
+  have hf1 : f (data.χ y₁) = morseNormalForm hk c y₁ := data.hnorm y₁ (le_trans (le_of_lt hy1) hRle)
+  have hf2 : f (data.χ y₂) = morseNormalForm hk c y₂ := data.hnorm y₂ (le_trans (le_of_lt hy2) hRle)
+  have hlev' : morseNormalForm hk c y₁ ≤ morseNormalForm hk c y₂ := by
+    rw [← hf1, ← hf2]
+    exact hlev
+  dsimp [morseFarCutoff]
+  rw [if_pos hchart1]
+  rw [if_pos hchart2]
+  have hsymm1 : data.χ.symm (data.χ y₁) = y₁ := data.χ.left_inv hy₁
+  have hsymm2 : data.χ.symm (data.χ y₂) = y₂ := data.χ.left_inv hy₂
+  have hmono := morseFarCutoffModel_mono hk c r ε' R₀ R₁ hε' hR hneg hlev'
+  simpa [hsymm1, hsymm2] using hmono
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
