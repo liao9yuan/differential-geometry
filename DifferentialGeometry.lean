@@ -2177,7 +2177,7 @@ import DifferentialGeometry.Geometry.Curvature.Realized.Operators
 import DifferentialGeometry.Geometry.Curvature.Realized.TimeInterval
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
-import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBoundFlow
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciOperatorNormBoundFlow
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
