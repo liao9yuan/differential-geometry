@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Spectral.Scalar.EigenIdx
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.Comparison
 import DifferentialGeometry.Analysis.Parabolic.MaximumPrinciple.HeatPotentialStrong
 import DifferentialGeometry.Analysis.Heat.Smoothing.MildSolution
+import DifferentialGeometry.Analysis.Parabolic.Harnack.LiYauHarnack
 
 noncomputable section
 
@@ -2880,6 +2881,204 @@ theorem mildSolution_slice_forced_equation_of_smooth_forcing
     mildSolution_has_classical_representatives_of_forcingSpectralMass
       (I := I) (M := M) g u_0 hf ht hmass hmass_deriv f_smooth hf_smooth
   ⟨u_smooth, du_smooth, hu, heq⟩
+
+lemma summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g) (σ : ℝ) :
+    Summable (fun i : TensorEigenIdx00 g =>
+      tensorSobolevWeight (I := I) (M := M) i σ *
+        (tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+          (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i) ^ 2) := by
+  classical
+  let S : SmoothCcTensor g 0 0 := scalarCcLift g u₀
+  let V : tensorHs (I := I) (M := M) g 0 0 σ :=
+    ccTensorToHs (I := I) (M := M) g 0 σ S
+  have hcoeff (i : TensorEigenIdx00 g) : (V.coeff i) =
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+        (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i := by
+    dsimp [V, S]
+  exact Summable.congr V.weighted_summable (fun i => by
+    rw [hcoeff i])
+
+theorem scalarHeatFlow_smoothInitial_contMDiffOn_closed
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} (hT : 0 < T) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M =>
+        scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) q.1 q.2)
+      (Set.Icc 0 T ×ˢ Set.univ) := by
+  classical
+  rw [contMDiffOn_infty]
+  intro N
+  have hU : Set.Icc 0 T ⊆ Set.univ := Set.subset_univ _
+  have hc (i : TensorEigenIdx00 g) :
+      ContDiffOn ℝ (N : ℕ)
+        (fun s : ℝ => scalarHeatCoeff (I := I) (M := M) g
+          (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i s) Set.univ := by
+    exact (scalarHeatCoeff_contDiff (I := I) (M := M) g
+      (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i (N : ℕ∞)).contDiffOn
+  set hc' := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0
+  let d : TensorEigenIdx00 g → ℝ := fun i =>
+    tensorL2Coeff (I := I) (M := M) hc' (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i
+  have hmass : ∀ j : ℕ, j ≤ N → ∀ m : ℕ,
+      ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+        ∀ i t, t ∈ Set.Icc 0 T →
+          tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (iteratedDeriv j (fun s : ℝ => scalarHeatCoeff (I := I) (M := M) g
+              (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i s) t) ^ 2 ≤ Cm i := by
+    intro j hj m
+    have hdecay := summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
+      (I := I) (M := M) g u₀ ((m : ℝ) + (2 * (j + 1) : ℕ))
+    refine ⟨fun i => tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (2 * (j + 1) : ℕ)) *
+        (d i) ^ 2, ?_, ?_⟩
+    · exact Summable.congr hdecay (fun i => by
+        dsimp [d])
+    · intro i t ht
+      have ht0 : 0 ≤ t := (Set.mem_Icc.mp ht).1
+      have hlam0 : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i :=
+        tensor_lambda_nonneg (I := I) (M := M) i
+      have hder := scalarHeatCoeff_iteratedDeriv (I := I) (M := M) g
+        (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i t j
+      have hsq : (iteratedDeriv j (fun s : ℝ => scalarHeatCoeff (I := I) (M := M) g
+            (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i s) t) ^ 2 =
+          TensorEigenIdx.lambda (I := I) (M := M) i ^ (2 * j) *
+            Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) * (d i) ^ 2 :=
+        scalarHeatCoeff_deriv_sq (I := I) (M := M) g
+          (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i t j
+      have hle1 : TensorEigenIdx.lambda (I := I) (M := M) i ^ (2 * j) *
+            Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) ≤
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * (j + 1) : ℕ) := by
+        have hpow : TensorEigenIdx.lambda (I := I) (M := M) i ^ (2 * j) ≤
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * (j + 1) : ℕ) := by
+          calc
+            TensorEigenIdx.lambda (I := I) (M := M) i ^ (2 * j)
+                ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * j) :=
+                  pow_le_pow_left₀ hlam0 (by linarith) (2 * j)
+            _ ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * (j + 1) : ℕ) := by
+                  exact pow_le_pow_right₀ (by linarith) (by omega)
+        have hexp : Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) ≤ 1 :=
+          Real.exp_le_one_iff.mpr (by nlinarith)
+        calc
+          TensorEigenIdx.lambda (I := I) (M := M) i ^ (2 * j) *
+              Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t))
+              ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * (j + 1) : ℕ) *
+                  Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) := by
+                exact mul_le_mul_of_nonneg_right hpow (Real.exp_pos _).le
+          _ ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * (j + 1) : ℕ) := by
+                rw [mul_comm]
+                exact mul_le_of_le_one_left (by positivity) hexp
+      have hw : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * (j + 1) : ℕ) =
+          tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (2 * (j + 1) : ℕ)) := by
+        unfold tensorSobolevWeight
+        rw [← Real.rpow_natCast (1 + TensorEigenIdx.lambda (I := I) (M := M) i)
+          (2 * (j + 1) : ℕ)]
+        rw [← Real.rpow_add (by linarith [hlam0] : 0 < 1 + TensorEigenIdx.lambda (I := I) (M := M) i)]
+      calc
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (iteratedDeriv j (fun s : ℝ => scalarHeatCoeff (I := I) (M := M) g
+              (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i s) t) ^ 2
+            = tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+                (TensorEigenIdx.lambda (I := I) (M := M) i ^ (2 * j) *
+                  Real.exp (-(2 * TensorEigenIdx.lambda (I := I) (M := M) i * t)) * (d i) ^ 2) := by
+              rw [hsq]
+        _ ≤ tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+              ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * (j + 1) : ℕ) * (d i) ^ 2) := by
+              exact mul_le_mul_of_nonneg_left
+                (mul_le_mul_of_nonneg_right hle1 (sq_nonneg _))
+                (tensorSobolevWeight_nonneg (I := I) (M := M) i (m : ℝ))
+        _ = tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (2 * (j + 1) : ℕ)) * (d i) ^ 2 := by
+              rw [← mul_assoc]
+              rw [hw]
+  simpa using (scalar_path_recon (I := I) (M := M) g htail hT N
+    (fun i s => scalarHeatCoeff (I := I) (M := M) g
+      (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i s)
+    (U := Set.univ) isOpen_univ hU hc hmass)
+
+theorem scalarHeatFlow_smoothInitial_strict_pos
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} (hT : 0 ≤ T)
+    (hpos0 : ∀ x : M, 0 < u₀.toFun x) :
+    ∀ t ∈ Set.Icc 0 T, ∀ x : M,
+      0 < scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t x := by
+  classical
+  have hmin : ∃ c : ℝ, 0 < c ∧ ∀ x : M, c ≤ u₀.toFun x := by
+    have hcont : Continuous u₀.toFun := u₀.smooth.continuous
+    by_cases hM : Nonempty M
+    · let x₀ : M := Classical.choice hM
+      have hmin' : ∃ x : M, ∀ y : M, u₀.toFun x ≤ u₀.toFun y := by
+        refine hcont.exists_forall_le' x₀ ?_
+        simp [Filter.cocompact_eq_bot]
+      let xm : M := Classical.choose hmin'
+      exact ⟨u₀.toFun xm, hpos0 xm, Classical.choose_spec hmin'⟩
+    · haveI : IsEmpty M := not_nonempty_iff.mp hM
+      exact ⟨(1 : ℝ), zero_lt_one, fun x => (IsEmpty.false x).elim⟩
+  obtain ⟨c₀, hc₀, hc₀_le⟩ := hmin
+  have hconst : DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+      (RealTimeInterval.closed 0 T hT) g (fun _ _ => c₀) := by
+    change DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn
+      (RealTimeInterval.closed 0 T hT) (stationaryMetricFamily g)
+      (fun _ _ => (0 : ℝ)) (fun _ _ => c₀)
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · exact contMDiffOn_const
+    · exact continuousOn_const
+    · intro t ht
+      exact contMDiff_const
+    · intro t ht x
+      have hd : HasDerivAt (fun s : ℝ => c₀) (0 : ℝ) t :=
+        hasDerivAt_const (c := c₀) (x := t)
+      refine hd.congr_deriv ?_
+      have hlap : laplacianAt (I := I) (stationaryMetricFamily g) t
+          (fun _ : M => c₀) x = 0 := by
+        unfold laplacianAt stationaryMetricFamily
+        exact laplacian_const (I := I) (LeviCivita (I := I) g) g c₀ x
+      rw [hlap]
+      simp
+  have hcomp := DifferentialGeometry.Analysis.Parabolic.heat_comparison
+    (I := I) (stationaryMetricFamily g) hT (fun _ _ => c₀)
+    (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
+    hconst (scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g u₀ htail hT)
+    (fun x => by
+      rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x]
+      exact hc₀_le x)
+  intro t ht x
+  exact lt_of_lt_of_le hc₀ (hcomp t ht x)
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
+    [CompactSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (hpos0 : ∀ x : M, 0 < u₀.toFun x)
+    {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) (x : M) :
+    scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) a x ≤
+      (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+        scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) b x := by
+  classical
+  have hb0 : 0 ≤ b := le_trans ha.le hab
+  have hbpos : 0 < b := lt_of_lt_of_le ha hab
+  have hb1 : 0 ≤ b + 1 := by linarith
+  have hb1pos : 0 < b + 1 := by linarith
+  have hu := scalarHeatFlow_isHeatOnStationary_smoothInitial
+    (I := I) (M := M) g u₀ htail hb1
+  have huClosed := scalarHeatFlow_smoothInitial_contMDiffOn_closed
+    (I := I) (M := M) g u₀ htail hb1pos
+  have hpos := scalarHeatFlow_smoothInitial_strict_pos
+    (I := I) (M := M) g u₀ htail hb1 hpos0
+  exact DifferentialGeometry.Analysis.Parabolic.Harnack.heat_solution_one_point_harnack_of_nonnegative_ricci_on
+    (I := I) (M := M) g hRic (RealTimeInterval.closed 0 (b + 1) hb1)
+    (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
+    hu huClosed hpos ha hab
+    (fun t ht => ⟨lt_of_lt_of_le ha ht.1, lt_of_le_of_lt ht.2 (by linarith)⟩)
+    (fun t ht => ⟨ht.1, le_trans ht.2 (by linarith)⟩)
+    (fun t ht => ⟨ht.1, lt_trans ht.2 (by linarith)⟩) x
 
 end HeatEquation
 end Analysis
