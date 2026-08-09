@@ -46,6 +46,7 @@ theorem chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt
     (f := (extChartAt I α).symm ∘ u) (s := s)
     (t := u ⁻¹' Set.range I) hconf).mp hcomp
 
+omit [SigmaCompactSpace M] in
 theorem manifoldFlowFamily_exists
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α)
@@ -110,6 +111,7 @@ theorem manifoldFlowFamily_exists
     simp only [hguard, dif_pos, and_self]
     exact (hdiffeo t ht htT).choose_spec x
 
+omit [SigmaCompactSpace M] in
 theorem manifoldFlowFamily_exists_chartRepr
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α)

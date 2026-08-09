@@ -79,6 +79,7 @@ theorem picard_data_chart_coord_in_closedBall
   exact Metric.ball_subset_closedBall hx.2
 
 
+omit [SigmaCompactSpace M] in
 theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α)

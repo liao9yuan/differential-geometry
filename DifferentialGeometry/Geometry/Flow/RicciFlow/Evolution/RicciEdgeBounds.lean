@@ -44,6 +44,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 omit [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M]
   [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 /-- Joint chart-Gram regularity up to the initial time gives one metric
 equivalence constant on every compact initial subinterval.  This is the
 zeroth-order component of the regularizing-edge estimates used in smooth

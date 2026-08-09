@@ -21,6 +21,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [SigmaCompactSpace M] in
 def scalarHsBoundedC0Semigroup
     (g : SmoothRiemannianMetric I M) (σ : ℝ) :
     BoundedC0Semigroup (scalarHs (I := I) (M := M) g σ) where
@@ -41,6 +42,7 @@ theorem scalarHsBoundedC0Semigroup_apply
     scalarHsBoundedC0Semigroup (I := I) (M := M) g σ t =
       heatSemigroupHsExt (I := I) (M := M) g σ t := rfl
 
+omit [SigmaCompactSpace M] in
 abbrev hkScalarBoundedC0Semigroup
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     BoundedC0Semigroup (HkScalar (I := I) (M := M) g k) :=
