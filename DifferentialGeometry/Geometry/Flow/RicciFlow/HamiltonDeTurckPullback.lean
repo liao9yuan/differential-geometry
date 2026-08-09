@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciTensor
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.RicciTensor
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationForm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.VariationalFlow

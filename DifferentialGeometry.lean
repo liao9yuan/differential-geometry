@@ -1938,7 +1938,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelCorrection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDiffKoszulDeriv
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDifferenceKoszul
 import DifferentialGeometry.Geometry.Connection.LeviCivita.CorrectionContraction
-import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CovariantDerivativePointwise
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.DifferentiatedSecondBianchi
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Hamilton
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
@@ -1948,7 +1948,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvari
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Hessian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.LeviCivita
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
@@ -1958,7 +1958,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LinearExtensionTangen
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LocalFrameHessian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricKoszul
-import DifferentialGeometry.Geometry.Connection.LeviCivita.PullbackConnection
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Reconcile
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ScalarBochner
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Scaling
@@ -1973,7 +1973,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Uniqueness
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.Connection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.RicciCoord
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.ScalarHessian
-import DifferentialGeometry.Geometry.Connection.MLieBracket
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.MLieBracket
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartGramChristoffel
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
@@ -2134,8 +2134,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciDifference
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciDrift
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciHessian
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciTensor
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciTrace
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.RicciTensor
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.RicciTrace
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvatureUnitEvalBridge

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
-import DifferentialGeometry.Geometry.Connection.MLieBracket
-import DifferentialGeometry.Geometry.Connection.LeviCivita.PullbackConnection
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.MLieBracket
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 open DifferentialGeometry.Geometry.Curvature

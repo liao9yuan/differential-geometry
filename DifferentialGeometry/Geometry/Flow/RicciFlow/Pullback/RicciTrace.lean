@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
-import DifferentialGeometry.Geometry.Connection.MLieBracket
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CovariantDerivativePointwise
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.MLieBracket
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling

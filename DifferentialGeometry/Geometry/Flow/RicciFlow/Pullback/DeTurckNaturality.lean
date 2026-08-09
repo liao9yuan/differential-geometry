@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
-import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CovariantDerivativePointwise
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
