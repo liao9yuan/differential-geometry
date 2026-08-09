@@ -5827,6 +5827,361 @@ theorem morseHandleAdjunctionToUpperSublevel_range {m k : ℕ} (hk : k ≤ m + 1
   · intro hy
     exact morseHandleAdjunctionToUpperSublevel_image_subset hk c ε r data hε hεr' hr y hy
 
+noncomputable def morseHandleAdjunctionToUpperSublevelInv {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data}) :
+    Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) := by
+  classical
+  by_cases hlow : f y.1 ≤ c - ε
+  · exact Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) ⟨y.1, hlow⟩
+  · have hcell : (y.1 : M) ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))) := by
+      by_contra hnot
+      exact hlow (by
+        rcases y.2 with hlow' | hcell
+        · exact hlow'
+        · exact False.elim (hnot hcell))
+    let w : MorseModel (m + 1) := Classical.choose hcell
+    have hw : w ∈ modelHandle hk ε r := (Classical.choose_spec hcell).1
+    have hw' : w ∈ Set.range (modelHandleMap hk ε r) := by
+      simpa [← modelHandleMap_range hk ε r hε hr] using hw
+    let d : StandardHandle k (m + 1 - k) := Classical.choose hw'
+    exact Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) d
+
+theorem morseHandleAdjunctionToUpperSublevel_right_inv {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data}) :
+    morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr'
+      (morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr y) = y := by
+  classical
+  dsimp [morseHandleAdjunctionToUpperSublevelInv]
+  by_cases hlow : f y.1 ≤ c - ε
+  · rw [dif_pos hlow]
+    apply Subtype.ext
+    rw [morseHandleAdjunctionToUpperSublevel_lower hk c ε r data hε hεr' ⟨y.1, hlow⟩]
+  · rw [dif_neg hlow]
+    have hcell : (y.1 : M) ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))) := by
+      rcases y.2 with hlow' | hcell
+      · exact False.elim (hlow hlow')
+      · exact hcell
+    let w : MorseModel (m + 1) := Classical.choose hcell
+    have hw : w ∈ modelHandle hk ε r := (Classical.choose_spec hcell).1
+    have hwy : data.χ w = (y.1 : M) := (Classical.choose_spec hcell).2
+    have hw' : w ∈ Set.range (modelHandleMap hk ε r) := by
+      simpa [← modelHandleMap_range hk ε r hε hr] using hw
+    let d : StandardHandle k (m + 1 - k) := Classical.choose hw'
+    have hd : modelHandleMap hk ε r d = w := Classical.choose_spec hw'
+    apply Subtype.ext
+    change (morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr'
+      (Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) d) : M) = y.1
+    rw [morseHandleAdjunctionToUpperSublevel_cell hk c ε r data hε hεr' d]
+    rw [hd]
+    rw [hwy]
+
+theorem morseHandleAdjunctionToUpperSublevel_left_inv {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (hcont : Continuous f)
+    (z : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))) :
+    morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr
+      ⟨morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr' z,
+        morseHandleAdjunctionToUpperSublevel_mem_image hk c ε r data hε hεr' z⟩ = z := by
+  apply morseHandleAdjunctionToUpperSublevel_injective hk c ε r data hε (ne_of_gt hr) hεr' hcont
+  exact morseHandleAdjunctionToUpperSublevel_right_inv hk c ε r data hε hεr' hr
+    ⟨morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr' z,
+      morseHandleAdjunctionToUpperSublevel_mem_image hk c ε r data hε hεr' z⟩
+
+theorem morseHandleAdjunctionInv_eq_cell_coherence {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data})
+    (hy : (y.1 : M) ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))))
+    (hbound : f (y.1 : M) ≤ c - ε) :
+    morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr y =
+      Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+        (modelHandleMapRawSymm hk ε r (data.χ.symm (y.1 : M))) := by
+  rcases hy with ⟨w, hw, hwy⟩
+  have hw' : w ∈ Set.range (modelHandleMap hk ε r) := by
+    simpa [← modelHandleMap_range hk ε r hε hr] using hw
+  rcases hw' with ⟨d, hd⟩
+  have hbound' : morseNorm (m + 1) w ≤ data.R := by
+    rw [← hd]
+    exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr')
+  have hsrc : w ∈ data.χ.source := data.hχsrc w hbound'
+  have hsymm : data.χ.symm (y.1 : M) = w := by
+    rw [← hwy]
+    exact data.χ.left_inv hsrc
+  have hmNF : morseNormalForm hk c w = c - ε := by
+    have hle : morseNormalForm hk c w ≤ c - ε := by
+      rw [← data.hnorm w hbound', hwy]
+      exact hbound
+    have hge : c - ε ≤ morseNormalForm hk c w := by
+      have hmem : w ∈ ({z : MorseModel (m + 1) | ‖posPart hk z‖ ≤ r} ∩
+          {z : MorseModel (m + 1) | c - ε ≤ morseNormalForm hk c z}) := by
+        simpa [modelHandle_eq_inter hk c ε r (le_of_lt hr)] using hw
+      exact hmem.2
+    exact le_antisymm hle hge
+  have hd₁ : ‖(d.1 : EuclideanSpace ℝ (Fin k))‖ = 1 := by
+    have hnf : morseNormalForm hk c (modelHandleMap hk ε r d) ≤ c - ε := by
+      rw [hd]
+      exact le_of_eq hmNF
+    exact (modelHandleMap_mem_lower_iff hk c ε r hε d).1 hnf
+  let u₀ : CellBoundary k := ⟨(d.1 : EuclideanSpace ℝ (Fin k)), hd₁⟩
+  let p : AttachingRegion k (m + 1 - k) := (u₀, d.2)
+  have hdi : d = attachingInclusion k (m + 1 - k) p := by
+    dsimp [p, u₀]
+    apply Prod.ext
+    · apply Subtype.ext
+      rfl
+    · rfl
+  have hraw : modelHandleMapRawSymm hk ε r w = attachingInclusion k (m + 1 - k) p := by
+    rw [modelHandleMapRawSymm_eq_symm hk ε r hε hr w hw]
+    apply modelHandleMap_injective hk ε r hε (ne_of_gt hr)
+    calc
+      modelHandleMap hk ε r ((morseModelHandleMapHomeo hk ε r hε hr).symm ⟨w, hw⟩) = w :=
+        morseModelHandleMapHomeo_symm_apply hk ε r hε hr ⟨w, hw⟩
+      _ = modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p) := by
+        rw [← hd, ← hdi]
+  have hφ : (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr') p : M) = (y.1 : M) := by
+    rw [morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε (le_of_lt hεr') p]
+    change data.χ (modelHandleMap hk ε r (attachingInclusion k (m + 1 - k) p)) = (y.1 : M)
+    rw [← hdi]
+    rw [hd]
+    exact hwy
+  dsimp [morseHandleAdjunctionToUpperSublevelInv]
+  rw [dif_pos hbound]
+  rw [hsymm, hraw]
+  calc
+    Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) ⟨(y.1 : M), hbound⟩ =
+        Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+          (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr') p) := by
+      congr 1
+      apply Subtype.ext
+      exact hφ.symm
+    _ = Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+          (attachingInclusion k (m + 1 - k) p) := by
+      simpa using (adjunction_coherence (i := attachingInclusion k (m + 1 - k))
+        (φ := morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) p).symm
+
+theorem morseHandleAdjunctionInv_eq_cell_strict {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data})
+    (hy : (y.1 : M) ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))))
+    (hnot : ¬ f (y.1 : M) ≤ c - ε) :
+    morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr y =
+      Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+        (modelHandleMapRawSymm hk ε r (data.χ.symm (y.1 : M))) := by
+  let w : MorseModel (m + 1) := Classical.choose hy
+  have hw : w ∈ modelHandle hk ε r := (Classical.choose_spec hy).1
+  have hwy : data.χ w = (y.1 : M) := (Classical.choose_spec hy).2
+  have hsrc : w ∈ data.χ.source := by
+    rcases (by simpa [← modelHandleMap_range hk ε r hε hr] using hw :
+      ∃ d : StandardHandle k (m + 1 - k), modelHandleMap hk ε r d = w) with ⟨d, hd⟩
+    exact data.hχsrc w (by
+      rw [← hd]
+      exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr'))
+  have hsymm : data.χ.symm (y.1 : M) = w := by
+    rw [← hwy]
+    exact data.χ.left_inv hsrc
+  have hw' : w ∈ Set.range (modelHandleMap hk ε r) := by
+    simpa [← modelHandleMap_range hk ε r hε hr] using hw
+  have hraw : Classical.choose hw' = modelHandleMapRawSymm hk ε r w := by
+    apply modelHandleMap_injective hk ε r hε (ne_of_gt hr)
+    rw [Classical.choose_spec hw', modelHandleMapRawSymm_map hk ε r hε hr w hw]
+  dsimp [morseHandleAdjunctionToUpperSublevelInv]
+  rw [dif_neg hnot]
+  change Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      (Classical.choose hw') =
+    Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      (modelHandleMapRawSymm hk ε r (data.χ.symm (y.1 : M)))
+  rw [hsymm, hraw]
+
+theorem continuousOn_morseHandleAdjunctionInv_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r) :
+    ContinuousOn (morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr)
+      {y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} |
+        (y.1 : M) ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} := by
+  let S : Set {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} :=
+    {y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} |
+      (y.1 : M) ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))}
+  let g : S → Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) :=
+    fun y => Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      (modelHandleMapRawSymm hk ε r (data.χ.symm (y.1 : M)))
+  have hproj : Continuous (fun y : S => (y.1 : M)) := by
+    exact continuous_subtype_val.comp (continuous_subtype_val.comp continuous_subtype_val)
+  have hχ : Continuous (fun y : S => data.χ.symm (y.1 : M)) := by
+    have hmaps : Set.MapsTo (fun y : S => (y.1 : M)) Set.univ data.χ.target := by
+      intro y hy
+      rcases y.2 with ⟨w, hw, hwy⟩
+      simpa [hwy] using data.χ.map_source (data.hχsrc w (by
+        rcases (by simpa [← modelHandleMap_range hk ε r hε hr] using hw :
+          ∃ d : StandardHandle k (m + 1 - k), modelHandleMap hk ε r d = w) with ⟨d, hd⟩
+        rw [← hd]
+        exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr')))
+    exact (continuousOn_univ.mp (data.χ.continuousOn_invFun.comp hproj.continuousOn hmaps))
+  have hmain : Continuous (fun y : S =>
+      Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+        (modelHandleMapRawSymm hk ε r (data.χ.symm (y.1 : M)))) := by
+    exact (continuous_cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))).comp
+      (by
+        have hraw : Continuous (modelHandleMapRawSymm hk ε r) := by
+          dsimp [modelHandleMapRawSymm]
+          refine Continuous.prodMk ?_ ?_
+          · exact (continuous_closedCellClamp k).comp (by
+              have hsqrt : Continuous (fun y : MorseModel (m + 1) =>
+                  (Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))⁻¹) := by
+                refine Continuous.inv₀ ?_ (fun y => ?_)
+                · exact Real.continuous_sqrt.comp (by
+                    have hnorm : Continuous (fun y : MorseModel (m + 1) => ‖posPart hk y‖) :=
+                      continuous_norm.comp (continuous_posPart hk)
+                    have hpow : Continuous (fun y : MorseModel (m + 1) => ‖posPart hk y‖ ^ 2) := hnorm.pow 2
+                    exact (continuous_const.add hpow : Continuous (fun y : MorseModel (m + 1) =>
+                      2 * ε + ‖posPart hk y‖ ^ 2)))
+                · exact ne_of_gt (by positivity : 0 < Real.sqrt (2 * ε + ‖posPart hk y‖ ^ 2))
+              exact hsqrt.smul (continuous_negPart hk))
+          · exact (continuous_closedCellClamp (m + 1 - k)).comp (by
+              have hscalar : Continuous (fun _ : MorseModel (m + 1) => (r⁻¹ : ℝ)) := continuous_const
+              exact hscalar.smul (continuous_posPart hk))
+        exact hraw.comp hχ)
+  have hg : Continuous g := by
+    dsimp [g]
+    exact hmain
+  have hmain2 : ContinuousOn (fun y : S =>
+      morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr
+        (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data})) Set.univ := by
+    refine (continuousOn_congr (s := Set.univ)
+      (g := fun y : S => morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr
+        (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data}))
+      (f := g) ?_).mpr hg.continuousOn
+    intro y hy
+    dsimp [g]
+    by_cases hlow : f (y.1 : M) ≤ c - ε
+    · exact morseHandleAdjunctionInv_eq_cell_coherence hk c ε r data hε hεr' hr
+        (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data}) y.2 hlow
+    · exact morseHandleAdjunctionInv_eq_cell_strict hk c ε r data hε hεr' hr
+        (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data}) y.2 hlow
+  rw [continuousOn_iff_continuous_restrict]
+  simpa [S] using (continuousOn_univ.mp hmain2)
+
+theorem continuousOn_morseHandleAdjunctionInv_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r) :
+    ContinuousOn (morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr)
+      {y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} |
+        f (y.1 : M) ≤ c - ε} := by
+  let S : Set {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} :=
+    {y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} |
+      f (y.1 : M) ≤ c - ε}
+  let g : S → Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) :=
+    fun y => Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      (⟨(y.1 : M), y.2⟩ : SublevelSpace f (c - ε))
+  have hproj : Continuous (fun y : S => (y.1 : M)) := by
+    exact continuous_subtype_val.comp (continuous_subtype_val.comp continuous_subtype_val)
+  have hg : Continuous g := by
+    dsimp [g]
+    exact (continuous_lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))).comp
+      (Continuous.subtype_mk hproj (fun y => y.2))
+  have hmain2 : ContinuousOn (fun y : S =>
+      morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr
+        (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data})) Set.univ := by
+    refine (continuousOn_congr (s := Set.univ)
+      (g := fun y : S => morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr
+        (y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data}))
+      (f := g) ?_).mpr hg.continuousOn
+    intro y hy
+    dsimp [g]
+    dsimp [morseHandleAdjunctionToUpperSublevelInv]
+    have hcond : f (y.1 : M) ≤ c - ε := y.2
+    rw [dif_pos hcond]
+  rw [continuousOn_iff_continuous_restrict]
+  simpa [S] using (continuousOn_univ.mp hmain2)
+
+theorem continuous_morseHandleAdjunctionInv {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (hcont : Continuous f) :
+    Continuous (morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr) := by
+  let S₁ : Set {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} :=
+    {y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} |
+      f (y.1 : M) ≤ c - ε}
+  let S₂ : Set {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} :=
+    {y : {y' : SublevelSpace f (c + r ^ 2 / 2) // y' ∈ morseHandleAdjunctionImage hk c ε r data} |
+      (y.1 : M) ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))}
+  have hsrc_all : ∀ w ∈ modelHandle hk ε r, w ∈ data.χ.source := by
+    intro w hw
+    rcases (by simpa [← modelHandleMap_range hk ε r hε hr] using hw :
+      ∃ d : StandardHandle k (m + 1 - k), modelHandleMap hk ε r d = w) with ⟨d, hd⟩
+    exact data.hχsrc w (by
+      rw [← hd]
+      exact le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr'))
+  have hclosed₁ : IsClosed S₁ := by
+    dsimp [S₁]
+    exact IsClosed.preimage (hcont.comp (continuous_subtype_val.comp continuous_subtype_val))
+      (isClosed_Iic (a := c - ε))
+  have hclosed₂ : IsClosed S₂ := by
+    have hcomp : IsCompact (data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))) := by
+      have hcomp' : IsCompact (modelHandle hk ε r : Set (MorseModel (m + 1))) := by
+        rw [← modelHandleMap_range hk ε r hε hr]
+        simpa using (IsCompact.image isCompact_univ (continuous_modelHandleMap hk ε r))
+      exact IsCompact.image_of_continuousOn hcomp' (data.χ.continuousOn_toFun.mono (fun w hw => hsrc_all w hw))
+    dsimp [S₂]
+    exact IsClosed.preimage (continuous_subtype_val.comp continuous_subtype_val)
+      hcomp.isClosed
+  have hunion : Set.univ = S₁ ∪ S₂ := by
+    ext y
+    constructor
+    · intro hy
+      rcases y.2 with h₁ | h₂
+      · exact Or.inl h₁
+      · exact Or.inr h₂
+    · intro hy
+      trivial
+  exact continuousOn_univ.mp (by
+    rw [hunion]
+    exact (continuousOn_morseHandleAdjunctionInv_lower hk c ε r data hε hεr' hr).union_of_isClosed
+      (continuousOn_morseHandleAdjunctionInv_cell hk c ε r data hε hεr' hr) hclosed₁ hclosed₂)
+
+noncomputable def morseHandleAdjunctionHomeoImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (hcont : Continuous f) :
+    Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) ≃ₜ
+      {y : SublevelSpace f (c + r ^ 2 / 2) // y ∈ morseHandleAdjunctionImage hk c ε r data} where
+  toFun := fun z => ⟨morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr' z,
+    morseHandleAdjunctionToUpperSublevel_mem_image hk c ε r data hε hεr' z⟩
+  invFun := morseHandleAdjunctionToUpperSublevelInv hk c ε r data hε hεr' hr
+  left_inv := fun z => morseHandleAdjunctionToUpperSublevel_left_inv hk c ε r data hε hεr' hr hcont z
+  right_inv := fun y => by
+    apply Subtype.ext
+    simpa using (morseHandleAdjunctionToUpperSublevel_right_inv hk c ε r data hε hεr' hr y)
+  continuous_toFun := Continuous.subtype_mk (continuous_morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr')
+    (fun z => morseHandleAdjunctionToUpperSublevel_mem_image hk c ε r data hε hεr' z)
+  continuous_invFun := continuous_morseHandleAdjunctionInv hk c ε r data hε hεr' hr hcont
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
