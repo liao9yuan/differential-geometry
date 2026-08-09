@@ -332,6 +332,30 @@ theorem metric_inner_contMDiffAt
   exact htotal.2
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
+theorem metric_inner_contMDiffOn_frame
+    (g : SmoothRiemannianMetric I M)
+    {u : Set M} {Idx : Type*} [Finite Idx]
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
+    ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun x : M => g.inner x (frame i x) (frame j x)) u := by
+  intro x hx
+  have hg : ContMDiffWithinAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun y : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        y (g.inner y)) u x :=
+    (g.contMDiff.contMDiffAt).contMDiffWithinAt
+  have hX : ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) ∞ (T% (frame i)) u x :=
+    hframe.contMDiffOn i x hx
+  have hY : ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) ∞ (T% (frame j)) u x :=
+    hframe.contMDiffOn j x hx
+  have htotal : ContMDiffWithinAt I (I.prod 𝓘(ℝ, ℝ)) ∞
+      (fun y : M => TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) y
+        (g.inner y (frame i y) (frame j y))) u x := by
+    exact ContMDiffWithinAt.clm_bundle_apply₂ (F₁ := E) (F₂ := E) hg hX hY
+  rw [contMDiffWithinAt_totalSpace] at htotal
+  exact htotal.2
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem cov_tangentConst_add_apply_eventuallyEq
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (x : M) (v₁ v₂ w : TangentSpace I x) :

@@ -3046,6 +3046,44 @@ theorem scalarHeatFlow_smoothInitial_strict_pos
   intro t ht x
   exact lt_of_lt_of_le hc₀ (hcomp t ht x)
 
+theorem scalarHeatFlow_smoothInitial_strict_pos_of_nonzero
+    [ConnectedSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} (hT : 0 ≤ T)
+    (hpos0 : ∀ x : M, 0 ≤ u₀.toFun x)
+    {c : M} (hc : 0 < u₀.toFun c)
+    {t : ℝ} (ht : t ∈ Set.Ioo 0 T) :
+    0 < scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t c := by
+  classical
+  have hu := scalarHeatFlow_isHeatOnStationary_smoothInitial
+    (I := I) (M := M) g u₀ htail hT
+  have ht0 : 0 < t := (Set.mem_Ioo.mp ht).1
+  let D : RealTimeInterval := RealTimeInterval.closed (-1) (t + 1) (by linarith : -1 ≤ t + 1)
+  have hG : MetricFamilySmoothOn (I := I) (M := M) D ((stationaryMetricFamily g).restrict D) :=
+    metricFamilySmoothOn_stationary (I := I) (M := M) g D
+  have hslab : Set.Icc 0 t ⊆ D.regular := by
+    intro s hs
+    dsimp [D]
+    exact ⟨by linarith [hs.1], by linarith [hs.2]⟩
+  have hconn : ∀ s ∈ Set.Icc 0 t,
+      (stationaryMetricFamily g).connection s = LeviCivita (I := I)
+        ((stationaryMetricFamily g).metric s) := by
+    intro s hs
+    rfl
+  exact DifferentialGeometry.Analysis.Parabolic.heat_pos_of_initial_pos_of_metricFamilySmoothOn
+    (I := I) (stationaryMetricFamily g) hT
+    (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
+    hu
+    (fun x => by
+      rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x]
+      exact hpos0 x)
+    (by
+      rw [scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ c]
+      exact hc)
+    ht hG hslab hconn c
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
     [CompactSpace M]
