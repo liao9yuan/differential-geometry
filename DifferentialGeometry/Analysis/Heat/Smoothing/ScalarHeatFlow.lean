@@ -3329,15 +3329,15 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
 private lemma fiberNormSq_jointContinuousOn_aux
     (g : SmoothRiemannianMetric I M) (r sIdx : ℕ)
     (Ψ : ℝ → SmoothCcTensor g r sIdx) (S : Set ℝ)
-    (hSI : Set.Icc (0 : ℝ) 1 ⊆ S)
+    {a b : ℝ} (hSI : Set.Icc a b ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r sIdx ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r sIdx ℝ E)
         (E := fun z : M => TensorRSSpace r sIdx I z) q.1 ((Ψ q.2).toSection q.1))
       ((Set.univ : Set M) ×ˢ S)) :
     ContinuousOn (fun p : ℝ × M =>
       riemannianFiberNormSq (I := I) (M := M) g r sIdx p.2 ((Ψ p.1).toSection p.2))
-      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
-  have hIccprod : (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) ⊆
+      (Set.Icc a b ×ˢ (Set.univ : Set M)) := by
+  have hIccprod : (Set.Icc a b ×ˢ (Set.univ : Set M)) ⊆
       (fun p : ℝ × M => (p.2, p.1)) ⁻¹' ((Set.univ : Set M) ×ˢ S) := by
     rintro ⟨t, x⟩ ⟨ht, -⟩
     exact ⟨Set.mem_univ _, hSI ht⟩
@@ -3345,7 +3345,7 @@ private lemma fiberNormSq_jointContinuousOn_aux
   have hv : ContinuousOn
       (fun p : ℝ × M => TotalSpace.mk' (TensorRSModel r sIdx ℝ E)
         (E := fun z : M => TensorRSSpace r sIdx I z) p.2 ((Ψ p.1).toSection p.2))
-      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+      (Set.Icc a b ×ˢ (Set.univ : Set M)) := by
     refine (hjoint.continuousOn.comp hswapCont.continuousOn hIccprod).congr ?_
     rintro ⟨t, x⟩ -
     rfl
@@ -3355,20 +3355,20 @@ private lemma fiberNormSq_jointContinuousOn_aux
         (E := fun x : M => TensorRSSpace r sIdx I x →L[ℝ] TensorRSSpace r sIdx I x →L[ℝ] ℝ)
         p.2
         (tensorRSRiemannianInnerCLM (I := I) (M := M) g r sIdx p.2))
-      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) :=
+      (Set.Icc a b ×ˢ (Set.univ : Set M)) :=
     ((tensorRSRiemannianInnerCLM_continuous (I := I) (M := M) g r sIdx).comp continuous_snd).continuousOn
   have happ : ContinuousOn
       (fun p : ℝ × M => TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) p.2
         (tensorRSRiemannianInnerCLM (I := I) (M := M) g r sIdx p.2
           ((Ψ p.1).toSection p.2) ((Ψ p.1).toSection p.2)))
-      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) :=
+      (Set.Icc a b ×ˢ (Set.univ : Set M)) :=
     ContinuousOn.clm_bundle_apply₂ (F₁ := TensorRSModel r sIdx ℝ E)
       (F₂ := TensorRSModel r sIdx ℝ E) (F₃ := ℝ) (b := fun p : ℝ × M => p.2) hψ hv hv
   have hscalar : ContinuousOn
       (fun p : ℝ × M =>
         tensorRSRiemannianInnerCLM (I := I) (M := M) g r sIdx p.2
           ((Ψ p.1).toSection p.2) ((Ψ p.1).toSection p.2))
-      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+      (Set.Icc a b ×ˢ (Set.univ : Set M)) := by
     intro p hp
     have hp2 := ((FiberBundle.continuousWithinAt_totalSpace ℝ
       (fun p : ℝ × M => TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) p.2
@@ -3406,6 +3406,7 @@ private lemma lift_jets_jointContMDiffOn
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma jet_l2Norm_contDiff
     (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g) (j : ℕ)
+    (a b : ℝ)
     (hLift : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 0 ℝ E)
         (E := fun z : M => TensorRSSpace 0 0 I z) q.1
@@ -3413,7 +3414,7 @@ private lemma jet_l2Norm_contDiff
       ((Set.univ : Set M) ×ˢ Set.univ)) :
     ContinuousOn (fun t : ℝ =>
       ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ^ 2)
-      (Set.Icc (0 : ℝ) 1) := by
+      (Set.Icc a b) := by
   have hjet : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 (0 + j) ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 (0 + j) ℝ E)
         (E := fun z : M => TensorRSSpace 0 (0 + j) I z) q.1
@@ -3428,7 +3429,7 @@ private lemma jet_l2Norm_contDiff
   have hfib : ContinuousOn (fun p : ℝ × M =>
       riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) p.2
         ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F p.1))).toSection p.2))
-      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+      (Set.Icc a b ×ˢ (Set.univ : Set M)) := by
     exact fiberNormSq_jointContinuousOn_aux (I := I) (M := M) g 0 (0 + j)
       (fun t => PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))) Set.univ
       (by intro x hx; trivial) hjet
@@ -3443,7 +3444,7 @@ private lemma jet_l2Norm_contDiff
   haveI : IsFiniteMeasureOnCompacts (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   have hk : IsCompact (Set.univ : Set M) := isCompact_univ
-  have hfs : ∀ p, ∀ x, p ∈ Set.Icc (0 : ℝ) 1 → x ∉ (Set.univ : Set M) →
+  have hfs : ∀ p, ∀ x, p ∈ Set.Icc a b → x ∉ (Set.univ : Set M) →
       riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) x
         ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F p))).toSection x) = 0 := by
     intro p x hp hx
@@ -3451,27 +3452,128 @@ private lemma jet_l2Norm_contDiff
   have hfib' : ContinuousOn (Function.uncurry (fun (t : ℝ) (x : M) =>
       riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) x
         ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))).toSection x)))
-      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+      (Set.Icc a b ×ˢ (Set.univ : Set M)) := by
     simpa [Function.uncurry] using hfib
   simpa using (continuousOn_integral_of_compact_support
     (μ := riemannianVolumeMeasure (I := I) (M := M) g)
-    (s := Set.Icc (0 : ℝ) 1) (k := (Set.univ : Set M)) hk hfib' hfs)
+    (s := Set.Icc a b) (k := (Set.univ : Set M)) hk hfib' hfs)
+
+private lemma forcingCoeff_sq_bdd_of_tensorHsNorm_bdd
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (F : ℝ → SmoothScalar g) (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    (m q : ℕ) (C : ℝ) (_hC : 0 ≤ C)
+    {a b : ℝ} (hbd : ∀ t ∈ Set.Icc a b,
+      ‖ccTensorToHs (I := I) (M := M) g 0 (m + q : ℕ) (scalarCcLift g (F t))‖ ≤ C)
+    (i : TensorEigenIdx00 g) (t : ℝ) (ht : t ∈ Set.Icc a b) :
+    tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+      (scalarForcingCoeff (I := I) (M := M) g f i t) ^ 2 ≤
+      C ^ 2 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) := by
+  have hb := hbd t ht
+  have hsq : tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) *
+        ((ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ) (scalarCcLift g (F t))).coeff i) ^ 2 ≤
+      ‖ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ) (scalarCcLift g (F t))‖ ^ 2 := by
+    rw [ccToHs_norm_sq]
+    exact Summable.le_tsum
+      (ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ) (scalarCcLift g (F t))).weighted_summable i
+      (fun j _ => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) j ((m + q : ℕ) : ℝ))
+        (sq_nonneg _))
+  have hbdd_sq : ‖ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ)
+        (scalarCcLift g (F t))‖ ^ 2 ≤ C ^ 2 :=
+    pow_le_pow_left₀ (norm_nonneg _) hb 2
+  have hcoeff_bdd : (ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ)
+        (scalarCcLift g (F t))).coeff i ^ 2 ≤
+      C ^ 2 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((m + q : ℕ) : ℝ)) := by
+    have hw : 0 < tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) := by
+      unfold tensorSobolevWeight
+      exact Real.rpow_pos_of_pos (by linarith [tensor_lambda_nonneg (I := I) (M := M) i])
+        ((m + q : ℕ) : ℝ)
+    calc
+      (ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ)
+          (scalarCcLift g (F t))).coeff i ^ 2
+          ≤ C ^ 2 / tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) := by
+            rw [le_div_iff₀ hw]
+            calc
+              (ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ)
+                  (scalarCcLift g (F t))).coeff i ^ 2 * tensorSobolevWeight
+                    (I := I) (M := M) i ((m + q : ℕ) : ℝ)
+                  ≤ ‖ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ)
+                      (scalarCcLift g (F t))‖ ^ 2 := by
+                    rw [mul_comm]
+                    exact hsq
+              _ ≤ C ^ 2 := hbdd_sq
+      _ = C ^ 2 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((m + q : ℕ) : ℝ)) := by
+            have hwval : tensorSobolevWeight (I := I) (M := M) i ((m + q : ℕ) : ℝ) =
+                (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ ((m + q : ℕ) : ℝ) := by
+              unfold tensorSobolevWeight
+              rfl
+            have hx : 0 ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+              linarith [tensor_lambda_nonneg (I := I) (M := M) i]
+            rw [hwval, div_eq_mul_inv]
+            rw [show ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ ((m + q : ℕ) : ℝ))⁻¹ =
+                (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((m + q : ℕ) : ℝ)) from
+              (Real.rpow_neg hx ((m + q : ℕ) : ℝ)).symm]
+  have hbridge : scalarForcingCoeff (I := I) (M := M) g f i t =
+      (ccTensorToHs (I := I) (M := M) g 0 ((m + q : ℕ) : ℝ) (scalarCcLift g (F t))).coeff i := by
+    rw [scalarForcingCoeff_eq_tensorL2Coeff_of_smoothRep (I := I) (M := M) g F hfF i t]
+    rfl
+  have hwt : tensorSobolevWeight (I := I) (M := M) i (m : ℝ) =
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (m : ℝ) := by
+    unfold tensorSobolevWeight
+    rw [Real.rpow_natCast]
+  calc
+    tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (scalarForcingCoeff (I := I) (M := M) g f i t) ^ 2
+        = (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (m : ℝ) *
+            (scalarForcingCoeff (I := I) (M := M) g f i t) ^ 2 := by rw [hwt]
+    _ ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (m : ℝ) *
+          (C ^ 2 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((m + q : ℕ) : ℝ))) := by
+          rw [hbridge]
+          have hnonneg : 0 ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (m : ℝ) :=
+            Real.rpow_nonneg (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (m : ℝ)
+          exact mul_le_mul_of_nonneg_left hcoeff_bdd hnonneg
+    _ = C ^ 2 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) := by
+          have hx : 0 < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+            linarith [tensor_lambda_nonneg (I := I) (M := M) i]
+          have hcomb : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (m : ℝ) *
+                (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((m + q : ℕ) : ℝ)) =
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) := by
+            have hL : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (m : ℝ) *
+                    (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((m + q : ℕ) : ℝ)) =
+                  (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+                    ((m : ℝ) + -((m + q : ℕ) : ℝ)) := by
+              rw [Real.rpow_add hx (m : ℝ) (-((m + q : ℕ) : ℝ))]
+            have hR : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+                    ((m : ℝ) + -((m + q : ℕ) : ℝ)) =
+                  (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) := by
+              congr 1
+              rw [Nat.cast_add]
+              ring
+            exact hL.trans hR
+          calc
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (m : ℝ) *
+                (C ^ 2 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((m + q : ℕ) : ℝ)))
+                = C ^ 2 * ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (m : ℝ) *
+                    (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((m + q : ℕ) : ℝ))) := by ring
+            _ = C ^ 2 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)) := by
+                  rw [hcomb]
 
 private lemma tensorHsNorm_uniform_bdd_of_liftJointSmooth
     (g : SmoothRiemannianMetric I M) (F : ℝ → SmoothScalar g) (m : ℕ)
+    {a b : ℝ} (hab : a ≤ b)
     (hLift : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 0 ℝ E)
         (E := fun z : M => TensorRSSpace 0 0 I z) q.1
           ((scalarCcLift g (F q.2)).toSection q.1))
       ((Set.univ : Set M) ×ˢ Set.univ)) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) 1,
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc a b,
       ‖ccTensorToHs (I := I) (M := M) g 0 (m : ℝ) (scalarCcLift g (F t))‖ ≤ C := by
   classical
-  have hjet_bdd (j : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc (0 : ℝ) 1,
+  have hjet_bdd (j : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc a b,
       ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ≤ C := by
-    have hcont := jet_l2Norm_contDiff (I := I) (M := M) g F j hLift
+    have hcont := jet_l2Norm_contDiff (I := I) (M := M) g F j a b hLift
     obtain ⟨x, hx, hmax⟩ := IsCompact.exists_isMaxOn isCompact_Icc
-      (show (Set.Icc (0 : ℝ) 1).Nonempty by exact ⟨(0 : ℝ), by simp⟩) hcont
+      (show (Set.Icc a b).Nonempty by exact ⟨a, by simp [hab]⟩) hcont
     refine ⟨‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F x))‖,
       norm_nonneg _, fun t ht => ?_⟩
     have hb := hmax ht
@@ -3482,7 +3584,7 @@ private lemma tensorHsNorm_uniform_bdd_of_liftJointSmooth
   obtain ⟨K, hK, hle⟩ := hs_le_jet (I := I) (M := M) g 0 m
   let B : ℕ → ℝ := fun j => (hjet_bdd j).choose
   have hBnn (j : ℕ) : 0 ≤ B j := (hjet_bdd j).choose_spec.1
-  have hjets : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+  have hjets : ∀ t ∈ Set.Icc a b,
       (∑ j ∈ Finset.range (m + 1),
         ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖) ≤
       ∑ j ∈ Finset.range (m + 1), B j := by
@@ -3497,6 +3599,42 @@ private lemma tensorHsNorm_uniform_bdd_of_liftJointSmooth
               ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ := hle _
       _ ≤ K * ∑ j ∈ Finset.range (m + 1), B j :=
             mul_le_mul_of_nonneg_left (hjets t ht) hK
+
+private lemma uniform_forcing_hspace_of_liftJointSmooth
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (F : ℝ → SmoothScalar g) (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    {a b : ℝ} (hab : a ≤ b)
+    (hLift : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 0 ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 0 ℝ E)
+        (E := fun z : M => TensorRSSpace 0 0 I z) q.1
+          ((scalarCcLift g (F q.2)).toSection q.1))
+      ((Set.univ : Set M) ×ˢ Set.univ))
+    (m : ℕ) :
+    ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc a b →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g f i t) ^ 2 ≤ Cm i := by
+  classical
+  obtain ⟨p, _hp, htail_s⟩ := scalar_eigen_tail (I := I) (M := M) g
+  set q : ℕ := Nat.ceil p
+  have hp_le : p ≤ (q : ℝ) := by
+    dsimp [q]
+    exact_mod_cast Nat.le_ceil p
+  have htail_q : Summable (fun i : TensorEigenIdx00 g =>
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ))) := by
+    refine Summable.of_nonneg_of_le
+      (fun i => Real.rpow_nonneg
+        (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (-(q : ℝ))) ?_ htail_s
+    intro i
+    exact Real.rpow_le_rpow_of_exponent_le
+      (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (neg_le_neg hp_le)
+  obtain ⟨C, hC, hbd⟩ := tensorHsNorm_uniform_bdd_of_liftJointSmooth
+    (I := I) (M := M) g F (m + q) hab hLift
+  refine ⟨fun i => C ^ 2 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(q : ℝ)),
+    htail_q.mul_left (C ^ 2), ?_⟩
+  intro i t ht
+  exact forcingCoeff_sq_bdd_of_tensorHsNorm_bdd (I := I) (M := M) g F hfF m q C hC hbd i t ht
 
 end jointSmoothness
 
@@ -4613,6 +4751,44 @@ theorem scalarForcedFlow_forcing_sum_eq
   have hfun : scalarForcingSlice g f hf hε hεT hspace ht = F t :=
     smoothToLp_injective (I := I) (M := M) g hL
   exact congrFun (congrArg SmoothScalar.toFun hfun) x
+
+theorem scalarForcingFlow_eq_smoothRep
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (F : ℝ → SmoothScalar g)
+    (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    (t : ℝ) (x : M) :
+    scalarForcingFlow g f t x = (F t).toFun x := by
+  have hbridge (i : TensorEigenIdx00 g) :
+      scalarForcingCoeff (I := I) (M := M) g f i t =
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+          (SmoothCcTensor.toL2 (scalarCcLift g (F t))) i :=
+    scalarForcingCoeff_eq_tensorL2Coeff_of_smoothRep (I := I) (M := M) g F hfF i t
+  calc
+    scalarForcingFlow g f t x
+        = scalarSpecSum (I := I) (M := M) g
+            (fun i : TensorEigenIdx00 g => fun _ : ℝ => tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+              (SmoothCcTensor.toL2 (scalarCcLift g (F t))) i) t x := by
+          unfold scalarForcingFlow
+          apply tsum_congr
+          intro i
+          change scalarForcingCoeff (I := I) (M := M) g f i t *
+              TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+                (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x =
+            tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+              (SmoothCcTensor.toL2 (scalarCcLift g (F t))) i *
+              TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+                (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x
+          rw [hbridge i]
+    _ = TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+          (scalarCcLift g (F t)).toSection x := by
+          simpa using (congrFun (scalarSpec_cc g (scalarCcLift g (F t))) x)
+    _ = (F t).toFun x := by
+          have h := congrArg SmoothScalar.toFun (scalar0Cc_scalarCcLift g (F t))
+          exact congrFun h x
 
 theorem scalarForcedFlow_hasDerivAt
     (g : SmoothRiemannianMetric I M)
