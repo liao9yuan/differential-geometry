@@ -39,6 +39,19 @@ open Tensor0SBundle
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+private local instance tensorRSModelNormedSpaceLocal (r s : ℕ) :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace r s
+
+private local instance tensorRSBundleTopologyLocal (r s : ℕ) :
+    TopologicalSpace (TotalSpace (TensorRSModel r s ℝ E)
+      (fun x : M => TensorRSSpace r s I x)) :=
+  Tensor0SBundle.tensorRSBundle_topology r s
+
+private local instance tensorRSBundleFiberLocal (r s : ℕ) :
+    FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
+  Tensor0SBundle.tensorRSBundle_fiber r s
+
 noncomputable def scalarHeatCoeff
     (g : SmoothRiemannianMetric I M) (u₀ : TensorL2 0 0 g)
     (i : TensorEigenIdx00 g) (t : ℝ) : ℝ :=
