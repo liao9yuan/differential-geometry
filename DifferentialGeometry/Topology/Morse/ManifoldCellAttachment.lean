@@ -8176,6 +8176,39 @@ theorem morseFarExpandMap_deep {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R�
   simp [morseFarExpandMap, morseFarExpandTime_zero hz, curveAt_zero]
 
 
+theorem morseFarExpandTime_antiMonotone {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    {t₁ t₂ : ℝ} (ht : t₁ ≤ t₂) :
+    morseFarExpandTime c ε δ t₂ ≤ morseFarExpandTime c ε δ t₁ := by
+  by_cases ht₁ : t₁ ≤ c - ε - δ
+  · have he₁ : morseFarExpandTime c ε δ t₁ = 0 := morseFarExpandTime_zero ht₁
+    rw [he₁]
+    exact (morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ hε : morseFarExpandTime c ε δ t₂ ≤ 0)
+  · have ht₁' : c - ε - δ < t₁ := lt_of_not_ge ht₁
+    have ht₂' : c - ε - δ < t₂ := lt_of_lt_of_le ht₁' ht
+    rw [morseFarExpandTime_eq hδ ht₂']
+    rw [morseFarExpandTime_eq hδ ht₁']
+    have hnum : -(t₂ - c + ε + δ) * (2 * ε) ≤ -(t₁ - c + ε + δ) * (2 * ε) := by
+      have hmul : (t₁ - c + ε + δ) * (2 * ε) ≤ (t₂ - c + ε + δ) * (2 * ε) :=
+        mul_le_mul_of_nonneg_right (by nlinarith) (by nlinarith [hε])
+      nlinarith [hmul]
+    exact div_le_div_of_nonneg_right hnum (le_of_lt hδ)
+
+theorem morseFarExpandLevel_mono {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    {t₁ t₂ ρ₁ ρ₂ : ℝ} (ht : t₁ ≤ t₂) (hρ0 : 0 ≤ ρ₁) (hρle : ρ₁ ≤ ρ₂)
+    (he2 : morseFarExpandTime c ε δ t₂ ≤ 0) :
+    t₂ - ρ₂ * morseFarExpandTime c ε δ t₂ ≥ t₁ - ρ₁ * morseFarExpandTime c ε δ t₁ := by
+  have hem := morseFarExpandTime_antiMonotone (c := c) (ε := ε) (δ := δ) hδ hε ht
+  have he1 : morseFarExpandTime c ε δ t₁ ≤ 0 :=
+    (morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ hε : morseFarExpandTime c ε δ t₁ ≤ 0)
+  have h1 : ρ₁ * (morseFarExpandTime c ε δ t₁ - morseFarExpandTime c ε δ t₂) ≥ 0 := by
+    exact mul_nonneg hρ0 (sub_nonneg.mpr hem)
+  have h2 : (ρ₁ - ρ₂) * morseFarExpandTime c ε δ t₂ ≥ 0 := by
+    exact mul_nonneg_of_nonpos_of_nonpos (sub_nonpos.mpr hρle) he2
+  have hdiff : ρ₁ * morseFarExpandTime c ε δ t₁ - ρ₂ * morseFarExpandTime c ε δ t₂ ≥ 0 := by
+    nlinarith [h1, h2]
+  nlinarith [hdiff, ht]
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
