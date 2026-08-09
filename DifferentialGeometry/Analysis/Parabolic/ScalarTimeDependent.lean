@@ -73,8 +73,6 @@ abbrev IsHeatOnStationary
     (u : Real → M → Real) : Prop :=
   IsHeatOn D (stationaryMetricFamily (I := I) (M := M) g) u
 
-/-- A classical solution of the additively forced heat equation
-`∂ₜu = Δu + f` on a time interval. -/
 structure IsHeatForcedOn
     (D : RealTimeInterval)
     (G : RealizedMetricFamily (I := I) (M := M) Real)

@@ -56,8 +56,6 @@ lemma real_inner_eq_mul' (a b : ℝ) : ⟪a, b⟫_ℝ = a * b := by
   ring
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The scalar `L²` inner product of two smooth scalars equals the integral
-of their pointwise product. -/
 theorem smoothToLp_inner_eq_integral_mul
     (g : SmoothRiemannianMetric I M) (f h : SmoothScalar g) :
     ⟪smoothToLp (I := I) (M := M) g f, smoothToLp (I := I) (M := M) g h⟫_ℝ =
@@ -93,7 +91,6 @@ lemma separableForm_zero_apply
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [CompactSpace M] in
-/-- Pointwise identity for the smooth rank-(0,0) tensor inner product. -/
 lemma tensorInnerPointwise_smooth_zero_zero
     (g : SmoothRiemannianMetric I M) (S T : SmoothCcTensor g 0 0) (x : M) :
     tensorInnerPointwise (I := I) (M := M) g 0 0 x (S.toFun x) (T.toFun x) =
@@ -118,8 +115,6 @@ lemma tensorInnerPointwise_smooth_zero_zero
   rw [tensorEval_zero_zero_scalar0 (I := I) (M := M) g T x]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
-/-- The tensor L² inner product of rank-(0,0) smooth tensors equals the
-scalar L² inner product of their scalar evaluations. -/
 theorem tensorL2Inner_zero_zero_eq_integral_scalar0_mul
     (g : SmoothRiemannianMetric I M) (S T : SmoothCcTensor g 0 0) :
     tensorL2Inner (I := I) (M := M) g 0 0 S.toFun T.toFun =
@@ -135,8 +130,6 @@ theorem tensorL2Inner_zero_zero_eq_integral_scalar0_mul
 abbrev TensorEigenIdx00 (g : SmoothRiemannianMetric I M) :=
   Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 0
 
-/-- The rank-(0,0) smooth eigenvector is the corresponding Hilbert basis
-element of the tensor `L²` space. -/
 theorem eigenvectorSmooth00_eq_basis
     (g : SmoothRiemannianMetric I M) (j : TensorEigenIdx00 g) :
     (eigenvectorSmooth g 0 0 j : TensorL2 0 0 g) =
@@ -152,8 +145,6 @@ theorem eigenvectorSmooth00_eq_basis
       (tensorResolventHilbertEigenbasisSigma_apply (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) j).symm
 
-/-- The tensor `L²` coefficient of the rank-(0,0) smooth eigenvector is the
-Kronecker delta. -/
 theorem tensorL2Coeff_eigenvectorSmooth00
     (g : SmoothRiemannianMetric I M) [DecidableEq (TensorEigenIdx00 g)]
     (i j : TensorEigenIdx00 g) :
@@ -186,8 +177,6 @@ theorem tensorL2Coeff_eigenvectorSmooth00
     rw [if_neg hne]
     exact Orthonormal.inner_eq_zero b.orthonormal hji
 
-/-- The rank-(0,0) rough Laplacian of a smooth eigenvector is the eigenvalue
-times the eigenvector. -/
 theorem tensorEigen00_rawLap_eq
     (g : SmoothRiemannianMetric I M) (i : TensorEigenIdx00 g) :
     SmoothCcTensor.toL2 (rawTensorConnLapSmooth g 0 0 (eigenvectorSmooth g 0 0 i)) =
@@ -217,8 +206,6 @@ theorem tensorEigen00_rawLap_eq
   · simp [hji]
 
 omit [CompactSpace M] in
-/-- The rank-(0,0) rough Laplacian of a smooth tensor section equals the
-`toRS0` lift of the scalar Laplacian of its scalar evaluation. -/
 lemma rawLapSection_eq_toRS0 (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 0) (x : M) :
     rawTensorConnLap g 0 0 (fun y : M => S.toSection y) x =
@@ -232,7 +219,6 @@ lemma rawLapSection_eq_toRS0 (g : SmoothRiemannianMetric I M)
   exact hraw
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] in
-/-- The scalar Laplacian of the scalar evaluation is smooth. -/
 lemma laplacian_scalar0_smooth (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 0) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (laplacian (I := I) (LeviCivita (I := I) g) g
@@ -245,7 +231,6 @@ lemma laplacian_scalar0_smooth (g : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [CompactSpace M] in
-/-- The fiber-model equivalence recovers the scalar value of a scalar field. -/
 lemma tensor0Iso_fromScalarField
     (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :
