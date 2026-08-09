@@ -7979,6 +7979,154 @@ theorem morseFarCutoff_eq_one {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ) (r ε' R�
     rw [if_neg hx]
 
 
+noncomputable def morseFarExpandTime (c ε δ : ℝ) (t : ℝ) : ℝ :=
+  t - morseUncompressLevel c ε δ t
+
+theorem morseFarExpandTime_zero {c ε δ t : ℝ} (ht : t ≤ c - ε - δ) :
+    morseFarExpandTime c ε δ t = 0 := by
+  dsimp [morseFarExpandTime]
+  rw [morseUncompressLevel_fixed ht]
+  ring
+
+theorem morseFarExpandTime_eq {c ε δ t : ℝ} (hδ : 0 < δ)
+    (ht : c - ε - δ < t) :
+    morseFarExpandTime c ε δ t = -(t - c + ε + δ) * (2 * ε) / δ := by
+  dsimp [morseFarExpandTime]
+  rw [morseExpandTime hδ ht]
+
+theorem morseFarExpandTime_le_zero {c ε δ t : ℝ} (hδ : 0 < δ) (hε : 0 < ε) :
+    morseFarExpandTime c ε δ t ≤ 0 := by
+  by_cases htle : t ≤ c - ε - δ
+  · rw [morseFarExpandTime_zero htle]
+  · have htgt : c - ε - δ < t := lt_of_not_ge htle
+    rw [morseFarExpandTime_eq hδ htgt]
+    have hnum : -(t - c + ε + δ) * (2 * ε) ≤ 0 := by
+      have hneg : -(t - c + ε + δ) ≤ 0 := by linarith
+      have htwo : 0 ≤ 2 * ε := by nlinarith [hε]
+      exact mul_nonpos_of_nonpos_of_nonneg hneg htwo
+    exact div_nonpos_of_nonpos_of_nonneg hnum (le_of_lt hδ)
+
+theorem morseFarExpandTime_ge {c ε δ t : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    (ht' : t ≤ c - ε) :
+    -(2 * ε) ≤ morseFarExpandTime c ε δ t := by
+  by_cases htle : t ≤ c - ε - δ
+  · rw [morseFarExpandTime_zero htle]
+    nlinarith
+  · have htgt : c - ε - δ < t := lt_of_not_ge htle
+    rw [morseFarExpandTime_eq hδ htgt]
+    have hmain : (t - c + ε + δ) * (2 * ε) / δ ≤ 2 * ε := by
+      have hmul : (t - c + ε + δ) * (2 * ε) ≤ δ * (2 * ε) :=
+        mul_le_mul_of_nonneg_right (by nlinarith [ht']) (by nlinarith [hε])
+      exact (div_le_iff₀ hδ).mpr (by
+        simpa [mul_comm, mul_left_comm, mul_assoc] using hmul)
+    have hgoal : -(2 * ε) ≤ -(t - c + ε + δ) * (2 * ε) / δ := by
+      field_simp [hδ.ne']
+      nlinarith [ht']
+    exact hgoal
+
+theorem morseFarExpandLevel_le {c ε δ t ρ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    (ht : c - ε - δ ≤ t) (hρ : ρ ∈ Set.Icc (0 : ℝ) 1) :
+    c - ε - δ ≤ t - ρ * morseFarExpandTime c ε δ t := by
+  have he : morseFarExpandTime c ε δ t ≤ 0 := morseFarExpandTime_le_zero hδ hε
+  have hpe : ρ * morseFarExpandTime c ε δ t ≤ 0 := mul_nonpos_of_nonneg_of_nonpos hρ.1 he
+  nlinarith [hpe, ht]
+
+theorem morseFarExpandLevel_le_top {c ε δ t ρ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
+    (ht' : t ≤ c - ε) (hρ : ρ ∈ Set.Icc (0 : ℝ) 1) :
+    t - ρ * morseFarExpandTime c ε δ t ≤ c + ε := by
+  have hg : -(2 * ε) ≤ morseFarExpandTime c ε δ t := morseFarExpandTime_ge hδ hε ht'
+  have hne : -morseFarExpandTime c ε δ t ≤ 2 * ε := by nlinarith [hg]
+  have hρne : ρ * (-morseFarExpandTime c ε δ t) ≤ 2 * ε := by
+    exact le_trans (mul_le_mul_of_nonneg_left hne hρ.1)
+      (by
+        have hρ2 : (2 * ε) * ρ ≤ 2 * ε := mul_le_of_le_one_right (by nlinarith [hε]) hρ.2
+        nlinarith [hρ2])
+  nlinarith [hρne, ht']
+
+noncomputable def morseFarExpandMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (z : SublevelSpace f (c - ε)) : M :=
+  curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z.1
+    (morseFarCutoff hk c r ε' R₀ R₁ data z.1 * morseFarExpandTime c ε δ (f z.1))
+
+theorem morseFarExpandMap_value {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (z : SublevelSpace f (c - ε)) :
+    f (morseFarExpandMap hk c ε r δ ε' R₀ R₁ data v hv hsupp z) =
+      f z.1 - morseFarCutoff hk c r ε' R₀ R₁ data z.1 * morseFarExpandTime c ε δ (f z.1) := by
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  let τ : ℝ := morseFarCutoff hk c r ε' R₀ R₁ data z.1 * morseFarExpandTime c ε δ (f z.1)
+  have hcut : morseFarCutoff hk c r ε' R₀ R₁ data z.1 ∈ Set.Icc (0 : ℝ) 1 :=
+    morseFarCutoff_mem hk c r ε' R₀ R₁ data z.1
+  have hz : f z.1 ≤ c - ε := z.2
+  by_cases hdeep : f z.1 ≤ c - ε - δ
+  · have hτ : τ = 0 := by
+      dsimp [τ]
+      rw [morseFarExpandTime_zero hdeep]
+      ring
+    have hmap : morseFarExpandMap hk c ε r δ ε' R₀ R₁ data v hv hsupp z = z.1 := by
+      simp [morseFarExpandMap, morseFarExpandTime_zero hdeep, curveAt_zero]
+    rw [hmap]
+    change f z.1 = f z.1 - τ
+    rw [hτ]
+    ring
+  · have hnotdeep : c - ε - δ < f z.1 := lt_of_not_ge hdeep
+    have hle : c - ε - δ ≤ f z.1 := le_of_lt hnotdeep
+    have he0 : morseFarExpandTime c ε δ (f z.1) ≤ 0 := morseFarExpandTime_le_zero hδ hε
+    have hge : -(2 * ε) ≤ morseFarExpandTime c ε δ (f z.1) := morseFarExpandTime_ge hδ hε hz
+    have hpe : morseFarCutoff hk c r ε' R₀ R₁ data z.1 * morseFarExpandTime c ε δ (f z.1) ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hcut.1 he0
+    have hne : -morseFarExpandTime c ε δ (f z.1) ≤ 2 * ε := by nlinarith [hge]
+    have hρne : morseFarCutoff hk c r ε' R₀ R₁ data z.1 * (-morseFarExpandTime c ε δ (f z.1)) ≤ 2 * ε := by
+      exact le_trans (mul_le_mul_of_nonneg_left hne hcut.1)
+        (by
+          have hρ2 : (2 * ε) * morseFarCutoff hk c r ε' R₀ R₁ data z.1 ≤ 2 * ε :=
+            mul_le_of_le_one_right (by nlinarith [hε]) hcut.2
+          nlinarith [hρ2])
+    have hτmem : τ ∈ Set.Icc (f z.1 - (c + r ^ 2 / 2)) (f z.1 - (c - ε - δ)) := by
+      constructor
+      · have hmain : f z.1 - τ ≤ c + r ^ 2 / 2 := by
+          dsimp [τ]
+          have hr2' : r ^ 2 / 2 = ε := by rw [hr2]; ring
+          nlinarith [hρne, hz, hr2']
+        nlinarith [hmain]
+      · have hmain : f z.1 - τ ≥ c - ε - δ := by
+          dsimp [τ]
+          nlinarith [hpe, hz, hδ]
+        nlinarith [hmain]
+    have hval := morseCollarFlow_valueOnStrip (I := I) f c ε r δ hf v hv hsupp hdfOn hrate
+      (by
+        constructor
+        · exact hnotdeep.le
+        · nlinarith [hz, hr2])
+      (by exact hτmem.1) (by exact hτmem.2)
+    dsimp [morseFarExpandMap]
+    change f (curveAt v hcomplete z.1 τ) = f z.1 - τ
+    exact hval
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
