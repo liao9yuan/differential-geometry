@@ -8127,6 +8127,55 @@ theorem morseFarExpandMap_value {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R�
     exact hval
 
 
+theorem morseFarExpandMap_mem_upper {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (z : SublevelSpace f (c - ε)) :
+    f (morseFarExpandMap hk c ε r δ ε' R₀ R₁ data v hv hsupp z) ≤ c + r ^ 2 / 2 := by
+  have hval := morseFarExpandMap_value hk c ε r δ ε' R₀ R₁ data hf hε hδ hr2 v hv hsupp hdfOn hrate z
+  rw [hval]
+  have hcut : morseFarCutoff hk c r ε' R₀ R₁ data z.1 ∈ Set.Icc (0 : ℝ) 1 :=
+    morseFarCutoff_mem hk c r ε' R₀ R₁ data z.1
+  have hz : f z.1 ≤ c - ε := z.2
+  by_cases hdeep : f z.1 ≤ c - ε - δ
+  · have hτ : morseFarCutoff hk c r ε' R₀ R₁ data z.1 * morseFarExpandTime c ε δ (f z.1) = 0 := by
+      rw [morseFarExpandTime_zero hdeep]
+      ring
+    rw [hτ]
+    have hr2' : c + ε = c + r ^ 2 / 2 := by rw [hr2]; ring
+    nlinarith [hz, hr2']
+  · have hnotdeep : c - ε - δ < f z.1 := lt_of_not_ge hdeep
+    have htop := morseFarExpandLevel_le_top hδ hε hz hcut
+    have hr2' : c + ε = c + r ^ 2 / 2 := by rw [hr2]; ring
+    nlinarith [htop, hr2']
+
+theorem morseFarExpandMap_deep {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (z : SublevelSpace f (c - ε)) (hz : f z.1 ≤ c - ε - δ) :
+    morseFarExpandMap hk c ε r δ ε' R₀ R₁ data v hv hsupp z = z.1 := by
+  simp [morseFarExpandMap, morseFarExpandTime_zero hz, curveAt_zero]
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
