@@ -1599,6 +1599,33 @@ theorem modelHandleMap_negPart {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
   dsimp [modelHandleMap]
   rw [negPart_recombine]
 
+theorem modelHandleMap_negPart_norm_sq_le {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 ≤ ε)
+    (p : StandardHandle k (n - k)) :
+    ‖negPart hk (modelHandleMap hk ε r p)‖ ^ 2 ≤ 2 * ε + r ^ 2 := by
+  have h1sq : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤ 1 := by
+    have hneg : -1 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := by
+      linarith [norm_nonneg (p.1 : EuclideanSpace ℝ (Fin k))]
+    exact (sq_le_sq' hneg p.1.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+  have h2sq : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ 1 := by
+    have hneg : -1 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := by
+      linarith [norm_nonneg (p.2 : EuclideanSpace ℝ (Fin (n - k)))]
+    exact (sq_le_sq' hneg p.2.2).trans_eq (by norm_num : (1 : ℝ) ^ 2 = 1)
+  calc
+    ‖negPart hk (modelHandleMap hk ε r p)‖ ^ 2
+        = (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+            ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 := by
+          rw [modelHandleMap_negPart]
+          rw [norm_smul]
+          rw [Real.norm_eq_abs]
+          rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+          rw [mul_pow]
+          rw [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)]
+    _ ≤ (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) * 1 := by
+      exact mul_le_mul_of_nonneg_left h1sq (by positivity)
+    _ ≤ 2 * ε + r ^ 2 := by
+      nlinarith [h2sq, hε, sq_nonneg r]
+    _ = 2 * ε + r ^ 2 := rfl
+
 theorem modelHandleMap_posPart {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     (p : StandardHandle k (n - k)) :
     posPart hk (modelHandleMap hk ε r p) =
@@ -2026,6 +2053,31 @@ theorem smoothCap_pos {ε r δ t : ℝ} (hδ0 : 0 < δ) (hδr : δ < r ^ 2) :
           nlinarith [hmid.1]
         nlinarith [hτ, hτle, hdelta]
       nlinarith [hlo, hδr]
+
+theorem smoothCap_le_max {ε r δ t : ℝ} (hε : 0 ≤ ε) (hδ : 0 < δ) :
+    smoothCap ε r δ t ≤ max (r ^ 2) t := by
+  by_cases ht₁ : t ≤ r ^ 2 + 2 * ε - δ
+  · rw [smoothCap_lower hδ ht₁]
+    exact le_max_left (r ^ 2) t
+  · by_cases ht₂ : r ^ 2 + 2 * ε + δ ≤ t
+    · rw [smoothCap_upper hδ ht₂]
+      exact le_trans (by nlinarith [hε]) (le_max_right (r ^ 2) t)
+    · have hmid : r ^ 2 + 2 * ε - δ < t ∧ t < r ^ 2 + 2 * ε + δ := by
+        constructor <;> linarith
+      dsimp [smoothCap]
+      have hτ : 0 ≤ Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) :=
+        Real.smoothTransition.nonneg _
+      have hτle : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ≤ 1 :=
+        Real.smoothTransition.le_one _
+      by_cases hsign : t - 2 * ε - r ^ 2 ≤ 0
+      · have hle : r ^ 2 + (t - 2 * ε - r ^ 2) * Real.smoothTransition
+            ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ≤ r ^ 2 := by
+          nlinarith [hτ, hsign]
+        exact le_trans hle (le_max_left (r ^ 2) t)
+      · have hle : r ^ 2 + (t - 2 * ε - r ^ 2) * Real.smoothTransition
+            ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ≤ t - 2 * ε := by
+          nlinarith [hτle, hsign]
+        exact le_trans (le_trans hle (by nlinarith [hε])) (le_max_right (r ^ 2) t)
 
 noncomputable def modelAttachedFunction {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ) (y : MorseModel n) : ℝ :=
   c + (1 / 2) * (‖posPart hk y‖ ^ (2 : ℕ) - smoothCap ε r δ (‖negPart hk y‖ ^ (2 : ℕ)))
@@ -3611,11 +3663,58 @@ noncomputable def modelSharpUnionRound {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ
     ((Real.sqrt (smoothCap ε r δ (‖negPart hk y‖ ^ 2) /
         modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2))) • posPart hk y)
 
+theorem modelSharpUnionRound_negPart {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ) (y : MorseModel n) :
+    negPart hk (modelSharpUnionRound hk ε r δ y) = negPart hk y := by
+  dsimp [modelSharpUnionRound]
+  rw [negPart_recombine]
+
+theorem morseNorm_lt_of_mem_attached_negPart_lt {n k : ℕ} (hk : k ≤ n) (ε r δ R : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < R / 2)
+    (hRpos : 0 < R) {y : MorseModel n} (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hneg : ‖negPart hk y‖ < R / 2) :
+    morseNorm n y < R := by
+  have ht : ‖negPart hk y‖ ^ 2 < (R / 2) ^ 2 := by
+    have habs : |‖negPart hk y‖| < |R / 2| := by
+      rw [abs_of_nonneg (norm_nonneg (negPart hk y)), abs_of_nonneg (by nlinarith [hRpos] : 0 ≤ R / 2)]
+      exact hneg
+    exact sq_lt_sq.mpr habs
+  have hle1 : r ^ 2 ≤ (R / 2) ^ 2 := by
+    have h1 : 2 * ε + 2 * r ^ 2 < (R / 2) ^ 2 := by
+      have hsc : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 < (R / 2) ^ 2 := by
+        have habs : |Real.sqrt (2 * ε + 2 * r ^ 2)| < |R / 2| := by
+          rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+          rw [abs_of_nonneg (div_nonneg (le_of_lt hRpos) (by norm_num))]
+          exact hεr'
+        exact sq_lt_sq.mpr habs
+      simpa [Real.sq_sqrt (by positivity : 0 ≤ 2 * ε + 2 * r ^ 2)] using hsc
+    nlinarith [h1, hε, sq_nonneg r]
+  have hsc : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ (R / 2) ^ 2 := by
+    exact le_trans (smoothCap_le_max hε hδ0) (max_le hle1 (le_of_lt ht))
+  have hpos : ‖posPart hk y‖ ^ 2 ≤ smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+    dsimp [modelAttachedRegion] at hy
+    exact hy
+  have hnorm : morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+    calc
+      morseNorm n y ^ 2 = morseNorm n (recombine hk (negPart hk y) (posPart hk y)) ^ 2 := by
+        rw [recombine_decompose hk y]
+      _ = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)
+  have hsq : morseNorm n y ^ 2 < (R / 2) ^ 2 + (R / 2) ^ 2 := by
+    nlinarith [hnorm, hpos, hsc, ht]
+  have hsq' : morseNorm n y ^ 2 < R ^ 2 := by nlinarith [hsq, hRpos]
+  have habs := sq_lt_sq.mp hsq'
+  rwa [abs_of_nonneg (norm_nonneg (WithLp.toLp 2 y : EuclideanSpace ℝ (Fin n))),
+    abs_of_nonneg (le_of_lt hRpos)] at habs
+
 noncomputable def modelSharpUnionUnround {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
     (y : MorseModel n) : MorseModel n :=
   recombine hk (negPart hk y)
     ((Real.sqrt (modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) /
         smoothCap ε r δ (‖negPart hk y‖ ^ 2))) • posPart hk y)
+
+theorem modelSharpUnionUnround_negPart {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ) (y : MorseModel n) :
+    negPart hk (modelSharpUnionUnround hk ε r δ y) = negPart hk y := by
+  dsimp [modelSharpUnionUnround]
+  rw [negPart_recombine]
 
 theorem modelSharpUnionBound_pos {ε r t : ℝ} (hr : r ≠ 0) : 0 < modelSharpUnionBound ε r t := by
   dsimp [modelSharpUnionBound]
