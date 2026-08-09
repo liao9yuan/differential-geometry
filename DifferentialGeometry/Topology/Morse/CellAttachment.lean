@@ -1811,6 +1811,24 @@ def modelHandle {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) : Set (MorseModel n) :=
   {y : MorseModel n | ‖posPart hk y‖ ^ 2 ≤ r ^ 2 ∧
     ‖negPart hk y‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 + 2 * ε}
 
+theorem modelFlow_mem_handle_of_up_le {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
+    {z : MorseModel n} (hz : morseNormalForm hk c z = c - ε)
+    {L : ℝ} (hL0 : 0 ≤ L) (hL : L ≤ (r ^ 2 - ‖posPart hk z‖ ^ 2) / 2)
+    (hzpos : 0 < ‖posPart hk z‖) :
+    modelFlow hk (-L) z ∈ modelHandle hk ε r := by
+  dsimp [modelHandle]
+  have hnorm : ‖posPart hk (modelFlow hk (-L) z)‖ ^ 2 = ‖posPart hk z‖ ^ 2 + 2 * L :=
+    modelFlow_up_posPart_norm_sq hk L z hL0 hzpos
+  have hneg : ‖negPart hk (modelFlow hk (-L) z)‖ ^ 2 = ‖negPart hk z‖ ^ 2 := by
+    rw [modelFlow_negPart]
+  have hzsplit := morseNormalForm_split hk c z
+  have hnegeq : ‖negPart hk z‖ ^ 2 = ‖posPart hk z‖ ^ 2 + 2 * ε := by
+    nlinarith [hzsplit, hz]
+  constructor
+  · nlinarith [hnorm, hL]
+  · nlinarith [hneg, hnorm, hnegeq, hL0]
+
+
 theorem modelHandleMap_mem {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 ≤ ε)
     (p : StandardHandle k (n - k)) :
     modelHandleMap hk ε r p ∈ modelHandle hk ε r := by
