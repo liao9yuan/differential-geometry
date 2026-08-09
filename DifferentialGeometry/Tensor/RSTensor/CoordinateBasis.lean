@@ -48,14 +48,6 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace Tensor0SBundle
@@ -74,17 +66,12 @@ section ModelBasis
 variable {V : Type*} [NormedAddCommGroup V] [NormedSpace 𝕜 V] [FiniteDimensional 𝕜 V]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
-
-
-
 end ModelBasis
 
 section Tensor0S
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {s : Nat} {x : M}
-
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem tensor0S_sum_apply {ι : Type*} [Fintype ι]
@@ -102,9 +89,6 @@ theorem tensor0S_sum_apply {ι : Type*} [Fintype ι]
       change T a v + (∑ i ∈ S, T i) v = T a v + ∑ i ∈ S, T i v
       rw [ih]
 
-
-
-
 theorem basisTensor0S_apply
     (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
     (slots : Fin s -> Idx) (v : Fin s -> TangentSpace I x) :
@@ -114,8 +98,6 @@ theorem basisTensor0S_apply
     ∏ a : Fin s, basis.coord (slots a) (v a)
   rw [continuousMultilinearMapBasis_apply]
   simp [continuousMultilinearMapBasisElem]
-
-
 
 omit [DecidableEq Idx] in
 theorem tensor0S_apply_eq_sum

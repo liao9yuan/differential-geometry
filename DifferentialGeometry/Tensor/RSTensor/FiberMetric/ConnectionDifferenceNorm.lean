@@ -3,13 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace Tensor0SBundle
@@ -22,8 +15,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
-
-
 
 theorem connOut_norm_le
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Bundle
@@ -170,23 +169,6 @@ import Mathlib.LinearAlgebra.TensorProduct.Basis
 import DifferentialGeometry.Bundle.SectionRealized
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace Tensor0SBundle
 noncomputable section
 
@@ -204,16 +186,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
 variable (n : WithTop ℕ∞) [IsManifold I (n + 1) M]
 
-
-
-
-
-
 section ApplyInput
 
 variable {r s : ℕ} [CompleteSpace 𝕜]
-
-
 
 noncomputable def model_applyInput_bilinear (r s : ℕ) :
     Tensor0SModel r 𝕜 E →L[𝕜]
@@ -226,8 +201,6 @@ omit [CompleteSpace 𝕜] in
 theorem model_applyInput_bilinear_apply (r s : ℕ)
     (θ : Tensor0SModel r 𝕜 E) (T : TensorRSModel r s 𝕜 E) :
     model_applyInput_bilinear (𝕜 := 𝕜) (E := E) r s θ T = T θ := rfl
-
-
 
 omit [CompleteSpace 𝕜] in
 theorem tensor0SModelAt_applyInput_eq
@@ -271,7 +244,6 @@ theorem tensor0SModelAt_applyInput_eq
         (R := 𝕜) hx θ
   rw [hθ]
 
-
 noncomputable def tensorRSField_applyInput_fun
     (T : (x : M) ->
       TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x)
@@ -280,8 +252,6 @@ noncomputable def tensorRSField_applyInput_fun
     (x : M) ->
       Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x :=
   fun x => T x (θ x)
-
-
 
 noncomputable def tensorRSField_applyInput
     (T : TensorRSField n r s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))
@@ -328,32 +298,11 @@ theorem tensorRSField_applyInput_apply
 
 end ApplyInput
 
-
-
-
-
-
-
-
-
 section SmulByFun
 
 variable {r s : ℕ} [CompleteSpace 𝕜]
 
-
-
-
 end SmulByFun
-
-
-
-
-
-
-
-
-
-
 
 noncomputable def Tensor0SField.one0 [CompleteSpace 𝕜] :
     Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) :=
@@ -368,23 +317,8 @@ theorem Tensor0SField.one0_apply [CompleteSpace 𝕜]
   exact Tensor0SField.fromScalarField_apply n (fun _ : M => (1 : 𝕜))
     contMDiff_const x v
 
-
-
-
-
-
-
-
-
-
-
-
 end
 end Tensor0SBundle
-
-
-
-
 
 namespace Tensor0SBundle
 noncomputable section
@@ -403,7 +337,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
 variable {s q : ℕ}
 
 variable (n : WithTop ℕ∞)
-
 
 end
 end Tensor0SBundle

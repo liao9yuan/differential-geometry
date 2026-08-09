@@ -1,8 +1,6 @@
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-
-
 noncomputable section
 
 namespace Tensor0SBundle
@@ -135,9 +133,6 @@ theorem component0S_apply
     (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
     component0S (I := I) basis A slots = A (fun a => basis (slots a)) :=
   rfl
-
-
-
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] [Fintype Idx] [DecidableEq Idx] in
 theorem component0S_congr_slots

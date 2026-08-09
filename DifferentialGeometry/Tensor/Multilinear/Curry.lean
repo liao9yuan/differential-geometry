@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 
 noncomputable section

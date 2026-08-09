@@ -2,12 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Trace04
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section
@@ -51,7 +45,6 @@ private theorem freezeHead03Slots_vec3
   fin_cases q <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 
 noncomputable def freezeHead03Field
     [CompleteSpace E]
@@ -180,8 +173,6 @@ private theorem freezeTail04Slots_vec4
   fin_cases q <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
-
 
 noncomputable def freezeTail04Field
     [CompleteSpace E]
@@ -313,8 +304,6 @@ private theorem freezeMiddle04Slots_vec4
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
 noncomputable def freezeMiddle04Field
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -427,9 +416,6 @@ noncomputable def freezeMiddle04Field
         ((A x).domDomCongr trace04Perm)
         (vec2 (I := I) (Y x) (Z x)) := by
   rfl
-
-
-
 
 theorem nablaTrace02
     [T2Space M] [CompleteSpace E] [IsManifold I 1 M]
@@ -546,8 +532,6 @@ theorem nablaTrace02
             intro j _
             rw [hnabla i j]
 
-
-
 theorem dTrace02_eq
     [T2Space M] [CompleteSpace E] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -626,7 +610,6 @@ theorem dTrace02_eq
       metricTracePair0SAt (I := I) g
         (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           2 cov X A x) := hsum.symm
-
 
 end
 

@@ -780,29 +780,24 @@ private def assocSum (m n p : ℕ) : (Fin m ⊕ Fin n) ⊕ Fin p ≃ Fin m ⊕ (
   left_inv := by intro x; rcases x with ((i | j) | k) <;> rfl
   right_inv := by intro x; rcases x with (i | (j | k)) <;> rfl
 
-
 private def leftPosEquiv (m n p : ℕ) : Fin m ⊕ (Fin n ⊕ Fin p) ≃ Fin (m + n + p) :=
   (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv : Fin n ⊕ Fin p ≃ Fin (n + p))).trans
     ((finSumFinEquiv : Fin m ⊕ Fin (n + p) ≃ Fin (m + (n + p))).trans
       (finAssocOrder m n p).symm.toEquiv)
 
-
 private def rightPosEquiv (m n p : ℕ) : (Fin m ⊕ Fin n) ⊕ Fin p ≃ Fin (m + n + p) :=
   (Equiv.sumCongr (finSumFinEquiv : Fin m ⊕ Fin n ≃ Fin (m + n)) (Equiv.refl (Fin p))).trans
     (finSumFinEquiv : Fin (m + n) ⊕ Fin p ≃ Fin (m + n + p))
-
 
 private theorem rightPosEquiv_sumCongr_symm (m n p : ℕ) (y : Fin (m + n) ⊕ Fin p) :
     rightPosEquiv m n p (Equiv.sumCongr (finSumFinEquiv.symm : Fin (m + n) ≃ Fin m ⊕ Fin n)
       (Equiv.refl (Fin p)) y) = finSumFinEquiv y := by
   simp [rightPosEquiv, Equiv.sumCongr_apply]
 
-
 private theorem leftPosEquiv_sumCongr_symm (m n p : ℕ) (y : Fin m ⊕ Fin (n + p)) :
     leftPosEquiv m n p (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv.symm : Fin (n + p) ≃ Fin n ⊕ Fin p) y) =
       (finAssocOrder m n p).symm (finSumFinEquiv y) := by
   simp [leftPosEquiv, Equiv.sumCongr_apply]
-
 
 private theorem canonicalRight_m (P : ThreeShuffle m n p) (i : Fin m) :
     rightPosEquiv m n p (canonicalRight P (Sum.inl (Sum.inl i))) =
@@ -815,7 +810,6 @@ private theorem canonicalRight_m (P : ThreeShuffle m n p) (i : Fin m) :
   rw [TwoShuffle.toPerm_inl]
   exact rightInner_emb P i
 
-
 private theorem canonicalRight_n (P : ThreeShuffle m n p) (j : Fin n) :
     rightPosEquiv m n p (canonicalRight P (Sum.inl (Sum.inr j))) =
       (nBlock P).1.orderEmbOfFin (nBlock P).2 j := by
@@ -827,7 +821,6 @@ private theorem canonicalRight_n (P : ThreeShuffle m n p) (j : Fin n) :
   rw [TwoShuffle.toPerm_inr]
   exact rightInner_compl_emb P j
 
-
 private theorem canonicalRight_p (P : ThreeShuffle m n p) (k : Fin p) :
     rightPosEquiv m n p (canonicalRight P (Sum.inr k)) =
       (pBlock P).1.orderEmbOfFin (pBlock P).2 k := by
@@ -836,14 +829,12 @@ private theorem canonicalRight_p (P : ThreeShuffle m n p) (k : Fin p) :
   rw [TwoShuffle.toPerm_inr]
   rfl
 
-
 private theorem canonicalLeft_m (P : ThreeShuffle m n p) (i : Fin m) :
     leftPosEquiv m n p (canonicalLeft P (Sum.inl i)) = P.mBlock.1.orderEmbOfFin P.mBlock.2 i := by
   rw [canonicalLeft, mergeLeft_inl]
   rw [leftPosEquiv_sumCongr_symm]
   rw [TwoShuffle.toPerm_inl]
   exact leftOuter_emb P i
-
 
 private theorem canonicalLeft_n (P : ThreeShuffle m n p) (j : Fin n) :
     leftPosEquiv m n p (canonicalLeft P (Sum.inr (Sum.inl j))) =
@@ -854,7 +845,6 @@ private theorem canonicalLeft_n (P : ThreeShuffle m n p) (j : Fin n) :
   rw [TwoShuffle.toPerm_inl]
   exact (leftOuter_compl_emb P ((leftInner P).1.orderEmbOfFin (leftInner P).2 j)).trans
     (leftInner_emb P j)
-
 
 private theorem canonicalLeft_p (P : ThreeShuffle m n p) (k : Fin p) :
     leftPosEquiv m n p (canonicalLeft P (Sum.inr (Sum.inr k))) =
@@ -867,7 +857,6 @@ private theorem canonicalLeft_p (P : ThreeShuffle m n p) (k : Fin p) :
     (by rw [Finset.card_compl, (leftInner P).2, Fintype.card_fin]; omega) k)).trans
     (leftInner_compl_emb P k)
 
-
 private theorem leftPosEquiv_assocSum (m n p : ℕ) (x : (Fin m ⊕ Fin n) ⊕ Fin p) :
     leftPosEquiv m n p (assocSum m n p x) = rightPosEquiv m n p x := by
   cases x with
@@ -878,7 +867,6 @@ private theorem leftPosEquiv_assocSum (m n p : ℕ) (x : (Fin m ⊕ Fin n) ⊕ F
     apply Fin.ext
     simp only [leftPosEquiv, rightPosEquiv, assocSum]
     exact (Nat.add_assoc m n ↑k).symm
-
 
 private theorem canonicalLeft_canonicalRight_pos (P : ThreeShuffle m n p) (x : (Fin m ⊕ Fin n) ⊕ Fin p) :
     leftPosEquiv m n p (canonicalLeft P (assocSum m n p x)) = rightPosEquiv m n p (canonicalRight P x) := by
@@ -891,7 +879,6 @@ private theorem canonicalLeft_canonicalRight_pos (P : ThreeShuffle m n p) (x : (
   | inr k =>
     exact (canonicalLeft_p P k).trans (canonicalRight_p P k).symm
 
-
 private theorem canonicalLeft_permCongr (P : ThreeShuffle m n p) :
     canonicalLeft P = (assocSum m n p).permCongr (canonicalRight P) := by
   apply Equiv.ext
@@ -901,7 +888,6 @@ private theorem canonicalLeft_permCongr (P : ThreeShuffle m n p) :
   rw [← leftPosEquiv_assocSum m n p (canonicalRight P ((assocSum m n p).symm x))] at h
   have hx := (leftPosEquiv m n p).injective h
   simpa [Equiv.permCongr_def] using hx
-
 
 theorem sign_canonicalLeft_canonicalRight (P : ThreeShuffle m n p) :
     Equiv.Perm.sign (canonicalLeft P) = Equiv.Perm.sign (canonicalRight P) := by

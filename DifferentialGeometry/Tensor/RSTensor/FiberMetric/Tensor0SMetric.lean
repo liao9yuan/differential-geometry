@@ -5,8 +5,6 @@ import Mathlib.LinearAlgebra.Trace
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
 
-
-
 namespace Tensor0SBundle
 
 noncomputable section
@@ -1339,7 +1337,6 @@ theorem coord_normSq0S_eq_coord
       coordInner0S (I := I) (x := x) s gInv₂ A A basis₂ := by
   rw [← normSq0S_eq_coord (I := I) g x s basis₁ gInv₁ hinv₁ A,
     ← normSq0S_eq_coord (I := I) g x s basis₂ gInv₂ hinv₂ A]
-
 
 end
 

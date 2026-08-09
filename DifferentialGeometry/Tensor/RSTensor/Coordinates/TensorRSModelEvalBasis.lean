@@ -10,7 +10,6 @@ import Mathlib.Analysis.Normed.Operator.Basic
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 import Mathlib.Geometry.Manifold.ContMDiff.Constructions
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

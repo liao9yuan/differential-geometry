@@ -1,11 +1,9 @@
 
 
-
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.Topology.Algebra.Module.FiniteDimension
-
 
 noncomputable section
 
@@ -115,7 +113,6 @@ variable {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
   [TopologicalSpace (TotalSpace F E)] [Π x, TopologicalSpace (E x)]
   [FiberBundle F E] [VectorBundle 𝕜 F E]
   (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
-
 
 omit [ContMDiffVectorBundle n F E IB] in
 theorem contMDiff_multilinearSection_iff_coord {d : ℕ}

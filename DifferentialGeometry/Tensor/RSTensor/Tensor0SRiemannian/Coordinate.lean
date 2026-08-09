@@ -3,14 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace Tensor0SBundle
 
 noncomputable section
@@ -143,8 +135,6 @@ theorem basis_repr_eq_sum_inv_inner
       · intro hi
         simp at hi
 
-
-
 omit [FiniteDimensional ℝ E] in
 theorem linearMap_trace_eq_sum_inv_inner_apply
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -163,8 +153,6 @@ theorem linearMap_trace_eq_sum_inv_inner_apply
   intro i _
   rw [LinearMap.toMatrix_apply]
   exact basis_repr_eq_sum_inv_inner (I := I) g x basis gInv hinv (A (basis i)) i
-
-
 
 theorem linearMap_trace_nonneg_of_metric_inner_apply_self_nonneg
     (g : SmoothMetric_gen I M) (x : M)
@@ -362,7 +350,6 @@ theorem tensor0S_curry_apply_cons
       ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x) A)
         (Fin.cons X tail)
   rw [continuousMultilinearCurryLeftEquiv_apply]
-
 
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_zero_eq
@@ -636,7 +623,6 @@ theorem tensor0S_curry_product_one_two
     fin_cases a <;> rfl
   rw [hhead, htail]
   rfl
-
 
 end
 

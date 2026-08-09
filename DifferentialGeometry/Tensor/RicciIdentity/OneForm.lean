@@ -8,15 +8,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
@@ -33,23 +24,17 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
-
 abbrev Tensor0SSection (s : ℕ) :=
   Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (∞ : WithTop ℕ∞) s
-
 
 abbrev OneFormSection :=
   Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (∞ : WithTop ℕ∞) 1
 
-
 abbrev TwoTensorSection :=
   Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (∞ : WithTop ℕ∞) 2
-
-
 
 def NablaOneFormRealizesAt
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -65,11 +50,6 @@ def NablaOneFormRealizesAt
       nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         1 cov X alpha x (fun _ : Fin 1 => Y)
 
-
-
-
-
-
 def NablaOneFormSectionRealizes
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -77,9 +57,6 @@ def NablaOneFormSectionRealizes
     (alpha : OneFormSection (I := I) (M := M))
     (nablaAlpha : TwoTensorSection (I := I) (M := M)) : Prop :=
   ∀ x : M, NablaOneFormRealizesAt (I := I) cov alpha (fun y => nablaAlpha y) x
-
-
-
 
 def Nabla2OneFormRealizesAt
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -128,8 +105,6 @@ theorem nabla2OneFormRealizesAt_apply
         2 cov X nablaAlpha x (vec2 Y Z) :=
   h.2 X Y Z
 
-
-
 theorem nabla2OneFormRealizesAt_of_totalNabla
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -169,19 +144,13 @@ theorem nabla2OneFormRealizesAt_of_totalNabla
     rw [hslots] at h
     exact h
 
-
-
 def Nabla2DuTrailingSymmCoord {Idx : Type*}
     (U : Idx -> Idx -> Idx -> Real) : Prop :=
   ∀ i j k : Idx, U i j k = U i k j
 
-
-
 def OneFormRicciIdentityCoord {Idx : Type*}
     (U curvatureAction : Idx -> Idx -> Idx -> Real) : Prop :=
   ∀ i k j : Idx, U i k j - U k i j = curvatureAction i k j
-
-
 
 def CurvatureActionTraceEqualsRicGradCoord {Idx : Type*} [Fintype Idx]
     (gInv : Idx -> Idx -> Real)
@@ -189,9 +158,6 @@ def CurvatureActionTraceEqualsRicGradCoord {Idx : Type*} [Fintype Idx]
     (ricGrad : Idx -> Real) : Prop :=
   ∀ k : Idx,
     (∑ i : Idx, ∑ j : Idx, gInv i j * curvatureAction i k j) = ricGrad k
-
-
-
 
 theorem oneFormRicciTraceCommCoord_of_identities {Idx : Type*} [Fintype Idx]
     (gInv : Idx -> Idx -> Real)
@@ -227,12 +193,6 @@ theorem oneFormRicciTraceCommCoord_of_identities {Idx : Type*} [Fintype Idx]
     _ = (∑ i : Idx, ∑ j : Idx, gInv i j * U k i j) + ricGrad k := by
           rw [h_trace k]
 
-
-
-
-
-
-
 def OneFormThirdCovDerivCommAt
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M}
@@ -258,7 +218,6 @@ theorem one_form_third_covDeriv_comm
       -Rm13 x alpha (vec3 X Y Z) :=
   h X Y Z
 
-
 def swapFirstTwo0S {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
@@ -274,8 +233,6 @@ omit [FiniteDimensional ℝ E] in
   congr 1
   funext q
   fin_cases q <;> simp [Equiv.swap_apply_def, vec3, DifferentialGeometry.Integral.Connection.vec3]
-
-
 
 theorem one_form_third_comm_of_coord
     {Idx : Type*} [Finite Idx]
@@ -307,7 +264,6 @@ theorem one_form_third_comm_of_coord
   rw [swapFirstTwo0S_apply_vec3] at h_eval
   exact h_eval
 
-
 theorem one_form_third_comm_of_coord_ijk
     {Idx : Type*} [Finite Idx]
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -337,9 +293,6 @@ theorem one_form_third_comm_of_coord_ijk
         DifferentialGeometry.Integral.Connection.vec3]
     simpa [hslots, hswap] using h
 
-
-
-
 def OneFormLastTwoSymmAt {x : M}
     (nabla2Alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
@@ -356,9 +309,6 @@ theorem one_form_last_two_symm {x : M}
     nabla2Alpha (vec3 X Y Z) = nabla2Alpha (vec3 X Z Y) :=
   h X Y Z
 
-
-
-
 def traceNablaOneFormAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -368,8 +318,6 @@ def traceNablaOneFormAt
     (Y : TangentSpace I x) : Real :=
   ∑ i : Idx, ∑ j : Idx,
     gInv i j * nabla2Alpha (vec3 Y (basis i) (basis j))
-
-
 
 def OneFormRicciTraceCommWithVectorAt
     {Idx : Type*} [Fintype Idx]
@@ -385,8 +333,6 @@ def OneFormRicciTraceCommWithVectorAt
       traceNablaOneFormAt (I := I) basis gInv nabla2Alpha Y +
         Ric x (vec2 Y curvatureVector)
 
-
-
 def nabla2OneFormCoord
     {Idx : Type*}
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -394,9 +340,6 @@ def nabla2OneFormCoord
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (i j k : Idx) : Real :=
   nabla2Alpha (vec3 (basis i) (basis j) (basis k))
-
-
-
 
 def curvatureActionOnOneFormCoord
     {Idx : Type*}
@@ -407,7 +350,6 @@ def curvatureActionOnOneFormCoord
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (i k j : Idx) : Real :=
   -Rm13 x alpha (vec3 (basis i) (basis k) (basis j))
-
 
 def ricciVectorCoord
     {Idx : Type*}
@@ -444,8 +386,6 @@ theorem oneFormRicciIdentityCoord_of_tensor
       (curvatureActionOnOneFormCoord (I := I) Rm13 alpha basis) := by
   intro i k j
   exact hcomm (basis i) (basis k) (basis j)
-
-
 
 theorem oneFormRicciTraceComm_basisCoord_of_identities
     {Idx : Type*} [Fintype Idx]
@@ -494,10 +434,6 @@ theorem metricTraceInput_one_eq_vec3 {x : M}
       Fin.cases X (fun i : Fin 2 => Fin.cases Y (fun _ : Fin 1 => Z) i)
           (Fin.succ (Fin.succ 0)) = Z
     rw [Fin.cases_succ, Fin.cases_succ]
-
-
-
-
 
 theorem oneForm_ricci_trace_comm_of_third_comm
     {Idx : Type*} [Fintype Idx]
@@ -566,8 +502,6 @@ theorem oneForm_ricci_trace_comm_of_third_comm
         Ric x (vec2 Y curvatureVector) := by
           rw [hcurv Y]
 
-
-
 def RicciIdentityOneFormAt
     (Ric : Tensor02Section (I := I) (M := M))
     {x : M}
@@ -635,6 +569,5 @@ theorem tensor0S_ricciIdentity_one
   ⟨oneFormThirdCovDerivCommAt_of_tensor0S_ricciIdentity_one (I := I)
       Rm13 alpha nabla2Alpha,
     tensor0S_ricciIdentity_one_of_oneForm (I := I) Rm13 alpha nabla2Alpha⟩
-
 
 end DifferentialGeometry.Integral.Connection

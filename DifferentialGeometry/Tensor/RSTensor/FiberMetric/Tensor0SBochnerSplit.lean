@@ -3,62 +3,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace Tensor0SBundle
 
 noncomputable section
@@ -70,44 +14,25 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
-
-
-
-
-
-
-
-
 section Coord
 
 variable {Idx : Type*} [Fintype Idx]
-
-
 
 def freezeFirst2Comp {s : Nat}
     (H2 : (Fin (s + 2) -> Idx) -> Real) (i j : Idx) :
     (Fin s -> Idx) -> Real :=
   fun J0 => H2 (Fin.cons i (Fin.cons j J0))
 
-
-
 def freezeFirst1Comp {s : Nat}
     (H1 : (Fin (s + 1) -> Idx) -> Real) (i : Idx) :
     (Fin s -> Idx) -> Real :=
   fun J0 => H1 (Fin.cons i J0)
-
-
-
-
 
 def traceFirst2Comp {s : Nat}
     (gInv : Idx -> Idx -> Real)
     (H2 : (Fin (s + 2) -> Idx) -> Real) :
     (Fin s -> Idx) -> Real :=
   fun J0 => ∑ i : Idx, ∑ j : Idx, gInv i j * H2 (Fin.cons i (Fin.cons j J0))
-
-
 
 theorem sum_fin_cons {s : Nat} {A : Type*} [AddCommMonoid A]
     (F : (Fin (s + 1) -> Idx) -> A) :
@@ -120,9 +45,6 @@ theorem sum_fin_cons {s : Nat} {A : Type*} [AddCommMonoid A]
   · intro K
     congr 1
     exact (Fin.cons_self_tail K).symm
-
-
-
 
 theorem sum_comm_blocks {s : Nat} {A : Type*} [AddCommMonoid A]
     (F : Idx -> Idx -> (Fin s -> Idx) -> (Fin s -> Idx) -> A) :
@@ -141,9 +63,6 @@ theorem sum_comm_blocks {s : Nat} {A : Type*} [AddCommMonoid A]
   refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ => ?_
   rw [Fintype.sum_prod_type]
 
-
-
-
 theorem sum_fin_cons2 {s : Nat} {A : Type*} [AddCommMonoid A]
     (F : (Fin (s + 1) -> Idx) -> (Fin (s + 1) -> Idx) -> A) :
     (∑ K : Fin (s + 1) -> Idx, ∑ L : Fin (s + 1) -> Idx, F K L) =
@@ -153,14 +72,6 @@ theorem sum_fin_cons2 {s : Nat} {A : Type*} [AddCommMonoid A]
     ∑ L : Fin (s + 1) -> Idx, F K L)]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun K' _ => ?_
   rw [sum_fin_cons (fun L : Fin (s + 1) -> Idx => F (Fin.cons i K') L)]
-
-
-
-
-
-
-
-
 
 theorem sum_trace_coordContract_rough {s : Nat}
     (gInv : Idx -> Idx -> Real)
@@ -185,15 +96,6 @@ theorem sum_trace_coordContract_rough {s : Nat}
     simp_rw [Finset.mul_sum, Finset.sum_mul]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     ring
-
-
-
-
-
-
-
-
-
 
 theorem sum_trace_coordContract_nabla {s : Nat}
     (gInv : Idx -> Idx -> Real)
@@ -220,20 +122,11 @@ theorem sum_trace_coordContract_nabla {s : Nat}
 
 end Coord
 
-
-
-
-
-
-
-
 section Intrinsic
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 open DifferentialGeometry.Integral.Connection
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [FiniteDimensional ℝ E] in
@@ -254,9 +147,6 @@ private theorem tensor0S_curry_comp {s : Nat} {x : M}
   refine Fin.cases ?_ (fun b => ?_) a
   · rfl
   · rfl
-
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [FiniteDimensional ℝ E] in
@@ -281,8 +171,6 @@ private theorem freezeFirstTwoArgs0S_comp {s : Nat} {x : M}
   · refine Fin.cases ?_ (fun c => ?_) b
     · rfl
     · rfl
-
-
 
 omit [DecidableEq Idx] in
 omit [FiniteDimensional ℝ E] in
@@ -312,15 +200,6 @@ private theorem metricTrace0S2TensorInBasis_comp {s : Nat} {x : M}
     · rfl
     · rfl
 
-
-
-
-
-
-
-
-
-
 def TensorNormHessianProductInBasis {s : Nat} {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -340,21 +219,6 @@ def TensorNormHessianProductInBasis {s : Nat} {x : M}
             (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x nablaT (basis i))
             (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x nablaT (basis j))
             basis)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [DecidableEq Idx] in
 omit [FiniteDimensional ℝ E] in
@@ -469,28 +333,6 @@ theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
     rw [hcH1]
     exact coordContract_eq_coordInner0S (I := I) gInv nablaT nablaT basis
   rw [hRL, hNN]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem tensorNormBochnerSplit {s : Nat} {x : M}
     (g : SmoothMetric I M)

@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import DifferentialGeometry.Tensor.Auxiliary.Perm
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
@@ -15,7 +9,6 @@ import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Placement
-
 
 noncomputable section
 
@@ -545,7 +538,6 @@ private lemma preimage_k_injective (τ' : Equiv.Perm.ModSumCongr (Fin (m + 1)) (
     derivShuffleRank_of_coset k σ₁ σ₂ (hcoset₁.trans hcoset₂.symm)
   rw [← hrank₁, hrank, hrank₂]
 
-
 private lemma coset_mul_sumCongr (τ₀ ρ : Equiv.Perm (Fin (m + 1) ⊕ Fin n))
     (h : (Quotient.mk'' ρ : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
       Quotient.mk'' τ₀) :
@@ -818,7 +810,6 @@ private theorem inducedPerm_swap_left {m : ℕ} (j b : Fin (m + 1)) (hjb : j < b
           simp [Equiv.swap_apply_def, Fin.succAbove_ne, hne2]
         simpa [hswapel, hrm] using hcyc.symm
 
-
 private theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
     inducedPerm ((Fin.revPerm : Equiv.Perm (Fin (m + 1))) * τl * (Fin.revPerm : Equiv.Perm (Fin (m + 1)))⁻¹)
       (Fin.rev j) =
@@ -865,7 +856,6 @@ private theorem inducedPerm_revPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (
   rw [hsub]
   congr 1
   simp [Fin.rev_rev]
-
 
 private theorem sign_swap_ne {m : ℕ} (j b : Fin (m + 1)) (h : j ≠ b) :
     Equiv.Perm.sign (Equiv.swap j b) = (-1 : ℤˣ) := by
@@ -952,7 +942,6 @@ private theorem inducedPerm_swap_sign_left {m : ℕ} (j b : Fin (m + 1)) (hjb : 
   change (-1 : ℤˣ) ^ (b.val - 1 - j.val) = (-1 : ℤˣ) ^ (1 + j.val + b.val)
   simp [hpow_ite, Nat.even_iff, hmod]
 
-
 private theorem inducedPerm_swap_sign_right {m : ℕ} (j b : Fin (m + 1)) (hbj : b < j) :
     Equiv.Perm.sign (inducedPerm (Equiv.swap j b) j) =
       Equiv.Perm.sign (Equiv.swap j b) * (-1 : ℤˣ) ^ (j.val + b.val) := by
@@ -1037,8 +1026,6 @@ private theorem inducedPerm_swap_sign {m : ℕ} (j b : Fin (m + 1)) :
   · rcases lt_or_gt_of_ne h with hjb | hbj
     · exact inducedPerm_swap_sign_left j b hjb
     · exact inducedPerm_swap_sign_right j b hbj
-
-
 
 private theorem removeHole_congr {m : ℕ} (p : Fin (m + 1)) {x y : Fin (m + 1)} (hxy : x = y)
     (hx : x ≠ p) (hy : y ≠ p) : removeHole p x hx = removeHole p y hy := by
@@ -1164,7 +1151,6 @@ private theorem inducedPerm_swap_sign' {m : ℕ} (a b j' : Fin (m + 1)) :
         rw [show (-1 : ℤˣ) ^ (j'.val + j'.val) = 1 from by
           rw [neg_one_pow_ite (n := j'.val + j'.val)]
           simp [hjj]]
-
 
 private theorem sign_inducedPerm {m : ℕ} (τl : Equiv.Perm (Fin (m + 1))) (j : Fin (m + 1)) :
     Equiv.Perm.sign (inducedPerm τl j) =
@@ -1437,7 +1423,6 @@ private theorem uncurryFin_wedge_productL_precompL_fiber
             rfl
     _ = ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w (Quot.out τ') j := rfl
 
-
 theorem uncurryFin_wedge_productL_precompL_eq_domDomCongr
     (f : N →L[𝕜] N' →L[𝕜] N'')
     (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N') :
@@ -1545,7 +1530,6 @@ theorem uncurryFin_wedge_productL_precompL_eq_domDomCongr
           rw [wedge_product_def, uncurryFinAdd, ContinuousAlternatingMap.domDomCongr_apply]
     _ = domDomCongr Fin.finAddFlipAssoc (wedge_product (uncurryFin g') h f) v := by
           rw [wedge_product_uncurryFin_apply]
-
 
 private def placementSummand (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (P : Equiv.Perm.ThreeShuffle m n p) (w : Fin (m + n + p) → M) : 𝕜 :=

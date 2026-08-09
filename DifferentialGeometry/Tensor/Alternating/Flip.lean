@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 import DifferentialGeometry.Tensor.Multilinear.Flip
 import Mathlib.Analysis.Normed.Module.Alternating.Basic
 

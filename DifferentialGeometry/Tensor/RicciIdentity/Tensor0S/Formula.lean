@@ -2,13 +2,6 @@ import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Realization
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
@@ -22,13 +15,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
-
-
-
-
-
 
 private theorem tensor0S_commutator_expansion_from_realizes
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -908,9 +894,6 @@ private theorem tensor0S_commutator_expansion_from_realizes
           (fun q : Fin s => Vsec q x) := by
           ring
 
-
-
-
 theorem tensor0S_ricciIdentity_with_torsion
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -998,9 +981,6 @@ theorem tensor0S_ricciIdentity_of_torsionFree
     exact nablaAlpha.map_coord_zero (0 : Fin (s + 1)) rfl
   simp [hzero, torsionCorrection0SAt, ht] at h
   simpa using h
-
-
-
 
 def RicciIdentity0SAt {x : M} {s : ℕ}
     (comm curvatureAction :

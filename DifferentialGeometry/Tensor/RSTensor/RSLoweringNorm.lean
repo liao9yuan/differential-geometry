@@ -5,16 +5,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweri
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -33,15 +23,11 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-
 noncomputable def lowerAllSpace
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : TensorRSSpace r s I x) : Tensor0SSpace (r + s) I x :=
   Tensor0SSpace.ofModel
     (lowerAllUpperIndices (I := I) (M := M) g r s x (TensorRSSpace.toModel A))
-
-
-
 
 omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
     [T2Space M] [BoundarylessManifold I M] in

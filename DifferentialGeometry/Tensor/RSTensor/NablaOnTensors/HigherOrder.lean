@@ -7,14 +7,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
-
-
-
-
-
-
-
-
 namespace TensorLieDeriv
 
 noncomputable section
@@ -29,10 +21,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 variable [FiniteDimensional 𝕜 E]
 
 section Model
-
-
-
-
 
 noncomputable def totalCovDeriv_tensor0SModelAt (s : ℕ)
     (Dα : E →L[𝕜] Tensor0SModel s 𝕜 E) (Γ : E →L[𝕜] E →L[𝕜] E)
@@ -94,11 +82,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 
-
-
-
-
-
 noncomputable def totalNabla0SFun (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -117,7 +100,6 @@ noncomputable def totalNabla0SFun (s : ℕ)
       (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         s x₀ x₀ (α x₀)))
 
-
 omit [IsManifold I ∞ M] in
 theorem totalNabla0SFun_congr (s : ℕ)
     {cov cov' : CovariantDerivative I E (TangentSpace I : M → Type _)}
@@ -132,11 +114,6 @@ theorem totalNabla0SFun_congr (s : ℕ)
   cases hα
   rfl
 
-
-
-
-
-
 abbrev TotalNabla0SRegular (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -149,7 +126,6 @@ abbrev TotalNabla0SRegular (s : ℕ)
         s cov α x⟩ :
         TotalSpace (Tensor0SModel (s + 1) 𝕜 E)
           (fun x : M => Tensor0SSpace (s + 1) I x)))
-
 
 noncomputable def totalNabla0S (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -176,8 +152,6 @@ omit [IsManifold I ∞ M] in
         s cov α hreg x =
       totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         s cov α x := rfl
-
-
 
 omit [IsManifold I ∞ M] in
 theorem totalNabla0SFun_apply_tangentConstInChart (s : ℕ)
@@ -221,12 +195,6 @@ theorem totalNabla0SFun_apply_tangentConstInChart (s : ℕ)
   unfold totalNabla0SFun
   rw [tensor0SModelAt_trivializationAt_symm]
   rw [totalCovDeriv_tensor0SModelAt_apply_cons]
-
-
-
-
-
-
 
 omit [IsManifold I ∞ M] in
 theorem totalNabla0SFun_apply_section (s : ℕ)
@@ -351,9 +319,6 @@ theorem totalNabla0SFun_apply_section (s : ℕ)
         s cov X α x slots := by
           rw [hslotsInput]
 
-
-
-
 def TotalNabla0SRealizes (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -365,8 +330,6 @@ def TotalNabla0SRealizes (s : ℕ)
       nablaAlpha x (Fin.cons (X x) slots) =
         nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
           s cov X α x slots
-
-
 
 def TotalNablaRSRealizes (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -396,8 +359,6 @@ theorem TotalNabla0SRealizes.apply {s : ℕ}
         s cov X α x slots :=
   h X x slots
 
-
-
 omit [IsManifold I ∞ M] in
 theorem totalNabla0S_realizes (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -414,12 +375,6 @@ theorem totalNabla0S_realizes (s : ℕ)
   exact totalNabla0SFun_apply_section
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α x slots
 
-
-
-
-
-
-
 structure CanonicalSpatialDerivs0S {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -432,9 +387,6 @@ structure CanonicalSpatialDerivs0S {s : ℕ}
     (M := M) s cov A nablaA
   second : TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H) (I := I)
     (M := M) (s + 1) cov nablaA nabla2A
-
-
-
 
 theorem TotalNabla0SRealizes.eval_smooth_slots {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
@@ -469,9 +421,6 @@ theorem TotalNabla0SRealizes.eval_smooth_slots {s : ℕ}
           exact nabla0SFun_eval_smooth_slots
             (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
             cov X V α x₀
-
-
-
 
 theorem TotalNabla0SRealizes.eval_C1_slots {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
@@ -525,9 +474,6 @@ theorem TotalNablaRSRealizes.apply {r s : ℕ}
         r s cov X T x β slots :=
   h X x β slots
 
-
-
-
 noncomputable def totalNabla20S (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -546,8 +492,6 @@ noncomputable def totalNabla20S (s : ℕ)
       s cov α hreg1)
     hreg2
 
-
-
 noncomputable def totalNabla20S_succSucc (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -562,9 +506,6 @@ noncomputable def totalNabla20S_succSucc (s : ℕ)
       (n := (∞ : WithTop ℕ∞)) (s + 2) :=
   totalNabla20S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     s cov α hreg1 hreg2
-
-
-
 
 inductive HigherCovDeriv0SRealizes
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -593,8 +534,6 @@ inductive HigherCovDeriv0SRealizes
           simpa [Nat.add_assoc, Nat.succ_add, Nat.add_comm, Nat.add_left_comm] using αk1 :
             Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
               (n := (∞ : WithTop ℕ∞)) ((k + 1) + s))
-
-
 
 inductive HigherCovDerivRSRealizes
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -656,10 +595,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
-
-
-
-
 
 theorem nabla0SFun_sub_cov
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -739,11 +674,6 @@ theorem nabla0SFun_sub_cov
   rw [← hsum]
   ring
 
-
-
-
-
-
 theorem nabla0SFun_sub_cov_two
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
@@ -818,9 +748,6 @@ theorem nabla0SFun_sub_cov_two
             else ((CovariantDerivative.difference cov cov' x) (Z x)) (X x))) := by
           rw [Fin.sum_univ_two]
           simp [V, DY, DZ, hupdate0, hupdate1]
-
-
-
 
 theorem nabla0SFun_add [T2Space M] {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -910,8 +837,6 @@ theorem nabla0SFun_add [T2Space M] {s : ℕ}
   rw [hcorr]
   ring
 
-
-
 theorem nabla0SFun_smul [T2Space M] {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -983,7 +908,6 @@ theorem nabla0SFun_smul [T2Space M] {s : ℕ}
   rw [hcorr]
   ring
 
-
 theorem TotalNabla0SRealizes.add [T2Space M] {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {α β : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1012,8 +936,6 @@ theorem TotalNabla0SRealizes.add [T2Space M] {s : ℕ}
           s cov X (α + β) x slots := by
         rw [nabla0SFun_add (I := I) cov X α β x]
         rfl
-
-
 
 theorem TotalNabla0SRealizes.smul [T2Space M] {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}

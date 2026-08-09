@@ -1,14 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Derivation
 
-
-
-
-
-
-
-
-
-
 namespace TensorLieDeriv
 
 noncomputable section
@@ -74,8 +65,6 @@ private theorem tangentFieldModelInChart_sum_tangentConst_model
           intro i hi
           rw [map_smul, hconst i, hright]
     _ = F y := b.sum_repr (F y)
-
-
 
 omit [I.Boundaryless] in
 theorem exists_cov_zero_at
@@ -363,8 +352,6 @@ theorem exists_cov_zero_at
     exact hvec
   refine ⟨V, hV_val, ?_⟩
   rw [hcov_congr, hcovVloc]
-
-
 
 omit [I.Boundaryless] in
 theorem exists_cov_zero_at_apply

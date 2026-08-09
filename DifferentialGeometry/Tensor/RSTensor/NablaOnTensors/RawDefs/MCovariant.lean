@@ -2,9 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Models
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Nabla0S
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-
-
-
 namespace TensorLieDeriv
 
 noncomputable section
@@ -28,11 +25,6 @@ section SmoothVectorFieldRSNabla
 
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
-
-
-
-
-
 omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 theorem modelAt_mcovRS {r s : ℕ}
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
@@ -55,7 +47,6 @@ theorem modelAt_mcovRS {r s : ℕ}
   unfold mcovariantDeriv_tensorRSWithin
   rw [tensorRSModelAt_trivializationAt_symm]
   rfl
-
 
 omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 omit [CompleteSpace 𝕜] in
@@ -90,11 +81,9 @@ theorem mcovariantDeriv_tensor0SWithin_apply_slots {s : ℕ}
   rw [extChartAt_to_inv]
   rfl
 
-
 section ExtractedConnection
 
 variable [IsManifold I 2 M]
-
 
 end ExtractedConnection
 

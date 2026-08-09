@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 import Mathlib.LinearAlgebra.Trace
 
-
 namespace Tensor0SBundle
 
 noncomputable section

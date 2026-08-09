@@ -2,13 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section
@@ -49,8 +42,6 @@ theorem metricTrace_finCons_vec3_eq_vec4 {x : M}
     Fin.cons X (vec3 (I := I) Y Z U) = vec4 (I := I) X Y Z U := by
   funext a
   fin_cases a <;> rfl
-
-
 
 def trace04Perm : Equiv.Perm (Fin 4) where
   toFun q := if q = 0 then 0 else if q = 1 then 2 else if q = 2 then 3 else 1
@@ -239,7 +230,6 @@ private theorem trace04Coeff
     (trace04Event (I := I) g A x₀ tail)
 
 set_option backward.isDefEq.respectTransparency false in
-
 
 def trace04Field
     (g : SmoothRiemannianMetric I M)

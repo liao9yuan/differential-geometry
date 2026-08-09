@@ -32,12 +32,6 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -62,11 +56,9 @@ instance metricUnitTop (g : SmoothRiemannianMetric I M) :
 
 namespace MetricUnitTangent
 
-
 def base {g : SmoothRiemannianMetric I M}
     (p : MetricUnitTangent (I := I) (M := M) g) : M :=
   (p.1).proj
-
 
 def vec {g : SmoothRiemannianMetric I M}
     (p : MetricUnitTangent (I := I) (M := M) g) :
@@ -101,7 +93,6 @@ theorem vec_mk {g : SmoothRiemannianMetric I M} {x : M}
 
 end MetricUnitTangent
 
-
 def MetricUnitTangentSlab
     (G : Real -> SmoothRiemannianMetric I M) (t0 t1 : Real) : Type _ :=
   Σ t : {t : Real // t ∈ Set.Icc t0 t1}, MetricUnitTangent (I := I) (M := M) (G t.1)
@@ -112,9 +103,6 @@ instance metricUnitTangentSlabTop
   inferInstanceAs (TopologicalSpace
     (Σ t : {t : Real // t ∈ Set.Icc t0 t1},
       MetricUnitTangent (I := I) (M := M) (G t.1)))
-
-
-
 
 def MetricUnitTangentTimeSlab
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real) : Type _ :=
@@ -128,13 +116,11 @@ instance metricUnitTangentTimeSlabTop
     {q : ({t : Real // t ∈ K} × TangentBundle I M) //
       (G q.1.1).inner q.2.proj q.2.2 q.2.2 = 1})
 
-
 abbrev MetricUnitTangentIccSlab
     (G : Real -> SmoothRiemannianMetric I M) (t0 t1 : Real) : Type _ :=
   MetricUnitTangentTimeSlab (I := I) (M := M) G (Set.Icc t0 t1)
 
 namespace MetricUnitTangentTimeSlab
-
 
 def time {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) : Real :=
@@ -147,17 +133,14 @@ theorem time_mem {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     time (I := I) (M := M) q ∈ K :=
   q.1.1.2
 
-
 def bundlePoint {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) :
     TangentBundle I M :=
   q.1.2
 
-
 def base {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) : M :=
   (bundlePoint (I := I) (M := M) q).proj
-
 
 def vec {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
     (q : MetricUnitTangentTimeSlab (I := I) (M := M) G K) :
@@ -216,13 +199,11 @@ theorem vec_mk {G : Real -> SmoothRiemannianMetric I M} {K : Set Real}
 
 end MetricUnitTangentTimeSlab
 
-
 def quad02
     {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (v : TangentSpace I x) : Real :=
   A (fun _ : Fin 2 => v)
-
 
 def eval02
     {x : M}
@@ -407,8 +388,6 @@ private theorem quad02_add_smul_eq
             rw [hv_add, hw_add, hsym]
             ring
 
-
-
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem psd_null_left
     {x : M}
@@ -449,7 +428,6 @@ theorem psd_null_left
       hden_sq_pos
   exact not_le_of_gt (by simpa [hcalc] using hneg) hnonneg
 
-
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem psd_null_right
     {x : M}
@@ -463,15 +441,6 @@ theorem psd_null_right
   intro w
   rw [← hsym v w]
   exact psd_null_left (I := I) (M := M) A hsym hpsd hnull w
-
-
-
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem metricQuad_cont
@@ -502,15 +471,12 @@ theorem metricQuad_cont
   simpa [Bundle.Trivial.homeomorphProd, TotalSpace.toProd] using
     (continuous_snd.comp hprod)
 
-
 omit [FiniteDimensional ℝ E] in
 theorem metricUnit_closed
     (g : SmoothRiemannianMetric I M) :
     IsClosed {p : TangentBundle I M | g.inner p.proj p.2 p.2 = 1} := by
   simpa [Set.setOf_eq_eq_singleton] using
     isClosed_singleton.preimage (metricQuad_cont (I := I) (M := M) g)
-
-
 
 private theorem coordMetric_lower
     [T2Space M]
@@ -573,8 +539,6 @@ private theorem coordMetric_lower
     intro x hxK w hw
     exfalso
     exact hSne ⟨(x, w), ⟨hxK, by simpa [Metric.sphere, dist_eq_norm] using hw⟩⟩
-
-
 
 private theorem coordMetric_bound
     [T2Space M]
@@ -643,8 +607,6 @@ private theorem coordMetric_bound
   · have hone_le : 1 ≤ r := le_of_lt (lt_of_not_ge hrle)
     have hr_le_sq : r ≤ r * r := by nlinarith
     linarith
-
-
 
 private theorem unitRest_compact
     [T2Space M]
@@ -867,7 +829,6 @@ theorem metricUnit_quadCont
     (n := 2) b hb (fun p => A (b p)) hA v hv
   simpa [quad02, b, v] using hEval
 
-
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem tensor02_smul2
     {x : M}
@@ -885,7 +846,6 @@ theorem tensor02_smul2
   simpa [quad02, Fin.prod_univ_two, pow_two, smul_eq_mul,
     mul_assoc, mul_comm, mul_left_comm] using hmap
 
-
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem metric_smul2
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -898,6 +858,5 @@ theorem metric_smul2
       congr 1
       simp [smul_eq_mul]
     _ = a * a * g.inner x v v := by ring
-
 
 end DifferentialGeometry

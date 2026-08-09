@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.RSTensor.Defs
 

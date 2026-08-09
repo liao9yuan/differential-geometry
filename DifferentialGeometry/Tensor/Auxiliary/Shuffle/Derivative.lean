@@ -1,8 +1,3 @@
-
-
-
-
-
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Decomposition
 import DifferentialGeometry.Tensor.Auxiliary.Fin
 import Mathlib.GroupTheory.Perm.Fin

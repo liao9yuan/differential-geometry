@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.Mixed.Bundle
 import DifferentialGeometry.Tensor.Multilinear.Field
 import DifferentialGeometry.Bundle.Section

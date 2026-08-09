@@ -19,14 +19,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace Tensor0SBundle
 
 noncomputable section
@@ -294,12 +286,7 @@ theorem hom_nonneg [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
   · exact homFlatLinear_comm DV DW
   · exact homFlatLinear_nonneg DV DW
 
-
 end MetricFiberData
-
-
-
-
 
 end
 

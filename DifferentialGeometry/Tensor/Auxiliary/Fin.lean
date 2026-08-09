@@ -1,7 +1,5 @@
 
 
-
-
 import Mathlib.Algebra.Group.Nat.Defs
 import Mathlib.Logic.Equiv.Fin.Basic
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic

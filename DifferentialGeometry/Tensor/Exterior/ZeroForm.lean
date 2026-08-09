@@ -58,8 +58,6 @@ noncomputable def ofFunction (f : M → ℝ) (hf : ContMDiff IM 𝓘(ℝ, ℝ) �
         (A := (trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x)))
     ⟩
 
-
-
 noncomputable def ofFunctionMap (f : C^⊤⟮IM, M; ℝ⟯) : DifferentialForm IM M 0 :=
   ofFunction f.1 f.2
 

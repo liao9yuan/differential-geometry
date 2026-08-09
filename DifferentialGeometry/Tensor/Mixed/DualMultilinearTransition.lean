@@ -6,7 +6,6 @@ import DifferentialGeometry.Tensor.Mixed.Naturality
 import DifferentialGeometry.Tensor.Product.Section
 import DifferentialGeometry.Tensor.Product.HomEquiv
 
-
 noncomputable section
 
 open Bundle Set ContinuousLinearMap

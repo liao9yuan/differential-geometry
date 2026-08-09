@@ -26,9 +26,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
-
-
-
 namespace Tensor0SBundle
 
 open Bundle Set TensorLieDeriv
@@ -1183,12 +1180,6 @@ theorem nablaRSFun_sub_raw {r s : ℕ}
   abel
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
 
 theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

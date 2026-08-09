@@ -1,12 +1,10 @@
 
 
-
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
-
 
 namespace Tensor0SBundle
 noncomputable section
@@ -703,7 +701,6 @@ theorem TensorRSSpace.add_apply (r s : ℕ) (x : M)
 theorem TensorRSSpace.smul_apply (r s : ℕ) (x : M)
     (c : 𝕜) (T : TensorRSSpace r s I x) (A : Tensor0SSpace r I x) :
     (c • T) A = c • T A := rfl
-
 
 end
 end Tensor0SBundle

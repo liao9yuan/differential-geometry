@@ -1,12 +1,5 @@
-
-
-
-
-
 import Mathlib.GroupTheory.Perm.Option
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
-
-
 
 namespace ShuffleSplit
 

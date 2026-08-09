@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.Realized.CurvatureTensor
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
@@ -23,8 +15,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
 
 def oneFormAtSlot0S {x : M} {s : ℕ}
     (alpha :
@@ -41,8 +31,6 @@ def oneFormAtSlot0S {x : M} {s : ℕ}
         rw [alpha.map_update_smul]
         simp [smul_eq_mul] }
 
-
-
 abbrev freezeSlot0SAt {x : M} {s : ℕ}
     (alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
@@ -58,16 +46,12 @@ abbrev freezeSlot0SAt {x : M} {s : ℕ}
       alpha (Function.update slots q W) := by
   simp [oneFormAtSlot0S]
 
-
-
 def curvatureAction0SAtSlots {x : M} {s : ℕ}
     (alpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (slots : Fin s → TangentSpace I x)
     (Rslot : Fin s → TangentSpace I x) : Real :=
   -∑ q : Fin s, alpha (Function.update slots q (Rslot q))
-
-
 
 def curvatureAction0SOperatorAt {x : M} {s : ℕ}
     (R :
@@ -79,9 +63,6 @@ def curvatureAction0SOperatorAt {x : M} {s : ℕ}
   curvatureAction0SAtSlots (I := I) alpha slots
     (fun q : Fin s => R X Y (slots q))
 
-
-
-
 def curvatureAction0SAt
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M} {s : ℕ}
@@ -92,14 +73,11 @@ def curvatureAction0SAt
     Rm13 x (oneFormAtSlot0S (I := I) alpha slots q)
       (vec3 X Y (slots q))
 
-
 def torsionCorrection0SAt {x : M} {s : ℕ}
     (nablaAlpha :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 1) x)
     (T : TangentSpace I x) (slots : Fin s → TangentSpace I x) : Real :=
   nablaAlpha (Fin.cons T slots)
-
-
 
 def Tensor0SRicciIdentityAt
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -113,8 +91,6 @@ def Tensor0SRicciIdentityAt
     nabla2Alpha (metricTraceInput (I := I) X Y slots) -
         nabla2Alpha (metricTraceInput (I := I) Y X slots) =
       curvatureAction0SAt (I := I) Rm13 alpha X Y slots
-
-
 
 def Tensor0SRicciIdentityWithTorsionAt
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -151,7 +127,6 @@ def Tensor0SRicciIdentityWithTorsionAt
     simp
   simp [hupdate]
 
-
 theorem curvatureAction0SAt_eq_slots_of_apply
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M} {s : ℕ}
@@ -175,7 +150,6 @@ theorem curvatureAction0SAt_eq_slots_of_apply
   intro q _
   exact hR q
 
-
 theorem curvatureAction0SAt_eq_operator_of_apply
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M} {s : ℕ}
@@ -194,10 +168,6 @@ theorem curvatureAction0SAt_eq_operator_of_apply
   simpa [curvatureAction0SOperatorAt] using
     curvatureAction0SAt_eq_slots_of_apply (I := I) Rm13 alpha X Y slots
       (fun q : Fin s => R X Y (slots q)) hR
-
-
-
-
 
 theorem curvatureAction0SAt_eq_slots_connectionRiemannCurvature
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
@@ -227,7 +197,6 @@ theorem curvatureAction0SAt_eq_slots_connectionRiemannCurvature
   have hRm := hRm13 Xsec Ysec (Vsec q) x
     (oneFormAtSlot0S (I := I) alpha (fun r : Fin s => Vsec r x) q)
   simpa [cotangentToDual_apply_gen, oneFormAtSlot0S_apply] using hRm
-
 
 theorem curvatureAction0SAt_eq_neg_sum_connectionRiemannCurvature
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}

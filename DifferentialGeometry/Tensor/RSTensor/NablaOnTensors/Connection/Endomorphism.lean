@@ -1,9 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-
-
-
 namespace TensorLieDeriv
 
 noncomputable section
@@ -22,9 +19,6 @@ variable (n : WithTop ℕ∞ := ⊤) [IsManifold I n M]
 variable {x x₀ : M} {s : Set M}
 
 variable [CompleteSpace 𝕜]
-
-
-
 
 private theorem contDiffWithinAt_clm_of_apply
     {D F : Type*} [NormedAddCommGroup D] [NormedSpace 𝕜 D]
@@ -106,8 +100,6 @@ lemma covariantDerivative_tangentConst_apply_contMDiffOn_baseSet
       CMDiff[e.baseSet] n (T% (fun p : M => X p)) :=
     X.contMDiff.contMDiffOn
   simpa [e] using hcovσ.clm_bundle_apply hX
-
-
 
 noncomputable def connectionEndomorphismInChartL
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -275,12 +267,6 @@ lemma connectionEndomorphismInChartL_apply_modelVector
         simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hp_source)
       (X ((extChartAt I x₀).symm y))]
 
-
-
-
-
-
-
 lemma connectionEndomorphismInChartL_apply_center_modelVector
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : (x : M) → TangentSpace I x) (x : M) (v : E) :
@@ -294,9 +280,6 @@ lemma connectionEndomorphismInChartL_apply_center_modelVector
       (𝕜 := 𝕜) (I := I) cov X x (mem_extChartAt_target (I := I) x) v
   rw [extChartAt_to_inv] at h
   simpa using h
-
-
-
 
 lemma connectionEndomorphismInChartL_apply_center
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -312,12 +295,6 @@ lemma connectionEndomorphismInChartL_apply_center
     (I := I) (x₀ := x) (x := x) (mem_chart_source H x)] at h
   rw [mfderiv_extChartAt_self] at h
   simpa using h
-
-
-
-
-
-
 
 theorem covariantDerivative_modelInChart_center_eq_sum
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -465,12 +442,6 @@ theorem covariantDerivative_modelInChart_center_eq_sum
   rw [Finset.sum_add_distrib]
   rw [← hcenter_model]
   rw [hΓ_sum]
-
-
-
-
-
-
 
 theorem covariantDerivative_modelInChart_eq_sum
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -626,8 +597,6 @@ theorem covariantDerivative_modelInChart_eq_sum
   rw [← hcenter_model]
   rw [hΓ_sum]
 
-
-
 omit [IsManifold I n M] in
 lemma connectionEndomorphismInChart_apply_contDiffWithinAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -715,8 +684,6 @@ lemma connectionEndomorphismInChart_apply_contDiffWithinAt
           W ((extChartAt I x₀).symm (extChartAt I x₀ x₀))⟩).2
       rw [hcoe]
   exact hmdiff.contDiffWithinAt
-
-
 
 omit [IsManifold I n M] in
 lemma connectionEndomorphismInChart_contDiffWithinAt

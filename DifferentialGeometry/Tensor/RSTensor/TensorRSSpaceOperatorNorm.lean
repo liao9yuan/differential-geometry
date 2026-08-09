@@ -1,6 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-
 noncomputable section
 
 namespace Tensor0SBundle

@@ -1,9 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 
-
-
-
-
 namespace Tensor0SBundle
 
 open Bundle Set TensorLieDeriv

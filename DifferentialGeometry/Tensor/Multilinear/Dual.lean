@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Fiber
@@ -11,7 +10,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.Topology.VectorBundle.FiniteDimensional
-
 
 noncomputable section
 

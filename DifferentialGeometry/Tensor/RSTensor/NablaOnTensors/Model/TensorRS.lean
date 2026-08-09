@@ -1,9 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Model.Tensor0S
 
-
-
-
 namespace TensorLieDeriv
 
 noncomputable section
@@ -24,19 +21,6 @@ variable {x x₀ : M} {s : Set M}
 variable [CompleteSpace 𝕜]
 
 section ModelCovariantDerivative
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace 𝕜] in
 theorem fderivWithin_tensorRSModel_eval_slots {r s : ℕ}
@@ -66,8 +50,6 @@ theorem fderivWithin_tensorRSModel_eval_slots {r s : ℕ}
     simpa [α] using fderivWithin_clm_apply (𝕜 := 𝕜) (s := u) (x := y) hu hT hβ
   rw [hslots, hαderiv]
   simp [α, add_assoc, add_comm]
-
-
 
 theorem covariantDeriv_tensorRSModelWithin_eval_derivation {r s : ℕ}
     (T : E → TensorRSModel r s 𝕜 E)
@@ -274,7 +256,6 @@ private theorem basis_coord_update_sum_comm {d r : ℕ}
       simp [hne]
     rw [hleft_zero, hright_zero]
 
-
 theorem lieDeriv_correctionL_apply_basis_slots_expanded {d s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (ΓX : E →L[𝕜] E)
@@ -294,13 +275,6 @@ theorem lieDeriv_correctionL_apply_basis_slots_expanded {d s : ℕ}
   rw [tensor0SModel_eval_update_basis_sum_modelRS basis α
     (fun c : Fin s => basis (lower c)) b (ΓX (basis (lower b)))]
   simp [connectionEndomorphismCoeff]
-
-
-
-
-
-
-
 
 theorem lieDeriv_correctionL_apply_basisTensor0S {d r : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
@@ -352,8 +326,6 @@ theorem lieDeriv_correctionL_apply_basisTensor0S {d r : ℕ}
     rw [hslots, continuousMultilinearMap_basis_apply_basis]
   · exact basis_coord_update_sum_comm basis ΓX upper lower a
 
-
-
 theorem covariantDeriv_tensorRSModelAt_apply_basis_slots {d r s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
     (dT_X : TensorRSModel r s 𝕜 E)
@@ -398,11 +370,6 @@ theorem covariantDeriv_tensorRSModelAt_apply_basis_slots {d r s : ℕ}
     ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.smul_apply,
     smul_eq_mul]
   abel
-
-
-
-
-
 
 theorem covDerivRS_sub_apply {d r s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)
@@ -452,8 +419,6 @@ theorem covDerivRS_sub_apply {d r s : ℕ}
   rw [covariantDeriv_tensorRSModelAt_apply_basis_slots basis dT_X ΓX T upper lower]
   rw [covariantDeriv_tensorRSModelAt_apply_basis_slots basis dT_X ΓX' T upper lower]
   abel
-
-
 
 theorem covariantDeriv_tensorRSModelWithin_apply_basis_slots {d r s : ℕ}
     (basis : Module.Basis (Fin d) 𝕜 E)

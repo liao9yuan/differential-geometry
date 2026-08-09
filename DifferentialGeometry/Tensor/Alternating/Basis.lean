@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.Auxiliary.Fin
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
@@ -10,7 +9,6 @@ import Mathlib.Analysis.Normed.Module.Alternating.Basic
 import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.Topology.Algebra.Module.FiniteDimension
-
 
 noncomputable section
 

@@ -464,7 +464,6 @@ variable {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
   {M : Type*} [TopologicalSpace M] [ChartedSpace HM M] [IsManifold IM ⊤ M]
   {k l : ℕ}
 
-
 private lemma triv_samePoint (m : ℕ) (x : M)
     (L : (TangentSpace IM x) [⋀^Fin m]→L[ℝ] ℝ) :
     (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)

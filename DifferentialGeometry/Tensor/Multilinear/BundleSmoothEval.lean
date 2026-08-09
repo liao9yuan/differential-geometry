@@ -5,7 +5,6 @@ import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

@@ -2,14 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.FixedChart.Models
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 
-
-
-
-
-
-
-
-
 set_option autoImplicit false
 
 namespace Tensor0SBundle
@@ -188,10 +180,6 @@ theorem tensorRS_eval_contMDiffAt {r s : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
-
-
 theorem tensor0S_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -236,6 +224,5 @@ theorem tensor0S_eval_tangentConstInChart_contMDiffAt
         ((Module.finBasis 𝕜 E) (slots a)))
     (hv := hframe)
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
-
 
 end Tensor0SBundle

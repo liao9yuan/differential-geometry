@@ -1,16 +1,9 @@
-
-
-
-
-
-
 import DifferentialGeometry.Tensor.Alternating.Comp
 import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Data.Bundle
-
 
 noncomputable section
 
@@ -19,7 +12,6 @@ open Bundle Set ContinuousAlternatingMap
 section defs
 variable (𝕜 : Type*) [CommSemiring 𝕜] [TopologicalSpace 𝕜] (ι : Type*) [Fintype ι]
 variable {B : Type*}
-
 
 protected def Bundle.continuousAlternatingMap (_F₁ : Type*) (E₁ : B → Type*)
     [Π x, AddCommMonoid (E₁ x)] [Π x, Module 𝕜 (E₁ x)] [Π x, TopologicalSpace (E₁ x)]
@@ -399,7 +391,6 @@ instance SmoothVectorBundle.continuousAlternatingMap :
 
 notation "𝒜⟮" 𝕜 "," ι ";"  F₁ "," E₁ ";"  F₂ "," E₂ "⟯" =>
   Bundle.TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯
-
 
 end smooth
 

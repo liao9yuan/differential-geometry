@@ -4,16 +4,6 @@ import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.BumpFunction
 
-
-
-
-
-
-
-
-
-
-
 namespace Tensor0SBundle
 
 open Bundle Set TensorLieDeriv
@@ -29,11 +19,6 @@ variable [T2Space M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
 
 theorem totalNabla0S_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
@@ -109,7 +94,6 @@ theorem totalNabla0S_eval_tangentConstInChart_contMDiffAt
 
 set_option backward.isDefEq.respectTransparency false in
 
-
 theorem totalNabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -164,8 +148,6 @@ theorem totalNabla0S_reg (s : ℕ)
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
     congr
   exact hsec
-
-
 
 noncomputable def CanonicalSpatialDerivs0S.of_smooth_connection {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

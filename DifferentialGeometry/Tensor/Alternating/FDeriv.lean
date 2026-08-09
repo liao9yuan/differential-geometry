@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Linear
 import Mathlib.Analysis.Normed.Module.Alternating.Basic

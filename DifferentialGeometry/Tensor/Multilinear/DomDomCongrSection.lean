@@ -1,23 +1,6 @@
 
 
-
 import DifferentialGeometry.Tensor.Multilinear.Tensor
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -35,8 +18,6 @@ variable {E : B → Type*} [∀ x, NormedAddCommGroup (E x)] [∀ x, NormedSpace
 variable [TopologicalSpace (TotalSpace F E)]
 variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F]
-
-
 
 theorem triv_coord_domDomCongr {s s' d : ℕ}
     (b : Module.Basis (Fin d) 𝕜 F)
@@ -74,8 +55,6 @@ variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F]
 variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
-
-
 noncomputable def domDomCongr {s s' : ℕ} (e : Fin s ≃ Fin s')
     (α : MultilinearSection 𝕜 F IB E n s) :
     MultilinearSection 𝕜 F IB E n s' :=
@@ -94,13 +73,11 @@ noncomputable def domDomCongr {s s' : ℕ} (e : Fin s ≃ Fin s')
     (domDomCongr (IB := IB) n e α) x = ContinuousMultilinearMap.domDomCongr e (α x) :=
   rfl
 
-
 @[simp] theorem domDomCongr_refl {s : ℕ} (α : MultilinearSection 𝕜 F IB E n s) :
     domDomCongr (IB := IB) n (Equiv.refl (Fin s)) α = α := by
   refine DFunLike.ext _ _ fun x => ?_
   ext V
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
-
 
 @[simp] theorem domDomCongr_zero {s s' : ℕ} (e : Fin s ≃ Fin s') :
     domDomCongr (IB := IB) n e (0 : MultilinearSection 𝕜 F IB E n s)
@@ -110,16 +87,12 @@ noncomputable def domDomCongr {s s' : ℕ} (e : Fin s ≃ Fin s')
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContMDiffSection.coe_zero]
 
-
-
 theorem domDomCongr_id_of_valPres {s : ℕ} (e : Fin s ≃ Fin s)
     (he : ∀ i, ((e i : Fin s) : ℕ) = (i : ℕ))
     (α : MultilinearSection 𝕜 F IB E n s) :
     domDomCongr (IB := IB) n e α = α := by
   have hee : e = Equiv.refl (Fin s) := Equiv.ext fun i => Fin.ext (he i)
   rw [hee, domDomCongr_refl]
-
-
 
 theorem domDomCongr_trans {s s' s'' : ℕ} (e₁ : Fin s ≃ Fin s') (e₂ : Fin s' ≃ Fin s'')
     (α : MultilinearSection 𝕜 F IB E n s) :
@@ -129,7 +102,6 @@ theorem domDomCongr_trans {s s' s'' : ℕ} (e₁ : Fin s ≃ Fin s') (e₂ : Fin
   ext V
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
-
 theorem domDomCongr_add {s s' : ℕ} (e : Fin s ≃ Fin s')
     (α β : MultilinearSection 𝕜 F IB E n s) :
     domDomCongr (IB := IB) n e (α + β)
@@ -138,7 +110,6 @@ theorem domDomCongr_add {s s' : ℕ} (e : Fin s ≃ Fin s')
   ext V
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
-
 theorem domDomCongr_smul {s s' : ℕ} (e : Fin s ≃ Fin s') (c : 𝕜)
     (α : MultilinearSection 𝕜 F IB E n s) :
     domDomCongr (IB := IB) n e (c • α) = c • domDomCongr (IB := IB) n e α := by
@@ -146,8 +117,6 @@ theorem domDomCongr_smul {s s' : ℕ} (e : Fin s ≃ Fin s') (c : 𝕜)
   ext V
   simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContMDiffSection.coe_smul]
-
-
 
 theorem product_domDomCongr_left {s s' q : ℕ} (e : Fin s ≃ Fin s')
     (α : MultilinearSection 𝕜 F IB E n s) (β : MultilinearSection 𝕜 F IB E n q) :

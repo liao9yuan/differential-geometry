@@ -2,12 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTrace02
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section
@@ -131,12 +125,6 @@ private theorem headFreezeNabla
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         3 cov A x (vec4 (I := I) (X x) (Y x) U V) := by
         simpa [metricTrace_finCons_vec3_eq_vec4 (I := I)] using hAtot.symm
-
-
-
-
-
-
 
 theorem nabla2Trace02
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
@@ -572,8 +560,6 @@ private theorem middleFreezeNabla
         4 cov A x (Fin.cons (X x) (vec4 (I := I) U (Y x) (Z x) V)) := by
         simpa [hUsec, hVsec] using hAtot.symm
 
-
-
 theorem nablaTrace04
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -684,7 +670,6 @@ theorem nablaTrace04
     middleFreezeNabla (I := I) (M := M) cov hcov A Xsec Ysec Zsec
       (hYcov Xsec) (hZcov Xsec) (basis i) (basis j)
   simpa [B, nablaA, hXsec, hYsec, hZsec] using hfreeze
-
 
 end
 

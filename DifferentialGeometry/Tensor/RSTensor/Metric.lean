@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import DifferentialGeometry.Tensor.RSTensor.Defs
@@ -76,20 +75,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -105,8 +90,6 @@ variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable (n : WithTop ℕ∞)
 variable (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 
-
-
 abbrev RiemannianMetric_gen := Bundle.ContMDiffRiemannianMetric I n E (TangentSpace I : M → Type _)
 
 private noncomputable def to02Tensor_eCLM :
@@ -117,8 +100,6 @@ private noncomputable def to02Tensor_uCLM :
     (E →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ) →L[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ :=
   (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) ℝ).symm.toContinuousLinearMap
-
-
 
 private lemma to02Tensor_trivialization_eq {x₀ x : M}
     (A : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -153,8 +134,6 @@ private lemma to02Tensor_trivialization_eq {x₀ x : M}
   rw [ContinuousLinearMap.inCoordinates_eq hx hx']
   simp [to02Tensor_eCLM, hom_trivializationAt, Trivialization.continuousLinearMap_apply]
   rfl
-
-
 
 theorem joint_to02 [IsManifold I ∞ M] {S : Set ℝ}
     (A : ∀ p : M × ℝ, TangentSpace I p.1 →L[ℝ] TangentSpace I p.1 →L[ℝ] ℝ)
@@ -210,9 +189,6 @@ theorem joint_to02 [IsManifold I ∞ M] {S : Set ℝ}
       (A := A p) hp
   · exact to02Tensor_trivialization_eq (I := I) (M := M)
       (A := A p₀) (mem_baseSet_trivializationAt E (TangentSpace I) p₀.1)
-
-
-
 
 def RiemannianMetric_gen.to02Tensor_gen {I : ModelWithCorners ℝ E H} {n : WithTop ℕ∞}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]

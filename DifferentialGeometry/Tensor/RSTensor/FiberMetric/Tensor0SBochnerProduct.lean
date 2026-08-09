@@ -7,48 +7,6 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace Tensor0SBundle
 
 noncomputable section
@@ -63,22 +21,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-
-
-
 private local instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace (𝕜 := Real) (E := E) s
 
 private local instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
-
-
-
-
-
-
-
 
 noncomputable def partialEval0SField {s : ℕ}
     (nablaT : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -102,12 +50,6 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
     (y : M) :
     partialEval0SField (I := I) nablaT Y y =
       tensor0S_curry (I := I) (𝕜 := Real) (M := M) s y (nablaT y) (Y y) := rfl
-
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem inner0S_mdiff {s : ℕ}
@@ -221,28 +163,6 @@ theorem inner0S_mdiff {s : ℕ}
       rfl
     rwa [heqfun] at hsumI
   exact hcontr.congr_of_eventuallyEq hlocal
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem nabla_partialEval0S {s : ℕ}
@@ -371,13 +291,6 @@ theorem nabla_partialEval0S {s : ℕ}
   rw [hLHS, hfreeze, hcurry, hRHStot]
   ring
 
-
-
-
-
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem freeze0S_deriv {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -458,9 +371,6 @@ theorem freeze0S_deriv {s : ℕ}
             (partialEval0SField (I := I) nablaT Y x)
             (partialEval0SField (I := I) nablaT X x)) := by
         rw [hAderiv, hBderiv, hBdef, hadd]
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem du_norm0S {s : ℕ}

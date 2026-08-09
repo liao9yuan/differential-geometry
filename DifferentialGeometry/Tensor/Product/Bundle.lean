@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.Product.Pretrivialization
 import DifferentialGeometry.Tensor.Product.Fiber
 

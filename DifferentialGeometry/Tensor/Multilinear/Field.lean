@@ -1,9 +1,7 @@
 
 
-
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Fiber
-
 
 noncomputable section
 

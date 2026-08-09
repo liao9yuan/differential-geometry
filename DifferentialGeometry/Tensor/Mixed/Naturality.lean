@@ -1,6 +1,5 @@
 
 
-
 import DifferentialGeometry.Tensor.Mixed.DualFiber
 
 noncomputable section
@@ -71,7 +70,6 @@ theorem homEquivCDualTensor_symm_tmul
     rfl
   exact h_inner
 
-
 private lemma multilinearHomEquivDualMultilinearTensor_naturality_tmul
     (r s : ℕ) (Φ : F ≃L[𝕜] F)
     (α : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜)
@@ -133,7 +131,6 @@ private lemma multilinearHomEquivDualMultilinearTensor_naturality_tmul
     dualMultilinearEquivMultilinearOfDual_compCCLM_ext r Φ.toContinuousLinearMap η,
     hη_def, LinearEquiv.apply_symm_apply]
   rfl
-
 
 theorem multilinearHomEquivDualMultilinearTensor_naturality
     (r s : ℕ) (Φ : F ≃L[𝕜] F)

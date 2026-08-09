@@ -128,7 +128,6 @@ noncomputable def pullback (f : M → N) (hf : ContMDiff IM IN ⊤ f)
     (pullback f hf η) x = (η (f x)).compContinuousLinearMap (mfderiv IM IN f x) :=
   rfl
 
-
 noncomputable def pullbackMap (f : C^⊤⟮IM, M; IN, N⟯)
     (η : DifferentialForm IN N k) : DifferentialForm IM M k :=
   pullback f.1 f.2 η
@@ -534,8 +533,6 @@ theorem exteriorDerivative_pullback [BoundarylessManifold IM M] [BoundarylessMan
       ((exteriorDerivative (pullback f hf η)) x)
   rw [← h₁, ← h₂]
   exact hfinal
-
-
 
 theorem exteriorDerivative_pullbackMap [BoundarylessManifold IM M] [BoundarylessManifold IN N]
     (f : C^⊤⟮IM, M; IN, N⟯) (η : DifferentialForm IN N k) :

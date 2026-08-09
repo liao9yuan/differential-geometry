@@ -2,14 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace Tensor0SBundle
 
 noncomputable section
@@ -47,13 +39,6 @@ private theorem totalNabla0SRealizes_eval_point_vector_smooth_slots
   have h0 := TotalNabla0SRealizes.eval_smooth_slots
     (I := I) hA Wsec V x
   simpa [hWsec] using h0
-
-
-
-
-
-
-
 
 theorem cotangentSharp_cov_eq_sharp_curry_of_mdiffAt
     [T2Space M]
@@ -239,7 +224,6 @@ private theorem cotangentInner_metricCompatible_extDerivFun_of_sharp_mdiffAt
   rw [hcovA, hcovB]
   rfl
 
-
 theorem inner0S_two_mdiff
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -350,10 +334,6 @@ theorem inner0S_two_mdiff
     exact hraw.congr_of_eventuallyEq
       (by filter_upwards with y; simp [Finset.sum_apply])
   exact hsum.congr_of_eventuallyEq hlocal
-
-
-
-
 
 theorem inner0S_two_nabla
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -796,19 +776,6 @@ theorem inner0S_two_nabla
         inner0S (I := I) g x 2 (A x)
           (nabla0SFun (E := E) (H := H) (I := I) (M := M) 2 cov X B x) := by
           rw [hsplit, ← hRhsA, ← hRhsB]
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem inner0S_two_metricCompatible_extDerivFun
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1294,7 +1261,6 @@ theorem inner0S_two_metricCompatible_extDerivFun
           (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 2 x
             (nablaB x) (X x)) := by
           rw [hsplit, ← hRhsA, ← hRhsB]
-
 
 end
 

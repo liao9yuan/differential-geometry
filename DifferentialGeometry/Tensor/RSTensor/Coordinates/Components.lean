@@ -1,8 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 
-
-
 noncomputable section
 
 namespace Tensor0SBundle
@@ -73,8 +71,6 @@ theorem componentRS_apply
       (T (basisTensor0S (I := I) basis upper))
         (fun a => basis (lower a)) :=
   rfl
-
-
 
 theorem componentRS_congr_slots
     (T : TensorRSSpace r s I x)

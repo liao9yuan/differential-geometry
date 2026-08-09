@@ -1,9 +1,7 @@
 
 
-
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import Mathlib.Topology.VectorBundle.Basic
-
 
 noncomputable section
 

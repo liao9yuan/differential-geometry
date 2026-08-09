@@ -1,8 +1,3 @@
-
-
-
-
-
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
 import Mathlib.GroupTheory.Perm.Finite
 import Mathlib.GroupTheory.Perm.Option
