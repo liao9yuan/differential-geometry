@@ -3472,6 +3472,1163 @@ noncomputable def scalarForcedSlice
         convert hc using 1
       exact (contMDiffOn_univ.mp hsliceOn)⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+private lemma summable_abs_mul_hsWeight_of_weighted
+    (g : SmoothRiemannianMetric I M)
+    (d : TensorEigenIdx00 g → ℝ)
+    {p : ℝ} (hp : 0 < p)
+    (htail : Summable (fun i : TensorEigenIdx00 g =>
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-p)))
+    (hd : Summable (fun i : TensorEigenIdx00 g =>
+      tensorSobolevWeight (I := I) (M := M) i
+        ((Nat.ceil (((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) + p) : ℕ) : ℝ) * (d i) ^ 2)) :
+    Summable (fun i : TensorEigenIdx00 g =>
+      |d i| * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+        (((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) / 2)) := by
+  classical
+  let N₀ : ℕ := Module.finrank ℝ E / 2 + 1
+  let σ : ℝ := (N₀ : ℝ)
+  let Mc : ℕ := Nat.ceil (σ + p)
+  have hM : σ + p ≤ (Mc : ℝ) := by
+    dsimp [Mc]
+    exact (Nat.ceil_le.mp (le_rfl : (Nat.ceil (σ + p) : ℕ) ≤ Nat.ceil (σ + p)))
+  have hM0 : 0 ≤ (Mc : ℝ) := by positivity
+  have htailM : Summable (fun i : TensorEigenIdx00 g =>
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ - (Mc : ℝ))) := by
+    refine Summable.of_nonneg_of_le
+      (fun i => Real.rpow_nonneg (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) _) ?_ htail
+    intro i
+    have hx1 : 1 ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+      linarith [tensor_lambda_nonneg (I := I) (M := M) i]
+    have hle : σ - (Mc : ℝ) ≤ -p := by
+      linarith [hM]
+    exact Real.rpow_le_rpow_of_exponent_le hx1 hle
+  have hdM : Summable (fun i : TensorEigenIdx00 g =>
+      tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) * (d i) ^ 2) := by
+    dsimp [Mc, σ, N₀]
+    exact hd
+  have hAMGM (a b : ℝ) : a * b ≤ (a ^ 2 + b ^ 2) / 2 := by
+    nlinarith [sq_nonneg (a - b)]
+  have hmain (i : TensorEigenIdx00 g) :
+      |d i| * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2) ≤
+        (tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) * (d i) ^ 2 +
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ - (Mc : ℝ))) / 2 := by
+    let x : ℝ := 1 + TensorEigenIdx.lambda (I := I) (M := M) i
+    have hx0 : 0 < x := by
+      dsimp [x]
+      linarith [tensor_lambda_nonneg (I := I) (M := M) i]
+    have hw : tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) = x ^ (Mc : ℝ) := by
+      unfold tensorSobolevWeight
+      rw [Real.rpow_natCast]
+    have hsplit : x ^ (σ / 2) = x ^ ((Mc : ℝ) / 2) * x ^ ((σ - (Mc : ℝ)) / 2) := by
+      rw [← Real.rpow_add hx0]
+      congr 1
+      field_simp
+      ring_nf
+    calc
+      |d i| * x ^ (σ / 2)
+          = (|d i| * x ^ ((Mc : ℝ) / 2)) * (x ^ ((σ - (Mc : ℝ)) / 2)) := by
+            rw [hsplit]
+            ring
+      _ ≤ ((|d i| * x ^ ((Mc : ℝ) / 2)) ^ 2 + (x ^ ((σ - (Mc : ℝ)) / 2)) ^ 2) / 2 := by
+            exact hAMGM (|d i| * x ^ ((Mc : ℝ) / 2)) (x ^ ((σ - (Mc : ℝ)) / 2))
+      _ = (x ^ (Mc : ℝ) * (d i) ^ 2 + x ^ (σ - (Mc : ℝ))) / 2 := by
+            rw [mul_pow, sq_abs]
+            rw [rpow_sq_eq hx0.le ((Mc : ℝ) / 2)]
+            rw [rpow_sq_eq hx0.le ((σ - (Mc : ℝ)) / 2)]
+            ring_nf
+      _ = (tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) * (d i) ^ 2 +
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ - (Mc : ℝ))) / 2 := by
+            rw [hw]
+  exact Summable.of_nonneg_of_le
+    (fun i => mul_nonneg (abs_nonneg _) (Real.rpow_nonneg
+      (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (σ / 2)))
+    hmain ((hdM.add htailM).div_const 2)
+
+private lemma scalarSpecCoeff_eq_inner
+    (g : SmoothRiemannianMetric I M)
+    (c : TensorEigenIdx00 g → ℝ)
+    (slice : SmoothScalar g)
+    (hslice : ∀ x : M, slice.toFun x =
+      ∑' i : TensorEigenIdx00 g, c i * (scalarEigenFunction g i).toFun x)
+    (hc_sum : Summable (fun i : TensorEigenIdx00 g =>
+      |c i| * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+        (((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) / 2)))
+    (j : TensorEigenIdx00 g) :
+    ⟪scalarEigenFunctionLp g j, smoothToLp (I := I) (M := M) g slice⟫_ℝ = c j := by
+  classical
+  let σ : ℝ := ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ)
+  let φj : SmoothScalar g := scalarEigenFunction g j
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g
+  haveI : MeasureTheory.IsFiniteMeasure μ :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  let F : TensorEigenIdx00 g → M → ℝ := fun i x =>
+    c i * (φj.toFun x * (scalarEigenFunction g i).toFun x)
+  have hF_cont (i : TensorEigenIdx00 g) : Continuous (F i) := by
+    dsimp [F]
+    exact (continuous_const.mul
+      ((φj.smooth.continuous).mul (scalarEigenFunction g i).smooth.continuous))
+  have hF_int (i : TensorEigenIdx00 g) : Integrable (F i) μ := by
+    exact Continuous.integrable_of_hasCompactSupport (hF_cont i)
+      (HasCompactSupport.of_compactSpace _)
+  obtain ⟨C0, hC0, hφbdd⟩ := scalarEigenFunction_abs_le (I := I) (M := M) g
+  have hw_nonneg (i : TensorEigenIdx00 g) :
+      0 ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2) :=
+    Real.rpow_nonneg (by linarith [tensor_lambda_nonneg (I := I) (M := M) i]) (σ / 2)
+  have hCj : 0 ≤ C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2) :=
+    mul_nonneg hC0 (hw_nonneg j)
+  have hpt (i : TensorEigenIdx00 g) (x : M) :
+      ‖F i x‖ ≤ |c i| * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+        (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+    dsimp [F]
+    calc
+      |c i * (φj.toFun x * (scalarEigenFunction g i).toFun x)|
+          = |c i| * |φj.toFun x| * |(scalarEigenFunction g i).toFun x| := by
+            rw [abs_mul, abs_mul]
+            ring
+      _ ≤ |c i| * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+            (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+            exact mul_le_mul
+              (mul_le_mul (le_rfl) (hφbdd j x) (abs_nonneg _) (abs_nonneg _))
+              (hφbdd i x) (abs_nonneg _)
+              (mul_nonneg (abs_nonneg _) hCj)
+  have hconst_int (i : TensorEigenIdx00 g) :
+      ∫ x : M, |c i| * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+          (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) ∂μ =
+        |c i| * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+          (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) *
+          (μ Set.univ).toReal := by
+    rw [MeasureTheory.integral_const]
+    simp [Measure.real, smul_eq_mul]
+    ring
+  have hinteg_bdd (i : TensorEigenIdx00 g) :
+      ∫ x : M, ‖F i x‖ ∂μ ≤
+        |c i| * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+          (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) *
+          (μ Set.univ).toReal := by
+    calc
+      ∫ x : M, ‖F i x‖ ∂μ
+          ≤ ∫ x : M, |c i| * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+              (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) ∂μ := by
+            exact MeasureTheory.integral_mono (hF_int i).norm (integrable_const _)
+              (fun x => hpt i x)
+      _ = |c i| * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+            (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) *
+            (μ Set.univ).toReal := hconst_int i
+  have hsum_norm : Summable (fun i : TensorEigenIdx00 g =>
+      ∫ x : M, ‖F i x‖ ∂μ) := by
+    let K : ℝ := C0 * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+      (μ Set.univ).toReal
+    let B : TensorEigenIdx00 g → ℝ := fun i =>
+      K * (|c i| * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2))
+    have hK : 0 ≤ K := by
+      dsimp [K]
+      positivity
+    have hB0 : ∀ i : TensorEigenIdx00 g, 0 ≤ B i := by
+      intro i
+      dsimp [B]
+      exact mul_nonneg hK (mul_nonneg (abs_nonneg _) (hw_nonneg i))
+    have hle : ∀ i : TensorEigenIdx00 g, ∫ x : M, ‖F i x‖ ∂μ ≤ B i := by
+      intro i
+      calc
+        ∫ x : M, ‖F i x‖ ∂μ
+            ≤ |c i| * (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) j) ^ (σ / 2)) *
+                (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) *
+                (μ Set.univ).toReal := hinteg_bdd i
+        _ = B i := by
+              dsimp [B, K]
+              ring
+    have hBsum : Summable B := by
+      exact Summable.mul_left K hc_sum
+    have hg0 : ∀ i : TensorEigenIdx00 g, 0 ≤ ∫ x : M, ‖F i x‖ ∂μ := by
+      intro i
+      exact MeasureTheory.integral_nonneg (fun x => norm_nonneg (F i x))
+    exact Summable.of_nonneg_of_le hg0 hle hBsum
+  have hinter :
+      (∑' i : TensorEigenIdx00 g, ∫ x : M, F i x ∂μ) =
+        ∫ x : M, (∑' i : TensorEigenIdx00 g, F i x) ∂μ :=
+    by
+    haveI : Countable (TensorEigenIdx00 g) :=
+      DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.countable_tensorEigenIdx
+        (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+    exact MeasureTheory.integral_tsum_of_summable_integral_norm (F := F) hF_int hsum_norm
+  have horth (i : TensorEigenIdx00 g) :
+      ∫ x : M, φj.toFun x * (scalarEigenFunction g i).toFun x ∂μ =
+        if i = j then (1 : ℝ) else 0 := by
+    calc
+      ∫ x : M, φj.toFun x * (scalarEigenFunction g i).toFun x ∂μ
+          = ⟪scalarEigenFunctionLp g j, scalarEigenFunctionLp g i⟫_ℝ := by
+            rw [← smoothToLp_inner_eq_integral_mul (I := I) (M := M) g φj
+              (scalarEigenFunction g i)]
+            rfl
+      _ = ⟪(eigenvectorSmooth g 0 0 j : TensorL2 0 0 g),
+            (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g)⟫_ℝ := by
+            rw [scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g j,
+              scalarEigenFunctionLp_eq_tensorBasis (I := I) (M := M) g i]
+            have h := (tensor00ScalarL2Equiv g).toLinearIsometry.inner_map_map
+              (eigenvectorSmooth g 0 0 j : TensorL2 0 0 g)
+              (eigenvectorSmooth g 0 0 i : TensorL2 0 0 g)
+            exact h
+      _ = tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0)
+            ((eigenvectorSmooth g 0 0 i : TensorL2 0 0 g)) j := by
+            rw [tensorL2Coeff_eq_inner]
+            congr 1
+            exact eigenvectorSmooth00_eq_basis (I := I) (M := M) g j
+      _ = if i = j then (1 : ℝ) else 0 := by
+            simpa [eq_comm] using tensorL2Coeff_eigenvectorSmooth00 (I := I) (M := M) g j i
+  have hmain : ∫ x : M, φj.toFun x * slice.toFun x ∂μ = c j := by
+    calc
+      ∫ x : M, φj.toFun x * slice.toFun x ∂μ
+          = ∫ x : M, φj.toFun x *
+              (∑' i : TensorEigenIdx00 g, c i * (scalarEigenFunction g i).toFun x) ∂μ := by
+            apply congrArg (MeasureTheory.integral (μ := μ))
+            funext x
+            rw [hslice x]
+      _ = ∫ x : M, (∑' i : TensorEigenIdx00 g, F i x) ∂μ := by
+            congr 1
+            funext x
+            dsimp [F]
+            rw [← tsum_mul_left]
+            apply tsum_congr
+            intro i
+            ring
+      _ = ∑' i : TensorEigenIdx00 g, ∫ x : M, F i x ∂μ := hinter.symm
+      _ = c j := by
+            calc
+              (∑' i : TensorEigenIdx00 g, ∫ x : M, F i x ∂μ)
+                  = ∑' i : TensorEigenIdx00 g, c i *
+                      ∫ x : M, φj.toFun x * (scalarEigenFunction g i).toFun x ∂μ := by
+                    apply tsum_congr
+                    intro i
+                    dsimp [F]
+                    rw [MeasureTheory.integral_const_mul]
+              _ = ∑' i : TensorEigenIdx00 g, c i * (if i = j then (1 : ℝ) else 0) := by
+                    apply tsum_congr
+                    intro i
+                    rw [horth i]
+              _ = c j := by
+                    rw [show (fun i : TensorEigenIdx00 g =>
+                        c i * (if i = j then (1 : ℝ) else 0)) =
+                      fun i : TensorEigenIdx00 g => if i = j then c j else (0 : ℝ) by
+                      funext i
+                      by_cases hij : i = j
+                      · subst hij
+                        simp
+                      · simp [hij]]
+                    exact tsum_ite_eq j (fun _ => c j)
+  calc
+    ⟪scalarEigenFunctionLp g j, smoothToLp (I := I) (M := M) g slice⟫_ℝ
+        = ∫ x : M, φj.toFun x * slice.toFun x ∂μ := by
+          rw [← smoothToLp_inner_eq_integral_mul (I := I) (M := M) g φj slice]
+          rfl
+    _ = c j := hmain
+
+theorem scalarForcedSlice_toL2_eq_mildSolution
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) :
+    smoothToLp (I := I) (M := M) g (scalarForcedSlice g u₀ f hf hε hεT hderiv ht) =
+      mildSolution (I := I) (M := M) g u₀ f t := by
+  classical
+  let slice : SmoothScalar g := scalarForcedSlice g u₀ f hf hε hεT hderiv ht
+  let c : TensorEigenIdx00 g → ℝ := fun i => scalarForcedCoeff (I := I) (M := M) g u₀ f i t
+  let σ : ℝ := ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ)
+  have hslice (x : M) : slice.toFun x =
+      ∑' i : TensorEigenIdx00 g, c i * (scalarEigenFunction g i).toFun x := by
+    dsimp [slice, scalarForcedSlice, scalarForcedFlow, c]
+    unfold scalarSpecSum
+    rfl
+  have hc_sum : Summable (fun i : TensorEigenIdx00 g =>
+      |c i| * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+    obtain ⟨p, hp, htail_p⟩ := scalar_eigen_tail (I := I) (M := M) g
+    let Mc : ℕ := Nat.ceil (σ + p)
+    obtain ⟨Cm, hCm, hbm⟩ := hderiv 0 Mc
+    have hd : Summable (fun i : TensorEigenIdx00 g =>
+        tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) * (c i) ^ 2) := by
+      refine Summable.of_nonneg_of_le
+        (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (Mc : ℝ)) (sq_nonneg _))
+        ?_ hCm
+      intro i
+      have hb := hbm i t ht
+      simpa [c, iteratedDeriv] using hb
+    exact summable_abs_mul_hsWeight_of_weighted (I := I) (M := M) g c hp htail_p hd
+  have hcoeff (i : TensorEigenIdx00 g) :
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice⟫_ℝ = c i :=
+    scalarSpecCoeff_eq_inner (I := I) (M := M) g c slice hslice hc_sum i
+  have h1 := hasSum_scalarEigenFunctionLp_repr g (smoothToLp (I := I) (M := M) g slice)
+  have h2 := hasSum_scalarEigenFunctionLp_repr g (mildSolution (I := I) (M := M) g u₀ f t)
+  have hsame : (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice⟫_ℝ •
+        scalarEigenFunctionLp g i) =
+      (fun i : TensorEigenIdx00 g =>
+        ⟪scalarEigenFunctionLp g i, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ •
+          scalarEigenFunctionLp g i) := by
+    funext i
+    rw [hcoeff i]
+    dsimp [c]
+    rfl
+  have h2' : HasSum (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice⟫_ℝ •
+        scalarEigenFunctionLp g i) (mildSolution (I := I) (M := M) g u₀ f t) := by
+    convert h2 using 1
+  exact h1.unique h2'
+
+noncomputable def scalarForcingFlow
+    (g : SmoothRiemannianMetric I M)
+    (f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    (t : ℝ) (x : M) : ℝ :=
+  scalarSpecSum (I := I) (M := M) g
+    (fun i s => scalarForcingCoeff (I := I) (M := M) g f i s) t x
+
+theorem scalarForcingFlow_contMDiffOn
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hspace : ∀ r m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t) ^ 2 ≤ Cm i)
+    (N : ℕ) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) (N : ℕ)
+      (fun q : ℝ × M => scalarForcingFlow g f q.1 q.2)
+      (Set.Icc ε T ×ˢ Set.univ) := by
+  classical
+  have hd (j : ℕ) (m : ℕ) : ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcingCoeff (I := I) (M := M) g f i s) t) ^ 2 ≤ Cm i := by
+    obtain ⟨Cm, hCm, hbm⟩ := hspace j m
+    refine ⟨Cm, hCm, ?_⟩
+    intro i t ht
+    have hb := hbm i t ht
+    rwa [← scalarForcingCoeff_iteratedDeriv (I := I) (M := M) g hf i j t] at hb
+  simpa [scalarForcingFlow] using (scalar_path_recon (I := I) (M := M) g
+    (scalar_eigen_tail (I := I) (M := M) g) hεT N
+    (fun i s => scalarForcingCoeff (I := I) (M := M) g f i s)
+    (U := Set.Ioi (0 : ℝ)) (isOpen_Ioi : IsOpen (Set.Ioi (0 : ℝ)))
+    (by intro t ht; exact lt_of_lt_of_le hε (Set.mem_Icc.mp ht).1)
+    (fun i => (scalarForcingCoeff_contDiff (I := I) (M := M) g
+      (hf.of_le (enat_coe_le_top N)) i).contDiffOn))
+    (fun j hj m => hd j m)
+
+theorem scalarForcingFlow_contMDiffOn_top
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hspace : ∀ r m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t) ^ 2 ≤ Cm i) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => scalarForcingFlow g f q.1 q.2)
+      (Set.Icc ε T ×ˢ Set.univ) := by
+  rw [contMDiffOn_infty]
+  intro N
+  exact scalarForcingFlow_contMDiffOn (I := I) (M := M) g hf hε hεT hspace N
+
+noncomputable def scalarForcingSlice
+    (g : SmoothRiemannianMetric I M)
+    (f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hspace : ∀ r m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) : SmoothScalar g :=
+  ⟨fun x => scalarForcingFlow g f t x,
+    by
+      have hjoint := scalarForcingFlow_contMDiffOn_top (I := I) (M := M) g hf hε hεT hspace
+      have hsliceOn : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+          (fun x : M => scalarForcingFlow g f t x) Set.univ := by
+        have hcomp := hjoint.comp
+          ((contMDiffOn_const : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun _ : M => t) Set.univ).prodMk
+            (contMDiffOn_id : ContMDiffOn I I ∞ id Set.univ))
+          (by intro p hp; exact ⟨⟨ht.1, ht.2⟩, Set.mem_univ p⟩)
+        refine (contMDiffOn_univ.mpr ?_)
+        have hc : ContMDiff I 𝓘(ℝ, ℝ) ∞
+            (fun x : M => scalarForcingFlow g f (t, x).1 (t, x).2) := by
+          simpa using (contMDiffOn_univ.mp hcomp)
+        convert hc using 1
+      exact (contMDiffOn_univ.mp hsliceOn)⟩
+
+theorem scalarForcingSlice_toL2_eq_smoothRep
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    (F : ℝ → SmoothScalar g)
+    (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hspace : ∀ r m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) :
+    smoothToLp (I := I) (M := M) g (scalarForcingSlice g f hf hε hεT hspace ht) =
+      smoothToLp (I := I) (M := M) g (F t) := by
+  classical
+  let slice : SmoothScalar g := scalarForcingSlice g f hf hε hεT hspace ht
+  let c : TensorEigenIdx00 g → ℝ := fun i => scalarForcingCoeff (I := I) (M := M) g f i t
+  let σ : ℝ := ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ)
+  have hslice (x : M) : slice.toFun x =
+      ∑' i : TensorEigenIdx00 g, c i * (scalarEigenFunction g i).toFun x := by
+    dsimp [slice, scalarForcingSlice, scalarForcingFlow, c]
+    unfold scalarSpecSum
+    rfl
+  have hc_sum : Summable (fun i : TensorEigenIdx00 g =>
+      |c i| * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+    obtain ⟨p, hp, htail_p⟩ := scalar_eigen_tail (I := I) (M := M) g
+    let Mc : ℕ := Nat.ceil (σ + p)
+    obtain ⟨Cm, hCm, hbm⟩ := hspace 0 Mc
+    have hd : Summable (fun i : TensorEigenIdx00 g =>
+        tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) * (c i) ^ 2) := by
+      refine Summable.of_nonneg_of_le
+        (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (Mc : ℝ)) (sq_nonneg _))
+        ?_ hCm
+      intro i
+      simpa [c] using hbm i t ht
+    exact summable_abs_mul_hsWeight_of_weighted (I := I) (M := M) g c hp htail_p hd
+  have hcoeff (i : TensorEigenIdx00 g) :
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice⟫_ℝ = c i :=
+    scalarSpecCoeff_eq_inner (I := I) (M := M) g c slice hslice hc_sum i
+  have h1 := hasSum_scalarEigenFunctionLp_repr g (smoothToLp (I := I) (M := M) g slice)
+  have h2 := hasSum_scalarEigenFunctionLp_repr g (smoothToLp (I := I) (M := M) g (F t))
+  have hsame : (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice⟫_ℝ •
+        scalarEigenFunctionLp g i) =
+      (fun i : TensorEigenIdx00 g =>
+        ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g (F t)⟫_ℝ •
+          scalarEigenFunctionLp g i) := by
+    funext i
+    rw [hcoeff i, hfF t]
+    rfl
+  have h2' : HasSum (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice⟫_ℝ •
+        scalarEigenFunctionLp g i) (smoothToLp (I := I) (M := M) g (F t)) := by
+    convert h2 using 1
+  exact h1.unique h2'
+
+private lemma scalarEigen_inner_tsum
+    (g : SmoothRiemannianMetric I M)
+    (x y : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
+    ⟪x, y⟫_ℝ =
+      ∑' k : EigenIdx (I := I) (M := M) g,
+        ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g k, x⟫_ℝ *
+          ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g k, y⟫_ℝ := by
+  classical
+  set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
+  have hsum := (innerSL (𝕜 := ℝ)
+      (E := Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) y).hasSum (b.hasSum_repr x)
+  have hmain : HasSum (fun k : EigenIdx (I := I) (M := M) g =>
+      ⟪b k, x⟫_ℝ * ⟪b k, y⟫_ℝ) ⟪x, y⟫_ℝ := by
+    have hrewrite : (fun k : EigenIdx (I := I) (M := M) g =>
+        (innerSL (𝕜 := ℝ)
+          (E := Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) y)
+          ((b.repr x) k • b k)) =
+        (fun k : EigenIdx (I := I) (M := M) g =>
+          ⟪b k, x⟫_ℝ * ⟪b k, y⟫_ℝ) := by
+      funext k
+      rw [innerSL_apply_apply]
+      rw [HilbertBasis.repr_apply_apply]
+      rw [inner_smul_right]
+      rw [real_inner_comm y (b k)]
+    have hsum' : HasSum (fun k : EigenIdx (I := I) (M := M) g =>
+        ⟪b k, x⟫_ℝ * ⟪b k, y⟫_ℝ) ⟪y, x⟫_ℝ := by
+      rwa [hrewrite] at hsum
+    simpa [real_inner_comm x y] using hsum'
+  exact hmain.tsum_eq.symm
+
+private lemma scalarForcedSlice_laplacian_coeff_eq
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) (i : TensorEigenIdx00 g) :
+    ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g
+        (scalarForcedSlice g u₀ f hf hε hεT hderiv ht).laplacian⟫_ℝ =
+      -TensorEigenIdx.lambda (I := I) (M := M) i *
+        scalarForcedCoeff (I := I) (M := M) g u₀ f i t := by
+  classical
+  let slice : SmoothScalar g := scalarForcedSlice g u₀ f hf hε hεT hderiv ht
+  let u_dom : laplacianDomain (I := I) (M := M) g :=
+    ⟨smoothToH1Compl (I := I) (M := M) g slice,
+      smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) slice⟩
+  have hu_lp : H1ComplToLp (I := I) (M := M) g (u_dom : H1Compl g) =
+      mildSolution (I := I) (M := M) g u₀ f t := by
+    change H1ComplToLp (I := I) (M := M) g
+      (smoothToH1Compl (I := I) (M := M) g slice) = _
+    rw [H1ComplToLp_smoothToH1Compl]
+    exact scalarForcedSlice_toL2_eq_mildSolution (I := I) (M := M) g u₀ hf hε hεT hderiv ht
+  have hlap_lp : smoothToLp (I := I) (M := M) g slice.laplacian =
+      laplacianOp (I := I) (M := M) g u_dom := by
+    exact (laplacianOp_smoothToH1Compl_eq_smoothToLp_laplacian
+      (I := I) (M := M) slice).symm
+  set b := resolventHilbertEigenbasisSigma (I := I) (M := M) g
+  set φ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    scalarEigenFunctionLp (I := I) (M := M) g i
+  let hw_h : laplacianDomain (I := I) (M := M) g :=
+    ⟨smoothToH1Compl (I := I) (M := M) g (scalarEigenFunction g i),
+      smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (scalarEigenFunction g i)⟩
+  have hH1 : H1ComplToLp (I := I) (M := M) g (hw_h : H1Compl g) = φ := by
+    dsimp [hw_h]
+    change H1ComplToLp (I := I) (M := M) g
+      (smoothToH1Compl (I := I) (M := M) g (scalarEigenFunction g i)) = φ
+    rw [H1ComplToLp_smoothToH1Compl]
+    rfl
+  have hzero_of_ne (k : EigenIdx (I := I) (M := M) g)
+      (hlam : EigenIdx.lambda (I := I) (M := M) k ≠
+        TensorEigenIdx.lambda (I := I) (M := M) i) :
+      ⟪b k, φ⟫_ℝ = 0 := by
+    have hinner_lap := laplacianOp_inner_eigenbasis (I := I) (M := M) g hw_h k
+    have h1 : ⟪b k, laplacianOp (I := I) (M := M) g hw_h⟫_ℝ =
+        -EigenIdx.lambda (I := I) (M := M) k * ⟪b k, φ⟫_ℝ := by
+      rw [hinner_lap, hH1]
+    have h2 : ⟪b k, laplacianOp (I := I) (M := M) g hw_h⟫_ℝ =
+        -TensorEigenIdx.lambda (I := I) (M := M) i * ⟪b k, φ⟫_ℝ := by
+      have hl : laplacianOp (I := I) (M := M) g hw_h =
+          -TensorEigenIdx.lambda (I := I) (M := M) i • scalarEigenFunctionLp g i := by
+        simpa [hw_h] using (laplacianOp_scalarEigenFunctionLp (I := I) (M := M) g i)
+      rw [hl]
+      simp [inner_smul_right, φ]
+    have hsub : (EigenIdx.lambda (I := I) (M := M) k -
+        TensorEigenIdx.lambda (I := I) (M := M) i) * ⟪b k, φ⟫_ℝ = 0 := by
+      nlinarith [h1, h2]
+    exact (mul_eq_zero.mp hsub).resolve_left (sub_ne_zero.mpr hlam)
+  have hφ_repr : HasSum (fun k : EigenIdx (I := I) (M := M) g =>
+      ⟪b k, φ⟫_ℝ • b k) φ :=
+    by
+      convert b.hasSum_repr φ using 1
+      funext k
+      rw [HilbertBasis.repr_apply_apply]
+  have hφ_lap : ⟪φ, laplacianOp (I := I) (M := M) g u_dom⟫_ℝ =
+      -TensorEigenIdx.lambda (I := I) (M := M) i *
+        ⟪φ, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ := by
+    calc
+      ⟪φ, laplacianOp (I := I) (M := M) g u_dom⟫_ℝ
+          = ∑' k : EigenIdx (I := I) (M := M) g,
+              ⟪b k, φ⟫_ℝ * ⟪b k, laplacianOp (I := I) (M := M) g u_dom⟫_ℝ := by
+            exact (scalarEigen_inner_tsum (I := I) (M := M) g φ
+              (laplacianOp (I := I) (M := M) g u_dom))
+      _ = ∑' k : EigenIdx (I := I) (M := M) g,
+              ⟪b k, φ⟫_ℝ *
+                (-TensorEigenIdx.lambda (I := I) (M := M) i *
+                  ⟪b k, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ) := by
+            apply tsum_congr
+            intro k
+            have hinner := laplacianOp_inner_eigenbasis (I := I) (M := M) g u_dom k
+            by_cases hlam : EigenIdx.lambda (I := I) (M := M) k =
+                TensorEigenIdx.lambda (I := I) (M := M) i
+            · rw [hinner, hu_lp]
+              change ⟪b k, φ⟫_ℝ *
+                  (-EigenIdx.lambda (I := I) (M := M) k *
+                    ⟪b k, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ) =
+                ⟪b k, φ⟫_ℝ *
+                  (-TensorEigenIdx.lambda (I := I) (M := M) i *
+                    ⟪b k, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ)
+              rw [hlam]
+            · have hφ0 : ⟪b k, φ⟫_ℝ = 0 := hzero_of_ne k hlam
+              simp [hφ0]
+      _ = -TensorEigenIdx.lambda (I := I) (M := M) i *
+            ∑' k : EigenIdx (I := I) (M := M) g,
+              ⟪b k, φ⟫_ℝ * ⟪b k, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ := by
+            calc
+              ∑' k : EigenIdx (I := I) (M := M) g,
+                  ⟪b k, φ⟫_ℝ *
+                    (-TensorEigenIdx.lambda (I := I) (M := M) i *
+                      ⟪b k, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ)
+                  = ∑' k : EigenIdx (I := I) (M := M) g,
+                      -TensorEigenIdx.lambda (I := I) (M := M) i *
+                        (⟪b k, φ⟫_ℝ * ⟪b k, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ) := by
+                    apply tsum_congr
+                    intro k
+                    ring
+              _ = -TensorEigenIdx.lambda (I := I) (M := M) i *
+                    ∑' k : EigenIdx (I := I) (M := M) g,
+                      ⟪b k, φ⟫_ℝ * ⟪b k, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ := by
+                    rw [tsum_mul_left
+                      (a := -TensorEigenIdx.lambda (I := I) (M := M) i)
+                      (f := fun k : EigenIdx (I := I) (M := M) g =>
+                        ⟪b k, φ⟫_ℝ * ⟪b k, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ)]
+      _ = -TensorEigenIdx.lambda (I := I) (M := M) i *
+            ⟪φ, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ := by
+            rw [scalarEigen_inner_tsum (I := I) (M := M) g φ
+              (mildSolution (I := I) (M := M) g u₀ f t)]
+  calc
+    ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice.laplacian⟫_ℝ
+        = ⟪φ, laplacianOp (I := I) (M := M) g u_dom⟫_ℝ := by
+          rw [hlap_lp]
+    _ = -TensorEigenIdx.lambda (I := I) (M := M) i *
+          ⟪φ, mildSolution (I := I) (M := M) g u₀ f t⟫_ℝ := hφ_lap
+    _ = -TensorEigenIdx.lambda (I := I) (M := M) i *
+          scalarForcedCoeff (I := I) (M := M) g u₀ f i t := by
+          rfl
+
+private lemma scalarForcedLaplacianCoeff_contDiffOn
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f) (i : TensorEigenIdx00 g) (N : ℕ) :
+    ContDiffOn ℝ (N : ℕ)
+      (fun s : ℝ => -TensorEigenIdx.lambda (I := I) (M := M) i *
+        scalarForcedCoeff (I := I) (M := M) g u₀ f i s)
+      (Set.Ioi (0 : ℝ)) := by
+  exact ((contDiffOn_const : ContDiffOn ℝ (N : ℕ)
+    (fun _ : ℝ => -TensorEigenIdx.lambda (I := I) (M := M) i)
+      (Set.Ioi (0 : ℝ))).mul
+    (scalarForcedCoeff_contDiffOn (I := I) (M := M) g u₀ hf i N))
+
+private lemma scalarForcedLaplacianCoeff_weighted_deriv_sq_le
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (_hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    (j m : ℕ) :
+    ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ =>
+            -TensorEigenIdx.lambda (I := I) (M := M) i *
+              scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i := by
+  classical
+  obtain ⟨Cm, hCm, hbm⟩ := hderiv j (m + 2)
+  refine ⟨Cm, hCm, ?_⟩
+  intro i t ht
+  have hb := hbm i t ht
+  have hder : iteratedDeriv j (fun s : ℝ =>
+      -TensorEigenIdx.lambda (I := I) (M := M) i *
+        scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t =
+      -TensorEigenIdx.lambda (I := I) (M := M) i *
+        iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t := by
+    have hcd : ContDiffAt ℝ (j : ℕ∞)
+        (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t :=
+      (scalarForcedCoeff_contDiffOn (I := I) (M := M) g u₀ hf i j).contDiffAt
+        (isOpen_Ioi.mem_nhds (lt_of_lt_of_le hε (Set.mem_Icc.mp ht).1))
+    exact iteratedDeriv_const_mul (-TensorEigenIdx.lambda (I := I) (M := M) i) hcd
+  calc
+    tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        (iteratedDeriv j (fun s : ℝ =>
+          -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2
+        = tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (TensorEigenIdx.lambda (I := I) (M := M) i ^ 2 *
+              (iteratedDeriv j (fun s : ℝ =>
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2) := by
+          rw [hder]
+          ring_nf
+    _ ≤ tensorSobolevWeight (I := I) (M := M) i (m + 2 : ℕ) *
+          (iteratedDeriv j (fun s : ℝ =>
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 := by
+          have hlam : TensorEigenIdx.lambda (I := I) (M := M) i ^ 2 ≤
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ 2 := by
+            have h0 : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i :=
+              tensor_lambda_nonneg (I := I) (M := M) i
+            exact pow_le_pow_left₀ h0 (by linarith) 2
+          have hw : tensorSobolevWeight (I := I) (M := M) i (m + 2 : ℕ) =
+              tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+                (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ 2 := by
+            unfold tensorSobolevWeight
+            rw [Real.rpow_natCast]
+            rw [pow_add]
+            rw [Real.rpow_natCast]
+          have hle2 : TensorEigenIdx.lambda (I := I) (M := M) i ^ 2 *
+              (iteratedDeriv j (fun s : ℝ =>
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ 2 *
+                (iteratedDeriv j (fun s : ℝ =>
+                  scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 := by
+            exact mul_le_mul_of_nonneg_right hlam (sq_nonneg _)
+          rw [hw]
+          nlinarith [mul_le_mul_of_nonneg_left hle2
+            (tensorSobolevWeight_nonneg (I := I) (M := M) i (m : ℝ))]
+    _ ≤ Cm i := hb
+
+theorem scalarForcedLaplacianFlow_contMDiffOn_top
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q : ℝ × M => scalarSpecSum (I := I) (M := M) g
+        (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+          scalarForcedCoeff (I := I) (M := M) g u₀ f i s) q.1 q.2)
+      (Set.Icc ε T ×ˢ Set.univ) := by
+  classical
+  rw [contMDiffOn_infty]
+  intro N
+  have hd (j : ℕ) (hj : j ≤ N) (m : ℕ) : ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ =>
+            -TensorEigenIdx.lambda (I := I) (M := M) i *
+              scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i :=
+    scalarForcedLaplacianCoeff_weighted_deriv_sq_le (I := I) (M := M) g u₀ hf hε hεT hderiv j m
+  exact scalar_path_recon (I := I) (M := M) g
+    (scalar_eigen_tail (I := I) (M := M) g) hεT N
+    (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+      scalarForcedCoeff (I := I) (M := M) g u₀ f i s)
+    (U := Set.Ioi (0 : ℝ)) (isOpen_Ioi : IsOpen (Set.Ioi (0 : ℝ)))
+    (by intro t ht; exact lt_of_lt_of_le hε (Set.mem_Icc.mp ht).1)
+    (fun i => scalarForcedLaplacianCoeff_contDiffOn (I := I) (M := M) g u₀ hf i N)
+    hd
+
+noncomputable def scalarForcedLaplacianSlice
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) : SmoothScalar g :=
+  ⟨fun x => scalarSpecSum (I := I) (M := M) g
+      (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+        scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t x,
+    by
+      classical
+      have hjoint := scalarForcedLaplacianFlow_contMDiffOn_top (I := I) (M := M) g u₀ hf hε hεT hderiv
+      have hsliceOn : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+          (fun x : M => scalarSpecSum (I := I) (M := M) g
+            (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+              scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t x) Set.univ := by
+        have hcomp := hjoint.comp
+          ((contMDiffOn_const : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun _ : M => t) Set.univ).prodMk
+            (contMDiffOn_id : ContMDiffOn I I ∞ id Set.univ))
+          (by intro p hp; exact ⟨⟨ht.1, ht.2⟩, Set.mem_univ p⟩)
+        refine (contMDiffOn_univ.mpr ?_)
+        have hc : ContMDiff I 𝓘(ℝ, ℝ) ∞
+            (fun x : M => scalarSpecSum (I := I) (M := M) g
+              (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i s) (t, x).1 (t, x).2) := by
+          simpa using (contMDiffOn_univ.mp hcomp)
+        convert hc using 1
+      exact (contMDiffOn_univ.mp hsliceOn)⟩
+
+private lemma scalarForcedLaplacianSlice_toL2_coeff_eq
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) (i : TensorEigenIdx00 g) :
+    ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g
+        (scalarForcedLaplacianSlice g u₀ hf hε hεT hderiv ht)⟫_ℝ =
+      -TensorEigenIdx.lambda (I := I) (M := M) i *
+        scalarForcedCoeff (I := I) (M := M) g u₀ f i t := by
+  classical
+  let w : SmoothScalar g := scalarForcedLaplacianSlice g u₀ hf hε hεT hderiv ht
+  let c : TensorEigenIdx00 g → ℝ := fun i =>
+    -TensorEigenIdx.lambda (I := I) (M := M) i * scalarForcedCoeff (I := I) (M := M) g u₀ f i t
+  let σ : ℝ := ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ)
+  have hslice (x : M) : w.toFun x =
+      ∑' i : TensorEigenIdx00 g, c i * (scalarEigenFunction g i).toFun x := by
+    dsimp [w, scalarForcedLaplacianSlice, c]
+    unfold scalarSpecSum
+    rfl
+  have hc_sum : Summable (fun i : TensorEigenIdx00 g =>
+      |c i| * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+    obtain ⟨p, hp, htail_p⟩ := scalar_eigen_tail (I := I) (M := M) g
+    let Mc : ℕ := Nat.ceil (σ + p)
+    obtain ⟨Cm, hCm, hbm⟩ :=
+      scalarForcedLaplacianCoeff_weighted_deriv_sq_le (I := I) (M := M) g u₀ hf hε hεT hderiv 0 Mc
+    have hd : Summable (fun i : TensorEigenIdx00 g =>
+        tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) * (c i) ^ 2) := by
+      refine Summable.of_nonneg_of_le
+        (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (Mc : ℝ)) (sq_nonneg _))
+        ?_ hCm
+      intro i
+      have hb := hbm i t ht
+      simpa [c, iteratedDeriv] using hb
+    exact summable_abs_mul_hsWeight_of_weighted (I := I) (M := M) g c hp htail_p hd
+  exact scalarSpecCoeff_eq_inner (I := I) (M := M) g c w hslice hc_sum i
+
+theorem scalarForcedFlow_laplacian_eq
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) (x : M) :
+    laplacian (I := I) (LeviCivita (I := I) g) g
+        (fun x => scalarForcedFlow g u₀ f t x) x =
+      scalarSpecSum (I := I) (M := M) g
+        (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+          scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t x := by
+  classical
+  let slice : SmoothScalar g := scalarForcedSlice g u₀ f hf hε hεT hderiv ht
+  let w : SmoothScalar g := scalarForcedLaplacianSlice g u₀ hf hε hεT hderiv ht
+  have hcoeff1 (i : TensorEigenIdx00 g) :
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice.laplacian⟫_ℝ =
+        -TensorEigenIdx.lambda (I := I) (M := M) i *
+          scalarForcedCoeff (I := I) (M := M) g u₀ f i t :=
+    scalarForcedSlice_laplacian_coeff_eq (I := I) (M := M) g u₀ hf hε hεT hderiv ht i
+  have hcoeff2 (i : TensorEigenIdx00 g) :
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g w⟫_ℝ =
+        -TensorEigenIdx.lambda (I := I) (M := M) i *
+          scalarForcedCoeff (I := I) (M := M) g u₀ f i t :=
+    scalarForcedLaplacianSlice_toL2_coeff_eq (I := I) (M := M) g u₀ hf hε hεT hderiv ht i
+  have h1 := hasSum_scalarEigenFunctionLp_repr g (smoothToLp (I := I) (M := M) g slice.laplacian)
+  have h2 := hasSum_scalarEigenFunctionLp_repr g (smoothToLp (I := I) (M := M) g w)
+  have hsame : (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice.laplacian⟫_ℝ •
+        scalarEigenFunctionLp g i) =
+      (fun i : TensorEigenIdx00 g =>
+        ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g w⟫_ℝ •
+          scalarEigenFunctionLp g i) := by
+    funext i
+    rw [hcoeff1 i, hcoeff2 i]
+  have h2' : HasSum (fun i : TensorEigenIdx00 g =>
+      ⟪scalarEigenFunctionLp g i, smoothToLp (I := I) (M := M) g slice.laplacian⟫_ℝ •
+        scalarEigenFunctionLp g i) (smoothToLp (I := I) (M := M) g w) := by
+    convert h2 using 1
+  have hL : smoothToLp (I := I) (M := M) g slice.laplacian =
+      smoothToLp (I := I) (M := M) g w := h1.unique h2'
+  have hfun : slice.laplacian = w := smoothToLp_injective (I := I) (M := M) g hL
+  calc
+    laplacian (I := I) (LeviCivita (I := I) g) g
+        (fun x => scalarForcedFlow g u₀ f t x) x
+        = (slice.laplacian).toFun x := by
+          change laplacian (I := I) (LeviCivita (I := I) g) g slice.toFun x =
+            (slice.laplacian).toFun x
+          rw [laplacian_levi_eq (I := I) g slice.smooth x]
+          rw [← SmoothScalar.laplacian_toFun]
+    _ = w.toFun x := congrFun (congrArg SmoothScalar.toFun hfun) x
+    _ = scalarSpecSum (I := I) (M := M) g
+          (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t x := rfl
+
+theorem scalarForcedFlow_forcing_sum_eq
+    (g : SmoothRiemannianMetric I M)
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    (F : ℝ → SmoothScalar g)
+    (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hspace : ∀ r m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Icc ε T) (x : M) :
+    scalarForcingFlow g f t x = (F t).toFun x := by
+  classical
+  have hL := scalarForcingSlice_toL2_eq_smoothRep (I := I) (M := M) g hf F hfF hε hεT hspace ht
+  have hfun : scalarForcingSlice g f hf hε hεT hspace ht = F t :=
+    smoothToLp_injective (I := I) (M := M) g hL
+  exact congrFun (congrArg SmoothScalar.toFun hfun) x
+
+theorem scalarForcedFlow_hasDerivAt
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    {t : ℝ} (ht : t ∈ Set.Ioo ε T) (x : M) :
+    HasDerivAt (fun s : ℝ => scalarForcedFlow g u₀ f s x)
+      (scalarSpecSum (I := I) (M := M) g
+        (fun i s => deriv (fun r : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i r) s) t x) t := by
+  classical
+  have htIcc : t ∈ Set.Icc ε T :=
+    Set.mem_Icc.mpr ⟨(Set.mem_Ioo.mp ht).1.le, (Set.mem_Ioo.mp ht).2.le⟩
+  have hU : Set.Icc ε T ⊆ Set.Ioi (0 : ℝ) := by
+    intro s hs
+    exact lt_of_lt_of_le hε (Set.mem_Icc.mp hs).1
+  have hc (i : TensorEigenIdx00 g) :
+      ContDiffOn ℝ (1 : ℕ) (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s)
+        (Set.Ioi (0 : ℝ)) := by
+    exact (scalarForcedCoeff_contDiffOn (I := I) (M := M) g u₀ hf i 1).mono (by
+      intro s hs
+      exact hs)
+  have hmass : ∀ j : ℕ, j ≤ 1 → ∀ m : ℕ,
+      ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+        ∀ i t', t' ∈ Set.Icc ε T →
+          tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+            (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t') ^ 2 ≤
+              Cm i := by
+    intro j hj m
+    exact hderiv j m
+  have hd1 := scalarSpec_d1 (I := I) (M := M) g (scalar_eigen_tail (I := I) (M := M) g) hεT
+    (fun i s => scalarForcedCoeff (I := I) (M := M) g u₀ f i s)
+    (isOpen_Ioi : IsOpen (Set.Ioi (0 : ℝ))) (U := Set.Ioi (0 : ℝ)) hU
+    hc hmass x htIcc
+  have hd1' : HasDerivWithinAt (fun s : ℝ => scalarForcedFlow g u₀ f s x)
+      (scalarSpecSum (I := I) (M := M) g
+        (fun i s => deriv (fun r : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i r) s) t x)
+      (Set.Icc ε T) t := by
+    simpa [scalarForcedFlow] using hd1
+  exact hd1'.hasDerivAt (Icc_mem_nhds (Set.mem_Ioo.mp ht).1 (Set.mem_Ioo.mp ht).2)
+
+theorem scalarForcedFlow_isHeatForcedOnStationary_of_weightedCoeffBounds
+    (g : SmoothRiemannianMetric I M)
+    (u₀ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
+    {f : ℝ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
+    (hf : ContDiff ℝ ∞ f)
+    (F : ℝ → SmoothScalar g)
+    (hfF : ∀ t : ℝ, smoothToLp (I := I) (M := M) g (F t) = f t)
+    {ε T : ℝ} (hε : 0 < ε) (hεT : ε < T)
+    (hderiv : ∀ j m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (iteratedDeriv j (fun s : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t) ^ 2 ≤ Cm i)
+    (hspace : ∀ r m : ℕ, ∃ Cm : TensorEigenIdx00 g → ℝ, Summable Cm ∧
+      ∀ i t, t ∈ Set.Icc ε T →
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (scalarForcingCoeff (I := I) (M := M) g (iteratedDeriv r f) i t) ^ 2 ≤ Cm i) :
+    DifferentialGeometry.Analysis.Parabolic.IsHeatForcedOnStationary
+      (RealTimeInterval.closed ε T hεT.le) g
+      (fun t x => (F t).toFun x) (scalarForcedFlow g u₀ f) := by
+  classical
+  change DifferentialGeometry.Analysis.Parabolic.IsHeatForcedOn
+    (RealTimeInterval.closed ε T hεT.le) (stationaryMetricFamily g)
+    (fun t x => (F t).toFun x) (scalarForcedFlow g u₀ f)
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · have hjoint := scalarForcedFlow_contMDiffOn_top (I := I) (M := M) g u₀ hf hε hεT hderiv
+    exact hjoint.mono (Set.prod_mono Set.Ioo_subset_Icc_self Set.Subset.rfl)
+  · have hjoint := scalarForcedFlow_contMDiffOn_top (I := I) (M := M) g u₀ hf hε hεT hderiv
+    exact hjoint.continuousOn
+  · intro t ht
+    exact (scalarForcedSlice g u₀ f hf hε hεT hderiv ht).smooth
+  · intro t ht x
+    have htIcc : t ∈ Set.Icc ε T := Set.mem_Icc.mpr ⟨ht.1.le, ht.2.le⟩
+    have hder := scalarForcedFlow_hasDerivAt (I := I) (M := M) g u₀ hf hε hεT hderiv ht x
+    refine hder.congr_deriv ?_
+    have hderiv_sum : scalarSpecSum (I := I) (M := M) g
+        (fun i s => deriv (fun r : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i r) s) t x =
+        scalarSpecSum (I := I) (M := M) g
+          (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i s +
+              scalarForcingCoeff (I := I) (M := M) g f i s) t x := by
+      unfold scalarSpecSum
+      apply tsum_congr
+      intro i
+      change deriv (fun r : ℝ => scalarForcedCoeff (I := I) (M := M) g u₀ f i r) t *
+          TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+            (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x =
+        (-TensorEigenIdx.lambda (I := I) (M := M) i *
+          scalarForcedCoeff (I := I) (M := M) g u₀ f i t +
+            scalarForcingCoeff (I := I) (M := M) g f i t) *
+          TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+            (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x
+      have hd := scalarForcedCoeff_hasDerivAt (I := I) (M := M) g u₀ hf.continuous
+        (lt_trans hε ht.1) i
+      rw [hd.deriv]
+    have hsplit : scalarSpecSum (I := I) (M := M) g
+          (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i s +
+              scalarForcingCoeff (I := I) (M := M) g f i s) t x =
+        scalarSpecSum (I := I) (M := M) g
+          (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t x +
+        scalarSpecSum (I := I) (M := M) g
+          (fun i s => scalarForcingCoeff (I := I) (M := M) g f i s) t x := by
+      unfold scalarSpecSum
+      have hφbdd := scalarEigenFunction_abs_le (I := I) (M := M) g
+      obtain ⟨C0, hC0, hφb⟩ := hφbdd
+      let σ : ℝ := ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ)
+      obtain ⟨p, hp, htail_p⟩ := scalar_eigen_tail (I := I) (M := M) g
+      let Mc : ℕ := Nat.ceil (σ + p)
+      obtain ⟨Cm1, hCm1, hbm1⟩ :=
+        scalarForcedLaplacianCoeff_weighted_deriv_sq_le (I := I) (M := M) g u₀ hf hε hεT hderiv 0 Mc
+      obtain ⟨Cm2, hCm2, hbm2⟩ := hspace 0 Mc
+      have hd1 : Summable (fun i : TensorEigenIdx00 g =>
+          tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) *
+            (TensorEigenIdx.lambda (I := I) (M := M) i *
+              scalarForcedCoeff (I := I) (M := M) g u₀ f i t) ^ 2) := by
+        refine Summable.of_nonneg_of_le
+          (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (Mc : ℝ)) (sq_nonneg _))
+          ?_ hCm1
+        intro i
+        have hb := hbm1 i t htIcc
+        simpa [iteratedDeriv] using hb
+      have hd2 : Summable (fun i : TensorEigenIdx00 g =>
+          tensorSobolevWeight (I := I) (M := M) i (Mc : ℝ) *
+            (scalarForcingCoeff (I := I) (M := M) g f i t) ^ 2) := by
+        refine Summable.of_nonneg_of_le
+          (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (Mc : ℝ)) (sq_nonneg _))
+          ?_ hCm2
+        intro i
+        simpa using hbm2 i t htIcc
+      have hs_abs1 : Summable (fun i : TensorEigenIdx00 g =>
+          |TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i t| *
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) :=
+        summable_abs_mul_hsWeight_of_weighted (I := I) (M := M) g
+          (fun i => TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i t) hp htail_p hd1
+      have hs_abs2 : Summable (fun i : TensorEigenIdx00 g =>
+          |scalarForcingCoeff (I := I) (M := M) g f i t| *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) :=
+        summable_abs_mul_hsWeight_of_weighted (I := I) (M := M) g
+          (fun i => scalarForcingCoeff (I := I) (M := M) g f i t) hp htail_p hd2
+      have hs_c : Summable (fun i : TensorEigenIdx00 g =>
+          -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i t *
+              (scalarEigenFunction g i).toFun x) := by
+        refine Summable.of_abs ?_
+        have hpt (i : TensorEigenIdx00 g) :
+            |(-TensorEigenIdx.lambda (I := I) (M := M) i *
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i t) *
+                  (scalarEigenFunction g i).toFun x| ≤
+              C0 * (|TensorEigenIdx.lambda (I := I) (M := M) i *
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i t| *
+                  (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+          calc
+            |(-TensorEigenIdx.lambda (I := I) (M := M) i *
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i t) *
+                  (scalarEigenFunction g i).toFun x|
+                = |TensorEigenIdx.lambda (I := I) (M := M) i *
+                    scalarForcedCoeff (I := I) (M := M) g u₀ f i t| *
+                      |(scalarEigenFunction g i).toFun x| := by
+                  rw [abs_mul]
+                  congr 1
+                  rw [neg_mul]
+                  exact abs_neg (TensorEigenIdx.lambda (I := I) (M := M) i *
+                    scalarForcedCoeff (I := I) (M := M) g u₀ f i t)
+            _ ≤ C0 * (|TensorEigenIdx.lambda (I := I) (M := M) i *
+                  scalarForcedCoeff (I := I) (M := M) g u₀ f i t| *
+                    (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+                  calc
+                    |TensorEigenIdx.lambda (I := I) (M := M) i *
+                        scalarForcedCoeff (I := I) (M := M) g u₀ f i t| *
+                          |(scalarEigenFunction g i).toFun x|
+                        ≤ |TensorEigenIdx.lambda (I := I) (M := M) i *
+                            scalarForcedCoeff (I := I) (M := M) g u₀ f i t| *
+                              (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+                          exact mul_le_mul_of_nonneg_left (hφb i x) (abs_nonneg _)
+                    _ = C0 * (|TensorEigenIdx.lambda (I := I) (M := M) i *
+                            scalarForcedCoeff (I := I) (M := M) g u₀ f i t| *
+                              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+                          ring
+        exact Summable.of_nonneg_of_le (fun i => abs_nonneg _) hpt
+          (hs_abs1.mul_left C0)
+      have hs_f : Summable (fun i : TensorEigenIdx00 g =>
+          scalarForcingCoeff (I := I) (M := M) g f i t *
+            (scalarEigenFunction g i).toFun x) := by
+        refine Summable.of_abs ?_
+        have hpt (i : TensorEigenIdx00 g) :
+            |scalarForcingCoeff (I := I) (M := M) g f i t *
+                (scalarEigenFunction g i).toFun x| ≤
+              C0 * (|scalarForcingCoeff (I := I) (M := M) g f i t| *
+                (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+          calc
+            |scalarForcingCoeff (I := I) (M := M) g f i t *
+                (scalarEigenFunction g i).toFun x|
+                = |scalarForcingCoeff (I := I) (M := M) g f i t| *
+                    |(scalarEigenFunction g i).toFun x| := by
+                  rw [abs_mul]
+            _ ≤ C0 * (|scalarForcingCoeff (I := I) (M := M) g f i t| *
+                  (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+                  calc
+                    |scalarForcingCoeff (I := I) (M := M) g f i t| *
+                        |(scalarEigenFunction g i).toFun x|
+                        ≤ |scalarForcingCoeff (I := I) (M := M) g f i t| *
+                            (C0 * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+                          exact mul_le_mul_of_nonneg_left (hφb i x) (abs_nonneg _)
+                    _ = C0 * (|scalarForcingCoeff (I := I) (M := M) g f i t| *
+                            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (σ / 2)) := by
+                          ring
+        exact Summable.of_nonneg_of_le (fun i => abs_nonneg _) hpt
+          (hs_abs2.mul_left C0)
+      have hs_c' : Summable (fun i : TensorEigenIdx00 g =>
+          -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i t *
+            TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+              (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x) := by
+        change Summable (fun i : TensorEigenIdx00 g =>
+          -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i t *
+            (scalarEigenFunction (I := I) (M := M) g i).toFun x)
+        exact hs_c
+      have hs_f' : Summable (fun i : TensorEigenIdx00 g =>
+          scalarForcingCoeff (I := I) (M := M) g f i t *
+            TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+              (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x) := by
+        change Summable (fun i : TensorEigenIdx00 g =>
+          scalarForcingCoeff (I := I) (M := M) g f i t *
+            (scalarEigenFunction (I := I) (M := M) g i).toFun x)
+        exact hs_f
+      change (∑' i : TensorEigenIdx00 g,
+          (-TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i t +
+            scalarForcingCoeff (I := I) (M := M) g f i t) *
+            TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+              (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x =
+          ∑' i : TensorEigenIdx00 g,
+            -TensorEigenIdx.lambda (I := I) (M := M) i *
+              scalarForcedCoeff (I := I) (M := M) g u₀ f i t *
+              TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+                (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x +
+          ∑' i : TensorEigenIdx00 g,
+            scalarForcingCoeff (I := I) (M := M) g f i t *
+              TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+                (eigenvectorSmooth (I := I) (M := M) g 0 0 i).toSection x)
+      rw [← Summable.tsum_add hs_c' hs_f']
+      apply tsum_congr
+      intro i
+      ring
+    calc
+      scalarSpecSum (I := I) (M := M) g
+          (fun i s => deriv (fun r : ℝ =>
+            scalarForcedCoeff (I := I) (M := M) g u₀ f i r) s) t x
+          = scalarSpecSum (I := I) (M := M) g
+              (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i s +
+                scalarForcingCoeff (I := I) (M := M) g f i s) t x := hderiv_sum
+      _ = scalarSpecSum (I := I) (M := M) g
+              (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t x +
+            scalarSpecSum (I := I) (M := M) g
+              (fun i s => scalarForcingCoeff (I := I) (M := M) g f i s) t x := hsplit
+      _ = scalarSpecSum (I := I) (M := M) g
+              (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+                scalarForcedCoeff (I := I) (M := M) g u₀ f i s) t x + (F t).toFun x := by
+            have hflow : scalarForcingFlow g f t x = (F t).toFun x :=
+              scalarForcedFlow_forcing_sum_eq (I := I) (M := M) g hf F hfF hε hεT hspace htIcc x
+            simpa [scalarForcingFlow] using hflow
+      _ = laplacian (I := I) (LeviCivita (I := I) g) g
+              (fun x => scalarForcedFlow g u₀ f t x) x + (F t).toFun x := by
+            rw [scalarForcedFlow_laplacian_eq (I := I) (M := M) g u₀ hf hε hεT hderiv htIcc x]
+      _ = laplacianAt (I := I) (stationaryMetricFamily g) t (scalarForcedFlow g u₀ f t) x +
+            (F t).toFun x := rfl
+
 private lemma summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g) (σ : ℝ) :
     Summable (fun i : TensorEigenIdx00 g =>
