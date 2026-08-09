@@ -7881,6 +7881,104 @@ theorem morseExpandTime {c ε δ : ℝ} (hδ : 0 < δ) {t : ℝ}
   ring
 
 
+noncomputable def morseFarCutoffPos (r ε' : ℝ) (s : ℝ) : ℝ :=
+  Real.smoothTransition ((s - r) / ε')
+
+theorem morseFarCutoffPos_zero {r ε' s : ℝ} (hε' : 0 < ε') (hs : s ≤ r) :
+    morseFarCutoffPos r ε' s = 0 := by
+  dsimp [morseFarCutoffPos]
+  have harg : (s - r) / ε' ≤ 0 := by
+    exact div_nonpos_of_nonpos_of_nonneg (by linarith) (le_of_lt hε')
+  rw [Real.smoothTransition.zero_of_nonpos harg]
+
+theorem morseFarCutoffPos_one {r ε' s : ℝ} (hε' : 0 < ε') (hs : r + ε' ≤ s) :
+    morseFarCutoffPos r ε' s = 1 := by
+  dsimp [morseFarCutoffPos]
+  have harg : 1 ≤ (s - r) / ε' := (one_le_div hε').mpr (by nlinarith)
+  rw [Real.smoothTransition.one_of_one_le harg]
+
+noncomputable def morseFarCutoffNorm (R₀ R₁ : ℝ) (u : ℝ) : ℝ :=
+  Real.smoothTransition ((u - R₀) / (R₁ - R₀))
+
+theorem morseFarCutoffNorm_zero {R₀ R₁ u : ℝ} (hR : R₀ < R₁) (hu : u ≤ R₀) :
+    morseFarCutoffNorm R₀ R₁ u = 0 := by
+  dsimp [morseFarCutoffNorm]
+  have harg : (u - R₀) / (R₁ - R₀) ≤ 0 := by
+    exact div_nonpos_of_nonpos_of_nonneg (by linarith) (by nlinarith)
+  rw [Real.smoothTransition.zero_of_nonpos harg]
+
+theorem morseFarCutoffNorm_one {R₀ R₁ u : ℝ} (hR : R₀ < R₁) (hu : R₁ ≤ u) :
+    morseFarCutoffNorm R₀ R₁ u = 1 := by
+  dsimp [morseFarCutoffNorm]
+  have harg : 1 ≤ (u - R₀) / (R₁ - R₀) := (one_le_div (by nlinarith : 0 < R₁ - R₀)).mpr (by nlinarith)
+  rw [Real.smoothTransition.one_of_one_le harg]
+
+noncomputable def morseFarCutoff {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ) (r ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) : ℝ := by
+  classical
+  exact if x ∈ data.χ.target then
+    max (morseFarCutoffPos r ε' (‖posPart hk (data.χ.symm x)‖))
+      (morseFarCutoffNorm R₀ R₁ (morseNorm (m + 1) (data.χ.symm x)))
+  else 1
+
+theorem morseFarCutoff_mem {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ) (r ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) :
+    morseFarCutoff hk c r ε' R₀ R₁ data x ∈ Set.Icc (0 : ℝ) 1 := by
+  by_cases hx : x ∈ data.χ.target
+  · dsimp [morseFarCutoff]
+    rw [if_pos hx]
+    have hp : morseFarCutoffPos r ε' (‖posPart hk (data.χ.symm x)‖) ∈ Set.Icc (0 : ℝ) 1 := by
+      constructor
+      · exact Real.smoothTransition.nonneg _
+      · exact Real.smoothTransition.le_one _
+    have hn : morseFarCutoffNorm R₀ R₁ (morseNorm (m + 1) (data.χ.symm x)) ∈ Set.Icc (0 : ℝ) 1 := by
+      constructor
+      · exact Real.smoothTransition.nonneg _
+      · exact Real.smoothTransition.le_one _
+    constructor
+    · exact le_max_of_le_left hp.1
+    · exact max_le hp.2 hn.2
+  · dsimp [morseFarCutoff]
+    rw [if_neg hx]
+    simp
+
+theorem morseFarCutoff_eq_zero {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ) (r ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) {x : M} (hx : x ∈ data.χ.target)
+    (hr : ‖posPart hk (data.χ.symm x)‖ ≤ r) (hR : morseNorm (m + 1) (data.χ.symm x) ≤ R₀)
+    (hε' : 0 < ε') (hR0 : R₀ < R₁) :
+    morseFarCutoff hk c r ε' R₀ R₁ data x = 0 := by
+  dsimp [morseFarCutoff]
+  rw [if_pos hx]
+  have hp := morseFarCutoffPos_zero (r := r) (ε' := ε') (s := ‖posPart hk (data.χ.symm x)‖) hε' hr
+  have hn := morseFarCutoffNorm_zero (R₀ := R₀) (R₁ := R₁) (u := morseNorm (m + 1) (data.χ.symm x)) hR0 hR
+  rw [hp, hn]
+  simp
+
+theorem morseFarCutoff_eq_one {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ) (r ε' R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) {x : M}
+    (hr : x ∈ data.χ.target → r + ε' ≤ ‖posPart hk (data.χ.symm x)‖)
+    (hR : x ∈ data.χ.target → R₁ ≤ morseNorm (m + 1) (data.χ.symm x))
+    (hε' : 0 < ε') (hR0 : R₀ < R₁) :
+    morseFarCutoff hk c r ε' R₀ R₁ data x = 1 := by
+  by_cases hx : x ∈ data.χ.target
+  · dsimp [morseFarCutoff]
+    rw [if_pos hx]
+    have hp := morseFarCutoffPos_one (r := r) (ε' := ε') (s := ‖posPart hk (data.χ.symm x)‖) hε' (hr hx)
+    have hn := morseFarCutoffNorm_one (R₀ := R₀) (R₁ := R₁) (u := morseNorm (m + 1) (data.χ.symm x)) hR0 (hR hx)
+    rw [hp, hn]
+    simp
+  · dsimp [morseFarCutoff]
+    rw [if_neg hx]
+
+
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
