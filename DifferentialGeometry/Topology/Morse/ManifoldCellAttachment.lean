@@ -10691,26 +10691,13 @@ noncomputable def morseHandleAttachmentHomeoUpper {m k : ℕ} (hk : k ≤ m + 1)
         c + r ^ 2 / 2} = sublevel f (c + r ^ 2 / 2) := by
       simpa [hlev] using hident
     simpa [hg_eq] using hident'
-  let e0 : Handle.AdjunctionSpace k (m + 1 - k)
-      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) ≃ₜ
-      {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
-    morseHandleAdjunctionHomeoUnion hk c ε r data hε (ne_of_gt hrpos) (le_of_lt hεr') hcontf
-  let e1 : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} ≃ₜ
-      {x : M // x ∈ sublevel f (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} :=
-    subtypeSetHomeomorph h₁set
-  let e2 : {x : M // x ∈ sublevel f (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} ≃ₜ
-      {x : M // x ∈ sublevel g (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} :=
-    (subtypeSetHomeomorph hunion).symm
-  let e3 : {x : M // x ∈ sublevel g (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} ≃ₜ
-      {x : M // x ∈ sublevel g (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
-    subtypeSetHomeomorph h₃set
-  let e4 : SublevelSpace g (c + r ^ 2 / 2) ≃ₜ
-      {x : M // x ∈ sublevel g (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
-    morseCollarHomeoUnion hk c ε r η data hg hε hη v hv hsupp hdfOn hrate hHandleInterval hHandleUpper
-      hflowTop hTopContg hflowMem hcontg
-  let e5 : SublevelSpace g (c + r ^ 2 / 2) ≃ₜ SublevelSpace f (c + r ^ 2 / 2) :=
-    subtypeSetHomeomorph hset
-  exact e0.trans (e1.trans (e2.trans (e3.trans (e4.symm.trans e5))))
+  exact (morseHandleAdjunctionHomeoUnion hk c ε r data hε (ne_of_gt hrpos) (le_of_lt hεr') hcontf).trans
+    ((subtypeSetHomeomorph h₁set).trans
+      (((subtypeSetHomeomorph hunion).symm).trans
+        ((subtypeSetHomeomorph h₃set).trans
+          ((morseCollarHomeoUnion hk c ε r η data hg hε hη v hv hsupp hdfOn hrate hHandleInterval
+            hHandleUpper hflowTop hTopContg hflowMem hcontg).symm.trans
+            (subtypeSetHomeomorph hset)))))
 
 theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hεR : Real.sqrt (2 * ε) ≤ R)
