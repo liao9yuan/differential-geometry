@@ -2269,7 +2269,7 @@ private theorem wedge_mul_assoc_lhs_can (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : 
     funext i
     rfl
   rw [hh', hl']
-  simp
+  simp only [Equiv.Perm.ThreeShuffle.finAssoc_finAssocOrder, OrderIso.coe_symm_toEquiv, zsmul_eq_mul]
   rw [show h (((w ∘ (Equiv.Perm.ThreeShuffle.finAssocOrder m n p).symm ∘ finSumFinEquiv) ∘
         σ₀ ∘ Sum.inr ∘ finSumFinEquiv) ∘
         (Equiv.Perm.TwoShuffle.ofPerm (Quot.out q₃)).toPerm ∘ Sum.inl) =
