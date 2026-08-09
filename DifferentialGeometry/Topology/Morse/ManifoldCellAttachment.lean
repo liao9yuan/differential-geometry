@@ -7132,6 +7132,49 @@ theorem morseCollarLevelMap_mem {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
       linarith
     exact hmain
 
+theorem morseCollarLevelMap_le_top {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
+    (hε : 0 < ε) (hη : 0 ≤ η)
+    (x : LevelSetSpace f (c - ε)) (σ : ℝ)
+    (hσ : σ ∈ Set.Icc (-η) (r ^ 2 / 2 + ε)) :
+    morseCollarLevelMap hk c ε r η data x σ ≤ morseCollarTopLevel hk c ε r data x := by
+  dsimp [morseCollarLevelMap]
+  have hden : 0 < r ^ 2 / 2 + ε + η := by
+    have h1 : 0 ≤ r ^ 2 / 2 := div_nonneg (sq_nonneg r) (by norm_num)
+    nlinarith [h1, hε, hη]
+  have hσ' : σ + η ≤ r ^ 2 / 2 + ε + η := by nlinarith [hσ.2]
+  have hT : 0 ≤ morseCollarTopLevel hk c ε r data x := morseCollarTopLevel_nonneg hk c ε r data x
+  have hnumle : (morseCollarTopLevel hk c ε r data x + η) * (σ + η) ≤
+      (morseCollarTopLevel hk c ε r data x + η) * (r ^ 2 / 2 + ε + η) := by
+    exact mul_le_mul_of_nonneg_left hσ' (by nlinarith [hT, hη])
+  have hdivle : (morseCollarTopLevel hk c ε r data x + η) * (σ + η) / (r ^ 2 / 2 + ε + η) ≤
+      morseCollarTopLevel hk c ε r data x + η := by
+    exact (div_le_iff₀ hden).mpr (by nlinarith [hnumle])
+  nlinarith [hdivle]
+
+theorem morseCollarLevelMap_nonpos_of_top_zero {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
+    (hε : 0 < ε) (hη : 0 ≤ η)
+    (x : LevelSetSpace f (c - ε)) (σ : ℝ)
+    (hσ : σ ∈ Set.Icc (-η) (r ^ 2 / 2 + ε))
+    (hTop : morseCollarTopLevel hk c ε r data x = 0) :
+    morseCollarLevelMap hk c ε r η data x σ ≤ 0 := by
+  dsimp [morseCollarLevelMap]
+  rw [hTop]
+  have hden : 0 < r ^ 2 / 2 + ε + η := by
+    have h1 : 0 ≤ r ^ 2 / 2 := div_nonneg (sq_nonneg r) (by norm_num)
+    nlinarith [h1, hε, hη]
+  have hσ' : σ + η ≤ r ^ 2 / 2 + ε + η := by nlinarith [hσ.2]
+  have hnumle : (0 + η) * (σ + η) ≤ (0 + η) * (r ^ 2 / 2 + ε + η) := by
+    exact mul_le_mul_of_nonneg_left hσ' (by simpa using hη)
+  have hdivle : (0 + η) * (σ + η) / (r ^ 2 / 2 + ε + η) ≤ 0 + η := by
+    exact (div_le_iff₀ hden).mpr (by nlinarith [hnumle])
+  linarith
+
 noncomputable def morseCollarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
@@ -7312,6 +7355,50 @@ theorem morseCollarMap_value {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
   rw [hval]
   dsimp [σ, L]
   linarith
+
+theorem morseCollarMap_mem_lower_of_top_zero {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    {f₀ : M → ℝ} (data : MorseChart (m + 1) k hk c I f₀)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hη : 0 < η)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (y : SublevelSpace f (c + r ^ 2 / 2))
+    (hy : c - ε - η ≤ f y.1)
+    (hTop : morseCollarTopLevel hk c ε r data
+      (⟨curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) y.1 (f y.1 - c + ε), by
+        exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+          constructor
+          · exact hy
+          · exact y.2))⟩) = 0) :
+    f (morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y) ≤ c - ε := by
+  have hval := morseCollarMap_value hk c ε r η data hf hε hη v hv hsupp hdfOn hrate y hy
+  have hσ : f y.1 - c + ε ∈ Set.Icc (-η) (r ^ 2 / 2 + ε) := by
+    change f y.1 - c + ε ∈ Set.Icc (-η) (r ^ 2 / 2 + ε)
+    constructor
+    · linarith [hy]
+    · change f y.1 - c + ε ≤ r ^ 2 / 2 + ε
+      have hy2 : f y.1 ≤ c + r ^ 2 / 2 := by
+        change f y.1 ≤ c + r ^ 2 / 2
+        exact y.2
+      nlinarith [hy2]
+  have hL := morseCollarLevelMap_nonpos_of_top_zero hk c ε r η data hε (le_of_lt hη)
+    (⟨curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) y.1 (f y.1 - c + ε), by
+      exact (morseCollarFlow_levelValue (I := I) f c ε r η hε (le_of_lt hη) hf v hv hsupp hdfOn hrate (by
+        constructor
+        · exact hy
+        · exact y.2))⟩) (f y.1 - c + ε) hσ hTop
+  rw [hval]
+  nlinarith
 
 theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
