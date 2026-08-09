@@ -5747,6 +5747,86 @@ theorem morseHandleAdjunctionToUpperSublevel_injective {m k : ℕ} (hk : k ≤ m
   have hval := congrArg Subtype.val h
   exact hz.symm.trans (hval.trans hw)
 
+noncomputable def morseHandleAdjunctionImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) :
+    Set (SublevelSpace f (c + r ^ 2 / 2)) :=
+  {y : SublevelSpace f (c + r ^ 2 / 2) |
+    f y.1 ≤ c - ε ∨ y.1 ∈ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))}
+
+theorem morseHandleAdjunctionToUpperSublevel_mem_image {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (z : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))) :
+    morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr' z ∈
+      morseHandleAdjunctionImage hk c ε r data := by
+  rcases Quot.exists_rep z with ⟨s, hs⟩
+  cases s with
+  | inl d =>
+      have hz : z = Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) d := by
+        simpa using hs.symm
+      rw [hz]
+      dsimp [morseHandleAdjunctionImage]
+      refine Or.inr ?_
+      refine ⟨modelHandleMap hk ε r d, modelHandleMap_mem hk ε r (le_of_lt hε) d, ?_⟩
+      rw [← morseHandleAdjunctionToUpperSublevel_cell hk c ε r data hε hεr' d]
+  | inr x =>
+      have hz : z = Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) x := by
+        simpa using hs.symm
+      rw [hz]
+      dsimp [morseHandleAdjunctionImage]
+      exact Or.inl (by
+        change f (morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr'
+          (Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) x)).1 ≤ c - ε
+        rw [morseHandleAdjunctionToUpperSublevel_lower hk c ε r data hε hεr' x]
+        exact x.2)
+
+theorem morseHandleAdjunctionToUpperSublevel_image_subset {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r)
+    (y : SublevelSpace f (c + r ^ 2 / 2))
+    (hy : y ∈ morseHandleAdjunctionImage hk c ε r data) :
+    ∃ z : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')),
+      morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr' z = y := by
+  rcases hy with hy | hy
+  · refine ⟨Handle.lower (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr'))
+      (⟨y.1, hy⟩ : SublevelSpace f (c - ε)), ?_⟩
+    apply Subtype.ext
+    rw [morseHandleAdjunctionToUpperSublevel_lower hk c ε r data hε hεr' ⟨y.1, hy⟩]
+  · rcases hy with ⟨w, hw, hwy⟩
+    have hw' : w ∈ Set.range (modelHandleMap hk ε r) := by
+      simpa [← modelHandleMap_range hk ε r hε hr] using hw
+    rcases hw' with ⟨d, hd⟩
+    refine ⟨Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) d, ?_⟩
+    apply Subtype.ext
+    change (morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr'
+      (Handle.cell (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) d) : M) = y.1
+    rw [morseHandleAdjunctionToUpperSublevel_cell hk c ε r data hε hεr' d]
+    rw [hd]
+    rw [hwy]
+
+theorem morseHandleAdjunctionToUpperSublevel_range {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) (hr : 0 < r) :
+    Set.range (morseHandleAdjunctionToUpperSublevel hk c ε r data hε hεr') =
+      morseHandleAdjunctionImage hk c ε r data := by
+  ext y
+  constructor
+  · intro hy
+    rcases hy with ⟨z, rfl⟩
+    exact morseHandleAdjunctionToUpperSublevel_mem_image hk c ε r data hε hεr' z
+  · intro hy
+    exact morseHandleAdjunctionToUpperSublevel_image_subset hk c ε r data hε hεr' hr y hy
+
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
