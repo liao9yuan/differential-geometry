@@ -290,7 +290,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 antitone ratio of its polar density to the hyperbolic model density. -/
 theorem exists_framed_ratio
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -511,7 +511,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- Local Bishop comparison for framed normal balls, in cross-multiplied form. -/
 theorem normalBall_cross
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -623,7 +623,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 antitone on one center-dependent interval. -/
 theorem normalBall_ratio
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
