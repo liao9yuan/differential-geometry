@@ -10038,6 +10038,85 @@ theorem lowerUnionCellImage_subset_modifiedSublevel {n k : ℕ} (hk : k ≤ n) (
     rw [← hu]
     exact modifiedNormalForm_cell_mem_lower hk c ε δ hε hδ u
 
+theorem modifiedSublevel_subset_lower_union_modelHandle {n k : ℕ} (hk : k ≤ n)
+    (c ε δ r : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hr : 3 * δ / 2 ≤ r) :
+    {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε} ⊆
+      {y : MorseModel n | morseNormalForm hk c y ≤ c - ε} ∪ modelHandle hk ε r := by
+  intro y hy
+  change modifiedNormalForm hk c ε δ y ≤ c - ε at hy
+  by_cases hf : morseNormalForm hk c y ≤ c - ε
+  · exact Or.inl hf
+  · have hgt : c - ε < morseNormalForm hk c y := lt_of_not_ge hf
+    have hsplit := morseNormalForm_split hk c y
+    have hneg_le : ‖negPart hk y‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 + 2 * ε := by
+      nlinarith [hsplit, hgt]
+    have hdip : 0 < modMu ε (‖negPart hk y‖ ^ 2) * modGamma δ ‖posPart hk y‖ := by
+      have hsplitM := modifiedNormalForm_split hk c ε δ y
+      have hnonneg : 0 ≤ modMu ε (‖negPart hk y‖ ^ 2) * modGamma δ ‖posPart hk y‖ := by
+        exact mul_nonneg (modMu_nonneg (le_of_lt hε)) (modGamma_nonneg δ ‖posPart hk y‖)
+      have hdip' : modMu ε (‖negPart hk y‖ ^ 2) * modGamma δ ‖posPart hk y‖ ≥
+          morseNormalForm hk c y - (c - ε) := by
+        nlinarith [hy, hsplitM, hsplit]
+      nlinarith [hnonneg, hdip', hgt]
+    have hmu_pos : 0 < modMu ε (‖negPart hk y‖ ^ 2) := by
+      have hg_nonneg : 0 ≤ modGamma δ ‖posPart hk y‖ := modGamma_nonneg δ ‖posPart hk y‖
+      have hg_pos : 0 < modGamma δ ‖posPart hk y‖ := by
+        by_contra hg0
+        have hg0' : modGamma δ ‖posPart hk y‖ = 0 := le_antisymm (not_lt.mp hg0) hg_nonneg
+        rw [hg0', mul_zero] at hdip
+        linarith
+      have hmu_nonneg : 0 ≤ modMu ε (‖negPart hk y‖ ^ 2) := modMu_nonneg (le_of_lt hε)
+      by_contra hmu0
+      have hmu0' : modMu ε (‖negPart hk y‖ ^ 2) = 0 := le_antisymm (not_lt.mp hmu0) hmu_nonneg
+      rw [hmu0', zero_mul] at hdip
+      linarith
+    have hg_pos : 0 < modGamma δ ‖posPart hk y‖ := by
+      have hg_nonneg : 0 ≤ modGamma δ ‖posPart hk y‖ := modGamma_nonneg δ ‖posPart hk y‖
+      by_contra hg0
+      have hg0' : modGamma δ ‖posPart hk y‖ = 0 := le_antisymm (not_lt.mp hg0) hg_nonneg
+      rw [hg0', mul_zero] at hdip
+      linarith
+    have hneg_lt : ‖negPart hk y‖ ^ 2 < 4 * ε := by
+      by_contra hnot
+      have hle : 4 * ε ≤ ‖negPart hk y‖ ^ 2 := le_of_not_gt hnot
+      have hz := modMu_zero hε hle
+      rw [hz] at hmu_pos
+      linarith
+    have hpos_lt : ‖posPart hk y‖ < 3 * δ / 2 := by
+      by_contra hnot
+      have hle : 3 * δ / 2 ≤ ‖posPart hk y‖ := le_of_not_gt hnot
+      have hz := modGamma_zero hδ hle
+      rw [hz] at hg_pos
+      linarith
+    have hpos_norm : 0 ≤ ‖posPart hk y‖ := norm_nonneg _
+    have hpos_le : ‖posPart hk y‖ ^ 2 ≤ r ^ 2 := by
+      nlinarith [hpos_lt, hr, hpos_norm]
+    exact Or.inr (by
+      dsimp [modelHandle]
+      constructor
+      · exact hpos_le
+      · exact hneg_le)
+
+
+theorem modifiedSublevel_union_modelHandle_eq {n k : ℕ} (hk : k ≤ n) (c ε δ r : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr : 3 * δ / 2 ≤ r) :
+    {y : MorseModel n | modifiedNormalForm hk c ε δ y ≤ c - ε} ∪ modelHandle hk ε r =
+      {y : MorseModel n | morseNormalForm hk c y ≤ c - ε} ∪ modelHandle hk ε r := by
+  ext y
+  constructor
+  · intro hy
+    rcases hy with hmod | hh
+    · by_cases hf : morseNormalForm hk c y ≤ c - ε
+      · exact Or.inl hf
+      · exact (modifiedSublevel_subset_lower_union_modelHandle hk c ε δ r hε hδ hr (by
+          exact hmod))
+    · exact Or.inr hh
+  · intro hy
+    rcases hy with hf | hh
+    · exact Or.inl (le_trans (modifiedNormalForm_le_f hk c ε δ hε y) hf)
+    · exact Or.inr hh
+
+
 theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hεR : Real.sqrt (2 * ε) ≤ R)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
