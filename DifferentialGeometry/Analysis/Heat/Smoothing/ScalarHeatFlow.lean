@@ -2567,6 +2567,112 @@ theorem scalarHeatFlow_smoothInitial_continuousOn_closed
   dsimp [d]
   rfl
 
+theorem scalarHeatFlowSmoothInitial_slice_contMDiff
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M =>
+      scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t x) := by
+  classical
+  by_cases ht0 : t = 0
+  · subst ht0
+    have hf : (fun x : M =>
+        scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) 0 x) =
+        u₀.toFun := by
+      funext x
+      exact scalarHeatFlow_zero_apply (I := I) (M := M) g u₀ x
+    rw [hf]
+    exact u₀.smooth
+  · have htpos : 0 < t := lt_of_le_of_ne (Set.mem_Icc.mp ht).1 (Ne.symm ht0)
+    have hε : 0 < t / 2 := half_pos htpos
+    have hεT : t / 2 < T := lt_of_lt_of_le (half_lt_self htpos) (Set.mem_Icc.mp ht).2
+    have ht' : t ∈ Set.Icc (t / 2) T :=
+      Set.mem_Icc.mpr ⟨(half_lt_self htpos).le, (Set.mem_Icc.mp ht).2⟩
+    exact scalarHeatFlow_slice_contMDiff (I := I) (M := M) g
+      (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε ht'
+
+noncomputable def scalarHeatFlowSmoothInitialSlice
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} {t : ℝ} (ht : t ∈ Set.Icc 0 T) : SmoothScalar g :=
+  ⟨fun x => scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t x,
+    scalarHeatFlowSmoothInitial_slice_contMDiff (I := I) (M := M) g u₀ htail ht⟩
+
+theorem scalarHeatFlow_isHeatOnStationary_smoothInitial
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (htail : EigenvalueTailSummable g 0 0)
+    {T : ℝ} (hT : 0 ≤ T) :
+    DifferentialGeometry.Analysis.Parabolic.IsHeatOnStationary
+      (RealTimeInterval.closed 0 T hT) g
+      (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀))) := by
+  change DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn
+    (RealTimeInterval.closed 0 T hT)
+    (stationaryMetricFamily g) (fun _ _ => (0 : ℝ))
+    (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)))
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · apply contMDiffOn_of_locally_contMDiffOn
+    rintro ⟨t, x⟩ ⟨ht, _⟩
+    have htpos : 0 < t := (Set.mem_Ioo.mp ht).1
+    have htT : t < T := (Set.mem_Ioo.mp ht).2
+    let ε : ℝ := t / 2
+    have hε0 : 0 < ε := by
+      dsimp [ε]
+      positivity
+    have hεt : ε < t := by
+      dsimp [ε]
+      exact half_lt_self htpos
+    have hεT : ε < T := lt_of_lt_of_le hεt htT.le
+    refine ⟨Set.Ioo ε T ×ˢ (Set.univ : Set M), isOpen_Ioo.prod isOpen_univ,
+      ⟨⟨hεt, htT⟩, Set.mem_univ x⟩, ?_⟩
+    have hjoint := scalarHeatFlow_contMDiffOn_top (I := I) (M := M) g
+      (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε0
+    have hsub : Set.Ioo ε T ⊆ Set.Ioo 0 T := by
+      intro s hs
+      exact ⟨lt_trans hε0 (Set.mem_Ioo.mp hs).1, (Set.mem_Ioo.mp hs).2⟩
+    have hinter : (Set.Ioo 0 T ×ˢ (Set.univ : Set M)) ∩
+        (Set.Ioo ε T ×ˢ (Set.univ : Set M)) =
+        Set.Ioo ε T ×ˢ (Set.univ : Set M) := by
+      rw [Set.prod_inter_prod (s₁ := Set.Ioo 0 T) (t₁ := (Set.univ : Set M))
+        (s₂ := Set.Ioo ε T) (t₂ := (Set.univ : Set M))]
+      congr 1
+      · rw [inter_comm]
+        exact (Set.inter_eq_left.mpr hsub)
+      · simp
+    change ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun q => scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) q.1 q.2)
+      ((Set.Ioo 0 T ×ˢ (Set.univ : Set M)) ∩ (Set.Ioo ε T ×ˢ (Set.univ : Set M)))
+    rw [hinter]
+    exact hjoint.mono (Set.prod_mono Set.Ioo_subset_Icc_self Set.Subset.rfl)
+  · exact scalarHeatFlow_smoothInitial_continuousOn_closed (I := I) (M := M) g u₀ htail
+  · intro t ht
+    exact scalarHeatFlowSmoothInitial_slice_contMDiff (I := I) (M := M) g u₀ htail ht
+  · intro t ht x
+    have htpos : 0 < t := (Set.mem_Ioo.mp ht).1
+    have htT : t < T := (Set.mem_Ioo.mp ht).2
+    have hε : 0 < t / 2 := half_pos htpos
+    have hεT : t / 2 < T := lt_of_lt_of_le (half_lt_self htpos) htT.le
+    have hderiv := scalarHeatFlow_hasDerivAt (I := I) (M := M) g
+      (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε
+      (Set.mem_Ioo.mpr ⟨half_lt_self htpos, htT⟩) x
+    have hlap := scalarHeatFlow_laplacian_eq_time_deriv (I := I) (M := M) g
+      (SmoothCcTensor.toL2 (scalarCcLift g u₀)) htail hεT hε
+      (Set.mem_Icc.mpr ⟨(half_lt_self htpos).le, htT.le⟩) x
+    refine hderiv.congr_deriv ?_
+    calc
+      scalarSpecSum (I := I) (M := M) g
+          (fun i s => -TensorEigenIdx.lambda (I := I) (M := M) i *
+            scalarHeatCoeff (I := I) (M := M) g
+              (SmoothCcTensor.toL2 (scalarCcLift g u₀)) i s) t x
+          = laplacian (I := I) (LeviCivita (I := I) g) g
+              (fun x => scalarHeatFlow g
+                (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t x) x := hlap.symm
+      _ = laplacianAt (I := I) (stationaryMetricFamily g) t
+            (scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t) x +
+            0 * scalarHeatFlow g (SmoothCcTensor.toL2 (scalarCcLift g u₀)) t x := by
+            unfold laplacianAt stationaryMetricFamily
+            simp [zero_mul, add_zero]
+            rfl
+
 end HeatEquation
 end Analysis
 end DifferentialGeometry
