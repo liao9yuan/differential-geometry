@@ -2132,4 +2132,144 @@ private lemma curveDensity_smul
     _ = c ^ Fintype.card ι * curveDensity (I := I) g γ V t := by
           simp [curveDensity, curveGram]
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+private lemma curveDensity_congr_eval
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    {γ : ℝ → M} {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (V V' : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ)
+    (h : ∀ i, (V i t : E) = (V' i t : E)) :
+    curveDensity (I := I) g γ V t = curveDensity (I := I) g γ V' t := by
+  unfold curveDensity curveGram
+  apply congrArg Real.sqrt
+  apply congrArg Matrix.det
+  ext i j
+  have hi : V i t = V' i t := by
+    change (V i t : E) = (V' i t : E)
+    exact h i
+  have hj : V j t = V' j t := by
+    change (V j t : E) = (V' j t : E)
+    exact h j
+  simp [hi, hj]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private lemma expJacDensity_radial_scaled
+    [ConnectedSpace M] [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (y : M) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y w w)))
+    (x : M) {u : TangentSpace I x} (hu : u ≠ 0)
+    (w : Fin (Module.finrank ℝ E - 1) → TangentSpace I x)
+    (hON : ∀ i j, g.inner x (w i) (w j) = if i = j then 1 else 0)
+    (hperp : ∀ i, g.inner x u (w i) = 0)
+    (r : ℝ) (hr : 0 < r)
+    (hLI : LinearIndependent ℝ fun i =>
+      intrinsicJacobi (I := I) g hEnorm x u (w i) r) :
+    expJacDensity (I := I) g hEnorm x ((r • u) : E) * r ^ (Module.finrank ℝ E - 1) =
+      normalChartDensity (I := I) g x 0 *
+        curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r := by
+  classical
+  let d : ℕ := Module.finrank ℝ E - 1
+  have hperp' : ∀ i, g.inner x ((r • u) : TangentSpace I x) (w i) = 0 := by
+    intro i
+    calc
+      g.inner x ((r • u) : TangentSpace I x) (w i)
+          = (r • (g.inner x u)) (w i) := by
+            rw [map_smul (g.inner x) r u]
+      _ = r • (g.inner x u (w i)) := by
+            simp [ContinuousLinearMap.smul_apply]
+      _ = 0 := by simp [hperp i]
+  have hvne : (r • u : TangentSpace I x) ≠ 0 := by
+    intro hz
+    have : r • (u : E) = 0 := by simpa using congrArg (fun v : TangentSpace I x => (v : E)) hz
+    exact hu (smul_eq_zero.mp this |>.resolve_left (ne_of_gt hr))
+  have hfac := expJacDensity_eq_ncd0_mul_transverse (I := I) g hEnorm x
+    (v := (r • u : TangentSpace I x)) hvne w hON hperp'
+  have hsc : ∀ i,
+      (intrinsicJacobi (I := I) g hEnorm x ((r • u : TangentSpace I x)) (w i) 1 : E)
+        = (r⁻¹ : ℝ) • (intrinsicJacobi (I := I) g hEnorm x u (w i) r : E) := by
+    intro i
+    exact intrinsicJacobi_smul (I := I) g hEnorm x u (w i) r (ne_of_gt hr)
+  let V : Fin d → ∀ t : ℝ, TangentSpace I
+      (intrinsicGeodesic (I := I) g hEnorm x (r • u) t) :=
+    fun i t => (intrinsicJacobi (I := I) g hEnorm x u (w i) r : E)
+  have hV1 : ∀ i, (intrinsicJacobi (I := I) g hEnorm x (r • u) (w i) 1 : E)
+      = ((r⁻¹ : ℝ) • (V i 1 : E) : E) := by
+    intro i
+    change (intrinsicJacobi (I := I) g hEnorm x (r • u) (w i) 1 : E)
+        = (r⁻¹ : ℝ) • (intrinsicJacobi (I := I) g hEnorm x u (w i) r : E)
+    exact hsc i
+  have hcong : curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x (r • u))
+      (fun i => intrinsicJacobi (I := I) g hEnorm x (r • u) (w i)) 1
+      = curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x (r • u))
+          (fun i t => (r⁻¹ : ℝ) • (V i t : E)) 1 := by
+    apply curveDensity_congr_eval
+    intro i
+    change (intrinsicJacobi (I := I) g hEnorm x (r • u) (w i) 1 : E)
+        = ((r⁻¹ : ℝ) • (V i 1 : E) : E)
+    exact hV1 i
+  have hsmul := curveDensity_smul (I := I) g
+    (γ := intrinsicGeodesic (I := I) g hEnorm x (r • u)) (V := V)
+    (t := 1) (c := r⁻¹) (inv_nonneg.mpr (le_of_lt hr)) hLI
+  have hbridge : curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x (r • u))
+      V 1 = curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r := by
+    unfold curveDensity curveGram
+    apply congrArg Real.sqrt
+    apply congrArg Matrix.det
+    ext i j
+    have hpt : intrinsicGeodesic (I := I) g hEnorm x (r • u) 1
+        = intrinsicGeodesic (I := I) g hEnorm x u r :=
+      by simpa using intrinsicGeodesic_smul_general (I := I) g hEnorm x u r 1
+    rw [hpt]
+  have hC : curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x (r • u))
+      (fun i => intrinsicJacobi (I := I) g hEnorm x (r • u) (w i)) 1
+      = (r⁻¹ ^ d) * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+          (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r := by
+    calc
+      curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x (r • u))
+          (fun i => intrinsicJacobi (I := I) g hEnorm x (r • u) (w i)) 1
+          = curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x (r • u))
+              (fun i t => (r⁻¹ : ℝ) • (V i t : E)) 1 := hcong
+      _ = (r⁻¹ ^ d) * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x (r • u))
+              V 1 := by
+            simpa [d] using hsmul
+      _ = (r⁻¹ ^ d) * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+              (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r := by
+            rw [hbridge]
+  have hmult : (r⁻¹ ^ d) * r ^ d = 1 := by
+    rw [← mul_pow, inv_mul_cancel₀ (ne_of_gt hr), one_pow]
+  have hmain : expJacDensity (I := I) g hEnorm x ((r • u) : E)
+      = normalChartDensity (I := I) g x 0 *
+          ((r⁻¹ ^ d) * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+            (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r) := by
+    rw [hfac, hC]
+  calc
+    expJacDensity (I := I) g hEnorm x ((r • u) : E) * r ^ d
+        = normalChartDensity (I := I) g x 0 *
+            ((r⁻¹ ^ d) * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+              (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r) * r ^ d := by
+          rw [hmain]
+    _ = normalChartDensity (I := I) g x 0 *
+          curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+            (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r := by
+          rw [mul_assoc]
+          congr 1
+          calc
+            (r⁻¹ ^ d * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+              (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r) * r ^ d
+                = (r⁻¹ ^ d * r ^ d) * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+                  (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r := by
+                  ring
+            _ = curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+                  (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r := by
+                  rw [hmult, one_mul]
+
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison
