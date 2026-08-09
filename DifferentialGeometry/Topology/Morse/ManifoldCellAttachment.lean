@@ -5022,6 +5022,53 @@ noncomputable def modelHandleCoreRetraction {n k : ℕ} (hk : k ≤ n) (ε r : �
   exact ContinuousMap.mk (fun y : X => ⟨⟨modelHandleCoreMap hk ε r y.1, hmem y⟩, hcore y⟩)
     (Continuous.subtype_mk (Continuous.subtype_mk hcont hmem) hcore)
 
+theorem modelHandleMap_core_eq_cellMap {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
+    (x : ClosedCell k) :
+    modelHandleMap hk ε r (x, (⟨(0 : EuclideanSpace ℝ (Fin (n - k))), by simp⟩ : ClosedCell (n - k))) =
+      cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) := by
+  have hsqrt : Real.sqrt (2 * ε + r ^ 2 * ‖(0 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) =
+      Real.sqrt (2 * ε) := by
+    simp
+  dsimp [modelHandleMap, cellMap]
+  rw [hsqrt]
+  ext i
+  by_cases h : i.val < k
+  · simp [cellMap, h, recombine]
+  · simp [cellMap, h, recombine]
+
+theorem modelHandleMap_coreDisk_image_eq {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) :
+    modelHandleMap hk ε r '' (coreDisk k (n - k) : Set (StandardHandle k (n - k))) =
+      Set.range (fun x : ClosedCell k => cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k))) := by
+  ext y
+  constructor
+  · intro hy
+    rcases hy with ⟨d, hd, hdy⟩
+    have hx0 : (d.2 : EuclideanSpace ℝ (Fin (n - k))) = 0 := by
+      have hx0' : d.2 = closedCellCenter (n - k) := by
+        simpa [coreDisk] using hd
+      have hval : (closedCellCenter (n - k) : EuclideanSpace ℝ (Fin (n - k))) = 0 := rfl
+      simp [hx0', hval]
+    let x : ClosedCell k := d.1
+    have hd_eq : d = (x, closedCellCenter (n - k)) := by
+      apply Prod.ext
+      · rfl
+      · apply Subtype.ext
+        exact hx0
+    refine ⟨x, ?_⟩
+    calc
+      cellMap (Real.sqrt (2 * ε)) (x : EuclideanSpace ℝ (Fin k)) = modelHandleMap hk ε r d := by
+        rw [hd_eq]
+        exact (modelHandleMap_core_eq_cellMap hk ε r x).symm
+      _ = y := hdy
+  · intro hy
+    rcases hy with ⟨x, hx⟩
+    let d : StandardHandle k (n - k) :=
+      (x, (⟨(0 : EuclideanSpace ℝ (Fin (n - k))), by simp⟩ : ClosedCell (n - k)))
+    refine ⟨d, ?_, ?_⟩
+    · dsimp [d, coreDisk, closedCellCenter]
+    · dsimp [d]
+      exact (modelHandleMap_core_eq_cellMap hk ε r x).trans hx
+
 noncomputable def modelHandleCoreHomotopy {n k : ℕ} (hk : k ≤ n) (ε r : ℝ)
     (hε : 0 < ε) (hr : 0 < r) :
     ContinuousMap.HomotopyRel (ContinuousMap.id {y : MorseModel n // y ∈ modelHandle hk ε r})
