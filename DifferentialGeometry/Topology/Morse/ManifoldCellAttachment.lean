@@ -8429,7 +8429,7 @@ theorem morseCollarTopLevel_ge_flowTime_of_handlePoint {m k : ℕ} (hk : k ≤ m
   rw [hr2] at hposle
   nlinarith
 
-theorem morseCollarMap_surj_on_image {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem morseCollarMap_surj_on_image {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9396,7 +9396,7 @@ theorem morseCollarMap_flow_eq {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
   rw [htime]
   exact hflow
 
-theorem morseCollarMap_surj_on_union {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem morseCollarMap_surj_on_union {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9432,7 +9432,7 @@ theorem morseCollarMap_surj_on_union {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
         rw [← hd]
         rfl)
 
-noncomputable def morseCollarPreimageStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private noncomputable def morseCollarPreimageStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9516,7 +9516,7 @@ noncomputable def morseCollarPreimageStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε 
   dsimp [σ]
   nlinarith [hval, hσmem.2]
 
-noncomputable def morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private noncomputable def morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9544,7 +9544,7 @@ noncomputable def morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η 
   Classical.choose (morseCollarMap_surj_on_union hk c ε r η data hf hε hη v hv hsupp hdfOn hrate
     hHandleInterval hHandleUpper hflowTop z)
 
-theorem morseCollarPreimage_collarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem morseCollarPreimage_collarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9573,7 +9573,7 @@ theorem morseCollarPreimage_collarMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r η 
   exact Classical.choose_spec (morseCollarMap_surj_on_union hk c ε r η data hf hε hη v hv hsupp
     hdfOn hrate hHandleInterval hHandleUpper hflowTop z)
 
-theorem morseCollarPreimage_eq_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem morseCollarPreimage_eq_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9615,7 +9615,7 @@ theorem morseCollarPreimage_eq_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : �
   exact (morseCollarMap_injective hk c ε r η data hf hε hη v hv hsupp hdfOn hrate) (by
     rw [hmap, hlow])
 
-theorem morseCollarPreimage_eq_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem morseCollarPreimage_eq_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9727,7 +9727,7 @@ theorem morseCollarPreimage_eq_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η :
   exact (morseCollarMap_injective hk c ε r η data hf hε hη v hv hsupp hdfOn hrate) (by
     rw [hmap, hstr])
 
-theorem morseCollarPreimage_eq {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem morseCollarPreimage_eq {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9764,7 +9764,7 @@ theorem morseCollarPreimage_eq {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
       ⟨morseCollarMap hk c ε r η data hf hε (le_of_lt hη) v hv hsupp hdfOn hrate y, hflowMem y⟩
   exact (morseCollarMap_injective hk c ε r η data hf hε hη v hv hsupp hdfOn hrate) hmap
 
-noncomputable def morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private noncomputable def morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9791,7 +9791,7 @@ noncomputable def morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c �
       c - ε - η ≤ f x.1}) : SublevelSpace f (c + r ^ 2 / 2) :=
   morseCollarPreimageStrip hk c ε r η data hf hε hη v hv hsupp hdfOn hrate hHandleInterval hHandleUpper hflowTop z.1 z.2
 
-theorem continuous_morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem continuous_morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9873,7 +9873,7 @@ theorem continuous_morseCollarPreimageOnStrip {m k : ℕ} (hk : k ≤ m + 1) (c 
   exact Continuous.subtype_mk hmain (fun z => (morseCollarPreimageOnStrip hk c ε r η data hf hε hη
     v hv hsupp hdfOn hrate hHandleInterval hHandleUpper hflowTop z).2)
 
-theorem continuousOn_morseCollarPreimage_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem continuousOn_morseCollarPreimage_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9923,7 +9923,7 @@ theorem continuousOn_morseCollarPreimage_lower {m k : ℕ} (hk : k ≤ m + 1) (c
     have hr2 : 0 ≤ r ^ 2 / 2 := div_nonneg (sq_nonneg r) (by norm_num)
     nlinarith [z.2, hε, hη, hr2])
 
-theorem continuousOn_morseCollarPreimage_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem continuousOn_morseCollarPreimage_strip {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -9969,7 +9969,7 @@ theorem continuousOn_morseCollarPreimage_strip {m k : ℕ} (hk : k ≤ m + 1) (c
   simpa using (continuous_morseCollarPreimageOnStrip hk c ε r η data hf hε hη
     v hv hsupp hdfOn hrate hHandleInterval hHandleUpper hflowTop hTopCont hcont)
 
-theorem continuous_morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem continuous_morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -10020,7 +10020,7 @@ theorem continuous_morseCollarPreimage {m k : ℕ} (hk : k ≤ m + 1) (c ε r η
       (continuousOn_morseCollarPreimage_strip hk c ε r η data hf hε hη v hv hsupp hdfOn hrate
         hHandleInterval hHandleUpper hflowTop hTopCont hcont) hclosed₁ hclosed₂)
 
-noncomputable def morseCollarHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private noncomputable def morseCollarHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -10066,7 +10066,7 @@ noncomputable def morseCollarHomeoUnion {m k : ℕ} (hk : k ≤ m + 1) (c ε r �
   continuous_invFun := continuous_morseCollarPreimage hk c ε r η data hf hε hη v hv hsupp hdfOn
     hrate hHandleInterval hHandleUpper hflowTop hTopCont hcont
 
-theorem morseCollarHomeoUnion_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem morseCollarHomeoUnion_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -10123,7 +10123,7 @@ theorem morseCollarHomeoUnion_low {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : �
       have hr2 : 0 ≤ r ^ 2 / 2 := div_nonneg (sq_nonneg r) (by norm_num)
       nlinarith [hx', hε, hη, hr2]⟩ hx'
 
-noncomputable def morseHandleAdjunctionHomeoUpper {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private noncomputable def morseHandleAdjunctionHomeoUpper {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -10157,7 +10157,7 @@ noncomputable def morseHandleAdjunctionHomeoUpper {m k : ℕ} (hk : k ≤ m + 1)
   (morseHandleAdjunctionHomeoUnion hk c ε r data hε (ne_of_gt hr) (le_of_lt hεr) hcont).trans
     (morseCollarHomeoUnion hk c ε r η data hf hε hη v hv hsupp hdfOn hrate hHandleInterval hHandleUpper hflowTop hTopCont hflowMem hcont).symm
 
-theorem morseHandleAdjunctionHomeoUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+private theorem morseHandleAdjunctionHomeoUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -11614,7 +11614,7 @@ theorem morseModifiedSublevel_union_handleImage_eq {n k : ℕ} (hk : k ≤ n) (c
     · exact Or.inl (le_trans (morseModifiedFunction_le_f (H := H) (M := M) hk c ε δ R hε χ f hnorm x) hf)
     · exact Or.inr hh
 
-noncomputable def morseHandleAttachmentHomeoUpper {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
+private noncomputable def morseHandleAttachmentHomeoUpper {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -11735,7 +11735,7 @@ private lemma collarLowerAux {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     hdfOn hrate hHandleInterval hHandleUpper hflowTop
       (⟨z, m⟩ : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)}) hz)
 
-theorem morseHandleAttachmentHomeoUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
+private theorem morseHandleAttachmentHomeoUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
