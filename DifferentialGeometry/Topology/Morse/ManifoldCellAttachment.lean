@@ -10483,6 +10483,75 @@ theorem eventually_morseCollarTopLevel_eq_zero_of_chartBoundary_modified {m k : 
       · change morseCollarTopLevel hk c ε r data y = 0
         exact morseCollarTopLevel_eq_zero hk c ε r data y hychart)
 
+theorem continuous_morseCollarTopLevel_modified {m k : ℕ} (hk : k ≤ m + 1) (c ε δ r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ)
+    (hr : r ^ 2 ≥ ε + 9 * δ ^ 2 / 8)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) :
+    Continuous (morseCollarTopLevel hk c ε r data :
+      LevelSetSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f) (c - ε) → ℝ) := by
+  rw [continuous_iff_continuousAt]
+  intro x
+  by_cases hx : x.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
+  · have hsrc : x.1 ∈ data.χ.target := by
+      rcases hx with ⟨w, hw, hwx⟩
+      rw [← hwx]
+      exact data.χ.map_source (data.hχsrc w (le_of_lt hw))
+    have hsymm : ContinuousAt data.χ.symm x.1 := by
+      exact (data.χ.continuousOn_invFun x.1 hsrc).continuousAt
+        (IsOpen.mem_nhds data.χ.open_target hsrc)
+    have h1 : ContinuousAt (fun y : LevelSetSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f) (c - ε) => data.χ.symm y.1) x :=
+      hsymm.comp continuous_subtype_val.continuousAt
+    have h2 : ContinuousAt (fun y : LevelSetSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f) (c - ε) =>
+        ‖posPart hk (data.χ.symm y.1)‖ ^ 2) x := by
+      exact ((continuous_norm.continuousAt.comp (continuous_posPart hk).continuousAt).comp h1).pow 2
+    have hf : ContinuousAt (fun y : LevelSetSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f) (c - ε) =>
+        (r ^ 2 - ‖posPart hk (data.χ.symm y.1)‖ ^ 2) / 2) x := by
+      exact (continuousAt_const.sub h2).div continuousAt_const (by norm_num : (2 : ℝ) ≠ 0)
+    have hg : ContinuousAt (fun y : LevelSetSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f) (c - ε) =>
+        max 0 ((r ^ 2 - ‖posPart hk (data.χ.symm y.1)‖ ^ 2) / 2)) x :=
+      continuousAt_const.max hf
+    refine hg.congr_of_eventuallyEq ?_
+    have hxopen : x ∈ morseCollarChartSet hk c ε r data := hx
+    exact Filter.mem_of_superset ((isOpen_morseCollarChartSet hk c ε r data).mem_nhds hxopen) (by
+      intro y hy
+      change morseCollarTopLevel hk c ε r data y =
+        max 0 ((r ^ 2 - ‖posPart hk (data.χ.symm y.1)‖ ^ 2) / 2)
+      exact morseCollarTopLevel_eq_on_chart hk c ε r data y hy)
+  · have hzero : morseCollarTopLevel hk c ε r data x = 0 :=
+      morseCollarTopLevel_eq_zero hk c ε r data x hx
+    change Filter.Tendsto (morseCollarTopLevel hk c ε r data) (nhds x)
+      (nhds (morseCollarTopLevel hk c ε r data x))
+    rw [hzero]
+    exact Metric.tendsto_nhds.mpr (by
+      intro δm hδm
+      by_cases hcl : x.1 ∈ closure (data.χ '' {y : MorseModel (m + 1) |
+          morseNorm (m + 1) y < data.R})
+      · exact Filter.mem_of_superset
+          (eventually_morseCollarTopLevel_eq_zero_of_chartBoundary_modified (hk := hk) (c := c) (ε := ε) (δ := δ) (hδ := hδ) (hr := hr)
+            (r := r) (data := data) (hε := hε) (hεr := hεr) x hx hcl) (by
+            intro y hy
+            change morseCollarTopLevel hk c ε r data y = 0 at hy
+            change dist (morseCollarTopLevel hk c ε r data y) 0 < δm
+            rw [hy]
+            simpa [Real.dist_eq] using hδm)
+      · have hopen : IsOpen (closure (data.χ '' {y : MorseModel (m + 1) |
+            morseNorm (m + 1) y < data.R}))ᶜ :=
+          (isClosed_closure).isOpen_compl
+        refine Filter.mem_of_superset
+          (continuous_subtype_val.continuousAt.preimage_mem_nhds (hopen.mem_nhds hcl)) (by
+            intro y hy
+            have hychart : y.1 ∉ data.χ '' {z : MorseModel (m + 1) |
+                morseNorm (m + 1) z < data.R} := by
+              intro hyc
+              exact hy (subset_closure hyc)
+            change dist (morseCollarTopLevel hk c ε r data y) 0 < δm
+            rw [morseCollarTopLevel_eq_zero (hk := hk) (c := c) (ε := ε) (r := r)
+              (data := data) y hychart]
+            simpa [Real.dist_eq] using hδm))
+
 theorem morseModifiedSublevel_union_handleImage_eq {n k : ℕ} (hk : k ≤ n) (c ε δ r R : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hr : 3 * δ / 2 ≤ r)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
