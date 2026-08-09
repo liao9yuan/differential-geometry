@@ -11687,6 +11687,104 @@ noncomputable def morseSharpUnionRoundingHomeo {m k : ℕ} (hk : k ≤ m + 1) (c
     exact Continuous.subtype_mk hrest (fun x =>
       morseSharpUnionUnround_mem_sharpUnion hk c ε r δ data hε hδ0 hδr hr hεr' x.2)
 
+theorem morseSharpUnionRound_eq_self_of_deep {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    (hη : r ^ 2 + δ ≤ 2 * η)
+    {x : M} (hx : f x ≤ c - ε - η) :
+    morseSharpUnionRound hk c ε r δ data x = x := by
+  by_cases hb : x ∈ morseChartBallImage hk c data
+  · dsimp [morseChartBallImage] at hb
+    rcases hb with ⟨y, hy, hxy⟩
+    have hsrc0 : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+    have hsymm : data.χ.symm x = y := by
+      rw [← hxy]
+      exact data.χ.left_inv hsrc0
+    have hdeep : modelSharpUnionRound hk ε r δ (data.χ.symm x) = data.χ.symm x := by
+      rw [hsymm]
+      exact modelSharpUnionRound_eq_self_of_deep hk c ε r δ η hδ0 hδr hη (by
+        rw [← data.hnorm y (le_of_lt hy)]
+        rw [hxy]
+        exact hx)
+    calc
+      morseSharpUnionRound hk c ε r δ data x = data.χ (modelSharpUnionRound hk ε r δ (data.χ.symm x)) := by
+        dsimp [morseSharpUnionRound]
+        rw [if_pos (by exact ⟨y, hy, hxy⟩)]
+      _ = data.χ (data.χ.symm x) := by rw [hdeep]
+      _ = x := by
+        rw [← hxy]
+        exact data.χ.right_inv (data.χ.map_source hsrc0)
+  · dsimp [morseSharpUnionRound]
+    rw [if_neg hb]
+
+theorem morseSharpUnionUnround_eq_self_of_deep {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    (hη : r ^ 2 + δ ≤ 2 * η)
+    {x : M} (hx : f x ≤ c - ε - η) :
+    morseSharpUnionUnround hk c ε r δ data x = x := by
+  by_cases hb : x ∈ morseChartBallImageHalf hk c data
+  · dsimp [morseChartBallImageHalf] at hb
+    rcases hb with ⟨y, hy, hxy⟩
+    have hsrc0 : y ∈ data.χ.source := data.hχsrc y
+      (le_trans (le_of_lt hy) (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+    have hsymm : data.χ.symm x = y := by
+      rw [← hxy]
+      exact data.χ.left_inv hsrc0
+    have hdeep : modelSharpUnionUnround hk ε r δ (data.χ.symm x) = data.χ.symm x := by
+      rw [hsymm]
+      exact modelSharpUnionUnround_eq_self_of_deep hk c ε r δ η hδ0 hδr hη (by
+        rw [← data.hnorm y (le_trans (le_of_lt hy) (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))]
+        rw [hxy]
+        exact hx)
+    calc
+      morseSharpUnionUnround hk c ε r δ data x =
+          data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x)) := by
+        dsimp [morseSharpUnionUnround]
+        rw [if_pos (by exact ⟨y, hy, hxy⟩)]
+      _ = data.χ (data.χ.symm x) := by rw [hdeep]
+      _ = x := by
+        rw [← hxy]
+        exact data.χ.right_inv (data.χ.map_source hsrc0)
+  · dsimp [morseSharpUnionUnround]
+    rw [if_neg hb]
+
+theorem morseSharpUnionRoundingHomeo_rel_deep {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    (hcont : Continuous f) (hη : r ^ 2 + δ ≤ 2 * η)
+    (x : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)})
+    (hx : f x.1 ≤ c - ε - η) :
+    (morseSharpUnionRoundingHomeo hk c ε r δ data hε hδ0 hδr hr hεr' hbig hcont x).1 = x.1 := by
+  change morseSharpUnionRound hk c ε r δ data x.1 = x.1
+  exact morseSharpUnionRound_eq_self_of_deep hk c ε r δ η data hδ0 hδr hη hx
+
+theorem morseSharpUnionRoundingHomeo_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    (hcont : Continuous f) (hη : r ^ 2 + δ ≤ 2 * η)
+    (x : {x : M // x ∈ morseRoundedAttachment hk c ε r δ data})
+    (hx : f x.1 ≤ c - ε - η) :
+    (morseSharpUnionRoundingHomeo hk c ε r δ data hε hδ0 hδr hr hεr' hbig hcont).symm x =
+      ⟨x.1, Or.inl (by
+        change f x.1 ≤ c - ε
+        exact le_trans hx (by nlinarith [hδ0, hη]))⟩ := by
+  apply Subtype.ext
+  change morseSharpUnionUnround hk c ε r δ data x.1 = x.1
+  exact morseSharpUnionUnround_eq_self_of_deep hk c ε r δ η data hδ0 hδr hη hx
+
 theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hεR : Real.sqrt (2 * ε) ≤ R)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]

@@ -3885,6 +3885,17 @@ theorem modelSharpUnionRound_eq_self_of_deep {n k : ℕ} (hk : k ≤ n) (c ε r 
     nlinarith [h, hη]
   exact modelSharpUnionRound_eq_self_of_negPart_large hk ε r δ hδ0 hδr ht
 
+theorem modelSharpUnionUnround_eq_self_of_deep {n k : ℕ} (hk : k ≤ n) (c ε r δ η : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    {y : MorseModel n} (hη : r ^ 2 + δ ≤ 2 * η)
+    (hy : morseNormalForm hk c y ≤ c - ε - η) :
+    modelSharpUnionUnround hk ε r δ y = y := by
+  have ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+    rw [morseNormalForm_split] at hy
+    have h : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε - 2 * η := by nlinarith
+    nlinarith [h, hη]
+  exact modelSharpUnionUnround_eq_self_of_negPart_large hk ε r δ hδ0 hδr ht
+
 theorem modelSharpUnionRound_morseNorm_le {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
     (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (y : MorseModel n) :
     morseNorm n (modelSharpUnionRound hk ε r δ y) ≤ morseNorm n y := by
