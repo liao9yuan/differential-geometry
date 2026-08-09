@@ -10851,6 +10851,135 @@ theorem morseHandleAttachmentHomeoUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c 
   simpa using collarLowerAux hk c ε r η data hg hε hη v hv hsupp hdfOn hrate hHandleInterval
     hHandleUpper hflowTop hTopContg hflowMem hcontg (z := x.1) hglow _
 
+def morseChartBallImage {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) : Set M :=
+  data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
+
+noncomputable def morseSharpUnionRound {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (x : M) : M := by
+  classical
+  exact if hx : x ∈ morseChartBallImage hk c data then
+    data.χ (modelSharpUnionRound hk ε r δ (data.χ.symm x))
+  else x
+
+noncomputable def morseSharpUnionUnround {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (x : M) : M := by
+  classical
+  exact if hx : x ∈ morseChartBallImage hk c data then
+    data.χ (modelSharpUnionUnround hk ε r δ (data.χ.symm x))
+  else x
+
+noncomputable def morseRoundedAttachment {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) : Set M :=
+  data.χ '' (modelAttachedRegion hk ε r δ ∩ {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}) ∪
+    (sublevel f (c - ε) ∩ (morseChartBallImage hk c data)ᶜ)
+
+theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R) :
+    Set.range (handleEmbedding hk c ε r data) ⊆ morseChartBallImage hk c data := by
+  intro x hx
+  rcases hx with ⟨d, hd⟩
+  rw [← hd]
+  dsimp [morseChartBallImage]
+  refine ⟨modelHandleMap hk ε r d, ?_, ?_⟩
+  · have hle : morseNorm (m + 1) (modelHandleMap hk ε r d) ≤ Real.sqrt (2 * ε + 2 * r ^ 2) :=
+      modelHandleMap_norm_le hk ε r (le_of_lt hε) d
+    exact lt_of_le_of_lt hle hεr'
+  · rfl
+
+theorem chartSymm_mem_sharpUnion_model {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    {x : M} (hx : x ∈ morseChartBallImage hk c data)
+    (hxU : x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)) :
+    data.χ.symm x ∈
+      (sublevel (morseNormalForm hk c) (c - ε) : Set (MorseModel (m + 1))) ∪ modelHandle hk ε r := by
+  rcases hxU with hf | hh
+  · left
+    have hfx : f x = morseNormalForm hk c (data.χ.symm x) := by
+      rcases hx with ⟨y, hy, hxy⟩
+      have hsrc0 : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+      have hxy' : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv hsrc0
+      calc
+        f x = morseNormalForm hk c y := by
+          rw [← hxy]
+          exact data.hnorm y (le_of_lt hy)
+        _ = morseNormalForm hk c (data.χ.symm x) := by rw [hxy']
+    change morseNormalForm hk c (data.χ.symm x) ≤ c - ε
+    rw [← hfx]
+    exact (by simpa [sublevel] using hf : f x ≤ c - ε)
+  · right
+    rcases hh with ⟨d, hd⟩
+    have hd' : data.χ.symm x = modelHandleMap hk ε r d := by
+      rw [← hd]
+      have hsrc' : modelHandleMap hk ε r d ∈ data.χ.source :=
+        data.hχsrc (modelHandleMap hk ε r d)
+          (le_trans (modelHandleMap_norm_le hk ε r (le_of_lt hε) d) (le_of_lt hεr'))
+      exact data.χ.left_inv hsrc'
+    rw [hd']
+    exact modelHandleMap_mem hk ε r (le_of_lt hε) d
+
+theorem morseSharpUnionRound_mem_rounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    {x : M} (hx : x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)) :
+    morseSharpUnionRound hk c ε r δ data x ∈ morseRoundedAttachment hk c ε r δ data := by
+  by_cases hb : x ∈ morseChartBallImage hk c data
+  · left
+    refine ⟨modelSharpUnionRound hk ε r δ (data.χ.symm x), ?_, ?_⟩
+    · constructor
+      · exact modelSharpUnionRound_mem_attached hk c ε r δ hδ0 hδr
+          (chartSymm_mem_sharpUnion_model hk c ε r data hε hεr' hb hx)
+      · dsimp [morseChartBallImage] at hb
+        rcases hb with ⟨y, hy, hxy⟩
+        have hsrc0 : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+        have hsymm : data.χ.symm x = y := by
+          rw [← hxy]
+          exact data.χ.left_inv hsrc0
+        rw [hsymm]
+        have hle : morseNorm (m + 1) (modelSharpUnionRound hk ε r δ y) ≤ morseNorm (m + 1) y := by
+          exact modelSharpUnionRound_morseNorm_le hk ε r δ hδ0 hδr y
+        exact lt_of_le_of_lt hle hy
+    · dsimp [morseSharpUnionRound]
+      rw [if_pos hb]
+  · right
+    constructor
+    · change morseSharpUnionRound hk c ε r δ data x ∈ sublevel f (c - ε)
+      dsimp [morseSharpUnionRound]
+      rw [if_neg hb]
+      have hnot : x ∉ Set.range (handleEmbedding hk c ε r data) := by
+        intro hh
+        exact hb (range_handleEmbedding_subset_ballImage hk c ε r data hε hεr' hh)
+      rcases hx with hf | hh
+      · exact hf
+      · exact False.elim (hnot hh)
+    · change morseSharpUnionRound hk c ε r δ data x ∈ (morseChartBallImage hk c data)ᶜ
+      dsimp [morseSharpUnionRound]
+      rw [if_neg hb]
+      exact hb
+
 theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hεR : Real.sqrt (2 * ε) ≤ R)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]

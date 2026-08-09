@@ -3864,6 +3864,60 @@ theorem modelSharpUnionRound_eq_self_of_deep {n k : ℕ} (hk : k ≤ n) (c ε r 
     nlinarith [h, hη]
   exact modelSharpUnionRound_eq_self_of_negPart_large hk ε r δ hδ0 hδr ht
 
+theorem modelSharpUnionRound_morseNorm_le {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (y : MorseModel n) :
+    morseNorm n (modelSharpUnionRound hk ε r δ y) ≤ morseNorm n y := by
+  have hsq : morseNorm n (modelSharpUnionRound hk ε r δ y) ^ 2 ≤ morseNorm n y ^ 2 := by
+    dsimp [modelSharpUnionRound]
+    rw [morseNorm_recombine_sq hk (negPart hk y)
+      (Real.sqrt (smoothCap ε r δ (‖negPart hk y‖ ^ 2) / modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2)) •
+        posPart hk y)]
+    have hnorm_y : morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+      rw [← recombine_decompose hk y]
+      rw [morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)]
+      simp [negPart_recombine, posPart_recombine]
+    rw [hnorm_y]
+    have hsc_le : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) := by
+      dsimp [modelSharpUnionBound]
+      by_cases hle : ‖negPart hk y‖ ^ 2 - 2 * ε ≤ r ^ 2
+      · have hmax : max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) = r ^ 2 := max_eq_left hle
+        rw [hmax]
+        dsimp [smoothCap]
+        have hst0 : 0 ≤ Real.smoothTransition ((‖negPart hk y‖ ^ 2 - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) :=
+          Real.smoothTransition.nonneg _
+        nlinarith
+      · have hmax : max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) = ‖negPart hk y‖ ^ 2 - 2 * ε :=
+          max_eq_right (le_of_not_ge hle)
+        rw [hmax]
+        dsimp [smoothCap]
+        have hst1 : Real.smoothTransition ((‖negPart hk y‖ ^ 2 - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ≤ 1 :=
+          Real.smoothTransition.le_one _
+        nlinarith
+    have hsq1 : ‖Real.sqrt (smoothCap ε r δ (‖negPart hk y‖ ^ 2) / modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2)) •
+        posPart hk y‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 := by
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+      rw [mul_pow]
+      rw [Real.sq_sqrt (by
+        have hBpos : 0 < modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) := by
+          exact modelSharpUnionBound_pos (hr := by
+            intro h
+            rw [h] at hδr
+            nlinarith [hδ0, hδr])
+        exact div_nonneg (le_of_lt (smoothCap_pos hδ0 hδr)) (le_of_lt hBpos))]
+      have hle' : smoothCap ε r δ (‖negPart hk y‖ ^ 2) / modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2) ≤ 1 := by
+        exact (div_le_one (by
+          exact modelSharpUnionBound_pos (hr := by
+            intro h
+            rw [h] at hδr
+            nlinarith [hδ0, hδr]))).2 hsc_le
+      nlinarith [hle', sq_nonneg (smoothCap ε r δ (‖negPart hk y‖ ^ 2) /
+        modelSharpUnionBound ε r (‖negPart hk y‖ ^ 2))]
+    nlinarith [hsq1]
+  have habs : |morseNorm n (modelSharpUnionRound hk ε r δ y)| ≤ |morseNorm n y| := sq_le_sq.mp hsq
+  rwa [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)] at habs
+
 theorem continuous_modelSharpUnionRound {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
     (hδ0 : 0 < δ) (hδr : δ < r ^ 2) :
     Continuous (modelSharpUnionRound hk ε r δ) := by
