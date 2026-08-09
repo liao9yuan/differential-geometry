@@ -7017,6 +7017,52 @@ theorem morseCollarLevelMap_injective_of_level {m k : ℕ} (hk : k ≤ m + 1) (c
     exact hstep'
   linarith
 
+theorem morseCollarLevelMap_surjective {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hη : 0 < η)
+    (x : LevelSetSpace f (c - ε)) (t : ℝ)
+    (ht : t ∈ Set.Icc (-η) (morseCollarTopLevel hk c ε r data x)) :
+    ∃ σ ∈ Set.Icc (-η) (r ^ 2 / 2 + ε), morseCollarLevelMap hk c ε r η data x σ = t := by
+  have hT : 0 ≤ morseCollarTopLevel hk c ε r data x :=
+    morseCollarTopLevel_nonneg hk c ε r data x
+  have hTη : 0 < morseCollarTopLevel hk c ε r data x + η := by nlinarith [hT, hη]
+  have hden : r ^ 2 / 2 + ε + η ≠ 0 := by positivity
+  let σ : ℝ := -η + (t + η) * (r ^ 2 / 2 + ε + η) / (morseCollarTopLevel hk c ε r data x + η)
+  refine ⟨σ, ?_, ?_⟩
+  · constructor
+    · dsimp [σ]
+      have h1 : 0 ≤ (t + η) * (r ^ 2 / 2 + ε + η) / (morseCollarTopLevel hk c ε r data x + η) := by
+        have h1' : 0 ≤ t + η := by nlinarith [ht.1, hη]
+        have h2' : 0 < r ^ 2 / 2 + ε + η := by positivity
+        exact div_nonneg (mul_nonneg h1' (le_of_lt h2')) (le_of_lt hTη)
+      nlinarith
+    · dsimp [σ]
+      have h1 : t ≤ morseCollarTopLevel hk c ε r data x := ht.2
+      have hTle : morseCollarTopLevel hk c ε r data x ≤ r ^ 2 / 2 :=
+        morseCollarTopLevel_le hk c ε r data x
+      have hnum : (t + η) * (r ^ 2 / 2 + ε + η) ≤
+          (morseCollarTopLevel hk c ε r data x + η) * (r ^ 2 / 2 + ε + η) := by
+        have h1' : t + η ≤ morseCollarTopLevel hk c ε r data x + η := by nlinarith [h1, hη]
+        have h2' : 0 ≤ r ^ 2 / 2 + ε + η := by positivity
+        exact mul_le_mul_of_nonneg_right h1' h2'
+      have hdiv : (t + η) * (r ^ 2 / 2 + ε + η) / (morseCollarTopLevel hk c ε r data x + η) ≤
+          r ^ 2 / 2 + ε + η := by
+        exact (div_le_iff₀ hTη).mpr (by
+          nlinarith [hnum])
+      have hmain : -η + (t + η) * (r ^ 2 / 2 + ε + η) / (morseCollarTopLevel hk c ε r data x + η) ≤
+          r ^ 2 / 2 + ε := by
+        nlinarith [hdiv]
+      exact hmain
+  · dsimp [morseCollarLevelMap, σ]
+    have hmain : -η + (morseCollarTopLevel hk c ε r data x + η) *
+        ((-η + (t + η) * (r ^ 2 / 2 + ε + η) / (morseCollarTopLevel hk c ε r data x + η)) + η) /
+          (r ^ 2 / 2 + ε + η) = t := by
+      field_simp [show r ^ 2 / 2 + ε + η ≠ 0 by positivity, ne_of_gt hTη]
+      ring
+    exact hmain
+
 theorem morseCollarMap_injective {m k : ℕ} (hk : k ≤ m + 1) (c ε r η : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
