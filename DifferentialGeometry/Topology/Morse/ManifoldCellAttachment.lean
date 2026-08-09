@@ -3792,6 +3792,19 @@ theorem isOpen_morseBeltOpenSet {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
       exact isOpen_empty
   exact IsOpen.union hW hV
 
+theorem morseBeltOpenSet_subset_beltSet {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    morseBeltOpenSet hk c ε r data hε hεr ⊆ morseBeltSet hk c ε r data hε hεr := by
+  intro z hz
+  rcases hz with hz | hz
+  · rcases hz with ⟨x, hx, rfl⟩
+    exact Or.inl ⟨x, hx, rfl⟩
+  · rcases hz with ⟨d, hd, rfl⟩
+    exact Or.inr ⟨d, trivial, rfl⟩
+
 noncomputable def morseBeltMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
@@ -3928,6 +3941,18 @@ theorem morseBeltMap_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
       data.χ.symm x.1 := by
   dsimp [morseBeltMap, Handle.lower, adjunctionLower, adjunctionMk, Quot.liftOn]
   simp [hx]
+
+noncomputable def morseBeltMapOnOpen {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (z : {z' : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) //
+        z' ∈ morseBeltOpenSet hk c ε r data hε (le_of_lt hεr')}) :
+    morseUpperSublevel hk c r :=
+  morseBeltMap hk c ε r data hε hεr' ⟨z.1,
+    morseBeltOpenSet_subset_beltSet hk c ε r data hε (le_of_lt hεr') z.2⟩
 
 def cellImage {n k : ℕ} (hk : k ≤ n) (c : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
