@@ -11785,6 +11785,61 @@ theorem morseSharpUnionRoundingHomeo_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1
   change morseSharpUnionUnround hk c ε r δ data x.1 = x.1
   exact morseSharpUnionUnround_eq_self_of_deep hk c ε r δ η data hδ0 hδr hη hx
 
+noncomputable def morseHandleAdjunctionEquivRounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    (hcont : Continuous f) :
+    Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))) ≃ₜ
+      {x : M // x ∈ morseRoundedAttachment hk c ε r δ data} :=
+  (morseHandleAdjunctionHomeoUnion hk c ε r data hε (ne_of_gt hr)
+      (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)) hcont).trans
+    (morseSharpUnionRoundingHomeo hk c ε r δ data hε hδ0 hδr hr hεr' hbig hcont)
+
+theorem morseHandleAdjunctionEquivRounded_rel_deep {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbig : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    (hcont : Continuous f) (hη : r ^ 2 + δ ≤ 2 * η)
+    (x : SublevelSpace f (c - ε - η)) :
+    (morseHandleAdjunctionEquivRounded hk c ε r δ data hε hδ0 hδr hr hεr' hbig hcont
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+        ⟨x.1, by
+          have hx : f x.1 ≤ c - ε - η := by
+            change f x.1 ≤ c - ε - η
+            exact x.2
+          have hsum : 0 ≤ r ^ 2 + δ := by positivity
+          have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+          exact le_trans hx (by nlinarith [hη0])⟩)).1 = x.1 := by
+  have hx : f x.1 ≤ c - ε - η := by
+    change f x.1 ≤ c - ε - η
+    exact x.2
+  change morseSharpUnionRound hk c ε r δ data
+    (morseHandleAdjunctionHomeoUnion hk c ε r data hε (ne_of_gt hr)
+      (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)) hcont
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+        ⟨x.1, by
+          have hsum : 0 ≤ r ^ 2 + δ := by positivity
+          have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+          exact le_trans hx (by nlinarith [hη0])⟩)).1 = x.1
+  rw [morseHandleAdjunctionHomeoUnion_lower hk c ε r data hε (ne_of_gt hr)
+    (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)) hcont
+    ⟨x.1, by
+      have hsum : 0 ≤ r ^ 2 + δ := by positivity
+      have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+      exact le_trans hx (by nlinarith [hη0])⟩]
+  exact morseSharpUnionRound_eq_self_of_deep hk c ε r δ η data hδ0 hδr hη hx
+
 theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hεR : Real.sqrt (2 * ε) ≤ R)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
