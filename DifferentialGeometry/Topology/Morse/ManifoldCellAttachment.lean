@@ -10616,6 +10616,102 @@ theorem morseModifiedSublevel_union_handleImage_eq {n k : ℕ} (hk : k ≤ n) (c
     · exact Or.inl (le_trans (morseModifiedFunction_le_f (H := H) (M := M) hk c ε δ R hε χ f hnorm x) hf)
     · exact Or.inr hh
 
+noncomputable def morseHandleAttachmentHomeoUpper {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ η : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hη : 0 < η)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R)
+    (hδε : 9 * δ ^ 2 < 4 * ε)
+    (hr2 : r ^ 2 = 2 * ε)
+    (hrδ : 3 * δ / 2 ≤ r)
+    (g : M → ℝ) (hg_eq : g = morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f)
+    (hg : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ g ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) ≤ 0)
+    (hHandleInterval : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r →
+      g (data.χ w) ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
+    (hHandleUpper : ∀ (w : MorseModel (m + 1)), w ∈ modelHandle hk ε r →
+      g (data.χ w) ≤ c + r ^ 2 / 2)
+    (hflowTop : ∀ (w : MorseModel (m + 1)) (hw : w ∈ modelHandle hk ε r),
+      morseCollarTopLevel hk c ε r data
+        (morseCollarFlowBase hk c ε r η hg hε hη v hv hsupp hdfOn hrate (data.χ w)
+          (hHandleInterval w hw)) ≥
+        g (data.χ w) - c + ε)
+    (hflowMem : ∀ y : SublevelSpace g (c + r ^ 2 / 2),
+      morseCollarMap hk c ε r η data hg hε (le_of_lt hη) v hv hsupp hdfOn hrate y ∈
+        sublevel g (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)) :
+    Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) ≃ₜ
+      SublevelSpace f (c + r ^ 2 / 2) := by
+  let hcontf : Continuous f := hf.continuous
+  have hrpos : 0 < r := by nlinarith [hδ, hrδ]
+  have hr' : r ^ 2 ≥ ε + 9 * δ ^ 2 / 8 := by
+    rw [hr2]
+    nlinarith [hδε, hε, sq_nonneg δ]
+  have hTopCont : Continuous (morseCollarTopLevel hk c ε r data :
+      LevelSetSpace (morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f) (c - ε) → ℝ) :=
+    continuous_morseCollarTopLevel_modified hk c ε δ r data hε hδ hr' hεr'
+  have hTopContg : Continuous (morseCollarTopLevel hk c ε r data : LevelSetSpace g (c - ε) → ℝ) := by
+    change Continuous (morseCollarTopLevel hk c ε r data : {x : M // g x = c - ε} → ℝ)
+    rw [hg_eq]
+    exact hTopCont
+  have hcontg : Continuous g := hg.continuous
+  have hrange : Set.range (handleEmbedding hk c ε r data) =
+      data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))) :=
+    range_handleEmbedding hk c ε r data hε hrpos
+  have hunion : {x : M | g x ≤ c - ε} ∪
+        data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))) =
+      {x : M | f x ≤ c - ε} ∪
+        data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))) := by
+    have h := morseModifiedSublevel_union_handleImage_eq (n := m + 1) hk c ε δ r data.R hε hδ hrδ
+      (H := H) (M := M) data.χ f data.hnorm data.hχsrc
+    simpa [hg_eq] using h
+  have h₁set : sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data) =
+      sublevel f (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))) := by
+    rw [hrange]
+  have h₃set : sublevel g (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1))) =
+      sublevel g (c - ε) ∪ Set.range (handleEmbedding hk c ε r data) := by
+    rw [← hrange]
+  have hset : {x : M | g x ≤ c + r ^ 2 / 2} = sublevel f (c + r ^ 2 / 2) := by
+    have hident := sublevel_upper_identity_morseModifiedFunction (n := m + 1) hk c ε δ data.R hε hδ hδε
+      (H := H) (M := M) data.χ f data.hnorm
+    have hlev : c + ε = c + r ^ 2 / 2 := by
+      rw [hr2]
+      ring
+    have hident' : {x : M | morseModifiedFunction (H := H) (M := M) hk c ε δ data.R data.χ f x ≤
+        c + r ^ 2 / 2} = sublevel f (c + r ^ 2 / 2) := by
+      simpa [hlev] using hident
+    simpa [hg_eq] using hident'
+  let e0 : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε (le_of_lt hεr')) ≃ₜ
+      {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
+    morseHandleAdjunctionHomeoUnion hk c ε r data hε (ne_of_gt hrpos) (le_of_lt hεr') hcontf
+  let e1 : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} ≃ₜ
+      {x : M // x ∈ sublevel f (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} :=
+    subtypeSetHomeomorph h₁set
+  let e2 : {x : M // x ∈ sublevel f (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} ≃ₜ
+      {x : M // x ∈ sublevel g (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} :=
+    (subtypeSetHomeomorph hunion).symm
+  let e3 : {x : M // x ∈ sublevel g (c - ε) ∪ data.χ '' (modelHandle hk ε r : Set (MorseModel (m + 1)))} ≃ₜ
+      {x : M // x ∈ sublevel g (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
+    subtypeSetHomeomorph h₃set
+  let e4 : SublevelSpace g (c + r ^ 2 / 2) ≃ₜ
+      {x : M // x ∈ sublevel g (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
+    morseCollarHomeoUnion hk c ε r η data hg hε hη v hv hsupp hdfOn hrate hHandleInterval hHandleUpper
+      hflowTop hTopContg hflowMem hcontg
+  let e5 : SublevelSpace g (c + r ^ 2 / 2) ≃ₜ SublevelSpace f (c + r ^ 2 / 2) :=
+    subtypeSetHomeomorph hset
+  exact e0.trans (e1.trans (e2.trans (e3.trans (e4.symm.trans e5))))
+
 theorem morseModifiedRetraction_eq_self_of_mem_lowerUnion {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hεR : Real.sqrt (2 * ε) ≤ R)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
