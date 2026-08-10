@@ -15423,6 +15423,27 @@ theorem isCompact_tsupport_morseRoundedDescentField {m k : ℕ} (hk : k ≤ m + 
     hV₀supp.union hcompImg
   exact hcompU.of_isClosed_subset (isClosed_tsupport (f := field)) htsub
 
+theorem contMDiffOn_pullbackV₀ {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M))) :
+    ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => (⟨data.χ y, V₀ (data.χ y)⟩ : TangentBundle I M))
+      (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+  have hcomp : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)) (Set.range data.χ) := by
+    exact (hV₀sm.contMDiffOn : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)) Set.univ).mono (by
+        intro x hx
+        trivial)
+  exact (hcomp.comp data.hχon (by
+    intro y hy
+    exact Set.mem_preimage.mpr (Set.mem_range_self (f := data.χ) y)))
+
 end ManifoldCellAttachment
 
 end
