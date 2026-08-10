@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemma
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExpContinuity
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import DifferentialGeometry.Geometry.Metric.Completeness
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.UnitInterval
 open DifferentialGeometry.Geometry.Curvature
@@ -294,6 +295,51 @@ theorem joinedIn_centre_smallNormalBall
   refine JoinedIn.ofLine hγ_cont.continuousOn hγ0 hγ1 ?_
   rintro x ⟨t, ht, rfl⟩
   exact smallNormalBall_radial_confined (I := I) g hEnorm p v hv ht
+
+omit [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] in
+omit [ConnectedSpace M] in
+theorem joinedIn_centre_smallNormalBall_of_complete_metric
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (p : M) (v : TangentSpace I p) {ρ : ℝ}
+    (hv : Real.sqrt (g.inner p v v) < ρ) :
+    letI : IsManifold I 1 M :=
+      IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+    letI : TopologicalSpace.MetrizableSpace M :=
+      Manifold.metrizableSpace I M
+    letI : T3Space M := inferInstance
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+    letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+    letI : PseudoEMetricSpace M := (EMetricSpace.ofRiemannianMetric I M).toPseudoEMetricSpace
+    letI : CompleteSpace M := hcomplete.complete
+    let hEnorm : IsMetricNorm (I := I) (M := M) g :=
+      fun x w => tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x w
+    JoinedIn (smallNormalBall (I := I) p ρ) p
+      (expMapIntrinsic (I := I) g hEnorm p v) := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M := (EMetricSpace.ofRiemannianMetric I M).toPseudoEMetricSpace
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x w
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x w
+  exact joinedIn_centre_smallNormalBall (I := I) (M := M) g hEnorm p v hv
 
 end IntrinsicBall
 
