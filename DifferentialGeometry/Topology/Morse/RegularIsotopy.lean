@@ -107,6 +107,97 @@ private theorem familyChartRep_fderiv_curry
     simpa [g] using (hgdiff.hasFDerivAt.comp y hpair)
   simpa [g] using hfd.fderiv
 
+private theorem familyChartRep_fderiv_curry_time
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
+    (hF : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => F q.1 q.2)) (x₀ : M) (y : MorseModel (m + 1)) (s : ℝ)
+    (hy : y ∈ (extChartAt I x₀).target) :
+    fderiv ℝ (fun t : ℝ => F ((extChartAt I x₀).symm y) t) s =
+      (fderiv ℝ (fun q : (MorseModel (m + 1)) × ℝ => F ((extChartAt I x₀).symm q.1) q.2) (y, s)).comp
+        (ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ) := by
+  let g : (MorseModel (m + 1)) × ℝ → ℝ := fun q => F ((extChartAt I x₀).symm q.1) q.2
+  have hgOn := familyChartRep_contDiffOn (I := I) F hF x₀
+  have hmem : (y, s) ∈ (extChartAt I x₀).target ×ˢ Set.univ := ⟨hy, trivial⟩
+  have hgdiff : DifferentiableAt ℝ g (y, s) := by
+    exact ((hgOn (y, s) hmem).contDiffAt
+      ((IsOpen.prod (isOpen_extChartAt_target x₀) isOpen_univ).mem_nhds hmem)).differentiableAt
+      (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
+  have hpair : HasFDerivAt (fun t : ℝ => (y, t))
+      (ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ) s := by
+    exact hasFDerivAt_prodMk_right y s
+  have hfd : HasFDerivAt (fun t : ℝ => g (y, t))
+      ((fderiv ℝ g (y, s)).comp (ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ)) s := by
+    simpa [g] using (hgdiff.hasFDerivAt.comp s hpair)
+  simpa [g] using hfd.fderiv
+
+private theorem familyTimeDeriv_contMDiffOn
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
+    (hF : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => F q.1 q.2)) (x₀ : M) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : M × ℝ => (fderiv ℝ (fun t : ℝ => F p.1 t) p.2) 1)
+      ((extChartAt I x₀).source ×ˢ Set.univ) := by
+  let g : (MorseModel (m + 1)) × ℝ → ℝ := fun q => F ((extChartAt I x₀).symm q.1) q.2
+  have hgOn := familyChartRep_contDiffOn (I := I) F hF x₀
+  have hfderiv : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fderiv ℝ g) ((extChartAt I x₀).target ×ˢ Set.univ) := by
+    exact ((contDiffOn_infty_iff_fderiv_of_isOpen
+      (IsOpen.prod (isOpen_extChartAt_target x₀) isOpen_univ)).1 hgOn).2
+  have ha' : ContMDiffOn 𝓘(ℝ, (MorseModel (m + 1)) × ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : (MorseModel (m + 1)) × ℝ =>
+        (fderiv ℝ g q) (ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ (1 : ℝ)))
+      ((extChartAt I x₀).target ×ˢ Set.univ) := by
+    exact (contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := (MorseModel (m + 1)) × ℝ) (E' := ℝ)
+      (f := fun q : (MorseModel (m + 1)) × ℝ =>
+        (fderiv ℝ g q) (ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ (1 : ℝ)))
+      (s := (extChartAt I x₀).target ×ˢ Set.univ) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))).2
+      (hfderiv.clm_apply (contDiffOn_const : ContDiffOn ℝ (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun _ : (MorseModel (m + 1)) × ℝ =>
+          ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ (1 : ℝ))
+        ((extChartAt I x₀).target ×ˢ Set.univ)))
+  have hφ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, (MorseModel (m + 1)) × ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : M × ℝ => ((extChartAt I x₀) p.1, p.2))
+      ((extChartAt I x₀).source ×ˢ Set.univ) := by
+    have hc := contMDiffOn_extChartAt (I := I.prod 𝓘(ℝ, ℝ)) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+      (x := (x₀, (0 : ℝ)))
+    simpa [extChartAt_prod, extChartAt_source (I := I) (x := x₀)] using hc
+  exact (ha'.comp hφ (by intro p hp; exact ⟨(extChartAt I x₀).map_source hp.1, trivial⟩)).congr
+    (by
+      intro p hp
+      have hcurry := familyChartRep_fderiv_curry_time (I := I) F hF x₀ (extChartAt I x₀ p.1) p.2
+        ((extChartAt I x₀).map_source hp.1)
+      have happly : (fderiv ℝ g ((extChartAt I x₀) p.1, p.2))
+          (ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ (1 : ℝ)) =
+          ((fderiv ℝ g ((extChartAt I x₀) p.1, p.2)).comp
+            (ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ)) (1 : ℝ) := by
+        rfl
+      change (fderiv ℝ (fun t : ℝ => F p.1 t) p.2) 1 =
+        (fderiv ℝ g ((extChartAt I x₀) p.1, p.2))
+          (ContinuousLinearMap.inr ℝ (MorseModel (m + 1)) ℝ (1 : ℝ))
+      rw [happly, ← hcurry]
+      have hsymm : (extChartAt I x₀).symm ((extChartAt I x₀) p.1) = p.1 :=
+        (extChartAt I x₀).left_inv hp.1
+      rw [hsymm])
+
+private theorem familyTimeDeriv_contMDiff
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
+    (hF : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => F q.1 q.2)) :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : M × ℝ => (fderiv ℝ (fun t : ℝ => F p.1 t) p.2) 1) := by
+  intro p
+  have hOn := familyTimeDeriv_contMDiffOn (I := I) F hF p.1
+  have hsrc : p ∈ (extChartAt I p.1).source ×ˢ Set.univ := ⟨mem_extChartAt_source p.1, trivial⟩
+  exact (hOn p hsrc).mono_of_mem_nhdsWithin (by
+    have hC : (extChartAt I p.1).source ×ˢ Set.univ ∈ nhds p :=
+      (IsOpen.prod (isOpen_extChartAt_source p.1) isOpen_univ).mem_nhds
+        ⟨mem_extChartAt_source p.1, trivial⟩
+    exact (mem_nhdsWithin_iff_exists_mem_nhds_inter.mpr
+      ⟨(extChartAt I p.1).source ×ˢ Set.univ, hC, inter_subset_left⟩))
+
 private theorem family_mfderiv_decomp
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
@@ -765,6 +856,79 @@ private theorem suspensionSection_contMDiff
     haveI : IsManifold 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞) ℝ := IsManifold.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
     exact contMDiff_equivTangentBundleProd_symm
   exact hsymm.comp hpair
+
+private theorem suspensionSection_smul_contMDiff
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
+    {W : (x : M) → (s : ℝ) → TangentSpace I x} {α : M × ℝ → ℝ}
+    (hW : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, W q.1 q.2⟩ : TangentBundle I M)))
+    (hα : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) α) :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) ((I.prod 𝓘(ℝ, ℝ)).prod 𝓘(ℝ, (MorseModel (m + 1)) × ℝ))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q, (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) q from
+        (α q • W q.1 q.2, α q))⟩ : TangentBundle (I.prod 𝓘(ℝ, ℝ)) (M × ℝ))) := by
+  have hαW : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, α q • W q.1 q.2⟩ : TangentBundle I M)) := by
+    exact familyTangentSection_smul_of_tsupport (I := I) (W := W) (ψ := α) (u := Set.univ)
+      (by intro q hq; exact hα q) isOpen_univ (by simp) (by intro q hq; exact hW q)
+  have hψ : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.2, (α q : TangentSpace 𝓘(ℝ, ℝ) q.2)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+    intro q₀
+    rw [Bundle.contMDiffAt_totalSpace]
+    constructor
+    · exact contMDiffAt_snd
+    · have heq : ∀ q : M × ℝ, (trivializationAt ℝ (TangentSpace 𝓘(ℝ, ℝ)) q₀.2
+          (⟨q.2, (α q : TangentSpace 𝓘(ℝ, ℝ) q.2)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)).2 = α q := by
+        intro q
+        simp
+      exact (hα q₀).congr_of_eventuallyEq (Filter.Eventually.of_forall heq)
+  have hpair : ContMDiff (I.prod 𝓘(ℝ, ℝ))
+      ((I.prod 𝓘(ℝ, MorseModel (m + 1))).prod (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ =>
+        ((⟨q.1, α q • W q.1 q.2⟩ : TangentBundle I M),
+          (⟨q.2, (α q : TangentSpace 𝓘(ℝ, ℝ) q.2)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))) :=
+    hαW.prodMk hψ
+  have hsymm : ContMDiff ((I.prod 𝓘(ℝ, MorseModel (m + 1))).prod (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)))
+      ((I.prod 𝓘(ℝ, ℝ)).prod 𝓘(ℝ, (MorseModel (m + 1)) × ℝ))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      ((equivTangentBundleProd I M 𝓘(ℝ, ℝ) ℝ).symm) := by
+    haveI : IsManifold I (1 : WithTop ℕ∞) M := IsManifold.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+    haveI : IsManifold 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞) ℝ := IsManifold.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+    exact contMDiff_equivTangentBundleProd_symm
+  exact hsymm.comp hpair
+
+private lemma eq_self_of_deriv_one_on_unit
+    {φ : ℝ → ℝ} (hφ : DifferentiableOn ℝ φ Set.univ)
+    (hφ' : ∀ t : ℝ, t ∈ Set.Icc 0 1 → deriv φ t = 1) (h0 : φ 0 = 0) : φ 1 = 1 := by
+  have hcont : ContinuousOn φ (Set.uIcc 0 1) := by
+    exact (hφ.mono (by intro u hu; trivial)).continuousOn
+  have hderiv : ∀ x ∈ Set.Ioo (0 : ℝ) 1, HasDerivAt φ 1 x := by
+    intro x hx
+    have hx' : x ∈ Set.Icc 0 1 := ⟨le_of_lt hx.1, le_of_lt hx.2⟩
+    exact ((hφ x trivial).differentiableAt Filter.univ_mem).hasDerivAt.congr_deriv (hφ' x hx')
+  have hderivOn : ∀ x ∈ Set.uIcc (0 : ℝ) 1, deriv φ x = 1 := by
+    intro x hx
+    exact hφ' x (by simpa using hx)
+  have hcontDeriv : ContinuousOn (deriv φ) (Set.uIcc (0 : ℝ) 1) := by
+    exact continuousOn_const.congr (by intro x hx; exact hderivOn x hx)
+  have hint : IntervalIntegrable (deriv φ) MeasureTheory.volume 0 1 := by
+    exact hcontDeriv.intervalIntegrable
+  have hderiv' : ∀ x ∈ Set.uIcc (0 : ℝ) 1, DifferentiableAt ℝ φ x := by
+    intro x hx
+    exact (hφ x trivial).differentiableAt Filter.univ_mem
+  have hmain := intervalIntegral.integral_deriv_eq_sub hderiv' hint
+  have hint1 : (∫ x in (0 : ℝ)..1, (1 : ℝ)) = 1 := by
+    rw [intervalIntegral.integral_const]
+    norm_num
+  have heqint : (∫ x in (0 : ℝ)..1, deriv φ x) = (∫ x in (0 : ℝ)..1, (1 : ℝ)) := by
+    exact intervalIntegral.integral_congr (by intro x hx; exact hderivOn x hx)
+  have hval : φ 1 - φ 0 = 1 := by
+    rw [heqint] at hmain
+    rw [hint1] at hmain
+    exact hmain.symm
+  linarith
 
 private lemma sublevel_const_of_deriv_eq_zero_ge'
     {f : ℝ → ℝ} (hf : DifferentiableOn ℝ f Set.univ) {L : ℝ} (_hL : 0 < L) {a : ℝ}
