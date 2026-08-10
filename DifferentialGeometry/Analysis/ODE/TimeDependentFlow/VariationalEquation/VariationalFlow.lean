@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Cancellation
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Cancellation
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ManifoldIntegralFlow
 import Mathlib.Analysis.Calculus.Deriv.Mul
 open DifferentialGeometry.Geometry.Curvature
