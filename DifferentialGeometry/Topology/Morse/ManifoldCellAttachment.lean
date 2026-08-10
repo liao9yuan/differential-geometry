@@ -8042,6 +8042,50 @@ theorem morseRoundedExpandTime_interface {m k : ℕ} (hk : k ≤ m + 1) (c ε r 
   rw [hr2]
   ring
 
+theorem morseRoundedCollarMap_value {n : ℕ} (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (z : SublevelSpace f (c - ε)) :
+    f (curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z.1
+      (morseFarExpandTime c ε δ (f z.1))) =
+      f z.1 - morseFarExpandTime c ε δ (f z.1) := by
+  have hz : f z.1 ≤ c - ε := z.2
+  by_cases hdeep : f z.1 ≤ c - ε - δ
+  · have htime : morseFarExpandTime c ε δ (f z.1) = 0 := morseFarExpandTime_zero hdeep
+    rw [htime, curveAt_zero v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z.1]
+    ring
+  · have hnotdeep : c - ε - δ < f z.1 := lt_of_not_ge hdeep
+    have hy : f z.1 ∈ Set.Icc (c - ε - δ) (c + r ^ 2 / 2) := by
+      constructor
+      · exact le_of_lt hnotdeep
+      · nlinarith [hz, hr2]
+    have htime : morseFarExpandTime c ε δ (f z.1) =
+        -(f z.1 - c + ε + δ) * (2 * ε) / δ :=
+      morseFarExpandTime_eq hδ hnotdeep
+    rw [htime]
+    have ht : f z.1 - (c + r ^ 2 / 2) ≤ -(f z.1 - c + ε + δ) * (2 * ε) / δ := by
+      rw [hr2]
+      rw [le_div_iff₀ hδ]
+      nlinarith [hz]
+    have ht' : -(f z.1 - c + ε + δ) * (2 * ε) / δ ≤ f z.1 - (c - ε - δ) := by
+      rw [div_le_iff₀ hδ]
+      have hpos : 0 ≤ f z.1 - c + ε + δ := by linarith
+      nlinarith [hpos, hε]
+    exact morseCollarFlow_valueOnStrip (I := I) f c ε r δ hf v hv hsupp hdfOn hrate
+      (hy := hy) (t := -(f z.1 - c + ε + δ) * (2 * ε) / δ) ht ht'
+
 theorem morseFarExpandLevel_le {c ε δ t ρ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
     (ht : c - ε - δ ≤ t) (hρ : ρ ∈ Set.Icc (0 : ℝ) 1) :
     c - ε - δ ≤ t - ρ * morseFarExpandTime c ε δ t := by
@@ -8060,6 +8104,31 @@ theorem morseFarExpandLevel_le_top {c ε δ t ρ : ℝ} (hδ : 0 < δ) (hε : 0 
         have hρ2 : (2 * ε) * ρ ≤ 2 * ε := mul_le_of_le_one_right (by nlinarith [hε]) hρ.2
         nlinarith [hρ2])
   nlinarith [hρne, ht']
+
+theorem morseRoundedCollarMap_mem_upper {n : ℕ} (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (z : SublevelSpace f (c - ε)) :
+    f (curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z.1
+      (morseFarExpandTime c ε δ (f z.1))) ≤ c + r ^ 2 / 2 := by
+  have hval := morseRoundedCollarMap_value (n := n) c ε r δ hf hε hδ hr2 v hv hsupp hdfOn hrate z
+  have hle := morseFarExpandLevel_le_top (c := c) (ε := ε) (δ := δ) (t := f z.1) (ρ := 1)
+    hδ hε z.2 (by norm_num)
+  rw [hval]
+  rw [hr2]
+  simpa using hle
 
 noncomputable def morseFarExpandMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R₀ R₁ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
