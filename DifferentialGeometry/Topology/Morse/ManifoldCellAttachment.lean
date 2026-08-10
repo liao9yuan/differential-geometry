@@ -14061,6 +14061,298 @@ theorem contMDiff_morseRoundedFunction {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ
   exact contMDiffOn_univ.mp hwhole
 
 
+theorem modelSharpUnion_negPart_ge_of_norm_gt {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ : ℝ)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hR0 : 0 ≤ R₀) (hR : R₀ < R₁)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) {y : MorseModel (m + 1)}
+    (hy : y ∈ (modelAttachedRegion hk ε r δ : Set (MorseModel (m + 1))) ∪
+      sublevel (morseNormalForm hk c) (c - ε))
+    (hnorm : R₁ < morseNorm (m + 1) y) :
+    r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+  by_contra hnot
+  have hlt : ‖negPart hk y‖ ^ 2 < r ^ 2 + 2 * ε + δ := lt_of_not_ge hnot
+  rcases hy with hy | hy
+  · have hnormle : morseNorm (m + 1) y ^ 2 < R₀ ^ 2 := by
+      have h1 := modelAttached_norm_sq_lt_of_negPart_lt hk ε r δ hε hδ hy hlt
+      nlinarith [hbig, h1]
+    have hle : morseNorm (m + 1) y ≤ R₀ := by
+      have habs := sq_lt_sq.mp hnormle
+      have hnon : 0 ≤ morseNorm (m + 1) y := by
+        dsimp [morseNorm]
+        exact norm_nonneg _
+      rw [abs_of_nonneg hnon, abs_of_nonneg hR0] at habs
+      exact le_of_lt habs
+    exact (not_lt_of_ge (le_trans hle (le_of_lt hR))) hnorm
+  · have hnormle : morseNorm (m + 1) y ^ 2 < R₀ ^ 2 := by
+      have h1 := modelLowerSublevel_norm_sq_lt_of_negPart_lt hk c ε r δ hy hlt
+      have h2 : 2 * (r ^ 2 + 2 * ε + δ) - 2 * ε < R₀ ^ 2 := by nlinarith [hbig]
+      nlinarith [h1, h2]
+    have hle : morseNorm (m + 1) y ≤ R₀ := by
+      have habs := sq_lt_sq.mp hnormle
+      have hnon : 0 ≤ morseNorm (m + 1) y := by
+        dsimp [morseNorm]
+        exact norm_nonneg _
+      rw [abs_of_nonneg hnon, abs_of_nonneg hR0] at habs
+      exact le_of_lt habs
+    exact (not_lt_of_ge (le_trans hle (le_of_lt hR))) hnorm
+
+theorem modelAttached_lower_of_negPart_ge {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hδ : 0 < δ) {y : MorseModel (m + 1)} (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hneg : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    morseNormalForm hk c y ≤ c - ε := by
+  dsimp [modelAttachedRegion] at hy
+  have hcap : smoothCap ε r δ (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε :=
+    smoothCap_upper hδ hneg
+  rw [morseNormalForm_split]
+  nlinarith [hy, hcap]
+
+theorem sublevel_morseRoundedFunction_eq_roundedAttachment {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁ ^ 2)
+    (hR₁₂R : R₁ ≤ data.R) :
+    {x : M | morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c} =
+      morseRoundedAttachment hk c ε r δ data := by
+  classical
+  ext x
+  constructor
+  · intro hx
+    by_cases hc : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+    · have hc₀ := hc
+      rcases hc with ⟨y, hy, hxy⟩
+      have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hy hR₁₂R)
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv hsrc
+      have hval : CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ (data.χ.symm x) ≤ c := by
+        have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data hc₀
+        change morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c at hx
+        rwa [heq] at hx
+      have hmem : data.χ.symm x ∈
+          (modelAttachedRegion hk ε r δ : Set (MorseModel (m + 1))) ∪
+            {y : MorseModel (m + 1) | r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 ∧
+              morseNormalForm hk c y ≤ c - ε} := by
+        have hsub := CellAttachment.modelRoundedFunction_sublevel_eq_attached_union_lower
+          hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig
+        rw [← hsub]
+        exact hval
+      rcases hmem with hatt | hlow
+      · by_cases hneg : ‖negPart hk (data.χ.symm x)‖ < data.R / 2
+        · left
+          dsimp [morseRoundedAttachment]
+          refine ⟨data.χ.symm x, ⟨hatt, ?_⟩, ?_⟩
+          · simpa [hsymm] using hneg
+          · have htgt : x ∈ data.χ.target := by
+              rw [← hxy]
+              exact data.χ.map_source hsrc
+            exact data.χ.right_inv htgt
+        · right
+          have hneg' : data.R / 2 ≤ ‖negPart hk (data.χ.symm x)‖ := le_of_not_gt hneg
+          have hnegl : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk (data.χ.symm x)‖ ^ 2 := by
+            have hsq : (data.R / 2) ^ 2 ≤ ‖negPart hk (data.χ.symm x)‖ ^ 2 := by
+              have hnon : 0 ≤ ‖negPart hk (data.χ.symm x)‖ := norm_nonneg _
+              have hR2 : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+              exact sq_le_sq.mpr (by
+                rw [abs_of_nonneg hR2, abs_of_nonneg hnon]
+                exact hneg')
+            nlinarith [hRbig, hsq]
+          have hlow' : morseNormalForm hk c (data.χ.symm x) ≤ c - ε :=
+            modelAttached_lower_of_negPart_ge hk c ε r δ hδ hatt hnegl
+          constructor
+          · rw [hsymm, ← data.hnorm y (le_trans hy hR₁₂R), hxy] at hlow'
+            exact hlow'
+          · intro hmem'
+            rcases hmem'.1 with ⟨htgt, hnegp⟩
+            exact (not_lt_of_ge hneg') hnegp
+      · rcases hlow with ⟨hnegl, hlow'⟩
+        by_cases hneg : ‖negPart hk (data.χ.symm x)‖ < data.R / 2
+        · left
+          dsimp [morseRoundedAttachment]
+          refine ⟨data.χ.symm x, ⟨?_, ?_⟩, ?_⟩
+          · dsimp [modelAttachedRegion]
+            have hcap : smoothCap ε r δ (‖negPart hk (data.χ.symm x)‖ ^ 2) =
+                ‖negPart hk (data.χ.symm x)‖ ^ 2 - 2 * ε :=
+              smoothCap_upper hδ hnegl
+            rw [morseNormalForm_split] at hlow'
+            nlinarith [hlow', hcap]
+          · simpa [hsymm] using hneg
+          · have htgt : x ∈ data.χ.target := by
+              rw [← hxy]
+              exact data.χ.map_source hsrc
+            exact data.χ.right_inv htgt
+        · right
+          have hneg' : data.R / 2 ≤ ‖negPart hk (data.χ.symm x)‖ := le_of_not_gt hneg
+          constructor
+          · rw [hsymm, ← data.hnorm y (le_trans hy hR₁₂R), hxy] at hlow'
+            exact hlow'
+          · intro hmem'
+            rcases hmem'.1 with ⟨htgt, hnegp⟩
+            exact (not_lt_of_ge hneg') hnegp
+    · have hval : f x + ε ≤ c := by
+        have heq := morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hc
+        change morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c at hx
+        rwa [heq] at hx
+      have hlow : f x ≤ c - ε := by nlinarith
+      right
+      constructor
+      · exact hlow
+      · intro hmem'
+        rcases hmem' with ⟨hcore, hball⟩
+        rcases hcore with ⟨htgt, hnegp⟩
+        rcases hball with ⟨y, hy, hxy⟩
+        have hsrc : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+        have hsymm : data.χ.symm x = y := by
+          rw [← hxy]
+          exact data.χ.left_inv hsrc
+        have hlowy : morseNormalForm hk c y ≤ c - ε := by
+          rwa [← data.hnorm y (le_of_lt hy), hxy]
+        have hnormle : morseNorm (m + 1) y ≤ R₁ := by
+          have hpos : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+            rw [morseNormalForm_split] at hlowy
+            nlinarith
+          have hnorm2 : morseNorm (m + 1) y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+            calc
+              morseNorm (m + 1) y ^ 2 =
+                  morseNorm (m + 1) (recombine hk (negPart hk y) (posPart hk y)) ^ 2 := by
+                    rw [recombine_decompose hk y]
+              _ = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 :=
+                morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)
+          have hneg2 : ‖negPart hk y‖ ^ 2 < (data.R / 2) ^ 2 := by
+            rw [hsymm] at hnegp
+            have hnon : 0 ≤ ‖negPart hk y‖ := norm_nonneg _
+            have hR2 : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+            exact sq_lt_sq.mpr (by
+              simpa [abs_of_nonneg hnon, abs_of_nonneg hR2] using hnegp)
+          have hnormle2 : morseNorm (m + 1) y ^ 2 ≤ R₁ ^ 2 := by
+            nlinarith [hnorm2, hpos, hneg2, hR₁big, data.hRpos]
+          have habs := sq_le_sq.mp hnormle2
+          have hnon : 0 ≤ morseNorm (m + 1) y := by
+            dsimp [morseNorm]
+            exact norm_nonneg _
+          have hR₁0 : 0 ≤ R₁ := by nlinarith [hR₁big, data.hRpos]
+          rw [abs_of_nonneg hnon, abs_of_nonneg hR₁0] at habs
+          exact habs
+        exact hc ⟨y, hnormle, hxy⟩
+  · intro hx
+    rcases hx with hA | hB
+    · rcases hA with ⟨y, hy, hxy⟩
+      by_cases hle : morseNorm (m + 1) y ≤ R₁
+      · have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hle hR₁₂R)
+        have hsymm : data.χ.symm x = y := by
+          rw [← hxy]
+          exact data.χ.left_inv hsrc
+        have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data ⟨y, hle, hxy⟩
+        change morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c
+        rw [heq]
+        change data.χ.symm x ∈ {y : MorseModel (m + 1) |
+          CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ y ≤ c}
+        have hsub := CellAttachment.modelRoundedFunction_sublevel_eq_attached_union_lower
+          hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig
+        rw [hsub]
+        exact Or.inl (by simpa [hsymm] using hy.1)
+      · have hgt : R₁ < morseNorm (m + 1) y := lt_of_not_ge hle
+        have hnegl : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 :=
+          modelSharpUnion_negPart_ge_of_norm_gt hk c ε r δ R₀ R₁ (le_of_lt hε) hδ hR0 hR hbig
+            (Or.inl hy.1) hgt
+        have hlow : morseNormalForm hk c y ≤ c - ε :=
+          modelAttached_lower_of_negPart_ge hk c ε r δ hδ hy.1 hnegl
+        have hnorm : morseNorm (m + 1) y ≤ data.R := by
+          have hnormle : morseNorm (m + 1) y ^ 2 < data.R ^ 2 := by
+            have hpos : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+              rw [morseNormalForm_split] at hlow
+              nlinarith
+            have hnorm2 : morseNorm (m + 1) y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+              calc
+                morseNorm (m + 1) y ^ 2 =
+                    morseNorm (m + 1) (recombine hk (negPart hk y) (posPart hk y)) ^ 2 := by
+                      rw [recombine_decompose hk y]
+                _ = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 :=
+                  morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)
+            have hneglt : ‖negPart hk y‖ ^ 2 < (data.R / 2) ^ 2 := by
+              have hnon : 0 ≤ ‖negPart hk y‖ := norm_nonneg _
+              have hR2 : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+              exact sq_lt_sq.mpr (by
+                simpa [abs_of_nonneg hnon, abs_of_nonneg hR2] using hy.2)
+            nlinarith [hnorm2, hpos, hneglt, data.hRpos]
+          have habs := sq_lt_sq.mp hnormle
+          have hnon : 0 ≤ morseNorm (m + 1) y := by
+            dsimp [morseNorm]
+            exact norm_nonneg _
+          rw [abs_of_nonneg hnon, abs_of_nonneg (le_of_lt data.hRpos)] at habs
+          exact le_of_lt habs
+        have hsrc : y ∈ data.χ.source := data.hχsrc y hnorm
+        have hf : f x = morseNormalForm hk c y := by
+          rw [← hxy]
+          exact data.hnorm y hnorm
+        have hnot : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} := by
+          intro hx'
+          rcases hx' with ⟨z, hz, hxz⟩
+          have hzinj : z = y := data.χ.injOn (data.hχsrc z (le_trans hz hR₁₂R)) hsrc
+            (hxz.trans hxy.symm)
+          rw [hzinj] at hz
+          exact (not_lt_of_ge hz) hgt
+        have heq := morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hnot
+        change morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c
+        rw [heq, hf]
+        nlinarith
+    · rcases hB with ⟨hlow, hnot⟩
+      by_cases hc : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+      · have hc₀ := hc
+        rcases hc with ⟨y, hy, hxy⟩
+        have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hy hR₁₂R)
+        have hsymm : data.χ.symm x = y := by
+          rw [← hxy]
+          exact data.χ.left_inv hsrc
+        have hnorm : morseNorm (m + 1) y ≤ data.R := le_trans hy hR₁₂R
+        have hlow' : morseNormalForm hk c y ≤ c - ε := by
+          rwa [← data.hnorm y hnorm, hxy]
+        have hnegl : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+          by_contra hnotneg
+          have hlt : ‖negPart hk y‖ ^ 2 < r ^ 2 + 2 * ε + δ := lt_of_not_ge hnotneg
+          have hnegp : ‖negPart hk y‖ < data.R / 2 := by
+            have hlt2 : ‖negPart hk y‖ ^ 2 < (data.R / 2) ^ 2 := lt_of_lt_of_le hlt hRbig
+            have hnon : 0 ≤ ‖negPart hk y‖ := norm_nonneg _
+            have hR2 : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+            simpa [abs_of_nonneg hnon, abs_of_nonneg hR2] using (sq_lt_sq.mp hlt2)
+          have hcore : x ∈ morseChartCoreBallImage hk c data := by
+            dsimp [morseChartCoreBallImage]
+            constructor
+            · simpa [← hxy] using (data.χ.map_source hsrc)
+            · have hlinv : data.χ.symm x = y := by
+                rw [← hxy]
+                exact data.χ.left_inv hsrc
+              simpa [hlinv] using hnegp
+          have hball : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R} := by
+            refine ⟨y, ?_, hxy⟩
+            have hb := modelLowerSublevel_norm_sq_lt_of_negPart_lt hk c ε r δ hlow' hlt
+            have hnormle : morseNorm (m + 1) y ^ 2 < data.R ^ 2 := by
+              nlinarith [hb, hRbig, data.hRpos]
+            have habs := sq_lt_sq.mp hnormle
+            have hnon : 0 ≤ morseNorm (m + 1) y := by
+              dsimp [morseNorm]
+              exact norm_nonneg _
+            rw [abs_of_nonneg hnon, abs_of_nonneg (le_of_lt data.hRpos)] at habs
+            exact habs
+          exact hnot ⟨hcore, hball⟩
+        have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data hc₀
+        change morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c
+        rw [heq]
+        change data.χ.symm x ∈ {y : MorseModel (m + 1) |
+          CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ y ≤ c}
+        have hsub := CellAttachment.modelRoundedFunction_sublevel_eq_attached_union_lower
+          hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig
+        rw [hsub]
+        exact Or.inr ⟨by simpa [hsymm] using hnegl, by simpa [hsymm] using hlow'⟩
+      · have heq := morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hc
+        change morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c
+        rw [heq]
+        have hlow' : f x ≤ c - ε := hlow
+        nlinarith [hlow']
+
+
 end ManifoldCellAttachment
 
 end
