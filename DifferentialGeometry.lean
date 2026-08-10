@@ -2240,7 +2240,7 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.Smoothness.UniformChartFlowBridge
 import DifferentialGeometry.Geometry.Exponential.Smoothness.ZeroSectionConstancy
 import DifferentialGeometry.Geometry.Connection.ConnectionDifference
-import DifferentialGeometry.Geometry.Flow.DeTurckOperator
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckOperator
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Flow.DeTurckVectorFieldL2JetBoundEndomorphismCometricRaise
@@ -2705,7 +2705,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.InverseFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.CovariantDerivative
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.NearIdentity
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ScaledHarmonicGauge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Realized.Bianchi
@@ -2724,7 +2724,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialData
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInteriorTimeRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRealizedSolutionFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciPde
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRicciRHSSymmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DuhamelIntegralTimeDeriv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.FineGramBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.FineInvGram

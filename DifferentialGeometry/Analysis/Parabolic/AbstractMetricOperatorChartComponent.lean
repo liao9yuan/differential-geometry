@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.Basic
-import DifferentialGeometry.Geometry.Flow.DeTurckOperator
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckOperator
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.QuasilinearMetricShortTimeExistence
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Basic

@@ -9,7 +9,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDef
 import DifferentialGeometry.Geometry.Connection.ChartBridge.MetricInverse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerProducer
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckChartRegularityFromJoint
-import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRicciRHSSymmetric
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricContinuity
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab

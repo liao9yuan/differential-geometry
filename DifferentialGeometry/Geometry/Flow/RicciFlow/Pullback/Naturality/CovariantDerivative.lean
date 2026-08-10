@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.LeviCivita
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
 
 
 
