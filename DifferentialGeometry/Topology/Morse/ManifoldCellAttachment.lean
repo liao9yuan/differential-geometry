@@ -7703,10 +7703,12 @@ theorem morseFlowInChart {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
     (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v))
-    (hchartField : ∀ z : MorseModel (m + 1), ‖z‖ < data.R' →
-      v (data.χ z) = mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ z (modelFlowField hk z))
     (y : MorseModel (m + 1))
     {a b : ℝ} (ha : a < 0) (hb : 0 < b)
+    (hchartField : ∀ t ∈ Set.Ioo a b,
+      v (data.χ (modelFlow hk t y)) =
+        mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (modelFlow hk t y)
+          (modelFlowField hk (modelFlow hk t y)))
     (hstay : ∀ t ∈ Set.Ioo a b, ‖modelFlow hk t y‖ < data.R')
     (hpos : ∀ t ∈ Set.Ioo a b, posPart hk (modelFlow hk t y) ≠ 0) :
     ∀ t ∈ Set.Ioo a b,
@@ -7744,7 +7746,7 @@ theorem morseFlowInChart {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
       intro s
       rw [ContinuousLinearMap.comp_apply]
       simp only [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, map_smul]
-      rw [← hchartField (modelFlow hk t y) (hstay t ht)]
+      rw [← hchartField t ht]
     have hβder : HasMFDerivAt 𝓘(ℝ, ℝ) I β t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (v (β t))) := by
       dsimp [β]
@@ -14933,10 +14935,12 @@ theorem morseAttachedUnstretchInChart {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ 
     (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v))
-    (hchartField : ∀ z : MorseModel (m + 1), ‖z‖ < data.R' →
-      v (data.χ z) = mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ z (modelFlowField hk z))
-    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
     {y : MorseModel (m + 1)}
+    (hchartField : ∀ t ∈ Set.Ioo (-1) 1,
+      v (data.χ (modelFlow hk t y)) =
+        mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (modelFlow hk t y)
+          (modelFlowField hk (modelFlow hk t y)))
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
     (hstay : ∀ t ∈ Set.Ioo (-1) 1, ‖modelFlow hk t y‖ < data.R')
     (hpos : ∀ t ∈ Set.Ioo (-1) 1, posPart hk (modelFlow hk t y) ≠ 0)
     (htime : CellAttachment.modelAttachedUnstretchTime hk ε r δ y ∈ Set.Ioo (-1) 1) :
@@ -15883,6 +15887,29 @@ theorem morseRoundedDescentField_section_eqOn_chartSource {m k : ℕ} (hk : k �
     rw [hfield]
     exact cast_heq (by rw [show data.χ (data.χ.symm x) = x from data.χ.right_inv hxtgt])
       (morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x))
+
+theorem morseRoundedDescentField_eq_modelField_of_handleCore {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁)
+    {x : M} (hx : x ∈ data.χ.target)
+    (hpos : ε₁ ≤ ‖posPart hk (data.χ.symm x)‖)
+    (hR : morseNorm (m + 1) (data.χ.symm x) ≤ R₀) :
+    morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x =
+      Eq.mp (by rw [show data.χ (data.χ.symm x) = x from data.χ.right_inv hx])
+        (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (data.χ.symm x)
+          (CellAttachment.modelFlowField hk (data.χ.symm x))) := by
+  have hdef : morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x =
+      Eq.mp (by rw [show data.χ (data.χ.symm x) = x from data.χ.right_inv hx])
+        (morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x)) := by
+    dsimp [morseRoundedDescentField]
+    rw [dif_pos hx]
+  have hmodel : morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x) =
+      mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (data.χ.symm x)
+        (CellAttachment.modelFlowField hk (data.χ.symm x)) :=
+    morseRoundedModelField_eq_modelField hk c ε₀ ε₁ R₀ R₁ data V₀ hε₀ε₁ hR₀R₁ hpos hR
+  rw [hdef, hmodel]
 
 theorem contMDiff_morseRoundedDescentFieldSection {m k : ℕ} (hk : k ≤ m + 1)
     (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
