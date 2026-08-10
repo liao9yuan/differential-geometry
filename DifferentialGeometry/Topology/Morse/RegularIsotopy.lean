@@ -4,8 +4,8 @@ import DifferentialGeometry.Analysis.ODE.CompactSupportFlow
 
 namespace DifferentialGeometry.Topology.Morse
 
-open Manifold Set
-open scoped Manifold ContDiff Topology
+open Manifold Set Filter
+open scoped Manifold ContDiff Topology Filter
 
 noncomputable section
 
@@ -765,6 +765,192 @@ private theorem suspensionSection_contMDiff
     haveI : IsManifold 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞) ℝ := IsManifold.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
     exact contMDiff_equivTangentBundleProd_symm
   exact hsymm.comp hpair
+
+private lemma sublevel_const_of_deriv_eq_zero_ge'
+    {f : ℝ → ℝ} (hf : DifferentiableOn ℝ f Set.univ) {L : ℝ} (_hL : 0 < L) {a : ℝ}
+    (hfa : f a ∈ Set.Ioo (-L) L)
+    (hderiv : ∀ t : ℝ, f t ∈ Set.Icc (-L) L → deriv f t = 0)
+    {t₁ : ℝ} (ht₁ : a ≤ t₁) (hgt : f a < f t₁) : f t₁ = f a := by
+  let S : Set ℝ := {u : ℝ | u ∈ Set.Icc a t₁ ∧ f a < f u}
+  have hSne : S.Nonempty := ⟨t₁, ⟨⟨ht₁, le_rfl⟩, hgt⟩⟩
+  have hSbdd : BddBelow S := ⟨a, by intro u hu; exact hu.1.1⟩
+  let t₀ : ℝ := sInf S
+  have ht₀a : a ≤ t₀ := le_csInf hSne (by intro u hu; exact hu.1.1)
+  have ht₀t₁ : t₀ ≤ t₁ := csInf_le hSbdd ⟨⟨ht₁, le_rfl⟩, hgt⟩
+  have hcont : ContinuousAt f t₀ := (hf.continuousOn t₀ trivial).continuousAt Filter.univ_mem
+  have hf₀_ge : f a ≤ f t₀ := by
+    have hcl : t₀ ∈ closure S := csInf_mem_closure hSne hSbdd
+    have hright : ∀ᶠ u in nhdsWithin t₀ S, f a ≤ f u := by
+      rw [Filter.eventually_iff_exists_mem]
+      exact ⟨S ∩ Set.univ, inter_mem_nhdsWithin S Filter.univ_mem, by
+        intro u hu
+        exact le_of_lt (hu.1).2⟩
+    have htend : Tendsto f (nhdsWithin t₀ S) (nhds (f t₀)) := hcont.tendsto.mono_left nhdsWithin_le_nhds
+    haveI : (nhdsWithin t₀ S).NeBot := mem_closure_iff_nhdsWithin_neBot.mp hcl
+    exact ge_of_tendsto htend hright
+  have hsub : ∀ u : ℝ, a < u → u < t₀ → f u ≤ f a := by
+    intro u hu₁ hu₂
+    by_cases huS : u ∈ S
+    · have : t₀ ≤ u := csInf_le hSbdd huS
+      linarith
+    · have hucc : u ∈ Set.Icc a t₁ := ⟨le_of_lt hu₁, le_of_lt (lt_of_lt_of_le hu₂ ht₀t₁)⟩
+      exact le_of_not_gt (fun hfu => huS ⟨hucc, hfu⟩)
+  have hf₀_le : f t₀ ≤ f a := by
+    by_cases ht₀a' : a = t₀
+    · simp [ht₀a']
+    · have hlt₀ : a < t₀ := lt_of_le_of_ne ht₀a (by intro h; exact ht₀a' h)
+      have hleft : ∀ᶠ u in nhdsWithin t₀ (Set.Iio t₀), f u ≤ f a := by
+        have hU : {u : ℝ | a < u} ∈ nhds t₀ := isOpen_Ioi.mem_nhds hlt₀
+        rw [Filter.eventually_iff_exists_mem]
+        exact ⟨Set.Iio t₀ ∩ {u : ℝ | a < u}, inter_mem_nhdsWithin (Set.Iio t₀) hU, by
+          intro u hu
+          exact hsub u hu.2 hu.1⟩
+      have htend : Tendsto f (nhdsWithin t₀ (Set.Iio t₀)) (nhds (f t₀)) :=
+        hcont.tendsto.mono_left nhdsWithin_le_nhds
+      have ht₀cl : t₀ ∈ closure (Set.Iio t₀) := by
+        rw [closure_Iio]
+        change t₀ ≤ t₀
+        exact le_rfl
+      haveI : (nhdsWithin t₀ (Set.Iio t₀)).NeBot := mem_closure_iff_nhdsWithin_neBot.mp ht₀cl
+      exact le_of_tendsto htend hleft
+  have hf₀ : f t₀ = f a := le_antisymm hf₀_le hf₀_ge
+  have hinner : f t₀ ∈ Set.Ioo (-L) L := by
+    rw [hf₀]
+    exact hfa
+  have hloc : ∀ᶠ u in nhds t₀, f u = f t₀ := by
+    have hopen : {u : ℝ | f u ∈ Set.Ioo (-L) L} ∈ nhds t₀ :=
+      hcont.preimage_mem_nhds (isOpen_Ioo.mem_nhds hinner)
+    rcases Metric.mem_nhds_iff.mp hopen with ⟨δ, hδ, hball⟩
+    have hdOn : ∀ v ∈ Metric.ball t₀ δ, deriv f v = 0 := by
+      intro v hv
+      exact hderiv v ⟨le_of_lt (hball hv).1, le_of_lt (hball hv).2⟩
+    filter_upwards [Metric.ball_mem_nhds t₀ hδ] with u hu
+    exact (isOpen_Ioo.is_const_of_deriv_eq_zero isPreconnected_Ioo
+      (hf.mono (by intro v hv; trivial))
+      (by
+        intro v hv
+        exact hdOn v (by simpa [Real.ball_eq_Ioo] using hv))
+      (by simpa [Real.ball_eq_Ioo] using hu)
+      (by simpa [Real.ball_eq_Ioo] using (Metric.mem_ball_self (α := ℝ) (ε := δ) hδ : t₀ ∈ Metric.ball t₀ δ)))
+  rcases hloc.exists_mem with ⟨U, hU, hball⟩
+  rcases Metric.mem_nhds_iff.mp hU with ⟨δ, hδ, hballU⟩
+  have hSarb : ∃ u ∈ S, u < t₀ + δ := by
+    by_contra hnot
+    have hleall : ∀ u ∈ S, t₀ + δ ≤ u := by
+      intro u hu
+      exact le_of_not_gt (fun h => hnot ⟨u, hu, h⟩)
+    have : t₀ + δ ≤ sInf S := le_csInf hSne hleall
+    linarith
+  rcases hSarb with ⟨u, huS, hult⟩
+  have hδlt : u > t₀ := by
+    by_contra hnot'
+    have hu_le : u ≤ t₀ := le_of_not_gt hnot'
+    have ht₀_le : t₀ ≤ u := csInf_le hSbdd huS
+    have hu_eq : u = t₀ := le_antisymm hu_le ht₀_le
+    have hfua : f a < f u := huS.2
+    have hcontr : f a < f a := by
+      calc
+        f a = f t₀ := hf₀.symm
+        _ = f u := by rw [hu_eq]
+        _ > f a := hfua
+    exact (lt_irrefl (f a)) hcontr
+  have hu_near : u ∈ Metric.ball t₀ δ := by
+    rw [Metric.mem_ball, Real.dist_eq]
+    rw [abs_of_pos (sub_pos.mpr hδlt)]
+    linarith [hult]
+  have hfu : f u = f t₀ := hball u (hballU hu_near)
+  have hfua' : f a < f u := huS.2
+  have hcontr : f a < f a := by
+    calc
+      f a = f t₀ := hf₀.symm
+      _ = f u := hfu.symm
+      _ > f a := hfua'
+  exact False.elim (lt_irrefl (f a) hcontr)
+
+private lemma sublevel_const_of_deriv_eq_zero_ge
+    {f : ℝ → ℝ} (hf : DifferentiableOn ℝ f Set.univ) {L : ℝ} (hL : 0 < L) {a : ℝ}
+    (hfa : f a ∈ Set.Ioo (-L) L)
+    (hderiv : ∀ t : ℝ, f t ∈ Set.Icc (-L) L → deriv f t = 0) :
+    ∀ t : ℝ, a ≤ t → f t = f a := by
+  intro t₁ ht₁
+  by_cases heq : f t₁ = f a
+  · exact heq
+  · rcases lt_or_gt_of_ne heq with hlt | hgt
+    · let g : ℝ → ℝ := fun u => -f u
+      have hg : DifferentiableOn ℝ g Set.univ := by
+        intro u hu
+        exact hf u hu |>.neg
+      have hgfa : g a ∈ Set.Ioo (-L) L := by
+        change -f a ∈ Set.Ioo (-L) L
+        constructor
+        · exact neg_lt_neg hfa.2
+        · simpa using neg_lt_neg hfa.1
+      have hgderiv : ∀ u : ℝ, g u ∈ Set.Icc (-L) L → deriv g u = 0 := by
+        intro u hu
+        have h0 : deriv g u = -deriv f u := by
+          dsimp [g]
+          simpa only [neg_one_smul] using (deriv_const_smul (c := (-1 : ℝ)) (f := f) (x := u) (hf := (hf u trivial).differentiableAt Filter.univ_mem))
+        rw [h0]
+        have hu' : f u ∈ Set.Icc (-L) L := by
+          dsimp [g] at hu
+          constructor
+          · simpa using (neg_le_neg hu.2)
+          · simpa using (neg_le_neg hu.1)
+        rw [hderiv u hu']
+        simp
+      have hgmain := sublevel_const_of_deriv_eq_zero_ge' hg hL hgfa hgderiv ht₁ (by
+        dsimp [g]
+        exact neg_lt_neg hlt)
+      have hgval : g t₁ = -f t₁ := rfl
+      have hgvala : g a = -f a := rfl
+      rw [hgval, hgvala] at hgmain
+      exact neg_inj.mp hgmain
+    · exact sublevel_const_of_deriv_eq_zero_ge' hf hL hfa hderiv ht₁ hgt
+
+private lemma sublevel_const_of_deriv_eq_zero_on_interval
+    {f : ℝ → ℝ} (hf : DifferentiableOn ℝ f Set.univ) {L : ℝ} (hL : 0 < L) {a : ℝ}
+    (hfa : f a ∈ Set.Ioo (-L) L)
+    (hderiv : ∀ t : ℝ, f t ∈ Set.Icc (-L) L → deriv f t = 0) :
+    ∀ t : ℝ, f t = f a := by
+  intro t₁
+  by_cases ht₁a : a ≤ t₁
+  · exact sublevel_const_of_deriv_eq_zero_ge hf hL hfa hderiv t₁ ht₁a
+  · have hlt : t₁ < a := lt_of_not_ge ht₁a
+    let g : ℝ → ℝ := fun u => f (a - u)
+    have hg : DifferentiableOn ℝ g Set.univ := by
+      intro u hu
+      dsimp [g]
+      refine DifferentiableWithinAt.comp (𝕜 := ℝ) (E := ℝ) (F := ℝ) (G := ℝ)
+        (f := fun u : ℝ => a - u) (g := f) (s := Set.univ) (t := Set.univ) (x := u) ?_ ?_ ?_
+      · exact hf (a - u) trivial
+      · exact DifferentiableWithinAt.sub (f := fun _ : ℝ => a) (g := fun u : ℝ => u)
+          (differentiableWithinAt_const (c := a) (x := u)) differentiableWithinAt_id
+      · intro y hy; trivial
+    have hgfa : g 0 ∈ Set.Ioo (-L) L := by
+      simpa [g] using hfa
+    have hgderiv : ∀ u : ℝ, g u ∈ Set.Icc (-L) L → deriv g u = 0 := by
+      intro u hu
+      have h0 : deriv g u = -deriv f (a - u) := by
+        dsimp [g]
+        have hin : DifferentiableAt ℝ (fun u : ℝ => a - u) u := by fun_prop
+        have hout : DifferentiableAt ℝ f (a - u) :=
+          (hf (a - u) trivial).differentiableAt Filter.univ_mem
+        change deriv (f ∘ (fun u : ℝ => a - u)) u = -deriv f (a - u)
+        rw [deriv_comp u hout hin]
+        · have hd : deriv (fun u : ℝ => a - u) u = -1 := by
+            simpa [deriv_id] using (deriv_const_sub (c := a) (f := fun u : ℝ => u) (x := u))
+          rw [hd]
+          simp
+      rw [h0]
+      rw [hderiv (a - u) hu]
+      simp
+    have hle : 0 ≤ a - t₁ := by linarith
+    have hmain := sublevel_const_of_deriv_eq_zero_ge hg hL hgfa hgderiv (a - t₁) hle
+    have hgval : g (a - t₁) = f t₁ := by
+      dsimp [g]
+      ring_nf
+    rw [hgval] at hmain
+    simpa [g] using hmain
 
 theorem localUnitSpeedFamilyVectorField_at_noncritical
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
