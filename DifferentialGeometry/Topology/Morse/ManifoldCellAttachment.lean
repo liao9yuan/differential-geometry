@@ -8024,6 +8024,24 @@ theorem morseFarExpandTime_ge {c ε δ t : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
       nlinarith [ht']
     exact hgoal
 
+theorem morseFarExpandTime_top {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε) :
+    morseFarExpandTime c ε δ (c - ε) = -(2 * ε) := by
+  rw [morseFarExpandTime_eq hδ (by linarith : c - ε - δ < c - ε)]
+  field_simp [hδ.ne']
+  ring
+
+theorem morseRoundedExpandTime_interface {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
+    {y : MorseModel (m + 1)}
+    (ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2)
+    (hp : ‖posPart hk y‖ ^ 2 = ‖negPart hk y‖ ^ 2 - 2 * ε) :
+    CellAttachment.modelAttachedUnstretchTime hk ε r δ y =
+      morseFarExpandTime c ε δ (c - ε) := by
+  rw [CellAttachment.modelAttachedUnstretchTime_eq_boundary hk ε r δ hδ ht hp,
+    morseFarExpandTime_top hδ hε]
+  rw [hr2]
+  ring
+
 theorem morseFarExpandLevel_le {c ε δ t ρ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
     (ht : c - ε - δ ≤ t) (hρ : ρ ∈ Set.Icc (0 : ℝ) 1) :
     c - ε - δ ≤ t - ρ * morseFarExpandTime c ε δ t := by
