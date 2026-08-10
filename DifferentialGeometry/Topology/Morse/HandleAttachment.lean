@@ -7,8 +7,10 @@ namespace DifferentialGeometry.Topology.Morse.CellAttachment
 
 open Set
 open Filter
+open Manifold
 
 open scoped BigOperators Topology ContDiff
+open scoped Manifold
 
 noncomputable section
 
@@ -2660,5 +2662,33 @@ theorem contDiffOn_modelFlowField_of_posPart_ne_zero {n k : ℕ} (hk : k ≤ n) 
         contDiffAt_const
       exact hzero.prodMk hsmul)
   exact hmain.contDiffWithinAt
+
+theorem contMDiffOn_modelFlowField_section {n k : ℕ} (hk : k ≤ n) :
+    ContMDiffOn 𝓘(ℝ, MorseModel n) 𝓘(ℝ, MorseModel n).tangent (⊤ : ℕ∞)
+      (fun y : MorseModel n => (⟨y, modelFlowField hk y⟩ : TangentBundle 𝓘(ℝ, MorseModel n) (MorseModel n)))
+      {y : MorseModel n | posPart hk y ≠ 0} := by
+  intro y₀ hy₀
+  have hsecAt : ContMDiffAt 𝓘(ℝ, MorseModel n) 𝓘(ℝ, MorseModel n).tangent (⊤ : ℕ∞)
+      (fun y : MorseModel n => (⟨y, modelFlowField hk y⟩ : TangentBundle 𝓘(ℝ, MorseModel n) (MorseModel n))) y₀ := by
+    rw [Bundle.Trivialization.contMDiffAt_section_iff
+      (e := trivializationAt (MorseModel n) (TangentSpace 𝓘(ℝ, MorseModel n)) y₀)
+      (by
+        rw [TangentBundle.trivializationAt_baseSet]
+        exact mem_chart_source (H := MorseModel n) (M := MorseModel n) y₀)]
+    have hfib : (fun y : MorseModel n => (trivializationAt (MorseModel n) (TangentSpace 𝓘(ℝ, MorseModel n)) y₀
+        (⟨y, modelFlowField hk y⟩ : TangentBundle 𝓘(ℝ, MorseModel n) (MorseModel n))).2) =ᶠ[nhds y₀]
+        (fun y : MorseModel n => modelFlowField hk y) := by
+      refine Filter.Eventually.of_forall (fun y => ?_)
+      simp
+    have hwOn : ContMDiffOn 𝓘(ℝ, MorseModel n) 𝓘(ℝ, MorseModel n) (⊤ : ℕ∞)
+        (modelFlowField hk) {y : MorseModel n | posPart hk y ≠ 0} := by
+      exact contMDiffOn_iff_contDiffOn.mpr (contDiffOn_modelFlowField_of_posPart_ne_zero hk)
+    have hwAt : ContMDiffAt 𝓘(ℝ, MorseModel n) 𝓘(ℝ, MorseModel n) (⊤ : ℕ∞)
+        (modelFlowField hk) y₀ := by
+      have hopen : IsOpen {y : MorseModel n | posPart hk y ≠ 0} :=
+        isOpen_ne.preimage (continuous_posPart hk)
+      exact hwOn.contMDiffAt (hopen.mem_nhds hy₀)
+    exact hwAt.congr_of_eventuallyEq hfib
+  exact hsecAt.contMDiffWithinAt
 
 end DifferentialGeometry.Topology.Morse.CellAttachment
