@@ -14951,6 +14951,124 @@ theorem morseAttachedUnstretchInChart {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ 
   rw [hflow]
   rw [← CellAttachment.modelAttachedUnstretch_eq_modelFlow hk ε r δ hδ0 hδr y]
 
+theorem mfderiv_descent_chartModelField {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hRltRp : data.R < data.R')
+    {y : MorseModel (m + 1)} (hy : morseNorm (m + 1) y < data.R)
+    (hpos : ‖posPart hk y‖ ≠ 0) :
+    (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y)
+      (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y))) = -1 := by
+  let F : MorseModel (m + 1) → ℝ := CellAttachment.morseNormalForm hk c
+  have hsrc : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+  have hcontNorm : Continuous (fun w : MorseModel (m + 1) => morseNorm (m + 1) w) := by
+    dsimp [morseNorm]
+    exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
+  have hopen : IsOpen (data.χ '' {w : MorseModel (m + 1) | morseNorm (m + 1) w < data.R}) := by
+    exact data.χ.isOpen_image_of_subset_source (isOpen_lt hcontNorm continuous_const) (by
+      intro w hw
+      exact data.hχsrc w (le_of_lt hw))
+  have hmem : data.χ y ∈ data.χ '' {w : MorseModel (m + 1) | morseNorm (m + 1) w < data.R} :=
+    ⟨y, hy, rfl⟩
+  have hloc : Filter.Eventually (fun x : M => f x = F (data.χ.symm x)) (nhds (data.χ y)) := by
+    refine Filter.eventually_of_mem (hopen.mem_nhds hmem) ?_
+    intro x hx
+    rcases hx with ⟨w, hw, hxw⟩
+    have hsrcw : w ∈ data.χ.source := data.hχsrc w (le_of_lt hw)
+    have hval : f (data.χ w) = CellAttachment.morseNormalForm hk c w := data.hnorm w (le_of_lt hw)
+    have hsymm : data.χ.symm (data.χ w) = w := data.χ.left_inv hsrcw
+    rw [← hxw]
+    rw [hval]
+    rw [hsymm]
+  have hge : mfderiv I 𝓘(ℝ, ℝ) f (data.χ y) =
+      mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F (data.χ.symm x)) (data.χ y) :=
+    Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)) (x := data.χ y)
+      (f₁ := f) (f := fun x : M => F (data.χ.symm x)) hloc
+  have hyR' : morseNorm (m + 1) y < data.R' := lt_trans hy hRltRp
+  have hχinv : MDifferentiableAt I 𝓘(ℝ, MorseModel (m + 1)) data.χ.symm (data.χ y) := by
+    have hball : y ∈ Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+      rw [Metric.mem_ball, dist_zero_right]
+      exact lt_of_le_of_lt (morseNorm_piNorm_le y) hyR'
+    have hmem' : data.χ y ∈ data.χ '' (data.χ.source ∩ Metric.ball (0 : MorseModel (m + 1)) data.R') :=
+      ⟨y, ⟨hsrc, hball⟩, rfl⟩
+    have hopen' : IsOpen (data.χ '' (data.χ.source ∩ Metric.ball (0 : MorseModel (m + 1)) data.R')) := by
+      exact data.χ.isOpen_image_of_subset_source (data.χ.open_source.inter Metric.isOpen_ball) Set.inter_subset_left
+    have hsub' : data.χ '' (data.χ.source ∩ Metric.ball (0 : MorseModel (m + 1)) data.R') ⊆
+        data.χ '' Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+      intro z hz
+      rcases hz with ⟨w, hw, hzw⟩
+      exact ⟨w, hw.2, hzw⟩
+    have hmd : ContMDiffAt I 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞) data.χ.symm
+        (data.χ y) :=
+      (data.hχsymmOn.mono hsub' (data.χ y) hmem').contMDiffAt (hopen'.mem_nhds hmem')
+    exact hmd.mdifferentiableAt (by simp)
+  have hχ : MDifferentiableAt 𝓘(ℝ, MorseModel (m + 1)) I data.χ y := by
+    have hmd : ContMDiffAt 𝓘(ℝ, MorseModel (m + 1)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) data.χ y :=
+      (data.hχon y (by
+        rw [Metric.mem_ball, dist_zero_right]
+        exact lt_of_le_of_lt (morseNorm_piNorm_le y) hyR')).contMDiffAt
+        (Metric.isOpen_ball.mem_nhds (by
+          rw [Metric.mem_ball, dist_zero_right]
+          exact lt_of_le_of_lt (morseNorm_piNorm_le y) hyR'))
+    exact hmd.mdifferentiableAt (by simp)
+  have hF : MDifferentiableAt 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, ℝ) F y := by
+    exact (contMDiff_iff_contDiff.mpr (CellAttachment.contDiff_morseNormalForm hk c)).contMDiffAt.mdifferentiableAt (by simp)
+  have hχy' : data.χ.symm (data.χ y) = y := data.χ.left_inv hsrc
+  have hcomp0 := mfderiv_comp (x := data.χ y) (f := data.χ.symm) (g := F)
+    (hf := hχinv) (hg := by simpa [hχy'] using hF)
+  have hcomp : mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F (data.χ.symm x)) (data.χ y) =
+      (fderiv ℝ (CellAttachment.morseNormalForm hk c) y).comp
+        (mfderiv I 𝓘(ℝ, MorseModel (m + 1)) data.χ.symm (data.χ y)) := by
+    simpa [Function.comp_def, hχy'] using hcomp0
+  have hcomp2 := mfderiv_comp (x := y) (f := data.χ) (g := fun z : M => data.χ.symm z)
+    (hf := hχ) (hg := by
+      have hg' : MDifferentiableAt I 𝓘(ℝ, MorseModel (m + 1)) data.χ.symm (data.χ y) := hχinv
+      simpa [hχy'] using hg')
+  have hid0 : mfderiv 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1))
+      (fun z : MorseModel (m + 1) => data.χ.symm (data.χ z)) y =
+      mfderiv 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1)) (fun z : MorseModel (m + 1) => z) y :=
+    Filter.EventuallyEq.mfderiv_eq (I := 𝓘(ℝ, MorseModel (m + 1))) (I' := 𝓘(ℝ, MorseModel (m + 1)))
+      (x := y) (f₁ := fun z : MorseModel (m + 1) => data.χ.symm (data.χ z))
+      (f := fun z : MorseModel (m + 1) => z) (by
+        have hnh : {z : MorseModel (m + 1) | morseNorm (m + 1) z < data.R} ∈ nhds y :=
+          (isOpen_lt hcontNorm continuous_const).mem_nhds hy
+        refine Filter.mem_of_superset hnh ?_
+        intro z hz
+        exact data.χ.left_inv (data.hχsrc z (le_of_lt hz)))
+  have hid' : mfderiv 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1))
+      (fun z : MorseModel (m + 1) => data.χ.symm (data.χ z)) y =
+      ContinuousLinearMap.id ℝ (MorseModel (m + 1)) := by
+    rw [hid0]
+    exact mfderiv_id
+  have hid : (mfderiv I 𝓘(ℝ, MorseModel (m + 1)) data.χ.symm (data.χ y)).comp
+      (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y) =
+      ContinuousLinearMap.id ℝ (MorseModel (m + 1)) := hcomp2.symm.trans hid'
+  have hmain : (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y)
+      (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y))) =
+      (fderiv ℝ (CellAttachment.morseNormalForm hk c) y (CellAttachment.modelFlowField hk y)) := by
+    rw [hge]
+    rw [hcomp]
+    change (NormedSpace.fromTangentSpace (F y)) (((fderiv ℝ (CellAttachment.morseNormalForm hk c) y).comp
+      (mfderiv I 𝓘(ℝ, MorseModel (m + 1)) data.χ.symm (data.χ y)))
+      (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y))) =
+      fderiv ℝ (CellAttachment.morseNormalForm hk c) y (CellAttachment.modelFlowField hk y)
+    rw [ContinuousLinearMap.comp_apply]
+    have hinner : (mfderiv I 𝓘(ℝ, MorseModel (m + 1)) data.χ.symm (data.χ y))
+        (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)) =
+        CellAttachment.modelFlowField hk y := by
+      have hv := congrArg (fun L : (MorseModel (m + 1) →L[ℝ] MorseModel (m + 1)) =>
+        L (CellAttachment.modelFlowField hk y)) hid
+      simpa using hv
+    conv_lhs =>
+      arg 2
+      arg 2
+      erw [hinner]
+    rfl
+  rw [hmain]
+  exact CellAttachment.fderiv_morseNormalForm_modelFlowField hk c hpos
+
 end ManifoldCellAttachment
 
 end
