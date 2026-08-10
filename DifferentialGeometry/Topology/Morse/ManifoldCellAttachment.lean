@@ -15555,6 +15555,60 @@ theorem chartModelFieldSection_fiber_eventually {m k : ℕ} (hk : k ≤ m + 1) (
   rw [hfderiv]
   rfl
 
+theorem contDiffAt_chartComposedFiber {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (y₀ : MorseModel (m + 1))
+    (hy₀ : y₀ ∈ Metric.ball (0 : MorseModel (m + 1)) data.R')
+    (hpos : posPart hk y₀ ≠ 0) :
+    ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        fderiv ℝ (extChartAt I (data.χ y₀) ∘ data.χ) y (CellAttachment.modelFlowField hk y)) y₀ := by
+  let g : MorseModel (m + 1) → MorseModel (m + 1) := extChartAt I (data.χ y₀) ∘ data.χ
+  have hgAt : ContDiffAt ℝ (⊤ : ℕ∞) g y₀ := by
+    have hχAt : ContMDiffAt 𝓘(ℝ, MorseModel (m + 1)) I (⊤ : ℕ∞) data.χ y₀ :=
+      (data.hχon y₀ hy₀).contMDiffAt (Metric.isOpen_ball.mem_nhds hy₀)
+    have hExtAt : ContMDiffAt I 𝓘(ℝ, MorseModel (m + 1)) (⊤ : ℕ∞)
+        (extChartAt I (data.χ y₀)) (data.χ y₀) :=
+      (contMDiffAt_extChartAt (I := I) (x := data.χ y₀) (n := (⊤ : ℕ∞)))
+    have hcompAt : ContMDiffAt 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1)) (⊤ : ℕ∞)
+        (extChartAt I (data.χ y₀) ∘ data.χ) y₀ := hExtAt.comp y₀ hχAt
+    have hcompAt' : ContMDiffAt 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1)) (⊤ : ℕ∞) g y₀ := by
+      simpa [g, Function.comp_def] using hcompAt
+    exact (contMDiffAt_iff_contDiffAt).mp hcompAt'
+  have hfderAt : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => fderiv ℝ g y) y₀ := by
+    have hproj : ContDiffAt ℝ (⊤ : ℕ∞)
+        (Prod.snd : MorseModel (m + 1) × MorseModel (m + 1) → MorseModel (m + 1)) (y₀, y₀) := by
+      simpa using (contDiffAt_snd : ContDiffAt ℝ (⊤ : ℕ∞)
+        (Prod.snd : MorseModel (m + 1) × MorseModel (m + 1) → MorseModel (m + 1)) (y₀, y₀))
+    have hgAt' : ContDiffAt ℝ (⊤ : ℕ∞)
+        (fun p : MorseModel (m + 1) × MorseModel (m + 1) => g p.2) (y₀, y₀) := by
+      change ContDiffAt ℝ (⊤ : ℕ∞) (g ∘ Prod.snd) (y₀, y₀)
+      exact hgAt.comp (x := (y₀, y₀)) (hf := hproj)
+    have hmain := ContDiffAt.fderiv (𝕜 := ℝ) (E := MorseModel (m + 1)) (F := MorseModel (m + 1))
+      (G := MorseModel (m + 1))
+      (f := fun _ : MorseModel (m + 1) => g)
+      (g := fun y : MorseModel (m + 1) => y)
+      (x₀ := y₀)
+      (hf := by
+        simpa [Function.uncurry] using hgAt')
+      (hg := (contDiffAt_id : ContDiffAt ℝ (⊤ : ℕ∞)
+        (fun y : MorseModel (m + 1) => y) y₀))
+      (hmn := by simp)
+    simpa using hmain
+  have hmodelAt : ContDiffAt ℝ (⊤ : ℕ∞) (CellAttachment.modelFlowField hk) y₀ := by
+    have hwOn : ContDiffOn ℝ (⊤ : ℕ∞) (CellAttachment.modelFlowField hk)
+        {y : MorseModel (m + 1) | posPart hk y ≠ 0} :=
+      contDiffOn_modelFlowField_of_posPart_ne_zero hk
+    have hopen : IsOpen {y : MorseModel (m + 1) | posPart hk y ≠ 0} :=
+      isOpen_ne.preimage (continuous_posPart hk)
+    exact hwOn.contDiffAt (hopen.mem_nhds hpos)
+  exact (hfderAt.clm_apply hmodelAt).congr_of_eventuallyEq (by
+    refine Filter.Eventually.of_forall (fun y => ?_)
+    rfl)
+
 end ManifoldCellAttachment
 
 end
