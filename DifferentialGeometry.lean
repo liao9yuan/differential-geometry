@@ -2675,7 +2675,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.NoncollapseOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.NoncollapseSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.ScaleTransfer
-import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Cancellation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationForm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
-import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.PrincipalSymbol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
