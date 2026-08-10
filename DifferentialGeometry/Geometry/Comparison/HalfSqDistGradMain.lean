@@ -360,6 +360,54 @@ theorem grad_halfSqDist
   intro pt hsrc hne hsmall hdiff
   exact gradientFun_eq_of_flat (I := I) g (hflat hsrc hne hsmall hdiff)
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+theorem grad_halfSqDist_of_complete_metric
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (q : M) :
+    letI : IsManifold I 1 M :=
+      IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+    letI : TopologicalSpace.MetrizableSpace M :=
+      Manifold.metrizableSpace I M
+    letI : T3Space M := inferInstance
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+    letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+    letI : PseudoEMetricSpace M :=
+      (EMetricSpace.ofRiemannianMetric I M).toPseudoEMetricSpace
+    letI : CompleteSpace M := hcomplete.complete
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {pt : M},
+      pt ∈ (NormalCoordinates.normalChartAt (I := I) g q).source → pt ≠ q →
+      Real.sqrt (g.inner q (NormalCoordinates.normalChartAt (I := I) g q pt : E)
+        (NormalCoordinates.normalChartAt (I := I) g q pt : E)) < ρ →
+      MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q →
+      gradientFun (I := I) g (CenterOfMass.halfSqDist pt) q =
+        -(show TangentSpace I q from NormalCoordinates.normalChartAt (I := I) g q pt) := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M :=
+    (EMetricSpace.ofRiemannianMetric I M).toPseudoEMetricSpace
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  exact grad_halfSqDist (I := I) (M := M) g hEnorm q
+
 end Riemannian
 end Geometry
 end DifferentialGeometry
