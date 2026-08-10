@@ -8516,6 +8516,121 @@ private lemma le_of_forall_pos_lt_add
       exact hd
     nlinarith
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
+private lemma riemannianEDist_congr_enorm
+    (x y : M)
+    (A B : ∀ x : M, ENorm (TangentSpace I x))
+    (h : ∀ (x : M) (v : TangentSpace I x),
+      @enorm (TangentSpace I x) (A x) v = @enorm (TangentSpace I x) (B x) v) :
+    @riemannianEDist E _ _ H _ I M _ _ A x y =
+      @riemannianEDist E _ _ H _ I M _ _ B x y := by
+  rw [riemannianEDist_def, riemannianEDist_def]
+  apply iInf_congr
+  intro γ
+  apply iInf_congr
+  intro hγ
+  apply lintegral_congr
+  intro s
+  exact h (γ s) (mfderiv% γ s 1)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] in
+private lemma scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci_of_enorm
+    [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+    [CompactSpace M] [ConnectedSpace M]
+    [VectorBundle ℝ E (TangentSpace I : M → Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
+    [PseudoEMetricSpace M] [CompleteSpace M]
+    [NeZero (Module.finrank ℝ E)]
+    (hENorm : ∀ x : M, ENorm (TangentSpace I x))
+    (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
+    (hEnorm : ∀ (x : M) (v : TangentSpace I x),
+      @enorm (TangentSpace I x) (hENorm x) v =
+        ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hedist : ∀ (x y : M), edist x y =
+      @riemannianEDist E _ _ H _ I M _ _ hENorm x y)
+    (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
+    (hpos0 : ∀ x : M, 0 ≤ u₀.toFun x)
+    {a b : ℝ} (ha : 0 < a) (hab : a < b) (x y : M) :
+    scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) a x ≤
+      (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+        Real.exp ((edist x y).toReal ^ 2 / (4 * (b - a))) *
+        scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) b y := by
+  classical
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) := ⟨g.toRiemannianMetric⟩
+  letI RBNAG : ∀ x : M, NormedAddCommGroup (TangentSpace I x) :=
+    fun x => Bundle.instNormedAddCommGroupOfRiemannianBundleOfIsTopologicalAddGroupOfContinuousConstSMulReal
+      (E := fun x : M => TangentSpace I x) x
+  letI : ∀ x : M, InnerProductSpace ℝ (TangentSpace I x) :=
+    fun x => Bundle.instInnerProductSpaceReal (E := fun x : M => TangentSpace I x) x
+  letI : ∀ x : M, NormedSpace ℝ (TangentSpace I x) := fun x => inferInstance
+  have hcrb : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) := by
+    refine ⟨⟨fun x => g.inner x, g.contMDiff.continuous, ?eq⟩⟩
+    intro x v w
+    rfl
+  haveI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) := hcrb
+  let RBENorm : ∀ x : M, ENorm (TangentSpace I x) := fun x =>
+    (@SeminormedAddGroup.toContinuousENorm (TangentSpace I x)
+      (@SeminormedAddCommGroup.toSeminormedAddGroup (TangentSpace I x)
+        (@NormedAddCommGroup.toSeminormedAddCommGroup (TangentSpace I x) (RBNAG x)))).toENorm
+  have hEnormRB : ∀ (x : M) (v : TangentSpace I x),
+      @enorm (TangentSpace I x) (RBENorm x) v =
+        ENNReal.ofReal (Real.sqrt (g.inner x v v)) := by
+    intro x v
+    have h₁ : @enorm (TangentSpace I x) (RBENorm x) v = ENNReal.ofReal ‖v‖ := by
+      change (‖v‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖v‖
+      rw [ENNReal.ofReal_eq_coe_nnreal (norm_nonneg v)]
+      rfl
+    rw [h₁]
+    rw [norm_eq_sqrt_real_inner]
+    congr 1
+  have hnorm_eq : ∀ (x : M) (v : TangentSpace I x),
+      @enorm (TangentSpace I x) (hENorm x) v =
+        @enorm (TangentSpace I x) (RBENorm x) v := by
+    intro x v
+    rw [hEnorm x v, hEnormRB x v]
+  haveI : IsRiemannianManifold I M := ⟨fun x y =>
+    (hedist x y).trans (riemannianEDist_congr_enorm x y hENorm RBENorm hnorm_eq)⟩
+  have hdistRB : @riemannianEDist E _ _ H _ I M _ _ RBENorm x y = edist x y :=
+    ((inferInstance : IsRiemannianManifold I M).out x y).symm
+  have hb1 : 0 ≤ b + 1 := by linarith
+  have hb1pos : 0 < b + 1 := by linarith
+  let C : ℝ := (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
+    Real.exp ((edist x y).toReal ^ 2 / (4 * (b - a)))
+  have hle_all : ∀ δ : ℝ, 0 < δ →
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) a x + δ ≤
+        C * (scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) b y + δ) := by
+    intro δ hδ
+    let uδ : ℝ → M → ℝ :=
+      scalarHeatFlow g (smoothToLp (I := I) (M := M) g (u₀ + scalarConst g δ))
+    have hposδ0 : ∀ y : M, 0 < (u₀ + scalarConst g δ).toFun y := by
+      intro y
+      simp [scalarConst]
+      linarith [hpos0 y, hδ]
+    have huδ := scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1
+    have huδClosed := scalarHeatFlow_smoothInitial_contMDiffOn_closed (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1pos
+    have hposδ := scalarHeatFlow_smoothInitial_strict_pos (I := I) (M := M) g
+      (u₀ + scalarConst g δ) hb1 hposδ0
+    have hharnack := DifferentialGeometry.Analysis.Parabolic.Harnack.heat_solution_harnack_of_nonnegative_ricci_on
+      (I := I) (M := M) g hEnormRB hRic (RealTimeInterval.closed 0 (b + 1) hb1) uδ
+      huδ huδClosed
+      (fun t ht x => hposδ t ht x)
+      ha hab
+      (fun t ht => ⟨lt_of_lt_of_le ha ht.1, lt_of_le_of_lt ht.2 (by linarith)⟩)
+      (fun t ht => ⟨ht.1, le_trans ht.2 (by linarith)⟩)
+      (fun t ht => ⟨ht.1, lt_trans ht.2 (by linarith)⟩) x y
+    have hshift_a := scalarHeatFlow_smoothInitial_shift_const (I := I) (M := M) g u₀ hb1 δ
+      (Set.mem_Icc.mpr ⟨le_of_lt ha, by linarith⟩) x
+    have hshift_b := scalarHeatFlow_smoothInitial_shift_const (I := I) (M := M) g u₀ hb1 δ
+      (Set.mem_Icc.mpr ⟨le_trans ha.le (le_of_lt hab), by linarith⟩) y
+    rw [← hshift_a, ← hshift_b]
+    simpa [uδ, hdistRB] using hharnack
+  simpa [C] using le_of_forall_pos_lt_add hle_all
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
     [CompactSpace M]
@@ -8565,21 +8680,18 @@ theorem scalarHeatFlow_smoothInitial_one_point_harnack_of_nonnegative_ricci
     simpa [uδ] using hharnack
   simpa [C] using le_of_forall_pos_lt_add hle_all
 
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci
     [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
     [CompactSpace M] [ConnectedSpace M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M → Type _) I]
-    [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [PseudoEMetricSpace M] [CompleteSpace M]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
       ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hedist : ∀ (x y : M), edist x y = riemannianEDist I x y)
     (hRic : ∀ x v, 0 ≤ ricciTensor (I := I) g x v v)
     (hpos0 : ∀ x : M, 0 ≤ u₀.toFun x)
     {a b : ℝ} (ha : 0 < a) (hab : a < b) (x y : M) :
@@ -8588,41 +8700,25 @@ theorem scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci
         Real.exp ((riemannianEDist I x y).toReal ^ 2 / (4 * (b - a))) *
         scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) b y := by
   classical
-  have hb1 : 0 ≤ b + 1 := by linarith
-  have hb1pos : 0 < b + 1 := by linarith
-  let C : ℝ := (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
-    Real.exp ((riemannianEDist I x y).toReal ^ 2 / (4 * (b - a)))
-  have hle_all : ∀ δ : ℝ, 0 < δ →
-      scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) a x + δ ≤
-        C * (scalarHeatFlow g (smoothToLp (I := I) (M := M) g u₀) b y + δ) := by
-    intro δ hδ
-    let uδ : ℝ → M → ℝ :=
-      scalarHeatFlow g (smoothToLp (I := I) (M := M) g (u₀ + scalarConst g δ))
-    have hposδ0 : ∀ y : M, 0 < (u₀ + scalarConst g δ).toFun y := by
-      intro y
-      simp [scalarConst]
-      linarith [hpos0 y, hδ]
-    have huδ := scalarHeatFlow_isHeatOnStationary_smoothInitial (I := I) (M := M) g
-      (u₀ + scalarConst g δ) hb1
-    have huδClosed := scalarHeatFlow_smoothInitial_contMDiffOn_closed (I := I) (M := M) g
-      (u₀ + scalarConst g δ) hb1pos
-    have hposδ := scalarHeatFlow_smoothInitial_strict_pos (I := I) (M := M) g
-      (u₀ + scalarConst g δ) hb1 hposδ0
-    have hharnack := DifferentialGeometry.Analysis.Parabolic.Harnack.heat_solution_harnack_of_nonnegative_ricci_on
-      (I := I) (M := M) g hEnorm hRic (RealTimeInterval.closed 0 (b + 1) hb1) uδ
-      huδ huδClosed
-      (fun t ht x => hposδ t ht x)
-      ha hab
-      (fun t ht => ⟨lt_of_lt_of_le ha ht.1, lt_of_le_of_lt ht.2 (by linarith)⟩)
-      (fun t ht => ⟨ht.1, le_trans ht.2 (by linarith)⟩)
-      (fun t ht => ⟨ht.1, lt_trans ht.2 (by linarith)⟩) x y
-    have hshift_a := scalarHeatFlow_smoothInitial_shift_const (I := I) (M := M) g u₀ hb1 δ
-      (Set.mem_Icc.mpr ⟨le_of_lt ha, by linarith⟩) x
-    have hshift_b := scalarHeatFlow_smoothInitial_shift_const (I := I) (M := M) g u₀ hb1 δ
-      (Set.mem_Icc.mpr ⟨le_trans ha.le (le_of_lt hab), by linarith⟩) y
-    rw [← hshift_a, ← hshift_b]
-    simpa [uδ] using hharnack
-  simpa [C] using le_of_forall_pos_lt_add hle_all
+  have hedistE : ∀ (x y : M), edist x y =
+      @riemannianEDist E _ _ H _ I M _ _
+        (fun x : M => (inferInstance : ENorm (TangentSpace I x))) x y := by
+    intro x y
+    calc
+      edist x y = riemannianEDist I x y := hedist x y
+      _ = @riemannianEDist E _ _ H _ I M _ _
+            (fun x : M => (inferInstance : ENorm (TangentSpace I x))) x y := by
+        rw [riemannianEDist_def]
+  have hEnormE : ∀ (x : M) (v : TangentSpace I x),
+      @enorm (TangentSpace I x)
+        ((fun x : M => (inferInstance : ENorm (TangentSpace I x))) x) v =
+        ENNReal.ofReal (Real.sqrt (g.inner x v v)) := by
+    intro x v
+    exact hEnorm x v
+  have hmain := scalarHeatFlow_smoothInitial_harnack_of_nonnegative_ricci_of_enorm
+    (I := I) (M := M) (fun x : M => (inferInstance : ENorm (TangentSpace I x)))
+    g u₀ hEnormE hedistE hRic hpos0 ha hab x y
+  simpa [hedist x y] using hmain
 
 end HeatEquation
 end Analysis

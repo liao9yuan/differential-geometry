@@ -26,7 +26,7 @@ theorem hasFDerivAt_integral_compact
     [MeasurableSpace X] [BorelSpace X]
     [T2Space X] [SecondCountableTopology X]
     [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
-    [NormedAddCommGroup W] [NormedSpace ℝ W] [CompleteSpace W]
+    [NormedAddCommGroup W] [NormedSpace ℝ W]
     (μ : Measure X) [IsFiniteMeasure μ]
     (F : V → X → W) (F' : V → X → (V →L[ℝ] W))
     (hF : Continuous (fun p : V × X => F p.1 p.2))
