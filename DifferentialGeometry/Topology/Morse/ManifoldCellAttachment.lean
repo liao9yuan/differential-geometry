@@ -8097,6 +8097,133 @@ theorem contDiff_morseFarExpandTimeSmooth {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ) 
   rw [hcover] at hUn
   exact contDiffOn_univ.mp hUn
 
+theorem morseFarExpandTimeSmooth_levelMap_strictMono {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
+    (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) {t₁ t₂ : ℝ} (hlt : t₁ < t₂) :
+    t₁ - morseFarExpandTimeSmooth c ε δ ρ ρ' t₁ <
+      t₂ - morseFarExpandTimeSmooth c ε δ ρ ρ' t₂ := by
+  let β : ℝ → ℝ := fun t => Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ)
+  let u : ℝ → ℝ := fun t => t - c + ε + δ
+  have hβmem : ∀ t, β t ∈ Set.Icc (0 : ℝ) 1 := by
+    intro t
+    dsimp [β]
+    exact ⟨Real.smoothTransition.nonneg _, Real.smoothTransition.le_one _⟩
+  have hβmono : ∀ {s₁ s₂ : ℝ}, s₁ ≤ s₂ → β s₁ ≤ β s₂ := by
+    intro s₁ s₂ hs
+    dsimp [β]
+    exact Real.smoothTransition.monotone
+      (div_le_div_of_nonneg_right (by linarith : s₁ - (c - ε - δ + ρ') ≤ s₂ - (c - ε - δ + ρ'))
+        (le_of_lt hρ))
+  have hlin : ∀ {t : ℝ} (ht : c - ε - δ < t),
+      morseFarExpandTimeSmooth c ε δ ρ ρ' t = -β t * u t * (2 * ε) / δ := by
+    intro t ht
+    dsimp [morseFarExpandTimeSmooth, β, u]
+    rw [morseFarExpandTime_eq (c := c) (ε := ε) (δ := δ) hδ ht]
+    ring
+  have hLdeep : ∀ {t : ℝ} (ht : t ≤ c - ε - δ + ρ'),
+      t - morseFarExpandTimeSmooth c ε δ ρ ρ' t = t := by
+    intro t ht
+    rw [morseFarExpandTimeSmooth_zero hρ ht]
+    ring
+  have hLcollar : ∀ {t : ℝ} (ht : c - ε - δ < t),
+      t - morseFarExpandTimeSmooth c ε δ ρ ρ' t = t + β t * u t * (2 * ε) / δ := by
+    intro t ht
+    rw [hlin ht]
+    ring
+  by_cases ht₂ : t₂ ≤ c - ε - δ + ρ'
+  · have ht₁ : t₁ ≤ c - ε - δ + ρ' := le_trans (le_of_lt hlt) ht₂
+    rw [hLdeep ht₁, hLdeep ht₂]
+    exact hlt
+  · have ht₂gt : c - ε - δ + ρ' < t₂ := lt_of_not_ge ht₂
+    have ht₂gt' : c - ε - δ < t₂ := by linarith
+    have hu₂ : 0 ≤ u t₂ := by
+      dsimp [u]
+      nlinarith [ht₂gt]
+    have hβ₂ : 0 ≤ β t₂ := (hβmem t₂).1
+    have hL₂ : t₂ - morseFarExpandTimeSmooth c ε δ ρ ρ' t₂ = t₂ + β t₂ * u t₂ * (2 * ε) / δ :=
+      hLcollar ht₂gt'
+    by_cases ht₁ : t₁ ≤ c - ε - δ + ρ'
+    · rw [hLdeep ht₁, hL₂]
+      have hnonneg : 0 ≤ β t₂ * u t₂ * (2 * ε) / δ := by
+        exact div_nonneg (mul_nonneg (mul_nonneg hβ₂ hu₂) (by nlinarith [hε])) (le_of_lt hδ)
+      nlinarith
+    · have ht₁gt : c - ε - δ + ρ' < t₁ := lt_of_not_ge ht₁
+      have ht₁gt' : c - ε - δ < t₁ := by linarith
+      have hL₁ : t₁ - morseFarExpandTimeSmooth c ε δ ρ ρ' t₁ = t₁ + β t₁ * u t₁ * (2 * ε) / δ :=
+        hLcollar ht₁gt'
+      rw [hL₁, hL₂]
+      have hu₁ : 0 ≤ u t₁ := by
+        dsimp [u]
+        nlinarith [ht₁gt]
+      have hβ₁ : 0 ≤ β t₁ := (hβmem t₁).1
+      have hβle : β t₁ ≤ β t₂ := hβmono (le_of_lt hlt)
+      have hule : u t₁ ≤ u t₂ := by
+        dsimp [u]
+        nlinarith
+      have hmain : β t₁ * u t₁ ≤ β t₂ * u t₂ := by
+        have h1 : β t₁ * u t₁ ≤ β t₂ * u t₁ :=
+          mul_le_mul_of_nonneg_right hβle hu₁
+        have h2 : β t₂ * u t₁ ≤ β t₂ * u t₂ :=
+          mul_le_mul_of_nonneg_left hule hβ₂
+        exact le_trans h1 h2
+      have hdiff : β t₁ * u t₁ * (2 * ε) / δ ≤ β t₂ * u t₂ * (2 * ε) / δ := by
+        exact div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_right hmain (by nlinarith [hε]))
+          (le_of_lt hδ)
+      nlinarith
+
+theorem morseFarExpandTimeSmooth_levelMap_le_top {c ε δ ρ ρ' t : ℝ} (hρ : 0 < ρ)
+    (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) (ht : t ≤ c - ε) :
+    t - morseFarExpandTimeSmooth c ε δ ρ ρ' t ≤ c + ε := by
+  by_cases ht' : t ≤ c - ε - δ + ρ'
+  · have hL : t - morseFarExpandTimeSmooth c ε δ ρ ρ' t = t := by
+      rw [morseFarExpandTimeSmooth_zero hρ ht']
+      ring
+    rw [hL]
+    nlinarith [ht]
+  · have htgt : c - ε - δ + ρ' < t := lt_of_not_ge ht'
+    have htgt' : c - ε - δ < t := by linarith
+    have hL : t - morseFarExpandTimeSmooth c ε δ ρ ρ' t =
+        t + Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (t - c + ε + δ) * (2 * ε) / δ := by
+      dsimp [morseFarExpandTimeSmooth]
+      rw [morseFarExpandTime_eq (c := c) (ε := ε) (δ := δ) hδ htgt']
+      ring
+    rw [hL]
+    have hβ : Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) ≤ 1 :=
+      Real.smoothTransition.le_one _
+    have hu : t - c + ε + δ ≤ δ := by linarith
+    have hmain : Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (t - c + ε + δ) * (2 * ε) / δ ≤ 2 * ε := by
+      have h1 : Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (t - c + ε + δ) ≤ δ := by
+        have hnonneg : 0 ≤ t - c + ε + δ := by linarith
+        have hβ0 : 0 ≤ Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) :=
+          Real.smoothTransition.nonneg _
+        exact le_trans (mul_le_mul_of_nonneg_left hu hβ0) (by nlinarith [hβ])
+      exact (div_le_iff₀ hδ).mpr (by
+        have hnonneg : 0 ≤ (2 * ε) := by nlinarith [hε]
+        nlinarith [h1])
+    nlinarith
+
+theorem morseFarExpandTimeSmooth_levelMap_ge_deep {c ε δ ρ ρ' t : ℝ} (hρ : 0 < ρ)
+    (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) (ht : c - ε - δ + ρ' ≤ t) :
+    c - ε - δ + ρ' ≤ t - morseFarExpandTimeSmooth c ε δ ρ ρ' t := by
+  by_cases ht' : t ≤ c - ε - δ + ρ'
+  · have htEq : t = c - ε - δ + ρ' := le_antisymm ht' ht
+    have hL : t - morseFarExpandTimeSmooth c ε δ ρ ρ' t = t := by
+      rw [morseFarExpandTimeSmooth_zero hρ ht']
+      ring
+    rw [hL, htEq]
+  · have htgt : c - ε - δ + ρ' < t := lt_of_not_ge ht'
+    have htgt' : c - ε - δ < t := by linarith
+    have hL : t - morseFarExpandTimeSmooth c ε δ ρ ρ' t =
+        t + Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (t - c + ε + δ) * (2 * ε) / δ := by
+      dsimp [morseFarExpandTimeSmooth]
+      rw [morseFarExpandTime_eq (c := c) (ε := ε) (δ := δ) hδ htgt']
+      ring
+    rw [hL]
+    have hnonneg : 0 ≤ Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (t - c + ε + δ) * (2 * ε) / δ := by
+      have hβ : 0 ≤ Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) := Real.smoothTransition.nonneg _
+      have hu : 0 ≤ t - c + ε + δ := by linarith
+      exact div_nonneg (mul_nonneg (mul_nonneg hβ hu) (by nlinarith [hε])) (le_of_lt hδ)
+    nlinarith
+
 theorem morseRoundedExpandTime_interface {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
     {y : MorseModel (m + 1)}
