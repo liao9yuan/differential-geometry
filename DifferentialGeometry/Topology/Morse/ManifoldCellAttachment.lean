@@ -16045,6 +16045,50 @@ theorem morseRoundedDescentField_unstretchInChart {m k : ℕ} (hk : k ≤ m + 1)
     (htime := htime)
   simpa [v] using hflow
 
+theorem morseRoundedHandleOrbitStay {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₁ R₀ R₁ ε' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε₁ : 0 < ε₁) (hε' : 0 ≤ ε') {y : MorseModel (m + 1)} {a b : ℝ}
+    (hynorm : morseNorm (m + 1) y ≤ R₁)
+    (hposBig : ε₁ ^ 2 ≤ ‖posPart hk y‖ ^ 2 / 2)
+    (hb : b ≤ ‖posPart hk y‖ ^ 2 / 4)
+    (habs : ∀ t ∈ Set.Ioo a b, |t| ≤ 2 * ε')
+    (hR₀0 : 0 ≤ R₀)
+    (hR₀room : R₁ ^ 2 + 4 * ε' < R₀ ^ 2)
+    (hR'room : R₁ ^ 2 + 4 * ε' < data.R' ^ 2) :
+    ∀ t ∈ Set.Ioo a b,
+      (ε₁ ≤ ‖posPart hk (modelFlow hk t y)‖ ∧
+        morseNorm (m + 1) (modelFlow hk t y) ≤ R₀) ∧
+      ‖modelFlow hk t y‖ < data.R' := by
+  intro t ht
+  have hpos : 0 < ‖posPart hk y‖ := by
+    have hε₁sq : 0 < ε₁ ^ 2 := sq_pos_of_pos hε₁
+    have hsqpos : 0 < ‖posPart hk y‖ ^ 2 := by
+      have hdiv : 0 < ‖posPart hk y‖ ^ 2 / 2 := lt_of_lt_of_le hε₁sq hposBig
+      nlinarith [hdiv]
+    exact lt_of_le_of_ne (norm_nonneg _) (Ne.symm (sq_pos_iff.mp hsqpos))
+  have hbal : b ≤ ‖posPart hk y‖ ^ 2 / 2 := by nlinarith [hb]
+  have hposge : ε₁ ≤ ‖posPart hk (modelFlow hk t y)‖ :=
+    modelFlow_posPart_ge_eps_of_interval hk ε₁ a b y hpos hb hposBig t ht
+  have hsq := modelFlow_norm_sq_le_add hk ε' hε' (habs t ht) y
+  have hynorm' : morseNorm (m + 1) y ^ 2 ≤ R₁ ^ 2 := by
+    have hle0 : 0 ≤ morseNorm (m + 1) y := norm_nonneg _
+    have hR0 : 0 ≤ R₁ := le_trans (norm_nonneg _) hynorm
+    nlinarith [hynorm, hle0, hR0]
+  have hnorm' : morseNorm (m + 1) (modelFlow hk t y) ^ 2 < data.R' ^ 2 := by
+    nlinarith [hsq, hynorm', hR'room]
+  have hnorm : morseNorm (m + 1) (modelFlow hk t y) < data.R' := by
+    have hle0' : 0 ≤ morseNorm (m + 1) (modelFlow hk t y) := norm_nonneg _
+    have hR'0 : 0 ≤ data.R' := le_of_lt data.hR'pos
+    nlinarith [hnorm', hR'0, hle0']
+  have hnormR₀ : morseNorm (m + 1) (modelFlow hk t y) ≤ R₀ := by
+    have hnorm₀ : morseNorm (m + 1) (modelFlow hk t y) ^ 2 < R₀ ^ 2 := by
+      nlinarith [hsq, hynorm', hR₀room]
+    have hle0' : 0 ≤ morseNorm (m + 1) (modelFlow hk t y) := norm_nonneg _
+    nlinarith [hnorm₀, hR₀0, hle0']
+  exact ⟨⟨hposge, hnormR₀⟩, lt_of_le_of_lt (morseNorm_piNorm_le (modelFlow hk t y)) hnorm⟩
+
 end ManifoldCellAttachment
 
 end
