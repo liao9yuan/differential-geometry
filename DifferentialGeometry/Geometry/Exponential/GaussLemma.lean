@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
+import DifferentialGeometry.Geometry.Metric.DistanceScaling
 import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Exponential.Smoothness.MfderivZero
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
@@ -1539,6 +1540,20 @@ theorem edist_exp_eq_radius
   exact radial_riemannianEDist_eq_radius (I := I) g p hEnorm
     (mem_expDomain_of_norm_lt_radius (I := I) g p ha_eucl)
     (ball_subset_normalChartAt_target (I := I) g p ha_eucl) ha_small
+
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+theorem edist_exp_eq_radius_of_metric
+    (g : SmoothRiemannianMetric I M) (p : M) {a : E}
+    (ha_small : Real.sqrt (g.inner p a a) < expRadiusGp (I := I) g p) :
+    riemannianEDistOf (I := I) g p (expMap (I := I) g p (show TangentSpace I p from a))
+      = ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  have h := edist_exp_eq_radius (I := I) (M := M) g p hEnorm ha_small
+  simpa [riemannianEDistOf] using h
 
 omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
 private theorem exists_forward_confinement_to_smallBall
