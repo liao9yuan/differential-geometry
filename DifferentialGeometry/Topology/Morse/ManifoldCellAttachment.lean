@@ -16664,6 +16664,58 @@ theorem contMDiff_morseRoundedTransportTime {m k : ℕ} (hk : k ≤ m + 1)
       · exact Or.inr (by simpa [U₂] using hxball)
   exact contMDiff_of_contMDiffOn_union_of_isOpen h₁ h₂ hcover hU₁open hU₂open
 
+theorem contMDiff_morseRoundedTransportMap {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀ : 0 < R₀) (hR₀R₁ : R₀ < R₁)
+    (hR₁R : R₁ < data.R) (hRltRp : data.R < data.R')
+    (hθ : 0 < θ) (hρ : 0 < ρ) (hρ' : 0 < ρ') (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) :
+    ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M =>
+        curveAt (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)
+          (exists_globalIntegralCurve_of_compactSupport (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)
+            (contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀ hV₀sm hε₀ hε₀ε₁
+              hR₀R₁ hRltRp hR₁R)
+            (isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+              (le_of_lt hR₁R) hV₀supp))
+          x (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x)) := by
+  let v : (x : M) → TangentSpace I x := morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀
+  have hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) := by
+    simpa [v] using contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀
+      hV₀sm hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R
+  have hsupp : IsCompact (tsupport v) := by
+    simpa [v] using isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+      (le_of_lt hR₁R) hV₀supp
+  have hτ : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data) :=
+    contMDiff_morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data hf
+      hθ hρ hρ' hδ hδr hR₀ hR₀R₁ hR₁R hRltRp
+  have hjoint : ContMDiff (𝓘(ℝ, ℝ).prod I) I (⊤ : ℕ∞)
+      (fun p : ℝ × M => curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) p.2 p.1) :=
+    contMDiff_globalFlow_joint_of_compactSupport v hv hsupp
+  have hpair : ContMDiff I (𝓘(ℝ, ℝ).prod I) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x, x)) :=
+    hτ.prodMk (contMDiff_id : ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun x : M => x))
+  have hc : ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) x
+        (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x)) := by
+    have hcomp : ContMDiff I I (min (⊤ : ℕ∞) (⊤ : ℕ∞))
+        (fun x : M => curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp)
+          (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x, x).2
+          (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x, x).1) :=
+      hjoint.comp hpair
+    simpa [Function.comp_def] using hcomp
+  simpa [v] using hc
+
 end ManifoldCellAttachment
 
 end
