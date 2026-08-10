@@ -13879,6 +13879,188 @@ noncomputable def morseModifiedLowerSublevelHomotopyEquivUnder {n k : ℕ} (hk :
     exact (ContinuousMap.HomotopyRel.refl (ContinuousMap.id Z)
       (Set.range (modifiedLowerSublevelUnionInclusion (H := H) (M := M) c ε χ f))).cast h.symm rfl
 
+noncomputable def morseRoundedFunction {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) : ℝ := by
+  classical
+  exact if hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} then
+    CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ (data.χ.symm x)
+  else f x + ε
+
+theorem morseRoundedFunction_eq_model_of_mem_closedBall {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    {x : M} (hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    morseRoundedFunction hk c ε r δ R₀ R₁ data x =
+      CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ (data.χ.symm x) := by
+  dsimp [morseRoundedFunction]
+  rw [if_pos hx]
+
+theorem morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    {x : M} (hx : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    morseRoundedFunction hk c ε r δ R₀ R₁ data x = f x + ε := by
+  dsimp [morseRoundedFunction]
+  rw [if_neg hx]
+
+theorem morseRoundedFunction_eq_model_of_ball' {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ R₁' : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hR₁₂ : R₁ < R₁')
+    (hR₁₂R : R₁' ≤ data.R)
+    {x : M} (hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < R₁'}) :
+    morseRoundedFunction hk c ε r δ R₀ R₁ data x =
+      CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ (data.χ.symm x) := by
+  classical
+  rcases hx with ⟨y, hy, hxy⟩
+  have hsrc : y ∈ data.χ.source := data.hχsrc y (le_of_lt (lt_of_lt_of_le hy hR₁₂R))
+  have hsymm : data.χ.symm x = y := by
+    rw [← hxy]
+    exact data.χ.left_inv hsrc
+  by_cases hy₁ : morseNorm (m + 1) y ≤ R₁
+  · have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data ⟨y, hy₁, hxy⟩
+    rw [heq, hsymm]
+  · have hy₁' : R₁ < morseNorm (m + 1) y := lt_of_not_ge hy₁
+    have hyR : morseNorm (m + 1) y ≤ data.R := le_of_lt (lt_of_lt_of_le hy hR₁₂R)
+    have hf : f x = morseNormalForm hk c y := by
+      rw [← hxy]
+      exact data.hnorm y hyR
+    have hnot : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} := by
+      intro hx'
+      rcases hx' with ⟨z, hz, hxz⟩
+      have hzinj : z = y := data.χ.injOn
+        (data.hχsrc z (le_trans hz (le_trans (le_of_lt hR₁₂) hR₁₂R))) hsrc
+        (hxz.trans hxy.symm)
+      rw [hzinj] at hz
+      exact (not_lt_of_ge hz) hy₁'
+    have heq := morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hnot
+    rw [heq]
+    rw [hf]
+    rw [hsymm]
+    exact (CellAttachment.modelRoundedFunction_eq_morse_add_eps_of_norm_ge hk c ε r δ R₀ R₁
+      hR hR0 (le_of_lt hy₁')).symm
+
+theorem contMDiff_morseRoundedFunction {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ R₁' : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R) (hR₁₂R' : R₁' ≤ data.R') :
+    ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedFunction hk c ε r δ R₀ R₁ data) := by
+  classical
+  let ball : Set (MorseModel (m + 1)) := {y : MorseModel (m + 1) | morseNorm (m + 1) y < R₁'}
+  let closedBall : Set (MorseModel (m + 1)) := {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+  have hcontNorm : Continuous (fun y : MorseModel (m + 1) => morseNorm (m + 1) y) := by
+    dsimp [morseNorm]
+    exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
+  have hball_open : IsOpen ball := by
+    dsimp [ball]
+    exact isOpen_lt hcontNorm continuous_const
+  have hball_src : ball ⊆ data.χ.source := by
+    intro y hy
+    dsimp [ball] at hy
+    exact data.hχsrc y (le_of_lt (lt_of_lt_of_le hy hR₁₂R))
+  have hball_sub : ball ⊆ Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+    intro y hy
+    dsimp [ball] at hy
+    exact Metric.mem_ball.mpr (by
+      simpa [dist_zero_right, dist_eq_norm] using
+        lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_of_lt_of_le hy hR₁₂R'))
+  have hU₁ : IsOpen (data.χ '' ball) := by
+    exact data.χ.isOpen_image_of_subset_source hball_open hball_src
+  have hU₂ : IsOpen (data.χ '' closedBall)ᶜ := by
+    have hclosed : IsClosed (data.χ '' closedBall) := by
+      have hbounded : Bornology.IsBounded closedBall := by
+        rw [Metric.isBounded_iff]
+        refine ⟨2 * R₁, ?_⟩
+        intro x hx y hy
+        have hx' : morseNorm (m + 1) x ≤ R₁ := by
+          dsimp [closedBall] at hx
+          exact hx
+        have hy' : morseNorm (m + 1) y ≤ R₁ := by
+          dsimp [closedBall] at hy
+          exact hy
+        rw [dist_eq_norm]
+        have hle : ‖x - y‖ ≤ ‖x‖ + ‖y‖ := norm_sub_le _ _
+        have hxle : ‖x‖ ≤ R₁ := le_trans (morseNorm_piNorm_le x) hx'
+        have hyle : ‖y‖ ≤ R₁ := le_trans (morseNorm_piNorm_le y) hy'
+        nlinarith [hxle, hyle, hle]
+      have hclosed' : IsClosed closedBall := by
+        have hpre : IsClosed ((fun y : MorseModel (m + 1) => morseNorm (m + 1) y) ⁻¹' Set.Iic R₁) :=
+          by simpa using (hcontNorm.continuousOn.preimage_isClosed_of_isClosed isClosed_univ isClosed_Iic)
+        have hset : closedBall = (fun y : MorseModel (m + 1) => morseNorm (m + 1) y) ⁻¹' Set.Iic R₁ := by
+          ext y
+          dsimp [closedBall]
+          exact Iff.rfl
+        rw [hset]
+        exact hpre
+      have hcmp : IsCompact closedBall := Metric.isCompact_iff_isClosed_bounded.2 ⟨hclosed', hbounded⟩
+      have hcmpimg : IsCompact (data.χ '' closedBall) :=
+        hcmp.image_of_continuousOn (data.χ.continuousOn.mono (by
+        intro y hy
+        dsimp [closedBall] at hy
+        exact data.hχsrc y (le_trans hy (le_trans (le_of_lt hR₁₂) hR₁₂R))))
+      exact hcmpimg.isClosed
+    exact isOpen_compl_iff.mpr hclosed
+  have h₁ : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedFunction hk c ε r δ R₀ R₁ data) (data.χ '' ball) := by
+    have hsymm : ContMDiffOn I 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞) data.χ.symm
+        (data.χ '' Metric.ball (0 : MorseModel (m + 1)) data.R') :=
+      data.hχsymmOn
+    have hsub : data.χ '' ball ⊆ data.χ '' Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      refine ⟨y, hball_sub hy, hxy⟩
+    have hsymm' : ContMDiffOn I 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞) data.χ.symm
+        (data.χ '' ball) :=
+      hsymm.mono hsub
+    have hmodel : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁) Set.univ := by
+      exact (CellAttachment.contDiff_modelRoundedFunction hk c ε r δ R₀ R₁).contDiffOn.contMDiffOn
+    have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun x : M => CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ (data.χ.symm x))
+        (data.χ '' ball) :=
+      hmodel.comp hsymm' (by intro x hx; trivial)
+    exact hcomp.congr (by
+      intro x hx
+      exact (morseRoundedFunction_eq_model_of_ball' hk c ε r δ R₀ R₁ R₁' data hR hR0 hR₁₂
+        hR₁₂R hx))
+  have h₂ : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedFunction hk c ε r δ R₀ R₁ data) (data.χ '' closedBall)ᶜ := by
+    have hfε : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : ℕ∞) (fun x : M => f x + ε) := by
+      simpa [Pi.add_apply] using
+        (hf.add (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : ℕ∞) (fun _ : M => ε)))
+    exact (hfε.contMDiffOn.congr (by
+      intro x hx
+      exact (morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hx)))
+  have hcover : (data.χ '' ball) ∪ (data.χ '' closedBall)ᶜ = Set.univ := by
+    ext x
+    constructor
+    · intro hx
+      trivial
+    · intro hx
+      by_cases hc : x ∈ data.χ '' closedBall
+      · left
+        rcases hc with ⟨z, hz, hxz⟩
+        change morseNorm (m + 1) z ≤ R₁ at hz
+        exact ⟨z, lt_of_le_of_lt hz hR₁₂, hxz⟩
+      · right
+        exact hc
+  have hwhole : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedFunction hk c ε r δ R₀ R₁ data) Set.univ := by
+    rw [← hcover]
+    exact h₁.union_of_isOpen h₂ hU₁ hU₂
+  exact contMDiffOn_univ.mp hwhole
+
+
 end ManifoldCellAttachment
 
 end
