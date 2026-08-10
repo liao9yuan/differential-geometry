@@ -952,6 +952,243 @@ private lemma sublevel_const_of_deriv_eq_zero_on_interval
     rw [hgval] at hmain
     simpa [g] using hmain
 
+private lemma sublevel_const_of_deriv_eq_zero_on_unit'
+    {f : ℝ → ℝ} (hf : DifferentiableOn ℝ f Set.univ) {L : ℝ} (_hL : 0 < L)
+    (hf0 : f 0 ∈ Set.Ioo (-L) L)
+    (hderiv : ∀ t : ℝ, t ∈ Set.Icc 0 1 → f t ∈ Set.Icc (-L) L → deriv f t = 0)
+    {t₁ : ℝ} (ht₁ : t₁ ∈ Set.Icc 0 1) (hgt : f 0 < f t₁) : f t₁ = f 0 := by
+  let S : Set ℝ := {u : ℝ | u ∈ Set.Icc 0 t₁ ∧ f 0 < f u}
+  have hSne : S.Nonempty := ⟨t₁, ⟨⟨ht₁.1, le_rfl⟩, hgt⟩⟩
+  have hSbdd : BddBelow S := ⟨0, by intro u hu; exact hu.1.1⟩
+  let t₀ : ℝ := sInf S
+  have ht₀₀ : 0 ≤ t₀ := le_csInf hSne (by intro u hu; exact hu.1.1)
+  have ht₀t₁ : t₀ ≤ t₁ := csInf_le hSbdd ⟨⟨ht₁.1, le_rfl⟩, hgt⟩
+  have ht₀₁ : t₀ ≤ 1 := le_trans ht₀t₁ ht₁.2
+  have hcont : ContinuousAt f t₀ := (hf.continuousOn t₀ trivial).continuousAt Filter.univ_mem
+  have hf₀_ge : f 0 ≤ f t₀ := by
+    have hcl : t₀ ∈ closure S := csInf_mem_closure hSne hSbdd
+    have hright : ∀ᶠ u in nhdsWithin t₀ S, f 0 ≤ f u := by
+      rw [Filter.eventually_iff_exists_mem]
+      exact ⟨S ∩ Set.univ, inter_mem_nhdsWithin S Filter.univ_mem, by
+        intro u hu
+        exact le_of_lt (hu.1).2⟩
+    have htend : Tendsto f (nhdsWithin t₀ S) (nhds (f t₀)) := hcont.tendsto.mono_left nhdsWithin_le_nhds
+    haveI : (nhdsWithin t₀ S).NeBot := mem_closure_iff_nhdsWithin_neBot.mp hcl
+    exact ge_of_tendsto htend hright
+  have hsub : ∀ u : ℝ, 0 < u → u < t₀ → f u ≤ f 0 := by
+    intro u hu₁ hu₂
+    by_cases huS : u ∈ S
+    · have : t₀ ≤ u := csInf_le hSbdd huS
+      linarith
+    · have hucc : u ∈ Set.Icc 0 t₁ := ⟨le_of_lt hu₁, le_of_lt (lt_of_lt_of_le hu₂ ht₀t₁)⟩
+      exact le_of_not_gt (fun hfu => huS ⟨hucc, hfu⟩)
+  have hf₀_le : f t₀ ≤ f 0 := by
+    by_cases ht₀₀' : 0 = t₀
+    · simp [ht₀₀']
+    · have hlt₀ : 0 < t₀ := lt_of_le_of_ne ht₀₀ (by intro h; exact ht₀₀' h)
+      have hleft : ∀ᶠ u in nhdsWithin t₀ (Set.Iio t₀), f u ≤ f 0 := by
+        have hU : {u : ℝ | 0 < u} ∈ nhds t₀ := isOpen_Ioi.mem_nhds hlt₀
+        rw [Filter.eventually_iff_exists_mem]
+        exact ⟨Set.Iio t₀ ∩ {u : ℝ | 0 < u}, inter_mem_nhdsWithin (Set.Iio t₀) hU, by
+          intro u hu
+          exact hsub u hu.2 hu.1⟩
+      have htend : Tendsto f (nhdsWithin t₀ (Set.Iio t₀)) (nhds (f t₀)) :=
+        hcont.tendsto.mono_left nhdsWithin_le_nhds
+      have ht₀cl : t₀ ∈ closure (Set.Iio t₀) := by
+        rw [closure_Iio]
+        change t₀ ≤ t₀
+        exact le_rfl
+      haveI : (nhdsWithin t₀ (Set.Iio t₀)).NeBot := mem_closure_iff_nhdsWithin_neBot.mp ht₀cl
+      exact le_of_tendsto htend hleft
+  have hf₀ : f t₀ = f 0 := le_antisymm hf₀_le hf₀_ge
+  have hinner : f t₀ ∈ Set.Ioo (-L) L := by
+    rw [hf₀]
+    exact hf0
+  have ht₀lt : t₀ < 1 := by
+    by_cases ht₁lt : t₁ < 1
+    · exact lt_of_le_of_lt ht₀t₁ ht₁lt
+    · have ht₁eq : t₁ = 1 := le_antisymm ht₁.2 (le_of_not_gt ht₁lt)
+      have hf1 : f 0 < f 1 := by simpa [ht₁eq] using hgt
+      have hcont1 : ContinuousAt f 1 := (hf.continuousOn 1 trivial).continuousAt Filter.univ_mem
+      have hev : {u : ℝ | f 0 < f u} ∈ nhds 1 :=
+        hcont1.preimage_mem_nhds (isOpen_Ioi.mem_nhds hf1)
+      rcases Metric.mem_nhds_iff.mp hev with ⟨δ, hδ, hball⟩
+      let δ₀ : ℝ := min δ 1
+      have hδ₀ : 0 < δ₀ := by exact lt_min hδ (by norm_num)
+      have hballδ : Metric.ball (1 : ℝ) δ₀ ⊆ Metric.ball (1 : ℝ) δ := Metric.ball_subset_ball (min_le_left δ 1)
+      have hmem : 1 - δ₀ / 2 ∈ Set.Icc 0 1 := by
+        constructor <;> linarith [hδ₀, min_le_right δ 1]
+      have hfmem : f 0 < f (1 - δ₀ / 2) := hball (hballδ (by
+        rw [Metric.mem_ball, Real.dist_eq]
+        rw [abs_of_neg (by linarith [hδ₀] : 1 - δ₀ / 2 - 1 < 0)]
+        linarith))
+      have hS' : 1 - δ₀ / 2 ∈ S := ⟨by simpa [ht₁eq] using hmem, hfmem⟩
+      have : t₀ ≤ 1 - δ₀ / 2 := csInf_le hSbdd hS'
+      linarith [hδ₀]
+  have hloc : ∀ᶠ u in nhdsWithin t₀ (Set.Icc 0 1), f u = f t₀ := by
+    have hopen : {u : ℝ | f u ∈ Set.Ioo (-L) L} ∈ nhds t₀ :=
+      hcont.preimage_mem_nhds (isOpen_Ioo.mem_nhds hinner)
+    rcases Metric.mem_nhds_iff.mp hopen with ⟨δ, hδ, hball⟩
+    by_cases ht₀z : t₀ = 0
+    · rw [ht₀z]
+      let δ₀ : ℝ := min δ 1
+      have hδ₀ : 0 < δ₀ := lt_min hδ (by norm_num)
+      have hdOn : ∀ v : ℝ, v ∈ Set.Ioo 0 δ₀ → deriv f v = 0 := by
+        intro v hv
+        have hvi : v ∈ Set.Icc 0 1 := ⟨le_of_lt hv.1, le_of_lt (lt_of_lt_of_le hv.2 (by linarith [hδ₀, min_le_right δ 1]))⟩
+        have hvball : v ∈ Metric.ball 0 δ := by
+          rw [Metric.mem_ball, Real.dist_eq]
+          rw [sub_zero, abs_of_pos hv.1]
+          linarith [hv.2, hδ₀, min_le_left δ 1]
+        have hfv : f v ∈ Set.Ioo (-L) L := by
+          simpa [ht₀z] using hball (by simpa [ht₀z] using hvball)
+        exact hderiv v hvi ⟨le_of_lt hfv.1, le_of_lt hfv.2⟩
+      have hconstOn : ∀ v : ℝ, v ∈ Set.Ioo 0 δ₀ → f v = f (δ₀ / 2) := by
+        intro v hv
+        exact (isOpen_Ioo.is_const_of_deriv_eq_zero isPreconnected_Ioo
+          (hf.mono (by intro w hw; trivial))
+          (by intro w hw; exact hdOn w hw)
+          hv (by constructor <;> linarith [hδ₀]))
+      have hc0 : f (δ₀ / 2) = f 0 := by
+        have hseq : Tendsto (fun n : ℕ => f (δ₀ / 2 / (n + 1))) atTop (nhds (f 0)) := by
+          have harg : Tendsto (fun n : ℕ => δ₀ / 2 / (n + 1)) atTop (nhds 0) := by
+            have hinv : Tendsto (fun n : ℕ => (1 : ℝ) / (n + 1)) atTop (nhds 0) :=
+              tendsto_one_div_add_atTop_nhds_zero_nat
+            have hconst : Tendsto (fun _ : ℕ => (δ₀ / 2 : ℝ)) atTop (nhds (δ₀ / 2)) :=
+              tendsto_const_nhds
+            simpa [div_eq_mul_inv, mul_assoc] using (hconst.mul hinv)
+          exact (hf.continuousOn 0 trivial).continuousAt Filter.univ_mem |>.tendsto.comp harg
+        have hmain : ∀ᶠ n : ℕ in atTop, f (δ₀ / 2 / (n + 1)) = f (δ₀ / 2) := by
+          exact Filter.Eventually.of_forall (fun n => hconstOn (δ₀ / 2 / (n + 1)) (by
+            constructor
+            · positivity
+            · have hle1 : (1 : ℝ) / (n + 1) ≤ 1 := by
+                rw [div_le_iff₀ (by positivity : (0 : ℝ) < (n + 1))]
+                have hn0 : (0 : ℝ) ≤ n := by positivity
+                nlinarith
+              have hle2 : (δ₀ / 2) * (((n : ℝ) + 1)⁻¹) ≤ δ₀ / 2 := by
+                simpa [one_div] using (mul_le_mul_of_nonneg_left hle1 (by positivity : (0 : ℝ) ≤ δ₀ / 2))
+              have hlt2 : δ₀ / 2 < δ₀ := by linarith [hδ₀]
+              rw [div_eq_mul_inv]
+              exact lt_of_le_of_lt hle2 hlt2))
+        have heqev : (fun _ : ℕ => f (δ₀ / 2)) =ᶠ[atTop] (fun n : ℕ => f (δ₀ / 2 / (n + 1))) := by
+          exact Filter.EventuallyEq.symm hmain
+        have htendc : Tendsto (fun n : ℕ => f (δ₀ / 2 / (n + 1))) atTop (nhds (f (δ₀ / 2))) := by
+          exact tendsto_const_nhds.congr' heqev
+        exact (tendsto_nhds_unique hseq htendc).symm
+      rw [Filter.eventually_iff_exists_mem]
+      refine ⟨Set.Icc 0 1 ∩ Metric.ball 0 δ₀,
+        inter_mem_nhdsWithin (Set.Icc (0 : ℝ) 1) (Metric.ball_mem_nhds (0 : ℝ) hδ₀), ?_⟩
+      intro u hu
+      rcases hu with ⟨huc, hub⟩
+      have huI : u ∈ Set.Icc 0 δ₀ := ⟨huc.1, le_of_lt (by rw [Real.ball_eq_Ioo] at hub; simpa using hub.2)⟩
+      by_cases huz : u = 0
+      · simp [huz]
+      · have hupos : 0 < u := lt_of_le_of_ne huI.1 (by intro h; exact huz h.symm)
+        have hultδ : u < δ₀ := by rw [Real.ball_eq_Ioo] at hub; simpa using hub.2
+        rw [hconstOn u (by constructor <;> linarith [hupos, hultδ]), hc0]
+    · have ht₀pos : 0 < t₀ := lt_of_le_of_ne ht₀₀ (by intro h; exact ht₀z h.symm)
+      let δ₀ : ℝ := min δ (min t₀ (1 - t₀))
+      have hδ₀ : 0 < δ₀ := by
+        exact lt_min hδ (lt_min ht₀pos (by linarith [ht₀lt]))
+      have hdOn : ∀ v : ℝ, v ∈ Metric.ball t₀ δ₀ → deriv f v = 0 := by
+        intro v hv
+        have hvi : v ∈ Set.Icc 0 1 := by
+          rw [Real.ball_eq_Ioo] at hv
+          constructor
+          · linarith [hv.1, min_le_right δ (min t₀ (1 - t₀)), min_le_left t₀ (1 - t₀)]
+          · linarith [hv.2, min_le_right δ (min t₀ (1 - t₀)), min_le_right t₀ (1 - t₀)]
+        have hvball : v ∈ Metric.ball t₀ δ := by
+          exact Metric.ball_subset_ball (min_le_left δ (min t₀ (1 - t₀))) hv
+        exact hderiv v hvi ⟨le_of_lt (hball hvball).1, le_of_lt (hball hvball).2⟩
+      rw [Filter.eventually_iff_exists_mem]
+      refine ⟨Metric.ball t₀ δ₀,
+        (mem_nhdsWithin_iff_exists_mem_nhds_inter.mpr ⟨Metric.ball t₀ δ₀,
+          Metric.ball_mem_nhds t₀ hδ₀, by intro u hu; exact hu.1⟩), ?_⟩
+      intro u hu
+      exact (isOpen_Ioo.is_const_of_deriv_eq_zero isPreconnected_Ioo
+        (hf.mono (by intro v hv; trivial))
+        (by intro v hv; exact hdOn v (by simpa [Real.ball_eq_Ioo] using hv))
+        (by simpa [Real.ball_eq_Ioo] using hu)
+        (by simpa [Real.ball_eq_Ioo] using (Metric.mem_ball_self (α := ℝ) (ε := δ₀) hδ₀ : t₀ ∈ Metric.ball t₀ δ₀)))
+  rcases hloc.exists_mem with ⟨U, hU, hball⟩
+  rw [mem_nhdsWithin_iff_exists_mem_nhds_inter] at hU
+  rcases hU with ⟨V, hV, hVsub⟩
+  rcases Metric.mem_nhds_iff.mp hV with ⟨δ, hδ, hballV⟩
+  have hSarb : ∃ u ∈ S, u < t₀ + δ := by
+    by_contra hnot
+    have hleall : ∀ u ∈ S, t₀ + δ ≤ u := by
+      intro u hu
+      exact le_of_not_gt (fun h => hnot ⟨u, hu, h⟩)
+    have : t₀ + δ ≤ sInf S := le_csInf hSne hleall
+    linarith
+  rcases hSarb with ⟨u, huS, hult⟩
+  have hδlt : u > t₀ := by
+    by_contra hnot'
+    have hu_le : u ≤ t₀ := le_of_not_gt hnot'
+    have ht₀_le : t₀ ≤ u := csInf_le hSbdd huS
+    have hu_eq : u = t₀ := le_antisymm hu_le ht₀_le
+    have hfua : f 0 < f u := huS.2
+    have hcontr : f 0 < f 0 := by
+      calc
+        f 0 = f t₀ := hf₀.symm
+        _ = f u := by rw [hu_eq]
+        _ > f 0 := hfua
+    exact (lt_irrefl (f 0)) hcontr
+  have hu_near : u ∈ Metric.ball t₀ δ := by
+    rw [Metric.mem_ball, Real.dist_eq]
+    rw [abs_of_pos (sub_pos.mpr hδlt)]
+    linarith [hult]
+  have huU : u ∈ U := hVsub ⟨hballV hu_near, ⟨huS.1.1, le_trans huS.1.2 ht₁.2⟩⟩
+  have hfu : f u = f t₀ := hball u huU
+  have hfua' : f 0 < f u := huS.2
+  have hcontr : f 0 < f 0 := by
+    calc
+      f 0 = f t₀ := hf₀.symm
+      _ = f u := hfu.symm
+      _ > f 0 := hfua'
+  exact False.elim (lt_irrefl (f 0) hcontr)
+
+private lemma sublevel_const_of_deriv_eq_zero_on_unit
+    {f : ℝ → ℝ} (hf : DifferentiableOn ℝ f Set.univ) {L : ℝ} (hL : 0 < L)
+    (hf0 : f 0 ∈ Set.Ioo (-L) L)
+    (hderiv : ∀ t : ℝ, t ∈ Set.Icc 0 1 → f t ∈ Set.Icc (-L) L → deriv f t = 0) :
+    ∀ t : ℝ, t ∈ Set.Icc 0 1 → f t = f 0 := by
+  intro t₁ ht₁
+  by_cases heq : f t₁ = f 0
+  · exact heq
+  · rcases lt_or_gt_of_ne heq with hlt | hgt
+    · let g : ℝ → ℝ := fun u => -f u
+      have hg : DifferentiableOn ℝ g Set.univ := by
+        intro u hu
+        exact hf u hu |>.neg
+      have hg0 : g 0 ∈ Set.Ioo (-L) L := by
+        change -f 0 ∈ Set.Ioo (-L) L
+        constructor
+        · exact neg_lt_neg hf0.2
+        · simpa using neg_lt_neg hf0.1
+      have hgderiv : ∀ t : ℝ, t ∈ Set.Icc 0 1 → g t ∈ Set.Icc (-L) L → deriv g t = 0 := by
+        intro t ht hgt
+        have h0 : deriv g t = -deriv f t := by
+          dsimp [g]
+          simpa only [neg_one_smul] using (deriv_const_smul (c := (-1 : ℝ)) (f := f) (x := t)
+            (hf := (hf t trivial).differentiableAt Filter.univ_mem))
+        rw [h0]
+        have hft : f t ∈ Set.Icc (-L) L := by
+          dsimp [g] at hgt
+          constructor
+          · simpa using (neg_le_neg hgt.2)
+          · simpa using (neg_le_neg hgt.1)
+        rw [hderiv t ht hft]
+        simp
+      have hmain := sublevel_const_of_deriv_eq_zero_on_unit' hg hL hg0 hgderiv ht₁ (by
+        dsimp [g]
+        exact neg_lt_neg hlt)
+      have hgval : g t₁ = -f t₁ := rfl
+      have hgvala : g 0 = -f 0 := rfl
+      rw [hgval, hgvala] at hmain
+      exact neg_inj.mp hmain
+    · exact sublevel_const_of_deriv_eq_zero_on_unit' hf hL hf0 hderiv ht₁ hgt
 theorem localUnitSpeedFamilyVectorField_at_noncritical
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
