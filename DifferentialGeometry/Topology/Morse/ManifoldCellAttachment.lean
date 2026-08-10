@@ -15069,6 +15069,103 @@ theorem mfderiv_descent_chartModelField {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
   rw [hmain]
   exact CellAttachment.fderiv_morseNormalForm_modelFlowField hk c hpos
 
+noncomputable def morseRoundedModelField {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x) (y : MorseModel (m + 1)) : TangentSpace I (data.χ y) :=
+  let β : ℝ := Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) *
+    (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)))
+  β • (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)) +
+    (1 - β) • (V₀ (data.χ y))
+
+theorem morseRoundedModelField_descent {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε ε₀ ε₁ R₀ R₁ r δ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hRltRp : data.R < data.R')
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hR₁R : R₁ ≤ data.R)
+    (hV₀ : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) = -1)
+    {y : MorseModel (m + 1)}
+    (hy : data.χ y ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2)) :
+    (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y)
+      (morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y)) = -1 := by
+  let β : ℝ := Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) *
+    (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)))
+  have hmain : (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y)
+      (β • (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)) +
+        (1 - β) • (V₀ (data.χ y)))) = -1 := by
+    by_cases hβ : β = 0
+    · have hmap : (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y)
+          (β • (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)) +
+            (1 - β) • (V₀ (data.χ y)))) =
+          (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y) (V₀ (data.χ y))) := by
+        rw [hβ]
+        simp
+      rw [hmap]
+      exact hV₀ (data.χ y) hy
+    · have hβne : β ≠ 0 := hβ
+      have hfac1 : Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) ≠ 0 := by
+        intro hz
+        apply hβne
+        dsimp [β]
+        rw [hz]
+        simp
+      have harg1 : 0 < (‖posPart hk y‖ - ε₀) / (ε₁ - ε₀) := by
+        by_contra hnot
+        have hle : (‖posPart hk y‖ - ε₀) / (ε₁ - ε₀) ≤ 0 := le_of_not_gt hnot
+        exact hfac1 (Real.smoothTransition.zero_of_nonpos hle)
+      have hposPart : ‖posPart hk y‖ ≠ 0 := by
+        have hmain2 : 0 < ‖posPart hk y‖ - ε₀ :=
+          (div_pos_iff_of_pos_right (sub_pos.mpr hε₀ε₁)).mp harg1
+        have hpos : 0 < ‖posPart hk y‖ := by nlinarith [hε₀, hmain2]
+        exact ne_of_gt hpos
+      have hfac2 : 1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) ≠ 0 := by
+        intro hz
+        apply hβne
+        dsimp [β]
+        rw [hz]
+        simp
+      have harg2 : (morseNorm (m + 1) y - R₀) / (R₁ - R₀) < 1 := by
+        by_contra hnot
+        have hge : 1 ≤ (morseNorm (m + 1) y - R₀) / (R₁ - R₀) := le_of_not_gt hnot
+        have htrans : Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) = 1 :=
+          Real.smoothTransition.one_of_one_le hge
+        exact hfac2 (by rw [htrans]; norm_num)
+      have hyRlt : morseNorm (m + 1) y < R₁ := by
+        have hmain3 : morseNorm (m + 1) y - R₀ < R₁ - R₀ :=
+          (div_lt_one (sub_pos.mpr hR₀R₁)).mp harg2
+        nlinarith
+      have hyR : morseNorm (m + 1) y < data.R := lt_of_lt_of_le hyRlt hR₁R
+      have hdescent := mfderiv_descent_chartModelField (hk := hk) (c := c) (data := data)
+        (hRltRp := hRltRp) (hy := hyR) (hpos := hposPart)
+      have hdescent' : (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y)
+          (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y))) = -1 := by
+        simpa using hdescent
+      have hlin : (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y)
+          (β • (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)) +
+            (1 - β) • (V₀ (data.χ y)))) =
+          β * (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y)
+            (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y))) +
+            (1 - β) * (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y) (V₀ (data.χ y))) := by
+        let L : TangentSpace I (data.χ y) →L[ℝ] ℝ :=
+          (NormedSpace.fromTangentSpace (f (data.χ y))).toContinuousLinearMap.comp
+            (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y))
+        change L (β • (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)) +
+            (1 - β) • (V₀ (data.χ y))) =
+          β * L (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)) +
+            (1 - β) * L (V₀ (data.χ y))
+        rw [map_add, map_smul, map_smul]
+        simp [smul_eq_mul]
+      rw [hlin, hdescent', hV₀ (data.χ y) hy]
+      ring
+  dsimp [morseRoundedModelField]
+  exact hmain
+
 end ManifoldCellAttachment
 
 end
