@@ -16988,6 +16988,67 @@ theorem morseRoundedTransportMap_mem_upper_of_handle {m k : ℕ} (hk : k ≤ m +
     hR₀R₁ (le_of_lt hR₀) hbig (by
       exact sq_pos_iff.mp (lt_trans hδ0 hδr)) hyg
 
+theorem morseRoundedTransportMap_mem_upper_of_collar {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hRltRp : data.R < data.R')
+    (hR₁R : R₁ < data.R)
+    (hδ0 : 0 < δ) (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hε : 0 < ε) (hr2 : r ^ 2 = 2 * ε)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hV₀desc : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) = -1)
+    (hV₀rate : ∀ x : M,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) ≤ 0)
+    (x : M) (hx : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁})
+    (hxg : morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c) :
+    f (morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁
+      hR₀R₁ hRltRp hR₁R x) ≤ c + r ^ 2 / 2 := by
+  let v : (x : M) → TangentSpace I x := morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀
+  have hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) := by
+    simpa [v] using contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀
+      hV₀sm hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R
+  have hsupp : IsCompact (tsupport v) := by
+    simpa [v] using isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+      (le_of_lt hR₁R) hV₀supp
+  have hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1 := by
+    intro x hx'
+    have hd := morseRoundedDescentField_descent hk c ε ε₀ ε₁ R₀ R₁ r δ data V₀ hRltRp hε₀
+      hε₀ε₁ hR₀R₁ (le_of_lt hR₁R) hV₀desc (x := x) hx'
+    simpa [v] using hd
+  have hrate : ∀ x : M,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0 := by
+    intro x
+    have hr := morseRoundedDescentField_rate hk c ε₀ ε₁ R₀ R₁ data V₀ hε₀ hε₀ε₁ hR₀R₁
+      hRltRp (le_of_lt hR₁R) hV₀rate x
+    simpa [v] using hr
+  have hfadd : morseRoundedFunction hk c ε r δ R₀ R₁ data x = f x + ε :=
+    morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hx
+  have hfx : f x ≤ c - ε := by
+    have hle : f x + ε ≤ c := by
+      rwa [hfadd] at hxg
+    nlinarith
+  let z : SublevelSpace f (c - ε) := ⟨x, hfx⟩
+  have hτ : morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x =
+      morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) :=
+    morseRoundedTransportTime_eq_collar hk c ε r δ ρ ρ' θ R₀ R₁ data hx
+  have hmem := morseRoundedCollarMapSmooth_mem_upper c ε r δ ρ ρ' hf hε hδ0 hρ hρ' hr2
+    v hv hsupp hdfOn hrate z
+  dsimp [morseRoundedTransportMap, z] at hmem ⊢
+  rw [hτ]
+  exact hmem
+
 end ManifoldCellAttachment
 
 end
