@@ -2092,6 +2092,23 @@ theorem memNChartSrcOfDist
   rw [← hy_symm]
   exact hsrc
 
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+theorem memNChartSrcOfDist_of_metric
+    (g : SmoothRiemannianMetric I M) (c : M)
+    {y : M} (hfin : riemannianEDistOf (I := I) g c y ≠ ⊤)
+    (hy : (riemannianEDistOf (I := I) g c y).toReal < expRadiusGp (I := I) g c) :
+    y ∈ (NormalCoordinates.normalChartAt (I := I) g c).source := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  have hfin' : riemannianEDist I c y ≠ ⊤ := by
+    simpa [riemannianEDistOf] using hfin
+  have hy' : (riemannianEDist I c y).toReal < expRadiusGp (I := I) g c := by
+    simpa [riemannianEDistOf] using hy
+  exact memNChartSrcOfDist (I := I) (M := M) g c hEnorm hfin' hy'
+
 end LocalRadialIdentification
 
 end RadialMinimizerConvention
