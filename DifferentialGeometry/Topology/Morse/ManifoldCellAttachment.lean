@@ -15609,6 +15609,362 @@ theorem contDiffAt_chartComposedFiber {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
     refine Filter.Eventually.of_forall (fun y => ?_)
     rfl)
 
+theorem contDiffAt_posPart_norm_of_ne_zero {m k : ℕ} (hk : k ≤ m + 1)
+    {y₀ : MorseModel (m + 1)} (hpos : posPart hk y₀ ≠ 0) :
+    ContDiffAt ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => ‖posPart hk y‖) y₀ := by
+  have hcoord : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => fun j : Fin (m + 1 - k) => y (posIdx hk j)) := by
+    rw [contDiff_pi]
+    intro j
+    simpa using (contDiff_apply (𝕜 := ℝ) (E := ℝ) (n := (⊤ : ℕ∞)) (i := posIdx hk j))
+  have htoLp : ContDiff ℝ (⊤ : ℕ∞)
+      ((WithLp.toLp 2 : (Fin (m + 1 - k) → ℝ) → EuclideanSpace ℝ (Fin (m + 1 - k))) :
+        (Fin (m + 1 - k) → ℝ) → EuclideanSpace ℝ (Fin (m + 1 - k))) := by
+    simpa [EuclideanSpace] using
+      (PiLp.contDiff_toLp (𝕜 := ℝ) (p := (2 : ENNReal)) (ι := Fin (m + 1 - k))
+        (E := fun _ : Fin (m + 1 - k) => ℝ) (n := (⊤ : ℕ∞)))
+  have hposPart : ContDiffAt ℝ (⊤ : ℕ∞) (posPart hk) y₀ := by
+    change ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        (WithLp.toLp 2 (fun j : Fin (m + 1 - k) => y (posIdx hk j)) :
+          EuclideanSpace ℝ (Fin (m + 1 - k)))) y₀
+    exact (htoLp.comp hcoord).contDiffAt
+  exact ContDiffAt.norm ℝ hposPart hpos
+
+theorem contDiffAt_morseNorm_of_ne_zero {m : ℕ} {y₀ : MorseModel (m + 1)}
+    (hy₀ne : y₀ ≠ 0) :
+    ContDiffAt ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => morseNorm (m + 1) y) y₀ := by
+  have htoLp : ContDiff ℝ (⊤ : ℕ∞)
+      ((WithLp.toLp 2 : MorseModel (m + 1) → EuclideanSpace ℝ (Fin (m + 1))) :
+        MorseModel (m + 1) → EuclideanSpace ℝ (Fin (m + 1))) := by
+    simpa [EuclideanSpace] using
+      (PiLp.contDiff_toLp (𝕜 := ℝ) (p := (2 : ENNReal)) (ι := Fin (m + 1))
+        (E := fun _ : Fin (m + 1) => ℝ) (n := (⊤ : ℕ∞)))
+  have hne : (WithLp.toLp 2 y₀ : EuclideanSpace ℝ (Fin (m + 1))) ≠ 0 := by
+    intro hz
+    exact hy₀ne (WithLp.toLp_injective (p := (2 : ENNReal)) (V := Fin (m + 1) → ℝ)
+      (by simpa using hz))
+  have h : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => ‖(WithLp.toLp 2 y : EuclideanSpace ℝ (Fin (m + 1)))‖) y₀ :=
+    ContDiffAt.norm ℝ htoLp.contDiffAt hne
+  simpa [morseNorm] using h
+
+theorem contDiffAt_morseRoundedCutoff {m k : ℕ} (hk : k ≤ m + 1)
+    (ε₀ ε₁ R₀ R₁ : ℝ) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁)
+    {y₀ : MorseModel (m + 1)} (hpos : posPart hk y₀ ≠ 0) :
+    ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) *
+          (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)))) y₀ := by
+  have hy₀ne : y₀ ≠ 0 := by
+    intro hz
+    apply hpos
+    rw [hz]
+    ext i
+    rfl
+  have hposNorm₁ : ContDiffAt ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => ‖posPart hk y‖) y₀ :=
+    contDiffAt_posPart_norm_of_ne_zero hk hpos
+  have hposNorm₂ : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => morseNorm (m + 1) y) y₀ :=
+    contDiffAt_morseNorm_of_ne_zero hy₀ne
+  have hden₁ : ε₁ - ε₀ ≠ 0 := by linarith
+  have hden₂ : R₁ - R₀ ≠ 0 := by linarith
+  have harg₁ : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => (‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) y₀ := by
+    exact (hposNorm₁.sub contDiffAt_const).div contDiffAt_const (by simpa using hden₁)
+  have harg₂ : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => (morseNorm (m + 1) y - R₀) / (R₁ - R₀)) y₀ := by
+    exact (hposNorm₂.sub contDiffAt_const).div contDiffAt_const (by simpa using hden₂)
+  have hβ₁ : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀))) y₀ := by
+    simpa [Function.comp_def] using (Real.smoothTransition.contDiffAt (n := (⊤ : ℕ∞))).comp y₀ harg₁
+  have hβ₂ : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀))) y₀ := by
+    simpa [Function.comp_def] using (Real.smoothTransition.contDiffAt (n := (⊤ : ℕ∞))).comp y₀ harg₂
+  have hβ₂c : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀))) y₀ := by
+    exact (contDiffAt_const : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun _ : MorseModel (m + 1) => (1 : ℝ)) y₀).sub hβ₂
+  exact hβ₁.mul hβ₂c
+
+theorem contMDiffOn_morseRoundedModelFieldSection {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) :
+    ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        (⟨data.χ y, morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y⟩ : TangentBundle I M))
+      (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+  let sec : MorseModel (m + 1) → TangentBundle I M :=
+    fun y => (⟨data.χ y, morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y⟩ : TangentBundle I M)
+  let secModel : MorseModel (m + 1) → TangentBundle I M :=
+    fun y => (⟨data.χ y, mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y
+      (CellAttachment.modelFlowField hk y)⟩ : TangentBundle I M)
+  let secV₀ : MorseModel (m + 1) → TangentBundle I M :=
+    fun y => (⟨data.χ y, V₀ (data.χ y)⟩ : TangentBundle I M)
+  let α : MorseModel (m + 1) → ℝ := fun y =>
+    Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) *
+      (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)))
+  let U₁ : Set (MorseModel (m + 1)) :=
+    {y : MorseModel (m + 1) | posPart hk y ≠ 0} ∩ Metric.ball (0 : MorseModel (m + 1)) data.R'
+  let U₂ : Set (MorseModel (m + 1)) :=
+    {y : MorseModel (m + 1) | ‖posPart hk y‖ < ε₀} ∩ Metric.ball (0 : MorseModel (m + 1)) data.R'
+  have h₁ : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞) sec U₁ := by
+    intro y₀ hy₀
+    let e : Bundle.Trivialization (MorseModel (m + 1))
+        (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+      trivializationAt (MorseModel (m + 1)) (TangentSpace I) (data.χ y₀)
+    have hpos : posPart hk y₀ ≠ 0 := hy₀.1
+    have hy₀ball : y₀ ∈ Metric.ball (0 : MorseModel (m + 1)) data.R' := hy₀.2
+    have hproj : ContMDiffWithinAt 𝓘(ℝ, MorseModel (m + 1)) I (⊤ : ℕ∞)
+        (fun y => (sec y).proj) U₁ y₀ := by
+      have hχ : ContMDiffWithinAt 𝓘(ℝ, MorseModel (m + 1)) I (⊤ : ℕ∞) data.χ U₁ y₀ :=
+        (data.hχon y₀ hy₀ball).mono (by intro y hy; exact hy.2)
+      simpa [sec] using hχ
+    have hsecModelAt : ContMDiffWithinAt 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞)
+        secModel U₁ y₀ := by
+      simpa [secModel] using (contMDiffOn_chartModelFieldSection hk c data) y₀ ⟨hpos, hy₀ball⟩
+    have hsecV₀At : ContMDiffWithinAt 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞)
+        secV₀ U₁ y₀ := by
+      simpa [secV₀] using
+        ((contMDiffOn_pullbackV₀ hk c data V₀ hV₀sm) y₀ hy₀ball).mono
+          (by intro y hy; exact hy.2)
+    have hsrc₀ : data.χ y₀ ∈ (chartAt H (data.χ y₀)).source :=
+      mem_chart_source (H := H) (M := M) (data.χ y₀)
+    have he : sec y₀ ∈ e.source := by
+      dsimp [sec, e]
+      simp [hsrc₀]
+    have heModel : secModel y₀ ∈ e.source := by
+      dsimp [secModel, e]
+      simp [hsrc₀]
+    have heV₀ : secV₀ y₀ ∈ e.source := by
+      dsimp [secV₀, e]
+      simp [hsrc₀]
+    have hfib₁ : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+        (fun y => (e (secModel y)).2) U₁ y₀ := by
+      have hiff := Bundle.Trivialization.contMDiffWithinAt_iff (𝕜 := ℝ) (B := M)
+        (F := MorseModel (m + 1)) (M := MorseModel (m + 1)) (E := TangentSpace I)
+        (IM := 𝓘(ℝ, MorseModel (m + 1))) (IB := I) (n := (⊤ : ℕ∞)) (s := U₁)
+        (e := e) (he := heModel)
+      exact (hiff.mp hsecModelAt).2.contDiffWithinAt
+    have hfib₂ : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+        (fun y => (e (secV₀ y)).2) U₁ y₀ := by
+      have hiff := Bundle.Trivialization.contMDiffWithinAt_iff (𝕜 := ℝ) (B := M)
+        (F := MorseModel (m + 1)) (M := MorseModel (m + 1)) (E := TangentSpace I)
+        (IM := 𝓘(ℝ, MorseModel (m + 1))) (IB := I) (n := (⊤ : ℕ∞)) (s := U₁)
+        (e := e) (he := heV₀)
+      exact (hiff.mp hsecV₀At).2.contDiffWithinAt
+    have hαAt : ContDiffAt ℝ (⊤ : ℕ∞) α y₀ := by
+      simpa [α] using contDiffAt_morseRoundedCutoff hk ε₀ ε₁ R₀ R₁ hε₀ε₁ hR₀R₁ hpos
+    have hαWithin : ContDiffWithinAt ℝ (⊤ : ℕ∞) α U₁ y₀ := hαAt.contDiffWithinAt
+    have hlin {y : MorseModel (m + 1)} (hb : data.χ y ∈ e.baseSet) :
+        (e (sec y)).2 = α y • (e (secModel y)).2 + (1 - α y) • (e (secV₀ y)).2 := by
+      let v : TangentSpace I (data.χ y) :=
+        mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)
+      let w : TangentSpace I (data.χ y) := V₀ (data.χ y)
+      have hsec : sec y = ⟨data.χ y, α y • v + (1 - α y) • w⟩ := by
+        dsimp [sec, secModel, secV₀, α, morseRoundedModelField, v, w]
+      have hmain : (e.linearEquivAt (R := ℝ) (data.χ y) hb) (α y • v + (1 - α y) • w) =
+          α y • (e.linearEquivAt (R := ℝ) (data.χ y) hb) v +
+            (1 - α y) • (e.linearEquivAt (R := ℝ) (data.χ y) hb) w := by
+        simp [map_add, map_smul]
+      calc
+        (e (sec y)).2 = (e.linearEquivAt (R := ℝ) (data.χ y) hb) (α y • v + (1 - α y) • w) := by
+          rw [hsec]
+          exact (e.linearEquivAt_apply (R := ℝ) (data.χ y) hb (α y • v + (1 - α y) • w)).symm
+        _ = α y • (e.linearEquivAt (R := ℝ) (data.χ y) hb) v +
+            (1 - α y) • (e.linearEquivAt (R := ℝ) (data.χ y) hb) w := hmain
+        _ = α y • (e (secModel y)).2 + (1 - α y) • (e (secV₀ y)).2 := by
+          have h₁ : (e (secModel y)).2 = (e.linearEquivAt (R := ℝ) (data.χ y) hb) v := by
+            exact (e.linearEquivAt_apply (R := ℝ) (data.χ y) hb v).symm
+          have h₂ : (e (secV₀ y)).2 = (e.linearEquivAt (R := ℝ) (data.χ y) hb) w := by
+            exact (e.linearEquivAt_apply (R := ℝ) (data.χ y) hb w).symm
+          rw [h₁, h₂]
+    have hfib : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun y => (e (sec y)).2) U₁ y₀ := by
+      have hcomb : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+          (fun y => α y • (e (secModel y)).2 + (1 - α y) • (e (secV₀ y)).2) U₁ y₀ := by
+        have hαsmul₁ : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+            (fun y => α y • (e (secModel y)).2) U₁ y₀ := hαWithin.smul hfib₁
+        have hαc : ContDiffWithinAt ℝ (⊤ : ℕ∞) (fun y => 1 - α y) U₁ y₀ := by
+          simpa using (contDiffWithinAt_const : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+            (fun _ : MorseModel (m + 1) => (1 : ℝ)) U₁ y₀).sub hαWithin
+        have hαsmul₂ : ContDiffWithinAt ℝ (⊤ : ℕ∞)
+            (fun y => (1 - α y) • (e (secV₀ y)).2) U₁ y₀ := hαc.smul hfib₂
+        exact hαsmul₁.add hαsmul₂
+      refine hcomb.congr_of_eventuallyEq ?_ ?_
+      · have hpre : data.χ ⁻¹' e.baseSet ∈ nhds y₀ := by
+          have hχcont : ContinuousAt data.χ y₀ := by
+            exact (continuousWithinAt_iff_continuousAt (Metric.isOpen_ball.mem_nhds hy₀ball)).mp
+              (data.hχon.continuousOn y₀ hy₀ball)
+          have hmem₀ : data.χ y₀ ∈ e.baseSet := by
+            simp [e]
+          exact hχcont.preimage_mem_nhds ((Bundle.Trivialization.open_baseSet e).mem_nhds hmem₀)
+        have hmem : U₁ ∩ data.χ ⁻¹' e.baseSet ∈ nhdsWithin y₀ U₁ := by
+          refine Filter.inter_mem ?_ ?_
+          · exact Filter.mem_inf_of_right
+              (Filter.mem_principal.mpr (by intro x hx; exact hx))
+          · exact Filter.mem_inf_of_left hpre
+        refine Filter.eventually_of_mem hmem ?_
+        intro y hy
+        exact hlin hy.2
+      · exact hlin (by simp [e] : data.χ y₀ ∈ e.baseSet)
+    exact (Bundle.Trivialization.contMDiffWithinAt_iff (𝕜 := ℝ) (B := M)
+      (F := MorseModel (m + 1)) (M := MorseModel (m + 1)) (E := TangentSpace I)
+      (IM := 𝓘(ℝ, MorseModel (m + 1))) (IB := I) (n := (⊤ : ℕ∞)) (s := U₁)
+      (e := e) (he := he)).mpr ⟨hproj, hfib.contMDiffWithinAt⟩
+  have h₂ : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞) sec U₂ := by
+    have hEq : Set.EqOn sec secV₀ U₂ := by
+      intro y hy
+      dsimp [sec, secV₀]
+      rw [morseRoundedModelField_eq_V₀_of_posPart_small hk c ε₀ ε₁ R₀ R₁ data V₀ hε₀ε₁
+        (le_of_lt hy.1)]
+    have hV₀On : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞) secV₀ U₂ := by
+      simpa [secV₀] using (contMDiffOn_pullbackV₀ hk c data V₀ hV₀sm).mono
+        (by intro y hy; exact hy.2)
+    exact hV₀On.congr hEq
+  have hU₁open : IsOpen U₁ := by
+    dsimp [U₁]
+    exact (isOpen_ne.preimage (continuous_posPart hk)).inter Metric.isOpen_ball
+  have hU₂open : IsOpen U₂ := by
+    dsimp [U₂]
+    exact (isOpen_lt (continuous_norm.comp (continuous_posPart hk)) continuous_const).inter
+      Metric.isOpen_ball
+  have hcover : U₁ ∪ U₂ = Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+    ext y
+    constructor
+    · intro hy
+      rcases hy with hy | hy
+      · exact hy.2
+      · exact hy.2
+    · intro hy
+      by_cases hpos : posPart hk y ≠ 0
+      · exact Or.inl ⟨hpos, hy⟩
+      · have hpos' : posPart hk y = 0 := by
+          by_contra hne
+          exact hpos hne
+        exact Or.inr ⟨by simpa [hpos'] using hε₀, hy⟩
+  rw [← hcover]
+  simpa [sec] using h₁.union_of_isOpen h₂ hU₁open hU₂open
+
+theorem morseRoundedDescentField_section_eqOn_chartSource {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x) :
+    Set.EqOn
+      (fun x : M => (⟨x, morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x⟩ : TangentBundle I M))
+      (fun x : M => (⟨data.χ (data.χ.symm x),
+        morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x)⟩ : TangentBundle I M))
+      (data.χ '' data.χ.source) := by
+  intro x hx
+  have hxtgt : x ∈ data.χ.target := by
+    rcases hx with ⟨y, hy, hxy⟩
+    rw [← hxy]
+    exact data.χ.map_source hy
+  have hχy : data.χ (data.χ.symm x) = x := data.χ.right_inv hxtgt
+  have hfield : morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x =
+      Eq.mp (by rw [show data.χ (data.χ.symm x) = x from data.χ.right_inv hxtgt])
+        (morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x)) := by
+    dsimp [morseRoundedDescentField]
+    rw [dif_pos hxtgt]
+  apply Bundle.TotalSpace.ext
+  · dsimp
+    exact hχy.symm
+  · dsimp
+    rw [hfield]
+    exact cast_heq (by rw [show data.χ (data.χ.symm x) = x from data.χ.right_inv hxtgt])
+      (morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x))
+
+theorem contMDiff_morseRoundedDescentFieldSection {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hRltRp : data.R < data.R')
+    (hR₁R : R₁ < data.R) :
+    ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x⟩ : TangentBundle I M)) := by
+  let sec : M → TangentBundle I M :=
+    fun x => (⟨x, morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x⟩ : TangentBundle I M)
+  let secModel : MorseModel (m + 1) → TangentBundle I M :=
+    fun y => (⟨data.χ y, morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y⟩ : TangentBundle I M)
+  let U₁ : Set M := data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
+  let U₂ : Set M := (data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁})ᶜ
+  have h₁ : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞) sec U₁ := by
+    have hsecModelOn : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞) secModel
+        (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+      simpa [secModel] using contMDiffOn_morseRoundedModelFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀
+        hV₀sm hε₀ hε₀ε₁ hR₀R₁
+    have hχsymm : ContMDiffOn I 𝓘(ℝ, MorseModel (m + 1)) (⊤ : ℕ∞) data.χ.symm U₁ := by
+      have hsub : U₁ ⊆ data.χ '' Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+        intro x hx
+        rcases hx with ⟨y, hy, hxy⟩
+        refine ⟨y, ?_, hxy⟩
+        rw [mem_ball_zero_iff]
+        exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+      exact data.hχsymmOn.mono hsub
+    have hmap : Set.MapsTo data.χ.symm U₁ (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+      rw [hsymm]
+      rw [mem_ball_zero_iff]
+      exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+    have hcomp : ContMDiffOn I I.tangent (⊤ : ℕ∞) (secModel ∘ data.χ.symm) U₁ :=
+      hsecModelOn.comp hχsymm hmap
+    have hEq : Set.EqOn (secModel ∘ data.χ.symm) sec U₁ := by
+      intro x hx
+      have hsrcx : x ∈ data.χ '' data.χ.source := by
+        rcases hx with ⟨y, hy, hxy⟩
+        exact ⟨y, data.hχsrc y (le_of_lt hy), hxy⟩
+      exact (morseRoundedDescentField_section_eqOn_chartSource hk c ε₀ ε₁ R₀ R₁ data V₀ hsrcx).symm
+    exact hcomp.congr (fun x hx => (hEq hx).symm)
+  have h₂ : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞) sec U₂ := by
+    have hEq : Set.EqOn sec
+        (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)) U₂ := by
+      intro x hx
+      dsimp [sec]
+      congr 1
+      exact morseRoundedDescentField_eq_V₀_of_not_mem_ballImage hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁ hx
+    have hV₀On : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+        (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)) U₂ :=
+      (hV₀sm.contMDiffOn : ContMDiffOn I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+        (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)) Set.univ).mono (by intro x hx; trivial)
+    exact hV₀On.congr (fun x hx => hEq hx)
+  have hU₁open : IsOpen U₁ := by
+    dsimp [U₁]
+    exact isOpen_chiBallImage data.χ data.R (fun y hy => data.hχsrc y (le_of_lt hy))
+  have hU₂open : IsOpen U₂ := by
+    dsimp [U₂]
+    exact isOpen_compl_ballImage hk c R₁ data (le_of_lt hR₁R)
+  have hcover : U₁ ∪ U₂ = Set.univ := by
+    ext x
+    constructor
+    · intro hx
+      trivial
+    · intro hx
+      by_cases hxball : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+      · exact Or.inl (by
+          rcases hxball with ⟨y, hy, hxy⟩
+          exact ⟨y, lt_of_le_of_lt hy hR₁R, hxy⟩)
+      · exact Or.inr (by simpa [U₂] using hxball)
+  exact contMDiff_of_contMDiffOn_union_of_isOpen h₁ h₂ hcover hU₁open hU₂open
+
 end ManifoldCellAttachment
 
 end
