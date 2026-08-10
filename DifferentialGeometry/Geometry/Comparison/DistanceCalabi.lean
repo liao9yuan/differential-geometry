@@ -623,6 +623,62 @@ theorem calabiDist_support
     ⟨fun y => tail.left + branchRadius (I := I) g tail.branch y,
       hrho_inf, hrho_x, hupper, hgrad_norm.le, hlap⟩
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem calabiDist_support_of_complete_metric
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (q : Real) (hq : 0 ≤ q)
+    (hRic : Geometry.Riemannian.BonnetMyers.RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2)))
+    {O x : M} (hOx : O ≠ x)
+    (hfin : riemannianEDistOf (I := I) g O x ≠ (⊤ : ENNReal)) :
+    letI : IsManifold I 1 M :=
+      IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+    letI : TopologicalSpace.MetrizableSpace M :=
+      Manifold.metrizableSpace I M
+    letI : T3Space M := inferInstance
+    letI : RiemannianBundle (fun y : M => TangentSpace I y) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y) :=
+      ⟨⟨g.inner, g.contMDiff.continuous, by intro y v w; rfl⟩⟩
+    letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+    letI : PseudoEMetricSpace M := inferInstance
+    letI : CompleteSpace M := hcomplete.complete
+    let r := (riemannianEDist I O x).toReal
+    ∃ rho : M → Real,
+      ContMDiffAt I 𝓘(Real, Real) ∞ rho x ∧
+      rho x = r ∧
+      (∀ᶠ y in 𝓝 x,
+        (riemannianEDist I O y).toReal ≤ rho y) ∧
+      g.inner x
+          (gradientFun (I := I) g rho x)
+          (gradientFun (I := I) g rho x) ≤ 1 ∧
+      laplacian (I := I)
+          (LeviCivita (I := I) g) g rho x ≤
+        2 * ((Module.finrank Real E - 1 : Nat) : Real) / r +
+          ((Module.finrank Real E - 1 : Nat) : Real) * q := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun y : M => TangentSpace I y) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro y v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M := inferInstance
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro y v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g y v
+  have hfin' : riemannianEDist I O x ≠ (⊤ : ENNReal) := by
+    simpa [riemannianEDistOf] using hfin
+  exact calabiDist_support (I := I) (M := M) g hEnorm q hq hRic hOx hfin'
+
 private theorem continuousAt_fiber_smul
     {X B F : Type*} [TopologicalSpace X] [TopologicalSpace B]
     [NormedAddCommGroup F] [NormedSpace Real F]
