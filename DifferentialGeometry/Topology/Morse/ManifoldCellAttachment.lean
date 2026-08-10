@@ -15166,6 +15166,66 @@ theorem morseRoundedModelField_descent {m k : ℕ} (hk : k ≤ m + 1)
   dsimp [morseRoundedModelField]
   exact hmain
 
+theorem morseRoundedModelField_eq_modelField {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x) {y : MorseModel (m + 1)}
+    (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁)
+    (hpos : ε₁ ≤ ‖posPart hk y‖) (hR : morseNorm (m + 1) y ≤ R₀) :
+    morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y =
+      mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y) := by
+  dsimp [morseRoundedModelField]
+  have hβ : Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) *
+      (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀))) = 1 := by
+    have h1 : Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) = 1 := by
+      apply Real.smoothTransition.one_of_one_le
+      rw [one_le_div (sub_pos.mpr hε₀ε₁)]
+      nlinarith [hpos]
+    have h2 : 1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) = 1 := by
+      have harg : (morseNorm (m + 1) y - R₀) / (R₁ - R₀) ≤ 0 := by
+        exact div_nonpos_of_nonpos_of_nonneg (by nlinarith [hR]) (le_of_lt (sub_pos.mpr hR₀R₁))
+      rw [Real.smoothTransition.zero_of_nonpos harg]
+      norm_num
+    rw [h1, h2]
+    norm_num
+  rw [hβ]
+  simp
+
+theorem morseRoundedModelField_eq_V₀_of_posPart_small {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x) {y : MorseModel (m + 1)}
+    (hε₀ε₁ : ε₀ < ε₁)
+    (hpos : ‖posPart hk y‖ ≤ ε₀) :
+    morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y = V₀ (data.χ y) := by
+  dsimp [morseRoundedModelField]
+  have h1 : Real.smoothTransition ((‖posPart hk y‖ - ε₀) / (ε₁ - ε₀)) = 0 := by
+    apply Real.smoothTransition.zero_of_nonpos
+    exact div_nonpos_of_nonpos_of_nonneg (by nlinarith [hpos]) (le_of_lt (sub_pos.mpr hε₀ε₁))
+  rw [h1]
+  simp
+
+theorem morseRoundedModelField_eq_V₀_of_norm_large {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x) {y : MorseModel (m + 1)}
+    (hR₀R₁ : R₀ < R₁)
+    (hR : R₁ ≤ morseNorm (m + 1) y) :
+    morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y = V₀ (data.χ y) := by
+  dsimp [morseRoundedModelField]
+  have h2 : 1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) = 0 := by
+    have htrans : Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) = 1 := by
+      apply Real.smoothTransition.one_of_one_le
+      rw [one_le_div (sub_pos.mpr hR₀R₁)]
+      nlinarith [hR]
+    rw [htrans]
+    norm_num
+  rw [h2]
+  simp
+
 end ManifoldCellAttachment
 
 end
