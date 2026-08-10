@@ -14935,21 +14935,22 @@ theorem morseAttachedUnstretchInChart {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ 
     (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v))
-    {y : MorseModel (m + 1)}
-    (hchartField : ∀ t ∈ Set.Ioo (-1) 1,
+    {y : MorseModel (m + 1)} {a b : ℝ}
+    (hchartField : ∀ t ∈ Set.Ioo a b,
       v (data.χ (modelFlow hk t y)) =
         mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (modelFlow hk t y)
           (modelFlowField hk (modelFlow hk t y)))
     (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
-    (hstay : ∀ t ∈ Set.Ioo (-1) 1, ‖modelFlow hk t y‖ < data.R')
-    (hpos : ∀ t ∈ Set.Ioo (-1) 1, posPart hk (modelFlow hk t y) ≠ 0)
-    (htime : CellAttachment.modelAttachedUnstretchTime hk ε r δ y ∈ Set.Ioo (-1) 1) :
+    (hstay : ∀ t ∈ Set.Ioo a b, ‖modelFlow hk t y‖ < data.R')
+    (hpos : ∀ t ∈ Set.Ioo a b, posPart hk (modelFlow hk t y) ≠ 0)
+    (ha : a < 0) (hb : 0 < b)
+    (htime : CellAttachment.modelAttachedUnstretchTime hk ε r δ y ∈ Set.Ioo a b) :
     curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) (data.χ y)
       (CellAttachment.modelAttachedUnstretchTime hk ε r δ y) =
       data.χ (CellAttachment.modelAttachedUnstretch hk ε r δ y) := by
   have hflow := morseFlowInChart (hk := hk) (c := c) (data := data) (v := v) (hv := hv)
-    (hsupp := hsupp) (hchartField := hchartField) y (a := (-1 : ℝ)) (b := (1 : ℝ))
-    (by norm_num : (-1 : ℝ) < 0) (by norm_num : (0 : ℝ) < 1)
+    (hsupp := hsupp) y (a := a) (b := b) (hchartField := hchartField)
+    ha hb
     (hstay := hstay) (hpos := hpos)
     (CellAttachment.modelAttachedUnstretchTime hk ε r δ y) htime
   rw [hflow]
@@ -15893,23 +15894,21 @@ theorem morseRoundedDescentField_eq_modelField_of_handleCore {m k : ℕ} (hk : k
     [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (V₀ : (x : M) → TangentSpace I x) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁)
-    {x : M} (hx : x ∈ data.χ.target)
-    (hpos : ε₁ ≤ ‖posPart hk (data.χ.symm x)‖)
-    (hR : morseNorm (m + 1) (data.χ.symm x) ≤ R₀) :
-    morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x =
-      Eq.mp (by rw [show data.χ (data.χ.symm x) = x from data.χ.right_inv hx])
-        (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (data.χ.symm x)
-          (CellAttachment.modelFlowField hk (data.χ.symm x))) := by
-  have hdef : morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x =
-      Eq.mp (by rw [show data.χ (data.χ.symm x) = x from data.χ.right_inv hx])
-        (morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x)) := by
-    dsimp [morseRoundedDescentField]
-    rw [dif_pos hx]
-  have hmodel : morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x) =
-      mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (data.χ.symm x)
-        (CellAttachment.modelFlowField hk (data.χ.symm x)) :=
+    {y : MorseModel (m + 1)} (hy : y ∈ data.χ.source)
+    (hpos : ε₁ ≤ ‖posPart hk y‖)
+    (hR : morseNorm (m + 1) y ≤ R₀) :
+    morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ y) =
+      mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y) := by
+  have hz' : data.χ y ∈ data.χ.target := data.χ.map_source hy
+  have hleft : data.χ.symm (data.χ y) = y := data.χ.left_inv hy
+  have hmodel : morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y =
+      mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y) :=
     morseRoundedModelField_eq_modelField hk c ε₀ ε₁ R₀ R₁ data V₀ hε₀ε₁ hR₀R₁ hpos hR
-  rw [hdef, hmodel]
+  dsimp [morseRoundedDescentField]
+  rw [dif_pos hz']
+  rw [hleft]
+  rw [hmodel]
+  simp
 
 theorem contMDiff_morseRoundedDescentFieldSection {m k : ℕ} (hk : k ≤ m + 1)
     (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
@@ -15991,6 +15990,60 @@ theorem contMDiff_morseRoundedDescentFieldSection {m k : ℕ} (hk : k ≤ m + 1)
           exact ⟨y, lt_of_le_of_lt hy hR₁R, hxy⟩)
       · exact Or.inr (by simpa [U₂] using hxball)
   exact contMDiff_of_contMDiffOn_union_of_isOpen h₁ h₂ hcover hU₁open hU₂open
+
+theorem morseRoundedDescentField_unstretchInChart {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁)
+    (hRltRp : data.R < data.R') (hR₁R : R₁ < data.R)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    {y : MorseModel (m + 1)} {a b : ℝ}
+    (hcutoff : ∀ t ∈ Set.Ioo a b,
+      ε₁ ≤ ‖posPart hk (modelFlow hk t y)‖ ∧ morseNorm (m + 1) (modelFlow hk t y) ≤ R₀)
+    (hstay : ∀ t ∈ Set.Ioo a b, ‖modelFlow hk t y‖ < data.R')
+    (hpos : ∀ t ∈ Set.Ioo a b, posPart hk (modelFlow hk t y) ≠ 0)
+    (ha : a < 0) (hb : 0 < b)
+    (htime : CellAttachment.modelAttachedUnstretchTime hk ε r δ y ∈ Set.Ioo a b) :
+    curveAt (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)
+      (exists_globalIntegralCurve_of_compactSupport (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)
+        (contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀ hV₀sm hε₀ hε₀ε₁ hR₀R₁
+          hRltRp hR₁R)
+        (isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+          (le_of_lt hR₁R) hV₀supp))
+      (data.χ y) (CellAttachment.modelAttachedUnstretchTime hk ε r δ y) =
+      data.χ (CellAttachment.modelAttachedUnstretch hk ε r δ y) := by
+  let v : (x : M) → TangentSpace I x := morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀
+  have hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) := by
+    simpa [v] using contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀
+      hV₀sm hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R
+  have hsupp : IsCompact (tsupport v) := by
+    simpa [v] using isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+      (le_of_lt hR₁R) hV₀supp
+  have hchartField : ∀ t ∈ Set.Ioo a b,
+      v (data.χ (modelFlow hk t y)) =
+        mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ (modelFlow hk t y)
+          (modelFlowField hk (modelFlow hk t y)) := by
+    intro t ht
+    let z : MorseModel (m + 1) := modelFlow hk t y
+    have hzsrc : z ∈ data.χ.source := data.hχsrc z
+      (le_trans (hcutoff t ht).2 (le_trans hR₀R₁.le hR₁R.le))
+    have hf := morseRoundedDescentField_eq_modelField_of_handleCore hk c ε₀ ε₁ R₀ R₁ data V₀
+      hε₀ε₁ hR₀R₁ hzsrc (hcutoff t ht).1 (hcutoff t ht).2
+    simpa [v, z] using hf
+  have hflow := morseAttachedUnstretchInChart (hk := hk) (c := c) (ε := ε) (r := r) (δ := δ)
+    (data := data) (v := v) (hv := hv) (hsupp := hsupp)
+    (hchartField := hchartField) (hδ0 := hδ0) (hδr := hδr)
+    (hstay := hstay) (hpos := hpos) (ha := ha) (hb := hb)
+    (htime := htime)
+  simpa [v] using hflow
 
 end ManifoldCellAttachment
 
