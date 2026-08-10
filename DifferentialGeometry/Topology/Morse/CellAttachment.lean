@@ -19,6 +19,7 @@ namespace CellAttachment
 namespace Real
 
 open Filter Set Function Polynomial
+open scoped Topology
 
 theorem smoothTransition_deriv_eq {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
     deriv Real.smoothTransition x =
@@ -57,6 +58,50 @@ theorem smoothTransition_deriv_eq {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
       expNegInvGlue x * expNegInvGlue (1 - x) * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) := by
     ring
   rw [hnum2]
+
+theorem smoothTransition_deriv_zero_of_nonpos (x : ℝ) (hx : x ≤ 0) :
+    deriv Real.smoothTransition x = 0 := by
+  by_cases hx0 : x < 0
+  · have hconst' : Filter.EventuallyEq (nhds x)
+        (fun y : ℝ => Real.smoothTransition y) (fun _ => (0 : ℝ)) := by
+      rw [Filter.EventuallyEq]
+      filter_upwards [Iio_mem_nhds hx0] with y hy
+      exact Real.smoothTransition.zero_of_nonpos (le_of_lt hy)
+    have hd : HasDerivAt Real.smoothTransition 0 x := by
+      exact (hasDerivAt_const (x := x) (c := (0 : ℝ))).congr_of_eventuallyEq hconst'
+    rw [hd.deriv]
+  · have hxeq : x = 0 := le_antisymm hx (le_of_not_gt hx0)
+    subst x
+    have hτw : HasDerivWithinAt Real.smoothTransition 0 (Set.Iic 0) 0 := by
+      have hconst : HasDerivWithinAt (fun _ : ℝ => (0 : ℝ)) 0 (Set.Iic 0) 0 :=
+        hasDerivWithinAt_const (x := (0 : ℝ)) (s := Set.Iic 0) (c := (0 : ℝ))
+      refine hconst.congr_of_eventuallyEq ?_ ?_
+      · filter_upwards [self_mem_nhdsWithin] with y hy
+        exact Real.smoothTransition.zero_of_nonpos hy
+      · simp
+    exact HasDerivWithinAt.deriv_eq_zero hτw (uniqueDiffWithinAt_Iic 0)
+
+theorem smoothTransition_deriv_zero_of_one_le (x : ℝ) (hx : 1 ≤ x) :
+    deriv Real.smoothTransition x = 0 := by
+  by_cases hx0 : 1 < x
+  · have hconst' : Filter.EventuallyEq (nhds x)
+        (fun y : ℝ => Real.smoothTransition y) (fun _ => (1 : ℝ)) := by
+      rw [Filter.EventuallyEq]
+      filter_upwards [Ioi_mem_nhds hx0] with y hy
+      exact Real.smoothTransition.one_of_one_le (le_of_lt hy)
+    have hd : HasDerivAt Real.smoothTransition 0 x := by
+      exact (hasDerivAt_const (x := x) (c := (1 : ℝ))).congr_of_eventuallyEq hconst'
+    rw [hd.deriv]
+  · have hxeq : x = 1 := le_antisymm (by linarith) hx
+    subst x
+    have hτw : HasDerivWithinAt Real.smoothTransition 0 (Set.Ici 1) 1 := by
+      have hconst : HasDerivWithinAt (fun _ : ℝ => (1 : ℝ)) 0 (Set.Ici 1) 1 :=
+        hasDerivWithinAt_const (x := (1 : ℝ)) (s := Set.Ici 1) (c := (1 : ℝ))
+      refine hconst.congr_of_eventuallyEq ?_ ?_
+      · filter_upwards [self_mem_nhdsWithin] with y hy
+        exact Real.smoothTransition.one_of_one_le hy
+      · simp
+    exact HasDerivWithinAt.deriv_eq_zero hτw (uniqueDiffWithinAt_Ici 1)
 
 end Real
 
