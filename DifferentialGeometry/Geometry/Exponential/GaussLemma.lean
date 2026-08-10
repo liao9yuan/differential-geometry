@@ -1496,6 +1496,21 @@ theorem edist_exp_le_radius
     radialCurve_pathELength_eq (I := I) g p a hEnorm ha] at hdist
   exact hdist
 
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+theorem edist_exp_le_radius_of_metric
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E)
+    (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
+    riemannianEDistOf (I := I) g p
+        (expMap (I := I) g p (show TangentSpace I p from a)) ≤
+      ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  have h := edist_exp_le_radius (I := I) (M := M) g p a hEnorm ha
+  simpa [riemannianEDistOf] using h
+
 private theorem radial_riemannianEDist_eq_radius
     (g : SmoothRiemannianMetric I M) (p : M) {a : E}
     (hEnorm : IsMetricNorm (I := I) (M := M) g)
@@ -2033,6 +2048,28 @@ theorem metricBall_subset_normalBall
   have hdy : riemannianEDist I c y = ENNReal.ofReal (Real.sqrt (g.inner c v v)) := by
     rw [hy_eq]; exact hdist_eq
   rw [hdy, ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
+
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+theorem metricBall_subset_normalBall_of_metric
+    (g : SmoothRiemannianMetric I M) (c : M)
+    {y : M} (hfin : riemannianEDistOf (I := I) g c y ≠ ⊤)
+    (hy : (riemannianEDistOf (I := I) g c y).toReal < expRadiusGp (I := I) g c) :
+    ∃ v : E, v ∈ (NormalCoordinates.normalChartAt (I := I) g c).target ∧
+        (show TangentSpace I c from v) ∈ expDomain (I := I) g c ∧
+        Real.sqrt (g.inner c (show TangentSpace I c from v) (show TangentSpace I c from v))
+          = (riemannianEDistOf (I := I) g c y).toReal ∧
+        y = expMap (I := I) g c v := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  have hfin' : riemannianEDist I c y ≠ ⊤ := by
+    simpa [riemannianEDistOf] using hfin
+  have hy' : (riemannianEDist I c y).toReal < expRadiusGp (I := I) g c := by
+    simpa [riemannianEDistOf] using hy
+  have h := metricBall_subset_normalBall (I := I) (M := M) g c hEnorm hfin' hy'
+  simpa [riemannianEDistOf] using h
 
 theorem memNChartSrcOfDist
     (g : SmoothRiemannianMetric I M) (c : M)
