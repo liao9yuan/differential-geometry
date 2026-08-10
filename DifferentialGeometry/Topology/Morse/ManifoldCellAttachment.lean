@@ -15855,6 +15855,157 @@ theorem isOpen_compl_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c R₁ : ℝ)
     exact hcompImg.isClosed
   exact isOpen_compl_iff.mpr hclosedImg
 
+noncomputable def morseRoundedUnstretchMap {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) : M := by
+  classical
+  exact if hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} then
+    data.χ (modelRoundedUnstretchDamped hk ε r δ R₀ R₁ (data.χ.symm x))
+  else x
+
+theorem morseRoundedUnstretchMap_eq_model {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) {x : M}
+    (hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    morseRoundedUnstretchMap hk c ε r δ R₀ R₁ data x =
+      data.χ (modelRoundedUnstretchDamped hk ε r δ R₀ R₁ (data.χ.symm x)) := by
+  dsimp [morseRoundedUnstretchMap]
+  rw [if_pos hx]
+
+theorem morseRoundedUnstretchMap_eq_self_of_not_mem_ball {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) {x : M}
+    (hx : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    morseRoundedUnstretchMap hk c ε r δ R₀ R₁ data x = x := by
+  dsimp [morseRoundedUnstretchMap]
+  rw [if_neg hx]
+
+theorem contMDiff_morseRoundedUnstretchMap {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hR₁R : R₁ < data.R) (hRltRp : data.R < data.R')
+    (hR'b : R₁ ^ 2 + R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) < data.R' ^ 2) :
+    ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedUnstretchMap hk c ε r δ R₀ R₁ data) := by
+  let U₁ : Set M := data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
+  let U₂ : Set M := (data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁})ᶜ
+  have hmodelOn : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (modelRoundedUnstretchDamped hk ε r δ R₀ R₁)
+      (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+    have hcontDiff : ContDiff ℝ (⊤ : ℕ∞)
+        (modelRoundedUnstretchDamped hk ε r δ R₀ R₁) :=
+      contDiff_modelRoundedUnstretchDamped hk ε r δ R₀ R₁ hδ hδr hR hR0
+    exact ((contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := MorseModel (m + 1)) (E' := MorseModel (m + 1))
+      (f := modelRoundedUnstretchDamped hk ε r δ R₀ R₁)
+      (s := Metric.ball (0 : MorseModel (m + 1)) data.R') (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))).mpr
+      hcontDiff.contDiffOn)
+  have h₁ : ContMDiffOn I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedUnstretchMap hk c ε r δ R₀ R₁ data) U₁ := by
+    have hχsymm : ContMDiffOn I 𝓘(ℝ, MorseModel (m + 1)) (⊤ : ℕ∞) data.χ.symm U₁ := by
+      have hsub : U₁ ⊆ data.χ '' Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+        intro x hx
+        rcases hx with ⟨y, hy, hxy⟩
+        refine ⟨y, ?_, hxy⟩
+        rw [mem_ball_zero_iff]
+        exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+      exact data.hχsymmOn.mono hsub
+    have hmap : Set.MapsTo data.χ.symm U₁ (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+      rw [hsymm]
+      rw [mem_ball_zero_iff]
+      exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+    have hcomp : ContMDiffOn I 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (modelRoundedUnstretchDamped hk ε r δ R₀ R₁ ∘ data.χ.symm) U₁ :=
+      hmodelOn.comp hχsymm hmap
+    have hχOn : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I (⊤ : ℕ∞) data.χ
+        (Metric.ball (0 : MorseModel (m + 1)) data.R') :=
+      data.hχon
+    have hmapsTo : Set.MapsTo (fun x : M => modelRoundedUnstretchDamped hk ε r δ R₀ R₁ (data.χ.symm x))
+        U₁ (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+      change modelRoundedUnstretchDamped hk ε r δ R₀ R₁ (data.χ.symm x) ∈
+        Metric.ball (0 : MorseModel (m + 1)) data.R'
+      rw [hsymm]
+      exact modelRoundedUnstretchDamped_mem_ball hk ε r δ R₀ R₁ data.R data.R' hε hδ hδr hR hR0
+        (le_of_lt hR₁R) hRltRp hR'b hy
+    have hcomp' : ContMDiffOn I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun x : M => data.χ (modelRoundedUnstretchDamped hk ε r δ R₀ R₁ (data.χ.symm x))) U₁ :=
+      hχOn.comp hcomp hmapsTo
+    have hEq : Set.EqOn (morseRoundedUnstretchMap hk c ε r δ R₀ R₁ data)
+        (fun x : M => data.χ (modelRoundedUnstretchDamped hk ε r δ R₀ R₁ (data.χ.symm x))) U₁ := by
+      intro x hx
+      by_cases hxball : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+      · exact morseRoundedUnstretchMap_eq_model hk c ε r δ R₀ R₁ data hxball
+      · have hR₁le : R₁ ≤ morseNorm (m + 1) (data.χ.symm x) := by
+          by_contra hnot
+          have hlt : morseNorm (m + 1) (data.χ.symm x) < R₁ := lt_of_not_ge hnot
+          exact hxball ⟨data.χ.symm x, le_of_lt hlt, by
+            rcases hx with ⟨y, hy, hxy⟩
+            have hsymm : data.χ.symm x = y := by
+              rw [← hxy]
+              exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+            rw [hsymm]
+            exact hxy⟩
+        have hmodel := modelRoundedUnstretchDamped_eq_self_of_norm_large hk ε r δ R₀ R₁ hR hR0
+          (y := data.χ.symm x) hR₁le
+        have hmap' : morseRoundedUnstretchMap hk c ε r δ R₀ R₁ data x =
+            data.χ (modelRoundedUnstretchDamped hk ε r δ R₀ R₁ (data.χ.symm x)) := by
+          rw [morseRoundedUnstretchMap_eq_self_of_not_mem_ball hk c ε r δ R₀ R₁ data hxball]
+          rw [hmodel]
+          rcases hx with ⟨y, hy, hxy⟩
+          have hsymm : data.χ.symm x = y := by
+            rw [← hxy]
+            exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+          rw [hsymm]
+          exact hxy.symm
+        exact hmap'
+    exact hcomp'.congr hEq
+  have h₂ : ContMDiffOn I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedUnstretchMap hk c ε r δ R₀ R₁ data) U₂ := by
+    have hEq : Set.EqOn (morseRoundedUnstretchMap hk c ε r δ R₀ R₁ data) (fun x : M => x) U₂ := by
+      intro x hx
+      exact morseRoundedUnstretchMap_eq_self_of_not_mem_ball hk c ε r δ R₀ R₁ data hx
+    exact (contMDiffOn_id : ContMDiffOn I I (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun x : M => x) U₂).congr hEq
+  have hU₁open : IsOpen U₁ := by
+    dsimp [U₁]
+    exact isOpen_chiBallImage data.χ data.R (fun y hy => data.hχsrc y (le_of_lt hy))
+  have hU₂open : IsOpen U₂ := by
+    dsimp [U₂]
+    exact isOpen_compl_ballImage hk c R₁ data (le_of_lt hR₁R)
+  have hcover : U₁ ∪ U₂ = Set.univ := by
+    ext x
+    constructor
+    · intro hx
+      trivial
+    · intro hx
+      by_cases hxball : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+      · exact Or.inl (by
+          rcases hxball with ⟨y, hy, hxy⟩
+          exact ⟨y, lt_of_le_of_lt hy hR₁R, hxy⟩)
+      · exact Or.inr (by simpa [U₂] using hxball)
+  exact contMDiff_of_contMDiffOn_union_of_isOpen h₁ h₂ hcover hU₁open hU₂open
+
 theorem isCompact_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c R₁ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
