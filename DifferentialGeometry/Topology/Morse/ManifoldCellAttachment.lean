@@ -15226,6 +15226,64 @@ theorem morseRoundedModelField_eq_V₀_of_norm_large {m k : ℕ} (hk : k ≤ m +
   rw [h2]
   simp
 
+noncomputable def morseRoundedDescentField {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x) (x : M) : TangentSpace I x := by
+  classical
+  exact if hx : x ∈ data.χ.target then
+    Eq.mp (by rw [show data.χ (data.χ.symm x) = x from data.χ.right_inv hx])
+      (morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ.symm x))
+  else V₀ x
+
+theorem fromTangentSpace_mfderiv_cast {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    {x : M} {y : MorseModel (m + 1)} (hχy : data.χ y = x)
+    (v : TangentSpace I (data.χ y)) :
+    (NormedSpace.fromTangentSpace (f x)) (mfderiv I 𝓘(ℝ, ℝ) f x (Eq.mp (by rw [hχy]) v)) =
+    (NormedSpace.fromTangentSpace (f (data.χ y))) (mfderiv I 𝓘(ℝ, ℝ) f (data.χ y) v) := by
+  subst hχy
+  rfl
+
+theorem morseRoundedDescentField_descent {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε ε₀ ε₁ R₀ R₁ r δ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hRltRp : data.R < data.R')
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hR₁R : R₁ ≤ data.R)
+    (hV₀ : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) = -1)
+    {x : M} (hx : x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2)) :
+    (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x)
+      (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x)) = -1 := by
+  by_cases hchart : x ∈ data.χ.target
+  · let y : MorseModel (m + 1) := data.χ.symm x
+    have hχy : data.χ y = x := by
+      dsimp [y]
+      exact data.χ.right_inv hchart
+    have hdef : morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ x =
+        Eq.mp (by rw [hχy]) (morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y) := by
+      dsimp [morseRoundedDescentField]
+      rw [dif_pos hchart]
+    rw [hdef]
+    have htr := fromTangentSpace_mfderiv_cast (hk := hk) (c := c) (data := data) (hχy := hχy)
+      (v := morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y)
+    rw [htr]
+    exact morseRoundedModelField_descent (hk := hk) (c := c) (ε := ε) (ε₀ := ε₀) (ε₁ := ε₁)
+      (R₀ := R₀) (R₁ := R₁) (r := r) (δ := δ) (data := data) (V₀ := V₀)
+      (hRltRp := hRltRp) (hε₀ := hε₀) (hε₀ε₁ := hε₀ε₁) (hR₀R₁ := hR₀R₁) (hR₁R := hR₁R)
+      (hV₀ := hV₀) (hy := by simpa [hχy] using hx)
+  · dsimp [morseRoundedDescentField]
+    rw [dif_neg hchart]
+    exact hV₀ x hx
+
 end ManifoldCellAttachment
 
 end
