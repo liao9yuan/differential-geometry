@@ -2301,6 +2301,24 @@ theorem modelAttachedRegion_iff_sublevel {n k : ℕ} (hk : k ≤ n) (c ε r δ :
       (modelAttachedFunction hk c ε r δ y ≤ c) from rfl] at heq
   exact Iff.of_eq heq
 
+theorem morseNormalForm_le_upper_of_mem_attachedRegion {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) {y : MorseModel n}
+    (hy : y ∈ modelAttachedRegion hk ε r δ) :
+    morseNormalForm hk c y ≤ c + r ^ 2 / 2 := by
+  have hsc := smoothCap_le_max (ε := ε) (r := r) (δ := δ)
+    (t := ‖negPart hk y‖ ^ 2) hε hδ
+  have hpos : ‖posPart hk y‖ ^ 2 ≤ smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+    simpa [modelAttachedRegion] using hy
+  have hmax : max (r ^ 2) (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+    rw [max_le_iff]
+    constructor <;> nlinarith [sq_nonneg ‖negPart hk y‖]
+  have hle : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+    nlinarith [hpos, hsc, hmax]
+  have hf : morseNormalForm hk c y = c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) :=
+    morseNormalForm_split hk c y
+  rw [hf]
+  nlinarith [hle]
+
 theorem contDiff_modelAttachedFunction {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ) :
     ContDiff ℝ (⊤ : ℕ∞) (modelAttachedFunction hk c ε r δ) := by
   have hnormNeg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) := by
