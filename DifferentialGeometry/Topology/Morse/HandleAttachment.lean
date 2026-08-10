@@ -2313,6 +2313,45 @@ theorem modelAttachedUnstretchTime_eq_boundary {n k : ℕ} (hk : k ≤ n) (ε r 
   have hpos : ‖negPart hk y‖ ^ 2 - 2 * ε ≠ 0 := by nlinarith [ht, hδ0]
   field_simp [hpos]
 
+theorem modelAttachedUnstretchTime_neg_of_posPart_ne_zero {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) {y : MorseModel n}
+    (hpos : ‖posPart hk y‖ ≠ 0) (hneg : ‖negPart hk y‖ ≠ 0) :
+    modelAttachedUnstretchTime hk ε r δ y < 0 := by
+  let t : ℝ := ‖negPart hk y‖ ^ 2
+  let b : ℝ := ‖posPart hk y‖ ^ 2
+  let sc : ℝ := smoothCap ε r δ t
+  have htpos : 0 < t := by
+    dsimp [t]
+    exact sq_pos_of_ne_zero hneg
+  have hbpos : 0 < b := by
+    dsimp [b]
+    exact sq_pos_of_ne_zero hpos
+  have hscpos : 0 < sc := by
+    dsimp [sc]
+    exact smoothCap_pos hδ hδr
+  have hβ : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ∈ Set.Icc (0 : ℝ) 1 := by
+    exact ⟨Real.smoothTransition.nonneg _, Real.smoothTransition.le_one _⟩
+  have hsc_lt : sc < t + r ^ 2 := by
+    dsimp [sc, smoothCap]
+    by_cases hβ1 : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) = 1
+    · rw [hβ1]
+      have hpos : 0 < t - (t - 2 * ε - r ^ 2) := by nlinarith [hδr]
+      nlinarith [hpos]
+    · have hβlt1 : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) < 1 :=
+        lt_of_le_of_ne hβ.2 hβ1
+      have h1 : 0 < t * (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ))) := by
+        exact mul_pos htpos (sub_pos.mpr hβlt1)
+      have h2 : 0 ≤ (2 * ε + r ^ 2) * Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) := by
+        exact mul_nonneg (by nlinarith [hδr]) hβ.1
+      nlinarith
+  have hratio_gt : 1 < (t + r ^ 2) / sc := by
+    exact (one_lt_div hscpos).2 hsc_lt
+  dsimp [modelAttachedUnstretchTime]
+  have hneg : 1 - (t + r ^ 2) / sc < 0 := by linarith
+  have hmain : b * (1 - (t + r ^ 2) / sc) < 0 := by
+    exact mul_neg_of_pos_of_neg hbpos hneg
+  nlinarith
+
 theorem fderiv_morseNormalForm_modelFlowField {n k : ℕ} (hk : k ≤ n) (c : ℝ) {y : MorseModel n}
     (hpos : ‖posPart hk y‖ ≠ 0) :
     fderiv ℝ (morseNormalForm hk c) y (modelFlowField hk y) = -1 := by
