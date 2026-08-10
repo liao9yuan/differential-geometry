@@ -2472,6 +2472,17 @@ theorem modelAttachedUnstretch_mem {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ) (h
     rwa [div_mul_cancel₀ (‖negPart hk y‖ ^ 2 + r ^ 2) (ne_of_gt hs)] at hle'
   exact hmain
 
+theorem modelAttachedUnstretch_norm_sq_le {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelAttachedRegion hk ε r δ) :
+    morseNorm n (modelAttachedUnstretch hk ε r δ y) ^ 2 ≤
+      2 * ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+  have hneg := modelAttachedUnstretch_negPart_norm_sq hk ε r δ y
+  have hmem := modelAttachedUnstretch_mem hk ε r δ hδ0 hδr y hy
+  have hnorm := morseNorm_sq_eq_negPart_add_posPart hk (modelAttachedUnstretch hk ε r δ y)
+  rw [hnorm, hneg]
+  nlinarith [hmem]
+
 theorem modelAttachedUnstretch_stretch {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
     (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) (y : MorseModel n) :
     modelAttachedUnstretch hk ε r δ (modelAttachedStretch hk ε r δ y) = y := by
