@@ -2495,4 +2495,69 @@ noncomputable def modelRoundedSublevelDiffeomorphUpper {m k : ℕ} (hk : k ≤ m
       (hbig := hbig) (hr := hr) (hcs₁ := hcs₂) (hcs₂ := hcs₁)
       (hchart₁ := hchart₂) (hchart₂ := hchart₁))
 
+noncomputable def modelRoundedSublevelDiffeomorphModified {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c) :=
+      sublevelChartedSpace (m := m) (modelRoundedFunction hk c ε r δ R₀ R₁) c
+        (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+        (fun y hy => fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y hy))
+    (hcs₂ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε)) :=
+      sublevelChartedSpace (m := m) (modifiedNormalForm hk c ε δ) (c - ε)
+        (contDiff_modifiedNormalForm hk c ε δ hδ)
+        (fun y hy => modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+          ⟨le_of_eq hy.symm, by linarith⟩))
+    (hcs₃ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+      sublevelChartedSpace (m := m) (morseNormalForm hk c) (c + r ^ 2 / 2)
+        (contDiff_morseNormalForm hk c)
+        (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy))
+    (hchart₁ : ∀ y : SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c,
+      hcs₁.chartAt y =
+        (if h : modelRoundedFunction hk c ε r δ R₀ R₁ y.1 = c then
+          sublevelBoundaryChart (modelRoundedFunction hk c ε r δ R₀ R₁) c y h
+            (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+            (fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y.1 h)
+        else sublevelInteriorChart (modelRoundedFunction hk c ε r δ R₀ R₁) c y
+          (lt_of_le_of_ne (show modelRoundedFunction hk c ε r δ R₀ R₁ y.1 ≤ c from y.2) h)
+          (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε),
+      hcs₂.chartAt y =
+        (if h : modifiedNormalForm hk c ε δ y.1 = c - ε then
+          sublevelBoundaryChart (modifiedNormalForm hk c ε δ) (c - ε) y h
+            (contDiff_modifiedNormalForm hk c ε δ hδ)
+            (modifiedNormalForm_no_critical_point_in_strip hk c ε δ hε hδ
+              ⟨le_of_eq h.symm, by linarith⟩)
+        else sublevelInteriorChart (modifiedNormalForm hk c ε δ) (c - ε) y
+          (lt_of_le_of_ne (show modifiedNormalForm hk c ε δ y.1 ≤ c - ε from y.2) h)
+          (contDiff_modifiedNormalForm hk c ε δ hδ)) := by
+      intro y
+      rfl)
+    (hchart₃ : ∀ y : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2),
+      hcs₃.chartAt y =
+        (if h : morseNormalForm hk c y.1 = c + r ^ 2 / 2 then
+          sublevelBoundaryChart (morseNormalForm hk c) (c + r ^ 2 / 2) y h
+            (contDiff_morseNormalForm hk c)
+            (fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y.1 h)
+        else sublevelInteriorChart (morseNormalForm hk c) (c + r ^ 2 / 2) y
+          (lt_of_le_of_ne (show morseNormalForm hk c y.1 ≤ c + r ^ 2 / 2 from y.2) h)
+          (contDiff_morseNormalForm hk c)) := by
+      intro y
+      rfl) :
+    @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c) _ hcs₁
+      (SublevelSpace (modifiedNormalForm hk c ε δ) (c - ε)) _ hcs₂
+      (⊤ : ℕ∞) :=
+  (modelRoundedSublevelDiffeomorphUpper hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig hr
+    (hcs₁ := hcs₁) (hcs₂ := hcs₃) (hchart₁ := hchart₁) (hchart₂ := hchart₃)).trans
+    (modelModifiedSublevelDiffeomorph hk c ε r δ hε hδ hr
+      (hcs₁ := hcs₂) (hcs₂ := hcs₃) (hchart₁ := hchart₂) (hchart₂ := hchart₃)).symm
+
 end DifferentialGeometry.Topology.Morse.CellAttachment
