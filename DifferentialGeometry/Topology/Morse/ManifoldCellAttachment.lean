@@ -18091,6 +18091,275 @@ theorem morseRoundedTransportMap_strict_of_sublevel {m k : ℕ} (hk : k ≤ m + 
       hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hδ0 hρ hρ' hρρ' hε hr2 hf hV₀desc hV₀rate
       x hx hxg
 
+private theorem morseFarExpandLevelMap_eq_of_le_upper {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
+    (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) {t : ℝ} (ht : t ≤ c + ε) :
+    ∃ s : ℝ, s ≤ c - ε ∧ s - morseFarExpandTimeSmooth c ε δ ρ ρ' s = t := by
+  by_cases hdeep : t ≤ c - ε - δ
+  · refine ⟨t, ?_, ?_⟩
+    · nlinarith
+    · have hτ : morseFarExpandTimeSmooth c ε δ ρ ρ' t = 0 :=
+        morseFarExpandTimeSmooth_zero hρ (by linarith)
+      rw [hτ]
+      ring
+  · have hnotdeep : c - ε - δ < t := lt_of_not_ge hdeep
+    let L : ℝ → ℝ := fun s => s - morseFarExpandTimeSmooth c ε δ ρ ρ' s
+    have hLcont : Continuous L := by
+      dsimp [L]
+      exact continuous_id.sub (contDiff_morseFarExpandTimeSmooth hρ hρ' hδ).continuous
+    have hmem : t ∈ Set.Icc (L (c - ε - δ)) (L (c - ε)) := by
+      have hτ₁ : morseFarExpandTimeSmooth c ε δ ρ ρ' (c - ε - δ) = 0 := by
+        exact morseFarExpandTimeSmooth_zero hρ (by linarith)
+      have hτ₂ : morseFarExpandTimeSmooth c ε δ ρ ρ' (c - ε) = -(2 * ε) :=
+        morseFarExpandTimeSmooth_top (c := c) (ε := ε) (δ := δ) (ρ := ρ) (ρ' := ρ') hρ hε hδ hρρ'
+      dsimp [L]
+      constructor
+      · rw [hτ₁]
+        nlinarith
+      · rw [hτ₂]
+        nlinarith [ht]
+    have hivt := intermediate_value_Icc (a := c - ε - δ) (b := c - ε) (by linarith)
+      (f := L) (by
+        exact hLcont.continuousOn)
+    have hmem' : t ∈ L '' Set.Icc (c - ε - δ) (c - ε) := hivt hmem
+    rcases hmem' with ⟨s, hs, hsL⟩
+    refine ⟨s, hs.2, hsL⟩
+
+private theorem morseFarExpandLevelMap_eq_unique {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
+    (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) {s₁ s₂ t : ℝ}
+    (h₁ : s₁ - morseFarExpandTimeSmooth c ε δ ρ ρ' s₁ = t)
+    (h₂ : s₂ - morseFarExpandTimeSmooth c ε δ ρ ρ' s₂ = t) :
+    s₁ = s₂ := by
+  by_contra hne
+  rcases lt_or_gt_of_ne hne with hlt | hlt
+  · have hmono := morseFarExpandTimeSmooth_levelMap_strictMono (c := c) (ε := ε) (δ := δ)
+      (ρ := ρ) (ρ' := ρ') hρ hρ' hε hδ hlt
+    nlinarith
+  · have hmono := morseFarExpandTimeSmooth_levelMap_strictMono (c := c) (ε := ε) (δ := δ)
+      (ρ := ρ) (ρ' := ρ') hρ hρ' hε hδ hlt
+    nlinarith
+
+private theorem morseRoundedTransportMap_preimage_of_outside {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hRltRp : data.R < data.R')
+    (hR₁R : R₁ < data.R)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hρ : 0 < ρ) (hρ' : 0 < ρ') (hρρ' : ρ + ρ' ≤ δ)
+    (hε : 0 < ε) (hr2 : r ^ 2 = 2 * ε)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hV₀desc : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) = -1)
+    (hV₀rate : ∀ x : M,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) ≤ 0)
+    {y : M} (hy : y ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁})
+    (hfy : f y ≤ c + r ^ 2 / 2)
+    (hroom : ∀ t : ℝ, 0 ≤ t → t ≤ 2 * ε →
+      curveAt (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)
+        (exists_globalIntegralCurve_of_compactSupport (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)
+          (contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀ hV₀sm hε₀ hε₀ε₁
+            hR₀R₁ hRltRp hR₁R)
+          (isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+            (le_of_lt hR₁R) hV₀supp))
+        y t ∉
+      data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    ∃ x : M, morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c ∧
+      morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁
+        hR₀R₁ hRltRp hR₁R x = y := by
+  let v : (x : M) → TangentSpace I x := morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀
+  have hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) := by
+    simpa [v] using contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀
+      hV₀sm hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R
+  have hsupp : IsCompact (tsupport v) := by
+    simpa [v] using isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+      (le_of_lt hR₁R) hV₀supp
+  have hrate : ∀ x : M,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0 := by
+    intro x
+    have hr := morseRoundedDescentField_rate hk c ε₀ ε₁ R₀ R₁ data V₀ hε₀ hε₀ε₁ hR₀R₁
+      hRltRp (le_of_lt hR₁R) hV₀rate x
+    simpa [v] using hr
+  have hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1 := by
+    intro x hx'
+    have hd := morseRoundedDescentField_descent hk c ε ε₀ ε₁ R₀ R₁ r δ data V₀ hRltRp hε₀
+      hε₀ε₁ hR₀R₁ (le_of_lt hR₁R) hV₀desc (x := x) hx'
+    simpa [v] using hd
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  by_cases hdeep : f y ≤ c - ε - δ + ρ'
+  · refine ⟨y, ?_, ?_⟩
+    · have hfy' : f y ≤ c - ε := by nlinarith
+      rw [morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hy]
+      nlinarith
+    · exact morseRoundedTransportMap_deep hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp
+        hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hρ y hy hdeep
+  · have hnotdeep : c - ε - δ + ρ' < f y := lt_of_not_ge hdeep
+    have hfy_le : f y ≤ c + ε := by
+      have hr2' : c + r ^ 2 / 2 = c + ε := by rw [hr2]; ring
+      rwa [hr2'] at hfy
+    rcases morseFarExpandLevelMap_eq_of_le_upper (c := c) (ε := ε) (δ := δ) (ρ := ρ) (ρ' := ρ')
+      hρ hρ' hε hδ0 hρρ' (t := f y) hfy_le with ⟨s, hs_le, hsL⟩
+    have hs_gt : c - ε - δ < s := by
+      by_contra hnot
+      have hsle : s ≤ c - ε - δ := le_of_not_gt hnot
+      have hτ : morseFarExpandTimeSmooth c ε δ ρ ρ' s = 0 :=
+        morseFarExpandTimeSmooth_zero hρ (by linarith)
+      have hL : s - morseFarExpandTimeSmooth c ε δ ρ ρ' s = f y := hsL
+      rw [hτ] at hL
+      have hsle' : s ≤ c - ε - δ + ρ' := by linarith
+      linarith
+    let τs : ℝ := morseFarExpandTimeSmooth c ε δ ρ ρ' s
+    have hτs_ge : -(2 * ε) ≤ τs := by
+      have hle := morseFarExpandTime_ge (c := c) (ε := ε) (δ := δ) hδ0 hε (t := s) hs_le
+      have hσ₁ : Real.smoothTransition ((s - (c - ε - δ + ρ')) / ρ) ≤ 1 :=
+        Real.smoothTransition.le_one _
+      have hmle : morseFarExpandTime c ε δ s ≤ 0 :=
+        morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ0 hε
+      have hfac : Real.smoothTransition ((s - (c - ε - δ + ρ')) / ρ) *
+          morseFarExpandTime c ε δ s ≥ morseFarExpandTime c ε δ s := by
+        simpa [mul_comm] using (mul_le_mul_of_nonpos_right hσ₁ hmle)
+      dsimp [τs, morseFarExpandTimeSmooth]
+      nlinarith
+    have hτs_le : τs ≤ 0 := by
+      have hle := morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ0 hε (t := s)
+      have hσ : 0 ≤ Real.smoothTransition ((s - (c - ε - δ + ρ')) / ρ) :=
+        Real.smoothTransition.nonneg _
+      dsimp [τs, morseFarExpandTimeSmooth]
+      exact mul_nonpos_of_nonneg_of_nonpos hσ hle
+    let t : ℝ := -τs
+    have ht0 : 0 ≤ t := by dsimp [t]; linarith
+    have ht2e : t ≤ 2 * ε := by dsimp [t]; linarith
+    let x : M := curveAt v hcomplete y t
+    have hxout : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} := by
+      dsimp [x]
+      simpa [v] using hroom t ht0 ht2e
+    have hfx : f x = s := by
+      have hstrip : f y ∈ Set.Icc (c - ε - δ) (c + r ^ 2 / 2) := by
+        constructor
+        · exact le_of_lt (by linarith)
+        · exact hfy
+      have ht1 : f y - (c + r ^ 2 / 2) ≤ t := by
+        dsimp [t]
+        have hr2' : c + ε = c + r ^ 2 / 2 := by rw [hr2]; ring
+        have hL : s - morseFarExpandTimeSmooth c ε δ ρ ρ' s = f y := hsL
+        nlinarith [hs_le, hr2']
+      have ht2 : t ≤ f y - (c - ε - δ) := by
+        dsimp [t]
+        have hs_ge : c - ε - δ ≤ s := le_of_lt hs_gt
+        have hL : s - morseFarExpandTimeSmooth c ε δ ρ ρ' s = f y := hsL
+        nlinarith
+      have hval := morseCollarFlow_valueOnStrip (I := I) f c ε r δ hf v hv hsupp hdfOn hrate
+        (hy := hstrip) (t := t) ht1 ht2
+      dsimp [x]
+      have hmain : f (curveAt v hcomplete y t) = f y - t := hval
+      rw [hmain]
+      dsimp [t]
+      have hL : s - morseFarExpandTimeSmooth c ε δ ρ ρ' s = f y := hsL
+      nlinarith
+    have hτx : morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x =
+        morseFarExpandTimeSmooth c ε δ ρ ρ' s := by
+      rw [morseRoundedTransportTime_eq_collar hk c ε r δ ρ ρ' θ R₀ R₁ data hxout]
+      rw [hfx]
+    have hgx : morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c := by
+      rw [morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hxout]
+      have : f x + ε ≤ c := by
+        have hs : s ≤ c - ε := hs_le
+        rw [hfx]
+        linarith
+      exact this
+    have hΦ : morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp
+        hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x = y := by
+      dsimp [morseRoundedTransportMap, x]
+      have hmain : curveAt v hcomplete (curveAt v hcomplete y t)
+          (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data (curveAt v hcomplete y t)) = y := by
+        rw [hτx]
+        have hv1 : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (1 : WithTop ℕ∞)
+            (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) :=
+          hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+        have hadd := curveAt_add v hv1 hcomplete y t (morseFarExpandTimeSmooth c ε δ ρ ρ' s)
+        have hsum : t + morseFarExpandTimeSmooth c ε δ ρ ρ' s = 0 := by
+          dsimp [t]
+          ring
+        calc
+          curveAt v hcomplete (curveAt v hcomplete y t)
+              (morseFarExpandTimeSmooth c ε δ ρ ρ' s) =
+              curveAt v hcomplete y (t + morseFarExpandTimeSmooth c ε δ ρ ρ' s) := hadd.symm
+          _ = curveAt v hcomplete y 0 := by rw [hsum]
+          _ = y := curveAt_zero v hcomplete y
+      simpa [v] using hmain
+    exact ⟨x, hgx, hΦ⟩
+
+private theorem morseRoundedHandleOrbitStayInner {m k : ℕ} (hk : k ≤ m + 1)
+    (ε₁ ε r δ R₀ R' : ℝ)
+    (hε₁ : 0 < ε₁) (hε : 0 ≤ ε) (hδ : 0 ≤ δ) (hR₀ : 0 ≤ R₀) (hR' : 0 ≤ R')
+    {y : MorseModel (m + 1)} {a b : ℝ}
+    (hynorm : morseNorm (m + 1) y ^ 2 + 2 * ε + r ^ 2 + δ + 1 ≤ R₀ ^ 2)
+    (hposBig : ε₁ ^ 2 ≤ ‖posPart hk y‖ ^ 2 / 2)
+    (hb : b ≤ ‖posPart hk y‖ ^ 2 / 4)
+    (habs : ∀ t ∈ Set.Ioo a b, |t| ≤ (2 * ε + r ^ 2 + δ) / 2 + 1 / 2)
+    (hRroom : R₀ ^ 2 + 2 * ε + r ^ 2 + δ + 1 < R' ^ 2) :
+    ∀ t ∈ Set.Ioo a b,
+      (ε₁ ≤ ‖posPart hk (modelFlow hk t y)‖ ∧ morseNorm (m + 1) (modelFlow hk t y) ≤ R₀) ∧
+      ‖modelFlow hk t y‖ < R' := by
+  intro t ht
+  have hpos : 0 < ‖posPart hk y‖ := by
+    have hε₁sq : 0 < ε₁ ^ 2 := sq_pos_of_pos hε₁
+    have hsqpos : 0 < ‖posPart hk y‖ ^ 2 := by
+      have hdiv : 0 < ‖posPart hk y‖ ^ 2 / 2 := lt_of_lt_of_le hε₁sq hposBig
+      nlinarith [hdiv]
+    exact lt_of_le_of_ne (norm_nonneg _) (Ne.symm (sq_pos_iff.mp hsqpos))
+  have hposge : ε₁ ≤ ‖posPart hk (modelFlow hk t y)‖ :=
+    modelFlow_posPart_ge_eps_of_interval hk ε₁ a b y hpos hb hposBig t ht
+  let ε' : ℝ := (2 * ε + r ^ 2 + δ) / 4 + 1 / 4
+  have hε'0 : 0 ≤ ε' := by
+    dsimp [ε']
+    nlinarith [hε, sq_nonneg r, hδ]
+  have habs' : |t| ≤ 2 * ε' := by
+    dsimp [ε']
+    nlinarith [habs t ht]
+  have hsq := modelFlow_norm_sq_le_add hk ε' hε'0 habs' y
+  have h4 : 4 * ε' = 2 * ε + r ^ 2 + δ + 1 := by
+    dsimp [ε']
+    ring
+  have hnormle : morseNorm (m + 1) (modelFlow hk t y) ^ 2 ≤ R₀ ^ 2 := by
+    nlinarith [hsq, hynorm, h4]
+  have hnorm : morseNorm (m + 1) (modelFlow hk t y) ≤ R₀ := by
+    have hnon : 0 ≤ morseNorm (m + 1) (modelFlow hk t y) := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have habs' := sq_le_sq.mp hnormle
+    have h1 : |morseNorm (m + 1) (modelFlow hk t y)| = morseNorm (m + 1) (modelFlow hk t y) :=
+      abs_of_nonneg hnon
+    have h2 : |R₀| = R₀ := abs_of_nonneg hR₀
+    rwa [h1, h2] at habs'
+  have hnormR' : ‖modelFlow hk t y‖ < R' := by
+    have hR'0 : 0 ≤ R' := hR'
+    have hsq' : morseNorm (m + 1) (modelFlow hk t y) ^ 2 < R' ^ 2 := by
+      have hy' : morseNorm (m + 1) y ^ 2 ≤ R₀ ^ 2 := by nlinarith [hynorm]
+      have hle : morseNorm (m + 1) (modelFlow hk t y) ^ 2 ≤ R₀ ^ 2 + 2 * ε + r ^ 2 + δ + 1 := by
+        nlinarith [hsq, hy', h4]
+      nlinarith [hle, hRroom]
+    have hnorm : morseNorm (m + 1) (modelFlow hk t y) < R' := by
+      have hnon : 0 ≤ morseNorm (m + 1) (modelFlow hk t y) := by
+        dsimp [morseNorm]
+        exact norm_nonneg _
+      have habs' := sq_lt_sq.mp hsq'
+      have h1 : |morseNorm (m + 1) (modelFlow hk t y)| = morseNorm (m + 1) (modelFlow hk t y) :=
+        abs_of_nonneg hnon
+      have h2 : |R'| = R' := abs_of_nonneg hR'0
+      rwa [h1, h2] at habs'
+    exact lt_of_le_of_lt (morseNorm_piNorm_le (modelFlow hk t y)) hnorm
+  exact ⟨⟨hposge, hnorm⟩, hnormR'⟩
+
 end ManifoldCellAttachment
 
 end
