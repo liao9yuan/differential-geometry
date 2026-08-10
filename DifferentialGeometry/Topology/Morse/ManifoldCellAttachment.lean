@@ -8324,6 +8324,75 @@ theorem morseRoundedCollarMap_mem_upper {n : ℕ} (c ε r δ : ℝ)
   rw [hr2]
   simpa using hle
 
+theorem morseRoundedCollarMapSmooth_value {n : ℕ} (c ε r δ ρ ρ' : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hr2 : r ^ 2 = 2 * ε)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (z : SublevelSpace f (c - ε)) :
+    f (curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z.1
+      (morseFarExpandTimeSmooth c ε δ ρ ρ' (f z.1))) =
+      f z.1 - morseFarExpandTimeSmooth c ε δ ρ ρ' (f z.1) := by
+  have hz : f z.1 ≤ c - ε := z.2
+  by_cases hdeep : f z.1 ≤ c - ε - δ + ρ'
+  · have hτ : morseFarExpandTimeSmooth c ε δ ρ ρ' (f z.1) = 0 :=
+      morseFarExpandTimeSmooth_zero hρ hdeep
+    rw [hτ, curveAt_zero v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z.1]
+    ring
+  · have hnotdeep : c - ε - δ + ρ' < f z.1 := lt_of_not_ge hdeep
+    have hy : f z.1 ∈ Set.Icc (c - ε - δ) (c + r ^ 2 / 2) := by
+      constructor
+      · exact le_of_lt (by linarith)
+      · nlinarith [hz, hr2]
+    let τ : ℝ := morseFarExpandTimeSmooth c ε δ ρ ρ' (f z.1)
+    have hτmem₁ : f z.1 - (c + r ^ 2 / 2) ≤ τ := by
+      have hle := morseFarExpandTimeSmooth_levelMap_le_top (t := f z.1) hρ hρ' hε hδ hz
+      have hr2' : c + ε = c + r ^ 2 / 2 := by rw [hr2]; ring
+      nlinarith [hle, hr2']
+    have hτmem₂ : τ ≤ f z.1 - (c - ε - δ) := by
+      have hge := morseFarExpandTimeSmooth_levelMap_ge_deep (t := f z.1) hρ hρ' hε hδ
+        (le_of_lt hnotdeep)
+      nlinarith [hge, hρ']
+    exact morseCollarFlow_valueOnStrip (I := I) f c ε r δ hf v hv hsupp hdfOn hrate
+      (hy := hy) (t := τ) hτmem₁ hτmem₂
+
+theorem morseRoundedCollarMapSmooth_mem_upper {n : ℕ} (c ε r δ ρ ρ' : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hr2 : r ^ 2 = 2 * ε)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (z : SublevelSpace f (c - ε)) :
+    f (curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) z.1
+      (morseFarExpandTimeSmooth c ε δ ρ ρ' (f z.1))) ≤ c + r ^ 2 / 2 := by
+  have hval := morseRoundedCollarMapSmooth_value c ε r δ ρ ρ' hf hε hδ hρ hρ' hr2
+    v hv hsupp hdfOn hrate z
+  have hle := morseFarExpandTimeSmooth_levelMap_le_top (t := f z.1) hρ hρ' hε hδ z.2
+  rw [hval]
+  have hr2' : c + ε = c + r ^ 2 / 2 := by rw [hr2]; ring
+  nlinarith [hle, hr2']
+
 noncomputable def morseFarExpandMap {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R₀ R₁ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
