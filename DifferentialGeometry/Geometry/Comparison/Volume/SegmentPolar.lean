@@ -2091,7 +2091,7 @@ private lemma curveDensity_smul
             simp [Pi.smul_apply]
       _ = (c ^ 2 : ℝ) • g.inner (γ t) (V i t) (V j t) := by
             rw [smul_smul]
-            ring
+            ring_nf
   change Real.sqrt ((Matrix.of (fun i j => g.inner (γ t) (c • V i t) (c • V j t))).det)
       = c ^ Fintype.card ι * Real.sqrt ((Matrix.of (fun i j => g.inner (γ t) (V i t) (V j t))).det)
   rw [hmat]
