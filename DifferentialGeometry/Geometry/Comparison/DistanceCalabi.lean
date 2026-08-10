@@ -525,6 +525,70 @@ theorem exists_calabiData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+theorem exists_calabiData_of_complete_metric
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (q : Real) (hq : 0 ≤ q)
+    (hRic : Geometry.Riemannian.BonnetMyers.RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2)))
+    {O x : M} (hOx : O ≠ x)
+    (hfin : riemannianEDistOf (I := I) g O x ≠ (⊤ : ENNReal)) :
+    letI : IsManifold I 1 M :=
+      IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+    letI : TopologicalSpace.MetrizableSpace M :=
+      Manifold.metrizableSpace I M
+    letI : T3Space M := inferInstance
+    letI : RiemannianBundle (fun y : M => TangentSpace I y) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y) :=
+      ⟨⟨g.inner, g.contMDiff.continuous, by intro y v w; rfl⟩⟩
+    letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+    letI : PseudoEMetricSpace M := inferInstance
+    letI : CompleteSpace M := hcomplete.complete
+    let hEnorm : IsMetricNorm (I := I) (M := M) g :=
+      fun y v => tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g y v
+    let r := (riemannianEDist I O x).toReal
+    ∃ tail : CalabiTailData (I := I) g hEnorm O x r,
+      let rho : M → Real := fun y =>
+        tail.left + branchRadius (I := I) g tail.branch y
+      ContMDiffAt I 𝓘(Real, Real) ∞ rho x ∧
+      rho x = r ∧
+      (∀ᶠ y in 𝓝 x,
+        (riemannianEDist I O y).toReal ≤ rho y) ∧
+      (∀ᶠ y in 𝓝 x,
+        MDifferentiableAt I 𝓘(Real, Real) rho y) ∧
+      MDifferentiableAt I (I.prod 𝓘(Real, E))
+        (T% fun y : M => gradientFun (I := I) g rho y) x ∧
+      g.inner x
+          (gradientFun (I := I) g rho x)
+          (gradientFun (I := I) g rho x) = 1 ∧
+      laplacian (I := I)
+          (LeviCivita (I := I) g) g rho x ≤
+        2 * ((Module.finrank Real E - 1 : Nat) : Real) / r +
+          ((Module.finrank Real E - 1 : Nat) : Real) * q := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun y : M => TangentSpace I y) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro y v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M := inferInstance
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro y v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g y v
+  have hfin' : riemannianEDist I O x ≠ (⊤ : ENNReal) := by
+    simpa [riemannianEDistOf] using hfin
+  exact exists_calabiData (I := I) (M := M) g hEnorm q hq hRic hOx hfin'
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- The distance from `O` admits a smooth Calabi upper support at every finite
 nonbase point, with the standard Ricci-lower-bound Laplacian estimate. -/
 theorem calabiDist_support
