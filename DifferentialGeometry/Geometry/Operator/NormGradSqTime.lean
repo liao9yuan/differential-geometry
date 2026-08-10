@@ -34,21 +34,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 theorem gradSq_joint
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
     {U : Set Real} (hUo : IsOpen U)
     (hG : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M =>
-          chartGramMatrix (I := I) (G.metric p.1) x₀ p.2 i j)
+          chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
         (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (f : Real -> M -> Real)
     (hf : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M => f p.1 p.2) (U ×ˢ Set.univ)) :
     ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
-        (G.metric p.1).inner p.2
-          (gradientFun (I := I) (G.metric p.1) (f p.1) p.2)
-          (gradientFun (I := I) (G.metric p.1) (f p.1) p.2))
+        (g_fam p.1).inner p.2
+          (gradientFun (I := I) (g_fam p.1) (f p.1) p.2)
+          (gradientFun (I := I) (g_fam p.1) (f p.1) p.2))
       (U ×ˢ Set.univ) := by
   classical
   intro p hp
@@ -64,7 +64,7 @@ theorem gradSq_joint
     simpa only [e] using
       mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x₀
   let Gm : (Real × M) -> Matrix Idx Idx Real := fun q =>
-    chartGramMatrix (I := I) (G.metric q.1) x₀ q.2
+    chartGramMatrix (I := I) (g_fam q.1) x₀ q.2
   have hentry (i j : Idx) :
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q : Real × M => Gm q i j) p := by
@@ -119,7 +119,7 @@ theorem gradSq_joint
     · simp only [Matrix.updateRow_ne ha]
       exact hentry a b
   have hdetne (q : Real × M) (hq : q.2 ∈ e.baseSet) : (Gm q).det ≠ 0 := by
-    exact ne_of_gt (chartGramMatrix_det_pos (I := I) (G.metric q.1) x₀ hq)
+    exact ne_of_gt (chartGramMatrix_det_pos (I := I) (g_fam q.1) x₀ hq)
   have hGinv (i j : Idx) :
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun q : Real × M => (Gm q)⁻¹ i j) p := by
@@ -136,18 +136,18 @@ theorem gradSq_joint
     refine ContMDiffAt.sum fun i _ => ContMDiffAt.sum fun j _ => ?_
     exact ((hGinv i j).mul (hdF i)).mul (hdF j)
   have hinv (q : Real × M) (hq : q.2 ∈ e.baseSet) :
-      MetricInverseInBasis (I := I) (G.metric q.1) q.2
+      MetricInverseInBasis (I := I) (g_fam q.1) q.2
         (hframe.toBasisAt hq) (fun i j => (Gm q)⁻¹ i j) := by
     intro i j
     have hunit : IsUnit (Gm q).det :=
       isUnit_iff_ne_zero.2 (hdetne q hq)
     have hGb (i' j' : Idx) :
-        (G.metric q.1).inner q.2
+        (g_fam q.1).inner q.2
             (hframe.toBasisAt hq i') (hframe.toBasisAt hq j') =
           Gm q i' j' := by
       rw [hframe.toBasisAt_coe, hframe.toBasisAt_coe]
       simp only [Gm, chartGramMatrix_apply]
-      change (G.metric q.1).inner q.2
+      change (g_fam q.1).inner q.2
           (e.localFrame b i' q.2) (e.localFrame b j' q.2) = _
       rw [e.localFrame_apply_of_mem_baseSet b hq,
         e.localFrame_apply_of_mem_baseSet b hq]
@@ -163,34 +163,34 @@ theorem gradSq_joint
         Matrix.mul_nonsing_inv (Gm q) hunit, Matrix.one_apply]
   have heq :
       (fun q : Real × M =>
-        (G.metric q.1).inner q.2
-          (gradientFun (I := I) (G.metric q.1) (f q.1) q.2)
-          (gradientFun (I := I) (G.metric q.1) (f q.1) q.2)) =ᶠ[𝓝 p] rhs := by
+        (g_fam q.1).inner q.2
+          (gradientFun (I := I) (g_fam q.1) (f q.1) q.2)
+          (gradientFun (I := I) (g_fam q.1) (f q.1) q.2)) =ᶠ[𝓝 p] rhs := by
     filter_upwards [(hUo.prod e.open_baseSet).mem_nhds ⟨hp.1, hxe⟩] with q hq
     let df : Tensor0SSpace 1 I q.2 :=
       differential1FormFun (I := I) (f q.1) q.2
     have hsharp :
-        cotangentSharp (I := I) (G.metric q.1) q.2 df =
-          gradientFun (I := I) (G.metric q.1) (f q.1) q.2 := by
-      apply tangentFlatLinear_injective (I := I) (G.metric q.1) q.2
+        cotangentSharp (I := I) (g_fam q.1) q.2 df =
+          gradientFun (I := I) (g_fam q.1) (f q.1) q.2 := by
+      apply tangentFlatLinear_injective (I := I) (g_fam q.1) q.2
       ext X
-      change (G.metric q.1).inner q.2
-          (cotangentSharp (I := I) (G.metric q.1) q.2 df) X =
-        (G.metric q.1).inner q.2
-          (gradientFun (I := I) (G.metric q.1) (f q.1) q.2) X
+      change (g_fam q.1).inner q.2
+          (cotangentSharp (I := I) (g_fam q.1) q.2 df) X =
+        (g_fam q.1).inner q.2
+          (gradientFun (I := I) (g_fam q.1) (f q.1) q.2) X
       rw [cotangentSharp_inner, cotangentToDual_apply]
       exact differential1FormFun_apply_eq_inner_gradientFun
-        (I := I) (G.metric q.1) (f q.1) q.2 X
+        (I := I) (g_fam q.1) (f q.1) q.2 X
     calc
-      (G.metric q.1).inner q.2
-          (gradientFun (I := I) (G.metric q.1) (f q.1) q.2)
-          (gradientFun (I := I) (G.metric q.1) (f q.1) q.2) =
-          cotangentInner (I := I) (G.metric q.1) q.2 df df := by
+      (g_fam q.1).inner q.2
+          (gradientFun (I := I) (g_fam q.1) (f q.1) q.2)
+          (gradientFun (I := I) (g_fam q.1) (f q.1) q.2) =
+          cotangentInner (I := I) (g_fam q.1) q.2 df df := by
             rw [cotangentInner_eq_sharp, hsharp]
       _ = ∑ i : Idx, ∑ j : Idx,
           (Gm q)⁻¹ i j * cotangentToDual (I := I) df (hframe.toBasisAt hq.2 i) *
             cotangentToDual (I := I) df (hframe.toBasisAt hq.2 j) :=
-        cotangentInner_eq_coord (I := I) (G.metric q.1) q.2
+        cotangentInner_eq_coord (I := I) (g_fam q.1) q.2
           (hframe.toBasisAt hq.2) (fun i j => (Gm q)⁻¹ i j) (hinv q hq.2) df df
       _ = rhs q := by
         unfold rhs

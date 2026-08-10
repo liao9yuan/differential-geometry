@@ -162,7 +162,7 @@ theorem w_rev_hasDerivAt
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M => q p.1 p.2) (U ×ˢ Set.univ) := by
     simpa only [q] using
-      gradSq_joint (I := I) G hUo hgram f hf
+      gradSq_joint (I := I) G.metric hUo hgram f hf
   have huU :
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M => u p.1 p.2) (U ×ˢ Set.univ) :=

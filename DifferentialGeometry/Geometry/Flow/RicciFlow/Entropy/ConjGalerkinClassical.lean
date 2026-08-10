@@ -1506,7 +1506,7 @@ theorem galLim_grad_cont
       (Set.Ioo (0 : Real) tauCore) D.regular := by
     intro r hr
     exact hmapCore ⟨hr.1.le, hr.2.le⟩
-  have hpos := gradSq_joint (I := I) G isOpen_Ioo
+  have hpos := gradSq_joint (I := I) G.metric isOpen_Ioo
     (rev_gram_smooth (I := I) (M := M) hS (T : Real) hmapOpen)
     f (by
       simpa only [f] using hjoint.mono (Set.prod_mono
