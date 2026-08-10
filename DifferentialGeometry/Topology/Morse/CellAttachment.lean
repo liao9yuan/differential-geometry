@@ -4504,6 +4504,19 @@ theorem modelFlow_posPart_ge_eps_of_interval {n k : ℕ} (hk : k ≤ n) (ε₁ :
   · have hlt : ε₁ < 0 := lt_of_not_ge hε10
     exact le_trans (le_of_lt hlt) (norm_nonneg _)
 
+theorem modelFlow_norm_lt_of_abs_bound {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (hε : 0 ≤ ε)
+    {t : ℝ} (ht : |t| ≤ 2 * ε) {y : MorseModel n} {ρ ρ' : ℝ} (hρ' : 0 ≤ ρ')
+    (hy : morseNorm n y < ρ) (hρρ' : ρ ^ 2 + 4 * ε < ρ' ^ 2) :
+    morseNorm n (modelFlow hk t y) < ρ' := by
+  have hsq := modelFlow_norm_sq_le_add hk ε hε ht y
+  have hy' : morseNorm n y ^ 2 < ρ ^ 2 := by
+    have hle : 0 ≤ morseNorm n y := norm_nonneg _
+    nlinarith [hy, hle, sq_nonneg ρ]
+  have hsq' : morseNorm n (modelFlow hk t y) ^ 2 < ρ' ^ 2 := by
+    nlinarith [hsq, hy', hρρ']
+  have hle : 0 ≤ morseNorm n (modelFlow hk t y) := norm_nonneg _
+  nlinarith [hsq', hρ', hle, sq_nonneg ρ']
+
 end CellAttachment
 
 end
