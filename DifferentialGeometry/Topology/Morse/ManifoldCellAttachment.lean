@@ -17633,42 +17633,41 @@ theorem morseRoundedTransportMap_mem_upper_of_sublevel {m k : ℕ} (hk : k ≤ m
   · exact morseRoundedTransportMap_mem_upper_of_collar hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀
       hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hδ0 hρ hρ' hε hr2 hf hV₀desc hV₀rate x hx hxg
 
-private theorem flowValueBackwardOnStrip {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
+private theorem flowValueBackwardOnBand {n : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     (I : ModelWithCorners ℝ (MorseModel n) H) [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (c ε r η : ℝ)
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ) (a b : ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel n)) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
     (hsupp : IsCompact (tsupport v))
-    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2),
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc a b,
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
     (hrate : ∀ x,
       -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
       (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
-    {y : M} (hy : f y ∈ Set.Icc (c - ε - η) (c + r ^ 2 / 2))
-    {t : ℝ} (ht : t ≤ 0) (ht' : f y - (c + r ^ 2 / 2) ≤ t) :
+    {y : M} (hy : f y ∈ Set.Icc a b)
+    {t : ℝ} (ht : t ≤ 0) (ht' : f y - b ≤ t) :
     f (curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) y t) = f y - t := by
   let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
     exists_globalIntegralCurve_of_compactSupport v hv hsupp
   let s : ℝ := -t
   have hs0 : 0 ≤ s := by dsimp [s]; linarith
   have hstay : ∀ u ∈ Set.Icc (0 : ℝ) s, curveAt v hcomplete y (-u) ∈
-      f ⁻¹' Set.Icc (c - ε - η) (c + r ^ 2 / 2) := by
+      f ⁻¹' Set.Icc a b := by
     intro u hu
     have hrb := f_rate_bounds_of_integralCurve_back f hf v hrate
       (hγ := curveAt_integralCurve v hcomplete y) (t := u) hu.1
-    have hlo : c - ε - η ≤ f (curveAt v hcomplete y (-u)) := by
+    have hlo : a ≤ f (curveAt v hcomplete y (-u)) := by
       exact le_trans hy.1 (by simpa [curveAt_zero v hcomplete y] using hrb.1)
-    have hhi : f (curveAt v hcomplete y (-u)) ≤ c + r ^ 2 / 2 := by
+    have hhi : f (curveAt v hcomplete y (-u)) ≤ b := by
       have hule : u ≤ -t := by simpa [s] using hu.2
       have hmain : f (curveAt v hcomplete y (-u)) ≤ f y + u := by
         simpa [curveAt_zero v hcomplete y] using hrb.2
-      have hb : f y - t ≤ c + r ^ 2 / 2 := by linarith [ht']
+      have hb : f y - t ≤ b := by linarith [ht']
       linarith
-    change c - ε - η ≤ f (curveAt v hcomplete y (-u)) ∧
-      f (curveAt v hcomplete y (-u)) ≤ c + r ^ 2 / 2
+    change a ≤ f (curveAt v hcomplete y (-u)) ∧ f (curveAt v hcomplete y (-u)) ≤ b
     exact ⟨hlo, hhi⟩
   have heq := f_add_of_integralCurve_back (I := I) f hf v hdfOn
     (hγ := curveAt_integralCurve v hcomplete y) (t := s) hs0 hstay
@@ -17792,8 +17791,8 @@ theorem morseRoundedTransportMap_boundary_of_sublevel {m k : ℕ} (hk : k ≤ m 
         dsimp [τ]
         rw [hτ, hτeq]
         exact modelAttachedUnstretchTime_nonpos hk ε r δ (le_of_lt hε) hδ0 hδr y
-      have hflowVal := flowValueBackwardOnStrip (I := I) f c ε r δ hf v hv hsupp hdfOn hrate
-        (hy := hstrip) (ht := hτle) (ht' := ht1)
+      have hflowVal := flowValueBackwardOnBand (I := I) f (c - ε - δ) (c + r ^ 2 / 2) hf v hv hsupp
+        hdfOn hrate (hy := hstrip) (ht := hτle) (ht' := ht1)
       have hmain : f (morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm
           hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x) = f x - τ := by
         rw [hτdef]
@@ -17867,8 +17866,8 @@ theorem morseRoundedTransportMap_boundary_of_sublevel {m k : ℕ} (hk : k ≤ m 
         dsimp [τ]
         rw [hτ, hτeq]
         linarith
-      have hflowVal := flowValueBackwardOnStrip (I := I) f c ε r δ hf v hv hsupp hdfOn hrate
-        (hy := hstrip) (ht := hτle) (ht' := ht1)
+      have hflowVal := flowValueBackwardOnBand (I := I) f (c - ε - δ) (c + r ^ 2 / 2) hf v hv hsupp
+        hdfOn hrate (hy := hstrip) (ht := hτle) (ht' := ht1)
       have hmain : f (morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm
           hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x) = f x - τ := by
         rw [hτdef]
