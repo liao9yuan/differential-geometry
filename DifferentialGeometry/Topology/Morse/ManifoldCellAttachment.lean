@@ -8525,6 +8525,89 @@ theorem morseFarExpandMap_deep {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ ε' R�
     morseFarExpandMap hk c ε r δ ε' R₀ R₁ data v hv hsupp z = z.1 := by
   simp [morseFarExpandMap, morseFarExpandTime_zero hz, curveAt_zero]
 
+noncomputable def morseFarExpandMapSmooth {m : ℕ} (c ε δ ρ ρ' : ℝ) {H : Type}
+    [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v)) (x : M) : M :=
+  curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) x
+    (morseFarExpandTimeSmooth c ε δ ρ ρ' (f x))
+
+theorem contMDiff_morseFarExpandMapSmooth {m : ℕ} (c ε δ ρ ρ' : ℝ) {H : Type}
+    [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hρ : 0 < ρ) (hρ' : 0 < ρ') (hδ : 0 < δ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) :
+    ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseFarExpandMapSmooth c ε δ ρ ρ' f v hv hsupp) := by
+  have hτ : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => morseFarExpandTimeSmooth c ε δ ρ ρ' (f x)) := by
+    have hT : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (morseFarExpandTimeSmooth c ε δ ρ ρ') := by
+      exact (contMDiffOn_univ.mp ((contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := ℝ) (E' := ℝ)
+        (f := morseFarExpandTimeSmooth c ε δ ρ ρ') (s := Set.univ) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))).mpr
+        (contDiff_morseFarExpandTimeSmooth hρ hρ' hδ).contDiffOn))
+    have hcomp : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (morseFarExpandTimeSmooth c ε δ ρ ρ' ∘ f) := hT.comp hf
+    exact hcomp.congr (fun x => rfl)
+  have hjoint : ContMDiff (𝓘(ℝ, ℝ).prod I) I (⊤ : ℕ∞)
+      (fun p : ℝ × M => curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) p.2 p.1) :=
+    contMDiff_globalFlow_joint_of_compactSupport v hv hsupp
+  have hpair : ContMDiff I (𝓘(ℝ, ℝ).prod I) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (morseFarExpandTimeSmooth c ε δ ρ ρ' (f x), x)) :=
+    hτ.prodMk (contMDiff_id : ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun x : M => x))
+  have hcomp : ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp)
+        (morseFarExpandTimeSmooth c ε δ ρ ρ' (f x), x).2
+        (morseFarExpandTimeSmooth c ε δ ρ ρ' (f x), x).1) := by
+    have hc := hjoint.comp hpair
+    simpa [Function.comp_def] using hc
+  simpa [morseFarExpandMapSmooth, Function.comp_def] using hcomp
+
+theorem morseFarExpandMapSmooth_deep {m : ℕ} (c ε δ ρ ρ' : ℝ) {H : Type}
+    [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hρ : 0 < ρ) {x : M} (hx : f x ≤ c - ε - δ + ρ') :
+    morseFarExpandMapSmooth c ε δ ρ ρ' f v hv hsupp x = x := by
+  dsimp [morseFarExpandMapSmooth]
+  rw [morseFarExpandTimeSmooth_zero hρ hx]
+  exact curveAt_zero v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) x
+
+theorem morseFarExpandMapSmooth_value {m : ℕ} (c ε r δ ρ ρ' : ℝ) {H : Type}
+    [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hρ : 0 < ρ) (hρ' : 0 < ρ') (hr2 : r ^ 2 = 2 * ε)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1)
+    (hrate : ∀ x,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0)
+    (z : SublevelSpace f (c - ε)) :
+    f (morseFarExpandMapSmooth c ε δ ρ ρ' f v hv hsupp z.1) =
+      f z.1 - morseFarExpandTimeSmooth c ε δ ρ ρ' (f z.1) := by
+  have hval := morseRoundedCollarMapSmooth_value (n := m + 1) c ε r δ ρ ρ' hf hε hδ hρ hρ' hr2
+    v hv hsupp hdfOn hrate z
+  dsimp [morseFarExpandMapSmooth]
+  exact hval
 
 theorem morseFarExpandTime_antiMonotone {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε)
     {t₁ t₂ : ℝ} (ht : t₁ ≤ t₂) :
