@@ -16494,6 +16494,176 @@ theorem contDiff_modelRoundedTransportTime {m k : ℕ} (hk : k ≤ m + 1)
   simpa [modelRoundedTransportTime, Function.comp_def] using
     (hβfull.mul htime).add ((hone.sub hβfull).mul hcollar)
 
+theorem modelRoundedTransportTime_eq_collar_of_norm_ge {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ : ℝ) (hR₀R₁ : R₀ < R₁) {y : MorseModel (m + 1)}
+    (hR : R₁ ≤ morseNorm (m + 1) y) :
+    modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ y =
+      morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y) := by
+  dsimp [modelRoundedTransportTime]
+  have hβ₂ : 1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) = 0 := by
+    have harg : 1 ≤ (morseNorm (m + 1) y - R₀) / (R₁ - R₀) := by
+      rw [one_le_div (sub_pos.mpr hR₀R₁)]
+      nlinarith [hR]
+    rw [Real.smoothTransition.one_of_one_le harg]
+    norm_num
+  rw [hβ₂]
+  ring
+
+noncomputable def morseRoundedTransportTime {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) : ℝ := by
+  classical
+  exact if hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} then
+    modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ (data.χ.symm x)
+  else morseFarExpandTimeSmooth c ε δ ρ ρ' (f x)
+
+theorem morseRoundedTransportTime_eq_model {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) {x : M}
+    (hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x =
+      modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ (data.χ.symm x) := by
+  dsimp [morseRoundedTransportTime]
+  rw [if_pos hx]
+
+theorem morseRoundedTransportTime_eq_collar {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) {x : M}
+    (hx : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x =
+      morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) := by
+  dsimp [morseRoundedTransportTime]
+  rw [if_neg hx]
+
+theorem contMDiff_morseRoundedTransportTime {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hθ : 0 < θ) (hρ : 0 < ρ) (hρ' : 0 < ρ') (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR₀ : 0 < R₀) (hR₀R₁ : R₀ < R₁) (hR₁R : R₁ < data.R) (hRltRp : data.R < data.R') :
+    ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data) := by
+  let U₁ : Set M := data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
+  let U₂ : Set M := (data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁})ᶜ
+  have hmodelOn : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁)
+      (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+    have hcontDiff : ContDiff ℝ (⊤ : ℕ∞)
+        (modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁) :=
+      contDiff_modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ hθ hρ hρ' hδ hδr hR₀ hR₀R₁
+    have hOn : ContDiffOn ℝ (⊤ : ℕ∞)
+        (modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁)
+        (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+      refine (hcontDiff.contDiffOn : ContDiffOn ℝ (⊤ : ℕ∞)
+        (modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁) Set.univ).mono ?_
+      intro y hy
+      trivial
+    exact ((contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := MorseModel (m + 1)) (E' := ℝ)
+      (f := modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁)
+      (s := Metric.ball (0 : MorseModel (m + 1)) data.R') (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))).mpr hOn)
+  have h₁ : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data) U₁ := by
+    have hχsymm : ContMDiffOn I 𝓘(ℝ, MorseModel (m + 1)) (⊤ : ℕ∞) data.χ.symm U₁ := by
+      have hsub : U₁ ⊆ data.χ '' Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+        intro x hx
+        rcases hx with ⟨y, hy, hxy⟩
+        refine ⟨y, ?_, hxy⟩
+        rw [mem_ball_zero_iff]
+        exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+      exact data.hχsymmOn.mono hsub
+    have hmap : Set.MapsTo data.χ.symm U₁ (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+      rw [hsymm]
+      rw [mem_ball_zero_iff]
+      exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+    have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ ∘ data.χ.symm) U₁ :=
+      hmodelOn.comp hχsymm hmap
+    have hEq : Set.EqOn (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data)
+        (modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ ∘ data.χ.symm) U₁ := by
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      by_cases hxball : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+      · exact morseRoundedTransportTime_eq_model hk c ε r δ ρ ρ' θ R₀ R₁ data hxball
+      · have hR₁le : R₁ ≤ morseNorm (m + 1) y := by
+          by_contra hnot
+          have hlt : morseNorm (m + 1) y < R₁ := lt_of_not_ge hnot
+          exact hxball ⟨y, le_of_lt hlt, hxy⟩
+        have hmodel := modelRoundedTransportTime_eq_collar_of_norm_ge hk c ε r δ ρ ρ' θ R₀ R₁
+          hR₀R₁ hR₁le
+        have hcollar : morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x =
+            morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) :=
+          morseRoundedTransportTime_eq_collar hk c ε r δ ρ ρ' θ R₀ R₁ data hxball
+        rw [hcollar]
+        have hf : f x = morseNormalForm hk c y := by
+          rw [← hxy]
+          exact data.hnorm y (le_of_lt hy)
+        rw [hf]
+        have hsymm : data.χ.symm x = y := by
+          rw [← hxy]
+          exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+        have hcomp' : (modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ ∘ data.χ.symm) x =
+            modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ y := by
+          simp [hsymm]
+        rw [hcomp']
+        exact hmodel.symm
+    exact hcomp.congr (fun x hx => hEq hx)
+  have h₂ : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data) U₂ := by
+    have hEq : Set.EqOn (morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data)
+        (morseFarExpandTimeSmooth c ε δ ρ ρ' ∘ f) U₂ := by
+      intro x hx
+      exact morseRoundedTransportTime_eq_collar hk c ε r δ ρ ρ' θ R₀ R₁ data hx
+    have hcollarOn : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun x : M => morseFarExpandTimeSmooth c ε δ ρ ρ' (f x)) U₂ := by
+      have hT : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (morseFarExpandTimeSmooth c ε δ ρ ρ') := by
+        exact (contMDiffOn_univ.mp ((contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := ℝ) (E' := ℝ)
+          (f := morseFarExpandTimeSmooth c ε δ ρ ρ') (s := Set.univ) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))).mpr
+          (contDiff_morseFarExpandTimeSmooth hρ hρ' hδ).contDiffOn))
+      have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (morseFarExpandTimeSmooth c ε δ ρ ρ' ∘ f) U₂ := by
+        have hTOn : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+            (morseFarExpandTimeSmooth c ε δ ρ ρ') Set.univ :=
+          (hT.contMDiffOn : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+            (morseFarExpandTimeSmooth c ε δ ρ ρ') Set.univ)
+        have hfOn : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f Set.univ :=
+          (hf.contMDiffOn : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f Set.univ)
+        have hcompUniv : ContMDiffOn I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+            (morseFarExpandTimeSmooth c ε δ ρ ρ' ∘ f) Set.univ :=
+          hTOn.comp hfOn (by intro x hx; trivial)
+        exact hcompUniv.mono (by intro x hx; trivial)
+      exact hcomp.congr (fun x hx => rfl)
+    exact hcollarOn.congr (fun x hx => hEq hx)
+  have hU₁open : IsOpen U₁ := by
+    dsimp [U₁]
+    exact isOpen_chiBallImage data.χ data.R (fun y hy => data.hχsrc y (le_of_lt hy))
+  have hU₂open : IsOpen U₂ := by
+    dsimp [U₂]
+    exact isOpen_compl_ballImage hk c R₁ data (le_of_lt hR₁R)
+  have hcover : U₁ ∪ U₂ = Set.univ := by
+    ext x
+    constructor
+    · intro hx
+      trivial
+    · intro hx
+      by_cases hxball : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+      · exact Or.inl (by
+          rcases hxball with ⟨y, hy, hxy⟩
+          exact ⟨y, lt_of_le_of_lt hy hR₁R, hxy⟩)
+      · exact Or.inr (by simpa [U₂] using hxball)
+  exact contMDiff_of_contMDiffOn_union_of_isOpen h₁ h₂ hcover hU₁open hU₂open
+
 end ManifoldCellAttachment
 
 end
