@@ -2261,6 +2261,56 @@ theorem modelAttachedStretch_strict_of_roundedSublevel {n k : ℕ} (hk : k ≤ n
   exact (modelRoundedFunction_lt_c_iff_attachedFunction_lt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig
     (modelAttachedStretch hk ε r δ u)).mpr hA
 
+noncomputable def modelAttachedUnstretchTime {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (y : MorseModel n) : ℝ :=
+  ‖posPart hk y‖ ^ 2 * (1 - (‖negPart hk y‖ ^ 2 + r ^ 2) /
+    smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / 2
+
+theorem modelAttachedUnstretch_eq_modelFlow {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (y : MorseModel n) :
+    modelAttachedUnstretch hk ε r δ y =
+      modelFlow hk (modelAttachedUnstretchTime hk ε r δ y) y := by
+  let sc : ℝ := smoothCap ε r δ (‖negPart hk y‖ ^ 2)
+  let t : ℝ := ‖negPart hk y‖ ^ 2
+  have hsc : 0 < sc := by
+    dsimp [sc]
+    exact smoothCap_pos (ε := ε) (r := r) (δ := δ) (t := ‖negPart hk y‖ ^ 2) hδ0 hδr
+  by_cases hp : ‖posPart hk y‖ = 0
+  · have hp0 : posPart hk y = 0 := norm_eq_zero.mp hp
+    dsimp [modelAttachedUnstretch, modelFlow, modelAttachedUnstretchTime]
+    rw [hp0]
+    simp
+  · have hpn : ‖posPart hk y‖ ≠ 0 := hp
+    have hp2 : ‖posPart hk y‖ ^ 2 ≠ 0 := pow_ne_zero 2 hpn
+    apply congrArg (fun v : EuclideanSpace ℝ (Fin (n - k)) => recombine hk (negPart hk y) v)
+    dsimp [modelAttachedUnstretch, modelFlow, modelAttachedUnstretchTime, sc, t]
+    have harg : 1 - 2 * (‖posPart hk y‖ ^ 2 * (1 - (t + r ^ 2) / sc) / 2) / ‖posPart hk y‖ ^ 2 =
+        (t + r ^ 2) / sc := by
+      field_simp [hp2, ne_of_gt hsc]
+      ring
+    rw [harg]
+
+theorem modelAttachedUnstretchTime_eq_of_negPart_large {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) {y : MorseModel n} (ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    modelAttachedUnstretchTime hk ε r δ y =
+      -‖posPart hk y‖ ^ 2 * (r ^ 2 + 2 * ε) / (2 * (‖negPart hk y‖ ^ 2 - 2 * ε)) := by
+  dsimp [modelAttachedUnstretchTime]
+  have hsc : smoothCap ε r δ (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε :=
+    smoothCap_upper hδ0 ht
+  have hne : ‖negPart hk y‖ ^ 2 - 2 * ε ≠ 0 := by nlinarith [ht, hδ0]
+  rw [hsc]
+  field_simp [hne]
+  ring
+
+theorem modelAttachedUnstretchTime_eq_boundary {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ0 : 0 < δ) {y : MorseModel n}
+    (ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2)
+    (hp : ‖posPart hk y‖ ^ 2 = ‖negPart hk y‖ ^ 2 - 2 * ε) :
+    modelAttachedUnstretchTime hk ε r δ y = -(r ^ 2 + 2 * ε) / 2 := by
+  rw [modelAttachedUnstretchTime_eq_of_negPart_large hk ε r δ hδ0 ht, hp]
+  have hpos : ‖negPart hk y‖ ^ 2 - 2 * ε ≠ 0 := by nlinarith [ht, hδ0]
+  field_simp [hpos]
+
 theorem contMDiff_modelAttachedUnstretch_sublevel {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
