@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integration.Volume.Family.Base
+import DifferentialGeometry.Analysis.Integration.Measure.MetricFamilyRegularity
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
 set_option autoImplicit false

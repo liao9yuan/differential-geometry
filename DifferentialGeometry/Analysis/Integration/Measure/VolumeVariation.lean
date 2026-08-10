@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Integration.Measure.RealizedMetricForMeasure
-import DifferentialGeometry.Integration.Volume.Family.Base
-import DifferentialGeometry.Integration.Volume.Family.Variation
+import DifferentialGeometry.Analysis.Integration.Measure.MetricFamilyRegularity
+import DifferentialGeometry.Analysis.Integration.Measure.MetricFamilyVolumeVariation
 
 set_option autoImplicit false
 

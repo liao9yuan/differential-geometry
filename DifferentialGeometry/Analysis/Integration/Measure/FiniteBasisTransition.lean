@@ -1,6 +1,6 @@
-import DifferentialGeometry.Integration.Volume.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
-import DifferentialGeometry.Integration.Volume.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.MeasureTheory.Measure.WithDensity
 import Mathlib.MeasureTheory.Integral.Lebesgue.Basic

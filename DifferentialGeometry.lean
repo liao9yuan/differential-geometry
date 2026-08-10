@@ -2933,12 +2933,11 @@ import DifferentialGeometry.Geometry.Topology.UniversalCover.Manifold
 import DifferentialGeometry.Geometry.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Geometry.Topology.UniversalCover.TruncateHomotopy
 import DifferentialGeometry.Geometry.Topology.UniversalCover.TruncationLift
-import DifferentialGeometry.Integration.DivergenceTheorem.Gradient
-import DifferentialGeometry.Integration.DivergenceTheorem.LocalFormula
-import DifferentialGeometry.Integration.Volume.ChartDensity
-import DifferentialGeometry.Integration.Volume.Family.Base
-import DifferentialGeometry.Integration.Volume.Family.Variation
-import DifferentialGeometry.Integration.Volume.Invariance
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartProductFormula
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.GradientIdentities
+import DifferentialGeometry.Analysis.Integration.Measure.FiniteBasisTransition
+import DifferentialGeometry.Analysis.Integration.Measure.MetricFamilyRegularity
+import DifferentialGeometry.Analysis.Integration.Measure.MetricFamilyVolumeVariation
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Alternating.Bundle
 import DifferentialGeometry.Tensor.Alternating.Comp
