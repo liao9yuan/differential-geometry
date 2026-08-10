@@ -1,3 +1,9 @@
+/-
+Copyright © 2023 Heather Macbeth. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Heather Macbeth
+Coauthors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Alternating.Comp
 import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
