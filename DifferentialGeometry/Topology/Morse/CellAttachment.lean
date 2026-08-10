@@ -4464,6 +4464,46 @@ theorem modelFlow_posPart_ne_zero_on_interval {n k : ℕ} (hk : k ≤ n) (a b : 
     have htle : t < ‖posPart hk y‖ ^ 2 / 2 := lt_of_lt_of_le ht.2 hbal
     exact modelFlow_posPart_ne_zero_of_posTime hk t y htpos htle
 
+theorem modelFlow_posPart_norm_sq_ge_half_of_interval {n k : ℕ} (hk : k ≤ n)
+    (a b : ℝ) (y : MorseModel n) (hy : 0 < ‖posPart hk y‖)
+    (hbal : b ≤ ‖posPart hk y‖ ^ 2 / 4) :
+    ∀ t ∈ Set.Ioo a b, ‖posPart hk y‖ ^ 2 / 2 ≤ ‖posPart hk (modelFlow hk t y)‖ ^ 2 := by
+  intro t ht
+  by_cases ht0 : t ≤ 0
+  · have hup := modelFlow_up_posPart_norm_sq hk (-t) y (by linarith : 0 ≤ -t) hy
+    have hmain : ‖posPart hk y‖ ^ 2 ≤ ‖posPart hk (modelFlow hk t y)‖ ^ 2 := by
+      rw [show ‖posPart hk (modelFlow hk t y)‖ ^ 2 = ‖posPart hk y‖ ^ 2 + 2 * (-t) by
+        simpa [neg_neg] using hup]
+      nlinarith [ht0]
+    nlinarith
+  · have htpos : 0 ≤ t := le_of_not_gt (by intro h; exact ht0 (le_of_lt h))
+    have htle : t ≤ ‖posPart hk y‖ ^ 2 / 2 := by
+      have hbpos : 0 < b := lt_of_le_of_lt htpos ht.2
+      have htlt : t < ‖posPart hk y‖ ^ 2 / 4 := lt_of_lt_of_le ht.2 hbal
+      nlinarith [htlt]
+    have hsq := modelFlow_posPart_norm_sq hk t y htpos htle
+    have hmain : ‖posPart hk y‖ ^ 2 / 2 ≤ ‖posPart hk (modelFlow hk t y)‖ ^ 2 := by
+      rw [hsq]
+      have htlt : t < ‖posPart hk y‖ ^ 2 / 4 := lt_of_lt_of_le ht.2 hbal
+      nlinarith
+    exact hmain
+
+theorem modelFlow_posPart_ge_eps_of_interval {n k : ℕ} (hk : k ≤ n) (ε₁ : ℝ)
+    (a b : ℝ) (y : MorseModel n) (hy : 0 < ‖posPart hk y‖)
+    (hbal : b ≤ ‖posPart hk y‖ ^ 2 / 4)
+    (hε : ε₁ ^ 2 ≤ ‖posPart hk y‖ ^ 2 / 2) :
+    ∀ t ∈ Set.Ioo a b, ε₁ ≤ ‖posPart hk (modelFlow hk t y)‖ := by
+  have hsq := modelFlow_posPart_norm_sq_ge_half_of_interval hk a b y hy hbal
+  intro t ht
+  have hmain : ε₁ ^ 2 ≤ ‖posPart hk (modelFlow hk t y)‖ ^ 2 :=
+    le_trans hε (hsq t ht)
+  by_cases hε10 : 0 ≤ ε₁
+  · have hnonneg' : 0 ≤ ‖posPart hk (modelFlow hk t y)‖ := norm_nonneg _
+    have habs := sq_le_sq.mp hmain
+    rwa [abs_of_nonneg hε10, abs_of_nonneg hnonneg'] at habs
+  · have hlt : ε₁ < 0 := lt_of_not_ge hε10
+    exact le_trans (le_of_lt hlt) (norm_nonneg _)
+
 end CellAttachment
 
 end
