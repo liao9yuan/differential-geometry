@@ -212,8 +212,10 @@ theorem localBall_ratio
       (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2))) :
     ∃ ρ : Real, 0 < ρ ∧
       ENNReal.ofReal ρ < injRadius (I := I) g p ∧
+      letI : MetricSpace M :=
+        HopfRinow.riemMetricSpace (I := I) (M := M)
       AntitoneOn
-        (fun R => localBallVolume (I := I) g p R /
+        (fun R => riemannianVolumeMeasure (I := I) (M := M) g (ball p R) /
           ENNReal.ofReal (hypRadVol q (Module.finrank Real E - 1) R))
         (Ioo (0 : Real) ρ) := by
   obtain ⟨ρ, hρ, hρinj, hcross⟩ :=
@@ -234,6 +236,55 @@ theorem localBall_ratio
   rw [← ENNReal.mul_div_right_comm]
   rw [ENNReal.le_div_iff_mul_le (Or.inl hmr0) (Or.inl ENNReal.ofReal_ne_top)]
   exact hcross hr.1 hrR hR.2
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem localBall_ratio_of_complete_metric
+    [ConnectedSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (p : M) (q : Real) (hq : 0 ≤ q)
+    (hd : 0 < Module.finrank Real E - 1)
+    (hRic : BonnetMyers.RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2))) :
+    letI : IsManifold I 1 M :=
+      IsManifold.of_le (I := I) (M := M) (n := (⊤ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+    letI : TopologicalSpace.MetrizableSpace M :=
+      Manifold.metrizableSpace I M
+    letI : T3Space M := inferInstance
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+    letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+    letI : PseudoEMetricSpace M := inferInstance
+    letI : CompleteSpace M := hcomplete.complete
+    ∃ ρ : Real, 0 < ρ ∧
+      ENNReal.ofReal ρ < injRadius (I := I) g p ∧
+      letI : MetricSpace M :=
+        HopfRinow.riemMetricSpace (I := I) (M := M)
+      AntitoneOn
+        (fun R => riemannianVolumeMeasure (I := I) (M := M) g (ball p R) /
+          ENNReal.ofReal (hypRadVol q (Module.finrank Real E - 1) R))
+        (Ioo (0 : Real) ρ) := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (⊤ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M := inferInstance
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  exact localBall_ratio (I := I) (M := M) g hEnorm p q hq hd hRic
 
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
