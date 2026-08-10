@@ -16988,6 +16988,59 @@ theorem morseRoundedTransportMap_mem_upper_of_handle {m k : ℕ} (hk : k ≤ m +
     hR₀R₁ (le_of_lt hR₀) hbig (by
       exact sq_pos_iff.mp (lt_trans hδ0 hδr)) hyg
 
+theorem morseRoundedTransportMap_boundary_of_handle {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hRltRp : data.R < data.R')
+    (hR₁R : R₁ < data.R)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    (hε : 0 < ε) (hR₀ : 0 < R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    {y : MorseModel (m + 1)}
+    (hRnorm : 2 * ‖negPart hk y‖ ^ 2 + r ^ 2 ≤ data.R ^ 2)
+    {a b : ℝ}
+    (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hyg : modelRoundedFunction hk c ε r δ R₀ R₁ y = c)
+    (hR0bound : morseNorm (m + 1) y ≤ R₀)
+    (hτ : modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ y =
+      modelAttachedUnstretchTime hk ε r δ y)
+    (hcutoff : ∀ t ∈ Set.Ioo a b,
+      ε₁ ≤ ‖posPart hk (modelFlow hk t y)‖ ∧ morseNorm (m + 1) (modelFlow hk t y) ≤ R₀)
+    (hstay : ∀ t ∈ Set.Ioo a b, ‖modelFlow hk t y‖ < data.R')
+    (hpos : ∀ t ∈ Set.Ioo a b, posPart hk (modelFlow hk t y) ≠ 0)
+    (ha : a < 0) (hb : 0 < b)
+    (htime : CellAttachment.modelAttachedUnstretchTime hk ε r δ y ∈ Set.Ioo a b) :
+    f (morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁
+      hR₀R₁ hRltRp hR₁R (data.χ y)) = c + r ^ 2 / 2 := by
+  have hΦ : morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁
+      hR₀R₁ hRltRp hR₁R (data.χ y) =
+      data.χ (modelAttachedUnstretch hk ε r δ y) :=
+    morseRoundedTransportMap_eq_unstretch_of_handle hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀
+      hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hδ0 hδr hR0bound hτ
+      hcutoff hstay hpos ha hb htime
+  rw [hΦ]
+  have hnormUnstretch : morseNorm (m + 1) (modelAttachedUnstretch hk ε r δ y) ≤ data.R := by
+    have hsq := modelAttachedUnstretch_norm_sq_le hk ε r δ hδ0 hδr hy
+    have hle : morseNorm (m + 1) (modelAttachedUnstretch hk ε r δ y) ^ 2 ≤ data.R ^ 2 :=
+      le_trans hsq hRnorm
+    have hnonneg : 0 ≤ morseNorm (m + 1) (modelAttachedUnstretch hk ε r δ y) := norm_nonneg _
+    have hR0 : 0 ≤ data.R := le_of_lt data.hRpos
+    have habs := sq_le_sq.mp hle
+    rwa [abs_of_nonneg hnonneg, abs_of_nonneg hR0] at habs
+  have hfval : f (data.χ (modelAttachedUnstretch hk ε r δ y)) =
+      morseNormalForm hk c (modelAttachedUnstretch hk ε r δ y) :=
+    data.hnorm (modelAttachedUnstretch hk ε r δ y) hnormUnstretch
+  rw [hfval]
+  exact modelAttachedUnstretch_boundary_of_roundedSublevel hk c ε r δ R₀ R₁ hε hδ0 hδr
+    hR₀R₁ (le_of_lt hR₀) hbig hyg
+
 theorem morseRoundedTransportMap_mem_upper_of_collar {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
