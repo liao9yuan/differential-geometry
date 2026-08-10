@@ -297,6 +297,50 @@ private theorem family_mfderiv_decomp
     exact hlin'
   rw [hlin]
 
+private theorem suspension_level_equation
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
+    (hF : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => F q.1 q.2)) (x : M) (s : ℝ)
+    (v : TangentSpace I x) (ρs : ℝ) :
+    (NormedSpace.fromTangentSpace (F x s))
+      ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (x, s))
+        (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (v, ρs))) =
+      (NormedSpace.fromTangentSpace (F x s)) ((mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) v) +
+        ((fderiv ℝ (fun t : ℝ => F x t) s) 1) * ρs := by
+  have hd := family_mfderiv_decomp (I := I) F hF x s
+    (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (v, ρs))
+  have hw₁ : (mfderiv (I.prod 𝓘(ℝ, ℝ)) I (fun q : M × ℝ => q.1) (x, s))
+      (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (v, ρs)) = v := by
+    have hm := mfderiv_fst (𝕜 := ℝ) (E := MorseModel (m + 1)) (H := H) (I := I) (M := M)
+      (E' := ℝ) (H' := ℝ) (I' := 𝓘(ℝ, ℝ)) (M' := ℝ) (x := (x, s))
+    rw [show (mfderiv (I.prod 𝓘(ℝ, ℝ)) I Prod.fst (x, s)) =
+        ContinuousLinearMap.fst ℝ (TangentSpace I x) (TangentSpace 𝓘(ℝ, ℝ) s) from hm]
+    change (ContinuousLinearMap.fst ℝ (TangentSpace I x) (TangentSpace 𝓘(ℝ, ℝ) s))
+        (show TangentSpace I x × TangentSpace 𝓘(ℝ, ℝ) s from
+          (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (v, ρs))) = v
+    change v = v
+    rfl
+  have hw₂ : (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => q.2) (x, s))
+      (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (v, ρs)) =
+      (show TangentSpace 𝓘(ℝ, ℝ) s from ρs) := by
+    have hm := mfderiv_snd (𝕜 := ℝ) (E := MorseModel (m + 1)) (H := H) (I := I) (M := M)
+      (E' := ℝ) (H' := ℝ) (I' := 𝓘(ℝ, ℝ)) (M' := ℝ) (x := (x, s))
+    rw [show (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Prod.snd (x, s)) =
+        ContinuousLinearMap.snd ℝ (TangentSpace I x) (TangentSpace 𝓘(ℝ, ℝ) s) from hm]
+    change (ContinuousLinearMap.snd ℝ (TangentSpace I x) (TangentSpace 𝓘(ℝ, ℝ) s))
+        (show TangentSpace I x × TangentSpace 𝓘(ℝ, ℝ) s from
+          (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (v, ρs))) =
+      (show TangentSpace 𝓘(ℝ, ℝ) s from ρs)
+    change (show TangentSpace 𝓘(ℝ, ℝ) s from ρs) = (show TangentSpace 𝓘(ℝ, ℝ) s from ρs)
+    rfl
+  have hw₂' : (NormedSpace.fromTangentSpace (s : ℝ))
+      ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => q.2) (x, s))
+        (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (v, ρs))) = ρs := by
+    rw [hw₂]
+    rfl
+  rw [hd, hw₁, hw₂']
+
 private theorem familyChartRep_coefficient_contMDiffOn
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
