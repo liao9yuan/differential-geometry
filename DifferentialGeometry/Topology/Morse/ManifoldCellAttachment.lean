@@ -8032,6 +8032,71 @@ theorem morseFarExpandTime_top {c ε δ : ℝ} (hδ : 0 < δ) (hε : 0 < ε) :
   field_simp [hδ.ne']
   ring
 
+noncomputable def morseFarExpandTimeSmooth (c ε δ ρ ρ' : ℝ) (t : ℝ) : ℝ :=
+  Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * morseFarExpandTime c ε δ t
+
+theorem morseFarExpandTimeSmooth_zero {c ε δ ρ ρ' t : ℝ} (hρ : 0 < ρ)
+    (ht : t ≤ c - ε - δ + ρ') :
+    morseFarExpandTimeSmooth c ε δ ρ ρ' t = 0 := by
+  dsimp [morseFarExpandTimeSmooth]
+  have harg : (t - (c - ε - δ + ρ')) / ρ ≤ 0 := by
+    exact div_nonpos_of_nonpos_of_nonneg (by linarith) (le_of_lt hρ)
+  rw [Real.smoothTransition.zero_of_nonpos harg]
+  ring
+
+theorem morseFarExpandTimeSmooth_top {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) :
+    morseFarExpandTimeSmooth c ε δ ρ ρ' (c - ε) = -(2 * ε) := by
+  dsimp [morseFarExpandTimeSmooth]
+  have harg : 1 ≤ (c - ε - (c - ε - δ + ρ')) / ρ := by
+    rw [one_le_div hρ]
+    nlinarith [hρρ']
+  rw [Real.smoothTransition.one_of_one_le harg]
+  rw [morseFarExpandTime_top (c := c) (ε := ε) (δ := δ) hδ hε]
+  ring
+
+theorem contDiff_morseFarExpandTimeSmooth {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hδ : 0 < δ) :
+    ContDiff ℝ (⊤ : ℕ∞) (morseFarExpandTimeSmooth c ε δ ρ ρ') := by
+  let U₁ : Set ℝ := {t : ℝ | t < c - ε - δ + ρ'}
+  let U₂ : Set ℝ := {t : ℝ | c - ε - δ < t}
+  have h₁ : ContDiffOn ℝ (⊤ : ℕ∞) (morseFarExpandTimeSmooth c ε δ ρ ρ') U₁ := by
+    exact (contDiffOn_const : ContDiffOn ℝ (⊤ : ℕ∞) (fun _ : ℝ => (0 : ℝ)) U₁).congr
+      (fun t ht => morseFarExpandTimeSmooth_zero hρ (le_of_lt ht))
+  have h₂ : ContDiffOn ℝ (⊤ : ℕ∞) (morseFarExpandTimeSmooth c ε δ ρ ρ') U₂ := by
+    have hlin : ∀ t ∈ U₂,
+        morseFarExpandTimeSmooth c ε δ ρ ρ' t =
+          Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (-(t - c + ε + δ) * (2 * ε) / δ) := by
+      intro t ht
+      dsimp [morseFarExpandTimeSmooth]
+      rw [morseFarExpandTime_eq (c := c) (ε := ε) (δ := δ) hδ ht]
+    have hsm : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun t : ℝ => Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (-(t - c + ε + δ) * (2 * ε) / δ)) U₂ := by
+      fun_prop
+    exact hsm.congr (fun t ht => hlin t ht)
+  have hU₁open : IsOpen U₁ := by
+    dsimp [U₁]
+    exact isOpen_lt continuous_id continuous_const
+  have hU₂open : IsOpen U₂ := by
+    dsimp [U₂]
+    exact isOpen_lt continuous_const continuous_id
+  have hcover : U₁ ∪ U₂ = Set.univ := by
+    ext t
+    constructor
+    · intro ht
+      trivial
+    · intro ht
+      by_cases ht' : t < c - ε - δ + ρ'
+      · exact Or.inl ht'
+      · exact Or.inr (by
+          have hge : c - ε - δ + ρ' ≤ t := le_of_not_gt ht'
+          have hgt : c - ε - δ < c - ε - δ + ρ' := by linarith
+          exact lt_of_lt_of_le hgt hge)
+  have hUn : ContDiffOn ℝ (⊤ : ℕ∞) (morseFarExpandTimeSmooth c ε δ ρ ρ') (U₁ ∪ U₂) :=
+    h₁.union_of_isOpen h₂ hU₁open hU₂open
+  rw [hcover] at hUn
+  exact contDiffOn_univ.mp hUn
+
 theorem morseRoundedExpandTime_interface {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
     {y : MorseModel (m + 1)}
