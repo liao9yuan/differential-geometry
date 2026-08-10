@@ -18360,6 +18360,205 @@ private theorem morseRoundedHandleOrbitStayInner {m k : ℕ} (hk : k ≤ m + 1)
     exact lt_of_le_of_lt (morseNorm_piNorm_le (modelFlow hk t y)) hnorm
   exact ⟨⟨hposge, hnorm⟩, hnormR'⟩
 
+private theorem morseRoundedTransportMap_preimage_of_ball {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hRltRp : data.R < data.R')
+    (hR₁R : R₁ < data.R)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    (hε : 0 < ε) (hR₀ : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hθ : 0 < θ)
+    (hR₁₂R : R₁ ≤ data.R)
+    {u : MorseModel (m + 1)} {y : M}
+    (hyu : data.χ u = y)
+    (hfy : f y ≤ c + r ^ 2 / 2)
+    (hnormU : morseNorm (m + 1) u ≤ data.R)
+    (hinner : morseNorm (m + 1) (modelAttachedStretch hk ε r δ u) ^ 2 +
+      2 * ε + r ^ 2 + δ + 1 ≤ R₀ ^ 2)
+    (hε₁ : 0 < ε₁)
+    (hR'room : R₀ ^ 2 + 2 * ε + r ^ 2 + δ + 1 < data.R' ^ 2)
+    (hposSource : ε₁ ^ 2 ≤ ‖posPart hk (modelAttachedStretch hk ε r δ u)‖ ^ 2 / 2) :
+    ∃ x : M, morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c ∧
+      morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁
+        hR₀R₁ hRltRp hR₁R x = y := by
+  let x : M := data.χ (modelAttachedStretch hk ε r δ u)
+  have hstretchball : morseNorm (m + 1) (modelAttachedStretch hk ε r δ u) ≤ R₀ := by
+    have hnon : 0 ≤ morseNorm (m + 1) (modelAttachedStretch hk ε r δ u) := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have hsq' : morseNorm (m + 1) (modelAttachedStretch hk ε r δ u) ^ 2 ≤ R₀ ^ 2 := by
+      nlinarith [hinner]
+    have habs' := sq_le_sq.mp hsq'
+    have h1 : |morseNorm (m + 1) (modelAttachedStretch hk ε r δ u)| =
+        morseNorm (m + 1) (modelAttachedStretch hk ε r δ u) := abs_of_nonneg hnon
+    have h2 : |R₀| = R₀ := abs_of_nonneg hR₀
+    rwa [h1, h2] at habs'
+  have hstretchball₁ : modelAttachedStretch hk ε r δ u ∈
+      {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} :=
+    le_trans hstretchball (le_of_lt hR₀R₁)
+  have hsrc : modelAttachedStretch hk ε r δ u ∈ data.χ.source := data.hχsrc
+    (modelAttachedStretch hk ε r δ u) (le_trans hstretchball (le_trans (le_of_lt hR₀R₁) hR₁₂R))
+  have hN : morseNormalForm hk c u ≤ c + r ^ 2 / 2 := by
+    have hf' : f (data.χ u) = morseNormalForm hk c u := data.hnorm u hnormU
+    rw [← hyu] at hfy
+    rwa [hf'] at hfy
+  have hmem : CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁
+      (modelAttachedStretch hk ε r δ u) ≤ c :=
+    modelAttachedStretch_mem_roundedSublevel hk c ε r δ R₀ R₁ hε hδ0 hδr hR₀R₁ hR₀ hbig
+      (sq_pos_iff.mp (lt_trans hδ0 hδr)) hN
+  have hgx : morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c := by
+    have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data
+      ⟨modelAttachedStretch hk ε r δ u, hstretchball₁, rfl⟩
+    dsimp [x]
+    rw [heq]
+    rw [data.χ.left_inv hsrc]
+    exact hmem
+  by_cases hcocore : posPart hk u = 0
+  · have hpos0s : ‖posPart hk (modelAttachedStretch hk ε r δ u)‖ = 0 := by
+      have hzero : posPart hk (modelAttachedStretch hk ε r δ u) = 0 := by
+        dsimp [modelAttachedStretch]
+        rw [posPart_recombine]
+        rw [hcocore]
+        simp
+      exact norm_eq_zero.mpr hzero
+    have hsu : modelAttachedStretch hk ε r δ u = u := by
+      dsimp [modelAttachedStretch]
+      rw [hcocore]
+      simp
+      simpa [hcocore] using recombine_decompose hk u
+    have hτx : morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x = 0 := by
+      rw [morseRoundedTransportTime_eq_model hk c ε r δ ρ ρ' θ R₀ R₁ data
+        ⟨modelAttachedStretch hk ε r δ u, hstretchball₁, rfl⟩]
+      rw [data.χ.left_inv hsrc]
+      have hτeq : modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁
+          (modelAttachedStretch hk ε r δ u) =
+          modelAttachedUnstretchTime hk ε r δ (modelAttachedStretch hk ε r δ u) :=
+        modelRoundedTransportTime_eq_unstretch hk c ε r δ ρ ρ' θ R₀ R₁ hθ hR₀R₁
+          (by
+            have hatt := (modelAttachedStretch_equiv hk c ε r δ hδ0 hδr
+              (sq_pos_iff.mp (lt_trans hδ0 hδr))).1 u hN
+            simpa [modelAttachedRegion] using hatt)
+          hstretchball
+      rw [hτeq]
+      dsimp [modelAttachedUnstretchTime]
+      rw [hpos0s]
+      norm_num
+    have hΦ : morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp
+        hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x = y := by
+      dsimp [morseRoundedTransportMap, x]
+      rw [hτx, curveAt_zero]
+      rw [hsu, hyu]
+    exact ⟨x, hgx, hΦ⟩
+  · let yS : MorseModel (m + 1) := modelAttachedStretch hk ε r δ u
+    have hposS : 0 < ‖posPart hk yS‖ := by
+      have hposU : 0 < ‖posPart hk u‖ := by
+        exact lt_of_le_of_ne (norm_nonneg _) (Ne.symm (by
+          intro hz
+          exact hcocore (norm_eq_zero.mp hz)))
+      have hsc : 0 < smoothCap ε r δ (‖negPart hk u‖ ^ 2) :=
+        smoothCap_pos hδ0 hδr
+      have hden : 0 < ‖negPart hk u‖ ^ 2 + r ^ 2 := by
+        nlinarith [sq_nonneg ‖negPart hk u‖, hδ0, hδr]
+      dsimp [yS, modelAttachedStretch]
+      rw [posPart_recombine]
+      rw [norm_smul]
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+      have hfac : 0 < Real.sqrt
+          (smoothCap ε r δ (‖negPart hk u‖ ^ 2) / (‖negPart hk u‖ ^ 2 + r ^ 2)) := by
+        exact Real.sqrt_pos.2 (div_pos hsc hden)
+      exact mul_pos hfac hposU
+    have hatt : yS ∈ modelAttachedRegion hk ε r δ := by
+      exact (modelAttachedStretch_equiv hk c ε r δ hδ0 hδr
+        (sq_pos_iff.mp (lt_trans hδ0 hδr))).1 u hN
+    have ht₀ : modelAttachedUnstretchTime hk ε r δ yS ≤ 0 :=
+      modelAttachedUnstretchTime_nonpos hk ε r δ (le_of_lt hε) hδ0 hδr yS
+    have ht₀abs : |modelAttachedUnstretchTime hk ε r δ yS| ≤ (2 * ε + r ^ 2 + δ) / 2 :=
+      modelAttachedUnstretchTime_abs_le hk ε r δ (le_of_lt hε) hδ0 hδr hatt
+    let a : ℝ := modelAttachedUnstretchTime hk ε r δ yS - 1 / 2
+    let b : ℝ := min (‖posPart hk yS‖ ^ 2 / 4) (1 / 2)
+    have ha : a < 0 := by
+      dsimp [a]
+      linarith
+    have hb0 : 0 < b := by
+      dsimp [b]
+      have hpos4 : 0 < ‖posPart hk yS‖ ^ 2 / 4 := by positivity
+      exact lt_min hpos4 (by norm_num)
+    have hb : b ≤ ‖posPart hk yS‖ ^ 2 / 4 := by
+      dsimp [b]
+      exact min_le_left _ _
+    have habs : ∀ t ∈ Set.Ioo a b, |t| ≤ (2 * ε + r ^ 2 + δ) / 2 + 1 / 2 := by
+      intro t ht
+      let B : ℝ := (2 * ε + r ^ 2 + δ) / 2 + 1 / 2
+      rw [abs_le]
+      constructor
+      · have ht₂ : a < t := ht.1
+        have h₁ : -B ≤ a := by
+          dsimp [B, a]
+          have h₀ : -(2 * ε + r ^ 2 + δ) / 2 ≤ modelAttachedUnstretchTime hk ε r δ yS :=
+            by
+              have h₁' : -((2 * ε + r ^ 2 + δ) / 2) ≤ modelAttachedUnstretchTime hk ε r δ yS :=
+                (abs_le.mp ht₀abs).1
+              convert h₁' using 1; ring
+          linarith
+        exact le_trans h₁ (le_of_lt ht₂)
+      · have ht₁ : t < b := ht.2
+        have h₂ : b ≤ B := by
+          dsimp [B, b]
+          have h₁' : 1 / 2 ≤ (2 * ε + r ^ 2 + δ) / 2 + 1 / 2 := by
+            nlinarith [hε, hδ0, sq_nonneg r]
+          exact le_trans (min_le_right _ _) h₁'
+        exact le_of_lt (lt_of_lt_of_le ht₁ h₂)
+    have htime : modelAttachedUnstretchTime hk ε r δ yS ∈ Set.Ioo a b := by
+      constructor
+      · dsimp [a]
+        linarith
+      · exact lt_of_le_of_lt ht₀ hb0
+    have hynorm : morseNorm (m + 1) yS ^ 2 + 2 * ε + r ^ 2 + δ + 1 ≤ R₀ ^ 2 := by
+      simpa [yS] using hinner
+    have hR'0 : 0 ≤ data.R' := le_of_lt data.hR'pos
+    have hstayOrbit := morseRoundedHandleOrbitStayInner hk ε₁ ε r δ R₀ data.R'
+      hε₁ (le_of_lt hε) (le_of_lt hδ0) hR₀ hR'0
+      hynorm (by simpa [yS] using hposSource) hb habs hR'room
+    have hcutoff : ∀ t ∈ Set.Ioo a b,
+        ε₁ ≤ ‖posPart hk (modelFlow hk t yS)‖ ∧ morseNorm (m + 1) (modelFlow hk t yS) ≤ R₀ := by
+      intro t ht
+      exact (hstayOrbit t ht).1
+    have hstay : ∀ t ∈ Set.Ioo a b, ‖modelFlow hk t yS‖ < data.R' := by
+      intro t ht
+      exact (hstayOrbit t ht).2
+    have hpos : ∀ t ∈ Set.Ioo a b, posPart hk (modelFlow hk t yS) ≠ 0 := by
+      intro t ht
+      have hge : ε₁ ≤ ‖posPart hk (modelFlow hk t yS)‖ := (hstayOrbit t ht).1.1
+      intro hz
+      have hle : ‖posPart hk (modelFlow hk t yS)‖ ≤ 0 := by simp [hz]
+      have hlt : ε₁ ≤ 0 := le_trans hge hle
+      exact (not_lt_of_ge hlt) hε₁
+    have hτ : modelRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ yS =
+        modelAttachedUnstretchTime hk ε r δ yS :=
+      modelRoundedTransportTime_eq_unstretch hk c ε r δ ρ ρ' θ R₀ R₁ hθ hR₀R₁
+        (by
+          simpa [modelAttachedRegion] using hatt)
+        hstretchball
+    have hEq := morseRoundedTransportMap_eq_unstretch_of_handle hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁
+      data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hδ0 hδr
+      (hR0bound := hstretchball) (hτ := hτ) (hcutoff := hcutoff) (hstay := hstay)
+      (hpos := hpos) (ha := ha) (hb := hb0) (htime := htime)
+    have hΦ : morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp
+        hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x = y := by
+      dsimp [x, yS]
+      rw [hEq]
+      rw [modelAttachedUnstretch_stretch hk ε r δ hδ0 hδr
+        (sq_pos_iff.mp (lt_trans hδ0 hδr)) u]
+      exact hyu
+    exact ⟨x, hgx, hΦ⟩
+
 end ManifoldCellAttachment
 
 end
