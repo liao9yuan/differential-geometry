@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
+import DifferentialGeometry.Geometry.Metric.Completeness
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChainedFlowContinuity
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
@@ -3136,6 +3137,50 @@ theorem expMapIntrinsic_continuous
     Continuous (fun v : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p v) :=
   expMapIntrinsic_continuous_of_jointContinuity (I := I) g hEnorm p
     (fun v₀ => intrinsicGeodesic_jointContinuity (I := I) g hEnorm p v₀)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+theorem expMapIntrinsic_continuous_of_complete_metric
+    [T2Space (TangentBundle I M)]
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (p : M) :
+    letI : IsManifold I 1 M :=
+      IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+    letI : TopologicalSpace.MetrizableSpace M :=
+      Manifold.metrizableSpace I M
+    letI : T3Space M := inferInstance
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+    letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+    letI : PseudoEMetricSpace M :=
+      (EMetricSpace.ofRiemannianMetric I M).toPseudoEMetricSpace
+    letI : CompleteSpace M := hcomplete.complete
+    let hEnorm : IsMetricNorm (I := I) (M := M) g :=
+      fun x v => tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+    Continuous (fun v : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p v) := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M :=
+    (EMetricSpace.ofRiemannianMetric I M).toPseudoEMetricSpace
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  exact expMapIntrinsic_continuous (I := I) (M := M) g hEnorm p
 
 end Exponential
 end Riemannian
