@@ -14837,6 +14837,33 @@ theorem morseHandleAdjunctionIsManifold {m k : ℕ} (hk : k ≤ m + 1)
     (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ R₀ R₁ data hε hδ hδr hr hεr' hbigR
       hR hR0 hbig hRbig hR₁big hR₁₂R hcont)
 
+theorem morseAttachedUnstretchInChart {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (v : (x : M) → TangentSpace I x)
+    (hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) ∞
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
+    (hsupp : IsCompact (tsupport v))
+    (hchartField : ∀ z : MorseModel (m + 1), ‖z‖ < data.R' →
+      v (data.χ z) = mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ z (modelFlowField hk z))
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2)
+    {y : MorseModel (m + 1)}
+    (hstay : ∀ t ∈ Set.Ioo (-1) 1, ‖modelFlow hk t y‖ < data.R')
+    (hpos : ∀ t ∈ Set.Ioo (-1) 1, posPart hk (modelFlow hk t y) ≠ 0)
+    (htime : CellAttachment.modelAttachedUnstretchTime hk ε r δ y ∈ Set.Ioo (-1) 1) :
+    curveAt v (exists_globalIntegralCurve_of_compactSupport v hv hsupp) (data.χ y)
+      (CellAttachment.modelAttachedUnstretchTime hk ε r δ y) =
+      data.χ (CellAttachment.modelAttachedUnstretch hk ε r δ y) := by
+  have hflow := morseFlowInChart (hk := hk) (c := c) (data := data) (v := v) (hv := hv)
+    (hsupp := hsupp) (hchartField := hchartField) y (a := (-1 : ℝ)) (b := (1 : ℝ))
+    (by norm_num : (-1 : ℝ) < 0) (by norm_num : (0 : ℝ) < 1)
+    (hstay := hstay) (hpos := hpos)
+    (CellAttachment.modelAttachedUnstretchTime hk ε r δ y) htime
+  rw [hflow]
+  rw [← CellAttachment.modelAttachedUnstretch_eq_modelFlow hk ε r δ hδ0 hδr y]
+
 end ManifoldCellAttachment
 
 end
