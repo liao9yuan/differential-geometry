@@ -35,7 +35,7 @@ variable [IsManifold I ∞ M]
 argument.  Each cutoff has one compact spatial support for the whole time
 slab. -/
 structure ShiCutoffData
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) where
   chi : Nat → Real → M → Real
   err : Nat → Real
@@ -72,7 +72,7 @@ structure ShiCutoffData
 
 /-- A smooth local lower support for a cutoff at one spacetime point. -/
 structure ShiCutoffLowerSupportAt
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T ε : Real)
     (χ : Real → M → Real)
     (t : Real) (x : M) where
@@ -102,7 +102,7 @@ structure ShiCutoffLowerSupportAt
 Regularity and differential inequalities are supplied only through a local
 lower support at points where the cutoff is positive. -/
 structure ShiBarrierCutoffData
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real)
     (O : M) where
   chi : Nat → Real → M → Real
@@ -135,7 +135,7 @@ namespace ShiCutoffData
 /-- The uniform spatial support produces a compact spacetime slab for each
 cutoff. -/
 theorem support_slab
-    {G : RealizedMetricFamily (I := I) (M := M) Real} {T : Real}
+    {G : MetricConnectionFamily (I := I) (M := M) Real} {T : Real}
     (cut : ShiCutoffData (I := I) G T) (n : Nat) :
     IsCompact (Set.Icc 0 T ×ˢ cut.support n) :=
   isCompact_Icc.prod (cut.support_compact n)
@@ -143,7 +143,7 @@ theorem support_slab
 /-- A smooth cutoff is pointwise differentiable in space on every controlled
 time slice. -/
 theorem space_diff
-    {G : RealizedMetricFamily (I := I) (M := M) Real} {T : Real}
+    {G : MetricConnectionFamily (I := I) (M := M) Real} {T : Real}
     (cut : ShiCutoffData (I := I) G T) {n : Nat} {t : Real}
     (ht : t ∈ Set.Icc 0 T) (x : M) :
     MDifferentiableAt I 𝓘(Real, Real) (cut.chi n t) x :=
@@ -152,7 +152,7 @@ theorem space_diff
 /-- The spatial gradient of a smooth cutoff is pointwise differentiable on
 every controlled time slice. -/
 theorem grad_diff
-    {G : RealizedMetricFamily (I := I) (M := M) Real} {T : Real}
+    {G : MetricConnectionFamily (I := I) (M := M) Real} {T : Real}
     (cut : ShiCutoffData (I := I) G T) {n : Nat} {t : Real}
     (ht : t ∈ Set.Icc 0 T) (x : M) :
     MDifferentiableAt I (I.prod 𝓘(Real, E))
@@ -163,7 +163,7 @@ theorem grad_diff
 /-- A smooth cutoff family gives point-centered barrier cutoff data at every
 chosen center. -/
 def toBarrierAt
-    {G : RealizedMetricFamily (I := I) (M := M) Real} {T : Real}
+    {G : MetricConnectionFamily (I := I) (M := M) Real} {T : Real}
     (cut : ShiCutoffData (I := I) G T) (O : M) :
     ShiBarrierCutoffData (I := I) G T O where
   chi := cut.chi

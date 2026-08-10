@@ -65,7 +65,7 @@ theorem torsion_free_apply
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem torsion_free_family_apply
     {D : RealTimeInterval}
-    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    {G : MetricConnectionFamilyOn (I := I) (M := M) D}
     (htf : IsTorsionFreeFamilyOn (I := I) G)
     (t : RealTimeInterval.FlowTime D)
     {x : M} {X Y : (p : M) -> TangentSpace I p}

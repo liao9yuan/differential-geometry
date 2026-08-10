@@ -119,7 +119,7 @@ theorem coordInvCovZero
     (S.family.connection (t : Real)) (coordinateFrameAt (I := I) x₀)
     (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
     (coordInvLocal (I := I) S x₀) (t : Real)
-    (DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.metricCompatibleAt_regular
+    (DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.metricCompatibleAt_regular
       (I := I) S.family t)
     (coordinateFrameSet_open (I := I) x₀)
     (coordinateFrameAt_mem (I := I) x₀)
@@ -144,7 +144,7 @@ theorem coordInvCovZeroOn
     (S.family.connection (t : Real)) (coordinateFrameAt (I := I) x₀)
     (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
     (coordInvLocal (I := I) S x₀) (t : Real)
-    (DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.metricCompatibleAt_regular
+    (DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.metricCompatibleAt_regular
       (I := I) S.family t)
     (coordinateFrameSet_open (I := I) x₀)
     hx

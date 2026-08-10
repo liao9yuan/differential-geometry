@@ -114,7 +114,7 @@ theorem tfLapCore
               (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) (flowG (I := I) S) t
                 (S.scalar t) x)) / 3 := by
   intro t ht x
-  let G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real :=
+  let G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real :=
     flowG (I := I) S
   have hreg := tfLapReg (I := I) S hS
   have hsq :

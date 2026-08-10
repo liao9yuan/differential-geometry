@@ -44,10 +44,10 @@ variable [IsManifold I ∞ M]
 
 
 def reverseFamily
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (T : Real) :
-    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real where
   metric := fun s => G.metric (T - s)
   connection := fun s => G.connection (T - s)
@@ -55,7 +55,7 @@ def reverseFamily
 
 omit [FiniteDimensional ℝ E] in
 @[simp] theorem reverse_metric
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (T s : Real) :
     (reverseFamily G T).metric s = G.metric (T - s) := by
@@ -68,7 +68,7 @@ moving the terminal anchor from `T` to `T + a` leaves the underlying original
 metric time unchanged. -/
 theorem heat_pot_add
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (V u : Real → M → Real) (T a : Real)
     (h : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D
@@ -151,7 +151,7 @@ theorem reverse_deriv
 
 
 theorem conj_heat_forward
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) (T s : Real) (x : M)
     (hu : DifferentiableAt Real (fun t : Real => u t x) (T - s))
@@ -176,7 +176,7 @@ theorem conj_heat_forward
 
 
 theorem conj_heat_backward
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar v : Real → M → Real) (T t : Real) (x : M)
     (hv : DifferentiableAt Real (fun s : Real => v s x) (T - t))
@@ -211,7 +211,7 @@ omit [TopologicalSpace M] in
 
 def IsConjHeatOn
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) (T : Real) : Prop :=
   DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D (reverseFamily G T)
@@ -221,7 +221,7 @@ def IsConjHeatOn
 
 theorem conj_heat_of_pot
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar v : Real → M → Real) (T : Real)
     (h : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D
@@ -233,7 +233,7 @@ theorem conj_heat_of_pot
 
 theorem heat_pot_to_conj
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar v : Real → M → Real) (T t : Real)
     (h : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D
@@ -265,7 +265,7 @@ theorem heat_pot_to_conj
 
 theorem conj_heat_mass_deriv
     [I.Boundaryless] [T2Space M] [CompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) {t : Real}
     (hg : MetricFamilyRegularAt (I := I)
@@ -311,7 +311,7 @@ theorem conj_heat_mass_deriv
 
 theorem conj_heat_mass_eq
     [I.Boundaryless] [T2Space M] [CompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) {a b : Real} (hab : a ≤ b)
     (hg : MetricFamilyRegularAt (I := I)
@@ -351,7 +351,7 @@ theorem conj_heat_mass_eq
 
 theorem conj_heat_mass_one
     [I.Boundaryless] [T2Space M] [CompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) {a b : Real}
     (hg : MetricFamilyRegularAt (I := I)

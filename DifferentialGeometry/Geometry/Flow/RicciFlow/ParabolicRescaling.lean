@@ -560,7 +560,7 @@ theorem connectionFamilySmooth_para
       (paraSolution (I := I) S τ R hR hτ).family := by
   intro t
   simpa [SolutionOn.family, paraSolution, paraFamily, SolutionFamily.connection,
-    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt]
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt]
     using lcConnectionSmooth (I := I)
       ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
 
@@ -578,7 +578,7 @@ theorem leviCivita_para
     exact (paraSolution (I := I) S τ R hR hτ).metricCompatible t
   · intro t
     simpa [SolutionOn.family, paraSolution, paraFamily, SolutionFamily.connection,
-      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt]
+      DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt]
       using DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
         (I := I) ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
 

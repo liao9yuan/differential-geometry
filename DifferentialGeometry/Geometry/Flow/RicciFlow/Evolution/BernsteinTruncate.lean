@@ -38,7 +38,7 @@ namespace BernsteinTower
 
 theorem estimate_of_heat
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     {w wLap : Nat -> Real -> M -> Real}
     (levelC : Nat -> Real)

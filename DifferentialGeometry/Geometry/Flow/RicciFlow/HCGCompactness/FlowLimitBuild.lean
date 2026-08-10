@@ -105,7 +105,7 @@ theorem isSolutionOn_of_reg
       ricciNormGrad := ?_ }
   · intro t
     simpa [SolutionOn.family, SolutionFamily.connection,
-      RealizedMetricFamilyOn.connectionAt]
+      MetricConnectionFamilyOn.connectionAt]
       using leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I)
         (g (t : Real))
   · intro t x X Y

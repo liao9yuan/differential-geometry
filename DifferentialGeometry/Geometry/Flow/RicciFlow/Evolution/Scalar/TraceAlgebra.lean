@@ -155,7 +155,7 @@ omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_laplacianAt
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -183,7 +183,7 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)

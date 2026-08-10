@@ -74,7 +74,7 @@ combination of the gradients. -/
 theorem gradientFun_sum
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
     (hf : ∀ i ∈ s, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
     DifferentialGeometry.Geometry.Operator.gradientFun (I := I) (G.metric t)
@@ -113,7 +113,7 @@ omit [CompleteSpace E] [T2Space M] in
 theorem mdiffAt_gradientFun_finset_sum_smul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
     (hf : ∀ i ∈ s, ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (f i) y)
     (hgradf : ∀ i ∈ s, MDiffAt (T% fun y : M =>
@@ -191,7 +191,7 @@ omit [CompleteSpace E] [T2Space M] in
 theorem laplacianAt_linear_combo_finset
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
     (hf : ∀ i ∈ s, ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (f i) y)
     (hgradf : ∀ i ∈ s, MDiffAt (T% fun y : M =>
@@ -243,7 +243,7 @@ omit
 theorem heatOperator_linear_combo_finset
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (t : Real) (f : ι -> M -> Real) (c : ι -> Real) (x : M)
     (hf : ∀ i ∈ s, ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) (f i) y)
     (hgradf : ∀ i ∈ s, MDiffAt (T% fun y : M =>
@@ -544,7 +544,7 @@ global analytic hypotheses. -/
 structure BernsteinTower
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real) where
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real) where
 
   D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval
 
@@ -594,7 +594,7 @@ namespace BernsteinTower
 
 variable [I.Boundaryless]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
-variable {G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real}
+variable {G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real}
 omit [CompleteSpace E] [T2Space M] in
 theorem sqrt_pow_mul_w_le (B : BernsteinTower (I := I) G) (j : ℕ)
     {t : Real} {x : M}

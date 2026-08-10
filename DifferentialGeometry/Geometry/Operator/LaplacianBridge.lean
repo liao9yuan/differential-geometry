@@ -114,7 +114,7 @@ omit [NeZero (Module.finrank Real E)] in
 omit [CompactSpace M] in
 omit [SigmaCompactSpace M] in
 theorem laplacianAt_eq_delta
-    (G : RealizedMetricFamily (I := I) (M := M) Real) (t : Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real) (t : Real)
     {f : M → Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
     (hconn : G.connection t = LeviCivita (I := I) (G.metric t)) (x : M) :
     laplacianAt (I := I) G t f x = Δ_g (I := I) (G.metric t) ⟨_, hf⟩ x := by

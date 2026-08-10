@@ -179,8 +179,8 @@ theorem chartRD_local
   let D : RealTimeInterval := RealTimeInterval.closedOpen a b hab
   let Sol₁ : SolutionOn (I := I) (M := M) D := { base := { metric := g₁ } }
   let Sol₂ : SolutionOn (I := I) (M := M) D := { base := { metric := g₂ } }
-  let G₁ : RealizedMetricFamilyOn (I := I) (M := M) D := Sol₁.family
-  let G₂ : RealizedMetricFamilyOn (I := I) (M := M) D := Sol₂.family
+  let G₁ : MetricConnectionFamilyOn (I := I) (M := M) D := Sol₁.family
+  let G₂ : MetricConnectionFamilyOn (I := I) (M := M) D := Sol₂.family
   have hG₁ : MetricFamilySmoothOn (I := I) (M := M) D G₁.metric := by
     simpa only [D, G₁, Sol₁] using
       metricFamilySmoothOn_of_chartGram (I := I) (M := M)

@@ -101,7 +101,7 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real)
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)

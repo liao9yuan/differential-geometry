@@ -118,7 +118,7 @@ theorem scalarEvolOfSmooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hmetric : ∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
       G.metric (t : Real) = S.family.metric (t : Real))
     (hconnection : ∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
@@ -136,7 +136,7 @@ theorem scalarEvolOfSmooth
 
 
 def ScalarLaplacianRealizesHeatOperatorOn
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (scalar scalarLap : Real -> M -> Real) : Prop :=
   forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
     scalarLap t x =
@@ -146,7 +146,7 @@ namespace ScalarLaplacianRealizesHeatOperatorOn
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem zero_drift
-    {G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real}
+    {G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real}
     {T : Real} {scalar scalarLap : Real -> M -> Real}
     (h : ScalarLaplacianRealizesHeatOperatorOn (I := I) G T scalar scalarLap) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
@@ -163,7 +163,7 @@ theorem zero_drift
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem of_laplacianAt
-    {G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real}
+    {G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real}
     {T : Real} {scalar scalarLap : Real -> M -> Real}
     (h : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
       scalarLap t x = DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t (scalar t)

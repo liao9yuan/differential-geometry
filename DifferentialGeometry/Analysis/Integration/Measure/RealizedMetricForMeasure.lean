@@ -52,14 +52,14 @@ theorem metricForMeasure_inner (g : SmoothRiemannianMetric I M) (x : M) :
 
 
 abbrev volumeMeasureAt [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Time)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Time)
       (t : Time) :
     MeasureTheory.Measure M :=
   riemannianVolumeMeasure (I := I) (M := M) (G.metric t)
 
 @[simp]
 theorem volumeMeasureAt_eq [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Time)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Time)
       (t : Time) :
     volumeMeasureAt (I := I) (M := M) G t =
       riemannianVolumeMeasure (I := I) (M := M) (G.metric t) := rfl
@@ -67,7 +67,7 @@ theorem volumeMeasureAt_eq [T2Space M] [SigmaCompactSpace M]
 
 abbrev volumeMeasureOn [T2Space M] [SigmaCompactSpace M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D) :
   MeasureTheory.Measure M :=
   riemannianVolumeMeasure (I := I) (M := M) (G.metricAt t)
@@ -75,7 +75,7 @@ abbrev volumeMeasureOn [T2Space M] [SigmaCompactSpace M]
 @[simp]
 theorem volumeMeasureOn_eq [T2Space M] [SigmaCompactSpace M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D) :
     volumeMeasureOn (I := I) (M := M) G t =
       riemannianVolumeMeasure (I := I) (M := M) (G.metricAt t) := rfl
@@ -83,20 +83,20 @@ theorem volumeMeasureOn_eq [T2Space M] [SigmaCompactSpace M]
 @[simp]
 theorem volumeMeasureOn_eq_metric [T2Space M] [SigmaCompactSpace M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D) :
     volumeMeasureOn (I := I) (M := M) G t =
       riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real)) := rfl
 
 theorem volumeMeasureAt_isLocallyFiniteMeasure [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Time)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Time)
       (t : Time) :
     IsLocallyFiniteMeasure (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isLocallyFiniteMeasure (I := I) (M := M)
     (G.metric t)
 
 theorem volumeMeasureAt_sigmaFinite [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Time)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Time)
       (t : Time) :
     SigmaFinite (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_sigmaFinite (I := I) (M := M)
@@ -104,7 +104,7 @@ theorem volumeMeasureAt_sigmaFinite [T2Space M] [SigmaCompactSpace M]
 
 theorem volumeMeasureAt_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Time)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Time)
       (t : Time) :
     IsFiniteMeasure (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
@@ -112,7 +112,7 @@ theorem volumeMeasureAt_isFiniteMeasure_of_compactSpace
 
 theorem volumeMeasureOn_isLocallyFiniteMeasure [T2Space M] [SigmaCompactSpace M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D) :
     IsLocallyFiniteMeasure (volumeMeasureOn (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isLocallyFiniteMeasure (I := I) (M := M)
@@ -120,7 +120,7 @@ theorem volumeMeasureOn_isLocallyFiniteMeasure [T2Space M] [SigmaCompactSpace M]
 
 theorem volumeMeasureOn_sigmaFinite [T2Space M] [SigmaCompactSpace M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D) :
     SigmaFinite (volumeMeasureOn (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_sigmaFinite (I := I) (M := M)
@@ -129,7 +129,7 @@ theorem volumeMeasureOn_sigmaFinite [T2Space M] [SigmaCompactSpace M]
 theorem volumeMeasureOn_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D) :
     IsFiniteMeasure (volumeMeasureOn (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace

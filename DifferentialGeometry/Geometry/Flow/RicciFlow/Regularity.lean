@@ -212,7 +212,7 @@ theorem scalarEvolOfSol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :
-    ∀ (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real),
+    ∀ (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real),
       (∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
         G.metric (t : Real) = S.family.metric (t : Real)) ->
       (∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
@@ -676,7 +676,7 @@ theorem ricciLapOfSol
   classical
   intro t x
   let Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E
-  let G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real :=
+  let G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real :=
     flowG (I := I) S
   let basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x) :=
     fun x => DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x

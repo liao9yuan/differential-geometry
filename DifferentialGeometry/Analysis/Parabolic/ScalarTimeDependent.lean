@@ -43,7 +43,7 @@ variable [IsManifold I ∞ M]
 
 structure IsHeatPotOn
     (D : RealTimeInterval)
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (V u : Real → M → Real) : Prop where
 
   jointSmooth :
@@ -69,7 +69,7 @@ namespace IsHeatPotOn
 
 theorem mono
     {D D' : RealTimeInterval}
-    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    {G : MetricConnectionFamily (I := I) (M := M) Real}
     {V u : Real → M → Real}
     (h : IsHeatPotOn D G V u)
     (hcarrier : D'.carrier ⊆ D.carrier)

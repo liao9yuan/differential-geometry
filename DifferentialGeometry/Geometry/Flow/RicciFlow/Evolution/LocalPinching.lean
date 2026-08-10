@@ -122,7 +122,7 @@ abbrev PAlphaOverQBetaFormulaOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [IsManifold I (∞ + 1) M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real) : Prop :=
   QuotientEvolutionOn (I := I) (D := D) G
@@ -202,7 +202,7 @@ theorem palpha_over_qbeta_formula
     [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [IsManifold I (∞ + 1) M] [IsManifold I 1 M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real)
     (hphiDt : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)

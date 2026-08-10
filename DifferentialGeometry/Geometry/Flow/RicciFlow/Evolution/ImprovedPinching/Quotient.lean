@@ -38,7 +38,7 @@ def quotField
 
 
 def quotLap
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi : Real -> M -> Real) (alpha beta : Real) :
     Real -> M -> Real :=
   fun t x =>
@@ -51,7 +51,7 @@ def quotLap
 
 
 def quotHeatRHS
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real) : Real -> M -> Real :=
   fun t x =>
@@ -80,7 +80,7 @@ def quotHeatRHS
 
 
 def quotHeatRHSDiv
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real) : Real -> M -> Real :=
   fun t x =>
@@ -109,7 +109,7 @@ def quotHeatRHSDiv
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem quotHeatRHSDiv_eq
     [FiniteDimensional Real E]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real) {t : Real} {x : M}
     (hpsi : 0 < psi t x) :
@@ -134,7 +134,7 @@ theorem quotHeatRHSDiv_eq
 
 def QuotientEvolutionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real) : Prop :=
   forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
@@ -150,7 +150,7 @@ def QuotientEvolutionOn
 
 def QuotEvolDivOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real) : Prop :=
   forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
@@ -173,7 +173,7 @@ theorem quotHeat_at
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real)
     (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M)
@@ -267,7 +267,7 @@ theorem quotHeat
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real)
     (hphiDt : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
@@ -340,7 +340,7 @@ theorem quotHeat_one
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (beta : Real)
     (hphiDt : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
@@ -414,7 +414,7 @@ theorem quotHeat1_of_nonneg
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (beta : Real)
     (hphiDt : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
@@ -515,7 +515,7 @@ theorem quotHeat_book
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real)
     (hphiDt : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
@@ -586,7 +586,7 @@ theorem quotHeat1_book
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (beta : Real)
     (hphiDt : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
@@ -649,7 +649,7 @@ theorem quotHeatDiv
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiLap psiLap phiHeat psiHeat : Real -> M -> Real)
     (alpha beta : Real)
     (hphiDt : forall (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)

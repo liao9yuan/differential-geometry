@@ -422,7 +422,7 @@ theorem formula510_of_components
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_producer
     [I.Boundaryless] [T2Space M] [CompactSpace M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     {s0 : Real}
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)

@@ -534,7 +534,7 @@ omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
     [CompactSpace M] [T2Space M]
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     {S : TwoTensorSecFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
@@ -780,7 +780,7 @@ omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
     [CompactSpace M] [T2Space M]
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     {S : TwoTensorSecFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}

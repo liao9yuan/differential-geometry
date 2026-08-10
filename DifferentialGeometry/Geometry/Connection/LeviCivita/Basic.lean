@@ -85,27 +85,27 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 def IsTorsionFreeFamilyOn
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D) : Prop :=
   forall t : RealTimeInterval.FlowTime D,
     IsTorsionFree (I := I) (G.connectionAt t)
 
 
 def IsLeviCivitaFamilyOn
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D) : Prop :=
   IsMetricCompatibleFamilyOn (I := I) G /\ IsTorsionFreeFamilyOn (I := I) G
 
 
 structure LeviCivitaCalculusOn
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop where
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D) : Prop where
   metricCompatible : IsMetricCompatibleFamilyOn (I := I) G
   torsionFree : IsTorsionFreeFamilyOn (I := I) G
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem isLeviCivitaFamilyOn_of_calculus
     {D : RealTimeInterval}
-    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    {G : MetricConnectionFamilyOn (I := I) (M := M) D}
     (hG : LeviCivitaCalculusOn (I := I) G) :
     IsLeviCivitaFamilyOn (I := I) G :=
   ⟨hG.metricCompatible, hG.torsionFree⟩

@@ -79,7 +79,7 @@ theorem tensorHeat0SMetricAt_apply
 
 
 def tensorHeat0SAt
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {x : M} {s : ℕ}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x) :
@@ -88,7 +88,7 @@ def tensorHeat0SAt
 
 @[simp]
 theorem tensorHeat0SAt_apply
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {x : M} {s : ℕ}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
@@ -162,7 +162,7 @@ theorem tensorHeatWithDrift0SMetricAt_apply
 
 
 def tensorHeatWithDrift0SAt
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {x : M} {s : ℕ}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -174,7 +174,7 @@ def tensorHeatWithDrift0SAt
 
 @[simp]
 theorem tensorHeatWithDrift0SAt_apply
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {x : M} {s : ℕ}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -216,7 +216,7 @@ theorem tensorHeatWithDrift2MetricAt_apply
 
 
 def tensorHeatWithDrift2At
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {x : M}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -228,7 +228,7 @@ def tensorHeatWithDrift2At
 
 @[simp]
 theorem tensorHeatWithDrift2At_apply
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {x : M}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -330,7 +330,7 @@ theorem tensorHeatWithDrift2QuadMetricAt_zero
 
 
 def tensorHeatWithDrift2QuadAt
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {x : M}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -342,7 +342,7 @@ def tensorHeatWithDrift2QuadAt
 
 @[simp]
 theorem tensorHeatWithDrift2QuadAt_eq
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {x : M}
     (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -357,7 +357,7 @@ theorem tensorHeatWithDrift2QuadAt_eq
 
 @[simp]
 theorem tensorHeatWithDrift2QuadAt_zero
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {x : M} (v : TangentSpace I x) :
     tensorHeatWithDrift2QuadAt (I := I) G t X

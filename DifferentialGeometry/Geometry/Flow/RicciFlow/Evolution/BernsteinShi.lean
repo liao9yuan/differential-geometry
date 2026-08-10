@@ -67,7 +67,7 @@ omit [CompleteSpace E] [T2Space M] in
 theorem parabolicOperatorWithDrift_affine_sub
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (F : Real -> M -> Real) (a b t : Real) (x : M)
     (huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t)
@@ -178,7 +178,7 @@ theorem parabolicOperatorWithDrift_affine_sub
 omit [CompleteSpace E] [T2Space M] in
 theorem laplacianAt_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (t : Real) (f g : M -> Real) (c1 c2 : Real) (x : M)
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hg : forall y : M, MDifferentiableAt I 𝓘(Real, Real) g y)
@@ -243,7 +243,7 @@ theorem laplacianAt_linear_combo
 omit [CompleteSpace E] [T2Space M] in
 theorem heatOperator_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (t : Real) (f g : M -> Real) (c1 c2 : Real) (x : M)
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hg : forall y : M, MDifferentiableAt I 𝓘(Real, Real) g y)
@@ -279,7 +279,7 @@ theorem heatOperator_linear_combo
 theorem scalar_subsolution_affine_bound
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (F : Real -> M -> Real) (a b : Real)
@@ -437,7 +437,7 @@ theorem bernstein_first_derivative_estimate
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 < T)
     (u v uLap vLap reaction : Real -> M -> Real)
     (cReact K alpha : Real)

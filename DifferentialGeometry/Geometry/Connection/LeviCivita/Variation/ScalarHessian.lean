@@ -245,7 +245,7 @@ theorem scalarSecond_of_fixedBaseRegular
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcHessVarCoord
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
     (f : Real -> M -> Real) (h : M -> Real)
     (gammaDot :
@@ -330,7 +330,7 @@ def ricciHessVarCoordRHS
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarCoord
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -377,7 +377,7 @@ def shiftedScalarHessCoordAt
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarShifted
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -417,7 +417,7 @@ theorem lcRicciHessVarShifted
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -474,7 +474,7 @@ theorem lcTraceVar
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessShifted_of_trace
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -529,7 +529,7 @@ theorem lcRicciHessShifted_of_trace
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_of_trace
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -604,7 +604,7 @@ theorem lcTraceVar_of_trace
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_inv
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -693,7 +693,7 @@ theorem lcTraceVar_inv
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcTraceShifted
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M

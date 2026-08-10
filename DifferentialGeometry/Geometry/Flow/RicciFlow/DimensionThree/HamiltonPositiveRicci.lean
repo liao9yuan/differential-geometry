@@ -129,7 +129,7 @@ def ham3RealFamilyCore
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
     (g0 : SmoothRiemannianMetric I M) :
-    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real where
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real where
   metric := fun t => by
     classical
     exact if _ht : t ∈ D.carrier then S.family.metric t else g0
@@ -692,7 +692,7 @@ noncomputable def ham3_flow_box
 def ham3RealFamily
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
-    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real :=
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real :=
   ham3RealFamilyCore (I := I) P.S g0
 
 
@@ -1547,7 +1547,7 @@ theorem ham3_scalar74
     (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω) :
-    exists G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real,
+    exists G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real,
       exists c0 : Real,
       exists scalar scalarLap ricciNormSq : Real -> M -> Real,
       exists K : Real -> NNReal,

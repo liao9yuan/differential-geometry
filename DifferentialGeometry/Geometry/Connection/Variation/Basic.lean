@@ -47,7 +47,7 @@ def metricVariationComponent
 
 structure MetricPotentialVariationPath
     (g : SmoothRiemannianMetric I M) (potential : M -> Real) where
-  G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real
+  G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real
   potentialPath : Real -> M -> Real
   base : Real
   metricBase : G.metric base = g

@@ -61,7 +61,7 @@ abbrev Tensor02Field (Time : Type*) :=
 
 def InverseMetricComponentsInFrameTime
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (gInv : Time -> InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x) : Prop :=
   forall t x i j,
@@ -223,7 +223,7 @@ theorem norm02_smooth
 
 
 def tensorNormSq02
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (A : Tensor02Field (I := I) (M := M) Time) :
     Time -> M -> Real :=
   fun t x => normSq02 (I := I) (G.metric t) x (A t x)
@@ -261,7 +261,7 @@ omit [FiniteDimensional ℝ E] in
 theorem metricInverseInBasis_of_frame
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (gInv : Time -> InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E ∞ frame u)
@@ -279,7 +279,7 @@ theorem metricInverseInBasis_of_frame
 theorem inner02_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (A B : Tensor02Field (I := I) (M := M) Time)
     (gInv : Time -> InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -304,7 +304,7 @@ theorem inner02_eq_coord
 theorem normSq02_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {u : Set M}
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (A : Tensor02Field (I := I) (M := M) Time)
     (gInv : Time -> InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -1759,7 +1759,7 @@ theorem ricci_lap_mc
     [T2Space M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (ricciNormLap : Time -> M -> Real)
     (roughLapRic : Time -> M -> Idx -> Idx -> Real)
     (Ric : Time -> RawTwoTensorField (I := I) (M := M))

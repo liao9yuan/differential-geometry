@@ -68,7 +68,7 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
         (S.family.connection (t : Real)) x₀ j i k := by
   have htf : DifferentialGeometry.Geometry.Connection.IsTorsionFree (I := I)
       (S.family.connection (t : Real)) := by
-    simpa [DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt] using
+    simpa [DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt] using
       hS.leviCivita.2 (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
   have hzero :
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff k x₀
@@ -660,7 +660,7 @@ theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
     coordinateFrameSet_open (I := I) x₀
   have hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (S.family.connection (t : Real)) (S.family.metric (t : Real)) :=
-    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.metricCompatibleAt_regular
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.metricCompatibleAt_regular
       (I := I) S.family t
   have hginv_mdiff :
       ∀ a b : CoordinateIdx (𝕜 := Real) E,
@@ -940,7 +940,7 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
     intro t d k l
     have hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
         (S.family.connection (t : Real)) (S.family.metric (t : Real)) :=
-      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.metricCompatibleAt_regular
+      DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.metricCompatibleAt_regular
         (I := I) S.family t
     exact invCovZeroLocal
       (I := I) S gInv (S.family.connection (t : Real)) frame hframe

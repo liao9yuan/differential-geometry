@@ -45,7 +45,7 @@ variable {Time : Type*}
 
 
 
-structure RealizedMetricFamily (Time : Type*) where
+structure MetricConnectionFamily (Time : Type*) where
   metric : Time -> SmoothRiemannianMetric I M
   connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : Time,
@@ -56,14 +56,14 @@ structure RealizedMetricFamily (Time : Type*) where
 
 
 
-structure RealizedMetricFamilyOn (D : RealTimeInterval) where
+structure MetricConnectionFamilyOn (D : RealTimeInterval) where
   metric : Real -> SmoothRiemannianMetric I M
   connection : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : RealTimeInterval.FlowTime D,
     DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (connection (t : Real)) (metric (t : Real))
 
-namespace RealizedMetricFamily
+namespace MetricConnectionFamily
 
 @[simp] theorem metric_mk
     (metric : Time -> SmoothRiemannianMetric I M)
@@ -72,7 +72,7 @@ namespace RealizedMetricFamily
       DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (connection t)
         (metric t))
     (t : Time) :
-    (RealizedMetricFamily.mk (I := I) (M := M) metric connection
+    (MetricConnectionFamily.mk (I := I) (M := M) metric connection
       metricCompatible).metric t = metric t := by
   rfl
 
@@ -83,7 +83,7 @@ namespace RealizedMetricFamily
       DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (connection t)
         (metric t))
     (t : Time) :
-    (RealizedMetricFamily.mk (I := I) (M := M) metric connection
+    (MetricConnectionFamily.mk (I := I) (M := M) metric connection
       metricCompatible).connection t =
       connection t := by
   rfl
@@ -95,19 +95,19 @@ namespace RealizedMetricFamily
       DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (connection t)
         (metric t))
     (t : Time) :
-    (RealizedMetricFamily.mk (I := I) (M := M) metric connection
+    (MetricConnectionFamily.mk (I := I) (M := M) metric connection
       metricCompatible).metricCompatible t = metricCompatible t := by
   rfl
 
-end RealizedMetricFamily
+end MetricConnectionFamily
 
-namespace RealizedMetricFamilyOn
+namespace MetricConnectionFamilyOn
 
 
 def toFlowTimeFamily
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
-    RealizedMetricFamily (I := I) (M := M) (RealTimeInterval.FlowTime D) where
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D) :
+    MetricConnectionFamily (I := I) (M := M) (RealTimeInterval.FlowTime D) where
   metric := fun t => G.metric (t : Real)
   connection := fun t => G.connection (t : Real)
   metricCompatible := fun t => G.metricCompatible t
@@ -115,8 +115,8 @@ def toFlowTimeFamily
 
 def toRegularTimeFamily
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
-    RealizedMetricFamily (I := I) (M := M) (RealTimeInterval.RegularTime D) where
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D) :
+    MetricConnectionFamily (I := I) (M := M) (RealTimeInterval.RegularTime D) where
   metric := fun t => G.metric (t : Real)
   connection := fun t => G.connection (t : Real)
   metricCompatible := fun t => G.metricCompatible (RealTimeInterval.regularToFlow t)
@@ -124,7 +124,7 @@ def toRegularTimeFamily
 
 def metricAt
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.FlowTime D) :
     SmoothRiemannianMetric I M :=
   G.metric (t : Real)
@@ -132,21 +132,21 @@ def metricAt
 
 def connectionAt
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.FlowTime D) :
     CovariantDerivative I E (TangentSpace I : M -> Type _) :=
   G.connection (t : Real)
 
 @[simp] theorem metricAt_eq
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.FlowTime D) :
     G.metricAt t = G.metric (t : Real) := by
   rfl
 
 @[simp] theorem connectionAt_eq
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.FlowTime D) :
     G.connectionAt t = G.connection (t : Real) := by
   rfl
@@ -154,7 +154,7 @@ def connectionAt
 
 theorem metricCompatibleAt
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.FlowTime D) :
     DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t)
       (G.metricAt t) := by
@@ -163,20 +163,20 @@ theorem metricCompatibleAt
 
 theorem metricCompatibleAt_regular
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.RegularTime D) :
     DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I)
       (G.connection (t : Real)) (G.metric (t : Real)) := by
   exact G.metricCompatible (RealTimeInterval.regularToFlow t)
 
-end RealizedMetricFamilyOn
+end MetricConnectionFamilyOn
 
 section FamilyCompatibility
 
 
 def IsMetricCompatibleFamilyOn
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D) : Prop :=
   forall t : RealTimeInterval.FlowTime D,
     DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (G.connectionAt t)
       (G.metricAt t)
@@ -184,14 +184,14 @@ def IsMetricCompatibleFamilyOn
 
 theorem isMetricCompatibleFamilyOn
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D) :
     IsMetricCompatibleFamilyOn (I := I) G :=
   fun t => G.metricCompatibleAt t
 
 
 theorem metric_compatible_family_apply
     {D : RealTimeInterval}
-    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    {G : MetricConnectionFamilyOn (I := I) (M := M) D}
     (hmc : IsMetricCompatibleFamilyOn (I := I) G)
     (t : RealTimeInterval.FlowTime D)
     {x : M}
@@ -214,14 +214,14 @@ variable {A Time : Type*} [CommRing A] [Algebra Real A]
 
 def MetricFamilySmoothInTime
     (td : TimeDerivativeData Real A Time) [TimeRegularFam td]
-    (G : RealizedMetricFamily (I := I) (M := M) Time) : Prop :=
+    (G : MetricConnectionFamily (I := I) (M := M) Time) : Prop :=
   forall (x : M) (X Y : TangentSpace I x),
     td.isSmoothFam (fun t : Time => (G.metric t).inner x X Y)
 
 
 theorem metric_smooth_coeff_of_metricFamilySmoothInTime
     (td : TimeDerivativeData Real A Time) [TimeRegularFam td]
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (hG : MetricFamilySmoothInTime td G)
     (x : M) (X Y : TangentSpace I x) :
     td.isSmoothFam (fun t : Time => (G.metric t).inner x X Y) :=
@@ -230,13 +230,13 @@ theorem metric_smooth_coeff_of_metricFamilySmoothInTime
 
 noncomputable def metricTimeDerivative
     (td : TimeDerivativeData Real A Time)
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (x : M) (X Y : TangentSpace I x) : Real :=
   td.dt_apply (fun s : Time => (G.metric s).inner x X Y) t
 
 @[simp] theorem metricTimeDerivative_eq
     (td : TimeDerivativeData Real A Time)
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (x : M) (X Y : TangentSpace I x) :
     metricTimeDerivative td G t x X Y =
       td.dt_apply (fun s : Time => (G.metric s).inner x X Y) t := by

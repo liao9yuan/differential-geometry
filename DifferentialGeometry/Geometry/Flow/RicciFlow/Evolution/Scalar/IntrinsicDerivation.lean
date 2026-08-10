@@ -721,7 +721,7 @@ theorem scalarEvolution_of_isSolution
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :
-    ∀ (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real),
+    ∀ (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real),
       (∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
         G.metric (t : Real) = S.family.metric (t : Real)) ->
       (∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,

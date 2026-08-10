@@ -1342,7 +1342,7 @@ theorem metricCov3_coord
 
 noncomputable def lcMetricFamily
     (g : Real -> SmoothRiemannianMetric I M) :
-    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real where
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real where
   metric := g
   connection := fun t : Real =>
     DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) (g t)

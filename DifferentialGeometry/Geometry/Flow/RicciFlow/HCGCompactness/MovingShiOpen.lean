@@ -244,7 +244,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem exists_trunc_tower
     {D : RealTimeInterval}
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
     (levelC : Nat → Real)
     (K aScale T : Real)
@@ -470,7 +470,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- Legacy fixed-order adapter to the unsupported global complete estimate. -/
 private theorem complete_of_heat
     {D : RealTimeInterval}
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
     (levelC : Nat → Real)
     (K aScale T : Real)
@@ -539,7 +539,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 Kato control through the requested order. -/
 private theorem complete_of_cutoff
     {D : RealTimeInterval}
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
     (levelC : Nat → Real)
     (K aScale T : Real)
@@ -610,7 +610,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 family and Kato control through the requested order. -/
 private theorem complete_of_barrier
     {D : RealTimeInterval}
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
     (levelC : Nat → Real)
     (K aScale T : Real)

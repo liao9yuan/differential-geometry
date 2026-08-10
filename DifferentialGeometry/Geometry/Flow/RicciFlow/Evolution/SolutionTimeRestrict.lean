@@ -83,7 +83,7 @@ theorem isSoln_timeRestrict
     let t' : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D :=
       ⟨(t : Real), hcar t.2⟩
     simpa [t', SolutionOn.timeRestrict, SolutionOn.family,
-      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt] using
+      DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt] using
       hS.smoothConnection t'
   equation := by
     intro t x X Y

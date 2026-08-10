@@ -37,7 +37,7 @@ omit [Module.Finite ℝ E] in
 theorem sqLap_at
     [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (t : Real) {f : M -> Real} {x : M}
     (hf_all : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hf_x : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -79,7 +79,7 @@ omit [Module.Finite ℝ E] in
 theorem sqLap_realizes
     [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (scalar scalarLap gradScalarNormSq : Real -> M -> Real)
     (hscalarLap : ScalarLaplacianRealizesHeatOperatorOn
       (I := I) G T scalar scalarLap)

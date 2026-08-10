@@ -1204,7 +1204,7 @@ theorem solutionOn_of_joint [I.Boundaryless]
       ricciNormGrad := ?_ }
   · intro t
     simpa [SolutionOn.family, SolutionFamily.connection,
-      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt]
+      DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt]
       using leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) (g (t : ℝ))
   · exact (scalarCont_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint).congr
       (fun _ _ => rfl)
@@ -1287,7 +1287,7 @@ theorem isSolutionOn_of_extendData
   · exact metricFamilySmoothOn_of_chartGram (I := I) g_ext hαb hsmooth hcont
   · intro t
     simpa [SolutionOn.family, SolutionFamily.connection,
-      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt]
+      DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt]
       using leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) (g_ext (t : ℝ))
   · exact metricVariationEquationOn_of_pde (I := I) g_ext hαb hpde
   · have hinterior : ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g_ext q.1) q.2)

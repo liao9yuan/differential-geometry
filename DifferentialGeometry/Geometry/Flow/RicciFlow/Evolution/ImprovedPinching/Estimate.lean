@@ -59,7 +59,7 @@ def pinchQuotient
 
 
 def pinchDriftVector
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar : Real -> M -> Real) (epsilon : Real) :
     Real -> (x : M) -> TangentSpace I x :=
   fun t x =>
@@ -70,7 +70,7 @@ def pinchDriftVector
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchDriftTerm_eq_inner_drift
     [Module.Finite ℝ E]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq : Real -> M -> Real)
     (epsilon t : Real) (x : M) :
     pinchDriftTerm (I := I) G scalar ricciNormSq epsilon t x =
@@ -251,7 +251,7 @@ theorem pinchCoupleSol_nonneg
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchBookRHS_le_drift
     [Module.Finite ℝ E]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq coupleSq Q : Real -> M -> Real)
     (epsilon t : Real) (x : M)
     (hR : 0 < scalar t x) (heps0 : 0 < epsilon) (heps1 : epsilon < 1)

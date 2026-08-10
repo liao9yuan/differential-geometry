@@ -37,7 +37,7 @@ variable [IsManifold I ∞ M]
 
 theorem potential_slice
     (D : RealTimeInterval)
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (V u : Real -> M -> Real) (n : Nat)
     (hu : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D G V u)
     {s : Real} (hs : s ∈ D.regular) (hspos : 0 < s)
@@ -68,7 +68,7 @@ theorem potential_slice
 
 theorem potential_pde
     (D : RealTimeInterval)
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (V u : Real -> M -> Real) (n : Nat)
     (hu : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D G V u)
     {s : Real} (hs : s ∈ D.regular) (hspos : 0 < s)
@@ -183,7 +183,7 @@ theorem potential_pde
 
 theorem potential_joint
     (D : RealTimeInterval)
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (V u : Real -> M -> Real) (n : Nat)
     (hu : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D G V u)
     (hpos : ∀ t : Real, t ∈ D.regular ∩ Set.Ioi (0 : Real) →
@@ -260,7 +260,7 @@ theorem potential_joint
 theorem potential_df_time
     [I.Boundaryless]
     (D : RealTimeInterval)
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (V u : Real -> M -> Real) (n : Nat)
     (hu : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D G V u)
     (hpos : ∀ t : Real, t ∈ D.regular ∩ Set.Ioi (0 : Real) →

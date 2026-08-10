@@ -159,7 +159,7 @@ private theorem curvVarAlg
 
 
 def gammaCoordDerivAt
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
     (gammaDot :
       M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
@@ -176,7 +176,7 @@ def gammaCoordDerivAt
 
 
 def gammaMixedCoordAt
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
     (gammaDot :
       M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
@@ -258,7 +258,7 @@ private theorem christoffelCoordAt_symm_of_lc
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 private theorem curvVarCoord
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -391,7 +391,7 @@ private theorem curvVarCoord
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciVarCoord
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)

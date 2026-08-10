@@ -181,7 +181,7 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (n c0 : Real) (hn : 0 < n) (hc0 : 0 < c0)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (K : Real -> NNReal)
@@ -229,7 +229,7 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (n c0 : Real) (hn : 0 < n)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (K : Real -> NNReal)
@@ -287,7 +287,7 @@ theorem finiteTime3D
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (c0 : Real)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (K : Real -> NNReal)

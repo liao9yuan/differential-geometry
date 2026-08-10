@@ -139,7 +139,7 @@ theorem towerLevelConst_mono {k m : ℕ} (hkm : k <= m) :
 omit [DecidableEq Idx] in
 theorem bernsteinShi_solution_estimate
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     {level : (k : ℕ) → Real → M → (Fin (4 + k) → Idx) → Real}
     {star : (k : ℕ) → Real → M → ℕ → (Fin (4 + k) → Idx) → Real}
     {w wLap : ℕ → Real → M → Real}

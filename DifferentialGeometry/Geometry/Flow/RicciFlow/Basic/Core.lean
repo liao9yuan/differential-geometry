@@ -262,7 +262,7 @@ theorem metricCompatible {D : DifferentialGeometry.Geometry.Curvature.RealTimeIn
 
 def family {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
-    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn (I := I) (M := M) D where
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn (I := I) (M := M) D where
   metric := S.base.metric
   connection := S.base.connection
   metricCompatible := S.metricCompatible
@@ -414,7 +414,7 @@ def flowG
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
-    DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real where
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real where
   metric := S.base.metric
   connection := S.base.connection
   metricCompatible := by
@@ -779,7 +779,7 @@ theorem isSolutionOn_timeShift
       ⟨(t : Real) + τ, t.2⟩
     have hOld := hS.smoothConnection t'
     simpa [t', SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift,
-      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt,
+      DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt,
         SolutionFamily.connection] using hOld
   equation := by
     intro t x X Y

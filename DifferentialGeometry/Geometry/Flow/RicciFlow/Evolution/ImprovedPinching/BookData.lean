@@ -563,7 +563,7 @@ theorem tfHeat_book
       S.scalar
       (ricciNorm (I := I) S)
       (cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S)) := by
-  let G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real :=
+  let G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real :=
     flowG (I := I) S
   let scalarLap : Real -> M -> Real :=
     fun t x => DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t (S.scalar t) x

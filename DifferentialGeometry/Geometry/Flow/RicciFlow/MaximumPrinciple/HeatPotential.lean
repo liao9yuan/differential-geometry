@@ -39,7 +39,7 @@ variable [IsManifold I ∞ M]
 private theorem heat_pot_nonneg_on_strict_subinterval
     [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C : Real)
@@ -150,7 +150,7 @@ private theorem heat_pot_nonneg_on_strict_subinterval
 theorem heat_pot_nonneg
     [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C : Real)
@@ -221,7 +221,7 @@ omit [CompleteSpace E] in
 private theorem heat_pot_exp_rescale_barrier_operator_nonneg
     [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C c : Real)
@@ -315,7 +315,7 @@ private theorem heat_pot_exp_rescale_barrier_operator_nonneg
 private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
     [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C c : Real)
@@ -394,7 +394,7 @@ private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
 theorem heat_pot_pos
     [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C : Real)

@@ -42,14 +42,14 @@ def spacetimeSlab (T : Real) : Set (Real × M) :=
 
 
 def parabolicOperatorWithDrift
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (t : Real) (x : M) : Real :=
   derivWithin (fun s : Real => u s x) (Set.Icc 0 T) t -
     heatOperatorWithDrift (I := I) G t (X t) (u t) x
 
 @[simp] theorem parabolicOperatorWithDrift_eq
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (t : Real) (x : M) :
     parabolicOperatorWithDrift (I := I) G T X u t x =
@@ -60,7 +60,7 @@ def parabolicOperatorWithDrift
 
 theorem parabolic_const_sub
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (C t : Real) (x : M)
     (huniq : UniqueDiffWithinAt Real (Set.Icc 0 T) t)
@@ -142,7 +142,7 @@ theorem parabolic_const_sub
 /-- The drifted parabolic operator is additive. -/
 theorem parabolic_add
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (u v : Real -> M -> Real) (t : Real) (x : M)
     (hu_time : DifferentiableWithinAt Real
@@ -168,7 +168,7 @@ theorem parabolic_add
 /-- The drifted parabolic operator scales by a fixed real scalar. -/
 theorem parabolic_smul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (a : Real) (u : Real -> M -> Real) (t : Real) (x : M)
     (hu_time : DifferentiableWithinAt Real
@@ -195,7 +195,7 @@ theorem parabolic_smul
 theorem parabolic_sum
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {κ : Type} (s : Finset κ)
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (u : κ -> Real -> M -> Real) (t : Real) (x : M)
     (htime : ∀ i ∈ s, DifferentiableWithinAt Real
@@ -322,7 +322,7 @@ theorem parabolic_sum
 /-- The drifted parabolic operator satisfies the scalar product rule. -/
 theorem parabolic_mul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (u v : Real -> M -> Real) (t : Real) (x : M)
     (hu_time : DifferentiableWithinAt Real
@@ -421,7 +421,7 @@ private theorem lap_comp_nhds
 spatial differentiability only near the evaluation point. -/
 theorem parabolic_comp_nhds
     [VectorBundle Real E (TangentSpace I : M → Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
     {φ : Real → Real} (u : Real → M → Real) (t : Real) (x : M)
     (hφ : Differentiable Real φ)
@@ -465,7 +465,7 @@ theorem parabolic_comp_nhds
 /-- The drifted parabolic operator satisfies the scalar chain rule. -/
 theorem parabolic_comp
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     {φ : Real -> Real} (u : Real -> M -> Real) (t : Real) (x : M)
     (hφ : Differentiable Real φ)
@@ -551,7 +551,7 @@ theorem negative_region_parabolic_lower_bound
 
 theorem parabolic_sub_time_curve_identity
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
     (t : Real) (_ht : t ∈ Set.Icc 0 T)
@@ -582,7 +582,7 @@ theorem parabolic_sub_time_curve_identity
 
 theorem parabolic_exp_rescale_identity
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T L : Real) (X : Real -> (x : M) -> TangentSpace I x)
     (v : Real -> M -> Real)
     (t : Real) (_ht : t ∈ Set.Icc 0 T)
@@ -638,7 +638,7 @@ theorem parabolic_exp_rescale_identity
 /-- A smooth local upper support for a spacetime scalar function at one point,
 with the parabolic inequality needed by the weak maximum principle. -/
 structure ParabolicUpperSupportAt
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real)
     (X : Real -> (x : M) -> TangentSpace I x)
     (w : Real -> M -> Real)
@@ -720,7 +720,7 @@ theorem strict_barrier_nonnegative_of_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (_hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (w : Real -> M -> Real)
@@ -838,7 +838,7 @@ theorem strict_barrier_posReg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (_hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (w : Real -> M -> Real)
@@ -953,7 +953,7 @@ theorem strict_barrier_cpt
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (_hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (w : Real -> M -> Real)
@@ -1077,7 +1077,7 @@ theorem strict_barrier_cpt_of_upperSupport
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (_hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (w : Real -> M -> Real)
@@ -1238,7 +1238,7 @@ theorem strict_barrier_nonnegative
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (w : Real -> M -> Real)
@@ -1269,7 +1269,7 @@ theorem scalar_wmp_sub_const_of_parabolic_nonpos
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (C : Real)
@@ -1322,7 +1322,7 @@ theorem scalar_sub_const_posReg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (C : Real)
@@ -1381,7 +1381,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -1477,7 +1477,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -1578,7 +1578,7 @@ theorem msm110_ch4_scalar_supersolutions
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (alpha : Real)
@@ -1626,7 +1626,7 @@ theorem msm110_ch4_scalar_pointwise_bounds
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (C1 C2 : Real) (_hC : C1 <= C2)
@@ -1692,7 +1692,7 @@ theorem msm110_ch4_scalar_linear_reaction
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (beta : Real -> M -> Real) (C : Real)
@@ -1742,7 +1742,7 @@ theorem linear_react_nonneg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (beta : Real -> M -> Real) (C : Real)
@@ -1823,7 +1823,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_va
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c ρ A : Real -> Real)
@@ -1939,7 +1939,7 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -2028,7 +2028,7 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular_positive_tim
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -2266,7 +2266,7 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -2314,7 +2314,7 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -2367,7 +2367,7 @@ theorem scalar_wmp_super_theorem_7_1
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -2419,7 +2419,7 @@ theorem scalar_wmp_sub_theorem_7_2
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -2490,7 +2490,7 @@ theorem msm110_ch4_scalar_ode_lower
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)

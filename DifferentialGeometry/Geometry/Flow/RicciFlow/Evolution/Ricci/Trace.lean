@@ -280,10 +280,10 @@ theorem lcAt_regular
     DifferentialGeometry.Geometry.Connection.IsLeviCivita (I := I)
       (S.family.connection (t : Real)) (S.family.metric (t : Real)) := by
   constructor
-  · simpa [DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt,
-      DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.metricAt] using
+  · simpa [DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt,
+      DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.metricAt] using
       hS.leviCivita.1 (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
-  · simpa [DifferentialGeometry.Geometry.Curvature.RealizedMetricFamilyOn.connectionAt] using
+  · simpa [DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn.connectionAt] using
       hS.leviCivita.2 (DifferentialGeometry.Geometry.Curvature.RealTimeInterval.regularToFlow t)
 
 private theorem rm04Realizes_regular

@@ -49,7 +49,7 @@ def scalarHeatTerm
 
 abbrev PinchEvolOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq Q :
       Real -> M -> Real)
     (epsilon : Real) : Prop :=
@@ -67,7 +67,7 @@ theorem pinchEvol_setup
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar scalarLap ricciNormSq tfNormLap
       nablaRicNormSq gradScalarNormSq Q : Real -> M -> Real)
     (epsilon : Real)
@@ -166,7 +166,7 @@ omit [Module.Finite ℝ E] in
 theorem ricciGradCoupleSq_exp_inner
     [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq : Real -> M -> Real)
     (Ric : Real -> (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 2 x)
@@ -229,7 +229,7 @@ theorem ricciMixed_eq_gradNorm
     [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [T2Space M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar : Real -> M -> Real)
     (RicSec :
       Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -352,7 +352,7 @@ theorem ricciMixed_eq_tfGrad
     [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [T2Space M]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq : Real -> M -> Real)
     (RicSec :
       Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -500,7 +500,7 @@ omit [Module.Finite ℝ E] in
 theorem ricciGradCoupleSq_exp_mixed
     [FiniteDimensional Real E]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq : Real -> M -> Real)
     (Ric : Real -> (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 2 x)
@@ -553,7 +553,7 @@ theorem ricciGradCoupleSq_exp_mixed
 
 
 def pinchDriftTerm
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real :=
   fun t x =>
@@ -591,7 +591,7 @@ def pinchReactTerm
 
 
 def pinchBookRHS
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq coupleSq Q : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real :=
   fun t x =>
@@ -605,7 +605,7 @@ omit [Module.Finite ℝ E] in
 theorem pinchDrift_exp
     [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq gradScalarNormSq : Real -> M -> Real)
     (epsilon t : Real) (x : M)
     (hscalar : 0 < scalar t x)
@@ -706,7 +706,7 @@ omit [Module.Finite ℝ E] in
 omit [IsManifold I 1 M] in
 theorem pinchRHS_eq_book_of_parts
     [FiniteDimensional Real E]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq
       coupleSq Q : Real -> M -> Real)
     (epsilon t : Real) (x : M)
@@ -795,7 +795,7 @@ omit [Module.Finite ℝ E] in
 theorem pinchRHS_eq_book
     [FiniteDimensional Real E]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq
       coupleSq Q : Real -> M -> Real)
     (epsilon t : Real) (x : M)
@@ -840,7 +840,7 @@ theorem pinchEvol_book_of_couple
     [FiniteDimensional Real E]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq
       coupleSq Q : Real -> M -> Real)
     (epsilon : Real)
@@ -910,7 +910,7 @@ theorem pinchEvol_book_of_mixed
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq Q : Real -> M -> Real)
     (Ric : Real -> (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 2 x)
@@ -1012,7 +1012,7 @@ theorem pinchEvol_sec
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq Q : Real -> M -> Real)
     (RicSec : Real ->
       Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

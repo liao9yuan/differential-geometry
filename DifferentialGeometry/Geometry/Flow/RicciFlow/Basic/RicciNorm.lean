@@ -306,7 +306,7 @@ structure IsSmoothSolutionOn
   scalarRegular : CanonicalScalarRegularOn (I := I) (M := M) S
   ricciRegular : CanonicalRicciRegularOn (I := I) (M := M) S
   scalarEvolution : ∀
-    (G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real),
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real),
       (∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
         G.metric (t : Real) = S.family.metric (t : Real)) ->
       (∀ t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
@@ -543,7 +543,7 @@ theorem ricci_heat_mc
       (D := D) (ricciNormSqInFrame (I := I) S gInv frame)
       ricciNormLap (nablaRicciNormSqInFrame (M := M) nablaRic gInv)
       (ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame) := by
-  let G : DifferentialGeometry.Geometry.Curvature.RealizedMetricFamily (I := I) (M := M) Real :=
+  let G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real :=
     { metric := S.base.metric
       connection := S.base.connection
       metricCompatible := by
