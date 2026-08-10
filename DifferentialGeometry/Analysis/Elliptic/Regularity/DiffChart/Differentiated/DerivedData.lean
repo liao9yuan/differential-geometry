@@ -490,6 +490,7 @@ private lemma derived_weak_partial_isWeakPartial
   rw [h_integral_eq] at h_id_bridge
   exact h_id_bridge
 
+omit [SigmaCompactSpace M] in
 private lemma derived_u_chart_memLp_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E))

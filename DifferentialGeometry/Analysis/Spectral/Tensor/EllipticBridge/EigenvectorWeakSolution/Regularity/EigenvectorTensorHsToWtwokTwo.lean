@@ -40,7 +40,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 open scoped Classical in
 omit [CompleteSpace E] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma sum_basisVec_coeff_apply
     (σ : ℝ) (S : Finset (TensorEigenIdx (I := I) (M := M) g r s))
@@ -62,7 +61,6 @@ private lemma sum_basisVec_coeff_apply
 end TensorHsSmoothReprAux
 
 omit [CompleteSpace E] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHs_eq_finset_sum_of_finite_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ}

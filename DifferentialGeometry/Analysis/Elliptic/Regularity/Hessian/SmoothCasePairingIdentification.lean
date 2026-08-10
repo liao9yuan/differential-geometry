@@ -55,6 +55,7 @@ private lemma h1ComplToLp_smoothToH1Compl_coeFn_aeEq_smooth
       =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g] v.toFun
   exact MemLp.coeFn_toLp v.memLp_two
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma h1ComplToLp_smoothToH1Compl_measurable
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) :

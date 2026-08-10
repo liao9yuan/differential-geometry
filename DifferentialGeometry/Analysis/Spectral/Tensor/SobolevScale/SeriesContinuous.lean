@@ -105,7 +105,6 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
     intro i
     rw [hf, hcoeff t ht i]
   exact (hsum'.tsum_eq).symm
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem mass_le_of_compact
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {σ σ' : ℝ}

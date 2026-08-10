@@ -48,6 +48,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_chartPushedRaw_etaTimesV_succ
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g) :
@@ -79,6 +80,7 @@ private lemma memWkp_chartPushedRaw_etaTimesV_succ
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) (m + 1)
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_chartPushedRaw_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g) :
@@ -110,6 +112,7 @@ private lemma memWkp_chartPushedRaw_etaTimesV
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) m
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g)

@@ -116,6 +116,7 @@ private lemma fderiv_apply_single_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
+omit [SigmaCompactSpace M] in
 private lemma base_weak_partial_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -129,6 +130,7 @@ private lemma base_weak_partial_locally_memLp
   (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
     hu_h).weak_partial_locally_memLp i K hK_compact hK_in
 
+omit [SigmaCompactSpace M] in
 private lemma base_u_chart_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -154,6 +156,7 @@ private lemma base_u_chart_locally_memLp
     h_weighted.smul_measure hc_ne_top
   exact h_smul.mono_measure h_le
 
+omit [SigmaCompactSpace M] in
 private lemma base_f_chart_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -755,6 +758,7 @@ private lemma density_coef_ibp
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
+omit [SigmaCompactSpace M] in
 private lemma density_u_chart_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

@@ -100,7 +100,6 @@ theorem exists_pathBall
     exact h.le
 
 omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M]
   [BoundarylessManifold I M] in
 /-- A continuous high-Sobolev path with a continuous strong derivative and a
 pointwise semilinear parabolic equation determines the exact zero-trace strong
@@ -497,7 +496,6 @@ theorem smoothGeom_strong
     hhi hD hincl hderiv hzero hpde
 
 omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M]
   [BoundarylessManifold I M] in
 /-- A continuous high-Sobolev path has a finite uniform bound for its
 Lipschitz nonlinearity on a nonempty closed time window. -/

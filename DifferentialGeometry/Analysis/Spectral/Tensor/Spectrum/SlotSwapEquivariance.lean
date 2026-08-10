@@ -213,7 +213,6 @@ theorem rawTensorConnLapSmooth_domDomCongrSection {s : ℕ}
   exact h2x
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lambda_eq_of_fst_eq
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}
@@ -224,7 +223,6 @@ private lemma lambda_eq_of_fst_eq
     tensorLaplacianEigenvalueOf μ.val) h
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma fst_eq_of_lambda_eq
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}
@@ -239,7 +237,6 @@ private lemma fst_eq_of_lambda_eq
   linear_combination -h'
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorSobolevWeight_eq_of_fst_eq
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}

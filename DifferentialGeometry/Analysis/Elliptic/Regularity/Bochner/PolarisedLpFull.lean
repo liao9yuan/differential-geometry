@@ -44,6 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_injOn_laplacianDomain
     (g : SmoothRiemannianMetric I M)
@@ -90,6 +91,7 @@ theorem H1ComplToLp_injOn_laplacianDomain
   have h_sub_zero : w₁ - w₂ = 0 := norm_eq_zero.mp h_norm_zero
   exact sub_eq_zero.mp h_sub_zero
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem preimageLift_smoothCase
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) :

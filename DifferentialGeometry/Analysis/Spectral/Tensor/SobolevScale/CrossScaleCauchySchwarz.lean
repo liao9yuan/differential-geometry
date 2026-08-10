@@ -21,7 +21,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorSobolevWeight_eq_sqrt_succ_mul_sqrt_pred
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
@@ -42,7 +41,6 @@ lemma tensorSobolevWeight_eq_sqrt_succ_mul_sqrt_pred
   rw [hsqrt_u, hsqrt_l, ← Real.rpow_add hbase]
   congr 1; ring
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma sq_sum_crossScale_le
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
@@ -78,7 +76,6 @@ lemma sq_sum_crossScale_le
     Finset.sum_congr rfl (fun i _ => hq_sq i)] at hCS
   exact hCS
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem abs_sum_crossScale_le
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
@@ -103,7 +100,6 @@ theorem abs_sum_crossScale_le
   rw [mul_pow, Real.sq_sqrt hhi_nonneg, Real.sq_sqrt hlo_nonneg]
   exact hsq
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem two_mul_sum_crossScale_le_eps
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
@@ -143,7 +139,6 @@ theorem two_mul_sum_crossScale_le_eps
     nlinarith [hkey, hsqA, hsqB, hsqε, hsqεinv, hcross]
   nlinarith [hle, hyoung]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma sq_sum_sameScale_le
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
@@ -186,7 +181,6 @@ lemma sq_sum_sameScale_le
     Finset.sum_congr rfl (fun i _ => hq_sq i)] at hCS
   exact hCS
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem two_mul_sum_sameScale_le_sqrt
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)

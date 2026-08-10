@@ -45,6 +45,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_le_of_le
     (g : SmoothRiemannianMetric I M) {k j : ℕ} (hjk : j ≤ k)
@@ -233,6 +234,7 @@ theorem memWkpChart_two_k_of_laplacianDomainPow
   exact memWkpChart_2k_of_chartSideH2kBridge_polymorphic
     (I := I) (M := M) g k h_bridge
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartSideH2kBridge_of_laplacianDomainPow
     (g : SmoothRiemannianMetric I M) (k : ℕ)

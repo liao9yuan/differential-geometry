@@ -38,7 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartTargetEuclid_sdiff_chartPouKernel_isOpen (α : M) :
@@ -48,7 +48,7 @@ private lemma chartTargetEuclid_sdiff_chartPouKernel_isOpen (α : M) :
     (M := M) α).sdiff
     (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartTargetEuclid_sdiff_chartPouKernel_subset (α : M) :
     chartTargetEuclid (I := I) (M := M) α \
         chartPouKernel (I := I) (M := M) α ⊆
@@ -371,7 +371,7 @@ private lemma thickening_mono_of_lt
   exact lt_of_lt_of_le (Metric.mem_thickening_iff_infEDist_lt.mp hy)
     (ENNReal.ofReal_le_ofReal hρ_lt.le)
 
-omit [CompleteSpace E] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 private lemma tensorChartBilinear_uniform_diffQuot_bound_of_data
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
@@ -468,7 +468,7 @@ private lemma tensorChartBilinear_uniform_diffQuot_bound_of_data
   refine ⟨M_bound, hM_nn, fun j k h hh_pos hh_le => ?_⟩
   exact h_bd j k h hh_pos (by rw [hε_def] at *; linarith)
 
-omit [CompleteSpace E] [SigmaCompactSpace M] in
+omit [CompleteSpace E] in
 lemma tensorChartBilinear_chartComponent_regularity_of_data
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}

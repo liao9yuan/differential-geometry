@@ -236,7 +236,6 @@ def EigenvalueTailSummable (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop :
 
 
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenvalueTail_eq_weight
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (p : ℝ)

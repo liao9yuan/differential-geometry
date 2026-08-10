@@ -37,7 +37,6 @@ private noncomputable def intrinsicEigenbasis
   tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma intrinsic_lambda_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∀ i : TensorEigenIdx (I := I) (M := M) g r s,

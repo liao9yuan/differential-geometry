@@ -326,7 +326,6 @@ noncomputable def fHLeibnizResidualSmoothRep
       (gradFun (I := I) g v.toFun x)) -
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma fHLeibnizResidualSmoothRep_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
@@ -361,7 +360,7 @@ lemma fHLeibnizResidualSmoothRep_contMDiff
     (laplacianOfChartPOU (I := I) (M := M) g α).contMDiff.mul v.smooth
   exact h_piece1.sub h_piece2
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fHLeibnizResidualSmoothRep_tsupport_subset
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     tsupport (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) ⊆

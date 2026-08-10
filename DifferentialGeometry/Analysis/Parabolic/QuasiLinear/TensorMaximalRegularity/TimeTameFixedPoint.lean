@@ -40,7 +40,7 @@ def lowerStateRS (g₀ : SmoothRiemannianMetric I M) (r s a : ℕ) (R : ℝ) :
   lowerBall (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := r) (s := s)
     (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith)) R
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Zero belongs to every generic nonnegative lower-order state ball. -/
 theorem zero_mem_lowerRS (g₀ : SmoothRiemannianMetric I M) (r s a : ℕ)
     {R : ℝ} (hR : 0 ≤ R) :

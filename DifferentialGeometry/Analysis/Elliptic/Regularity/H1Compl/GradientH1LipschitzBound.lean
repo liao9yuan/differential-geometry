@@ -47,9 +47,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedPartial_eq_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) {y : EuclN}
@@ -90,7 +90,7 @@ private lemma chartPushedPartial_eq_fderiv_chartSmoothExt
     rw [if_pos h_eq_z]
   rw [h_chartSmoothExt]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -105,7 +105,7 @@ private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt
   refine Filter.Eventually.of_forall (fun y hy => ?_)
   exact chartPushedPartial_eq_fderiv_chartSmoothExt (I := I) (M := M) g α j v hy
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt_volume
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :

@@ -50,7 +50,6 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem tensorL2_ext_of_tensorL2Coeff_jsmooth
     {g : SmoothRiemannianMetric I M} {r s : ℕ}

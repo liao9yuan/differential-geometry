@@ -44,6 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     (g : SmoothRiemannianMetric I M)
@@ -82,6 +83,7 @@ theorem lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     exact resolvent_laplacianDomain_preimage_eq (I := I) (M := M) g ⟨w_lift, hw_lift⟩
   rw [h_LHS, h_RHS]
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem lpInner_gradInner_smooth_oneSubLap_eq_lpInner_smooth_preimage
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)

@@ -60,6 +60,7 @@ noncomputable def chartTensorPairingLocal
             chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
             chartTensorWeakHessianRaw (I := I) (M := M) g α hu_h k l y
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartTensorPairingLocal_def
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
@@ -660,6 +661,7 @@ private noncomputable def chartTensorPairingLocalMExt
   chartTensorPairingLocal (I := I) (M := M) g α φ hu_h
     ((toEuclidean (E := E)) (extChartAt I α x))
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTensorPairingLocalMExt_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)

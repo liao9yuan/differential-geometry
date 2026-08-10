@@ -528,6 +528,7 @@ lemma chartPushedRaw_smoothRep_eq
         chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
     ring
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_chartPushedRaw_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
@@ -559,6 +560,7 @@ private lemma memWkp_chartPushedRaw_etaTimesV
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (by exact hCP_smooth) hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) 2
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)

@@ -40,7 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem galVec_norm_sq
     (q : SmoothRiemannianMetric I M)
@@ -58,7 +57,6 @@ theorem galVec_norm_sq
 
 omit [BoundarylessManifold I M] in
 open scoped Classical in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem gal_crit_nf
     (q : SmoothRiemannianMetric I M)

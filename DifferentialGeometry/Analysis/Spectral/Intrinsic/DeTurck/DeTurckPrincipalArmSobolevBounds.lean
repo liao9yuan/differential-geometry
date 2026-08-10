@@ -89,7 +89,6 @@ theorem smoothCcToTensorHs_inner_order_congr (g₀ : SmoothRiemannianMetric I M)
   subst h; rfl
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma weight_natCast (g₀ : SmoothRiemannianMetric I M)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx

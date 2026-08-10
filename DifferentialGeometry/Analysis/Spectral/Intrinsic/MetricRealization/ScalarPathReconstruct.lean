@@ -228,7 +228,6 @@ lemma scalarMode_smooth
   exact ht.mul hx
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma weight_two_sq
     (g : SmoothRiemannianMetric I M)
@@ -242,7 +241,6 @@ private lemma weight_two_sq
     Real.rpow_two]
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma abs_le_sqrt_wt
     (g : SmoothRiemannianMetric I M)
@@ -268,7 +266,6 @@ private lemma abs_le_sqrt_wt
   rwa [← hW_def]
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma sqrt_mul_tail
     (g : SmoothRiemannianMetric I M) (p : ℝ)
@@ -404,7 +401,6 @@ private lemma jet_snd_le
   simpa only [L, Function.comp_apply] using hbound
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem prodMode_majorant
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]

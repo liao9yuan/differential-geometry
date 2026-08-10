@@ -35,6 +35,7 @@ def scalarHsBoundedC0Semigroup
   continuousOn_apply := fun u =>
     heatSemigroupHsExt_continuousOn (I := I) (M := M) g σ u
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp]
 theorem scalarHsBoundedC0Semigroup_apply

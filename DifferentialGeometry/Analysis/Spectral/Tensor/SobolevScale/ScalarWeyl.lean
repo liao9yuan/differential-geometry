@@ -76,7 +76,7 @@ private lemma combo_val
       unfold scalarCombo at ih ⊢
       simp [hi, ih, smul_eq_mul]
 
-omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 open scoped Classical in
 private lemma basis_sum_coeff
     (g : SmoothRiemannianMetric I M)

@@ -64,7 +64,6 @@ noncomputable def scalarScaleLap (g : SmoothRiemannianMetric I M) :
         (by norm_num : (2 : ℝ) = 0 + 2)).toContinuousLinearEquiv.toContinuousLinearMap
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarScaleLap_coeff
     (g : SmoothRiemannianMetric I M)
@@ -140,7 +139,6 @@ theorem rawLap_cc_scalar
       (I := I) g hf x]
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_scalarLap_le
     (g : SmoothRiemannianMetric I M)

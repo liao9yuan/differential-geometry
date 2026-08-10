@@ -44,6 +44,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem laplacianDomainPow_succ_exists_resolvent_preimage
     (g : SmoothRiemannianMetric I M) {k : ℕ} (hk_pos : 1 ≤ k)

@@ -173,6 +173,7 @@ omit [NeZero (Module.finrank ℝ E)] in
     ricciPairingCLMOnSmoothOfBound (I := I) (M := M) g φ C hC_nn hC_bound v =
       ricciPairingSmooth (I := I) (M := M) g φ v := rfl
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
@@ -183,6 +184,7 @@ private lemma denseRange_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :

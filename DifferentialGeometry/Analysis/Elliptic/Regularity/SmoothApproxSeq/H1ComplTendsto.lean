@@ -609,6 +609,7 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
     exact this
   linarith
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
     (g : SmoothRiemannianMetric I M) (v f : SmoothScalar g) :
@@ -618,6 +619,7 @@ lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
   rw [smoothScalarH1Inner_symm]
   exact smoothScalarH1Inner_eq_lpInner_oneSubLap f v
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma inner_h1Compl_smoothToH1Compl_eq_lpInner
     (g : SmoothRiemannianMetric I M)

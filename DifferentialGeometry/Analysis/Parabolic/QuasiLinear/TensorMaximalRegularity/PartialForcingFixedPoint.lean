@@ -41,7 +41,7 @@ def lowerState (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ) :
   lowerBall (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
     (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith)) R
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem zero_mem_lowerState (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     {R : ℝ} (hR : 0 ≤ R) :
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) ∈
@@ -95,7 +95,7 @@ theorem field_mem_lower
     _ ≤ 2 * ρ := mul_le_mul hsqrt hF (norm_nonneg F) (by positivity)
     _ ≤ R := hρR
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The mixed pointwise estimate on a lower-norm state set integrates to the
 same mixed time-`L²` estimate. -/
 theorem nemytskiiOn_mixed

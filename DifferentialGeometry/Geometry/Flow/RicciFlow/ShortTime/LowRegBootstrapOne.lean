@@ -54,7 +54,6 @@ def duhamelCross (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) u₀ f
 
 omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M]
   [BoundarylessManifold I M] in
 /-- The intermediate representative realizes the continuous lower carrier at
 every time of the original interval. -/
@@ -69,7 +68,6 @@ theorem crossRepr_toFun
   rfl
 
 omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M]
   [BoundarylessManifold I M] in
 /-- The intermediate representative is the intermediate inclusion of the top
 companion field almost everywhere on the original interval. -/
@@ -121,7 +119,6 @@ theorem duhRepr_field_ae
       (duhamelCross (I := I) (M := M) g r s a hT hT1 u₀ f) hT
 
 omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M]
   [BoundarylessManifold I M] in
 /-- An almost-everywhere intermediate-order ball bound for the top companion
 holds for the cross-scale representative at every time.  The proof uses the

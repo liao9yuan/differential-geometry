@@ -156,7 +156,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
   ring
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorParseval_l2Coeff_ofCompact_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -172,7 +171,6 @@ theorem tensorParseval_l2Coeff_ofCompact_sq
     Real.norm_eq_abs, sq_abs]
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorL2Coeff_ofCompact_summable_sq'
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -185,7 +183,6 @@ theorem tensorL2Coeff_ofCompact_summable_sq'
   tensorL2Coeff_summable_sq (I := I) (M := M) h_compact u
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem summable_tensorSobolevWeight_of_even
     {g : SmoothRiemannianMetric I M} {r s : ℕ}

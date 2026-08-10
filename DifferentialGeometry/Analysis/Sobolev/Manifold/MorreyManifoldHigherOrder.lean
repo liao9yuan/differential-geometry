@@ -25,7 +25,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+variable [T2Space M] [CompactSpace M] [I.Boundaryless]
 
 omit [FiniteDimensional ℝ E] in
 private lemma iteratedFDeriv_eq_zero_of_notMem_tsupport
@@ -162,7 +162,6 @@ private lemma sum_eLpNorm_norm_iteratedFDeriv_chartSmoothExt_le_wkpNorm
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.eLpNorm_iteratedFDeriv_le_wkpNorm
     (d := Module.finrank ℝ E) hΩ_open hp_one k hh_smooth_top hh_compact hh_supp
 
-omit [CompactSpace M] in
 private lemma wkpNorm_chartPushed_target_le_wkpNormChart_k
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (k : ℕ) (α : M) (u : M → ℝ) :
@@ -177,7 +176,6 @@ private lemma wkpNorm_chartPushed_target_le_wkpNormChart_k
   unfold wkpNormChart
   exact ENNReal.le_tsum α
 
-omit [CompactSpace M] in
 private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target_k
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (k : ℕ) (α : M) (u : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
@@ -196,7 +194,6 @@ private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target_k
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (chartSmoothExt_ae_eq_chartPushed (I := I) (M := M) α u)
 
-omit [CompactSpace M] in
 private lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart_k
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (k : ℕ) (α : M) (u : M → ℝ) :
@@ -474,7 +471,7 @@ theorem smooth_manifold_morrey_iteratedFDeriv_bound_uniform_perChart
     {E H M : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [CompactSpace M] [T2Space M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ) (α : M) :
@@ -491,7 +488,7 @@ theorem smooth_manifold_morrey_iteratedFDeriv_bound_uniform
     {E H M : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [CompactSpace M] [T2Space M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     {p : ℝ} (hp : (Module.finrank ℝ E : ℝ) < p) (m : ℕ) :

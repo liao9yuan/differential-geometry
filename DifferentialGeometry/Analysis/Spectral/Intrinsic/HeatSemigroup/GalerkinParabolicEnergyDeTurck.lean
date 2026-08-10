@@ -111,7 +111,6 @@ noncomputable def galerkinCoordEmbed
 
 open scoped Classical in
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma galerkinCoordEmbed_coeff
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -137,7 +136,6 @@ noncomputable def galerkinCoordRestrict
         (I := I) (M := M) (a := (a : ℝ)) j.1))
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma galerkinCoordRestrict_apply
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -169,7 +167,6 @@ noncomputable def galerkinCoordDiag
   (galerkinCoordDiagLM (I := I) (M := M) g₀ S).toContinuousLinearMap
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma galerkinCoordDiag_apply
     (g₀ : SmoothRiemannianMetric I M)

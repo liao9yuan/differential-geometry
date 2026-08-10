@@ -450,6 +450,7 @@ private lemma chosenSecondPartialChartPushedU_ae_zero_off_K_α
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := j) h_isWeak hw_li h_g_i_ae_zero
 
+omit [SigmaCompactSpace M] in
 private lemma base_f_chart_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

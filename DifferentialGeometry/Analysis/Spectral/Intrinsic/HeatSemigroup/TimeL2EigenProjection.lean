@@ -29,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable (g : SmoothRiemannianMetric I M)
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_finiteEigenComboHs_self_le (σ : ℝ)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))

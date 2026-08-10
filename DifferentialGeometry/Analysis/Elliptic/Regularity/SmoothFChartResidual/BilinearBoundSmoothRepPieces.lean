@@ -49,11 +49,13 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 noncomputable def etaTimesV (α : M) (v : M → ℝ) : M → ℝ :=
   fun x => chartStrictCutoff (I := I) (M := M) α x * v x
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma etaTimesV_apply (α : M) (v : M → ℝ) (x : M) :
     etaTimesV (I := I) (M := M) α v x =
       chartStrictCutoff (I := I) (M := M) α x * v x := rfl
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma etaTimesV_smooth (α : M) {v : M → ℝ}
     (hv : ContMDiff I 𝓘(ℝ, ℝ) ∞ v) :
@@ -67,12 +69,14 @@ noncomputable def etaTimesVScalar
   toFun := etaTimesV (I := I) (M := M) α v.toFun
   smooth := etaTimesV_smooth (I := I) (M := M) α v.smooth
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma etaTimesVScalar_toFun (g : SmoothRiemannianMetric I M)
     (α : M) (v : SmoothScalar g) :
     (etaTimesVScalar (I := I) (M := M) g α v).toFun =
       etaTimesV (I := I) (M := M) α v.toFun := rfl
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_etaTimesV_subset (α : M) (v : M → ℝ) :
     tsupport (etaTimesV (I := I) (M := M) α v) ⊆ (chartAt H α).source := by
@@ -99,7 +103,7 @@ noncomputable def smoothRep
       (gradFun (I := I) g v.toFun x)) -
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothRep_apply (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) (x : M) :
     smoothRep (I := I) (M := M) g α v x =
@@ -108,7 +112,7 @@ private lemma smoothRep_apply (g : SmoothRiemannianMetric I M) (α : M)
         (gradFun (I := I) g v.toFun x)) -
       (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothRep_eq_zero_off_tsupport_chartAtlasPOU
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {x : M}
     (hx : x ∉ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :
@@ -146,6 +150,7 @@ private lemma smoothRep_eq_zero_off_tsupport_chartAtlasPOU
   rw [smoothRep_apply, h_grad_zero, h_lap_zero]
   simp
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma gradFun_eq_gradFun_etaTimesV_of_eventuallyOne
     (g : SmoothRiemannianMetric I M) (α : M) {v : M → ℝ} {x : M}
@@ -162,6 +167,7 @@ private lemma gradFun_eq_gradFun_etaTimesV_of_eventuallyOne
   unfold gradFun
   rw [h_mfderiv]
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma etaTimesV_eq_of_eventuallyOne
     (α : M) {v : M → ℝ} {x : M}
@@ -247,6 +253,7 @@ noncomputable def lapPiece
   fun x => (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x *
     etaTimesV (I := I) (M := M) α v x
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma lapPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
     (v : M → ℝ) (x : M) :
@@ -290,6 +297,7 @@ lemma gradInnerPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
     simp [DifferentialGeometry.Geometry.Operator.grad_g_apply]
   exact (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (2 : ℝ))).mul h_inner
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma lapPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
@@ -333,6 +341,7 @@ lemma tsupport_gradInnerPiece_subset_source
   (tsupport_gradInnerPiece_subset (I := I) (M := M) g α v).trans
     (chartAtlasPOU_isSubordinate I M α)
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_lapPiece_subset
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :
@@ -351,6 +360,7 @@ private lemma tsupport_lapPiece_subset
   exact closure_minimal (h_supp_subset.trans (subset_tsupport _))
     (isClosed_tsupport _)
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma tsupport_lapPiece_subset_source
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :

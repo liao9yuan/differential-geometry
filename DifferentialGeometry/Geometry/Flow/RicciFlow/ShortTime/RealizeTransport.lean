@@ -166,7 +166,6 @@ theorem realize_eval_carrier_factorization
     (I := I) (M := M) g_bg a ha T_z x v w).tsum_eq
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem pointwise_deriv_through_realize
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
