@@ -2948,6 +2948,70 @@ theorem exists_pairR_bound
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+theorem exists_pairR_bound_of_complete_metric
+    [ConnectedSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (p : M) :
+    letI : IsManifold I 1 M :=
+      IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+    letI : TopologicalSpace.MetrizableSpace M :=
+      Manifold.metrizableSpace I M
+    letI : T3Space M := inferInstance
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+    letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+    letI : PseudoEMetricSpace M := inferInstance
+    letI : CompleteSpace M := hcomplete.complete
+    ∃ C D Blo A : ℝ, 0 < C ∧ 0 < D ∧ 0 < Blo ∧
+      ∀ {Rm : ℝ},
+        0 ≤ Rm →
+        Rm04GlobalBound (I := I) (M := M) g Rm →
+        ∃ δ : ℝ, 0 < δ ∧ ∀ {s : ℝ}, 0 < s → s < δ →
+          let Rlo : ℝ := s / (2 * C)
+          let Rup : ℝ := D * s
+          let Bhi : ℝ :=
+            max
+              (A + gronwallBound 0
+                (max (Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
+                  Rm * (C * Rup) ^ 2) 1)
+                ((Real.sqrt ((Fintype.card (Fin 1 -> Fin (Module.finrank ℝ E)) : Real)) *
+                  Rm * (C * Rup) ^ 2) * A) 1)
+              0
+          letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+          ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank ℝ E)) *
+              (ENNReal.ofReal (Rlo ^ Module.finrank ℝ E) *
+                (modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
+            riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ∧
+          riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) ≤
+            ENNReal.ofReal
+              (Real.sqrt (((Module.finrank ℝ E).factorial : ℝ) *
+                (Bhi * Bhi) ^ Module.finrank ℝ E)) *
+              (ENNReal.ofReal (Rup ^ Module.finrank ℝ E) *
+                (modelHaar (E := E)) (Metric.ball (0 : E) 1)) := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M := inferInstance
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  exact exists_pairR_bound (I := I) (M := M) g hEnorm p
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 theorem exists_vol_rm04_pair_pkg
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
