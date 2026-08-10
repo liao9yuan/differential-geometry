@@ -266,6 +266,237 @@ private theorem familyTangentSection_contMDiffWithinAt_section_iff'
       (fun q : M × ℝ => (e (σ q)).2) a p
   exact hiff
 
+private theorem familyTangentSection_smul_section
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
+    {W : (x : M) → (s : ℝ) → TangentSpace I x} {ψ : M × ℝ → ℝ} {u : Set (M × ℝ)} {p : M × ℝ}
+    (hψ : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) ψ u p)
+    (hW : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, W q.1 q.2⟩ : TangentBundle I M)) u p) :
+    ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, ψ q • W q.1 q.2⟩ : TangentBundle I M)) u p := by
+  let u' : Set (M × ℝ) := u ∩ ((extChartAt I p.1).source ×ˢ Set.univ)
+  have hu'sub : u' ⊆ (extChartAt I p.1).source ×ˢ Set.univ := by
+    intro q hq
+    exact hq.2
+  have hψ' : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) ψ u' p :=
+    hψ.mono (by intro q hq; exact hq.1)
+  have hW' : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1)))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, W q.1 q.2⟩ : TangentBundle I M)) u' p :=
+    hW.mono (by intro q hq; exact hq.1)
+  have hiff := familyTangentSection_contMDiffWithinAt_section_iff (I := I)
+    (W := W) (a := u') (p := p) hu'sub
+  have hfib : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+        ⟨q.1, W q.1 q.2⟩).2) u' p :=
+    hiff.mp hW'
+  have hsmul : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => ψ q • (trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+        ⟨q.1, W q.1 q.2⟩).2) u' p :=
+    hψ'.smul hfib
+  let e : Bundle.Trivialization (MorseModel (m + 1))
+      (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+    trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+  have hlin : (fun q : M × ℝ => (trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+      ⟨q.1, ψ q • W q.1 q.2⟩).2) =ᶠ[nhdsWithin p u']
+      (fun q : M × ℝ => ψ q • (trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+        ⟨q.1, W q.1 q.2⟩).2) := by
+    filter_upwards [self_mem_nhdsWithin] with q hq
+    have hqbase : q.1 ∈ e.baseSet := by
+      have hq' := hu'sub hq
+      simpa [← extChartAt_source] using hq'.1
+    exact (e.linear ℝ hqbase).2 (ψ q) (W q.1 q.2)
+  have hsmul' : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+        ⟨q.1, ψ q • W q.1 q.2⟩).2) u' p :=
+    hsmul.congr_of_eventuallyEq hlin (by
+      exact (e.linear ℝ (mem_baseSet_trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1)).2
+        (ψ p) (W p.1 p.2))
+  have hiff' := familyTangentSection_contMDiffWithinAt_section_iff (I := I)
+    (W := fun x s => ψ (x, s) • W x s) (a := u') (p := p) hu'sub
+  have hgoal : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1)))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, ψ q • W q.1 q.2⟩ : TangentBundle I M)) u' p :=
+    hiff'.mpr hsmul'
+  exact hgoal.mono_of_mem_nhdsWithin (by
+    have hC : (extChartAt I p.1).source ×ˢ Set.univ ∈ nhds p :=
+      (IsOpen.prod (isOpen_extChartAt_source p.1) isOpen_univ).mem_nhds
+        ⟨mem_extChartAt_source p.1, trivial⟩
+    exact inter_mem_nhdsWithin u hC)
+
+private theorem familyTangentSection_finsum_of_locallyFinite
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
+    {ι : Type*} {t : ι → (x : M) → (s : ℝ) → TangentSpace I x}
+    (ht : LocallyFinite (fun i : ι => {q : M × ℝ | t i q.1 q.2 ≠ 0}))
+    (ht' : ∀ i, ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, t i q.1 q.2⟩ : TangentBundle I M))) :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, ∑ᶠ i, t i q.1 q.2⟩ : TangentBundle I M)) := by
+  intro p
+  rcases ht p with ⟨U, hUp, hfin⟩
+  let F : Finset ι := hfin.toFinset
+  have hFcover : ∀ i, i ∉ F → t i p.1 p.2 = 0 := by
+    intro i hi
+    by_contra hnot
+    have hmem : ((fun i : ι => {q : M × ℝ | t i q.1 q.2 ≠ 0}) i ∩ U).Nonempty :=
+      ⟨p, ⟨by simpa [Function.support] using hnot, mem_of_mem_nhds hUp⟩⟩
+    exact hi (by simpa [F] using hfin.mem_toFinset.mpr hmem)
+  have hsup : Function.support (fun i : ι => t i p.1 p.2) ⊆ F := by
+    intro i hi
+    by_contra hnot
+    exact False.elim (hi (hFcover i hnot))
+  have hsum : (∑ᶠ i, t i p.1 p.2) = ∑ i ∈ F, t i p.1 p.2 := by
+    exact finsum_eq_sum_of_support_subset (fun i : ι => t i p.1 p.2) hsup
+  have hsumOn : ∀ q ∈ U, (∑ᶠ i, t i q.1 q.2) = ∑ i ∈ F, t i q.1 q.2 := by
+    intro q hq
+    have hsup' : Function.support (fun i : ι => t i q.1 q.2) ⊆ F := by
+      intro i hi
+      by_contra hnot
+      have hmem : ((fun i : ι => {q : M × ℝ | t i q.1 q.2 ≠ 0}) i ∩ U).Nonempty :=
+        ⟨q, ⟨hi, hq⟩⟩
+      exact hnot (by simpa [F] using hfin.mem_toFinset.mpr hmem)
+    exact finsum_eq_sum_of_support_subset (fun i : ι => t i q.1 q.2) hsup'
+  let U' : Set (M × ℝ) := U ∩ ((extChartAt I p.1).source ×ˢ Set.univ)
+  have hU'sub : U' ⊆ (extChartAt I p.1).source ×ˢ Set.univ := by
+    intro q hq
+    exact hq.2
+  have hpU' : p ∈ U' := ⟨mem_of_mem_nhds hUp, ⟨mem_extChartAt_source p.1, trivial⟩⟩
+  have hfinite : ∀ q ∈ U', (∑ᶠ i, t i q.1 q.2) = ∑ i ∈ F, t i q.1 q.2 := by
+    intro q hq
+    exact hsumOn q hq.1
+  have hfibsum : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+        ⟨q.1, ∑ i ∈ F, t i q.1 q.2⟩).2) U' p := by
+    let e : Bundle.Trivialization (MorseModel (m + 1))
+        (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+      trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+    have hlin : ∀ q ∈ U', (e ⟨q.1, ∑ i ∈ F, t i q.1 q.2⟩).2 =
+        ∑ i ∈ F, (e ⟨q.1, t i q.1 q.2⟩).2 := by
+      intro q hq
+      have hqbase : q.1 ∈ e.baseSet := by
+        have hq' := hU'sub hq
+        simpa [← extChartAt_source] using hq'.1
+      let L : TangentSpace I q.1 →+ MorseModel (m + 1) :=
+        { toFun := fun v => (e ⟨q.1, v⟩).2
+          map_zero' := (e.linear ℝ hqbase).map_zero
+          map_add' := (e.linear ℝ hqbase).1 }
+      classical
+      induction F using Finset.induction_on with
+      | empty =>
+        simpa only [Finset.sum_empty] using (e.linear ℝ hqbase).map_zero
+      | insert i s hi ih =>
+        calc
+          (e ⟨q.1, ∑ j ∈ insert i s, t j q.1 q.2⟩).2
+              = (e ⟨q.1, t i q.1 q.2 + ∑ j ∈ s, t j q.1 q.2⟩).2 := by
+                rw [Finset.sum_insert hi]
+          _ = (e ⟨q.1, t i q.1 q.2⟩).2 + (e ⟨q.1, ∑ j ∈ s, t j q.1 q.2⟩).2 := by
+                exact (e.linear ℝ hqbase).1 (t i q.1 q.2) (∑ j ∈ s, t j q.1 q.2)
+          _ = (e ⟨q.1, t i q.1 q.2⟩).2 + ∑ j ∈ s, (e ⟨q.1, t j q.1 q.2⟩).2 := by
+                rw [ih]
+          _ = ∑ j ∈ insert i s, (e ⟨q.1, t j q.1 q.2⟩).2 := by
+                rw [Finset.sum_insert hi]
+    have hfibs : ∀ i, ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1))
+        (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun q : M × ℝ => (e ⟨q.1, t i q.1 q.2⟩).2) U' p := by
+      intro i
+      have hiff := familyTangentSection_contMDiffWithinAt_section_iff (I := I)
+        (W := t i) (a := U') (p := p) hU'sub
+      exact hiff.mp (((ht' i) p).contMDiffWithinAt (s := U'))
+    have hsum' : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun q : M × ℝ => ∑ i ∈ F, (e ⟨q.1, t i q.1 q.2⟩).2) U' p := by
+      classical
+      induction F using Finset.induction_on with
+      | empty =>
+        simpa only [Finset.sum_empty] using
+          (contMDiffWithinAt_const : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1))
+            (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun _ : M × ℝ => (0 : MorseModel (m + 1))) U' p)
+      | insert i s hi ih =>
+        simpa only [Finset.sum_insert hi] using (hfibs i).add ih
+    exact hsum'.congr_of_eventuallyEq (by
+      filter_upwards [self_mem_nhdsWithin] with q hq
+      exact hlin q hq) (hlin p hpU')
+  have hiffs := familyTangentSection_contMDiffWithinAt_section_iff (I := I)
+    (W := fun x s => ∑ᶠ i, t i x s) (a := U') (p := p) hU'sub
+  have hsec : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1)))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, ∑ᶠ i, t i q.1 q.2⟩ : TangentBundle I M)) U' p := by
+    apply hiffs.mpr
+    refine hfibsum.congr_of_eventuallyEq ?_ ?_
+    · filter_upwards [self_mem_nhdsWithin] with q hq
+      rw [hfinite q hq]
+    · change (trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+        ⟨p.1, ∑ᶠ i, t i p.1 p.2⟩).2 = (trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+          ⟨p.1, ∑ i ∈ F, t i p.1 p.2⟩).2
+      rw [hsum]
+  exact hsec.mono_of_mem_nhdsWithin (by
+    have hC : (extChartAt I p.1).source ×ˢ Set.univ ∈ nhds p :=
+      (IsOpen.prod (isOpen_extChartAt_source p.1) isOpen_univ).mem_nhds
+        ⟨mem_extChartAt_source p.1, trivial⟩
+    simpa [U', nhdsWithin_univ] using (Filter.inter_mem hUp hC))
+
+private theorem familyTangentSection_smul_of_tsupport
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
+    {W : (x : M) → (s : ℝ) → TangentSpace I x} {ψ : M × ℝ → ℝ} {u : Set (M × ℝ)}
+    (hψ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) ψ u)
+    (ht : IsOpen u) (ht' : tsupport ψ ⊆ u)
+    (hW : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, W q.1 q.2⟩ : TangentBundle I M)) u) :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, ψ q • W q.1 q.2⟩ : TangentBundle I M)) := by
+  apply contMDiff_of_contMDiffOn_union_of_isOpen
+  · intro p hp
+    exact familyTangentSection_smul_section (I := I) (W := W) (ψ := ψ) (u := u) (p := p)
+      (hψ p hp) (hW p hp)
+  · intro p hp
+    have hzero : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1)))
+        (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun q : M × ℝ => (⟨q.1, (0 : TangentSpace I q.1)⟩ : TangentBundle I M))
+        (tsupport ψ)ᶜ p := by
+      let u' : Set (M × ℝ) := (tsupport ψ)ᶜ ∩ ((extChartAt I p.1).source ×ˢ Set.univ)
+      have hu'sub : u' ⊆ (extChartAt I p.1).source ×ˢ Set.univ := by
+        intro q hq
+        exact hq.2
+      have hp' : p ∈ u' := ⟨hp, ⟨mem_extChartAt_source p.1, trivial⟩⟩
+      have hiff := familyTangentSection_contMDiffWithinAt_section_iff (I := I)
+        (W := fun _ _ => (0 : TangentSpace I _)) (a := u') (p := p) hu'sub
+      let e : Bundle.Trivialization (MorseModel (m + 1))
+          (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+        trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1
+      have hfib : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1))
+          (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun q : M × ℝ => (e ⟨q.1, (0 : TangentSpace I q.1)⟩).2) u' p := by
+        have hconst : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, MorseModel (m + 1))
+            (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun _ : M × ℝ => (0 : MorseModel (m + 1))) u' p :=
+          contMDiffWithinAt_const
+        have heq : (fun q : M × ℝ => (e ⟨q.1, (0 : TangentSpace I q.1)⟩).2) =ᶠ[nhdsWithin p u']
+            (fun _ : M × ℝ => (0 : MorseModel (m + 1))) := by
+          filter_upwards [self_mem_nhdsWithin] with q hq
+          have hqbase : q.1 ∈ e.baseSet := by
+            have hq' := hu'sub hq
+            simpa [← extChartAt_source] using hq'.1
+          exact (e.linear ℝ hqbase).map_zero
+        exact hconst.congr_of_eventuallyEq heq (by
+          exact (e.linear ℝ (mem_baseSet_trivializationAt (MorseModel (m + 1)) (TangentSpace I) p.1)).map_zero)
+      have hgoal : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1)))
+          (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun q : M × ℝ => (⟨q.1, (0 : TangentSpace I q.1)⟩ : TangentBundle I M)) u' p :=
+        hiff.mpr hfib
+      exact hgoal.mono_of_mem_nhdsWithin (by
+        have hC : (extChartAt I p.1).source ×ˢ Set.univ ∈ nhds p :=
+          (IsOpen.prod (isOpen_extChartAt_source p.1) isOpen_univ).mem_nhds
+            ⟨mem_extChartAt_source p.1, trivial⟩
+        exact inter_mem_nhdsWithin (tsupport ψ)ᶜ hC)
+    exact hzero.congr_of_eventuallyEq (by
+      filter_upwards [self_mem_nhdsWithin] with q hq
+      simp [image_eq_zero_of_notMem_tsupport hq]) (by
+      simp [image_eq_zero_of_notMem_tsupport hp])
+  · exact Set.compl_subset_iff_union.mp <| Set.compl_subset_compl.mpr ht'
+  · exact ht
+  · exact (isClosed_tsupport ψ).isOpen_compl
+
 theorem localUnitSpeedFamilyVectorField_at_noncritical
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
@@ -502,6 +733,155 @@ theorem localUnitSpeedFamilyVectorField_at_noncritical
         (IsOpen.prod (isOpen_extChartAt_source p.1) isOpen_univ).mem_nhds
           ⟨mem_extChartAt_source p.1, trivial⟩
       exact inter_mem_nhdsWithin U hC)
+
+theorem exists_unitSpeedFamilyVectorField_on_compact
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
+    (F : M → ℝ → ℝ) (hF : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => F q.1 q.2)) (K : Set (M × ℝ)) (hcompact : IsCompact K)
+    (hregular : ∀ p ∈ K, ¬ IsCriticalPointAt I (fun x => F x p.2) p.1) :
+    ∃ V : (x : M) → (s : ℝ) → TangentSpace I x,
+      ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun q : M × ℝ => (⟨q.1, V q.1 q.2⟩ : TangentBundle I M)) ∧
+      IsCompact (tsupport (fun q : M × ℝ => V q.1 q.2)) ∧
+      (∀ p ∈ K, (NormedSpace.fromTangentSpace (F p.1 p.2))
+        ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x p.2) p.1) (V p.1 p.2)) = -1) ∧
+      (∀ q : M × ℝ, -1 ≤ (NormedSpace.fromTangentSpace (F q.1 q.2))
+          ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (V q.1 q.2)) ∧
+        (NormedSpace.fromTangentSpace (F q.1 q.2))
+          ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (V q.1 q.2)) ≤ 0) := by
+  let K : Set (M × ℝ) := K
+  have hpts : ∀ x : K, ∃ U : Set (M × ℝ), x.1 ∈ U ∧ IsOpen U ∧
+      ∃ W : (x : M) → (s : ℝ) → TangentSpace I x,
+        (∀ y ∈ U, (NormedSpace.fromTangentSpace (F y.1 y.2))
+          ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x y.2) y.1) (W y.1 y.2)) = -1) ∧
+        ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : M × ℝ => (⟨y.1, W y.1 y.2⟩ : TangentBundle I M)) U :=
+    fun x => localUnitSpeedFamilyVectorField_at_noncritical I F hF (hregular x x.2)
+  choose U hUmem hUopen W hWdf hWsec using hpts
+  have hKclosed : IsClosed K := hcompact.isClosed
+  haveI : LocallyCompactSpace H := I.locallyCompactSpace
+  haveI : LocallyCompactSpace M := ChartedSpace.locallyCompactSpace H M
+  rcases exists_open_between_and_isCompact_closure hcompact isOpen_univ (subset_univ K)
+    with ⟨W₀, hW₀open, hKW₀, hW₀cl, hW₀compact⟩
+  let U' : K → Set (M × ℝ) := fun x => U x ∩ W₀
+  have hU'mem : ∀ x : K, x.1 ∈ U' x := fun x => ⟨hUmem x, hKW₀ x.2⟩
+  have hU'open : ∀ x : K, IsOpen (U' x) := fun x => (hUopen x).inter hW₀open
+  have hcov : K ⊆ ⋃ x : K, U' x := by
+    intro y hy
+    exact Set.mem_iUnion_of_mem ⟨y, hy⟩ (hU'mem ⟨y, hy⟩)
+  rcases SmoothPartitionOfUnity.exists_isSubordinate (I := I.prod 𝓘(ℝ, ℝ)) (s := K) (U := U')
+    (hs := hKclosed) (ho := hU'open) (hU := hcov) with ⟨ρ, hρsub⟩
+  let V : (x : M) → (s : ℝ) → TangentSpace I x := fun y s =>
+    ∑ᶠ x : K, (ρ x (y, s) : ℝ) • (W x y s : TangentSpace I y)
+  have hdfsum : ∀ y : M × ℝ,
+      (NormedSpace.fromTangentSpace (F y.1 y.2)) ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x y.2) y.1) (V y.1 y.2)) =
+        -(∑ᶠ x : K, (ρ x y : ℝ)) := by
+    intro y
+    let L : TangentSpace I y.1 →L[ℝ] ℝ :=
+      (NormedSpace.fromTangentSpace (𝕜 := ℝ) (F y.1 y.2) : TangentSpace 𝓘(ℝ, ℝ) (F y.1 y.2) →L[ℝ] ℝ).comp
+        (mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x y.2) y.1)
+    have hVdef : (NormedSpace.fromTangentSpace (F y.1 y.2)) ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x y.2) y.1) (V y.1 y.2)) = L (V y.1 y.2) := by
+      simp [L]
+    rw [hVdef]
+    have hfinSuppρ : Function.HasFiniteSupport (fun x : K => ρ x y) := by
+      have hlf : LocallyFinite (fun x : K => {z : M × ℝ | ρ x z ≠ 0}) := ρ.locallyFinite
+      have hlfy := hlf y
+      rcases hlfy with ⟨N, hN, hfinN⟩
+      have hsub : (Function.support fun x : K => ρ x y) ⊆
+          {x : K | ((fun x : K => {z : M × ℝ | ρ x z ≠ 0}) x ∩ N).Nonempty} := by
+        intro x hx
+        rw [Function.support] at hx
+        exact ⟨y, ⟨hx, mem_of_mem_nhds hN⟩⟩
+      exact Set.Finite.subset hfinN hsub
+    have hfinSupp : Function.HasFiniteSupport (fun x : K => ρ x y • W x y.1 y.2) := by
+      exact Set.Finite.subset hfinSuppρ (by intro x hx; exact fun hρ0 => hx (by simp [hρ0]))
+    have hlin : L (V y.1 y.2) = ∑ᶠ x : K, L (ρ x y • W x y.1 y.2) := by
+      dsimp [V]
+      have hmap := (AddMonoidHom.map_finsum (g := (L : TangentSpace I y.1 →+ ℝ)) (hf := hfinSupp))
+      simpa using hmap
+    rw [hlin]
+    have hterm : ∀ x : K, L (ρ x y • W x y.1 y.2) = ρ x y • L (W x y.1 y.2) := by
+      intro x
+      rw [map_smul]
+    have hrew : (∑ᶠ x : K, L (ρ x y • W x y.1 y.2)) = ∑ᶠ x : K, ρ x y • (-1 : ℝ) := by
+      apply finsum_congr
+      intro x
+      rw [hterm x]
+      by_cases hyU : y ∈ U' x
+      · have hdf := hWdf x y hyU.1
+        have hLval : L (W x y.1 y.2) = -1 := by
+          dsimp [L]
+          simpa using hdf
+        rw [hLval]
+      · have hρ0 : ρ x y = 0 := by
+          have hts' : y ∉ tsupport (ρ x) := fun h => hyU (hρsub x h)
+          have hnot : y ∉ Function.support (ρ x) := fun hs => hts' (subset_closure hs)
+          by_contra h
+          exact hnot (by simpa [Function.support] using h)
+        simp [hρ0]
+    rw [hrew]
+    have hsum : (∑ᶠ x : K, ρ x y • (-1 : ℝ)) = -(∑ᶠ x : K, (ρ x y : ℝ)) := by
+      have hsmul' : (∑ᶠ x : K, ρ x y • (-1 : ℝ)) = (∑ᶠ x : K, ρ x y) • (-1 : ℝ) := by
+        exact (finsum_smul' hfinSuppρ (-1 : ℝ)).symm
+      rw [hsmul']
+      simp
+    exact hsum
+  refine ⟨V, ?_, ?_, ?_, ?_⟩
+  · have hsummand : ∀ x : K, ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1)))
+        (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun y : M × ℝ => (⟨y.1, ρ x y • W x y.1 y.2⟩ : TangentBundle I M)) := by
+      intro x
+      have hρOn : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (ρ x : M × ℝ → ℝ) (U' x) := by
+        have hc' : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+            (ρ x : M × ℝ → ℝ) Set.univ := by
+          simpa using (ρ x).property.contMDiffOn
+        exact (hc'.mono (subset_univ _)).of_le le_rfl
+      exact familyTangentSection_smul_of_tsupport (I := I) (W := W x) (ψ := ρ x) (u := U' x)
+        hρOn (hU'open x) (hρsub x) ((hWsec x).mono (by intro y hy; exact hy.1))
+    have hfin : LocallyFinite (fun x : K => {y : M × ℝ | ρ x y • W x y.1 y.2 ≠ 0}) := by
+      exact ρ.locallyFinite.subset (fun x => by
+        intro y hy
+        have hρy : ρ x y ≠ 0 := by
+          intro hρ0
+          apply hy
+          simp [hρ0]
+        exact hρy)
+    simpa [V] using (familyTangentSection_finsum_of_locallyFinite (I := I)
+      (t := fun x : K => fun y s => ρ x (y, s) • W x y s) hfin hsummand)
+  · have hmem : ∀ y, y ∈ Function.support (fun q : M × ℝ => V q.1 q.2) → y ∈ ⋃ x : K, tsupport (ρ x) := by
+      intro y hy
+      by_contra hnot
+      have hy' : V y.1 y.2 ≠ 0 := hy
+      apply hy'
+      have hall : ∀ x : K, (ρ x y : ℝ) • (W x y.1 y.2 : TangentSpace I y.1) = 0 := by
+        intro x
+        by_contra hx
+        apply hnot
+        exact Set.mem_iUnion.mpr ⟨x, subset_closure (by
+          intro hρ0
+          apply hx
+          simp [hρ0])⟩
+      have hV0 : (∑ᶠ x : K, (ρ x y : ℝ) • (W x y.1 y.2 : TangentSpace I y.1)) = 0 :=
+        finsum_eq_zero_of_forall_eq_zero hall
+      simpa [V] using hV0
+    have hsupp₀ : Function.support (fun q : M × ℝ => V q.1 q.2) ⊆ W₀ := by
+      intro y hy
+      rcases Set.mem_iUnion.mp (hmem y hy) with ⟨x, hx⟩
+      exact (hρsub x hx).2
+    have hts : tsupport (fun q : M × ℝ => V q.1 q.2) ⊆ closure W₀ := closure_mono hsupp₀
+    exact hW₀compact.of_isClosed_subset (isClosed_tsupport (fun q : M × ℝ => V q.1 q.2)) hts
+  · intro y hy
+    rw [hdfsum y]
+    have hs1 : (∑ᶠ x : K, ρ x y) = 1 := ρ.sum_eq_one hy
+    rw [hs1]
+  · intro y
+    rw [hdfsum y]
+    have hnonneg : 0 ≤ ∑ᶠ x : K, (ρ x y : ℝ) := finsum_nonneg (fun x => ρ.nonneg x y)
+    have hle1 : (∑ᶠ x : K, (ρ x y : ℝ)) ≤ 1 := ρ.sum_le_one y
+    constructor <;> linarith
+
 
 end
 end DifferentialGeometry.Topology.Morse
