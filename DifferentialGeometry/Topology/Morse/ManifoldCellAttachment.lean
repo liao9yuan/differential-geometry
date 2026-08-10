@@ -15360,6 +15360,69 @@ theorem isOpen_compl_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c R₁ : ℝ)
     exact hcompImg.isClosed
   exact isOpen_compl_iff.mpr hclosedImg
 
+theorem isCompact_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (hR₁R : R₁ ≤ data.R) :
+    IsCompact (data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) := by
+  have hcontNorm : Continuous (fun w : MorseModel (m + 1) => morseNorm (m + 1) w) := by
+    dsimp [morseNorm]
+    exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
+  have hclosed : IsClosed {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} := by
+    exact isClosed_Iic.preimage hcontNorm
+  have hbounded : Bornology.IsBounded {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} := by
+    rw [Metric.isBounded_iff]
+    refine ⟨2 * R₁, ?_⟩
+    intro a ha b hb
+    have ha' : ‖a‖ ≤ R₁ := le_trans (morseNorm_piNorm_le a) ha
+    have hb' : ‖b‖ ≤ R₁ := le_trans (morseNorm_piNorm_le b) hb
+    rw [dist_eq_norm]
+    exact le_trans (norm_sub_le a b) (by nlinarith)
+  have hcompBall : IsCompact ({y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} : Set (MorseModel (m + 1))) :=
+    Metric.isCompact_iff_isClosed_bounded.2 ⟨hclosed, hbounded⟩
+  have hsrc' : {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} ⊆ data.χ.source := by
+    intro y hy
+    exact data.hχsrc y (le_trans hy hR₁R)
+  exact hcompBall.image_of_continuousOn (data.χ.continuousOn.mono hsrc')
+
+theorem isCompact_tsupport_morseRoundedDescentField {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x) (hR₀R₁ : R₀ < R₁) (hR₁R : R₁ ≤ data.R)
+    (hV₀supp : IsCompact (tsupport V₀)) :
+    IsCompact (tsupport (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)) := by
+  let field : (x : M) → TangentSpace I x := morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀
+  have hcompImg := isCompact_ballImage (hk := hk) (c := c) (R₁ := R₁) (data := data) hR₁R
+  have hsub : Function.support field ⊆ tsupport V₀ ∪ data.χ '' {y | morseNorm (m + 1) y ≤ R₁} := by
+    intro x hx
+    by_contra hnot
+    have hxV : x ∉ tsupport V₀ := by
+      intro h
+      exact hnot (Or.inl h)
+    have hxball : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} := by
+      intro h
+      exact hnot (Or.inr h)
+    have hfield : field x = V₀ x := by
+      dsimp [field]
+      exact morseRoundedDescentField_eq_V₀_of_not_mem_ballImage hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁ hxball
+    have hVzero : V₀ x = 0 := by
+      by_contra hne
+      have hmem : x ∈ Function.support V₀ := Function.mem_support.mpr hne
+      exact hxV (subset_closure hmem)
+    exact hx (by
+      rw [hfield, hVzero]
+      rfl)
+  have hclosedU : IsClosed (tsupport V₀ ∪ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) := by
+    exact (isClosed_tsupport (f := V₀)).union hcompImg.isClosed
+  have htsub : tsupport field ⊆ tsupport V₀ ∪ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} :=
+    closure_minimal hsub hclosedU
+  have hcompU : IsCompact (tsupport V₀ ∪ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :=
+    hV₀supp.union hcompImg
+  exact hcompU.of_isClosed_subset (isClosed_tsupport (f := field)) htsub
+
 end ManifoldCellAttachment
 
 end
