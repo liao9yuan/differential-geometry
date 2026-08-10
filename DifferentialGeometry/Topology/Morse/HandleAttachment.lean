@@ -2631,4 +2631,34 @@ noncomputable def modelRoundedSublevelDiffeomorphModified {m k : ℕ} (hk : k �
     (modelModifiedSublevelDiffeomorph hk c ε r δ hε hδ hr
       (hcs₁ := hcs₂) (hcs₂ := hcs₃) (hchart₁ := hchart₂) (hchart₂ := hchart₃)).symm
 
+theorem contDiffOn_modelFlowField_of_posPart_ne_zero {n k : ℕ} (hk : k ≤ n) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (modelFlowField hk)
+      {y : MorseModel n | posPart hk y ≠ 0} := by
+  intro y hy
+  have hpos : ‖posPart hk y‖ ≠ 0 := by
+    intro hz
+    exact hy (norm_eq_zero.mp hz)
+  have hsq : ‖posPart hk y‖ ^ 2 ≠ 0 := pow_ne_zero 2 hpos
+  have hns : ContDiffAt ℝ (⊤ : ℕ∞) (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y := by
+    exact (contDiff_posPart_normSq hk).contDiffAt
+  have hinv : ContDiffAt ℝ (⊤ : ℕ∞) (fun z : MorseModel n => (‖posPart hk z‖ ^ 2)⁻¹) y := by
+    exact hns.inv (by
+      intro hz
+      exact hsq (congrArg (fun t : ℝ => t) hz))
+  have hsmul : ContDiffAt ℝ (⊤ : ℕ∞)
+      (fun z : MorseModel n => -(‖posPart hk z‖ ^ 2)⁻¹ • posPart hk z) y := by
+    have hneg : ContDiffAt ℝ (⊤ : ℕ∞) (fun z : MorseModel n => -(‖posPart hk z‖ ^ 2)⁻¹) y :=
+      hinv.neg
+    exact hneg.smul (posPartCLM hk).contDiff.contDiffAt
+  have hrec : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        recombine hk p.1 p.2) := recombine_contDiff_generic hk
+  have hmain : ContDiffAt ℝ (⊤ : ℕ∞) (modelFlowField hk) y := by
+    dsimp [modelFlowField]
+    exact (ContDiff.contDiffAt hrec).comp y (by
+      have hzero : ContDiffAt ℝ (⊤ : ℕ∞) (fun z : MorseModel n => (0 : EuclideanSpace ℝ (Fin k))) y :=
+        contDiffAt_const
+      exact hzero.prodMk hsmul)
+  exact hmain.contDiffWithinAt
+
 end DifferentialGeometry.Topology.Morse.CellAttachment
