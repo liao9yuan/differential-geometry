@@ -2311,6 +2311,77 @@ theorem modelAttachedUnstretchTime_eq_boundary {n k : ℕ} (hk : k ≤ n) (ε r 
   have hpos : ‖negPart hk y‖ ^ 2 - 2 * ε ≠ 0 := by nlinarith [ht, hδ0]
   field_simp [hpos]
 
+theorem fderiv_morseNormalForm_modelFlowField {n k : ℕ} (hk : k ≤ n) (c : ℝ) {y : MorseModel n}
+    (hpos : ‖posPart hk y‖ ≠ 0) :
+    fderiv ℝ (morseNormalForm hk c) y (modelFlowField hk y) = -1 := by
+  have hdiff : DifferentiableAt ℝ (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y := by
+    exact (contDiff_posPart_normSq hk).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt
+  have hdiffNeg : DifferentiableAt ℝ (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) y := by
+    exact (contDiff_negPart_normSq hk).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt
+  have hfderiv : fderiv ℝ (morseNormalForm hk c) y =
+      (1 / 2 : ℝ) • (fderiv ℝ (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y -
+        fderiv ℝ (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) y) := by
+    have hmain : (fun z : MorseModel n =>
+        c + (1 / 2) * (‖posPart hk z‖ ^ 2 - ‖negPart hk z‖ ^ 2)) =
+        morseNormalForm hk c := by
+      funext z
+      exact (morseNormalForm_split hk c z).symm
+    rw [← hmain]
+    rw [fderiv_const_add]
+    have hsub : DifferentiableAt ℝ (fun z : MorseModel n =>
+        ‖posPart hk z‖ ^ 2 - ‖negPart hk z‖ ^ 2) y := hdiff.sub hdiffNeg
+    have hmul : fderiv ℝ (fun z : MorseModel n =>
+        (1 / 2 : ℝ) * (‖posPart hk z‖ ^ 2 - ‖negPart hk z‖ ^ 2)) y =
+        (1 / 2 : ℝ) • fderiv ℝ (fun z : MorseModel n =>
+          ‖posPart hk z‖ ^ 2 - ‖negPart hk z‖ ^ 2) y :=
+      fderiv_const_mul hsub (1 / 2 : ℝ)
+    rw [hmul]
+    congr 1
+    exact fderiv_sub (f := fun z : MorseModel n => ‖posPart hk z‖ ^ 2)
+      (g := fun z : MorseModel n => ‖negPart hk z‖ ^ 2)
+      (hf := hdiff) (hg := hdiffNeg)
+  let w : MorseModel n := modelFlowField hk y
+  have hposPart : posPart hk w = -(‖posPart hk y‖ ^ 2)⁻¹ • posPart hk y := by
+    simpa [w] using posPart_modelFlowField hk y
+  have hnegPart : negPart hk w = 0 := by
+    simpa [w] using negPart_modelFlowField hk y
+  have hA : fderiv ℝ (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y w = -2 := by
+    rw [fderiv_posPart_normSq hk y w]
+    rw [hposPart]
+    have hterm : ∀ j : Fin (n - k), (posPart hk y j) *
+        (-(‖posPart hk y‖ ^ 2)⁻¹ • posPart hk y) j =
+        -(‖posPart hk y‖ ^ 2)⁻¹ * (posPart hk y j) ^ 2 := by
+      intro j
+      have hsmul : (-(‖posPart hk y‖ ^ 2)⁻¹ • posPart hk y) j =
+          -(‖posPart hk y‖ ^ 2)⁻¹ * (posPart hk y j) := by
+        rfl
+      rw [hsmul]
+      ring
+    have hsum : ∑ j : Fin (n - k), (posPart hk y j) *
+        (-(‖posPart hk y‖ ^ 2)⁻¹ • posPart hk y) j =
+        -(‖posPart hk y‖ ^ 2)⁻¹ * ∑ j : Fin (n - k), (posPart hk y j) ^ 2 := by
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl (fun j hj => hterm j)
+    rw [hsum]
+    have hsq : ∑ j : Fin (n - k), (posPart hk y j) ^ 2 = ‖posPart hk y‖ ^ 2 := by
+      exact (EuclideanSpace.real_norm_sq_eq (posPart hk y)).symm
+    rw [hsq]
+    have hne : ‖posPart hk y‖ ^ 2 ≠ 0 := pow_ne_zero 2 hpos
+    field_simp [hne]
+  have hB : fderiv ℝ (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) y w = 0 := by
+    rw [fderiv_negPart_normSq hk y w]
+    rw [hnegPart]
+    simp
+  rw [hfderiv]
+  change ((1 / 2 : ℝ) • (fderiv ℝ (fun z : MorseModel n => ‖posPart hk z‖ ^ 2) y -
+    fderiv ℝ (fun z : MorseModel n => ‖negPart hk z‖ ^ 2) y)) w = -1
+  rw [ContinuousLinearMap.smul_apply]
+  rw [ContinuousLinearMap.sub_apply, hA, hB]
+  rw [smul_eq_mul]
+  norm_num
+
 theorem contMDiff_modelAttachedUnstretch_sublevel {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
