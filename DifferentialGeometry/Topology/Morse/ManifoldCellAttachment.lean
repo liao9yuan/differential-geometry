@@ -8097,6 +8097,74 @@ theorem contDiff_morseFarExpandTimeSmooth {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ) 
   rw [hcover] at hUn
   exact contDiffOn_univ.mp hUn
 
+noncomputable def modelRoundedTransportTime {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ : ℝ) (y : MorseModel (m + 1)) : ℝ :=
+  let β : ℝ := Real.smoothTransition
+    ((smoothCap ε r δ (‖negPart hk y‖ ^ 2) - ‖posPart hk y‖ ^ 2) / θ)
+  β * modelAttachedUnstretchTime hk ε r δ y +
+    (1 - β) * morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y)
+
+theorem modelRoundedTransportTime_eq_unstretch {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ : ℝ) (hθ : 0 < θ) {y : MorseModel (m + 1)}
+    (hy : θ ≤ smoothCap ε r δ (‖negPart hk y‖ ^ 2) - ‖posPart hk y‖ ^ 2) :
+    modelRoundedTransportTime hk c ε r δ ρ ρ' θ y =
+      modelAttachedUnstretchTime hk ε r δ y := by
+  dsimp [modelRoundedTransportTime]
+  have hβ : Real.smoothTransition
+      ((smoothCap ε r δ (‖negPart hk y‖ ^ 2) - ‖posPart hk y‖ ^ 2) / θ) = 1 := by
+    apply Real.smoothTransition.one_of_one_le
+    rw [one_le_div hθ]
+    exact hy
+  rw [hβ]
+  ring
+
+theorem modelRoundedTransportTime_eq_collar {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ : ℝ) (hθ : 0 < θ) {y : MorseModel (m + 1)}
+    (hy : ‖posPart hk y‖ ^ 2 ≥ smoothCap ε r δ (‖negPart hk y‖ ^ 2)) :
+    modelRoundedTransportTime hk c ε r δ ρ ρ' θ y =
+      morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y) := by
+  dsimp [modelRoundedTransportTime]
+  have hβ : Real.smoothTransition
+      ((smoothCap ε r δ (‖negPart hk y‖ ^ 2) - ‖posPart hk y‖ ^ 2) / θ) = 0 := by
+    apply Real.smoothTransition.zero_of_nonpos
+    exact div_nonpos_of_nonpos_of_nonneg (by linarith) (le_of_lt hθ)
+  rw [hβ]
+  ring
+
+theorem contDiff_modelRoundedTransportTime {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ : ℝ) (hθ : 0 < θ) (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hδ : 0 < δ) (hδr : δ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelRoundedTransportTime hk c ε r δ ρ ρ' θ) := by
+  have hpos : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => ‖posPart hk y‖ ^ 2) :=
+    contDiff_posPart_normSq hk
+  have hneg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel (m + 1) => ‖negPart hk y‖ ^ 2) :=
+    contDiff_negPart_normSq hk
+  have hcap : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) :=
+    (smoothCap_contDiff ε r δ).comp hneg
+  have hβ : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => Real.smoothTransition
+        ((smoothCap ε r δ (‖negPart hk y‖ ^ 2) - ‖posPart hk y‖ ^ 2) / θ)) := by
+    have harg : ContDiff ℝ (⊤ : ℕ∞)
+        (fun y : MorseModel (m + 1) =>
+          (smoothCap ε r δ (‖negPart hk y‖ ^ 2) - ‖posPart hk y‖ ^ 2) / θ) :=
+      (hcap.sub hpos).div
+        (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel (m + 1) => θ))
+        (fun _ : MorseModel (m + 1) => ne_of_gt hθ)
+    simpa [Function.comp_def] using (Real.smoothTransition.contDiff (n := (⊤ : ℕ∞))).comp harg
+  have htime : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) => modelAttachedUnstretchTime hk ε r δ y) :=
+    contDiff_modelAttachedUnstretchTime hk ε r δ hδ hδr
+  have hcollar : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y)) :=
+    (contDiff_morseFarExpandTimeSmooth (c := c) (ε := ε) (δ := δ) (ρ := ρ) (ρ' := ρ')
+      hρ hρ' hδ).comp (contDiff_morseNormalForm hk c)
+  have hone : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel (m + 1) => (1 : ℝ)) :=
+    (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel (m + 1) => (1 : ℝ)))
+  simpa [modelRoundedTransportTime, Function.comp_def] using
+    (hβ.mul htime).add ((hone.sub hβ).mul hcollar)
+
 theorem morseFarExpandTimeSmooth_levelMap_strictMono {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
     (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) {t₁ t₂ : ℝ} (hlt : t₁ < t₂) :
     t₁ - morseFarExpandTimeSmooth c ε δ ρ ρ' t₁ <
