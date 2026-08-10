@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.ODE.CompactSupportFlow
 
 namespace DifferentialGeometry.Topology.Morse
 
-open Manifold Set Filter
+open Manifold Set Filter DifferentialGeometry.Analysis.ODE
 open scoped Manifold ContDiff Topology Filter
 
 noncomputable section
@@ -1738,6 +1738,699 @@ theorem exists_unitSpeedFamilyVectorField_on_compact
     have hle1 : (∑ᶠ x : K, (ρ x y : ℝ)) ≤ 1 := ρ.sum_le_one y
     constructor <;> linarith
 
+
+private lemma snd_range_of_deriv_unit
+    {s : ℝ → ℝ} (hs : DifferentiableOn ℝ s Set.univ) (hs0 : s 0 = 0)
+    (hs' : ∀ t : ℝ, t ∈ Set.Icc 0 1 → deriv s t ∈ Set.Icc 0 1) :
+    ∀ u : ℝ, u ∈ Set.Icc 0 1 → s u ∈ Set.Icc 0 1 := by
+  intro u hu
+  have hmono : MonotoneOn s (Set.Icc 0 u) := by
+    apply monotoneOn_of_deriv_nonneg (convex_Icc (0 : ℝ) u)
+    · exact hs.continuousOn.mono (by intro x hx; trivial)
+    · intro t ht
+      have hOn : DifferentiableOn ℝ s (interior (Set.Icc 0 u)) := by
+        intro x hx
+        exact (hs x trivial).mono (by intro y hy; trivial : interior (Set.Icc 0 u) ⊆ Set.univ)
+      exact hOn t ht
+    · intro t ht
+      exact (hs' t ⟨(interior_subset ht).1, le_trans (interior_subset ht).2 hu.2⟩).1
+  have hlo : 0 ≤ s u := by
+    have hle := hmono ⟨le_rfl, hu.1⟩ ⟨hu.1, le_rfl⟩ hu.1
+    simpa [hs0] using hle
+  have hanti : AntitoneOn (fun t : ℝ => s t - t) (Set.Icc 0 u) := by
+    apply antitoneOn_of_deriv_nonpos (convex_Icc (0 : ℝ) u)
+    · exact ((hs.continuousOn.sub continuousOn_id)).mono (by intro x hx; trivial)
+    · intro t ht
+      have hOn : DifferentiableOn ℝ s (interior (Set.Icc 0 u)) := by
+        intro x hx
+        exact (hs x trivial).mono (by intro y hy; trivial)
+      exact (hOn t ht).sub differentiableAt_id.differentiableWithinAt
+    · intro t ht
+      have hd : deriv (fun t : ℝ => s t - t) t = deriv s t - 1 := by
+        have hsub := deriv_sub ((hs t trivial).differentiableAt Filter.univ_mem) differentiableAt_id
+        simpa using hsub
+      rw [hd]
+      have hb := hs' t ⟨(interior_subset ht).1, le_trans (interior_subset ht).2 hu.2⟩
+      linarith [hb.2]
+  have hup : s u ≤ u := by
+    have hle := hanti ⟨le_rfl, hu.1⟩ ⟨hu.1, le_rfl⟩ hu.1
+    dsimp at hle
+    have hg0 : s 0 - 0 = 0 := by rw [hs0]; norm_num
+    linarith
+  exact ⟨hlo, le_trans hup hu.2⟩
+
+theorem exists_relDiffeomorph_sublevel_of_regularFamily
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
+    [FiniteDimensional ℝ (MorseModel (m + 1))] [CompleteSpace (MorseModel (m + 1))]
+    (F : M → ℝ → ℝ)
+    (hF : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => F q.1 q.2))
+    (ε₀ : ℝ) (hε₀ : 0 < ε₀)
+    (hstrip : IsCompact {q : M × ℝ | |F q.1 q.2| ≤ 2 * ε₀ ∧ q.2 ∈ Set.Icc 0 1})
+    (hreg : ∀ q : M × ℝ, |F q.1 q.2| ≤ 2 * ε₀ → q.2 ∈ Set.Icc 0 1 →
+      ¬ IsCriticalPointAt I (fun x : M => F x q.2) q.1)
+    (hsupp : IsCompact (tsupport (fun q : M × ℝ => (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1)))
+    (D : Set M) (hDfix : ∀ x : M, x ∈ D → ∀ s : ℝ, F x s = F x 0)
+    (hDdeep0 : ∀ x : M, F x 0 ≤ -(2 * ε₀) → x ∈ D)
+    (hDdeep1 : ∀ x : M, F x 1 ≤ -(2 * ε₀) → x ∈ D) :
+    ∃ (Φ Ψ : M → M),
+      ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞) Φ ∧
+      ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞) Ψ ∧
+      (∀ x : M, x ∈ D → Φ x = x ∧ Ψ x = x) ∧
+      (∀ x : M, F x 0 ≤ 0 → F (Φ x) 1 ≤ 0) ∧
+      (∀ y : M, F y 1 ≤ 0 → F (Ψ y) 0 ≤ 0) ∧
+      (∀ x : M, F x 0 ≤ 0 → Ψ (Φ x) = x) ∧
+      (∀ y : M, F y 1 ≤ 0 → Φ (Ψ y) = y) := by
+  classical
+  let K : Set (M × ℝ) := {q : M × ℝ | |F q.1 q.2| ≤ 2 * ε₀ ∧ q.2 ∈ Set.Icc 0 1}
+  have hK : IsCompact K := hstrip
+  have hKreg : ∀ p ∈ K, ¬ IsCriticalPointAt I (fun x : M => F x p.2) p.1 := by
+    intro p hp
+    exact hreg p hp.1 hp.2
+  rcases exists_unitSpeedFamilyVectorField_on_compact I F hF K hK hKreg with
+    ⟨V, hVsec, hVsupp, hVdf, hVdfbdd⟩
+  have hdt : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) :=
+    familyTimeDeriv_contMDiff (I := I) F hF
+  let w : (x : M) → (s : ℝ) → TangentSpace I x := fun x s =>
+    ((fderiv ℝ (fun t : ℝ => F x t) s) 1) • V x s
+  have hwsec : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, w q.1 q.2⟩ : TangentBundle I M)) := by
+    exact familyTangentSection_smul_of_tsupport (I := I) (W := V)
+      (ψ := fun q => (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) (u := Set.univ)
+      (by intro q hq; exact hdt q) isOpen_univ (by simp) (by intro q hq; exact hVsec q)
+  have hwsupp : IsCompact (tsupport (fun q : M × ℝ => w q.1 q.2)) := by
+    have hsub : tsupport (fun q : M × ℝ => w q.1 q.2) ⊆
+        tsupport (fun q : M × ℝ => (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) := by
+      refine closure_mono ?_
+      intro q hq
+      dsimp [w] at hq
+      by_contra hder
+      have hder' : (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1 = 0 := by
+        exact not_not.mp hder
+      exact hq (by
+        simp [hder']
+        rfl)
+    exact hsupp.of_isClosed_subset (isClosed_tsupport _) hsub
+  have hKcl : IsClosed K := hK.isClosed
+  haveI : LocallyCompactSpace H := I.locallyCompactSpace
+  haveI : LocallyCompactSpace M := ChartedSpace.locallyCompactSpace H M
+  rcases exists_open_between_and_isCompact_closure hK isOpen_univ (subset_univ K)
+    with ⟨U₀, hU₀open, hKU₀, hU₀cl, hU₀compact⟩
+  rcases SmoothPartitionOfUnity.exists_isSubordinate (I := I.prod 𝓘(ℝ, ℝ)) (s := K)
+    (U := fun i : Fin 2 => if i = 0 then U₀ else (Set.compl K)) (hs := hKcl)
+    (ho := by
+      intro i
+      by_cases hi : i = 0
+      · have hopen : IsOpen U₀ := hU₀open
+        simpa [hi] using hopen
+      · have hopen : IsOpen (Set.compl K) := hKcl.isOpen_compl
+        simpa [hi] using hopen)
+    (hU := by
+      intro q hq
+      refine Set.mem_iUnion.mpr ?_
+      exact ⟨0, by simpa using hKU₀ hq⟩) with ⟨ρ, hρsub⟩
+  let χ : M × ℝ → ℝ := ρ 0
+  have hχsm : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χ := by
+    exact (ρ 0).property
+  have hχ01 : ∀ q : M × ℝ, χ q ∈ Set.Icc 0 1 := by
+    intro q
+    dsimp [χ]
+    constructor
+    · exact ρ.nonneg 0 q
+    · have hsum01 : (∑ᶠ i : Fin 2, ρ i q) = ρ 0 q + ρ 1 q := by
+        rw [finsum_eq_sum_of_fintype]
+        simp
+      have hle : ρ 0 q ≤ (∑ᶠ i : Fin 2, ρ i q) := by
+        rw [hsum01]
+        exact le_add_of_nonneg_right (ρ.nonneg 1 q)
+      exact le_trans hle (ρ.sum_le_one q)
+  have hχK : ∀ q ∈ K, χ q = 1 := by
+    intro q hq
+    dsimp [χ]
+    have hsum : (∑ᶠ i : Fin 2, ρ i q) = 1 := ρ.sum_eq_one hq
+    have hρ1 : ρ 1 q = 0 := by
+      have hts : q ∉ tsupport (ρ 1) := by
+        intro ht
+        have hsub := hρsub 1 ht
+        have hsub' : q ∈ Set.compl K := by simpa using hsub
+        have hqnot : q ∉ Set.compl K := by
+          intro hc
+          exact (by simpa [Set.mem_compl_iff] using hc : q ∉ K) hq
+        exact False.elim (hqnot hsub')
+      exact image_eq_zero_of_notMem_tsupport hts
+    have hfin : (∑ᶠ i : Fin 2, ρ i q) = ρ 0 q + ρ 1 q := by
+      rw [finsum_eq_sum_of_fintype]
+      simp
+    rw [hfin, hρ1] at hsum
+    linarith
+  have hχsupp : IsCompact (tsupport χ) := by
+    have hts : tsupport χ ⊆ closure U₀ := by
+      exact (hρsub 0).trans subset_closure
+    exact hU₀compact.of_isClosed_subset (isClosed_tsupport χ) hts
+  let Vsusp : (q : M × ℝ) → TangentSpace (I.prod 𝓘(ℝ, ℝ)) q := fun q =>
+    (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) q from (χ q • w q.1 q.2, χ q))
+  have hVsuspsec : ContMDiff (I.prod 𝓘(ℝ, ℝ)) ((I.prod 𝓘(ℝ, ℝ)).prod 𝓘(ℝ, (MorseModel (m + 1)) × ℝ))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q, Vsusp q⟩ : TangentBundle (I.prod 𝓘(ℝ, ℝ)) (M × ℝ))) := by
+    exact suspensionSection_smul_contMDiff (I := I) (W := w) (α := χ) hwsec hχsm
+  have hVsuspsupp : IsCompact (tsupport Vsusp) := by
+    have hsub : tsupport Vsusp ⊆ tsupport χ := by
+      refine closure_mono ?_
+      intro q hq
+      dsimp [Vsusp] at hq
+      by_contra hχ0
+      have hχ0' : χ q = 0 := by
+        exact not_not.mp hχ0
+      exact hq (by
+        simp [hχ0']
+        rfl)
+    exact hχsupp.of_isClosed_subset (isClosed_tsupport Vsusp) hsub
+  have hcomplete : ∀ p : M × ℝ, ∃ γ : ℝ → M × ℝ, γ 0 = p ∧ IsMIntegralCurve γ Vsusp :=
+    exists_globalIntegralCurve_of_compactSupport Vsusp hVsuspsec hVsuspsupp
+  have hflowsm : ContMDiff (𝓘(ℝ, ℝ).prod (I.prod 𝓘(ℝ, ℝ))) (I.prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun p : ℝ × (M × ℝ) => curveAt Vsusp hcomplete p.2 p.1) :=
+    contMDiff_globalFlow_joint_of_compactSupport Vsusp hVsuspsec hVsuspsupp
+  let Φ : M → M := fun x => (curveAt Vsusp hcomplete (x, 0) 1).1
+  let Ψ : M → M := fun y => (curveAt Vsusp hcomplete (y, 1) (-1)).1
+  have hVsuspχ : ∀ q : M × ℝ, (Vsusp q).2 = χ q := by
+    intro q
+    simp [Vsusp]
+  have hsnd_deriv : ∀ (p : M × ℝ) (u : ℝ), HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ)
+      (fun t : ℝ => (curveAt Vsusp hcomplete p t).2) u
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (χ (curveAt Vsusp hcomplete p u))) := by
+    intro p u
+    have hc : HasMFDerivAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Prod.snd (curveAt Vsusp hcomplete p u)
+        (ContinuousLinearMap.snd ℝ (TangentSpace I (curveAt Vsusp hcomplete p u).1)
+          (TangentSpace 𝓘(ℝ, ℝ) (curveAt Vsusp hcomplete p u).2) :
+          TangentSpace (I.prod 𝓘(ℝ, ℝ)) (curveAt Vsusp hcomplete p u) →L[ℝ]
+          TangentSpace 𝓘(ℝ, ℝ) (curveAt Vsusp hcomplete p u).2) := by
+      exact hasMFDerivAt_snd (x := curveAt Vsusp hcomplete p u)
+    have hγu : HasMFDerivAt 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) (curveAt Vsusp hcomplete p) u
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Vsusp (curveAt Vsusp hcomplete p u))) := by
+      exact curveAt_integralCurve Vsusp hcomplete p u
+    have hcomp := hc.comp u hγu
+    rw [hasMFDerivAt_iff_hasFDerivAt] at hcomp
+    have hderiv_eq : (ContinuousLinearMap.snd ℝ (TangentSpace I (curveAt Vsusp hcomplete p u).1)
+          (TangentSpace 𝓘(ℝ, ℝ) (curveAt Vsusp hcomplete p u).2)).comp
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Vsusp (curveAt Vsusp hcomplete p u))) =
+        (1 : ℝ →L[ℝ] ℝ).smulRight (χ (curveAt Vsusp hcomplete p u)) := by
+      apply ContinuousLinearMap.ext
+      intro z
+      change (z • Vsusp (curveAt Vsusp hcomplete p u)).2 = z • χ (curveAt Vsusp hcomplete p u)
+      change (z • (χ (curveAt Vsusp hcomplete p u) • w (curveAt Vsusp hcomplete p u).1 (curveAt Vsusp hcomplete p u).2,
+        χ (curveAt Vsusp hcomplete p u))).2 = z • χ (curveAt Vsusp hcomplete p u)
+      simp
+    have hcomp' : HasFDerivAt (fun t : ℝ => (curveAt Vsusp hcomplete p t).2)
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (χ (curveAt Vsusp hcomplete p u))) u := by
+      exact hcomp.congr_fderiv hderiv_eq
+    exact hcomp'.hasMFDerivAt
+  have hsderiv : ∀ (p : M × ℝ) (u : ℝ),
+      deriv (fun t : ℝ => (curveAt Vsusp hcomplete p t).2) u = χ (curveAt Vsusp hcomplete p u) := by
+    intro p u
+    have hd := hsnd_deriv p u
+    rw [hasMFDerivAt_iff_hasFDerivAt] at hd
+    rw [hd.hasDerivAt.deriv]
+    change (1 : ℝ) • χ (curveAt Vsusp hcomplete p u) = χ (curveAt Vsusp hcomplete p u)
+    simp
+  have hs01 : ∀ (x : M) (u : ℝ), u ∈ Set.Icc 0 1 →
+      (curveAt Vsusp hcomplete (x, 0) u).2 ∈ Set.Icc 0 1 := by
+    intro x u hu
+    let s : ℝ → ℝ := fun t => (curveAt Vsusp hcomplete (x, 0) t).2
+    apply snd_range_of_deriv_unit (s := s)
+    · intro t ht
+      exact (hsnd_deriv (x, 0) t).hasFDerivAt.differentiableAt.differentiableWithinAt
+    · dsimp [s]
+      rw [curveAt_zero Vsusp hcomplete (x, 0)]
+    · intro t ht
+      rw [hsderiv (x, 0) t]
+      exact hχ01 (curveAt Vsusp hcomplete (x, 0) t)
+    · exact hu
+  have hΦsm : ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞) Φ := by
+    intro x₀
+    have hpair : ContMDiffAt I (𝓘(ℝ, ℝ).prod (I.prod 𝓘(ℝ, ℝ))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun x : M => ((1 : ℝ), (x, (0 : ℝ)))) x₀ := by
+      exact ContMDiffAt.prodMk (contMDiffAt_const (c := (1 : ℝ)) (x := x₀))
+        (ContMDiffAt.prodMk (contMDiffAt_id (x := x₀)) (contMDiffAt_const (c := (0 : ℝ)) (x := x₀)))
+    have hc := (hflowsm (1, (x₀, (0 : ℝ)))).comp x₀ hpair
+    have hfst : ContMDiffAt (I.prod 𝓘(ℝ, ℝ)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun p : M × ℝ => p.1) (curveAt Vsusp hcomplete (x₀, 0) 1) := contMDiffAt_fst
+    have hΦat : ContMDiffAt I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun x : M => (curveAt Vsusp hcomplete (x, 0) 1).1) x₀ := by
+      have hc' : ContMDiffAt I (I.prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun x : M => curveAt Vsusp hcomplete (x, 0) 1) x₀ := by
+        simpa [Function.comp_def] using hc
+      exact hfst.comp x₀ hc'
+    simpa [Φ] using hΦat
+  have hΨsm : ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞) Ψ := by
+    intro y₀
+    have hpair : ContMDiffAt I (𝓘(ℝ, ℝ).prod (I.prod 𝓘(ℝ, ℝ))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun y : M => ((-1 : ℝ), (y, (1 : ℝ)))) y₀ := by
+      exact ContMDiffAt.prodMk (contMDiffAt_const (c := (-1 : ℝ)) (x := y₀))
+        (ContMDiffAt.prodMk (contMDiffAt_id (x := y₀)) (contMDiffAt_const (c := (1 : ℝ)) (x := y₀)))
+    have hc := (hflowsm (-1, (y₀, (1 : ℝ)))).comp y₀ hpair
+    have hfst : ContMDiffAt (I.prod 𝓘(ℝ, ℝ)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun p : M × ℝ => p.1) (curveAt Vsusp hcomplete (y₀, 1) (-1)) := contMDiffAt_fst
+    have hΨat : ContMDiffAt I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun y : M => (curveAt Vsusp hcomplete (y, 1) (-1)).1) y₀ := by
+      have hc' : ContMDiffAt I (I.prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun y : M => curveAt Vsusp hcomplete (y, 1) (-1)) y₀ := by
+        simpa [Function.comp_def] using hc
+      exact hfst.comp y₀ hc'
+    simpa [Ψ] using hΨat
+  have hVsuspdf : ∀ q ∈ K, (NormedSpace.fromTangentSpace (F q.1 q.2))
+      ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun x : M × ℝ => F x.1 x.2) q)
+        (Vsusp q)) = 0 := by
+    intro q hq
+    have hdF : (NormedSpace.fromTangentSpace (F q.1 q.2))
+        ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (V q.1 q.2)) = -1 :=
+      hVdf q hq
+    have hlev := suspension_level_equation (I := I) F hF q.1 q.2
+      (χ q • w q.1 q.2) (χ q)
+    have hwdef : w q.1 q.2 = ((fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) • V q.1 q.2 := rfl
+    have hterm1 : (mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (χ q • w q.1 q.2) =
+        -((fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) * χ q := by
+      rw [hwdef]
+      rw [smul_smul]
+      rw [map_smul]
+      have hcast : (mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (V q.1 q.2) = -1 := by
+        change (NormedSpace.fromTangentSpace (F q.1 q.2))
+          ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (V q.1 q.2)) = -1
+        exact hdF
+      rw [hcast]
+      have hsmul : (χ q * (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) •
+          (-1 : TangentSpace 𝓘(ℝ, ℝ) (F q.1 q.2)) =
+          -((χ q * (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) :
+            TangentSpace 𝓘(ℝ, ℝ) (F q.1 q.2)) := by
+        calc
+          (χ q * (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) •
+              (-1 : TangentSpace 𝓘(ℝ, ℝ) (F q.1 q.2))
+              = -((χ q * (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) •
+                  (1 : TangentSpace 𝓘(ℝ, ℝ) (F q.1 q.2))) := by
+                rw [smul_neg]
+          _ = -((χ q * (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) :
+              TangentSpace 𝓘(ℝ, ℝ) (F q.1 q.2)) := by
+                congr 1
+                change (χ q * (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) • (1 : ℝ) =
+                  (χ q * (fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1 : ℝ)
+                rw [smul_eq_mul]
+                ring
+      rw [hsmul]
+      ring_nf
+    have hlev' : (NormedSpace.fromTangentSpace (F q.1 q.2))
+        ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun x : M × ℝ => F x.1 x.2) q) (Vsusp q)) =
+        (NormedSpace.fromTangentSpace (F q.1 q.2))
+          ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (χ q • w q.1 q.2)) +
+        ((fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) * χ q := by
+      dsimp [Vsusp]
+      exact hlev
+    rw [hlev']
+    have hval1 : (NormedSpace.fromTangentSpace (F q.1 q.2))
+        ((mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (χ q • w q.1 q.2)) =
+        -((fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) * χ q := by
+      change (mfderiv I 𝓘(ℝ, ℝ) (fun x : M => F x q.2) q.1) (χ q • w q.1 q.2) =
+        -((fderiv ℝ (fun t : ℝ => F q.1 t) q.2) 1) * χ q
+      exact hterm1
+    rw [hval1]
+    ring_nf
+  have hscmdiff : ∀ (p : M × ℝ),
+      DifferentiableOn ℝ (fun t : ℝ => (curveAt Vsusp hcomplete p t).2) Set.univ := by
+    intro p t ht
+    exact (hsnd_deriv p t).hasFDerivAt.differentiableAt.differentiableWithinAt
+  have hwD : ∀ x : M, x ∈ D → ∀ s : ℝ, w x s = 0 := by
+    intro x hxD s
+    dsimp [w]
+    have hconst : (fun t : ℝ => F x t) =ᶠ[nhds s] (fun _ : ℝ => F x 0) := by
+      filter_upwards [Filter.univ_mem] with q hq
+      exact hDfix x hxD q
+    have hderiv : fderiv ℝ (fun t : ℝ => F x t) s = 0 := by
+      rw [hconst.fderiv_eq]
+      simp
+    simp [hderiv]
+  have hscalarcomplete : ∀ (x : M) (s₀ : ℝ),
+      ∃ σ : ℝ → ℝ, σ 0 = s₀ ∧ IsMIntegralCurve (I := 𝓘(ℝ, ℝ)) (M := ℝ) (E := ℝ) (H := ℝ)
+        σ (fun s : ℝ => (χ (x, s) : TangentSpace 𝓘(ℝ, ℝ) s)) := by
+    intro x s₀
+    have hσsupp : IsCompact (tsupport (fun s : ℝ => χ (x, s))) := by
+      have hsub : tsupport (fun s : ℝ => χ (x, s)) ⊆ (Prod.snd '' tsupport χ) := by
+        intro s hs
+        have hcl : closure ((fun t : ℝ => (x, t)) ⁻¹' {q : M × ℝ | χ q ≠ 0}) ⊆
+            (fun t : ℝ => (x, t)) ⁻¹' closure {q : M × ℝ | χ q ≠ 0} := by
+          exact (by fun_prop : Continuous (fun t : ℝ => (x, t))).closure_preimage_subset _
+        have hm : s ∈ (fun t : ℝ => (x, t)) ⁻¹' closure {q : M × ℝ | χ q ≠ 0} := hcl (by
+          simpa [tsupport, Function.support] using hs)
+        exact ⟨(x, s), by simpa using hm, rfl⟩
+      exact (hχsupp.image continuous_snd).of_isClosed_subset (isClosed_tsupport _) hsub
+    have hvσ : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun s : ℝ => (⟨s, (χ (x, s) : TangentSpace 𝓘(ℝ, ℝ) s)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+      intro s
+      rw [Bundle.contMDiffAt_totalSpace]
+      constructor
+      · exact contMDiffAt_id
+      · have heq : ∀ t : ℝ, (trivializationAt ℝ (TangentSpace 𝓘(ℝ, ℝ)) s
+            (⟨t, (χ (x, t) : TangentSpace 𝓘(ℝ, ℝ) t)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)).2 = χ (x, t) := by
+          intro t
+          simp
+        have hslice : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+            (fun t : ℝ => χ (x, t)) s := by
+          have hpair : ContMDiffAt 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+              (fun t : ℝ => (x, t)) s := by
+            exact ContMDiffAt.prodMk (contMDiffAt_const (c := x) (x := s)) (contMDiffAt_id (x := s))
+          exact (hχsm (x, s)).comp s hpair
+        exact hslice.congr_of_eventuallyEq (Filter.Eventually.of_forall heq)
+    exact exists_globalIntegralCurve_of_compactSupport (I := 𝓘(ℝ, ℝ)) (M := ℝ) (E := ℝ) (H := ℝ)
+      (fun s : ℝ => (χ (x, s) : TangentSpace 𝓘(ℝ, ℝ) s)) hvσ hσsupp s₀
+  have hDfixflow : ∀ x : M, x ∈ D → ∀ s₀ t : ℝ, (curveAt Vsusp hcomplete (x, s₀) t).1 = x := by
+    intro x hxD s₀ t
+    rcases hscalarcomplete x s₀ with ⟨σ, hσ0, hσIs⟩
+    let c : ℝ → M × ℝ := fun u => (x, σ u)
+    have hcIs : IsMIntegralCurve c Vsusp := by
+      intro u
+      have hfst0 : HasMFDerivAt 𝓘(ℝ, ℝ) I (fun _ : ℝ => x) u (0 : ℝ →L[ℝ] TangentSpace I x) := by
+        exact hasMFDerivAt_const (c := x) (x := u)
+      have hsnd' : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) σ u
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (χ (x, σ u))) := hσIs u
+      have hprod := hfst0.prodMk hsnd'
+      have hderiv_eq : ((0 : ℝ →L[ℝ] TangentSpace I x).prod
+            ((1 : ℝ →L[ℝ] ℝ).smulRight (χ (x, σ u)))) =
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Vsusp (c u))) := by
+        apply ContinuousLinearMap.ext
+        intro z
+        change ((0 : ℝ →L[ℝ] TangentSpace I x) z, ((1 : ℝ →L[ℝ] ℝ).smulRight (χ (x, σ u))) z) =
+          z • Vsusp (c u)
+        dsimp [c]
+        change ((0 : TangentSpace I x), z • χ (x, σ u)) = z • Vsusp (x, σ u)
+        dsimp [Vsusp]
+        simp only [hwD x hxD, smul_zero]
+        change ((0 : TangentSpace I x), z • χ (x, σ u)) =
+          (z • (0 : TangentSpace I x), z • χ (x, σ u))
+        simp
+      change HasMFDerivAt 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) (fun u : ℝ => (x, σ u)) u
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Vsusp (c u)))
+      rw [← hderiv_eq]
+      exact hprod
+    let gammaBar : ℝ → M × ℝ := curveAt Vsusp hcomplete (x, s₀)
+    have hgammaBarIs : IsMIntegralCurve gammaBar Vsusp := curveAt_integralCurve Vsusp hcomplete (x, s₀)
+    have hgammaBarInterior : ∀ t : ℝ, (I.prod 𝓘(ℝ, ℝ)).IsInteriorPoint (gammaBar t) := by
+      intro t
+      exact BoundarylessManifold.isInteriorPoint (I := I.prod 𝓘(ℝ, ℝ)) (M := M × ℝ) (x := gammaBar t)
+    have hstart : gammaBar 0 = c 0 := by
+      dsimp [c, gammaBar]
+      rw [curveAt_zero Vsusp hcomplete (x, s₀)]
+      rw [hσ0]
+    have heq : gammaBar = c := by
+      exact isMIntegralCurve_eq_of_contMDiff (t₀ := 0) (I := I.prod 𝓘(ℝ, ℝ))
+        (v := Vsusp) (γ := gammaBar) (γ' := c)
+        (hv := hVsuspsec.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞))
+        hgammaBarInterior hgammaBarIs hcIs hstart
+    change (curveAt Vsusp hcomplete (x, s₀) t).1 = x
+    change (gammaBar t).1 = x
+    rw [show gammaBar = c from heq]
+  have hDfixprop : ∀ x : M, x ∈ D → Φ x = x ∧ Ψ x = x := by
+    intro x hxD
+    constructor
+    · dsimp [Φ]
+      exact hDfixflow x hxD 0 1
+    · dsimp [Ψ]
+      exact hDfixflow x hxD 1 (-1)
+  have hFconst : ∀ (x : M) (u : ℝ), u ∈ Set.Icc 0 1 →
+      F x 0 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) →
+      F (curveAt Vsusp hcomplete (x, 0) u).1 (curveAt Vsusp hcomplete (x, 0) u).2 = F x 0 := by
+    intro x u hu hval0
+    let gammaBar : ℝ → M × ℝ := curveAt Vsusp hcomplete (x, 0)
+    let f : ℝ → ℝ := fun t => F (gammaBar t).1 (gammaBar t).2
+    have hf : DifferentiableOn ℝ f Set.univ := by
+      intro t ht
+      have hpair : ContMDiffAt 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod (I.prod 𝓘(ℝ, ℝ))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun u : ℝ => (u, (x, (0 : ℝ)))) t := by
+        exact ContMDiffAt.prodMk (contMDiffAt_id (x := t)) (contMDiffAt_const (c := (x, (0 : ℝ))) (x := t))
+      have hflowAt : ContMDiffAt (𝓘(ℝ, ℝ).prod (I.prod 𝓘(ℝ, ℝ))) (I.prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun p : ℝ × (M × ℝ) => curveAt Vsusp hcomplete p.2 p.1) (t, (x, 0)) := hflowsm (t, (x, 0))
+      have hγat : ContMDiffAt 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun u : ℝ => curveAt Vsusp hcomplete (x, 0) u) t := by
+        simpa [Function.comp_def] using hflowAt.comp t hpair
+      have hfAt : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f t := by
+        have hc := (hF (gammaBar t)).comp t hγat
+        simpa [f, gammaBar, Function.comp_def] using hc
+      have hmdiff : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) f t :=
+        hfAt.mdifferentiableAt (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
+      exact hmdiff.hasMFDerivAt.hasFDerivAt.differentiableAt.differentiableWithinAt
+    have hfderiv : ∀ t : ℝ, t ∈ Set.Icc 0 1 → f t ∈ Set.Icc (-(2 * ε₀)) (2 * ε₀) → deriv f t = 0 := by
+      intro t ht hft
+      have hcomp := (hF (gammaBar t)).mdifferentiableAt (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0) |>.hasMFDerivAt.comp t (curveAt_integralCurve Vsusp hcomplete (x, 0) t)
+      have hd : deriv f t = (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)) (Vsusp (gammaBar t)) := by
+        have hfd : HasFDerivAt f ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)).comp
+            ((1 : ℝ →L[ℝ] ℝ).smulRight (Vsusp (gammaBar t)))) t := hcomp.hasFDerivAt
+        rw [hfd.hasDerivAt.deriv]
+        change (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t))
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Vsusp (gammaBar t)) 1) =
+          (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)) (Vsusp (gammaBar t))
+        simp
+      rw [hd]
+      have hs01t : (gammaBar t).2 ∈ Set.Icc 0 1 := hs01 x t ht
+      have hKmem : gammaBar t ∈ K := ⟨abs_le.mpr ⟨hft.1, hft.2⟩, hs01t⟩
+      have hzero : (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)) (Vsusp (gammaBar t)) = 0 := by
+        exact hVsuspdf (gammaBar t) hKmem
+      exact hzero
+    have hf0 : f 0 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) := by
+      dsimp [f, gammaBar]
+      rw [curveAt_zero Vsusp hcomplete (x, 0)]
+      exact hval0
+    have hmain : f u = f 0 :=
+      sublevel_const_of_deriv_eq_zero_on_unit hf (by positivity : (0 : ℝ) < 2 * ε₀) hf0 hfderiv u hu
+    change F (curveAt Vsusp hcomplete (x, 0) u).1 (curveAt Vsusp hcomplete (x, 0) u).2 = F x 0
+    rw [show F (curveAt Vsusp hcomplete (x, 0) u).1 (curveAt Vsusp hcomplete (x, 0) u).2 = f u by rfl]
+    rw [show F x 0 = f 0 by
+      dsimp [f, gammaBar]
+      rw [curveAt_zero Vsusp hcomplete (x, 0)]]
+    exact hmain
+  have hs1 : ∀ (x : M), F x 0 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) →
+      (curveAt Vsusp hcomplete (x, 0) 1).2 = 1 := by
+    intro x hval0
+    let s : ℝ → ℝ := fun t => (curveAt Vsusp hcomplete (x, 0) t).2
+    apply eq_self_of_deriv_one_on_unit (φ := s)
+    · exact hscmdiff (x, 0)
+    · intro t ht
+      have hconstt := hFconst x t ht hval0
+      have hs01t : (curveAt Vsusp hcomplete (x, 0) t).2 ∈ Set.Icc 0 1 := hs01 x t ht
+      have hKmem : curveAt Vsusp hcomplete (x, 0) t ∈ K := by
+        dsimp [K]
+        constructor
+        · rw [hconstt]
+          exact abs_le.mpr ⟨le_of_lt hval0.1, le_of_lt hval0.2⟩
+        · exact hs01t
+      rw [hsderiv (x, 0) t]
+      rw [hχK (curveAt Vsusp hcomplete (x, 0) t) hKmem]
+    · dsimp [s]
+      rw [curveAt_zero Vsusp hcomplete (x, 0)]
+  have hsub_fwd : ∀ x : M, F x 0 ≤ 0 → F (Φ x) 1 ≤ 0 := by
+    intro x hx
+    by_cases hdeep : F x 0 ≤ -(2 * ε₀)
+    · have hxD : x ∈ D := hDdeep0 x hdeep
+      have hfix := (hDfixprop x hxD).1
+      rw [hfix]
+      rw [hDfix x hxD 1]
+      exact hx
+    · have hval0 : F x 0 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) := by
+        constructor
+        · exact lt_of_not_ge hdeep
+        · exact lt_of_le_of_lt hx (by linarith [hε₀])
+      have hconst := hFconst x 1 (by norm_num) hval0
+      have hγ1 : curveAt Vsusp hcomplete (x, 0) 1 = (Φ x, 1) := by
+        ext <;> simp [Φ, hs1 x hval0]
+      have hΦ : F (Φ x) 1 = F x 0 := by
+        change (fun q : M × ℝ => F q.1 q.2) (Φ x, 1) = F x 0
+        rw [← hγ1]
+        exact hconst
+      rw [hΦ]
+      exact hx
+  have hinv_fwd : ∀ x : M, F x 0 ≤ 0 → Ψ (Φ x) = x := by
+    intro x hx
+    by_cases hdeep : F x 0 ≤ -(2 * ε₀)
+    · have hxD : x ∈ D := hDdeep0 x hdeep
+      rw [(hDfixprop x hxD).1]
+      exact (hDfixprop x hxD).2
+    · have hval0 : F x 0 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) := by
+        constructor
+        · exact lt_of_not_ge hdeep
+        · exact lt_of_le_of_lt hx (by linarith [hε₀])
+      have hγ1 : curveAt Vsusp hcomplete (x, 0) 1 = (Φ x, 1) := by
+        ext <;> simp [Φ, hs1 x hval0]
+      have hγ0 : curveAt Vsusp hcomplete (x, 0) 0 = (x, 0) := curveAt_zero Vsusp hcomplete (x, 0)
+      have hgrp : curveAt Vsusp hcomplete (curveAt Vsusp hcomplete (x, 0) 1) (-1) = curveAt Vsusp hcomplete (x, 0) 0 := by
+        rw [← curveAt_add Vsusp (hVsuspsec.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)) hcomplete (x, 0) 1 (-1)]
+        norm_num
+      rw [hγ1] at hgrp
+      rw [hγ0] at hgrp
+      dsimp [Ψ]
+      simpa using congrArg Prod.fst hgrp
+  have hsback : ∀ (y : M) (u : ℝ), u ∈ Set.Icc 0 1 →
+      (curveAt Vsusp hcomplete (y, 1) (-u)).2 ∈ Set.Icc 0 1 := by
+    intro y u hu
+    let s : ℝ → ℝ := fun t => 1 - (curveAt Vsusp hcomplete (y, 1) (-t)).2
+    have hs0 : s 0 = 0 := by
+      dsimp [s]
+      norm_num
+      rw [curveAt_zero Vsusp hcomplete (y, 1)]
+      norm_num
+    have hsd : ∀ t : ℝ, t ∈ Set.Icc 0 1 → deriv s t ∈ Set.Icc 0 1 := by
+      intro t ht
+      have hdneg : deriv (fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) (-v)).2) t =
+          -deriv (fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) v).2) (-t) := by
+        exact deriv_comp_neg (f := fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) v).2) (x := t)
+      have hdcomp : deriv s t = -deriv (fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) (-v)).2) t := by
+        dsimp [s]
+        rw [deriv_const_sub (c := (1 : ℝ))
+          (f := fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) (-v)).2)]
+      rw [hdcomp, hdneg]
+      rw [hsderiv (y, 1) (-t)]
+      simpa using hχ01 (curveAt Vsusp hcomplete (y, 1) (-t))
+    have hsmain := snd_range_of_deriv_unit (s := s) (by
+      intro t ht
+      have hc : DifferentiableWithinAt ℝ (fun t : ℝ => (curveAt Vsusp hcomplete (y, 1) t).2) univ (-t) :=
+        (hsnd_deriv (y, 1) (-t)).hasFDerivAt.differentiableAt.differentiableWithinAt (s := univ)
+      have hneg : DifferentiableWithinAt ℝ (fun v : ℝ => -v) univ t := differentiableWithinAt_id.neg
+      have hsub : MapsTo (fun v : ℝ => -v) univ univ := by intro z hz; trivial
+      have hcomp : DifferentiableWithinAt ℝ (fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) (-v)).2) univ t :=
+        DifferentiableWithinAt.comp (𝕜 := ℝ) (E := ℝ) (F := ℝ) (G := ℝ)
+          (f := fun v : ℝ => -v) (g := fun t : ℝ => (curveAt Vsusp hcomplete (y, 1) t).2)
+          (s := univ) (t := univ) t hc hneg hsub
+      exact DifferentiableWithinAt.sub (differentiableWithinAt_const (c := (1 : ℝ)) (x := t)) hcomp
+      ) hs0 hsd u hu
+    have hs01u : s u ∈ Set.Icc 0 1 := hsmain
+    dsimp [s] at hs01u
+    constructor
+    · linarith [hs01u.2]
+    · linarith [hs01u.1]
+  have hFconstBack : ∀ (y : M) (u : ℝ), u ∈ Set.Icc 0 1 →
+      F y 1 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) →
+      F (curveAt Vsusp hcomplete (y, 1) (-u)).1 (curveAt Vsusp hcomplete (y, 1) (-u)).2 = F y 1 := by
+    intro y u hu hval0
+    let gammaBar : ℝ → M × ℝ := fun t => curveAt Vsusp hcomplete (y, 1) (-t)
+    let f : ℝ → ℝ := fun t => F (gammaBar t).1 (gammaBar t).2
+    have hf : DifferentiableOn ℝ f Set.univ := by
+      intro t ht
+      have hcomp := (hF (gammaBar t)).mdifferentiableAt (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0) |>.hasMFDerivAt.comp (-t) (curveAt_integralCurve Vsusp hcomplete (y, 1) (-t))
+      have hneg : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s : ℝ => -s) t (-1 : ℝ →L[ℝ] ℝ) := by
+        have hneg' : HasFDerivAt (fun s : ℝ => -s) (-1 : ℝ →L[ℝ] ℝ) t := by
+          exact (hasFDerivAt_id t).neg
+        exact hneg'.hasMFDerivAt
+      exact (hcomp.comp t hneg).hasFDerivAt.differentiableAt.differentiableWithinAt
+    have hfderiv : ∀ t : ℝ, t ∈ Set.Icc 0 1 → f t ∈ Set.Icc (-(2 * ε₀)) (2 * ε₀) → deriv f t = 0 := by
+      intro t ht hft
+      have hcomp := (hF (gammaBar t)).mdifferentiableAt (by norm_num : (↑(⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0) |>.hasMFDerivAt.comp (-t) (curveAt_integralCurve Vsusp hcomplete (y, 1) (-t))
+      have hd : deriv f t = -(mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)) (Vsusp (gammaBar t)) := by
+        have hneg : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s : ℝ => -s) t (-1 : ℝ →L[ℝ] ℝ) := by
+          exact (hasFDerivAt_id t).neg |>.hasMFDerivAt
+        have hchain := hcomp.comp t hneg
+        have hfd : HasFDerivAt f (((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)).comp
+            ((1 : ℝ →L[ℝ] ℝ).smulRight (Vsusp (gammaBar t)))).comp (-1 : ℝ →L[ℝ] ℝ)) t := by
+          exact hchain.hasFDerivAt
+        rw [hfd.hasDerivAt.deriv]
+        change ((((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)).comp
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (Vsusp (gammaBar t)))).comp (-1 : ℝ →L[ℝ] ℝ)) 1) =
+          -(mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)) (Vsusp (gammaBar t))
+        simp
+      rw [hd]
+      have hsbackt : (gammaBar t).2 ∈ Set.Icc 0 1 := hsback y t ht
+      have hKmem : gammaBar t ∈ K := ⟨abs_le.mpr ⟨hft.1, hft.2⟩, hsbackt⟩
+      have hzneg : -((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => F q.1 q.2) (gammaBar t)) (Vsusp (gammaBar t))) = 0 := by
+        simpa using congrArg Neg.neg (hVsuspdf (gammaBar t) hKmem)
+      exact hzneg
+    simpa [f, gammaBar, curveAt_zero Vsusp hcomplete (y, 1)] using
+      sublevel_const_of_deriv_eq_zero_on_unit hf (by positivity : (0 : ℝ) < 2 * ε₀)
+        (by simpa [gammaBar, f, curveAt_zero Vsusp hcomplete (y, 1)] using hval0) hfderiv u hu
+  have hsb1 : ∀ (y : M), F y 1 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) →
+      (curveAt Vsusp hcomplete (y, 1) (-1)).2 = 0 := by
+    intro y hval0
+    let s : ℝ → ℝ := fun t => (curveAt Vsusp hcomplete (y, 1) (-t)).2
+    have hφdiff : DifferentiableOn ℝ (fun t : ℝ => 1 - s t) Set.univ := by
+      intro t ht
+      have hc : DifferentiableWithinAt ℝ (fun t : ℝ => (curveAt Vsusp hcomplete (y, 1) t).2) univ (-t) :=
+        (hsnd_deriv (y, 1) (-t)).hasFDerivAt.differentiableAt.differentiableWithinAt (s := univ)
+      have hcomp : DifferentiableWithinAt ℝ (fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) (-v)).2) univ t :=
+        DifferentiableWithinAt.comp (𝕜 := ℝ) (E := ℝ) (F := ℝ) (G := ℝ)
+          (f := fun v : ℝ => -v) (g := fun t : ℝ => (curveAt Vsusp hcomplete (y, 1) t).2)
+          (s := univ) (t := univ) t hc differentiableWithinAt_id.neg
+          (by intro z hz; trivial)
+      exact DifferentiableWithinAt.sub (differentiableWithinAt_const (c := (1 : ℝ)) (x := t)) hcomp
+    have hφderiv : ∀ t : ℝ, t ∈ Set.Icc 0 1 → deriv (fun t : ℝ => 1 - s t) t = 1 := by
+      intro t ht
+      have hconstt := hFconstBack y t ht hval0
+      have hsbackt : (curveAt Vsusp hcomplete (y, 1) (-t)).2 ∈ Set.Icc 0 1 := hsback y t ht
+      have hKmem : curveAt Vsusp hcomplete (y, 1) (-t) ∈ K := by
+        dsimp [K]
+        constructor
+        · rw [hconstt]
+          exact abs_le.mpr ⟨le_of_lt hval0.1, le_of_lt hval0.2⟩
+        · exact hsbackt
+      have hsd : deriv (fun t : ℝ => (curveAt Vsusp hcomplete (y, 1) (-t)).2) t =
+          -χ (curveAt Vsusp hcomplete (y, 1) (-t)) := by
+        have hdneg : deriv (fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) (-v)).2) t =
+            -deriv (fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) v).2) (-t) := by
+          exact deriv_comp_neg (f := fun v : ℝ => (curveAt Vsusp hcomplete (y, 1) v).2) (x := t)
+        rw [hdneg, hsderiv (y, 1) (-t)]
+      have hd1 : deriv (fun t : ℝ => 1 - s t) t = χ (curveAt Vsusp hcomplete (y, 1) (-t)) := by
+        dsimp [s]
+        rw [deriv_const_sub (c := (1 : ℝ))
+          (f := fun t : ℝ => (curveAt Vsusp hcomplete (y, 1) (-t)).2)]
+        rw [hsd]
+        ring
+      rw [hd1]
+      rw [hχK (curveAt Vsusp hcomplete (y, 1) (-t)) hKmem]
+    have hφ0 : (fun t : ℝ => 1 - s t) 0 = 0 := by
+      change 1 - s 0 = 0
+      dsimp [s]
+      norm_num
+      rw [curveAt_zero Vsusp hcomplete (y, 1)]
+      norm_num
+    have hφ1 : (fun t : ℝ => 1 - s t) 1 = 1 :=
+      eq_self_of_deriv_one_on_unit (φ := fun t : ℝ => 1 - s t) hφdiff hφderiv hφ0
+    dsimp [s] at hφ1
+    linarith
+  have hsub_back : ∀ y : M, F y 1 ≤ 0 → F (Ψ y) 0 ≤ 0 := by
+    intro y hy
+    by_cases hdeep : F y 1 ≤ -(2 * ε₀)
+    · have hyD : y ∈ D := hDdeep1 y hdeep
+      have hfix := (hDfixprop y hyD).2
+      rw [hfix]
+      rw [← hDfix y hyD 1]
+      exact hy
+    · have hval0 : F y 1 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) := by
+        constructor
+        · exact lt_of_not_ge hdeep
+        · exact lt_of_le_of_lt hy (by linarith [hε₀])
+      have hconst := hFconstBack y 1 (by norm_num) hval0
+      have hγ1 : curveAt Vsusp hcomplete (y, 1) (-1) = (Ψ y, 0) := by
+        ext <;> simp [Ψ, hsb1 y hval0]
+      have hΨ : F (Ψ y) 0 = F y 1 := by
+        change (fun q : M × ℝ => F q.1 q.2) (Ψ y, 0) = F y 1
+        rw [← hγ1]
+        exact hconst
+      rw [hΨ]
+      exact hy
+  have hinv_back : ∀ y : M, F y 1 ≤ 0 → Φ (Ψ y) = y := by
+    intro y hy
+    by_cases hdeep : F y 1 ≤ -(2 * ε₀)
+    · have hyD : y ∈ D := hDdeep1 y hdeep
+      rw [(hDfixprop y hyD).2]
+      exact (hDfixprop y hyD).1
+    · have hval0 : F y 1 ∈ Set.Ioo (-(2 * ε₀)) (2 * ε₀) := by
+        constructor
+        · exact lt_of_not_ge hdeep
+        · exact lt_of_le_of_lt hy (by linarith [hε₀])
+      have hγ1 : curveAt Vsusp hcomplete (y, 1) (-1) = (Ψ y, 0) := by
+        ext <;> simp [Ψ, hsb1 y hval0]
+      have hγ0 : curveAt Vsusp hcomplete (y, 1) 0 = (y, 1) := curveAt_zero Vsusp hcomplete (y, 1)
+      have hgrp : curveAt Vsusp hcomplete (curveAt Vsusp hcomplete (y, 1) (-1)) 1 = curveAt Vsusp hcomplete (y, 1) 0 := by
+        rw [← curveAt_add Vsusp (hVsuspsec.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)) hcomplete (y, 1) (-1) 1]
+        norm_num
+      rw [hγ1] at hgrp
+      rw [hγ0] at hgrp
+      dsimp [Φ]
+      simpa using congrArg Prod.fst hgrp
+  refine ⟨Φ, Ψ, hΦsm, hΨsm, hDfixprop, hsub_fwd, hsub_back, hinv_fwd, hinv_back⟩
 
 end
 end DifferentialGeometry.Topology.Morse
