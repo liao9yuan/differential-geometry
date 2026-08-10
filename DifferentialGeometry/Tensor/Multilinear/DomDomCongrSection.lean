@@ -1,5 +1,6 @@
-
-
+/-
+Authors: Jack McCarthy (pattern), extended for slot permutation of smooth sections
+-/
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 
 noncomputable section

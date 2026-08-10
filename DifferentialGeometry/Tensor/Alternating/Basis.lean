@@ -1,5 +1,6 @@
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Auxiliary.Fin
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis

@@ -1,5 +1,6 @@
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Product.Bundle
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 

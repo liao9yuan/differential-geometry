@@ -1,6 +1,6 @@
-
-
-
+/-
+Authors: Jack McCarthy
+-/
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Analysis.Normed.Module.FiniteDimension

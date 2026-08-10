@@ -1,5 +1,6 @@
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 

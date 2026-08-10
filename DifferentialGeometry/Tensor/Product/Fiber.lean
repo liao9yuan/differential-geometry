@@ -1,5 +1,6 @@
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import Mathlib.Topology.VectorBundle.Basic
 

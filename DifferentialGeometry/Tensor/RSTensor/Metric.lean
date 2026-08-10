@@ -1,5 +1,6 @@
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import DifferentialGeometry.Tensor.RSTensor.Defs
