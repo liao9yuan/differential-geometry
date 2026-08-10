@@ -4535,6 +4535,33 @@ theorem modelFlow_norm_lt_of_abs_bound {n k : ℕ} (hk : k ≤ n) (ε : ℝ) (h�
   have hle : 0 ≤ morseNorm n (modelFlow hk t y) := norm_nonneg _
   nlinarith [hsq', hρ', hle, sq_nonneg ρ']
 
+theorem contDiff_modelAttachedUnstretchTime {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hδ : 0 < δ) (hδr : δ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelAttachedUnstretchTime hk ε r δ) := by
+  have hpos : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) :=
+    contDiff_posPart_normSq hk
+  have hneg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) :=
+    contDiff_negPart_normSq hk
+  have hsc : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) :=
+    (smoothCap_contDiff ε r δ).comp hneg
+  have hsc0 : ∀ y : MorseModel n, smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≠ 0 := by
+    intro y
+    exact ne_of_gt (smoothCap_pos (ε := ε) (r := r) (δ := δ)
+      (t := ‖negPart hk y‖ ^ 2) hδ hδr)
+  have hratio : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => (‖negPart hk y‖ ^ 2 + r ^ 2) / smoothCap ε r δ (‖negPart hk y‖ ^ 2)) := by
+    exact (hneg.add (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => r ^ 2))).div hsc hsc0
+  have hone : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (1 : ℝ)) :=
+    (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (1 : ℝ)))
+  have hmain : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n =>
+        ‖posPart hk y‖ ^ 2 * (1 - (‖negPart hk y‖ ^ 2 + r ^ 2) / smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / 2) := by
+    exact ((hpos.mul (hone.sub hratio)).div
+      (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (2 : ℝ)))
+      (fun _ : MorseModel n => (by norm_num : (2 : ℝ) ≠ 0)))
+  simpa [modelAttachedUnstretchTime] using hmain
+
 end CellAttachment
 
 end
