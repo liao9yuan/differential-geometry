@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartLieDerivStructuralDifference
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieMatrixChartBridge
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
-import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeChartFrameIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
 open DifferentialGeometry.Geometry.Operator
 

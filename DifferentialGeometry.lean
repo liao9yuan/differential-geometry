@@ -2244,7 +2244,7 @@ import DifferentialGeometry.Geometry.Flow.DeTurckOperator
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Flow.DeTurckVectorFieldL2JetBoundEndomorphismCometricRaise
-import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeChartFrameIdentity
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricTrace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
@@ -2252,7 +2252,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.RicciNorm
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRHS
-import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRHSSection
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckVFTimeFamily
@@ -2651,7 +2651,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowDataPul
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullbackFlat
-import DifferentialGeometry.Geometry.Flow.RicciFlow.LieDerivativePairing
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.LieDerivativePairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.HeatPotential
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
@@ -2680,7 +2680,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Cancellation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationForm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormProducer
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Formula
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ComponentRestrict
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.Riemann
