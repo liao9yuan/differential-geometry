@@ -107,6 +107,196 @@ private theorem familyChartRep_fderiv_curry
     simpa [g] using (hgdiff.hasFDerivAt.comp y hpair)
   simpa [g] using hfd.fderiv
 
+private theorem family_mfderiv_decomp
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
+    (hF : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => F q.1 q.2)) (x : M) (s : ℝ)
+    (w : TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s)) :
+    (NormedSpace.fromTangentSpace (F x s)) ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ)
+        (fun q : M × ℝ => F q.1 q.2) (x, s)) w) =
+      (NormedSpace.fromTangentSpace (F x s)) ((mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x)
+        ((mfderiv (I.prod 𝓘(ℝ, ℝ)) I (fun q : M × ℝ => q.1) (x, s)) w)) +
+        ((fderiv ℝ (fun t : ℝ => F x t) s) 1) *
+          (NormedSpace.fromTangentSpace (s : ℝ))
+            ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => q.2) (x, s)) w) := by
+  let Fp : M × ℝ → ℝ := fun q => F q.1 q.2
+  let w₁ : TangentSpace I x := (mfderiv (I.prod 𝓘(ℝ, ℝ)) I (fun q : M × ℝ => q.1) (x, s)) w
+  let w₂ : TangentSpace 𝓘(ℝ, ℝ) s := (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => q.2) (x, s)) w
+  let inlMap : M → M × ℝ := fun y => (y, s)
+  let inrMap : ℝ → M × ℝ := fun t => (x, t)
+  have hFp : MDifferentiableAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Fp (x, s) :=
+    (hF (x, s)).mdifferentiableAt (by norm_num)
+  have hπ₁ : MDifferentiableAt (I.prod 𝓘(ℝ, ℝ)) I (fun q : M × ℝ => q.1) (x, s) :=
+    mdifferentiableAt_fst
+  have hπ₂ : MDifferentiableAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (fun q : M × ℝ => q.2) (x, s) :=
+    mdifferentiableAt_snd
+  have hinl : MDifferentiableAt I (I.prod 𝓘(ℝ, ℝ)) inlMap x := by
+    exact (mdifferentiableAt_id.prodMk mdifferentiableAt_const)
+  have hinr : MDifferentiableAt 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) inrMap s := by
+    exact (mdifferentiableAt_const.prodMk mdifferentiableAt_id)
+  have hw₁ : w₁ = (show TangentSpace I x from w.1) := by
+    dsimp [w₁]
+    have hm := mfderiv_fst (𝕜 := ℝ) (E := MorseModel (m + 1)) (H := H) (I := I) (M := M)
+      (E' := ℝ) (H' := ℝ) (I' := 𝓘(ℝ, ℝ)) (M' := ℝ) (x := (x, s))
+    have hv : w = (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (w.1, w.2)) := by
+      rfl
+    rw [hv]
+    rw [show (mfderiv (I.prod 𝓘(ℝ, ℝ)) I Prod.fst (x, s)) =
+        ContinuousLinearMap.fst ℝ (TangentSpace I x) (TangentSpace 𝓘(ℝ, ℝ) s) from hm]
+    change (ContinuousLinearMap.fst ℝ (TangentSpace I x) (TangentSpace 𝓘(ℝ, ℝ) s))
+        (show TangentSpace I x × TangentSpace 𝓘(ℝ, ℝ) s from
+          (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (w.1, w.2))) =
+      (show TangentSpace I x from w.1)
+    change (show TangentSpace I x from w.1) = (show TangentSpace I x from w.1)
+    rfl
+  have hw₂ : w₂ = (show TangentSpace 𝓘(ℝ, ℝ) s from w.2) := by
+    dsimp [w₂]
+    have hm := mfderiv_snd (𝕜 := ℝ) (E := MorseModel (m + 1)) (H := H) (I := I) (M := M)
+      (E' := ℝ) (H' := ℝ) (I' := 𝓘(ℝ, ℝ)) (M' := ℝ) (x := (x, s))
+    have hv : w = (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (w.1, w.2)) := by
+      rfl
+    rw [hv]
+    rw [show (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Prod.snd (x, s)) =
+        ContinuousLinearMap.snd ℝ (TangentSpace I x) (TangentSpace 𝓘(ℝ, ℝ) s) from hm]
+    change (ContinuousLinearMap.snd ℝ (TangentSpace I x) (TangentSpace 𝓘(ℝ, ℝ) s))
+        (show TangentSpace I x × TangentSpace 𝓘(ℝ, ℝ) s from
+          (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (w.1, w.2))) =
+      (show TangentSpace 𝓘(ℝ, ℝ) s from w.2)
+    change (show TangentSpace 𝓘(ℝ, ℝ) s from w.2) = (show TangentSpace 𝓘(ℝ, ℝ) s from w.2)
+    rfl
+  have hinlval : (mfderiv I (I.prod 𝓘(ℝ, ℝ)) inlMap x) w₁ =
+      (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from
+        (w₁, (0 : TangentSpace 𝓘(ℝ, ℝ) s))) := by
+    have hid : MDifferentiableAt I I (fun y : M => y) x := mdifferentiableAt_id
+    have hc : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun _ : M => s) x := mdifferentiableAt_const
+    have hprod := mfderiv_prodMk (hf := hid) (hg := hc)
+    change (mfderiv I (I.prod 𝓘(ℝ, ℝ)) (fun y : M => (y, s)) x) w₁ =
+      (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (w₁, (0 : TangentSpace 𝓘(ℝ, ℝ) s)))
+    rw [hprod]
+    change (((mfderiv I I (fun y : M => y) x) w₁),
+        ((mfderiv I 𝓘(ℝ, ℝ) (fun _ : M => s) x) w₁)) =
+      (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from (w₁, (0 : TangentSpace 𝓘(ℝ, ℝ) s)))
+    have hidv : (mfderiv I I (fun y : M => y) x) w₁ = w₁ := by
+      change ((mfderiv I I (@id M) x) w₁) = w₁
+      rw [show (mfderiv I I (@id M) x) = ContinuousLinearMap.id ℝ (TangentSpace I x) by
+        exact mfderiv_id (𝕜 := ℝ) (E := MorseModel (m + 1)) (H := H) (I := I) (M := M) (x := x)]
+      rfl
+    have hcv : (mfderiv I 𝓘(ℝ, ℝ) (fun _ : M => s) x) w₁ = (0 : TangentSpace 𝓘(ℝ, ℝ) s) := by
+      have hm := mfderiv_const (𝕜 := ℝ) (I := I) (I' := 𝓘(ℝ, ℝ)) (x := x) (c := s)
+      rw [show (mfderiv I 𝓘(ℝ, ℝ) (fun _ : M => s) x) =
+          (0 : TangentSpace I x →L[ℝ] TangentSpace 𝓘(ℝ, ℝ) s) from hm]
+      rfl
+    rw [hidv, hcv]
+    rfl
+  have hinrval : (mfderiv 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) inrMap s) w₂ =
+      (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from
+        ((0 : TangentSpace I x), w₂)) := by
+    have hc : MDifferentiableAt 𝓘(ℝ, ℝ) I (fun _ : ℝ => x) s := mdifferentiableAt_const
+    have hid : MDifferentiableAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => t) s := mdifferentiableAt_id
+    have hprod := mfderiv_prodMk (hf := hc) (hg := hid)
+    change (mfderiv 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) (fun t : ℝ => (x, t)) s) w₂ =
+      (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from ((0 : TangentSpace I x), w₂))
+    rw [hprod]
+    change (((mfderiv 𝓘(ℝ, ℝ) I (fun _ : ℝ => x) s) w₂),
+        ((mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => t) s) w₂)) =
+      (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from ((0 : TangentSpace I x), w₂))
+    have hcv : (mfderiv 𝓘(ℝ, ℝ) I (fun _ : ℝ => x) s) w₂ = (0 : TangentSpace I x) := by
+      have hm := mfderiv_const (𝕜 := ℝ) (I := 𝓘(ℝ, ℝ)) (I' := I) (x := s) (c := x)
+      rw [show (mfderiv 𝓘(ℝ, ℝ) I (fun _ : ℝ => x) s) =
+          (0 : TangentSpace 𝓘(ℝ, ℝ) s →L[ℝ] TangentSpace I x) from hm]
+      rfl
+    have hidv : (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => t) s) w₂ = w₂ := by
+      change ((mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (@id ℝ) s) w₂) = w₂
+      rw [show (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (@id ℝ) s) =
+          ContinuousLinearMap.id ℝ (TangentSpace 𝓘(ℝ, ℝ) s) by
+        exact mfderiv_id (𝕜 := ℝ) (E := ℝ) (H := ℝ) (I := 𝓘(ℝ, ℝ)) (M := ℝ) (x := s)]
+      rfl
+    rw [hcv, hidv]
+    rfl
+  have hsplit : w = (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from
+      (((mfderiv I (I.prod 𝓘(ℝ, ℝ)) inlMap x) w₁) +
+        ((mfderiv 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) inrMap s) w₂))) := by
+    rw [hinlval, hinrval]
+    change w = (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) (x, s) from
+      ((w₁, (0 : TangentSpace 𝓘(ℝ, ℝ) s)) + ((0 : TangentSpace I x), w₂)))
+    rw [hw₁, hw₂]
+    simp
+  have hmain : (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Fp (x, s)) w =
+      (mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) w₁ +
+        (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) w₂ := by
+    rw [hsplit]
+    change (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Fp (x, s))
+        ((mfderiv I (I.prod 𝓘(ℝ, ℝ)) inlMap x) w₁ +
+          (mfderiv 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) inrMap s) w₂) =
+      (mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) w₁ +
+        (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) w₂
+    rw [map_add]
+    have hinlcomp : (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Fp (x, s))
+        ((mfderiv I (I.prod 𝓘(ℝ, ℝ)) inlMap x) w₁) =
+        (mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) w₁ := by
+      have hc := mfderiv_comp (x := x) (g := Fp) (f := inlMap) (hg := hFp) (hf := hinl)
+      have hfun : (Fp ∘ inlMap) = (fun y : M => F y s) := by
+        funext y
+        dsimp [Fp, inlMap]
+      rw [hfun] at hc
+      change ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Fp (x, s)).comp
+          (mfderiv I (I.prod 𝓘(ℝ, ℝ)) inlMap x)) w₁ = (mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) w₁
+      rw [← hc]
+    have hinrcomp : (mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Fp (x, s))
+        ((mfderiv 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) inrMap s) w₂) =
+        (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) w₂ := by
+      have hc := mfderiv_comp (x := s) (g := Fp) (f := inrMap) (hg := hFp) (hf := hinr)
+      have hfun : (Fp ∘ inrMap) = (fun t : ℝ => F x t) := by
+        funext t
+        dsimp [Fp, inrMap]
+      rw [hfun] at hc
+      change ((mfderiv (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) Fp (x, s)).comp
+          (mfderiv 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) inrMap s)) w₂ =
+        (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) w₂
+      rw [← hc]
+    rw [hinlcomp, hinrcomp]
+  have hge : (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) =
+      fderiv ℝ (fun t : ℝ => F x t) s := by
+    exact (mfderiv_eq_fderiv (𝕜 := ℝ) (E := ℝ) (E' := ℝ)
+      (f := fun t : ℝ => F x t) (x := s))
+  rw [hmain]
+  change (NormedSpace.fromTangentSpace (F x s))
+      ((mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) w₁ +
+        (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) w₂) =
+      (NormedSpace.fromTangentSpace (F x s)) ((mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) w₁) +
+        ((fderiv ℝ (fun t : ℝ => F x t) s) 1) *
+          (NormedSpace.fromTangentSpace (s : ℝ)) w₂
+  have hsum : (NormedSpace.fromTangentSpace (F x s))
+      ((mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) w₁ +
+        (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) w₂) =
+      (NormedSpace.fromTangentSpace (F x s)) ((mfderiv I 𝓘(ℝ, ℝ) (fun y : M => F y s) x) w₁) +
+        (NormedSpace.fromTangentSpace (F x s)) ((mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) w₂) := by
+    rw [map_add]
+  rw [hsum]
+  have hlin : (NormedSpace.fromTangentSpace (F x s))
+      ((mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s) w₂) =
+      ((fderiv ℝ (fun t : ℝ => F x t) s) 1) * (NormedSpace.fromTangentSpace (s : ℝ)) w₂ := by
+    have hlin' : (fderiv ℝ (fun t : ℝ => F x t) s) (NormedSpace.fromTangentSpace (s : ℝ) w₂) =
+        ((fderiv ℝ (fun t : ℝ => F x t) s) 1) * (NormedSpace.fromTangentSpace (s : ℝ) w₂) := by
+      calc
+        (fderiv ℝ (fun t : ℝ => F x t) s) (NormedSpace.fromTangentSpace (s : ℝ) w₂)
+            = (fderiv ℝ (fun t : ℝ => F x t) s)
+                ((NormedSpace.fromTangentSpace (s : ℝ) w₂) • (1 : ℝ)) := by
+              rw [smul_eq_mul, mul_one]
+        _ = (NormedSpace.fromTangentSpace (s : ℝ) w₂) •
+            ((fderiv ℝ (fun t : ℝ => F x t) s) 1) := by
+              rw [← (fderiv ℝ (fun t : ℝ => F x t) s).map_smul]
+        _ = ((fderiv ℝ (fun t : ℝ => F x t) s) 1) * (NormedSpace.fromTangentSpace (s : ℝ) w₂) := by
+              rw [smul_eq_mul, mul_comm]
+    change (NormedSpace.fromTangentSpace (F x s))
+        ((mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => F x t) s)
+          (show TangentSpace 𝓘(ℝ, ℝ) s from (NormedSpace.fromTangentSpace (s : ℝ) w₂))) =
+      ((fderiv ℝ (fun t : ℝ => F x t) s) 1) * (NormedSpace.fromTangentSpace (s : ℝ)) w₂
+    rw [hge]
+    exact hlin'
+  rw [hlin]
+
 private theorem familyChartRep_coefficient_contMDiffOn
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
