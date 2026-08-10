@@ -2242,11 +2242,11 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.ZeroSectionConstancy
 import DifferentialGeometry.Geometry.Connection.ConnectionDifference
 import DifferentialGeometry.Geometry.Flow.DeTurckOperator
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
-import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Flow.DeTurckVectorFieldL2JetBoundEndomorphismCometricRaise
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
-import DifferentialGeometry.Geometry.Flow.MetricTrace
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricTrace
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
@@ -2774,8 +2774,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.DeTurckVFSmoot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.FlowVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ForwardFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.InteriorLocalFlow
-import DifferentialGeometry.Geometry.Flow.VectorField
-import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorFieldSmooth
 import DifferentialGeometry.Geometry.Geodesic.AffineReparam
 import DifferentialGeometry.Geometry.Geodesic.ChartRegularity
 import DifferentialGeometry.Geometry.Geodesic.ChartTransitionJacobian

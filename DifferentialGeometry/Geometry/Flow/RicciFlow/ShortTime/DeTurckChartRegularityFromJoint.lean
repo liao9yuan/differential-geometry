@@ -6,7 +6,7 @@ import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
-import DifferentialGeometry.Geometry.Flow.VectorField
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieMatrixChartBridge

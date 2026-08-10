@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
-import DifferentialGeometry.Geometry.Flow.VectorField
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection

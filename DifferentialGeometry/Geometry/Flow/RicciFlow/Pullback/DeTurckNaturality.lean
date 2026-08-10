@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
-import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CovariantDerivativePointwise
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.VectorField
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser

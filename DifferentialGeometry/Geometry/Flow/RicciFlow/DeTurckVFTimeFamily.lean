@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
-import DifferentialGeometry.Geometry.Flow.VectorField
-import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorFieldSmooth
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 open DifferentialGeometry.Geometry.Curvature

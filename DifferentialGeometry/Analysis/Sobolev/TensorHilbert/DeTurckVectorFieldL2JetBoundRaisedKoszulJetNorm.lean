@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMoser
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnectionDifferenceBridge
-import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
 import Mathlib.Analysis.MeanInequalities
 open DifferentialGeometry.Analysis.Sobolev

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.MetricTrace
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricTrace
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
