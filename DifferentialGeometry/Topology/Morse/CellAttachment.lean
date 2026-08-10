@@ -16,6 +16,51 @@ noncomputable section
 
 namespace CellAttachment
 
+namespace Real
+
+open Filter Set Function Polynomial
+
+theorem smoothTransition_deriv_eq {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
+    deriv Real.smoothTransition x =
+      (expNegInvGlue x * expNegInvGlue (1 - x) * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2)) /
+        (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 := by
+  have hE : ∀ x : ℝ, HasDerivAt expNegInvGlue (expNegInvGlue x * x⁻¹ ^ 2) x := by
+    intro y
+    have h := expNegInvGlue.hasDerivAt_polynomial_eval_inv_mul (p := (1 : ℝ[X])) y
+    simpa [pow_two, Polynomial.eval_X, Polynomial.eval_mul, Polynomial.eval_pow,
+      derivative_one, mul_comm, mul_left_comm, mul_assoc] using h
+  have hnum : HasDerivAt (fun y : ℝ => expNegInvGlue y) (expNegInvGlue x * x⁻¹ ^ 2) x := hE x
+  have h2 : HasDerivAt (fun y : ℝ => expNegInvGlue (1 - y)) (-(expNegInvGlue (1 - x) * (1 - x)⁻¹ ^ 2)) x := by
+    have h3 : HasDerivAt (fun y : ℝ => expNegInvGlue y) (expNegInvGlue (1 - x) * (1 - x)⁻¹ ^ 2) (1 - x) := hE (1 - x)
+    have hneg : HasDerivAt (fun y : ℝ => 1 - y) (-1 : ℝ) x := by
+      simpa using (hasDerivAt_const (x := x) (c := (1 : ℝ))).sub (hasDerivAt_id x)
+    simpa using h3.comp x hneg
+  have hden : HasDerivAt (fun y : ℝ => expNegInvGlue y + expNegInvGlue (1 - y))
+      (expNegInvGlue x * x⁻¹ ^ 2 - expNegInvGlue (1 - x) * (1 - x)⁻¹ ^ 2) x := by
+    simpa [sub_eq_add_neg] using hnum.add h2
+  have hden_ne : expNegInvGlue x + expNegInvGlue (1 - x) ≠ 0 := by
+    have hpos1 : 0 < expNegInvGlue x := expNegInvGlue.pos_of_pos hx0
+    have hpos2 : 0 < expNegInvGlue (1 - x) := expNegInvGlue.pos_of_pos (by linarith)
+    nlinarith
+  have hτ' : HasDerivAt (fun y : ℝ => expNegInvGlue y / (expNegInvGlue y + expNegInvGlue (1 - y)))
+      (((expNegInvGlue x * x⁻¹ ^ 2) * (expNegInvGlue x + expNegInvGlue (1 - x)) -
+        expNegInvGlue x * (expNegInvGlue x * x⁻¹ ^ 2 - expNegInvGlue (1 - x) * (1 - x)⁻¹ ^ 2)) /
+        (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2) x := by
+    convert hnum.div hden hden_ne using 1
+  have hdef : (fun y : ℝ => expNegInvGlue y / (expNegInvGlue y + expNegInvGlue (1 - y))) = Real.smoothTransition := by
+    funext y
+    rfl
+  rw [← hdef]
+  rw [hτ'.deriv]
+  have hnum2 : expNegInvGlue x * x⁻¹ ^ 2 * (expNegInvGlue x + expNegInvGlue (1 - x)) -
+        expNegInvGlue x * (expNegInvGlue x * x⁻¹ ^ 2 - expNegInvGlue (1 - x) * (1 - x)⁻¹ ^ 2) =
+      expNegInvGlue x * expNegInvGlue (1 - x) * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) := by
+    ring
+  rw [hnum2]
+
+end Real
+
+
 def negIdx {n k : ℕ} (hk : k ≤ n) (i : Fin k) : Fin n :=
   Fin.castLE hk i
 
