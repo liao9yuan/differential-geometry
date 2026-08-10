@@ -2947,6 +2947,7 @@ import DifferentialGeometry.Topology.Morse.ModifiedFunction
 import DifferentialGeometry.Topology.Morse.MorseLemma
 import DifferentialGeometry.Topology.Morse.NoCriticalValues
 import DifferentialGeometry.Topology.Morse.RegularSublevel
+import DifferentialGeometry.Topology.Morse.RegularIsotopy
 import DifferentialGeometry.Topology.Morse.RegularVectorField
 import DifferentialGeometry.Topology.Morse.SmoothHandleAttachment
 import DifferentialGeometry.Tensor.Alternating.Basis
