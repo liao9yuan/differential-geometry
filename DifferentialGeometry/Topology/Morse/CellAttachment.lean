@@ -5,6 +5,7 @@ import DifferentialGeometry.Topology.Handle.Defs
 import Mathlib.Topology.Homotopy.Basic
 import Mathlib.Topology.Homotopy.Equiv
 import Mathlib.Analysis.SpecialFunctions.Sqrt
+import Mathlib.Analysis.Complex.ExponentialBounds
 
 namespace DifferentialGeometry.Topology.Morse
 
@@ -103,6 +104,283 @@ theorem smoothTransition_deriv_zero_of_one_le (x : ℝ) (hx : 1 ≤ x) :
       · simp
     exact HasDerivWithinAt.deriv_eq_zero hτw (uniqueDiffWithinAt_Ici 1)
 
+private theorem smoothTransition_deriv_le_forty_of_le_quarter (x : ℝ) (hx0 : 0 < x) (hx1 : x < 1) (hxlo : x ≤ 1 / 4) :
+    deriv Real.smoothTransition x ≤ 40 := by
+  have hExpGlue : ∀ y : ℝ, 0 < y → expNegInvGlue y = Real.exp (-y⁻¹) := by
+    intro y hy
+    rw [expNegInvGlue, if_neg (not_le.mpr hy)]
+  rw [smoothTransition_deriv_eq hx0 hx1]
+  have hA : 0 < expNegInvGlue x := expNegInvGlue.pos_of_pos hx0
+  have hB : 0 < expNegInvGlue (1 - x) := expNegInvGlue.pos_of_pos (by linarith)
+  have hAB : expNegInvGlue x * expNegInvGlue (1 - x) /
+      (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤ 40 := by
+    have hxinv : (4 : ℝ) ≤ x⁻¹ := by
+      rw [← one_div]
+      exact (le_div_iff₀ hx0).2 (by nlinarith [hxlo])
+    have h1xinv : (1 - x)⁻¹ ≤ 4 / 3 := by
+      rw [← one_div]
+      exact (div_le_iff₀ (by linarith : 0 < 1 - x)).2 (by nlinarith [hxlo])
+    have h1xsq : (1 - x)⁻¹ ^ 2 ≤ 16 / 9 := by
+      have hle : (1 - x)⁻¹ ≤ 4 / 3 := h1xinv
+      have hnon : 0 ≤ (1 - x)⁻¹ :=
+        inv_nonneg.mpr (le_of_lt (by linarith : 0 < 1 - x))
+      calc
+        (1 - x)⁻¹ ^ 2 ≤ (4 / 3) ^ 2 := by
+          exact sq_le_sq.mpr ((abs_of_nonneg hnon).trans_le (by
+            rw [abs_of_nonneg (by norm_num : 0 ≤ (4 / 3 : ℝ))]
+            exact hle))
+        _ = 16 / 9 := by norm_num
+    have hratio : expNegInvGlue x * expNegInvGlue (1 - x) /
+        (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 ≤
+        expNegInvGlue x / expNegInvGlue (1 - x) := by
+      rw [div_le_div_iff₀ (by positivity : 0 < (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2) hB]
+      rw [mul_assoc]
+      have hB2 : expNegInvGlue (1 - x) ^ 2 ≤
+          (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 := by
+        have hAB2' : expNegInvGlue (1 - x) ^ 2 < (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 := by
+          nlinarith [sq_nonneg (expNegInvGlue x : ℝ), hB]
+        exact le_of_lt hAB2'
+      exact mul_le_mul_of_nonneg_left (by simpa [pow_two] using hB2) (le_of_lt hA)
+    have hABexp : expNegInvGlue x / expNegInvGlue (1 - x) ≤ Real.exp (4 / 3) * expNegInvGlue x := by
+      have hval : expNegInvGlue x / expNegInvGlue (1 - x) = Real.exp (-x⁻¹ + (1 - x)⁻¹) := by
+        rw [hExpGlue x hx0, hExpGlue (1 - x) (by linarith : 0 < 1 - x), ← Real.exp_sub]
+        have hargs : -x⁻¹ - (-(1 - x)⁻¹) = -x⁻¹ + (1 - x)⁻¹ := by ring
+        rw [hargs]
+      rw [hval]
+      rw [Real.exp_add]
+      rw [hExpGlue x hx0]
+      rw [mul_comm]
+      exact mul_le_mul_of_nonneg_right (Real.exp_le_exp_of_le h1xinv)
+        (Real.exp_pos (-x⁻¹)).le
+    have hterm : expNegInvGlue x / expNegInvGlue (1 - x) * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤
+        Real.exp (4 / 3) * (2 + 16 / 9) := by
+      have hle1 : expNegInvGlue x / expNegInvGlue (1 - x) * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤
+          Real.exp (4 / 3) * expNegInvGlue x * (x⁻¹ ^ 2 + 16 / 9) := by
+        have hsumle : x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2 ≤ x⁻¹ ^ 2 + 16 / 9 := by
+          nlinarith [h1xsq]
+        have hposb : 0 ≤ Real.exp (4 / 3) * expNegInvGlue x := by positivity
+        exact mul_le_mul hABexp hsumle (by positivity) hposb
+      have hle2 : Real.exp (4 / 3) * expNegInvGlue x * (x⁻¹ ^ 2 + 16 / 9) ≤
+          Real.exp (4 / 3) * (2 + 16 / 9) := by
+        have hE : expNegInvGlue x * (x⁻¹ ^ 2 + 16 / 9) ≤ 2 + 16 / 9 := by
+          have h1 : expNegInvGlue x * x⁻¹ ^ 2 ≤ 2 := by
+            have hquad : 0 ≤ x⁻¹ := by positivity
+            have hval : expNegInvGlue x * x⁻¹ ^ 2 = x⁻¹ ^ 2 / Real.exp x⁻¹ := by
+              rw [hExpGlue x hx0]
+              rw [Real.exp_neg]
+              field_simp
+            rw [hval]
+            rw [div_le_iff₀ (Real.exp_pos x⁻¹)]
+            have hm : x⁻¹ ^ 2 ≤ 2 * Real.exp x⁻¹ := by
+              have hq2 : 1 + x⁻¹ + x⁻¹ ^ 2 / 2 ≤ Real.exp x⁻¹ := Real.quadratic_le_exp_of_nonneg hquad
+              nlinarith
+            exact hm
+          have h2 : expNegInvGlue x * (16 / 9) ≤ 16 / 9 := by
+            have hle : expNegInvGlue x ≤ 1 := by
+              have hval : expNegInvGlue x = Real.exp (-x⁻¹) := hExpGlue x hx0
+              rw [hval]
+              have hneg : -x⁻¹ ≤ 0 := by nlinarith [hxinv]
+              have h1' : Real.exp (-x⁻¹) ≤ Real.exp 0 :=
+                Real.exp_le_exp.mpr (by nlinarith [hxinv])
+              simpa using h1'
+            simpa [mul_comm] using
+              mul_le_of_le_one_right (by norm_num : 0 ≤ (16 / 9 : ℝ)) hle
+          nlinarith
+        have hpos : 0 ≤ Real.exp (4 / 3) := by positivity
+        simpa [mul_assoc] using mul_le_mul_of_nonneg_left hE hpos
+      exact le_trans hle1 hle2
+    have hfin : Real.exp (4 / 3) * (2 + 16 / 9) ≤ 40 := by
+      have h1 : Real.exp (4 / 3) < 9 := by
+        have hE1 : Real.exp 1 < 3 := Real.exp_one_lt_three
+        have hE13 : Real.exp (1 / 3) ≤ Real.exp 1 := Real.exp_le_exp_of_le (by norm_num)
+        have hval : Real.exp (4 / 3) = Real.exp 1 * Real.exp (1 / 3) := by
+          rw [← Real.exp_add]
+          ring_nf
+        rw [hval]
+        have hpos13 : 0 ≤ Real.exp (1 / 3) := (Real.exp_pos _).le
+        have hpos1 : 0 ≤ Real.exp 1 := (Real.exp_pos _).le
+        nlinarith [hE1, hE13, hpos13, hpos1]
+      nlinarith
+    have hmain : expNegInvGlue x * expNegInvGlue (1 - x) / (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 *
+        (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤ expNegInvGlue x / expNegInvGlue (1 - x) * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) := by
+      exact mul_le_mul_of_nonneg_right hratio (by positivity)
+    exact le_trans (le_trans hmain hterm) (by nlinarith [hfin])
+  simpa [div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm] using hAB
+
+private theorem smoothTransition_deriv_le_forty_of_ge_three_quarters (x : ℝ) (hx0 : 0 < x) (hx1 : x < 1) (hxhi : 3 / 4 ≤ x) :
+    deriv Real.smoothTransition x ≤ 40 := by
+  have hExpGlue : ∀ y : ℝ, 0 < y → expNegInvGlue y = Real.exp (-y⁻¹) := by
+    intro y hy
+    rw [expNegInvGlue, if_neg (not_le.mpr hy)]
+  rw [smoothTransition_deriv_eq hx0 hx1]
+  have hA : 0 < expNegInvGlue x := expNegInvGlue.pos_of_pos hx0
+  have hB : 0 < expNegInvGlue (1 - x) := expNegInvGlue.pos_of_pos (by linarith)
+  have hAB : expNegInvGlue x * expNegInvGlue (1 - x) /
+      (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤ 40 := by
+    have hABsq : (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 ≥
+        expNegInvGlue x ^ 2 := by
+      have hle : expNegInvGlue x + expNegInvGlue (1 - x) ≥ expNegInvGlue x := by linarith
+      have hnon : 0 ≤ expNegInvGlue x := le_of_lt hA
+      have hnon2 : 0 ≤ expNegInvGlue x + expNegInvGlue (1 - x) := by positivity
+      exact sq_le_sq.mpr (by
+        rw [abs_of_nonneg hnon2]
+        rw [abs_of_nonneg hnon]
+        exact hle)
+    have hratio : expNegInvGlue x * expNegInvGlue (1 - x) /
+        (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 ≤
+        expNegInvGlue (1 - x) / expNegInvGlue x := by
+      rw [div_le_div_iff₀ (by positivity : 0 < (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2) hA]
+      nlinarith [hABsq]
+    have h1x' : (1 - x)⁻¹ ≥ 4 := by
+      rw [← one_div]
+      exact (le_div_iff₀ (by linarith : 0 < 1 - x)).2 (by nlinarith [hxhi])
+    have hx' : x⁻¹ ≤ 4 / 3 := by
+      rw [← one_div]
+      exact (div_le_iff₀ hx0).2 (by nlinarith [hxhi])
+    have hxsq : x⁻¹ ^ 2 ≤ 16 / 9 := by
+      have hnon : 0 ≤ x⁻¹ := inv_nonneg.mpr (le_of_lt hx0)
+      calc
+        x⁻¹ ^ 2 ≤ (4 / 3) ^ 2 := by
+          exact sq_le_sq.mpr ((abs_of_nonneg hnon).trans_le (by
+            rw [abs_of_nonneg (by norm_num : 0 ≤ (4 / 3 : ℝ))]
+            exact hx'))
+        _ = 16 / 9 := by norm_num
+    have hABexp : expNegInvGlue (1 - x) / expNegInvGlue x ≤ Real.exp (4 / 3) * expNegInvGlue (1 - x) := by
+      have hval : expNegInvGlue (1 - x) / expNegInvGlue x = Real.exp (-(1 - x)⁻¹ + x⁻¹) := by
+        rw [hExpGlue (1 - x) (by linarith : 0 < 1 - x), hExpGlue x hx0, ← Real.exp_sub]
+        have hargs : -(1 - x)⁻¹ - (-x⁻¹) = -(1 - x)⁻¹ + x⁻¹ := by ring
+        rw [hargs]
+      rw [hval]
+      rw [Real.exp_add]
+      rw [hExpGlue (1 - x) (by linarith : 0 < 1 - x)]
+      rw [mul_comm]
+      exact mul_le_mul_of_nonneg_right (Real.exp_le_exp_of_le hx')
+        (Real.exp_pos (-(1 - x)⁻¹)).le
+    have hterm : expNegInvGlue (1 - x) / expNegInvGlue x * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤
+        Real.exp (4 / 3) * (2 + 16 / 9) := by
+      have hle1 : expNegInvGlue (1 - x) / expNegInvGlue x * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤
+          Real.exp (4 / 3) * expNegInvGlue (1 - x) * (16 / 9 + (1 - x)⁻¹ ^ 2) := by
+        have hsumle : x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2 ≤ 16 / 9 + (1 - x)⁻¹ ^ 2 := by
+          nlinarith [hxsq]
+        have hposb : 0 ≤ Real.exp (4 / 3) * expNegInvGlue (1 - x) := by positivity
+        exact mul_le_mul hABexp hsumle (by positivity) hposb
+      have hle2 : Real.exp (4 / 3) * expNegInvGlue (1 - x) * (16 / 9 + (1 - x)⁻¹ ^ 2) ≤
+          Real.exp (4 / 3) * (2 + 16 / 9) := by
+        have hE : expNegInvGlue (1 - x) * (16 / 9 + (1 - x)⁻¹ ^ 2) ≤ 2 + 16 / 9 := by
+          have h1 : expNegInvGlue (1 - x) * (1 - x)⁻¹ ^ 2 ≤ 2 := by
+            have hquad : 0 ≤ (1 - x)⁻¹ := by positivity
+            have hval : expNegInvGlue (1 - x) * (1 - x)⁻¹ ^ 2 = (1 - x)⁻¹ ^ 2 / Real.exp (1 - x)⁻¹ := by
+              rw [hExpGlue (1 - x) (by linarith : 0 < 1 - x)]
+              rw [Real.exp_neg]
+              field_simp
+            rw [hval]
+            rw [div_le_iff₀ (Real.exp_pos (1 - x)⁻¹)]
+            have hq2 : 1 + (1 - x)⁻¹ + (1 - x)⁻¹ ^ 2 / 2 ≤ Real.exp (1 - x)⁻¹ :=
+              Real.quadratic_le_exp_of_nonneg hquad
+            nlinarith
+          have h2 : expNegInvGlue (1 - x) * (16 / 9) ≤ 16 / 9 := by
+            have hle : expNegInvGlue (1 - x) ≤ 1 := by
+              have hval : expNegInvGlue (1 - x) = Real.exp (-(1 - x)⁻¹) :=
+                hExpGlue (1 - x) (by linarith : 0 < 1 - x)
+              rw [hval]
+              have hneg : -(1 - x)⁻¹ ≤ 0 := by nlinarith [h1x']
+              have h1' : Real.exp (-(1 - x)⁻¹) ≤ Real.exp 0 :=
+                Real.exp_le_exp.mpr (by nlinarith [h1x'])
+              simpa using h1'
+            simpa [mul_comm] using
+              mul_le_of_le_one_right (by norm_num : 0 ≤ (16 / 9 : ℝ)) hle
+          nlinarith
+        have hpos : 0 ≤ Real.exp (4 / 3) := by positivity
+        simpa [mul_assoc] using mul_le_mul_of_nonneg_left hE hpos
+      exact le_trans hle1 hle2
+    have hfin : Real.exp (4 / 3) * (2 + 16 / 9) ≤ 40 := by
+      have h1 : Real.exp (4 / 3) < 9 := by
+        have hE1 : Real.exp 1 < 3 := Real.exp_one_lt_three
+        have hE13 : Real.exp (1 / 3) ≤ Real.exp 1 := Real.exp_le_exp_of_le (by norm_num)
+        have hval : Real.exp (4 / 3) = Real.exp 1 * Real.exp (1 / 3) := by
+          rw [← Real.exp_add]
+          ring_nf
+        rw [hval]
+        have hpos13 : 0 ≤ Real.exp (1 / 3) := (Real.exp_pos _).le
+        have hpos1 : 0 ≤ Real.exp 1 := (Real.exp_pos _).le
+        nlinarith [hE1, hE13, hpos13, hpos1]
+      nlinarith
+    have hmain : expNegInvGlue x * expNegInvGlue (1 - x) / (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 *
+        (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤ expNegInvGlue (1 - x) / expNegInvGlue x * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) := by
+      exact mul_le_mul_of_nonneg_right hratio (by positivity)
+    exact le_trans (le_trans hmain hterm) (by nlinarith [hfin])
+  simpa [div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm] using hAB
+
+private theorem smoothTransition_deriv_le_forty_middle (x : ℝ) (hx0 : 0 < x) (hx1 : x < 1) (hxq' : 1 / 4 ≤ x ∧ x ≤ 3 / 4) :
+    deriv Real.smoothTransition x ≤ 40 := by
+  rw [smoothTransition_deriv_eq hx0 hx1]
+  have hA : 0 < expNegInvGlue x := expNegInvGlue.pos_of_pos hx0
+  have hB : 0 < expNegInvGlue (1 - x) := expNegInvGlue.pos_of_pos (by linarith)
+  have hAB : expNegInvGlue x * expNegInvGlue (1 - x) /
+      (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤ 40 := by
+    have hx2 : x⁻¹ ^ 2 ≤ 16 := by
+      have hle : x⁻¹ ≤ 4 := by
+        have hpos : 0 < x := hx0
+        rw [← one_div]
+        exact (div_le_iff₀ hpos).2 (by nlinarith [hxq'.1])
+      have hnon : 0 ≤ x⁻¹ := inv_nonneg.mpr (le_of_lt hx0)
+      calc
+        x⁻¹ ^ 2 ≤ 4 ^ 2 := by
+          exact sq_le_sq.mpr ((abs_of_nonneg hnon).trans_le (by simpa using hle))
+        _ = 16 := by norm_num
+    have h1x2 : (1 - x)⁻¹ ^ 2 ≤ 16 := by
+      have hle : (1 - x)⁻¹ ≤ 4 := by
+        have hpos : 0 < 1 - x := by linarith
+        rw [← one_div]
+        exact (div_le_iff₀ hpos).2 (by nlinarith [hxq'.2])
+      have hnon : 0 ≤ (1 - x)⁻¹ :=
+        inv_nonneg.mpr (le_of_lt (by linarith : 0 < 1 - x))
+      calc
+        (1 - x)⁻¹ ^ 2 ≤ 4 ^ 2 := by
+          exact sq_le_sq.mpr ((abs_of_nonneg hnon).trans_le (by simpa using hle))
+        _ = 16 := by norm_num
+    have hsum : x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2 ≤ 32 := by nlinarith
+    have hmid : expNegInvGlue x * expNegInvGlue (1 - x) /
+        (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤ 40 := by
+      have h1 : expNegInvGlue x * expNegInvGlue (1 - x) /
+          (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 ≤ 1 / 4 := by
+        rw [div_le_div_iff₀
+          (pow_pos (add_pos hA hB) 2)
+          (by norm_num : (0 : ℝ) < 4)]
+        have ham' : 4 * expNegInvGlue x * expNegInvGlue (1 - x) ≤
+            (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 := by
+          have hsub : 0 ≤ (expNegInvGlue x - expNegInvGlue (1 - x)) ^ 2 := sq_nonneg _
+          nlinarith [hsub]
+        nlinarith [ham']
+      have hprod : (expNegInvGlue x * expNegInvGlue (1 - x) /
+          (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2) *
+          (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) ≤ (1 / 4) * 32 := by
+        exact mul_le_mul h1 hsum (add_nonneg (sq_nonneg _) (sq_nonneg _)) (by norm_num)
+      exact le_trans hprod (by norm_num)
+    exact hmid
+  simpa [div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm] using hAB
+
+theorem smoothTransition_deriv_le_forty (x : ℝ) : deriv Real.smoothTransition x ≤ 40 := by
+  by_cases hx : x ≤ 0 ∨ 1 ≤ x
+  · rcases hx with hxle | hxge
+    · rw [smoothTransition_deriv_zero_of_nonpos x hxle]
+      norm_num
+    · rw [smoothTransition_deriv_zero_of_one_le x hxge]
+      norm_num
+  · have hx0 : 0 < x := by
+      rw [not_or] at hx
+      exact lt_of_not_ge hx.1
+    have hx1 : x < 1 := by
+      rw [not_or] at hx
+      exact lt_of_not_ge hx.2
+    by_cases hxq : x ≤ 1 / 4 ∨ 3 / 4 ≤ x
+    · rcases hxq with hxlo | hxhi
+      · exact smoothTransition_deriv_le_forty_of_le_quarter x hx0 hx1 hxlo
+      · exact smoothTransition_deriv_le_forty_of_ge_three_quarters x hx0 hx1 hxhi
+    · have hxq' : 1 / 4 ≤ x ∧ x ≤ 3 / 4 := by
+        rw [not_or] at hxq
+        exact ⟨le_of_lt (lt_of_not_ge hxq.1), le_of_lt (lt_of_not_ge hxq.2)⟩
+      exact smoothTransition_deriv_le_forty_middle x hx0 hx1 hxq'
 end Real
 
 
