@@ -17298,6 +17298,30 @@ theorem morseRoundedTransportMap_strict_of_collar {m k : ℕ} (hk : k ≤ m + 1)
   rw [← hr2']
   rwa [hLtop] at hmono
 
+theorem morseRoundedTransportMap_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hRltRp : data.R < data.R')
+    (hR₁R : R₁ < data.R) (hρ : 0 < ρ)
+    (x : M) (hx : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁})
+    (hdeep : f x ≤ c - ε - δ + ρ') :
+    morseRoundedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ ε₀ ε₁ data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁
+      hR₀R₁ hRltRp hR₁R x = x := by
+  have hτ : morseRoundedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ data x =
+      morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) :=
+    morseRoundedTransportTime_eq_collar hk c ε r δ ρ ρ' θ R₀ R₁ data hx
+  have hτ0 : morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) = 0 :=
+    morseFarExpandTimeSmooth_zero hρ hdeep
+  dsimp [morseRoundedTransportMap]
+  rw [hτ, hτ0, curveAt_zero]
+
 end ManifoldCellAttachment
 
 end
