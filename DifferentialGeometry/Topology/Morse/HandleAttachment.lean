@@ -1754,7 +1754,10 @@ theorem modelRoundedFunction_gt_c_of_norm_gt_negPart_lt {n k : ℕ} (hk : k ≤ 
         dsimp [σ]
         exact Real.smoothTransition.lt_one_of_lt_one (by
           have hsq : morseNorm n y ^ 2 < R₁ ^ 2 := by
-            exact sq_lt_sq' (by nlinarith [hR0, hR]) hy₁'
+            have hnon : 0 ≤ morseNorm n y := by
+              dsimp [morseNorm]
+              exact norm_nonneg _
+            exact sq_lt_sq' (by nlinarith [hR0, hR, hnon]) hy₁'
           have hden : 0 < R₁ ^ 2 - R₀ ^ 2 := by nlinarith [hR, hR0]
           exact (div_lt_one hden).mpr (by nlinarith [hsq]))
       have hpos1 : 0 < modelAttachedFunction hk c ε r δ y - c := by linarith [hF₁]
@@ -1901,5 +1904,545 @@ theorem modelRoundedFunction_sublevel_eq_attached_union_lower {n k : ℕ} (hk : 
 
 
 end
+theorem modelRoundedFunction_gt_c_of_norm_ge_negPart_lt {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) {y : MorseModel n}
+    (hy₀ : R₀ ≤ morseNorm n y)
+    (hneg : ‖negPart hk y‖ ^ 2 < r ^ 2 + 2 * ε + δ) :
+    c < modelRoundedFunction hk c ε r δ R₀ R₁ y := by
+  by_cases hy₁ : R₁ ≤ morseNorm n y
+  · rw [modelRoundedFunction_eq_morse_add_eps_of_norm_ge hk c ε r δ R₀ R₁ hR hR0 hy₁]
+    rw [morseNormalForm_split]
+    have hnorm : morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+      calc
+        morseNorm n y ^ 2 = morseNorm n (recombine hk (negPart hk y) (posPart hk y)) ^ 2 := by
+          rw [recombine_decompose hk y]
+        _ = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 :=
+          morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)
+    have hbig' : r ^ 2 + 2 * ε + δ < R₁ ^ 2 := by
+      have h01 : R₀ ^ 2 < R₁ ^ 2 := by
+        have h0 : 0 ≤ R₁ := by nlinarith [hR0, hR]
+        exact sq_lt_sq.mpr (by
+          rw [abs_of_nonneg hR0, abs_of_nonneg h0]
+          exact hR)
+      have hb' : 2 * (r ^ 2 + 2 * ε + δ) < R₁ ^ 2 := by nlinarith [hbig, h01]
+      nlinarith
+    have hb : ‖negPart hk y‖ ^ 2 - 2 * ε < ‖posPart hk y‖ ^ 2 := by
+      have hsq : R₁ ^ 2 ≤ morseNorm n y ^ 2 := by
+        exact sq_le_sq' (by nlinarith [hR0, hR]) hy₁
+      nlinarith [hnorm, hsq, hbig', hneg]
+    nlinarith
+  · have hy₁' : morseNorm n y < R₁ := lt_of_not_ge hy₁
+    let σ : ℝ := Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))
+    have hσ : 0 ≤ σ := by dsimp [σ]; exact Real.smoothTransition.nonneg _
+    have hσ₁ : σ ≤ 1 := by dsimp [σ]; exact Real.smoothTransition.le_one _
+    have hpos : R₀ ^ 2 ≤ morseNorm n y ^ 2 := by
+      have hnon : 0 ≤ morseNorm n y := by
+        dsimp [morseNorm]
+        exact norm_nonneg _
+      exact sq_le_sq' (by nlinarith [hR0, hnon]) hy₀
+    have hpos2 : ‖posPart hk y‖ ^ 2 > max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) := by
+      have hnorm : morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+        calc
+          morseNorm n y ^ 2 = morseNorm n (recombine hk (negPart hk y) (posPart hk y)) ^ 2 := by
+            rw [recombine_decompose hk y]
+          _ = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 :=
+            morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)
+      have hb : ‖negPart hk y‖ ^ 2 + max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) < R₀ ^ 2 := by
+        have h1 : max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) ≤ r ^ 2 + 2 * ε + δ := by
+          exact max_le (by nlinarith) (by nlinarith [hneg])
+        nlinarith [hbig, h1, hneg]
+      nlinarith [hnorm, hpos, hb]
+    have hF₁ : c < modelAttachedFunction hk c ε r δ y := by
+      dsimp [modelAttachedFunction]
+      have hcap : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ max (r ^ 2) (‖negPart hk y‖ ^ 2 - 2 * ε) :=
+        smoothCap_le_max_sub (ε := ε) (r := r) (δ := δ) (t := ‖negPart hk y‖ ^ 2)
+      nlinarith [hpos2, hcap]
+    have hF₂ : c < morseNormalForm hk c y + ε := by
+      rw [morseNormalForm_split]
+      have hnorm : morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+        calc
+          morseNorm n y ^ 2 = morseNorm n (recombine hk (negPart hk y) (posPart hk y)) ^ 2 := by
+            rw [recombine_decompose hk y]
+          _ = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 :=
+            morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)
+      have hb : ‖negPart hk y‖ ^ 2 - 2 * ε < ‖posPart hk y‖ ^ 2 := by nlinarith [hpos2, hnorm]
+      nlinarith
+    dsimp [modelRoundedFunction]
+    have hmain : c < modelAttachedFunction hk c ε r δ y +
+        (morseNormalForm hk c y + ε - modelAttachedFunction hk c ε r δ y) * σ := by
+      have hσlt : σ < 1 := by
+        dsimp [σ]
+        exact Real.smoothTransition.lt_one_of_lt_one (by
+          have hsq : morseNorm n y ^ 2 < R₁ ^ 2 := by
+            have hnon : 0 ≤ morseNorm n y := by
+              dsimp [morseNorm]
+              exact norm_nonneg _
+            exact sq_lt_sq' (by nlinarith [hR0, hR, hnon]) hy₁'
+          have hden : 0 < R₁ ^ 2 - R₀ ^ 2 := by nlinarith [hR, hR0]
+          exact (div_lt_one hden).mpr (by nlinarith [hsq]))
+      have hpos1 : 0 < modelAttachedFunction hk c ε r δ y - c := by linarith [hF₁]
+      have hpos2' : 0 < morseNormalForm hk c y + ε - c := by linarith [hF₂]
+      have hmain' : 0 < (1 - σ) * (modelAttachedFunction hk c ε r δ y - c) +
+          σ * (morseNormalForm hk c y + ε - c) := by
+        have h₁ : 0 < (1 - σ) * (modelAttachedFunction hk c ε r δ y - c) :=
+          mul_pos (by linarith [hσlt]) hpos1
+        have h₂ : 0 ≤ σ * (morseNormalForm hk c y + ε - c) :=
+          mul_nonneg hσ (le_of_lt hpos2')
+        nlinarith
+      have hrew : modelAttachedFunction hk c ε r δ y +
+          (morseNormalForm hk c y + ε - modelAttachedFunction hk c ε r δ y) * σ - c =
+          (1 - σ) * (modelAttachedFunction hk c ε r δ y - c) +
+            σ * (morseNormalForm hk c y + ε - c) := by
+        ring
+      rw [← hrew] at hmain'
+      linarith
+    exact hmain
+
+
+
+theorem modelAttachedRegion_of_negPart_large_lower {n k : ℕ} (hk : k ≤ n) (c ε r δ : ℝ)
+    (hδ : 0 < δ) {y : MorseModel n}
+    (ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2)
+    (hlow : morseNormalForm hk c y ≤ c - ε) : y ∈ modelAttachedRegion hk ε r δ := by
+  dsimp [modelAttachedRegion]
+  rw [morseNormalForm_split] at hlow
+  have hsc : smoothCap ε r δ (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε :=
+    smoothCap_upper hδ ht
+  nlinarith [hlow, hsc]
+
+theorem modelRoundedFunction_le_c_iff_mem_attachedRegion {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (y : MorseModel n) :
+    modelRoundedFunction hk c ε r δ R₀ R₁ y ≤ c ↔ y ∈ modelAttachedRegion hk ε r δ := by
+  change y ∈ {z : MorseModel n | modelRoundedFunction hk c ε r δ R₀ R₁ z ≤ c} ↔
+    y ∈ modelAttachedRegion hk ε r δ
+  rw [modelRoundedFunction_sublevel_eq_attached_union_lower hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig]
+  constructor
+  · intro hy
+    rcases hy with hyatt | hydl
+    · exact hyatt
+    · exact modelAttachedRegion_of_negPart_large_lower hk c ε r δ hδ hydl.1 hydl.2
+  · intro hyatt
+    exact Or.inl hyatt
+
+theorem modelRoundedFunction_eq_attached_of_norm_gt {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (_hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) {y : MorseModel n}
+    (hyatt : y ∈ modelAttachedRegion hk ε r δ) (hy₀ : R₀ < morseNorm n y) :
+    modelRoundedFunction hk c ε r δ R₀ R₁ y = modelAttachedFunction hk c ε r δ y := by
+  have hnegl : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+    by_contra hnot
+    have hlt : ‖negPart hk y‖ ^ 2 < r ^ 2 + 2 * ε + δ := lt_of_not_ge hnot
+    have hnormle : morseNorm n y ^ 2 < R₀ ^ 2 := by
+      have hmain := modelAttached_norm_sq_lt_of_negPart_lt hk ε r δ (le_of_lt hε) hδ hyatt hlt
+      nlinarith [hbig, hmain]
+    have hle : morseNorm n y ≤ R₀ := by
+      have hnon : 0 ≤ morseNorm n y := by
+        dsimp [morseNorm]
+        exact norm_nonneg _
+      have habs := sq_lt_sq.mp hnormle
+      have h1 : |morseNorm n y| = morseNorm n y := abs_of_nonneg hnon
+      have h2 : |R₀| = R₀ := abs_of_nonneg hR0
+      rw [h1, h2] at habs
+      exact le_of_lt habs
+    exact (not_lt_of_ge hle) hy₀
+  have hsc : smoothCap ε r δ (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε :=
+    smoothCap_upper hδ hnegl
+  dsimp [modelRoundedFunction]
+  have hB : morseNormalForm hk c y + ε - modelAttachedFunction hk c ε r δ y = 0 := by
+    dsimp [modelAttachedFunction]
+    rw [morseNormalForm_split]
+    rw [hsc]
+    ring
+  rw [hB]
+  ring
+
+theorem modelRoundedFunction_eq_c_iff_attachedFunction_eq {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (y : MorseModel n) :
+    modelRoundedFunction hk c ε r δ R₀ R₁ y = c ↔ modelAttachedFunction hk c ε r δ y = c := by
+  constructor
+  · intro hy
+    have hyatt : y ∈ modelAttachedRegion hk ε r δ :=
+      (modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp
+        (le_of_eq hy)
+    by_cases hnorm : morseNorm n y ≤ R₀
+    · rwa [modelRoundedFunction_eq_attached_of_norm_le hk c ε r δ R₀ R₁ hR hR0 hnorm] at hy
+    · have hnorm' : R₀ < morseNorm n y := lt_of_not_ge hnorm
+      rwa [modelRoundedFunction_eq_attached_of_norm_gt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig hyatt hnorm'] at hy
+  · intro hy
+    have hyatt : y ∈ modelAttachedRegion hk ε r δ :=
+      (modelAttachedRegion_iff_sublevel hk c ε r δ y).mpr (le_of_eq hy)
+    by_cases hnorm : morseNorm n y ≤ R₀
+    · rw [modelRoundedFunction_eq_attached_of_norm_le hk c ε r δ R₀ R₁ hR hR0 hnorm]
+      exact hy
+    · have hnorm' : R₀ < morseNorm n y := lt_of_not_ge hnorm
+      rw [modelRoundedFunction_eq_attached_of_norm_gt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig hyatt hnorm']
+      exact hy
+
+theorem modelRoundedFunction_lt_c_iff_attachedFunction_lt {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (y : MorseModel n) :
+    modelRoundedFunction hk c ε r δ R₀ R₁ y < c ↔ modelAttachedFunction hk c ε r δ y < c := by
+  constructor
+  · intro hy
+    have hyatt : y ∈ modelAttachedRegion hk ε r δ :=
+      (modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp
+        (le_of_lt hy)
+    have hle : modelAttachedFunction hk c ε r δ y ≤ c :=
+      (modelAttachedRegion_iff_sublevel hk c ε r δ y).mp hyatt
+    have hne : modelAttachedFunction hk c ε r δ y ≠ c := by
+      intro hc
+      have hc' : modelRoundedFunction hk c ε r δ R₀ R₁ y = c :=
+        (modelRoundedFunction_eq_c_iff_attachedFunction_eq hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mpr hc
+      exact (ne_of_lt hy) hc'
+    exact lt_of_le_of_ne hle hne
+  · intro hy
+    have hyatt : y ∈ modelAttachedRegion hk ε r δ :=
+      (modelAttachedRegion_iff_sublevel hk c ε r δ y).mpr (le_of_lt hy)
+    have hle : modelRoundedFunction hk c ε r δ R₀ R₁ y ≤ c :=
+      (modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mpr hyatt
+    have hne : modelRoundedFunction hk c ε r δ R₀ R₁ y ≠ c := by
+      intro hc
+      have hc' : modelAttachedFunction hk c ε r δ y = c :=
+        (modelRoundedFunction_eq_c_iff_attachedFunction_eq hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp hc
+      exact (ne_of_lt hy) hc'
+    exact lt_of_le_of_ne hle hne
+
+theorem fderiv_modelRoundedFunction_ne_zero {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (y : MorseModel n) (hy : modelRoundedFunction hk c ε r δ R₀ R₁ y = c) :
+    fderiv ℝ (modelRoundedFunction hk c ε r δ R₀ R₁) y ≠ 0 := by
+  by_cases hR0' : morseNorm n y < R₀
+  · have hlocEq : Filter.Eventually (fun w : MorseModel n =>
+        modelRoundedFunction hk c ε r δ R₀ R₁ w = modelAttachedFunction hk c ε r δ w) (nhds y) := by
+      have hcontNorm : Continuous (fun w : MorseModel n => morseNorm n w) := by
+        dsimp [morseNorm]
+        exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin n => ℝ))
+      refine Filter.mem_of_superset ((isOpen_lt hcontNorm continuous_const).mem_nhds hR0') ?_
+      intro w hw
+      exact modelRoundedFunction_eq_attached_of_norm_le hk c ε r δ R₀ R₁ hR hR0 (le_of_lt hw)
+    have hfderiv : fderiv ℝ (modelRoundedFunction hk c ε r δ R₀ R₁) y =
+        fderiv ℝ (modelAttachedFunction hk c ε r δ) y :=
+      Filter.EventuallyEq.fderiv_eq (f₁ := modelRoundedFunction hk c ε r δ R₀ R₁)
+        (f := modelAttachedFunction hk c ε r δ) (x := y) hlocEq
+    have hval' : modelAttachedFunction hk c ε r δ y = c := by
+      have hmod := modelRoundedFunction_eq_attached_of_norm_le hk c ε r δ R₀ R₁ hR hR0 (le_of_lt hR0')
+      rwa [hmod] at hy
+    rw [hfderiv]
+    exact fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ hδr y hval'
+  · have hR0ge : R₀ ≤ morseNorm n y := le_of_not_gt hR0'
+    have hnegl : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+      by_contra hnot
+      have hlt : ‖negPart hk y‖ ^ 2 < r ^ 2 + 2 * ε + δ := lt_of_not_ge hnot
+      have hgt : c < modelRoundedFunction hk c ε r δ R₀ R₁ y :=
+        modelRoundedFunction_gt_c_of_norm_ge_negPart_lt hk c ε r δ R₀ R₁
+          hε hδ hR hR0 hbig hR0ge hlt
+      exact (not_lt_of_ge (le_of_eq hy)) hgt
+    have hlow : morseNormalForm hk c y = c - ε := by
+      have hmod := modelRoundedFunction_eq_morse_add_eps_of_negPart_large
+        hk c ε r δ R₀ R₁ hδ hnegl
+      rw [hmod] at hy
+      nlinarith
+    have hneglStrict : r ^ 2 + 2 * ε + δ < ‖negPart hk y‖ ^ 2 := by
+      by_contra hnot
+      have hle : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε + δ := le_of_not_gt hnot
+      have hpos : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - ε := by
+        rw [morseNormalForm_split] at hlow
+        nlinarith
+      have hnormSq : morseNorm n y ^ 2 = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 := by
+        calc
+          morseNorm n y ^ 2 = morseNorm n (recombine hk (negPart hk y) (posPart hk y)) ^ 2 := by
+            rw [recombine_decompose hk y]
+          _ = ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 :=
+            morseNorm_recombine_sq hk (negPart hk y) (posPart hk y)
+      have hsmall : morseNorm n y ^ 2 < R₀ ^ 2 := by
+        nlinarith [hle, hpos, hnormSq, hε, hbig]
+      have hltR : morseNorm n y < R₀ := by
+        have hnon : 0 ≤ morseNorm n y := by
+          dsimp [morseNorm]
+          exact norm_nonneg _
+        have habs : |morseNorm n y| < |R₀| := sq_lt_sq.mp hsmall
+        rw [abs_of_nonneg hnon, abs_of_nonneg hR0] at habs
+        exact habs
+      exact (not_le_of_gt hltR) hR0ge
+    have hlocEq : Filter.Eventually (fun w : MorseModel n =>
+        modelRoundedFunction hk c ε r δ R₀ R₁ w =
+          (fun w : MorseModel n => morseNormalForm hk c w + ε) w) (nhds y) := by
+      have hcontNorm' : Continuous (fun w : MorseModel n => ‖negPart hk w‖) := by
+        simpa [Function.comp_def] using (continuous_norm.comp (continuous_negPart hk))
+      have hcont : Continuous (fun w : MorseModel n => ‖negPart hk w‖ ^ 2) :=
+        hcontNorm'.pow 2
+      have hopen : IsOpen {w : MorseModel n |
+          r ^ 2 + 2 * ε + δ < ‖negPart hk w‖ ^ 2} :=
+        isOpen_lt continuous_const hcont
+      refine Filter.mem_of_superset (hopen.mem_nhds hneglStrict) ?_
+      intro w hw
+      exact modelRoundedFunction_eq_morse_add_eps_of_negPart_large hk c ε r δ R₀ R₁ hδ (le_of_lt hw)
+    have hfderiv : fderiv ℝ (modelRoundedFunction hk c ε r δ R₀ R₁) y =
+        fderiv ℝ (fun w : MorseModel n => morseNormalForm hk c w + ε) y :=
+      Filter.EventuallyEq.fderiv_eq (f₁ := modelRoundedFunction hk c ε r δ R₀ R₁)
+        (f := fun w : MorseModel n => morseNormalForm hk c w + ε) (x := y) hlocEq
+    have hder : fderiv ℝ (morseNormalForm hk c) y ≠ 0 :=
+      fderiv_morseNormalForm_ne_zero_lower hk c ε hε y hlow
+    have hderε : fderiv ℝ (fun w : MorseModel n => morseNormalForm hk c w + ε) y ≠ 0 := by
+      intro hzero
+      have hz : fderiv ℝ (fun w : MorseModel n => morseNormalForm hk c w + ε) y =
+          fderiv ℝ (morseNormalForm hk c) y := by
+        simp
+      rw [hz] at hzero
+      exact hder hzero
+    rw [hfderiv]
+    exact hderε
+
+theorem modelAttachedUnstretch_mem_upper_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr : r ≠ 0) {y : MorseModel n}
+    (hy : modelRoundedFunction hk c ε r δ R₀ R₁ y ≤ c) :
+    morseNormalForm hk c (modelAttachedUnstretch hk ε r δ y) ≤ c + r ^ 2 / 2 := by
+  have hyatt : y ∈ modelAttachedRegion hk ε r δ :=
+    (modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp hy
+  exact (modelAttachedStretch_equiv hk c ε r δ hδ hδr hr).2.1 y hyatt
+
+theorem modelAttachedUnstretch_boundary_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    {y : MorseModel n} (hy : modelRoundedFunction hk c ε r δ R₀ R₁ y = c) :
+    morseNormalForm hk c (modelAttachedUnstretch hk ε r δ y) = c + r ^ 2 / 2 := by
+  have hyatt : y ∈ modelAttachedRegion hk ε r δ :=
+    (modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp
+      (le_of_eq hy)
+  have hA : modelAttachedFunction hk c ε r δ y = c :=
+    (modelRoundedFunction_eq_c_iff_attachedFunction_eq hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp hy
+  exact modelAttachedFunction_unstretch_boundary hk c ε r δ hδ hδr y hyatt hA
+
+theorem modelAttachedUnstretch_strict_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    {y : MorseModel n} (hy : modelRoundedFunction hk c ε r δ R₀ R₁ y < c) :
+    morseNormalForm hk c (modelAttachedUnstretch hk ε r δ y) < c + r ^ 2 / 2 := by
+  have hyatt : y ∈ modelAttachedRegion hk ε r δ :=
+    (modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp
+      (le_of_lt hy)
+  have hA : modelAttachedFunction hk c ε r δ y < c :=
+    (modelRoundedFunction_lt_c_iff_attachedFunction_lt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp hy
+  exact modelAttachedFunction_unstretch_strict hk c ε r δ hδ hδr y hyatt hA
+
+theorem modelAttachedStretch_mem_roundedSublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr : r ≠ 0) {u : MorseModel n} (hu : morseNormalForm hk c u ≤ c + r ^ 2 / 2) :
+    modelRoundedFunction hk c ε r δ R₀ R₁ (modelAttachedStretch hk ε r δ u) ≤ c := by
+  have huatt : modelAttachedStretch hk ε r δ u ∈ modelAttachedRegion hk ε r δ :=
+    (modelAttachedStretch_equiv hk c ε r δ hδ hδr hr).1 u hu
+  exact (modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig
+    (modelAttachedStretch hk ε r δ u)).mpr huatt
+
+theorem modelAttachedStretch_boundary_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr : r ≠ 0) {u : MorseModel n} (hu : morseNormalForm hk c u = c + r ^ 2 / 2) :
+    modelRoundedFunction hk c ε r δ R₀ R₁ (modelAttachedStretch hk ε r δ u) = c := by
+  have hA : modelAttachedFunction hk c ε r δ (modelAttachedStretch hk ε r δ u) = c :=
+    modelAttachedFunction_stretch_boundary hk c ε r δ hδ hδr hr u hu
+  exact (modelRoundedFunction_eq_c_iff_attachedFunction_eq hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig
+    (modelAttachedStretch hk ε r δ u)).mpr hA
+
+theorem modelAttachedStretch_strict_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr : r ≠ 0) {u : MorseModel n} (hu : morseNormalForm hk c u < c + r ^ 2 / 2) :
+    modelRoundedFunction hk c ε r δ R₀ R₁ (modelAttachedStretch hk ε r δ u) < c := by
+  have hA : modelAttachedFunction hk c ε r δ (modelAttachedStretch hk ε r δ u) < c :=
+    modelAttachedFunction_stretch_strict hk c ε r δ hδ hδr hr u hu
+  exact (modelRoundedFunction_lt_c_iff_attachedFunction_lt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig
+    (modelAttachedStretch hk ε r δ u)).mpr hA
+
+theorem contMDiff_modelAttachedUnstretch_sublevel {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c) :=
+      sublevelChartedSpace (m := m) (modelRoundedFunction hk c ε r δ R₀ R₁) c
+        (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+        (fun y hy => fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y hy))
+    (hcs₂ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+      sublevelChartedSpace (m := m) (morseNormalForm hk c) (c + r ^ 2 / 2)
+        (contDiff_morseNormalForm hk c)
+        (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy))
+    (hchart₁ : ∀ y : SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c,
+      hcs₁.chartAt y =
+        (if h : modelRoundedFunction hk c ε r δ R₀ R₁ y.1 = c then
+          sublevelBoundaryChart (modelRoundedFunction hk c ε r δ R₀ R₁) c y h
+            (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+            (fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y.1 h)
+        else sublevelInteriorChart (modelRoundedFunction hk c ε r δ R₀ R₁) c y
+          (lt_of_le_of_ne (show modelRoundedFunction hk c ε r δ R₀ R₁ y.1 ≤ c from y.2) h)
+          (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2),
+      hcs₂.chartAt y =
+        (if h : morseNormalForm hk c y.1 = c + r ^ 2 / 2 then
+          sublevelBoundaryChart (morseNormalForm hk c) (c + r ^ 2 / 2) y h
+            (contDiff_morseNormalForm hk c)
+            (fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y.1 h)
+        else sublevelInteriorChart (morseNormalForm hk c) (c + r ^ 2 / 2) y
+          (lt_of_le_of_ne (show morseNormalForm hk c y.1 ≤ c + r ^ 2 / 2 from y.2) h)
+          (contDiff_morseNormalForm hk c)) := by
+      intro y
+      rfl) :
+    ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun y : SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c =>
+        (⟨modelAttachedUnstretch hk ε r δ y.1,
+          modelAttachedUnstretch_mem_upper_of_roundedSublevel hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig
+            hr y.2⟩ :
+          SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2))) := by
+  have hΦ : ContDiffOn ℝ (⊤ : ℕ∞) (modelAttachedUnstretch hk ε r δ) Set.univ :=
+    contDiffOn_univ.mpr (contDiff_modelAttachedUnstretch hk ε r δ hδ hδr hr)
+  exact contMDiff_sublevelMap_on (m := m) (modelRoundedFunction hk c ε r δ R₀ R₁)
+    (morseNormalForm hk c) c (c + r ^ 2 / 2)
+    (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁) (contDiff_morseNormalForm hk c)
+    (fun y hy => fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y hy)
+    (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy)
+    (modelAttachedUnstretch hk ε r δ) Set.univ isOpen_univ (fun y hy => trivial) hΦ
+    (fun y hy => modelAttachedUnstretch_mem_upper_of_roundedSublevel hk c ε r δ R₀ R₁
+      hε hδ hδr hR hR0 hbig hr hy)
+    (fun y hy => modelAttachedUnstretch_boundary_of_roundedSublevel hk c ε r δ R₀ R₁
+      hε hδ hδr hR hR0 hbig hy)
+    (fun y hy => modelAttachedUnstretch_strict_of_roundedSublevel hk c ε r δ R₀ R₁
+      hε hδ hδr hR hR0 hbig hy)
+    (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+
+theorem contMDiff_modelAttachedStretch_sublevel {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+      sublevelChartedSpace (m := m) (morseNormalForm hk c) (c + r ^ 2 / 2)
+        (contDiff_morseNormalForm hk c)
+        (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy))
+    (hcs₂ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c) :=
+      sublevelChartedSpace (m := m) (modelRoundedFunction hk c ε r δ R₀ R₁) c
+        (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+        (fun y hy => fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y hy))
+    (hchart₁ : ∀ y : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2),
+      hcs₁.chartAt y =
+        (if h : morseNormalForm hk c y.1 = c + r ^ 2 / 2 then
+          sublevelBoundaryChart (morseNormalForm hk c) (c + r ^ 2 / 2) y h
+            (contDiff_morseNormalForm hk c)
+            (fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y.1 h)
+        else sublevelInteriorChart (morseNormalForm hk c) (c + r ^ 2 / 2) y
+          (lt_of_le_of_ne (show morseNormalForm hk c y.1 ≤ c + r ^ 2 / 2 from y.2) h)
+          (contDiff_morseNormalForm hk c)) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c,
+      hcs₂.chartAt y =
+        (if h : modelRoundedFunction hk c ε r δ R₀ R₁ y.1 = c then
+          sublevelBoundaryChart (modelRoundedFunction hk c ε r δ R₀ R₁) c y h
+            (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+            (fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y.1 h)
+        else sublevelInteriorChart (modelRoundedFunction hk c ε r δ R₀ R₁) c y
+          (lt_of_le_of_ne (show modelRoundedFunction hk c ε r δ R₀ R₁ y.1 ≤ c from y.2) h)
+          (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)) := by
+      intro y
+      rfl) :
+    ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun u : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2) =>
+        (⟨modelAttachedStretch hk ε r δ u.1,
+          modelAttachedStretch_mem_roundedSublevel hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig hr u.2⟩ :
+          SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c)) := by
+  have hΦ : ContDiffOn ℝ (⊤ : ℕ∞) (modelAttachedStretch hk ε r δ) Set.univ :=
+    contDiffOn_univ.mpr (contDiff_modelAttachedStretch hk ε r δ hδ hδr hr)
+  exact contMDiff_sublevelMap_on (m := m) (morseNormalForm hk c)
+    (modelRoundedFunction hk c ε r δ R₀ R₁) (c + r ^ 2 / 2) c
+    (contDiff_morseNormalForm hk c) (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+    (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy)
+    (fun y hy => fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y hy)
+    (modelAttachedStretch hk ε r δ) Set.univ isOpen_univ (fun y hy => trivial) hΦ
+    (fun u hu => modelAttachedStretch_mem_roundedSublevel hk c ε r δ R₀ R₁
+      hε hδ hδr hR hR0 hbig hr hu)
+    (fun u hu => modelAttachedStretch_boundary_of_roundedSublevel hk c ε r δ R₀ R₁
+      hε hδ hδr hR hR0 hbig hr hu)
+    (fun u hu => modelAttachedStretch_strict_of_roundedSublevel hk c ε r δ R₀ R₁
+      hε hδ hδr hR hR0 hbig hr hu)
+    (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+
+noncomputable def modelRoundedSublevelDiffeomorphUpper {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr : r ≠ 0)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c) :=
+      sublevelChartedSpace (m := m) (modelRoundedFunction hk c ε r δ R₀ R₁) c
+        (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+        (fun y hy => fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y hy))
+    (hcs₂ : ChartedSpace (MorseHalfSpace m)
+        (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) :=
+      sublevelChartedSpace (m := m) (morseNormalForm hk c) (c + r ^ 2 / 2)
+        (contDiff_morseNormalForm hk c)
+        (fun y hy => fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y hy))
+    (hchart₁ : ∀ y : SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c,
+      hcs₁.chartAt y =
+        (if h : modelRoundedFunction hk c ε r δ R₀ R₁ y.1 = c then
+          sublevelBoundaryChart (modelRoundedFunction hk c ε r δ R₀ R₁) c y h
+            (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)
+            (fderiv_modelRoundedFunction_ne_zero hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig y.1 h)
+        else sublevelInteriorChart (modelRoundedFunction hk c ε r δ R₀ R₁) c y
+          (lt_of_le_of_ne (show modelRoundedFunction hk c ε r δ R₀ R₁ y.1 ≤ c from y.2) h)
+          (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁)) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2),
+      hcs₂.chartAt y =
+        (if h : morseNormalForm hk c y.1 = c + r ^ 2 / 2 then
+          sublevelBoundaryChart (morseNormalForm hk c) (c + r ^ 2 / 2) y h
+            (contDiff_morseNormalForm hk c)
+            (fderiv_morseNormalForm_ne_zero hk c (r ^ 2 / 2) (by positivity) y.1 h)
+        else sublevelInteriorChart (morseNormalForm hk c) (c + r ^ 2 / 2) y
+          (lt_of_le_of_ne (show morseNormalForm hk c y.1 ≤ c + r ^ 2 / 2 from y.2) h)
+          (contDiff_morseNormalForm hk c)) := by
+      intro y
+      rfl) :
+    @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c) _ hcs₁
+      (SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2)) _ hcs₂
+      (⊤ : ℕ∞) where
+  toEquiv :=
+    { toFun := fun y => (⟨modelAttachedUnstretch hk ε r δ y.1,
+        modelAttachedUnstretch_mem_upper_of_roundedSublevel hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig
+          hr y.2⟩ :
+          SublevelSpace (morseNormalForm hk c) (c + r ^ 2 / 2))
+      invFun := fun u => (⟨modelAttachedStretch hk ε r δ u.1,
+        modelAttachedStretch_mem_roundedSublevel hk c ε r δ R₀ R₁ hε hδ hδr hR hR0 hbig hr u.2⟩ :
+          SublevelSpace (modelRoundedFunction hk c ε r δ R₀ R₁) c)
+      left_inv := by
+        intro y
+        apply Subtype.ext
+        exact modelAttachedStretch_unstretch hk ε r δ hδ hδr hr y.1
+      right_inv := by
+        intro u
+        apply Subtype.ext
+        exact modelAttachedUnstretch_stretch hk ε r δ hδ hδr hr u.1 }
+  contMDiff_toFun := by
+    simpa using (contMDiff_modelAttachedUnstretch_sublevel (hk := hk) (c := c) (ε := ε) (r := r)
+      (δ := δ) (R₀ := R₀) (R₁ := R₁) (hε := hε) (hδ := hδ) (hδr := hδr) (hR := hR) (hR0 := hR0)
+      (hbig := hbig) (hr := hr) (hcs₁ := hcs₁) (hcs₂ := hcs₂)
+      (hchart₁ := hchart₁) (hchart₂ := hchart₂))
+  contMDiff_invFun := by
+    simpa using (contMDiff_modelAttachedStretch_sublevel (hk := hk) (c := c) (ε := ε) (r := r)
+      (δ := δ) (R₀ := R₀) (R₁ := R₁) (hε := hε) (hδ := hδ) (hδr := hδr) (hR := hR) (hR0 := hR0)
+      (hbig := hbig) (hr := hr) (hcs₁ := hcs₂) (hcs₂ := hcs₁)
+      (hchart₁ := hchart₂) (hchart₂ := hchart₁))
 
 end DifferentialGeometry.Topology.Morse.CellAttachment
