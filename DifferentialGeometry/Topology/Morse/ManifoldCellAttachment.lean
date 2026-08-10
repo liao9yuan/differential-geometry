@@ -15444,6 +15444,63 @@ theorem contMDiffOn_pullbackV₀ {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
     intro y hy
     exact Set.mem_preimage.mpr (Set.mem_range_self (f := data.χ) y)))
 
+theorem contMDiffOn_chartModelFieldSection {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) :
+    ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞)
+      (fun y : MorseModel (m + 1) =>
+        (⟨data.χ y, mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)⟩ :
+          TangentBundle I M))
+      ({y : MorseModel (m + 1) | posPart hk y ≠ 0} ∩
+        Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+  let modelSection : MorseModel (m + 1) → TangentBundle 𝓘(ℝ, MorseModel (m + 1)) (MorseModel (m + 1)) :=
+    fun y => ⟨y, CellAttachment.modelFlowField hk y⟩
+  let dom : Set (MorseModel (m + 1)) :=
+    {y : MorseModel (m + 1) | posPart hk y ≠ 0} ∩ Metric.ball (0 : MorseModel (m + 1)) data.R'
+  have hsec : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1)).tangent (⊤ : ℕ∞)
+      modelSection dom := by
+    exact (CellAttachment.contMDiffOn_modelFlowField_section hk).mono (by
+      intro y hy
+      exact hy.1)
+  have hs : UniqueMDiffOn 𝓘(ℝ, MorseModel (m + 1))
+      (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+    rw [uniqueMDiffOn_iff_uniqueDiffOn]
+    intro x hx
+    simpa using ((uniqueDiffWithinAt_inter (Metric.isOpen_ball.mem_nhds hx)).2
+      (uniqueDiffOn_univ x trivial))
+  have htangent : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)).tangent I.tangent (⊤ : ℕ∞)
+      (tangentMapWithin 𝓘(ℝ, MorseModel (m + 1)) I data.χ
+        (Metric.ball (0 : MorseModel (m + 1)) data.R'))
+      ((Bundle.TotalSpace.proj : TangentBundle 𝓘(ℝ, MorseModel (m + 1)) (MorseModel (m + 1)) →
+        MorseModel (m + 1)) ⁻¹' Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+    exact data.hχon.contMDiffOn_tangentMapWithin (m := (⊤ : ℕ∞)) (n := (⊤ : ℕ∞))
+      (hmn := by simp) hs
+  have hmap : ∀ y ∈ dom, modelSection y ∈
+      (Bundle.TotalSpace.proj : TangentBundle 𝓘(ℝ, MorseModel (m + 1)) (MorseModel (m + 1)) →
+        MorseModel (m + 1)) ⁻¹' Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+    intro y hy
+    exact hy.2
+  have hcomp : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I.tangent (⊤ : ℕ∞)
+      (fun y => tangentMapWithin 𝓘(ℝ, MorseModel (m + 1)) I data.χ (Metric.ball (0 : MorseModel (m + 1)) data.R') (modelSection y))
+      dom := by
+    exact (htangent.comp hsec hmap).mono (by
+      intro y hy
+      change y ∈ {z : MorseModel (m + 1) | posPart hk z ≠ 0} ∩
+        Metric.ball (0 : MorseModel (m + 1)) data.R' at hy
+      exact hy)
+  refine hcomp.congr ?_
+  intro y hy
+  have hmain : mfderivWithin 𝓘(ℝ, MorseModel (m + 1)) I data.χ
+        (Metric.ball (0 : MorseModel (m + 1)) data.R') y (CellAttachment.modelFlowField hk y) =
+      mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y) := by
+    have hEq := mfderivWithin_of_mem_nhds (I := 𝓘(ℝ, MorseModel (m + 1))) (I' := I)
+      (f := data.χ) (Metric.isOpen_ball.mem_nhds hy.2)
+    exact congrArg (fun L : (TangentSpace 𝓘(ℝ, MorseModel (m + 1)) y →L[ℝ] TangentSpace I (data.χ y)) =>
+      L (CellAttachment.modelFlowField hk y)) hEq
+  simp only [modelSection, tangentMapWithin, hmain]
+
 end ManifoldCellAttachment
 
 end
