@@ -2352,6 +2352,87 @@ theorem modelAttachedUnstretchTime_neg_of_posPart_ne_zero {n k : ℕ} (hk : k �
     exact mul_neg_of_pos_of_neg hbpos hneg
   nlinarith
 
+theorem modelAttachedUnstretchTime_abs_le {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelAttachedRegion hk ε r δ) :
+    |modelAttachedUnstretchTime hk ε r δ y| ≤ (2 * ε + r ^ 2 + δ) / 2 := by
+  let t : ℝ := ‖negPart hk y‖ ^ 2
+  let b : ℝ := ‖posPart hk y‖ ^ 2
+  let sc : ℝ := smoothCap ε r δ t
+  have ht0 : 0 ≤ t := by
+    dsimp [t]
+    positivity
+  have hb0 : 0 ≤ b := by
+    dsimp [b]
+    positivity
+  have hscpos : 0 < sc := by
+    dsimp [sc]
+    exact smoothCap_pos hδ hδr
+  have hbsc : b ≤ sc := by
+    dsimp [b, sc]
+    exact hy
+  have hβ : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ∈ Set.Icc (0 : ℝ) 1 := by
+    exact ⟨Real.smoothTransition.nonneg _, Real.smoothTransition.le_one _⟩
+  have hcap_le : sc ≤ t + r ^ 2 := by
+    dsimp [sc, smoothCap]
+    have h1 : 0 ≤ t * (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ))) := by
+      exact mul_nonneg ht0 (sub_nonneg.mpr hβ.2)
+    have h2 : 0 ≤ (2 * ε + r ^ 2) * Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) := by
+      exact mul_nonneg (by nlinarith [hδr]) hβ.1
+    nlinarith
+  have hdiff_le : t + r ^ 2 - sc ≤ 2 * ε + r ^ 2 + δ := by
+    dsimp [sc, smoothCap]
+    by_cases hβ1 : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) = 1
+    · rw [hβ1]
+      nlinarith [hδr]
+    · have hβlt1 : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) < 1 :=
+        lt_of_le_of_ne hβ.2 hβ1
+      have harglt : t < r ^ 2 + 2 * ε + δ := by
+        by_contra hnot
+        have hge : r ^ 2 + 2 * ε + δ ≤ t := le_of_not_gt hnot
+        have harg1 : 1 ≤ (t - (r ^ 2 + 2 * ε - δ)) / (2 * δ) := by
+          rw [le_div_iff₀ (by positivity : (0 : ℝ) < 2 * δ)]
+          nlinarith
+        exact hβ1 (Real.smoothTransition.eq_one_iff_one_le.mpr harg1)
+      have hle1 : t - 2 * ε - r ^ 2 ≤ δ := by nlinarith [harglt]
+      have hmul : (t - 2 * ε - r ^ 2) * (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ))) ≤ δ := by
+        have hpos : 0 ≤ 1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) :=
+          sub_nonneg.mpr hβ.2
+        have hmul' : (t - 2 * ε - r ^ 2) * (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ))) ≤
+            δ * (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ))) := by
+          exact mul_le_mul_of_nonneg_right hle1 hpos
+        have hle2 : δ * (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ))) ≤ δ := by
+          have hnonneg : 0 ≤ Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) :=
+            Real.smoothTransition.nonneg _
+          nlinarith
+        exact le_trans hmul' hle2
+      nlinarith
+  have hmain : b * ((t + r ^ 2) / sc - 1) ≤ 2 * ε + r ^ 2 + δ := by
+    have hb : b * ((t + r ^ 2) / sc - 1) ≤ sc * ((t + r ^ 2) / sc - 1) := by
+      have hdiff0 : 0 ≤ (t + r ^ 2) / sc - 1 := by
+        rw [le_sub_iff_add_le]
+        rw [le_div_iff₀ hscpos]
+        nlinarith [hcap_le]
+      exact mul_le_mul_of_nonneg_right hbsc hdiff0
+    have hsc : sc * ((t + r ^ 2) / sc - 1) = t + r ^ 2 - sc := by
+      field_simp [ne_of_gt hscpos]
+    nlinarith [hb, hsc, hdiff_le]
+  dsimp [modelAttachedUnstretchTime]
+  have harg : b * (1 - (t + r ^ 2) / sc) / 2 = -(b * ((t + r ^ 2) / sc - 1) / 2) := by ring
+  rw [harg]
+  rw [abs_neg]
+  rw [abs_div]
+  have hbabs : |b * ((t + r ^ 2) / sc - 1)| = b * ((t + r ^ 2) / sc - 1) := by
+    rw [abs_of_nonneg]
+    have hdiff0 : 0 ≤ (t + r ^ 2) / sc - 1 := by
+      rw [le_sub_iff_add_le]
+      rw [le_div_iff₀ hscpos]
+      nlinarith [hcap_le]
+    exact mul_nonneg hb0 hdiff0
+  rw [hbabs]
+  rw [abs_of_nonneg (by positivity : (0 : ℝ) ≤ 2)]
+  nlinarith [hmain]
+
 theorem fderiv_morseNormalForm_modelFlowField {n k : ℕ} (hk : k ≤ n) (c : ℝ) {y : MorseModel n}
     (hpos : ‖posPart hk y‖ ≠ 0) :
     fderiv ℝ (morseNormalForm hk c) y (modelFlowField hk y) = -1 := by
