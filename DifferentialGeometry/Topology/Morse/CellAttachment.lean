@@ -4433,6 +4433,37 @@ noncomputable def modelSharpUnionToUpperHomeo {n k : ℕ} (hk : k ≤ n) (c ε r
       rw [h] at hδr
       nlinarith [hδ0, hδr]))
 
+theorem modelFlow_posPart_ne_zero_of_negTime {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (ht : t ≤ 0) (hy : 0 < ‖posPart hk y‖) :
+    posPart hk (modelFlow hk t y) ≠ 0 := by
+  have hup := modelFlow_up_posPart_norm_sq hk (-t) y (by linarith : 0 ≤ -t) hy
+  have hmain : ‖posPart hk (modelFlow hk t y)‖ ^ 2 = ‖posPart hk y‖ ^ 2 - 2 * t := by
+    simpa [neg_neg] using hup
+  have hpos : 0 < ‖posPart hk (modelFlow hk t y)‖ ^ 2 := by
+    rw [hmain]
+    nlinarith [sq_pos_of_pos hy, ht]
+  exact norm_ne_zero_iff.mp (sq_pos_iff.mp hpos)
+
+theorem modelFlow_posPart_ne_zero_of_posTime {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (ht0 : 0 ≤ t) (ht : t < ‖posPart hk y‖ ^ 2 / 2) :
+    posPart hk (modelFlow hk t y) ≠ 0 := by
+  have hsq := modelFlow_posPart_norm_sq hk t y ht0 (le_of_lt ht)
+  have hpos : 0 < ‖posPart hk (modelFlow hk t y)‖ ^ 2 := by
+    rw [hsq]
+    nlinarith [ht0, ht]
+  exact norm_ne_zero_iff.mp (sq_pos_iff.mp hpos)
+
+theorem modelFlow_posPart_ne_zero_on_interval {n k : ℕ} (hk : k ≤ n) (a b : ℝ) (y : MorseModel n)
+    (hy : 0 < ‖posPart hk y‖)
+    (hbal : b ≤ ‖posPart hk y‖ ^ 2 / 2) :
+    ∀ t ∈ Set.Ioo a b, posPart hk (modelFlow hk t y) ≠ 0 := by
+  intro t ht
+  by_cases ht0 : t ≤ 0
+  · exact modelFlow_posPart_ne_zero_of_negTime hk t y ht0 hy
+  · have htpos : 0 ≤ t := le_of_not_gt (by intro h; exact ht0 (le_of_lt h))
+    have htle : t < ‖posPart hk y‖ ^ 2 / 2 := lt_of_lt_of_le ht.2 hbal
+    exact modelFlow_posPart_ne_zero_of_posTime hk t y htpos htle
+
 end CellAttachment
 
 end
