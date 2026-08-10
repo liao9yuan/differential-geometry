@@ -15501,6 +15501,60 @@ theorem contMDiffOn_chartModelFieldSection {m k : ℕ} (hk : k ≤ m + 1) (c : �
       L (CellAttachment.modelFlowField hk y)) hEq
   simp only [modelSection, tangentMapWithin, hmain]
 
+theorem chartModelFieldSection_fiber_eventually {m k : ℕ} (hk : k ≤ m + 1) (c : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (y₀ : MorseModel (m + 1))
+    (hy₀ : y₀ ∈ Metric.ball (0 : MorseModel (m + 1)) data.R') :
+    (fun y : MorseModel (m + 1) =>
+      (trivializationAt (MorseModel (m + 1)) (TangentSpace I) (data.χ y₀)
+        (⟨data.χ y, mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)⟩ :
+          TangentBundle I M)).2) =ᶠ[nhds y₀]
+    (fun y : MorseModel (m + 1) =>
+      fderiv ℝ (extChartAt I (data.χ y₀) ∘ data.χ) y (CellAttachment.modelFlowField hk y)) := by
+  have hχcont : ContinuousAt data.χ y₀ := by
+    exact (continuousWithinAt_iff_continuousAt (Metric.isOpen_ball.mem_nhds hy₀)).mp
+      (data.hχon.continuousOn y₀ hy₀)
+  have hsrc₀ : data.χ y₀ ∈ (chartAt H (data.χ y₀)).source := mem_chart_source (H := H) (M := M) (data.χ y₀)
+  have hsrc₀' : data.χ y₀ ∈ (extChartAt I (data.χ y₀)).source := by
+    simp [hsrc₀]
+  have hpre : data.χ ⁻¹' (extChartAt I (data.χ y₀)).source ∈ nhds y₀ :=
+    hχcont.preimage_mem_nhds ((isOpen_extChartAt_source (I := I) (x := data.χ y₀)).mem_nhds hsrc₀')
+  have hball : Metric.ball (0 : MorseModel (m + 1)) data.R' ∈ nhds y₀ :=
+    Metric.isOpen_ball.mem_nhds hy₀
+  refine Filter.eventually_of_mem (Filter.inter_mem hpre hball) ?_
+  intro y hy
+  change (trivializationAt (MorseModel (m + 1)) (TangentSpace I) (data.χ y₀)
+      (⟨data.χ y, mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y)⟩ :
+        TangentBundle I M)).2 =
+    fderiv ℝ (extChartAt I (data.χ y₀) ∘ data.χ) y (CellAttachment.modelFlowField hk y)
+  rw [tangentTrivializationAt_apply (I := I) (x₀ := data.χ y₀) (x := data.χ y)
+    (by simpa [extChartAt_source (I := I) (x := data.χ y₀)] using hy.1)]
+  have hmdχ : MDifferentiableAt 𝓘(ℝ, MorseModel (m + 1)) I data.χ y := by
+    have hmd' : ContMDiffAt 𝓘(ℝ, MorseModel (m + 1)) I (↑(⊤ : ℕ∞) : WithTop ℕ∞) data.χ y :=
+      (data.hχon y hy.2).contMDiffAt (Metric.isOpen_ball.mem_nhds hy.2)
+    exact hmd'.mdifferentiableAt (by simp)
+  have hmdExt : MDifferentiableAt I 𝓘(ℝ, MorseModel (m + 1)) (extChartAt I (data.χ y₀)) (data.χ y) := by
+    have hmd' : ContMDiffAt I 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (extChartAt I (data.χ y₀)) (data.χ y) :=
+      (contMDiffAt_extChartAt' (I := I) (x := data.χ y₀)
+        (by simpa [extChartAt_source (I := I) (x := data.χ y₀)] using hy.1)).of_le le_top
+    exact hmd'.mdifferentiableAt (by simp)
+  have hcomp := mfderiv_comp (x := y) (f := data.χ) (g := extChartAt I (data.χ y₀))
+    (hf := hmdχ) (hg := hmdExt)
+  have hfderiv : mfderiv 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1))
+      (extChartAt I (data.χ y₀) ∘ data.χ) y =
+      fderiv ℝ (extChartAt I (data.χ y₀) ∘ data.χ) y := by
+    exact (mfderiv_eq_fderiv (𝕜 := ℝ) (E := MorseModel (m + 1)) (E' := MorseModel (m + 1))
+      (f := extChartAt I (data.χ y₀) ∘ data.χ) (x := y))
+  change ((mfderiv I 𝓘(ℝ, MorseModel (m + 1)) (extChartAt I (data.χ y₀)) (data.χ y)).comp
+      (mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y)) (CellAttachment.modelFlowField hk y) =
+    fderiv ℝ (extChartAt I (data.χ y₀) ∘ data.χ) y (CellAttachment.modelFlowField hk y)
+  rw [← hcomp]
+  rw [hfderiv]
+  rfl
+
 end ManifoldCellAttachment
 
 end
